@@ -1,3 +1,5 @@
 node_modules/
 *.log
 .tmp/
+.tmp-server.log
+.tmp-server.pid

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>λWAVES smoke — field only</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #05070b; color: #cfd6de; font: 11px ui-monospace, Menlo, monospace; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #s { position: fixed; left: 8px; top: 8px; white-space: pre; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="s">booting…</div>
+<script type="module">
+/* smoke.html — the bare field pipeline, no rack. A diagnostic, not the lab. */
+import { createField, tableFor, VIEW } from './field.js';
+import { Register, PRESETS, PRESET_BY_ID } from './state.js';
+import { BASIS, domainFor, psiAt } from './hydrogen.js';
+const S = document.getElementById('s');
+const canvas = document.getElementById('c');
+const q = new URLSearchParams(location.search);
+const LW = window.__LW = { ready: false };
+const reg = new Register();
+reg.load(PRESET_BY_ID.get(q.get('preset') || '1s+2pz'));
+const obs = { yaw: 0.6, pitch: 0.35, dist: 2.4, fov: 0.6 };
+const mat = { view: VIEW[q.get('view') || 'density'], exposure: 1.0, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 } };
+let t = +(q.get('t') || 0);
+const field = await createField(canvas, { resolution: +(q.get('res') || 96) });
+LW.field = field; LW.reg = reg; LW.obs = obs; LW.mat = mat;
+if (!field.ok) { S.textContent = 'NO WEBGPU: ' + field.error; LW.ready = true; LW.error = field.error; }
+else {
+  field.resize(1);
+  field.setDomain(domainFor(reg.nmax()));
+  const modesAt = (tt) => { const c = reg.at(tt); return reg.renderSet().ids.map((a) => ({ table: tableFor(BASIS[a]), re: c.re[a], im: c.im[a] })); };
+  LW.modesAt = modesAt;
+  LW.render = (tt) => { t = tt; field.frame({ modes: modesAt(t), obs, mat }); };
+  LW.cpuPsi = (x, y, z) => { const c = reg.at(t); return psiAt(c.re, c.im, x, y, z, reg.renderSet().ids); };
+  LW.render(t);
+  S.textContent = `λWAVES smoke · ${JSON.stringify(field.adapterInfo)} · res ${field.resolution}³ · half ${field.half} · preset ${reg.preset}`;
+  LW.ready = true;
+}
+</script>
+</body>
+</html>
