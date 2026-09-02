@@ -395,14 +395,15 @@ export async function createField(canvas, opts = {}) {
     device.queue.submit([enc.finish()]);
     await buf.mapAsync(GPUMapMode.READ);
     const px = new Uint8Array(buf.getMappedRange());
-    let nonBlack = 0, lum = 0, bright = 0, hue = 0;
+    let nonBlack = 0, lum = 0, bright = 0, hue = 0, hsh = 2166136261 >>> 0;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const o = y * bpr + x * 4, r = px[o], g = px[o + 1], b = px[o + 2];
       const L = (r + g + b) / 3; lum += L; if (L > 24) nonBlack++; if (L > 128) bright++;
       hue += Math.abs(r - b);
+      hsh = Math.imul(hsh ^ (r + (g << 8) + (b << 16)), 16777619) >>> 0;
     }
     buf.unmap(); buf.destroy(); tex.destroy();
-    return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h) };
+    return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16) };
   }
   async function sampleVoxel(i, j, k) {
     const buf = device.createBuffer({ size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -443,12 +444,22 @@ export async function createField(canvas, opts = {}) {
     return { rhoMax: f[0], refMax: f[1] };
   }
 
+  /** one measured frame: submit reconstruct + present and wait for the GPU to finish → ms */
+  async function measure(args) {
+    const t0 = performance.now();
+    frame(args);
+    await device.queue.onSubmittedWorkDone();
+    return performance.now() - t0;
+  }
+  /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
+  Object.defineProperties(out, {
+    resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true },
+    generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
-    frame, readPixels, sampleVoxel, fieldDigest, readStats,
-    setResolution, get resolution() { return res; },
-    setDomain(h) { half = h; }, get half() { return half; },
-    get generation() { return generation; }, get refValid() { return refValid; },
+    frame, measure, readPixels, sampleVoxel, fieldDigest, readStats,
+    setResolution,
+    setDomain(h) { half = h; },
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, 2) * (scale || 1);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));

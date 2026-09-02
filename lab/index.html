@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>λWAVES · QWAVE-0 · Hydrogen Shadow Lab</title>
+<link rel="stylesheet" href="./lab.css">
+</head>
+<body>
+<div id="lab">
+  <div id="stage">
+    <canvas id="field" aria-label="FIELD: the reconstructed hydrogen wavefunction"></canvas>
+    <div id="title" class="glass"><span class="lam">λWAVES</span><span class="ms">QWAVE-0 · HYDROGEN SHADOW LAB</span></div>
+    <div id="badges"></div>
+    <div id="sheet" class="glass" hidden>
+      <h3>WHAT IS EXACT, WHAT IS NOT</h3>
+      <p><b>EXACT ANALYTIC</b> — the 91 states n ≤ 6 are closed-form R<sub>nl</sub>(r)Y<sub>l</sub><sup>m</sup>(θ,φ) (complex Y, Condon–Shortley phase, atomic units); E<sub>n</sub> = −1/(2n²); field-free evolution is c<sub>a</sub>(t) = e<sup>−iE<sub>a</sub>t</sup>c<sub>a</sub>(0), a pure phase per mode. Norm, ⟨E⟩ and the autocorrelation are computed from these coefficients, not from the grid.</p>
+      <p><b>EXACT REAL REPRESENTATION</b> — SHADOW reads the same c(t) as q = √2 Re c, p = √2 Im c. For diagonal H that is exactly a set of uncoupled harmonic oscillators, and H<sub>C</sub> = ⟨H⟩. It is an equation-level identity, not a claim about ontology.</p>
+      <p><b>NUMERICAL</b> — FIELD is ψ sampled on an N³ grid (f16), trilinearly filtered and ray-marched. Voxel values agree with the closed form to ~10<sup>−5</sup>; the picture is limited by grid resolution and the transfer function, never by the physics. Quality settings change only this estimate.</p>
+      <p><b>TRUNCATED / MASKED</b> — muting or soloing removes modes from the reconstruction only; the state keeps them and the badge says what fraction of the norm you are looking at. A finite basis (n ≤ 6) is not the whole atom.</p>
+      <p><b>Camera</b> orbit, slice and clip are observer operations. <b>STATE ROTATE</b> is a physical rotation of |ψ⟩. They are never the same thing.</p>
+    </div>
+    <div id="hint" class="glass">drag to orbit · pinch / wheel to zoom · space to play · touch a SPECTRUM lane</div>
+    <div id="transport" class="glass"></div>
+    <div id="banner" hidden><h3>WebGPU unavailable</h3><p></p></div>
+  </div>
+  <aside id="rack" aria-label="device rack"></aside>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

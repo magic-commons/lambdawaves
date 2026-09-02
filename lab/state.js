@@ -144,13 +144,15 @@ export class Register {
       truncated: eligible.length - ids.length, coveredFraction: total > 0 ? covered / total : 0
     };
   }
-  /** a stable digest of the authoritative state (anchor, mask) — time is not part of it */
+  /** a stable digest of the PHYSICAL state (the anchor coefficients) — neither time nor the render mask is part of it */
   digest() {
     let h = 2166136261 >>> 0;
     const mix = (v) => { const s = v.toPrecision(15); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } };
-    for (let a = 0; a < N; a++) { if (this.re0[a] || this.im0[a]) { mix(a); mix(this.re0[a]); mix(this.im0[a]); } mix(this.muted[a] * 2 + this.solo[a]); }
+    for (let a = 0; a < N; a++) if (this.re0[a] || this.im0[a]) { mix(a); mix(this.re0[a]); mix(this.im0[a]); }
     return h.toString(16).padStart(8, '0');
   }
+  /** the reconstruction mask, separately */
+  maskDigest() { let h = 0; for (let a = 0; a < N; a++) h = (h * 3 + this.muted[a] * 2 + this.solo[a]) >>> 0; return h.toString(16); }
   /* ── persistence ───────────────────────────────────────────────────────── */
   serialize(t = 0) {
     const modes = [];
