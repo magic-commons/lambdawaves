@@ -368,8 +368,8 @@ export async function boot(dom) {
     setMute(a, on) { reg.setMute(a, on); touchState(); }, setView(v) { mat.view = VIEW[v]; ui.viewSeg.set(v); schedule(TIER.PRESENT); },
     orbit(dy, dp) { obs.yaw += dy; obs.pitch += dp; schedule(TIER.PRESENT); },
     setShadowMode(m) { shadowView.setMode(m); ui.shadowSeg.set(m); schedule(TIER.PRESENT); },
-    /** GPU completion time of one full frame (reconstruct + present) at the current settings, ms; n samples → median */
-    async gpuFrameMs(n = 12) { if (!field.ok) return null; field.resize(quality.scale); const xs = []; for (let i = 0; i < n; i++) xs.push(await field.measure({ modes: modesAt(clock.t), obs, mat })); xs.sort((a, b) => a - b); return { median: xs[n >> 1], min: xs[0], max: xs[n - 1], res: field.resolution, steps: mat.steps, w: dom.canvas.width, h: dom.canvas.height, modes: reg.renderSet(RENDER_CAP).rendered }; },
+    /** GPU throughput at the current settings: ms per frame for reconstruct+present, reconstruct, present (n back-to-back frames) */
+    async gpuFrameMs(n = 60) { if (!field.ok) return null; field.resize(quality.scale); const r = await field.throughput({ modes: modesAt(clock.t), obs, mat, n }); r.half = domain.half; return r; },
     stateDigest: () => reg.digest(), meters: meterSnapshot, modesAt,
     cpuPsi(x, y, z) { const c = reg.at(clock.t); return psiAt(c.re, c.im, x, y, z, reg.renderSet(RENDER_CAP).ids); },
     readPixels: () => field.ok ? field.readPixels(obs, mat) : null,

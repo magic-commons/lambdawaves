@@ -306,14 +306,14 @@ export async function createField(canvas, opts = {}) {
   }
   setResolution(opts.resolution || 96);
 
-  function encodeCompute(enc, slot, modes) {
+  function encodeCompute(enc, slot, modes, tw) {
     const { buf, count } = packModes(modes);
     device.queue.writeBuffer(modesBuf[slot], 0, buf);
     const p = new ArrayBuffer(32); const u = new Uint32Array(p), f = new Float32Array(p);
     u[0] = res; u[1] = count; u[2] = slot; u[3] = 0; f[4] = half;
     device.queue.writeBuffer(paramsBuf[slot], 0, p);
     device.queue.writeBuffer(statsBuf, slot * 4, new Uint32Array([0]));
-    const pass = enc.beginComputePass();
+    const pass = enc.beginComputePass(tw ? { timestampWrites: tw } : {});
     pass.setPipeline(computePipeline); pass.setBindGroup(0, computeBind[slot]);
     const g = Math.ceil(res / 4); pass.dispatchWorkgroups(g, g, g);
     pass.end();
@@ -357,10 +357,12 @@ export async function createField(canvas, opts = {}) {
     device.queue.writeBuffer(lineBuf, 0, new Float32Array(v));
     return n * 2;
   }
-  function encodeRender(enc, target, obs, mat, w, h) {
+  function encodeRender(enc, target, obs, mat, w, h, tw) {
     writeView(obs, mat, w, h);
     const nv = writeLines(mat);
-    const pass = enc.beginRenderPass({ colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
+    const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
+    if (tw) desc.timestampWrites = tw;
+    const pass = enc.beginRenderPass(desc);
     pass.setPipeline(renderPipeline); pass.setBindGroup(0, renderBind); pass.draw(3);
     if (mat.frame !== false) { pass.setPipeline(linePipeline); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv); }
     pass.end();
@@ -444,12 +446,38 @@ export async function createField(canvas, opts = {}) {
     return { rhoMax: f[0], refMax: f[1] };
   }
 
-  /** one measured frame: submit reconstruct + present and wait for the GPU to finish → ms */
-  async function measure(args) {
-    const t0 = performance.now();
-    frame(args);
-    await device.queue.onSubmittedWorkDone();
-    return performance.now() - t0;
+  /**
+   * GPU THROUGHPUT, the honest number this browser can give (Firefox zeroes timestamp queries and
+   * polls completion at ~100 ms): encode n frames back-to-back into an offscreen target of the
+   * canvas' size, wait once for the GPU, and divide.  Returns ms per frame for
+   * reconstruct+present, reconstruct only, and present only.
+   */
+  async function throughput({ modes, obs, mat, n = 60 }) {
+    const w = canvas.width, h = canvas.height;
+    const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT });
+    if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
+    const view = tex.createView();
+    const run = async (doCompute, doRender) => {
+      await device.queue.onSubmittedWorkDone();
+      const t0 = performance.now();
+      const enc = device.createCommandEncoder();
+      for (let i = 0; i < n; i++) {
+        if (doCompute) encodeCompute(enc, 0, modes);
+        if (doRender) {
+          writeView(obs, mat, w, h); const nv = writeLines(mat);
+          const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
+          pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
+          if (mat.frame !== false) { pass.setPipeline(out._lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv); }
+          pass.end();
+        }
+      }
+      device.queue.submit([enc.finish()]);
+      await device.queue.onSubmittedWorkDone();
+      return (performance.now() - t0) / n;
+    };
+    const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
+    tex.destroy();
+    return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: mat.steps };
   }
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
@@ -457,7 +485,7 @@ export async function createField(canvas, opts = {}) {
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
-    frame, measure, readPixels, sampleVoxel, fieldDigest, readStats,
+    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats,
     setResolution,
     setDomain(h) { half = h; },
     resize(scale) {
