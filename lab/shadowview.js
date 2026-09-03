@@ -27,6 +27,9 @@ export function createShadowView(canvas, api) {
 
   function update(c, t, ids, selected) {
     const { W, H } = size();
+    /* a FOLDED window has no size: every radius below would go negative and canvas throws (which would kill the
+       rest of the render loop — layout must never break the instrument, §24). Draw nothing and say nothing. */
+    if (W < 32 || H < 32) return;
     g.clearRect(0, 0, W, H);
     g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
     if (!ids.length) { g.fillStyle = 'rgba(255,255,255,0.35)'; g.textAlign = 'center'; g.fillText('no populated modes', W / 2, H / 2); return; }

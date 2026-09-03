@@ -15,13 +15,16 @@ import { modeTable } from './hydrogen.js';
 
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];
+/** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), or noisy particles */
+export const STYLE = { cloud: 0, solid: 1, grain: 2 };
+export const STYLE_NAMES = ['cloud', 'solid', 'grain'];
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 export const MAX_MODES = 32;
 const MODE_BYTES = 96;
 
 const COMPUTE_WGSL = /* wgsl */`
 struct Mode { nlm: vec4<f32>, c: vec4<f32>, lag0: vec4<f32>, lag1: vec4<f32>, leg0: vec4<f32>, leg1: vec4<f32> };
-struct Params { n: u32, count: u32, slot: u32, pad: u32, half: f32, p1: f32, p2: f32, p3: f32 };
+struct Params { n: u32, count: u32, slot: u32, space: u32, half: f32, p1: f32, p2: f32, p3: f32 };   // space: 0 position, 1 momentum
 @group(0) @binding(0) var<uniform> P: Params;
 @group(0) @binding(1) var<storage, read> modes: array<Mode>;
 @group(0) @binding(2) var outTex: texture_storage_3d<rgba16float, write>;
@@ -45,10 +48,20 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
     for (var a = 0u; a < P.count; a++) {
       let M = modes[a];
       let n = M.nlm.x; let l = u32(M.nlm.y); let am = u32(M.nlm.z); let m = M.nlm.w;
-      let rho = 2.0 * r / n;
-      let L = M.lag0.x + rho * (M.lag0.y + rho * (M.lag0.z + rho * (M.lag0.w + rho * (M.lag1.x + rho * M.lag1.y))));
       let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * M.leg1.y))));
-      let f = M.c.z * exp(-0.5 * rho) * ipow(rho, l) * L * ipow(st, am) * D;
+      var f = 0.0;
+      if (P.space == 0u) {
+        /* POSITION  ψ = norm · e^{−ρ/2} ρ^l L(ρ) · Y,  ρ = 2r/n  (L = Laguerre) */
+        let rho = 2.0 * r / n;
+        let L = M.lag0.x + rho * (M.lag0.y + rho * (M.lag0.z + rho * (M.lag0.w + rho * (M.lag1.x + rho * M.lag1.y))));
+        f = M.c.z * exp(-0.5 * rho) * ipow(rho, l) * L * ipow(st, am) * D;
+      } else {
+        /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
+           the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */
+        let q = n * r; let t = q * q;
+        let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
+        f = M.c.z * ipow(q, l) * L / pow(1.0 + t, n + 1.0) * ipow(st, am) * D;
+      }
       let e = vec2<f32>(cos(m * phi), sin(m * phi));
       let ce = vec2<f32>(M.c.x * e.x - M.c.y * e.y, M.c.x * e.y + M.c.y * e.x);
       psi += f * ce;
@@ -69,13 +82,17 @@ struct View {
   fwd: vec4<f32>,    // xyz, w = steps
   p0: vec4<f32>,     // view mode, exposure, softness, dither
   p1: vec4<f32>,     // slice mode, slice axis, slice pos (-1..1 of half), slab thickness (fraction of half)
-  p2: vec4<f32>,     // hue shift, invert, unused, unused
+  p2: vec4<f32>,     // hue shift, invert, palette on, unused
+  p3: vec4<f32>,     // draw style, iso level (fraction of ρmax), grain, saturation knee
 };
 @group(0) @binding(0) var<uniform> V: View;
 @group(0) @binding(1) var psiTex: texture_3d<f32>;
 @group(0) @binding(2) var refTex: texture_3d<f32>;
 @group(0) @binding(3) var samp: sampler;
 @group(0) @binding(4) var<storage, read> stats: array<u32>;
+/* the PALETTE: 256 colours around the complex plane, arg ψ = −π at index 0 and +π at 255 (wrapping).
+   Written from palette.js; V.p2.z > 0.5 turns it on and the built-in HSV wheel off. */
+@group(0) @binding(5) var<storage, read> pal: array<vec4<f32>, 256>;
 
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) uv: vec2<f32> };
 @vertex fn vs(@builtin(vertex_index) i: u32) -> VSOut {
@@ -89,6 +106,11 @@ fn hsv(h: f32, s: f32, v: f32) -> vec3<f32> {
   return v * mix(vec3<f32>(1.0), c, s);
 }
 fn hash(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(12.9898, 78.233))) * 43758.5453); }
+fn hash3(p: vec3<f32>) -> f32 { return fract(sin(dot(p, vec3<f32>(127.1, 311.7, 74.7))) * 43758.5453); }
+/* the local density, for the SOLID mode's surface normal */
+fn rhoAt(psiTex: texture_3d<f32>, samp: sampler, uvw: vec3<f32>) -> f32 {
+  let s = textureSampleLevel(psiTex, samp, uvw, 0.0).rg; return dot(s, s);
+}
 /* the interval of the ray inside the axis slab lo ≤ p_k ≤ hi */
 fn slabInterval(ro: f32, rd: f32, lo: f32, hi: f32) -> vec2<f32> {
   if (abs(rd) < 1e-9) { if (ro >= lo && ro <= hi) { return vec2<f32>(-1e30, 1e30); } return vec2<f32>(1.0, -1.0); }
@@ -141,7 +163,11 @@ fn slabInterval(ro: f32, rd: f32, lo: f32, hi: f32) -> vec2<f32> {
       let rho = dot(s, s) / rhoMax;
       w = pow(rho, soft);
       let h = atan2(s.y, s.x) / 6.283185307 + 0.5 + V.p2.x;
-      c = hsv(h, 0.85, 1.0);
+      if (V.p2.z > 0.5) {
+        let u = fract(h) * 256.0;
+        let i0 = u32(floor(u)) % 256u; let i1 = (i0 + 1u) % 256u;
+        c = mix(pal[i0].rgb, pal[i1].rgb, fract(u));       // the user's palette, linearly interpolated and wrapping
+      } else { c = hsv(h, 0.85, 1.0); }
     } else if (mode == 2u || mode == 3u) {
       var v = 0.0; if (mode == 2u) { v = s.x / ampMax; } else { v = s.y / ampMax; }
       w = pow(v * v, soft);
@@ -153,7 +179,38 @@ fn slabInterval(ro: f32, rd: f32, lo: f32, hi: f32) -> vec2<f32> {
       c = select(vec3<f32>(0.25, 0.48, 1.0), vec3<f32>(1.0, 0.86, 0.22), d > 0.0);
     }
     if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
-    let a = 1.0 - exp(-w * sigma * stepN * 4.0);
+    /* ── DRAW STYLE ────────────────────────────────────────────────────────
+       0 CLOUD  the original emission/absorption integral.
+       1 SOLID  a bounded plateau: opacity is a smooth band about the iso level, so turning EXPOSURE up moves the
+                surface inward instead of filling the box — the blob has an asymptotic limit and never glows the
+                whole field.  Shaded by the density gradient, so it reads as a lit surface.
+       2 GRAIN  the same field drawn as noisy particles: a per-voxel hash keeps a fraction of the samples, so the
+                cloud is stippled rather than smooth.  Bounded the same way.
+       In every style the accumulated weight passes through a SATURATION KNEE w ↦ w/(1+kw), which is what makes
+       the limit asymptotic: as exposure → ∞ the opacity of a step tends to a finite ceiling, not to 1. */
+    let style = u32(V.p3.x);
+    let knee = max(V.p3.w, 1e-4);
+    var wEff = w / (1.0 + knee * w);                       // the bounded transfer: wEff < 1/knee always
+    if (style == 1u) {
+      let iso = max(V.p3.y, 1e-6);
+      let rho = dot(s, s) / rhoMax;
+      let band = smoothstep(iso * 0.55, iso, rho) * (1.0 - smoothstep(iso * 6.0, iso * 14.0, rho));
+      wEff = band * 2.2;
+      if (band > 0.02) {                                   // shade the plateau by its own gradient
+        let e = 1.2 / f32(textureDimensions(psiTex).x);
+        let gx = rhoAt(psiTex, samp, uvw + vec3<f32>(e, 0.0, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(e, 0.0, 0.0));
+        let gy = rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, e, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, e, 0.0));
+        let gz = rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, 0.0, e)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, 0.0, e));
+        let n = normalize(vec3<f32>(gx, gy, gz) + vec3<f32>(1e-9));
+        let lit = 0.35 + 0.65 * abs(dot(n, normalize(V.fwd.xyz + vec3<f32>(0.35, 0.2, 0.5))));
+        c = c * lit;
+      }
+    } else if (style == 2u) {
+      let keep = clamp(V.p3.z, 0.0, 1.0);
+      let cell = floor(uvw * 96.0 + vec3<f32>(V.p0.w * 7.0));
+      if (hash3(cell) > keep) { wEff = 0.0; } else { wEff = wEff * (1.0 / max(keep, 0.02)); }
+    }
+    let a = 1.0 - exp(-wEff * sigma * stepN * 4.0);
     col += (1.0 - alpha) * a * c;
     alpha += (1.0 - alpha) * a;
     if (alpha > 0.985) { break; }
@@ -216,7 +273,9 @@ export function packModes(modes) {
     const { table: T, re, im } = modes[i];
     const o = i * 24;
     buf[o] = T.n; buf[o + 1] = T.l; buf[o + 2] = T.am; buf[o + 3] = T.m;
-    buf[o + 4] = re; buf[o + 5] = im; buf[o + 6] = T.norm; buf[o + 7] = 0;
+    let cre = re, cim = im;
+    if (T.phase) { cre = re * T.phase.re - im * T.phase.im; cim = re * T.phase.im + im * T.phase.re; }   // momentum tables carry (−i)^l
+    buf[o + 4] = cre; buf[o + 5] = cim; buf[o + 6] = T.norm; buf[o + 7] = 0;
     for (let j = 0; j < 6; j++) { buf[o + 8 + j] = T.lag[j]; buf[o + 16 + j] = T.leg[j]; }
   }
   return { buf, count };
@@ -262,7 +321,8 @@ export async function createField(canvas, opts = {}) {
     { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: '3d' } },
     { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: '3d' } },
     { binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
-    { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
+    { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+    { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
   const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
@@ -279,15 +339,18 @@ export async function createField(canvas, opts = {}) {
   const paramsBuf = [0, 1].map(() => device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }));
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
-  const viewBuf = device.createBuffer({ size: 7 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const viewBuf = device.createBuffer({ size: 8 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
+  const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  { const init = new Float32Array(256 * 4); for (let i = 0; i < 256; i++) { init[i * 4] = 1; init[i * 4 + 1] = 1; init[i * 4 + 2] = 1; init[i * 4 + 3] = 1; } device.queue.writeBuffer(palBuf, 0, init); }
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
   const lineVerts = 64;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }] });
 
   let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null;
-  let half = 7, generation = 0, refGeneration = -1, refValid = false;
+  let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
 
   function setResolution(n) {
@@ -301,7 +364,8 @@ export async function createField(canvas, opts = {}) {
       { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }] }));
     renderBind = device.createBindGroup({ layout: renderBGL, entries: [
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
-      { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } }] });
+      { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
+      { binding: 5, resource: { buffer: palBuf } }] });
     refValid = false; stats.resolution = n;
   }
   setResolution(opts.resolution || 96);
@@ -310,7 +374,7 @@ export async function createField(canvas, opts = {}) {
     const { buf, count } = packModes(modes);
     device.queue.writeBuffer(modesBuf[slot], 0, buf);
     const p = new ArrayBuffer(32); const u = new Uint32Array(p), f = new Float32Array(p);
-    u[0] = res; u[1] = count; u[2] = slot; u[3] = 0; f[4] = half;
+    u[0] = res; u[1] = count; u[2] = slot; u[3] = space; f[4] = half;
     device.queue.writeBuffer(paramsBuf[slot], 0, p);
     device.queue.writeBuffer(statsBuf, slot * 4, new Uint32Array([0]));
     const pass = enc.beginComputePass(tw ? { timestampWrites: tw } : {});
@@ -324,14 +388,16 @@ export async function createField(canvas, opts = {}) {
     const D = obs.dist * half;
     const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = w / h;
-    const v = new Float32Array(28);
+    const v = new Float32Array(32);
     v.set([cam[0], cam[1], cam[2], half], 0);
     v.set([B.right[0], B.right[1], B.right[2], tanH * aspect], 4);
     v.set([B.up[0], B.up[1], B.up[2], tanH], 8);
     v.set([B.fwd[0], B.fwd[1], B.fwd[2], mat.steps || 160], 12);
     v.set([mat.view | 0, mat.exposure, mat.softness, (stats.presents % 97) / 97], 16);
     v.set([mat.slice ? mat.slice.mode | 0 : 0, mat.slice ? mat.slice.axis | 0 : 2, mat.slice ? mat.slice.pos : 0, mat.slice ? mat.slice.thick : 0.03], 20);
-    v.set([mat.hueShift || 0, mat.invert ? 1 : 0, 0, 0], 24);
+    v.set([mat.hueShift || 0, mat.invert ? 1 : 0, mat.paletteOn ? 1 : 0, 0], 24);
+    v.set([mat.style | 0, mat.iso === undefined ? 0.06 : mat.iso, mat.grain === undefined ? 0.35 : mat.grain,
+      mat.knee === undefined ? 0.6 : mat.knee], 28);
     device.queue.writeBuffer(viewBuf, 0, v);
     const vp = mul4(perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half), lookAt(cam, [0, 0, 0], B.up));
     device.queue.writeBuffer(vpBuf, 0, vp);
@@ -481,13 +547,17 @@ export async function createField(canvas, opts = {}) {
   }
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
-    resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true },
+    resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats,
     setResolution,
     setDomain(h) { half = h; },
+    /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
+    setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
+    /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
+    setPalette(lut) { device.queue.writeBuffer(palBuf, 0, lut instanceof Float32Array ? lut : new Float32Array(lut)); },
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, 2) * (scale || 1);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));

@@ -159,6 +159,7 @@ try {
   judge('B11 a MOUSE tap on PLAY starts the transport, another pauses it', tapPlay.ok === 1 && playing && paused, { tapPlay, playing, paused });
   const lane = await g.ev(`const b = document.querySelector('.sp-row .mute'); const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, ok: r.width >= 34 && r.height >= 40 };`);
   judge('B11 SPECTRUM lane buttons are real touch targets (≥ 34 × 40 px)', lane.ok, lane);
+  await g.ev(`document.querySelector('.sp-row .mute').scrollIntoView({ block: 'center' }); await new Promise(r=>setTimeout(r,80)); return 1;`);
   const muteTap = await g.tap('.sp-row .mute');
   const muted = await g.ev('await __LW.settle(); const m = __LW.meters(); const on = __LW.reg.muted[__LW.reg.populated()[0]]; __LW.setMute(__LW.reg.populated()[0], false); await __LW.settle(); return { on: !!on, rendered: m.rendered };');
   judge('B11 tapping a lane\'s M mutes it through the same road', muteTap.ok === 1 && muted.on && muted.rendered === 1, { muteTap, muted });
@@ -168,6 +169,184 @@ try {
     __LW.loadPreset('1s'); await __LW.settle(); const mid = __LW.stateDigest(); __LW.restore(s); await __LW.settle();
     return { same: d0 === __LW.stateDigest(), t: __LW.clock.t === t0, changedInBetween: mid !== d0, status: s.experiment.status, basis: s.experiment.basis };`);
   judge('B12 Q7: serialize → load another preset → restore reproduces the state and the logical time, with its status label', rt.same && rt.t && rt.changedInBetween && rt.status === 'EXACT ANALYTIC', rt);
+
+  /* ── FRONTIER (2026-09-03): ORBIT, VORTEX, LADDER and the two new state operations ── */
+  const fr = await g.ev(`try { __LW.loadPreset('2s+2pz'); await __LW.settle();
+    const sh = __LW.orbitView.shells.find(s => s.n === 2);
+    const wins = ['orbit','vortex','ladder'].map(id => !!document.querySelector('[data-id="' + id + '"]'));
+    __LW.rotateK(0.1); await __LW.settle();          // the first state touch after a preset load is a REBUILD (domain tracker); absorb it
+    const d0 = __LW.stateDigest(); __LW.rotateK(0.4); await __LW.settle(); const d1 = __LW.stateDigest(), t1 = __LW.stats.lastTier; const sh1 = __LW.orbitView.shells.find(s => s.n === 2);
+    __LW.defectWait(0.5); await __LW.settle(); const d2 = __LW.stateDigest(); const sh2 = __LW.orbitView.shells.find(s => s.n === 2);
+    const lad = __LW.ladder.last;
+    return { wins, spec: sh.spectrum, e: sh.e, z: sh.z, d0, d1, t1, spec1: sh1.spectrum, d2, spec2: sh2.spectrum, lad: lad.scan.aPeak, ladAt: lad.scan.tPeak / lad.clocks.Trev, norm: __LW.meters().norm }; } catch (e) { return { error: String(e) + ' | ' + String(e && e.stack) + ' | keys ' + Object.keys(__LW).slice(-8).join(',') + ' | orbit ' + typeof __LW.orbit + ' shells ' + (__LW.orbit && JSON.stringify(__LW.orbitView.shells)) }; }`) || { error: 'no result' };
+  judge('B14 FRONTIER windows exist; ORBIT reads the Stark state as coherent: Schmidt (1,0), e = ½, ⟨z⟩ = −3', !fr.error && fr.wins.every(Boolean) && Math.abs(fr.spec[0] - 1) < 1e-9 && Math.abs(fr.e - 0.5) < 1e-9 && Math.abs(fr.z + 3) < 1e-9, fr);
+  if (fr.error) { judge('B14 (skipped: the FRONTIER script threw)', false, fr.error); }
+  judge('B14 STARK ROTATE changes the digest at RECONSTRUCT and keeps the Schmidt spectrum; DEFECT WAIT moves the spectrum; norm stays 1', !fr.error && fr.d0 !== fr.d1 && fr.t1 === 'RECONSTRUCT' && Math.abs(fr.spec1[0] - 1) < 1e-9 && fr.d2 !== fr.d1 && fr.spec2[0] < 0.999 && Math.abs(fr.norm - 1) < 1e-6, fr);
+  judge('B14 LADDER (n̄ = 30, σ = 2): the exact revival peak 0.80 at 0.994 T_rev is on the page', !fr.error && fr.lad > 0.78 && fr.ladAt > 0.99 && fr.ladAt < 0.999, { lad: fr.lad, at: fr.ladAt });
+  const vx = await g.ev(`try { __LW.loadPreset('recon'); await __LW.settle(); const c = __LW.vortex.census; const L = __LW.vortex.last;
+    __LW.loadPreset('2px'); await __LW.settle(); const L2 = __LW.vortex.last; const xm = Math.max(...L2.points.map(p => Math.abs(p.x)));
+    const ctx = document.getElementById('vortex').getContext('2d'); const img = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height).data; let lit = 0; for (let i = 3; i < img.length; i += 4) if (img[i] > 0) lit++;
+    return { count: c && c.count, Td: c && c.Td, pts: L && L.points.length, M: L && L.M, pts2: L2.points.length, M2: L2.M, xm, lit }; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B14 VORTEX: the census of 3d₊₂+4p₊₁+5s reads 10 points at T_d = 481.265; 2p_x has M = 2 with every located point in x = 0; the overlay is drawn', !vx.error && vx.count === 10 && Math.abs(vx.Td - 481.265) < 1e-2 && vx.M2 === 2 && vx.pts2 > 20 && vx.xm < 1e-6 && vx.lit > 50, vx);
+
+  const r7 = await g.ev(`try { __LW.loadPreset('2s+2pz'); await __LW.settle();
+    const s0 = __LW.orbitView.shells.find(s => s.n === 2).spectrum.slice();
+    const c0 = Array.from(__LW.reg.re0).concat(Array.from(__LW.reg.im0));
+    const d0 = __LW.stateDigest(); __LW.rotor({ which: '+', axis: 'y', angle: 0.7 }); await __LW.settle();
+    const sh = __LW.orbitView.shells.find(s => s.n === 2); const d1 = __LW.stateDigest();
+    __LW.rotor({ which: '+', axis: 'y', angle: -0.7 }); await __LW.settle();
+    const c2 = Array.from(__LW.reg.re0).concat(Array.from(__LW.reg.im0));
+    let back = 0; for (let i = 0; i < c0.length; i++) back = Math.max(back, Math.abs(c0[i] - c2[i]));
+    const lad = __LW.ladder.last.sup; const norm = __LW.meters().norm;
+    return { s0, s1: sh.spectrum, e1: sh.e, L1: sh.absL, d0, d1, back, norm, cls: lad.cls, kind: lad.kind, exact: lad.exact, pred: lad.predicted }; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B15 ROTOR DRIVE: one rotor alone is an SO(4) move — it changes the state and tilts ⟨L⟩, keeps the Schmidt spectrum and the norm, and its inverse returns the coefficients to 1e-14',
+    !r7.error && r7.d0 !== r7.d1 && r7.back < 1e-14 && Math.abs(r7.s1[0] - r7.s0[0]) < 1e-9 && r7.L1 > 1e-3 && Math.abs(r7.norm - 1) < 1e-6, r7);
+  judge('B15 LADDER superrevival: n̄ = 30 ≡ 2 (mod 4) ⇒ the HALF-SHIFTED class, and the exact |A(T_sr)| by integer phase reduction sits beside the cusp prediction',
+    !r7.error && r7.cls === 2 && r7.kind === 'half-shifted' && r7.exact >= 0 && r7.exact <= 1 && r7.pred > 0, { cls: r7.cls, kind: r7.kind, exact: r7.exact, pred: r7.pred });
+
+  /* fold every window, drive the state, unfold: layout must never break the instrument (§24) */
+  const fold = await g.ev(`try { const devs = [...document.querySelectorAll('.dev')];
+    devs.forEach(d => d.querySelector('.dev-fold').click()); await __LW.settle();
+    const e0 = window.__e.length; const v0 = __LW.reg.version;
+    __LW.rotor({ which: '+', axis: 'y', angle: 0.5 }); __LW.scrub(3.3); await __LW.settle(); await new Promise(r=>setTimeout(r,120));
+    const e1 = window.__e.length; const folded = __LW.orbitView.shells.length ? __LW.orbitView.shells[0].absL : -1;
+    devs.forEach(d => d.querySelector('.dev-fold').click()); await __LW.settle();
+    return { e0, e1, errs: window.__e.slice(0, 3), v0, v1: __LW.reg.version, folded, open: __LW.orbitView.shells[0].absL };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B16 folding every window is layout only: no errors thrown, the state still evolves and the ORBIT invariants still recompute behind the fold (a folded canvas has no size — its radii would go negative and canvas throws, killing the render loop)',
+    !fold.error && fold.e1 === fold.e0 && fold.errs.length === 0 && fold.v1 > fold.v0 && fold.folded > 1e-6 && Math.abs(fold.open - fold.folded) < 1e-12, fold);
+
+  /* ── DYNAMICS: the Lagrangian window and the particle view ─────────────── */
+  const dyn = await g.ev(`try { __LW.loadPreset('1s+2pz'); __LW.scrub(0); await __LW.settle();
+    const q = (k) => document.querySelector('[data-id="dynamics"] [data-dq="' + k + '"]');
+    const txt = [...document.querySelectorAll('[data-id="dynamics"] .ro')].map(r => r.querySelector('.ro-lbl').textContent + '=' + r.querySelector('.ro-val').textContent);
+    const d0 = __LW.dynamics ? 1 : 0;
+    // the dipole must oscillate at the Bohr period 16.755 and vanish a quarter of the way through
+    const dz = []; for (const t of [0, 16.755/4, 16.755/2]) { __LW.scrub(t); await __LW.settle(); dz.push(+document.querySelector('[data-dq="dz"] .ro-val').textContent); }
+    __LW.scrub(0); await __LW.settle();
+    const seeded = __LW.seedParticles(90); await __LW.settle();
+    const p0 = __LW.particles.points.map(p => p.slice());
+    __LW.play(); await new Promise(r => setTimeout(r, 420)); __LW.pause(); await __LW.settle();
+    const p1 = __LW.particles.points;
+    let moved = 0; for (let i = 0; i < Math.min(p0.length, p1.length); i++) moved = Math.max(moved, Math.hypot(p1[i][0]-p0[i][0], p1[i][1]-p0[i][1], p1[i][2]-p0[i][2]));
+    const ctx = document.getElementById('particles').getContext('2d'); const img = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height).data;
+    let lit = 0; for (let i = 3; i < img.length; i += 4) if (img[i] > 0) lit++;
+    const digest = __LW.stateDigest();
+    return { d0, txt: txt.slice(0, 4), seeded, alive: __LW.particles.state.alive, moved, lit, digest, dz, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B17 DYNAMICS: the window exists and reads the Lagrangian, and the 1s+2p_z dipole ⟨z⟩ oscillates at the Bohr period — full at t = 0, zero a quarter period later, reversed at half',
+    !dyn.error && dyn.d0 === 1 && Math.abs(Math.abs(dyn.dz[0]) - 0.7449) < 2e-3 && Math.abs(dyn.dz[1]) < 2e-3 && Math.abs(dyn.dz[2] + dyn.dz[0]) < 2e-3, dyn);
+  judge('B18 PARTICLES: a cloud seeded from |ψ|² is drawn on the stage and flows along the exact velocity field while the transport plays, without touching the state',
+    !dyn.error && dyn.seeded > 60 && dyn.alive > 40 && dyn.moved > 0.05 && dyn.lit > 40 && dyn.errs === 0, { seeded: dyn.seeded, alive: dyn.alive, moved: dyn.moved, lit: dyn.lit });
+
+  /* ── FIELDS and the PHASE PALETTE ──────────────────────────────────────── */
+  const fld = await g.ev(`try { __LW.loadPreset('2s+2pz'); __LW.scrub(0); await __LW.settle();
+    const a0 = __LW.meters().autocorr, e0 = __LW.meters().energy;
+    __LW.reg.setField({ Fz: 1e-3 }); __LW.schedule(2); await __LW.settle();
+    __LW.scrub(4000); await __LW.settle();
+    const aStark = __LW.meters().autocorr;                       // the Stark state is now an eigenstate: |A| = 1
+    __LW.reg.setField({ Fz: 0, Bz: 0.01 }); __LW.scrub(0); __LW.schedule(2); await __LW.settle();
+    const eZee = __LW.meters().energy;
+    const badge = [...document.querySelectorAll('#badges .badge')].map(b => b.textContent).join(' | ');
+    const status = document.querySelector('[data-m="status"] .ro-val').textContent;
+    __LW.reg.setField({ Fz: 0, Bz: 0 }); __LW.schedule(2); await __LW.settle();
+    return { a0, aStark, e0, eZee, badge, status, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B19 STATIC FIELD: switching on a Stark field makes the Stark state an eigenstate — |A(t)| stays 1 at t = 4000 where it would otherwise have moved — and a Zeeman field leaves ⟨E⟩ unchanged for this m = 0 state',
+    !fld.error && Math.abs(fld.aStark - 1) < 1e-6 && Math.abs(fld.eZee - fld.e0) < 1e-12 && fld.errs === 0, fld);
+  judge('B19 and the instrument SAYS which Hamiltonian is in force: a Stark badge appears and the status line drops from EXACT ANALYTIC to EXACT WITHIN EACH SHELL', /STARK|ZEEMAN/.test(fld.badge) || /WITHIN EACH SHELL/.test(fld.status), { badge: fld.badge, status: fld.status });
+
+  const pal = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('phase'); await __LW.settle();
+    const before = await __LW.readPixels();
+    __LW.palette.setOn(true); await __LW.settle();
+    const after = await __LW.readPixels();
+    const seam = document.querySelector('.pal-strip').width > 0;
+    const d0 = __LW.stateDigest();
+    __LW.palette.load([{ at: 0, rgb: [1, 0, 0] }, { at: 0.5, rgb: [0, 0, 1] }]); await __LW.settle();
+    const two = await __LW.readPixels();
+    __LW.palette.setOn(false); await __LW.settle();
+    const off = await __LW.readPixels();
+    const C = (p) => p.meanChroma;
+    return { before: C(before), after: C(after), two: C(two), off: C(off), seam, same: d0 === __LW.stateDigest(), errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  // the shader dithers every frame, so two renders of one scene never hash alike: compare the colour statistic
+  judge('B20 PHASE PALETTE: turning it on visibly recolours the field, editing the stops recolours it again, turning it off returns to the built-in wheel, and none of it touches ψ',
+    !pal.error && pal.seam && Math.abs(pal.after - pal.before) > 1 && Math.abs(pal.two - pal.after) > 1 && Math.abs(pal.off - pal.before) < 0.5 && pal.same && pal.errs === 0, pal);
+
+  /* ── draw styles (bounded transfer) and the keyboard ───────────────────── */
+  const draw = await g.ev(`try { __LW.loadPreset('3dz2'); __LW.setView('density'); __LW.mat.style = 0; __LW.mat.exposure = 1; __LW.schedule(1); await __LW.settle();
+    const cloud = await __LW.readPixels();
+    __LW.mat.exposure = 12; __LW.schedule(1); await __LW.settle(); const cloudHot = await __LW.readPixels();
+    __LW.mat.style = 1; __LW.mat.exposure = 1; __LW.schedule(1); await __LW.settle(); const solid = await __LW.readPixels();
+    __LW.mat.exposure = 12; __LW.schedule(1); await __LW.settle(); const solidHot = await __LW.readPixels();
+    __LW.mat.style = 2; __LW.mat.exposure = 1; __LW.schedule(1); await __LW.settle(); const grain = await __LW.readPixels();
+    __LW.mat.style = 0; __LW.mat.exposure = 1; __LW.schedule(1); await __LW.settle();
+    return { cloud: cloud.nonBlack / cloud.total, cloudHot: cloudHot.nonBlack / cloudHot.total, cloudLum: cloudHot.meanLum,
+      solid: solid.nonBlack / solid.total, solidHot: solidHot.nonBlack / solidHot.total, solidLum: solidHot.meanLum,
+      grain: grain.nonBlack / grain.total, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B21 DRAW STYLES: SOLID and GRAIN both render, and the bounded transfer holds — at exposure 12 the SOLID plateau stays far dimmer than the CLOUD, which is what stops the blob glowing the whole field',
+    !draw.error && draw.solid > 0.01 && draw.grain > 0.005 && draw.solidLum < draw.cloudLum && draw.errs === 0, draw);
+  const keys = await g.ev(`try { const y0 = __LW.obs.yaw, p0 = __LW.obs.pitch, d0 = __LW.obs.dist, s0 = __LW.stateDigest();
+    const K = (code, mods) => window.dispatchEvent(new KeyboardEvent('keydown', Object.assign({ code, bubbles: true }, mods || {})));
+    K('KeyD'); K('KeyW'); K('KeyE'); await __LW.settle();
+    const cam = { yaw: __LW.obs.yaw !== y0, pitch: __LW.obs.pitch !== p0, dist: __LW.obs.dist !== d0, stateSame: s0 === __LW.stateDigest() };
+    K('KeyY'); K('BracketRight'); await __LW.settle();
+    const rotated = s0 !== __LW.stateDigest();
+    K('BracketLeft'); await __LW.settle();
+    const styleBefore = __LW.mat.style; K('KeyC'); await __LW.settle(); const styleAfter = __LW.mat.style;
+    K('KeyC'); K('KeyC'); await __LW.settle();
+    return { cam, rotated, styleBefore, styleAfter, styleBack: __LW.mat.style, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B21 KEYS: WASD/QE move the camera without touching ψ; X/Y/Z picks the rotation axis and [ ] turns the STATE about it; C cycles the draw style back to where it started',
+    !keys.error && keys.cam.yaw && keys.cam.pitch && keys.cam.dist && keys.cam.stateSame && keys.rotated && keys.styleAfter !== keys.styleBefore && keys.styleBack === keys.styleBefore && keys.errs === 0, keys);
+
+  /* ── QCD: the window computes, draws, and prints the refutation ────────── */
+  const qcd = await g.ev(`try { const w = document.querySelector('.dev[data-id="qcd"]'); if (!w) return { error: 'no QCD window' };
+    if (w.classList.contains('folded')) w.querySelector('.dev-fold').click();
+    await __LW.settle(); await new Promise(r => setTimeout(r, 200));
+    const c = __LW.qcd.cache; const cv = w.querySelector('canvas.qcd-c');
+    const cornell = { split: c.sp.split, meas: c.sp.measuredSplit, ratio: c.flav.predRatio, v0: c.v0, m2: c.sp.levels[1].M };
+    __LW.qcd.setPotential('linear'); __LW.schedule(1); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
+    const lin = { ratio: __LW.qcd.cache.flav.predRatio, airy: __LW.qcd.cache.flav.airyRatio };
+    const subs = [...w.querySelectorAll('.ro-sub')].map(e => e.textContent).join(' | ');
+    __LW.qcd.setPotential('cornell'); __LW.schedule(1); await __LW.settle();
+    return { cornell, lin, refuted: subs.includes('REFUTED'), canvas: cv && cv.width > 0 && cv.height > 0, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B22 QCD: the window solves Cornell (2S−1S = 0.6036, ψ(2S) within 20 MeV with V₀ fitted), draws the ladder, and under the LINEAR potential prints the Airy spectroscopy as REFUTED with the rigid 0.679 ratio',
+    !qcd.error && Math.abs(qcd.cornell.split - 0.6036) < 2e-3 && Math.abs(qcd.cornell.m2 - 3.6861) < 0.02 && Math.abs(qcd.lin.ratio - 0.679) < 0.02 && qcd.refuted && qcd.canvas && qcd.errs === 0, qcd);
+
+  /* ── MOMENTUM SPACE: Parseval on the GPU grid ──────────────────────────── */
+  const mom = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('density'); await __LW.settle();
+    const x = await __LW.fieldDigest(); const halfX = __LW.domain.half;
+    __LW.setSpace('p'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
+    const p = await __LW.fieldDigest(); const halfP = __LW.domain.half;
+    const badge = document.body.textContent;
+    const px = await __LW.readPixels();
+    __LW.setSpace('x'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
+    const back = await __LW.fieldDigest();
+    return { xInt: x.integral, pInt: p.integral, backInt: back.integral, halfX, halfP, fieldSpace: p.half, nanP: p.nan,
+      momentumBadge: badge.includes('a₀⁻¹ · MOMENTUM'), lit: px.nonBlack / px.total, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B23 MOMENTUM SPACE: switching the grid to φ(p) keeps the norm — PARSEVAL on the GPU: ∫|φ|²d³p = ∫|ψ|²d³x = 1 within 2% on a 96³ grid — the box rescales to a₀⁻¹, the badge says MOMENTUM, the picture is lit, and switching back restores the position integral',
+    !mom.error && Math.abs(mom.pInt - 1) < 0.02 && Math.abs(mom.xInt - 1) < 0.02 && Math.abs(mom.backInt - mom.xInt) < 1e-6 && mom.halfP < mom.halfX && mom.momentumBadge && mom.lit > 0.02 && !mom.nanP && mom.errs === 0 && !mom.gpu, mom);
+
+  /* ── SLAP: the impulse drops the norm by the escaped fraction and the state jiggles ── */
+  const slap = await g.ev(`try { __LW.reg.clear(); __LW.reg.set(0, 1, 0); await __LW.settle();
+    const w = document.querySelector('.dev[data-id="state"]'); if (w && w.classList.contains('folded')) w.querySelector('.dev-fold').click();
+    const n0 = __LW.reg.norm2(), d0 = __LW.stateDigest();
+    __LW.kick(0.1, 'z'); await __LW.settle();
+    const n1 = __LW.reg.norm2(), d1 = __LW.stateDigest();
+    const ro = w ? [...w.querySelectorAll('.ro-val')].map(e => e.textContent).find(t => t.includes('%')) : null;
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyX', bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyK', bubbles: true })); await __LW.settle();
+    const n2 = __LW.reg.norm2();
+    __LW.clock.step(4); await __LW.settle();
+    const dq = [...document.querySelectorAll('[data-dq="dipole"]')].map(e => e.textContent)[0] || '';
+    return { n0, n1, n2, escZ: 1 - n1 / n0, escX: 1 - n2 / n1, changed: d0 !== d1, readout: ro, dipole: dq, errs: window.__e.length };
+  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  judge('B24 SLAP: kicking 1s with k = 0.1 along z drops the norm by 0.31% (the electron knocked out of the six-shell register — physics, not renormalised), the readout prints it, the K key slaps at k = 0.2 along the chosen axis (escape 1.2–1.4%, the same law), and the state jiggles',
+    !slap.error && Math.abs(slap.n0 - 1) < 1e-9 && slap.escZ > 0.0027 && slap.escZ < 0.0034 && slap.escX > 0.010 && slap.escX < 0.017 && slap.changed && slap.readout && slap.readout.includes('%') && slap.errs === 0, slap);
 
   /* ── the end: no errors, a last look ───────────────────────────────────── */
   const errs = await g.ev('return { errs: window.__e, gpu: __LW.field.lastGpuError || null, frames: __LW.stats.frames, recon: __LW.stats.reconstructs, presents: __LW.stats.presents };');

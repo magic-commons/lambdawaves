@@ -1,0 +1,352 @@
+# BEYOND THE FRONTIER · λWAVES — Round 4 · OPUS (rival)
+
+*Reply to Round 3 (Fable, `03-fable.md`). Seats: KNOWN (author/theorem) · DERIVED-HERE · MEASURED · UNVERIFIED (why) · REFUTED (by what number). Units atomic; $E_n=-1/(2n^2)$, $T_{\rm cl}=2\pi\bar n^3$, $T_{\rm rev}=\tfrac{4\pi}{3}\bar n^4$, $\beta_3=8\pi\sigma^3/(3\bar n)$, $\beta_4=10\pi\sigma^4/(3\bar n^2)$. Complex $Y_{lm}$, Condon–Shortley (`lab/hydrogen.js`).*
+
+*This round I hold an advantage Fable does not: Josh's half-year mathematics corpus. Everything §5 draws from it is cited by file and section; the corpus's own results are KNOWN-in-corpus, the bridges are DERIVED-HERE.*
+
+**Evidence.** Eight new probes in `research/probes/`: `bf-r4-stokes.py` (the exact Airy closed form, the late-term calculus in exact rationals, and $C_k$ to $k=110$ by Lagrange inversion), `bf-r4-fq.py` (exact rank mod $q$ against the closed form, $N\le14$, six primes, plus $q=2$), `bf-r4-c5census.py` (Theorem C5's census as a root count, and the C3 escape law), `bf-r4-verify.py` (direct verification of the two missed events, the tangency audit, and the $81/8$), `bf-r4-q22.py` (the cubic reconnection by winding number on a $1200\times90000$ grid over one full period), `bf-r4-corpus.py` (the Bessel/Yang–Mills bridge, the in-shell entangling gate, the coherent-state dictionary), `bf-r4-comb.py` (every reduced $a/b$ with $b\le60$ against the comb), `bf-r4-recon.py` and `bf-r4-threadA2.py` (superseded by `bf-r4-q22.py` and `bf-r4-comb.py`; kept for the reduction and the Poisson-alias scaffold). Where a number of Fable's is reproduced or contradicted, her probe is named.
+
+---
+
+## 0 · Verdicts on Round 3
+
+Round 3 is the strongest round so far and most of it survives. Two things die, one census is wrong by four points, and three constants that were fitted are now derived.
+
+| # | Round-3 claim | Verdict | The deciding number |
+|---|---|---|---|
+| **A2** | the ladder is a Poisson sum of Airy envelopes; $\Delta n_j=\tfrac12\sqrt{\bar nj}$, "weight $e^{-\bar nj/8\sigma^2}$" | **STANDS**, one word corrected | The identity is exact and $\Delta n_j=\tfrac12\sqrt{\bar nj}$ re-derived independently ($u_j^2=\bar nj/4\sigma^2$). But $e^{-\bar nj/8\sigma^2}$ is *exactly* the Airy prefactor $e^{\alpha_j/6\beta_3}$ — an **envelope**, not the amplitude ratio: her own $|I_1|/|I_0|=0.259,\,0.072,\,0.00093$ against $0.392,\,0.153,\,0.0092$, a gap growing $1.5\times\to10\times$. §1.2 |
+| **60-term series, Theorem A6** | $C_k=(-1)^k54^k\Gamma(k)/(6\pi e)\,(1+O(1/k))$; simple Borel pole at $\beta^2=-1/54$; Borel-summable for real $\beta$ | **STANDS — and is now a theorem, not a fit** | Exponent $a=0$ ✓, pole $-1/54$ ✓, constant $\tfrac1{6\pi e}$ **derived** from $u_k=(\tfrac16)_k(\tfrac56)_k/(k!2^k)$ and the $_2F_1$ Borel pole. Upgraded to **A6′**: nine exact rational $b_r$, ratio $C_k/\text{pred}=0.99999999999963$ at $k=100$. §1.1 |
+| Q19's sign clash | "the singulant $e^{-\frac43h^3/w}$ gives $e^{+1}$ … one of the two conventions is wrong" | **DISSOLVED, not decided** | Neither convention is wrong; the *companion* was. Ai's late terms are governed by $e^{+2\zeta}$ (Bi), not $e^{-2\zeta}$; $\chi_x=-2<0$ and $e^{+2\zeta}=e^{4/3w}e^{-1}(1+\tfrac38w)$ — the same $e^{-1}$. §1.1(i) |
+| $c\approx0.78$, "$-\tfrac79$ nearest candidate; UNVERIFIED" | | **CONFIRMED AND DERIVED: $c=\tfrac79$ exactly** | Richardson-5 on 110 coefficients: $-0.777777776$ vs $-7/9=-0.777777778$; and $b_1=(\mathcal G_{C,1}/\mathcal G_{C,0})\chi_W=42\cdot(-\tfrac1{54})=-\tfrac79$ as an exact rational. §1.1(iv) |
+| **A5** (the arithmetic packet; deafness for $b\mid6$ by Fermat) | | **STANDS, and is exactly true** | At the cubic level the $b\mid6$ peaks are $\mathbf{1.000000}$ to $10^{-10}$ (all $a$, $b=1,2,3,6$), not $0.966/0.938/0.932$ — her deviations are her own quartic column. Over all $b\le60$: peak $=1$ **iff** $b\mid6$; largest non-deaf peak $0.9622$ at $b=59$. §1.3(i) |
+| **Ω₂** ("for prime $b\ge5$, $\max_x|\cdot|\le1-c(1-b^{-1/2})$; is $b=5$ the worst?") | | **DEAD — and by the opposite sign** | $\min_a$ peak *falls* with $b$: $0.7203\,(5),\,0.5760\,(7),\,0.5672\,(13),\,0.5378\,(19),\,0.5129\,(29),\,0.5099\,(37)$, and $b=4,12$ reach $\mathbf{0.507186}$, below every prime. $b=5$ is the **best** non-deaf denominator. The truth is a floor at $\|p\|_2/\|p\|_1=0.375570$ times $1.3504$. §1.3(ii) |
+| Sturmian consequence (per-shell $S^3$) | | **STANDS** | Corollary of Theorem 3; $p_0=1/n$ is per shell. §2.1 |
+| extended orbit theorem; $\langle z\rangle(\theta)=-3\tanh2\theta$ | | **STANDS** | $-3\tanh2.04=-2.9018$ vs her $-2.91$ ✓; $\mathrm{Gr}^+(2,4)=S^2\times S^2$ is KNOWN (Bander–Itzykson 1966). §2.1 |
+| Q21's $e=|\mathbf K|/\sqrt{\mathbf L^2+\mathbf K^2}$, "extreme Stark $e=1$" | | **REFUTED** | $e=\frac{n-1}{n}\sin\frac\gamma2$; the extreme Stark state has $e=\tfrac12$ at $n=2$, $\tfrac23$ at $n=3$, $\tfrac56$ at $n=6$ — never 1. §2.2 |
+| the **FILTER** category (Q23: "no unitary generated by shell operators changes the Schmidt spectrum") | | **ALIVE-AS-A-GATE; the proposed theorem is REFUTED** | $e^{i\frac\pi4\mathbf L^2}e^{-i\frac\pi4K_z}|2s\rangle=\tfrac1{\sqrt2}(2s+2p_0)$, $\langle z\rangle=-3.0000000000$, Schmidt $(1,0)$: in-shell, unitary, no norm discarded. The invariance holds for $\exp\mathfrak{so}(4)$, not for the enveloping algebra. The fourth control is a **DEFECT WAIT**. §2.3 |
+| degree bound $m_{\max}-m_{\min}$; dominance lemma | | **STANDS** (both) | Degree of $P$; Rouché. Used throughout §3. |
+| **C5** (the two curves, the two firing phases) | | **THEOREM STANDS** | Re-derived in one line from the reduction $W=\xi w$: $\hat A_1^2=4\hat A_0\hat A_2e^{i\omega t}$ forces $e^{i\omega t}=\pm1$. §3.1 |
+| **C5's six measured points** | "**six reconnection points**, three mirror pairs" | **REFUTED — there are TEN** | $\Phi(r)=\hat A_0^2-4|\hat A_+\hat A_-|$ has six roots on $(0,\infty)$, five admissible: her three plus $r=14.32627490$ ($\theta=0.0147886$) and $r=14.32954540$ ($\theta=0.0144629$), verified on the full $\psi$ to $|\psi|/s=4\times10^{-14}$. Her $\theta$-grid spacing was $0.00262$; the two sit $0.00033$ apart, two cells above her cutoff. §3.1 |
+| **C3** (vortex lines escape along the angular nodes; my Theorem 7 refuted) | "the exponent … is asserted, not fitted" | **STANDS — CONCEDED, and now fitted** | $|\cos\theta|\,r\,e^{r/6}=10.125000$ at $r=20,30,40,60,80,100$: $|\cos\theta|=\tfrac{81}8r^{-1}e^{-r/6}$ **exactly**. Her $e^{-r/6}$ alone overestimates by $r/(81/8)$: $2.96\times$ at $r=30$, $9.9\times$ at $r=100$. My Theorem 7 stays DEAD. §3.3 |
+| §3.3 symmetric case ($PT$ pairs at generic times for $M\ge2$) | | **STANDS, verified on the first generic event** | The cubic's first event $t=113.526579$ has its mirror at $t=45125.407633=T-113.526579$, residual $1.9\times10^{-15}$. §3.2 |
+| the f16 current gate | | **STANDS (ALIVE-AS-A-GATE)** | Not re-measured this round; the architecture argument is unchanged and correct. |
+| the $\mathbb F_q$ table; "$n^2$ iff $q>n-1$, first failure at $n=q+1$" | | **STANDS, and is now PROVED with a closed form** | $\dim\ker\Lambda|_{\deg N}=\sum_{2m\equiv N(q)}(m+1)(N-m+1)$; at $N=2n-2$ it is $(2J+1)n^2-q^2\frac{J(J+1)(2J+1)}3$, $J=\lfloor\frac{n-1}q\rfloor$. **Zero mismatches** over 90 cells ($N\le14$, six primes), odd $N$ included. §4.1 |
+| her mechanism for the excess ("$q$-th powers … $16+14=30$") | | **SUPERSEDED** | The totals are right, the mechanism is a special case: the real cause is aliasing of the $U(1)$ weight $2m-N$ modulo $q$, and each alias $j$ contributes exactly $n^2-j^2q^2$. §4.1 |
+
+---
+
+## 1 · Thread A — the revival
+
+### 1.1 Q19 CLOSED. The sign, the constant, and $c=7/9$ — all three, exactly (DERIVED-HERE; MEASURED to 13 digits)
+
+Round 3 left Theorem A6 with one leading-order derivation, one unresolved sign, and one fitted number: *"one of the two conventions is wrong and the numbers say which; that is Q19 now… The subleading $c$ is MEASURED only: Richardson-1 gives $-0.78$ ($-\tfrac79$ is the nearest simple candidate; UNVERIFIED)."* All three are now settled, and the third is exactly $7/9$.
+
+**(i) The sign. Round 3 read the wrong exponential.** Fable's singulant reading was *"$e^{-2\zeta}=e^{-\frac43h^3/w}=e^{-4/(3w)}\,e^{+1}\cdots$"*. That object is Ai's **own** exponential. The late terms of an asymptotic series are never governed by its own exponential; they are governed by the **relative** exponential to the adjacent (companion) solution. For $\mathrm{Ai}$ on $z>0$ the companion is $\mathrm{Bi}\sim e^{+\zeta}$, so the relative exponential is $e^{+2\zeta}$, and in $x=\zeta^{-1}$ the singulant (the $\chi$ in $e^{-\chi/x}$) is
+$$\chi_x=-2<0,$$
+**negative**, which is exactly what the alternating signs of $C_k$ demand. Then, with $2\zeta=\tfrac{4}{3w}-1+\tfrac38w+O(w^2)$ — Fable's own expansion —
+$$e^{+2\zeta}=e^{+\frac{4}{3w}}\cdot e^{-1}\cdot\big(1+\tfrac38w+\cdots\big),$$
+and the $e^{-1}$ is *there in the singulant reading too*. **There was never a disagreement between the two readings; there was a wrong companion.** The composition lemma is correct as Fable stated it. Corrected line a gate could assert: *the singulant of $\alpha^*$ in $w=72\beta^2$ is $\chi_w=-4/3$; the Borel singularity in $\beta^2$ sits at $-1/54$; the adjacent exponential $e^{+1/(54\beta^2)}$ is exponentially **large** on the real axis — which is precisely why there is no Stokes phenomenon there.* Fable's point (ii) STANDS, and is now proved rather than asserted.
+
+**(ii) The composition lemma, proved in one line.** *Let $F(y)$ have late terms governed by singulant $\chi$ with prefactor series $\mathcal G(y)$, i.e. $F_k\sim\sum_{r\ge0}\mathcal G_r\,\Gamma(k-r)\,\chi^{-(k-r)}$. Let $y=w\phi(w)$ with $\phi$ analytic, $\phi(0)=1$. Then $\tilde F(w)=F(y(w))$ has the **same** singulant $\chi$ and prefactor series $\mathcal G(y(w))\,e^{\chi(1/w-1/y)}$.* Proof: $\chi/y=\chi/w-\chi\gamma+O(w)$ with $\gamma=\phi'(0)$, so $e^{-\chi/y}=e^{-\chi/w}\,e^{\chi\gamma}(1+O(w))$: $\chi$ unchanged, constant $e^{\chi\gamma}$. With $\chi=-c$ this is Fable's $e^{-c\gamma}$; here $\chi=-\tfrac43,\gamma=\tfrac34$, factor $e^{-1}$. $\square$ The dictionary itself is elementary and exact term by term: $F_k=\mathcal G_0\Gamma(k)\chi^{-k}$ ⟺ Borel transform $\mathcal G_0/(\chi-\tau)$, jump $2\pi i\,\mathcal G_0e^{-\chi/y}$; $F_k=\mathcal G_1\Gamma(k-1)\chi^{-(k-1)}$ ⟺ $-\mathcal G_1\log(1-\tau/\chi)$, constant jump $2\pi i\mathcal G_1$, Laplace $2\pi i\mathcal G_1\,y\,e^{-\chi/y}$; hence $\Xi(y)=2\pi i\,e^{-\chi/y}\mathcal G(y)$.
+
+**(iii) The Stokes constant, from an exact closed form for the Airy coefficients (DERIVED-HERE).** The Gauss triplication formula turns $u_k=\Gamma(3k+\tfrac12)/(54^k k!\,\Gamma(k+\tfrac12))$ into
+$$\boxed{\;u_k=\frac{\Gamma(k+\frac16)\,\Gamma(k+\frac56)}{2\pi\,2^k\,\Gamma(k+1)}=\frac{(\tfrac16)_k(\tfrac56)_k}{k!\;2^k}\;}$$
+(verified against the recursion exactly for $k\le14$, `bf-r4-stokes.py` [1]). Two consequences. First, $\sum_ku_kx^k={}_2F_0(\tfrac16,\tfrac56;;\tfrac x2)$, so the Borel transform of the Airy series is
+$$\widehat{\textstyle\sum_k u_kx^k}(\tau)=\tfrac{5}{72}\,{}_2F_1\!\big(\tfrac76,\tfrac{11}{6};2;\tfrac\tau2\big),$$
+whose only finite singularity is at $\tau=2$; the $c-a-b=-1$ connection formula gives pole part $\frac{5}{72}\cdot\frac{\Gamma(2)\Gamma(1)}{\Gamma(7/6)\Gamma(11/6)}\cdot\frac{1}{1-\tau/2}=\frac{1}{2\pi}\cdot\frac{1}{2-\tau}$, because $\Gamma(\tfrac76)\Gamma(\tfrac{11}{6})=\tfrac{5}{36}\Gamma(\tfrac16)\Gamma(\tfrac56)=\tfrac{5\pi}{18}$. Hence **exactly**
+$$\mathcal G_U(x)=\frac{1}{2\pi}\sum_r u_r x^r,\qquad \mathcal G_V(x)=-\frac{1}{2\pi}\sum_r v_r x^r$$
+— *the late terms of Ai's series are Bi's series divided by $2\pi$*, and the same for the primed pair. This is the rigorous input Round 3 was missing; nothing here is fitted.
+
+**(iv) The whole chain, exactly.** Carrying the pair $(\chi,\mathcal G)$ through $h=U/V$, the rescale $x=\tfrac32y$, the implicit solve $h=\hat h(w h^{-3})$ (linearised: $\delta=\Xi_{\hat h}(y)\big/[1+3wh^{-4}\hat h'(y)]$ — the self-consistency contributes only $O(w)$ and cannot move $\chi$), then $h\mapsto h^2$ and $w=72\beta^2$, gives with $W=\beta^2$ and $\chi_W=-\tfrac1{54}$
+$$\boxed{\;\mathcal G_C(W)=\frac{1}{2\pi e}\Big(\tfrac13+14W-822W^2+128748W^3-29352006W^4+\tfrac{42412656996}{5}W^5-\cdots\Big)\;}$$
+and $C_k\sim\sum_r\mathcal G_{C,r}\,\Gamma(k-r)\,(-54)^{k-r}$:
+
+**Theorem A6′ (the complete Stokes data of the revival-peak law; DERIVED-HERE, MEASURED to 13 digits).** *The coefficients of $\alpha^*(\beta)=\sum_{k\ge1}C_k\beta^{2k-1}$ satisfy*
+$$\boxed{\;C_k=\frac{(-1)^k\,54^k\,\Gamma(k)}{6\pi e}\Big(1+\sum_{r\ge1}b_r\,\frac{\Gamma(k-r)}{\Gamma(k)}\Big),\quad
+b=\Big(1,\ -\tfrac79,\ -\tfrac{137}{162},\ -\tfrac{10729}{4374},\ -\tfrac{1630667}{157464},\ -\tfrac{392709787}{7085880},\ -\tfrac{135505168901}{382637520},\ \dots\Big)\;}$$
+*In particular $C_k=\frac{(-1)^k54^k\Gamma(k)}{6\pi e}\big(1-\frac{7/9}{k-1}+O(k^{-2})\big)$: the subleading constant is exactly $c=\tfrac79$.*
+
+MEASURED (`bf-r4-stokes.py`; $C_k$ computed to $k=110$ by **Lagrange inversion** — since $w(y)=y\,\hat h(y)^3$ is explicit, $[w^k]h^2=\tfrac1k[y^{k-1}]\big(\tfrac{d}{dy}\hat h^2\cdot\hat h^{-3k}\big)$, an $O(N^3)$ route where Round 3's fixed point is $O(N^4)$; $C_1\ldots C_6$ reproduce Fable's exact integers). Richardson on $(S_k/S-1)(k-1)$ with $S=\tfrac{1}{6\pi e}$:
+
+| Richardson order | 1 | 2 | 3 | 4 | 5 | target |
+|---|---|---|---|---|---|---|
+| tail | $-0.777774656$ | $-0.777783700$ | $-0.777777620$ | $-0.777777801$ | $-0.777777776$ | $-7/9=-0.777777778$ |
+
+and the **full nine-term dictionary against the exact $C_k$**: ratio $C_k/\text{pred}=0.99999451$ at $k=20$, $0.9999999957$ at $k=40$, $0.99999999994$ at $k=60$, $0.99999999999963$ at $k=100$. Fable's $-7/9$ guess is **confirmed and derived**; her $\tfrac1{6\pi e}$ is **confirmed and derived**; her sign worry is dissolved.
+
+**What it buys.** $\alpha^*(\beta)$ is now known to all orders with an explicit remainder: optimal truncation at $k^*\simeq1/(54\beta^2)$ with floor $\simeq\frac{1}{6\pi e}\sqrt{2\pi/k^*}\,e^{-1/(54\beta^2)}$ — Round 2's $e^{-1/(54\beta^2)}$ with its constant attached: $5.0\times10^{-3}$ at $\beta=0.1$ ($k^*=1.85$), $1.9\times10^{-5}$ at $\beta=0.05$, $4.6\times10^{-22}$ at $\beta=0.02$ (Round 2 measured $7.8\times10^{-21}$, $6.1\times10^{-4}$, $0.157$ — the two agree in the only regime where an optimal-truncation estimate means anything, $\beta\le0.05$; my Round-2 numbers at $\beta\ge0.1$ were the first-omitted-term of a series with $k^*<2$, i.e. noise).
+
+### 1.2 Theorem A2 — STANDS, with one word corrected: the alias "weight" is an envelope, not a ratio
+
+A2's identity is Poisson summation on an exactly-Gaussian sum: exact, and I reproduce its arithmetic. The alias location is right and I re-derive it independently: the stationary point of $I(2\pi\sigma(x-j),\beta_3)$ sits at $u_j^2=2\pi\sigma j/(3\beta_3)$, and with $\beta_3=8\pi\sigma^3/3\bar n$ this is $u_j^2=\bar nj/(4\sigma^2)$, so $\Delta n_j=\sigma u_j=\tfrac12\sqrt{\bar nj}$ — **independent of $\sigma$, confirmed**. The weight is where the wording slips. In the Airy closed form $I(\alpha,\beta)=\sqrt{2\pi}(3\beta)^{-1/3}e^{\alpha/6\beta+1/108\beta^2}\mathrm{Ai}(z)$, the factor $e^{\alpha_j/6\beta_3}$ with $\alpha_j=-2\pi\sigma j$ is **exactly** $e^{-\bar nj/8\sigma^2}$ — so A2's Gaussian weight is precisely the exponential prefactor of the $j$-th Airy term, DERIVED-HERE. But the alias **amplitude ratio** carries the Airy factor too:
+$$\frac{|I_j|}{|I_0|}=e^{-\bar nj/8\sigma^2}\cdot\frac{|\mathrm{Ai}(z_j)|}{|\mathrm{Ai}(z_0)|},\qquad z_j=\big(-2\pi\sigma j+\tfrac1{12\beta_3}\big)(3\beta_3)^{-1/3},$$
+and $z_j\to-\infty$ puts $\mathrm{Ai}$ in its **oscillatory** régime, $|\mathrm{Ai}(z_j)|\sim\pi^{-1/2}|z_j|^{-1/4}|\cos(\tfrac23|z_j|^{3/2}-\tfrac\pi4)|$. Round 3's own numbers show the gap: measured $|I_1|/|I_0|=0.259,\,0.072,\,0.00093$ at $(\bar n,\sigma)=(30,2),(60,2),(150,2)$ against $e^{-\bar n/8\sigma^2}=0.392,\,0.153,\,0.0092$ — a discrepancy that **grows** from $1.5\times$ to $10\times$, i.e. it is not a constant and cannot be absorbed. Verdict: **A2 STANDS as an identity; "weight $e^{-\bar nj/8\sigma^2}$" is the envelope of the alias, and the régime boundary $\sigma^2\gtrsim\bar n/8$ derived from it is an upper bound on the alias, conservative by up to an order of magnitude.** The gate line: *the alias amplitude is $e^{-\bar nj/8\sigma^2}|\mathrm{Ai}(z_j)/\mathrm{Ai}(z_0)|$, and the second factor oscillates.*
+
+### 1.3 Theorem A5 — STANDS and is now exact; **Conjecture Ω₂ is REFUTED**, and Q20's Weil route is dead
+
+`bf-r4-comb.py` recomputes the eight rows of Round 3's table at the **cubic level only** ($p_m\propto e^{-m^2/8}$, $m=-8..8$; the exact quantity $\max_x|\sum_mp_me(am^3/b+xm)|$, $x$ on $20001$ points), and adds every reduced $a/b$ with $b\le60$.
+
+**(i) A5's deafness law: exactly right, and Round 3's table never showed it.**
+
+| $a/b$ | $1/1$ | $3/2$ | $4/3$ | $10/9$ | $8/9$ | $18/17$ | $4/5$ | $6/5$ |
+|---|---|---|---|---|---|---|---|---|
+| **exact cubic peak** | $\mathbf{1.000000}$ | $\mathbf{1.000000}$ | $\mathbf{1.000000}$ | $0.844052$ | $0.844052$ | $0.808460$ | $0.744456$ | $0.744456$ |
+| Round 3 (with quartic) | $0.966$ | $0.938$ | $0.932$ | $0.811$ | $0.819$ | $0.821$ | $0.729$ | $0.760$ |
+
+The $b\mid6$ rows are **exactly $1$ to $10^{-10}$** (checked for all $a$ at $b=1,2,3,6$), as Fermat demands — Round 3's $0.966,0.938,0.932$ are the quartic $\beta_4$, which she listed in the same table ($0.105,0.236,0.186$) without noticing it accounts for the whole deviation. Two more consequences her table hides: the cubic peak depends only on $a\bmod b$ and is invariant under $a\mapsto-a$ (complex conjugation), so her rows $10/9$ and $8/9$ **must** be equal ($a\equiv1,-1$) and her rows $4/5$ and $6/5$ **must** be equal ($a\equiv-1,1$); their measured splits $0.008$ and $0.031$ are pure $\beta_4$. Over all $b\le60$ the peak is $1$ **iff** $b\mid6$; the largest non-trivial peak is $0.9622$ at $b=59$. **A5 STANDS, and is exactly true rather than approximately.**
+
+**(ii) Conjecture Ω₂ is REFUTED — and by the opposite sign.** Ω₂: *"for prime $b\ge5$ it is bounded by $\max_x|\cdot|\le1-c(1-b^{-1/2})$ for a $c>0$ independent of $\bar n$"*, with falsifier "a prime-$b$ comb reviving above $0.9$". No comb revives above $0.9$; the conjecture dies the other way. Its form makes the bound **rise** toward $1-c$ as $b$ grows. The data fall:
+
+| $b$ (prime) | 5 | 7 | 11 | 13 | 17 | 19 | 23 | 29 | 31 | 37 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| $\min_a$ peak | $0.720338$ | $0.576037$ | $0.574758$ | $0.567183$ | $0.546795$ | $0.537809$ | $0.523350$ | $0.512900$ | $0.511528$ | $0.509870$ |
+
+and composite $b$ go lower still: $b=4$ and $b=12$ both give $\mathbf{0.507186}$, below every prime. **$b=5$ is not the worst; it is the best of the non-deaf denominators.** So Ω₂ is dead, and the true statement is a **floor**:
+$$\boxed{\;\min_{a}\max_x\Big|\sum_mp_me\big(\tfrac{am^3}{b}+xm\big)\Big|\ \longrightarrow\ \Phi_{\rm env}\approx0.5072\quad\text{as }b\to\infty,\ \text{with}\ \frac{\|p\|_2}{\|p\|_1}=0.375570\;}$$
+— the ratio $0.507186/0.375570=1.3504$ is the maximisation gain of the one free linear phase. **The floor is a property of the envelope, not of the arithmetic**: once $b$ is large the cubic residues equidistribute and $\sum_mp_me(\theta_m+xm)$ is a random walk on the tooth weights, whose $\max_x$ is $\|p\|_2/\|p\|_1$ times an $O(1)$ gain. Corrected line a gate could assert: *for a comb of $T$ effective teeth with weights $p$, the cubic-level revival is bounded below by $\sim\|p\|_2/\|p\|_1$ and above by $1$, with equality above iff $b\mid6$; the denominator decides only where in that band you land, and the band's floor is $O(T^{-1/2})$.*
+
+**(iii) Q20 answered, and its route rejected.** Q20 asked to bound the incomplete sum "using Weil for the complete sum and the Gaussian tail for the incomplete one", and to predict $0.729$ and $0.760$ to $10^{-2}$. Both predictions are of the wrong object (those numbers are quartic-contaminated; the cubic values are $0.744456$ for both). And **Weil does not control this quantity at all**: among the twelve lowest peaks, ten have complete cubic sum $|S(a,b)|=\mathbf0$ exactly ($b=12,53,55,59$ — every prime factor $p$ of $b$ has $\gcd(3,p-1)=1$, so $m\mapsto m^3$ is a bijection mod $p$ and the complete sum vanishes by CRT), while the peaks differ from each other only in the fourth decimal. The complete sum is $0$ or $O(\sqrt b)$; the peak is $0.507$–$0.512$ regardless. The incomplete sum here has $17$ terms against a modulus up to $60$ — it is *shorter than the modulus*, the régime where completion (Pólya–Vinogradov) costs a factor $\sqrt b\log b$ and the bound exceeds the trivial one. **The honest tool is not Weil but equidistribution of $\{am^3/b\}$ on the short interval $|m|\le T$**, and the answer it gives is the envelope floor above.
+
+
+---
+
+## 2 · Thread B — the two spheres
+
+### 2.1 What stands
+
+The **Sturmian consequence** (§2.1 of Round 3) STANDS: it is a corollary of my own Theorem 3 ($W^2=J(1+\cos\chi)$) and the per-shell $p_0=1/n$ is exactly the reason a cross-$n$ superposition has no common $S^3$; the instrument conclusion ("a per-shell object with its $n$ on the badge") follows. The **extended orbit theorem** STANDS: the rank-one orbit is $S^2\times S^2=\mathrm{Gr}^+(2,4)$, these are the $SO(4)$ coherent states (KNOWN: Bander–Itzykson 1966; Perelomov 1986), and the identification with NEBULA's camera manifold is exact as an isomorphism of homogeneous spaces. **$\langle z\rangle(\theta)=-3\tanh2\theta$ STANDS** — re-derived: $e^{\theta K_z}|2s\rangle=\cosh\theta|2s\rangle+\sinh\theta|2p_0\rangle$, $\|\cdot\|^2=\cosh2\theta$, $\langle z\rangle=\sinh2\theta\cdot(-3)/\cosh2\theta$; at $\theta=1.02$, $-3\tanh2.04=-2.9018$ against Fable's $-2.91$ ✓.
+
+### 2.2 Q21 — the dictionary, with the factor Round 3 dropped: $e=\frac{n-1}{n}\sin\frac\gamma2$
+
+Q21 proposed *"the eccentricity $e=|\mathbf K|/\sqrt{\mathbf L^2+\mathbf K^2}$ hmm — the correct formula"*, and asserted *"the extreme Stark state $|j,j\rangle|j,-j\rangle$ ($e=1$, a degenerate ellipse along $z$)"*. Both are wrong by one factor, and the factor is the whole quantum content.
+
+For the coherent state $|j\,\hat n_+\rangle\otimes|j\,\hat n_-\rangle$ with $j=\tfrac{n-1}{2}$: $\langle\mathbf L\rangle=j(\hat n_++\hat n_-)$, $\langle\mathbf K\rangle=j(\hat n_+-\hat n_-)$, hence with $\gamma=\angle(\hat n_+,\hat n_-)$
+$$|\langle\mathbf L\rangle|=(n-1)\cos\tfrac\gamma2,\qquad |\langle\mathbf K\rangle|=(n-1)\sin\tfrac\gamma2,\qquad |\langle\mathbf L\rangle|^2+|\langle\mathbf K\rangle|^2=(n-1)^2 .$$
+The classical Kepler dictionary at energy $E_n=-\tfrac1{2n^2}$ is $\mathbf K=\mathbf A/\sqrt{-2E}=n\mathbf A$ with $|\mathbf A|=e$ the eccentricity, so $L^2+K^2=n^2$ *classically*. The coherent state's expectation vectors live on the sphere of radius $n-1$, not $n$ (and the operator Casimir gives a third number, $\langle\mathbf L^2+\mathbf K^2\rangle=n^2-1$). Normalising by the physical energy, not by the state's own vector length:
+$$\boxed{\;e=\frac{|\langle\mathbf K\rangle|}{n}=\frac{n-1}{n}\,\sin\frac\gamma2=\frac{n-1}{n}\cdot\frac{|\hat n_+-\hat n_-|}{2},\qquad |\langle\mathbf L\rangle|=(n-1)\cos\frac\gamma2,\qquad a=n^2 .\;}$$
+Checks and numbers (`bf-r4-corpus.py` BRIDGE 3). Circular $|j,j\rangle|j,j\rangle$: $\gamma=0$, $e=0$ ✓, $|\langle\mathbf L\rangle|=n-1$ (the maximal-$l$ circular state). Extreme Stark $|j,j\rangle|j,-j\rangle$: $\gamma=\pi$, $\langle\mathbf L\rangle=0$, and
+
+| $n$ | 2 | 3 | 4 | 6 | 10 | 30 |
+|---|---|---|---|---|---|---|
+| $e_{\max}=(n-1)/n$ | $\mathbf{1/2}$ | $\mathbf{2/3}$ | $3/4$ | $\mathbf{5/6}$ | $9/10$ | $29/30$ |
+| $|\langle z\rangle|_{\max}=\tfrac32n(n-1)$ | $3$ | $9$ | $18$ | $45$ | $135$ | $1305$ |
+
+$e=1$ is reached only in the limit $n\to\infty$. **No hydrogenic state has a degenerate (radial) Kepler orbit** — the "collision orbit" of the extreme Stark state is a classical fiction with a $1/n$ correction, and the correction is exactly the difference between the shell radius $n$ and the spin length $n-1$. ($|\langle z\rangle|_{\max}=3$ at $n=2$ reproduces the Stark states' $\mp3$, the number both rounds have used; the general $-\tfrac{3n}{2}K_z=z$ on the shell gives $\tfrac32n(n-1)$.)
+
+### 2.3 Theorem B5 — Q23's proposed theorem is REFUTED. The fourth control is a **DEFECT WAIT**, not a FILTER
+
+Q23 instructed: *"By Theorem 4 no — so state the theorem: no unitary generated by shell operators changes the Schmidt spectrum; the only unitaries that reach the Stark states from $2s$ must leave the shell."* That theorem is false, and the counter-example is one line of the same algebra.
+
+**Theorem B5 (DERIVED-HERE; MEASURED exactly).** *The Schmidt spectrum of the shell's Clebsch matrix is invariant under the **group** $\exp\mathfrak{so}(4)=SU(2)_+\times SU(2)_-$ — and under nothing larger. The enveloping algebra is strictly bigger, and*
+$$\mathbf L^2=(\mathbf J_++\mathbf J_-)^2=2j(j+1)+2\,\mathbf J_+\!\cdot\!\mathbf J_-$$
+*is an **entangling** generator between the two rotors. On $n=2$,*
+$$\boxed{\;e^{\,i\frac\pi4\mathbf L^2}\,e^{-i\frac\pi4K_z}\,|2s\rangle=\tfrac1{\sqrt2}\big(|2s\rangle+|2p_0\rangle\big),\qquad \langle z\rangle=-3.0000000000,\qquad \text{Schmidt spectrum }(1,0),\;}$$
+*a unitary that stays in the shell, discards no norm, and lands exactly on a Stark state.*
+
+MEASURED (`bf-r4-corpus.py` BRIDGE 2): $2s$ has Schmidt spectrum $(0.70710678,0.70710678)$, the Stark state $(1,0)$; $e^{-i\pi K_z/4}|2s\rangle=(0.707107,-0.707107\,i)$ with $\langle z\rangle=0$ exactly (my Round-2 §4.2 result, so B3's picture stays REFUTED); the extra $l$-dependent phase $e^{2i\alpha}=i$ at $\alpha=\pi/4$ rotates the $-i$ to $+1$ and lands on $(0.70710678,0.70710678)$, $\langle z\rangle=-3$, spectrum $(1,0)$.
+
+**What it is physically.** $e^{i\alpha\mathbf L^2}$ is a *wait* under a Hamiltonian whose energies depend on $l$: a **quantum defect** (any alkali Rydberg series), fine structure, or a core polarisation. Hydrogen's exact Coulomb degeneracy is what removes it — the $SO(4)$ degeneracy is precisely the statement that this control is *off* in hydrogen. So the instrument's missing fourth category is not FILTER (non-unitary, discards norm, must print what it threw away) but **DEFECT WAIT**: a unitary, norm-preserving, in-shell operation with one knob $\alpha$, implemented in the lab by adding an $l$-dependent term to the phase advance of the coefficient vector — free, exact, and reversible. FILTER remains a legitimate fourth *kind* of operation (Round 3's $e^{-\tau Fz}$ is genuinely non-unitary), but it is no longer **forced**, and a designer choosing between them should choose the unitary one. Corrected line a gate could assert: *the $SO(4)$-orbit invariants (the Schmidt spectrum) are broken by exactly one cheap unitary, $e^{i\alpha\mathbf L^2}$, and by no element of $SU(2)\times SU(2)$.*
+
+---
+
+## 3 · Thread C — the vortex lines
+
+### 3.1 Theorem C6 — the census separates, and Theorem C5's census is REFUTED: **ten** points, not six
+
+Round 3's census was traced on a grid: *"the curve $|g_-|=|g_+|$ traced by 1200 meridians, sign changes of $|g_0|-2|g_+|$ along it, then Newton"* on $\theta\in[0.01,\pi-0.01]$. Task 3 asked me to attack C5's completeness — *"is there a point the curve-tracer misses near the axis or at large $r$?"* There is. Two mirror pairs, near the axis. The way to see it is to remove the grid entirely.
+
+**Theorem C6 (the census reduction; DERIVED-HERE).** *Let every mode of a superposition be **stretched**, $l_m=|m|$, so that $\Theta_{l_mm}(\theta)=\varsigma_m\sin^{|m|}\theta$ with $\varsigma_m$ constant. Put $\xi=\sin\theta$, $\mu=\xi^2$, $w=e^{i\phi}$ and $W=\xi w$. Then $\xi^{\,\kappa}P(w)$ becomes a polynomial $Q(W)$ whose coefficients depend on $(r,t)$ only, except that $\mu$ enters **linearly** in the coefficients of the modes with $|m|$ below the top two. Consequently:*
+- *three modes $(m+1,m,m-1)$ with $l=|m|$: $\theta$ leaves the problem entirely, $Q(W)=\hat A_+e^{-iE_+t}W^2+\hat A_0e^{-iE_0t}W+\hat A_-e^{-iE_-t}$, and the reconnection set is*
+$$\boxed{\;\Phi(r):=\hat A_0(r)^2-4\,|\hat A_+(r)\hat A_-(r)|=0\quad\text{with}\quad \xi(r)=\frac{|\hat A_0(r)|}{2|\hat A_+(r)|}\le1,\;}$$
+  *$\theta=\arcsin\xi$ and $\pi-\arcsin\xi$, $t\equiv0$ (if $\hat A_+\hat A_->0$) or $T_d/2$ (if $<0$). **One equation in $r$ alone**: the census is a root count, not a search.*
+- *four modes $(m+2,\dots,m-1)$, all stretched: $Q(W)=\hat A_2W^3+\hat A_1W^2+\hat A_0W+\mu\hat A_{-1}$, and $Q'(W)=3\hat A_2W^2+2\hat A_1W+\hat A_0$ is $\mu$-free, so $W=W_\pm(r,t)$ and $\mu=-(\hat A_2W^3+\hat A_1W^2+\hat A_0W)/\hat A_{-1}$: **two real equations $\operatorname{Im}\mu=0$, $\operatorname{Re}\mu=|W|^2$ in the two unknowns $(r,t)$.***
+- *in general (any $l_m$) the modulus conditions are additively separable, so the census is the number of crossings of the **radial curve** $r\mapsto(\ln|\rho_1(r)|,\ln|\rho_2(r)|)$ with the **angular curve** $\theta\mapsto(-\ln|\sigma_1(\theta)|,\ln2-\ln|\sigma_2(\theta)|)$ in the log-ratio plane; for stretched modes the angular curve is the straight half-line of slope $\tfrac12$, which is why the problem collapses.*
+
+**The kill.** For Round 3's state $\psi=(3d_{+2}+4p_{+1}+5s)/\sqrt3$ (all three stretched: $l=2,1,0=|m|$), `bf-r4-c5census.py` scans $\Phi$ on $r\in(0,400]$ with $8\times10^6$ samples and finds **exactly six** sign changes, five of them admissible:
+
+| root $r$ | $\xi=\sin\theta$ | $\theta$ | $(\rho,z)$ | $\operatorname{sgn}\hat A_+\hat A_-$ | $t_0$ | in Round 3? |
+|---|---|---|---|---|---|---|
+| $2.75347965$ | $0.743069420$ | $0.837645$ | $(2.04603,\ \pm1.84267)$ | $-$ | $T_d/2$ | yes |
+| $6.36762188$ | $0.090901439$ | $0.091027$ | $(0.57883,\ \pm6.34126)$ | $-$ | $T_d/2$ | yes |
+| $6.51013250$ | $0.103392096$ | $0.103577$ | $(0.67310,\ \pm6.47524)$ | $+$ | $0$ | yes |
+| $\mathbf{14.32627490}$ | $\mathbf{0.014788037}$ | $\mathbf{0.0147886}$ | $\mathbf{(0.21186,\ \pm14.32471)}$ | $+$ | $0$ | **NO** |
+| $\mathbf{14.32954540}$ | $\mathbf{0.014462474}$ | $\mathbf{0.0144629}$ | $\mathbf{(0.20724,\ \pm14.32805)}$ | $-$ | $T_d/2$ | **NO** |
+| $20.05924142$ | $1.077363750$ | — | — | — | — | inadmissible ($\xi>1$) |
+
+**VERIFIED directly** (`bf-r4-verify.py`, the full three-mode $\psi$, not the reduction): at the two new points $|\psi|/\text{scale}=4.3\times10^{-14}$ and $1.2\times10^{-13}$ at the double root, $\big||w_d|-1\big|=2.2\times10^{-15}$, $|w_1-w_2|\le1.4\times10^{-6}$. **The census is $5\times2=\mathbf{10}$ reconnection points, not 6.**
+
+*Why Round 3 missed them.* Her $\theta$-grid was $1200$ points on $[0.01,\pi-0.01]$: spacing $0.00262$ rad, lower cutoff $0.01$. The two events sit at $\theta=0.0147886$ and $0.0144629$ — **$0.00033$ apart, inside a single cell, two cells above her cutoff**; her nearest-branch matcher (`min(by_th[b], key=lambda p: abs(p[0]-ra))`) collapses them. The prediction in Task 3 ("near the axis") was right.
+
+*Why they are there.* $\hat A_-\propto R_{50}$, whose radial nodes are at $r=1.85823,\ 6.42909,\ \mathbf{14.32795},\ 27.38474$. At a node $|\hat A_-|=0$, so $\Phi=\hat A_0^2>0$, while $\Phi<0$ on both sides wherever $4|\hat A_+\hat A_-|$ dominates: **every radial node of the lowest-$|m|$ mode inside the dominance window generates a mirror pair of reconnection radii straddling it**, and the events crowd onto the axis as the node moves out (because $\sin\theta=\sqrt{|\hat A_-/\hat A_+|}\to0$ at the node). Round 3 saw the pair straddling the node at $6.429$ and correctly said so ("the last two pairs straddle the $5s$ radial node at $r=6.43$"); she did not see that the **same mechanism fires again at $14.32795$**, where $\theta$ has shrunk by a factor 7. The fourth node, $27.385$, produces nothing because it lies beyond the dominance crossover at $r=20.059$ ($\hat A_0^2\sim e^{-r/2}$ finally beats $4|\hat A_+\hat A_-|\sim e^{-8r/15}$, and $\tfrac12<\tfrac8{15}$).
+
+*Completeness, proved rather than scanned.* (i) small $r$: $\hat A_-\sim r^0,\hat A_0\sim r,\hat A_+\sim r^2$, so $\xi\sim\text{const}/r\to\infty$ and the constraint fails; (ii) large $r$: $\Phi>0$ (rates $\tfrac12$ vs $\tfrac8{15}$) and $\xi\sim e^{r/12}\to\infty$; (iii) in between, a tangency audit (`bf-r4-verify.py` (ii), $6\times10^6$ samples, local minima of $|\Phi|$ as well as sign changes) finds **exactly six** local minima of $|\Phi|$ on $(0,60]$, all of them the six roots — no near-tangency anywhere, so no pair of roots is hiding inside a sampling cell. Verdict on C5: **the theorem STANDS; the census attached to it is REFUTED (10, not 6).**
+
+**The Bézout question, answered.** Q22 asks whether $N_\times$ is "bounded by a Bézout-type function of the shell numbers". **No — the right bound is Descartes/Pólya–Szegő for exponential sums, and it is linear, not multiplicative.** By Theorem C6, $\Phi(r)=p_0(r)e^{-2r/n_0}\mp4\,p_+(r)p_-(r)e^{-r(1/n_++1/n_-)}$ with $\deg p_0=2n_0-2$ and $\deg(p_+p_-)=n_++n_--2$; the classical bound on the real zeros of $\sum_{j=1}^kq_j(x)e^{\lambda_jx}$ is $\sum_j(\deg q_j+1)-1$, so
+$$\#\{\Phi=0\}\ \le\ 2\big(2n_0+n_++n_--3\big),\qquad N_\times\le 4\big(2n_0+n_++n_--3\big)$$
+(the outer 2 for the two signs inside $|\cdot|$, the further 2 for the $z\to-z$ mirror). For $(n_+,n_0,n_-)=(3,4,5)$: $\#\{\Phi=0\}\le26$ (measured 6), $N_\times\le52$ (measured 10). Bézout cannot apply because the curves are not algebraic; the governing theory is fewnomials (Khovanskii), and its bound grows like $\sum n_i$, not $\prod n_i$.
+
+### 3.2 Q22 — the genuinely generic reconnection EXISTS. First event $t=113.526579$ a.u.
+
+State $\psi=(3d_{+2}+4p_{+1}+5s+6p_{-1})/2$, every mode stretched. $P(w)=A_{-1}+A_0w+A_1w^2+A_2w^3$ is a cubic; by Theorem C6 the census is two real equations in $(r,t)$, detected by the **winding number** of the single-valued symmetric function $G=(F_1^++iF_2^+)(F_1^-+iF_2^-)$ (symmetric in the unordered pair of roots of $Q'$, so no branch tracking) around every cell of a $1200\times90000$ grid ($\Delta r=0.0372$, $\Delta t=0.503$ a.u.) covering one **full** period $T=2\pi\cdot7200=45238.934$ a.u. (the energies are $-400,-225,-144,-100$ in units of $\tfrac1{7200}$; $\gcd(300,125,44)=1$). `bf-r4-q22.py`: 3236 cells with nonzero winding, refined by 4-D Newton on $(\operatorname{Re}P,\operatorname{Im}P,\operatorname{Re}P',\operatorname{Im}P')$ in $(r,\theta,t,\phi)$ to residual $\le10^{-11}$ (typical $10^{-16}$).
+
+$$\boxed{\;\textbf{1480 distinct reconnection events per period},\ \text{the first at}\ t=113.526579\ \text{a.u.},\ (\rho,z)=(0.925147,\,-14.159404),\ \phi=2.515863\;}$$
+
+and it is at a **generic** phase of every beat in the state:
+
+| beat | $3$–$4$ | $3$–$5$ | $3$–$6$ | $4$–$5$ | $4$–$6$ | $5$–$6$ | discriminant $3{+}5{-}2\cdot4$ |
+|---|---|---|---|---|---|---|---|
+| $T$ (a.u.) | $258.508$ | $176.715$ | $150.796$ | $558.505$ | $361.911$ | $1028.158$ | $481.265$ |
+| $t/T\bmod1$ | $0.43916$ | $0.64243$ | $0.75285$ | $0.20327$ | $0.31369$ | $0.11042$ | $0.23589$ |
+
+Not one is $0$ or $\tfrac12$. **Q15's premise is vindicated for the cubic and Q22 is answered YES.** The mechanism is exactly the one Theorem C5 forbids for the quadratic: $\operatorname{disc}(P)$ is a **five-term** exponential sum in $t$ whose phase sums are $-869,-775,-738,-832,-1000$ (in units of $\tfrac1{7200}$) — all distinct, so it cannot be written as a real number times a single phase, and its zeros are not pinned to $0,\pi$.
+
+Checks. **$PT$ mirror**: the event at $(r,\theta,\phi,t)$ has its partner at $(r,\theta,2\pi-\phi,T-t)$ — found at $t=45125.407633=T-113.526579$ with residual $1.9\times10^{-15}$ ✓, so Fable's §3.3 symmetric-case generalisation STANDS. **$z\to-z$ mirror**: every event appears twice with $\theta\leftrightarrow\pi-\theta$ at the same $(t,\phi)$ ✓ (stretched profiles are even). **Local normal form**: freezing $(r,\theta,\phi)$ and moving $t$ by $\tau$, the coalescing pair splits as $|w_1-w_2|=0.1212,\,0.2428$ at $|\tau|=0.5,\,2$ — ratio $2.003$ against $\sqrt4=2$, i.e. $|w_1-w_2|=\kappa\sqrt{|\tau|}$ with $\kappa=0.1714$, the square-root splitting of a transversal $X$. But unlike the quadratic the pair is **not** a reciprocal pair: $|w_1w_2|=1.00075$ at $\tau=-0.5$ and $0.99936$ at $\tau=+0.5$ — the asymmetry is the signature of a generic (unprotected) event. The third root sits at $|w|=2.567$ throughout.
+
+**Rate.** $1480$ events per $T=45238.9$ a.u. is $15.74$ per discriminant period $T_d=481.265$, against the quadratic's $10$ per $T_d$ concentrated at exactly two instants. The $r$-values still cluster on the radial nodes of the lowest-$|m|$ mode ($6.28,6.61,6.73,6.70$ near the $5s$ node $6.429$; $14.15,14.19,14.58,14.62$ near $14.328$): **Theorem C6's node mechanism survives the loss of the two-phase law.**
+
+**"What replaces the two curves for a cubic?"** — the last clause of Q22, answered. For the quadratic the census was two curves in the *meridian plane* meeting at points, with time slaved to $\{0,T_d/2\}$. For the cubic the meridian plane is the wrong stage: **the census is one curve in the $(r,t)$ plane meeting itself nowhere and meeting a second curve everywhere.** Concretely, by Theorem C6 the two objects are
+$$\mathcal C_1=\{(r,t):\operatorname{Im}\mu(r,t)=0\}\quad\text{and}\quad \mathcal C_2=\{(r,t):\operatorname{Re}\mu(r,t)=|W(r,t)|^2\},\qquad \mu=-\frac{\hat A_2W^3+\hat A_1W^2+\hat A_0W}{\hat A_{-1}},$$
+with $W$ either root of the $\mu$-free quadratic $Q'(W)=0$; $\theta$ and $\phi$ are then *outputs* ($\sin\theta=\sqrt\mu$, $\phi=\arg W$), not unknowns. Time has been promoted from a slaved label to a coordinate, and the two curves live in spacetime rather than in space. The counting theory is the same as in §3.1 — fewnomials, not Bézout — but now in two variables: $\operatorname{disc}(P)$ is the five-term exponential sum whose zero geometry the corpus's L-0250 governs (§5.4), and its counting function is linear in $T$, which is exactly what $1480/45238.9=$ const measures.
+
+### 3.3 Theorem C3 — STANDS, and its rate is now exact (the missing prefactor)
+
+Round 3: *"Theorem C3's exponent $e^{-r(1/n'-1/n_{\max})}$ is the ratio of the two radial decays and is asserted, not fitted."* Fitted now, and it is not just an exponent. For the Q11 state $2p_++3p_0+3d_-$ the escaping pair sits at $|f_1|=|f_3|$ on the equator, i.e. $|\cos\theta|=|R_{21}|\,|Y_1^1|\big/\big(|R_{32}|\,|\partial_{\cos\theta}Y_2^{-1}|\big)$. MEASURED (`bf-r4-verify.py` (iii), $\theta$ bisected to $10^{-16}$):
+
+| $r$ | 20 | 30 | 40 | 60 | 80 | 100 |
+|---|---|---|---|---|---|---|
+| $\lvert\cos\theta\rvert$ | $1.806\times10^{-2}$ | $2.274\times10^{-3}$ | $3.221\times10^{-4}$ | $7.661\times10^{-6}$ | $2.050\times10^{-7}$ | $5.850\times10^{-9}$ |
+| $\lvert\cos\theta\rvert\,r\,e^{r/6}$ | $10.125000$ | $10.125000$ | $10.125000$ | $10.125000$ | $10.125000$ | $10.124999$ |
+
+$$\boxed{\;|\cos\theta_{\rm esc}(r)|=\frac{81}{8}\cdot\frac{e^{-r/6}}{r}\quad\text{exactly}\;}$$
+because $R_{21}=\tfrac{1}{2\sqrt6}re^{-r/2}$ and $R_{32}=\tfrac{4}{81\sqrt{30}}r^2e^{-r/3}$ give $|R_{21}/R_{32}|=\tfrac{81\sqrt5}{8}r^{-1}e^{-r/6}$, and the angular ratio at the equator is $1/\sqrt5$. Round 3's own reported bound "$|\cos\theta|\le0.0068$ at $r=30$" is exactly $e^{-30/6}=0.006738$: her model is the exponent alone and it overestimates by the factor $r/(81/8)=2.96$ at $r=30$ and $9.9$ at $r=100$. **The general law is $|\cos\theta|\asymp K\,r^{\,l'-l_{\max}}e^{-r(1/n'-1/n_{\max})}$: the algebraic prefactor $r^{\,l'-l_{\max}}$ is missing from Theorem C3's statement, and it is the thing that decides the crossing radius in any finite window.** Verdict: **C3 STANDS, sharpened.** My Theorem 7 stays DEAD; I concede it without reservation and note that its number $r_{\rm core}=20.475$ has now acquired a second, independent meaning — the dominance crossover of §3.1 is at $r=20.059$, the radius past which no reconnection of the $(3,4,5)$ state can occur.
+
+---
+
+## 4 · Finite fields — Q18 answered in closed form, and Fable's law proved
+
+### 4.1 Theorem F1 (the $\mathbb F_q$ shell, exactly; DERIVED-HERE, MEASURED with zero mismatches)
+
+Fable's Q18 asked for "the exact dimension of $\ker\Lambda$ on degree-$N$ forms over $\mathbb F_q$ for all $N$ and odd prime $q$… a formula in $n$ and $q$, and its proof from Frobenius", and offered a prediction to beat ($\sum_i\binom{i+3}{3}\dim\ker^{\mathbb Q}_{N-qi}$, which she already knew was wrong). **The mechanism is not Frobenius. It is the collapse of the eigenvalue lattice modulo $q$**, and the answer is a two-line diagonalisation.
+
+Over $\mathbb F_q(i)$ put
+$$a_1=u_1-iu_4,\quad a_2=u_2+iu_3\quad(\Lambda\text{-eigenvalue }+i),\qquad b_1=u_1+iu_4,\quad b_2=u_2-iu_3\quad(-i).$$
+(Direct check on $\Lambda=u_2\partial_3-u_3\partial_2-u_1\partial_4+u_4\partial_1$: $\Lambda u_1=u_4$, $\Lambda u_2=-u_3$, $\Lambda u_3=u_2$, $\Lambda u_4=-u_1$.) $\Lambda$ is a derivation, so on the monomial $a_1^{p}a_2^{s}b_1^{r}b_2^{t}$ it acts by the **scalar** $i(p+s-r-t)$: $\Lambda$ is *diagonal* on monomials, over any field with $i$ and (by flat base change of the rank) with the same kernel dimension over $\mathbb F_q$ itself.
+
+**Theorem F1.** *For odd prime $q$ and any $N\ge0$,*
+$$\boxed{\;\dim_{\mathbb F_q}\ker\Lambda\big|_{\deg N}=\sum_{\substack{0\le m\le N\\ 2m\equiv N\!\!\pmod q}}(m+1)(N-m+1)\;}$$
+*and for the shell degree $N=2n-2$, writing $m=(n-1)+jq$ so that $(m+1)(N-m+1)=n^2-j^2q^2$,*
+$$\boxed{\;\dim\ker\Lambda\big|_{\deg 2n-2}=\sum_{|j|\le J}\big(n^2-j^2q^2\big)=(2J+1)\,n^2-q^2\,\frac{J(J+1)(2J+1)}{3},\qquad J=\Big\lfloor\frac{n-1}{q}\Big\rfloor.\;}$$
+*In particular $\dim=n^2$ iff $J=0$ iff $q>n-1$, and the first failure is at $n=q+1$.*
+
+That is **Fable's empirical "iff $q>n-1$, first failure at $n=q+1$" PROVED**, and Round 2's "$q>2n$" was loose by exactly a factor two because $\Lambda$'s spectrum on degree $N$ is $\{i(2m-N)\}$, which wraps modulo $q$ once $|2m-N|$ can reach $q$, i.e. once $q\le N/1\cdot\tfrac12\cdot2=n-1$.
+
+MEASURED (`bf-r4-fq.py`, exact rank modulo $q$): **zero mismatches** between the closed form and the measured rank deficit over all $N\le14$ and $q\in\{3,5,7,11,13,37\}$ — 90 cells, including the **odd** degrees Round 3 never tested ($N=3$: $8,0,0,0,0,0$; $N=5$: $20,12,0,\ldots$; $N=7$: $36,28,16,0,\ldots$; $N=9$: $76,48,36,0,\ldots$; $N=11$: $124,72,60,24,0,0$; $N=13$: $180,100,88,52,28,0$). Round 3's six numbers are reproduced ($30,57,90$ at $q=3$; $58$ at $q=5$) and extended: at $q=7$, $n=8$ gives $94$; at $q=5$, $n=7,8,9$ give $97,142,193$; at $q=3$, $n=7,8,9$ give $155,230,315$. Fable's guessed "$16+14$, the extra 22 includes cross terms; the exact count is Q18" is answered: there are no "extra invariants" to count separately — there is one formula, and the $q$-th powers she pointed to are simply the monomials with $j\ne0$.
+
+**Reading.** The finite Hopf fibration of the corpus (§42–43 of the finite-field handoff: the Desarguesian spread $\mathbb P^1(\mathbb F_{q^2})\cong Q^-(3,q)$ with exactly $q^2+1$ points) reproduces the hydrogen degeneracy $n^2$ *because it is the $j=0$ term*. What breaks it is not Frobenius but **aliasing of the $U(1)$ weight**: the Hopf circle has $q$ "characters" available, and once the shell's weight range $[-(n-1),(n-1)]$ is wider than $q$, weights $\pm q$ apart become indistinguishable and their whole $(m+1)(N-m+1)$ blocks join the kernel. Each extra $j$ contributes exactly $n^2-j^2q^2$ — a *sum of squares minus squares*, i.e. the same $n^2$ counting with a defect $q^2j^2$.
+
+### 4.2 The even prime, measured (Theorem F1 does not apply)
+
+At $q=2$ the two eigenvalues $\pm i$ collide ($i^2=-1=1$) and $\Lambda$ is not semisimple; $2$ is not invertible and the congruence $2m\equiv N$ degenerates. MEASURED (`bf-r4-fq.py` C): $\dim\ker\Lambda=0$ for every **odd** $N$, and for $N=2n-2$
+$$1,\ 6,\ 19,\ 44,\ 85,\ 146,\ 231\ (n=1..7)\qquad\Longrightarrow\qquad \boxed{\dim_{\mathbb F_2}\ker\Lambda\big|_{\deg 2n-2}=\frac{n(2n^2+1)}{3}}$$
+(third differences constant $=4$; the closed form checks at all seven values). This is a **third** law, neither $n^2$ nor $\binom{N+3}{3}$: at $n=4$ it is $44$, against $16$ over $\mathbb Q$ and $84=\binom93$ for the whole degree. Seat: MEASURED for $n\le7$; the closed form is a fit to seven exact integers, UNVERIFIED as a theorem (Q24).
+
+---
+
+## 5 · Corpus synthesis — four bridges, each with its number
+
+*Read this round by disciplined subagents (grep-first, ≤350-line chunks): the finite-field handoff, the CM sextic file, the general library, MATH-DISK-07, YMD-DISK-01. What the corpus does **not** contain is stated in §5.5 so it is not asked for again.*
+
+### 5.1 Theorem S1 — the corpus's Yang–Mills Borel constant is exactly 2, and its Stokes constant is $-2/\pi$
+
+`YMD-DISK-01 COMPENDIUM.md`, **Y-0138** (lines 519–590; the mass gap "**is** a Stokes constant", the alien-derivative datum at $\omega=C=9\pi^2/22=4.0375654368$) rests on the divergent series
+$$\sigma_0(\beta)=-\log\frac{I_2(\beta)}{I_1(\beta)}=\sum_{k\ge1}s_k\beta^{-k},\qquad s_1=\tfrac32,\ s_2=\tfrac34,\ s_3=\tfrac3{16},\ s_4=-\tfrac9{16},$$
+KNOWN-in-corpus as Gevrey-1 with "$|s_k/s_{k-1}|/k\to0.49$" and Borel singularity **"$A=2.0027$"** (their Richardson window $[1.95,2.03]$; their Borel–Padé$[4/4]$ nearest real pole $2.26$). The late-term calculus of §1.1 settles all of it exactly. The same reflection-formula move that gave the Airy closed form gives the Bessel one:
+$$\boxed{\;a_k(\nu)=\frac{\prod_{j\le k}(4\nu^2-(2j-1)^2)}{k!\,8^k}=\frac{(-1)^k\cos\pi\nu}{\pi}\cdot\frac{\Gamma(k+\nu+\frac12)\,\Gamma(k-\nu+\frac12)}{\Gamma(k+1)\,2^k}\;}$$
+(verified exactly for $\nu=1,2,3$, $k\le19$, `bf-r4-corpus.py`; note it vanishes for half-integer $\nu$, where the series terminates — the formula knows that). Hence $\mathcal G_{\mathcal I_\nu}=\frac{\cos\pi\nu}{\pi}\mathcal K_\nu$ with singulant $\chi=+2$ (**positive**, unlike the revival's: $e^{-2\beta}$ is exponentially small on the real axis, so $\sigma_0$ **is not** Borel-summable there — the opposite side of the same dichotomy), and since the $e^\beta/\sqrt{2\pi\beta}$ prefactors cancel in the ratio,
+$$\mathcal G_{\sigma_0}=-\frac1\pi\Big[\frac{\mathcal K_1}{\mathcal I_1}+\frac{\mathcal K_2}{\mathcal I_2}\Big]=-\frac2\pi\Big(1+\tfrac94x+\tfrac{117}{32}x^2+\tfrac{633}{128}x^3+\cdots\Big),\quad x=\beta^{-1}.$$
+**Theorem S1 (DERIVED-HERE; MEASURED to $1.2\times10^{-10}$).** *$\sigma_0$'s Borel singularity is at $A=2$ **exactly**, its Stokes constant is $S_{\sigma}=-\tfrac2\pi=-0.6366197724$, and*
+$$s_k=-\frac2\pi\Big[\frac{\Gamma(k)}{2^k}+\frac94\frac{\Gamma(k-1)}{2^{k-1}}+\frac{117}{32}\frac{\Gamma(k-2)}{2^{k-2}}+\cdots\Big]=-\frac{2\,\Gamma(k)}{\pi\,2^k}\Big(1+\frac{9/2}{k-1}+O(k^{-2})\Big).$$
+MEASURED: the eight-term dictionary against the exact $s_k$ gives ratio $1.00697$ at $k=10$, $0.9999949$ at $k=20$, $0.99999999$ at $k=40$, $0.999999999882$ at $k=60$; and $|s_k/s_{k-1}|/k=0.40225,\,0.48043,\,0.49100$ at $k=10,30,60$ — **converging to $\tfrac12$ exactly**, which is what the corpus's four-term "$0.49$" was seeing. *Consequences for the corpus programme:* (i) Y-0138's key structural claim, $\Delta_C\sigma_0=0$ because the Bessel scale $A=2$ misses the gap action $C/2=9\pi^2/44=2.0188$, is **proved rather than measured** — the two are $2$ and $2.0188$, a genuine separation of $0.94\,\%$ that their Richardson window $[1.95,2.03]$ could not certify and their Borel–Padé value $2.26$ actively contradicted; (ii) the Stokes constant of the *Bessel* channel is now a closed form, so Y-0139's "unknown Stokes constant $S_1$" is isolated as the only remaining unknown of that Ext$^1$ class; (iii) the corpus's whole "gap = Stokes constant" language and this programme's Theorem A6′ are the **same calculus applied to two different classical pairs**, $(I_\nu,K_\nu)$ and $(\mathrm{Ai},\mathrm{Bi})$, with the identical dictionary $\mathcal G_{\text{recessive}}=\text{const}\times(\text{dominant series})$.
+
+### 5.2 Theorem S2 — L-0245 is the *reason* for the comb floor: the revival floor is an uncertainty constant
+
+`GENERAL MATHEMATICS LIBRARY.md`, **L-0245** (line 967, seat $[\mathrm{N/C},\blacksquare]$): on $\mathbb Z/N$, $|T||\Omega|\ge N$ with equality **iff** $f=c\,e^{2\pi ibx/N}\mathbf 1_{H+a}$ for a **subgroup** $H$ (Donoho–Stark; the entropic version has the same equality locus, converse due to Özaydın–Przebinda, JFA 215 (2004)); $\tau(N)$ Heisenberg orbits, $\lceil\tau(N)/2\rceil$ under $\langle\mathrm{HW},F\rangle$ (five at $N=36$). Round 2 cited this to kill Ω₁; Round 3 used it to build A5. It does more: **it explains the number I measured in §1.3(ii).**
+
+**Theorem S2 (DERIVED-HERE, with L-0245 KNOWN-in-corpus).** *Let $p$ be a population profile and $\mathcal A(p;a/b)=\max_x|\sum_mp_me(am^3/b+xm)|/\|p\|_1$. Then*
+$$\frac{\|p\|_2}{\|p\|_1}\ \le\ \mathcal A(p;a/b)\ \le\ 1,$$
+*the upper bound with equality iff $am^3$ is affine on $\operatorname{supp}p$ (Theorem A5), and the lower bound is exactly the Donoho–Stark ratio of $\operatorname{supp}p$: for a **uniform** comb of $T$ teeth, $\|p\|_2/\|p\|_1=T^{-1/2}$ and L-0245 gives $|\Omega|\ge b/T$, i.e. the comb's own Fourier support is what the free phase $x$ has to work with. Among all $p$ supported on $T$ points the ratio is minimised precisely on the modulated subgroup indicators that saturate L-0245 — so **the packet with the sharpest possible arithmetic sensitivity is exactly the packet that saturates the uncertainty principle**.* MEASURED: for the Gaussian-tapered comb of §1.3, $\|p\|_2/\|p\|_1=0.375570$ (effective tooth count $(\|p\|_1/\|p\|_2)^2=7.09$ against 17 actual teeth), and $\inf_{a,b\le60}\mathcal A=0.507186=1.3504\times0.375570$; the $1.3504$ is the gain from maximising over the one free linear phase. *(Cross-check inside the corpus:* `MATH-DISK-07 COMPENDIUM.md` line 3851 records that $H_6=\{0,6,\dots,30\}\subset\mathbb Z/36$ **equals its own DFT**, and **T-2744** (line 1844) that every "Song" has $\le\sqrt N=6$ nonzero coefficients at $N=36=6^2$ — the $\sqrt N$-compressive encoding is the same $T^{-1/2}$, and the self-dual comb of spacing 6 is precisely the $b\mid6$ deaf case of Theorem A5.)*
+
+### 5.3 Theorem S3 — the exact-arithmetic shell: $\mathbb F_{37}$ renders every shell the lab can draw
+
+`CM SEXTIC OUROBOROS AND BALANCE LADDER 2026-08-23.md`, **Thm 2.1** (lines 88–165): the twist-class balance $\#=w$ holds **iff $p=w^2+1$**, with the ladder $(w,p)=(2,5),(4,17),(6,37)$ and Cor 2.2 making $37=6^2+1$ terminal; **Thm 10.1/10.2**: $H_6=\mu_6=(\mathbb F_{37}^\times)^6$ **iff $p=37$**. `FINITE FIELD SPECTRAL DYNAMICS FRONTIER HANDOFF`, **§42–43** (lines 2171–2330): the Desarguesian spread is the finite Hopf fibration $\mathbb P^1(\mathbb F_{q^2})\cong Q^-(3,q)$ with exactly $q^2+1$ $\mathbb F_q$-points; **§30** (lines 1535–1597): for $p\equiv1\ (3)$, $4p=L^2+27M^2$, and at $p=37$, $L=-11$, $M=1$, so the cubic Gaussian period polynomial is $F_{3,37}(x)=x^3+x^2-12x+11$ with $\operatorname{Disc}=37^2$.
+
+**Theorem S3 (DERIVED-HERE, from Theorem F1 + corpus).** *By F1 the $\mathbb F_q$ Hopf shell reproduces the hydrogen degeneracy $n^2$ for **every** $n\le q$. At the corpus's terminal balanced prime $q=37$ this covers every shell up to $n=37$; the lab's presets top out at $n=15$. Hence the whole $n^2$-dimensional shell algebra of the instrument — the Clebsch matrix, the $SU(2)\times SU(2)$ action, the Hopf-invariant basis, and the orbit invariants of Theorem 4 — can be carried in **exact $\mathbb F_{37}$ integer arithmetic with no loss**, and the first shell at which the count breaks is $n=38$.* Two things this buys that floating point cannot: an exact test for "is this state on the rank-one orbit?" (a rank computation mod 37 rather than a singular-value threshold), and an exact, reproducible degeneracy check for the KS level count. The corpus's own reason for stopping at 37 (Cor 2.2: $w\in\{2,4,6\}$ exhausts the balance ladder) and this programme's reason for it being enough ($37>15$) are independent — that is the kind of agreement this protocol trusts.
+
+*A second, sharper thread from the same page (LEAD, UNVERIFIED).* Round 2 §7.1 evaluated $\sum_ke(k^3/37)=1+3\theta_0=4.472835$ with $\theta_j$ the roots of the corpus's $F_{3,37}$. My §1.3 measurements now say the **complete** cubic sum is irrelevant to the revival ($b=12,53,55,59$ all have $|S(a,b)|=0$ and all sit at the floor). The place where $F_{3,37}$ *should* matter is the opposite regime — a comb whose tooth count exceeds $b$, so the sum is complete. Test in Q26's spirit: at $b=37$, $T\ge37$ teeth, the peak should be $\max_x|\tfrac1{37}\sum_{m\bmod37}e(am^3/37+xm)|$, computable in closed form from $\theta_0,\theta_1,\theta_2$.
+
+### 5.4 Lead S4 — L-0250 is the counting theorem for the cubic reconnection
+
+`GENERAL MATHEMATICS LIBRARY.md`, **L-0250** (line ~1027, *Tilted-Line Zero Theorem for Cosine-Exponential Trinomials*, seat $[\mathrm{N/C},\blacksquare]$, PARTIAL): for the **five-term** exponential sum $F(s)=a\cos^2w+b\,q^{z/2}\cos w+c$ with $w=\pi z/2k$, above some $T_0$ every zero is simple, they lie on a tilted line of slope $\pi/(k\log q)$ with vertical spacing $\Delta t=4\pi k^2\log q/(k^2\log^2q+\pi^2)$ and **counting function $N(T)=T/\Delta t+O(1)$**; proof by Rouché; for $\eta_\ell$ the zeros accumulate on exactly $\ell-2$ tilted lines with explicit slopes.
+
+The discriminant of my cubic $P(w)$ is, in $t$, **exactly this genre**: $\operatorname{disc}=18a_3a_2a_1a_0-4a_2^3a_0+a_2^2a_1^2-4a_3a_1^3-27a_3^2a_0^2$, five monomials with phase sums $-869,-775,-738,-832,-1000$ (units $\tfrac1{7200}$), all distinct — a five-term exponential sum with real $(r,\theta)$-dependent coefficients. L-0250's shape predicts a **linear** counting function for its zeros, hence a constant reconnection rate, and my measurement is exactly that:
+$$1480\ \text{events per}\ T=45238.934\ \text{a.u.}\qquad\Longrightarrow\qquad \Delta t_{\rm meas}=30.5668\ \text{a.u.}$$
+$$\text{i.e. } 15.74\ \text{events per } T_d=481.265,\ \text{against the quadratic's } 10\ \text{at exactly two instants.}$$
+What L-0250 supplies and this programme lacks is the *derivation* of $\Delta t$ from the exponents; that is Q28. This is the first place the corpus's pure-mathematics wing hands the physics wing a theorem it can use verbatim rather than by analogy.
+
+### 5.5 What the corpus does **not** have (so it is not asked for again)
+
+Checked by grep across all five files this round: **no** Airy/Borel/Stokes/resurgence content anywhere except YMD-DISK-01 (§5.1); **no** bound on an incomplete character sum, no Pólya–Vinogradov, no Kloosterman/Salié evaluation (the finite-field handoff has $|G(\chi)|=\sqrt q$, $J=G G/G$, and the period polynomial, nothing incomplete); **no** derivation-kernel or Frobenius-kernel-inflation result (§4 is entirely DERIVED-HERE); **no** point count for $\sum u_i^2=c$ over $\mathbb F_q$; **no** Laguerre, Hermite, interlacing, Descartes, Sturm, or Bézout anywhere (the §3.1 fewnomial bound is DERIVED-HERE); **no** SO(4), Runge–Lenz, Kepler, Grassmannian or coherent-state material outside YMD-DISK-01's single Hodge-split remark (Y-0075). `L-0100` is *not* about self-inversive polynomials — it is the rotation-covariant Apostol log-derivative of $\Phi_n$ — so **Round 2's §7.3 citation was wrong**; the self-inversive/unimodular structure of Theorem 5 is DERIVED-HERE and has no corpus ancestor. I withdraw that citation.
+
+---
+
+## 6 · The final-conjecture candidate
+
+The programme opened with Ω₁: *"the revival is arithmetic."* Round 2 killed it, Round 3 replaced its mechanism with Theorem A5 and conjectured Ω₂, Round 4 kills Ω₂. What is left is not nothing — it is a sharp trichotomy, and it is the statement I would bet the programme on.
+
+> ### Conjecture Ω₃ (the revival hears the packet, not the ladder — with exactly one arithmetic exception, and the exception is a subgroup)
+>
+> *For a population profile $p$ on the Rydberg ladder, let $\mathcal A(p;a/b)=\|p\|_1^{-1}\max_x\big|\sum_mp_m\,e(am^3/b+xm)\big|$ be the cubic-level revival height, $a/b=4d^3/3\bar n$ in lowest terms. Then*
+> 1. **(the ceiling is arithmetic, and it is Fermat's)** $\mathcal A=1$ *iff* $m\mapsto am^3$ *is affine on* $\operatorname{supp}p$; *for a full comb of spacing $d$ this holds iff $b\mid6$. No other denominator reaches 1.*
+> 2. **(the floor is not arithmetic — it is the uncertainty principle of the support)** $\mathcal A(p;a/b)\ \ge\ \|p\|_2/\|p\|_1$ *for every $a,b$, and* $\inf_{a,b}\mathcal A(p;a/b)=\kappa\,\|p\|_2/\|p\|_1$ *with $\kappa$ an absolute constant (measured $\kappa=1.3504$), attained in the limit $b\to\infty$ where the cubic residues equidistribute.*
+> 3. **(the extremal packet is the subgroup)** *Over all $p$ with $|\operatorname{supp}p|=T$, the floor $\|p\|_2/\|p\|_1$ is minimised, at $T^{-1/2}$, precisely on the modulated subgroup-coset indicators — the unique equality case of the Donoho–Stark/Hirschman bound $|T||\Omega|\ge N$ (corpus, L-0245).*
+>
+> *Hence the arithmetic of the ladder enters the revival through **one Boolean**, $b\mid6$, and everything else is the uncertainty principle of the packet's own support. **Ω₁ was a true statement about the wrong object**: the denominator that decides a revival is not $\bar n$'s, it is the packet's — and the packets that hear the most are exactly the ones that saturate an uncertainty principle.*
+
+**Evidence for.** (1) is Theorem A5 with its "iff" now verified exactly: at the cubic level the $b\mid6$ peaks are $1.000000$ to $10^{-10}$ for every $a$, and over all $b\le60$ no other denominator exceeds $0.9622$ ($b=59$) — every reduced $a/b$ with $b\le60$ tested (about eleven hundred fractions), one clean cut. (2) is measured across ten primes and every composite $b\le60$: the minimum peak falls monotonically from $0.7203$ ($b=5$) to $0.5099$ ($b=37$) and bottoms at $0.507186$ ($b=4,12$), while $\|p\|_2/\|p\|_1=0.375570$; the ratio is $1.3504$. (3) is KNOWN-in-corpus with a proved converse (Özaydın–Przebinda 2004), and its finite instance appears twice more in the corpus at $N=36$ (`MATH-DISK-07` T-2744, line 3851). Structurally: parts 1–3 explain, in one frame, why Ω₁ died (the ladder's own $b$ is not what is heard), why A5 lives (a comb *is* a subgroup indicator), and why Ω₂ died (its bound has the wrong monotonicity because it looked for the arithmetic in the floor rather than in the ceiling).
+
+**Evidence against, honestly.** (a) $\kappa$ is measured on **one** envelope (Gaussian taper, $d=30$, $\sigma=60$, 17 teeth, effective 7.09); that it is absolute — independent of the taper and of $T$ — is UNVERIFIED, and it is the single weakest joint. A Gaussian with a much longer tail could plausibly push $\kappa$ toward $\sqrt{2\ln T_{\rm eff}}$ rather than a constant, which would make (2) false as stated and true with a $\sqrt{\log}$. (b) $b\le60$ and $T\le17$: the complete-sum régime $T>b$ is untested, and it is exactly where the corpus's $F_{3,37}$ would enter (§5.3) — if the ceiling there is set by $\max_j|1+3\theta_j|$ rather than by $b\mid6$, part (1) needs a second clause. (c) The whole statement is at the **cubic level**; the quartic $\beta_4$ is what corrupted Round 3's table and it is not in the conjecture. **The falsifier:** a packet $p$ and a fraction $a/b$ with $b\nmid6$ and $\mathcal A(p;a/b)>0.99$ at quartic $<0.05$ — or an envelope family on which $\inf_{a,b}\mathcal A\big/(\|p\|_2/\|p\|_1)$ drifts by more than $10\,\%$.
+
+**The runner-up, for the record.** If the print wants a conjecture in Thread A's analytic register instead, mine is **Ω₄ (Airy universality of the revival)**: *every observable of $I(\alpha,\beta)$ defined by a stationarity or moment condition — $\alpha^*$, $|I|_{\max}$, the peak curvature, the half-width, the $j$-th alias amplitude — has a Gevrey-1 series in $\beta^2$ with the **same** singulant $\chi_W=-\tfrac1{54}$ and a Stokes prefactor series obtained from $(\mathcal G_U,\mathcal G_V)=\pm\tfrac1{2\pi}(\tilde U,\tilde V)$ by the chain rules of §1.1(ii); in particular each has late terms $\propto(-54)^k\Gamma(k)$ with leading constant in $\tfrac1{\pi e}\mathbb Q$ and every $b_r\in\mathbb Q$.* Evidence for: $\alpha^*$ verified to 13 digits with nine exact rational $b_r$, constant $\tfrac1{6\pi e}$, $b_1=-\tfrac79$; the identical structure reproduces the corpus's Bessel case (§5.1) with constant $-\tfrac2\pi$ and $b_1$-analogue $\tfrac92$, so the mechanism is not special to Airy. Evidence against: $|I|_{\max}$'s series has not been computed past $\beta^4$ — that is Q25, and it is a two-hour computation.
+
+---
+
+## 7 · Questions Q24–Q29
+
+**Q24 (DEEPEN — the even prime).** Theorem F1 needs $q$ odd. MEASURED at $q=2$: $\dim\ker\Lambda=0$ for every odd degree and $1,6,19,44,85,146,231$ at $N=2n-2$, $n\le7$, i.e. $\tfrac{n(2n^2+1)}{3}$. **Prove it** (the two eigenvalues $\pm i$ collide, so $\Lambda$ is not semisimple: give the Jordan structure of $\Lambda$ on degree-$N$ forms over $\mathbb F_2$ and the general $\mathbb F_{2^e}$ answer), and say whether the formula is the $q\to2$ limit of anything. *Prediction to beat:* $n=8,9,10$ give $344,\ 489,\ 670$.
+
+**Q25 (DEEPEN — Ω₄'s first real test).** Compute the asymptotic series of $|I|_{\max}(\beta)$ (Round 1's $1-3\beta^2+O(\beta^4)$) to 60 exact terms by the same Lagrange-inversion route ($|I|_{\max}=\sqrt{2\pi}(3\beta)^{-1/3}e^{\alpha^*/6\beta+1/108\beta^2}\mathrm{Ai}(z^*)$ with $z^*$ already known), and give its Stokes data: the singulant, the leading constant, and $b_1$. **Ω₄ predicts $\chi_W=-\tfrac1{54}$ exactly, a leading constant in $\tfrac1{\pi e}\mathbb Q$, and $b_1\in\mathbb Q$.** Any of the three failing kills Ω₄; a rational $b_1$ that is *not* $-\tfrac79$ is the interesting outcome, because it separates "same singularity" from "same series".
+
+**Q26 (LOCATE — the corpus's open Airy problem).** `YMD-DISK-01` line 613 states that *"a uniform fold/Airy asymptotic of the diagonal isosceles $|6j|$ is needed"* and leaves it open. §1.1(iii) supplies the missing ingredient in closed form: $u_k=(\tfrac16)_k(\tfrac56)_k/(k!2^k)$, Borel transform $\tfrac5{72}\,{}_2F_1(\tfrac76,\tfrac{11}6;2;\tfrac\tau2)$, single pole at $\tau=2$, residue $-\tfrac1{2\pi}$. **Produce the all-orders fold asymptotics of the diagonal isosceles $6j$ symbol with its first two Stokes corrections**, and test at $j=20$ and $j=40$ against exact Racah evaluation. Give the number: the relative error of the two-term Stokes-corrected formula at the fold.
+
+**Q27 (BROADEN — the node-attractor law, proved).** Theorem C6 + §3.1 measurement say the reconnection radii of a stretched three-mode state straddle the radial nodes of the **lowest-$|m|$** mode that lie inside the dominance window $\{4|\hat A_+\hat A_-|>\hat A_0^2\}$: for $(3d_{+2},4p_{+1},5s)$ the $5s$ nodes at $6.42909$ and $14.32795$ each give a pair, the node at $1.85823$ gives none (outside), the node at $27.38474$ gives none (past the crossover at $20.059$), and one isolated root sits at $2.753$. **Prove that the admissible-root count is $2\nu+\epsilon$ with $\nu$ the number of such nodes and $\epsilon\in\{0,1\}$**, and predict the census of $(3d_{+2},4p_{+1},6s)$ — $6s$ has five radial nodes — before computing it. My prediction: $\nu=2$ or $3$, census $10$ or $14$.
+
+**Q28 (LOCATE — the reconnection rate, derived).** MEASURED: $1480$ generic reconnection events per period $T=2\pi\cdot7200=45238.934$ a.u. for the cubic, i.e. $\Delta t=30.5668$ a.u., $15.74$ per $T_d$. L-0250 (corpus) gives a counting function $N(T)=T/\Delta t+O(1)$ for five-term exponential sums with an **explicit** $\Delta t$ built from the exponents. **Derive $\Delta t$ from the five discriminant phase sums $\tfrac1{7200}(869,775,738,832,1000)$ and the radial dominance window, and reproduce $30.5668$ to $1\,\%$.** Say also how many "tilted-line families" the events fall into (L-0250 predicts $\ell-2=3$ for a five-term sum) — my $r$-values cluster near $2.98,\,6.3\text{–}6.7,\,14.1\text{–}14.6$, which is suggestively three.
+
+**Q29 (BROADEN — the DEFECT WAIT as a universal gate set).** Theorem B5 gives one in-shell unitary outside $SU(2)_+\times SU(2)_-$: $e^{i\alpha\mathbf L^2}$. **Is $\langle SU(2)\times SU(2),\,e^{i\alpha\mathbf L^2}\rangle$ dense in $SU(n^2)$?** I conjecture yes for every $n\ge2$ (the entangler $\mathbf J_+\!\cdot\!\mathbf J_-$ plus local $SU(2)$s is the textbook universal set). Give the smallest $n$ where it fails, or prove universality and give the **gate count**: the minimum number of alternating $(SU(2)\times SU(2),\,e^{i\alpha\mathbf L^2})$ factors needed to reach an arbitrary $n=3$ shell state (9 complex dimensions) from $|3s\rangle$, and the corresponding $l$-dependent phase schedule. This is the instrument's real fourth-control specification.
+
+---
+
+## NOT CERTIFIED
+
+- **No GPU ran; nothing under `lab/` or `tests/` was touched; no server started; no git operation performed.** All probes are new files `research/probes/bf-r4-{stokes,fq,recon,c5census,verify,q22,corpus,comb}.py`.
+- **Theorem A6′.** The dictionary $F_k\sim\sum_r\mathcal G_r\Gamma(k-r)\chi^{-(k-r)}\Leftrightarrow\Xi=2\pi ie^{-\chi/y}\mathcal G(y)$ is verified term-by-term for $r=0,1$ and used to all $r$; the identification $\mathcal G_U=\tfrac1{2\pi}\tilde U$ is *proved* at $r=0$ (the ${}_2F_1$ pole) and at $r=1$ (the $\tfrac5{72}$ match), and *assumed* for $r\ge2$ — its consequence is verified numerically to 13 digits at $k=100$, which is strong evidence but not a proof. The self-consistency step (linearising $h=\hat h(wh^{-3})$) is a leading-order argument; it cannot move $\chi$, but I have not proved that the $O(w)$ terms I dropped in the denominator contribute nothing beyond $b_1$.
+- **$C_k$ to $k=110$** were computed in mpmath at dps 320 by Lagrange inversion, not in exact rationals; $C_1\ldots C_6$ match Fable's exact integers to all printed digits, and the Richardson tails are stable, but the high-$k$ values are floating point.
+- **Theorem F1** is proved for odd $q$; the $q=2$ formula $\tfrac{n(2n^2+1)}3$ is MEASURED for $n\le7$ only (Q24). The claim that base change $\mathbb F_q\to\mathbb F_q(i)$ preserves the kernel dimension is standard (rank is invariant under field extension) but not re-derived here.
+- **Theorem C6's census (10 points)** is complete on $r\in(0,400]$ with $8\times10^6$ samples plus a tangency audit ($6\times10^6$ samples, local minima of $|\Phi|$) on $(0,60]$, plus analytic exclusion at both ends. A double root of $\Phi$ inside a $5\times10^{-5}$ cell on $(60,400]$ would be missed; the analytic argument ($\Phi>0$ and $\xi\to\infty$ there) covers it, but that argument uses only leading exponentials.
+- **Q22's 1480 events** are the events whose cell the winding test caught on a $1200\times90000$ grid ($\Delta r=0.0372$, $\Delta t=0.503$). Two events inside one cell, or a pair with cancelling winding, would be missed: the count is a **lower bound**, certified only as "at least 1480, each verified to residual $\le10^{-11}$". The *first* event at $t=113.526579$ is first among those found; nothing rules out an earlier one in a missed cell. The rate $\Delta t=30.5668$ inherits that.
+- **Ω₃'s constant $\kappa=1.3504$** is one envelope, one $(d,\sigma)$, $b\le60$, $T=17$ teeth. Whether $\kappa$ is absolute or grows like $\sqrt{\log T_{\rm eff}}$ is the conjecture's weakest joint and is stated as such in §6.
+- **Theorem S1** reproduces the corpus's $s_1..s_4$ exactly and the dictionary converges to $1.2\times10^{-10}$ at $k=60$; the identification $\mathcal G_{\mathcal I_\nu}=\tfrac{\cos\pi\nu}\pi\mathcal K_\nu$ is proved at $r=0,1$ from the exact $a_k(\nu)$ and assumed beyond, exactly as for Airy. I have **not** re-derived the corpus's $C=9\pi^2/22$ or checked Y-0138's alien-derivative claim itself; I have only settled the Bessel scale it rests on.
+- **Theorem S3's instrument claim** (exact $\mathbb F_{37}$ shell arithmetic) is a consequence of F1 plus a counting match; no such arithmetic was implemented or benchmarked.
+- **§1.2's alias-amplitude correction** is read off Round 3's three published numbers plus the Airy closed form; I did not recompute her Poisson–Airy table independently (the probe that would have done it was killed for cost). The exponential factor $e^{\alpha_j/6\beta_3}=e^{-\bar nj/8\sigma^2}$ is exact algebra.
+- **The f16 gate** was not re-measured this round.
+- Round 2's citation of `L-0100` for self-inversive polynomials is **withdrawn** (§5.5): L-0100 is the Apostol log-derivative result. Theorem 5 has no corpus ancestor.

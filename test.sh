@@ -7,6 +7,14 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HERE"
 node tests/hydrogen.test.mjs; NODE_RC=$?
+node tests/frontier.test.mjs; FR_RC=$?
+node tests/dynamics.test.mjs; DY_RC=$?
+node tests/fields.test.mjs; FD_RC=$?
+node tests/rotor4.test.mjs; R4_RC=$?
+node tests/qcd.test.mjs; QC_RC=$?
+node tests/momentum.test.mjs; MO_RC=$?
+node tests/kick.test.mjs; KI_RC=$?
+NODE_RC=$(( NODE_RC || FR_RC || DY_RC || FD_RC || R4_RC || QC_RC || MO_RC || KI_RC ))
 [ "${1:-}" = "node" ] && exit $NODE_RC
 PORT="${LW_PORT:-8701}"
 export MB_CERTS="${MB_CERTS:-$HOME/mandelbrot/certs}"

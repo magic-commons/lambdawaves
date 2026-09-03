@@ -14,7 +14,42 @@
  *     populations are rendered and the truncation is reported, never hidden.
  * Nothing in here knows about the DOM, the GPU or wall-clock time.
  */
-import { BASIS, BASIS_INDEX, energy } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, energy, stateOf } from './hydrogen.js';
+import { applyRotateK, applyDefectWait, applyRotor, kzElement, symEig } from './frontier.js';
+import { applyKick } from './kick.js';
+
+/* ── static external fields ────────────────────────────────────────────────
+ * ZEEMAN  H = H₀ + (B/2)L_z  is still DIAGONAL: E_a → E_a + B·m_a/2.  Exact, no approximation, no caveat
+ *   (orbital only — this register has no spin, so there is no anomalous term and no fine structure).
+ * STARK   H = H₀ + F·z  is not diagonal.  Within one shell it is exactly solvable, because on the shell
+ *   z = −(3n/2)K_z, so the (n, m) block is E_n + (B m/2) + F·Z with Z the tridiagonal matrix of z; its
+ *   eigenvectors are the parabolic (Stark) states and are FIELD-INDEPENDENT, so they are computed once and the
+ *   eigenvalues just scale with F.  What is neglected is coupling between shells, which is valid while
+ *   F ≪ ΔE/⟨z⟩ ≈ 1/(3n⁵); the badge says so and `field.validUpTo` prints the number.
+ */
+const ZBLOCK = new Map();
+function starkBlock(n, m) {
+  const key = n + ':' + m;
+  if (ZBLOCK.has(key)) return ZBLOCK.get(key);
+  const ls = []; for (let l = Math.abs(m); l < n; l++) ls.push(l);
+  const B = ls.length, Z = new Float64Array(B * B);
+  for (let i = 0; i + 1 < B; i++) {
+    const v = -1.5 * n * kzElement(n, ls[i], m);       // ⟨n l+1 m|z|n l m⟩ = −(3n/2)·K_z element
+    Z[i * B + i + 1] = v; Z[(i + 1) * B + i] = v;
+  }
+  const { values, vectors } = symEig(Z, B);
+  const out = { B, idx: ls.map((l) => stateOf(n, l, m).index), V: vectors, lam: values };
+  ZBLOCK.set(key, out);
+  return out;
+}
+/** every (n, m) block of the register, with its Stark eigenvectors and eigenvalues (cached, field-independent) */
+function allBlocks() {
+  if (allBlocks._c) return allBlocks._c;
+  const out = [];
+  for (let n = 1; n <= 6; n++) for (let m = -(n - 1); m <= n - 1; m++) out.push({ n, m, ...starkBlock(n, m) });
+  allBlocks._c = out;
+  return out;
+}
 
 export const N = BASIS.length;          // 91
 export const RENDER_CAP = 32;           // the WGSL kernel's mode-array capacity
@@ -30,31 +65,103 @@ export class Register {
     for (const s of BASIS) this.E[s.index] = s.E;
     this.version = 0;                   // bumps on every state mutation (not on time)
     this.preset = null;                 // id of the last loaded preset, for provenance
+    this.field = { Bz: 0, Fz: 0 };      // magnetic (exact) and electric (exact within each shell)
+  }
+
+  /* ── the Hamiltonian in force ────────────────────────────────────────── */
+  /** E_a + B m_a / 2 — the diagonal part, exact whatever the electric field is */
+  Ediag(a) { return this.E[a] + this.field.Bz * BASIS[a].m / 2; }
+  /** the largest electric field for which neglecting inter-shell coupling is defensible: ≈ 1/(3n⁵) */
+  fieldValidUpTo() { const n = this.nmax(); return 1 / (3 * Math.pow(Math.max(1, n), 5)); }
+  setField(f) {
+    if (f.Bz !== undefined) this.field.Bz = f.Bz;
+    if (f.Fz !== undefined) this.field.Fz = f.Fz;
+    this.version++;
+  }
+  /**
+   * The normal modes of the Hamiltonian in force, with the state's amplitude in each, at time t.
+   * With no electric field these ARE the register's modes; with one they are the Stark (parabolic) states —
+   * which is why the action–angle chart in DYNAMICS switches to them automatically.
+   */
+  normalAmplitudes(t = 0) {
+    const out = { E: [], re: [], im: [], label: [] };
+    if (this.field.Fz === 0) {
+      const c = this.at(t);
+      for (let a = 0; a < N; a++) if (this.re0[a] || this.im0[a]) { out.E.push(this.Ediag(a)); out.re.push(c.re[a]); out.im.push(c.im[a]); out.label.push(BASIS[a].label); }
+      return out;
+    }
+    const c = this.at(t);
+    for (const b of allBlocks()) {
+      let any = false; for (const a of b.idx) if (this.re0[a] || this.im0[a]) { any = true; break; }
+      if (!any) continue;
+      for (let k = 0; k < b.B; k++) {
+        let r = 0, i = 0;
+        for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; r += v * c.re[b.idx[j]]; i += v * c.im[b.idx[j]]; }
+        if (r === 0 && i === 0) continue;
+        out.E.push(this.E[b.idx[0]] + this.field.Bz * b.m / 2 + this.field.Fz * b.lam[k]);
+        out.re.push(r); out.im.push(i);
+        out.label.push(`n${b.n} m${b.m} k${k}`);
+      }
+    }
+    return out;
+  }
+  /** propagate a coefficient vector by e^{∓iHt} (dir = −1 forward, +1 back to the anchor) */
+  _propagate(reIn, imIn, t, dir, reOut, imOut) {
+    reOut = reOut || new Float64Array(N); imOut = imOut || new Float64Array(N);
+    if (this.field.Fz === 0) {
+      for (let a = 0; a < N; a++) {
+        const r0 = reIn[a], i0 = imIn[a];
+        if (r0 === 0 && i0 === 0) { reOut[a] = 0; imOut[a] = 0; continue; }
+        const ph = dir * this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);
+        reOut[a] = r0 * c - i0 * s; imOut[a] = r0 * s + i0 * c;
+      }
+      return { re: reOut, im: imOut };
+    }
+    reOut.fill(0); imOut.fill(0);
+    for (const b of allBlocks()) {
+      let any = false; for (const a of b.idx) if (reIn[a] || imIn[a]) { any = true; break; }
+      if (!any) continue;
+      const E0 = this.E[b.idx[0]] + this.field.Bz * b.m / 2;
+      for (let k = 0; k < b.B; k++) {
+        let r = 0, i = 0;
+        for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; r += v * reIn[b.idx[j]]; i += v * imIn[b.idx[j]]; }
+        if (r === 0 && i === 0) continue;
+        const ph = dir * (E0 + this.field.Fz * b.lam[k]) * t, c = Math.cos(ph), s = Math.sin(ph);
+        const yr = r * c - i * s, yi = r * s + i * c;
+        for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; reOut[b.idx[j]] += v * yr; imOut[b.idx[j]] += v * yi; }
+      }
+    }
+    return { re: reOut, im: imOut };
   }
 
   /* ── time evaluation ─────────────────────────────────────────────────── */
   /** c(t) into the supplied arrays (or fresh ones) */
-  at(t, re, im) {
-    re = re || new Float64Array(N); im = im || new Float64Array(N);
-    for (let a = 0; a < N; a++) {
-      const r0 = this.re0[a], i0 = this.im0[a];
-      if (r0 === 0 && i0 === 0) { re[a] = 0; im[a] = 0; continue; }
-      const ph = -this.E[a] * t, c = Math.cos(ph), s = Math.sin(ph);
-      re[a] = r0 * c - i0 * s;
-      im[a] = r0 * s + i0 * c;
-    }
-    return { re, im };
-  }
+  at(t, re, im) { return this._propagate(this.re0, this.im0, t, -1, re || new Float64Array(N), im || new Float64Array(N)); }
   /** one coefficient at time t */
   coeffAt(a, t) {
-    const ph = -this.E[a] * t, c = Math.cos(ph), s = Math.sin(ph);
-    return { re: this.re0[a] * c - this.im0[a] * s, im: this.re0[a] * s + this.im0[a] * c };
+    if (this.field.Fz === 0) {
+      const ph = -this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);
+      return { re: this.re0[a] * c - this.im0[a] * s, im: this.re0[a] * s + this.im0[a] * c };
+    }
+    const c = this.at(t);
+    return { re: c.re[a], im: c.im[a] };
+  }
+  /** re-anchor from a whole coefficient vector given at time t (the general form of an edit-at-time) */
+  anchorFrom(re, im, t) {
+    const a = this._propagate(re, im, t, +1);
+    this.re0.set(a.re); this.im0.set(a.im);
+    this.version++;
   }
 
   /* ── mutations (all bump version) ─────────────────────────────────────── */
   /** set c_a(t) = re + i·im at logical time t (re-anchors c_a(0)) */
   set(a, re, im, t = 0) {
-    const ph = this.E[a] * t, c = Math.cos(ph), s = Math.sin(ph);   // e^{+iE t}
+    if (this.field.Fz !== 0) {                       // H mixes l: set the component AT time t, then re-anchor
+      const c = this.at(t); c.re[a] = re; c.im[a] = im;
+      this.anchorFrom(c.re, c.im, t);
+      return;
+    }
+    const ph = this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);   // e^{+iE t}
     this.re0[a] = re * c - im * s;
     this.im0[a] = re * s + im * c;
     this.version++;
@@ -83,6 +190,41 @@ export class Register {
     }
     this.version++;
   }
+  /**
+   * STARK ROTATE: e^{-iθ K_z} on the state, K the Runge–Lenz vector scaled to the shell (K_z = -(2/3n) z on the shell).
+   * An SO(4) rotation that mixes l at fixed (n, m): the Schmidt spectrum of every shell is invariant (print, Theorem B.1).
+   * Exact (eigendecomposition of the tridiagonal K_z blocks); commutes with H, so it acts on the anchor at any time.
+   */
+  rotateK(theta) { applyRotateK(this.re0, this.im0, theta); this.version++; }
+  /**
+   * DEFECT WAIT: e^{iα L²}, c_nlm → e^{iα l(l+1)} c_nlm — a wait under an l-dependent phase (a quantum defect, which
+   * hydrogen's degeneracy switches off).  Unitary, in-shell, NOT an SO(4) element: it changes the orbit invariants
+   * (print, Theorem B.3), and with the rotors it is a universal gate set on the shell.
+   */
+  defectWait(alpha, t = 0) { this._op((re, im) => applyDefectWait(re, im, alpha), t); }
+  /**
+   * ROTOR DRIVE: the full SO(4) = (SU(2)₊ × SU(2)₋)/Z₂ on every populated shell, exactly (Theorem B.7).
+   *   which 'both' → the ordinary spatial rotation D^l(R) about the axis — the general Wigner rotation
+   *   which 'K'    → e^{−iθK_axis}, the Stark rotation about any axis (z reproduces rotateK)
+   *   which '+'/'−' → one rotor alone: an SO(4) element that is NOT a spatial rotation. All keep the Schmidt spectrum.
+   */
+  rotor({ which = 'both', axis = 'z', angle = 0, t = 0 }) { this._op((re, im) => applyRotor(re, im, { which, axis, angle }), t); }
+  /**
+   * SLAP: a sudden momentum impulse k along an axis — ψ ↦ e^{ik·x}ψ, the impulsive Stark limit (Δp = −∫E dt).  Exact
+   * as an operator; the register keeps only its n ≤ 6 image, so the norm DROPS by the probability the electron was
+   * knocked out of the first six shells or ionised.  That loss is physics and is never renormalised away here.
+   */
+  kick(k, axis = 'z', t = 0) { this._op((re, im) => applyKick(re, im, k, axis), t); }
+  /**
+   * Apply a unitary to the state AT the current logical time.  With no electric field every operator here commutes
+   * with H (L_z, K_z and L² all do), so acting on the anchor is the same thing and we take the fast path; with a
+   * Stark field L² does NOT commute, so the operator is applied at time t and the state re-anchored — which is the
+   * register's documented policy ("edits happen at the current logical time") made to hold in general.
+   */
+  _op(fn, t = 0) {
+    if (this.field.Fz === 0 || !t) { fn(this.re0, this.im0); this.version++; return; }
+    const c = this.at(t); fn(c.re, c.im); this.anchorFrom(c.re, c.im, t);
+  }
   /** load a preset: coefficients at t = 0, normalized as stored */
   load(preset) {
     this.clear();
@@ -104,17 +246,19 @@ export class Register {
   population(a) { return this.re0[a] ** 2 + this.im0[a] ** 2; }
   /** ⟨H⟩ = c†Hc (diagonal H) — divided by the norm² so an unnormalized edit still reads as an energy */
   energy() {
+    const na = this.normalAmplitudes(0);
     let e = 0, n = 0;
-    for (let a = 0; a < N; a++) { const p = this.re0[a] ** 2 + this.im0[a] ** 2; e += p * this.E[a]; n += p; }
+    for (let k = 0; k < na.E.length; k++) { const p = na.re[k] ** 2 + na.im[k] ** 2; e += p * na.E[k]; n += p; }
     return n > 0 ? e / n : 0;
   }
   /** A(t) = ⟨ψ(0)|ψ(t)⟩ = Σ |c_a|² e^{-iE_a t}  (per unit norm) → { re, im, abs } */
   autocorrelation(t) {
+    const na = this.normalAmplitudes(0);
     let r = 0, i = 0, n = 0;
-    for (let a = 0; a < N; a++) {
-      const p = this.re0[a] ** 2 + this.im0[a] ** 2;
+    for (let k = 0; k < na.E.length; k++) {
+      const p = na.re[k] ** 2 + na.im[k] ** 2;
       if (p === 0) continue;
-      n += p; const ph = -this.E[a] * t;
+      n += p; const ph = -na.E[k] * t;
       r += p * Math.cos(ph); i += p * Math.sin(ph);
     }
     if (n > 0) { r /= n; i /= n; }
@@ -126,7 +270,9 @@ export class Register {
     for (let a = 0; a < N; a++) if (this.re0[a] ** 2 + this.im0[a] ** 2 > EPS_POP) out.push(a);
     return out;
   }
-  nmax() { let n = 1; for (const a of this.populated()) n = Math.max(n, BASIS[a].n); return n; }
+  /** the largest populated n; with minFrac > 0, only states carrying at least that fraction of the norm count (so a slap's 1e-4 tails do not blow the box up to the n = 6 scale) */
+  nmax(minFrac = 0) { const n2 = this.norm2(); let n = 1; for (const a of this.populated()) if (minFrac === 0 || this.population(a) >= minFrac * n2) n = Math.max(n, BASIS[a].n); return n; }
+  nmin() { let n = 99; for (const a of this.populated()) n = Math.min(n, BASIS[a].n); return n === 99 ? 1 : n; }
   /**
    * The set the field is reconstructed from: populated, unmuted (solo wins), sorted by
    * population, capped.  Reports what was left out so the UI can say so.
@@ -154,13 +300,14 @@ export class Register {
   /** the reconstruction mask, separately */
   maskDigest() { let h = 0; for (let a = 0; a < N; a++) h = (h * 3 + this.muted[a] * 2 + this.solo[a]) >>> 0; return h.toString(16); }
   /* ── persistence ───────────────────────────────────────────────────────── */
-  serialize(t = 0) {
+  serialize(t = 0, _f) {
     const modes = [];
     for (let a = 0; a < N; a++) if (this.re0[a] || this.im0[a] || this.muted[a] || this.solo[a]) {
       const s = BASIS[a];
       modes.push({ id: s.id, n: s.n, l: s.l, m: s.m, re: this.re0[a], im: this.im0[a], muted: !!this.muted[a], solo: !!this.solo[a] });
     }
-    return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes, status: 'EXACT ANALYTIC' };
+    return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
+      field: { ...this.field }, status: this.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark)' : 'EXACT ANALYTIC' };
   }
   restore(obj) {
     this.clear();
@@ -171,6 +318,7 @@ export class Register {
       this.muted[a] = m.muted ? 1 : 0; this.solo[a] = m.solo ? 1 : 0;
     }
     this.preset = obj.preset || null;
+    this.field = { Bz: (obj.field && +obj.field.Bz) || 0, Fz: (obj.field && +obj.field.Fz) || 0 };
     this.version++;
     return +obj.t || 0;
   }
@@ -192,8 +340,12 @@ export const PRESETS = [
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 1, m: 0, amp: 1 }], visual: { rate: 4, window: T_BEAT_12, view: 'density' } },
   { id: '2p+', label: '2p₊ = (2p_x + i·2p_y)/√2', note: 'circular current · stationary torus, the current lives in arg ψ = φ', status: 'EXACT ANALYTIC',
     modes: [{ n: 2, l: 1, m: 1, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'phase' } },
-  { id: '2s+2pz', label: '2s + 2p_z  (degenerate)', note: 'same energy → no motion: an sp hybrid is stationary', status: 'EXACT ANALYTIC',
+  { id: '2s+2pz', label: '2s + 2p_z  (Stark, degenerate)', note: 'same energy → no motion: the Stark state, a coherent state of the two rotors (ORBIT: Schmidt (1,0), e = ½, ⟨z⟩ = −3)', status: 'EXACT ANALYTIC',
     modes: [{ n: 2, l: 0, m: 0, amp: 1 }, { n: 2, l: 1, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'density' } },
+  { id: '2px', label: '2p_x = (Y₁⁻¹ − Y₁¹)/√2', note: 'one nodal plane x = 0 · VORTEX: two unimodular roots at φ = ±π/2 on every coaxial circle', status: 'EXACT ANALYTIC',
+    modes: [{ n: 2, l: 1, m: -1, amp: Math.SQRT1_2 }, { n: 2, l: 1, m: 1, amp: -Math.SQRT1_2 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'real' } },
+  { id: 'recon', label: '3d₊₂ + 4p₊₁ + 5s  (reconnection)', note: 'three stretched modes: vortex lines reconnect at ten points, at two phases of the discriminant beat T_d = 481.27 a.u. (VORTEX census)', status: 'EXACT ANALYTIC',
+    modes: [{ n: 3, l: 2, m: 2, amp: 1 }, { n: 4, l: 1, m: 1, amp: 1 }, { n: 5, l: 0, m: 0, amp: 1 }], visual: { rate: 60, window: 2 * Math.PI / Math.abs(E(3) + E(5) - 2 * E(4)), view: 'phase' } },
   { id: '3dz2', label: '3d_z²', note: 'stationary · two conical nodes', status: 'EXACT ANALYTIC',
     modes: [{ n: 3, l: 2, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / (1 / 18), view: 'real' } },
   { id: 'rydberg', label: 'Rydberg packet n = 4…6', note: 'circular states |n,n−1,n−1⟩, Gaussian in n about n̄ = 5 · orbits in xy, T_cl = 2π n̄³ ≈ 785 a.u.', status: 'EXACT ANALYTIC',

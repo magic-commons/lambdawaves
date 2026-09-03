@@ -93,6 +93,7 @@ export function createSpectrum(host, api) {
     const reg = api.reg;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = ladder.clientWidth, H = ladder.clientHeight;
+    if (W < 32 || H < 32) return;                       // folded: no size, nothing to paint
     if (lcv.width !== W * dpr || lcv.height !== H * dpr) { lcv.width = W * dpr; lcv.height = H * dpr; }
     const g = lcv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const pad = 10, left = 44, right = W - 12, top = 10, bot = H - 14;
