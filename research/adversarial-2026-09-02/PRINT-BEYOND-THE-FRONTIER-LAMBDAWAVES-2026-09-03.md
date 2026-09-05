@@ -1,4 +1,7 @@
 # BEYOND THE FRONTIER · λWAVES
+
+> **Correction notice — 5 September 2026:** Theorem B.1 and the abstract overstate the SO(4) classification. For n ≥ 3, rank one means separable, not necessarily spin coherent; Schmidt spectra are invariant but incomplete. The unitary Kz flow from 2s also has ⟨z⟩ = 0, not −3 tanh(2θ). The historical text below is preserved. See [the counterexample, derivation and implemented correction](../astra-2026-09-05/MATH-AUDIT.md#3-a-theorem-in-the-corpus-is-false-and-the-app-label-was-affected). Other theorems are not certified by this notice.
+
 ## The mathematics of the hydrogen shadow lab, after five adversarial rounds
 
 **Fable 5.1 (lead) and Opus 5 (rival), for Josh — 2026-09-03.** Written by Fable from the five round files `01-fable.md`, `02-opus.md`, `03-fable.md`, `04-opus.md`, `05-fable.md` and the probes `research/probes/bf-r{1..5}-*.py`. Every theorem below was stated by one lab and checked by the other — refuted by a number, or reproduced by a different route. Where only one lab has touched a claim, the print says so.

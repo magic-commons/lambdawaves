@@ -1,0 +1,72 @@
+λWAVES
+Copyright 2026 Joshua Hosain
+λWAVES by Joshua Hosain · Magic Commons
+
+This product includes software developed by Joshua Hosain.
+Licensed under the Apache License, Version 2.0 (the "License"); see LICENSE
+in this directory, or http://www.apache.org/licenses/LICENSE-2.0
+
+────────────────────────────────────────────────────────────────────────────
+THIRD-PARTY COMPONENTS
+
+The following third-party works are redistributed with λWAVES under their own
+licences.  Each licence file named below ships in the tree beside the work it
+covers; nothing here is fetched from a third-party host at run time.
+
+1.  Spinwerad  —  the wordmark's typeface
+    Author:    gluk (gluksza@wp.pl)
+    Version:   0.3
+    Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
+    Notice:    Copyright (c) 2009, gluk (gluksza@wp.pl),
+               with Reserved Font Name spinwerad.
+               (the licence file as shipped by the author reads 1997-2008;
+               the font binaries themselves read 2009 — both are reproduced
+               in lab/fonts/Spinwerad-OFL.txt and the binaries' name table.)
+    Files:     lab/fonts/Spinwerad.ttf, lab/fonts/SpinweradC.ttf
+    Licence:   lab/fonts/Spinwerad-OFL.txt
+
+2.  Roboto  —  the interface typeface
+    Version:   3.015
+    Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
+    Notice:    Copyright 2011 The Roboto Project Authors
+               (https://github.com/googlefonts/roboto-classic)
+               Roboto is a trademark of Google.
+    Files:     lab/fonts/Roboto.ttf
+    Licence:   lab/fonts/Roboto-OFL.txt
+
+3.  marked  —  the notebook's markdown parser
+    Version:   12.0.2
+    Licence:   MIT License
+    Notice:    Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+               Copyright (c) 2011-2018, Christopher Jeffrey
+               (https://github.com/chjj/)
+    marked's licence file also carries the notice for the original Markdown,
+    under the BSD 3-Clause licence:
+               Copyright © 2004, John Gruber
+               http://daringfireball.net/
+               All rights reserved.
+    Files:     lab/vendor/marked.min.js
+    Licence:   lab/vendor/marked-LICENSE.md
+
+4.  KaTeX  —  the notebook's mathematics typesetting
+    Version:   0.16.11
+    Licence:   The MIT License (MIT)
+    Notice:    Copyright (c) 2013-2020 Khan Academy and other contributors
+    Files:     lab/vendor/katex/katex.min.js, lab/vendor/katex/katex.min.css,
+               and the twenty KaTeX_*.woff2 faces in lab/vendor/katex/fonts/,
+               which carry no separate notice and are covered by the licence
+               file below.
+    Licence:   lab/vendor/katex/LICENSE
+
+────────────────────────────────────────────────────────────────────────────
+WITH THANKS
+
+The people and works below informed λWAVES.  No code or asset of theirs is
+redistributed here, so none of them places a licence obligation on this
+tree — they are named because the lab would be poorer without them.
+
+  · Team @ Chronus Quantum, for the Molecular Orbital Model
+    https://github.com/xsligroup/chronusq_public
+  · 'Electron Orbitals', a Google Play Store app by Brian Johnson
+  · Paul Falstad's Math & Physics Java Applets, falstad.com
+  · Seth Shultz · Beatriz Erranté — independent research & assistance

@@ -1,17 +1,24 @@
 /* orbit.js — ORBIT: the two rotors of every populated shell (print of 2026-09-03, Thread B).
  *
  * STATUS: EXACT ANALYTIC.  A shell n is V_j ⊗ V_j with j = (n−1)/2 (SO(4) ≅ SU(2)₊ × SU(2)₋ / Z₂).  The Clebsch matrix
- * M of the shell's coefficients has singular values (the Schmidt spectrum) that are complete invariants of the
+ * M of the shell's coefficients has singular values (the Schmidt spectrum) that are invariants of the
  * SO(4) orbit: unchanged by time, by STATE ROTATE R_z, by STARK ROTATE K_z — changed by a DEFECT WAIT, which is
  * how one recognises that e^{iαL²} is not an SO(4) element.  ⟨J₊⟩ and ⟨J₋⟩ are drawn on two unit spheres
- * (the coherent states are the rank-one matrices: both vectors on their spheres, a Kepler ellipse with
- * e = |⟨K⟩|/n, and NEBULA's camera sphere pair).  Invariants are recomputed only when the register's version
+ * (coherent states have BOTH spin expectations of length j; rank one alone is insufficient for n ≥ 3).
+ * The illustrative Kepler shadow uses e = |⟨K⟩|/n. Invariants are recomputed only when the register's version
  * changes; the drawing follows the observer's camera so ẑ points where the FIELD's ẑ points.
  */
 import { BASIS } from './hydrogen.js';
-import { shellMatrix, schmidt, rotorExpectations } from './frontier.js';
+import { shellMatrix, shellCharacter } from './frontier.js';
 import { cameraBasis } from './field.js';
-import { el, readout, sw, N_RGB } from './kit.js';
+import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './kit.js';
+
+/* WAVE 49 — THE LABEL IS THE SCALAR'S VERDICT.  The card used to read "rank one ⇒ COHERENT (a Kepler ellipse)"
+   off the Schmidt spectrum alone, which printed a Kepler ellipse with e = 0 over |1,0⟩⊗|1,0⟩ = −0.5774·3s +
+   0.8165·3d₀ — a state with NO angular momentum at all (⟨L⟩ = ⟨K⟩ = 0).  Rank one is separability of the two
+   rotors and nothing more for n ≥ 3; "coherent" is now said only when the SO(4) invariant |⟨L⟩|² + |⟨K⟩|²
+   saturates its ceiling (n−1)² to 1e-9 (frontier.js shellCharacter). */
+const characterLabel = (s) => s.coherent ? 'spin coherent · Kepler shadow' : s.separable ? 'rank one · not coherent' : 'entangled rotors';
 
 export function createOrbit(host, api) {
   const cv = el('canvas', 'orbit-c', host);
@@ -21,9 +28,13 @@ export function createOrbit(host, api) {
   const hint = el('div', 'note', bar); hint.style.flex = '1 1 auto';
   hint.innerHTML = 'drag a sphere: <b>⟨J₊⟩</b> or <b>⟨J₋⟩</b> alone is an SO(4) move that is <i>not</i> a spatial rotation; the <b>KEPLER</b> panel drags both together = the ordinary rotation D<sup>l</sup>(R).';
   const rows = el('div', 'orbit-rows', host);
-  el('div', 'note', host).innerHTML = '<b>EXACT.</b> Schmidt spectrum = the invariants of the SO(4) orbit (unchanged by t, R<sub>z</sub>, K<sub>z</sub> and by any rotor pair; changed by DEFECT WAIT). A rank-one shell is a coherent state: a classical Kepler ellipse with e = |⟨K⟩|/n = ((n−1)/n)·sin(γ/2), γ the angle between the two rotors — never e = 1.';
+  el('div', 'note', host).innerHTML = '<b>EXACT.</b> The Schmidt spectrum is invariant under rotor pairs, but does not fully classify SO(4) orbits for n ≥ 3. Rank one means <b>separable rotors and nothing more</b>: |1,0⟩⊗|1,0⟩ = −0.5774·3s + 0.8165·3d₀ has Schmidt (1, 0, 0) and ⟨L⟩ = ⟨K⟩ = 0 — rank one, not coherent, no orbit. Coherence is one <b>SO(4)-invariant scalar</b>: |⟨L⟩|² + |⟨K⟩|² = (n−1)², saturated only when |⟨J₊⟩| = |⟨J₋⟩| = j, and that is what the label reads (to 1e-9). Its Kepler shadow uses e = |⟨K⟩|/n = ((n−1)/n)·sin(γ/2); the ellipse is an illustrative classical correspondence.';
   const g = cv.getContext('2d');
-  let lastVersion = -1, shells = [], lastObs = '', centres = [0, 0, 0], radius = 1, midY = 0;
+  let lastVersion = -1, shells = [], lastObs = '', centres = [0, 0, 0], radius = 1, midY = 0, lastPaintObs = null, hovers = [], plot = null;
+  /* WAVE 46 — the three panels carry no floating text.  "n2  e = 0.834  (rank > 1)" used to be stacked in the
+     top-left corner in the shell's own colour, over whatever the spheres had drawn there; the rotor arms, the
+     tips and the ellipse ARE the objects, and each one answers for itself under the pointer. */
+  const hover = graphHover(cv, { repaint: () => { if (lastPaintObs) paint(lastPaintObs); }, plot: () => plot });
   /* the three panels are three controls when DRIVE is on: ⟨J₊⟩ · ⟨J₋⟩ · both (a spatial rotation) */
   {
     const WHICH = ['+', '−', 'both'];
@@ -51,17 +62,16 @@ export function createOrbit(host, api) {
     const seen = new Set(); for (const a of reg.populated()) seen.add(BASIS[a].n);
     for (const n of [...seen].sort((x, y) => x - y)) {
       const M = shellMatrix(reg.re0, reg.im0, n);
-      const S = schmidt(M), R = rotorExpectations(M);
-      shells.push({ n, weight: M.norm2 / (reg.norm2() || 1), spectrum: S.values, ...R, coherent: n === 1 || S.values[0] > 0.9995 });
+      shells.push({ n, weight: M.norm2 / (reg.norm2() || 1), ...shellCharacter(M) });
     }
     lastVersion = reg.version;
     rows.innerHTML = '';
     for (const s of shells) {
-      const row = el('div', 'orbit-row', rows); row.style.setProperty('--nc', `rgb(${N_RGB[s.n].join(',')})`);
+      const row = el('div', 'orbit-row', rows); row.style.setProperty('--nc', `rgb(${nRGB(s.n).join(',')})`);
       el('div', 'orbit-band', row);
       const idz = el('div', 'orbit-id', row); el('div', 'sp-name', idz, `n${s.n}`); el('div', 'sp-sub', idz, `${(s.weight * 100).toFixed(1)}% of norm · j = ${s.j}`);
-      const spec = readout({ label: 'SCHMIDT SPECTRUM', value: s.spectrum.map((v) => v.toFixed(3)).join(' · '), sub: s.coherent ? 'rank one · COHERENT (a Kepler ellipse)' : 'rank > 1 · entangled rotors' }); row.appendChild(spec.root); spec.set(spec.root.querySelector('.ro-val').textContent, s.coherent ? 'ok' : '');
-      const lk = readout({ label: '|⟨L⟩| · |⟨K⟩| · e', value: `${s.absL.toFixed(3)} · ${s.absK.toFixed(3)} · ${s.e.toFixed(3)}`, sub: `⟨z⟩ = ${s.z.toFixed(3)} a₀ · coherence ${s.coherence.toFixed(3)}` }); row.appendChild(lk.root);
+      const spec = readout({ label: 'SCHMIDT SPECTRUM', value: s.spectrum.map((v) => v.toFixed(3)).join(' · '), sub: characterLabel(s) }); row.appendChild(spec.root); spec.set(spec.root.querySelector('.ro-val').textContent, s.coherent ? 'ok' : '');
+      const lk = readout({ label: '|⟨L⟩| · |⟨K⟩| · e', cls: 'wide', value: `${s.absL.toFixed(3)} · ${s.absK.toFixed(3)} · ${s.e.toFixed(3)}`, sub: `⟨z⟩ = ${s.z.toFixed(3)} a₀ · |⟨L⟩|²+|⟨K⟩|² = ${s.casimir.toFixed(4)} of ${s.casimirMax} (coherent ⟺ equal)` }); row.appendChild(lk.root);
     }
   }
   function project(v, B) { return [v[0] * B.right[0] + v[1] * B.right[1] + v[2] * B.right[2], v[0] * B.up[0] + v[1] * B.up[1] + v[2] * B.up[2], v[0] * B.fwd[0] + v[1] * B.fwd[1] + v[2] * B.fwd[2]]; }
@@ -70,23 +80,32 @@ export function createOrbit(host, api) {
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     if (W < 32 || H < 32) return;                       // folded: no size, no drawing (radii would go negative)
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
-    if (!shells.length) { g.fillStyle = 'rgba(255,255,255,0.35)'; g.textAlign = 'center'; g.fillText('no populated shell', W / 2, H / 2); return; }
+    lastPaintObs = obs; hovers = []; plot = { x0: 0, y0: 0, x1: W, y1: H };
+    const T = themeInk(g);
+    if (!shells.length) { g.fillStyle = T.ink(0.55); g.textAlign = 'center'; g.fillText('no populated shell', W / 2, H / 2); hover.set(hovers, plot); return; }
     const B = cameraBasis(obs);
     const R = Math.min(W / 6.6, H / 2 - 16), cx = [W * 0.17, W * 0.5, W * 0.83], cy = H / 2;
     centres = cx; radius = R; midY = cy;
+    /* the frame: a thin low-alpha circle, the ẑ tick, and ONE short name per panel — measured and clamped into
+       its own third, never over the next sphere (KEPLER's parenthetical is on the panel's hover now) */
     const sphere = (k, label) => {
-      g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 1; g.beginPath(); g.arc(cx[k], cy, R, 0, 2 * Math.PI); g.stroke();
-      const zt = project([0, 0, 1], B); g.strokeStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.moveTo(cx[k], cy); g.lineTo(cx[k] + zt[0] * R, cy - zt[1] * R); g.stroke();
-      g.fillStyle = 'rgba(255,255,255,0.5)'; g.textAlign = 'center'; g.fillText('ẑ', cx[k] + zt[0] * R * 1.12, cy - zt[1] * R * 1.12); g.fillText(label, cx[k], cy + R + 10);
+      g.strokeStyle = T.ink(0.30); g.lineWidth = 1; g.beginPath(); g.arc(cx[k], cy, R, 0, 2 * Math.PI); g.stroke();
+      const zt = project([0, 0, 1], B); g.strokeStyle = T.ink(0.45); g.beginPath(); g.moveTo(cx[k], cy); g.lineTo(cx[k] + zt[0] * R, cy - zt[1] * R); g.stroke();
+      g.fillStyle = T.ink(0.75); g.textAlign = 'center'; g.fillText('ẑ', cx[k] + zt[0] * R * 1.12, cy - zt[1] * R * 1.12);
+      fitText(g, label, cx[k], cy + R + 10, { x0: k * W / 3 + 2, y0: 0, x1: (k + 1) * W / 3 - 2, y1: H }, 'center');
     };
-    sphere(0, '⟨J₊⟩ / j'); sphere(1, '⟨J₋⟩ / j'); sphere(2, 'KEPLER  (L̂ normal, K̂ major axis)');
+    sphere(0, '⟨J₊⟩ / j'); sphere(1, '⟨J₋⟩ / j'); sphere(2, 'KEPLER');
+    hovers.push({ kind: 'dot', key: 'kep', x: cx[2], y: cy + R + 10, r: 7, colour: T.ink(1), info: 'KEPLER — L̂ the orbit normal, K̂ the major axis; the panel drags both rotors together (an ordinary rotation)' });
     for (const s of shells) {
       if (s.n === 1) continue;
-      const col = N_RGB[s.n], rgba = (a) => `rgba(${col[0]},${col[1]},${col[2]},${a})`;
+      const col = nRGB(s.n), rgba = (a) => `rgba(${col[0]},${col[1]},${col[2]},${a})`;
+      const tail = `e = ${s.e.toFixed(3)}  ·  ${characterLabel(s)}`;
       for (const [k, v] of [[0, s.Jp], [1, s.Jm]]) {
         const p = project([v[0] / s.j, v[1] / s.j, v[2] / s.j], B), x = cx[k] + p[0] * R, y = cy - p[1] * R;
         g.strokeStyle = rgba(0.9); g.lineWidth = 2; g.beginPath(); g.moveTo(cx[k], cy); g.lineTo(x, y); g.stroke();
         g.fillStyle = rgba(1); g.beginPath(); g.arc(x, y, p[2] > 0 ? 3.5 : 2.5, 0, 2 * Math.PI); g.fill();
+        hovers.push({ kind: 'line', key: `n${s.n}J${k}`, points: [cx[k], cy, x, y], lw: 2, colour: rgba(1),
+          info: `n${s.n}  ⟨J${k ? '₋' : '₊'}⟩ / j  ·  ${tail}` });
       }
       // the Kepler ellipse of the (coherent) shell: a = n² a₀, e = |K|/n, major axis along K̂, normal along L̂
       if (s.absL > 1e-9 || s.absK > 1e-9) {
@@ -97,17 +116,21 @@ export function createOrbit(host, api) {
         else { w = [0, 0, 1]; }
         const sc = 0.92 / (1 + e);   // the ellipse a(1+e) apoapsis fits the sphere
         g.strokeStyle = rgba(s.coherent ? 0.95 : 0.35); g.lineWidth = s.coherent ? 1.8 : 1; g.beginPath();
+        const ell = [];
         for (let i = 0; i <= 96; i++) {
           const ph = 2 * Math.PI * i / 96, rr = (1 - e * e) / (1 + e * Math.cos(ph)) * sc;      // r(φ) with the focus at the centre, periapsis toward +K̂ ... A points to the perihelion
           const q = [rr * (Math.cos(ph) * u[0] + Math.sin(ph) * w[0]), rr * (Math.cos(ph) * u[1] + Math.sin(ph) * w[1]), rr * (Math.cos(ph) * u[2] + Math.sin(ph) * w[2])];
           const p = project(q, B); const x = cx[2] + p[0] * R, y = cy - p[1] * R;
+          ell.push(x, y);
           if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
         }
         g.stroke();
         g.fillStyle = rgba(1); g.beginPath(); g.arc(cx[2], cy, 2.5, 0, 2 * Math.PI); g.fill();
+        hovers.push({ kind: 'curve', key: `n${s.n}ell`, points: ell, lw: s.coherent ? 1.8 : 1, colour: rgba(1),
+          info: `n${s.n}  Kepler ellipse  ·  ${tail}  ·  a = ${s.n * s.n} a₀` });
       }
-      g.fillStyle = rgba(1); g.textAlign = 'left'; g.fillText(`n${s.n}  e = ${s.e.toFixed(3)}${s.coherent ? '' : '  (rank > 1)'}`, 6, 10 + 11 * shells.indexOf(s));
     }
+    hover.set(hovers, plot);
   }
   function update(obs) {
     const reg = api.reg;

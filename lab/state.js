@@ -12,11 +12,14 @@
  *     rebuilt from the unmuted set, and the meters report the rendered fraction of the norm.
  *   • The render set is capped (RENDER_CAP); when the populated set exceeds it the largest
  *     populations are rendered and the truncation is reported, never hidden.
+ *   • THE PROPAGATOR HOOK (W-STURMIAN): setPropagator(P) swaps the diagonal law for c(t) = P.evolve(c(0), t) in a
+ *     non-orthogonal basis (the norm is ⟨c|S|c⟩, the normal modes P's eigenvectors, edits still happen AT time t);
+ *     setPropagator(null) restores the diagonal law — every line above is then the code path, unchanged.
  * Nothing in here knows about the DOM, the GPU or wall-clock time.
  */
 import { BASIS, BASIS_INDEX, energy, stateOf } from './hydrogen.js';
 import { applyRotateK, applyDefectWait, applyRotor, kzElement, symEig } from './frontier.js';
-import { applyKick } from './kick.js';
+import { applyKick, applyKickAlong } from './kick.js';
 
 /* ── static external fields ────────────────────────────────────────────────
  * ZEEMAN  H = H₀ + (B/2)L_z  is still DIAGONAL: E_a → E_a + B·m_a/2.  Exact, no approximation, no caveat
@@ -52,7 +55,7 @@ function allBlocks() {
 }
 
 export const N = BASIS.length;          // 91
-export const RENDER_CAP = 32;           // the WGSL kernel's mode-array capacity
+export const RENDER_CAP = 91;           // the WGSL kernel's mode-array capacity
 export const EPS_POP = 1e-14;
 
 export class Register {
@@ -66,31 +69,61 @@ export class Register {
     this.version = 0;                   // bumps on every state mutation (not on time)
     this.preset = null;                 // id of the last loaded preset, for provenance
     this.field = { Bz: 0, Fz: 0 };      // magnetic (exact) and electric (exact within each shell)
+    this.damping = 0;                   // the DRAG toy (see setDamping): 0 = off = the exact unitary register
+    this.P = null;                      // the PROPAGATOR (W-STURMIAN, see setPropagator): null = the diagonal law above
+    /* scratch for the per-frame observables (wave 45): energy(), autocorrelation() and normalAmplitudes() used to
+       allocate two Float64Array(91) and four arrays per call, several times a frame — the meters, the badges and the
+       SHADOW readout — so the frame loop was a steady allocator.  They read c(t) into these instead. */
+    this._sr = new Float64Array(N); this._si = new Float64Array(N);
+    this._na = { E: [], re: [], im: [], label: [] };
   }
 
   /* ── the Hamiltonian in force ────────────────────────────────────────── */
   /** E_a + B m_a / 2 — the diagonal part, exact whatever the electric field is */
-  Ediag(a) { return this.E[a] + this.field.Bz * BASIS[a].m / 2; }
+  Ediag(a) { return (this.P ? this.P.H[a * N + a] / this.P.S[a * N + a] : this.E[a]) + this.field.Bz * BASIS[a].m / 2; }   // under a PROPAGATOR: the label's ⟨a|H|a⟩/⟨a|S|a⟩, NOT an eigenvalue
+  /** the HAMILTONIAN switch: refill the eigenvalues the 91 labels carry (hydrogen −1/2n², oscillator N + 3/2, …) */
+  setEnergies(fn) { for (const s of BASIS) this.E[s.index] = fn(s.index); this.version++; }
   /** the largest electric field for which neglecting inter-shell coupling is defensible: ≈ 1/(3n⁵) */
   fieldValidUpTo() { const n = this.nmax(); return 1 / (3 * Math.pow(Math.max(1, n), 5)); }
   setField(f) {
     if (f.Bz !== undefined) this.field.Bz = f.Bz;
-    if (f.Fz !== undefined) this.field.Fz = f.Fz;
+    if (f.Fz !== undefined) this.field.Fz = this.P ? 0 : f.Fz;   // the Stark field is a theorem about hydrogen's shells: refused under a PROPAGATOR
     this.version++;
   }
+  /**
+   * THE PROPAGATOR HOOK (W-STURMIAN).  P = null restores the diagonal law.  Otherwise P is an object over the 91 labels
+   * with evolve(c, t) = C e^{−iEt} CᵀS c, norm(c) = ⟨c|S|c⟩, populations(c), eigenstate(k), E, C, CtS, rank, H, S and
+   * mK (the m of eigenvector k): at(t) becomes P.evolve(anchor, t); edits still happen AT the current logical time
+   * (set / anchorFrom re-anchor by P.evolve(·, −t)); the norm is the S-norm; the normal modes are P's eigenvectors;
+   * the Zeeman term — diagonal in the labels, commuting with a block-diagonal P — is the per-label phase e^{−iBm t/2}
+   * applied after evolve, exactly; the Stark field is refused (it is a theorem about hydrogen's shells).  Nothing here
+   * is Sturmian-specific: any propagator in a non-orthogonal basis with that interface plugs in.
+   */
+  setPropagator(P) { this.P = P || null; if (this.P) this.field.Fz = 0; this.version++; }
   /**
    * The normal modes of the Hamiltonian in force, with the state's amplitude in each, at time t.
    * With no electric field these ARE the register's modes; with one they are the Stark (parabolic) states —
    * which is why the action–angle chart in DYNAMICS switches to them automatically.
    */
-  normalAmplitudes(t = 0) {
-    const out = { E: [], re: [], im: [], label: [] };
+  normalAmplitudes(t = 0, scratch = false) {
+    const out = scratch ? this._na : { E: [], re: [], im: [], label: [] };
+    if (scratch) { out.E.length = 0; out.re.length = 0; out.im.length = 0; out.label.length = 0; }
+    if (this.P) {                                       // a PROPAGATOR: its S-orthonormal eigenvectors are the normal modes, d = CᵀS c(t)
+      const P = this.P, M = P.rank, c = this.at(t, this._sr, this._si);
+      for (let k = 0; k < M; k++) {
+        let r = 0, i = 0;
+        for (let a = 0; a < N; a++) { const w = P.CtS[k * N + a]; if (w === 0) continue; r += w * c.re[a]; i += w * c.im[a]; }
+        if (r === 0 && i === 0) continue;
+        out.E.push(P.E[k] + this.field.Bz * (P.mK ? P.mK[k] : 0) / 2); out.re.push(r); out.im.push(i); out.label.push('ε' + k);
+      }
+      return out;
+    }
     if (this.field.Fz === 0) {
-      const c = this.at(t);
+      const c = this.at(t, this._sr, this._si);
       for (let a = 0; a < N; a++) if (this.re0[a] || this.im0[a]) { out.E.push(this.Ediag(a)); out.re.push(c.re[a]); out.im.push(c.im[a]); out.label.push(BASIS[a].label); }
       return out;
     }
-    const c = this.at(t);
+    const c = this.at(t, this._sr, this._si);
     for (const b of allBlocks()) {
       let any = false; for (const a of b.idx) if (this.re0[a] || this.im0[a]) { any = true; break; }
       if (!any) continue;
@@ -108,12 +141,14 @@ export class Register {
   /** propagate a coefficient vector by e^{∓iHt} (dir = −1 forward, +1 back to the anchor) */
   _propagate(reIn, imIn, t, dir, reOut, imOut) {
     reOut = reOut || new Float64Array(N); imOut = imOut || new Float64Array(N);
+    if (this.P) return this._propagateP(reIn, imIn, t, dir, reOut, imOut);
     if (this.field.Fz === 0) {
       for (let a = 0; a < N; a++) {
         const r0 = reIn[a], i0 = imIn[a];
         if (r0 === 0 && i0 === 0) { reOut[a] = 0; imOut[a] = 0; continue; }
         const ph = dir * this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);
-        reOut[a] = r0 * c - i0 * s; imOut[a] = r0 * s + i0 * c;
+        const g = (this.damping > 0 && dir < 0 && t > 0) ? Math.exp(-this.damping * Math.max(0, this.Ediag(a) - this.E[0]) * t) : 1;   // never amplify (Round 11 B6)   // the DRAG toy, forward only
+        reOut[a] = g * (r0 * c - i0 * s); imOut[a] = g * (r0 * s + i0 * c);
       }
       return { re: reOut, im: imOut };
     }
@@ -126,25 +161,83 @@ export class Register {
         let r = 0, i = 0;
         for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; r += v * reIn[b.idx[j]]; i += v * imIn[b.idx[j]]; }
         if (r === 0 && i === 0) continue;
-        const ph = dir * (E0 + this.field.Fz * b.lam[k]) * t, c = Math.cos(ph), s = Math.sin(ph);
-        const yr = r * c - i * s, yi = r * s + i * c;
+        const Ek = E0 + this.field.Fz * b.lam[k], ph = dir * Ek * t, c = Math.cos(ph), s = Math.sin(ph);
+        const g = (this.damping > 0 && dir < 0 && t > 0) ? Math.exp(-this.damping * Math.max(0, Ek - this.E[0]) * t) : 1;   // the toy acts under Stark too (Round 11 A3)
+        const yr = g * (r * c - i * s), yi = g * (r * s + i * c);
         for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; reOut[b.idx[j]] += v * yr; imOut[b.idx[j]] += v * yi; }
       }
     }
     return { re: reOut, im: imOut };
   }
 
+  /** the PROPAGATOR's law, forward (dir = −1) or back to the anchor (dir = +1): P.evolve, then the Zeeman phase per label;
+   *  the DRAG toy acts in P's eigenbasis, forward only, never amplifying — the same toy as the diagonal one */
+  _propagateP(reIn, imIn, t, dir, reOut, imOut) {
+    const P = this.P;
+    if (this.damping > 0 && dir < 0 && t > 0) {
+      const M = P.rank, dre = new Float64Array(M), dim = new Float64Array(M), E0 = P.E[0];
+      for (let k = 0; k < M; k++) {
+        let r = 0, i = 0;
+        for (let a = 0; a < N; a++) { const w = P.CtS[k * N + a]; if (w === 0) continue; r += w * reIn[a]; i += w * imIn[a]; }
+        const ph = -P.E[k] * t, c = Math.cos(ph), s = Math.sin(ph), g = Math.exp(-this.damping * Math.max(0, P.E[k] - E0) * t);
+        dre[k] = g * (r * c - i * s); dim[k] = g * (r * s + i * c);
+      }
+      reOut.fill(0); imOut.fill(0);
+      for (let a = 0; a < N; a++) { let sr = 0, si = 0; for (let k = 0; k < M; k++) { const w = P.C[a * M + k]; if (w === 0) continue; sr += w * dre[k]; si += w * dim[k]; } reOut[a] = sr; imOut[a] = si; }
+    } else {
+      const r = P.evolve({ re: reIn, im: imIn }, dir < 0 ? t : -t);
+      reOut.set(r.re); imOut.set(r.im);
+    }
+    if (this.field.Bz !== 0) for (let a = 0; a < N; a++) {
+      const r0 = reOut[a], i0 = imOut[a]; if (r0 === 0 && i0 === 0) continue;
+      const ph = dir * this.field.Bz * BASIS[a].m / 2 * t, c = Math.cos(ph), s = Math.sin(ph);
+      reOut[a] = r0 * c - i0 * s; imOut[a] = r0 * s + i0 * c;
+    }
+    return { re: reOut, im: imOut };
+  }
+
   /* ── time evaluation ─────────────────────────────────────────────────── */
   /** c(t) into the supplied arrays (or fresh ones) */
-  at(t, re, im) { return this._propagate(this.re0, this.im0, t, -1, re || new Float64Array(N), im || new Float64Array(N)); }
+  at(t, re, im) {
+    if (this.mix) {                                   // A ↔ B TRANSITION: the played state is the Rabi mix of two exact evolutions
+      const m = this.mix, A = this._propagate(m.reA, m.imA, t, -1, m._ra, m._ia), B = this._propagate(m.reB, m.imB, t, -1, m._rb, m._ib);
+      const th = this.mixAngle(t), c = Math.cos(th), s = Math.sin(th);
+      re = re || new Float64Array(N); im = im || new Float64Array(N);
+      for (let a = 0; a < N; a++) { re[a] = c * A.re[a] + s * B.re[a]; im[a] = c * A.im[a] + s * B.im[a]; }
+      return { re, im };
+    }
+    return this._propagate(this.re0, this.im0, t, -1, re || new Float64Array(N), im || new Float64Array(N));
+  }
+  /* ── A ↔ B TRANSITION (Rabi) ────────────────────────────────────────────
+   * c(t) = cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t), with A(t), B(t) the EXACT evolutions of two stored anchors.
+   * For two eigenstates under a resonant drive this is the exact two-level Rabi solution in the rotating-wave
+   * approximation; the density then breathes at E_B − E_A — the radiating dipole of a transition.  With composite A or
+   * B the same envelope is a TOY, and the instrument labels it so.  While a transition plays, edits act on the stored
+   * anchors (re0/im0 hold the union so the listing shows both); clearing it freezes the mix as the new state. */
+  setTransition(A, B, omega, t0) {
+    this.mix = { reA: Float64Array.from(A.re), imA: Float64Array.from(A.im), reB: Float64Array.from(B.re), imB: Float64Array.from(B.im), omega, t0,
+      _ra: new Float64Array(N), _ia: new Float64Array(N), _rb: new Float64Array(N), _ib: new Float64Array(N) };
+    for (let a = 0; a < N; a++) { this.re0[a] = A.re[a] + B.re[a]; this.im0[a] = A.im[a] + B.im[a]; }
+    this.version++;
+  }
+  clearTransition(t) { if (!this.mix) return; const c = this.at(t); this.mix = null; this.anchorFrom(c.re, c.im, t); }
+  get transition() { return this.mix; }
+  mixAngle(t) { return this.mix ? this.mix.omega * (t - this.mix.t0) / 2 : 0; }
   /** one coefficient at time t */
   coeffAt(a, t) {
-    if (this.field.Fz === 0) {
+    if (this.mix) { const c = this.at(t); return { re: c.re[a], im: c.im[a] }; }
+    if (this.field.Fz === 0 && !this.P) {
       const ph = -this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);
       return { re: this.re0[a] * c - this.im0[a] * s, im: this.re0[a] * s + this.im0[a] * c };
     }
     const c = this.at(t);
     return { re: c.re[a], im: c.im[a] };
+  }
+  /** land a vector computed off the thread as the state AT time t — exactly the road _op takes for a non-commuting
+      operator (wave 45, the bow): at t = 0 it IS the anchor; otherwise it is carried back to t = 0 */
+  setAnchorAt(re, im, t) {
+    if (!t) { this.re0.set(re); this.im0.set(im); this.version++; return; }
+    this.anchorFrom(re, im, t);
   }
   /** re-anchor from a whole coefficient vector given at time t (the general form of an edit-at-time) */
   anchorFrom(re, im, t) {
@@ -156,7 +249,7 @@ export class Register {
   /* ── mutations (all bump version) ─────────────────────────────────────── */
   /** set c_a(t) = re + i·im at logical time t (re-anchors c_a(0)) */
   set(a, re, im, t = 0) {
-    if (this.field.Fz !== 0) {                       // H mixes l: set the component AT time t, then re-anchor
+    if (this.field.Fz !== 0 || this.P) {             // H mixes l (or the labels are not eigenstates): set the component AT time t, then re-anchor
       const c = this.at(t); c.re[a] = re; c.im[a] = im;
       this.anchorFrom(c.re, c.im, t);
       return;
@@ -214,15 +307,19 @@ export class Register {
    * as an operator; the register keeps only its n ≤ 6 image, so the norm DROPS by the probability the electron was
    * knocked out of the first six shells or ionised.  That loss is physics and is never renormalised away here.
    */
-  kick(k, axis = 'z', t = 0) { this._op((re, im) => applyKick(re, im, k, axis), t); }
+  kick(k, axis = 'z', t = 0) { this._op((re, im) => applyKick(re, im, k, axis), t, false); }
+  /** the same slap along any unit direction (the BOW) */
+  kickAlong(k, d, t = 0) { this._op((re, im) => applyKickAlong(re, im, k, d), t, false); }
+  /** the DRAG toy: γ ≥ 0; NON-UNITARY, not physics — excited amplitudes decay as e^{−γ(E_a−E_0)t}, forward in time only, under no electric field */
+  setDamping(g) { this.damping = Math.max(0, g || 0); this.version++; }
   /**
    * Apply a unitary to the state AT the current logical time.  With no electric field every operator here commutes
    * with H (L_z, K_z and L² all do), so acting on the anchor is the same thing and we take the fast path; with a
    * Stark field L² does NOT commute, so the operator is applied at time t and the state re-anchored — which is the
    * register's documented policy ("edits happen at the current logical time") made to hold in general.
    */
-  _op(fn, t = 0) {
-    if (this.field.Fz === 0 || !t) { fn(this.re0, this.im0); this.version++; return; }
+  _op(fn, t = 0, commutes = true) {
+    if ((commutes && this.field.Fz === 0 && !this.P) || !t) { fn(this.re0, this.im0); this.version++; return; }   // a slap does NOT commute with H: it must act at time t
     const c = this.at(t); fn(c.re, c.im); this.anchorFrom(c.re, c.im, t);
   }
   /** load a preset: coefficients at t = 0, normalized as stored */
@@ -241,19 +338,19 @@ export class Register {
   }
 
   /* ── observables (all from the full authoritative state) ──────────────── */
-  norm2() { let s = 0; for (let a = 0; a < N; a++) s += this.re0[a] ** 2 + this.im0[a] ** 2; return s; }
+  norm2() { if (this.P) return this.P.norm({ re: this.re0, im: this.im0 }); let s = 0; for (let a = 0; a < N; a++) s += this.re0[a] ** 2 + this.im0[a] ** 2; return s; }   // under a PROPAGATOR: ⟨c|S|c⟩ (conserved, so the anchor's)
   norm() { return Math.sqrt(this.norm2()); }
   population(a) { return this.re0[a] ** 2 + this.im0[a] ** 2; }
   /** ⟨H⟩ = c†Hc (diagonal H) — divided by the norm² so an unnormalized edit still reads as an energy */
   energy() {
-    const na = this.normalAmplitudes(0);
+    const na = this.normalAmplitudes(0, true);
     let e = 0, n = 0;
     for (let k = 0; k < na.E.length; k++) { const p = na.re[k] ** 2 + na.im[k] ** 2; e += p * na.E[k]; n += p; }
     return n > 0 ? e / n : 0;
   }
   /** A(t) = ⟨ψ(0)|ψ(t)⟩ = Σ |c_a|² e^{-iE_a t}  (per unit norm) → { re, im, abs } */
   autocorrelation(t) {
-    const na = this.normalAmplitudes(0);
+    const na = this.normalAmplitudes(0, true);
     let r = 0, i = 0, n = 0;
     for (let k = 0; k < na.E.length; k++) {
       const p = na.re[k] ** 2 + na.im[k] ** 2;
@@ -307,7 +404,7 @@ export class Register {
       modes.push({ id: s.id, n: s.n, l: s.l, m: s.m, re: this.re0[a], im: this.im0[a], muted: !!this.muted[a], solo: !!this.solo[a] });
     }
     return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
-      field: { ...this.field }, status: this.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark)' : 'EXACT ANALYTIC' };
+      field: { ...this.field }, status: this.P ? 'EXACT IN THE PROPAGATOR\'S BASIS (Sturmian: VARIATIONAL eigenvalues, S-norm)' : this.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark)' : 'EXACT ANALYTIC' };
   }
   restore(obj) {
     this.clear();

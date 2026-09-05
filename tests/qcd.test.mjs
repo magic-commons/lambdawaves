@@ -45,7 +45,7 @@ function judge(name, ok, detail) {
   judge('Q the exponent the data actually wants is p ≈ 0 (Round 9: 0.0388) — not a power law at all but a LOGARITHM, for which the spacing is mass-independent exactly', Math.abs(lin.fittedExponent) < 0.06, lin.fittedExponent);
   judge('Q Cornell rescues it: its predicted ratio 0.9625 sits within 0.7% of the measured 0.9559, because the Coulomb core breaks the pure power law', Math.abs(cor.predRatio - 0.9625) < 5e-3 && Math.abs(cor.predRatio - cor.measRatio) < 0.02, cor);
   const logf = flavourIndependence('log', { ...DEFAULTS, C: 0.733, r0: 1 });
-  judge('Q and a logarithmic potential gives the SAME splitting for both systems to better than 1% — the flavour independence the data shows', Math.abs(logf.predRatio - 1) < 0.01, { ratio: logf.predRatio, charm: logf.charmSplit, bottom: logf.bottomSplit });
+  judge('Q and a logarithmic potential gives the SAME splitting for both systems, 0.5887 GeV each (1e-3) — the flavour independence the data shows', Math.abs(logf.charmSplit - 0.58868) < 1e-3 && Math.abs(logf.bottomSplit - 0.58868) < 1e-3 && Math.abs(logf.predRatio - 1) < 1e-9, { ratio: logf.predRatio, charm: logf.charmSplit, bottom: logf.bottomSplit });
 }
 /* the string, exactly */
 {

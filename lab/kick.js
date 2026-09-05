@@ -17,58 +17,83 @@
  *
  * A kick along x or y is the z-kick conjugated by a spatial rotation: R⁻¹ e^{ikz} R = e^{i k (R⁻¹ẑ)·x}.
  */
-import { BASIS, radial, modeTable, orbitalFromTable, energy } from './hydrogen.js';
+import { BASIS, radial, modeTable, orbitalFromTable } from './hydrogen.js';
+import { getHamiltonian } from './hamiltonian.js';
+import { sphericalBessel } from './bessel.js';
 import { applyRotor } from './frontier.js';
 import { angularDipoleZ, radialDipole } from './dynamics.js';
 
 const N = 91, LMAX = 10;
-/** spherical Bessel j_L(x) for L ≤ 12: series near zero, upward recurrence for x > L, Miller's downward otherwise */
-export function sphericalBessel(L, x) {
-  if (x < 1e-6) { let s = 1; for (let i = 1; i <= L; i++) s *= x / (2 * i + 1); return s; }
-  const j0 = Math.sin(x) / x;
-  if (L === 0) return j0;
-  const j1 = j0 / x - Math.cos(x) / x;
-  if (L === 1) return j1;
-  if (x > L + 1) { let a = j0, b = j1; for (let l = 1; l < L; l++) { const c = (2 * l + 1) / x * b - a; a = b; b = c; } return b; }
-  const start = L + 30 + Math.ceil(x);                          // Miller: downward from a high order, then scale by j0
-  let b = 0, a = 1e-300, out = 0;
-  for (let l = start; l >= 1; l--) { const c = (2 * l + 1) / x * a - b; b = a; a = c; if (l - 1 === L) out = c; if (Math.abs(a) > 1e250) { a *= 1e-250; b *= 1e-250; out *= 1e-250; } }
-  return out * j0 / a;                                           // a now holds the unnormalised j_0
-}
+export { sphericalBessel };                                   // lives in bessel.js (shared with the well; no import cycle)
 /** Legendre P_L(x) for all L ≤ LMAX by the recurrence */
 function legendreAll(x) { const P = new Float64Array(LMAX + 1); P[0] = 1; P[1] = x; for (let l = 1; l < LMAX; l++) P[l + 1] = ((2 * l + 1) * x * P[l] - l * P[l - 1]) / (l + 1); return P; }
 
-/* ── the k-independent tables, built once ─────────────────────────────────── */
+/* ── the k-independent tables, built once — and, since wave 45, a row at a time inside a millisecond budget ──
+ * The first bow used to pay for them on the pointer (127 ms measured: the angular table is 91 × 2001 orbital samples
+ * and 637 m-matched pairs × 11 multipoles × 2001 points).  warmStep(ms) builds the same tables in slices, so the rack
+ * can finish them in idle time after boot and the maths worker can build its own copy off the thread; buildTables()
+ * is warmStep with no budget — every number is bit-identical whichever road built it. */
 let ANG = null;          // ANG[a*N+b] = Float64Array(LMAX+1) of A_L(a,b), only for m_a = m_b
-let RAD = null;          // { r, w, tab[a] = R_a(r_j) } on the log grid
+let RAD = null;          // { r, w, wr2, tab[a] = R_a(r_j) } on the log grid
 const NR = 3000, R0 = 1e-5, R1 = 300;
-function buildTables() {
-  if (ANG) return;
-  /* angular: Θ_a(θ) tabulated on a Simpson grid in x = cos θ (the integrand is a polynomial of degree ≤ 20) */
-  const NT = 2000, theta = new Float64Array(NT + 1), Th = [];
-  const wT = new Float64Array(NT + 1);
-  for (let i = 0; i <= NT; i++) { const x = -1 + 2 * i / NT; theta[i] = Math.acos(Math.min(1, Math.max(-1, x))); wT[i] = ((i === 0 || i === NT) ? 1 : (i % 2 ? 4 : 2)) * (2 / NT) / 3; }
-  const PL = []; for (let i = 0; i <= NT; i++) PL.push(legendreAll(-1 + 2 * i / NT));
-  for (let a = 0; a < N; a++) {
-    const s = BASIS[a], T = modeTable(s.n, s.l, s.m);
-    let r0 = 0.7; if (Math.abs(radial(s.n, s.l, r0)) < 1e-6) r0 = 1.3;
-    const Rr = radial(s.n, s.l, r0), row = new Float64Array(NT + 1);
-    for (let i = 0; i <= NT; i++) row[i] = orbitalFromTable(T, r0 * Math.sin(theta[i]), 0, r0 * Math.cos(theta[i])).re / Rr;
-    Th.push(row);
+const NT = 2000;
+let W = null;            // the warm-up in progress: { theta, wT, PL, Th, a (next row), pairsA (next pair row), ang, radId, radRows, rad }
+const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+export function tablesReady() { const H = getHamiltonian(); return !!(ANG && RAD && RAD.id === H.id); }
+function buildTables() { while (!warmStep(1e9)) { /* no budget: to the end */ } }
+/** one slice of the build, at most ~budgetMs of wall; true when the tables for the Hamiltonian in force are ready */
+export function warmStep(budgetMs = 8) {
+  const H = getHamiltonian(), t0 = nowMs();
+  if (ANG && RAD && RAD.id === H.id) return true;
+  if (!W) W = { theta: null, wT: null, PL: null, Th: [], a: 0, pairsA: 0, ang: null, radId: null, radRows: 0, rad: null };
+  const over = () => nowMs() - t0 >= budgetMs;
+  if (!ANG) {
+    if (!W.theta) {
+      /* angular: Θ_a(θ) tabulated on a Simpson grid in x = cos θ (the integrand is a polynomial of degree ≤ 20) */
+      W.theta = new Float64Array(NT + 1); W.wT = new Float64Array(NT + 1);
+      for (let i = 0; i <= NT; i++) { const x = -1 + 2 * i / NT; W.theta[i] = Math.acos(Math.min(1, Math.max(-1, x))); W.wT[i] = ((i === 0 || i === NT) ? 1 : (i % 2 ? 4 : 2)) * (2 / NT) / 3; }
+      W.PL = []; for (let i = 0; i <= NT; i++) W.PL.push(legendreAll(-1 + 2 * i / NT));
+      if (over()) return false;
+    }
+    while (W.a < N) {                                                // the 91 rows Θ_a
+      const s = BASIS[W.a], T = modeTable(s.n, s.l, s.m);
+      let r0 = 0.7; if (Math.abs(radial(s.n, s.l, r0)) < 1e-6) r0 = 1.3;
+      const Rr = radial(s.n, s.l, r0), row = new Float64Array(NT + 1);
+      for (let i = 0; i <= NT; i++) row[i] = orbitalFromTable(T, r0 * Math.sin(W.theta[i]), 0, r0 * Math.cos(W.theta[i])).re / Rr;
+      W.Th.push(row); W.a++;
+      if (over()) return false;
+    }
+    if (!W.ang) W.ang = new Array(N * N).fill(null);
+    while (W.pairsA < N) {                                           // the pair rows A_L(a, b), m_a = m_b
+      const a = W.pairsA;
+      for (let b = 0; b < N; b++) {
+        if (BASIS[a].m !== BASIS[b].m) continue;
+        const A = new Float64Array(LMAX + 1);
+        for (let L = 0; L <= LMAX; L++) { let s = 0; for (let i = 0; i <= NT; i++) s += W.wT[i] * W.Th[a][i] * W.Th[b][i] * W.PL[i][L]; A[L] = 2 * Math.PI * s; }
+        W.ang[a * N + b] = A;
+      }
+      W.pairsA++;
+      if (over()) return false;
+    }
+    ANG = W.ang; W.ang = null; W.Th = []; W.theta = null; W.wT = null; W.PL = null;
   }
-  ANG = new Array(N * N).fill(null);
-  for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) {
-    if (BASIS[a].m !== BASIS[b].m) continue;
-    const A = new Float64Array(LMAX + 1);
-    for (let L = 0; L <= LMAX; L++) { let s = 0; for (let i = 0; i <= NT; i++) s += wT[i] * Th[a][i] * Th[b][i] * PL[i][L]; A[L] = 2 * Math.PI * s; }
-    ANG[a * N + b] = A;
+  if (!RAD || RAD.id !== H.id) {
+    if (W.radId !== H.id) {
+      /* radial: R_a of the Hamiltonian IN FORCE on a log grid, Simpson weights in u = ln r with the Jacobian r folded in */
+      const r = new Float64Array(NR + 1), w = new Float64Array(NR + 1), wr2 = new Float64Array(NR + 1), du = Math.log(R1 / R0) / NR;
+      for (let j = 0; j <= NR; j++) { r[j] = R0 * Math.exp(j * du); w[j] = ((j === 0 || j === NR) ? 1 : (j % 2 ? 4 : 2)) * du / 3 * r[j]; wr2[j] = w[j] * r[j] * r[j]; }
+      W.rad = { id: H.id, r, w, wr2, tab: [] }; W.radId = H.id; W.radRows = 0;
+    }
+    while (W.radRows < N) {
+      const s = BASIS[W.radRows], row = new Float64Array(NR + 1), r = W.rad.r;
+      for (let j = 0; j <= NR; j++) row[j] = H.radial(s.n, s.l, r[j]);
+      W.rad.tab.push(row); W.radRows++;
+      if (over() && W.radRows < N) return false;
+    }
+    RAD = W.rad; W.rad = null; W.radId = null;
   }
-  /* radial: R_a on a log grid, Simpson weights in u = ln r with the Jacobian r folded in */
-  const r = new Float64Array(NR + 1), w = new Float64Array(NR + 1), du = Math.log(R1 / R0) / NR;
-  for (let j = 0; j <= NR; j++) { r[j] = R0 * Math.exp(j * du); w[j] = ((j === 0 || j === NR) ? 1 : (j % 2 ? 4 : 2)) * du / 3 * r[j]; }
-  const tab = [];
-  for (let a = 0; a < N; a++) { const s = BASIS[a], row = new Float64Array(NR + 1); for (let j = 0; j <= NR; j++) row[j] = radial(s.n, s.l, r[j]); tab.push(row); }
-  RAD = { r, w, tab };
+  W = null;
+  return true;
 }
 /** the boost matrix along z for impulse k: complex, block-diagonal in m.  { re, im } as N×N Float64Arrays */
 export function kickMatrixZ(k) {
@@ -85,7 +110,7 @@ export function kickMatrixZ(k) {
     for (let L = lo; L <= hi; L++) {
       if (Math.abs(A[L]) < 1e-14) continue;
       let I = 0; const jl = J[L];
-      for (let j = 0; j <= NR; j++) I += RAD.w[j] * ra[j] * rb[j] * jl[j] * RAD.r[j] * RAD.r[j];
+      const wr2 = RAD.wr2; for (let j = 0; j <= NR; j++) I += wr2[j] * ra[j] * rb[j] * jl[j];
       const v = (2 * L + 1) * A[L] * I, p = IL[L % 4];
       sr += v * p[0]; si += v * p[1];
     }
@@ -113,6 +138,21 @@ export function applyKick(re, im, k, axis = 'z') {
   applyKickZ(re, im, k);
   applyRotor(re, im, { which: 'both', axis: R.axis, angle: -R.angle });
 }
+/** the two rotations taking a unit direction d = (sinθcosφ, sinθsinφ, cosθ) onto ẑ: about z by −φ, then about y by −θ
+    (for d = x̂ this is AXIS_TO_Z.x exactly; for d = ŷ it differs from AXIS_TO_Z.y by a rotation about ẑ, which commutes with the z-kick) */
+export function rotorsToZ(d) {
+  const n = Math.hypot(d[0], d[1], d[2]) || 1, z = d[2] / n;
+  const theta = Math.acos(Math.max(-1, Math.min(1, z))), phi = Math.atan2(d[1], d[0]);
+  return [{ axis: 'z', angle: -phi }, { axis: 'y', angle: -theta }];
+}
+/** a kick of impulse k along ANY unit direction d: R⁻¹ e^{ikz} R with R the rotations above */
+export function applyKickAlong(re, im, k, d) {
+  const n = Math.hypot(d[0], d[1], d[2]); if (n === 0 || k === 0) return;
+  const R = rotorsToZ([d[0] / n, d[1] / n, d[2] / n]);
+  for (const r of R) applyRotor(re, im, { which: 'both', axis: r.axis, angle: r.angle });
+  applyKickZ(re, im, k);
+  for (const r of [...R].reverse()) applyRotor(re, im, { which: 'both', axis: r.axis, angle: -r.angle });
+}
 /** ⟨p_z⟩ by Heisenberg, p_z = i[H, z]: ⟨a|p_z|b⟩ = i(E_a − E_b)⟨a|z|b⟩ — exact within the register, per unit norm */
 export function momentumZ(re, im, ids) {
   const list = ids || BASIS.map((s) => s.index);
@@ -121,7 +161,7 @@ export function momentumZ(re, im, ids) {
   for (const a of list) for (const b of list) {
     const A = BASIS[a], B = BASIS[b], ang = angularDipoleZ(A.l, A.m, B.l, B.m);
     if (ang === 0) continue;
-    const z = ang * radialDipole(A.n, A.l, B.n, B.l), dE = energy(A.n) - energy(B.n);
+    const z = ang * radialDipole(A.n, A.l, B.n, B.l), dE = getHamiltonian().energy(a) - getHamiltonian().energy(b);
     /* Re[ c_a* · i dE z · c_b ] = −dE z · Im(c_a* c_b) */
     s += -dE * z * (re[a] * im[b] - im[a] * re[b]);
   }

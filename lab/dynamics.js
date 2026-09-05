@@ -1,6 +1,8 @@
 /* dynamics.js — the LAGRANGIAN picture, the action–angle chart, the dipole, and the particle (Bohmian) velocity field.
  *
- * STATUS: EXACT ANALYTIC throughout, except the radial dipole integrals (NUMERICAL, Simpson, measured below).
+ * STATUS: EXACT ANALYTIC throughout, except the radial integrals (NUMERICAL: Gauss–Legendre on doubling panels for
+ * hydrogen and the oscillator, exponentially convergent — 1e-14 against mpmath; Simpson in ln r for the atom's tabulated
+ * shells; see radialRule below).
  *
  * THE LAGRANGIAN.  The Schrödinger field Lagrangian
  *     L[ψ] = ∫ ( (i/2)(ψ*ψ̇ − ψ̇*ψ) − ½|∇ψ|² − V|ψ|² ) d³r
@@ -131,20 +133,45 @@ export function angularDipoleZ(lp, mp_, l, m) {
   if (lp === l - 1) return Math.sqrt((l * l - m * m) / ((2 * l - 1) * (2 * l + 1)));
   return 0;
 }
+import { getHamiltonian } from './hamiltonian.js';
+import { gaussLegendre } from './wigner.js';
+/* ── the radial quadrature: ONE rule per Hamiltonian, shaped to its radial functions (wave 42) ──────────────────────
+ * hydrogen (any Z): R_nl is a polynomial × e^{−Zr/n}, so Gauss–Legendre converges exponentially — 24 points on panels
+ *   DOUBLING from r₁ = n_min/(4Z) out to 40 n_max²/Z (14 panels for 1s–6p, 336 evaluations) put every pair on mpmath to
+ *   ~1e-14.  The uniform Simpson it replaces needed 12000·⌈n_max²/n_min²⌉ panels for the smaller shell's cusp — 432 000
+ *   for 1s–6p — and a 16-label state's first frame cost 1.4 s (dipoleZ 418 ms + radialObservables 1009 ms): the reviewer's
+ *   finding.  qho: Gaussian × polynomial, the same rule on [0, 14].  well: 8 panels on [0, a] — the wall is a panel edge
+ *   and the radial is zero beyond it.  atom: the shells are linear interpolants in ln r on a 10⁻⁶/Z … 60 mesh, so the
+ *   rule is Simpson in ln r on 6000 points (three per mesh step).  Otherwise (quarkonium's uniform table): Simpson on
+ *   [0, 14], 12000 panels, the rule this file always had.  Every rule is built once and cached. */
+const RULE_CACHE = new Map();
+function radialRule(H, nlo, nhi) {
+  const Z = H.Z || 1, key = `${H.id}:${Z}:${H.radius || 0}:${nlo}:${nhi}`;
+  const hit = RULE_CACHE.get(key); if (hit) return hit;
+  const r = [], w = [];
+  const panels = (edges, q) => { const G = gaussLegendre(q); for (let p = 0; p + 1 < edges.length; p++) { const h = (edges[p + 1] - edges[p]) / 2, c = (edges[p] + edges[p + 1]) / 2; for (let i = 0; i < q; i++) { r.push(c + h * G.x[i]); w.push(h * G.w[i]); } } };
+  const doubling = (r1, top) => { const e = [0]; for (let x = r1; ; x *= 2) { e.push(Math.min(x, top)); if (x >= top) break; } return e; };
+  const simpson = (nodes, jac) => { const N = nodes.length - 1; for (let i = 0; i <= N; i++) { r.push(nodes[i]); w.push(((i === 0 || i === N) ? 1 : (i % 2 ? 4 : 2)) / 3 * jac(i)); } };
+  if (H.id === 'hydrogen') panels(doubling(0.25 * nlo / Z, 40 * nhi * nhi / Z), 24);
+  else if (H.id === 'qho') panels([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 14], 24);
+  else if (H.id === 'well' && H.radius > 0) panels(Array.from({ length: 9 }, (_, i) => H.radius * i / 8), 24);
+  else if (H.id === 'atom') { const N = 6000, r0 = 1e-6 / Z, du = Math.log(60 / r0) / N; simpson(Array.from({ length: N + 1 }, (_, i) => r0 * Math.exp(i * du)), (i) => du * r0 * Math.exp(i * du)); }
+  else { const N = 12000, h = 14 / N; simpson(Array.from({ length: N + 1 }, (_, i) => i * h), () => h); }
+  const rule = { r: Float64Array.from(r), w: Float64Array.from(w) };
+  RULE_CACHE.set(key, rule); return rule;
+}
 const RAD_CACHE = new Map();
-/** ∫₀^∞ R_{n′l′}(r) r R_{nl}(r) r² dr — NUMERICAL (Simpson, 4000 panels to r = 60·max(n²), cached) */
+/** ∫₀^∞ R_{n′l′}(r) r R_{nl}(r) r² dr — NUMERICAL on the Hamiltonian's own rule above (exponentially convergent for
+ *  hydrogen: 1s–4p and 1s–6p to 1e-14 against mpmath), cached per Hamiltonian, Z (and the well's radius) and pair */
 export function radialDipole(np_, lp, n, l) {
-  const key = `${np_}:${lp}:${n}:${l}`;
+  const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);                 // the integrand is symmetric: ONE key per pair
+  const key = swap ? `${H.id}:${H.Z || 1}:${H.radius || 0}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.Z || 1}:${H.radius || 0}:${np_}:${lp}:${n}:${l}`;   // Z in the key (Round 11 A2)
   if (RAD_CACHE.has(key)) return RAD_CACHE.get(key);
-  const R = 40 * Math.max(np_ * np_, n * n), N = 4000, h = R / N;
+  const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;
-  for (let i = 0; i <= N; i++) {
-    const r = i * h, w = (i === 0 || i === N) ? 1 : (i % 2 ? 4 : 2);
-    s += w * radial(np_, lp, r) * radial(n, l, r) * r * r * r;
-  }
-  const v = s * h / 3;
-  RAD_CACHE.set(key, v);
-  return v;
+  for (let i = 0; i < r.length; i++) { const x = r[i]; s += (H.radial(np_, lp, x) * H.radial(n, l, x)) * (w[i] * x * x * x); }   // the radials multiplied FIRST: bit-symmetric in (a, b)
+  RAD_CACHE.set(key, s);
+  return s;
 }
 /**
  * ⟨z⟩ = Σ_{ab} c_a* c_b ⟨a|z|b⟩ over the populated set, per unit norm.  z couples l → l ± 1 at fixed m, so a
@@ -180,8 +207,8 @@ export function dipoleLines(re, im, ids) {
     if (ang === 0) continue;
     const z = Math.abs(ang * radialDipole(A.n, A.l, B.n, B.l));
     const amp = 2 * Math.hypot(re[a], im[a]) * Math.hypot(re[b], im[b]) * z;
-    const om = Math.abs(A.E - B.E);
-    if (amp > 1e-12) out.push({ a, b, label: `${A.label}↔${B.label}`, omega: om, period: om > 0 ? 2 * PI / om : Infinity, amplitude: amp, power: (2 / 3) * Math.pow(om, 4) * amp * amp / 2 });
+    const om = Math.abs(getHamiltonian().energy(a) - getHamiltonian().energy(b));   // the operator in force, not the static hydrogen energies
+    if (amp > 1e-12 && om > 1e-12) out.push({ a, b, label: `${A.label}↔${B.label}`, omega: om, period: om > 0 ? 2 * PI / om : Infinity, amplitude: amp, power: (2 / 3) * Math.pow(om, 4) * amp * amp / 2 });
   }
   out.sort((x, y) => y.amplitude - x.amplitude);
   return out;
@@ -189,19 +216,19 @@ export function dipoleLines(re, im, ids) {
 
 /* ── radial moments, and the atom's OWN virial theorem ───────────────────── */
 const MOM_CACHE = new Map();
-/** ∫₀^∞ R_{n′l}(r) r^k R_{nl}(r) r² dr — NUMERICAL (Simpson, cached); k = 1 gives ⟨r⟩, k = −1 gives ⟨1/r⟩ */
+/** ∫₀^∞ R_{n′l}(r) r^k R_{nl}(r) r² dr — NUMERICAL on the same rule as radialDipole (cached); k = 1 gives ⟨r⟩, k = −1 gives ⟨1/r⟩ */
 export function radialMoment(k, np_, lp, n, l) {
-  const key = `${k}:${np_}:${lp}:${n}:${l}`;
+  const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);
+  const key = swap ? `${H.id}:${H.Z || 1}:${H.radius || 0}:${k}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.Z || 1}:${H.radius || 0}:${k}:${np_}:${lp}:${n}:${l}`;   // the Hamiltonian in force, and Z (Round 11 A1)
   if (MOM_CACHE.has(key)) return MOM_CACHE.get(key);
-  const R = 40 * Math.max(np_ * np_, n * n), N = 6000, h = R / N;
+  const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;
-  for (let i = 1; i <= N; i++) {                       // start at i = 1: r^{k+2} is integrable at 0 for k ≥ −1
-    const r = i * h, w = (i === N) ? 1 : (i % 2 ? 4 : 2);
-    s += w * radial(np_, lp, r) * radial(n, l, r) * Math.pow(r, k + 2);
+  for (let i = 0; i < r.length; i++) {
+    const x = r[i]; if (x === 0 && k + 2 <= 0) continue;   // r^{k+2} is integrable at 0 for k ≥ −1; a Simpson rule's r = 0 node is skipped below that
+    s += (H.radial(np_, lp, x) * H.radial(n, l, x)) * (w[i] * Math.pow(x, k + 2));
   }
-  const v = s * h / 3;
-  MOM_CACHE.set(key, v);
-  return v;
+  MOM_CACHE.set(key, s);
+  return s;
 }
 /**
  * ⟨r⟩, ⟨1/r⟩ and hence the Coulomb split ⟨V⟩ = −⟨1/r⟩, ⟨T⟩ = ⟨H⟩ + ⟨1/r⟩ — per unit norm.  r is a scalar, so it
@@ -222,7 +249,7 @@ export function radialObservables(re, im, ids, energy) {
   }
   if (n2 <= 0) return { r: 0, rinv: 0, V: 0, T: 0, virial: 0 };
   r1 /= n2; rinv /= n2;
-  const V = -rinv, T = energy - V;
+  const Z = getHamiltonian().Z || 1, V = -Z * rinv, T = energy - V;              // V = −Z⟨1/r⟩ (Round 11 A1)
   return { r: r1, rinv, V, T, virial: V !== 0 ? -T / V * 2 : 0 };   // 2T/(−V) = 1 exactly for a stationary state
 }
 
@@ -262,18 +289,20 @@ export function psiAndGrad(re, im, ids, x, y, z) {
     drR += cr * rr - ci * ri; drI += cr * ri + ci * rr;
     const tr = dfdt * cph, ti = dfdt * sph;
     dtR += cr * tr - ci * ti; dtI += cr * ti + ci * tr;
-    // ∂_φ ψ_a = i m ψ_a
-    const ar = cr * wr - ci * wi, ai = cr * wi + ci * wr;
-    dpR += -m * ai; dpI += m * ar;
+    // ∂_φ ψ_a / sin θ = i m · (f / sin θ), with sin^{|m|−1}θ carried explicitly (electrostatics.js's thetaFuncs): finite ON the
+    // axis, where (∂_φψ)/(r sin θ) was dropped as 0/0 before — 2p₊1 at (0, 0, 1) read g_y = 0 for a true −0.04277i (wave 42)
+    const fs = am ? T.norm * e * rl * L * stm1 * D : 0, ur = fs * cph, ui = fs * sph;
+    const br = cr * ur - ci * ui, bi = cr * ui + ci * ur;
+    dpR += -m * bi; dpI += m * br;
   }
-  // spherical → Cartesian
+  // spherical → Cartesian: ∇ψ = r̂ ∂_r + θ̂ (1/r)∂_θ + φ̂ (1/r)(∂_φ/sin θ)
   const cp = Math.cos(phi), sp = Math.sin(phi);
   const rh = [st * cp, st * sp, ct], th = [ct * cp, ct * sp, -st], ph = [-sp, cp, 0];
-  const invR = 1 / r, invRs = st > 1e-9 ? 1 / (r * st) : 0;
+  const invR = 1 / r;
   const g = [];
   for (let k = 0; k < 3; k++) {
-    g.push({ re: drR * rh[k] + invR * dtR * th[k] + invRs * dpR * ph[k],
-             im: drI * rh[k] + invR * dtI * th[k] + invRs * dpI * ph[k] });
+    g.push({ re: drR * rh[k] + invR * dtR * th[k] + invR * dpR * ph[k],
+             im: drI * rh[k] + invR * dtI * th[k] + invR * dpI * ph[k] });
   }
   return { re: pr, im: pi, gx: g[0], gy: g[1], gz: g[2] };
 }

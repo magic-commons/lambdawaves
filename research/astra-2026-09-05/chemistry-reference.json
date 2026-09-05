@@ -1,0 +1,41 @@
+{
+  "pyscf": "2.14.0",
+  "basis": "sto-3g",
+  "energyUnit": "hartree",
+  "threads": 2,
+  "results": [
+    {
+      "molecule": "H2",
+      "distanceAngstrom": 0.74,
+      "nao": 2,
+      "electrons": 2,
+      "rhf": -1.1167593073964255,
+      "fci": -1.1372838344885023,
+      "rhfConverged": true
+    },
+    {
+      "molecule": "H2",
+      "distanceAngstrom": 3.0,
+      "nao": 2,
+      "electrons": 2,
+      "rhf": -0.6560482511455911,
+      "fci": -0.9336318445584986,
+      "rhfConverged": true
+    },
+    {
+      "molecule": "benzene",
+      "geometry": "regular planar hexagon; C-C 1.397 A; C-H 1.080 A; not optimised",
+      "nao": 36,
+      "electrons": 42,
+      "occupiedSpatial": 21,
+      "rhf": -227.89056887857598,
+      "rhfConverged": true,
+      "seconds": 0.16143798595294356,
+      "electronTrace": 42.00000000000001,
+      "orthogonalityMax": 2.9565511948144286e-14,
+      "scfCommutatorMax": 2.0135745015803508e-09,
+      "closedShellIdempotencyMax": 5.861977570020827e-14,
+      "warning": "STO-3G RHF feasibility fixture, not accurate excitation or dissociation data"
+    }
+  ]
+}

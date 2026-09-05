@@ -8,33 +8,51 @@
  * ensemble that starts as |ψ|² stays |ψ|² forever (equivariance), so the cloud IS the density, drawn one
  * trajectory at a time.  Nothing here is a claim that the atom contains particles; it is the exact velocity field
  * of the same wavefunction, which is a legitimate reading of it and a very good way to SEE the current.
+ *
+ * MEMORY (wave 45): the trails are ONE Float32Array ring (count × trailLen × 3) with a head per particle, the
+ * register is read into three scratch pairs keyed by the substep's time (no Map, no string keys, no fresh arrays),
+ * and the canvas is sized only while the view is on — off, it is a 1 × 1 bitmap, not a full-stage one at the DPR.
  */
 import { bohmStep, bohmVelocity, psiAndGrad } from './dynamics.js';
 import { cameraBasis } from './field.js';
 
 export function createParticles(canvas, api) {
   const g = canvas.getContext('2d');
-  let pts = [], trails = [], lastT = null, on = false, trailLen = 24, speedCap = 4;
+  let pts = [], lastT = null, on = false, trailLen = 24, speedCap = 4;
+  let ring = new Float32Array(3), heads = new Int32Array(1), lens = new Int32Array(1);   // the trails: a ring per particle
   const state = { count: 0, alive: 0, stalled: 0, maxSpeed: 0, seededAt: null };
+  /* the register at the substep times: bohmStep asks for c(t), c(t + h/2) (twice) and c(t + h) — three distinct times per step */
+  const memo = [0, 1, 2].map(() => ({ u: NaN, re: new Float64Array(91), im: new Float64Array(91) }));
+  let memoN = 0, memoReg = null;
+  const coeffsAt = (u) => {
+    for (let i = 0; i < memoN; i++) if (memo[i].u === u) return memo[i];
+    let m; if (memoN < 3) m = memo[memoN++]; else { m = memo[0]; memoN = 1; }
+    memoReg.at(u, m.re, m.im); m.u = u; return m;
+  };
 
   function psi2(re, im, ids, x, y, z) { const s = psiAndGrad(re, im, ids, x, y, z); return s ? s.re * s.re + s.im * s.im : 0; }
+  function allocTrails() { const n = Math.max(1, pts.length); ring = new Float32Array(n * trailLen * 3); heads = new Int32Array(n); lens = new Int32Array(n); }
+  function pushTrail(i, p) { const o = (i * trailLen + heads[i]) * 3; ring[o] = p[0]; ring[o + 1] = p[1]; ring[o + 2] = p[2]; heads[i] = (heads[i] + 1) % trailLen; if (lens[i] < trailLen) lens[i]++; }
+  /** the k-th oldest point of particle i's trail (k = 0 … lens[i]−1), into out */
+  function trailAt(i, k, out) { const j = ((heads[i] - lens[i] + k) % trailLen + trailLen) % trailLen, o = (i * trailLen + j) * 3; out[0] = ring[o]; out[1] = ring[o + 1]; out[2] = ring[o + 2]; return out; }
   /** seed n particles by rejection sampling from |ψ|² — the equilibrium distribution */
   function seed(n, reg, t, half) {
     const c = reg.at(t), ids = reg.renderSet().ids;
-    if (!ids.length) { pts = []; trails = []; return 0; }
+    if (!ids.length) { pts = []; allocTrails(); return 0; }
     let peak = 0;
     for (let k = 0; k < 4000; k++) {
       const x = (Math.random() * 2 - 1) * half, y = (Math.random() * 2 - 1) * half, z = (Math.random() * 2 - 1) * half;
       peak = Math.max(peak, psi2(c.re, c.im, ids, x, y, z));
     }
-    pts = []; trails = [];
+    pts = [];
     let tries = 0;
     while (pts.length < n && tries < n * 4000) {
       tries++;
       const x = (Math.random() * 2 - 1) * half, y = (Math.random() * 2 - 1) * half, z = (Math.random() * 2 - 1) * half;
       if (Math.hypot(x, y, z) < 1e-3) continue;
-      if (psi2(c.re, c.im, ids, x, y, z) > Math.random() * peak) { pts.push([x, y, z]); trails.push([]); }
+      if (psi2(c.re, c.im, ids, x, y, z) > Math.random() * peak) pts.push([x, y, z]);
     }
+    allocTrails();
     lastT = t; state.count = pts.length; state.seededAt = t;
     return pts.length;
   }
@@ -46,9 +64,9 @@ export function createParticles(canvas, api) {
     if (dt === 0) return;
     if (Math.abs(dt) > 4) { lastT = t; return; }                 // a big scrub: do not fake a trajectory across it
     const ids = reg.renderSet().ids;
-    const coeffsAt = (u) => reg.at(u);
+    memoReg = reg; memoN = 0;                                     // the register is evaluated ONCE per substep time, shared by every particle
     const sub = Math.min(24, Math.max(1, Math.ceil(Math.abs(dt) / 0.05)));
-    const h = dt / sub;
+    const h = dt / sub, cT = reg.at(t);
     let alive = 0, stalled = 0, vmax = 0;
     for (let i = 0; i < pts.length; i++) {
       let p = pts[i], ok = true;
@@ -58,53 +76,64 @@ export function createParticles(canvas, api) {
         p = q;
       }
       if (ok) {
-        const b = bohmVelocity(reg.at(t).re, reg.at(t).im, ids, p[0], p[1], p[2]);
-        if (b) vmax = Math.max(vmax, Math.hypot(...b.v));
+        const b = bohmVelocity(cT.re, cT.im, ids, p[0], p[1], p[2]);
+        if (b) vmax = Math.max(vmax, Math.hypot(b.v[0], b.v[1], b.v[2]));
         pts[i] = p; alive++;
-        const tr = trails[i]; tr.push(p.slice()); if (tr.length > trailLen) tr.shift();
+        pushTrail(i, p);
       } else stalled++;
     }
     state.alive = alive; state.stalled = stalled; state.maxSpeed = vmax;
     lastT = t;
   }
-  function project(p, B, cam, tanH, aspect, W, H) {
+  function project(p, B, cam, tanH, aspect, W, H, out) {
     const dx = p[0] - cam[0], dy = p[1] - cam[1], dz = p[2] - cam[2];
     const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2];
-    if (depth <= 0) return null;
+    if (depth <= 0) return false;
     const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect);
     const v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-    return [(u + 1) / 2 * W, (1 - v) / 2 * H, depth];
+    out[0] = (u + 1) / 2 * W; out[1] = (1 - v) / 2 * H; out[2] = depth;
+    return true;
   }
+  const P3 = [0, 0, 0], S3 = [0, 0, 0];
+  function release() { if (canvas.width !== 1 || canvas.height !== 1) { canvas.width = 1; canvas.height = 1; } }   // off: no full-stage bitmap kept
   function draw(obs, half) {
+    if (!on || !pts.length) { release(); return; }
     const W = canvas.clientWidth, H = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (W < 32 || H < 32) return;
     if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    if (!on || !pts.length || W < 32 || H < 32) return;
     const B = cameraBasis(obs), D = obs.dist * half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
     g.lineCap = 'round';
+    g.strokeStyle = 'rgba(255,226,170,0.28)'; g.lineWidth = 1;
     for (let i = 0; i < pts.length; i++) {
-      const tr = trails[i];
-      if (tr.length > 1) {
+      const n = lens[i];
+      if (n > 1) {
         g.beginPath(); let started = false;
-        for (let k = 0; k < tr.length; k++) {
-          const s = project(tr[k], B, cam, tanH, aspect, W, H); if (!s) { started = false; continue; }
-          if (!started) { g.moveTo(s[0], s[1]); started = true; } else g.lineTo(s[0], s[1]);
+        for (let k = 0; k < n; k++) {
+          if (!project(trailAt(i, k, P3), B, cam, tanH, aspect, W, H, S3)) { started = false; continue; }
+          if (!started) { g.moveTo(S3[0], S3[1]); started = true; } else g.lineTo(S3[0], S3[1]);
         }
-        g.strokeStyle = 'rgba(255,226,170,0.28)'; g.lineWidth = 1; g.stroke();
+        g.stroke();
       }
-      const s = project(pts[i], B, cam, tanH, aspect, W, H); if (!s) continue;
-      const sz = Math.max(1, 2.1 * Math.sqrt(D / s[2]));
-      g.fillStyle = 'rgba(255,240,210,0.95)'; g.beginPath(); g.arc(s[0], s[1], sz, 0, 2 * Math.PI); g.fill();
+    }
+    g.fillStyle = 'rgba(255,240,210,0.95)';
+    for (let i = 0; i < pts.length; i++) {
+      if (!project(pts[i], B, cam, tanH, aspect, W, H, S3)) continue;
+      const sz = Math.max(1, 2.1 * Math.sqrt(D / S3[2]));
+      g.beginPath(); g.arc(S3[0], S3[1], sz, 0, 2 * Math.PI); g.fill();
     }
     g.fillStyle = 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
     g.fillText(`PARTICLES · ${state.alive}/${state.count} on the exact field v = Im(∇ψ/ψ) · seeded from |ψ|²`, 12, H - 88);
   }
   return {
     seed, advance, draw, get state() { return state; },
-    setOn(v) { on = v; if (!v) { pts = []; trails = []; lastT = null; state.count = 0; state.alive = 0; } },
+    setOn(v) { on = v; if (!v) { pts = []; allocTrails(); lastT = null; state.count = 0; state.alive = 0; release(); } },
     get on() { return on; }, get points() { return pts; },
-    setTrail(n) { trailLen = n; }, setCap(v) { speedCap = v; },
+    /** the trail of particle i as an array of [x, y, z], oldest first — for the proofs */
+    trailOf(i) { const out = []; if (i < 0 || i >= pts.length) return out; for (let k = 0; k < lens[i]; k++) out.push(trailAt(i, k, [0, 0, 0])); return out; },
+    get trailLen() { return trailLen; },
+    setTrail(n) { trailLen = Math.max(2, n | 0); allocTrails(); }, setCap(v) { speedCap = v; },
     resetClock(t) { lastT = t; }
   };
 }

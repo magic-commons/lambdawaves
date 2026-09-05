@@ -183,8 +183,8 @@ judge('Q0 Lyman-α energy 0.375 a.u. = 10.204 eV', Math.abs((energy(2) - energy(
   R.setSolo(R.populated()[1], true);
   judge('solo wins over mute', R.renderSet().rendered === 1);
   const Big = new Register(); for (let a = 0; a < 40; a++) Big.set(a, 1, 0, 0);
-  const sb = Big.renderSet();
-  judge('a 40-mode state is truncated to the 32-mode kernel cap and SAYS so', sb.rendered === 32 && sb.truncated === 8 && Math.abs(sb.coveredFraction - 0.8) < 1e-12, sb);
+  const sb = Big.renderSet(32);                                    // an explicit cap: the register's default now holds all 91
+  judge('a 40-mode state under an explicit 32-mode cap is truncated and SAYS so (the default cap now holds all 91)', sb.rendered === 32 && sb.truncated === 8 && Math.abs(sb.coveredFraction - 0.8) < 1e-12, sb);
 }
 /* presets all load inside the register and normalized */
 {

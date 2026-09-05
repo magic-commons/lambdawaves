@@ -16,9 +16,9 @@ import { el, readout, sw, seg, trig } from './kit.js';
 
 export function createVortex(host, overlay, api) {
   const r1 = el('div', 'row tight', host);
-  const on = sw({ label: 'LOCATE', value: true, onChange: () => { dirty = true; } }); r1.appendChild(on.root);
+  const on = sw({ label: 'LOCATE', value: false, onChange: () => { dirty = true; } }); r1.appendChild(on.root);   // off until asked: the census is a CPU reader
   const qual = seg({ label: 'SAMPLING', value: 'fine', options: [{ id: 'coarse', label: '20 × 48' }, { id: 'fine', label: '40 × 96' }, { id: 'dense', label: '72 × 160' }], onChange: () => { dirty = true; } }); r1.appendChild(qual.root);
-  const show = sw({ label: 'OVERLAY ON FIELD', value: true, onChange: () => { drawOverlay(); } }); r1.appendChild(show.root);
+  const show = sw({ label: 'OVERLAY ON FIELD', value: false, onChange: () => { drawOverlay(); } }); r1.appendChild(show.root);
   const r2 = el('div', 'row tight', host);
   const mRo = readout({ label: 'DEGREE BOUND  M = m_max − m_min', value: '—', sub: 'lines per coaxial circle ≤ M' }); r2.appendChild(mRo.root);
   const nRo = readout({ label: 'POINTS · CIRCLES · DOMINANT', value: '—', sub: '' }); r2.appendChild(nRo.root);
@@ -45,7 +45,7 @@ export function createVortex(host, overlay, api) {
       if (census) {
         const adm = census.points.filter((p) => p.admissible);
         cRo.set(`${census.count} points · T_d = ${census.Td.toFixed(3)} a.u.`, 'ok');
-        cRo.setSub(adm.map((p) => `(ρ,±z) = (${p.rho.toFixed(3)}, ${p.z.toFixed(3)}) at t ≡ ${p.t0.toFixed(2)}`).join(' · ') || 'none admissible');
+        cRo.setSub(adm.map((p) => `(ρ,±z) = (${p.rho.toFixed(3)}, ${p.z.toFixed(3)}) at t ≡ ${p.t0 == null ? "—" : p.t0.toFixed(2)}`).join(' · ') || 'none admissible');
       } else { cRo.set('— (needs three stretched modes m₀+1, m₀, m₀−1 with l = |m|)', ''); cRo.setSub(''); }
     }
   }
@@ -69,8 +69,9 @@ export function createVortex(host, overlay, api) {
       const pts = [[0, 0, -last.half * 0.95], [0, 0, last.half * 0.95]].map((q) => { const dx = q[0] - cam[0], dy = q[1] - cam[1], dz = q[2] - cam[2]; const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2]; return [(1 + (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect)) / 2 * W, (1 - (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH)) / 2 * H, depth]; });
       if (pts[0][2] > 0 && pts[1][2] > 0) { g.strokeStyle = 'rgba(120,225,240,0.5)'; g.lineWidth = 1.5; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[1][0], pts[1][1]); g.stroke(); g.setLineDash([]); }
     }
-    g.fillStyle = 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
-    g.fillText(`VORTEX · ${last.points.length} nodal points on ${grid()[0]} spheres · exact on the sampled circles`, 12, H - 74);
+    g.fillStyle = document.body.dataset.theme === 'light' ? 'rgba(20,30,50,0.62)' : 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
+    const cx = document.body.classList.contains('rack-l') ? 12 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300) + 8 : 12;
+    if (!document.body.classList.contains('no-captions')) g.fillText(`VORTEX · ${last.points.length} nodal points on ${grid()[0]} spheres · exact on the sampled circles`, cx, H - 114);
   }
   /**
    * display-rate update: relocate when the register or the time changed (throttled while playing), redraw the
@@ -85,5 +86,6 @@ export function createVortex(host, overlay, api) {
     const ok = `${obs.yaw.toFixed(4)}|${obs.pitch.toFixed(4)}|${obs.dist.toFixed(4)}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;
     if (ok !== lastObs) { lastObs = ok; drawOverlay(obs); }
   }
-  return { update, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; } };
+  return { update, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },
+    setOn(v) { on.set(v); dirty = true; }, setOverlay(v) { show.set(v); drawOverlay(); }, get on() { return on.get(); }, get overlay() { return show.get(); } };
 }

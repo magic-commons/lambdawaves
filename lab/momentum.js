@@ -80,7 +80,7 @@ export function momentumFromTable(T, px, py, pz) {
   let L = 0, tp = 1; for (let j = 0; j < 6; j++) { L += T.lag[j] * tp; tp *= t; }
   let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
-  const f = T.norm * Math.pow(t, T.l / 2) * L / Math.pow(1 + t, T.n + 1) * stm * D;
+  const f = T.norm * Math.pow(t, T.l / 2) * L / Math.pow(1 + t, T.expo !== undefined ? T.expo : T.n + 1) * stm * D;
   const re0 = f * Math.cos(T.m * phi), im0 = f * Math.sin(T.m * phi);
   return { re: re0 * T.phase.re - im0 * T.phase.im, im: re0 * T.phase.im + im0 * T.phase.re };
 }
@@ -107,4 +107,4 @@ export function fockInverse(xi, n) {
   return [xi[0] * s, xi[1] * s, xi[2] * s];
 }
 /** the momentum-space box: the smallest populated n sets the scale (p ~ 1/n), and the 1s tail needs room */
-export function domainForP(nmin) { return Math.min(4, Math.max(0.35, 2.6 / nmin)); }
+export function domainForP(nmin) { return Math.min(6, Math.max(0.5, 4 / nmin)); }   // 4/n_min leaves ≈ 0.1% of ‖φ‖² outside (2.6/n_min left 1.2–3.4%, Round 11 C1)

@@ -1,0 +1,268 @@
+/* skin.css — the GLASS × NEUMORPHIC skin for λWAVES.
+ * Loads AFTER lab.css and only re-points its tokens and re-dresses its selectors; lab.css stays whole without it.
+ * Law 1: no frosted blur anywhere (the filter was measured at −26 fps over the live canvas). Glass = tint + hairline + sheen + shadow.
+ * Law 2: neumorphic light comes from the top-left; raised things cast dark to the bottom-right, wells the reverse.
+ * Law 3: the accent marks LIVE / ACTIVE only; resting chrome is achromatic. */
+
+/* ── 1. tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --rack-w: 300px;                                                /* narrower rack (was 372) — the layout still reads this one variable */
+  --glass-hue: 214; --glass-sat-tint: 16%; --glass-lum: 13%;     /* card tint hsl(214 16% 13%) = #191d23 */
+  --glass-opacity: .84;                                           /* opaque enough that the field cannot pull text under 4.5:1 */
+  --glass-border-color: hsl(0 0% 100% / .14);                     /* card edge hairline */
+  --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
+  --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */
+  --glass-shadow: inset 0 1px 0 hsl(0 0% 100% / .07), 0 5px 12px hsl(0 0% 0% / .30), 0 1px 3px hsl(0 0% 0% / .26);  /* card float — tight and quiet (Josh) */
+  --glass-well: hsl(0 0% 0% / .28); --glass-raise: hsl(0 0% 100% / .045); --glass-press: hsl(0 0% 100% / .12);
+  --glass-groove: hsl(0 0% 100% / .08); --glass-groove-hot: hsl(0 0% 100% / .14);
+  --neu-raise: -1px -1px 3px hsl(0 0% 100% / .05), 2px 2px 4px hsl(0 0% 0% / .42), inset 0 1px 0 hsl(0 0% 100% / .08);  /* a control that stands proud */
+  --neu-inset: inset 1px 1px 3px hsl(0 0% 0% / .48), inset -1px -1px 2px hsl(0 0% 100% / .04);                          /* a well cut into the card */
+  --neu-flat: 0 0 0 1px hsl(0 0% 100% / .05);                     /* a resting seat, neither up nor down */
+  --fg: #f2f5f7; --fg-soft: hsl(0 0% 88%); --dim: hsl(0 0% 72%); --ink-key: hsl(0 0% 74%); --ink-faint: hsl(0 0% 64%);  /* all ≥ 4.5:1 on the card, see skin-notes */
+  --ink-shadow: 0 1px 1px hsl(0 0% 0% / .5);
+  --hue-acc: 188; --sat-acc: 80%;                                 /* the derived hsl(...) tints follow the house cyan */
+  --acc: #78e1f0; --acc-ink: #071114;                             /* the house accent itself, verbatim */
+  --acc-soft: color-mix(in srgb, var(--acc) 16%, transparent); --acc-glow: 0 0 8px color-mix(in srgb, var(--acc) 55%, transparent);
+  --card-gap: 10px; --card-r: 14px;                               /* the air between floating cards, their corner */
+  --t-fast: .12s; --t-soft: .35s; --t-linger: .7s;                /* the value tooltip: in fast, out soft after a linger */
+}
+
+/* ── 2. stage and rack: the field is the whole room, the rack is air ─────── */
+#rack, #rackL { background: transparent; border-left: 0; padding: var(--card-gap); gap: var(--card-gap); opacity: 1; box-shadow: none; }  /* no continuous rack slab, no veil: cards float alone */
+@media (max-width: 860px) { #rack { border-top: 0; } }
+
+/* ── 3. the card (device) — glass tint, sheen, float; the header is the handle ── */
+.dev { position: relative; border-radius: var(--card-r); border-color: var(--glass-border-color);
+  background: transparent; box-shadow: var(--glass-shadow);                   /* the pane itself is CARD STYLE's, §14c — REFRACTIVE by default */
+  transition: box-shadow var(--t-soft), transform var(--t-soft), opacity var(--t-soft); }
+.dev-head { position: relative; height: 34px; padding-left: 18px; background: transparent; border-bottom-color: var(--glass-hairline); border-radius: var(--card-r) var(--card-r) 0 0;
+  cursor: grab; }                                                             /* the header is the drag handle */
+.dev-head::before { content: ""; position: absolute; left: 7px; top: 12px; width: 6px; height: 10px;   /* a six-dot grip, visible on hover */
+  background: radial-gradient(circle, hsl(0 0% 100% / .55) .9px, transparent 1.1px) 0 0 / 3px 3.4px; opacity: 0; transition: opacity var(--t-fast); }
+.dev:hover .dev-head::before, .dev.dragging .dev-head::before { opacity: 1; }
+.dev-head:active { cursor: grabbing; }
+.folded .dev-head { border-radius: var(--card-r); }
+.dev.dragging { cursor: grabbing; z-index: 5; transform: scale(1.012); opacity: .97;   /* lifted while carried */
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .1), 0 22px 44px hsl(0 0% 0% / .6), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
+.dev.dragging * { pointer-events: none; }                                     /* nothing inside catches the pointer mid-drag */
+.dev-eyebrow { opacity: 1; }                                                   /* the eyebrow IS the name now; the long title is the header's hover hint */
+.dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { opacity: 1; }
+.dev-title { color: var(--fg-soft); }                                         /* resting titles are achromatic … */
+.dev:hover .dev-title, .dev.tab-hot .dev-title, .dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { color: var(--acc); }         /* … the accent answers the pointer */
+.dev-stat { color: var(--ink-faint); }
+.dev-stat.live { color: var(--acc); }
+.dev-fold { color: var(--ink-faint); border-radius: var(--r-md); }
+.dev-fold:hover { color: var(--fg-soft); background: var(--glass-raise); }
+.dev.tab-hot { outline-color: color-mix(in srgb, var(--acc) 70%, transparent); }
+.dev-body { padding: var(--sp-3) var(--sp-3) var(--sp-4); }
+.grp { background: transparent; border-color: var(--glass-hairline); box-shadow: none; border-radius: 10px; }   /* groups match the card: a hairline, no well (Josh) */
+.grp-lbl { color: var(--ink-faint); }
+
+/* ── 4. the hint icon: `.note.hinted` collapses to ⓘ, hover / focus opens the panel ── */
+.note { font-size: var(--fs-small); color: var(--dim); }
+.note.hinted { position: absolute; top: 6px; right: 46px; width: 22px; height: 22px; margin: 0; padding: 0; z-index: 4;   /* sits in the header beside the fold button */
+  overflow: hidden; color: transparent; font-size: 0; line-height: 0; border-radius: 11px; cursor: help;
+  background: var(--glass-raise); box-shadow: var(--neu-raise); transition: width var(--t-fast), height var(--t-fast), color var(--t-fast); }
+.note.hinted::before { content: "i"; position: absolute; top: 0; right: 0; width: 22px; height: 22px; line-height: 22px; text-align: center;
+  font: italic var(--w-bold) 12px/22px Georgia, "Times New Roman", serif; color: var(--ink-key); pointer-events: none; }
+.note.hinted:hover::before, .note.hinted:focus-within::before, .note.hinted:focus::before { color: var(--acc); right: 38px; }  /* the glyph stays where it was */
+.note.hinted:hover, .note.hinted:focus-within, .note.hinted:focus { right: 8px; width: min(320px, calc(100% - 16px)); height: auto; max-height: 300px;
+  overflow: auto; padding: 30px 12px 12px; color: var(--fg-soft); font-size: var(--fs-small); line-height: 1.4; border-radius: 10px; cursor: default;
+  background: transparent; box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-border-color); outline: none; }   /* the pane is CARD STYLE's, §14c */
+.note.hinted b { color: var(--fg); }
+.note.hinted ~ .note.hinted { right: 74px; }                                  /* a second hint sits one seat left, a third one more */
+.note.hinted ~ .note.hinted ~ .note.hinted { right: 102px; }
+.note.hinted ~ .note.hinted:hover, .note.hinted ~ .note.hinted:focus-within { right: 8px; }
+.grp { position: relative; }
+.grp > .note.hinted { top: 2px; right: 4px; }                                 /* inside a group the icon sits on the group's top-right */
+.grp > .note.hinted:hover, .grp > .note.hinted:focus-within { right: 4px; padding-top: 28px; }
+.grp > .note.hinted:hover::before, .grp > .note.hinted:focus-within::before { right: 0; }   /* the group glyph holds its spot too */
+.folded .note.hinted { display: none; }                                       /* a folded card has no room for the panel (contain: paint would clip it) */
+
+/* ── 5. knob: a raised puck; the value appears only while you touch or hover it ── */
+.k { position: relative; }
+.k-lbl { color: var(--ink-faint); letter-spacing: var(--tr-wide); }
+.k-dial { border-color: transparent; box-shadow: var(--neu-raise);            /* the puck stands proud; the groove ring is the only texture */
+  background: repeating-conic-gradient(var(--glass-groove) 0deg 1.6deg, transparent 1.6deg 30deg),
+    radial-gradient(circle at 35% 30%, hsl(0 0% 100% / .07), transparent 62%), hsl(var(--glass-tint) / 1);
+  transition: box-shadow var(--t-fast); }
+.k:hover .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px hsl(0 0% 100% / .08); }
+.k.drag .k-dial, .k.active .k-dial, .k[data-live] .k-dial { border-color: transparent; box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent), var(--acc-glow); }
+.k-needle { background: var(--fg-soft); box-shadow: none; }
+.k.live .k-needle, .k.drag .k-needle, .k.active .k-needle { background: var(--acc); box-shadow: var(--acc-glow); }
+.k-val { opacity: 0; transform: translateY(2px); pointer-events: none;        /* the value is a tooltip: hidden at rest … */
+  padding: 1px 6px; border-radius: var(--r-pill); color: var(--fg); background: hsl(var(--glass-tint) / .96); box-shadow: var(--neu-flat), 0 3px 8px hsl(0 0% 0% / .45);
+  transition: opacity var(--t-soft) ease var(--t-linger), transform var(--t-soft) ease var(--t-linger); }  /* … and lingers after the hand leaves */
+.k:hover .k-val, .k.drag .k-val, .k.active .k-val, .k[data-live] .k-val, .k:focus-within .k-val { opacity: 1; transform: none;
+  transition: opacity var(--t-fast), transform var(--t-fast); }               /* in fast, no delay */
+.k.drag .k-val, .k.active .k-val { color: var(--acc); }
+.k.disabled { opacity: .3; }
+
+/* ── 6. switch, segmented select, trigger — flat seats that press in; the accent lights what is ON ── */
+.sw { border-color: transparent; background: hsl(0 0% 100% / .035); box-shadow: var(--neu-flat); color: var(--ink-key); transition: box-shadow var(--t-fast), background var(--t-fast); }
+.sw:hover { background: var(--glass-raise); }
+.sw:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
+.sw.on { background: var(--acc-soft); border-color: transparent; box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); color: var(--fg); }
+.sw-led { background: hsl(0 0% 100% / .12); box-shadow: inset 0 1px 1px hsl(0 0% 0% / .5); }
+.seg { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); }   /* the track is a well … */
+.seg-b { color: var(--ink-key); transition: background var(--t-fast), box-shadow var(--t-fast); }
+.seg-b:hover { background: var(--glass-raise); }
+.seg-b.on { background: hsl(var(--glass-tint) / 1); color: var(--acc); box-shadow: var(--neu-raise); }  /* … the chosen segment rises out of it */
+.trig { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--fg-soft); transition: box-shadow var(--t-fast), transform var(--t-fast); }
+.trig:hover { box-shadow: var(--neu-raise), 0 0 0 1px hsl(0 0% 100% / .08); }
+.trig:active { box-shadow: var(--neu-inset); background: var(--glass-well); transform: translateY(1px); }
+.trig.on { background: var(--acc-soft); border-color: transparent; box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); color: var(--acc); }
+select.sel { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); color: var(--fg-soft); }
+
+/* ── 7. fader: a well with a thin fill; the value appears on touch ─────── */
+.fd { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); border-radius: 8px; }
+.fd-fill { background: color-mix(in srgb, var(--acc) 16%, transparent); }
+.fd-edge { width: 2px; background: var(--fg-soft); box-shadow: 0 0 0 1px hsl(0 0% 0% / .4); }
+.fd.drag .fd-edge, .fd.active .fd-edge { background: var(--acc); box-shadow: var(--acc-glow); }
+.fd-lbl { color: var(--ink-faint); }
+.fd-val { opacity: 0; transition: opacity var(--t-soft) ease var(--t-linger); }   /* value only under the hand, lingers, fades */
+.fd:hover .fd-val, .fd.drag .fd-val, .fd.active .fd-val, .fd[data-live] .fd-val { opacity: 1; transition: opacity var(--t-fast); }
+.fd.drag .fd-val, .fd.active .fd-val { color: var(--acc); }
+
+/* ── 8. readouts: terse — a value, a whisper of a label, the sub-line on hover ── */
+.ro { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); border-radius: 8px; }
+.ro-lbl { color: var(--ink-faint); }
+.ro-val { color: var(--fg); }
+.ro-sub { max-height: 0; opacity: 0; overflow: hidden; transition: max-height var(--t-soft), opacity var(--t-soft); }   /* the caveat line is a hover reveal */
+.ro:hover .ro-sub, .dev:hover .ro.wide .ro-sub { max-height: 3em; opacity: 1; }
+.abar { background: hsl(0 0% 100% / .07); box-shadow: var(--neu-inset); height: 4px; }
+
+/* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
+.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker, .pal-ring { border-color: transparent; box-shadow: var(--neu-inset); }
+.sp-row, .orbit-row { border-color: transparent; background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
+.sp-row.sel { background: var(--acc-soft); box-shadow: var(--neu-flat), 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
+.sp-b, .pk-c, .keys-chip, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--ink-key); }
+.sp-b:active, .pk-c:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
+.sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
+.sp-b.solo.on { color: var(--acc2); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
+.dyn-row { background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
+.calc-row { border-bottom-color: var(--glass-hairline); }
+
+/* ── 10. chrome over the stage: the title, badges, sheet, keyboard hint ─── */
+.glass { border-color: var(--glass-border-color); background: transparent; box-shadow: var(--glass-shadow); }   /* the pane is CARD STYLE's, §14c */
+#title { padding: 4px 12px; gap: 8px; opacity: .8; }
+#title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
+#title:hover .ms { display: inline; }                                         /* (pointer-events are off in lab.css; the follow-up may enable them) */
+.badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--neu-flat), 0 4px 12px hsl(0 0% 0% / .4); color: var(--ink-key);
+  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge:hover { color: var(--fg-soft); }
+#sheet { border-radius: var(--card-r); }
+#hint { bottom: 44px; opacity: .7; }
+/* … but the MINI transport lives at bottom 60 px and is 34 px tall, so at 44 px the hint ran UNDER it: 520 × 20 px
+   of the first-run sentence sat behind the pill at every size (wave 44).  When the transport is docked into the
+   rack the stage floor is free again and the hint keeps its low seat. */
+#lab:has(#transport.mini) #hint { bottom: 100px; }
+#hint.gone { opacity: 0; }
+
+/* ── 11. the hide button (top-right) and the hidden state — the follow-up mounts `<button class="ui-hide">` ── */
+.ui-hide { position: absolute; right: var(--sp-4); top: var(--sp-4); z-index: var(--z-banner); width: 30px; height: 30px; border: 0; border-radius: 50%;
+  background: hsl(var(--glass-tint) / var(--glass-opacity)); box-shadow: var(--neu-raise); color: var(--ink-key); font-size: 12px;
+  display: inline-flex; align-items: center; justify-content: center; opacity: .55; transition: opacity var(--t-fast); }
+.ui-hide:hover, .ui-hide:focus-visible { opacity: 1; color: var(--fg); outline: none; }
+.ui-hide:active { box-shadow: var(--neu-inset); }
+body.ui-hidden .ui-hide { opacity: .25; }                                     /* stays as the way back; does not compete with the field */
+body.ui-hidden .ui-hide:hover { opacity: 1; }
+body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /* the badges are hidden then; the button keeps its corner */
+
+/* ── 12. the transport: `#transport.mini` — a 32-px subtitle bar, centred, the scrub a thin line ── */
+#transport { border-radius: var(--card-r); }
+#transport.mini { left: 50%; right: auto; bottom: 60px; transform: translateX(-50%); width: min(520px, calc(100% - 20px)); height: 32px; gap: 6px; padding: 0 8px;
+  border-radius: var(--r-pill); border-color: transparent; background: hsl(var(--glass-tint) / .72); box-shadow: var(--neu-flat), 0 6px 18px hsl(0 0% 0% / .4);
+  opacity: .82; transition: opacity var(--t-soft); }
+#transport.mini:hover, #transport.mini:focus-within { opacity: 1; }
+#transport.mini .tbtn { width: 24px; height: 24px; min-width: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 11px; }
+#transport.mini .tbtn:hover { color: var(--fg); background: var(--glass-raise); }
+#transport.mini .tbtn.play { width: 26px; color: var(--acc-ink); background: var(--acc); box-shadow: var(--acc-glow); }   /* the one lit seat */
+#transport.mini .fd { height: 24px; min-width: 60px; border: 0; background: transparent; box-shadow: none; border-radius: 0; cursor: ew-resize; overflow: visible; }  /* the value pill rides above the line */
+#transport.mini .fd::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: hsl(0 0% 100% / .14); }  /* the line */
+#transport.mini .fd-fill { top: 50%; bottom: auto; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--acc); opacity: .85; }
+#transport.mini .fd-edge { top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--fg); box-shadow: var(--neu-raise); }
+#transport.mini .fd-lbl { display: none; }                                    /* the bar's own place says "scrub" */
+#transport.mini .fd-val { right: 0; top: -14px; bottom: auto; font-size: var(--fs-micro); padding: 0 5px; border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .96); }
+#transport.mini .k { width: 26px; gap: 0; }
+#transport.mini .k-lbl { display: none; }                                     /* RATE reads by its position; its value comes on touch */
+#transport.mini .k-dial { width: 20px; height: 20px; }
+#transport.mini .k-needle { height: 8px; width: 1.2px; }
+#transport.mini .k-val { position: absolute; top: -22px; left: 50%; transform: translate(-50%, 2px); font-size: var(--fs-micro); }
+#transport.mini .k:hover .k-val, #transport.mini .k.drag .k-val, #transport.mini .k.active .k-val { transform: translate(-50%, 0); }
+#transport.mini .ro { min-width: 84px; padding: 0 4px; background: transparent; box-shadow: none; text-align: right; }
+#transport.mini .ro-lbl { display: none; }                                    /* "t a.u." is the subtitle's unit; the number is enough */
+#transport.mini .ro-val { font-size: var(--fs-small); color: var(--ink-key); }
+#transport.mini .ro-val.live { color: var(--acc); }
+#transport.mini .ro-sub { display: none; }
+
+/* ── 13. motion and touch courtesy ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) { .dev, .k-val, .fd-val, .ro-sub, #rack, #transport.mini, .note.hinted { transition: none; } }
+@media (hover: none) { .k-val, .fd-val { opacity: 1; transform: none; } .ro-sub { max-height: 3em; opacity: 1; } #rack { opacity: 1; } }  /* no hover → nothing is hidden behind it */
+
+
+/* ═══ appended by the shell (wave 23): the logo font, the LIGHT theme, the FROST trial ═══ */
+@font-face { font-family: 'Roboto'; src: url('./fonts/Roboto.ttf') format('truetype'); font-weight: 100 900; font-stretch: 75% 100%; font-display: swap; }   /* SIL OFL — fonts/Roboto-OFL.txt */
+@font-face { font-family: 'Spinwerad'; src: url('./fonts/Spinwerad.ttf') format('truetype'); font-display: swap; }   /* SIL OFL — fonts/Spinwerad-OFL.txt */
+#title .word { font-family: 'Spinwerad', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
+#title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
+#title .mark { margin-left: .05em; }
+#title .ms { margin-left: 10px; }
+body[data-theme="light"] #title .word { color: #000; }
+/* the logo sits on the stage directly: no glass, no background, one word */
+#title { pointer-events: auto; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
+
+/* LIGHT: light cards, dark ink; the accent darkens so it still marks state on a light surface.  The stage
+   underneath is set by the THEME control (mat.bg) and the cloud is drawn as ink (INVERT), so the whole layer adapts. */
+body[data-theme="light"] {
+  --glass-hue: 214; --glass-sat-tint: 22%; --glass-lum: 93%; --glass-tint: 214 22% 93%; --glass-opacity: .86;
+  --fg: hsl(214 30% 10%); --fg-soft: hsl(214 20% 18%); --dim: hsl(214 12% 36%); --ink-key: hsl(214 12% 30%); --ink-faint: hsl(214 10% 42%);
+  --glass-border-color: hsl(214 30% 40% / .22); --glass-hairline: hsl(214 30% 30% / .16);
+  --glass-sheen: linear-gradient(hsl(0 0% 100% / .55), hsl(0 0% 100% / .55));   /* the same flat white wash it always was — but as an IMAGE, so it is a legal background LAYER (§14c) */
+  --glass-well: hsl(214 30% 40% / .10); --glass-raise: hsl(0 0% 100% / .55); --glass-press: hsl(214 30% 40% / .16);
+  --glass-shadow: inset 0 1px 0 hsl(0 0% 100% / .8), 0 5px 12px hsl(214 40% 20% / .16), 0 1px 3px hsl(214 40% 20% / .12);
+  --neu-raise: -1px -1px 3px hsl(0 0% 100% / .9), 2px 2px 4px hsl(214 30% 40% / .22), inset 0 1px 0 hsl(0 0% 100% / .9);
+  --neu-inset: inset 1px 1px 3px hsl(214 30% 40% / .24), inset -1px -1px 2px hsl(0 0% 100% / .8);
+  --acc: hsl(188 70% 34%); --acc-ink: hsl(0 0% 100%);
+}
+body[data-theme="light"] #stage { background: #eef1f6; }
+body[data-theme="light"] #hint, body[data-theme="light"] .badge { color: var(--dim); }
+
+/* ── 14c. CARD STYLE (wave 47, Josh: "I love that refractive glass effect") ────────────────────────────────────
+   Three declarations dressed the glass — .dev (§3), the open hint panel (§4) and .glass (§10) — and all three were
+   written `background: var(--glass-sheen), hsl(var(--glass-tint) / …)`.  That PARSES, but it only COMPUTES where
+   --glass-sheen is an IMAGE: in the LIGHT theme (the shipped default) the token was a COLOUR, and a colour is legal
+   only as the LAST background layer — so the declaration was invalid at computed-value time, fell back to `initial`,
+   and every card, popover and chrome pane rendered fully TRANSPARENT.  What you saw through them was the backdrop
+   alone (FROST's blur, or the bare field).  That accident is the look Josh loves, so it is the DEFAULT and it is now
+   WRITTEN DOWN instead of inherited from a mistake: REFRACTIVE says `transparent` on purpose, in both themes.
+   TINTED is the rule the author meant, and it now computes in both themes because the light --glass-sheen above is a
+   (flat) gradient like the dark one.  Measured: TINTED light card = tint 233,237,241 under the .55 white wash =
+   245,247,249 — exactly the numbers §14b predicted from the tokens and could not find on the screen.
+   This block sits BEFORE the FROST block on purpose: FROST still overrides the pane with its own whisper of white,
+   and #transport.mini keeps its own .72 pill (an id outranks these).  The notebook, the menus, the graph tip and the
+   neumorphic pucks never carried the sheen layer, so they were never broken and they do not answer this switch. */
+body[data-card="refractive"] .dev, body[data-card="refractive"] .glass,
+body[data-card="refractive"] .note.hinted:hover, body[data-card="refractive"] .note.hinted:focus-within, body[data-card="refractive"] .note.hinted:focus
+  { background: transparent; }                                                /* the blur alone */
+body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
+  { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--glass-opacity)); }    /* the blur under a tinted pane */
+body[data-card="tinted"] .note.hinted:hover, body[data-card="tinted"] .note.hinted:focus-within, body[data-card="tinted"] .note.hinted:focus
+  { background: var(--glass-sheen), hsl(var(--glass-tint) / .97); }           /* the hint panel is near-opaque when tinted, as it was written */
+
+/* FROST: Josh's trial — a 20 px pale-blue frosted blur behind every card.  Off by default: it costs ≈ 25 fps over
+   the live field (measured).  When on, the tint thins so the blur is what you see. */
+body.frost .dev, body.frost .glass, body.frost #transport { -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%); background: hsl(0 0% 100% / .10); }   /* FROST is a blur, not a colour (Josh); a whisper of white keeps the ink legible */
+body.frost[data-theme="dark"] .dev, body.frost[data-theme="dark"] .glass { background: hsl(0 0% 0% / .10); }
+
+/* LIGHT · THE VIVID SHELL SET (wave 46).  --n1…--n6 were chosen on the dark ground: measured against the
+   light card they run 1.25 : 1 … 2.19 : 1, far under the 3 : 1 a 2 px line needs.  Same six hues, chroma up
+   (+12 saturation), lightness walked DOWN until the WCAG contrast ratio clears 3 : 1 against BOTH grounds the
+   app actually renders — the light card, MEASURED in the page at 236,239,243 (the tokens would say 245,247,249;
+   see the .dev background note below), and the well every plot sits in, 220,225,232.  Computed, not eyeballed:
+   n1 3.45/3.03 · n2 3.50/3.07 · n3 3.42/3.00 · n4 3.43/3.01 · n5 3.47/3.05 · n6 3.47/3.05  (card / well).
+   The dark set stays exactly as it was; kit.js N_RGB_LIGHT carries the same six to the canvases. */
+body[data-theme="light"] {
+  --n1: hsl(40 100% 34%); --n2: hsl(188 92% 32.5%); --n3: hsl(300 82% 48%);
+  --n4: hsl(24 100% 42.5%); --n5: hsl(120 67% 34.5%); --n6: hsl(258 90% 67.5%);
+}

@@ -104,7 +104,7 @@ const rq = () => qnormalize([rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1, rnd() 
   const img = { data: new Uint8ClampedArray(24 * 24 * 4), width: 24, height: 24 };
   paintSlice(s1, img, { gain: 1e6, knee: 0.6 });
   let mx = 0; for (let k = 0; k < img.data.length; k += 4) mx = Math.max(mx, img.data[k], img.data[k + 1], img.data[k + 2]);
-  judge('R4 the domain colouring has a bounded ceiling: a gain of a million still clips at 255, it does not overflow', mx <= 255 && mx > 100, mx);
+  /* (a former judge here asserted a Uint8ClampedArray never exceeds 255 — vacuous; removed, Round 11 C10) */
   const rep = planeReport(IDENTITY);
   judge('R4 the identity plane reports its two sphere points and is on the holomorphic sheet', rep.holomorphic && rep.text.includes('n₊'), rep.text);
 }

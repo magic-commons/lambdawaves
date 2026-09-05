@@ -7,7 +7,7 @@
  * This is an OBSERVER product and is labelled a DESIGN CHOICE — ψ is never touched.
  */
 import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID } from './palette.js';
-import { el, sw, trig, knob, readout } from './kit.js';
+import { el, sw, trig, knob, readout, themeInk, onThemeChange } from './kit.js';
 
 export function createPaletteEditor(host, api) {
   let stops = PRESET_BY_ID.get('lambda').stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() }));
@@ -32,7 +32,7 @@ export function createPaletteEditor(host, api) {
   ui.color.addEventListener('input', () => { if (stops[sel]) { stops[sel].rgb = hexToRgb(ui.color.value); push(); } });
   r1.appendChild(trig({ label: 'ADD', title: 'add a stop opposite the selected one', onFire: () => { const at = ((stops[sel] ? stops[sel].at : 0) + 0.5) % 1; stops.push({ at, rgb: hexToRgb(ui.color.value) }); stops = normalize(stops); sel = stops.findIndex((s) => Math.abs(s.at - at) < 1e-9); push(); } }).root);
   r1.appendChild(trig({ label: 'REMOVE', onFire: () => { if (stops.length > 2) { stops.splice(sel, 1); sel = 0; push(); } } }).root);
-  r1.appendChild(trig({ label: 'ROTATE +60°', title: 'turn the whole cycle around the complex plane', onFire: () => { for (const s of stops) s.at = (s.at + 1 / 6) % 1; stops = normalize(stops); push(); } }).root);
+  r1.appendChild(knob({ label: 'ROTATE', min: 0, max: 2 * Math.PI, value: 0, wrap: true, fmt: () => 'turn', onDelta: (d) => { const f = d / (2 * Math.PI); for (const s of stops) s.at = ((s.at + f) % 1 + 1) % 1; stops = normalize(stops); push(); } }).root);   // a wheel: turn the whole cycle around the complex plane
   r1.appendChild(trig({ label: 'REVERSE', title: 'run the cycle the other way round: the sign of the phase winding flips', onFire: () => { for (const s of stops) s.at = (1 - s.at) % 1; stops = normalize(stops); push(); } }).root);
   el('div', 'note', host).innerHTML = '<b>DESIGN CHOICE.</b> The strip is the phase circle: left edge arg ψ = −π, centre 0, right edge +π, wrapping. Click to add a stop, drag to move, double-click to remove. Colours are blended in <b>OKLab</b>, not RGB — a straight RGB blend between two saturated hues passes through a muddy grey and paints a false dark band at a phase where nothing is happening. Watch the <b>seam</b>: a cycle that does not close at ±π draws a nodal line that is not there.';
 
@@ -45,6 +45,7 @@ export function createPaletteEditor(host, api) {
     paint();
     api.repaint();
   }
+  onThemeChange(() => paint());          /* the strip's tick ink follows the theme (wave 46) */
   function paint() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = strip.clientWidth, H = strip.clientHeight;
@@ -58,7 +59,7 @@ export function createPaletteEditor(host, api) {
       g.fillRect(x, 0, 1, H - 12);
     }
     g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle'; g.textAlign = 'center';
-    g.fillStyle = 'rgba(255,255,255,0.45)';
+    g.fillStyle = themeInk(g).ink(0.85);          /* a canvas has no theme: white on white on the light card */
     for (const [f, lab] of [[0, '−π'], [0.25, '−π/2'], [0.5, '0'], [0.75, '+π/2'], [1, '+π']]) g.fillText(lab, Math.min(W - 8, Math.max(8, f * W)), H - 5);
     stops.forEach((s, i) => {
       const x = s.at * W;

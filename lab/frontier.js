@@ -9,7 +9,8 @@
  *   with Borel pole β² = -1/54 (optimal truncation at k* ≈ 1/(54β²)); the Rydberg ladder as a Poisson sum of
  *   Airy envelopes; the deaf comb (b | 6 ⇔ m³ ≡ m mod b, Fermat/Korselt); the Parseval floor.
  * Thread B — the two rotors.  A shell n is V_j ⊗ V_j, j = (n-1)/2; the Clebsch matrix M of a shell state has
- *   singular values that are complete SO(4)-orbit invariants; ⟨J±⟩ = ⟨L ± K⟩/2 live on two spheres; the
+ *   singular values invariant under SO(4), but not complete for n ≥ 3; ⟨J±⟩ = ⟨L ± K⟩/2 live in spin balls;
+ *   both reach radius j only for a product of spin-coherent states. Rank one alone is insufficient for n ≥ 3. The
  *   eccentricity e = |⟨K⟩|/n; K_z = -(2/3n) z on the shell (Pauli); e^{-iθK_z} is an SO(4) rotation, e^{iαL²} is not.
  * Thread C — the vortex lines.  On the coaxial circle (r,θ): ψ = Σ_m g_m e^{imφ}, so the nodal set is the set of
  *   unimodular roots of P(w) = Σ g_m w^{m-m_min}; degree bound, dominance lemma; three stretched modes reconnect
@@ -340,6 +341,28 @@ export function rotorExpectations(M) {
   const L = [Jp[0] + Jm[0], Jp[1] + Jm[1], Jp[2] + Jm[2]], K = [Jp[0] - Jm[0], Jp[1] - Jm[1], Jp[2] - Jm[2]];
   const absK = Math.hypot(...K), absL = Math.hypot(...L), absJp = Math.hypot(...Jp), absJm = Math.hypot(...Jm);
   return { Jp, Jm, L, K, absL, absK, e: absK / n, j, coherence: j > 0 ? Math.min(absJp, absJm) / j : 1, z: -1.5 * n * K[2] };
+}
+/**
+ * SO(4) coherent = a product of two maximally polarised spin-j states.
+ * For a nonzero pure shell this is equivalent to |⟨J+⟩| = |⟨J−⟩| = j:
+ * saturation forces each reduced state onto the unique highest-weight eigenvector along its expectation.
+ * A rank-one Clebsch matrix only asserts separability. At n=3, |1,0⟩⊗|1,0⟩ has rank one and zero polarisation.
+ *
+ * WAVE 49 — THE CRITERION IS ONE SCALAR, AND IT IS THE ONE THE CARD CAN PRINT (ledger MATH-MOLECULAR-PULSES §2.1 A2).
+ * |⟨L⟩|² + |⟨K⟩|² = |⟨J₊⟩+⟨J₋⟩|² + |⟨J₊⟩−⟨J₋⟩|² = 2(|⟨J₊⟩|² + |⟨J₋⟩|²), and each |⟨J±⟩| ≤ j, so with (n−1)² = 4j²
+ *     |⟨L⟩|² + |⟨K⟩|² = (n−1)²   ⟺   |⟨J₊⟩| = |⟨J₋⟩| = j   ⟺   the shell is SO(4) coherent,
+ * an SO(4)-invariant polynomial in the coefficients that saturates ONLY at a coherent state (each term is bounded
+ * separately, so the sum reaches its ceiling only when both do).  `casimir` is that scalar, `casimirMax` its ceiling,
+ * and `coherent` is now the saturation of the scalar to `tolerance` ABSOLUTE — not the rank-one test the card used to
+ * print, which called −0.5774·3s + 0.8165·3d₀ (Schmidt (1, 0, 0), ⟨L⟩ = ⟨K⟩ = 0) "a Kepler ellipse" with e = 0.
+ * `separable` stays the rank-one test: rank one ⇒ separable rotors, and NOTHING more for n ≥ 3.
+ */
+export function shellCharacter(M, tolerance = 1e-9) {
+  const S = schmidt(M), R = rotorExpectations(M), populated = M.norm2 > 0;
+  const casimir = R.absL * R.absL + R.absK * R.absK, casimirMax = (M.n - 1) * (M.n - 1);
+  return { ...R, spectrum: S.values, populated, casimir, casimirMax, casimirDeficit: casimirMax - casimir,
+    separable: populated && S.values[0] >= 1 - tolerance,
+    coherent: populated && Math.abs(casimirMax - casimir) <= tolerance };
 }
 /**
  * e^{-iθ K_z} on the anchor coefficients (re, im), shell by shell and m-block by m-block (K_z conserves n and m):

@@ -7,7 +7,7 @@
 import { lagrangian, action, actionAngle, angularMoments, rotorEntropy, dipoleZ, dipoleLines, radialObservables } from './dynamics.js';
 import { shellMatrix, schmidt } from './frontier.js';
 import { BASIS } from './hydrogen.js';
-import { el, knob, sw, trig, readout, group } from './kit.js';
+import { el, knob, sw, trig, readout, group, nRGB, themeInk, graphHover } from './kit.js';
 
 export function createDynamics(host, api) {
   const ui = {};
@@ -18,6 +18,10 @@ export function createDynamics(host, api) {
   ui.S = readout({ label: 'S = ∫₀ᵗ L dt′', value: '—', sub: 'closed form' });
   for (const k of ['L', 'T', 'V', 'S']) r1.appendChild(ui[k].root);
   const plot = el('div', 'dyn-c', host); const pcv = el('canvas', '', plot);
+  /* WAVE 46 — the two curves used to name themselves in their own colour at the top-left of the plot
+     ("L(t)" and "S(t)", right where L crosses on a fresh register).  The curves ARE the objects. */
+  let hovers = [], rect = null, lastT = 0;
+  const hover = graphHover(pcv, { repaint: () => paint(lastT), plot: () => rect });
   el('div', 'note', host).innerHTML = 'The Schrödinger field Lagrangian restricted to this basis IS the shadow\'s L = Σp<sub>a</sub>q̇<sub>a</sub> − H<sub>C</sub>: uncoupled oscillators of mass 1/E<sub>a</sub> and stiffness E<sub>a</sub> — <b>both negative</b> for a bound state, ratio ω² = E<sub>a</sub>². Euler–Lagrange gives q̈ = −E²q, which is the Schrödinger equation. Over a period ⟨T⟩ = ⟨V⟩ = ½⟨H⟩ and ⟨L⟩ = 0 (the virial theorem), so <b>S(t) is bounded and periodic</b>.';
 
   const gAA = group(host, 'ACTION–ANGLE  ·  J_a = (1/2π)∮p dq = |c_a|² = the POPULATION  ·  θ_a = arg c_a');
@@ -72,7 +76,7 @@ export function createDynamics(host, api) {
     if (reg.version !== lastVersion) {
       lastVersion = reg.version;
       const lines = dipoleLines(reg.re0, reg.im0, ids);
-      ui.lines.set(lines.length ? `${lines.length} · ω = ${lines[0].omega.toFixed(4)}` : 'none (single l)', lines.length ? '' : 'warn');
+      ui.lines.set(lines.length ? `${lines.length} · ω = ${lines[0].omega.toFixed(4)}` : 'none: no Δl = ±1 pair with ΔE ≠ 0 (a degenerate pair is a static dipole, not a line)', lines.length ? '' : 'warn');
       ui.lines.setSub(lines.length ? lines.slice(0, 2).map((l) => `${l.label}  T = ${l.period.toFixed(2)} a.u.  d = ${l.amplitude.toFixed(3)} a₀  P = ${l.power.toExponential(2)}`).join(' · ') : 'z couples l → l ± 1: nothing here does');
       rebuildAA(reg, c, ids);
     }
@@ -80,7 +84,7 @@ export function createDynamics(host, api) {
     const st = api.particles.state;
     ui.pstat.set(api.particles.on ? `${st.alive} / ${st.count} alive` : 'off');
     ui.pstat.setSub(api.particles.on ? `${st.stalled} left the domain or stalled at a node · max |v| = ${st.maxSpeed.toFixed(2)} a.u.` : 'seeded from |ψ|² at the current logical time');
-    paint(t, playing);
+    lastT = t; paint(t, playing);
   }
   function rebuildAA(reg, c, ids) {
     aaRows.innerHTML = '';
@@ -105,15 +109,20 @@ export function createDynamics(host, api) {
     if (!(hi > lo)) { hi = lo + 1e-9; }
     const pad = (hi - lo) * 0.15; lo -= pad; hi += pad;
     const X = (u) => 26 + (u - t0) / Math.max(1e-12, t1 - t0) * (W - 34), Y = (v) => H - 12 - (v - lo) / (hi - lo) * (H - 22);
-    g.strokeStyle = 'rgba(255,255,255,0.12)'; g.beginPath(); g.moveTo(26, Y(0)); g.lineTo(W - 8, Y(0)); g.stroke();
-    g.fillStyle = 'rgba(255,255,255,0.35)'; g.textAlign = 'right'; g.fillText('0', 24, Y(0));
-    for (const [k, col] of [[1, 'rgba(255,226,170,0.95)'], [2, 'rgba(120,225,240,0.95)']]) {
+    const T = themeInk(g);
+    rect = { x0: 26, y0: 10, x1: W - 8, y1: H - 12 }; hovers = [];
+    g.strokeStyle = T.ink(0.22); g.beginPath(); g.moveTo(26, Y(0)); g.lineTo(W - 8, Y(0)); g.stroke();
+    g.fillStyle = T.ink(0.6); g.textAlign = 'right'; g.fillText('0', 24, Y(0));           // the one tick, in the gutter
+    for (const [k, name, law] of [[1, 'L(t)', 'the Lagrangian T − V'], [2, 'S(t)', 'the action ∫₀ᵗ L dt′']]) {
+      const c = nRGB(k), col = `rgba(${c[0]},${c[1]},${c[2]},0.95)`, pts = [];
       g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath();
-      hist.forEach(([u, ...v], i) => { const x = X(u), y = Y(v[k - 1]); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
+      hist.forEach(([u, ...v], i) => { const x = X(u), y = Y(v[k - 1]); pts.push(x, y); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
       g.stroke();
+      const now = hist[hist.length - 1][k];
+      hovers.push({ kind: 'curve', key: name, points: pts, lw: 1.2, colour: col,
+        info: `${name}  ·  ${law}  ·  now ${now.toFixed(6)}  ·  over the window [${lo.toFixed(4)}, ${hi.toFixed(4)}]` });
     }
-    g.textAlign = 'left'; g.fillStyle = 'rgba(255,226,170,0.95)'; g.fillText('L(t)', 30, 8);
-    g.fillStyle = 'rgba(120,225,240,0.95)'; g.fillText('S(t)', 56, 8);
+    hover.set(hovers, rect);
   }
   window.addEventListener('resize', () => paint(0));
   return { update, clearHistory() { hist = []; }, get ui() { return ui; } };

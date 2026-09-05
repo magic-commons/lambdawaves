@@ -46,7 +46,7 @@ let seed = 20260903; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>
   const p2 = peakLaw(0.02), p5 = peakLaw(0.05);
   judge('A α*(0.02): integer series −3β+54β³−… (optimally truncated, error 2e-10) = numerical maximiser to 1e-7 (the √ε floor of locating a maximum)', Math.abs(p2.alphaStar - p2.alphaStarNum) < 1e-7 && p2.alphaStarError < 1e-9, { series: p2.alphaStar, num: p2.alphaStarNum, terms: p2.alphaStarTerms });
   judge('A |I|max(0.02): rational series 1−3β²+(279/2)β⁴−… = numerical maximum to 1e-9', Math.abs(p2.height - p2.heightNum) < 1e-9, { series: p2.height, num: p2.heightNum });
-  judge('A α*(0.05): the series is Gevrey-1 — its optimal truncation error is ~2e-4 and the numerical value sits inside it', Math.abs(p5.alphaStar - p5.alphaStarNum) < 3 * p5.alphaStarError + 1e-6 && p5.alphaStarError < 5e-4, { series: p5.alphaStar, num: p5.alphaStarNum, err: p5.alphaStarError });
+  judge('A α*(0.05): the series is Gevrey-1 — its optimal truncation error is ~2e-4 and the numerical value sits inside it', Math.abs(p5.alphaStar - p5.alphaStarNum) < 2e-4 && p5.alphaStarError < 5e-4, { series: p5.alphaStar, num: p5.alphaStarNum, err: p5.alphaStarError });
   judge('A the first lobe: at β = 3 the maximiser is α* = −1.89744 (Round 3 probe, 2e-3); at β = 300 the height tends to √(2π)·max Ai/(3β)^{1/3} = 1.3427/(3β)^{1/3} within 1%', Math.abs(peakLaw(3).alphaStarNum + 1.89744) < 2e-3 && Math.abs(peakLaw(300).heightNum * Math.cbrt(900) / 1.3427 - 1) < 0.01, { a3: peakLaw(3).alphaStarNum, h300: peakLaw(300).heightNum * Math.cbrt(900) });
 }
 /* the clocks and the Poisson sum of Airy envelopes against the exact ladder sum */

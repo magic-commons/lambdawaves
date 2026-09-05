@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-05",
+  "node": "v22.22.1",
+  "command": "bash test.sh node",
+  "exitCode": 0,
+  "legacySuites": 29,
+  "legacyNamedChecks": 467,
+  "newSuites": [
+    "math-audit.test.mjs",
+    "modrive.test.mjs"
+  ],
+  "allSuitesPassed": 31,
+  "baseline": "1 particle-trail failure; did not reproduce in final run; no fix claimed",
+  "browser": "Unavailable: browser runtime discovery returned no browsers; no browser regression run",
+  "plot": "PNG visually inspected",
+  "workingTree": "Pre-existing and concurrent unrelated changes preserved; no commit/deploy",
+  "implementationFilesTouchedByThisAudit": [
+    {
+      "path": "lab/frontier.js",
+      "sha256": "cddc2aafbdaa2b5b162b2b2b2b7c676ec7d050ab8a5d74527873666ad327f74b"
+    },
+    {
+      "path": "lab/orbit.js",
+      "sha256": "2331c8fd5ddcca67f751f88ab603622573f4f2d27932dcc0e3800821d5f0cb7f"
+    },
+    {
+      "path": "lab/index.html",
+      "sha256": "489bea80c97f21cdd4130bab32a1ee9512771844b7f02e4b25f7763076ff870a"
+    },
+    {
+      "path": "lab/twocentre.js",
+      "sha256": "ee6db36dfc49bc7104c7ab8d90bdbc0da890ef89ff7abd9cf991064e9f9bbfb2"
+    },
+    {
+      "path": "lab/mo.js",
+      "sha256": "61d93a54791ac67c99a29b1abcc272018fb544516b7cb438df7cf4426bb97cdb"
+    },
+    {
+      "path": "lab/moview.js",
+      "sha256": "dbb68e928c191fcfaf6f1ea91ec85933e8fab1405268d9860bcac2830c07093f"
+    },
+    {
+      "path": "lab/modrive.js",
+      "sha256": "89b99a6568d1ae94117c18c122ea8978f91de7bfdbcae368d1b65502a784222d"
+    },
+    {
+      "path": "tests/math-audit.test.mjs",
+      "sha256": "aa33d3f66b0e2b1a578873ef3da35f670d3de518cef279c84378fa218fb56cb5"
+    },
+    {
+      "path": "tests/modrive.test.mjs",
+      "sha256": "7a7471ca63c1f1a89a70fee73189027095d8ef156d032b431790509974d1eb08"
+    },
+    {
+      "path": "test.sh",
+      "sha256": "4f9a3f99fa4645f5848ad08cbef481cda9db68093ed95c741f2f26e02d513e06"
+    }
+  ]
+}

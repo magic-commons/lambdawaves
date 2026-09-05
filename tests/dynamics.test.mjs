@@ -19,6 +19,18 @@ const PI = Math.PI, S2 = Math.SQRT1_2;
 let seed = 20260904; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (let i = 1; i < n; i++) s += f(a + i * h) * ((i % 2) ? 4 : 2); return s * h / 3; }
 
+/* ── wave 42, the reviewer's finding 5 — FIRST, so the caches are cold: the uniform Simpson with 12000·⌈n_max²/n_min²⌉
+   panels cost a 16-label hydrogen state 1.4 s on its first frame (dipoleZ 418 ms + radialObservables 1009 ms) ── */
+{
+  const re = new Float64Array(91), im = new Float64Array(91);
+  for (const [n, l, m] of [[1, 0, 0], [2, 0, 0], [2, 1, 0], [2, 1, 1], [3, 1, 0], [3, 2, -2], [4, 1, -1], [4, 2, 2], [4, 3, 3], [5, 4, -4], [6, 0, 0], [6, 5, 5], [6, 1, 0], [5, 0, 0], [6, 2, 0], [5, 1, 0]]) re[stateOf(n, l, m).index] = 0.25;
+  const ids = BASIS.filter((s) => re[s.index]).map((s) => s.index);
+  const t0 = performance.now(); const dz = dipoleZ(re, im, ids); const t1 = performance.now(); const ro = radialObservables(re, im, ids, -0.1); const t2 = performance.now();
+  judge('W42-5 THE FIRST FRAME OF A 16-LABEL STATE: dipoleZ + radialObservables cold in ' + (t2 - t0).toFixed(1) + ' ms (< 100; it was 1427 ms) — the radial integrals are Gauss–Legendre on doubling panels now, 24 points per panel, exponentially convergent (the 1s–4p and 1s–6p elements are judged against mpmath in tests/radiation.test.mjs)',
+    t2 - t0 < 100 && isFinite(dz.value) && isFinite(ro.r) && isFinite(ro.rinv) && Math.abs(dz.value + 6.99358203) < 1e-6 && Math.abs(ro.r - 21.8338696) < 1e-6,
+    { dipoleMs: +(t1 - t0).toFixed(1), radialMs: +(t2 - t1).toFixed(1), z: dz.value, r: ro.r, rinv: ro.rinv });
+}
+
 /* ── L, T, V, H and the virial ────────────────────────────────────────────── */
 {
   const R = new Register(); R.load(PRESETS.find((p) => p.id === '1s+2s'));
@@ -169,5 +181,17 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
   }
 }
 
+/* ── wave 42, the reviewer's finding 10: the φ-gradient was dropped on the axis (sin θ < 1e-9 → 0/0 → 0) ── */
+{
+  const mk = (n, l, m) => { const re = new Float64Array(91), im = new Float64Array(91), a = stateOf(n, l, m).index; re[a] = 1; return { re, im, ids: [a] }; };
+  const p1 = mk(2, 1, 1), on = psiAndGrad(p1.re, p1.im, p1.ids, 0, 0, 1), off = psiAndGrad(p1.re, p1.im, p1.ids, 1e-8, 0, 1);   // 1e-8 off: the second derivative moves g by ~2e-10 there
+  const exact = -Math.exp(-0.5) / (8 * Math.sqrt(PI));                                     // ∂_y[−(x+iy)e^{−r/2}/(8√π)] at (0,0,1) = −i e^{−1/2}/(8√π)
+  const d1 = mk(3, 2, 1), on3 = psiAndGrad(d1.re, d1.im, d1.ids, 0, 0, -2), off3 = psiAndGrad(d1.re, d1.im, d1.ids, 0, 1e-8, -2);
+  const d2 = mk(3, 2, 2), on22 = psiAndGrad(d2.re, d2.im, d2.ids, 0, 0, 1.5);
+  const dev = (a, b) => Math.max(Math.abs(a.gx.re - b.gx.re), Math.abs(a.gx.im - b.gx.im), Math.abs(a.gy.re - b.gy.re), Math.abs(a.gy.im - b.gy.im), Math.abs(a.gz.re - b.gz.re), Math.abs(a.gz.im - b.gz.im));
+  judge('W42-10 ∇ψ ON THE AXIS: 2p₊1 at (0, 0, 1) has g_y = −0.04277i — the closed form −e^{−1/2}/(8√π) to 1e-12 and the off-axis limit at x = 1e-8 to 1e-9 (it read g_y = 0); 3d₊1 at (0, 0, −2) matches its off-axis limit to 1e-9, and 3d₊2 (sin²θ: no gradient on the axis) is finite and 0 there — (∂_φψ)/sin θ is carried with sin^{|m|−1}θ, as electrostatics.js\'s thetaFuncs do',
+    Math.abs(on.gy.im - exact) < 1e-12 && Math.abs(on.gy.re) < 1e-15 && dev(on, off) < 1e-9 && dev(on3, off3) < 1e-9 && [on22.gx, on22.gy, on22.gz].every((g) => isFinite(g.re) && isFinite(g.im) && Math.abs(g.re) < 1e-15 && Math.abs(g.im) < 1e-15),
+    { gy_on: on.gy, exact, gy_off: off.gy, dev2p: dev(on, off), dev3d1: dev(on3, off3) });
+}
 console.log((FAILED ? 'RED' : 'GREEN') + ' dynamics.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

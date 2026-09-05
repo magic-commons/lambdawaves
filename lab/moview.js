@@ -1,0 +1,368 @@
+/* moview.js — the MOLECULE window's GENERAL BASIS block (W-MO): the same two protons, but the electron may live in a
+ * basis bigger than one 1s per nucleus, and the nuclei may be let go on the force that basis actually exerts.
+ *
+ * THE MATHS is lab/mo.js and nothing here re-derives it.  createMO({kind, nMax, lambda}) puts one one-centre set on
+ * both nuclei — {1s} (lcao1s), the Coulomb Sturmians n ≤ 4 at a common scale λ (sturmian), or the register's own σ
+ * functions n ≤ 6 at the fixed hydrogenic exponents ζ = 1/n (hydrogenic, 42 functions) — solves H C = S C E in the
+ * gerade/ungerade blocks, and reports for ANY coefficient vector
+ *     F_elec (the electron density's pull on nucleus B),  F_nuc = Z_A Z_B/R²,  F_HF = F_elec + F_nuc,
+ *     pulay = 2Re⟨∂_Rψ|(H−E)ψ⟩  with  F_HF − pulay = F_exact = −dE/dR,   bound = 2‖∂_Rψ‖‖(H−E)ψ‖ ≥ |pulay|.
+ * createDynamics drives classical nuclei on R with velocity Verlet, electrons Born–Oppenheimer or Ehrenfest, and
+ * compares drift with the integrated BO Pulay contribution; this is not a bound on all numerical errors.
+ *
+ * THE HONEST FINDING this block exists to show (tests/mo.test.mjs D1).  On the frozen 1s LCAO the Hellmann–Feynman
+ * force is REPULSIVE at every R (F_HF → ½/R²: a frozen 1s density cannot polarise), so under it the nuclei simply
+ * run away — there is no vibration to see.  Only −dE/dR binds that basis, and the FORCE segment therefore ships on
+ * −dE/dR for the 1s LCAO and on HELLMANN–FEYNMAN for the two bases that are nearly translation-closed, with the
+ * sentence printed beside the force line either way.  The Pulay term and its bound are printed at every R.
+ *
+ * WHAT COSTS WHAT (measured, node; the browser is the same order).  groundEnergy: 0.2 / 3 / 11 ms for the three
+ * bases; force() with the central differences 17 / 26 / 60 ms; one dynamics step 5 / 10 / 26 ms.  So the E(R) curve
+ * (40 points) and the equilibrium (golden section, 40 iterations, then the 5-point curvature) are computed ONCE per
+ * basis by a job queue that gives the frame loop the wall back every 24 ms — LW.mo.whenReady() resolves when it
+ * drains — and the run takes ONE step per frame, or one per OTHER frame when a step measures over 15 ms (which the
+ * 42-function register always does): the budget is 30 ms of dynamics in any one frame, and the readout says which
+ * cadence is running.  The stage is not asked to draw the bigger bases at all — the card's canvas is the view there,
+ * and the caption says so.
+ *
+ * STATUS: EXACT integrals (mo.js / twocentre.js quadrature, certified in tests/mo.test.mjs), VARIATIONAL energies
+ * (an upper bound at every R), NUMERICAL eigen-solver and integrator, CLASSICAL nuclei.  KNOWN numbers re-read here:
+ * Eg(2) = −0.5537715 (1s LCAO), −0.6026243 with R_e = 1.99720 and D_e = 2.7926 eV (Sturmian n ≤ 4, λ = 1.7611,
+ * above the exact −0.602634214 of Bates–Ledsham–Stewart 1953), R_e = 2.35227 and D_e = 2.1246 eV (the register).
+ */
+import { createMO, createDynamics } from './mo.js';
+import { el, seg, knob, fader, trig, readout, group, graphHover, fitText } from './kit.js';
+
+/* THE CANVAS HAS NO THEME (wave 44).  These rules were written rgba(255,255,255,…) — right on the dark theme and
+   WHITE ON WHITE on the light one, where the dissociation line, its "H + H⁺" label, the exact Bates dots, the R
+   marker and the caption were all ghosts.  --dim is rated ≥ 4.5:1 on the card in both themes. */
+function readRGB(g, name, fallback) {
+  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
+  const keep = g.fillStyle;
+  g.fillStyle = fallback; if (v) { try { g.fillStyle = v; } catch (e) { /* an unparseable value leaves the fallback */ } }
+  const t = String(g.fillStyle); g.fillStyle = keep;
+  let m = /^#([0-9a-f]{6})$/i.exec(t);
+  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
+  m = /^#([0-9a-f]{3})$/i.exec(t);
+  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
+  m = /rgba?\(([^)]+)\)/i.exec(t);
+  if (m) { const p = m[1].split(',').map((x) => parseFloat(x)); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
+  return [255, 255, 255];
+}
+
+
+const KINDS = {
+  lcao1s: { label: '1s LCAO', nMax: 1, title: 'one 1s on each proton — molecule.js\'s frozen-orbital basis, 2 functions: E(2) = −0.5537715' },
+  sturmian: { label: 'STURMIAN n ≤ 4', nMax: 4, title: 'the Coulomb Sturmians n ≤ 4 at one common scale λ on both nuclei — 20 σ functions: E(2) = −0.6026243, above the exact −0.602634214' },
+  hydrogenic: { label: 'REGISTER n ≤ 6', nMax: 6, title: 'the register\'s own σ functions n ≤ 6 at the FIXED exponents ζ = 1/n on both nuclei — 42 functions: R_e = 2.35227, D_e = 2.1246 eV' },
+};
+const RUNAWAY = 'frozen 1s: the HF force is repulsive at every R — the exact force or a bigger basis binds';
+const CURVE_N = 40, CURVE_LO = 0.8, CURVE_HI = 8, CHUNK = 5, SLICE_MS = 24, BUDGET_MS = 30;
+const defaultForce = (k) => (k === 'lcao1s' ? 'exact' : 'hf');
+const cssv = (name, fallback) => { const v = getComputedStyle(document.body).getPropertyValue(name).trim(); return v || fallback; };
+/** the exact 1sσg total energies of Bates, Ledsham & Stewart 1953 — drawn as dots, printed when R sits on one */
+const EXACT = [[1, -0.45179], [2, -0.60263], [3, -0.57756], [4, -0.54608]];
+
+export function createMOPanel(host, api = {}) {
+  let kind = 'lcao1s', lambda = 1.7611, R = 2;
+  let mode = 'hold', nuclear = defaultForce('lcao1s'), R0 = 2.8, v0 = 0, dt = 5;
+  let mo = null, curve = null, eq = null, f = null, E0 = 0;
+  let dyn = null, running = false, Rmin = 0, Rmax = 0, stepMs = 0, frames = 0;
+
+  /* ── the job queue: heavy maths in ≤ 24 ms slices, one pending job per tag, the last request winning ────────── */
+  const jobs = []; let pumping = false, waiters = [];
+  function enqueue(tag, fn) {
+    const i = jobs.findIndex((j) => j.tag === tag); if (i >= 0) jobs.splice(i, 1);
+    jobs.push({ tag, fn });
+    if (!pumping) { pumping = true; setTimeout(pump, 0); }
+  }
+  function drain() { pumping = false; refresh(); paint(); const w = waiters; waiters = []; for (const r of w) r(); }
+  function pump() {
+    const t0 = performance.now();
+    while (jobs.length && performance.now() - t0 < SLICE_MS) { const j = jobs.shift(); try { j.fn(); } catch (e) { console.error('mo job ' + j.tag, e); } }
+    if (jobs.length) { setTimeout(pump, 0); return; }
+    drain();
+  }
+  const whenReady = () => (jobs.length || pumping ? new Promise((r) => waiters.push(r)) : Promise.resolve());
+
+  /* ── the basis: one createMO, one cached curve, one equilibrium, one force ──────────────────────────────────── */
+  function rebuild() {
+    jobs.length = 0;
+    mo = createMO({ kind, nMax: KINDS[kind].nMax, lambda });
+    eq = null; f = null; resetRun();
+    curve = { R: new Float64Array(CURVE_N), E: new Float64Array(CURVE_N), done: 0, n: CURVE_N, kind, lambda };
+    for (let i = 0; i < CURVE_N; i++) curve.R[i] = CURVE_LO + (CURVE_HI - CURVE_LO) * i / (CURVE_N - 1);
+    for (let s = 0; s < CURVE_N; s += CHUNK) enqueue('curve:' + s, () => { const c = curve; for (let i = s; i < Math.min(CURVE_N, s + CHUNK); i++) { c.E[i] = mo.groundEnergy(c.R[i]); c.done++; } paint(); });
+    enqueue('eq', () => { eq = mo.equilibrium({ lo: 1.2, hi: 4, iters: 40 }); });
+    enqueue('force', solveForce);
+    refresh();
+  }
+  /** the force line at the current R, for the ground eigenvector of the chosen basis (F_exact by central differences) */
+  function solveForce() {
+    if (!mo) return;
+    const sol = mo.solve(R); E0 = sol.E0;
+    f = mo.force(R, mo.vector(sol, 0));
+  }
+
+  /* ── the run ────────────────────────────────────────────────────────────────────────────────────────────────── */
+  function resetRun() { dyn = null; running = false; Rmin = Rmax = R0; stepMs = 0; }
+  function ensureDyn() {
+    if (!dyn) {
+      dyn = createDynamics(mo, { R0, v0, dt, electron: mode === 'ehrenfest' ? 'ehrenfest' : 'bo', nuclearForce: nuclear, track: false });
+      Rmin = Rmax = dyn.R;
+    }
+    return dyn;
+  }
+  /** one step, timed: Rmin/Rmax are kept here so the stepper needs no history */
+  function stepOnce(n = 1) {
+    const d = ensureDyn(), t0 = performance.now();
+    for (let k = 0; k < n; k++) { d.step(1); if (d.R < Rmin) Rmin = d.R; if (d.R > Rmax) Rmax = d.R; }
+    stepMs = stepMs ? stepMs * 0.7 + (performance.now() - t0) / n * 0.3 : (performance.now() - t0) / n;
+    return d;
+  }
+  /** ONE step per frame, or one per OTHER frame once a step measures over half a 30 ms budget (always the register) */
+  const every = () => (kind === 'hydrogenic' || stepMs > BUDGET_MS / 2 ? 2 : 1);
+
+  /* ── the controls ───────────────────────────────────────────────────────────────────────────────────────────── */
+  const box = group(host, 'GENERAL BASIS · CLASSICAL NUCLEI · THE PULAY BOUND');
+  const rB = el('div', 'row tight', box);
+  const basisSeg = seg({ label: 'BASIS', value: 'lcao1s',
+    options: Object.keys(KINDS).map((k) => ({ id: k, label: KINDS[k].label, title: KINDS[k].title })),
+    onChange: (v) => setBasis(v) });
+  rB.appendChild(basisSeg.root);
+  const lamKnob = knob({ label: 'λ  (Sturmian)', min: 0.5, max: 3, value: 1.7611, fmt: (v) => v.toFixed(4),
+    onInput: (v) => { if (kind !== 'sturmian') return; lambda = v; jobs.length = 0; enqueue('rebuild', rebuild); } });   // a drag drops the stale queue: the last λ wins
+  lamKnob.root.title = 'the one common exponent of the Coulomb Sturmians: 1.7611 is the value the FIELDS AND MOLECULES round settled on for H₂⁺ (drag with SHIFT for fine)';
+  rB.appendChild(lamKnob.root); lamKnob.setDisabled(true);
+
+  const cv = el('canvas', 'mol-c', box);
+  const g = cv.getContext('2d');
+
+  const rr = el('div', 'row tight', box);
+  const roE = readout({ label: 'E_total(R)  (hartree)', value: '—', sub: '' });
+  const roQ = readout({ label: 'R_e · D_e · ω · T', value: '—', sub: '' });
+  /* `wide` (wave 44): the force line is 333 px of text in a 230 px box, and .ro-val is nowrap with NO ellipsis — so
+     the card printed "F_elec −0.133906  +  Z_AZ_B/R² 0.2500" and hard-clipped the "= F_HF" that is the whole claim.
+     .ro.wide lets it wrap, which is wave 41's own lesson (ii) applied to the readout instead of the caption. */
+  const roF = readout({ label: 'HELLMANN–FEYNMAN  F on nucleus B  (hartree/a₀)', value: '—', cls: 'wide', sub: '' });
+  rr.appendChild(roE.root); rr.appendChild(roQ.root); rr.appendChild(roF.root);
+
+  const rN = el('div', 'row tight', box);
+  const nucSeg = seg({ label: 'NUCLEI', value: 'hold', options: [
+    { id: 'hold', label: 'HOLD', title: 'the nuclei stand still at R' },
+    { id: 'bo', label: 'BO', title: 'Born–Oppenheimer: the electron is the ground eigenvector at every R' },
+    { id: 'ehrenfest', label: 'EHRENFEST*', title: 'Approximate: the moving-basis connection D = S′/2 + ½diag(P, −P) IS carried now (wave 49) and nothing is renormalised, but the basis rides rigidly on the nuclei with no translation factors, so the one-centre coupling ⟨χ|∂_z|χ⟩ survives at large R. Excess BO energy is a diagnostic, not an error certificate.' }],
+    onChange: (v) => { mode = v; resetRun(); refresh(); paint(); } });
+  rN.appendChild(nucSeg.root);
+  const forceSeg = seg({ label: 'FORCE', value: nuclear === 'exact' ? 'exact' : 'hf', options: [
+    { id: 'exact', label: '−dE/dR', title: 'the force conjugate to R, F_rel − pulay: energy-conserving with BO electrons' },
+    { id: 'hf', label: 'HELLMANN–FEYNMAN', title: 'the ELECTROSTATIC force F_rel on the nucleus — ' + RUNAWAY }],
+    onChange: (v) => { nuclear = v; resetRun(); refresh(); paint(); } });
+  rN.appendChild(forceSeg.root);
+  const dtKnob = knob({ label: 'dt  (a.u.)', min: 1, max: 10, value: 5, step: 0.5, fmt: (v) => v.toFixed(1),
+    onInput: (v) => { dt = v; resetRun(); refresh(); } });
+  rN.appendChild(dtKnob.root);
+  rN.appendChild(trig({ label: 'RUN', title: 'let the nuclei go, one dynamics step per frame while the lab clock plays', onFire: () => run() }).root);
+  rN.appendChild(trig({ label: 'HOLD', title: 'stop stepping — the trajectory stays where it is', onFire: () => hold() }).root);
+  rN.appendChild(trig({ label: 'RESET', title: 'throw the trajectory away and start again at R₀, v₀', onFire: () => resetTraj() }).root);
+
+  const rF = el('div', 'row tight', box);
+  const r0Fd = fader({ label: 'R₀  a₀', min: 1, max: 6, value: 2.8, fmt: (v) => v.toFixed(3), onInput: (v) => { R0 = v; resetRun(); refresh(); paint(); } });
+  const v0Fd = fader({ label: 'v₀  a.u.', min: -0.02, max: 0.02, value: 0, fmt: (v) => v.toFixed(4), onInput: (v) => { v0 = v; resetRun(); refresh(); paint(); } });
+  rF.appendChild(r0Fd.root); rF.appendChild(v0Fd.root);
+
+  const rr2 = el('div', 'row tight', box);
+  const roR = readout({ label: 'NUCLEI  R(t) · v', value: '—', sub: '' });
+  const roD = readout({ label: 'E_total · DRIFT · ∫bound', value: '—', sub: '' });
+  rr2.appendChild(roR.root); rr2.appendChild(roD.root);
+
+  el('div', 'note', box).innerHTML = '<b>The same molecule in a basis you choose, and the nuclei let go.</b> One one-centre set sits on <i>both</i> protons: the frozen <b>1s LCAO</b>, the <b>Coulomb Sturmians</b> n ≤ 4 at one common scale λ, or the <b>register\'s own</b> σ functions n ≤ 6 at the fixed exponents ζ = 1/n. All two-centre integrals are <b>EXACT</b> (prolate quadrature, 1e-13); the energies are <b>VARIATIONAL</b> — the Sturmian gives −0.60262 at R = 2 against the exact −0.602634214, R_e = 1.9972 and D_e = 2.793 eV, and the register\'s fixed exponents can only reach R_e = 2.3523, D_e = 2.125 eV. <b>The force line is the whole point.</b> Hellmann–Feynman says the force on a nucleus is pure electrostatics, F_elec + Z_AZ_B/R²; in a finite basis that is <i>not</i> −dE/dR, and the difference is Pulay\'s term, 2Re⟨∂_Rψ|(H−E)ψ⟩, because the basis rides on the nuclei. Cauchy–Schwarz bounds it by 2‖∂_Rψ‖‖(H−E)ψ‖ <b>from the state alone</b> — so a run driven by the electrostatic force carries its own error bar: |drift| ≤ ∫bound·|Ṙ|dt, printed live. On the <b>1s LCAO the electrostatic force is repulsive at every R</b> (F_HF → ½/R²: a frozen 1s cannot polarise) and the nuclei run away — the honest failure, which is why that basis ships on −dE/dR. The bigger bases are nearly translation-closed and vibrate under the electrostatic force itself (the Sturmian\'s period is 605.8 a.u. against 593.2 from the curvature). <b>EHRENFEST</b> propagates the coefficient vector in the instantaneous basis and <i>neglects</i> the non-adiabatic coupling of the moving functions: the gap from Born–Oppenheimer is reported, not hidden.';
+
+  /* ── the readouts ───────────────────────────────────────────────────────────────────────────────────────────── */
+  const exactAt = (r) => { const p = EXACT.find((q) => Math.abs(q[0] - r) < 5e-4); return p ? ` · exact here ${p[1].toFixed(5)}` : ''; };
+  const note = () => (kind === 'lcao1s' ? RUNAWAY : '');
+  function refresh() {
+    if (!mo) return;
+    const busy = jobs.length > 0;
+    roE.set(E0 ? E0.toFixed(5) : '—', E0 && E0 < -0.5 ? 'ok' : E0 ? 'warn' : '');
+    roE.setSub(`${KINDS[kind].label}${kind === 'sturmian' ? ` λ = ${lambda.toFixed(4)}` : ''} · ${mo.n} functions on two centres · R = ${R.toFixed(3)} · ${E0 ? E0.toFixed(4) : '—'} hartree is a VARIATIONAL bound from above${exactAt(R)}`);
+    if (eq) {
+      roQ.set(`R_e ${eq.Re.toFixed(4)} a₀ · D_e ${eq.De_eV.toFixed(3)} eV`, eq.De_eV > 0 ? 'ok' : 'warn');
+      roQ.setSub(`ω = ${eq.omega.toFixed(6)} a.u. · T = 2π/ω = ${eq.period.toFixed(1)} a.u. · from the 5-point curvature at R_e (golden section on this basis's own curve)`);
+    } else { roQ.set(busy ? 'computing…' : '—', ''); roQ.setSub(`golden section on E(R), then the curvature at R_e — ${curve ? curve.done : 0}/${CURVE_N} curve points`); }
+    if (f) {
+      roF.set(`F_elec ${f.F_elec.toFixed(6)}  +  Z_AZ_B/R² ${f.F_nuc.toFixed(6)}  =  F_HF ${f.F_HF.toFixed(6)}`, Math.abs(f.pulay) <= f.bound ? 'ok' : 'warn');
+      roF.setSub(`Pulay ${f.pulay.toFixed(4)} (${f.pulay.toFixed(8)}, |·| ≤ bound ${f.bound.toFixed(6)}) · F_exact = −dE/dR = ${f.F_exact.toFixed(6)} = F_HF − Pulay${note() ? ' · ' + note() : ''}`);
+    } else { roF.set(busy ? 'computing…' : '—', ''); roF.setSub('F_elec + Z_AZ_B/R² = F_HF, and F_HF − Pulay = −dE/dR — in a finite basis they are different numbers'); }
+    refreshRun();
+  }
+  function refreshRun() {
+    const d = dyn;
+    if (!d) {
+      roR.set(`R₀ ${R0.toFixed(3)} a₀ · v₀ ${v0 >= 0 ? '+' : ''}${v0.toFixed(4)}`, mode === 'hold' ? '' : 'ok');
+      roR.setSub(mode === 'hold' ? 'NUCLEI HOLD — choose BO or EHRENFEST, then RUN (the run advances with the lab clock)' : `${mode === 'bo' ? 'Born–Oppenheimer' : 'Ehrenfest'} electrons · ${nuclear === 'exact' ? '−dE/dR' : 'Hellmann–Feynman'} · dt = ${dt.toFixed(1)} a.u. · nothing stepped yet`);
+      roD.set('—', ''); roD.setSub(`μ = 918.0764 electron masses · velocity Verlet · the bound is 2‖∂_Rψ‖‖(H−E)ψ‖ at every step`);
+      return;
+    }
+    const e = d.energy, drift = d.drift, ib = d.integratedBound, ok = Math.abs(drift) <= ib;
+    roR.set(`R ${d.R.toFixed(4)} a₀ · v ${d.v >= 0 ? '+' : ''}${d.v.toFixed(6)}`, running ? 'live' : 'ok');
+    roR.setSub(`t = ${d.t.toFixed(0)} a.u. · ${d.steps} steps · ${mode === 'bo' ? 'BO' : 'Ehrenfest'} · ${nuclear === 'exact' ? '−dE/dR' : 'Hellmann–Feynman'} · dt = ${dt.toFixed(1)} · R ∈ [${Rmin.toFixed(3)}, ${Rmax.toFixed(3)}] · ${stepMs.toFixed(1)} ms/step, one step per ${every() === 1 ? 'frame' : 'OTHER frame'} (budget ${BUDGET_MS} ms)${note() && nuclear === 'hf' ? ' · ' + note() : ''}`);
+    /* WAVE 49 — THE INEQUALITY MAY SHOW GREEN AGAIN, AND ONLY WHERE IT IS PROVED.  A BO run's |drift| ≤ ∫bound·|Ṙ|dt
+       is a statement the stepper verifies at EVERY step (tests/mo.test.mjs D1, D3: max ratio 0.83), so a BO run that
+       satisfies it, with no boundary clamp, is entitled to say so — the audit removed every green and left a run that
+       met its own bound looking like a run that had failed.  An EHRENFEST run is never green: the bound is a BO
+       statement and does not cover the electronic dynamics, whatever the connection is doing. */
+    roD.set(`${e.total.toFixed(6)} · ${drift >= 0 ? '+' : ''}${drift.toExponential(2)} · ${ib.toExponential(2)}`, mode === 'bo' ? (!d.clamps && ok ? 'ok' : 'warn') : 'warn');
+    roD.setSub(`${ok ? 'drift ≤ ∫bound' : 'drift > ∫bound'} · comparison only. ${mode === 'ehrenfest' ? `The moving-basis connection is CARRIED (D = S′/2 + ½diag(P, −P)) and the S-norm is reported, not repaired (‖c‖²_S − 1 = ${(d.sNorm - 1).toExponential(2)}); the basis still rides rigidly, so excess BO energy ${d.adiabaticGap.toExponential(2)} is a diagnostic, not an error estimate.` : nuclear === 'hf' ? 'The integral estimates the continuous BO Pulay contribution; timestep and quadrature errors are additional.' : 'The BO energy-gradient force conserves continuous energy; test the numerical drift by reducing dt.'}${d.clamps ? ' A boundary clamp has occurred.' : ''}`);
+  }
+
+  /* ── the canvas: E(R) of the chosen basis, the marker at R, the run's total energy as a dotted level ─────────── */
+  const captionText = () => (kind === 'lcao1s'
+    ? 'E(R) · 1s LCAO · dots = EXACT (Bates 1953)'
+    : `E(R) · ${KINDS[kind].label} — shown on the card; the stage draws the 1s LCAO only`);
+  const captionShown = () => (document.body.classList.contains('no-captions') ? '' : captionText());
+  /** greedy word wrap — a rack card is narrow, and this caption is the one that must be read whole (the font must
+      already be set on g) */
+  function wrapCaption(text, maxW) {
+    if (!text) return [];
+    const out = []; let line = '';
+    for (const word of text.split(' ')) {
+      const next = line ? line + ' ' + word : word;
+      if (line && g.measureText(next).width > maxW) { out.push(line); line = word; } else line = next;
+    }
+    if (line) out.push(line);
+    return out;
+  }
+  /* WAVE 46 — "R_e 1.997" used to float in the plot beside its own dashed line and "R a₀" sat inside the
+     top-right corner of the frame.  The curve, the exact points and the three verticals answer for themselves. */
+  let rect = null;
+  const hover = graphHover(cv, { repaint: () => paint(), plot: () => rect });
+  function paint() {
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (W < 32 || H < 32 || !curve) return;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const L = 40, Rt = W - 10, Tp = 12, dis = mo ? mo.dissociation : -0.5;
+    g.font = '8px ui-monospace, monospace';
+    const caps = wrapCaption(captionShown(), Rt - L);                            // the card is narrow: the caption wraps at its own · marks
+    const Bt = H - 8 - caps.length * 10;
+    let lo = dis, hiRef = dis;
+    for (let i = 0; i < curve.done; i++) if (curve.E[i] < lo) lo = curve.E[i];
+    for (const [, E] of EXACT) { if (E < lo) lo = E; if (E > hiRef) hiRef = E; }  // the exact points share the frame: the bound's cost is the picture
+    const well = Math.max(0.02, dis - lo);                                       // the depth on the card is the depth this basis finds
+    const Emin = lo - 0.15 * well, Emax = Math.max(dis + 0.35 * well, hiRef + 0.08 * well);
+    const x = (r) => L + (r - CURVE_LO) / (CURVE_HI - CURVE_LO) * (Rt - L);
+    const y = (E) => Bt - (Math.min(Emax, Math.max(Emin, E)) - Emin) / (Emax - Emin) * (Bt - Tp);
+    const acc = cssv('--acc', '#78e1f0'), acc2 = cssv('--acc2', '#d97ce8');
+    const D = readRGB(g, '--dim', '#b8b8b8'), ink = (al) => `rgba(${D[0]},${D[1]},${D[2]},${al})`;
+    g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
+    g.strokeStyle = ink(0.35); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(L, y(dis)); g.lineTo(Rt, y(dis)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = ink(0.8); g.textAlign = 'right'; g.fillText('H + H⁺', L - 3, y(dis));   // the gutter's one end value
+    rect = { x0: L, y0: Tp, x1: Rt, y1: Bt };
+    const hovers = [];
+    if (curve.done > 1) {                                                        // the curve, as far as the queue has got
+      const pts = [];
+      g.strokeStyle = acc; g.lineWidth = 2; g.beginPath();
+      for (let i = 0; i < curve.done; i++) { const p = [x(curve.R[i]), y(curve.E[i])]; pts.push(p[0], p[1]); if (i === 0) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]); }
+      g.stroke();
+      hovers.push({ kind: 'curve', key: 'E0', points: pts, lw: 2, colour: acc,
+        info: `E₀(R)  ·  the variational curve, ${curve.done} of ${curve.R.length} points  ·  dissociation ${dis.toFixed(4)} Eh` });
+    }
+    for (const [r, E] of EXACT) { g.fillStyle = ink(0.95); g.beginPath(); g.arc(x(r), y(E), 3, 0, 2 * Math.PI); g.fill();
+      hovers.push({ kind: 'dot', key: 'x' + r, x: x(r), y: y(E), r: 3, colour: ink(1), info: `EXACT  ·  R = ${r} a₀  ·  E = ${E.toFixed(4)} Eh` }); }
+    if (eq) {                                                                    // the minimum this basis actually has
+      g.strokeStyle = ink(0.4); g.setLineDash([1, 3]); g.beginPath(); g.moveTo(x(eq.Re), y(eq.E)); g.lineTo(x(eq.Re), Bt); g.stroke(); g.setLineDash([]);
+      hovers.push({ kind: 'line', key: 'Re', points: [x(eq.Re), y(eq.E), x(eq.Re), Bt], lw: 1, colour: ink(1),
+        info: `R_e = ${eq.Re.toFixed(3)} a₀  ·  E = ${eq.E.toFixed(4)} Eh  ·  the minimum THIS basis has` });
+    }
+    if (dyn) {                                                                   // the trajectory's conserved total, dotted
+      g.strokeStyle = acc2; g.setLineDash([2, 4]); g.lineWidth = 1.2; g.beginPath(); g.moveTo(L, y(dyn.energy.total)); g.lineTo(Rt, y(dyn.energy.total)); g.stroke(); g.setLineDash([]);
+      hovers.push({ kind: 'line', key: 'tot', points: [L, y(dyn.energy.total), Rt, y(dyn.energy.total)], lw: 1.2, colour: acc2,
+        info: `the trajectory's conserved total  ·  E = ${dyn.energy.total.toFixed(5)} Eh` });
+    }
+    const Rnow = dyn ? dyn.R : R, Enow = dyn ? dyn.force.E0 : E0;
+    g.strokeStyle = ink(0.6); g.lineWidth = 1; g.beginPath(); g.moveTo(x(Rnow), Tp); g.lineTo(x(Rnow), Bt); g.stroke();
+    if (Enow) { g.fillStyle = dyn ? acc2 : acc; g.beginPath(); g.arc(x(Rnow), y(Enow), 3.5, 0, 2 * Math.PI); g.fill();
+      hovers.push({ kind: 'dot', key: 'now', x: x(Rnow), y: y(Enow), r: 3.5, colour: dyn ? acc2 : acc,
+        info: `now  ·  R = ${Rnow.toFixed(3)} a₀  ·  E₀ = ${Enow.toFixed(5)} Eh` }); }
+    g.font = '8px ui-monospace, monospace'; g.fillStyle = ink(0.8); g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    caps.forEach((line, i) => g.fillText(line, L, H - 4 - (caps.length - 1 - i) * 10));   // the law, under the plot
+    g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle'; g.fillStyle = ink(0.8);
+    fitText(g, 'R a₀', Rt, 6, { x0: L, y0: 0, x1: Rt, y1: Tp - 2 }, 'right');            // the x axis name, ABOVE the frame
+    hover.set(hovers, rect);
+  }
+
+  /* ── the API ────────────────────────────────────────────────────────────────────────────────────────────────── */
+  function setBasis(k) {
+    if (!KINDS[k] || k === kind) return false;
+    kind = k; basisSeg.set(k); lamKnob.setDisabled(kind !== 'sturmian');
+    nuclear = defaultForce(kind); forceSeg.set(nuclear);
+    rebuild(); return true;
+  }
+  function setLambda(v) { lambda = Math.max(0.5, Math.min(3, +v || 1.7611)); lamKnob.set(lambda); if (kind === 'sturmian') { rebuild(); return true; } return false; }
+  function setR(v, sync) { R = v; if (sync) { solveForce(); refresh(); paint(); } else enqueue('force', () => { solveForce(); paint(); }); }
+  function setDynamics(m) { if (!['hold', 'bo', 'ehrenfest'].includes(m)) return false; mode = m; nucSeg.set(m); resetRun(); refresh(); paint(); return true; }
+  function setForce(v) { const id = (v === 'hf' || v === 'exact') ? v : null; if (!id) return false; nuclear = id; forceSeg.set(id); resetRun(); refresh(); paint(); return true; }
+  function run() { if (mode === 'hold') { refreshRun(); return false; } ensureDyn(); running = true; refreshRun(); if (api.repaint) api.repaint(false); return true; }
+  function hold() { running = false; refreshRun(); return true; }
+  function resetTraj() { resetRun(); refresh(); paint(); return true; }
+  function step(n = 1) { if (mode === 'hold') setDynamics('bo'); stepOnce(Math.max(1, n | 0)); refreshRun(); paint(); return dyn.R; }
+  /** the digest table: the force identity in full, the curve's own numbers, and the run if there is one */
+  function table() {
+    if (!mo) return '';
+    const rows = [`THE GENERAL BASIS (W-MO)  ·  ${KINDS[kind].label}  ·  ${mo.n} functions on two centres`,
+      `basis\t${kind}${kind === 'sturmian' ? '  λ = ' + lambda.toFixed(4) : ''}`,
+      `R\t${R.toFixed(4)}`, `E_total(R)\t${E0.toFixed(8)}`];
+    if (eq) rows.push(`R_e\t${eq.Re.toFixed(5)}`, `D_e\t${eq.De.toFixed(8)} hartree = ${eq.De_eV.toFixed(4)} eV`, `ω\t${eq.omega.toFixed(8)}`, `period 2π/ω\t${eq.period.toFixed(3)} a.u.`);
+    if (f) rows.push('', 'THE FORCE ON NUCLEUS B  (hartree/a₀, positive = apart)',
+      `F_elec  (the density's pull)\t${f.F_elec.toFixed(8)}`, `F_nuc = Z_AZ_B/R²\t${f.F_nuc.toFixed(8)}`, `F_HF = F_elec + F_nuc\t${f.F_HF.toFixed(8)}`,
+      `F_exact = −dE/dR\t${f.F_exact.toFixed(8)}`, `Pulay 2⟨∂_Rψ|(H−E)ψ⟩\t${f.pulay.toFixed(8)}  (${f.pulay.toFixed(4)})`,
+      `bound 2‖∂_Rψ‖‖(H−E)ψ‖\t${f.bound.toFixed(8)}`, `‖∂_Rψ‖\t${f.dpsiNorm.toFixed(8)}`, `‖(H−E)ψ‖\t${f.residual.toFixed(8)}`,
+      `F_HF − Pulay − F_exact\t${(f.F_HF - f.pulay - f.F_exact).toExponential(3)}`);
+    if (note()) rows.push(`note\t${note()}`);
+    if (dyn) rows.push('', `THE RUN  ·  ${mode === 'bo' ? 'Born–Oppenheimer' : 'Ehrenfest'} electrons  ·  ${nuclear === 'exact' ? '−dE/dR' : 'Hellmann–Feynman'}  ·  dt = ${dt.toFixed(1)}`,
+      `R₀ · v₀\t${R0.toFixed(4)}\t${v0.toFixed(6)}`, `t\t${dyn.t.toFixed(2)}`, `steps\t${dyn.steps}`, `R(t)\t${dyn.R.toFixed(6)}`, `v(t)\t${dyn.v.toFixed(8)}`,
+      `R range\t${Rmin.toFixed(5)}\t${Rmax.toFixed(5)}`, `E_total\t${dyn.energy.total.toFixed(8)}`, `drift\t${dyn.drift.toExponential(4)}`,
+      `∫bound\t${dyn.integratedBound.toExponential(4)}`, `comparison (not a certificate)\t${Math.abs(dyn.drift) <= dyn.integratedBound ? 'drift ≤ ∫bound' : 'drift > ∫bound'}`,
+      `scope\tcontinuous BO Pulay contribution only; excludes numerical error, omitted basis transport and clamps`);
+    return rows.join('\n');
+  }
+  function state() {
+    const d = dyn;
+    return { kind, lambda, R, n: mo ? mo.n : 0, E0, label: KINDS[kind].label,
+      Re: eq ? eq.Re : null, De_eV: eq ? eq.De_eV : null, omega: eq ? eq.omega : null, period: eq ? eq.period : null,
+      electron: mode, force: nuclear, running, busy: jobs.length > 0 || pumping, note: note(), caption: captionShown(),
+      stepMs, every: every(), curveDone: curve ? curve.done : 0,
+      t: d ? d.t : 0, Rt: d ? d.R : R, v: d ? d.v : v0, steps: d ? d.steps : 0, Rmin: d ? Rmin : null, Rmax: d ? Rmax : null,
+      energy: d ? d.energy : null, drift: d ? d.drift : 0, integratedBound: d ? d.integratedBound : 0,
+      adiabaticGap: d ? d.adiabaticGap : 0, normDrift: d ? d.normDrift : 0,
+      badge: d ? (Math.abs(d.drift) <= d.integratedBound ? 'drift ≤ ∫bound' : 'drift > ∫bound') : '' };
+  }
+  /** the run advances with the lab clock: one step per frame, or one per other frame when a step is dear */
+  function update(t, playing) {
+    if (!running || mode === 'hold' || !mo) return;
+    if (!playing) return;
+    frames++; if (frames % every()) return;
+    stepOnce(1); refreshRun(); paint();
+  }
+  window.addEventListener('resize', () => paint());
+  rebuild();
+  return {
+    update, refresh, paint, table, whenReady,
+    setR, get R() { return R; }, get kind() { return kind; },
+    save: () => ({ kind, lambda, R, electron: mode, force: nuclear }),
+    load(o) {
+      if (!o) return false;
+      if (o.kind && KINDS[o.kind] && o.kind !== kind) { kind = o.kind; basisSeg.set(kind); lamKnob.setDisabled(kind !== 'sturmian'); }
+      if (o.lambda !== undefined) { lambda = Math.max(0.5, Math.min(3, +o.lambda || 1.7611)); lamKnob.set(lambda); }
+      if (o.R !== undefined) R = +o.R;
+      if (o.electron && ['hold', 'bo', 'ehrenfest'].includes(o.electron)) { mode = o.electron; nucSeg.set(mode); }
+      if (o.force === 'hf' || o.force === 'exact') { nuclear = o.force; forceSeg.set(nuclear); }
+      rebuild(); return true;
+    },
+    api: { setBasis, setLambda, setR: (v) => setR(v, true), setDynamics, setForce, run, hold, reset: resetTraj, step,
+      force: () => { if (!f) { solveForce(); refresh(); } return f; }, state, curve: () => curve, note, whenReady,
+      setR0: (v) => { R0 = v; r0Fd.set(v); resetRun(); refresh(); paint(); }, setV0: (v) => { v0 = v; v0Fd.set(v); resetRun(); refresh(); paint(); },
+      setDt: (v) => { dt = v; dtKnob.set(v); resetRun(); refresh(); paint(); }, digest: table, get mo() { return mo; } },
+  };
+}

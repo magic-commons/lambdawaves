@@ -77,7 +77,7 @@ const N = 91;
   /* Ehrenfest with a deficit: ⟨p_z⟩ = k · Σ_bound f = 0.546 k, because the register holds only the bound part of the TRK sum */
   const re2 = new Float64Array(N), im2 = new Float64Array(N); re2[a1] = 1; applyKickZ(re2, im2, 0.05);
   const pz = momentumZ(re2, im2);
-  judge('K EHRENFEST WITH A DEFICIT: after a slap of k = 0.05 the register\'s ⟨p_z⟩ is 0.546 k, the bound share of the Thomas–Reiche–Kuhn sum rule (Σ f_{1s→np}, n ≤ 6) — the missing 45% is the continuum a six-shell register cannot hold', Math.abs(pz / 0.05 - 0.546) < 0.02, { pzOverK: pz / 0.05 });
+  judge('K EHRENFEST WITH A DEFICIT: after a slap of k = 0.05 the register\'s ⟨p_z⟩ is 0.5446 k (±0.3%), the bound share of the Thomas–Reiche–Kuhn sum rule (Σ f_{1s→np}, n ≤ 6) — the missing 45% is the continuum a six-shell register cannot hold', Math.abs(pz / 0.05 - 0.5446) < 0.003, { pzOverK: pz / 0.05 });
   /* the same ⟨p_z⟩ by the direct momentum-space integral ∫ p_z |φ|² d³p — a second route */
   const ids = []; for (let a = 0; a < N; a++) if (Math.hypot(re2[a], im2[a]) > 1e-12) ids.push(a);
   const G = 44, P = 5, h = 2 * P / G; let num = 0, den = 0;
@@ -100,12 +100,55 @@ const N = 91;
     nx += px * d; nz += pz * d; den += d;
   }
   const px = nx / den, pz = nz / den;
-  judge('K a slap along x: ⟨p_x⟩ = +0.546·k (the rotation conjugation has the right sign) and ⟨p_z⟩ = 0', px > 0.09 && px < 0.13 && Math.abs(pz) < 0.005, { px, pz, expected: 0.546 * 0.2, rot: AXIS_TO_Z.x });
+  judge('K a slap along x: ⟨p_x⟩ = +0.5446·k = 0.1089 (the 40³ momentum grid reads it within 5%; the rotation conjugation has the right sign) and ⟨p_z⟩ = 0', Math.abs(px - 0.1089) < 0.006 && Math.abs(pz) < 0.005, { px, pz, expected: 0.546 * 0.2, rot: AXIS_TO_Z.x });
   /* it jiggles: the dipole after a z-slap is not constant — a superposition rings at the Lyman-α beat */
   const rz = new Float64Array(N), iz = new Float64Array(N); rz[a1] = 1; applyKickZ(rz, iz, 0.05);
   const b2 = idx(2, 1, 0);
   judge('K the slapped 1s carries 2p₀ (and higher p states) so it now has a dipole to ring with: |c_{2p₀}|² = k²·0.555 at k = 0.05', Math.abs((rz[b2] ** 2 + iz[b2] ** 2) / (0.0025 * 0.5549) - 1) < 0.02, rz[b2] ** 2 + iz[b2] ** 2);
 }
 
+/* A SLAP ACTS AT THE CURRENT LOGICAL TIME.  The register's operator hook has a fast path for operators that commute
+   with H (every rotor does); a boost does not, so it must be applied to c(t) and re-anchored.  Found by the
+   oscillator: a slap "at t = 4" applied to the anchor instead reads ⟨p⟩ = k cos 4 = −0.65k at t = 4. */
+{
+  const { Register } = await import('../lab/state.js');
+  const R = new Register(); R.clear(); R.set(0, 1, 0);                          // 1s, hydrogen
+  const t = 4.0;
+  R.kick(0.1, 'z', t);
+  const c = R.at(t);
+  const pAt = momentumZ(c.re, c.im);
+  const c0 = R.at(0), pAt0 = momentumZ(c0.re, c0.im);
+  judge('K a slap at logical time t = 4 acts on c(t), not on the anchor: right after it ⟨p_z⟩ = 0.546k (the bound share), and read back at t = 0 the same state has a different ⟨p_z⟩ — the kick is not a commuting operator', Math.abs(pAt / 0.1 - 0.546) < 0.02 && Math.abs(pAt0 - pAt) > 0.01, { pAt, pAt0 });
+}
+/* A KICK ALONG ANY DIRECTION (the bow): rotate the direction onto ẑ, kick, rotate back — and the DRAG toy */
+{
+  const { rotorsToZ, applyKickAlong } = await import('../lab/kick.js');
+  const rx = rotorsToZ([1, 0, 0]);
+  judge('K rotorsToZ(x̂) is the y-rotation by −π/2 the x-kick already used (its z-rotation is by 0)', Math.abs(rx[0].angle) < 1e-15 && rx[1].axis === 'y' && Math.abs(rx[1].angle + Math.PI / 2) < 1e-15, rx);
+  const a1 = idx(1, 0, 0), re = new Float64Array(N), im = new Float64Array(N); re[a1] = 1;
+  const d = [1, 1, 1].map((v) => v / Math.sqrt(3)), k = 0.2;
+  applyKickAlong(re, im, k, d);
+  const ids = []; for (let a = 0; a < N; a++) if (Math.hypot(re[a], im[a]) > 1e-12) ids.push(a);
+  const G = 40, P = 5, h = 2 * P / G; let sx = 0, sy = 0, sz = 0, den = 0;
+  for (let i = 0; i < G; i++) for (let j = 0; j < G; j++) for (let l = 0; l < G; l++) {
+    const px = -P + (i + 0.5) * h, py = -P + (j + 0.5) * h, pz = -P + (l + 0.5) * h;
+    const v = phiAt(re, im, px, py, pz, ids), w = v.re * v.re + v.im * v.im;
+    sx += px * w; sy += py * w; sz += pz * w; den += w;
+  }
+  const p = [sx / den, sy / den, sz / den], mag = Math.hypot(...p), cosang = (p[0] * d[0] + p[1] * d[1] + p[2] * d[2]) / mag;
+  judge('K a kick along the diagonal (1,1,1)/√3 gives ⟨p⟩ ALONG that direction (cos > 0.999) with |⟨p⟩| = 0.5446k by the momentum-space integral (40³ grid, within 5%) — the bow can aim anywhere', cosang > 0.999 && Math.abs(mag / k - 0.5446) < 0.03, { p, mag, cosang });
+}
+{
+  const { Register } = await import('../lab/state.js');
+  const R = new Register(); R.clear(); R.set(idx(1, 0, 0), Math.SQRT1_2, 0); R.set(idx(2, 1, 0), Math.SQRT1_2, 0);
+  R.setDamping(0.1);
+  const c10 = R.at(10), c0 = R.at(0), cm = R.at(-3);
+  const p1s = c10.re[idx(1, 0, 0)] ** 2 + c10.im[idx(1, 0, 0)] ** 2, p2p = c10.re[idx(2, 1, 0)] ** 2 + c10.im[idx(2, 1, 0)] ** 2;
+  const expect2p = 0.5 * Math.exp(-2 * 0.1 * 0.375 * 10);
+  judge('K THE DRAG TOY (labelled non-physics): with γ = 0.1 the 2p population decays as e^{−2γ(E₂−E₁)t} = e^{−0.75} at t = 10 while 1s is untouched, nothing happens at t = 0 or backwards, and the norm drops — the wave "settles"', Math.abs(p2p - expect2p) < 1e-12 && Math.abs(p1s - 0.5) < 1e-12 && Math.abs(c0.re[idx(2, 1, 0)] ** 2 - 0.5) < 1e-12 && Math.abs(cm.re[idx(2, 1, 0)] ** 2 + cm.im[idx(2, 1, 0)] ** 2 - 0.5) < 1e-12 && p1s + p2p < 1, { p2p, expect2p, p1s });
+  R.setDamping(0);
+  const u = R.at(10);
+  judge('K and γ = 0 is the exact unitary register again (norm 1 at t = 10)', Math.abs(u.re[idx(2, 1, 0)] ** 2 + u.im[idx(2, 1, 0)] ** 2 - 0.5) < 1e-12 && R.damping === 0);
+}
 console.log((FAILED ? 'RED' : 'GREEN') + ' kick.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

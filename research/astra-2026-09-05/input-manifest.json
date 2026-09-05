@@ -1,0 +1,571 @@
+{
+  "head": "82765573a27d67aeffeedc223492fee6fb69bd6e",
+  "working_tree": "dirty before this audit",
+  "files": [
+    {
+      "path": "REPORT.md",
+      "sha256": "9b0639cbab9d82d1b37512a5f29bc695b1ffb86c2ac09aa742ae0a4f28a083e9",
+      "bytes": 145047
+    },
+    {
+      "path": "lab/atoms.js",
+      "sha256": "1bfbfc778e1031405667528e6c6f56a68f21a5f6a8e2478d8b366644634f18ee",
+      "bytes": 35702
+    },
+    {
+      "path": "lab/atomsview.js",
+      "sha256": "39a963ca88c06b150a01e205512b5a59173d28cb7b2519186e13193a522eba22",
+      "bytes": 18785
+    },
+    {
+      "path": "lab/bessel.js",
+      "sha256": "0689408ac98495dd6b69eb8b46c7ba1b013b1089ed286c13dccf7f4e0f807230",
+      "bytes": 1168
+    },
+    {
+      "path": "lab/calculus.js",
+      "sha256": "43eae3b25a7240cb0233ab6867b7eb24aac9baa643a783f35ecd508dac99ef5d",
+      "bytes": 6263
+    },
+    {
+      "path": "lab/calculusview.js",
+      "sha256": "33b69c87fd5c712ab9136136e780924755d50791af34a7bad033d434e10eb298",
+      "bytes": 2988
+    },
+    {
+      "path": "lab/clock.js",
+      "sha256": "6431963e1506203d77514b60e4bfb72f4db752b0f77d9f9ef6abac2e7ff1197c",
+      "bytes": 1933
+    },
+    {
+      "path": "lab/cornell.js",
+      "sha256": "70b64dee2baa8d0d5a6a4a229ed21ece339f22ddf4f20d7e5cb7e379f86a7711",
+      "bytes": 7800
+    },
+    {
+      "path": "lab/dynamics.js",
+      "sha256": "e45f1820ad918d4841a97706e1569a790d9eca8884c469b0ec37617fa8d2e865",
+      "bytes": 20635
+    },
+    {
+      "path": "lab/dynamicsview.js",
+      "sha256": "65df638fac493b56b5cf9d9b77b559c69dbfe7864eced40ad51e09171f675ace",
+      "bytes": 10533
+    },
+    {
+      "path": "lab/electrostatics.js",
+      "sha256": "793bcb83905bbf93c729e163651c0f64d1b580feba7c686eee1e52046989f612",
+      "bytes": 35595
+    },
+    {
+      "path": "lab/field.js",
+      "sha256": "943c8a8c6d24005c6f4de0ec5762212a67ede3a57bce0dadf97d0789d2d5b2e8",
+      "bytes": 45217
+    },
+    {
+      "path": "lab/fieldview.js",
+      "sha256": "37f9a930f972c51a37460ce10e70f059216148671f393fb52c64777636a97e5c",
+      "bytes": 17129
+    },
+    {
+      "path": "lab/frontier.js",
+      "sha256": "f41fffa9a4178ea1690feb2231996a7b7813808060eac5ecb92fb2be01fa8293",
+      "bytes": 48313
+    },
+    {
+      "path": "lab/gas.js",
+      "sha256": "c08e2760306c8d1f30af6ad832e0cb2dbe7e98f050d83e000ac635c4e88d079a",
+      "bytes": 7801
+    },
+    {
+      "path": "lab/h2.js",
+      "sha256": "5dc1410a91c0d98f093842541dc813ca16d82bb6c47566f5de93482a54c77f8b",
+      "bytes": 5632
+    },
+    {
+      "path": "lab/h2view.js",
+      "sha256": "c2f7c9b47fb907158c7cfd8df0858c55b9841f2a3ea238fb1d1eb5c88a1fa42c",
+      "bytes": 9384
+    },
+    {
+      "path": "lab/hamiltonian.js",
+      "sha256": "d5a31e2ef11860ca56a9346d4d3159180a6cd6f85493643d0157f597ede8be50",
+      "bytes": 15033
+    },
+    {
+      "path": "lab/helium.js",
+      "sha256": "a6f522f5cc594b16be3b138df3ab484a6974670702adf8aaadbff2e8d2518053",
+      "bytes": 10690
+    },
+    {
+      "path": "lab/heliumview.js",
+      "sha256": "d030b878308ff55385355596f78a7d7b1159d7b9024f1a0f52cdcc561d086139",
+      "bytes": 5038
+    },
+    {
+      "path": "lab/history.js",
+      "sha256": "0bc9b30a316f90c33ae6ae99b04427bd42d74b233601d074dad7da25b89e0467",
+      "bytes": 5192
+    },
+    {
+      "path": "lab/hydrogen.js",
+      "sha256": "8022044a45f58d152a0f134ae2be11ab84ee74cdbefa47f1acda4fda607075f9",
+      "bytes": 8211
+    },
+    {
+      "path": "lab/index.html",
+      "sha256": "d1860521e3913ebc2c48b18bf388087c96192dba9b2271d6d6fb5b9a223a6f3e",
+      "bytes": 8354
+    },
+    {
+      "path": "lab/kepler.js",
+      "sha256": "11e0235e3f0db0db8332a9ae0491a8aa6ca750283afe74273ea912b9a78ed494",
+      "bytes": 5766
+    },
+    {
+      "path": "lab/keplerview.js",
+      "sha256": "9fec062be6fa283b48d2b6a3b162259ee8cd28d17266be2e76ddecca9b042196",
+      "bytes": 8231
+    },
+    {
+      "path": "lab/kick.js",
+      "sha256": "dd58e709b0c398720f7019340d3e53525a37316971f96869ade32ef89f162052",
+      "bytes": 10619
+    },
+    {
+      "path": "lab/kit.js",
+      "sha256": "1546fff0921b2905d8f5a7eaa0474a5dde02324d0c8d18b749799abed49bc75e",
+      "bytes": 29075
+    },
+    {
+      "path": "lab/ladder.js",
+      "sha256": "6f8a48e77256fae1c044f58a3e1b8a5bcbdc54099e871e66992a8969b23ecf6f",
+      "bytes": 12353
+    },
+    {
+      "path": "lab/main.js",
+      "sha256": "f346d877f4236a41c3a3d7cf79ca57be10df8593f80d2adf86f3a71b0efaa91c",
+      "bytes": 782
+    },
+    {
+      "path": "lab/mathworker.js",
+      "sha256": "e05367ef33ed0de6154bd61452f12b199697ee2969d4272511b0c8296cbb5ce2",
+      "bytes": 3189
+    },
+    {
+      "path": "lab/meters.js",
+      "sha256": "75430b4ab2405a929000abaedefef59f52c497b2cd20cc61f97e1f5bbbda7568",
+      "bytes": 3673
+    },
+    {
+      "path": "lab/mo.js",
+      "sha256": "8f0822391a901f8a11308e4e9e73b51bc0fa7bf9a912458a515dda6ebf9bf86d",
+      "bytes": 35991
+    },
+    {
+      "path": "lab/molecule.js",
+      "sha256": "a2f3c70b3705e2d06b47d9fb39fb2f4696c1aab1f9ad90061a499ca4164cb0f8",
+      "bytes": 5183
+    },
+    {
+      "path": "lab/moleculeview.js",
+      "sha256": "290407ef631c850b8a10735d8803aaa69639f645d849abd22d17519afedfc95b",
+      "bytes": 10302
+    },
+    {
+      "path": "lab/momentum.js",
+      "sha256": "0b32cc20e73abfe86d3b2873daecd4ec4ed47f25165dc733cfef55b2375f2a3d",
+      "bytes": 6487
+    },
+    {
+      "path": "lab/moview.js",
+      "sha256": "208694f35fa8ff250ad85da23f297d818fbbf8e2e13a3ad65875e8d1b1183d88",
+      "bytes": 31206
+    },
+    {
+      "path": "lab/orbit.js",
+      "sha256": "22e1be460bd185d4973972c11fa028a14f915b117cc59cf5aa48eb5094bc73fc",
+      "bytes": 10665
+    },
+    {
+      "path": "lab/palette.js",
+      "sha256": "c2214f5f4f998f155430fa822f2f9197e0d5f724b4e4be02bd2fc0537a7824a3",
+      "bytes": 6220
+    },
+    {
+      "path": "lab/paletteview.js",
+      "sha256": "bd1e4e2640d85d18866de1fa45aa80bf1080fc38e5b9fc3cc99bc36dea984520",
+      "bytes": 8354
+    },
+    {
+      "path": "lab/particles.js",
+      "sha256": "7fe3057b6384b980b52467a98f2d51fbae36a950603815eca08a73ccafb50363",
+      "bytes": 8360
+    },
+    {
+      "path": "lab/period.js",
+      "sha256": "5714dbda4bb9fe9dbb522cea3aa914afb194ddff657f67660172476d806ea0dd",
+      "bytes": 6830
+    },
+    {
+      "path": "lab/qcd.js",
+      "sha256": "d719df2e6c5c3624fe2ce83a33af07dbfc4bb513e01579f3873de6bee75f1813",
+      "bytes": 7560
+    },
+    {
+      "path": "lab/qcdview.js",
+      "sha256": "d4bec644bc2f3b66d104635e159942bd8818656147ea4dc506fd16ad9b8cdae6",
+      "bytes": 8774
+    },
+    {
+      "path": "lab/qho.js",
+      "sha256": "dc55dfe4479ffc990b8938060dc90bcd5a169e82e2fa408e4017e2c476ab9510",
+      "bytes": 6820
+    },
+    {
+      "path": "lab/rack.js",
+      "sha256": "a40e931fb02d3624794250e3337e6b14465fe219ad03d7cc73641d5d2383b975",
+      "bytes": 208026
+    },
+    {
+      "path": "lab/radiation.js",
+      "sha256": "3fdc3094e4861d5694f59c43ee615bf127e44248627f33579dc5d1c3293f3c75",
+      "bytes": 14812
+    },
+    {
+      "path": "lab/radiationview.js",
+      "sha256": "779b02ca1c95b55f11ec98a4c59311e0121d94670e0406838ba86ec41031bcb6",
+      "bytes": 18629
+    },
+    {
+      "path": "lab/rotor4.js",
+      "sha256": "77100e79256cc93724eb07ae777ac62a7cc6b0fe91b119456ee71464f069579e",
+      "bytes": 7782
+    },
+    {
+      "path": "lab/shadow.js",
+      "sha256": "98d26391c1b54f7c3df6e006cfa8334be6efc474b5e8b69cf0b5c9655b9aa881",
+      "bytes": 4429
+    },
+    {
+      "path": "lab/shadowview.js",
+      "sha256": "1143b0ef0ac78d90e6778687bb934957e7a65be74297db9f03b495e9ef1a729e",
+      "bytes": 9087
+    },
+    {
+      "path": "lab/slice.js",
+      "sha256": "6d7648bd5e5b91e8276c240c27a037bc12ca4bdd2e112f3417e285c2b3ec8029",
+      "bytes": 6005
+    },
+    {
+      "path": "lab/sliceview.js",
+      "sha256": "b76bc88e20aea934aa5e4119172b8b537a1cb8c514780a8e764923a485143a52",
+      "bytes": 9357
+    },
+    {
+      "path": "lab/smoke.html",
+      "sha256": "5759b7e3ac8bbf5f188d36017af47dc41b0a0d419ad709fc572cbe0e3145b325",
+      "bytes": 2241
+    },
+    {
+      "path": "lab/spectrum.js",
+      "sha256": "ca70a2a85895cd17dab53ef330fb3323245568bf9630030bc14111f092702daf",
+      "bytes": 20212
+    },
+    {
+      "path": "lab/state.js",
+      "sha256": "be9e7fa3bb5f1dfd6a5df9031fd86067bd7d493028b376d551bd3addafc9d2cf",
+      "bytes": 29802
+    },
+    {
+      "path": "lab/sturmian.js",
+      "sha256": "47ed5b7c81da0c95f607d51f572d9c5b25451cd32bfa46469bafbaa8f2a2f618",
+      "bytes": 18828
+    },
+    {
+      "path": "lab/sturmianreg.js",
+      "sha256": "1ce5f44b2fae54c5046dd9e38b68450f55a1b4e9da26932fd7b49738b28b322f",
+      "bytes": 6632
+    },
+    {
+      "path": "lab/twocentre.js",
+      "sha256": "1a2bcb7634c8b8bd3c25c16f27b685314e73091f30cd9595df93d10028b75508",
+      "bytes": 15313
+    },
+    {
+      "path": "lab/vortex.js",
+      "sha256": "7b8037d5084630e628b6ff63e2a71e7fb7be341bc17e06236539f61e561d6b48",
+      "bytes": 8687
+    },
+    {
+      "path": "lab/well.js",
+      "sha256": "603218807b5732d1ec002494bf75cf844e24c7504ed00e098428f95841be1c45",
+      "bytes": 6577
+    },
+    {
+      "path": "lab/wigner.js",
+      "sha256": "370c23027ea31db18b5ed388d641b77e10081bad44f6e6928bc6351e0996ea91",
+      "bytes": 24211
+    },
+    {
+      "path": "lab/wignerview.js",
+      "sha256": "7cb88ec48f635b2ab9638fca1b786df123b9461e596e8120805dcd8c5cdc41f7",
+      "bytes": 17610
+    },
+    {
+      "path": "research/FOR-JOSH-FIELDS-AND-MOLECULES-2026-09-04.md",
+      "sha256": "498f78cdd165e4407a0a026d61ea50baaa68e80d91a9f1de29b28f58173b162c",
+      "bytes": 3243
+    },
+    {
+      "path": "research/LIT-FIELDS-AND-MOLECULES-2026-09-04.md",
+      "sha256": "96e0967ad303bf4dd838bd53b5bf1ab0d423afa1b288160e745b54e04daf7bb0",
+      "bytes": 16660
+    },
+    {
+      "path": "research/MATH-FIELDS-AND-MOLECULES-2026-09-04.md",
+      "sha256": "feba765ab18d645094de629e8d7d829321e85d6ef0a5b2a88a7ea47399c6894c",
+      "bytes": 52617
+    },
+    {
+      "path": "research/MATH-LAMBDAWAVES-2026-09-02.md",
+      "sha256": "517676338ff680c924b4bde85cf63a6979041663244239ef5536a6c758e7c563",
+      "bytes": 18006
+    },
+    {
+      "path": "research/RIVAL-FIELDS-AND-MOLECULES-OPUS.md",
+      "sha256": "eb7c31707702ed57f4ff523b9f72cb01f75107f350a7e937f0b6e22a3da1d290",
+      "bytes": 51153
+    },
+    {
+      "path": "research/SYNTHESIS-APP-2026-09-03.md",
+      "sha256": "c9d931f1a8ef77c9aea74254300ec13c4093b18620eafdbc594a5ef30d27612a",
+      "bytes": 6752
+    },
+    {
+      "path": "research/adversarial-2026-09-02/01-fable.md",
+      "sha256": "386bada991015859cc632a8bc3e86580e27725ea7844673aaee84d852919b134",
+      "bytes": 15689
+    },
+    {
+      "path": "research/adversarial-2026-09-02/02-opus.md",
+      "sha256": "1312f24e6c4bec9186f1c90c768f1c230a94b0bc7a6f600093ede2575fab1759",
+      "bytes": 67753
+    },
+    {
+      "path": "research/adversarial-2026-09-02/03-fable.md",
+      "sha256": "826ccc7631aed15c3e2fae62c03c26db0436cccb1474c37d927adf9d12b7b6a5",
+      "bytes": 38138
+    },
+    {
+      "path": "research/adversarial-2026-09-02/04-opus.md",
+      "sha256": "c8d341ae3025b34f0c2b9f30eba2b927059722755d625ba650943ac261f242cc",
+      "bytes": 68986
+    },
+    {
+      "path": "research/adversarial-2026-09-02/05-fable.md",
+      "sha256": "749c9b4658acc8f316d84404e060a4d396ea31eedf32425260b8e625b51e85c5",
+      "bytes": 44590
+    },
+    {
+      "path": "research/adversarial-2026-09-02/06-opus.md",
+      "sha256": "e5678a47e97cca07fee544123ca0bc4ed6f4835e33609976a1b1582c4c016337",
+      "bytes": 78798
+    },
+    {
+      "path": "research/adversarial-2026-09-02/07-fable.md",
+      "sha256": "07050341063ae93fa99e72d19ecdb4a720cc45539052182dcbc7f5bac8ac3090",
+      "bytes": 16272
+    },
+    {
+      "path": "research/adversarial-2026-09-02/08-fable.md",
+      "sha256": "40c88c5d0bbf4878bf66d8a6a91bfe015f44717bcc1362ca739d6a8cd9a2797c",
+      "bytes": 11980
+    },
+    {
+      "path": "research/adversarial-2026-09-02/09-opus-qcd.md",
+      "sha256": "9c9bb2cc1be00cb991ea2ea056b9ca36c94b27f9aa4216bf597801fd67f5e245",
+      "bytes": 51641
+    },
+    {
+      "path": "research/adversarial-2026-09-02/10-fable.md",
+      "sha256": "bde4d2bb5212115f993063455fb2626a4bb1057e0c13be124acf451c8de69351",
+      "bytes": 42053
+    },
+    {
+      "path": "research/adversarial-2026-09-02/11-opus-audit.md",
+      "sha256": "423f807097eb93ac8ada0f39a64a5a039c5fdde6188f2c9d294f1bb9c946d552",
+      "bytes": 56374
+    },
+    {
+      "path": "research/adversarial-2026-09-02/PRINT-BEYOND-THE-FRONTIER-LAMBDAWAVES-2026-09-03.md",
+      "sha256": "78dc9606b8dbdc0ae8f65de7db2864b1f486e92c7274b2616fa0f9437447cb39",
+      "bytes": 29940
+    },
+    {
+      "path": "test.sh",
+      "sha256": "6a4974552db596b3a742c85efa6b1f32a97c35ffc4c6c4409f56879f448ee4dc",
+      "bytes": 2121
+    },
+    {
+      "path": "tests/atoms.test.mjs",
+      "sha256": "8f765a413a48bacfbe376ec160bd559619d60d3f05ae634edb7e15f946d88d7a",
+      "bytes": 21519
+    },
+    {
+      "path": "tests/boot.browser-test.mjs",
+      "sha256": "efa398c7ee2f47a4b6f0331f0fc65b8d33c56353890f31e213f9709c14e2aa2f",
+      "bytes": 188343
+    },
+    {
+      "path": "tests/calculus.test.mjs",
+      "sha256": "0c8d280500295771b66d6431c9d92ec5ff57834ebd695fd9b0dcb5b851cf7252",
+      "bytes": 7523
+    },
+    {
+      "path": "tests/cornell.test.mjs",
+      "sha256": "f4415b5c6d10912ab53761666f386d9b89226ea21c01f571d31f679ec4752356",
+      "bytes": 4596
+    },
+    {
+      "path": "tests/dynamics.test.mjs",
+      "sha256": "5daf03555cf627290cd71429eb1310174ab1bf99846992ece1028d40c8fcfc2d",
+      "bytes": 17039
+    },
+    {
+      "path": "tests/electrostatics.test.mjs",
+      "sha256": "363bc86014553a1e094ac9b9b4e16b70175d8fe4a3298d50e7238e9d33c7e365",
+      "bytes": 29355
+    },
+    {
+      "path": "tests/fields.test.mjs",
+      "sha256": "e93a3a1bc1a8240b2b189cb6c846d51f6b981a037c71e0ea453c6426b20c391d",
+      "bytes": 7322
+    },
+    {
+      "path": "tests/frontier.test.mjs",
+      "sha256": "f7a3d19506073e9b2498114a90f0d05b7f723e7add67291a8d5ba4cf9774d3ad",
+      "bytes": 29147
+    },
+    {
+      "path": "tests/gas.test.mjs",
+      "sha256": "66dd485ce8901895430032b64fd88ea117965a4027b6f35f72c4846ecd1946b0",
+      "bytes": 3089
+    },
+    {
+      "path": "tests/h2.test.mjs",
+      "sha256": "856b275fd579784adafef6e552a2275ebdf43b6235b6ae53e48aa938648a08a4",
+      "bytes": 4450
+    },
+    {
+      "path": "tests/helium.test.mjs",
+      "sha256": "031641bc758892b906ecb988ec7814c94c12733ffc4ed146f1e2f04db85a1348",
+      "bytes": 4929
+    },
+    {
+      "path": "tests/history.test.mjs",
+      "sha256": "276f95a662b605a291e31d9ad7c8fb3a82f4c8a5eec76c7bfc126845f6a80f30",
+      "bytes": 6580
+    },
+    {
+      "path": "tests/hydrogen.test.mjs",
+      "sha256": "12a3ba5573cf3d93e16519ce57ca6c1b8bb368f71a086eac5fa51cc3eaf91d59",
+      "bytes": 17627
+    },
+    {
+      "path": "tests/kepler.test.mjs",
+      "sha256": "d31482e4fd80961acc3ee784aeb20b3b136be00815d59fac7abe756c56693ada",
+      "bytes": 6319
+    },
+    {
+      "path": "tests/kick.test.mjs",
+      "sha256": "d7d066073fee6e96ddbff9075b8cdc0c4add2baf8fdef210d55b97b90ffa88da",
+      "bytes": 12140
+    },
+    {
+      "path": "tests/mo.test.mjs",
+      "sha256": "10222c45ec783149febd7dc35270f02280a25e13949c9a4578ae0b072c535522",
+      "bytes": 22046
+    },
+    {
+      "path": "tests/molecule.test.mjs",
+      "sha256": "6d9567a78d54f757a1b3006b6f8d3296a9ea39a4ee00ddc81ef00f210f285e5a",
+      "bytes": 5148
+    },
+    {
+      "path": "tests/momentum.test.mjs",
+      "sha256": "6c65861452bd9b490b338f96c54163df0adf9d64fe68c6de62673d51a2b2c391",
+      "bytes": 9390
+    },
+    {
+      "path": "tests/peek.mjs",
+      "sha256": "52d07685fff44c1749dcf87dd5f4785765acb2c9eb561730cd6d4cafcb620ca2",
+      "bytes": 1408
+    },
+    {
+      "path": "tests/perf.test.mjs",
+      "sha256": "57c88188f59118f9b07db6592b7b4601aa14e66935038b8bfc45e998f597f21e",
+      "bytes": 8434
+    },
+    {
+      "path": "tests/period.test.mjs",
+      "sha256": "a70e9936b1dc5127f143e563271dd21a3db376a822495f276871e3a2d0b827c0",
+      "bytes": 7546
+    },
+    {
+      "path": "tests/qcd.test.mjs",
+      "sha256": "f849d99ef5354b43e9083ecffa69f3838e960f1fee4e5e9c51d387b023d2800b",
+      "bytes": 5710
+    },
+    {
+      "path": "tests/qho.test.mjs",
+      "sha256": "ff091765e47ef0253cbc55763b17f2f4a1baed9f93470bd2af2449ffde0192f0",
+      "bytes": 7855
+    },
+    {
+      "path": "tests/radiation.test.mjs",
+      "sha256": "2e1a7367b9209f54a74f826b847c6bf7cad52516f9ec03b8f25bb37e91aeb6cd",
+      "bytes": 17718
+    },
+    {
+      "path": "tests/rotor4.test.mjs",
+      "sha256": "fdd132efa1eaa4aaa8fe5c4cf19338f7ad43bc4ecbc1a6e53f11228ba317ee76",
+      "bytes": 11047
+    },
+    {
+      "path": "tests/smoke.mjs",
+      "sha256": "976177dc8303a0cfc141a161c6c2c5e15ce3e521afbae5249384eb027f05444b",
+      "bytes": 2164
+    },
+    {
+      "path": "tests/sturmian.test.mjs",
+      "sha256": "324897de54d2b866116787ae9e919df6447155c0b5900a3b35158d58461f4371",
+      "bytes": 20186
+    },
+    {
+      "path": "tests/sturmianreg.test.mjs",
+      "sha256": "f4df3d2fc13b615660df1f536efe30834857e702874a6da5817136b9655a2971",
+      "bytes": 11316
+    },
+    {
+      "path": "tests/twocentre.test.mjs",
+      "sha256": "1f06eea081b2e0c13b1820553e3778a123d0c44221639d93c69986cfee298490",
+      "bytes": 18161
+    },
+    {
+      "path": "tests/well.test.mjs",
+      "sha256": "e9f087ef0e08b80cbf92760a783e0ba2ed398ee69e059503e209e8f18ae5b5b2",
+      "bytes": 6463
+    },
+    {
+      "path": "tests/wigner.test.mjs",
+      "sha256": "b154d2bc69ab713532d004399a13828f915ceb8eedccdfa0ac83446a8b185b5c",
+      "bytes": 19788
+    },
+    {
+      "path": "tests/zion.test.mjs",
+      "sha256": "6016733fb8ff6906ce2ddabfbabd95be3162adf8dc2a87693e90fa52ed288b1f",
+      "bytes": 3574
+    }
+  ]
+}
