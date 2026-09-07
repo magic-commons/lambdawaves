@@ -82,9 +82,23 @@ Three recurring root causes, worth knowing before you touch anything:
   codec's own node suite could not see it: **the asymmetry is in `rack.js`, not
   `statelink.js`.** Fixed by keeping angles that already agree with the pose to 1e-4.
 
-**STILL RED — ~7 blocks, not yet diagnosed:**
-`B129 B131 B132 B134 B135 B139 B141`, plus `B123` and `B124` which ARE diagnosed but
-whose patches I did not apply (see below). Re-run the gate to get the current list.
+**ALL SEVEN ARE NOW DIAGNOSED**, with measured verdicts and ready-to-apply patches, in
+**`research/GATE-DIAGNOSIS-2026-09-07.md`**. Read that before touching any of them. Two
+things in it deserve your eye beyond the patches: `law.h` 440 against `law.lawH` 466 is
+a **genuinely broken invariant** (the artifact's arithmetic size law no longer predicts
+the window the host builds, because the density overrides are host CSS its `geometry()`
+cannot see), and B129 §10's break-it demonstration is now **vacuous** — the host rules
+moved to a suffix match, so the label it breaks no longer breaks anything. A passing arm
+that proves nothing is worse than a failing one.
+
+**B131 is FIXED** — it was one selector. It threw rather than failed because wave 106
+moved FRAME + AXIS out of the WAVE window, so its probe called `getComputedStyle(null)`.
+
+**STILL RED — six blocks, diagnosed but NOT applied:**
+`B129 B132 B134 B135 B139 B141`, plus `B123` and `B124`. Re-run the gate for the current
+list — and note the diagnosis file's own warning: **the tree moves under a diagnosis**
+(`lab.css` went from 638 to 726 rules mid-investigation), so re-confirm every numeric
+baseline against a fresh full run before trusting a count.
 
 - **B131 throws** rather than failing: its dump is
   `{"error":"@https://127.0.0.1:8701/lab/?preset=1s%2B2pz&warn=0:33:15"}`. Diagnose the
