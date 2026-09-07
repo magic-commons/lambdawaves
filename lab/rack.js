@@ -22,6 +22,7 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
+import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
 import { densityPeriod, fmtPeriod } from './period.js';
@@ -1602,6 +1603,7 @@ export async function boot(dom) {
       let sayTimer = 0;
       ui.keysSay = (t) => { clearTimeout(sayTimer); say.textContent = t; say.hidden = false; sayTimer = setTimeout(() => { say.hidden = true; say.textContent = ''; }, 6000); };
       const rr = el('div', 'row tight', gk);
+      rr.appendChild(trig({ label: 'THE KEYBOARD', onFire: () => layout.keymap && layout.keymap.open() }).root);   /* wave 106: the drawn board, where the chips above are a list */
       rr.appendChild(trig({ label: 'RESET KEYS', onFire: () => __LW_hooks.keys.reset() }).root);
       el('div', 'note', gk).innerHTML = 'Click a key chip and press the new key. <b>H</b> hides the interface, the frame and the axes (press again to bring them back), <b>TAB</b> brings the next window to the top of the rack and unfolds it (Shift+TAB the previous), <b>Ctrl+R</b> reseeds the particles. Shift is the fine step for the stepping keys. <b>Ctrl/⌘+Z</b> undoes the last edit to ψ or its law and <b>Ctrl/⌘+Shift+Z</b> (or Ctrl+Y) redoes it — one whole knob drag is one step, and the camera, the palette, the layout and the theme are never on that stack. Keys never fire while you are typing in the notebook or any field.';
       setTimeout(() => ui.keysRefresh && ui.keysRefresh(), 0);
@@ -3819,6 +3821,26 @@ export async function boot(dom) {
         /** what the SHEET is showing, read back out of the DOM — never out of the table it was built from */
         rows() { return [...list.querySelectorAll('.ks-row')].map((r) => ({ id: r.dataset.action, label: r.querySelector('.ks-label').textContent, key: r.querySelector('.ks-chip').textContent })); } };
     }
+
+    /* ── WAVE 106 · THE KEYBOARD MANUAL, and why it is a second thing beside the sheet ──────────────
+     * The '?' sheet above is a LIST you read; this is a PICTURE of the board you edit on — every bound
+     * key lit in its own place, so "what is still free" is a glance rather than a search through forty
+     * rows.  They are the same table underneath (__LW_hooks.keys) and neither owns a copy of it, which
+     * is the whole of ANTI-PATTERN 6: the manual calls keys.bind() and keys.reset() and then re-reads
+     * keys.actions, exactly as the SETTINGS chips do, so a rebind made in any of the three is on the
+     * other two in the same tick.  Escape closes it, as it closes the sheet. */
+    {
+      const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
+      km.setAttribute('role', 'dialog'); km.setAttribute('aria-label', 'the keyboard, and every binding on it');
+      const man = createKeymap(km, __LW_hooks.keys);
+      const open = () => { km.hidden = false; man.refresh(); return true; };
+      const close = () => { km.hidden = true; return false; };
+      /* the same ONE ROAD the sheet rides: a rebind anywhere ends in ui.keysRefresh(), so the manual
+         hangs off that rather than owning a second notification of its own. */
+      const prevKR = ui.keysRefresh;
+      ui.keysRefresh = () => { if (prevKR) prevKR(); if (!km.hidden) man.refresh(); };
+      layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
+    }
     /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
     for (const d of document.querySelectorAll('.dev')) {
       const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
@@ -4825,6 +4847,7 @@ export async function boot(dom) {
       capturing = null; saveKeys(); if (ui.keysRefresh) ui.keysRefresh();
       return;
     }
+    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape, like the sheet
     if (e.code === 'Escape' && layout.keysheet && layout.keysheet.isOpen) { e.preventDefault(); layout.keysheet.close(); return; }   // wave 53: Escape closes the key sheet (and Escape is bound to nothing else)
     if (e.code === 'Escape' && stageHasFocus()) { try { dom.canvas.blur(); } catch (_) {} return; }   // wave 57: the keyboard way OFF the stage — the next Tab then walks the interface
     if (e.code === 'Escape' && layout.menu && layout.menu.isOpen) { e.preventDefault(); layout.menu.close(); const t = document.getElementById('title'); if (t) t.focus(); return; }   // wave 62: the ONE new key in the whole wave
@@ -5435,6 +5458,8 @@ export async function boot(dom) {
     get frost() { return frostMode; },
     /** WAVE 53 · the '?' sheet: open / close / what it is showing (read back out of the DOM) */
     get keysheet() { return layout.keysheet; },
+    /** WAVE 106 · the drawn keyboard: open / close / is it up */
+    get keymap() { return layout.keymap; },
     cpuPsi(x, y, z) { const c = reg.at(clock.t); if (sturm.P) { let R = 0, I = 0; for (const a of reg.renderSet(RENDER_CAP).ids) { const v = orbitalFromTable(sturm.rec[a], x, y, z); R += c.re[a] * v.re - c.im[a] * v.im; I += c.re[a] * v.im + c.im[a] * v.re; } return { re: R, im: I }; } return psiAt(c.re, c.im, x, y, z, reg.renderSet(RENDER_CAP).ids); },   // W-STURMIAN: the kernel's CPU twin on the scaled records
     readPixels: () => field.ok ? field.readPixels(obs, mat) : null,
     /** the GPU chrome as the screen gets it: the box and the three axes rendered alone over the stage's ground */
