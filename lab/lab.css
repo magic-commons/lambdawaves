@@ -1258,3 +1258,121 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .mod-poprts > .grp-lbl { flex: 1 0 100%; }
 .mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
 .mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }
+
+/* ══ WAVE 106 · THE KEYBOARD MANUAL (lab/keymap.js) ══════════════════════════════════════════════════
+   Josh: "here's what Gemini achieved, we can have Gemini simply build this in again."  The module came
+   back with a written CSS CONTRACT — 80 classes, every geometry named — and zero colour in its code.
+   That division is why this works: the GEOMETRY below is Gemini's, verbatim (the flex units that make an
+   ANSI board, the 44-px hit law, the gaps and radii), and every COLOUR is ours, because the contract was
+   written in Tailwind slate on a fixed dark ground and this lab has two themes and one token ladder.
+   A literal hex here would be a third palette nobody maintains — ANTI-PATTERN 6 wearing a new hat. */
+
+#keymap { position: fixed; inset: 0; z-index: var(--z-chrome); display: flex; flex-direction: column; }
+#keymap[hidden] { display: none; }
+.km-panel { position: absolute; inset: 0; display: flex; flex-direction: column;
+  background: hsl(var(--glass-hue) / calc(var(--glass-opacity) * 0.97)); backdrop-filter: blur(var(--glass-blur, 22px)); }
+.km-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;
+  border-bottom: 1px solid var(--glass-hairline); flex: 0 0 auto; }
+.km-header-titles { display: flex; flex-direction: column; gap: 4px; }
+.km-eyebrow { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.km-title { font: var(--w-bold) 22px / 1.1 var(--font-ui); letter-spacing: .03em; color: var(--fg); }
+.km-close { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-border-color);
+  background: var(--glass-raise); color: var(--fg); font-size: 20px; line-height: 1; cursor: pointer; }
+.km-close:hover, .km-close:focus-visible { background: var(--glass-press); box-shadow: 0 0 0 2px var(--acc-soft); }
+
+.km-columns { flex: 1; display: flex; gap: 24px; padding: 20px 24px; min-height: 0; }
+.km-col { display: flex; flex-direction: column; min-height: 0; padding: 18px;
+  background: var(--glass-well); border: 1px solid var(--glass-hairline); border-radius: 12px; }
+.km-col-left { flex: 1.4; }
+.km-col-right { flex: 1; min-width: 360px; }
+.km-col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex: 0 0 auto; }
+.km-col-title { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+
+.km-platform-switch { display: flex; gap: 2px; padding: 3px; border-radius: 24px; background: var(--glass-well); border: 1px solid var(--glass-hairline); }
+.km-platform-btn { min-height: 44px; padding: 6px 14px; border-radius: 20px; border: 0; background: transparent;
+  font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); color: var(--dim); cursor: pointer; }
+.km-platform-active { background: var(--glass-press); color: var(--fg); box-shadow: var(--neu-raise); }
+
+.km-legend { display: flex; align-items: center; gap: 12px; margin: 10px 0 14px; font: var(--fs-micro) / 1 var(--font-ui); color: var(--dim); flex-wrap: wrap; }
+.km-legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: -1px; }
+.km-legend-active { background: var(--acc); box-shadow: 0 0 6px var(--acc-soft); }
+.km-legend-unbound { background: var(--ink-faint); }
+.km-legend-shift-sample { padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 700; background: var(--acc2); color: var(--glass-hue-ink, #fff); }
+.km-legend-text { color: var(--dim); }
+
+/* THE BOARD.  Flex units, not widths: the row is 1fr-summed so the board fills whatever column it gets
+   and an ANSI Enter stays 2.05 keys wide at every size.  That is Gemini's spec and it is the right one. */
+.km-keyboard { display: flex; flex-direction: column; gap: 6px; }
+.km-kb-row { display: flex; gap: 6px; }
+.km-key { position: relative; flex: 1 0 0; min-height: 44px; padding: 4px 5px; border-radius: 6px;
+  display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+  font: var(--font-ui); text-align: left; overflow: hidden; }
+/* the 44-px finger over smaller ink, the way every other control in this lab does it */
+.km-key::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: max(100%, 44px); height: max(100%, 44px); }
+.km-key-w-1 { flex-grow: 1; } .km-key-w-esc { flex-grow: 1.25; } .km-key-w-bksp { flex-grow: 1.6; }
+.km-key-w-tab { flex-grow: 1.5; } .km-key-w-backslash { flex-grow: 1.35; } .km-key-w-caps { flex-grow: 1.8; }
+.km-key-w-enter { flex-grow: 2.05; } .km-key-w-lshift { flex-grow: 2.2; } .km-key-w-rshift { flex-grow: 1.8; }
+.km-key-w-ctrl { flex-grow: 1.4; } .km-key-w-win { flex-grow: 1.3; } .km-key-w-alt { flex-grow: 1.3; }
+.km-key-w-space { flex-grow: 5.2; } .km-key-w-arrow { flex-grow: 1; }
+.km-key-bound { background: var(--glass-raise); border: 1px solid var(--glass-border-color); color: var(--fg); }
+.km-key-unbound { background: var(--glass-well); border: 1px solid var(--glass-hairline); color: var(--ink-faint); }
+.km-key-selected { outline: 2px solid var(--acc); outline-offset: -1px; box-shadow: 0 0 14px var(--acc-soft); }
+.km-key-hovered, .km-key:hover, .km-key:focus-visible { background: var(--glass-press); border-color: var(--acc-soft); }
+.km-key-recording { border: 2px solid var(--bad); animation: km-pulse 1s ease-in-out infinite; }
+@keyframes km-pulse { 50% { border-color: var(--acc); } }
+@media (prefers-reduced-motion: reduce) { .km-key-recording { animation: none; } }
+.km-key-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 3px; }
+.km-key-shift-char { font-size: 10px; opacity: .5; }
+.km-key-cap { font-size: 13px; font-weight: 700; text-align: center; color: inherit; }
+.km-key-sub { font-size: 9px; color: var(--dim); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.km-badge { font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; color: #fff; }
+.km-badge-ctrl { background: var(--acc); }
+.km-badge-shift { background: var(--acc2); }
+.km-badge-alt { background: color-mix(in oklch, var(--acc) 50%, var(--acc2)); }
+.km-badge-combo { background: linear-gradient(90deg, var(--acc), var(--acc2)); }
+
+.km-count { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); color: var(--dim); }
+.km-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; scrollbar-width: thin; }
+.km-action-row { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center;
+  border: 1px solid transparent; background: transparent; color: var(--fg); cursor: pointer; text-align: left; }
+.km-action-row-selected { background: var(--acc-soft); border-color: var(--acc); }
+.km-action-row-hovered, .km-action-row:hover, .km-action-row:focus-visible { background: var(--glass-press); }
+.km-action-row-recording { background: var(--glass-press); box-shadow: inset 0 0 0 1px var(--bad); }
+.km-chips { display: flex; gap: 4px; min-width: 90px; flex: 0 0 auto; }
+.km-chip { padding: 3px 7px; font: 600 11px / 1 var(--font-mono); border-radius: 4px; }
+.km-chip-mod { background: var(--glass-raise); border: 1px solid var(--glass-border-color); color: var(--fg-soft); }
+.km-chip-key { background: var(--glass-press); border: 1px solid var(--glass-border-color); color: var(--fg); box-shadow: var(--neu-flat); }
+.km-chip-unbound { color: var(--ink-faint); border: 1px dashed var(--glass-hairline); }
+.km-chip-recording { color: var(--bad); border: 1px solid var(--bad); }
+.km-action-text { flex: 1; font-size: 12px; text-align: left; margin-left: 10px; }
+.km-action-label { font-weight: 500; color: var(--fg); }
+.km-action-sep { color: var(--ink-faint); }
+.km-action-desc { color: var(--dim); font-weight: 400; }
+
+.km-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 24px;
+  border-top: 1px solid var(--glass-hairline); flex: 0 0 auto; }
+.km-footer-actions { display: flex; gap: 12px; }
+.km-btn { min-height: 44px; padding: 8px 18px; border-radius: 8px; display: flex; flex-direction: column; gap: 2px;
+  background: var(--glass-raise); border: 1px solid var(--glass-border-color); cursor: pointer; }
+.km-btn:hover, .km-btn:focus-visible { background: var(--glass-press); }
+.km-btn-main { font: var(--w-bold) 12px / 1 var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--fg); }
+.km-btn-sub { font-size: 10px; opacity: .65; color: var(--fg-soft); }
+.km-btn-record { border-color: var(--acc); }
+.km-btn-recording { border-color: var(--bad); }
+.km-btn-reset { }
+.km-footer-info { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
+.km-status { font: 600 12px / 1.3 var(--font-ui); color: var(--acc); }
+.km-status-conflict { color: var(--bad); }
+.km-hint { font: 11px / 1.3 var(--font-ui); letter-spacing: .02em; color: var(--dim); }
+
+/* the phone gets one column: the drawn board needs ~700 px to stay legible, and below that the LIST is
+   the manual — every binding, still rebindable, which is the part that has to work on a small screen */
+@media (max-width: 860px) {
+  .km-columns { flex-direction: column; padding: 12px; gap: 12px; }
+  .km-col-left { display: none; }
+  .km-col-right { min-width: 0; }
+  .km-footer { flex-direction: column; align-items: stretch; }
+  .km-footer-info { align-items: flex-start; text-align: left; }
+}

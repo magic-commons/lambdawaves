@@ -3752,7 +3752,7 @@ export async function boot(dom) {
          untransformed width times the scale.  Measuring r.right instead would put the chips wherever the transition
          happened to be on the frame the menu opened. */
       const showBar = (focusIt) => { clearTimeout(barTimer); barShown(true); const r = title.getBoundingClientRect();
-        bar.style.left = (r.left + title.offsetWidth * LOGO_SCALE + 8) + 'px'; bar.style.top = (r.top + r.height / 2 - bar.offsetHeight / 2) + 'px';
+        bar.style.left = (r.left + title.offsetWidth + 8) + 'px';   /* WAVE 79 DELETED THE ENLARGE AND THIS TERM OUTLIVED IT: with nothing scaling, the FINAL right edge IS the plain one, and the LOGO_SCALE factor reserved 11 px for chips whose law is 8 */ bar.style.top = (r.top + r.height / 2 - bar.offsetHeight / 2) + 'px';
         /* the bar is appended to #lab AFTER both racks, so its DOM position would put it 400 stops away.
            Moving focus into it on a keyboard open is what makes that position irrelevant — and it is
            only ever done for the KEYBOARD, so a pointer hover never steals the seat under the hand. */
@@ -4968,7 +4968,15 @@ export async function boot(dom) {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
       if (ex) { const t = reg.restore(ex); if (!(opt && opt.keepTime)) { clock.pause(); clock.scrub(t); } if (ex.rate) clock.setRate(paceRate(ex.rate)); if (ex.window) clock.window = ex.window; ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; lastNmax = -1; setReference(); }
-      if (pr) { camLevel.from = null; Object.assign(obs, pr.obs || {}); obs.mode = obs.mode === 'free' ? 'free' : 'turntable'; if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') syncFreeAngles(); if (ui.camSeg) ui.camSeg.set(obs.mode); if (ui.camNote) ui.camNote.textContent = CAM_TRADE[obs.mode]; camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.gamma; delete pm.lightUI; Object.assign(mat, pm); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      if (pr) { camLevel.from = null; Object.assign(obs, pr.obs || {}); obs.mode = obs.mode === 'free' ? 'free' : 'turntable'; if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
+      A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
+      ones the link carried, so mint(open(link)) stopped being byte-identical the moment the camera began booting
+      FREE — B98's fixed point, and the codec's own node suite cannot see it because the asymmetry is here and not
+      in statelink.js.  A record whose angles already agree with its pose far closer than any dial can show KEEPS
+      the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
+      carrying no quaternion needs. */
+      const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); if (ui.camNote) ui.camNote.textContent = CAM_TRADE[obs.mode]; camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.gamma; delete pm.lightUI; Object.assign(mat, pm); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
       if (pr) {
         /* WAVE 63 · A LINK'S MATERIAL WAS DISCARDED 16 ms AFTER IT OPENED.  `Object.assign` above has
            just put the sender's camera and material into `obs`/`mat`; for a target THIS browser has
@@ -5418,6 +5426,13 @@ export async function boot(dom) {
       get turning() { const m = document.querySelector('#title .mark'); return !!m && (m.classList.contains('turn') || m.classList.contains('busy')); },
       get menu() { return layout.menu; },
     },
+    /* WAVE 106 · THE FROST POLICY IS READABLE, not only writable.  setFrost has been on this surface since
+       wave 67 and the matching read never was, so a caller that wanted to borrow the policy for one
+       measurement and hand it back had nothing to hand back — it read undefined and setFrost(undefined)
+       resolves to 'off', which is not the same as the policy it borrowed.  B62 is exactly that caller: it
+       has to take FROST off to see the CARD STYLE pane at all, because the frost rule is a later rule of
+       equal specificity that replaces the pane with its own veil. */
+    get frost() { return frostMode; },
     /** WAVE 53 · the '?' sheet: open / close / what it is showing (read back out of the DOM) */
     get keysheet() { return layout.keysheet; },
     cpuPsi(x, y, z) { const c = reg.at(clock.t); if (sturm.P) { let R = 0, I = 0; for (const a of reg.renderSet(RENDER_CAP).ids) { const v = orbitalFromTable(sturm.rec[a], x, y, z); R += c.re[a] * v.re - c.im[a] * v.im; I += c.re[a] * v.im + c.im[a] * v.re; } return { re: R, im: I }; } return psiAt(c.re, c.im, x, y, z, reg.renderSet(RENDER_CAP).ids); },   // W-STURMIAN: the kernel's CPU twin on the scaled records
