@@ -23,27 +23,15 @@
  */
 import { wignerSlice, wignerAxial } from './wigner.js';
 import { BASIS } from './hydrogen.js';
-import { el, knob, readout, graphHover, fitText } from './kit.js';
+import { el, knob, readout, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
 
 const NZ = 64, NP = 64;                 // the grid the window runs (the brief's 64 × 64)
 const GAMMA = 0.35;                     // the display law for the ink's opacity: |W/W_max|^γ, printed on the card
 const TERM_CAP = 6;                     // the most populated labels the map integrates (the cost is O(terms²))
 const LABEL = 'SLICE through x = y = 0, p_x = p_y = 0 — ∫∫ ≠ 1';
 
-/** a CSS colour token resolved through the canvas (so any colour form parses), as [r, g, b] — atomsview's reader */
-function readRGB(g, name, fallback) {
-  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
-  const keep = g.fillStyle;
-  g.fillStyle = fallback; if (v) { try { g.fillStyle = v; } catch (e) { /* an unparseable value leaves the fallback */ } }
-  const s = String(g.fillStyle); g.fillStyle = keep;
-  let m = /^#([0-9a-f]{6})$/i.exec(s);
-  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{3})$/i.exec(s);
-  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
-  m = /rgba?\(([^)]+)\)/i.exec(s);
-  if (m) { const p = m[1].split(/[,\s/]+/).map(Number); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
-  return [120, 225, 240];
-}
+/** a CSS colour token resolved through the canvas (so any colour form parses), as [r, g, b] — kit.js's reader (wave 57) */
+const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
 
 /**
  * createWigner(host, api) — api: { repaint() } (ask the rack for a frame when a knob moves).
@@ -91,7 +79,7 @@ export function createWigner(host, api = {}) {
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const ML = 30, MR = 8, MT = 8, MB = 24, pw = W - ML - MR, ph = H - MT - MB;   // MB: TWO rows under the frame — the end ticks, then the axis name (they used to print over one another)
     if (pw < 20 || ph < 20) return;
-    const A = readRGB(g, '--acc', '#78e1f0'), B = readRGB(g, '--acc2', '#d97ce8'), dim = readRGB(g, '--dim', '#b8b8b8');
+    const A = accentRGB(g, 1), B = accentRGB(g, 2), dim = readRGB(g, '--dim', '#b8b8b8');
     const S = cache.slice, amp = Math.max(Math.abs(S.min), Math.abs(S.max)) || 1;
     /* the raster: row y is p (flipped, +p up), column x is z; ink = accent, opacity = |W/amp|^γ */
     const img = octx.createImageData(NZ, NP);

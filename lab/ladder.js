@@ -7,36 +7,44 @@
  * main register, the clock, or the camera; it recomputes only when a knob moves (idle stays zero).
  */
 import { revivalClocks, packet, revivalScan, poissonAiryChirped, combVerdict, cubicPeak, peakLaw, clockAutocorr, superrevival } from './frontier.js';
-import { el, knob, readout, group } from './kit.js';
+import { el, knob, readout, group, formula } from './kit.js';
 
 export function createLadder(host) {
   const P = { nbar: 30, sigma: 2, d: 0, teeth: 8 };
   const ui = {};
   const r1 = el('div', 'row', host);
-  ui.nbar = knob({ label: 'n̄', min: 8, max: 400, value: 30, log: true, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { P.nbar = Math.round(v); schedule(); } });
-  ui.sigma = knob({ label: 'σ (in n)', min: 0.5, max: 16, value: 2, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { P.sigma = v; schedule(); } });
-  ui.d = knob({ label: 'COMB d', min: 0, max: 24, value: 0, step: 1, fmt: (v) => v === 0 ? 'all n' : v.toFixed(0), onInput: (v) => { P.d = Math.round(v); schedule(); } });
-  ui.teeth = knob({ label: 'TEETH ±', min: 2, max: 12, value: 8, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { P.teeth = Math.round(v); schedule(); } });
+  ui.nbar = knob({ label: '<m>n̄</m>', min: 8, max: 400, value: 30, log: true, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { P.nbar = Math.round(v); clockFx(); schedule(); } });
+  ui.sigma = knob({ label: '<m>σ</m> (in <m>n</m>)', min: 0.5, max: 16, value: 2, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { P.sigma = v; schedule(); } });
+  ui.d = knob({ label: 'COMB <m>d</m>', min: 0, max: 24, value: 0, step: 1, fmt: (v) => v === 0 ? 'all n' : v.toFixed(0), onInput: (v) => { P.d = Math.round(v); schedule(); } });
+  ui.teeth = knob({ label: 'TEETH <m>±</m>', min: 2, max: 12, value: 8, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { P.teeth = Math.round(v); schedule(); } });
   for (const k of ['nbar', 'sigma', 'd', 'teeth']) r1.appendChild(ui[k].root);
-  const gClk = group(host, 'CLOCKS  (exact: T_cl = 2πn̄³ · T_rev = 4πn̄⁴/3 · T_sr = πn̄⁵)');
+  const gClk = group(host, 'CLOCKS  (exact: <m>T_cl = 2πn̄³ · T_rev = 4πn̄⁴/3 · T_sr = πn̄⁵</m>)');
+  /* WAVE 69 · THE SUBSTITUTION, UNDER THE FINGER.  The three clocks are closed forms in n̄ alone, so
+     this line is exact at every pixel of the knob's travel — and it lands INSTANTLY, while the
+     revival scan behind it (revivalScan is 400 periods × 20 samples) is still on its way.  That gap
+     is not a defect to hide: a closed form answering before a numerical one is the whole reason the
+     print bothered to derive it, and the window now shows the two arriving at different speeds. */
+  ui.clockFx = formula({ lines: [
+    ['<m>n̄ = </m>', { s: 'n' }, '<m>   ⇒   T_cl = 2π n̄³ = </m>', { s: 'tcl' }, '<m>   ·   T_rev = 4π n̄⁴/3 = </m>', { s: 'trev' }, '<m>   ·   T_sr = π n̄⁵ = </m>', { s: 'tsr' }] ] });
+  gClk.appendChild(ui.clockFx.root);
   const r2 = el('div', 'row tight', gClk);
-  ui.tcl = readout({ label: 'T_cl  a.u.', value: '—' }); ui.trev = readout({ label: 'T_rev  a.u.', value: '—', sub: '' }); ui.tsr = readout({ label: 'T_sr  a.u.', value: '—' }); ui.beta = readout({ label: 'β₃ · β₄', value: '—', sub: 'cubic · quartic strength' });
-  for (const k of ['tcl', 'trev', 'tsr', 'beta']) r2.appendChild(ui[k].root);
-  const gLand = group(host, 'REVIVAL LANDSCAPE  ·  max |A| in each classical period  (EXACT)');
+  ui.tcl = readout({ label: '<m>T_cl</m>  a.u.', value: '—' }); ui.trev = readout({ label: '<m>T_rev</m>  a.u.', value: '—', sub: '' }); ui.tsrClk = readout({ label: '<m>T_sr</m>  a.u.', value: '—' }); ui.beta = readout({ label: '<m>β₃ · β₄</m>', value: '—', sub: 'cubic · quartic strength' });
+  for (const k of ['tcl', 'trev', 'tsrClk', 'beta']) r2.appendChild(ui[k].root);
+  const gLand = group(host, 'REVIVAL LANDSCAPE  ·  max <m>|A|</m> in each classical period  (EXACT)');
   const land = el('div', 'ladder-c', gLand); const lcv = el('canvas', '', land);
-  const gFine = group(host, 'AT T_rev  ·  |A(T_rev + x·T_cl)|  ·  solid EXACT · dashed PREDICTION (Poisson sum of Airy envelopes)');
+  const gFine = group(host, 'AT <m>T_rev</m>  ·  <m>|A(T_rev + x·T_cl)|</m>  ·  solid EXACT · dashed PREDICTION (Poisson sum of Airy envelopes)');
   const fine = el('div', 'ladder-c', gFine); const fcv = el('canvas', '', fine);
   const r3 = el('div', 'row tight', host);
-  ui.peak = readout({ label: 'PEAK  |A|max  (measured)', value: '—', sub: '' }); ui.pred = readout({ label: 'AIRY LAW  |I|max(β₃)', value: '—', sub: '' }); ui.atTrev = readout({ label: '|A(T_rev)|', value: '—' });
+  ui.peak = readout({ label: 'PEAK  <m>|A|max</m>  (measured)', value: '—', sub: '' }); ui.pred = readout({ label: 'AIRY LAW  <m>|I|max(β₃)</m>', value: '—', sub: '' }); ui.atTrev = readout({ label: '<m>|A(T_rev)|</m>', value: '—' });
   for (const k of ['peak', 'pred', 'atTrev']) r3.appendChild(ui[k].root);
-  const gSuper = group(host, 'SUPERREVIVAL  ·  T_sr = πn̄⁵  ·  the CUSP: at T_sr the cubic phase vanishes and the QUARTIC is what is left');
+  const gSuper = group(host, 'SUPERREVIVAL  ·  <m>T_sr = πn̄⁵</m>  ·  the CUSP: at <m>T_sr</m> the cubic phase vanishes and the QUARTIC is what is left');
   const r5 = el('div', 'row tight', gSuper);
-  ui.tsr = readout({ label: 'T_sr  a.u.', value: '—', sub: '' }); ui.cls = readout({ label: 'n̄ mod 4  ·  CLASS', value: '—', cls: 'two', sub: '' });
-  ui.asr = readout({ label: '|A(T_sr)|  EXACT', value: '—', sub: 'integer phase reduction' }); ui.psr = readout({ label: 'CUSP LAW  (Pearcey)', value: '—', sub: '' });
+  ui.tsr = readout({ label: '<m>T_sr</m>  a.u.', value: '—', sub: '' }); ui.cls = readout({ label: '<m>n̄ mod 4</m>  ·  CLASS', value: '—', cls: 'two', sub: '' });
+  ui.asr = readout({ label: '<m>|A(T_sr)|</m>  EXACT', value: '—', sub: 'integer phase reduction' }); ui.psr = readout({ label: 'CUSP LAW  (Pearcey)', value: '—', sub: '' });
   for (const k of ['tsr', 'cls', 'asr', 'psr']) r5.appendChild(ui[k].root);
-  const gArith = group(host, 'THE ARITHMETIC  ·  a/b = 4d³/3n̄  ·  DEAF (peak 1) iff b | 6  (Fermat: m³ ≡ m mod b)');
+  const gArith = group(host, 'THE ARITHMETIC  ·  <m>a/b = 4d³/3n̄</m>  ·  DEAF (peak 1) iff <m>b | 6</m>  (Fermat: <m>m³ ≡ m mod b</m>)');
   const r4 = el('div', 'row tight', gArith);
-  ui.frac = readout({ label: 'a / b', value: '—', sub: '' }); ui.verdict = readout({ label: 'VERDICT', value: '—', cls: 'two', sub: '' }); ui.cubic = readout({ label: 'CUBIC-LEVEL A(p; a/b)', value: '—', sub: '' }); ui.floor = readout({ label: 'PARSEVAL FLOOR ‖p‖₂/‖p‖₁', value: '—' });
+  ui.frac = readout({ label: '<m>a / b</m>', value: '—', sub: '' }); ui.verdict = readout({ label: 'VERDICT', value: '—', cls: 'two', sub: '' }); ui.cubic = readout({ label: 'CUBIC-LEVEL <m>A(p; a/b)</m>', value: '—', sub: '' }); ui.floor = readout({ label: 'PARSEVAL FLOOR <m>‖p‖₂/‖p‖₁</m>', value: '—' });
   for (const k of ['frac', 'verdict', 'cubic', 'floor']) r4.appendChild(ui[k].root);
   el('div', 'note', host).innerHTML = '<b>EXACT · SPECTRAL.</b> The revival hears the packet, not the ladder: a comb of spacing d revives perfectly iff the reduced denominator of 4d³/3n̄ divides 6; every other packet sits between the Parseval floor and 1. The FIELD cannot draw n > 6 — this window is the spectrum alone, its own register.';
 
@@ -57,6 +65,12 @@ export function createLadder(host) {
     paint();
   }
   function fmtT(t) { return t >= 1e7 ? t.toExponential(3) : t >= 1e4 ? t.toFixed(0) : t.toFixed(2); }
+  /** the closed forms alone — no scan, no packet, three powers: this is why it can run on the drag */
+  function clockFx() {
+    const n = P.nbar, TAU = 2 * Math.PI;
+    ui.clockFx.set({ n: String(n), tcl: fmtT(TAU * n ** 3), trev: fmtT(2 * TAU * n ** 4 / 3), tsr: fmtT(Math.PI * n ** 5) });
+  }
+  clockFx();
   function paint() {
     if (!last) return;
     const { clocks, scan, law, pred, comb, pops, sup } = last;
@@ -66,7 +80,7 @@ export function createLadder(host) {
     ui.asr.set(sup.exact.toFixed(6)); ui.asr.setSub(`exact for any n̄: t/(4πn²) = n̄⁵/(4n²) is rational`);
     ui.psr.set(sup.predicted === null ? '—' : sup.predicted.toFixed(6), sup.trustworthy ? '' : 'warn');
     ui.psr.setSub(sup.trustworthy ? `quartic envelope + aliases · quintic γ₅ = ${sup.quintic.toExponential(1)}` : `quintic γ₅ = ${sup.quintic.toExponential(1)} — too large: the k-expansion is not converged`);
-    ui.tcl.set(fmtT(clocks.Tcl)); ui.trev.set(fmtT(clocks.Trev)); ui.trev.setSub(`= ${(clocks.Trev / clocks.Tcl).toFixed(1)} T_cl · ${(clocks.Trev * 24.188843e-3).toExponential(2)} fs`); ui.tsr.set(fmtT(clocks.Tsr));
+    ui.tcl.set(fmtT(clocks.Tcl)); ui.tsrClk.set(fmtT(clocks.Tsr));   /* WAVE 69: `ui.tsr` was assigned TWICE — the CLOCKS readout and the SUPERREVIVAL one had the same key, so the second overwrote the first and the CLOCKS T_sr has printed an em dash since it was written.  Two readouts, two names. */ ui.trev.set(fmtT(clocks.Trev)); ui.trev.setSub(`= ${(clocks.Trev / clocks.Tcl).toFixed(1)} T_cl · ${(clocks.Trev * 24.188843e-3).toExponential(2)} fs`); ui.tsr.set(fmtT(clocks.Tsr));
     ui.beta.set(`${clocks.beta3.toFixed(3)} · ${clocks.beta4.toFixed(4)}`);
     ui.peak.set(scan.aPeak.toFixed(4), scan.aPeak > 0.5 ? 'ok' : 'warn'); ui.peak.setSub(`at ${(scan.tPeak / clocks.Trev).toFixed(5)} T_rev = T_rev ${(scan.tPeak - clocks.Trev) / clocks.Tcl >= 0 ? '+' : '−'} ${Math.abs((scan.tPeak - clocks.Trev) / clocks.Tcl).toFixed(3)} T_cl`);
     ui.pred.set(law.heightNum.toFixed(4), reg[1]); ui.pred.setSub(`fold/Airy régime ${reg[0]} at β₃ = ${clocks.beta3.toFixed(3)} · ` + (law.seriesUsable ? `series to ${law.heightTerms} terms (err ${law.heightError.toExponential(1)})` : 'Airy maximiser, series divergent here'));
@@ -126,5 +140,5 @@ export function createLadder(host) {
   }
   window.addEventListener('resize', () => paint());
   compute();
-  return { compute, params: P, get last() { return last; }, set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); compute(); } };
+  return { compute, params: P, get last() { return last; }, set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); compute(); } };
 }

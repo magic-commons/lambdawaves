@@ -6,21 +6,84 @@
  * the seam at ±π is visible: a palette that does not close there paints a false nodal line into the picture.
  * This is an OBSERVER product and is labelled a DESIGN CHOICE — ψ is never touched.
  */
-import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID } from './palette.js';
-import { el, sw, trig, knob, readout, themeInk, onThemeChange } from './kit.js';
+import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID, PRESET_GROUPS } from './palette.js';
+import { el, sw, trig, knob, readout, themeInk, onThemeChange, chip } from './kit.js';
 
+/* WAVE 54 (board #51, Josh's ruling): PRISM is the shipped default — the six-stop spectral map computed from the
+ * CIE 1931 colour-matching functions at 440/480/510/570/600 nm and closed through the line of purples, and the best
+ * all-round colour-vision-deficiency performer in the catalogue (antipodal separation 0.324 normal, 0.213
+ * deuteranope).  λWAVES stays one click away in the menu.  A DEFAULT IS FOR A FIRST VISIT: a browser that has said
+ * which palette it wants keeps it (rack.js hands that id in as `api.startId`), and a project file that carries
+ * stops overrides both. */
+export const DEFAULT_PALETTE = 'prism';
 export function createPaletteEditor(host, api) {
-  let stops = PRESET_BY_ID.get('lambda').stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() }));
+  const startId = (api.startId && PRESET_BY_ID.get(api.startId)) ? api.startId : DEFAULT_PALETTE;
+  let stops = PRESET_BY_ID.get(startId).stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() }));
   let sel = 0;
   const ui = {};
   const r0 = el('div', 'row tight', host);
   ui.on = sw({ label: 'PALETTE', value: false, onChange: (v) => { api.setEnabled(v); push(); } });
   r0.appendChild(ui.on.root);
-  ui.sel = el('select', 'sel', r0);
-  for (const p of PRESETS) { const o = el('option', '', ui.sel, p.label); o.value = p.id; }
-  ui.sel.value = 'lambda';
-  ui.sel.addEventListener('change', () => { stops = PRESET_BY_ID.get(ui.sel.value).stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() })); sel = 0; push(); });
+  ui.sel = el('select', 'sel', r0); ui.sel.setAttribute('aria-label', 'palette');   // wave 62: the other five <select>s name themselves through a `title`; this one had nothing
+  /* WAVE 54 (board #47, Josh: "like how ember only has 4"): the menu is GROUPED BY THE NUMBER OF COLOUR POINTS
+     around the circle, ascending.  The grouping is the catalogue's own — palette.js already publishes PRESET_GROUPS
+     with each preset's `points` — so the menu cannot drift from the data, and a palette added there arrives in the
+     right group with no edit here.  A count is the one property of a cyclic palette you can see at a glance in the
+     ring, and it is what decides whether a phase reads as four quadrants or six sectors. */
+  for (const g of PRESET_GROUPS) {
+    const og = el('optgroup', '', ui.sel); og.label = g.points + ' points';
+    for (const p of g.items) { const o = el('option', '', og, p.label); o.value = p.id; if (p.note) o.title = p.note; }
+  }
+  ui.sel.value = startId;
+  /* ── WAVE 56 · THE SECOND RE-PICK TRAP (ANTI-PATTERNS 12) ────────────────────────────────────
+   * Wave 55 fixed this exact class on the PRESET select and NAMED this one without fixing it: a
+   * `<select>` fires `change` only when the value CHANGES, so after ROTATE / REVERSE / ADD / REMOVE
+   * / a recolour, re-picking the palette you are already on fires nothing at all and the catalogue
+   * colours you were reaching for are unreachable — the menu looks like a dead control.  The work
+   * this handler does is a RELOAD and not an assignment, so it needs a way to be asked for again.
+   * Same class, same fix as the preset select: one loader, called unconditionally by a trigger. */
+  const pickPalette = (id) => {
+    const p = PRESET_BY_ID.get(id); if (!p) return false;
+    stops = p.stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() }));
+    sel = 0; push();
+    if (api.chose) api.chose(id);
+    return true;
+  };
+  ui.sel.addEventListener('change', () => pickPalette(ui.sel.value));
   ui.sel.style.flex = '1 1 120px';
+  /* ── WAVE 76 · CYCLE THE CATALOGUE WITH A THUMB (Josh) ───────────────────────────────────────
+   * A <select> is the right control for REACHING a named palette out of forty and the wrong one for
+   * BROWSING them: every look costs open · scan · pick, and choosing a palette is a thing you do by
+   * eye, against the live field, one step at a time.  Two triggers step the flat catalogue order —
+   * the same order the menu shows, groups and all, read back OFF THE MENU rather than from a second
+   * copy of the list, so a palette added to palette.js arrives here with no edit.
+   *   IT WRAPS, both ways, because a catalogue browsed by thumb has no natural end and a disabled
+   * button at each end would be two dead controls most of the time.  Each step goes through
+   * `pickPalette`, so it loads the stops, repaints, and tells the host this is the browser's choice
+   * exactly as picking from the menu does — one road, not two (ANTI-PATTERNS 20). */
+  const stepPalette = (d) => {
+    const ids = [...ui.sel.options].map((o) => o.value);
+    if (!ids.length) return;
+    const i = ids.indexOf(ui.sel.value);
+    const next = ids[((i < 0 ? 0 : i) + d + ids.length) % ids.length];
+    ui.sel.value = next; pickPalette(next);
+  };
+  /* ── WAVE 101 · THEY ARE DRAWN CHIPS, NOT TEXT ARROWS ────────────────────────────────────────
+   * Josh: "Palette's new left and right buttons also look weird, can you fix?"  Two things were wrong
+   * and they compounded.  The MARK was a literal '◂' / '▸' — a request to whichever font the device
+   * resolves, which is the reason lab/mir/glyph.js exists at all — and the SEAT was a `.trig` in a
+   * `.row`, where lab.css §the compaction pass gives `.row > .trig { flex: 1 1 auto }`: so each arrow
+   * stretched to a share of the whole row, and the result was two enormous buttons with a tiny
+   * character adrift in the middle of each.
+   *   They take glyph.js's own `dirPrev` / `dirNext` — the same two drawings the modulation window's
+   * preset bar steps its list with — in a fixed 34-px seat that does not grow. */
+  ui.palPrev = trig({ label: '', cls: 'pal-nav', title: 'the previous palette in the catalogue — steps the list in the order the menu shows, and wraps', onFire: () => stepPalette(-1) });
+  ui.palNext = trig({ label: '', cls: 'pal-nav', title: 'the next palette in the catalogue — steps the list in the order the menu shows, and wraps', onFire: () => stepPalette(1) });
+  chip(ui.palPrev.root, 'dirPrev', 'previous palette');
+  chip(ui.palNext.root, 'dirNext', 'next palette');
+  r0.insertBefore(ui.palPrev.root, ui.sel);
+  r0.appendChild(ui.palNext.root);
+  r0.appendChild(trig({ label: 'RELOAD', title: 'reload the palette that is already selected — its catalogue stops back, exactly as shipped. Re-picking the same entry in the list fires no change event, which is why this button exists', onFire: () => pickPalette(ui.sel.value) }).root);
   ui.seam = readout({ label: 'SEAM at ±π', value: '—', sub: 'OKLab distance across the wrap' });
   r0.appendChild(ui.seam.root);
 
@@ -109,5 +172,8 @@ export function createPaletteEditor(host, api) {
   window.addEventListener('resize', () => paint());
   push();
   return { get stops() { return stops; }, get on() { return ui.on.get(); }, setOn(v) { ui.on.set(v); api.setEnabled(v); push(); },
+    get id() { return ui.sel.value; }, get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
+    /** name a preset from the catalogue — the settings key's road back in, and LW.setPalette's */
+    select(id) { if (!PRESET_BY_ID.get(id)) return false; ui.sel.value = id; stops = PRESET_BY_ID.get(id).stops.map((x) => ({ at: x.at, rgb: x.rgb.slice() })); sel = 0; push(); return true; },
     load(s) { stops = normalize(s.map((x) => ({ at: x.at, rgb: x.rgb.slice() }))); sel = 0; push(); }, repaint: paint };
 }

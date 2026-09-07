@@ -1,0 +1,38 @@
+Roboto-ui.woff2 — how it was made (2026-09-05)
+
+SOURCE   Roboto (roboto-classic), Version 3.015 — Roboto.ttf, 488 584 bytes.
+         SIL Open Font License 1.1 — licence in Roboto-OFL.txt.
+         Copyright 2011 The Roboto Project Authors (https://github.com/googlefonts/roboto-classic).
+         Roboto is a trademark of Google.
+         Recoverable from this repo's history:  git show <pre-subset-rev>:lab/fonts/Roboto.ttf
+SUBSET    58 292 bytes (8.4x smaller), variable axes KEPT — the weight (100..900) and stretch
+         (75%..100%) declared in skin.css's @font-face are real, not synthesised.
+
+THE NAME STAYS.  Roboto's licence declares NO Reserved Font Name (grep "Reserved Font Name"
+Roboto-OFL.txt returns only the OFL's own definition at line 33), so OFL section 3 does not bite and
+a subset may keep the name.  This is the opposite of Spinwerad-SOURCE.txt's case, and the difference
+is the RFN, not the amount of modification.  Google's own Fonts API serves subset Roboto as "Roboto".
+
+COMMAND  python -m fontTools.subset Roboto.ttf \
+             --text-file=<the 198 characters below> --flavor=woff2 \
+             --output-file=Roboto-ui.woff2 --layout-features='*' --no-hinting
+
+THE LICENCE METADATA WAS PUT BACK BY HAND (2026-09-05).  fontTools' default --name-IDs=0,1,2,3,4,5,6
+dropped nameIDs 7-14, so the shipped binary said nothing about its own licence — the standalone
+Roboto-OFL.txt satisfies OFL section 2, but the "machine-readable metadata fields" branch was thrown
+away for free, and a binary lifted out of this tree could not say what it was.  Rather than re-subset
+(which risks moving an outline for a metadata fix), nameIDs 7, 8, 9, 11, 13 and 14 were copied verbatim
+from the original Roboto.ttf into the existing subset's name table and the file re-saved:
+  7  Roboto is a trademark of Google.      8  Google      9  Christian Robertson
+  11 Google.com                            13 the SIL OFL 1.1 sentence
+  14 https://openfontlicense.org
+VERIFIED: all 17 other tables are byte-identical before and after; +300 bytes (58 292 -> 58 592).
+STIX Two Math has no nameID 13/14 to restore -- the upstream 400 876-byte original carries neither.
+
+GLYPH SET  the 198 characters that appear in lab/*.{js,html,css} AND exist in Roboto — Latin,
+           digits, punctuation, the arrows and box marks the interface draws, and the Greek and
+           mathematical characters Roboto covers.  Anything Roboto lacks falls to the STIX Two Math
+           face ahead of it in the maths stack, or to the generic fallback: see
+           STIXTwoMath-SOURCE.txt, which owns the maths glyph list.
+           If you set a character the interface has never set before, re-run this and state the new
+           byte cost.

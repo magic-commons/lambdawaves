@@ -37,14 +37,38 @@ node tests/history.test.mjs; HI_RC=$?
 node tests/perf.test.mjs; PF_RC=$?
 node tests/math-audit.test.mjs; MA_RC=$?
 node tests/modrive.test.mjs; MD_RC=$?
+node tests/pulse.test.mjs; PU_RC=$?
 node tests/h2ci.test.mjs; HC_RC=$?
+node tests/mir.test.mjs; MI_RC=$?
+node tests/audio.test.mjs; AU_RC=$?          # wave 102: the capture half and the seam it meets the model at
+node tests/palette.test.mjs; PL_RC=$?
+node tests/statelink.test.mjs; SL_RC=$?
+node tests/capture.test.mjs; CP_RC=$?
+node tests/ink.test.mjs; IK_RC=$?
+# WAVE 62 · THREE SUITES THAT EXISTED, PASSED, AND WERE NOT IN THIS FILE.  wiring.test.mjs (every .js under
+# lab/ is reached from the real roots, or named in a dated allowlist) and render-exact.test.mjs were both
+# green and both unrun by the gate, which is ANTI-PATTERN 17 pointed at the gate itself: a proof nothing
+# invokes is worth exactly what an unregistered service worker is worth.  access.test.mjs is new and cheap —
+# three keyboard laws read off the SOURCE in 40 ms, so the regressions that would otherwise cost a
+# seven-minute browser run fail in the fast half.  (render-exact.js itself is still not wired into the app;
+# that is a later wave, and wiring.test.mjs's allowlist entry for it is deliberate and dated.)
+node tests/wiring.test.mjs; WR_RC=$?
+node tests/render-exact.test.mjs; RX_RC=$?
+node tests/access.test.mjs; AC_RC=$?
+# WAVE 56 · pwa.test.mjs LAST, and it is the gate on ANTI-PATTERN 14: sw.js's cache NAME is a digest of
+# its own §1 precache table, so a stale entry means the name does not move when a file does and every
+# returning visitor is served the old bytes forever, silently.  It was RED when this wave started
+# (rack.js and skin.css had moved and §1 had not).  `node tests/pwa.test.mjs --write` regenerates §1 and
+# then proves the result; without --write it only prints the corrected block, so CI still fails.
+node tests/pwa.test.mjs; PW_RC=$?
 NODE_RC=$(( NODE_RC || FR_RC || DY_RC || FD_RC || R4_RC || QC_RC || MO_RC || KI_RC || KE_RC || QH_RC || ML_RC || WE_RC || ZI_RC || HE_RC || H2_RC || CA_RC || CO_RC || GA_RC || PE_RC || AT_RC || EL_RC || ST_RC || TC_RC || SR_RC || WI_RC || RA_RC || MX_RC || HI_RC || PF_RC ))
-NODE_RC=$(( NODE_RC || MA_RC || MD_RC ))
-NODE_RC=$(( NODE_RC || HC_RC ))
+NODE_RC=$(( NODE_RC || MA_RC || MD_RC || PU_RC ))
+NODE_RC=$(( NODE_RC || HC_RC || MI_RC || AU_RC || PL_RC ))
+NODE_RC=$(( NODE_RC || SL_RC || CP_RC || IK_RC || WR_RC || RX_RC || AC_RC || PW_RC ))
 [ "${1:-}" = "node" ] && exit $NODE_RC
 PORT="${LW_PORT:-8701}"
 export MB_CERTS="${MB_CERTS:-$HOME/mandelbrot/certs}"
-python3 "/home/joshua-hosain/Documents/MANDELBROT APP/project/mbgate/server2.py" "$HERE" "$PORT" > /dev/null 2>&1 &
+python3 "$HERE/tools/gate/server.py" "$HERE" "$PORT" > /dev/null 2>&1 &
 SRV=$!
 sleep 1
 LW_PORT="$PORT" GD_PORT="${GD_PORT:-5202}" node tests/boot.browser-test.mjs; BR_RC=$?

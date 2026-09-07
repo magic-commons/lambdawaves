@@ -3,3 +3,12 @@ node_modules/
 .tmp/
 .tmp-server.log
 .tmp-server.pid
+dist/
+# wave 68: `npx wrangler dev` (DEPLOY.md step 6) creates .wrangler/{cache,state,tmp} in the repo root, and
+# step 8 two lines later is `git add -A`. The document reassures you that node_modules/ and dist/ are both
+# already here; the one it does not name is the one the preceding step creates.
+.wrangler/
+
+# wave 106 (THE ARK): tools/gate/server.py generates a self-signed pair here on first run.
+# A private key is never a repository's business, and this one is trusted by nothing anyway.
+.certs/

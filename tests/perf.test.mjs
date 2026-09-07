@@ -22,15 +22,22 @@ const T0 = performance.now();
 
 /* ── the SLAP tables, a slice at a time ─────────────────────────────────────── */
 {
+  /* THE SLICE BUDGET IS 0, AND THAT IS THE POINT.  warmStep checks its budget AFTER each unit of work,
+   * so at a budget of 0 it yields after EVERY unit: the slice count below is the shape of the build
+   * (273 resumption points — one Simpson grid, 91 Theta rows, 91 pair rows, 91 radial rows) and not a
+   * reading of the clock, and every one of those resumption points is exercised.  The arm this replaces
+   * was `steps > 3` at a budget of 2 ms, which asserted that the BOX IS SLOW: it counted 65 slices here
+   * only because the build takes 187 ms, and it goes red on a machine fast enough to finish it in four.
+   * That is the one shape of flake a loaded run can never show you, because load hides it. */
   let steps = 0, t0 = performance.now();
-  while (!warmStep(2)) steps++;
+  while (!warmStep(0)) steps++;
   const wall = performance.now() - t0;
   const M0 = kickMatrixZ(0); let offDiag = 0, diag = 0;
   for (let a = 0; a < 91; a++) for (let b = 0; b < 91; b++) { if (a === b) diag = Math.max(diag, Math.abs(M0.re[a * 91 + b] - 1) + Math.abs(M0.im[a * 91 + b])); else offDiag = Math.max(offDiag, Math.abs(M0.re[a * 91 + b]) + Math.abs(M0.im[a * 91 + b])); }
   const k = 1e-3, M = kickMatrixZ(k), a = idx(1, 0, 0), b = idx(2, 1, 0);
   const dip = M.im[a * 91 + b] / k, exact = 128 * Math.SQRT2 / 243;
-  judge(`P the SLAP tables built in ${steps} slices of ≤ 2 ms (${wall.toFixed(0)} ms in all) are ready, give the identity at k = 0 (1e-12) and the 1s→2p dipole 128√2/243 = ${exact.toFixed(6)} from M(k)/ik at k = 1e-3 (1e-5): the incremental build is the one-shot build`,
-    tablesReady() && steps > 3 && diag < 1e-12 && offDiag < 1e-12 && Math.abs(dip - exact) < 1e-5, { steps, wall: +wall.toFixed(1), diag, offDiag, dip, exact });
+  judge(`P the SLAP tables built one unit of work at a time — ${steps} resumed slices at a budget of 0 ms, so every resumption point in the build is crossed and the count is a property of the BUILD and not of the clock (${wall.toFixed(0)} ms in all, floor 1, margin ${steps}×) — are ready, give the identity at k = 0 (1e-12) and the 1s→2p dipole 128√2/243 = ${exact.toFixed(6)} from M(k)/ik at k = 1e-3 (1e-5): the incremental build is the one-shot build. The arm was 'steps > 3' at a 2 ms budget — an assertion that this machine is slow, with the inequality pointing the wrong way; what it meant to say is that warmStep RESUMES rather than doing the whole build in one call, which is 'steps > 1'`,
+    tablesReady() && steps > 1 && diag < 1e-12 && offDiag < 1e-12 && Math.abs(dip - exact) < 1e-5, { steps, floor: 1, wall: +wall.toFixed(1), diag, offDiag, dip, exact });
 }
 /* ── packModes: one persistent buffer, the right count ──────────────────────── */
 {

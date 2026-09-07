@@ -11,7 +11,7 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, N_COLOR, nRGB, vividInk, graphHover } from './kit.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover } from './kit.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and
@@ -41,11 +41,33 @@ export function createSpectrum(host, api) {
   const clrBtn = el('button', 'trig', head); clrBtn.type = 'button'; clrBtn.textContent = 'CLEAR'; clrBtn.title = 'c ↦ 0 for every label';
   const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORMALIZE'; nrmBtn.title = 'c ↦ c / √(c†c) — explicit, never silent; the status says what ‖c‖ was';
   const info = el('div', 'note', head);
+  /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
+   * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
+   * exact, no propagator — and every number on this line is read out of the coefficient vector the
+   * frame is drawing from.  So this is the strongest of the three places a number was given
+   * permission to move: the angle really is E·t folded into a turn, and watching it run is watching
+   * the law rather than an animation of it.  It follows the SELECTED lane, or the strongest populated
+   * one when nothing is selected, so it is never about a mode that is not there. */
+  const psiFx = formula({ cls: 'sp-fx', lines: [
+    ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
+    ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
+  host.appendChild(psiFx.root);
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', rowsEl.hidden); hideBtn.textContent = rowsEl.hidden ? 'SHOW' : 'HIDE'; });
   clrBtn.addEventListener('click', () => { if (api.clear) api.clear(); });
   nrmBtn.addEventListener('click', () => { if (api.normalize) api.normalize(); });
   const rowsEl = el('div', 'sp-rows', host);
+  /* ══ WAVE 106 · THE CHANNELS START FOLDED (Josh: "For spectrum, always 'Hide' the spinny wheels
+     for new users") ═══════════════════════════════════════════════════════════════════════════
+     The lanes are the deepest thing in the instrument and the first thing a stranger meets, because
+     SPECTRUM is the window this rack opens on.  Ninety-one spinning phase dials is not an
+     introduction, it is a wall.  The LADDER above them is the picture that reads without a caption,
+     so that is what a new visitor gets; the lanes are one press away and the button says SHOW.
+       IT IS A DEFAULT AND NOT A LAW: the state keeps every coefficient either way — the button's own
+     title has always said "layout only" — and a browser that has pressed SHOW keeps it for the
+     session.  Nothing about the register, the mask or the reconstruction changes. */
+  rowsEl.hidden = true;
+  hideBtn.classList.add('on'); hideBtn.textContent = 'SHOW';
   const picker = el('div', 'picker', host); picker.hidden = true;
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();
@@ -108,20 +130,27 @@ export function createSpectrum(host, api) {
     const nm = el('div', 'sp-name sp-nm', id, labelText(a)); nm.dataset.a = s.index;
     const esub = el('div', 'sp-sub sp-e', id, energyText(a)); esub.dataset.a = s.index;   // the operator IN FORCE, never the static basis energy
     id.addEventListener('click', () => api.select(a));
-    const pop = fader({ label: '|c|²', min: 0, max: 1, value: 0, cls: 'pop', fmt: (v) => v.toFixed(3),
+    /* WAVE 62 · A LANE NAMES ITSELF.  `aria` overrides `label` in the kit, which is exactly what these
+       three need: the eye reads '|c|²' next to a label it can see, but ninety-one sliders all called
+       "|c|²" are ninety-one identical seats to anything that cannot see the row they are in. */
+    /* WAVE 69 · the fader's own label is the one string in a lane that is pure mathematics; the
+       ARIA name is `mathPlain`ed by the kit, so the marker never reaches an attribute. */
+    const pop = fader({ label: '<m>|c|²</m>', aria: '|c|² ' + labelText(a), min: 0, max: 1, value: 0, cls: 'pop', fmt: (v) => v.toFixed(3),
       onInput: (v) => api.setPopulation(a, v), onChange: (v) => api.setPopulation(a, v, true) });
     root.appendChild(pop.root);
-    const ph = knob({ min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
+    const ph = knob({ aria: 'phase ' + labelText(a), min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (d) => api.addPhase(a, d), onReset: () => api.setPhase(a, 0) });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);   // the two knobs stack, half-size
-    const rate = knob({ min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
+    const rate = knob({ aria: 'phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
     rate.root.title = RATE_TITLE;
     kn.appendChild(rate.root);
     const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'mute: drop from the FIELD reconstruction (the state keeps c)';
+    mute.setAttribute('aria-label', 'mute ' + labelText(a)); mute.setAttribute('aria-pressed', 'false');
     mute.addEventListener('click', () => api.toggleMute(a));
     const solo = el('button', 'sp-b solo', root, 'S'); solo.type = 'button'; solo.title = 'solo: reconstruct from this mode alone';
+    solo.setAttribute('aria-label', 'solo ' + labelText(a)); solo.setAttribute('aria-pressed', 'false');
     solo.addEventListener('click', () => api.toggleSolo(a));
-    const x = el('button', 'sp-x', root, '×'); x.type = 'button'; x.title = 'remove (sets c = 0)';
+    const x = el('button', 'sp-x', root, '×'); x.type = 'button'; x.title = 'remove (sets c = 0)'; x.setAttribute('aria-label', 'remove ' + labelText(a));
     x.addEventListener('click', () => api.remove(a));
     /* `was` is the dirty-cache: the values ACTUALLY applied to this lane's DOM.  The two strings start at what
        lane() just wrote (so a fresh lane is never rewritten); every other field starts unset, so the lane's
@@ -139,8 +168,8 @@ export function createSpectrum(host, api) {
     if (L.rate && api.rateOf) { const rv = api.rateOf(a); if (Math.abs(L.rate.get() - rv) > 1e-12) L.rate.set(rv); }
     if (L.rate) paintRate(L, rateOff);
     const p = reg.population(a) / n2;                    if (L.pop.get() !== p) L.pop.set(p);
-    const m = !!reg.muted[a];                            if (w.mute !== m) { w.mute = m; L.mute.classList.toggle('on', m); }
-    const s = !!reg.solo[a];                             if (w.solo !== s) { w.solo = s; L.solo.classList.toggle('on', s); }
+    const m = !!reg.muted[a];                            if (w.mute !== m) { w.mute = m; L.mute.classList.toggle('on', m); L.mute.setAttribute('aria-pressed', String(m)); }
+    const s = !!reg.solo[a];                             if (w.solo !== s) { w.solo = s; L.solo.classList.toggle('on', s); L.solo.setAttribute('aria-pressed', String(s)); }
     const off = anySolo ? !s : m;                        if (w.off !== off) { w.off = off; L.root.classList.toggle('muted', off); }
     const sel = a === selected;                          if (w.sel !== sel) { w.sel = sel; L.root.classList.toggle('sel', sel); }
     if (L.root.classList.contains('off')) L.root.classList.remove('off');    // nothing here ever sets it; the old rebuild cleared it every pass
@@ -306,6 +335,23 @@ export function createSpectrum(host, api) {
     if (best) api.selectEigen(best.k);
   });
   /** display-rate update: the bookkeeping on a version bump, one budget of lane construction, then the live phases */
+  let fxWall = 0;
+  /** the c(t) line, at 5 Hz.  THE CADENCE IS THE LAB'S OWN LAW, not a new one: rack.js prints the `t`
+      readout every 200 ms unless KEEP FRAMES is on, because that is as fast as a number can be read;
+      a formula is a number and takes the same rule.  It is also the reason nothing here needs a
+      throttle of its own — three text writes at 5 Hz cost nothing on any frame. */
+  function paintPsi(c, t) {
+    const now = performance.now();
+    if (now - fxWall < 200) return;
+    fxWall = now;
+    let a = selected;
+    if (a < 0 || !lanes.has(a)) { let best = -1, bp = 0; for (const [i] of lanes) { const p = c.re[i] * c.re[i] + c.im[i] * c.im[i]; if (p > bp) { bp = p; best = i; } } a = best; }
+    if (a < 0) { psiFx.set({ lab: '—', E: '—', t: '—', arg: '—', mag: '—' }); return; }
+    const re = c.re[a], im = c.im[a];
+    let ph = Math.atan2(im, re); if (ph < 0) ph += 2 * Math.PI;
+    psiFx.set({ lab: labelText(a), E: (api.energyOf ? api.energyOf(a) : BASIS[a].E).toFixed(6) + ' ' + (api.unit ? api.unit() : 'Eh'),
+      t: t.toFixed(2), arg: (ph * 180 / Math.PI).toFixed(1) + '°', mag: Math.sqrt(re * re + im * im).toFixed(4) });
+  }
   function update(c, t) {
     const t0 = performance.now();
     const reg = api.reg;
@@ -315,8 +361,9 @@ export function createSpectrum(host, api) {
       const ph = Math.atan2(c.im[a], c.re[a]);
       L.ph.set(ph < 0 ? ph + 2 * Math.PI : ph);
     }
+    paintPsi(c, t);
   }
-  function select(a) { selected = a; for (const [i, L] of lanes) { const s = i === a; if (L.was.sel !== s) { L.was.sel = s; L.root.classList.toggle('sel', s); } } }
+  function select(a) { selected = a; fxWall = 0; for (const [i, L] of lanes) { const s = i === a; if (L.was.sel !== s) { L.was.sel = s; L.root.classList.toggle('sel', s); } } }
   window.addEventListener('resize', () => paintLadder());
   return { update, rebuild, select, get selected() { return selected; }, lanes, get building() { return pending.length; },
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; } };

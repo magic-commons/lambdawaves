@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- icon-maskable.svg — λWAVES, purpose MASKABLE (safe zone honoured).
+     THE λWAVES MARK, verbatim: the nine coloured squares of #title .mark in lab/index.html, rotated 45°.
+     Ground #070a0f — lab.css's unconditional `html, body` background, the colour the document actually is
+     before rack.js resolves LIGHT or DARK, and therefore the one ground that is not a theme guess.
+     Cell 84 units of 512; the block is 3 cells, its diagonal 356.4 units = 69.6% of the icon.
+     MASKABLE: the safe zone is the centred circle of radius 40% of the width = 204.8 units.
+     The block's corners sit at radius 178.2 — 26.6 units of clearance — so no launcher mask can eat them.
+     REGENERATE (needs ~/bin/scipython — cairosvg):
+       ~/bin/scipython -c "import cairosvg,sys; cairosvg.svg2png(url='lab/img/icon-maskable.svg', \
+         write_to='lab/img/icon-maskable-512.png', output_width=N, output_height=N)"
+     Then `node tests/pwa.test.mjs` re-reads every pixel it cares about; it does not trust the rasteriser. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect x="0" y="0" width="512" height="512" fill="#070a0f"/>
+  <g transform="translate(256 256) rotate(45)">
+    <rect x="-126.5" y="-126.5" width="85" height="85" fill="#5ee7d8"/>
+    <rect x="-42.5" y="-126.5" width="85" height="85" fill="#78e1f0"/>
+    <rect x="41.5" y="-126.5" width="85" height="85" fill="#f5f7fa"/>
+    <rect x="-126.5" y="-42.5" width="85" height="85" fill="#d97ce8"/>
+    <rect x="-42.5" y="-42.5" width="85" height="85" fill="#2b3f7a"/>
+    <rect x="41.5" y="-42.5" width="85" height="85" fill="#5ee7d8"/>
+    <rect x="-126.5" y="41.5" width="85" height="85" fill="#ffbe5a"/>
+    <rect x="-42.5" y="41.5" width="85" height="85" fill="#d97ce8"/>
+    <rect x="41.5" y="41.5" width="85" height="85" fill="#78e1f0"/>
+  </g>
+</svg>

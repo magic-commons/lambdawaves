@@ -19,6 +19,32 @@ function judge(name, ok, detail) {
 const T0 = performance.now();
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 const sig = (v, d = 8) => +v.toPrecision(d);
+
+/* ── TIMING, the house law (ANTI-PATTERNS §19: a gate that asserts a duration when it means a condition) ──
+ * Every wall time in this file is judged as a RATIO against a baseline measured in the SAME RUN, never
+ * against a constant.  The reason is measured rather than assumed: with eight spinners on this box
+ * (6 cores / 12 threads, load ≈ 5) one force() goes 13.1 → 26.5 ms and one Ehrenfest step 33.2 → 61.0 ms
+ * — 2.0× — while the ratio step/force moves only 2.51 → 2.31.  The three 60 ms budgets these judges used
+ * to carry read 41.3 ms quiet and 61.4 / 62.4 ms loaded: 1.1× headroom, which is a coin and not a test.
+ * timeMs() takes 10 readings, DISCARDS THE FIRST (the cold run is 2.5× the warm ones here) and returns the
+ * median of the remaining 9.  Exactly ONE absolute anchor is kept in this file — force() against
+ * FORCE_ANCHOR_MS — so a uniform order-of-magnitude regression cannot hide behind a tree of ratios. */
+const timeMs = (fn, n = 10) => { const t = []; for (let k = 0; k < n; k++) { const a = performance.now(); fn(); t.push(performance.now() - a); } t.shift(); t.sort((a, b) => a - b); return { ms: t[(t.length - 1) >> 1], all: t.map((v) => +v.toFixed(1)), n: t.length }; };
+/* timePair takes the baseline INTERLEAVED with the thing it bounds — one reading of each, in turn — so a
+ * drift in the box's speed part-way through the run moves numerator and denominator together.  Measuring
+ * them in two separate batches is not enough: two loaded runs of this file gave step/force 2.23 and 3.00
+ * while neither quantity moved by more than the load did, purely because the batches landed in different
+ * weather.  Interleaved, the same pair holds to a few per cent. */
+const timePair = (a, b, n = 10) => {
+  const A = [], B = [];
+  for (let k = 0; k < n; k++) { let t = performance.now(); a(); A.push(performance.now() - t); t = performance.now(); b(); B.push(performance.now() - t); }
+  A.shift(); B.shift(); A.sort((x, y) => x - y); B.sort((x, y) => x - y);
+  const med = (v) => v[(v.length - 1) >> 1];
+  return { a: med(A), b: med(B), aAll: A.map((v) => +v.toFixed(1)), bAll: B.map((v) => +v.toFixed(1)), n: A.length };
+};
+const FORCE_ANCHOR_MS = 120;   // 9× the quiet median (13 ms), ~4.5× the median at load 5 (26 ms), and a 10× regression (131 ms) still fails it
+let forceMs = 0;               // the file's one absolute reading: written by G5 WALL TIME, judged against the anchor
+let forceProbe = null;         // and the same call as a closure, so every ratio below can re-baseline beside its own measurement
 const DOUBLED = { nXi: 24, nEta: 40, nRad: 20, nAng: 40, nAngNear: 64 };
 const EXACT_H2P = -0.602634214;
 
@@ -65,11 +91,13 @@ const reg = createMO({ kind: 'hydrogenic', nMax: 6 });
 {
   const eq = reg.equilibrium({ lo: 2.1, hi: 2.7, iters: 50 });
   judge('G5 THE REGISTER σ SET (nMax 6, 42 functions): R_e = 2.35227 (3e-5), D_e = 2.1246 eV (1e-3) — Opus Q3\'s floor of the fixed exponents', near(eq.Re, 2.35227, 3e-5) && near(eq.De_eV, 2.1246, 1e-3), { Re: sig(eq.Re), De_eV: sig(eq.De_eV, 6), E: sig(eq.E, 10), omega: sig(eq.omega, 6) });
-  const c0 = reg.vector(reg.solve(eq.Re), 0), times = []; let f;
-  for (let k = 0; k < 5; k++) { const t = performance.now(); f = reg.force(eq.Re, c0, { differences: false }); times.push(performance.now() - t); }
-  times.sort((a, b) => a - b); const fd = reg.force(eq.Re, c0);
+  const c0 = reg.vector(reg.solve(eq.Re), 0); let f;
+  forceProbe = () => { f = reg.force(eq.Re, c0, { differences: false }); };
+  const TF = timeMs(forceProbe); forceMs = TF.ms;
+  const fd = reg.force(eq.Re, c0);
   judge('G5 force() at R_e for the register: F_exact = 0 (1e-5), F_HF − pulay = F_exact (1e-6, Hurley in an ill-conditioned 42-function basis), |pulay| ≤ bound (the bound is loose here — ‖∂_Rψ‖ = 2.57 from the large alternating coefficients the near-dependent register forces; honest, and stated), the pointwise checks 1e-9', Math.abs(fd.F_exact) < 1e-5 && near(fd.F_HF - fd.pulay, fd.F_exact, 1e-6) && Math.abs(fd.pulay) <= fd.bound && Math.abs(fd.checks.norm) < 1e-9 && Math.abs(fd.checks.energy) < 1e-9, { F_HF: sig(fd.F_HF, 6), pulay: sig(fd.pulay, 6), bound: sig(fd.bound, 5), dpsiNorm: sig(fd.dpsiNorm, 5), residual: sig(fd.residual, 5), F_exact: sig(fd.F_exact, 3), hurley: sig(fd.F_HF - fd.pulay - fd.F_exact, 3), checks: fd.checks });
-  judge('G5 WALL TIME: one force() on the 42-function basis (11 120 quadrature points × 42 functions, no differences), median of 5 < 60 ms', times[2] < 60, { medianMs: +times[2].toFixed(1), minMs: +times[0].toFixed(1), points: f.points });
+  judge('G5 WALL TIME — THE ONE ABSOLUTE ANCHOR IN THIS FILE: one force() on the 42-function basis (11 120 quadrature points × 42 functions, no differences) costs under ' + FORCE_ANCHOR_MS + ' ms — measured ' + forceMs.toFixed(1) + ' ms, median of ' + TF.n + ' after a discarded warm-up run, margin ' + (FORCE_ANCHOR_MS / forceMs).toFixed(1) + '×. The budget is deliberately loose: 9× the quiet median (13 ms) and about 4.5× the median this box gives at load 5 (26 ms), so no amount of load can turn it red, while a genuine order-of-magnitude regression (131 ms) still does. It is the only constant here — every other wall time in this file is a ratio to it, and this anchor is what stops a uniform slowdown hiding behind them',
+    forceMs < FORCE_ANCHOR_MS, { medianMs: +forceMs.toFixed(1), budgetMs: FORCE_ANCHOR_MS, margin: +(FORCE_ANCHOR_MS / forceMs).toFixed(2), all: TF.all, points: f.points });
   const reg2 = createMO({ kind: 'hydrogenic', nMax: 6, quad: DOUBLED }), g = reg2.force(eq.Re, reg2.vector(reg2.solve(eq.Re), 0), { differences: false });
   judge('G5 THE DIGITS on the register (ζ from 1 to 1/6, functions out to r ≈ 200): doubled orders move F_elec, pulay by < 1e-10 and bound by < 1e-9', Math.abs(g.F_elec - f.F_elec) < 1e-10 && Math.abs(g.pulay - f.pulay) < 1e-10 && Math.abs(g.bound - f.bound) < 1e-9, { dF: sig(g.F_elec - f.F_elec, 3), dPulay: sig(g.pulay - f.pulay, 3), dBound: sig(g.bound - f.bound, 3) });
 }
@@ -104,8 +132,10 @@ const runBO = (mo, opts, steps) => {
   const st2 = createMO({ kind: 'sturmian', nMax: 2 }), e2 = createDynamics(st2, { R0: 2.3, dt: 5, electron: 'ehrenfest', connection: false }), b2 = createDynamics(st2, { R0: 2.3, dt: 5 }); let g2 = 0, ag = 0;
   for (let k = 0; k < 200; k++) { e2.step(); b2.step(); g2 = Math.max(g2, Math.abs(e2.energy.total - b2.energy.total)); ag = Math.max(ag, Math.abs(e2.adiabaticGap)); }
   judge('E2 THE COMPARISON BRANCH, connection: false — the wave-42 scheme kept as it was (the carried vector re-read in the new basis and rescaled), on a multi-function basis (sturmian nMax 2, 6 functions, R0 = 2.3, 200 steps): Ehrenfest departs from BO by 4.68e-5 in total energy and lifts the electronic energy above E_0 by up to 4.30e-6, real (> 1e-8) and small (< 1e-3), with |drift| ≤ integratedBound — the number the audit was about, still judged, now beside the connection that replaced it (W49-5)', g2 > 1e-8 && g2 < 1e-3 && ag > 1e-8 && ag < 1e-4 && Math.abs(e2.drift) <= e2.integratedBound && near(g2, 4.68e-5, 2e-6) && e2.connection === false, { energyGap: sig(g2, 3), adiabaticGap: sig(ag, 3), drift: sig(e2.drift, 3), integratedBound: sig(e2.integratedBound, 3), normDriftPerStep: sig(e2.normDrift / 200, 3) });
-  const t0 = performance.now(), eR = createDynamics(reg, { R0: 2.5, dt: 5, electron: 'ehrenfest' }), t1 = performance.now(); const ms = []; for (let k = 0; k < 3; k++) { const t = performance.now(); eR.step(); ms.push(performance.now() - t); } ms.sort((a, b) => a - b);
-  judge('T WALL TIME: one Ehrenfest step on the 42-function register (two half-step propagations, the 42 × 42 S/H rebuild, the eigen-solve and one force()) < 60 ms (median of 3)', ms[1] < 60, { medianMs: +ms[1].toFixed(1), initMs: +(t1 - t0).toFixed(1), all: ms.map((v) => +v.toFixed(1)) });
+  const t0 = performance.now(), eR = createDynamics(reg, { R0: 2.5, dt: 5, electron: 'ehrenfest' }), t1 = performance.now();
+  const TS = timePair(forceProbe, () => eR.step()), stepOverForce = TS.b / TS.a;
+  judge('T WALL TIME — A RATIO, NOT A BUDGET: one Ehrenfest step on the 42-function register (two half-step propagations, the 42 × 42 S/H rebuild, the eigen-solve and one force()) costs no more than 4 force()s on the SAME register in the SAME run — measured ' + stepOverForce.toFixed(2) + '× (' + TS.b.toFixed(1) + ' ms against ' + TS.a.toFixed(1) + ' ms), the two INTERLEAVED one reading at a time so that a drift in the box\'s speed moves both, each a median of ' + TS.n + ' after a discarded warm-up run. The step CONTAINS one force(), so what is claimed is that the rebuild, the eigen-solve and the two propagations together cost under three more: a statement about the algorithm, true at 400 MHz and at 4.4 GHz alike. It replaces `< 60 ms (median of 3)`, which read 41.3 ms quiet and 61.4 / 62.4 ms at load 2.5 / 4.7 — the ratio moves 2.51 → 2.31 across that same load, i.e. it gets SAFER when the box gets busy',
+    stepOverForce < 4, { stepMs: +TS.b.toFixed(1), forceMs: +TS.a.toFixed(1), ratio: +stepOverForce.toFixed(2), budget: 4, margin: +(4 / stepOverForce).toFixed(2), initMs: +(t1 - t0).toFixed(1), step: TS.bAll, force: TS.aAll });
 }
 /* ── W the reviewer's findings (wave 42): the force beyond R ≈ 35/ζ_min, and the stepper at dt = 500 ── */
 {
@@ -118,11 +148,13 @@ const runBO = (mo, opts, steps) => {
   const hur = [20, 40].map((R) => { const c = { re: new Float64Array(st4.n), im: new Float64Array(st4.n) }; for (let i = 0; i < st4.n; i++) { c.re[i] = Math.sin(1.7 * i + 0.2); c.im[i] = 0.3 * Math.cos(0.9 * i); } const f = st4.force(R, c); return { R, hurley: f.F_rel - f.pulay - f.F_fixed, checks: f.checks, points: f.points }; });
   judge('W42-1 THE DEFAULT STURMIAN BASIS (n ≤ 4, λ = 1.7611) with a fixed complex vector at R = 20 and R = 40: Hurley\'s identity to 1e-8 and the pointwise norm/energy checks to 1e-10 (the identity was 3e-4 off at R = 40)',
     hur.every((h) => Math.abs(h.hurley) < 1e-8 && Math.abs(h.checks.norm) < 1e-10 && Math.abs(h.checks.energy) < 1e-10), hur.map((h) => ({ R: h.R, hurley: sig(h.hurley, 3), checks: h.checks, points: h.points })));
-  const H2 = hellmannFeynman(2), f2 = one.force(2, one.vector(one.solve(2), 0), { differences: false }), tR = [];
-  const c0 = reg.vector(reg.solve(2), 0); for (let k = 0; k < 5; k++) { const t = performance.now(); reg.force(2, c0, { differences: false }); tR.push(performance.now() - t); } tR.sort((a, b) => a - b);
-  judge('W42-1 AND THE R = 2 ANCHORS DID NOT MOVE: F_elec −0.13390616, pulay 0.06228945, bound 0.10202406 (the 8-decimal literals, 5e-9) and the closed forms themselves to 1e-9, and force() on the 42-function register at R = 2 still under 60 ms (median of 5; the η rule gains ⌈2ζ_max R⌉ = 4 points there, and the ladder about r = R reproduces the old edges 1, 1.5, 2, 2.5, 3, 4 exactly)',
-    near(f2.F_elec, H2.F_elec, 1e-9) && near(f2.pulay, H2.pulay, 1e-9) && near(f2.bound, H2.bound, 1e-9) && near(f2.F_elec, -0.13390616, 5e-9) && near(f2.pulay, 0.06228945, 5e-9) && near(f2.bound, 0.10202406, 5e-9) && tR[2] < 60,
-    { F_elec: sig(f2.F_elec, 9), pulay: sig(f2.pulay, 9), bound: sig(f2.bound, 9), medianMs: +tR[2].toFixed(1) });
+  const H2 = hellmannFeynman(2), f2 = one.force(2, one.vector(one.solve(2), 0), { differences: false });
+  const c2 = reg.vector(reg.solve(2), 0), TR = timePair(forceProbe, () => reg.force(2, c2, { differences: false })), r2OverForce = TR.b / TR.a;
+  judge('W42-1 AND THE R = 2 ANCHORS DID NOT MOVE: F_elec −0.13390616, pulay 0.06228945, bound 0.10202406 (the 8-decimal literals, 5e-9) and the closed forms themselves to 1e-9 — the ladder about r = R reproduces the old edges 1, 1.5, 2, 2.5, 3, 4 exactly. The wall time that used to ride in this && chain is its own judge below: a correctness claim about eight decimal places must not be able to go red because the box was busy',
+    near(f2.F_elec, H2.F_elec, 1e-9) && near(f2.pulay, H2.pulay, 1e-9) && near(f2.bound, H2.bound, 1e-9) && near(f2.F_elec, -0.13390616, 5e-9) && near(f2.pulay, 0.06228945, 5e-9) && near(f2.bound, 0.10202406, 5e-9),
+    { F_elec: sig(f2.F_elec, 9), pulay: sig(f2.pulay, 9), bound: sig(f2.bound, 9) });
+  judge('W42-1 AND THE η RULE COST NOTHING — A RATIO: force() on the 42-function register at R = 2, where the η rule gains ⌈2ζ_max R⌉ = 4 points, costs no more than TWICE force() at R_e in the same run — measured ' + r2OverForce.toFixed(2) + '× (' + TR.b.toFixed(1) + ' ms against ' + TR.a.toFixed(1) + ' ms), the two interleaved, medians of ' + TR.n + ' after a discarded warm-up. It comes out BELOW 1 because the shorter ladder more than pays for the four extra points: 0.89–0.92 quiet, at load 8 and at load 16 alike, where the 60 ms it used to be judged against moved by 2.3×. The ceiling is 2 rather than 1.2 because at full saturation the medians themselves go noisy (one run of twelve spinners read 1.22 on a true 0.9), and a bound is worth having only if the noise cannot reach it',
+    r2OverForce < 2, { r2Ms: +TR.b.toFixed(1), forceMs: +TR.a.toFixed(1), ratio: +r2OverForce.toFixed(2), budget: 2, margin: +(2 / r2OverForce).toFixed(2), r2: TR.bAll, force: TR.aAll });
   /* 2. at dt = 500 the first step runs to R ≈ 6600, where S and H were NaN (e^{−α} × e^{−βη} over/underflowed) and the
         eigen-solver threw 'QL did not converge' through mo.solve; the two-centre weight is one exponential now and the
         stepper clamps R into [Rmin, Rmax] and SAYS so */

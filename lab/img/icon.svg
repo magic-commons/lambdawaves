@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- icon.svg — λWAVES, purpose ANY (full bleed).
+     THE λWAVES MARK, verbatim: the nine coloured squares of #title .mark in lab/index.html, rotated 45°.
+     Ground #070a0f — lab.css's unconditional `html, body` background, the colour the document actually is
+     before rack.js resolves LIGHT or DARK, and therefore the one ground that is not a theme guess.
+     Cell 96 units of 512; the block is 3 cells, its diagonal 407.3 units = 79.5% of the icon.
+     ANY is full-bleed: the launcher, not us, decides the outline (iOS masks a squircle).
+     REGENERATE (needs ~/bin/scipython — cairosvg):
+       ~/bin/scipython -c "import cairosvg,sys; cairosvg.svg2png(url='lab/img/icon.svg', \
+         write_to='lab/img/icon-512.png', output_width=N, output_height=N)"
+     Then `node tests/pwa.test.mjs` re-reads every pixel it cares about; it does not trust the rasteriser. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect x="0" y="0" width="512" height="512" fill="#070a0f"/>
+  <g transform="translate(256 256) rotate(45)">
+    <rect x="-144.5" y="-144.5" width="97" height="97" fill="#5ee7d8"/>
+    <rect x="-48.5" y="-144.5" width="97" height="97" fill="#78e1f0"/>
+    <rect x="47.5" y="-144.5" width="97" height="97" fill="#f5f7fa"/>
+    <rect x="-144.5" y="-48.5" width="97" height="97" fill="#d97ce8"/>
+    <rect x="-48.5" y="-48.5" width="97" height="97" fill="#2b3f7a"/>
+    <rect x="47.5" y="-48.5" width="97" height="97" fill="#5ee7d8"/>
+    <rect x="-144.5" y="47.5" width="97" height="97" fill="#ffbe5a"/>
+    <rect x="-48.5" y="47.5" width="97" height="97" fill="#d97ce8"/>
+    <rect x="47.5" y="47.5" width="97" height="97" fill="#78e1f0"/>
+  </g>
+</svg>

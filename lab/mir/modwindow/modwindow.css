@@ -1,0 +1,2019 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   mir/modwindow/modwindow.css — THE MODULATION WINDOW, PORTABLE.
+
+   This is not a design.  It is BASINS' modulation window, copied.  Josh spent
+   three to four weeks on its dimensions, material, chips, booleans and layout,
+   and three separate ports threw the window away and re-implemented its
+   FUNCTIONS in the host's idiom.  This file exists so that never happens again.
+
+   PROVENANCE, every line of it:
+     PART A  the chrome the window sits in — 42 rules out of index.html,
+             via EXTRACT-MODWINDOW.md files 02 (WindowKit) and 04 (material).
+     PART B  the window's own sheet — anim.js:1782–3306, all 664 rules,
+             every declaration block byte-identical.
+
+   PART A COMES FIRST ON PURPOSE.  In the running app the chrome lives in
+   index.html and the window's own sheet is appended to <head> at first open,
+   so file 01 wins every tie.  Several rules depend on that — notably
+   `#modwin .m2edit { background: transparent }` beating
+   `.m2edit { background: var(--m2-recess) }` in the SAME sheet, and
+   `#modwin.modwin { overflow: visible; contain: layout }` undoing `.kwin`'s
+   `overflow: hidden; contain: layout paint` so the work bars can paint beyond
+   the window.  Keep this order.  Do not load a host sheet after this one that
+   can reach inside .mir-modwindow.
+
+   ONE NAMESPACE CLASS: `mir-modwindow`, on the window root.  Nothing else
+   needs it.  See MANIFEST.md for the six-branch scoping law and every
+   deviation from source, and host-contract.md for what a host must supply.
+
+   WHAT THIS FILE DOES **NOT** CARRY, deliberately:
+     · the 117 `:root.skin-frost` constellation rules — without .skin-frost the
+       classic connected form paints, and it is correct and complete;
+     · .kwin-halo / .kwin-grip / .kwin-edge — this window is resizable:false
+       and never builds them;
+     · the host's own design tokens.  It reads about forty of them and declares
+       none but its own twenty --m2-mat-*.  host-contract.md lists the lot with
+       BASINS' shipping values.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PART A — THE CHROME.  42 rules, each labelled with the index.html line it
+   came from and the selector it had there.  Declaration blocks are verbatim;
+   only the selector was scoped.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* THE BEVEL. Declared on the surfaces, never on :root — see the comment. */
+/* index.html:1236-1244   was:  .glass, .panel, .chip, .kwin, .jwin  */
+.glass.mir-modwindow, .mir-modwindow .glass {
+  --glass-bevel:
+    inset 0 var(--gl-w) 0 calc(var(--gl-w) * -0.35) var(--gl-t),
+    inset calc(-1 * var(--gl-w)) 0 0 calc(var(--gl-w) * -0.35) var(--gl-r),
+    inset 0 calc(-1 * var(--gl-w)) 0 calc(var(--gl-w) * -0.35) var(--gl-b),
+    inset var(--gl-w) 0 0 calc(var(--gl-w) * -0.35) var(--gl-l),
+    0 0 14px -2px var(--gl-glow);
+}
+
+/* THE GLASS RECIPE. #modwin reads border-width/style from here; so do .m2ppick.glass, .m2deadpick.glass and the two .m2workbar.glass boxes. */
+/* index.html:1290   was:  .glass, .panel, .chip  */
+.glass.mir-modwindow, .mir-modwindow .glass {
+  /* TWO LAYERS, and they are two layers rather than one on purpose: the
+     background-COLOR is the scrim (the accessibility control), and the
+     background-IMAGE is N2-B's wash — the live colour of the picture under this
+     surface, from the glass-light probe.  A flat `linear-gradient(c, c)` is the
+     shortest way to say "one solid layer" in the image slot, and it keeps the
+     scrim and the wash independently addressable: a policy can change the scrim
+     without touching the wash, which is exactly what glass-live does. */
+  background-color: hsl(var(--glass-tint) / var(--glass-opacity));
+  /* ⟡ WAVE-UI: TWO STOPS, NOT ONE.  N2-B's `linear-gradient(c, c)` was the
+     shortest way to say "one solid layer"; this is the shortest way to say "the
+     light behind this surface is not uniform", which is the truth about every
+     picture this app draws and the whole difference between glass and a slab.
+     The two stops are the mean colour of the picture under the surface's TOP
+     half and BOTTOM half, from the same probe, in the same pass.  A build where
+     the probe has not run has both equal to `--gl-fill` = `transparent`, i.e.
+     byte-identical to the N2-B rule. */
+  background-image: linear-gradient(180deg, var(--gl-fill-a), var(--gl-fill-b));
+  border: var(--glass-border) solid var(--glass-border-color);
+  border-radius: var(--r-md);
+  /* THE SHEEN IS THE MATERIAL AND THE BEVEL IS THE LIGHT.  The first inset is
+     glass v1's static top-edge highlight; --glass-bevel is the glass-light
+     engine's four edge colours and its outer spill, and it is `transparent`
+     until a probe has run — so this line is identical to v1's on any build
+     where the engine is off, absent, or has not sampled yet. */
+  box-shadow: inset 0 var(--glass-border) 0 var(--glass-sheen), var(--glass-bevel);
+  /* INHERITED, deliberately: every descendant of a glass surface is text over
+     an unpredictable picture, so the halo belongs to the surface and not to
+     each label.  Filled-accent ink turns it off (see .kwin-tab.on etc). */
+  text-shadow: var(--ink-shadow);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+/* index.html:3353   was:  .kwin  */
+.kwin.mir-modwindow {
+  position: fixed;
+  z-index: var(--z-win);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  box-shadow: var(--glass-shadow), var(--glass-bevel);
+  /* ⟡ W-ANDROIDGLASS — TWO BELTS, AND WHY A WINDOW NOW WEARS BOTH.
+     THE REPORT (Josh, on the Pixel): "all the windows inner layout are over
+     other windows".  The first suspect was the z ladder — that Blink builds
+     the window's own paint order differently.  MEASURED ON THE RIG AND IT IS
+     NOT THAT: with all three windows open, every root already forms its own
+     stacking context THREE ways over — `position: fixed`, `z-index: 12..19`,
+     and `contain: layout` — and stripping the z-index outright still left two.
+     Nothing inside a window can out-stack another window by that route.
+     WHAT IS ACTUALLY LOAD-BEARING IS THE CLIP, and only one line was holding
+     it.  Fifty-five descendants deliberately overhang their own window's box
+     (the 44 px close target's negative margins are the biggest of them); the
+     same probe run with `overflow: hidden` taken away found one of them
+     painted AND hit-testable four pixels outside the window — a control from
+     one window, sitting over the window beside it.  On a 448 px phone every
+     window is the width of the screen, so "beside it" is always another
+     window.  That is the shape of what Josh is looking at.
+       `contain: paint` says "no descendant paints outside this box" at a level
+     a compositor does not get to re-decide per layer, which is where the
+     engine-specific bugs in this family live.  `isolation: isolate` states the
+     stacking half outright instead of leaving it inferred from three
+     properties that are each there for another reason — and it makes the
+     window its own BACKDROP ROOT, so a frosted surface inside a window can
+     never sample, or spill, past its edge.
+       COST ON GECKO: none, and that is measured rather than assumed.  One
+     session, three windows open, transport paused, screenshotted without /
+     with / without these two lines: sha 681d81d4e1568e22 all three times, byte
+     for byte — glass, outer shadow and every rect unchanged.  Repeated with
+     the Julia window and its live WebGPU canvas up: 7a4282c194f14354 x3.
+     (`contain: paint` clips DESCENDANTS, not this element's own box
+     decorations, which is why the outer shadow is still there.) */
+  contain: layout paint;
+  isolation: isolate;
+}
+/* index.html:3393-3395   was:  .kwin[hidden]  */
+.kwin.mir-modwindow[hidden] { display: none; }
+/* index.html:3394-3399   was:  .kwin.kwin-device-hidden  */
+.kwin.mir-modwindow.kwin-device-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+/* index.html:3210-3213   was:  .kwin.resizing, .jwin.resizing  */
+.kwin.mir-modwindow.resizing {
+  box-shadow: var(--glass-shadow), var(--glass-bevel),
+              0 0 0 1px hsl(var(--hue-acc) var(--sat-acc) 68% / 0.55);
+}
+
+/* THE BAR IS HIDDEN BY THIS ONE LINE in every skin. barlessAlways still empties it into .m2pre; this is what stops the empty box showing. */
+/* index.html:3403   was:  .kwin.kwin-chips-only > .kwin-bar  */
+.kwin.mir-modwindow.kwin-chips-only > .kwin-bar { display: none !important; }
+/* index.html:3412-3433   was:  .kwin-bar  */
+.mir-modwindow .kwin-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: var(--kwin-bar-h);          /* ⟡ WAVE-UISCALE: was 26px */
+  padding: 0 var(--sp-1) 0 var(--sp-4);
+  border-bottom: var(--glass-border) solid var(--glass-hairline);
+  background: var(--bar-raise);       /* ⟡ W-NIGHTFIX-1 — was --glass-raise */
+  cursor: move;
+  touch-action: none;
+  /* ⟡ W-FROST-2 — the -webkit- twin, found by frostgate2's source scan.  This
+     bar IS the frost bar-chip and it is a DRAG HANDLE; WebKit wanted
+     `user-select` prefixed until Safari 17, and the failure mode there is a
+     text-selection drag fighting the window move.  The house pairs these
+     everywhere else (seven of nine already did). */
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* index.html:3432-3445   was:  .kwin-title  */
+.mir-modwindow .kwin-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--fs-tiny);
+  letter-spacing: var(--tr-wider);
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  text-shadow: var(--ink-shadow);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* index.html:3444-3464   was:  .kwin-close  */
+.mir-modwindow .kwin-close {
+  flex: 0 0 auto;
+  /* ⟡ WAVE-UI — 22x20 -> a 44x44 TARGET around the same 22x20 of ink.  A close
+     button that is hard to hit is the single most annoying control in any UI,
+     and it was the smallest target in this app by a factor of four in area.
+     ⟡ WAVE-UISCALE: 44px -> var(--touch), which IS 44px at scale 1.00. */
+  width: var(--touch); height: var(--touch);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -12px -10px -12px 0;
+  padding: 0;
+  line-height: 1;
+  font-size: var(--fs-lead);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--dim);
+}
+/* index.html:3463-3465   was:  .kwin-close:active  */
+.mir-modwindow .kwin-close:active { background: var(--glass-press); color: var(--fg); }
+/* index.html:3467   was:  .kwin-tabs  */
+.mir-modwindow .kwin-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 2px;
+  margin: var(--sp-2) var(--sp-2) 0;
+  padding: 2px;
+  border-radius: var(--r-md);
+  background: var(--glass-well);
+  border: var(--glass-border) solid var(--glass-hairline);
+}
+/* index.html:3479   was:  .kwin-tabs[hidden]  */
+.mir-modwindow .kwin-tabs[hidden] { display: none; }
+
+/* THE CHIPS ARE .kwin-tab TOO (button.kwin-tab.crail-chip), and the chip rail is a DOM SIBLING of the window — hence the second part. */
+/* index.html:3479-3497   was:  .kwin-tab  */
+.mir-modwindow .kwin-tab, .kwin-chiprail[aria-label="MODULATION window controls"] .kwin-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 4px 2px 3px;
+  font: inherit;
+  font-size: var(--fs-tiny);
+  letter-spacing: var(--tr-wide);
+  line-height: 1.4;
+  color: var(--dim);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+/* index.html:3496-3498   was:  .kwin-tab:active  */
+.mir-modwindow .kwin-tab:active, .kwin-chiprail[aria-label="MODULATION window controls"] .kwin-tab:active { background: var(--glass-press); }
+/* index.html:3521-3535   was:  .kwin-body  */
+.mir-modwindow .kwin-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  touch-action: pan-y;
+  /* a full-weight scrollbar inside a 300 px glass window is a white slab: the
+     MOD window's dynamic row list is the case that made this visible */
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-groove-hot) transparent;
+}
+/* index.html:3534-3536   was:  .kwin-panel  */
+.mir-modwindow .kwin-panel { display: none; }
+/* index.html:3535-3537   was:  .kwin-panel.on  */
+.mir-modwindow .kwin-panel.on { display: block; }
+/* index.html:3538   was:  .kwin-panel:empty::before  */
+.mir-modwindow .kwin-panel:empty::before {
+  content: "—";
+  display: block;
+  padding: var(--sp-5) 0;
+  text-align: center;
+  color: var(--dim);
+  opacity: 0.5;
+}
+
+/* THE CONTROL LAYER. window.js's registerControl puts .kctl / .ctl-round / .ctl-sel / .ctl-frozen on every knob; file 01 styles them but never declares these four. */
+/* index.html:3545-3579   was:  .kctl  */
+.mir-modwindow .kctl {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 240ms ease,
+              filter 240ms ease,
+              box-shadow 240ms ease;
+  outline: none;                /* the ring below IS the focus indicator */
+}
+/* index.html:3578-3585   was:  .kctl.ctl-sel  */
+.mir-modwindow .kctl.ctl-sel {
+  filter: brightness(1.16) saturate(1.08);
+  box-shadow: 0 0 0 1.5px hsl(var(--hue-acc) calc(var(--sat-acc) + 8%) 64% / 0.85),
+              0 2px 16px -2px hsl(var(--hue-acc) calc(var(--sat-acc) + 8%) 52% / 0.35);
+  border-radius: 8px;           /* the ring follows a soft concentric corner */
+}
+/* index.html:3584-3589   was:  .kctl.ctl-round.ctl-sel  */
+.mir-modwindow .kctl.ctl-round.ctl-sel { border-radius: 50%; }
+/* index.html:3588-3594   was:  .ksel .kctl:not(.ctl-sel)  */
+.mir-modwindow .ksel .kctl:not(.ctl-sel) {
+  opacity: 0.72;
+  transform: scale(0.96);
+}
+/* index.html:4660   was:  .modwin .kwin-body  */
+.modwin.mir-modwindow .kwin-body { padding: var(--sp-2) var(--sp-4) 9px; }
+
+/* THE BUTTON RESET, AND EXTRACT FILE 02 DOES NOT CARRY IT.  index.html has exactly four bare element selectors — html, body, button and button:active — and file 02's filter ("every rule whose selector names kwin or modwin") could not see them.  MEASURED, headless, with and without this rule: 44 of the window's 48 buttons lose cursor:pointer; .m2zoom, .m2audgrip, .m2audmac, .modxport and .modtempo fall back to the UA font at 13.33px because they rely on `font: inherit`; and .m2pickb loses its 5px 9px padding for the UA's 1px 6px.  It is required. */
+/* index.html:4802   was:  button  */
+.mir-modwindow button, .kwin-chiprail[aria-label="MODULATION window controls"] button {
+  font: inherit;
+  color: var(--fg);
+  background: var(--glass-raise);
+  border: var(--glass-border) solid var(--glass-border-color);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) 9px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* index.html:4812   was:  button:active  */
+.mir-modwindow button:active, .kwin-chiprail[aria-label="MODULATION window controls"] button:active { background: var(--glass-press); }
+/* index.html:6917   was:  .kwin-tab.on  */
+.mir-modwindow .kwin-tab.on, .kwin-chiprail[aria-label="MODULATION window controls"] .kwin-tab.on {
+  color: var(--fg);
+  background: var(--bar-raise);
+  box-shadow: inset 0 0 0 var(--glass-border) var(--glass-border-color);
+  font-weight: var(--w-bold);
+  text-shadow: var(--ink-shadow);
+}
+
+/* THE FLOATING CHIP RAIL. Scoped by the same byte-exact aria-label hook file 01 already uses. The label is (title || root.id) + " window controls" — pass title: "MODULATION" or the chips lose their material. */
+/* index.html:7098   was:  .crail.crail-float.kwin-chiprail  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] {
+  position: fixed;
+  width: var(--chrome-chip-target);
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(7px * var(--ui-scale));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* index.html:7116-7140   was:  .crail.crail-float.kwin-chiprail .crail-chip  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 0;
+  flex: 0 0 var(--chrome-chip-target);
+  width: var(--chrome-chip-target);
+  height: var(--chrome-chip-target);
+  min-width: var(--chrome-chip-target);
+  min-height: var(--chrome-chip-target);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dim);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font: 700 var(--fs-small)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+/* index.html:7139-7158   was:  .crail.crail-float.kwin-chiprail .crail-chip::before  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: var(--chrome-chip-disc);
+  height: var(--chrome-chip-disc);
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  border: var(--glass-border) solid var(--glass-border-color);
+  border-radius: 50%;
+  background-color: hsl(var(--glass-tint) / var(--glass-opacity));
+  background-image: linear-gradient(180deg, var(--gl-fill-a), var(--gl-fill-b));
+  box-shadow: inset 0 var(--glass-border) 0 var(--glass-sheen), var(--glass-bevel);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+/* index.html:7157-7159   was:  .crail.crail-float.kwin-chiprail .crail-chip:focus-visible  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip:focus-visible { outline: 1px solid var(--fg-soft); }
+/* index.html:7158-7160   was:  .crail.crail-float.kwin-chiprail .crail-chip.on  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip.on { color: var(--fg); outline: none; }
+/* index.html:7159-7165   was:  .crail.crail-float.kwin-chiprail .crail-chip:active::before, .crail.crail-float.kwin-chiprail .crail-chip.on::before  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip:active::before,
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip.on::before {
+  background-color: var(--bar-raise);
+  border-color: var(--glass-border-color);
+}
+/* index.html:7164-7169   was:  .crail.crail-float.kwin-chiprail .crail-grip  */
+.crail.crail-float.kwin-chiprail[aria-label="MODULATION window controls"] .crail-grip {
+  cursor: move;
+  touch-action: none;
+}
+/* index.html:7168-7177   was:  .kwin-grip-dots  */
+.kwin-chiprail[aria-label="MODULATION window controls"] .kwin-grip-dots {
+  width: calc(14px * var(--ui-scale));
+  height: calc(14px * var(--ui-scale));
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(2px * var(--ui-scale));
+  pointer-events: none;
+}
+/* index.html:7176-7185   was:  .kwin-grip-dots > i  */
+.kwin-chiprail[aria-label="MODULATION window controls"] .kwin-grip-dots > i {
+  width: calc(2px * var(--ui-scale));
+  height: calc(2px * var(--ui-scale));
+  align-self: center;
+  justify-self: center;
+  border-radius: 50%;
+  background: currentColor;
+}
+/* index.html:7200   was:  html body .crail.crail-float  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] {
+  width: var(--chrome-chip-target);
+  gap: var(--sp-3);
+}
+/* index.html:7203-7211   was:  html body .crail.crail-float .crail-chip  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chip {
+  flex-basis: var(--chrome-chip-target);
+  width: var(--chrome-chip-target);
+  height: var(--chrome-chip-target);
+  min-width: var(--chrome-chip-target);
+  min-height: var(--chrome-chip-target);
+}
+/* index.html:7210-7218   was:  html body .crail.crail-float .crail-chip::before  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chip::before {
+  left: 50%;
+  top: 50%;
+  width: var(--chrome-chip-disc);
+  height: var(--chrome-chip-disc);
+  transform: translate(-50%, -50%);
+}
+/* index.html:7217-7223   was:  html body .crail.crail-float .crail-chip.on  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chip.on {
+  color: var(--fg);
+  outline: none;
+  text-shadow: var(--ink-shadow);
+}
+/* index.html:7222-7228   was:  html body .crail.crail-float .crail-chip.on::before  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chip.on::before {
+  background-color: var(--bar-raise);
+  border-color: var(--glass-border-color);
+  box-shadow: inset 0 var(--glass-border) 0 var(--glass-sheen), var(--glass-bevel);
+}
+/* index.html:7227-7232   was:  html body .crail.crail-float .crail-chip:active::before  */
+html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chip:active::before {
+  background-color: var(--glass-press);
+  border-color: var(--glass-border-color);
+}
+
+/* THE RUN SCROLLS HORIZONTALLY AND SHOWS NO BAR. */
+/* index.html:7390-7393   was:  #modwin .m2run  */
+#modwin.mir-modwindow .m2run { scrollbar-width: none; }
+/* index.html:7392-7394   was:  #modwin .m2run::-webkit-scrollbar  */
+#modwin.mir-modwindow .m2run::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PART B — THE WINDOW'S OWN STYLESHEET.
+
+   SOURCE  : anim.js:1782–3306, the template literal inside injectMod2Css(),
+             which the running app mounts as <style id="mod2css">.
+   TAKEN   : byte-for-byte, comments and whitespace included.  The nine ${…}
+             template holes are substituted with the integers anim.js
+             interpolates, so the text below is what the BROWSER receives:
+               M2_WORK_LANE_H 52 · M2_SLOT_H 64 · M2_PREBAR_W 294
+               M2_TIMING_W 450 · M2_STRIP_W 64 · M2_RAIL_W 224
+               M2_CARD.E.h 368 · M2_CARD.C.w 320 · M2_CARD.C.h 368
+   CHANGED : selector text only, by one mechanical law.  See MANIFEST.md.
+             Every declaration block below is untouched.
+
+   THE SCOPING LAW, in full — each comma-separated selector part takes exactly
+   one of six branches:
+
+     #modwin…                  →  #modwin.mir-modwindow…      (compound)
+     .modwin…                  →  .modwin.mir-modwindow…      (compound)
+     :root… #modwin…           →  …#modwin.mir-modwindow…     (compound)
+     :root  (subject)          →  UNCHANGED — the material-token ladder
+     .kwin-chiprail[aria-label="MODULATION window controls"]…
+                               →  UNCHANGED — already scoped by the label
+     .m2ghost / .m2ring* / .m2clr* / .m2span* / [data-m2target]
+                               →  UNCHANGED — these attach to HOST controls
+     everything else           →  .mir-modwindow <selector>    (descendant)
+
+   The 20 --m2-mat-* tokens stay in this file, on :root, exactly as anim.js
+   writes them.  That is what makes the window portable: it carries its own
+   material and borrows only the accent hues and the fonts.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.modwin.mir-modwindow .kwin-panel[data-tab="mod"] { display: none; }
+/* The panel may not be taller than the body it sits in. */
+.modwin.mir-modwindow .kwin-panel[data-tab="mod"].on { display: flex; flex-direction: column;
+  min-height: 0; max-height: 100%; overflow: visible; padding: 0; }
+/* The retired tab strip stays hidden. */
+.modwin.mir-modwindow.m2retired .kwin-tabs { display: none; }
+
+/* One rigid work-bar lane.  Its children are two independent boxes, anchored
+   by geometry rather than flex growth or device content height.  BARS-012B
+   deliberately lets those boxes paint beyond the rack-owned window. */
+#modwin.mir-modwindow.modwin { overflow: visible; contain: layout; }
+#modwin.mir-modwindow.modwin > .kwin-body { overflow: visible; }
+.mir-modwindow .m2foot { order: 2; flex: 0 0 52px; height: 52px;
+  position: relative; z-index: 9; padding: 0; overflow: visible; pointer-events: none; }
+.mir-modwindow .m2bars-top .m2foot { order: 0; }
+.mir-modwindow .m2root { order: 1; overflow: hidden; }
+.mir-modwindow .m2hint { order: 3; }
+.mir-modwindow .m2workbar { position: absolute; left: 0; top: 0; height: 52px;
+  box-sizing: border-box; display: flex; flex-wrap: nowrap; align-items: center;
+  gap: 2px; padding: 2px 7px 3px; overflow: hidden; pointer-events: auto;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: 16px; }
+.mir-modwindow .m2prebar { flex: 0 0 auto; width: 294px; }
+.mir-modwindow .m2pre { width: 450px; }
+.mir-modwindow .m2precore { display: flex; flex: 0 0 calc(var(--m2-precore-w, 294px) - 14px - var(--glass-border) - var(--glass-border));
+  min-width: 0; height: 44px; align-items: center; gap: 2px; }
+/* WindowKit's Frost bar host has a historical wrapping recipe.  Both current
+   work bars now use this single fixed-height grammar in every material. */
+:root.skin-frost #modwin.mir-modwindow.kwin-frost.kwin-barless .m2workbar {
+  flex-wrap: nowrap; gap: 2px; margin: 0; padding: 2px 7px 3px;
+  height: 52px; border-radius: 16px; }
+.mir-modwindow .m2prename { flex: 1 1 auto; min-width: 44px; height: 44px; box-sizing: border-box;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: 5px;
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.94); padding: 2px 6px;
+  font: 500 10.5px var(--font-sans); letter-spacing: 0.05em;
+  text-align: center; -webkit-appearance: none; appearance: none; }
+.mir-modwindow .m2prename::placeholder { color: rgba(255,255,255,0.94); opacity: 1; }
+.mir-modwindow .m2prename:focus { outline: 0; border-color: var(--acc); background: rgba(255,255,255,0.11); }
+/* EDITED SINCE IT WAS LOADED — the DAW asterisk, said in colour instead of ink
+   so the name the user typed keeps every character it had. */
+.mir-modwindow .m2prename.m2predirty { border-color: hsl(var(--hue-acc) var(--sat-acc) 62% / 0.55); }
+.mir-modwindow .m2prenav, .mir-modwindow .m2presave, .mir-modwindow .m2predel, .mir-modwindow .m2predead {
+  flex: 0 0 auto; min-width: 44px; height: 44px; min-height: 44px; padding: 0;
+  border-radius: 6px; border: var(--glass-border) solid var(--glass-hairline);
+  background: transparent; color: rgba(255,255,255,0.72);
+  font: 600 11px var(--font-sans); letter-spacing: 0.06em; }
+.mir-modwindow .m2prenav { color: var(--acc); font-size: 15px; }
+/* The save button, a 44 px disc. */
+.mir-modwindow .m2presave { min-width: 44px; width: 44px; border-radius: 50%; padding: 0; color: var(--acc);
+  display: flex; align-items: center; justify-content: center; }
+.mir-modwindow .m2presave svg { width: 21px; height: 21px; display: block; pointer-events: none; }
+.mir-modwindow .m2presave.m2arm { width: 44px; min-width: 44px; border-radius: 6px; padding: 0;
+  font-size: 7px; }
+.mir-modwindow .m2prenav:active:not(:disabled), .mir-modwindow .m2presave:active:not(:disabled),
+.mir-modwindow .m2predel:active:not(:disabled) { background: var(--glass-press); color: #fff; }
+.mir-modwindow .m2prenav:disabled, .mir-modwindow .m2presave:disabled, .mir-modwindow .m2predel:disabled { opacity: 0.30; }
+/* ARMED — one tap asks, the second acts.  A confirm that costs a modal is a
+   confirm nobody reads; a button that says SURE for four seconds is one. */
+.mir-modwindow .m2presave.m2arm { border-color: var(--acc); color: var(--acc); }
+.mir-modwindow .m2predel.m2arm { border-color: var(--bad); color: var(--bad); }
+/* DEAD SENDS — the MODUX collision idiom, verbatim: var(--bad) on the thing
+   that is dead, and nothing moved out from under the user. */
+.mir-modwindow .m2predead { color: var(--bad); border-color: var(--bad); font-size: 10px; }
+.mir-modwindow .m2predead.off { display: none; }
+/* The warning's inspector floats from the 46 px extension.  It is outside the
+   work bar's clipped flow, so opening it cannot bargain with the preset core. */
+.mir-modwindow .m2deadpick { position: absolute; width: 320px; max-width: calc(100vw - 16px); z-index: 43;
+  box-sizing: border-box; border-radius: 12px; padding: 7px;
+  border: var(--glass-border) solid var(--glass-hairline);
+  display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.mir-modwindow .m2deadpick[hidden] { display: none; }
+.mir-modwindow .m2deadhead { flex: 0 0 44px; min-height: 44px; display: flex; align-items: center;
+  justify-content: space-between; gap: 8px; padding-left: 8px; color: var(--bad);
+  font: 700 9px var(--font-sans); letter-spacing: .12em; }
+.mir-modwindow .m2deadclose, .mir-modwindow .m2deadremove { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px;
+  min-height: 44px; padding: 0; border-radius: 7px;
+  border: var(--glass-border) solid var(--glass-hairline); background: transparent;
+  color: var(--fg-soft); font: 700 7px var(--font-sans); letter-spacing: .08em; }
+.mir-modwindow .m2deadclose { color: var(--bad); font-size: 13px; }
+.mir-modwindow .m2deadclose:active, .mir-modwindow .m2deadremove:active { background: var(--glass-press); color: var(--fg); }
+.mir-modwindow .m2deadlist { min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  touch-action: pan-y; display: flex; flex-direction: column; gap: 4px; }
+.mir-modwindow .m2deadrow { flex: 0 0 auto; min-height: 62px; display: grid;
+  grid-template-columns: minmax(0,1fr) 44px; grid-template-rows: auto auto;
+  column-gap: 7px; padding: 7px; box-sizing: border-box; border-radius: 8px;
+  border: var(--glass-border) solid var(--glass-hairline); background: rgba(255,255,255,.04); }
+.mir-modwindow .m2deadroute { min-width: 0; color: var(--fg); font: 650 9px var(--font-sans);
+  letter-spacing: .05em; line-height: 1.35; overflow-wrap: anywhere; }
+.mir-modwindow .m2deadtarget { color: var(--acc2); }
+.mir-modwindow .m2deadmeta { min-width: 0; color: var(--dim); font: 600 7px var(--font-sans);
+  letter-spacing: .09em; line-height: 1.35; overflow-wrap: anywhere; }
+.mir-modwindow .m2deadwhy { color: var(--bad); }
+.mir-modwindow .m2deadremove { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+/* The former free-placement grips stay absent: the lane chip is now the one
+   placement control and moves both bars together. */
+.mir-modwindow .m2bargrip { flex: 0 0 auto; min-width: 44px; width: 44px; height: 44px; min-height: 44px;
+  padding: 0; border: 0; border-radius: 8px; background: transparent;
+  color: var(--acc2); touch-action: none;
+  display: none; align-items: center; justify-content: center; }
+.mir-modwindow .m2bargrip svg { width: 20px; height: 20px; display: block; pointer-events: none; }
+.mir-modwindow .m2bargrip:active { color: var(--fg); background: var(--glass-press); }
+/* a bar off its dock says so quietly — the accent rim is the only ink it gains */
+.mir-modwindow .m2barfloat { border-color: var(--acc2); }
+/* The timing bar's legacy grip sits out of the flow. */
+.mir-modwindow .m2bargrip.m2gripabs { position: absolute; right: 0; bottom: 0; }
+/* A floating grip is fixed to the viewport. */
+.mir-modwindow .m2bargrip.m2gripfloat { position: fixed; z-index: 45; }
+
+/* The size law's four custom properties. */
+/* The material tokens: the device size, the view height and the recess colours. */
+.mir-modwindow .m2root { --m2-device-w: 360px; --m2-device-h: 368px; --m2-view-h: 368px;
+  --m2-recess: var(--m2-mat-recess);
+  --m2-recess-deep: var(--m2-mat-recess-deep);
+  --m2-plate: var(--m2-mat-chassis);
+  position: relative;
+  display: flex; align-items: stretch; gap: 0; flex: 0 0 auto;
+  height: var(--m2-view-h); min-height: 0; }
+
+/* ── THE MACRO RAIL ──────────────────────────────────────────────────────── */
+/* The rail is the view's height, not the card's. */
+/* The rail is the view's height, not the card's. */
+.mir-modwindow .m2rail { flex: 0 0 auto; width: 224px; height: var(--m2-view-h);
+  max-height: var(--m2-view-h); box-sizing: border-box;
+  display: flex; flex-direction: column; min-height: 0;
+  border-right: var(--glass-border) solid var(--glass-hairline); }
+/* The rail head. */
+.mir-modwindow .m2railhead { flex: 0 0 auto; padding: 3px 9px 2px; color: var(--acc2);
+  font: 700 10.5px var(--font-sans); letter-spacing: 0.13em; }
+.mir-modwindow .m2slots { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; padding: 0 5px 4px; scrollbar-width: thin; }
+/* The slot list's scrollbar is drawn, not faded. */
+.mir-modwindow .m2slots::-webkit-scrollbar { width: 8px; }
+/* The scrollbar track and thumb. */
+.mir-modwindow .m2slots::-webkit-scrollbar-track { background: var(--m2-recess); border-radius: 4px; }
+.mir-modwindow .m2slots::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.30); border-radius: 4px; }
+.mir-modwindow .m2slots::-webkit-scrollbar-thumb:active { background: var(--acc); }
+/* the +/− row: two 44 px halves of one 44 px row, so the rail's macro count is
+   a control and costs the slot stack no height at all */
+/* pinned at the foot of the RAIL, outside the .m2slots scroller, so growing the rail can
+   never push the button that grows it out of view — see buildMod2 */
+.mir-modwindow .m2macrow { flex: 0 0 auto; display: flex; align-items: stretch; gap: 3px;
+  padding: 2px 5px 6px; }
+.mir-modwindow .m2macadd, .mir-modwindow .m2macdel { flex: 1 1 0; min-width: 44px; height: 44px; min-height: 44px;
+  padding: 0; border-radius: 7px; border: var(--glass-border) solid var(--glass-hairline);
+  background: transparent; color: var(--acc2);
+  font: 400 19px var(--font-sans); line-height: 1; }
+.mir-modwindow .m2macdel { color: rgba(255,255,255,0.62); }
+.mir-modwindow .m2macadd:active:not(:disabled) { background: var(--acc2-soft); }
+.mir-modwindow .m2macdel:active:not(:disabled) { background: var(--glass-press); color: #fff; }
+.mir-modwindow .m2macadd:disabled, .mir-modwindow .m2macdel:disabled { opacity: 0.30; }
+/* Every slot is one fixed controller row.  Its three permanent zones are the
+   route grip, a future-ready 44 px number seat, and the information face. */
+.mir-modwindow .m2slot { position: relative; height: 64px; box-sizing: border-box;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: 8px;
+  padding: 0; margin-bottom: 2px; background: rgba(255,255,255,0.035); overflow: hidden; }
+.mir-modwindow .m2slot.m2armed { background: var(--acc2-soft); }
+/* A slot whose macro is gone. */
+.mir-modwindow .m2slot.m2dead { border-color: var(--bad); }
+.mir-modwindow .m2slot.m2dead .m2num { border-color: var(--bad); color: var(--bad); }
+.mir-modwindow .m2slotrow { display: grid; grid-template-columns: 44px 44px minmax(0, 1fr);
+  align-items: stretch; gap: 4px; height: calc(64px - 2px); }
+/* the 4-way "ICON DRAGABLE" handle: a real 44 px target with a small icon in it */
+.mir-modwindow .m2grip { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; min-height: 44px;
+  align-self: center; padding: 0; border: 0;
+  background: transparent; color: var(--acc2); touch-action: none; display: flex;
+  align-items: center; justify-content: center; border-radius: 8px; }
+.mir-modwindow .m2grip svg { width: 22px; height: 22px; display: block; pointer-events: none; }
+.mir-modwindow .m2grip:active { color: var(--fg); background: var(--glass-press); }
+.mir-modwindow .m2numseat { position: relative; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 100%; padding: 0; border: 0; border-radius: 7px;
+  background: transparent; touch-action: none; cursor: ns-resize; }
+.mir-modwindow .m2numseat:active, .mir-modwindow .m2numseat.drag { background: rgba(255,255,255,0.05); }
+.mir-modwindow .m2numseat:focus-visible { outline: 1px solid rgba(255,255,255,0.72); outline-offset: -3px; }
+.mir-modwindow .m2num { position: relative; z-index: 1; flex: 0 0 auto; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.2px solid rgba(255,255,255,0.55); color: rgba(255,255,255,0.9);
+  font: 600 10px var(--font-num); line-height: 1; }
+.mir-modwindow .m2depthring { position: absolute; z-index: 2; left: 5px; top: 50%;
+  width: 34px; height: 34px; margin-top: -17px; overflow: visible;
+  pointer-events: none; transform: rotate(-90deg); }
+.mir-modwindow .m2depthtrack, .mir-modwindow .m2deptharc { fill: none; stroke-width: 2.2; }
+.mir-modwindow .m2depthtrack { stroke: rgba(255,255,255,0.13); }
+.mir-modwindow .m2deptharc { stroke: var(--acc); stroke-linecap: round; }
+.mir-modwindow .m2numseat.m2zero .m2deptharc { opacity: 0; }
+.mir-modwindow .m2numseat.drag .m2deptharc, .mir-modwindow .m2numseat.ctl-sel .m2deptharc { stroke-width: 3; }
+/* The information face is still the shipped value slider; only its paint is
+   split into name/value, signal, incoming activity, and route state. */
+.mir-modwindow .m2val, .mir-modwindow .m2pad { position: relative; min-width: 0; height: 100%; box-sizing: border-box;
+  border-radius: 6px; overflow: hidden; border: 0; background: transparent; touch-action: none; }
+.mir-modwindow .m2vinfo { position: absolute; left: 5px; right: 5px; top: 4px; height: 20px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 32px; align-items: center; gap: 4px; }
+.mir-modwindow .m2vname { min-width: 0; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis; text-align: left;
+  color: rgba(255,255,255,0.94); font: 600 9.5px var(--font-sans); letter-spacing: 0.035em; }
+.mir-modwindow .m2vnum { color: rgba(255,255,255,0.88); text-align: right;
+  font: 650 9px var(--font-num); font-variant-numeric: tabular-nums; line-height: 1; }
+.mir-modwindow .m2signal { position: absolute; left: 6px; right: 6px; top: 29px; height: 12px;
+  pointer-events: none; overflow: visible; }
+.mir-modwindow .m2signal::before { content: ""; position: absolute; left: 0; right: 0; top: 5px;
+  height: 1px; background: rgba(255,255,255,0.20); }
+.mir-modwindow .m2vfill { position: absolute; left: 0; top: 5px; height: 1px; pointer-events: none;
+  width: calc(var(--fill, 0) * 100%); background: rgba(255,255,255,0.44); }
+.mir-modwindow .m2vedge { position: absolute; top: 2px; width: 7px; height: 7px; border-radius: 50%;
+  pointer-events: none; background: var(--fg); box-shadow: 0 0 0 1px rgba(0,0,0,0.48);
+  left: calc(var(--fill, 0) * 100%); margin-left: -3.5px; }
+.mir-modwindow .m2spark { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+  fill: none; stroke: var(--acc2); stroke-width: 1.15; opacity: 0; }
+.mir-modwindow .m2val.m2driven .m2spark { opacity: 0.78; }
+.mir-modwindow .m2vmeta { position: absolute; left: 6px; right: 6px; bottom: 4px; height: 12px;
+  display: flex; align-items: center; gap: 4px; pointer-events: none;
+  font: 700 7px var(--font-sans); letter-spacing: 0.08em; }
+.mir-modwindow .m2drive { color: rgba(255,255,255,0.32); }
+.mir-modwindow .m2val.m2driven .m2drive { color: var(--acc2); }
+.mir-modwindow .m2route { margin-left: auto; color: rgba(255,255,255,0.28); white-space: nowrap; }
+.mir-modwindow .m2route.m2one { color: rgba(255,255,255,0.68); }
+.mir-modwindow .m2route.m2many { color: var(--acc); }
+.mir-modwindow .m2slot.m2dead .m2route { color: var(--bad); }
+.mir-modwindow .m2val:active { background: rgba(255,255,255,0.055); }
+/* Rename is an in-place overlay over the information face.  It leaves the
+   route grip exposed and never changes this or any neighbouring row's height. */
+.mir-modwindow .m2namerow { position: absolute; z-index: 3; left: 48px; right: 4px; top: 9px;
+  height: 44px; display: flex; align-items: stretch; gap: 3px; margin: 0; padding: 0; }
+.mir-modwindow .m2namerow[hidden] { display: none; }
+.mir-modwindow .m2name { display: block; flex: 1 1 auto; min-width: 0; height: 44px; box-sizing: border-box;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: 5px;
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.94); padding: 2px 4px;
+  font: 500 9.5px var(--font-sans); letter-spacing: 0.04em;
+  text-align: center; -webkit-appearance: none; appearance: none; }
+.mir-modwindow .m2name:focus { outline: 0; border-color: var(--acc); background: rgba(255,255,255,0.11); }
+.mir-modwindow .m2mclr { flex: 0 0 auto; width: 44px; min-width: 44px; height: 44px; min-height: 44px;
+  padding: 0; border-radius: 5px; border: var(--glass-border) solid var(--glass-hairline);
+  background: transparent; color: rgba(255,255,255,0.62); font-size: 13px; line-height: 1; }
+.mir-modwindow .m2mclr:active:not(:disabled) { background: var(--glass-press); color: #fff; }
+.mir-modwindow .m2mclr:disabled { opacity: 0.30; }
+/* The trigger uses the same information anatomy; its signal line is the live
+   hit level and the face remains the existing press/hold target. */
+.mir-modwindow .m2pad { padding: 0; color: var(--acc2); }
+.mir-modwindow .m2padin { position: absolute; left: 0; top: 4px; display: block; height: 3px;
+  width: calc(var(--hit, 0) * 100%); border-radius: 2px; background: var(--acc2);
+  pointer-events: none; opacity: calc(0.38 + 0.62 * var(--hit, 0)); }
+.mir-modwindow .m2pad:active, .mir-modwindow .m2pad.m2held { background: var(--acc2-soft); border-color: var(--acc2); }
+/* an EMPTY pad is not dead — it fires nothing yet and says so quietly */
+.mir-modwindow .m2pad.m2empty .m2padin { background: rgba(255,255,255,0.42); }
+/* The macro chooser sheet. */
+.mir-modwindow .m2pick.m2mpick { left: 8px; right: auto; top: auto; bottom: 58px; transform: none;
+  min-width: 124px; }
+/* The macro assignment box. */
+.mir-modwindow .m2macbox { display: flex; align-items: stretch; gap: 3px; margin-top: auto; }
+.mir-modwindow .m2capbox { display: flex; align-items: stretch; gap: 3px; }
+.mir-modwindow .m2capbox .m2maccap { flex: 1 1 0; min-width: 0; margin-top: 1px; }
+
+/* ── THE DEVICE RUN ──────────────────────────────────────────────────────── */
+.mir-modwindow .m2run { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; align-items: flex-start;
+  gap: 7px; overflow-x: auto; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 6px 7px 8px; container-type: inline-size; }
+.mir-modwindow .m2dev { flex: 0 0 auto; width: var(--m2-device-w); height: var(--m2-device-h);
+  box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;
+  position: relative; border-radius: 16px; }
+.mir-modwindow .m2dev.m2cmp { width: 320px; height: 368px; }
+/* A device card without glass. */
+.mir-modwindow .m2dev:not(.glass) { border: var(--glass-border) solid var(--glass-hairline);
+  background: rgba(255,255,255,0.045); }
+.mir-modwindow .m2dev.m2off .m2body, .mir-modwindow .m2dev.m2off .m2knobs, .mir-modwindow .m2dev.m2off .m2lfocmpzone { opacity: 0.42; }
+.mir-modwindow .m2head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  gap: 4px; padding: 2px 5px; height: 48px; min-height: 48px; }
+.mir-modwindow .m2headl { min-width: 0; display: flex; align-items: center; gap: 3px; overflow: hidden; }
+.mir-modwindow .m2kind { font: 700 13px var(--font-sans); letter-spacing: 0.09em;
+  color: var(--acc); }
+.mir-modwindow .m2dev.env .m2kind { color: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+.mir-modwindow .m2bank { display: flex; align-items: center; justify-content: center; gap: 1px;
+  width: 46px; height: 44px; min-height: 44px; padding: 0; border-radius: 6px;
+  border: var(--glass-border) solid var(--glass-hairline); background: transparent; }
+.mir-modwindow .m2bank span { font: 700 12px var(--font-num); color: rgba(255,255,255,0.30); }
+.mir-modwindow .m2bank .m2bslash { color: rgba(255,255,255,0.30); font-weight: 400; }
+.mir-modwindow .m2bank span.on { color: var(--acc); }
+.mir-modwindow .m2bank:active { background: var(--glass-press); }
+.mir-modwindow .m2spacer { flex: 1 1 auto; }
+/* The device head. */
+/* The two zones never wrap: utilities may disappear, but the right anchor is
+   always the device edge and Power/Close remain its final two seats. */
+.mir-modwindow .m2headr { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+/* The head rules, on all three device kinds. */
+/* An expanded device's head does not shrink. */
+.mir-modwindow .m2dev:not(.m2min) .m2head { flex-shrink: 0; }
+.mir-modwindow .m2modelabel { flex: 0 0 auto; color: rgba(255,255,255,0.38);
+  font: 700 7px var(--font-sans); letter-spacing: 0.08em; }
+/* Compact spends header room on identity and status, not clipboard/reorder. */
+.mir-modwindow .m2dev.m2cmp .m2ab, .mir-modwindow .m2dev.m2cmp .m2move { display: none; }
+/* The fold button. */
+.mir-modwindow .m2fold { display: flex; align-items: center; gap: 4px; height: 40px; min-height: 40px;
+  padding: 0 4px; border: 0; border-radius: 6px; background: transparent; position: relative; }
+.mir-modwindow .m2fold::before { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  height: 44px; margin-top: -22px; }
+.mir-modwindow .m2fold:active { background: var(--glass-press); }
+.mir-modwindow .m2chev { flex: 0 0 auto; width: 0; height: 0; color: rgba(255,255,255,0.55);
+  border-left: 5px solid currentColor; border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent; transform: rotate(90deg);
+  transition: transform var(--m2-motion-structural, 120ms) var(--m2-motion-ease, ease); }
+.mir-modwindow .m2dev.m2min .m2chev { transform: rotate(0deg); }
+/* The A/B clipboard. */
+/* The A/B button, 28 px wide. */
+.mir-modwindow .m2ab { flex: 0 0 auto; width: 28px; height: 40px; min-height: 40px; padding: 0;
+  border-radius: 6px; border: var(--glass-border) solid var(--glass-hairline);
+  background: transparent; color: rgba(255,255,255,0.60); position: relative;
+  font: 700 7px var(--font-sans); letter-spacing: 0.04em; }
+.mir-modwindow .m2ab::before { content: ""; position: absolute; left: -2px; right: -2px; top: 50%;
+  height: 44px; margin-top: -22px; }
+.mir-modwindow .m2ab:active { background: var(--glass-press); color: var(--acc); }
+.mir-modwindow .m2ab[disabled] { opacity: 0.32; }
+/* THE REORDER ARROWS.  Presentation order and nothing else — mod.js's
+   moveSource carries the proof that a move cannot reach a routing. */
+.mir-modwindow .m2move { flex: 0 0 auto; width: 34px; height: 40px; min-height: 40px; padding: 0; border: 0;
+  border-radius: 6px; background: transparent; color: rgba(255,255,255,0.55);
+  font-size: 14px; line-height: 1; position: relative; }
+.mir-modwindow .m2move::before { content: ""; position: absolute; left: -2px; right: -2px; top: 50%;
+  height: 44px; margin-top: -22px; }
+.mir-modwindow .m2move:active { background: var(--glass-press); color: #fff; }
+.mir-modwindow .m2move[disabled] { opacity: 0.24; }
+/* The folded strip. */
+/* A folded strip is as tall as the device. */
+/* A folded device is 64 px wide and the view's height. */
+.mir-modwindow .m2dev.m2min { width: 64px; height: 368px; }
+.mir-modwindow .m2dev.m2min .m2body, .mir-modwindow .m2dev.m2min .m2knobs,
+.mir-modwindow .m2dev.m2min .m2bank, .mir-modwindow .m2dev.m2min .m2ab,
+.mir-modwindow .m2dev.m2min .m2trig, .mir-modwindow .m2dev.m2min .m2move,
+.mir-modwindow .m2dev.m2min .m2fold .m2kind, .mir-modwindow .m2dev.m2min .m2modelabel { display: none; }
+/* The folded strip keeps its power button. */
+/* The power button on a folded strip. */
+.mir-modwindow .m2dev.m2min .m2pow { order: 4; flex: 0 0 auto; margin: 0 auto; }
+.mir-modwindow .m2dev.m2min .m2head { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: center;
+  gap: 4px; height: 100%; min-height: 0; padding: 4px 2px 2px; }
+.mir-modwindow .m2dev.m2min .m2headl, .mir-modwindow .m2dev.m2min .m2headr { display: contents; }
+.mir-modwindow .m2dev.m2min .m2fold { order: 2; width: 100%; justify-content: center; height: 44px;
+  min-height: 44px; }
+/* The macro numeral on a folded strip. */
+/* the macro this strip drives, as a numeral — the fact that tells two folded
+   LFOs apart, and the mixer-channel number it reads as */
+.mir-modwindow .m2minnum { display: none; }
+/* The macro numeral is the macro switcher. */
+/* The macro numeral, last and larger. */
+.mir-modwindow .m2dev.m2min .m2minnum { display: flex; order: 5; flex: 0 0 auto;
+  align-items: center; justify-content: center;
+  width: 100%; height: 44px; min-height: 44px; padding: 0;
+  border: 0; background: transparent; position: relative;
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+  font: 700 21px var(--font-num); color: var(--acc); line-height: 1; }
+.mir-modwindow .m2dev.m2min .m2minnum:active { background: var(--glass-press); border-radius: 5px; }
+.mir-modwindow .m2dev.env.m2min .m2minnum { color: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+.mir-modwindow .m2dev.m2min .m2minnum.m2nomac { color: rgba(255,255,255,0.34); }
+/* THE BAY: the tall meter and the name lying on its side, which is the shape
+   Ableton's collapsed device has and the reason the strip can be this narrow */
+.mir-modwindow .m2minbay { display: none; }
+.mir-modwindow .m2dev.m2min .m2minbay { display: flex; order: 3; flex: 1 1 auto; min-height: 0;
+  align-items: stretch; justify-content: center; gap: 5px; width: 100%; }
+.mir-modwindow .m2minname { display: none; }
+.mir-modwindow .m2dev.m2min .m2minname { display: block; flex: 0 0 auto; max-height: 100%;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 600 9px var(--font-sans); letter-spacing: 0.09em;
+  color: rgba(255,255,255,0.62); overflow: hidden; white-space: nowrap;
+  text-overflow: ellipsis; }
+.mir-modwindow .m2meter { display: none; }
+.mir-modwindow .m2dev.m2min .m2meter { display: flex; flex: 0 0 auto; width: 11px; height: 100%;
+  align-items: flex-end; border-radius: 6px; background: rgba(255,255,255,0.13);
+  overflow: hidden; }
+.mir-modwindow .m2meterfill { display: block; width: 100%; height: 0%; background: var(--acc); }
+.mir-modwindow .m2dev.env .m2meterfill { background: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+.mir-modwindow .m2dev.m2min.m2off .m2meterfill { opacity: 0.32; }
+/* The move buttons stay reachable while folded. */
+/* The right-hand head group stops being a group on a strip. */
+.mir-modwindow .m2dev.m2min .m2headr { display: contents; }
+.mir-modwindow .m2dev.m2min .m2grab { order: 1; }
+.mir-modwindow .m2dev.m2min .m2x { display: flex; order: 6; flex: 0 0 auto; align-items: center;
+  justify-content: center; margin: 0 auto; }
+.mir-modwindow .m2trig { min-width: 48px; height: 44px; min-height: 44px; border-radius: 6px; padding: 0 8px;
+  border: var(--glass-border) solid var(--glass-hairline); background: transparent;
+  color: rgba(255,255,255,0.85); font: 600 10px var(--font-sans);
+  letter-spacing: 0.09em; }
+.mir-modwindow .m2trig:active { background: var(--glass-press); color: #fff; }
+/* TRIG lives in the ENV's switch column, 44 px wide. */
+.mir-modwindow .m2dev.env .m2sw .m2trig { min-width: 0; width: 100%; padding: 0 2px; }
+.mir-modwindow .m2pow { width: 40px; height: 40px; min-height: 40px; border-radius: 50%; padding: 0;
+  border: 1.5px solid rgba(255,255,255,0.4); background: transparent; position: relative;
+  display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); }
+.mir-modwindow .m2pow::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; border-radius: 50%; }
+.mir-modwindow .m2pow svg { width: 15px; height: 15px; pointer-events: none; }
+.mir-modwindow .m2pow.on { background: transparent; border-color: var(--acc); color: var(--acc);
+  box-shadow: none; }
+.mir-modwindow .m2x { border: 0; background: transparent; color: rgba(255,255,255,0.55); padding: 0;
+  width: 40px; height: 40px; min-height: 40px; font-size: 17px; line-height: 1; position: relative;
+  border-radius: 6px; }
+.mir-modwindow .m2x::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; }
+.mir-modwindow .m2x:active { color: #fff; background: var(--glass-press); }
+
+.mir-modwindow .m2body { display: flex; align-items: stretch; gap: 5px; padding: 0 6px 4px; }
+.mir-modwindow .m2col { flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; gap: 3px; }
+.mir-modwindow .m2colhead { font: 600 8.5px var(--font-sans); letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.48); text-align: center; }
+/* The preset stack, two columns of 44 px. */
+.mir-modwindow .m2presets { display: grid; grid-template-columns: 44px 44px; gap: 2px; justify-content: center; }
+.mir-modwindow .m2preset { width: 44px; height: 44px; min-height: 44px; padding: 3px 2px; border: 0;
+  outline: 0; border-radius: 6px; background: transparent; display: block; }
+.mir-modwindow .m2preset svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+.mir-modwindow .m2preset .m2gl { fill: none; stroke: #fff; stroke-width: 1.6;
+  stroke-linejoin: round; stroke-linecap: round; }
+.mir-modwindow .m2preset.on { background: transparent; }
+.mir-modwindow .m2preset.on .m2gl { stroke: var(--acc); }
+.mir-modwindow .m2preset:hover .m2gl { stroke: var(--fg); }
+.mir-modwindow .m2preset:active { background: transparent; }
+/* The flip button. */
+.mir-modwindow .m2sw .m2flipb { display: flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0; border-radius: 5px;
+  border: var(--glass-border) solid var(--glass-hairline); background: transparent;
+  font: 700 8.5px var(--font-sans);
+  letter-spacing: 0.08em; color: rgba(255,255,255,0.78); }
+.mir-modwindow .m2sw .m2flipb:active { background: var(--glass-press); color: var(--acc); }
+/* The device drag handle. */
+.mir-modwindow .m2grab { flex: 0 0 auto; width: 16px; height: 40px; min-height: 40px; padding: 0;
+  border: 0; border-radius: 6px; background: transparent; position: relative;
+  touch-action: none; display: flex; align-items: center; justify-content: center; }
+.mir-modwindow .m2grab::before { content: ""; position: absolute; left: -14px; right: -14px; top: 50%;
+  height: 44px; margin-top: -22px; }
+.mir-modwindow .m2grab i { display: block; width: 9px; height: 14px; pointer-events: none;
+  color: rgba(255,255,255,0.42);
+  background-image: radial-gradient(circle at 50% 50%, currentColor 1.05px, transparent 1.15px);
+  background-size: 4.5px 4.7px; }
+.mir-modwindow .m2grab:active i { color: rgba(255,255,255,0.85); }
+.mir-modwindow .m2dev.m2drag { opacity: 0.55; }
+.mir-modwindow .m2run.m2rearrange .m2dev:not(.m2drag) { transition: none; }
+.mir-modwindow .m2zoom { width: 100%; height: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 6px;
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.82); font-size: 15px;
+  line-height: 1; }
+.mir-modwindow .m2zoom:active { background: var(--glass-press); }
+.mir-modwindow .m2zoom.m2fit { font: 600 10px var(--font-sans); letter-spacing: 0.1em; }
+.mir-modwindow .m2mac { width: 100%; height: 44px; min-height: 44px; margin-top: auto; border-radius: 6px;
+  border: 1.3px solid rgba(255,255,255,0.5); background: transparent; color: rgba(255,255,255,0.92);
+  font: 600 15px var(--font-num); padding: 0; }
+.mir-modwindow .m2mac.on { border-color: var(--acc); color: var(--acc); }
+/* A refused macro assignment. */
+.mir-modwindow .m2mac.m2bad { border-color: var(--bad); color: var(--bad); }
+.mir-modwindow .m2maccap { font: 600 8px var(--font-sans); letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.44); text-align: center; margin-top: 1px; }
+
+/* the editor */
+/* The curve editor box. */
+.mir-modwindow .m2edit { flex: 1 1 auto; min-width: 0; min-height: 132px; position: relative;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: 7px;
+  background: var(--m2-recess); overflow: hidden; }
+/* The editor's SVG is out of flow. */
+/* The curve box grows a caption band; the SVG stays out of flow. */
+.mir-modwindow .m2svg { position: absolute; left: 0; top: 0; display: block;
+  width: 100%; height: calc(100% - 14px); touch-action: none; }
+.mir-modwindow .m2mid { stroke: rgba(255,255,255,0.22); stroke-width: 1; }
+.mir-modwindow .m2gridline { stroke: rgba(255,255,255,0.17); stroke-width: 1; }
+.mir-modwindow .m2gridtxt { fill: rgba(255,255,255,0.45); font: 8.5px var(--font-num); }
+.mir-modwindow .m2path { fill: none; stroke: var(--acc); stroke-width: 2; stroke-linejoin: round;
+  stroke-linecap: round; }
+.mir-modwindow .m2dev.env .m2path { stroke: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+.mir-modwindow .m2fill { fill: var(--acc); opacity: 0.10; stroke: none; }
+.mir-modwindow .m2dev.env .m2fill { fill: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+/* The play tracker line. */
+.mir-modwindow .m2play { stroke: var(--fg); stroke-width: 1; opacity: 0.32; }
+.mir-modwindow .m2pt { fill: var(--acc); stroke: none; }
+.mir-modwindow .m2dev.env .m2pt { fill: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+/* A curve node. */
+.mir-modwindow .m2tn { fill: var(--m2-recess-deep); stroke: var(--acc); stroke-width: 1.5; }
+.mir-modwindow .m2dev.env .m2tn { stroke: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+/* The note band under the curve. */
+.mir-modwindow .m2note { position: absolute; left: 7px; right: 7px; bottom: 0; height: 14px;
+  display: flex; align-items: center; pointer-events: none; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
+  font: 500 9px var(--font-sans); color: rgba(255,255,255,0.5); }
+
+/* the right column: the 3-way switch and the checkboxes */
+.mir-modwindow .m2rt { flex: 0 0 auto; width: 104px; display: flex; gap: 4px; }
+.mir-modwindow .m2sw { flex: 0 0 auto; width: 44px; display: flex; flex-direction: column; gap: 2px; }
+.mir-modwindow .m2swb { min-height: 44px; border: 0; border-radius: 5px; background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.62); font: 600 8.5px var(--font-sans);
+  letter-spacing: 0.04em; padding: 0; }
+.mir-modwindow .m2swb.on { background: hsl(var(--hue-acc) var(--sat-acc) 62% / 0.32); color: #fff; }
+.mir-modwindow .m2chks { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mir-modwindow .m2chk { display: flex; align-items: center; gap: 5px; min-height: 44px; border: 0; padding: 0 3px;
+  border-radius: 5px; background: transparent; color: rgba(255,255,255,0.62);
+  font: 500 9px var(--font-sans); letter-spacing: 0.04em; text-align: left; }
+.mir-modwindow .m2chk:active { background: var(--glass-press); }
+/* A status lamp. */
+.mir-modwindow .m2dot { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%;
+  border: 0; background: var(--m2-recess);
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.34); }
+.mir-modwindow .m2chk.on { color: #fff; }
+.mir-modwindow .m2chk.on .m2dot { background: var(--acc); border-color: var(--acc);
+  box-shadow: 0 0 5px var(--acc-soft); }
+
+/* the knob row */
+.mir-modwindow .m2knobs { display: flex; align-items: flex-start; gap: 4px; padding: 3px 6px 8px; }
+.mir-modwindow .m2k { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.mir-modwindow .m2kd { position: relative; width: 44px; height: 44px; border-radius: 50%;
+  border: var(--glass-border) solid var(--glass-hairline); background:
+  repeating-conic-gradient(var(--glass-groove-hot) 0deg 1.6deg, hsl(0 0% 0% / 0) 1.6deg 30deg),
+  var(--glass-raise); touch-action: none; }
+.mir-modwindow .m2k[data-knob="smooth"] .m2kd,
+.mir-modwindow .m2k[data-knob="steps"] .m2kd { background: transparent; }
+.mir-modwindow .m2kd.drag { border-color: var(--acc); }
+.mir-modwindow .m2kcap { font: 600 8.5px var(--font-sans); letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.6); white-space: nowrap; }
+.mir-modwindow .m2kval { font: 600 9.5px var(--font-num); color: var(--acc);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+/* The MIN / MAX labels on every arc. */
+.mir-modwindow .m2kends { display: flex; justify-content: space-between; width: 100%; padding: 0 1px;
+  font: 500 7.5px var(--font-sans); letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.38); }
+
+/* The (+) button, a blue circle. */
+/* The ADD button steps out of the handle's band. */
+.mir-modwindow .m2add { flex: 0 0 auto; align-self: center; width: 46px; height: 46px; min-height: 46px;
+  margin-top: 60px; margin-left: 43px; border-radius: 50%; border: 2px solid var(--acc);
+  background: transparent;
+  color: var(--acc); font: 300 24px var(--font-sans); line-height: 1; padding: 0; }
+.mir-modwindow .m2add:active { background: var(--acc-soft); }
+/* A chooser sheet, on the app's own glass. */
+.mir-modwindow .m2pick { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); z-index: 42;
+  min-width: 200px; border-radius: 12px; background: var(--m2-plate);
+  -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);
+  border: var(--glass-border) solid var(--glass-hairline); padding: 8px;
+  box-shadow: var(--glass-shadow); display: flex; flex-direction: column; gap: 6px; }
+.mir-modwindow .m2pick[hidden] { display: none; }
+.mir-modwindow .m2pickb { min-height: 46px; border: 0; border-radius: 8px; background: rgba(255,255,255,0.07);
+  color: #fff; font: 600 12px var(--font-sans); letter-spacing: 0.08em; }
+.mir-modwindow .m2pickb:active { background: var(--glass-press); }
+/* The hint stops at the grip. */
+.mir-modwindow .m2hint { flex: 0 0 auto; font: 400 9px var(--font-sans);
+  padding: 0 calc(var(--grip-hit, 44px) + 8px) 6px 8px;
+  /* The row takes no presses. */
+  pointer-events: none;
+  color: rgba(255,255,255,0.5); }
+/* ── THE ROUTING DRAG, and the min-max ring it leaves behind ─────────────── */
+.m2ghost { position: fixed; left: 0; top: 0; z-index: 9000; pointer-events: none;
+  min-width: 30px; height: 30px; padding: 0 10px; border-radius: 15px; background: var(--acc);
+  color: var(--acc-ink); font: 700 11px var(--font-sans);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+[data-m2target].m2droppable { outline: 1.5px dashed hsl(var(--hue-acc) calc(var(--sat-acc) + 8%) 66% / 0.6);
+  outline-offset: 2px; }
+[data-m2target].m2drop { outline: 2px solid var(--acc); outline-offset: 2px;
+  box-shadow: 0 0 12px var(--acc-soft); }
+.m2ring { position: absolute; left: 100%; top: 50%; margin-left: 3px; width: 26px; height: 26px;
+  transform: translateY(-50%); z-index: 6; touch-action: none; }
+.m2ring::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; border-radius: 50%; }
+.m2ring svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+.m2ringtrk { fill: none; stroke: rgba(255,255,255,0.20); stroke-width: 3; stroke-linecap: round; }
+.m2ringarc { fill: none; stroke: var(--acc); stroke-width: 3; stroke-linecap: round; }
+.m2ringdot { fill: var(--acc2); stroke: var(--fg); stroke-width: .7; }
+.m2ringn { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex;
+  align-items: center; justify-content: center; pointer-events: none;
+  font: 700 9px var(--font-num); color: var(--acc); }
+.m2ring.m2negative .m2ringarc { stroke-dasharray: 2.1 1.7; }
+.m2ring.m2zero .m2ringarc { opacity: .36; }
+.m2ring.drag .m2ringarc { stroke: var(--fg); stroke-width: 4; }
+/* The min-max numbers. */
+/* The line height rides inside the font shorthand. */
+/* The ring's numbers. */
+.m2ringnum { position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+  margin-left: 2px; display: none; flex-direction: column; align-items: flex-start;
+  pointer-events: none; white-space: nowrap;
+  font: 600 7.5px/0.96 var(--font-num); color: var(--acc);
+  text-shadow: 0 0 3px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.7); }
+.m2ring.drag .m2ringnum { display: flex; }
+.m2ring.drag .m2ringnum[hidden] { display: none; }
+.m2ringnum[hidden] { display: none; }
+.m2rnhi { color: var(--acc); }
+.m2rnlo { color: hsl(var(--hue-acc) var(--sat-acc) 62% / 0.72); }
+/* The clear button on a modulated control. */
+.m2clr { position: absolute; left: 100%; top: 50%; margin-left: 3px;
+  width: 26px; height: 20px; min-height: 20px; padding: 0; z-index: 6;
+  border: 0; border-radius: 5px; background: var(--m2-recess-deep);
+  color: rgba(255,255,255,0.66); font-size: 11px; line-height: 1;
+  display: flex; align-items: center; justify-content: center; }
+.m2clr::before { content: ""; position: absolute; left: 50%; top: 50%;
+  width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 8px; }
+.m2clr:active { color: #fff; background: var(--glass-press); }
+
+/* The excursion, drawn on the control itself. */
+.m2span { position: absolute; pointer-events: none; z-index: 3; }
+.m2span.vert { left: 1px; right: 1px; border-radius: 3px; }
+.m2span.horz { top: 1px; bottom: 1px; border-radius: 3px; }
+.m2span.vert, .m2span.horz {
+  background: hsl(var(--hue-acc2) var(--sat-acc2) 62% / 0.16);
+  box-shadow: inset 0 0 0 1px hsl(var(--hue-acc2) var(--sat-acc2) 70% / 0.38); }
+.m2spancap { position: absolute; pointer-events: none; z-index: 4;
+  background: var(--fg); border-radius: 2px; }
+.m2spancap.vert { left: 0; right: 0; height: 2px; }
+.m2spancap.horz { top: 0; bottom: 0; width: 2px; }
+.m2spanlivecap { position: absolute; pointer-events: none; z-index: 5;
+  background: var(--acc2); border-radius: 2px; box-shadow: 0 0 4px var(--acc2-soft); }
+.m2spanlivecap.vert { left: -1px; right: -1px; height: 3px; }
+.m2spanlivecap.horz { top: -1px; bottom: -1px; width: 3px; }
+.m2span.round { left: 0; top: 0; width: 100%; height: 100%; }
+.m2span.round svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.m2spanarc { fill: none; stroke: hsl(var(--hue-acc2) var(--sat-acc2) 66% / 0.46); stroke-width: 7;
+  stroke-linecap: round; }
+.m2spanbase { fill: none; stroke: var(--fg); stroke-width: 3; stroke-linecap: round; }
+.m2spanlive { fill: none; stroke: var(--acc2); stroke-width: 4; stroke-linecap: round;
+  filter: drop-shadow(0 0 2px var(--acc2-soft)); }
+/* One band, not two. */
+.m2spanned > .cvband { display: none; }
+/* The transport row. */
+/* The transport row scales with the furniture and gives before it breaks. */
+.modwin.mir-modwindow .kwin-bar { gap: var(--sp-1); }
+/* Hidden transport parts stay hidden. */
+.modwin.mir-modwindow .modxport[hidden], .modwin.mir-modwindow .modtempo[hidden],
+.modwin.mir-modwindow .modtap[hidden],   .modwin.mir-modwindow .modsync[hidden] { display: none; }
+.modwin.mir-modwindow .modxport { flex: 0 0 auto; width: var(--touch); height: var(--touch);
+  margin: calc(-12px * var(--ui-scale)) 0;
+  padding: 0; display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: var(--r-sm); background: transparent;
+  color: var(--dim); font-size: var(--fs-lead); line-height: 1; }
+.modwin.mir-modwindow .modxport.on { color: var(--acc); text-shadow: 0 0 8px var(--acc); }
+.modwin.mir-modwindow .modxport:active { background: var(--glass-press); }
+/* The global tempo field. */
+/* The tempo field looks like a field at rest, always. */
+/* The tempo readout. */
+.modwin.mir-modwindow .modtempo { flex: 0 0 auto;
+  height: calc(22px * var(--ui-scale)); min-height: calc(22px * var(--ui-scale));
+  margin: 0; padding: 0 calc(6px * var(--ui-scale));
+  display: flex; align-items: center; gap: calc(4px * var(--ui-scale));
+  position: relative;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.05);
+  color: var(--fg-soft); touch-action: none; }
+/* A 44 px target around the 22 px drawing. */
+.modwin.mir-modwindow .modtempo::before { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  height: var(--touch); margin-top: calc(var(--touch) / -2); }
+.modwin.mir-modwindow .modtempo b { font: 700 calc(12px * var(--ui-scale)) var(--font-num);
+  line-height: 1; font-variant-numeric: tabular-nums; }
+.modwin.mir-modwindow .modtempo span { font: 600 calc(7.5px * var(--ui-scale)) var(--font-sans);
+  letter-spacing: 0.10em; line-height: 1; opacity: 0.7; }
+/* What the row gives up first, in order. */
+.modwin.mir-modwindow .modtempo.tight .modhz { display: none; }
+.modwin.mir-modwindow .modtempo.tighter span { display: none; }
+/* the derived reading: dimmer than the number it comes from, because it is a
+   consequence and not a second control */
+.modwin.mir-modwindow .modtempo .modhz { font: 500 calc(8.5px * var(--ui-scale)) var(--font-num);
+  line-height: 1;
+  font-style: normal; font-variant-numeric: tabular-nums; opacity: 0.55; }
+.modwin.mir-modwindow .modtempo.on { color: var(--acc); border-color: hsl(var(--hue-acc) var(--sat-acc) 62% / 0.55); }
+.modwin.mir-modwindow .modtempo:active { background: var(--glass-press); color: var(--fg); }
+/* the typing box — it stands exactly where the field stood, so the swap does
+   not move the bar's other children by a pixel */
+/* The typing box stands where the field stands. */
+/* The tempo typing box. */
+.modwin.mir-modwindow .modtempoin { flex: 0 1 auto; width: calc(96px * var(--ui-scale));
+  min-width: calc(56px * var(--ui-scale));
+  height: calc(22px * var(--ui-scale)); min-height: calc(22px * var(--ui-scale));
+  margin: 0; padding: 0 calc(6px * var(--ui-scale)); box-sizing: border-box;
+  border: var(--glass-border) solid var(--acc); border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.11); color: var(--fg);
+  font: 700 calc(12px * var(--ui-scale)) var(--font-num);
+  font-variant-numeric: tabular-nums;
+  text-align: center; -webkit-appearance: none; appearance: none; }
+.modwin.mir-modwindow .modtempoin:focus { outline: 0; }
+/* THE TAPPER.  44 px of finger through the negative margin, 26 px of ink — the
+   .modxport idiom, which is the bar's own answer to a 26 px bar. */
+.modwin.mir-modwindow .modtap { flex: 0 0 auto; width: var(--touch); height: var(--touch);
+  min-height: var(--touch);
+  margin: calc(-12px * var(--ui-scale)) 0; padding: 0; display: flex; align-items: center;
+  justify-content: center; border: 0; border-radius: var(--r-sm); background: transparent;
+  color: var(--dim); font: 700 calc(8.5px * var(--ui-scale)) var(--font-sans);
+  letter-spacing: 0.12em; line-height: 1; }
+.modwin.mir-modwindow .modtap:active { background: var(--glass-press); color: var(--acc); }
+/* The sync-mode switch. */
+.modwin.mir-modwindow .modsync { flex: 0 0 auto; width: var(--touch); height: var(--touch);
+  min-height: var(--touch);
+  margin: calc(-12px * var(--ui-scale)) 0; padding: 0; display: flex; align-items: center;
+  justify-content: center; border: 0; border-radius: var(--r-sm); background: transparent;
+  color: var(--dim); font: 700 calc(8.5px * var(--ui-scale)) var(--font-sans);
+  letter-spacing: 0.10em; line-height: 1; }
+.modwin.mir-modwindow .modsync.on { color: var(--acc); }
+.modwin.mir-modwindow .modsync.pend { color: var(--acc); opacity: 0.55; }
+.modwin.mir-modwindow .modsync:active { background: var(--glass-press); color: var(--acc); }
+
+/* The cadence chip. */
+.modwin.mir-modwindow .modcad { flex: 0 0 auto; min-width: var(--touch); height: var(--touch);
+  min-height: var(--touch); margin: 0; padding: 0 calc(7px * var(--ui-scale));
+  display: flex; align-items: center; justify-content: center; white-space: nowrap;
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-sm);
+  background: transparent; color: var(--dim);
+  font: 700 calc(8.5px * var(--ui-scale)) var(--font-sans); letter-spacing: 0.10em; line-height: 1; }
+.modwin.mir-modwindow .modcad.on { color: var(--acc); border-color: hsl(var(--hue-acc) var(--sat-acc) 62% / 0.55); }
+.modwin.mir-modwindow .modcad:active { background: var(--glass-press); color: var(--acc); }
+.modwin.mir-modwindow .modcad[hidden] { display: none; }
+/* The frost radii for this window. */
+#modwin.mir-modwindow.kwin-frost { --fr-r-card: calc(16px * var(--ui-scale)); --fr-r-chip: calc(16px * var(--ui-scale)); }
+/* Centre the folded strip's head so its power button is not clipped. */
+#modwin.mir-modwindow .m2dev.m2min .m2headr { justify-content: center; }
+/* The rail and the device share one top and one height. */
+#modwin.mir-modwindow .m2run { padding-top: 0; padding-bottom: 0; padding-right: 7px; }
+/* The work lane reserves the same room in either position. */
+#modwin.mir-modwindow .m2foot { margin-top: 8px; }
+#modwin.mir-modwindow .m2bars-top .m2foot { margin-top: 0; margin-bottom: 8px; }
+/* No dark disc behind a knob in this window. */
+#modwin.mir-modwindow .m2knob, #modwin.mir-modwindow .m2kd { background: transparent; }
+#modwin.mir-modwindow .m2knob::before, #modwin.mir-modwindow .m2kd::before { background: transparent; }
+/* The status lamps under frost. */
+#modwin.mir-modwindow .m2dot { border: 0; background: var(--m2-recess);
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.34); }
+#modwin.mir-modwindow .m2chk.on .m2dot { background: var(--acc);
+  box-shadow: 0 0 5px var(--acc-soft); }
+/* A chosen edit option is structural Accent A. Hover stays neutral; Accent B
+   remains reserved for the playhead and other truthful live signal ink. */
+#modwin.mir-modwindow .m2preset.on .m2gl { stroke: var(--acc); }
+/* remove dark bg — the ink arrow lands on the curve-editor well; its hairline stays */
+#modwin.mir-modwindow .m2edit { background: transparent; }
+/* no accent outline on macros: a focused name field keeps its brighter floor and no accent rim */
+#modwin.mir-modwindow .m2rail .m2name:focus { border-color: var(--glass-hairline); }
+/* white text in PRESET NAME, including WebKit's separately painted input ink */
+#modwin.mir-modwindow .m2prename { color: var(--fg); -webkit-text-fill-color: var(--fg); }
+#modwin.mir-modwindow .m2prename::placeholder { color: var(--fg); -webkit-text-fill-color: var(--fg); opacity: 0.94; }
+/* Crossed-out captions leave the glass, not the control. */
+#modwin.mir-modwindow .m2dev.lfo .m2colhead, #modwin.mir-modwindow .m2dev.lfo .m2kcap, #modwin.mir-modwindow .m2dev.lfo .m2kends,
+#modwin.mir-modwindow .m2dev.env .m2k[data-knob="steps"] .m2kcap,
+#modwin.mir-modwindow .m2dev.env .m2k[data-knob="steps"] .m2kends,
+#modwin.mir-modwindow .m2dev.lfo .m2capbox { display: none; }
+#modwin.mir-modwindow .m2capbox .m2maccap.m2capgone { visibility: hidden; }
+/* The expanded ENV card's bottom padding. */
+#modwin.mir-modwindow .m2dev.env:not(.m2cmp) .m2knobs { padding-bottom: 3px; }
+/* The knob's number stays inside the disc at every UI scale. */
+#modwin.mir-modwindow .m2knob .ckval, #modwin.mir-modwindow .m2kd .ckval { left: 15%; right: 15%; width: auto; max-width: 70%;
+  box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 0; font-size: 7.5px; letter-spacing: 0; }
+/* the swap indicator: the card a drag would exchange with wears a dashed
+   second-accent rim and the SWAP glyph; the carried card wears the glyph too */
+.mir-modwindow .m2swapbadge { display: none; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+  margin: -22px 0 0 -22px; border-radius: 50%; background: var(--acc2-soft); color: var(--acc2);
+  align-items: center; justify-content: center; pointer-events: none; z-index: 5; }
+.mir-modwindow .m2swapbadge svg { width: 22px; height: 22px; display: block; }
+.mir-modwindow .m2dev.m2swaphot .m2swapbadge, .mir-modwindow .m2dev.m2drag .m2swapbadge { display: flex; }
+.mir-modwindow .m2dev.m2swaphot { outline: 2px dashed var(--acc2); outline-offset: -3px; }
+/* the comet in a folded strip's meter well: accent dots, sized and faded by
+   age at build, positioned by percentage so nothing is ever measured */
+#modwin.mir-modwindow .m2meter { position: relative; }
+.mir-modwindow .m2trail { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+.mir-modwindow .m2tdot { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: var(--acc); box-shadow: var(--acc-glow); }
+.mir-modwindow .m2dev.env .m2tdot { background: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%);
+  box-shadow: none; }
+/* the dot on the playhead: the accent, ringed in the foreground ink so it reads over the trace */
+.mir-modwindow .m2playdot { fill: var(--acc); stroke: var(--fg); stroke-width: 1.2; }
+.mir-modwindow .m2dev.env .m2playdot { fill: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+/* The preset list sheet. */
+.mir-modwindow .m2ppick { position: absolute; left: 8px; width: 340px; max-width: calc(100% - 16px); z-index: 42;
+  box-sizing: border-box; border-radius: 12px; padding: 8px;
+  border: var(--glass-border) solid var(--glass-hairline);
+  display: flex; flex-direction: column; gap: 3px; max-height: 62%; overflow-y: auto; }
+.mir-modwindow .m2ppick[hidden] { display: none; }
+/* the preset chip under CLASSIC sits inside a glass window already: one
+   material, not two — the chip keeps its hairline and drops its own glass */
+#modwin.mir-modwindow:not(.kwin-frost) .m2prebar.glass { background: transparent; background-image: none;
+  backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none;
+  border: var(--glass-border) solid var(--glass-hairline); }
+#modwin.mir-modwindow.kwin-frost .m2prebar { border-radius: var(--fr-r-chip); }
+.mir-modwindow .m2prow { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 44px; padding: 0 10px; text-align: left; }
+.mir-modwindow .m2prow.on { color: var(--acc); }
+.mir-modwindow .m2prow.m2stale { opacity: 0.5; }
+.mir-modwindow .m2prowtag { font: 600 7.5px var(--font-sans); letter-spacing: 0.12em; opacity: 0.55; }
+/* A preset row. */
+.mir-modwindow .m2prowwrap { display: flex; align-items: stretch; gap: 4px; }
+/* the folder header: a 44 px control that opens and shuts its own folder */
+.mir-modwindow .m2pgrp { display: flex; flex-direction: column; gap: 3px; }
+.mir-modwindow .m2pfold { display: flex; align-items: center; gap: 6px; min-height: 44px;
+  padding: 0 8px; border: 0; border-radius: 8px; background: transparent;
+  color: var(--acc2); font: 700 9.5px var(--font-sans); letter-spacing: 0.13em;
+  text-align: left; }
+.mir-modwindow .m2pfold.on { color: var(--acc); }
+.mir-modwindow .m2pfold:active { background: var(--glass-press); }
+.mir-modwindow .m2pfoldname { flex: 1 1 auto; min-width: 0; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis; }
+.mir-modwindow .m2pcaret { flex: 0 0 auto; display: flex; align-items: center; }
+.mir-modwindow .m2pcaret svg { display: block; }
+.mir-modwindow .m2pfold.m2shut .m2pcaret svg { transform: rotate(-90deg); }
+.mir-modwindow .m2pgrp .m2prowwrap { padding-left: 10px; }
+.mir-modwindow .m2prowwrap .m2prow { flex: 1 1 auto; min-width: 0; }
+.mir-modwindow .m2prowdel { flex: 0 0 44px; width: 44px; min-width: 44px; min-height: 44px; padding: 0;
+  border: 0; border-radius: 8px; background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.62); font: 700 9px var(--font-sans); letter-spacing: 0.06em; }
+.mir-modwindow .m2prowdel:active { background: var(--glass-press); color: #fff; }
+.mir-modwindow .m2prowdel.m2arm { width: auto; min-width: 58px; color: var(--bad);
+  box-shadow: inset 0 0 0 1px var(--bad); }
+
+/* The size law's own rules. */
+/* COMPACT is a separate 320×368 face: editor identity remains, while large
+   preset/zoom utilities leave and the knobs use a deliberate lower grid. */
+.mir-modwindow .m2dev.m2cmp.lfo .m2presets,
+.mir-modwindow .m2dev.m2cmp.env .m2zoom,
+.mir-modwindow .m2dev.m2cmp .m2colhead { display: none; }
+.mir-modwindow .m2dev.m2cmp .m2body { flex: 0 0 174px; min-height: 174px; }
+.mir-modwindow .m2dev.m2cmp .m2edit { min-height: 0; }
+.mir-modwindow .m2dev.m2cmp .m2knobs { display: grid; align-items: start; justify-items: center;
+  justify-content: center; row-gap: 4px; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2knobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mir-modwindow .m2dev.m2cmp.env .m2knobs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mir-modwindow .m2dev.m2cmp.audio .m2knobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mir-modwindow .m2dev.m2cmp .m2k { width: 100%; }
+
+/* ══ PROVEN DEVICE PRIMITIVES ═════════════════════════════════════════════
+   Only geometry/ink shared by LFO, ENV and AUDIO lives here. Their body grids,
+   signal renderers and state meanings remain explicit below. */
+.mir-modwindow .m2dev:not(.m2min) { background-color: var(--m2-plate); }
+.mir-modwindow .m2dev:not(.m2min) .m2head { grid-template-columns: auto minmax(0, 1fr) auto; }
+.mir-modwindow .m2dev:not(.m2min) .m2headl { overflow: visible; }
+.mir-modwindow .m2headc { min-width: 0; display: flex; align-items: center;
+  justify-content: center; gap: 2px; overflow: hidden; }
+.mir-modwindow .m2dev:not(.m2min) .m2move { display: none; }
+
+/* Protected hero shell; device ink and content stay device-owned. */
+.mir-modwindow .m2hero { border-radius: 6px; }
+.mir-modwindow .m2dev.env .m2hero, .mir-modwindow .m2dev.audio .m2hero {
+  border-color: hsl(0 0% 100% / .22); background: hsl(var(--glass-tint) / .96); }
+
+/* Concise status anatomy: lamp/text, optional middle datum, output datum. */
+.mir-modwindow .m2status { position: absolute; z-index: 2; top: 4px; display: flex; align-items: center;
+  height: 18px; padding: 0 5px; border: 1px solid hsl(0 0% 100% / .10);
+  border-radius: 4px; pointer-events: none; }
+.mir-modwindow .m2statusmain { display: flex; align-items: center; gap: 4px; }
+.mir-modwindow .m2statuslamp { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%;
+  background: hsl(0 0% 100% / .25); }
+.mir-modwindow .m2statusmain.on { color: var(--fg); }
+.mir-modwindow .m2statusmain.on .m2statuslamp { background: var(--acc2); }
+
+/* One editing-seat geometry. Semantics and typography remain on each device. */
+.mir-modwindow .m2dev .m2seat44 { width: 100%; min-width: 0; height: 44px; min-height: 44px;
+  padding: 0 2px; border: 1px solid transparent; border-radius: 5px;
+  background: hsl(0 0% 100% / .035); }
+
+/* WindowKit still owns every gesture and arc value. This is presentation ink. */
+#modwin.mir-modwindow .m2dev .m2knobs { flex: 1 1 auto; min-height: 0; display: grid;
+  align-items: start; justify-items: center; }
+#modwin.mir-modwindow .m2dial { width: 100%; gap: 1px; }
+#modwin.mir-modwindow .m2dialink { border: 0; overflow: visible; background: transparent; box-shadow: none; }
+#modwin.mir-modwindow .m2dialink::before { content: ""; position: absolute; inset: 15%;
+  border-radius: 50%; background: hsl(var(--glass-tint) / .98);
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .14); pointer-events: none; }
+#modwin.mir-modwindow .m2dialink .ckarc { display: block; position: absolute; inset: 0;
+  width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+#modwin.mir-modwindow .m2dialink .ckarc-trk, #modwin.mir-modwindow .m2dialink .ckarc-val,
+#modwin.mir-modwindow .m2dialink .ckarc-band { fill: none; stroke-linecap: round; }
+#modwin.mir-modwindow .m2dialink .ckarc-trk { stroke: hsl(0 0% 100% / .16); stroke-width: 6; }
+#modwin.mir-modwindow .m2dialink .ckarc-val { stroke: var(--acc); stroke-width: 6; }
+#modwin.mir-modwindow .m2dialink .ckarc-band { stroke: var(--acc2); stroke-width: 4; }
+#modwin.mir-modwindow .m2dialink .m2kn { position: absolute; z-index: 2; left: 50%; bottom: 50%;
+  width: 0; height: 40%; margin: 0; background: none; pointer-events: none;
+  transform: rotate(var(--needle, -150deg)); transform-origin: 50% 100%; }
+#modwin.mir-modwindow .m2dialink .m2kn::before { content: ""; position: absolute; left: 0; top: 0;
+  width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--acc); }
+#modwin.mir-modwindow .m2dialink .ckval { display: block; position: absolute; z-index: 3;
+  left: 15%; right: 15%; top: 50%; transform: translateY(-50%); text-align: center;
+  color: var(--fg-soft); pointer-events: none; font: 600 7px/1 var(--font-num); }
+#modwin.mir-modwindow .m2dev .m2dial .m2kcap { display: block; color: hsl(0 0% 100% / .72);
+  font-size: 8px; line-height: 10px; }
+#modwin.mir-modwindow .m2dev .m2dial .m2kval { display: block; color: var(--acc);
+  font-size: 8px; line-height: 10px; }
+#modwin.mir-modwindow .m2dev .m2dial .m2kends { display: none; }
+#modwin.mir-modwindow .m2dialink:hover .ckarc-trk { stroke: hsl(0 0% 100% / .32); }
+#modwin.mir-modwindow .m2dialink.drag .ckarc-val,
+#modwin.mir-modwindow .m2dialink.drag .m2kn::before { stroke: var(--fg); background: var(--fg); }
+#modwin.mir-modwindow .m2dialink.drag .ckval,
+#modwin.mir-modwindow .m2dialink.drag ~ .m2kval { color: var(--fg); font-weight: 800; }
+
+/* ══ CONTROL OFFICIATION ═══════════════════════════════════════════════════
+   Shape/recess says control, Accent A says structural value/selection, Accent
+   B says only live modulation/signal, and white says active interaction/focus.
+   These rules add no handlers and never alter a control's hit geometry. */
+#modwin.mir-modwindow button, #modwin.mir-modwindow input, #modwin.mir-modwindow [role="slider"] {
+  -webkit-tap-highlight-color: transparent; }
+@media (hover: hover) {
+  #modwin.mir-modwindow button:not(:disabled):not(.on):hover,
+  #modwin.mir-modwindow .kctl:not(.ctl-frozen):hover {
+    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .20); }
+}
+#modwin.mir-modwindow button:focus-visible, #modwin.mir-modwindow input:focus-visible,
+#modwin.mir-modwindow [role="slider"]:focus-visible {
+  outline: 1px solid var(--fg); outline-offset: 2px;
+  box-shadow: 0 0 0 1px hsl(0 0% 100% / .20); }
+#modwin.mir-modwindow .m2chk.on, #modwin.mir-modwindow .m2swb.on, #modwin.mir-modwindow .m2mac.on,
+#modwin.mir-modwindow .m2bus.on, #modwin.mir-modwindow .modxport.on, #modwin.mir-modwindow .modsync.on,
+#modwin.mir-modwindow .modcad.on, #modwin.mir-modwindow .m2audsrc.on {
+  box-shadow: inset 0 -2px 0 hsl(var(--hue-acc) var(--sat-acc) 66% / .64); }
+#modwin.mir-modwindow button:disabled, #modwin.mir-modwindow input:disabled {
+  opacity: .48; filter: saturate(.34); border-style: dashed; cursor: not-allowed; }
+/* WindowKit's global freeze still owns refusal and its known pointer fall-through.
+   The hatch and explicit edge make a locked control more than a faded control. */
+#modwin.mir-modwindow .kctl.ctl-frozen {
+  opacity: .92; cursor: not-allowed;
+  background-image: repeating-linear-gradient(135deg, transparent 0 5px,
+    hsl(0 0% 100% / .085) 5px 6px);
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .26); }
+#modwin.mir-modwindow .kctl.ctl-frozen:focus-visible {
+  outline: 1px dashed var(--fg); outline-offset: 2px;
+  box-shadow: 0 0 0 1px hsl(0 0% 100% / .20); }
+#modwin.mir-modwindow .m2numseat.drag .m2deptharc { stroke: var(--fg); }
+#modwin.mir-modwindow .m2val.drag { background: hsl(0 0% 100% / .07); }
+#modwin.mir-modwindow .m2val.drag .m2vnum { color: var(--fg); font-weight: 800; }
+
+/* Shared minimized frame/status; each signal monitor below remains distinct. */
+.mir-modwindow .m2minstatus { display: none; }
+.mir-modwindow .m2dev.m2min .m2minstatus { display: block; order: 5; flex: 0 0 18px; width: 100%;
+  overflow: hidden; white-space: nowrap; text-align: center;
+  color: hsl(0 0% 100% / .46); font: 700 6px/18px var(--font-num); letter-spacing: 0; }
+.mir-modwindow .m2dev.m2min .m2meterfill { background: var(--acc2); }
+#modwin.mir-modwindow .m2dev.m2min.lfo .m2tdot, #modwin.mir-modwindow .m2dev.m2min.env .m2tdot { background: var(--acc2); }
+#modwin.mir-modwindow .m2dev.m2min .m2knobs { display: none; }
+
+/* ══ LFO REFERENCE FACEPLATE ═══════════════════════════════════════════════
+   Presentation only: every control below is the existing registered control,
+   merely seated into the rigid Full/Compact/Minimized chassis. */
+.mir-modwindow .m2dev.lfo .m2lfowave { flex: 1 1 auto; min-width: 34px; max-width: 70px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;
+  color: var(--acc2); font: 700 7.5px var(--font-sans); letter-spacing: .08em; }
+/* Full: graph, compact shape/output bank, secondary switch row, then knobs. */
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2body {
+  flex: 0 0 216px; height: 216px; min-height: 216px; box-sizing: border-box;
+  display: grid; grid-template: 120px 44px 44px / minmax(0, 1fr);
+  gap: 2px; padding: 0 6px 4px;
+}
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2edit { grid-area: 1 / 1; min-height: 0; }
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2col { grid-area: 2 / 1; width: auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: 4px; }
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2presets { display: grid;
+  grid-template-columns: repeat(6, 44px); gap: 2px; justify-content: start; }
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2macbox { grid-column: 2; margin: 0; position: relative; }
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2rt { grid-area: 3 / 1; width: auto;
+  display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 1px; }
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2sw,
+.mir-modwindow .m2dev.lfo:not(.m2cmp):not(.m2min) .m2chks { display: contents; }
+
+/* Compact: one dominant signal surface, then a dense 190/130 editing split.
+   Its right bank is an alternate view onto the same source/clipboard/routing
+   actions; the Full gallery and its instructional caption never leak in. */
+.mir-modwindow .m2lfocmpzone { display: none; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2body { flex: 0 0 136px; height: 136px; min-height: 136px;
+  box-sizing: border-box; display: block; padding: 0 5px 4px; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2edit { width: 100%; height: 132px; min-height: 132px; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2edit .m2note { display: none; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2edit .m2svg { height: 100%; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2col, .mir-modwindow .m2dev.m2cmp.lfo .m2rt { display: none; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpzone { position: absolute; z-index: 3;
+  left: 190px; right: 2px; top: 184px; bottom: 2px; box-sizing: border-box;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, 44px); gap: 2px; padding: 1px 2px 1px 3px;
+  border-left: 1px solid hsl(0 0% 100% / .10); }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcmd { position: relative; min-width: 0; width: 100%;
+  height: 44px; min-height: 44px; padding: 0 3px; overflow: hidden;
+  border: 1px solid transparent; border-radius: 5px;
+  background: hsl(0 0% 100% / .035); color: hsl(0 0% 100% / .62);
+  font: 700 7px var(--font-sans); letter-spacing: .035em; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcmd:active { background: var(--glass-press); color: var(--fg); }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcmd.on {
+  color: var(--fg); border-color: hsl(var(--hue-acc) var(--sat-acc) 65% / .35);
+  box-shadow: inset 0 -2px 0 hsl(var(--hue-acc) var(--sat-acc) 66% / .64); }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcmd.m2bad { color: var(--bad); border-color: var(--bad); }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpshape { display: grid; grid-template: 8px 17px 9px / 1fr;
+  align-content: center; justify-items: stretch; gap: 1px; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpshape svg { width: 100%; height: 17px; overflow: visible; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpshape path { fill: none; stroke: var(--acc);
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcap { color: hsl(0 0% 100% / .38);
+  font: 700 6px/8px var(--font-sans); letter-spacing: .10em; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpvalue { display: block; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis; color: var(--acc);
+  font: 700 7px/9px var(--font-num); letter-spacing: .02em; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpmacro { display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmplabel { pointer-events: none; }
+.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpclip { letter-spacing: .08em; }
+
+/* Useful graph ink over hostile backgrounds: waveform is Accent A; the live
+   playhead/output is Accent B, so signal never masquerades as structure. */
+.mir-modwindow .m2dev.lfo .m2hero { border-color: hsl(0 0% 100% / .20);
+  background: hsl(var(--glass-tint) / .98); }
+.mir-modwindow .m2dev.lfo .m2path { stroke: var(--acc); stroke-width: 2.2; }
+.mir-modwindow .m2dev.lfo .m2fill { fill: var(--acc); opacity: .07; }
+.mir-modwindow .m2dev.lfo .m2mid { stroke: hsl(0 0% 100% / .14); }
+.mir-modwindow .m2dev.lfo .m2play { stroke: var(--acc2); stroke-width: 1.25; opacity: .66; }
+.mir-modwindow .m2dev.lfo .m2playdot { fill: var(--acc2); stroke: var(--fg); stroke-width: 1; }
+.mir-modwindow .m2lfostatus { right: 5px; gap: 7px; background: hsl(var(--glass-tint) / .90);
+  font: 700 7px var(--font-num); letter-spacing: .06em; color: hsl(0 0% 100% / .58); }
+.mir-modwindow .m2lfoout { color: var(--acc2); }
+
+/* Editing buttons use one restrained material and retain their real 44px hit
+   targets.  The output seat is distinguished by label, not glow. */
+.mir-modwindow .m2dev.lfo .m2preset { width: 100%; height: 44px; min-height: 44px;
+  border: 1px solid transparent; border-radius: 5px; }
+.mir-modwindow .m2dev.lfo .m2preset.on { border-color: hsl(var(--hue-acc) var(--sat-acc) 66% / .55);
+  background: var(--acc-soft); }
+.mir-modwindow .m2dev.lfo .m2preset .m2gl { stroke-width: 1.5; }
+.mir-modwindow .m2dev.lfo .m2macbox::before { content: "OUT"; position: absolute; z-index: 1;
+  left: 0; right: 0; top: 4px; text-align: center; pointer-events: none;
+  font: 700 6.5px var(--font-sans); letter-spacing: .10em; color: hsl(0 0% 100% / .40); }
+.mir-modwindow .m2dev.lfo .m2mac { height: 44px; min-height: 44px; padding-top: 8px;
+  border-radius: 5px; background: hsl(0 0% 100% / .035); }
+.mir-modwindow .m2dev.lfo .m2swb, .mir-modwindow .m2dev.lfo .m2flipb, .mir-modwindow .m2dev.lfo .m2chk {
+  justify-content: center; gap: 2px; overflow: hidden; white-space: nowrap;
+  font: 600 6.8px var(--font-sans); letter-spacing: .015em; text-align: center; }
+.mir-modwindow .m2dev.lfo .m2swb.on, .mir-modwindow .m2dev.lfo .m2chk.on { border-color: hsl(var(--hue-acc) var(--sat-acc) 65% / .35); }
+.mir-modwindow .m2dev.lfo .m2dot { width: 7px; height: 7px; }
+
+/* LFO owns the grid and size hierarchy around the shared WindowKit dial ink. */
+#modwin.mir-modwindow .m2dev.lfo .m2knobs {
+  grid-template-columns: 1.24fr repeat(3, minmax(0, 1fr)); gap: 3px; padding: 5px 7px 4px; }
+#modwin.mir-modwindow .m2dev.lfo .m2kd { width: 48px; height: 48px; }
+#modwin.mir-modwindow .m2dev.lfo .m2k[data-knob="rate"] .m2kd { width: 56px; height: 56px; }
+#modwin.mir-modwindow .m2dev.lfo .ckval { font-size: 7.5px; }
+#modwin.mir-modwindow .m2dev.lfo .m2kval { font-size: 8.5px; }
+
+/* Compact keeps four performable controls in an intentional 2×2 bank. */
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2knobs { flex: 1 1 auto; align-self: flex-start;
+  width: 190px; box-sizing: border-box; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px 2px; padding: 3px 4px 4px; }
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2kd,
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2k[data-knob="rate"] .m2kd { width: 40px; height: 40px; }
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2k[data-knob="rate"] .m2kd { width: 44px; height: 44px; }
+
+/* ══ ENV REFERENCE FACEPLATE ═══════════════════════════════════════════════
+   Same instrument grammar as the LFO, translated for stage editing: the
+   envelope is structure, selected handles are edit state, and Accent B is
+   reserved for the live playhead/output. */
+.mir-modwindow .m2dev.env { --m2-env-ink: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%); }
+.mir-modwindow .m2dev.env .m2envstage { flex: 1 1 auto; min-width: 42px; max-width: 62px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;
+  color: hsl(0 0% 100% / .48); font: 700 7px var(--font-sans); letter-spacing: .07em; }
+.mir-modwindow .m2dev.env .m2envstage.on { color: var(--acc2); }
+.mir-modwindow .m2dev.env .m2envstage.done { color: var(--m2-env-ink); }
+/* Reorder already has the grab affordance; the right zone stays [TRIG][POWER][CLOSE]. */
+.mir-modwindow .m2dev.env:not(.m2min) .m2trig { width: 48px; min-width: 48px; padding: 0 2px;
+  border-color: hsl(0 0% 100% / .14); background: hsl(0 0% 100% / .035); }
+
+/* Full: the curve owns the face. Zoom/Fit and output/gate furniture share one
+   dense 44px editing row rather than flanking the graph. */
+.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2body {
+  flex: 0 0 216px; height: 216px; min-height: 216px; box-sizing: border-box;
+  display: grid; grid-template: 164px 44px / minmax(0, 1fr) 90px;
+  gap: 2px 4px; padding: 0 6px 4px;
+}
+.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2edit { grid-area: 1 / 1 / 2 / 3; min-height: 0; }
+.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2col { grid-area: 2 / 1; width: auto;
+  display: grid; grid-template-columns: repeat(3, 44px) minmax(0, 1fr); gap: 2px; }
+.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2rt { grid-area: 2 / 2; width: auto; display: block; }
+.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2chks { height: 44px; display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+
+/* Compact: a view-only auto-fit graph, output/trigger assignment and the two
+   performance switches. Zoom/Fit is absent by law. */
+.mir-modwindow .m2dev.m2cmp.env .m2body { flex: 0 0 174px; height: 174px; min-height: 174px;
+  box-sizing: border-box; display: grid; grid-template: 126px 44px / 118px minmax(0, 1fr);
+  gap: 4px; padding: 0 5px; }
+.mir-modwindow .m2dev.m2cmp.env .m2edit { grid-area: 1 / 1 / 2 / 3; min-height: 0; }
+.mir-modwindow .m2dev.m2cmp.env .m2col { grid-area: 2 / 1; width: auto; display: block; }
+.mir-modwindow .m2dev.m2cmp.env .m2rt { grid-area: 2 / 2; width: auto; display: block; }
+.mir-modwindow .m2dev.m2cmp.env .m2chks { height: 44px; display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.mir-modwindow .m2dev.env .m2colhead, .mir-modwindow .m2dev.env .m2capbox { display: none; }
+.mir-modwindow .m2dev.env .m2macbox { height: 44px; margin: 0; gap: 2px; }
+.mir-modwindow .m2dev.env .m2mac { position: relative; height: 44px; min-height: 44px; margin: 0;
+  padding-top: 9px; border-radius: 5px; background: hsl(0 0% 100% / .035); }
+.mir-modwindow .m2dev.env .m2mac::before { content: "OUT"; position: absolute; left: 0; right: 0; top: 4px;
+  text-align: center; pointer-events: none; font: 700 6px var(--font-sans);
+  letter-spacing: .08em; color: hsl(0 0% 100% / .38); }
+.mir-modwindow .m2dev.env .m2mac.m2bus::before { content: "TRIG IN"; }
+.mir-modwindow .m2dev.env .m2zoom { font-size: 13px; }
+.mir-modwindow .m2dev.env .m2zoom.m2fit { font-size: 8px; }
+.mir-modwindow .m2dev.env .m2chk { justify-content: center; gap: 3px; overflow: hidden;
+  white-space: nowrap; font: 600 7px var(--font-sans); letter-spacing: .01em; }
+.mir-modwindow .m2dev.env .m2chk.on { border-color: hsl(var(--hue-acc) var(--sat-acc) 65% / .35); }
+.mir-modwindow .m2dev.env .m2dot { width: 7px; height: 7px; }
+
+/* The protected hero contains only ENV-owned curve and handle ink. */
+.mir-modwindow .m2dev.env .m2path { stroke: var(--m2-env-ink); stroke-width: 2.2; }
+.mir-modwindow .m2dev.env .m2fill { fill: var(--m2-env-ink); opacity: .075; }
+.mir-modwindow .m2dev.env .m2mid { stroke: hsl(0 0% 100% / .12); }
+.mir-modwindow .m2dev.env .m2gridline { stroke: hsl(0 0% 100% / .12); }
+.mir-modwindow .m2dev.env .m2pt { fill: hsl(var(--glass-tint) / .98); stroke: var(--m2-env-ink);
+  stroke-width: 2; paint-order: stroke; }
+.mir-modwindow .m2dev.env .m2tn { fill: hsl(var(--glass-tint) / .98); stroke: var(--m2-env-ink);
+  stroke-width: 1.6; }
+.mir-modwindow .m2dev.env .m2pt.sel, .mir-modwindow .m2dev.env .m2tn.sel { fill: var(--acc); stroke: var(--fg);
+  stroke-width: 2.2; }
+.mir-modwindow .m2dev.env .m2play { stroke: var(--acc2); stroke-width: 1.25; opacity: .7; }
+.mir-modwindow .m2dev.env .m2playdot { fill: var(--acc2); stroke: var(--fg); stroke-width: 1; }
+.mir-modwindow .m2envstatus { right: 5px; gap: 7px; background: hsl(var(--glass-tint) / .90);
+  font: 700 7px var(--font-num); letter-spacing: .05em; color: hsl(0 0% 100% / .58); }
+.mir-modwindow .m2envrun.done { color: var(--m2-env-ink); }
+.mir-modwindow .m2envout { color: var(--acc2); }
+.mir-modwindow .m2envprogress { position: absolute; z-index: 2; left: 6px; right: 6px; bottom: 3px;
+  height: 2px; overflow: hidden; border-radius: 2px; background: hsl(0 0% 100% / .12);
+  pointer-events: none; }
+.mir-modwindow .m2envprogress i { display: block; width: 0; height: 100%; background: var(--acc2); }
+
+/* ENV uses the same WindowKit arc, marker, label, value and interaction ink as
+   the reference LFO. A/D/R are slightly larger without breaking stage order. */
+#modwin.mir-modwindow .m2dev.env .m2knobs {
+  grid-template-columns: 1.12fr .9fr 1.12fr .9fr 1.12fr .9fr;
+  gap: 2px; padding: 5px 6px 3px; }
+#modwin.mir-modwindow .m2dev.env .m2kd { width: 42px; height: 42px; }
+#modwin.mir-modwindow .m2dev.env .m2k[data-knob="a"] .m2kd,
+#modwin.mir-modwindow .m2dev.env .m2k[data-knob="d"] .m2kd,
+#modwin.mir-modwindow .m2dev.env .m2k[data-knob="r"] .m2kd { width: 48px; height: 48px; }
+#modwin.mir-modwindow .m2dev.env .ckarc-val { stroke: var(--m2-env-ink); }
+#modwin.mir-modwindow .m2dev.env .m2kn::before { background: var(--m2-env-ink); }
+#modwin.mir-modwindow .m2dev.env .m2kcap { font-size: 7px; letter-spacing: .025em; }
+#modwin.mir-modwindow .m2dev.env .m2kval { color: var(--m2-env-ink); }
+#modwin.mir-modwindow .m2dev.m2cmp.env .m2knobs { grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px 3px; padding: 3px 7px 3px; }
+#modwin.mir-modwindow .m2dev.m2cmp.env .m2kd,
+#modwin.mir-modwindow .m2dev.m2cmp.env .m2k[data-knob="a"] .m2kd,
+#modwin.mir-modwindow .m2dev.m2cmp.env .m2k[data-knob="d"] .m2kd,
+#modwin.mir-modwindow .m2dev.m2cmp.env .m2k[data-knob="r"] .m2kd { width: 40px; height: 40px; }
+
+/* Minimized ENV is two true signals—output and stage progress—with lifecycle
+   and route status. No normal-size editing control survives. */
+.mir-modwindow .m2envminprog { display: none; }
+.mir-modwindow .m2dev.m2min.env .m2envminprog { display: flex; flex: 0 0 auto; width: 5px; height: 100%;
+  align-items: flex-end; border-radius: 3px; overflow: hidden;
+  background: hsl(0 0% 100% / .11); }
+.mir-modwindow .m2dev.m2min.env .m2envminprog i { display: block; width: 100%; height: 0; background: var(--acc2); }
+.mir-modwindow .m2dev.m2min.env .m2envminout.on { color: var(--acc2); }
+.mir-modwindow .m2dev.m2min.env .m2envminout.done { color: var(--m2-env-ink); }
+.mir-modwindow .m2dev.m2min.env .m2minnum { order: 6; }
+.mir-modwindow .m2dev.m2min.env .m2x { order: 7; }
+.mir-modwindow .m2dev.m2min.env .m2minname { color: var(--m2-env-ink); }
+
+/* Minimized is a signal monitor: actual curve identity, actual live trail,
+   running state and route count; no normal-size edit control survives. */
+.mir-modwindow .m2lfominshape { display: none; }
+.mir-modwindow .m2dev.m2min .m2headc { display: none; }
+.mir-modwindow .m2dev.m2min.lfo .m2lfominshape { display: block; flex: 0 0 22px; width: 22px;
+  height: 100%; min-height: 0; overflow: visible; }
+.mir-modwindow .m2dev.m2min.lfo .m2lfominshape path { fill: none; stroke: var(--acc);
+  stroke-width: 4; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.mir-modwindow .m2dev.m2min.lfo .m2lfominout { font-size: 6.5px; letter-spacing: .02em; }
+.mir-modwindow .m2dev.m2min.lfo .m2lfominout.on { color: var(--acc2); }
+.mir-modwindow .m2dev.m2min.lfo .m2minnum { order: 6; }
+.mir-modwindow .m2dev.m2min.lfo .m2x { order: 7; }
+/* The ribbon rail. */
+/* The ribbon's rail width. */
+.mir-modwindow .m2ribbon .m2rail { width: 58px; }
+/* The ribbon keeps the transport. */
+/* The ribbon keeps the transport. */
+.mir-modwindow .m2ribbon .m2railhead, .mir-modwindow .m2ribbon .m2macrow, .mir-modwindow .m2ribbon .m2namerow,
+.mir-modwindow .m2ribbon .m2grip, .mir-modwindow .m2ribbon .m2pad, .mir-modwindow .m2ribbon .m2sep,
+.mir-modwindow .m2ribbon .m2val, .mir-modwindow .m2ribbon .m2vname, .mir-modwindow .m2ribbon .m2vnum,
+.mir-modwindow .m2ribbon .m2signal, .mir-modwindow .m2ribbon .m2vmeta,
+.mir-modwindow .m2ribbon .m2predel, .mir-modwindow .m2ribbon .m2predead,
+.mir-modwindow .m2ribbon .modtap, .mir-modwindow .m2ribbon .modcad { display: none; }
+/* the NAME keeps its 44 px height and gives up only its elastic width, so the
+   ribbon's preset bar is [chevron][save][NAME][left][right][grip] and reads */
+.mir-modwindow .m2ribbon .m2prename { flex: 0 1 auto; min-width: 46px; max-width: 128px; }
+.mir-modwindow .m2ribbon .m2slot { height: 48px; padding: 1px; }
+.mir-modwindow .m2ribbon .m2slotrow { display: flex; height: 44px; }
+.mir-modwindow .m2ribbon .m2numseat { flex: 0 0 44px; height: 44px; }
+.mir-modwindow .m2ribbon .m2prebar { width: auto; }
+/* The stutter hold buttons. */
+.modwin.mir-modwindow .m2hold { flex: 0 0 auto; min-width: calc(46px * var(--ui-scale));
+  height: var(--touch); padding: 0 calc(5px * var(--ui-scale));
+  border-radius: 7px; border: var(--glass-border) solid var(--glass-hairline);
+  background: transparent; color: rgba(255,255,255,0.62);
+  font: 700 calc(8.5px * var(--ui-scale)) var(--font-sans); letter-spacing: 0.06em;
+  cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; }
+.modwin.mir-modwindow .m2hold:disabled { opacity: 0.34; cursor: default; }
+/* A held hold button. */
+.modwin.mir-modwindow .m2hold.held { color: var(--acc); border-color: var(--acc);
+  box-shadow: inset 0 0 0 1px var(--acc), inset 0 0 11px rgba(255,255,255,0.30); }
+/* ══ AUDIO REFERENCE FACEPLATE ════════════════════════════════════════════
+   The third sibling uses the same chassis/header/dial grammar, but its hero is
+   a measured external signal: LEVEL dominates, bands are subordinate, and HIT
+   remains an event rather than a fifth generic meter. */
+.mir-modwindow .m2dev.audio .m2kind { color: var(--acc2); }
+.mir-modwindow .m2audioheadstate { flex: 1 1 auto; min-width: 38px; max-width: 58px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; text-align: center;
+  color: hsl(0 0% 100% / .46); font: 700 7px var(--font-sans); letter-spacing: .07em; }
+.mir-modwindow .m2audioheadstate.on { color: var(--acc2); }
+.mir-modwindow .m2audioheadstate.bad { color: var(--bad); }
+/* Lifecycle is high-value minimized AUDIO identity; LFO/ENV omit their centre zone. */
+.mir-modwindow .m2dev.audio.m2min .m2headc { display: flex; }
+
+/* Full and Compact reserve the same 216px body. Compact removes the advanced
+   SET door, not signal understanding; the recovered width goes to the hero. */
+.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2body {
+  flex: 0 0 216px; height: 216px; min-height: 216px; box-sizing: border-box;
+  display: grid; grid-template: 120px 88px / 88px minmax(0, 1fr);
+  gap: 4px; padding: 0 6px 4px;
+}
+.mir-modwindow .m2dev.m2cmp.audio .m2body {
+  flex: 0 0 216px; height: 216px; min-height: 216px; box-sizing: border-box;
+  display: grid; grid-template: 120px 88px / 50px minmax(0, 1fr);
+  gap: 4px; padding: 0 5px 4px;
+}
+.mir-modwindow .m2dev.audio:not(.m2min) .m2col { grid-area: 1 / 1; width: auto; min-width: 0; }
+.mir-modwindow .m2dev.audio:not(.m2min) .m2edit { grid-area: 1 / 2; min-height: 0; }
+.mir-modwindow .m2dev.audio:not(.m2min) .m2rt { grid-area: 2 / 1 / 3 / 3; width: auto; min-width: 0; }
+.mir-modwindow .m2dev.audio .m2colhead, .mir-modwindow .m2dev.audio > .m2body > .m2col > .m2audnote { display: none; }
+.mir-modwindow .m2aud { display: grid; grid-template-rows: repeat(2, 44px); gap: 2px; width: 100%; }
+.mir-modwindow .m2audlive { display: none; }
+.mir-modwindow .m2audsrc { width: 100%; min-width: 44px; min-height: 44px; padding: 0 4px;
+  border-radius: 5px; border: 1px solid hsl(0 0% 100% / .14);
+  background: hsl(0 0% 100% / .035); color: hsl(0 0% 100% / .72);
+  font: 700 8px var(--font-sans); letter-spacing: .07em;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; }
+.mir-modwindow .m2audsrc.on { color: var(--acc2); border-color: hsl(var(--hue-acc2) var(--sat-acc2) 70% / .58); }
+.mir-modwindow .m2audsrc.m2audbad { color: var(--bad); border-color: var(--bad); }
+.mir-modwindow .m2audsrc:hover, .mir-modwindow .m2audsrc:focus-visible { border-color: hsl(0 0% 100% / .34); }
+.mir-modwindow .m2audsrc:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+.mir-modwindow .m2audsrc:active { background: var(--glass-press); }
+.mir-modwindow .m2dev.m2cmp.audio .m2aud { display: flex; align-items: flex-start; }
+.mir-modwindow .m2dev.m2cmp.audio .m2audsrc { padding: 0 1px; font-size: 7px; }
+.mir-modwindow .m2dev.m2cmp.audio .m2audsrc:nth-child(3), .mir-modwindow .m2dev.m2cmp.audio .m2audsheet { display: none; }
+.mir-modwindow .m2audrow { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.mir-modwindow .m2kstub { position: relative; width: 44px; height: 44px; border-radius: 50%;
+  border: var(--glass-border) solid var(--glass-hairline); opacity: 0.42; }
+
+/* Five real output sockets in an 88px bank. LEVEL owns a double-height seat;
+   LOW/MID/HIGH remain equal band species and HIT gets a square event lamp. */
+.mir-modwindow .m2dev.audio .m2chks { width: 100%; height: 88px; display: grid;
+  grid-template: repeat(2, 44px) / repeat(3, minmax(0, 1fr)); gap: 0 2px; }
+.mir-modwindow .m2audout { min-width: 0; min-height: 44px; display: grid;
+  grid-template-columns: 44px minmax(0, 1fr); align-items: stretch; overflow: hidden;
+  border: 1px solid transparent; border-radius: 5px; color: hsl(0 0% 100% / .56);
+  background: hsl(0 0% 100% / .025); }
+.mir-modwindow .m2audout[data-out="level"] { grid-row: 1 / 3; display: grid;
+  grid-template: 44px 44px / minmax(0, 1fr); border-color: hsl(0 0% 100% / .09); }
+.mir-modwindow .m2audout[data-out="low"] { grid-area: 1 / 2; }
+.mir-modwindow .m2audout[data-out="mid"] { grid-area: 1 / 3; }
+.mir-modwindow .m2audout[data-out="high"] { grid-area: 2 / 2; }
+.mir-modwindow .m2audout[data-out="hit"] { grid-area: 2 / 3; border-style: dashed;
+  border-color: hsl(0 0% 100% / .10); }
+.mir-modwindow .m2audout.on { border-color: hsl(var(--hue-acc2) var(--sat-acc2) 70% / .25); }
+.mir-modwindow .m2audgrip { width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 0;
+  border: 0; border-radius: 5px; background: transparent; color: hsl(0 0% 100% / .54);
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  touch-action: none; cursor: grab; }
+.mir-modwindow .m2audout[data-out="level"] .m2audgrip { width: 100%; }
+.mir-modwindow .m2audgrip:active { background: var(--glass-press); }
+.mir-modwindow .m2audgrip svg { display: block; width: 12px; height: 12px; pointer-events: none; }
+.mir-modwindow .m2audled { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--mark-under); }
+.mir-modwindow .m2audout.on .m2audled { background: var(--acc2); }
+.mir-modwindow .m2audout[data-out="hit"] .m2audled { border-radius: 1px; transform: rotate(45deg); }
+.mir-modwindow .m2audmac { min-width: 0; min-height: 44px; padding: 0 5px; border: 0; border-radius: 5px;
+  background: transparent; color: inherit; display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center; touch-action: none; text-align: left; }
+.mir-modwindow .m2audout[data-out="level"] .m2audmac { width: 100%; align-items: center; text-align: center; }
+.mir-modwindow .m2audmac:active { background: var(--glass-press); }
+.mir-modwindow .m2audname { font: 700 7px var(--font-sans); letter-spacing: .08em;
+  color: hsl(0 0% 100% / .58); }
+.mir-modwindow .m2audslot { font: 700 9px var(--font-num); color: hsl(0 0% 100% / .30); }
+.mir-modwindow .m2audout.on .m2audname { color: var(--fg); }
+.mir-modwindow .m2audmac.on .m2audslot { color: var(--acc2); }
+
+/* One locally protected signal face. The trace and meters are actual model
+   values; structural threshold/hysteresis ink remains Accent A. */
+.mir-modwindow .m2dev.audio .m2path, .mir-modwindow .m2dev.audio .m2fill, .mir-modwindow .m2dev.audio .m2mid,
+.mir-modwindow .m2dev.audio .m2play, .mir-modwindow .m2dev.audio .m2playdot { display: none; }
+.mir-modwindow .m2audtracewell { fill: hsl(0 0% 100% / .035); stroke: hsl(0 0% 100% / .08); }
+.mir-modwindow .m2audtrace { fill: none; stroke: var(--acc2); stroke-width: 1.7;
+  stroke-linejoin: round; stroke-linecap: round; opacity: .82; }
+.mir-modwindow .m2audtracedot { fill: var(--acc2); stroke: var(--fg); stroke-width: .8; }
+.mir-modwindow .m2audbar { fill: var(--acc2); }
+.mir-modwindow .m2audbar.m2audq { fill: var(--acc); opacity: .64; }
+.mir-modwindow .m2audwell { fill: hsl(0 0% 100% / .075); }
+.mir-modwindow .m2audhyst { fill: var(--acc); opacity: .16; }
+.mir-modwindow .m2audgate { stroke: var(--acc); stroke-width: 1.2; }
+.mir-modwindow .m2audtick { stroke: hsl(0 0% 100% / .28); stroke-width: 1; }
+.mir-modwindow .m2audtxt { fill: hsl(0 0% 100% / .50); font: 700 6.5px var(--font-num); }
+.mir-modwindow .m2audhitlabel { fill: hsl(0 0% 100% / .58); }
+.mir-modwindow .m2audflash { fill: var(--acc2); }
+.mir-modwindow .m2audiostatus { left: 5px; right: 5px; gap: 6px; background: hsl(var(--glass-tint) / .91);
+  font: 700 6.5px var(--font-num); letter-spacing: .04em; color: hsl(0 0% 100% / .52); }
+.mir-modwindow .m2audiolife { min-width: 0; overflow: hidden; }
+.mir-modwindow .m2audiolife b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mir-modwindow .m2audiolife:not(.on):not(.bad) .m2statuslamp { background: hsl(0 0% 100% / .24); }
+.mir-modwindow .m2audiolife.bad { color: var(--bad); }
+.mir-modwindow .m2audiolife.bad i { background: var(--bad); }
+.mir-modwindow .m2audiolevel { margin-left: auto; color: var(--acc2); white-space: nowrap; }
+.mir-modwindow .m2audioout { white-space: nowrap; }
+.mir-modwindow .m2dev.audio .m2note { max-width: calc(100% - 14px); line-height: 1.25;
+  color: hsl(0 0% 100% / .46); font-size: 7px; }
+
+/* AUDIO uses the established device dial—arc, marker, value, focus and drag—
+   with three conditioning controls in one dense row. */
+#modwin.mir-modwindow .m2dev.audio .m2knobs {
+  grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 5px 10px 4px; }
+#modwin.mir-modwindow .m2dev.audio .m2kd { width: 50px; height: 50px; }
+#modwin.mir-modwindow .m2dev.audio .m2k[data-knob="sens"] .m2kd { width: 56px; height: 56px; }
+#modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs { grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px; padding: 5px 8px 4px; }
+#modwin.mir-modwindow .m2dev.m2cmp.audio .m2kd,
+#modwin.mir-modwindow .m2dev.m2cmp.audio .m2k[data-knob="sens"] .m2kd { width: 46px; height: 46px; }
+/* The conditioning sheet: one door, five rows. */
+.mir-modwindow .m2audsheet { position: absolute; left: 6px; right: 6px; top: 40px; z-index: 24;
+  border-radius: 10px; border: var(--glass-border) solid var(--glass-hairline);
+  background: var(--m2-plate);
+  -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);
+  padding: 6px;
+  display: flex; flex-direction: column; gap: 3px;
+  box-shadow: var(--glass-shadow); }
+.mir-modwindow .m2audsheet[hidden] { display: none; }
+.mir-modwindow .m2audshead { display: flex; align-items: center; gap: 4px; min-height: 22px;
+  font: 700 8.5px var(--font-sans); letter-spacing: 0.12em; color: rgba(255,255,255,0.66); }
+.mir-modwindow .m2audinput { flex: 1 1 auto; min-width: 0; height: 44px; border-radius: 8px;
+  border: var(--glass-border) solid var(--glass-hairline); background: var(--m2-plate);
+  color: var(--fg); padding: 0 7px; font: 600 8px var(--font-sans); }
+.mir-modwindow .m2audinput:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+.mir-modwindow .m2audsx { margin-left: auto; width: 44px; height: 44px; min-height: 44px; padding: 0;
+  border: 0; border-radius: 8px; background: rgba(255,255,255,0.07); color: #fff;
+  font: 600 12px var(--font-sans); }
+.mir-modwindow .m2audsrow { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.mir-modwindow .m2audslab { flex: 0 0 46px; font: 600 8.5px var(--font-sans); letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.62); }
+.mir-modwindow .m2audsval { flex: 1 1 auto; min-width: 0; text-align: center;
+  font: 600 10px var(--font-num); color: var(--acc2); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.mir-modwindow .m2audsbtn { flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; padding: 0;
+  border: 0; border-radius: 8px; background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.78); font: 600 13px var(--font-sans); }
+.mir-modwindow .m2audsbtn:active { background: var(--glass-press); }
+.mir-modwindow .m2audsleg { padding: 0 2px 2px; font: 500 8px var(--font-sans);
+  color: rgba(255,255,255,0.46); letter-spacing: 0.04em; }
+/* Minimized AUDIO is a real monitor: LEVEL is the tall rail, three narrow
+   follower rails stay independent, and HIT is a separate square event lamp. */
+.mir-modwindow .m2audminleds { display: none; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds { display: flex; flex-direction: column;
+  flex: 0 0 8px; width: 8px; gap: 4px; align-items: center; justify-content: center; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i { --signal: 0; display: block; position: relative;
+  width: 7px; height: 22px; overflow: hidden; border-radius: 3px;
+  background: hsl(0 0% 100% / .12); }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i::after { content: ""; position: absolute;
+  left: 0; right: 0; bottom: 0; height: calc(var(--signal) * 100%); background: var(--acc2); }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="level"] { display: none; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="hit"] { width: 9px; height: 9px;
+  border-radius: 1px; transform: rotate(45deg); }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="hit"]::after { inset: 0; height: auto;
+  opacity: var(--signal); }
+.mir-modwindow .m2dev.audio.m2min .m2audminout { color: hsl(0 0% 100% / .44); }
+.mir-modwindow .m2dev.audio.m2min .m2audminout.on { color: var(--acc2); }
+.mir-modwindow .m2dev.audio.m2min .m2audminout.hit { color: var(--fg); background: var(--acc2-soft); }
+.mir-modwindow .m2dev.audio.m2min .m2minnum { display: none; }
+.mir-modwindow .m2dev.audio.m2min .m2x { order: 6; }
+.mir-modwindow .m2dev.audio.m2min .m2minname { color: hsl(0 0% 100% / .68); }
+
+/* ══ MATERIAL SKINS OFFICIATION ═════════════════════════════════════════════════════
+   One semantic/control language sits above four material recipes. CLASSIC is
+   the persisted internal name for the connected DEFAULT pane; FROST remains
+   the disconnected constellation. fr-light is deliberately meaningful in
+   both. The existing glass scrim value reaches this face as --m2-separation:
+   it strengthens protection without changing the skin's identity. */
+:root {
+  --m2-motion-micro: 80ms;
+  --m2-motion-structural: 120ms;
+  --m2-motion-ease: cubic-bezier(.2, .7, .2, 1);
+  --m2-blend: var(--m2-separation, var(--glass-canvas-scrim, .26));
+  --m2-mat-hue: var(--glass-hue, 212);
+  --m2-mat-pane-lum: 14%;
+  --m2-mat-chassis-lum: 19%;
+  --m2-mat-control-lum: 10%;
+  --m2-mat-recess-lum: 7%;
+  --m2-mat-pane-alpha: calc(.62 + var(--m2-blend) * .22);
+  --m2-mat-chassis-alpha: calc(.66 + var(--m2-blend) * .20);
+  --m2-mat-control-alpha: calc(.50 + var(--m2-blend) * .20);
+  --m2-mat-edge-alpha: calc(.15 + var(--m2-blend) * .12);
+  --m2-mat-pane: hsl(var(--m2-mat-hue) 14% var(--m2-mat-pane-lum) / var(--m2-mat-pane-alpha));
+  --m2-mat-chassis: hsl(var(--m2-mat-hue) 13% var(--m2-mat-chassis-lum) / var(--m2-mat-chassis-alpha));
+  --m2-mat-control: hsl(var(--m2-mat-hue) 12% var(--m2-mat-control-lum) / var(--m2-mat-control-alpha));
+  --m2-mat-frost: hsl(0 0% 100% / calc(.07 + var(--m2-blend) * .06));
+  --m2-mat-recess: hsl(var(--m2-mat-hue) 18% var(--m2-mat-recess-lum) / calc(.60 + var(--m2-blend) * .28));
+  --m2-mat-recess-deep: hsl(var(--m2-mat-hue) 20% calc(var(--m2-mat-recess-lum) - 2%) / calc(.72 + var(--m2-blend) * .22));
+  --m2-mat-status: hsl(var(--m2-mat-hue) 18% 6% / calc(.68 + var(--m2-blend) * .24));
+  --m2-mat-edge: hsl(0 0% 100% / var(--m2-mat-edge-alpha));
+  --m2-mat-inner: hsl(0 0% 100% / calc(.055 + var(--m2-blend) * .055));
+  --m2-mat-shadow: 0 8px 26px hsl(0 0% 0% / .24);
+  --m2-signal-glow: 0 0 4px hsl(var(--hue-acc2, 288) var(--sat-acc2, 75%) 68% / .20);
+}
+/* LIGHT is not a white theme. It bends the material toward a brighter local
+   neutral while the instrument ink and the protected recess stay dark. */
+:root.fr-light {
+  --m2-mat-pane-lum: 28%;
+  --m2-mat-chassis-lum: 32%;
+  --m2-mat-control-lum: 15%;
+  --m2-mat-recess-lum: 9%;
+  --m2-mat-pane-alpha: calc(.56 + var(--m2-blend) * .22);
+  --m2-mat-chassis-alpha: calc(.60 + var(--m2-blend) * .20);
+  --m2-mat-control-alpha: calc(.48 + var(--m2-blend) * .20);
+}
+/* FROST keeps the same token ladder but makes each card the material object.
+   Its outer composition/negative space remains WindowKit's existing law. */
+:root.skin-frost {
+  --m2-mat-pane-lum: 13%;
+  --m2-mat-chassis-lum: 17%;
+  --m2-mat-pane-alpha: calc(.60 + var(--m2-blend) * .22);
+  --m2-mat-chassis-alpha: calc(.68 + var(--m2-blend) * .22);
+  --m2-mat-shadow: none;
+}
+:root.skin-frost.fr-light {
+  --m2-mat-pane-lum: 31%;
+  --m2-mat-chassis-lum: 36%;
+  --m2-mat-pane-alpha: calc(.52 + var(--m2-blend) * .20);
+  --m2-mat-chassis-alpha: calc(.60 + var(--m2-blend) * .18);
+  --m2-mat-recess-lum: 9%;
+}
+
+/* M2 panel: DEFAULT is one optical pane. Device regions are local depth, not
+   disconnected cards; FROST's window root remains paintless by WindowKit. */
+:root:not(.skin-frost) #modwin.mir-modwindow.glass {
+  background-color: var(--m2-mat-pane);
+  border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 0 var(--m2-mat-inner), var(--m2-mat-shadow), var(--glass-bevel); }
+:root:not(.skin-frost) #modwin.mir-modwindow .m2rail {
+  background-color: hsl(var(--m2-mat-hue) 12% var(--m2-mat-chassis-lum) / calc(.24 + var(--m2-blend) * .20));
+  box-shadow: inset -1px 0 0 var(--m2-mat-inner); }
+#modwin.mir-modwindow .m2dev {
+  background-color: var(--m2-mat-chassis);
+  border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 0 var(--m2-mat-inner); }
+#modwin.mir-modwindow .m2dev .m2head {
+  background-image: linear-gradient(180deg, hsl(0 0% 100% / .035), transparent);
+  box-shadow: inset 0 -1px 0 hsl(0 0% 100% / .055); }
+
+/* M5 recess: signal surfaces are locally protected, but keep enough material
+   variation to read as glass rather than pasted opaque rectangles. */
+#modwin.mir-modwindow .m2hero {
+  background-color: var(--m2-mat-recess-deep);
+  background-image: linear-gradient(180deg, hsl(0 0% 100% / .025), hsl(0 0% 0% / .07));
+  border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 3px hsl(0 0% 0% / .32), inset 0 1px 0 var(--m2-mat-inner); }
+#modwin.mir-modwindow .m2status, #modwin.mir-modwindow .m2lfostatus, #modwin.mir-modwindow .m2envstatus, #modwin.mir-modwindow .m2audiostatus {
+  background: var(--m2-mat-status); border-color: var(--m2-mat-inner);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .04); }
+
+/* M3 controls: a stable neutral floor. The MOD-UI-008 markers keep exclusive
+   ownership of value, live, focus, drag, selected, disabled and locked ink. */
+#modwin.mir-modwindow .m2slot, #modwin.mir-modwindow .m2seat44, #modwin.mir-modwindow .m2bank, #modwin.mir-modwindow .m2ab,
+#modwin.mir-modwindow .m2trig, #modwin.mir-modwindow .m2zoom, #modwin.mir-modwindow .m2swb, #modwin.mir-modwindow .m2chk,
+#modwin.mir-modwindow .m2mac, #modwin.mir-modwindow .m2audsrc, #modwin.mir-modwindow .m2audout, #modwin.mir-modwindow .modcad,
+#modwin.mir-modwindow .modtempo, #modwin.mir-modwindow .m2hold, #modwin.mir-modwindow .m2prename, #modwin.mir-modwindow .m2name {
+  background-color: var(--m2-mat-control); }
+#modwin.mir-modwindow .m2dialink::before {
+  background: var(--m2-mat-recess);
+  box-shadow: inset 0 0 0 1px var(--m2-mat-edge), inset 0 2px 4px hsl(0 0% 0% / .25); }
+
+/* The work lane remains two boxes with a real hole between them. */
+:root:not(.skin-frost) #modwin.mir-modwindow .m2workbar {
+  background-color: var(--m2-mat-chassis); background-image: none;
+  border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 0 var(--m2-mat-inner); }
+:root.skin-frost #modwin.mir-modwindow .m2workbar {
+  background-color: var(--m2-mat-pane); background-image: none;
+  border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 0 var(--m2-mat-inner); }
+#modwin.mir-modwindow .m2foot { background: transparent; }
+
+/* Window chrome is structural Frost, never modulation signal. */
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before {
+  background: var(--m2-mat-pane); border-color: var(--m2-mat-edge);
+  box-shadow: inset 0 1px 0 var(--m2-mat-inner), 0 3px 12px hsl(0 0% 0% / .20); }
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip.on::before,
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip[aria-pressed="true"]::before {
+  background: var(--m2-mat-frost);
+  box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .22), inset 0 1px 0 hsl(0 0% 100% / .12); }
+
+/* M4/M5 interaction depth. Hover is a neutral lift; pressing moves inward.
+   No rule here changes the semantic state colours established in MOD-UI-008. */
+@media (hover: hover) {
+  #modwin.mir-modwindow button:not(:disabled):hover,
+  #modwin.mir-modwindow .kctl:not(.ctl-frozen):hover {
+    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .20), inset 0 1px 0 hsl(0 0% 100% / .10); }
+}
+#modwin.mir-modwindow button:active:not(:disabled), #modwin.mir-modwindow [role="slider"].drag {
+  background-color: hsl(0 0% 0% / .10);
+  box-shadow: inset 0 2px 5px hsl(0 0% 0% / .34), inset 0 0 0 1px hsl(0 0% 100% / .13); }
+
+/* M6 signal budget: markers stay brighter than their supporting glow. Ordinary
+   selection and transport chrome receive no permanent bloom. */
+#modwin.mir-modwindow .modxport.on { text-shadow: none; }
+#modwin.mir-modwindow .m2chk.on .m2dot { box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .18); }
+#modwin.mir-modwindow .m2statusmain.on .m2statuslamp,
+#modwin.mir-modwindow .m2tdot, #modwin.mir-modwindow .m2spanlivecap { box-shadow: var(--m2-signal-glow); }
+#modwin.mir-modwindow .m2spanlive { filter: drop-shadow(0 0 1.5px hsl(var(--hue-acc2, 288) var(--sat-acc2, 75%) 68% / .18)); }
+/* ══ MOTION OFFICIATION ═════════════════════════════════════════════════════════════════════════════════
+   MICRO settles neutral material ink. STRUCTURAL geometry remains immediate:
+   fixed chassis, work lanes and a migrating ChipRail never tween through an
+   invalid layout. Only the fold glyph explains the already-complete change.
+   SIGNAL ink has no CSS clock; every position is written by model sampling. */
+#modwin.mir-modwindow button, #modwin.mir-modwindow .kctl {
+  transition-property: background-color, border-color, box-shadow, color, filter, opacity;
+  transition-duration: var(--m2-motion-micro);
+  transition-timing-function: var(--m2-motion-ease); }
+#modwin.mir-modwindow .m2chev {
+  transition-property: transform;
+  transition-duration: var(--m2-motion-structural);
+  transition-timing-function: var(--m2-motion-ease); }
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before {
+  transition: background-color var(--m2-motion-micro) var(--m2-motion-ease),
+              border-color var(--m2-motion-micro) var(--m2-motion-ease),
+              box-shadow var(--m2-motion-micro) var(--m2-motion-ease); }
+#modwin.mir-modwindow .m2play, #modwin.mir-modwindow .m2playdot, #modwin.mir-modwindow .m2meterfill,
+#modwin.mir-modwindow .m2envprogress i, #modwin.mir-modwindow .m2envminprog i,
+#modwin.mir-modwindow .m2audbar, #modwin.mir-modwindow .m2audtrace, #modwin.mir-modwindow .m2audtracedot,
+#modwin.mir-modwindow .m2audflash, #modwin.mir-modwindow .m2marker, #modwin.mir-modwindow .m2spanlivecap,
+#modwin.mir-modwindow .m2tdot {
+  transition: none; animation: none; }
+/* Legacy class retained for the public bar-state compatibility surface. */
+.mir-modwindow .m2barfloat { position: fixed; z-index: 44; }
+@media (prefers-reduced-motion: reduce) {
+  :root { --m2-motion-micro: 0ms; --m2-motion-structural: 0ms; }
+  #modwin.mir-modwindow button, #modwin.mir-modwindow .kctl, #modwin.mir-modwindow .m2chev,
+  .kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before,
+  .mir-modwindow .m2dev, .m2ring, .m2ghost, .m2span, .m2spancap {
+    transition: none !important; animation: none !important; }
+  /* Histories are optional presentation memory. Current-value markers, meters,
+     LFO/ENV playheads and HIT remain visible and continue to tell the truth. */
+  #modwin.mir-modwindow .m2spark, #modwin.mir-modwindow .m2audtrace { visibility: hidden; }
+  #modwin.mir-modwindow .m2trail .m2tdot:not(:first-child) { display: none; }
+/* ── RESTORED.  modwindow-01-anim.css stops at anim.js:3306 and so drops the
+      `}` that closes `@media (prefers-reduced-motion: reduce)`; the template
+      literal actually runs 1782–3307.  Without this line the sheet is not
+      valid CSS (browsers recover by implicit close at EOF, but a bundler or a
+      later concatenation would not).  This brace is the ONLY character added
+      to PART B. ── */
+}

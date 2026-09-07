@@ -1,7 +1,7 @@
 /* tests/smoke.mjs — is the bare field pipeline alive in headless Firefox WebGPU?
  *   LW_PORT=8701 GD_PORT=5201 node tests/smoke.mjs
  */
-import { open, judge, done } from '/home/joshua-hosain/Documents/MANDELBROT APP/project/mbgate/gatekit.mjs';
+import { open, judge, done } from '../tools/gate/gatekit.mjs';
 const PORT = process.env.LW_PORT || '8701';
 const g = await open(`https://127.0.0.1:${PORT}/lab/smoke.html?preset=1s%2B2pz`, { width: 900, height: 700 });
 try {

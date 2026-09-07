@@ -11,7 +11,7 @@
  */
 import { BASIS } from './hydrogen.js';
 import { vortexPoints, stretchedCensus, threeModes } from './frontier.js';
-import { cameraBasis } from './field.js';
+import { cameraBasis, cameraKey } from './field.js';
 import { el, readout, sw, seg, trig } from './kit.js';
 
 export function createVortex(host, overlay, api) {
@@ -83,7 +83,7 @@ export function createVortex(host, overlay, api) {
     const key = `${reg.version}|${t.toFixed(6)}|${qual.get()}|${half}`;
     const now = performance.now();
     if (key !== lastKey && (!playing || now - lastLocateWall > 120 || dirty)) { lastKey = key; lastLocateWall = now; dirty = false; locate(reg, t, half); drawOverlay(obs); lastObs = ''; return; }
-    const ok = `${obs.yaw.toFixed(4)}|${obs.pitch.toFixed(4)}|${obs.dist.toFixed(4)}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;
+    const ok = `${cameraKey(obs)}|${obs.dist.toFixed(4)}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;   // wave 54: the WHOLE orientation (a FREE camera rolls)
     if (ok !== lastObs) { lastObs = ok; drawOverlay(obs); }
   }
   return { update, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },

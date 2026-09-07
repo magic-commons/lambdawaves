@@ -6,7 +6,11 @@
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --font-sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
   --font-num: var(--font-ui);
-  --glass-blur: 18px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) */
+  /* WAVE 69 · THE MATH FACE.  Every stack after the house face is a REAL fallback (STYLE-LOCK,
+     Typography) — Latin Modern and Libertinus are the two maths faces a Linux box is likeliest to
+     carry, and the generic `serif` is the last resort the SOURCE.txt contract warns about. */
+  --font-math: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif;
+  --glass-blur: 22px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) — wave 101, Josh */
   --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-lead: 13px;
   --tr-tight: .02em; --tr-wide: .12em; --tr-wider: .14em; --lh: 1.45; --w-light: 300; --w-med: 500; --w-bold: 650;
   --r-xs: 3px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
@@ -27,7 +31,8 @@
   --acc2: hsl(288 70% 72%); --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
   --ok: hsl(142 42% 70%); --warn: hsl(38 70% 70%); --bad: hsl(4 62% 74%);
   --n1: hsl(40 90% 80%); --n2: hsl(188 80% 68%); --n3: hsl(300 70% 76%); --n4: hsl(24 92% 66%); --n5: hsl(120 55% 68%); --n6: hsl(258 78% 78%);
-  --rack-w: 372px; --z-chrome: 30; --z-veil: 40; --z-banner: 60;
+  --rack-w: 372px; --rail-w: 46px; --z-chrome: 30; --z-veil: 40; --z-banner: 60;   /* --rail-w: a COMPACT floating window's strip (wave 55) */
+  --phone: 0;   /* the sentinel skin.css's phone query raises to 1 — the breakpoint is written there, ONCE, and rack.js reads it back */
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
@@ -57,7 +62,7 @@ body.rack-hidden.rack-peek #rackL { transform: none; opacity: 1; }
 body.rack-hidden #rack { transform: translateX(calc(100% + 12px)); opacity: 0; }
 body.rack-hidden.rack-peek #rack { transform: none; opacity: 1; }
 #rackPeek { position: absolute; right: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
-#rackToggle, #rackAdd { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+#rackToggle, #rackAdd, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
 .dev-head { cursor: grab; user-select: none; touch-action: none; }
 .dev { touch-action: pan-y; }
@@ -77,10 +82,16 @@ body.rack-hidden #rackToggle { color: var(--acc); }
 .dev-copy:hover { color: var(--acc); }
 .dev[data-kind="info"] .ro-sub { max-height: 3em; opacity: 1; }
 #rackAdd { top: 44px; font-size: 18px; line-height: 1; transition: opacity .28s ease; }
-body.rack-hidden #rackAdd, body.rack-hidden #rackAddList { opacity: 0; pointer-events: none; }
-body.rack-hidden.rack-peek #rackAdd { opacity: 1; pointer-events: auto; }
-#rackAdd:hover { color: var(--acc); }
-#rackAddList { position: absolute; right: calc(var(--rack-w) + 14px); top: 80px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
+/* wave 54 (board #48): FAVOURITE LAYOUTS takes the next seat down the same column, on the same rules as its two
+   neighbours — one geometry, one hide rule, one hover colour, and its list opens where the + list opens. */
+#rackFav { top: 80px; font-size: 15px; line-height: 1; transition: opacity .28s ease; }
+body.rack-hidden #rackAdd, body.rack-hidden #rackAddList, body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
+body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
+#rackAdd:hover, #rackFav:hover { color: var(--acc); }
+#rackAddList, #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
+.rack-fav-head { padding: 5px 10px 3px; font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); color: var(--dim); }
+.mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
+.mb-item:hover .fav-x { color: var(--acc2); }
 /* the window's name is its eyebrow; the long title is a hover hint (Josh: "really long subtitles") */
 .dev-title { display: none; }
 .dev-eyebrow { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--fg-soft); font-weight: var(--w-bold); }
@@ -104,7 +115,7 @@ body.no-badges #badges, body.no-hint #hint { display: none !important; }
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
 .nb-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 6px 14px; cursor: grab; user-select: none; touch-action: none; }
-.nb-title { font-family: 'Spinwerad', var(--font-ui); font-size: 30px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 70%; min-width: 0; }
+.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 30px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 70%; min-width: 0; }
 .nb-title:focus { color: var(--acc); }
 #notebook[data-face="about"] .nb-title, #notebook[data-face="projects"] .nb-title { visibility: hidden; }
 .nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: 14px/1.6 var(--font-ui); color: var(--fg); }
@@ -125,7 +136,56 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-projectsface { gap: 8px; }
 .pj-new { display: flex; gap: 6px; } .pj-path { flex: 1 1 auto; border: 1px solid hsl(0 0% 50% / .3); border-radius: 8px; background: var(--nb-btn); padding: 4px 8px; font: 13px var(--font-ui); color: var(--fg); }
 .pj-save, .pj-export, .pj-import { height: 26px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; display: inline-flex; align-items: center; }
-.pj-list { display: flex; flex-direction: column; gap: 2px; max-height: 44vh; overflow: auto; }
+/* ══ WAVE 106 · THE HISTORY LIST ═══════════════════════════════════════════════════════════════
+   Newest at the top, the way a stack reads.  Three states, and only ONE of them is a colour trick:
+     · PAST     the ordinary ink — these happened and they hold.
+     · CURRENT  where the instrument is standing.  Accent, plus a left rule, because "which row am I
+                on" is the one thing you look for and colour alone is not enough to answer it.
+     · FUTURE   the rows you stepped back from.  GREYED, NOT REMOVED — that is FL's behaviour and it
+                is the honest one: they are still reachable until you do something new, and a list
+                that deleted them would be lying about what the next click can still do.
+   It takes the RACK's own scrollbar, like the project list two rules down, because 60 rows will not
+   fit and a scroller nothing marks is a scroller nobody finds. */
+.hist-list { display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: hidden auto;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
+.hist-list::-webkit-scrollbar { width: 2px; }
+.hist-list::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }
+.hist-row { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left;
+  border: 0; border-left: 2px solid transparent; background: transparent; cursor: pointer;
+  padding: 3px 6px; border-radius: var(--r-sm); color: var(--fg); font: 12px/1.4 var(--font-ui); }
+.hist-row:hover { background: hsl(0 0% 50% / .12); }
+.hist-i { flex: 0 0 auto; min-width: 1.6em; text-align: right; color: var(--dim);
+  font: var(--fs-micro)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
+.hist-lbl { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-current { border-left-color: var(--acc); color: var(--acc); }
+.hist-current .hist-i { color: var(--acc); }
+/* the stepped-back future: still there, still clickable, and visibly spent */
+.hist-future { opacity: .42; }
+.hist-future .hist-lbl { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* WAVE 106 · THE PROJECT LIST SCROLLS, AND NOW IT SAYS SO.  It always had `overflow: auto`, but no
+   scrollbar of its own while #rack two rules below wears an explicit 2-px accent one — so a list
+   longer than the box gave a reader nothing to see and nothing to grab, on a face that already looked
+   empty for a different reason (see rack.js's `show('projects')`).  It takes the RACK'S OWN
+   scrollbar, not a new one, plus the two behaviours every other scroller in this lab has: the scroll
+   stops at its own ends instead of dragging the notebook behind it, and iOS gets momentum. */
+.pj-list { display: flex; flex-direction: column; gap: 2px; max-height: 44vh; overflow: hidden auto;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
+.pj-list::-webkit-scrollbar { width: 2px; }
+.pj-list::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }
+.pj-list::-webkit-scrollbar-track { background: transparent; }
+/* WAVE 106 · THE ROOTS, shown above the list so SAVE AS can aim at one.  They wear the .pj-folder
+   heading's own type — same micro size, same tracking — because a chip here NAMES the heading it
+   scrolls you to; it is the same word, made pressable.  A 44-px target would tower over a 13-px
+   field, so these take the notebook's own dense scale and rely on being a wide, well-spaced row. */
+.pj-roots { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+.pj-root { border: 1px solid hsl(0 0% 50% / .3); background: var(--nb-btn); color: var(--dim);
+  border-radius: var(--r-pill); padding: 3px 9px; cursor: pointer;
+  font: var(--fs-micro)/1.5 var(--font-ui); letter-spacing: var(--tr-wider); }
+.pj-root:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 55%, transparent); }
+.pj-root:active { background: var(--glass-press); }
 .pj-folder { margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); }
 .pj-item { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; } .pj-item:hover { background: hsl(0 0% 50% / .12); }
 .pj-item .pj-name { flex: 1 1 auto; cursor: pointer; font-size: 13px; color: var(--fg); } .pj-item .pj-when { font-size: var(--fs-micro); color: var(--dim); }
@@ -144,7 +204,7 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
 .nb-logo { display: flex; align-items: center; gap: 0; font-size: 35px; margin: 6px 0 4px; }   /* wave 48: 1.35 × the old 26px (Josh) */
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
-.nb-logo .word { font-family: 'Spinwerad', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
+.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
 .nb-logo .mark { height: 1.05em; width: 1.05em; margin-left: .05em; }
 .ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
 .ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
@@ -161,18 +221,50 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .picker, .pk-n { background: transparent !important; box-shadow: none !important; }
 .picker { border: 1px solid var(--glass-hairline) !important; }
 /* the playhead slides away with the rack and fades back when the pointer nears its place */
-#transport.mini { transition: transform .28s ease, opacity .28s ease; }
+/* WAVE 96 · A SHARPER LEAVE AND RETURN (Josh: "the native playhead hide/reveal should have a sharper
+   ease out/ease in").  `ease` is nearly symmetric and reads as drift on a bar that is either there or
+   not.  These are MOTION-LAW's own two curves — arriving decelerates, leaving accelerates — and each
+   is shorter than the .28 it replaces, which is the other half of "sharper". */
+#transport.mini { transition: transform .24s cubic-bezier(.23, 1, .32, 1), opacity .24s cubic-bezier(.23, 1, .32, 1); }
+body.rack-hidden #transport.mini { transition: transform .18s cubic-bezier(.55, 0, 1, .45), opacity .18s cubic-bezier(.55, 0, 1, .45); }
 body.rack-hidden #transport.mini { transform: translate(-50%, 140px); opacity: 0; pointer-events: none; }
 body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); opacity: 1; pointer-events: auto; }
 body.rack-hidden #hint { opacity: 0; }
-/* the channel's two knobs: half-size, stacked; alternate rows step 3 px right / left for readability (Josh) */
+/* ══ WAVE 106 · THE LANES LINE UP, AND THE TWO DIALS STOP LOOKING THE SAME ══════════════════════
+   Josh: "I changed my mind on the staggered phase knobs in the spectrum window, they can all be
+   aligned, but can you give me visual distinction between the rate knob and the phase knob?"
+     THE STAGGER GOES.  It was a ±3 px nth-child nudge on the whole two-knob stack — it never
+   separated PHASE from RATE at all, it separated one LANE from the next, which is why aligning them
+   costs nothing structural: one rule out, one column back.
+     AND THE DISTINCTION IT WAS STANDING IN FOR IS BUILT PROPERLY, on TWO channels rather than one,
+   because at a 17-px dial in a 30-px column colour alone is a thin thread and colour alone is also
+   the thing a CVD reader cannot use:
+       · SIZE.  PHASE keeps 17; RATE steps to 15.  This file already ladders the dial three times by
+         nesting depth — 34 → 28 → 17 — so a fourth step is the house idiom and not a new one, and a
+         2-px difference is unmissable when the two sit stacked and centred one above the other.
+       · COLOUR.  PHASE is the LIVE reading — it is the one that turns on its own, and `--acc` already
+         means live everywhere in this lab — so its ring takes a low-alpha accent tint.  RATE is a
+         SETTING you leave somewhere, so it keeps the neutral hairline every other dial wears.
+     Nothing is invented: `.k.rate` was already in the markup and already a live test selector, and it
+     had exactly one rule (`.k.rate .k-val { font-size: var(--fs-micro) }`) that duplicated the size
+     this block already set — a hook that had been sitting there doing nothing. */
 .sp-knobs { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .sp-row .sp-knobs .k { width: 30px; gap: 0; }
 .sp-row .sp-knobs .k-dial { width: 17px; height: 17px; }
 .sp-row .sp-knobs .k-needle { height: 6px; width: 1.2px; }
 .sp-row .sp-knobs .k-val { font-size: 8px; line-height: 1; padding: 0 3px; }
-.sp-row:nth-child(odd) .sp-knobs { transform: translateX(3px); }
-.sp-row:nth-child(even) .sp-knobs { transform: translateX(-3px); }
+/* PHASE — the live one: it turns by itself, so it takes the accent the rest of the lab spends on live.
+   ⚠ AS A RING OF SHADOW, NOT A BORDER, and that is not a detail: skin.css sets `border-color:
+   transparent` on EVERY `.k-dial` and draws the puck with `--neu-raise` instead — "the puck stands
+   proud; the groove ring is the only texture".  A border here would win on specificity and look
+   wrong-footed against every other dial in the lab.  The accent ring is spelled exactly as skin.css
+   already spells a lit dial (`.k.drag`, `.k.active`): the raise, plus one accent pixel outside it. */
+.sp-row .sp-knobs .k.live .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent); }
+/* RATE — a setting, not a reading: two pixels smaller, and the plain puck.  The 45-px finger band
+   skin.css gives these dials on a phone sits on `.k-dial::before` and is absolute, so it does not
+   shrink with the ink. */
+.sp-row .sp-knobs .k.rate .k-dial { width: 15px; height: 15px; }
+.sp-row .sp-knobs .k.rate .k-needle { height: 5px; }
 /* 2 px accent scrollbars: the left rack scrolls on its right edge, the right rack on its left edge (direction: rtl on the
    container only — every card is set back to ltr, so the controls read and drag exactly as before) */
 #rack, #rackL { scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
@@ -182,6 +274,43 @@ body.rack-hidden #hint { opacity: 0; }
 #rack { direction: rtl; }
 #rack > * { direction: ltr; }
 .k-val, .fd-val, .ro-val, .ro-sub, .dev-stat, .sp-e, .sp-nm, .keys-chip, .tbtn, #transport .time { font-variant-numeric: tabular-nums; }
+/* ═══ WAVE 69 · <m> — MATHEMATICS, IN THE MATH FACE ═══════════════════════════════════════════════
+ * ONE rule, one element, and the element is deliberately an unknown one: an inline note written with
+ * innerHTML gets the face with no code at all, and every plain-text call site goes through kit.js's
+ * `mathText()`, which BUILDS the element rather than parsing a string.  `<m>` is not in the HTML
+ * vocabulary, which is the point — nothing else in the tree can claim it by accident.
+ *   THE OPTICAL SIZE IS MEASURED, not chosen.  STIX Two Math's x-height is 473/1000 em against
+ * Roboto's 528/2048·2 = 528‰ (0.5283), and its cap-height 657 against 711; matching the x-heights
+ * asks ×1.117, matching the caps ×1.082, and a formula is both at once — 1.10em is the geometric
+ * mean and it is what makes `arg ψ` sit on the same line as OBSERVABLE without either looking shrunk.
+ *   IT STAYS UPRIGHT.  The subset carries one weight and no italic, so `font-style: italic` would be
+ * a SYNTHETIC slant of a mathematics face — and half of what this lab sets is operator names (Re, Im,
+ * arg, gcd, mod), which are upright by convention anyway.  One honest face beats two fake ones.
+ *   AND IT DOES NOT MOVE THE LINE.  The face declares USE_TYPO_METRICS with ascent 762 / descent 238,
+ * exactly one em, so an <m> inline box never grows a row the way a maths font's 2200/1700 winAscent
+ * pair would; `line-height: 1` holds it under the parent's 1.45 strut whatever the fallback does. */
+m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-height: 1;
+    letter-spacing: normal; font-variant-numeric: tabular-nums; }
+/* a marked run inside a label that is TRACKED gets its tracking back to zero, and one inside a
+   heading keeps the heading's weight — the face has one, so this is the browser's synthesis and it
+   is the same thing #title .lam has always done */
+.k-lbl m, .fd-lbl m, .ro-lbl m, .grp-lbl m, .dev-eyebrow m, .seg-b m { letter-spacing: 0; }
+
+/* ═══ WAVE 69 · .fx — A CLOSED FORM WITH LIVE SLOTS (kit.js `formula`) ════════════════════════════
+ * Two faces on one line, on purpose: the EXPRESSION is the math face and a SLOT is `--font-num` with
+ * tabular figures, so the mathematics reads as mathematics and the numbers substituted into it can
+ * never dance.  The slot is also the brightest ink on the line, which is how the eye finds the values
+ * that are moving WITHOUT anything having to move decoratively (MOTION-LAW gate 3). */
+.fx { margin: 3px 0 0; display: flex; flex-direction: column; gap: 1px; }
+.fx-l { display: block; font-size: var(--fs-small); line-height: 1.55; color: var(--ink-key); letter-spacing: 0; }
+.fx-v { font-style: normal; font-family: var(--font-num); font-size: .92em; font-variant-numeric: tabular-nums;
+        color: var(--fg); letter-spacing: var(--tr-tight); }
+.fx.dim .fx-l { color: var(--ink-faint); }
+/* THE PILL IS A 32-px STRIP AND A DERIVATION HAS NO PLACE IN IT.  The transport's REPEATS formula
+   lives on the DOCKED card; undocked, the same DOM is restyled as a 560 x 32 pill with twelve seats
+   in one flex row, and a two-line expression there would either be clipped or would break the row.
+   It is `display: none`, so the pill still has exactly twelve seats and B74's claim stays true. */
+#transport.mini .fx { display: none; }
 /* notes fold into hint icons; N (or the icon) opens them */
 .hint-i { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin: 2px 0; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font: 10px/1 var(--font-ui); cursor: help; }
 .note.hinted { display: none; }
@@ -201,12 +330,27 @@ body.notes-open .note.hint-src { display: block; }
 .mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: left; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: 6px; font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
 .mb-item:hover { background: var(--glass-raise); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+/* WAVE 103 · THE QUEUE'S ORDINAL — "a little masked number in a filled circle" (Josh).  Filled in the
+   accent with the number knocked out in the accent's own ink, which is the one pairing in this lab
+   that is guaranteed legible on both themes because `--acc-ink` is chosen from `--acc`'s lightness. */
+.mb-item > .mb-num { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center;
+  justify-content: center; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--acc); color: var(--acc-ink);
+  font: var(--w-bold) var(--fs-micro)/1 var(--font-num); font-variant-numeric: tabular-nums; }
+.mb-item.queued { color: var(--fg); background: var(--acc-soft); }
+/* WAVE 104 · the favourite mark.  It sits BEFORE any queue ordinal in the DOM, so the sibling rule
+   below hands the auto margin to whichever of the two comes first and the pair never fights over it. */
+.mb-item > .mb-fav { margin-left: auto; flex: 0 0 auto; color: var(--acc2); font-size: var(--fs-small); line-height: 1; }
+.mb-item > .mb-fav ~ .mb-num { margin-left: 6px; }
 .mb-item:disabled { color: var(--dim); opacity: .45; cursor: default; }                    /* nothing to UNDO / REDO: the item is there and says so */
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }
 .sp-head .note { display: none; }
 .sp-head .trig { flex: 1 1 0; min-width: 0; padding: 0 6px; }
 .k.rate .k-val { font-size: var(--fs-micro); }
 .hint-i:hover + .note.hinted, .hint-i:focus + .note.hinted, .note.hinted.open, body.notes-open .note.hinted { display: block; }
+/* THE NARROW SCREEN: the rack drops along the bottom.  This is the IPAD's rule (portrait 744–834) and a
+   narrow desktop window's, and wave 51 left it exactly as it was.  A PHONE does not land here: skin.css's
+   last block is a (hover: none) + size pair that comes later and overrides every property below. */
 @media (max-width: 860px) {
   #rack { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
 }
@@ -219,7 +363,10 @@ body.notes-open .note.hint-src { display: block; }
 #title .lam { color: var(--acc); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
 #title .word { color: var(--fg); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: .14em; }
 #title .mark { height: 1.05em; width: 1.05em; display: inline-block; vertical-align: -0.12em; }
-#title .ms { display: none !important; }
+#title .ms { display: none; }   /* WAVE 59: the `!important` here beat skin.css:151's `#title:hover .ms { display: inline }`
+                                  regardless of specificity, so QWAVE-0 · HYDROGEN SHADOW LAB — the ONLY on-screen string
+                                  containing the word "hydrogen" — could never render, on hover or otherwise.  The rule
+                                  stays (the subtitle is a hover-level fact); only the sledgehammer goes. */
 #badges { position: absolute; left: calc(var(--rack-w) + 340px); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
 #badges > * { pointer-events: auto; }
 .badge { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; border-radius: var(--r-pill); font-size: var(--fs-tiny); letter-spacing: var(--tr-wide);
@@ -236,28 +383,68 @@ body.notes-open .note.hint-src { display: block; }
 #sheet b { color: var(--fg); }
 #banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: var(--z-banner); max-width: 520px; padding: var(--sp-5); border-radius: var(--r-lg);
   font-family: var(--font-sans); background: hsl(350 40% 18% / .95); border: 1px solid hsl(350 60% 50% / .6); }
-#banner h3 { margin: 0 0 6px; font-family: var(--font-ui); letter-spacing: var(--tr-wide); color: var(--bad); }
+/* WAVE 59 · THE BANNER IS THE ONE PANE THAT DOES NOT FOLLOW THE THEME, so its ink is written here and not
+   inherited.  It paints its own dark maroon ground unconditionally (above), while `body { color: var(--fg) }`
+   resolves to NEAR-BLACK on the shipped LIGHT theme — measured in the page at 1.19 : 1, and worse than a
+   plain miss because showBanner() runs three thousand lines BEFORE applySettings(): the sentence appeared
+   white-on-maroon and went DARK a second later.  It is the only thing a visitor without WebGPU ever sees,
+   so it is written unconditionally — one string of ink on BOTH themes, 13.69 : 1 on the pane's own ground,
+   with the heading at 6.64 : 1.  Nothing here is an accent (STYLE-LOCK's ruling stands). */
+#banner, #banner p { color: hsl(0 0% 96%); }
+#banner p { margin: 0; }
+#banner h3 { margin: 0 0 6px; padding-right: 30px; font-family: var(--font-ui); letter-spacing: var(--tr-wide); color: var(--bad); }
+/* …and a way out.  It sat at z-index 60 over the stage for the whole session with no dismiss and no
+   pointer-events rule, so the message a broken browser could not read was also one it could not put down. */
+#banner .banner-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; border-radius: var(--r-sm); color: hsl(0 0% 96%); opacity: .75; font-size: var(--fs-lead); line-height: 1; cursor: pointer; }
+#banner .banner-x::after { content: ''; position: absolute; inset: -9px; }    /* 26 px of ink, 44 px of finger — wave 51's rule, not a 44-px mark */
+#banner .banner-x:hover, #banner .banner-x:focus-visible { opacity: 1; background: hsl(0 0% 100% / .12); }
 #hint { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); z-index: var(--z-chrome); padding: 4px 12px; border-radius: var(--r-pill);
   font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); color: var(--dim); pointer-events: none; opacity: 1; transition: opacity .6s; }
 #hint.gone { opacity: 0; }
+#hint .touch { display: none; }        /* wave 59: the bar carries BOTH legends; skin.css's phone block swaps which one shows */
 
 /* ── transport strip (the master logical transport, §25) ───────────────── */
 #transport { position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: var(--sp-4); z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-2);
   height: 56px; padding: 0 var(--sp-3); border-radius: var(--r-lg); }
 /* the subtitle-sized transport: one slim bar at the bottom centre */
-#transport.mini { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, calc(100% - 2 * var(--rack-w) - 40px)); height: 34px; bottom: 60px; padding: 0 8px; gap: 6px; border-radius: var(--r-pill); }
+#transport.mini { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, calc(100% - 2 * var(--rack-w) - 40px)); height: 46px; bottom: 60px; padding: 2px 7px 3px; gap: 2px; border-radius: 16px; }   /* wave 92: the modulation work bar's box */
 #transport.mini .tbtn { width: 26px; height: 26px; font-size: 11px; border-radius: 50%; }
 #transport.mini .tbtn.play { width: 34px; }
 #transport.mini .fd { flex: 1 1 auto; min-width: 120px; }   /* the play bar keeps its length: the readouts beside it are fixed-width */
 #transport.mini .k { width: 36px; }
-#transport.mini .ro { flex: 0 0 84px; min-width: 84px; width: 84px; }
-#transport.mini .ro.period { flex: 0 0 132px; min-width: 132px; width: 132px; }
+/* WAVE 65 · THE PILL'S WIDTH BUDGET, MEASURED RATHER THAN ASSUMED.  Adding the MOD seat is what
+   made this worth checking, and the check found the row was ALREADY over: at 520 px the eleven
+   fixed items and their gaps wanted 542, so `play` was rendering at 20.3 px of its 26 and the three
+   step buttons at 18.9 of their 24 — every one of them silently flex-shrunk, on the shipped default.
+   Four numbers close it, and each is MEASURED against the longest string its readout can hold rather
+   than the one that happens to be on screen: the pill takes lab.css's own 560 in skin.css (where a
+   520 had been contradicting it), MOD is 26 in the pill rather than 40, the `t` readout gives up 8
+   (its worst, "12345.67  (300)", measures 68.2 in a box that is now 74) and REPEATS TAKES 12 —
+   because `fmtPeriod`'s worst is "≈ 123456 a.u. · 2.987 ps" at 106.5 px, which the old 132 cleared
+   and a naive trim would have clipped.  The row wants 556 in 560 and the SCRUB — the one
+   `flex: 1 1 auto` in it — takes the rest.  Move a seat in this row and re-run the measurement. */
+#transport.mini .ro { flex: 0 0 76px; min-width: 76px; width: 76px; }
+#transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
 #transport.mini .fd-label, #transport.mini .ro-label, #transport.mini .k-label { display: none; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
-.dock-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font-size: 10px; cursor: pointer; flex: 0 0 auto; }
+/* ══ WAVE 92 · THE TWO WINDOW VERBS ARE CHIPS ═══════════════════════════════════════════════
+ * Josh: "The buttons that put the transport into the rack and open modulation window should be
+ * chips."  DOCK and ⤢ EXPAND are not transport controls — one stows this bar, the other opens
+ * another window — so they take the chip vocabulary the modulation rail already uses: a round disc,
+ * the house card edge, the house float, and a glyph in the neutral ink with the same 1-px light.
+ * They keep their 22-px drawing inside a 34-px seat, which is the row's height and the same
+ * grow-the-seat-never-the-mark law the phone block states. */
+.dock-btn, .mod-exp { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; cursor: pointer;
+  border: var(--glass-border) solid var(--glass-border-color); background: transparent;
+  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: 11px;
+  display: inline-flex; align-items: center; justify-content: center; }
+.dock-btn > svg, .mod-exp > svg { filter: drop-shadow(0 1px 0 var(--glass-raise)); }
+.dock-btn:hover, .mod-exp:hover { color: var(--fg); }
+.dock-btn:active, .mod-exp:active { background: var(--glass-press); }
 #hint { bottom: 100px; }
 #transport .trig { min-width: var(--touch); }
 #transport .fd { flex: 1 1 auto; min-width: 80px; }
@@ -267,6 +454,14 @@ body.notes-open .note.hint-src { display: block; }
 .tbtn:active { background: var(--glass-press); }
 .tbtn.play { width: 56px; color: var(--acc-ink); background: var(--acc); border-color: transparent; box-shadow: var(--acc-glow); font-weight: var(--w-bold); }
 .tbtn.play.on { background: hsl(var(--hue-acc) var(--sat-acc) 56%); }
+/* WAVE 65 · THE MOD ARM — a small mark on a full seat.  The `.tbtn` 44-px box is kept exactly (the
+   density law: grow the seat, never the ink) and only the WIDTH and the TYPE are narrowed to hold a
+   word instead of a dingbat.  The glow is ACCENT B because modulation is a RELATIONSHIP, and that is
+   the colour it already wears everywhere else in this instrument: the ⤢ lamp two seats away, and
+   every dial out in the rack that a modulator is holding. */
+.tbtn.modb { font-size: var(--fs-tiny); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); color: var(--ink-key); }   /* the 44-px `.tbtn` box IS the seat — B70 walks it at the phone breakpoint and a 40 would fail the law */
+.tbtn.modb.on { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) 55%, transparent); background: var(--acc2-soft); }
+#transport.mini .tbtn.modb { width: 26px; border-radius: var(--r-pill); font-size: var(--fs-micro); }
 
 /* ── device chassis ─────────────────────────────────────────────────────── */
 .dev { flex: 0 0 auto; display: flex; flex-direction: column; border-radius: var(--r-lg); border: var(--glass-border) solid var(--glass-border-color);
@@ -286,6 +481,77 @@ body.notes-open .note.hint-src { display: block; }
 .dev-fold:active { background: var(--glass-press); }
 .dev-body { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) var(--sp-4); }
 .folded .dev-body { display: none; }
+
+/* ── §55 · THE FLOATING WINDOW ─────────────────────────────────────────────────────────────────────
+ * ONE LAYER over the stage, pointer-transparent so the canvas gestures underneath are untouched, above
+ * both racks and BELOW the notebook (+4) and the menus (+3), so a menu can always be opened over a
+ * window.  Each floating card takes its own pointer events back and carries its own z-index, written by
+ * the press that raised it. */
+#floats { position: absolute; inset: 0; z-index: calc(var(--z-chrome) + 2); pointer-events: none; }
+/* THE WIDTH IS THE RACK'S — `--float-w` is measured from the rack's content box when the window pops out,
+   so a floating window is pixel-identical to the card it was (Josh: "Let it use the same dimensions or
+   layout as it"), and NOTHING inside it reflows.  There is deliberately no resize grip: STYLE-LOCK's
+   "discipline inside" is exactly the promise a resizable window breaks. */
+#floats > .dev { position: absolute; pointer-events: auto; width: var(--float-w, var(--rack-w));
+  max-height: calc(100dvh - 16px); }
+/* a window taller than the screen scrolls its BODY, which moves no control relative to any other */
+#floats > .dev > .dev-body { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+/* WAVE 80 · a floating window is lifted, not dropped — the same inversion the card float took, at
+   the one step more a window off the rack has always had over a card on it. */
+.dev.floating { box-shadow: var(--glass-shadow), 0 -5px 14px hsl(0 0% 0% / .20); }
+/* the rack a dragged window would land in says so while the finger is over it */
+#rack.rack-drop, #rackL.rack-drop { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 55%, transparent); border-radius: var(--r-lg); }
+
+/* COMPACT: a MODE, not a resize.  The body stands down and the header re-flows to a vertical rail that
+   keeps the three things the reference keeps — the window's NAME, its POWER switch, its CLOSE — plus the
+   way back.  Because the body is hidden rather than re-laid-out, FULL restores the interior exactly. */
+/* the width rule above is `#floats > .dev`, an ID selector, so COMPACT has to answer at the same
+   specificity or it loses silently — which it did, on the first run of the gate. */
+#floats > .dev.compact { width: var(--rail-w); }
+.dev.floating.compact .dev-body { display: none; }
+.dev.floating.compact .dev-head { height: auto; grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content;
+  justify-items: center; padding: var(--sp-3) 0 var(--sp-2); row-gap: var(--sp-3); border-bottom: 0; border-radius: var(--r-lg); }
+.dev.floating.compact .dev-id { writing-mode: vertical-rl; transform: rotate(180deg); max-height: 190px; align-items: center; }
+.dev.floating.compact .dev-stat { display: none; }
+.dev.floating.compact .dev-util { flex-direction: column; gap: var(--sp-2); }
+.dev.floating.compact .dev-util > button { display: none; }
+.dev.floating.compact .dev-util > .dev-power,
+.dev.floating.compact .dev-util > .dev-rail,
+.dev.floating.compact .dev-util > .dev-close { display: inline-flex; }
+
+/* THE TWO NEW CHIPS wear the puck the other round header buttons wear — same 22 px, same rim, same ink.
+   The RAIL chip is in every header and shown only while the window floats, so a header's box does not
+   change shape when a window comes off the rack. */
+.dev-pop, .dev-rail { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline);
+  background: var(--glass-raise); color: var(--dim); cursor: pointer; margin-right: 4px; }
+.dev-pop:hover, .dev-rail:hover { color: var(--acc); }
+/* the child combinator is not decoration: `.dev-util > button` below sets `display: inline-flex` at
+   (0,1,1), so a bare `.dev-rail { display: none }` at (0,1,0) loses to it whatever the source order —
+   which is exactly what the first screenshot showed, a rail chip on every docked card. */
+.dev-util > .dev-rail { display: none; }
+.dev.floating .dev-util > .dev-rail { display: inline-flex; }
+/* ⇄ SWAP stands down while a window floats: "send this to the other rack" is a control that would change
+   nothing for a window that is on neither (ANTI-PATTERN 7) — and its seat is exactly the one the rail chip
+   takes, so the header carries the same number of chips docked or floating and its box does not change. */
+.dev.floating .dev-util > .dev-swap { display: none; }
+.dev.floating .dev-pop { color: var(--acc); }        /* the window is off the rack, and its own chip says so */
+
+/* ── §55b · A DRAWN CHIP, NEVER A TEXT CHARACTER (lab/mir/glyph.js, Josh's own drawings) ──────────────
+ * Sizing is OURS: glyph.js writes width/height as presentation attributes precisely so a stylesheet can
+ * win over them, which is why no call site in this lab passes a pixel count. */
+.dev-util > button { display: inline-flex; align-items: center; justify-content: center; }
+.dev-util > button > svg { width: 14px; height: 14px; display: block; }
+.dev-fold > svg { width: 13px; height: 13px; transition: transform var(--t-fast) ease; }
+/* ONE drawing for the caret, turned a quarter turn when the window is folded — the chevron's own idiom
+   ("the caret each folder header turns", glyph.js), not one glyph rotated into another's meaning. */
+.dev.folded .dev-fold > svg { transform: rotate(-90deg); }
+.dev-close > svg { width: 13px; height: 13px; }
+/* `north` is the one SOLID mark in a header of hairline outlines (it is drawn that way at source, and
+   glyph.js is maintained by diff — we size it, we do not redraw it), so its box is two pixels smaller
+   and the optical mass matches the rest of the row. */
+button[data-gly="north"] > svg { width: 12px; height: 12px; }
+#rackAdd > svg { width: 16px; height: 16px; }
+.dock-btn > svg, .mod-exp > svg { width: 13px; height: 13px; }
 .row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-2); }
 .row.tight { gap: var(--sp-1); }
 .grp { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-2) var(--sp-2) var(--sp-3); border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-md); background: transparent; }   /* a group matches its card (Josh: no dark tint) */
@@ -309,7 +575,7 @@ body.notes-open .note.hint-src { display: block; }
 .k-val { font-size: var(--fs-tiny); color: var(--fg-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .k.drag .k-val { color: var(--acc); font-weight: var(--w-bold); }
 .k.disabled { opacity: .38; pointer-events: none; }
-.sw.disabled, .sw:disabled, .seg-b:disabled { opacity: .38; pointer-events: none; }   /* W-STURMIAN: a control that stands down keeps its seat and carries its note */
+.sw.disabled, .sw:disabled, .seg-b:disabled, .trig:disabled { opacity: .38; pointer-events: none; }   /* W-STURMIAN: a control that stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses) */
 .sp-cap, .sturm-note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; padding: 0 2px 2px; }   /* the note's look, outside the ⓘ sweep */
 .sp-cap b, .sturm-note b { color: var(--fg-soft); font-weight: var(--w-med); }
 
@@ -398,7 +664,12 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
 #particles { z-index: 6; }
 #kepler { z-index: 7; }
 /* H: the interface hides, the stage takes the whole window */
-body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #infoPop, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #hint, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
+/* WAVE 101 · #rackFav AND #rackFavList JOIN THE LIST (Josh: "favorite's button doesn't hide when
+   pressing 'H'").  Wave 54 added the ☆ beside the + and the ◧ and put it in every OTHER rule those
+   two share — the hide, the peek, the phone's thumb stack — but not this one, so H took the whole
+   interface away and left one button floating over the field. */
+body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
+body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #infoPop, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #hint, body.ui-hidden #transport, body.ui-hidden #sheet, body.ui-hidden #keysheet { display: none !important; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 /* TAB: the window just brought to the top flashes */
 .dev.tab-hot { outline: 1px solid var(--acc); outline-offset: -1px; }
@@ -407,11 +678,36 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .keys-label { color: var(--dim); }
 .keys-chip { font: inherit; color: var(--fg); background: hsl(0 0% 100% / .06); border: 1px solid var(--glass-hairline); border-radius: 4px; padding: 1px 8px; cursor: pointer; min-width: 64px; }
 .keys-chip.hot { border-color: var(--acc); color: var(--acc); }
+/* wave 68: the one refusal this panel can make (TAB), said where the eye and the ear both get it */
+.keys-say { font-size: var(--fs-tiny); color: var(--acc); margin-top: 6px; line-height: 1.4; }
 .dyn-c { position: relative; height: 84px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }   /* the well, not a hard black: the light theme has its own (wave 46) */
 .dyn-c canvas { width: 100%; height: 100%; display: block; }
 .slice-c { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline);
   background: var(--glass-well); touch-action: none; cursor: grab; image-rendering: auto; }
 .slice-c:active { cursor: grabbing; }
+/* WAVE 101 · the palette's two step chips: a fixed seat that does not take a share of the row, and
+   the drawn glyph at the size every other header chip in this lab uses (§55b). */
+.row > .trig.pal-nav { flex: 0 0 auto; min-width: 34px; width: 34px; padding: 0; position: relative; }
+/* ⚠ WAVE 106 · THE 34-PX SEAT KEEPS ITS LOOK AND GETS ITS 44-PX TARGET BACK.  The line above is
+   wave 101's and is right about the LOOK — a fixed narrow seat that takes no share of the row.  What
+   it also did, silently, was put the only two controls in this lab under `--touch: 44px` (line 4):
+   `.trig`'s base gives every other one `min-width: 48px`, and this override takes these two to 34.
+   The phone gate measured it and named them — B70 / B71, `hit: [34, 44]`, the only 2 failures in a
+   506-control sweep — and no rule inside the phone breakpoint gives them the width back.
+     THE BAND IS THE ANSWER THIS CODEBASE ALREADY USES for exactly this (modhost reach 88 and 99, and
+   the artifact's own `.m2grab`): the box stays 34 and an unpainted `::before` carries the target.
+   34 + 5 + 5 = 44.  MEASURED at 500 x 844 before choosing it, because the alternative was shrinking
+   Josh's palette dropdown: the row is 246 px and its children are 140 + 34 + 66 with two 3-px gaps,
+   which is 246 exactly — there is no spare width, so widening the seat could only come out of the
+   name select.  NOBODY drops below the law: the select keeps 137 of its 140 and the STEP button 63
+   of its 66.
+     IT IS 6 PX AND NOT 5, AND THE 6 WAS MEASURED RATHER THAN CHOSEN.  34 + 5 + 5 is 44 on paper and
+   the gate's own elementFromPoint sweep read 42 — the seat sits on a fractional x, so a pixel is
+   lost to rounding at each edge.  6 gives a 46-px band that measures the 44 the law asks for, which
+   is the difference between satisfying the arithmetic and satisfying the finger. */
+.row > .trig.pal-nav::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -6px; right: -6px; }
+.pal-nav > svg { width: 13px; height: 13px; display: block; margin: auto; }
 .pal-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 62px; gap: var(--sp-2); align-items: stretch; }
 .pal-strip { width: 100%; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: crosshair; }
 .pal-ring { width: 62px; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .25); }
@@ -456,10 +752,14 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .wig-stand, .rad-stand { font-size: var(--fs-tiny); line-height: 1.35; color: var(--warn); padding: 4px 2px 0; }
 
 /* ═══ wave 46 — THE MINIMALIST GRAPH ═══════════════════════════════════════════════════════════ */
-/* THE OBSERVABLE IS A 2 × 3 GRID (Josh).  The seg wrapped six buttons by content width, so five sat on
-   one line and Re+Im took the whole bottom row on its own.  No rack.js change: the OBSERVER window holds
-   exactly one seg with six segments (SPACE has two), so :has() names it, and grid gives six EQUAL cells. */
-.dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
+/* THE OBSERVABLE IS THREE WIDE AND TWO TALL (wave 53, Josh clarifying his "6x2 / 2x6" note, board #50:
+   THREE COLUMNS, TWO ROWS —  row 1: ρ=|ψ|² · arg ψ · Re ψ   row 2: Im ψ · Δρ · Re+Im).  Wave 46 first gave the
+   seg a grid because it wrapped by content width (five on one line, Re+Im alone underneath) and wave 47 laid it
+   2 × 3; the DOM order is already the order above, so the re-lay is one number.  No rack.js change: the OBSERVER
+   window holds exactly one seg with six segments (SPACE has two), so :has() names it, and grid gives six EQUAL
+   cells.  The labels stay plain text on purpose — the mathematical typography Josh wants here belongs to the font
+   revision wave, and it can have it without moving a cell. */
+.dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; }
 .dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) > .seg-b { min-width: 0; padding: 0 4px; }
 
 /* THE ONE TIP.  Fixed on the body, so no card, no rack scroll and no overflow can clip it; clamped to the
@@ -479,7 +779,7 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
    canvas is recomposited every frame the field changes, whether or not anything reads it.  Leaving it up behind
    a hidden interface made HIDDEN cost MORE than SHOWN on a tile-based GPU.  The two peek strips go with it —
    nothing can peek while there is nothing to peek at. */
-body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, body.ui-hidden #graphTip { display: none !important; }
+body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, body.ui-hidden #graphTip, body.ui-hidden #floats { display: none !important; }   /* wave 55: a floating window is interface, so H takes it out of paint with the rest */
 
 /* (b) A RACK THAT HAS SLID AWAY IS NOT PAINTED EITHER.  opacity: 0 keeps an element in the compositor with its
    backdrop-filter live; visibility: hidden takes it out of paint AND KEEPS ITS scrollTop, which display: none
@@ -501,26 +801,73 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
   border-right: 2px solid var(--nb-line); border-bottom: 2px solid var(--nb-line); border-bottom-right-radius: 3px; }
 .nb-grip:hover::before { opacity: 1; }
 
-/* (d) THE BUSY MARK (Josh: the little square logo next to the cursor, hue-cycling the current palette, no shadow).
-   Two elements, one job each: the HOST carries the position (a transform written from --cx / --cy, never left/top,
-   so a pointer move costs no layout) and the hue cycle; the cloned mark inside carries the spin.  BOTH motions are
-   CSS animations and neither is driven from JS — the whole point of the mark is that it keeps turning while the
-   main thread is the thing that is stuck.  No box-shadow, no drop-shadow: the filter is the hue rotation alone. */
+/* (d) THE BUSY MARK (Josh: the little square logo next to the cursor, no shadow).  The HOST carries the position —
+   a transform written from --cx / --cy, never left/top, so a pointer move costs no layout.
+   WAVE 53 TOOK BOTH ROTATIONS OUT (Josh, board #45: no spin anywhere in the logo, and the colour motion is the
+   PALETTE turning, not a hue phase).  What says "busy" now is a BREATH in opacity — no transform, no filter, no
+   hue-rotate — with the palette turning through the nine squares beside it (§53a).  It is a keyframe and not a
+   transition for the one reason the mark exists at all: a transition that repeats needs JS to turn it round, and
+   the thread this mark reports on is the thread that is stuck.  MOTION-LAW's interruption clause names this very
+   element, and it is satisfied where it applies: the RAPID TRIGGER is the raise and the lower — many times a second
+   under load — and that is the `hidden` attribute, an instantaneous cut with no animation to restart.  The motion is
+   declared unconditionally, as the hue cycle was: a display:none element animates nothing and composites nothing, so
+   gating it on [hidden] buys no frame and only makes what the mark DECLARES depend on when you happen to ask. */
 #busyMark { position: fixed; left: 0; top: 0; width: 22px; height: 22px; z-index: calc(var(--z-banner) + 20);
-  pointer-events: none; box-shadow: none; text-shadow: none; will-change: transform, filter;
-  transform: translate3d(calc(var(--cx, -200px) + 15px), calc(var(--cy, -200px) + 15px), 0);
-  animation: lw-busy-hue 3s linear infinite; }
-#busyMark .mark { display: block; width: 22px; height: 22px; box-shadow: none; filter: none;
-  animation: lw-busy-spin 1.2s linear infinite; }
-@keyframes lw-busy-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes lw-busy-hue  { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+  pointer-events: none; box-shadow: none; text-shadow: none; will-change: transform, opacity;
+  transform: translate3d(calc(var(--cx, -200px) + 15px), calc(var(--cy, -200px) + 15px), 0); }
+#busyMark { animation: lw-busy-breathe 1.1s linear infinite alternate; }
+#busyMark .mark { display: block; width: 22px; height: 22px; box-shadow: none; filter: none; }
+/* ══ WAVE 106 · THE MODULATION DOOR WEARS THE HOUSE MARK (Josh: "the logo as the button that activates
+   the modulation window on the native playhead") ══════════════════════════════════════════════════════
+   The mark is CLONED from the masthead, so it needs a seat and nothing else: paintMarks() already turns
+   its nine squares with the wheel, which is what makes this a live logo rather than a picture of one.
+   16 px inside a 34-px disc leaves the ring the seat already draws — the mark is the CONTENT of the
+   button, not a replacement for it, so hover, focus and the `.live` accent halo all still land. */
+.mod-logo .mark { display: block; width: 16px; height: 16px; margin: auto; box-shadow: none; filter: none; }
+.mod-logo { display: flex; align-items: center; justify-content: center; }
+@keyframes lw-busy-breathe { from { opacity: .42; } to { opacity: 1; } }
 
-/* (e) THE HEADER MARK TURNS (Josh: "have the logo rotate 360") — one full turn on boot, and turning while busy.
-   It RESTS at 45°, which is the <g> inside the SVG, so the element's own transform rests at none. */
+/* (e) §53a — THE PALETTE TURNS THROUGH THE MARK; THE MARK NEVER MOVES (Josh, board #45: "the logo shouldn't be
+   spinning, and it also shouldn't be going 360 … it's more like the current palette itself rotating 360, not hue
+   phase 360").  The nine @keyframes are GENERATED by rack.js from the live palette — one per square, so square i
+   walks the wheel from i·40° all the way round to i·40° again — and these two rules are the only timing there is:
+   ONE turn for the boot, and a turn that keeps going for as long as the lab is busy.  `linear`, because a turn at
+   a constant rate is constant motion (MOTION-LAW).  The mark RESTS at 45°, which lives in the <g> inside the SVG,
+   so the element's own transform stays `none` and there is not a rotation left in the logo anywhere. */
 #title .mark, .nb-logo .mark { transform-origin: 50% 50%; }
-#title .mark.spin { animation: lw-mark-spin 1.2s cubic-bezier(.33, 0, .2, 1) 1; }
-#title .mark.busy { animation: lw-mark-spin 1.2s linear infinite; }
-@keyframes lw-mark-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#title .mark.turn rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: 1; }
+#title .mark.busy rect, #busyMark .mark rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: infinite; }
+
+/* (e2) §53b — THE LOGO ENLARGES WHILE THE MENU IS OPEN (Josh: "the λWAVES logo should also … slightly enlarge when
+   mouse over and back to normal when file, edit, view, etc. disappear").  The enlarged state belongs to the CHIPS,
+   not to the pointer, so rack.js writes `menu-open` in the one place it writes `bar.hidden`.  It grows from its LEFT
+   edge and about its vertical centre — both invariants the menubar's placement depends on. */
+/* WAVE 79 · AND IT NO LONGER GROWS (Josh: "I think I want to disable the expanding animation when
+   mouse over").  Board #45 asked for the enlarge and Josh has now watched it for a few days and
+   ruled the other way; the PALETTE TURN through the mark stays, which is the motion he kept. */
+#title { transform-origin: left center; }
+#title.menu-open { transform: none; }
+
+/* (e3) §53c — THE '?' SHEET: every binding, built live from the table.  Same glass, same ink and the same seat as
+   #sheet (which is the badges' EXACT/NUMERICAL panel) — a second panel, not a second design. */
+/* It sits CLEAR OF THE RIGHT RACK rather than over it (#sheet is four paragraphs and can afford the overlap; this
+   is thirty-eight rows and cannot), and the clamp keeps it inside a phone viewport where the rack is the whole width:
+   its right edge is the rack's inner edge, but never further in than a 440-px pane can be and stay on screen. */
+#keysheet { position: absolute; top: 52px; z-index: var(--z-veil);
+  right: clamp(var(--sp-4), calc(var(--rack-w) + var(--sp-4)), calc(100vw - 460px));
+  width: min(440px, 80vw); max-height: calc(100vh - 120px); overflow: auto;
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--r-lg);
+  font: var(--fs-tiny)/1.5 var(--font-ui); color: var(--fg-soft); }
+.ks-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
+.ks-head h3 { margin: 0; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
+.ks-close { font: inherit; line-height: 1; color: var(--dim); background: none; border: 0; cursor: pointer; padding: 0 4px; }
+.ks-close:hover { color: var(--fg); }
+.ks-list { display: flex; flex-direction: column; gap: 2px; }
+.ks-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ks-label { color: var(--dim); }
+.ks-chip { color: var(--fg); background: hsl(0 0% 100% / .06); border: 1px solid var(--glass-hairline); border-radius: 4px;
+  padding: 1px 8px; min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.ks-note { margin: 8px 0 0; color: var(--ink-faint); font-size: var(--fs-micro); line-height: 1.45; }
 
 /* (f) THE PHOTOSENSITIVITY WARNING.  Text, layout, symbol and function are the MANDELBROT app's, verbatim;
    the two things that are ours are the GROUND and the INK.  MANDELBROT paints solid #000 because its warning
@@ -556,8 +903,358 @@ body[data-theme="dark"] #warnPane { color: #fff; }
 .warn-btn:hover, .warn-btn:focus-visible { opacity: 1; background: currentColor; outline: none; }
 #warnPane .warn-btn:hover, #warnPane .warn-btn:focus-visible { color: #fff; background: #000; }
 body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warnPane .warn-btn:focus-visible { color: #000; background: #fff; }
+/* ═══ WAVE 81 · THE PLAYHEAD'S OTHER SEAT, AND THE TUNNEL BETWEEN THEM ════════════════════════
+ * The pill has always lived at the bottom.  When the modulation plugin is dragged over that seat,
+ * rack.js (`modDodge`) sends it to the top instead — and the move is a TUNNEL: it leaves through the
+ * edge it is on and arrives through the opposite one, so the two halves read as one continuous
+ * travel rather than a jump.  Both halves are `forwards`, so the pill holds the frame it lands on
+ * until the script clears the animation.
+ *   The X half of every transform is `-50%` because that is what centres the pill (§12); a keyframe
+ * that wrote only Y would throw it to the left edge mid-flight. */
+#transport.mini.at-top { top: calc(env(safe-area-inset-top) + 52px); bottom: auto; }
+@keyframes lw-tr-out-down { from { transform: translate(-50%, 0);     opacity: 1; }
+                            to   { transform: translate(-50%, 96px);  opacity: 0; } }
+@keyframes lw-tr-out-up   { from { transform: translate(-50%, 0);     opacity: 1; }
+                            to   { transform: translate(-50%, -96px); opacity: 0; } }
+@keyframes lw-tr-in-up    { from { transform: translate(-50%, 96px);  opacity: 0; }
+                            to   { transform: translate(-50%, 0);     opacity: 1; } }
+@keyframes lw-tr-in-down  { from { transform: translate(-50%, -96px); opacity: 0; }
+                            to   { transform: translate(-50%, 0);     opacity: 1; } }
+/* FEWER AND GENTLER, NEVER ZERO: the seat still changes and the pill still fades across it; what
+   goes is the 96 px of travel, which is the part that is motion rather than information. */
 @media (prefers-reduced-motion: reduce) {
-  #warnPane, #busyMark, #busyMark .mark, #title .mark.spin, #title .mark.busy { animation: none !important; transition: none !important; }
+  @keyframes lw-tr-out-down { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes lw-tr-out-up   { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes lw-tr-in-up    { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lw-tr-in-down  { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* ═══ WAVE 69 · THE WINDOW ENTRANCE ═══════════════════════════════════════════════════════════════
+ * The lab's ONE entrance, fired by `layout.reopen()` and by nothing else (rack.js says why).  220 ms,
+ * inside the 300 ms ceiling, MOTION-LAW's entrance easing verbatim, opacity and a 7-px slide — chrome,
+ * one-shot, in no accent colour, so nothing here can be mistaken for the field. */
+@keyframes lw-dev-enter { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
+@keyframes lw-dev-enter-quiet { from { opacity: 0; } to { opacity: 1; } }
+.dev.dev-enter { animation: lw-dev-enter .22s cubic-bezier(.23, 1, .32, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* "fewer and gentler, never zero": the palette turn and the busy breath are COLOUR and OPACITY and they stay
+     (MOTION-LAW); what goes is the one transform-based motion the logo has, the menu's enlarge. */
+  #warnPane { animation: none !important; transition: none !important; }
+  #title { transition: none !important; }
+  #title.menu-open { transform: none !important; }
   #warnPane { opacity: 1 !important; }
   #warnPane.warn-out { opacity: 0 !important; }
+  /* ── WAVE 69 · THE HALF THE DOC SAID WAS MISSING, TAKEN BEFORE ANOTHER ANIMATION WAS ADDED ───────
+   * MOTION-LAW's accessibility section names this list and says it will keep growing until somebody
+   * closes it: the rack's 310-px slide losing on SPECIFICITY, the two fold chevrons, the card's
+   * drag transform, and `.dev.dragging`.  It is a short list of selectors and one specificity fix.
+   *   THE SPECIFICITY FIX IS THE WHOLE POINT of the first two rules.  `body.rack-hidden #rack` is
+   * (1,1,1); skin.css's media block names `#rack` at (1,0,0) and therefore never reached the rule
+   * that carries the transform.  Repeating the FULL selector inside the query is the fix, and it is
+   * why a `transition: none` on `#rack` alone looked right and did nothing for four waves.
+   *   WHAT STAYS: every opacity fade in the lab — the two rack chips, the rack's own fade, the value
+   * tooltips, `.note` — because reduced motion is FEWER AND GENTLER, NEVER ZERO, and an opacity
+   * change is exactly what the preference asks to keep.  Only transforms go. */
+  body.rack-hidden #rack, body.rack-hidden #rackL,
+  body.rack-hidden.rack-peek #rack, body.rack-hidden.rack-peek #rackL,
+  body.rack-hidden #transport.mini, body.rack-hidden.transport-peek #transport.mini {
+    transition-property: opacity, visibility; }
+  body.rack-hidden #rack, body.rack-hidden #rackL, body.rack-hidden #transport.mini { transform: none; }
+  .dev-fold > svg, .mod-fold > svg { transition: none; }
+  .dev.dragging { transform: none; }
+  .trig:active { transform: none; }
+  .k .k-val, .fd .fd-val { transition-property: opacity; }
+  .dev.dev-enter { animation-name: lw-dev-enter-quiet; }         /* the slide goes, the fade stays */
+  /* the PORTED plugin declares its own motion tokens and this is what they are for — one line
+     reaches every `var(--m2-motion-*)` transition in modwindow.css without touching its sheet */
+  .mir-modwindow, .kwin-chiprail { --m2-motion-structural: 0s; --m2-motion-micro: 0s; }
 }
+
+/* ═══ wave 52 — W-MODWINDOW: the modulation window's own furniture ════════════════════════════════
+ * The window is built from the kit (knob · sw · seg · trig · fader) and these classes are its
+ * FURNITURE, not new widgets: the lists the kit's controls sit in, the value strip that answers the
+ * contract's "a modulated parameter must be readable while it moves", and the chips that name a
+ * macro and a source.  Every colour is a token; ACCENT B carries the relationship (macros, routes,
+ * the sweep band, the lit EXPAND) and ACCENT A carries the live signal (the meter, the NOW dot),
+ * which is the material law in STYLE-LOCK read literally.  The gap inside a block is 3 px and the
+ * gap between blocks is 7 px, so space carries the hierarchy before a word is read. */
+.mod-srcs, .mod-macros, .mod-targets { display: flex; flex-direction: column; gap: var(--sp-3); }
+.mod-empty { font-size: var(--fs-tiny); color: var(--ink-faint); padding: 2px 1px; }
+.mod-dead { opacity: .38; cursor: not-allowed; }
+.mod-beats { flex: 0 0 auto; min-width: 92px; padding: 0 6px; font-size: var(--fs-small); font-variant-numeric: tabular-nums;
+  color: var(--ink-key); align-self: center; white-space: nowrap; }
+.mod-beats.live { color: var(--acc); }
+
+/* a source: a head line (power · id · live meter · remove) over its own parameter row */
+.mod-src, .mod-macro { display: flex; flex-direction: column; gap: var(--sp-1); }
+.mod-srch, .mod-macroh { display: flex; align-items: center; gap: var(--sp-2); }
+.mod-src.mod-off { opacity: .5; }                                    /* bypassed: the material says so, not a colour */
+.mod-tag { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); flex: 0 0 auto; }
+.mod-meter { position: relative; flex: 1 1 auto; min-width: 24px; height: 4px; border-radius: 2px; background: var(--glass-well); overflow: hidden; }
+.mod-meter > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--acc); }
+.mod-x { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; border: var(--glass-border) solid var(--glass-hairline);
+  background: var(--glass-raise); color: var(--dim); font-size: 12px; line-height: 1; }
+.mod-x:hover { color: var(--fg); background: var(--glass-press); }
+.mod-x { position: relative; }                                       /* the 44-px finger is the phone block's, skin.css §5 */
+.mod-wave { flex: 0 1 110px; min-width: 96px; }                     /* the shape menu takes its own width, it does not eat the row */
+
+/* a macro: the name, the ONE drive control, its reach, and a value that is a fader or a meter — never both */
+.mod-name { flex: 1 1 60px; min-width: 40px; height: 30px; padding: 0 6px; border-radius: var(--r-sm);
+  border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); color: var(--fg); font-size: var(--fs-small); }
+.mod-drive { flex: 1 1 90px; min-width: 78px; }        /* select.sel already carries the 44-px seat */
+.mod-routes { flex: 0 0 auto; min-width: 18px; padding: 1px 5px; border-radius: var(--r-pill); font-size: var(--fs-micro);
+  text-align: center; color: var(--acc2); background: var(--acc2-soft); font-variant-numeric: tabular-nums; }
+.mod-val { flex: 1 1 auto; }
+/* the DRIVEN row is a METER, not a fader with its pointers off: it does not look like something to grab */
+.mod-mtr { position: relative; flex: 1 1 auto; min-width: 60px; height: 26px; border-radius: 6px; overflow: hidden;
+  background: var(--glass-well); box-shadow: inset 0 0 0 1px var(--glass-hairline); }
+.mod-mtr > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: color-mix(in srgb, var(--acc2) 30%, transparent);
+  border-right: 1px solid var(--acc2); }
+.mod-mtr > b { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); font-size: var(--fs-micro);
+  font-weight: var(--w-med); letter-spacing: var(--tr-wider); color: var(--acc2); }
+.mod-mtr > em { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-style: normal;
+  font-size: var(--fs-tiny); color: var(--fg-soft); font-variant-numeric: tabular-nums; }
+
+/* a routed target: the strip is the contract — base · sweep · now, all three at once */
+.mod-target { display: flex; flex-direction: column; gap: var(--sp-1); }
+.mod-th { display: flex; align-items: baseline; gap: var(--sp-2); }
+.mod-tlabel { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.mod-target.mod-live .mod-tlabel { color: var(--acc); }
+.mod-tgrp { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
+.mod-strip { position: relative; height: 12px; border-radius: 3px; background: var(--glass-well);
+  box-shadow: inset 0 0 0 1px var(--glass-hairline); overflow: hidden; }
+.mod-span { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--acc2) 40%, transparent);
+  border-left: 1px solid var(--acc2); border-right: 1px solid var(--acc2); }
+.mod-base { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg-soft); }
+.mod-now { position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--acc); }
+.mod-nums { display: flex; gap: var(--sp-2); }
+.mod-n { display: flex; flex-direction: column; gap: 0; min-width: 0; flex: 1 1 auto; }
+.mod-n > b { font-size: var(--fs-micro); font-weight: var(--w-med); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
+.mod-n > em { font-style: normal; font-size: var(--fs-small); color: var(--fg-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mod-n.now > em { color: var(--acc); }
+.mod-n.span { flex: 1 1 110px; }
+.mod-n.span > em { color: var(--acc2); }
+.mod-rt { display: flex; align-items: center; gap: var(--sp-1); }
+.mod-rt.mod-dormant { opacity: .45; }
+.mod-mchip { flex: 0 0 auto; max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 2px 6px; border-radius: var(--r-pill); font-size: var(--fs-micro); color: var(--acc2); background: var(--acc2-soft); }
+.mod-mm { flex: 1 1 60px; min-width: 52px; }
+
+/* THE MINIMISED MODE.  The playhead's geometry is untouched — the EXPAND button takes a seat in the
+   same flex row the dock button already sits in, so the pill's box does not move.  It lights ACCENT B
+   while the modulation is running, which is how a user with the window shut can see it is still going. */
+/* WAVE 92 · THIS RULE IS WHY THE CHIP TREATMENT DID NOT TAKE: it is 500 lines further down the
+   sheet than §55's `.dock-btn, .mod-exp` block and won on source order at equal specificity —
+   measured, `.mod-exp` read 22 px against the 34 the chip rule asked for.  It IS the chip now, so
+   the two verbs are one declaration in two places rather than two answers. */
+.mod-exp { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; cursor: pointer;
+  border: var(--glass-border) solid var(--glass-border-color); background: transparent;
+  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: 11px;
+  display: inline-flex; align-items: center; justify-content: center; }
+.mod-exp:hover { color: var(--fg); background: var(--glass-press); }
+.mod-exp.live { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) 55%, transparent); background: var(--acc2-soft); }
+
+/* a knob whose parameter a modulator is holding wears ACCENT B wherever it lives in the rack: the
+   dial is telling the truth about a number the hand did not set, and it should say whose it is */
+.k.mod-held .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc2) 65%, transparent); }
+.k.mod-held .k-needle { background: var(--acc2); }
+
+/* ═══ wave 60 — W-MODSHAPE: one picture per source, and the six controls it makes meaningful ══════
+ * Josh, on the window as wave 52 shipped it: "it seems like the modulation window still hasn't
+ * started yet."  What it had was the wiring; what it lacked was the SHAPE.  Everything below is the
+ * furniture of that picture — a card, an SVG in a well, six buttons that draw their own presets, and
+ * two compact seats for the chips.  NO NEW WIDGET: the chips are `sw`, the shape buttons are plain
+ * buttons carrying a sampled path, and the picture is an <svg> inside a div (STYLE-LOCK: a new widget
+ * is a design decision, not a convenience).  Every colour is a token — ACCENT A carries the live
+ * signal (the playhead, the dot, a lit shape), the ink ladder carries the drawing — so both themes
+ * are one definition and neither is an inversion of the other (ANTI-PATTERN 1). */
+.mod-srcs { gap: var(--sp-4); }                                      /* a gap INSIDE a card is at most half the gap between cards */
+.mod-card { border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-1); gap: var(--sp-2); background: var(--glass-raise); }
+.mod-cardb { display: flex; flex-direction: column; gap: var(--sp-2); }
+/* THE HEADER WRAPS.  `.mod-srch` has never wrapped, and it did not need to while it carried three
+   things; it now carries six, and on the PHONE the four round chips take their 44-px seats — 290 px
+   of header in a 250-px card, which overflowed the rack rather than folding, and put two × buttons
+   where elementFromPoint answers `#rack` (found by the 44-px walk, not by looking). */
+.mod-card .mod-srch { flex-wrap: wrap; }
+.mod-card.mod-min .mod-cardb { display: none; }                      /* FOLD is a HEIGHT act; the state is in the MODEL and round-trips */
+.mod-x { display: inline-flex; align-items: center; justify-content: center; }
+.mod-x > svg { width: 12px; height: 12px; display: block; }
+.mod-fold > svg { transition: transform var(--t-fast) ease; }
+/* ONE drawing for the caret, turned a quarter turn when the card is folded — device()'s own idiom */
+.mod-card.mod-min .mod-fold > svg { transform: rotate(-90deg); }
+.mod-x:disabled { opacity: .3; cursor: default; }
+
+/* the picture: a well, and inside it the ONE renderer both kinds share */
+.mod-graph { position: relative; border-radius: var(--r-sm); background: var(--glass-well);
+  box-shadow: inset 0 0 0 1px var(--glass-hairline); overflow: hidden; }
+svg.mod-cv { display: block; width: 100%; height: 108px; touch-action: none; cursor: crosshair; }
+.cv-grid { fill: none; stroke: var(--glass-hairline); stroke-width: 1; }
+.cv-tlbl { fill: var(--ink-faint); font-size: 7px; font-family: var(--font-ui); }
+.cv-fill { stroke: none; fill: color-mix(in srgb, var(--acc) 11%, transparent); }
+.cv-line { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.cv-stair { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; stroke-linejoin: miter; }
+/* with the ladder on, the SHAPE stays under the stairs rather than being replaced by them */
+.mod-cv.stepped .cv-line { stroke: var(--ink-faint); stroke-width: 1; }
+.mod-cv.stepped .cv-fill { fill: color-mix(in srgb, var(--acc) 6%, transparent); }
+.cv-pt { fill: var(--fg); }
+.cv-h { fill: none; stroke: var(--ink-key); stroke-width: 1.2; }
+.cv-head { stroke: color-mix(in srgb, var(--acc) 55%, transparent); stroke-width: 1; }
+.cv-dot { fill: var(--acc); }
+
+/* the caption says what the picture IS; the capsule says what the source is DOING, in numbers, on
+   the card — not in a hover tip (ANTI-PATTERN 4) */
+.mod-capr { display: flex; align-items: baseline; gap: var(--sp-2); }
+.mod-cap { flex: 1 1 auto; min-width: 0; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.35; }
+.mod-stat { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--acc); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mod-src.mod-off .mod-stat { color: var(--ink-faint); }
+.mod-say { font-size: var(--fs-micro); color: var(--fg-soft); }
+.mod-say:empty { display: none; }                                    /* a line that has nothing to say takes no room */
+
+/* THE GLYPH ON A SHAPE BUTTON IS THE PRESET ITSELF, SAMPLED — a button can never draw a shape the
+   engine would not produce, and it redraws MIRRORED when the mirror is what is loaded */
+/* SIX BUTTONS, THREE TO A ROW.  The map's budget assumed a 286-px body; MEASURED, this window is
+   274 px wide floating (--float-w is the rack's content box, less its scrollbar) and the card's own
+   content box is 226 px — six 44-px seats in one row need 279 and would have come out at 36 px each.
+   Three to a row is 74 px a seat at any width this window can take, and it never has to be checked. */
+.mod-shapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.mod-sh { height: var(--touch); padding: 0; border: var(--glass-border) solid var(--glass-hairline);
+  border-radius: var(--r-sm); background: var(--glass-raise); display: block; }
+.mod-sh:hover { background: var(--glass-press); }
+.mod-sh:active { background: var(--glass-press); }
+.mod-sh.on { background: var(--acc-soft); border-color: color-mix(in srgb, var(--acc) 50%, transparent); }
+.sh-cv { display: block; width: 100%; height: 100%; }
+.sh-p { fill: none; stroke: var(--dim); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.mod-sh.on .sh-p { stroke: var(--acc); }
+
+/* the compact seats.  A 44-px SEAT with micro ink is the wave-51 rule read literally: grow the seat,
+   never the mark — four chips fit a 268-px card row and none of their hit areas touch. */
+.mod-chip { min-width: 44px; padding: 0 4px; gap: 3px; }
+.mod-chip .sw-led { width: 6px; height: 6px; }
+.mod-chip .sw-lbl { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+.mod-mini { min-width: 44px; padding: 0 5px; }
+.mod-mini .trig-l { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+/* `.row > .sw` and `.row > .trig` are TWO classes and beat a one-class rule: a chip that stretched to
+   the whole row is what that specificity looks like from the outside (measured: DOTTED at 226 px). */
+.row > .mod-chip, .row > .mod-mini { flex: 0 0 auto; }
+.mod-seg, .mod-bank { flex: 0 0 auto; }
+/* a segment inside a shrink-to-fit `.segw` does not stretch, so its own min-width IS its finger:
+   44 px here, never the kit's 40, because 40 + the 2-px gap is 42 and B70 measures the real region */
+.mod-seg .seg-b, .mod-bank .seg-b { min-width: 44px; padding: 0 5px; font-size: var(--fs-micro); }
+.mod-bankr { align-items: center; }
+.mod-waver > .mod-wave { flex: 1 1 auto; min-width: 90px; }          /* the shape menu takes the rest of the row */
+
+/* ═══ wave 61 — THE MACRO IS THE ROUTER: the grip, the gesture, the arc, the popover ═════════════
+ * Josh: "the macro is essentially the router that brings it into the app. Otherwise the modulation
+ * is useless… A glowing bar with the second accent color can show the range of the modulation…
+ * whenever a macro is routed to a knob, there should be an indicator or miniknob or drag space where
+ * the colored arc around the knob changes the arc length."  This AMENDS the containment law in
+ * docs/ui/STYLE-LOCK.md: modulation's CONTROLS stay in the modulation window, and exactly two things
+ * reach out onto a target knob — the ROUTE gesture while it is live, and the ARC once a route exists.
+ * EVERY COLOUR HERE IS `--acc2`, which is ACCENT B, which is what "relationship" already means; not
+ * one hue is invented, and nothing is ever painted `--bad` (that is spoken for, and a red arc would
+ * be unreadable at 34 px anyway — the OVERFLOW is said with GEOMETRY, the spur below). */
+
+/* THE GRIP.  A dedicated handle carrying the macro's ordinal, because the row beside it holds a text
+   field and a select and a draggable row would steal the caret and the menu. 22 px of ink; the phone
+   block gives it the 44-px seat on the same law as `.mod-x` — grow the seat, never the mark. */
+.mod-grip { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 7px; padding: 0; cursor: grab;
+  border: var(--glass-border) solid color-mix(in srgb, var(--acc2) 40%, var(--glass-hairline));
+  background: var(--glass-raise); color: var(--acc2); font: inherit; font-size: var(--fs-micro);
+  font-weight: var(--w-bold); font-variant-numeric: tabular-nums; touch-action: none;
+  display: inline-flex; align-items: center; justify-content: center; }
+.mod-grip:hover { background: var(--acc2-soft); }
+/* LATCHED reads as latched (material semantics: press/latched = darker, recessed) — and the ordinal
+   stays READABLE, which "accent ink on an accent ground" would not be on either theme. */
+.mod-grip.armed { background: var(--acc2-soft); border-color: var(--acc2); cursor: grabbing;
+  box-shadow: var(--neu-inset), 0 0 0 2px color-mix(in srgb, var(--acc2) 45%, transparent); }
+.mod-macro.sel > .mod-macroh > .mod-grip { box-shadow: 0 0 0 1px var(--acc2); }
+
+/* WHILE THE GESTURE IS LIVE.  There is no hover on a touch screen, so validity cannot be reported at
+   the pointer (Serum's "+" cursor): it is reported ON THE SURFACE, for the whole gesture, and the
+   invalid half RECEDES.  This is Massive's permanently-drawn slots without Massive's permanent
+   noise — the sockets exist only while you are holding something. */
+body.mod-arming .k[data-param] { position: relative; }
+body.mod-arming .k[data-param].mod-drop > .k-dial {
+  outline: 2px dashed color-mix(in srgb, var(--acc2) 55%, transparent); outline-offset: 3px; }
+body.mod-arming .k[data-param].mod-drop > .k-lbl { color: var(--acc2); }
+/* A CONTROL THIS MACRO ALREADY REACHES: solid, not dashed, and no highlight on press — a drop here
+   SELECTS the existing route rather than adding a second (addRoute answers `already`). */
+body.mod-arming .k[data-param].mod-drop.is-dup > .k-dial { outline-style: solid; outline-color: color-mix(in srgb, var(--acc2) 75%, transparent); }
+/* the `+` cursor, drawn at the destination because a touch screen has no pointer to draw it at */
+body.mod-arming .k[data-param].mod-drop.is-over > .k-dial {
+  outline: 3px solid var(--acc2); outline-offset: 3px; box-shadow: var(--neu-raise), 0 0 0 7px var(--acc2-soft); }
+body.mod-arming .sw, body.mod-arming .seg, body.mod-arming .trig, body.mod-arming .fd,
+body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45; }
+
+/* THE GHOST — what the finger is carrying, and what the depth drag reads.  44 px ABOVE a fingertip
+   (the iOS magnifier convention), under-right of a mouse: the finger covers the 34-px dial at exactly
+   the moment the number matters, so the number is never under it.
+   WAVE 64 · IT IS THE PLUGIN'S NOW, AND OURS IS DELETED RATHER THAN SHIPPED BESIDE IT.  `.m2ghost`
+   in lab/mir/modwindow/modwindow.css is the same object in BASINS' own material — position: fixed at
+   the pointer, pointer-events: none, twelve characters — and it is one of the routing overlays that
+   travelled, because it needs no room beside anything and so no host geometry can break it.  See
+   REPORT.md wave 64 for the two that did not travel, and why. */
+
+/* THE ARC.  Two radii, not two colours: at 34 px one radius cannot carry both legibly, and a derived
+   grey is not stable when `--acc2` is an angle the user can turn.  The OUTER ring is the selected
+   macro's route — the one you can grab, where a finger can reach it — and the INNER one is the summed
+   reach of every other live route, so a control is never silently over-subscribed.
+   NO ROUTE, NO RING: a knob is a knob until something holds it. */
+/* WAVE 63 · THE BOX IS 60 px AND ONE USER UNIT IS ONE PIXEL, which it was not: at inset -6 the box
+   was 44 px for a 46-unit viewBox, so every radius below was drawn at 0.957 of what it says and the
+   "8 px" grab band was really 7.65.  A 60-px box over a 60-unit viewBox is 1 : 1, and it is what
+   gives the band room to sit OUTSIDE the dial's 44-px core (see .k-ring-hit). */
+.k-ring { position: absolute; inset: -14px; overflow: visible; pointer-events: none; }
+.k-ring-edit, .k-ring-stack, .k-ring-tick, .k-ring-spur {
+  fill: none; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.k-ring-edit { stroke: var(--acc2); stroke-width: 2.5; }
+.k-ring-stack { stroke: color-mix(in srgb, var(--acc2) 42%, transparent); stroke-width: 1.5; }
+/* ZERO DEPTH IS A REAL STATE, and a zero-length arc cannot be grabbed — so it becomes a TICK at the
+   base, which is Massive's fixed slot without Massive's permanent socket. */
+.k-ring-tick { stroke: var(--acc2); stroke-width: 2.5; stroke-linecap: round; }
+/* MASSIVE's "small break at the limit of the modulation range", inverted so it reads as an overflow:
+   it says WHICH end runs off the dial using nothing but geometry, which survives a colour-blind eye,
+   a dim screen and a 34-px knob — none of which "turn it red" does. */
+.k-ring-spur { stroke: var(--acc2); stroke-width: 3; }
+.k-ring.is-dormant .k-ring-edit, .k-ring.is-dormant .k-ring-tick { stroke: var(--ink-faint); }
+/* THE GRAB BAND, AND THE ONE PLACE THIS FEATURE COST SOMETHING IT DID NOT ADMIT TO.  It used to say
+   the ring "owns only the annulus the pseudo-element finger already had" — true, and the trade the
+   sentence hid is that the finger IS the target: at r in [17, 24] with stopPropagation on its own
+   pointerdown, a ROUTED dial's turn target through its own centre measured 35 x 33 px against this
+   house's 44-px law, and B70 could not fail it because its walk asks who OWNS a point and the ring
+   svg is a child of .k-dial.  So the band moved OUT rather than the law bending: r in [24, 32] (28
+   +- 4 at 1 : 1), which leaves the dial a contiguous 47 px core — measured, with a route present, by
+   the listener that actually answers — and gives the band the full 8 px it always claimed.  The
+   radius is set for the WIDER of the two strokes: skin.css takes it to 11 under a finger, which is
+   [22.5, 33.5] and a 45-px core, and 45 is the number that matters because the phone is where the
+   44-px law is measured.
+   non-scaling-stroke because the four drawn paths have it and this one did not: on a .k-lg dial the
+   band would otherwise scale with the box and stop being 8 px.  A press lands on the ring only
+   OUTSIDE the knob's rim now, where cursor: ns-resize is the only thing on the screen. */
+.k-ring-hit { fill: none; stroke: transparent; stroke-width: 8; vector-effect: non-scaling-stroke;
+  pointer-events: stroke; cursor: ns-resize; }
+.k.ring-drag .k-ring-edit, .k.ring-drag .k-ring-tick { stroke-width: 3.5; }
+.k.ring-drag .k-val { position: relative; z-index: 2; padding: 0 4px; border-radius: var(--r-sm);
+  background: var(--glass-press); color: var(--acc2); font-weight: var(--w-bold); }
+.k.ring-drag .k-val i { font-style: normal; }
+/* Serum's red, kept to the ONE place a hue can actually be read: text. */
+.k.ring-drag .k-val i.clip { color: var(--warn); }
+
+/* THE POPOVER — press and hold 450 ms, or the right button.  One menu, two doors: everything Serum
+   puts behind a right-click needs another road on a touch screen.  And it carries the half Serum is
+   missing — with more than one macro on a control, Serum sends you to another tile or to the Mod
+   Matrix; here the choice of which route the outer arc edits is ON the control. */
+.mod-pop { position: fixed; z-index: calc(var(--z-banner) + 4); min-width: 210px; max-width: 280px;
+  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md);
+  border: var(--glass-border) solid var(--glass-border-color); background: hsl(var(--glass-tint) / .98);
+  box-shadow: var(--glass-shadow), 0 10px 30px hsl(0 0% 0% / .28);
+  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); }
+.mod-poph { display: flex; align-items: baseline; gap: var(--sp-2); }
+.mod-poph > b { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--fg); font-weight: var(--w-med); }
+.mod-poph > span { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--acc2); }
+.mod-poprts { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.mod-poprts > .grp-lbl { flex: 1 0 100%; }
+.mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
+.mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }

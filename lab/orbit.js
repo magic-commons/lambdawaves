@@ -10,7 +10,7 @@
  */
 import { BASIS } from './hydrogen.js';
 import { shellMatrix, shellCharacter } from './frontier.js';
-import { cameraBasis } from './field.js';
+import { cameraBasis, cameraKey } from './field.js';
 import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './kit.js';
 
 /* WAVE 49 — THE LABEL IS THE SCALAR'S VERDICT.  The card used to read "rank one ⇒ COHERENT (a Kepler ellipse)"
@@ -135,7 +135,7 @@ export function createOrbit(host, api) {
   function update(obs) {
     const reg = api.reg;
     if (reg.version !== lastVersion) { recompute(reg); paint(obs); lastObs = ''; return; }
-    const key = `${obs.yaw.toFixed(4)}|${obs.pitch.toFixed(4)}|${cv.clientWidth}`;
+    const key = `${cameraKey(obs)}|${cv.clientWidth}`;                              // wave 54: the WHOLE orientation — a FREE camera can roll with both angles still
     if (key !== lastObs) { lastObs = key; paint(obs); }
   }
   window.addEventListener('resize', () => { lastObs = ''; });

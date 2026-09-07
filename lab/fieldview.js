@@ -29,7 +29,7 @@
  */
 import { createElectrostatics, contours as contourLines, streamlines as streamLines, planeFrame } from './electrostatics.js';
 import { cameraBasis } from './field.js';
-import { fitText } from './kit.js';
+import { fitText, accentRGB } from './kit.js';
 import { BASIS, factorial } from './hydrogen.js';
 
 export const VOLT = 27.211386245988;            // CODATA 2018: one a.u. of potential in volts
@@ -37,11 +37,8 @@ export const V_PER_M = 5.14220675112e11;        // CODATA 2018: one a.u. of elec
 const TERM_CAP = 12;                            // the biggest state the closed form is asked to build inside a frame
 const GOLDEN = 2.39996322972865332;             // the golden angle: the j seeds spread evenly over the disc
 
-/** the accent hex the interface is wearing (theme-corrected in rack.js), with a fallback that survives a bare page */
-function accentOf(name, fallback) {
-  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
-  return v || fallback;
-}
+/** the accent the interface is wearing, as a canvas colour — the WHEEL's own sRGB triple (wave 57), never a hex copy */
+const accentOf = (g, n) => { const c = accentRGB(g, n); return `rgb(${c[0]},${c[1]},${c[2]})`; };
 
 export function createFieldLines(canvas, api = {}) {
   const cv = canvas, g = cv && cv.getContext ? cv.getContext('2d') : null;
@@ -181,7 +178,7 @@ export function createFieldLines(canvas, api = {}) {
       const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
       return [(u + 1) / 2 * W, (1 - v) / 2 * H];
     };
-    g.strokeStyle = art.second ? accentOf('--acc2', '#d97ce8') : accentOf('--acc', '#78e1f0');
+    g.strokeStyle = art.second ? accentOf(g, 2) : accentOf(g, 1);
     g.lineWidth = 1; g.lineJoin = 'round'; g.lineCap = 'round';
     art.polys.forEach((line, i) => {
       g.globalAlpha = art.alpha[i];

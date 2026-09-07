@@ -1,7 +1,7 @@
 /* tests/peek.mjs — open the lab headless, run an optional script, screenshot. A look, not a proof.
  *   LW_PORT=8701 GD_PORT=5201 node tests/peek.mjs [query] [js-after-boot] [out.png]
  */
-import { open } from '/home/joshua-hosain/Documents/MANDELBROT APP/project/mbgate/gatekit.mjs';
+import { open } from '../tools/gate/gatekit.mjs';
 import fs from 'node:fs';
 const PORT = process.env.LW_PORT || '8701';
 const query = process.argv[2] || 'preset=1s%2B2pz';

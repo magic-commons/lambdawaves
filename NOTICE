@@ -13,17 +13,25 @@ The following third-party works are redistributed with λWAVES under their own
 licences.  Each licence file named below ships in the tree beside the work it
 covers; nothing here is fetched from a third-party host at run time.
 
-1.  Spinwerad  —  the wordmark's typeface
-    Author:    gluk (gluksza@wp.pl)
-    Version:   0.3
+The three interface typefaces are SUBSET for this lab.  A subset is a Modified
+Version under the SIL Open Font License, and each entry below says so.
+
+1.  LW Title  —  the wordmark's typeface
+    Derived from: Spinwerad 0.3 by gluk (gluksza@wp.pl)
     Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
-    Notice:    Copyright (c) 2009, gluk (gluksza@wp.pl),
-               with Reserved Font Name spinwerad.
-               (the licence file as shipped by the author reads 1997-2008;
-               the font binaries themselves read 2009 — both are reproduced
-               in lab/fonts/Spinwerad-OFL.txt and the binaries' name table.)
-    Files:     lab/fonts/Spinwerad.ttf, lab/fonts/SpinweradC.ttf
+    Notice:    Copyright (c) 1997-2008, gluk (gluksza@wp.pl),
+               with Reserved Font Names spinwerad
+               (the author's licence file reads 1997-2008; the original font
+               binary's own licence record reads "Copyright (c) 2009, gluk
+               (gluksza@wp.pl), with Reserved Font Name spinwerad" — both are
+               reproduced here.)
+    Modified:  a five-glyph subset ("WAVES"), converted to WOFF2, and RENAMED
+               per OFL §3, which forbids a Modified Version from using a
+               Reserved Font Name.  Neither gluk nor the Spinwerad project
+               produced or endorses this derivative.
+    Files:     lab/fonts/LWTitle-title.woff2
     Licence:   lab/fonts/Spinwerad-OFL.txt
+    Source:    lab/fonts/Spinwerad-SOURCE.txt
 
 2.  Roboto  —  the interface typeface
     Version:   3.015
@@ -31,32 +39,65 @@ covers; nothing here is fetched from a third-party host at run time.
     Notice:    Copyright 2011 The Roboto Project Authors
                (https://github.com/googlefonts/roboto-classic)
                Roboto is a trademark of Google.
-    Files:     lab/fonts/Roboto.ttf
+    Modified:  subset to the 198 characters this lab sets, variable axes kept,
+               converted to WOFF2.  The Roboto licence declares no Reserved
+               Font Name, so the subset keeps the name.
+    Files:     lab/fonts/Roboto-ui.woff2
     Licence:   lab/fonts/Roboto-OFL.txt
+    Source:    lab/fonts/Roboto-SOURCE.txt
 
-3.  marked  —  the notebook's markdown parser
+3.  STIX Two Math  —  the mathematical typeface
+    Version:   2.0.2
+    Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
+    Notice:    Copyright 2001-2021 The STIX Fonts Project Authors
+               (https://github.com/stipub/stixfonts), with Reserved Font Name
+               "TM Math".  STIX Fonts™ is a trademark of The Institute of
+               Electrical and Electronics Engineers, Inc.
+    Modified:  subset to the symbols this lab sets, converted to WOFF2.  The
+               Reserved Font Name "TM Math" is not used, so OFL §3 permits the
+               name.  This subset is not produced or endorsed by the STIX Fonts
+               Project or by IEEE.
+    Files:     lab/fonts/STIXTwoMath-subset.woff2
+    Licence:   lab/fonts/STIXTwoMath-OFL.txt
+    Source:    lab/fonts/STIXTwoMath-SOURCE.txt
+
+4.  marked  —  the notebook's markdown parser
     Version:   12.0.2
     Licence:   MIT License
     Notice:    Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
                Copyright (c) 2011-2018, Christopher Jeffrey
                (https://github.com/chjj/)
-    marked's licence file also carries the notice for the original Markdown,
-    under the BSD 3-Clause licence:
-               Copyright © 2004, John Gruber
-               http://daringfireball.net/
-               All rights reserved.
+               The licence file also carries the BSD 3-Clause notice for the
+               original Markdown, Copyright © 2004 John Gruber.
     Files:     lab/vendor/marked.min.js
     Licence:   lab/vendor/marked-LICENSE.md
 
-4.  KaTeX  —  the notebook's mathematics typesetting
+5.  KaTeX  —  the notebook's mathematics typesetting
     Version:   0.16.11
     Licence:   The MIT License (MIT)
     Notice:    Copyright (c) 2013-2020 Khan Academy and other contributors
-    Files:     lab/vendor/katex/katex.min.js, lab/vendor/katex/katex.min.css,
-               and the twenty KaTeX_*.woff2 faces in lab/vendor/katex/fonts/,
-               which carry no separate notice and are covered by the licence
-               file below.
+    Files:     lab/vendor/katex/katex.min.js, lab/vendor/katex/katex.min.css
     Licence:   lab/vendor/katex/LICENSE
+
+6.  The KaTeX fonts  —  redistributed UNMODIFIED with KaTeX
+    Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
+               — NOT the MIT licence above, which covers only KaTeX's code.
+    Notice:    Copyright (c) 2009-2010, Design Science, Inc.
+               (<www.mathjax.org>)
+               Copyright (c) 2014-2018 Khan Academy
+               (<www.khanacademy.org>),
+               with Reserved Font Names KaTeX_AMS, KaTeX_Caligraphic,
+               KaTeX_Fraktur, KaTeX_Main, KaTeX_Math, KaTeX_SansSerif,
+               KaTeX_Script, KaTeX_Size1, KaTeX_Size2, KaTeX_Size3,
+               KaTeX_Size4 and KaTeX_Typewriter.
+    Files:     the twenty KaTeX_*.woff2 faces in lab/vendor/katex/fonts/
+    Licence:   lab/vendor/katex/fonts/OFL.txt
+
+7.  lab/mir/mod.js, lab/mir/curve.js, lab/mir/glyph.js
+    From:      the MANDELBROT app, © 2026 Joshua Hosain · Magic Commons,
+               Apache License 2.0 — the same author and the same licence as
+               λWAVES, so no third-party obligation arises.  Taken by sha256
+               with provenance headers; see lab/mir/PORT-NOTES.md.
 
 ────────────────────────────────────────────────────────────────────────────
 WITH THANKS

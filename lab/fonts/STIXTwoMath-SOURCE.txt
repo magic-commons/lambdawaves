@@ -1,0 +1,34 @@
+STIXTwoMath-subset.woff2 — how it was made (2026-09-05, re-cut 2026-09-06 by wave 69)
+
+SOURCE   https://raw.githubusercontent.com/stipub/stixfonts/master/archive/STIXv2.0.2/WOFF2/STIX2Math.woff2
+         (STIX Two Math, v2.0.2, SIL Open Font License 1.1 — licence in STIXTwoMath-OFL.txt)
+FULL     400 876 bytes  ·  4 138 codepoints
+SUBSET    40 288 bytes  ·    194 codepoints   (9.95x smaller — a phone pays 40 KB, not 400)
+         was 39 088 bytes / 175 codepoints before wave 69; the 19 glyphs it added cost 1 200 bytes.
+
+COMMAND  python -m fontTools.subset STIX2Math.woff2 \
+             --text-file=STIXTwoMath-glyphs.txt --flavor=woff2 \
+             --output-file=STIXTwoMath-subset.woff2 --layout-features='*' --no-hinting
+
+THE GLYPH SET IS A FILE NOW, NOT A PARAGRAPH: `STIXTwoMath-glyphs.txt`, beside this one, IS the
+--text-file the command above takes.  It used to be a prose list here, and the prose had already
+drifted from the binary — it claimed ' " and the Latin subscripts ₓₙₗₘₖ, and the shipped face carried
+none of them.  A list you can feed to the subsetter cannot drift from the subsetter.  (STIX Two Math
+has no Latin subscripts at all; write E_n, not Eₙ.  Digit subscripts ₀…₉ are there.)
+
+WHAT WAVE 69 ADDED, and why each:
+  <  ^  _        the lab writes r < a, e^{ik·x} and T_cl / c_nlm / p_z in its own ASCII convention
+  −  (U+2212)    the real MINUS.  Every "−1/(2n²)" in the tree is this character, not a hyphen, and
+                 it was the single commonest silent fallback in the whole set
+  ↦  ‖  ℝ        ψ ↦ e^{ik·x}ψ  ·  the Parseval floor ‖p‖₂/‖p‖₁  ·  KS ℝ⁴
+  …              Z = 1…36
+  U+0304         the COMBINING MACRON, which is what makes LADDER's n̄ an n̄
+  > ' " ! ? & #  the ASCII completion — a stated margin, not a need.  An apostrophe or a question mark
+  – — †          inside a marked run is the likeliest future silent fallback and it costs ~90 bytes
+
+THE RULE THAT MATTERS, unchanged: if you set a glyph that is not in the list, the browser falls back
+SILENTLY to a serif and the symbol looks almost right — which is worse than wrong.  SINCE WAVE 69 THAT
+SENTENCE IS A GATE rather than a warning: `tests/pwa.test.mjs §G` reads this face's own cmap out of the
+WOFF2, walks every `<m>…</m>` run in lab/**, and fails on any character the face does not carry.  So:
+extend `STIXTwoMath-glyphs.txt`, re-run the command, state the new byte cost here, and the gate will
+tell you if you missed one.

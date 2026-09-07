@@ -66,7 +66,7 @@ export function createKepler(canvas) {
       fitText(g, `KEPLER${label.length ? ' · ' + label.join(' · ') : ''} · dot = perihelion (⟨K⟩) — drag it: around = D(R) about L̂, in/out = e^{−iθK} (exact rotors on the state) · cross = ⟨x⟩ (exact)`,
         cx, H - 128, { x0: cx, y0: 0, x1: W - 12, y1: H }, 'left', true);
   }
-  /* ── the BOW: drawn over everything while ctrl+drag is held ── */
+  /* ── the IMPULSE VECTOR (wave 53; `bow` is still its name in the code): drawn over everything while ctrl+drag is held ── */
   let bow = null;
   function setBow(b) { bow = b; }
   function bowFrame() {
@@ -83,7 +83,7 @@ export function createKepler(canvas) {
     g.beginPath(); g.arc(bow.x0, bow.y0, 4, 0, 2 * Math.PI); g.fillStyle = 'rgba(255,255,255,0.9)'; g.fill();
     g.fillStyle = 'rgba(255,255,255,0.92)'; g.font = '11px ui-monospace, monospace';
     /* the gesture's own readout, clamped into the stage: it used to run off the right edge from a bow drawn there */
-    fitText(g, `BOW  k = ${bow.k.toFixed(3)} a.u. · λ = 2π/k = ${bow.k > 0.001 ? (2 * Math.PI / bow.k).toFixed(1) : '∞'} · release to slap · release CTRL to cancel`,
+    fitText(g, `IMPULSE VECTOR  k = ${bow.k.toFixed(3)} a.u. · λ = 2π/k = ${bow.k > 0.001 ? (2 * Math.PI / bow.k).toFixed(1) : '∞'} · release to apply · release CTRL to cancel`,
       bow.x1 + 12, bow.y1 - 10, { x0: 10, y0: 0, x1: W - 10, y1: H }, 'left', true);
   }
   function update(reg, t, obs, half) { recompute(reg, t); draw(obs, half); }

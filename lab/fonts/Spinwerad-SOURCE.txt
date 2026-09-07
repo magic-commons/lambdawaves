@@ -1,0 +1,44 @@
+LWTitle-title.woff2 — how it was made, and WHY IT IS NOT CALLED SPINWERAD (2026-09-05)
+
+SOURCE   Spinwerad 0.3 by gluk (gluksza@wp.pl) — spinwerad.ttf, 695 184 bytes.
+         SIL Open Font License 1.1 — the licence text is Spinwerad-OFL.txt, which is the
+         author's own file and keeps the author's own name.
+         Recoverable from this repo's history:  git show <pre-subset-rev>:lab/fonts/Spinwerad.ttf
+SUBSET   3 176 bytes, five glyphs (.notdef A E S V W) — 219x smaller.
+
+THE NAME.  A subset is a "Modified Version" in the OFL's own words ("any derivative made by adding
+to, deleting, or substituting ... or by changing formats"), and this file is both subset and
+converted TTF -> WOFF2.  "spinwerad" is a Reserved Font Name, declared twice: in Spinwerad-OFL.txt:2
+and in the original binary's own nameID 13.  OFL section 3 forbids a Modified Version from using a
+Reserved Font Name as "the primary font name as presented to the users", and the TERMINATION clause
+makes the whole licence null and void where a condition is not met — so shipping a five-glyph subset
+under the name "Spinwerad" would void the grant that lets us ship the file at all.
+The derivative is therefore called LW Title: nameID 1 = "LW Title", 4 = "LW Title Bold",
+6 = "LWTitle-Bold", and the CSS family in skin.css is 'LW Title'.  UN-SUBSETTING DOES NOT FIX THIS
+(a WOFF2 conversion is still a Modified Version, and it costs 695 KB); renaming does.
+The binary KEEPS gluk's nameID 0 and 13/14 verbatim, and carries a nameID 10 that says what it
+derives from — OFL section 4 expressly permits acknowledging the author, and the acknowledgement
+should exist.
+
+COMMAND  python -m fontTools.subset Spinwerad.ttf \
+             --text="WAVES" --flavor=woff2 --output-file=LWTitle-title.woff2 \
+             --layout-features='*' --no-hinting --name-IDs='*'
+         then rewrite nameIDs 1, 3, 4 and 6 so that NO user-facing name contains "spinwerad",
+         add nameID 10 (the derivation),
+         keep 0, 13 and 14, and drop the Macintosh (platform 1) name records.
+         VERIFIED: every one of the five outlines is byte-identical to the pre-rename subset
+         (glyf, loca, hmtx, cmap, OS/2, GSUB, GPOS, GDEF, post, hhea, maxp, gasp all identical;
+         only head's checksum and name differ).  The wordmark did not move a pixel.
+
+GLYPH SET   W A V E S   — #title .word and .nb-logo .word set exactly the word "WAVES".
+            Add a letter to the wordmark and this list must grow, or it falls back to Roboto
+            silently and looks almost right, which is worse than wrong.
+
+FONTLOG (gluk's, carried forward from the original release; the OFL FAQ's recommended place for a
+modifier to record what changed)
+  15.01.2009  gluk (gluksza@wp.pl)   spinwerad Version 0.2 — first release
+  07.02.2009  gluk (gluksza@wp.pl)   spinwerad Version 0.3 — spinweradC.ttf
+  2026-09-05  λWAVES — subset to the five letters of "WAVES", converted to WOFF2, and RENAMED to
+              "LW Title" per OFL section 3.  695 184 -> 3 176 bytes.  spinweradC.ttf was referenced
+              nowhere and is not shipped.  Neither gluk nor the Spinwerad project produced or
+              endorses this derivative.

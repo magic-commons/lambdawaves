@@ -16,25 +16,14 @@
  *
  * STATUS: NUMERICAL, reporting a MODEL.  Every number leaves here with its model string attached.
  */
-import { el, readout, trig, graphHover, fitText } from './kit.js';
+import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
 import { ATOMS, atom, configOf, solveAtom, atomEnergyOf, ionisation, quantumDefect, atomRadial, atomDomainFor,
   EXCHANGE_MODEL, HARTREE_EV } from './atoms.js';
 
 const SPD = 'spdfgh';
-/** the two accent angles, resolved through the canvas so any CSS colour form parses; mix in sRGB */
-function readRGB(g, name, fallback) {
-  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
-  const keep = g.fillStyle;
-  g.fillStyle = fallback; if (v) { try { g.fillStyle = v; } catch (e) { /* an unparseable value leaves the fallback */ } }
-  const s = String(g.fillStyle); g.fillStyle = keep;
-  let m = /^#([0-9a-f]{6})$/i.exec(s);
-  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{3})$/i.exec(s);
-  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
-  m = /rgba?\(([^)]+)\)/i.exec(s);
-  if (m) { const p = m[1].split(/[,\s/]+/).map(Number); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
-  return [120, 225, 240];
-}
+/* WAVE 57 · the reader moved to kit.js — one copy, and it knows color(display-p3 …); the accents come
+   from the WHEEL itself (kit's setAccentRGB), so this canvas draws the array the DOM was painted from. */
+const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
 const mix = (a, b, t) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t));
 const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al})`;
 
@@ -119,7 +108,7 @@ export function createAtoms(host, api) {
     if (lad.width !== Math.round(W * dpr) || lad.height !== Math.round(H * dpr)) { lad.width = Math.round(W * dpr); lad.height = Math.round(H * dpr); }
     const g = lad.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const A = readRGB(g, '--acc', '#78e1f0'), B = readRGB(g, '--acc2', '#d97ce8'), ink = readRGB(g, '--fg-soft', '#e0e0e0'), dim = readRGB(g, '--dim', '#b8b8b8');
+    const A = accentRGB(g, 1), B = accentRGB(g, 2), ink = readRGB(g, '--fg-soft', '#e0e0e0'), dim = readRGB(g, '--dim', '#b8b8b8');
     const sh = cache.shells, n = sh.length;                               // ascending in ε: the least bound is drawn first, at the top
     g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
     /* the columns are measured, not guessed: this card is ~256 px wide and the ε of a Kr 1s is nine characters */
@@ -159,7 +148,7 @@ export function createAtoms(host, api) {
     if (rad.width !== Math.round(W * dpr) || rad.height !== Math.round(H * dpr)) { rad.width = Math.round(W * dpr); rad.height = Math.round(H * dpr); }
     const g = rad.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const A = readRGB(g, '--acc', '#78e1f0'), B = readRGB(g, '--acc2', '#d97ce8'), dim = readRGB(g, '--dim', '#b8b8b8');
+    const A = accentRGB(g, 1), B = accentRGB(g, 2), dim = readRGB(g, '--dim', '#b8b8b8');
     const sh = cache.shells, n = sh.length, R = cache.half, N = 200;
     const left = 20, right = W - 8, top = 10, bot = H - 22, mid = (top + bot) / 2;   // two text rows below the frame: the ticks, then the caption
     const X = (i) => left + (right - left) * i / N;                       // i/N = √(r/R): the stated display choice

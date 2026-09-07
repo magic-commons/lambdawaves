@@ -31,24 +31,12 @@
  * above the exact −0.602634214 of Bates–Ledsham–Stewart 1953), R_e = 2.35227 and D_e = 2.1246 eV (the register).
  */
 import { createMO, createDynamics } from './mo.js';
-import { el, seg, knob, fader, trig, readout, group, graphHover, fitText } from './kit.js';
+import { el, sw, seg, knob, fader, trig, readout, group, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
 
 /* THE CANVAS HAS NO THEME (wave 44).  These rules were written rgba(255,255,255,…) — right on the dark theme and
    WHITE ON WHITE on the light one, where the dissociation line, its "H + H⁺" label, the exact Bates dots, the R
    marker and the caption were all ghosts.  --dim is rated ≥ 4.5:1 on the card in both themes. */
-function readRGB(g, name, fallback) {
-  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
-  const keep = g.fillStyle;
-  g.fillStyle = fallback; if (v) { try { g.fillStyle = v; } catch (e) { /* an unparseable value leaves the fallback */ } }
-  const t = String(g.fillStyle); g.fillStyle = keep;
-  let m = /^#([0-9a-f]{6})$/i.exec(t);
-  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{3})$/i.exec(t);
-  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
-  m = /rgba?\(([^)]+)\)/i.exec(t);
-  if (m) { const p = m[1].split(',').map((x) => parseFloat(x)); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
-  return [255, 255, 255];
-}
+const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);          // wave 57: kit.js's one reader, which knows color(display-p3 …)
 
 
 const KINDS = {
@@ -59,13 +47,12 @@ const KINDS = {
 const RUNAWAY = 'frozen 1s: the HF force is repulsive at every R — the exact force or a bigger basis binds';
 const CURVE_N = 40, CURVE_LO = 0.8, CURVE_HI = 8, CHUNK = 5, SLICE_MS = 24, BUDGET_MS = 30;
 const defaultForce = (k) => (k === 'lcao1s' ? 'exact' : 'hf');
-const cssv = (name, fallback) => { const v = getComputedStyle(document.body).getPropertyValue(name).trim(); return v || fallback; };
 /** the exact 1sσg total energies of Bates, Ledsham & Stewart 1953 — drawn as dots, printed when R sits on one */
 const EXACT = [[1, -0.45179], [2, -0.60263], [3, -0.57756], [4, -0.54608]];
 
 export function createMOPanel(host, api = {}) {
   let kind = 'lcao1s', lambda = 1.7611, R = 2;
-  let mode = 'hold', nuclear = defaultForce('lcao1s'), R0 = 2.8, v0 = 0, dt = 5;
+  let mode = 'hold', nuclear = defaultForce('lcao1s'), R0 = 2.8, v0 = 0, dt = 5, connection = true;
   let mo = null, curve = null, eq = null, f = null, E0 = 0;
   let dyn = null, running = false, Rmin = 0, Rmax = 0, stepMs = 0, frames = 0;
 
@@ -108,7 +95,7 @@ export function createMOPanel(host, api = {}) {
   function resetRun() { dyn = null; running = false; Rmin = Rmax = R0; stepMs = 0; }
   function ensureDyn() {
     if (!dyn) {
-      dyn = createDynamics(mo, { R0, v0, dt, electron: mode === 'ehrenfest' ? 'ehrenfest' : 'bo', nuclearForce: nuclear, track: false });
+      dyn = createDynamics(mo, { R0, v0, dt, electron: mode === 'ehrenfest' ? 'ehrenfest' : 'bo', nuclearForce: nuclear, connection, track: false });
       Rmin = Rmax = dyn.R;
     }
     return dyn;
@@ -162,6 +149,14 @@ export function createMOPanel(host, api = {}) {
   const dtKnob = knob({ label: 'dt  (a.u.)', min: 1, max: 10, value: 5, step: 0.5, fmt: (v) => v.toFixed(1),
     onInput: (v) => { dt = v; resetRun(); refresh(); } });
   rN.appendChild(dtKnob.root);
+  /* CONNECTION (wave 50).  mo.js has taken `connection` since wave 49 and nothing on the card could reach it.  It is
+     the moving-basis transport exp(−ΔR S⁻¹D) with D = S′/2 + ½diag(P, −P) — the term the exact equation
+     iSċ = (H − iṘD)c carries because the basis rides on the nuclei — and it is EHRENFEST's alone (a BO electron is
+     re-solved at every R and has nothing to transport).  OFF is the wave-42 comparison branch: the carried vector is
+     re-read in the new basis and rescaled, and normDrift then reports what the rescaling removed. */
+  const connSw = sw({ label: 'CONNECTION', value: true, onChange: (v) => { connection = v; resetRun(); refresh(); paint(); } });
+  connSw.root.title = 'EHRENFEST only: carry the moving-basis transport exp(−ΔR S⁻¹D), D = S′/2 + ½diag(P, −P) — the term the exact equation iSċ = (H − iṘD)c owes to a basis that rides on the nuclei, conserving c†S(R)c with nothing renormalised. On the 1s LCAO P is 1 × 1 and therefore exactly zero, so the whole connection there IS the metric term (and coincides with the old rescaling to 1e-14). OFF is the wave-42 branch: re-read in the new basis and rescale, with normDrift reporting what the rescaling removed';
+  rN.appendChild(connSw.root);
   rN.appendChild(trig({ label: 'RUN', title: 'let the nuclei go, one dynamics step per frame while the lab clock plays', onFire: () => run() }).root);
   rN.appendChild(trig({ label: 'HOLD', title: 'stop stepping — the trajectory stays where it is', onFire: () => hold() }).root);
   rN.appendChild(trig({ label: 'RESET', title: 'throw the trajectory away and start again at R₀, v₀', onFire: () => resetTraj() }).root);
@@ -174,9 +169,10 @@ export function createMOPanel(host, api = {}) {
   const rr2 = el('div', 'row tight', box);
   const roR = readout({ label: 'NUCLEI  R(t) · v', value: '—', sub: '' });
   const roD = readout({ label: 'E_total · DRIFT · ∫bound', value: '—', sub: '' });
-  rr2.appendChild(roR.root); rr2.appendChild(roD.root);
+  const roC = readout({ label: 'MOVING BASIS  ·  dt CEILING', value: '—', cls: 'wide', sub: '' });
+  rr2.appendChild(roR.root); rr2.appendChild(roD.root); rr2.appendChild(roC.root);
 
-  el('div', 'note', box).innerHTML = '<b>The same molecule in a basis you choose, and the nuclei let go.</b> One one-centre set sits on <i>both</i> protons: the frozen <b>1s LCAO</b>, the <b>Coulomb Sturmians</b> n ≤ 4 at one common scale λ, or the <b>register\'s own</b> σ functions n ≤ 6 at the fixed exponents ζ = 1/n. All two-centre integrals are <b>EXACT</b> (prolate quadrature, 1e-13); the energies are <b>VARIATIONAL</b> — the Sturmian gives −0.60262 at R = 2 against the exact −0.602634214, R_e = 1.9972 and D_e = 2.793 eV, and the register\'s fixed exponents can only reach R_e = 2.3523, D_e = 2.125 eV. <b>The force line is the whole point.</b> Hellmann–Feynman says the force on a nucleus is pure electrostatics, F_elec + Z_AZ_B/R²; in a finite basis that is <i>not</i> −dE/dR, and the difference is Pulay\'s term, 2Re⟨∂_Rψ|(H−E)ψ⟩, because the basis rides on the nuclei. Cauchy–Schwarz bounds it by 2‖∂_Rψ‖‖(H−E)ψ‖ <b>from the state alone</b> — so a run driven by the electrostatic force carries its own error bar: |drift| ≤ ∫bound·|Ṙ|dt, printed live. On the <b>1s LCAO the electrostatic force is repulsive at every R</b> (F_HF → ½/R²: a frozen 1s cannot polarise) and the nuclei run away — the honest failure, which is why that basis ships on −dE/dR. The bigger bases are nearly translation-closed and vibrate under the electrostatic force itself (the Sturmian\'s period is 605.8 a.u. against 593.2 from the curvature). <b>EHRENFEST</b> propagates the coefficient vector in the instantaneous basis and <i>neglects</i> the non-adiabatic coupling of the moving functions: the gap from Born–Oppenheimer is reported, not hidden.';
+  el('div', 'note', box).innerHTML = '<b>The same molecule in a basis you choose, and the nuclei let go.</b> One one-centre set sits on <i>both</i> protons: the frozen <b>1s LCAO</b>, the <b>Coulomb Sturmians</b> n ≤ 4 at one common scale λ, or the <b>register\'s own</b> σ functions n ≤ 6 at the fixed exponents ζ = 1/n. All two-centre integrals are <b>EXACT</b> (prolate quadrature, 1e-13); the energies are <b>VARIATIONAL</b> — the Sturmian gives −0.60262 at R = 2 against the exact −0.602634214, R_e = 1.9972 and D_e = 2.793 eV, and the register\'s fixed exponents can only reach R_e = 2.3523, D_e = 2.125 eV. <b>The force line is the whole point.</b> Hellmann–Feynman says the force on a nucleus is pure electrostatics, F_elec + Z_AZ_B/R²; in a finite basis that is <i>not</i> −dE/dR, and the difference is Pulay\'s term, 2Re⟨∂_Rψ|(H−E)ψ⟩, because the basis rides on the nuclei. Cauchy–Schwarz bounds it by 2‖∂_Rψ‖‖(H−E)ψ‖ <b>from the state alone</b> — so a run driven by the electrostatic force carries its own error bar: |drift| ≤ ∫bound·|Ṙ|dt, printed live. On the <b>1s LCAO the electrostatic force is repulsive at every R</b> (F_HF → ½/R²: a frozen 1s cannot polarise) and the nuclei run away — the honest failure, which is why that basis ships on −dE/dR. The bigger bases are nearly translation-closed and vibrate under the electrostatic force itself (the Sturmian\'s period is 605.8 a.u. against 593.2 from the curvature). <b>EHRENFEST</b> propagates the coefficient vector in the instantaneous basis and <b>carries the moving-basis connection</b> exp(−ΔR S⁻¹D) with D = S′/2 + ½ diag(P, −P) — the <b>CONNECTION</b> switch, on by default; on the 1s LCAO P is 1 × 1 and exactly zero, so there it <i>is</i> the metric term. Nothing is renormalised: c†S(R)c is conserved by the equation itself and the S-norm is reported, not repaired. The generator is R-dependent, so the step is only resolved for <b>dt ≤ 2.5 a.u.</b> and the line beside the knob says so above it. The basis still rides rigidly with no translation factors, and the gap from Born–Oppenheimer is reported, not hidden.';
 
   /* ── the readouts ───────────────────────────────────────────────────────────────────────────────────────────── */
   const exactAt = (r) => { const p = EXACT.find((q) => Math.abs(q[0] - r) < 5e-4); return p ? ` · exact here ${p[1].toFixed(5)}` : ''; };
@@ -196,7 +192,23 @@ export function createMOPanel(host, api = {}) {
     } else { roF.set(busy ? 'computing…' : '—', ''); roF.setSub('F_elec + Z_AZ_B/R² = F_HF, and F_HF − Pulay = −dE/dR — in a finite basis they are different numbers'); }
     refreshRun();
   }
+  /* THE dt CEILING (wave 50).  With the connection carried the generator is R-dependent, so the accuracy of the
+     electron step is set by ΔR = |Ṙ|dt, not by dt alone: tests/mo.test.mjs W49-6 measures the excess electronic
+     energy of the same run at 3.08e-5 · 2.14e-6 · 1.19e-6 for dt = 5 · 2.5 · 1.25 — the lab's shipped dt = 5 is 26
+     times off its own converged answer, and it said so nowhere.  DT_OK = 2.5 is where that run is within a factor
+     of two of the resolved number, and above it this line goes amber.  A BO electron is re-solved at every R and
+     does not carry the term, so the ceiling is named for what it is. */
+  const DT_OK = 2.5;
+  function refreshConn() {
+    const carried = mode === 'ehrenfest' && connection, over = dt > DT_OK + 1e-9;
+    const state = mode !== 'ehrenfest' ? 'BO — nothing to transport' : connection ? 'CARRIED' : 'OFF — wave-42 branch';
+    roC.set(`${state} · dt ${dt.toFixed(1)}${over ? ' > ' + DT_OK.toFixed(1) : ''}`, over && carried ? 'warn' : carried ? 'ok' : '');
+    roC.setSub(over
+      ? `dt ${dt.toFixed(1)} is ABOVE the ${DT_OK.toFixed(1)} a.u. ceiling: the moving-basis generator is R-dependent, so the step's accuracy is set by ΔR = |Ṙ|dt — the excess electronic energy of the reference run reads 3.08e-5 at dt = 5 against 1.19e-6 at dt = 1.25 (mo.test W49-6), 26× off. Turn dt down to read the connection's own answer; BO is unaffected.`
+      : `exp(−ΔR S⁻¹D), D = S′/2 + ½diag(P, −P): the term a basis riding on the nuclei owes the exact equation iSċ = (H − iṘD)c. On the 1s LCAO P = 0 exactly, so it is precisely the metric term. dt ≤ ${DT_OK.toFixed(1)} a.u. resolves it.`);
+  }
   function refreshRun() {
+    refreshConn();
     const d = dyn;
     if (!d) {
       roR.set(`R₀ ${R0.toFixed(3)} a₀ · v₀ ${v0 >= 0 ? '+' : ''}${v0.toFixed(4)}`, mode === 'hold' ? '' : 'ok');
@@ -253,7 +265,8 @@ export function createMOPanel(host, api = {}) {
     const Emin = lo - 0.15 * well, Emax = Math.max(dis + 0.35 * well, hiRef + 0.08 * well);
     const x = (r) => L + (r - CURVE_LO) / (CURVE_HI - CURVE_LO) * (Rt - L);
     const y = (E) => Bt - (Math.min(Emax, Math.max(Emin, E)) - Emin) / (Emax - Emin) * (Bt - Tp);
-    const acc = cssv('--acc', '#78e1f0'), acc2 = cssv('--acc2', '#d97ce8');
+    const rgbOf = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;                        // wave 57: the wheel's own sRGB triple, not the DOM string re-parsed
+    const acc = rgbOf(accentRGB(g, 1)), acc2 = rgbOf(accentRGB(g, 2));
     const D = readRGB(g, '--dim', '#b8b8b8'), ink = (al) => `rgba(${D[0]},${D[1]},${D[2]},${al})`;
     g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
     g.strokeStyle = ink(0.35); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(L, y(dis)); g.lineTo(Rt, y(dis)); g.stroke(); g.setLineDash([]);
@@ -320,7 +333,8 @@ export function createMOPanel(host, api = {}) {
       `bound 2‖∂_Rψ‖‖(H−E)ψ‖\t${f.bound.toFixed(8)}`, `‖∂_Rψ‖\t${f.dpsiNorm.toFixed(8)}`, `‖(H−E)ψ‖\t${f.residual.toFixed(8)}`,
       `F_HF − Pulay − F_exact\t${(f.F_HF - f.pulay - f.F_exact).toExponential(3)}`);
     if (note()) rows.push(`note\t${note()}`);
-    if (dyn) rows.push('', `THE RUN  ·  ${mode === 'bo' ? 'Born–Oppenheimer' : 'Ehrenfest'} electrons  ·  ${nuclear === 'exact' ? '−dE/dR' : 'Hellmann–Feynman'}  ·  dt = ${dt.toFixed(1)}`,
+    if (dyn) rows.push('', `THE RUN  ·  ${mode === 'bo' ? 'Born–Oppenheimer' : 'Ehrenfest'} electrons  ·  ${nuclear === 'exact' ? '−dE/dR' : 'Hellmann–Feynman'}  ·  dt = ${dt.toFixed(1)}${dt > DT_OK + 1e-9 ? '  (ABOVE the ' + DT_OK.toFixed(1) + ' a.u. ceiling)' : ''}`,
+      `moving-basis connection\t${dyn.connection ? 'CARRIED  exp(−ΔR S⁻¹D)' : mode === 'ehrenfest' ? 'OFF  (wave-42: re-read and rescale)' : 'n/a  (BO electrons)'}`,
       `R₀ · v₀\t${R0.toFixed(4)}\t${v0.toFixed(6)}`, `t\t${dyn.t.toFixed(2)}`, `steps\t${dyn.steps}`, `R(t)\t${dyn.R.toFixed(6)}`, `v(t)\t${dyn.v.toFixed(8)}`,
       `R range\t${Rmin.toFixed(5)}\t${Rmax.toFixed(5)}`, `E_total\t${dyn.energy.total.toFixed(8)}`, `drift\t${dyn.drift.toExponential(4)}`,
       `∫bound\t${dyn.integratedBound.toExponential(4)}`, `comparison (not a certificate)\t${Math.abs(dyn.drift) <= dyn.integratedBound ? 'drift ≤ ∫bound' : 'drift > ∫bound'}`,
@@ -331,7 +345,7 @@ export function createMOPanel(host, api = {}) {
     const d = dyn;
     return { kind, lambda, R, n: mo ? mo.n : 0, E0, label: KINDS[kind].label,
       Re: eq ? eq.Re : null, De_eV: eq ? eq.De_eV : null, omega: eq ? eq.omega : null, period: eq ? eq.period : null,
-      electron: mode, force: nuclear, running, busy: jobs.length > 0 || pumping, note: note(), caption: captionShown(),
+      electron: mode, force: nuclear, connection, dt, dtOver: dt > DT_OK + 1e-9, dtCeiling: DT_OK, carried: dyn ? dyn.connection : (mode === 'ehrenfest' && connection), running, busy: jobs.length > 0 || pumping, note: note(), caption: captionShown(),
       stepMs, every: every(), curveDone: curve ? curve.done : 0,
       t: d ? d.t : 0, Rt: d ? d.R : R, v: d ? d.v : v0, steps: d ? d.steps : 0, Rmin: d ? Rmin : null, Rmax: d ? Rmax : null,
       energy: d ? d.energy : null, drift: d ? d.drift : 0, integratedBound: d ? d.integratedBound : 0,
@@ -350,7 +364,7 @@ export function createMOPanel(host, api = {}) {
   return {
     update, refresh, paint, table, whenReady,
     setR, get R() { return R; }, get kind() { return kind; },
-    save: () => ({ kind, lambda, R, electron: mode, force: nuclear }),
+    save: () => ({ kind, lambda, R, electron: mode, force: nuclear, connection, dt }),
     load(o) {
       if (!o) return false;
       if (o.kind && KINDS[o.kind] && o.kind !== kind) { kind = o.kind; basisSeg.set(kind); lamKnob.setDisabled(kind !== 'sturmian'); }
@@ -358,11 +372,15 @@ export function createMOPanel(host, api = {}) {
       if (o.R !== undefined) R = +o.R;
       if (o.electron && ['hold', 'bo', 'ehrenfest'].includes(o.electron)) { mode = o.electron; nucSeg.set(mode); }
       if (o.force === 'hf' || o.force === 'exact') { nuclear = o.force; forceSeg.set(nuclear); }
+      if (o.connection !== undefined) { connection = !!o.connection; connSw.set(connection); }
+      if (o.dt !== undefined) { dt = Math.max(1, Math.min(10, +o.dt || 5)); dtKnob.set(dt); }
       rebuild(); return true;
     },
     api: { setBasis, setLambda, setR: (v) => setR(v, true), setDynamics, setForce, run, hold, reset: resetTraj, step,
       force: () => { if (!f) { solveForce(); refresh(); } return f; }, state, curve: () => curve, note, whenReady,
       setR0: (v) => { R0 = v; r0Fd.set(v); resetRun(); refresh(); paint(); }, setV0: (v) => { v0 = v; v0Fd.set(v); resetRun(); refresh(); paint(); },
-      setDt: (v) => { dt = v; dtKnob.set(v); resetRun(); refresh(); paint(); }, digest: table, get mo() { return mo; } },
+      setDt: (v) => { dt = v; dtKnob.set(v); resetRun(); refresh(); paint(); },
+      setConnection: (v) => { connection = !!v; connSw.set(connection); resetRun(); refresh(); paint(); return connection; }, get connection() { return connection; }, get dtCeiling() { return DT_OK; },
+      digest: table, get mo() { return mo; } },
   };
 }

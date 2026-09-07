@@ -26,7 +26,7 @@
  */
 import { dipoleMatrix, einsteinA, lifetime, coherentPower, pattern, vec3c, C_AU, MU_H, AU_S } from './radiation.js';
 import { BASIS } from './hydrogen.js';
-import { el, readout, graphHover, fitText } from './kit.js';
+import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
 
 const HARTREE_EV = 27.211386245988;          // CODATA 2018
 const A0_NM = 0.0529177210903;               // the Bohr radius in nm
@@ -35,20 +35,8 @@ const NTH = 160;                             // points on the polar curve
 /** scientific notation the way the rest of the lab prints it: 6.2649e8, no '+' */
 const sci = (v, d = 4) => (v === 0 ? '0' : v.toExponential(d).replace('e+', 'e'));
 
-/** a CSS colour token resolved through the canvas, as [r, g, b] */
-function readRGB(g, name, fallback) {
-  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
-  const keep = g.fillStyle;
-  g.fillStyle = fallback; if (v) { try { g.fillStyle = v; } catch (e) { /* an unparseable value leaves the fallback */ } }
-  const s = String(g.fillStyle); g.fillStyle = keep;
-  let m = /^#([0-9a-f]{6})$/i.exec(s);
-  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{3})$/i.exec(s);
-  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
-  m = /rgba?\(([^)]+)\)/i.exec(s);
-  if (m) { const p = m[1].split(/[,\s/]+/).map(Number); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
-  return [120, 225, 240];
-}
+/** a CSS colour token resolved through the canvas, as [r, g, b] — kit.js's one reader (wave 57) */
+const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
 const dominant = (S) => { let k = -1, best = 0; for (let a = 0; a < 91; a++) { const v = S.re[a] * S.re[a] + S.im[a] * S.im[a]; if (v > best) { best = v; k = a; } } return k; };
 
 /**
@@ -125,7 +113,7 @@ export function createRadiation(host, api = {}) {
     if (W < 40 || H < 40) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const A = readRGB(g, '--acc', '#78e1f0'), B2 = readRGB(g, '--acc2', '#d97ce8'), dim = readRGB(g, '--dim', '#b8b8b8');
+    const A = accentRGB(g, 1), B2 = accentRGB(g, 2), dim = readRGB(g, '--dim', '#b8b8b8');
     const ink = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
     const cx = W / 2, cy = H / 2, R = Math.max(10, Math.min(W, H) / 2 - 16);
     if (!cache) {                                                        /* no pair: the empty frame, never a blank slab */

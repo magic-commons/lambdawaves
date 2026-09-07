@@ -450,5 +450,253 @@ export const PRESETS = [
     visual: { rate: 160, window: 2 * Math.PI * 125, view: 'density' } },
   { id: 'shadow-pair', label: '1s + 2s + 3s  (shadow trio)', note: 'three uncoupled oscillators at ω = ½, ⅛, 1⁄18 — watch SHADOW', status: 'EXACT ANALYTIC',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 0, m: 0, amp: 1 }, { n: 3, l: 0, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / (1 / 18 - 0) * 1, view: 'density' } },
+
+  /* ══ WAVE 106 · THE PRESET SUITE (Josh, and a collaboration with Gemini 3.8 at high effort) ═════
+     Josh: "Create a suite of presets (now you get a chance to mathematically shine and show me all
+     the realistic atoms, shapes, demonstrations and simulations and also perhaps personal debugging
+     presets so that when we finally return to QCD or Molecules or whatever, we flesh it out and have
+     the preset essentially be our 'reset button'."
+       Drafted by the second lab and then CHECKED HERE rather than taken on trust, twice:
+         · every mode is inside the register — 1 ≤ n ≤ 6, l < n, |m| ≤ l.  0 violations of 20 entries.
+         · every `window` was recomputed from its OWN modes in exact rational arithmetic: T = 2π
+           divided by the gcd of all pairwise |E_i − E_j| (one phase cycle 2π/|E_n| for a stationary
+           state), with E_n = −1/(2n²).  ALL TWENTY land on that recurrence exactly, so each of these
+           animations closes on itself instead of drifting.
+       The five groups are Josh's: realistic orbitals · shapes · demonstrations · simulations · and the
+       DEBUG set, whose notes say what a correct render should look like — those are the reset buttons,
+       and a note that names what you should see is what makes a preset a test. */
+  /* Physics justification: Linear combination (Y₂² + Y₂⁻²)/√2 ∝ sin²θ cos(2φ) = (x²−y²)/r² forms the canonical real d_x²-y² orbital with four lobes lying directly along the x and y Cartesian axes. As a single-energy eigenstate (E₃ = −1/18 a.u.), its density is strictly stationary; the display window is set to one quantum phase cycle 2π/|E₃| = 36π ≈ 113.097 a.u. */
+  {
+    id: '3dx2y2',
+    label: '3d_x²-y²',
+    note: 'the textbook dx2-y2 orbital · 4 lobes on x and y axes · stationary · phase cycle T = 2π/|E₃| = 36π = 113.097 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 3, l: 2, m: -2, amp: Math.SQRT1_2 },
+      { n: 3, l: 2, m: 2, amp: Math.SQRT1_2 }
+    ],
+    visual: { rate: 4, window: 36 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: Complex combination i(Y₂² − Y₂⁻²)/√2 ∝ sin²θ sin(2φ) = 2xy/r² rotates the cloverleaf by 45° so its four lobes bisect the x and y axes. Like 3d_x²-y², it is an exact stationary eigenstate at E₃ = −1/18 a.u., closing its real-amplitude cycle at T = 2π/|E₃| = 36π ≈ 113.097 a.u. */
+  {
+    id: '3dxy',
+    label: '3d_xy',
+    note: 'cloverleaf orbital bisecting x and y axes · stationary · phase cycle T = 2π/|E₃| = 36π = 113.097 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 3, l: 2, m: -2, amp: Math.SQRT1_2, phase: Math.PI / 2 },
+      { n: 3, l: 2, m: 2, amp: Math.SQRT1_2, phase: -Math.PI / 2 }
+    ],
+    visual: { rate: 4, window: 36 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: The cubic f-orbital f_xyz ∝ xyz/r³ = ½ sin²θ cos θ sin(2φ) is formed from i(Y₃² − Y₃⁻²)/√2. It possesses three mutually orthogonal planar nodes (x=0, y=0, z=0), dividing space into eight sign-alternating octant lobes; stationary at E₄ = −1/32 a.u. with phase recurrence T = 2π/|E₄| = 64π ≈ 201.062 a.u. */
+  {
+    id: '4fxyz',
+    label: '4f_xyz',
+    note: 'cubic octupole: 8 alternating lobes in the 8 octants · stationary · phase cycle T = 2π/|E₄| = 64π = 201.062 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 4, l: 3, m: -2, amp: Math.SQRT1_2, phase: Math.PI / 2 },
+      { n: 4, l: 3, m: 2, amp: Math.SQRT1_2, phase: -Math.PI / 2 }
+    ],
+    visual: { rate: 4, window: 64 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: Explicit superposition ½(|2s⟩ + |2p_z⟩ + |2p_x⟩ + |2p_y⟩) creates a single hybrid lobe directed toward (1,1,1). Because all four basis states belong to the n=2 shell (E₂ = −1/8 a.u.), accidental Coulomb SO(4) degeneracy ensures the density is strictly stationary (|A(t)| ≡ 1) without requiring molecular bonding; display window is T = 2π/|E₂| = 16π ≈ 50.265 a.u. */
+  {
+    id: '2sp3',
+    label: '2sp³  tetrahedral',
+    note: 'directed tetrahedral hybrid along (1,1,1) · n=2 Coulomb degeneracy freezes density (|A(t)| = 1) · phase cycle T = 16π = 50.265 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 2, l: 0, m: 0, amp: 0.5 },
+      { n: 2, l: 1, m: 0, amp: 0.5 },
+      { n: 2, l: 1, m: -1, amp: 0.5, phase: Math.PI / 4 },
+      { n: 2, l: 1, m: 1, amp: 0.5, phase: 3 * Math.PI / 4 }
+    ],
+    visual: { rate: 4, window: 16 * Math.PI, view: 'density' }
+  },
+  /* Physics justification: The extremal state |6, 5, 5⟩ has radial wave R₆₅(r) ∝ r⁵ e^{−r/6} (0 radial nodes, peak at r = n² = 36 a.u.) and angular wave Y₅⁵ ∝ sin⁵θ e^{5iφ} (0 polar nodes). It forms a razor-thin circular Bohr orbit in the xy plane with a central phase vortex of topological charge m = +5; stationary at E₆ = −1/72 a.u. with phase period T = 2π/|E₆| = 144π ≈ 452.389 a.u. */
+  {
+    id: '6h-circ',
+    label: '6h₅  circular torus',
+    note: 'maximum angular momentum in n≤6: razor-thin equatorial torus with winding number m = +5 vortex in arg ψ',
+    status: 'EXACT ANALYTIC',
+    modes: [{ n: 6, l: 5, m: 5, amp: 1 }],
+    visual: { rate: 8, window: 144 * Math.PI, view: 'phase' }
+  },
+  /* Physics justification: With l = 0 and m = 0, the state possesses zero angular nodes and the maximum possible radial node count in the register: n − l − 1 = 5 spherical nodes given by the roots of Laguerre L¹₅(2r/6). In 'real' view it renders as five nested onion-skin shells of alternating sign extending past r = 80 a.u.; phase period T = 2π/|E₆| = 144π ≈ 452.389 a.u. */
+  {
+    id: '6s-onion',
+    label: '6s  nested shells',
+    note: 'pure radial nodal structure: five concentric spherical nodal shells (n−l−1 = 5) out to r ≈ 80 a.u. · stationary',
+    status: 'EXACT ANALYTIC',
+    modes: [{ n: 6, l: 0, m: 0, amp: 1 }],
+    visual: { rate: 4, window: 144 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: Real combination (Y₃⁻³ − Y₃³)/√2 ∝ sin³θ cos(3φ) = x(x²−3y²)/r³ creates a 6-petaled rosette in the xy plane with D₃ₕ point group symmetry and three vertical planar nodes at φ = π/6, π/2, 5π/6; stationary at E₄ = −1/32 a.u. with phase cycle T = 2π/|E₄| = 64π ≈ 201.062 a.u. */
+  {
+    id: '4f-hex',
+    label: '4f_x(x²-3y²)',
+    note: 'hexagonal 6-petaled planar rosette with D₃ₕ symmetry · 3 vertical nodal planes slicing through z · stationary',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 4, l: 3, m: -3, amp: Math.SQRT1_2 },
+      { n: 4, l: 3, m: 3, amp: -Math.SQRT1_2 }
+    ],
+    visual: { rate: 4, window: 64 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: Interfering the spherical 3s orbital with the quadrupole 3d_z² within the same n=3 shell cancels the outer lobe along the z-axis while reinforcing amplitude in the xy plane, folding the spherical nodal shell into an isolated doughnut-shaped toroidal nodal surface; stationary at E₃ = −1/18 a.u. with phase period T = 2π/|E₃| = 36π ≈ 113.097 a.u. */
+  {
+    id: '3s-3dz2',
+    label: '3s − 3d_z²  toroidal node',
+    note: 'Coulomb l-interference: polar lobes cancel while equatorial ring reinforces, pinching a closed toroidal nodal bubble',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 3, l: 0, m: 0, amp: Math.SQRT1_2 },
+      { n: 3, l: 2, m: 0, amp: -Math.SQRT1_2 }
+    ],
+    visual: { rate: 4, window: 36 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: In an arbitrary central potential, states of different l precess at different frequencies. In Coulomb hydrogen, the Runge-Lenz vector enforces exact l-degeneracy. Although this parity-mixed state breaks inversion symmetry and strongly displaces charge along +z, its probability density |ψ|² is rigorously frozen (|A(t)| ≡ 1); display window T = 2π/|E₃| = 36π ≈ 113.097 a.u. */
+  {
+    id: 'demo-degen',
+    label: '3s + 3p_z + 3d_z²  degeneracy',
+    note: 'degeneracy means no motion: 3s + 3p_z + 3d_z² shares E = −1/18 a.u. · strongly polar density is frozen (|A(t)| = 1)',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 3, l: 0, m: 0, amp: 1 },
+      { n: 3, l: 1, m: 0, amp: 1 },
+      { n: 3, l: 2, m: 0, amp: 1 }
+    ],
+    visual: { rate: 4, window: 36 * Math.PI, view: 'density' }
+  },
+  /* Physics justification: An electric-dipole allowed pair (Δl = +1, Δm = 0) between n=2 and n=3. With E₂ = −1/8 and E₃ = −1/18, the energy difference is ΔE = 5/72 a.u. (1.8898 eV), yielding an exact beat period T = 2π/(5/72) = 144π/5 = 28.8π ≈ 90.477868 a.u. The oscillating charge density directly visualizes the atomic antenna emitting hydrogen's famous 656.3 nm H-α red line. */
+  {
+    id: 'demo-rabi',
+    label: '2p_z + 3d_z²  Balmer-α beat',
+    note: 'the microscopic Balmer-α radiator: density sloshes at T = 2π/(E₃−E₂) = 144π/5 = 90.478 a.u. (1.89 eV, 656.3 nm photon)',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 2, l: 1, m: 0, amp: 1 },
+      { n: 3, l: 2, m: 0, amp: 1 }
+    ],
+    visual: { rate: 8, window: 144 * Math.PI / 5, view: 'density' }
+  },
+  /* Physics justification: For an eigenstate with m = +2, the density is an azimuthally symmetric torus, but the wavefunction carries phase factor e^{2iφ}. In 'phase' view, the hue cycles twice around the z-axis, directly revealing the quantum probability current j = (ℏ/m_e) Im(ψ* ∇ψ) = (m / r sin θ) |ψ|² φ̂; stationary at E₃ = −1/18 a.u. with phase cycle T = 36π ≈ 113.097 a.u. */
+  {
+    id: 'demo-current',
+    label: '3d₊₂  circulating current',
+    note: 'angular momentum as current: arg ψ = 2φ winds twice around z · probability current j = 2|ψ|²/(r sin θ) φ̂',
+    status: 'EXACT ANALYTIC',
+    modes: [{ n: 3, l: 2, m: 2, amp: 1 }],
+    visual: { rate: 6, window: 36 * Math.PI, view: 'phase' }
+  },
+  /* Physics justification: Energies E₂ = −9/72, E₃ = −4/72, E₆ = −1/72 have pairwise differences ΔE₂₃ = 5/72, ΔE₃₆ = 3/72, ΔE₂₆ = 8/72. Their greatest common divisor is exactly 1/72 a.u., producing a rigorous full revival at T_rev = 2π/(1/72) = 144π ≈ 452.389 a.u. Fractional revivals occur where sub-pairs re-phase: T/8 = 18π ≈ 56.549 a.u. (2–6), T/5 = 28.8π ≈ 90.478 a.u. (2–3), and T/3 = 48π ≈ 150.796 a.u. (3–6). */
+  {
+    id: 'demo-revival',
+    label: '2p_z + 3p_z + 6p_z  packet revival',
+    note: 'rational packet revival at T_rev = 2π/(1/72) = 144π = 452.389 a.u. · fractional revivals at T/8 (56.5 a.u.), T/5 (90.5 a.u.), T/3 (150.8 a.u.)',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 2, l: 1, m: 0, amp: 1 },
+      { n: 3, l: 1, m: 0, amp: 1 },
+      { n: 6, l: 1, m: 0, amp: 1 }
+    ],
+    visual: { rate: 20, window: 144 * Math.PI, view: 'density' }
+  },
+  /* Physics justification: Demonstrates Bohr's correspondence limit using adjacent extremal circular states (l = m = n − 1). With E₅ = −1/50 and E₆ = −1/72, the transition energy is ΔE = 11/1800 a.u., giving quantum period T_beat = 3600π/11 ≈ 1028.157 a.u. This agrees within 1.6% with the classical Kepler orbital period T_cl = 2π n̄³ ≈ 1045.36 a.u. at n̄ = 5.5, showing a localized clump orbiting like a classical particle. */
+  {
+    id: 'demo-corresp',
+    label: '5g₄ + 6h₅  Bohr correspondence',
+    note: 'circular wavepacket revolving at T = 2π/(11/1800) = 3600π/11 = 1028.157 a.u. · matches classical Kepler orbit T_cl = 2π·n̄³ = 1045.36 a.u. to 1.6%',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 5, l: 4, m: 4, amp: 1 },
+      { n: 6, l: 5, m: 5, amp: 1 }
+    ],
+    visual: { rate: 120, window: 3600 * Math.PI / 11, view: 'density' }
+  },
+  /* Physics justification: An alternating-parity dipole cascade across n = 1, 2, 3, 4. Over a common denominator of 288, the energies are E₁ = −144/288, E₂ = −36/288, E₃ = −16/288, E₄ = −9/288 with differences ΔE₁₂ = 108/288, ΔE₂₃ = 20/288, ΔE₃₄ = 7/288. Since gcd(108, 20, 7) = 1, the base recurrence frequency is 1/288 a.u., yielding an exact grand recurrence period T = 2π/(1/288) = 576π ≈ 1809.557 a.u. In this window, the 1–2 beat executes 108 cycles, 2–3 executes 20 cycles, and 3–4 executes 7 cycles, cleanly dephasing and perfectly re-forming. */
+  {
+    id: 'sim-ladder',
+    label: '1s + 2p_z + 3s + 4p_z  dipole cascade',
+    note: 'four-shell dipole ladder: multi-harmonic slosh disperses into fine interferogram and collapses at grand period T = 576π = 1809.557 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 1, l: 0, m: 0, amp: 1 },
+      { n: 2, l: 1, m: 0, amp: 1 },
+      { n: 3, l: 0, m: 0, amp: 1 },
+      { n: 4, l: 1, m: 0, amp: 1 }
+    ],
+    visual: { rate: 60, window: 576 * Math.PI, view: 'density' }
+  },
+  /* Physics justification: Superposition of m = +2 quadrupole states across n = 3, 4, 6. The energies are E₃ = −16/288, E₄ = −9/288, E₆ = −4/288, with differences ΔE₃₄ = 7/288, ΔE₄₆ = 5/288, and ΔE₃₆ = 12/288. All differences are exact multiples of 1/288 a.u., yielding an exact recurrence window T = 2π/(1/288) = 576π ≈ 1809.557 a.u. The double vortex remains stationary in azimuth while the concentric radial shells beat, shear, and periodically re-crystallize. */
+  {
+    id: 'sim-churn',
+    label: '3d₊₂ + 4d₊₂ + 6d₊₂  quadrupole churn',
+    note: 'three-mode m=2 vortex: radial breathing and shear across shells with exact rational recurrence at T = 576π = 1809.557 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 3, l: 2, m: 2, amp: 1 },
+      { n: 4, l: 2, m: 2, amp: 1 },
+      { n: 6, l: 2, m: 2, amp: 1 }
+    ],
+    visual: { rate: 60, window: 576 * Math.PI, view: 'diff' }
+  },
+  /* Physics justification: Mixing adjacent shells n=4 and n=5 with mixed m values breaks azimuthal symmetry, creating an eccentric, banana-shaped Keplerian wavepacket that orbits the nucleus. Because E₄ = −25/800 and E₅ = −16/800, the energy difference between the two populated shells is ΔE = 9/800 a.u., giving a rigorous density recurrence period T = 2π/(9/800) = 1600π/9 ≈ 558.505 a.u. */
+  {
+    id: 'sim-kepler',
+    label: '4f₊₃ + 5f₊₂ + 5g₊₄  eccentric orbit',
+    note: 'azimuthally asymmetric Keplerian clump revolving and breathing with exact closed recurrence at T = 2π/(9/800) = 1600π/9 = 558.505 a.u.',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 4, l: 3, m: 3, amp: 1 },
+      { n: 5, l: 3, m: 2, amp: 1 },
+      { n: 5, l: 4, m: 4, amp: 1 }
+    ],
+    visual: { rate: 40, window: 1600 * Math.PI / 9, view: 'density' }
+  },
+  /* Physics justification: Ground truth test of unitary stationary propagation. For a single eigenstate (E₄ = −1/32 a.u.), ψ(t) = e^{−iE₄t} ψ(0), so |ψ(t)|² ≡ |ψ(0)|² for all t. Any temporal fluctuation, flickering, or drift in 'density' view immediately exposes a regression in the time-propagation kernel; the real component oscillates with period T = 2π/|E₄| = 64π ≈ 201.062 a.u. */
+  {
+    id: 'debug-stat',
+    label: '4f₀  [TEST: density invariance]',
+    note: 'WHAT AN OBSERVER SHOULD SEE: volume in density view is 100% frozen for all t; phase and real view rotate at T = 64π = 201.062 a.u. · any density motion is a bug',
+    status: 'EXACT ANALYTIC',
+    modes: [{ n: 4, l: 3, m: 0, amp: 1 }],
+    visual: { rate: 10, window: 64 * Math.PI, view: 'density' }
+  },
+  /* Physics justification: Benchmark for the logical clock and transport engine. E₂ = −1/8, E₄ = −1/32, so ΔE = 3/32 a.u., giving beat period T = 2π/(3/32) = 64π/3 ≈ 67.020643 a.u. Specifying playback rate = (64π/3)/10 ≈ 6.702064328 a.u./s ensures that exactly one beat cycle elapses every 10.000 wall seconds, allowing precise calibration against an external physical stopwatch. */
+  {
+    id: 'debug-clock',
+    label: '2s + 4s  [TEST: clock & stopwatch]',
+    note: 'beat period T = 2π/(E₄−E₂) = 64π/3 = 67.021 a.u. · at rate 6.702064 a.u./s, 1 beat cycle = exactly 10.000 wall seconds · WHAT AN OBSERVER SHOULD SEE: stopwatch reads 10.00 s peak to peak',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 2, l: 0, m: 0, amp: 1 },
+      { n: 4, l: 0, m: 0, amp: 1 }
+    ],
+    visual: { rate: 6.70206432766, window: 64 * Math.PI / 3, view: 'diff' }
+  },
+  /* Physics justification: Diagnostic for raymarching isosurface precision and nodal topology. With n = 5, l = 2, m = 0, the state possesses exactly n − l − 1 = 2 radial spherical nodes (at r = 5(3 ± √3) ≈ 6.34 a.u. and 23.66 a.u.) and l − |m| = 2 angular conical nodes (cos²θ = 1/3, θ ≈ 54.74° and 125.26°). The volume is partitioned into 9 sign-alternating domains; any nodal fuzziness or dislocation flags raymarcher step inaccuracy. */
+  {
+    id: 'debug-nodes',
+    label: '5d₀  [TEST: node count]',
+    note: 'WHAT AN OBSERVER SHOULD SEE: in real view, exactly 2 radial spherical nodes and 2 angular conical nodes partition space into 3×3 = 9 sign-alternating cells; nodes must never drift',
+    status: 'EXACT ANALYTIC',
+    modes: [{ n: 5, l: 2, m: 0, amp: 1 }],
+    visual: { rate: 4, window: 100 * Math.PI, view: 'real' }
+  },
+  /* Physics justification: Minimal two-mode state for bisecting rendering regressions. Both modes have l = 0 and m = 0, so the state is rigorously isotropic in 3D (Y₀⁰ = 1/√4π everywhere). Energy difference ΔE = −1/18 − (−1/2) = 4/9 a.u. sets the breathing period to T = 2π/(4/9) = 9π/2 ≈ 14.137167 a.u. Any angular asymmetry, directional artifacts, or lobe pinching isolates a bug in spatial volume evaluation. */
+  {
+    id: 'debug-bisect',
+    label: '1s + 3s  [TEST: bisection baseline]',
+    note: 'purely isotropic radial beat at T = 9π/2 = 14.137 a.u. · WHAT AN OBSERVER SHOULD SEE: perfect spherical symmetry at all times; any angular variation isolates a renderer bug',
+    status: 'EXACT ANALYTIC',
+    modes: [
+      { n: 1, l: 0, m: 0, amp: 1 },
+      { n: 3, l: 0, m: 0, amp: 1 }
+    ],
+    visual: { rate: 4, window: 4.5 * Math.PI, view: 'diff' }
+  },
 ];
 export const PRESET_BY_ID = new Map(PRESETS.map((p) => [p.id, p]));

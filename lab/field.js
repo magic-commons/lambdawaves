@@ -12,6 +12,7 @@
  * A 96³ grid × 16 modes is ~14 M evaluations — well under a millisecond on an RTX 3070.
  */
 import { modeTable } from './hydrogen.js';
+import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
 
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
@@ -132,7 +133,7 @@ struct View {
   fwd: vec4<f32>,    // xyz, w = steps
   p0: vec4<f32>,     // view mode, exposure, softness, dither
   p1: vec4<f32>,     // slice mode, slice axis, slice pos (-1..1 of half), slab thickness (fraction of half)
-  p2: vec4<f32>,     // hue shift, invert, palette on, unused
+  p2: vec4<f32>,     // hue shift, invert, palette on, DITHER strength in LSB (wave 54 — p0.w stays the ray-march jitter seed)
   p3: vec4<f32>,     // draw style, iso level (fraction of ρmax), grain, saturation knee
   p4: vec4<f32>,     // PREVIEW BOOST: k (xyz) and on (w) — while the bow is drawn the field is shown multiplied by e^{ik·x}, the exact boosted state
   p5: vec4<f32>,     // SURFACE: the stage background colour (xyz) and the output gamma (w) — the theme lives here
@@ -182,6 +183,21 @@ fn litAt(uvw: vec3<f32>) -> f32 {
    colour lifted toward white — never a grey multiplied in, which is what read as "a dark grey cast on the colours" */
 fn overlay(c: vec3<f32>, l: f32) -> vec3<f32> { return mix(c * c, c + (1.0 - c) * 0.35, smoothstep(0.0, 1.0, l)); }
 
+/* ORDERED DITHER — the recursive Bayer 8x8 threshold matrix, closed form, no table and no texture.
+ * M_{2n} = [[4M, 4M+2],[4M+3, 4M+1]] means each level contributes two bits, and the TOP level's pair are the
+ * LOW bits of the answer (a bit reversal): with X, Y the k-th bits of the pixel's x and y, that pair is
+ * (b1, b0) = (X xor Y, Y).  Unrolled over three levels that is six shifts and five xors, no branch, and the
+ * value comes back centred in (-1/2, +1/2) so the mean of the pattern is exactly zero and the picture's
+ * average brightness cannot move.  It is FIXED IN SCREEN SPACE on purpose: a still field must be still, and
+ * a temporal (blue-noise-per-frame) dither would make a paused instrument shimmer. */
+fn bayer8(px: vec2<f32>) -> f32 {
+  let x = u32(px.x) & 7u;
+  let y = u32(px.y) & 7u;
+  let a = x ^ y;
+  let v = ((y >> 2u) & 1u) | (((a >> 2u) & 1u) << 1u) | (((y >> 1u) & 1u) << 2u)
+        | (((a >> 1u) & 1u) << 3u) | ((y & 1u) << 4u) | ((a & 1u) << 5u);
+  return (f32(v) + 0.5) / 64.0 - 0.5;
+}
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   let half = V.cam.w;
   let ro = V.cam.xyz;
@@ -304,6 +320,13 @@ fn overlay(c: vec3<f32>, l: f32) -> vec3<f32> { return mix(c * c, c + (1.0 - c) 
   }
   var o = pow(max(col + bg * (1.0 - alpha), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control)
   o = select(o, bg, o != o);                                                                          // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
+  /* DITHER (wave 54).  The LAST thing that happens to the colour, AFTER the gamma, because the quantiser it
+     defeats is the 8-bit swapchain and nothing else — dithering in linear light would be dithering the wrong
+     ladder.  V.p2.w is the amplitude in LEAST SIGNIFICANT BITS: 1.0 is the textbook ±½ LSB, which turns the
+     hard step between two adjacent codes into a spatial average that lands between them.  It is OFF (0) by
+     default and it never touches the physics — the readback path renders through the same shader, so a gate
+     that compares pixels compares the same numbers as long as the strength is zero. */
+  o = o + bayer8(in.pos.xy) * (V.p2.w / 255.0);
   return vec4<f32>(o, 1.0);
 }`;
 
@@ -339,7 +362,47 @@ function mul4(a, b, out) {
   for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + r] * b[c * 4 + k]; o[c * 4 + r] = s; }
   return o;
 }
+/* ── THE CAMERA HAS TWO MODES (wave 54, board #43) ──────────────────────────────────────────────────────────
+ * TURNTABLE is the shipped camera and is not touched below: two Euler angles about a WORLD up of +z, a level
+ * horizon by construction, and a pitch clamp at the poles because atan2 has nothing to say there.
+ * FREE stores ONE unit quaternion q and no angles at all, so there is no clamp to hit: R(q) carries the camera's
+ * own (x̂, ŷ, ẑ) = (right, up, back) onto the world, a drag LEFT-multiplies... no: RIGHT-multiplies a rotor built
+ * in the camera's own frame, and the horizon is free to tilt.
+ *
+ * THE Z-UP CONVERSION, and why a copy would have been wrong.  The reference (NEBULA, and the study written from
+ * it) is a Y-UP world in which the home camera looks down −z, so its home orientation is the IDENTITY quaternion
+ * and q(ψ, θ) = q_y(ψ)·q_x(θ).  OURS IS Z-UP — z is the quantization axis, which is physics and not preference —
+ * and our home camera is NOT the identity: at yaw = pitch = 0 the basis is right = ŷ, up = ẑ, back = x̂, i.e. the
+ * cyclic permutation x → y → z → x, whose quaternion is q₀ = ½(1 + i + j + k).  So the honest conversion is
+ *
+ *        q(ψ, θ) = q_z(ψ) · q₀ · q_x(−θ),        q_z(ψ) = [cos ψ/2, 0, 0, sin ψ/2],  q_x(−θ) = [cos θ/2, −sin θ/2, 0, 0]
+ *
+ * — the extra q₀ is exactly the term a transplanted Y-up formula has no reason to carry, and the minus on θ is
+ * the second: turning the camera about its own +right by β LOWERS the pitch by β (dir·ẑ = −sin β).  Both are
+ * verified against this very function, to 7e-16 over 2000 random poses, by the browser gate.
+ * Back the other way: b = R(q)ẑ is the camera's own back vector, so θ = asin b_z and ψ = atan2(b_y, b_x) — the
+ * study's Y-up θ = asin b_y, ψ = atan2(b_x, b_z) reads the WRONG TWO COMPONENTS in this world and would have
+ * produced a camera that was very nearly right, which is the worst kind. */
+export const CAM_HOME_Q = [0.5, 0.5, 0.5, 0.5];          // q₀: the cyclic permutation x → y → z → x
+/** TURNTABLE (ψ, θ) → the FREE rotor.  Exact: the two bases agree to floating point. */
+export function quatFromYawPitch(yaw, pitch) {
+  return qnormalize(qmul(qmul([Math.cos(yaw / 2), 0, 0, Math.sin(yaw / 2)], CAM_HOME_Q),
+    [Math.cos(pitch / 2), -Math.sin(pitch / 2), 0, 0]));
+}
+/** the FREE rotor → TURNTABLE (ψ, θ), the pitch held inside the clamp so the levelling slerp has an exact target */
+export function yawPitchFromQuat(q, pitchMax = 1.52) {
+  const b = adjoint(q, [0, 0, 1]), s = Math.sin(pitchMax);
+  return { yaw: Math.atan2(b[1], b[0]), pitch: Math.asin(Math.max(-s, Math.min(s, b[2]))) };
+}
+/** turn the FREE rotor in the CAMERA's own frame: dψ about its up, dθ in the turntable's sense about its right */
+export function turnFree(q, dyaw, dpitch) {
+  return qnormalize(qmul(q, expPure([-dpitch / 2, dyaw / 2, 0])));
+}
 export function cameraBasis(obs) {
+  if (obs.mode === 'free' && obs.quat) {                    // FREE: the rotor's three columns, no angles anywhere
+    const q = obs.quat, dir = adjoint(q, [0, 0, 1]);
+    return { dir, fwd: [-dir[0], -dir[1], -dir[2]], right: adjoint(q, [1, 0, 0]), up: adjoint(q, [0, 1, 0]) };
+  }
   const cp = Math.cos(obs.pitch), sp = Math.sin(obs.pitch), cy = Math.cos(obs.yaw), sy = Math.sin(obs.yaw);
   const dir = [cp * cy, cp * sy, sp];                       // z is UP (the quantization axis)
   const fwd = [-dir[0], -dir[1], -dir[2]];
@@ -348,6 +411,12 @@ export function cameraBasis(obs) {
   const rl = Math.hypot(rx, ry, rz); rx /= rl; ry /= rl; rz /= rl;
   const up = [ry * fwd[2] - rz * fwd[1], rz * fwd[0] - rx * fwd[2], rx * fwd[1] - ry * fwd[0]];
   return { dir, fwd, right: [rx, ry, rz], up };
+}
+/** the whole orientation as ONE string — what a cached 2-D overlay must key on, because a FREE camera can ROLL
+ *  without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
+export function cameraKey(obs) {
+  if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',');
+  return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4);
 }
 function f16(h) {
   const s = (h & 0x8000) ? -1 : 1, e = (h >> 10) & 0x1f, f = h & 0x3ff;
@@ -388,7 +457,17 @@ export async function createField(canvas, opts = {}) {
   try {
     adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
     if (!adapter) { out.error = 'no WebGPU adapter'; return out; }
-    device = await adapter.requestDevice();
+    /* WAVE 58 — ASK FOR THE ADAPTER'S OWN CEILING, not WebGPU's default one.  `requestDevice()` with no
+     * `requiredLimits` gives the DEFAULT limits whatever the hardware can do — maxTextureDimension2D 8192 — and
+     * that number is the largest picture lab/capture.js can ever take, on an adapter that reports 32767.  The
+     * ceiling was a line of this file and not the GPU, which capture.js' header says in as many words.
+     * A device MUST grant a limit its own adapter reported, so this cannot fail on a conforming implementation;
+     * it is still wrapped, because a device that does not come up is the whole application and a bigger PNG is
+     * not worth that trade.  `capture.limits()` READS what was granted rather than believing this comment. */
+    const want = {};
+    for (const k of ['maxTextureDimension2D', 'maxTextureDimension1D']) if (adapter.limits && adapter.limits[k]) want[k] = adapter.limits[k];
+    try { device = await adapter.requestDevice({ requiredLimits: want }); out.limitsRequested = want; }
+    catch (_) { device = await adapter.requestDevice(); out.limitsRequested = null; }
   } catch (e) { out.error = 'WebGPU device request failed: ' + (e && e.message || e); return out; }
   try { const info = adapter.info || (adapter.requestAdapterInfo && await adapter.requestAdapterInfo()); out.adapterInfo = info ? { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description } : null; } catch (_) {}
   device.addEventListener('uncapturederror', (e) => { out.lastGpuError = String(e.error && e.error.message || e.error); if (opts.onError) opts.onError(out.lastGpuError); });
@@ -396,7 +475,53 @@ export async function createField(canvas, opts = {}) {
 
   const format = navigator.gpu.getPreferredCanvasFormat();
   const ctx = canvas.getContext('webgpu');
+  /* ── THE COLOUR GAMUT (wave 54, board #52) ──────────────────────────────────────────────────────────────────
+   * WebGPU's canvas can be tagged `colorSpace: 'display-p3'` — and Gecko does not implement the member.  It is
+   * commented out in dom/webidl/WebGPU.webidl (Bug 1834395), and a WebIDL dictionary IGNORES a member it does not
+   * declare, so passing it throws nothing, warns nothing, and leaves the swapchain sRGB.  A feature test that
+   * asks whether the string was ACCEPTED therefore always says yes and is worthless.
+   * THE HONEST PROBE, and it is exact: dictionary conversion performs Get(obj, "colorSpace") for every member the
+   * binding DECLARES.  Hand configure() an object whose `colorSpace` is a GETTER and see whether the browser ever
+   * calls it.  Called ⇒ the member exists in this build; never called ⇒ it does not, whatever the docs say.
+   * (The probe configures with 'srgb', i.e. the default, so the canvas is in its shipped state either way; it is
+   * re-configured immediately below regardless, before a single frame is drawn.) */
+  let canvasP3 = false;
+  try {
+    const probe = { device, format, alphaMode: 'opaque' };
+    Object.defineProperty(probe, 'colorSpace', { enumerable: true, configurable: true, get() { canvasP3 = true; return 'srgb'; } });
+    ctx.configure(probe);
+  } catch (_) { canvasP3 = false; }
+  let gamut = 'srgb';
   ctx.configure({ device, format, alphaMode: 'opaque' });
+  /** srgb ⇄ display-p3 both share the sRGB transfer curve, so the matrix must be applied in LINEAR light */
+  const lin = (u) => (u <= 0.04045 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4));
+  const enc8 = (u) => (u <= 0.0031308 ? 12.92 * u : 1.055 * Math.pow(u, 1 / 2.4) - 0.055);
+  const M_SRGB_P3 = [[0.822462, 0.177538, 0], [0.033194, 0.966806, 0], [0.017083, 0.072397, 0.910520]];   // rows sum to 1: D65 white is fixed
+  /** the CONVERSION: the same colour, re-expressed in a wider basis.  Nothing looks different; the banding improves. */
+  function srgbToP3(rgb) {
+    const l = [lin(rgb[0]), lin(rgb[1]), lin(rgb[2])];
+    return M_SRGB_P3.map((r) => enc8(Math.max(0, Math.min(1, r[0] * l[0] + r[1] * l[1] + r[2] * l[2]))));
+  }
+  /** the EXPANSION: the same lightness and hue, more chroma than was authored.  A DESIGN CHOICE, never accuracy. */
+  function vividP3(rgb, k = 1.25) {
+    const c = srgbToP3(rgb), l = [lin(c[0]), lin(c[1]), lin(c[2])];
+    const g = 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+    return l.map((v) => enc8(Math.max(0, Math.min(1, g + (v - g) * k))));
+  }
+  /** the ONE road the colour takes on its way to the canvas — the DOM takes the same one (rack.js applyAccent) */
+  const gamutMap = (rgb) => (gamut === 'srgb' ? rgb : gamut === 'p3-vivid' ? vividP3(rgb) : srgbToP3(rgb));
+  const cssP3 = !!(window.CSS && CSS.supports && CSS.supports('color', 'color(display-p3 1 0 0)'));
+  const displayP3 = !!(window.matchMedia && matchMedia('(color-gamut: p3)').matches);
+  const GAMUT_WHY = 'this browser\u2019s WebGPU canvas has no colorSpace: Gecko leaves the WebIDL member out (Bug 1834395), so the canvas stays sRGB \u2014 and styling the interface in P3 while the field is sRGB would put the same accent in two different colours';
+  let lastLUT = null;
+  /** the palette reaches the GPU through the gamut, so the field and the interface can never disagree */
+  function uploadPalette() {
+    if (!lastLUT) return;
+    if (gamut === 'srgb') { device.queue.writeBuffer(palBuf, 0, lastLUT); return; }
+    const out2 = new Float32Array(lastLUT.length);
+    for (let i = 0; i < lastLUT.length; i += 4) { const c = gamutMap([lastLUT[i], lastLUT[i + 1], lastLUT[i + 2]]); out2[i] = c[0]; out2[i + 1] = c[1]; out2[i + 2] = c[2]; out2[i + 3] = lastLUT[i + 3]; }
+    device.queue.writeBuffer(palBuf, 0, out2);
+  }
 
   const computeModule = device.createShaderModule({ code: COMPUTE_WGSL });
   const renderModule = device.createShaderModule({ code: RENDER_WGSL });
@@ -443,6 +568,13 @@ export async function createField(canvas, opts = {}) {
   const lineVerts = 64;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
+  /* WAVE 53 — THE FRAME AND THE AXES ARE TWO OBJECTS (Josh, board #40: "an 'Axis' button alongside frame to make the
+     axis and frame two individual objects").  One switch used to draw both, so the xyz axes could not be seen without
+     the cube around them and the cube could not be seen without the axes through it.  THE BUFFER'S LAYOUT DOES NOT
+     MOVE — the box's twelve edges are vertices 0…23, the three axes 24…29 and the slice rectangle 30…37, which is
+     exactly what lineColors() reads — and the two switches are two DRAW CALLS into it, so either object can be off
+     without shifting the other by a byte.  The slice rectangle stays with the FRAME: it is a frame, not an axis. */
+  const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
   const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }] });
 
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
@@ -452,6 +584,7 @@ export async function createField(canvas, opts = {}) {
   let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
+  let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
 
   function setResolution(n) {
     if (n === res) return;
@@ -495,7 +628,7 @@ export async function createField(canvas, opts = {}) {
     v[12] = B.fwd[0]; v[13] = B.fwd[1]; v[14] = B.fwd[2]; v[15] = mat.steps || 160;
     v[16] = mat.view | 0; v[17] = mat.exposure; v[18] = mat.softness; v[19] = (stats.presents % 97) / 97;
     v[20] = mat.slice ? mat.slice.mode | 0 : 0; v[21] = mat.slice ? mat.slice.axis | 0 : 2; v[22] = mat.slice ? mat.slice.pos : 0; v[23] = mat.slice ? mat.slice.thick : 0.03;
-    v[24] = mat.hueShift || 0; v[25] = mat.invert ? 1 : 0; v[26] = mat.paletteOn ? 1 : 0; v[27] = 0;
+    v[24] = mat.hueShift || 0; v[25] = mat.invert ? 1 : 0; v[26] = mat.paletteOn ? 1 : 0; v[27] = mat.dither || 0;   // wave 54: the DITHER amplitude in LSB (p0.w keeps the ray-march jitter seed)
     v[28] = mat.style | 0; v[29] = mat.iso === undefined ? 0.06 : mat.iso; v[30] = mat.grain === undefined ? 0.35 : mat.grain; v[31] = mat.knee === undefined ? 0.6 : mat.knee;
     const bon = mat.boost && mat.boost.on, bk = bon ? mat.boost.k : null;
     v[32] = bon ? bk[0] : 0; v[33] = bon ? bk[1] : 0; v[34] = bon ? bk[2] : 0; v[35] = bon ? 1 : 0;
@@ -517,17 +650,35 @@ export async function createField(canvas, opts = {}) {
     dark:  { box: [1, 1, 1, 0.13],          x: [0.0, 1.0, 1.0, 0.85],  y: [1.0, 0.0, 1.0, 0.85], z: [1.0, 1.0, 0.0, 0.9] },   // vivid CMY: x = cyan, y = magenta, z = yellow
     light: { box: [0.02, 0.03, 0.05, 0.42], x: [1.0, 0.45, 0.35, 0.45], y: [0.45, 1.0, 0.5, 0.45], z: [0.45, 0.65, 1.0, 0.6] },
   };
+  /* ⚠ WAVE 106 · THE AXES' COLOUR IS THE USER'S NOW, AND ONLY THE BOX IS STILL THE THEME'S.
+     Josh: "frame and axis in draw should move to settings alongside a toggle to make the axis RBG or CMY."
+     The table above stops being a per-theme LAW for the three axes and becomes the two PALETTES that toggle
+     picks between — the dark row's CMY and the light row's warm/cool RGB.  It is deliberately the SAME table
+     and not a new one: a second copy of a colour is a colour that goes stale.
+       TWO THINGS ARE SPLIT APART HERE, AND THE SPLIT IS THE DESIGN.  THE HUE is the user's choice.  THE ALPHA
+     STAYS THE THEME'S, because how hard a line has to push is a property of the GROUND it is drawn on and not
+     of the hue it is drawn in: the light row's .45 laid over the near-black stage measures (0.47, 0.23, 0.19),
+     a muddy orange, where the dark theme's own .85 puts the same hue on at (0.86, 0.39, 0.31).  So the seat
+     picks the row and the theme keeps the fourth number.
+       `mat.axisInk` is 'theme' — the shipped binding, and what an older settings key, an older project and an
+     older link all resolve to — or 'cmy' or 'rgb'.  ON 'theme' THIS IS BIT-IDENTICAL to what wave 48 shipped:
+     axc(INK.x, INK.x[3]) writes INK.x back unchanged, which is why the theme proof's pixel counts did not have
+     to move.  AND THE BOX NEVER MOVES in any of the three. */
+  const AXIS_HUE = { cmy: FRAME_INK.dark, rgb: FRAME_INK.light };
+  const AXC = [0, 0, 0, 1];                                        // ONE scratch, not one array per axis per frame: push() copies out of it before the next call
+  const axc = (hue, a) => { AXC[0] = hue[0]; AXC[1] = hue[1]; AXC[2] = hue[2]; AXC[3] = a; return AXC; };
   function writeLines(mat) {
     const h = half, v = LINES; let k = 0;
     const push = (a, b, c) => { v[k++] = a[0]; v[k++] = a[1]; v[k++] = a[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; v[k++] = b[0]; v[k++] = b[1]; v[k++] = b[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; };
-    const INK = mat.lightUI ? FRAME_INK.light : FRAME_INK.dark;
+    const INK = mat.lightUI ? FRAME_INK.light : FRAME_INK.dark;    // the BOX's ink, and the ALPHA of all three axes, in both cases the theme's
+    const AX = AXIS_HUE[mat.axisInk] || INK;                       // ⚠ the AXES' hue is the user's — 'theme', and anything unreadable, fall back to the theme's own row
     const boxC = INK.box;
     const corners = [[-h, -h, -h], [h, -h, -h], [h, h, -h], [-h, h, -h], [-h, -h, h], [h, -h, h], [h, h, h], [-h, h, h]];
     const edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
     for (const [a, b] of edges) push(corners[a], corners[b], boxC);
-    push([0, 0, 0], [0.6 * h, 0, 0], INK.x);   // x
-    push([0, 0, 0], [0, 0.6 * h, 0], INK.y);   // y
-    push([0, 0, 0], [0, 0, 0.6 * h], INK.z);   // z (quantization axis)
+    push([0, 0, 0], [0.6 * h, 0, 0], axc(AX.x, INK.x[3]));   // x — the hue is the seat's, the alpha is the theme's
+    push([0, 0, 0], [0, 0.6 * h, 0], axc(AX.y, INK.y[3]));   // y
+    push([0, 0, 0], [0, 0, 0.6 * h], axc(AX.z, INK.z[3]));   // z (quantization axis)
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
@@ -536,16 +687,25 @@ export async function createField(canvas, opts = {}) {
       n += 4;
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k);
-    return n * 2;
+    return n > 15;                                                 // whether the slice rectangle is in the buffer (the box and the axes always are)
+  }
+  /** the chrome, as two independently switched objects over one buffer.  `all` ignores the switches (the ink proofs). */
+  function drawChrome(pass, lp, mat, hasSlice, all) {
+    const box = all || mat.frame !== false, axes = all || mat.axis !== false, slice = hasSlice && box;
+    if (!box && !axes) return;
+    pass.setPipeline(lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
+    if (box) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
+    if (axes) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
+    if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
   }
   function encodeRender(enc, target, obs, mat, w, h, tw) {
     writeView(obs, mat, w, h);
-    const nv = writeLines(mat);
+    const sl = writeLines(mat);
     const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
     if (tw) desc.timestampWrites = tw;
     const pass = enc.beginRenderPass(desc);
     pass.setPipeline(renderPipeline); pass.setBindGroup(0, renderBind); pass.draw(3);
-    if (mat.frame !== false) { pass.setPipeline(linePipeline); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv); }
+    drawChrome(pass, linePipeline, mat, sl);
     pass.end();
   }
 
@@ -574,10 +734,10 @@ export async function createField(canvas, opts = {}) {
     if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
     const rp = out._rp, lp = out._lp;
     const enc = device.createCommandEncoder();
-    writeView(obs, mat, w, h); const nv = writeLines(mat);
+    writeView(obs, mat, w, h); const sl = writeLines(mat);
     const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
     pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
-    if (mat.frame !== false) { pass.setPipeline(lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv); }
+    drawChrome(pass, lp, mat, sl);
     pass.end();
     const bpr = Math.ceil(w * 4 / 256) * 256;
     const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -603,10 +763,10 @@ export async function createField(canvas, opts = {}) {
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
     if (!out._lp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
     const enc = device.createCommandEncoder();
-    writeView(obs, mat, w, h); const nv = writeLines(mat);
+    writeView(obs, mat, w, h); const sl = writeLines(mat);
     const bg = mat.bg || DEFAULT_BG;
     const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: bg[0], g: bg[1], b: bg[2], a: 1 }, storeOp: 'store' }] });
-    pass.setPipeline(out._lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv);
+    drawChrome(pass, out._lp, mat, sl);
     pass.end();
     const bpr = Math.ceil(w * 4 / 256) * 256;
     const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -690,10 +850,10 @@ export async function createField(canvas, opts = {}) {
       for (let i = 0; i < n; i++) {
         if (doCompute) encodeCompute(enc, 0, modes);
         if (doRender) {
-          writeView(obs, mat, w, h); const nv = writeLines(mat);
+          writeView(obs, mat, w, h); const sl = writeLines(mat);
           const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
           pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
-          if (mat.frame !== false) { pass.setPipeline(out._lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf); pass.draw(nv); }
+          drawChrome(pass, out._lp, mat, sl);
           pass.end();
         }
       }
@@ -708,7 +868,8 @@ export async function createField(canvas, opts = {}) {
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
-    generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true } });
+    generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
+    dprCap: { get: () => dprCap, enumerable: true } });   // a LIVE getter: Object.assign below would have frozen it at 2 (the same trap B10 caught)
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
@@ -718,9 +879,34 @@ export async function createField(canvas, opts = {}) {
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
-    setPalette(lut) { device.queue.writeBuffer(palBuf, 0, lut instanceof Float32Array ? lut : new Float32Array(lut)); },
+    setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
+    /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
+     * `support` is measured, never assumed: `canvas` is the WebIDL getter probe above, `css` asks the engine
+     * whether it parses color(display-p3 …), and `display` is the media query — with the caveat that Firefox
+     * under privacy.resistFingerprinting answers false to that one unconditionally, so it is REPORTED and never
+     * used as a gate.  setGamut refuses anything the canvas cannot honour and returns what is actually in force,
+     * so the caller can never end up believing the canvas is somewhere it is not — which is the whole law:
+     * the DOM and the canvas are in the same space, or the feature is off. */
+    get gamutSupport() { return { canvas: canvasP3, css: cssP3, display: displayP3, reason: canvasP3 ? '' : GAMUT_WHY }; },
+    get gamut() { return gamut; },
+    setGamut(id) {
+      const want = (id === 'p3' || id === 'p3-vivid') ? id : 'srgb';
+      if (want !== 'srgb' && !(canvasP3 && cssP3)) return gamut;          // never a state where the DOM is P3 and the canvas is not
+      if (want === gamut) return gamut;
+      gamut = want;
+      try { ctx.configure(want === 'srgb' ? { device, format, alphaMode: 'opaque' } : { device, format, alphaMode: 'opaque', colorSpace: 'display-p3' }); } catch (_) { gamut = 'srgb'; ctx.configure({ device, format, alphaMode: 'opaque' }); }
+      uploadPalette();
+      return gamut;
+    },
+    /** the colour a DOM token must wear so that it matches what the canvas will paint — one function, both sides */
+    gamutInk(rgb) { return gamutMap(rgb); },
+    /* THE DEVICE-PIXEL CEILING (wave 51).  A desktop is capped at 2 and always was; a phone reports 3, and
+       three physical pixels per CSS pixel of a ray-marched volume is 2.25 x the fragments for a difference
+       nobody can see at arm's length.  The cap is a NUMBER the caller owns (rack.js drops it at the phone
+       breakpoint), not a branch in here: the renderer knows nothing about layout. */
+    setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     resize(scale) {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2) * (scale || 1);
+      const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (scale || 1);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; return true; }
       return false;
