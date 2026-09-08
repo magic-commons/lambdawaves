@@ -59,8 +59,14 @@ with no browser at all, and it is worth preserving.
 - `tests/pwa.test.mjs` (859) — the precache digest. **`--write` re-stamps it.**
 - `tests/wiring.test.mjs` (531) — resolves the real import graph and fails on any
   `lab/**/*.js` no root reaches.
-- `tests/access.test.mjs` (187) — the 44 px hit law, and a **ceiling of four live
-  regions in the whole tree**. A fifth fails. Announce with ordinary text nodes.
+- `tests/access.test.mjs` (187) — the screen-reader laws: tab order (A1), the slider
+  ARIA contract in both of kit.js's writers (A2), the chatter guard (A3), a driven
+  control announcing its base (A8), the knob's one quantiser (A9), and a radiogroup
+  that can never ship with zero reachable seats (A10). It also holds a **ceiling of
+  four live regions in the whole tree** (A4) — a fifth fails, because 107 readouts
+  rewrite on a 10 Hz guard and one polite region on any of them queues an utterance
+  per change. Announce with ordinary text nodes. **The 44 px hit law is NOT here** —
+  it is in the browser gate's own sweep.
 - The rest are physics suites: hydrogen, frontier, dynamics, atoms, mo, wigner,
   radiation, electrostatics, sturmian, twocentre, pulse, kick, palette, ink, history,
   capture, statelink, render-exact, audio.
