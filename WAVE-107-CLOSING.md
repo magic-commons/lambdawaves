@@ -125,3 +125,8 @@ The older diagnosis's warning about mismatched 440/466 numbers was addressed at 
 
 The task board completion entries now cite these source locations and measured blocks. Task #37 stays
 pending at GitHub authentication and Cloudflare deployment. No production outcome is inferred.
+
+
+**Final result:** the corrected full browser run passed 165/165, with no page/GPU errors. The node leg
+was already green; only the probe comparison and records changed afterward. The merge and clean ark
+refresh can now proceed under the original green-gate condition.

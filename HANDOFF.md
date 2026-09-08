@@ -9,9 +9,11 @@ The completed focused probes are described in REPORT.md. Do not restart the hist
 
 ## Local state
 
-- Work is on `dev`. The full node/browser gate is running; merge to `main` only after it passes.
+- `main` and `dev` carry the verified wave-107 build; `dev` is the working checkout.
+- Validation: node suites exit 0; full browser gate 0 failures out of 165, no page/GPU errors.
+  The final rerun changed only the B139 probe comparison; the already-green node suite was not repeated.
 - The `pre-alpha-1` and `pre-alpha-2` fallback tags remain untouched.
-- `~/Documents/LAMBDAWAVES-ARK` is the clean verification clone, refreshed after the final commit.
+- `~/Documents/LAMBDAWAVES-ARK` is the clean verification clone, checked out on `main`, with both branches refreshed. Its deploy build proves the source stands alone.
 - The local deploy payload is assembled by `node tools/build-deploy.mjs`; `dist/` is generated and ignored.
 - No remote is configured. No branches have been pushed and nothing has been deployed.
 

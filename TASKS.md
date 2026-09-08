@@ -3,6 +3,9 @@
 Reconciled 2026-09-07 with Claude session `9967323c-7abb-4b43-b275-5f63330cbd06`.
 The current rulings keep the resting hint hidden and leave visual acceptance to Josh.
 Implementation decisions and gate corrections are recorded in REPORT.md, wave 107.
+Final validation: node suites green; full browser gate 165/165; deploy build verified.
+The reopened interim-review items are reconciled with source and measured evidence in
+WAVE-107-CLOSING.md, continuation addendum.
 
 | Task | State | Delivered |
 |---|---|---|

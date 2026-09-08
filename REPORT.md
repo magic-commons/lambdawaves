@@ -2132,3 +2132,11 @@ resolves the token through computed style before comparing. All policy/material 
 The interim closing review's reopened task conclusions are reconciled in WAVE-107-CLOSING.md's addendum
 with earlier source and the actual passing browser blocks, rather than assuming a feature must appear
 in the newest commit to exist.
+
+
+**Final validation and local delivery.** The corrected full browser run passed **165/165** with zero
+page errors and no uncaptured GPU errors. The node suite passed before the test-only B139 correction;
+it was not rerun redundantly. `node tools/build-deploy.mjs` verifies the deploy payload. `main` receives
+the verified `dev` history by fast-forward; `dev` remains the working checkout. The ark is refreshed to
+that history and builds independently. GitHub/Cloudflare remain the explicit account boundary, not a
+reason to leave local source unfinished.
