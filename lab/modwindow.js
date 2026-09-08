@@ -194,12 +194,6 @@ export function createModulation(host, port) {
   /* THE STATUS LINE IS THE WINDOW'S OWN HINT ROW.  `.m2hint` is where BASINS prints the
      window's one sentence of instruction; a transient message takes that seat and the
      artifact's copy comes back verbatim when it clears — no second surface, nothing added. */
-  /* WAVE 65 · THE RESTING SENTENCE SAYS WHETHER THE RACK IS ARMED.  A transient message still takes
-     the seat and still gives it back; what it gives it back TO is the truth about MOD, because a
-     window whose every control is dead should say so on the one line it has for saying things. */
-  const restingHint = () => ((port.armed && !port.armed())
-    ? 'MOD IS OFF — the modulation is inert and every routed control is sitting on the number your hand left it on. The small MOD button beside λWAVES’ own play (or the m key) arms it; SPACE then plays and pauses both clocks.'
-    : COPY.hint);
   /* ══ WAVE 105 · THE WINDOW COULD NOT SPEAK ═══════════════════════════════════════════════════
    * Two independent reviews found the same thing: `.m2hint` (reach 22) and `.m2note` (reach 35) are
    * both `display: none`, and between them they are the ONLY surfaces this file writes to — 29
@@ -275,6 +269,7 @@ export function createModulation(host, port) {
   /* WAVE 100 · the width at the last place, so only a GROWTH pulls the window back on screen */
   let lastW = -1;
 
+  const CARD_TRIM = 32, FLOAT_ROOM = 6;
   /* ═══ THE GEOMETRY IS ARITHMETIC.  `sizeLaw` never measures the live window. ════════════ */
   const devOrder = () => M.sourceList().filter((s) => s.kind !== 'audioout');
   const modeOf = (id) => { if (P.modes[id]) return P.modes[id] === 'C' ? 'C' : P.modes[id] === 'M' ? 'M' : 'F';
@@ -336,13 +331,12 @@ export function createModulation(host, port) {
     /* WAVE 95 · the card lost 32 (modhost §96) and the float's room came down 18 → 6 (§42), so the
        window follows both: `sizeLaw.height` still returns chrome + CARD_FULL, and the two numbers
        below are the only place that difference is spent. */
-    const CARD_TRIM = 32, FLOAT_ROOM = 6;
     root.style.width = w + 'px'; root.style.height = (h - CARD_TRIM + FLOAT_ROOM) + 'px';
     root.style.left = P.x + 'px'; root.style.top = P.y + 'px';
     mw.setViewHeight(h);
     /* the artifact clamps its view to CARD_FULL.h, which is still 368 — the shorter card is ours, so
        the view is re-stated after its setter rather than fought with a second one. */
-    if (rackEl.root) rackEl.root.style.setProperty('--m2-view-h', (336) + 'px');
+    if (rackEl.root) rackEl.root.style.setProperty('--m2-view-h', (GEOM.CARD_FULL.h - CARD_TRIM) + 'px');
     /* THE WORK-BAR LANE.  Two absolutely-positioned boxes in one 52 px lane with a real hole
        between them, placed by the artifact's own law in VIEWPORT pixels and written back
        relative to the window. */
@@ -2885,7 +2879,7 @@ export function createModulation(host, port) {
       const r = root.getBoundingClientRect();
       return { w: Math.round(r.width), h: Math.round(r.height), x: P.x, y: P.y,
                lawW: sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }),
-               lawH: sizeLaw.height({ uiScale: 1 }), modes: cardModes(), lane: P.lane, ribbon: P.ribbon,
+               lawH: sizeLaw.height({ uiScale: 1 }) - CARD_TRIM + FLOAT_ROOM, modes: cardModes(), lane: P.lane, ribbon: P.ribbon,
                rail: rail.getAttribute('aria-label'), chips: Object.keys(chips).length };
     },
     curve(id) {

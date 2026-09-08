@@ -460,7 +460,7 @@ body[data-theme="light"] #hint, body[data-theme="light"] .badge { color: var(--d
    TINTED is the rule the author meant, and it now computes in both themes because the light --glass-sheen above is a
    (flat) gradient like the dark one.  Measured: TINTED light card = tint 233,237,241 under the .55 white wash =
    245,247,249 — exactly the numbers §14b predicted from the tokens and could not find on the screen.
-   This block sits BEFORE the FROST block on purpose: FROST still overrides the pane with its own whisper of white,
+   The later FROST block adds its whisper only to REFRACTIVE; TINTED keeps this pane,
    and #transport.mini keeps its own .72 pill (an id outranks these).  The notebook, the menus, the graph tip and the
    neumorphic pucks never carried the sheen layer, so they were never broken and they do not answer this switch. */
 body[data-card="refractive"] .dev, body[data-card="refractive"] .glass,
@@ -471,6 +471,10 @@ body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
 body[data-card="tinted"] .note.hinted:hover, body[data-card="tinted"] .note.hinted:focus-within, body[data-card="tinted"] .note.hinted:focus
   { background: var(--glass-sheen), hsl(var(--glass-tint) / .97); }           /* the hint panel is near-opaque when tinted, as it was written */
 
+/* CARD STYLE owns the pane even with FROST on. The shipped ALWAYS policy otherwise
+   overrode both choices with the same veil, making the setting inert. Refractive keeps
+   its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
+body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 /* FROST: Josh's trial — a 20 px pale-blue frosted blur behind every card.  Off by default: it costs ≈ 25 fps over
    the live field (measured).  When on, the tint thins so the blur is what you see.
    ── WAVE 67 · THE VIVIDNESS, AND WHY IT IS ONLY THE SATURATION ──────────────────────────────────────────
@@ -493,8 +497,8 @@ body[data-card="tinted"] .note.hinted:hover, body[data-card="tinted"] .note.hint
    alone 50.32 · blur(8px) 50.30 · the full BASINS recipe 50.30 — all identical, because THE COST IS THE
    BACKDROP CAPTURE AND NOT THE KERNEL (a 100×100 px overlay already buys the whole +33 ms).  There is no
    cheap half of this.  BUT WITH THE FIELD PAUSED EVERY ARM READS 17.10 ms — free.  Hence the POLICY below. */
-body.frost .dev, body.frost .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }   /* FROST is a blur, not a colour (Josh); a whisper of white keeps the ink legible */
-body.frost[data-theme="dark"] .dev, body.frost[data-theme="dark"] .glass { background: hsl(0 0% 0% / .10); }
+body.frost[data-card="refractive"] .dev, body.frost[data-card="refractive"] .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }   /* FROST is a blur, not a colour (Josh); a whisper of white keeps the ink legible */
+body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card="refractive"][data-theme="dark"] .glass { background: hsl(0 0% 0% / .10); }
 /* THE APPEARANCE CONTRACT, taken from BASINS verbatim and kept here rather than quoted: *"`glass-live` MAY
    ECONOMISE THE BACKDROP BLUR.  IT MAY NOT CHANGE THE APPEARANCE.  Tint, opacity, saturation, brightness,
    border, sheen and the bevel are the material, and a material does not change because a finger landed on
@@ -581,8 +585,8 @@ body.disconnected:not(.phone) .dev > .dev-head { background: var(--glass-raise);
 body.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--glass-opacity)); }
 /* FROST reaches the constellation the same way it reaches a joined card: the veil, then the filter, and the
    filter alone answers `frost-hold`.  The chip keeps its own lighter fill — the difference is the point. */
-body.disconnected.frost:not(.phone) .dev > .dev-body { background: hsl(0 0% 100% / .10); }
-body.disconnected.frost[data-theme="dark"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 0% / .10); }
+body.disconnected.frost[data-card="refractive"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 100% / .10); }
+body.disconnected.frost[data-card="refractive"][data-theme="dark"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 0% / .10); }
 body.disconnected.frost:not(.phone) .dev > .dev-body { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 body.disconnected.frost:not(.phone) .dev > .dev-head {
   -webkit-backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03);

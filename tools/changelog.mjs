@@ -231,7 +231,7 @@ put('This file is GENERATED — `node tools/changelog.mjs` — from the git tags
 put('Do not edit it by hand; edit the heading in `REPORT.md` and run the tool again.');
 put('');
 put('`REPORT.md` is the other document and it is not this one: it is the lab notebook — the laws, the constants, the');
-put('measured numbers and the named proofs, for whoever builds next.  It is not release notes and it does not ship.');
+put('measured numbers and the named proofs, for whoever builds next.  It is not release notes; it ships beside the application as the engineering record.');
 put('');
 
 if (hasUnreleased) {

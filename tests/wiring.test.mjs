@@ -55,18 +55,7 @@ const TODAY = new Date();
  *   · An entry EXPIRES.  Loud warning at 14 days, hard failure at 60.  This is a time bomb on purpose: the
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
-const ALLOWLIST = [
-  {
-    file: 'lab/render-exact.js',
-    date: '2026-09-05',
-    reason:
-      'THE DETERMINISTIC RENDERER, stage two of the capture work: finished, 39 green gates in ' +
-      'tests/render-exact.test.mjs, and imported by nothing. The caller is a RACK wave — rack.js must import ' +
-      "{ createExactRenderer } and hang ex.plan()/ex.render()/ex.verify() off the capture window's EXACT " +
-      'button, next to the real-time recorder it shares capture.js with. Until that wave lands this file is ' +
-      '92 KB every visitor downloads and no code path can reach.',
-  },
-];
+const ALLOWLIST = []; // Wave 107 wires the deterministic renderer into CAPTURE; the historical example above is now closed.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
  * Not a parser — a lexer, which is all an import graph needs and all that can be had from the standard

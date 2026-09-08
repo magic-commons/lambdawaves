@@ -1088,20 +1088,20 @@ body[data-theme="light"] .m2ghost {
      TINTED                  → the house tint at the house opacity, exactly like #sheet.
      FROST                   → skin.css:325's own `hsl(0 0% 100% / .10)`, the whisper of white that
                                keeps ink legible under the blur — its value, quoted, not invented.
-   FROST is written last so it wins over both card styles, which is the order skin.css itself uses. */
+   FROST supplies the REFRACTIVE veil only; TINTED keeps its pane, matching skin.css. The filter answers the frost policy independently of that choice. */
 :root:root:root body[data-card="refractive"] .mir-modwindow,
 :root:root:root body[data-card="refractive"] #modwin.mir-modwindow { --m2-mat-chassis: transparent; }
 :root:root:root body[data-card="tinted"] .mir-modwindow,
 :root:root:root body[data-card="tinted"] #modwin.mir-modwindow {
   --m2-mat-chassis: hsl(var(--glass-tint) / var(--glass-opacity)); }
-:root:root:root body.frost .mir-modwindow,
-:root:root:root body.frost #modwin.mir-modwindow { --m2-mat-chassis: hsl(0 0% 100% / .10); }
+:root:root:root body.frost[data-card="refractive"] .mir-modwindow,
+:root:root:root body.frost[data-card="refractive"] #modwin.mir-modwindow { --m2-mat-chassis: hsl(0 0% 100% / .10); }
 /* AND FROST'S WHISPER INVERTS ON DARK — skin.css:326, which the first cut of this wave missed and the
    acceptance run caught: 6/8 settings matched the ABOUT card and the two that did not were both
    dark+frost, the sheet computing rgba(0,0,0,.1) against our rgba(255,255,255,.1).  The house's own
    line, quoted: `body.frost[data-theme="dark"] .dev, … .glass { background: hsl(0 0% 0% / .10) }`. */
-:root:root:root body.frost[data-theme="dark"] .mir-modwindow,
-:root:root:root body.frost[data-theme="dark"] #modwin.mir-modwindow { --m2-mat-chassis: hsl(0 0% 0% / .10); }
+:root:root:root body.frost[data-card="refractive"][data-theme="dark"] .mir-modwindow,
+:root:root:root body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow { --m2-mat-chassis: hsl(0 0% 0% / .10); }
 /* and the window's own pane follows the same three, so a TINTED window is a tinted window */
 /* RETIRED wave 105 — the two FROST pane fills: --m2-pane has no reader. */
 

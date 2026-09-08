@@ -363,6 +363,7 @@ export function encodeState(state, opts = {}) {
   const notCarried = [];
   for (const k of ['mo', 'modulation']) if (pr[k] !== undefined && pr[k] !== null) notCarried.push(k);
 
+  if (pr.rotationRates && Object.values(pr.rotationRates).some((v) => v !== 0)) notCarried.push('rotationRates');
   return { text, bytes: bytes.length, chars: text.length, mode, rates: ratesMode,
     populated, dropped, scale: s, fits: text.length <= LINK_CHAR_CEILING, notCarried };
 }

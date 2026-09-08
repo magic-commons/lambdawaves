@@ -22,6 +22,7 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
+import { createExactRenderer } from './render-exact.js';
 import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
@@ -58,7 +59,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = 'PRE-ALPHA · waves 5–64 · 2026-09-06';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = 'PRE-ALPHA · waves 5–107 · 2026-09-07';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -648,6 +649,71 @@ export async function boot(dom) {
      guard on it before the window that shows it has been built. */
   let modHost = null, modView = null, modWall = 0, modExpOn = null, modSyncing = false;
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
+  /* ══ THE ROTATION AND DEFLECTION RATES — A RATE IS A NUMBER, AN ANGLE IS NOT ══════════════════
+   * Josh: "modulation parameters for those rotation and deflection knobs seem juicy" — and, on the
+   * problem below, "rotation/deflection could be like how you suggest."
+   *
+   * THE PROBLEM, MEASURED.  ROTATE z, STARK K_z and DEFECT L² are JOG WHEELS.  kit.js:213 —
+   * `if (o.onDelta) { … o.onDelta(d * 2π); announce(true); return; }` — returns BEFORE touching `v`,
+   * so `k.get()` hands back the constructor's `value` (0) for the life of the control.  And the
+   * quantity does not exist underneath either: reg.rotateZ / rotateK / defectWait mutate the
+   * coefficient vector in place (state.js:276, 291, 297) and NO angle is stored anywhere in the lab.
+   * So these three cannot be ABSOLUTE modulation targets: the registry would believe it owns a
+   * number the program does not keep, `modSyncBases` would re-base it from a getter that lies, and
+   * the arc would be anchored to a fiction.
+   *
+   * ⚠ THE LAW THAT CHANGES.  The block above the `defs` array says "MODULATION IS AN OBSERVER
+   * INSTRUMENT: … it never touches ψ."  That sentence is now half wrong, and the new line is drawn
+   * on the DERIVATIVE, not on the target: a macro may drive dθ/dt, never θ.  Nothing accumulates a
+   * fictional angle, so nothing can go stale; the register is still the hand's, and what the
+   * modulator holds is HOW FAST the hand is turning.  reg.re0/im0 remain the only truth.
+   *
+   * THE RANGES ARE DERIVED, NOT CHOSEN — the house rule ("ranges are the dials' own … a registry
+   * whose range disagrees with the knob lies") applied to a control that has no range of its own:
+   *   · z   — D(R_z(α)) is a rigid spatial turn of the density, exact for any α, so it cannot
+   *           alias: 2π rad/s is exactly ONE TURN A SECOND at full deflection.
+   *   · K_z — applyRotateK's K_z blocks have INTEGER eigenvalues on every shell (the parabolic
+   *           n₁ − n₂), so e^{−iθK_z} is 2π-periodic: 2π rad/s is one full Stark cycle a second.
+   *   · L²  — applyDefectWait phases by l(l+1), which for l = 0…5 is {0, 2, 6, 12, 20, 30} — EVERY
+   *           ONE EVEN, gcd 2 — so e^{iαL²} is π-PERIODIC, not 2π.  π rad/s is one full defect
+   *           cycle a second, and the range is π rather than 2π because the operator says so.
+   *
+   * ZERO COSTS NOTHING, and that is the first line of rotStep: at rate zero not one coefficient is
+   * touched, reg.version does not move, none of the twelve version-keyed caches is invalidated, and
+   * the frame loop is given no reason to re-arm (§45, idle is zero work).  `map: 'bipolar'` makes
+   * that exact rather than approximate — zero is a detent, and the registry's zero-depth
+   * short-circuit hands back r.base ITSELF (B119), so an LFO parked at depth 0 writes exactly 0. */
+  const ROT_LIMIT = { z: 2 * Math.PI, kz: 2 * Math.PI, def: Math.PI };
+  const rotRate = { z: 0, kz: 0, def: 0 };            // rad/s.  THE ANGLE IS NOT STORED AND NEVER WILL BE.
+  const rotDriving = () => rotRate.z !== 0 || rotRate.kz !== 0 || rotRate.def !== 0;
+  function setRotationRate(key, value) {
+    if (!(key in ROT_LIMIT) || !Number.isFinite(value)) return false;
+    const v = key !== 'z' && sturm.P ? 0 : Math.max(-ROT_LIMIT[key], Math.min(ROT_LIMIT[key], value));
+    if (rotRate[key] === v) return v;
+    rotRate[key] = v;
+    const k = key === 'z' ? ui.rotZRate : key === 'kz' ? ui.kzRate : ui.defRate;
+    setKnob(k, v);
+    if (!rotDriving() && history) history.note('rotation drive');
+    schedule(TIER.PRESENT);
+    return v;
+  }
+  /** One tick applies each exact operator in z, K_z, L² order. Simultaneous noncommuting
+   * drives use this ordered splitting; no claim of a joint closed-form exponential is made. */
+  function rotStep(dt) {
+    if (dt <= 0 || !rotDriving()) return false;       // the whole cost of a still instrument
+    /* W-STURMIAN: K_z and L² are moves inside a COULOMB shell.  Under the Sturmian propagator
+       state.js's _op takes its non-commuting branch and would apply them at time t under a scale
+       whose shells are not n²-fold degenerate — which is why the two jog wheels already stand down
+       (applySturmian).  Their RATES stand down on the same line, in the SETTER as well as here, so
+       a modulated rate cannot creep past a disabled dial.  ROTATE z survives: m is still m. */
+    const az = rotRate.z * dt, ak = sturm.P ? 0 : rotRate.kz * dt, ad = sturm.P ? 0 : rotRate.def * dt;
+    if (az === 0 && ak === 0 && ad === 0) return false;
+    if (az !== 0) reg.rotateZ(az);
+    if (ak !== 0) reg.rotateK(ak);                    // ≤ 35 blocks of ≤ 6×6 symEig, unpopulated ones skipped
+    if (ad !== 0) reg.defectWait(ad);
+    touchState();                                     // ONE schedule for all three, not three
+    return true;
+  }
   /* ── WAVE 102 · ONE MICROPHONE FOR THE WHOLE RACK ───────────────────────────────────────────
    * `lab/audio.js` owns the stream, the graph and the permission story; the MODEL owns the
    * normaliser, the gate, the four followers and the onset detector.  This holds the one capture
@@ -1082,9 +1148,18 @@ export async function boot(dom) {
           feedMs = feedMs ? feedMs + (dt - feedMs) * 0.25 : dt;
         }
         const feedHz = feedMs ? 1000 / feedMs : MOD.hz;
+        /* THE ROTATION RATES INTEGRATE ON THIS TICK, from the RAW interval — never from `feedMs`,
+           which is an EMA and would make the accumulated angle drift against the wall clock.  The
+           250 ms ceiling is wave 105's own measurement used again: one 200 ms stall must not become
+           a 1.3-radian jump in a single step. */
+        const modDt = modWall ? Math.min(0.25, (nowMs - modWall) / 1000) : 0;
         modWall = nowMs;
         feedAudio(feedHz);
         modHost.clock.advanceTo(now);
+        /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
+           tick applies is driven by the rate this tick asked for, with no one-frame lag between the
+           modulator's number and the register's turn.  At rate zero this returns on its first line. */
+        rotStep(modDt);
       }
     }
     let tier = pending; pending = TIER.NONE;
@@ -1148,7 +1223,7 @@ export async function boot(dom) {
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
       if (!uiHidden && live(wSpec) && may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (!uiHidden && live(wSh) && may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, reg.populated(), spectrum.selected));
-      if (!uiHidden && live(wOrb) && may('orbit', wOrb)) tick('orbit', () => orbit.update(obs));
+      if (!uiHidden && live(wOrb) && may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
     tick('overlays', () => {
       if (space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on)) {       // the overlays are position-space objects, and theorems about hydrogen
@@ -1198,7 +1273,7 @@ export async function boot(dom) {
        quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
        the transport stopped opened the device and then never read it: the meter sat at 0.00, the
        followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
-    if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning())) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame
+    if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame; and so is a NON-ZERO ROTATION RATE, which the hand can set on a paused instrument with no modulator running at all — without this clause it would turn exactly once
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; }
     if (cpuTick && !uiHidden && live(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     const spent = performance.now() - tFrame0;
@@ -1279,6 +1354,7 @@ export async function boot(dom) {
   }
   function loadPreset(id) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
+    for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); lastNmax = -1;
     clock.window = p.visual.window;
     if (applyVisuals) { clock.setRate(paceRate(p.visual.rate)); mat.view = VIEW[p.visual.view]; ui.viewSeg.set(p.visual.view); ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
@@ -1719,6 +1795,8 @@ export async function boot(dom) {
      * and the readout says STALE (with the button down) when the state or the view has moved since.  A stale plan
      * is not an ok plan, which is exactly what `plan.ok` gating the button has to mean. */
     const gcap = group(wCam.body, 'CAPTURE  ·  A PICTURE, A CLIP, AND ONE EXACT PERIOD');
+    let exact = null, exactRun = null;
+    const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩
     const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
@@ -1741,6 +1819,11 @@ export async function boot(dom) {
     rc2.appendChild(ui.capLoop.root);
     ui.capPlanT = trig({ label: 'PLAN', title: 'ask period.js what closes here, for this observable, now — never done on a frame, because a box full of impulses has 56 incommensurate energies and the scan is not free', onFire: () => capMakePlan(true) });
     rc2.appendChild(ui.capPlanT.root);
+    const rx = el('div', 'row tight', gcap);
+    ui.capExact = trig({ label: 'EXPORT FRAMES', title: 'export a deterministic PNG sequence and manifest as a ZIP; freezes live modulation and camera motion while rendering one exact period', onFire: () => capExportFrames() });
+    rx.appendChild(ui.capExact.root);
+    ui.capExactRo = readout({ label: 'FRAME EXPORT', cls: 'wide', value: '—', sub: 'One period · PNG sequence + manifest · live modulation frozen during export' });
+    gcap.appendChild(ui.capExactRo.root);
     const rc3 = el('div', 'row tight', gcap);
     ui.capShot = readout({ label: 'PICTURE', value: '—', sub: '' });
     ui.capPlanRo = readout({ label: 'THE LOOP PLAN', cls: 'wide', value: '—', sub: '' });
@@ -1806,9 +1889,44 @@ export async function boot(dom) {
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
       capBusy = false; ui.capLoop.on = false; capPaint();
     }
+    async function capExportFrames(options = {}) {
+      if (exactRun) { exactRun.stop(); return; }
+      if (capBusy) return;
+      const ex = exactRenderer();
+      const settings = { fps: +ui.capFps.get(), seconds: ui.capSec.get(), scale: +ui.capScale.get(), camera: 'still', modulation: 'freeze', zip: true, ...options };
+      const plan = ex.plan(settings);
+      if (!plan.ok) { ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(plan.message); return plan; }
+      // A project stores rates, but a period describes the state at this instant. Freeze
+      // all live targets and operator drives for this export; restore the hand bases after.
+      const armed = modArm, bases = Object.fromEntries(['z', 'kz', 'def'].map((k) => {
+        const id = k === 'z' ? 'state.rot.z' : k === 'kz' ? 'state.stark.kz' : 'state.defect.l2';
+        return [k, modHost.registry.state(id).base];
+      }));
+      capBusy = true; ui.capExact.setLabel('STOP EXPORT'); ui.capExact.on = true; capPaint();
+      try {
+        setModArm(false);
+        for (const key of Object.keys(bases)) LW.setRotRate(key, 0);
+        exactRun = ex.render({ ...settings, onProgress(p) {
+          ui.capExactRo.set(`${p.done} / ${p.total} frames`, 'live');
+          ui.capExactRo.setSub(p.human || 'Rendering the scheduled frame times');
+        } });
+        const result = await exactRun.done;
+        ui.capExactRo.set(result.ok ? 'exported' : result.stopped ? 'stopped' : 'refused', result.ok ? 'ok' : 'warn');
+        ui.capExactRo.setSub(result.message || result.error || 'Export finished');
+        if (result.ok && result.blob && options.download !== false) ex.save(result);
+        return result;
+      } catch (e) {
+        ui.capExactRo.set('error', 'warn'); ui.capExactRo.setSub(String(e.message || e));
+        return { ok: false, error: String(e.message || e) };
+      } finally {
+        for (const [key, value] of Object.entries(bases)) LW.setRotRate(key, value);
+        setModArm(armed); exactRun = null; capBusy = false;
+        ui.capExact.setLabel('EXPORT FRAMES'); ui.capExact.on = false; capPaint();
+      }
+    }
     gcap.addEventListener('pointerenter', () => { if (!capBusy) capMakePlan(false); });
     capShowLimits(); capPaint();
-    capApi = { get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
+    capApi = { exportFrames: capExportFrames, get exact() { return exactRenderer(); }, get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
     const gq = group(ui.set.body, 'FIELD CACHE  ·  QUALITY  (changes the estimate, never the state)');
     const r5 = el('div', 'row', gq);
     ui.gridSeg = seg({ label: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
@@ -1866,6 +1984,15 @@ export async function boot(dom) {
        things, because clearing the state and rewinding its clock are one act. */
     r2.appendChild(trig({ label: 'CLEAR', onFire: () => { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); } }).root);
     r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
+    /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
+       applied and forgotten, holding nothing (kit.js:213).  This is a RATE, in rad/s, and it is a
+       real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
+       modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
+    ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
+      title: 'turn the state about z continuously: D(R_z(α̇ t)).  ±2π rad/s is one full turn a second; a double-click stops it',
+      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
+      onInput: (v) => { if (modHand('state.rot.z', v)) return; setRotationRate('z', v); } });
+    r2.appendChild(ui.rotZRate.root);
     {
       const gab = group(wState.body, 'A / B  ·  TRANSITION  (Rabi)');
       const rab = el('div', 'row tight', gab);
@@ -1914,6 +2041,21 @@ export async function boot(dom) {
     r2.appendChild(ui.kzKnob.root);
     ui.defKnob = knob({ label: 'DEFECT L²', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{iαL²}', onDelta: (d) => { reg.defectWait(d); touchState(); } });
     r2.appendChild(ui.defKnob.root);
+    /* THE TWO DEFLECTION RATES.  Both setters CLAMP TO ZERO under STURMIAN rather than trusting the
+       disable, because a modulated base survives a setDisabled(): the dial would sit dead while an
+       LFO went on writing behind it.  A guard in rotStep alone would be worse — the dial would then
+       read a rate that does nothing, and a knob that does not follow the value it owns is a knob
+       that lies.  So: clamped here, zeroed and disabled in applySturmian, and ignored in rotStep. */
+    ui.kzRate = knob({ label: 'SPIN K_z', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, value: 0, cls: 'rot',
+      title: 'precess the state through the Stark manifold continuously: e^{−iθ̇t·K_z}.  K_z has integer eigenvalues on every shell, so ±2π rad/s is one full cycle a second',
+      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
+      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.kzRate.set(w); if (modHand('state.stark.kz', w)) return; setRotationRate('kz', w); } });
+    r2.appendChild(ui.kzRate.root);
+    ui.defRate = knob({ label: 'SPIN L²', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, value: 0, cls: 'rot',
+      title: 'run the quantum defect continuously: e^{iα̇t·L²}.  l(l+1) is EVEN for every l ≤ 5, so the phase is π-periodic and ±π rad/s is one full defect cycle a second',
+      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
+      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.defRate.set(w); if (modHand('state.defect.l2', w)) return; setRotationRate('def', w); } });
+    r2.appendChild(ui.defRate.root);
     el('div', 'note', wState.body).innerHTML = '<b>STATE ROTATE</b> applies D(R_z(α)) to the coefficients (c<sub>nlm</sub> → e<sup>−imα</sup>c<sub>nlm</sub>). <b>STARK ROTATE</b> applies e<sup>−iθK<sub>z</sub></sup>, K the Runge–Lenz vector: an SO(4) rotation mixing l at fixed (n, m) — the ORBIT invariants do not move. <b>DEFECT WAIT</b> applies e<sup>iαL²</sup> (a wait under an l-dependent phase, a quantum defect): unitary, in-shell, not an SO(4) element — the invariants move, and with the rotors it is a universal gate set. All three change c; <b>camera</b> orbit is in OBSERVER and never touches c. Edits happen at the current logical time; nothing is silently renormalized.';
     /* ── IMPULSE (wave 53, Josh, board #44: SLAP → IMPULSE, BOW → IMPULSE VECTOR — every user-visible string; the
        identifiers `slap`, `bow`, `bowRelease` and the __LW.bow / LW.kickAlong API keep their names) ── */
@@ -2109,6 +2251,13 @@ export async function boot(dom) {
        scale does not have (its eigenvalues are variational, its shells are not n²-fold), so they stand down too */
     if (ui.kzKnob) { ui.kzKnob.setDisabled(on); keep(ui.kzKnob.root, 'STARK K_z is an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
     if (ui.defKnob) { ui.defKnob.setDisabled(on); keep(ui.defKnob.root, 'DEFECT L² is a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
+    /* AND THE TWO RATES WITH THEM — the STORED number, not just the dial.  A rate left running into
+       a scale change would go on turning a register the operator has no business turning, and
+       switching back to HYDROGEN would find it already spun.  ROTATE z's rate is untouched: m is
+       still m under the Sturmian scale, which is why its jog wheel is not disabled either. */
+    if (on) { rotRate.kz = 0; rotRate.def = 0; }
+    if (ui.kzRate) { ui.kzRate.setDisabled(on); if (on) ui.kzRate.set(0); keep(ui.kzRate.root, 'SPIN K_z drives an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
+    if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L² drives a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
     if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'not built for the Sturmians: position space only under STURMIAN'); } }
     if (ui.spaceNote) ui.spaceNote.hidden = !on;
     if (!(helium && helium.on)) { for (const w of [wOrb, wVor, wDyn, wSlice, wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems; if (wCalc) wCalc.root.hidden = on; }   // theorems about hydrogen's eigenfunctions stand down
@@ -2208,6 +2357,54 @@ export async function boot(dom) {
   const kepler = createKepler(dom.kepler);
   {
     const rk = wOrb.row('tight');
+    /* ══ THE KEPLER KNOBS (Josh: "perhaps we can have some turnable knobs for kepler orbit that can
+     * allow us to mess with the rotations alongside the current touch/drag controls") ═════════════
+     *
+     * WHY THEY ARE JOG WHEELS AND HOLD NO VALUE.  Everywhere else in this lab a knob that holds no
+     * value is a defect (kit.js:213, and the three STATE wheels are the standing example).  HERE it
+     * is the only correct control, and for the opposite reason: EVERY KEPLER ROTATION QUANTITY IS
+     * DERIVED.  orbitOfShell(n) recomputes the orbit from reg.re0/im0 on every call; there is no
+     * orbit object to write to and no angle stored anywhere.  A knob bound to a stored angle would
+     * be a SECOND TRUTH, and it would drift the instant anything else edited the state — which the
+     * perihelion drag, IMPULSE, the presets, a project LOAD and every undo all do.  So these report
+     * deltas, they read the orbit FRESH inside every onDelta, and that fresh read is exactly what
+     * makes the knobs and the drag agree instead of fighting.
+     *
+     * ⚠ THE ROTORS ARE NOT PER-SHELL, AND THE SELECTOR DOES NOT PRETEND THEY ARE.  applyRotor
+     * (frontier.js) loops n = 2…6 and turns EVERY POPULATED SHELL.  SHELL picks whose geometry
+     * supplies the AXIS, not what moves — and that has always been true of the drag too: pulling
+     * n = 3's perihelion turns n = 4's orbit with it.  The note says so rather than leaving it to
+     * be discovered.
+     *
+     * ISOTROPIC IS DISABLED, INCOHERENT IS ONLY WARNED, and the line between them is where the AXIS
+     * lives.  An isotropic shell has ⟨L⟩ = ⟨K⟩ = 0: there is no normal, no node line and no
+     * perihelion, so there is no axis to turn about and the controls go dead — DISABLED, never a
+     * silent no-op.  Below coherence ½ the AXES still exist and the rotors are still exact SO(4)
+     * elements; what fails is the claim that the ellipse IS the state, which is a DRAWING refusal
+     * (keplerview.js:47) and nothing more.  Disabling a control because a picture stood down would
+     * be disabling it for a reason that has nothing to do with the operator it applies. */
+    ui.kepShell = seg({ label: 'SHELL', value: '3', aria: 'Kepler shell',
+      options: [2, 3, 4, 5, 6].map((n) => ({ id: String(n), label: 'n' + n, title: `read the orbit axes off shell ${n} (the rotors act on the whole register)` })),
+      onChange: () => keplerRowSync(true) });
+    rk.appendChild(ui.kepShell.root);
+    {
+      const rkk = wOrb.row('tight');
+      /* SPIN is the drag's OWN FIRST LEG, and it is the same call — keplerTurn('spin', dθ) is what
+         keplerDragToPoint reaches for once it has worked out the φ that puts the perihelion under
+         the pointer.  One entry point, one fresh read, one convention check, one touchState. */
+      ui.kepSpin = knob({ label: 'SPIN  ω', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_L̂)',
+        title: 'carry the perihelion around inside its own plane — a spatial rotation about the orbit normal L̂. This is the drag\'s first leg, by the same call',
+        onDelta: (d) => keplerTurn('spin', d) });
+      ui.kepTilt = knob({ label: 'TILT  ν', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_n̂)',
+        title: 'tip the orbit plane about its NODE LINE (ẑ × L̂) — the inclination changes, the ascending node does not. With the plane already level every in-plane axis is a node, and the perihelion û is taken',
+        onDelta: (d) => keplerTurn('tilt', d) });
+      ui.kepTurn = knob({ label: 'TURN  Ω', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)',
+        title: 'turn the ascending node about world z. The SAME operator as STATE · ROTATE z, seated here because the node is a Kepler quantity — and the only one of the three that needs no conjugation, since axis z is native to reg.rotor',
+        onDelta: (d) => keplerTurn('turn', d) });
+      for (const k of [ui.kepSpin, ui.kepTilt, ui.kepTurn]) rkk.appendChild(k.root);
+      ui.kepRo = readout({ label: 'ORBIT  a · e · coherence', cls: 'wide', value: '—', sub: 'pick a populated shell' });
+      rkk.appendChild(ui.kepRo.root);
+    }
     rk.appendChild(sw({ label: 'KEPLER ORBIT', value: false, title: 'draw the classical orbit each shell carries — from the exact ⟨L⟩ and ⟨K⟩ — over the cloud', onChange: (v) => { kepler.setOn(v); schedule(TIER.PRESENT); } }).root);
     el('div', 'note', wOrb.body).innerHTML = '<b>KEPLER ORBIT.</b> The two sphere points ARE a classical orbit: the shell sets a = n², the angle between n₊ and n₋ is the eccentricity, their sum is the angular momentum, and ⟨K⟩ points to the perihelion. It is drawn over the cloud with the perihelion dotted and the classical <b>time-averaged position</b> crossed — which equals the quantum ⟨x⟩ = −(3n/2)⟨K⟩ (Pauli\'s replacement, exact for every shell state) — an identity by construction once a = n² and e = |⟨K⟩|/n are read off the state. The ellipse carries the state\'s energy and eccentricity but NOT its angular momentum: its own L = n√(1−e²) exceeds |⟨L⟩| always (K² + L² ≤ n²−1), and the label prints both. A dashed orbit means the shell is not coherent; below coherence ½ none is drawn (Round 11 §3).';
   }
@@ -2301,8 +2498,9 @@ export async function boot(dom) {
    * PRESENTATION callback, which is schedule(TIER.PRESENT) and is never allowed to be more.
    *
    * WHICH CONTROLS ARE OFFERED, and the line the choice draws.  MODULATION IS AN OBSERVER
-   * INSTRUMENT: it moves the camera, the material and the physics RATE, and it never touches ψ.
-   * That is §14 of the house laws taken literally, and it settles three questions at once.
+   * INSTRUMENT: most targets move camera, material and physics RATE. Wave 107 adds three
+   * operator rates that integrate into ψ; they own no absolute angle and share one held history
+   * gesture. Absolute coefficient targets remain excluded. The original boundary explains why:
    *   · Every offered setter is a PRESENT — the contract forbids anything above it, so a target
    *     whose setter needs a REBUILD is not a target here.  That is why FIELD RESOLUTION and STEPS
    *     (in host.js's labParameters as the SHAPE of a catalogue) are NOT offered: an LFO on the grid
@@ -2343,7 +2541,7 @@ export async function boot(dom) {
         get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; schedule(TIER.PRESENT); } },
       { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer',
         hint: 'signed and detented at the horizon: 50 % is EXACTLY level',
-        get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; schedule(TIER.PRESENT); } },
+        get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; schedule(TIER.PRESENT); } },
       { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => ui.zoomK,
         hint: 'the ZOOM dial itself — log, because the interesting half of a zoom is always the near half',
         get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); setKnob(ui.zoomK, obs.dist); schedule(TIER.PRESENT); } },
@@ -2391,6 +2589,34 @@ export async function boot(dom) {
          write — `setTransition` is the only thing in state.js that bumps `version` — so no undo entry
          and no rebuild.  The knob's own `onInput` schedules nothing (while a transition plays the loop
          is already evolving); the SETTER must, or a PAUSED instrument would not repaint under a macro. */
+      /* ══ THE ROTATION AND DEFLECTION RATES — THE HOUSE RULE, KEPT BY CHANGING WHAT IS REGISTERED ══
+       * The rule above this array refused ROTATE z, STARK K_z and DEFECT L² for two reasons, both
+       * true: their setters bump reg.version (the undo trigger and twelve readers' cache key), and
+       * they hold no value to be a target OF.  Registering the RATE answers both.
+       *   · NOTHING GOES STALE.  rotRate.{z,kz,def} is a real stored number and the ONLY truth about
+       *     the drive; the angle is still nowhere.  So `get` is honest, modSyncBases re-bases from
+       *     the instrument rather than from a fiction, and the arc is anchored to something real.
+       *   · THE VERSION BUMP IS ANSWERED SEPARATELY, at the ring, not here — see hDriven below.  A
+       *     driven turn is a MOTION, not an edit, and the undo ring is told so once.
+       * They carry `knob:` accessors on purpose, so all three are DROP targets: a rate is exactly
+       * the kind of number a macro should be dragged onto, and the accessor is also what hands the
+       * dial its base through setBase, so a focused dial under a running LFO announces the number
+       * the hand owns instead of the number the modulator is at.
+       * `map: 'bipolar'` on all three, and it is load-bearing rather than decorative: it makes the
+       * detent at zero EXACT, and zero is the state in which this whole feature costs nothing. */
+      { id: 'state.rot.z', label: 'SPIN z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, def: 0, group: 'state', knob: () => ui.rotZRate,
+        hint: 'dθ/dt about z, in rad/s — a RATE, never an angle. ±2π is one full turn a second, and D(R_z) is a rigid spatial turn so it is exact at any rate',
+        get: () => rotRate.z,
+        set: (v) => { setRotationRate('z', v); } },
+      { id: 'state.stark.kz', label: 'SPIN K_z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, def: 0, group: 'state', knob: () => ui.kzRate,
+        hint: 'dθ/dt of e^{−iθK_z}, in rad/s. K_z has integer eigenvalues on every shell, so ±2π is one full Stark cycle a second. Clamped to zero under STURMIAN',
+        get: () => rotRate.kz,
+        set: (v) => { setRotationRate('kz', v); } },
+      { id: 'state.defect.l2', label: 'SPIN L²', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, def: 0, group: 'state', knob: () => ui.defRate,
+        hint: 'dα/dt of e^{iαL²}, in rad/s. l(l+1) is EVEN for every l ≤ 5, so the phase is π-periodic and the range is π, not 2π: full deflection is one defect cycle a second. Clamped to zero under STURMIAN',
+        get: () => rotRate.def,
+        set: (v) => { setRotationRate('def', v); } },
+
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'the Rabi rate of the A → B → A mix. t₀ is re-solved on every change so the mix angle never jumps',
         get: () => __LW_hooks.ab.omega,
@@ -2690,7 +2916,12 @@ export async function boot(dom) {
      */
     function periodNow(force = false) {
       if (periodFresh()) { periodSettling = false; return lastPeriod; }
-      if (!force && lastPeriod && periodCostMs > 8 && pointerHeld) { periodSettling = true; return lastPeriod; }
+      /* AND A DRIVEN ROTATION IS A GESTURE TOO.  The guard was `pointerHeld` alone, which a
+         hands-off drive does not set: a running rate bumps reg.version on every frame, so
+         periodPending got a new key sixty times a second and this posted a fresh O(pairs × 2·10⁶)
+         scan to the worker on every one of them, for as long as the rate turned.  Same law, same
+         line — an expensive answer waits until the movement stops. */
+      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
       if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
       if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
@@ -3071,6 +3302,55 @@ export async function boot(dom) {
     return out;
   }
   const applySeq = (seq) => { for (const s of seq) reg.rotor({ ...s, t: clock.t }); };
+  /* ══ THE ONE ROAD EVERY KEPLER EDIT TAKES ══════════════════════════════════════════════════════
+   * The drag and the knobs are the same two moves, so they are the same two functions.  A Kepler
+   * edit has exactly two legs, which is what keplerDragToPoint has always been:
+   *   keplerTurn(kind, dθ)  — a ROTATION, about an axis read off the orbit NOW
+   *   keplerSeekE(n, eT)    — an ECCENTRICITY, which has no closed form and must be searched
+   * The drag hands the first a φ computed from the pointer and the second an eT computed from the
+   * pointer's radius; the knobs hand the first their own delta and the second their own number.
+   * Neither road caches the orbit, and that is the whole reason the two agree: both read it fresh
+   * from reg.re0/im0, so a knob turned after a drag sees what the drag left, and a drag started
+   * after a knob sees what the knob left.  Two roads with two reads would drift within one gesture.
+   */
+  const kepShell = () => (ui.kepShell ? +ui.kepShell.get() : 3);
+  /** the axis a kind names, read off a FRESH orbit — or null when the orbit has no such axis */
+  function keplerAxis(kind, o) {
+    if (kind === 'turn') return [0, 0, 1];                             // world z: native to reg.rotor, no conjugation
+    if (kind === 'spin') return o.normal;                              // L̂ — the drag's own first leg
+    /* THE NODE LINE: ẑ × L̂, the intersection of the orbit plane with the reference plane.  It
+       degenerates exactly when the plane is ALREADY level (L̂ ∥ ẑ), where every in-plane direction
+       is a node and the choice is free — so û is taken, which still tips the plane and is the one
+       in-plane axis the state itself names. */
+    const N = o.normal, nx = -N[1], ny = N[0], nl = Math.hypot(nx, ny);
+    return nl > 1e-6 ? [nx / nl, ny / nl, 0] : o.u;
+  }
+  /** THE ROTATION LEG.  Fresh read, isotropy guard, rotor, convention check, one touchState. */
+  function keplerTurn(kind, dth, n = kepShell()) {
+    if (!['spin', 'tilt', 'turn'].includes(kind) || !Number.isFinite(dth) || !Number.isInteger(n) || n < 2 || n > 6 || !(Math.abs(dth) > 1e-9)) return false;
+    const o = orbitOfShell(n); if (!o || o.isotropic) return false;    // no ⟨L⟩ and no ⟨K⟩: there is no axis, and the dials are already disabled
+    const ax = keplerAxis(kind, o); if (!ax) return false;
+    applySeq(rotorSeq('both', ax, dth));
+    /* THE SAME CHECK THE DRAG MAKES, stated without a target: the rotor convention is checked, not
+       assumed.  û is carried by |dθ| about ax, so the achieved turn must have the sign asked for —
+       if it went the other way, turn back twice as far.  Skipped for 'turn', whose axis is ẑ and
+       whose sign reg.rotateZ has always fixed, and skipped when û lies along the axis (nothing to
+       measure).  A projection is used rather than the full angle so a tilt out of the plane, which
+       moves û legitimately, is not read as a wrong-way turn. */
+    if (kind !== 'turn') {
+      const p = orbitOfShell(n);
+      if (p && !p.isotropic) {
+        const proj = (v) => { const d = v[0] * ax[0] + v[1] * ax[1] + v[2] * ax[2]; return [v[0] - d * ax[0], v[1] - d * ax[1], v[2] - d * ax[2]]; };
+        const a0 = proj(o.u), a1 = proj(p.u), l0 = Math.hypot(...a0), l1 = Math.hypot(...a1);
+        if (l0 > 1e-6 && l1 > 1e-6) {
+          const c = (a0[0] * a1[0] + a0[1] * a1[1] + a0[2] * a1[2]) / (l0 * l1);
+          const s = (ax[0] * (a0[1] * a1[2] - a0[2] * a1[1]) + ax[1] * (a0[2] * a1[0] - a0[0] * a1[2]) + ax[2] * (a0[0] * a1[1] - a0[1] * a1[0])) / (l0 * l1);
+          if (Math.atan2(s, c) * dth < 0) applySeq(rotorSeq('both', ax, -2 * dth));
+        }
+      }
+    }
+    touchState(); return true;
+  }
   /** bring shell n's perihelion to the world point w (in its orbit plane): around by D(R) about L̂, in/out by e^{−iθ â·K} */
   function keplerDragToPoint(n, w) {
     const o = orbitOfShell(n); if (!o || o.isotropic) return false;
@@ -3079,8 +3359,11 @@ export async function boot(dom) {
     const cr = [o.u[1] * uT[2] - o.u[2] * uT[1], o.u[2] * uT[0] - o.u[0] * uT[2], o.u[0] * uT[1] - o.u[1] * uT[0]];
     const phi = Math.atan2(cr[0] * N[0] + cr[1] * N[1] + cr[2] * N[2], o.u[0] * uT[0] + o.u[1] * uT[1] + o.u[2] * uT[2]);
     if (Math.abs(phi) > 1e-6) {
-      applySeq(rotorSeq('both', N, phi));
-      const chk = orbitOfShell(n);                                       // the rotor convention is checked, not assumed: if it turned the wrong way, turn back twice as far
+      /* THE DRAG'S FIRST LEG IS THE SPIN KNOB'S CALL.  It used to carry its own copy of the rotor
+         and its own convention check; both now live in keplerTurn, so the two controls cannot
+         diverge — a fix to the convention is a fix to both, which is what one entry point buys. */
+      keplerTurn('spin', phi, n);
+      const chk = orbitOfShell(n);                                     // and the DRAG keeps its own extra check, which keplerTurn cannot make: it has a TARGET, and the target is the better witness
       if (chk && !chk.isotropic && (chk.u[0] * uT[0] + chk.u[1] * uT[1] + chk.u[2] * uT[2]) < Math.cos(Math.abs(phi)) - 1e-3) applySeq(rotorSeq('both', N, -2 * phi));
     }
     const eT = Math.max(0, Math.min(0.96, 1 - wl / o.a));
@@ -3104,6 +3387,32 @@ export async function boot(dom) {
     const dn = d[0] * N[0] + d[1] * N[1] + d[2] * N[2]; if (Math.abs(dn) < 1e-6) return false;
     const lam = -(cam[0] * N[0] + cam[1] * N[1] + cam[2] * N[2]) / dn; if (lam <= 0) return false;
     return keplerDragToPoint(n, [cam[0] + lam * d[0], cam[1] + lam * d[1], cam[2] + lam * d[2]]);
+  }
+  /* THE ROW SAYS WHY A CONTROL IS DEAD, because a control that stops working without saying so is
+     the same defect as one that silently no-ops.  Keyed on reg.version — the key orbit.js,
+     keplerview.js, spectrum.js and nine other readers already use — so a still instrument spends a
+     single integer compare per frame here and nothing else. */
+  let kepRowVer = -1, kepRowTime = NaN;
+  function keplerRowSync(force) {
+    if (!ui.kepShell || !ui.kepRo) return;
+    const time = reg.field.Fz !== 0 ? clock.t : 0;
+    if (!force && reg.version === kepRowVer && time === kepRowTime) return;
+    kepRowVer = reg.version; kepRowTime = time;
+    const lit = new Map(keplerOrbits(reg.field.Fz !== 0 ? reg.at(clock.t).re : reg.re0, reg.field.Fz !== 0 ? reg.at(clock.t).im : reg.im0, 0.01).map((x) => [x.orbit.n, x.orbit]));
+    for (const n of [2, 3, 4, 5, 6]) { const b = ui.kepShell.button(String(n)); if (b) b.disabled = !lit.has(n); }
+    ui.kepShell.set(ui.kepShell.get());
+    const n = kepShell(), o = lit.get(n);
+    const dead = !o || o.isotropic;
+    for (const k of [ui.kepSpin, ui.kepTilt, ui.kepTurn]) if (k) k.setDisabled(dead);
+    if (ui.kepEcc) ui.kepEcc.setDisabled(dead);
+    if (!o) { ui.kepRo.set(`n${n} not populated`, 'warn'); ui.kepRo.setSub('this shell carries less than 1 % of the norm — nothing to turn'); return; }
+    if (o.isotropic) { ui.kepRo.set(`n${n} isotropic`, 'warn'); ui.kepRo.setSub('⟨L⟩ = ⟨K⟩ = 0: no normal, no node line, no perihelion — there is no axis to turn about'); return; }
+    if (ui.kepEcc && !ui.kepEcc.root.classList.contains('drag')) ui.kepEcc.set(o.e);   // the eccentricity dial is RE-SEEDED from the fresh orbit, never trusted to remember: the orbit is derived and the dial is only its face
+    const warn = o.coherence < 0.5;
+    ui.kepRo.set(`a = ${o.a} a₀ · e = ${o.e.toFixed(3)} · coh ${o.coherence.toFixed(2)}`, warn ? 'warn' : 'ok');
+    ui.kepRo.setSub(warn
+      ? 'below coherence ½ NO ELLIPSE IS DRAWN (Round 11 A5) — but ⟨L⟩ and ⟨K⟩ are exact and so are the rotors, so the knobs stay live: the refusal is the picture\'s, not the operator\'s'
+      : `L̂ = (${o.normal.map((v) => v.toFixed(2)).join(', ')}) · û = (${o.u.map((v) => v.toFixed(2)).join(', ')}) · the rotors turn EVERY populated shell; this shell supplies the axes`);
   }
   let kdrag = null;
   function unproject(px, py) {
@@ -3671,8 +3980,8 @@ export async function boot(dom) {
       const clickTrig = (label) => { const b = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === label); if (b) b.click(); };
       const runKey = (code) => { const a = ACTIONS.find((x) => x.key === code && !x.ctrl); if (a) a.run(); };
       const MENUS = {
-        FILE: () => [['NEW project', () => layout.projects.fresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…', () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
-          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.open(p)]),
+        FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…', () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
+          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p)]),
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
           ['SAVE the experiment (quick)', () => clickTrig('SAVE')], ['LOAD the last quick save', () => clickTrig('LOAD')], ['COPY as JSON', () => clickTrig('COPY JSON')],
           ['COPY a LINK to this state', () => clickTrig('COPY LINK'), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
@@ -3832,9 +4141,19 @@ export async function boot(dom) {
     {
       const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
       km.setAttribute('role', 'dialog'); km.setAttribute('aria-label', 'the keyboard, and every binding on it');
-      const man = createKeymap(km, __LW_hooks.keys);
-      const open = () => { km.hidden = false; man.refresh(); return true; };
-      const close = () => { km.hidden = true; return false; };
+      let returnFocus = null;
+      const man = createKeymap(km, {
+        get actions() { return __LW_hooks.keys ? __LW_hooks.keys.actions : []; },
+        bind(id, spec) { return __LW_hooks.keys.bind(id, spec); },
+        reset() { return __LW_hooks.keys.reset(); }
+      }, { onClose() {
+        km.hidden = true;
+        if (returnFocus && returnFocus.isConnected) returnFocus.focus();
+      } });
+      // The editor owns a second hidden root and its recording lifecycle. Showing only
+      // the host left a blank modal and a key listener whose isOpen guard never passed.
+      const open = () => { returnFocus = document.activeElement; km.hidden = false; man.open(); man.root.querySelector('button').focus(); return true; };
+      const close = () => { man.close(); return false; };
       /* the same ONE ROAD the sheet rides: a rebind anywhere ends in ui.keysRefresh(), so the manual
          hangs off that rather than owning a second notification of its own. */
       const prevKR = ui.keysRefresh;
@@ -4063,8 +4382,42 @@ export async function boot(dom) {
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS')) e.stopPropagation(); });   // wave 106: the save keys pass; every other key is still the textarea's
       /* ── PROJECTS: sessions in folders, a recent list, the notebook as each one's landing page ── */
       const pjRead = () => { try { return JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'); } catch (e) { return { items: {}, recent: [] }; } };
-      const pjWrite = (P) => { try { localStorage.setItem(PJ_KEY, JSON.stringify(P)); } catch (e) {} };
-      let pjCurrent = null;
+      const pjWrite = (P) => { try { localStorage.setItem(PJ_KEY, JSON.stringify(P)); return true; } catch (e) { pjStatus('save failed — ' + e.message); return false; } };
+      let pjCurrent = null, pjBaseline = null;
+      /* The saved project is wider than undo: notebook, camera, palette, and modulation all
+         belong here. Compare on a destructive act, never on a frame. Playback time and the
+         quality governor are runtime; routed numbers compare their hand-owned bases so an
+         LFO does not manufacture unsaved edits while the user listens. */
+      function projectKey() {
+        const data = serialize(), pr = data.presentation;
+        delete data.experiment.t;
+        delete pr.quality.autoScale;
+        const seats = {
+          'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'],
+          'observer.dist': [pr.obs, 'dist'], 'observer.fov': [pr.obs, 'fov'],
+          'material.exposure': [pr.mat, 'exposure'], 'material.softness': [pr.mat, 'softness'],
+          'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'],
+          'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
+          'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'],
+          'transport.rate': [data.experiment, 'rate'],
+          'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'],
+          'state.defect.l2': [pr.rotationRates, 'def'],
+        };
+        for (const [id, [obj, key]] of Object.entries(seats)) {
+          const r = modHost && modHost.registry.state(id);
+          if (r && r.modulated) obj[key] = r.base;
+        }
+        return JSON.stringify([data, titleIn.value, ta.value]);
+      }
+      const projectClean = () => { pjBaseline = projectKey(); };
+      const projectDirty = () => pjBaseline !== null && projectKey() !== pjBaseline;
+      function discardProject(action) {
+        return !projectDirty() || window.confirm(action + ' WITHOUT SAVING?\nYour unsaved project changes will be lost. Cancel to save them first.');
+      }
+      addEventListener('beforeunload', (e) => {
+        if (!projectDirty()) return;
+        e.preventDefault(); e.returnValue = '';
+      });
       /* wave 62 · ONE of the at most THREE live regions in this document (#banner's role="alert" is
          another).  It changes once per user act — a save, an open, an import — which is exactly what a
          status region is for, and is why the 107 readouts must never become one. */
@@ -4075,12 +4428,16 @@ export async function boot(dom) {
         list() { const P = pjRead(); return Object.values(P.items).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
         recent() { const P = pjRead(); return (P.recent || []).filter((p) => P.items[p]); },
         get current() { return pjCurrent; },
+        get dirty() { return projectDirty(); },
+        markClean: projectClean,
+        requestOpen(path) { return discardProject('OPEN') && projects.open(path); },
+        requestFresh() { return discardProject('START A NEW PROJECT') && projects.fresh(); },
         save(path) {
           path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
           const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
           const P = pjRead(); const now = new Date().toISOString();
           P.items[path] = { path, folder, name, saved: now, opened: P.items[path] ? P.items[path].opened : now, data: serialize(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, text: ta.value } };
-          pjTouch(P, path); pjWrite(P); pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } renderProjects(); return true;
+          pjTouch(P, path); if (!pjWrite(P)) return false; pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } projectClean(); renderProjects(); return true;
         },
         open(path) {
           const P = pjRead(), it = P.items[path]; if (!it) return false;
@@ -4088,11 +4445,11 @@ export async function boot(dom) {
           busy.n++; busySync(); try { restore(it.data); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name; try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); } catch (e) {}
           it.opened = new Date().toISOString(); pjTouch(P, path); pjWrite(P); pjCurrent = path; pjStatus('opened ' + path);
-          show('notes'); nb.dataset.mode = 'view'; render(true);                      // the landing page: the notebook, capped
+          projectClean(); show('notes'); nb.dataset.mode = 'view'; render(true);                      // the landing page: the notebook, capped
           return true;
         },
         remove(path) { const P = pjRead(); if (!P.items[path]) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); pjWrite(P); if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
-        fresh() { reg.clear(); refSnapshot = null; touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); } catch (e) {} pjCurrent = null; pjStatus('new'); show('notes'); setMode('edit'); },
+        fresh() { reg.clear(); refSnapshot = null; touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); } catch (e) {} pjCurrent = null; projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
         exportText(path) { const P = pjRead(), it = P.items[path || pjCurrent]; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
         importText(text) { const o = JSON.parse(text); if (!o || o.lambdawaves !== 'project' || !o.path || !o.data) throw new Error('not a λWAVES project'); const P = pjRead(); P.items[o.path] = { path: o.path, folder: o.folder || '', name: o.name || o.path, saved: o.saved || new Date().toISOString(), opened: o.opened || '', data: o.data, notebook: o.notebook || { title: o.name, text: '' } }; pjTouch(P, o.path); pjWrite(P); renderProjects(); return o.path; },
       };
@@ -4129,7 +4486,7 @@ export async function boot(dom) {
         /* …and the group headings sort by NAME.  `[...map.entries()].sort()` with no comparator sorts
            the STRINGIFIED pairs — "demo,[object Object]" — which happened to order by folder but only
            by accident, and case-sensitively.  It is the key, compared as a name. */
-        for (const [f, arr] of [...byFolder.entries()].sort((a, b) => a[0].localeCompare(b[0]))) { el('div', 'pj-folder', list, f); for (const it of arr) { const row = el('div', 'pj-item', list); const nm = el('span', 'pj-name', row, it.name + (it.path === pjCurrent ? '  ·  current' : '')); nm.addEventListener('click', () => projects.open(it.path)); el('span', 'pj-when', row, (it.saved || '').slice(0, 16).replace('T', ' ')); const x = el('button', '', row, '×'); x.title = 'delete this project'; x.addEventListener('click', (e) => { e.stopPropagation(); projects.remove(it.path); }); } }
+        for (const [f, arr] of [...byFolder.entries()].sort((a, b) => a[0].localeCompare(b[0]))) { el('div', 'pj-folder', list, f); for (const it of arr) { const row = el('div', 'pj-item', list); const nm = el('span', 'pj-name', row, it.name + (it.path === pjCurrent ? '  ·  current' : '')); nm.addEventListener('click', () => projects.requestOpen(it.path)); el('span', 'pj-when', row, (it.saved || '').slice(0, 16).replace('T', ' ')); const x = el('button', '', row, '×'); x.title = 'delete this project'; x.addEventListener('click', (e) => { e.stopPropagation(); projects.remove(it.path); }); } }
       }
       nb.querySelector('.pj-save').addEventListener('click', () => { const p = nb.querySelector('.pj-path').value.trim() || pjCurrent; if (p) projects.save(p); else pjStatus('give it a name: folder/name'); });
       /* wave 106: …and the field stops swallowing the save keys.  The dispatcher listens on `window`
@@ -4933,7 +5290,7 @@ export async function boot(dom) {
         field: { overlay: fieldlines.overlay, lines: fieldlines.lines, source: fieldlines.source },
         wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
         mo: moPanel ? moPanel.save() : null,
-        rates: Array.from(rates), sturmian: { on: sturm.on, lambda: sturm.lambda },
+        rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: modHost ? modRackStamped() : null } };
   }
   /** WAVE 63 · THE RACK CARRIES ITS MODEL VERSION, because nothing else on this road did.
@@ -5021,6 +5378,17 @@ export async function boot(dom) {
         if (pr.modulation !== undefined) restoreModulation(pr.modulation);   // wave 52 (an UNDO's presentation has no such key, so undo never touches the rack)
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
+        // Restore operator rates AFTER the destination scale is installed. The old project's
+        // Sturmian guard must not erase a Coulomb project's rates on the way in.
+        if (!(opt && opt.keepTime)) {
+          const rr = pr.rotationRates;
+          for (const key of Object.keys(rotRate)) {
+            const v = setRotationRate(key, rr && Number.isFinite(rr[key]) ? rr[key] : 0);
+            const id = key === 'z' ? 'state.rot.z' : key === 'kz' ? 'state.stark.kz' : 'state.defect.l2';
+            modHost.registry.setBase(id, v);
+          }
+          modHost.clock.applyAll(true);
+        }
         if (pr.space && pr.space !== space && !getHamiltonian().noMomentum && !sturm.P) { space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(space); }
         if (pr.palette && palette) { if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops); palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]); }
       }
@@ -5043,7 +5411,7 @@ export async function boot(dom) {
    * The two keys serialize() gained above are applied HERE and nowhere else: restore() is the project
    * road and does not read them, so a link opening is the one place where somebody else's palette choice
    * and somebody else's DRAG γ land in this browser. */
-  const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack' };
+  const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack', rotationRates: 'the rotation and deflection rates' };
   const notCarriedWords = (keys) => keys.map((k) => NOT_CARRIED_NAME[k] || k).join(' · ');
   const esc = (t) => String(t).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
   let linkLast = null;
@@ -5068,7 +5436,7 @@ export async function boot(dom) {
     try { await navigator.clipboard.writeText(enc.href); copied = true; } catch (_) {}
     const say = [];
     if (enc.notCarried.length) say.push('<b>THIS LINK DOES NOT CARRY:</b> ' + notCarriedWords(enc.notCarried)
-      + '. Link format v1 has no room for either — everything else in this window is in it: the register and its mask, the clock, the operator and its scale, the camera, the material, the palette and the 91 rates.');
+      + '. Link format v1 does not carry those settings — everything else in this window is in it: the register and its mask, the clock, the operator and its scale, the camera, the material, the palette and the 91 rates.');
     if (enc.dropped) say.push('<b>' + enc.dropped + ' coefficient' + (enc.dropped === 1 ? '' : 's') + ' fell below the link\'s 16-bit floor</b> and — at under 2.3e-10 of the peak population — travelled as zero.');
     if (!enc.fits) say.push('<b>' + enc.chars + ' CHARACTERS.</b> That is past the ' + LINK_CHAR_CEILING
       + '-character length a URL can be relied on to survive in a chat app or a mail client. It opens here; it may be cut in transit.');
@@ -5207,7 +5575,7 @@ export async function boot(dom) {
   /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
      every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
   let hRender = null;
-  history = createHistory({ read: hRead, write: hWrite, liveKey: hLiveKey, depth: 60, quiet: 400,
+  history = createHistory({ read: hRead, write: hWrite, liveKey: hLiveKey, depth: 60, quiet: 400, driven: rotDriving,
     onChange: () => { if (hRender) hRender(); } });
   /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════
      An FL-style list is only worth having if a row says what it was — "Move Pattern", not "edit #17".
@@ -5301,7 +5669,7 @@ export async function boot(dom) {
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */
@@ -5631,6 +5999,7 @@ export async function boot(dom) {
      rest, which is the same event said with colour instead of rotation.  Boot is the RARE tier, so it gets it. */
   markTurn();
   busyHost();                         // the mark is cloned and painted before anything can need it
+  if (layout.projects) layout.projects.markClean();
   LW.ready = true;
   return LW;
 }

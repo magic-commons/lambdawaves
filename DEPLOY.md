@@ -1,5 +1,10 @@
 # DEPLOY — λWAVES Alpha
 
+Local source is prepared through wave 107; account deployment remains task #37.
+The working and development branches are `main` and `dev`. Follow HANDOFF.md for GitHub login
+and remote creation. Cloudflare has not been touched in this takeover; the live acceptance and
+rollback steps below remain pending until Josh deploys.
+
 λWAVES is a static application on **Cloudflare Workers + Static Assets**. Shipping it is **three commands
 and a login**, in this order, **with no edit to `lab/` in between** — the repo is actively worked on, and a
 build from ten minutes ago is not the build you are shipping.

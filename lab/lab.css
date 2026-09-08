@@ -1267,10 +1267,10 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
    written in Tailwind slate on a fixed dark ground and this lab has two themes and one token ladder.
    A literal hex here would be a third palette nobody maintains — ANTI-PATTERN 6 wearing a new hat. */
 
-#keymap { position: fixed; inset: 0; z-index: var(--z-chrome); display: flex; flex-direction: column; }
+#keymap { position: fixed; inset: 0; z-index: var(--z-veil); display: flex; flex-direction: column; }
 #keymap[hidden] { display: none; }
 .km-panel { position: absolute; inset: 0; display: flex; flex-direction: column;
-  background: hsl(var(--glass-hue) / calc(var(--glass-opacity) * 0.97)); backdrop-filter: blur(var(--glass-blur, 22px)); }
+  background: hsl(var(--glass-tint) / .97); backdrop-filter: blur(var(--glass-blur, 22px)); }
 .km-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;
   border-bottom: 1px solid var(--glass-hairline); flex: 0 0 auto; }
 .km-header-titles { display: flex; flex-direction: column; gap: 4px; }

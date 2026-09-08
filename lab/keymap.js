@@ -288,7 +288,7 @@ function isSameChord(b1, b2) {
  * Builds the visual keybinding editor inside `host` and binds to the `keys` model.
  * Returns: { root, refresh(), open(), close(), destroy() }
  */
-export function createKeymap(host, keys) {
+export function createKeymap(host, keys, options = {}) {
   let isOpen = false;
   let platform = detectPlatform();
   let selectedActionId = null;
@@ -775,6 +775,9 @@ export function createKeymap(host, keys) {
         cancelRecording('escape');
         return;
       }
+      // Tab must remain focus navigation in every editor, including this visual one.
+      // The host's settings recorder already reserves it; this path must honor that law.
+      if (e.code === 'Tab') { setStatus('Tab is reserved for focus navigation. Choose another key.', true); return; }
       // Modifier keys held down alone: keep waiting for the companion stroke
       if (MODIFIER_CODES.has(e.code)) return;
 
@@ -887,6 +890,7 @@ export function createKeymap(host, keys) {
     isOpen = false;
     clearHover();
     if (root) root.hidden = true;
+    if (options.onClose) options.onClose();
     return false;
   }
 

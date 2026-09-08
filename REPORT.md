@@ -2039,3 +2039,87 @@ The [audit](research/astra-2026-09-05/MATH-AUDIT.md) corrects the rank-one/SO(4)
 **PROOFS.** **B146** the face is loaded, every live `<m>` resolves to it, and it PAINTED — the probe string measured on a canvas differs from both fallbacks the stack names, which a silent fall-through could not do; no `title` or `aria-label` in the app contains a literal marker. **B147** the ten figures at one width, the five value columns still Roboto + tabular, no marked run inside any of them. **B148** the three moving sites read off the DOM and recomputed from the model at the same instant. **B149** the entrance, two REAL driver Tabs animating nothing, and reduced motion applied at real specificity on the real elements. **§G** in `pwa.test.mjs` is the coverage gate. Updated because the wave was asked to change exactly what they pinned: **B129** (the pane, and the three defects inverted) and **B131** (the clear button's plate). One free fix on the way past: `ui.tsr` was assigned twice in `ladder.js`, so the CLOCKS `T_sr` has printed an em dash since it was written. `./test.sh`: **node: 0   browser: 0** — 165 judged browser blocks and 42 node suites, all green, `node tests/pwa.test.mjs --write` last.
 
 **LESSONS.** **A convention beats a heuristic when the categories are semantic.** No amount of Unicode cleverness can tell an operator from a label; one marker in the string can, and it costs less. **A .txt beside a binary drifts, and the pair that drifts is exactly the pair nobody re-reads** — the glyph list is the subsetter's own input file now, gated against the cmap. **The obvious one-word fix was wrong for a reason worth knowing**: an invalid `var()` substitution wins the cascade before it computes to `unset`, so adding a lower-specificity class under it changes nothing, silently. **A defect fixed while the gate that pinned it stays green is not fixed**; invert the gate in the same wave. And **the plugin looked wrong because it answered nothing** — not because its colour was wrong. Ask what a surface RESPONDS to before you re-tune what it is.
+
+
+### wave 107: W-FINISH — the rates turn the state, the keyboard manual gets its model, and saved projects acquire a boundary
+
+The remaining Claude board was reconciled against the shipped source, not restarted. Josh's current
+rulings are **keep the resting hint hidden** and **keep verification focused; Josh will verify the UI**.
+The frozen `lab/mir/modwindow/` bytes have not been edited. Host behavior and skin remain outside them.
+
+**Three rates, no fictional angles (#79).** The existing ROTATE z, STARK K_z and DEFECT L² wheels are
+relative gestures; registering their permanently-zero getters would invent an absolute state. Their new
+SPIN controls hold signed rad/s, with limits derived from the operators' periods: one turn per second
+for z and K_z, one π-period per second for L². The registry and dials read the same constants. A cadence
+tick integrates the raw wall interval, capped after a stall, and applies z, K_z, then L². Each operator
+is exact; simultaneous noncommuting drives use that ordered splitting, not a claimed joint exponential.
+Zero writes nothing and does not keep the frame loop alive. Sturmian disables K_z and L² in the setter
+as well as the UI. Files carry the rates; v1 links name nonzero rotation rates among settings not carried.
+Restore applies the destination scale before its rates, so the departing project's scale cannot clamp
+away the arriving project's controls.
+
+History treats a running drive as one held gesture: `dirty()` avoids hashing it and `note()` does not
+schedule commits while it runs. Stopping banks the result as one edit. This preserves redo and avoids
+incidental pointer clicks banking continuously moving coefficients. The expensive recurrence scan also
+waits through a drive. The new history test measures the omitted hashing, preserved redo and one final
+undoable entry, rather than just checking a flag.
+
+**The Kepler controls read the state.** SPIN ω, TILT ν and TURN Ω derive their axes from the selected
+shell's current orbit and apply the existing SO(4) rotor path. There is no remembered orbit angle to go
+stale. Missing and isotropic shells disable the controls with a reason; low coherence remains an honest
+picture limitation, not a ban on the exact operator. Static-field time participates in the readout cache.
+A measured turn and inverse returned coefficients within 5.6e-16; this checks the shared operator seam,
+not every possible orbit a user can draw.
+
+**The keyboard manual had three real defects.** The outer host opened while the editor's own hidden
+root and recording guard stayed closed. The model argument captured `undefined` before the action table
+was installed, so even an opened editor had no actions. Its HSL background supplied a hue without a
+saturation or lightness, so the declaration was invalid and the stage showed through. The host now uses
+the editor's lifecycle, a live adapter to the one key table, the existing full tint token, and the overlay
+stack level. Focus returns to the opener. The measured list contains every one of the table's 43 actions;
+Escape closes it. Its recorder respects the same Tab reservation as the settings recorder.
+
+**Projects now distinguish an unsaved document from playback (#85).** A baseline combines the saved
+experiment, presentation and notebook. Clock position and adaptive render scale do not dirty it;
+modulated parameters compare their hand bases. An edit to material or notebook does. New/open/recent
+UI actions ask before discarding, cancellation leaves the project alone, and beforeunload protects the
+same boundary. Successful save/open/new establishes the baseline; storage failure never claims a save.
+The comparison runs at the destructive boundary, not on every display frame. This is deliberately a
+project model: the register-only undo flag could not protect a notebook or a camera edit.
+
+**The deterministic renderer is reachable (#57).** `createExactRenderer` already existed with its own
+suite but no app importer. CAPTURE now offers EXPORT FRAMES beside the recorder, reports progress, and
+lets the same button stop the run. It downloads a PNG sequence and manifest in a ZIP. The existing size,
+FPS and duration controls supply the plan; refusal is shown when no exact period exists. Live modulation
+and operator rates are frozen during this export and restored afterwards, while the renderer pins the
+camera, GPU jitter and clock. This exports the current state's evolution; it does not claim a recurrence
+of a live driven operator. The dormant-module allowlist entry is removed. A small real GPU export
+produced three scheduled frames with no page errors; the module's numerical suite remains the fuller law.
+
+**The gate reconciliation, by verdict.** B131 was measured first: `getComputedStyle(null)` threw because
+wave 106 removed the OBSERVER switch the probe selected. The surviving SPACE segment supplies the opacity
+measurement. This is a STALE LAW selector, not a boot exception or a ghost cache.
+
+| Blocks | Verdict and reason |
+|---|---|
+| B40 | STALE LAW probe mechanics: template-literal escaping destroyed its transparent-color regex. Compare the actual computed transparent value. |
+| B62 | STALE LAW fixture: applying saved settings re-enabled FROST after the probe disabled it. Establish the intended OFF condition after restoration. |
+| B74 | STALE LAW: prose already specified the newer 46 px transport, assertion still required 32. |
+| B98 | REAL DEFECT: the free-camera pitch adapter called `orbitBy(0, 0)` when restoring an unchanged pitch, re-deriving yaw and shifting a minted link by one f32 unit. Equal pitch now returns before rotating. Byte-identical re-mint measured. |
+| B118/B119/B131 target counts | STALE LAW: the new rate targets extend the registry; counts are derived from the actual target/dial catalogue. |
+| B123/B124/B141 | STALE LAW: Josh assigned Space to transport; Enter activates the focused control. Update both the keys pressed and the sentences describing them. |
+| B129 | STALE LAW: later waves deliberately detached surfaces, shortened cards, unified knobs, moved ADD onto the rail and made fold binary. Measure those dimensions from the artifact and host tokens; unrelated house stylesheet rule counts are not a design contract. The frozen artifact still parses intact. |
+| B132 | STALE LAW: mini transport geometry and accent changed; Ctrl+Space arms modulation, M opens its window; resting hint remains hidden by Josh's current ruling. The off/base and pause/hold behavior stays measured. |
+| B134 | STALE LAW fixture: the chip selector clicked an older persisted source while the probe read a newly added one. Reset the fixture and read its source by id. The actual ANCHOR/BPM/TRIG clock laws pass. |
+| B135 | STALE LAW for removed stacked shade/bevel layers; REAL DEFECT for CARD STYLE becoming inert under default FROST. The filter now remains independent of the pane. House, macro rail, workbar and devices agree for both themes, both pane styles, and frost off/on. |
+| B139 | STALE LAW: the later frosted recipe uses the shared blur token and separate header treatment. Read the actual token rather than reinstate the discarded saturation/brightness recipe. |
+
+`.m2add` being zero-sized is deliberate: ADD moved to `.m2addchip` on the rail. The hidden reorder arrows
+were superseded by the later layout ruling; source moves remain wired. The resting helper was dead code
+and is removed; temporary operation/status messages retain their existing behavior. No hidden control
+was resurrected to satisfy an obsolete probe.
+
+GitHub authentication and Cloudflare deployment remain account boundaries. The local source, branches,
+ark and deploy payload can be prepared here; an unauthenticated CLI cannot create the remote, and this
+handoff explicitly forbids touching Cloudflare. `TASKS.md` records that remaining external task without
+calling it shipped.

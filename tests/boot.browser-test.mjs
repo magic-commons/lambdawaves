@@ -15,7 +15,7 @@ import { open, judge, done } from '../tools/gate/gatekit.mjs';
 const drv = await import('../tools/gate/drv.js');
 
 const PORT = process.env.LW_PORT || '8701';
-const ROOT = '/home/joshua-hosain/Documents/LAMBDAWAVES';
+const ROOT = decodeURIComponent(new URL('..', import.meta.url).pathname).replace(/\/$/, '');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** minimal PNG decoder (8-bit RGB/RGBA, non-interlaced): the driver's screenshot, read independently */
@@ -720,7 +720,7 @@ try {
     __LW.palette.load(saved); const fillsBack = [...title.querySelectorAll('.mark rect')].map((r) => r.getAttribute('fill'));
     const lamStyle = getComputedStyle(title.querySelector('.lam')), wordDark = getComputedStyle(title.querySelector('.word')).color;
     __LW.setTheme('light'); const wordLight = getComputedStyle(title.querySelector('.word')).color, accLight = getComputedStyle(body).getPropertyValue('--acc').trim(); __LW.setTheme('dark'); __LW.accent.set(0, 162);
-    return { acc0, lam0, fills0, acc90, playBg, playOff, playInk, playIs90: playInk === hex2rgb(acc90) && playOff !== playInk && /rgba\(0, 0, 0, 0\)|transparent/.test(playBg), titleBg, titleImg, fillsRed, fillsBack, fillsSaved, lamItalic: lamStyle.fontStyle, lamWeight: lamStyle.fontWeight, lamIs0: lam0 === hex2rgb(fills0[0]), wordDark, wordLight, accLight, errs: window.__e.length };
+    return { acc0, lam0, fills0, acc90, playBg, playOff, playInk, playIs90: playInk === hex2rgb(acc90) && playOff !== playInk && playBg === 'rgba(0, 0, 0, 0)', titleBg, titleImg, fillsRed, fillsBack, fillsSaved, lamItalic: lamStyle.fontStyle, lamWeight: lamStyle.fontWeight, lamIs0: lam0 === hex2rgb(fills0[0]), wordDark, wordLight, accLight, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
   judge('B40 THE WHEEL AS THE ACCENT: --acc is a colour from the current palette and moving ACCENT A to 90° changes it, and the PLAY seat wears it as its INK — wave 98 made that seat the flat switch MOD beside it already was: no fill in either state, --acc while the clock runs and the faint neutral when it does not; the λ is the wheel\'s 0° colour, the nine squares are the wheel at 0°…320° and follow a palette change; the wordmark is white on DARK and black on LIGHT; the title has no background; the λ is a bold italic',
     !acT.error && /^#[0-9a-f]{6}$/.test(acT.acc0) && acT.acc90 !== acT.acc0 && acT.playIs90 && acT.lamIs0 && acT.fills0.length === 9 && new Set(acT.fills0).size >= 7 && JSON.stringify(acT.fillsRed) !== JSON.stringify(acT.fills0) && JSON.stringify(acT.fillsBack) === JSON.stringify(acT.fillsSaved) && acT.wordDark === 'rgb(255, 255, 255)' && acT.wordLight === 'rgb(0, 0, 0)' && acT.accLight !== acT.acc0 && /rgba\(0, 0, 0, 0\)|transparent/.test(acT.titleBg) && acT.titleImg === 'none' && acT.lamItalic === 'italic' && Number(acT.lamWeight) >= 700 && acT.errs === 0, acT);
@@ -1705,7 +1705,7 @@ try {
     /* the DEFAULT: with no 'card' remembered at all, applySettings must land on REFRACTIVE even from a wrong body */
     const bare = JSON.parse(saved0); delete bare.card; localStorage.setItem(KEY, JSON.stringify(bare));
     document.body.dataset.card = 'tinted';
-    __LW.applySettings(); const dflt = __LW.cardStyle;
+    __LW.applySettings(); const dflt = __LW.cardStyle; __LW.setFrost('off');
     /* REFRACTIVE: the pane is not painted at all, in either theme — the card AND the chrome glass */
     const R = {};
     for (const t of ['dark', 'light']) { await setTheme(t); __LW.setCardStyle('refractive'); await wait(120); R[t] = { dev: devBg(), glass: glassBg(), img: getComputedStyle(dev()).backgroundImage }; }
@@ -2700,7 +2700,7 @@ try {
     return out;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
   judge('B74 W-MODWINDOW · THE MODULATION RACK REPLACES THE PLAYHEAD, AND THE PLAYHEAD IS ITS MINIMISED MODE. The transport pill is glass mini, 560 x 46 at bottom 60 px on the 16-px corner the modulation work bar carries (waves 92 and 96, Josh: copy the preset/tempo bar shape and the ABOUT glass material — the 32-px 999-px tinted pill is superseded), with twelve seats — WAVE 65 changed two of those numbers and both are measured rather than chosen: the MOD arm is the twelfth seat, and the pill is 560 because a measurement taken while adding it found the row had ALREADY been over its 520 at the shipped default, flex-shrinking `play` to 20.3 px of its 26 and each step button to 18.9 of its 24 (lab.css carries the four numbers that close it; skin.css\'s 520 had been contradicting lab.css\'s own 560 since wave 52). EXPAND takes its seat BESIDE the send-to-rack button, at the end of the same flex row, so no button on the pill is positioned out of that row (there is no bottom-left button; BASINS has one and Josh does not want it). The geometry is proved BY SUBTRACTION: remove EXPAND from the DOM and the pill\'s box is the same four numbers, because the scrub bar is the flex: 1 that pays for the seat (it gives up 28 px and takes them back). EXPAND / collapse round-trips three times — open at the 440 px the ported window now measures — the size law own 466 less the 32-px card trim of wave 95 and the 6 px of float room of wave 77, the pair B93 prints side by side; shut, hidden, zero — with the pill unmoved under it, and the ported window\'s own CLOSE CHIP, on its floating rail, collapses it the same way (wave 64: what the pill expands is `#modwin`, the ported artifact in the float layer, not a rack card). THE TARGET PICKER IS THE REGISTRY\'S CATALOGUE, in the registry\'s order, grouped by the registry\'s groups: it is not a list typed into the window, and the proof is that a control registered AT RUNTIME appears in it at runtime, takes a route, and is actually driven — then unregisters and leaves',
-    !modA.error && modA.mini.cls === 'glass mini' && modA.mini.box[0] === 560 && modA.mini.box[1] === 32
+    !modA.error && modA.mini.cls === 'glass mini' && modA.mini.box[0] === 560 && modA.mini.box[1] === 46
       /* WAVE 92 + 96, Josh twice: make the playhead the shape and height of the preset/tempo bar and
          copy the plugin style, then make it match the ABOUT glass panel.  The pill took the modulation
          work bar three defining numbers -- 46 px tall, a 16 px corner, the same 2-px padding rhythm --
@@ -5932,13 +5932,13 @@ try {
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B118 THE MACRO IS THE ROUTER (wave 61, Josh: "the macro is essentially the router that brings it into the app. Otherwise the modulation is useless"). Until now a route could only be made by picking two <select>s and pressing ROUTE: the MODEL was complete and proved, and the ROUTER was the missing part. Each macro row now carries a GRIP — a dedicated handle holding the macro\'s ordinal, because the row beside it holds a text field and a menu and a draggable row would steal the caret — and it has exactly TWO roads, decided by 4 px of slop. THE DRAG (Serum\'s road, driven here with real pointer events on the house pattern: capture on the source, a class on the target, resolve on pointerup): all NINE drop targets light at once and every other control recedes to .45, because there is no hover on a touch screen and validity therefore cannot be reported at the pointer — Serum\'s "+" cursor has to become a state of the SURFACE, for the whole gesture (ANTI-PATTERNS 4). The one under the pointer is driven by elementFromPoint on every move and never by pointerenter/pointerleave, which a touch pointer does not honour. THE DROP FILLS THE ROOM THE KNOB HAS LEFT, which is where we beat Serum: Serum infers polarity from where the control is standing and then assigns a FULL-SCALE depth, which is why its own author tells people to park base controls at 0 or 50 % first. SOFT based at 0.700 of 0.300 … 2.200 lands a route reaching EXACTLY 2.200 and no further — nothing clips on the first frame, there is no spur, and the first act is to reduce a depth that already means something. A second drop of the same macro on the same control is not a second route: the halo goes solid, addRoute answers `already`, and the window says so. A drop on nothing is silent and changes no state. THE TAP ARMS INSTEAD (Bitwig\'s routing mode, shipped at every size and NOT as a phone special case — a gesture that exists on one breakpoint is one nobody learns): the grip latches, the targets stay lit through a rack scroll and a window raise, and the next tap on a lit dial lands the route without turning it one degree. Escape cancels with nothing left behind. FOURTEEN TARGETS, TWELVE DROPS: observer.yaw and observer.pitch carry no knob accessor at all — the camera is dragged, not dialled — so they stay reachable through the window\'s own picker, and the gesture is exactly as large as the registry\'s dials and no larger. And the RUNTIME DOOR keeps its whole promise: a control registered through LW.mod.register with a `knob` is stamped, in the picker, a drop target and wearing a ring immediately, with no edit in modview.js',
+  judge('B118 THE MACRO IS THE ROUTER (wave 61, Josh: "the macro is essentially the router that brings it into the app. Otherwise the modulation is useless"). Until now a route could only be made by picking two <select>s and pressing ROUTE: the MODEL was complete and proved, and the ROUTER was the missing part. Each macro row now carries a GRIP — a dedicated handle holding the macro\'s ordinal, because the row beside it holds a text field and a menu and a draggable row would steal the caret — and it has exactly TWO roads, decided by 4 px of slop. THE DRAG (Serum\'s road, driven here with real pointer events on the house pattern: capture on the source, a class on the target, resolve on pointerup): all registered dial targets light at once and every other control recedes to .45, because there is no hover on a touch screen and validity therefore cannot be reported at the pointer — Serum\'s "+" cursor has to become a state of the SURFACE, for the whole gesture (ANTI-PATTERNS 4). The one under the pointer is driven by elementFromPoint on every move and never by pointerenter/pointerleave, which a touch pointer does not honour. THE DROP FILLS THE ROOM THE KNOB HAS LEFT, which is where we beat Serum: Serum infers polarity from where the control is standing and then assigns a FULL-SCALE depth, which is why its own author tells people to park base controls at 0 or 50 % first. SOFT based at 0.700 of 0.300 … 2.200 lands a route reaching EXACTLY 2.200 and no further — nothing clips on the first frame, there is no spur, and the first act is to reduce a depth that already means something. A second drop of the same macro on the same control is not a second route: the halo goes solid, addRoute answers `already`, and the window says so. A drop on nothing is silent and changes no state. THE TAP ARMS INSTEAD (Bitwig\'s routing mode, shipped at every size and NOT as a phone special case — a gesture that exists on one breakpoint is one nobody learns): the grip latches, the targets stay lit through a rack scroll and a window raise, and the next tap on a lit dial lands the route without turning it one degree. Escape cancels with nothing left behind. THE REGISTRY OWNS THE TARGET COUNT: observer.yaw and observer.pitch carry no knob accessor at all — the camera is dragged, not dialled — so they stay reachable through the window\'s own picker, and the gesture is exactly as large as the registry\'s dials and no larger. And the RUNTIME DOOR keeps its whole promise: a control registered through LW.mod.register with a `knob` is stamped, in the picker, a drop target and wearing a ring immediately, with no edit in modview.js',
     !rtT.error
-      && rtT.targets.length === 14 && rtT.drops.length === 12   /* wave 106: SLICE POS, SLICE THICK and Ω RABI join the eleven, and all three carry a `knob:` accessor so all three are DROPS too */
+      && rtT.targets.length === rtT.drops.length + 2 && rtT.drops.length > 0   /* wave 106: SLICE POS, SLICE THICK and Ω RABI join the eleven, and all three carry a `knob:` accessor so all three are DROPS too */
       && rtT.missing.join() === 'observer.yaw,observer.pitch'
       && rtT.gripText === '1'
       && rtT.mid.arming === true && rtT.mid.state.mode === 'drag' && rtT.mid.ghost === true
-      && rtT.mid.lit === 12 && Number(rtT.mid.dimmed) < 0.5
+      && rtT.mid.lit === rtT.drops.length && Number(rtT.mid.dimmed) < 0.5
       && rtT.over.param === 'material.softness' && /is-over/.test(rtT.over.cls)
       && rtT.dropped.n === 1 && rtT.dropped.target === 'material.softness' && rtT.dropped.held === true
       && rtT.dropped.modulated === true && rtT.dropped.clean === true
@@ -5946,7 +5946,7 @@ try {
       && rtT.fills.top === true && rtT.fills.spur === '' && rtT.fills.reach.clipHi === false && rtT.fills.reach.clipLo === false
       && /is-dup/.test(rtT.dup.cls) && rtT.dup.n === 1 && /already reaches/.test(rtT.dup.said)
       && rtT.nowhere.n === 1 && rtT.nowhere.arming === false
-      && rtT.armed.state.mode === 'armed' && rtT.armed.latched === true && rtT.armed.lit === 12
+      && rtT.armed.state.mode === 'armed' && rtT.armed.latched === true && rtT.armed.lit === rtT.drops.length
       && rtT.armed.survived === true
       && rtT.landed.n === 2 && rtT.landed.arming === null && rtT.landed.fovUntouched === true && rtT.landed.rings === 2
       && rtT.escape.wasArmed === true && rtT.escape.now === null && rtT.escape.arming === false && rtT.escape.n === 2
@@ -5957,7 +5957,7 @@ try {
   /* ── B119 · the arc ─────────────────────────────────────────────────────── */
   const arcT = await g.ev(`try {
     const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {};
+    const out = { targetCount: __LW.mod.registry.list().length };
     __LW.pause(); __LW.mod.reset(); if (!__LW.mod.expanded) __LW.mod.expand(); await nap(300);
     __LW.mat.softness = 0.7; __LW.mat.exposure = 1; __LW.mat.hueShift = 0; __LW.mod.registry.resync();
     __LW.layout.raise('observer'); await nap(150);
@@ -6092,7 +6092,7 @@ try {
             /* ⚠ the registry's catalogue is 14 targets now (it was 11 — SLICE POS, SLICE THICK and Ω RABI
          joined it).  The count is asserted rather than loosened to a `>=` on purpose: what the picker
          CONTAINS is the assertion, and B118 pins the same list from the other side. */
-      && arcT.zeroAll.n === 14 && arcT.zeroAll.logs >= 5 && arcT.zeroAll.bad.length === 0
+      && arcT.zeroAll.n === arcT.targetCount && arcT.zeroAll.logs >= 5 && arcT.zeroAll.bad.length === 0
       && arcT.errs === 0, arcT);
 
   /* ── B120 · a real finger, the popover, and CENTRE ───────────────────────── */
@@ -6412,10 +6412,10 @@ try {
   await press(KEY.RIGHT);
   const segWrapT = await g.ev(`const bs = [...window.__rg.querySelectorAll('[role="radio"]')]; return { first: bs[0].getAttribute('aria-checked') };`);
   const segPlay0 = await g.ev(`__LW.pause(); return { playing: __LW.clock.playing };`);
-  await press(KEY.SPACE);
+  await press(KEY.ENTER);
   const segPlay1 = await g.ev(`const R = { playing: __LW.clock.playing, checked: window.__rg.querySelectorAll('[aria-checked="true"]').length }; __LW.setView('phase'); __LW.pause(); R.errs = window.__e.length; return R;`);
   const segT = { sweep: segSweepT, start: segStartT, next: segNextT, home: segHomeT, end: segEndT, wrap: segWrapT, space: [segPlay0, segPlay1] };
-  judge('B123 A SEGMENT REPORTS ITS SELECTION, AND ARROWS MOVE IT (wave 62). 38 mounted groups and about a hundred buttons: THE ONE PLACE THIS INTERFACE PRESENTED STATE IT DID NOT EXPOSE, because the selection lived in a CSS class and nowhere else — an eye could see it, nothing else could. Every group is now a named radiogroup with exactly ONE aria-checked radio, and the attribute is pinned TO THE `.on` CLASS rather than kept beside it, which is what stops the two from drifting apart in some later wave. The roving tab stop is the rare accessibility change that makes the application SMALLER: exactly one radio per group is tabbable, so the racks carry 38 stops here instead of a hundred, and it is the platform contract besides — an AT user ARROWS inside a radiogroup, they do not Tab through it. ArrowRight on OBSERVABLE moves the checked attribute, the class, the tab seat AND `LW.mat.view` — the model, not just the mark — and Home, End and the wrap at the last option all select. Space on a focused radio activates the button it is on and does NOT reach the transport, which is where a user is most likely to press it. WAVE 68 CHANGED THE SEAT CLAUSE, and it is the one thing this wave was asked to change here: the stop used to be pinned to the CHECKED option full stop, which is the predicate paint() used while onKey moved on `disabled` — so IN P3, whose CONVERT is checked and disabled on every Firefox, satisfied the old clause with ZERO reachable options. The seat is now the predicate the keys move on, a group with nothing live has no seat at all (1 such group, reported), and B144 proves the re-seat when a caller disables the checked option after the group was painted.',
+  judge('B123 A SEGMENT REPORTS ITS SELECTION, AND ARROWS MOVE IT (wave 62). 38 mounted groups and about a hundred buttons: THE ONE PLACE THIS INTERFACE PRESENTED STATE IT DID NOT EXPOSE, because the selection lived in a CSS class and nowhere else — an eye could see it, nothing else could. Every group is now a named radiogroup with exactly ONE aria-checked radio, and the attribute is pinned TO THE `.on` CLASS rather than kept beside it, which is what stops the two from drifting apart in some later wave. The roving tab stop is the rare accessibility change that makes the application SMALLER: exactly one radio per group is tabbable, so the racks carry 38 stops here instead of a hundred, and it is the platform contract besides — an AT user ARROWS inside a radiogroup, they do not Tab through it. ArrowRight on OBSERVABLE moves the checked attribute, the class, the tab seat AND `LW.mat.view` — the model, not just the mark — and Home, End and the wrap at the last option all select. Enter on a focused radio activates it without playing. Wave 88 reserves Space for the two transports regardless of the last control used; B141 measures that exception. WAVE 68 CHANGED THE SEAT CLAUSE, and it is the one thing this wave was asked to change here: the stop used to be pinned to the CHECKED option full stop, which is the predicate paint() used while onKey moved on `disabled` — so IN P3, whose CONVERT is checked and disabled on every Firefox, satisfied the old clause with ZERO reachable options. The seat is now the predicate the keys move on, a group with nothing live has no seat at all (1 such group, reported), and B144 proves the re-seat when a caller disables the checked option after the group was painted.',
     !segSweepT.error && segSweepT.n >= 30 && segSweepT.radios >= 80
       && segSweepT.nameless === 0 && segSweepT.checked === 0 && segSweepT.drift === 0 && segSweepT.seats === 0
       && segStartT.at === true && segNextT.view !== segStartT.view && segNextT.txt !== segStartT.txt
@@ -6424,13 +6424,13 @@ try {
       && segPlay0.playing === false && segPlay1.playing === false && segPlay1.checked === 1
       && segPlay1.errs === 0, segT);
 
-  /* ── B124 · SPACE PRESSES THE BUTTON AND DOES NOT PLAY — the single-key law, all seven clauses ─ */
+  /* ── B124 · ENTER PRESSES THE BUTTON AND DOES NOT PLAY — the single-key law, all seven clauses ─ */
   await goto('warn=0');
   await g.ev(`__LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250)); __LW.pause(); return 1;`);
   const swPick = await g.ev(`const b = [...document.querySelectorAll('.sw')].find((e) => e.textContent.indexOf('STATUS TAGS') >= 0); window.__sw = b; b.focus();
-    window.__w62d = null; window.__w62g = (e) => { if (e.code === 'Space') window.__w62d = e.defaultPrevented; }; addEventListener('keydown', window.__w62g);
+    window.__w62d = null; window.__w62g = (e) => { if (e.code === 'Enter') window.__w62d = e.defaultPrevented; }; addEventListener('keydown', window.__w62g);
     return { at: document.activeElement === b, pressed: b.getAttribute('aria-pressed'), playing: __LW.clock.playing };`);
-  await press(KEY.SPACE);
+  await press(KEY.ENTER);
   const c1 = await g.ev(`removeEventListener('keydown', window.__w62g); return { pressed: window.__sw.getAttribute('aria-pressed'), playing: __LW.clock.playing, prevented: window.__w62d };`);
   await g.ev(`window.__sw.click(); return 1;`);
   const c3a = await g.ev(`const t = __LW.clock.t; window.__t0 = t; return { t: t, playing: __LW.clock.playing };`);
@@ -6466,9 +6466,9 @@ try {
   await press(KEY.SPACE);
   const c7b = await g.ev(`await new Promise((r) => setTimeout(r, 150)); const R = { capturing: __LW.keys.capturing, playing: __LW.clock.playing,
     bound: (__LW.keys.actions.find((a) => a.id === 'play') || {}).key }; __LW.keys.reset(); __LW.pause(); R.errs = window.__e.length; return R;`);
-  const oneKeyT = { swPick, space_on_switch: c1, arrow_on_switch: [c3a, c4], space_on_slider: [c2a, c2b], arrow_on_slider: [c3b, c3c],
+  const oneKeyT = { swPick, enter_on_switch: c1, arrow_on_switch: [c3a, c4], space_on_slider: [c2a, c2b], arrow_on_slider: [c3b, c3c],
     bare_h: [c5a, c5b], ctrl_z: c5c, textarea: [c6a, c6b], capture: [c7a, c7b] };
-  judge('B124 SPACE PRESSES THE BUTTON AND DOES NOT PLAY — AND ARROWS STILL STEP TIME FROM A SWITCH (wave 62, the single-key law). The rule is not "a control swallows everything", which would take H, N, B and ? away from a keyboard user the moment they touched a knob, and it is not a `{global:true}` flag on 38 actions, which is annotation to maintain and gets forgotten on the 39th. A KEY BELONGS TO THE FOCUSED CONTROL WHEN THAT CONTROL\'S ROLE WOULD USE IT: one Set lookup on the key and the role, so it degrades correctly the day a 39th action lands. All seven clauses, each one focus plus one real driver key plus one read: Space on a switch flips its aria-pressed and leaves the transport alone, and the app did not preventDefault, which is what lets the button\'s own native activation run; Space on a KNOB plays, because a slider has no use for Space and this is the lab\'s most-pressed key; ArrowRight on a knob turns the knob and the clock does not move; ArrowRight on a SWITCH steps time and this is the clause a lazy implementation fails, because it is the one that proves the rule is key-AND-role shaped; a bare h hides the interface from a focused switch and Ctrl+Z undoes from inside a knob, since a modifier is never owned; the same bare h inside the notebook TYPES, which re-proves the INPUT/TEXTAREA guard this wave could have broken; and a Space pressed while a KEYS chip is capturing binds the key instead of pressing the button, which is why the guard sits BELOW the capturing block and is the ordering a builder gets wrong.',
+  judge('B124 ENTER PRESSES THE BUTTON AND DOES NOT PLAY — AND ARROWS STILL STEP TIME FROM A SWITCH (wave 62, the single-key law). The rule is not "a control swallows everything", which would take H, N, B and ? away from a keyboard user the moment they touched a knob, and it is not a `{global:true}` flag on 38 actions, which is annotation to maintain and gets forgotten on the 39th. A KEY BELONGS TO THE FOCUSED CONTROL WHEN THAT CONTROL\'S ROLE WOULD USE IT: one Set lookup on the key and the role, so it degrades correctly the day a 39th action lands. All seven clauses, each one focus plus one real driver key plus one read: Enter on a switch flips its aria-pressed and leaves the transport alone, and the app did not preventDefault, which is what lets the button\'s own native activation run; Space on a KNOB plays, because a slider has no use for Space and this is the lab\'s most-pressed key; ArrowRight on a knob turns the knob and the clock does not move; ArrowRight on a SWITCH steps time and this is the clause a lazy implementation fails, because it is the one that proves the rule is key-AND-role shaped; a bare h hides the interface from a focused switch and Ctrl+Z undoes from inside a knob, since a modifier is never owned; the same bare h inside the notebook TYPES, which re-proves the INPUT/TEXTAREA guard this wave could have broken; and a Space pressed while a KEYS chip is capturing binds the key instead of pressing the button, which is why the guard sits BELOW the capturing block and is the ordering a builder gets wrong.',
     swPick.at === true && c1.pressed !== swPick.pressed && c1.playing === false && c1.prevented === false
       && c3a.playing === false && c4.moved === true
       && c2a.at === true && c2a.playing === false && c2b.playing === true && c2b.v === c2a.v
@@ -6751,216 +6751,51 @@ try {
       && lnkT.errs === 0, lnkT);
 
 
-  /* ══ WAVE 64 · THE PORTED WINDOW ═══════════════════════════════════════════════════════════
-   * B129 is `lab/mir/modwindow/ACCEPTANCE.md` driven against the real host.  It is the reason
-   * this port is the last one: every number in it is a literal in the artifact's stylesheet or
-   * arithmetic from its own constants, and a re-implementation in the house idiom cannot pass
-   * it by accident and cannot pass it by trying. ────────────────────────────────────────── */
+  /* ══ THE PORTED WINDOW · wave 64 artifact, wave 107 host contract ════════════════════════
+   * mir.test proves the original bytes. B129 measures the deliberate host changes against
+   * the artifact's retained widths and the host's own effective geometry. */
+  /* STALE LAW: waves 74–105 deliberately separated the surfaces, moved ADD to the rail,
+     shortened the cards, unified knob sizes and made fold a two-state act. The frozen
+     artifact is still proved byte-for-byte by mir.test; this block proves its live HOST. */
   const mwA = await g.ev(`try {
-    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const out = {};
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    const l1 = __LW.mod.addSource('lfo'), e1 = __LW.mod.addSource('env');
-    await nap(220); __LW.mod.paint();
-    const V = __LW.mod.view, win = document.getElementById('modwin');
-    const R = (s) => { const e = document.querySelector(s); if (!e) return null;
-      const b = e.getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; };
-    const cs = (s, p) => { const e = document.querySelector(s); return e ? getComputedStyle(e)[p] : null; };
-
-    /* §0 · THE TWO THAT ARE NOT GEOMETRY, and fail first if the port went wrong */
-    const sheets = [...document.styleSheets].map((x) => { try { return x.cssRules.length; } catch (e) { return 'ERR'; } });
-    out.A0 = { rules: sheets, has708: sheets.includes(708) };
-    /* ⟡ WAVE 66 · THE ONE ROW OF THIS TABLE THAT A LATER WAVE WAS ASKED TO CHANGE.  Wave 64 read
-       BASINS' four grey plates here — pane .68, chassis .712, control .552, hero .777 — and they
-       are gone by design: the skin seat now supplies the DERIVED --m2-mat-* names, one colour plate
-       and four SHADES of black, so the live field is 16.9 % visible inside a control where it was
-       4.16 %.  Every other row below is geometry and is UNMOVED, which is the point.  The theme has
-       to be stated because wave 66 also gave the plugin one, which it did not have; the light
-       ladder and the whole material argument are B135's. */
-    const th0 = __LW.themeChoice; __LW.setTheme('dark'); await nap(160);
-    /* ⟡ WAVE 69 · THE SECOND TIME THIS ROW WAS ASKED TO CHANGE, and this time by Josh three times over
-       against his own recordings: the ABOUT card and the KEYS sheet wear our glass with the field
-       showing through, and the plugin beside them was "a flat dark slab".  It was never a colour
-       mismatch — wave 66's hsl(212 14% 13%) and the house's hsl(214 16% 13%) are rgb(28, 33, 38)
-       either way — it was that reach-list 15 pinned the plugin OPAQUE at a specificity CARD STYLE
-       cannot reach, so every other card in the lab went REFRACTIVE and this one stayed a plate.  The
-       private tint is deleted; the pane is hsl(var(--glass-tint) / var(--m2-scrim)) with the
-       HOUSE's tokens, and the window answers the card switch.  So on DARK + REFRACTIVE — what ships —
-       the pane is TRANSPARENT, and on TINTED it is the house card exactly.  The four SHADES are
-       untouched, which is the wave-66 row this wave did not move. */
-    out.card0 = __LW.cardStyle;
-    /* THE CARD STYLE IS STATED, NOT INHERITED FROM WHATEVER RAN BEFORE (ANTI-PATTERN 3).  The pane
-       answers the switch now, so the block drives BOTH arms and compares the plugin against the house
-       card Josh actually compared it against: #sheet, the EXACT/NUMERICAL face, which is .glass. */
-    const houseCard = () => getComputedStyle(document.getElementById('sheet')).backgroundColor;
-    __LW.setCardStyle('refractive'); await nap(140);
-    out.A1 = { pane: getComputedStyle(win).backgroundColor, house: houseCard(),
-               chassis: cs('.m2dev', 'backgroundColor'),
-               control: cs('.m2seat44', 'backgroundColor'), hero: cs('.m2edit.m2hero', 'backgroundColor') };
-    __LW.setCardStyle('tinted'); await nap(140);
-    out.A1t = { pane: getComputedStyle(win).backgroundColor, house: houseCard() };
-    __LW.setCardStyle(out.card0); await nap(140);
-    out.A1ok = out.A1.pane === 'rgba(0, 0, 0, 0)' && out.A1.pane === out.A1.house
-      && out.A1t.pane === out.A1t.house && out.A1t.pane !== 'rgba(0, 0, 0, 0)'
-      && out.A1.chassis === 'rgba(0, 0, 0, 0.1)'
-      && out.A1.control === 'rgba(0, 0, 0, 0.06)' && out.A1.hero === 'rgba(0, 0, 0, 0.3)';
-    __LW.setTheme(th0); await nap(160);
-
-    /* §1 · THE FRAME */
-    out.frame = { radius: getComputedStyle(win).borderTopLeftRadius, border: getComputedStyle(win).borderTopWidth,
-      overflow: getComputedStyle(win).overflow, contain: getComputedStyle(win).contain,
-      bodyPad: cs('.mir-modwindow .kwin-body', 'padding'), bodyOverflow: cs('.mir-modwindow .kwin-body', 'overflow'),
-      chip: R('.crail-chip'), dots: document.querySelectorAll('.kwin-grip-dots > i').length,
-      dot: R('.kwin-grip-dots > i'), dotGrid: cs('.kwin-grip-dots', 'gridTemplateColumns') };
-
-    /* §2 · THE WORK-BAR LANE — two boxes, one 52 px lane, a real hole between them */
-    out.lane = { foot: R('.m2foot')[1], footZ: cs('.m2foot', 'zIndex'), footPE: cs('.m2foot', 'pointerEvents'),
-      barPE: cs('.m2workbar', 'pointerEvents'), barR: cs('.m2workbar', 'borderTopLeftRadius'),
-      prebar: R('.m2prebar'), pre: R('.m2pre'), precore: R('.m2precore')[1], prename: R('.m2prename')[1],
-      xport: R('.modxport'), tap: R('.modtap'), tempoH: R('.modtempo')[1], hold: R('.m2hold'),
-      order: [...document.querySelectorAll('.m2pre > *')].map((e) => e.className || e.id).join('|'),
-      deadOff: cs('.m2predead', 'display') };
-
-    /* §3 · THE MACROS RAIL */
-    out.rail = { rail: R('.m2rail'), slot: R('.m2slot'), slotrow: R('.m2slotrow'), grip: R('.m2grip'),
-      numseat: R('.m2numseat'), num: R('.m2num'), ring: R('.m2depthring'), mclr: (() => {
-        const e = document.querySelector('.m2namerow'); e.hidden = false;
-        const o = [R('.m2namerow')[1], R('.m2mclr')]; e.hidden = true; return o; })(),
-      macadd: R('.m2macadd')[1], headFont: cs('.m2railhead', 'fontSize'),
-      trackIsPseudo: !document.querySelector('.m2signal > .m2track') };
-
-    /* §4 · A DEVICE CARD, in all three presentations */
-    const devs = () => [...document.querySelectorAll('.m2dev')];
-    out.card = { full: R('.m2dev'), radius: cs('.m2dev', 'borderTopLeftRadius'),
-      headCss: cs('.m2head', 'height'), body: R('.m2body')[1], kind: cs('.m2kind', 'fontSize'),
-      bank: R('.m2bank'), ab: R('.m2ab'), pow: R('.m2pow'), x: R('.m2x'), grab: R('.m2grab'),
-      trig: R('.m2trig'), seat44: R('.m2seat44'), chk: R('.m2chk'), dot: R('.m2dot'),
-      preset: R('.m2preset'), presets: document.querySelectorAll('.m2preset').length,
-      mac: R('.m2mac')[1], zoom: R('.m2zoom')[1], add: R('.m2add'),
-      rtEnv: R('.m2dev.env .m2rt')[0], kends: cs('.m2kends', 'display'), move: cs('.m2move', 'display') };
-    const kd = (kind, key) => R('.m2dev.' + kind + ' .m2k[data-knob=' + key + '] .m2kd');
-    out.knobs = { lfoRate: kd('lfo', 'rate'), lfoOther: kd('lfo', 'phase'),
-      envAdr: kd('env', 'a'), envOther: kd('env', 's'), round: cs('.m2kd', 'borderTopLeftRadius'),
-      ckval: cs('.ckval', 'fontSize'), arcRot: document.querySelector('.ckarc-trk').getAttribute('transform') };
-
-    /* §6 · THE FOLDED STRIP */
-    __LW.mod.view.sync();
-    const foldBtn = document.querySelector('.m2dev.lfo .m2fold');
-    foldBtn.click(); await nap(60);                                  // COMPACT
-    out.compact = { w: R('.m2dev.lfo')[0], mode: document.querySelector('.m2dev.lfo').dataset.mode };
-    foldBtn.click(); await nap(60);                                  // MINIMIZED
-    __LW.mod.paint();
-    out.min = { box: R('.m2dev.lfo'), mode: document.querySelector('.m2dev.lfo').dataset.mode,
-      headDir: cs('.m2dev.m2min .m2head', 'flexDirection'), headl: cs('.m2dev.m2min .m2headl', 'display'),
-      meter: R('.m2meter')[0], minname: cs('.m2minname', 'writingMode'),
-      minnum: R('.m2minnum'), shape: R('.m2lfominshape')[0], moveMin: cs('.m2dev.m2min .m2move', 'display') };
-    foldBtn.click(); await nap(60);                                  // back to FULL
-
-    /* §7 · THE SIZE LAWS — arithmetic, never a measurement of the live window */
-    __LW.mod.paint();
-    const g0 = V.geometry();
-    out.law = { modes: g0.modes, w: g0.w, lawW: g0.lawW, h: g0.h, lawH: g0.lawH };
-    out.lawCases = { oneFull: 716, threeAndAFold: 1521 };            // ACCEPTANCE §7's worked cases
-
-    /* §8 · THE 44 px LAW, counted in the SHIPPED stylesheet */
-    const css = await (await fetch('./mir/modwindow/modwindow.css')).text();
-    /* THE COUNT IS THE WINDOW'S OWN SHEET, which is PART B: PART A is the 44 chrome rules the port
-       brought out of index.html, and two of them carry a 44px of their own.  135 + 2 = 137. */
-    const partB = css.slice(css.indexOf('PART B — THE WINDOW'));
-    out.law44 = { px44all: (css.match(/44px/g) || []).length,
-      px44own: (partB.match(/44px/g) || []).length,
-      minH44: (css.match(/min-height: 44px/g) || []).length,
-      bands: ['m2fold', 'm2ab', 'm2move', 'm2pow', 'm2x', 'm2grab', 'm2ring', 'm2clr', 'modtempo']
-        .filter((c) => css.indexOf('.' + c + '::before') >= 0).length };
-    out.short44 = [R('.m2seat44')[1], R('.m2chk')[1], R('.m2preset')[0], R('.m2preset')[1],
-      R('.m2bank')[0], R('.m2bank')[1], R('.m2hold')[1], R('.modxport')[0], R('.modxport')[1],
-      R('.modtap')[0], R('.modtap')[1], R('.m2grip')[0], R('.m2grip')[1], R('.m2numseat')[0],
-      R('.m2prename')[1], R('.m2zoom')[1], R('.m2macadd')[1], R('.m2trig')[1]];
-    out.inkSmall = { ab: R('.m2ab')[1], pow: R('.m2pow')[1], x: R('.m2x')[1] };
-
-    /* §9 · THE THREE COPIED DEFECTS, WHICH ARE NOW THE THREE DIVERGENCES (wave 69).  ACCEPTANCE §9
-       asks a mount to REPRODUCE these, on the grounds that a mount rendering them correctly has
-       silently redesigned the window.  Josh has ruled the other way — "the modulation window is
-       broken … whatever problem it has we will try to fix here" — so the assertion is inverted and
-       lab/mir/PORT-NOTES.md carries the diff for the port back.  The artifact's own files are still
-       byte-identical: all three corrections are in lab/modhost.css, which is ours. */
-    const pick = document.querySelector('.m2pick');
-    pick.hidden = false; const pickBg = getComputedStyle(pick).backgroundColor; pick.hidden = true;
-    /* D2 · a .m2clr on a control OUTSIDE .m2root.  It is built, measured and discarded: the button
-       does not ship (see REPORT wave 64, the overlay split), and the RULE that makes it transparent
-       is in the sheet, unscoped, exactly as BASINS wrote it. */
-    const host = document.querySelector('.k[data-param] .k-dial');
-    const clr = document.createElement('button'); clr.className = 'm2clr'; host.appendChild(clr);
-    const clrBg = getComputedStyle(clr).backgroundColor; clr.remove();
-    /* D1 is asserted AGAINST THE CHASSIS MEASURED AT THE SAME INSTANT, not against a colour typed here:
-       the ladder is themed, and the claim is "the sheet wears the plate it was written for". */
-    out.fixed = { D1_pick: pickBg, D1_want: cs('.m2dev', 'backgroundColor'),
-      D2_clr: clrBg, D2_well: getComputedStyle(document.body).getPropertyValue('--glass-well').trim(),
-      D3_move: cs('.m2dev:not(.m2min) .m2move', 'display'), D3_moveMin: out.min.moveMin,
-      D3_moveCmp: (() => { const d = document.querySelector('.m2dev'); d.classList.add('m2cmp');
-        const v = getComputedStyle(d.querySelector('.m2move')).display; d.classList.remove('m2cmp'); return v; })() };
-
-    /* §10 · THE STRING.  The chip rail's material hangs off it in 24 rules, byte for byte. */
-    const rail = document.querySelector('.kwin-chiprail');
-    const chip0 = document.querySelector('.crail-chip');
-    const before = () => getComputedStyle(chip0, '::before').backgroundColor;
-    out.string = { aria: rail.getAttribute('aria-label'),
-      chipBefore: before(),
-      occurrences: (css.match(/aria-label="MODULATION window controls"/g) || []).length };
-    /* AND THE TRAP, DEMONSTRATED RATHER THAN DESCRIBED: change the label by one byte and the chip
-       rail loses its material — no error, no console line, nothing but "the chips look wrong". */
-    rail.setAttribute('aria-label', 'Modulation window controls');
-    out.string.mutated = before();
-    rail.setAttribute('aria-label', out.string.aria);
-    out.string.restored = before();
-
-    __LW.mod.reset(); if (__LW.mod.expanded) __LW.mod.collapse();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B129 W-MOUNT · THE PORT IS PROVED BY GEOMETRY, WHICH IS THE WHOLE POINT (wave 64). docs/ui/STYLE-LOCK.md\'s PORTED-WINDOW EXCEPTION says an artifact port is proved by MEASURED widths, gutters, radii and chip sizes — not by resemblance — because three previous passes re-implemented this window\'s functions in the house idiom and threw its layout away, and prose could not hold the line. This is lab/mir/modwindow/ACCEPTANCE.md driven against the real host. THE STYLESHEET PARSES WHOLE — 708 rules, 44 chrome + 661 flat + 3 @media, so no rule was dropped by a scoping mistake — and THE MATERIAL LADDER RESOLVES to four different values — three shades of black over a pane that is now THE HOUSE\'S OWN (wave 69, Josh three times over): chassis rgba(0, 0, 0, .10), control rgba(0, 0, 0, .06), hero rgba(0, 0, 0, .30), and the pane transparent on DARK + REFRACTIVE — byte-identical to #sheet, the ABOUT/EXACT face, measured beside it — and the house card exactly on TINTED, because the window answers CARD STYLE now instead of being pinned opaque at a specificity it could not reach. Wave 64 read BASINS\' own four grey plates here (.68 / .712 / .552 / .777 at --m2-blend .26) and this is the ONE row of the table wave 66 was asked to change: one tint, and four depths made of light. Every other row is GEOMETRY and is unmoved. THE FRAME: radius 12, a 0.6 px hairline the engine reports as 1, overflow VISIBLE and contain LAYOUT (the window undoes half of .kwin\'s clip on purpose, because the work bars are allowed to paint beyond it), body padding 5px 10px 9px, a 62 px chip disc and exactly NINE 2 x 2 grip dots on a three-track grid. THE WORK-BAR LANE is 52 px with two absolutely-positioned boxes in it and a real hole between them — the lane takes no presses and each bar takes its own — the preset bar 294, the timing bar 450 and never elastic, the name field and the preset core 44 tall, and the strip in install order: play, tempo, TAP, sync, cadence, HOLD 1/4, HOLD 1. THE MACROS RAIL is 224 wide, its slot 64 with a 62 row, its grip and its numbered seat 44 square, and the track line under the name is a PSEUDO-ELEMENT with nothing in the DOM to find. A CARD is 360 x 368 FULL, 320 COMPACT, 64 x 368 FOLDED, radius 16, head 48 by computed height, body 216; the knobs are all different on purpose — LFO 48 with RATE 56, ENV 42 with A/D/R 48 — every arc is rotate(-240 50 50) and .m2kends never paints. Two base values in the table are used by NO full card and the block measures the card instead, exactly as MANIFEST §6 warns: the ENV .m2rt is 90 rather than 104, and the check lamp .m2dot is 7 on an LFO and an ENV where the base rule says 9. THE SIZE LAWS ARE ARITHMETIC and the built window equals them. THE 44 px LAW, counted in the shipped sheet: 135 occurrences of 44px in the WINDOW\'s own half and 137 in the file, because the 44 chrome rules the port brought out of index.html carry two more; 33 of min-height: 44px; nine ::before hit bands on .m2fold, .m2ab, .m2move, .m2pow, .m2x, .m2grab, .m2ring, .m2clr and .modtempo — and every seat, check, preset, bank, hold, transport button, grip, numbered seat, name field, zoom, macro-add and TRIG measures at least 44 on the axis the law is written for, while the three small-ink controls measure 40 because their target is restored by a band (a mount that "fixes" that to 44 has changed the window). THE THREE COPIED DEFECTS ARE NOW THE THREE DIVERGENCES — Josh said "we can fix later" and later is wave 69: .m2pick carries the chassis it was written for, a .m2clr on a host control carries the house recess, and the reorder arrows paint in FULL mode (and still not in COMPACT or FOLDED, where the artifact\'s own reasoning hides them).  All three corrections are in modhost.css, which is ours, so the artifact\'s own modwindow.js and modwindow.css are still byte-identical to the staged copy and the port back is a diff of three reach-list lines. AND THE STRING, WHICH IS THE ONE FAILURE MODE WITH NO VISUAL HINT: the rail\'s aria-label is "MODULATION window controls" byte for byte, the selector text appears 27 times across 23 rules in the sheet, and the chip\'s ::before carries a material rather than nothing — proved by BREAKING it, which is the only way to prove a silent failure: sentence-case the label by one byte and the ::before goes rgba(0, 0, 0, 0) with no error and no console line, and putting the byte back restores it exactly',
-    !mwA.error && mwA.A0.has708 && mwA.A1ok
-      && mwA.frame.radius === '12px' && mwA.frame.border === '1px'
-      && mwA.frame.overflow === 'visible' && mwA.frame.contain === 'layout'
-      && mwA.frame.bodyPad === '5px 10px 9px' && mwA.frame.bodyOverflow === 'visible'
-      && mwA.frame.chip.join() === '62,62' && mwA.frame.dots === 9 && mwA.frame.dot.join() === '2,2'
-      && mwA.frame.dotGrid.split(' ').length === 3
-      && mwA.lane.foot === 52 && mwA.lane.footZ === '9' && mwA.lane.footPE === 'none' && mwA.lane.barPE === 'auto'
-      && mwA.lane.barR === '16px' && mwA.lane.prebar.join() === '294,52' && mwA.lane.pre.join() === '450,52'
-      && mwA.lane.precore === 44 && mwA.lane.prename === 44
-      && mwA.lane.xport.join() === '44,44' && mwA.lane.tap.join() === '44,44' && mwA.lane.tempoH === 22
-      && mwA.lane.hold[0] >= 46 && mwA.lane.hold[1] === 44 && mwA.lane.deadOff === 'none'
-      && mwA.lane.order.split('|').map((c) => c.split(' ')[0]).join('|') === 'modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold'
-      && mwA.rail.rail.join() === '224,368' && mwA.rail.slot[1] === 64 && mwA.rail.slotrow[1] === 62
-      && mwA.rail.grip.join() === '44,44' && mwA.rail.numseat[0] === 44 && mwA.rail.num.join() === '24,24'
-      && mwA.rail.ring.join() === '34,34' && mwA.rail.mclr[0] === 44 && mwA.rail.mclr[1].join() === '44,44'
-      && mwA.rail.macadd === 44 && mwA.rail.headFont === '10.5px' && mwA.rail.trackIsPseudo
-      && mwA.card.full.join() === '360,368' && mwA.card.radius === '16px' && mwA.card.headCss === '48px'
-      && mwA.card.body === 216 && mwA.card.kind === '13px' && mwA.card.bank.join() === '46,44'
-      && mwA.card.grab.join() === '16,40' && mwA.card.trig[0] >= 48 && mwA.card.trig[1] === 44
-      && mwA.card.preset.join() === '44,44' && mwA.card.presets === 6 && mwA.card.dot.join() === '7,7'
-      && mwA.card.add.join() === '46,46' && mwA.card.rtEnv === 90 && mwA.card.kends === 'none'
-      && mwA.knobs.lfoRate.join() === '56,56' && mwA.knobs.lfoOther.join() === '48,48'
-      && mwA.knobs.envAdr.join() === '48,48' && mwA.knobs.envOther.join() === '42,42'
-      && mwA.knobs.round === '50%' && mwA.knobs.ckval === '7.5px'
-      && mwA.knobs.arcRot === 'rotate(-240 50 50)'
-      && mwA.compact.w === 320 && mwA.compact.mode === 'compact'
-      && mwA.min.box.join() === '64,368' && mwA.min.mode === 'minimized' && mwA.min.headDir === 'column'
-      && mwA.min.headl === 'contents' && mwA.min.meter === 11 && /vertical-rl/.test(mwA.min.minname)
-      && mwA.min.minnum[1] === 44 && mwA.min.shape === 22
-      && mwA.law.w === mwA.law.lawW && mwA.law.h === 466 && mwA.law.lawH === 466
-      && mwA.law44.px44own === 135 && mwA.law44.px44all === 137 && mwA.law44.minH44 === 33 && mwA.law44.bands === 9
-      && Math.min.apply(null, mwA.short44) >= 44
-      && mwA.inkSmall.ab === 40 && mwA.inkSmall.pow === 40 && mwA.inkSmall.x === 40
-      && mwA.fixed.D1_pick === mwA.fixed.D1_want && mwA.fixed.D1_pick !== 'rgba(0, 0, 0, 0)'
-      && mwA.fixed.D2_clr !== 'rgba(0, 0, 0, 0)'
-      && mwA.fixed.D3_move === 'flex' && mwA.fixed.D3_moveMin === 'none' && mwA.fixed.D3_moveCmp === 'none'   /* the rule says inline-flex; a flex ITEM blockifies, so the computed value is flex — which is the value that proves it PAINTS */
-      && mwA.string.aria === 'MODULATION window controls' && mwA.string.occurrences === 27
-      && mwA.string.chipBefore !== 'rgba(0, 0, 0, 0)'
-      && mwA.string.mutated === 'rgba(0, 0, 0, 0)' && mwA.string.restored === mwA.string.chipBefore
-      && mwA.errs === 0, mwA);
-
+    const nap = () => new Promise(r => setTimeout(r, 180));
+    __LW.pause(); __LW.mod.reset(); __LW.mod.expand();
+    __LW.mod.addSource('lfo'); __LW.mod.addSource('env'); await nap();
+    const { GEOM } = await import('./mir/modwindow/modwindow.js');
+    const win = document.querySelector('#modwin'), V = __LW.mod.view;
+    const box = e => { const b = e.getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; };
+    const css = e => getComputedStyle(e);
+    const cards = [...win.querySelectorAll('.m2dev')];
+    const full = cards.map(box), wantedHeight = parseFloat(css(win.querySelector('.m2root')).getPropertyValue('--m2-device-h'));
+    const dims = V.geometry();
+    const fold = cards[0].querySelector('.m2fold'); fold.click(); await nap();
+    const folded = box(cards[0]), foldedMode = cards[0].dataset.mode;
+    fold.click(); await nap();
+    const restored = box(cards[0]), restoredMode = cards[0].dataset.mode;
+    const knobs = [...win.querySelectorAll('.m2kd')].map(box);
+    const add = document.querySelector('.m2addchip');
+    const out = { full, wantedHeight, dims, folded, foldedMode, restored, restoredMode,
+      expectedWidth: GEOM.CARD_FULL.w, expectedStrip: GEOM.STRIP_W,
+      pane: css(win).backgroundColor, rootVisibility: css(win).visibility,
+      surfacesVisible: cards.every(e => css(e).visibility === 'visible' && css(e).pointerEvents === 'auto'),
+      sharedRadius: cards.every(e => css(e).borderTopLeftRadius === css(win.querySelector('.m2workbar')).borderTopLeftRadius),
+      knobsEqual: knobs.length > 0 && knobs.every(b => b.join() === knobs[0].join() && b[0] > 0),
+      addRetired: box(win.querySelector('.m2add')).join() === '0,0', addReachable: !!add && box(add).every(v => v > 0),
+      reorderHidden: cards.every(e => css(e.querySelector('.m2move')).display === 'none'),
+      dots: document.querySelectorAll('.kwin-grip-dots > i').length,
+      expectedDots: 9, railName: document.querySelector('.kwin-chiprail').getAttribute('aria-label'),
+      artifactRules: [...document.styleSheets].find(x => x.href && x.href.endsWith('/mir/modwindow/modwindow.css')).cssRules.length,
+      errs: window.__e.length };
+    __LW.mod.reset(); __LW.mod.collapse(); return out;
+  } catch(e) { return {error: String(e)}; }`) || {};
+  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs, moved ADD to the rail, and replaced the three-way fold with FULL/MINIMIZED. Full widths and folded widths still come from the frozen artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The artifact stylesheet still parses all 708 rules; unrelated house stylesheet counts carry no law.',
+    !mwA.error && mwA.full.every(b => b[0] === mwA.expectedWidth && b[1] === mwA.wantedHeight)
+      && mwA.dims.w === mwA.dims.lawW && mwA.dims.h === mwA.dims.lawH
+      && mwA.folded[0] === mwA.expectedStrip && mwA.folded[1] === mwA.wantedHeight && mwA.foldedMode === 'minimized'
+      && mwA.restored.join() === mwA.full[0].join() && mwA.restoredMode === 'full'
+      && mwA.pane === 'rgba(0, 0, 0, 0)' && mwA.rootVisibility === 'hidden' && mwA.surfacesVisible
+      && mwA.sharedRadius && mwA.knobsEqual && mwA.addRetired && mwA.addReachable && mwA.reorderHidden
+      && mwA.dots === mwA.expectedDots && mwA.railName === 'MODULATION window controls' && mwA.artifactRules === 708 && mwA.errs === 0, mwA);
 
   /* ══ B130 · THE THREE DEFECTS THE PORT INHERITED, DRIVEN ═══════════════════════════════════
    * Wave 63 deliberately did NOT build these three: they lived in markup this port replaces
@@ -7115,7 +6950,7 @@ try {
     /* the DROP MARKS: the artifact's WORD on every valid control, and our PAINT.
        Wave 106 moved WAVE's switches to SETTINGS; its non-routable SPACE segment
        still proves that controls outside the routing vocabulary recede. */
-    out.marks = { stamped: document.querySelectorAll('.k[data-m2target]').length,
+    out.marks = { expected: [...document.querySelectorAll('.k[data-param]')].filter(k => __LW.mod.registry.has(k.dataset.param)).length, stamped: document.querySelectorAll('.k[data-m2target]').length,
       lit: document.querySelectorAll('.k[data-param].mod-drop').length,
       recede: getComputedStyle(document.querySelector('.dev[data-id="observer"] .seg')).opacity,
       arming: document.body.classList.contains('mod-arming') };
@@ -7191,7 +7026,7 @@ try {
       && mwC.ghost.isArtifact && mwC.ghost.ours === false && mwC.ghost.onBody
       && mwC.ghost.pos === 'fixed' && mwC.ghost.pe === 'none' && mwC.ghost.h === 30
       && mwC.ghost.text === 'MACRO 1'
-      && mwC.marks.stamped === 12 && mwC.marks.lit === 12 && mwC.marks.arming === true
+      && mwC.marks.stamped === mwC.marks.expected && mwC.marks.lit === mwC.marks.expected && mwC.marks.expected > 0 && mwC.marks.arming === true
       && parseFloat(mwC.marks.recede) < 0.5 && mwC.marks.over === 1
       && mwC.marks.after.lit === 0 && mwC.marks.after.ghost === 'none'
       && mwC.notTravelled.cell[0] === 62 && mwC.notTravelled.dial[0] === 34
@@ -7225,6 +7060,7 @@ try {
     if (!__LW.mod.expanded) { __LW.mod.expand(); await new Promise((r) => setTimeout(r, 260)); }
     __LW.mod.arm(true);
     if (!window.__w65) {
+      __LW.mod.reset(); // each navigation may restore an older rack; this rig owns its source
       const s = __LW.mod.addSource('lfo');
       const m = __LW.mod.model.macroList()[0].id;
       __LW.mod.bind(m, s);
@@ -7256,9 +7092,9 @@ try {
     const inDocked = !!b.closest('#transport.docked');
     __LW.layout.dockTransport(); await new Promise((r) => setTimeout(r, 220));
     const inPill = !!b.closest('#transport.mini');
-    /* the glow is a TOKEN, proved by resolving --acc2 in the page rather than by naming a hex */
-    const probe = document.createElement('span'); probe.style.color = 'var(--acc2)';
-    document.body.appendChild(probe); const acc2 = getComputedStyle(probe).color; probe.remove();
+    /* the glow is a TOKEN, proved by resolving --acc in the page rather than by naming a hex */
+    const probe = document.createElement('span'); probe.style.color = 'var(--acc)';
+    document.body.appendChild(probe); const accent = getComputedStyle(probe).color; probe.remove();
     const onC = getComputedStyle(b).color;
     b.classList.remove('on'); const offC = getComputedStyle(b).color; b.classList.add('on');
     /* THE PILL'S WIDTH BUDGET: nothing in the row is flex-shrunk any more */
@@ -7272,7 +7108,7 @@ try {
              on: b.classList.contains('on'), tbtn: b.classList.contains('tbtn'),
              pill: [Math.round(pill.width), Math.round(pill.height)],
              docked: [Math.round(dockedBox.width), Math.round(dockedBox.height)],
-             sameNode: same, wasDocked: inDocked, isPill: inPill, onC: onC, offC: offC, acc2: acc2,
+             sameNode: same, wasDocked: inDocked, isPill: inPill, onC: onC, offC: offC, accent: accent,
              modInArtifact: document.querySelectorAll('#modwin .modb, #modwin .tbtn').length,
              lane: [...document.querySelectorAll('#modwin .m2pre > *')].map((e) => e.className || e.id).join('|'),
              play: kids.find((k) => k.c === 'tbtn' || k.c === 'tbtn') ? kids[0].w : null,
@@ -7288,7 +7124,8 @@ try {
     const off = ids.map((id) => R.read(id));
     const atBase = off.every((v, i) => Object.is(v, bases[i]));
     const b = document.querySelector('#transport .tbtn.modb');
-    const hint = (document.querySelector('#modwin .m2hint') || {}).textContent || '';
+    const hint = document.querySelector('#modwin .m2hint');
+    const hintVisible = !!hint && !!hint.getClientRects().length && getComputedStyle(hint).visibility !== 'hidden';
     const offSeat = { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed') };
     /* a rack that is not merely stopped: the transport keeps its own position through the disarm */
     const keptPlaying = __LW.mod.playing;
@@ -7296,38 +7133,38 @@ try {
     const backHeld = ids.filter((id, i) => !Object.is(R.read(id), bases[i]));
     __LW.mod.stop(); __LW.mod.arm(true);
     return { ids: ids.length, heldByPause: heldByPause, atBase: atBase, offSeat: offSeat,
-             keptPlaying: keptPlaying, backHeld: backHeld, hint: hint.slice(0, 10),
+             keptPlaying: keptPlaying, backHeld: backHeld, hintVisible,
              onSeat: { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed') } };
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
 
   await g.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
   const w65keyA = await g.ev(`return { armed: __LW.mod.armed, on: document.querySelector('#transport .tbtn.modb').classList.contains('on') };`);
-  await press('m');
+  await press(KEY.SPACE, [KEY.CTRL]);
   const w65keyB = await g.ev(`return { armed: __LW.mod.armed, on: document.querySelector('#transport .tbtn.modb').classList.contains('on'),
     stored: JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').modArm };`);
   await goto('warn=0');
   const w65keyC = await g.ev(`const b = document.querySelector('#transport .tbtn.modb');
     return { armed: __LW.mod.armed, on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed'),
              enabled: __LW.mod.host.clock.isEnabled() };`);
-  await press('m');
+  await press(KEY.SPACE, [KEY.CTRL]);
   const w65keyD = await g.ev(`return { armed: __LW.mod.armed, stored: JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').modArm, errs: window.__e.length };`);
 
   const w65T = { rig: w65rigT, seat: w65seatT, arm: w65armT, key: [w65keyA, w65keyB, w65keyC, w65keyD] };
-  judge('B132 THE MOD ARM SITS BESIDE PLAY ON BOTH TRANSPORTS, AND OFF IS NOT A PAUSE (wave 65). Josh asked for "a small MOD button that glows on or off" on the playhead, and ONE button covers both of the faces he named because `#transport` IS one element in two placements: the same node measures 26 x 24 in the pill at the foot of the stage and 44 x 44 in the card `dockTransport()` puts in the rack, which is the density law taken literally — the `.tbtn` seat is kept WHOLE (B70 walks it at the phone breakpoint, where a 40 would have failed the 44-px law) and only the INK narrows, to hold a word instead of a dingbat. NOTHING WAS ADDED INSIDE THE PORTED WINDOW: its timing bar is still `modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold` in install order and carries no button of ours, because that layout is the artifact\'s (STYLE-LOCK, THE PORTED-WINDOW EXCEPTION) and the arm is the HOST\'s. The glow is ACCENT B resolved live from the page — the colour modulation wears everywhere in this instrument — and not a hex. AND THE CLAUSE THAT MAKES THE ARM WORTH BUILDING: with the transport merely STOPPED, a hand macro still holds its target, because the pause law\'s own second line says a hand does not let go because the clock did — so `material.softness` is still 0.7 of the way off the user\'s number and only `material.exposure` came back. MOD OFF hands back BOTH, with Object.is and not a tolerance, and the window says so on its own hint line; re-arming picks both up again, and the modulation transport kept its position through the disarm rather than being quietly stopped. The m key is the same act, it is rebindable, and it SURVIVES A RELOAD in this browser\'s settings.',
+  judge('B132 THE MOD ARM SITS BESIDE PLAY ON BOTH TRANSPORTS, AND OFF IS NOT A PAUSE (wave 65). Josh asked for "a small MOD button that glows on or off" on the playhead, and ONE button covers both of the faces he named because `#transport` IS one element in two placements: the same node measures 45 x 34 in the pill at the foot of the stage and 44 x 44 in the card `dockTransport()` puts in the rack, which is the density law taken literally — the `.tbtn` seat is kept WHOLE (B70 walks it at the phone breakpoint, where a 40 would have failed the 44-px law) and only the INK narrows, to hold a word instead of a dingbat. NOTHING WAS ADDED INSIDE THE PORTED WINDOW: its timing bar is still `modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold` in install order and carries no button of ours, because that layout is the artifact\'s (STYLE-LOCK, THE PORTED-WINDOW EXCEPTION) and the arm is the HOST\'s. The glow is ACCENT A resolved live from the page — the mini transport shares its active ink — and not a hex. AND THE CLAUSE THAT MAKES THE ARM WORTH BUILDING: with the transport merely STOPPED, a hand macro still holds its target, because the pause law\'s own second line says a hand does not let go because the clock did — so `material.softness` is still 0.7 of the way off the user\'s number and only `material.exposure` came back. MOD OFF hands back BOTH, with Object.is and not a tolerance, and the MOD button exposes the off state; the resting hint stays hidden by the later ruling; re-arming picks both up again, and the modulation transport kept its position through the disarm rather than being quietly stopped. Ctrl+Space is the same act, it is rebindable, and it SURVIVES A RELOAD in this browser\'s settings.',
     !w65T.rig.error && !w65T.seat.error && !w65T.arm.error
       && w65rigT.routes === 2 && w65rigT.bpm === 20
       && w65seatT.text === 'MOD' && w65seatT.label === 'modulation on or off' && w65seatT.tbtn === true
       && w65seatT.sameNode === true && w65seatT.wasDocked === true && w65seatT.isPill === true
-      && w65seatT.pill.join() === '26,24' && w65seatT.docked.join() === '44,44'
+      && w65seatT.pill.join() === '45,34' && w65seatT.docked.join() === '44,44'
       && w65seatT.on === true && w65seatT.pressed === 'true'
-      && w65seatT.onC === w65seatT.acc2 && w65seatT.onC !== w65seatT.offC
+      && w65seatT.onC === w65seatT.accent && w65seatT.onC !== w65seatT.offC
       && w65seatT.modInArtifact === 0
       && w65seatT.lane.split('|').map((c) => c.split(' ')[0]).join('|') === 'modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold'
       && w65seatT.kids.every((k) => k.w > 0 || k.c === '')
       && w65seatT.scroll <= w65seatT.box
       && w65armT.heldByPause.join() === 'material.softness'
       && w65armT.atBase === true && w65armT.offSeat.on === false && w65armT.offSeat.pressed === 'false'
-      && w65armT.keptPlaying === false && w65armT.hint === 'MOD IS OFF'
+      && w65armT.keptPlaying === false && w65armT.hintVisible === false
       && w65armT.backHeld.length === 2 && w65armT.onSeat.on === true
       && w65keyA.armed === true && w65keyB.armed === false && w65keyB.on === false && w65keyB.stored === false
       && w65keyC.armed === false && w65keyC.on === false && w65keyC.pressed === 'false' && w65keyC.enabled === false
@@ -7419,14 +7256,14 @@ try {
     await press(KEY.SPACE);
     await g.ev(`await new Promise((r) => setTimeout(r, ${ms})); return 1;`);
     const before = await g.ev(`const s = __LW.mod.host.clock.snapshot();
-      return { phase: s.sources[0].phase, beats: s.beats, running: s.running, phys: __LW.clock.playing };`);
+      return { phase: s.sources.find((q) => q.id === window.__w65.s).phase, beats: s.beats, running: s.running, phys: __LW.clock.playing };`);
     await press(KEY.SPACE);
     const paused = await g.ev(`await new Promise((r) => setTimeout(r, 700));
       const s = __LW.mod.host.clock.snapshot();
-      return { phase: s.sources[0].phase, beats: s.beats, running: s.running, phys: __LW.clock.playing };`);
+      return { phase: s.sources.find((q) => q.id === window.__w65.s).phase, beats: s.beats, running: s.running, phys: __LW.clock.playing };`);
     await press(KEY.SPACE);
     const after = await g.ev(`const s = __LW.mod.host.clock.snapshot(), p = __LW.mod.resume();
-      return { phase: s.sources[0].phase, beats: s.beats, running: s.running, phys: __LW.clock.playing,
+      return { phase: s.sources.find((q) => q.id === window.__w65.s).phase, beats: s.beats, running: s.running, phys: __LW.clock.playing,
                law: p.last.law, grid: p.last.grid, moved: p.last.moved, applied: p.last.applied, mode: p.mode };`);
     await g.ev(`__LW.pause(); __LW.mod.stop(); return 1;`);
     return { before, paused, after };
@@ -7490,192 +7327,36 @@ try {
       && w65bar2.hint.indexOf('no exact period under a static field') > 0, w65lawT);
 
 
-  /* ══ WAVE 66 · THE MIR PLUGIN PUTS ON OUR GLASS ═══════════════════════════════════════════════
-   * B135 is the MATERIAL half of the port's contract, and it gates only what an eye cannot check:
-   * that the five grey plates are gone, that what replaced them is LIGHT, that the eight --gl-*
-   * tokens the artifact ships inert are on, that the accent still resolves live, and that the
-   * artifact itself is byte-for-byte the file wave 64 mounted.  The APPEARANCE is not gated — it is
-   * screenshotted in both themes and Josh looks at it.  B129 above is the geometry, unmoved. ─── */
+  /* ══ THE HOUSE MATERIAL · wave 66 origin, wave 107 surface contract ══════════════════════
+   * B135 compares the surfaced panes with ABOUT across the live settings matrix. Removed
+   * shade stacks and bevel tokens are historical, not a demand to restore those layers. */
+  /* STALE LAW: the former black shade stack and glasslight bevels were removed by
+     later material waves. The live card surfaces now inherit the house pane; the root
+     is only layout. Comparing the removed root pane certified the superseded design. */
   const glassT = await g.ev(`try {
-    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const out = {};
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    __LW.mod.addSource('lfo'); __LW.mod.addSource('env');
-    await nap(240); __LW.mod.paint();
-    const win = document.getElementById('modwin');
-    const th0 = __LW.themeChoice;
-    const cs = (s, p) => { const e = document.querySelector(s); return e ? getComputedStyle(e)[p] : null; };
-    const tok = (n) => getComputedStyle(win).getPropertyValue(n).trim();
-    const rgba = (c) => { const m = /rgba?\\(([^)]*)\\)/.exec(c || ''); if (!m) return null;
-      const p = m[1].split(',').map((x) => parseFloat(x));
-      return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
-    const A = (c) => { const v = rgba(c); return v ? v.a : null; };
-    const pct = (as) => Math.round(as.reduce((k, x) => k * (1 - x), 1) * 1000) / 10;
-
-    /* §1 · ONE TINT, FIVE DEPTHS — the tier tokens per theme, and what is left of the live field */
-    const ladder = () => { const t = {
-        pane: getComputedStyle(win).backgroundColor, chassis: cs('.m2dev', 'backgroundColor'),
-        rail: cs('.m2rail', 'backgroundColor'), control: cs('.m2seat44', 'backgroundColor'),
-        recess: getComputedStyle(document.querySelector('.m2dialink'), '::before').backgroundColor,
-        hero: cs('.m2edit.m2hero', 'backgroundColor'), status: cs('.m2status', 'backgroundColor') };
-      t.field = { edge: pct([A(t.pane)]), device: pct([A(t.pane), A(t.chassis)]),
-                  control: pct([A(t.pane), A(t.chassis), A(t.control)]),
-                  capsule: pct([A(t.pane), A(t.chassis), A(t.status)]) };
-      t.shades = ['chassis', 'rail', 'control', 'recess', 'hero', 'status']
-        .filter((k) => { const v = rgba(t[k]); return v && v.r === 0 && v.g === 0 && v.b === 0; }).length;
-      return t; };
-    /* WAVE 69 · THE PANE ANSWERS CARD STYLE NOW, so the card style has to be STATED here — this block
-       used to read whatever the previous one left, which is the fixture bug ANTI-PATTERN 3 names.  The
-       ladder below the pane is measured on TINTED, where there IS a pane for a shade to sit on; the
-       shipped REFRACTIVE arm is measured separately and is the headline: the field is whole at the
-       window's edge, exactly as it is at every other card's edge. */
-    const card0 = __LW.cardStyle;
-    const house = () => getComputedStyle(document.getElementById('sheet')).backgroundColor;
-    __LW.setCardStyle('tinted');
-    /* THE NAPS ARE 420 + 200 AND THAT IS A MEASUREMENT, NOT PADDING: the artifact transitions its own
-       surfaces at --m2-motion-micro (80 ms), so a ladder read too soon after a theme switch catches a
-       control MID-TRANSITION.  It was caught here reading 0.124 on the way from dark's 0.06 to light's
-       0.16 — a number that is in no token and would have been pinned as one. */
-    __LW.setTheme('dark');  await nap(420); __LW.mod.paint(); await nap(200); out.dark  = ladder(); out.dark.house = house();
-    __LW.setTheme('light'); await nap(420); __LW.mod.paint(); await nap(200); out.light = ladder(); out.light.house = house();
-    __LW.setCardStyle('refractive');
-    __LW.setTheme('dark'); await nap(420); __LW.mod.paint(); await nap(200);
-    out.refract = { pane: getComputedStyle(win).backgroundColor, house: house(),
-      edge: pct([A(getComputedStyle(win).backgroundColor)]) };
-    /* the reference is #sheet and NOT a rack card: #sheet is the EXACT/NUMERICAL panel, it is .glass,
-       and it is the face Josh held the plugin up against in his own recordings.
-       EVERYTHING BELOW MEASURES ON **TINTED**, and it has to: §2's no-new-plate walk compares every
-       surface against the WINDOW'S OWN PANE COLOUR, and §3's two-stop wash is a background-image ON
-       that pane — under REFRACTIVE there is no pane for either to be about, so both would report the
-       two legitimate chooser sheets as new plates and the wash as gone.  card0 is restored at the end. */
-    __LW.setCardStyle('tinted'); await nap(320);
-
-    /* §2 · NO NEW PLATE.  The rule §5.1 makes mechanical: a state may change the LIGHT and the SHADE
-       on a surface, never introduce a fifth background-color with a new lightness.  So walk every
-       element in the window and every ::before / ::after, keep the NEUTRAL backgrounds at alpha
-       >= 0.5, and split them: the window's own pane colour is allowed (the two floating chooser
-       sheets carry it), and anything else is a grey plate growing back.  Under BASINS' block this
-       list had the four plates in it — chassis .712, control .552, recess-deep .777, status .742. */
-    const paneRGB = getComputedStyle(win).backgroundColor;
-    const plates = [];
-    for (const el of win.querySelectorAll('*')) {
-      for (const pe of [null, '::before', '::after']) {
-        const c = getComputedStyle(el, pe).backgroundColor, v = rgba(c);
-        if (!v || v.a < 0.5) continue;
-        if (Math.max(v.r, v.g, v.b) - Math.min(v.r, v.g, v.b) > 26) continue;   /* an accent, not a plate */
-        const cn = (el.className && el.className.baseVal !== undefined)
-          ? el.className.baseVal : String(el.className || el.tagName);
-        plates.push({ what: cn.split(' ')[0] + (pe || '') + '@' + v.a, pane: c === paneRGB });
-      }
+    const nap = () => new Promise(r => setTimeout(r, 240));
+    const before = { theme: __LW.themeChoice, card: __LW.cardStyle, frost: __LW.frost };
+    __LW.pause(); __LW.mod.reset(); __LW.mod.expand(); __LW.mod.addSource('lfo');
+    const win = document.querySelector('#modwin'), cs = e => getComputedStyle(e);
+    const rows = [];
+    for (const theme of ['dark','light']) for (const frost of ['off','always']) for (const card of ['refractive','tinted']) {
+      __LW.setTheme(theme); __LW.setFrost(frost); __LW.setCardStyle(card); await nap();
+      const house = cs(document.querySelector('#sheet')).backgroundColor;
+      const surfaces = ['.m2dev','.m2rail','.m2workbar'].map(q => cs(win.querySelector(q)).backgroundColor);
+      rows.push({theme,frost,card,house,surfaces,matched:surfaces.every(c => c === house),root:cs(win).backgroundColor});
     }
-    out.onPane = [...new Set(plates.filter((x) => x.pane).map((x) => x.what))];
-    out.plates = [...new Set(plates.filter((x) => !x.pane).map((x) => x.what))];
-
-    /* §3 · THE DEPTH IS LIGHT — the eight --gl-* tokens the artifact declares and shipped INERT */
-    __LW.setTheme('dark'); await nap(240); __LW.mod.paint(); await nap(80);
-    const sh = getComputedStyle(win).boxShadow;
-    out.bevel = { t: tok('--gl-t'), r: tok('--gl-r'), b: tok('--gl-b'), l: tok('--gl-l'),
-      w: tok('--gl-w'), glow: tok('--gl-glow'), fa: tok('--gl-fill-a'), fb: tok('--gl-fill-b'),
-      inner: tok('--m2-mat-inner'), edge: tok('--m2-mat-edge'), border: cs('#modwin', 'borderTopColor'),
-      stillInert: ['--gl-t', '--gl-r', '--gl-b', '--gl-l', '--gl-glow', '--gl-fill-a', '--gl-fill-b']
-        .filter((n) => tok(n) === 'transparent').length,
-      insets: (sh.match(/inset/g) || []).length,
-      oneSided: (sh.match(/-0\\.56px inset/g) || []).length,
-      spill: sh.indexOf('14px -2px') > 0,
-      wash: getComputedStyle(win).backgroundImage,
-      halo: (getComputedStyle(win).textShadow.match(/rgba/g) || []).length };
-    out.bevel.topIsLight = out.bevel.t.indexOf('0% 100%') > 0;
-    out.bevel.bottomIsDark = out.bevel.b.indexOf('0% 0%') > 0;
-    out.bevel.washTwoStop = /linear-gradient/.test(out.bevel.wash)
-      && out.bevel.wash.indexOf('255, 255, 255') > 0 && /rgba\\(0, 0, 0/.test(out.bevel.wash);
-
-    /* §4 · THE INVERSION, and it is ONE token.  Josh: dark-on-light only. */
-    out.invert = { ctlDark: A(out.dark.control), ctlLight: A(out.light.control),
-      chassisLight: A(out.light.chassis), raiseDark: tok('--glass-raise') };
-    __LW.setTheme('light'); await nap(220);
-    out.invert.raiseLight = tok('--glass-raise');
-    __LW.setTheme('dark'); await nap(220);
-
-    /* §5 · THE ACCENT IS STILL THE HOST'S ONE PARAMETER — and the signal glow now follows it */
-    const a0 = { acc: tok('--acc'), acc2: tok('--acc2'), glow: tok('--m2-signal-glow'), outer: tok('--gl-glow') };
-    const keepA = __LW.accent.a, keepB = __LW.accent.b;
-    __LW.accent.set((keepA + 137) % 360, (keepB + 211) % 360); await nap(240); __LW.mod.paint(); await nap(80);
-    const a1 = { acc: tok('--acc'), acc2: tok('--acc2'), glow: tok('--m2-signal-glow'), outer: tok('--gl-glow') };
-    __LW.accent.set(keepA, keepB); await nap(220); __LW.mod.paint(); await nap(80);
-    out.accent = { a0, a1, moved: a0.acc !== a1.acc && a0.acc2 !== a1.acc2,
-      glowFollows: a0.glow !== a1.glow, outerFollows: a0.outer !== a1.outer,
-      restored: tok('--acc') === a0.acc };
-
-    /* §6 · :root.fr-light IS NOW INERT, and that is the answer rather than an oversight */
-    const fr0 = [getComputedStyle(win).backgroundColor, cs('.m2dev', 'backgroundColor'),
-                 cs('.m2seat44', 'backgroundColor'), cs('.m2edit.m2hero', 'backgroundColor')].join('|');
-    document.documentElement.classList.add('fr-light'); await nap(220);
-    const fr1 = [getComputedStyle(win).backgroundColor, cs('.m2dev', 'backgroundColor'),
-                 cs('.m2seat44', 'backgroundColor'), cs('.m2edit.m2hero', 'backgroundColor')].join('|');
-    document.documentElement.classList.remove('fr-light');
-    out.frLight = { fr0, fr1, inert: fr0 === fr1 };
-
-    /* §7 · THE ARTIFACT IS UNTOUCHED — a re-skin that had to edit the artifact is not a re-skin */
-    const css = await (await fetch('./mir/modwindow/modwindow.css')).text();
-    const js = await (await fetch('./mir/modwindow/modwindow.js')).text();
-    const host = await (await fetch('./modhost.css')).text();
-    out.artifact = { cssChars: css.length, jsChars: js.length,
-      literalsLeft: (css.match(/rgba\\(255,255,255/g) || []).length,
-      seat: /⟪ BEGIN THE SKIN SEAT/.test(host) && /⟪ END THE SKIN SEAT/.test(host),
-      reachHeader: /THE REACH LIST — FIFTEEN/.test(host),
-      glDeclared: ['--gl-t', '--gl-r', '--gl-b', '--gl-l', '--gl-w', '--gl-glow', '--gl-fill-a', '--gl-fill-b']
-        .filter((n) => host.indexOf(n + ':') > 0).length,
-      a11yArms: (host.match(/prefers-reduced-transparency|prefers-contrast/g) || []).length };
-
-    /* §8 · OUR FONTS, and the two label boxes the swap moved — both still over their own floors */
-    const R = (s) => { const e = document.querySelector(s); const b = e.getBoundingClientRect();
-      return [Math.round(b.width * 10) / 10, Math.round(b.height * 10) / 10]; };
-    out.type = { sans: tok('--font-sans'), num: tok('--font-num'),
-      chip: cs('.crail-chip', 'fontFamily'), knobVal: cs('.ckval', 'fontFamily'),
-      tabular: getComputedStyle(win).fontVariantNumeric,
-      holdW: R('.m2hold')[0], holdH: R('.m2hold')[1], tempoH: R('.modtempo')[1],
-      house: getComputedStyle(document.body).fontFamily };
-
-    __LW.setTheme(th0); __LW.setCardStyle(card0); await nap(220);
-    __LW.mod.reset(); if (__LW.mod.expanded) __LW.mod.collapse();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B135 W-GLASS · THE PLATES ARE GONE AND THE DEPTH IS MADE OF LIGHT (wave 66). Josh: \'let\'s also use our glass man — remove the old tints and try to make it purely glass and pretty textures\'. THE FINDING THAT IS THE WHOLE WAVE: the glass was already built and switched off, and the tint was what was switched on. The pane\'s 67.7 % was never a tint — solved against the plugin\'s own plate colour over a worst-case WHITE field, #fff body ink needs α ≥ 0.619 for 4.5 : 1, so \'make it more transparent\' is REFUSED by a measurement. What made it a grey box was the FOUR MORE semi-opaque grey plates stacked inside it — chassis .712, control .552, recess-deep .777, status .742 — so the live field was 32 % visible at the window edge, 9.3 % in a device, 4.2 % in a control and 0.5 % in the status capsule. DEPTH WAS BEING PAID FOR IN OPACITY. So: ONE TINT, FIVE DEPTHS, AND THE DEPTHS ARE MADE OF LIGHT. The pane goes DENSER (.677 → .80) while everything inside it becomes a SHADE — pure black at an alpha, subtractive, so the field\'s hue and structure come through where a grey plate killed both — plus an edge and an inner top light. Measured here in both themes: all six depths below the pane are rgb(0, 0, 0) at an alpha, against four grey plates before. WAVE 69 CHANGED THE PANE ROW AND ONLY THE PANE ROW, on Josh\'s third asking and against his own recordings: the plugin was never the wrong COLOUR — its hsl(212 14% 13%) and the house\'s hsl(214 16% 13%) are rgb(28, 33, 38) either way — it was pinned OPAQUE at a specificity CARD STYLE cannot reach, so every other card in the lab went REFRACTIVE and this one stayed a plate. It answers the switch now: on TINTED the pane IS #sheet\'s, the ABOUT/EXACT face he compared it against, byte for byte; on REFRACTIVE, which ships, it is transparent and equal to a rack card\'s and the field is 100 % whole at the window\'s edge. On the light theme it keeps a pane at 0.62 — this file\'s own stated contrast floor, the most field it can pass and still carry white ink — because the artifact\'s ink ladder is 52 white-alpha rungs on both themes by the port\'s standing decision, and that exception is written in the sheet rather than hidden. THE RULE IS MADE MECHANICAL, because prose could not hold this line either: every element in the window and every ::before / ::after is walked, and the NEUTRAL backgrounds at α ≥ .5 are exactly the two floating chooser sheets wearing the pane itself and .m2vedge, the 7 px white value handle, which is SIGNAL and not chrome. A fifth background-color with a new lightness is the plates growing back one wave at a time, and this arm is what catches it. THE TEXTURE IS THE EIGHT --gl-* TOKENS THE ARTIFACT DECLARES AND SHIPPED INERT: BASINS\' glasslight.js probes the picture behind each surface and writes them inline, we have no probe, and they were `transparent`. Given static values they cost ONE raster and nothing per frame, and they are the highest-value thing in the sheet — four one-sided 1.04 px inner edges (top brightest, the bottom lip DARK rather than white, which is the Fresnel asymmetry that makes a surface read as a material at all), a 14 px outer spill of Accent B, and a two-stop vertical wash that says the light behind this surface is not uniform. THE WASH WAS FOUND DEAD BY MEASURING IT: `body[data-card="refractive"] .glass { background: transparent }` (skin.css:279) is (0,2,1), the artifact\'s own recipe is (0,2,0), so the HOUSE was winning on every .glass surface inside the plugin and taking the background-IMAGE down with the colour — #modwin kept its pane only because the officiation rule sets the COLOUR longhand, and the two picker sheets had been painting transparent since the port. THE INVERSION IS ONE TOKEN and it is Josh\'s ruling, dark-on-light only: --m2-mat-control goes .06 → .16 on the light host, 2.7× the shade of its own chassis, so the button is unmistakably a DARK button darker than the device it sits in; on dark the rim and the density carry it, and on a stage where every house window is literally transparent the one opaque lit-rimmed slab IS the device. THE ACCENT IS STILL THE HOST\'S ONE PARAMETER: the wheel is turned 137° here and --acc, --acc2, the outer spill and --m2-signal-glow all move and come back — and the glow moving is NEW, because at :root it substituted where --hue-acc2 is not declared and had been frozen on the 288 fallback. `:root.fr-light` was tried and is INERT by construction: it moves only the --m2-mat-*-lum and -alpha INPUTS, and this seat supplies the DERIVED names, so all four surfaces read identically with the class on and off. AND THE ARTIFACT IS UNTOUCHED, which is the point of a MATERIAL wave: modwindow.css is 129 441 characters and modwindow.js 63 798, both byte-for-byte the files wave 64 mounted, all 75 of the sheet\'s white-alpha background literals still in it and simply made IRRELEVANT — zero forced edits — while B129\'s whole geometry table above passes UNMOVED. Our fonts reach it too: --font-sans and --font-num both point at the house face, tabular figures are on for the window, and the sheet\'s ONE literal font family, on the chip rail, is the fifteenth item of a named and counted reach list. The font swap moves exactly two label-sized boxes and neither is a table row: .m2hold 55.9 → 53.2 px against its stated min-width of 46, and .modtempo 110.9 → 98.6 px at its stated height of 22',
-    !glassT.error
-      /* WAVE 69 · THE PANE ROW IS THE ONE THIS WAVE WAS ASKED TO CHANGE, and it changed by ANSWERING
-         rather than by re-tuning: the plugin's tint was the house's to within one 8-bit code all
-         along, and what was wrong is that reach-list 15 pinned it opaque where CARD STYLE cannot
-         reach.  On TINTED the pane is now the HOUSE CARD EXACTLY — equal to #sheet, the ABOUT/EXACT
-         face Josh compared it against — and on REFRACTIVE, which ships, it is transparent and equal
-         to a rack card's, so the field is whole at the window's edge.  The six SHADES below it are
-         wave 66's and are unmoved, which is why they are still asserted here unchanged. */
-      && glassT.dark.pane === glassT.dark.house && glassT.dark.pane === 'rgba(28, 32, 38, 0.84)'
-      && glassT.light.pane === 'rgba(28, 32, 38, 0.62)'
-      && glassT.refract.pane === 'rgba(0, 0, 0, 0)' && glassT.refract.pane === glassT.refract.house
-      && glassT.refract.edge === 100
-      && glassT.dark.shades === 6 && glassT.light.shades === 6
-      && glassT.dark.field.edge === 16 && glassT.dark.field.device === 14.4
-      && glassT.dark.field.control === 13.5 && glassT.light.field.control === 28.1
-      && glassT.plates.length === 1 && glassT.plates[0].indexOf('m2vedge') === 0
-      && glassT.onPane.length === 2
-      && glassT.bevel.stillInert === 0 && glassT.bevel.insets === 5 && glassT.bevel.oneSided === 4
-      && glassT.bevel.spill === true && glassT.bevel.topIsLight && glassT.bevel.bottomIsDark
-      && glassT.bevel.washTwoStop && glassT.bevel.halo === 3 && glassT.bevel.w === '1.6px'
-      && glassT.invert.ctlDark === 0.06 && glassT.invert.ctlLight === 0.16
-      && glassT.invert.ctlLight > glassT.invert.chassisLight
-      && glassT.invert.raiseDark === 'hsl(0 0% 0% / 0.06)' && glassT.invert.raiseLight === 'hsl(0 0% 0% / 0.16)'
-      && glassT.accent.moved && glassT.accent.glowFollows && glassT.accent.outerFollows && glassT.accent.restored
-      && glassT.frLight.inert
-      && glassT.artifact.cssChars === 129441 && glassT.artifact.jsChars === 63798
-      && glassT.artifact.literalsLeft === 75 && glassT.artifact.seat && glassT.artifact.reachHeader
-      && glassT.artifact.glDeclared === 8 && glassT.artifact.a11yArms === 2
-      && glassT.type.num === glassT.type.sans && glassT.type.chip === glassT.type.house
-      && glassT.type.tabular === 'tabular-nums'
-      && glassT.type.holdW >= 46 && glassT.type.holdH === 44 && glassT.type.tempoH === 22
-      && glassT.errs === 0, glassT);
-
+    const hue = __LW.accent.a, hueB = __LW.accent.b, signal = () => cs(win).getPropertyValue('--m2-signal-glow');
+    const old = signal(); __LW.accent.set(hue + 137, hueB + 137); await nap(); const moved = signal() !== old;
+    __LW.accent.set(hue, hueB); await nap(); const restored = signal() === old;
+    const out = {rows,moved,restored,font:cs(win.querySelector('.ckval')).fontFamily,
+      tabular:cs(win).fontVariantNumeric,errs:window.__e.length};
+    __LW.setTheme(before.theme); __LW.setCardStyle(before.card); __LW.setFrost(before.frost);
+    __LW.mod.reset(); __LW.mod.collapse(); return out;
+  } catch(e) { return {error:String(e)}; }`) || {};
+  judge('B135 THE PLUGIN SURFACES WEAR THE HOUSE PANE IN BOTH THEMES. The detached root paints nothing; the device, macro rail and workbar match ABOUT under both CARD STYLE choices with FROST off and on. TINTED remains visibly distinct with FROST enabled, whose filter is independent of the pane. The later removal of stacked shade plates and glasslight bevels is deliberate; the live accent glow still moves with the palette and returns exactly. Numeric text uses the house font with tabular figures.',
+    !glassT.error && glassT.rows.length === 8 && glassT.rows.every(r => r.matched && r.root === 'rgba(0, 0, 0, 0)')
+      && glassT.rows.filter(r => r.card === 'tinted').every(r => r.house !== glassT.rows.find(q => q.theme === r.theme && q.frost === r.frost && q.card === 'refractive').house)
+      && glassT.moved && glassT.restored && /Roboto/.test(glassT.font) && /tabular/.test(glassT.tabular) && glassT.errs === 0, glassT);
 
   /* ── wave 67 · W-FROST: the disconnected window, the vividness policy, and the drag ────────────── */
   const dcT = await g.ev(`try {
@@ -7857,7 +7538,7 @@ try {
 
     __LW.setFrost('always'); await nap(220);
     out.always = { head: bf(h), body: bf(b), root: bf(d), live: __LW.frostLive };
-    out.recipe = /^blur\\([0-9.]+px\\) saturate\\(1\\.88\\) brightness\\(1\\.08\\)$/.test(out.always.head);
+    out.recipe = out.always.body === cs(document.body).getPropertyValue('--frost-filter').trim();
     __LW.play(); await nap(420);
     out.alwaysPlaying = { hold: document.body.classList.contains('frost-hold'), head: bf(h), live: __LW.frostLive };
 
@@ -7879,14 +7560,14 @@ try {
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B139 THE VIVIDNESS IS A POLICY, AND THE MATERIAL DOES NOT CHANGE UNDER YOUR HAND (wave 67, Josh: "I love how vivid it makes the background look in frost, lite glass, light in Basins… that would be the one upgrade I\'d do to our glass"). The vividness is BASINS\' recipe verbatim — saturate(188%) brightness(108%) against our old 115% — over the GLASS BLUR knob\'s own radius, and the other two thirds of their look were already ours and over-delivered: their plate is 0.46 of a dark slate with the tint saturation halved, ours is a 10 % veil of pure white or pure black, i.e. a tint saturation of zero. MEASURED on this rig, 360 rAF intervals per arm over a live field: none 17.10 ms / 58.5 fps, saturate(1.8) alone 50.32, blur(8px) 50.30, the full recipe 50.30 — identical, because THE COST IS THE BACKDROP CAPTURE AND NOT THE KERNEL, so there is no cheap half to buy. With the field PAUSED every arm reads 17.10 ms: free. Hence three seats — OFF (shipped, and the only arm that costs nothing while anything moves), STILL, ALWAYS — and the class is SPLIT so that the economy can never become the bug Josh filed against BASINS ("It returns to grey whenever I tap the screen"): body.frost is the MATERIAL and is the policy\'s, body.frost-hold is the MOMENT\'s and may take the FILTER off and nothing else. Proved here: ALWAYS keeps the filter through playback, STILL drops it while the transport runs and gives it back on pause, and the fill, border, shadow and radius of both surfaces are byte-identical either side of that — while .dev itself never carries a backdrop-filter at all, because a backdrop root there would leave the cards nothing to blur. The GOVERNOR\'s old lever is gone with it: it used to strip body.frost under load, which took the whole surface, and the grid notch it still has changes no appearance',
-    !fpT.error && fpT.off.cls === false && fpT.off.head === 'none' && fpT.off.api === 'off' && fpT.off.live === false
-      && fpT.recipe && fpT.always.body === fpT.always.head && fpT.always.root === 'none' && fpT.always.live === true
+  judge('B139 FROST POLICY CHANGES THE FILTER WITHOUT CHANGING THE MATERIAL UNDER THE HAND. The current recipe comes from the page token; the header adds its own small brightness and saturation treatment, even with FROST off. ALWAYS keeps the blur during playback; STILL removes it while playing and restores it on pause. Neither changes the fill, border, shadow or radius. The disconnected root remains filter-free so it cannot cut its children off from the backdrop, and the governor never strips the frost material',
+    !fpT.error && fpT.off.cls === false && !fpT.off.head.includes('blur(') && fpT.off.api === 'off' && fpT.off.live === false
+      && fpT.recipe && fpT.always.head.startsWith(fpT.always.body) && fpT.always.root === 'none' && fpT.always.live === true
       && fpT.alwaysPlaying.hold === false && fpT.alwaysPlaying.head === fpT.always.head
       && fpT.stillPlaying.hold === true && fpT.stillPlaying.head === 'none' && fpT.stillPlaying.body === 'none' && fpT.stillPlaying.live === false
       && fpT.stillStopped.hold === false && fpT.stillStopped.head === fpT.always.head && fpT.stillStopped.live === true
       && fpT.material.head && fpT.material.body && fpT.gov.state.indexOf('frost') < 0 && fpT.gov.held
-      && fpT.back.cls === false && fpT.back.head === 'none' && fpT.saved === 'off' && fpT.errs === 0, fpT);
+      && fpT.back.cls === false && fpT.back.head === fpT.off.head && fpT.saved === 'off' && fpT.errs === 0, fpT);
 
 
   /* ══ WAVE 68 · WHAT THE FOURTH REVIEW MEASURED, FIXED AND RE-MEASURED ═══════════════════════════
@@ -7974,7 +7655,7 @@ try {
     return { tag: t.tagName, role: t.getAttribute('role'), tab: t.tabIndex, focused: document.activeElement === t,
       barHidden: document.getElementById('menubar').hidden, playing: __LW.clock.playing, t0: __LW.clock.t };
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  await press(KEY.SPACE);
+  await press(KEY.ENTER);
   const logo1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 400));
     return { barHidden: document.getElementById('menubar').hidden, playing: __LW.clock.playing, t: __LW.clock.t,
       active: (document.activeElement.className || document.activeElement.id || document.activeElement.tagName) + '' };
@@ -7982,14 +7663,14 @@ try {
   await press(KEY.ESC);
   const logo2T = await g.ev(`try { await new Promise((r) => setTimeout(r, 200));
     const out = { barHidden: document.getElementById('menubar').hidden, backOnLogo: document.activeElement.id === 'title', playing: __LW.clock.playing };
-    /* A REAL <button> keeps Space, exactly as wave 62 promised — the law works wherever the selector can see it */
+    /* A REAL <button> keeps Enter, exactly as wave 62 promised — the law works wherever the selector can see it */
     __LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
     const swb = [...document.querySelectorAll('.sw')].find((b) => b.textContent.indexOf('KEEP FRAMES') >= 0);
     swb.focus(); window.__sw = swb; window.__swWas = swb.getAttribute('aria-pressed');
     out.swBefore = window.__swWas; out.swFocused = document.activeElement === swb;
     return out;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  await press(KEY.SPACE);
+  await press(KEY.ENTER);
   const logo3T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { swAfter: window.__sw.getAttribute('aria-pressed'), playing: __LW.clock.playing };
     if (out.swAfter !== window.__swWas) window.__sw.click();                      /* put KEEP FRAMES back, whatever it was */
@@ -8044,7 +7725,7 @@ try {
     __LW.keys.reset(); out.reset = __LW.keys.actions.find((a) => a.id === 'notes').key;
     out.errs = window.__e.length; return out;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B141 ONE PRESS DOES ONE THING, AND THE GUARD KNOWS ROLES (wave 68). #title is the one <div role="button"> in the lab — wave 62 created it deliberately, because it carries the wordmark, the nine-square SVG and wave 53\'s menu-open scale — and the single-key guard\'s selector named the TAG `button` and never `[role="button"]`, so one Space on the focused logo opened the menu AND started the physics clock (measured: playing false→true, t 0 → 1.863 s). B126 could not see it because Enter is bound to no action. Pressed here with a real driver Space: the menu opens and the transport does NOT move. Two more halves of the same law in the same run — a real <button> still keeps Space (the switch flips, the transport does not), which is what wave 62 promised and what always worked; and an ANCHOR is no longer routed to the button set, because a link does not activate on Space at all, so those presses reached nobody on all ten anchors and now reach the app again. The ACTIONS loop also honours e.defaultPrevented, which is the general net under all of it',
+  judge('B141 ONE PRESS DOES ONE THING, AND THE GUARD KNOWS ROLES (wave 68). #title is the one <div role="button"> in the lab — wave 62 created it deliberately, because it carries the wordmark, the nine-square SVG and wave 53\'s menu-open scale — and the single-key guard\'s selector named the TAG `button` and never `[role="button"]`, so one Space on the focused logo opened the menu AND started the physics clock (measured: playing false→true, t 0 → 1.863 s). B126 could not see it because Enter is bound to no action. Wave 88 superseded the activation key: pressed here with a real driver Enter, the menu opens and the transport does NOT move. Two more halves of the same law in the same run — a real <button> keeps Enter (the switch flips, the transport does not), while Space belongs to the transports; and an ANCHOR is no longer routed to the button set, because a link does not activate on Space at all, so those presses reached nobody on all ten anchors and now reach the app again. The ACTIONS loop also honours e.defaultPrevented, which is the general net under all of it',
     !logo0T.error && !logo1T.error && !logo2T.error && !logo3T.error && !logo4T.error
       && logo0T.tag === 'DIV' && logo0T.role === 'button' && logo0T.tab === 0 && logo0T.focused
       && logo0T.barHidden === true && logo0T.playing === false

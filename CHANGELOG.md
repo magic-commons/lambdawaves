@@ -7,13 +7,13 @@ This file is GENERATED — `node tools/changelog.mjs` — from the git tags and 
 Do not edit it by hand; edit the heading in `REPORT.md` and run the tool again.
 
 `REPORT.md` is the other document and it is not this one: it is the lab notebook — the laws, the constants, the
-measured numbers and the named proofs, for whoever builds next.  It is not release notes and it does not ship.
+measured numbers and the named proofs, for whoever builds next.  It is not release notes; it ships beside the application as the engineering record.
 
 ---
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 7 waves, 0 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 5 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -25,6 +25,30 @@ stable enough to gate on.
 - **wave 54**: W-ASKS-II — the machinery behind four more asks, and three places where the obvious build was the wrong one
 - **wave 55**: W-FLOAT — the transport's dock, widened until any window can come off the rack
 - **wave 56**: W-WIRING — three finished subsystems, two of them inert, and the window Josh asked to be one
+- **wave 57**: W-HONEST — four things two audits found that are not matters of taste, and one ruling that says which
+- **wave 58**: W-PULSE + W-H2CI-UI + THE TWO DIALS + THE CAMERA BUTTONS — two proved maths contracts get a face, and the planner one of them stands on gets corrected first
+- **wave 59**: W-AUDITS — the harvest of four audits, in which almost nothing was this wave's idea and the whole job was doing each one exactly and proving it
+- **wave 60**: W-MODSHAPE — the modulation window's missing half is one idea: a picture per source, and the six controls that picture makes meaningful
+- **wave 61**: W-MACRO-ROUTER — the macro becomes the router, and the arc reaches out onto the knob it holds
+- **wave 62**: W-KEYBOARD — the instrument becomes operable from a keyboard, and the law it needed was already written inside `knob()`
+- **wave 63**: W-MODFIX — four defects the third review measured, and in three of the four the fix is that a law finally reaches the case it was written for
+- **wave 64**: W-MOUNT — the modulation window arrives as an ARTIFACT, and the only thing this wave designed is the four edges it plugs into
+- **wave 65**: W-MODKEY — one key for two clocks, an arm that is not a pause, and three resume laws that were already drawn on the card
+- **wave 66**: W-GLASS — the MIR plugin puts on our glass, and the finding is that the glass was already built and switched off
+- **wave 67**: W-FROST — the disconnected window, a vividness with its price on the label, and a drag that writes once a frame
+- **wave 68**: W-KEYFIX + W-DEPLOY — a stale number is worse than silence, and a rule enforced by a coincidence of the address is not a rule
+- **wave 69**: W-POLISH — the math face goes to work, three numbers earn the right to move, and the plugin stops being made of different stuff
+- **wave 107**: W-FINISH — the rates turn the state, the keyboard manual gets its model, and saved projects acquire a boundary
+
+<details><summary>commits</summary>
+
+- `3ea35c2` 2026-09-07 — waves 50–106
+- `f5897a1` 2026-09-07 — wave 106 · the gate catches up, and two defects it was written to catch
+- `771936e` 2026-09-07 — the handoff, the landscape, and the keyboard manual wired
+- `1113dca` 2026-09-07 — ASTRA-START.md
+- `f11898d` 2026-09-07 — B131 was one selector, and the last six are diagnosed on disk
+
+</details>
 
 ---
 

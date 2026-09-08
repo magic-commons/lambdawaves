@@ -70,12 +70,15 @@ export function createHistory(port) {
 
   const row = (S, name) => ({ snapshot: S, label: name || UNNAMED, at: Date.now() });
   const here = () => ring[cursor] || null;
-  const dirty = () => { const e = here(); return !!e && port.liveKey() !== e.snapshot.key; };
+  /* A continuous drive is one unfinished gesture. Checking before liveKey also avoids
+     hashing the moving register on every read of canRedo. Edits made during the drive
+     join that gesture; its stop exposes one dirty state for the next commit. */
+  const dirty = () => { if (port.driven && port.driven()) return false; const e = here(); return !!e && port.liveKey() !== e.snapshot.key; };
   /** an edit may have happened: arm the quiet window (cheap — no snapshot is taken here).
    *  An optional NAME rides along, and an UNNAMED note never erases a name a caller already set —
    *  that is what lets hold('lane fader') survive the hundred anonymous notes the drag itself raises. */
   function note(name) {
-    if (applying) return;
+    if (applying || (port.driven && port.driven())) return;
     if (name) pending = name;
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => { timer = 0; commit(false); }, quiet);

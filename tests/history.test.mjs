@@ -240,5 +240,24 @@ function withClock(fn) {
     && r.labels.join(' · ') === 'start · lane fader · coefficient · edit · edit'
     && r.rows === 5 && typeof r.at === 'number' && r.v === 88, r);
 }
+/* A drive mutates between arbitrary clicks. Neither those clicks nor redo may mint
+   frames as edits; ending the drive exposes precisely one state to commit. */
+{
+  let value = 0, driven = false, reads = 0;
+  const H = createHistory({ read: () => ({ value, key: String(value) }),
+    write: (S) => { value = S.value; },
+    liveKey: () => { reads++; return String(value); }, driven: () => driven });
+  H.clear(); value = 1; H.flush(); value = 2; H.flush(); H.undo();
+  driven = true; const before = reads;
+  for (let i = 0; i < 30; i++) { value++; H.note(); H.hold(); H.release(); H.flush(); }
+  const quiet = reads === before, redo = H.canRedo, rows = H.entries().length;
+  H.redo(); const restored = value === 2;
+  value = 9; driven = false; H.note('rotation drive'); H.flush();
+  const one = H.entries().length === rows + 1;
+  H.undo();
+  judge('DRIVEN: no keys hashed or click entries while turning; redo survives; stop commits one undoable gesture',
+    quiet && redo && restored && one && value === 2, { quiet, redo, restored, one, value });
+}
+
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'history.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);
