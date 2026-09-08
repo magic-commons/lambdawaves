@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 5 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 8 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -47,6 +47,9 @@ stable enough to gate on.
 - `771936e` 2026-09-07 — the handoff, the landscape, and the keyboard manual wired
 - `1113dca` 2026-09-07 — ASTRA-START.md
 - `f11898d` 2026-09-07 — B131 was one selector, and the last six are diagnosed on disk
+- `ce70497` 2026-09-07 — wave 107: finish rate macros, project guards, keymap and frame export
+- `18e78c6` 2026-09-07 — LANDSCAPE: access.test.mjs does not hold the 44-px law, and B131 is unproven
+- `79d7a4d` 2026-09-07 — the closing for wave 107, written from the diff and a full gate run
 
 </details>
 

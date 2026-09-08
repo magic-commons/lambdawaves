@@ -1,5 +1,8 @@
 # WAVE 107 — the closing Astra did not get to write
 
+> Continuation correction: the historical review below is retained. Read the evidence-backed
+> addendum at the end before acting on its reopened-task or remaining-defect conclusions.
+
 She was rate-limited after committing `ce70497` and before writing this. Reconstructed
 from the diff and from a full gate run on her tree, by the session that handed off to
 her. Everything below is measured, not inferred from her commit message.
@@ -88,3 +91,37 @@ work was better than good; the bookkeeping ran ahead of both.
 - `law.h` 440 against the artifact's own `lawH` 466 — a genuinely broken invariant,
   recorded in `research/GATE-DIAGNOSIS-2026-09-07.md`.
 - The merge to `main`, which is one red away.
+
+
+## Continuation addendum — measured evidence supersedes the guesses above
+
+B139 is a **probe serialization defect**, not upstream state contamination. The actual browser
+measurement is `{token: "blur(22.0px)", computed: "blur(22px)"}`. `applySettings()` legitimately formats
+the blur with `toFixed(1)`. A clean profile uses the lexical default `22px`, explaining why the isolated
+probe passed. The fix resolves the token through a temporary element's computed `backdrop-filter` before
+comparing; no material setting or app behavior changed and the policy assertions remain intact.
+
+The six reopened tasks were delivered in **earlier waves**, which the wave-107 diff cannot establish or
+refute. `lab/skin.css` installs the Roboto/title subsets and STIX; `lab/lab.css` declares the math face;
+`kit.js` owns accessible sliders, segments and `formula()`. The latter explicitly rejects decorative
+tweens and renders true analytical values in live slots. `spectrum.js` and `rack.js` use it. The completed
+full gate passed B123–B124, B140–B144 and B146–B149, measuring these implementations. Absence of an odometer
+is the recorded motion decision, not absent dynamic mathematics. Host picker/CLEAR fixes are in
+`modhost.css` entries 16/17/21; the word BASINS need not appear in this wave's behavior diff to prove them.
+
+CARD STYLE was fixed in wave 107: the FROST pane override is scoped to REFRACTIVE, while both styles keep
+the shared filter. The measured eight-way theme/frost/pane matrix passed B135. No further ruling is
+needed to make this existing control effective. Josh's explicit new ruling keeps the resting hint hidden.
+
+The keyboard manual **was opened**: the initial screenshot exposed invalid HSL and an empty action list;
+after repair, `.tmp/keymap-final.png` and `.tmp/new-features.log` record all 43 rows, matching the live
+table, with an opaque-enough resolved pane and zero page errors. Its Escape/focus lifecycle was checked.
+This was a focused integration check, not a claim of exhaustive visual approval; Josh remains verifier.
+
+The geometry API now reports its **effective host** height, using the same CARD_TRIM and FLOAT_ROOM as
+placement. The frozen artifact retains its original 466 law; the deliberate host adjustment gives 440.
+B129 and B131 passed in the completed full run. The original frozen bytes remain protected by mir.test.
+The older diagnosis's warning about mismatched 440/466 numbers was addressed at that API seam.
+
+The task board completion entries now cite these source locations and measured blocks. Task #37 stays
+pending at GitHub authentication and Cloudflare deployment. No production outcome is inferred.

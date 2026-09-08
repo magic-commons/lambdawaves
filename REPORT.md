@@ -2123,3 +2123,12 @@ GitHub authentication and Cloudflare deployment remain account boundaries. The l
 ark and deploy payload can be prepared here; an unauthenticated CLI cannot create the remote, and this
 handoff explicitly forbids touching Cloudflare. `TASKS.md` records that remaining external task without
 calling it shipped.
+
+
+**Continuation: B139's final failure was lexical, not material.** The first full gate ended node 0,
+browser 1/165. Its body filter was `blur(22px)` and its token, after saved settings passed through
+`toFixed(1)`, was `blur(22.0px)`. Reproduced directly in Firefox. Both are the same CSS value; the probe now
+resolves the token through computed style before comparing. All policy/material arms stay unchanged.
+The interim closing review's reopened task conclusions are reconciled in WAVE-107-CLOSING.md's addendum
+with earlier source and the actual passing browser blocks, rather than assuming a feature must appear
+in the newest commit to exist.

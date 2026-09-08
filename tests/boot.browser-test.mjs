@@ -7538,7 +7538,15 @@ try {
 
     __LW.setFrost('always'); await nap(220);
     out.always = { head: bf(h), body: bf(b), root: bf(d), live: __LW.frostLive };
-    out.recipe = out.always.body === cs(document.body).getPropertyValue('--frost-filter').trim();
+    /* applySettings serializes blur with toFixed(1): the valid token blur(22.0px)
+       computes to blur(22px). Compare computed filters, not two serialization formats. */
+    const filterProbe = document.createElement('span');
+    filterProbe.style.backdropFilter = 'var(--frost-filter)';
+    document.body.appendChild(filterProbe);
+    out.recipeToken = cs(document.body).getPropertyValue('--frost-filter').trim();
+    out.recipeComputed = bf(filterProbe);
+    out.recipe = out.always.body === out.recipeComputed;
+    filterProbe.remove();
     __LW.play(); await nap(420);
     out.alwaysPlaying = { hold: document.body.classList.contains('frost-hold'), head: bf(h), live: __LW.frostLive };
 
