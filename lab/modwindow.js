@@ -67,6 +67,7 @@
  *      `envMove` writes the KNOB and never re-reads the clamped point.
  */
 import { el, seg, trig, knob, tapWatcher } from './kit.js';
+import { bindSliderKeys } from './slider-keys.js';
 import { glyphEl } from './mir/glyph.js';                    // wave 75: the rail chip's ink is a drawing, never a character
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modwindow/modwindow.js';
@@ -1242,12 +1243,15 @@ export function createModulation(host, port) {
       /* THE NUMBERED SEAT is the MASTER DEPTH: one unipolar gain over everything this macro
          sends, on the artifact's own 34-px ring.  A double-tap puts it back to 100 %, which is
          what the window's own hint line promises. */
-      wireSlider(rec.numSeat, {
+      const numberInput = {
         get: () => P.macroMin ? M.macroOf(m.id).value : M.macroOf(m.id).masterDepth,
         set: (v) => { const mm = M.macroOf(m.id); if (P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:clamp01(v)} : {masterDepth:clamp01(v)}); apply(); paint(true); },
         reset: () => { const mm=M.macroOf(m.id); if(P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:0} : {masterDepth:1}); apply(); paint(true); },
-        axis: 'y'
-      });
+        axis: 'y',
+        editable: () => !P.macroMin || !M.macroOf(m.id).sourceId
+      };
+      wireSlider(rec.numSeat, numberInput);
+      bindSliderKeys(rec.numSeat, numberInput);
       rec.numSeat.title = 'MASTER DEPTH — one gain over everything this macro sends. Drag up and down; double-tap for 100 %';
       /* THE ARIA IS THE HOST'S, AND THE ARTIFACT SAYS SO.  `buildMacroSlot` sets role="slider"
          "because that is what it is; the host's registry writes the aria range and value" — so it
@@ -1263,7 +1267,7 @@ export function createModulation(host, port) {
       } else {
         /* A HAND MACRO IS A BAR YOU DRAG SIDEWAYS.  A SOURCE-DRIVEN one is a LOCKED meter: you
            cannot turn a knob a source owns, because there is no knob there to turn. */
-        wireSlider(rec.val, {
+        const valueInput = {
           get: () => M.macroOf(m.id).value,
           set: (v) => { const mm = M.macroOf(m.id); if (mm.sourceId) return; M.setMacro(m.id, { value: clamp01(v) }); apply(); paint(true); },
           /* ⚠ WAVE 105 · NO `reset` HERE, DELIBERATELY.  `wireSlider` fires its reset from BOTH a
@@ -1273,8 +1277,11 @@ export function createModulation(host, port) {
              The reset is not lost — it lives on the GRIP, which is where it is advertised
              ("Double-tap resets the macro", and B130 drives that gesture).  The value bar's
              double-click is rename, alone, which is what the comment below always claimed. */
-          axis: 'x'
-        });
+          axis: 'x',
+          editable: () => !M.macroOf(m.id).sourceId
+        };
+        wireSlider(rec.val, valueInput);
+        bindSliderKeys(rec.val, valueInput);
         rec.val.title = 'this macro\'s value. Drag sideways to set it by hand; a source-driven macro is locked, because a hand and a modulator cannot share one number';
         aria(rec.val, m.name + ' value', 0, 100, 100 * M.macroOf(m.id).value, '0%');
         /* a DOUBLE-click opens the rename row, which is a sibling already in the DOM: opening it
@@ -2719,6 +2726,8 @@ export function createModulation(host, port) {
       rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
       rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
       aria(rec.numSeat, P.macroMin ? m.name+' VALUE' : 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
+      rec.numSeat.setAttribute('aria-disabled',String(P.macroMin && !!m.sourceId));
+      if(rec.val)rec.val.setAttribute('aria-disabled',String(!!m.sourceId));
       rec.numSeat.title = P.macroMin ? m.name+' value'+(m.sourceId?' — driven by source':'') : 'MASTER DEPTH';
       if (rec.val) aria(rec.val, m.name + ' value', 0, 100, 100 * m.value, rec.vnum.textContent);
     }

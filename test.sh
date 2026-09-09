@@ -57,6 +57,7 @@ node tests/render-exact.test.mjs; RX_RC=$?
 node tests/final-ii.test.mjs; F2_RC=$?
 node tests/access.test.mjs; AC_RC=$?
 node tests/native-ui.test.mjs; NU_RC=$?
+node tests/slider-keys.test.mjs; SK_RC=$?
 # WAVE 56 · pwa.test.mjs LAST, and it is the gate on ANTI-PATTERN 14: sw.js's cache NAME is a digest of
 # its own §1 precache table, so a stale entry means the name does not move when a file does and every
 # returning visitor is served the old bytes forever, silently.  It was RED when this wave started
@@ -66,7 +67,7 @@ node tests/pwa.test.mjs; PW_RC=$?
 NODE_RC=$(( NODE_RC || FR_RC || DY_RC || FD_RC || R4_RC || QC_RC || MO_RC || KI_RC || KE_RC || QH_RC || ML_RC || WE_RC || ZI_RC || HE_RC || H2_RC || CA_RC || CO_RC || GA_RC || PE_RC || AT_RC || EL_RC || ST_RC || TC_RC || SR_RC || WI_RC || RA_RC || MX_RC || HI_RC || PF_RC ))
 NODE_RC=$(( NODE_RC || MA_RC || MD_RC || PU_RC ))
 NODE_RC=$(( NODE_RC || HC_RC || MI_RC || AU_RC || PL_RC ))
-NODE_RC=$(( NODE_RC || SL_RC || CP_RC || IK_RC || WR_RC || RX_RC || AC_RC || PW_RC || F2_RC || NU_RC ))
+NODE_RC=$(( NODE_RC || SL_RC || CP_RC || IK_RC || WR_RC || RX_RC || AC_RC || PW_RC || F2_RC || NU_RC || SK_RC ))
 [ "${1:-}" = "node" ] && exit $NODE_RC
 PORT="${LW_PORT:-8701}"
 export MB_CERTS="${MB_CERTS:-$HOME/mandelbrot/certs}"

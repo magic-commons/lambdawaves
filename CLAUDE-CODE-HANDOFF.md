@@ -146,3 +146,19 @@ whole debugging pass reconciling historical source-text assertions.
   restoration. Default native share parameters preserve old encoded bytes; new
   material parameters use an optional backward-compatible section.
 - This is a local commit only. Do not assume push/deployment authorization.
+
+## Post-freeze follow-up: macro keyboard controls
+
+Josh authorized a focused debugging pass after the freeze. On
+`codex/macro-keyboard-fixes`, numbered macro controls and macro value bars now enter
+Tab order and handle Arrow keys (1%), Shift+Arrow (0.1%), Home and End. The host
+uses `lab/slider-keys.js`; source-driven values reject writes and expose
+`aria-disabled`, while expanded master depth remains editable. Space and modified
+application shortcuts remain untouched. The frozen artifact is unchanged.
+
+`tests/slider-keys.test.mjs` covers actual macro model depth/value separation,
+recreated control bindings, fine increments, bounds and source locks. It is included
+in the node runner. Real Firefox key input additionally verified depth 100→99,
+compact value 0→1, preservation through close/reopen, then 1→2. No page errors.
+This does not certify every trigger/routing/microphone interaction. Accessibility,
+PWA integrity and local build passed for this follow-up.
