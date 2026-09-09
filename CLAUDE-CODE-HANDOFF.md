@@ -1,9 +1,87 @@
-# Frozen app — Claude Code debugging and cleanup handoff
+# Claude Code debugging, cleanup and shipping handoff
+
+## Latest checkpoint: shipping preparation (2026-09-08)
+
+This section supersedes the older verification/build status below. The earlier
+freeze and macro keyboard sections remain the behavior contract and history.
+The incoming baseline is `78ecb30` on `codex/macro-keyboard-fixes`; this new commit
+contains release-tooling fixes, a notebook security fix and this handoff. There were no uncommitted changes
+at the start. No remote is configured; no push, deployment or release tag was made.
+
+**Your task:** perform major debugging and then refactoring/cleanup while preserving
+Josh's approved behavior below. Treat this as a release candidate preparation,
+not an already accepted release. Read [shipping readiness](docs/SHIPPING-READINESS.md)
+for the prioritized release blockers, implemented safeguards and release rehearsal.
+
+Current verification:
+
+- `bash test.sh node`: all **49** discovered suites pass on Node **22.22.1**,
+  including the new release/harness and notebook-security regression suites. The original 46-suite
+  baseline also passed before the changes.
+- `node tools/build-deploy.mjs --quiet`: **142 files, 4.29 MiB**, complete and
+  verified. PWA hashes were regenerated after the notebook fix; all hashes verify.
+- Shell and changed JS syntax checks, focused harness/packaging regressions, and
+  `git diff --check` pass. Tracked-source scan found no private-key PEM material;
+  this is not an exhaustive credential audit.
+- Browser baseline: **102 assertions emitted, 25 red**, then stalled during B88's
+  reload sequence and was interrupted. This is an incomplete failing run. Read the
+  [committed failure ledger](docs/BROWSER-BASELINE-2026-09-08.md); no full browser
+  acceptance is claimed for the subsequent notebook fix.
+- `npm ci --ignore-scripts` and Wrangler **4.129.0** deployment dry-run pass; no
+  assets uploaded. The deploy toolchain is locked, with **sharp 0.35.4** overridden
+  to fix its reported dependency advisory. `npm audit` reports **zero vulnerabilities**
+  in the npm graph; this does not cover vendored browser libraries.
+- Twelve local Wrangler HTTP checks passed: entry URLs (no redirect), module/worker
+  MIME, manifest and public documents, cache/security headers, missing asset 404s
+  and private deployment files/diagnostic page 404s. This is local serving evidence,
+  not a production or installed-PWA test.
+- The workflow is committed for future GitHub execution, not claimed as a hosted
+  CI result. No production checks or physical-device acceptance were performed.
+
+Security fix: notebook TeX fallback previously inserted raw text as HTML after
+sanitization when KaTeX was unavailable or threw. `lab/notebook-math.js` escapes
+that fallback and explicitly disables KaTeX trust; `rack.js` uses it and safely
+leaves unknown placeholders alone. The regression exercises hostile text under
+both fallback conditions and verifies the normal render options. Browser-level
+notebook acceptance remains part of your pass.
+
+What else changed: test mode selection and automatic suite discovery; HTTPS startup and
+cleanup; removal of an accidental certificate dependency on another project;
+refusal to attach to a pre-existing geckodriver session; configurable browser paths;
+public-asset packaging guards; credential ignore rules; pinned read-only CI actions;
+a reproducible audited deployment toolchain; and current shipping documentation. Regression tests run temporary fixtures and
+check actual failure propagation, mode isolation, port refusal and cleanup. Their
+browser fixture verifies the runner, not app or GPU behavior.
+
+Start your debugging pass here:
+
+1. Run the Node gate, then the browser gate on unused ports, retaining its exit code.
+   `LW_PORT=8719 GD_PORT=5239 bash test.sh browser` is the command used here.
+2. Triage the red browser assertions against the user-approved behavior in this
+   file and `docs/ui/STYLE-LOCK.md`. Old 18px-blur and Settings-keyboard expectations
+   are obsolete. Zero-area Spectrum targets, undo drag/key failures and exceptions
+   need reproduction before deciding whether the app or the test is wrong.
+3. Preserve the numerical/GPU correctness checks while separating stale visual
+   contracts into focused native-UI tests. Do not mark an exception/no-result as a
+   pass, suppress GPU errors, or restore retired UI merely to make the gate green.
+4. Reproduce macro/transport/project lifecycle behavior and add portable regressions
+   for isolated defects. Then consolidate CSS and split `rack.js` by ownership.
+5. Complete device, microphone, installed-PWA update and rollback acceptance from
+   the readiness checklist before declaring the app ready to ship.
+
+Local full logs: `.tmp/shipping-node-final.log`, `.tmp/shipping-build.log`, and
+`.tmp/shipping-browser-isolated.log`. Logs are ignored; the compact browser ledger
+is committed for a fresh clone. `gatekit.judge` truncates details to 300 characters,
+so reproduce individual failures with fuller diagnostics instead of guessing from
+truncated objects. Default-port failure originally came from someone else's active
+session; startup now refuses that port rather than touching it.
+
+---
 
 2026-09-08. Josh explicitly requested freezing the app, committing **all current
 working-tree changes**, and handing it to Claude Code for major debugging,
-refactoring, and cleanup. This document is the current entry point. The checkpoint
-commit containing it is the freeze baseline; use `git log -1` to identify it.
+refactoring, and cleanup. The original freeze baseline is `5f6421e`; see the latest checkpoint section above
+for subsequent work and current verification.
 No push or deployment is part of this freeze. Checkout at freeze: `main`.
 
 ## Scope and reading order

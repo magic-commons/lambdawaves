@@ -8,6 +8,5 @@ set -euo pipefail
 PORT="${1:-8700}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SERVER="$HERE/tools/gate/server.py"
-export MB_CERTS="${MB_CERTS:-$HOME/mandelbrot/certs}"
 echo "λWAVES · QWAVE-0 → https://127.0.0.1:${PORT}/lab/   (ctrl-c stops the server)"
 exec python3 "$SERVER" "$HERE" "$PORT"

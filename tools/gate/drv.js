@@ -2,21 +2,43 @@
 // global fetch caps at undici's 300 s headersTimeout, see req() below).
 import { spawn } from 'node:child_process';
 import http from 'node:http';
+import net from 'node:net';
+import { existsSync } from 'node:fs';
 
 const PORT = Number(process.env.GD_PORT || 4444);
 const BASE = `http://127.0.0.1:${PORT}`;
 
 export async function startDriver() {
-  const p = spawn('/snap/bin/geckodriver',
+  // Refuse an occupied port before spawning: /status can belong to another run.
+  await new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once('error', reject);
+    probe.listen(PORT, '127.0.0.1', () => probe.close(resolve));
+  });
+  const binary = process.env.GECKODRIVER || 'geckodriver';
+  const p = spawn(binary,
     ['--port', String(PORT), '--host', '127.0.0.1', '--allow-hosts', '127.0.0.1', 'localhost'],
     { stdio: ['ignore', 'pipe', 'pipe'] });
+  let startupError;
+  p.once('error', error => { startupError = error; });
   p.stdout.on('data', () => {});
   p.stderr.on('data', (d) => { if (process.env.GD_VERBOSE) process.stderr.write(d); });
-  for (let i = 0; i < 100; i++) {
-    try { const r = await fetch(BASE + '/status'); if (r.ok) return p; } catch (_) {}
-    await new Promise((r) => setTimeout(r, 100));
+  try {
+    for (let i = 0; i < 100; i++) {
+      if (startupError) throw startupError;
+      if (p.exitCode !== null || p.signalCode !== null) throw new Error('geckodriver exited during startup');
+      try {
+        const r = await fetch(BASE + '/status', { signal: AbortSignal.timeout(500) });
+        const status = r.ok ? await r.json() : null;
+        if (status?.value?.ready && p.exitCode === null && !startupError) return p;
+      } catch (_) {}
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    throw new Error('geckodriver did not come up');
+  } catch (error) {
+    if (p.pid && p.exitCode === null && p.signalCode === null) p.kill();
+    throw error;
   }
-  throw new Error('geckodriver did not come up');
 }
 
 /* node:http, NOT global fetch.  FOUND BY A FAILURE, not by reading: Node 22's
@@ -63,7 +85,9 @@ export async function newSession(opts = {}) {
       alwaysMatch: {
         acceptInsecureCerts: true,
         'moz:firefoxOptions': {
-          binary: '/snap/firefox/current/usr/lib/firefox/firefox',
+          ...(process.env.FIREFOX_BINARY ? { binary: process.env.FIREFOX_BINARY } :
+            existsSync('/snap/firefox/current/usr/lib/firefox/firefox') ?
+              { binary: '/snap/firefox/current/usr/lib/firefox/firefox' } : {}),
           args,
           /* S2-LAG: `opts.prefs` is ADDITIVE and defaults to nothing, so every
              harness written before it gets exactly the profile it always got.

@@ -30,7 +30,9 @@ KEPLER, VORTEX, MOLECULE, WIGNER, RADIATION, …), a transport with four clocks,
 modulation plug-in with drag-to-patch macros, presets, projects, shareable state links,
 and an offline-capable PWA.
 
-**Requires WebGPU.** Chrome/Edge 113+, Safari 18+, or Firefox with WebGPU enabled.
+**Requires a working WebGPU adapter in a secure context.** Browser support varies
+by OS, GPU and driver; see the [WebGPU compatibility reference](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API).
+The release device matrix is still pending; see [shipping readiness](docs/SHIPPING-READINESS.md).
 
 ## Run it
 
@@ -50,7 +52,10 @@ you edit is what the browser runs.
 ./test.sh browser   # a real headless Firefox drives the real UI
 ```
 
-The browser leg starts its own HTTPS server on 8701 and geckodriver on 5202. Blocks are
+Use Node 22, Python 3 and OpenSSL for the gate (the harness regression creates
+a temporary HTTPS server). The browser gate also needs Firefox and geckodriver on PATH. It starts its own HTTPS server on 8701 and
+geckodriver on 5202; `LW_PORT` / `GD_PORT` select unused ports. `GECKODRIVER` and
+`FIREFOX_BINARY` can select installed executables. It refuses occupied ports. Blocks are
 written as **laws in prose** — each one states what must be true and then measures it,
 so a failure reads as a sentence rather than an assertion number.
 
@@ -63,11 +68,12 @@ when the bytes do, and every returning visitor is served the old bytes for ever.
 ```bash
 node tests/pwa.test.mjs --write   # re-hash lab/ into sw.js §1
 node tools/build-deploy.mjs       # assemble dist/, prove it, print the payload
+npm ci --ignore-scripts          # install the pinned deploy CLI (not shipped)
 npx wrangler deploy --dry-run     # compiles and checks, uploads nothing
 npx wrangler deploy               # publish exactly that
 ```
 
-Read **[DEPLOY.md](DEPLOY.md)** first — it explains why λWAVES gets its own hostname
+Read **[shipping readiness](docs/SHIPPING-READINESS.md)** and **[DEPLOY.md](DEPLOY.md)** first — it explains why λWAVES gets its own hostname
 (a service worker's scope is an origin, and it outlives the deploy that installed it),
 why `html_handling` is `"none"`, and what the build refuses to let you do.
 
@@ -83,7 +89,7 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 
 ## Branches
 
-- **`main`** — the working build. Green gate, deployable.
+- **`main`** — the working integration branch. Release readiness requires current gate and device acceptance.
 - **`dev`** — iterative work. Waves land here first.
 
 ## Licence

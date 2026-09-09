@@ -12,3 +12,13 @@ dist/
 # wave 106 (THE ARK): tools/gate/server.py generates a self-signed pair here on first run.
 # A private key is never a repository's business, and this one is trusted by nothing anyway.
 .certs/
+
+# Local credentials and environment overrides must never enter a checkpoint.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+__pycache__/

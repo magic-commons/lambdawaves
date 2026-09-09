@@ -1,3 +1,4 @@
+import { renderNotebookMath } from './notebook-math.js';
 import { reworkNative, planeModel, infoPanel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
@@ -4444,7 +4445,7 @@ export async function boot(dom) {
         const math = []; const keep = (tex, display) => { math.push({ tex, display }); return '\uE000MATH' + (math.length - 1) + '\uE001'; };
         let s = src.replace(/\$\$([\s\S]+?)\$\$/g, (m, t) => keep(t, true)).replace(/(^|[^\\$])\$([^$\n]+?)\$/g, (m, pre, t) => pre + keep(t, false));
         let html = nbClean(M.parse(s, { breaks: true, gfm: true }));
-        html = html.replace(/\uE000MATH(\d+)\uE001/g, (m, i) => { const q = math[+i]; try { return K ? K.renderToString(q.tex, { displayMode: q.display, throwOnError: false, output: 'html' }) : '<code>' + q.tex + '</code>'; } catch (e) { return '<code>' + q.tex + '</code>'; } });
+        html = html.replace(/\uE000MATH(\d+)\uE001/g, (m, i) => { const q = math[+i]; return q ? renderNotebookMath(q.tex, q.display, K) : m; });
         return html;
       }
       const CAP = { lines: 14, words: 140 };

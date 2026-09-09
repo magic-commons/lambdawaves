@@ -1,5 +1,10 @@
 # DEPLOY — λWAVES Alpha
 
+**Current release status:** read [SHIPPING-READINESS](docs/SHIPPING-READINESS.md) and
+[Claude Code handoff](CLAUDE-CODE-HANDOFF.md) before following this historical runbook.
+Browser acceptance is not green. Run `npm ci --ignore-scripts` to install the pinned
+Wrangler toolchain before using the `npx` commands below.
+
 Local source is prepared through wave 107; account deployment remains task #37.
 The working and development branches are `main` and `dev`. Follow HANDOFF.md for GitHub login
 and remote creation. Cloudflare has not been touched in this takeover; the live acceptance and
@@ -78,8 +83,7 @@ and `./test.sh` keep working unchanged — the build re-proves that by walking e
 ## Local parity first — never `file://`
 
 ```
-npm init -y                        # once; add "private": true to the package.json it writes
-npm install --save-dev wrangler    # once
+npm ci --ignore-scripts            # install the committed, pinned deployment toolchain
 npx wrangler dev                   # http://localhost:8787/
 ```
 

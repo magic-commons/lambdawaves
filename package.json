@@ -1,0 +1,15 @@
+{
+  "name": "lambdawaves",
+  "private": true,
+  "scripts": {
+    "test": "bash test.sh node",
+    "test:browser": "bash test.sh browser",
+    "build": "node tools/build-deploy.mjs --quiet"
+  },
+  "devDependencies": {
+    "wrangler": "4.129.0"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
+  }
+}

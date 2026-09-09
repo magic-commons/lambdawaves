@@ -60,10 +60,16 @@ const A = (b) => `const d=arguments[arguments.length-1];(async()=>{try{d(await (
 
 export async function open(url, opts = {}) {
   const gd = await drv.startDriver();
-  const s = await drv.newSession({ headless: true,
-    width: opts.width || 1300, height: opts.height || 850 });
-  await drv.setTO(s, { script: opts.script || 600000, pageLoad: 120000 });
-  await drv.go(s, url);
+  let s;
+  try {
+    s = await drv.newSession({ headless: true,
+      width: opts.width || 1300, height: opts.height || 850 });
+    await drv.setTO(s, { script: opts.script || 600000, pageLoad: 120000 });
+    await drv.go(s, url);
+  } catch (error) {
+    try { if (s) await drv.quit(s); } finally { gd.kill(); }
+    throw error;
+  }
 
   const ev = async (body, args = []) => drv.evalA(s, A(body), args);
 

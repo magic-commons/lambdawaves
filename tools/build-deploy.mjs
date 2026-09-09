@@ -49,6 +49,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertPublicTree } from './release-inputs.mjs';
 
 /* ══ THE THREE CONSTANTS ════════════════════════════════════════════════════════════════════════════════
  *
@@ -159,6 +160,9 @@ const rule = (t) => console.log('\n' + t + ' ' + '─'.repeat(Math.max(0, 100 - 
 /* ══ 1.  ASSEMBLE ═══════════════════════════════════════════════════════════════════════════════════════ */
 rule('1 · ASSEMBLE');
 if (!existsSync(LAB)) { console.error('no lab/ — run this from the λWAVES repo.'); process.exit(2); }
+// Validate before copying or removing the previous build. Never dereference a
+// source symlink or include local credentials in public static assets.
+try { assertPublicTree(LAB); } catch (error) { console.error(error.message); process.exit(2); }
 if (existsSync(DIST)) {
   if (lstatSync(DIST).isSymbolicLink()) { console.error('dist/ is a symlink; refusing to touch it.'); process.exit(2); }
   rmSync(DIST, { recursive: true, force: true });
