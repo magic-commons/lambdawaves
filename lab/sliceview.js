@@ -1,3 +1,4 @@
+import { planeModel } from './native-ui.js';
 /* sliceview.js — the SLICE window: a rotatable complex plane through ψ, painted with the phase palette.
  *
  * Drag the picture to turn the plane.  Plain drag moves the MINUS rotor, which is a HOLOMORPHIC (U(2)) motion —
@@ -89,8 +90,14 @@ export function createSliceView(host, api) {
   const holo = sw({ label: 'HOLO U(2)', value: false, title: 'snap the plus rotor to the holomorphic sheet: every motion then keeps n₊ fixed', onChange: (v) => { if (v) { rotor = canonicaliseRotors(projectToU2(rotor.qL), rotor.qR); dirty = true; api.repaint(); } } });
   r1.appendChild(holo.root);
 
+  const mini = planeModel(host, {
+    getNormal:()=>adjoint(rotor.qL,[0,0,1]),
+    onTurn:n=>{if(mode!=='space')return;const axis=[-n[1],n[0],0], len=Math.hypot(...axis),angle=Math.acos(Math.max(-1,Math.min(1,n[2])));
+      rotor={qL:len<1e-8?(n[2]<0?[0,1,0,0]:[1,0,0,0]):[Math.cos(angle/2),...axis.map(v=>v/len*Math.sin(angle/2))],qR:[1,0,0,0]};
+      tour=null;mode='space';modeSeg.set('space');dirty=true;api.repaint();}
+  });
   const r2 = el('div', 'row tight', host);
-  for (const p of NAMED) r2.appendChild(trig({ label: p.label, onFire: () => { startTour(p); api.repaint(); } }).root);
+  for (const p of NAMED.filter(p=>p.key==='iso')) r2.appendChild(trig({ label: p.label, onFire: () => { startTour(p); api.repaint(); } }).root);
   r2.appendChild(trig({ label: 'RESET', onFire: () => { rotor = { ...IDENTITY }; tour = null; res = 128; dirty = true; api.repaint(); } }).root);
   const ro = readout({ label: 'PLANE  n₊ · n₋', value: '—', cls: 'wide', sub: '' });
   el('div', 'row tight', host).appendChild(ro.root);
@@ -228,6 +235,9 @@ export function createSliceView(host, api) {
     armPump();                                                   // stepJob() nulls `job` when it finishes, and the pump stops
   }
   function update(reg, t, playing) {
+    mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
+    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere control; drag the slice image to rotate in KS ℝ⁴';
+    mini.paint();
     if (tour) {
       tour.t = Math.min(1, tour.t + 0.04);
       rotor = tourSegmentAt({ from: tour.from, to: tour.to }, tour.t);

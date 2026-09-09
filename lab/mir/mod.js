@@ -5,7 +5,7 @@
  *              took the absolute path out of a file that ships)
  *   Taken      2026-09-05, at 2978 lines
  *   sha256     d76cc74f886357a35794519e0a953f8f0328abea91443a47811e26dec5777b74
- *   Forced     8 edits.  Every other byte below this header is the source, unmodified.
+ *   Forced     8 edits.  Plus the reversible Final II matrix/audio extensions in docs/mir-matrix-patch.json.
  *              1/8  the PRESET_LS storage namespace                        (wave 52)
  *              2/8 … 6/8  the BIPOLAR route — flag, anchor, patch, save, load   (wave 61)
  *              7/8, 8/8  MOD_STATE_V and MOD_STATE_READS                   (wave 63)
@@ -61,14 +61,14 @@ export const MACRO_MAX = 8;
    version-INDISTINGUISHABLE.  The λWAVES namespace starts at 100 (= 100 + the upstream
    version this model is derived from) so our 104 can never be mistaken for an upstream 5,
    and an upstream 5 we have never seen is refused here rather than half-read. */
-export const MOD_STATE_V = 104;
+export const MOD_STATE_V = 106;
 /** Every model version whose racks and presets THIS build can read.  A version
     outside it is refused loudly and the stored blob is left untouched. */
 /* λWAVES: forced edit 8/8 — and 3 and 4 are still read: a rack with no `bi` on any route
    is byte-identical on the wire to one written before the flag existed, so there is nothing
    to migrate in that direction and refusing it would throw away every patch made before
    wave 61.  The refusal only runs the other way. */
-export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
+export const MOD_STATE_READS = Object.freeze([3, 4, 104, 105, 106]);
 /** Is this stamped model version one this build understands?  An ABSENT stamp
     is NOT handled here — it is the callers' (library.js reads absent as
     "predates the stamp, fine"; the preset store has stamped every record since
@@ -212,6 +212,10 @@ export const AUDIO_MODES    = Object.freeze(['follow', 'trigger']);
 
 export const AUDIO_DB_FLOOR = -60;      // normalises to 0, exactly
 export const AUDIO_DB_TOP   = -6;       // normalises to 1, exactly
+export const AUDIO_RANGE_MIN = -90;
+export const AUDIO_RANGE_MAX = 0;
+export const AUDIO_RANGE_GAP = 1;       // dB; endpoints never cross
+export const AUDIO_TIME_MAX = 60000;
 export const AUDIO_DB_SPAN  = AUDIO_DB_TOP - AUDIO_DB_FLOOR;      // 54
 export const AUDIO_GAIN_MAX = 24;       // +/- dB
 
@@ -490,11 +494,19 @@ function audioOutDefaults(key) {
 }
 /** One output's stored parameters, inspected.  `mode` is DERIVED from the key
     and never read off the payload — see AUDIO_OUT_MODE. */
+export function audioRangeNorm(dbfs, gainDb, out) {
+  if (!out || (out.floorDb === AUDIO_DB_FLOOR && out.ceilingDb === AUDIO_DB_TOP)) return audioNorm(dbfs, gainDb);
+  if (!Number.isFinite(dbfs)) return dbfs === Infinity ? 1 : 0;
+  return clamp01((dbfs + gainDb - out.floorDb) / (out.ceilingDb - out.floorDb));
+}
 function audioOutFrom(raw, key) {
   const d = audioOutDefaults(key);
   const o = raw && typeof raw === 'object' ? raw : null;
-  const t = (v, dflt) => (Number.isFinite(v) && v >= 0 ? Math.min(60000, v) : dflt);
-  return { attackMs: t(o && o.attackMs, d.attackMs),
+  const t = (v, dflt) => (Number.isFinite(v) && v >= 0 ? Math.min(AUDIO_TIME_MAX, v) : dflt);
+  const floorDb = Number.isFinite(o && o.floorDb) ? Math.max(AUDIO_RANGE_MIN, Math.min(AUDIO_RANGE_MAX - AUDIO_RANGE_GAP, o.floorDb)) : AUDIO_DB_FLOOR;
+  const ceilingDb = Number.isFinite(o && o.ceilingDb) ? o.ceilingDb : AUDIO_DB_TOP;
+  return { floorDb, ceilingDb: Math.max(floorDb + AUDIO_RANGE_GAP, Math.min(AUDIO_RANGE_MAX, ceilingDb)),
+           attackMs: t(o && o.attackMs, d.attackMs),
            releaseMs: t(o && o.releaseMs, d.releaseMs),
            mode: d.mode };
 }
@@ -507,6 +519,7 @@ function audioPatchFrom(raw) {
   for (const k of AUDIO_OUTPUTS) outs[k] = audioOutFrom(o.outs && o.outs[k], k);
   const g = AUDIO_GATE_DEFAULTS;
   return {
+    gateEnabled: o.gateEnabled !== false,
     source: AUDIO_SOURCES.indexOf(o.source) >= 0 ? o.source : 'mic',
     gainDb: Number.isFinite(o.gainDb)
       ? Math.max(-AUDIO_GAIN_MAX, Math.min(AUDIO_GAIN_MAX, o.gainDb)) : 0,
@@ -523,20 +536,22 @@ function audioPatchFrom(raw) {
 function audioPatchOf(s) {
   const outs = {};
   for (const k of AUDIO_OUTPUTS) {
-    outs[k] = { attackMs: s.audio.outs[k].attackMs,
+    outs[k] = { floorDb: s.audio.outs[k].floorDb, ceilingDb: s.audio.outs[k].ceilingDb,
+                attackMs: s.audio.outs[k].attackMs,
                 releaseMs: s.audio.outs[k].releaseMs,
                 mode: s.audio.outs[k].mode };
   }
-  return { source: s.audio.source, gainDb: s.audio.gainDb,
+  return { gateEnabled: s.audio.gateEnabled, source: s.audio.source, gainDb: s.audio.gainDb,
            thresholdDb: s.audio.thresholdDb, hysteresisDb: s.audio.hysteresisDb,
            holdMs: s.audio.holdMs, fluxFloor: s.audio.fluxFloor, outs };
 }
 function audioPatchApply(s, q) {
   const p = audioPatchFrom(q);
-  s.audio.source = p.source; s.audio.gainDb = p.gainDb;
+  s.audio.source = p.source; s.audio.gainDb = p.gainDb; s.audio.gateEnabled = p.gateEnabled;
   s.audio.thresholdDb = p.thresholdDb; s.audio.hysteresisDb = p.hysteresisDb;
   s.audio.holdMs = p.holdMs; s.audio.fluxFloor = p.fluxFloor;
   for (const k of AUDIO_OUTPUTS) {
+    s.audio.outs[k].floorDb = p.outs[k].floorDb; s.audio.outs[k].ceilingDb = p.outs[k].ceilingDb;
     s.audio.outs[k].attackMs = p.outs[k].attackMs;
     s.audio.outs[k].releaseMs = p.outs[k].releaseMs;
   }
@@ -549,6 +564,7 @@ function audioPatchApply(s, q) {
 function audioResetRuntime(s) {
   const r = s.audioRt;
   for (const k of AUDIO_FOLLOWED) r.env[k] = 0;
+  r.inputDb = Object.fromEntries(AUDIO_FOLLOWED.map(k => [k, -Infinity]));
   r.hist.fill(0); r.histN = 0; r.histI = 0;
   r.gateOpen = false; r.gateHold = 0;
   r.prevFlux = 0; r.prevPrevFlux = 0; r.prevT = 0; r.prevDb = -Infinity;
@@ -756,7 +772,7 @@ function newRoute(macroId, targetId, min, max, opts) {
     /* λWAVES: forced edit 2/8 — the BIPOLAR flag.  A unipolar route's offset is always 0
        when the macro is at 0, so "the base is the CENTRE of the swing" is not expressible
        in this model; the flag is read in routeInfluence() and nowhere else. */
-    bi: !!o.bi,
+    bi: !!o.bi, enabled: o.enabled !== false, curve: Number.isFinite(o.curve) ? Math.max(-1, Math.min(1, o.curve)) : 0,
     dormant: false
   };
   routes.push(r);
@@ -1262,7 +1278,9 @@ function audioMergeOuts(s, raw) {
   const out = {};
   for (const k of AUDIO_OUTPUTS) {
     const q = raw[k] && typeof raw[k] === 'object' ? raw[k] : null;
-    out[k] = { attackMs: q && Number.isFinite(q.attackMs) ? q.attackMs : cur[k].attackMs,
+    out[k] = { floorDb: q && Number.isFinite(q.floorDb) ? q.floorDb : cur[k].floorDb,
+               ceilingDb: q && Number.isFinite(q.ceilingDb) ? q.ceilingDb : cur[k].ceilingDb,
+               attackMs: q && Number.isFinite(q.attackMs) ? q.attackMs : cur[k].attackMs,
                releaseMs: q && Number.isFinite(q.releaseMs) ? q.releaseMs : cur[k].releaseMs,
                mode: cur[k].mode };
   }
@@ -1354,6 +1372,8 @@ export function setRouteRange(id, patch) {
   if (Number.isFinite(patch.max)) r.max = clamp01(patch.max);
   /* λWAVES: forced edit 4/8 — the bipolar flag is patchable, exactly like min and max. */
   if (patch.bi !== undefined) r.bi = !!patch.bi;
+  if (patch.enabled !== undefined) r.enabled = !!patch.enabled;
+  if (Number.isFinite(patch.curve)) r.curve = Math.max(-1, Math.min(1, patch.curve));
   if (patch.macroId !== undefined && macroById.has(String(patch.macroId))) r.macroId = String(patch.macroId);
   return r;
 }
@@ -1722,17 +1742,20 @@ export function modFeedAudio(deviceId, feed) {
 
   /* ── 1 · CALIBRATE.  Fixed dB, post-gain, exact 0 at the floor. ── */
   const db = audioDbAmp(rms) + a.gainDb;              // post-gain level, dBFS
-  const level = audioNorm(audioDbAmp(rms), a.gainDb);
+  const level = audioRangeNorm(audioDbAmp(rms), a.gainDb, a.outs.level);
 
   /* ── 2 · GATE.  One decision for the whole device, from the LEVEL. ── */
-  const open = audioGateStep(s, db, dtFeed);
+  const open = a.gateEnabled ? audioGateStep(s, db, dtFeed) : true;
+  if (!a.gateEnabled) { r.gateOpen = true; r.gateHold = 0; }
 
   /* ── 3 · FOLLOW.  Four outputs, each its own pair of time constants. ── */
   const bandNorm = [
-    audioNorm(audioDbPow(Math.max(0, Number(bp[0]) || 0)), a.gainDb),
-    audioNorm(audioDbPow(Math.max(0, Number(bp[1]) || 0)), a.gainDb),
-    audioNorm(audioDbPow(Math.max(0, Number(bp[2]) || 0)), a.gainDb)
+    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[0]) || 0)), a.gainDb, a.outs.low),
+    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[1]) || 0)), a.gainDb, a.outs.mid),
+    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[2]) || 0)), a.gainDb, a.outs.high)
   ];
+  r.inputDb = { level: db, low: audioDbPow(Math.max(0, Number(bp[0]) || 0)) + a.gainDb,
+    mid: audioDbPow(Math.max(0, Number(bp[1]) || 0)) + a.gainDb, high: audioDbPow(Math.max(0, Number(bp[2]) || 0)) + a.gainDb };
   let vLevel = 0, vLow = 0, vMid = 0, vHigh = 0;
   if (open) {
     vLevel = audioFollow(s, 'level', level, feedHz);
@@ -1880,7 +1903,8 @@ export function audioReadout(deviceId) {
   const outs = {};
   for (const k of AUDIO_OUTPUTS) {
     const o = a.outs[k];
-    outs[k] = { attackMs: o.attackMs, releaseMs: o.releaseMs, mode: o.mode,
+    outs[k] = { floorDb: o.floorDb, ceilingDb: o.ceilingDb, inputDb: r.inputDb ? r.inputDb[k] : -Infinity,
+                attackMs: o.attackMs, releaseMs: o.releaseMs, mode: o.mode,
                 alphaA: audioAlpha(o.attackMs, hz), alphaR: audioAlpha(o.releaseMs, hz),
                 rise90Ms: audioRiseMs(o.attackMs, 0.9),
                 fall90Ms: audioRiseMs(o.releaseMs, 0.9),
@@ -1894,7 +1918,7 @@ export function audioReadout(deviceId) {
     fed: r.fed, frames: r.frames, feedHz: hz, sampleRate: r.sampleRate,
     feedMs: 1000 / hz, capturedAt: r.capturedAt,
     gainDb: a.gainDb, dbfs: r.lastDb, gateOpen: r.gateOpen,
-    thresholdDb: a.thresholdDb, hysteresisDb: a.hysteresisDb, holdMs: a.holdMs,
+    gateEnabled: a.gateEnabled, thresholdDb: a.thresholdDb, hysteresisDb: a.hysteresisDb, holdMs: a.holdMs,
     flux: r.lastFlux, fluxThreshold: r.threshold, fluxFloor: a.fluxFloor,
     hits: r.hits, hitAgeSeconds: r.hitAgeSeconds,
     refractoryMs: AUDIO_ONSET.refractoryMs, onsetFloorDb: AUDIO_ONSET.floorDb,
@@ -2021,6 +2045,10 @@ function macroReading(m, s, wrap) {
 
 /* The sole semantic scaling point.  The explicit 1 branch retains the exact
    pre-MOD-UI-003 subtraction and result when Master Depth is at its default. */
+function routeReading(m, s, wrap, r) {
+  const u = macroReading(m, s, wrap);
+  return !r.curve ? u : Math.pow(clamp01(u), Math.pow(4, r.curve));
+}
 function routeInfluence(m, r, lerped) {
   /* λWAVES: forced edit 3/8 — the ANCHOR.  A unipolar route measures its influence from
      r.min, so the offset is 0 when the macro is at 0; a BIPOLAR route measures it from the
@@ -2040,9 +2068,9 @@ export function targetPos(id, base, wrap) {
     const m = macroById.get(r.macroId);
     if (!m) continue;
     const src = m.sourceId ? sourceById.get(m.sourceId) : null;
-    const lerped = r.min + (r.max - r.min) * macroReading(m, src, wrap);
+    const lerped = r.min + (r.max - r.min) * routeReading(m, src, wrap, r);
     const influence = routeInfluence(m, r, lerped);
-    const on = !(src && !src.on);
+    const on = r.enabled !== false && !(src && !src.on);
     if (first === null) {
       first = r;
       firstLerp = m.masterDepth === 1 ? lerped : r.min + influence;
@@ -2077,12 +2105,12 @@ export function targetValue(id, base, wrap) {
     const m = macroById.get(r.macroId);
     if (!m) continue;
     const s = m.sourceId ? sourceById.get(m.sourceId) : null;
-    const lerped = r.min + (r.max - r.min) * macroReading(m, s, wrap);
+    const lerped = r.min + (r.max - r.min) * routeReading(m, s, wrap, r);
     const influence = routeInfluence(m, r, lerped);
     if (n === 0 && i === 0) {
       firstLerp = m.masterDepth === 1 ? lerped : r.min + influence;
     }
-    if (m.sourceId && (!s || !s.on)) continue;  // bypass: THIS route contributes 0
+    if (r.enabled === false || (m.sourceId && (!s || !s.on))) continue;  // bypass: THIS route contributes 0
     sum += influence;
     n++;
   }
@@ -2270,7 +2298,7 @@ export function serialize() {
     /* λWAVES: forced edit 5/8 — `bi` travels with the route.  undefined is dropped by
        JSON.stringify, so a rack with no bipolar route serialises exactly as it always did. */
     routes: routes.map((r) => ({ id: r.id, macroId: r.macroId, targetId: r.targetId,
-                                 min: r.min, max: r.max, bi: r.bi ? 1 : undefined }))
+                                 min: r.min, max: r.max, bi: r.bi ? 1 : undefined, enabled: r.enabled === false ? false : undefined, curve: r.curve || undefined }))
   };
 }
 
@@ -2311,7 +2339,7 @@ export function deserialize(o) {
       if (have && have.some((q) => q.macroId === String(r.macroId))) continue;
       /* λWAVES: forced edit 6/8 — …and comes back.  A flag that does not survive a preset
          silently changes the sound of every patch that was ever saved with it. */
-      newRoute(r.macroId, r.targetId, r.min, r.max, { id: String(r.id), bi: !!r.bi });
+      newRoute(r.macroId, r.targetId, r.min, r.max, { id: String(r.id), bi: !!r.bi, enabled: r.enabled, curve: r.curve });
     }
   }
   /* the counters come last and are floored by what actually loaded, so a

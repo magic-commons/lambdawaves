@@ -10,7 +10,7 @@
      Typography) — Latin Modern and Libertinus are the two maths faces a Linux box is likeliest to
      carry, and the generic `serif` is the last resort the SOURCE.txt contract warns about. */
   --font-math: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif;
-  --glass-blur: 22px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) — wave 101, Josh */
+  --glass-blur: 11px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) — wave 101, Josh */
   --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-lead: 13px;
   --tr-tight: .02em; --tr-wide: .12em; --tr-wider: .14em; --lh: 1.45; --w-light: 300; --w-med: 500; --w-bold: 650;
   --r-xs: 3px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
@@ -112,12 +112,19 @@ body.no-badges #badges, body.no-hint #hint { display: none !important; }
 #notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }
+#notebook[data-face="about"] { width: 470px; height: 670px; left: calc(50% - 235px); top: max(20px, calc(50% - 335px)); }
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
-.nb-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 6px 14px; cursor: grab; user-select: none; touch-action: none; }
-.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 30px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 70%; min-width: 0; }
+.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 8px 8px 6px 14px; cursor: grab; user-select: none; touch-action: none; }
+.nb-titles { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; }
 .nb-title:focus { color: var(--acc); }
-#notebook[data-face="about"] .nb-title, #notebook[data-face="projects"] .nb-title { visibility: hidden; }
+.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; color: var(--fg-soft); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; margin-top: 2px; }
+.nb-subtitle:focus { color: var(--acc); }
+.nb-subtitle::placeholder { color: var(--dim); opacity: .6; }
+#notebook[data-face="about"] .nb-titles, #notebook[data-face="projects"] .nb-titles,
+#notebook[data-face="about"] .nb-title, #notebook[data-face="projects"] .nb-title,
+#notebook[data-face="about"] .nb-subtitle, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
 .nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: 14px/1.6 var(--font-ui); color: var(--fg); }
 .nb-view h1, .nb-view h2, .nb-view h3 { margin: .6em 0 .3em; line-height: 1.2; font-weight: 700; color: var(--fg); }
 .nb-view h1 { font-size: 22px; } .nb-view h2 { font-size: 18px; } .nb-view h3 { font-size: 15px; }
@@ -1376,3 +1383,17 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
   .km-footer { flex-direction: column; align-items: stretch; }
   .km-footer-info { align-items: flex-start; text-align: left; }
 }
+
+/* Final II: readouts reserve their text lanes as values change. */
+.ro { min-width:0; overflow:hidden; }
+.ro-val { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:1.4em; }
+.ro.wide .ro-val { height:2.6em; line-height:1.3; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; white-space:normal; }
+.ro-sub { height:2.8em; max-height:2.8em; line-height:1.4; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; opacity:0.85; }
+.k-val { white-space:nowrap; font-variant-numeric:tabular-nums; }
+#transport .mod-logo:active { transform:scale(.91); box-shadow:inset 0 2px 5px #0006; }
+
+.corner-axis-hit { position:fixed; width:88px; height:88px; background:transparent; border:0; z-index:5; cursor:ew-resize; }
+.corner-axis-hit:focus-visible { outline:1px solid var(--acc); }
+
+.sw[data-mode] { min-width:112px; }
+.sw[data-mode]::after { content:attr(data-mode); font-size:8px; margin-left:auto; opacity:.7; }

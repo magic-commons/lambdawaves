@@ -2383,13 +2383,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow,
 :root:root:root #modwin.mir-modwindow .m2dev.env { --m2-env-ink: var(--acc); }                        /* 110 */
 
-/* 111 · THE KNOB'S VALUE DOT TRAVELS.  Josh: "that dot that sits where '0' usually would be on the
-   knob; I want *that* thing to move" — and wave 101's grey dot on the tick is undone with it.
-     WHAT THAT DOT ACTUALLY IS, measured: `.ckarc-val` is a circle whose `stroke-dasharray` grows from
-   the -150° origin with `stroke-linecap: round`, so its START cap is a half-disc parked at zero for
-   ever while only the far end travels.  At value 0 the arc has no length and the cap is all you see:
-   a dot sitting on the nought.  lab/modwindow.js now writes a near-zero dash and moves it with
-   `stroke-dashoffset`, so the same round cap becomes ONE DOT that rides the dial to the value. */
+/* The follow-up restores the colored value arc; retain the clean needle without a second dot. */
 :root:root:root #modwin.mir-modwindow .m2dialink .m2kn::before { display: none; }                     /* 111 */
 
 /* ⟪ END THE SKIN SEAT ⟫ */
@@ -2424,3 +2418,88 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
    at (1,5,0).  MEASURED: the window root computes `pointer-events: none`, deliberately — entry 27
    hands events to the six painted subtrees instead.  The CHIPRAIL arm is live and stays. */
 #floats > .kwin-chiprail { pointer-events: auto; }
+
+/* Final II: fixed-height macro rail, compacted sideways. */
+:root:root:root #modwin .m2-native-rate { width:44px; min-width:44px; height:44px; flex:0 0 44px; align-self:center; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0; }
+:root:root:root #modwin .m2-native-rate .k-lbl { display:none; }
+:root:root:root #modwin .m2-native-rate .dial { transform:scale(.75); }
+:root:root:root #modwin .m2-native-rate .k-dial { width:24px; height:24px; flex:0 0 24px; aspect-ratio:1; }
+:root:root:root #modwin .m2-native-rate .k-val { font:600 8.5px var(--font-num, monospace); line-height:1; color:var(--acc); margin-top:2px; padding:0; }
+:root:root:root #modwin .m2-native-rate.drag .k-val { color:var(--fg); font-weight:800; }
+
+.mod-matrix { width:min(1100px,calc(100vw - 24px)); height:calc(100dvh - 32px); box-sizing:border-box; border:1px solid var(--line); border-radius:14px; color:var(--fg); background:var(--bg); padding:16px; }
+.mod-matrix::backdrop { background:#0008; backdrop-filter:blur(8px); }
+.mod-matrix-head,.mod-matrix-add,.mod-matrix-bars { display:flex; align-items:center; gap:12px; }
+.mod-matrix-head { justify-content:space-between; height:44px; }
+.mod-matrix-bars { min-height:60px; position:relative; }
+.mod-matrix-bars > * { position:relative!important; inset:auto!important; transform:none!important; flex-shrink:0; }
+.mod-matrix-body { overflow:auto; max-height:calc(100% - 110px); }
+.mod-matrix table { width:100%; table-layout:fixed; border-collapse:collapse; }
+.mod-matrix th,.mod-matrix td { padding:8px 4px; height:44px; border-bottom:1px solid var(--line); overflow:hidden; text-overflow:ellipsis; }
+.mod-matrix input,.mod-matrix select { max-width:100%; box-sizing:border-box; }
+.mod-matrix th:first-child { width:36px; }
+.mod-matrix input[type=number] { width:80px; }
+.mod-matrix button,.mod-matrix select { min-height:32px; }
+.mod-matrix-add { margin-top:16px; }
+.k-route-depth { position:absolute; bottom:-6px; right:0; width:22px; height:22px; accent-color:var(--acc2); }
+:root:root:root #modwin .m2-matrix-open { flex:0 0 auto; padding:2px; }
+.ro.wide .ro-val { height:2.6em; overflow:auto; }
+
+.k-route-depth.k { position:absolute; bottom:0; right:0; width:24px; min-width:24px; height:24px; padding:0; z-index:3; }
+.k-route-depth .k-dial { width:22px; height:22px; }
+.k-route-depth .k-lbl, .k-route-depth .k-val { display:none; }
+.mod-matrix { background:var(--pane, #171b22); }
+
+
+
+:root:root:root #modwin .mod-matrix { position:fixed; margin:auto; inset:0; background:hsl(var(--glass-tint) / 1); color:var(--fg); border-color:var(--glass-hairline); font-size:12px; }
+:root:root:root #modwin .mod-matrix-bars { position:relative; inset:auto; height:64px; display:flex; gap:12px; margin:8px 0; overflow:auto; }
+:root:root:root #modwin .mod-matrix-bars .m2pre { display:flex; flex:0 0 auto; position:relative; height:48px; }
+:root:root:root #modwin .mod-matrix-bars .m2prebar { position:relative; height:48px; flex:0 0 auto; }
+:root:root:root #modwin .mod-matrix input,:root:root:root #modwin .mod-matrix select,:root:root:root #modwin .mod-matrix button { color:var(--fg); background:hsl(var(--glass-tint) / 1); border:1px solid var(--glass-hairline); border-radius:5px; }
+
+/* Audio response editing stays inside the existing plot; card geometry does not grow. */
+:root:root:root #modwin .audio-ranges .m2edit > svg { visibility:hidden; }
+:root:root:root #modwin .aud-ranges { position:absolute; inset:4px; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; display:flex; flex-direction:column; gap:2px; color:var(--fg); }
+:root:root:root #modwin .aud-range-row { position:relative; flex:0 0 22px; min-width:0; padding:0 7px; }
+:root:root:root #modwin .aud-range-name { position:absolute; inset:0 7px; z-index:2; pointer-events:none; display:flex; justify-content:space-between; align-items:center; gap:4px; width:calc(100% - 14px); height:22px; padding:0; border:0; background:transparent; color:var(--dim); font-size:9px; cursor:pointer; }
+:root:root:root #modwin .aud-range-name[aria-pressed=true] { color:var(--acc2); }
+:root:root:root #modwin .aud-range-value { padding-right:8px; font-size:8px; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap; }
+:root:root:root #modwin .aud-range-track { position:relative; margin-left:34px; height:22px; border-radius:4px; background:var(--glass-well); box-shadow:inset 0 0 0 1px var(--glass-hairline); touch-action:none; cursor:ew-resize; }
+:root:root:root #modwin .aud-range-output { position:absolute; inset:0 auto 0 0; background:var(--acc2-soft); border-radius:4px; pointer-events:none; }
+:root:root:root #modwin .aud-range-zone { position:absolute; top:3px; bottom:3px; border-block:1px solid var(--acc2); background:var(--acc2-soft); pointer-events:none; }
+:root:root:root #modwin .aud-range-input { position:absolute; top:5px; bottom:5px; width:2px; background:var(--fg); pointer-events:none; }
+:root:root:root #modwin .aud-range-handle { position:absolute; z-index:3; top:0; bottom:0; width:14px; padding:0; transform:translateX(-50%); border:0; background:transparent; color:var(--acc2); cursor:ew-resize; touch-action:none; }
+:root:root:root #modwin .aud-range-handle::after { content:''; position:absolute; top:2px; bottom:2px; left:6px; width:2px; border-radius:2px; background:currentColor; }
+:root:root:root #modwin .aud-range-handle:focus-visible { outline:1px solid var(--acc2); border-radius:3px; }
+:root:root:root #modwin .aud-range-hint { flex:0 0 12px; font-size:8px; color:var(--dim); white-space:nowrap; text-align:center; }
+:root:root:root #modwin .audio-ranges .m2audsheet { overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+:root:root:root #modwin .aud-setting-input { width:100%; min-width:0; border:0; color:var(--fg); background:transparent; text-align:center; font:inherit; font-variant-numeric:tabular-nums; }
+:root:root:root #modwin .audio-ranges .m2audsheet { bottom:6px; }
+:root:root:root #modwin .audio-ranges .m2audshead { flex-shrink:0; position:sticky; top:0; background:hsl(var(--glass-tint) / 1); z-index:1; }
+:root:root:root #modwin .audio-ranges .m2audsleg { flex-shrink:0; }
+:root:root:root #modwin .aud-range-name b { pointer-events:auto; cursor:pointer; }
+
+/* The shared rate puck is centered independently of its transient value label. */
+:root:root:root #modwin .m2-native-rate { position:relative;overflow:visible; }
+:root:root:root #modwin .m2-native-rate .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);margin:0;padding:2px 6px;white-space:nowrap;z-index:10;background:hsl(var(--glass-tint) / .96);border-radius:var(--r-pill);box-shadow:var(--neu-flat);pointer-events:none; }
+:root:root:root #modwin .m2-native-rate:hover .k-val,
+:root:root:root #modwin .m2-native-rate:focus-within .k-val,
+:root:root:root #modwin .m2-native-rate.drag .k-val { transform:translate(-50%,0); }
+:root:root:root #modwin.mir-modwindow .m2pre { overflow:visible; }
+
+/* Park unfinished macro relocation/matrix UI; keep routes and restored layouts intact. */
+:root:root:root #modwin .m2-side-grip,:root:root:root #modwin .m2-matrix-open { display:none !important; }
+:root:root:root #modwin .m2dev.env .m2kind { color:var(--acc); }
+:root:root:root #modwin .modtempoin { box-sizing:border-box;min-width:0;max-width:none;margin:0; }
+
+/* Compact macros retain the real routing grip and value knob, not empty arc fragments. */
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:112px;height:336px;max-height:336px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:flex;flex-direction:column; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow { grid-template-columns:44px 44px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2numseat { display:flex; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2num { display:flex; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2val,
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow,
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2erow { display:none; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2railhead { padding-left:4px;gap:2px;font-size:10px; }

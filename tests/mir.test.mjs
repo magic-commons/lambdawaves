@@ -715,7 +715,14 @@ function runWindow(r, n, dt) {
 {
   const SRC = '/home/joshua-hosain/Documents/MANDELBROT APP/project/app';
   const noHeader = (s) => s.replace(/^\/\*[\s\S]*?\*\/\n/, '');
-  const ours = (f) => noHeader(readFileSync(resolve(ROOT, 'lab/mir/' + f), 'utf8'));
+  const ours = (f) => {
+    let source = readFileSync(resolve(ROOT, 'lab/mir/' + f), 'utf8');
+    if (f === 'mod.js') for (const patch of JSON.parse(readFileSync(resolve(ROOT,'docs/mir-matrix-patch.json'),'utf8'))) {
+      if (!source.includes(patch.after)) throw new Error('Final II provenance patch no longer matches');
+      source=source.replace(patch.after,patch.before);
+    }
+    return noHeader(source);
+  };
   let comparable = true, theirMod = '', theirCurve = '';
   try {
     theirMod = readFileSync(SRC + '/mod.js', 'utf8');
@@ -798,7 +805,7 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
       undone = undone.split(ours2).join(theirs);
     }
     const markers = (ourMod.match(/λWAVES:/g) || []).length;
-    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES: strip the provenance headers, undo the EIGHT marked edits by their exact text, and both files are byte-identical to their sources — the whole port is one storage key, one bipolar flag and the model version that flag made necessary, and an upstream fix is still a patch rather than archaeology',
+    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES: reverse the documented Final II matrix patch, strip the provenance headers, undo the EIGHT marked edits by their exact text, and both files are byte-identical to their sources — the whole port is one storage key, one bipolar flag and the model version that flag made necessary, and an upstream fix is still a patch rather than archaeology',
       ourCurve === theirCurve && undone === theirMod && markers === EDITS.length && missed.length === 0,
       { curveIdentical: ourCurve === theirCurve, modIdenticalOnceUndone: undone === theirMod,
         markedEdits: markers, wantEdits: EDITS.length, editsNotFound: missed, modBytes: ourMod.length });

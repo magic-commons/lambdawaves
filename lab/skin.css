@@ -211,8 +211,8 @@ select.sel { border-color: transparent; background: var(--glass-well); box-shado
 .ro { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); border-radius: 8px; }
 .ro-lbl { color: var(--ink-faint); }
 .ro-val { color: var(--fg); }
-.ro-sub { max-height: 0; opacity: 0; overflow: hidden; transition: max-height var(--t-soft), opacity var(--t-soft); }   /* the caveat line is a hover reveal */
-.ro:hover .ro-sub, .dev:hover .ro.wide .ro-sub { max-height: 3em; opacity: 1; }
+.ro-sub { height: 2.8em; max-height: 2.8em; line-height: 1.4; overflow: auto; overflow-wrap: anywhere; scrollbar-width: thin; opacity: 0.85; transition: opacity var(--t-soft); }
+.ro:hover .ro-sub, .dev:hover .ro.wide .ro-sub { opacity: 1; }
 .abar { background: hsl(0 0% 100% / .07); box-shadow: var(--neu-inset); height: 4px; }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
@@ -824,3 +824,215 @@ body[data-theme="light"] {
      28 - 11/2 = 22.5, so the dial keeps 45 px and the extra three pixels of band grow outward. */
   .k-ring-hit { stroke-width: 11; }
 }
+
+/* Native instruments, September 2026. Modulation retains its own vocabulary. */
+.native-clean .dev-body { padding: 10px 12px; }
+.native-clean .grp, .native-clean .grp .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
+.native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: .12em; margin: 4px 0 8px; }
+.native-clean .row { gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
+.native-clean .seg-lbl { font-size: var(--fs-micro); }
+.native-clean .ro { min-width: 0; box-shadow:var(--neu-inset);border:0;background:var(--glass-well); }
+.native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
+.native-clean .row > .k { flex: 0 0 64px; }
+.native-clean .native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
+.native-info-button { width: 28px; height: 28px; padding: 0; border: 0; background: none; color: var(--dim); cursor: pointer; }
+.native-info .native-info-content { display: none !important; position: absolute; z-index: 150; top: 100%; left: 0; width: min(260px, 75vw); max-height: 260px; overflow: auto; box-sizing: border-box; padding: 12px; margin: 0; border-radius: 10px; background: hsl(var(--glass-hue) var(--glass-sat-tint) var(--glass-lum)); color: var(--fg); box-shadow: var(--glass-shadow); font-size: var(--fs-small); line-height: 1.5; }
+.native-clean[data-id="observer"] .grp { margin-bottom: 6px; }
+.native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
+.native-clean[data-id="observer"] .row > .k { flex: 1 1 60px; }
+.native-clean[data-id="observer"] .row { margin: 4px 0; }
+.native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
+.native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
+.native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
+.native-clean[data-id="camera"] .row > .k { flex: 0 0 68px; }
+.native-clean[data-id="palette"] .pal-preset { min-width: 0; }
+.native-clean[data-id="palette"] .pal-nav { flex: 0 0 32px; width: 32px; }
+.native-clean[data-id="palette"] .palette-action { flex: 1 1 90px; height: 34px; border-radius: 7px; justify-content: center; }
+.native-clean .bow-hint { text-align: center; font-size: var(--fs-micro); color: var(--dim); }
+.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
+.plane-model:active { cursor: grabbing; }
+.plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
+body.disconnected:not(.phone) .dev.native-selected > .dev-head,
+body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
+body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
+#transport .tempo-expand { order: 8; font-size: var(--fs-micro); }
+#transport .native-tempo { order: 9; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; width: 100%; flex: 1 0 100%; padding: 8px 0 0; }
+#transport .native-tempo[hidden] { display: none; }
+#transport.tempo-open { flex-wrap: wrap; }
+#transport.mini.tempo-open { width: min(520px,calc(100vw - 32px)); }
+.native-tempo .trig, .native-bpm { min-width: 0; height: 34px; font-size: var(--fs-micro); }
+.native-bpm { width: 100%; box-sizing: border-box; border: 0; border-radius: 6px; background: var(--glass-well); color: var(--fg); text-align: center; font-variant-numeric: tabular-nums; }
+/* Motion can change ink, never the dimensions of the controls around it. */
+.native-clean .formula { white-space: normal; }
+.native-clean .sp-rows[hidden] { display: none !important; }
+@media (pointer: coarse) { .native-info-button, .native-clean[data-id="palette"] .pal-nav, .native-tempo .trig { min-width: 44px; min-height: 44px; } }
+.native-clean [hidden] { display: none !important; }
+.native-clean .row > .trig { flex: 1 1 76px; min-width: 0; }
+.native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
+.native-clean .sp-head .trig { padding: 0 3px; font-size: 9px; }
+.native-clean .sp-head .native-info { grid-row: 2; }
+.native-clean[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
+.native-clean[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
+.native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
+.native-clean[data-id="palette"] .palette-presets { display: grid; grid-template-columns: 30px minmax(0,1fr) 30px; gap: 5px; }
+.native-clean[data-id="palette"] .palette-presets .sel { width: 100%; min-width: 0; }
+.native-clean[data-id="palette"] .palette-seam .ro { padding: 2px; }
+.native-clean[data-id="palette"] .palette-seam .ro-sub { height: 1.3em; }
+.native-clean[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
+.native-clean[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
+.native-clean .segw { align-items: stretch; }
+.native-clean .segw > .seg { width: 100%; box-sizing: border-box; }
+.native-clean[data-id="observer"] .seg-b { min-height: 32px; }
+.native-clean .row { min-height: 0; }
+.native-clean .grp > .row { padding: 0; }
+.native-clean[data-id="palette"] .grp-lbl, .native-clean[data-id="clip"] .grp-lbl { display: none; }
+.native-clean[data-id="observer"] .wave-row > .segw > .seg { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%; }
+.native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .native-clean[data-id="observer"] .wave-row-6 > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.native-clean[data-id="observer"] .wave-row-6 > .segw { flex:1 1 150px;width:auto; }
+.native-clean[data-id="observer"] .wave-row-6 > .k { flex:0 0 64px; }
+.native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
+.native-clean[data-id="observer"] .wave-row-2, .native-clean[data-id="observer"] .wave-row-5 { margin-bottom:14px; }
+.native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
+.native-clean .native-help-book > .note, .native-clean .native-help-book > .sturm-note { display:block !important;position:static;margin:0 0 12px; }
+.native-clean[data-id="camera"] .camera-motion .sw { flex: 1 1 100%; }
+.native-clean .native-info-content .ro-sub { height:auto; }
+.native-clean .row:empty { display:none; }
+.native-info .native-info-content { position:fixed !important; inset:auto; margin:0; border:0; }
+.native-info .native-info-content:popover-open { display:block !important; }
+.native-tempo-hz { display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:var(--fs-micro);font-variant-numeric:tabular-nums; }
+.native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
+.native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+.native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
+.native-clean[data-id="spectrum"] .grp .k-lbl { max-width:100%; }
+.native-clean > .dev-body { gap:4px; }
+.native-clean .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);z-index:2; }
+.native-clean .k:hover .k-val, .native-clean .k:focus-within .k-val, .native-clean .k.drag .k-val, .native-clean .k[data-live] .k-val { transform:translate(-50%,0); }
+.native-clean[data-id="observer"] .wave-row { margin-bottom:8px; }
+.native-clean[data-id="observer"] .wave-row-2, .native-clean[data-id="observer"] .wave-row-5 { margin-bottom:18px; }
+.native-clean[data-id="palette"] .palette-seam .ro { display:flex;align-items:center;gap:10px; }
+.native-clean[data-id="palette"] .palette-seam .ro-sub { display:none; }
+.native-clean[data-id="clip"] .grp > .row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center; }
+.native-clean[data-id="clip"] .grp > .row > .segw { grid-column:1/-1;width:100%; }
+.native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
+@media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; } }
+.plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
+.native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
+#transport.mini .native-play-row { flex-wrap:nowrap;gap:2px; }
+#transport .native-tempo { flex:none; }
+#transport.mini.tempo-open { width:min(560px,calc(100vw - 32px));height:auto;min-height:46px;padding-bottom:8px; }
+#transport .tempo-expand svg { width:14px;height:14px; }
+#transport .tempo-expand[aria-expanded="true"] svg { transform:rotate(180deg); }
+.native-clean .native-rotors { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;row-gap:14px; }
+.native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+.plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
+.native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
+.native-clean[data-id="camera"] .camera-motion .sw { grid-column:1/-1;width:100%; }
+.native-clean .native-bpm { min-height:34px; }
+#transport .native-info { display:inline-flex;position:relative;align-items:center;flex:0 0 24px;order:7; }
+#transport .native-info-content:popover-open { display:block !important; }
+#transport.docked .native-play-row { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px; }
+#transport.docked .native-play-row > .tbtn { min-width:0;width:100%;height:34px; }
+#transport.docked .native-play-row > .fd { grid-column:1/6;min-width:0;width:100%; }
+#transport.docked .native-play-row > .k { width:auto;min-width:0; }
+#transport.docked .native-play-row > .ro { grid-column:span 3;min-width:0;width:auto;height:42px;padding:4px;overflow:hidden; }
+#transport.docked .native-play-row .ro-sub { display:none; }
+#transport.docked .native-play-row .ro-val { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+#transport.docked .native-tempo { grid-template-columns:repeat(2,minmax(0,1fr)); }
+#transport.docked .native-play-row .k-val { position:absolute;top:100%;left:50%;transform:translateX(-50%); }
+#transport .native-tempo .trig { min-width:0;height:34px;padding:0 5px; }
+#transport .k-val { display:none; }
+#transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
+#transport .native-tempo-hz { gap:4px; }
+#transport .native-tempo-hz .native-info { flex:0 0 20px; }
+#transport .native-tempo-hz .native-info-button { width:20px; }
+#transport.docked .native-play-row { grid-template-columns:repeat(5,minmax(0,1fr)); }
+#transport.docked .native-play-row > .fd { grid-column:1/5; }
+#transport.docked .native-play-row > .ro { grid-column:span 2; }
+#transport.docked .native-play-row > .ro.period { grid-column:span 3; }
+#transport.docked .native-play-row .k-lbl { display:none; }
+#transport .native-tempo .trig { min-height:34px; }
+#transport.docked .native-play-row .fd-val { display:none; }
+#transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
+@media (pointer:coarse) { #transport .native-tempo .trig { min-height:44px; } }
+
+/* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
+.dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--glass-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--neu-inset); }
+.dev:not(.mir-modwindow) .seg-b { border:0;border-radius:6px;background:transparent;color:var(--ink-key); }
+.dev:not(.mir-modwindow) .seg-b:hover { background:var(--glass-raise); }
+.dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--neu-raise);color:var(--acc); }
+.dev:not(.mir-modwindow) .trig { background:hsl(var(--glass-tint) / 1);border:1px solid transparent;box-shadow:var(--neu-raise);border-radius:8px; }
+.dev:not(.mir-modwindow) .trig:active { background:var(--glass-well);box-shadow:var(--neu-inset); }
+.dev:not(.mir-modwindow) .sw { border:1px solid transparent;border-radius:8px;box-shadow:var(--neu-flat); }
+.dev:not(.mir-modwindow) .sw.on,
+.dev:not(.mir-modwindow) .trig[aria-expanded="true"],
+.dev:not(.mir-modwindow) .trig[aria-pressed="true"],
+#transport .native-tempo .trig[aria-pressed="true"] { color:var(--fg);background:var(--acc-soft);border-color:color-mix(in srgb,var(--acc) 60%,transparent);box-shadow:var(--neu-inset),0 0 5px color-mix(in srgb,var(--acc) 22%,transparent); }
+.dev:not(.mir-modwindow) .sw.on .sw-led { background:var(--acc);box-shadow:0 0 6px color-mix(in srgb,var(--acc) 70%,transparent); }
+.dev:not(.mir-modwindow) .trig[aria-expanded]::before,
+.dev:not(.mir-modwindow) .trig[aria-pressed]::before,
+#transport .native-tempo .trig[aria-pressed]::before { content:'';flex:0 0 6px;width:6px;height:6px;border-radius:50%;background:var(--glass-press); }
+.dev:not(.mir-modwindow) .trig[aria-expanded="true"]::before,
+.dev:not(.mir-modwindow) .trig[aria-pressed="true"]::before,
+#transport .native-tempo .trig[aria-pressed="true"]::before { background:var(--acc);box-shadow:0 0 6px color-mix(in srgb,var(--acc) 70%,transparent); }
+/* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
+#floats > .dev { max-height:none; }
+#floats > .dev > .dev-body { overflow:visible; }
+.dev .picker, .dev .keys-list, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
+.native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
+.dev .ro-sub, .dev .ro.wide .ro-val { overflow:hidden; }
+.native-clean .sp-knobs .k-val { max-width:80px; }
+.native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }
+/* Spectrum lanes own their compact column sizes; general window knobs never size these stacks. */
+@media (hover:hover) and (pointer:fine) { .dev[data-id="spectrum"] .sp-row { grid-template-columns:4px 48px minmax(42px,1fr) 34px 28px 28px 24px; } }
+.dev[data-id="spectrum"] .sp-row > .sp-b, .dev[data-id="spectrum"] .sp-row > .sp-x { width:100%;min-width:0;box-sizing:border-box; }
+.dev[data-id="spectrum"] .sp-knobs { align-self:center; }
+.dev[data-id="spectrum"] .sp-knobs > .k { flex:none;min-height:0; }
+.dev[data-id="spectrum"] .sp-b { background:hsl(var(--glass-tint) / 1);box-shadow:var(--neu-raise); }
+.dev[data-id="spectrum"] .sp-b.on { color:var(--acc);background:var(--acc-soft);border-color:var(--acc);box-shadow:var(--neu-inset),0 0 5px color-mix(in srgb,var(--acc) 25%,transparent); }
+
+/* Explanatory pockets are optional; numerical interaction labels stay available. */
+body.window-info-off .native-info,
+body.window-info-off .info-i,
+body.window-info-off .note.hinted,
+body.window-info-off #infoPop,
+body.window-info-off .native-info-content { display:none !important; }
+body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))),
+body.window-info-off .settings-help { display:none; }
+.native-clean[data-id="camera"] .camera-control { display:flex;flex-wrap:nowrap;gap:6px;align-items:stretch; }
+.native-clean[data-id="camera"] .camera-control > .segw { flex:1 1 0;width:auto;min-width:0; }
+.native-clean[data-id="camera"] .camera-control .seg { display:flex;width:100%;height:100%;box-sizing:border-box; }
+.native-clean[data-id="camera"] .camera-control .seg-b { flex:1;min-width:0;padding:0 4px;letter-spacing:.04em; }
+.native-clean[data-id="camera"] .camera-control > .sw { flex:0 0 auto;min-width:0;padding:0 7px;letter-spacing:.04em; }
+.native-clean[data-id="camera"] .camera-export-row { display:flex;flex-wrap:nowrap;gap:6px; }
+.native-clean[data-id="camera"] .camera-export-row > .trig:first-child { flex:1 1 0;min-width:0; }
+.native-clean[data-id="camera"] .camera-export-row > .camera-export-toggle { flex:0 0 32px;min-width:32px;padding:0; }
+.native-clean[data-id="camera"] .camera-export-toggle::before { display:none; }
+.camera-export-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
+.camera-export-toggle[aria-expanded="true"] svg { transform:none; }
+.camera-export-details:not([hidden]) { display:flex;flex-direction:column;gap:10px; }
+
+.native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+.native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
+.accent-dial .k-dial { position:relative; }
+.accent-dial .k-dial::after { content:'';position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(var(--acc) var(--accent-sweep),transparent 0);mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 0);pointer-events:none; }
+.accent-dial-b .k-dial::after { background:conic-gradient(var(--acc2) var(--accent-sweep),transparent 0); }
+#menubar[popover] { position:fixed;inset:auto;margin:0;overflow:visible;border:0;padding:0;background:transparent;color:var(--fg); }
+#menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
+
+.shadow-controls { display:flex;flex-wrap:nowrap;gap:6px; }
+.shadow-controls > .segw { flex:1;min-width:0; }
+.shadow-controls .seg { display:flex; }
+.shadow-controls .seg-b { min-width:0;padding:0 4px;flex:1; }
+.dev .shadow-controls > .shadow-details-toggle { flex:0 0 30px;min-width:30px;padding:0; }
+.shadow-details-toggle::before { display:none !important; }
+.shadow-details-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
+.shadow-details-toggle[aria-expanded="true"] svg { transform:none; }
+.shadow-details:not([hidden]) { display:flex;flex-direction:column;gap:8px; }
+
+.dev .shadow-controls { display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:stretch;gap:6px; }
+.dev .shadow-controls > .segw { width:100%;min-width:0; }
+.dev .shadow-controls .seg { width:100%;height:100%;box-sizing:border-box; }
+.dev .shadow-controls .seg-b { flex:1 1 0;padding:0 4px; }
+.dev .shadow-controls > .shadow-details-toggle { width:32px;min-width:32px; }
+#transport.docked .native-play-row > .dock-btn { order:-1; }

@@ -1,5 +1,14 @@
 # λWAVES — handoff
 
+**Frozen checkpoint for Claude Code (2026-09-08): read [CLAUDE-CODE-HANDOFF.md](CLAUDE-CODE-HANDOFF.md) first.** Latest UI decisions supersede the historical notes below.
+
+**Latest audio work:** [AUDIO-RANGES-HANDOFF.md](AUDIO-RANGES-HANDOFF.md) documents
+per-band response ranges, attack/release, gate controls and focused integration checks.
+
+**Current local work (2026-09-08):** see [FINAL-II-HANDOFF.md](FINAL-II-HANDOFF.md)
+for the resumed Final II board, working-tree changes and focused checks. The remainder
+of this file records the prior wave-107 baseline and account boundaries.
+
 Updated 2026-09-07 after completing the remaining local Claude board work in wave 107.
 Read [TASKS.md](TASKS.md) for task outcomes, [LANDSCAPE.md](LANDSCAPE.md) for the code map,
 and REPORT.md wave 107 for implementation decisions and STALE LAW / REAL DEFECT verdicts.

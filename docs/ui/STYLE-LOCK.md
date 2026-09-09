@@ -417,3 +417,80 @@ and a port that reproduces the window's geometry can very easily reproduce these
 
 Full report: `REVIEW-3-2026-09-06.md` §1.1, §2.1, §1.2–§1.4. **The port's acceptance gate should drive each of
 these three gestures and fail on them**, exactly as wave 63's B70, B119 and B128 do for the four it built.
+
+## Native window rework — 2026-09-08, explicit user supersession
+
+Josh requested a full redesign of Spectrum, State, Palette, Wave, Camera, Slice,
+Settings and native transport, with judgment delegated on older layout laws.
+For these native windows, the older SPACE/DRAW nesting is superseded by flat rows;
+section boundaries use spacing instead of nested bordered cards. Positions retain
+their general ordering. Settings uses LOOK / DISPLAY / QUALITY pages in a fixed
+viewport. Keyboard editing belongs only to the dedicated `?` keyboard window.
+
+Explanatory native text and live Spectrum mathematics use accessible hover/focus/tap
+popovers in the browser top layer. Their changing content cannot change a window's
+geometry. The existing graph tooltip remains the graph mechanism. Readout lanes
+retain fixed dimensions during playback; intentional expansions and folds remain
+layout actions. The mode chooser remains open by default with a bounded scroll area;
+coefficient dials remain hidden by default. Hamiltonian owns its controls below it.
+
+The modulation design stays excluded. The old ban on exposing its tempo controls
+outside the plugin is superseded specifically for the expandable native tempo bar:
+both surfaces operate the same BPM, sync, cadence and hold model. No second clock,
+source cards, routing layout or modulation skin is introduced. Disconnected selected
+native headers tint with Accent A; the rack-switch header button is removed.
+
+A sphere/plane control now supplies an arbitrary 3D slice normal (drag, arrow keys,
+Home). The KS slice retains its 4D image gestures; the 3D miniature stands down there.
+Bow adds pull gain, response exponent and a momentum limit, retaining the existing
+boost/projection physics. Shader shape and finish are separate; surface-only finishes
+stand down for shapes without surface lighting. Glass is a stylized translucent finish,
+not a claim of physically refractive optics. New presentation parameters are saved in
+projects, undo and an optional backward-compatible share-link section.
+
+### Native control relief and natural window sizing — follow-up
+
+User ruling supersedes the flat-control treatment and fixed Settings viewport above.
+Exclusive choices use a recessed track and raised selected segment; action buttons
+retain the sculpted kit surface. Persistent on/off states use an accent lamp and edge
+glow in both themes. Modulation remains excluded from the native redesign.
+
+Native window contents expand without internal scroll areas, except History. Show
+all 91 Spectrum mode labels. Settings LOOK owns Reset Layout, Forget and Warning;
+DISPLAY exposes a stubborn P3 switch instead of the redundant actual-gamut readout.
+Changing live values must still leave geometry stable. Explicit tab changes and DIALS
+expansion may resize contents. Horizontal knob-row sizing must never apply inside
+Spectrum's vertical phase/rate stacks; each lane owns its grid and touch dimensions.
+
+### Follow-up: accent arcs, basins and compact tools
+
+WINDOW INFO is the fourth DISPLAY status switch, beside STAGE CAPTIONS; it starts
+off. Accent defaults are A=300°, B=30°, Vivid=10%, without replacing saved choices.
+Accent selectors and modulation dials show colored value arcs. ENV uses Accent A,
+including its heading. Native readouts retain the shared inset basin material.
+Macro relocation and matrix launchers are parked; see ARCHIVED-MACRO-TOOLS.md.
+The ENV header TRIG is removed. Tempo editing retains the display seat's dimensions.
+Logo menus use a glass surface in the browser top layer above floating windows.
+
+### First-visit rack arrangement and compact macros
+
+First-visit left rack: SHADOW, SPECTRUM. Right rack: SETTINGS (folded), STATE
+(folded), PALETTE, WAVE, CAMERA, SLICE/CLIP. Other windows, including modulation,
+start closed. DISPLAY precedes LOOK and is Settings' initially selected tab.
+SHADOW's disclosure starts closed and groups its Hamiltonian readout and exact-real
+caption. UI accents sample the λWAVES preset while PALETTE is off; when enabled,
+they follow the active palette. Saved accent angles remain independent of this rule.
+
+The user clarified macro minimization: narrow the rail to 112px, retaining each
+macro's value knob and routing grip. Do not collapse it to a header or hide its
+number seats. The separately archived macro relocation and matrix launchers stay off.
+
+### Default refinements and transport placement
+
+New settings use 11px glass blur, Accent A=30°, Accent B=300° (Vivid stays 10%).
+Saved settings retain their values. SHADOW uses PHASORS / OSC / LISSA, followed by
+a separate 32px disclosure. Docking reopens the transport at the left rack's top
+unless a project/layout or prior undock supplied a remembered side and slot.
+Loading a layout must place the transport in array order like every other card.
+Macro folding refreshes the displayed value/depth immediately and restores its
+expanded accessibility state; repeated close/reopen must preserve values and width.

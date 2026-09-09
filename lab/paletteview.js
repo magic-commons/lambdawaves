@@ -21,9 +21,9 @@ export function createPaletteEditor(host, api) {
   let stops = PRESET_BY_ID.get(startId).stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() }));
   let sel = 0;
   const ui = {};
-  const r0 = el('div', 'row tight', host);
+  const r0 = el('div', 'row tight palette-presets', host);
   ui.on = sw({ label: 'PALETTE', value: false, onChange: (v) => { api.setEnabled(v); push(); } });
-  r0.appendChild(ui.on.root);
+  const enableRow=el('div','row tight palette-enable',host);enableRow.appendChild(ui.on.root);
   ui.sel = el('select', 'sel', r0); ui.sel.setAttribute('aria-label', 'palette');   // wave 62: the other five <select>s name themselves through a `title`; this one had nothing
   /* WAVE 54 (board #47, Josh: "like how ember only has 4"): the menu is GROUPED BY THE NUMBER OF COLOUR POINTS
      around the circle, ascending.  The grouping is the catalogue's own — palette.js already publishes PRESET_GROUPS
@@ -83,9 +83,9 @@ export function createPaletteEditor(host, api) {
   chip(ui.palNext.root, 'dirNext', 'next palette');
   r0.insertBefore(ui.palPrev.root, ui.sel);
   r0.appendChild(ui.palNext.root);
-  r0.appendChild(trig({ label: 'RELOAD', title: 'reload the palette that is already selected — its catalogue stops back, exactly as shipped. Re-picking the same entry in the list fires no change event, which is why this button exists', onFire: () => pickPalette(ui.sel.value) }).root);
+  enableRow.appendChild(trig({ label: 'RESET', title: 'reload the palette that is already selected — its catalogue stops back, exactly as shipped. Re-picking the same entry in the list fires no change event, which is why this button exists', onFire: () => pickPalette(ui.sel.value) }).root);
   ui.seam = readout({ label: 'SEAM at ±π', value: '—', sub: 'OKLab distance across the wrap' });
-  r0.appendChild(ui.seam.root);
+  const seamInfo=el('div','palette-seam',host);seamInfo.appendChild(ui.seam.root);
 
   const wrap = el('div', 'pal-wrap', host);
   const strip = el('canvas', 'pal-strip', wrap);

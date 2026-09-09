@@ -88,7 +88,7 @@
     <div id="rackAddList" class="glass" hidden></div>
     <div id="rackFavList" class="glass" hidden></div>
     <section id="notebook" class="nb" hidden aria-label="notebook" data-face="notes">
-      <header class="nb-head"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><span class="nb-tools"><button class="nb-mode" type="button" aria-label="edit or preview the notes" title="edit / preview (ctrl+enter) — markdown, $inline$ and $$display$$ maths">◐</button><button class="nb-projects-btn" type="button" aria-label="projects" title="projects: save, open, folders, recent">▤</button><button class="nb-about" type="button" aria-label="about λWAVES" title="about λWAVES (and back to the notes)">i</button><button class="nb-close" type="button" aria-label="close the notebook" title="close (J)">×</button></span></header>
+      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div><span class="nb-tools"><button class="nb-mode" type="button" aria-label="edit or preview the notes" title="edit / preview (ctrl+enter) — markdown, $inline$ and $$display$$ maths">◐</button><button class="nb-projects-btn" type="button" aria-label="projects" title="projects: save, open, folders, recent">▤</button><button class="nb-about" type="button" aria-label="about λWAVES" title="about λWAVES (and back to the notes)">i</button><button class="nb-close" type="button" aria-label="close the notebook" title="close (J)">×</button></span></header>
       <div class="nb-face nb-notes">
         <textarea class="nb-text" spellcheck="false" placeholder="notes — markdown, $inline$ and $$display$$ maths; ctrl+enter previews — kept in this browser and in the project"></textarea>
         <div class="nb-view md"></div>
@@ -109,7 +109,7 @@
         <p class="ab-credit">Paul Falstad’s Math &amp; Physics Java Applets @ <a href="https://www.falstad.com/" target="_blank" rel="noopener">falstad.com</a></p>
         <p class="ab-credit ab-team">Seth Shultz · Beatriz Erranté · Independent research &amp; Assistance</p>
         <p class="ab-fine">Made with</p>
-        <p class="ab-fine">Claude (Anthropic)&nbsp;&nbsp; GPT (OpenAI)</p>
+        <p class="ab-fine">Claude (Anthropic) · Gemini (Google Deepmind) · GPT (OpenAI)</p>
         <div class="ab-rule"></div>
         <p class="ab-fine">Type: <a href="./fonts/Spinwerad-OFL.txt" target="_blank" rel="noopener">LW&nbsp;Title</a>, a renamed subset of Spinwerad by gluk · <a href="./fonts/Roboto-OFL.txt" target="_blank" rel="noopener">Roboto</a> · <a href="./fonts/STIXTwoMath-OFL.txt" target="_blank" rel="noopener">STIX&nbsp;Two&nbsp;Math</a> — all SIL OFL 1.1, subset for this lab. Maths set with <a href="./vendor/katex/LICENSE" target="_blank" rel="noopener">KaTeX</a> (MIT; its <a href="./vendor/katex/fonts/OFL.txt" target="_blank" rel="noopener">fonts</a> SIL OFL 1.1) and <a href="./vendor/marked-LICENSE.md" target="_blank" rel="noopener">marked</a> (MIT).</p>
         <div class="ab-dumprow"><span>Copy dump</span><button class="nb-dump" type="button">COPY</button></div>
@@ -132,7 +132,7 @@
          gestures along with the keys — on the one device where discovery is hardest.  `shift+click = place
          electron 1` is gone: it is guarded on `helium && helium.on` and HELIUM ships folded and off, so it
          was the one clause of seven that did nothing on the screen that advertised it. -->
-    <div id="hint" class="glass"><span class="keys">drag to orbit · ctrl+drag = impulse vector · space = play · H = hide · N = notes · ? = every key</span><span class="touch">drag to turn it · pinch to zoom · ◧ opens the rack, and ▶ is at the top of it</span></div>
+    <div id="hint" class="glass"><span class="keys">drag to orbit · ctrl+drag = bow · space = play · H = hide · N = notes · ? = every key</span><span class="touch">drag to turn it · pinch to zoom · ◧ opens the rack, and ▶ is at the top of it</span></div>
     <div id="transport" class="glass mini"></div>
     <!-- WAVE 55 · THE FLOAT LAYER.  Every window that comes off a rack lives here: one absolutely
          positioned layer over the stage, pointer-transparent itself so the canvas gestures underneath

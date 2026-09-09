@@ -66,7 +66,7 @@
  *      so the caption cannot go stale.  A stage clamped at t = 1 keeps its seconds, because
  *      `envMove` writes the KNOB and never re-reads the clamped point.
  */
-import { el, seg, trig, tapWatcher } from './kit.js';
+import { el, seg, trig, knob, tapWatcher } from './kit.js';
 import { glyphEl } from './mir/glyph.js';                    // wave 75: the rail chip's ink is a drawing, never a character
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modwindow/modwindow.js';
@@ -143,13 +143,13 @@ const CHECK_HINT = {
 export function createModulation(host, port) {
   const M = port.M, registry = port.registry, clock = port.clock;
   const apply = port.apply || (() => {});
+  const audBands = new Map();
 
   /* ── THE ARTIFACT, BUILT ───────────────────────────────────────────────────────────────── */
   const root = createModWindow({
-    /* COPY is the artifact's own parameterisation hook — "the only app-shaped strings".
-       `factory` is the one word that named another app; the hint line, the chip labels, the
-       knob captions and the six preset names are the window's and are not touched. */
-    copy: { factory: 'FACTORY' }
+    /* COPY customizes audio's face while the ported files stay frozen. */
+    copy: { factory: 'FACTORY', knobs: {...COPY.knobs, audio:[['sens','GAIN','-24','+24'],['attack','ATTACK','0','60s'],['release','RELEASE','0','60s']]},
+      audioSheetRows:[['out','BAND'],['lower','LOWER'],['upper','UPPER'],['att','ATTACK'],['rel','RELEASE'],['gate','NOISE GATE'],['thresh','GATE dB'],['hold','GATE HOLD'],['hyst','HYST'],['flux','HIT SENSE']] }
   });
   host.appendChild(root);
   const rail = buildChipRail(root, {});
@@ -256,7 +256,7 @@ export function createModulation(host, port) {
   }
 
   /* ── PRESENTATION STATE.  The window's own, never the model's, never the project's. ────── */
-  const P = { x: 0, y: 0, lane: 'bottom', ribbon: false, modes: {}, open: false, folder: {} };
+  const P = { x: 0, y: 0, lane: 'bottom', ribbon: false, modes: {}, open: false, folder: {}, macroSide: 'left', macroMin: false };
   /* THE STORED MODES ARE ADOPTED ONCE, AND A DEAD ID TAKES ITS MODE WITH IT.  `modReset()` recycles
      source ids — the next `s1` is a different device — so a mode kept by id and never pruned puts a
      brand-new LFO on the screen folded because something called `s1` was folded last session.  The
@@ -277,7 +277,8 @@ export function createModulation(host, port) {
   const cardModes = () => devOrder().map((s) => modeOf(s.id));
 
   function place() {
-    const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon });
+    if (root.querySelector('.mod-matrix[open]')) return;
+    const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }) - (P.macroMin && !P.ribbon ? 112 : 0);
     const h = sizeLaw.height({ uiScale: 1 });
     const vw = window.innerWidth, vh = window.innerHeight;
     /* ── WAVE 100 · THE WINDOW MAY NOT GROW PAST THE SCREEN ──────────────────────────────────────
@@ -360,7 +361,7 @@ export function createModulation(host, port) {
     let railX = 0;
     const footEl = foot.prebar.parentElement;
     if (footEl && rackEl.rail) {
-      const rr = rackEl.rail.getBoundingClientRect(), fr = footEl.getBoundingClientRect();
+      const rr = rackEl.root.getBoundingClientRect(), fr = footEl.getBoundingClientRect();
       if (rr.width > 0) railX = Math.round(rr.left - fr.left);
     }
     foot.prebar.style.left = railX + 'px';
@@ -443,7 +444,7 @@ export function createModulation(host, port) {
       const edge3 = Math.min(cards3.length ? cards3[cards3.length - 1].getBoundingClientRect().right : runR3, runR3);
       railLeft = Math.min(vw - 62, Math.round(edge3 + gap));
     }
-    rail.style.left = railLeft + 'px';
+    rail.style.left = (P.macroSide === 'right' ? Math.min(vw-38,P.x+w+4) : railLeft) + 'px';
     /* WAVE 87 · THE CHIPS SIT ON THE SCROLLER'S CENTRE LINE (Josh: "Center the chips to the center
        height of the scrolling windows (the macros and the devices)").  The rail used to be pinned to
        the WINDOW's top, so it drifted off the cards as the row grew and the work lane came and went.
@@ -562,12 +563,16 @@ export function createModulation(host, port) {
   });
   transport.xport.title = 'start modulation time. It is NOT the physics transport: an LFO keeps animating the camera while ψ is paused, and RATE — itself a modulation target — cannot set how fast the modulator runs. SPACE plays and pauses both clocks at once while MOD is on; this button is the modulation playhead alone';
 
+  const nativeRate = port.rateControl && port.rateControl();
+  if (nativeRate) { nativeRate.root.classList.add('m2-native-rate'); transport.xport.parentNode.insertBefore(nativeRate.root, transport.tempo); }
+
   /* THE TEMPO FIELD.  `.modtempo` and `.modtempoin` stand in the same seat and swap `hidden`;
      the number never goes, only its unit and its derived Hz (`.tight`, then `.tighter`). */
   transport.tempo.title = 'the LOOP CLOCK, in beats per minute — not tempo: a captured loop CLOSES only when every modulator divides one period exactly. Tap to type it';
   let tempoDragged = false;
   transport.tempo.addEventListener('click', () => {
     if (tempoDragged) { tempoDragged = false; return; }
+    const seat=transport.tempo.getBoundingClientRect();transport.tempoIn.style.width=seat.width+'px';transport.tempoIn.style.flex='0 0 '+seat.width+'px';transport.tempoIn.style.height=seat.height+'px';
     transport.tempo.hidden = true; transport.tempoIn.hidden = false;
     transport.tempoIn.value = String(Math.round(M.transport.bpm));
     transport.tempoIn.focus(); transport.tempoIn.select();
@@ -631,8 +636,8 @@ export function createModulation(host, port) {
   transport.holds.forEach((b, i) => {
     b.title = 'the stutter hold: fold the beat into ' + HOLD_NOTE[i] + ' and keep a shadow of the un-held run — release rejoins the shadow. A hold is a GESTURE, so closing this window never releases it';
     b.addEventListener('click', () => {
-      if (M.transport.hold && M.transport.holdNote === HOLD_NOTE[i]) clock.release();
-      else { if (M.transport.hold) clock.release(); clock.hold(HOLD_NOTE[i]); }
+      if (M.transport.hold && M.transport.holdNote === HOLD_NOTE[i]) { clock.release(); status('STUTTER released — rejoined the running beat', ''); }
+      else { if (M.transport.hold) clock.release(); clock.hold(HOLD_NOTE[i]); status('STUTTER '+HOLD_NOTE[i]+' latched — applies to BPM-synced LFOs; press again to release', ''); }
       sync();
     });
   });
@@ -787,7 +792,7 @@ export function createModulation(host, port) {
     return r.bi ? { lo: -Math.abs(d) / 2, hi: Math.abs(d) / 2, d } : d < 0 ? { lo: d, hi: 0, d } : { lo: 0, hi: d, d };
   }
   function liveSpan(r) {
-    if (r.dormant) return null;
+    if (r.dormant || r.enabled === false) return null;
     const m = M.macroOf(r.macroId); if (!m) return null;
     if (m.sourceId) { const s = M.sourceOf(m.sourceId); if (!s || !s.on) return null; }
     return routeSpan(r);
@@ -823,7 +828,7 @@ export function createModulation(host, port) {
     const idx = routeIndex();
     for (const [id, rec] of rings) {
       if (idx.has(id) && registry.has(id) && rec.dial.isConnected) continue;
-      rec.svg.remove(); if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring');
+      rec.svg.remove(); if(rec.depth) rec.depth.root.remove(); if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring');
       rings.delete(id);
     }
     for (const id of idx.keys()) {
@@ -846,6 +851,10 @@ export function createModulation(host, port) {
     dial.appendChild(svg);
     if (dial.parentElement) dial.parentElement.classList.add('has-ring');
     wireRing(rec);
+    const depth = knob({label:'RANGE',min:-1,max:1,value:0,fmt:v=>(v*100).toFixed(0)+'%',onInput:d=>{const r=editRouteOf(id);if(!r)return;M.setRouteRange(r.id,{min:Math.max(0,-d),max:Math.max(0,d)});apply();paintRings();}});
+    depth.root.classList.add('k-route-depth'); depth.root.title='Selected macro range; the large dial sets the base';
+    depth.root.addEventListener('pointerdown',e=>e.stopPropagation());
+    dial.parentElement.appendChild(depth.root); rec.depth=depth;
     return rec;
   }
 
@@ -871,6 +880,7 @@ export function createModulation(host, port) {
   function paintRing(rec, q) {
     const id = rec.id;
     const hide = (p) => p.setAttribute('d', '');
+    if (rec.depth) { const route = editRouteOf(id); rec.depth.root.hidden = !q || !route; if (route) rec.depth.set(route.max - route.min); }
     if (!q || !registry.has(id)) { hide(rec.edit); hide(rec.stack); hide(rec.tick); hide(rec.spur); return; }
     const st = registry.state(id), wrap = st.wrap, g = ringGeom(wrap);
     const b = wrap ? ((st.baseNorm % 1) + 1) % 1 : st.baseNorm;
@@ -1233,9 +1243,9 @@ export function createModulation(host, port) {
          sends, on the artifact's own 34-px ring.  A double-tap puts it back to 100 %, which is
          what the window's own hint line promises. */
       wireSlider(rec.numSeat, {
-        get: () => M.macroOf(m.id).masterDepth,
-        set: (v) => { M.setMacro(m.id, { masterDepth: clamp01(v) }); apply(); paint(true); },
-        reset: () => { M.setMacro(m.id, { masterDepth: 1 }); apply(); paint(true); },
+        get: () => P.macroMin ? M.macroOf(m.id).value : M.macroOf(m.id).masterDepth,
+        set: (v) => { const mm = M.macroOf(m.id); if (P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:clamp01(v)} : {masterDepth:clamp01(v)}); apply(); paint(true); },
+        reset: () => { const mm=M.macroOf(m.id); if(P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:0} : {masterDepth:1}); apply(); paint(true); },
         axis: 'y'
       });
       rec.numSeat.title = 'MASTER DEPTH — one gain over everything this macro sends. Drag up and down; double-tap for 100 %';
@@ -1406,6 +1416,12 @@ export function createModulation(host, port) {
     const L = M.STEPS_LADDER;
     const SQ = (v) => Math.sqrt(Math.max(0, v) / M.ENV_MAX_S);
     const nMult = M.LFO_MULTS.length;
+    if(s.kind==='audio' && (key==='attack'||key==='release')) {
+      const field=key+'Ms',band=()=>audBands.get(s.id)||'level',value=()=>s.audio.outs[band()][field];
+      return {get:()=>Math.log1p(value())/Math.log1p(M.AUDIO_TIME_MAX),
+        set:u=>M.setSource(s.id,{audio:{outs:{[band()]:{[field]:Math.round(Math.expm1(clamp01(u)*Math.log1p(M.AUDIO_TIME_MAX)))}}}}),
+        text:()=>value().toFixed(0)+' ms',hint:'Selected audio band '+key+' time constant; choose LEVEL, LOW, MID or HIGH on its meter'};
+    }
     switch (key) {
       case 'rate': return {
         get: () => (s.sync ? s.mult / (nMult - 1) : s.ratePos),
@@ -1421,15 +1437,7 @@ export function createModulation(host, port) {
         set: (u) => M.setSource(s.id, { steps: L[Math.round(clamp01(u) * (L.length - 1))] }),
         text: () => (s.steps >= M.STEPS_MIN ? String(s.steps) : 'OFF'),
         hint: 'quantise the output to N discrete levels — the 35-rung ladder, drawn as stairs on the picture' };
-      /* AUDIO's HOLD is a millisecond release on the follower (COPY: 0 … 1000), not one of the
-         envelope's four second-stages — it only shared this case because it shares the key. */
-      case 'hold': if (s.kind === 'audio') {
-        const ms = () => ((s.audio && Number.isFinite(s.audio.holdMs)) ? s.audio.holdMs : 0);
-        return { get: () => clamp01(ms() / 1000),
-          set: (u) => M.setSource(s.id, { audio: { holdMs: clamp01(u) * 1000 } }),
-          text: () => ms().toFixed(0) + ' ms', hint: 'how long the follower holds a peak before it falls' };
-      }
-      /* falls through to the envelope's square-law stages for every other kind */
+      case 'hold':
       case 'a': case 'd': case 'r': return {
         get: () => SQ(s[key]), set: (u) => M.setSource(s.id, { [key]: clamp01(u) * clamp01(u) * M.ENV_MAX_S }),
         text: () => fmtSec(s[key]),
@@ -1454,7 +1462,7 @@ export function createModulation(host, port) {
         const db = () => ((s.audio && Number.isFinite(s.audio.gainDb)) ? s.audio.gainDb : 0);
         return { get: () => (db() + M.AUDIO_GAIN_MAX) / (2 * M.AUDIO_GAIN_MAX),
           set: (u) => M.setSource(s.id, { audio: { gainDb: (clamp01(u) * 2 - 1) * M.AUDIO_GAIN_MAX } }),
-          text: () => (db() >= 0 ? '+' : '') + db().toFixed(1), hint: 'input gain, ±24 dB before the fixed-dB normaliser' }; }
+          text: () => (db() >= 0 ? '+' : '') + db().toFixed(1) + ' dB', hint: 'input gain, ±24 dB before the band response ranges' }; }
       case 'thresh': {
         const db = () => ((s.audio && Number.isFinite(s.audio.thresholdDb)) ? s.audio.thresholdDb : M.AUDIO_DB_FLOOR);
         return { get: () => clamp01((db() - M.AUDIO_DB_FLOOR) / M.AUDIO_DB_SPAN),
@@ -1510,15 +1518,92 @@ export function createModulation(host, port) {
     head.insertBefore(chev, head.firstChild);
     const toggle = () => {
       const rail = head.closest('.m2rail');
-      const on = rail.classList.toggle('m2railmin');
+      const on = rail.classList.toggle('m2railmin'); P.macroMin = on;
       head.setAttribute('aria-expanded', String(!on));
-      place(); persist();
+      paint(true);place(); persist();
     };
     head.addEventListener('click', toggle);
     head.addEventListener('keydown', (e) => {
       if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); toggle(); }
     });
   }
+
+  function setMacroSide(side) {
+    P.macroSide = side;
+    const macro = root.querySelector('.m2rail');
+    if (macro) macro.style.order = side === 'right' ? '2' : '0';
+  }
+  const macroHead = root.querySelector('.m2railhead');
+  const sideGrip = el('button', 'm2-side-grip', macroHead, '⠿');
+  sideGrip.hidden=true;sideGrip.disabled=true;sideGrip.type = 'button'; sideGrip.title = 'Drag macros to either end; double-click or use arrow keys to swap sides';
+  sideGrip.setAttribute('aria-label', 'Move macros to left or right end');
+  let sideDrag = null;
+  sideGrip.addEventListener('click', (e) => e.stopPropagation());
+  sideGrip.addEventListener('pointerdown', (e) => { e.stopPropagation(); sideDrag = e.clientX; sideGrip.setPointerCapture(e.pointerId); });
+  sideGrip.addEventListener('pointerup', (e) => { if (sideDrag === null) return; if (Math.abs(e.clientX - sideDrag) > 8) { setMacroSide(e.clientX > root.getBoundingClientRect().left + root.offsetWidth / 2 ? 'right' : 'left'); place(); persist(); } sideDrag = null; });
+  sideGrip.addEventListener('pointercancel', () => { sideDrag = null; });
+  sideGrip.addEventListener('dblclick', (e) => { e.stopPropagation(); setMacroSide(P.macroSide === 'right' ? 'left' : 'right'); place(); persist(); });
+  sideGrip.addEventListener('keydown', (e) => { e.stopPropagation(); if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return; e.preventDefault(); setMacroSide(e.key === 'ArrowLeft' ? 'left' : 'right'); place(); persist(); });
+
+  // The matrix and the ring gestures edit the same route objects.
+  const matrix = el('dialog', 'mod-matrix', root);
+  const matrixHead = el('div', 'mod-matrix-head', matrix);
+  el('b', '', matrixHead, 'MODULATION MATRIX');
+  const matrixClose = el('button', '', matrixHead, 'CLOSE'); matrixClose.type = 'button';
+  const matrixBars = el('div', 'mod-matrix-bars m2foot', matrix);
+  const matrixBody = el('div', 'mod-matrix-body', matrix);
+  const matrixButton = el('button', 'm2-matrix-open', macroHead, '▦'); matrixButton.hidden=true;matrixButton.disabled=true;matrixButton.type = 'button';
+  matrixButton.title = 'Open modulation matrix'; matrixButton.setAttribute('aria-label', 'Open modulation matrix');
+  let barHomes = [];
+  const closeMatrix = () => {
+    for (const [node, parent, next] of barHomes) parent.insertBefore(node, next && next.parentNode === parent ? next : null);
+    barHomes = []; matrix.close(); place(); matrixButton.focus();
+  };
+  matrixClose.addEventListener('click', closeMatrix);
+  matrix.addEventListener('cancel', (e) => { e.preventDefault(); closeMatrix(); });
+  function renderMatrix() {
+    matrixBody.replaceChildren();
+    const table = el('table', '', matrixBody), head = el('tr', '', el('thead', '', table));
+    for (const name of ['ON', 'SOURCE', 'DESTINATION', 'AMOUNT', 'POLARITY', 'CURVE', '']) el('th', '', head, name);
+    const body = el('tbody', '', table);
+    const select = (cell, values, value, label, change) => {
+      const input = el('select', '', cell); input.setAttribute('aria-label', label);
+      for (const [id, name] of values) { const option = el('option', '', input, name); option.value = id; }
+      input.value = value; input.addEventListener('change', () => change(input.value)); return input;
+    };
+    const macros = M.macroList().filter(m => m.kind !== 'trigger').map(m => [m.id, m.name]);
+    const targets = registry.describe().map(d => [d.id, d.label]);
+    const update = (r, patch) => { M.setRouteRange(r.id, patch); clock.recomputeRunning(); apply(); paintRings(); };
+    for (const r of M.routeList()) {
+      const row = el('tr', '', body), cell = () => el('td', '', row);
+      const on = el('input', '', cell()); on.type = 'checkbox'; on.checked = r.enabled !== false; on.setAttribute('aria-label', 'Enable route');
+      on.addEventListener('change', () => update(r, { enabled: on.checked }));
+      select(cell(), macros, r.macroId, 'Route source', value => { const dup = M.routesOfTarget(r.targetId).some(q => q.id !== r.id && q.macroId === value); if (!dup) update(r, { macroId: value }); renderMatrix(); });
+      select(cell(), targets.some(d=>d[0]===r.targetId) ? targets : [...targets,[r.targetId,r.targetId+' (unavailable)']], r.targetId, 'Route destination', value => {
+        if (value===r.targetId || M.routesOfTarget(value).some(q=>q.macroId===r.macroId)) { renderMatrix(); return; }
+        const next=M.addRoute(r.macroId,value,r.min,r.max);
+        if(next && !next.already) { M.setRouteRange(next.route.id,{bi:r.bi,enabled:r.enabled,curve:r.curve}); M.removeRoute(r.id); clock.recomputeRunning(); apply(); rebuild(); }
+        renderMatrix();
+      });
+      const amount = el('input', '', cell()); amount.type = 'number'; amount.min = -100; amount.max = 100; amount.step = 1; amount.value = ((r.max - r.min) * 100).toFixed(1); amount.setAttribute('aria-label', 'Signed route amount percent');
+      amount.addEventListener('change', () => { if (!Number.isFinite(amount.valueAsNumber)) return; const d = Math.max(-1, Math.min(1, amount.valueAsNumber / 100)); update(r, {min:Math.max(0,-d),max:Math.max(0,d)}); amount.value = (d*100).toFixed(1); });
+      select(cell(), [['uni','UNIPOLAR'],['bi','BIPOLAR']], r.bi ? 'bi' : 'uni', 'Route polarity', v => update(r, {bi:v === 'bi'}));
+      const curve = el('input', '', cell()); curve.type = 'range'; curve.min = -1; curve.max = 1; curve.step = .01; curve.value = r.curve || 0; curve.setAttribute('aria-label', 'Response curve, zero is linear'); curve.addEventListener('input', () => update(r, {curve:curve.valueAsNumber}));
+      const remove = el('button', '', cell(), 'REMOVE'); remove.type = 'button'; remove.addEventListener('click', () => { M.removeRoute(r.id); clock.recomputeRunning(); apply(); rebuild(); renderMatrix(); });
+    }
+    const add = el('div', 'mod-matrix-add', matrixBody);
+    const source = select(add, macros, selectedMacro(), 'New route source', () => {});
+    const target = select(add, targets, targets[0] && targets[0][0], 'New route destination', () => {});
+    const button = el('button', '', add, 'ADD ROUTE'); button.type = 'button'; button.disabled = !macros.length || !targets.length;
+    button.addEventListener('click', () => { dropOn(source.value, target.value); renderMatrix(); });
+    if (!macros.length) el('p', '', matrixBody, 'Add a macro in the modulation window to begin routing.');
+  }
+  matrixButton.addEventListener('click', (e) => {
+    e.stopPropagation(); renderMatrix();
+    barHomes = [foot.prebar, transport.xport.parentNode].filter(Boolean).map(node => [node, node.parentNode, node.nextSibling]);
+    for (const [node] of barHomes) matrixBars.appendChild(node);
+    matrix.showModal();
+  });
 
   /* WAVE 92 · AND IT GOES BACK TO THE HEAD, WHERE ENV'S OWN LABEL ALREADY LIVES.  Josh: "place it
      similar to the 'REL' is on in ENV, not in the curve window."  `.m2envstage` — the word REL — is
@@ -1702,6 +1787,7 @@ export function createModulation(host, port) {
     wireGrab(rec);
 
     if (dev.trig) {
+      dev.trig.hidden=true;dev.trig.disabled=true;
       dev.trig.title = 'fire this envelope by hand — an envelope moves on modulation time, so the transport has to be running for it to run its shape';
       /* WAVE 105 · A GATE MUST NOT BE STRANDABLE.  `pointerup` on the BUTTON only fires if the
          finger is still over it; sliding off mid-gate left the envelope held with no way back
@@ -1814,7 +1900,7 @@ export function createModulation(host, port) {
         }
         sync(); paint(true);
       });
-      A.setBtn.title = 'the conditioning sheet — input, attack, release, hysteresis and sensitivity';
+      A.setBtn.title = 'Input, exact band ranges and timing, noise gate, gate HOLD and onset sensitivity';
       A.setBtn.addEventListener('click', () => {
         /* the sheet's whole content is the CAPTURE's — a host with none has nothing to condition.
            A restored session can carry an AUDIO source onto such a host, so this is reachable. */
@@ -1822,8 +1908,9 @@ export function createModulation(host, port) {
         if (!rec.audSheet) rec.audSheet = buildAudioSheet(dev, mw.copy);
         const sh = rec.audSheet;
         if (!sh) { say(rec, 'the conditioning sheet is not available in this build'); return; }
-        sh.root.hidden = !sh.root.hidden;
+        sh.root.hidden = !sh.root.hidden; if(sh.refresh)sh.refresh();
         if (!sh.wired) { sh.wired = true;
+          wireAudioConditioning(rec, sh);
           sh.close.addEventListener('click', () => { sh.root.hidden = true; });
           sh.input.addEventListener('change', async () => {
             if (!port.audio) { say(rec, 'this host supplies no audio capture'); return; }
@@ -1932,6 +2019,7 @@ export function createModulation(host, port) {
     rec.g = { box: dev.ed.box, svg: dev.ed.svg, ed: dev.ed, w: 0, h: 0, X: (t) => t, Y: (v) => v,
               samples: [], levels: 0, hseg: [], pts: null, sig: '' };
     wireEditor(rec);
+    if(s.kind==='audio')buildAudioRanges(rec);
     seatMinTrace(rec);                  // wave 97: the folded strip's one indicator
 
     /* ── WAVE 99 · THE FOLDED STRIP'S NUMERAL SWITCHES THE MACRO, IT DOES NOT EXPAND ────────────
@@ -2371,102 +2459,131 @@ export function createModulation(host, port) {
     svg.addEventListener('pointercancel', () => { mode = null; box = null; key = null; });
   }
 
-  /* ══ WAVE 102 · THE AUDIO METER, DRAWN FROM `audioReadout` AND NOTHING ELSE ═══════════════════
-   * Every number on this picture is the model's own: the gate threshold and its hysteresis, the four
-   * follower outputs, the adaptive flux threshold and the onset count.  Nothing is re-derived here —
-   * this file has no opinion about what is loud (ANTI-PATTERN 20), it only decides where to put the
-   * model's answer.  The artifact built every one of these elements in `buildAudioMeter`; this is the
-   * first thing that has ever given them coordinates.
-   *   THE LAYOUT: the left 56 % is LEVEL over time, with the gate drawn ACROSS it — so you can see the
-   * signal crossing the threshold rather than reading two numbers and inferring it — and the right is
-   * five bars: LEVEL, LOW, MID, HIGH and the FLUX with its own moving threshold tick.  The HIT lamp
-   * flashes on the corner because an event has no height. */
-  const HIT_FLASH_MS = 140;
+  // Each meter is both an input-level display and a response-range editor.
+  function buildAudioRanges(rec) {
+    const {s, dev} = rec;
+    dev.root.classList.add('audio-ranges');
+    const root = el('div', 'aud-ranges', dev.ed.box);
+    root.setAttribute('aria-label', 'Audio response ranges');
+    const rows = {};
+    const select = key => { audBands.set(s.id, key); syncKnobs(rec); paintAudio(rec); };
+    const patch = (key, q) => { for(const k of ['floorDb','ceilingDb'])if(Number.isFinite(q[k]))q[k]=Math.round(q[k]*10)/10; M.setSource(s.id, {audio:{outs:{[key]:q}}}); apply(); paintAudio(rec); };
+    const shift = (key, delta, base=s.audio.outs[key]) => {
+      delta = Math.max(M.AUDIO_RANGE_MIN-base.floorDb, Math.min(M.AUDIO_RANGE_MAX-base.ceilingDb, delta));
+      patch(key, {floorDb:base.floorDb+delta, ceilingDb:base.ceilingDb+delta});
+    };
+    for (const key of M.AUDIO_FOLLOWED) {
+      const row = el('div', 'aud-range-row', root); row.dataset.band=key;
+      const head = el('button', 'aud-range-name', row); head.type='button';
+      const name=el('b','',head,key.toUpperCase()), text=el('span','aud-range-value',head);
+      head.addEventListener('click',()=>select(key));
+      head.title='Select '+key.toUpperCase()+' for ATTACK and RELEASE';
+      const track=el('div','aud-range-track',row);
+      const fill=el('div','aud-range-output',track), zone=el('div','aud-range-zone',track), cursor=el('i','aud-range-input',track);
+      const handles={};
+      for(const endpoint of ['floorDb','ceilingDb']) {
+        const handle=el('button','aud-range-handle',track); handle.type='button'; handle.dataset.endpoint=endpoint;
+        handle.setAttribute('role','slider'); handle.setAttribute('aria-orientation','horizontal');
+        handle.setAttribute('aria-label',key.toUpperCase()+' '+(endpoint==='floorDb'?'lower':'upper')+' response boundary dB');
+        handle.addEventListener('keydown',e=>{
+          if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
+          e.preventDefault(); e.stopPropagation(); select(key);
+          const o=s.audio.outs[key],lo=endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP,
+            hi=endpoint==='floorDb'?o.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX;
+          const v=e.key==='Home'?lo:e.key==='End'?hi:o[endpoint]+(['ArrowRight','ArrowUp'].includes(e.key)?1:-1)*(e.shiftKey ? .1 : 1);
+          patch(key,{[endpoint]:Math.max(lo,Math.min(hi,v))});
+        });
+        handles[endpoint]=handle;
+      }
+      let drag=null;
+      track.addEventListener('pointerdown',e=>{
+        if(e.button!==0)return; e.preventDefault();e.stopPropagation();select(key);
+        const o=s.audio.outs[key],b=track.getBoundingClientRect();
+        const db=M.AUDIO_RANGE_MIN+(e.clientX-b.left)/b.width*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
+        const endpoint=e.target.dataset.endpoint || (db<o.floorDb?'floorDb':db>o.ceilingDb?'ceilingDb':null);
+        drag={x:e.clientX,w:b.width,base:{...o},endpoint};
+        track.setPointerCapture(e.pointerId); if(endpoint)handles[endpoint].focus();
+      });
+      track.addEventListener('pointermove',e=>{
+        if(!drag)return;const delta=(e.clientX-drag.x)/drag.w*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
+        if(!drag.endpoint)shift(key,delta,drag.base);
+        else {
+          const lo=drag.endpoint==='floorDb'?M.AUDIO_RANGE_MIN:drag.base.floorDb+M.AUDIO_RANGE_GAP;
+          const hi=drag.endpoint==='floorDb'?drag.base.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX;
+          patch(key,{[drag.endpoint]:Math.max(lo,Math.min(hi,drag.base[drag.endpoint]+delta))});
+        }
+      });
+      const end=()=>{drag=null;};track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);
+      track.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();select(key);shift(key,(e.deltaY<0?1:-1)*(e.shiftKey ? .1 : 1));},{passive:false});
+      track.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();patch(key,{floorDb:M.AUDIO_DB_FLOOR,ceilingDb:M.AUDIO_DB_TOP});});
+      track.title='Drag either boundary to resize; drag inside or scroll to shift; double-click to reset. Fill = output, line = input dB.';
+      rows[key]={row,head,text,fill,zone,cursor,handles};
+    }
+    const hint=el('div','aud-range-hint',root,'Drag edges · scroll range · select band for timing');
+    rec.audRanges={root,rows,hint};
+  }
+
+  function wireAudioConditioning(rec, sh) {
+    const s=rec.s, keys=M.AUDIO_FOLLOWED;
+    const selected=()=>audBands.get(s.id)||'level';
+    const specs={
+      lower:{min:M.AUDIO_RANGE_MIN,max:M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_GAP,step:1,unit:'dB',field:'floorDb'},
+      upper:{min:M.AUDIO_RANGE_MIN+M.AUDIO_RANGE_GAP,max:M.AUDIO_RANGE_MAX,step:1,unit:'dB',field:'ceilingDb'},
+      att:{min:0,max:M.AUDIO_TIME_MAX,step:1,unit:'ms',field:'attackMs'},
+      rel:{min:0,max:M.AUDIO_TIME_MAX,step:1,unit:'ms',field:'releaseMs'},
+      thresh:{min:-90,max:0,step:1,unit:'dB',field:'thresholdDb',global:true},
+      hold:{min:0,max:4000,step:10,unit:'ms',field:'holdMs',global:true},
+      hyst:{min:0,max:24,step:1,unit:'dB',field:'hysteresisDb',global:true},
+      flux:{min:.001,max:10,step:.001,unit:'',field:'fluxFloor',global:true}
+    };
+    const refresh=()=>{
+      sh.rows.out.val.textContent=selected().toUpperCase();
+      sh.rows.gate.val.textContent=s.audio.gateEnabled?'ON':'OFF';
+      for(const [key,spec] of Object.entries(specs)) {
+        const row=sh.rows[key],o=spec.global?s.audio:s.audio.outs[selected()];
+        if(document.activeElement!==row.input)row.input.value=o[spec.field];
+        row.input.min=key==='upper'?o.floorDb+M.AUDIO_RANGE_GAP:spec.min;
+        row.input.max=key==='lower'?o.ceilingDb-M.AUDIO_RANGE_GAP:spec.max;
+      }
+    };
+    const changed=()=>{apply();syncKnobs(rec);paintAudio(rec);refresh();};
+    for(const [key,spec] of Object.entries(specs)) {
+      const row=sh.rows[key],input=el('input','aud-setting-input',row.val);row.input=input;
+      input.type='number';input.min=spec.min;input.max=spec.max;input.step=spec.step;input.setAttribute('aria-label',row.lab.textContent+' '+spec.unit);
+      const write=v=>{
+        if(!Number.isFinite(v)){refresh();return;}
+        v=Math.max(+input.min,Math.min(+input.max,v));
+        M.setSource(s.id,{audio:spec.global?{[spec.field]:v}:{outs:{[selected()]:{[spec.field]:v}}}});changed();
+      };
+      input.addEventListener('change',()=>write(input.valueAsNumber));
+      row.dn.addEventListener('click',()=>write(input.valueAsNumber-spec.step));row.up.addEventListener('click',()=>write(input.valueAsNumber+spec.step));
+    }
+    for(const [button,dir] of [[sh.rows.out.dn,-1],[sh.rows.out.up,1]])button.addEventListener('click',()=>{audBands.set(s.id,keys[(keys.indexOf(selected())+dir+keys.length)%keys.length]);changed();});
+    for(const button of [sh.rows.gate.dn,sh.rows.gate.up])button.addEventListener('click',()=>{M.setSource(s.id,{audio:{gateEnabled:!s.audio.gateEnabled}});changed();});
+    sh.rows.hold.leg.textContent='Gate HOLD delays closing; RELEASE shapes the fall. Turn GATE off for uninterrupted release tails.';
+    sh.rows.lower.leg.textContent='Input dB at 0% output; upper boundary reaches 100%.';
+    sh.refresh=refresh;refresh();
+  }
+
   function paintAudioMeter(rec, ro) {
-    const m = rec.dev.aud && rec.dev.aud.meter, g = rec.g;
-    if (!m || !g || !(g.w > 8)) return;
-    const w = g.w, h = g.h, PADL = PAD;
-    const L = PADL, R = w - PADL, T = PADL, B = h - PADL - 10;   // 10 px of label band at the foot
-    const traceR = L + (R - L) * 0.56;
-    const put = (el, x, y, ww, hh) => { el.setAttribute('x', x.toFixed(1)); el.setAttribute('y', y.toFixed(1));
-      el.setAttribute('width', Math.max(0, ww).toFixed(1)); el.setAttribute('height', Math.max(0, hh).toFixed(1)); };
-    const Y = (v) => B - clamp01(v) * (B - T);
-
-    put(m.traceWell, L, T, traceR - L, B - T);
-    /* the ring is the host's only memory of the signal, and it is 96 frames — about a second and a
-       half at 60 Hz, which is long enough to see a phrase and short enough to stay honest */
-    const ring = rec.audRing; if (!ring) return;
-    const hist = ring.hist, n = hist.length;
-    let d = '';
-    for (let k = 0; k < n; k++) {
-      const i = (ring.i + k) % n;
-      const x = L + (k / (n - 1)) * (traceR - L);
-      d += (k ? 'L' : 'M') + x.toFixed(1) + ' ' + Y(hist[i]).toFixed(1);
+    const ui=rec.audRanges;if(!ui)return;
+    const position=v=>100*clamp01((v-M.AUDIO_RANGE_MIN)/(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN));
+    const selected=audBands.get(rec.id)||'level';
+    for(const key of M.AUDIO_FOLLOWED) {
+      const row=ui.rows[key],o=ro.outs[key],lo=position(o.floorDb),hi=position(o.ceilingDb);
+      row.head.setAttribute('aria-pressed',String(key===selected));
+      row.text.textContent=o.floorDb.toFixed(1)+' / '+o.ceilingDb.toFixed(1)+' dB';
+      row.fill.style.width=(o.out*100).toFixed(1)+'%';row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
+      row.cursor.style.left=position(o.inputDb)+'%';
+      for(const endpoint of ['floorDb','ceilingDb']) {
+        const h=row.handles[endpoint];h.style.left=position(o[endpoint])+'%';
+        h.setAttribute('aria-valuemin',endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP);
+        h.setAttribute('aria-valuemax',endpoint==='floorDb'?o.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX);
+        h.setAttribute('aria-valuenow',o[endpoint]);h.setAttribute('aria-valuetext',o[endpoint].toFixed(1)+' dB');
+      }
+      row.head.title=key.toUpperCase()+' · '+(o.out*100).toFixed(0)+'% output · '+(Number.isFinite(o.inputDb)?o.inputDb.toFixed(1):'−∞')+' dB input';
     }
-    m.trace.setAttribute('d', d);
-    m.traceDot.setAttribute('cx', traceR.toFixed(1));
-    m.traceDot.setAttribute('cy', Y(hist[(ring.i - 1 + n) % n]).toFixed(1));
-
-    /* THE GATE, ACROSS THE TRACE.  `audioNorm` is the model's own normaliser, called rather than
-       reproduced — the whole point of the fixed-dB law is that there is one of it. */
-    /* ⚠ WAVE 105 · THE BAND IS BELOW THE LINE.  The gate OPENS at `thresholdDb` and STAYS open all
-       the way down to `thresholdDb − hysteresisDb` (mod.js: `stay = a.thresholdDb - a.hysteresisDb`),
-       so the region hysteresis actually governs is [threshold − hyst, threshold].  This drew
-       [threshold, threshold + hyst] — the mirror image, 3 dB on the wrong side — and it LOOKED right
-       because `Y()` inverts, so the rect still had a positive height.  A user reading the picture to
-       set the hysteresis was being shown the opposite of the behaviour. */
-    const gN = M.audioNorm ? M.audioNorm(ro.thresholdDb, ro.gainDb) : 0;
-    const hN = M.audioNorm ? M.audioNorm(ro.thresholdDb - (ro.hysteresisDb || 0), ro.gainDb) : gN;
-    m.gate.setAttribute('x1', L.toFixed(1)); m.gate.setAttribute('x2', traceR.toFixed(1));
-    m.gate.setAttribute('y1', Y(gN).toFixed(1)); m.gate.setAttribute('y2', Y(gN).toFixed(1));
-    put(m.hyst, L, Y(gN), traceR - L, Math.max(0, Y(hN) - Y(gN)));
-
-    /* FIVE BARS on the right: LEVEL · LOW · MID · HIGH · FLUX */
-    const cols = 5, gap = 4;
-    const bw = Math.max(3, ((R - traceR - gap) - (cols - 1) * gap) / cols);
-    /* wave 105: `+ gap`, not `+ gap * 2` — with five columns of `bw` and four internal gaps the row
-       is exactly `R - traceR - gap` wide, so starting two gaps in pushed the FLUX bar `gap` past R and
-       under the HIT lamp. */
-    const x0 = traceR + gap;
-    const col = (i) => x0 + i * (bw + gap);
-    const vals = [ro.outs.level.out, ro.outs.low.out, ro.outs.mid.out, ro.outs.high.out];
-    put(m.well, col(0), T, bw, B - T);
-    put(m.lvl, col(0), Y(vals[0]), bw, B - Y(vals[0]));
-    for (let i = 0; i < 3; i++) {
-      put(m.bands[i], col(i + 1), T, bw, B - T);
-      put(m.fills[i], col(i + 1), Y(vals[i + 1]), bw, B - Y(vals[i + 1]));
-      m.labels[i].setAttribute('x', (col(i + 1) + bw / 2).toFixed(1));
-      m.labels[i].setAttribute('y', (B + 9).toFixed(1));
-      m.labels[i].setAttribute('text-anchor', 'middle');
-    }
-    m.scale.setAttribute('x', (col(0) + bw / 2).toFixed(1));
-    m.scale.setAttribute('y', (B + 9).toFixed(1));
-    m.scale.setAttribute('text-anchor', 'middle');
-    /* THE FLUX BAR carries its own THRESHOLD as a tick, because the threshold is adaptive: a fixed
-       line would be a lie about a number the detector recomputes every frame from a median and a MAD.
-       Both are scaled by the same denominator so the tick and the bar can be compared by eye. */
-    const fScale = Math.max(ro.fluxThreshold * 2, ro.flux, 1e-6);
-    put(m.fwell, col(4), T, bw, B - T);
-    const fv = clamp01(ro.flux / fScale);
-    put(m.flux, col(4), Y(fv), bw, B - Y(fv));
-    const ft = Y(clamp01(ro.fluxThreshold / fScale));
-    m.ftick.setAttribute('x1', col(4).toFixed(1)); m.ftick.setAttribute('x2', (col(4) + bw).toFixed(1));
-    m.ftick.setAttribute('y1', ft.toFixed(1)); m.ftick.setAttribute('y2', ft.toFixed(1));
-
-    /* THE ONSET LAMP.  `hits` is a COUNT, so a change in it is an event — which is the only honest
-       way to flash for something that happened between two frames. */
-    /* `hits` is a COUNT, so a CHANGE in it is the event.  Seeded at -1 when the ring is made, so the
-       first paint of a fresh card is not mistaken for an onset (it was: `0 !== undefined`). */
-    if (ring.hits < 0) ring.hits = ro.hits;
-    else if (ro.hits !== ring.hits) { ring.hits = ro.hits; ring.flashAt = performance.now(); }
-    const age = performance.now() - ring.flashAt;
-    const lit = age < HIT_FLASH_MS ? 1 - age / HIT_FLASH_MS : 0;
-    m.flash.setAttribute('x', (R - 9).toFixed(1)); m.flash.setAttribute('y', (T + 1).toFixed(1));
-    m.flash.setAttribute('width', '8'); m.flash.setAttribute('height', '8');
-    m.flash.style.opacity = lit.toFixed(3);
-    m.hitLabel.setAttribute('x', (R - 5).toFixed(1));
-    m.hitLabel.setAttribute('y', (T + 18).toFixed(1));
-    m.hitLabel.setAttribute('text-anchor', 'middle');
+    const out=ro.outs[selected];ui.hint.textContent=selected.toUpperCase()+' · A '+out.attackMs.toFixed(0)+' / R '+out.releaseMs.toFixed(0)+' ms · GATE '+(ro.gateEnabled?'ON':'OFF');
   }
 
   /** the AUDIO device's words and lamps — the capture's own state first, because a follower with no
@@ -2516,22 +2633,18 @@ export function createModulation(host, port) {
     const q = rec.knobs[key]; if (!q) return;
     const u = clamp01(q.spec.get());
     q.k.dial.style.setProperty('--needle', (-150 + u * 300).toFixed(2) + 'deg');
-    /* WAVE 103 · THE VALUE IS A TRAVELLING DOT, NOT A GROWING ARC (Josh).  The artifact grew the
-       dash from the -150° origin, and with `stroke-linecap: round` that leaves a half-disc parked on
-       the nought for ever while only the far end moves — which is the dot Josh is pointing at.  A
-       near-zero dash moved by `stroke-dashoffset` puts the SAME round cap wherever the value is, so
-       there is one mark on the dial and it is the one that means something.  Negative, because a
-       dash offset walks the pattern backwards along the path. */
+    /* Value arcs restored by the September 8 UI follow-up; span tracks normalized value. */
     if (q.k.arc && q.k.arc.val) {
       const a = q.k.arc;
-      a.val.style.strokeDasharray = '0.01 9999';
-      a.val.style.strokeDashoffset = (-(u * a.span * a.c1)).toFixed(2);
+      a.val.style.strokeDasharray = (u * a.span * a.c1).toFixed(2) + ' 9999';
+      a.val.style.strokeDashoffset = '0';
     }
     /* TWO SEATS, TWO READINGS.  `.ckval` is the 7.5 px chip INSIDE the dial and `.m2kval` is the
        line under the caption; printing one string in both is a number said twice.  The chip
        takes the magnitude — which is all a 7.5 px seat inside a 48 px dial can hold — and the
        line under the cap takes the whole reading with its unit. */
     const t = q.spec.text();
+    if(rec.kind==='audio' && (key==='attack'||key==='release'))q.k.dial.setAttribute('aria-label',(audBands.get(rec.id)||'level').toUpperCase()+' '+key.toUpperCase());
     if (q.k.arc && q.k.arc.chip) q.k.arc.chip.textContent = q.spec.short ? q.spec.short() : t.split(' ')[0];
     q.k.val.textContent = t;
     q.k.dial.setAttribute('aria-valuenow', String(Math.round(100 * u)));
@@ -2545,6 +2658,7 @@ export function createModulation(host, port) {
     if (!force && t - lastPaint < 33) return false;      // 30 Hz is plenty for a number to be read at
     lastPaint = t;
     const T = M.transport;
+    if (nativeRate) nativeRate.set(registry.state('transport.rate').current);
 
     /* ── the transport strip ── */
     const playing = clock.isPlaying();
@@ -2567,6 +2681,7 @@ export function createModulation(host, port) {
       const on = !!T.hold && T.holdNote === HOLD_NOTE[i];
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
       b.classList.toggle('on', on);
+      b.classList.toggle('held', on);
     });
     const nd = M.dormantCount();
     foot.dead.textContent = '⊘ ' + nd;
@@ -2600,9 +2715,11 @@ export function createModulation(host, port) {
         !src ? 'var(--m2-ink-faint)' : src.kind === 'env' ? 'var(--m2-env-ink)' : 'var(--acc)');
       rec.drive.textContent = src ? (src.kind.toUpperCase() + ' ' + (src.label || src.id)) : 'HAND';
       rec.route.textContent = pad2(M.routeCountOfMacro(m.id)) + ' OUT';
-      rec.depthArc.style.strokeDasharray = clamp01(m.masterDepth).toFixed(4) + ' 1';
-      rec.numSeat.classList.toggle('m2zero', m.masterDepth <= 1e-6);
-      aria(rec.numSeat, 'MACRO ' + rec.index + ' DEPTH', 0, 100, 100 * m.masterDepth, (100 * m.masterDepth).toFixed(0) + '%');
+      const shownDepth = P.macroMin ? m.value : m.masterDepth;
+      rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
+      rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
+      aria(rec.numSeat, P.macroMin ? m.name+' VALUE' : 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
+      rec.numSeat.title = P.macroMin ? m.name+' value'+(m.sourceId?' — driven by source':'') : 'MASTER DEPTH';
       if (rec.val) aria(rec.val, m.name + ' value', 0, 100, 100 * m.value, rec.vnum.textContent);
     }
 
@@ -2711,6 +2828,7 @@ export function createModulation(host, port) {
 
   /* ═══ SYNC — the cheap half of a rebuild: what moved without the LIST moving ════════════ */
   function sync() {
+    if (nativeRate && port.registry.has('transport.rate')) nativeRate.set(port.registry.state('transport.rate').current);
     for (const s of devOrder()) {
       const rec = devRows.get(s.id); if (!rec) continue;
       const dev = rec.dev;
@@ -2787,7 +2905,7 @@ export function createModulation(host, port) {
   let persistFn = port.persist || (() => {});
   const persist = () => persistFn(presentation());
   function presentation() {
-    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, open: P.open, folder: { ...P.folder } };
+    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, open: P.open, folder: { ...P.folder }, macroSide: P.macroSide, macroMin: P.macroMin };
   }
   /* WAVE 105 · THE CHIPS TOLD THE TRUTH ONLY UNTIL A RELOAD.  `.on` and `aria-pressed` were
      written by the three click handlers and by nothing else, so a window restored with the
@@ -2810,6 +2928,8 @@ export function createModulation(host, port) {
     if (o.ribbon) { P.ribbon = true; rackEl.root.classList.add('m2ribbon'); }
     if (o.modes) Object.assign(saved, o.modes);      /* claimed once, by the first source to bear the id */
     if (o.folder) Object.assign(P.folder, o.folder);
+    setMacroSide(o.macroSide === 'right' ? 'right' : 'left');
+    P.macroMin = !!o.macroMin; root.querySelector('.m2rail').classList.toggle('m2railmin', P.macroMin);root.querySelector('.m2railhead').setAttribute('aria-expanded',String(!P.macroMin));
     for (const s of devOrder()) { const r = devRows.get(s.id); if (r) setDeviceMode(r.dev, modeOf(s.id)); }
     syncChips();
     if (o.open) open();
@@ -2826,12 +2946,14 @@ export function createModulation(host, port) {
     /* CLOSING IS A LAYOUT ACT AND NOTHING ELSE.  It does not reach the clock, the model or the
        registry — the boundary law, and the other project's one YELLOW was exactly this. */
     P.open = false;
+    if (port.closed) port.closed();
     root.hidden = true; rail.hidden = true;
     /* WAVE 105 · a closed window may not leave a sheet floating.  The two PICKERS were the pair
        `closePop/closePresets/closeDead` never covered. */
     devPickOpen = false; if (pick && pick.root) pick.root.hidden = true;
     macroPickOpen = false; if (mpick && mpick.root) mpick.root.hidden = true;
     closePop(); closePresets(); closeDead();
+    if (matrix.open) closeMatrix();
     persist();
     return true;
   }
@@ -2953,7 +3075,7 @@ export function createModulation(host, port) {
       window.removeEventListener('keydown', popKey, true);
       window.removeEventListener('resize', onResize);
       if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
-      audRings.clear();
+      audRings.clear(); audBands.clear();
       endArm(); closePop();
       if (ghost) { ghost.remove(); ghost = null; }
       for (const [, rec] of rings) rec.svg.remove(); rings.clear();

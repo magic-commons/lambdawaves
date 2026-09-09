@@ -406,6 +406,19 @@ async function runFake(lab, o = {}) {
 const digestsOf = (r) => (r.manifest ? r.manifest.frames.map((f) => f.digest) : []);
 const bytesOf = (r) => r.files.map((f) => Buffer.from(f.bytes).toString('base64'));
 
+// Final II: a retry must not advance modulation a second time, and frame zero is time zero.
+{
+  const lab = fakeLab({}), plain = fakeLab({});
+  let steps = 0; const step = lab.LW.mod.step;
+  lab.LW.mod.step = (dt) => { steps++; return step.call(lab.LW.mod, dt); };
+  const a = await runFake(lab, {frames:5,modulation:'drive',interlopeAt:2});
+  const b = await runFake(plain, {frames:5,modulation:'drive'});
+  judge('Final II: modulation begins at zero, advances once per frame interval, and survives a GPU retry without changing the output',
+    a.ok && b.ok && steps === 4 && a.manifest.frames[0].t === 0 && bytesOf(a).join() === bytesOf(b).join(),
+    {error:a.error, aborted:a.aborted, steps,retries:a.contended,firstTime:a.manifest?.frames[0].t,same:bytesOf(a).join() === bytesOf(b).join()});
+}
+
+
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    §7 — THE SAME SCHEDULE TWICE IS BYTE-IDENTICAL
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */

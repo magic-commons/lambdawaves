@@ -2140,3 +2140,10 @@ it was not rerun redundantly. `node tools/build-deploy.mjs` verifies the deploy 
 the verified `dev` history by fast-forward; `dev` remains the working checkout. The ark is refreshed to
 that history and builds independently. GitHub/Cloudflare remain the explicit account boundary, not a
 reason to leave local source unfinished.
+# Final II continuation — 2026-09-08
+
+The interrupted UI/render/matrix work is continued in the working tree. See
+[FINAL-II-HANDOFF.md](FINAL-II-HANDOFF.md) for the board-to-code map, focused validation,
+intentional style-rule changes and implementation boundaries; see
+[Serum/MASSIVE architecture](research/SERUM-MASSIVE-MATRIX-2026-09-08.md) for primary-source
+guidance and unavailable historical evidence. Existing wave reports follow unchanged.

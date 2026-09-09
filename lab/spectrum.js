@@ -1,3 +1,4 @@
+import { infoPanel } from './native-ui.js';
 /* spectrum.js — the SPECTRUM rail: eigenvalue ladder, one lane per populated mode.
  *
  * A lane shows the ENERGY (eigenvalue, hartree), the degeneracy group (colour = n), the
@@ -51,9 +52,9 @@ export function createSpectrum(host, api) {
   const psiFx = formula({ cls: 'sp-fx', lines: [
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
-  host.appendChild(psiFx.root);
+  host.appendChild(psiFx.root); head.appendChild(infoPanel(psiFx.root, 'Live evolution equation'));
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
-  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', rowsEl.hidden); hideBtn.textContent = rowsEl.hidden ? 'SHOW' : 'HIDE'; });
+  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
   clrBtn.addEventListener('click', () => { if (api.clear) api.clear(); });
   nrmBtn.addEventListener('click', () => { if (api.normalize) api.normalize(); });
   const rowsEl = el('div', 'sp-rows', host);
@@ -67,7 +68,7 @@ export function createSpectrum(host, api) {
      title has always said "layout only" — and a browser that has pressed SHOW keeps it for the
      session.  Nothing about the register, the mask or the reconstruction changes. */
   rowsEl.hidden = true;
-  hideBtn.classList.add('on'); hideBtn.textContent = 'SHOW';
+  hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();

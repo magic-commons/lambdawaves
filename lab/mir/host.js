@@ -309,7 +309,12 @@ export function createModClock(opts) {
     for (const id of registry.list()) {
       const u = livePos(id);
       if (u === null) {
-        if (registry.isModulated(id) || force) { registry.restoreBase(id, !!force); stats.restores++; moved++; }
+        /* A forced transport edge must re-assert routed targets, but it must not
+         * write every unmodulated control back through its adapter.  Some adapters
+         * are presentation bridges rather than plain knobs (STAGE maps its value
+         * to the theme's clear colour), so doing that here can overwrite a live
+         * theme/surface choice merely by pressing Space. */
+        if (registry.isModulated(id)) { registry.restoreBase(id, !!force); stats.restores++; moved++; }
         continue;
       }
       const before = registry.read(id);

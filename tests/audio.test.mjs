@@ -292,5 +292,37 @@ console.log('\n══ 7 · THE UNITS THE SEAM DEPENDS ON ══');
   await c4.stop();
 }
 
+// Editable response ranges use amplitude dB for LEVEL and power dB for the bands.
+{
+  M.modReset();
+  const a=M.addSource('audio');
+  M.setSource(a.id,{audio:{gateEnabled:false,outs:{
+    level:{floorDb:-40,ceilingDb:-20,attackMs:0,releaseMs:0},
+    low:{floorDb:-50,ceilingDb:-10,attackMs:0,releaseMs:0},
+    mid:{floorDb:-35,ceilingDb:-25,attackMs:0,releaseMs:0},
+    high:{floorDb:-20,ceilingDb:-10,attackMs:0,releaseMs:0}
+  }}});
+  let frame=0;
+  const feed=db=>M.modFeedAudio(a.id,{rms:10**(db/20),bandPower:[10**(db/10),10**(db/10),10**(db/10)],flux:0,feedHz:100,capturedAt:frame++/100});
+  feed(-30);
+  let ro=M.audioReadout(a.id);
+  ok('independent ranges map the same -30 dB input to .5/.5/.5/0',
+    ['level','low','mid'].every(k=>near(ro.outs[k].out,.5,1e-12)) && ro.outs.high.out===0,JSON.stringify(Object.fromEntries(M.AUDIO_FOLLOWED.map(k=>[k,ro.outs[k].out]))));
+  feed(-40);ok('the LEVEL lower boundary is exactly zero',M.audioReadout(a.id).outs.level.out===0);
+  feed(-20);ok('the LEVEL upper boundary is exactly one',M.audioReadout(a.id).outs.level.out===1);
+  M.setSource(a.id,{audio:{outs:{level:{releaseMs:100}}}});feed(-Infinity);
+  ro=M.audioReadout(a.id);
+  ok('with gate off, silence releases exponentially rather than snapping shut',near(ro.outs.level.out,Math.exp(-.1),1e-12));
+  M.setSource(a.id,{audio:{outs:{level:{releaseMs:0,attackMs:100}}}});feed(-Infinity);feed(-20);
+  ok('attack is independent of release and follows the selected time constant',near(M.audioReadout(a.id).outs.level.out,1-Math.exp(-.1),1e-12));
+  const saved=M.serialize();M.modReset();M.deserialize(saved);
+  const restored=M.sourceOf(a.id);
+  ok('ranges, gate bypass and timing survive a saved patch',restored.audio.gateEnabled===false && restored.audio.outs.level.floorDb===-40 && restored.audio.outs.level.ceilingDb===-20 && restored.audio.outs.level.attackMs===100 && restored.audio.outs.low.floorDb===-50);
+  M.setSource(a.id,{audio:{outs:{level:{floorDb:20,ceilingDb:-100}}}});
+  ok('malformed endpoints stay bounded and cannot cross',restored.audio.outs.level.floorDb===-1 && restored.audio.outs.level.ceilingDb===0);
+  const legacy=M.addSource('audio',{audio:{outs:{level:{attackMs:12}}}});
+  ok('legacy audio patches retain their old range and enabled noise gate',legacy.audio.gateEnabled && legacy.audio.outs.level.floorDb===-60 && legacy.audio.outs.level.ceilingDb===-6);
+}
+
 console.log('\n' + (fail ? 'RED' : 'GREEN') + ' audio.test — ' + fail + ' failing of ' + (pass + fail));
 process.exit(fail ? 1 : 0);

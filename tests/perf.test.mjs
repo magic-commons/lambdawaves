@@ -11,6 +11,7 @@ import { warmStep, tablesReady, kickMatrixZ, applyKickAlong } from '../lab/kick.
 import { packModes, tableFor, MAX_MODES } from '../lab/field.js';
 import { Register, PRESET_BY_ID } from '../lab/state.js';
 import { createParticles } from '../lab/particles.js';
+import { createFrameBudget } from '../lab/frame-budget.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -94,6 +95,23 @@ const T0 = performance.now();
   P.setOn(false); const released = canvas.width === 1 && canvas.height === 1;
   judge(`P particles: ${n} seeded from |2p₊|², ten advances of 0.2 a.u. leave a ring trail of at most 6 points (${tr.length}), finite, oldest first with the head the particle's position; drawn ON the canvas is sized to the stage, switched OFF it is released to 1 × 1`,
     n >= 16 && alive >= 10 && tr.length === 6 && allFinite && lastIsHead && sizedOn && released, { n, alive, trail: tr.length, sizedOn, released });
+}
+{
+  const b = createFrameBudget();
+  for (let i = 0; i < 120; i++) b.sample(1000 / 60);
+  const sixty = b.milliseconds('120');
+  b.sample(4); for (let i = 0; i < 23; i++) b.sample(1000 / 60);
+  const outlier = b.milliseconds('120');
+  for (let i = 0; i < 48; i++) b.sample(1000 / 120);
+  const fast = b.milliseconds('120');
+  for (let i = 0; i < 48; i++) b.sample(40);
+  judge('P 120 mode respects a 60 Hz delivery ceiling, ignores one short callback, learns sustained 120 Hz, and does not mistake subsequent GPU stalls for a slower display',
+    sixty === 1000 / 60 && outlier === sixty && fast === 1000 / 120 && b.milliseconds('120') === fast && b.milliseconds('full') === sixty,
+    { sixty, outlier, fast, loaded: b.milliseconds('120') });
+  const isolated = createFrameBudget();
+  for (let i = 0; i < 50; i++) { isolated.sample(8); isolated.breakSequence(); }
+  isolated.sample(NaN); isolated.sample(5000);
+  judge('P isolated edits and idle gaps do not calibrate display refresh', isolated.milliseconds('120') === 1000 / 60);
 }
 console.log(`perf.test wall ${((performance.now() - T0) / 1000).toFixed(1)} s`);
 console.log((FAILED ? 'RED' : 'GREEN') + ' perf.test — ' + FAILED + ' failing of ' + TOTAL);

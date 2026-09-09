@@ -959,7 +959,10 @@ export function createExactRenderer(LW, opts = {}) {
 
       /* ── PREFLIGHT.  Every pin, then a drain, then the baseline the witnesses are read against. ────────── */
       const before = {
-        playing: LW.clock.playing, t: LW.clock.t,
+        playing: LW.clock.playing, t: LW.clock.t, rate: LW.clock.rate,
+        modPhases: LW.mod && LW.mod.model ? LW.mod.model.snapshotPhases() : null,
+        modShadows: LW.mod && LW.mod.model ? LW.mod.model.sourceList().map(s => [s.id, {shadowed:s.shadowed, shadowPhase:s.shadowPhase, shadowCycles:s.shadowCycles}]) : [],
+        modTransport: LW.mod && LW.mod.model ? { ...LW.mod.model.transport } : null,
         qAuto: LW.quality ? LW.quality.auto : null, qScale: LW.quality ? LW.quality.scale : null,
         gov: LW.governor ? LW.governor.on : null,
         camDy: LW.camera ? LW.camera.dy : null, camDp: LW.camera ? LW.camera.dp : null, camAuto: LW.camera ? LW.camera.autoRotate : null,
@@ -988,7 +991,7 @@ export function createExactRenderer(LW, opts = {}) {
       /* the modulation (H6) */
       if (LW.mod && LW.mod.host && pinned('modulation')) {
         if (modMode === 'freeze') { if (LW.mod.running) LW.mod.stop(); pins.modulation = 'frozen: every target back to its base'; }
-        else if (modMode === 'drive') { if (LW.mod.running) LW.mod.stop(); pins.modulation = 'driven from the schedule at ' + (1 / fps).toFixed(6) + ' s per frame'; }
+        else if (modMode === 'drive') { if (LW.mod.playing || LW.mod.running) LW.mod.stop(); if (LW.mod.model) { LW.mod.model.resetPhases(); LW.mod.model.modPlayEdge(); LW.mod.model.advance(0, 0); LW.mod.clock.applyAll(false); } pins.modulation = 'driven from the schedule at ' + (1 / fps).toFixed(6) + ' s per frame'; }
         else pins.modulation = 'LEFT RUNNING at the caller\'s request — this render is NOT deterministic';
       } else pins.modulation = LW.mod && LW.mod.host ? 'NOT PINNED (unpin)' : 'no modulation rack';
       pins.jitter = pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)';
@@ -1014,9 +1017,22 @@ export function createExactRenderer(LW, opts = {}) {
       const files = [], frameLog = [];
       const msRing = [];
       let bytesOut = 0, err = null, aborted = null, contended = 0, k = 0;
+      let drivenTime = 0;
       try {
         for (k = 0; k < N && !stopped; k++) {
-          const t = sched.at(k);
+          let t = sched.at(k);
+          // Advance once per output frame, never again when a GPU witness retries it.
+          if (modMode === 'drive' && LW.mod && LW.mod.step && pinned('modulation')) {
+            if (k > 0) {
+              drivenTime += LW.clock.rate / fps;
+              if (LW.mod.model) {
+                LW.mod.model.advance(1 / fps, k / fps);
+                LW.mod.clock.applyAll(false);
+              } else LW.mod.step(1 / fps);
+            }
+            t = drivenTime;
+          }
+          if (o.beforeFrame) o.beforeFrame({k, t, dt: k ? 1 / fps : 0});
           const fStart = now();
           let shot = null, wit = null, tries = 0;
           for (;;) {
@@ -1027,7 +1043,7 @@ export function createExactRenderer(LW, opts = {}) {
             LW.clock.scrub(t);
             /* THE OBSERVER CLOCKS ARE STEPPED, by the frame index and nothing else. */
             if (o.poseAt) Object.assign(LW.obs, o.poseAt(k, N, t) || {});
-            if (modMode === 'drive' && LW.mod && LW.mod.step && pinned('modulation')) LW.mod.step(1 / fps);
+
             /* H7: H2's field modes read an R that only h2.update(t) sets, and the rack sets it after the frame */
             if (pinned('h2') && LW.h2 && LW.h2.on && LW.h2.update) LW.h2.update(t);
             /* H1: the jitter seed, pinned for THIS frame — the pin belongs to the driver so that an injected
@@ -1059,7 +1075,7 @@ export function createExactRenderer(LW, opts = {}) {
           const z = await def.run(raw);
           const png = buildPNG(z instanceof Uint8Array ? z : new Uint8Array(z), size.w, size.h);
           const name = 'lambdawaves-' + stem + '-' + String(k).padStart(5, '0') + '.png';
-          const item = { k, t, off: sched.off(k), name, bytes: png, size: png.length, digest: dig, w: size.w, h: size.h, retries: tries - 1 };
+          const item = { k, t, off: modMode === 'drive' ? t : sched.off(k), name, bytes: png, size: png.length, digest: dig, w: size.w, h: size.h, retries: tries - 1 };
           /* the Blob is LAZY: six hundred of them held eagerly is a second copy of the whole render in memory,
              and a caller that streams with onFrame or downloads the zip never asks for one. */
           let _blob = null;
@@ -1090,6 +1106,7 @@ export function createExactRenderer(LW, opts = {}) {
         frames: frameLog, ffmpeg,
       });
 
+      if (modMode === 'drive') man.modulationClock = {origin:0,stepSeconds:1/fps,physics:'Previous-frame RATE integrated once per output interval; frame records contain actual physics times; no loop closure asserted'};
       let blob = null, name = null;
       if (o.zip && !o.onFrame && delivered) {
         const enc = new TextEncoder();
@@ -1132,8 +1149,15 @@ export function createExactRenderer(LW, opts = {}) {
       if (LW.governor && before.gov !== null) LW.governor.on = before.gov;
       /* the diagnostic counter, put back honestly: the frames really did happen (capture.js' rule) */
       if (f && f.stats) f.stats.presents = before.presents + delivered;
-      if (LW.clock) LW.clock.scrub(before.t);
       if (before.modPlaying && LW.mod && LW.mod.play) LW.mod.play();
+      if (before.modPhases && LW.mod && LW.mod.model) {
+        LW.mod.model.restorePhases(before.modPhases);
+        for (const [id, shadow] of before.modShadows) { const source=LW.mod.model.sourceOf(id); if(source) Object.assign(source, shadow); }
+        Object.assign(LW.mod.model.transport, before.modTransport);
+        LW.mod.model.reanchorTransport(null);
+        LW.mod.clock.applyAll(false);
+      }
+      if (LW.clock) { LW.clock.scrub(before.t); if (LW.clock.setRate) LW.clock.setRate(before.rate); }
       if (before.playing && LW.play) LW.play();
       if (canvas && before.cfg !== 'copy') configure(false);
       if (LW.schedule && LW.TIER) LW.schedule(LW.TIER.PRESENT);   // the screen goes back to showing the lab

@@ -89,8 +89,8 @@ const T_SOURCE  = ['total', 'rho'];
    place.  Index 3 is unused and reads as 'theme'. */
 const AXIS_INK = ['theme', 'cmy', 'rgb'];
 
-const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08 };
-const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates' };
+const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08, NATIVE: 0x09 };
+const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates', 9: 'native material' };
 
 /* ── base64url, no padding (portable: no Buffer, no btoa) ──────────────────────────────────── */
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
@@ -306,6 +306,14 @@ export function encodeState(state, opts = {}) {
     x.u8(int(slice.mode, 0, 0, 255)).u8(int(slice.axis, 2, 0, 255)).f32(num(slice.pos, 0)).f32(num(slice.thick, 0.03));
   });
 
+  // Optional extension: old links keep their exact bytes; older readers report a skipped section.
+  if ((mat.finish && mat.finish !== 'lit') || slice.normal || (mat.bow && (mat.bow.gain !== 1 || mat.bow.curve !== 1 || mat.bow.limit !== 3))) section(TAG.NATIVE, x => {
+    x.u8(mat.finish === 'glass' ? 1 : mat.finish === 'matte' ? 2 : 0);
+    x.u8(slice.normal ? 1 : 0);
+    if (slice.normal) for (const v of slice.normal) x.f32(num(v, 0));
+    x.f32(num(mat.bow?.gain, 1)).f32(num(mat.bow?.curve, 1)).f32(num(mat.bow?.limit, 3));
+  });
+
   const dom = pr.domain || {}, qua = pr.quality || {}, fl = pr.field || {}, wg = pr.wigner || {};
   /* THE STAGE carries five independent groups and a state may hold any subset of them (an UNDO record
      holds none of them), so a flags byte says which are here and nothing is invented for the rest. */
@@ -361,6 +369,7 @@ export function encodeState(state, opts = {}) {
   const text = toBase64url(bytes);
 
   const notCarried = [];
+  for (const k of ['frameMode','axisMode','cornerSide']) if (mat[k]) notCarried.push('mat.'+k);
   for (const k of ['mo', 'modulation']) if (pr[k] !== undefined && pr[k] !== null) notCarried.push(k);
 
   if (pr.rotationRates && Object.values(pr.rotationRates).some((v) => v !== 0)) notCarried.push('rotationRates');
@@ -500,6 +509,17 @@ export function decodeState(text) {
       axisInk: AXIS_INK[(flags >> 5) & 3] || 'theme',              // ⚠ bits 32 · 64 — zero in every link minted before this wave, and zero IS 'theme'
       boost: { k, on: !!(flags & 16) },
       slice: { mode: x.u8(), axis: x.u8(), pos: x.f32(), thick: x.f32() } };
+  }
+
+  if (sec.has(TAG.NATIVE) && presentation.mat) {
+    const x = new Reader(sec.get(TAG.NATIVE), 'native material');
+    const finish=x.u8();
+    if(finish>2)throw new LinkError('corrupt','unknown material finish');
+    presentation.mat.finish=['lit','glass','matte'][finish];
+    if(x.u8()) { const n=[x.f32(),x.f32(),x.f32()],length=Math.hypot(...n); if(length<.5 || length>1.5)throw new LinkError('corrupt','invalid slice normal'); presentation.mat.slice.normal=n; }
+    const gain=x.f32(),curve=x.f32(),limit=x.f32();
+    if(gain<.25||gain>4||curve<.25||curve>3||limit<.1-1e-7||limit>3)throw new LinkError('corrupt','invalid bow controls');
+    presentation.mat.bow={gain,curve,limit};
   }
 
   /* STAGE */

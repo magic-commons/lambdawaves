@@ -439,13 +439,13 @@ export function readout(o) {
   const root = el('div', 'ro' + (o.cls ? ' ' + o.cls : ''));
   el('div', 'ro-lbl', root, o.label);
   const val = el('div', 'ro-val', root, o.value === undefined ? '—' : String(o.value));
-  if (o.sub) el('div', 'ro-sub', root, o.sub);
+  el('div', 'ro-sub', root, o.sub || '');
   /* WAVE 69 · both writers take the `<m>` marker, so a readout can print `⟨p⟩ gained` or
      `T = 2π/gcd{|ΔE|}` in the math face while its DIGITS stay in the UI column.  The dirty-check is
      on the SOURCE string, not on textContent, because a marked string and its rendered text are no
      longer the same thing and comparing them would rewrite the node on every frame. */
   let wasV = String(o.value === undefined ? '—' : o.value), wasS = o.sub === undefined ? null : String(o.sub);
-  return { root, set(t, cls) { if (wasV !== t) { wasV = t; mathText(val, t); } if (cls !== undefined) val.className = 'ro-val ' + cls; }, setSub(t) { let s = root.querySelector('.ro-sub'); if (!s) { s = el('div', 'ro-sub', root); wasS = null; } if (wasS !== t) { wasS = t; mathText(s, t); } } };
+  return { root, set(t, cls) { if (wasV !== t) { wasV = t; mathText(val, t); } if (cls !== undefined) val.className = 'ro-val ' + cls; }, setSub(t) { let s = root.querySelector('.ro-sub'); if (!s) { s = el('div', 'ro-sub', root); wasS = null; } const next = t === undefined || t === null ? '' : String(t).trim(); if (wasS !== next) { wasS = next; mathText(s, next); } } };
 }
 
 /* ── WAVE 69 · formula() — A CLOSED FORM WITH LIVE SLOTS, AND WHY IT IS HONEST HERE ─────────────

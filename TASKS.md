@@ -1,5 +1,8 @@
 # λWAVES task board
 
+The newer Obsidian Final II requests are mapped to the current local implementation in
+[FINAL-II-HANDOFF.md](FINAL-II-HANDOFF.md) (2026-09-08). The table below is the earlier board.
+
 Reconciled 2026-09-07 with Claude session `9967323c-7abb-4b43-b275-5f63330cbd06`.
 The current rulings keep the resting hint hidden and leave visual acceptance to Josh.
 Implementation decisions and gate corrections are recorded in REPORT.md, wave 107.

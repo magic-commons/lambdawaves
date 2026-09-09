@@ -17,8 +17,8 @@ import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
 /** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), or noisy particles */
-export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4 };
-export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands'];
+export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7 };
+export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive'];
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 export const MAX_MODES = 320;                                 // the whole 91-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
@@ -136,6 +136,7 @@ struct View {
   p2: vec4<f32>,     // hue shift, invert, palette on, DITHER strength in LSB (wave 54 — p0.w stays the ray-march jitter seed)
   p3: vec4<f32>,     // draw style, iso level (fraction of ρmax), grain, saturation knee
   p4: vec4<f32>,     // PREVIEW BOOST: k (xyz) and on (w) — while the bow is drawn the field is shown multiplied by e^{ik·x}, the exact boosted state
+  p6: vec4<f32>,     // arbitrary slice normal (xyz), finish (w)
   p5: vec4<f32>,     // SURFACE: the stage background colour (xyz) and the output gamma (w) — the theme lives here
 };
 @group(0) @binding(0) var<uniform> V: View;
@@ -213,7 +214,7 @@ fn bayer8(px: vec2<f32>) -> f32 {
   let smode = u32(V.p1.x); let axis = u32(V.p1.y); let spos = V.p1.z * half; let thick = max(V.p1.w * half, 0.6 * (2.0 * half) / 96.0);
   if (smode != 0u) {
     var rok = 0.0; var rdk = 0.0;
-    if (axis == 0u) { rok = ro.x; rdk = rd.x; } else if (axis == 1u) { rok = ro.y; rdk = rd.y; } else { rok = ro.z; rdk = rd.z; }
+    rok = dot(ro, V.p6.xyz); rdk = dot(rd, V.p6.xyz);
     var iv = vec2<f32>(0.0);
     if (smode == 1u) { iv = slabInterval(rok, rdk, -1e30, spos); } else { iv = slabInterval(rok, rdk, spos - thick, spos + thick); }
     t0 = max(t0, iv.x); tf = min(tf, iv.y);
@@ -224,6 +225,7 @@ fn bayer8(px: vec2<f32>) -> f32 {
   let mode = u32(V.p0.x);
   let sigma = V.p0.y * 24.0;
   let soft = V.p0.z;
+  let style = u32(V.p3.x);
   let rhoMax = max(bitcast<f32>(stats[0]), 1e-30);
   let ampMax = sqrt(rhoMax);
   let refMax = max(bitcast<f32>(stats[1]), 1e-30);
@@ -282,15 +284,15 @@ fn bayer8(px: vec2<f32>) -> f32 {
                 cloud is stippled rather than smooth.  Bounded the same way.
        In every style the accumulated weight passes through a SATURATION KNEE w ↦ w/(1+kw), which is what makes
        the limit asymptotic: as exposure → ∞ the opacity of a step tends to a finite ceiling, not to 1. */
-    let style = u32(V.p3.x);
     let knee = max(V.p3.w, 1e-4);
+    let baseColour = c;
     var wEff = w / (1.0 + knee * w);                       // the bounded transfer: wEff < 1/knee always
     if (style == 1u) {
       let iso = max(V.p3.y, 1e-6);
       let rho = dot(s, s) / rhoMax;
       let band = smoothstep(iso * 0.55, iso, rho) * (1.0 - smoothstep(iso * 6.0, iso * 14.0, rho));
       wEff = band * 2.2;
-      if (band > 0.02) { c = overlay(c, litAt(uvw)); }   // shade the plateau by its own gradient, as an overlay
+      if (band > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }   // shade the plateau by its own gradient, as an overlay
     } else if (style == 3u) {
       /* SIGNED: the wave as flat ±1 lobes — opacity saturates just above the nodal surface, so a real orbital reads as
          solid positive and negative regions meeting at a hard node (Josh's "the orbital becomes plus or minus 1") */
@@ -298,7 +300,7 @@ fn bayer8(px: vec2<f32>) -> f32 {
       let mag = select(sqrt(dot(s, s) / rhoMax), abs(sv), mode == 2u || mode == 3u);
       let iso = max(V.p3.y, 1e-6);
       wEff = smoothstep(iso * 1.5, iso * 5.0, mag) * 2.2;
-      if (wEff > 0.02) { c = overlay(c, litAt(uvw)); }
+      if (wEff > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }
     } else if (style == 4u) {
       /* BANDS: the wave's own level lines — a cosine comb on |ψ| (or |Re ψ|, |Im ψ|), 2–16 bands set by the GRAIN
          knob; the stripes are where the amplitude crosses each level, an interference-fringe reading of the field */
@@ -312,13 +314,44 @@ fn bayer8(px: vec2<f32>) -> f32 {
       let cell = floor(uvw * 96.0 + vec3<f32>(V.p0.w * 7.0));
       if (hash3(cell) > keep) { wEff = 0.0; } else { wEff = wEff * (1.0 / max(keep, 0.02)); }
     }
+    if (style == 5u) {
+      // World-locked grains: the paused cloud and a deterministic export share the same dust.
+      let cell = floor(uvw * 144.0);
+      let keep = max(.02, V.p3.z * .25);
+      let delta = fract(uvw * 144.0) - vec3<f32>(.5);
+      wEff *= select(0.0, 1.0 / keep, hash3(cell) < keep && dot(delta,delta) < .16);
+    } else if (style == 6u) {
+      let rho = dot(s,s) / rhoMax;
+      let iso = max(V.p3.y, .000001);
+      let shell = exp(-pow((rho - iso) / (iso * .32), 2.0));
+      wEff = shell * .7;
+      // Skip lighting only when this sample contributes nothing. A 0.02
+      // cutoff changes visible shell colour and is not an exact optimisation.
+      if (shell > 0.0) {
+        let light = litAt(uvw);
+        c = mix(c, vec3<f32>(1.0), clamp(light * .65, 0.0, 1.0));
+      }
+    }
+    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u) {
+      // A glass finish on the selected shape, including signed nodal lobes.
+      wEff *= .22;
+      if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
+    }
+    if (V.p6.w > 1.5) { c = baseColour; }
     let a = 1.0 - exp(-wEff * sigma * stepN * 4.0);
-    col += (1.0 - alpha) * a * c;
-    alpha += (1.0 - alpha) * a;
-    if (alpha > 0.985) { break; }
+    if (style == 7u) {
+      col += a * c;
+      // Do not terminate on one saturated channel: the remaining samples
+      // can still change the other channels, including after gamma/dither.
+    } else {
+      col += (1.0 - alpha) * a * c;
+      alpha += (1.0 - alpha) * a;
+      if (alpha > 0.985) { break; }
+    }
     t += ds;
   }
-  var o = pow(max(col + bg * (1.0 - alpha), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control)
+  let bgBlend = select(1.0 - alpha, max(0.0, 1.0 - max(col.r, max(col.g, col.b))), style == 7u);
+  var o = pow(max(col + bg * bgBlend, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control)
   o = select(o, bg, o != o);                                                                          // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
   /* DITHER (wave 54).  The LAST thing that happens to the colour, AFTER the gamma, because the quantiser it
      defeats is the 8-bit swapchain and nothing else — dithering in linear light would be dithering the wrong
@@ -559,13 +592,14 @@ export async function createField(canvas, opts = {}) {
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
   const radialBuf = device.createBuffer({ size: 40 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 36 rows in use
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
-  const viewBuf = device.createBuffer({ size: 10 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const viewBuf = device.createBuffer({ size: 11 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
   const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   { const init = new Float32Array(256 * 4); for (let i = 0; i < 256; i++) { init[i * 4] = 1; init[i * 4 + 1] = 1; init[i * 4 + 2] = 1; init[i * 4 + 3] = 1; } device.queue.writeBuffer(palBuf, 0, init); }
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
-  const lineVerts = 64;
+  const lineVerts = 36000;
+  let latticeStart = 38, latticeCount = 0, cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
   /* WAVE 53 — THE FRAME AND THE AXES ARE TWO OBJECTS (Josh, board #40: "an 'Axis' button alongside frame to make the
@@ -575,12 +609,31 @@ export async function createField(canvas, opts = {}) {
      exactly what lineColors() reads — and the two switches are two DRAW CALLS into it, so either object can be off
      without shifting the other by a byte.  The slice rectangle stays with the FRAME: it is a frame, not an axis. */
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
+  const cornerVP = device.createBuffer({ size:64, usage:GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  device.queue.writeBuffer(cornerVP,0,new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]));
+  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}}]});
   const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }] });
 
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
-  const VIEW = new Float32Array(40), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
+  const VIEW = new Float32Array(44), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
+  /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
+     Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
+  const LATTICE_SEGS = new Int8Array(13872 * 6);
+  {
+    const rad = 8;
+    let idx = 0;
+    for (let x = -rad; x <= rad; x++) {
+      for (let y = -rad; y <= rad; y++) {
+        for (let z = -rad; z <= rad; z++) {
+          if (x < rad) { LATTICE_SEGS[idx++] = x; LATTICE_SEGS[idx++] = y; LATTICE_SEGS[idx++] = z; LATTICE_SEGS[idx++] = x + 1; LATTICE_SEGS[idx++] = y; LATTICE_SEGS[idx++] = z; }
+          if (y < rad) { LATTICE_SEGS[idx++] = x; LATTICE_SEGS[idx++] = y; LATTICE_SEGS[idx++] = z; LATTICE_SEGS[idx++] = x; LATTICE_SEGS[idx++] = y + 1; LATTICE_SEGS[idx++] = z; }
+          if (z < rad) { LATTICE_SEGS[idx++] = x; LATTICE_SEGS[idx++] = y; LATTICE_SEGS[idx++] = z; LATTICE_SEGS[idx++] = x; LATTICE_SEGS[idx++] = y; LATTICE_SEGS[idx++] = z + 1; }
+        }
+      }
+    }
+  }
   let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
@@ -634,6 +687,11 @@ export async function createField(canvas, opts = {}) {
     v[32] = bon ? bk[0] : 0; v[33] = bon ? bk[1] : 0; v[34] = bon ? bk[2] : 0; v[35] = bon ? 1 : 0;
     const bgc = mat.bg || DEFAULT_BG;
     v[36] = bgc[0]; v[37] = bgc[1]; v[38] = bgc[2]; v[39] = mat.gamma === undefined ? 1 : mat.gamma;
+    v.copyWithin(40,36,40);
+    const sn = mat.slice?.normal || [0,1,2].map(i=>i===(mat.slice?.axis ?? 2)?1:0);
+    const snLen = Math.hypot(...sn) || 1;
+    v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
+    v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
     device.queue.writeBuffer(viewBuf, 0, v);
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lookAt(cam, ORIGIN, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
     device.queue.writeBuffer(vpBuf, 0, M_VP);
@@ -682,9 +740,106 @@ export async function createField(canvas, opts = {}) {
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
-      const q = (u, w) => { const p = [0, 0, 0]; p[ax] = s; p[(ax + 1) % 3] = u; p[(ax + 2) % 3] = w; return p; };
+      const normal = mat.slice.normal || [0,1,2].map(i=>i===ax?1:0);
+      const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+      const raw=cross(normal,Math.abs(normal[2])<.9?[0,0,1]:[0,1,0]),len=Math.hypot(...raw)||1;
+      const uvec=raw.map(v=>v/len),vvec=cross(normal,uvec);
+      const q=(u,w)=>normal.map((v,i)=>v*s+uvec[i]*u+vvec[i]*w);
       push(q(-h, -h), q(h, -h), c); push(q(h, -h), q(h, h), c); push(q(h, h), q(-h, h), c); push(q(-h, h), q(-h, -h), c);
       n += 4;
+    }
+    k = latticeStart * 7; latticeCount = 0;
+    if (mat.frame !== false && (mat.frameMode === 'lattice' || mat.frameMode === 'dots')) {
+      const radius = 8, spacing = h * 2;
+      const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
+      const invMaxDist = 1 / (spacing * radius);
+      const baseAlpha = mat.lightUI ? 0.22 : 0.16;
+      const inkR = mat.lightUI ? 0.18 : 0.75;
+      const inkG = mat.lightUI ? 0.22 : 0.80;
+      const inkB = mat.lightUI ? 0.28 : 0.88;
+
+      if (mat.frameMode === 'lattice') {
+        const segCount = 13872;
+        for (let s = 0; s < segCount; s++) {
+          const base = s * 6;
+          let ax = LATTICE_SEGS[base] * spacing;
+          let ay = LATTICE_SEGS[base + 1] * spacing;
+          let az = LATTICE_SEGS[base + 2] * spacing;
+          let bx = LATTICE_SEGS[base + 3] * spacing;
+          let by = LATTICE_SEGS[base + 4] * spacing;
+          let bz = LATTICE_SEGS[base + 5] * spacing;
+
+          const da = ax * camX + ay * camY + az * camZ;
+          const db = bx * camX + by * camY + bz * camZ;
+          if (da > 0 && db > 0) continue;
+          if (da > 0 || db > 0) {
+            const u = da / (da - db);
+            const qx = ax + (bx - ax) * u;
+            const qy = ay + (by - ay) * u;
+            const qz = az + (bz - az) * u;
+            if (da > 0) { ax = qx; ay = qy; az = qz; }
+            else { bx = qx; by = qy; bz = qz; }
+          }
+          const distA = Math.hypot(ax, ay, az);
+          const distB = Math.hypot(bx, by, bz);
+          const dist = Math.max(distA, distB) * invMaxDist;
+          const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+
+          v[k++] = ax; v[k++] = ay; v[k++] = az;
+          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+          v[k++] = bx; v[k++] = by; v[k++] = bz;
+          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+          latticeCount += 2;
+        }
+      } else {
+        const tick = h * 0.022;
+        for (let x = -radius; x <= radius; x++) {
+          for (let y = -radius; y <= radius; y++) {
+            for (let z = -radius; z <= radius; z++) {
+              const px = x * spacing, py = y * spacing, pz = z * spacing;
+              const da = px * camX + py * camY + pz * camZ;
+              if (da > 0) continue;
+              const dist = Math.hypot(px, py, pz) * invMaxDist;
+              const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+
+              v[k++] = px - tick; v[k++] = py; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px + tick; v[k++] = py; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+
+              v[k++] = px; v[k++] = py - tick; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px; v[k++] = py + tick; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+
+              v[k++] = px; v[k++] = py; v[k++] = pz - tick;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px; v[k++] = py; v[k++] = pz + tick;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              latticeCount += 6;
+            }
+          }
+        }
+      }
+    }
+    cornerStart = k / 7;
+    if (mat.axis !== false && mat.axisMode === 'corner') {
+      const ink = AX;
+      const px = mat.cornerX !== undefined ? mat.cornerX : 0.8;
+      const py = mat.cornerY !== undefined ? mat.cornerY : -0.8;
+      const aspect = canvas.width > 0 && canvas.height > 0 ? canvas.width / canvas.height : 1;
+      const sx = mat.cornerScaleX !== undefined ? mat.cornerScaleX : (0.08 / aspect);
+      const sy = mat.cornerScaleY !== undefined ? mat.cornerScaleY : 0.08;
+      const axCols = [ink.x, ink.y, ink.z];
+      for (let axis = 0; axis < 3; axis++) {
+        const c = axCols[axis];
+        const ex = px + VIEW[4 + axis] * sx;
+        const ey = py + VIEW[8 + axis] * sy;
+        v[k++] = px; v[k++] = py; v[k++] = 0.5;
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+        v[k++] = ex; v[k++] = ey; v[k++] = 0.5;
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+      }
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k);
     return n > 15;                                                 // whether the slice rectangle is in the buffer (the box and the axes always are)
@@ -694,8 +849,10 @@ export async function createField(canvas, opts = {}) {
     const box = all || mat.frame !== false, axes = all || mat.axis !== false, slice = hasSlice && box;
     if (!box && !axes) return;
     pass.setPipeline(lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
-    if (box) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
-    if (axes) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
+    if (box && (all || !mat.frameMode || mat.frameMode === 'box')) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
+    if (box && !all && latticeCount) pass.draw(latticeCount,1,latticeStart);
+    if (axes && (all || mat.axisMode !== 'corner')) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
+    if (axes && !all && mat.axisMode === 'corner') { pass.setBindGroup(0,cornerBind); pass.draw(6,1,cornerStart); pass.setBindGroup(0,lineBind); }
     if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
   }
   function encodeRender(enc, target, obs, mat, w, h, tw) {
