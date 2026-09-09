@@ -7,6 +7,13 @@ that real devices, installed clients, or the current UI work end to end. Start w
 
 ## Implemented in this checkpoint
 
+- Current-app follow-up: new projects start clean despite automatic domain sizing;
+  subtitle edits count as dirty; failed deletion preserves current-project state;
+  malformed storage no longer crashes listing or gets overwritten by save. Special
+  project names are handled as own properties. 51 Node suites and the focused
+  `tests/current.browser-test.mjs` UI checks pass. GPU allocation failed in Firefox,
+  so GPU acceptance remains open. Old-save migration is not a user priority.
+
 - Follow-up after `23328bf`: project import validates metadata and an 8 MiB UTF-8
   size limit before storage access; file selection checks size before reading.
   Failed writes/read errors now fail the import, corrupt JSON remains untouched,

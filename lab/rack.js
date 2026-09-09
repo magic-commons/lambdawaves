@@ -1,3 +1,4 @@
+import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
 import { renderNotebookMath } from './notebook-math.js';
 import { reworkNative, planeModel, infoPanel } from './native-ui.js';
@@ -4458,7 +4459,7 @@ export async function boot(dom) {
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS')) e.stopPropagation(); });   // wave 106: the save keys pass; every other key is still the textarea's
       /* ── PROJECTS: sessions in folders, a recent list, the notebook as each one's landing page ── */
-      const pjRead = () => { try { return JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'); } catch (e) { return { items: {}, recent: [] }; } };
+      const pjRead = () => { try { return readProjectCollection(localStorage, PJ_KEY); } catch (e) { pjStatus('projects unavailable — ' + e.message + '. Stored data was left untouched.'); return null; } };
       const pjWrite = (P) => { try { localStorage.setItem(PJ_KEY, JSON.stringify(P)); return true; } catch (e) { pjStatus('save failed — ' + e.message); return false; } };
       let pjCurrent = null, pjBaseline = null;
       /* The saved project is wider than undo: notebook, camera, palette, and modulation all
@@ -4469,6 +4470,7 @@ export async function boot(dom) {
         const data = serialize(), pr = data.presentation;
         delete data.experiment.t;
         delete pr.quality.autoScale;
+        if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
         const seats = {
           'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'],
           'observer.dist': [pr.obs, 'dist'], 'observer.fov': [pr.obs, 'fov'],
@@ -4484,7 +4486,7 @@ export async function boot(dom) {
           const r = modHost && modHost.registry.state(id);
           if (r && r.modulated) obj[key] = r.base;
         }
-        return JSON.stringify([data, titleIn.value, ta.value]);
+        return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
       const projectClean = () => { pjBaseline = projectKey(); };
       const projectDirty = () => pjBaseline !== null && projectKey() !== pjBaseline;
@@ -4502,8 +4504,8 @@ export async function boot(dom) {
       const pjStatus = (t) => { const s = nb.querySelector('.pj-status'); if (s) s.textContent = t; };
       const pjTouch = (P, path, key) => { P.recent = [path, ...(P.recent || []).filter((p) => p !== path)].slice(0, 8); };
       const projects = {
-        list() { const P = pjRead(); return Object.values(P.items).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
-        recent() { const P = pjRead(); return (P.recent || []).filter((p) => P.items[p]); },
+        list() { const P = pjRead(); return Object.values(P ? P.items : {}).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
+        recent() { const P = pjRead(); return P ? (P.recent || []).filter((p) => Object.hasOwn(P.items, p)) : []; },
         get current() { return pjCurrent; },
         get dirty() { return projectDirty(); },
         markClean: projectClean,
@@ -4512,24 +4514,24 @@ export async function boot(dom) {
         save(path) {
           path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
           const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
-          const P = pjRead(); const now = new Date().toISOString();
-          P.items[path] = { path, folder, name, saved: now, opened: P.items[path] ? P.items[path].opened : now, data: serialize(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } };
+          const P = pjRead(); if (!P) return false; const now = new Date().toISOString();
+          Object.defineProperty(P.items, path, { configurable: true, enumerable: true, writable: true, value: { path, folder, name, saved: now, opened: Object.hasOwn(P.items, path) ? P.items[path].opened : now, data: serialize(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } } });
           pjTouch(P, path); if (!pjWrite(P)) return false; pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } projectClean(); renderProjects(); return true;
         },
         open(path) {
-          const P = pjRead(), it = P.items[path]; if (!it) return false;
+          const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
           busy.n++; busySync(); try { restore(it.data); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
-          it.opened = new Date().toISOString(); pjTouch(P, path); pjWrite(P); pjCurrent = path; pjStatus('opened ' + path);
+          it.opened = new Date().toISOString(); pjTouch(P, path); const remembered = pjWrite(P); pjCurrent = path; pjStatus('opened ' + path + (remembered ? '' : ' — recent history could not be saved'));
           projectClean(); show('notes'); nb.dataset.mode = 'view'; render(true);                      // the landing page: the notebook, capped
           return true;
         },
-        remove(path) { const P = pjRead(); if (!P.items[path]) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); pjWrite(P); if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
+        remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
         fresh() { reg.clear(); refSnapshot = null; touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; if (subIn) { subIn.value = ''; subIn.hidden = true; } try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); if (subIn) localStorage.setItem(NB_SUBTITLE, ''); } catch (e) {} pjCurrent = null; projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
-        exportText(path) { const P = pjRead(), it = P.items[path || pjCurrent]; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
+        exportText(path) { const P = pjRead(), it = P && Object.hasOwn(P.items, path || pjCurrent) ? P.items[path || pjCurrent] : null; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
         importText(text) { const path = storeProjectImport(text, () => JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'), pjWrite); renderProjects(); return path; },
       };
       function renderProjects() {

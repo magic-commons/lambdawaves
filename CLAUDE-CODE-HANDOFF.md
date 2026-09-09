@@ -1,5 +1,46 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Current-app debugging follow-up
+
+Josh clarified that old-save migration is not a priority; focus on reliable new
+projects and the latest approved UI. No existing user storage was cleared.
+
+Reproduced and fixed in the current app:
+
+- New sessions appeared dirty immediately: automatic domain sizing changed half-width
+  from 7 to 16 after the clean baseline. Ignore computed half-width while DOMAIN AUTO
+  is on; manual half-width and the AUTO toggle still count as edits.
+- Notebook subtitle edits were absent from the project dirty key. They now trigger
+  unsaved-change protection and round-trip through a new project.
+- A quota failure during delete returned true and cleared the current project even
+  though the saved record remained. Delete now reports failure and preserves current.
+- Malformed stored collections threw in list/recent, and malformed JSON could be
+  replaced by an empty collection during save. Reads now validate, report a visible
+  error, and refuse overwriting invalid storage. No migration or clearing was added.
+- Project names such as `__proto__` now save as own properties; inherited object
+  properties cannot be opened/exported/deleted as projects.
+- Opening still loads a valid project if updating its recent-history timestamp fails,
+  but the status explicitly reports that history could not be saved.
+
+Validation: **51 Node suites pass**; PWA integrity, syntax, and build pass (**144
+files, 4.30 MiB**). `tests/current.browser-test.mjs` passed on the real Firefox UI:
+clean boot, save/open notes+subtitle, failed deletion, malformed storage, missing
+KaTeX fallback, and real macro arrow keys across compact/full and close/reopen.
+No page errors. The Firefox session reported **WebGPU device request failed: Not
+enough memory left**; these results certify the exercised UI paths, not GPU rendering.
+The historical monolithic browser gate and its reload stall remain unresolved.
+
+Run the focused test with an owned server and an unused driver port:
+
+```bash
+python3 tools/gate/server.py . 8742
+# Separate terminal:
+LW_PORT=8742 GD_PORT=5369 node tests/current.browser-test.mjs
+```
+
+The focused test uses a fresh WebDriver profile and changes only that profile's data.
+Its cleanup failure is nonzero rather than being swallowed as a successful run.
+
 ## Follow-up: project import integrity
 
 After shipping checkpoint `23328bf`, a focused pass fixed project import reporting
