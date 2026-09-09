@@ -1,3 +1,4 @@
+import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
 import { renderNotebookMath } from './notebook-math.js';
@@ -5946,7 +5947,7 @@ export async function boot(dom) {
     fieldDigest: () => field.ok ? field.fieldDigest() : null,
     sampleVoxel: (i, j, k) => field.ok ? field.sampleVoxel(i, j, k) : null,
     /** resolves after the next frame has run (so a scheduled tier has been applied) */
-    settle() { return new Promise((res) => { schedule(TIER.PRESENT); requestAnimationFrame(() => requestAnimationFrame(() => res(stats.frames))); }); },
+    settle() { schedule(TIER.PRESENT); return waitForPaint(() => ({ frames: stats.frames, error: field.error, hidden: page.hidden })); },
     /* ── WAVE 56 ──────────────────────────────────────────────────────────────────────────────────────── */
     /** SHAREABLE LINKS.  mint() builds without copying; copy() is the trig; open() is the boot/hashchange road. */
     link: { mint: () => mintLink(), copy: () => copyLink(), open: (href) => openLink(href),

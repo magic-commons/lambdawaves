@@ -898,6 +898,7 @@ export async function createField(canvas, opts = {}) {
     pass.end();
     const bpr = Math.ceil(w * 4 / 256) * 256;
     const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
     enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
     device.queue.submit([enc.finish()]);
     await buf.mapAsync(GPUMapMode.READ);
@@ -909,8 +910,9 @@ export async function createField(canvas, opts = {}) {
       hue += Math.abs(r - b);
       hsh = Math.imul(hsh ^ (r + (g << 8) + (b << 16)), 16777619) >>> 0;
     }
-    buf.unmap(); buf.destroy(); tex.destroy();
+    buf.unmap();
     return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16) };
+    } finally { buf.destroy(); tex.destroy(); }
   }
   /** THE CHROME AS THE SCREEN GETS IT (wave 48).  readPixels renders the volume and returns aggregates; this
       renders the LINES ALONE over the stage's own ground (mat.bg, not black — the light theme's near-black frame
@@ -927,6 +929,7 @@ export async function createField(canvas, opts = {}) {
     pass.end();
     const bpr = Math.ceil(w * 4 / 256) * 256;
     const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
     enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
     device.queue.submit([enc.finish()]);
     await buf.mapAsync(GPUMapMode.READ);
@@ -947,25 +950,29 @@ export async function createField(canvas, opts = {}) {
       else if (hi(r) && hi(g) && lo(b)) { B.yellow++; if (!top.yellow || r + g > top.yellow[0] + top.yellow[1]) top.yellow = [r, g, b]; }
       else if (hi(r)) B.warm++; else if (hi(g)) B.green++; else B.blue++;
     }
-    buf.unmap(); buf.destroy(); tex.destroy();
+    buf.unmap();
     return { w, h, buckets: B, top, ground, darkest: Math.round(darkest), darkestPx };
+    } finally { buf.destroy(); tex.destroy(); }
   }
   async function sampleVoxel(i, j, k) {
     const buf = device.createBuffer({ size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
     const enc = device.createCommandEncoder();
     enc.copyTextureToBuffer({ texture: psiTex, origin: [i, j, k] }, { buffer: buf, bytesPerRow: 256, rowsPerImage: 1 }, [1, 1, 1]);
     device.queue.submit([enc.finish()]);
     await buf.mapAsync(GPUMapMode.READ);
     const u = new Uint16Array(buf.getMappedRange());
     const re = f16(u[0]), im = f16(u[1]);
-    buf.unmap(); buf.destroy();
+    buf.unmap();
     const x = (i + 0.5) / res * 2 * half - half, y = (j + 0.5) / res * 2 * half - half, z = (k + 0.5) / res * 2 * half - half;
     return { re, im, x, y, z };
+    } finally { buf.destroy(); }
   }
   /** Σ|ψ|² dV over the grid, the max density, and a hash — the whole cache read back */
   async function fieldDigest() {
     const bpr = res * 8, size = bpr * res * res;
     const buf = device.createBuffer({ size, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
     const enc = device.createCommandEncoder();
     enc.copyTextureToBuffer({ texture: psiTex }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: res }, [res, res, res]);
     device.queue.submit([enc.finish()]);
@@ -979,14 +986,17 @@ export async function createField(canvas, opts = {}) {
       const rho = re * re + im * im; integral += rho; if (rho > maxRho) maxRho = rho;
       hsh = (Math.imul(hsh ^ u[v * 4], 16777619) ^ u[v * 4 + 1]) >>> 0;
     }
-    buf.unmap(); buf.destroy();
+    buf.unmap();
     return { integral: integral * dV, maxRho, hash: hsh.toString(16), nan, res, half, generation };
+    } finally { buf.destroy(); }
   }
   async function readStats() {
     const buf = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
     const enc = device.createCommandEncoder(); enc.copyBufferToBuffer(statsBuf, 0, buf, 0, 16); device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ); const f = new Float32Array(buf.getMappedRange().slice(0)); buf.unmap(); buf.destroy();
+    await buf.mapAsync(GPUMapMode.READ); const f = new Float32Array(buf.getMappedRange().slice(0)); buf.unmap();
     return { rhoMax: f[0], refMax: f[1] };
+    } finally { buf.destroy(); }
   }
 
   /**

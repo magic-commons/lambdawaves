@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { waitForPaint } from '../lab/frame-settle.js';
+let queue=[],cancelled=[];
+const request=callback=>{queue.push(callback);return queue.length;};
+const cancel=id=>cancelled.push(id);
+const success=waitForPaint(()=>({frames:7}),request,cancel,100);
+queue.shift()();queue.shift()();assert.equal(await success,7);
+queue=[];
+await assert.rejects(waitForPaint(()=>({frames:0,error:'device lost',hidden:false}),request,cancel,10),/animation frames stopped — device lost/);
+assert.ok(cancelled.length);
+queue=[];
+const partial=waitForPaint(()=>({frames:1,hidden:true}),request,cancel,10);
+queue.shift()();await assert.rejects(partial,/page hidden/);
+console.log('PASS frame settle: two real frames required, stalled compositor rejects with diagnostics');

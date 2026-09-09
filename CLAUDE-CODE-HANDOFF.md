@@ -1,5 +1,35 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## GPU/reload investigation — 2026-09-09
+
+The GPU allocation error reproduces on an empty HTML page before importing any app
+code: default device limits, maximum texture limits and low-power adapter preference
+all returned “Not enough memory left.” At inspection there were 24 headless Firefox
+instances and 58 geckodrivers, with swap nearly full; NVIDIA reported ~6 GiB free
+VRAM. This identifies a browser/host failure, not a demonstrated oversized app texture.
+Termination of the known abandoned test browser was denied by the OS/Snap confinement.
+No shared GPU reset, reboot, or unrelated-browser termination was attempted.
+
+Reload itself completed and `__LW.ready` became true, but a direct two-rAF probe
+received no animation frames for 1.5 seconds despite a visible document. The old
+`settle()` could therefore hang indefinitely. It now requires two real frames but
+rejects after three seconds with GPU/visibility diagnostics. A later fresh-browser
+probe completed three reload/settle cycles, with no page errors, but GPU allocation
+still failed. Rendering acceptance remains blocked on a healthy browser/host.
+
+The historical GPU gate now stops on missing GPU and explicitly checks reload boot
+and GPU readiness; it propagates the harness's returned error object instead of
+silently continuing. It does not convert missing frames into a green render proof.
+GPU diagnostic readbacks (pixels, lines, voxels, digest and stats) now release their
+readback buffers on submit/map failures; pixel/line textures are also released after
+readback failure. This is scoped cleanup, not a complete renderer lifecycle rewrite.
+
+Focused frame-settle and GPU-cleanup regressions pass, as do render-exact, PWA,
+syntax and deployment build checks (145 files, ~4.30 MiB). The entire historical
+browser gate was not certified. No claim is made that the external GPU failure has
+been repaired. Restart abandoned test browsers from outside the confined agent or
+restart the desktop session after saving work, then rerun the GPU gate.
+
 ## Current-app debugging follow-up
 
 Josh clarified that old-save migration is not a priority; focus on reliable new

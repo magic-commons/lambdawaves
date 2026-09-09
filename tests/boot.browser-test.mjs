@@ -84,7 +84,8 @@ try {
   const r = await g.waitFor('window.__LW && __LW.ready', 300, 100);
   judge('B1 the lab boots (window.__LW.ready)', r && r.ok, r);
   const bootInfo = await g.ev('return { ok: __LW.field.ok, err: __LW.field.error, shader: __LW.field.shaderMessages, errs: window.__e, banner: !document.getElementById("banner").hidden };');
-  judge('B1 WebGPU field is up, no shader messages, no page errors, no banner', bootInfo.ok && !bootInfo.err && bootInfo.shader.length === 0 && bootInfo.errs.length === 0 && !bootInfo.banner, bootInfo);
+  judge('B1 WebGPU field is up, no shader messages, no page errors, no banner', bootInfo.ok && !bootInfo.err && (bootInfo.shader || []).length === 0 && bootInfo.errs.length === 0 && !bootInfo.banner, bootInfo);
+  if (!bootInfo.ok) throw new Error('GPU gate cannot continue: ' + bootInfo.err);
   /* ── B43: the shipped defaults, read on the fresh page before the proof sets its own baseline ── */
   const dfT = await g.ev(`try { const v0 = __LW.mat.view; __LW.setView('density'); const vD = __LW.mat.view; __LW.setView('phase'); const vP = __LW.mat.view;
     let font = false; try { await document.fonts.load('12px Roboto'); font = document.fonts.check('12px Roboto'); } catch (e) {}
@@ -3595,7 +3596,8 @@ try {
   const reload = async () => {
     await g.ev(`try { sessionStorage.setItem('__w54e', JSON.stringify(window.__e || [])); } catch (e) {} return 1;`);
     await drv.go(g.s, `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz`);
-    await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } await __LW.settle(); return 1;`);
+    const settled = await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } if (!window.__LW?.ready) throw new Error('Reload did not finish booting'); if (!__LW.field.ok) throw new Error('Reload GPU unavailable: ' + __LW.field.error); await __LW.settle(); return 1;`);
+    if (settled !== 1) throw new Error('Reload failed: ' + JSON.stringify(settled));
     await g.armErrors();
     /* the run's error list SURVIVES the navigation, so B13 at the foot still speaks for the whole session */
     await g.ev(`try { window.__e = JSON.parse(sessionStorage.getItem('__w54e') || '[]').concat(window.__e || []); } catch (e) {} return 1;`); };
@@ -4204,7 +4206,8 @@ try {
   const navTo = async (u) => {
     await g.ev(`try { sessionStorage.setItem('__w56e', JSON.stringify(window.__e || [])); } catch (e) {} return 1;`);
     await drv.go(g.s, u);
-    await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } await __LW.settle(); return 1;`);
+    const settled = await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } if (!window.__LW?.ready) throw new Error('Reload did not finish booting'); if (!__LW.field.ok) throw new Error('Reload GPU unavailable: ' + __LW.field.error); await __LW.settle(); return 1;`);
+    if (settled !== 1) throw new Error('Reload failed: ' + JSON.stringify(settled));
     await g.armErrors();
     await g.ev(`try { window.__e = JSON.parse(sessionStorage.getItem('__w56e') || '[]').concat(window.__e || []); } catch (e) {} return 1;`); };
   await navTo(swURL);

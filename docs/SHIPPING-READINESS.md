@@ -7,6 +7,12 @@ that real devices, installed clients, or the current UI work end to end. Start w
 
 ## Implemented in this checkpoint
 
+- GPU/reload follow-up: stalled animation frames now reject `settle()` after three
+  seconds; the GPU browser gate stops on missing device/reload readiness. Diagnostic
+  GPU readbacks release buffers after failures. A fresh probe completed three reloads.
+  GPU device allocation still fails on a blank page without app code, so host/browser
+  recovery and hardware rendering acceptance remain open. See the latest handoff.
+
 - Current-app follow-up: new projects start clean despite automatic domain sizing;
   subtitle edits count as dirty; failed deletion preserves current-project state;
   malformed storage no longer crashes listing or gets overwritten by save. Special
