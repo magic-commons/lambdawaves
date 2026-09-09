@@ -1028,9 +1028,13 @@ body[data-theme="light"] .m2ghost {
    with real air between them.  Making that slab transparent was never going to produce it, because
    the slab was still there doing the layout — one box with everything welded inside it.
      So this is skin.css §DISCONNECTED's recipe, applied to `#modwin` alone and permanently on.  Its
-   four load-bearing declarations are copied for the reasons that sheet already gives: `visibility`
-   rather than `display`, so the window still lays out, still drags and still clamps while painting
-   nothing; `contain: layout` + `isolation: auto`, because a paint root between a surface and the
+   load-bearing declarations are copied for the reasons that sheet already gives, with one WebKit
+   exception: the window stays `visibility:visible`.  An iPad can fail to composite `.m2dev` children
+   inside the momentum-scrolling `.m2run` when an ancestor is hidden and only the children opt back
+   into visibility; the cards then appear only after ADD or COMPACT/FULL invalidates that layer.
+   The window still paints nothing because every shell has a transparent fill, edge and shadow, and
+   its `pointer-events:none` still makes the air real.  `contain: layout` + `isolation: auto`, because
+   a paint root between a surface and the
    canvas is what stops FROST reaching the constellation; `border-radius: 0`, because a rounded clip
    on an ancestor kills a descendant's backdrop-filter; and `pointer-events: none` with the surfaces
    `auto`, SO THE GAPS ARE REAL HOLES a press falls through to the field.
@@ -1044,7 +1048,7 @@ body[data-theme="light"] .m2ghost {
   background: transparent; border-color: transparent; box-shadow: none;
   border-radius: 0; contain: layout; isolation: auto;
   -webkit-backdrop-filter: none; backdrop-filter: none;
-  visibility: hidden; pointer-events: none; }                                                         /* 25 */
+  visibility: visible; pointer-events: none; }                                                        /* 25 */
 /* the layout boxes: seen through, pressed through */
 :root:root:root #modwin.mir-modwindow > .kwin-body,
 :root:root:root #modwin.mir-modwindow .kwin-panel,

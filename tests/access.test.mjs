@@ -108,7 +108,7 @@ judge('A10 a radiogroup can never ship with zero reachable seats: paint() seats 
    The modulation window computes 29 `status()` sentences and 25 `say()` sentences — a refused
    microphone, an empty preset name, an exhausted macro bank, a route that already exists — and
    until this wave EVERY ONE of them was written into a node reach-list 22 sets `display: none`
-   and reach-list 25 leaves `visibility: hidden`.  Nothing was spoken and nothing was shown: the
+   and the modulation root inherited `visibility: hidden`.  Nothing was spoken and nothing was shown: the
    refusals were computed into nothing.  The seat is visible-while-it-speaks now and it is a
    `role="status"`, which makes it the FOURTH region.
      IT IS THE ADMITTED KIND, NOT THE FORBIDDEN ONE.  The clause bans a region on a READOUT —

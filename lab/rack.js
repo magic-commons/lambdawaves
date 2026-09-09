@@ -4619,12 +4619,14 @@ export async function boot(dom) {
       count();
       layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
     }
-    /* a hidden rack peeks when the pointer nears its column and goes when it leaves; the playhead the same, at the foot of the stage */
+    /* a hidden rack peeks when the pointer nears its column and goes when it leaves; the playhead
+       does the same around whichever seat modDodge currently gives it. */
     /* wave 48: this handler ran getComputedStyle(documentElement) on EVERY pointer move — a style resolution of the
        root, on the pointer's thread, sixty times a second, to read a constant.  --rack-w changes with the viewport
        and with nothing else, so it is read once and on resize.  And a hidden INTERFACE peeks at nothing: the racks
        are display:none under H, so the handler leaves before it touches anything. */
     const peekLast = { x: -1, y: -1, armed: false, bar: false };
+    const peekTransport = document.getElementById('transport');
     let rackW = 300;
     const readRackW = () => { rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300; };
     readRackW(); window.addEventListener('resize', readRackW, { passive: true });
@@ -4637,8 +4639,19 @@ export async function boot(dom) {
       const near = e.clientX > W - 60 || (hasL && e.clientX < 60);
       const inside = e.clientX > W - rw - 24 || (hasL && e.clientX < rw + 24);
       if (near) { document.body.classList.add('rack-peek'); peekLast.armed = true; } else if (!inside && peekLast.armed) { document.body.classList.remove('rack-peek'); peekLast.armed = false; }   // only a peek this handler armed is its to dismiss
-      const nearBar = e.clientY > H - 120 && Math.abs(e.clientX - W / 2) < 360;
-      if (nearBar) { document.body.classList.add('transport-peek'); peekLast.bar = true; } else if (e.clientY < H - 200 && peekLast.bar) { document.body.classList.remove('transport-peek'); peekLast.bar = false; }
+      /* WAVE 108 · THE REVEAL TARGET FOLLOWS THE PLAYHEAD.  modDodge can tunnel the native
+         transport from its bottom seat to its top seat, but the hidden-rack hit area used to stay
+         hard-coded at the bottom of the viewport.  The pill's `at-top` class is the current seat
+         written by that move, so derive the same candidate rect from it here.  The 80/120 px margins preserve the old
+         720-px-wide target and its forgiving exit band without reading layout on every pointermove. */
+      const barTop = peekTransport && peekTransport.classList.contains('at-top') ? 52 : H - 60 - 46;
+      const bar = { left: (W - 560) / 2, right: (W + 560) / 2, top: barTop, bottom: barTop + 46 };
+      const nearBar = e.clientX >= bar.left - 80 && e.clientX <= bar.right + 80
+        && e.clientY >= bar.top - 60 && e.clientY <= bar.bottom + 60;
+      const insideBar = e.clientX >= bar.left - 120 && e.clientX <= bar.right + 120
+        && e.clientY >= bar.top - 120 && e.clientY <= bar.bottom + 120;
+      if (nearBar) { document.body.classList.add('transport-peek'); peekLast.bar = true; }
+      else if (!insideBar && peekLast.bar) { document.body.classList.remove('transport-peek'); peekLast.bar = false; }
     });
     /* ── WAVE 67 · A DRAG WRITES ONCE A FRAME, AND READS NO GEOMETRY IN A POINTER HANDLER ──────────────
      * BOTH window drags — reorder a rack card, and move a floating one — used to do their whole job

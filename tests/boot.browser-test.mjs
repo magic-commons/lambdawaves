@@ -878,10 +878,29 @@ try {
     window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth / 2, clientY: 200 })); const unpeek = !document.body.classList.contains('transport-peek');
     window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth - 50, clientY: 300 })); const rackNear = document.body.classList.contains('rack-peek');
     __LW.layout.toggleRack(); const restored = !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('transport-peek');
-    return { blur, bg, titleFont, textFont, kept, moved, face, hasCredits: /Chronus Quantum/.test(about) && /Brian Johnson/.test(about) && /falstad\\.com/.test(about) && /Seth Shultz/.test(about) && /Beatriz Errant/.test(about), logo, dumpLen: dump.length, back, closed, keyJ, frost, frostBg, blurKnob: !!bk, pkBg, hidOp, hidPe, peek, peekOp, unpeek, rackNear, restored, errs: window.__e.length };
+    /* WAVE 108: move the modulation window over the bottom seat so the native transport tunnels
+       to the top, hide the racks again, and prove that the reveal target moved with it. */
+    __LW.mod.expand(); await new Promise((r) => setTimeout(r, 180));
+    const modwin = document.getElementById('modwin'), grip = document.querySelector('.kwin-chiprail [data-rail="drag"]');
+    const mr = modwin.getBoundingClientRect(), gr = grip.getBoundingClientRect();
+    const gx = gr.left + gr.width / 2, gy = gr.top + gr.height / 2, dy = window.innerHeight - 250 - mr.top;
+    grip.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 77, pointerType: 'mouse', buttons: 1, clientX: gx, clientY: gy, bubbles: true }));
+    grip.dispatchEvent(new PointerEvent('pointermove', { pointerId: 77, pointerType: 'mouse', buttons: 1, clientX: gx, clientY: gy + dy, bubbles: true }));
+    grip.dispatchEvent(new PointerEvent('pointerup', { pointerId: 77, pointerType: 'mouse', clientX: gx, clientY: gy + dy, bubbles: true }));
+    await new Promise((r) => setTimeout(r, 520)); const topSeat = tr.classList.contains('at-top');
+    __LW.layout.toggleRack();
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth / 2, clientY: window.innerHeight - 30 }));
+    const bottomMiss = !document.body.classList.contains('transport-peek');
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth / 2, clientY: 90 }));
+    const topPeek = document.body.classList.contains('transport-peek');
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: 80, clientY: window.innerHeight / 2 }));
+    const topUnpeek = !document.body.classList.contains('transport-peek');
+    __LW.layout.toggleRack(); __LW.mod.collapse(); await new Promise((r) => setTimeout(r, 520));
+    const bottomSeat = !tr.classList.contains('at-top');
+    return { blur, bg, titleFont, textFont, kept, moved, face, hasCredits: /Chronus Quantum/.test(about) && /Brian Johnson/.test(about) && /falstad\\.com/.test(about) && /Seth Shultz/.test(about) && /Beatriz Errant/.test(about), logo, dumpLen: dump.length, back, closed, keyJ, frost, frostBg, blurKnob: !!bk, pkBg, hidOp, hidPe, peek, peekOp, unpeek, rackNear, restored, topSeat, bottomMiss, topPeek, topUnpeek, bottomSeat, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B47 THE NOTEBOOK GLASS: opens as a free window with a real backdrop blur and no colour behind it, its title in the logo\'s face (\'LW Title\' since wave 59 renamed the subset for OFL §3) and its notes in Roboto, kept in this browser; it drags to a place; ⓘ flips it into the ABOUT face with the logo, the three credits, the team line and a copy dump, and back; J is its key; FROST is now a blur with only a whisper of tint; a GLASS BLUR knob exists; the +MODE picker has no slab; hiding the rack slides the playhead away and the pointer near its place brings it back; the rack peeks within 60 px',
-    !nbT.error && /blur\(/.test(nbT.blur) && (nbT.bg === 'rgba(0, 0, 0, 0)' || nbT.bg === 'transparent') && /LW Title/.test(nbT.titleFont) && /Roboto/.test(nbT.textFont) && nbT.kept === 'the 2p_z bounce at t = 3.1' && nbT.moved && nbT.face === 'about' && nbT.hasCredits && nbT.logo === 9 && nbT.dumpLen > 200 && nbT.back === 'notes' && nbT.closed && nbT.keyJ && /blur\(/.test(nbT.frost) && /rgba\(255, 255, 255, 0\.1\)|rgba\(0, 0, 0, 0\.1\)/.test(nbT.frostBg) && nbT.blurKnob && (nbT.pkBg === 'rgba(0, 0, 0, 0)' || nbT.pkBg === 'transparent') && nbT.hidOp === '0' && nbT.hidPe === 'none' && nbT.peek && nbT.peekOp === '1' && nbT.unpeek && nbT.rackNear && nbT.restored && nbT.errs === 0, nbT);
+  judge('B47 THE NOTEBOOK GLASS: opens as a free window with a real backdrop blur and no colour behind it, its title in the logo\'s face (\'LW Title\' since wave 59 renamed the subset for OFL §3) and its notes in Roboto, kept in this browser; it drags to a place; ⓘ flips it into the ABOUT face with the logo, the three credits, the team line and a copy dump, and back; J is its key; FROST is now a blur with only a whisper of tint; a GLASS BLUR knob exists; the +MODE picker has no slab; hiding the rack slides the playhead away and the pointer near its current seat brings it back, at the bottom or after the modulation window moves it to the top; the rack peeks within 60 px',
+    !nbT.error && /blur\(/.test(nbT.blur) && (nbT.bg === 'rgba(0, 0, 0, 0)' || nbT.bg === 'transparent') && /LW Title/.test(nbT.titleFont) && /Roboto/.test(nbT.textFont) && nbT.kept === 'the 2p_z bounce at t = 3.1' && nbT.moved && nbT.face === 'about' && nbT.hasCredits && nbT.logo === 9 && nbT.dumpLen > 200 && nbT.back === 'notes' && nbT.closed && nbT.keyJ && /blur\(/.test(nbT.frost) && /rgba\(255, 255, 255, 0\.1\)|rgba\(0, 0, 0, 0\.1\)/.test(nbT.frostBg) && nbT.blurKnob && (nbT.pkBg === 'rgba(0, 0, 0, 0)' || nbT.pkBg === 'transparent') && nbT.hidOp === '0' && nbT.hidPe === 'none' && nbT.peek && nbT.peekOp === '1' && nbT.unpeek && nbT.rackNear && nbT.restored && nbT.topSeat && nbT.bottomMiss && nbT.topPeek && nbT.topUnpeek && nbT.bottomSeat && nbT.errs === 0, nbT);
 
   /* ── B48: QUARKONIUM in the HAMILTONIAN selector — the tabulated-radial kernel branch draws it, in GeV ── */
   const qqT = await g.ev(`try { __LW.pause(); __LW.setTheme('dark'); __LW.setView('density'); __LW.loadPreset('1s+2pz'); await __LW.settle();
@@ -6791,12 +6810,12 @@ try {
       errs: window.__e.length };
     __LW.mod.reset(); __LW.mod.collapse(); return out;
   } catch(e) { return {error: String(e)}; }`) || {};
-  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs, moved ADD to the rail, and replaced the three-way fold with FULL/MINIMIZED. Full widths and folded widths still come from the frozen artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The artifact stylesheet still parses all 708 rules; unrelated house stylesheet counts carry no law.',
+  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs, moved ADD to the rail, and replaced the three-way fold with FULL/MINIMIZED. Full widths and folded widths still come from the frozen artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The transparent root itself stays visible because WebKit can otherwise omit the device cards inside its momentum scroller until a later mutation; transparent paint and pointer-events still make its gaps real. The artifact stylesheet still parses all 708 rules; unrelated house stylesheet counts carry no law.',
     !mwA.error && mwA.full.every(b => b[0] === mwA.expectedWidth && b[1] === mwA.wantedHeight)
       && mwA.dims.w === mwA.dims.lawW && mwA.dims.h === mwA.dims.lawH
       && mwA.folded[0] === mwA.expectedStrip && mwA.folded[1] === mwA.wantedHeight && mwA.foldedMode === 'minimized'
       && mwA.restored.join() === mwA.full[0].join() && mwA.restoredMode === 'full'
-      && mwA.pane === 'rgba(0, 0, 0, 0)' && mwA.rootVisibility === 'hidden' && mwA.surfacesVisible
+      && mwA.pane === 'rgba(0, 0, 0, 0)' && mwA.rootVisibility === 'visible' && mwA.surfacesVisible
       && mwA.sharedRadius && mwA.knobsEqual && mwA.addRetired && mwA.addReachable && mwA.reorderHidden
       && mwA.dots === mwA.expectedDots && mwA.railName === 'MODULATION window controls' && mwA.artifactRules === 708 && mwA.errs === 0, mwA);
 
