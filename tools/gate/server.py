@@ -29,6 +29,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))          # tools/gate/ -> tools/ -
 CERTS = os.environ.get("LW_CERTS") or os.environ.get("MB_CERTS") or os.path.join(ROOT, ".certs")
 APP = sys.argv[1] if len(sys.argv) > 1 else ROOT
 PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 8701
+HOST = os.environ.get("LW_HOST", "127.0.0.1")
 
 CERT, KEY = os.path.join(CERTS, "cert.pem"), os.path.join(CERTS, "key.pem")
 if not (os.path.exists(CERT) and os.path.exists(KEY)):
@@ -55,9 +56,9 @@ class H(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
 
 
-httpd = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), H)
+httpd = http.server.ThreadingHTTPServer((HOST, PORT), H)
 ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ctx.load_cert_chain(CERT, KEY)
 httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
-print("λWAVES gate server on https://127.0.0.1:%d/ -> %s" % (PORT, APP), flush=True)
+print("λWAVES gate server on https://%s:%d/ -> %s" % (HOST, PORT, APP), flush=True)
 httpd.serve_forever()
