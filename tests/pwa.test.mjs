@@ -841,7 +841,8 @@ console.log(`PASS the math face covers what the lab sets in it: ${runs} <m> runs
  *    thing on addEventListener('load') AFTER an awaited async boot(), which on a slow WebGPU start is
  *    added when `load` has already fired.  main.js reads all three worker states, listens for the
  *    announcement (and waits for `waiting` to catch up, because the message is sent from inside install's
- *    waitUntil when `registration.waiting` is still null), and branches on document.readyState.
+ *    waitUntil when `registration.waiting` is still null), branches on document.readyState, and gives the first
+ *    field a quiet lead before the whole-app precache begins in idle time.
  *    IT ALSO DOES NOT RELOAD BLINDLY.  skipWaiting() re-points EVERY client in scope, so a page cannot
  *    keep this file's ONE LAW by reloading on `controllerchange`: the tab that pressed would take the
  *    unsaved state of every other tab with it.  rack.js's `swClient` decides instead — the tab that ASKED

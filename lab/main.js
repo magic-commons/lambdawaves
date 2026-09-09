@@ -86,7 +86,15 @@ function installLayer(LW) {
       navigator.serviceWorker.controller.postMessage({ type: 'LW_SW_HELLO' }, [ch.port2]);
     }
   };
-  if (document.readyState === 'complete') go();                             // (c): `load` may be long gone
-  else addEventListener('load', go, { once: true });
+  /* Installing the first worker precaches the whole local lab. Starting those fetches at the ready boundary used
+     to compete with WebGPU's first field and the user's first gesture, especially in mobile Safari. Give the live
+     instrument a short quiet lead, then register in browser-declared idle time. The timeout still guarantees that
+     a continuously busy session becomes installable and offline; ?sw=1 exercises this same deferred road. */
+  const afterFirstField = () => setTimeout(() => {
+    if ('requestIdleCallback' in globalThis) requestIdleCallback(() => go(), { timeout: 6500 });
+    else setTimeout(go, 0);
+  }, 1500);
+  if (document.readyState === 'complete') afterFirstField();                // (c): `load` may be long gone
+  else addEventListener('load', afterFirstField, { once: true });
   return (sw.mode = 'arming');
 }

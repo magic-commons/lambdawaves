@@ -3,7 +3,7 @@
  * What is judged: the SLAP tables built a slice at a time (kick.js warmStep) give the SAME matrix as the one-shot
  * build (the 1s→2p dipole limit and the identity at k = 0, as kick.test.mjs judges them); packModes packs into ONE
  * persistent buffer with the right count and values; the register's energy() and autocorrelation() are the same
- * numbers through the scratch arrays (against the direct sums); the particles' ring trails hold at most trailLen
+ * numbers through a versioned normal-mode spectrum (against the direct sums); the particles' ring trails hold at most trailLen
  * points, oldest first, and release their canvas when off; Register.setAnchorAt is _op's road at t = 0 and t ≠ 0.
  */
 import { BASIS, energy } from '../lab/hydrogen.js';
@@ -52,18 +52,22 @@ const T0 = performance.now();
   const ok = p1.count === 2 && p2.count === 1 && sameBuf && rec.n === T.n && rec.norm === Math.fround(T.norm) && rec.expo === T.n + 1 && rec.lag0 === Math.fround(T.lag[0]) && rec.leg0 === Math.fround(T.leg[0]) && buf1.length === MAX_MODES * 28;
   judge('P packModes packs the 1s+2pz preset (count 2) and then one mode (count 1) into the SAME persistent Float32Array of 320 records, the first record carrying the 1s table (n, norm, exponent n+1, the Laguerre and Legendre leads) — no 36 KB buffer per reconstruct', ok, { c1: p1.count, c2: p2.count, sameBuf, rec: { n: rec.n, expo: rec.expo, norm: rec.norm }, len: buf1.length });
 }
-/* ── the register's observables through the scratch arrays ────────────────── */
+/* ── the register's observables through one versioned normal-mode spectrum ─────── */
 {
   const reg = new Register(); reg.load(PRESET_BY_ID.get('1s+2pz'));
+  const normalAmplitudes = reg.normalAmplitudes.bind(reg); let weightBuilds = 0;
+  reg.normalAmplitudes = (...args) => { weightBuilds++; return normalAmplitudes(...args); };
   const direct = () => { let e = 0, n = 0; for (const a of reg.populated()) { const p = reg.population(a); e += p * reg.Ediag(a); n += p; } return e / n; };
   const e1 = reg.energy(), e2 = reg.energy(), eD = direct();
   const t = 3.7; let r = 0, i = 0, n = 0; for (const a of reg.populated()) { const p = reg.population(a); n += p; r += p * Math.cos(-reg.Ediag(a) * t); i += p * Math.sin(-reg.Ediag(a) * t); }
   const A = reg.autocorrelation(t), AD = Math.hypot(r / n, i / n);
+  const oneBuild = weightBuilds === 1;
   reg.setField({ Bz: 0.01, Fz: 0.002 }); const eS = reg.energy(), AS = reg.autocorrelation(1.5).abs;   // the Stark road: the blocks' eigenvalues
+  const oneRebuild = weightBuilds === 2;
   const na = reg.normalAmplitudes(0), naS = reg.normalAmplitudes(0, true);
   const sameNA = na.E.length === naS.E.length && na.E.every((v, k) => v === naS.E[k]) && na.re.every((v, k) => v === naS.re[k]);
-  judge('P energy() and autocorrelation() read c(t) through the register\'s scratch arrays and give the direct sums to 1e-14 (1s+2pz: ⟨E⟩ = −0.3125, |A(3.7)|), are repeatable, and under Zeeman + Stark the scratch normalAmplitudes equals the allocating one element for element',
-    Math.abs(e1 - eD) < 1e-14 && e1 === e2 && Math.abs(e1 + 0.3125) < 1e-12 && Math.abs(A.abs - AD) < 1e-14 && Number.isFinite(eS) && AS > 0 && AS <= 1 + 1e-12 && sameNA, { e1, eD, A: A.abs, AD, eS, AS, sameNA });
+  judge('P energy() and autocorrelation() share one cached normal-mode spectrum per register version, give the direct sums to 1e-14 (1s+2pz: ⟨E⟩ = −0.3125, |A(3.7)|), rebuild after a field edit, and under Zeeman + Stark the scratch normalAmplitudes equals the allocating one element for element',
+    oneBuild && oneRebuild && Math.abs(e1 - eD) < 1e-14 && e1 === e2 && Math.abs(e1 + 0.3125) < 1e-12 && Math.abs(A.abs - AD) < 1e-14 && Number.isFinite(eS) && AS > 0 && AS <= 1 + 1e-12 && sameNA, { weightBuilds, oneBuild, oneRebuild, e1, eD, A: A.abs, AD, eS, AS, sameNA });
 }
 /* ── setAnchorAt is _op's road ──────────────────────────────────────────────── */
 {

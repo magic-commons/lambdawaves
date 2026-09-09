@@ -76,6 +76,10 @@ export class Register {
        SHADOW readout — so the frame loop was a steady allocator.  They read c(t) into these instead. */
     this._sr = new Float64Array(N); this._si = new Float64Array(N);
     this._na = { E: [], re: [], im: [], label: [] };
+    /* Energy and autocorrelation use the same normal-mode populations. They are fixed until version changes;
+       only autocorrelation's phases move with t. Keeping that spectrum avoids evolving the register twice per
+       meter paint (and again for H_C) while preserving the exact Stark/propagator road above. */
+    this._ow = { version: -1, E: [], p: [], norm: 0, energy: 0 };
   }
 
   /* ── the Hamiltonian in force ────────────────────────────────────────── */
@@ -341,24 +345,34 @@ export class Register {
   norm2() { if (this.P) return this.P.norm({ re: this.re0, im: this.im0 }); let s = 0; for (let a = 0; a < N; a++) s += this.re0[a] ** 2 + this.im0[a] ** 2; return s; }   // under a PROPAGATOR: ⟨c|S|c⟩ (conserved, so the anchor's)
   norm() { return Math.sqrt(this.norm2()); }
   population(a) { return this.re0[a] ** 2 + this.im0[a] ** 2; }
+  _observableWeights() {
+    const out = this._ow;
+    if (out.version === this.version) return out;
+    const na = this.normalAmplitudes(0, true);
+    out.E.length = na.E.length; out.p.length = na.E.length;
+    let e = 0, n = 0;
+    for (let k = 0; k < na.E.length; k++) {
+      const p = na.re[k] ** 2 + na.im[k] ** 2;
+      out.E[k] = na.E[k]; out.p[k] = p; e += p * na.E[k]; n += p;
+    }
+    out.norm = n; out.energy = n > 0 ? e / n : 0; out.version = this.version;
+    return out;
+  }
   /** ⟨H⟩ = c†Hc (diagonal H) — divided by the norm² so an unnormalized edit still reads as an energy */
   energy() {
-    const na = this.normalAmplitudes(0, true);
-    let e = 0, n = 0;
-    for (let k = 0; k < na.E.length; k++) { const p = na.re[k] ** 2 + na.im[k] ** 2; e += p * na.E[k]; n += p; }
-    return n > 0 ? e / n : 0;
+    return this._observableWeights().energy;
   }
   /** A(t) = ⟨ψ(0)|ψ(t)⟩ = Σ |c_a|² e^{-iE_a t}  (per unit norm) → { re, im, abs } */
   autocorrelation(t) {
-    const na = this.normalAmplitudes(0, true);
-    let r = 0, i = 0, n = 0;
-    for (let k = 0; k < na.E.length; k++) {
-      const p = na.re[k] ** 2 + na.im[k] ** 2;
+    const weights = this._observableWeights();
+    let r = 0, i = 0;
+    for (let k = 0; k < weights.E.length; k++) {
+      const p = weights.p[k];
       if (p === 0) continue;
-      n += p; const ph = -na.E[k] * t;
+      const ph = -weights.E[k] * t;
       r += p * Math.cos(ph); i += p * Math.sin(ph);
     }
-    if (n > 0) { r /= n; i /= n; }
+    if (weights.norm > 0) { r /= weights.norm; i /= weights.norm; }
     return { re: r, im: i, abs: Math.hypot(r, i) };
   }
   /** indices with non-negligible population, in register order */
@@ -374,8 +388,8 @@ export class Register {
    * The set the field is reconstructed from: populated, unmuted (solo wins), sorted by
    * population, capped.  Reports what was left out so the UI can say so.
    */
-  renderSet(cap = RENDER_CAP) {
-    const pop = this.populated();
+  renderSet(cap = RENDER_CAP, knownPopulated = null) {
+    const pop = knownPopulated || this.populated();
     const anySolo = pop.some((a) => this.solo[a]);
     const eligible = pop.filter((a) => anySolo ? this.solo[a] : !this.muted[a]);
     eligible.sort((x, y) => this.population(y) - this.population(x));

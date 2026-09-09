@@ -3,7 +3,7 @@
  * Oracles: the closed-form shell table (P8 of the FIELDS AND MOLECULES round), direct recurrence of the density on a
  * ring, the oscillator's integer ladder, and an incommensurate case that must be refused.
  */
-import { densityPeriod, hydrogenShellPeriod, rational, fmtPeriod } from '../lab/period.js';
+import { densityPeriod, densityPeriodExact, hydrogenShellPeriod, rational, fmtPeriod } from '../lab/period.js';
 import { BASIS, psiAt } from '../lab/hydrogen.js';
 
 let FAILED = 0, TOTAL = 0;
@@ -49,6 +49,14 @@ const En = (n) => -0.5 / (n * n);
     w.exact === false && w.T / step > 64 && w.T * dmax / (2 * Math.PI) > 1 && Math.abs(werr - w.err) < 1e-12,
     { T: w.T, steps: Math.round(w.T / step), turnsOfFastest: Math.round(w.T * dmax / (2 * Math.PI)), err: w.err, recomputed: werr });
   judge('FORMAT: 67.021 a.u. reads as fs, 45238.93 as ps', /1\.62[0-9]* fs/.test(fmtPeriod(64 * Math.PI / 3)) && /1\.094 ps/.test(fmtPeriod(2 * Math.PI * 7200)), { a: fmtPeriod(64 * Math.PI / 3), b: fmtPeriod(2 * Math.PI * 7200) });
+}
+{
+  const exact = densityPeriodExact([En(2), En(4)]), stationary = densityPeriodExact([En(2)]);
+  const inc = densityPeriodExact([0, 1, Math.SQRT2]);
+  const falseWitness = densityPeriodExact([-30.38483, -1.36619, -0.55410]);
+  judge('FAST EXACT HALF: commensurate hydrogen and stationary states finish without a scan; incommensurate and falsely rational spectra explicitly ask for the bounded scan',
+    exact && exact.exact && Math.abs(exact.T - 64 * Math.PI / 3) < 1e-6 && stationary && stationary.stationary && inc === null && falseWitness === null,
+    { exact, stationary, inc, falseWitness });
 }
 { /* wave 42, the reviewer's finding: rational()'s tolerance is RELATIVE, so a ratio of 55 passes at 5.5e-9 absolute — and
      5.5e-9 of a beat over the 2·10⁴ turns its denominator demands is a whole cycle.  Ne's three occupied ε (the ported

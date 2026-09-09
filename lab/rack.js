@@ -33,7 +33,7 @@ import { createExactRenderer } from './render-exact.js';
 import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
-import { densityPeriod, fmtPeriod } from './period.js';
+import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
 import { createMolecule } from './moleculeview.js';
 import { createMOPanel } from './moview.js';
 import { createPulse } from './pulseview.js';
@@ -918,17 +918,29 @@ export async function boot(dom) {
      is bit-identical to the synchronous road; a worker that fails to load, errors or times out (8 s) hands the call
      back to that road.  The SLAP trigger, the K key, LAUNCH and every forced period reader stay synchronous. ── */
   const makeWorker = (label) => {
-    let w = null, seq = 0; const waiting = new Map();
-    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
-    try {
-      w = new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' });
-      w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } };
-      w.onerror = (e) => fail('worker error: ' + (e && e.message || e));
-    } catch (e) { w = null; }
-    const raw = (msg, transfer) => { if (!w) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, 8000); waiting.set(id, { res, timer }); try { w.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
+    let w = null, seq = 0, failed = typeof Worker !== 'function', wantedParked = false, starts = 0; const waiting = new Map();
+    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
+    /* Constructing a module worker fetches and parses its whole private module graph. Three identical workers used
+       to do that at the ready boundary even when the session never bowed, scanned or opened a heavy card. */
+    const ensure = () => {
+      if (w || failed) return w;
+      try {
+        w = new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' }); starts++;
+        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } };
+        w.onerror = (e) => fail('worker error: ' + (e && e.message || e));
+        /* Message order is FIFO. A worker first requested while the page is away sees PARK before speculative work. */
+        if (wantedParked) w.postMessage({ id: 0, op: 'park' });
+      } catch (e) { fail('worker construction failed: ' + (e && e.message || e)); }
+      return w;
+    };
+    const raw = (msg, transfer) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, 8000); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
     const call = (msg, transfer) => busyWrap(raw(msg, transfer));   // wave 48: every worker job is a BUSY job
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
-    return { label, get ok() { return !!w; }, call, raw, park: () => raw({ op: 'park' }), resume: () => raw({ op: 'resume' }), stat: () => raw({ op: 'stat' }) };
+    const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
+    return { label, get ok() { return !failed; }, get started() { return !!w; }, get starts() { return starts; }, call, raw,
+      park: () => { wantedParked = true; return w ? raw({ op: 'park' }) : Promise.resolve(idleStat()); },
+      resume: () => { wantedParked = false; return w ? raw({ op: 'resume' }) : Promise.resolve(idleStat()); },
+      stat: () => w ? raw({ op: 'stat' }) : Promise.resolve(idleStat()) };
   };
   const maths = makeWorker('bow'), scan = makeWorker('period'), cards = makeWorker('cards');   // separate queues: interaction, recurrence, and user-requested card preparation cannot block each other
   const solveCard = (msg, fallback, pluck = (r) => r.result) => {
@@ -936,11 +948,10 @@ export async function boot(dom) {
     if (!cards.ok) return local();
     return cards.call(msg).then((r) => r && !r.error ? pluck(r) : local());
   };
-  if (maths.ok) maths.call({ op: 'warm', ham: 'hydrogen', Z: 1 });                    // the SLAP tables, built once off the thread
   /* …and on this thread too (the K key and the IMPULSE trigger are synchronous). This used to spend 8 ms every
      40 ms beginning 1.5 s after boot: a deliberate 20% main-thread tax during the exact interval an iPad was
      trying to settle its first field. Warm in short idle slices instead, after the first-use path is stable. */
-  let warmTimer = 0, warmIdle = 0;
+  let warmTimer = 0, warmIdle = 0, workerWarmStarted = false;
   const cancelWarm = () => {
     if (warmTimer) { clearTimeout(warmTimer); warmTimer = 0; }
     if (warmIdle && globalThis.cancelIdleCallback) { cancelIdleCallback(warmIdle); warmIdle = 0; }
@@ -948,6 +959,9 @@ export async function boot(dom) {
   const warmKick = (deadline) => {
     warmTimer = warmIdle = 0; if (page.hidden) return;
     const room = deadline && deadline.timeRemaining ? deadline.timeRemaining() : 3;
+    /* The worker graph used to load during boot. Its speculative table now starts only in real idle time and does
+       not raise the cursor busy mark; the first user-requested bow still starts the same worker immediately. */
+    if (!workerWarmStarted && maths.ok && !clock.playing && room >= 1) { workerWarmStarted = true; maths.raw({ op: 'warm', ham: 'hydrogen', Z: 1 }); }
     if (!kickReady() && !clock.playing && room >= 1) kickWarm(Math.min(4, Math.max(1, room - 1)));
     warmArm(kickReady() ? 2000 : clock.playing ? 750 : 120);
   };
@@ -1079,12 +1093,27 @@ export async function boot(dom) {
     : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
   const sturmHalf = () => { const nm = reg.nmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n)
+  /* Population membership, mute/solo eligibility and ordering change only with register.version. During exact
+     time evolution the coefficients rotate but these lists do not; rebuilding and sorting them each frame was
+     pure allocation. The returned records are read-only inside the rack. */
+  const stateShape = { version: -1, populated: [], rendered: null };
+  function stateReaders() {
+    if (stateShape.version !== reg.version) {
+      stateShape.populated = reg.populated();
+      stateShape.rendered = reg.renderSet(RENDER_CAP, stateShape.populated);
+      stateShape.version = reg.version;
+    }
+    return stateShape;
+  }
+  let modeStateT = NaN, modeStateVersion = -1;
+  const modeState = { re: cRe, im: cIm };
   function modesAt(t) {
+    modeStateT = NaN; modeStateVersion = -1;
     if (molecule && molecule.on) return molecule.fieldModes(t);           // the molecule holds the field
     if (helium && helium.on) return helium.fieldModes();                   // helium: the conditional cloud of electron 2
     if (h2 && h2.on) return h2.fieldModes();                               // H₂: the Heitler–London one-electron density
     if (gas && gas.on) return gas.fieldModes(t);                           // the AXIAL GAS: the box's second register
-    const c = reg.at(t, cRe, cIm), ids = reg.renderSet(RENDER_CAP).ids;
+    const c = reg.at(t, cRe, cIm), ids = stateReaders().rendered.ids; modeStateT = t; modeStateVersion = reg.version;
     modeList.length = ids.length;                                        // wave 45: the same 91 records, rewritten in place (was 1–91 fresh objects per reconstruct)
     for (let i = 0; i < ids.length; i++) { const a = ids[i], m = modeRecs[i]; m.table = tableOf(a); m.re = c.re[a]; m.im = c.im[a]; modeList[i] = m; }
     return modeList;
@@ -1316,14 +1345,16 @@ export async function boot(dom) {
       }
     }
     if (!clock.playing && gov.drop) { gov.drop = 0; gov.okSince = 0; gov.changes++; schedule(TIER.REBUILD); }   // paused: nothing to govern — the user's grid comes back at once
-    const c = reg.at(clock.t, cRe, cIm);
     perf.counts.frames++;
     const cpuTick = !clock.playing || (perf.counts.frames % perf.cpuEvery) === 0;   // the CPU windows' cadence
     if (cpuTick) {
+      /* modesAt() already evolved the same register into these scratch arrays on a reconstruction frame. Reuse it;
+         in 120 Hz mode the other three frames need no CPU-reader coefficient vector at all. */
+      const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
-      if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, reg.populated(), spectrum.selected));
+      if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
     const overlayDomain = space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P &&
@@ -1412,7 +1443,7 @@ export async function boot(dom) {
     perf.ring[perf.counts.frames % 60] = spent;                        // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
   }
   function meterSnapshot() {
-    const rs = reg.renderSet(RENDER_CAP);
+    const rs = stateReaders().rendered;
     return { norm: reg.norm(), energy: reg.energy(), autocorr: reg.autocorrelation(clock.t).abs, t: clock.t, playing: clock.playing,
       rendered: rs.rendered, populated: rs.populated, masked: rs.masked, truncated: rs.truncated, covered: rs.coveredFraction,
       res: field.ok ? field.resolution : 0, half: domain.half, steps: mat.steps, encodeMs: stats.lastEncodeMs,
@@ -1428,7 +1459,7 @@ export async function boot(dom) {
     ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') + ' · re-probed every ' + (READER_LAW.probeMs / 1000).toFixed(0) + ' s' : 'nothing parked') + ' · budget ' + (perfBudgetMs() * 1.68).toFixed(0) + ' ms over the last 60 frames · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%' + (maths.ok && scan.ok ? ' · the impulse, the packet and the period scan off the frame' : ' · no worker: the maths runs on the frame'));
   }
   function statusLine() {
-    const rs = reg.renderSet(RENDER_CAP);
+    const rs = stateReaders().rendered;
     let s = reg.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark) · EXACT REAL shadow · NUMERICAL field'
       : reg.field.Bz !== 0 ? 'EXACT ANALYTIC state + evolution (Zeeman) · EXACT REAL shadow · NUMERICAL field'
       : 'EXACT ANALYTIC state + evolution · EXACT REAL shadow · NUMERICAL field';
@@ -3072,6 +3103,10 @@ export async function boot(dom) {
       if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
       if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
       const Es = periodEnergies();          // W-STURMIAN: the OCCUPIED eigenvalues (populations > 1e-6), never the labels' ⟨H⟩ — and wave 58 hands the SAME expression to capture.js
+      /* Hydrogen, ions and the oscillator normally prove commensurate in microseconds. Answer that exact half here;
+         only an actually incommensurate spectrum pays module-worker startup and the bounded two-million-step scan. */
+      const exact = densityPeriodExact(Es);
+      if (exact) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
       if (!force && scan.ok) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
            answer lands — a BOX bow populates 56 incommensurate well energies and the scan measured 1.2 s on the first
@@ -3260,7 +3295,7 @@ export async function boot(dom) {
     const VIEW_SAY = ['ρ = |ψ|² — density', 'arg ψ — phase', 'Re ψ', 'Im ψ', 'Δρ — difference', 'Re + Im superposed'];
     function canvasSentence(rs) {
       if (!field.ok) return 'no field — WebGPU unavailable';
-      const H = getHamiltonian(), who = reg.populated();
+      const H = getHamiltonian(), who = stateReaders().populated;
       const names = who.slice(0, 3).map((a) => H.labelOf(BASIS[a])).join(' + ') + (who.length > 3 ? ' + ' + (who.length - 3) + ' more' : '');
       const half = Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2);
       /* `quality.res`, NOT `field.resolution`: the governor drops the live grid under load and restores
@@ -3284,7 +3319,7 @@ export async function boot(dom) {
         ui.fieldRo.set(reg.field.Fz !== 0 ? 'H₀ + F z' : reg.field.Bz !== 0 ? 'H₀ + (B/2)L_z' : 'H₀ (bare Coulomb)', reg.field.Fz !== 0 ? 'warn' : reg.field.Bz !== 0 ? 'live' : '');
         ui.fieldRo.setSub(reg.field.Fz !== 0 ? `within-shell exact · needs F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal: exact, no caveat' : 'the register\'s own Hamiltonian');
       }
-      const rs = reg.renderSet(RENDER_CAP);
+      const rs = stateReaders().rendered;
       const t2 = field.ok ? `NUMERICAL · FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${space === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';
       if (b2.lastChild.textContent !== t2) b2.lastChild.textContent = t2;
       b2.className = 'badge ' + (field.ok ? 'numerical' : 'bad');
@@ -5839,7 +5874,7 @@ export async function boot(dom) {
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */

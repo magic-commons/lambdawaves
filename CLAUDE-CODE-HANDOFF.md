@@ -1,5 +1,46 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Deep startup and frame-loop pass — 2026-09-09
+
+The ready boundary and steady animation loop now avoid work whose inputs have not
+changed. This pass preserves the current appearance, saved-project format and exact
+physics results.
+
+- The bow, period and heavy-card module workers are constructed on first demand.
+  Their park state is retained before construction, so a worker first requested in
+  a background tab receives PARK before its job. Fresh boot, playback and the common
+  exact-period readout start zero workers. The speculative bow warm-up begins only
+  after three seconds and in browser-declared idle time while transport is paused.
+- Register population, mute/solo eligibility and render ordering are cached by
+  `reg.version`. Reconstruction evolves the coefficient vector once and CPU readers
+  reuse it on the same frame. Energy and autocorrelation share one versioned
+  normal-mode population spectrum. A 2.5-second playback probe fell from 92 to 40
+  `reg.at()` calls, 54 to 1 population walks and 41 to 0 redundant `renderSet()` calls.
+- Exact commensurate density periods are solved synchronously before the scan worker
+  exists. Hydrogen, stationary states and the oscillator take this fast path;
+  incommensurate spectra still use the bounded worker scan and its existing stale-job
+  protection.
+- Marked and KaTeX remain ordered but load as deferred scripts. In comparable local
+  cold-page runs, DOM interactive moved from 142 ms to 39 ms. Service-worker
+  registration waits 1.5 seconds and then uses idle time with a 6.5-second deadline,
+  keeping the 3.79 MiB first precache away from the first field and first gesture.
+  A fresh-profile probe found no registration at ready or 706 ms, then an active
+  registration at 1.875 seconds.
+
+Fresh tablet-size Firefox/WebGPU acceptance retained the official defaults and
+demand-loaded heavy cards. Pressing H suspended every tracked window, released all
+overlay canvases to 1×1 and reduced loop CPU EMA from 2.508 ms to 0.252 ms with no
+rebuild. Modulation stress remained dormant while closed and stopped; with seven
+LFOs and six routes open it performed 24 paints in the sample, 19 ms total and about
+1.85 ms per painted frame. No page, worker or registry-callback errors occurred.
+
+The complete `npm test` gate passes, as do current-app Firefox acceptance, four-cycle
+WebGPU recovery, the 64³ → 96³ → 128³ → 64³ grid sequence, PWA hash verification and
+the deployment build. The verified build is 148 files and 4.33 MiB; 131 entries and
+3.79 MiB are precached. The remaining high-value refactor boundary is the 581 KiB
+`rack.js` and 197 KiB `modwindow.js`: split those incrementally behind the current
+behavior gates rather than combining module extraction with further scheduling work.
+
 ## Visibility scheduling and startup pass — 2026-09-09
 
 Window presentation now follows one rule in `lab/window-activity.js`: a reader or

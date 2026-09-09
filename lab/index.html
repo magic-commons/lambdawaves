@@ -58,8 +58,10 @@
      with its own values.  It comes first because a custom property is resolved where it is USED. -->
     <link rel="stylesheet" href="./modhost.css">
     <link rel="stylesheet" href="./mir/modwindow/modwindow.css">
-    <script src="./vendor/marked.min.js"></script>
-    <script src="./vendor/katex/katex.min.js"></script>
+    <!-- Notebook parsers are ordered deferred scripts: they remain ready before DOMContentLoaded, while the HTML
+         parser can reach the stage and main module without waiting for 308 KB of notebook-only JavaScript. -->
+    <script defer src="./vendor/marked.min.js"></script>
+    <script defer src="./vendor/katex/katex.min.js"></script>
   </head>
 <body>
 <div id="lab">

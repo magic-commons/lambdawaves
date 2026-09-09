@@ -6,9 +6,11 @@ const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { 
 let failed = false;
 try {
  assert.equal((await g.waitFor('window.__LW&&__LW.ready',150,100)).ok,1);
- const boot = await g.ev(`return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null,
+ const boot = await g.ev(`const workers=__LW.maths.started,period=__LW.period;return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null,workers,period,workersAfterPeriod:__LW.maths.started,
   heliumComputed:__LW.helium.computed,ladderComputed:__LW.ladder.computed,moCurveDone:__LW.mo.state().curveDone}`);
  assert.deepEqual(boot.errors,[]); assert.equal(boot.dirty,false);
+ assert.deepEqual(boot.workers,{bow:false,scan:false,cards:false});
+ assert.equal(boot.period.exact,true); assert.deepEqual(boot.workersAfterPeriod,{bow:false,scan:false,cards:false});
  assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);assert.equal(boot.moCurveDone,0);
  console.log('PASS current boot: no page errors, clean new project');
  console.log('GPU status:',boot.gpu || 'available');

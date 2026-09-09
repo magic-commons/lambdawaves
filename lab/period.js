@@ -27,6 +27,31 @@ export function rational(x, qmax = 1e6, tol = 1e-9) {
   }
   return Math.abs(x - h1 / k1) <= tol * Math.max(1, x) ? { p: sign * h1, q: k1 } : null;
 }
+
+function periodDifferences(energies) {
+  const E = []; for (const e of [...energies].sort((a, b) => a - b)) if (!E.length || Math.abs(e - E[E.length - 1]) > 1e-12) E.push(e);
+  const d = []; for (let i = 0; i < E.length; i++) for (let j = i + 1; j < E.length; j++) { const v = Math.abs(E[j] - E[i]); if (v > 1e-12) d.push(v); }
+  return { E, d };
+}
+
+/* The exact/commensurate half is quick even for a full register. Exposing it lets
+   the UI answer common hydrogen and oscillator states without starting a worker;
+   null means the bounded near-recurrence scan is genuinely needed. */
+export function densityPeriodExact(energies, { tol = 1e-10, qmax = 20000 } = {}) {
+  const { E, d } = periodDifferences(energies);
+  return exactFromDifferences(E, d, tol, qmax);
+}
+function exactFromDifferences(E, d, tol, qmax) {
+  if (E.length < 2 || !d.length) return { exact: true, T: 0, g: 0, stationary: true };
+  const dmin = Math.min(...d);
+  const rats = d.map((v) => rational(v / dmin, qmax, tol));
+  if (!rats.every(Boolean)) return null;
+  let L = 1; for (const r of rats) L = L / gcdInt(L, r.q) * r.q;
+  let G = 0; for (const r of rats) G = gcdInt(G, Math.round(r.p * L / r.q));
+  const g = dmin * G / L;
+  let verr = 0; for (const v of d) { const x = v / g; verr = Math.max(verr, Math.abs(x - Math.round(x))); }
+  return verr < 1e-9 ? { exact: true, T: 2 * Math.PI / g, g, count: E.length, pairs: d.length, verified: verr } : null;
+}
 /**
  * densityPeriod(energies) — energies: the distinct energies (a.u.) of the populated labels.
  * Returns { exact: true, T, g } with T in a.u. (g = gcd of the differences), or { exact: false, T, err } for the best
@@ -37,25 +62,9 @@ export function densityPeriod(energies, { horizon = 2e4, tol = 1e-10, qmax = 200
   /* the commensurability test must be STRICTER than Dirichlet: any real is within 1/q² of some p/q, so at q ≤ 2·10⁴ a
      random ratio is matched to ~1e-9; a true rational of the register (denominators ≤ 7200) is matched to 1e-15.
      The energies are NOT rounded before the test (a 12-digit rounding once perturbed the {3,4,5} ratios past 1e-11) */
-  const E = []; for (const e of [...energies].sort((a, b) => a - b)) if (!E.length || Math.abs(e - E[E.length - 1]) > 1e-12) E.push(e);
-  if (E.length < 2) return { exact: true, T: 0, g: 0, stationary: true };
-  const d = []; for (let i = 0; i < E.length; i++) for (let j = i + 1; j < E.length; j++) { const v = Math.abs(E[j] - E[i]); if (v > 1e-12) d.push(v); }
-  if (!d.length) return { exact: true, T: 0, g: 0, stationary: true };
-  const dmin = Math.min(...d);
-  /* commensurate? every ΔE/ΔE_min must be rational with a modest denominator */
-  const rats = d.map((v) => rational(v / dmin, qmax, tol));
-  if (rats.every(Boolean)) {
-    let L = 1; for (const r of rats) L = L / gcdInt(L, r.q) * r.q;                       // lcm of the denominators
-    let G = 0; for (const r of rats) G = gcdInt(G, Math.round(r.p * L / r.q));           // gcd of the numerators over the common denominator
-    const g = dmin * G / L;                                                                // the gcd of the differences, in a.u.
-    /* THE VERIFICATION (wave 42, the reviewer's finding).  rational()'s tolerance is RELATIVE to the ratio, so a ratio of
-       55 matched at 1e-10 relative is 5.5e-9 absolute — and 5.5e-9 of a beat, times the 2·10⁴ turns a denominator of
-       that size demands, is a whole cycle: Ne's three occupied ε (ratios 55 and 1.5) were called exact with T = 153 295
-       a.u. and a true recurrence error of 2e-5, and {0, 0.001√2, 1} exact with T = 1.4e7.  So the gcd is CHECKED before it
-       is believed: every difference must be an integer multiple of g to 1e-9 of a turn, else the spectrum goes to the scan. */
-    let verr = 0; for (const v of d) { const x = v / g; verr = Math.max(verr, Math.abs(x - Math.round(x))); }
-    if (verr < 1e-9) return { exact: true, T: 2 * Math.PI / g, g, count: E.length, pairs: d.length, verified: verr };
-  }
+  const { E, d } = periodDifferences(energies);
+  const exact = exactFromDifferences(E, d, tol, qmax);
+  if (exact) return exact;
   /* incommensurate: the best near-recurrence up to the horizon (a scan on the finest beat, refined).
      THE SCAN STARTS AT ONE FULL TURN OF THE FASTEST BEAT (k = 64 · step = 2π/max ΔE), never at its own first step:
      every spectrum has an arbitrarily good "recurrence" at T → 0, where nothing has moved yet, and for a WIDE
