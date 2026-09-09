@@ -1,5 +1,34 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Successful GPU/reload retry — 2026-09-09
+
+This supersedes the environmental GPU blocker recorded below. On retry the host
+had ~26 GiB available RAM, zero swap use and no leftover geckodriver processes at
+initial inspection. A blank-page GPU probe succeeded with default limits, requested
+maximum texture limits and low-power preference.
+
+`tests/gpu-recovery.browser-test.mjs` passes on the real Firefox WebGPU renderer:
+initial boot plus three consecutive reloads from dirty projects, no page/uncaptured
+GPU errors, nonblank density readback, finite field values, and the expected ~0.998
+integrated density. Grid changes 64³ → 96³ → 128³ → 64³ also pass without GPU
+errors or NaNs. The test requires a functioning GPU; a CPU-only UI cannot pass it.
+
+`tests/current.browser-test.mjs` also passes again with GPU available: clean boot,
+new-project save/open including subtitle, failed-delete preservation, malformed
+storage, missing-KaTeX fallback, and keyboard macros across close/reopen.
+
+Both runs exited zero. No runtime changes were needed for this retry. This clears
+the reproduced allocation failure and reload stall in the recovered environment;
+it is not a certification of the entire historical UI suite, long sessions, mobile
+hardware, real microphone use, or production/installed-PWA behavior.
+
+Reproduce with the HTTPS server running, using unused driver ports:
+
+```bash
+LW_PORT=8751 GD_PORT=5383 node tests/gpu-recovery.browser-test.mjs
+LW_PORT=8751 GD_PORT=5382 node tests/current.browser-test.mjs
+```
+
 ## GPU/reload investigation — 2026-09-09
 
 The GPU allocation error reproduces on an empty HTML page before importing any app

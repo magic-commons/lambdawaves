@@ -5,6 +5,14 @@ owns the major debugging/refactoring pass. The Node and packaging gates do not p
 that real devices, installed clients, or the current UI work end to end. Start with
 `CLAUDE-CODE-HANDOFF.md` for the behavior that cleanup must preserve.
 
+## Latest verification — 2026-09-09
+
+The GPU allocation and reload problems no longer reproduce after host recovery.
+The blank-page allocation probe, dedicated GPU recovery test (three reloads plus
+64³/96³/128³ grids), and current UI acceptance test all pass with GPU available.
+See the latest handoff for exact coverage. The older failure notes below are
+historical; long-session, mobile, microphone and production acceptance remain open.
+
 ## Implemented in this checkpoint
 
 - GPU/reload follow-up: stalled animation frames now reject `settle()` after three
