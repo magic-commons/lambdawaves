@@ -15,7 +15,13 @@ export async function startDriver() {
     probe.once('error', reject);
     probe.listen(PORT, '127.0.0.1', () => probe.close(resolve));
   });
-  const binary = process.env.GECKODRIVER || 'geckodriver';
+  /* Ubuntu's /snap/bin/geckodriver is a launcher. It asks snapd to create the real
+     process and then exits, so the ChildProcess returned by spawn() no longer owns
+     the listener: p.kill() succeeds against the dead launcher while geckodriver and
+     its Firefox can remain for hours. Spawn the bundled executable itself when it
+     exists, keeping the ordinary PATH fallback for non-Snap installations. */
+  const snapBinary = '/snap/firefox/current/usr/lib/firefox/geckodriver';
+  const binary = process.env.GECKODRIVER || (existsSync(snapBinary) ? snapBinary : 'geckodriver');
   const p = spawn(binary,
     ['--port', String(PORT), '--host', '127.0.0.1', '--allow-hosts', '127.0.0.1', 'localhost'],
     { stdio: ['ignore', 'pipe', 'pipe'] });

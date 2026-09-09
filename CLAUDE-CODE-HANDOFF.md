@@ -41,6 +41,15 @@ the deployment build. The verified build is 148 files and 4.33 MiB; 131 entries 
 `rack.js` and 197 KiB `modwindow.js`: split those incrementally behind the current
 behavior gates rather than combining module extraction with further scheduling work.
 
+The local browser harness also stopped using `/snap/bin/geckodriver`, whose launcher
+exits after asking snapd to orphan the real listener. It now spawns Firefox's bundled
+geckodriver executable directly, so the existing `g.close()` owns and terminates the
+process. This prevents successful performance probes from accumulating hidden Firefox
+sessions and distorting later GPU, memory and timing results.
+The corrected current-app gate released fresh port 5416 immediately. Snap confinement
+refused signals to the already reparented legacy processes, so restart Firefox or the
+desktop session before the next final hardware benchmark to clear that old host state.
+
 ## Visibility scheduling and startup pass — 2026-09-09
 
 Window presentation now follows one rule in `lab/window-activity.js`: a reader or
