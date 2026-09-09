@@ -34,6 +34,25 @@ try {
  }finally{window.katex=k}`);
  assert.equal(math.images,0); assert.match(math.text,/<img/);
  console.log('PASS malformed storage and unavailable math renderer fail safely');
+ const notebook = await g.ev(String.raw`const {renderNotebook}=await import('./notebook-render.js');
+  const inspect=html=>{const t=document.createElement('template');t.innerHTML=html;return t.content};
+  const attack='<a title="$x$" href="java&#9;script:alert(1)" onclick=bad()>link</a><img src=x onerror=bad()><svg onload=bad()></svg><script>bad()</script><input type=checkbox>';
+  const safe=inspect(renderNotebook(attack));
+  const formula=inspect(renderNotebook('Before $x^2$ and $$y^2$$ after'));
+  const attr=inspect(renderNotebook('<span class="$x$">text</span>',{katex:{renderToString(){return '<b>math</b>'}}}));
+  const fallback=inspect(renderNotebook('$<img src=x onerror=bad()>$',{katex:null}));
+  const injected=inspect(renderNotebook("<span title='$\" onmouseover=\"bad()$'>text</span>",{katex:null}));
+  const missing=inspect(renderNotebook('<script>bad()</script>',{marked:null}));
+  return {unsafe:safe.querySelectorAll('script,svg,[onclick],[onerror],[onload],a[href]').length,
+    title:safe.querySelector('a').title,disabled:safe.querySelector('input').disabled,
+    inline:formula.querySelectorAll('.katex').length,display:formula.querySelectorAll('.katex-display').length,
+    text:formula.textContent.includes('Before')&&formula.textContent.includes('after'),
+    attribute:attr.querySelector('span').getAttribute('class'),attributeElements:attr.querySelectorAll('b').length,
+    injectedHandlers:injected.querySelectorAll('[onmouseover]').length,
+    fallbackImages:fallback.querySelectorAll('img').length,missingText:missing.textContent};`);
+ assert.deepEqual(notebook,{unsafe:0,title:'$x$',disabled:true,inline:2,display:1,text:true,
+  attribute:'$x$',attributeElements:0,injectedHandlers:0,fallbackImages:0,missingText:'<script>bad()</script>'});
+ console.log('PASS notebook renderer: sanitized markup, inline/display math, literal attributes and safe parser fallback');
  await g.ev(`__LW.layout.modulation.expand();await new Promise(r=>setTimeout(r,150));document.querySelector('.m2numseat').focus();return true`);
  await g.press('\uE012');
  const depth=await g.ev(`return document.querySelector('.m2numseat').getAttribute('aria-valuenow')`);

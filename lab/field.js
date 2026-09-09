@@ -888,31 +888,32 @@ export async function createField(canvas, opts = {}) {
   }
   async function readPixels(obs, mat, w = 320, h = 240) {
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
-    if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
-    const rp = out._rp, lp = out._lp;
-    const enc = device.createCommandEncoder();
-    writeView(obs, mat, w, h); const sl = writeLines(mat);
-    const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-    pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
-    drawChrome(pass, lp, mat, sl);
-    pass.end();
-    const bpr = Math.ceil(w * 4 / 256) * 256;
-    const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    let buf;
     try {
-    enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
-    device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ);
-    const px = new Uint8Array(buf.getMappedRange());
-    let nonBlack = 0, lum = 0, bright = 0, hue = 0, hsh = 2166136261 >>> 0;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const o = y * bpr + x * 4, r = px[o], g = px[o + 1], b = px[o + 2];
-      const L = (r + g + b) / 3; lum += L; if (L > 24) nonBlack++; if (L > 128) bright++;
-      hue += Math.abs(r - b);
-      hsh = Math.imul(hsh ^ (r + (g << 8) + (b << 16)), 16777619) >>> 0;
-    }
-    buf.unmap();
-    return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16) };
-    } finally { buf.destroy(); tex.destroy(); }
+      if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
+      const rp = out._rp, lp = out._lp;
+      const enc = device.createCommandEncoder();
+      writeView(obs, mat, w, h); const sl = writeLines(mat);
+      const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
+      pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
+      drawChrome(pass, lp, mat, sl);
+      pass.end();
+      const bpr = Math.ceil(w * 4 / 256) * 256;
+      buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
+      device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ);
+      const px = new Uint8Array(buf.getMappedRange());
+      let nonBlack = 0, lum = 0, bright = 0, hue = 0, hsh = 2166136261 >>> 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const o = y * bpr + x * 4, r = px[o], g = px[o + 1], b = px[o + 2];
+        const L = (r + g + b) / 3; lum += L; if (L > 24) nonBlack++; if (L > 128) bright++;
+        hue += Math.abs(r - b);
+        hsh = Math.imul(hsh ^ (r + (g << 8) + (b << 16)), 16777619) >>> 0;
+      }
+      buf.unmap();
+      return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16) };
+    } finally { buf?.destroy(); tex.destroy(); }
   }
   /** THE CHROME AS THE SCREEN GETS IT (wave 48).  readPixels renders the volume and returns aggregates; this
       renders the LINES ALONE over the stage's own ground (mat.bg, not black — the light theme's near-black frame
@@ -920,52 +921,53 @@ export async function createField(canvas, opts = {}) {
       It is the colour proof that reads the rendered image rather than the buffer writeLines just filled. */
   async function linePixels(obs, mat, w = 256, h = 256) {
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
-    if (!out._lp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
-    const enc = device.createCommandEncoder();
-    writeView(obs, mat, w, h); const sl = writeLines(mat);
-    const bg = mat.bg || DEFAULT_BG;
-    const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: bg[0], g: bg[1], b: bg[2], a: 1 }, storeOp: 'store' }] });
-    drawChrome(pass, out._lp, mat, sl);
-    pass.end();
-    const bpr = Math.ceil(w * 4 / 256) * 256;
-    const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    let buf;
     try {
-    enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
-    device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ);
-    const px = new Uint8Array(buf.getMappedRange());
-    const B = { cyan: 0, magenta: 0, yellow: 0, warm: 0, green: 0, blue: 0, grey: 0 };
-    const top = { cyan: null, magenta: null, yellow: null };
-    const ground = [Math.round(bg[0] * 255), Math.round(bg[1] * 255), Math.round(bg[2] * 255)];
-    let darkest = 255, darkestPx = null;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const o = y * bpr + x * 4, r = px[o], g = px[o + 1], b = px[o + 2];
-      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-      const L = (r + g + b) / 3;
-      if (L < darkest) { darkest = L; darkestPx = [r, g, b]; }
-      if (mx - mn < 34) { B.grey++; continue; }                        // achromatic: the box, or the ground
-      const hi = (v) => v >= mx - 34, lo = (v) => v <= mn + 34;
-      if (hi(g) && hi(b) && lo(r)) { B.cyan++; if (!top.cyan || g + b > top.cyan[1] + top.cyan[2]) top.cyan = [r, g, b]; }
-      else if (hi(r) && hi(b) && lo(g)) { B.magenta++; if (!top.magenta || r + b > top.magenta[0] + top.magenta[2]) top.magenta = [r, g, b]; }
-      else if (hi(r) && hi(g) && lo(b)) { B.yellow++; if (!top.yellow || r + g > top.yellow[0] + top.yellow[1]) top.yellow = [r, g, b]; }
-      else if (hi(r)) B.warm++; else if (hi(g)) B.green++; else B.blue++;
-    }
-    buf.unmap();
-    return { w, h, buckets: B, top, ground, darkest: Math.round(darkest), darkestPx };
-    } finally { buf.destroy(); tex.destroy(); }
+      if (!out._lp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
+      const enc = device.createCommandEncoder();
+      writeView(obs, mat, w, h); const sl = writeLines(mat);
+      const bg = mat.bg || DEFAULT_BG;
+      const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: bg[0], g: bg[1], b: bg[2], a: 1 }, storeOp: 'store' }] });
+      drawChrome(pass, out._lp, mat, sl);
+      pass.end();
+      const bpr = Math.ceil(w * 4 / 256) * 256;
+      buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
+      device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ);
+      const px = new Uint8Array(buf.getMappedRange());
+      const B = { cyan: 0, magenta: 0, yellow: 0, warm: 0, green: 0, blue: 0, grey: 0 };
+      const top = { cyan: null, magenta: null, yellow: null };
+      const ground = [Math.round(bg[0] * 255), Math.round(bg[1] * 255), Math.round(bg[2] * 255)];
+      let darkest = 255, darkestPx = null;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const o = y * bpr + x * 4, r = px[o], g = px[o + 1], b = px[o + 2];
+        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        const L = (r + g + b) / 3;
+        if (L < darkest) { darkest = L; darkestPx = [r, g, b]; }
+        if (mx - mn < 34) { B.grey++; continue; }                        // achromatic: the box, or the ground
+        const hi = (v) => v >= mx - 34, lo = (v) => v <= mn + 34;
+        if (hi(g) && hi(b) && lo(r)) { B.cyan++; if (!top.cyan || g + b > top.cyan[1] + top.cyan[2]) top.cyan = [r, g, b]; }
+        else if (hi(r) && hi(b) && lo(g)) { B.magenta++; if (!top.magenta || r + b > top.magenta[0] + top.magenta[2]) top.magenta = [r, g, b]; }
+        else if (hi(r) && hi(g) && lo(b)) { B.yellow++; if (!top.yellow || r + g > top.yellow[0] + top.yellow[1]) top.yellow = [r, g, b]; }
+        else if (hi(r)) B.warm++; else if (hi(g)) B.green++; else B.blue++;
+      }
+      buf.unmap();
+      return { w, h, buckets: B, top, ground, darkest: Math.round(darkest), darkestPx };
+    } finally { buf?.destroy(); tex.destroy(); }
   }
   async function sampleVoxel(i, j, k) {
     const buf = device.createBuffer({ size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
     try {
-    const enc = device.createCommandEncoder();
-    enc.copyTextureToBuffer({ texture: psiTex, origin: [i, j, k] }, { buffer: buf, bytesPerRow: 256, rowsPerImage: 1 }, [1, 1, 1]);
-    device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ);
-    const u = new Uint16Array(buf.getMappedRange());
-    const re = f16(u[0]), im = f16(u[1]);
-    buf.unmap();
-    const x = (i + 0.5) / res * 2 * half - half, y = (j + 0.5) / res * 2 * half - half, z = (k + 0.5) / res * 2 * half - half;
-    return { re, im, x, y, z };
+      const enc = device.createCommandEncoder();
+      enc.copyTextureToBuffer({ texture: psiTex, origin: [i, j, k] }, { buffer: buf, bytesPerRow: 256, rowsPerImage: 1 }, [1, 1, 1]);
+      device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ);
+      const u = new Uint16Array(buf.getMappedRange());
+      const re = f16(u[0]), im = f16(u[1]);
+      buf.unmap();
+      const x = (i + 0.5) / res * 2 * half - half, y = (j + 0.5) / res * 2 * half - half, z = (k + 0.5) / res * 2 * half - half;
+      return { re, im, x, y, z };
     } finally { buf.destroy(); }
   }
   /** Σ|ψ|² dV over the grid, the max density, and a hash — the whole cache read back */
@@ -973,29 +975,29 @@ export async function createField(canvas, opts = {}) {
     const bpr = res * 8, size = bpr * res * res;
     const buf = device.createBuffer({ size, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
     try {
-    const enc = device.createCommandEncoder();
-    enc.copyTextureToBuffer({ texture: psiTex }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: res }, [res, res, res]);
-    device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ);
-    const u = new Uint16Array(buf.getMappedRange());
-    const dV = Math.pow(2 * half / res, 3);
-    let integral = 0, maxRho = 0, hsh = 2166136261 >>> 0, nan = 0;
-    for (let v = 0; v < res * res * res; v++) {
-      const re = f16(u[v * 4]), im = f16(u[v * 4 + 1]);
-      if (Number.isNaN(re) || Number.isNaN(im)) { nan++; continue; }
-      const rho = re * re + im * im; integral += rho; if (rho > maxRho) maxRho = rho;
-      hsh = (Math.imul(hsh ^ u[v * 4], 16777619) ^ u[v * 4 + 1]) >>> 0;
-    }
-    buf.unmap();
-    return { integral: integral * dV, maxRho, hash: hsh.toString(16), nan, res, half, generation };
+      const enc = device.createCommandEncoder();
+      enc.copyTextureToBuffer({ texture: psiTex }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: res }, [res, res, res]);
+      device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ);
+      const u = new Uint16Array(buf.getMappedRange());
+      const dV = Math.pow(2 * half / res, 3);
+      let integral = 0, maxRho = 0, hsh = 2166136261 >>> 0, nan = 0;
+      for (let v = 0; v < res * res * res; v++) {
+        const re = f16(u[v * 4]), im = f16(u[v * 4 + 1]);
+        if (Number.isNaN(re) || Number.isNaN(im)) { nan++; continue; }
+        const rho = re * re + im * im; integral += rho; if (rho > maxRho) maxRho = rho;
+        hsh = (Math.imul(hsh ^ u[v * 4], 16777619) ^ u[v * 4 + 1]) >>> 0;
+      }
+      buf.unmap();
+      return { integral: integral * dV, maxRho, hash: hsh.toString(16), nan, res, half, generation };
     } finally { buf.destroy(); }
   }
   async function readStats() {
     const buf = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
     try {
-    const enc = device.createCommandEncoder(); enc.copyBufferToBuffer(statsBuf, 0, buf, 0, 16); device.queue.submit([enc.finish()]);
-    await buf.mapAsync(GPUMapMode.READ); const f = new Float32Array(buf.getMappedRange().slice(0)); buf.unmap();
-    return { rhoMax: f[0], refMax: f[1] };
+      const enc = device.createCommandEncoder(); enc.copyBufferToBuffer(statsBuf, 0, buf, 0, 16); device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ); const f = new Float32Array(buf.getMappedRange().slice(0)); buf.unmap();
+      return { rhoMax: f[0], refMax: f[1] };
     } finally { buf.destroy(); }
   }
 
@@ -1008,29 +1010,30 @@ export async function createField(canvas, opts = {}) {
   async function throughput({ modes, obs, mat, n = 60 }) {
     const w = canvas.width, h = canvas.height;
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT });
-    if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
-    const view = tex.createView();
-    const run = async (doCompute, doRender) => {
-      await device.queue.onSubmittedWorkDone();
-      const t0 = performance.now();
-      const enc = device.createCommandEncoder();
-      for (let i = 0; i < n; i++) {
-        if (doCompute) encodeCompute(enc, 0, modes);
-        if (doRender) {
-          writeView(obs, mat, w, h); const sl = writeLines(mat);
-          const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-          pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
-          drawChrome(pass, out._lp, mat, sl);
-          pass.end();
+    try {
+      if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
+      const view = tex.createView();
+      const run = async (doCompute, doRender) => {
+        await device.queue.onSubmittedWorkDone();
+        const t0 = performance.now();
+        const enc = device.createCommandEncoder();
+        for (let i = 0; i < n; i++) {
+          if (doCompute) encodeCompute(enc, 0, modes);
+          if (doRender) {
+            writeView(obs, mat, w, h); const sl = writeLines(mat);
+            const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
+            pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
+            drawChrome(pass, out._lp, mat, sl);
+            pass.end();
+          }
         }
-      }
-      device.queue.submit([enc.finish()]);
-      await device.queue.onSubmittedWorkDone();
-      return (performance.now() - t0) / n;
-    };
-    const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
-    tex.destroy();
-    return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: mat.steps };
+        device.queue.submit([enc.finish()]);
+        await device.queue.onSubmittedWorkDone();
+        return (performance.now() - t0) / n;
+      };
+      const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
+      return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: mat.steps };
+    } finally { tex.destroy(); }
   }
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {

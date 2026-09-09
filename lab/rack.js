@@ -1,7 +1,7 @@
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
-import { renderNotebookMath } from './notebook-math.js';
+import { renderNotebook } from './notebook-render.js';
 import { reworkNative, planeModel, infoPanel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
@@ -4392,65 +4392,7 @@ export async function boot(dom) {
           e.stopPropagation();
         });
       }
-      /* ── WAVE 68 · THE NOTEBOOK SANITISER IS AN ALLOWLIST OVER A PARSED TREE, NOT A BLOCKLIST OVER A STRING
-       * It was two regexes — strip `<script>…</script>`, strip ` on…="…"` — and a blocklist of two shapes
-       * catches exactly two shapes.  Measured, 7 of 8 payloads went straight through: an UNQUOTED handler,
-       * a SINGLE-quoted one, one separated by a NEWLINE rather than a space, `<svg onload=…>`, an UNCLOSED
-       * `<script>`, `<iframe src="javascript:…">` and `<a href="javascript:…">`.  Only the exact
-       * double-quoted form was caught, which is the one everybody tests with.
-       * WHY IT MATTERS HERE AND NOT ONLY IN THEORY: `projects.importText` takes `o.notebook.text` out of an
-       * arbitrary uploaded `.json`, stores it, and renders it into `view.innerHTML` when the project is
-       * opened — and the dossier §27 asks in as many words to treat imported project files as untrusted and
-       * to sanitise anything that becomes HTML.  The severity is capped at "a project file somebody chose to
-       * import", NOT "a link": `statelink.js` does not carry notebook text, which is worth saying out loud
-       * so nobody later assumes the state link is a safe carrier for prose.  On this origin an execution
-       * would read every saved project out of localStorage.
-       * THE MECHANISM: `marked`'s output is parsed into an INERT `<template>` (no browsing context — an
-       * `<img>` in there never loads and a `<script>` in there never runs, even before we touch it), then
-       * walked: an element whose tag is not on the list is REMOVED with its subtree, and every attribute
-       * that is not on that tag's own list is removed — so a handler nobody has thought of yet is refused by
-       * construction rather than by pattern.  `href`/`src` are additionally checked for a scheme, with the
-       * control characters stripped first, because `java\tscript:` is the oldest trick here.
-       * ORDER IS THE OTHER HALF: the KaTeX output is substituted AFTER the walk.  It is OURS — we generate
-       * it from the extracted TeX — and it is full of `<span style>`, which this allowlist would strip.  The
-       * placeholders had to move off U+0000 to survive the parse (the HTML tokenizer turns a NULL in data
-       * into U+FFFD); they are private-use characters now, which nothing escapes and nothing rewrites. */
-      const NB_TAG = new Set(['P', 'BR', 'HR', 'STRONG', 'EM', 'B', 'I', 'U', 'DEL', 'S', 'MARK', 'SMALL', 'CODE', 'PRE', 'KBD', 'SAMP', 'VAR', 'BLOCKQUOTE',
-        'UL', 'OL', 'LI', 'DL', 'DT', 'DD', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'A', 'IMG', 'SPAN', 'DIV', 'SUP', 'SUB',
-        'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'CAPTION', 'INPUT']);
-      const NB_ATTR = { A: ['href', 'title'], IMG: ['src', 'alt', 'title'], INPUT: ['type', 'checked', 'disabled'],
-        TH: ['align', 'colspan', 'rowspan'], TD: ['align', 'colspan', 'rowspan'], OL: ['start'], CODE: ['class'], PRE: ['class'], SPAN: ['class'] };
-      const nbSafeURL = (u) => !/^(?:javascript|data|vbscript|file|blob):/i.test(String(u).replace(/[\u0000-\u0020]/g, '').toLowerCase());
-      function nbClean(html) {
-        const t = document.createElement('template');
-        t.innerHTML = html;                                       // INERT: no load, no execution, no navigation
-        const walk = (node) => {
-          for (const el of [...node.children]) {
-            if (!NB_TAG.has(el.tagName)) { el.remove(); continue; }
-            const allow = NB_ATTR[el.tagName] || [];
-            for (const a of [...el.attributes]) {
-              const n = a.name.toLowerCase();
-              if (allow.indexOf(n) < 0) { el.removeAttribute(a.name); continue; }
-              if ((n === 'href' || n === 'src') && !nbSafeURL(a.value)) el.removeAttribute(a.name);
-            }
-            /* a link in a note goes OUT, and it goes out without a handle on this window */
-            if (el.tagName === 'A' && el.getAttribute('href')) { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener noreferrer'); }
-            if (el.tagName === 'INPUT') el.setAttribute('disabled', '');   // marked's task-list checkbox is a picture of state, not a control
-            walk(el);
-          }
-        };
-        walk(t.content);
-        return t.innerHTML;
-      }
-      /* ── markdown + LaTeX: $…$ and $$…$$ are lifted out before marked runs and set by KaTeX after ── */
-      function renderMarkdown(src) {
-        const M = window.marked, K = window.katex; if (!M) return src.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-        const math = []; const keep = (tex, display) => { math.push({ tex, display }); return '\uE000MATH' + (math.length - 1) + '\uE001'; };
-        let s = src.replace(/\$\$([\s\S]+?)\$\$/g, (m, t) => keep(t, true)).replace(/(^|[^\\$])\$([^$\n]+?)\$/g, (m, pre, t) => pre + keep(t, false));
-        let html = nbClean(M.parse(s, { breaks: true, gfm: true }));
-        html = html.replace(/\uE000MATH(\d+)\uE001/g, (m, i) => { const q = math[+i]; return q ? renderNotebookMath(q.tex, q.display, K) : m; });
-        return html;
-      }
+      const renderMarkdown = renderNotebook;
       const CAP = { lines: 14, words: 140 };
       function capText(t) { const lines = t.split('\n'); let out = [], words = 0, cut = false; for (const ln of lines) { if (out.length >= CAP.lines) { cut = true; break; } const w = ln.trim() ? ln.trim().split(/\s+/).length : 0; if (words + w > CAP.words) { cut = true; break; } words += w; out.push(ln); } return { text: out.join('\n'), cut }; }
       function render(capped) { const src = capped ? capText(ta.value) : { text: ta.value, cut: false }; view.innerHTML = renderMarkdown(src.text || '*empty — press ◐ to write*') + (src.cut ? '<div class="nb-more">… the landing shows the first ' + CAP.lines + ' lines / ' + CAP.words + ' words · ◐ opens the whole notebook</div>' : ''); }

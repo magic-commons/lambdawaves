@@ -4,6 +4,11 @@ const object = value => value !== null && typeof value === 'object' && !Array.is
 export function readProjectCollection(storage, key) {
   const text = storage.getItem(key);
   const collection = text === null ? { items: {}, recent: [] } : JSON.parse(text);
+  return validateProjectCollection(collection);
+}
+
+// Shared by reads and imports so neither can overwrite malformed saved records.
+export function validateProjectCollection(collection) {
   if (!object(collection) || !object(collection.items) ||
       (collection.recent !== undefined && (!Array.isArray(collection.recent) ||
         collection.recent.some(path => typeof path !== 'string'))))

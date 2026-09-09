@@ -1,3 +1,5 @@
+import { validateProjectCollection } from './project-storage.js';
+
 // Validate the imported envelope before touching the saved project collection.
 // Experiment/model migration still belongs to restore(), when the project opens.
 export const MAX_PROJECT_BYTES = 8 * 1024 * 1024;
@@ -28,9 +30,8 @@ export function parseProjectImport(text) {
 export function storeProjectImport(text, read, write) {
   const project = parseProjectImport(text);
   const collection = read();
-  if (!object(collection) || !object(collection.items) ||
-      (collection.recent !== undefined && !Array.isArray(collection.recent)))
-    throw new Error('saved project collection is invalid; export or recover it before importing');
+  try { validateProjectCollection(collection); }
+  catch (cause) { throw new Error('saved project collection is invalid; export or recover it before importing', { cause }); }
   // Copy rather than mutating the reader's collection before a successful write.
   // A computed property treats "__proto__" as an ordinary project name.
   const next = { ...collection, items: { ...collection.items, [project.path]: project },

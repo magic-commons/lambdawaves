@@ -1,5 +1,35 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Review and cleanup — 2026-09-09
+
+Preserved the approved layout, visual styling and physics behavior. This pass
+concentrated on notebook rendering, saved-project integrity and GPU diagnostics:
+
+- Extracted notebook Markdown sanitization/rendering from `lab/rack.js` into
+  `lab/notebook-render.js`. Formula HTML is now inserted only into text nodes.
+  Formula syntax inside attributes stays literal and undergoes the normal URL
+  checks. This prevents generated markup from breaking out of attributes after
+  sanitization. KaTeX styles, inline/display formulas and escaped fallback remain.
+- Shared `validateProjectCollection()` between storage reads and imports. Imports
+  now reject malformed existing records and non-string recent paths before writes,
+  preserving the original collection. No user storage or old saves were deleted.
+- Extended temporary GPU texture cleanup to cover pipeline creation, encoder setup
+  and buffer allocation failures, and throughput completion failures. Readback
+  functions now have consistently indented resource scopes.
+
+Validation: all 53 Node suites passed; current-app Firefox acceptance passed with
+WebGPU available, including new hostile notebook markup/attribute regressions;
+GPU recovery acceptance passed all four boots and the 64/96/128/64 grid sequence.
+The deployment build passed (146 files, ~4.30 MiB), with the new module included
+in the regenerated service-worker precache. Changes are local, not deployed.
+
+Remaining review boundaries: the large rack/modulation modules and historical CSS
+layers still warrant incremental extraction with current-behavior acceptance.
+This pass does not certify the obsolete layout gate, microphone hardware, mobile
+GPU behavior, long sessions, or installed-PWA updates in production. Preserve the
+latest style lock when tackling those areas; do not revive old UI rules.
+
+
 ## Successful GPU/reload retry — 2026-09-09
 
 This supersedes the environmental GPU blocker recorded below. On retry the host

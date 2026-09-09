@@ -41,7 +41,9 @@ storeProjectImport(JSON.stringify({ ...project, path: '__proto__' }), () => orig
   next => { stored = JSON.stringify(next); return true; });
 assert.ok(Object.hasOwn(JSON.parse(stored).items, '__proto__'));
 assert.equal(Object.getPrototypeOf(original.items), Object.prototype);
-for (const collection of [null, [], { items: [] }, { items: {}, recent: 'broken' }]) {
+for (const collection of [null, [], { items: [] }, { items: {}, recent: 'broken' },
+  { items: {}, recent: [3] }, { items: { broken: { path: 'broken', data: null, notebook: {} } } },
+  { items: { broken: { path: 'broken', data: {}, notebook: { text: 7 } } } }]) {
   assert.throws(() => storeProjectImport(text, () => collection,
     () => { throw new Error('must not write'); }), /collection is invalid/);
 }
