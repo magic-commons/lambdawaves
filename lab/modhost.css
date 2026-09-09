@@ -2497,6 +2497,84 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .m2dev.env .m2kind { color:var(--acc); }
 :root:root:root #modwin .modtempoin { box-sizing:border-box;min-width:0;max-width:none;margin:0; }
 
+/* Audio finishing pass: the four performance controls use one row at full
+   size and the same 2×2 dial bank as the other compact instruments. */
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2knobs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 5px 7px 4px; }
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2kd,
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2k[data-knob="sens"] .m2kd {
+  width: 48px; height: 48px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs {
+  width: 190px; align-self: flex-start; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px; padding: 3px 4px 4px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2kd,
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2k[data-knob="sens"] .m2kd {
+  width: 40px; height: 40px; }
+
+/* Compact Audio exposes one response band at a time. Its label is the band
+   switch, leaving the range itself broad enough for touch editing. */
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-row:not([data-selected="true"]) { display: none; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-ranges { justify-content: center; gap: 8px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-row { flex-basis: 42px; padding: 0 9px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-name {
+  inset: 0 9px; width: calc(100% - 18px); height: 42px; font-size: 10px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-track {
+  margin-left: 42px; height: 42px; border-radius: 7px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-zone { top: 7px; bottom: 7px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-input { top: 9px; bottom: 9px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-handle::after { top: 5px; bottom: 5px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout:not([data-route-selected="true"]) { display: none; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] {
+  display: grid; flex: 1 1 auto; min-height: 0; grid-template: 1fr / 44px minmax(0, 1fr); }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audgrip { width: 44px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audmac { width: auto; align-items: center; text-align: center; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audname { cursor: pointer; }
+
+/* The conditioning sheet uses continuous sliders with stable value seats.
+   BAND and NOISE GATE retain their discrete minus/plus switchers. */
+:root:root:root #modwin.mir-modwindow .m2audsheet { gap: 2px; padding: 8px; border-radius: 12px; }
+:root:root:root #modwin.mir-modwindow .m2audshead { min-height: 36px; padding-left: 5px; }
+:root:root:root #modwin.mir-modwindow .m2audsrow { min-height: 40px; border-radius: 7px; padding: 0 3px; }
+:root:root:root #modwin.mir-modwindow .m2audsrow:nth-of-type(even) { background: hsl(var(--glass-tint) / .18); }
+:root:root:root #modwin.mir-modwindow .m2audscontinuous .m2audsbtn { display: none; }
+:root:root:root #modwin.mir-modwindow .m2audscontinuous .m2audsval {
+  display: grid; grid-template-columns: minmax(72px, 1fr) 58px; align-items: center; gap: 8px; }
+:root:root:root #modwin.mir-modwindow .aud-setting-input {
+  width: 100%; height: 28px; margin: 0; padding: 0; appearance: none; -webkit-appearance: none;
+  background: transparent; cursor: ew-resize; touch-action: pan-y; }
+:root:root:root #modwin.mir-modwindow .aud-setting-input::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 3px; background: var(--m2-rule); }
+:root:root:root #modwin.mir-modwindow .aud-setting-input::-webkit-slider-thumb {
+  width: 15px; height: 15px; margin-top: -6px; border: 0; border-radius: 50%;
+  appearance: none; -webkit-appearance: none; background: var(--acc2); box-shadow: none; }
+:root:root:root #modwin.mir-modwindow .aud-setting-input::-moz-range-track {
+  height: 3px; border: 0; border-radius: 3px; background: var(--m2-rule); }
+:root:root:root #modwin.mir-modwindow .aud-setting-input::-moz-range-thumb {
+  width: 15px; height: 15px; border: 0; border-radius: 50%; background: var(--acc2); box-shadow: none; }
+:root:root:root #modwin.mir-modwindow .m2audsreadout {
+  color: var(--acc2); text-align: right; font: 650 9px var(--font-num); font-variant-numeric: tabular-nums; }
+:root:root:root #modwin.mir-modwindow .m2audsleg:empty { display: none; }
+
+/* One minimized anatomy for LFO, ENV and AUDIO. Removing the duplicate state
+   word gives the live curve the vertical room and fixes every shared seat. */
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2headc,
+:root:root:root #modwin.mir-modwindow .m2dev.audio.m2min .m2headc,
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minstatus { display: none; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2grab { order: 1; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2fold { order: 2; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minbay { order: 3; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2pow { order: 4; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minnum,
+:root:root:root #modwin.mir-modwindow .m2dev.audio.m2min .m2minnum {
+  display: flex; order: 5; color: var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minnum.m2nomac { color: var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2x { order: 6; }
+
+/* Macro output is Accent B: both the travelled line and its unoutlined live dot. */
+:root:root:root #modwin.mir-modwindow .m2slot .m2vfill,
+:root:root:root #modwin.mir-modwindow .m2slot .m2vedge { background: var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2slot .m2vedge { box-shadow: none; }
+
 /* Compact macros retain the real routing grip and value knob, not empty arc fragments. */
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:112px;height:336px;max-height:336px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:flex;flex-direction:column; }

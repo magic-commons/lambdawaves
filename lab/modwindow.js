@@ -145,11 +145,12 @@ export function createModulation(host, port) {
   const M = port.M, registry = port.registry, clock = port.clock;
   const apply = port.apply || (() => {});
   const audBands = new Map();
+  const audRoutes = new Map();
 
   /* ── THE ARTIFACT, BUILT ───────────────────────────────────────────────────────────────── */
   const root = createModWindow({
     /* COPY customizes audio's face while the ported files stay frozen. */
-    copy: { factory: 'FACTORY', knobs: {...COPY.knobs, audio:[['sens','GAIN','-24','+24'],['attack','ATTACK','0','60s'],['release','RELEASE','0','60s']]},
+    copy: { factory: 'FACTORY', knobs: {...COPY.knobs, audio:[['sens','GAIN','-24','+24'],['attack','ATTACK','0','2s'],['release','RELEASE','0','2s'],['peakHold','HOLD','0','2s']]},
       audioSheetRows:[['out','BAND'],['lower','LOWER'],['upper','UPPER'],['att','ATTACK'],['rel','RELEASE'],['gate','NOISE GATE'],['thresh','GATE dB'],['hold','GATE HOLD'],['hyst','HYST'],['flux','HIT SENSE']] }
   });
   host.appendChild(root);
@@ -246,14 +247,14 @@ export function createModulation(host, port) {
      `audio.js` — its only feed — was deliberately not ported, so the button would have built a
      device that could never move.  `lab/audio.js` is that feed, and `rack.js` pumps it at the
      modulation cadence, so the control now changes something and may be offered.
-       IT STILL OPENS NOTHING.  Adding the device does not touch the microphone; its own MIC button
+       IT STILL OPENS NOTHING.  Adding the device does not touch the microphone; its own AUDIO IN button
      does, once, on a press.  See lab/audio.js's header for the whole privacy story. */
   if (pick.btns.audio && !port.audio) {
     pick.btns.audio.disabled = true;
     pick.btns.audio.setAttribute('aria-disabled', 'true');
     pick.btns.audio.title = 'this host supplies no audio capture, so an AUDIO device would have nothing to follow';
   } else if (pick.btns.audio) {
-    pick.btns.audio.title = 'add an AUDIO follower — four bands and an onset, from this machine’s microphone. Adding it opens nothing; its own MIC button asks for the microphone when you press it';
+    pick.btns.audio.title = 'add an AUDIO follower — four bands and an onset, from this machine’s audio input. Adding it opens nothing; its own AUDIO IN button asks for permission when you press it';
   }
 
   /* ── PRESENTATION STATE.  The window's own, never the model's, never the project's. ────── */
@@ -1429,11 +1430,12 @@ export function createModulation(host, port) {
     const L = M.STEPS_LADDER;
     const SQ = (v) => Math.sqrt(Math.max(0, v) / M.ENV_MAX_S);
     const nMult = M.LFO_MULTS.length;
-    if(s.kind==='audio' && (key==='attack'||key==='release')) {
-      const field=key+'Ms',band=()=>audBands.get(s.id)||'level',value=()=>s.audio.outs[band()][field];
+    if(s.kind==='audio' && (key==='attack'||key==='release'||key==='peakHold')) {
+      const field=key==='peakHold'?'holdMs':key+'Ms',band=()=>audBands.get(s.id)||'level',value=()=>s.audio.outs[band()][field];
       return {get:()=>Math.log1p(value())/Math.log1p(M.AUDIO_TIME_MAX),
         set:u=>M.setSource(s.id,{audio:{outs:{[band()]:{[field]:Math.round(Math.expm1(clamp01(u)*Math.log1p(M.AUDIO_TIME_MAX)))}}}}),
-        text:()=>value().toFixed(0)+' ms',hint:'Selected audio band '+key+' time constant; choose LEVEL, LOW, MID or HIGH on its meter'};
+        text:()=>value()>=1000?(value()/1000).toFixed(value()%1000?2:0)+' s':value().toFixed(0)+' ms',
+        hint:'Selected audio band '+(key==='peakHold'?'peak hold':key+' time constant')+'; choose LEVEL, LOW, MID or HIGH on its meter'};
     }
     switch (key) {
       case 'rate': return {
@@ -1947,7 +1949,14 @@ export function createModulation(host, port) {
         row.box.title = key === 'hit'
           ? 'HIT is an EVENT, not a level: it fires an envelope whose TRIG IN names this socket, rather than driving a macro'
           : 'which MACRO this output drives — tap to walk the list. Only macros nothing else is driving are offered';
-        row.box.addEventListener('click', () => { if (key !== 'hit') cycleAudioOut(rec, key); });
+        row.box.addEventListener('click', (event) => {
+          if (modeOf(s.id) === 'C' && event.target === row.name) {
+            const keys = Object.keys(A.outs), next = keys[(keys.indexOf(key) + 1) % keys.length];
+            audRoutes.set(s.id, next);
+            if (M.AUDIO_FOLLOWED.includes(next)) audBands.set(s.id, next);
+            syncKnobs(rec); paintAudio(rec);
+          } else if (key !== 'hit') cycleAudioOut(rec, key);
+        });
         row.grip.title = 'this output is a source like any other: bind it from a macro’s own DRIVE, or here';
       }
       /* WAVE 105 · THE LEVEL RING SURVIVES A REBUILD.  It was allocated per CARD, so binding a macro —
@@ -2041,7 +2050,10 @@ export function createModulation(host, port) {
        instead — so the one control the folded strip has for changing what it drives did the same
        thing as the caret two seats above it, and the strip had no way to re-route at all.
        Expanding is still the CARET's job, which is where a fold control belongs. */
-    if (dev.minNum) dev.minNum.addEventListener('click', () => cycleMacro(rec));
+    if (dev.minNum) dev.minNum.addEventListener('click', () => {
+      if (s.kind === 'audio') cycleAudioOut(rec, audRoutes.get(s.id) || audBands.get(s.id) || 'level');
+      else cycleMacro(rec);
+    });
     return rec;
   }
 
@@ -2478,7 +2490,7 @@ export function createModulation(host, port) {
     const root = el('div', 'aud-ranges', dev.ed.box);
     root.setAttribute('aria-label', 'Audio response ranges');
     const rows = {};
-    const select = key => { audBands.set(s.id, key); syncKnobs(rec); paintAudio(rec); };
+    const select = key => { audBands.set(s.id, key); audRoutes.set(s.id, key); syncKnobs(rec); paintAudio(rec); };
     const patch = (key, q) => { for(const k of ['floorDb','ceilingDb'])if(Number.isFinite(q[k]))q[k]=Math.round(q[k]*10)/10; M.setSource(s.id, {audio:{outs:{[key]:q}}}); apply(); paintAudio(rec); };
     const shift = (key, delta, base=s.audio.outs[key]) => {
       delta = Math.max(M.AUDIO_RANGE_MIN-base.floorDb, Math.min(M.AUDIO_RANGE_MAX-base.ceilingDb, delta));
@@ -2488,8 +2500,11 @@ export function createModulation(host, port) {
       const row = el('div', 'aud-range-row', root); row.dataset.band=key;
       const head = el('button', 'aud-range-name', row); head.type='button';
       const name=el('b','',head,key.toUpperCase()), text=el('span','aud-range-value',head);
-      head.addEventListener('click',()=>select(key));
-      head.title='Select '+key.toUpperCase()+' for ATTACK and RELEASE';
+      head.addEventListener('click',()=>{
+        if(modeOf(s.id)==='C')select(M.AUDIO_FOLLOWED[(M.AUDIO_FOLLOWED.indexOf(key)+1)%M.AUDIO_FOLLOWED.length]);
+        else select(key);
+      });
+      head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD; in compact mode click again to cycle bands';
       const track=el('div','aud-range-track',row);
       const fill=el('div','aud-range-output',track), zone=el('div','aud-range-zone',track), cursor=el('i','aud-range-input',track);
       const handles={};
@@ -2538,6 +2553,7 @@ export function createModulation(host, port) {
   function wireAudioConditioning(rec, sh) {
     const s=rec.s, keys=M.AUDIO_FOLLOWED;
     const selected=()=>audBands.get(s.id)||'level';
+    const timeText=v=>v>=1000?(v/1000).toFixed(v%1000?2:0)+' s':Math.round(v)+' ms';
     const specs={
       lower:{min:M.AUDIO_RANGE_MIN,max:M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_GAP,step:1,unit:'dB',field:'floorDb'},
       upper:{min:M.AUDIO_RANGE_MIN+M.AUDIO_RANGE_GAP,max:M.AUDIO_RANGE_MAX,step:1,unit:'dB',field:'ceilingDb'},
@@ -2556,23 +2572,27 @@ export function createModulation(host, port) {
         if(document.activeElement!==row.input)row.input.value=o[spec.field];
         row.input.min=key==='upper'?o.floorDb+M.AUDIO_RANGE_GAP:spec.min;
         row.input.max=key==='lower'?o.ceilingDb-M.AUDIO_RANGE_GAP:spec.max;
+        const v=o[spec.field];
+        row.output.textContent=spec.unit==='ms'?timeText(v):
+          (spec.unit==='dB'?(v>0?'+':'')+Number(v).toFixed(key==='lower'||key==='upper'?1:0)+' dB':Number(v).toFixed(v<.1?3:2));
       }
     };
     const changed=()=>{apply();syncKnobs(rec);paintAudio(rec);refresh();};
     for(const [key,spec] of Object.entries(specs)) {
-      const row=sh.rows[key],input=el('input','aud-setting-input',row.val);row.input=input;
-      input.type='number';input.min=spec.min;input.max=spec.max;input.step=spec.step;input.setAttribute('aria-label',row.lab.textContent+' '+spec.unit);
+      const row=sh.rows[key],input=el('input','aud-setting-input',row.val),output=el('output','m2audsreadout',row.val);row.input=input;row.output=output;
+      row.row.classList.add('m2audscontinuous');
+      input.type='range';input.min=spec.min;input.max=spec.max;input.step=spec.step;input.setAttribute('aria-label',row.lab.textContent+' '+spec.unit);
       const write=v=>{
         if(!Number.isFinite(v)){refresh();return;}
         v=Math.max(+input.min,Math.min(+input.max,v));
         M.setSource(s.id,{audio:spec.global?{[spec.field]:v}:{outs:{[selected()]:{[spec.field]:v}}}});changed();
       };
-      input.addEventListener('change',()=>write(input.valueAsNumber));
+      input.addEventListener('input',()=>write(input.valueAsNumber));
       row.dn.addEventListener('click',()=>write(input.valueAsNumber-spec.step));row.up.addEventListener('click',()=>write(input.valueAsNumber+spec.step));
     }
-    for(const [button,dir] of [[sh.rows.out.dn,-1],[sh.rows.out.up,1]])button.addEventListener('click',()=>{audBands.set(s.id,keys[(keys.indexOf(selected())+dir+keys.length)%keys.length]);changed();});
+    for(const [button,dir] of [[sh.rows.out.dn,-1],[sh.rows.out.up,1]])button.addEventListener('click',()=>{const next=keys[(keys.indexOf(selected())+dir+keys.length)%keys.length];audBands.set(s.id,next);audRoutes.set(s.id,next);changed();});
     for(const button of [sh.rows.gate.dn,sh.rows.gate.up])button.addEventListener('click',()=>{M.setSource(s.id,{audio:{gateEnabled:!s.audio.gateEnabled}});changed();});
-    sh.rows.hold.leg.textContent='Gate HOLD delays closing; RELEASE shapes the fall. Turn GATE off for uninterrupted release tails.';
+    sh.rows.hold.leg.textContent='Gate hold keeps the noise gate open. The face HOLD knob separately holds each band peak before release.';
     sh.rows.lower.leg.textContent='Input dB at 0% output; upper boundary reaches 100%.';
     sh.refresh=refresh;refresh();
   }
@@ -2584,6 +2604,7 @@ export function createModulation(host, port) {
     for(const key of M.AUDIO_FOLLOWED) {
       const row=ui.rows[key],o=ro.outs[key],lo=position(o.floorDb),hi=position(o.ceilingDb);
       row.head.setAttribute('aria-pressed',String(key===selected));
+      row.row.dataset.selected=String(key===selected);
       row.text.textContent=o.floorDb.toFixed(1)+' / '+o.ceilingDb.toFixed(1)+' dB';
       row.fill.style.width=(o.out*100).toFixed(1)+'%';row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
       row.cursor.style.left=position(o.inputDb)+'%';
@@ -2595,7 +2616,7 @@ export function createModulation(host, port) {
       }
       row.head.title=key.toUpperCase()+' · '+(o.out*100).toFixed(0)+'% output · '+(Number.isFinite(o.inputDb)?o.inputDb.toFixed(1):'−∞')+' dB input';
     }
-    const out=ro.outs[selected];ui.hint.textContent=selected.toUpperCase()+' · A '+out.attackMs.toFixed(0)+' / R '+out.releaseMs.toFixed(0)+' ms · GATE '+(ro.gateEnabled?'ON':'OFF');
+    const out=ro.outs[selected];ui.hint.textContent=selected.toUpperCase()+' · A '+out.attackMs.toFixed(0)+' · R '+out.releaseMs.toFixed(0)+' · H '+out.holdMs.toFixed(0)+' ms';
   }
 
   /** the AUDIO device's words and lamps — the capture's own state first, because a follower with no
@@ -2610,13 +2631,13 @@ export function createModulation(host, port) {
     if (cap.live && ring) { ring.hist[ring.i] = ro.outs.level.out; ring.i = (ring.i + 1) % ring.hist.length; }
     A.srcBtn.classList.toggle('on', cap.live);
     A.srcBtn.setAttribute('aria-pressed', String(cap.live));
-    A.srcBtn.textContent = cap.live ? 'MIC ON' : 'MIC';
+    A.srcBtn.textContent = cap.live ? 'AUDIO ON' : 'AUDIO IN';
     A.liveLed.style.background = cap.live ? 'var(--acc2)' : '';
     A.liveTxt.textContent = cap.live ? 'LIVE' : cap.state.toUpperCase();
     A.live.classList.toggle('on', cap.live);
     A.note.textContent = cap.live
       ? (ro.sampleRate ? (ro.sampleRate / 1000).toFixed(1) + ' kHz · ' + ro.feedHz.toFixed(0) + ' Hz feed' : 'listening')
-      : (cap.reason || 'the microphone is closed — press MIC');
+      : (cap.reason || 'audio input is closed — press AUDIO IN');
     if (dev.audioState) { dev.audioState.textContent = cap.live ? (ro.gateOpen ? 'OPEN' : 'GATED') : 'OFF';
       dev.audioState.classList.toggle('on', cap.live && ro.gateOpen);
       dev.audioState.classList.toggle('bad', cap.state === 'denied' || cap.state === 'error'); }
@@ -2629,6 +2650,8 @@ export function createModulation(host, port) {
     /* each socket says which macro holds it, by NUMBER — the same reading the rail's indicator and
        the minimised strip give, so one macro is one number wherever you meet it */
     const macros = M.macroList();
+    const selected = audBands.get(s.id) || 'level';
+    const selectedRoute = audRoutes.get(s.id) || selected;
     for (const key of Object.keys(A.outs)) {
       const row = A.outs[key], sock = M.scalarOutputId ? M.scalarOutputId(s.id, key) : null;
       const ix = sock ? macros.findIndex((m) => m.sourceId === sock) : -1;
@@ -2636,6 +2659,16 @@ export function createModulation(host, port) {
       const v = ro.outs[key] ? ro.outs[key].out : 0;
       row.row.classList.toggle('on', cap.live && (key === 'hit' ? v > 0 : v > 0.02));
       row.box.classList.toggle('on', ix >= 0);
+      row.row.dataset.routeSelected = String(key === selectedRoute);
+      row.name.title = modeOf(s.id) === 'C' ? 'Click the label to show the next Audio output' : '';
+    }
+    const selectedSock = M.scalarOutputId ? M.scalarOutputId(s.id, selectedRoute) : null;
+    const selectedIx = selectedSock ? macros.findIndex((m) => m.sourceId === selectedSock) : -1;
+    if (dev.minNum) {
+      dev.minNum.textContent = selectedIx >= 0 ? String(selectedIx + 1) : '--';
+      dev.minNum.classList.toggle('m2nomac', selectedIx < 0);
+      dev.minNum.setAttribute('aria-label', selectedRoute.toUpperCase()+' audio routing'+(selectedIx >= 0?' macro '+(selectedIx+1):' hand'));
+      dev.minNum.title = selectedRoute.toUpperCase()+' routing — click to cycle available macros';
     }
     paintAudioMeter(rec, ro);
   }
@@ -2656,7 +2689,7 @@ export function createModulation(host, port) {
        takes the magnitude — which is all a 7.5 px seat inside a 48 px dial can hold — and the
        line under the cap takes the whole reading with its unit. */
     const t = q.spec.text();
-    if(rec.kind==='audio' && (key==='attack'||key==='release'))q.k.dial.setAttribute('aria-label',(audBands.get(rec.id)||'level').toUpperCase()+' '+key.toUpperCase());
+    if(rec.kind==='audio' && (key==='attack'||key==='release'||key==='peakHold'))q.k.dial.setAttribute('aria-label',(audBands.get(rec.id)||'level').toUpperCase()+' '+(key==='peakHold'?'HOLD':key.toUpperCase()));
     if (q.k.arc && q.k.arc.chip) q.k.arc.chip.textContent = q.spec.short ? q.spec.short() : t.split(' ')[0];
     q.k.val.textContent = t;
     q.k.dial.setAttribute('aria-valuenow', String(Math.round(100 * u)));
@@ -3097,7 +3130,7 @@ export function createModulation(host, port) {
       window.removeEventListener('keydown', popKey, true);
       window.removeEventListener('resize', onResize);
       if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
-      audRings.clear(); audBands.clear();
+      audRings.clear(); audBands.clear(); audRoutes.clear();
       endArm(); closePop();
       if (ghost) { ghost.remove(); ghost = null; }
       for (const [, rec] of rings) rec.svg.remove(); rings.clear();

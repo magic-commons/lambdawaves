@@ -61,14 +61,14 @@ export const MACRO_MAX = 8;
    version-INDISTINGUISHABLE.  The λWAVES namespace starts at 100 (= 100 + the upstream
    version this model is derived from) so our 104 can never be mistaken for an upstream 5,
    and an upstream 5 we have never seen is refused here rather than half-read. */
-export const MOD_STATE_V = 106;
+export const MOD_STATE_V = 107;
 /** Every model version whose racks and presets THIS build can read.  A version
     outside it is refused loudly and the stored blob is left untouched. */
 /* λWAVES: forced edit 8/8 — and 3 and 4 are still read: a rack with no `bi` on any route
    is byte-identical on the wire to one written before the flag existed, so there is nothing
    to migrate in that direction and refusing it would throw away every patch made before
    wave 61.  The refusal only runs the other way. */
-export const MOD_STATE_READS = Object.freeze([3, 4, 104, 105, 106]);
+export const MOD_STATE_READS = Object.freeze([3, 4, 104, 105, 106, 107]);
 /** Is this stamped model version one this build understands?  An ABSENT stamp
     is NOT handled here — it is the callers' (library.js reads absent as
     "predates the stamp, fine"; the preset store has stamped every record since
@@ -215,19 +215,19 @@ export const AUDIO_DB_TOP   = -6;       // normalises to 1, exactly
 export const AUDIO_RANGE_MIN = -90;
 export const AUDIO_RANGE_MAX = 0;
 export const AUDIO_RANGE_GAP = 1;       // dB; endpoints never cross
-export const AUDIO_TIME_MAX = 60000;
+export const AUDIO_TIME_MAX = 2000;
 export const AUDIO_DB_SPAN  = AUDIO_DB_TOP - AUDIO_DB_FLOOR;      // 54
 export const AUDIO_GAIN_MAX = 24;       // +/- dB
 
 /** attack/release TIME CONSTANTS in ms, per output.  See the essay above for
     why MID and LEVEL are the arithmetic midpoint and why 5 ms is a snap. */
 export const AUDIO_FOLLOW_DEFAULTS = Object.freeze({
-  level: Object.freeze({ attackMs: 10, releaseMs: 120 }),
-  low:   Object.freeze({ attackMs: 15, releaseMs: 180 }),
-  mid:   Object.freeze({ attackMs: 10, releaseMs: 120 }),
-  high:  Object.freeze({ attackMs:  5, releaseMs:  60 }),
-  hit:   Object.freeze({ attackMs:  0, releaseMs:   0 }),
-  beat:  Object.freeze({ attackMs:  0, releaseMs:   0 })
+  level: Object.freeze({ attackMs: 10, releaseMs: 120, holdMs: 0 }),
+  low:   Object.freeze({ attackMs: 15, releaseMs: 180, holdMs: 0 }),
+  mid:   Object.freeze({ attackMs: 10, releaseMs: 120, holdMs: 0 }),
+  high:  Object.freeze({ attackMs:  5, releaseMs:  60, holdMs: 0 }),
+  hit:   Object.freeze({ attackMs:  0, releaseMs:   0, holdMs: 0 }),
+  beat:  Object.freeze({ attackMs:  0, releaseMs:   0, holdMs: 0 })
 });
 /** The one mode each output has in v1.  DERIVED, never a knob — the schema
     carries it (so v2 can make it settable with no migration) and setSource
@@ -490,7 +490,7 @@ function modeShadow(s) {
 /* Returns the default follow settings for an audio output. */
 function audioOutDefaults(key) {
   const d = AUDIO_FOLLOW_DEFAULTS[key] || AUDIO_FOLLOW_DEFAULTS.level;
-  return { attackMs: d.attackMs, releaseMs: d.releaseMs, mode: AUDIO_OUT_MODE[key] };
+  return { attackMs: d.attackMs, releaseMs: d.releaseMs, holdMs: d.holdMs, mode: AUDIO_OUT_MODE[key] };
 }
 /** One output's stored parameters, inspected.  `mode` is DERIVED from the key
     and never read off the payload — see AUDIO_OUT_MODE. */
@@ -508,6 +508,7 @@ function audioOutFrom(raw, key) {
   return { floorDb, ceilingDb: Math.max(floorDb + AUDIO_RANGE_GAP, Math.min(AUDIO_RANGE_MAX, ceilingDb)),
            attackMs: t(o && o.attackMs, d.attackMs),
            releaseMs: t(o && o.releaseMs, d.releaseMs),
+           holdMs: t(o && o.holdMs, d.holdMs),
            mode: d.mode };
 }
 /** The AUDIO device's whole patch, inspected, from a payload or from nothing.
@@ -539,6 +540,7 @@ function audioPatchOf(s) {
     outs[k] = { floorDb: s.audio.outs[k].floorDb, ceilingDb: s.audio.outs[k].ceilingDb,
                 attackMs: s.audio.outs[k].attackMs,
                 releaseMs: s.audio.outs[k].releaseMs,
+                holdMs: s.audio.outs[k].holdMs,
                 mode: s.audio.outs[k].mode };
   }
   return { gateEnabled: s.audio.gateEnabled, source: s.audio.source, gainDb: s.audio.gainDb,
@@ -554,6 +556,7 @@ function audioPatchApply(s, q) {
     s.audio.outs[k].floorDb = p.outs[k].floorDb; s.audio.outs[k].ceilingDb = p.outs[k].ceilingDb;
     s.audio.outs[k].attackMs = p.outs[k].attackMs;
     s.audio.outs[k].releaseMs = p.outs[k].releaseMs;
+    s.audio.outs[k].holdMs = p.outs[k].holdMs;
   }
 }
 
@@ -563,7 +566,7 @@ function audioPatchApply(s, q) {
     its initial value, so "a reset is exactly a fresh device" is one call. */
 function audioResetRuntime(s) {
   const r = s.audioRt;
-  for (const k of AUDIO_FOLLOWED) r.env[k] = 0;
+  for (const k of AUDIO_FOLLOWED) { r.env[k] = 0; r.peakHold[k] = 0; }
   r.inputDb = Object.fromEntries(AUDIO_FOLLOWED.map(k => [k, -Infinity]));
   r.hist.fill(0); r.histN = 0; r.histI = 0;
   r.gateOpen = false; r.gateHold = 0;
@@ -638,6 +641,7 @@ function newSource(kind, opts) {
     s.armed = false;
     s.audioRt = {
       env: { level: 0, low: 0, mid: 0, high: 0 },
+      peakHold: { level: 0, low: 0, mid: 0, high: 0 },
       hist: new Float64Array(AUDIO_ONSET.histN),
       scratch: new Float64Array(AUDIO_ONSET.histN),
       scratch2: new Float64Array(AUDIO_ONSET.histN),
@@ -1282,6 +1286,7 @@ function audioMergeOuts(s, raw) {
                ceilingDb: q && Number.isFinite(q.ceilingDb) ? q.ceilingDb : cur[k].ceilingDb,
                attackMs: q && Number.isFinite(q.attackMs) ? q.attackMs : cur[k].attackMs,
                releaseMs: q && Number.isFinite(q.releaseMs) ? q.releaseMs : cur[k].releaseMs,
+               holdMs: q && Number.isFinite(q.holdMs) ? q.holdMs : cur[k].holdMs,
                mode: cur[k].mode };
   }
   return out;
@@ -1677,11 +1682,18 @@ function audioGateStep(s, db, dtFeed) {
   return r.gateOpen;
 }
 
-/** ONE FOLLOWER STEP.  Rising takes ATTACK, falling takes RELEASE, and both
-    are TIME CONSTANTS turned into coefficients at THIS feed's rate. */
+/** ONE FOLLOWER STEP. Rising takes ATTACK. Once the smoothed value reaches a
+    peak, HOLD keeps it there before RELEASE begins. All three times are feed
+    rate independent. */
 function audioFollow(s, key, target, feedHz) {
   const r = s.audioRt, o = s.audio.outs[key];
   const prev = r.env[key];
+  const dtMs = 1000 / (Number.isFinite(feedHz) && feedHz > 0 ? feedHz : AUDIO_FEED_HZ_DEFAULT);
+  if (target >= prev) r.peakHold[key] = o.holdMs;
+  else if (r.peakHold[key] > 0) {
+    r.peakHold[key] = Math.max(0, r.peakHold[key] - dtMs);
+    target = prev;
+  }
   const alpha = audioAlpha(target > prev ? o.attackMs : o.releaseMs, feedHz);
   const v = alpha > 0 ? alpha * prev + (1 - alpha) * target : target;
   r.env[key] = v;
@@ -1764,7 +1776,7 @@ export function modFeedAudio(deviceId, feed) {
     vHigh  = audioFollow(s, 'high',  bandNorm[2], feedHz);
   } else {
     /* EXACT ZERO, and the follower states with it — see audioGateStep. */
-    for (const k of AUDIO_FOLLOWED) r.env[k] = 0;
+    for (const k of AUDIO_FOLLOWED) { r.env[k] = 0; r.peakHold[k] = 0; }
   }
   audioPublish(s, 'level', vLevel);
   audioPublish(s, 'low',   vLow);
@@ -1904,7 +1916,7 @@ export function audioReadout(deviceId) {
   for (const k of AUDIO_OUTPUTS) {
     const o = a.outs[k];
     outs[k] = { floorDb: o.floorDb, ceilingDb: o.ceilingDb, inputDb: r.inputDb ? r.inputDb[k] : -Infinity,
-                attackMs: o.attackMs, releaseMs: o.releaseMs, mode: o.mode,
+                attackMs: o.attackMs, releaseMs: o.releaseMs, holdMs: o.holdMs, mode: o.mode,
                 alphaA: audioAlpha(o.attackMs, hz), alphaR: audioAlpha(o.releaseMs, hz),
                 rise90Ms: audioRiseMs(o.attackMs, 0.9),
                 fall90Ms: audioRiseMs(o.releaseMs, 0.9),
@@ -2174,7 +2186,7 @@ function audioRtSnapshot(s) {
   const r = s.audioRt;
   const outs = {};
   for (const k of AUDIO_EXPOSED) { const c = audioChild(s, k); outs[k] = c ? c.out : 0; }
-  return { env: { ...r.env }, hist: r.hist.slice(), histN: r.histN, histI: r.histI,
+  return { env: { ...r.env }, peakHold: { ...r.peakHold }, hist: r.hist.slice(), histN: r.histN, histI: r.histI,
            gateOpen: r.gateOpen, gateHold: r.gateHold,
            prevFlux: r.prevFlux, prevPrevFlux: r.prevPrevFlux, prevT: r.prevT,
            prevDb: r.prevDb, prevAt: r.prevAt, havePrev: r.havePrev,
@@ -2186,6 +2198,7 @@ function audioRtSnapshot(s) {
 function audioRtRestore(s, v) {
   const r = s.audioRt;
   for (const k of AUDIO_FOLLOWED) r.env[k] = Number.isFinite(v.env[k]) ? v.env[k] : 0;
+  for (const k of AUDIO_FOLLOWED) r.peakHold[k] = Number.isFinite(v.peakHold && v.peakHold[k]) ? v.peakHold[k] : 0;
   r.hist.set(v.hist); r.histN = v.histN; r.histI = v.histI;
   r.gateOpen = v.gateOpen; r.gateHold = v.gateHold;
   r.prevFlux = v.prevFlux; r.prevPrevFlux = v.prevPrevFlux; r.prevT = v.prevT;

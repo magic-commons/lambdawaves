@@ -165,8 +165,8 @@ export const COPY = {
     env: [['a', 'ATTACK', '0', '8s'], ['hold', 'HOLD', '0', '8s'],
     ['d', 'DECAY', '0', '8s'], ['s', 'SUSTAIN', '0', '1'],
     ['r', 'RELEASE', '0', '8s'], ['steps', 'STEPS', 'OFF', '1024']],
-    audio: [['sens', 'SENS', '-24', '+24'], ['thresh', 'THRESH', '-60', '-6'],
-    ['hold', 'HOLD', '0', '1000']]
+    audio: [['sens', 'GAIN', '-24', '+24'], ['attack', 'ATTACK', '0', '2s'],
+    ['release', 'RELEASE', '0', '2s'], ['peakHold', 'HOLD', '0', '2s']]
   },
   audioSheetRows: [['out', 'OUTPUT'], ['att', 'ATTACK'], ['rel', 'RELEASE'],
   ['hyst', 'HYST'], ['flux', 'SENSE']],
@@ -1056,7 +1056,7 @@ export function buildDevice(run, add, src, copyIn) {
   } else if (kind === 'audio') {
     const wrap = m2mk('div', 'm2aud', col);
     const srcBtn = m2mk('button', 'm2audsrc', wrap);
-    srcBtn.type = 'button'; srcBtn.textContent = 'MIC';
+    srcBtn.type = 'button'; srcBtn.textContent = 'AUDIO IN';
     srcBtn.setAttribute('aria-pressed', 'false');
     /* its OWN class, not .m2audout: the five routable outputs are counted by
        a gate, and a LIVE lamp in that count is a sixth output that does not
