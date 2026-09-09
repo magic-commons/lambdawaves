@@ -1,3 +1,4 @@
+import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
 import { renderNotebookMath } from './notebook-math.js';
 import { reworkNative, planeModel, infoPanel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
@@ -4529,7 +4530,7 @@ export async function boot(dom) {
         remove(path) { const P = pjRead(); if (!P.items[path]) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); pjWrite(P); if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
         fresh() { reg.clear(); refSnapshot = null; touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; if (subIn) { subIn.value = ''; subIn.hidden = true; } try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); if (subIn) localStorage.setItem(NB_SUBTITLE, ''); } catch (e) {} pjCurrent = null; projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
         exportText(path) { const P = pjRead(), it = P.items[path || pjCurrent]; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
-        importText(text) { const o = JSON.parse(text); if (!o || o.lambdawaves !== 'project' || !o.path || !o.data) throw new Error('not a λWAVES project'); const P = pjRead(); P.items[o.path] = { path: o.path, folder: o.folder || '', name: o.name || o.path, saved: o.saved || new Date().toISOString(), opened: o.opened || '', data: o.data, notebook: o.notebook || { title: o.name, subtitle: '', text: '' } }; pjTouch(P, o.path); pjWrite(P); renderProjects(); return o.path; },
+        importText(text) { const path = storeProjectImport(text, () => JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'), pjWrite); renderProjects(); return path; },
       };
       function renderProjects() {
         const list = nb.querySelector('.pj-list'); if (!list) return; list.innerHTML = '';
@@ -4573,7 +4574,7 @@ export async function boot(dom) {
       nb.querySelector('.pj-path').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nb.querySelector('.pj-save').click(); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS')) e.stopPropagation(); });
       nb.querySelector('.pj-export').addEventListener('click', () => { const t = projects.exportText(); if (!t) { pjStatus('nothing to export — save first'); return; } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'application/json' })); a.download = (pjCurrent || 'project').replace(/\//g, '__') + '.lambdawaves.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
-      nb.querySelector('.pj-import input').addEventListener('change', async (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; try { const p = projects.importText(await f.text()); pjStatus('imported ' + p); } catch (err) { pjStatus('import failed: ' + err.message); } e.target.value = ''; });
+      nb.querySelector('.pj-import input').addEventListener('change', async (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; try { if (f.size > MAX_PROJECT_BYTES) throw new Error('project file exceeds 8 MiB'); const p = projects.importText(await f.text()); pjStatus('imported ' + p); } catch (err) { pjStatus('import failed: ' + err.message); } e.target.value = ''; });
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
       layout.projects = projects;
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };

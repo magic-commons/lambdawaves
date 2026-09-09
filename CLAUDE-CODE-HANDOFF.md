@@ -1,5 +1,27 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Follow-up: project import integrity
+
+After shipping checkpoint `23328bf`, a focused pass fixed project import reporting
+success when storage rejected the write. `lab/project-import.js` now validates the
+project envelope and metadata before reading storage, accepts legacy files without
+a version, rejects unsupported explicit versions, and caps imports at 8 MiB UTF-8.
+The file-input handler checks size before reading the file. Model migration remains
+owned by `restore()`; this is not full experiment-schema validation.
+
+Import now reads stored JSON strictly: corrupt JSON/read failures are surfaced,
+not replaced with an empty collection. Failed writes throw before UI refresh or a
+success result. Import builds a new collection, preserves other projects, and treats
+`__proto__` as an ordinary own property rather than changing a prototype.
+
+`tests/project-import.test.mjs` covers malformed metadata, byte limits, legacy files,
+failed writes, existing-project preservation and special names, and executes the
+actual rack import method with storage/render seams. Focused import, final-ii,
+wiring, PWA, module syntax and build checks pass. Payload: **143 files, 4.30 MiB**.
+The full Node/browser gates were not rerun for this follow-up; there are now 50
+Node suites. Reload stall, full model validation, real-browser import acceptance,
+and storage failure handling in other project operations remain open.
+
 ## Latest checkpoint: shipping preparation (2026-09-08)
 
 This section supersedes the older verification/build status below. The earlier

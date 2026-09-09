@@ -7,6 +7,12 @@ that real devices, installed clients, or the current UI work end to end. Start w
 
 ## Implemented in this checkpoint
 
+- Follow-up after `23328bf`: project import validates metadata and an 8 MiB UTF-8
+  size limit before storage access; file selection checks size before reading.
+  Failed writes/read errors now fail the import, corrupt JSON remains untouched,
+  and existing projects are preserved. Focused import/integration tests pass.
+  Full experiment schema validation and other storage operations still need review.
+
 - Fixed notebook math fallback HTML injection when KaTeX is unavailable or throws.
   Fallback TeX is escaped after sanitization, with trust disabled for normal math
   rendering. Regression tests cover both fallback paths and normal rendering.
