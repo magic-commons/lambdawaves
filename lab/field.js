@@ -374,6 +374,7 @@ struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
 const ORIGIN = [0, 0, 0], DEFAULT_BG = [0.028, 0.038, 0.058];
+const AXIS_NORMALS = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
 function perspective(fovy, aspect, near, far, out) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far), o = out || new Float32Array(16);
   o.fill(0); o[0] = f / aspect; o[5] = f; o[10] = far * nf; o[11] = -1; o[14] = far * near * nf;
@@ -636,8 +637,9 @@ export async function createField(canvas, opts = {}) {
   }
   let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
-  const stats = { reconstructs: 0, presents: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
+  const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
+  let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
 
   function setResolution(n) {
     if (n === res) return;
@@ -678,7 +680,7 @@ export async function createField(canvas, opts = {}) {
     v[0] = cam[0]; v[1] = cam[1]; v[2] = cam[2]; v[3] = half;
     v[4] = B.right[0]; v[5] = B.right[1]; v[6] = B.right[2]; v[7] = tanH * aspect;
     v[8] = B.up[0]; v[9] = B.up[1]; v[10] = B.up[2]; v[11] = tanH;
-    v[12] = B.fwd[0]; v[13] = B.fwd[1]; v[14] = B.fwd[2]; v[15] = mat.steps || 160;
+    v[12] = B.fwd[0]; v[13] = B.fwd[1]; v[14] = B.fwd[2]; v[15] = Math.min(mat.steps || 160, stepCap);
     v[16] = mat.view | 0; v[17] = mat.exposure; v[18] = mat.softness; v[19] = (stats.presents % 97) / 97;
     v[20] = mat.slice ? mat.slice.mode | 0 : 0; v[21] = mat.slice ? mat.slice.axis | 0 : 2; v[22] = mat.slice ? mat.slice.pos : 0; v[23] = mat.slice ? mat.slice.thick : 0.03;
     v[24] = mat.hueShift || 0; v[25] = mat.invert ? 1 : 0; v[26] = mat.paletteOn ? 1 : 0; v[27] = mat.dither || 0;   // wave 54: the DITHER amplitude in LSB (p0.w keeps the ray-march jitter seed)
@@ -688,8 +690,8 @@ export async function createField(canvas, opts = {}) {
     const bgc = mat.bg || DEFAULT_BG;
     v[36] = bgc[0]; v[37] = bgc[1]; v[38] = bgc[2]; v[39] = mat.gamma === undefined ? 1 : mat.gamma;
     v.copyWithin(40,36,40);
-    const sn = mat.slice?.normal || [0,1,2].map(i=>i===(mat.slice?.axis ?? 2)?1:0);
-    const snLen = Math.hypot(...sn) || 1;
+    const sn = mat.slice?.normal || AXIS_NORMALS[mat.slice?.axis ?? 2] || AXIS_NORMALS[2];
+    const snLen = Math.hypot(sn[0], sn[1], sn[2]) || 1;
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
     device.queue.writeBuffer(viewBuf, 0, v);
@@ -725,7 +727,50 @@ export async function createField(canvas, opts = {}) {
   const AXIS_HUE = { cmy: FRAME_INK.dark, rgb: FRAME_INK.light };
   const AXC = [0, 0, 0, 1];                                        // ONE scratch, not one array per axis per frame: push() copies out of it before the next call
   const axc = (hue, a) => { AXC[0] = hue[0]; AXC[1] = hue[1]; AXC[2] = hue[2]; AXC[3] = a; return AXC; };
+  /* Chrome changes with the camera, domain, theme and its own controls, but the field can evolve for hundreds
+     of frames without any of those changing. Keep the last geometry in the GPU instead of regenerating and
+     uploading as much as a megabyte on every presentation. The fixed signature keeps this check allocation-free. */
+  const LINE_STATE = new Array(32).fill(NaN);
+  let lineStateReady = false, cachedHasSlice = false;
+  function setLineState(index, value) {
+    const changed = !Object.is(LINE_STATE[index], value);
+    if (changed) LINE_STATE[index] = value;
+    return changed;
+  }
+  function linesUnchanged(mat) {
+    let i = 0, changed = false;
+    const frameMode = mat.frameMode === 'lattice' ? 1 : mat.frameMode === 'dots' ? 2 : 0;
+    const axisMode = mat.axisMode === 'corner' ? 1 : 0;
+    const axisInk = mat.axisInk === 'cmy' ? 1 : mat.axisInk === 'rgb' ? 2 : 0;
+    const slice = mat.slice;
+    const normal = slice && slice.normal;
+    changed = setLineState(i++, half) || changed;
+    for (let j = 0; j < 12; j++) changed = setLineState(i++, VIEW[j]) || changed;
+    changed = setLineState(i++, canvas.width) || changed;
+    changed = setLineState(i++, canvas.height) || changed;
+    changed = setLineState(i++, mat.lightUI ? 1 : 0) || changed;
+    changed = setLineState(i++, axisInk) || changed;
+    changed = setLineState(i++, mat.frame === false ? 0 : 1) || changed;
+    changed = setLineState(i++, frameMode) || changed;
+    changed = setLineState(i++, mat.axis === false ? 0 : 1) || changed;
+    changed = setLineState(i++, axisMode) || changed;
+    changed = setLineState(i++, mat.cornerX) || changed;
+    changed = setLineState(i++, mat.cornerY) || changed;
+    changed = setLineState(i++, mat.cornerScaleX) || changed;
+    changed = setLineState(i++, mat.cornerScaleY) || changed;
+    changed = setLineState(i++, slice ? slice.mode | 0 : 0) || changed;
+    changed = setLineState(i++, slice ? slice.axis | 0 : 2) || changed;
+    changed = setLineState(i++, slice ? slice.pos : 0) || changed;
+    changed = setLineState(i++, slice ? slice.thick : 0.03) || changed;
+    changed = setLineState(i++, normal ? normal[0] : undefined) || changed;
+    changed = setLineState(i++, normal ? normal[1] : undefined) || changed;
+    changed = setLineState(i++, normal ? normal[2] : undefined) || changed;
+    const same = lineStateReady && !changed;
+    lineStateReady = true;
+    return same;
+  }
   function writeLines(mat) {
+    if (linesUnchanged(mat)) return cachedHasSlice;
     const h = half, v = LINES; let k = 0;
     const push = (a, b, c) => { v[k++] = a[0]; v[k++] = a[1]; v[k++] = a[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; v[k++] = b[0]; v[k++] = b[1]; v[k++] = b[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; };
     const INK = mat.lightUI ? FRAME_INK.light : FRAME_INK.dark;    // the BOX's ink, and the ALPHA of all three axes, in both cases the theme's
@@ -740,7 +785,7 @@ export async function createField(canvas, opts = {}) {
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
-      const normal = mat.slice.normal || [0,1,2].map(i=>i===ax?1:0);
+      const normal = mat.slice.normal || AXIS_NORMALS[ax] || AXIS_NORMALS[2];
       const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
       const raw=cross(normal,Math.abs(normal[2])<.9?[0,0,1]:[0,1,0]),len=Math.hypot(...raw)||1;
       const uvec=raw.map(v=>v/len),vvec=cross(normal,uvec);
@@ -841,8 +886,9 @@ export async function createField(canvas, opts = {}) {
         v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
       }
     }
-    device.queue.writeBuffer(lineBuf, 0, v, 0, k);
-    return n > 15;                                                 // whether the slice rectangle is in the buffer (the box and the axes always are)
+    device.queue.writeBuffer(lineBuf, 0, v, 0, k); stats.chromeWrites++;
+    cachedHasSlice = n > 15;
+    return cachedHasSlice;                                        // whether the slice rectangle is in the buffer (the box and the axes always are)
   }
   /** the chrome, as two independently switched objects over one buffer.  `all` ignores the switches (the ink proofs). */
   function drawChrome(pass, lp, mat, hasSlice, all) {
@@ -1032,14 +1078,15 @@ export async function createField(canvas, opts = {}) {
         return (performance.now() - t0) / n;
       };
       const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
-      return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: mat.steps };
+      return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
     } finally { tex.destroy(); }
   }
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
-    dprCap: { get: () => dprCap, enumerable: true } });   // a LIVE getter: Object.assign below would have frozen it at 2 (the same trap B10 caught)
+    dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
+    stepCap: { get: () => stepCap, enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
@@ -1075,6 +1122,7 @@ export async function createField(canvas, opts = {}) {
        nobody can see at arm's length.  The cap is a NUMBER the caller owns (rack.js drops it at the phone
        breakpoint), not a branch in here: the renderer knows nothing about layout. */
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
+    setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (scale || 1);
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));

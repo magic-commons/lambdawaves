@@ -1,5 +1,41 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## iPad/Safari performance pass — 2026-09-09
+
+The reported tablet regression was isolated to repeated presentation work rather
+than a larger ray-march volume. FRAME OFF and BOX already skip the radius-8 mesh;
+LATTICE and DOTS keep their full approved distance and appearance.
+
+- `lab/field.js` now caches frame/axis/slice geometry until the camera, domain,
+  viewport, theme, slice, or chrome controls change. This removes regeneration and
+  `queue.writeBuffer` of up to ~1 MiB on unchanged field frames. The check uses a
+  fixed allocation-free signature. `field.stats.chromeWrites` exposes the uploads.
+- The slice plane preview skips hidden windows and repaints only when its plane,
+  position, theme, card, or size changes. Corner-axis placement and legacy mode
+  attributes avoid unchanged DOM writes.
+- A non-phone touch-tablet profile caps canvas DPR at 1.5. During playback, camera
+  motion, or modulation-driven motion it caps presentation at 110 ray steps; the
+  selected project quality returns on the first still frame. This runtime cap is
+  not serialized and does not alter saved project settings.
+- Official first-run defaults are Frost OFF, Card Style REFRACTIVE, Glass Blur
+  22px, Performance 120 Hz, Grid 64³, and Keep Frames OFF. Performance mode now
+  persists like the other browser preferences. Explicit existing choices remain.
+
+Focused real-Firefox/WebGPU validation: fresh defaults matched all six settings;
+an unchanged 12-frame lattice batch made zero additional chrome uploads, while a
+camera move, mode change, and OFF change each caused one; simulated iPad Safari
+identity measured DPR 1.5 and 110 moving steps, restoring full steps on pause. No
+page or shader errors occurred. An 80-frame comparison measured OFF 6.263 ms,
+BOX 3.763 ms, DOTS 3.837 ms, and LATTICE 5.013 ms on this host; these are local
+throughput figures, not device promises. The verified deployment build contains
+146 files (~4.30 MiB), and the service-worker content hashes were regenerated.
+
+The monolithic historical browser gate remains unsuitable as a release verdict:
+it contains numerous assertions for superseded layout/default rules and was already
+red across those sections. Do not rewrite the app to satisfy those old laws. The
+current focused tests, current-app acceptance, GPU recovery gate, Node suites, PWA
+integrity gate, and deployment build are the relevant checks for this checkpoint.
+
 ## Review and cleanup — 2026-09-09
 
 Preserved the approved layout, visual styling and physics behavior. This pass
@@ -263,7 +299,8 @@ The historical wave-107 all-green browser claim does not certify this checkpoint
   2×2 grid: STATUS TAGS, HINT BAR, STAGE CAPTIONS, WINDOW INFO. Only WINDOW INFO
   defaults off. Its separate `lw-window-info` localStorage preference is remembered.
   It hides both native info popovers and legacy header information buttons.
-- Defaults: glass blur **11px**, Accent A **30°**, Accent B **300°**, Vivid **10%**.
+- Defaults: Frost **OFF**, card style **REFRACTIVE**, glass blur **22px**, performance **120 Hz**, grid **64³**,
+  and Keep Frames **OFF**. Accent A remains **30°**, Accent B **300°**, and Vivid **10%**.
   Existing saved settings are not silently reset. With PALETTE off, accents sample
   the λWAVES palette independently of the selected palette or hue shift. With it on,
   accents follow the active palette. Restore full value arcs, including the accent

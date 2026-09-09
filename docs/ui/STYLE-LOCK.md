@@ -19,11 +19,10 @@ the `--fs-*` / `--sp-*` / `--r-*` scales; skin.css re-points what it re-dresses.
   can never pull text below 4.5:1. **That guarantee covers the TINTED pane, NOT the shipped desktop default**:
   REFRACTIVE is `background: transparent`, so on the surface most users see there is no pane between the ink and
   the live field, and the ink ladder's own ≥ 4.5 : 1 below is measured against the tinted card. Wave 59 audited
-  the surfaces and changed nothing here, so it still stands. **The phone is the one surface where the guarantee
-  is real, and the forced opacity is only half of why**: `defaultCard()` boots a phone **TINTED** *and*
-  `skin.css` forces `--glass-opacity: 1` there — the forcing alone would buy nothing, because REFRACTIVE has no
-  pane for an opacity to act on. Flagged rather than fixed — REFRACTIVE is Josh's choice
-  (see *Defaults*) and it stays; know which surface a contrast number describes before you quote it.
+  the surfaces and changed nothing here, so it still stands. `skin.css` forces `--glass-opacity: 1` on phones,
+  but REFRACTIVE has no pane for opacity to act on, so the contrast guarantee still describes TINTED only.
+  REFRACTIVE is the official default on every layout; know which surface a contrast number describes before
+  you quote it.
   `--glass-border-color` .14 edge, `--glass-hairline` .08 inner, `--glass-sheen` (a 160° highlight that
   REPLACES blur), `--glass-shadow` "tight and quiet" (Josh's words).
 - Relief: `--neu-raise` (stands proud) · `--neu-inset` (a well cut into the card) · `--neu-flat` (a resting seat).
@@ -316,6 +315,8 @@ rename. Not one outline moved. The rules that follow:
   via the rack's `canvasCap`) and not WebGPU's default 8192 — the largest picture the build could take used to
   be a line of `field.js` rather than the GPU.
 - **CARD STYLE** (REFRACTIVE default / TINTED) is Josh's choice and stays.
+- **Rendering defaults:** FROST **OFF**, GLASS BLUR **22px**, PERFORMANCE **120 Hz**, GRID **64³**, and KEEP
+  FRAMES **OFF**. These are first-run settings; an existing browser's explicit choices still win.
 
 ## The state is a LINK (wave 56)
 The whole state rides in the URL **fragment** (`#s=…`, base64url, ~300 characters), never the query; COPY LINK
@@ -487,7 +488,7 @@ number seats. The separately archived macro relocation and matrix launchers stay
 
 ### Default refinements and transport placement
 
-New settings use 11px glass blur, Accent A=30°, Accent B=300° (Vivid stays 10%).
+New settings use 22px glass blur, Accent A=30°, Accent B=300° (Vivid stays 10%).
 Saved settings retain their values. SHADOW uses PHASORS / OSC / LISSA, followed by
 a separate 32px disclosure. Docking reopens the transport at the left rack's top
 unless a project/layout or prior undock supplied a remembered side and slot.

@@ -471,7 +471,7 @@ body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
 body[data-card="tinted"] .note.hinted:hover, body[data-card="tinted"] .note.hinted:focus-within, body[data-card="tinted"] .note.hinted:focus
   { background: var(--glass-sheen), hsl(var(--glass-tint) / .97); }           /* the hint panel is near-opaque when tinted, as it was written */
 
-/* CARD STYLE owns the pane even with FROST on. The shipped ALWAYS policy otherwise
+/* CARD STYLE owns the pane even with FROST on. An enabled FROST policy otherwise
    overrode both choices with the same veil, making the setting inert. Refractive keeps
    its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
 body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }

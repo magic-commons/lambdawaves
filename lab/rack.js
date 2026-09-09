@@ -275,17 +275,16 @@ export async function boot(dom) {
     const ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '') + ' ' + (navigator.vendor || '');
     return /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua);
   } catch (_) { return false; } };
-  /* CARD STYLE's DEFAULT is the phone's, and only its default: REFRACTIVE reads the live field through the
-     glass, which under a knob on a phone is jarring and is fill-rate we do not have.  A browser that has SAID
-     which surface it wants still gets exactly what it said. */
-  const defaultCard = () => (isPhone() ? 'tinted' : 'refractive');
+  /* CARD STYLE has one official first-run default on every layout. A browser that has named a surface still
+     gets exactly what it named; the phone's rendering budget is handled by the renderer rather than by changing
+     the material under the user's hand. */
+  const defaultCard = () => 'refractive';
   /* `cardChosen` is the difference between "this browser wants TINTED" and "this browser has never said":
      without it the first saveSettings() of a session freezes whatever the default happened to be, and the
      surface could never follow the device again.  The seg — the one place a HAND can say it — sets it. */
   let cardChosen = readSettings().cardSet === true;
-  /* Wave 89: Josh explicitly chose ALWAYS for new users. Backdrop capture
-     can limit live frame rate; OFF and STILL remain available preferences. */
-  let frostMode = 'always';                   // 'off' | 'still' | 'always'
+  /* Backdrop capture is costly over a moving WebGPU canvas, so a fresh profile starts without it. */
+  let frostMode = 'off';                      // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
@@ -308,7 +307,7 @@ export async function boot(dom) {
          59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
          else.  Pick an input, move any window, reload: back to the system default. */
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), hint: !document.body.classList.contains('no-hint'), captions: !document.body.classList.contains('no-captions'),
-        frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 11, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames,
+        frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
@@ -377,7 +376,7 @@ export async function boot(dom) {
    * did that were FIXES and not design are kept and are untouched by this: the drag rewrite (40
    * forced layouts and 40 synchronous writes per drag down to one write per frame) and the pick-up
    * transition at the 120 ms rung instead of 350, which brought it back inside MOTION-LAW's ceiling.
-   * FROST is independent; wave 89 later changed its first-run default to ALWAYS.
+   * FROST is independent; its first-run default is OFF because backdrop capture remains costly.
    *   `!!v` and not `v !== false`: NOTHING SAID MEANS JOINED now, on both roads — `applySettings`
    * reads `s.disc === true` for the same reason, so a profile that predates the switch opens joined
    * rather than inheriting a default nobody asked for. */
@@ -404,7 +403,7 @@ export async function boot(dom) {
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default, OFF. */
-    setFrost(s.frost === true ? 'always' : (s.frost || frostMode), { quiet: true });   // wave 89: an ABSENT key takes the shipped default, not OFF
+    setFrost(s.frost === true ? 'always' : (s.frost || frostMode), { quiet: true });
     /* ⚠ WAVE 101 · DISCONNECTED IS ON BY DEFAULT NOW, AND THAT REVERSES WAVE 69 ON JOSH'S OWN WORD.
        Wave 67 shipped it on, Josh said "Why was the design of our own UI changed?? I meant the design
        of the Modulation window only", and wave 69 made it an off-by-default switch.  He has now looked
@@ -419,6 +418,7 @@ export async function boot(dom) {
     if (s.auto === false) { quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
+    setPerfMode(s.perfMode === 'full' ? 'full' : '120');         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
     if (typeof s.friction === 'number') camera.setFriction(s.friction);   // wave 51: the camera's feel comes back …
     if (typeof s.spin === 'number') camera.setSpeed(s.spin);              // … but AUTO-ROTATE never does (see saveSettings)
     if (typeof s.dragGain === 'number') camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
@@ -505,7 +505,7 @@ export async function boot(dom) {
    * A default of STILL would therefore either take a third of the frame rate off a gesture Josh performs a
    * hundred times a day, or twitch the material under his hand every time he touched it — and he has ruled
    * against both (he keeps all the motion; the glass may not go grey when he taps).  The vividness is one
-   * press away. Wave 89 superseded this default with Josh's explicit choice of ALWAYS. */
+   * press away. Wave 89 temporarily changed the default to ALWAYS; the current shipping choice restores OFF. */
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
   function frostSync() {
     const hold = frostMode === 'still' && clock.playing;
@@ -597,7 +597,7 @@ export async function boot(dom) {
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
      the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */
-  const perf = { mode: 'full', cpuEvery: 1, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, overlays: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
+  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, overlays: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
   const frameBudget = createFrameBudget();
   const perfBudgetMs = () => frameBudget.milliseconds(perf.mode);
   const tick = (name, fn) => { const a = performance.now(); fn(); const d = performance.now() - a; perf.profile[name] = perf.profile[name] * 0.9 + d * 0.1; if (d >= 1) { perf.work[name] = perf.work[name] ? perf.work[name] * 0.7 + d * 0.3 : d; perf.wall[name] = a; } };
@@ -1004,20 +1004,28 @@ export async function boot(dom) {
   const cornerAxis = el('button','corner-axis-hit',document.getElementById('lab'));
   cornerAxis.type='button'; cornerAxis.hidden=true; cornerAxis.setAttribute('aria-label','Swap corner axis side');
   cornerAxis.title='Double-click or double-tap to swap sides; Enter also swaps';
-  const swapCorner=()=>{mat.cornerSide=mat.cornerSide==='left'?'right':'left';saveSettings();schedule(TIER.PRESENT);};
+  let cornerLayoutDirty=true,cornerSideAtLayout='',cornerVW=0,cornerVH=0;
+  const swapCorner=()=>{mat.cornerSide=mat.cornerSide==='left'?'right':'left';cornerLayoutDirty=true;saveSettings();schedule(TIER.PRESENT);};
   let cornerTap=0;
   cornerAxis.addEventListener('click',e=>{const now=performance.now();if(e.detail===0 || now-cornerTap<400){swapCorner();cornerTap=0;}else cornerTap=now;});
   function placeCornerAxis() {
-    cornerAxis.hidden=mat.axis===false || mat.axisMode!=='corner'; if(cornerAxis.hidden)return;
+    if (mat.axis===false || mat.axisMode!=='corner') { if (!cornerAxis.hidden) cornerAxis.hidden=true; return; }
+    if (cornerAxis.hidden) { cornerAxis.hidden=false; cornerLayoutDirty=true; }
+    if (cornerSideAtLayout!==mat.cornerSide || cornerVW!==window.innerWidth || cornerVH!==window.innerHeight) cornerLayoutDirty=true;
+    if (!cornerLayoutDirty) return;
+    cornerLayoutDirty=false;
     const vw=window.innerWidth,vh=window.innerHeight,left=mat.cornerSide==='left';
+    cornerSideAtLayout=mat.cornerSide;cornerVW=vw;cornerVH=vh;
     const rack=document.getElementById(left?'rackL':'rack'),r=rack&&rack.getBoundingClientRect();
     const inset=r&&r.width>0 ? (left?Math.max(0,r.right):Math.max(0,vw-r.left)) : 0;
     const x=left?Math.min(vw-48,inset+54):Math.max(48,vw-inset-54),y=vh-76;
-    cornerAxis.style.left=(x-44)+'px';cornerAxis.style.top=(y-44)+'px';
+    const cssLeft=(x-44)+'px',cssTop=(y-44)+'px';
+    if(cornerAxis.style.left!==cssLeft)cornerAxis.style.left=cssLeft;
+    if(cornerAxis.style.top!==cssTop)cornerAxis.style.top=cssTop;
     mat.cornerX=x/vw*2-1;mat.cornerY=1-y/vh*2;mat.cornerScaleX=64/vw;mat.cornerScaleY=64/vh;
   }
-  document.addEventListener('transitionrun',e=>{if(!['rack','rackL'].includes(e.target.id)||mat.axisMode!=='corner')return;const end=performance.now()+500;const tick=()=>{schedule(TIER.PRESENT);if(performance.now()<end)requestAnimationFrame(tick);};tick();});
-  document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL')schedule(TIER.PRESENT);});
+  document.addEventListener('transitionrun',e=>{if(!['rack','rackL'].includes(e.target.id)||mat.axisMode!=='corner')return;const end=performance.now()+500;const tick=()=>{cornerLayoutDirty=true;schedule(TIER.PRESENT);if(performance.now()<end)requestAnimationFrame(tick);};tick();});
+  document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
   let exportLocked = false;
   function schedule(tier) {
     if (exportLocked) return;
@@ -1155,9 +1163,10 @@ export async function boot(dom) {
     rafId = 0;
     if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
-    placeCornerAxis();
-    if(ui.frameSw) ui.frameSw.root.dataset.mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase();
-    if(ui.axisSw) ui.axisSw.root.dataset.mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase();
+    if (mat.axis!==false && mat.axisMode==='corner') placeCornerAxis();
+    else if (!cornerAxis.hidden) cornerAxis.hidden=true;
+    if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
+    if(ui.axisSw) { const mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase(); if(ui.axisSw.root.dataset.mode!==mode)ui.axisSw.root.dataset.mode=mode; }
     frostSync();   /* WAVE 67: the FROST policy's one per-frame act — a class compare, no read of anything.
                       It rides the loop rather than the play button because there are seven ways to start the
                       transport in this lab (the button, the key, LW.play, the A/B switch, the bow, the slap,
@@ -1220,6 +1229,8 @@ export async function boot(dom) {
     }
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
+      const tabletMotion = tablet.on && (clock.playing || dragging || camera.moving || camLevel.from || (modHost && modHost.clock.isRunning()) || rotDriving());
+      field.setStepCap(tabletMotion ? tablet.steps : Infinity);       // full saved quality returns on the first still frame
       tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat }); });
       pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
@@ -1325,7 +1336,7 @@ export async function boot(dom) {
     if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame; and so is a NON-ZERO ROTATION RATE, which the hand can set on a paused instrument with no modulator running at all — without this clause it would turn exactly once
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
     if (cpuTick && !uiHidden && live(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
-    if(ui.sliceMini && ui.sliceMini.root.clientWidth>0)ui.sliceMini.paint();
+    if(ui.sliceMini && !uiHidden && live(wSlice) && !wSlice.root.classList.contains('closed'))ui.sliceMini.paint();
     const spent = performance.now() - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[perf.counts.frames % 60] = spent;                        // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
@@ -1599,14 +1610,14 @@ export async function boot(dom) {
      * number rather than implying one. */
     ui.discSw = sw({ label: 'DISCONNECTED', value: false, title: 'take every window apart into a CONSTELLATION: its header becomes a floating bar-chip, its body a separate card, and the 7 px between them is a real hole — over the stage a press there turns the camera. OFF is the shipped look and is the one this rack has always had (wave 67 shipped it ON by mistake: Josh meant the MODULATION window only). Fused on a phone, where a constellation has no air to breathe', onChange: (v) => setDisconnected(v) });
     rt.appendChild(ui.discSw.root);
-    ui.frostSeg = seg({ label: 'FROST', value: 'always', options: [
+    ui.frostSeg = seg({ label: 'FROST', value: 'off', options: [
       { id: 'off', label: 'OFF', title: 'no backdrop filter: the card is its tint, its hairline and its sheen, and the field behind it is untouched. This is the shipped default and the only arm that costs nothing while anything moves' },
       { id: 'still', label: 'STILL', title: 'the vividness while the transport is STOPPED, held while it runs. MEASURED on this rig: with the field paused every filter reads 17.10 ms — identical to no filter at all, i.e. free — and over a moving field the same filter reads 50.3 ms (58.5 → 19.9 fps). Only the FILTER moves: the fill, the border, the sheen and the shadow are the same either side of it, so the glass never goes grey under your hand' },
       { id: 'always', label: 'ALWAYS', title: 'the exact BASINS recipe at all times — blur(GLASS BLUR) saturate(188%) brightness(108%), which is the vividness Josh named. MEASURED: 58.5 → 19.9 fps over a moving field, and it does NOT get cheaper by dropping the blur, because the cost is the backdrop capture and not the kernel (a saturate alone measured the same 50.3 ms). Worth it for a still, and it is a stated price rather than a surprise' }],
       onChange: (v) => setFrost(v) });
     rt.appendChild(ui.frostSeg.root);
     el('div', 'note', rt, 'frost: the picture\u2019s colour through the glass \u00b7 free while the field is still, a third of the frame rate while it moves');
-    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: 11,   /* wave 101: Josh's new default */ fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => { document.documentElement.style.setProperty('--glass-blur', v.toFixed(1) + 'px'); }, onChange: () => saveSettings() }); rt.appendChild(ui.blurK.root);
+    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: 22, fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => { document.documentElement.style.setProperty('--glass-blur', v.toFixed(1) + 'px'); }, onChange: () => saveSettings() }); rt.appendChild(ui.blurK.root);
     /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
        correction against a ground the hand can drag is not a correction.  One named function, so the knob,
@@ -1675,7 +1686,7 @@ export async function boot(dom) {
     ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: 30, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => { accent.a = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accA.root);
     ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: 300, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the second UI accent (solo, the warm marks): an angle on the same wheel', onInput: (v) => { accent.b = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accB.root);
     ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .1, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'push both accents toward neon: more chroma and a wider glow (also for visibility)', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
-    el('div', 'note', gt).innerHTML = '<b>THEME</b> swaps the skin\'s tokens and adapts the layer underneath: LIGHT sets a light stage (INVERT is yours — turn it on if you want the cloud drawn as ink). <b>SURFACE</b> is the render of the object itself — STAGE is the background lightness, GAMMA the output curve, and with EXPOSURE (gain), HUE and INVERT above they are all presentation: none of them touches ψ. <b>FROST</b> is the blur behind the cards, ALWAYS by default: measured at 21 px over the live field it took the frame from 17 ms to 82 ms (13 fps) under software compositing and about 25 fps on a GPU desktop, because the blur of both racks is recomposited on every frame the field changes — choose STILL to suspend its filter during playback, or OFF to avoid the backdrop capture. The GOVERNOR preserves your chosen material. <b>ACCENT A · B</b> are two angles on the current palette wheel (the PHASE PALETTE editor\'s stops, shifted by HUE): every accent in the interface takes its colour from them, held to a legible lightness for the theme, so turning the wheel recolours the whole UI. The logo is the same wheel verbatim — λ at 0°, the nine squares at 0°, 40°, … 320°.';
+    el('div', 'note', gt).innerHTML = '<b>THEME</b> swaps the skin\'s tokens and adapts the layer underneath: LIGHT sets a light stage (INVERT is yours — turn it on if you want the cloud drawn as ink). <b>SURFACE</b> is the render of the object itself — STAGE is the background lightness, GAMMA the output curve, and with EXPOSURE (gain), HUE and INVERT above they are all presentation: none of them touches ψ. <b>FROST</b> is the blur behind the cards, OFF by default: measured over the live field it took the frame from 17 ms to 82 ms (13 fps) under software compositing and about 25 fps on a GPU desktop, because both racks are recomposited whenever the field changes — choose STILL for still images or ALWAYS when the vivid backdrop is worth that cost. The GOVERNOR preserves your chosen material. <b>ACCENT A · B</b> are two angles on the current palette wheel (the PHASE PALETTE editor\'s stops, shifted by HUE): every accent in the interface takes its colour from them, held to a legible lightness for the theme, so turning the wheel recolours the whole UI. The logo is the same wheel verbatim — λ at 0°, the nine squares at 0°, 40°, … 320°.';
     __LW_hooks.setTheme = setTheme;
 
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: `wStyle` is `wObs`; this block is the DRAW section of the WAVE window
@@ -1721,7 +1732,8 @@ export async function boot(dom) {
     r3.appendChild(ui.sliceModeSeg.root);
     ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
     r3.appendChild(ui.sliceAxisSeg.root);
-    const mini = planeModel(gs, { getNormal:()=>mat.slice.normal || [0,1,2].map(i=>i===mat.slice.axis?1:0), getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
+    const sliceNormals = [[1,0,0],[0,1,0],[0,0,1]];
+    const mini = planeModel(gs, { getNormal:()=>mat.slice.normal || sliceNormals[mat.slice.axis|0] || sliceNormals[2], getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
     ui.sliceMini = mini;
     ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
@@ -2525,10 +2537,10 @@ export async function boot(dom) {
 
   {
     const rp = wMet.row('tight');
-    ui.perfSeg = seg({ label: 'PERFORMANCE', value: 'full', options: [
+    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [
       { id: 'full', label: 'FULL', title: 'every window updates every frame; automatic quality protects a 60 Hz frame budget' },
       { id: '120', label: '120 Hz', title: 'the CPU windows update every 4th frame; the FIELD and overlays present every frame. Automatic quality targets up to 120 Hz, following the fastest sustained cadence this browser has delivered' }],
-      onChange: (v) => setPerfMode(v) });
+      onChange: (v) => { setPerfMode(v); saveSettings(); } });
     rp.appendChild(ui.perfSeg.root);
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 28 ms over the last 60 frames' }); rp.appendChild(ui.govRo.root);
     el('div', 'note', wMet.body).innerHTML = '<b>FRAME PROFILE</b> is an exponential average of what each stage costs per frame, in milliseconds, measured on this machine and this browser. The display refresh rate caps what the browser will deliver (Firefox follows the compositor; a 60 Hz monitor gives 60 Hz whatever the code does). <b>120 Hz</b> mode moves the CPU windows to every 4th frame and lets AUTO SCALE / GOVERNOR follow sustained browser delivery up to 120 Hz; it starts with a 60 Hz budget until faster delivery is observed; the physics clock and the field cadence are untouched (§12: four clocks).';
@@ -4873,7 +4885,6 @@ export async function boot(dom) {
     phone.wasRackHidden = document.body.classList.contains('rack-hidden');   // the crossing is reversible in BOTH directions (wave 51's law)
     document.body.classList.toggle('rack-hidden', readSettings().phoneRack !== true);
     phone.wasCard = document.body.dataset.card;
-    if (!cardChosen) applyCard('tinted');                             // OPAQUE by default: a live field under a knob is jarring on a phone — the seg (or LW.setCardStyle) still overrules it
     if (!phone.hooked) { phone.hooked = true; const fb = wTr.root.querySelector('.dev-fold'); if (fb) fb.addEventListener('click', () => saveSettings()); }
     /* THE LOW-POWER PATH, once per page.  Every one of these is a DEFAULT, not an override: a value this
        browser has SAID in SETTINGS still wins, exactly as CARD STYLE's default does. */
@@ -4939,17 +4950,28 @@ export async function boot(dom) {
     field.setDprCap(2);
     schedule(TIER.REBUILD);
   }
+  const tablet = { on: false, DPR: 1.5, steps: 110 };
+  const isTablet = () => { try {
+    const ipad = /iPad/.test(navigator.userAgent || '') || ((navigator.platform || '') === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const coarse = matchMedia('(hover: none) and (pointer: coarse)').matches;
+    return !isPhone() && (ipad || (coarse && Math.min(innerWidth, innerHeight) >= 600));
+  } catch (_) { return false; } };
   function syncPhone() {
+    cornerLayoutDirty=true;
     const on = isPhone();
-    if (on === phone.on) return on;
-    phone.on = on; document.body.classList.toggle('phone', on);
-    if (on) enterPhone(); else leavePhone();
+    if (on !== phone.on) {
+      phone.on = on; document.body.classList.toggle('phone', on);
+      if (on) enterPhone(); else leavePhone();
+    }
+    tablet.on = isTablet();
+    field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
     schedule(TIER.PRESENT);
     return on;
   }
   window.addEventListener('resize', syncPhone, { passive: true });
   window.addEventListener('orientationchange', syncPhone, { passive: true });
   layout.phone = { get on() { return phone.on; }, get dprCap() { return field.dprCap; }, get transportFolded() { return wTr.root.classList.contains('folded'); }, get parkedFloats() { return phone.floats ? Object.keys(phone.floats) : []; }, sync: syncPhone };
+  layout.tablet = { get on() { return tablet.on; }, get dprCap() { return field.dprCap; }, get stepCap() { return field.stepCap; }, sync: syncPhone };
 
   /* ── canvas gestures: the observer ─────────────────────────────────────── */
   {

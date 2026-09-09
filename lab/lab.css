@@ -10,7 +10,7 @@
      Typography) — Latin Modern and Libertinus are the two maths faces a Linux box is likeliest to
      carry, and the generic `serif` is the last resort the SOURCE.txt contract warns about. */
   --font-math: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif;
-  --glass-blur: 11px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) — wave 101, Josh */
+  --glass-blur: 22px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) */
   --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-lead: 13px;
   --tr-tight: .02em; --tr-wide: .12em; --tr-wider: .14em; --lh: 1.45; --w-light: 300; --w-med: 500; --w-bold: 650;
   --r-xs: 3px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
