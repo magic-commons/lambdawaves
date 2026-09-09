@@ -57,20 +57,29 @@ export function createMOPanel(host, api = {}) {
   let dyn = null, running = false, Rmin = 0, Rmax = 0, stepMs = 0, frames = 0;
 
   /* ── the job queue: heavy maths in ≤ 24 ms slices, one pending job per tag, the last request winning ────────── */
-  const jobs = []; let pumping = false, waiters = [];
+  const jobs = []; let pumping = false, waiters = [], demanded = false, loading = false;
+  let active = api.active ? !!api.active() : true;
+  const setLoading = (v) => { const next = !!v; if (next === loading) return; loading = next; if (api.loading) api.loading(next); };
+  function armPump() { if (!pumping && jobs.length && (active || demanded)) { pumping = true; setLoading(true); setTimeout(pump, 0); } }
   function enqueue(tag, fn) {
     const i = jobs.findIndex((j) => j.tag === tag); if (i >= 0) jobs.splice(i, 1);
     jobs.push({ tag, fn });
-    if (!pumping) { pumping = true; setTimeout(pump, 0); }
+    armPump();
   }
-  function drain() { pumping = false; refresh(); paint(); const w = waiters; waiters = []; for (const r of w) r(); }
+  function drain() { pumping = false; setLoading(false); if (active) { refresh(); paint(); } const w = waiters; waiters = []; demanded = false; for (const r of w) r(); }
   function pump() {
+    if (!active && !demanded) { pumping = false; setLoading(false); return; }
     const t0 = performance.now();
     while (jobs.length && performance.now() - t0 < SLICE_MS) { const j = jobs.shift(); try { j.fn(); } catch (e) { console.error('mo job ' + j.tag, e); } }
     if (jobs.length) { setTimeout(pump, 0); return; }
     drain();
   }
-  const whenReady = () => (jobs.length || pumping ? new Promise((r) => waiters.push(r)) : Promise.resolve());
+  const whenReady = () => {
+    if (!jobs.length && !pumping) return Promise.resolve();
+    demanded = true; armPump();
+    return new Promise((r) => waiters.push(r));
+  };
+  function setActive(v) { active = !!v; if (active) armPump(); else if (!demanded) setLoading(false); return active; }
 
   /* ── the basis: one createMO, one cached curve, one equilibrium, one force ──────────────────────────────────── */
   function rebuild() {
@@ -79,7 +88,7 @@ export function createMOPanel(host, api = {}) {
     eq = null; f = null; resetRun();
     curve = { R: new Float64Array(CURVE_N), E: new Float64Array(CURVE_N), done: 0, n: CURVE_N, kind, lambda };
     for (let i = 0; i < CURVE_N; i++) curve.R[i] = CURVE_LO + (CURVE_HI - CURVE_LO) * i / (CURVE_N - 1);
-    for (let s = 0; s < CURVE_N; s += CHUNK) enqueue('curve:' + s, () => { const c = curve; for (let i = s; i < Math.min(CURVE_N, s + CHUNK); i++) { c.E[i] = mo.groundEnergy(c.R[i]); c.done++; } paint(); });
+    for (let s = 0; s < CURVE_N; s += CHUNK) enqueue('curve:' + s, () => { const c = curve; for (let i = s; i < Math.min(CURVE_N, s + CHUNK); i++) { c.E[i] = mo.groundEnergy(c.R[i]); c.done++; } if (active) paint(); });
     enqueue('eq', () => { eq = mo.equilibrium({ lo: 1.2, hi: 4, iters: 40 }); });
     enqueue('force', solveForce);
     refresh();
@@ -359,10 +368,10 @@ export function createMOPanel(host, api = {}) {
     frames++; if (frames % every()) return;
     stepOnce(1); refreshRun(); paint();
   }
-  window.addEventListener('resize', () => paint());
+  window.addEventListener('resize', () => { if (active) paint(); });
   rebuild();
   return {
-    update, refresh, paint, table, whenReady,
+    update, refresh, paint, table, whenReady, setActive,
     setR, get R() { return R; }, get kind() { return kind; },
     save: () => ({ kind, lambda, R, electron: mode, force: nuclear, connection, dt }),
     load(o) {

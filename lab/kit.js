@@ -548,7 +548,7 @@ export function device(o) {
     off = !!v;
     if (off && body.contains(document.activeElement)) power.focus();
     root.classList.toggle('off', off);
-    body.inert = off;
+    body.inert = off || loadingKeys.size > 0;
     power.setAttribute('aria-pressed', String(!off));
     if (o.onPower) o.onPower(!off);
   };
@@ -556,13 +556,27 @@ export function device(o) {
   close.addEventListener('click', (e) => { e.stopPropagation(); root.classList.add('closed'); root.dispatchEvent(new CustomEvent('devclose', { bubbles: true })); });
   const body = el('div', 'dev-body', root);
   body.id = 'devb-' + o.id;
+  /* Heavy card maths is demand-loaded. Desktop already has the cursor-following busy mark; coarse pointers need
+     the same mark where the waiting card is, because there may be no cursor position at all. A keyed set lets
+     independent blocks in one card finish in either order without unlocking each other. */
+  const loadingKeys = new Set();
+  const loading = el('div', 'dev-loading', root); loading.hidden = true; loading.setAttribute('aria-hidden', 'true');
+  const loadingMark = document.querySelector('#title .mark'); if (loadingMark) loading.appendChild(loadingMark.cloneNode(true));
+  el('span', 'dev-loading-label', loading, 'CALCULATING');
+  const setLoading = (v, key = 'work') => {
+    if (v) loadingKeys.add(key); else loadingKeys.delete(key);
+    const on = loadingKeys.size > 0;
+    root.classList.toggle('loading', on); root.toggleAttribute('aria-busy', on); root.inert = on;
+    body.inert = off || on; loading.hidden = !on;
+    return on;
+  };
   fold.setAttribute('aria-controls', body.id); fold.setAttribute('aria-expanded', 'true');
   let folded = false;
   const setFold = (on) => { folded = on; root.classList.toggle('folded', on); fold.setAttribute('aria-expanded', String(!on)); };   // the glyph is ONE drawing now; `.dev.folded .dev-fold svg` turns it (lab.css §55)
   fold.addEventListener('click', () => setFold(!folded));
   /* the guard is `closest`, not `===`: the target of a click on a chip is the SVG inside the button, never the button */
   head.addEventListener('dblclick', (e) => { if (e.target.closest && e.target.closest('button')) return; setFold(!folded); });
-  return { root, body, setOff, popBtn: pop, railBtn: rail, foldBtn: fold, get off() { return off; }, setStatus(t, cls) { if (stat.textContent !== t) { stat.textContent = t; headHint(t); } if (cls !== undefined) stat.className = 'dev-stat ' + cls; }, fold: setFold, row(cls) { return el('div', 'row' + (cls ? ' ' + cls : ''), body); } };
+  return { root, body, setOff, setLoading, popBtn: pop, railBtn: rail, foldBtn: fold, get off() { return off; }, get loading() { return loadingKeys.size > 0; }, setStatus(t, cls) { if (stat.textContent !== t) { stat.textContent = t; headHint(t); } if (cls !== undefined) stat.className = 'dev-stat ' + cls; }, fold: setFold, row(cls) { return el('div', 'row' + (cls ? ' ' + cls : ''), body); } };
 }
 
 /** a labelled group inside a device body */

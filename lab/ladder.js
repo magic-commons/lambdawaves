@@ -6,10 +6,10 @@
  * Airy laws (cubic order in the level expansion; the neglected quartic β₄ is printed).  Nothing here touches the
  * main register, the clock, or the camera; it recomputes only when a knob moves (idle stays zero).
  */
-import { revivalClocks, packet, revivalScan, poissonAiryChirped, combVerdict, cubicPeak, peakLaw, clockAutocorr, superrevival } from './frontier.js';
+import { solveLadder } from './ladder-model.js';
 import { el, knob, readout, group, formula } from './kit.js';
 
-export function createLadder(host) {
+export function createLadder(host, api = {}) {
   const P = { nbar: 30, sigma: 2, d: 0, teeth: 8 };
   const ui = {};
   const r1 = el('div', 'row', host);
@@ -48,21 +48,29 @@ export function createLadder(host) {
   for (const k of ['frac', 'verdict', 'cubic', 'floor']) r4.appendChild(ui[k].root);
   el('div', 'note', host).innerHTML = '<b>EXACT · SPECTRAL.</b> The revival hears the packet, not the ladder: a comb of spacing d revives perfectly iff the reduced denominator of 4d³/3n̄ divides 6; every other packet sits between the Parseval floor and 1. The FIELD cannot draw n > 6 — this window is the spectrum alone, its own register.';
 
-  let pending = 0, last = null;
-  function schedule() { if (!pending) pending = requestAnimationFrame(() => { pending = 0; compute(); }); }
+  let pending = 0, last = null, dirty = true, running = false, task = null, generation = 0;
+  let active = api.active ? !!api.active() : true;
+  function arm() { if (active && !pending && !running) pending = requestAnimationFrame(() => { pending = 0; prepare(); }); }
+  function schedule() { dirty = true; generation++; arm(); }
   function compute() {
-    const clocks = revivalClocks(P.nbar, P.sigma);
-    const pops = packet({ nbar: P.nbar, sigma: P.sigma, d: P.d, teeth: P.teeth });
-    const scan = revivalScan(pops, P.nbar, { maxPeriods: 400, perPeriod: 20, fine: 601, fineHalf: 1.5 });
-    const law = peakLaw(clocks.beta3);
-    const pred = []; const NP = 121;
-    for (let i = 0; i < NP; i++) { const x = -0.5 + i / (NP - 1); pred.push([x, poissonAiryChirped(P.nbar, P.sigma, x)]); }
-    let comb = null;
-    if (P.d >= 1) { const v = combVerdict(P.nbar, P.d); comb = { ...v, ...cubicPeak(pops, v.a, v.b) }; }
-    const sup = superrevival(P.nbar, P.sigma);
-    sup.exact = clockAutocorr(pops, P.nbar, 1, 1, 5).abs;
-    last = { P: { ...P }, clocks, pops, scan, law, pred, comb, sup };
-    paint();
+    if (pending) { cancelAnimationFrame(pending); pending = 0; }
+    generation++; last = solveLadder(P); dirty = false;
+    if (active) paint();
+    return last;
+  }
+  function prepare() {
+    if (!dirty) return Promise.resolve(last);
+    if (running) return task;
+    if (!api.solve) return new Promise((resolve) => requestAnimationFrame(() => resolve(compute())));
+    const mine = generation, params = { ...P }; running = true; if (api.loading) api.loading(true);
+    task = api.solve(params).then((result) => {
+      if (mine === generation && result && !result.error) { last = result; dirty = false; if (active) paint(); }
+      return last;
+    }).finally(() => {
+      running = false; task = null; if (api.loading) api.loading(false);
+      if (dirty && active) arm();
+    });
+    return task;
   }
   function fmtT(t) { return t >= 1e7 ? t.toExponential(3) : t >= 1e4 ? t.toFixed(0) : t.toFixed(2); }
   /** the closed forms alone — no scan, no packet, three powers: this is why it can run on the drag */
@@ -138,7 +146,16 @@ export function createLadder(host) {
     g.fillStyle = '#fff'; g.beginPath(); g.arc(xp, yp, 3, 0, 2 * Math.PI); g.fill();
     g.fillStyle = 'rgba(255,255,255,0.45)'; g.textAlign = 'left'; g.fillText(`prediction: Poisson sum of Airy envelopes WITH the chirp δ = 3πxσ²/n̄; neglected: quartic β₄ = ${clocks.beta4.toFixed(4)}`, left + 4, top + 6);
   }
-  window.addEventListener('resize', () => paint());
-  compute();
-  return { compute, params: P, get last() { return last; }, set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); compute(); } };
+  function setActive(v) {
+    const next = !!v; if (next === active) return active;
+    active = next;
+    if (active) { if (dirty || !last) arm(); else paint(); }
+    return active;
+  }
+  window.addEventListener('resize', () => { if (active) paint(); });
+  if (active) compute();
+  return { compute, prepare, setActive, params: P, get computed() { return !!last && !dirty; },
+    /* Reading the mathematical result is an explicit demand (tests and copy/export use it), even if the card is hidden. */
+    get last() { if (!last || dirty) compute(); return last; },
+    set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); compute(); } };
 }

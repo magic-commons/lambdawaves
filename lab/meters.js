@@ -33,7 +33,8 @@ export function createMeters(host) {
     if (m.profile) {
       const p = m.profile, win = p.spectrum + p.shadow + p.orbit + p.dynamics + p.slice + p.qcd + p.molecule + p.meters;
       prof.set(`${p.total.toFixed(2)} · ${p.field.toFixed(2)} · ${win.toFixed(2)}`, p.total < 8.3 ? 'ok' : 'warn');
-      prof.setSub(`${m.perfMode === '120' ? '120 Hz mode · ' : ''}spectrum ${p.spectrum.toFixed(2)} · shadow ${p.shadow.toFixed(2)} · orbit ${p.orbit.toFixed(2)} · overlays ${p.overlays.toFixed(2)} · dynamics ${p.dynamics.toFixed(2)} · slice ${p.slice.toFixed(2)} · meters ${p.meters.toFixed(2)} · 8.33 ms is a 120 Hz frame`);
+      const ms = (name) => (p[name] || 0).toFixed(2);
+      prof.setSub(`${m.perfMode === '120' ? '120 Hz mode · ' : ''}spectrum ${ms('spectrum')} · shadow ${ms('shadow')} · orbit ${ms('orbit')} · vortex ${ms('vortex')} · particles ${ms('particles')} · Kepler ${ms('kepler')} · field lines ${ms('fieldlines')} · dynamics ${ms('dynamics')} · slice ${ms('slice')} · meters ${ms('meters')} · 8.33 ms is a 120 Hz frame`);
     }
   }
   return { update };

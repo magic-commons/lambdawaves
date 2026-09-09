@@ -168,7 +168,10 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
 
   const expand=el('button','tbtn tempo-expand',main);chip(expand,'chevronDown','show or hide tempo controls');expand.title='Tempo controls';expand.type='button';expand.setAttribute('aria-expanded','false');
   const panel=el('div','native-tempo',tr);panel.hidden=true;
-  expand.addEventListener('click',()=>{panel.hidden=!panel.hidden;tr.classList.toggle('tempo-open',!panel.hidden);expand.setAttribute('aria-expanded',String(!panel.hidden));sync();});
+  let syncTimer=0;
+  const stopSync=()=>{if(syncTimer){clearTimeout(syncTimer);syncTimer=0;}};
+  const armSync=()=>{if(panel.hidden||syncTimer)return;syncTimer=setTimeout(()=>{syncTimer=0;sync();armSync();},200);};
+  expand.addEventListener('click',()=>{panel.hidden=!panel.hidden;tr.classList.toggle('tempo-open',!panel.hidden);expand.setAttribute('aria-expanded',String(!panel.hidden));sync();if(panel.hidden)stopSync();else armSync();});
   const M=modHost.model,C=modHost.clock;
   const play=trig({label:'MOD PLAY',title:'Play/pause modulation independently of physics',onFire:()=>{arm(true);C.toggle(performance.now()/1000);sync();}});panel.appendChild(play.root);
   const bpm=el('input','native-bpm',panel);bpm.type='number';bpm.min=String(M.BPM_MIN);bpm.max=String(M.BPM_MAX);bpm.step='.1';bpm.setAttribute('aria-label','Tempo in beats per minute');bpm.title='BPM';
@@ -179,6 +182,6 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   const hzGroup=el('div','native-tempo-hz',panel);const hz=el('span','',hzGroup);hzGroup.appendChild(repeatInfo);
   const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+note,onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});panel.appendChild(b.root);return b;});
   function sync(){hz.textContent=(M.transport.bpm/60).toFixed(2)+' Hz';if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');}
-  setInterval(()=>{if(!panel.hidden)sync();},200);sync();
+  sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
 }

@@ -1298,13 +1298,19 @@ export function createModulation(host, port) {
     for (const [mid, rec] of macRows) rec.root.classList.toggle('sel', mid === sel);
   }
 
+  /* Live modulation ticks can call this dozens of times per second. Avoid notifying
+     the accessibility tree when a value is already current. */
+  function attr(elm, name, value) {
+    const next = String(value);
+    if (elm.getAttribute(name) !== next) elm.setAttribute(name, next);
+  }
   /** the four attributes a `role="slider"` owes a reader, in one place */
   function aria(elm, label, lo, hi, now, text) {
-    elm.setAttribute('aria-label', label);
-    elm.setAttribute('aria-valuemin', String(lo));
-    elm.setAttribute('aria-valuemax', String(hi));
-    elm.setAttribute('aria-valuenow', String(Math.round(now)));
-    if (text !== undefined) elm.setAttribute('aria-valuetext', text);
+    attr(elm, 'aria-label', label);
+    attr(elm, 'aria-valuemin', lo);
+    attr(elm, 'aria-valuemax', hi);
+    attr(elm, 'aria-valuenow', Math.round(now));
+    if (text !== undefined) attr(elm, 'aria-valuetext', text);
   }
 
   /** ONE POINTER CONTRACT for every plain drag surface in this window — the artifact's numbered
@@ -1684,7 +1690,7 @@ export function createModulation(host, port) {
   /** THE STRIP'S PAINT.  X is the VALUE (6 … 94, so the dot never rides half off its own box) and Y is
    *  TIME, which is the transpose named above.  It is signature-guarded exactly as `render()` is, so a
    *  settled strip costs two custom-property writes a frame and nothing else. */
-  function paintMinTrace(rec, s) {
+  function paintMinTrace(rec, s, force) {
     const t = rec.minTrace; if (!t) return;
     /* BOTH AXES ARE INSET, and the Y one is not cosmetic: the dot is a real element riding this
        geometry, so a trace that ran the full 0 … 100 would hang half a dot outside the bay at t = 0
@@ -1702,9 +1708,8 @@ export function createModulation(host, port) {
       t.dot.style.setProperty('--ty', Y(0.5));
       return;
     }
-    const sig = sigOf(s, 26, 200);
-    if (sig !== t.sig) {
-      t.sig = sig;
+    if (force || !t.sig) {
+      t.sig = sigOf(s, 26, 200);
       const sm = sampleShape(s, 96);
       let d = '';
       for (let i = 0; i < sm.length; i++) d += (i ? 'L' : 'M') + X(sm[i][1]) + ' ' + Y(sm[i][0]);
@@ -2659,9 +2664,10 @@ export function createModulation(host, port) {
   }
   const syncKnobs = (rec) => { for (const key in rec.knobs) paintKnob(rec, key); };
 
-  let lastPaint = 0;
+  let lastPaint = 0, paintCalls = 0, paintRuns = 0, paintMs = 0;
   function paint(force) {
     const t = performance.now();
+    paintCalls++;
     if (!force && t - lastPaint < 33) return false;      // 30 Hz is plenty for a number to be read at
     lastPaint = t;
     const T = M.transport;
@@ -2703,8 +2709,21 @@ export function createModulation(host, port) {
     /* ── the macro rail ── */
     for (const m of M.macroList()) {
       const rec = macRows.get(m.id); if (!rec) continue;
-      rec.vname.textContent = m.name;
       const src = m.sourceId ? M.sourceOf(m.sourceId) : null;
+      const shownDepth = P.macroMin ? m.value : m.masterDepth;
+      if (force) {
+        rec.vname.textContent = m.name;
+        rec.root.classList.toggle('m2locked', !!m.sourceId);
+        rec.root.style.setProperty('--m2-slot-ink',
+          !src ? 'var(--m2-ink-faint)' : src.kind === 'env' ? 'var(--m2-env-ink)' : 'var(--acc)');
+        rec.drive.textContent = src ? (src.kind.toUpperCase() + ' ' + (src.label || src.id)) : 'HAND';
+        rec.route.textContent = pad2(M.routeCountOfMacro(m.id)) + ' OUT';
+        rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
+        rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
+        rec.numSeat.setAttribute('aria-disabled',String(P.macroMin && !!m.sourceId));
+        if(rec.val)rec.val.setAttribute('aria-disabled',String(!!m.sourceId));
+        rec.numSeat.title = P.macroMin ? m.name+' value'+(m.sourceId?' — driven by source':'') : 'MASTER DEPTH';
+      }
       if (rec.kind === 'trigger') {
         rec.signal.style.setProperty('--hit', M.triggerLevel(m.id).toFixed(4));
         rec.vnum.textContent = M.subCountOfTrigger(m.id) + ' SUB';
@@ -2712,23 +2731,12 @@ export function createModulation(host, port) {
         rec.signal.style.setProperty('--fill', clamp01(m.value).toFixed(4));
         rec.vnum.textContent = (100 * m.value).toFixed(0) + '%';
       }
-      rec.root.classList.toggle('m2locked', !!m.sourceId);
       /* WAVE 79 · THE INDICATOR WEARS THE CURVE'S OWN COLOUR (Josh: "Have that indicator also match
          the colors of the curves into the indicator").  The device draws its curve in Accent A for an
          LFO and in the artifact's own derived ENV ink for an envelope; the ring on the macro that
          curve is driving now reads the same, so a glance down the rail says WHICH source holds each
          macro without reading the DRIVE line.  A macro on HAND keeps the neutral ring. */
-      rec.root.style.setProperty('--m2-slot-ink',
-        !src ? 'var(--m2-ink-faint)' : src.kind === 'env' ? 'var(--m2-env-ink)' : 'var(--acc)');
-      rec.drive.textContent = src ? (src.kind.toUpperCase() + ' ' + (src.label || src.id)) : 'HAND';
-      rec.route.textContent = pad2(M.routeCountOfMacro(m.id)) + ' OUT';
-      const shownDepth = P.macroMin ? m.value : m.masterDepth;
-      rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
-      rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
       aria(rec.numSeat, P.macroMin ? m.name+' VALUE' : 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
-      rec.numSeat.setAttribute('aria-disabled',String(P.macroMin && !!m.sourceId));
-      if(rec.val)rec.val.setAttribute('aria-disabled',String(!!m.sourceId));
-      rec.numSeat.title = P.macroMin ? m.name+' value'+(m.sourceId?' — driven by source':'') : 'MASTER DEPTH';
       if (rec.val) aria(rec.val, m.name + ' value', 0, 100, 100 * m.value, rec.vnum.textContent);
     }
 
@@ -2736,11 +2744,13 @@ export function createModulation(host, port) {
     for (const s of devOrder()) {
       const rec = devRows.get(s.id); if (!rec) continue;
       const dev = rec.dev, g = rec.g;
-      dev.root.classList.toggle('m2off', !s.on);
-      dev.pow.setAttribute('aria-pressed', s.on ? 'true' : 'false');
-      dev.bank.btn.classList.toggle('on', s.bank === 'B');
-      dev.bank.A.classList.toggle('on', s.bank === 'A');
-      dev.bank.B.classList.toggle('on', s.bank === 'B');
+      if (force) {
+        dev.root.classList.toggle('m2off', !s.on);
+        dev.pow.setAttribute('aria-pressed', s.on ? 'true' : 'false');
+        dev.bank.btn.classList.toggle('on', s.bank === 'B');
+        dev.bank.A.classList.toggle('on', s.bank === 'A');
+        dev.bank.B.classList.toggle('on', s.bank === 'B');
+      }
       /* WAVE 93 · THE OUT SEAT NAMES THE MACRO BY ITS NUMBER, NOT ITS NAME.  Josh: "OUT routing also
          has to not be the renamed text of the macro name but rather be the number of the macro
          similar to how the minimized version does it."  A macro is renameable, so the name is
@@ -2750,13 +2760,13 @@ export function createModulation(host, port) {
       const macros = M.macroList();
       const heldIx = macros.findIndex((m) => m.sourceId === s.id);
       const heldBy = heldIx >= 0 ? macros[heldIx] : null;
-      if (dev.mac) dev.mac.textContent = heldBy ? String(heldIx + 1) : '--';
+      if (force && dev.mac) dev.mac.textContent = heldBy ? String(heldIx + 1) : '--';
       if (dev.bus) {
         const f = s.triggerId ? fireSources().find((q) => q.id === s.triggerId) : null;
         dev.bus.textContent = f ? f.label : '--';
         dev.bus.classList.toggle('m2bushit', !!(f && f.hit));   /* a signal binding, not a hand one */
       }
-      if (dev.lfoWave) dev.lfoWave.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
+      if (force && dev.lfoWave) dev.lfoWave.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
       if (dev.envStage) dev.envStage.textContent = stateOf(s);
       const outs = outsOf(s);
       if (dev.status) {
@@ -2766,11 +2776,11 @@ export function createModulation(host, port) {
       }
       /* the folded strip's bay */
       if (dev.meterFill) dev.meterFill.style.height = pct(s.out);
-      if (dev.minName) dev.minName.textContent = s.label || s.kind.toUpperCase();
+      if (force && dev.minName) dev.minName.textContent = s.label || s.kind.toUpperCase();
       if (dev.minOut) dev.minOut.textContent = stateOf(s);
-      if (dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
+      if (force && dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
       if (dev.envMinProgFill) dev.envMinProgFill.style.height = pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0);
-      if (dev.compactLfo) { dev.compactLfo.shapeValue.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
+      if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
                             dev.compactLfo.macroValue.textContent = heldBy ? heldBy.name : '--'; }
 
       /* WAVE 101 · A COMPACT ENVELOPE IS ALWAYS FITTED.  Josh: "For ENV in compact mode, it should
@@ -2788,21 +2798,23 @@ export function createModulation(host, port) {
          `.m2lfominshape` has never been repainted while folded: a folded LFO showed whatever shape it
          held when it was last expanded, for as long as it stayed folded.  The new indicator is painted
          here, ABOVE the guard, so a folded strip is live. */
-      paintMinTrace(rec, s);
+      paintMinTrace(rec, s, force);
       if (rec.kind === 'audio') paintAudio(rec);
-      const w = Math.round(g.box.clientWidth), h = Math.round(g.box.clientHeight);
-      if (!(w > 8 && h > 8)) { g.sig = ''; continue; }        // folded, closed, or not laid out yet
-      const sig = sigOf(s, w, h);
-      if (sig !== g.sig) { g.sig = sig; render(rec); paintPresetGlyphs(rec); }
+      if (force) {
+        const w = Math.round(g.box.clientWidth), h = Math.round(g.box.clientHeight);
+        if (!(w > 8 && h > 8)) { g.sig = ''; continue; }        // folded, closed, or not laid out yet
+        const sig = sigOf(s, w, h);
+        if (sig !== g.sig) { g.sig = sig; render(rec); paintPresetGlyphs(rec); }
+      } else if (!g.sig) continue;
       const x = g.X(headU(s)).toFixed(2);
       dev.ed.play.setAttribute('x1', x); dev.ed.play.setAttribute('x2', x);
       dev.ed.pdot.setAttribute('cx', x); dev.ed.pdot.setAttribute('cy', g.Y(s.out).toFixed(2));
-      if (dev.minWavePath) dev.minWavePath.setAttribute('d', minShapeD(s));
+      if (force && dev.minWavePath) dev.minWavePath.setAttribute('d', minShapeD(s));
     }
 
     /* ── the routing overlays ── */
-    const idx = routeIndex();
-    paintRings(idx);
+    if (force) paintRings(routeIndex());
+    paintRuns++; paintMs += performance.now() - t;
     return true;
   }
 
@@ -3056,7 +3068,8 @@ export function createModulation(host, port) {
                live: sp.live, label: d ? d.label : id };
     },
     presets: () => M.presetList().map((p) => ({ id: p.id, name: p.name, folder: p.folder, factory: !!p.factory })),
-    dead: () => M.dormantRoutes().map((r) => ({ id: r.id, macro: r.macroId, target: r.targetId }))
+    dead: () => M.dormantRoutes().map((r) => ({ id: r.id, macro: r.macroId, target: r.targetId })),
+    performance: () => ({ calls: paintCalls, paints: paintRuns, ms: paintMs, averageMs: paintRuns ? paintMs / paintRuns : 0 })
   };
 
   /* WAVE 75 · IT OPENS WITH AN LFO AND AN ENV (Josh, "have it by default have LFO and an ENV for

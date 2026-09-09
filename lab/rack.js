@@ -18,6 +18,7 @@ import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.j
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
+import { createWindowActivity } from './window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, setAccentRGB, cssRGB, accentRGB, parseCssColor } from './kit.js';
 import { createSpectrum } from './spectrum.js';
@@ -39,6 +40,9 @@ import { createPulse } from './pulseview.js';
 import { createCapture, maxPictureSize } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
+import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
+import { solveLadder } from './ladder-model.js';
+import { h2CurveTable } from './h2ci.js';
 import { createCalculus } from './calculusview.js';
 import { createDynamics } from './dynamicsview.js';
 import { createPaletteEditor } from './paletteview.js';
@@ -205,7 +209,7 @@ export async function boot(dom) {
   function paintMarks() {
     for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamutCss(markInk(0, stageGround()));   // over the CANVAS: the live STAGE colour
     for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamutCss(markInk(0));                  // over the CARD: the constant that really is one
-    document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
+    document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
       const k = i % MARK_N;
       r.setAttribute('fill', gamutCss(wheelColor(k * MARK_STEP)));       // wave 54: the mark is DOM, so it wears the same gamut the canvas does
       if (!r.classList.contains('sq' + k)) r.classList.add('sq' + k);      // which seat on the wheel this square holds
@@ -246,7 +250,7 @@ export async function boot(dom) {
     const rows = turnStops(), css = [];
     for (let i = 0; i < MARK_N; i++) {
       css.push('@keyframes lw-turn-' + i + '{' + rows[i].map((hex, k) => (100 * k / TURN_STOPS).toFixed(3) + '%{fill:' + hex + '}').join('') + '}');
-      css.push('#title .mark.turn rect.sq' + i + ',#title .mark.busy rect.sq' + i + ',#busyMark .mark rect.sq' + i + '{animation-name:lw-turn-' + i + '}');
+      css.push('#title .mark.turn rect.sq' + i + ',#title .mark.busy rect.sq' + i + ',#busyMark .mark rect.sq' + i + ',.dev-loading .mark rect.sq' + i + '{animation-name:lw-turn-' + i + '}');
     }
     turnSheet.textContent = css.join('\n');
     turnDirty = false;
@@ -465,7 +469,9 @@ export async function boot(dom) {
      move.  Read by layout.applyLayout(); the settings key's `closed[]` needs nothing, because it names each
      window independently and the heir already names itself. */
   const RETIRED_WINDOWS = { style: 'observer' };
-  const live = (w) => !(w && w.root && w.root.classList.contains('off'));
+  /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
+     leaving the viewport must save work without rewriting the user's project or switches. */
+  const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
   const DIGESTS = {};
   let space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
   /* WAVE 101 · THE SHIPPED GRID IS 64³ (Josh's new first-run default).  It is the FIRST rung of
@@ -597,7 +603,7 @@ export async function boot(dom) {
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
      the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */
-  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, overlays: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
+  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, fieldlines: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
   const frameBudget = createFrameBudget();
   const perfBudgetMs = () => frameBudget.milliseconds(perf.mode);
   const tick = (name, fn) => { const a = performance.now(); fn(); const d = performance.now() - a; perf.profile[name] = perf.profile[name] * 0.9 + d * 0.1; if (d >= 1) { perf.work[name] = perf.work[name] ? perf.work[name] * 0.7 + d * 0.3 : d; perf.wall[name] = a; } };
@@ -607,8 +613,10 @@ export async function boot(dom) {
       every frame exactly as before, so nothing a proof reads after settle() has changed.  The SLICE was the case: a 128²
       resample of every populated mode, 20–100 ms each at 8 Hz — every hitch of the idle histogram, and 134 ms per call
       after a bow (wave 45's measurements). */
+  let uiHidden = false;
   const READERS = {};
   function may(name, w) {
+    if (w && !windowActivity.canPresent(w)) return false;
     if (!clock.playing || !gov.on) { if (gov.parked.has(name)) unpark(name, w); return true; }
     const now = performance.now();
     if (now - gov.scroll < 150) return false;
@@ -741,7 +749,7 @@ export async function boot(dom) {
    * own: only a press on an AUDIO device's MIC button reaches `start()`. */
   let audioCap = null;
   const audioCapture = () => (audioCap || (audioCap = createAudioCapture({
-    onState: () => { if (modView) modView.paint(true); schedule(TIER.PRESENT); }
+    onState: () => { if (modView && modView.isOpen) modView.paint(true); schedule(TIER.PRESENT); }
   })));
   /** THE FEED, at the modulation cadence and only while something wants it.  One `read()` serves
    *  every AUDIO device in the rack: two cards listening to one microphone are two ANALYSES of one
@@ -875,6 +883,10 @@ export async function boot(dom) {
     clearTimeout(busy.timer); busy.timer = setTimeout(() => { busy.timer = 0; busySync(); }, Math.max(0, busy.until - performance.now()) + 30); }   // the window has to close itself: nothing else would ask again
   /** bracket a promise (or a synchronous function) with the mark */
   function busyWrap(p) { busy.n++; busySync(); const done = () => { busy.n = Math.max(0, busy.n - 1); busySync(); }; if (p && typeof p.then === 'function') { p.then(done, done); return p; } done(); return p; }
+  function cardLoading(w, key) {
+    let on = false;
+    return (v) => { const next = !!v; if (next === on) return; on = next; w.setLoading(next, key); if (next) { busy.n++; busySync(); } else { busy.n = Math.max(0, busy.n - 1); busySync(); } };
+  }
   window.addEventListener('pointermove', (e) => {                       // the position: two writes, no read, and only while it is up
     busy.x = e.clientX; busy.y = e.clientY;
     if (busy.shown) { busy.moves++; busyWrite(); }
@@ -918,13 +930,36 @@ export async function boot(dom) {
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
     return { label, get ok() { return !!w; }, call, raw, park: () => raw({ op: 'park' }), resume: () => raw({ op: 'resume' }), stat: () => raw({ op: 'stat' }) };
   };
-  const maths = makeWorker('bow'), scan = makeWorker('period');   // TWO: a 1.2 s period scan (a BOX state) must never queue a bow behind it (measured: the packet landed at 1185 ms behind one)
+  const maths = makeWorker('bow'), scan = makeWorker('period'), cards = makeWorker('cards');   // separate queues: interaction, recurrence, and user-requested card preparation cannot block each other
+  const solveCard = (msg, fallback, pluck = (r) => r.result) => {
+    const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));
+    if (!cards.ok) return local();
+    return cards.call(msg).then((r) => r && !r.error ? pluck(r) : local());
+  };
   if (maths.ok) maths.call({ op: 'warm', ham: 'hydrogen', Z: 1 });                    // the SLAP tables, built once off the thread
-  /* …and on this thread too (the K key and the SLAP trigger are synchronous): 8 ms at a time while the transport is idle */
-  let warmTimer = 0;
-  const warmKick = () => { warmTimer = 0; if (page.hidden) return; if (!kickReady() && !clock.playing) kickWarm(8); warmArm(kickReady() ? 2000 : clock.playing ? 500 : 40); };
-  const warmArm = (ms) => { if (warmTimer) clearTimeout(warmTimer); warmTimer = setTimeout(warmKick, ms); };
-  warmArm(1500);
+  /* …and on this thread too (the K key and the IMPULSE trigger are synchronous). This used to spend 8 ms every
+     40 ms beginning 1.5 s after boot: a deliberate 20% main-thread tax during the exact interval an iPad was
+     trying to settle its first field. Warm in short idle slices instead, after the first-use path is stable. */
+  let warmTimer = 0, warmIdle = 0;
+  const cancelWarm = () => {
+    if (warmTimer) { clearTimeout(warmTimer); warmTimer = 0; }
+    if (warmIdle && globalThis.cancelIdleCallback) { cancelIdleCallback(warmIdle); warmIdle = 0; }
+  };
+  const warmKick = (deadline) => {
+    warmTimer = warmIdle = 0; if (page.hidden) return;
+    const room = deadline && deadline.timeRemaining ? deadline.timeRemaining() : 3;
+    if (!kickReady() && !clock.playing && room >= 1) kickWarm(Math.min(4, Math.max(1, room - 1)));
+    warmArm(kickReady() ? 2000 : clock.playing ? 750 : 120);
+  };
+  const warmArm = (ms) => {
+    cancelWarm();
+    warmTimer = setTimeout(() => {
+      warmTimer = 0;
+      if (globalThis.requestIdleCallback) warmIdle = requestIdleCallback(warmKick, { timeout: 1500 });
+      else warmKick(null);
+    }, ms);
+  };
+  warmArm(3000);
 
   /* ── THE BACKGROUNDED TAB (wave 54, board #42) ──────────────────────────────────────────────────────────────
    * WHAT IS AND IS NOT A WIN, measured in this browser rather than assumed:
@@ -957,8 +992,8 @@ export async function boot(dom) {
     if (want) {
       page.parks++; page.hiddenAt = performance.now();
       page.mark = { t: clock.t, camT: camera.t, frames: stats.frames, presents: stats.presents, wall: page.hiddenAt };
-      if (maths.ok) maths.park(); if (scan.ok) scan.park();     // the workers: the one thing the browser throttles for nobody
-      if (warmTimer) { clearTimeout(warmTimer); warmTimer = 0; }  // the timer-driven reader
+      if (maths.ok) maths.park(); if (scan.ok) scan.park(); if (cards.ok) cards.park();     // the workers: the one thing the browser throttles for nobody
+      cancelWarm();                                             // the idle reader and its delay
       if (modHost) modHost.clock.setHidden(true);                 // the modulation clock stops (and releases any hold)
       if (audioCap && audioCap.setHidden) audioCap.setHidden(true);  // wave 105: the capture reports to the SAME authority — it owns no listener of its own
     } else {
@@ -977,7 +1012,7 @@ export async function boot(dom) {
       gov.n = 0; gov.okSince = 0; metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
-      if (maths.ok) maths.resume(); if (scan.ok) scan.resume();
+      if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
       if (modHost) modHost.clock.setHidden(false);                // mir/host re-anchors itself: prevWall = null + reanchorTransport
       if (audioCap && audioCap.setHidden) audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
       warmArm(60);
@@ -1036,6 +1071,12 @@ export async function boot(dom) {
     if (page.hidden) { stats.scheduled = false; return; }
     if (!rafId && !inLoop) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }
   }
+  /* The frame loop asks this cached service instead of reading layout geometry. IntersectionObserver accounts for
+     both viewport clipping and a rack's scrollport; class/hidden mutations wake one catch-up frame on re-entry. */
+  const windowActivity = createWindowActivity({ onChange: () => schedule(TIER.PRESENT) });
+  const canPresent = (w) => windowActivity.canPresent(w);
+  const canPresentTransport = () => !uiHidden && (layout.docked ? canPresent(wTr)
+    : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
   const sturmHalf = () => { const nm = reg.nmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n)
   function modesAt(t) {
@@ -1281,42 +1322,71 @@ export async function boot(dom) {
     if (cpuTick) {
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (!uiHidden && live(wSpec) && may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
-      if (!uiHidden && live(wSh) && may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, reg.populated(), spectrum.selected));
-      if (!uiHidden && live(wOrb) && may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
+      if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
+      if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, reg.populated(), spectrum.selected));
+      if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
-    tick('overlays', () => {
-      if (space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on)) {       // the overlays are position-space objects, and theorems about hydrogen
-        if (live(wVor)) vortex.update(reg, clock.t, obs, domain.half, clock.playing); else if (dom.vortex) dom.vortex.getContext('2d').clearRect(0, 0, dom.vortex.width, dom.vortex.height);
-        if (particles.on) { if (perf.cpuEvery === 1 || (perf.counts.frames % 2) === 0) particles.advance(reg, clock.t, domain.half); particles.draw(obs, domain.half); }   // 120 Hz: step every other frame (the integrator uses the logical dt, so nothing is skipped)
-        if (kepler.on || kdrag || keplerDirty) { kepler.update(reg, clock.t, obs, domain.half); keplerDirty = !!kepler.on; if (!kepler.on && !bow && dom.kepler.width > 1) { dom.kepler.width = 1; dom.kepler.height = 1; } }   // wave 45: drawn while on, cleared once after, and its full-stage bitmap released (4.4 MB here, 22 MB at the iPad's DPR)
-      } else { for (const c of [dom.vortex, dom.particles, dom.kepler]) if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height); }
-      fieldlines.update(reg, clock.t, obs, domain.half, clock.playing, getZ(), fieldOn());   // the classical field of ρ: its own guard, its own throttle
-      kepler.bowFrame();
-    });
+    const overlayDomain = space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P &&
+      !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on);
+    if (overlayDomain) {
+      const vortexVisible = canPresent(wVor);
+      if (vortexVisible && may('vortex')) tick('vortex', () => vortex.update(reg, clock.t, obs, domain.half, clock.playing));
+      else if (!vortexVisible) vortex.suspend();
+
+      const particlesVisible = canPresent(wDyn);
+      if (particlesVisible && particles.on && may('particles')) tick('particles', () => {
+        if (perf.cpuEvery === 1 || (perf.counts.frames % 2) === 0) particles.advance(reg, clock.t, domain.half);
+        particles.draw(obs, domain.half);
+      });
+      else if (!particlesVisible || !particles.on) particles.suspend(clock.t);   // retain switch/points; skip hidden time instead of a catch-up burst
+
+      const keplerVisible = bow || canPresent(wOrb);
+      if (keplerVisible && (kepler.on || kdrag || keplerDirty || bow) && (bow || may('kepler'))) tick('kepler', () => {
+        kepler.update(reg, clock.t, obs, domain.half); keplerDirty = !!kepler.on;
+        if (!kepler.on && !bow) kepler.suspend();
+      });
+      else if (!keplerVisible) kepler.suspend();
+    } else { vortex.suspend(); particles.suspend(clock.t); if (!bow) kepler.suspend(); }
+
+    const fieldVisible = fieldOn() && fieldlines.overlay !== 'off';
+    if (fieldVisible && may('fieldlines')) tick('fieldlines', () => fieldlines.update(reg, clock.t, obs, domain.half, clock.playing, getZ(), true));
+    else if (!fieldVisible) fieldlines.update(reg, clock.t, obs, domain.half, clock.playing, getZ(), false);
+    kepler.bowFrame();
     /* the MOLECULE and H₂ integrators feed the FIELD, so they run whether or not their card can be seen;
        only moPanel's repaint is chrome, and that is the one thing the hidden interface drops (wave 48) */
-    if (cpuTick && live(wMol)) tick('molecule', () => { if (molecule) molecule.update(clock.t); if (moPanel && !uiHidden) moPanel.update(clock.t, clock.playing); if (pulsePanel && !uiHidden) pulsePanel.update(clock.t); if (h2 && h2.on) { h2.update(clock.t); if (h2.run && clock.playing) schedule(TIER.RECONSTRUCT); } });
-    if (cpuTick && !uiHidden) {
-      if (live(wDyn) && may('dynamics', wDyn)) tick('dynamics', () => dynamics.update(reg, clock.t, clock.playing));
-      if (live(wSlice) && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t, clock.playing));
-      if (live(wQCD) && may('qcd', wQCD)) tick('qcd', () => qcd.update());
-      if (live(wAtoms) && may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
-      if (live(wWig) && !wWig.root.classList.contains('closed') && may('wigner', wWig)) tick('wigner', () => {          // the WIGNER slice: its own throttle (2 Hz while playing, wignerview.js), its own guard
+    const molVisible = canPresent(wMol); if (moPanel) moPanel.setActive(molVisible);
+    helium.setActive(canPresent(wHe));
+    h2.setActive(canPresent(wH2));
+    const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
+    ladder.setActive(canPresent(wLad));
+    if (cpuTick) {
+      if (powered(wMol) || (h2 && h2.on && powered(wH2))) tick('molecule', () => {
+        if (molecule && powered(wMol)) molecule.update(clock.t);
+        if (moPanel && molVisible) moPanel.update(clock.t, clock.playing);
+        if (pulsePanel && molVisible) pulsePanel.update(clock.t);
+        if (h2 && h2.on && powered(wH2)) { h2.update(clock.t); if (h2.run && clock.playing) schedule(TIER.RECONSTRUCT); }
+      });
+    }
+    if (cpuTick) {
+      if (may('dynamics', wDyn)) tick('dynamics', () => dynamics.update(reg, clock.t, clock.playing));
+      if (sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t, clock.playing));
+      if (may('qcd', wQCD)) tick('qcd', () => qcd.update());
+      if (may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
+      if (may('wigner', wWig)) tick('wigner', () => {          // the WIGNER slice: its own throttle (2 Hz while playing, wignerview.js), its own guard
         const G = hydroReader(); wWig.setStatus(G.status === null ? WIG_OK : G.status, G.status === null ? '' : 'warn');
         wignerView.update(reg, clock.t, clock.playing, G.on, G.why, domain.half);
       });
-      if (live(wRad) && !wRad.root.classList.contains('closed') && may('radiation', wRad)) tick('radiation', () => {        // the DIPOLE: cheap, so every CPU tick
+      if (may('radiation', wRad)) tick('radiation', () => {        // the DIPOLE: cheap, so every CPU tick
         const G = hydroReader(); radiationView.update(reg, clock.t, clock.playing, G.on, G.why);
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
-      if (live(wCalc) && may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on)) calculus.update(reg, clock.t); });
-      ui.hc.set(reg.energy().toFixed(5));
-      if (sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
-      if (gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) { const s = gas.stats(clock.t); ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn'); }
+      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on)) calculus.update(reg, clock.t); });
+      if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
+      if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
+      if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) { const s = gas.stats(clock.t); ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn'); }
     }
-    if (!uiHidden) transport.update();
+    if (canPresentTransport()) transport.update();
     /* WAVE 52: the strip, the meters and the beat readout, at 30 Hz (modview throttles itself) — and
        the EXPAND lamp, which is the one thing that must be painted whether the window is open or not. */
     if (modHost) {
@@ -1335,8 +1405,8 @@ export async function boot(dom) {
        followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
     if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame; and so is a NON-ZERO ROTATION RATE, which the hand can set on a paused instrument with no modulator running at all — without this clause it would turn exactly once
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
-    if (cpuTick && !uiHidden && live(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
-    if(ui.sliceMini && !uiHidden && live(wSlice) && !wSlice.root.classList.contains('closed'))ui.sliceMini.paint();
+    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
+    if (ui.sliceMini && canPresent(wSlice)) ui.sliceMini.paint();
     const spent = performance.now() - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[perf.counts.frames % 60] = spent;                        // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
@@ -2498,11 +2568,12 @@ export async function boot(dom) {
 
   // MOLECULE — H₂⁺ in the 1s LCAO basis: the field is handed to two protons and one electron
   const wMol = device({ id: 'molecule', eyebrow: 'MOLECULE', title: '<m>H₂⁺</m> · LCAO · TUNNELLING', status: 'exact integrals · variational · classical nuclei · Pulay bound' });
+  if (useCompactDefaults) wMol.root.classList.add('closed');   // do not paint the 200-point energy plot behind first-visit furniture
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
-  moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
+  moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
   /* W-PULSE (wave 58, board #24): the third block on this card — Astra's field-driven H₂⁺ (lab/modrive.js), which
      nothing in the interface reached until now.  It runs on the LAB's clock (t_drive = t_lab − t₀ at FIRE) and it
      feeds nothing: the stage still draws whatever the two blocks above it hold, and the pulse is the card's own. */
@@ -2517,13 +2588,15 @@ export async function boot(dom) {
 
   // HELIUM — two electrons, Hylleraas: the field becomes the conditional cloud of electron 2
   const wHe = device({ id: 'helium', eyebrow: 'HELIUM', title: 'TWO ELECTRONS · HYLLERAAS · CORRELATION', status: 'exact integrals · variational' });
+  if (useCompactDefaults) wHe.root.classList.add('closed');     // defer the ~77 ms variational solve until this card is first shown
   rack.appendChild(wHe.root);
-  const helium = createHelium(wHe.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && molecule.on) molecule.setOn(false); moleculeMode(v); } });
+  const helium = createHelium(wHe.body, { active: () => canPresent(wHe), loading: cardLoading(wHe, 'helium'), solve: (basis) => solveCard({ op: 'helium', basis }, () => hylleraas(HELIUM_BASES[basis]), (r) => r.sol), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && molecule.on) molecule.setOn(false); moleculeMode(v); } });
 
   // H₂ — two atoms, Heitler–London: the curves, the collision, the one-electron density
   const wH2 = device({ id: 'h2', eyebrow: '<m>H₂</m>', title: 'HEITLER–LONDON · THE BOND · THE COLLISION', status: 'exact integrals · variational · classical nuclei' });
+  if (useCompactDefaults) wH2.root.classList.add('closed');    // avoid the 221-point RHF/FCI plot until the user opens it
   rack.appendChild(wH2.root);
-  const h2 = createH2(wH2.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); } moleculeMode(v); }, now: () => clock.t });
+  const h2 = createH2(wH2.body, { active: () => canPresent(wH2), loading: cardLoading(wH2, 'curve'), solveCurve: (Rmin, Rmax, count) => solveCard({ op: 'h2curve', Rmin, Rmax, count }, () => h2CurveTable(Rmin, Rmax, count)), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); } moleculeMode(v); }, now: () => clock.t });
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', title: 'THE STATS · DERIVED · EHRENFEST LIVE', status: 'exact within the register' });
@@ -2539,7 +2612,7 @@ export async function boot(dom) {
     const rp = wMet.row('tight');
     ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [
       { id: 'full', label: 'FULL', title: 'every window updates every frame; automatic quality protects a 60 Hz frame budget' },
-      { id: '120', label: '120 Hz', title: 'the CPU windows update every 4th frame; the FIELD and overlays present every frame. Automatic quality targets up to 120 Hz, following the fastest sustained cadence this browser has delivered' }],
+      { id: '120', label: '120 Hz', title: 'visible CPU windows update every 4th frame; the field still presents every frame. Automatic quality targets up to 120 Hz, following the fastest sustained cadence this browser has delivered' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     rp.appendChild(ui.perfSeg.root);
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 28 ms over the last 60 frames' }); rp.appendChild(ui.govRo.root);
@@ -2547,8 +2620,15 @@ export async function boot(dom) {
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', title: 'RYDBERG REVIVAL · SPECTRAL', status: 'own register · no field' });
+  if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
-  const ladder = createLadder(wLad.body);
+  const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
+  /* Shift multi-add reopens several cards in one gesture. Each explicit request enters the card worker queue even
+     if later cards land below the rack clip; the single worker keeps those solves from competing with the field. */
+  wMol.root.addEventListener('devopen', () => { if (moPanel) moPanel.whenReady(); });
+  wHe.root.addEventListener('devopen', () => helium.prepare());
+  wH2.root.addEventListener('devopen', () => h2.prepare());
+  wLad.root.addEventListener('devopen', () => ladder.prepare());
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
    * The model is lab/mir — vendored, headless, 53 gates green before a single pixel of this existed.
@@ -2875,9 +2955,9 @@ export async function boot(dom) {
     ui.fldB.set(`${s.Bz.toFixed(6)} T at the nucleus  ·  ${s.Bz1.toFixed(6)} T`, Math.abs(s.Bz) > 1e-9 ? 'ok' : '');
     ui.fldB.setSub(`|B| ${s.Bmag.toExponential(3)} T · ${Math.abs(s.Bmag) < 1e-9 ? 'a real orbital carries no current' : 'the orbital hyperfine field'}${s.Bstale ? ' · at an earlier t (B is a quadrature: it runs at 1 Hz while playing)' : ''}`);
   }
-  /** is the window entitled to draw?  live, open, hydrogenic, position space, and no molecule holding the field */
+  /** is the window entitled to present? visible, hydrogenic, in position space, with no molecule holding the field */
   function fieldOn() {
-    return live(wFld) && !wFld.root.classList.contains('closed') && space === 'x' && getHamiltonian().id === 'hydrogen' && !sturm.P
+    return canPresent(wFld) && space === 'x' && getHamiltonian().id === 'hydrogen' && !sturm.P
       && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on);
   }
 
@@ -2891,7 +2971,9 @@ export async function boot(dom) {
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
   const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => __LW_hooks.ab });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
-  Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, dynamics: wDyn, slice: wSlice, qcd: wQCD, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+  Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wDyn, kepler: wOrb, fieldlines: wFld,
+    dynamics: wDyn, slice: wSlice, qcd: wQCD, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+  for (const w of [...Object.values(READERS), wVor, wMol, wHe, wH2, wMet, wFld, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one
       number; they say which one stood them down, in the wave-39 voice. */
@@ -3574,9 +3656,8 @@ export async function boot(dom) {
    * the stage and in the rack.  Josh asked for that in his own words: "Let it use the same dimensions or
    * layout as it."  The one thing that changes the box is COMPACT, and compact is a MODE, not a reflow.
    *
-   * NOTHING HERE TOUCHES ψ.  Floating is chrome: no reader changes tier because its window left the rack,
-   * `live(w)` still reads the same `.off` class, and the governor parks a floating window's reader on
-   * exactly the law it parks a docked one on.
+   * NOTHING HERE TOUCHES ψ.  Floating is chrome. The visibility scheduler observes the same card in either
+   * parent, so a floating reader runs while its full face intersects the stage and sleeps in COMPACT mode.
    */
   const floats = document.getElementById('floats');
   const floatState = new Map();        // id → { home:{side,index}, x, y, w, compact } — the ARRANGEMENT, never the physics
@@ -3771,6 +3852,7 @@ export async function boot(dom) {
       dev.classList.remove('closed'); const host = side === 'L' ? rackL : side === 'R' ? rack : dev.parentElement || rack;
       const first = host.querySelector('.dev'); if (first) host.insertBefore(dev, first); else host.appendChild(dev);
       enterWindow(dev);
+      dev.dispatchEvent(new CustomEvent('devopen'));
       saveSettings(); return true;
     },
     closed() { return [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id); },
@@ -3931,6 +4013,7 @@ export async function boot(dom) {
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
   const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', title: 'PLAY · SCRUB · RATE', status: 'docked' });
   wTr.root.hidden = true; (rackL || rack).appendChild(wTr.root);
+  windowActivity.track(wTr);
   {
     const tb = document.getElementById('rackToggle'); if (tb) tb.addEventListener('click', () => layout.toggleRack());
     /* WAVE 62 · THE SKIP LINKS MOVE FOCUS THEMSELVES.  The anchors are real anchors — without script
@@ -5183,17 +5266,16 @@ export async function boot(dom) {
      to hide it only from the EYE: every reader still ran, every readout still wrote its string, and the notebook's
      backdrop-filter was still recomposited on every frame the field changed.  `uiHidden` is now a real state — the
      loop skips the readers whose only product is a display:none card, and lab.css §48a/§48b take the panes out of
-     paint.  What it does NOT skip is anything the STAGE shows (the field, the vortex, the particles, the Kepler
-     handle, the field lines) or anything with physics behind it (the molecule and H₂ integrators), because those are
-     the picture, not the chrome.  Coming back forces one full pass so nothing shows a stale number. */
-  let uiHidden = false;
+     paint. Window-owned stage overlays (vortex, particles, Kepler and field lines) sleep too: their switches remain
+     set, and visibility returning redraws them. Physics that produces the field still runs. Coming back forces one
+     presentation pass so nothing shows a stale number. */
   function toggleUI() {
     const on = document.body.classList.toggle('ui-hidden');
     uiHidden = on;
     if (on) { ui.frameWas = mat.frame; ui.axisWas = mat.axis; mat.frame = false; mat.axis = false; }
     else { if (ui.frameWas !== undefined) mat.frame = ui.frameWas; if (ui.axisWas !== undefined) mat.axis = ui.axisWas; metersWall = 0; govVersion = -1; }
     if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false);
-    schedule(TIER.REBUILD);
+    schedule(TIER.PRESENT);
   }
   let tabIdx = 0, tabOrder = null;                                 // the cycle runs over the windows' ORIGINAL order
   /* ── THE TAB ORDER, STATED (wave 55) ────────────────────────────────────────────────────────────
@@ -5884,6 +5966,10 @@ export async function boot(dom) {
     /** the photosensitivity notice: shown once per browser, remembered in the settings key, SETTINGS brings it back */
     get warning() { return warning; },
     get uiHidden() { return uiHidden; },
+    windowActivity: {
+      state(id) { const w = document.querySelector('.dev[data-id="' + id + '"]'); return windowActivity.state(w); },
+      get tracked() { return windowActivity.tracked; }, get changes() { return windowActivity.changes; },
+    },
     /** the nine wheel samples every copy of the mark is painted from — the ABOUT face reads the same ones */
     paintMarks,
     /** WAVE 53 · the two chrome objects, each with its own switch and its own seat in the settings key */

@@ -1,5 +1,67 @@
 # Claude Code debugging, cleanup and shipping handoff
 
+## Visibility scheduling and startup pass — 2026-09-09
+
+Window presentation now follows one rule in `lab/window-activity.js`: a reader or
+overlay runs only while its device is powered, open, unfolded, in the visible rack
+clip, and the interface is visible. Closing, folding, compacting, scrolling away,
+hiding the racks, or pressing H suspends its presentation without changing saved
+power or feature switches. Returning to view schedules one catch-up presentation.
+
+- Spectrum, Shadow, Orbit, Dynamics, Slice, QCD, Atoms, Wigner, Radiation,
+  Calculus, meters, the molecule panels, Ladder, Electrostatics, Vortex, particles,
+  Kepler and their stage overlays use the shared eligibility service.
+- Hidden overlay canvases release their backing stores to 1×1. Vortex and Field
+  also release them while their own overlay switch is OFF, even if their cards are
+  visible. Particle time rebases while suspended, preventing a catch-up burst.
+- MO curve work and Slice's private animation pump pause out of view. Ladder's
+  initial recurrence scan is lazy. The closed Helium card now defers its roughly
+  77 ms six-term variational solve until first display, explicit query, or enable.
+- H requests presentation only; it no longer causes a field rebuild. The boot warm
+  kick waits for idle time, and the Tempo panel's old permanent 200 ms timer exists
+  only while that panel is open. Hidden readout DOM writes are skipped.
+- Overlay costs have separate profile slots, making the governor and future tuning
+  able to distinguish Vortex, particles, Kepler and field lines.
+
+Fresh Firefox/WebGPU validation at an 834×1194 tablet viewport found only Spectrum
+and Shadow active at first load; MO/Ladder/Helium background work remained deferred.
+Opening Helium computed and painted it. With all expensive overlays enabled, H made
+every tracked window inactive, released all four overlay canvases to 1×1, caused no
+rebuild, and reduced the measured loop EMA from 5.30 ms to 0.47 ms on this host.
+Scrolling made the selected Dynamics card active while clipped Orbit and Vortex
+remained suspended. No page errors occurred. Current-product browser acceptance and
+the four-boot WebGPU recovery/grid sequence pass. The historical monolithic browser
+gate still asserts the superseded rule that folded or closed readers keep computing;
+do not restore that behavior to make it green.
+
+## Demand-loaded card work and modulation pass — 2026-09-09
+
+Heavy card preparation now starts when the card is opened. Helium's Hylleraas solve,
+Ladder's full recurrence scan, and H₂'s 221-point correlated curve run through a
+dedicated card worker, separate from the bow and period queues. The views and worker
+import the same pure solver modules. If workers are unavailable, the fallback yields
+through an animation frame before doing the same computation. Molecule's existing
+sliced queue also waits until the card is visible or explicitly requested.
+
+While a requested card is calculating, its face dims and locks. Desktop keeps the
+existing pointer-following busy mark; touch/coarse-pointer layouts also show that
+mark and CALCULATING in the centre of every waiting card. Loading is keyed per card,
+so overlapping work cannot unlock the card early. Shift multi-add dispatches every
+selected heavy card immediately, including cards which initially land below the
+rack clip. Browser acceptance covers all four cards entering and leaving loading,
+and verifies their completed results. On this host the formerly blocking default
+Ladder solve was roughly 472 ms and Helium roughly 77 ms.
+
+The modulation painter now separates structural work from live values. Its 120 Hz
+tick no longer repeats device labels, routing rings, path geometry, layout reads,
+static classes, and unchanged accessibility attributes. A headless 834×1194 stress
+probe with seven LFOs and six active routes measured open-window paint work falling
+from 125 ms over the sample to 19 ms (about 85%), and loop EMA from 6.33 ms to
+1.72 ms. With the window closed it issued one transition paint and then none; with
+the transport stopped it scheduled zero frames and paints. Headless animation-frame
+cadence was 14–19 FPS, so these are comparative CPU timings rather than an iPad FPS
+claim. No page, registry-callback, or worker errors occurred.
+
 ## iPad/Safari performance pass — 2026-09-09
 
 The reported tablet regression was isolated to repeated presentation work rather

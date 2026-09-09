@@ -50,10 +50,13 @@ export function createVortex(host, overlay, api) {
     }
   }
   function drawOverlay(obs) {
+    if (!show.get() || !last || !obs) {
+      if (cv.width !== 1 || cv.height !== 1) { cv.width = 1; cv.height = 1; }
+      return;
+    }
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    if (!show.get() || !last || !obs) return;
     const B = cameraBasis(obs), D = obs.dist * last.half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
     for (const p of last.points) {
@@ -76,8 +79,12 @@ export function createVortex(host, overlay, api) {
   /**
    * display-rate update: relocate when the register or the time changed (throttled while playing), redraw the
    * overlay when the camera moved.  Idle: nothing.
-   */
+  */
   let lastLocateWall = 0;
+  function suspend() {
+    lastObs = '';                                      // visibility returning must redraw even if the camera did not move
+    if (cv.width !== 1 || cv.height !== 1) { cv.width = 1; cv.height = 1; }
+  }
   function update(reg, t, obs, half, playing) {
     if (!on.get()) { if (last) { last = null; drawOverlay(obs); } return; }
     const key = `${reg.version}|${t.toFixed(6)}|${qual.get()}|${half}`;
@@ -86,6 +93,6 @@ export function createVortex(host, overlay, api) {
     const ok = `${cameraKey(obs)}|${obs.dist.toFixed(4)}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;   // wave 54: the WHOLE orientation (a FREE camera rolls)
     if (ok !== lastObs) { lastObs = ok; drawOverlay(obs); }
   }
-  return { update, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },
+  return { update, suspend, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },
     setOn(v) { on.set(v); dirty = true; }, setOverlay(v) { show.set(v); drawOverlay(); }, get on() { return on.get(); }, get overlay() { return show.get(); } };
 }

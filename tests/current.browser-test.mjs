@@ -6,10 +6,22 @@ const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { 
 let failed = false;
 try {
  assert.equal((await g.waitFor('window.__LW&&__LW.ready',150,100)).ok,1);
- const boot = await g.ev(`return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null}`);
+ const boot = await g.ev(`return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null,
+  heliumComputed:__LW.helium.computed,ladderComputed:__LW.ladder.computed,moCurveDone:__LW.mo.state().curveDone}`);
  assert.deepEqual(boot.errors,[]); assert.equal(boot.dirty,false);
+ assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);assert.equal(boot.moCurveDone,0);
  console.log('PASS current boot: no page errors, clean new project');
  console.log('GPU status:',boot.gpu || 'available');
+ const lazy=await g.ev(`const ids=['helium','h2','ladder','molecule'];ids.forEach(id=>__LW.layout.reopen(id,'R'));
+  const immediate={loading:Object.fromEntries(ids.map(id=>[id,document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')])),busy:__LW.busy.count,
+    centered:ids.every(id=>!!document.querySelector('.dev[data-id="'+id+'"] .dev-loading .mark'))};
+  await Promise.all([__LW.helium.prepare(),__LW.h2.prepare(),__LW.ladder.prepare(),__LW.mo.whenReady()]);
+  const done={helium:__LW.helium.computed,h2:__LW.h2.curveReady,ladder:__LW.ladder.computed,mo:__LW.mo.state().curveDone,
+    loading:ids.some(id=>document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')),errors:__e};
+  ids.forEach(id=>document.querySelector('.dev[data-id="'+id+'"]').classList.add('closed'));return {immediate,done}`);
+ assert.deepEqual(lazy.immediate.loading,{helium:true,h2:true,ladder:true,molecule:true});assert.ok(lazy.immediate.busy>0);assert.equal(lazy.immediate.centered,true);
+ assert.deepEqual(lazy.done,{helium:true,h2:true,ladder:true,mo:40,loading:false,errors:[]});
+ console.log('PASS multi-add queues every heavy card with local and cursor loading states');
  const persistence = await g.ev(`const p=__LW.layout.projects,n=__LW.layout.notebook;
   p.save('acceptance/new');const clean=!p.dirty;n.subtitle='edited subtitle';const dirty=p.dirty;
   p.save('acceptance/new');const original=Storage.prototype.setItem;let removed;

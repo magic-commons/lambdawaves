@@ -198,7 +198,7 @@ export function createFieldLines(canvas, api = {}) {
   const caption = () => (overlay === 'phi' ? `${stats.polys} equipotentials of ${source === 'total' ? 'Φ' : 'Φ_e'}`
     : overlay === 'E' ? `${stats.polys} lines of ${source === 'total' ? 'E' : 'E_e'}` : `${stats.polys} streamlines of j`);
 
-  function clear() { if (!g) return; const W = cv.clientWidth, H = cv.clientHeight; if (W < 1 || H < 1) return; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); }
+  function clear() { if (!g) return; if (cv.width !== 1 || cv.height !== 1) { cv.width = 1; cv.height = 1; } }
 
   /**
    * one frame.  `on` is the window's own verdict (live, open, hydrogenic, position space, no molecule): false blanks
@@ -207,7 +207,7 @@ export function createFieldLines(canvas, api = {}) {
    */
   function update(reg, t, obs, half, playing, Z, on) {
     if (!g) return;
-    if (!on) { clear(); return; }
+    if (!on || overlay === 'off') { clear(); return; }
     const k = `${reg.version}|${t.toFixed(6)}|${overlay}|${nLines}|${source}|${Z}|${half.toFixed(3)}`;
     if (k !== key) {
       const wall = performance.now();

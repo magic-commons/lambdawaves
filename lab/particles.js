@@ -96,6 +96,7 @@ export function createParticles(canvas, api) {
   }
   const P3 = [0, 0, 0], S3 = [0, 0, 0];
   function release() { if (canvas.width !== 1 || canvas.height !== 1) { canvas.width = 1; canvas.height = 1; } }   // off: no full-stage bitmap kept
+  function suspend(t) { if (Number.isFinite(t)) lastT = t; release(); }
   function draw(obs, half) {
     if (!on || !pts.length) { release(); return; }
     const W = canvas.clientWidth, H = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -127,7 +128,7 @@ export function createParticles(canvas, api) {
     g.fillText(`PARTICLES · ${state.alive}/${state.count} on the exact field v = Im(∇ψ/ψ) · seeded from |ψ|²`, 12, H - 88);
   }
   return {
-    seed, advance, draw, get state() { return state; },
+    seed, advance, draw, suspend, get state() { return state; },
     setOn(v) { on = v; if (!v) { pts = []; allocTrails(); lastT = null; state.count = 0; state.alive = 0; release(); } },
     get on() { return on; }, get points() { return pts; },
     /** the trail of particle i as an array of [x, y, z], oldest first — for the proofs */

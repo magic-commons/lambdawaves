@@ -225,15 +225,16 @@ export function createSliceView(host, api) {
      own buffers and draws on its own canvas.  So it keeps ITSELF alive on a PRIVATE requestAnimationFrame that steps,
      paints, and touches no part of the tier machinery — and it is the ONLY stepper, so the 2.2 ms budget is spent once
      per animation frame whether the transport is playing, paused, or not scheduling frames at all. */
-  let pumpId = 0;
-  function armPump() { if (!pumpId && job) pumpId = requestAnimationFrame(pump); }
+  let pumpId = 0, active = true;
+  function armPump() { if (active && !pumpId && job) pumpId = requestAnimationFrame(pump); }
   function pump() {
     pumpId = 0;
-    if (!job) return;
+    if (!job || !active) return;
     if (cv.clientWidth < 32) { job = null; return; }             // folded mid-job: drop it, exactly as update() would
     stepJob(); paint();
     armPump();                                                   // stepJob() nulls `job` when it finishes, and the pump stops
   }
+  function setActive(v) { active = !!v; if (active) armPump(); return active; }
   function update(reg, t, playing) {
     mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
     mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere control; drag the slice image to rotate in KS ℝ⁴';
@@ -274,10 +275,10 @@ export function createSliceView(host, api) {
     const up = () => { if (down) { down = false; res = 128; dirty = true; api.repaint(); } };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   }
-  window.addEventListener('resize', () => paint());
+  window.addEventListener('resize', () => { if (active) paint(); });
   /* `sampleAt` is the one-shot route kept for anything that wants a slice OUTSIDE the frame loop (a proof, a test):
      it is slice.js's own sampleSlice, unchunked, and it is what the chunked job reproduces row by row. */
-  return { update, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); dirty = true; },
+  return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); dirty = true; },
     get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m; modeSeg.set(m); dirty = true; },
     sampleAt(reg, t, N = res) { return sampleSlice(reg, t, rotor, { mode, half, N }); },
     tourTo(name) { const p = NAMED.find((x) => x.key === name); if (p) startTour(p); } };

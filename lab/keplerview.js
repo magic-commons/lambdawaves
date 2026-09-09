@@ -87,6 +87,11 @@ export function createKepler(canvas) {
       bow.x1 + 12, bow.y1 - 10, { x0: 10, y0: 0, x1: W - 10, y1: H }, 'left', true);
   }
   function update(reg, t, obs, half) { recompute(reg, t); draw(obs, half); }
+  function suspend() {
+    handles = []; hover = null;
+    hideGraphTip(cv);
+    if (cv.width !== 1 || cv.height !== 1) { cv.width = 1; cv.height = 1; }
+  }
   /** the perihelion handle under a canvas point (within 14 px), or null */
   function hit(x, y) { lastPointer = [x, y]; let best = null, bd = 14; for (const h of handles) { const d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h; } } return best; }
   /** the rack hands the hovered handle back here: that is where the orbit's own numbers are shown */
@@ -95,5 +100,5 @@ export function createKepler(canvas) {
     if (h && h.info && lastPointer) { const r = cv.getBoundingClientRect(); showGraphTip(cv, h.info, r.left + lastPointer[0], r.top + lastPointer[1]); }
     else hideGraphTip(cv);
   }
-  return { update, setBow, bowFrame, get on() { return on; }, setOn(v) { on = !!v; }, get orbits() { return orbits; }, hit, setHover, get handles() { return handles; } };
+  return { update, suspend, setBow, bowFrame, get on() { return on; }, setOn(v) { on = !!v; }, get orbits() { return orbits; }, hit, setHover, get handles() { return handles; } };
 }

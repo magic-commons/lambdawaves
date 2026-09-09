@@ -4,7 +4,7 @@
  * not the square of any single orbital — that is correlation).
  */
 import { h2Energies, h2Equilibrium, KNOWN_HL, EXACT_H2, collide, hlDensityWeights, MU_H2, EV } from './h2.js';
-import { h2Curves, sto3gH2, sto3gHydrogen, weinbaumOptimal } from './h2ci.js';
+import { h2Curves, h2CurveTable, sto3gH2, sto3gHydrogen, weinbaumOptimal } from './h2ci.js';
 import { overlapS } from './molecule.js';
 import { modeTable } from './hydrogen.js';
 import { el, seg, sw, knob, readout, trig, nRGB, vividInk, themeInk, graphHover, fitText } from './kit.js';
@@ -19,15 +19,8 @@ const T1S = modeTable(1, 0, 0);
    a flat one, and the readout under the plot carries the number at the marker either way. */
 const CURVE_N = 221;
 let CI_CURVE = null;
-function ciCurve(Rmin, Rmax) {
-  if (CI_CURVE && CI_CURVE.Rmin === Rmin && CI_CURVE.Rmax === Rmax) return CI_CURVE;
-  const rhf = new Float64Array(CURVE_N), fci = new Float64Array(CURVE_N), R = new Float64Array(CURVE_N);
-  for (let i = 0; i < CURVE_N; i++) { const r = Rmin + (Rmax - Rmin) * i / (CURVE_N - 1), s = sto3gH2(r); R[i] = r; rhf[i] = s.rhf; fci[i] = s.fci; }
-  CI_CURVE = { Rmin, Rmax, R, rhf, fci, limit: 2 * sto3gHydrogen().E };
-  return CI_CURVE;
-}
 export function createH2(host, api) {
-  let on = false, which = 'triplet', R = 6, ke = 0.02, run = null, kappa = 300, showCI = true;   // κ: nuclear time per logical time unit (a DISPLAY choice)
+  let on = false, active = api.active ? !!api.active() : true, curveTask = null, which = 'triplet', R = 6, ke = 0.02, run = null, kappa = 300, showCI = true;   // κ: nuclear time per logical time unit (a DISPLAY choice)
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'H₂ ON', value: false, title: 'hand the FIELD to two hydrogen atoms: the Heitler–London one-electron density on two moving nuclei', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
@@ -65,6 +58,17 @@ export function createH2(host, api) {
       roW.set(`${wb.fci.toFixed(6)} · ${wb.zeta.toFixed(4)}`, wb.fci < c.fci ? 'ok' : '');
       roW.setSub(`the same 2 × 2 CI on SLATER orbitals with ζ free — VARIATIONAL, and below STO-3G's FCI by ${(c.fci - wb.fci).toFixed(6)} at this R · ionic mixing λ = ${wb.lambda.toFixed(4)} · D_e ${((-1 - wb.fci) * EV).toFixed(3)} eV against Heitler–London's 3.16 and the exact 4.75`); }
     paint();
+  }
+  function prepare() {
+    if (CI_CURVE) return Promise.resolve(CI_CURVE);
+    if (curveTask) return curveTask;
+    if (api.loading) api.loading(true);
+    const work = api.solveCurve ? api.solveCurve(0.6, 10, CURVE_N) : new Promise((resolve) => requestAnimationFrame(() => setTimeout(() => resolve(h2CurveTable(0.6, 10, CURVE_N)), 0)));
+    curveTask = Promise.resolve(work).then((result) => {
+      if (result && !result.error) CI_CURVE = result.result || result;
+      if (active) paint(); return CI_CURVE;
+    }).finally(() => { curveTask = null; if (api.loading) api.loading(false); });
+    return curveTask;
   }
   /* WAVE 46 — the caption named the two curves ("singlet (bond) · triplet (repel)") because the plot could
      not; the curves say it themselves now, and the caption keeps the law.  A CANVAS HAS NO THEME: every rule
@@ -104,7 +108,8 @@ export function createH2(host, api) {
         info: `${key} — ${what}  ·  Heitler–London, a bound from above  ·  at R = ${R.toFixed(2)} a₀  E = ${eNow[key].toFixed(4)} Eh` });
     }
     /* the two STO-3G curves — the correlated pair, drawn under the Heitler–London ones so the bond well reads first */
-    if (showCI) { const cc = ciCurve(Rmin, Rmax);
+    if (showCI && !CI_CURVE) prepare();
+    if (showCI && CI_CURVE) { const cc = CI_CURVE;
       /* WAVE 58 — THE DISSOCIATION LIMIT DRAWN AS WHAT IT IS.  The dashed rule at −1 is the EXACT H + H, and the
          STO-3G curves do not go there: their atom is −0.4665819, so their limit is −0.933164, and FCI reaching it
          while RHF climbs away is the whole claim of this pair.  Drawn in FCI's own colour, so it reads as the
@@ -162,7 +167,7 @@ export function createH2(host, api) {
       { table: T1S, re: nu, im: 0, center: A, group: 1 }, { table: T1S, re: -nu, im: 0, center: B, group: 1 }];
   }
   refresh();
-  return { update, refresh, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = v; run = null; refresh(); }, get which() { return which; }, setWhich(w) { which = w; wSeg.set(w); run = null; refresh(); },
+  return { update, refresh, prepare, setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) refresh(); return active; }, get curveReady() { return !!CI_CURVE; }, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = v; run = null; refresh(); }, get which() { return which; }, setWhich(w) { which = w; wSeg.set(w); run = null; refresh(); },
     get showCI() { return showCI; }, setShowCI(v) { showCI = !!v; ciSw.set(showCI); paint(); return showCI; },
     /** the correlated numbers AT R, for a proof that wants them without reading a readout's string */
     ci(r = R) { const c = sto3gH2(r), wb = weinbaumOptimal(r); return { R: r, rhf: c.rhf, fci: c.fci, correlation: c.fci - c.rhf, weinbaum: wb.fci, zeta: wb.zeta, lambda: wb.lambda, limit: 2 * sto3gHydrogen().E }; },

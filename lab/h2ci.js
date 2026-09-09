@@ -261,6 +261,13 @@ function golden(f, lo, hi, iters) {
 }
 /** STO-3G RHF and FCI at R */
 export const sto3gH2 = (R) => minimalH2(sto3gIntegrals(R));
+
+/** The serialisable correlated-curve table used by the H₂ card and its background worker. */
+export function h2CurveTable(Rmin = 0.6, Rmax = 10, count = 221) {
+  const n = Math.max(2, count | 0), rhf = new Float64Array(n), fci = new Float64Array(n), R = new Float64Array(n);
+  for (let i = 0; i < n; i++) { const r = Rmin + (Rmax - Rmin) * i / (n - 1), s = sto3gH2(r); R[i] = r; rhf[i] = s.rhf; fci[i] = s.fci; }
+  return { Rmin, Rmax, R, rhf, fci, limit: 2 * sto3gHydrogen().E };
+}
 /** E(H, STO-3G): the one-electron atom in the same contraction — the dissociation limit FCI must reach */
 export function sto3gHydrogen() {
   const { alpha: al, coef: co } = STO3G_H, d = co.map((c, i) => c * Math.pow(2 * al[i] / Math.PI, 0.75));
