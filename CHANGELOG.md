@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 40 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 41 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -82,6 +82,7 @@ stable enough to gate on.
 - `d13da27` 2026-09-10 — Transport second pass: miniature macro rail, the law of the two clocks, compact cuts, hints step…
 - `71d8eb6` 2026-09-10 — Transport third pass: the window's own macro rows, its gestures, its compact rail as specified
 - `33341d3` 2026-09-10 — Transport fourth pass: dot grip, ×4, digit-under-pointer BPM, the transport follows card style
+- `ecd096a` 2026-09-10 — Adopt MIR: the interface kit lives in lab/mir, the app keeps only its own selectors
 
 </details>
 

@@ -2348,3 +2348,39 @@ chip-rail grip was already this mark; the kit takes it as the law.
 `MIR-MANIFEST.json` names the bytes; `node ../MIR/tools/adopt.mjs . --check` reads "in step". The gallery
 (`MIR/gallery/`) shows every token, material and widget built by the kit itself, with the theme, card
 style, frost and disconnected seats live.
+
+## 2026-09-10 · The DAW law: a project carries everything a demo shows
+
+Josh, about to make demos: "treat this like a DAW and check if every observable thing is kept in the
+project files." Audited against `serialize()`: the register, material, camera pose, quality, domain,
+palette, hamiltonian, field lines, Wigner, MO, rates, Sturmian and the modulation rack were already
+there. What was not, and is now, each an additive key under `presentation` (an old file opens as before;
+an UNDO record never carries them):
+
+- **`ui`** — theme (dark / light / system), card style, frost policy, disconnected, the accents, and the
+  **stage**: the knob's mix plus a **custom stage colour**. The palette's own swatch now sits left of the
+  STAGE knob; pick a colour and the stage stops following the theme (that colour is the dark end of the
+  same mix, and a theme flip keeps it); FOLLOW THEME clears it. Untouched, the stage follows the theme
+  exactly as before.
+- **`layout`** — the arrangement as it stands: every window's side, order, folded / closed / off, floats
+  with their positions (the favourites' own record, reused). "Random windows are open as they are."
+- **`modwin`** — the modulation window's placement, lane, ribbon, device modes, folder, macro side and
+  fold.
+- **`camera`** — auto-rotate, friction, spin, drag gain, fling.
+- **`overlays`** — VORTEX on / overlay, KEPLER, particles (on and count, re-seeded on open), and SPECTRUM's
+  DIALS fold.
+- **`ab`** — the A/B transition's two stored states, Ω and whether it was running (the block's private
+  stores now have a project road; Josh: "state transitions don't keep").
+- **`notebook`** — its size, only when it was resized from the default (the ABOUT face and the notebook
+  share the default).
+
+Proved in the shipped gate (`tests/current.browser-test.mjs`, the DAW law): arrange a demo — a route with
+its own range, the opposite theme, a custom stage, auto-rotate, KEPLER, VORTEX, DIALS, A and B stored, the
+notebook at 520 × 380 — save, disturb everything, restore, and read every value back equal. One bug found
+on the way: `restore()`'s catch said "restore failed" and nothing else, which hid a scope error for an
+afternoon; it now says why in the console.
+
+On the macros "moving the entire region": that is the pause law working as designed — a hand on a routed
+knob moves its BASE and the ring is the range; the route's `min`/`max` and the base are in the file and
+round-trip (the proof routes `material.exposure` over 0.5…4). If a demo shows otherwise, a screenshot of
+the route and the knob before/after the save will find it.

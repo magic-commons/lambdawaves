@@ -889,3 +889,10 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
   .km-footer-info { align-items: flex-start; text-align: left; }
 }
 #transport .mod-logo:active { transform:scale(.91); box-shadow:inset 0 2px 5px #0006; }
+
+/* THE STAGE COLOUR SEAT (2026-09-10): the palette's own swatch and a FOLLOW THEME chip, left of the STAGE knob */
+.stage-seat { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; align-self: flex-end; }
+.stage-colour { width: 34px; height: 34px; padding: 2px; }
+.stage-colour.on { box-shadow: 0 0 0 1.5px var(--acc); }
+.stage-follow { height: 18px; min-height: 18px; padding: 0 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+

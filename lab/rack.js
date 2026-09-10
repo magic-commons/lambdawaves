@@ -655,7 +655,8 @@ export async function boot(dom) {
 
 
   let modArm = true;
-  let clockLink = true, linkFollowed = null, linkRetryAt = 0;   // 2026-09-10 · THE LAW OF THE TWO CLOCKS: linked, the modulation clock follows the transport; free, it is its own (MOD PLAY). This browser's, never the project's.
+  let clockLink = true, linkFollowed = null, linkRetryAt = 0;
+  let stageMix = 0.04;                       // the STAGE knob's mix, hoisted here because serialize() writes it   // 2026-09-10 · THE LAW OF THE TWO CLOCKS: linked, the modulation clock follows the transport; free, it is its own (MOD PLAY). This browser's, never the project's.
   const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
   /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
    *  Found here and fixed here: every transport EDGE calls the host's applyAll(force), which hands
@@ -1501,6 +1502,7 @@ export async function boot(dom) {
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
       mat.bg = THEMES[theme].bg.slice();
+      if (__LW_hooks.restage) __LW_hooks.restage();                       // a customised stage survives a theme flip; an untouched one follows it
       mat.lightUI = theme === 'light';                                     // wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads this
       if (ui.themeSeg) ui.themeSeg.set(themeChoice);
       if (__LW_hooks.themeChanged) __LW_hooks.themeChanged(theme);
@@ -1531,10 +1533,23 @@ export async function boot(dom) {
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
        correction against a ground the hand can drag is not a correction.  One named function, so the knob,
        LW.setStage and the gate all take the same road. */
-    function setStageMix(v) { const d = THEMES.dark.bg, l = THEMES.light.bg; mat.bg = [0, 1, 2].map((i) => d[i] + (l[i] - d[i]) * v); paintMarks(); schedule(TIER.PRESENT); }
+    /* THE STAGE COLOUR (Josh, 2026-09-10): by default the stage is the theme's — the knob mixes the dark ground
+       toward the light one and a theme flip repaints it. Pick a colour and the stage is CUSTOMISED: that colour is
+       the dark end of the same mix, it survives a theme flip, and it travels in the project. FOLLOW THEME clears it. */
+    function setStageMix(v) { stageMix = v; const d = mat.stageCustom || THEMES.dark.bg, l = THEMES.light.bg; mat.bg = [0, 1, 2].map((i) => d[i] + (l[i] - d[i]) * v); paintMarks(); schedule(TIER.PRESENT); }
+    __LW_hooks.restage = () => { if (mat.stageCustom) setStageMix(stageMix); };
+    const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255), rgbToHex = (c) => '#' + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
+    function setStageColour(rgb) { mat.stageCustom = rgb ? rgb.slice(0, 3) : null; if (ui.stageColour) { ui.stageColour.value = rgbToHex(mat.stageCustom || THEMES.dark.bg); ui.stageColour.classList.toggle('on', !!mat.stageCustom); } if (ui.stageFollow) ui.stageFollow.hidden = !mat.stageCustom; setStageMix(stageMix); }
+    __LW_hooks.setStageColour = setStageColour;
     ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     __LW_hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
-    rt.appendChild(ui.stageK.root);
+    { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };                                    // the palette's own swatch, left of the knob (native-ui seats it by name)
+      ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.value = rgbToHex(THEMES.dark.bg);
+      ui.stageColour.title = 'Stage colour — pick one and the stage stops following the theme'; ui.stageColour.setAttribute('aria-label', 'stage colour');
+      ui.stageColour.addEventListener('input', () => setStageColour(hexToRgb(ui.stageColour.value)));
+      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.hidden = true; ui.stageFollow.title = 'Forget the custom stage colour';
+      ui.stageFollow.addEventListener('click', () => setStageColour(null));
+      rt.appendChild(ui.stageK.root); }
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
     ui.cardSeg = seg({ label: 'CARD STYLE', value: 'refractive', options: [
       { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
@@ -1941,6 +1956,16 @@ export async function boot(dom) {
       ui.abOmega = knob({ label: 'Ω  RABI', min: 0.005, max: 1, value: 0.05, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = v; reg.transition.t0 = clock.t - 2 * th / v; } abOmega = v; } });
       rab2.appendChild(ui.abOmega.root);
       rab2.appendChild(ui.abRo.root);
+      /* THE PROJECT'S ROAD (Josh, 2026-09-10: "state transitions don't keep"): both stores, Ω and whether the
+         transition is running — plain arrays in the file, typed arrays in the block. */
+      ui.ab = {
+        get: () => ({ a: abA ? { re: Array.from(abA.re), im: Array.from(abA.im) } : null, b: abB ? { re: Array.from(abB.re), im: Array.from(abB.im) } : null, omega: abOmega, on: !!reg.transition }),
+        set(o) { if (!o) return; const take = (S) => (S && Array.isArray(S.re) && S.re.length === 91 && Array.isArray(S.im)) ? { re: Float64Array.from(S.re), im: Float64Array.from(S.im) } : null;
+          abA = take(o.a); abB = take(o.b); if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
+          if (reg.transition) reg.clearTransition(clock.t);
+          if (o.on && abA && abB && !sturm.P) { reg.setTransition(abA, abB, abOmega, clock.t); ui.abSw.set(true); } else ui.abSw.set(false);
+          abStatus(); }
+      };
       function abStatus() {
         const count = (S) => S ? S.re.reduce((k, v, i) => k + ((v || S.im[i]) ? 1 : 0), 0) : 0, nA = count(abA), nB = count(abB);
         let ov = 0; if (abA && abB) { let r = 0, im = 0; for (let a = 0; a < 91; a++) { r += abA.re[a] * abB.re[a] + abA.im[a] * abB.im[a]; im += abA.re[a] * abB.im[a] - abA.im[a] * abB.re[a]; } ov = Math.hypot(r, im); }
@@ -2309,7 +2334,7 @@ export async function boot(dom) {
       ui.kepRo = readout({ label: 'ORBIT  a · e · coherence', cls: 'wide', value: '—', sub: 'pick a populated shell' });
       rkk.appendChild(ui.kepRo.root);
     }
-    rk.appendChild(sw({ label: 'KEPLER ORBIT', value: false, title: 'Draw the Kepler orbit over the field', onChange: (v) => { kepler.setOn(v); schedule(TIER.PRESENT); } }).root);
+    ui.keplerSw = sw({ label: 'KEPLER ORBIT', value: false, title: 'Draw the Kepler orbit over the field', onChange: (v) => { kepler.setOn(v); schedule(TIER.PRESENT); } }); rk.appendChild(ui.keplerSw.root);
   el('div', 'note', wOrb.body).innerHTML = '<b>Kepler overlay.</b> The selected shell sets the ellipse size and eccentricity from ⟨L⟩ and ⟨K⟩. Dashed lines indicate a low-coherence correspondence; no orbit is drawn below the threshold.';
   }
 
@@ -4126,6 +4151,10 @@ export async function boot(dom) {
         const data = serialize(), pr = data.presentation;
         delete data.experiment.t;
         delete pr.quality.autoScale;
+        /* THE DAW KEYS THAT DO NOT DIRTY A PROJECT: moving a window, the modulation window's placement, the
+           camera's feel, the theme and stage, the notebook's size are saved WITH the project but a demo-maker
+           dragging a window is not "unsaved work". The overlays and the A/B transition are content and do count. */
+        delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.ui; delete pr.notebook;
         if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
         const seats = {
           'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'],
@@ -4293,6 +4322,7 @@ export async function boot(dom) {
         nb.addEventListener('pointerup', () => nbSaveSize());
         const S0 = readSettings(); if (typeof S0.nbW === 'number' && typeof S0.nbH === 'number') nbResize(S0.nbW, S0.nbH);
         layout.notebookResize = (w, h) => { const r = nbResize(w, h); nbSaveSize(); return r; };
+        layout.notebookSize = () => { const w = Math.round(parseFloat(nb.style.width) || NOTES_DEF_W), h = Math.round(parseFloat(nb.style.height) || NOTES_DEF_H); return { w, h, custom: w !== NOTES_DEF_W || h !== NOTES_DEF_H }; };
       }
       let nd = null, nbMoved = false; const nhead = nb.querySelector('.nb-head');
       nhead.addEventListener('pointerdown', (e) => { if (e.target.closest('button, input')) return; const r = nb.getBoundingClientRect(); nd = { dx: e.clientX - r.left, dy: e.clientY - r.top }; nhead.setPointerCapture(e.pointerId); });
@@ -4930,7 +4960,7 @@ export async function boot(dom) {
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   function serialize() {
-    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI;
+    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI; delete m.stageCustom;   // the stage travels under presentation.ui.stage
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -4946,7 +4976,20 @@ export async function boot(dom) {
         wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
         mo: moPanel ? moPanel.save() : null,
         rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
-        modulation: modHost ? modRackStamped() : null } };
+        modulation: modHost ? modRackStamped() : null,
+        /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT. Everything a demo can show rides in it — the theme, the
+           card style and frost, the accents, the stage; the window arrangement (every window as it stands,
+           floats included); the modulation window's placement; the camera's feel and auto-rotate; the overlays;
+           SPECTRUM's DIALS fold; the A/B transition; the notebook's size when it was resized. Every key is
+           additive: a file without it opens as before, and an UNDO record never carries them. */
+        ui: { theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'dark', card: document.body.dataset.card || null, frost: frostMode,
+              disc: document.body.classList.contains('disconnected'), accent: { ...accent }, stage: { mix: stageMix, custom: mat.stageCustom ? mat.stageCustom.slice(0, 3) : null } },
+        layout: layout.captureLayout ? layout.captureLayout() : null,
+        modwin: modView ? modView.presentation() : null,
+        camera: { autoRotate: !!camera.autoRotate, friction: camera.friction, speed: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain },
+        overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
+        ab: ui.ab ? ui.ab.get() : null,
+        notebook: layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
   }
   /** WAVE 63 · THE RACK CARRIES ITS MODEL VERSION, because nothing else on this road did.
    *  `mod.js` stamps `modV` on a PRESET record and `presetApply` refuses a stamp it cannot read —
@@ -5031,6 +5074,24 @@ export async function boot(dom) {
         if (pr.field) { const F = pr.field; if (F.overlay !== undefined) fieldlines.setOverlay(F.overlay); if (F.lines !== undefined) fieldlines.setLines(F.lines); if (F.source !== undefined) fieldlines.setSource(F.source); }
         if (Array.isArray(pr.rates) && pr.rates.length === 91) { rates.set(pr.rates); reg.setEnergies(energyOf); }
         if (pr.modulation !== undefined) restoreModulation(pr.modulation);   // wave 52 (an UNDO's presentation has no such key, so undo never touches the rack)
+        /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize) */
+        if (pr.ui) { const U = pr.ui;
+          if (U.theme && __LW_hooks.setTheme) __LW_hooks.setTheme(U.theme);
+          if (U.card) setCardStyle(U.card);
+          if (U.frost !== undefined) setFrost(U.frost, { quiet: true });
+          if (U.disc !== undefined) setDisconnected(!!U.disc, { quiet: true });
+          if (U.accent) { Object.assign(accent, U.accent); if (ui.accA) ui.accA.set(accent.a); if (ui.accB) ui.accB.set(accent.b); if (ui.vivid) ui.vivid.set(accent.vivid); applyAccent(); }
+          if (U.stage) { if (Number.isFinite(U.stage.mix)) { stageMix = U.stage.mix; if (ui.stageK) ui.stageK.set(stageMix); } if (__LW_hooks.setStageColour) __LW_hooks.setStageColour(Array.isArray(U.stage.custom) ? U.stage.custom : null); } }
+        if (pr.camera) { const C = pr.camera; if (Number.isFinite(C.friction)) camera.setFriction(C.friction); if (Number.isFinite(C.speed)) camera.setSpeed(C.speed); if (Number.isFinite(C.dragGain)) camera.setDragGain(C.dragGain); if (Number.isFinite(C.fling)) camera.setFling(C.fling); camera.setAutoRotate(!!C.autoRotate); }
+        if (pr.overlays) { const O = pr.overlays;
+          if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
+          if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
+          if (O.particles) { if (O.particles.on) { particles.setOn(true); particles.seed(O.particles.count || 160, reg, clock.t, domain.half); } else particles.setOn(false); }
+          if (O.dials !== undefined && spectrum.setDials) spectrum.setDials(!!O.dials); }
+        if (pr.ab && ui.ab) ui.ab.set(pr.ab);
+        if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w)) layout.notebookResize(pr.notebook.w, pr.notebook.h);
+        if (pr.modwin && modView) modView.restore(pr.modwin);
+        if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         // Restore operator rates AFTER the destination scale is installed. The old project's
@@ -5049,7 +5110,7 @@ export async function boot(dom) {
       }
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
       return true;
-    } catch (e) { wState.setStatus('restore failed', 'warn'); return false; }
+    } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
   }
 
   /* ── WAVE 56 · SHAREABLE LINKS (board #55) ────────────────────────────────────────────────

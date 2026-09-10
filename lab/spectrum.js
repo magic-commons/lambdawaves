@@ -359,6 +359,9 @@ export function createSpectrum(host, api) {
   }
   function select(a) { selected = a; fxWall = 0; for (const [i, L] of lanes) { const s = i === a; if (L.was.sel !== s) { L.was.sel = s; L.root.classList.toggle('sel', s); } } }
   window.addEventListener('resize', () => paintLadder());
+  /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
+  const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
   return { update, rebuild, select, get selected() { return selected; }, lanes, get building() { return pending.length; },
+    get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; } };
 }

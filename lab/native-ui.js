@@ -92,7 +92,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   ui.setWindowInfo=applyWindowInfo;
   ui.windowInfoSw=sw({label:'HELP',value:showWindowInfo,title:'Show window help buttons',onChange:applyWindowInfo});applyWindowInfo(showWindowInfo);
   row('appearance',['themeSeg']);row('appearance',['cardSeg']);row('appearance',['frostSeg']);row('appearance',['discSw','blurK']);row('appearance',['accA','accB','vivid']);
-  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.appearance);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
