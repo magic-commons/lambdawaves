@@ -90,25 +90,36 @@ try {
  console.log('PASS macro keyboard: the seat edits depth folded or not, and close/reopen keeps it; no page errors');
  const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await w(250);const audio=M.sourceList().find(s=>s.kind==='audio');
   const card=document.querySelector('.m2dev.audio'),rows=[...card.querySelectorAll('.aud-range-row')];
-  const bands=['low','mid','high'].map(k=>card.querySelector('[data-band="'+k+'"]').getBoundingClientRect().x);
+  const rowBoxes=rows.map(e=>e.getBoundingClientRect()),trackBoxes=rows.map(e=>e.querySelector('.aud-range-track').getBoundingClientRect()),mixBoxes=rows.map(e=>e.querySelector('.aud-level-mix').getBoundingClientRect());
   const level=card.querySelector('[data-band="level"]'),track=level.querySelector('.aud-range-track'),lower=level.querySelector('.aud-range-handle.lower'),upper=level.querySelector('.aud-range-handle.upper');
   const probe=document.createElement('i');card.append(probe);probe.style.background='var(--acc)';const accA=getComputedStyle(probe).backgroundColor;probe.style.background='var(--acc2)';const accB=getComputedStyle(probe).backgroundColor;probe.remove();
   const ott={mixers:card.querySelectorAll('.aud-level-mix-dial').length,valuesHidden:rows.every(e=>getComputedStyle(e.querySelector('.aud-range-value')).opacity==='0'),
-    border:getComputedStyle(track).borderTopWidth,live:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor,
-    devicePalette:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor===accA&&getComputedStyle(lower).color===accA&&getComputedStyle(upper).color===accA&&accA!==accB,
+    macroArc:rows.every(e=>e.querySelector('.aud-level-mix-dial>.m2depthring>.m2depthtrack')&&e.querySelector('.aud-level-mix-dial>.m2depthring>.m2deptharc')),
+    equalRows:new Set(rowBoxes.map(b=>Math.round(b.height*10))).size===1&&new Set(trackBoxes.map(b=>Math.round(b.width))).size===1&&new Set(trackBoxes.map(b=>Math.round(b.height))).size===1,
+    stacked:rowBoxes.every((b,i)=>i===0||b.y>rowBoxes[i-1].y)&&new Set(rowBoxes.map(b=>Math.round(b.x))).size===1,
+    aligned:rows.every((e,i)=>Math.abs((mixBoxes[i].y+mixBoxes[i].height/2)-(trackBoxes[i].y+trackBoxes[i].height/2))<1),
+    longMeters:trackBoxes.every(b=>b.width>=190),sourceNarrow:[...card.querySelectorAll('.m2audsrc')].every(e=>e.getBoundingClientRect().width<70),
+    border:getComputedStyle(track).borderTopWidth,clearTrack:getComputedStyle(track).backgroundColor==='rgba(0, 0, 0, 0)',live:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor,
+    palette:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor===accA&&getComputedStyle(lower).color===accB&&getComputedStyle(upper).color===accB&&getComputedStyle(card.querySelector('.m2audsrc')).color===accB&&accA!==accB,
+    latencyUnderSet:card.querySelector('.aud-latency').parentElement===card.querySelector('.m2col')&&card.querySelector('.aud-latency').getBoundingClientRect().top>card.querySelectorAll('.m2audsrc')[1].getBoundingClientRect().bottom,
+    noHeadStatus:getComputedStyle(card.querySelector('.m2audioheadstate')).display==='none',
     oneGrip:getComputedStyle(card.querySelector('.m2head'),'::before').content==='none'&&Math.round(card.querySelector('.m2grab i').getBoundingClientRect().width)===13};
-  card.style.setProperty('--acc','#0b528f');await w(250);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===paletteLive;card.style.removeProperty('--acc');
+  card.style.setProperty('--acc','#0b528f');card.style.setProperty('--acc2','#8f520b');await w(250);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===getComputedStyle(card.querySelector('.m2audsrc')).color&&getComputedStyle(upper).color!==paletteLive;card.style.removeProperty('--acc');card.style.removeProperty('--acc2');
   lower.focus();await w(250);ott.valuesReveal=getComputedStyle(level.querySelector('.aud-range-value')).opacity==='1';lower.blur();
   const lowMix=card.querySelector('[data-band="low"] .aud-level-mix-dial');lowMix.focus();lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));
   ott.lowMixHome=M.audioReadout(audio.id).levelMix.low===0;lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));
   const compact=[...document.querySelectorAll('.kwin-chiprail button')].find(e=>e.getAttribute('aria-label')==='COMPACT');compact.click();await w(180);
-  const card2=document.querySelector('.m2dev.audio'),tops=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>Math.round(e.getBoundingClientRect().top));
-  const result={ordered:bands[0]<bands[1]&&bands[1]<bands[2],allBands:[...card2.querySelectorAll('.aud-range-row')].every(e=>getComputedStyle(e).display!=='none'),
-    oneKnobRow:new Set(tops).size===1,setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),
+  const card2=document.querySelector('.m2dev.audio'),knobBoxes=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>e.getBoundingClientRect()),compactRows=[...card2.querySelectorAll('.aud-range-row')],compactTracks=compactRows.map(e=>e.querySelector('.aud-range-track').getBoundingClientRect()),compactMix=compactRows.map(e=>e.querySelector('.aud-level-mix').getBoundingClientRect()),bodyBox=card2.querySelector('.m2body').getBoundingClientRect();
+  const result={allBands:compactRows.every(e=>getComputedStyle(e).display!=='none'),twoByTwo:new Set(knobBoxes.map(b=>Math.round(b.top))).size===2&&new Set(knobBoxes.map(b=>Math.round(b.left))).size===2,
+    knobsAboveMeters:Math.max(...knobBoxes.map(b=>b.bottom))<=bodyBox.top+1,verticalMeters:compactTracks.every(b=>b.height>b.width)&&compactTracks.every((b,i)=>i===0||b.x>compactTracks[i-1].x),
+    compactAligned:compactTracks.every((b,i)=>Math.abs((b.x+b.width/2)-(compactMix[i].x+compactMix[i].width/2))<1),shortLabels:compactRows.map(e=>e.querySelector('.aud-range-short').textContent).join('')==='MLMH',
+    verticalHandles:compactRows.every(e=>e.querySelector('.aud-range-handle').getAttribute('aria-orientation')==='vertical'),routeWidth:Math.round(card2.querySelector('.m2audout[data-route-selected="true"]').getBoundingClientRect().width),
+    setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),
     ott,latency:card2.querySelector('.aud-latency').textContent,errors:__e.slice()};M.deserialize(null);return result;`);
- assert.equal(audioFace.ordered,true);assert.equal(audioFace.allBands,true);assert.equal(audioFace.oneKnobRow,true);assert.equal(audioFace.setVisible,true);assert.equal(audioFace.latency,'LATENCY —');assert.deepEqual(audioFace.errors,[]);
- assert.equal(audioFace.ott.mixers,4);assert.equal(audioFace.ott.valuesHidden,true);assert.equal(audioFace.ott.valuesReveal,true);assert.equal(audioFace.ott.lowMixHome,true);assert.equal(audioFace.ott.border,'0px');assert.equal(audioFace.ott.devicePalette,true);assert.equal(audioFace.ott.followsPalette,true);assert.equal(audioFace.ott.oneGrip,true);assert.match(audioFace.ott.live,/rgb/);
- console.log('PASS Audio face: OTT signal ranges, transient values, four LEVEL mix dials, one reorder grip, and complete compact controls');
+ assert.equal(audioFace.allBands,true);assert.equal(audioFace.twoByTwo,true);assert.equal(audioFace.knobsAboveMeters,true);assert.equal(audioFace.verticalMeters,true);assert.equal(audioFace.compactAligned,true);assert.equal(audioFace.shortLabels,true);assert.equal(audioFace.verticalHandles,true);assert.ok(audioFace.routeWidth<=90);assert.equal(audioFace.setVisible,true);assert.equal(audioFace.latency,'LATENCY —');assert.deepEqual(audioFace.errors,[]);
+ for(const key of ['macroArc','equalRows','stacked','aligned','longMeters','sourceNarrow','clearTrack','palette','latencyUnderSet','noHeadStatus','valuesHidden','valuesReveal','lowMixHome','followsPalette','oneGrip'])assert.equal(audioFace.ott[key],true,key);
+ assert.equal(audioFace.ott.mixers,4);assert.equal(audioFace.ott.border,'0px');assert.match(audioFace.ott.live,/rgb/);
+ console.log('PASS Audio face: equal full meters, macro-ring mix controls, house palette, and compact 2×2 knobs with vertical channels');
  /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — theme, stage colour, camera feel and
     auto-rotate, overlays, SPECTRUM's DIALS fold, the A/B transition, the notebook's size, the modulation window's
     placement, the arrangement, the routes with their ranges — and comes back from it. */

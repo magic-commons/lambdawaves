@@ -2292,18 +2292,25 @@ export function createModulation(host, port) {
       apply();paintAudio(rec);return value;
     };
     const makeMix = (row, key) => {
-      const root=el('div','aud-level-mix',row),dial=el('div','aud-level-mix-dial',root),value=el('output','aud-level-mix-value',root);
-      dial.tabIndex=0;dial.setAttribute('role','slider');dial.setAttribute('aria-valuemin','0');dial.setAttribute('aria-valuemax','100');
-      dial.setAttribute('aria-label',(key==='level'?'LEVEL master':key.toUpperCase()+' contribution')+' to LEVEL');
-      let drag=null;
-      const set=v=>{select(key);patchMix(key,v);};
-      dial.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();select(key);drag={y:e.clientY,v:s.audio.levelMix[key]};row.classList.add('editing');dial.setPointerCapture(e.pointerId);dial.focus();});
-      dial.addEventListener('pointermove',e=>{if(drag)set(drag.v+(drag.y-e.clientY)/70);});
-      const end=()=>{drag=null;row.classList.remove('editing');};dial.addEventListener('pointerup',end);dial.addEventListener('pointercancel',end);dial.addEventListener('lostpointercapture',end);
-      dial.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();set(s.audio.levelMix[key]+(e.deltaY<0?.05:-.05));},{passive:false});
-      dial.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const d=['ArrowRight','ArrowUp'].includes(e.key)?.05:-.05;set(e.key==='Home'?0:e.key==='End'?1:s.audio.levelMix[key]+d);});
-      dial.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();set(1);});
-      return {root,dial,value};
+      // Use the macro depth control's real ring anatomy. Audio only supplies its
+      // own value and gesture; the established track/arc nodes own the shape.
+      const root=el('div','aud-level-mix',row),dial=el('div','aud-level-mix-dial m2numseat',root);
+      const ring=svgEl('svg','m2depthring',dial);ring.setAttribute('viewBox','0 0 36 36');ring.setAttribute('aria-hidden','true');
+      const track=svgEl('circle','m2depthtrack',ring),arc=svgEl('circle','m2deptharc',ring);
+      for(const node of [track,arc]){node.setAttribute('cx','18');node.setAttribute('cy','18');node.setAttribute('r','15');node.setAttribute('pathLength','1');}
+      track.setAttribute('stroke-dasharray','1 1');arc.setAttribute('stroke-dasharray','1 1');
+      el('span','m2num aud-level-mix-core',dial).setAttribute('aria-hidden','true');
+      const value=el('output','aud-level-mix-value',root);
+      dial.setAttribute('role','slider');
+      const input={
+        get:()=>s.audio.levelMix[key],
+        set:v=>{select(key);patchMix(key,v);},
+        reset:()=>{select(key);patchMix(key,1);},
+        axis:'y',editable:()=>true
+      };
+      wireSlider(dial,input);bindSliderKeys(dial,input);
+      aria(dial,(key==='level'?'LEVEL master':key.toUpperCase()+' contribution')+' to LEVEL',0,100,100*input.get(),Math.round(100*input.get())+'%');
+      return {root,dial,value,arc};
     };
     const shift = (key, delta, base=s.audio.outs[key]) => {
       delta = Math.max(M.AUDIO_RANGE_MIN-base.floorDb, Math.min(M.AUDIO_RANGE_MAX-base.ceilingDb, delta));
@@ -2313,7 +2320,9 @@ export function createModulation(host, port) {
       const row = el('div', 'aud-range-row', root); row.dataset.band=key;
       const mix=makeMix(row,key);
       const head = el('button', 'aud-range-name', row); head.type='button';
-      el('b','',head,key.toUpperCase()); const text=el('output','aud-range-value',row);
+      el('b','aud-range-full',head,key.toUpperCase());
+      el('span','aud-range-short',head,key==='level'?'M':key[0].toUpperCase());
+      const text=el('output','aud-range-value',row);
       head.addEventListener('click',()=>select(key));
       head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD';
       const track=el('div','aud-range-track',row);
@@ -2336,14 +2345,15 @@ export function createModulation(host, port) {
       let drag=null;
       track.addEventListener('pointerdown',e=>{
         if(e.button!==0)return; e.preventDefault();e.stopPropagation();select(key);
-        const o=s.audio.outs[key],b=track.getBoundingClientRect();
-        const db=M.AUDIO_RANGE_MIN+(e.clientX-b.left)/b.width*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
+        const o=s.audio.outs[key],b=track.getBoundingClientRect(),vertical=dev.root.classList.contains('m2cmp');
+        const u=vertical?1-(e.clientY-b.top)/b.height:(e.clientX-b.left)/b.width;
+        const db=M.AUDIO_RANGE_MIN+u*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
         const endpoint=e.target.dataset.endpoint || (db<o.floorDb?'floorDb':db>o.ceilingDb?'ceilingDb':null);
-        drag={x:e.clientX,w:b.width,base:{...o},endpoint};
+        drag={x:e.clientX,y:e.clientY,w:b.width,h:b.height,vertical,base:{...o},endpoint};
         row.classList.add('editing');track.setPointerCapture(e.pointerId); if(endpoint)handles[endpoint].focus();
       });
       track.addEventListener('pointermove',e=>{
-        if(!drag)return;const delta=(e.clientX-drag.x)/drag.w*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
+        if(!drag)return;const delta=(drag.vertical?(drag.y-e.clientY)/drag.h:(e.clientX-drag.x)/drag.w)*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
         if(!drag.endpoint)shift(key,delta,drag.base);
         else {
           const lo=drag.endpoint==='floorDb'?M.AUDIO_RANGE_MIN:drag.base.floorDb+M.AUDIO_RANGE_GAP;
@@ -2358,7 +2368,7 @@ export function createModulation(host, port) {
       rows[key]={row,head,text,mix,low,high,fill,zone,cursor,handles};
     }
     const hint=el('div','aud-range-hint',root,'Select a band for timing');
-    const latency=el('output','aud-latency',root,'LATENCY —');
+    const latency=el('output','aud-latency',dev.col,'LATENCY —');
     latency.setAttribute('aria-label','Estimated audio input to visual latency');
     latency.title='Estimated from capture latency, half the analyser window, and half a visual frame';
     rec.audRanges={root,rows,hint,latency};
@@ -2422,13 +2432,19 @@ export function createModulation(host, port) {
       const db=v=>(v>0?'+':'')+(Math.abs(v)<.05?'0':v.toFixed(1));
       row.text.textContent=db(o.floorDb)+'…'+db(o.ceilingDb)+' dB';
       const input=position(o.inputDb),mix=ro.levelMix[key];
-      row.low.style.width=lo+'%';row.high.style.left=hi+'%';row.high.style.width=(100-hi)+'%';
-      row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
-      row.fill.style.width=input+'%';row.cursor.style.left=input+'%';
-      row.mix.dial.style.setProperty('--mix-angle',(-145+mix*290).toFixed(1)+'deg');
+      const vertical=rec.dev.root.classList.contains('m2cmp');
+      if(vertical){
+        row.low.style.cssText='height:'+lo+'%;bottom:0';row.high.style.cssText='height:'+(100-hi)+'%;bottom:'+hi+'%';
+        row.zone.style.cssText='height:'+(hi-lo)+'%;bottom:'+lo+'%';row.fill.style.cssText='height:'+input+'%;bottom:0';row.cursor.style.cssText='bottom:'+input+'%';
+      }else{
+        row.low.style.cssText='width:'+lo+'%;left:0';row.high.style.cssText='width:'+(100-hi)+'%;left:'+hi+'%';
+        row.zone.style.cssText='width:'+(hi-lo)+'%;left:'+lo+'%';row.fill.style.cssText='width:'+input+'%;left:0';row.cursor.style.cssText='left:'+input+'%';
+      }
+      row.mix.arc.style.strokeDasharray=clamp01(mix).toFixed(4)+' 1';row.mix.dial.classList.toggle('m2zero',mix<=0);
       row.mix.value.textContent=Math.round(mix*100)+'%';row.mix.dial.setAttribute('aria-valuenow',String(Math.round(mix*100)));row.mix.dial.setAttribute('aria-valuetext',Math.round(mix*100)+' percent');
       for(const endpoint of ['floorDb','ceilingDb']) {
-        const h=row.handles[endpoint];h.style.left=position(o[endpoint])+'%';
+        const h=row.handles[endpoint],p=position(o[endpoint]);
+        h.style.cssText=vertical?'bottom:'+p+'%':'left:'+p+'%';h.setAttribute('aria-orientation',vertical?'vertical':'horizontal');
         h.setAttribute('aria-valuemin',endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP);
         h.setAttribute('aria-valuemax',endpoint==='floorDb'?o.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX);
         h.setAttribute('aria-valuenow',o[endpoint]);h.setAttribute('aria-valuetext',o[endpoint].toFixed(1)+' dB');
