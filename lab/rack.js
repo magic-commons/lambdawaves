@@ -650,7 +650,7 @@ export async function boot(dom) {
 
   let modArm = true;
   let clockLink = true, linkFollowed = null, linkRetryAt = 0;
-  let stageMix = 0.04;                       // the STAGE knob's mix, hoisted here because serialize() writes it   // 2026-09-10 · THE LAW OF THE TWO CLOCKS: linked, the modulation clock follows the transport; free, it is its own (MOD PLAY). This browser's, never the project's.
+  let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
   const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
   /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
    *  Found here and fixed here: every transport EDGE calls the host's applyAll(force), which hands
@@ -1501,7 +1501,7 @@ export async function boot(dom) {
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
       mat.bg = THEMES[theme].bg.slice();
-      if (__LW_hooks.setStageEnds) __LW_hooks.setStageEnds(mat.stageA, mat.stageB);   // the unnamed ends follow the theme; the named ones stay
+      if (__LW_hooks.restage) __LW_hooks.restage();
       mat.lightUI = theme === 'light';                                     // wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads this
       if (ui.themeSeg) ui.themeSeg.set(themeChoice);
       if (__LW_hooks.themeChanged) __LW_hooks.themeChanged(theme);
@@ -1532,37 +1532,38 @@ export async function boot(dom) {
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
        correction against a ground the hand can drag is not a correction.  One named function, so the knob,
        LW.setStage and the gate all take the same road. */
-    /* THE STAGE COLOUR (Josh, 2026-09-10): by default the stage is the theme's — the knob mixes the dark ground
-       toward the light one and a theme flip repaints it. Pick a colour and the stage is CUSTOMISED: that colour is
-       the dark end of the same mix, it survives a theme flip, and it travels in the project. FOLLOW THEME clears it. */
-    /* TWO ENDS (Josh, 2026-09-10): A is the knob at 0, B at 1. Unnamed, A is THIS theme's ground and B the other
-       theme's — so in DARK the knob runs black → light and in LIGHT it runs white → dark, and a theme flip swaps
-       both. Name either with its swatch and that end is customised and travels in the project. */
-    const themeGround = (t) => THEMES[t === 'light' ? 'light' : 'dark'].bg, otherGround = (t) => THEMES[t === 'light' ? 'dark' : 'light'].bg;
-    function stageEnds() { const t = document.body.dataset.theme; return [mat.stageA || themeGround(t), mat.stageB || otherGround(t)]; }
-    function setStageMix(v) { stageMix = v; const [a, b] = stageEnds(); mat.bg = [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * v); paintMarks(); schedule(TIER.PRESENT); }
+    /* STAGE has one plain law: 0% is the active theme ground and 100% is the retained custom colour.
+       FOLLOW THEME bypasses the blend without changing the knob or swatch, so it is reversible. */
+    const themeGround = () => THEMES[document.body.dataset.theme === 'light' ? 'light' : 'dark'].bg;
+    mat.stageCustom = [0.12, 0.14, 0.18];
+    function setStageMix(v) {
+      stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
+      const a = themeGround(), b = mat.stageCustom;
+      mat.bg = stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * stageMix);
+      paintMarks(); schedule(TIER.PRESENT);
+    }
     __LW_hooks.restage = () => setStageMix(stageMix);
     const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255), rgbToHex = (c) => '#' + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
-    function setStageEnds(a, b) {
-      mat.stageA = Array.isArray(a) ? a.slice(0, 3) : null; mat.stageB = Array.isArray(b) ? b.slice(0, 3) : null;
-      const [ea, eb] = stageEnds();
-      if (ui.stageA) { ui.stageA.value = rgbToHex(ea); ui.stageA.classList.toggle('on', !!mat.stageA); }
-      if (ui.stageB) { ui.stageB.value = rgbToHex(eb); ui.stageB.classList.toggle('on', !!mat.stageB); }
-      if (ui.stageFollow) ui.stageFollow.hidden = !(mat.stageA || mat.stageB);
+    function setStageColour(colour) {
+      if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
+      if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
       setStageMix(stageMix);
     }
-    __LW_hooks.setStageEnds = setStageEnds;
+    function setStageFollow(on) {
+      stageFollow = !!on;
+      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(stageFollow)); }
+      setStageMix(stageMix);
+    }
+    __LW_hooks.setStageColour = setStageColour;
+    __LW_hooks.setStageFollow = setStageFollow;
     ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     __LW_hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
-    { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };                                    // the palette's own swatches, left of the knob (native-ui seats it by name)
-      const pair = el('div', 'stage-pair', seat);
-      const mk = (which, title) => { const i = el('input', 'pal-color stage-colour', pair); i.type = 'color'; i.title = title; i.setAttribute('aria-label', 'stage ' + which); return i; };
-      ui.stageA = mk('A', 'Stage A — the knob at 0. Unnamed it is this theme\'s ground.'); ui.stageB = mk('B', 'Stage B — the knob at 1. Unnamed it is the other theme\'s ground.');
-      ui.stageA.addEventListener('input', () => setStageEnds(hexToRgb(ui.stageA.value), mat.stageB));
-      ui.stageB.addEventListener('input', () => setStageEnds(mat.stageA, hexToRgb(ui.stageB.value)));
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.hidden = true; ui.stageFollow.title = 'Forget both stage colours';
-      ui.stageFollow.addEventListener('click', () => setStageEnds(null, null));
-      rt.appendChild(ui.stageK.root); setStageEnds(null, null); }
+    { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
+      ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
+      ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); });
+      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
+      ui.stageFollow.addEventListener('click', () => setStageFollow(!stageFollow));
+      rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
     ui.cardSeg = seg({ label: 'CARD STYLE', value: 'refractive', options: [
       { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
@@ -4969,7 +4970,7 @@ export async function boot(dom) {
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   function serialize() {
-    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI; delete m.stageA; delete m.stageB;   // the stage travels under presentation.ui.stage
+    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI; delete m.stageCustom;   // the stage travels under presentation.ui.stage
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -4992,7 +4993,7 @@ export async function boot(dom) {
            SPECTRUM's DIALS fold; the A/B transition; the notebook's size when it was resized. Every key is
            additive: a file without it opens as before, and an UNDO record never carries them. */
         ui: { theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'dark', card: document.body.dataset.card || null, frost: frostMode,
-              disc: document.body.classList.contains('disconnected'), accent: { ...accent }, stage: { mix: stageMix, a: mat.stageA ? mat.stageA.slice(0, 3) : null, b: mat.stageB ? mat.stageB.slice(0, 3) : null } },
+              disc: document.body.classList.contains('disconnected'), accent: { ...accent }, stage: { mix: stageMix, custom: mat.stageCustom.slice(0, 3), follow: stageFollow } },
         layout: layout.captureLayout ? layout.captureLayout() : null,
         modwin: modView ? modView.presentation() : null,
         camera: { autoRotate: !!camera.autoRotate, friction: camera.friction, speed: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain },
@@ -5090,7 +5091,12 @@ export async function boot(dom) {
           if (U.frost !== undefined) setFrost(U.frost, { quiet: true });
           if (U.disc !== undefined) setDisconnected(!!U.disc, { quiet: true });
           if (U.accent) { Object.assign(accent, U.accent); if (ui.accA) ui.accA.set(accent.a); if (ui.accB) ui.accB.set(accent.b); if (ui.vivid) ui.vivid.set(accent.vivid); applyAccent(); }
-          if (U.stage) { if (Number.isFinite(U.stage.mix)) { stageMix = U.stage.mix; if (ui.stageK) ui.stageK.set(stageMix); } if (__LW_hooks.setStageEnds) __LW_hooks.setStageEnds(Array.isArray(U.stage.a) ? U.stage.a : null, Array.isArray(U.stage.b) ? U.stage.b : (Array.isArray(U.stage.custom) ? U.stage.custom : null)); } }
+          if (U.stage) {
+            if (Number.isFinite(U.stage.mix)) { stageMix = Math.max(0, Math.min(1, U.stage.mix)); if (ui.stageK) ui.stageK.set(stageMix); }
+            const custom = Array.isArray(U.stage.custom) ? U.stage.custom : (Array.isArray(U.stage.b) ? U.stage.b : (Array.isArray(U.stage.a) ? U.stage.a : null));
+            if (__LW_hooks.setStageColour) __LW_hooks.setStageColour(custom);
+            if (__LW_hooks.setStageFollow) __LW_hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
+          } }
         if (pr.camera) { const C = pr.camera; if (Number.isFinite(C.friction)) camera.setFriction(C.friction); if (Number.isFinite(C.speed)) camera.setSpeed(C.speed); if (Number.isFinite(C.dragGain)) camera.setDragGain(C.dragGain); if (Number.isFinite(C.fling)) camera.setFling(C.fling); camera.setAutoRotate(!!C.autoRotate); }
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }

@@ -51,7 +51,6 @@ export function createSpectrum(host, api) {
   const psiFx = formula({ cls: 'sp-fx', lines: [
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
-  host.appendChild(psiFx.root);
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
   clrBtn.addEventListener('click', () => { if (api.clear) api.clear(); });
@@ -62,6 +61,7 @@ export function createSpectrum(host, api) {
   rowsEl.hidden = true;
   hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
+  host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();
   for (let n = 1; n <= 6; n++) {

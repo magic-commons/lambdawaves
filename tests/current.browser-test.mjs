@@ -14,6 +14,10 @@ try {
  assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);assert.equal(boot.moCurveDone,0);
  console.log('PASS current boot: no page errors, clean new project');
  console.log('GPU status:',boot.gpu || 'available');
+ const spectrumOrder=await g.ev(`const body=document.querySelector('.dev[data-id="spectrum"] .dev-body'),fx=body.querySelector('.sp-fx'),picker=body.querySelector('.picker'),rows=body.querySelector('.sp-rows');
+  return {afterPicker:!!(picker.compareDocumentPosition(fx)&Node.DOCUMENT_POSITION_FOLLOWING),afterRows:!!(rows.compareDocumentPosition(fx)&Node.DOCUMENT_POSITION_FOLLOWING)};`);
+ assert.deepEqual(spectrumOrder,{afterPicker:true,afterRows:true});
+ console.log('PASS Spectrum live readout sits below the scale and channel controls');
  const lazy=await g.ev(`const ids=['helium','h2','ladder','molecule'];ids.forEach(id=>__LW.layout.reopen(id,'R'));
   const immediate={loading:Object.fromEntries(ids.map(id=>[id,document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')])),busy:__LW.busy.count,
     centered:ids.every(id=>!!document.querySelector('.dev[data-id="'+id+'"] .dev-loading .mark'))};
@@ -103,12 +107,17 @@ try {
   __LW.layout.reopen('settings','R');__LW.layout.reopen('state','R');await w(200);
   __LW.camera.setAutoRotate(true);__LW.camera.setFriction(0.31);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
   const tr=[...document.querySelectorAll('.dev[data-id=state] .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
-  const sc=document.querySelectorAll('.stage-colour')[1];sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
+  const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
+  __LW.setStage(0);const stage0=__LW.mat.bg.slice();__LW.setStage(1);const stage1=__LW.mat.bg.slice();
+  const follow=document.querySelector('.stage-follow');follow.click();const followed=__LW.mat.bg.slice(),retained=sc.value;follow.click();const resumed=__LW.mat.bg.slice();
   const S=__LW.serialize();S.presentation.ui.theme=theme0==='light'?'dark':'light';
-  __LW.camera.setAutoRotate(false);__LW.camera.setFriction(0.1);__LW.kepler.setOn(false);__LW.vortex.setOn(false);__LW.spectrum.setDials(false);__LW.layout.notebookResize(300,200);document.querySelector('.stage-follow').click();__LW.loadPreset('1s');M.deserialize(null);
+  __LW.camera.setAutoRotate(false);__LW.camera.setFriction(0.1);__LW.kepler.setOn(false);__LW.vortex.setOn(false);__LW.spectrum.setDials(false);__LW.layout.notebookResize(300,200);follow.click();__LW.loadPreset('1s');M.deserialize(null);
   const ok=__LW.restore(S);await w(600);const q=__LW.serialize().presentation;const errs=__e.slice();
-  return {ok,theme:document.body.dataset.theme,want:S.presentation.ui.theme,stage:q.ui.stage.b,auto:q.camera.autoRotate,friction:q.camera.friction,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
- assert.equal(daw.ok,true); assert.equal(daw.theme,daw.want); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.auto,true); assert.equal(daw.friction,0.31);
+  return {ok,theme:document.body.dataset.theme,want:S.presentation.ui.theme,stage:q.ui.stage.custom,stageFollow:q.ui.stage.follow,
+    stageLaw:{stage0,stage1,followed,retained,resumed},auto:q.camera.autoRotate,friction:q.camera.friction,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
+ assert.equal(daw.ok,true); assert.equal(daw.theme,daw.want); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.stageFollow,false);
+ assert.deepEqual(daw.stageLaw.stage1.map(v=>Math.round(v*255)),[32,48,64]); assert.deepEqual(daw.stageLaw.followed,daw.stageLaw.stage0); assert.equal(daw.stageLaw.retained,'#203040'); assert.deepEqual(daw.stageLaw.resumed,daw.stageLaw.stage1);
+ assert.equal(daw.auto,true); assert.equal(daw.friction,0.31);
  assert.equal(daw.kepler,true); assert.equal(daw.vortex,true); assert.equal(daw.dials,true); assert.equal(daw.ab,true); assert.deepEqual(daw.nb,{w:520,h:380}); assert.deepEqual(daw.routes,[[0.5,1]]); assert.equal(daw.modwin,true); assert.ok(daw.cards>20); assert.deepEqual(daw.errs,[]);
  console.log('PASS the DAW law: theme, stage colour, camera, overlays, dials, A/B, notebook size, modulation placement, arrangement and routes round-trip through the project');
  /* THE HAND ON A ROUTED KNOB (Josh, 2026-09-10): a click leaves the base and the range alone; a drag moves the BASE by
