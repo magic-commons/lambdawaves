@@ -1874,14 +1874,14 @@ try {
     R.head2 = fills('#title .mark rect'); R.about2 = fills('.nb-logo .mark rect');
     /* THE ABOUT FACE carries what Josh wrote */
     const ab = document.querySelector('.nb-aboutface'), t = ab.innerText;
-    R.magic = t.indexOf('Magic Commons') >= 0; R.apache = t.indexOf('Apache') >= 0; R.made = t.indexOf('Made with') >= 0;
+    R.magic = t.indexOf('Magic Commons') >= 0; R.gpl = t.indexOf('GNU GPL v3.0 only') >= 0; R.made = t.indexOf('Made with') >= 0;
     R.blurb = t.indexOf('A playable hydrogen shadow where 91 nlm states become heuristics for classical waves.') >= 0;
     R.chronus = !!ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]');
     R.chronusTxt = (ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]') || {}).textContent;
     R.build = (document.querySelector('.ab-version') || {}).textContent;
     R.buildApi = __LW.build; R.buildOk = R.build === __LW.build;   // wave 51: the face is judged against the CONSTANT, not against a string typed in this file
     R.dump = __LW.notebook.dump();
-    R.dumpOk = R.dump.indexOf('Magic Commons') >= 0 && R.dump.indexOf('Apache') >= 0 && R.dump.indexOf('A playable hydrogen shadow') >= 0;
+    R.dumpOk = R.dump.indexOf('Magic Commons') >= 0 && R.dump.indexOf('GNU GPL v3.0 only') >= 0 && R.dump.indexOf('A playable hydrogen shadow') >= 0;
     /* THE GRIP: a real pointer target, a 320 x 240 floor, and two numbers that round-trip the settings key */
     const nb = document.getElementById('notebook'), grip = nb.querySelector('.nb-grip');
     R.grip = !!grip; R.gripW = grip ? Math.round(grip.getBoundingClientRect().width) : 0;
@@ -1971,7 +1971,7 @@ try {
       && bmT.head0 === bmT.about0 && bmT.head0 === bmT.busy0 && bmT.head0.length > 0
       && bmT.head1 === bmT.about1 && bmT.head1 === bmT.busy1 && bmT.head1 !== bmT.head0
       && bmT.head2 === bmT.about2 && bmT.head2 === bmT.head0
-      && bmT.magic && bmT.apache && bmT.made && bmT.blurb && bmT.chronus && bmT.chronusTxt === 'ChronusQ'
+      && bmT.magic && bmT.gpl && bmT.made && bmT.blurb && bmT.chronus && bmT.chronusTxt === 'ChronusQ'
       && bmT.buildOk && /^PRE-ALPHA . waves 5.[0-9]+ . [0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(bmT.buildApi) && bmT.dumpOk
       && bmT.grip === true && bmT.gripW === 22 && bmT.cssResize === 'both'
       && bmT.dragged[0] > 60 && bmT.dragged[1] > 45 && bmT.savedMatches
@@ -4077,7 +4077,7 @@ try {
     __LW.notebook.open('about'); await nap(140);
     R.aboutHrefs = [...document.querySelectorAll('.nb-aboutface a')].map((a) => a.getAttribute('href'));
     R.siteRoot = R.aboutHrefs.filter((h) => h && h.charAt(0) === '/');
-    R.licenceNamed = /Apache License 2\\.0/.test(document.querySelector('.nb-aboutface').textContent);
+    R.licenceNamed = /GNU GPL v3\\.0 only/.test(document.querySelector('.nb-aboutface').textContent);
     __LW.notebook.close(); await nap(80);
     /* ── RIDER B (board #58).  The creep is correct physics; the BUG was the absence of a way back. ── */
     __LW.loadPreset('rydberg'); await __LW.settle(); await nap(150);

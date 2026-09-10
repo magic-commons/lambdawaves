@@ -118,8 +118,8 @@ const DROP = [
  * (they 404ed under /lab/ on the dev server).  So these files are reachable but no longer linked — and now
  * that λWAVES owns its origin, a root-relative link would resolve again if a later wave restores one. */
 const SHIP_EXTRA = [
-  ['LICENSE',      'Apache-2.0 §4(a): a browser that runs lab/*.js is a recipient of the work in source form, so the copy of the Licence travels with it. Dossier §8, §25.'],
-  ['NOTICE',       'Apache-2.0 §4(d): the NOTICE text must accompany the distribution. Dossier §8, §25.'],
+  ['LICENSE',      'GPL-3.0 §4: the source distribution carries the complete licence text. Dossier §8, §25.'],
+  ['NOTICE',       'project copyright, warranty and third-party attribution notices. Dossier §8, §25.'],
   ['REPORT.md',    'the lab notebook — the laws, the constants, the measured numbers and the named proofs. Dossier §8 and acceptance criterion 8 want /REPORT.md to work. 226 KB, never loaded by the running lab, never precached (a .md by rule), so it costs a reader nothing unless they ask for it.'],
   ['CHANGELOG.md', 'the release history, generated from REPORT.md by tools/changelog.mjs. Dossier §15 makes it the traceability record a tester quotes ("the VORTEX issue happened in v0.3.1-alpha"), which is only useful if it is reachable from the deployed address.'],
 ];

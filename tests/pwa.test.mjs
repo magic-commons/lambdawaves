@@ -577,7 +577,7 @@ async function fetchMatrix(W, mount) {
     /* THE DOCUMENTS, as sub-resources AND as navigations.  At '/lab/' the scope check refuses them; at
        '/' they are INSIDE the scope and only the ENTRY rule can.  These six lines are the whole finding:
        nine target="_blank" licence links in the ABOUT face, each of which opened a second copy of the lab
-       from the second launch onward — and the licence texts are the ones Apache-2.0 §4 and OFL §2 require
+       from the second launch onward — and the licence texts are the ones GPL-3.0 §4 and OFL §2 require
        a reader to be able to open. */
     ['a document beside the app',    'https://host.invalid/REPORT.md',  {}],
     ['a NAVIGATION to a document beside the app', 'https://host.invalid/REPORT.md', { mode: 'navigate' }],

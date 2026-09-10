@@ -70,7 +70,7 @@ const PRECACHE = [
   ['./img/icon-maskable.svg',                             '8a719456bbf1'],
   ['./img/icon.svg',                                      'd836bdb7bfea'],
   ['./img/warning-orbital.png',                           'fb796735bfd5'],
-  ['./index.html',                                        'e5ce42943469'],
+  ['./index.html',                                        '5b5a51648acb'],
   ['./kepler.js',                                         '11e0235e3f0d'],
   ['./keplerview.js',                                     '19e0a0a79362'],
   ['./keymap.js',                                         '309e44780105'],
@@ -255,7 +255,7 @@ self.addEventListener('activate', (event) => {
  * `startsWith('/')` refuses NOTHING, so from the second launch onward EVERY navigation on the hostname —
  * /LICENSE, /NOTICE, /REPORT.md, a typo — was answered from the cache with the lab. Measured in real
  * Firefox against `wrangler dev`. The nine document links in the ABOUT face each opened a second copy of
- * λWAVES, which is an Apache-2.0 §4 and OFL §2 REACHABILITY problem and not a cosmetic one, and
+ * λWAVES, which is a GPL-3.0 §4 and OFL §2 REACHABILITY problem and not a cosmetic one, and
  * `not_found_handling: "404-page"` was defeated for every controlled visitor.
  * THE RULE IS NOW ON THE PATH ITSELF: a navigation is answered from the precache only when it names the
  * app entry (SCOPE or SCOPE + 'index.html'). The app has NO path routing at all — state travels in the

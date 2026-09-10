@@ -7,7 +7,7 @@ viewpoints, then watch the eigenmodes interfere and the cloud bloom into motion.
 > λWAVES · QWAVE-0 · Hydrogen Shadow Lab
 
 Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)** · a
-[Magic Commons](https://magic-commons.com) project · Apache 2.0
+[Magic Commons](https://magic-commons.com) project · GPL-3.0-only
 
 ---
 
@@ -94,7 +94,7 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 
 ## Licence
 
-Apache 2.0 — Copyright 2026 Joshua Hosain. See [`LICENSE`](LICENSE).
+GNU General Public License v3.0 only — Copyright 2026 Joshua Hosain. See [`LICENSE`](LICENSE).
 
 Third-party notices in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, KaTeX 0.16.11,
 marked 12.0.2. Thanks to [ChronusQ](https://github.com/xsligroup/chronusq_public).

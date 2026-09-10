@@ -2,9 +2,13 @@
 Copyright 2026 Joshua Hosain
 λWAVES by Joshua Hosain · Magic Commons
 
-This product includes software developed by Joshua Hosain.
-Licensed under the Apache License, Version 2.0 (the "License"); see LICENSE
-in this directory, or http://www.apache.org/licenses/LICENSE-2.0
+λWAVES is free software: you may redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 only. See LICENSE in this directory.
+
+λWAVES is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.
 
 ────────────────────────────────────────────────────────────────────────────
 THIRD-PARTY COMPONENTS
@@ -95,7 +99,7 @@ Version under the SIL Open Font License, and each entry below says so.
 
 7.  lab/mir/mod.js, lab/mir/curve.js, lab/mir/glyph.js
     From:      the MANDELBROT app, © 2026 Joshua Hosain · Magic Commons,
-               Apache License 2.0 — the same author and the same licence as
+               GNU General Public License v3.0 only — the same author and licence as
                λWAVES, so no third-party obligation arises.  Taken by sha256
                with provenance headers; see lab/mir/PORT-NOTES.md.
 

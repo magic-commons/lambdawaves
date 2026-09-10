@@ -1,6 +1,7 @@
 {
   "name": "lambdawaves",
   "private": true,
+  "license": "GPL-3.0-only",
   "scripts": {
     "test": "bash test.sh node",
     "test:browser": "bash test.sh browser",
