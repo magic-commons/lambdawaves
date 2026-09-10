@@ -1128,10 +1128,10 @@ export function buildDevice(run, add, src, copyIn) {
     for (const k of copy.audioOuts) {
       const rowEl = m2mk('div', 'm2audout', outs);
       rowEl.dataset.out = k;
-      const grip = m2mk('button', 'm2audgrip', rowEl);
-      grip.type = 'button';
-      const led = m2mk('i', 'm2audled', grip);    // created BEFORE the svg
-      gripIcon(grip);
+      /* The route has no drag action. Keep its live lamp as a plain status mark
+         and leave the adjacent label/number button as the only control. */
+      const grip = m2mk('span', 'm2audgrip', rowEl);
+      const led = m2mk('i', 'm2audled', grip);
       const boxBtn = m2mk('button', 'm2audmac', rowEl);
       boxBtn.type = 'button';
       boxBtn.dataset.child = '';

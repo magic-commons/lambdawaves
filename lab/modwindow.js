@@ -1787,7 +1787,7 @@ export function createModulation(host, port) {
             syncKnobs(rec); paintAudio(rec);
           } else if (key !== 'hit') cycleAudioOut(rec, key);
         });
-        row.grip.title = 'Route this output to a macro';
+        row.grip.setAttribute('aria-hidden', 'true');
       }
       /* WAVE 105 · THE LEVEL RING SURVIVES A REBUILD.  It was allocated per CARD, so binding a macro —
          or adding, removing or reordering any device — blanked the audio trace to zeros.  It is state
