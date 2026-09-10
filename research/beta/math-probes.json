@@ -1,0 +1,16 @@
+{
+  "scope": "Algebra checks only; no new molecular reference or app tests",
+  "python": "3.12.13",
+  "numpy": "2.4.6",
+  "huckel_spectrum_max_error": 8.881784197001252e-16,
+  "distorted_ring_site_charge_max_error": 1.2212453270876722e-15,
+  "distorted_ring_density_matrix_max_change": 0.2740306914893116,
+  "shutter_quadrature_max_error": 1.8924367453520465e-10,
+  "generalized_eigenvalue_derivative_error": 1.9874102363814927e-12,
+  "error_if_overlap_derivative_omitted": 0.004803775716928804,
+  "fixed_N_dimension": 924,
+  "Ms_zero_dimension": 400,
+  "vibrational_coordinates": 30,
+  "symmetry_distinct_mode_count": 20,
+  "status": "passed"
+}
