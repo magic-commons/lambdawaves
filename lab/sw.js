@@ -119,7 +119,7 @@ const PRECACHE = [
   ['./qcd.js',                                            'd719df2e6c5c'],
   ['./qcdview.js',                                        '2e184e0937cf'],
   ['./qho.js',                                            'dc55dfe4479f'],
-  ['./rack.js',                                           '8878fcaf8e43'],
+  ['./rack.js',                                           '780e0db5bda9'],
   ['./radiation.js',                                      '3fdc3094e486'],
   ['./radiationview.js',                                  '655a6aef068a'],
   ['./render-exact.js',                                   'cf0cdb3eaeda'],

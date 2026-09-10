@@ -459,12 +459,6 @@ export async function boot(dom) {
    * (two turns a second) so no flick can outrun the picture.  A fling that hits the POLE CLAMP loses its pitch
    * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
    * not on the undo stack, and reg.version cannot move because of it (§14). */
-  const CAM_TRADE = {
-    turntable: 'TURNTABLE: the horizon stays level, and the pitch stops at the poles.',
-    free: 'FREE: there are no poles, and the horizon rolls — a closed drag loop leaves a turn behind it, because [ĵ, k̂] = 2î.',
-  };
-
-
   const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
     GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
   const camera = {
@@ -489,8 +483,8 @@ export async function boot(dom) {
     /** the camera clock starts NOW: the first frame after an idle must not integrate the idle */
     wake() { lastWall = performance.now() / 1000; schedule(TIER.PRESENT); },
     setFriction(v) { this.friction = Math.max(0, Math.min(CAM.MU_MAX, v)); if (ui.fricK) ui.fricK.set(this.friction); this.wake(); return this.friction; },
-    setDragGain(v) { this.dragGain = Math.max(CAM.GAIN[0], Math.min(CAM.GAIN[1], +v || 0)); if (ui.gainK) ui.gainK.set(this.dragGain); if (ui.camGainNote) ui.camGainNote(); return this.dragGain; },
-    setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); if (ui.flingK) ui.flingK.set(this.flingGain); if (ui.camGainNote) ui.camGainNote(); return this.flingGain; },
+    setDragGain(v) { this.dragGain = Math.max(CAM.GAIN[0], Math.min(CAM.GAIN[1], +v || 0)); if (ui.gainK) ui.gainK.set(this.dragGain); return this.dragGain; },
+    setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); if (ui.flingK) ui.flingK.set(this.flingGain); return this.flingGain; },
     get radPerPixel() { return this.dragGain * CAM.SENS; },
     setAutoRotate(v) { this.autoRotate = !!v; if (ui.spinSw) ui.spinSw.set(this.autoRotate); this.wake(); return this.autoRotate; },
     setSpeed(v) { this.speed = v; if (ui.spinK) ui.spinK.set(v); this.wake(); return v; },
@@ -1028,7 +1022,6 @@ export async function boot(dom) {
       if (opt && opt.now) { obs.mode = 'turntable'; obs.yaw = yaw; obs.pitch = a.pitch; obs.quat = to; camLevel.from = null; }
       else { camLevel.from = obs.quat.slice(); camLevel.to = to; camLevel.yaw = yaw; camLevel.pitch = a.pitch; camLevel.t0 = performance.now(); }
     }
-    if (ui.camNote) ui.camNote.textContent = obs.mode === 'free' || camLevel.from ? CAM_TRADE.free : CAM_TRADE.turntable;
     saveSettings(); schedule(TIER.PRESENT);
     return obs.mode;
   }
@@ -1066,7 +1059,7 @@ export async function boot(dom) {
      setDist, so the dial can never lie about where the camera is (and neither can a restored project) */
   function setDist(v) { if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); if (ui.zoomK) ui.zoomK.set(obs.dist); schedule(TIER.PRESENT); return obs.dist; }
   function setFov(v) { if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); if (ui.fovK) ui.fovK.set(obs.fov); schedule(TIER.PRESENT); return obs.fov; }
-  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); if (ui.camGainNote) ui.camGainNote(); }
+  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); }
   /** RESET VIEW (the trigger, R, a double-click and a double-tap): the shipped pose and the motion with it —
       AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
   function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); syncCamUI(); schedule(TIER.PRESENT); }   // wave 54: the pose is the same pose in either mode
@@ -1700,8 +1693,6 @@ export async function boot(dom) {
       { id: 'free', label: 'FREE', title: 'Use unrestricted camera rotation with roll' }],
       onChange: (v) => setCamMode(v) });
     r4a.appendChild(ui.camSeg.root);
-    ui.camNote = el('div', 'sturm-note', gc);            // its own class: the ⓘ sweep folds every .note away, and the trade must stay readable
-    ui.camNote.textContent = CAM_TRADE.turntable;
     const r4 = el('div', 'row', gc);
     ui.spinSw = sw({ label: 'AUTO-ROTATE', value: false, onChange: (v) => { camera.autoRotate = v; camera.wake(); } });
     ui.spinSw.root.title = 'Rotate continuously around the world z axis';
@@ -1716,23 +1707,15 @@ export async function boot(dom) {
        and the default does not.  Both sit with FRICTION because all three are the feel of the same hand. */
     const r4h = el('div', 'row', gc);
     ui.gainK = knob({ label: 'DRAG GAIN', min: CAM.GAIN[0], max: CAM.GAIN[1], value: CAM.GAIN_DEF, step: CAM.GAIN_STEP,
-      fmt: (v) => '×' + v.toFixed(2),                       // the MAPPING is a sentence, not a knob value: a .k-val is a floating tooltip and a long one spills off the card
-      onInput: (v) => { camera.dragGain = v; camGainNote(); }, onChange: () => saveSettings() });
+      fmt: (v) => '×' + v.toFixed(2),
+      onInput: (v) => { camera.dragGain = v; }, onChange: () => saveSettings() });
     ui.gainK.root.title = 'Set drag sensitivity; Shift is finer; double-click resets';
     r4h.appendChild(ui.gainK.root);
     ui.flingK = knob({ label: 'FLING', min: CAM.FLING[0], max: CAM.FLING[1], value: CAM.FLING_DEF, step: CAM.FLING_STEP,
       fmt: (v) => '×' + v.toFixed(2),
-      onInput: (v) => { camera.flingGain = v; camGainNote(); }, onChange: () => saveSettings() });
+      onInput: (v) => { camera.flingGain = v; }, onChange: () => saveSettings() });
     ui.flingK.root.title = 'Set released camera speed; double-click to reset';
     r4h.appendChild(ui.flingK.root);
-    /* THE MAPPING IS ON THE CARD, not in a hover (ANTI-PATTERN 4): a .k-val is a floating tooltip that cannot hold
-       "×1.00 · 0.0065 rad/px" without spilling off a 300-px card, and the number a gain MEANS is the point of it. */
-    ui.gainNote = el('div', 'sturm-note', gc);
-    r4h.after(ui.gainNote);
-    const camGainNote = () => { if (!ui.gainNote) return;
-      ui.gainNote.textContent = `${(camera.dragGain * CAM.SENS).toFixed(4)} rad/px  (SHIFT ${(camera.dragGain * CAM.SENS * CAM.FINE).toFixed(4)})`
-        + ` · FLING ${camera.flingGain === 0 ? '0: the drag turns, the release leaves nothing' : camera.flingGain === 1 ? '×1: the shipped throw' : '×' + camera.flingGain.toFixed(2) + ' on the released ω₀'}`; };
-    ui.camGainNote = camGainNote; camGainNote();
     const r4b = el('div', 'row tight', gc);
     ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => setDist(v) });
     ui.zoomK.root.title = 'Camera distance. Use the wheel or pinch on the stage.';
@@ -5080,7 +5063,7 @@ export async function boot(dom) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); if (ui.camNote) ui.camNote.textContent = CAM_TRADE[obs.mode]; camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.gamma; delete pm.lightUI; Object.assign(mat, pm); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if(ui.frameModeSeg)ui.frameModeSeg.set(mat.frame===false?'off':mat.frameMode||'box'); if(ui.axisModeSeg)ui.axisModeSeg.set(mat.axis===false?'off':mat.axisMode||'box'); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.gamma; delete pm.lightUI; Object.assign(mat, pm); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if(ui.frameModeSeg)ui.frameModeSeg.set(mat.frame===false?'off':mat.frameMode||'box'); if(ui.axisModeSeg)ui.axisModeSeg.set(mat.axis===false?'off':mat.axisMode||'box'); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
       if (pr) {
         /* WAVE 63 · A LINK'S MATERIAL WAS DISCARDED 16 ms AFTER IT OPENED.  `Object.assign` above has
            just put the sender's camera and material into `obs`/`mat`; for a target THIS browser has
