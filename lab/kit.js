@@ -330,6 +330,18 @@ export function seg(o) {
 }
 
 /** trig({ label, onFire, glyph, cls }) — a momentary event */
+/** THE DOT GRIP — Josh's 5×5: dots at rows 1, 3, 5 × columns 1, 3, 5. The reorder handle in the modulation
+ *  rail and the transport's macro tiles; the four-way cross stays the ROUTING grip. */
+export function gripDots(parent, size = 13) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 5 5'); svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('width', String(size)); svg.setAttribute('height', String(size)); svg.style.display = 'block'; svg.style.pointerEvents = 'none';
+  for (const y of [0.5, 2.5, 4.5]) for (const x of [0.5, 2.5, 4.5]) {
+    const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', String(x)); c.setAttribute('cy', String(y)); c.setAttribute('r', '0.5'); c.setAttribute('fill', 'currentColor'); svg.appendChild(c);
+  }
+  if (parent) parent.appendChild(svg);
+  return svg;
+}
 export function trig(o) {
   const b = el('button', 'trig' + (o.cls ? ' ' + o.cls : ''));
   b.type = 'button';

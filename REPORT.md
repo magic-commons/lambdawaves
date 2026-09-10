@@ -2299,3 +2299,19 @@ window's first row became m2.
 number, and the tool seat — the name face is hidden (not clipped), the rows keep the full rail's
 vertical metrics so the rail head and rows 3–4 no longer move. The tool seat's divider is gone: reorder
 reads in accent B, delete in faint ink, with a hair of air between them.
+
+## 2026-09-10 · Fourth pass on the transport: the dot grip, ×4, digits under the pointer, one pane law
+
+- **The MACROS head no longer moves on compact.** The compact head had its own padding and font size
+  (modhost.css entry, now deleted); it keeps the full head's metrics — measured identical left, top,
+  height, font and padding across the toggle.
+- **The reorder handle is the dot grip** — Josh's 5×5 pixel art, dots on rows 1/3/5 × columns 1/3/5 —
+  in the window's rail and on the transport tiles (`gripDots` in kit.js, swapped onto the ported rows by
+  the host). The four-way cross stays the ROUTING grip.
+- **The transport is a pane like the windows.** It had kept a transparent surface from an old wave; it
+  now follows CARD STYLE (tinted / refractive), theme and FROST exactly as `.dev` does. The tempo pill
+  is a rounded rectangle (10 px), not the seats' 50 %.
+- **×4** fills the clock's empty fifth tile: ÷2 · ×2 · ×4 · HOLD ¼ · HOLD 1, all on the one-base bend law.
+- **The digit under the pointer is the step** (FL Studio's law): dragging on the tens moves tens, on the
+  ones moves ones, on a visible decimal moves tenths; the wheel steps by the digit it is over; a touch
+  moves ones. Measured from 60.0: tens drag → 80.0, ones → 82.0, tenths → 82.2, wheel on tens → 92.2.

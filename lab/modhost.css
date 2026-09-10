@@ -1810,7 +1810,6 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2num { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2erow { display:none; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2railhead { padding-left:4px;gap:2px;font-size:10px; }
 
 /* Macro selection is visible at the controls it reaches. Routed controls rest
    in Accent A; choosing their macro or source, or touching the control itself,

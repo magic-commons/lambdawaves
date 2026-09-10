@@ -1,6 +1,6 @@
 
 
-import { el, seg, trig, knob, tapWatcher } from './kit.js';
+import { el, seg, trig, knob, tapWatcher, gripDots } from './kit.js';
 import { bindSliderKeys } from './slider-keys.js';
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modwindow/modwindow.js';
@@ -1139,6 +1139,7 @@ export function createModulation(host, port) {
       wireGrip(rec.grip, m.id);
       rec.reorder.title = 'Drag to reorder; double-tap to rename';
       rec.reorder.setAttribute('aria-label', 'reorder or rename ' + m.name);
+      rec.reorder.replaceChildren(gripDots());                  // Josh: the dot grip for reorder; the cross stays the routing grip
       wireMacroReorder(rec, m.id, rename);
       rec.del.title = 'delete ' + m.name + ' and its routes';
       rec.del.setAttribute('aria-label', rec.del.title);

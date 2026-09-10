@@ -1,5 +1,5 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
-import { el, seg, sw, trig, chip } from './kit.js';
+import { el, seg, sw, trig, chip, gripDots } from './kit.js';
 import { buildMacroSlot } from './mir/modwindow/modwindow.js';   // the window's own slot builder: the transport's tiles are its rows, faces hidden
 
 const HELP_HOVER_DELAY = 600;
@@ -239,8 +239,15 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const armSync=()=>{if(panel.hidden||syncTimer)return;syncTimer=setTimeout(()=>{syncTimer=0;sync();armSync();},200);};
   const toggleTempo=()=>{panel.hidden=!panel.hidden;tr.classList.toggle('tempo-open',!panel.hidden);expand.setAttribute('aria-expanded',String(!panel.hidden));sync();if(panel.hidden)stopSync();else armSync();};
   let tempoDrag=null,tempoDragged=false;
-  expand.addEventListener('pointerdown',e=>{if(e.button)return;tempoDrag={y:e.clientY,bpm:M.transport.bpm,moved:false,touch:e.pointerType==='touch'};try{expand.setPointerCapture(e.pointerId);}catch(_){}});
-  expand.addEventListener('pointermove',e=>{if(!tempoDrag)return;const dy=tempoDrag.y-e.clientY;if(!tempoDrag.moved&&Math.abs(dy)<4)return;tempoDrag.moved=true;const travel=tempoDrag.touch?300:220;C.setBpm(tempoDrag.bpm+dy/travel*(M.BPM_MAX-M.BPM_MIN));sync();});
+  /* THE DIGIT UNDER THE POINTER IS THE STEP (Josh, FL Studio's law): on the tens it moves tens, on the ones
+     it moves ones, on a visible decimal it moves tenths. A touch has no digit and moves ones. */
+  const digitStep=(x,y)=>{const t=tempoNum.firstChild;if(!t||t.nodeType!==3)return 1;const s=t.textContent,p=s.indexOf('.')<0?s.length:s.indexOf('.');const r=document.createRange();
+    for(let i=0;i<s.length;i++){r.setStart(t,i);r.setEnd(t,i+1);const b=r.getBoundingClientRect();if(x>=b.left&&x<=b.right){if(s[i]==='.')return 1;return i<p?Math.pow(10,p-1-i):Math.pow(10,-(i-p));}}
+    return 1;};
+  const PX_PER_STEP=9;
+  expand.addEventListener('pointerdown',e=>{if(e.button)return;const touch=e.pointerType==='touch';tempoDrag={y:e.clientY,bpm:M.transport.bpm,moved:false,touch,step:touch?1:digitStep(e.clientX,e.clientY)};try{expand.setPointerCapture(e.pointerId);}catch(_){}});
+  expand.addEventListener('pointermove',e=>{if(!tempoDrag)return;const dy=tempoDrag.y-e.clientY;if(!tempoDrag.moved&&Math.abs(dy)<4)return;tempoDrag.moved=true;const n=Math.trunc(dy/(tempoDrag.touch?14:PX_PER_STEP));C.setBpm(Math.round((tempoDrag.bpm+n*tempoDrag.step)*10)/10);sync();});
+  expand.addEventListener('wheel',e=>{e.preventDefault();const step=digitStep(e.clientX,e.clientY);const dir=e.deltaY<0?1:e.deltaY>0?-1:0;if(!dir)return;C.setBpm(Math.round((M.transport.bpm+dir*step)*10)/10);sync();ui.saveNative();},{passive:false});
   const endTempoDrag=()=>{if(!tempoDrag)return;if(tempoDrag.moved){tempoDragged=true;ui.saveNative();}tempoDrag=null;};
   expand.addEventListener('pointerup',endTempoDrag);expand.addEventListener('pointercancel',()=>{tempoDrag=null;});
   expand.addEventListener('click',()=>{if(tempoDragged){tempoDragged=false;return;}toggleTempo();});
@@ -266,7 +273,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
       const rec=buildMacroSlot(macroRail,m,i+1);rec.root.classList.add('tempo-tile');
       for(const x of [rec.val,rec.pad,rec.del,rec.erow])if(x)x.hidden=true;
       if(api){api.wireGrip(rec.grip,m.id);api.wireDepth(rec.numSeat,m.id,i+1);wireTileReorder(rec,m.id,api);}
-      rec.grip.title='Drag to route; tap to arm; double-tap to reset';rec.reorder.title='Drag to reorder';
+      rec.reorder.replaceChildren(gripDots());rec.grip.title='Drag to route; tap to arm; double-top to reset'.replace('double-top','double-tap');rec.reorder.title='Drag to reorder';
       tiles.set(m.id,rec);
     });
     if(!list.length)el('div','tempo-empty',macroRail,'No macros yet — add one in the modulation window.');
@@ -304,7 +311,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
      halves its rate with it — the transition move Josh asked for. */
   const clampBpm=v=>Math.min(M.BPM_MAX,Math.max(M.BPM_MIN,v));
   const bend={base:null,which:null,latched:false,downAt:0};
-  const bends=[[0.5,'÷2'],[2,'×2']].map(([factor,label])=>{
+  const bends=[[0.5,'÷2'],[2,'×2'],[4,'×4']].map(([factor,label])=>{
     const b=trig({label,title:'Hold to '+(factor>1?'double':'halve')+' the tempo, release to return · tap to latch, tap again to release',onFire:()=>{}});
     b.root.setAttribute('aria-pressed','false');
     const on=()=>{if(bend.base===null)bend.base=M.transport.bpm;bend.which=label;C.setBpm(clampBpm(bend.base*factor));sync();};

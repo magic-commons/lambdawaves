@@ -211,7 +211,7 @@ body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /*
 
 
   border-radius: 16px; border: var(--glass-border) solid var(--glass-border-color);
-  background: transparent; box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow);                       /* the pane itself comes from CARD STYLE below, like every window */
 
 
   opacity: 1; }
@@ -230,6 +230,7 @@ body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /*
 #transport.mini .tbtn.play.on { color: var(--acc); background: transparent; box-shadow: none; }
 
 
+#transport.mini .tbtn.tempo-expand { border-radius: 10px; }                     /* a rounded rectangle, not the 50 % of the round seats */
 #transport.mini .tbtn.modb { height: 34px;
   border-radius: 9px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wide);
   color: var(--ink-faint); background: transparent; border: var(--glass-border) solid transparent; }
@@ -334,6 +335,11 @@ body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
    overrode both choices with the same veil, making the setting inert. Refractive keeps
    its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
 body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+/* 2026-09-10 (Josh): THE TRANSPORT IS A PANE LIKE THE WINDOWS. It follows CARD STYLE (tinted / refractive), the
+   theme and FROST exactly as .dev does; it had kept a transparent surface of its own from an older wave. */
+body[data-card="tinted"] #transport.mini { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
+body[data-card="refractive"] #transport.mini { background: transparent; }
+body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 
 
 body.frost[data-card="refractive"] .dev, body.frost[data-card="refractive"] .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }
