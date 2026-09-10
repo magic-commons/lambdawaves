@@ -15,6 +15,7 @@ export function createWindowActivity({ body = document.body, onChange = () => {}
   const IO = globalThis.IntersectionObserver;
   const MO = globalThis.MutationObserver;
   let changes = 0;
+  let offscreenOk = false;   // a proof harness may present windows the viewport cannot see; nothing else sets this
 
   const structurallyAvailable = (root) => {
     if (!root || root.hidden || body.classList.contains('ui-hidden')) return false;
@@ -28,7 +29,7 @@ export function createWindowActivity({ body = document.body, onChange = () => {}
 
   const refresh = (root, notify = true) => {
     const rec = records.get(root); if (!rec) return false;
-    const active = rec.intersecting && structurallyAvailable(root);
+    const active = (rec.intersecting || offscreenOk) && structurallyAvailable(root);
     if (active === rec.active) return false;
     rec.active = active; changes++;
     if (notify) onChange();
@@ -90,8 +91,18 @@ export function createWindowActivity({ body = document.body, onChange = () => {}
     return { active: rec.active, intersecting: rec.intersecting, reason };
   }
 
+  /** Treat every tracked window as intersecting the viewport. Structural gates (hidden, closed, folded, off,
+   *  ui-hidden, rack-hidden) still apply. For proof harnesses whose probes read windows below the fold. */
+  function presentOffscreen(on) {
+    offscreenOk = !!on;
+    let changed = false;
+    for (const root of roots) changed = refresh(root, false) || changed;
+    if (changed) onChange();
+    return offscreenOk;
+  }
+
   return {
-    track, canPresent, state,
+    track, canPresent, state, presentOffscreen,
     get tracked() { return roots.size; },
     get changes() { return changes; },
     disconnect() { if (intersection) intersection.disconnect(); if (mutations) mutations.disconnect(); roots.clear(); },

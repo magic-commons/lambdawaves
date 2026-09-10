@@ -46,10 +46,10 @@ export function createKepler(canvas) {
       if (o.isotropic) { label.push(`n${o.n} isotropic`); continue; }
       if (o.coherence < 0.5) { label.push(`n${o.n}: no classical orbit (coherence ${o.coherence.toFixed(2)} < ½)`); continue; }   // the mean vectors of an incoherent shell are not an orbit (Round 11 A5)
       const rgb = vividInk(N_RGB[o.n] || [255, 255, 255]), alpha = 0.35 + 0.6 * Math.min(1, share);
-      const pts = orbitPoints(o, 160).map(proj);
+      const pts = orbitPoints(o, 160);
       g.strokeStyle = `rgba(${rgb.join(',')},${alpha})`; g.lineWidth = 1.6; g.setLineDash(o.coherence > 0.98 ? [] : [5, 4]);
       g.beginPath(); let started = false;
-      for (const q of pts) { if (!q) { started = false; continue; } if (!started) { g.moveTo(q[0], q[1]); started = true; } else g.lineTo(q[0], q[1]); }
+      for (const pt of pts) { const q = proj(pt); if (!q) { started = false; continue; } if (!started) { g.moveTo(q[0], q[1]); started = true; } else g.lineTo(q[0], q[1]); }
       if (o.e < 1 - 1e-9) g.closePath();
       g.stroke(); g.setLineDash([]);
       const per = proj(o.perihelion), mean = proj(o.meanPosition);

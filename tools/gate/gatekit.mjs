@@ -36,7 +36,7 @@
 /* S1-KIT: the driver sits BESIDE this file, and is resolved from this file's
    own URL.  The absolute path that used to be here pinned the kit to one
    checkout on one machine — a browser proof cloned anywhere could not run. */
-const drv = await import(new URL('./drv.js', import.meta.url).href);
+const drv = await import(new URL('./drv.mjs', import.meta.url).href);
 const { default: http } = await import('node:http');
 
 let FAILED = 0, TOTAL = 0;
@@ -45,7 +45,7 @@ let FAILED = 0, TOTAL = 0;
 export function judge(name, ok, detail) {
   TOTAL++; if (!ok) FAILED++;
   console.log((ok ? 'GREEN ' : 'RED   ') + name + '\n      ' +
-    JSON.stringify(detail === undefined ? null : detail).slice(0, 300));
+    JSON.stringify(detail === undefined ? null : detail).slice(0, 600));
   return !!ok;
 }
 

@@ -419,7 +419,7 @@ export async function boot(dom) {
      paused, nothing is governed and the user's grid comes back at once.  quality.res stays the USER's choice (and the
      project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
-  const gov = { on: true, drop: 0, median: 0, ring: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
+  const gov = { on: true, drop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
@@ -1166,7 +1166,7 @@ export async function boot(dom) {
     }
     /* THE GOVERNOR: the median of the last 60 presented frames, judged every 30 frames while playing */
     if (gov.n >= 30 && (gov.n % 30) === 0) {
-      const m = Math.min(60, gov.n), s = Array.from(gov.ring.subarray(0, m)).sort((x, y) => x - y); gov.median = s[m >> 1];
+      const m = Math.min(60, gov.n), s = gov.sorted.subarray(0, m); s.set(gov.ring.subarray(0, m)); s.sort(); gov.median = s[m >> 1];   // typed-array sort is numeric; no copy through a plain array
       if (gov.on && clock.playing) {
         const budget = perfBudgetMs();
         if (gov.median > budget * 1.68) {
@@ -3909,39 +3909,8 @@ export async function boot(dom) {
     }
 
 
-    {
-      const ks = el('div', 'glass', document.getElementById('lab')); ks.id = 'keysheet'; ks.hidden = true;
-      ks.setAttribute('role', 'dialog'); ks.setAttribute('aria-label', 'keyboard bindings');
-      const head = el('div', 'ks-head', ks);
-      el('h3', '', head, 'KEYBOARD');
-      const x = el('button', 'ks-close', head, '×'); x.type = 'button'; x.title = 'close (? or Esc)';
-      const list = el('div', 'ks-list', ks);
-      el('div', 'ks-note', ks, 'Bindings update here when changed. Shift gives finer steps. Shortcuts are disabled while typing.');
-      const fill = () => {
-        const K = __LW_hooks.keys; list.innerHTML = '';
-        if (!K) return 0;
-        for (const a of K.actions) {
-          const row = el('div', 'ks-row', list); row.dataset.action = a.id;
-          el('span', 'ks-label', row, a.label);
-          el('span', 'ks-chip', row, K.name(a));
-        }
-        return K.actions.length;
-      };
-      const open = () => { fill(); ks.hidden = false; return true; };
-      const close = () => { ks.hidden = true; return true; };
-      /* ONE ROAD.  Every rebind already ends in ui.keysRefresh() (the SETTINGS chips' own repaint), so the sheet
-         hangs off that rather than owning a second notification: a rebind made while the sheet is up lands on it
-         in the same tick, and one made while it is down is picked up by the fill() that opening does. */
-      const prevRefresh = ui.keysRefresh;
-      ui.keysRefresh = () => { if (prevRefresh) prevRefresh(); if (!ks.hidden) fill(); };
-      x.addEventListener('click', (e) => { e.stopPropagation(); close(); });
-      layout.keysheet = { open, close, toggle() { return ks.hidden ? open() : close(); }, get isOpen() { return !ks.hidden; },
-        /** what the SHEET is showing, read back out of the DOM — never out of the table it was built from */
-        rows() { return [...list.querySelectorAll('.ks-row')].map((r) => ({ id: r.dataset.action, label: r.querySelector('.ks-label').textContent, key: r.querySelector('.ks-chip').textContent })); } };
-    }
-
     /* ── WAVE 106 · THE KEYBOARD MANUAL, and why it is a second thing beside the sheet ──────────────
-     * The '?' sheet above is a LIST you read; this is a PICTURE of the board you edit on — every bound
+     * The '?' sheet of wave 53 was a LIST you read; this is a PICTURE of the board you edit on — every bound
      * key lit in its own place, so "what is still free" is a glance rather than a search through forty
      * rows.  They are the same table underneath (__LW_hooks.keys) and neither owns a copy of it, which
      * is the whole of ANTI-PATTERN 6: the manual calls keys.bind() and keys.reset() and then re-reads
@@ -3968,7 +3937,7 @@ export async function boot(dom) {
       const prevKR = ui.keysRefresh;
       ui.keysRefresh = () => { if (prevKR) prevKR(); if (!km.hidden) man.refresh(); };
       layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
-      layout.keysheet = layout.keymap; document.getElementById('keysheet')?.remove();
+      layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
     }
     /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
     for (const d of document.querySelectorAll('.dev')) {
@@ -5463,6 +5432,7 @@ export async function boot(dom) {
     get frost() { return frostMode; },
     /** WAVE 53 · the '?' sheet: open / close / what it is showing (read back out of the DOM) */
     get keysheet() { return layout.keysheet; },
+    get windowActivity() { return windowActivity; },   // the gate presents below-the-fold windows through presentOffscreen()
     /** WAVE 106 · the drawn keyboard: open / close / is it up */
     get keymap() { return layout.keymap; },
     cpuPsi(x, y, z) { const c = reg.at(clock.t); if (sturm.P) { let R = 0, I = 0; for (const a of reg.renderSet(RENDER_CAP).ids) { const v = orbitalFromTable(sturm.rec[a], x, y, z); R += c.re[a] * v.re - c.im[a] * v.im; I += c.re[a] * v.im + c.im[a] * v.re; } return { re: R, im: I }; } return psiAt(c.re, c.im, x, y, z, reg.renderSet(RENDER_CAP).ids); },   // W-STURMIAN: the kernel's CPU twin on the scaled records

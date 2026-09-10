@@ -744,7 +744,8 @@ function runWindow(r, n, dt) {
 
 /* ══════════════ 16 · the vendored files are still the vendored files ═══════════ */
 {
-  const SRC = '/home/joshua-hosain/Documents/MANDELBROT APP/project/app';
+  // The upstream plugin checkout is machine-local; point LW_MIR_SRC at it to run the byte comparison elsewhere.
+  const SRC = process.env.LW_MIR_SRC || '/home/joshua-hosain/Documents/MANDELBROT APP/project/app';
   const noHeader = (s) => s.replace(/^\/\*[\s\S]*?\*\/\n/, '');
   const ours = (f) => {
     let source = readFileSync(resolve(ROOT, 'lab/mir/' + f), 'utf8');

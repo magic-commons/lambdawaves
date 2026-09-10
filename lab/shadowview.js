@@ -41,7 +41,7 @@ export function createShadowView(canvas, api) {
     const T = themeInk(g); hovers = []; plot = { x0: 0, y0: 0, x1: W, y1: H };
     if (!ids.length) { g.fillStyle = T.ink(0.55); g.textAlign = 'center'; g.fillText('no populated modes', W / 2, H / 2); hover.set(hovers, plot); return; }
     const q = ids.map((a) => SQRT2 * c.re[a]), p = ids.map((a) => SQRT2 * c.im[a]);
-    out.last = { t, ids: ids.slice(), q: q.slice(), p: p.slice() };      // what was drawn, for the lockstep proof
+    out.last = { t, ids: ids.slice(), q, p };      // what was drawn, for the lockstep proof (q, p are this frame's own arrays)
     let rmax = 1e-9; for (let i = 0; i < ids.length; i++) rmax = Math.max(rmax, Math.hypot(q[i], p[i]));
     if (mode === 'phasors') {
       const cx = W * 0.36, cy = H / 2, R = Math.min(W * 0.32, H / 2 - 14);

@@ -2,9 +2,16 @@
   "name": "lambdawaves",
   "private": true,
   "license": "GPL-3.0-only",
+  "description": "λWAVES — a real-time WebGPU instrument for playing the exact hydrogen eigenstates as an evolving wave field.",
+  "homepage": "https://lambdawaves.magic-commons.com",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "serve": "bash serve.sh",
     "test": "bash test.sh node",
     "test:browser": "bash test.sh browser",
+    "test:all": "bash test.sh all",
     "build": "node tools/build-deploy.mjs --quiet"
   },
   "devDependencies": {

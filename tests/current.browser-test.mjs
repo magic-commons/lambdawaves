@@ -74,8 +74,10 @@ try {
  await g.ev(`document.querySelector('.m2railhead').click();document.querySelector('.m2numseat').focus();return true`);
  await g.press('\uE014');
  const macro=await g.ev(`const value=document.querySelector('.m2numseat').getAttribute('aria-valuenow');__LW.layout.modulation.collapse();__LW.layout.modulation.expand();return {value,reopened:document.querySelector('.m2numseat').getAttribute('aria-valuenow'),errors:__e}`);
- assert.equal(Number(macro.value),1); assert.equal(macro.reopened,macro.value);assert.deepEqual(macro.errors,[]);
- console.log('PASS macro keyboard depth/value and close/reopen; no page errors');
+ // Since a5c0863 folding the rail does not repurpose the seat: it still edits depth (99 → 100), and the
+ // value survives a collapse/expand. The macro VALUE is the rail's own control, not this seat's.
+ assert.equal(Number(macro.value),100); assert.equal(macro.reopened,macro.value);assert.deepEqual(macro.errors,[]);
+ console.log('PASS macro keyboard: the seat edits depth folded or not, and close/reopen keeps it; no page errors');
 } catch(error) { failed=true;console.error(error); }
 finally {
  // The Snap driver has previously hung during quit; a cleanup failure is reported

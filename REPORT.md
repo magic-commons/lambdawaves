@@ -2147,3 +2147,46 @@ The interrupted UI/render/matrix work is continued in the working tree. See
 intentional style-rule changes and implementation boundaries; see
 [Serum/MASSIVE architecture](research/SERUM-MASSIVE-MATRIX-2026-09-08.md) for primary-source
 guidance and unavailable historical evidence. Existing wave reports follow unchanged.
+
+## 2026-09-10 · Senior review pass: the gate is green, the cascade is pruned, the hot paths are cold
+
+A one-session review of the whole tree as it stood after the September 7–10 commits, done as a senior
+engineer would read a repository handed over by iterative prompting: measure first, cut what is provably
+dead, fix what is provably wrong, leave the physics alone. Every removal here was proved neutral before it
+was kept.
+
+**The gate.** `./test.sh` now means something: 58 node suites plus the two shipped browser suites
+(`tests/current.browser-test.mjs`, `tests/gpu-recovery.browser-test.mjs`) all pass. The historical
+wave-by-wave gate (`boot.browser-test.mjs`, 8 172 lines, waves 1–143) moved to `tests/legacy/` and runs
+with `./test.sh legacy`; it stood at 83 green / 76 red and its reds were triaged: 17 read windows the
+visibility scheduler of `f2b4929` keeps idle (METERS, ORBIT, DYNAMICS, KEPLER, CALCULUS ship closed or
+below a 900-px fold), 6 matched on-screen copy that `a526bda` reworded, 1 was the harness returning
+nothing, and 52 were unreadable because every `catch` logged Firefox's `e.stack`, which carries no
+message. That logging now prints the message; `judge()` keeps 600 characters of payload instead of 300;
+and `__LW.windowActivity.presentOffscreen(true)` lets a proof present below-the-fold windows without
+lifting the structural gates (closed, folded, off, ui-hidden) — asserted in `tests/window-activity.test.mjs`.
+`tests/current.browser-test.mjs` carried one stale law from `a5c0863` (the macro seat edits depth whether
+the rail is folded or not); it is restated, not weakened. No red was traced to broken physics or a broken
+shipped control.
+
+**The cascade.** A pruner (`same selector, same @media context, later declaration wins, !important-aware`)
+removed 66 dead declarations from `lab.css`, `skin.css` and `modhost.css` — the residue of waves
+re-declaring `#transport.mini .ro`, `.ro-val`, `.k-val`, the modulation rail and the phone breakpoints on
+top of each other. Neutrality was proved, not argued: 3 285 elements × 50 computed properties with all
+25 windows open, dark and light, hash-identical before and after. The wave-53 `?` keysheet, which wave 106
+replaced with the drawn keyboard and then deleted from the DOM on every boot, no longer gets built at all
+(rack.js, ~30 lines; lab.css/skin.css, 16 rules).
+
+**The hot paths.** `field.resize()` read `canvas.clientWidth` every presented frame after the loop had
+written body attributes — a forced synchronous layout per frame; it now reads a ResizeObserver-kept size.
+DYNAMICS ran a Schmidt decomposition per populated shell on every CPU tick for a quantity that depends only
+on the anchor coefficients; it runs per edit. The quality governor's median no longer copies through a plain
+array; SPECTRUM's caption walks `groupByN` once; SHADOW and KEPLER drop three per-frame array allocations.
+Exact physics results are untouched (37/37 hydrogen, all suites).
+
+**The repository.** Nine handoff and task-board documents moved from the root to `docs/history/`
+(REPORT, CHANGELOG, DEPLOY, README, CONTRIBUTING remain). `CONTRIBUTING.md` is new. The three test scripts
+that carried this machine's home directory now derive it from `import.meta.url`
+(`tests/mir.test.mjs` takes `LW_MIR_SRC`). `tools/gate/drv.js` is `drv.mjs`, which is what it was.
+`package.json` names the project, the licence, the homepage, Node ≥ 22 and `npm run serve|test|test:browser|test:all|build`.
+What remains open is off this machine: iPad/phone acceptance, installed-PWA update, a real microphone, and the deploy.

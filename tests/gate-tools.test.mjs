@@ -39,7 +39,7 @@ try {
     assert.match(blocked.stderr, /Browser gate server failed to start/);
     assert.doesNotMatch(blocked.stdout, /BROWSER_ONLY|DISCOVERED/);
     const driver = spawnSync(process.execPath, ['--input-type=module', '-e',
-      `import { startDriver } from ${JSON.stringify(new URL('../tools/gate/drv.js', import.meta.url).href)}; await startDriver();`],
+      `import { startDriver } from ${JSON.stringify(new URL('../tools/gate/drv.mjs', import.meta.url).href)}; await startDriver();`],
     { encoding: 'utf8', timeout: 5000, env: { ...process.env, GD_PORT: String(port) } });
     assert.equal(driver.status, 1);
     assert.match(driver.stderr, /EADDRINUSE/);

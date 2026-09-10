@@ -2,7 +2,7 @@
 // Unlike current.browser-test, this requires a real, working GPU renderer.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
-import * as driver from '../tools/gate/drv.js';
+import * as driver from '../tools/gate/drv.mjs';
 const url=`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`;
 const g=await open(url,{width:1200,height:850,script:20000});
 let failed=false;

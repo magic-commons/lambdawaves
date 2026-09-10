@@ -206,7 +206,8 @@ export function createSpectrum(host, api) {
     for (const [a, L] of lanes) refresh(L, a);
     for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
     const rs = reg.renderSet();
-    info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${Object.keys(groupByN(want)).length} level${Object.keys(groupByN(want)).length === 1 ? '' : 's'}`;
+    const levels = Object.keys(groupByN(want)).length;
+    info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${levels} level${levels === 1 ? '' : 's'}`;
     { const HS = api.hamiltonian ? api.hamiltonian() : null, eig = !!(HS && HS.eigen);                          // W-STURMIAN: the caption and the ladder's affordance
       cap.hidden = !eig; if (eig) cap.textContent = HS.caption || 'non-orthogonal basis: populations are projections';
       if (eig !== ladderEigen) { ladderEigen = eig; lcv.style.cursor = eig ? 'pointer' : ''; lcv.title = eig ? 'click an eigenvalue to load its S-normalised eigenvector into the labels' : ''; } }

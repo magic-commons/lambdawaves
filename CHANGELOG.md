@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 9 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 33 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -51,6 +51,30 @@ stable enough to gate on.
 - `18e78c6` 2026-09-07 — LANDSCAPE: access.test.mjs does not hold the 44-px law, and B131 is unproven
 - `79d7a4d` 2026-09-07 — the closing for wave 107, written from the diff and a full gate run
 - `d9b57fa` 2026-09-07 — Compare computed frost values and reconcile the closing review
+- `9eb463d` 2026-09-07 — Record the green wave 107 gate and completed local task board
+- `5f6421e` 2026-09-08 — Freeze app for Claude Code debugging and refactoring handoff
+- `78ecb30` 2026-09-08 — Make macro value and depth controls keyboard accessible
+- `23328bf` 2026-09-08 — Prepare shipping checkpoint and Claude debugging handoff
+- `e8f78bb` 2026-09-08 — Validate project imports and surface storage failures
+- `89772f6` 2026-09-08 — Fix current project dirty tracking and storage error handling
+- `b784b85` 2026-09-09 — Bound render settling and clean up failed GPU readbacks
+- `2e8b0aa` 2026-09-09 — Verify recovered GPU rendering and repeated reloads
+- `ed83c7c` 2026-09-09 — Refactor notebook rendering and harden storage and GPU cleanup
+- `bc7fe73` 2026-09-09 — Allow local server to bind on the LAN
+- `4c56c55` 2026-09-09 — Optimize tablet rendering and update shipping defaults
+- `d827406` 2026-09-09 — Fix iPad modulation rendering and playhead reveal
+- `f2b4929` 2026-09-09 — Suspend hidden work and defer heavy card solvers
+- `631230c` 2026-09-09 — Reduce startup and frame-loop duplicate work
+- `ef94133` 2026-09-09 — Ensure browser gates release Snap drivers
+- `06a2042` 2026-09-09 — Polish Audio modulation controls
+- `372f354` 2026-09-09 — Rework modulation macro controls
+- `27c2434` 2026-09-09 — Relicense λWAVES under GPL-3.0-only
+- `a526bda` 2026-09-09 — Unify help surfaces and tighten interface copy
+- `d2839e6` 2026-09-10 — Polish and constrain the transport
+- `a5c0863` 2026-09-10 — Fix compact macro controls and logo alignment
+- `12fc572` 2026-09-10 — Polish About actions and workbar modes
+- `84c3e33` 2026-09-10 — Reduce tablet compositor and idle modulation work
+- `35aa0c5` 2026-09-10 — Improve update and history workflows
 
 </details>
 

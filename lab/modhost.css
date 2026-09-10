@@ -1000,7 +1000,7 @@ body[data-theme="light"] .m2ghost {
     filter: drop-shadow(0 1px 0 var(--glass-raise)) drop-shadow(0 2px 6px hsl(214 40% 20% / .22));
     color: var(--fg); }
 }
-:root:root:root #modwin.mir-modwindow .m2mac.on { border-color: transparent; color: var(--acc); }      /* 49 */
+:root:root:root #modwin.mir-modwindow .m2mac.on { border-color: transparent; }      /* 49 */
 
 
 :root:root:root #modwin.mir-modwindow *,
@@ -1061,9 +1061,8 @@ body[data-theme="light"] .m2ghost {
 
 
 :root:root:root #modwin.mir-modwindow .modtempo {
-  display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto;
-  align-items: center; justify-items: start; column-gap: calc(4px * var(--ui-scale)); row-gap: 0;
-  height: calc(30px * var(--ui-scale)); min-height: calc(30px * var(--ui-scale)); }
+  display: grid; grid-template-rows: auto auto;
+  align-items: center; justify-items: start; row-gap: 0; }
 :root:root:root #modwin.mir-modwindow .modtempo b { grid-area: 1 / 1 / 3 / 2; align-self: center; }
 :root:root:root #modwin.mir-modwindow .modtempo span { grid-area: 1 / 2 / 2 / 3; }
 :root:root:root #modwin.mir-modwindow .modtempo .modhz { grid-area: 2 / 2 / 3 / 3; }
@@ -1116,7 +1115,6 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2statusmain .m2statuslamp { font-size: 0; }                     /* 64 */
 
 
-:root:root:root #modwin.mir-modwindow .m2rail { width: 200px; }
 :root:root:root #modwin.mir-modwindow .m2vname { flex: 1 1 auto; min-width: 0; }
 :root:root:root #modwin.mir-modwindow .m2vnum { flex: 0 0 auto; }                                       /* 65 */
 
@@ -1172,7 +1170,6 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2tn {
   fill: hsl(var(--glass-tint) / 1); pointer-events: all; stroke-width: 2; }
-:root:root:root #modwin.mir-modwindow .m2pt { stroke: var(--acc); }
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2tn { stroke: var(--m2-env-ink); }
 /* the SELECTED node is the one place a joint fills, because "this is the handle you are editing" is
@@ -1258,8 +1255,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 
 
 :root:root:root #modwin.mir-modwindow .m2railhead {
-  display: flex; align-items: center; gap: 4px;
-  height: 48px; min-height: 48px; padding: 2px 5px 2px 18px;
+  display: flex; align-items: center; gap: 4px; padding: 2px 5px 2px 18px;
   cursor: pointer; user-select: none; }
 :root:root:root #modwin.mir-modwindow .m2railhead .m2chev { flex: 0 0 auto; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots,
@@ -1316,7 +1312,6 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
    reaching it. */
 :root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2head { height: 40px; min-height: 40px; }
 :root:root:root #modwin.mir-modwindow .m2railhead { height: 40px; min-height: 40px; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { height: 40px; max-height: 40px; }
 :root:root:root #modwin.mir-modwindow .m2grab,
 :root:root:root #modwin.mir-modwindow .m2fold,
 :root:root:root #modwin.mir-modwindow .m2ab,
@@ -1663,10 +1658,10 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .m2-native-rate .k-lbl { display:none; }
 :root:root:root #modwin .m2-native-rate .dial { transform:scale(.75); }
 :root:root:root #modwin .m2-native-rate .k-dial { width:24px; height:24px; flex:0 0 24px; aspect-ratio:1; }
-:root:root:root #modwin .m2-native-rate .k-val { font:600 8.5px var(--font-num, monospace); line-height:1; color:var(--acc); margin-top:2px; padding:0; }
+:root:root:root #modwin .m2-native-rate .k-val { font:600 8.5px var(--font-num, monospace); line-height:1; color:var(--acc); margin-top:2px; }
 :root:root:root #modwin .m2-native-rate.drag .k-val { color:var(--fg); font-weight:800; }
 
-.mod-matrix { width:min(1100px,calc(100vw - 24px)); height:calc(100dvh - 32px); box-sizing:border-box; border:1px solid var(--line); border-radius:14px; color:var(--fg); background:var(--bg); padding:16px; }
+.mod-matrix { width:min(1100px,calc(100vw - 24px)); height:calc(100dvh - 32px); box-sizing:border-box; border:1px solid var(--line); border-radius:14px; color:var(--fg); padding:16px; }
 .mod-matrix::backdrop { background:#0008; backdrop-filter:blur(8px); }
 .mod-matrix-head,.mod-matrix-add,.mod-matrix-bars { display:flex; align-items:center; gap:12px; }
 .mod-matrix-head { justify-content:space-between; height:44px; }
@@ -1810,9 +1805,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2slot .m2vedge { box-shadow: none; }
 
 /* Compact macros retain the real routing grip and value knob, not empty arc fragments. */
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:112px;height:336px;max-height:336px; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:flex;flex-direction:column; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow { grid-template-columns:44px 44px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { height:336px;max-height:336px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2numseat { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2num { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2val,

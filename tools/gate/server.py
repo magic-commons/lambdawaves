@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Static HTTPS dev server for λWAVES: server.py <dir> <port>.
 
-WAVE 106 · THE ARK.  This file, gatekit.mjs and drv.js beside it are VENDORED — they
+WAVE 106 · THE ARK.  This file, gatekit.mjs and drv.mjs beside it are VENDORED — they
 were the MANDELBROT app's mbgate kit (same author, same org; NOTICE records the lift),
 reached by absolute path from serve.sh, test.sh and three test files.  That worked on
 one laptop and nowhere else: a clone of this repo could not serve the lab or run one

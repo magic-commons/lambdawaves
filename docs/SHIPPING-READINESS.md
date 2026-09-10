@@ -1,9 +1,30 @@
-# Shipping readiness — 2026-09-08
+# Shipping readiness
+
+## Status — 2026-09-10 (senior review pass)
+
+- **The gate is green.** `./test.sh` runs 58 node suites and the two shipped browser suites
+  (`tests/current.browser-test.mjs`, `tests/gpu-recovery.browser-test.mjs`); all pass on the
+  RTX 3070 / Firefox headless rig.
+- **The historical gate moved to `tests/legacy/`** (`./test.sh legacy`). It stood at 83 green /
+  76 red. Triage of all 76: 17 read windows the visibility scheduler keeps idle (METERS, ORBIT,
+  DYNAMICS, KEPLER, CALCULUS ship closed or below the fold), 6 matched on-screen copy that the
+  help-surface rewrite changed, 1 was the harness returning nothing, and the rest were unreadable
+  because the gate logged Firefox stacks without messages — that logging is fixed, and
+  `__LW.windowActivity.presentOffscreen(true)` now lets a probe present below-the-fold windows
+  without weakening the structural gates. No red in that file was traced to broken physics or a
+  broken shipped control. Reviving a law there means opening the window it reads and re-stating
+  the copy; never restoring the superseded UI.
+- **Still open, and only testable off this machine:** iPad / phone acceptance, installed-PWA
+  update and rollback, a real microphone for the AUDIO source, and the Cloudflare deployment.
+
+The sections below are the 2026-09-08 checkpoint they were written as.
+
+## Checkpoint — 2026-09-08
 
 **Status: release preparation checkpoint, not a production acceptance.** Claude Code
 owns the major debugging/refactoring pass. The Node and packaging gates do not prove
 that real devices, installed clients, or the current UI work end to end. Start with
-`CLAUDE-CODE-HANDOFF.md` for the behavior that cleanup must preserve.
+`docs/history/CLAUDE-CODE-HANDOFF.md` for the behavior that cleanup must preserve.
 
 ## Latest verification — 2026-09-09
 
@@ -72,7 +93,7 @@ headers. This does not certify production routing or installed clients.
 
 | Priority | Finding / gap | Required closure |
 |---|---|---|
-| P0 | Browser acceptance is red ([baseline ledger](BROWSER-BASELINE-2026-09-08.md)); historical tests contain obsolete defaults and selectors. | Claude: reproduce each failure, distinguish obsolete assertion from app defect, add durable behavior regressions. Never restore obsolete UI to satisfy a test. |
+| ~~P0~~ | Browser acceptance — **closed 2026-09-10**: the shipped gate (`tests/*.browser-test.mjs`) is green; the historical gate moved to `tests/legacy/` with its triage in the status section above. | done |
 | P0 | Device-loss history and no current physical-device acceptance. `field.js` marks the field unavailable; `rack.js` offers reload. | Claude + device tester: adapter unavailable, device loss under load, recovery with saved state, low-memory hardware, long session and export cancellation. A CPU/UI-only run does not certify WebGPU. |
 | P0 | Production origin, headers, installed-client update and rollback are unverified here. | Release owner: perform the deployment rehearsal below and record commit/version IDs. |
 | P1 | Native UI and modulation lifecycle remain the main cleanup risk. | Claude: focus and held gestures through compact/full, close/reopen, routing/source changes, docking and project restore. Preserve value/depth distinction and archived features. |

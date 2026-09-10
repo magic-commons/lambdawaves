@@ -64,10 +64,6 @@ export function createDynamics(host, api) {
     ui.L.set(lg.L.toFixed(6)); ui.T.set(lg.T.toFixed(6)); ui.V.set(lg.V.toFixed(6)); ui.S.set(S.toFixed(6));
     const am = angularMoments(c.re, c.im);
     ui.Lz.set(am.Lz.toFixed(4)); ui.L2.set(am.L2.toFixed(4));
-    const shells = [...new Set(ids.map((a) => BASIS[a].n))].sort();
-    const ents = shells.map((n) => [n, rotorEntropy(schmidt(shellMatrix(reg.re0, reg.im0, n)).values)]);
-    ui.ent.set(ents.length ? ents.map(([n, e]) => e.toFixed(4)).join(' · ') : '—');
-    ui.ent.setSub(ents.length ? 'n = ' + ents.map(([n]) => n).join(' · ') + '   (ln 2 = 0.6931 is maximal for n = 2)' : '');
     const ro = radialObservables(c.re, c.im, ids, reg.energy());
     ui.rr.set(ro.r.toFixed(4)); ui.rr.setSub(`⟨1/r⟩ = ${ro.rinv.toFixed(5)} · ⟨T⟩ = ${ro.T.toFixed(5)}`);
     ui.vir.set(ro.virial.toFixed(5), Math.abs(ro.virial - 1) < 1e-4 ? 'ok' : '');
@@ -75,6 +71,12 @@ export function createDynamics(host, api) {
     ui.dz.set(dz.toFixed(6), Math.abs(dz) > 1e-9 ? 'live' : '');
     if (reg.version !== lastVersion) {
       lastVersion = reg.version;
+      // The per-shell Schmidt entropies are functions of the anchor coefficients (re0, im0), not of t:
+      // a decomposition per populated shell belongs here, once per edit, not once per tick.
+      const shells = [...new Set(ids.map((a) => BASIS[a].n))].sort();
+      const ents = shells.map((n) => [n, rotorEntropy(schmidt(shellMatrix(reg.re0, reg.im0, n)).values)]);
+      ui.ent.set(ents.length ? ents.map(([n, e]) => e.toFixed(4)).join(' · ') : '—');
+      ui.ent.setSub(ents.length ? 'n = ' + ents.map(([n]) => n).join(' · ') + '   (ln 2 = 0.6931 is maximal for n = 2)' : '');
       const lines = dipoleLines(reg.re0, reg.im0, ids);
       ui.lines.set(lines.length ? `${lines.length} · ω = ${lines[0].omega.toFixed(4)}` : 'none: no Δl = ±1 pair with ΔE ≠ 0 (a degenerate pair is a static dipole, not a line)', lines.length ? '' : 'warn');
       ui.lines.setSub(lines.length ? lines.slice(0, 2).map((l) => `${l.label}  T = ${l.period.toFixed(2)} a.u.  d = ${l.amplitude.toFixed(3)} a₀  P = ${l.power.toExponential(2)}`).join(' · ') : 'z couples l → l ± 1: nothing here does');

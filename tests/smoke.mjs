@@ -24,7 +24,8 @@ try {
   judge('no page errors', errs.errs.length === 0, errs);
   const png = await g.snap();
   const fs = await import('node:fs');
-  fs.mkdirSync('/home/joshua-hosain/Documents/LAMBDAWAVES/.tmp', { recursive: true });
-  fs.writeFileSync('/home/joshua-hosain/Documents/LAMBDAWAVES/.tmp/smoke.png', Buffer.from(png, 'base64'));
+  const ROOT = new URL('..', import.meta.url).pathname;
+  fs.mkdirSync(`${ROOT}.tmp`, { recursive: true });
+  fs.writeFileSync(`${ROOT}.tmp/smoke.png`, Buffer.from(png, 'base64'));
 } finally { await g.close(); }
 process.exit(done('smoke'));

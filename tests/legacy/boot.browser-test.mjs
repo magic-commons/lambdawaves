@@ -11,8 +11,8 @@
 import zlib from 'node:zlib';
 import fs from 'node:fs';
 import http from 'node:http';   // wave 51: Set Window Rect on the live session — the only way to reach a phone viewport mid-run
-import { open, judge, done } from '../tools/gate/gatekit.mjs';
-const drv = await import('../tools/gate/drv.js');
+import { open, judge, done } from '../../tools/gate/gatekit.mjs';
+const drv = await import('../../tools/gate/drv.mjs');
 
 const PORT = process.env.LW_PORT || '8701';
 const ROOT = decodeURIComponent(new URL('..', import.meta.url).pathname).replace(/\/$/, '');
@@ -83,6 +83,10 @@ try {
   /* ── boot ──────────────────────────────────────────────────────────────── */
   const r = await g.waitFor('window.__LW && __LW.ready', 300, 100);
   judge('B1 the lab boots (window.__LW.ready)', r && r.ok, r);
+  /* The visibility scheduler (window-activity.js) keeps a window below the fold at zero work. Most of this
+     gate's probes were written before that law and read windows the 900-px viewport never shows; presenting
+     them off-screen keeps those probes honest without weakening the structural gates (closed, folded, off). */
+  await g.ev("__LW.windowActivity.presentOffscreen(true);");
   const bootInfo = await g.ev('return { ok: __LW.field.ok, err: __LW.field.error, shader: __LW.field.shaderMessages, errs: window.__e, banner: !document.getElementById("banner").hidden };');
   judge('B1 WebGPU field is up, no shader messages, no page errors, no banner', bootInfo.ok && !bootInfo.err && (bootInfo.shader || []).length === 0 && bootInfo.errs.length === 0 && !bootInfo.banner, bootInfo);
   if (!bootInfo.ok) throw new Error('GPU gate cannot continue: ' + bootInfo.err);
@@ -92,7 +96,7 @@ try {
     const kinds = {}; for (const d of document.querySelectorAll('.dev')) kinds[d.dataset.id] = { kind: d.dataset.kind, folded: d.classList.contains('folded'), power: !!d.querySelector('.dev-power'), close: !!d.querySelector('.dev-close'), copy: !!d.querySelector('.dev-copy') };
     const set = document.querySelector('.dev[data-id="settings"]');
     return { specSide: __LW.layout.side('spectrum'), pickerOpen: __LW.spectrum.pickerOpen, keplerOn: __LW.kepler.on, theme: document.body.dataset.theme, phaseDefault: __LW.bootView === 'phase' && v0 === vP && v0 !== vD, vortexOn: __LW.vortex.on, vortexOverlay: __LW.vortex.overlay, font, bodyFont: getComputedStyle(document.body).fontFamily, kinds, settings: !!set, keysInSettings: set ? set.querySelectorAll('.keys-chip').length : 0, themeSegInSettings: !!(set && [...set.querySelectorAll('.seg')].length), adds: document.querySelectorAll('#rackAdd').length, veil: getComputedStyle(document.getElementById('rack')).opacity, shadow: getComputedStyle(document.body).getPropertyValue('--glass-shadow') };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B43 THE SHIPPED DEFAULTS: SPECTRUM on the left rack with MODE open, KEPLER off, LIGHT theme, arg ψ as the observable, the vortex census and its overlay off; Roboto is the interface face; every window has ⏻ ▾ ×, INFO panels have ⧉ COPY, CONTROL and OTHER windows start folded, CORE open; SETTINGS exists with the key bindings inside; both racks carry a + and no veil; the card shadow is the tight one',
     !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && dfT.kinds.qcd.kind === 'info' && dfT.kinds.qcd.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
   /* ══ WAVE 106 · THE GATE OPENS THE CHANNELS, BECAUSE A NEW USER NO LONGER ARRIVES WITH THEM OPEN ══
@@ -107,8 +111,8 @@ try {
      channels would.  It is deliberately NOT a `hidden = false` poke at the DOM: going through the real
      button means this line also proves the button still works, and it fails loudly if the control is
      ever renamed rather than silently un-hiding a panel behind the test's back. */
-  await g.ev(`const b = [...document.querySelectorAll('.dev[data-id=spectrum] .trig')].find(x => /^(HIDE|SHOW)$/.test((x.textContent||'').trim()));
-    if (b && (b.textContent||'').trim() === 'SHOW') b.click();
+  await g.ev(`const b = [...document.querySelectorAll('.dev[data-id=spectrum] .trig')].find(x => /^(HIDE|SHOW|DIALS)$/.test((x.textContent||'').trim()));   // the button reads DIALS since the help-surface wave; aria-expanded says which way it is
+    if (b && ((b.textContent||'').trim() === 'SHOW' || b.getAttribute('aria-expanded') === 'false')) b.click();
     await new Promise(r => setTimeout(r, 120));
     const rows = document.querySelector('.sp-rows');
     return { pressed: !!b, rowsHidden: rows ? rows.hidden : null };`);
@@ -252,7 +256,7 @@ try {
   const vx = await g.ev(`try { __LW.loadPreset('recon'); await __LW.settle(); const c = __LW.vortex.census; const L = __LW.vortex.last;
     __LW.loadPreset('2px'); await __LW.settle(); const L2 = __LW.vortex.last; const xm = Math.max(...L2.points.map(p => Math.abs(p.x)));
     const ctx = document.getElementById('vortex').getContext('2d'); const img = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height).data; let lit = 0; for (let i = 3; i < img.length; i += 4) if (img[i] > 0) lit++;
-    return { count: c && c.count, Td: c && c.Td, pts: L && L.points.length, M: L && L.M, pts2: L2.points.length, M2: L2.M, xm, lit }; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+    return { count: c && c.count, Td: c && c.Td, pts: L && L.points.length, M: L && L.M, pts2: L2.points.length, M2: L2.M, xm, lit }; } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B14 VORTEX: the census of 3d₊₂+4p₊₁+5s reads 10 points at T_d = 481.265; 2p_x has M = 2 with every located point in x = 0; the overlay is drawn', !vx.error && vx.count === 10 && Math.abs(vx.Td - 481.265) < 1e-2 && vx.M2 === 2 && vx.pts2 > 20 && vx.xm < 1e-6 && vx.lit > 50, vx);
 
   const r7 = await g.ev(`try { __LW.loadPreset('2s+2pz'); await __LW.settle();
@@ -264,7 +268,7 @@ try {
     const c2 = Array.from(__LW.reg.re0).concat(Array.from(__LW.reg.im0));
     let back = 0; for (let i = 0; i < c0.length; i++) back = Math.max(back, Math.abs(c0[i] - c2[i]));
     const lad = __LW.ladder.last.sup; const norm = __LW.meters().norm;
-    return { s0, s1: sh.spectrum, e1: sh.e, L1: sh.absL, d0, d1, back, norm, cls: lad.cls, kind: lad.kind, exact: lad.exact, pred: lad.predicted }; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+    return { s0, s1: sh.spectrum, e1: sh.e, L1: sh.absL, d0, d1, back, norm, cls: lad.cls, kind: lad.kind, exact: lad.exact, pred: lad.predicted }; } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B15 ROTOR DRIVE: one rotor alone is an SO(4) move — it changes the state and tilts ⟨L⟩, keeps the Schmidt spectrum and the norm, and its inverse returns the coefficients to 1e-14',
     !r7.error && r7.d0 !== r7.d1 && r7.back < 1e-14 && Math.abs(r7.s1[0] - r7.s0[0]) < 1e-9 && r7.L1 > 1e-3 && Math.abs(r7.norm - 1) < 1e-6, r7);
   judge('B15 LADDER superrevival: n̄ = 30 ≡ 2 (mod 4) ⇒ the HALF-SHIFTED class, and the exact |A(T_sr)| by integer phase reduction sits beside the cusp prediction',
@@ -278,7 +282,7 @@ try {
     const e1 = window.__e.length; const folded = __LW.orbitView.shells.length ? __LW.orbitView.shells[0].absL : -1;
     devs.forEach(d => d.querySelector('.dev-fold').click()); await __LW.settle();
     return { e0, e1, errs: window.__e.slice(0, 3), v0, v1: __LW.reg.version, folded, open: __LW.orbitView.shells[0].absL };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B16 folding every window is layout only: no errors thrown, the state still evolves and the ORBIT invariants still recompute behind the fold (a folded canvas has no size — its radii would go negative and canvas throws, killing the render loop)',
     !fold.error && fold.e1 === fold.e0 && fold.errs.length === 0 && fold.v1 > fold.v0 && fold.folded > 1e-6 && Math.abs(fold.open - fold.folded) < 1e-12, fold);
 
@@ -299,7 +303,7 @@ try {
     let lit = 0; for (let i = 3; i < img.length; i += 4) if (img[i] > 0) lit++;
     const digest = __LW.stateDigest();
     return { d0, txt: txt.slice(0, 4), seeded, alive: __LW.particles.state.alive, moved, lit, digest, dz, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B17 DYNAMICS: the window exists and reads the Lagrangian, and the 1s+2p_z dipole ⟨z⟩ oscillates at the Bohr period — full at t = 0, zero a quarter period later, reversed at half',
     !dyn.error && dyn.d0 === 1 && Math.abs(Math.abs(dyn.dz[0]) - 0.7449) < 2e-3 && Math.abs(dyn.dz[1]) < 2e-3 && Math.abs(dyn.dz[2] + dyn.dz[0]) < 2e-3, dyn);
   judge('B18 PARTICLES: a cloud seeded from |ψ|² is drawn on the stage and flows along the exact velocity field while the transport plays, without touching the state',
@@ -317,7 +321,7 @@ try {
     const status = document.querySelector('[data-m="status"] .ro-val').textContent;
     __LW.reg.setField({ Fz: 0, Bz: 0 }); __LW.schedule(2); await __LW.settle();
     return { a0, aStark, e0, eZee, badge, status, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B19 STATIC FIELD: switching on a Stark field makes the Stark state an eigenstate — |A(t)| stays 1 at t = 4000 where it would otherwise have moved — and a Zeeman field leaves ⟨E⟩ unchanged for this m = 0 state',
     !fld.error && Math.abs(fld.aStark - 1) < 1e-6 && Math.abs(fld.eZee - fld.e0) < 1e-12 && fld.errs === 0, fld);
   judge('B19 and the instrument SAYS which Hamiltonian is in force: a Stark badge appears and the status line drops from EXACT ANALYTIC to EXACT WITHIN EACH SHELL', /STARK|ZEEMAN/.test(fld.badge) || /WITHIN EACH SHELL/.test(fld.status), { badge: fld.badge, status: fld.status });
@@ -338,7 +342,7 @@ try {
     const off = await __LW.readPixels();
     const C = (p) => p.meanChroma;
     return { before: C(before), after: C(after), two: C(two), off: C(off), seam, same: d0 === __LW.stateDigest(), errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   // the shader dithers every frame, so two renders of one scene never hash alike: compare the colour statistic
   judge('B20 PHASE PALETTE: turning it on visibly recolours the field, editing the stops recolours it again, turning it off returns to the built-in wheel, and none of it touches ψ',
     !pal.error && pal.seam && Math.abs(pal.after - pal.before) > 1 && Math.abs(pal.two - pal.after) > 8 && Math.abs(pal.off - pal.before) < 0.5 && pal.same && pal.errs === 0, pal);
@@ -354,7 +358,7 @@ try {
     return { cloud: cloud.nonBlack / cloud.total, cloudHot: cloudHot.nonBlack / cloudHot.total, cloudLum: cloudHot.meanLum,
       solid: solid.nonBlack / solid.total, solidHot: solidHot.nonBlack / solidHot.total, solidLum: solidHot.meanLum,
       grain: grain.nonBlack / grain.total, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B21 DRAW STYLES: SOLID and GRAIN both render, and the bounded transfer holds — at exposure 12 the SOLID plateau stays far dimmer than the CLOUD, which is what stops the blob glowing the whole field',
     !draw.error && draw.solid > 0.01 && draw.grain > 0.005 && draw.solidLum < draw.cloudLum && draw.errs === 0, draw);
   const keys = await g.ev(`try { const y0 = __LW.obs.yaw, p0 = __LW.obs.pitch, d0 = __LW.obs.dist, s0 = __LW.stateDigest();
@@ -367,7 +371,7 @@ try {
     const styleBefore = __LW.mat.style; K('KeyC'); await __LW.settle(); const styleAfter = __LW.mat.style;
     K('KeyC'); K('KeyC'); K('KeyC'); K('KeyC'); await __LW.settle();
     return { cam, rotated, styleBefore, styleAfter, styleBack: __LW.mat.style, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B21 KEYS: WASD/QE move the camera without touching ψ; X/Y/Z picks the rotation axis and [ ] turns the STATE about it; C cycles the draw style back to where it started',
     !keys.error && keys.cam.yaw && keys.cam.pitch && keys.cam.dist && keys.cam.stateSame && keys.rotated && keys.styleAfter !== keys.styleBefore && keys.styleBack === keys.styleBefore && keys.errs === 0, keys);
 
@@ -382,7 +386,7 @@ try {
     const subs = [...w.querySelectorAll('.ro-sub')].map(e => e.textContent).join(' | ');
     __LW.qcd.setPotential('cornell'); __LW.schedule(1); await __LW.settle();
     return { cornell, lin, refuted: subs.includes('REFUTED'), canvas: cv && cv.width > 0 && cv.height > 0, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B22 QCD: the window solves Cornell (2S−1S = 0.6036, ψ(2S) within 20 MeV with V₀ fitted), draws the ladder, and under the LINEAR potential prints the Airy spectroscopy as REFUTED with the rigid 0.679 ratio',
     !qcd.error && Math.abs(qcd.cornell.split - 0.6036) < 2e-3 && Math.abs(qcd.cornell.m2 - 3.6861) < 0.02 && Math.abs(qcd.lin.ratio - 0.679) < 0.02 && qcd.refuted && qcd.canvas && qcd.errs === 0, qcd);
 
@@ -397,7 +401,7 @@ try {
     const back = await __LW.fieldDigest();
     return { xInt: x.integral, pInt: p.integral, backInt: back.integral, halfX, halfP, fieldSpace: p.half, nanP: p.nan,
       momentumBadge: badge.includes('a₀⁻¹ · MOMENTUM'), lit: px.nonBlack / px.total, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B23 MOMENTUM SPACE: switching the grid to φ(p) keeps the norm — PARSEVAL on the GPU: ∫|φ|²d³p = ∫|ψ|²d³x = 1 within 2% on a 96³ grid — the box rescales to a₀⁻¹, the badge says MOMENTUM, the picture is lit, and switching back restores the position integral',
     !mom.error && Math.abs(mom.pInt - 1) < 0.02 && Math.abs(mom.xInt - 1) < 0.02 && Math.abs(mom.backInt - mom.xInt) < 1e-6 && mom.halfP < mom.halfX && mom.momentumBadge && mom.lit > 0.02 && !mom.nanP && mom.errs === 0 && !mom.gpu, mom);
 
@@ -414,7 +418,7 @@ try {
     __LW.clock.step(4); await __LW.settle();
     const dq = [...document.querySelectorAll('[data-dq="dipole"]')].map(e => e.textContent)[0] || '';
     return { n0, n1, n2, escZ: 1 - n1 / n0, escX: 1 - n2 / n1, changed: d0 !== d1, readout: ro, dipole: dq, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B24 IMPULSE (named SLAP until wave 53): kicking 1s with k = 0.1 along z drops the norm by 0.31% (the electron knocked out of the six-shell register — physics, not renormalised), the readout prints it, the K key kicks at k = 0.2 along the chosen axis (escape 1.2–1.4%, the same law), and the state jiggles',
     !slap.error && Math.abs(slap.n0 - 1) < 1e-9 && slap.escZ > 0.0027 && slap.escZ < 0.0034 && slap.escX > 0.010 && slap.escX < 0.017 && slap.changed && slap.readout && slap.readout.includes('%') && slap.errs === 0, slap);
 
@@ -430,7 +434,7 @@ try {
     const px2 = ctx.getImageData(0, 0, cv.width, cv.height).data; let lit2 = 0; for (let i = 3; i < px2.length; i += 4) if (px2[i] > 0) lit2++;
     __LW.kepler.setOn(true); __LW.schedule(1); await __LW.settle();
     return { o0, o1, lit, lit2, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B25 KEPLER: the circular 3d₊₂ state carries a circle (e = 0, a = 9) drawn over the cloud; a Runge–Lenz rotation by 0.6 turns it into an ellipse of e = (2/3)·sin 0.6 = 0.376; the overlay lights and clears with its switch',
     !kep.error && kep.o0.length === 1 && kep.o0[0].n === 3 && kep.o0[0].e < 1e-9 && kep.o0[0].a === 9 && Math.abs(kep.o1[0].e - 2 / 3 * Math.sin(0.6)) < 1e-9 && kep.lit > 200 && kep.lit2 === 0 && kep.errs === 0, kep);
 
@@ -449,7 +453,7 @@ try {
     __LW.setHamiltonian('hydrogen'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const back = { E0: __LW.reg.E[0], orbitHidden: document.querySelector('.dev[data-id="orbit"]').hidden };
     return { E0, E2p, half, integral: dig.integral, nan: dig.nan, hidden, status, escaped: 1 - n1 / n0, readout: ro, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B26 OSCILLATOR: switching the Hamiltonian sets E = 3/2 and 5/2 on the ground and first p labels, rescales the box, the GPU grid integrates the Gaussian ground state to 1 (2%), the hydrogen-theorem windows stand down, and a slap of k = 0.5 loses NOTHING (< 1e-6) with ⟨p⟩ gained = 0.5000 — Ehrenfest exact; switching back restores hydrogen',
     !qho.error && Math.abs(qho.E0 - 1.5) < 1e-12 && Math.abs(qho.E2p - 2.5) < 1e-12 && qho.half < 9 && Math.abs(qho.integral - 1) < 0.02 && !qho.nan && qho.hidden.every(h => h === true) && qho.status.includes('OSCILLATOR') && qho.escaped < 1e-6 && qho.readout && qho.readout.includes('0.5000') && Math.abs(qho.back.E0 + 0.5) < 1e-12 && qho.back.orbitHidden === false && qho.errs === 0 && !qho.gpu, qho);
 
@@ -470,7 +474,7 @@ try {
     const status = __LW.field.ok ? document.body.textContent.includes('TOY DRAG') : true;
     __LW.setDamping(0); const nB = __LW.reg.at(8); let n8b = 0; for (let i = 0; i < 91; i++) n8b += nB.re[i] ** 2 + nB.im[i] ** 2;
     return { during, lit: px.meanChroma, afterCancel, afterRelease, damp: { n8, n8b, status }, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B27 THE IMPULSE VECTOR (named THE BOW until wave 53): ctrl+drag 240 px draws k = 2.0 in the screen plane, switches to the phase view with the preview boost on (the fringes are the exact e^{ik·x}ψ); releasing CTRL cancels with ψ untouched; pulling 120 px and releasing applies k = 1 and drops the norm; the DRAG toy at γ = 0.2 bleeds the excited norm at t = 8 and says TOY DRAG, and γ = 0 restores the unitary register',
     !bowT.error && bowT.during.active && Math.abs(bowT.during.k - 2) < 1e-9 && bowT.during.boostOn && bowT.during.view === 1 && Math.abs(Math.hypot(...bowT.during.boostK) - 2) < 1e-9
       && !bowT.afterCancel.active && !bowT.afterCancel.boostOn && bowT.afterCancel.view === 0 && bowT.afterCancel.same
@@ -506,7 +510,7 @@ try {
     const saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys') || '{}');
     __LW.keys.reset();
     return { hidden, shown, first0, stageHeld, tab1, tab2, offSame, seeded, notReset, reset, saved, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B28 KEYS: H hides the rack, badges, hint and frame and H shows them again; TAB brings the next window to the top unfolded and Shift+TAB the previous — FROM THE STAGE, which is wave 57\'s change to this block and the only one: Tab was an application key everywhere, so keyboard focus could not move at all, and it now cycles windows only while the stage holds focus and is the browser\'s everywhere else (proved both ways here); Ctrl+R seeds the particles; rebinding the camera reset from R to T takes effect at once and is saved in localStorage',
     !keysT.error && keysT.hidden.cls && keysT.hidden.rack === 'none' && keysT.hidden.frame === false && !keysT.shown.cls && keysT.shown.rack !== 'none'
       && keysT.stageHeld === true && keysT.offSame === true
@@ -518,7 +522,7 @@ try {
     const atomInt = (await __LW.fieldDigest()).integral;
     __LW.molecule.setOn(true); __LW.molecule.setR(2); __LW.molecule.setKind('sigma_g'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const gInt = (await __LW.fieldDigest()).integral, half = __LW.domain.half;
-    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('H₂⁺ · EXACT integrals');
+    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('H₂⁺ · LCAO · CLASSICAL NUCLEI');
     __LW.molecule.setKind('sigma_u'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const uInt = (await __LW.fieldDigest()).integral;
     __LW.molecule.setKind('on_A'); __LW.clock.reset(); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
@@ -530,7 +534,7 @@ try {
     __LW.molecule.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const back = { stateHidden: document.querySelector('.dev[data-id="state"]').hidden, integral: (await __LW.fieldDigest()).integral };
     return { atomInt, gInt, uInt, half, stateHidden, status, p0, pHalf, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B29 MOLECULE: with H₂⁺ holding the field the GPU integrates σg and σu — two 1s orbitals centred on the protons at ±1 — to 1 (2%; the centred-orbital kernel works and the non-orthogonal normalisation is right), the atom windows stand down, the status names the labels, the electron ON A reads 1.0000 at t = 0 and 0.0000 half a tunnelling period later, and OFF gives the atom back',
     !mol.error && Math.abs(mol.atomInt - 1) < 0.02 && Math.abs(mol.gInt - 1) < 0.02 && Math.abs(mol.uInt - 1) < 0.02 && Math.abs(mol.half - 7) < 1e-9 && mol.stateHidden && mol.status && mol.p0 === '1.0000' && mol.pHalf === '0.0000' && !mol.back.stateHidden && Math.abs(mol.back.integral - 1) < 0.02 && mol.errs === 0 && !mol.gpu, mol);
 
@@ -548,7 +552,7 @@ try {
     const fast = await run(45);
     __LW.perf.setMode('full');
     return { full, fast, mode: __LW.perf.mode, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B30 PERFORMANCE: the profile measures every stage (field and total > 0); in 120 Hz mode the CPU windows update on about every 4th frame while the field still presents every frame; the mode switches back cleanly. WAVE 63: both windows are 45 FRAMES rather than 1500 ms, so the sample size is a constant on any box and the wall time is the variable — which is what let the two `frames > 10` guards go. They were a 6.7 fps floor wearing a sample-size hat, and a floor is not a claim this block makes',
     !perfT.error && perfT.full.profile.field > 0 && perfT.full.profile.total > 0 && !perfT.full.short && !perfT.fast.short
             /* the boundary frames of a 47-frame window put the every-4th count at 12 ± 2 and it FLIPS run to
@@ -569,7 +573,7 @@ try {
     const status = document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent.includes('SPHERICAL WELL'); const lane2s = (document.querySelector('.sp-e[data-a="1"]') || {}).textContent;
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
     return { E0, half, gInt: g0.integral, dInt: d0.integral, nan: g0.nan + d0.nan, escaped: 1 - n1 / n0, status, lane2s, back: __LW.reg.E[0], errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B31 THE BOX: selecting the spherical well sets E = π²/200 on the ground label, the box is the well (±10.8), the GPU integrates the ground state (j₀) AND a d state (j₂ by Miller\'s recurrence in WGSL) to 1 (2%), a slap of k = 0.6 leaves the register only a little (the box\'s spectrum is dense), the footer names the wall, and hydrogen comes back',
     !wellT.error && Math.abs(wellT.E0 - Math.PI ** 2 / 200) < 1e-12 && Math.abs(wellT.half - 10.8) < 1e-6 && Math.abs(wellT.gInt - 1) < 0.02 && Math.abs(wellT.dInt - 1) < 0.02 && !wellT.nan && wellT.escaped < 0.1 && wellT.status && wellT.lane2s && wellT.lane2s.startsWith('0.1974') && Math.abs(wellT.back + 0.5) < 1e-12 && wellT.errs === 0 && !wellT.gpu, wellT);
 
@@ -584,7 +588,7 @@ try {
     __LW.setSpace('x'); __LW.setIonZ(1); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const back = { E0: __LW.reg.E[0], half: __LW.domain.half, ladderHidden: document.querySelector('.dev[data-id="ladder"]').hidden };
     return { E0, half, xInt, pInt, halfP, status, orbitHidden, ladderHidden, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B32 Z = 2 (He⁺): E_1s = −2, the box halves to ±8, the GPU integrates the scaled 2p₊ to 1 in position AND momentum space (the exponent fix), the status names the ion, the hydrogen-theorem windows stand down, and Z = 1 restores everything',
     !zT.error && Math.abs(zT.E0 + 2) < 1e-12 && Math.abs(zT.half - 8) < 1e-9 && Math.abs(zT.xInt - 1) < 0.02 && Math.abs(zT.pInt - 1) < 0.02 && Math.abs(zT.halfP - 4.0) < 1e-9 && zT.status.includes('Z = 2') && zT.ladderHidden && Math.abs(zT.back.E0 + 0.5) < 1e-12 && Math.abs(zT.back.half - 16) < 1e-9 && !zT.back.ladderHidden && zT.errs === 0 && !zT.gpu, zT);
 
@@ -592,7 +596,7 @@ try {
   const heT = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
     __LW.helium.setBasis('six'); __LW.helium.place(0.8, 0); __LW.helium.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const d1 = await __LW.fieldDigest(), half = __LW.domain.half, space = __LW.field.space;
-    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('the conditional density of electron 2');
+    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('HELIUM · HYLLERAAS · CONDITIONAL DENSITY');
     __LW.helium.place(2.0, Math.PI / 2); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const d2 = await __LW.fieldDigest();
     const w = document.querySelector('.dev[data-id="helium"]');
@@ -600,7 +604,7 @@ try {
     __LW.helium.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const back = { stateHidden: document.querySelector('.dev[data-id="state"]').hidden, integral: (await __LW.fieldDigest()).integral, space: __LW.field.space };
     return { half, space, int1: d1.integral, int2: d2.integral, hash1: d1.hash, hash2: d2.hash, nan: d1.nan + d2.nan, stateHidden, status, vals, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B33 HELIUM: with helium holding the field the kernel runs the two-electron branch (space 4) on a ±4 box, draws a finite conditional cloud that CHANGES when electron 1 is moved (different grid, no NaN), the window prints the variational energy above the exact one with the cusp near ½, the atom windows stand down, and OFF gives the atom back',
     !heT.error && heT.space === 4 && Math.abs(heT.half - 4) < 1e-9 && heT.int1 > 0 && heT.int2 > 0 && heT.hash1 !== heT.hash2 && !heT.nan && heT.stateHidden && heT.status
       && heT.vals.some(v => v.startsWith('-2.903')) && !heT.back.stateHidden && Math.abs(heT.back.integral - 1) < 0.02 && heT.back.space === 0 && heT.errs === 0 && !heT.gpu, heT);
@@ -616,7 +620,7 @@ try {
     const ro = [...w.querySelectorAll('.ro-val')].map(e => e.textContent).find(t => t.includes('held'));
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
     return { captured: L.captured, norm, pop, c0, c3, hash0: d0.hash, hash3: d3.hash, int0: d0.integral, int3: d3.integral, ro, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B34 THE GAS: a σ = 1.6 packet launched at z = −4 with k = 0.8 is held by the box to > 85%, is a unit-norm state of > 20 well eigenstates, sits at z ≈ −4, moves to ≈ −1.6 in three time units, the GPU grid integrates it to 1 (2%) before and after, and the readout reports how much the box holds',
     !gasT.error && gasT.captured > 0.85 && Math.abs(gasT.norm - 1) < 1e-9 && gasT.pop > 20 && Math.abs(gasT.c0[2] + 4) < 0.4 && Math.abs(gasT.c3[2] + 1.6) < 0.7 && gasT.hash0 !== gasT.hash3 && Math.abs(gasT.int0 - 1) < 0.02 && Math.abs(gasT.int3 - 1) < 0.02 && gasT.ro && gasT.ro.includes('held') && gasT.errs === 0 && !gasT.gpu, gasT);
 
@@ -627,13 +631,13 @@ try {
     __LW.h2.setR(1.4); __LW.h2.setWhich('singlet'); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const d14 = await __LW.fieldDigest();
     __LW.h2.setWhich('triplet'); __LW.clock.reset(); const traj = __LW.h2.collide(0.02); __LW.schedule(4); await __LW.settle();
-    const status = document.body.textContent.includes('CLASSICAL nuclei');
+    const status = document.body.textContent.includes('CLASSICAL NUCLEI');
     __LW.clock.step(1.5); __LW.schedule(3); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const Rmid = __LW.h2.R;
     __LW.h2.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const back = { space: __LW.field.space, integral: (await __LW.fieldDigest()).integral };
     return { space, half, int6: d6.integral, int14: d14.integral, nan: d6.nan + d14.nan, Rmin: traj.Rmin, Rmid, status, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B35 H₂: the kernel\'s incoherent two-group branch integrates the Heitler–London one-electron density to 2 electrons (2%) at R = 6 (triplet) and at R = 1.4 (singlet, where the σu group is nearly gone), the collision on the triplet turns around at R ≈ 3.4 and the nuclei are on their way in 1.5 time units later (R between the turning point and the start), the status says classical nuclei, and OFF gives the atom back',
     !h2T.error && h2T.space === 5 && Math.abs(h2T.half - 8) < 1e-9 && Math.abs(h2T.int6 - 2) < 0.04 && Math.abs(h2T.int14 - 2) < 0.04 && !h2T.nan && h2T.Rmin > 2.8 && h2T.Rmin < 4.2 && h2T.Rmid < 8 && h2T.Rmid > h2T.Rmin - 1e-9 && h2T.status && h2T.back.space === 0 && Math.abs(h2T.back.integral - 1) < 0.02 && h2T.errs === 0 && !h2T.gpu, h2T);
 
@@ -649,7 +653,7 @@ try {
     const lawQ = __LW.calculus.last.rows[3].law;
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
     return { n: rows.length, res, ehrI: { v: ehrI.value, d: ehrI.derivative, p: ehrI.predicted, r: ehrI.residual }, ehrII: { d: ehrII.derivative, p: ehrII.predicted, r: ehrII.residual }, lawQ, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B36 CALCULUS: on 1s + 2p_z at t = 1.3 the live table shows five rows with Ehrenfest I and II holding (residuals < 1e-5 relative, marked ok), the dipole moving (|⟨p_z⟩| > 0.01), and under the oscillator the law reads Newton (−⟨z⟩)',
     !calcT.error && calcT.n === 5 && Math.abs(calcT.ehrI.r) < 1e-5 * (1 + Math.abs(calcT.ehrI.p)) && Math.abs(calcT.ehrII.r) < 1e-5 * (1 + Math.abs(calcT.ehrII.p)) && Math.abs(calcT.ehrI.p) > 0.01 && calcT.res[2].includes('ok') && calcT.res[3].includes('ok') && calcT.lawQ.includes('−⟨z⟩') && calcT.errs === 0, calcT);
 
@@ -662,7 +666,7 @@ try {
     const moved = Math.hypot(x1[0] - x0[0], x1[1] - x0[1], x1[2] - x0[2]);
     __LW.helium.setOn(false); await __LW.settle();
     return { x0, x1, moved, changed: d0.hash !== d1.hash, inside: Math.hypot(...x1) < 3.5, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B37 shift-click places electron 1 where the cursor points on the plane facing the camera (moved > 0.3 a₀, inside the box), and the conditional cloud of electron 2 is rebuilt', !plT.error && plT.moved > 0.3 && plT.inside && plT.changed && plT.errs === 0, plT);
 
   /* ── THE FLOATING RACK: hide/peek, reorder, the mini transport that docks, notes behind hint icons ── */
@@ -683,7 +687,7 @@ try {
     __LW.layout.dockTransport(); const undocked = tr.parentElement.id === 'stage' && tr.classList.contains('mini');
     const stageFull = stage.position === 'absolute';
     return { stageFull, rackPos, notesHidden, icons, notesShown, hidden, peek, peekDbg, before0: before[0], after0: after[0], mini, docked, undocked, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B38 THE FLOATING RACK: the stage fills the window and the rack floats over it; every note is folded behind a hint icon and N opens them all; the hide button slides the rack out and the right-edge peek brings it back; a card can be moved to the top; the transport is a slim bar that docks into the rack as a card and undocks',
     !layT.error && layT.stageFull && layT.rackPos === 'absolute' && layT.notesHidden && layT.icons > 10 && layT.notesShown && layT.hidden.cls && parseFloat(layT.hidden.op) < 0.05 && parseFloat(layT.peek) > 0.95 && layT.before0 !== 'meters' && layT.after0 === 'meters' && layT.mini && layT.docked && layT.undocked && layT.errs === 0, layT);
 
@@ -705,7 +709,7 @@ try {
     const title = document.getElementById('title'), mark = title.querySelector('svg.mark'), rects = mark ? mark.querySelectorAll('rect').length : 0;
     let font = false; try { await document.fonts.load('16px "LW Title"'); font = document.fonts.check('16px "LW Title"'); } catch (e) {}
     return { darkLum: dark.meanLum, lightLum: light.meanLum, gamLum: gam.meanLum, lightState, frost, sideBefore, inLeft, sideAfter, backRight, swaps, all, rects, font, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B39 THEME + MIRROR + LOGO: LIGHT sets the theme, lightens the stage so the frame\'s mean luminance jumps; GAMMA 2.2 changes the picture; FROST applies the GLASS BLUR radius (18 px by default) as a backdrop blur only while on; a card moves to the left rack by the API and back by its ⇄ button; TAB\'s order spans both racks; the title carries the nine-square diamond mark and the wordmark face loads under the name it is licensed to use — WAVE 59 RENAMED IT: our five-glyph subset of gluk\'s Spinwerad is a Modified Version, "spinwerad" is a Reserved Font Name, and SIL OFL §3 forbids a Modified Version from using one (the TERMINATION clause voids the grant where it does), so the family is \'LW Title\' in the binary and in the CSS. Every outline is byte-identical to the subset it renames',
     !thT.error && thT.lightState.theme === 'light' && thT.lightLum > thT.darkLum + 40 && Math.abs(thT.gamLum - thT.lightLum) > 3 && /blur\(22px\)/.test(thT.frost)   /* ⚠ wave 101: Josh's new GLASS BLUR default */ && thT.sideBefore === 'L' && thT.inLeft && thT.sideAfter === 'L' && thT.backRight && thT.swaps > 10 && thT.all > 10 && thT.rects === 9 && thT.font && thT.errs === 0 && !thT.gpu, thT);
 
@@ -722,7 +726,7 @@ try {
     const lamStyle = getComputedStyle(title.querySelector('.lam')), wordDark = getComputedStyle(title.querySelector('.word')).color;
     __LW.setTheme('light'); const wordLight = getComputedStyle(title.querySelector('.word')).color, accLight = getComputedStyle(body).getPropertyValue('--acc').trim(); __LW.setTheme('dark'); __LW.accent.set(0, 162);
     return { acc0, lam0, fills0, acc90, playBg, playOff, playInk, playIs90: playInk === hex2rgb(acc90) && playOff !== playInk && playBg === 'rgba(0, 0, 0, 0)', titleBg, titleImg, fillsRed, fillsBack, fillsSaved, lamItalic: lamStyle.fontStyle, lamWeight: lamStyle.fontWeight, lamIs0: lam0 === hex2rgb(fills0[0]), wordDark, wordLight, accLight, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B40 THE WHEEL AS THE ACCENT: --acc is a colour from the current palette and moving ACCENT A to 90° changes it, and the PLAY seat wears it as its INK — wave 98 made that seat the flat switch MOD beside it already was: no fill in either state, --acc while the clock runs and the faint neutral when it does not; the λ is the wheel\'s 0° colour, the nine squares are the wheel at 0°…320° and follow a palette change; the wordmark is white on DARK and black on LIGHT; the title has no background; the λ is a bold italic',
     !acT.error && /^#[0-9a-f]{6}$/.test(acT.acc0) && acT.acc90 !== acT.acc0 && acT.playIs90 && acT.lamIs0 && acT.fills0.length === 9 && new Set(acT.fills0).size >= 7 && JSON.stringify(acT.fillsRed) !== JSON.stringify(acT.fills0) && JSON.stringify(acT.fillsBack) === JSON.stringify(acT.fillsSaved) && acT.wordDark === 'rgb(255, 255, 255)' && acT.wordLight === 'rgb(0, 0, 0)' && acT.accLight !== acT.acc0 && /rgba\(0, 0, 0, 0\)|transparent/.test(acT.titleBg) && acT.titleImg === 'none' && acT.lamItalic === 'italic' && Number(acT.lamWeight) >= 700 && acT.errs === 0, acT);
 
@@ -738,7 +742,7 @@ try {
     __LW.setView('phase'); __LW.palette.setOn(true); await __LW.settle(); const px = await __LW.readPixels(); __LW.palette.setOn(false); __LW.setView('density'); await __LW.settle();
     q.auto = true;
     return { auto, rackPE: rs.pointerEvents, rackTA: rs.touchAction, rackBottom: rs.bottom, devTA: dev.touchAction, box, coh, palLit: px.nonBlack, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B41 THE iPAD ROUND: AUTO SCALE is on with a floor and a measured frame interval; the rack is a real scroller (pointer-events auto, pan-y) and cards pan; entering the BOX launches a held gas packet and plays; COHERENT BOUNCE puts the oscillator in a slapped ground state of unit norm across many N; the phase view with the palette on stays lit and the guarded shader compiles clean',
     !ipT.error && ipT.auto.on === true && ipT.auto.scale <= 1 && ipT.auto.min > 0 && ipT.auto.ema > 0 && ipT.rackPE === 'auto' && /pan-y/.test(ipT.rackTA) && /pan-y/.test(ipT.devTA) && ipT.box.h === 'well' && ipT.box.launched && ipT.box.held > 0.85 && ipT.box.playing && ipT.box.modes > 20 && ipT.coh.h === 'qho' && ipT.coh.coherent && Math.abs(ipT.coh.norm - 1) < 2e-3 && ipT.coh.modes >= 4 && ipT.coh.playing && ipT.palLit > 1000 && ipT.shader === 0 && ipT.errs === 0 && !ipT.gpu, ipT);
 
@@ -765,7 +769,7 @@ try {
     const gk = [...document.querySelectorAll('.k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'GAMMA'); __LW.layout.raise('observer'); gk.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 80));
     const dr = gk.querySelector('.k-dial').getBoundingClientRect();
     return { invLight, invDark, lit, rackTop, icons, outside, cycles: t1 !== t2 && f1.startsWith('1 / ') && f2.startsWith('2 / '), titleLeft: tRect.left, togRight: tog.right, rackLeft: rackRect.left, rw, menuOpen, names, items, miniBottom, dockedFirst, idx1, pos, dial: { x: Math.round(dr.left + dr.width / 2), y: Math.round(dr.top + dr.height / 2) }, gamma0: __LW.mat.gamma };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   let uxB = { error: 'no result' };
   if (!uxA.error) {
     await drv.actions(g.s, [{ type: 'pointer', id: 'gamma1', parameters: { pointerType: 'mouse' }, actions: [
@@ -782,7 +786,7 @@ try {
       window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth - 4, clientY: 300 })); const peek1 = body.classList.contains('rack-peek');
       window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: 500, clientY: 300 })); const peek2 = body.classList.contains('rack-peek'); __LW.layout.toggleRack();
       return { gammaMoved: ${JSON.stringify(gammaMoved)}, gammaReset, wasHidden, peek1, peek2, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-    } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+    } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   }
   const uxT = { ...uxA, ...uxB };
   judge('B42 THE SECOND UX ROUND: a theme change leaves INVERT alone; SIGNED, BANDS and the overlay-shaded SOLID all draw the real 1s+2pz; the rack runs to the top; each card has one ⓘ in its header whose panel opens outside the rack and cycles the card\'s notes; the logo and hide button sit between the racks; the logo opens FILE · EDIT · WINDOW with the windows listed; the transport floats 60 px up, docks into the LEFT rack at the top and remembers its slot; a real drag turns the GAMMA knob and a double-click resets it; a hidden rack peeks at the edge and goes when the pointer leaves its column',
@@ -803,7 +807,7 @@ try {
     const title = document.getElementById('title'); title.click(); const bar = document.getElementById('menubar'), br = bar.getBoundingClientRect(), tr = title.getBoundingClientRect(), barBg = getComputedStyle(bar).backgroundColor; __LW.layout.menu.close();
     const items = (() => { title.click(); bar.querySelectorAll('.mb-btn')[1].click(); const n = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].map((b) => b.textContent); __LW.layout.menu.close(); return n; })();
     return { closed1, saved1, listed, reopened, off, on, metersProfileFrozen, digestLen: digest.length, digestHasProfile: /frame profile/.test(digest), specRows: spec.split('\\n').length, setOpen, badgesGone, savedBadges, barRight: br.left >= tr.right, barBg, hasSettingsItem: items.some((t) => /SETTINGS/.test(t)), errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B44 SETTINGS · CLOSE · POWER · COPY: × closes a window (display none, remembered), the rack\'s + lists it and reopens it at the top; ⏻ switches METERS off and on; the COPY digest of METERS carries the frame profile and the SPECTRUM digest is a table; EDIT → SETTINGS raises the settings window; STATUS TAGS hides the badges and is remembered; the menubar sits to the right of the logo with no background',
     !stT.error && stT.closed1 && stT.saved1 && stT.listed.some((t) => /CLASSICAL SHADOW/.test(t)) && stT.reopened && stT.off && stT.on && stT.digestLen > 80 && stT.digestHasProfile && stT.specRows >= 3 && stT.setOpen && stT.badgesGone && stT.savedBadges && stT.barRight && (stT.barBg === 'rgba(0, 0, 0, 0)' || stT.barBg === 'transparent') && stT.hasSettingsItem && stT.errs === 0, stT);
 
@@ -832,7 +836,7 @@ try {
     /* polar palette */
     __LW.setView('real'); __LW.palette.setOn(true); await __LW.settle(); const px = await __LW.readPixels(); __LW.palette.setOn(false); __LW.setView('density'); await __LW.settle();
     return { a, before, after, rateStat, rateBack, knobs, heads, statA, okOn, on, pop, statOn, n0, nT, wA, wB, off, popOff, empty, afterKickEmpty, w1, w2, hid, keys, palLit: px.nonBlack, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B45 RATE · A/B · CHROME: changing a channel\'s RATE leaves c(t) continuous and flags a TOY, resetting it clears the flag; every channel has two knobs; the spectrum head carries HIDE · +MODE · CLEAR · NORMALIZE; A = 1s and B = 2pz stored, TRANSITION plays the exact two-level Rabi mix — unit norm, both listed, all B at θ = π/2 — and turning it off freezes one state; a kick on an empty box conjures a state; the play bar keeps its width across rates; H hides the toggles and the title; menu items show their keys; the polar palette draws the real view',
     !abT.error && Math.abs(abT.before.re - abT.after.re) < 1e-9 && Math.abs(abT.before.im - abT.after.im) < 1e-9 && /TOY/.test(abT.rateStat) && !/TOY/.test(abT.rateBack) && abT.knobs === 2 && abT.heads.join() === 'HIDE,+MODE,CLEAR,NORMALIZE' && abT.okOn && abT.on && abT.pop === 2 && /EXACT/.test(abT.statOn) && Math.abs(abT.n0 - 1) < 1e-9 && Math.abs(abT.nT - 1) < 1e-9 && abT.wA < 1e-9 && Math.abs(abT.wB - 1) < 1e-9 && abT.off && abT.popOff >= 1 && abT.empty === 0 && abT.afterKickEmpty >= 1 && Math.abs(abT.w1 - abT.w2) < 1 && abT.hid.every((d) => d === 'none') && abT.keys.length >= 3 && abT.palLit > 500 && abT.shader === 0 && abT.errs === 0 && !abT.gpu, abT);
 
@@ -855,7 +859,7 @@ try {
     const fs = !![...document.querySelectorAll('.keys-chip')].find((c) => c.textContent.trim() === 'F'), fsItem = (() => { document.getElementById('title').click(); const bar = document.getElementById('menubar'); bar.querySelectorAll('.mb-btn')[2].click(); const ok = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].some((b) => /FULL SCREEN/.test(b.textContent)); __LW.layout.menu.close(); return ok; })();
     const rot = !![...document.querySelectorAll('.dev[data-id="palette"] .k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'ROTATE'), rot60 = [...document.querySelectorAll('.trig')].some((b) => /ROTATE \\+60/.test(b.textContent));
     return { inOrder, has, ladderIdx, hamIdx, pickerIdx, knobs, dial, tx, rateDial, liveRing, rateRing, vivid: !!vk, glow0, rackDir, cardDir, sbc, reimLit: px.nonBlack, fs, fsItem, rot, rot60, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B46 THE OBSERVER SPLIT AND THE REST (wave 56: PALETTE · WAVE · CAMERA · SLICE/CLIP are FOUR windows in that order, DRAW STYLE having been absorbed into WAVE, and no card carries the id `style` any more); the SPECTRUM\'s ladder comes first and the Hamiltonian block sits below the picker; each channel stacks two half-size knobs, alternate rows staggered; a VIVID knob and a glow token exist; the right rack scrolls on its left edge with the cards left-to-right and accent scrollbars; Re+Im draws; F and the VIEW menu offer full screen; the palette ROTATE is a wheel',
     !spT.error && spT.inOrder && Object.values(spT.has).every(Boolean) && spT.ladderIdx === 0 && spT.hamIdx > spT.pickerIdx && spT.pickerIdx > 0 && spT.knobs.length === 2 && spT.knobs.every((n) => n === 2) && spT.dial === '17px' && spT.tx.every((t) => t === spT.tx[0]) && spT.rateDial === '15px' && spT.liveRing !== spT.rateRing && spT.vivid && /px/.test(spT.glow0) && spT.rackDir === 'rtl' && spT.cardDir === 'ltr' && spT.reimLit > 500 && spT.fs && spT.fsItem && spT.rot && !spT.rot60 && spT.shader === 0 && spT.errs === 0 && !spT.gpu, spT);
 
@@ -898,7 +902,7 @@ try {
     __LW.layout.toggleRack(); __LW.mod.collapse(); await new Promise((r) => setTimeout(r, 520));
     const bottomSeat = !tr.classList.contains('at-top');
     return { blur, bg, titleFont, textFont, kept, moved, face, hasCredits: /Chronus Quantum/.test(about) && /Brian Johnson/.test(about) && /falstad\\.com/.test(about) && /Seth Shultz/.test(about) && /Beatriz Errant/.test(about), logo, dumpLen: dump.length, back, closed, keyJ, frost, frostBg, blurKnob: !!bk, pkBg, hidOp, hidPe, peek, peekOp, unpeek, rackNear, restored, topSeat, bottomMiss, topPeek, topUnpeek, bottomSeat, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B47 THE NOTEBOOK GLASS: opens as a free window with a real backdrop blur and no colour behind it, its title in the logo\'s face (\'LW Title\' since wave 59 renamed the subset for OFL §3) and its notes in Roboto, kept in this browser; it drags to a place; ⓘ flips it into the ABOUT face with the logo, the three credits, the team line and a copy dump, and back; J is its key; FROST is now a blur with only a whisper of tint; a GLASS BLUR knob exists; the +MODE picker has no slab; hiding the rack slides the playhead away and the pointer near its current seat brings it back, at the bottom or after the modulation window moves it to the top; the rack peeks within 60 px',
     !nbT.error && /blur\(/.test(nbT.blur) && (nbT.bg === 'rgba(0, 0, 0, 0)' || nbT.bg === 'transparent') && /LW Title/.test(nbT.titleFont) && /Roboto/.test(nbT.textFont) && nbT.kept === 'the 2p_z bounce at t = 3.1' && nbT.moved && nbT.face === 'about' && nbT.hasCredits && nbT.logo === 9 && nbT.dumpLen > 200 && nbT.back === 'notes' && nbT.closed && nbT.keyJ && /blur\(/.test(nbT.frost) && /rgba\(255, 255, 255, 0\.1\)|rgba\(0, 0, 0, 0\.1\)/.test(nbT.frostBg) && nbT.blurKnob && (nbT.pkBg === 'rgba(0, 0, 0, 0)' || nbT.pkBg === 'transparent') && nbT.hidOp === '0' && nbT.hidPe === 'none' && nbT.peek && nbT.peekOp === '1' && nbT.unpeek && nbT.rackNear && nbT.restored && nbT.topSeat && nbT.bottomMiss && nbT.topPeek && nbT.topUnpeek && nbT.bottomSeat && nbT.errs === 0, nbT);
 
@@ -911,7 +915,7 @@ try {
     __LW.play(); await new Promise((r) => setTimeout(r, 500)); __LW.pause(); const px2 = await __LW.readPixels();
     __LW.setHamiltonian('hydrogen'); await __LW.settle(); const back = __LW.hamiltonian;
     return { h, lit: px.nonBlack, lit2: px2.nonBlack, pop, es, names, stat, half, qcdKind, back, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B48 QUARKONIUM: the selector switches the same 1s+2pz register to the Cornell Hamiltonian; the field draws it through the tabulated-radial branch with no GPU or shader error; the channel energies read in GeV with quarkonium labels (1S, 1P), the status names QUARKONIUM, the domain is a few GeV⁻¹, it evolves, the QCD panel is an information panel, and hydrogen comes back',
     !qqT.error && qqT.h === 'cornell' && qqT.lit > 300 && qqT.lit2 > 300 && qqT.pop === 2 && qqT.es.length === 2 && qqT.es.every((t) => /GeV/.test(t) && /^3\./.test(t)) && /1S/.test(qqT.names[0]) && /1P/.test(qqT.names[1]) && /QUARKONIUM/.test(qqT.stat) && qqT.half > 0.5 && qqT.half < 20 && qqT.qcdKind === 'info' && qqT.back === 'hydrogen' && qqT.shader === 0 && qqT.errs === 0 && !qqT.gpu, qqT);
 
@@ -930,7 +934,7 @@ try {
     document.getElementById('title').click(); const bar = document.getElementById('menubar'); bar.querySelectorAll('.mb-btn')[0].click(); const fileItems = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].map((b) => b.textContent); __LW.layout.menu.close();
     P.remove('demo/beta'); P.remove('demo/alpha'); const gone = P.list().length; N.setMode('edit'); N.close();
     return { titleFont, keptTitle, h1, katex, display, li, viewShown, taHidden, titleHiddenOnAbout, idsA, saved, listed, cur, idsB, opened, idsBack, textBack, landing, recent, expOk, imported, listed2, fileItems, gone, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B49 NOTEBOOK II: the title is typed at 34 px and kept, hidden on the ABOUT face; the preview renders markdown (h1, list) and KaTeX (inline and display) in place of the textarea; a project saves under demo/alpha with the register and the notes, another state replaces them, opening the project brings both back and lands on the capped notebook; recent lists it; export is a project JSON that imports as demo/beta; FILE shows the recent entry; delete cleans up',
     !pjT.error && pjT.titleFont === '34px' && pjT.keptTitle === 'RECONNECTION' && pjT.h1 && pjT.katex >= 2 && pjT.display && pjT.li === 2 && pjT.viewShown && pjT.taHidden && pjT.titleHiddenOnAbout && pjT.saved && pjT.listed.includes('demo/alpha') && pjT.cur === 'demo/alpha' && pjT.idsB !== pjT.idsA && pjT.opened && pjT.idsBack === pjT.idsA && pjT.textBack && pjT.landing && pjT.recent[0] === 'demo/alpha' && pjT.expOk && pjT.imported === 'demo/beta' && pjT.listed2.includes('demo/beta') && pjT.fileItems.some((t) => /demo\/alpha/.test(t)) && pjT.gone === 0 && pjT.errs === 0, pjT);
 
@@ -944,7 +948,7 @@ try {
     const ok3 = __LW.keplerDrag(2, [0, 0, 0]); const handles = __LW.kepler.handles.length;
     __LW.loadPreset('1s+2pz'); await __LW.settle();
     return { e0, norm0, ok1, e1, dot1, norm1, pop1, n1, ok2, e2, dot2, norm2, ok3, handles, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B50 THE KEPLER HANDLE: from the circular 2p₊ orbit (e = 0), dragging the perihelion to 2.4 a₀ along +y makes an orbit with e ≈ 0.4 whose perihelion points along +y, unit norm kept (unitary rotors) and the shell mixed (2s joins 2p); asking for 1.2 a₀ along +x gives e ≈ 0.5, the most a 2p₊ shell can give (|L| = 1), pointing along +x; a drag to the focus is refused; the overlay exposes a handle',
     !kpT.error && kpT.e0 !== null && kpT.e0 < 0.02 && kpT.ok1 && Math.abs(kpT.e1 - 0.4) < 0.03 && kpT.dot1 > 0.985 && Math.abs(kpT.norm1 - kpT.norm0) < 1e-9 && kpT.pop1 >= 2 && kpT.n1 === 2 && kpT.ok2 && Math.abs(kpT.e2 - 0.5) < 0.03 && kpT.dot2 > 0.985 && Math.abs(kpT.norm2 - kpT.norm0) < 1e-9 && kpT.ok3 === false && kpT.handles >= 1 && kpT.errs === 0, kpT);
 
@@ -955,7 +959,7 @@ try {
     __LW.play(); await new Promise((r) => setTimeout(r, 600)); __LW.pause(); await __LW.settle(); const st2 = __LW.gas.stats(__LW.clock.t), px2 = await __LW.readPixels();
     __LW.setGasBasis('reg'); const off = !__LW.gas.on; __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); await __LW.settle(); const back = __LW.hamiltonian;
     return { on, cap, modes, lit: px.nonBlack, st, ro, st2, lit2: px2.nonBlack, off, back, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B51 THE AXIAL GAS: choosing the 256-mode basis and entering the box launches a packet held > 90 %, the field renders more than 91 modes through the recurrence branch with no shader or GPU error, the packet has moved after play, the readout says held / ⟨z⟩ / σ_z, and the 91 basis switches it off',
     !gsT.error && gsT.on && gsT.cap > 0.9 && gsT.modes > 91 && gsT.lit > 200 && gsT.lit2 > 200 && Math.abs(gsT.st2.z - gsT.st.z) > 0.05 && /held/.test(gsT.ro) && gsT.off && gsT.back === 'hydrogen' && gsT.shader === 0 && gsT.errs === 0 && !gsT.gpu, gsT);
 
@@ -968,7 +972,7 @@ try {
       themeAfter: document.body.dataset.theme, bgAfter: __LW.mat.bg.slice(), lightBg, darkBg, style: ['cloud', 'solid', 'grain', 'signed', 'bands'][__LW.mat.style], palOn: __LW.palette.on, ham: __LW.hamiltonian, rate0: __LW.rateOf(0), camSet, camBack: JSON.stringify([__LW.camQuat, __LW.obs.dist]), pop: __LW.reg.populated().length };
     P.remove('proof/full'); __LW.setHamiltonian('hydrogen'); __LW.setRate(0, 1); __LW.palette.setOn(false); __LW.setStyle('cloud'); __LW.setTheme('dark'); __LW.loadPreset('1s+2pz'); await __LW.settle();
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B52 THE PROJECT FILE: saving under DARK with SOLID, the palette on, the OSCILLATOR and a RATE of 1.7 records style, palette, Hamiltonian, rates, space and camera but no stage colour or gamma; after switching to LIGHT and changing everything, opening the project brings the style, palette, Hamiltonian, rate, camera and state back while the theme stays LIGHT and the stage keeps the light colour',
     !prT.error && prT.hasNoTheme && prT.savedSpace === 'x' && prT.savedPalette && prT.savedHam === 'qho' && Math.abs(prT.savedRate - 1.7) < 1e-9 && prT.themeAfter === 'light' && JSON.stringify(prT.bgAfter) === JSON.stringify(prT.lightBg) && JSON.stringify(prT.bgAfter) !== JSON.stringify(prT.darkBg) && prT.style === 'solid' && prT.palOn && prT.ham === 'qho' && Math.abs(prT.rate0 - 1.7) < 1e-9 && prT.camBack === prT.camSet && prT.pop === 2, prT);
 
@@ -984,7 +988,7 @@ try {
     __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); await __LW.settle(); __LW.reg.setField({ Fz: 0.01 }); await __LW.settle(); await new Promise((r) => setTimeout(r, 150)); const t5 = ro(); __LW.reg.setField({ Fz: 0 }); await __LW.settle();
     const digest = __LW.layout.digest('meters');
     return { P1: { exact: P1.exact, T: P1.T }, t1, P2: { exact: P2.exact, T: P2.T, n: P2.count }, before, after, P3: { exact: P3.exact, T: P3.T }, P4: { exact: P4.exact, T: P4.T, err: P4.err }, t5, digestHas: /density period/.test(digest), errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B53 THE CLOCK: 1s+2pz repeats every 16π/3 = 16.755 a.u. and the transport says so; adding an n = 4 label to a 2p₊ state makes 64π/3 = 67.021 and ⟳ jumps to the next repeat (a multiple of T beyond t = 10); the oscillator repeats every 2π; a three-label box state has no exact period and says so with a near-recurrence; a Stark field reads "(Stark)"; the digest carries the period',
     !ckT.error && ckT.P1.exact && Math.abs(ckT.P1.T - 16 * Math.PI / 3) < 1e-6 && ckT.t1.includes('16.7') && ckT.P2.exact && Math.abs(ckT.P2.T - 64 * Math.PI / 3) < 1e-6 && ckT.after > ckT.before && Math.abs(ckT.after / ckT.P2.T - Math.round(ckT.after / ckT.P2.T)) < 1e-6 && ckT.P3.exact && Math.abs(ckT.P3.T - 2 * Math.PI) < 1e-6 && ckT.P4.exact === false && ckT.P4.T > 0 && /Stark/.test(ckT.t5) && ckT.digestHas && ckT.errs === 0, ckT);
 
@@ -1039,7 +1043,7 @@ try {
       naQD: dNa.indexOf('1.32656') >= 0 && dNa.indexOf('1.37323') >= 0 && dNa.indexOf('α = 2/3') >= 0, qd, qd1,
       scAlpha: dSc.indexOf('α-DEPENDENT') >= 0 && dSc.indexOf('4s') >= 0 && dSc.indexOf('3d') >= 0,
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B54 THE ATOM: ATOM Z = 10 makes the 91 labels the shells of Ne in one self-consistent Xα(2/3) + Latter-tail central field — every 2p label carries atoms.js\'s own ε to 1e-9 (and an unoccupied 3d carries the frozen field\'s, marked °), the kernel switches to the tabulated radial path and momentum space is forced off, a 2p_z cloud renders lit with no NaN on the grid and unit norm; the ATOMS window ships CLOSED and is the first of the four that do, with ELECTROSTATICS, then WIGNER and RADIATION consecutive behind it and HISTORY closing the rack (wave 106 appended HISTORY after RADIATION, which is why FOURTH FROM LAST is no longer the address — the RUN, not the index, is the law), draws its shell ladder and its radials, and its digest carries Ne, the Δ-SCF 21.088 eV beside Koopmans 15.078 eV labelled NOT the IP, and Xα; FILL THE VALENCE puts the three 2p labels in the register at unit norm; Na\'s digest carries δ = 1.32656 at α = 2/3 and 1.37323 at α = 1; Sc says the 3d/4s order is α-dependent instead of asserting one; the project file carries atomZ and restores it into the knob; and hydrogen comes back to E(1s) = −0.5 on the closed-form path',
     !atT.error && atT.shipsClosed && atT.shipsLast && atT.hasCopy && atT.ham === 'atom' && atT.sym === 'Ne' && atT.kspace === 6 && atT.pBefore === 'p' && atT.forcedX === 'x'
     && atT.dE < 1e-9 && Math.abs(atT.eps + 0.5540927689) < 1e-6 && atT.dVirt < 1e-9 && atT.labels === '2p₋1 2p₊0 2p₊1' && atT.virtLabel === '3d₊0°' && atT.finite
@@ -1136,7 +1140,7 @@ try {
       mL, mR, mirror, phiE0_1s, Q1s, B1s, molHF, molBound, molExact, qhoInk, qhoStat, backInk, backStat,
       saved, noTheme, back, closedAtEnd: document.querySelector('.dev[data-id="field"]').classList.contains('closed'),
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B55 THE CLASSICAL FIELD: ELECTROSTATICS ships CLOSED with WIGNER and RADIATION consecutive behind it (HISTORY closes the rack since wave 106, so THIRD FROM LAST is no longer the address), and once opened it solves Poisson for the register\'s own |ψ|² in closed form — 2p₊1 gives the monopole = ‖c‖² = 1 exactly, Φ_e(0) = −0.25 a.u. = −6.803 V, |E|(0,0,1) = 0.985576 a.u. = 5.068e11 V/m, and the certified magnetostatic numbers B_z = −0.521534 T at the nucleus and −0.429533 T at 1 a₀, all of them in a copyable digest; Φ, E and j each draw ink on the stage overlay and OFF clears it; a 1s state\'s equipotentials are left–right symmetric about the nucleus\'s screen x to better than 10 % (0.1 % with the caption off) and carry no current at all; the MOLECULE window prints the Hellmann–Feynman force −0.1339 with its Pulay bound 0.102 against the variational 0.053804; a project keeps the overlay and its 14 lines and still no theme; drawing Φ every frame costs the frame rate under 28 % against the same page with the window shut, counted against the wall clock back to back over a fixed FORTY FRAMES each (an absolute rate is the machine\'s, not this window\'s — and wave 63 deleted the `fps > 6` beside this arm, which the sentence had refuted in its own parenthesis while asserting it anyway; a sleep of 2000 ms made the sample size the machine\'s too, so the sample is counted now and a run that could not reach it says `short` instead); and the whole window stands down with "hydrogenic register only" under the oscillator and comes back under hydrogen',
     !elT.error && elT.shipsClosed && elT.shipsLast && elT.hasCopy && elT.inkBefore === 0
     && Math.abs(elT.Q - 1) < 1e-9 && Math.abs(elT.Q - elT.norm2) < 1e-9 && elT.terms === 1 && elT.slots === 2 && elT.Lmax === 2
@@ -1217,7 +1221,7 @@ try {
       rateOff, rateNote, abOff, abNote, abRefused, rateRefused, rateStill, spaceTry, spaceNow, pOff, noteShown, fzRefused, hidden,
       worstE, rateOn, abOn, pOn, noteHidden, backHidden, same2p: same(p2p1, p2p0), sameH: same(pH2, pH), hashBack: fH2.hash === fH.hash, propNull, status7,
       saved, noTheme, mid8, back, buildMs: S.buildMs, errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B56 THE SCALE (W-STURMIAN, a switch): hydrogen 1s → STURMIAN at λ = 1 keeps E(1s) = −½ (1e-12) with population 1 and renders the same cloud (pixels within 1 %, the same field integral); λ = ½ with 2p_z puts −1/8 on the eigen ladder (1e-10) with a stationary density (frames 5 a.u. apart within 1 %); λ = 1.4 with 1s + 2p_z played to t = 50 conserves ⟨c|S|c⟩ (1e-9) and the populations (Σ = 1, each constant to 1e-9), the GPU voxel matches the CPU twin on the scaled records (1 %), the cloud moves, and the transport says NO EXACT PERIOD; Z = 2 at λ = 2 gives −2 (1e-10); select(k) loads an eigenstate with population 1 on it, unit S-norm, stationary; RATE and A/B are disabled with their notes and refuse through the API, the Stark field is refused, momentum space is forced off with the note, the hydrogen-theorem windows stand down; back on HYDROGEN every label is −Z²/2n² again, RATE / A/B / momentum / the windows come back, the propagator is null and a 2p₊1 frame (and the 1s field, bit for bit) equal the frames before the excursion; the project round-trip keeps { on: true, lambda: 1.4 } and no theme; zero errors',
     !srT.error && Math.abs(srT.E1 + 0.5) < 1e-12 && Math.abs(srT.pop1 - 1) < 1e-9 && srT.on1 && srT.same1 && srT.dInt < 1e-6 && srT.capShown && /projection/.test(srT.capText) && /STURMIAN/.test(srT.status1) && srT.ink1 > 100
     && srT.k2 >= 0 && Math.abs(srT.E2 + 0.125) < 1e-10 && Math.abs(srT.pop2 - 1) < 1e-9 && srT.stationary && srT.per2.stationary
@@ -1326,7 +1330,7 @@ try {
     return { chk, ships, hasCopy, w1, dig1, s1, even, mir, mxW, zsSym, s2, saved, noTheme, mid, back,
       rad, dig2, pair, patInk, api, flat, turn, rotPair, lone, ink0, onS: { ...onS, slice: onS.slice === null, pair: onS.pair === null }, offS, qho, home,
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B57 PHASE SPACE AND THE DIPOLE: WIGNER and RADIATION ship CLOSED, after ELECTROSTATICS, each with a ⧉ COPY digest. Opened on the 1s, WIGNER draws the (z, p_z) SLICE at 64 × 64 with W(0, 0) = 1/π³ = 0.0322515344 to 1e-9 and its minimum refined off the grid to the certified −3.09725752e-4 at (1.3295, 1.3791), the digest carrying 0.03225, −3.0973e-4 and the word SLICE — the map is signed, with more than 200 pixels of the first accent AND of the second, so both signs of a function that is not positive are on the card; on 2p_z, a real orbital of definite parity, the map is EVEN in z to 1.5e-11 of its peak; Z RANGE 14 and P RANGE 3 round-trip through a project (and the theme still never). On 1s + 2p_z, RADIATION reads the pair 1s₀ → 2p₀ with A = 6.2649 × 10⁸ s⁻¹ (NIST\'s reduced-mass value), τ = 1.596 ns, λ = 2296 a₀, ħω = 10.2043 eV, |⟨a|r|b⟩| = 0.744935539 and P = |c₁|²|c₂|² ħωA = 1.4215e-9 a.u. — the identity held to 1e-20 — and draws its far-field pattern; the Δm = 0 pattern stands still at three times while the Δm = +1 pattern of 1s + 2p₊1 turns with the clock and returns at Δωt = π. A lone 1s has no allowed pair and the window says exactly "no dipole in this state" and draws its EMPTY FRAME and nothing more (under a third of the pattern\u2019s ink) rather than the blank slab it used to leave. The STURMIAN scale stands the slice down (no ink, LW.wigner.slice() null) with its note, and disables STARK K_z and DEFECT L² with the wave-39 note in their titles; HYDROGEN re-enables both and the ink comes back; the oscillator stands both windows down with "hydrogenic register only"; zero errors',
     !wrT.error && wrT.chk && Object.keys(wrT.chk).every((k) => wrT.chk[k] === true) && !wrT.gpu, wrT);
 
@@ -1358,7 +1362,7 @@ try {
     /* the honest failure: the SAME basis under the electrostatic force simply runs away */
     M.setForce('hf'); M.reset(); M.step(60);
     const away = M.state(), noteText = M.note(), d5 = D();
-    const noteIn = d5.indexOf('the HF force is repulsive at every R') >= 0;
+    const noteIn = d5.indexOf('This frozen basis gives a repulsive electrostatic force') >= 0;
     /* the project carries the basis and the scale, and still not the theme */
     M.setBasis('sturmian'); M.setLambda(1.7611); await M.whenReady();
     const proj = __LW.serialize(), saved = proj.presentation.mo;
@@ -1403,7 +1407,7 @@ try {
       fpsMore: { drift: rs.drift, ib: rs.integratedBound, gap: rs.adiabaticGap },
       digLen: [d1.length, d2.length, d3.length, d4.length],
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B58 THE GENERAL BASIS AND THE NUCLEI IT DRIVES (W-MO): the MOLECULE window carries a BASIS segment — the 1s LCAO (2 functions, E(2) = −0.5537715, R_e = 2.4928), the Coulomb Sturmians n ≤ 4 at λ = 1.7611 (20 functions, E(2) = −0.60262 above the exact −0.602634214, R_e = 1.9972) and the register\'s own σ set n ≤ 6 (42 functions, R_e = 2.35227, D_e = 2.1246 eV, computed lazily by a job queue that hands the frame loop back the wall every 24 ms) — and the wave-38 Hellmann–Feynman line is now the general one for whichever basis is chosen: at the 1s LCAO the digest still reads F_elec −0.1339, Pulay 0.0623, bound 0.102 and F_exact 0.053804, and switching away and back restores it word for word. Let the nuclei go on −dE/dR with Born–Oppenheimer electrons from R₀ = 2.8 at rest (dt = 5, 160 steps): R falls to 2.24 and comes back above 2.7 — one vibration — with |drift| ≤ ∫bound and the badge reading "drift ≤ ∫bound"; the SAME basis under the electrostatic force runs away instead (R past 3, never once below 2.8) and the window says why in the note the segment carries, "the HF force is repulsive at every R". A project keeps { kind: sturmian, λ: 1.7611 } and still no theme; the card\'s caption says the bigger bases are shown on the card because the stage draws the 1s LCAO only, and goes with STAGE CAPTIONS; and 30 frames with the 42-function register stepping EHRENFEST — one step per OTHER frame, the 30 ms budget — cost under 65 % of the frame against the SAME page with the window shut, measured in the same run. WAVE 63 DELETED THE ABSOLUTE BESIDE IT: `fpsRun > 15` flaked twice in six runs and did no work the ratio was not already doing better, because an absolute rate is a property of the machine and not of this window — five minutes into a headless run on a shared box the page is at a third of the rate it holds fresh, whatever is drawn. The rate is still printed, so a ratio drifting across waves is visible; what is JUDGED is the comparison and the sample size (thirty counted frames, or `short` says the 12 s ceiling ran out first and the block goes red with a reason)',
     !moT.error && moT.chk && Object.keys(moT.chk).every((k) => moT.chk[k] === true) && !moT.gpu, moT);
 
@@ -1555,7 +1559,7 @@ try {
     __LW.loadPreset('1s+2pz'); await __LW.settle(); H.clear();
     chk.err = window.__e.length === 0;
     return { chk, out, errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B59 UNDO / REDO over the register side (Ctrl+Z · Ctrl+Shift+Z · Ctrl+Y): a ring of at most 60 snapshots of what changes ψ or its law — the anchor c(0) with its mask and static field, the DRAG γ, the Hamiltonian selection, the SCALE, the 91 RATEs and the two A/B stores — and of nothing the observer owns. Set a label on 1s+2pz and UNDO puts the preset\'s two labels back, REDO puts the third back; three distinct edits (a coefficient, a Zeeman field, one label\'s RATE) are three steps and three undos return the state digest, Bz = 0 and rate = 1 exactly, with canUndo false at the bottom and canRedo true. A whole pointer drag on a lane fader — pointerdown, five pointermoves, pointerup — is ONE entry, and one undo puts |c|² back to the value it had before the finger went down. The Hamiltonian switched to qho then undone is hydrogen again with E(1s) = −0.5 and the segment on HYDROGEN; the SCALE turned on at λ = 1.4 then undone is off at λ = 1 with no propagator; a project LOAD is itself one step whose undo restores the register that was there, and no project file carries a history. The EDIT menu carries UNDO ⌐ Ctrl+Z and REDO ⌐ Ctrl+Shift+Z, both greyed at the bottom of the stack and each lighting as its stack fills; Ctrl+Z on the body undoes and the same key inside the notebook\'s textarea does not. An undo moves neither the camera, nor the draw style, nor the play state; RESET LAYOUT leaves the stack and the state alone; 65 edits leave 60. Zero errors',
     !unT.error && unT.chk && Object.keys(unT.chk).every((k) => unT.chk[k] === true) && !unT.gpu, unT);
 
@@ -1607,7 +1611,7 @@ try {
     const govSw = [...document.querySelectorAll('.dev[data-id="settings"] .sw')].find((el) => /GOVERNOR/.test(el.textContent)); govSw.click(); const off = { on: __LW.governor.on, setting: __LW.settings.governor, state: __LW.governor.state }; govSw.click(); const backOn = __LW.governor.on && __LW.settings.governor !== false;
     __LW.pause(); __LW.loadPreset('1s+2pz'); await __LW.settle();
     return { def, playing, tAfter, fillPlaying, paused, rateMoved, hit, on, fillOn, offAgain, hyd, box, per, forcedT: forced && forced.T, perOk, res0, g0, stepped, restored, onPause, off, backOn, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B60 THE PERFORMANCE WAVE: KEEP FRAMES ships OFF — the transport\'s scrub bar is disabled (pointer-events none, dimmed, no hit at its centre, its fill stays at 0 through 350 ms of play) while the play button toggles the clock and the RATE dial takes a pointer drag; the SETTINGS switch turns it on (the fill moves, the bar takes pointers again), the setting is remembered by this browser and no project carries it, and off again is off. THE BOW off the frame: on hydrogen 1s release() returns in under 5 ms with the bow in flight, a pointer event dispatched from the next macrotask is handled within 50 ms, and the slap lands within 2 s (the first frame after it may be the landing frame itself, so it is reported, not judged) (> 20 labels, norm < 0.9, the STATE window back to "changes c"); in the BOX the packet lands within 2 s as a new launch holding > 85 % and the REPEATS readout settles off the frame to the value the forced reader gives. THE GOVERNOR: under a forced 40 ms load per frame it steps the grid from 96³ to 64³ (drop ≥ 1, METERS reads STEPPED) within 8 s; when the load ends it lifts one notch per 3 s UNDER BUDGET, and that arm is judged only when the median says the budget was actually met — an absolute frame rate is the machine and not this governor, which is wave 63 lesson from B55 read back onto this block: on this rig a PAUSED page presents every 17.1 ms and the loop spends 2 ms in a frame, but the raymarch itself takes 33 to 67 ms at every rung of the ladder, so 45 fps is simply not on offer and the lift is REPORTED rather than asserted. What IS judged, with no machine in it, is the law the app owes unconditionally: PAUSE gives the grid back at once — drop 0, at the full resolution; the SETTINGS switch holds it off (remembered) and on again; zero errors',
     !pfT.error && pfT.def.keep === false && !pfT.def.setting && pfT.def.pe === 'none' && pfT.def.op < 0.5 && pfT.def.disabled && pfT.playing && pfT.tAfter > 0.5 && pfT.fillPlaying === '0' && pfT.paused && pfT.rateMoved && !pfT.hit
       && pfT.on.keep === true && pfT.on.setting === true && pfT.on.pe !== 'none' && !pfT.on.inProject && +pfT.fillOn > 0 && pfT.offAgain.keep === false && pfT.offAgain.pe === 'none'
@@ -1693,7 +1697,7 @@ try {
       tipText: shown ? shown.text : null, tipCount: shown ? shown.count : 0, tipPos: shown ? shown.position : null,
       grid, plot: P, inside, gutter, texts: calls.map((c) => c.t), laneInfo: lane ? lane.info : null,
       darkN2, lightN2, ground: ground.map((v) => Math.round(v)), themeWalk: [theme0, wasDark, wasLight], cells };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B61 THE MINIMALIST GRAPH (Josh). The OBSERVER\'s six observables are a grid of EQUAL cells with Re+Im the sixth and no longer a row of its own — laid 2 x 3 here, and re-laid 3 WIDE x 2 TALL by wave 53 at Josh\'s word, so the SHAPE is B83\'s to assert and this block now asks only that the six cells be one grid and equal. The SPECTRUM ladder draws NO text inside its plot rectangle: one redraw under a proxy on CanvasRenderingContext2D.prototype.fillText records every glyph, and not one of them lands inside cv.__lwPlot — the level names stay in the 44 px gutter, the law stays in the footer, and the value that used to be stroked on the population bar ("50%  −0.1250") is gone. A pointermove over the n2 lane raises ONE glass tip (#graphTip, position fixed, exactly one in the document, wholly inside the viewport) carrying that level\'s own line — its name, its share of the norm and E = −0.1250 — and pointerleave takes it away. The LIGHT theme carries its own vivid shell set: --n2 measured against the ground the card actually renders clears 3 : 1, where the dark set on the same ground does not. The block wakes the windows it measures first — a card with no size cannot paint. Zero errors',
     !mgT.error && mgT.gridN === 6 && mgT.tops * mgT.lefts === 6 && mgT.equal && mgT.grid.last === 'Re+Im'
       && mgT.lad.w > 32 && mgT.calls > 0 && mgT.insideN === 0 && mgT.gutterN >= 2
@@ -1755,7 +1759,7 @@ try {
     return { dflt, R, T, savedCard, afterReload, seg: !!segw, seats, hint, beside, aboutLine, build: __LW.build, waveWord: WAVE,
       aboutHas: about.indexOf(WAVE) >= 0, dumpHas: dump.indexOf(WAVE) >= 0, tags: (about.match(/PRE-ALPHA/g) || []).length,
       card0, theme0, cardNow: __LW.cardStyle, themeNow: document.body.dataset.theme, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B62 CARD STYLE (Josh: "I love that refractive glass effect"). The card\'s pane was never a decision: `background: var(--glass-sheen), hsl(var(--glass-tint) / …)` parses but cannot COMPUTE where --glass-sheen is a colour — a colour is legal only as the LAST background layer — so in the LIGHT theme the whole declaration fell back to `initial` and every card, popover and chrome pane rendered fully TRANSPARENT. That accident is the look, so it is now the DEFAULT and it is written down: with no card remembered, applySettings lands on REFRACTIVE even from a body wearing the other one, and .dev and .glass compute to rgba(0, 0, 0, 0) with no image in BOTH themes — measured with FROST OFF, because wave 89 moved the shipped FROST policy to ALWAYS and the FROST block is a later rule of the same specificity that deliberately replaces the pane with its own 10 per cent veil (skin.css 14c says so in its own note), so the pane is only observable underneath it; the policy this browser arrived with is put back. TINTED is the rule the author meant, valid in both themes now that the light sheen is a flat gradient: the card computes to a real pane whose RGB is exactly the theme\'s own --glass-tint and whose alpha is above zero. The choice rides in the settings key beside theme, frost and blur — never in a project — and survives the readSettings/applySettings round trip. The seg sits in THEME · SURFACE with two seats and its one-line hint. And the build stamp is ONE constant, BUILD_LINE, published as LW.build: this block reads the wave word OUT of it rather than typing the number a second time (wave 51), and the ABOUT face and the copy dump that quotes it both carry that same word. Zero errors',
     !csT.error && csT.dflt === 'refractive'
       && csT.R.dark.dev === 'rgba(0, 0, 0, 0)' && csT.R.light.dev === 'rgba(0, 0, 0, 0)'
@@ -1822,7 +1826,7 @@ try {
     __LW.setTheme(R.theme0); await __LW.settle();
     R.themeNow = __LW.themeChoice; R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B63 THE THEME REACHES THE ONE THING IT COULD NOT (Josh: "Make the cube frame become black when in lightmode", "darkmode turns the xyz axis to a vivid CMY color"). The domain cube and the three axes are drawn by the GPU, not by CSS, so no token could ever reach them: rack.js now hands the RESOLVED theme down as mat.lightUI and field.js keeps one ink palette per theme. LIGHT paints the box near-black — the stroke is #05080d at .42 and the rendered frame comes back at luminance 88 against a ground of 243, achromatic and unmistakably a black line — while the shipped warm/cool axes stay. DARK keeps the shipped white box at .13 and takes vivid CMY: the rendered axes classify as cyan, magenta and yellow with not one warm, green or blue pixel between them, and the reverse holds in LIGHT. The theme itself now has THREE seats and TWO values: the CHOICE (light / dark / SYSTEM) is what the settings key remembers, the RESOLVED theme is what the body, the accents, the GPU and the notice read, and SYSTEM resolves to prefers-color-scheme. A project still carries neither — lightUI joins bg and gamma outside the file. And the PHOTOSENSITIVITY NOTICE is MANDELBROT\'s, verbatim in text, symbol, layout and focus trap, with three things ours by instruction: a frost-glass ground over the running lab instead of solid black (no colour tint — the blur is the --glass-blur token), ink that is BLACK in light and WHITE in dark by the resolved theme, and a memory in the settings key with SETTINGS · SHOW THE WARNING AGAIN as the way back. Zero errors',
     !chT.error
       && chT.darkLightUI === false && chT.lightLightUI === true
@@ -1964,7 +1968,7 @@ try {
     __LW.clock.pause(); __LW.notebook.close(); await __LW.settle();
     R.errs = window.__e.length; R.errList = window.__e.slice(0, 4);
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B64 THE MARK, THE GRIP, AND A HIDDEN INTERFACE THAT IS ACTUALLY FASTER. The nine squares of the logo now TILE — step equals width in both directions, so the grid of gutters Josh saw is gone and the colours touch — and all three copies of the wheel (the header, the ABOUT face\'s clone, the busy mark\'s) are painted by ONE function from the SAME nine samples, so turning the accent wheel moves all of them together instead of leaving the clone frozen at whatever it was cloned from. THE BUSY MARK is a nesting counter, not a flag: it goes up the instant a Worker job is issued (the bow\'s slap, the packet, the period scan — every call goes through one wrapper), it rides the last pointer position through --cx / --cy written as custom properties (a write, never a layout read), it moves PURELY in CSS so a blocked main thread cannot stop it — a breath in opacity since wave 53 took the spin and the hue cycle out of it, see B79 — it carries no shadow of any kind, and it comes down when the last job lands. The NOTEBOOK\'s corner is a real pointer target now, because CSS `resize` is a mouse affordance no touch pointer can reach: synthetic pointer events drag it, the floor is 320 x 240, and the size round-trips through the settings key — while `resize: both` stays for the desktop. And HIDING THE INTERFACE is now the cheapest state it has ever been: the readers whose only product is a display:none card stop running, the notebook\'s backdrop-filter stops being recomposited on every frame the field changes, the peek handler stops resolving the root\'s style on every pointer move, and the measured main-thread cost of the loop falls BELOW the shown state rather than above it — with zero blurred panes left for the compositor. A rack slid away by B keeps its scrollTop and stops being painted. Zero errors',
     !bmT.error && bmT.raised === true
       && bmT.n === 9 && bmT.square === true && bmT.gapX === 0 && bmT.gapY === 0
@@ -2051,7 +2055,7 @@ try {
     C.setFriction(2.5); C.stop(); C.reset(); __LW.pause(); await __LW.settle();
     __LW.setCamMode(mode0, true);
     return { decay, travel, idle, psi, forever, amb, pole, mode0, flings: C.flings, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B65 THE CAMERA LAW (W-CAMERA, Josh: "NO MOMENTUM BOOLEANS: a FRICTION slider where 0 = spins forever"). NEBULA\'s four Auto-Rotate x Momentum states are replaced by ONE first-order law with one constant, ω̇ = −μ(ω − ω_amb), integrated in closed form every frame. A 6 rad/s fling at μ = 2.5 decays as e^{−μt} against the camera\'s own clock to 1e-9 relative (measured 5.6e-16 — the integrator is the exact solution, not an Euler step) and that clock is the wall clock to 0.2 s; left alone it comes to REST after ln(ω₀/ω_rest)/μ ≈ 3.0 s having turned through exactly ∫ω dt = ω₀/μ = 2.4 rad — measured on the TURNTABLE, the mode this identity and the pole clamp are written in, because wave 106 boots the camera FREE, where the pose is a unit quaternion and the yaw is only a readout of it and there is no clamp to hit (the friction law is the same law in both; only the axis its two numbers turn about changes, and B85 owns FREE), inside the REST/μ = 1.2e-3 the rest threshold is allowed to discard. A still camera then SCHEDULES NOTHING — zero frames in 300 ms with stats.scheduled false — and the whole fling is PRESENT work only: no RECONSTRUCT, no EVOLVE, no REBUILD, reg.version and the state digest unchanged and not one entry on the undo stack. At μ = 0 ("∞ · forever") nothing decays at all: |ω| is constant to 1e-12 over 2.2 s and the yaw travelled equals ω₀ × the camera clock to 1e-9, with frames still being asked for. With AUTO-ROTATE on at 0.5 rad/s and μ = 4, a 4 rad/s fling settles to the AMBIENT rate — 0.5, not 0 — matching ω_amb + (ω₀ − ω_amb)e^{−μt} to 0.02, and switching the ambient off brings the same law to rest. A fling into the pole clamp loses its pitch and keeps its yaw. Zero errors',
     !camT.error && camT.decay.rel < 1e-9 && camT.decay.wallGap < 0.2 && camT.decay.s2.dy < camT.decay.s1.dy
       && camT.travel.err <= camT.travel.bound + 1e-9 && camT.travel.restMs !== null && camT.travel.restMs < 2.2 * camT.travel.expectMs && camT.travel.wy === 0
@@ -2134,7 +2138,7 @@ try {
     fov.narrow = __LW.obs.fov; fov.moved = pA.hash !== pB.hash;
     C.setFov(0.6); C.reset(); C.setFriction(2.5); __LW.pause(); await __LW.settle();
     return { knobs, sws, trigs, note: note.slice(0, 160), fric, zoom, n8, dbl, dtap, seed, fov, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B66 THE CAMERA WINDOW, ported in our own kit (Josh: "port every other control; seed gets an intuitive use or is dropped"). The card carries AUTO-ROTATE, SPIN, FRICTION, ZOOM, FOV, RESET VIEW and SET Δρ REF and no widget that is not already in the kit — and since wave 58 the two dials Josh asked to be copied out of the View window (DRAG GAIN and FLING, beside FRICTION because all three are the feel of the same hand) and the CAPTURE group with them, which is where SECONDS, TAKE A PICTURE and ONE PERIOD come from. The knob list is pinned EXACTLY, on purpose: what this window contains is the assertion. FRICTION ships at μ = 1.00 /s reading "μ 1.00 /s" (wave 106, Josh: "the friction to be quite low but not tooo low" — and the shipped number is read off the DIAL DEFAULT, which is CAM.MU_DEF and the only place the app keeps it, rather than typed here a second time), and μ = 0 is reachable BY THE DIAL — a pointer drag to the end of its travel lands on exactly 0 and the dial reads "∞ · forever", the far end is 12, and a double-click brings the default back. ZOOM, the wheel and obs.dist are one number: a wheel notch moves the camera and the dial follows it to the digit; and NEBULA\'s N8 holds — a wheel with CTRL, SHIFT, ALT or META each zooms and generates EXACTLY zero rotational increment. A double-click on the stage is RESET VIEW (pose and field of view both), and so is a DOUBLE-TAP with a touch pointer — which no dblclick would ever deliver on the iPad — while a single tap moves nothing. There is no SEED control in CAMERA: NEBULA\'s seed is its point-bank RNG, ours is the particle cloud, and the note sends the reader to DYNAMICS · RESEED and Ctrl+R, where it already lives. FOV is the camera\'s own and the renderer honours it: 0.9 rad reads 52° and changing it changes the picture. Zero errors',
     /* WAVE 58 UPDATED THIS LINE, and says so: the knob list was 'SPIN|FRICTION|ZOOM|FOV' and Josh asked for the
        View window's two dials (board #63) and for the camera and record buttons (board #57), so DRAG GAIN and
@@ -2205,7 +2209,7 @@ try {
     const psi = { version: __LW.reg.version - v0, digest: __LW.stateDigest() === dig0 };
     C.stop(); C.reset(); __LW.setCamMode(mode0, true); __LW.kepler.setOn(true); __LW.pause(); await __LW.settle();
     return { gain, flung, clutch, stale, psi, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B67 THE DRAG THE FLING COMES FROM (NEBULA\'s N1 and N2, in our own idiom). One drag on the TURNTABLE — the mode these units are written in, since wave 106 boots the camera FREE, where a drag turns a quaternion about the screen axes and the yaw is only a readout of the pose (B85 owns that mode) — that goes default → SHIFT → default over three legs of 60 px turns the camera by exactly 60 × 0.0065 = 0.390 rad, then 0.0975 = a QUARTER of it (SHIFT is the fine drag here, as it is at every knob), then 0.390 again — and no single pointer move ever moves the pose by more than one coarse step, so the modifier changes hands with NO pose jump. The fling is measured, not invented: a drag whose samples span less than 8 ms of wall clock hands the law nothing at all, and neither does a finger that had already stopped 220 ms before it lifted. A TIMED drag does: on release the mean angular velocity of the last 80 ms becomes ω₀, |ω| falls within 300 ms and the camera is at rest 2 s later. THE CLUTCH: three fast coarse moves one way followed by three fine moves the other way fling the FINE way — the history is cleared the moment Shift changes hands, so the coarse motion that would have flung at 32 rad/s contributes nothing and the fling comes out under 3 rad/s in the opposite sign. Through all of it reg.version and the state digest do not move. Zero errors',
     !dragT.error && Math.abs(dragT.gain.leg[0] - dragT.gain.wantCoarse) < 1e-12 && Math.abs(dragT.gain.leg[1] - dragT.gain.wantFine) < 1e-12 && Math.abs(dragT.gain.leg[2] - dragT.gain.wantCoarse) < 1e-12
       && dragT.gain.jump <= dragT.gain.jumpMax + 1e-12 && dragT.gain.noFling
@@ -2268,7 +2272,7 @@ try {
     const conn = { swOnAtBoot, carriedOn, carriedStill, at5, at2, off, backOn, ceiling: mo.dtCeiling, inDigest: /moving-basis connection/.test(digest) };
     __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle();
     return { rate, probe, conn, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B68 THE FOUR RACK LEFTOVERS. (2) api.energyOf ignored the RATE: the register evolves label a at H.energy(a) × rates[a], and the API every reader prints from returned H.energy(a) alone, so with RATE ≠ 1 the SPECTRUM lane printed an energy the state was not moving with. It is the same function now — RATE 1.7 on the 1s prints −0.8500 Eh, exactly reg.Ediag(0), and 1.0 prints −0.5000 again — and the two other places that painted a lane by hand (the WELL RADIUS knob and switchHamiltonian) go through it too. (1) THE READER-LAW RE-PROBE: a reader whose measured cost is over a frame\'s budget is PARKED while the transport plays, and before this it was never measured again, so a window that got cheap stayed parked for the session. Now a parked reader is let through ONCE every 3 s — the governor\'s own recovery cadence — with its stale measurement cleared first, so the fresh number is the one judged: a SPECTRUM forced to 40 ms parks within half a second and comes back on its own inside two probes, its warning status restored to what it said before. (4) THE MOLECULE\'s moving-basis CONNECTION, which mo.js has taken since wave 49 with nothing on the card able to reach it, is a switch — ON by default, EHRENFEST only, carrying exp(−ΔR S⁻¹D) with D = S′/2 + ½diag(P, −P), which on the 1s LCAO is exactly the metric term (P is 1 × 1 and zero) — and the run it builds reports connection true; turning it off gives the wave-42 branch and the run reports false. Beside it the dt CEILING now says what was silent: at the shipped dt = 5 the line goes amber, because with the connection carried the generator is R-dependent and the step is only resolved for dt ≤ 2.5 (mo.test W49-6: the excess electronic energy runs 3.08e-5 · 2.14e-6 · 1.19e-6 at dt = 5 · 2.5 · 1.25), and at dt = 2 it is green. (3) The misplaced comment on the WIGNER reader\'s throttle (rack.js:488) named the SLICE and now names WIGNER. Zero errors',
     !leftT.error && leftT.rate.printed === '-0.8500 Eh' && Math.abs(leftT.rate.Ediag + 0.85) < 1e-12 && leftT.rate.agrees && leftT.rate.back === '-0.5000 Eh' && Math.abs(leftT.rate.EdiagBack + 0.5) < 1e-12
       && leftT.probe.parkedMs !== null && leftT.probe.parkedMs < 1500 && leftT.probe.parked && leftT.probe.backMs !== null && leftT.probe.backMs < 3 * leftT.probe.probeMs && leftT.probe.probes >= 1 && leftT.probe.still.indexOf('spectrum') < 0 && !/PARKED/.test(leftT.probe.statusBack)
@@ -2365,7 +2369,7 @@ try {
     fb.click(); await nap(80); r.unfolded = !tr.classList.contains('folded'); r.savedBack = JSON.parse(localStorage.getItem(K) || '{}').phoneTr;
     r.errs = window.__e.length; r.gpu = __LW.field.lastGpuError || null;
     return r;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B69 W-MOBILE · THE PHONE, PORTRAIT (500 × 844 — see the note above on the 500-px floor). A phone is not a narrow desktop: the old small-screen rule drops the rack along the BOTTOM, and that rule is the iPad\'s and stays. The breakpoint is a POINTER / SIZE pair — (hover: none) with ≤ 700 px wide, or ≤ 520 px tall and ≤ 1000 px wide — written ONCE, in the stylesheet, and read back by rack.js through the --phone sentinel, so the script and the sheet cannot disagree. At it: ONE RACK, on the LEFT, at x = 0 and full height below the masthead, with --rack-w = min(300, 100vw − 76) exactly; the mirror rack and BOTH hover-peek strips stand down and no card is left in either. The TRANSPORT is docked as the FIRST card in that rack, not hidden, not closed, carrying a ▾ and NO × — hideable, never closable — and its fold rides in the settings key as phoneTr. The glass is OPAQUE: --glass-opacity is 1 (a token moved, never a colour on a component), CARD STYLE defaults to TINTED so the card computes to a real pane, and not one backdrop-filter is left on the notebook, the cards or the chrome. The low-power path is on: 64³ / 110 steps / render scale 0.75 / a device-pixel ceiling of 1.5, GOVERNOR on, FROST off, KEEP FRAMES off. The hide toggle FOLLOWS the rack — 310 px of travel when the rack leaves — and with the rack gone it is still the topmost thing at its own centre, and one tap brings the rack back. WAVE 59 CHANGED ONE THING HERE, DELIBERATELY: at this breakpoint the rack now starts HIDDEN for a browser that has never said otherwise, so the geometry below is measured after one press of ◧ — and that press writes `phoneRack: true`, which is this browser saying. B111 measures the default and what it is for. Nothing spills past the viewport in either direction. Zero errors',
     !phT.error && phT.sentinel === '1' && phT.api === true && phT.cls === true && phT.hoverNone === true && !phT.wide
       && phT.rack.l === 0 && phT.rack.w === phT.wantRackW && phT.rack.t > 0 && phT.rack.t + phT.rack.h === phT.vp[1]
@@ -2521,7 +2525,7 @@ try {
       ringed: routedRows.length, ringShort, bandMin, ringRows: routedRows,
       swap: getComputedStyle(document.querySelector('.dev-swap')).display, copy: getComputedStyle(document.querySelector('.dev-copy')).display,
       head: getComputedStyle(document.querySelector('#rack .dev-head')).height, seg: getComputedStyle(document.querySelector('#rack .seg-b')).minHeight };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`;
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`;
   const hitP = await g.ev(HITWALK) || { error: 'no result' };
   judge('B70 W-MOBILE · TOUCH TARGETS WITHOUT INFLATION, portrait. Every interactive control on the screen — knob dials, switches, segments, triggers, faders, selects, the SPECTRUM lane\'s M / S / ×, picker chips, key chips, the card-header buttons, the transport buttons, the status tags, the two rack buttons and the transport pill\'s own seats — carries a hit region of at least 44 × 44 CSS px, measured by walking outward from each control\'s centre with elementFromPoint, which answers exactly ONE owner per point: that every one of them clears 44 SIMULTANEOUSLY is the proof that no two overlap, since an overlap would truncate the loser. The INK is untouched — 22-px pucks inside 44-px boxes (the k-dial\'s own trick, now the header\'s), a 24-px status chip inside a 46-px strip, 17-px lane knobs with a 45-px finger — and only two seats grew: the card header 34 → 44 px, and a segment 38 → 44 px. Two header buttons stand down instead: ⇄ SWAP, which would move a card to a rack that no longer exists (ANTI-PATTERN 7), and ⧉ COPY, because six 44-px targets and the window\'s own name do not both fit on a 300-px card. WAVE 63 ADDS THE CASE THIS WALK USED TO STEP AROUND. It opened with mod.reset(), so no MODULATION RING existed while it measured, and its own(n, el) climbs parentElement — while the ring svg is a CHILD of .k-dial, so ownership answered 61 px for a routed dial where the finger had 33. A second pass now routes every dial the lab offers and asks which LISTENER receives the press at each radius, the ring\'s pointerdown being a stopPropagation and therefore a radius the dial has LOST: measured, wave 61\'s 8-px grab band at r in [17, 24] left a routed dial a contiguous turn target of 33 x 33 px through its own centre (plus a DETACHED band of dial at 25…28 horizontally, which is not a target a finger can reach). The band moved OUT rather than the law bending — r in [24, 32], 28 ± 4 in a ring box that is finally 1 : 1 (it was a 46-unit viewBox in a 44-px box, so the "8 px" was 7.65) — and the radius is set for the WIDER of the two strokes, because skin.css takes the band to 11 px under a finger and that is the breakpoint this walk runs at: [22.5, 33.5] there, a 45-px core, and 47 px on a fine pointer. Every routed dial measures 45 x 45 with an 11-px band, outside the knob\'s rim where ns-resize is the only cursor on the screen. THE CLAIM IS MADE RELATIVELY, against the SAME dial measured bare in the same run: a dial that had 44 keeps 44 with a ring on it. An absolute floor here would have been measuring something else — the 20-px RATE dial in the floating transport strip measures 34 x 42 before any ring exists, which is a real thing to fix and is not this ring\'s doing, and it is invisible at this breakpoint because the strip stands down and the transport becomes a card. WAVE 64: the MODULATION PLUGIN is no longer walked here and that is deliberate — it is a 1083-px ported window and a 500-px phone would measure the twelve controls that happen to be on screen. Its own 44-px law is B129\'s, at the size it is built for, and it is the stricter proof: every seat, check, preset, bank, hold, transport button, grip, numbered seat, name field and zoom measured live, plus the 135 / 33 / 9 literals counted in the shipped sheet',
     !hitP.error && hitP.n > 300 && hitP.fails === 0 && hitP.swap === 'none' && hitP.copy === 'none' && hitP.head === '44px' && hitP.seg === '44px'
@@ -2542,7 +2546,7 @@ try {
       glassOpacity: cs.getPropertyValue('--glass-opacity').trim(), dprCap: __LW.field.dprCap, res: __LW.quality.res,
       spill: [...document.querySelectorAll('#lab > *, #stage > *')].filter((e) => e.id !== 'busyMark').filter((e) => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > innerWidth + 1 || q.left < -1); }).map((e) => e.id || String(e.className)),
       labScroll: [document.getElementById('lab').scrollWidth, document.getElementById('lab').clientWidth] };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const hitL = await g.ev(HITWALK) || { error: 'no result' };
   /* the ONE tip mechanism, driven by a REAL touch pointer at a phone viewport (ANTI-PATTERN 4: the values
      a graph carries must be reachable without a hover, and kit.js already has that path — this pins it) */
@@ -2564,7 +2568,7 @@ try {
       if (landed && top === cv) return { x, y, aimed: true, onScreen: b.top > 0 && b.bottom < innerHeight, info: String(o.info).slice(0, 40) };
     }
     return { error: 'no dot both on screen and reachable', dots: dots.length, box: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)] };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   let hov = { error: 'aim failed', hovAim };
   if (!hovAim.error) {
     await touchTap(hovAim.x, hovAim.y, 'w51tapA');
@@ -2609,7 +2613,7 @@ try {
     __LW.applySettings();
     r.errs = window.__e.length; r.gpu = __LW.field.lastGpuError || null;
     return r;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B72 W-MOBILE · THE CROSSING UNDOES ITSELF, AND THE DESKTOP AND THE IPAD ARE UNTOUCHED. Back at 1400 × 814 the sentinel falls to 0, body.phone comes off, and every card is in the rack it was in BEFORE the crossing — judged against the layout this run actually had, since earlier blocks move windows between racks — with the main rack back in the right-hand column at the shipped --rack-w, the transport back to the dock state it had, the field back to the grid it had and the device-pixel ceiling to 2, the surface back to the one that was worn, the glass to its .84 token, ⇄ SWAP back on every header and the header back to 34 px, and the hide toggle back to its FIXED desktop seat at the rack\'s inner edge. Nothing about the iPad changed in this wave: at 744–834 px portrait it clears the phone query\'s 700-px arm and at 744 px-plus tall it clears the landscape arm, so it keeps the 860-px bottom rack it has today — that rule was left exactly as written, with only a comment added saying whose it is. The settings key this run wrote is put back. Zero errors',
     !backT.error && backT.sentinel === '0' && backT.api === false && backT.cls === false
       && backT.rack.l === 1100 && backT.rack.t === 0 && backT.rack.w === 300 && backT.rackW === '300px'
@@ -2643,7 +2647,7 @@ try {
     __LW.camera.setFriction(before.mu); __LW.camera.setSpeed(before.spin); __LW.camera.setAutoRotate(before.auto);
     localStorage.setItem(K, saved === null ? '{}' : saved); __LW.applySettings();
     return { before, written, after, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B73 THE CAMERA\'S FEEL IS REMEMBERED, AND AUTO-ROTATE IS NOT. Wave 50 built FRICTION, SPIN and AUTO-ROTATE and not one of them survived a reload (neither did the pair before them). FRICTION and SPIN are preferences about how the instrument FEELS in the hand, so they ride in this browser\'s settings key beside FROST and the GOVERNOR: set μ = 6.5 and SPIN = 1.25, they are written, and an applySettings — the same call boot makes — brings both back to the camera AND to the two knobs\' own readouts. AUTO-ROTATE is deliberately absent from that key and comes back OFF however it was left: a lab that starts turning by itself when you open it is a surprise, not a setting. The two knobs save on onChange, which is the release of a drag, so a slider sweep costs one localStorage write and not sixty',
     !feelT.error && feelT.written.friction === 6.5 && feelT.written.spin === 1.25 && feelT.written.rotKeys.length === 0 && feelT.written.autoIsScale
       && feelT.after.mu === 6.5 && feelT.after.spin === 1.25 && feelT.after.auto === false
@@ -2718,7 +2722,7 @@ try {
     out.runtime.gone = !__LW.mod.picker().includes('field.ghost');
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B74 W-MODWINDOW · THE MODULATION RACK REPLACES THE PLAYHEAD, AND THE PLAYHEAD IS ITS MINIMISED MODE. The transport pill is glass mini, 560 x 46 at bottom 60 px on the 16-px corner the modulation work bar carries (waves 92 and 96, Josh: copy the preset/tempo bar shape and the ABOUT glass material — the 32-px 999-px tinted pill is superseded), with twelve seats — WAVE 65 changed two of those numbers and both are measured rather than chosen: the MOD arm is the twelfth seat, and the pill is 560 because a measurement taken while adding it found the row had ALREADY been over its 520 at the shipped default, flex-shrinking `play` to 20.3 px of its 26 and each step button to 18.9 of its 24 (lab.css carries the four numbers that close it; skin.css\'s 520 had been contradicting lab.css\'s own 560 since wave 52). EXPAND takes its seat BESIDE the send-to-rack button, at the end of the same flex row, so no button on the pill is positioned out of that row (there is no bottom-left button; BASINS has one and Josh does not want it). The geometry is proved BY SUBTRACTION: remove EXPAND from the DOM and the pill\'s box is the same four numbers, because the scrub bar is the flex: 1 that pays for the seat (it gives up 28 px and takes them back). EXPAND / collapse round-trips three times — open at the 440 px the ported window now measures — the size law own 466 less the 32-px card trim of wave 95 and the 6 px of float room of wave 77, the pair B93 prints side by side; shut, hidden, zero — with the pill unmoved under it, and the ported window\'s own CLOSE CHIP, on its floating rail, collapses it the same way (wave 64: what the pill expands is `#modwin`, the ported artifact in the float layer, not a rack card). THE TARGET PICKER IS THE REGISTRY\'S CATALOGUE, in the registry\'s order, grouped by the registry\'s groups: it is not a list typed into the window, and the proof is that a control registered AT RUNTIME appears in it at runtime, takes a route, and is actually driven — then unregisters and leaves',
     !modA.error && modA.mini.cls === 'glass mini' && modA.mini.box[0] === 560 && modA.mini.box[1] === 46
       /* WAVE 92 + 96, Josh twice: make the playhead the shape and height of the preset/tempo bar and
@@ -2847,7 +2851,7 @@ try {
     __LW.mod.reset(); __LW.mat.exposure = 1; __LW.mod.registry.resync();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B75 W-MODWINDOW · A MODULATED PARAMETER IS READABLE WHILE IT MOVES, AND CLOSING THE WINDOW DOES NOT STOP IT (wave 64: the same law, read off the PORTED window). The registry keeps the user\'s BASE and the modulator\'s CURRENT apart, so both are on the screen and the sweep around them with it — but they are on the CONTROL now, not in a list in the window: wave 52\'s BASE / NOW / RANGE strip was λWAVES work and the artifact replaces the panel it lived in, so with EXPOSURE based at 1.000 and one LFO routed 25 - 45 % the ARC on the EXPOSURE dial is anchored at the base to 1e-9 and spans upward, the dial\'s own value line prints NOW to 5e-3 of the model, the reach the arc names is 1.000 … 2.724 to 5e-3, and the current value lies inside it — with no TICK (that is zero depth) and no SPUR (nothing clips). A macro a source drives keeps its bar and LOSES ITS FINGER: the ported window draws one .m2val per macro, a driven one is .m2locked and a real sideways drag on it moves nothing, while the same drag on a hand macro moves it — one drive, one control, in the artifact\'s own shape. The EXPOSURE dial wears ACCENT B while it is held, and a REAL DRAG on that dial under the running LFO moves the BASE and leaves the modulated value alone (mir/registry\'s law: write IS setBase), without touching reg.version. The base follows the hand for every parameter NOT held, too — the defect this wave found: a transport EDGE hands each un-routed target back to its registry base, and that base was seeded once at registration, so pressing RUN on an unrelated route used to snap a hand-orbited camera and a hand-set EXPOSURE back to their boot values — the hand-orbit is driven on the TURNTABLE, since wave 106 boots the camera FREE where the yaw is a readout of a quaternion rather than the number the hand wrote; it does not now. Then the window is CLOSED and the modulation keeps running — frames keep coming, the value keeps moving, the EXPAND lamp stays lit — and when the transport finally stops, the parameter returns to the hand\'s own number BIT FOR BIT (Object.is), un-modulated, with the accent off the dial. The project file carries the rack and a load comes back stopped',
     !modB.error && modB.macroRow.drivenBar === true && modB.macroRow.drivenLocked === true
       && modB.macroRow.handBar === true && modB.macroRow.handLocked === false
@@ -2913,7 +2917,7 @@ try {
     if (__LW.mod.expanded) __LW.mod.collapse();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B76 W-MODWINDOW · THE CADENCE IS CAPPED, THE TIER CEILING HOLDS, AND THE TWO CLOCKS ARE TWO CLOCKS. The modulation applies at most 60 (or 120) times a second whatever the display runs at — and where the DISPLAY is the slower of the two, as it is on this rig at about 25 frames a second, the applied count IS the frame count (applied equal to raf, nothing refused) and the two cadences are deliberately not compared with each other, because that comparison would be measuring the machine — over 2 s at each setting, and again over 2 s with 28 ms of forced burn on every frame, the applied count never passes the cap and never passes the number of frames the browser actually gave; skipping a frame costs nothing, because under WALL sync the beat is DERIVED from the absolute stamp and cannot drift. With the physics stopped, every tier the modulation raises is a PRESENT: zero RECONSTRUCTs, zero EVOLVEs, zero REBUILDs across all three windows, which is why FIELD RESOLUTION is not offered as a target. And the two logical times stay two: the physics clock is stopped and t does not move by a nanosecond while the modulator turns the camera AND sweeps the physics RATE itself — a target that could not exist if the modulator ran on the clock it is modulating. The cap is this browser\'s setting, remembered in the settings key and absent from every project file',
     !modC.error
       && modC.c60.applied <= modC.c60.cap && modC.c60.applied <= modC.c60.raf && modC.c60.applied > 10
@@ -3012,7 +3016,7 @@ try {
     R.psi = { version: __LW.reg.version === v0, digest: __LW.stateDigest() === d0 };
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B77 THE AXIS IS ITS OWN OBJECT (wave 53, Josh, board #40: "Toggle Space window for an Axis button alongside frame to make the axis and frame two individual objects"). ONE switch used to draw the domain cube AND the three xyz axes, so neither could ever be seen without the other. They are two switches now, side by side in OBSERVER, and the split is in the GPU rather than in a flag: field.js keeps the one line buffer with its layout unmoved — the box is vertices 0…23, the axes 24…29 and the slice rectangle 30…37, which is exactly what lineColors() reads — and issues two draw calls into it. Judged off the RENDERED chrome on LIGHT, where the box is a near-black line and the axes are the only chroma there is: both on gives colour AND a dark line (darkest 88 of 255); FRAME off leaves the colour and takes the dark line away (darkest > 150); AXIS off leaves the dark line and takes every coloured pixel (chroma exactly 0); both off leaves the bare ground; and both back reproduces the first picture pixel statistic for pixel statistic. The hand switch is the same road as the API, each rides in the settings key on its own, a project carries both and the switches follow the file, H hides both and gives both back, and neither touches ψ — reg.version and the state digest are unmoved across all of it',
     !axT.error
       && axT.two && axT.sideBySide && axT.labels.indexOf('FRAME') >= 0 && axT.labels.indexOf('AXIS') >= 0
@@ -3068,7 +3072,7 @@ try {
     __LW.loadPreset('1s+2pz'); await __LW.settle();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B78 SLAP BECOMES IMPULSE AND THE BOW BECOMES THE IMPULSE VECTOR (wave 53, Josh, board #44). A sweep of the whole LIVE document — every text node, and every title, aria-label and placeholder on every element, with the four windows that carried the words open — finds not one SLAP, BOW, slap, slapped or bow left in anything a user can read. The new words are in every seat the old ones held: the trigger reads IMPULSE, the group reads "IMPULSE · a sudden momentum kick ψ ↦ e^{ik·x}ψ", the readout reads LAST IMPULSE, the key sheet prints "impulse along the axis (k = 0.2)" against the K key, the hint bar reads "ctrl+drag = impulse vector", the STATE window says "the impulse is in flight…" while the gesture is in the air, and the sub it lands with begins "impulse vector: k = 1.000". The identifiers underneath are deliberately unchanged and named in the REPORT — slap, bow, bowRelease, __LW.bow, LW.kickAlong, the CSS classes and the worker\'s op codes — because renaming a word on the screen is not a reason to churn an API that twelve gates already speak',
     !nameT.error
       && nameT.leftN === 0
@@ -3151,7 +3155,7 @@ try {
     R.restoredNine = __LW.logo.colours(0).join() === R.wheelNine.join();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B79 THE LOGO STOPS SPINNING AND THE PALETTE STARTS TURNING (wave 53, Josh, board #45: "the logo shouldn\'t be spinning, and it also shouldn\'t be going 360 … it\'s more like the current palette itself rotating 360, not hue phase 360"). Read literally, and it is neither a spin nor a hue-rotate. EVERY ROTATION IS GONE: lw-mark-spin, lw-busy-spin and lw-busy-hue are not in any stylesheet the document has, the generated turn contains no transform of any kind, and the only transform anywhere in the logo — the resting 45° on the <g> inside the SVG — reads identically before a turn, during one, while the lab is busy and 500 ms later. WHAT MOVES IS THE PALETTE, THROUGH THE MARK: square i walks the wheel from i·40° all the way round to i·40° again, so all nine squares march the SAME thirty-six palette samples, each rotated by four places — the exact statement of "the palette itself rotating" — and every one of those samples is a colour the CURRENT palette actually has, checked against the live wheel LW.accent.colorAt. Loaded with a FOUR-STOP palette the nine squares are that palette\'s own colours and its four stops come round on the mark at φ = 0, 90, 180 and 270 exactly; the resting computed fills are those colours and not the wheel\'s; and putting the λWAVES palette back puts the nine back. The BOOT\'s 360° spin is now one turn of the palette through the same mark — one iteration, and it ends. THE BUSY MARK still says busy and never rotates: the host BREATHES in opacity (lw-busy-breathe, 1.1 s, linear, alternate) with no filter, no hue-rotate and no shadow of any kind, and the palette turns in its nine squares beside it — both in CSS, because the thread the mark reports on is the thread that is stuck',
     !logoT.error
       && logoT.kfSpin.length === 0 && logoT.kfBreathe === true && logoT.kfTurns === 9
@@ -3203,7 +3207,7 @@ try {
     R.afterLeave = { cls: title.classList.contains('menu-open'), tr: getComputedStyle(title).transform, bar: bar.hidden };
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B80 THE LOGO ENLARGES WITH THE MENU AND COMES BACK WITH IT (wave 53, Josh, board #45: "have the logo slightly enlarge when mouse over and back to normal when file, edit, view, etc. disappear" — so the enlarged state belongs to the CHIPS being up, not to the pointer being over it). rack.js writes `menu-open` in exactly the one place it writes bar.hidden, so the two can never disagree: at rest the title has no transform at all, a pointerenter raises FILE · EDIT · VIEW · WINDOW · ABOUT and WAVE 79 TOOK THE GROWTH AWAY AGAIN (Josh, having watched it for a few days: \'I think I want to disable the expanding animation when mouse over\'), so what this block now proves is the STATE and not the size: the title carries no transform and no transition on one at any moment of it, a pointerenter raises FILE · EDIT · VIEW · WINDOW · ABOUT and writes the class, closing the menu clears it, and a pointerleave — the way it actually goes away in the hand — takes the chips and the size together after the 400 ms of grace. AND THIS ARM CAUGHT WHAT WAVE 79 LEFT BEHIND: showBar() still multiplied the width by the deleted LOGO_SCALE, so the chips landed 11 px clear of a logo that had stopped growing. The placement is the logo own untransformed geometry now — its left edge and its vertical centre — and the chips land 8 px clear of the right edge and vertically centred on it',
     !hovT.error
       && hovT.rest === 'none' && hovT.restClass === false && hovT.barRest === true
@@ -3238,7 +3242,7 @@ try {
         masked: wp.querySelector('image').getAttribute('mask'), clipped: wp.querySelector('image').getAttribute('clip-path'),
         bangs: wp.querySelectorAll('.warn-bang').length, inMask: wp.querySelectorAll('mask .warn-bang').length,
         painted: wp.querySelectorAll('svg > .warn-bang, svg > g.warn-bang').length, err: null };
-    } catch (e) { return { err: String(e && e.stack || e) }; }`) || { err: 'no result' };
+    } catch (e) { return { err: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { err: 'no result' };
     const shot = decodePNG(Buffer.from(await g.snap(), 'base64'));
     cutPix[theme] = {};
     for (const k of ['stem', 'dot', 'fillL', 'fillR', 'outside']) cutPix[theme][k] = patch(shot, cutGeo[theme][k][0], cutGeo[theme][k][1]);
@@ -3302,7 +3306,7 @@ try {
     __LW.keys.toggleUI(); await wait(120); __LW.keysheet.close();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B82 THE \'?\' KEY IS A LIVE BINDINGS SHEET (wave 53, Josh, board #46: "? - shortcut key for keyboard binds (should also show the dynamic current keyboard binding)"). It ships closed; \'?\' opens it, \'?\' closes it and Escape closes it. Every one of the 40 rebindable actions is on it (wave 65 added MOD on m and the loop-clock lock on g, and the fixture below moved its own rebinds to I and O, because aiming a rebind at a key that is now BOUND tests a collision rather than a rebind) with the action\'s OWN name beside its key, formatted by the same keyName() the SETTINGS chips use — including the row for \'?\' itself, which prints \'?\' rather than Shift+/ — and there is no hand-written list anywhere for a rebind to leave stale (ANTI-PATTERN 6 in another guise). It is built on every open AND hangs off ui.keysRefresh, the one call every rebind already ends in, so both roads are proved: rebinding the camera reset to I while the sheet is UP changes the row in the same tick and the SETTINGS chip agrees with it, rebinding to O with the sheet DOWN is on it the moment it opens, and RESET KEYS puts R back on both. It cannot fire while you are typing — the notebook\'s textarea and its title field both swallow it — and H takes it away with the rest of the interface',
     !ksT.error
       && ksT.shipsClosed === true && ksT.opened === true
@@ -3343,7 +3347,7 @@ try {
     R.face = [...seg.querySelectorAll('.seg-b m')].every((e) => /^["']?STIX Two Math/.test(getComputedStyle(e).fontFamily));
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B83 THE OBSERVABLES ARE THREE WIDE AND TWO TALL (wave 53, Josh clarifying his "6x2 / 2x6" note, board #50: THREE COLUMNS, TWO ROWS — row 1 ρ=|ψ|² · arg ψ · Re ψ, row 2 Im ψ · Δρ · Re+Im). Wave 46 gave the six-seat seg a grid because it wrapped by content width; wave 47 laid it 2 × 3; this lays it 3 × 2, and because the DOM order already IS the order Josh wrote, the re-lay is one number in one rule and no rack.js change at all. Measured on the card: three distinct lefts and two distinct tops, six cells of equal width and equal height, the first three on the top row and the last three on the bottom, each column\'s two cells sharing a left, and the labels in exactly that order. WAVE 69 IS THE FONT REVISION WAVE THIS BLOCK NAMED IN ADVANCE, and the promise it made — that the typography could arrive WITHOUT MOVING A CELL — is now asserted rather than hoped: each of the six is exactly one <m> element resolving to STIX Two Math (Josh chose the observables himself as the best place for real mathematical typography), and every geometry clause above is unchanged at the same instant',
     !gridT.error
       && gridT.grid === 'grid' && gridT.cols === 3
@@ -3387,7 +3391,7 @@ try {
          excluded from busyMs, so this is the honest "what has the worker actually DONE while nobody was looking". */
       J.statHidden = await __LW.background.workerStat(); J.statAt = performance.now(); }, 700);
     return { vis: document.visibilityState, playing: __LW.clock.playing, parks: __LW.background.parks, stat: window.__w54.stat };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const newWin = await wd('POST', '/window/new', { type: 'tab' });
   await wd('POST', '/window', { handle: newWin.handle });
   await sleep(3000);                                        // three seconds of a genuinely hidden lab
@@ -3419,7 +3423,7 @@ try {
     __LW.pause(); __LW.setRate(0, 1); await __LW.settle();
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await wd('POST', '/window', { handle: newWin.handle });
   await wd('DELETE', '/window');
   await wd('POST', '/window', { handle: homeWin });
@@ -3494,7 +3498,7 @@ try {
     __LW.setCamMode('turntable', true); __LW.camera.reset(); __LW.camera.stop(); await __LW.settle();
     R.home = __LW.camMode; R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B85 THE CAMERA\'S SECOND MODE (wave 54, board #43 — Josh: "currently, I can\'t rotate past the poles"). CAMERA carries a TURNTABLE · FREE segment and the trade is written on the card in one sentence, because it is a real trade and not a free lunch: a level horizon with poles, or no poles with a horizon that rolls. TURNTABLE is untouched — two Euler angles about z, the quantization axis — and forty upward steps of 0.05 rad from pitch 1.30 stop DEAD at the clamp, 1.52 rad. FREE is one unit quaternion with the drag rotor multiplied on the RIGHT, so the axes are the screen\'s at every pose: the same forty steps from the same pose walk straight over the pole and come out the other side with the camera upside down (up·ẑ < 0). THE CONVERSION IS Z-UP AND WAS DERIVED, NOT COPIED: the study\'s formula is written for a Y-up world whose home camera is the identity quaternion, and ours is not — at yaw = pitch = 0 our basis is the cyclic permutation x → y → z → x, so q(ψ,θ) = q_z(ψ)·q₀·q_x(−θ) with q₀ = ½(1+i+j+k), and back the other way θ = asin b_z and ψ = atan2(b_y, b_x) rather than the Y-up pair. Judged over 400 poses spanning eight radians of yaw and the whole pitch range against cameraBasis itself, the two agree to better than 1e-15, and the mode switch therefore moves NO PIXEL. A closed drag loop in FREE returns the look direction and leaves a ROLL behind it — the horizon has tilted, right·ẑ ≠ 0 — which is not a defect and cannot be removed: the two drag generators are the camera\'s up and right and [ĵ, k̂] = 2î, so a closed loop keeps the commutator. In TURNTABLE the same loop leaves right·ẑ exactly 0. Coming back out of FREE SLERPS the roll level over 150 ms — the mode is still FREE at 50 ms and level TURNTABLE at 350 — never a snap. And wave 50\'s friction law works unchanged in the new mode, because it is arithmetic on two scalars and only their AXES changed: a fling of ω₀ = 1.2 rad/s at μ = 2.5 turns through the closed form ω₀/μ = 0.480 rad to within 2e-3, μ = 0 still spins forever, and the rest threshold still stops it. The mode and the rotor ride in a project file, and a file written before this wave gets a valid rotor built from its angles. Zero errors',
     !cmodeT.error
       && cmodeT.seg.includes('TURNTABLE') && cmodeT.seg.includes('FREE')
@@ -3558,7 +3562,7 @@ try {
     R.emptied = __LW.layout.layouts().length;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B86 FAVOURITE LAYOUTS (wave 54, board #48). A ☆ button takes the seat underneath the + exactly where Josh asked for it — 36 px below it in the same column, on the same geometry rule, and on a phone it follows the rack up the thumb stack like its two neighbours (wave 51\'s law is one rule, not three copies). Its dropdown is the + LIST\'S OWN IDIOM and not a second menu style: the same .glass panel, the same .mb-item buttons, the same outside-pointerdown dismissal — SAVE LAYOUT, then a LOAD row per saved layout with a × to forget it. A LAYOUT IS THE ARRANGEMENT AND NOTHING ELSE: which windows exist, in what order, in which rack, folded / closed / powered down, the transport\'s dock, the rack\'s own visibility, and the one size a hand can set in this instrument (the notebook\'s — rack cards are sized by their content, by law, and there is no per-window size to save). The proof deranges the rack properly — two cards moved to the mirror rack, one reordered, one folded, one closed, one switched off — and loading the layout back restores the arrangement CARD FOR CARD, in order, with the fold glyph and the power button\'s aria-pressed in step, because fold and power are restored through their BUTTONS and not by toggling a class behind the closure that owns the glyph. And the state digest is IDENTICAL before the save, after the derangement and after the load: a layout is never the physics. Four numbered slots, each wearing an auto-description — how many windows, which racks, the time — which is the information a name would have carried; numbered rather than named because the alternatives were a modal browser prompt or a text field inside the dropdown, and the paragraph above just refused a second menu idiom. A fifth save replaces the oldest. Zero errors',
     !favT.error
       && favT.btn === true && favT.underAdd === 36 && favT.sameColumn === 0
@@ -3601,7 +3605,7 @@ try {
     __LW.setDither(0); __LW.palette.setOn(false); __LW.setView('density'); await __LW.settle();
     R.finalOff = __LW.dither; R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B87 DITHERING (wave 54, board #49 — Josh asked whether realtime dithering is possible). It is, and it is nearly free, and "nearly free" is not a claim until it has two numbers: at 96³ with 160 ray steps on this canvas the frame takes the SAME median milliseconds with it off and with it on, and the difference is smaller than the run-to-run spread of the measurement itself. ORDERED (Bayer 8×8) was chosen over blue noise for a reason that matters in an instrument rather than in a demo: the threshold is a closed form in six shifts and five xors — no table, no texture, no extra bind group — and it is FIXED IN SCREEN SPACE, so a paused field is perfectly still, where a per-frame noise would make a state nobody is changing shimmer. Error diffusion was never a candidate: it is inherently sequential and a fragment shader is not. It is applied to the FINAL colour, after the output gamma, because the quantiser it defeats is the 8-bit swapchain and dithering in linear light would be dithering the wrong ladder; and it rides at p2.w, BESIDE the ray-march jitter seed at p0.w rather than on top of it, so the march\'s own dither is untouched. Measured: with it OFF the picture is bit-reproducible across two reads (deterministic, as a screen-space pattern must be) and identical to what it has always been, because OFF adds exactly zero; with it ON the picture changes while the mean luminance moves by under 1e-3 of one code, which is the Bayer matrix being exactly zero-mean. It is OFF BY DEFAULT — so every pixel gate in this suite reads the numbers it always did — its STRENGTH dial is disabled until it is on, 1.00 is the textbook ±½ LSB, and it rides in a project file like the draw style it sits beside. Zero errors',
     !ditT.error
       && ditT.seg.includes('OFF') && ditT.seg.includes('ORDERED 8×8') && ditT.defaultOff === true
@@ -3635,7 +3639,7 @@ try {
     R.lambdaThere = !!sel.querySelector('option[value="lambda"]');
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* a FRESH profile: the settings key cleared and the page reloaded, so the DEFAULT is what is measured */
   await g.ev(`localStorage.removeItem('lambdawaves.q0.settings'); return 1;`);
   await reload();
@@ -3645,14 +3649,14 @@ try {
     /* AND A BROWSER THAT HAS SAID keeps what it said — a default is for a first visit, never a retroactive edit */
     __LW.setPalette('lambda'); R.said = __LW.paletteId; R.savedAs = JSON.parse(localStorage.getItem('lambdawaves.q0.settings')).palette;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await reload();
   const keptT = await g.ev(`try {
     const R = { kept: __LW.paletteId };
     localStorage.removeItem('lambdawaves.q0.settings');
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await reload();
   judge('B88 THE PALETTE MENU GROUPS BY STOP COUNT, AND PRISM SHIPS AS THE DEFAULT (wave 54, boards #47 and #51). Josh: "like how ember only has 4" — so the dropdown is grouped by the NUMBER OF COLOUR POINTS around the circle, ascending, in real <optgroup>s with not one option left loose outside a group. The grouping is the CATALOGUE\'S OWN (palette.js already publishes each preset\'s stop count and the groups built from it), so the menu cannot drift from the data and a palette added there arrives in the right group with no edit in the view at all — ember lands under 4 points and prism under 6, which is the reading Josh gave. THE DEFAULT IS NOW PRISM, his ruling on board #51: the six-stop spectral map computed from the CIE 1931 colour-matching functions at 440 / 480 / 510 / 570 / 600 nm and closed through the line of purples, and the best colour-vision-deficiency all-rounder in the set — and because every accent in the interface is an angle on the live wheel, a FRESH PROFILE now boots with --acc at prism\'s own 0° colour rather than λWAVES\'. λWAVES is one click away in the 6-point group. AND A DEFAULT IS FOR A FIRST VISIT: naming a palette from the menu IS this browser saying which it wants, that choice rides in the settings key, and a reload comes back on it — measured by clearing the key, reloading to prism, choosing λWAVES, reloading again and finding λWAVES still there. Nobody\'s settings are retroactively edited. The suite tests/palette.test.mjs is now in test.sh',
     !palT.error && !freshT.error && !keptT.error
@@ -3684,7 +3688,7 @@ try {
     R.hexNotP3 = /^#[0-9a-f]{6}$/i.test(R.readsBack);
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B89 THE COLOUR GAMUT — THE HONEST VERSION, NOT THE FLATTERING ONE (wave 54, board #52). Josh asked for P3 and asked whether we could default to it. We cannot, on this browser, and SETTINGS now says so in the interface instead of quietly doing nothing: a GAMUT segment sRGB · DISPLAY-P3 whose P3 position is DISABLED and carries the reason — Firefox does not implement GPUCanvasConfiguration.colorSpace at all, the WebIDL member is commented out in Gecko (Bug 1834395), and because a WebIDL dictionary silently ignores a member it does not declare, passing "display-p3" throws nothing, warns nothing, and leaves the swapchain sRGB. THE FEATURE TEST IS A REAL PROBE AND NOT A VERSION SNIFF: configure() is handed an object whose colorSpace is a GETTER, and whether the browser CALLS it is exactly whether the member exists in this build — measured false here, while CSS color(display-p3 …) is measured TRUE, which is precisely the trap: a P3 interface over an sRGB canvas would put the same accent in two different colours. Hence THE LAW, enforced in one place rather than asserted in a note: the DOM and the canvas are in the same colour space, or the feature is off — and asking for P3 twice, once plain and once vivid, returns sRGB and leaves BOTH sides sRGB, with --acc still a plain sRGB hex. Where a canvas can honour it the two things it can do are built and named apart: CONVERT (a colorimetric re-expression — identical colours, better banding, the 0.822/0.178 matrix in linear light) and VIVID (a deliberate chroma expansion, more saturated than the palette says — a design choice, and it says so), both routed through the SAME function that transforms the palette LUT, so they cannot diverge. The display query is reported and never used as a gate, because privacy.resistFingerprinting makes Firefox answer false to it unconditionally and a wide-gamut screen must not be locked out by a privacy setting. A fresh profile is sRGB. And the real fix for 8-bit banding today — a wider gamut over the same 256 levels makes it WORSE, not better — is DITHER in DRAW STYLE, which works on every browser. Zero errors',
     !gamT.error
       && gamT.seg.includes('sRGB') && gamT.seg.includes('DISPLAY-P3')
@@ -3761,7 +3765,7 @@ try {
     R.dig1 = __LW.stateDigest(); R.recon1 = __LW.stats.reconstructs;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B90 ANY WINDOW COMES OFF THE RACK (wave 55, Josh: "I was hoping the modulation window was going to be a floating draggable regular window like a VST plugin" and then, choosing the capability over the one-off, "yes! I was also thinking this idea where any window can be taken off the rack"). The pop-out chip takes SPACE out of the rack\'s flow onto the float layer; the rack closes the gap and every other window keeps its order; the window is EXACTLY as wide as the card it was, because a floating window is not resizable and its interior therefore never reflows. It is dragged by its HEADER — 110 px across, 90 px down — and a drag on a KNOB inside it turns the knob and moves the window by (0, 0), which is the one failure that would make the instrument unusable. A press brings it to the front over a second floating window, and the chip docks it back between the two neighbours it left. Nothing here reaches ψ: the state digest and the reconstruct count are the same at the end as at the start.',
     !popT.error && popT.parent === 'floats' && popT.inFlow === -1 && popT.gapClosed && popT.restOrder
       && popT.sameWidth && popT.onStage && popT.popGly === 'reopen'
@@ -3829,7 +3833,7 @@ try {
     R.dig1 = __LW.stateDigest();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B91 COMPACT IS NOT FOLD, AND IT IS THE WIDTH THAT SAYS SO (wave 55). Fold already existed and it is a HEIGHT act: the body goes, the card keeps the rack\'s width, and what is left is a horizontal title bar. COMPACT is a WIDTH act a rack card cannot perform — the window narrows to a 46-px rail carrying exactly the three things the reference keeps, its NAME, its POWER switch and its CLOSE, plus the way back — so the two are kept apart rather than collapsed into one control. And because compact HIDES the body instead of re-laying it out, the interior is bit-identical before and after (every knob, switch, segment, trigger, fader and readout at the same offset in the card, measured), which is STYLE-LOCK\'s "discipline inside" as a number. ⇄ SWAP stands down while a window floats, because "send this to the other rack" changes nothing for a window on neither. Every mark in every window header is now a DRAWING from Josh\'s own glyph library, vendored at lab/mir/glyph.js and maintained by diff — close, chevron (turned a quarter turn when the window folds, which is the caret\'s own idiom), info, swap, plus, and the two faces of each new chip — every one on his 24-unit grid. The three that are NOT glyph.js drawings are named rather than glossed over: ⏻ POWER, which was already a CSS drawing and not a character at all; ⧉ COPY, for which the library offers nothing; and, since wave 106, the playhead expand button, which is the HOUSE MARK itself — the masthead nine-square SVG, cloned rather than redrawn so paintMarks() turns it with the wheel — and it is measured here as that drawing (nine rects, no text, no glyph name) rather than allowed through on a list. The rule the law was ever about is unbroken: not one mark in this chrome is a text character.',
     !railT.error && railT.foldKeepsWidth && railT.fold.body === 'none' && railT.fold.gly === 'chevronDown'
       && railT.railShown && railT.swapHidden && railT.narrows && railT.compact.body === 'none'
@@ -3879,7 +3883,7 @@ try {
     __LW.layout.dockAll(false); __LW.layout.moveToRack('meters', 'R'); await nap(120);
     R.dig1 = __LW.stateDigest(); R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B92 TAB STILL WALKS EVERY WINDOW, IN AN ORDER THAT IS WRITTEN DOWN (wave 55). THE ORDER IS: the mirror rack top to bottom, then the right rack top to bottom, then whatever is floating, back-most first — frozen at the first TAB of the session and never rebuilt, because the act itself moves a card to the top of its rack and a re-read order would bounce between two windows for ever. Because the cycle holds the ELEMENTS and not a rack query, A WINDOW KEEPS ITS SEAT when it pops out or docks back: the same list is walked on the stage as in the rack. "To the top" means the top of its rack for a docked window and the FRONT OF THE STACK for a floating one, and either way the window is unfolded and a rail is opened back to full — because what TAB promises is that the window it names is the one you can now read.',
     !tabT.error && tabT.isStated && tabT.floatsLast && tabT.sawFloats && tabT.floatsInOrder && tabT.noGhost && tabT.lap
       && tabT.orderAfterDock && tabT.raisedByTab && tabT.dig0 === tabT.dig1 && tabT.errs === 0, tabT);
@@ -3962,7 +3966,7 @@ try {
     R.dig1 = __LW.stateDigest();
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B93 MODULATION IS NOT A RACK WINDOW AT ALL (wave 55 made it the only one that DEFAULTED to the stage; wave 64 made that permanent by porting it). It is a PLUG-IN WINDOW — BASINS\' own #modwin, moved here whole under STYLE-LOCK\'s PORTED-WINDOW EXCEPTION — so the λ ON THE PLAYHEAD PILL — wave 106 made the door the house mark itself, cloned from the masthead and turned by paintMarks with every other copy, while the ↗ it used to wear went to the transport dock button where a direction is literally what it means — shows a position: fixed .kwin in the float layer that is not a .dev, is not in layout.floating() (which lists rack cards that came off), carries its own five-disc chip rail on the exact aria-label 24 rules select on, and measures the artifact\'s OWN size law rather than a rack card\'s width — 466 tall, 22·scale + 224 + 14 + 89 + Σ cards + n·7 wide. It is moved by the artifact\'s own nine-dot grip, driven here with real pointer events, and collapsing it does NOT dock it: the pill and the close chip only hide it, so reopening puts it back where the hand left it, which is what a plug-in window does. THE OUTLIER STAYS SELF-CONTAINED, and that is a stated organisational law, not an accident (Josh: "Modulation related stuff stays with modulation. It must be treated like the outlier and it\'s okay"): the sweep finds no modulation furniture anywhere but inside the modulation window and its own pill, and the single modulation-shaped thing elsewhere is ACCENT B on a dial whose parameter a modulator is holding — a READ-ONLY signal, carrying no control of its own. And floating is chrome, not physics: a floating window\'s reader parks and unparks on exactly the governor law a docked one obeys, with the state digest unmoved through all of it (the block plays, so the reconstruct count is expected to move and is not the invariant here — ψ\'s own digest is).',
     !modFT.error && modFT.startsDocked
       && modFT.expMark && modFT.expMark.gly === null && modFT.expMark.logo === true && modFT.expMark.svg === true && modFT.expMark.rects === 9 && modFT.expMark.text === 0
@@ -3997,7 +4001,7 @@ try {
       cards: S.cards.map((c) => ({ id: c.id, side: c.side, folded: c.folded, closed: c.closed, off: c.off })) };
     localStorage.setItem('lambdawaves.q0.settings', JSON.stringify(A));
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(390, 844);                                      /* → the phone arm, portrait */
   await g.ev(`await new Promise((r) => setTimeout(r, 900)); await __LW.settle(); return 1;`);
   const floatPh = await g.ev(`try {
@@ -4022,7 +4026,7 @@ try {
     R.utilSeats = [...document.querySelectorAll('.dev[data-id="camera"] .dev-util > button')].filter((b) => getComputedStyle(b).display !== 'none').map((b) => b.className.split(' ')[0]);
     R.dig = __LW.stateDigest(); R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(1400, 900);                                     /* … and back to the desktop */
   await g.ev(`await new Promise((r) => setTimeout(r, 900)); await __LW.settle(); return 1;`);
   const floatBack = await g.ev(`try {
@@ -4037,7 +4041,7 @@ try {
     __LW.layout.moveToRack('meters', 'R');
     R.dig2 = __LW.stateDigest(); R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B94 A LAYOUT CARRIES THE STAGE, AND THE PHONE STILL HAS ONE RACK (wave 55, extending board #48). A favourite layout gains ONE optional key per card — `float`, with the position, the width, the compact flag, the z-order and the HOME slot — so `v: 2` is a superset and a v1 layout saved before this wave still loads, meaning exactly what it says: nothing floats. It is still the ARRANGEMENT and nothing else; no physics is in the record. THE PHONE ARM (wave 51) IS UNTOUCHED BY ALL OF IT: crossing the breakpoint docks every floating window before the mirror rack is folded into the one rack, so a window whose home is the left rack still makes the trip; the pop-out and rail chips stand down in CSS and `popOut()` refuses in script, so the control and the act agree; the four header seats stay ⓘ ⏻ ▾ × at a 44-px pitch; and a desktop layout carrying three floating windows LOADS there with all three DOCKED rather than breaking. Crossing back restores every one of them — the same place, the same rail, the same home rack — because wave 51\'s law is that the crossing is reversible in both directions, and the state digest never moves through any of it.',
     !floatDesk.error && !floatPh.error && !floatBack.error
       && floatDesk.floating.length === 3 && floatDesk.v === 3   /* wave 106: v3 adds the `look` and `cam` blocks — colour, draw and camera travel with a favourite now (Josh), and the wave state deliberately does not */
@@ -4112,7 +4116,7 @@ try {
     R.selects = document.querySelectorAll('select.sel').length;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B95 ABOUT exposes app information, the live shortcut sheet, Settings, and cache repair. The about face has no deployment-root links. Reload restores the selected preset and an impulse remains undoable.',
     !riderT.error && riderT.about.join('|') === 'ABOUT λWAVES|KEYBOARD SHORTCUTS…|SETTINGS…|UPDATE APP'
       && riderT.siteRoot.length === 0 && riderT.licenceNamed
@@ -4177,7 +4181,7 @@ try {
     R.back = !dev.classList.contains('closed') && !dev.classList.contains('folded');
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B96 THE MERGED WAVE WINDOW (wave 56, board #59). Josh asked for SPACE and DRAW in one window titled WAVE with INVERT, FRAME and AXIS at its foot, and then ruled that it must NOT take a new id — so this is a retitle and an absorption: the card is eyebrowed WAVE, its body is a SPACE group (the two exact pictures, the six observables, EXPOSURE · SOFT · HUE) over a DRAW group (the five styles, ISO · GRAIN · KNEE, DITHER and the bounded-ceiling note), with the three overlay switches together in a row at the foot and in neither group. The id it kept is `observer`, which is what lab.css reads to lay the six observables out as a 3-column grid — proved here on the computed style, not on the stylesheet. And a saved LAYOUT that names the window that no longer exists still loads: naming both, the heir\'s record wins; naming only `style`, it resolves to its heir rather than dropping the seat in silence.',
     !waveT.error
       && waveT.styleGone === true && waveT.eyebrow === 'WAVE'
@@ -4218,7 +4222,7 @@ try {
     R.mode = __LW.sw.mode; R.state = __LW.sw.state; R.asked = __LW.sw.asked;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
   /* the real thing, on its own page */
   const swURL = `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&warn=0&sw=1`;
@@ -4238,7 +4242,7 @@ try {
     R.scope = reg.scope; R.active = !!reg.active; R.hasReg = !!__LW.sw.registration;
     R.controlledFirst = !!navigator.serviceWorker.controller;   /* no clients.claim: the FIRST visit runs uncontrolled */
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await navTo(swURL);
   const swT2 = await g.ev(`try {
     const R = {};
@@ -4274,7 +4278,7 @@ try {
     R.cachesLeft = (await caches.keys()).filter((k) => k.indexOf('lw-lab-') === 0).length;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await reload();
   judge('B97 THE INSTALL LAYER, LINKED AND REGISTERED (wave 56, board #56). The manifest, the SVG and 192 icons, the apple-touch icon, both web-app-capable metas and the title and status-bar metas are in the head and every one of their URLs answers 200; `color-scheme` says "light dark" rather than the lie it said (the shipped theme is LIGHT); the theme-colour meta follows the LIVE theme, which is the one thing a manifest cannot do; and the manifest carries NO `id` member, because `id` is resolved against the ORIGIN and any value written there is wrong at some deploy depth — with none, the identity falls back to start_url and is right at every depth. The WORKER registers for real on a page that asks for it (scope /lab/), runs the first visit UNCONTROLLED as its no-claim law requires, controls the second, and answers the §6 handshake with a build whose name IS its cache. And the law the worker cannot keep alone is kept here: skipWaiting re-points every client in scope, so the tab that ASKED reloads exactly once and a tab that did not ask is TOLD and keeps its unsaved state. The gate leaves no registration and no cache behind.',
     !headT.error && !swT1.error && !swT2.error
@@ -4362,7 +4366,7 @@ try {
     R.plainVisit = none.ok === true && none.opened === false;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B98 A MINTED LINK REOPENS THE SAME STATE (wave 56, board #55). lab/statelink.js is a codec on serialize()\'s own object, and it was inert — nothing minted a link and nothing read one. COPY LINK sits beside SAVE · LOAD · COPY JSON and in the FILE menu; the state travels in the FRAGMENT and never in the query, because a fragment is not sent to a server; the mint reports its length and NAMES what format v1 cannot carry — the MOLECULE panel and the MODULATION rack — in a note on the card and not in a hover, and when the browser refuses the clipboard the note carries the link itself. Deranged and reopened, the same labels come back with no coefficient off by more than the stated 16-bit step, and the clock, the draw style, the palette the reader named and the DRAG γ come back exactly. The codec is lossy ONCE and exact ever after: re-minting what a link produced is byte-identical text, and opening the same link a second time lands on the same digest. The undo ring is empty, because a link is the bottom of the stack.',
     !linkT.error && linkT.chars > 100 && linkT.fits === true && linkT.fragment === true && linkT.noQuery === true
       && linkT.hasTrig === true && linkT.inFileMenu === true
@@ -4407,7 +4411,7 @@ try {
     R.goodOpens = r4.ok === true && r4.opened === true && __LW.stateDigest() === d0;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B99 A CORRUPTED LINK SAYS SO AND CHANGES NOTHING (wave 56). readLink throws a LinkError with a code and a whole sentence, and that sentence reaches the interface — the STATE card\'s status line and its note — rather than the console, where a reader would never look. Three damaged links: one character flipped inside the payload (the checksum catches it), a fragment that is not base64url at all, and one cut short. Each is refused with its own code, each leaves the register digest, the clock and the palette exactly where they were, and the intact link still opens, so the refusals are the CRC doing its job and not the codec being broken.',
     !badT.error && badT.corruptOk === true && badT.corruptCode === 'corrupt' && badT.corruptSays === true
       && badT.noteShown === true && /DID NOT OPEN/.test(badT.noteText) && /Nothing in the lab was changed/.test(badT.noteText)
@@ -4450,7 +4454,7 @@ try {
     R.dampZero = __LW.reg.damping === 0;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B100 THE SECOND RE-PICK TRAP, CLOSED (wave 56, ANTI-PATTERNS 12). Wave 55 fixed this class on the PRESET select and named this one without fixing it: a <select> fires `change` only when the value CHANGES, so after REVERSE or ROTATE or a recolour, re-picking the palette you are already on did nothing whatever and the catalogue colours were unreachable. Demonstrated with a counting listener rather than asserted, then fixed the same way the preset was — one loader, called unconditionally by a RELOAD trigger beside the select — and picking a different palette still goes through that same loader.',
     !repickT.error && repickT.hasReload === true && repickT.beside === true
       && repickT.edited === true && repickT.silentReselect === true && repickT.stillEdited === true
@@ -4537,7 +4541,7 @@ try {
     __LW.setTheme('dark');                       /* the suite's own baseline, put back — setTheme writes the settings key */
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B101 THE λ IS ALWAYS THERE (wave 57, the accent audit\'s §9). paintMarks() set `#title .lam` INLINE from the raw wheel, bypassing every legibility term in the app while its sibling `.word` got a light-theme override to #000 — so the λ wore whatever luminance the palette happened to have at 0°, and swept over 23 palettes × 360° of HUE that reaches 1.00 : 1 on BOTH stages (ember @0° on light, aurora @6° on dark, which the audit did not measure): the same luminance as the ground, the mark simply not there. It now goes through `visibleInk`, which is the SMALLEST thing that guarantees it can be seen — the colour\'s own OKLab a and b are handed straight through, only L moves, only when the colour is under the floor, and only as far as the floor demands, so it is a NO-OP on 47 % of the light wheel and 66 % of the dark one and a vivid λ stays exactly as vivid as it was. THE FLOOR IS 3 : 1, WCAG\'s non-text ratio. WAVE 59 SPLIT THE GROUND, and that is the one expectation changed here: the two λ copies were corrected against ONE constant, the card — right for the notebook, which is on a card, and wrong for the header, which is `background: none` over the CANVAS whose clear colour is the shipped STAGE knob. They are still one call site; each now clears the floor against the ground it is actually on, and the two grounds differ, so they are no longer the same string of ink and asserting that they were would be asserting the defect. The stage this block measures against is `LW.ink.stageGround` — the canvas clear colour the λ is really drawn on, read out of the app rather than typed here. THE NINE SQUARES ARE LEFT AS THE PALETTE PAINTS THEM, because they are a swatch grid — the palette showing itself, beside an editor that draws the same stops — and a swatch corrected for its ground lies about the colour it is a swatch of. tests/ink.test.mjs sweeps all 8280 samples per theme; this measures the 46 the DOM actually resolves.',
     !lamT.error && lamT.hasLam === true && lamT.palettes === 33 && lamT.n === 66   /* the catalogue grew by ten (wave 106); 33 palettes x 2 themes = 66 */
       && lamT.worstInk >= 3 && lamT.worstRaw < 1.05 && lamT.rawUnder3 > 0
@@ -4581,7 +4585,7 @@ try {
     __LW.setPalette('prism');
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B102 SIX CANVAS VIEWS STOP DRAWING LAST YEAR\'S COLOUR (wave 57). fieldview, moview, radiationview, wignerview and atomsview each carried a private copy of one CSS-colour reader with the pre-wheel house cyan #78e1f0 and magenta #d97ce8 written in as its fallback — and atomsview held a SECOND copy of the cyan as `return [120, 225, 240]`. That fallback was not dead code waiting for a bad day: it FIRES BY DESIGN under DISPLAY-P3, because applyAccent writes `color(display-p3 …)`, the canvas serialises it back in that form, and none of the three regexes those readers had ever matched it — so on a P3 display six views would have drawn the wave-23 accent while the DOM around them wore the chosen palette, silently. There is ONE reader now, in kit.js, and it knows the fourth form (the P3 → sRGB map is the inverse of field.js\'s own, in linear light); and the two accents no longer travel as a string at all — the wheel PUBLISHES its sRGB triples through setAccentRGB and the views draw the same array the DOM was painted from, so a gamut round-trip cannot come between them. A colour space the app does not write is refused rather than guessed, and the caller\'s own fallback — this theme\'s foreground, never a stale accent — stands.',
     !inkT.error && inkT.allAgree === true && inkT.notCyan === true
       && inkT.p3White.join() === '255,255,255' && inkT.p3Mid.join() === '46,207,233' && inkT.p3Red.join() === '250,5,0'
@@ -4614,7 +4618,7 @@ try {
     R.movedAfter = __LW.clock.t > R.t1;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57goto('motion=reduce&play=1&warn=0');
   const redT = await g.ev(`try {
     const R = { reduced: __LW.motion.reduced, source: __LW.motion.source, autoplay: __LW.motion.autoplay,
@@ -4631,7 +4635,7 @@ try {
     __LW.pause();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57goto('motion=full&play=1&warn=0');
   const fullT = await g.ev(`try {
     await new Promise((r) => setTimeout(r, 300));
@@ -4639,7 +4643,7 @@ try {
     __LW.pause();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B103 NOTHING MOVES UNDER THE PHOTOSENSITIVITY NOTICE, AND "REDUCED MOTION" NOW REACHES THE THING THAT MOVES (wave 57). `?play=1` started the transport SEVENTY-FIVE LINES ABOVE the pane, so a shared link animated the field underneath the warning while it was being read — which defeats the pane entirely, and wave 56\'s shareable links made it likelier rather than rarer. The order is fixed at the source: the transport is armed at the foot of boot and waits on the CONTINUE button (immediately, for a browser that accepted before, so a returning visitor loses nothing). Measured with the pane up and 600 ms of real wall time: the clock has not advanced by one atomic unit, and the moment the button is pressed it runs. AND THE SECOND HALF: prefers-reduced-motion used to disable a 120 ms scale on the logo and NOTHING about the field — the strongest signal a user can send about movement never reached the only thing in the lab that strobes. It does not mean FROZEN, and that is a decision: this is a time-evolution instrument and a frozen field is not a reduced λWAVES but a broken one; what makes a strobe dangerous is the RATE of luminance change, which is exactly the quantity the clock owns. So (1) nothing moves unasked — `?play=1`, the one thing that starts the field without a press, is refused — and (2) a rate NOBODY CHOSE, a preset\'s or a project\'s or a link\'s, is divided by four, while a rate the hand sets is untouched, because a default is for a first visit and the hand always wins. `?motion=reduce` / `?motion=full` name the input the way `?warn=` does, so this can be asked without a browser profile.',
     !warnT.error && !redT.error && !fullT.error
       && warnT.paneUp === true && warnT.playing0 === false && warnT.autoplay0 === 'waiting for the notice'
@@ -4679,7 +4683,7 @@ try {
     R.stageFocus = __LW.stageFocus;
     R.topBefore = (document.getElementById('rack').querySelector('.dev') || {}).dataset.id;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57press(w57TAB, false);
   const stageT = await g.ev(`try {
     await new Promise((r) => setTimeout(r, 120));
@@ -4687,14 +4691,14 @@ try {
     R.hot = document.querySelector('.dev.tab-hot') ? document.querySelector('.dev.tab-hot').dataset.id : null;
     R.stillStage = __LW.stageFocus;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57press(w57TAB, true);
   const w57back = await g.ev(`try { await new Promise((r) => setTimeout(r, 120));
-    return { hot: document.querySelector('.dev.tab-hot') ? document.querySelector('.dev.tab-hot').dataset.id : null, stillStage: __LW.stageFocus }; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+    return { hot: document.querySelector('.dev.tab-hot') ? document.querySelector('.dev.tab-hot').dataset.id : null, stillStage: __LW.stageFocus }; } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57press(w57ESC, false);
-  const escT = await g.ev(`try { const R = ${w57who}; R.stageFocus = __LW.stageFocus; R.cycle = __LW.keys.tabOrder.length; return R; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  const escT = await g.ev(`try { const R = ${w57who}; R.stageFocus = __LW.stageFocus; R.cycle = __LW.keys.tabOrder.length; return R; } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await w57press(w57TAB, false);
-  const bodyT = await g.ev(`try { const R = ${w57who}; R.errs = window.__e.length; return R; } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  const bodyT = await g.ev(`try { const R = ${w57who}; R.errs = window.__e.length; return R; } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const w57moved = w57walk.slice(1).every((w, i) => w.idx !== w57walk[i].idx && w.idx >= 0);   /* EVERY press moves focus to a DIFFERENT seat — that is the trap, in value space */
   judge('B104 THE KEYBOARD TRAP IS GONE, AND JOSH\'S SHORTCUT IS NOT (wave 57, the access audit\'s A1 — WCAG 2.1.2). Tab and Shift+Tab were bound as APPLICATION keys and preventDefault()ed on every match, with the dispatcher exempting only INPUT / TEXTAREA / SELECT. Every one of the 461 controls in this lab is a <button> or a <div>, so focus could not move at all: reach the notebook by pointer, press Tab once to leave it, and you were stuck for the session — and in forty suites nothing had ever pressed Tab, which is how it survived to wave 56. THE RULE IS NARROWER THAN THE OBVIOUS ONE, deliberately: TAB cycles windows only while THE STAGE has focus, not while the BODY does, because a rule that eats the press on <body> leaves the trap standing at the door — a keyboard user lands there at load and would never get in. The stage is a focus target for the POINTER only (tabIndex −1, focused on pointerdown), which is precisely the case the shortcut is used in — a hand already on the world — and Escape lets go of it. So every state has a keyboard way out: from the stage Escape, from <body> Tab walks in, from any control Tab walks on. Proved with REAL key events through the driver, not synthesised ones: three presses from the notebook land on three different elements and none of them is defaultPrevented, while a press with the stage focused raises a window, is defaultPrevented, and leaves focus where it was.',
     !keyT.error && !stageT.error && !w57back.error && !escT.error && !bodyT.error
@@ -4766,7 +4770,7 @@ try {
     R.digest = __LW.layout.digest('molecule').indexOf('THE PULSE') >= 0;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B105 W-PULSE — THE FIELD-DRIVEN MOLECULE FINALLY HAS A FACE (wave 58, board #24, ledger C1). lab/modrive.js is the other lab\'s (Astra, GPT-6): a length-gauge H₂⁺ driven by a sin² pulse, iSċ = (H₀ + E_z(t)Z)c, propagated by the exponential midpoint with the FULL matrix re-solved at every distinct field value — and nothing in the interface reached it. The MOLECULE card now carries amplitude, ω, duration, phase, Δt, a basis and a FIRE, and shows while it runs the three things the contract asks for: the population that left the ground state, ⟨z⟩ and the absorbed energy. THE NUMBERS ARE THE OTHER LAB\'S AND ARE ASSERTED, NOT RE-DERIVED — at R = 2 and Δt = 0.05, t = 96: popU 0.0852227 and ⟨z⟩ −0.0170653, both to 1e-6 of Astra\'s DOP853 trace, with the S-norm 1 to 1e-10 and nothing renormalised anywhere. AND THE CLAIM THAT DECIDES WHETHER IT WORKS RATHER THAN MERELY MOVES: the scheme is SECOND ORDER, measured here through the interface at Δt = 0.2, 0.1, 0.05, 0.025 with no oracle fetched — the successive differences in the final population QUARTER (ratios 4.00 ± 0.05, twice), and so does the residue of the work balance ⟨H₀⟩ − ⟨H₀⟩₀ = ∫Ė⟨z⟩dt, which is exact for the exact solution and is computed here on the same trace by two different routes (8.6e-6 → 1.35e-7 down the ladder). The twelve-function Sturmian n ≤ 3 runs the same pulse and stays S-unitary to 2e-10. THE CLOCK IS THE LAB\'S AND THERE IS NO THIRD ONE: FIRE remembers t₀ and the drive\'s time is t_lab − t₀ in the same atomic units, so RATE decides how fast you watch and Δt decides how accurately it is solved; pausing stops it, and scrubbing BACK holds it and says so rather than pretending a driven state can be un-integrated. It never touches ψ — the state digest is identical before and after — and the card is labelled in one line as NUMERICAL propagation of a VARIATIONAL model with EXACT integrals.',
     !pulT.error && pulT.api === true
       && Math.abs(pulT.popOut - 0.0852227) < 1e-6 && Math.abs(pulT.z + 0.0170653) < 1e-6
@@ -4817,7 +4821,7 @@ try {
     await new Promise((r) => setTimeout(r, 80));
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B106 THE H₂ CI CARD SAYS WHICH CURVE IS WHICH, AND DRAWS THE LIMIT IT IS ACTUALLY HEADING FOR (wave 58, board #35, ledger C3). lab/h2ci.js and its four curves were already built and gated in wave 49, so this wave added only what was missing rather than rebuilding working work: (1) a CORRELATED PAIR switch that takes the STO-3G pair down TOGETHER, because RHF and FCI mean nothing apart — the distance between them IS the correlation energy — measured here as a real change in the ink on the canvas; (2) WEINBAUM in its own readout beside the STO-3G one instead of buried in its sub-line, since the two are the SAME 2 × 2 full CI fed by two different integral sets and the pair of numbers is the comparison; (3) THE DISSOCIATION LIMIT DRAWN AS WHAT IT IS — the dashed rule at −1 is two REAL hydrogen atoms, and the STO-3G curves are not going there: their atom is −0.4665819, so a second rule at −0.933164 is drawn in FCI\'s own colour, which is the line that curve actually reaches while RHF leaves the top of the box; (4) a note that says plainly, in words, that Heitler–London, Weinbaum and RHF are VARIATIONAL bounds from above while STO-3G FCI is EXACT IN THIS BASIS and still misses the real H₂ by 0.037 hartree. The ledger\'s numbers, asserted from the card\'s own function: Weinbaum −1.1478 at R = 1.4 with ζ = 1.193 (±2e-3); RHF −1.116759307 and FCI −1.137283834 at 0.74 Å, to 1e-8 of PySCF 2.14.0 run by the other lab; FCI −0.933631845 at 3.00 Å; and RHF − FCI there = 0.2776, which is the whole point — a restricted Hartree–Fock determinant cannot break a bond and the CI can.',
     !h2cT.error
       && Math.abs(h2cT.at14.weinbaum + 1.1478) < 2e-3 && Math.abs(h2cT.at14.zeta - 1.193) < 0.01
@@ -4888,7 +4892,7 @@ try {
     cam.setDragGain(1); cam.setFling(1); cam.setFriction(2.5); cam.stop(); __LW.camera.reset(); __LW.saveSettings();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B107 THE CAMERA GAINS THE VIEW WINDOW\'S TWO DIALS, IN OUR UNITS (wave 58, board #63 — Josh: "can I also copy the View window\'s drag gain and fling slider? we can put that into our camera window"). THE RANGE AND THE STEP ARE NEBULA\'S AND THE UNIT IS OURS, deliberately: their gain is radians per SCREEN WIDTH — 3.14 means a full-width drag turns π — which is a quantity that means nothing at a rack\'s width, and a dial whose default silently retunes the shipped camera is the wrong port. So DRAG GAIN multiplies this instrument\'s own CAM.SENS: rad/px = GAIN × 0.0065, and ×1.00 IS the camera Josh already has. Measured with real pointer events on the stage: a 100-px drag turns 0.6500 rad at ×1, exactly twice that at ×2 and exactly half at ×0.5, in TURNTABLE and in FREE, and SHIFT still takes a quarter of whatever it is set to. FLING MULTIPLIES THE RELEASED VELOCITY BEFORE THE LAW SEES IT, so it COMPOSES with friction rather than competing: FLING decides how much velocity you get, μ decides how fast it decays. At FLING 0 a drag still turns the view and the release leaves EXACTLY zero residual — a pure trackball, which is a thing no value of μ can do, because μ = 12 is a fling that dies over a quarter turn and this one never starts; at 1 the residual is ω₀ unchanged; at 2 it is 2ω₀. And wave 50\'s closed form survives both: under μ = 4 a fling of 1.0 rad/s at FLING 2 turns through 2ω₀/μ = 0.50 rad and at FLING 0 through nothing at all. Both ride in this browser\'s settings beside FRICTION and SPIN, and both come back through the same applySettings a reload makes.',
     !camGT.error && camGT.knobs.indexOf('DRAG GAIN') >= 0 && camGT.knobs.indexOf('FLING') >= 0
       && Math.abs(camGT.defaults.gain - 1) < 1e-12 && Math.abs(camGT.defaults.fling - 1) < 1e-12
@@ -4964,7 +4968,7 @@ try {
       && body(__LW.layout.digest('state')) === dig0 && __LW.reg.version === ver0;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B108 THE CAMERA AND RECORD BUTTONS — AND THE PLANNER THEY STAND ON, CORRECTED FIRST (wave 58, board #57). lab/capture.js is 1033 lines and thirty node gates and NOTHING imported it, so an adversarial review of it found three defects no browser had ever run into — and a button that says EXACT LOOP over a half-turn seam is worse than no button, so they were fixed before the buttons went on. (1) planPeriodRecording believed the ψ period without checking that the DENSITY period was exact; the two verdicts are numerical and planLoop was computing them from two DIFFERENT energy sets, so under STURMIAN a state with no period at all came back kind:"exact", closes:true, seamError:0, laps:0, with a true seam of 0.49 of a turn — antiphase, the worst there is. capture.js now requires D.exact, and rack.js hands it the SAME energy expression periodNow() uses, because two of them is how this happened. (2) The stationary branch fired ABOVE the line that reads the observable, so 2p₊ — a preset that ships in the PHASE view and whose own note says the picture lives in arg ψ — was told "the density never changes, so every frame is the same picture" while its hue turned 0.95° a frame. It now loops at T_ψ = 2π/|E| = 50.265482 a.u., a number state.js already carried as that preset\'s own window. (3) laps was unbounded, so an exact loop could be a picture of nothing; it stays ok, because it IS a loop, and now carries framesPerDensityPeriod and an UNDERSAMPLED flag instead of silence. On top of that: PICTURE with a size, RECORD with seconds and fps, ONE PERIOD gated by plan.ok, and a wide readout carrying plan.message verbatim — so the interface never re-derives what the planner decided. In the shipped PHASE view the plan runs three laps of the density period; a Stark field is refused with its near-recurrence and the button goes down; and a real picture comes off the GPU at the stage\'s size and puts the canvas, the clock and ψ back exactly. THE CEILING IS ALSO REAL NOW: field.js asked requestDevice() for nothing, so the device took WebGPU\'s DEFAULT 8192 on an adapter offering 32767 — one line, and the largest picture this build can take doubled on a side.',
     !capT.error
       && capT.trigs.indexOf('TAKE A PICTURE') >= 0 && capT.trigs.indexOf('RECORD') >= 0 && capT.trigs.indexOf('ONE PERIOD') >= 0 && capT.trigs.indexOf('PLAN') >= 0
@@ -5029,7 +5033,7 @@ try {
     __LW.setTheme(R.theme0); await __LW.settle();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B109 THE ONE MESSAGE A BROKEN BROWSER GETS, MADE READABLE AND MADE DISMISSIBLE (wave 59, AUDIT-FIRSTRUN R1). lab.css had no `#banner p` rule at all, so the paragraph inherited `body { color: var(--fg) }` — NEAR-BLACK on the shipped LIGHT theme — on the dark maroon ground the pane paints for itself: 1.19 : 1 measured here with the lab\'s own arithmetic, and worse than a plain miss because `showBanner()` runs three thousand lines BEFORE `applySettings()`, so the sentence appeared white-on-maroon and went DARK a second later as the theme resolved. It is the only thing a visitor without WebGPU ever sees, it names the cause and says what still works, and it could not be read. The ink is now written UNCONDITIONALLY, because this is the one pane in the lab that does not follow the theme: the same string of ink on both themes, 13.69 : 1 on the pane\'s own ground in each. The heading was always fine (--bad is never redefined for light) and still is, at 6.64 : 1. It also had no way down — z-index 60 over the stage for the whole session — so there is a × now: 26 px of ink inside a 44-px finger, topmost at its own centre and still hit 6 px outside its ink, and one press hides the pane. AND THE LOST DEVICE FINALLY SPEAKS: `field.js` has offered `onLost` since it was written and `rack.js` passed only `onError`, so a driver reset, a reclaimed mobile tab or a laptop switching GPUs froze the picture and told NOBODY. That path is asserted from the SOURCE — the three files are fetched and read here — because a real WebGPU device cannot be lost on demand; the pane the message lands in is driven for real.',
     !banT.error && banT.hasX === true
       && banT.light.p >= 4.5 && banT.dark.p >= 4.5 && banT.light.h3 >= 3 && banT.dark.h3 >= 3
@@ -5089,7 +5093,7 @@ try {
     R.ogAbsolute = (R.ogImage || '').indexOf('https://') === 0;   /* a string test, not a regex: see B109 */
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* THE HOVER, WITH A REAL POINTER — the CSS rule existing is not the same as the reveal happening */
   const msBox = await g.ev(`const t = document.getElementById('title'), b = t.getBoundingClientRect(); return { x: Math.round(b.left + 12), y: Math.round(b.top + b.height / 2) };`);
   await drv.actions(g.s, [{ type: 'pointer', id: 'w59hover', parameters: { pointerType: 'mouse' }, actions: [
@@ -5176,7 +5180,7 @@ try {
     /* and the saying STICKS: re-entering the breakpoint honours it rather than re-applying the default */
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(1400, 900);
   await g.ev(`await new Promise((r) => setTimeout(r, 700)); await __LW.settle(); return 1;`);
   await rect(390, 844);
@@ -5189,7 +5193,7 @@ try {
     R.storedAgain = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').phoneRack;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(1400, 900);
   await g.ev(`await new Promise((r) => setTimeout(r, 800)); await __LW.settle(); return 1;`);
   const phDeskT = await g.ev(`try {
@@ -5197,7 +5201,7 @@ try {
       rackAt: Math.round(document.getElementById('rack').getBoundingClientRect().left),
       keysShown: getComputedStyle(document.querySelector('#hint .keys')).display !== 'none',
       touchShown: getComputedStyle(document.querySelector('#hint .touch')).display !== 'none', errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B111 ON A PHONE, THE VISITOR MEETS THE FIELD (wave 59, AUDIT-FIRSTRUN §5 — a judgement call, and this is the one that was taken). At the phone breakpoint the rack is 300 px of 390 — 77 % of the width, 95 % of the height — and it is OPAQUE there by wave 51\'s own rule; nothing hid it at boot, and #field is a full-stage canvas, so the volume rendered CENTRED BEHIND IT and the 90-px strip down the right edge showed the far corner of an empty domain box. Someone opening a shared link met two hundred controls and a sliver of static colour. THE RACK NOW STARTS HIDDEN AT THIS BREAKPOINT, and it is a DEFAULT rather than a rule: `phoneRack` is the same kind of key as `card` / `phoneTr` — a default is for a first visit, and pressing ◧ IS this browser saying which it wants, which is measured here in both directions (press to show, the key reads true; cross out and back, the saying is honoured; press again, it reads false). Measured on a 390 × 844 phone with the key cleared: the whole width is canvas, the centre of the screen hit-tests to #field rather than to a card, and the one control that brings the instrument back sits at the screen edge in the thumb zone, topmost at its own centre. WHAT WAS NOT DONE, AND WHY: the transport stays DOCKED at the top of the rack, because that is Josh\'s wave-51 instruction and undocking it into a floating pill would contradict it; and the volume is NOT offset to dodge the rack, because moving the camera to make room for furniture is a lie about where the origin is, and a 90-px picture is not the cure for a 90-px picture. The phone gets the LEGEND instead: the keyboard line stands down, the touch line takes its seat, and it names both the ◧ and the ▶ — the bar wraps inside the viewport, clears the button stack it points at, and is VISIBLE — which took one more rule, because lab.css fades the hint out with `body.rack-hidden` and that is now the phone\'s boot state. Crossing back to the desktop restores the desktop exactly: both racks, the keyboard legend, and the rack state it crossed with.',
     !phFieldT.error && !phSaidT.error && !phDeskT.error
       && phFieldT.phone === true && phFieldT.hidden === true && phFieldT.stored !== true
@@ -5264,7 +5268,7 @@ try {
     R.warnedCarried = rackSrc.indexOf('warned: S0.warned') >= 0;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B112 A SAFETY NOTICE THAT WAS ANSWERED STAYS ANSWERED, AND A LINK CANNOT UNASK IT (wave 59, the adversarial review of 2026-09-05 §3.1 and §3.2). TWO DEFECTS, both live. (a) `saveSettings()` rebuilt the settings object from scratch and carried exactly three foreign keys — the wave-54 bug its own comment describes — and `warned`, added by wave 48 AFTERWARDS, was not among them. So accepting the photosensitivity notice and then changing the theme, choosing a card style, hiding the rack, loading a favourite layout or opening a link that names a palette ERASED the acceptance, in the same session, before `warning.needed()` reads it: the notice came back on every subsequent visit for ever. Driven here through five ordinary writes, with the key read back after each. (b) `?warn=0` was a third door and it was in the URL: `needed()` answered false before `seen()` was consulted, `remember(true)` never ran, and `onAccept` therefore fired SYNCHRONOUSLY — so `…/lab/?play=1&warn=0#s=…` started the field at full rate for a first-time visitor with the pane never shown. The stated reason was a convenience so a test could ask without a reload, but `navigator.webdriver` already covers every test, so it bought the gate nothing and shipped a query string that silences a photosensitivity warning. Both ?warn arms are behind the driver check now — ?warn=1 too, because a gate with one arm reachable from a public URL is not one rule — and the six combinations are driven here in value space. `?motion=reduce` / `?motion=full` are gated the same way and for a stronger reason: an operating-system `prefers-reduced-motion` is the strongest thing a person can say about movement, and a link is somebody else\'s picture. With no query the source is the media query, live; the driver arm is B103\'s.',
     !safeT.error
       && safeT.accepted === true && safeT.survives === true && safeT.stillRemembered === true && safeT.needsNothing === true
@@ -5323,7 +5327,7 @@ try {
     R.backToDefault = __LW.ink.stageGround.slice();
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B113 THE λ HAS A THIRD SURFACE AND IT IS A KNOB (wave 59, the adversarial review of 2026-09-05 §2.3–§2.4). Wave 57 corrected BOTH copies of the λ against `MARK_GROUND`, two constants — right for the notebook\'s `.nb-logo`, which really is drawn on a card, and wrong for `#title`, which is `background: none` over `#field`, whose clear colour is `mat.bg`: the shipped STAGE knob in the CAMERA window. A correction against a ground the hand can drag away from is not a correction, and the numbers were not marginal — swept in node over 23 palettes × 360 hues, STAGE 0.20 put 38.9 % of the wheel under 3 : 1, STAGE 0.50 put 92.8 % under it with a worst case of 1.00 : 1, and on light STAGE 0.30 reached 1.00 : 1 across the whole wheel. 1.00 : 1 is the exact number rack.js\'s own wave-57 header names as the failure it removed — "Not faint: absent" — reached by a knob instead of a palette. `markInk` now reads the LIVE ground for the header and keeps the constant for the notebook, and BOTH λ copies are still one call site. AND THAT ALONE WAS NOT ENOUGH: `visibleInk` chose its walk direction at relative luminance 0.5, the midpoint of the SCALE and not the break-even of the RATIO, so for a ground in (0.179, 0.5) — which is exactly where the knob\'s travel passes — it climbed toward a white that is itself too dark and returned a colour under the floor in silence. The constant is √0.0525 − 0.05 = 0.1791287847, where white and black both give 4.583 : 1. Driven here through the real interface at seven values of the knob on both themes: the ground MOVES with the knob and the card\'s does not, the raw wheel goes far under the floor, and every drawn λ clears 3 : 1. tests/ink.test.mjs sweeps 91 080 samples and measures both thresholds; this measures what the DOM resolves.',
     !lamStageT.error && lamStageT.hasKnob === true && lamStageT.n >= 100
       && lamStageT.worstInk >= 3 && lamStageT.worstRaw < 1.6 && lamStageT.rawUnder3 > 20
@@ -5351,7 +5355,7 @@ try {
     R.sides = ['spectrum', 'meters'].map((id) => __LW.layout.side(id));
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(390, 844);
   await g.ev(`await new Promise((r) => setTimeout(r, 900)); await __LW.settle(); return 1;`);
   const layPhT = await g.ev(`try {
@@ -5374,7 +5378,7 @@ try {
     R.stillNoFloating = __LW.layout.floating().length;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await rect(1400, 900);
   await g.ev(`await new Promise((r) => setTimeout(r, 900)); await __LW.settle(); return 1;`);
   const layBackT = await g.ev(`try {
@@ -5399,7 +5403,7 @@ try {
     R.dockedBack = __LW.layout.docked === window.__w59.docked0;
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B114 A LAYOUT SAVED ON A PHONE COMES HOME (wave 59, the adversarial review of 2026-09-05 §4.1 and §4.2). TWO ORDERINGS, both reachable with shipped controls, and B94 tests the neighbouring one that works. (1) `captureLayout()` read `d.parentElement === rackL` and nothing else — but `enterPhone()` folds the mirror rack into the ONE rack, so on a phone #rackL is empty and EVERY card was saved `side: R`. With the shipped arrangement (SPECTRUM lives on the left rack out of the box) that meant: narrow a window or rotate a tablet past the breakpoint, press ☆, rotate back, load — and the mirror rack is empty for ever, with the ex-left cards jumbled to the top of the right one, and the menu row saying "right rack" for a layout that was both. Wave 51 created `data-phone-from` for exactly this and `applyLayout` already read it; only the capture did not, and the asymmetry was the bug. Driven here: two windows are put on the left rack, the breakpoint is crossed, the layout is saved ON THE PHONE, and its record marks them L — then, back on the desktop and with both moved away, loading it puts them back in the mirror rack. (2) `phone.floats` is the record of what was on the stage when the breakpoint was crossed, and `leavePhone()` replays it. A LOAD on the phone arranged every card, skipped the float pass (a phone has no floating) and left that record untouched — so rotating back popped the PRE-CROSSING windows out at their PRE-CROSSING positions, on top of the layout just loaded, and no control the user pressed said so. The fix is not to forget but to make the record describe the arrangement that IS loaded: a load on a phone replaces `phone.floats` with the loaded layout\'s own float block, so crossing back reproduces the layout in full. Driven here with two DIFFERENT stage arrangements — CAMERA in the saved layout, CLIP on the stage at the crossing — so the two cannot be confused: after the load the parked set is CAMERA, and crossing back floats camera at its saved place and leaves clip docked. RESET LAYOUT clears the record outright, because reset means nothing floats.',
     !layDeskT.error && !layPhT.error && !layBackT.error
       && layDeskT.aFloats.join() === 'camera' && layDeskT.beforeCross.join() === 'clip'
@@ -5563,7 +5567,7 @@ try {
     __LW.mod.reset();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B115 W-MODSHAPE · THE CURVE DISPLAY: ONE PICTURE PER SOURCE, AND IT IS THE MODEL\'S OWN GEOMETRY. Josh, on the window as wave 52 shipped it: "it seems like the modulation window still hasn\'t started yet" — it had the wiring and no shape, and a modulation window whose central object is a <select> of seven words has not started. Each source now carries an SVG the width of the card. In WAVE mode it is READ-ONLY and says so in a caption ("SINE — an analytic wave. Tap a shape to draw it."): its polyline agrees with M.waveAt to 1e-12, a tap on it adds nothing and names the refusal, and FLIP refuses aloud. The six SHAPE buttons draw THEIR OWN PRESETS, sampled — a button can never draw a shape the engine would not produce — and there are six for SEVEN presets because the FLIP LIVES IN THE MODEL: tapping SAW↑ once draws it and twice gives exactly sawdown, while tapping TRI twice reports "its own mirror" and leaves the hash bit-identical. In CURVE mode every drawn sample equals evaluate(points, u) to 1e-12 (the only exclusions are a duplicate `t`, where the polyline holds the value before the jump and the evaluator returns the one after it — curve.js\'s stated tie rule, not an error). REAL POINTER DRAGS: one on a point moves EXACTLY ONE point and keeps its index, because the window calls curveEdit and curveEdit clamps a move between its neighbours; one on a handle moves EXACTLY ONE tension and not a single point; a tap adds a point where the finger was and a second tap on it takes it away. The PLAYHEAD is frac(phase + phaseOff) to half a pixel and the DOT is s.out — the EMITTED value — so with SMOOTH on the dot visibly LEAVES the drawn line, which is the clearest demonstration of what that control does. And the SMOOTH readout is FIXED: the model\'s law is tau = 0.5v², so knob 0.25 prints 31 ms where wave 52 printed 125. The ladder is drawn as stairs with exactly its own number of levels — and in the PORTED editor (wave 64) the stairs ARE the drawn line rather than a second path laid over the smooth one, because the artifact has exactly one .m2path and what it should show is what the engine emits. And the WAY BACK exists, in the artifact\'s own furniture: the LFO head already PRINTS the wave it is running, so tapping it walks the model\'s list and puts the source back in WAVE mode, and a preset tap is the other door. Without one of them S&H and DRIFT would be STRANDED, because no preset can draw a per-cycle stochastic wave — which is also why the picture shows FOUR cycles of them and says so',
     !cvT.error && cvT.wave.mode === 'wave' && cvT.wave.points === null && cvT.wave.w > 150 && cvT.wave.h > 60
       && cvT.wave.cap.indexOf('an analytic wave') > 0 && cvT.waveErr < 1e-12
@@ -5673,7 +5677,7 @@ try {
     __LW.mod.reset();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B116 W-MODSHAPE · THE ENVELOPE IS THE SAME PICTURE WITH A COMPLETELY DIFFERENT DOOR, AND FIT IS LEGIBILITY RATHER THAN POLISH. envPoints() hands back the same {t, v, tension} list the LFO draws, so ONE renderer serves both cards — and the drawn polyline agrees with envAt() to 1e-12 at every sample, tensions and the HOLD stage included. But a default envelope over its default 4 s window puts its breakpoints on pixels 9 · 10 · 25 · 56 of the 226-px picture this window actually has: THE ATTACK IS ONE PIXEL WIDE and the whole shape lives in the left quarter. FIT (timeScale = clamp(0.25, 8, duration × 1.15), spelled as a WORD because a magnifier glyph reads as zoom) spreads them across the drawing; ×0.5 and ×2 halve and double it and come back to where they started, and all three are VIEW quantities that never move a knob. THE POINT → KNOB MAP is envPoints\' own construction: dragging the attack point writes `a` AND NOTHING ELSE, dragging the decay point writes `d` AND `s` (both axes live), dragging the first handle writes `ta` alone — and the HOLD stage appears in the map the moment it is non-zero — five points and five mapped keys, one for one, which is the case that could have slipped every index by one. The two REFUSALS are sentences, not silence: a tap on empty space says "the ENV follows its knobs" and a double-tap on a point says an envelope has exactly five stages, and both leave every stage bit-identical. Finally the TIME KNOBS TAKE THE SQUARE LAW, because linear over 0 … 8 s on kit.js\'s 220-px travel is 36 ms per pixel while the DEFAULT ATTACK IS 10 ms: a real 3-pixel drag on the ATT dial now moves it by 9 ms where it would have moved it by 109',
     !envT.error
       && envT.before.timeScale === 4 && envT.before.attackPx <= 1 && envT.before.spanPx < envT.before.w * 0.3
@@ -5812,7 +5816,7 @@ try {
     __LW.mod.reset();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B117 W-MODSHAPE · THE LOOP CLOCK, THE LADDER, A/B, AND A RACK THAT REARRANGES. λWAVES has no tempo and no audience, but it does have a camera and a recorder — so BPM is REFRAMED rather than deleted, and the window says so on the card: a loop that CLOSES needs every modulator to be an exact integer division of one period, which is what BPM sync + LFO_MULTS + ANCHOR provide (TAP TEMPO is the one musical control with no reframe available, and it is not offered). Driven here: two LFOs put on the grid at 1/4 and 1/8 through their own chips, anchored, and after exactly one beat of deterministic steps both are back at the phase pair they started on. TRIPLET and DOTTED are MUTUALLY EXCLUSIVE IN THE SETTER, so the chips repaint FROM THE MODEL after every write — pressing DOTTED then TRIPLET leaves DOTTED off on the card as well as in the model, and beatsPerCycle reads 1.5 then 0.667. INVERT is one chip and makes s.out the complement. The STEPS knob rides the model\'s own 35-rung ladder, and a value off the ladder answers the nearest rung IN LOG SPACE (100 → 96). A/B is TWO WHOLE SAVED PATCHES: switching away, editing the other side and switching back restores every scalar with Object.is and the curve point for point, while phase, cycles and power do not move — a comparison must not restart anything. COPY / PASTE carries a patch between devices and REFUSES a cross-kind blob in a sentence. And the rack rearranges: a source moves in the run order (which is the fire order), takes a NAME that replaces its id in the DRIVE menu while an unnamed one keeps its id as the field\'s placeholder, and FOLDS — the artifact\'s tri-state, FULL 360 → COMPACT 320 → FOLDED 64, with `minimized` still written into the MODEL so a folded card is folded again when the project comes back. Two of wave 60\'s seats have no place in the ported card and are stated rather than smuggled: the DEVICE RENAME (the label is set on the model here and the proof is that it reaches the face — the macro\'s DRIVE line prints SWEEP), and the reframe PARAGRAPH, which is now the tempo button\'s own title, on the control it describes. The ◂ ▸ reorder buttons are driven through their listeners because they are display:none in both modes — BASINS\' own copied-broken seat, travelling as it is',
     !lclT.error
       && lclT.grid.syncs.join() === 'true,true' && lclT.grid.anchors.join() === 'true,true'
@@ -5953,7 +5957,7 @@ try {
     __LW.mod.reset(); __LW.mod.registry.resync();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B118 THE MACRO IS THE ROUTER (wave 61, Josh: "the macro is essentially the router that brings it into the app. Otherwise the modulation is useless"). Until now a route could only be made by picking two <select>s and pressing ROUTE: the MODEL was complete and proved, and the ROUTER was the missing part. Each macro row now carries a GRIP — a dedicated handle holding the macro\'s ordinal, because the row beside it holds a text field and a menu and a draggable row would steal the caret — and it has exactly TWO roads, decided by 4 px of slop. THE DRAG (Serum\'s road, driven here with real pointer events on the house pattern: capture on the source, a class on the target, resolve on pointerup): all registered dial targets light at once and every other control recedes to .45, because there is no hover on a touch screen and validity therefore cannot be reported at the pointer — Serum\'s "+" cursor has to become a state of the SURFACE, for the whole gesture (ANTI-PATTERNS 4). The one under the pointer is driven by elementFromPoint on every move and never by pointerenter/pointerleave, which a touch pointer does not honour. THE DROP FILLS THE ROOM THE KNOB HAS LEFT, which is where we beat Serum: Serum infers polarity from where the control is standing and then assigns a FULL-SCALE depth, which is why its own author tells people to park base controls at 0 or 50 % first. SOFT based at 0.700 of 0.300 … 2.200 lands a route reaching EXACTLY 2.200 and no further — nothing clips on the first frame, there is no spur, and the first act is to reduce a depth that already means something. A second drop of the same macro on the same control is not a second route: the halo goes solid, addRoute answers `already`, and the window says so. A drop on nothing is silent and changes no state. THE TAP ARMS INSTEAD (Bitwig\'s routing mode, shipped at every size and NOT as a phone special case — a gesture that exists on one breakpoint is one nobody learns): the grip latches, the targets stay lit through a rack scroll and a window raise, and the next tap on a lit dial lands the route without turning it one degree. Escape cancels with nothing left behind. THE REGISTRY OWNS THE TARGET COUNT: observer.yaw and observer.pitch carry no knob accessor at all — the camera is dragged, not dialled — so they stay reachable through the window\'s own picker, and the gesture is exactly as large as the registry\'s dials and no larger. And the RUNTIME DOOR keeps its whole promise: a control registered through LW.mod.register with a `knob` is stamped, in the picker, a drop target and wearing a ring immediately, with no edit in modview.js',
     !rtT.error
       && rtT.targets.length === rtT.drops.length + 2 && rtT.drops.length > 0   /* wave 106: SLICE POS, SLICE THICK and Ω RABI join the eleven, and all three carry a `knob:` accessor so all three are DROPS too */
@@ -6089,7 +6093,7 @@ try {
     __LW.mod.reset(); __LW.mat.softness = 0.7; __LW.mat.hueShift = 0; __LW.mod.registry.resync();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B119 THE ARC IS THE DEPTH, AND IT IS ANCHORED TO THE BASE (wave 61, Josh: "a glowing bar with the second accent color can show the range of the modulation… the colored arc around the knob changes the arc length"). NO ROUTE, NO RING — a knob is a knob until something holds it, which is where we depart from Massive and its permanently-drawn empty sockets. Once routed, TWO RADII rather than two colours: at 34 px one radius cannot carry both legibly and a derived grey is not stable when ACCENT B is an angle the user can turn, so the OUTER 21.5 is the selected macro\'s route (the one you grab) and the INNER 18 is every other live route\'s summed reach. THE DEPTH DRAG IS VERTICAL OVER THE CARD, never along the arc — 270 deg of a 43-px circle is 101 px and a fingertip is 44 — and it runs on kit.js\'s own ladder, so 44 px is exactly 0.200 of scale and SHIFT makes 45 px 0.050: the arc and the dial feel like one instrument. While it drags, the dial\'s own value line becomes the RANGE in the parameter\'s currency and the same number rides the ghost, because the finger covers the dial at exactly the moment the number matters — and since wave 64 that ghost is the ARTIFACT\'s own pill, which truncates its text to twelve characters by its own builder, so the assertion is that the dial\'s reading BEGINS with what the ghost is carrying. ZERO DEPTH IS A REAL STATE and it keeps its handle: the arc becomes a 4-px TICK at the base, isModulated stays true, .mod-held stays lit, current is Object.is-equal to base, and NOTHING was restored — dragging to zero is not removal and must never be. WAVE 63 PROVES THAT LAST CLAIM WHERE IT USED TO BE FALSE: it was gated here on material.softness, the one linear map among the visible dials, and it was false on five of the eleven registered targets — every log one, by up to 2.2e-16, because a modulated write is a round trip through the normalised currency and log/exp is not exact. It is swept over all eleven now, and it is exact rather than tolerated: registry.applyModulatedNorm hands back r.base ITSELF when the normalised position is Object.is-equal to the base\'s own normalised form, which is the zero-influence case and no other. CLIPPING is said with GEOMETRY: the model clamps (it always did), the arc stops at the end, and a radial SPUR runs OUTWARD at the overflowing end — Massive\'s "small break at the limit of the modulation range", inverted — while the clipped number alone goes to --warn. The arc is NEVER painted red: --bad is spoken for and ACCENT B is a colour the user can move. A WRAP target does not clip and never shows a spur, and its ring is 360 deg from the top rather than 270 from 7:30, BECAUSE THAT IS THE LAW ITS OWN NEEDLE RUNS ON — HUE and YAW are wrap dials and a 270-deg arc on one would put the modulation somewhere the needle never goes. And the law the whole feature stands on, measured: with an LFO running, a real drag on the dial moves the BASE (registry: write IS setBase), so the arc SLIDES WITH THE NEEDLE AND KEEPS ITS WIDTH to 1e-9 while the modulator keeps the value — that is the synth law made visible. A double-tap on the arc removes the route on kit.js\'s own 320 ms (one number, one file) and the parameter comes back to the hand\'s number BIT FOR BIT. The ring is destroyed with the last route. And a DEFECT this exposed is fixed beside it: modview.sync() never refreshed a route\'s MIN/MAX faders, so a range changed from anywhere but the fader itself went stale for ever — 0 %/40 % reads 0 %/60 % after the arc moves it now',
     !arcT.error
       && arcT.noRing.ring === null && arcT.noRing.svg === false
@@ -6155,7 +6159,7 @@ try {
                 [24, 32]) — a coordinate that only worked because the ring was eating the dial. */
              ring: [kb.left + kb.width / 2, kb.top + kb.height / 2 - 28],
              onScreen: inside(gb) && inside(kb) && inside(b2), vp: [innerWidth, innerHeight] };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* A REAL WEBDRIVER FINGER — a touch mechanism driven only through a test hook is not proved */
   await w61touch([w61mv(w61set.grip[0], w61set.grip[1]), w61dn, w61pz(80),
                 w61mv(w61set.grip[0] + 40, w61set.grip[1] + 40, 100),
@@ -6217,7 +6221,7 @@ try {
     __LW.mod.reset(); __LW.mat.softness = 0.7; __LW.mat.grain = 0.35; __LW.mod.registry.resync();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const w61tch = { set: w61set, drag: w61t1, armed: w61t2, tapped: w61t3, hold: w61t4, pop: w61pop };
   judge('B120 A REAL FINGER, THE POPOVER, AND THE ONE MODE THE MODEL COULD NOT EXPRESS (wave 61). Everything above is driven by synthetic pointer events; this is a REAL WebDriver TOUCH pointer, because a touch mechanism driven only through a test hook is not proved (ANTI-PATTERNS 4). A finger drags the grip onto SOFT and the route exists; a finger TAPS the grip, it latches, and a tap on GRAIN — a control the first gesture never touched — lands the second route without moving the dial by more than 1e-12. A finger PRESSES AND HOLDS 700 ms on the arc and the popover opens: press-and-hold is the only universal replacement for the right button we do not have, it is armed on pointerdown and cancelled by 4 px of movement so a hold that becomes a drag is a drag, and `contextmenu` opens the identical menu on a desktop — one menu, two doors. IN IT: RANGE · CENTRE / UP / DOWN, REMOVE, REMOVE ALL, and — the half SERUM IS MISSING — with more than one macro on a control, the list of which route the outer arc edits, ON the control instead of in another window. CENTRE is Josh\'s "center of dial" and it is the one thing the vendored model could not do: `influence = lerped − r.min` makes the offset ALWAYS zero when the macro reads zero, so a base that is the MIDDLE of a swing needs a negative offset at m = 0 and there is no honest workaround (inverting the source still yields 0…1, two opposed routes both start at 0, and shifting the base would destroy the user\'s number, which is what registry.js exists to prevent). Four marked touches in lab/mir/mod.js — a `bi` field, a MIDPOINT anchor in routeInfluence, setRouteRange, and both ends of the serializer — and the diff goes from two hunks to seven, which mir.test.mjs §16 undoes by exact text and re-proves byte-identical. Measured HERE, through the real popover: CENTRE sets max = 2 × min(b, 1 − b), a macro at 0.5 moves the target BY EXACTLY NOTHING (Object.is on the base, not a tolerance), at 0 it is base − h and at 1 it is base + h, and `bi` rides the PROJECT FILE and comes back — a flag that does not round-trip does not change a control, it changes the sound of every patch ever saved with it. UP and DOWN re-derive from the base the knob is on NOW, reaching the top and the bottom exactly; the MIN/MAX faders follow; and REMOVE ALL empties the control and hands the number back bit for bit',
     !w61set.error && w61set.onScreen === true
@@ -6288,7 +6292,7 @@ try {
       transport: ix(firstIn('transport')), rackL: ix(firstIn('rackL')), rack: ix(firstIn('rack')),
       fieldTab: document.getElementById('field').tabIndex,
       racksTab: [document.getElementById('rack').tabIndex, document.getElementById('rackL').tabIndex] };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await g.ev(`document.querySelector('a.skip').focus(); return 1;`);
   const kbSkipT = await g.ev(`const a = document.activeElement, r = a.getBoundingClientRect(); return { cls: a.className, w: r.width, h: r.height, txt: a.textContent };`);
   await press(KEY.ENTER);
@@ -6372,7 +6376,7 @@ try {
       drag: (by('DRAG γ (TOY)') || {}).getAttribute ? by('DRAG γ (TOY)').getAttribute('aria-valuetext') : null,
       elem: by('ELEMENT  Z').getAttribute('aria-valuetext'),
       kOp: kOp, fOp: fOp, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const knobT = { gamFound, gam: { g0: gam0, step: gam1 - gam0, fine: gam2 - gam1, page: gam3 - gam2, home: gamH, end: gamE, del: gamD, want: (2.4 - 0.5) / 100 },
     rateFound, rate: { lo: rt0, up: rt1 / rt0, hi: rt2, down: rt2 / rt3, want: Math.pow(3000 / 0.1, 0.01) },
     elemFound, elem: { e0: el0, arrow: el1 - el0, shift: el2 - el1, page: el3 - el2, del: elD },
@@ -6419,7 +6423,7 @@ try {
       else { dead++; if (tab.length !== 0) seats++; }
     }
     return { n: G.length, radios: document.querySelectorAll('[role="radio"]').length, nameless: nameless, checked: checked, drift: drift, seats: seats, dead: dead };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const segStartT = await g.ev(`const r = [...document.querySelectorAll('[role="radiogroup"]')].find((x) => (x.getAttribute('aria-label') || '').indexOf('OBSERVABLE') === 0);
     window.__rg = r; const on = r.querySelector('[aria-checked="true"]'); on.focus();
     return { view: __LW.mat.view, txt: on.textContent, at: document.activeElement === on, n: r.querySelectorAll('[role="radio"]').length };`);
@@ -6543,7 +6547,7 @@ try {
     return { wasIn: wasIn, inert: body.inert, attr: body.hasAttribute('inert'),
       rescued: document.activeElement !== document.body && !body.contains(document.activeElement),
       landed: document.activeElement.className, off: d.classList.contains('off') };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await g.ev(`window.__d.querySelector('.dev-fold').focus(); return 1;`);
   await press(KEY.TAB);
   const offTab = await g.ev(`return { inBody: window.__body.contains(document.activeElement), at: document.activeElement.className };`);
@@ -6617,7 +6621,7 @@ try {
       namedRegions: [...document.querySelectorAll('section.dev[aria-labelledby]')].filter((d) => { const h = document.getElementById(d.getAttribute('aria-labelledby')); return h && h.textContent.trim(); }).length,
       power: (document.querySelector('.dev-power') || {}).getAttribute ? document.querySelector('.dev-power').getAttribute('aria-label') : null,
       errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const menuT = { title: titleT, was: themeWasT, bar: barT, onWindow, list: listT, esc: escT2, theme: themeT, back: themeBackT, names: namesT };
   judge('B126 THE MENUBAR IS REACHABLE, AND THE THEME CHANGES WITHOUT A POINTER (wave 62). #title carried the wordmark, the nine-square SVG, the subtitle and wave 53\'s scale transition and was a <div>: an entire visible surface with no keyboard road to it at all. It is now an operable DISCLOSURE and deliberately NOT an ARIA menubar — that would need role="menu", a roving tabindex across five chips, arrows with the open list following, typeahead, Escape at two levels, and menu items made unreachable by Tab, which is days of work on a surface that DUPLICATES what is elsewhere: the theme is a seg in SETTINGS, raise() is duplicated by the + button, the project verbs are in the notebook. Enter on the logo opens the bar and MOVES FOCUS INTO IT, which is what makes the bar\'s DOM position (appended after both racks) irrelevant; aria-expanded is written in the one function that writes bar.hidden, so the two can never disagree; Tab walks the five chips and Enter opens a list of 33 real buttons; Escape closes and hands focus back to the logo. THE SECOND ROAD, in the same block because it is what makes refusing the menubar defensible: the theme goes light → dark → light through the SETTINGS radiogroup with nothing but arrows. And the names — IMPORT\'s file input is back in the tab order (`hidden` had put it in `display:none !important`, out of the tree entirely), the five transport buttons announce as words rather than dingbats, PLAY\'S NAME DOES NOT CHANGE WHEN ITS GLYPH SWAPS ▶ ↔ ❚❚ but its aria-pressed does (and wave 65\'s MOD arm is the sixth transport button, announcing as words like the other five), and 25 <section>s are named REGIONS, which is the real answer to four hundred tab stops for anyone who navigates by landmark.',
     !namesT.error && titleT.role === 'button' && titleT.tab === 0 && titleT.at === true
@@ -6677,7 +6681,7 @@ try {
     R.overlays = [...document.querySelectorAll('#fieldlines,#vortex,#particles,#kepler')].filter(function (c) { return c.getAttribute('aria-hidden') === 'true'; }).length;
     R.errs = window.__e.length;
     return R;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const chatterT = await g.ev(`try {
     const sw = [...document.querySelectorAll('.sw')].find(function (b) { return b.textContent.indexOf('KEEP FRAMES') >= 0; });
     const was = sw.getAttribute('aria-pressed');
@@ -6693,7 +6697,7 @@ try {
     await new Promise((r) => setTimeout(r, 2000));
     __LW.pause(); await new Promise((r) => setTimeout(r, 200));
     return { tab: fd.tabIndex, focused: document.activeElement === fd, during: window.__n, text: fd.getAttribute('aria-valuetext') };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.RIGHT);
   const chatterAfterT = await g.ev(`await new Promise((r) => setTimeout(r, 150)); const R = { after: window.__n, text: window.__fd.getAttribute('aria-valuetext') };
     window.__mo.disconnect(); if (window.__was !== 'true') window.__sw2.click(); await new Promise((r) => setTimeout(r, 150));
@@ -6759,7 +6763,7 @@ try {
     __LW.loadPreset('1s+2pz'); await __LW.settle();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B128 A LINK\'S MATERIAL SURVIVES A ROUTED CONTROL (wave 63). A link carries the camera and the material and NOT the rack — the card says so in a note that stays on it — and for any parameter the RECEIVER happened to have routed, the sentence was false: restore() reached modSyncBases() only inside restoreModulation(), which runs only `if (pr.modulation !== undefined)`, a key a link never sets and an undo record deliberately never sets, while the frame loop\'s own modSyncBases() skips modulated ids by design. So the sender\'s EXPOSURE 6.5 was discarded 16 ms after the link opened, the base stayed the receiver\'s 1, the LFO went on sweeping around the wrong number, and pulling the route off afterwards handed back 1 — no recovery even by hand, on a control whose base is the only copy of that number in the program. The re-base is unconditional now and it runs FIRST, before restoreModulation\'s own restoreAll() can write the registry\'s stale bases back over the file\'s: measured here with a real LFO holding the target across the open — base 6.5 one frame later, 6.5 a second later with the modulator still running on it, the unrouted softness 1.9 (to the link\'s own 32-bit float, which is what "the number the link carried" means and what this block compares against — 6.5 survives that to the bit, 1.9 does not, and asserting 1.9 would be measuring the codec\'s mantissa and calling it a restore) as it always was, the route untouched (a link still carries no rack), and restoreBase() handing back exactly 6.5. The same road is every direct write to mat/obs, so an UNDO of a camera move on a modulated camera parameter is fixed by the same line',
     !lnkT.error && lnkT.minted.exposure === 6.5 && lnkT.minted.softness === 1.9
       && /MODULATION rack/.test(lnkT.says)
@@ -6918,7 +6922,7 @@ try {
     __LW.mod.reset(); if (__LW.mod.expanded) __LW.mod.collapse();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B130 W-MOUNT · THE THREE DEFECTS THE PORT INHERITED DO NOT SURVIVE IT, AND EACH IS DRIVEN RATHER THAN ASSERTED (wave 64). Wave 63 built four of the third review\'s seven and deliberately left these three, because they lived in the markup this port replaces wholesale and building them would have been work thrown away — but they are not thereby fixed, and a port that reproduces a window\'s geometry can very easily reproduce these with it. (1) THE ENV DRAG DESTROYED TWO STAGES AND THIS RACK IS OUTSIDE THE UNDO RING: the point\'s INDEX was latched at pointerdown while the map was re-read on every move, and the map is six long when HOLD > 0 and five when it is 0 — so the instant a drag took HOLD to zero, index 2 stopped meaning `hold` and started meaning `d` (measured: d 0.8 s → 0 and the sustain 0.5 → 1, neither touched, with no road back). The KEY is latched now, so the drag that zeroes HOLD — the exact case, the map shortening under the finger — writes `hold` AND NOTHING ELSE: d, s and r come back Object.is-identical. (2) THE ADVERTISED DOUBLE-TAP FIRED ZERO TIMES: the grip\'s own title says "Double-tap resets the macro" and the pointerdown\'s arm/disarm branch returned before the tap watcher, so only every other tap reached it and the gesture that fired it was a TRIPLE tap. The watcher runs on EVERY lift now and before anything decides what the press meant, so TWO taps 40 ms apart put value 0.7 → 0 and depth 0.3 → 1 — and a pair 460 ms apart still does nothing, because the 320 ms is kit.js\'s one number in one file. (3) FIT DID NOT FRAME A GATE ENVELOPE: envDuration drops `r` under GATE while envPoints DRAWS it, so FIT framed 0.3565 s of a picture that runs to 0.910 s — 155 % past the right edge — and gateMode was not in the signature, so the printed duration went 2.94× stale for ever on a toggle. FIT frames what is DRAWN now (a + hold + d + r, always), the last real breakpoint lands inside the window, the caption prints the drawn span and is therefore IDENTICAL across a GATE toggle rather than merely refreshed, and gateMode is in the signature so the picture rebuilds anyway. And the one beside them: a stage clamped at t = 1 KEEPS ITS SECONDS. The inverse was ABSOLUTE — pointer t times the window, minus the earlier stages — which cannot express a stage longer than the window at all, so a two-pixel twitch on a 6.5 s release inside a 1 s window wrote 0.682 and threw 5.818 s away. It is RELATIVE now: the stage\'s own seconds and the finger\'s own t are latched at pointerdown and the stage moves by the DIFFERENCE, so the same twitch moves it by 0.008 s — exactly the seconds the finger travelled — and the release is still 6.492. It is identical to the absolute inverse wherever the point is not clamped, and it stops a point grabbed 15 px off centre jumping under the finger',
     !mwB.error
       && mwB.mapWithHold.keys.join() === ',a,hold,d,r' && mwB.pointsWithHold === 6
@@ -7046,7 +7050,7 @@ try {
     if (__LW.mod.expanded) __LW.mod.collapse();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B131 W-MOUNT · THE ROUTING OVERLAYS ARE SPLIT, AND THE SPLIT IS A MEASUREMENT (wave 64). The artifact\'s overlays are the one part of its sheet that is NOT the window — they attach into HOST controls in other windows, which is why the stager left their 39 rules unscoped and why which of them travel was this wave\'s one genuine decision. All nine of the selector families are still in the shipped sheet whatever the host paints with. THE GHOST TRAVELS: .m2ghost is the artifact\'s own pill, built by its own buildGhost onto document.body, position: fixed and pointer-events: none at the pointer, 30 px tall and wearing --acc — it needs no room beside anything, so no host geometry can break it, and λWAVES\' own .mod-ghost is DELETED rather than shipped beside it. THE RING AND THE CLEAR DO NOT, and the reason is measured rather than argued: both are position: absolute; left: 100%; margin-left: 3px with a 44 px ::before band, which is right in a window with room to the right of its controls and wrong here — built on a real λWAVES dial, the ring\'s box lands 14 px past the right edge of the 62 px knob cell and its band 23 px past, ON a neighbouring knob, and the clear button does the same. On top of the geometry, wave 61\'s arc says three things BASINS\' 300-degree badge cannot: CENTRE (Josh\'s "center of dial" — the bipolar route that cost five forced edits in mod.js, offered in the popover and symmetric about the base to 1e-9), the overflow SPUR (Massive\'s break at the limit, inverted, drawn when a route reaches past the end), and 360 DEGREES ON A WRAP DIAL (HUE\'s needle runs a full turn, so a 270-degree arc on it would put the modulation somewhere the needle never goes). So exactly ONE ring is on each dial and it is ours; no .m2ring, .m2clr or .m2span is built anywhere. THE DROP MARKS SPLIT THE OTHER WAY, deliberately: the ARTIFACT\'S WORD is stamped — data-m2target on every routable control, so nothing is renamed — while the PAINT is ours, because two outline rules cannot say what a touch screen needs (all registered dial targets lit at once, the duplicate marked apart, the one under the pointer marked, and WAVE\'s non-routable SPACE segment receded to .45 for the whole gesture). And .m2clr\'s copied-broken transparency IS NO LONGER COPIED (wave 69, on Josh\'s ruling that the plugin\'s defects are ours to fix): built on a host control it now carries a real plate, because modhost.css entry 17 gives the .m2root-local alias a REACHABLE fallback — the HOUSE recess, which is themed, and which is the right answer twice over for a button that lands on a λWAVES dial',
     !mwC.error && mwC.rulesPresent === 9
       && mwC.ghost.isArtifact && mwC.ghost.ours === false && mwC.ghost.onBody
@@ -7106,7 +7110,7 @@ try {
     return { s: window.__w65.s, sync: !!src.sync, anchor: !!src.anchor, trig: !!src.trig,
              law: __LW.mod.resume().law, grid: __LW.mod.resume().grid, bpm: __LW.mod.model.transport.bpm,
              routes: __LW.mod.view.routes().length, body: document.activeElement === document.body };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
   const w65rigT = await w65rig({ sync: true, anchor: true });
   const w65seatT = await g.ev(`try {
@@ -7139,7 +7143,7 @@ try {
              lane: [...document.querySelectorAll('#modwin .m2pre > *')].map((e) => e.className || e.id).join('|'),
              play: kids.find((k) => k.c === 'tbtn' || k.c === 'tbtn') ? kids[0].w : null,
              kids: kids, box: Math.round(T.getBoundingClientRect().width), scroll: T.scrollWidth };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
   const w65armT = await g.ev(`try {
     __LW.pause();
@@ -7161,7 +7165,7 @@ try {
     return { ids: ids.length, heldByPause: heldByPause, atBase: atBase, offSeat: offSeat,
              keptPlaying: keptPlaying, backHeld: backHeld, hintVisible,
              onSeat: { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed') } };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
   await g.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
   const w65keyA = await g.ev(`return { armed: __LW.mod.armed, on: document.querySelector('#transport .tbtn.modb').classList.contains('on') };`);
@@ -7238,7 +7242,7 @@ try {
     __LW.mod.stop();
     return { rateSlow: rateSlow, rateFast: rateFast, slow: slow.per, fast: fast.per,
              want: bpm / 60, dw: [slow.dw, fast.dw] };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* MOD OFF: the one key plays ψ alone */
   await g.ev(`__LW.pause(); __LW.mod.arm(false); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
   await press(KEY.SPACE);
@@ -7465,7 +7469,7 @@ try {
     __LW.layout.dockWindow(id); await nap(200);
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B136 THE DISCONNECTED WINDOW (wave 67, Josh: "can you make it like the webm where the window is disconnected" — and DISCONNECTED is his own word for BASINS\' FROST skin, not for a drag mode: "I love that disconnected look, it allows for more of the background to show"). A window stops being one slab and becomes a CONSTELLATION — a floating bar-chip, a body-card, and real air between them — rebuilt against our own .dev DOM under STYLE-LOCK\'s ported-artifact law and proved here by GEOMETRY and HIT-TESTING rather than by resemblance. The root goes visibility:hidden with every child visible (it still lays out, still drags, still clamps, and paints nothing), RELEASES contain:paint to `layout` and zeroes its radius — both because a paint root or a rounded clip between a card and the canvas leaves the card nothing to blur, which is what would have silently switched FROST off for the whole constellation — and drops its own backdrop-filter for the same reason. The two surfaces carry one gap of 7 px, smaller than the 10 px between WINDOWS so the pair reads as one object with air in it, one radius, and four edges that line up. JOINED is still there and is still one slab. AND THE GAP IS A REAL HOLE: on the float layer elementFromPoint in the slot answers the CANVAS, each surface still hit-tests as itself and as THIS card, and a real pointerdown dispatched there is taken by the field — the class lands, the yaw moves, and the window under it does not shift one pixel. The pointer-events rule names #floats, #rack and #rackL explicitly because those are ID rules a class-only selector loses to however many classes it stacks; the first build read back `auto` and the hole was not one. The phone is FUSED by :not(.phone), on BASINS\' own FR_COMPACT_W law that a constellation needs air a 390-px screen has not got. AND IT IS OFF BY DEFAULT AGAIN (wave 69, and the first clause of this block now): wave 67 read those two sentences as being about λWAVES\' own rack and shipped every window as a constellation — Josh meant the MODULATION window only, and said so ("Why was the design of our own UI changed?? … I meant the design of the Modulation window only"). Our rack looks exactly as it did before wave 67, and this stays as a SWITCH because twenty-one CSS rules and one class cost nothing while they are off. Both roads are asserted, because a default that disagrees with itself is how it happened: nothing said to setDisconnected is JOINED, and applySettings reads s.disc === true so a profile with no key opens joined. What wave 67 did that was a FIX rather than a design change is kept and is untouched: the drag rewrite, and the 120 ms pick-up',
     !dcT.error && dcT.dflt.nothingSaid === false && dcT.dflt.sw === 'false' && dcT.dflt.bootLaw
       && dcT.root.vis === 'hidden' && dcT.root.kidVis === 'visible' && dcT.root.bodyVis === 'visible'
@@ -7529,7 +7533,7 @@ try {
     __LW.layout.dockWindow(id); await nap(200);
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B137 A DRAG WRITES ONCE A FRAME AND FORCES NO LAYOUT IN A POINTER HANDLER (wave 67). Both window drags used to do their whole job synchronously inside pointermove: the float wrote style.left/top after calling getBoundingClientRect on BOTH racks, and the rack reorder measured every other card and then insertBefore\'d — several forced style recalculations per DISPLAYED frame, every one of them thrown away, plus a DOM mutation per event. The mechanism is BASINS\' dragHandle taken as a REFERENCE and not copied: a pointermove stores a delta and schedules, one rAF does the geometry, and a 32 ms setTimeout FLOOR flushes it anyway when rAF is starved — which is exactly what a busy WebGPU canvas does to rAF. The rack rects are hoisted out of the handler and measured at the press and on resize, since a rack column does not move while a window is carried over it. MEASURED HERE by patching Element.prototype.getBoundingClientRect and counting: 40 synchronous pointermoves force ZERO layout reads and write nothing at all, one frame later the window has moved exactly once, and the pointerup FLUSHES so the finger\'s LAST position wins to within a pixel — which is the difference between a drop landing where you let go and where the last frame happened to be',
     !dgT.error && dgT.duringMoves === 0 && dgT.movesN === 40 && dgT.wroteDuring === false
       && dgT.wroteAfterFrame === true && dgT.beforeUp === true && dgT.lastWins === true && dgT.atUp <= 2 && dgT.dragging === false && dgT.errs === 0, dgT);
@@ -7546,7 +7550,7 @@ try {
     return { rest, held, restMax: Math.max.apply(null, rest.durs), heldMax: Math.max.apply(null, held.durs),
       hasTransform: rest.props.indexOf('transform') >= 0, hasOpacity: rest.props.indexOf('opacity') >= 0,
       errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B138 THE PICK-UP OBEYS OUR OWN MOTION LAW (wave 67). docs/ui/MOTION-LAW.md gate 1 files "window drag (docked or floating)" under 100+/day and rules NO ANIMATION; .dev carried box-shadow, transform AND opacity on a .35s transition, so picking a window up started a 350-ms cross-fade at the exact moment the compositor was trying to keep up with a finger — over the law\'s own 300-ms ceiling, on the one class of interaction the law says may not animate at all. It was also a live landmine: `transform` in that list means the day this lab moves positioning to transform, the drag becomes 350 ms LAGGED. transform and opacity are gone from the list, the shadow drops to the press rung, and .dragging sets `transition: none` so the lift is instantaneous in the hand. Read off the computed style: the resting card transitions box-shadow and nothing else, at or under the ceiling, and a card in the hand transitions for exactly 0 s',
     !mlT.error && mlT.hasTransform === false && mlT.hasOpacity === false && mlT.rest.props.indexOf('box-shadow') >= 0
       && mlT.restMax <= 300 && mlT.heldMax === 0 && mlT.errs === 0, mlT);
@@ -7593,7 +7597,7 @@ try {
     out.saved = __LW.settings.frost;
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B139 FROST POLICY CHANGES THE FILTER WITHOUT CHANGING THE MATERIAL UNDER THE HAND. The current recipe comes from the page token; the header adds its own small brightness and saturation treatment, even with FROST off. ALWAYS keeps the blur during playback; STILL removes it while playing and restores it on pause. Neither changes the fill, border, shadow or radius. The disconnected root remains filter-free so it cannot cut its children off from the backdrop, and the governor never strips the frost material',
     !fpT.error && fpT.off.cls === false && !fpT.off.head.includes('blur(') && fpT.off.api === 'off' && fpT.off.live === false
       && fpT.recipe && fpT.always.head.startsWith(fpT.always.body) && fpT.always.root === 'none' && fpT.always.live === true
@@ -7650,7 +7654,7 @@ try {
     window.__mo = new MutationObserver((rs) => { window.__n += rs.length; });
     window.__mo.observe(dial, { attributes: true, attributeFilter: ['aria-valuenow', 'aria-valuetext'] });
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.RIGHT);
   const earAfterT = await g.ev(`try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms)); await nap(250);
@@ -7671,7 +7675,7 @@ try {
     out.plain = { text: t0, marked: t0.indexOf('base') >= 0, driven: R.isModulated('material.softness') };
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B140 A MODULATED DIAL TELLS THE EAR THE TRUTH, AND SILENCE IS ONLY HALF THE PROMISE (wave 68). Wave 62 refused to become a 60 Hz live region and that measurement stands here — a live LFO on the dial under the user\'s own finger makes ZERO aria mutations across three seconds while the visible value moves through 30+ distinct strings. What it LEFT in the tree was the string from the moment focus arrived, 9.3x off the instrument, and a screen reader reads aria-valuetext ON DEMAND and not only when it changes. So this block gates the EAR, THE EYE AND THE MODEL at one instant instead of gating the mutation count alone: the announced number is now exactly the registry BASE, the announced text says the word ("· base · modulated"), and the eye and the model are somewhere else entirely — which is the honest description of a dial the app is driving. The user\'s own ArrowRight speaks EXACTLY ONCE (two attributes, one act) and what it speaks is again the base, because on a routed parameter the hand\'s write IS setBase; 700 ms of further modulation adds nothing. And an UNDRIVEN dial is untouched: no marker, and wave 62\'s guard is still the whole law there',
     !earT.error && !earAfterT.error && earT.found && earT.focused && earT.modulated
       && earT.during === 0 && earT.eyeDistinct >= 10
@@ -7688,12 +7692,12 @@ try {
     const t = document.getElementById('title'); t.focus();
     return { tag: t.tagName, role: t.getAttribute('role'), tab: t.tabIndex, focused: document.activeElement === t,
       barHidden: document.getElementById('menubar').hidden, playing: __LW.clock.playing, t0: __LW.clock.t };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.ENTER);
   const logo1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 400));
     return { barHidden: document.getElementById('menubar').hidden, playing: __LW.clock.playing, t: __LW.clock.t,
       active: (document.activeElement.className || document.activeElement.id || document.activeElement.tagName) + '' };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.ESC);
   const logo2T = await g.ev(`try { await new Promise((r) => setTimeout(r, 200));
     const out = { barHidden: document.getElementById('menubar').hidden, backOnLogo: document.activeElement.id === 'title', playing: __LW.clock.playing };
@@ -7703,7 +7707,7 @@ try {
     swb.focus(); window.__sw = swb; window.__swWas = swb.getAttribute('aria-pressed');
     out.swBefore = window.__swWas; out.swFocused = document.activeElement === swb;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.ENTER);
   const logo3T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { swAfter: window.__sw.getAttribute('aria-pressed'), playing: __LW.clock.playing };
@@ -7714,12 +7718,12 @@ try {
     const a = document.querySelector('a.skip'); a.focus(); window.__a = a;
     out.linkFocused = document.activeElement === a; out.href = a.getAttribute('href'); out.playing2 = __LW.clock.playing;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.SPACE);
   const logo4T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { playing: __LW.clock.playing, stillOnLink: document.activeElement === window.__a };
     __LW.pause(); out.errs = window.__e.length; return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
   /* ── B142 · THE TAB TRAP IS UNREACHABLE WHATEVER THE BINDING TABLE SAYS ─────────────────────── */
   await goto('warn=0');
@@ -7734,7 +7738,7 @@ try {
     row.querySelector('.keys-chip').click();
     out.capturing = __LW.keys.capturing;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.TAB);
   const trap1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { capturing: __LW.keys.capturing, key: __LW.keys.actions.find((a) => a.id === 'notes').key };
@@ -7751,14 +7755,14 @@ try {
     const seat = document.querySelector('.keys-chip'); seat.focus(); window.__seat = seat;
     out.onSeat = document.activeElement === seat; out.stageFocus = __LW.stageFocus;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.TAB);
   const trap2T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { moved: document.activeElement !== window.__seat, isBody: document.activeElement === document.body,
       notesOpen: document.body.classList.contains('notes-open') };
     __LW.keys.reset(); out.reset = __LW.keys.actions.find((a) => a.id === 'notes').key;
     out.errs = window.__e.length; return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B141 ONE PRESS DOES ONE THING, AND THE GUARD KNOWS ROLES (wave 68). #title is the one <div role="button"> in the lab — wave 62 created it deliberately, because it carries the wordmark, the nine-square SVG and wave 53\'s menu-open scale — and the single-key guard\'s selector named the TAG `button` and never `[role="button"]`, so one Space on the focused logo opened the menu AND started the physics clock (measured: playing false→true, t 0 → 1.863 s). B126 could not see it because Enter is bound to no action. Wave 88 superseded the activation key: pressed here with a real driver Enter, the menu opens and the transport does NOT move. Two more halves of the same law in the same run — a real <button> keeps Enter (the switch flips, the transport does not), while Space belongs to the transports; and an ANCHOR is no longer routed to the button set, because a link does not activate on Space at all, so those presses reached nobody on all ten anchors and now reach the app again. The ACTIONS loop also honours e.defaultPrevented, which is the general net under all of it',
     !logo0T.error && !logo1T.error && !logo2T.error && !logo3T.error && !logo4T.error
       && logo0T.tag === 'DIV' && logo0T.role === 'button' && logo0T.tab === 0 && logo0T.focused
@@ -7800,12 +7804,12 @@ try {
     out.deadTabs = dead.filter((k) => k.tabIndex === -1).length;
     out.deadNames = dead.map((k) => k.getAttribute('aria-label')).slice(0, 6);
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.RIGHT);
   await press(KEY.UP);
   const deaf1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     return { t: __LW.clock.t, dist: __LW.obs.dist, stillFocused: document.activeElement === window.__fd };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.HOME);
   const deaf2T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
     const out = { t: __LW.clock.t };
@@ -7825,7 +7829,7 @@ try {
     out.seatIs = (document.activeElement.className || '') + '';
     out.kzBack = out.kzDisabled;
     out.errs = window.__e.length; return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B143 A SLIDER THAT WILL NOT ACT DOES NOT SWALLOW THE KEYS (wave 68). With KEEP FRAMES off — THE SHIPPED DEFAULT — the scrub is aria-disabled, out of the tab order, and its own keydown returns; wave 62\'s single-key guard was keyed on the ROLE alone, so it took ArrowRight, ArrowUp and Home from the app first and the three presses reached NOBODY (measured: t 2.5 → 2.5, dist 3.3 → 3.3). Pressed here as real driver keys at the focused scrub: the arrows step time and zoom the camera again and Home resets the clock, because a control that says it is disabled does not own anything. The three knobs that mount disabled now SAY so — kit.js setDisabled writes aria-disabled where before it wrote a class and a tabIndex, so an assistive technology was told they were operable sliders holding a live value — and disabling a knob a user is sitting on moves the seat to the window\'s own power button instead of leaving them in a dead zone',
     !deaf0T.error && !deaf1T.error && !deaf2T.error && deaf0T.found && deaf0T.keepFrames === false
       && deaf0T.tab === -1 && deaf0T.ariaDisabled === 'true' && deaf0T.focused
@@ -7862,13 +7866,13 @@ try {
       out.accBox = { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
       out.accBefore = { now: a.getAttribute('aria-valuenow'), min: a.getAttribute('aria-valuemin'), max: a.getAttribute('aria-valuemax') }; }
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.RIGHT);
   await press(KEY.RIGHT);
   const knob1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 200));
     const z = window.__z;
     return { now: z.getAttribute('aria-valuenow'), eye: z.querySelector('.k-val').textContent };
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* THE HAND, on a wrap knob: about 1.9 turns of net diagonal drag — 220 px is one whole turn */
   if (knob0T.accBox) await w68mouse([w68mv(knob0T.accBox.x, knob0T.accBox.y), { type: 'pointerDown', button: 0 },
     w68mv(knob0T.accBox.x + 100, knob0T.accBox.y - 100, 60), w68mv(knob0T.accBox.x + 210, knob0T.accBox.y - 210, 60),
@@ -7881,13 +7885,13 @@ try {
     out.turned = out.dragged.now !== '0';
     a.focus(); out.focused = document.activeElement === a;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.END);
   const knob3T = await g.ev(`try { await new Promise((r) => setTimeout(r, 200));
     const a = window.__a, out = { now: a.getAttribute('aria-valuenow'), max: a.getAttribute('aria-valuemax'), eye: a.querySelector('.k-val').textContent };
     out.endReachesMax = out.now === out.max;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.HOME);
   const knob4T = await g.ev(`try { await new Promise((r) => setTimeout(r, 200));
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -7919,7 +7923,7 @@ try {
     out.restored = back.length === 1 && back[0] === checked;
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B144 ONE FOLD, ONE LATTICE, ONE SEAT (wave 68). Three knob laws that were each true in one place and false in another. (a) `Z (ion)` is min 1, max 6 and was the ONE rounding dial in the lab with no `step`, so an arrow moved 1/100 of the travel = 0.05 = a twentieth of an integer: eleven real presses produced TWO announced values while aria-valuenow walked 1.05 … 1.55 through Z values the register cannot hold. Two real ArrowRights now read Z = 3. (b) The wrap FOLD lived in the keydown handler alone, so the sentence "v is folded back into [lo, hi) so aria-valuenow stays inside [valuemin, valuemax]" was true of the keyboard and false of the hand — one real WebDriver mouse drag of about 1.9 turns on ACCENT A left aria-valuenow at 654.5 against a declared max of 360. Both roads now take one `settle()`. (c) End on a wheel used to be Home, so a control published an aria-valuemax it could never announce; the ruling is that on a circle hi and lo are the same POINT and two different NUMBERS, so End reaches 360° and Home reaches 0° and both are the seam. And the roving tab stop: every radiogroup with a live option has exactly one reachable seat and that seat is never a disabled button — including when the checked option is disabled AFTER the group was painted, which is what all three call sites in this lab do and is why the shipped IN P3 group had zero seats',
     !knob0T.error && !knob1T.error && !knob2T.error && !knob3T.error && !knob4T.error
       && knob0T.zFound && knob0T.zStep.focused && knob0T.zStep.now === '1' && knob0T.zStep.eye === 'Z = 1'
@@ -7958,7 +7962,7 @@ try {
     N.setMode('edit'); P.remove('w68/xss2'); P.remove('w68/xss'); N.text = ''; N.close();
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B145 THE NOTEBOOK SANITISER IS AN ALLOWLIST OVER A PARSED TREE (wave 68). It was two regexes over a string — strip <script>…</script>, strip ` on…="…"` — and a blocklist of two shapes catches exactly two shapes: 7 of 8 measured payloads went through, including an UNQUOTED handler, a SINGLE-quoted one, one separated by a newline, <svg onload>, an unclosed <script>, <iframe src="javascript:"> and <a href="javascript:">. Only the exact double-quoted form was caught, which is the one everybody tests with. The reachable road is `projects.importText`, which takes notebook text out of an arbitrary uploaded .json and renders it into innerHTML when the project is opened — dossier §27 in as many words — and the severity is capped at "a project file somebody chose to import" and NOT "a link", because statelink.js does not carry notebook text. The mechanism is now marked\'s output parsed into an INERT <template> (an <img> in there never loads, a <script> in there never runs) and walked against an allowlist of tags and per-tag attributes, with href/src scheme-checked after control characters are stripped — so a handler nobody has thought of yet is refused by construction. 16 payloads refused, the markdown and both KaTeX modes still render, links go out with rel="noopener noreferrer", and the same payload arriving through a real project IMPORT comes back clean',
     !xssT.error && xssT.n >= 16 && xssT.fails.length === 0
       && xssT.md.h1 && xssT.md.li === 2 && xssT.md.katex >= 2 && xssT.md.display && xssT.md.link && xssT.md.rel
@@ -7997,7 +8001,7 @@ try {
     out.discTitle = (document.querySelector('.dev[data-id="settings"] .sw[aria-pressed]') || {}).title || '';
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B146 THE MATH FACE IS IN USE AND IT IS NOT A FALLBACK (wave 69). STIX Two Math has shipped since wave 59 and rescued exactly ONE glyph — the title\'s λ. It now sets the mathematics: Josh chose the OBSERVABLES himself ("the best place for real math typography") and the 3 × 2 grid is six pure `<m>` runs — ρ=|ψ|², arg ψ, Re ψ, Im ψ, Δρ, Re+Im — beside eleven window titles that carry their operator and NOTHING else (|ψ⟩ = Σ c_nlm |nlm⟩, c = (q + ip)/√2, SO(4), P(w), KS ℝ⁴, H₂⁺, Xα, (z, p_z), Δρ, ρ), the LADDER and SPECTRUM labels, IMPULSE VECTOR\'s readout and the notes. AN ENGLISH WORD STAYS IN THE UI FACE, which is why the face cannot be applied by selector and is not applied by a tokenizer either: `Re ψ` is mathematics and `SLICE / CLIP` is furniture and no regex over the characters can tell them apart, so it is DECLARED, one marker, in the string. THE FACE IS PROVED TO HAVE PAINTED rather than merely named: the same probe string measured on a canvas in the face and in BOTH fallbacks the stack names differs from each, which a silent fall-through to a serif could not do. And the marker is a STRING convention that must never become one: no `title` or `aria-label` in the whole app contains a literal `<m>` (kit.js `mathPlain` strips it at every attribute site) and the string never reaches the page as text. FREE ON THE WAY PAST: `sw()` ignored `o.title` since it was written, so fifteen switches — several of them the longest explanations in the lab — had tooltips nobody could ever see. Wave 53 found it and left it here',
     !w69mfT.error && w69mfT.mathLoaded && w69mfT.count >= 60 && w69mfT.allMath && w69mfT.resolved
       && w69mfT.attrLeak === 0 && w69mfT.textLeak === -1 && w69mfT.obsMath === 6 && w69mfT.titles >= 10
@@ -8028,7 +8032,7 @@ try {
     out.mInColumns = document.querySelectorAll('.ro-val m, .k-val m, .fd-val m, #transport .time m').length;
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B147 DIGITS DO NOT MOVE, AND THE RULE WAS DECIDED BY MEASUREMENT (wave 69). The brief\'s condition was "if the math face lacks real tabular figures, numbers keep the UI font, because a wobbling digit column is a regression no amount of nice ψ makes up for." It does not lack them: all ten figures of the shipped subset are 495/1000 em, measured in the binary before a line was written and re-measured HERE on a canvas in the browser that draws them. So a FORMULA keeps its own numbers and reads as one expression. What did NOT move is `--font-num`: every value field, knob readout, fader value and the transport clock is still Roboto with `tabular-nums`, and so is a live formula SLOT — because a slot is where the digits are, and STYLE-LOCK\'s density rule is that a numeral column does not dance. The two faces on one line are the design, not a compromise: the expression is the math face, the substituted values are the number face, and that is also what makes the moving values findable by the eye with NO motion at all. No value field in the app contains a marked run, so no column changes face halfway down',
     !w69dgT.error && w69dgT.tabular && w69dgT.colsFound >= 4 && w69dgT.colsUI && w69dgT.colsTab && w69dgT.mInColumns === 0 && w69dgT.errs === 0, w69dgT);
 
@@ -8087,7 +8091,7 @@ try {
     out.slots = document.querySelectorAll('.fx-v').length;
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B148 THE MOVING NUMBERS ARE THE TRUE VALUE AT EVERY FRAME, WHICH IS WHY THEY ARE ALLOWED TO MOVE (wave 69). Josh: "I was inspired by Brilliant\'s visually dynamic displays of mathematics and 3Blue1Brown\'s interactives that I must mimic that style of showing math numbers moving dynamically." The straight mimicry is a TWEEN, because there the motion is illustration. Here the register\'s law is c(t) = e^{−iEt}c(0), so a number crossing a formula can be the exact value at every intermediate frame — and this block is that claim, driven: each of the three sites is read off the DOM and recomputed from the model at the same instant, and they agree to the character. (1) THE TRANSPORT prints T = 2π/gcd{|ΔE|} substituted, with the lap decomposition t = lap·T + φ·T; a second scrub moves φ and it is still exact. (2) THE LADDER\'s three clocks are closed forms in n̄ alone, so the line is exact at every pixel of a drag and lands INSTANTLY while the 400-period revival scan behind it is still on its way — checked at n̄ = 12, 30 and 97. (3) THE SPECTRUM carries the law itself with the selected label\'s E, arg c and |c| read back out of the coefficient vector the frame is drawing from. ONLY THREE OF THE LAB\'S HUNDRED-ODD READOUTS MOVE, and the others were left still on purpose: a number that is not a closed form of something the hand or the clock is turning has nothing true to say between two states. And nothing announces — there is no aria-live anywhere near a formula, because a slot moving at 5 Hz behind one would be a hundred utterances a minute',
     !w69dynT.error && w69dynT.period.exact && w69dynT.period.T > 0 && w69dynT.ok1 && w69dynT.ok1b && w69dynT.ok2 && w69dynT.ok3
       && w69dynT.live === 0 && w69dynT.slots >= 9 && w69dynT.errs === 0, w69dynT);
@@ -8113,7 +8117,7 @@ try {
     document.getElementById('field').focus();
     out.before = document.querySelectorAll('.dev-enter').length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.TAB); await press(KEY.TAB);
   const w69motT = await g.ev(`try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -8156,7 +8160,7 @@ try {
     await nap(80);
     out.errs = window.__e.length;
     return out;
-  } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B149 THE MOTION PASS, GATED WHERE AN EYE CANNOT CHECK IT (wave 69). MOTION-LAW gate 1 files "window open/close" under OCCASIONAL, the one tier that gets a standard animation, and this lab now has exactly ONE entrance: 220 ms — inside the 300 ms ceiling — with the law\'s entrance easing verbatim, opacity and a 7-px slide, one iteration, on chrome, in no accent colour. IT IS ON `reopen()` ALONE and that is the law rather than an oversight: `raise()` also clears `.closed`, TAB reaches it, and A KEYBOARD-INITIATED ACTION IS NEVER ANIMATED — "the key is the user asking for the result, not the journey" — so two REAL driver Tabs raise two windows and start zero animations, and a menu raise travels no further. THE SECOND HALF IS THE ONE MOTION-LAW SAID WAS UNFINISHED and predicted would keep growing: the preference reached 9 of the lab\'s 34 transition sites because `body.rack-hidden #rack` is (1,1,1) and the media block named `#rack` at (1,0,0), so the 310-px slide it was written for never heard it. The OS preference cannot be driven from this harness, so the block is lifted out of its @media wrapper and injected as written — which measures the SELECTORS against the elements that actually carry the transforms, and is the only thing that could have caught a specificity bug. Before: #rack transitions transform and has one. After: the transform is gone, OPACITY REMAINS (fewer and gentler, never zero), both fold chevrons stop, and the entrance falls back to its opacity-only keyframe',
     !w69m1.error && !w69motT.error && w69m1.enter.cls && w69m1.enter.name === 'lw-dev-enter'
       && w69m1.enter.dur === '0.22s' && w69m1.enter.iter === '1' && w69m1.enterGone && w69m1.raiseQuiet

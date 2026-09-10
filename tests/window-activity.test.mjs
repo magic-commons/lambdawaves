@@ -43,7 +43,17 @@ try {
   root.classList.remove('off'); IO.last.emit(false);
   assert.equal(activity.state(root).reason, 'offscreen');
   assert.ok(changes >= 1);
-  console.log('GREEN window activity — intersection, fold, rack hide/peek and power suspend presentation without mutation');
+  /* presentOffscreen(true) is the proof harness's road past the viewport gate: the window presents while
+     off-screen, the structural gates still hold, and switching it off puts the viewport law back. */
+  const before = changes;
+  assert.equal(activity.presentOffscreen(true), true);
+  assert.equal(activity.canPresent(root), true);
+  assert.ok(changes > before, 'presenting off-screen windows schedules a present');
+  root.classList.add('folded'); assert.equal(activity.canPresent(root), false); root.classList.remove('folded');
+  root.classList.add('off'); assert.equal(activity.canPresent(root), false); root.classList.remove('off');
+  assert.equal(activity.presentOffscreen(false), false);
+  assert.equal(activity.state(root).reason, 'offscreen');
+  console.log('GREEN window activity — intersection, fold, rack hide/peek and power suspend presentation without mutation; presentOffscreen lifts only the viewport gate');
 } finally {
   globalThis.IntersectionObserver = oldIO; globalThis.MutationObserver = oldMO;
 }

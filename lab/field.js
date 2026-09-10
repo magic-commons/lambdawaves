@@ -636,6 +636,10 @@ export async function createField(canvas, opts = {}) {
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
   let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
+  let cssW = canvas.clientWidth || 1, cssH = canvas.clientHeight || 1;   // the CSS box, kept current by the observer below
+  if (typeof ResizeObserver === 'function') new ResizeObserver((entries) => {
+    const r = entries[entries.length - 1].contentRect; cssW = r.width || cssW; cssH = r.height || cssH;
+  }).observe(canvas);
 
   function setResolution(n) {
     if (n === res) return;
@@ -1102,9 +1106,11 @@ export async function createField(canvas, opts = {}) {
        breakpoint), not a branch in here: the renderer knows nothing about layout. */
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
+    /* The CSS size is read from a ResizeObserver, not from clientWidth on every frame: the frame loop writes
+       body attributes before it presents, so a per-frame clientWidth read forced a synchronous layout. */
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (scale || 1);
-      const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; return true; }
       return false;
     }
