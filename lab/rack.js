@@ -5600,7 +5600,7 @@ export async function boot(dom) {
   })();
   ui.saveNative = saveSettings;
   ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; linkFollowed = null; saveSettings(); };   // the frame loop's edge takes it from here
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────

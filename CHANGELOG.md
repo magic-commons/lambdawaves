@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 37 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 38 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -79,6 +79,7 @@ stable enough to gate on.
 - `d218878` 2026-09-10 — Senior review pass: green shipped gate, pruned cascade, cold hot paths, repo hygiene
 - `dfa9b19` 2026-09-10 — Merge branch 'dev' into codex/macro-keyboard-fixes
 - `f83be2c` 2026-09-10 — Real-time pass: steps before grid, GPU release on unload, transport macros + DJ bends, Josh's…
+- `d13da27` 2026-09-10 — Transport second pass: miniature macro rail, the law of the two clocks, compact cuts, hints step…
 
 </details>
 

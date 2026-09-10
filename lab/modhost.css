@@ -1858,7 +1858,10 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   display:flex;align-items:center;justify-content:center;padding:0;border:0;
   border-radius:0;background:transparent;color:var(--m2-ink-faint); }
 :root:root:root #modwin.mir-modwindow .m2rowgrip {
-  touch-action:none;cursor:ns-resize;border-bottom:1px solid var(--m2-rule); }
+  touch-action:none;cursor:ns-resize; }                              /* 2026-09-10: no divider — the two tools are told apart by ink, not by a rule */
+:root:root:root #modwin.mir-modwindow .m2rowgrip { color:var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2slotx { color:var(--m2-ink-faint); opacity:.75; }
+:root:root:root #modwin.mir-modwindow .m2slottools { grid-template-rows:21px 21px; row-gap:2px; }
 :root:root:root #modwin.mir-modwindow .m2rowgrip svg { width:13px;height:13px;pointer-events:none; }
 :root:root:root #modwin.mir-modwindow .m2slotx svg { width:13px;height:13px;pointer-events:none; }
 :root:root:root #modwin.mir-modwindow .m2rowgrip:active,
@@ -1892,12 +1895,14 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
    same coordinates, and the right tool seat still offers reorder, rename and
    delete. Row height is unchanged, preventing the rail from reformatting. */
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:144px; overflow:hidden; }
-/* 2026-09-10 (Josh): COMPACT CUTS, IT DOES NOT REFLOW. The rail narrows and clips at 144 px; every row keeps
-   the full rail's grid at its full width, so the badge, the seat and the start of the name stay exactly
-   where they were and the value fader and the tool seat are what the edge cuts off. */
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:block; padding:0 5px 4px; }   /* entry 81 above hid it; compact shows the same list, clipped */
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slot { width:216px; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow { width:216px; }
+/* 2026-09-10 (Josh): COMPACT SHOWS THREE THINGS PER ROW — the routing grip, the depth seat with its number,
+   and the tool seat (reorder above, delete below). The name face is hidden, not clipped. Row height, slot
+   spacing and the rail head keep the full rail's metrics so nothing above or below a row moves. */
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:block; padding:0 5px 4px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow { grid-template-columns:44px 44px 44px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2val,
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2pad { display:none; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slottools { grid-column:3; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macrow { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macadd,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2devadd {

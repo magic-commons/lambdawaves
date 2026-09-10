@@ -2798,6 +2798,29 @@ export function createModulation(host, port) {
 
   /* ═══ THE API — what the gates read, and the one door a proof drives ════════════════════ */
   const api = {
+    /* 2026-09-10 · THE TRANSPORT'S MINIATURE RAIL USES THIS WINDOW'S OWN GESTURES, not copies of them:
+       the routing grip (drag to route, tap to arm), the numbered depth seat (vertical drag, keys,
+       double-tap to 100 %) and the rail's reorder. One code path, two faces. */
+    wireGrip: (grip, macroId) => wireGrip(grip, macroId),
+    wireDepth(seat, macroId, n) {
+      const input = {
+        get: () => (M.macroOf(macroId) || { masterDepth: 1 }).masterDepth,
+        set: (v) => { M.setMacro(macroId, { masterDepth: clamp01(v) }); apply(); paint(true); },
+        reset: () => { M.setMacro(macroId, { masterDepth: 1 }); apply(); paint(true); },
+        axis: 'y', editable: () => true
+      };
+      wireSlider(seat, input); bindSliderKeys(seat, input);
+      seat.title = 'Master depth for this macro. Double-tap for 100%.';
+      aria(seat, 'MACRO ' + n + ' DEPTH', 0, 100, 100 * input.get(), '100%');
+    },
+    paintDepth(seat, arc, macroId) {
+      const m = M.macroOf(macroId); if (!m) return;
+      arc.style.strokeDasharray = clamp01(m.masterDepth).toFixed(4) + ' 1';
+      seat.classList.toggle('m2zero', m.masterDepth <= 1e-6);
+      seat.setAttribute('aria-valuenow', String(Math.round(100 * m.masterDepth))); seat.setAttribute('aria-valuetext', Math.round(100 * m.masterDepth) + '%');
+    },
+    moveMacro: (id, to) => { M.moveMacro(id, to); apply(); rebuildMacros(); },
+    rebuildMacros: () => rebuildMacros(),
     targets: () => registry.describe(),
     picker: () => registry.describe().map((d) => d.id),
     macros: () => M.macroList().map((m) => ({ id: m.id, name: m.name, kind: m.kind, value: m.value, depth: m.masterDepth, source: m.sourceId })),

@@ -664,25 +664,33 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK, two tile rows high */
 #transport .native-tempo[hidden] { display: none; }
 .tempo-pane { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.tempo-info { display: flex; align-items: center; justify-content: center; }
 .tempo-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 14px; font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
-.tempo-rail { display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 72px; }   /* the same 72 px the two tile rows take */
-/* the miniature rail: the window's number badge, name, value and thin fader at two-thirds scale */
-.tm-row { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 6px; align-items: center; min-height: 18px; }
-.tm-num { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; border: 1.2px solid color-mix(in srgb, var(--fg) 55%, transparent); color: var(--fg); font: 600 9px/1 var(--font-num); }
-.tm-face { position: relative; min-width: 0; height: 18px; border-radius: 5px; cursor: ew-resize; touch-action: none; outline: 0; }
-.tm-face:focus-visible { box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 70%, transparent); }
-.tm-face.drag, .tm-face:active { background: color-mix(in srgb, var(--fg) 6%, transparent); }
-.tm-info { position: absolute; left: 3px; right: 3px; top: 0; height: 11px; display: grid; grid-template-columns: minmax(0,1fr) 30px; align-items: center; gap: 4px; }
-.tm-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--fg); font: 600 8.5px/1 var(--font-ui); letter-spacing: .035em; }
-.tm-val { text-align: right; color: var(--ink-key); font: 650 8px/1 var(--font-num); font-variant-numeric: tabular-nums; }
-.tm-signal { position: absolute; left: 4px; right: 4px; top: 13px; height: 4px; }
-.tm-signal::before { content: ''; position: absolute; left: 0; right: 0; top: 1.5px; height: 1px; background: color-mix(in srgb, var(--fg) 20%, transparent); }
-.tm-fill { position: absolute; left: 0; top: 1.5px; height: 1px; width: 0; background: color-mix(in srgb, var(--fg) 45%, transparent); }
-.tm-edge { position: absolute; top: -1px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg, #000) 50%, transparent); }
-.tm-driven .tm-fill { background: var(--acc2); }
-.tm-trig .tm-face { cursor: default; }
-.tm-trig .tm-signal { display: none; }
+/* THE TRANSPORT'S MACRO TILES ARE THE WINDOW'S ROWS. These rules are the ported window's own (.mir-modwindow
+   .m2grip / .m2numseat / .m2num / .m2depthring, modwindow.css 583–607) and the host's overrides for them
+   (modhost.css 1037–1038, 1204, 1847–1848, 1865), re-scoped to the rail — copied, not redesigned. */
+.tempo-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 6px; max-height: 92px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--fg) 22%, transparent) transparent; align-content: start; }
+.tempo-tile { position: relative; height: 44px; border-radius: 8px; }
+.tempo-tile.m2reorder { opacity: .55; }
+.tempo-tile .m2slotrow { display: grid; grid-template-columns: 44px 44px 18px; align-items: center; height: 44px; }
+.tempo-tile .m2grip { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; min-height: 44px; align-self: center; padding: 0; border: 0; background: transparent; color: var(--acc2); touch-action: none; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.tempo-tile .m2grip svg { width: 18px; height: 18px; display: block; pointer-events: none; }
+.tempo-tile .m2grip:active { color: var(--fg); background: var(--glass-press); }
+.tempo-tile .m2numseat { position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 100%; padding: 0; border: 0; border-radius: 7px; background: transparent; touch-action: none; cursor: ns-resize; }
+.tempo-tile .m2numseat:focus-visible { outline: 1px solid color-mix(in srgb, var(--fg) 72%, transparent); outline-offset: -3px; }
+.tempo-tile .m2num { position: relative; z-index: 1; flex: 0 0 auto; pointer-events: none; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; border: 0; color: var(--acc2); font: 600 10px var(--font-num); line-height: 1; }
+.tempo-tile .m2depthring { position: absolute; z-index: 2; left: 7px; top: 50%; width: 30px; height: 30px; margin-top: -15px; overflow: visible; pointer-events: none; transform: rotate(-90deg); }
+.tempo-tile .m2depthtrack, .tempo-tile .m2deptharc { fill: none; stroke-width: 2.2; }
+.tempo-tile .m2depthtrack { stroke: transparent; }
+.tempo-tile .m2deptharc { stroke: var(--acc); stroke-linecap: round; }
+.tempo-tile .m2numseat.m2zero .m2deptharc { opacity: 0; }
+.tempo-tile .m2numseat.drag .m2deptharc { stroke-width: 3; }
+.tempo-tile .m2slottools { display: flex; align-items: center; width: 18px; height: 44px; }
+.tempo-tile .m2rowgrip { width: 18px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--acc2); opacity: .6; touch-action: none; cursor: grab; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+.tempo-tile .m2rowgrip:hover, .tempo-tile .m2rowgrip:active { opacity: 1; }
+.tempo-tile .m2rowgrip svg { width: 13px; height: 13px; pointer-events: none; }
+.tempo-tile [hidden] { display: none !important; }
+#transport .native-tempo { position: relative; }
+.tempo-info { position: absolute; top: 6px; right: 6px; }
 .tempo-empty { font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
 .tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
 .tempo-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; }
@@ -781,7 +789,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport.docked .native-play-row .ro-sub { display:none; }
 #transport.docked .native-play-row .ro-val { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 #transport.docked .native-play-row .k-val { position:absolute;top:100%;left:50%;transform:translateX(-50%); }
-#transport .native-tempo .trig { min-width:0;height:34px;min-height:34px;padding:0 3px;justify-content:center;font-size:8.5px;letter-spacing:.04em; }
+#transport .native-tempo .trig { min-width:0;height:44px;min-height:44px;padding:0 3px;justify-content:center;font-size:8.5px;letter-spacing:.04em; }   /* the window's seats are 44 px; the clock tiles match */
 #transport .k-val { display:none; }
 #transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
 #transport.docked .native-play-row { grid-template-columns:repeat(5,minmax(0,1fr)); }
@@ -789,7 +797,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport.docked .native-play-row > .ro { grid-column:span 2; }
 #transport.docked .native-play-row > .ro.period { grid-column:span 3; }
 #transport.docked .native-play-row .k-lbl { display:none; }
-#transport .native-tempo .trig { min-height:34px; }
+#transport .native-tempo .trig { min-height:44px; }
 #transport.docked .native-play-row .fd-val { display:none; }
 #transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
 #transport.docked .tempo-expand { grid-column:span 2;width:100%; }

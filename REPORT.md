@@ -2275,3 +2275,27 @@ the reading of his words and the measured old layout, in which the tools jumped 
 
 **Hints step aside** (`installControlHelp`): a press, a wheel, or any key that operates the control closes
 the hint, and it does not reopen until the pointer leaves and returns; a drag never opens one.
+
+## 2026-09-10 · Third pass on the transport: the window's own rows, not a likeness of them
+
+Josh: "The modulation window already has features that you can just copy. COPY THE LOOK, THE FUNCTIONS,
+THE DETAILS, THE SPACING." The previous pass drew a likeness; this one reuses the thing itself.
+
+**The transport's macro tiles are the window's rows.** `buildMacroSlot` — the ported window's own slot
+builder — builds each tile, so the routing grip, the numbered depth seat with its ring, and the reorder
+tool are the same nodes the window builds; the name face, the delete and the rename row are hidden. The
+window's API now exposes its own gestures (`wireGrip`, `wireDepth`, `paintDepth`, `moveMacro`,
+`rebuildMacros`) and the tiles are wired through them: one code path, two faces. Its rules for those
+nodes (modwindow.css 583–607, modhost.css 1037–1038, 1204, 1847–1848, 1865) are copied to the rail's
+scope, not restyled. Two tiles to a row — A B / C D — and past two rows the rail scrolls on its own
+while the clock tiles stay. Reorder: the rail's tool, dragged across the two-column grid or stepped with
+the arrows, moves the macro in the model and both views follow. The ⓘ sits in the panel's corner, not
+a tile. Measured: five macros → five 44-px tiles (0,0 · 139,0 · 0,48 · 139,48 …), rail 140 px tall in
+92 visible, a vertical drag on seat 1 took depth 1.000 → 0.782 and both arcs read `0.7818 1`, a grip tap
+armed macro m1 in the window's own arming state, a handle drag put m1 after m2 in the model and the
+window's first row became m2.
+
+**The window's compact rail, as specified:** each row is the routing grip, the depth seat with its
+number, and the tool seat — the name face is hidden (not clipped), the rows keep the full rail's
+vertical metrics so the rail head and rows 3–4 no longer move. The tool seat's divider is gone: reorder
+reads in accent B, delete in faint ink, with a hair of air between them.

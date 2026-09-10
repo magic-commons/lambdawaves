@@ -1,5 +1,6 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
-import { el, seg, sw, trig, chip, knob } from './kit.js';
+import { el, seg, sw, trig, chip } from './kit.js';
+import { buildMacroSlot } from './mir/modwindow/modwindow.js';   // the window's own slot builder: the transport's tiles are its rows, faces hidden
 
 const HELP_HOVER_DELAY = 600;
 
@@ -123,7 +124,7 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   new ResizeObserver(()=>paint(true)).observe(cv); paint(true); return { root:cv, paint };
 }
 
-export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, arm }) {
+export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCadence, arm }) {
   const ids=['spectrum','state','palette','observer','camera','clip','slice','settings'];
   for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
@@ -251,37 +252,42 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
      carries the tempo (drag, arrows, TAP). In its place is the LAW the two clocks were missing — LINK: the
      modulation clock follows the transport, no in-between state; FREE: it runs on its own MOD PLAY. */
   const macroPane=el('div','tempo-pane tempo-macros',panel);macroPane.setAttribute('aria-label','macros');
+  /* THE TILES ARE THE WINDOW'S ROWS. `buildMacroSlot` is the ported window's own builder — the same grip,
+     the same numbered depth seat with its ring, the same reorder tool — and the window's API wires the
+     same gestures to them. The name face, the delete and the rename row are hidden here, not rebuilt.
+     Two tiles to a row (A B / C D …); past two rows the rail scrolls and the clock does not. */
   const macroRail=el('div','tempo-rail',macroPane);
-  const macroRows=new Map();let macroSig='';
+  const tiles=new Map();let macroSig='';
   function buildMacros(){
-    const list=M.macroList().slice(0,4);
-    const sig=list.map(m=>m.id+':'+(m.name||'')+':'+m.kind).join('|');
-    if(sig===macroSig)return;macroSig=sig;macroRail.textContent='';macroRows.clear();
+    const api=modApi&&modApi();const list=M.macroList();
+    const sig=list.map(m=>m.id+':'+m.kind).join('|')+(api?'+':'-');
+    if(sig===macroSig)return;macroSig=sig;macroRail.textContent='';tiles.clear();
     list.forEach((m,i)=>{
-      const row=el('div','tm-row'+(m.kind==='trigger'?' tm-trig':''),macroRail);row.dataset.id=m.id;
-      const num=el('span','tm-num',row,String(i+1));num.setAttribute('aria-hidden','true');
-      const face=el('div','tm-face',row);face.tabIndex=0;face.setAttribute('role','slider');face.setAttribute('aria-valuemin','0');face.setAttribute('aria-valuemax','100');
-      face.setAttribute('aria-label','Macro '+(m.name||i+1));face.title=m.kind==='trigger'?'A trigger macro: fire it from the modulation window':'Drag to set the macro; arrows step it';
-      const info=el('div','tm-info',face);el('span','tm-name',info,m.name||('MACRO '+(i+1)));const val=el('span','tm-val',info,'');
-      const sig2=el('div','tm-signal',face);const fill=el('span','tm-fill',sig2);const edge=el('span','tm-edge',sig2);
-      const write=v=>{const mm=M.macroOf(m.id);if(!mm||mm.sourceId||mm.kind==='trigger')return;M.setMacro(m.id,{value:Math.max(0,Math.min(1,v))});C.applyAll(false);repaint();paintRow(row);};
-      let drag=null;
-      face.addEventListener('pointerdown',e=>{if(e.button||m.kind==='trigger')return;e.preventDefault();face.focus();const b=sig2.getBoundingClientRect();drag={x0:e.clientX,v0:(M.macroOf(m.id)||{}).value||0,w:Math.max(24,b.width)};face.classList.add('drag');try{face.setPointerCapture(e.pointerId);}catch(_){}
-        if(Math.abs(e.clientX-b.left-drag.v0*drag.w)>10)write((e.clientX-b.left)/drag.w),drag.v0=(M.macroOf(m.id)||{}).value||0,drag.x0=e.clientX;});
-      face.addEventListener('pointermove',e=>{if(!drag)return;write(drag.v0+(e.clientX-drag.x0)/drag.w);});
-      for(const t of ['pointerup','pointercancel'])face.addEventListener(t,()=>{drag=null;face.classList.remove('drag');});
-      face.addEventListener('keydown',e=>{const step=e.shiftKey?.01:e.code.startsWith('Page')?.1:.05;const d=/ArrowRight|ArrowUp|PageUp/.test(e.code)?1:/ArrowLeft|ArrowDown|PageDown/.test(e.code)?-1:0;
-        if(e.code==='Home'){e.preventDefault();write(0);return;}if(e.code==='End'){e.preventDefault();write(1);return;}if(!d)return;e.preventDefault();write(((M.macroOf(m.id)||{}).value||0)+d*step);});
-      macroRows.set(m.id,{row,val,fill,edge,face});paintRow(row);
+      const rec=buildMacroSlot(macroRail,m,i+1);rec.root.classList.add('tempo-tile');
+      for(const x of [rec.val,rec.pad,rec.del,rec.erow])if(x)x.hidden=true;
+      if(api){api.wireGrip(rec.grip,m.id);api.wireDepth(rec.numSeat,m.id,i+1);wireTileReorder(rec,m.id,api);}
+      rec.grip.title='Drag to route; tap to arm; double-tap to reset';rec.reorder.title='Drag to reorder';
+      tiles.set(m.id,rec);
     });
     if(!list.length)el('div','tempo-empty',macroRail,'No macros yet — add one in the modulation window.');
+    paintTiles();
   }
-  function paintRow(row){const rec=macroRows.get(row.dataset.id);const m=M.macroOf(row.dataset.id);if(!rec||!m)return;
-    const v=Math.max(0,Math.min(1,m.value||0));const pct=Math.round(v*100)+'%';
-    if(m.kind==='trigger'){rec.val.textContent='TRIG';rec.fill.style.width='0%';rec.edge.style.left='0%';}
-    else{rec.val.textContent=pct;rec.fill.style.width=(v*100)+'%';rec.edge.style.left=(v*100)+'%';rec.face.setAttribute('aria-valuenow',String(Math.round(v*100)));rec.face.setAttribute('aria-valuetext',pct);}
-    rec.row.classList.toggle('tm-driven',!!m.sourceId);}
-  function syncMacros(){buildMacros();for(const [,rec] of macroRows)if(!rec.face.classList.contains('drag'))paintRow(rec.row);}
+  function paintTiles(){const api=modApi&&modApi();if(!api)return;for(const [id,rec] of tiles)api.paintDepth(rec.numSeat,rec.depthArc,id);}
+  /* the rail's reorder, on a two-column grid: the tile under the pointer says where the row goes */
+  function wireTileReorder(rec,macroId,api){
+    let d=null;
+    const at=(list,x,y)=>{for(let i=0;i<list.length;i++){const b=list[i].getBoundingClientRect();if(y<b.top||y>b.bottom)continue;if(x<b.left+b.width/2)return i;if(x<=b.right)return i+1;}return -1;};   // over the OTHER tiles, so the index is the insertion point
+    const move=e=>{if(!d||e.pointerId!==d.id)return;if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<4)return;d.moved=true;rec.root.classList.add('m2reorder');
+      const list=[...macroRail.querySelectorAll('.tempo-tile')].filter(t=>t!==rec.root);let i=at(list,e.clientX,e.clientY);if(i<0)return;
+      const before=list[Math.min(i,list.length)]||null;if(before&&before!==rec.root.nextSibling)macroRail.insertBefore(rec.root,before);else if(!before&&macroRail.lastElementChild!==rec.root)macroRail.appendChild(rec.root);};
+    const stop=(e,cancel)=>{if(!d||e.pointerId!==d.id)return;const moved=d.moved;d=null;document.removeEventListener('pointermove',move,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',cancelE,true);rec.root.classList.remove('m2reorder');
+      if(!moved)return;e.preventDefault();e.stopPropagation();if(!cancel){const to=[...macroRail.querySelectorAll('.tempo-tile')].indexOf(rec.root);api.moveMacro(macroId,to);}macroSig='';buildMacros();};
+    const up=e=>stop(e,false),cancelE=e=>stop(e,true);
+    rec.reorder.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();e.stopPropagation();try{rec.reorder.setPointerCapture(e.pointerId);}catch(_){}d={x:e.clientX,y:e.clientY,id:e.pointerId,moved:false};document.addEventListener('pointermove',move,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',cancelE,true);});
+    rec.reorder.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const list=M.macroList(),atI=list.findIndex(m=>m.id===macroId);
+      const to=e.key==='Home'?0:e.key==='End'?list.length-1:atI+(e.key==='ArrowLeft'?-1:e.key==='ArrowRight'?1:e.key==='ArrowUp'?-2:2);api.moveMacro(macroId,Math.max(0,Math.min(list.length-1,to)));macroSig='';buildMacros();});
+  }
+  function syncMacros(){buildMacros();paintTiles();}
   const clockPane=el('div','tempo-pane tempo-clock',panel);clockPane.setAttribute('aria-label','clock');
   const grid=el('div','tempo-grid',clockPane);
   /* THE LAW OF THE TWO CLOCKS. Linked, the modulation clock is a follower of the transport — rack.js
@@ -313,7 +319,7 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
     grid.appendChild(b.root);return {b,label};
   });
   const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+(note==='1/4'?'¼':note),title:'Stutter: hold the beat at this note value',onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});grid.appendChild(b.root);return b;});
-  const infoSeat=el('div','tempo-info',grid);infoSeat.appendChild(repeatInfo);   // the tenth tile: the repeat mathematics
+  const infoSeat=el('div','tempo-info',panel);infoSeat.appendChild(repeatInfo);   // the repeat mathematics, in the panel's corner — not a tile
   function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});const linked=ui.clockLink();linkB.root.classList.toggle('on',linked);linkB.root.setAttribute('aria-pressed',String(linked));linkB.setLabel(linked?'LINKED':'SEPARATE');play.root.disabled=linked;play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD ❚❚':'MOD ▶');for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
   sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
