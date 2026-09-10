@@ -2368,7 +2368,7 @@ export function createModulation(host, port) {
       rows[key]={row,head,text,mix,low,high,fill,zone,cursor,handles};
     }
     const hint=el('div','aud-range-hint',root,'Select a band for timing');
-    const latency=el('output','aud-latency',dev.col,'LATENCY —');
+    const latency=el('output','aud-latency',dev.col,'— ms');
     latency.setAttribute('aria-label','Estimated audio input to visual latency');
     latency.title='Estimated from capture latency, half the analyser window, and half a visual frame';
     rec.audRanges={root,rows,hint,latency};
@@ -2476,8 +2476,8 @@ export function createModulation(host, port) {
     if (rec.audRanges && rec.audRanges.latency) {
       const l = rec.audRanges.latency;
       const latencyText = cap.live && Number.isFinite(cap.latencyMs)
-        ? 'LATENCY ' + (cap.latencyEstimated ? '≥' : '≈') + Math.round(cap.latencyMs) + ' ms'
-        : 'LATENCY —';
+        ? Math.round(cap.latencyMs) + ' ms'
+        : '— ms';
       if (l.textContent !== latencyText) l.textContent = latencyText;
       l.classList.toggle('on', cap.live);
       const latencyTitle = cap.live
