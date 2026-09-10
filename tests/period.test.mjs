@@ -48,7 +48,8 @@ const En = (n) => -0.5 / (n * n);
   judge('THE SCAN DOES NOT ACCEPT ITS OWN FIRST STEP: the wide incommensurate spectrum {0, 1, e, π, 50} used to return T = 1.96e-3 a.u. — the k = 1 sample, err = 1/64 exactly, a "recurrence" at which the slow pairs have turned a thousandth of a cycle. The scan starts at one full turn of the fastest beat now, so the near-recurrence is > 64 steps (3770 a.u., 30001 turns of the fastest), it is still refused as exact, and the err it prints is the err it has: recomputed from the returned T to 1e-12',
     w.exact === false && w.T / step > 64 && w.T * dmax / (2 * Math.PI) > 1 && Math.abs(werr - w.err) < 1e-12,
     { T: w.T, steps: Math.round(w.T / step), turnsOfFastest: Math.round(w.T * dmax / (2 * Math.PI)), err: w.err, recomputed: werr });
-  judge('FORMAT: 67.021 a.u. reads as fs, 45238.93 as ps', /1\.62[0-9]* fs/.test(fmtPeriod(64 * Math.PI / 3)) && /1\.094 ps/.test(fmtPeriod(2 * Math.PI * 7200)), { a: fmtPeriod(64 * Math.PI / 3), b: fmtPeriod(2 * Math.PI * 7200) });
+  const huge = fmtPeriod(4.035892638554461e20);
+  judge('FORMAT: ordinary periods retain useful precision; very large periods use bounded scientific and human-scale units', /1\.62[0-9]* fs/.test(fmtPeriod(64 * Math.PI / 3)) && /1\.094 ps/.test(fmtPeriod(2 * Math.PI * 7200)) && huge.length <= 28 && /e20 a\.u\./.test(huge) && / h$/.test(huge), { a: fmtPeriod(64 * Math.PI / 3), b: fmtPeriod(2 * Math.PI * 7200), huge });
 }
 {
   const exact = densityPeriodExact([En(2), En(4)]), stationary = densityPeriodExact([En(2)]);

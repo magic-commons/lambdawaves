@@ -2539,8 +2539,10 @@ export async function boot(dom) {
     let trSeat = 'bottom', trMoving = false;
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
-      const top = where === 'top' ? 52 : vh - 60 - h;
-      return { left: (vw - w) / 2, right: (vw + w) / 2, top, bottom: top + h };
+      const narrowRack = matchMedia('(max-width: 860px)').matches;
+      const top = where === 'top' ? (narrowRack ? 112 : 52) : vh - 60 - h;
+      const left = narrowRack ? vw - w - 10 : (vw - w) / 2;
+      return { left, right: left + w, top, bottom: top + h };
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     function modDodge(r) {
@@ -2550,7 +2552,10 @@ export async function boot(dom) {
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
-      const want = !hits(seatRect('bottom', w, h), r) ? 'bottom'
+      const narrowRack = matchMedia('(max-width: 860px)').matches;
+      if (narrowRack) trSeat = 'top';
+      const want = narrowRack ? 'top'
+                 : !hits(seatRect('bottom', w, h), r) ? 'bottom'
                  : !hits(seatRect('top', w, h), r) ? 'top' : trSeat;
       if (want === trSeat) return;
       trMoving = true;
@@ -2720,15 +2725,15 @@ export async function boot(dom) {
 
 
     const SVG_REWIND = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:13px;height:13px;display:block;margin:auto"><rect x="5" y="5" width="2.6" height="14" rx="1.1"/><polygon points="20 5 20 19 9.5 12 20 5"/></svg>';
-    const rst = el('button', 'tbtn', T); rst.type = 'button'; rst.innerHTML = SVG_REWIND; rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0');
-    const sm = el('button', 'tbtn', T, '‹'); sm.type = 'button'; sm.title = 'step back  (←)'; sm.setAttribute('aria-label', 'step back');
-    const sp = el('button', 'tbtn', T, '›'); sp.type = 'button'; sp.title = 'step forward  (→)'; sp.setAttribute('aria-label', 'step forward');
+    const rst = el('button', 'tbtn transport-home', T); rst.type = 'button'; rst.innerHTML = SVG_REWIND; rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0');
+    const sm = el('button', 'tbtn transport-step-back', T, '‹'); sm.type = 'button'; sm.title = 'step back  (←)'; sm.setAttribute('aria-label', 'step back');
+    const sp = el('button', 'tbtn transport-step-forward', T, '›'); sp.type = 'button'; sp.title = 'step forward  (→)'; sp.setAttribute('aria-label', 'step forward');
     ui.scrub = fader({ label: 'SCRUB  t / window', min: 0, max: 1, value: 0, fmt: (v) => (v * clock.window).toFixed(2) + ' a.u.',
       onInput: (v) => { clock.scrub(v * clock.window + laps() * clock.window); schedule(TIER.EVOLVE); } });
     T.appendChild(ui.scrub.root);
     ui.rateKnob = knob({ label: 'RATE a.u./s', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => v >= 100 ? v.toFixed(0) : v.toFixed(1), onInput: (v) => { if (modHand('transport.rate', v)) return; clock.setRate(v); } });
     T.appendChild(ui.rateKnob.root);
-    const tro = readout({ label: 't  a.u.  (lap)', value: '0.00' });
+    const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
     T.appendChild(tro.root);
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
        differences are commensurate: hydrogen and its ions, the oscillator; a near-recurrence with its error otherwise) ── */
@@ -2830,6 +2835,13 @@ export async function boot(dom) {
     function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
     __LW_hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
     const laps = () => Math.floor(clock.t / clock.window);
+    const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
+      ? v.toFixed(decimals)
+      : v.toExponential(decimals).replace('e+', 'e');
+    const clockText = () => {
+      const lap = laps();
+      return compactClock(clock.t, 1e5, 2) + (lap ? '  (' + compactClock(lap, 1e4, 1) + ')' : '');
+    };
     const stepDt = () => clock.window / 48;
     play.addEventListener('click', () => togglePlay());
     /* wave 106: …and the PLAYHEAD goes back with the clock.  `ui.scrub` is only ever repainted inside
@@ -2847,8 +2859,8 @@ export async function boot(dom) {
          disabled and never repainted, and the t readout runs at 5 Hz while playing (every paused frame, as before) */
       if (keep.frames) {
         if (!ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
-        tro.set(clock.t.toFixed(2) + (laps() ? '  (' + laps() + ')' : ''), on ? 'live' : '');
-      } else if (!on || now - troWall >= 200) { troWall = now; tro.set(clock.t.toFixed(2) + (laps() ? '  (' + laps() + ')' : ''), on ? 'live' : ''); }
+        tro.set(clockText(), on ? 'live' : '');
+      } else if (!on || now - troWall >= 200) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
       if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled

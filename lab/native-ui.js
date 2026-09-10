@@ -214,23 +214,35 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   const tr=document.getElementById('transport');
   const main=el('div','native-play-row');main.append(...tr.children);tr.appendChild(main);
   const repeatInfo=infoPanel(ui.periodFx.root,'Repeat mathematics');
-
-  const expand=el('button','tbtn tempo-expand',main);chip(expand,'chevronDown','show or hide tempo controls');expand.title='Tempo controls';expand.type='button';expand.setAttribute('aria-expanded','false');
+  const M=modHost.model,C=modHost.clock;
+  const expand=el('button','tbtn tempo-expand',main);expand.type='button';expand.title='Set modulation tempo';expand.setAttribute('aria-expanded','false');
+  const tempoNum=el('b','tempo-number',expand,'60.0');
+  el('span','tempo-unit',expand,'BPM');
+  const tempoHz=el('i','tempo-hz',expand,'1.00 Hz');
+  const tempoChevron=el('span','tempo-chevron',expand);tempoChevron.setAttribute('aria-hidden','true');
   const panel=el('div','native-tempo',tr);panel.hidden=true;
   let syncTimer=0;
   const stopSync=()=>{if(syncTimer){clearTimeout(syncTimer);syncTimer=0;}};
   const armSync=()=>{if(panel.hidden||syncTimer)return;syncTimer=setTimeout(()=>{syncTimer=0;sync();armSync();},200);};
-  expand.addEventListener('click',()=>{panel.hidden=!panel.hidden;tr.classList.toggle('tempo-open',!panel.hidden);expand.setAttribute('aria-expanded',String(!panel.hidden));sync();if(panel.hidden)stopSync();else armSync();});
-  const M=modHost.model,C=modHost.clock;
+  const toggleTempo=()=>{panel.hidden=!panel.hidden;tr.classList.toggle('tempo-open',!panel.hidden);expand.setAttribute('aria-expanded',String(!panel.hidden));sync();if(panel.hidden)stopSync();else armSync();};
+  let tempoDrag=null,tempoDragged=false;
+  expand.addEventListener('pointerdown',e=>{if(e.button)return;tempoDrag={y:e.clientY,bpm:M.transport.bpm,moved:false,touch:e.pointerType==='touch'};try{expand.setPointerCapture(e.pointerId);}catch(_){}});
+  expand.addEventListener('pointermove',e=>{if(!tempoDrag)return;const dy=tempoDrag.y-e.clientY;if(!tempoDrag.moved&&Math.abs(dy)<4)return;tempoDrag.moved=true;const travel=tempoDrag.touch?300:220;C.setBpm(tempoDrag.bpm+dy/travel*(M.BPM_MAX-M.BPM_MIN));sync();});
+  const endTempoDrag=()=>{if(!tempoDrag)return;if(tempoDrag.moved){tempoDragged=true;ui.saveNative();}tempoDrag=null;};
+  expand.addEventListener('pointerup',endTempoDrag);expand.addEventListener('pointercancel',()=>{tempoDrag=null;});
+  expand.addEventListener('click',()=>{if(tempoDragged){tempoDragged=false;return;}toggleTempo();});
+  expand.addEventListener('keydown',e=>{const step=e.shiftKey?.1:e.code.startsWith('Page')?10:1;const dir=e.code==='ArrowUp'||e.code==='ArrowRight'||e.code==='PageUp'?1:e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='PageDown'?-1:0;if(!dir)return;e.preventDefault();C.setBpm(M.transport.bpm+dir*step);sync();ui.saveNative();});
+  const bpmField=el('div','native-tempo-field',panel);
+  const bpm=el('input','native-bpm',bpmField);bpm.type='number';bpm.min=String(M.BPM_MIN);bpm.max=String(M.BPM_MAX);bpm.step='.1';bpm.setAttribute('aria-label','Tempo in beats per minute');bpm.title='BPM';
+  el('span','native-tempo-unit',bpmField,'BPM');
+  const hzGroup=el('div','native-tempo-hz',bpmField);const hz=el('span','',hzGroup);hzGroup.appendChild(repeatInfo);
   const play=trig({label:'MOD PLAY',title:'Play/pause modulation independently of physics',onFire:()=>{arm(true);C.toggle(performance.now()/1000);sync();}});panel.appendChild(play.root);
-  const bpm=el('input','native-bpm',panel);bpm.type='number';bpm.min=String(M.BPM_MIN);bpm.max=String(M.BPM_MAX);bpm.step='.1';bpm.setAttribute('aria-label','Tempo in beats per minute');bpm.title='BPM';
   bpm.addEventListener('change',()=>{if(Number.isFinite(bpm.valueAsNumber))C.setBpm(bpm.valueAsNumber);sync();ui.saveNative();});
   let taps=[];panel.appendChild(trig({label:'TAP',onFire:()=>{const r=M.tapTempo(taps,performance.now());taps=r.taps;if(r.bpm)C.setBpm(r.bpm);sync();ui.saveNative();}}).root);
   const syncB=trig({label:'WALL',onFire:()=>{C.setSync(M.syncMode()==='wall'?'free':'wall');sync();ui.saveNative();}});panel.appendChild(syncB.root);
   const cad=trig({label:'60 Hz',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});panel.appendChild(cad.root);
-  const hzGroup=el('div','native-tempo-hz',panel);const hz=el('span','',hzGroup);hzGroup.appendChild(repeatInfo);
   const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+note,onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});panel.appendChild(b.root);return b;});
-  function sync(){hz.textContent=(M.transport.bpm/60).toFixed(2)+' Hz';if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');}
+  function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;hz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');}
   sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
   consolidateWindowHelp();

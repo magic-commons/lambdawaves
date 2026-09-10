@@ -655,7 +655,7 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
 body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
-#transport .tempo-expand { order: 8; font-size: var(--fs-micro); }
+#transport .tempo-expand { order: 8; }
 #transport .native-tempo { order: 9; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; width: 100%; flex: 1 0 100%; padding: 8px 0 0; }
 #transport .native-tempo[hidden] { display: none; }
 #transport.tempo-open { flex-wrap: wrap; }
@@ -718,10 +718,36 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { flex-wrap:nowrap;gap:2px; }
-#transport .native-tempo { flex:none; }
-#transport.mini.tempo-open { width:min(560px,calc(100vw - 32px));height:auto;min-height:46px;padding-bottom:8px; }
-#transport .tempo-expand svg { width:14px;height:14px; }
-#transport .tempo-expand[aria-expanded="true"] svg { transform:rotate(180deg); }
+#transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
+#transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
+#transport .native-tempo { flex:none;box-sizing:border-box; }
+#transport.mini.tempo-open { width:min(640px,calc(100vw - 24px));height:auto;min-height:46px;padding-bottom:8px; }
+#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid var(--glass-hairline);border-radius:8px;background:var(--glass-well);box-shadow:var(--neu-inset);color:var(--fg-soft);touch-action:none; }
+#transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) 60%,transparent);background:var(--glass-raise);outline:0; }
+#transport .tempo-expand[aria-expanded="true"] { border-color:color-mix(in srgb,var(--acc2) 70%,transparent);box-shadow:var(--neu-inset),0 0 7px color-mix(in srgb,var(--acc2) 24%,transparent); }
+#transport .tempo-number { grid-area:1/1/3/2;align-self:center;font:var(--w-bold) 12px/1 var(--font-num);font-variant-numeric:tabular-nums;color:var(--acc2); }
+#transport .tempo-unit { align-self:end;font:var(--w-bold) 7px/1 var(--font-ui);letter-spacing:var(--tr-wide);color:var(--ink-key); }
+#transport .tempo-hz { align-self:start;font:var(--w-med) 7px/1.1 var(--font-num);font-style:normal;font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap; }
+#transport .tempo-chevron { position:absolute;right:6px;top:50%;width:5px;height:5px;margin-top:-4px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);transition:transform var(--t-fast);color:var(--dim); }
+#transport .tempo-expand[aria-expanded="true"] .tempo-chevron { transform:translateY(3px) rotate(225deg); }
+#transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px;background:linear-gradient(180deg,var(--glass-well),transparent); }
+#transport .native-tempo-field { grid-column:span 2;min-width:0;height:34px;padding:0 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:6px;align-items:center;border:1px solid color-mix(in srgb,var(--acc2) 38%,var(--glass-hairline));border-radius:8px;background:var(--glass-well);box-shadow:var(--neu-inset); }
+#transport .native-bpm { grid-area:1/1/3/2;width:100%;height:30px;padding:0;border:0;background:transparent;box-shadow:none;color:var(--acc2);font:var(--w-bold) 15px/1 var(--font-num);text-align:left; }
+#transport .native-bpm:focus { outline:0;color:var(--fg); }
+#transport .native-tempo-unit { align-self:end;font:var(--w-bold) var(--fs-micro)/1 var(--font-ui);letter-spacing:var(--tr-wide);color:var(--ink-key); }
+#transport .native-tempo-hz { align-self:start;justify-content:flex-start;gap:4px;font-size:var(--fs-micro);line-height:1; }
+#transport .native-tempo-hz .native-info { flex:0 0 20px;height:14px; }
+#transport .native-tempo-hz .native-info-button { width:20px;height:14px;line-height:14px; }
+#transport.mini { width:min(640px,calc(100vw - 24px));contain:layout paint; }
+#transport.mini .tempo-expand { flex-basis:72px;width:72px;min-width:72px; }
+#transport.mini .native-play-row { flex-wrap:nowrap; }
+#transport.mini .fd { flex:1 1 48px;min-width:40px; }
+#transport.mini .ro { flex:0 1 auto;min-width:0;overflow:hidden; }
+#transport.mini .ro.time { width:58px; }
+#transport.mini .ro.period { width:76px; }
+#transport.mini .ro-val { max-width:100%;overflow:hidden;text-overflow:ellipsis; }
+#transport.mini .tbtn.modb { min-width:38px;width:38px;padding:0 5px; }
+#transport.mini .tbtn.modb.on { color:var(--acc2); }
 .native-clean .native-rotors { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;row-gap:14px; }
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
@@ -753,6 +779,32 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport .native-tempo .trig { min-height:34px; }
 #transport.docked .native-play-row .fd-val { display:none; }
 #transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
+#transport.docked .tempo-expand { grid-column:span 2;width:100%; }
+#transport.docked .native-tempo { width:100%;grid-template-columns:repeat(2,minmax(0,1fr)); }
+#transport.docked .play { grid-area:1/1; }
+#transport.docked .modb { grid-area:1/2; }
+#transport.docked .transport-home { grid-area:1/3; }
+#transport.docked .transport-step-back { grid-area:1/4; }
+#transport.docked .transport-step-forward { grid-area:1/5; }
+#transport.docked .fd { grid-area:2/1/3/5; }
+#transport.docked .k { grid-area:2/5; }
+#transport.docked .ro.time { grid-area:3/1/4/3; }
+#transport.docked .ro.period { grid-area:3/3/4/6; }
+#transport.docked .jump { grid-area:4/1; }
+#transport.docked .dock-btn { grid-area:4/2; }
+#transport.docked .mod-exp { grid-area:4/3; }
+#transport.docked .tempo-expand { grid-area:4/4/5/6; }
+@media (max-width:1000px) {
+  #transport.mini,#transport.mini.tempo-open { width:min(560px,calc(100vw - 24px)); }
+  #transport.mini .ro.period { display:none; }
+}
+@media (max-width:860px) {
+  #transport.mini,#transport.mini.tempo-open { left:calc(var(--rack-w) + 10px);right:10px;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;width:auto;transform:none; }
+  #transport.mini .fd { min-width:32px; }
+  #transport.mini .ro.time { width:50px; }
+  #transport.mini .tbtn.modb { min-width:34px;width:34px; }
+  #transport.mini .tempo-expand { flex-basis:68px;width:68px;min-width:68px; }
+}
 @media (pointer:coarse) { #transport .native-tempo .trig { min-height:44px; } }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */

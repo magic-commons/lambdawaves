@@ -85,7 +85,16 @@ export function hydrogenShellPeriod(shells, Z = 1) {
 }
 export const AU_FS = 0.02418884326;
 export function fmtPeriod(T) {
-  if (!T) return '—';
+  if (!T || !Number.isFinite(T)) return '—';
   const fs = T * AU_FS;
-  return (T >= 1000 ? T.toFixed(0) : T >= 100 ? T.toFixed(1) : T.toFixed(2)) + ' a.u. · ' + (fs >= 1000 ? (fs / 1000).toFixed(3) + ' ps' : fs >= 10 ? fs.toFixed(1) + ' fs' : fs.toFixed(3) + ' fs');
+  const au = Math.abs(T) >= 1e6 ? T.toExponential(2).replace('e+', 'e')
+    : T >= 1000 ? T.toFixed(0) : T >= 100 ? T.toFixed(1) : T.toFixed(2);
+  const units = [['fs', 1], ['ps', 1e3], ['ns', 1e6], ['µs', 1e9], ['ms', 1e12], ['s', 1e15], ['min', 6e16], ['h', 3.6e18], ['d', 8.64e19]];
+  let i = 0;
+  while (i + 1 < units.length && Math.abs(fs) >= units[i + 1][1]) i++;
+  const q = fs / units[i][1];
+  const physical = Math.abs(q) >= 1e4 ? q.toExponential(2).replace('e+', 'e')
+    : i === 0 ? (Math.abs(q) >= 10 ? q.toFixed(1) : q.toFixed(3))
+    : Math.abs(q) >= 100 ? q.toFixed(1) : Math.abs(q) >= 10 ? q.toFixed(2) : q.toFixed(3);
+  return au + ' a.u. · ' + physical + ' ' + units[i][0];
 }
