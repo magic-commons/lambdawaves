@@ -8,12 +8,11 @@
  * WRONG, which is why the acceptance table was proved against BASINS' own shipping numbers
  * FIRST — unskinned, in wave 64 — so a later change is detectable.
  *
- * ⟡ WAVE 66 TOOK THE SEAT.  It now carries λWAVES GLASS and not BASINS' shipping block, and it
- * is the ONLY file this wave wrote: every byte under `lab/mir/modwindow/` is untouched and its
- * five sha256s are unchanged.  BASINS' values are in git and in `host-contract.md` PART 2 if
- * they are ever wanted back.  What changed is MATERIAL and nothing else — the geometry gate
- * (B129, the full ACCEPTANCE table) passes unmoved, and the only rows of it this wave was asked
- * to change are §A1's four material colours, which are the point of the wave.
+ * ⟡ WAVE 66 TOOK THE SEAT.  It carries λWAVES GLASS rather than BASINS' shipping block.
+ * BASINS' values remain in git and in `host-contract.md` PART 2.  Later user-approved revisions
+ * also changed the portable macro rail structure; those changes live in its builder and sheet,
+ * while this host file owns selection paint, dial spacing, and compact geometry.  B129 gates the
+ * resulting integration rather than an immutable vendor checksum.
  *
  * AND ONE THING A LATER SKIN MUST KNOW, MEASURED HERE RATHER THAN DISCOVERED LATER: the
  * plugin's stylesheet carries **170 literal colour values in 91 distinct strings**, and 158 of
@@ -519,8 +518,9 @@ body[data-theme="light"] .m2ghost {
 /* ══ WAVE 69 · THE THREE DIVERGENCES — the copied defects, fixed HERE and nowhere else ═══════════
    Josh, 2026-09-06: *"The modulation window is broken when we were even working on it on basins so
    whatever problem it has we will try to fix here."*  So the three defects ACCEPTANCE §9 asks a mount
-   to REPRODUCE are corrected — and `lab/mir/modwindow/` is still byte-identical to the staged
-   artifact, because every correction is written in THIS sheet, which is ours.  That is what makes the
+   to REPRODUCE are corrected — at that wave the staged artifact remained byte-identical because
+   every correction was written in THIS sheet.  Later macro-rail edits are documented at their
+   source.  That is what made the
    reciprocal port back to MANDELBROT a diff of eighteen reach-list lines rather than an archaeology.
    lab/mir/PORT-NOTES.md § THE THREE DIVERGENCES carries the same three with their measurements.
 
@@ -686,8 +686,8 @@ body[data-theme="light"] .m2ghost {
      THIS IS THE INK FLIP THE PORT DEFERRED THREE TIMES, and it is finally cheap because it was
    MEASURED rather than estimated: the artifact's white ink is 55 selectors in 25 alpha rungs and its
    white washes are 22 selectors in 13, so the whole inversion is 38 GENERATED RULES below — not the
-   "~50 forced edits against a vendored-artifact law" the port feared, and not ONE byte of
-   modwindow.css, which stays byte-identical.  White at alpha on a dark ground becomes the house's
+   "~50 forced edits against a vendored-artifact law" the port feared, and at that wave changed no
+   imported CSS.  White at alpha on a dark ground becomes the house's
    own near-black at the SAME alpha on a pale ground, so the artifact's five-rung hierarchy survives
    intact; only its polarity changes, and only on the light theme.
      The washes split by what they are: at or below 0.15 a white wash was a SURFACE TINT and is
@@ -2189,8 +2189,8 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
      THE NEW ONE IS THE FULL CARD'S PLOT, TRANSPOSED: time runs DOWN the strip and the value across it,
    which is the right way round for 26 × 200, with the same live dot the big plot has riding the same
    curve in the same ink.  A folded device is now the same instrument at a smaller size.
-     The artifact's three are HIDDEN, never deleted — `lab/mir/modwindow/` is still byte-identical and
-   a host that wants them back has them.  The builder is `seatMinTrace` in lab/modwindow.js. */
+     The artifact's three are HIDDEN, never deleted, so a host that wants them back still has them.
+   The builder is `seatMinTrace` in lab/modwindow.js. */
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2meter,
 :root:root:root #modwin.mir-modwindow .m2dev.m2min.lfo .m2lfominshape,
 :root:root:root #modwin.mir-modwindow .m2dev.m2min.env .m2envminprog,
@@ -2585,3 +2585,74 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2erow { display:none; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2railhead { padding-left:4px;gap:2px;font-size:10px; }
+
+/* Macro selection is visible at the controls it reaches. Routed controls rest
+   in Accent A; choosing their macro or source, or touching the control itself,
+   promotes the dial and complete range drawing to Accent B. */
+:root:root:root .k.has-ring > .k-dial {
+  box-shadow:var(--neu-raise),0 0 0 1px color-mix(in srgb,var(--acc) 65%,transparent); }
+:root:root:root .k.has-ring > .k-dial > .k-needle { background:var(--acc);box-shadow:none; }
+:root:root:root .k.has-ring.mod-selected > .k-dial {
+  box-shadow:var(--neu-raise),0 0 0 1px color-mix(in srgb,var(--acc2) 75%,transparent); }
+:root:root:root .k.has-ring.mod-selected > .k-dial > .k-needle { background:var(--acc2);box-shadow:none; }
+:root:root:root .k.mod-selected .k-ring-edit,
+:root:root:root .k.mod-selected .k-ring-stack,
+:root:root:root .k.mod-selected .k-ring-tick,
+:root:root:root .k.mod-selected .k-ring-spur { stroke:var(--acc2); }
+
+/* The range dial gets its own seat beside the parameter dial. Its fixed top
+   dot marks bipolar zero, while its needle edits range only. */
+:root:root:root .k.has-ring > .k-dial { transform:translateX(-10px); }
+:root:root:root .k-route-depth.k {
+  top:50%;right:0;bottom:auto;width:24px;min-width:24px;height:24px;
+  transform:translateY(-50%);z-index:3; }
+:root:root:root .k-route-depth .k-dial { width:22px;height:22px; }
+:root:root:root .k-route-depth .k-dial::before { inset:-3px; }
+:root:root:root .k-route-depth .k-dial::after {
+  content:"";position:absolute;left:50%;top:-4px;width:4px;height:4px;
+  margin-left:-2px;border-radius:50%;background:var(--acc2);pointer-events:none; }
+
+/* The macro rail has two explicit add verbs and one delete seat per row. The
+   indicator face accepts horizontal value travel and vertical reorder travel. */
+:root:root:root #modwin.mir-modwindow .m2rail { width:224px; }
+:root:root:root #modwin.mir-modwindow .m2slots { padding-left:4px;padding-right:4px; }
+:root:root:root #modwin.mir-modwindow .m2slotrow {
+  grid-template-columns:44px 44px minmax(0,1fr) 44px;gap:0; }
+:root:root:root #modwin.mir-modwindow .m2grip svg { width:18px;height:18px; }
+:root:root:root #modwin.mir-modwindow .m2depthring { width:30px;height:30px;left:7px;margin-top:-15px; }
+:root:root:root #modwin.mir-modwindow .m2val { cursor:move; }
+:root:root:root #modwin.mir-modwindow .m2slot.m2reorder {
+  background:var(--acc2-soft);box-shadow:inset 0 0 0 1px var(--acc2);z-index:2; }
+:root:root:root #modwin.mir-modwindow .m2slotx {
+  width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;
+  display:flex;align-items:center;justify-content:center;padding:0;border:0;
+  border-radius:8px;background:transparent;color:var(--m2-ink-faint); }
+:root:root:root #modwin.mir-modwindow .m2slotx svg { width:13px;height:13px;pointer-events:none; }
+:root:root:root #modwin.mir-modwindow .m2slotx:active { background:var(--glass-press);color:var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2vinfo {
+  left:3px;right:3px;grid-template-columns:minmax(0,1fr) 22px;gap:2px; }
+:root:root:root #modwin.mir-modwindow .m2vname { font-size:9px; }
+:root:root:root #modwin.mir-modwindow .m2vmeta { right:3px; }
+:root:root:root #modwin.mir-modwindow .m2macrow { gap:4px;padding:4px 5px 6px; }
+:root:root:root #modwin.mir-modwindow .m2macadd,
+:root:root:root #modwin.mir-modwindow .m2devadd {
+  flex:1 1 0;min-width:0;height:44px;min-height:44px;padding:0 5px;border:0;
+  border-radius:7px;background:hsl(0 0% 100% / .06);color:var(--acc2);
+  font:700 8px var(--font-sans);letter-spacing:.08em;white-space:nowrap; }
+:root:root:root body[data-theme="light"] #modwin.mir-modwindow .m2macadd,
+:root:root:root body[data-theme="light"] #modwin.mir-modwindow .m2devadd {
+  background:hsl(214 30% 40% / .09); }
+:root:root:root #modwin.mir-modwindow .m2macadd:active:not(:disabled),
+:root:root:root #modwin.mir-modwindow .m2devadd:active:not(:disabled),
+:root:root:root #modwin.mir-modwindow .m2devadd.on { background:var(--acc2-soft); }
+
+/* Minimized macros use three fixed 44 px columns. The value face hides, while
+   routing, depth/value and delete remain in the same place for every row. */
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:144px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots {
+  display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:0 4px 4px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slot {
+  flex:0 0 48px;height:48px;margin:0; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow {
+  height:46px;grid-template-columns:44px 44px 44px;gap:0; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotx { display:flex;grid-column:3; }

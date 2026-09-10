@@ -216,11 +216,12 @@ attaches the behaviour and does the painting:
 - **the preset bar** — `mw.foot.{open, save, name, prev, next, dead}`. `dead` starts with
   `.off`, which is `display: none`; a warning that is always on the glass is furniture.
 - **the macro rail** — `mw.addMacro({id, kind}, index)` per macro, 1-based. Paint
-  `.vname`, `.vnum`, `.drive`, `.route`, and write `--fill` (knob) or `--hit` (trigger)
+  `.vname`, `.vnum`, `.drive`, and write `--fill` (knob) or `--hit` (trigger)
   inline on `.signal`. The track line under the name is `.m2signal::before` — a
-  pseudo-element. There is nothing in the DOM to find.
+  pseudo-element. `.m2slotx` is the row's delete seat; the signal face is also the
+  vertical reorder surface. There is nothing in the DOM to find for the track.
 - **the rack** — `mw.addDevice({id, kind})`, kind `'lfo' | 'env' | 'audio'`. Cards are
-  inserted ahead of `.m2add`. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
+  appended to the horizontal scroller. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
   presentation tri-state.
 - **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; the measuring law is
   `w = max(60, round(box.clientWidth) || 206)`,

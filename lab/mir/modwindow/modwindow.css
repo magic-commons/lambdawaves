@@ -6,21 +6,23 @@
    and three separate ports threw the window away and re-implemented its
    FUNCTIONS in the host's idiom.  This file exists so that never happens again.
 
-   PROVENANCE, every line of it:
+   PROVENANCE BASELINE:
      PART A  the chrome the window sits in — 42 rules out of index.html,
              via EXTRACT-MODWINDOW.md files 02 (WindowKit) and 04 (material).
-     PART B  the window's own sheet — anim.js:1782–3306, all 664 rules,
-             every declaration block byte-identical.
+     PART B  the window's own sheet — anim.js:1782–3306, originally imported
+             as 664 rules.  Shipping revisions are called out where they occur;
+             the macro rail rules intentionally follow the revised builder.
 
    PART A COMES FIRST ON PURPOSE.  In the running app the chrome lives in
    index.html and the window's own sheet is appended to <head> at first open,
-   so file 01 wins every tie.  Several rules depend on that — notably
+   so file 01 wins every tie inside the portable sheet.  Several rules depend
+   on that — notably
    `#modwin .m2edit { background: transparent }` beating
    `.m2edit { background: var(--m2-recess) }` in the SAME sheet, and
    `#modwin.modwin { overflow: visible; contain: layout }` undoing `.kwin`'s
    `overflow: hidden; contain: layout paint` so the work bars can paint beyond
-   the window.  Keep this order.  Do not load a host sheet after this one that
-   can reach inside .mir-modwindow.
+   the window.  Keep this internal order.  The host sheet loads afterwards and
+   uses explicit high-specificity overrides for documented λWAVES integration.
 
    ONE NAMESPACE CLASS: `mir-modwindow`, on the window root.  Nothing else
    needs it.  See MANIFEST.md for the six-branch scoping law and every
@@ -459,14 +461,15 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 
    SOURCE  : anim.js:1782–3306, the template literal inside injectMod2Css(),
              which the running app mounts as <style id="mod2css">.
-   TAKEN   : byte-for-byte, comments and whitespace included.  The nine ${…}
+   BASELINE: imported byte-for-byte, comments and whitespace included.  The nine ${…}
              template holes are substituted with the integers anim.js
              interpolates, so the text below is what the BROWSER receives:
                M2_WORK_LANE_H 52 · M2_SLOT_H 64 · M2_PREBAR_W 294
                M2_TIMING_W 450 · M2_STRIP_W 64 · M2_RAIL_W 224
                M2_CARD.E.h 368 · M2_CARD.C.w 320 · M2_CARD.C.h 368
-   CHANGED : selector text only, by one mechanical law.  See MANIFEST.md.
-             Every declaration block below is untouched.
+   SCOPED  : selector text by one mechanical law.  See MANIFEST.md.
+   REVISED : later shipping changes are documented inline.  The macro rail's
+             controls and row grid intentionally match the current builder.
 
    THE SCOPING LAW, in full — each comma-separated selector part takes exactly
    one of six branches:
@@ -621,20 +624,17 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 .mir-modwindow .m2slots::-webkit-scrollbar-track { background: var(--m2-recess); border-radius: 4px; }
 .mir-modwindow .m2slots::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.30); border-radius: 4px; }
 .mir-modwindow .m2slots::-webkit-scrollbar-thumb:active { background: var(--acc); }
-/* the +/− row: two 44 px halves of one 44 px row, so the rail's macro count is
-   a control and costs the slot stack no height at all */
+/* the add row: two explicit 44 px verbs, pinned outside the slot scroller */
 /* pinned at the foot of the RAIL, outside the .m2slots scroller, so growing the rail can
    never push the button that grows it out of view — see buildMod2 */
 .mir-modwindow .m2macrow { flex: 0 0 auto; display: flex; align-items: stretch; gap: 3px;
   padding: 2px 5px 6px; }
-.mir-modwindow .m2macadd, .mir-modwindow .m2macdel { flex: 1 1 0; min-width: 44px; height: 44px; min-height: 44px;
+.mir-modwindow .m2macadd, .mir-modwindow .m2devadd { flex: 1 1 0; min-width: 44px; height: 44px; min-height: 44px;
   padding: 0; border-radius: 7px; border: var(--glass-border) solid var(--glass-hairline);
   background: transparent; color: var(--acc2);
-  font: 400 19px var(--font-sans); line-height: 1; }
-.mir-modwindow .m2macdel { color: rgba(255,255,255,0.62); }
-.mir-modwindow .m2macadd:active:not(:disabled) { background: var(--acc2-soft); }
-.mir-modwindow .m2macdel:active:not(:disabled) { background: var(--glass-press); color: #fff; }
-.mir-modwindow .m2macadd:disabled, .mir-modwindow .m2macdel:disabled { opacity: 0.30; }
+  font: 700 8px var(--font-sans); letter-spacing: .08em; line-height: 1; }
+.mir-modwindow .m2macadd:active:not(:disabled), .mir-modwindow .m2devadd:active:not(:disabled) { background: var(--acc2-soft); }
+.mir-modwindow .m2macadd:disabled, .mir-modwindow .m2devadd:disabled { opacity: 0.30; }
 /* Every slot is one fixed controller row.  Its three permanent zones are the
    route grip, a future-ready 44 px number seat, and the information face. */
 .mir-modwindow .m2slot { position: relative; height: 64px; box-sizing: border-box;
@@ -644,8 +644,8 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 /* A slot whose macro is gone. */
 .mir-modwindow .m2slot.m2dead { border-color: var(--bad); }
 .mir-modwindow .m2slot.m2dead .m2num { border-color: var(--bad); color: var(--bad); }
-.mir-modwindow .m2slotrow { display: grid; grid-template-columns: 44px 44px minmax(0, 1fr);
-  align-items: stretch; gap: 4px; height: calc(64px - 2px); }
+.mir-modwindow .m2slotrow { display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px;
+  align-items: stretch; gap: 0; height: calc(64px - 2px); }
 /* the 4-way "ICON DRAGABLE" handle: a real 44 px target with a small icon in it */
 .mir-modwindow .m2grip { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; min-height: 44px;
   align-self: center; padding: 0; border: 0;
@@ -704,9 +704,14 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 .mir-modwindow .m2route.m2many { color: var(--acc); }
 .mir-modwindow .m2slot.m2dead .m2route { color: var(--bad); }
 .mir-modwindow .m2val:active { background: rgba(255,255,255,0.055); }
+.mir-modwindow .m2slotx { width: 44px; min-width: 44px; height: 44px; min-height: 44px;
+  align-self: center; display: flex; align-items: center; justify-content: center;
+  padding: 0; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,.42); }
+.mir-modwindow .m2slotx svg { width: 13px; height: 13px; pointer-events: none; }
+.mir-modwindow .m2slotx:active { background: var(--glass-press); color: var(--acc2); }
 /* Rename is an in-place overlay over the information face.  It leaves the
    route grip exposed and never changes this or any neighbouring row's height. */
-.mir-modwindow .m2namerow { position: absolute; z-index: 3; left: 48px; right: 4px; top: 9px;
+.mir-modwindow .m2namerow { position: absolute; z-index: 3; left: 48px; right: 48px; top: 9px;
   height: 44px; display: flex; align-items: stretch; gap: 3px; margin: 0; padding: 0; }
 .mir-modwindow .m2namerow[hidden] { display: none; }
 .mir-modwindow .m2name { display: block; flex: 1 1 auto; min-width: 0; height: 44px; box-sizing: border-box;
@@ -1636,7 +1641,7 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 /* The ribbon keeps the transport. */
 /* The ribbon keeps the transport. */
 .mir-modwindow .m2ribbon .m2railhead, .mir-modwindow .m2ribbon .m2macrow, .mir-modwindow .m2ribbon .m2namerow,
-.mir-modwindow .m2ribbon .m2grip, .mir-modwindow .m2ribbon .m2pad, .mir-modwindow .m2ribbon .m2sep,
+.mir-modwindow .m2ribbon .m2grip, .mir-modwindow .m2ribbon .m2slotx, .mir-modwindow .m2ribbon .m2pad, .mir-modwindow .m2ribbon .m2sep,
 .mir-modwindow .m2ribbon .m2val, .mir-modwindow .m2ribbon .m2vname, .mir-modwindow .m2ribbon .m2vnum,
 .mir-modwindow .m2ribbon .m2signal, .mir-modwindow .m2ribbon .m2vmeta,
 .mir-modwindow .m2ribbon .m2predel, .mir-modwindow .m2ribbon .m2predead,

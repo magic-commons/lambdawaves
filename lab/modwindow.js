@@ -1,13 +1,11 @@
 /* modwindow.js — THE HOST SIDE OF A PORTED WINDOW.  It wires; it does not design.
  *
- * `lab/mir/modwindow/` is an ARTIFACT: BASINS' modulation window, moved here whole under
- * docs/ui/STYLE-LOCK.md's PORTED-WINDOW EXCEPTION.  Its stylesheet is 667 of 667 declaration
- * blocks byte-identical to the source's and its builder emits the source's DOM tree; neither
- * knows this app exists.  **Nothing in this file draws a control, invents a shape, or reaches
- * for the house kit.**  Every element it touches was built by `modwindow.js` in the artifact
- * directory, and every behaviour attached here is a behaviour the artifact deliberately does
- * not carry — it BUILDS AND DOES NOT WIRE (its own words), so the wiring is the host's by
- * construction, not by adaptation.
+ * `lab/mir/modwindow/` began as BASINS' modulation window under
+ * docs/ui/STYLE-LOCK.md's PORTED-WINDOW EXCEPTION.  Its portable builder now includes the
+ * user-approved macro rail revision; this host attaches the behavior, selection state, dial
+ * paint, routing, persistence, and rearranging that the builder deliberately does not carry.
+ * The split remains simple: the artifact builds stable element references and this file wires
+ * them to λWAVES.
  *
  * THE ONE SENTENCE THAT MUST NOT APPEAR ANYWHERE BELOW is "the equivalent in our kit would
  * be".  Three previous passes at this port wrote it and each threw the window away.
@@ -68,7 +66,6 @@
  */
 import { el, seg, trig, knob, tapWatcher } from './kit.js';
 import { bindSliderKeys } from './slider-keys.js';
-import { glyphEl } from './mir/glyph.js';                    // wave 75: the rail chip's ink is a drawing, never a character
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -159,37 +156,9 @@ export function createModulation(host, port) {
   seatCurveName();
   seatRailHead();
 
-  /* ── WAVE 75 · THE ADD CONTROL IS A RAIL CHIP ───────────────────────────────────────────────
-     JOSH: "Move and change the add plug in to be like another 'chip' or button on the left side of
-     the window … Use the 'X' glyph from the chip and just rotate it 45 degrees and center it.
-     Insert the chip in between the drag chip and the minimize chip.  Hitting the plus sign will
-     show the drop down menu where it's at."
-       The artifact's own `.m2add` is a button INSIDE the device run, which is why it drifted around
-     the layout as devices came and went.  The rail is where this window's verbs already live, so the
-     verb moves there.  The chip is built exactly as `buildChipRail` builds its own — same classes,
-     same dataset keys, same 26-px drawing — so every one of the five chip-rail rules in
-     modwindow.css reaches it without a single new selector.
-       THE MARK IS THE CLOSE GLYPH TURNED 45°, which is Josh's own instruction and is also the
-     honest one: a `+` as a text character is a request to whatever font the device resolves (the
-     reason glyph.js exists at all), while the X is already a drawn, vendored path — rotate it an
-     eighth turn and it IS a plus, at the same weight and the same optical centre as its neighbours.
-       The rail's DOM order is close · compact · workbars · ribbon · drag, and `ribbon` wears the
-     `leave` bar — the minus-looking one Josh means by "the minimize chip" — so inserting before the
-     grip puts the chip exactly between the two he named. */
-  const railChips = (root.modwindow && root.modwindow.chiprail && root.modwindow.chiprail.chips) || {};
-  const addChip = document.createElement('button');
-  addChip.type = 'button';
-  addChip.className = 'kwin-tab crail-chip m2addchip';
-  addChip.dataset.rail = 'add';
-  addChip.dataset.chromeKind = 'action';
-  addChip.dataset.reopensWindow = 'false';
-  addChip.dataset.ink = 'close';
-  addChip.setAttribute('aria-label', 'Add a modulation device — an LFO or an envelope');
-  addChip.setAttribute('aria-expanded', 'false');
-  addChip.title = 'add a modulation device — an LFO or an envelope';
-  { const ink = glyphEl('close', 'crail-ink gly-close', 26); if (ink) addChip.appendChild(ink); }
-  if (railChips.drag && railChips.drag.parentNode === rail) rail.insertBefore(addChip, railChips.drag);
-  else rail.appendChild(addChip);
+  /* Adding belongs with the rack it changes. The macro rail now owns the two
+     explicit ADD MACRO and ADD DEVICE buttons, leaving the window chip rail
+     for window-level actions only. */
   const mw = root.modwindow;
   const panel = mw.panel, foot = mw.foot, transport = mw.transport, rackEl = mw.rack;
 
@@ -271,7 +240,7 @@ export function createModulation(host, port) {
   /* WAVE 100 · the width at the last place, so only a GROWTH pulls the window back on screen */
   let lastW = -1;
 
-  const CARD_TRIM = 32, FLOAT_ROOM = 6;
+  const CARD_TRIM = 32, FLOAT_ROOM = 6, MACRO_MIN_W = 144;
   /* ═══ THE GEOMETRY IS ARITHMETIC.  `sizeLaw` never measures the live window. ════════════ */
   const devOrder = () => M.sourceList().filter((s) => s.kind !== 'audioout');
   const modeOf = (id) => { if (P.modes[id]) return P.modes[id] === 'C' ? 'C' : P.modes[id] === 'M' ? 'M' : 'F';
@@ -280,7 +249,8 @@ export function createModulation(host, port) {
 
   function place() {
     if (root.querySelector('.mod-matrix[open]')) return;
-    const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }) - (P.macroMin && !P.ribbon ? 112 : 0);
+    const macroTrim = P.macroMin && !P.ribbon ? GEOM.RAIL_W - MACRO_MIN_W : 0;
+    const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }) - macroTrim;
     const h = sizeLaw.height({ uiScale: 1 });
     const vw = window.innerWidth, vh = window.innerHeight;
     /* ── WAVE 100 · THE WINDOW MAY NOT GROW PAST THE SCREEN ──────────────────────────────────────
@@ -427,9 +397,8 @@ export function createModulation(host, port) {
        JOSH: "When the chips move to teleport to the right when going off screen, they seem to be too
        far away from the rightmost device, can you make the gap just as close as the left-side's way?"
          The two branches were spending the SAME 4 px and still looked nothing alike, because they were
-       measured from different things.  `sizeLaw.width` is chrome + rail + run padding + ADD_SEAT_W +
-       the cards, and ADD_SEAT_W is 89 px of room for the `.m2add` button that reach 20 HIDES — so the
-       window's right edge stands ~96 px past the last card, and chips placed 4 px outside the WINDOW
+       measured from different things.  The inherited size law includes historical room after the
+       cards, so the window's right edge stands past the last card and chips placed outside the WINDOW
        are a hundred pixels from the DEVICE the eye lines them up against.  (Wave 76 found this same
        surplus under the tempo bar, in this same function, for this same reason.)
          So this side is measured too.  The LEFT gap is read as laid out — the chips' right edge to the
@@ -770,7 +739,10 @@ export function createModulation(host, port) {
   /** THE SELECTED MACRO — view state, never serialized: it decides which macro's route the
    *  OUTER arc of a ring edits, and nothing else. */
   let selMacro = null;
+  let selSource = null;
   const macroIds = () => M.macroList().filter((m) => m.kind !== 'trigger').map((m) => m.id);
+  const sourceOwnsMacro = (sourceId, m) => !!(sourceId && m && m.sourceId &&
+    (m.sourceId === sourceId || m.sourceId.startsWith(sourceId + ':')));
   function selectedMacro() {
     const ids = macroIds();
     if (!ids.length) return null;
@@ -779,9 +751,20 @@ export function createModulation(host, port) {
     return selMacro;
   }
   function selectMacro(id) {
-    selMacro = id;
+    selMacro = id; selSource = null;
     for (const [mid, rec] of macRows) rec.root.classList.toggle('sel', mid === id);
     paintRings();
+  }
+  function selectSource(id) {
+    selSource = id;
+    const owned = M.macroList().filter((m) => sourceOwnsMacro(id, m));
+    if (owned.length) selMacro = owned[0].id;
+    for (const [mid, rec] of macRows) rec.root.classList.toggle('sel', owned.some((m) => m.id === mid));
+    paintRings();
+  }
+  function routeSelected(r) {
+    const m = r && M.macroOf(r.macroId);
+    return !!(m && (selSource ? sourceOwnsMacro(selSource, m) : r.macroId === selectedMacro()));
   }
   function editRouteOf(id) {
     const sel = selectedMacro(); if (!sel) return null;
@@ -830,7 +813,7 @@ export function createModulation(host, port) {
     const idx = routeIndex();
     for (const [id, rec] of rings) {
       if (idx.has(id) && registry.has(id) && rec.dial.isConnected) continue;
-      rec.svg.remove(); if(rec.depth) rec.depth.root.remove(); if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring');
+      rec.svg.remove(); if(rec.depth) rec.depth.root.remove(); if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring', 'mod-selected');
       rings.delete(id);
     }
     for (const id of idx.keys()) {
@@ -852,6 +835,12 @@ export function createModulation(host, port) {
     rec.hit.setAttribute('d', fullD(R_HIT));
     dial.appendChild(svg);
     if (dial.parentElement) dial.parentElement.classList.add('has-ring');
+    dial.addEventListener('pointerdown', (e) => {
+      if (e.button) return;
+      const rs = M.routesOfTarget(id).filter((r) => !r.dormant);
+      const chosen = rs.find(routeSelected) || rs[0];
+      if (chosen) selectMacro(chosen.macroId);
+    });
     wireRing(rec);
     const depth = knob({label:'RANGE',min:-1,max:1,value:0,fmt:v=>(v*100).toFixed(0)+'%',onInput:d=>{const r=editRouteOf(id);if(!r)return;M.setRouteRange(r.id,{min:Math.max(0,-d),max:Math.max(0,d)});apply();paintRings();}});
     depth.root.classList.add('k-route-depth'); depth.root.title='Selected macro range; the large dial sets the base';
@@ -882,6 +871,8 @@ export function createModulation(host, port) {
   function paintRing(rec, q) {
     const id = rec.id;
     const hide = (p) => p.setAttribute('d', '');
+    const root = rec.dial.parentElement;
+    if (root) root.classList.toggle('mod-selected', !!(q && q.rs.some(routeSelected)));
     if (rec.depth) { const route = editRouteOf(id); rec.depth.root.hidden = !q || !route; if (route) rec.depth.set(route.max - route.min); }
     if (!q || !registry.has(id)) { hide(rec.edit); hide(rec.stack); hide(rec.tick); hide(rec.spur); return; }
     const st = registry.state(id), wrap = st.wrap, g = ringGeom(wrap);
@@ -1193,10 +1184,9 @@ export function createModulation(host, port) {
      the chip re-opens on. */
   const pickAway = (e) => {
     const t = e.target;
-    if (devPickOpen && !pick.root.contains(t) && !addChip.contains(t)
-        && !(rackEl.add && rackEl.add.contains(t))) setDevPick(false);
+    if (devPickOpen && !pick.root.contains(t) && !rackEl.devadd.contains(t)) setDevPick(false);
     if (macroPickOpen && !mpick.root.contains(t) && !(rackEl.macadd && rackEl.macadd.contains(t))) {
-      macroPickOpen = false; mpick.root.hidden = true;
+      macroPickOpen = false; mpick.root.hidden = true; rackEl.macadd.setAttribute('aria-expanded', 'false');
     }
   };
   document.addEventListener('pointerdown', pickAway, true);
@@ -1210,25 +1200,70 @@ export function createModulation(host, port) {
    * ═══════════════════════════════════════════════════════════════════════════════════════ */
   const macRows = new Map();
   let macroPickOpen = false;
-  rackEl.macadd.title = 'add a macro: the thing a source (or a hand) drives, and the thing a route carries to a target';
+  rackEl.macadd.title = 'add a macro: the thing a source or a hand drives, and a route carries to a target';
+  rackEl.macadd.setAttribute('aria-expanded', 'false');
   rackEl.macadd.addEventListener('click', () => {
     if (M.macroList().length >= M.MACRO_MAX) { status('eight macros is the model\'s ceiling', 'warn'); return; }
     macroPickOpen = !macroPickOpen; mpick.root.hidden = !macroPickOpen;
+    rackEl.macadd.setAttribute('aria-expanded', String(macroPickOpen));
   });
   for (const kind of ['knob', 'trigger']) {
     if (!mpick.btns[kind]) continue;
     mpick.btns[kind].addEventListener('click', () => {
       mpick.root.hidden = true; macroPickOpen = false;
+      rackEl.macadd.setAttribute('aria-expanded', 'false');
       M.addMacro(null, { kind });
       rebuild();
     });
   }
-  rackEl.macdel.title = 'remove the selected macro and every route it carries';
-  rackEl.macdel.addEventListener('click', () => {
-    const id = selectedMacro();
-    if (!id) { status('no macro to remove', 'warn'); return; }
-    M.removeMacro(id); clock.recomputeRunning(); apply(); rebuild();
-  });
+
+  /* Horizontal travel still sets a hand macro. Vertical travel over the same
+     indicator face reorders the stable macro identities. Moving the DOM while
+     dragging gives direct feedback; the model commits once on release. */
+  function wireMacroReorder(rec, macroId) {
+    let d = null;
+    const detach = () => {
+      document.removeEventListener('pointermove', move, true);
+      document.removeEventListener('pointerup', up, true);
+      document.removeEventListener('pointercancel', cancel, true);
+    };
+    const move = (e) => {
+      if (!d || e.pointerId !== d.pointerId) return;
+      const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y);
+      if (!d.mode) {
+        if (Math.max(dx, dy) < 7) return;
+        d.mode = dy > dx + 2 ? 'reorder' : 'value';
+      }
+      if (d.mode !== 'reorder') return;
+      e.preventDefault(); e.stopPropagation();
+      rec.root.classList.add('m2reorder');
+      const rows = [...rackEl.slots.querySelectorAll(':scope > .m2slot')].filter((r) => r !== rec.root);
+      const before = rows.find((r) => e.clientY < r.getBoundingClientRect().top + r.getBoundingClientRect().height / 2);
+      if (before) rackEl.slots.insertBefore(rec.root, before); else rackEl.slots.appendChild(rec.root);
+    };
+    const stop = (e, cancel) => {
+      if (!d || e.pointerId !== d.pointerId) return;
+      const reorder = d.mode === 'reorder'; d = null;
+      detach();
+      if (!reorder) return;
+      e.preventDefault(); e.stopPropagation();
+      rec.root.classList.remove('m2reorder');
+      if (!cancel) {
+        const to = [...rackEl.slots.querySelectorAll(':scope > .m2slot')].indexOf(rec.root);
+        M.moveMacro(macroId, to); apply();
+      }
+      rebuild();
+    };
+    const up = (e) => stop(e, false);
+    const cancel = (e) => stop(e, true);
+    rec.root.addEventListener('pointerdown', (e) => {
+      if (e.button || e.target.closest('.m2grip,.m2numseat,.m2slotx,.m2namerow,.m2pad')) return;
+      d = { x: e.clientX, y: e.clientY, pointerId: e.pointerId, mode: '' };
+      document.addEventListener('pointermove', move, true);
+      document.addEventListener('pointerup', up, true);
+      document.addEventListener('pointercancel', cancel, true);
+    }, true);
+  }
 
   function rebuildMacros() {
     rackEl.slots.innerHTML = ''; macRows.clear();
@@ -1240,6 +1275,13 @@ export function createModulation(host, port) {
       rec.grip.title = 'ROUTE this macro. DRAG it onto any dial — the range starts as the room that dial has left, so nothing clips. Or TAP to ARM it and then tap a lit dial. Double-tap resets the macro';
       rec.grip.setAttribute('aria-label', 'route ' + m.name + ' — drag onto a control, or tap to arm');
       wireGrip(rec.grip, m.id);
+      wireMacroReorder(rec, m.id);
+      rec.del.title = 'delete ' + m.name + ' and every route it carries';
+      rec.del.setAttribute('aria-label', rec.del.title);
+      rec.del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        M.removeMacro(m.id); clock.recomputeRunning(); apply(); rebuild();
+      });
 
       /* THE NUMBERED SEAT is the MASTER DEPTH: one unipolar gain over everything this macro
          sends, on the artifact's own 34-px ring.  A double-tap puts it back to 100 %, which is
@@ -1283,7 +1325,7 @@ export function createModulation(host, port) {
         };
         wireSlider(rec.val, valueInput);
         bindSliderKeys(rec.val, valueInput);
-        rec.val.title = 'this macro\'s value. Drag sideways to set it by hand; a source-driven macro is locked, because a hand and a modulator cannot share one number';
+        rec.val.title = 'drag sideways to set this macro by hand; drag vertically to reorder it. A source-driven macro is locked because a hand and a modulator cannot share one number';
         aria(rec.val, m.name + ' value', 0, 100, 100 * M.macroOf(m.id).value, '0%');
         /* a DOUBLE-click opens the rename row, which is a sibling already in the DOM: opening it
            only clears `hidden` — nothing is ever reparented. */
@@ -1350,15 +1392,12 @@ export function createModulation(host, port) {
      onset count the lamp compares against, and when it last flashed. */
   const audRings = new Map();
   let devPickOpen = false;
-  rackEl.add.title = 'add a modulation device — an LFO or an envelope';
-  /* WAVE 75 · THE SHEET OPENS WHERE THE HAND IS.  `.m2pick` is `position: absolute; left: 50%` inside
-     the WINDOW, which is the right answer for a button in the run and the wrong one for a chip on a
-     rail that is a DOM SIBLING of the window — it would open half a window away from the press.  So
-     the sheet goes `fixed` beside the chip (the class does the switching; only the two coordinates
-     are inline), and it flips to the chip's other side when there is no room, which is the same
-     clamp every popover in this lab already does. */
-  function placePickAtChip() {
-    const r = addChip.getBoundingClientRect();
+  rackEl.devadd.title = 'add a modulation device — LFO, ENV or AUDIO';
+  rackEl.devadd.setAttribute('aria-expanded', 'false');
+  /* The picker opens beside the explicit ADD DEVICE button and flips to its
+     other side when the viewport has no room. */
+  function placeDevicePicker() {
+    const r = rackEl.devadd.getBoundingClientRect();
     pick.root.classList.add('m2pick-at-chip');
     /* ⚠ `position: fixed` HERE IS NOT THE VIEWPORT'S, AND THAT IS THE ARTIFACT'S OWN DOING:
        `#modwin.mir-modwindow.modwin` declares `contain: layout` (modwindow.css:499), and a layout
@@ -1381,13 +1420,12 @@ export function createModulation(host, port) {
   function setDevPick(on) {
     devPickOpen = !!on;
     pick.root.hidden = !devPickOpen;
-    addChip.setAttribute('aria-expanded', String(devPickOpen));
-    addChip.classList.toggle('on', devPickOpen);
-    if (devPickOpen) placePickAtChip();
+    rackEl.devadd.setAttribute('aria-expanded', String(devPickOpen));
+    rackEl.devadd.classList.toggle('on', devPickOpen);
+    if (devPickOpen) placeDevicePicker();
     else { pick.root.classList.remove('m2pick-at-chip'); pick.root.style.left = ''; pick.root.style.top = ''; }
   }
-  addChip.addEventListener('click', () => setDevPick(!devPickOpen));
-  rackEl.add.addEventListener('click', () => setDevPick(!devPickOpen));   // the retired button still answers if a host un-hides it
+  rackEl.devadd.addEventListener('click', () => setDevPick(!devPickOpen));
   /* WAVE 100 · ALL THREE KINDS ARE WIRED, AND AUDIO IS STILL DISABLED.  Josh: "prep for everything
      you need for the AUDIO devices minimized, compact, and default adoption into lambdawaves."  The
      loop used to name two kinds, so `ADD AUDIO` carried no listener at all on top of being disabled —
@@ -1764,6 +1802,7 @@ export function createModulation(host, port) {
     const dev = mw.addDevice({ id: s.id, kind: s.kind === 'env' ? 'env' : s.kind === 'audio' ? 'audio' : 'lfo' });
     const rec = { dev, s, id: s.id, kind: dev.kind, g: null, say: '', sig: '' };
     devRows.set(s.id, rec);
+    dev.root.addEventListener('pointerdown', () => selectSource(s.id));
 
     /* ── THE HEAD ── */
     /* WAVE 79 · TWO STATES ON THIS BUTTON, NOT THREE (Josh): "let the behavior of that button be
@@ -2750,7 +2789,6 @@ export function createModulation(host, port) {
         rec.root.style.setProperty('--m2-slot-ink',
           !src ? 'var(--m2-ink-faint)' : src.kind === 'env' ? 'var(--m2-env-ink)' : 'var(--acc)');
         rec.drive.textContent = src ? (src.kind.toUpperCase() + ' ' + (src.label || src.id)) : 'HAND';
-        rec.route.textContent = pad2(M.routeCountOfMacro(m.id)) + ' OUT';
         rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
         rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
         rec.numSeat.setAttribute('aria-disabled',String(P.macroMin && !!m.sourceId));
@@ -3054,7 +3092,8 @@ export function createModulation(host, port) {
     geometry() {
       const r = root.getBoundingClientRect();
       return { w: Math.round(r.width), h: Math.round(r.height), x: P.x, y: P.y,
-               lawW: sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }),
+               lawW: sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon })
+                 - (P.macroMin && !P.ribbon ? GEOM.RAIL_W - MACRO_MIN_W : 0),
                lawH: sizeLaw.height({ uiScale: 1 }) - CARD_TRIM + FLOAT_ROOM, modes: cardModes(), lane: P.lane, ribbon: P.ribbon,
                rail: rail.getAttribute('aria-label'), chips: Object.keys(chips).length };
     },

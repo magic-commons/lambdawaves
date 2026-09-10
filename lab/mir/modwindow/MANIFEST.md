@@ -1,15 +1,16 @@
-# MANIFEST — every deviation from the source, and why
+# MANIFEST — baseline import and shipping revisions
 
-`modwindow.css` is BASINS' modulation window stylesheet. `modwindow.js` is its DOM.
-Everything below is a place where the staged files differ from
-`EXTRACT-MODWINDOW.md` and its five companion files. There is nothing else.
+`modwindow.css` and `modwindow.js` began as BASINS' modulation window. The table
+records the import transformation and the deliberate λWAVES revisions that now
+ship with it.
 
 ## modwindow.css
 
 | # | change | why |
 |---|---|---|
 | C1 | The nine `${…}` template holes are substituted with the integers `anim.js` interpolates — 23 occurrences (52, 64, 294, 450, 64, 224, 368, 320, 368). | A `${}` is not CSS. The result is byte-for-byte the text the browser receives in BASINS. |
-| C2 | **Selector text only** is rewritten, by a six-branch law printed at the head of PART B. Counts: 164 `#modwin…` → `#modwin.mir-modwindow…`; 35 `.modwin…` → `.modwin.mir-modwindow…`; 5 `:root… #modwin…` gain the class on the `#modwin` compound; 551 others gain `.mir-modwindow ` as an ancestor. | The one namespace class. Every declaration block, every comment and every rule's position is byte-identical — verified by diff, 667 of 667 blocks. |
+| C2 | The baseline import rewrote selector text by the six-branch law printed at the head of PART B. Later rules explicitly revise the macro rail layout and controls. | The namespace keeps the portable window isolated while the current builder and stylesheet remain in sync. |
+| C10 | The macro rail uses fixed row columns, full-face rearranging feedback, a per-row close control, and labelled `ADD MACRO` / `ADD DEVICE` actions; the redundant `OUT` caption and add-device chip are gone. | These are the shipping interactions requested for λWAVES. Stable macro ids keep routes attached when rows move. |
 | C3 | **Not scoped, deliberately:** the five `:root`-subject blocks (the 20 `--m2-mat-*` tokens and the three motion tokens); the 5 `.kwin-chiprail[aria-label="MODULATION window controls"]` rules; 43 selector parts whose subject is `.m2ghost`, `.m2ring*`, `.m2clr*`, `.m2span*` or `[data-m2target]`. | Scoping any of these would **change what paints**. The chip rail is a DOM *sibling* of the window, so tokens on the window root would never reach it. The routing overlays are appended **into the routed control**, which `m2droppables()` takes from the app-wide `kit.controls` registry — in BASINS, `colors.js` registers 8 such controls in another window. Scoping them un-paints routing onto host controls. Every one of these names is already `--m2-*`, `.m2*` or a byte-exact aria-label, so none of them can fight a host. |
 | C4 | Restored one character: the `}` that closes `@media (prefers-reduced-motion: reduce)`. | `modwindow-01-anim.css` stops at `anim.js:3306`; the template literal actually runs 1782–**3307**. Without it the sheet is not valid CSS. |
 | C5 | 44 chrome rules brought, each labelled with its `index.html` line and its original selector, in ascending source order, **before** PART B. | The window sits in this chrome. Everything else — 117 `:root.skin-frost` rules, `.jwin*`, `.kwin-halo` / `.kwin-grip` / `.kwin-edge` (this window is `resizable:false`), `.kwin-chip-contentbar`, `.klock`, `.cpick`, `#banner-close`, `#zoe`, `#nebula-card`, `.save-sort-chip`, `:root.window-close-mode-*` — is not needed and is not here. Without `.skin-frost` the classic connected form paints, and it is correct and complete. |
@@ -30,6 +31,7 @@ Everything below is a place where the staged files differ from
 | J6 | The two visible strings that say **MANDELBROT** become `{factory}`, default `'FACTORY'`, in `COPY`. | EXTRACT §5: "a word, not a mechanism". Set `host.copy.factory` to restore it. |
 | J7 | `COPY.knobs[…]` carries BASINS' `.m2kends` range labels as literals though the source derives them from the model (`String(M.ENV_MAX_S) + 's'`, `String(M.STEPS_MAX)`, …). | `#modwin .m2kends { display: none }` — nothing paints them. Overridable through `host.copy`. |
 | J8 | `data-reopens-window` on every chip is the literal `'false'`. | That is what all five of this window's chips resolve to (`reopensWindow: false` on the three `chipItems`; drag and close have their own structural paths). |
+| J9 | Macro rows expose a close button and no route/OUT text. The rail exposes `ADD MACRO` and `ADD DEVICE`; device construction no longer needs a separate add-chip sentinel. | The full row is available for rearranging, compact rows stay aligned, and both creation actions live in one predictable place. |
 
 ## COPIED BROKEN — recorded, not fixed. These are Josh's to decide.
 

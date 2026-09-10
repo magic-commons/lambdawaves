@@ -6795,14 +6795,17 @@ try {
     fold.click(); await nap();
     const restored = box(cards[0]), restoredMode = cards[0].dataset.mode;
     const knobs = [...win.querySelectorAll('.m2kd')].map(box);
-    const add = document.querySelector('.m2addchip');
+    const addMacro = win.querySelector('.m2macadd'), addDevice = win.querySelector('.m2devadd');
     const out = { full, wantedHeight, dims, folded, foldedMode, restored, restoredMode,
       expectedWidth: GEOM.CARD_FULL.w, expectedStrip: GEOM.STRIP_W,
       pane: css(win).backgroundColor, rootVisibility: css(win).visibility,
       surfacesVisible: cards.every(e => css(e).visibility === 'visible' && css(e).pointerEvents === 'auto'),
       sharedRadius: cards.every(e => css(e).borderTopLeftRadius === css(win.querySelector('.m2workbar')).borderTopLeftRadius),
       knobsEqual: knobs.length > 0 && knobs.every(b => b.join() === knobs[0].join() && b[0] > 0),
-      addRetired: box(win.querySelector('.m2add')).join() === '0,0', addReachable: !!add && box(add).every(v => v > 0),
+      addLabels: [addMacro, addDevice].map(e => e && e.textContent.trim()),
+      addsReachable: [addMacro, addDevice].every(e => e && box(e).every(v => v > 0)),
+      obsoleteAddsGone: !win.querySelector('.m2add,.m2addchip,.m2macdel'),
+      slotDeletes: [...win.querySelectorAll('.m2slot')].every(e => !!e.querySelector('.m2slotx') && !e.querySelector('.m2route')),
       reorderHidden: cards.every(e => css(e.querySelector('.m2move')).display === 'none'),
       dots: document.querySelectorAll('.kwin-grip-dots > i').length,
       expectedDots: 9, railName: document.querySelector('.kwin-chiprail').getAttribute('aria-label'),
@@ -6810,14 +6813,15 @@ try {
       errs: window.__e.length };
     __LW.mod.reset(); __LW.mod.collapse(); return out;
   } catch(e) { return {error: String(e)}; }`) || {};
-  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs, moved ADD to the rail, and replaced the three-way fold with FULL/MINIMIZED. Full widths and folded widths still come from the frozen artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The transparent root itself stays visible because WebKit can otherwise omit the device cards inside its momentum scroller until a later mutation; transparent paint and pointer-events still make its gaps real. The artifact stylesheet still parses all 708 rules; unrelated house stylesheet counts carry no law.',
+  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs and replaced the three-way fold with FULL/MINIMIZED. The macro revision gives ADD MACRO and ADD DEVICE permanent rail seats, removes the duplicate add chip, puts delete on each macro row and removes the obsolete OUT label. Full widths and folded widths still come from the artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The transparent root itself stays visible because WebKit can otherwise omit the device cards inside its momentum scroller until a later mutation; transparent paint and pointer-events still make its gaps real. The artifact stylesheet parses all 709 current rules; unrelated house stylesheet counts carry no law.',
     !mwA.error && mwA.full.every(b => b[0] === mwA.expectedWidth && b[1] === mwA.wantedHeight)
       && mwA.dims.w === mwA.dims.lawW && mwA.dims.h === mwA.dims.lawH
       && mwA.folded[0] === mwA.expectedStrip && mwA.folded[1] === mwA.wantedHeight && mwA.foldedMode === 'minimized'
       && mwA.restored.join() === mwA.full[0].join() && mwA.restoredMode === 'full'
       && mwA.pane === 'rgba(0, 0, 0, 0)' && mwA.rootVisibility === 'visible' && mwA.surfacesVisible
-      && mwA.sharedRadius && mwA.knobsEqual && mwA.addRetired && mwA.addReachable && mwA.reorderHidden
-      && mwA.dots === mwA.expectedDots && mwA.railName === 'MODULATION window controls' && mwA.artifactRules === 708 && mwA.errs === 0, mwA);
+      && mwA.sharedRadius && mwA.knobsEqual && mwA.addLabels.join() === 'ADD MACRO,ADD DEVICE'
+      && mwA.addsReachable && mwA.obsoleteAddsGone && mwA.slotDeletes && mwA.reorderHidden
+      && mwA.dots === mwA.expectedDots && mwA.railName === 'MODULATION window controls' && mwA.artifactRules === 709 && mwA.errs === 0, mwA);
 
   /* ══ B130 · THE THREE DEFECTS THE PORT INHERITED, DRIVEN ═══════════════════════════════════
    * Wave 63 deliberately did NOT build these three: they lived in markup this port replaces

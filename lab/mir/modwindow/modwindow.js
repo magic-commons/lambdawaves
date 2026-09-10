@@ -1,10 +1,11 @@
 /* ══════════════════════════════════════════════════════════════════════════
    mir/modwindow/modwindow.js — THE MODULATION WINDOW'S DOM, PORTABLE.
 
-   This emits BASINS' modulation window tree.  Nothing here is adapted or
-   idiomatised: every class string, every nesting order, every literal text
-   node and every structural attribute is what anim.js writes, at the source
-   line named in the comment above each builder.
+   This began as BASINS' modulation window tree and retains its portable
+   builder contract.  The macro rail now carries the host's shipping controls:
+   explicit ADD MACRO / ADD DEVICE actions, a delete control on each row, and
+   no redundant OUT caption.  The remaining builders keep the source's DOM
+   vocabulary and are labelled with their original anim.js locations.
 
    IT BUILDS AND IT DOES NOT WIRE.  There is no model, no registry, no
    persistence and no paint in this file.  It returns element references; the
@@ -473,7 +474,7 @@ export function createModWindow(host) {
     chiprail: null,
     /* the sub-builders, so the host can grow the rack after the first paint */
     addMacro: (m, index) => buildMacroSlot(rack.slots, m, index),
-    addDevice: (src) => buildDevice(rack.run, rack.add, src, copy),
+    addDevice: (src) => buildDevice(rack.run, null, src, copy),
     setDeviceMode, setViewHeight: (px) => setViewHeight(rack.root, px),
     buildRing, buildSpan, buildClear, buildGhost,
     buildDevicePick: () => buildDevicePick(root, copy),
@@ -553,21 +554,17 @@ function buildRack(panel, copy) {
   /* PINNED OUTSIDE THE SCROLLER, at the rail's foot, so "the button that grows
      the rail can never be pushed out of view by growing the rail". */
   const macrow = m2mk('div', 'm2macrow', rail);
-  const macdel = m2mk('button', 'm2macdel', macrow);
-  macdel.type = 'button';
-  setGlyph(macdel, 'leave', { size: 14 });      // a drawn bar, not a "−"
   const macadd = m2mk('button', 'm2macadd', macrow);
   macadd.type = 'button';
-  macadd.textContent = '+';                      // a literal plus character
+  macadd.textContent = 'ADD MACRO';
+  const devadd = m2mk('button', 'm2devadd', macrow);
+  devadd.type = 'button';
+  devadd.textContent = 'ADD DEVICE';
 
   const run = m2mk('div', 'm2run', root);
   run.dataset.inputOwner = 'rack-scroll';
-  const add = m2mk('button', 'm2add', run);
-  add.type = 'button';
-  add.textContent = '+';
-  add.setAttribute('aria-label', 'Add a modulation device — LFO or ENV');
 
-  return { root, rail, railhead, slots, macrow, macdel, macadd, run, add };
+  return { root, rail, railhead, slots, macrow, macadd, devadd, run };
 }
 
 /** anim.js:6763 — the only fluid vertical number, clamped to [220, 368]. */
@@ -742,8 +739,7 @@ function buildMacroFace(hostEl, trigger) {
   const meta = m2mk('span', 'm2vmeta', hostEl);
   meta.setAttribute('aria-hidden', 'true');
   const drive = m2mk('span', 'm2drive', meta);
-  const route = m2mk('span', 'm2route', meta);
-  return { info, vname, vnum, signal, fill, marker, spark, sparkLine, padin, meta, drive, route };
+  return { info, vname, vnum, signal, fill, marker, spark, sparkLine, padin, meta, drive };
 }
 
 /** anim.js:4313.  A SIBLING of .m2slotrow, absolutely positioned over the
@@ -782,16 +778,20 @@ export function buildMacroSlot(slotbox, m, index) {
   if (trigger) face.type = 'button'; else face.setAttribute('role', 'slider');
   const parts = buildMacroFace(face, trigger);
 
+  const del = m2mk('button', 'm2slotx', row);
+  del.type = 'button';
+  setGlyph(del, 'close', { size: 14, label: 'Delete ' + (trigger ? 'trigger ' : 'macro ') + index });
+
   const ed = mkEditRow(root, trigger ? 'Trigger' : 'Macro', index);
 
   return {
     id: m && m.id, kind: trigger ? 'trigger' : 'knob', index,
-    root, row, grip, val: trigger ? null : face, pad: trigger ? face : null,
+    root, row, grip, del, val: trigger ? null : face, pad: trigger ? face : null,
     numSeat: numbered.seat, num: numbered.num, depthArc: numbered.depthArc,
     vname: parts.vname, vnum: parts.vnum, signal: parts.signal,
     marker: parts.marker, fill: parts.fill, spark: parts.spark,
     sparkLine: parts.sparkLine, padin: parts.padin,
-    drive: parts.drive, route: parts.route,
+    drive: parts.drive,
     erow: ed.row, name: ed.name, clr: ed.clr
   };
 }
@@ -929,7 +929,7 @@ function mkCheck(parent, label, aria) {
 
 /**
  * @param {HTMLElement} run   the `.m2run` scroller
- * @param {HTMLElement} add   the `.m2add` button; cards are insertBefore'd it
+ * @param {HTMLElement|null} add optional insertion sentinel retained for callers of this exported builder
  * @param {object} src        { id, kind: 'lfo'|'env'|'audio' }
  */
 export function buildDevice(run, add, src, copyIn) {

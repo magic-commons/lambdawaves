@@ -1648,5 +1648,31 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
   M.modReset();
 }
 
+/* ══════════════ 24 · MACRO ORDER IS PRESENTATION, IDENTITY KEEPS THE ROUTES ══════════════ */
+{
+  M.modReset();
+  const third = M.addMacro();
+  const before = M.macroList(), firstId = before[0].id, secondId = before[1].id;
+  M.setMacro(secondId, { name: 'BASS MOVEMENT' });
+  const route = M.addRoute(firstId, 'material.exposure', 0, 0.4).route;
+  const moved = M.moveMacro(firstId, 2);
+  const order = M.macroList();
+  const wire = JSON.parse(JSON.stringify(M.serialize()));
+  M.modReset(); M.deserialize(wire);
+  const restored = M.macroList();
+  judge('24 · REORDERING MOVES A STABLE MACRO ID, not its wiring: macro 1 can move to slot 3 while its route keeps the same macroId, generated names follow the visible 1/2/3 order, a human name remains untouched, and serialization restores that same order',
+    moved === 2 && order.map((m) => m.id).join() === [secondId, third.id, firstId].join()
+      && order.map((m) => m.name).join('|') === 'BASS MOVEMENT|MACRO 2|MACRO 3'
+      && M.routeList().some((r) => r.id === route.id && r.macroId === firstId)
+      && restored.map((m) => m.id).join() === order.map((m) => m.id).join(),
+    { moved, order: order.map((m) => [m.id, m.name]), routeMacro: route.macroId,
+      restored: restored.map((m) => [m.id, m.name]) });
+  M.removeMacro(third.id);
+  judge('24 · REMOVING A ROW CLOSES THE ORDINAL GAP without renaming a human label',
+    M.macroList().map((m) => m.name).join('|') === 'BASS MOVEMENT|MACRO 2',
+    M.macroList().map((m) => [m.id, m.name]));
+  M.modReset();
+}
+
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'mir.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

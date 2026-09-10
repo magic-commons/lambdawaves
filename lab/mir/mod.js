@@ -415,7 +415,7 @@ export function tapTempo(taps, t) {
 }
 
 const seq = { macro: 0, source: 0, route: 0 };
-export const modStat = { macroAdds: 0, macroRemoves: 0, sourceAdds: 0, sourceRemoves: 0,
+export const modStat = { macroAdds: 0, macroRemoves: 0, macroMoves: 0, sourceAdds: 0, sourceRemoves: 0,
                          routeAdds: 0, routeRemoves: 0, routeReplaces: 0, triggers: 0,
                          sourceMoves: 0, macroRefusals: 0, bankPastes: 0,
                          presetSaves: 0, presetLoads: 0, presetDeletes: 0,
@@ -433,6 +433,9 @@ export const modStat = { macroAdds: 0, macroRemoves: 0, sourceAdds: 0, sourceRem
 /* Returns the generated name for a new macro. */
 function genericMacroName(index0, kind) {
   return (kind === 'trigger' ? 'TRIG ' : 'MACRO ') + (index0 + 1);
+}
+function renumberGenericMacros() {
+  for (let i = 0; i < macros.length; i++) if (!macros[i].named) macros[i].name = genericMacroName(i, macros[i].kind);
 }
 
 function newMacro(name, opts) {
@@ -1087,8 +1090,27 @@ export function removeMacro(id) {
   macroById.delete(key);
   const i = macros.indexOf(m);
   if (i >= 0) macros.splice(i, 1);
+  renumberGenericMacros();
   modStat.macroRemoves++;
   return true;
+}
+
+/** Moves a macro by stable identity. Routes and source assignments keep the
+    macro id; only its display order and generated label change. */
+export function moveMacro(id, index) {
+  const m = macroById.get(String(id));
+  if (!m) return -1;
+  const from = macros.indexOf(m);
+  if (from < 0) return -1;
+  let to = Math.round(Number(index));
+  if (!Number.isFinite(to)) return from;
+  to = Math.max(0, Math.min(macros.length - 1, to));
+  if (to === from) return from;
+  macros.splice(from, 1);
+  macros.splice(to, 0, m);
+  renumberGenericMacros();
+  modStat.macroMoves++;
+  return to;
 }
 
 /** Sets the macro's knob, master depth, name and source assignment; sourceId null is unassigned. */

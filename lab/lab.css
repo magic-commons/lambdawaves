@@ -1068,10 +1068,10 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
 .mod-exp:hover { color: var(--fg); background: var(--glass-press); }
 .mod-exp.live { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) 55%, transparent); background: var(--acc2-soft); }
 
-/* a knob whose parameter a modulator is holding wears ACCENT B wherever it lives in the rack: the
-   dial is telling the truth about a number the hand did not set, and it should say whose it is */
-.k.mod-held .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc2) 65%, transparent); }
-.k.mod-held .k-needle { background: var(--acc2); }
+/* A knob whose parameter a modulator is holding wears ACCENT A wherever it lives in the rack.
+   Selecting the route's macro or source promotes it to ACCENT B in the host layer. */
+.k.mod-held .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 65%, transparent); }
+.k.mod-held .k-needle { background: var(--acc); }
 
 /* ═══ wave 60 — W-MODSHAPE: one picture per source, and the six controls it makes meaningful ══════
  * Josh, on the window as wave 52 shipped it: "it seems like the modulation window still hasn't
@@ -1165,9 +1165,9 @@ svg.mod-cv { display: block; width: 100%; height: 108px; touch-action: none; cur
  * the colored arc around the knob changes the arc length."  This AMENDS the containment law in
  * docs/ui/STYLE-LOCK.md: modulation's CONTROLS stay in the modulation window, and exactly two things
  * reach out onto a target knob — the ROUTE gesture while it is live, and the ARC once a route exists.
- * EVERY COLOUR HERE IS `--acc2`, which is ACCENT B, which is what "relationship" already means; not
- * one hue is invented, and nothing is ever painted `--bad` (that is spoken for, and a red arc would
- * be unreadable at 34 px anyway — the OVERFLOW is said with GEOMETRY, the spur below). */
+ * Routed controls use ACCENT A so their active state stays visible without taking over the surface.
+ * Selecting the controlling macro or device promotes that route to ACCENT B. Nothing is painted
+ * `--bad`; overflow is communicated by the spur geometry below. */
 
 /* THE GRIP.  A dedicated handle carrying the macro's ordinal, because the row beside it holds a text
    field and a select and a draggable row would steal the caret and the menu. 22 px of ink; the phone
@@ -1222,15 +1222,15 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .k-ring { position: absolute; inset: -14px; overflow: visible; pointer-events: none; }
 .k-ring-edit, .k-ring-stack, .k-ring-tick, .k-ring-spur {
   fill: none; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
-.k-ring-edit { stroke: var(--acc2); stroke-width: 2.5; }
-.k-ring-stack { stroke: color-mix(in srgb, var(--acc2) 42%, transparent); stroke-width: 1.5; }
+.k-ring-edit { stroke: var(--acc); stroke-width: 2.5; }
+.k-ring-stack { stroke: color-mix(in srgb, var(--acc) 42%, transparent); stroke-width: 1.5; }
 /* ZERO DEPTH IS A REAL STATE, and a zero-length arc cannot be grabbed — so it becomes a TICK at the
    base, which is Massive's fixed slot without Massive's permanent socket. */
-.k-ring-tick { stroke: var(--acc2); stroke-width: 2.5; stroke-linecap: round; }
+.k-ring-tick { stroke: var(--acc); stroke-width: 2.5; stroke-linecap: round; }
 /* MASSIVE's "small break at the limit of the modulation range", inverted so it reads as an overflow:
    it says WHICH end runs off the dial using nothing but geometry, which survives a colour-blind eye,
    a dim screen and a 34-px knob — none of which "turn it red" does. */
-.k-ring-spur { stroke: var(--acc2); stroke-width: 3; }
+.k-ring-spur { stroke: var(--acc); stroke-width: 3; }
 .k-ring.is-dormant .k-ring-edit, .k-ring.is-dormant .k-ring-tick { stroke: var(--ink-faint); }
 /* THE GRAB BAND, AND THE ONE PLACE THIS FEATURE COST SOMETHING IT DID NOT ADMIT TO.  It used to say
    the ring "owns only the annulus the pseudo-element finger already had" — true, and the trade the

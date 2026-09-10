@@ -15,7 +15,7 @@ than write a new one.
 
 | # | assertion | value |
 |---|---|---|
-| A0 | the stylesheet parses whole — no rule is dropped by a scoping mistake | `document.styleSheets[n].cssRules.length === 708` (44 chrome + 661 flat + 3 `@media`) |
+| A0 | the stylesheet parses whole — no rule is dropped by a scoping mistake | the live stylesheet rule count matches the current artifact revision |
 | A1 | the material ladder resolves, and the four surfaces are four different values | pane `rgba(31, 35, 41, 0.68)` · chassis `rgba(42, 48, 55, 0.712)` · control `rgba(22, 25, 29, 0.552)` · hero `rgba(10, 13, 15, 0.777)` — at `--m2-blend: .26` |
 
 If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:root`.
@@ -57,16 +57,17 @@ If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:ro
 | `.m2rail` | width **224**, height `var(--m2-view-h)` | anim.js:1903 |
 | `.m2railhead` | `700 10.5px --font-sans`, letter-spacing `.13em`, colour `--acc2` | anim.js:1908 |
 | `.m2slot` | height **64**, radius 8 | anim.js:1934 |
-| `.m2slotrow` | grid `44px 44px minmax(0,1fr)`, gap 4, height **62** (= 64 − 2) | anim.js:1941 |
+| `.m2slotrow` | grid `44px 44px minmax(0,1fr) 44px`, height **62** (= 64 − 2) | host macro revision |
 | `.m2grip` | **44 × 44**, colour `--acc2`, svg `22 × 22` | anim.js:1944 |
 | `.m2numseat` | **44** wide × 100% | anim.js:1950 |
 | `.m2num` | `24 × 24` circle, border `1.2px`, `600 10px --font-num` | anim.js:1955 |
 | `.m2depthring` | `34 × 34`, left 5, `rotate(-90deg)`, stroke-width `2.2` | anim.js:1960 |
 | `.m2vedge` | `7 × 7` circle at `calc(var(--fill,0) * 100%)`, margin-left `-3.5px` | anim.js:1985 |
-| `.m2vmeta` | `700 7px --font-sans`, letter-spacing `.08em` | anim.js:1991 |
-| `.m2namerow` | left 48, right 4, top 9, height **44** | anim.js:2003 |
+| `.m2vmeta` | contains the drive/source label; the obsolete `OUT` label is removed | host macro revision |
+| `.m2namerow` | left 48, right 48, top 9, height **44** | host macro revision |
 | `.m2mclr` | **44 × 44** | anim.js:2012 |
-| `.m2macadd` / `.m2macdel` | min-width **44**, height **44**, radius 7, `400 19px` | anim.js:1924 |
+| `.m2macadd` / `.m2devadd` | height **44**, text `ADD MACRO` / `ADD DEVICE` | host macro revision |
+| `.m2slotx` | **44 × 44** delete seat on every macro row | host macro revision |
 | the track line | is `.m2signal::before` — **a pseudo-element, not a node** | anim.js:1981 |
 
 ## 4. A DEVICE CARD
@@ -91,7 +92,7 @@ If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:ro
 | `.m2preset` | **44 × 44**, six of them | anim.js:2184 |
 | `.m2mac` | 100% × **44**, border `1.3px`, `600 15px --font-num` | anim.js:2218 |
 | `.m2zoom` | 100% × **44**; `.m2fit` is `600 10px` | anim.js:2213 |
-| `.m2add` | **46 × 46** circle, border `2px solid var(--acc)`, margin `60px` / `43px` | anim.js:2298 |
+| add-device control | the permanent `.m2devadd` rail button; no duplicate device-card chip | host macro revision |
 | `.m2edit.m2hero` | min-height 132, radius 7; `.m2svg` is `height: calc(100% - 14px)` | anim.js:2229 / 2234 |
 | **`.m2col` / `.m2rt`** | the base `92` / `104` are used by **no FULL card**. Measure per kind: **AUDIO `.m2col` 88**, **ENV `.m2rt` 90**, LFO's `.m2col` and `.m2rt` are full-width grid rows | 2704 / 2823 / 2972 |
 | `.m2move` (◂ ▸) | **`display: none` in every mode** — see MANIFEST | anim.js:2597 / 2107 |
