@@ -472,6 +472,8 @@ including its heading. Native readouts retain the shared inset basin material.
 Macro relocation and matrix launchers are parked; see ARCHIVED-MACRO-TOOLS.md.
 The ENV header TRIG is removed. Tempo editing retains the display seat's dimensions.
 Logo menus use a glass surface in the browser top layer above floating windows.
+The work-bar chip cycles the preset and tempo bars below, above, then hidden; the
+chosen lane persists. Every ENV dial, including STEPS, keeps its caption.
 
 ### First-visit rack arrangement and compact macros
 
@@ -496,3 +498,5 @@ unless a project/layout or prior undock supplied a remembered side and slot.
 Loading a layout must place the transport in array order like every other card.
 Macro folding refreshes the displayed depth immediately and restores its expanded
 accessibility state; repeated close/reopen must preserve values and width.
+ABOUT ends with centered `COPY DUMP` and `RETURN HOME` actions. The dump excludes
+those action labels; RETURN HOME points to `https://magic-commons.com/`.

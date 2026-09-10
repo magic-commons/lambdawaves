@@ -4204,7 +4204,10 @@ export async function boot(dom) {
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
       const dump = nb.querySelector('.nb-dump');
-      const dumpText = () => faces.about.innerText.replace(/\n{3,}/g, '\n\n') + '\n\nsettings ' + JSON.stringify(readSettings()) + '\nfield ' + JSON.stringify({ resolution: field.resolution, half: field.half, adapter: field.adapterInfo || null }) + '\n' + navigator.userAgent;
+      const dumpText = () => {
+        const info = [...faces.about.children].filter((node) => !node.classList.contains('ab-actions')).map((node) => node.innerText).join('\n');
+        return info.replace(/\n{3,}/g, '\n\n') + '\n\nsettings ' + JSON.stringify(readSettings()) + '\nfield ' + JSON.stringify({ resolution: field.resolution, half: field.half, adapter: field.adapterInfo || null }) + '\n' + navigator.userAgent;
+      };
       if (dump) dump.addEventListener('click', async () => { try { await navigator.clipboard.writeText(dumpText()); } catch (e) {} });
 
 

@@ -186,7 +186,7 @@ export const COPY = {
     'sideways = direction.',
   chips: [
     { id: 'compact', glyph: 'compact', label: 'COMPACT' },
-    { id: 'workbars', glyph: 'barsTop', label: 'Move work bars to top' },
+    { id: 'workbars', glyph: 'barsTop', label: 'Work bars: bottom' },
     { id: 'ribbon', glyph: 'leave', label: 'RIBBON' }
   ]
 };
@@ -577,6 +577,7 @@ export function setViewHeight(rackRoot, winH, uiScale) {
  *  (.m2foot order 2 -> 0). */
 export function setWorkLane(panel, where) {
   panel.classList.toggle('m2bars-top', where === 'top');
+  panel.classList.toggle('m2bars-hidden', where === 'hidden');
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

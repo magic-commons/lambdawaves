@@ -325,6 +325,17 @@ export function createModulation(host, port) {
 
   /* ═══ THE CHIP RAIL — five discs, and the drag is one of them ═══════════════════════════ */
   const chips = mw.chiprail.chips;
+  const WORK_LANES = ['bottom', 'top', 'hidden'];
+  function syncWorkbarChip() {
+    const chip = chips.workbars; if (!chip) return;
+    const next = WORK_LANES[(WORK_LANES.indexOf(P.lane) + 1) % WORK_LANES.length];
+    const names = { bottom: 'below', top: 'above', hidden: 'hidden' };
+    chip.dataset.workLane = P.lane;
+    chip.setAttribute('aria-pressed', P.lane === 'top' ? 'true' : P.lane === 'hidden' ? 'mixed' : 'false');
+    chip.setAttribute('aria-label', 'Work bars: ' + names[P.lane] + '. Tap to ' + (next === 'hidden' ? 'hide them' : 'move them ' + names[next]));
+    chip.title = 'WORK BARS · ' + P.lane.toUpperCase();
+    chip.classList.toggle('on', P.lane === 'top');
+  }
   chips.close.addEventListener('click', () => close());
   chips.compact.addEventListener('click', () => {
     const all = devOrder();
@@ -335,10 +346,10 @@ export function createModulation(host, port) {
     place(); paint(true); persist();
   });
   chips.workbars.addEventListener('click', () => {
-    P.lane = P.lane === 'top' ? 'bottom' : 'top';
+    P.lane = WORK_LANES[(WORK_LANES.indexOf(P.lane) + 1) % WORK_LANES.length];
     setWorkLane(panel, P.lane);
-    chips.workbars.setAttribute('aria-pressed', P.lane === 'top' ? 'true' : 'false');
-    chips.workbars.classList.toggle('on', P.lane === 'top');
+    syncWorkbarChip();
+    if (P.lane !== 'hidden') place();
     persist();
   });
   /* THE RIBBON IS THE ARTIFACT'S OWN SECOND FORM.  Its 21 rules and `sizeLaw`'s 58-px rail
@@ -2738,16 +2749,18 @@ export function createModulation(host, port) {
   function syncChips() {
     const all = devOrder();
     const cmp = all.length > 0 && all.every((x) => modeOf(x.id) !== 'F');
-    for (const [chip, on] of [[chips.compact, cmp], [chips.workbars, P.lane === 'top'], [chips.ribbon, P.ribbon]]) {
+    for (const [chip, on] of [[chips.compact, cmp], [chips.ribbon, P.ribbon]]) {
       if (!chip) continue;
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
       chip.classList.toggle('on', on);
     }
+    syncWorkbarChip();
   }
   function restore(o) {
     if (!o) return;
     if (Number.isFinite(o.x)) { P.x = o.x; P.y = o.y; placed = true; }   // a remembered position is a hand's
-    if (o.lane === 'top') { P.lane = 'top'; setWorkLane(panel, 'top'); }
+    P.lane = WORK_LANES.includes(o.lane) ? o.lane : 'bottom';
+    setWorkLane(panel, P.lane);
     if (o.ribbon) { P.ribbon = true; rackEl.root.classList.add('m2ribbon'); }
     if (o.modes) Object.assign(saved, o.modes);      /* claimed once, by the first source to bear the id */
     if (o.folder) Object.assign(P.folder, o.folder);

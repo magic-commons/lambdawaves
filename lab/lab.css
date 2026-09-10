@@ -213,7 +213,9 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-text { flex: 1 1 auto; min-height: 120px; resize: none; border: 0; outline: 0; background: transparent; color: var(--fg); font: 13px/1.5 var(--font-ui); padding: 4px 0; }
 .nb-text::placeholder { color: var(--dim); }
 .nb-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--dim); }
-.nb-foot button, .nb-dump { height: 26px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
+.nb-foot button, .nb-dump, .ab-home { border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; box-sizing: border-box; }
+.nb-foot button { height: 26px; padding: 0 12px; }
+.nb-dump, .ab-home { height: 30px; padding: 0 14px; line-height: 28px; }
 .nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
 .nb-logo { display: flex; align-items: baseline; gap: 0; font-size: 35px; margin: 6px 0 4px; }
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
@@ -229,7 +231,10 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .ab-fine code { font-family: var(--font-mono); }
 .nb-aboutface a { color: var(--acc); }
 .ab-rule { width: 60%; height: 1px; background: hsl(0 0% 50% / .25); margin: 8px 0; }
-.ab-dumprow { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 8px; font-size: 12px; color: var(--fg-soft); }
+.ab-actions { display: flex; align-items: center; justify-content: center; gap: 24px; width: 100%; margin-top: auto; padding-top: 12px; flex: 0 0 auto; }
+.nb-aboutface .ab-home { color: var(--fg-soft); text-decoration: none; }
+.nb-dump:hover, .ab-home:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
+.nb-dump:active, .ab-home:active { transform: translateY(1px); background: var(--glass-press); }
 
 .picker, .pk-n { background: transparent !important; box-shadow: none !important; }
 .picker { border: 1px solid var(--glass-hairline) !important; }

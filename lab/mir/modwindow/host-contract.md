@@ -81,7 +81,7 @@ BASINS uses nine: `mandel.anim`, `mandel.animPlay`, `mandel.animPanel`, `mandel.
 `mandel.modsize`, `mandel.modcadence`, `mandel.modwin.bars`, `mandel.modwin.workBars`,
 `mandel.modwin.deviceModes`. `modwindow.js` reads and writes **none** of them — it has no
 persistence at all. Rename the prefix in whatever the host's own store is, and remember
-what the window's presentation state actually is: the work-bar lane (top / bottom), each
+what the window's presentation state actually is: the work-bar lane (top / bottom / hidden), each
 device's mode (F / C / M), and the window geometry.
 
 ---

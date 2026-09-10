@@ -1220,6 +1220,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2bars-top .m2foot { order: 2; margin-top: 2px; margin-bottom: 0; }
 :root:root:root #modwin.mir-modwindow .m2bars-top .m2workbar {
   transform: translateY(calc(-1 * var(--m2-lane-lift, 438px))); }                                       /* 77 */
+:root:root:root #modwin.mir-modwindow .m2bars-hidden .m2foot { display: none; }
 
 
 body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip::before,
@@ -1614,6 +1615,15 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 
 /* The follow-up restores the colored value arc; retain the clean needle without a second dot. */
 :root:root:root #modwin.mir-modwindow .m2dialink .m2kn::before { display: none; }                     /* 111 */
+
+/* The ENV quantizer is a real sixth control. Its caption was inherited as
+   display:none from the source artifact even though every other ENV dial is named. */
+:root:root:root #modwin.mir-modwindow .m2dev.env .m2k[data-knob="steps"] .m2kcap { display: block; }
+
+/* The third work-lane state keeps the same glyph and crosses it out. */
+:root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip[data-work-lane="hidden"]::after {
+  content:"";position:absolute;z-index:2;width:21px;height:1.5px;border-radius:2px;
+  background:currentColor;transform:rotate(-42deg);pointer-events:none; }
 
 /* ⟪ END THE SKIN SEAT ⟫ */
 
