@@ -4,7 +4,7 @@
  * as the result.
  */
 import { POTENTIALS, DEFAULTS, MEASURED, spectrum, airyLevels, flavourIndependence, fitOffset, reggeSlope, luscher, widthCoefficient } from './qcd.js';
-import { el, seg, knob, readout, nRGB, vividInk, themeInk, graphHover, fitText } from './kit.js';
+import { el, seg, knob, readout, nRGB, vividInk, themeInk, graphHover, fitText } from './mir/kit.js';
 
 export function createQCD(host, api) {
   let kind = 'charm', pot = 'cornell', params = { ...DEFAULTS }, cache = null, dirty = true;

@@ -44,6 +44,9 @@
 <meta name="apple-mobile-web-app-title" content="λWAVES">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta id="themeColor" name="theme-color" content="#070a0f">
+<!-- MIR · the kit's sheets come first: tokens and widgets, then the material language; the app's own sheets follow. -->
+<link rel="stylesheet" href="./mir/css/base.css">
+<link rel="stylesheet" href="./mir/css/skin.css">
 <link rel="stylesheet" href="./lab.css">
 <link rel="stylesheet" href="./skin.css">
     <link rel="stylesheet" href="./vendor/katex/katex.min.css">
@@ -56,8 +59,8 @@
      `modhost.css` is the OTHER half of the contract: the 67 host tokens the window reads and declares
      nothing of, SCOPED rather than pasted onto :root, because λWAVES already owns 24 of those names
      with its own values.  It comes first because a custom property is resolved where it is USED. -->
-    <link rel="stylesheet" href="./modhost.css">
-    <link rel="stylesheet" href="./mir/modwindow/modwindow.css">
+    <link rel="stylesheet" href="./mir/modulation/modhost.css">
+    <link rel="stylesheet" href="./mir/modulation/modwindow/modwindow.css">
     <!-- Notebook parsers are ordered deferred scripts: they remain ready before DOMContentLoaded, while the HTML
          parser can reach the stage and main module without waiting for 308 KB of notebook-only JavaScript. -->
     <script defer src="./vendor/marked.min.js"></script>

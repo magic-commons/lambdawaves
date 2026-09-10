@@ -1,6 +1,6 @@
 /* meters.js — METERS: norm, ⟨E⟩, autocorrelation, active modes, logical time, the badge (§10.6). */
 import { AU_TIME_AS, HARTREE_EV } from './hydrogen.js';
-import { el, readout } from './kit.js';
+import { el, readout } from './mir/kit.js';
 
 export function createMeters(host) {
   const grid = el('div', 'meters', host);

@@ -23,7 +23,7 @@
  */
 import { wignerSlice, wignerAxial } from './wigner.js';
 import { BASIS } from './hydrogen.js';
-import { el, knob, readout, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
+import { el, knob, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 const NZ = 64, NP = 64;                 // the grid the window runs (the brief's 64 × 64)
 const GAMMA = 0.35;                     // the display law for the ink's opacity: |W/W_max|^γ, printed on the card

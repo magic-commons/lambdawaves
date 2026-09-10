@@ -43,7 +43,7 @@
  *   of the eleven modulation targets its registry base, and a dial nobody drives never sees it.
  *   B140 gates the EAR, the EYE and the MODEL together, which is what B127 could not see.
  */
-import { setGlyph } from './mir/glyph.js';
+import { setGlyph } from './glyph.js';
 
 
 export const chip = (btn, name, label) => setGlyph(btn, name, { label });

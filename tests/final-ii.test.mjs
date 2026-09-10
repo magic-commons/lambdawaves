@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import * as M from '../lab/mir/mod.js';
+import * as M from '../lab/mir/modulation/mod.js';
 M.modReset();
 const m=M.addMacro(null); M.setMacro(m.id,{value:.5});
 const r=M.addRoute(m.id,'test',0,.4).route;

@@ -1,162 +1,17 @@
-/* skin.css — the GLASS × NEUMORPHIC skin for λWAVES.
- * Loads AFTER lab.css and only re-points its tokens and re-dresses its selectors; lab.css stays whole without it.
- * Law 1: no frosted blur anywhere (the filter was measured at −26 fps over the live canvas). Glass = tint + hairline + sheen + shadow.
- * Law 2: neumorphic light comes from the top-left; raised things cast dark to the bottom-right, wells the reverse.
- * Law 3: the accent marks LIVE / ACTIVE only; resting chrome is achromatic. */
-
-/* ── 1. tokens ──────────────────────────────────────────────────────────── */
-:root {
-  --rack-w: 300px;                                                /* narrower rack (was 372) — the layout still reads this one variable */
-  --glass-hue: 214; --glass-sat-tint: 16%; --glass-lum: 13%;     /* card tint hsl(214 16% 13%) = #191d23 */
-  --glass-opacity: .84;
-  --card-opacity: .76;                                             /* the TINTED pane alone: a little more of the field shows through than the pills and chips allow */                                           /* opaque enough that the field cannot pull text under 4.5:1 */
-  --glass-border-color: hsl(0 0% 100% / .14);                     /* card edge hairline */
-  --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
-  --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */
-
-
-  --glass-shadow: inset 0 1px 0 hsl(0 0% 100% / .06), 0 -2px 6px hsl(0 0% 0% / .20), 0 1px 2px hsl(0 0% 0% / .16);
-  /* WAVE 98 · THE SAME CARD FLOAT WITH THE UPWARD TERM TAKEN OUT — see §2b. */
-  --glass-shadow-flat: inset 0 1px 0 hsl(0 0% 100% / .06), 0 1px 2px hsl(0 0% 0% / .16);
-  --glass-well: hsl(0 0% 0% / .28); --glass-raise: hsl(0 0% 100% / .045); --glass-press: hsl(0 0% 100% / .12);
-  --glass-groove: hsl(0 0% 100% / .08); --glass-groove-hot: hsl(0 0% 100% / .14);
-  --neu-raise: -1px -1px 3px hsl(0 0% 100% / .05), 2px 2px 4px hsl(0 0% 0% / .42), inset 0 1px 0 hsl(0 0% 100% / .08);  /* a control that stands proud */
-  --neu-inset: inset 1px 1px 3px hsl(0 0% 0% / .48), inset -1px -1px 2px hsl(0 0% 100% / .04);                          /* a well cut into the card */
-  --neu-flat: 0 0 0 1px hsl(0 0% 100% / .05);                     /* a resting seat, neither up nor down */
-  --fg: #f2f5f7; --fg-soft: hsl(0 0% 88%); --dim: hsl(0 0% 72%); --ink-key: hsl(0 0% 74%); --ink-faint: hsl(0 0% 64%);  /* all ≥ 4.5:1 on the card, see skin-notes */
-  --ink-shadow: 0 1px 1px hsl(0 0% 0% / .5);
-  --hue-acc: 188; --sat-acc: 80%;                                 /* the derived hsl(...) tints follow the house cyan */
-  --acc: #78e1f0; --acc-ink: #071114;                             /* the house accent itself, verbatim */
-  --acc-soft: color-mix(in srgb, var(--acc) 16%, transparent); --acc-glow: 0 0 8px color-mix(in srgb, var(--acc) 55%, transparent);
-  --card-gap: 10px; --card-r: 14px;                               /* the air between floating cards, their corner */
-  /* WAVE 67 · THE DISCONNECTED WINDOW.  Two numbers, and together they are a RHYTHM rather than a pair of
-     values: the gap INSIDE a window (7) is smaller than the gap BETWEEN windows (--card-gap, 10), which is
-     what makes a bar-chip and its body read as one object with air in it instead of as two neighbours.
-     BASINS' own step is `--fr-sep: 7px` and ours is --sp-3, the same 7.  The radius is the card's 14 taken
-     one rung down, on their reasoning: the CARDS are the visible surface now and the window is not, so they
-     wear the window's own corner one step in.  --frost-filter is the whole vividness under one name. */
-  --disc-gap: var(--sp-3); --disc-r: var(--r-lg);
-
-
-  --frost-filter: blur(var(--glass-blur));
-  --t-fast: .12s; --t-soft: .35s; --t-linger: .7s;                /* the value tooltip: in fast, out soft after a linger */
-  --logo-turn: 1.2s;                                              /* wave 53: one turn of the PALETTE through the mark — the boot's, and the busy loop's */
-}
-
 /* ── 2. stage and rack: the field is the whole room, the rack is air ─────── */
 #rack, #rackL { background: transparent; border-left: 0; padding: var(--card-gap); gap: var(--card-gap); opacity: 1; box-shadow: none; }
 
 
 #rack > .dev, #rackL > .dev { box-shadow: var(--glass-shadow-flat); }  /* no continuous rack slab, no veil: cards float alone */
-@media (max-width: 860px) { #rack { border-top: 0; } }
-
-/* ── 3. the card (device) — glass tint, sheen, float; the header is the handle ── */
-.dev { position: relative; border-radius: var(--card-r); border-color: var(--glass-border-color);
-  background: transparent; box-shadow: var(--glass-shadow);                   /* the pane itself is CARD STYLE's, §14c — REFRACTIVE by default */
-  /* WAVE 67 · THE PICK-UP DOES NOT ANIMATE, and this is our own law being kept rather than a taste.
-     docs/ui/MOTION-LAW.md gate 1 files "window drag (docked or floating)" under 100+/day ⇒ NO ANIMATION;
-     this list used to carry `transform` and `opacity` at --t-soft (.35s), which is both a 350-ms cross-fade
-     starting at the exact moment the compositor is trying to keep up with a finger AND a live landmine —
-     `transform` in a transition list means the day positioning moves to transform, the drag becomes
-     350 ms LAGGED.  Both are gone.  What is left is the shadow, at the press rung, and .dragging turns
-     even that off so the lift is instantaneous in the hand and settles when the hand lets go. */
-  transition: box-shadow var(--t-fast); }
-
-
-.dev-head { position: relative; height: 34px; padding-left: 28px; background: transparent; border-bottom-color: var(--glass-hairline); border-radius: var(--card-r) var(--card-r) 0 0;
-  cursor: grab; }                                                             /* the header is the drag handle */
-.dev-head::before { content: ""; position: absolute; left: 8px; top: 50%; width: 14px; height: 14px; margin-top: -7px;
-  color: var(--ink-faint); opacity: 1; transition: color var(--t-fast);
-  background-image: radial-gradient(circle at 50% 50%, currentColor 1px, transparent 1.1px);
-  background-size: 4.667px 4.667px; }
-.dev:hover .dev-head::before, .dev.dragging .dev-head::before { color: var(--fg-soft); }
+@media (max-width: 860px) { #rack { border-top: 0; }
+}
 /* THE STATUS LINE GOES.  It is the "secondary writing" — a right-aligned second string beside the
    window's own name, changing under the eye while you read the name.  Nothing is LOST: `device()`
    already mirrors every status into the header's `title`, so the governor's PARKED sentence and the
    readers' own notes are one hover away, which is where a caveat belongs. */
 .dev-head > .dev-stat { display: none; }
-
-
-.dev-head > .dev-util { grid-column: 3; justify-self: end; gap: 4px; }
-.dev-util > .dev-power, .dev-util > .dev-copy, .dev-util > .dev-swap,
-.dev-util > .dev-pop, .dev-util > .dev-rail,
-.dev-util > .dev-close, .dev-util > .dev-fold { margin-left: 0; margin-right: 0; }
-.dev-head:active { cursor: grabbing; }
-.folded .dev-head { border-radius: var(--card-r); }
-.dev.dragging { cursor: grabbing; z-index: 5; transform: scale(1.012); opacity: .97;   /* lifted while carried */
-  transition: none;                                                           /* wave 67: the lift is INSTANT — see the note on .dev's transition */
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .1), 0 -6px 16px hsl(0 0% 0% / .34), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
-.dev.dragging * { pointer-events: none; }                                     /* nothing inside catches the pointer mid-drag */
-.dev-eyebrow { opacity: 1; }                                                   /* the eyebrow IS the name now; the long title is the header's hover hint */
-.dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { opacity: 1; }
-.dev-title { color: var(--fg-soft); }                                         /* resting titles are achromatic … */
-.dev:hover .dev-title, .dev.tab-hot .dev-title, .dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { color: var(--acc); }         /* … the accent answers the pointer */
 .dev-stat { color: var(--ink-faint); }
 .dev-stat.live { color: var(--acc); }
-.dev-fold { color: var(--ink-faint); border-radius: var(--r-md); }
-.dev-fold:hover { color: var(--fg-soft); background: var(--glass-raise); }
-.dev.tab-hot { outline-color: color-mix(in srgb, var(--acc) 70%, transparent); }
-.dev-body { padding: var(--sp-3) var(--sp-3) var(--sp-4); }
-.grp { background: transparent; border-color: var(--glass-hairline); box-shadow: none; border-radius: 10px; }
-.grp-lbl { color: var(--ink-faint); }
-
-.note { font-size: var(--fs-small); color: var(--dim); }
-.grp { position: relative; }
-
-/* ── 5. knob: a raised puck; the value appears only while you touch or hover it ── */
-.k { position: relative; }
-.k-lbl { color: var(--ink-faint); letter-spacing: var(--tr-wide); }
-.k-dial { border-color: transparent; box-shadow: var(--neu-raise);            /* the puck stands proud; the groove ring is the only texture */
-  background: repeating-conic-gradient(var(--glass-groove) 0deg 1.6deg, transparent 1.6deg 30deg),
-    radial-gradient(circle at 35% 30%, hsl(0 0% 100% / .07), transparent 62%), hsl(var(--glass-tint) / 1);
-  transition: box-shadow var(--t-fast); }
-.k:hover .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px hsl(0 0% 100% / .08); }
-
-
-.k.drag .k-dial, .k.active .k-dial, .k[data-live] .k-dial { border-color: transparent; box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent); }
-.k-needle { background: var(--fg-soft); box-shadow: none; }
-.k.live .k-needle, .k.drag .k-needle, .k.active .k-needle { background: var(--acc); box-shadow: 0 0 0 .5px hsl(0 0% 0% / .38); }
-.k-val { opacity: 0; transform: translateY(2px); pointer-events: none;        /* the value is a tooltip: hidden at rest … */
-  padding: 1px 6px; border-radius: var(--r-pill); color: var(--fg); background: hsl(var(--glass-tint) / .96); box-shadow: var(--neu-flat), 0 3px 8px hsl(0 0% 0% / .45);
-  transition: opacity var(--t-soft) ease var(--t-linger), transform var(--t-soft) ease var(--t-linger); }  /* … and lingers after the hand leaves */
-.k:hover .k-val, .k.drag .k-val, .k.active .k-val, .k[data-live] .k-val, .k:focus-within .k-val { opacity: 1; transform: none;
-  transition: opacity var(--t-fast), transform var(--t-fast); }               /* in fast, no delay */
-.k.drag .k-val, .k.active .k-val { color: var(--acc); }
-.k.disabled { opacity: .3; }
-
-/* ── 6. switch, segmented select, trigger — flat seats that press in; the accent lights what is ON ── */
-.sw { border-color: transparent; background: hsl(0 0% 100% / .035); box-shadow: var(--neu-flat); color: var(--ink-key); transition: box-shadow var(--t-fast), background var(--t-fast); }
-.sw:hover { background: var(--glass-raise); }
-.sw:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
-.sw.on { background: var(--acc-soft); border-color: transparent; box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); color: var(--fg); }
-.sw-led { background: hsl(0 0% 100% / .12); box-shadow: inset 0 1px 1px hsl(0 0% 0% / .5); }
-.seg { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); }   /* the track is a well … */
-.seg-b { color: var(--ink-key); transition: background var(--t-fast), box-shadow var(--t-fast); }
-.seg-b:hover { background: var(--glass-raise); }
-.seg-b.on { background: hsl(var(--glass-tint) / 1); color: var(--acc); box-shadow: var(--neu-raise); }  /* … the chosen segment rises out of it */
-.trig { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--fg-soft); transition: box-shadow var(--t-fast), transform var(--t-fast); }
-.trig:hover { box-shadow: var(--neu-raise), 0 0 0 1px hsl(0 0% 100% / .08); }
-.trig:active { box-shadow: var(--neu-inset); background: var(--glass-well); transform: translateY(1px); }
-.trig.on { background: var(--acc-soft); border-color: transparent; box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); color: var(--acc); }
-select.sel { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); color: var(--fg-soft); }
-
-/* ── 7. fader: a well with a thin fill; the value appears on touch ─────── */
-.fd { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); border-radius: 8px; }
-.fd-fill { background: color-mix(in srgb, var(--acc) 16%, transparent); }
-.fd-edge { width: 2px; background: var(--fg-soft); box-shadow: 0 0 0 1px hsl(0 0% 0% / .4); }
-.fd.drag .fd-edge, .fd.active .fd-edge { background: var(--acc); box-shadow: var(--acc-glow); }
-.fd-lbl { color: var(--ink-faint); }
-.fd-val { opacity: 0; transition: opacity var(--t-soft) ease var(--t-linger); }   /* value only under the hand, lingers, fades */
-.fd:hover .fd-val, .fd.drag .fd-val, .fd.active .fd-val, .fd[data-live] .fd-val, .fd:focus-within .fd-val { opacity: 1; transition: opacity var(--t-fast); }   /* wave 62: `.k` line 97 has had `:focus-within` since it was written; without this a FOCUSED fader moves a value nobody can read */
-.fd.drag .fd-val, .fd.active .fd-val { color: var(--acc); }
-
-/* ── 8. readouts: terse — a value, a whisper of a label, the sub-line on hover ── */
-.ro { border-color: transparent; background: var(--glass-well); box-shadow: var(--neu-inset); border-radius: 8px; }
-.ro-lbl { color: var(--ink-faint); }
-.ro-val { color: var(--fg); }
-.ro-sub { height: 2.8em; max-height: 2.8em; line-height: 1.4; overflow: auto; overflow-wrap: anywhere; scrollbar-width: thin; opacity: 0.85; transition: opacity var(--t-soft); }
-.ro:hover .ro-sub, .dev:hover .ro.wide .ro-sub { opacity: 1; }
-.abar { background: hsl(0 0% 100% / .07); box-shadow: var(--neu-inset); height: 4px; }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
 .ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker, .pal-ring { border-color: transparent; box-shadow: var(--neu-inset); }
@@ -167,17 +22,10 @@ select.sel { border-color: transparent; background: var(--glass-well); box-shado
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
 .dyn-row { background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
-.calc-row { border-bottom-color: var(--glass-hairline); }
-
-/* ── 10. chrome over the stage: the title, badges, sheet, keyboard hint ─── */
-.glass { border-color: var(--glass-border-color); background: transparent; box-shadow: var(--glass-shadow); }   /* the pane is CARD STYLE's, §14c */
 #title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 
 #title:hover .ms { display: none; }
-.badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--neu-flat), 0 4px 12px hsl(0 0% 0% / .4); color: var(--ink-key);
-  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.badge:hover { color: var(--fg-soft); }
 #sheet { border-radius: var(--card-r); }               /* wave 53: the '?' bindings sheet wears the same glass as the EXACT/NUMERICAL one */
 
 /* ── 10b. THE SKIP LINKS, AND THE ONE VISUALLY-HIDDEN SEAT (wave 62) ────────────────────────────────
@@ -270,35 +118,13 @@ body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /*
 #modwin.mir-modwindow .m2workbar button > svg { display: block; margin: auto; }
 #modwin.mir-modwindow .m2presave svg { width: 26px; height: 26px; }
 
-
-.dev-util > .dev-pop { display: none; }
-
 /* ── 13. motion and touch courtesy ─────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) { .dev, .k-val, .fd-val, .ro-sub, #rack, #transport.mini { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .dev, .k-val, .fd-val, .ro-sub, #rack, #transport.mini { transition: none; }
+}
 
 
-@media (hover: none) { .ro-sub { max-height: 3em; opacity: 1; } #rack { opacity: 1; } }
-
-
-/* ═══ appended by the shell (wave 23): the logo font, the LIGHT theme, the FROST trial ═══ */
-/* THE FONTS ARE SUBSET TO WHAT THIS LAB ACTUALLY SETS (2026-09-05).  They were 1.7 MB of a 4.2 MB lab — and a font is
-   the thing a phone waits on before it can draw a word.  Roboto is cut to the 198 characters that appear in
-   lab/*.{js,html,css} AND exist in Roboto (its variable axes are kept, so the weight and stretch below are real);
-   The wordmark face sets exactly one word — #title .word = "WAVES" — so it is five letters; SpinweradC.ttf was
-   referenced NOWHERE and is gone.  THAT SUBSET IS RENAMED 'LW Title' AND THAT IS A LICENCE MATTER, NOT A LABEL:
-   a subset is a Modified Version under the SIL OFL, "spinwerad" is a Reserved Font Name, and OFL §3 forbids a
-   Modified Version from using one — the TERMINATION clause voids the grant where it does.  The derivation is
-   recorded in fonts/Spinwerad-SOURCE.txt and inside the binary (nameID 10, 13, 14); the licence file keeps gluk's
-   own name.  DO NOT rename it back, and do NOT "fix" this by un-subsetting: the WOFF2 conversion alone is still
-   a Modified Version, and the original is 695 KB.  STIX Two Math is NEW and makes the λ below resolve at last: that stack has always asked for it
-   and never had it, so on every machine but a TeX user's the λ fell back to a generic serif.
-   488 584 → 58 292 · 695 184 → 1 060 · +39 088 (STIX) · −522 456 (deleted) — the lab goes 4.2 MB → 2.6 MB.
-   fonts/STIXTwoMath-SOURCE.txt records the source, the licence and the exact subset command: EXTEND ITS GLYPH LIST AND
-   RE-RUN if you set a symbol it lacks — an uncovered glyph falls back silently, which looks almost right and is
-   therefore worse than wrong. */
-@font-face { font-family: 'Roboto'; src: url('./fonts/Roboto-ui.woff2') format('woff2'); font-weight: 100 900; font-stretch: 75% 100%; font-display: swap; }   /* SIL OFL — fonts/Roboto-OFL.txt */
-@font-face { font-family: 'LW Title'; src: url('./fonts/LWTitle-title.woff2') format('woff2'); font-display: swap; }   /* a RENAMED subset of Spinwerad 0.3 by gluk — SIL OFL, fonts/Spinwerad-OFL.txt, derivation in fonts/Spinwerad-SOURCE.txt */
-@font-face { font-family: 'STIX Two Math'; src: url('./fonts/STIXTwoMath-subset.woff2') format('woff2'); font-display: swap; }   /* SIL OFL — fonts/STIXTwoMath-OFL.txt · v2.0.2 subset — fonts/STIXTwoMath-SOURCE.txt */
+@media (hover: none) { #rack { opacity: 1; }
+}   /* SIL OFL — fonts/STIXTwoMath-OFL.txt · v2.0.2 subset — fonts/STIXTwoMath-SOURCE.txt */
 #title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
 #title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
 #title .mark { margin-left: .05em; }
@@ -307,34 +133,7 @@ body[data-theme="light"] #title .word { color: #000; }
 /* the logo sits on the stage directly: no glass, no background, one word */
 #title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
 #title .mark { align-self: center; }
-
-/* LIGHT: light cards, dark ink; the accent darkens so it still marks state on a light surface.  The stage
-   underneath is set by the THEME control (mat.bg) and the cloud is drawn as ink (INVERT), so the whole layer adapts. */
-body[data-theme="light"] {
-  --glass-hue: 214; --glass-sat-tint: 22%; --glass-lum: 93%; --glass-tint: 214 22% 93%; --glass-opacity: .86;
-  --fg: hsl(214 30% 10%); --fg-soft: hsl(214 20% 18%); --dim: hsl(214 12% 36%); --ink-key: hsl(214 12% 30%); --ink-faint: hsl(214 10% 42%);
-  --glass-border-color: hsl(214 30% 40% / .22); --glass-hairline: hsl(214 30% 30% / .16);
-  --glass-sheen: linear-gradient(hsl(0 0% 100% / .55), hsl(0 0% 100% / .55));   /* the same flat white wash it always was — but as an IMAGE, so it is a legal background LAYER (§14c) */
-  --glass-well: hsl(214 30% 40% / .10); --glass-raise: hsl(0 0% 100% / .55); --glass-press: hsl(214 30% 40% / .16);
-  --glass-shadow: inset 0 1px 0 hsl(0 0% 100% / .8), 0 -2px 6px hsl(214 40% 20% / .11), 0 1px 2px hsl(214 40% 20% / .09);
-  --glass-shadow-flat: inset 0 1px 0 hsl(0 0% 100% / .8), 0 1px 2px hsl(214 40% 20% / .09);
-  --neu-raise: -1px -1px 3px hsl(0 0% 100% / .9), 2px 2px 4px hsl(214 30% 40% / .22), inset 0 1px 0 hsl(0 0% 100% / .9);
-  --neu-inset: inset 1px 1px 3px hsl(214 30% 40% / .24), inset -1px -1px 2px hsl(0 0% 100% / .8);
-  --acc: hsl(188 70% 34%); --acc-ink: hsl(0 0% 100%);
-}
 body[data-theme="light"] #stage { background: #eef1f6; }
-body[data-theme="light"] .badge { color: var(--dim); }
-
-
-body[data-card="refractive"] .dev, body[data-card="refractive"] .glass
-  { background: transparent; }                                                /* the blur alone */
-body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
-  { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }    /* the tinted pane: no filter, so no compositor cost — the shipped default since 2026-09-10 */
-
-/* CARD STYLE owns the pane even with FROST on. An enabled FROST policy otherwise
-   overrode both choices with the same veil, making the setting inert. Refractive keeps
-   its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
-body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 /* 2026-09-10 (Josh): THE TRANSPORT IS A PANE LIKE THE WINDOWS. It follows CARD STYLE (tinted / refractive), the
    theme and FROST exactly as .dev does; it had kept a transparent surface of its own from an older wave. */
 body[data-card="tinted"] #transport.mini { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
@@ -343,22 +142,9 @@ body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--
 
 
 body.frost[data-card="refractive"] .dev, body.frost[data-card="refractive"] .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }
-body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card="refractive"][data-theme="dark"] .glass { background: hsl(0 0% 0% / .10); }
 
 
 body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold #transport { -webkit-backdrop-filter: none; backdrop-filter: none; }
-
-/* A live WebGPU canvas makes every blurred/inset child shadow in a translucent rack a recurring
-   compositor cost on iPad. During motion the card silhouette, borders, fills and state colours stay;
-   the nested relief returns on the first still frame. The root shadow is intentionally retained. */
-body.tablet-motion .dev * { box-shadow: none !important; }
-
-
-body.disconnected:not(.phone) .dev {
-  background: transparent; border-color: transparent; box-shadow: none;
-  border-radius: 0; contain: layout; isolation: auto;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  visibility: hidden; pointer-events: none; row-gap: var(--disc-gap); }
 /* `#floats > .dev { pointer-events: auto }` and `#rack > *` are ID rules (lab.css §55, §2) and a class-only
    selector loses to them however many classes it stacks — MEASURED: the first build of this read back
    `pointer-events: auto` on a rack card and the hole silently was not one.  All three are named.  On the
@@ -368,59 +154,6 @@ body.disconnected:not(.phone) .dev {
 body.disconnected:not(.phone) #floats > .dev,
 body.disconnected:not(.phone) #rack > .dev,
 body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
-body.disconnected:not(.phone) .dev > * { visibility: visible; pointer-events: auto; }
-/* THE TWO SURFACES.  Same edge, same corner, same shadow — the only difference is the FILL, which is exactly
-   what BASINS measured about their own bar and card ("every mode: SAME backdrop-filter, SAME border, SAME
-   radius, SAME shadow.  THE ONLY DIFFERENCE IS THE FILL"). */
-body.disconnected:not(.phone) .dev > .dev-head,
-body.disconnected:not(.phone) .dev > .dev-body {
-  border: var(--glass-border) solid var(--glass-border-color); border-radius: var(--disc-r); box-shadow: var(--glass-shadow); }
-
-
-body.disconnected:not(.phone) .dev > .dev-head { background: var(--glass-raise);
-  -webkit-backdrop-filter: brightness(1.03) saturate(1.03);
-  backdrop-filter: brightness(1.03) saturate(1.03); }
-/* THE BODY-CARD wears whatever CARD STYLE says the pane is — REFRACTIVE leaves it the field itself. */
-body.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
-/* FROST reaches the constellation the same way it reaches a joined card: the veil, then the filter, and the
-   filter alone answers `frost-hold`.  The chip keeps its own lighter fill — the difference is the point. */
-body.disconnected.frost[data-card="refractive"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 100% / .10); }
-body.disconnected.frost[data-card="refractive"][data-theme="dark"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 0% / .10); }
-body.disconnected.frost:not(.phone) .dev > .dev-body { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
-body.disconnected.frost:not(.phone) .dev > .dev-head {
-  -webkit-backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03);
-  backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03); }
-body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head,
-body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-body { -webkit-backdrop-filter: none; backdrop-filter: none; }
-/* A COMPACT window is one rail and nothing else: the body is gone, so there is no constellation and the
-   chip is the whole window.  A FOLDED one is the same shape, and both fall out of `display: none` on the
-   body without a rule — stated here only so the next reader does not go looking for one.
-   THE FOUR THINGS THE ROOT USED TO SAY AND CANNOT NOW, each moved to the surfaces rather than lost.  Three
-   of them are SPECIFICITY, and every one of them was found by arithmetic on the cascade, not by the eye:
-   `.dev > *` at (0,3,1) outranks `.dev.off .dev-body` (0,3,0) and `.dev.dragging *` (0,2,0), so a powered-
-   off body would have taken the pointer back and a dragged window would have caught presses inside it. */
-body.disconnected:not(.phone) .dev.off > .dev-body { pointer-events: none; }
-body.disconnected:not(.phone) .dev.dragging * { pointer-events: none; }
-/* the TAB-cycle mark and the drag lift are both painted BY THE ROOT in the joined window, and a hidden root
-   paints nothing — so both move outward onto the two surfaces, where they are visible and where they also
-   read better: the whole constellation lights, which is what "this window" means when there is no slab. */
-body.disconnected:not(.phone) .dev.tab-hot > .dev-head,
-body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: 1px solid color-mix(in srgb, var(--acc) 70%, transparent); outline-offset: -1px; }
-body.disconnected:not(.phone) .dev.dragging > .dev-head,
-body.disconnected:not(.phone) .dev.dragging > .dev-body {
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .1), 0 -6px 16px hsl(0 0% 0% / .34), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
-
-/* LIGHT · THE VIVID SHELL SET (wave 46).  --n1…--n6 were chosen on the dark ground: measured against the
-   light card they run 1.25 : 1 … 2.19 : 1, far under the 3 : 1 a 2 px line needs.  Same six hues, chroma up
-   (+12 saturation), lightness walked DOWN until the WCAG contrast ratio clears 3 : 1 against BOTH grounds the
-   app actually renders — the light card, MEASURED in the page at 236,239,243 (the tokens would say 245,247,249;
-   see the .dev background note below), and the well every plot sits in, 220,225,232.  Computed, not eyeballed:
-   n1 3.45/3.03 · n2 3.50/3.07 · n3 3.42/3.00 · n4 3.43/3.01 · n5 3.47/3.05 · n6 3.47/3.05  (card / well).
-   The dark set stays exactly as it was; kit.js N_RGB_LIGHT carries the same six to the canvases. */
-body[data-theme="light"] {
-  --n1: hsl(40 100% 34%); --n2: hsl(188 92% 32.5%); --n3: hsl(300 82% 48%);
-  --n4: hsl(24 100% 42.5%); --n5: hsl(120 67% 34.5%); --n6: hsl(258 90% 67.5%);
-}
 
 /* ═══ wave 51 — W-MOBILE: THE PHONE ═══════════════════════════════════════════════════════════════
  * A PHONE IS NOT A NARROW DESKTOP.  The old small-screen rule (lab.css, `max-width: 860px`) drops the
@@ -448,17 +181,7 @@ body[data-theme="light"] {
  */
 @media (hover: none) and (max-width: 700px),
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
-  :root {
-    --phone: 1;
-    --rack-w: min(300px, calc(100vw - 76px));      /* the designed 300-px density, clamped only under 376 px */
-    --rack-edge: calc(var(--rack-w) + 10px);       /* the rack's outer edge: what the hide toggle FOLLOWS */
-    --top-bar: 46px;                               /* the masthead strip the rack starts below — deep enough that the tags' fingers clear the first card */
-  }
   body.rack-hidden { --rack-edge: 0px; }           /* … and follows to the screen edge when the rack has gone */
-  /* the LIGHT theme redefines --glass-opacity on `body`, which outranks `:root`; this ties its specificity
-     and comes later, so the phone's opaque card is the one both themes get (ANTI-PATTERN 1: a token, never
-     a one-off colour on a component). */
-  :root, body[data-theme] { --glass-opacity: 1; }
 
   /* ── 1. ONE RACK, ON THE LEFT — portrait and landscape both ─────────────────────────────────── */
   #rack { top: calc(env(safe-area-inset-top) + var(--top-bar)); bottom: 0; left: 0; right: auto;
@@ -473,10 +196,6 @@ body[data-theme="light"] {
   #title::after { content: ''; position: absolute; inset: -3px -8px; }      /* the 44-px finger on the menu opener, the same ink */
   #badges { left: max(env(safe-area-inset-left), 8px); right: max(env(safe-area-inset-right), 8px); top: env(safe-area-inset-top); height: var(--top-bar); align-items: center;
     padding-left: 116px; justify-content: flex-start; flex-wrap: nowrap; overflow: hidden; z-index: calc(var(--z-chrome) + 5); }
-  /* the tag clips its TEXT, not itself: `overflow: hidden` on the chip (skin §10) was eating the finger */
-  .badge { position: relative; max-width: 40vw; overflow: visible; }
-  .badge > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .badge::after { content: ''; position: absolute; inset: -11px 0; }        /* 24 px of chip, 46 px of finger (the strip's own height caps it) */
   /* WAVE 59 · THE BAR IS A SUBSTITUTION HERE, NOT A SUPPRESSION.  `display: none` was right that a phone has
      no keys and wrong that it should also take away the three GESTURES in the same line — and the clause
      naming `space = play` was the only place in the whole app that told anyone the thing can be played, on
@@ -512,49 +231,14 @@ body[data-theme="light"] {
   .nb-grip { display: none; }
   .mb-list { max-width: calc(100vw - 24px); }
   .mb-item { min-height: var(--touch); }
-
-  /* ── 5. TOUCH TARGETS WITHOUT INFLATION — 44 px of finger, the same ink ──────────────────────── */
-  /* (a) the card header.  Six 22-px buttons at a 26-px pitch cannot carry six non-overlapping 44-px
-     targets AND the window's own name on a 300-px card, so two stand down: ⇄ SWAP moves a card to a
-     rack that no longer exists (ANTI-PATTERN 7), and ⧉ COPY is a clipboard-and-notebook affordance of
-     the desk (LW.layout.copyDigest(id) still answers).  The four that remain — ⓘ ⏻ ▾ × — take a
-     44 × 44 seat each at a 44-px pitch, which is 176 px of a 279-px header and leaves the eyebrow its
-     width.  The INK of every one of them is unchanged. */
-  .dev-head { height: var(--touch); }
-  .dev-head::before { top: 17px; }                                          /* the six-dot grip, recentred */
-  /* WAVE 55 · THE HOUSE FORM FOR HIDING A HEADER CHIP IS THE CHILD COMBINATOR.  lab.css §55b sets
-     `display: inline-flex` on `.dev-util > button` so a drawing centres in its seat, and that selector
-     is (0,1,1) — a bare `.dev-swap { display: none }` at (0,1,0) loses to it whatever the source order,
-     which is exactly how ⇄ and ⧉ came back on the phone the first time this wave ran the gate. */
-  .dev-util > .dev-swap, .dev-util > .dev-copy { display: none; }
-  /* WAVE 55 · THE PHONE HAS NO FLOATING.  One rack, everything docked — so the pop-out chip and the rail
-     chip stand down here exactly as ⇄ and ⧉ do, and the four that remain (ⓘ ⏻ ▾ ×) keep the 44-px pitch
-     the arithmetic above is written for.  `layout.popOut()` refuses at this breakpoint as well: the CSS
-     hides the control, the script refuses the act, and a desktop layout carrying floating windows loads
-     here with every one of them DOCKED (rack.js, `applyLayout`). */
-  .dev-util > .dev-pop, .dev-util > .dev-rail { display: none; }   /* the child combinator, for the same reason lab.css §55 gives: `.dev-util > button` sets display at (0,1,1) */
   /* HIDEABLE, NEVER CLOSABLE: the transport has no × at this breakpoint — ▾ is its hide, and which way it
      was left is remembered in this browser's settings (rack.js, `phoneTr`). */
   .dev[data-id="transport"] .dev-close { display: none; }
-  .dev-util { gap: 0; }
-  .dev-util > button { width: var(--touch); height: var(--touch); margin: 0; flex: 0 0 auto; }
-  /* the two ROUND ones keep a 22-px puck inside a 44-px box: the fill and its 1-px rim are painted into
-     the CONTENT box instead of onto the border box.  Same two colours, same 22 px, same place. */
-  .dock-btn { width: var(--touch); height: var(--touch); }
-  .dev-power, .dock-btn { padding: calc((var(--touch) - 22px) / 2); border: 0; border-radius: 50%;
-    background-origin: content-box; background-clip: content-box;
-    background-image: radial-gradient(closest-side, var(--glass-raise) calc(100% - 1.5px), var(--glass-hairline) calc(100% - 1.5px) 100%, transparent 100%); }
-  .dev-power::before { inset: calc((var(--touch) - 22px) / 2 + 6px); }      /* the ⏻ ring, where it always sat in the puck */
-  .dev-power::after { top: calc((var(--touch) - 22px) / 2 + 4px); }         /* … and its tick */
-
-  /* (b) the widgets.  Every seat that was under 44 px grows its SEAT, never its glyph. */
-  .seg-b { min-width: var(--touch); min-height: var(--touch); }   /* the track wraps, so a wider seat costs a row, not a control */
 
 
   .dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) > .seg-b { min-width: var(--touch); }
   .pk-c { min-width: var(--touch); min-height: var(--touch); }   /* the mode chips wrap, so a wider seat costs a column, not a control */
   .keys-chip { min-height: var(--touch); }
-  .dev-fold { height: var(--touch); }
   .hint-i { width: var(--touch); height: var(--touch); }
 
   /* (c) SPECTRUM's lane is the one interior this wave re-flows: seven controls in one 274-px row cannot
@@ -608,13 +292,6 @@ body[data-theme="light"] {
       color-mix(in srgb, var(--acc2) 45%, transparent) calc(100% - 1.5px) 100%, transparent 100%); }
   .mod-grip.armed { box-shadow: none;
     background-image: radial-gradient(closest-side, var(--acc2-soft) calc(100% - 2px), var(--acc2) calc(100% - 2px) 100%, transparent 100%); }
-  /* THE ARC'S GRAB BAND IS THICKER UNDER A FINGER — and wave 63 had to say what "thicker" costs.
-     It used to read "it still never eats the dial's own face", which was true of the 34-px FACE and
-     false of the 44-px TARGET: with the band centred at r = 21.5 an 11-px stroke ran from 16 to 27
-     and left a routed dial 31 px through its own centre, at the one breakpoint where the 44-px law
-     is measured.  The radius (modview.js R_HIT = 28) is chosen for THIS stroke, not the 8-px one:
-     28 - 11/2 = 22.5, so the dial keeps 45 px and the extra three pixels of band grow outward. */
-  .k-ring-hit { stroke-width: 11; }
 }
 
 /* Native instruments, September 2026. Modulation retains its own vocabulary. */
@@ -631,9 +308,6 @@ body[data-theme="light"] {
 .native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) 12px Georgia, 'Times New Roman', serif; }
 .native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
 .native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
-.window-help-book > * { display: block !important; position: static !important; margin: 0; }
-.window-help-book > * + * { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--glass-hairline); }
-.window-help-book b { color: var(--fg); font-weight: var(--w-medium); }
 .control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
 .native-info .native-info-content, .control-help {
@@ -665,7 +339,6 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
-body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport .tempo-expand { order: 8; }
 #transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK, two tile rows high */
 #transport .native-tempo[hidden] { display: none; }
@@ -704,7 +377,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 /* Motion can change ink, never the dimensions of the controls around it. */
 .native-clean .formula { white-space: normal; }
 .native-clean .sp-rows[hidden] { display: none !important; }
-@media (pointer: coarse) { .native-info-button, .native-clean[data-id="palette"] .pal-nav, .native-tempo .trig { min-width: 44px; min-height: 44px; } }
+@media (pointer: coarse) { .native-info-button, .native-clean[data-id="palette"] .pal-nav, .native-tempo .trig { min-width: 44px; min-height: 44px; }
+}
 .native-clean [hidden] { display: none !important; }
 .native-clean .row > .trig { flex: 1 1 76px; min-width: 0; }
 .native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
@@ -753,7 +427,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .native-clean[data-id="clip"] .grp > .row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center; }
 .native-clean[data-id="clip"] .grp > .row > .segw { grid-column:1/-1;width:100%; }
 .native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
-@media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; } }
+@media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; }
+}
 .plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { gap:2px; }
@@ -832,7 +507,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
   #transport.mini .tbtn.modb { min-width:34px;width:34px; }
   #transport.mini .tempo-expand { flex-basis:68px;width:68px;min-width:68px; }
 }
-@media (pointer:coarse) { #transport .native-tempo .trig { min-height:44px; } }
+@media (pointer:coarse) { #transport .native-tempo .trig { min-height:44px; }
+}
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
 .dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--glass-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--neu-inset); }
@@ -858,11 +534,11 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #floats > .dev > .dev-body { overflow:visible; }
 .dev .picker, .dev .keys-list, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
 .native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
-.dev .ro-sub, .dev .ro.wide .ro-val { overflow:hidden; }
 .native-clean .sp-knobs .k-val { max-width:80px; }
 .native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }
 /* Spectrum lanes own their compact column sizes; general window knobs never size these stacks. */
-@media (hover:hover) and (pointer:fine) { .dev[data-id="spectrum"] .sp-row { grid-template-columns:4px 48px minmax(42px,1fr) 34px 28px 28px 24px; } }
+@media (hover:hover) and (pointer:fine) { .dev[data-id="spectrum"] .sp-row { grid-template-columns:4px 48px minmax(42px,1fr) 34px 28px 28px 24px; }
+}
 .dev[data-id="spectrum"] .sp-row > .sp-b, .dev[data-id="spectrum"] .sp-row > .sp-x { width:100%;min-width:0;box-sizing:border-box; }
 .dev[data-id="spectrum"] .sp-knobs { align-self:center; }
 .dev[data-id="spectrum"] .sp-knobs > .k { flex:none;min-height:0; }
@@ -883,16 +559,9 @@ body.window-info-off .settings-help { display:none; }
 .native-clean[data-id="camera"] .camera-export-row > .trig:first-child { flex:1 1 0;min-width:0; }
 .native-clean[data-id="camera"] .camera-export-row > .camera-export-toggle { flex:0 0 32px;min-width:32px;padding:0; }
 .native-clean[data-id="camera"] .camera-export-toggle::before { display:none; }
-.camera-export-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
-.camera-export-toggle[aria-expanded="true"] svg { transform:none; }
-.camera-export-details:not([hidden]) { display:flex;flex-direction:column;gap:10px; }
 
 .native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
 .native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
-.accent-dial .k-dial { position:relative; }
-.accent-dial .k-dial::after { content:'';position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(var(--acc) var(--accent-sweep),transparent 0);mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 0);pointer-events:none; }
-.accent-dial-b .k-dial::after { background:conic-gradient(var(--acc2) var(--accent-sweep),transparent 0); }
-#menubar[popover] { position:fixed;inset:auto;margin:0;overflow:visible;border:0;padding:0;background:transparent;color:var(--fg); }
 #menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
 
 .shadow-controls { display:flex;flex-wrap:nowrap;gap:6px; }

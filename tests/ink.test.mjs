@@ -36,7 +36,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS, toLUT, rgbToOklab, oklabToRgb, visibleInk, contrastRatio, relLuminance } from '../lab/palette.js';
-import { parseCssColor } from '../lab/kit.js';
+import { parseCssColor } from '../lab/mir/kit.js';
 
 const LAB = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'lab');
 let FAILED = 0, TOTAL = 0;

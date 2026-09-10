@@ -7,7 +7,7 @@
  * This is an OBSERVER product and is labelled a DESIGN CHOICE — ψ is never touched.
  */
 import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID, PRESET_GROUPS } from './palette.js';
-import { el, sw, trig, knob, readout, themeInk, onThemeChange, chip } from './kit.js';
+import { el, sw, trig, knob, readout, themeInk, onThemeChange, chip } from './mir/kit.js';
 
 
 export const DEFAULT_PALETTE = 'prism';

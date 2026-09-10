@@ -21,17 +21,17 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, relative } from 'node:path';
 
-import { createRegistry, idFault, MAP_KINDS } from '../lab/mir/registry.js';
+import { createRegistry, idFault, MAP_KINDS } from '../lab/mir/modulation/registry.js';
 import { createModHost, createTargetHost, createModClock, labParameters, model as M,
          MAX_WALL_STEP, PAUSE_MODES,
          LAB_PRESETS, LAB_PRESET_FOLDER, labPresetList, labPresetFolders, labPresetGet,
          labPresetApply, foreignPresets, presetRouteTargets, barTempo,
-         resumeGrid, RESUME_LAWS } from '../lab/mir/host.js';
+         resumeGrid, RESUME_LAWS } from '../lab/mir/modulation/host.js';
 /* WAVE 60 · curve.js is imported HERE for the first time.  §16 asserts it is byte-identical to its
    source, which is a PROVENANCE claim and not a behavioural one — until this wave the file had 430
    correct lines, an importer, and NOT ONE GATE ON WHAT IT COMPUTES.  That is our own ANTI-PATTERN 17
    sitting inside the file Josh asked to be copied. */
-import * as CV from '../lab/mir/curve.js';
+import * as CV from '../lab/mir/modulation/curve.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -294,7 +294,7 @@ function runWindow(r, n, dt) {
   const bare = [];
   const outside = [];
   let computed = false;
-  const stack = [resolve(ROOT, 'lab/mir/host.js'), resolve(ROOT, 'lab/mir/registry.js')];
+  const stack = [resolve(ROOT, 'lab/mir/modulation/host.js'), resolve(ROOT, 'lab/mir/modulation/registry.js')];
   while (stack.length) {
     const file = stack.pop();
     if (closure.has(file)) continue;
@@ -309,7 +309,7 @@ function runWindow(r, n, dt) {
     }
   }
   const rel = Array.from(closure).map((f) => relative(ROOT, f)).sort();
-  const expected = ['lab/mir/curve.js', 'lab/mir/host.js', 'lab/mir/mod.js', 'lab/mir/registry.js'];
+  const expected = ['lab/mir/modulation/curve.js', 'lab/mir/modulation/host.js', 'lab/mir/modulation/mod.js', 'lab/mir/modulation/registry.js'];
 
   judge('THE COMPLETE IMPORT CLOSURE IS EXACTLY FOUR FILES — walked from host.js and registry.js, not eyeballed: no rack, no kit, no view, no renderer, no GPU, no npm package, no computed dynamic import',
     JSON.stringify(rel) === JSON.stringify(expected) && !bare.length && !outside.length && !computed,
@@ -324,7 +324,7 @@ function runWindow(r, n, dt) {
     [/\bGPU(?:Device|Adapter|Buffer)\b/, 'WebGPU'], [/\bHTML[A-Z]\w*Element\b/, 'HTMLElement'],
     [/from\s*['"][^'"]*(?:rack|kit|moview|skin|lab)\.js['"]/, 'a rack module']
   ];
-  const ourFiles = ['lab/mir/registry.js', 'lab/mir/host.js'];
+  const ourFiles = ['lab/mir/modulation/registry.js', 'lab/mir/modulation/host.js'];
   const domHits = [];
   for (const f of ourFiles) {
     const src = readFileSync(resolve(ROOT, f), 'utf8')
@@ -336,9 +336,9 @@ function runWindow(r, n, dt) {
 
   /* the storage law: the ONE storage touch in the whole closure is mod.js's own
      guarded globalThis.localStorage, and it now points at OUR namespace */
-  const modSrc = readFileSync(resolve(ROOT, 'lab/mir/mod.js'), 'utf8');
-  const storage = (readFileSync(resolve(ROOT, 'lab/mir/registry.js'), 'utf8') +
-                   readFileSync(resolve(ROOT, 'lab/mir/host.js'), 'utf8')).match(/localStorage|sessionStorage|indexedDB/g);
+  const modSrc = readFileSync(resolve(ROOT, 'lab/mir/modulation/mod.js'), 'utf8');
+  const storage = (readFileSync(resolve(ROOT, 'lab/mir/modulation/registry.js'), 'utf8') +
+                   readFileSync(resolve(ROOT, 'lab/mir/modulation/host.js'), 'utf8')).match(/localStorage|sessionStorage|indexedDB/g);
   const keyLine = /^export const PRESET_LS = '([^']+)';$/m.exec(modSrc);
   judge('...and the only storage in the closure is the vendored model’s own guarded globalThis.localStorage, pointed at the λWAVES namespace by the one forced edit — our two files touch no storage at all',
     !storage && keyLine && keyLine[1] === 'lambdawaves.q0.modpresets' && M.PRESET_LS === 'lambdawaves.q0.modpresets',
@@ -748,7 +748,7 @@ function runWindow(r, n, dt) {
   const SRC = process.env.LW_MIR_SRC || '/home/joshua-hosain/Documents/MANDELBROT APP/project/app';
   const noHeader = (s) => s.replace(/^\/\*[\s\S]*?\*\/\n/, '');
   const ours = (f) => {
-    let source = readFileSync(resolve(ROOT, 'lab/mir/' + f), 'utf8');
+    let source = readFileSync(resolve(ROOT, 'lab/mir/modulation/' + f), 'utf8');
     if (f === 'mod.js') for (const patch of JSON.parse(readFileSync(resolve(ROOT,'docs/mir-matrix-patch.json'),'utf8'))) {
       if (!source.includes(patch.after)) throw new Error('Final II provenance patch no longer matches');
       source=source.replace(patch.after,patch.before);
@@ -847,7 +847,7 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
        the source, unmodified" for a whole wave after five more edits went in under it.  A maintainer
        taking an upstream fix reads that header FIRST, because it is the file that tells them how.
        So the number is read out of the header and made to equal the markers in the body. */
-    const head = readFileSync(resolve(ROOT, 'lab/mir/mod.js'), 'utf8').slice(0, 2400);
+    const head = readFileSync(resolve(ROOT, 'lab/mir/modulation/mod.js'), 'utf8').slice(0, 2400);
     const said = head.match(/Forced\s+(\d+)\s+edits?/);
     judge('THE VENDORED HEADER COUNTS ITS OWN EDITS, and the count is gated: §16 strips the provenance block before it diffs, so the sentence that tells a maintainer how to read the file is the one sentence the byte-identity proof structurally cannot see — it said "Forced 1 edit" for a whole wave with six in the file. The number in the header must now equal the marked edits in the body and the entries in the table above, all three',
       !!said && Number(said[1]) === markers && Number(said[1]) === EDITS.length,
@@ -979,7 +979,7 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
 }
 
 /* ══════════════ 19 · THE BREAKPOINT CURVE'S FIVE LAWS ══════════════════════════
- * `lab/mir/curve.js` is the mathematics BOTH device pictures are drawn from, and until
+ * `lab/mir/modulation/curve.js` is the mathematics BOTH device pictures are drawn from, and until
  * wave 60 the only thing this suite said about it was that its bytes match its source.
  * Its own header states five laws "each one a gate rather than a preference"; these are
  * those gates, plus the exactness table the wave-60 curve display leans on, plus the four
@@ -1187,7 +1187,7 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
  * tried and all three fail honestly: inverting the source still yields 0…1, two opposed
  * routes both start at offset 0, and shifting the base down by a half-span would produce
  * the right picture by DESTROYING the user's number — which is the one failure
- * lab/mir/registry.js exists to prevent.  So four touches in the vendored file, and this
+ * lab/mir/modulation/registry.js exists to prevent.  So four touches in the vendored file, and this
  * is the gate on all four.  The last one matters most: a flag that does not survive a
  * preset silently changes the sound of every patch ever saved with it. */
 {

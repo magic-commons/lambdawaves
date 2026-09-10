@@ -1912,3 +1912,16 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   content:"+ DEVICE";font:700 8px/1 var(--font-sans);letter-spacing:.04em; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow:not([hidden]) {
   display:flex;left:4px;right:4px;top:9px; }
+
+/* ── 2026-09-10 · THE DOT GRIP ON EVERY DEVICE CARD (Josh) ─────────────────────────────────────────────
+   The card's header is its drag surface and had no mark. It wears the kit's 3 × 3 dot grip — the same mark as
+   the rack windows' headers, the rail's reorder handle and the transport's tiles — at the left of the head in
+   COMPACT and FULL, and at the top of the rotated MINIMISED bar. */
+:root:root:root #modwin.mir-modwindow .m2head { position: relative; }
+:root:root:root #modwin.mir-modwindow .m2head::before { content: ""; position: absolute; left: 5px; top: 50%; width: 13px; height: 13px; margin-top: -6.5px;
+  color: var(--m2-ink-faint); pointer-events: none; opacity: .9;
+  background-image: radial-gradient(circle at 50% 50%, currentColor 1.1px, transparent 1.3px); background-size: 4.333px 4.333px; background-position: 0 0; }
+:root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2headl { padding-left: 22px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2head::before { left: 50%; top: 4px; margin: 0 0 0 -6.5px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2headl { padding-top: 18px; }
+

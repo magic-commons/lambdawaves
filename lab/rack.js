@@ -18,9 +18,9 @@ import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.j
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
-import { createWindowActivity } from './window-activity.js';
+import { createWindowActivity } from './mir/window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
-import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, setAccentRGB, cssRGB, accentRGB, parseCssColor } from './kit.js';
+import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, setAccentRGB, cssRGB, accentRGB, parseCssColor } from './mir/kit.js';
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
 import { createShadowView } from './shadowview.js';
@@ -62,7 +62,7 @@ import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
-import { createModHost, labParameters, barTempo } from './mir/host.js';
+import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK

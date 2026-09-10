@@ -29,7 +29,7 @@
  */
 import { createElectrostatics, contours as contourLines, streamlines as streamLines, planeFrame } from './electrostatics.js';
 import { cameraBasis } from './field.js';
-import { fitText, accentRGB } from './kit.js';
+import { fitText, accentRGB } from './mir/kit.js';
 import { BASIS, factorial } from './hydrogen.js';
 
 export const VOLT = 27.211386245988;            // CODATA 2018: one a.u. of potential in volts

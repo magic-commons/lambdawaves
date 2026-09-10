@@ -7,7 +7,7 @@
 import { lagrangian, action, actionAngle, angularMoments, rotorEntropy, dipoleZ, dipoleLines, radialObservables } from './dynamics.js';
 import { shellMatrix, schmidt } from './frontier.js';
 import { BASIS } from './hydrogen.js';
-import { el, knob, sw, trig, readout, group, nRGB, themeInk, graphHover } from './kit.js';
+import { el, knob, sw, trig, readout, group, nRGB, themeInk, graphHover } from './mir/kit.js';
 
 export function createDynamics(host, api) {
   const ui = {};

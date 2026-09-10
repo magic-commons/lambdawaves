@@ -82,6 +82,13 @@ Read **[shipping readiness](docs/SHIPPING-READINESS.md)** and **[DEPLOY.md](DEPL
 (a service worker's scope is an origin, and it outlives the deploy that installed it),
 why `html_handling` is `"none"`, and what the build refuses to let you do.
 
+## MIR
+
+The interface — tokens, materials, widgets, gestures, window chrome and the modulation window — is
+**MIR**, Magic Commons' kit, adopted into `lab/mir/` and `lab/fonts/` from its own repository
+(`../MIR`). λWAVES keeps only its own selectors in `lab.css` and `skin.css`. See `CONTRIBUTING.md`
+for the one rule, and `MIR-MANIFEST.json` for which bytes are the kit's.
+
 ## The documents
 
 | File | What it is |

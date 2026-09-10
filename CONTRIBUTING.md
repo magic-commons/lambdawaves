@@ -15,6 +15,12 @@ framework; what you edit is what the browser runs. Keep it that way.
 
 ## House rules
 
+- **`lab/mir/` and `lab/fonts/` are MIR's, not ours.** MIR is the interface kit (`~/Documents/MIR`, its own
+  repository): tokens, materials, widgets, gestures, window chrome, the modulation system. λWAVES *adopts* it —
+  `node ../MIR/tools/adopt.mjs .` copies the bytes in and writes `MIR-MANIFEST.json`. Never edit those files
+  here: change MIR, re-adopt, commit both. `node ../MIR/tools/adopt.mjs . --check` must print "in step"
+  before a commit. Reuse MIR's nodes, gestures and CSS; do not copy their look.
+
 - **Exact physics stays exact.** Hydrogen coefficients evolve by `e^{-iE t}`; nothing is
   integrated. A change that makes a proof in `tests/` tolerate more error needs a reason in
   the pull request, not a wider tolerance.

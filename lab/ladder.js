@@ -7,7 +7,7 @@
  * main register, the clock, or the camera; it recomputes only when a knob moves (idle stays zero).
  */
 import { solveLadder } from './ladder-model.js';
-import { el, knob, readout, group, formula } from './kit.js';
+import { el, knob, readout, group, formula } from './mir/kit.js';
 
 export function createLadder(host, api = {}) {
   const P = { nbar: 30, sigma: 2, d: 0, teeth: 8 };

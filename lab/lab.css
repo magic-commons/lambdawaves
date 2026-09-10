@@ -1,46 +1,7 @@
-/* lab.css — λWAVES material: the token ladder (in the MANDELBROT/BASINS family) and the rack grammar. */
-:root {
-  color-scheme: dark;
-  --ui-scale: 1; --touch: 44px;
-  --font-ui: 'Roboto', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-  --font-sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-num: var(--font-ui);
-  /* WAVE 69 · THE MATH FACE.  Every stack after the house face is a REAL fallback (STYLE-LOCK,
-     Typography) — Latin Modern and Libertinus are the two maths faces a Linux box is likeliest to
-     carry, and the generic `serif` is the last resort the SOURCE.txt contract warns about. */
-  --font-math: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif;
-  --glass-blur: 22px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) */
-  --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-lead: 13px;
-  --tr-tight: .02em; --tr-wide: .12em; --tr-wider: .14em; --lh: 1.45; --w-light: 300; --w-med: 500; --w-bold: 650;
-  --r-xs: 3px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
-  --sp-1: 3px; --sp-2: 5px; --sp-3: 7px; --sp-4: 10px; --sp-5: 14px;
-  --glass-hue: 212; --glass-sat-tint: 12%; --glass-lum: 17%;
-  --glass-tint: var(--glass-hue) var(--glass-sat-tint) var(--glass-lum);
-  --glass-opacity: .93; --glass-border: 1px;
-  --glass-border-color: hsl(0 0% 100% / .18); --glass-hairline: hsl(0 0% 100% / .11);
-  --glass-sheen: hsl(0 0% 100% / .09); --glass-shadow: 0 3px 13px hsl(0 0% 0% / .35);
-  --glass-well: hsl(0 0% 0% / .22); --glass-raise: hsl(0 0% 100% / .05); --glass-press: hsl(0 0% 100% / .15);
-  --glass-groove: hsl(0 0% 100% / .10); --glass-groove-hot: hsl(0 0% 100% / .18);
-  --glass-filter: none;   /* the frosted blur cost 26 fps over a live WebGPU canvas (32 → 58 measured); the tint carries the glass now */
-  --fg: #fff; --fg-soft: hsl(0 0% 91%); --dim: hsl(0 0% 70%); --ink-key: hsl(0 0% 72%); --ink-faint: hsl(0 0% 48%);
-  --ink-shadow: 0 1px 2px hsl(0 0% 0% / .58);
-  --hue-acc: 172; --sat-acc: 62%;
-  --acc: hsl(var(--hue-acc) var(--sat-acc) 66%); --acc-ink: #071114;
-  --acc-soft: color-mix(in srgb, var(--acc) 18%, transparent); --acc-glow: 0 0 9px color-mix(in srgb, var(--acc) 60%, transparent);
-  --acc2: hsl(288 70% 72%); --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
-  --ok: hsl(142 42% 70%); --warn: hsl(38 70% 70%); --bad: hsl(4 62% 74%);
-  --n1: hsl(40 90% 80%); --n2: hsl(188 80% 68%); --n3: hsl(300 70% 76%); --n4: hsl(24 92% 66%); --n5: hsl(120 55% 68%); --n6: hsl(258 78% 78%);
-  --rack-w: 372px; --rail-w: 46px; --z-chrome: 30; --z-veil: 40; --z-banner: 60;   /* --rail-w: a COMPACT floating window's strip (wave 55) */
-  --phone: 0;   /* the sentinel skin.css's phone query raises to 1 — the breakpoint is written there, ONCE, and rack.js reads it back */
-}
-* { box-sizing: border-box; }
+/* THE GROUND IS THE APP'S: this unconditional html/body background is what the document is from first paint until
+   a theme resolves, and index.html's theme-color meta and tests/pwa.test.mjs read it from HERE (MIR's base.css owns
+   the tokens and the widgets, not the stage). */
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
-body { font: var(--fs-base)/var(--lh) var(--font-ui); color: var(--fg); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-button, input, select { font: inherit; color: inherit; }
-button { cursor: pointer; }
-[hidden] { display: none !important; }
-h1, h2 { margin: 0; font-weight: var(--w-bold); }
 
 /* ── shell ──────────────────────────────────────────────────────────────── */
 /* THE STAGE IS THE WHOLE WINDOW; the rack floats over it as detached cards */
@@ -57,36 +18,15 @@ h1, h2 { margin: 0; font-weight: var(--w-bold); }
 body.rack-hidden #rackL { transform: translateX(calc(-100% - 12px)); opacity: 0; }
 body.rack-hidden.rack-peek #rackL { transform: none; opacity: 1; }
 #rackPeekL { position: absolute; left: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
-.dev-swap { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font-size: 11px; cursor: pointer; margin-right: 4px; }
 #rackL:empty { pointer-events: none; }
 body.rack-hidden #rack { transform: translateX(calc(100% + 12px)); opacity: 0; }
 body.rack-hidden.rack-peek #rack { transform: none; opacity: 1; }
 #rackPeek { position: absolute; right: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
 #rackToggle, #rackAdd, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
-.dev-head { cursor: grab; user-select: none; touch-action: none; }
-.dev { touch-action: pan-y; }
-.dev.dragging { opacity: .82; outline: 1px solid var(--acc); outline-offset: -1px; }
-.dev.closed { display: none !important; }
-.dev.off .dev-body { opacity: .38; pointer-events: none; }
-.dev.loading > .dev-head, .dev.loading > .dev-body { opacity: .38; pointer-events: none; }
-.dev-loading { display: none; position: absolute; inset: 0; z-index: 8; align-items: center; justify-content: center;
-  flex-direction: column; gap: 7px; color: var(--fg-soft); font: 700 9px/1 var(--font-ui); letter-spacing: .14em;
-  pointer-events: none; }
 .dev-loading .mark { width: 28px; height: 28px; animation: lw-busy-breathe 1.1s linear infinite alternate; }
-@media (hover: none), (pointer: coarse) { .dev-loading:not([hidden]) { display: flex; } }
 .dev.off .dev-stat::after { content: ' · OFF'; color: var(--dim); }
 .dev.copied .dev-stat::after { content: ' · COPIED'; color: var(--acc); }
-.dev-power { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); cursor: pointer; position: relative; margin-right: 4px; }
-.dev-power::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 1.5px solid var(--acc); border-top-color: transparent; }
-.dev-power::after { content: ''; position: absolute; left: 50%; top: 4px; width: 1.5px; height: 6px; background: var(--acc); transform: translateX(-50%); }
-.dev-power[aria-pressed="false"]::before, .dev-power[aria-pressed="false"]::after { border-color: var(--dim); border-top-color: transparent; background: var(--dim); }
-.dev-power[aria-pressed="false"]::before { background: transparent; }
-.dev-close { width: 22px; height: 22px; border-radius: 50%; border: 0; background: transparent; color: var(--dim); font-size: 15px; line-height: 1; cursor: pointer; margin-left: 2px; }
-.dev-close:hover { color: var(--fg); background: var(--glass-raise); }
-.dev-copy { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font-size: 12px; cursor: copy; margin-right: 4px; }
-.dev-copy:hover { color: var(--acc); }
-.dev[data-kind="info"] .ro-sub { max-height: 3em; opacity: 1; }
 #rackAdd { top: 44px; font-size: 18px; line-height: 1; transition: opacity .28s ease; }
 /* wave 54 (board #48): FAVOURITE LAYOUTS takes the next seat down the same column, on the same rules as its two
    neighbours — one geometry, one hide rule, one hover colour, and its list opens where the + list opens. */
@@ -95,22 +35,8 @@ body.rack-hidden #rackAdd, body.rack-hidden #rackAddList, body.rack-hidden #rack
 body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 #rackAdd:hover, #rackFav:hover { color: var(--acc); }
 #rackAddList, #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
-.rack-fav-head { padding: 5px 10px 3px; font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); color: var(--dim); }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
-
-.dev-title { display: none; }
-.dev-eyebrow { font-weight: var(--w-bold); }
-/* the compaction pass: rows fill their width and centre their contents */
-.row { justify-content: space-between; }
-.row.tight { justify-content: flex-start; }
-.row > .trig, .row > .sw, .row > .seg, .row > .ro, .row > select.sel { flex: 1 1 auto; }
-.seg-b { flex: 1 1 auto; text-align: center; }
-.trig { text-align: center; }
-.ro { flex: 1 1 auto; }
-.about p { margin: 0 0 8px; font-size: var(--fs-small); line-height: 1.5; color: var(--fg-soft); }
-.about b { color: var(--fg); } .about a { color: var(--acc); } .about code { font-family: var(--font-mono); font-size: 11px; }
-.rack-add-none { padding: 6px 10px; font-size: var(--fs-tiny); color: var(--dim); }
 body.no-badges #badges { display: none !important; }
 /* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
 #notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
@@ -237,7 +163,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-dump:active, .ab-home:active { transform: translateY(1px); background: var(--glass-press); }
 
 .picker, .pk-n { background: transparent !important; box-shadow: none !important; }
-.picker { border: 1px solid var(--glass-hairline) !important; }
 /* the playhead slides away with the rack and fades back when the pointer nears its place */
 
 
@@ -272,27 +197,6 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 #rack { direction: rtl; }
 #rack > * { direction: ltr; }
 .k-val, .fd-val, .ro-val, .ro-sub, .dev-stat, .sp-e, .sp-nm, .keys-chip, .tbtn, #transport .time { font-variant-numeric: tabular-nums; }
-/* ═══ WAVE 69 · <m> — MATHEMATICS, IN THE MATH FACE ═══════════════════════════════════════════════
- * ONE rule, one element, and the element is deliberately an unknown one: an inline note written with
- * innerHTML gets the face with no code at all, and every plain-text call site goes through kit.js's
- * `mathText()`, which BUILDS the element rather than parsing a string.  `<m>` is not in the HTML
- * vocabulary, which is the point — nothing else in the tree can claim it by accident.
- *   THE OPTICAL SIZE IS MEASURED, not chosen.  STIX Two Math's x-height is 473/1000 em against
- * Roboto's 528/2048·2 = 528‰ (0.5283), and its cap-height 657 against 711; matching the x-heights
- * asks ×1.117, matching the caps ×1.082, and a formula is both at once — 1.10em is the geometric
- * mean and it is what makes `arg ψ` sit on the same line as OBSERVABLE without either looking shrunk.
- *   IT STAYS UPRIGHT.  The subset carries one weight and no italic, so `font-style: italic` would be
- * a SYNTHETIC slant of a mathematics face — and half of what this lab sets is operator names (Re, Im,
- * arg, gcd, mod), which are upright by convention anyway.  One honest face beats two fake ones.
- *   AND IT DOES NOT MOVE THE LINE.  The face declares USE_TYPO_METRICS with ascent 762 / descent 238,
- * exactly one em, so an <m> inline box never grows a row the way a maths font's 2200/1700 winAscent
- * pair would; `line-height: 1` holds it under the parent's 1.45 strut whatever the fallback does. */
-m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-height: 1;
-    letter-spacing: normal; font-variant-numeric: tabular-nums; }
-/* a marked run inside a label that is TRACKED gets its tracking back to zero, and one inside a
-   heading keeps the heading's weight — the face has one, so this is the browser's synthesis and it
-   is the same thing #title .lam has always done */
-.k-lbl m, .fd-lbl m, .ro-lbl m, .grp-lbl m, .dev-eyebrow m, .seg-b m { letter-spacing: 0; }
 
 /* ═══ WAVE 69 · .fx — A CLOSED FORM WITH LIVE SLOTS (kit.js `formula`) ════════════════════════════
  * Two faces on one line, on purpose: the EXPRESSION is the math face and a SLOT is `--font-num` with
@@ -317,8 +221,6 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
    in one flex row, and a two-line expression there would either be clipped or would break the row.
    It is `display: none`, so the pill still has exactly twelve seats and B74's claim stays true. */
 #transport.mini .fx { display: none; }
-/* Help uses one info button for window explanations and one tooltip surface for controls. */
-#menubar { position: absolute; z-index: calc(var(--z-chrome) + 3); display: flex; gap: 0; padding: 0; background: none; border: 0; box-shadow: none; }
 .mb-group { position: relative; }
 .mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
 .mb-btn:hover { background: transparent; color: var(--acc); }
@@ -342,17 +244,12 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }
 .sp-head .note { display: none; }
 .sp-head .trig { flex: 1 1 0; min-width: 0; padding: 0 6px; }
-.k.rate .k-val { font-size: var(--fs-micro); }
 /* THE NARROW SCREEN: the rack drops along the bottom.  This is the IPAD's rule (portrait 744–834) and a
    narrow desktop window's, and wave 51 left it exactly as it was.  A PHONE does not land here: skin.css's
    last block is a (hover: none) + size pair that comes later and overrides every property below. */
 @media (max-width: 860px) {
   #rack { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
 }
-
-/* ── title chip and badges over the stage ──────────────────────────────── */
-.glass { border: var(--glass-border) solid var(--glass-border-color); background: hsl(var(--glass-tint) / var(--glass-opacity));
-  box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); text-shadow: var(--ink-shadow); }
 #title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); pointer-events: none; }
 #title .lam { color: var(--acc); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
@@ -364,13 +261,6 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
                                   stays (the subtitle is a hover-level fact); only the sledgehammer goes. */
 #badges { position: absolute; left: calc(var(--rack-w) + 340px); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
 #badges > * { pointer-events: auto; }
-.badge { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; border-radius: var(--r-pill); font-size: var(--fs-tiny); letter-spacing: var(--tr-wide);
-  color: var(--fg-soft); cursor: pointer; border: var(--glass-border) solid var(--glass-border-color); background: hsl(var(--glass-tint) / var(--glass-opacity)); }
-.badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
-.badge.exact i { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
-.badge.numerical i { background: var(--acc); box-shadow: 0 0 6px var(--acc); }
-.badge.warn i { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-.badge.bad i { background: var(--bad); box-shadow: 0 0 6px var(--bad); }
 #sheet { position: absolute; right: var(--sp-4); top: 52px; z-index: var(--z-veil); width: min(440px, 80%); padding: var(--sp-4) var(--sp-5); border-radius: var(--r-lg);
   font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.5; color: var(--fg-soft); }
 #sheet h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
@@ -446,25 +336,10 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
 .tbtn.modb { font-size: var(--fs-tiny); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); color: var(--ink-key); }   /* the 44-px `.tbtn` box IS the seat — B70 walks it at the phone breakpoint and a 40 would fail the law */
 .tbtn.modb.on { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) 55%, transparent); background: var(--acc2-soft); }
 #transport.mini .tbtn.modb { width: 26px; border-radius: var(--r-pill); font-size: var(--fs-micro); }
-
-/* ── device chassis ─────────────────────────────────────────────────────── */
-.dev { flex: 0 0 auto; display: flex; flex-direction: column; border-radius: var(--r-lg); border: var(--glass-border) solid var(--glass-border-color);
-  background: hsl(var(--glass-tint) / var(--glass-opacity)); box-shadow: var(--glass-shadow); contain: layout paint; }
-.dev-head { flex: 0 0 auto; display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; column-gap: 0; height: 38px; padding: 0 var(--sp-1) 0 var(--sp-4);
-  border-bottom: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); border-radius: var(--r-lg) var(--r-lg) 0 0; }
-.folded .dev-head { border-bottom: 0; border-radius: var(--r-lg); }
-.dev-id { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; min-width: 0; overflow: hidden; }
-.dev-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dev-title { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--acc); }
 .dev-stat { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: right; font-size: var(--fs-tiny); letter-spacing: var(--tr-tight); color: var(--dim); font-variant-numeric: tabular-nums;
   padding: 0 var(--sp-2); }   /* the header's spacing lives in the STATUS's own padding, so it collapses with the status instead of stealing the eyebrow's width (wave 44) */
 .dev-stat.live { color: var(--acc); }
 .dev-stat.warn { color: var(--warn); }
-.dev-util { display: flex; align-items: center; }
-.dev-fold { width: var(--touch); height: 36px; border: 0; background: transparent; color: var(--dim); font-size: 13px; border-radius: var(--r-md); }
-.dev-fold:active { background: var(--glass-press); }
-.dev-body { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) var(--sp-4); }
-.folded .dev-body { display: none; }
 
 /* ── §55 · THE FLOATING WINDOW ─────────────────────────────────────────────────────────────────────
  * ONE LAYER over the stage, pointer-transparent so the canvas gestures underneath are untouched, above
@@ -478,9 +353,6 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
   max-height: calc(100dvh - 16px); }
 /* a window taller than the screen scrolls its BODY, which moves no control relative to any other */
 #floats > .dev > .dev-body { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
-/* WAVE 80 · a floating window is lifted, not dropped — the same inversion the card float took, at
-   the one step more a window off the rack has always had over a card on it. */
-.dev.floating { box-shadow: var(--glass-shadow), 0 -5px 14px hsl(0 0% 0% / .20); }
 /* the rack a dragged window would land in says so while the finger is over it */
 #rack.rack-drop, #rackL.rack-drop { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 55%, transparent); border-radius: var(--r-lg); }
 
@@ -490,119 +362,11 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
 /* the width rule above is `#floats > .dev`, an ID selector, so COMPACT has to answer at the same
    specificity or it loses silently — which it did, on the first run of the gate. */
 #floats > .dev.compact { width: var(--rail-w); }
-.dev.floating.compact .dev-body { display: none; }
-.dev.floating.compact .dev-head { height: auto; grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content;
-  justify-items: center; padding: var(--sp-3) 0 var(--sp-2); row-gap: var(--sp-3); border-bottom: 0; border-radius: var(--r-lg); }
-.dev.floating.compact .dev-id { writing-mode: vertical-rl; transform: rotate(180deg); max-height: 190px; align-items: center; }
 .dev.floating.compact .dev-stat { display: none; }
-.dev.floating.compact .dev-util { flex-direction: column; gap: var(--sp-2); }
-.dev.floating.compact .dev-util > button { display: none; }
-.dev.floating.compact .dev-util > .dev-power,
-.dev.floating.compact .dev-util > .dev-rail,
-.dev.floating.compact .dev-util > .dev-close { display: inline-flex; }
-
-/* THE TWO NEW CHIPS wear the puck the other round header buttons wear — same 22 px, same rim, same ink.
-   The RAIL chip is in every header and shown only while the window floats, so a header's box does not
-   change shape when a window comes off the rack. */
-.dev-pop, .dev-rail { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline);
-  background: var(--glass-raise); color: var(--dim); cursor: pointer; margin-right: 4px; }
-.dev-pop:hover, .dev-rail:hover { color: var(--acc); }
-/* the child combinator is not decoration: `.dev-util > button` below sets `display: inline-flex` at
-   (0,1,1), so a bare `.dev-rail { display: none }` at (0,1,0) loses to it whatever the source order —
-   which is exactly what the first screenshot showed, a rail chip on every docked card. */
-.dev-util > .dev-rail { display: none; }
-.dev.floating .dev-util > .dev-rail { display: inline-flex; }
-/* ⇄ SWAP stands down while a window floats: "send this to the other rack" is a control that would change
-   nothing for a window that is on neither (ANTI-PATTERN 7) — and its seat is exactly the one the rail chip
-   takes, so the header carries the same number of chips docked or floating and its box does not change. */
-.dev.floating .dev-util > .dev-swap { display: none; }
-.dev.floating .dev-pop { color: var(--acc); }        /* the window is off the rack, and its own chip says so */
-
-
-.dev-util > button { display: inline-flex; align-items: center; justify-content: center; }
-.dev-util > button > svg { width: 14px; height: 14px; display: block; }
-.dev-fold > svg { width: 13px; height: 13px; transition: transform var(--t-fast) ease; }
-/* ONE drawing for the caret, turned a quarter turn when the window is folded — the chevron's own idiom
-   ("the caret each folder header turns", glyph.js), not one glyph rotated into another's meaning. */
-.dev.folded .dev-fold > svg { transform: rotate(-90deg); }
-.dev-close > svg { width: 13px; height: 13px; }
-/* `north` is the one SOLID mark in a header of hairline outlines (it is drawn that way at source, and
-   glyph.js is maintained by diff — we size it, we do not redraw it), so its box is two pixels smaller
-   and the optical mass matches the rest of the row. */
-button[data-gly="north"] > svg { width: 12px; height: 12px; }
 #rackAdd > svg { width: 16px; height: 16px; }
 .dock-btn > svg, .mod-exp > svg { width: 13px; height: 13px; }
-.row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-2); }
-.row.tight { gap: var(--sp-1); }
-.grp { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-2) var(--sp-2) var(--sp-3); border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-md); background: transparent; }
-.grp-lbl { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
-.spacer { flex: 1 1 auto; }
-.note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; }
-.note b { color: var(--fg-soft); font-weight: var(--w-med); }
-
-/* ── knob ───────────────────────────────────────────────────────────────── */
-.k { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 62px; flex: 0 0 auto; }
-.k-lbl { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-key); white-space: nowrap; }
-.k-dial { position: relative; width: 34px; height: 34px; border-radius: 50%; border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: grab;
-  background: repeating-conic-gradient(var(--glass-groove-hot) 0deg 1.8deg, hsl(0 0% 0% / 0) 1.8deg 30deg), var(--glass-raise); }
-.k-dial::before { content: ""; position: absolute; left: -12px; right: -12px; top: -8px; bottom: -8px; }   /* the 44-px finger, the 34-px ink */
-.k-lg .k-dial { width: 42px; height: 42px; }
-.k.drag .k-dial { border-color: var(--acc); cursor: grabbing; }
-.k-needle { position: absolute; left: 50%; bottom: 50%; width: 1.5px; height: 13px; margin-left: -.75px; border-radius: 1px; background: var(--fg);
-  box-shadow: 0 0 0 .5px hsl(0 0% 0% / .38); transform-origin: 50% 100%; transform: rotate(var(--turn, 0deg)); pointer-events: none; }
-.k-lg .k-needle { height: 17px; }
-.k.live .k-needle { background: var(--acc); box-shadow: var(--acc-glow); }
-.k-val { font-size: var(--fs-tiny); color: var(--fg-soft); }
-.k.drag .k-val { color: var(--acc); font-weight: var(--w-bold); }
-.k.disabled { opacity: .38; pointer-events: none; }
-.sw.disabled, .sw:disabled, .seg-b:disabled, .trig:disabled { opacity: .38; pointer-events: none; }   /* W-STURMIAN: a control that stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses) */
 .sp-cap, .sturm-note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; padding: 0 2px 2px; }   /* the note's look, outside the ⓘ sweep */
 .sp-cap b, .sturm-note b { color: var(--fg-soft); font-weight: var(--w-med); }
-
-/* ── switch, segmented select, trigger ───────────────────────────────────── */
-.sw { display: inline-flex; align-items: center; gap: 5px; min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline);
-  background: hsl(0 0% 100% / .06); color: var(--dim); font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); }
-.sw-led { width: 7px; height: 7px; border-radius: 50%; background: hsl(0 0% 100% / .18); }
-.sw.on { background: hsl(var(--hue-acc) var(--sat-acc) 62% / .28); color: var(--fg); border-color: color-mix(in srgb, var(--acc) 50%, transparent); }
-.sw.on .sw-led { background: var(--acc); box-shadow: var(--acc-glow); }
-.sw:active { background: var(--glass-press); }
-.segw { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; min-width: 0; max-width: 100%; }
-.segw > .k-lbl { white-space: normal; }                                      /* a row label longer than the card wraps rather than running off it */
-.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; gap: 2px; padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .2); }
-.seg-b { min-width: 40px; min-height: 38px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; color: var(--dim); font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); }
-.seg-b.on { background: hsl(var(--hue-acc) var(--sat-acc) 62% / .30); color: var(--fg); }
-.seg-b:active { background: var(--glass-press); }
-.trig { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 48px; min-height: var(--touch); padding: 0 10px; border-radius: var(--r-md);
-  border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); color: var(--fg-soft); font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); }
-.trig:active { background: var(--glass-press); color: #fff; }
-.trig.on { background: var(--acc-soft); border-color: color-mix(in srgb, var(--acc) 50%, transparent); color: var(--fg); }
-.trig.acc2 { color: var(--acc2); }
-.trig-g { font-size: 13px; }
-select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: hsl(220 15% 12%); color: var(--fg); font-size: var(--fs-small); max-width: 100%; }
-
-/* ── fader ──────────────────────────────────────────────────────────────── */
-.fd { position: relative; min-width: 60px; height: var(--touch); border-radius: 6px; overflow: hidden; border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .18); touch-action: none; cursor: ew-resize; }
-.fd-fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--fill, 0) * 100%); background: hsl(var(--hue-acc) var(--sat-acc) 60% / .22); pointer-events: none; }
-.fd-edge { position: absolute; top: 0; bottom: 0; width: 2px; left: calc(var(--fill, 0) * 100%); margin-left: -1px; background: var(--fg); box-shadow: 0 0 0 1px hsl(0 0% 0% / .48); pointer-events: none; }
-.fd-lbl { position: absolute; left: 7px; top: 5px; font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-key); pointer-events: none; }
-.fd-val { position: absolute; right: 7px; bottom: 4px; font-size: var(--fs-tiny); color: var(--fg-soft); font-variant-numeric: tabular-nums; pointer-events: none; }
-.fd.drag .fd-val { color: var(--acc); font-weight: var(--w-bold); }
-.fd.pop .fd-fill { background: color-mix(in oklab, var(--nc, var(--acc)) 30%, transparent); }
-
-/* ── readouts / meters ──────────────────────────────────────────────────── */
-.ro { display: flex; flex-direction: column; gap: 1px; padding: 4px 7px; border-radius: var(--r-sm); background: hsl(0 0% 0% / .16); border: var(--glass-border) solid var(--glass-hairline); }
-.ro-lbl { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-key); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ro-val { font-size: var(--fs-lead); color: var(--fg); font-variant-numeric: tabular-nums; line-height: 1.15; }
-.ro-val.live { color: var(--acc); }
-.ro-val.warn { color: var(--warn); }
-.ro-val.ok { color: var(--ok); }
-.ro-sub { font-size: var(--fs-micro); color: var(--ink-faint); white-space: nowrap; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.ro.wide .ro-val { font-size: var(--fs-small); }
-.meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
-.meters .ro.wide { grid-column: span 3; }
-.meters .ro.two { grid-column: span 2; }
-.abar { height: 3px; border-radius: 2px; background: hsl(0 0% 100% / .1); overflow: hidden; margin-top: 3px; }
-.abar > i { display: block; height: 100%; width: calc(var(--v, 0) * 100%); background: var(--acc); }
 
 /* ── spectrum rail ──────────────────────────────────────────────────────── */
 .ladder { position: relative; height: 92px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
@@ -629,7 +393,6 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
 .sp-b:active { background: var(--glass-press); }
 .sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: 13px; border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
-.picker { display: flex; flex-direction: column; gap: 4px; padding: var(--sp-2); border-radius: var(--r-md); background: hsl(0 0% 0% / .2); }
 .pk-n { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 4px; }
 .pk-nl { font-size: var(--fs-small); color: var(--nc); padding-top: 9px; text-align: center; }
 .pk-chips { display: flex; flex-wrap: wrap; gap: 3px; }
@@ -648,8 +411,6 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
 body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
 body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
-/* TAB: the window just brought to the top flashes */
-.dev.tab-hot { outline: 1px solid var(--acc); outline-offset: -1px; }
 .keys-list { display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow: auto; }
 .keys-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--fs-tiny); }
 .keys-label { color: var(--dim); }
@@ -691,41 +452,17 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 
 /* ── shadow view ────────────────────────────────────────────────────────── */
 .shadow-c { width: 100%; height: 236px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); touch-action: none; }
-.epi { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ok); }
-.calc-table { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-tiny); overflow-x: auto; }
-.calc-row { display: flex; flex-wrap: wrap; gap: 1px 10px; align-items: baseline; padding: 3px 4px; border-bottom: 1px solid var(--glass-hairline); }
-.calc-name { color: var(--fg); font-weight: var(--w-bold); flex: 0 0 auto; }
-.calc-val { color: var(--fg); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
-.calc-res { font-variant-numeric: tabular-nums; flex: 0 0 auto; margin-left: auto; }
-.calc-formula, .calc-law { color: var(--dim); flex: 1 1 100%; font-size: 9px; line-height: 1.35; }
-.calc-res.ok { color: var(--ok, #7fe0a0); }
-.calc-res.warn { color: var(--warn, #ffbe5a); }
-.calc-foot { color: var(--dim); font-size: 9px; padding-top: 3px; }
 .mol-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
 .qcd-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
 /* ATOMS: the shell ladder and the radials of the atom in force (wave 37) */
 .atm-c { width: 100%; height: 152px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
 .atm-r { width: 100%; height: 120px; display: block; margin-top: 6px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
-/* WIGNER: the (z, p_z) slice map — its ground IS the neutral midpoint of the signed scale, so the ink is drawn
-   with opacity over it and the map reads the same in both themes.  RADIATION: the far-field polar plot (wave 40) */
-.wig-c { width: 100%; height: 190px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
-.rad-c { width: 100%; height: 168px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
-.wig-law, .rad-cap { font-size: var(--fs-micro); letter-spacing: var(--tr-tight); color: var(--dim); padding: 3px 2px 0; }
-.wig-stand, .rad-stand { font-size: var(--fs-tiny); line-height: 1.35; color: var(--warn); padding: 4px 2px 0; }
 
 /* ═══ wave 46 — THE MINIMALIST GRAPH ═══════════════════════════════════════════════════════════ */
 
 
 .dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; }
 .dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) > .seg-b { min-width: 0; padding: 0 4px; }
-
-/* THE ONE TIP.  Fixed on the body, so no card, no rack scroll and no overflow can clip it; clamped to the
-   viewport in kit.js.  Glass and ink only — never the object's colour: the highlight on the object carries that. */
-#graphTip { position: fixed; left: 0; top: 0; z-index: calc(var(--z-banner) + 5); pointer-events: none; max-width: 268px;
-  padding: 4px 8px; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-border-color);
-  background: hsl(var(--glass-tint) / .97); color: var(--fg); box-shadow: var(--glass-shadow);
-  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
-  font: var(--fs-tiny)/1.4 var(--font-ui); letter-spacing: var(--tr-tight); white-space: pre-line; }
 
 
 /* ═══ wave 48 — HIDDEN IS THE FASTEST STATE · THE GRIP · THE BUSY MARK · THE WARNING ═══════════ */
@@ -760,7 +497,6 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 
 .mod-logo .mark { display: block; width: 16px; height: 16px; margin: auto; box-shadow: none; filter: none; }
 .mod-logo { display: flex; align-items: center; justify-content: center; }
-@keyframes lw-busy-breathe { from { opacity: .42; } to { opacity: 1; } }
 
 
 #title .mark, .nb-logo .mark { transform-origin: 50% 50%; }
@@ -791,7 +527,6 @@ body[data-theme="dark"] #warnPane { color: #fff; }
   body[data-theme="dark"] #warnPane { background: hsl(0 0% 4% / .88); }
 }
 #warnPane.warn-out { opacity: 0; pointer-events: none; }
-@keyframes lw-warn-in { from { opacity: 0; } to { opacity: 1; } }
 .warn-card { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 34em; width: 100%; margin: auto; }
 .warn-sign { display: block; width: clamp(200px, 44vmin, 420px); height: auto; margin: 0 auto 2rem; user-select: none; pointer-events: none; }
 .warn-title { margin: 0 0 1rem; font-size: clamp(1.1rem, 2.8vmin, 1.45rem); font-weight: 700; letter-spacing: .18em;
@@ -813,30 +548,6 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
  *   The X half of every transform is `-50%` because that is what centres the pill (§12); a keyframe
  * that wrote only Y would throw it to the left edge mid-flight. */
 #transport.mini.at-top { top: calc(env(safe-area-inset-top) + 52px); bottom: auto; }
-@keyframes lw-tr-out-down { from { transform: translate(-50%, 0);     opacity: 1; }
-                            to   { transform: translate(-50%, 96px);  opacity: 0; } }
-@keyframes lw-tr-out-up   { from { transform: translate(-50%, 0);     opacity: 1; }
-                            to   { transform: translate(-50%, -96px); opacity: 0; } }
-@keyframes lw-tr-in-up    { from { transform: translate(-50%, 96px);  opacity: 0; }
-                            to   { transform: translate(-50%, 0);     opacity: 1; } }
-@keyframes lw-tr-in-down  { from { transform: translate(-50%, -96px); opacity: 0; }
-                            to   { transform: translate(-50%, 0);     opacity: 1; } }
-/* FEWER AND GENTLER, NEVER ZERO: the seat still changes and the pill still fades across it; what
-   goes is the 96 px of travel, which is the part that is motion rather than information. */
-@media (prefers-reduced-motion: reduce) {
-  @keyframes lw-tr-out-down { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes lw-tr-out-up   { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes lw-tr-in-up    { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes lw-tr-in-down  { from { opacity: 0; } to { opacity: 1; } }
-}
-
-/* ═══ WAVE 69 · THE WINDOW ENTRANCE ═══════════════════════════════════════════════════════════════
- * The lab's ONE entrance, fired by `layout.reopen()` and by nothing else (rack.js says why).  220 ms,
- * inside the 300 ms ceiling, MOTION-LAW's entrance easing verbatim, opacity and a 7-px slide — chrome,
- * one-shot, in no accent colour, so nothing here can be mistaken for the field. */
-@keyframes lw-dev-enter { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
-@keyframes lw-dev-enter-quiet { from { opacity: 0; } to { opacity: 1; } }
-.dev.dev-enter { animation: lw-dev-enter .22s cubic-bezier(.23, 1, .32, 1); }
 
 @media (prefers-reduced-motion: reduce) {
   /* "fewer and gentler, never zero": the palette turn and the busy breath are COLOUR and OPACITY and they stay
@@ -863,10 +574,6 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
     transition-property: opacity, visibility; }
   body.rack-hidden #rack, body.rack-hidden #rackL, body.rack-hidden #transport.mini { transform: none; }
   .dev-fold > svg, .mod-fold > svg { transition: none; }
-  .dev.dragging { transform: none; }
-  .trig:active { transform: none; }
-  .k .k-val, .fd .fd-val { transition-property: opacity; }
-  .dev.dev-enter { animation-name: lw-dev-enter-quiet; }         /* the slide goes, the fade stays */
   /* the PORTED plugin declares its own motion tokens and this is what they are for — one line
      reaches every `var(--m2-motion-*)` transition in modwindow.css without touching its sheet */
   .mir-modwindow, .kwin-chiprail { --m2-motion-structural: 0s; --m2-motion-micro: 0s; }
@@ -983,18 +690,9 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
 .mod-graph { position: relative; border-radius: var(--r-sm); background: var(--glass-well);
   box-shadow: inset 0 0 0 1px var(--glass-hairline); overflow: hidden; }
 svg.mod-cv { display: block; width: 100%; height: 108px; touch-action: none; cursor: crosshair; }
-.cv-grid { fill: none; stroke: var(--glass-hairline); stroke-width: 1; }
-.cv-tlbl { fill: var(--ink-faint); font-size: 7px; font-family: var(--font-ui); }
-.cv-fill { stroke: none; fill: color-mix(in srgb, var(--acc) 11%, transparent); }
-.cv-line { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
-.cv-stair { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; stroke-linejoin: miter; }
 /* with the ladder on, the SHAPE stays under the stairs rather than being replaced by them */
 .mod-cv.stepped .cv-line { stroke: var(--ink-faint); stroke-width: 1; }
 .mod-cv.stepped .cv-fill { fill: color-mix(in srgb, var(--acc) 6%, transparent); }
-.cv-pt { fill: var(--fg); }
-.cv-h { fill: none; stroke: var(--ink-key); stroke-width: 1.2; }
-.cv-head { stroke: color-mix(in srgb, var(--acc) 55%, transparent); stroke-width: 1; }
-.cv-dot { fill: var(--acc); }
 
 /* the caption says what the picture IS; the capsule says what the source is DOING, in numbers, on
    the card — not in a hover tip (ANTI-PATTERN 4) */
@@ -1017,8 +715,6 @@ svg.mod-cv { display: block; width: 100%; height: 108px; touch-action: none; cur
 .mod-sh:hover { background: var(--glass-press); }
 .mod-sh:active { background: var(--glass-press); }
 .mod-sh.on { background: var(--acc-soft); border-color: color-mix(in srgb, var(--acc) 50%, transparent); }
-.sh-cv { display: block; width: 100%; height: 100%; }
-.sh-p { fill: none; stroke: var(--dim); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .mod-sh.on .sh-p { stroke: var(--acc); }
 
 /* the compact seats.  A 44-px SEAT with micro ink is the wave-51 rule read literally: grow the seat,
@@ -1071,60 +767,6 @@ body.mod-arming .k[data-param].mod-drop.is-over > .k-dial {
 body.mod-arming .sw, body.mod-arming .seg, body.mod-arming .trig, body.mod-arming .fd,
 body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45; }
 
-/* THE GHOST — what the finger is carrying, and what the depth drag reads.  44 px ABOVE a fingertip
-   (the iOS magnifier convention), under-right of a mouse: the finger covers the 34-px dial at exactly
-   the moment the number matters, so the number is never under it.
-   WAVE 64 · IT IS THE PLUGIN'S NOW, AND OURS IS DELETED RATHER THAN SHIPPED BESIDE IT.  `.m2ghost`
-   in lab/mir/modwindow/modwindow.css is the same object in BASINS' own material — position: fixed at
-   the pointer, pointer-events: none, twelve characters — and it is one of the routing overlays that
-   travelled, because it needs no room beside anything and so no host geometry can break it.  See
-   REPORT.md wave 64 for the two that did not travel, and why. */
-
-/* THE ARC.  Two radii, not two colours: at 34 px one radius cannot carry both legibly, and a derived
-   grey is not stable when `--acc2` is an angle the user can turn.  The OUTER ring is the selected
-   macro's route — the one you can grab, where a finger can reach it — and the INNER one is the summed
-   reach of every other live route, so a control is never silently over-subscribed.
-   NO ROUTE, NO RING: a knob is a knob until something holds it. */
-/* WAVE 63 · THE BOX IS 60 px AND ONE USER UNIT IS ONE PIXEL, which it was not: at inset -6 the box
-   was 44 px for a 46-unit viewBox, so every radius below was drawn at 0.957 of what it says and the
-   "8 px" grab band was really 7.65.  A 60-px box over a 60-unit viewBox is 1 : 1, and it is what
-   gives the band room to sit OUTSIDE the dial's 44-px core (see .k-ring-hit). */
-.k-ring { position: absolute; inset: -14px; overflow: visible; pointer-events: none; }
-.k-ring-edit, .k-ring-stack, .k-ring-tick, .k-ring-spur {
-  fill: none; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
-.k-ring-edit { stroke: var(--acc); stroke-width: 2.5; }
-.k-ring-stack { stroke: color-mix(in srgb, var(--acc) 42%, transparent); stroke-width: 1.5; }
-/* ZERO DEPTH IS A REAL STATE, and a zero-length arc cannot be grabbed — so it becomes a TICK at the
-   base, which is Massive's fixed slot without Massive's permanent socket. */
-.k-ring-tick { stroke: var(--acc); stroke-width: 2.5; stroke-linecap: round; }
-/* MASSIVE's "small break at the limit of the modulation range", inverted so it reads as an overflow:
-   it says WHICH end runs off the dial using nothing but geometry, which survives a colour-blind eye,
-   a dim screen and a 34-px knob — none of which "turn it red" does. */
-.k-ring-spur { stroke: var(--acc); stroke-width: 3; }
-.k-ring.is-dormant .k-ring-edit, .k-ring.is-dormant .k-ring-tick { stroke: var(--ink-faint); }
-/* THE GRAB BAND, AND THE ONE PLACE THIS FEATURE COST SOMETHING IT DID NOT ADMIT TO.  It used to say
-   the ring "owns only the annulus the pseudo-element finger already had" — true, and the trade the
-   sentence hid is that the finger IS the target: at r in [17, 24] with stopPropagation on its own
-   pointerdown, a ROUTED dial's turn target through its own centre measured 35 x 33 px against this
-   house's 44-px law, and B70 could not fail it because its walk asks who OWNS a point and the ring
-   svg is a child of .k-dial.  So the band moved OUT rather than the law bending: r in [24, 32] (28
-   +- 4 at 1 : 1), which leaves the dial a contiguous 47 px core — measured, with a route present, by
-   the listener that actually answers — and gives the band the full 8 px it always claimed.  The
-   radius is set for the WIDER of the two strokes: skin.css takes it to 11 under a finger, which is
-   [22.5, 33.5] and a 45-px core, and 45 is the number that matters because the phone is where the
-   44-px law is measured.
-   non-scaling-stroke because the four drawn paths have it and this one did not: on a .k-lg dial the
-   band would otherwise scale with the box and stop being 8 px.  A press lands on the ring only
-   OUTSIDE the knob's rim now, where cursor: ns-resize is the only thing on the screen. */
-.k-ring-hit { fill: none; stroke: transparent; stroke-width: 8; vector-effect: non-scaling-stroke;
-  pointer-events: stroke; cursor: ns-resize; }
-.k.ring-drag .k-ring-edit, .k.ring-drag .k-ring-tick { stroke-width: 3.5; }
-.k.ring-drag .k-val { position: relative; z-index: 2; padding: 0 4px; border-radius: var(--r-sm);
-  background: var(--glass-press); color: var(--acc2); font-weight: var(--w-bold); }
-.k.ring-drag .k-val i { font-style: normal; }
-/* Serum's red, kept to the ONE place a hue can actually be read: text. */
-.k.ring-drag .k-val i.clip { color: var(--warn); }
-
 /* THE POPOVER — press and hold 450 ms, or the right button.  One menu, two doors: everything Serum
    puts behind a right-click needs another road on a touch screen.  And it carries the half Serum is
    missing — with more than one macro on a control, Serum sends you to another tile or to the Mod
@@ -1141,10 +783,6 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .mod-poprts > .grp-lbl { flex: 1 0 100%; }
 .mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
 .mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }
-
-
-#keymap { position: fixed; inset: 0; z-index: var(--z-veil); display: flex; flex-direction: column; }
-#keymap[hidden] { display: none; }
 .km-panel { position: absolute; inset: 0; display: flex; flex-direction: column;
   background: hsl(var(--glass-tint) / .97); backdrop-filter: blur(var(--glass-blur, 22px)); }
 .km-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;
@@ -1195,8 +833,8 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .km-key-selected { outline: 2px solid var(--acc); outline-offset: -1px; box-shadow: 0 0 14px var(--acc-soft); }
 .km-key-hovered, .km-key:hover, .km-key:focus-visible { background: var(--glass-press); border-color: var(--acc-soft); }
 .km-key-recording { border: 2px solid var(--bad); animation: km-pulse 1s ease-in-out infinite; }
-@keyframes km-pulse { 50% { border-color: var(--acc); } }
-@media (prefers-reduced-motion: reduce) { .km-key-recording { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .km-key-recording { animation: none; }
+}
 .km-key-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 3px; }
 .km-key-shift-char { font-size: 10px; opacity: .5; }
 .km-key-cap { font-size: 13px; font-weight: 700; text-align: center; color: inherit; }
@@ -1250,17 +888,4 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
   .km-footer { flex-direction: column; align-items: stretch; }
   .km-footer-info { align-items: flex-start; text-align: left; }
 }
-
-/* Final II: readouts reserve their text lanes as values change. */
-.ro { min-width:0; overflow:hidden; }
-.ro-val { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:1.4em; }
-.ro.wide .ro-val { height:2.6em; line-height:1.3; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; white-space:normal; }
-.ro-sub { height:2.8em; max-height:2.8em; line-height:1.4; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; opacity:0.85; }
-.k-val { white-space:nowrap; font-variant-numeric:tabular-nums; }
 #transport .mod-logo:active { transform:scale(.91); box-shadow:inset 0 2px 5px #0006; }
-
-.corner-axis-hit { position:fixed; width:88px; height:88px; background:transparent; border:0; z-index:5; cursor:ew-resize; }
-.corner-axis-hit:focus-visible { outline:1px solid var(--acc); }
-
-.sw[data-mode] { min-width:112px; }
-.sw[data-mode]::after { content:attr(data-mode); font-size:8px; margin-left:auto; opacity:.7; }

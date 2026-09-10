@@ -2,7 +2,7 @@
 
 import { createMO } from './mo.js';
 import { createPulseRun, rabiRWA } from './pulse.js';
-import { el, seg, knob, trig, readout, group, nRGB, themeInk, graphHover, fitText } from './kit.js';
+import { el, seg, knob, trig, readout, group, nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
 
 const KINDS = {
   lcao1s: { label: '1s LCAO', nMax: 1, n: 2, title: 'Two 1s functions: one bonding and one antibonding state' },

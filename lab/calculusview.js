@@ -3,7 +3,7 @@
  * with exact matrix elements, and the derivatives are centred differences of the exact evolution.
  */
 import { stats } from './calculus.js';
-import { el, readout, sw } from './kit.js';
+import { el, readout, sw } from './mir/kit.js';
 
 export function createCalculus(host, api) {
   let on = true, last = null;

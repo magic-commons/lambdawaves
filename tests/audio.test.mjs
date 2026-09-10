@@ -15,7 +15,7 @@
  * What is NOT claimed here: that a real microphone sounds right.  That is Josh's ear.
  */
 import { createAudioCapture, audioSupport, AUDIO_STATE, BANDS } from '../lab/audio.js';
-import * as M from '../lab/mir/mod.js';
+import * as M from '../lab/mir/modulation/mod.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {

@@ -31,7 +31,7 @@
  * above the exact −0.602634214 of Bates–Ledsham–Stewart 1953), R_e = 2.35227 and D_e = 2.1246 eV (the register).
  */
 import { createMO, createDynamics } from './mo.js';
-import { el, sw, seg, knob, fader, trig, readout, group, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
+import { el, sw, seg, knob, fader, trig, readout, group, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 /* THE CANVAS HAS NO THEME (wave 44).  These rules were written rgba(255,255,255,…) — right on the dark theme and
    WHITE ON WHITE on the light one, where the dissociation line, its "H + H⁺" label, the exact Bates dots, the R

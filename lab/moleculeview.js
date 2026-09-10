@@ -6,7 +6,7 @@
  * 1s LCAO the general machinery reproduces electrostatics.js's closed forms to 1e-9 (tests/mo.test.mjs G2).
  */
 import { energies, EXACT_REFERENCE, EXACT_RE, EXACT_DE_EV, equilibrium, moState, moAt, aoAmplitudes, populationA, tunnelPeriod, fieldModes, domainFor, EV } from './molecule.js';
-import { el, seg, sw, knob, readout, nRGB, vividInk, graphHover, fitText } from './kit.js';
+import { el, seg, sw, knob, readout, nRGB, vividInk, graphHover, fitText } from './mir/kit.js';
 
 /* THE CANVAS HAS NO THEME (wave 44).  These rules were written rgba(255,255,255,…) — right on the dark theme and
    WHITE ON WHITE on the light one, where the dissociation line, its "H + H⁺" label, the exact Bates dots, the R

@@ -2315,3 +2315,36 @@ reads in accent B, delete in faint ink, with a hair of air between them.
 - **The digit under the pointer is the step** (FL Studio's law): dragging on the tens moves tens, on the
   ones moves ones, on a visible decimal moves tenths; the wheel steps by the digit it is over; a touch
   moves ones. Measured from 60.0: tens drag → 80.0, ones → 82.0, tenths → 82.2, wheel on tens → 92.2.
+
+## 2026-09-10 · MIR: the interface becomes a kit, and λWAVES becomes its first reader
+
+Josh: "I've learned my mistakes because agents would keep copying instead of taking a kit." So the kit
+exists now, as its own repository (`~/Documents/MIR`, v1.0.0), and this tree adopts it.
+
+**What moved into MIR** — `kit.js` (with `glyph.js`), `slider-keys.js`, `window-activity.js`, and two
+modules cut out of `native-ui.js`: `control-help.js` (hints that step aside, the ⓘ panel, one help
+surface per window) and `plane-model.js`; the modulation system whole (`mir/modulation/`: BASINS' window,
+byte-frozen, with the host, model, registry, curves and `modhost.css`); the fonts with their licences;
+the four UI laws from `docs/ui/`. **The sheets were split** by selector: every rule naming an app id or
+class (`#transport`, `.sp-`, `.nb-`, `data-id=`, …) stayed in `lab.css` / `skin.css`; every generic rule
+(tokens, `.k`, `.seg`, `.trig`, `.fd`, `.ro`, `.fx`, `.dev`, the materials and themes) became
+`mir/css/base.css` and `mir/css/skin.css`, loaded first. The split is a script (`.tmp/splitcss.mjs`,
+kept in this entry's spirit: same selector, same @media context, comments travel with their rule).
+
+**Proved, not argued.** 3 292 elements × 50 computed properties with all 25 windows open, dark and light,
+before and after. The only differences: the two new `<link>`s; the intended dot grip on the modulation
+device cards (`.m2head::before`, `.m2headl` padding 18 → 22); and **one latent cascade bug the split
+fixed** — HISTORY's action row was written as a two-column grid but a later `.row { display: flex }` in
+the same sheet had beaten it since it was written; with the kit's `.row` now loading first the grid is
+live and the window is 94 px shorter. The light run also showed one SPECTRUM lane fewer, traced to the
+probe's own settle time, not the sheets (see the follow-up line below).
+
+**One mark for "drag me."** The rack windows' header grip (`.dev-head::before`) and the modulation device
+cards' headers (compact, full and the rotated minimised bar) wear the same 3 × 3 dot grip as the rail's
+reorder handle and the transport tiles. The four-way cross remains the routing grip. BASINS' own
+chip-rail grip was already this mark; the kit takes it as the law.
+
+**The layout law of an adopting app:** `lab/mir/` ≡ MIR's `mir/`, `lab/fonts/` ≡ MIR's `fonts/`,
+`MIR-MANIFEST.json` names the bytes; `node ../MIR/tools/adopt.mjs . --check` reads "in step". The gallery
+(`MIR/gallery/`) shows every token, material and widget built by the kit itself, with the theme, card
+style, frost and disconnected seats live.

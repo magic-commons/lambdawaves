@@ -11,7 +11,7 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover } from './kit.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover } from './mir/kit.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and

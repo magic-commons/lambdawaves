@@ -11,7 +11,7 @@
 import { BASIS } from './hydrogen.js';
 import { shellMatrix, shellCharacter } from './frontier.js';
 import { cameraBasis, cameraKey } from './field.js';
-import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './kit.js';
+import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
 
 /* WAVE 49 — THE LABEL IS THE SCALAR'S VERDICT.  The card used to read "rank one ⇒ COHERENT (a Kepler ellipse)"
    off the Schmidt spectrum alone, which printed a Kepler ellipse with e = 0 over |1,0⟩⊗|1,0⟩ = −0.5774·3s +

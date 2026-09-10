@@ -1,6 +1,6 @@
 
 
-import { el } from './kit.js';
+import { el } from './mir/kit.js';
 
 /* ── 1. KEYBOARD LAYOUT DEFINITION (ANSI 5-ROW STRUCTURE) ─────────────────────────────────────── */
 

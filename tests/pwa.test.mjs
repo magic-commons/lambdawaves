@@ -398,7 +398,7 @@ for (const rel of onDisk.filter((r) => /\.js$/.test(r) && !r.startsWith('vendor/
   noteAll(rel, src, /(?:from|import)\s*\(?\s*['"](\.[^'"]+)['"]/g);
   noteAll(rel, src, /new URL\(\s*['"](\.[^'"]+)['"]\s*,\s*import\.meta\.url/g);
 }
-for (const rel of ['lab.css', 'skin.css']) noteAll(rel, live(text(rel)), /url\(\s*['"]?(\.[^'")]+)/g);
+for (const rel of ['mir/css/base.css', 'mir/css/skin.css', 'lab.css', 'skin.css']) noteAll(rel, live(text(rel)), /url\(\s*['"]?(\.[^'")]+)/g);   // MIR's sheets first: the fonts are the kit's
 /* the stripper must not have eaten live code: these three are certainly there */
 for (const [rel, ref] of [['main.js', './rack.js'], ['index.html', './main.js'], ['rack.js', './mathworker.js']])
   assert.ok(live(text(rel), rel.endsWith('.html')).includes(ref), `the comment stripper removed ${ref} from lab/${rel} — it is over-eager and D3 is not proving anything`);
@@ -702,8 +702,9 @@ assert.deepEqual(breaches, [], 'a SUBSET font ships under a Reserved Font Name �
 /* AND THE CSS SAYS THE SAME NAME THE BINARY DOES.  Half of the original defect was that skin.css declared
    `font-family: 'Spinwerad'` — the RFN — as the name presented to users; a rename in the binary alone
    would have left that half standing. */
-const skin = text('skin.css'), faceRules = [...skin.matchAll(/@font-face\s*\{[^}]*font-family:\s*'([^']+)'[^}]*url\('\.\/([^']+)'\)/g)].map((m) => [m[1], m[2]]);
-assert.equal(faceRules.length, 3, `skin.css: expected three @font-face rules for lab/fonts/, parsed ${faceRules.length}`);
+/* 2026-09-10: the faces are MIR's (lab/mir/css/skin.css), which reaches the fonts as ../../fonts/ */
+const skin = text('mir/css/skin.css'), faceRules = [...skin.matchAll(/@font-face\s*\{[^}]*font-family:\s*'([^']+)'[^}]*url\('(?:\.\.\/\.\.\/|\.\/)([^']+)'\)/g)].map((m) => [m[1], m[2]]);
+assert.equal(faceRules.length, 3, `mir/css/skin.css: expected three @font-face rules for lab/fonts/, parsed ${faceRules.length}`);
 for (const [fam, url] of faceRules) {
   assert.ok(faceName[url] !== undefined, `skin.css: @font-face '${fam}' names ./${url}, which is not one of the three faces in lab/fonts/`);
   assert.equal(fam, faceName[url], `skin.css: @font-face declares '${fam}' but lab/${url}'s own nameID 1 is "${faceName[url]}" — the family a user sees and the name in the binary must be the same string, or a rename has only been done in one of the two places OFL §3 talks about`);

@@ -5,7 +5,7 @@
  * exact −2.903724), the picture is the Born rule — ρ(x₂ | x₁) ∝ |ψ(x₁, x₂)|² — with nothing interpretive added.
  */
 import { hylleraas, BASES, EXACT_E, KNOWN, cuspRatio, conditionalModes, psiPair } from './helium.js';
-import { el, seg, sw, knob, readout } from './kit.js';
+import { el, seg, sw, knob, readout } from './mir/kit.js';
 
 export function createHelium(host, api) {
   let basis = 'six', sol = null, solving = null, generation = 0, active = api.active ? !!api.active() : true, on = false, r1 = 0.8, th1 = 0, x1v = null;   // x1v: a point placed by hand on the field (shift-click), off the knobs' plane

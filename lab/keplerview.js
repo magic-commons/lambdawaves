@@ -6,7 +6,7 @@
  */
 import { cameraBasis } from './field.js';
 import { keplerOrbits, orbitPoints } from './kepler.js';
-import { vividInk, showGraphTip, hideGraphTip, fitText } from './kit.js';
+import { vividInk, showGraphTip, hideGraphTip, fitText } from './mir/kit.js';
 
 const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150] };
 

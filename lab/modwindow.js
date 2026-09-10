@@ -1,11 +1,11 @@
 
 
-import { el, seg, trig, knob, tapWatcher, gripDots } from './kit.js';
-import { bindSliderKeys } from './slider-keys.js';
+import { el, seg, trig, knob, tapWatcher, gripDots } from './mir/kit.js';
+import { bindSliderKeys } from './mir/slider-keys.js';
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
-         SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modwindow/modwindow.js';
+         SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modulation/modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
-         pointsEqual, PRESET_LABEL } from './mir/curve.js';
+         pointsEqual, PRESET_LABEL } from './mir/modulation/curve.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const pct = (u) => (100 * clamp01(u)).toFixed(2) + '%';

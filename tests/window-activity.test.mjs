@@ -1,7 +1,7 @@
 /* The presentation scheduler's pure boundary: viewport and chrome state may suspend work, while power and saved
  * switches remain untouched. Intersection is injected exactly as a browser would deliver it. */
 import assert from 'node:assert/strict';
-import { createWindowActivity } from '../lab/window-activity.js';
+import { createWindowActivity } from '../lab/mir/window-activity.js';
 
 class Classes {
   constructor(...names) { this.names = new Set(names); }

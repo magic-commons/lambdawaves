@@ -62,7 +62,7 @@ for (const [name, src] of TEXT) {
 judge('A1 no positive tabindex in lab/ — every tabbable seat is 0 or −1, so the tab order is the DOM\'s and stays the DOM\'s', positives.length === 0, positives.slice(0, 6));
 
 /* ── 2 · a slider carries its four numbers ───────────────────────────────────────────────────── */
-const kit = TEXT.get('lab/kit.js') || '';
+const kit = TEXT.get('lab/mir/kit.js') || '';
 const roleWrites = (kit.match(/setAttribute\('role',\s*'slider'\)/g) || []).length;
 const wants = ['aria-valuemin', 'aria-valuemax', 'aria-valuenow', 'aria-valuetext'];
 const missing = wants.filter((w) => kit.indexOf(w) < 0);

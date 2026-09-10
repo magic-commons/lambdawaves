@@ -12,7 +12,7 @@
 import { BASIS } from './hydrogen.js';
 import { vortexPoints, stretchedCensus, threeModes } from './frontier.js';
 import { cameraBasis, cameraKey } from './field.js';
-import { el, readout, sw, seg, trig } from './kit.js';
+import { el, readout, sw, seg, trig } from './mir/kit.js';
 
 export function createVortex(host, overlay, api) {
   const r1 = el('div', 'row tight', host);

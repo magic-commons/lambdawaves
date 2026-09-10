@@ -16,7 +16,7 @@
  *
  * STATUS: NUMERICAL, reporting a MODEL.  Every number leaves here with its model string attached.
  */
-import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
+import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 import { ATOMS, atom, configOf, solveAtom, atomEnergyOf, ionisation, quantumDefect, atomRadial, atomDomainFor,
   EXCHANGE_MODEL, HARTREE_EV } from './atoms.js';
 

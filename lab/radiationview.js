@@ -26,7 +26,7 @@
  */
 import { dipoleMatrix, einsteinA, lifetime, coherentPower, pattern, vec3c, C_AU, MU_H, AU_S } from './radiation.js';
 import { BASIS } from './hydrogen.js';
-import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './kit.js';
+import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 const HARTREE_EV = 27.211386245988;          // CODATA 2018
 const A0_NM = 0.0529177210903;               // the Bohr radius in nm

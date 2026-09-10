@@ -7,7 +7,7 @@ import { h2Energies, h2Equilibrium, KNOWN_HL, EXACT_H2, collide, hlDensityWeight
 import { h2Curves, h2CurveTable, sto3gH2, sto3gHydrogen, weinbaumOptimal } from './h2ci.js';
 import { overlapS } from './molecule.js';
 import { modeTable } from './hydrogen.js';
-import { el, seg, sw, knob, readout, trig, nRGB, vividInk, themeInk, graphHover, fitText } from './kit.js';
+import { el, seg, sw, knob, readout, trig, nRGB, vividInk, themeInk, graphHover, fitText } from './mir/kit.js';
 
 const T1S = modeTable(1, 0, 0);
 /* WAVE 49 — THE CORRELATED CURVES BESIDE THE VARIATIONAL ONE (lab/h2ci.js).  Heitler–London is a bound from above

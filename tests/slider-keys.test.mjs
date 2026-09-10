@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { bindSliderKeys } from '../lab/slider-keys.js';
-import * as M from '../lab/mir/mod.js';
+import { bindSliderKeys } from '../lab/mir/slider-keys.js';
+import * as M from '../lab/mir/modulation/mod.js';
 const key = (element, name, modifiers = {}) => {
   const e = new Event('keydown', { cancelable: true });
   Object.assign(e, { key: name, ...modifiers });

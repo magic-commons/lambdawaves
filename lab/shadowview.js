@@ -7,7 +7,7 @@
  * Nothing here integrates anything: the coordinates are read from the register's c(t).
  */
 import { BASIS } from './hydrogen.js';
-import { nRGB, themeInk, graphHover, fitText } from './kit.js';
+import { nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
 import { SQRT2 } from './shadow.js';
 
 export function createShadowView(canvas, api) {

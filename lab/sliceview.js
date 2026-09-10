@@ -42,7 +42,7 @@ import { planeModel } from './native-ui.js';
 import { sampleSlice, paintSlice, planeReport, ksMap } from './slice.js';
 import { psiAndGrad } from './dynamics.js';
 import { IDENTITY, expPure, qmul, qnormalize, canonicaliseRotors, classifyManeuver, tourSegmentAt, projectToU2, isHolomorphic, visibleFrame, adjoint } from './rotor4.js';
-import { el, seg, sw, knob, trig, readout, themeInk, graphHover } from './kit.js';
+import { el, seg, sw, knob, trig, readout, themeInk, graphHover } from './mir/kit.js';
 
 const NAMED = [
   { key: 'xy', label: 'x–y', qL: [1, 0, 0, 0], qR: [1, 0, 0, 0] },
