@@ -157,8 +157,8 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
      · FUTURE   the rows you stepped back from.  GREYED, NOT REMOVED — that is FL's behaviour and it
                 is the honest one: they are still reachable until you do something new, and a list
                 that deleted them would be lying about what the next click can still do.
-   It takes the RACK's own scrollbar, like the project list two rules down, because 60 rows will not
-   fit and a scroller nothing marks is a scroller nobody finds. */
+   The engine keeps 60 states, but the card renders only the ten latest points. This is a glanceable
+   recovery surface rather than another workspace; sequential Undo and Redo still reach the full ring. */
 .hist-list { display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: hidden auto;
   overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
@@ -176,6 +176,8 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 /* the stepped-back future: still there, still clickable, and visibly spent */
 .hist-future { opacity: .42; }
 .hist-future .hist-lbl { text-decoration: line-through; text-decoration-thickness: 1px; }
+.hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+.hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
 /* WAVE 106 · THE PROJECT LIST SCROLLS, AND NOW IT SAYS SO.  It always had `overflow: auto`, but no
    scrollbar of its own while #rack two rules below wears an explicit 2-px accent one — so a list
@@ -319,6 +321,7 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
 .mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: left; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: 6px; font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
 .mb-item:hover { background: var(--glass-raise); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+.mb-sep { height: 1px; margin: 4px 8px; background: var(--glass-hairline); pointer-events: none; }
 
 
 .mb-item > .mb-num { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center;

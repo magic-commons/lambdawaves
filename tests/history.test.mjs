@@ -220,6 +220,25 @@ function withClock(fn) {
     && frozen === true && noSnapshots === true && typeof atTop[3].at === 'number',
     { labels: atTop.map((r) => r.label), top: atTop.map((r) => r.state).join(' '), jumped: jumped.map((r) => r.state).join(' '), frozen, noSnapshots });
 }
+{ /* grace after random access: recover even after the old future was truncated */
+  const { st, H, edit } = toy();
+  H.clear();
+  for (let i = 1; i <= 5; i++) { edit(i); H.flush(); }
+  H.goto(2);                              // stand on 2; the original head at 5 becomes the return branch
+  const jumped = { value: st.v, can: H.canHistoryUndo, future: H.redoDepth };
+  edit(20); H.flush();                    // ordinary history now reads start, 1, 2, 20; 3…5 were truncated
+  const branched = { value: st.v, rows: H.entries().map((r) => r.label), redo: H.canRedo, can: H.canHistoryUndo };
+  const restored = H.historyUndo();
+  const after = { value: st.v, rows: H.entries().length, cursor: H.cursor, can: H.canHistoryUndo,
+                  again: H.historyUndo() };
+  H.undo();
+  judge('HISTORY UNDO IS ONE-USE GRACE FOR A TIMELINE JUMP: goto(2) keeps the five-step head, an edit at 20 may truncate rows 3…5 normally, and History Undo still restores the exact six-row timeline at value 5. The branch is consumed, so a second History Undo does nothing; ordinary Undo then continues from the restored timeline and lands on 4',
+    jumped.value === 2 && jumped.can === true && jumped.future === 3
+    && branched.value === 20 && branched.rows.length === 4 && branched.redo === false && branched.can === true
+    && restored === true && after.value === 5 && after.rows === 6 && after.cursor === 5
+    && after.can === false && after.again === false && st.v === 4,
+    { jumped, branched, after, undo: st.v });
+}
 { /* a name has to survive the very window that swallows the drag's mutations */
   const r = withClock((clock) => {
     const { st, H, edit } = toy();

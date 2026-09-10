@@ -3058,6 +3058,56 @@ export async function boot(dom) {
       try { swClient.take(); } catch (e) { swClient.error = String(e && e.message || e); return false; }
       return true;
     },
+    /** Explicit repair path from ABOUT > UPDATE APP. First ask the registration for a new worker. If
+     *  one installs, take it through the normal safe handoff. If the server has the same worker, remove
+     *  this app's registration and Cache Storage, then reload from the network; the next boot precaches
+     *  a clean copy. Project data lives in localStorage and is never touched here. */
+    async refresh() {
+      if (swClient.state === 'refreshing' || swClient.state === 'taking') return false;
+      let discardApproved = false;
+      if (layout.projects && layout.projects.dirty) {
+        if (!window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')) return false;
+        discardApproved = true;
+      }
+      swClient.state = 'refreshing';
+      swClient.say('CHECKING FOR A NEW BUILD…', 'checking for a new build');
+      try {
+        const reg = swClient.registration || (navigator.serviceWorker && await navigator.serviceWorker.getRegistration('./'));
+        if (reg) {
+          await reg.update();
+          const installing = reg.installing;
+          if (installing && !['installed', 'activated', 'redundant'].includes(installing.state)) {
+            await Promise.race([
+              new Promise((resolve) => installing.addEventListener('statechange', () => {
+                if (['installed', 'activated', 'redundant'].includes(installing.state)) resolve();
+              })),
+              new Promise((resolve) => setTimeout(resolve, 15000)),
+            ]);
+          }
+          if (reg.waiting) {
+            if (discardApproved) layout.projects.markClean();
+            swClient.asked = true; swClient.state = 'taking';
+            swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
+            reg.waiting.postMessage({ type: 'LW_SW_SKIP_WAITING' });
+            return true;
+          }
+          await reg.unregister();
+        }
+        if ('caches' in globalThis) {
+          const names = await caches.keys();
+          await Promise.all(names.filter((name) => name.startsWith('lw-lab-')).map((name) => caches.delete(name)));
+        }
+        if (discardApproved) layout.projects.markClean();
+        swClient.asked = true;
+        swClient.say('CACHE CLEARED · RELOADING…', 'cache cleared; reloading');
+        swClient.reload();
+        return true;
+      } catch (e) {
+        swClient.error = String(e && e.message || e); swClient.state = 'failed';
+        swClient.say('UPDATE FAILED · TRY AGAIN', 'update failed: ' + swClient.error);
+        return false;
+      }
+    },
     /** the controller under this document changed.  ONLY the document that asked may reload. */
     controllerChanged() {
       if (swClient.asked) { if (swClient.reloads++ === 0) swClient.reload(); return 'reloaded'; }
@@ -3761,13 +3811,17 @@ export async function boot(dom) {
       const bar = el('nav', 'menubar', document.getElementById('lab')); bar.id = 'menubar'; bar.setAttribute('popover','manual');bar.hidden = true;
       const clickTrig = (label) => { const b = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === label); if (b) b.click(); };
       const runKey = (code) => { const a = ACTIONS.find((x) => x.key === code && !x.ctrl); if (a) a.run(); };
+      const keyFor = (id) => { const a = ACTIONS.find((x) => x.id === id); return a ? keyName(a) : ''; };
       const MENUS = {
-        FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…', () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
+        FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
           ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p)]),
+          null,
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
+          null,
           ['SAVE the experiment (quick)', () => clickTrig('SAVE')], ['LOAD the last quick save', () => clickTrig('LOAD')], ['COPY as JSON', () => clickTrig('COPY JSON')],
           ['COPY a LINK to this state', () => clickTrig('COPY LINK'), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
-        EDIT: () => [['UNDO\t' + keyName(ACTIONS.find((x) => x.id === 'undo')), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyName(ACTIONS.find((x) => x.id === 'redo')), () => historyApi.redo(), () => !historyApi.canRedo], ['PLAY / PAUSE\tSpace', () => runKey('Space')], ['NORMALIZE', () => clickTrig('NORMALIZE')], ['CLEAR the register', () => clickTrig('CLEAR')], ['RESET the view', () => clickTrig('RESET VIEW')], ['RESEED the particles\tctrl+R', () => runKey('KeyR')], ['RESET the key bindings', () => clickTrig('RESET KEYS')], ['SETTINGS…', () => layout.raise('settings')]],
+        EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
+          ['PLAY / PAUSE\tSpace', () => runKey('Space')], ['NORMALIZE', () => clickTrig('NORMALIZE')], ['CLEAR the register', () => clickTrig('CLEAR')], ['RESET the view', () => clickTrig('RESET VIEW')], ['RESEED the particles\tCtrl+R', () => runKey('KeyR')], null, ['RESET the key bindings', () => clickTrig('RESET KEYS')], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\tV cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
@@ -3775,11 +3829,11 @@ export async function boot(dom) {
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\tH', () => runKey('KeyH')], ['FULL SCREEN / back\tF', () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')],
+        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
-        ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['SETTINGS…', () => layout.raise('settings')]],
+        ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('keysheet'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
       };
       let openList = null;
       const closeLists = () => { for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
@@ -3814,7 +3868,7 @@ export async function boot(dom) {
         const btn = el('button', 'mb-btn', grp, name); btn.type = 'button';
         btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
         const list = el('div', 'mb-list', grp); list.hidden = true;
-        const fill = () => { list.innerHTML = ''; for (const [label, run, dis, hint] of MENUS[name]()) { const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true; it.addEventListener('click', (e) => { e.stopPropagation(); run(); closeLists(); barShown(false); }); } };
+        const fill = () => { list.innerHTML = ''; for (const entry of MENUS[name]()) { if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; } const [label, run, dis, hint] = entry; const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true; it.addEventListener('click', (e) => { e.stopPropagation(); run(); closeLists(); barShown(false); }); } };
         btn.addEventListener('click', (e) => { e.stopPropagation(); const was = openList === list; closeLists(); if (!was) { fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; } });
         btn.addEventListener('pointerenter', (e) => { if (e.pointerType === 'touch' || !openList || openList === list) return; closeLists(); fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; });
       }
@@ -4047,7 +4101,7 @@ export async function boot(dom) {
           else titleIn.blur();
         }
         if (e.key === 'ArrowDown' && subIn && !subIn.hidden) { e.preventDefault(); subIn.focus(); }
-        e.stopPropagation();
+        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
       });
       if (subIn) {
         subIn.addEventListener('input', () => { try { localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {} });
@@ -4055,7 +4109,7 @@ export async function boot(dom) {
           if (e.key === 'Enter') { e.preventDefault(); subIn.blur(); }
           else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; try { localStorage.removeItem(NB_SUBTITLE); } catch (_) {} titleIn.focus(); }
           else if (e.key === 'ArrowUp') { e.preventDefault(); titleIn.focus(); }
-          e.stopPropagation();
+          if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
         });
       }
       const renderMarkdown = renderNotebook;
@@ -4066,7 +4120,7 @@ export async function boot(dom) {
       nb.dataset.mode = 'edit';
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS')) e.stopPropagation(); });   // wave 106: the save keys pass; every other key is still the textarea's
+        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
       /* ── PROJECTS: sessions in folders, a recent list, the notebook as each one's landing page ── */
       const pjRead = () => { try { return readProjectCollection(localStorage, PJ_KEY); } catch (e) { pjStatus('projects unavailable — ' + e.message + '. Stored data was left untouched.'); return null; } };
       const pjWrite = (P) => { try { localStorage.setItem(PJ_KEY, JSON.stringify(P)); return true; } catch (e) { pjStatus('save failed — ' + e.message); return false; } };
@@ -4173,7 +4227,7 @@ export async function boot(dom) {
          in the BUBBLE phase, so this `stopPropagation` was a second, independent block on Ctrl+S —
          fixing only the early return above would have left it dead here. */
       nb.querySelector('.pj-path').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nb.querySelector('.pj-save').click(); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS')) e.stopPropagation(); });
+        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
       nb.querySelector('.pj-export').addEventListener('click', () => { const t = projects.exportText(); if (!t) { pjStatus('nothing to export — save first'); return; } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'application/json' })); a.download = (pjCurrent || 'project').replace(/\//g, '__') + '.lambdawaves.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
       nb.querySelector('.pj-import input').addEventListener('change', async (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; try { if (f.size > MAX_PROJECT_BYTES) throw new Error('project file exceeds 8 MiB'); const p = projects.importText(await f.text()); pjStatus('imported ' + p); } catch (err) { pjStatus('import failed: ' + err.message); } e.target.value = ''; });
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
@@ -4703,6 +4757,8 @@ export async function boot(dom) {
     { id: 'modBar', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', label: 'undo the last edit to ψ or its law', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
     { id: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => historyApi.redo() },
+    { id: 'historyUndo', label: 'return from the last history jump', key: 'KeyZ', ctrl: true, alt: true, shift: false, run: () => historyApi.historyUndo() },
+    { id: 'settings', label: 'settings', key: 'Comma', ctrl: true, shift: false, run: () => layout.raise('settings') },
 
 
     { id: 'save', label: 'save the open project (asks for a name when none is open)', key: 'KeyS', ctrl: true, shift: false,
@@ -4714,8 +4770,8 @@ export async function boot(dom) {
   try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) if (ov[a.id]) Object.assign(a, ov[a.id]); } catch (_) {}
   function saveKeys() { try { const ov = {}; for (const a of ACTIONS) { const d = DEFAULT_KEYS[a.id]; if (a.key !== d.key || !!a.ctrl !== d.ctrl || !!a.alt !== d.alt || a.shift !== d.shift) ov[a.id] = { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }; } localStorage.setItem(LS_KEYS, JSON.stringify(ov)); } catch (_) {} }
   const MAC = /Mac|iPhone|iPad/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
-  function keyName(a) { const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/');
-    const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? 'Alt+' : '') + (a.shift ? 'Shift+' : '') + k;
+  function keyName(a) { const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/').replace('Comma', ',');
+    const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? (MAC ? '⌥+' : 'Alt+') : '') + (a.shift ? 'Shift+' : '') + k;
     return n === 'Shift+/' ? '?' : n; }
 
   function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
@@ -4787,16 +4843,14 @@ export async function boot(dom) {
     const tag = (e.target && e.target.tagName) || '';
 
 
-    /* ⚠ WAVE 106 · TWO KEYS ESCAPE A TEXT FIELD, AND ONLY TWO.  This return sat ABOVE every modifier
+    /* Project save and Settings escape a text field. This return sits above every modifier
        test, so Ctrl+S pressed with the caret in the project's name field or the notebook — the two
        places a hand most plausibly is when it reaches for save — reached nobody at all.
          IT IS AN ALLOWLIST AND NOT A LOOSENING.  Ctrl+Z inside the notebook still does the TEXTAREA'S
-       undo and not the register's, which is a law B59 drives with a real key
-       (boot.browser-test.mjs: "Ctrl+Z on the body undoes and the same key inside the notebook's
-       textarea does not") — only Ctrl+S and Ctrl+Shift+S are named, because only those two have no
-       meaning inside a text field that a user could want instead. */
-    const savesFromText = (e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyS';
-    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !savesFromText) return;
+       undo and not the register's. Save and the platform-standard Settings shortcut have no useful
+       text-editing meaning, so they stay global while the caret is active. */
+    const appCommandFromText = (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma');
+    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !appCommandFromText) return;
     if (tag === 'SELECT' && e.code !== 'Space') return;
     if (capturing) {                                               // the KEYS panel is listening for a new binding
       e.preventDefault();
@@ -5198,7 +5252,9 @@ export async function boot(dom) {
   const historyApi = {
     undo() { const ok = history.undo(); if (ok) wState.setStatus('undone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
     redo() { const ok = history.redo(); if (ok) wState.setStatus('redone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
+    historyUndo() { const ok = history.historyUndo(); if (ok) wState.setStatus('returned from history jump', 'live'); return ok; },
     get canUndo() { return history.canUndo; }, get canRedo() { return history.canRedo; },
+    get canHistoryUndo() { return history.canHistoryUndo; },
     get depth() { return history.depth; }, get redoDepth() { return history.redoDepth; }, get limit() { return history.limit; },
     clear() { history.clear(); }, flush() { return history.flush(); }, note(name) { history.note(name); },
     /* wave 106: the three the LIST needs — the rows, where the instrument is standing, and the jump.
@@ -5214,19 +5270,21 @@ export async function boot(dom) {
   const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
   rack.appendChild(wHist.root);
   const histList = el('div', 'hist-list', wHist.body);
+  let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
   {
-    const rh = wHist.row('tight');
-    rh.appendChild(trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root);
-    rh.appendChild(trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root);
+    const rh = wHist.row('tight hist-actions');
+    histUndoBtn = trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root; rh.appendChild(histUndoBtn);
+    histRedoBtn = trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn);
+    histReturnBtn = trig({ label: 'HISTORY UNDO', title: 'return once to the timeline from before the last history jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn);
     rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
-    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Each row is one completed edit; a drag creates one row. Select a row to return to it. A new edit replaces any later rows. The last 60 edits are kept. Camera pose, layout, and play state are excluded.';
+    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> The ten latest points are shown. Select one to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Sixty edits remain available to Undo and Redo.';
   }
   function renderHistory() {
     if (!histList) return;
     const rows = historyApi.entries();
     histList.innerHTML = '';
-    for (let i = rows.length - 1; i >= 0; i--) {          // newest at the top, the way a stack reads
-      const r = rows[i];
+    const shown = rows.slice(-10).reverse();
+    for (const r of shown) {                              // newest at the top, capped so this is a glance, not a workspace
       const b = el('button', 'hist-row hist-' + r.state, histList); b.type = 'button';
       el('span', 'hist-i', b, String(r.i));
       el('span', 'hist-lbl', b, r.label || 'edit');
@@ -5234,7 +5292,10 @@ export async function boot(dom) {
       b.title = r.state === 'current' ? 'where the instrument is standing' : 'land on this moment';
       b.addEventListener('click', () => historyApi.goto(r.i));
     }
-    wHist.setStatus(rows.length + (rows.length === 1 ? ' row' : ' rows') + '  ·  on ' + (historyApi.cursor + 1), 'live');
+    if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
+    if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
+    if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
+    wHist.setStatus(shown.length + ' recent  ·  ' + rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
   }
   hRender = renderHistory;
   renderHistory();

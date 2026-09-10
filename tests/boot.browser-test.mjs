@@ -3306,7 +3306,7 @@ try {
   judge('B82 THE \'?\' KEY IS A LIVE BINDINGS SHEET (wave 53, Josh, board #46: "? - shortcut key for keyboard binds (should also show the dynamic current keyboard binding)"). It ships closed; \'?\' opens it, \'?\' closes it and Escape closes it. Every one of the 40 rebindable actions is on it (wave 65 added MOD on m and the loop-clock lock on g, and the fixture below moved its own rebinds to I and O, because aiming a rebind at a key that is now BOUND tests a collision rather than a rebind) with the action\'s OWN name beside its key, formatted by the same keyName() the SETTINGS chips use — including the row for \'?\' itself, which prints \'?\' rather than Shift+/ — and there is no hand-written list anywhere for a rebind to leave stale (ANTI-PATTERN 6 in another guise). It is built on every open AND hangs off ui.keysRefresh, the one call every rebind already ends in, so both roads are proved: rebinding the camera reset to I while the sheet is UP changes the row in the same tick and the SETTINGS chip agrees with it, rebinding to O with the sheet DOWN is on it the moment it opens, and RESET KEYS puts R back on both. It cannot fire while you are typing — the notebook\'s textarea and its title field both swallow it — and H takes it away with the rest of the interface',
     !ksT.error
       && ksT.shipsClosed === true && ksT.opened === true
-      && ksT.rows === ksT.actions && ksT.rows === 43 && ksT.everyAction === true   /* wave 65: MOD (m) and the bar lock (g) are the 39th and 40th; wave 106: Ctrl+S and Ctrl+Shift+S are the 41st and 42nd (Josh asked for the classic pair); wave 106: the modulation window's own door is the 43rd, M, while ARMING moved to Ctrl+Space. THE COUNT IS THE POINT — it is here so a new binding cannot be added without a wave looking at this line and at the KEYS panel it feeds. */
+      && ksT.rows === ksT.actions && ksT.rows === 45 && ksT.everyAction === true   /* History Undo and the standard Settings shortcut bring the live action catalog to 45. THE COUNT IS THE POINT — it is here so a new binding cannot be added without a wave looking at this line and at the KEYS panel it feeds. */
       && ksT.ownRow && ksT.ownRow.key === '?' && ksT.ownRow.label === 'the key sheet — every binding, live'
       && ksT.closedByKey === true && ksT.closedByEsc === true
       && ksT.before.key === 'R' && ksT.whileOpen.key === 'I' && ksT.chipAgrees && ksT.chipAgrees[1] === 'I'
@@ -4066,7 +4066,7 @@ try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
     __LW.pause(); __LW.layout.dockAll(false); await __LW.settle(); await nap(150);
     const R = {};
-    /* ── RIDER A (board #54).  Josh: "in the menu should just say 'ABOUT λWAVES', SETTINGS" ── */
+    /* ── RIDER A. ABOUT also carries the two app-level support actions: shortcuts and cache repair. ── */
     document.getElementById('title').click(); await nap(90);
     const ab = [...document.querySelectorAll('#menubar .mb-btn')].find((b) => b.textContent.trim() === 'ABOUT');
     ab.click(); await nap(90);
@@ -4113,8 +4113,8 @@ try {
     R.errs = window.__e.length; R.gpu = __LW.field.lastGpuError || null;
     return R;
   } catch (e) { return { error: String(e && e.stack || e) }; }`) || { error: 'no result' };
-  judge('B95 THE TWO RIDERS (wave 55). (A, board #54) The ABOUT menu says two things — ABOUT λWAVES and SETTINGS… — because NOTEBOOK duplicated the WINDOW menu and LICENCES merely opened the ABOUT face that already names the licence. The three SITE-ROOT file links went with them (/LICENSE, /NOTICE, /REPORT.md), and that is not tidying: they are exactly the three paths that 404 the moment `lab/` is deployed as the Cloudflare Pages root, so the rider closed a ship snag as a side effect. (B, board #58) Josh, throwing the bow: "It seems to accumulate speed … and there\'s no way to reset it other than refresh page." THE CREEP IS CORRECT PHYSICS — an impulse multiplies ψ by e^{ik·x}, adding momentum AND energy, so repeated throws populate higher shells and the beats quicken — and the BUG was the absence of a way back: a preset loads on the select\'s `change` event, and assigning the value that is already selected fires no change event at all, which the block demonstrates rather than asserts. RELOAD calls the same loader unconditionally and puts the register, the clock and the scrub back. It is deliberately NOT a "remove the momentum" control: you cannot subtract momentum without applying the opposite boost. And the question that came with the rider is answered by measurement — Ctrl+Z DOES capture an impulse, because the register\'s version setter arms history.js\'s quiet window and the pre-image on the ring is the state before the throw.',
-    !riderT.error && riderT.about.join('|') === 'ABOUT λWAVES|SETTINGS…'
+  judge('B95 ABOUT exposes app information, the live shortcut sheet, Settings, and cache repair. The about face has no deployment-root links. Reload restores the selected preset and an impulse remains undoable.',
+    !riderT.error && riderT.about.join('|') === 'ABOUT λWAVES|KEYBOARD SHORTCUTS…|SETTINGS…|UPDATE APP'
       && riderT.siteRoot.length === 0 && riderT.licenceNamed
       && riderT.hasReload && riderT.beside && riderT.silentReselect && riderT.crept && riderT.stillSelected
       && riderT.reloaded && riderT.clockReset

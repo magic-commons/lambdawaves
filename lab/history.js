@@ -16,6 +16,7 @@ export function createHistory(port) {
   const onChange = port.onChange || (() => {});
   const ring = [];                    // [{ snapshot, label, at }], oldest first: the WHOLE timeline
   let cursor = -1;                    // the row standing under the instrument; −1 until the first read
+  let returnBranch = null;            // one-use recovery from the most recent direct timeline jump
   let held = 0, heldAt = 0, timer = 0, applying = false, pending = null;
 
   const row = (S, name) => ({ snapshot: S, label: name || UNNAMED, at: Date.now() });
@@ -83,27 +84,47 @@ export function createHistory(port) {
    *  the very indices the caller read out of entries() (its own edit truncates the future above it and
    *  lands on top), and clamping then puts it on the newest row, which is the honest answer — the row
    *  it clicked was destroyed by its own pending edit. */
-  function goto(i) {
+  /* A direct row jump is different from sequential undo/redo: it can strand a whole future. Keep a
+   * shallow copy of the timeline before the jump. Entry snapshots are immutable after capture (apply
+   * replaces an entry's snapshot instead of mutating it), so this costs 61 tiny wrappers, not a second
+   * copy of every register. A later direct jump replaces the grace branch; recovery is deliberately
+   * one-use so History cannot become a second project store. */
+  function moveTo(i, rememberBranch) {
     const n = Math.trunc(i);
     if (!Number.isFinite(n)) return false;
     commit(true);
     if (!ring.length) return false;
     const j = Math.max(0, Math.min(ring.length - 1, n));
     if (j === cursor) return false;
+    if (rememberBranch) returnBranch = { ring: ring.map((e) => ({ ...e })), cursor };
     cursor = j;
     apply(ring[j].snapshot);
     onChange();
     return true;
   }
+  function goto(i) { return moveTo(i, true); }
   // commit(true) first and read `cursor` AFTER it: an edit still inside the quiet window becomes the
   // top row, and one step back from THERE is the state the hand started from.  (Passing cursor − 1
   // computed before the commit would step back two.)
-  function undo() { commit(true); return goto(cursor - 1); }
-  function redo() { commit(true); return goto(cursor + 1); }
+  function undo() { commit(true); return moveTo(cursor - 1, false); }
+  function redo() { commit(true); return moveTo(cursor + 1, false); }
+  /** Return to the exact timeline and state that existed before the last direct row jump. This still
+   *  works after an edit truncated that jump's future. Taking it consumes the branch. */
+  function historyUndo() {
+    commit(true);
+    if (!returnBranch || !returnBranch.ring.length) return false;
+    const back = returnBranch; returnBranch = null;
+    ring.length = 0;
+    ring.push(...back.ring.map((e) => ({ ...e })));
+    cursor = Math.max(0, Math.min(ring.length - 1, back.cursor));
+    apply(ring[cursor].snapshot);
+    onChange();
+    return true;
+  }
   function clear() {
     if (timer) { clearTimeout(timer); timer = 0; }
     ring.length = 0; ring.push(row(port.read(), BOTTOM)); cursor = 0;
-    held = 0; pending = null;
+    held = 0; pending = null; returnBranch = null;
     onChange();
   }
   /** the list a UI paints: one frozen row per state, oldest first, each with the index goto() takes,
@@ -121,10 +142,11 @@ export function createHistory(port) {
   }
 
   return {
-    note, hold, release, label, undo, redo, goto, clear, entries,
+    note, hold, release, label, undo, redo, historyUndo, goto, clear, entries,
     flush: () => commit(true),
     get canUndo() { return cursor > 0 || dirty(); },
     get canRedo() { return cursor < ring.length - 1 && !dirty(); },
+    get canHistoryUndo() { return !!returnBranch; },
     get depth() { return Math.max(0, cursor) + (dirty() ? 1 : 0); },
     get redoDepth() { return dirty() ? 0 : Math.max(0, ring.length - 1 - cursor); },
     get cursor() { return cursor; },
