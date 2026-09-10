@@ -343,6 +343,11 @@ body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card
 
 body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold #transport { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
+/* A live WebGPU canvas makes every blurred/inset child shadow in a translucent rack a recurring
+   compositor cost on iPad. During motion the card silhouette, borders, fills and state colours stay;
+   the nested relief returns on the first still frame. The root shadow is intentionally retained. */
+body.tablet-motion .dev * { box-shadow: none !important; }
+
 
 body.disconnected:not(.phone) .dev {
   background: transparent; border-color: transparent; box-shadow: none;

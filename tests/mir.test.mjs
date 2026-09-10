@@ -97,6 +97,37 @@ function runWindow(r, n, dt) {
   return trace;
 }
 
+/* ══════════════ 0 · a hidden preview is not background machinery ═════════════ */
+{
+  M.modReset({ bare: true });
+  const host = createModHost({ wall: 1000, presentationActive: false });
+  const source = M.addSource('lfo', { on: true, wave: 'sine', sync: false, freq: 1 });
+  const closed = host.clock.play(1000);
+  host.clock.setPresentationActive(true);
+  const open = host.clock.play(1000);
+  host.clock.advanceTo(1000.1);
+  host.clock.advanceTo(1000.2);
+  const preview = host.clock.snapshot();
+  host.clock.setPresentationActive(false);
+  const shut = host.clock.snapshot();
+
+  judge('AN UNROUTED SOURCE RUNS FOR ITS OPEN EDITOR AND STOPS WHEN THAT EDITOR CLOSES, while transport intent remains ready for reopening',
+    !closed.ok && open.ok && shut.playing && !shut.running && !shut.presentationActive && preview.sources[0].phase > 0,
+    { closed, open, shut: { playing: shut.playing, running: shut.running, presentationActive: shut.presentationActive }, phase: preview.sources[0].phase });
+
+  let value = 0.5;
+  host.install([{ id: 'material.knee', label: 'KNEE', min: 0, max: 1, get: () => value, set: (v) => { value = v; } }]);
+  const macro = M.addMacro(null);
+  M.setMacro(macro.id, { sourceId: source.id });
+  M.addRoute(macro.id, 'material.knee', 0, 0.25);
+  host.targets.sync();
+  host.clock.recomputeRunning();
+  const routed = host.clock.snapshot();
+  judge('A ROUTED SOURCE REMAINS MACHINERY AFTER THE EDITOR CLOSES',
+    routed.playing && routed.running && !routed.presentationActive && M.needsClock(),
+    { playing: routed.playing, running: routed.running, presentationActive: routed.presentationActive, value });
+}
+
 /* ══════════════ 1 · one LFO, five targets, five distinct values ════════════════ */
 {
   const r = rig();

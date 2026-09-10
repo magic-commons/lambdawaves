@@ -1079,7 +1079,8 @@ export async function boot(dom) {
        callback is schedule(TIER.PRESENT), which is why this sits ABOVE the read of `pending`: the output
        of this frame is presented on this frame.  It runs whether or not the window that shows it is open. */
     if (modHost) {
-      modSyncBases();
+      const modRunning = modHost.clock.isRunning();
+      if (modRunning) modSyncBases();
       if (nowMs - modWall >= MOD.step) {
         /* WAVE 102 · THE FEED RATE IS MEASURED, NOT NOMINAL.  `modFeedAudio` turns each output's
            attack and release MILLISECONDS into per-frame coefficients using this number, so handing
@@ -1102,8 +1103,10 @@ export async function boot(dom) {
            a 1.3-radian jump in a single step. */
         const modDt = modWall ? Math.min(0.25, (nowMs - modWall) / 1000) : 0;
         modWall = nowMs;
-        feedAudio(feedHz);
-        modHost.clock.advanceTo(now);
+        if (modRunning || (audioCap && audioCap.live) || rotDriving()) {
+          feedAudio(feedHz);
+          modHost.clock.advanceTo(now);
+        }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
            modulator's number and the register's turn.  At rate zero this returns on its first line. */
@@ -1119,6 +1122,12 @@ export async function boot(dom) {
       if (cameraStep(Math.min(0.1, Math.max(0, now - lastWall)))) tier = Math.max(tier, TIER.PRESENT);
     }
     lastWall = now;
+    /* On iPad, the nested neumorphic shadow stack competes with the live WebGPU canvas even without
+       backdrop blur. Keep the silhouettes and fills, and flatten only inner shadows while pixels move. */
+    const tabletMotion = tablet.on && (clock.playing || dragging || camera.moving || camLevel.from ||
+      (modHost && modHost.clock.isRunning()) || rotDriving());
+    if (tabletMotion !== document.body.classList.contains('tablet-motion'))
+      document.body.classList.toggle('tablet-motion', tabletMotion);
     if (tier >= TIER.REBUILD) applyRebuild();
     let modes = null;
     if (tier >= TIER.RECONSTRUCT) {
@@ -1127,7 +1136,6 @@ export async function boot(dom) {
     }
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
-      const tabletMotion = tablet.on && (clock.playing || dragging || camera.moving || camLevel.from || (modHost && modHost.clock.isRunning()) || rotDriving());
       field.setStepCap(tabletMotion ? tablet.steps : Infinity);       // full saved quality returns on the first still frame
       tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat }); });
       pendingRef = null;
@@ -2499,6 +2507,7 @@ export async function boot(dom) {
     modHost = createModHost({
       available: () => field.ok,                          /* BASINS’s flowActive: is the reader live */
       present: () => schedule(TIER.PRESENT),               /* EDGE 4 — and never a tier above it */
+      presentationActive: false,                           /* a closed editor has no preview demand */
     });
     modHost.install(defs.map(({ knob: _k, ...d }) => d));
     for (const d of defs) { if (d.knob) modKnobs[d.id] = d.knob; modGets[d.id] = d.get; }
@@ -2582,7 +2591,8 @@ export async function boot(dom) {
 
     modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), {
       moved: modDodge,
-      closed: () => modDodge({ left: -1, right: -1, top: -1, bottom: -1 }),
+      opened: () => modHost.clock.setPresentationActive(true),
+      closed: () => { modHost.clock.setPresentationActive(false); modDodge({ left: -1, right: -1, top: -1, bottom: -1 }); },
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
       M: modHost.model, registry: modHost.registry, targets: modHost.targets, clock: modHost.clock,
       apply: () => { modHost.clock.applyAll(false); schedule(TIER.PRESENT); },
@@ -3741,8 +3751,7 @@ export async function boot(dom) {
         document.body.classList.remove('rack-hidden');
         saveSettings(); schedule(TIER.PRESENT); return true;
       },
-      /** COLLAPSE IS A LAYOUT ACT AND NOTHING ELSE.  The other project's one YELLOW was exactly
-       *  this coupling, and we do not inherit it. */
+      /** Collapse releases preview-only work. Any route still drives its parameter. */
       collapse() { if (!modView) return false; modView.close(); saveSettings(); schedule(TIER.PRESENT); return true; },
       toggle() { return layout.modulation.open ? layout.modulation.collapse() : layout.modulation.expand(); },
     };

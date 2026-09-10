@@ -2774,13 +2774,14 @@ export function createModulation(host, port) {
   function open() {
     P.open = true;
     root.hidden = false; rail.hidden = false;
+    if (port.opened) port.opened();
     rebuild(); place(); paint(true);
     persist();
     return true;
   }
   function close() {
-    /* CLOSING IS A LAYOUT ACT AND NOTHING ELSE.  It does not reach the clock, the model or the
-       registry — the boundary law, and the other project's one YELLOW was exactly this. */
+    /* Closing releases only the preview's presentation demand. Routed modulation remains machinery
+       and the host clock keeps it running; an unrouted source no longer burns frames for a hidden graph. */
     P.open = false;
     if (port.closed) port.closed();
     root.hidden = true; rail.hidden = true;

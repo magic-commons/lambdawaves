@@ -317,6 +317,9 @@ rename. Not one outline moved. The rules that follow:
 - **CARD STYLE** (REFRACTIVE default / TINTED) is Josh's choice and stays.
 - **Rendering defaults:** FROST **OFF**, GLASS BLUR **22px**, PERFORMANCE **120 Hz**, GRID **64³**, and KEEP
   FRAMES **OFF**. These are first-run settings; an existing browser's explicit choices still win.
+- **Tablet motion material:** while the field, camera, rotation, or modulation moves on a tablet, nested
+  control shadows stand down. Card silhouettes, borders, fills, and state colours remain; relief returns
+  on the first still frame. Unrouted modulation sources request frames only while their editor is open.
 
 ## The state is a LINK (wave 56)
 The whole state rides in the URL **fragment** (`#s=…`, base64url, ~300 characters), never the query; COPY LINK

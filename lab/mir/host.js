@@ -183,7 +183,7 @@ export function createTargetHost(opts) {
 /* ═══════════════════════ EDGE 3 — the clock ════════════════════════════════════ */
 
 /**
- * createModClock({ registry, targets, present, pauseMode, maxStep, enabled })
+ * createModClock({ registry, targets, present, pauseMode, maxStep, enabled, presentationActive })
  *
  * It owns modulation time.  Rendering may only SAMPLE it — that is the boundary law,
  * and the reason λWAVES's own lab/clock.js (which owns PHYSICS time, in atomic units,
@@ -206,6 +206,9 @@ export function createModClock(opts) {
   let playing = false;
   let running = false;
   let hidden = false;
+  /* An unpatched source has one useful product: the moving preview in its open window.
+   * Default true preserves the headless host contract; an app with a closable view owns this edge. */
+  let presentationActive = o.presentationActive === undefined ? true : !!o.presentationActive;
   let stepping = 0;                 /* > 0 inside a deterministic step (their videoClock.on) */
   let wall = Number.isFinite(o.wall) ? o.wall : 0;
   let prevWall = null;              /* null: the next dt is NOT a dt (their prevTs = 0) */
@@ -221,7 +224,7 @@ export function createModClock(opts) {
 
 
   const anyLive = () => anyRouted() ||
-    (typeof M.sourceList === 'function' &&
+    (presentationActive && typeof M.sourceList === 'function' &&
      M.sourceList().some((s) => s && s.kind !== 'audioout' && s.on !== false));
 
   /* ── THE PAUSE LAW, four lines, ported from the source's livePos() ─────────────
@@ -367,6 +370,17 @@ export function createModClock(opts) {
     isRunning: () => running,
     anyRouted,
 
+    /** Unrouted sources run only to animate their editor. Routed sources remain machinery and
+     *  continue when the editor closes. This changes presentation demand, never transport state. */
+    setPresentationActive(on) {
+      const want = !!on;
+      if (want === presentationActive) return presentationActive;
+      presentationActive = want;
+      recomputeRunning();
+      return presentationActive;
+    },
+    isPresentationActive: () => presentationActive,
+
     /** Visibility.  Hidden stops the clock without touching `playing`, and RELEASES
      *  any hold — the source releases holds on hide because a hold is a gesture and
      *  the gesture is over.  Becoming visible again re-anchors (see recomputeRunning). */
@@ -489,7 +503,7 @@ export function createModClock(opts) {
     reanchor: (w) => M.reanchorTransport(Number.isFinite(w) ? w : wall).anchorAt,
     stats: () => ({ ...stats }),
     snapshot: () => ({
-      playing, running, hidden, wall, pauseMode, enabled,
+      playing, running, hidden, presentationActive, wall, pauseMode, enabled,
       resume: { ...resumeGrid(M.sourceList()), mode: M.effectiveSyncMode(), last: { ...lastResume } },
       bpm: M.transport.bpm, beats: M.transport.beats, time: M.transport.time,
       sync: M.transport.sync, reanchors: M.transport.reanchors,
@@ -545,7 +559,7 @@ export function createModHost(opts) {
   const targets = o.targets || createTargetHost({ registry, available: o.available });
   const clock = createModClock({ registry, targets, present,
                                  pauseMode: o.pauseMode, wall: o.wall, maxStep: o.maxStep,
-                                 enabled: o.enabled });
+                                 enabled: o.enabled, presentationActive: o.presentationActive });
 
   return Object.freeze({
     /* the four edges, each reachable on its own */
