@@ -775,7 +775,13 @@ export function buildMacroSlot(slotbox, m, index) {
   if (trigger) face.type = 'button'; else face.setAttribute('role', 'slider');
   const parts = buildMacroFace(face, trigger);
 
-  const del = m2mk('button', 'm2slotx', row);
+  /* The right seat stays present at both rail widths. Reordering owns its
+     upper half; deletion remains a smaller, explicit action below it. */
+  const tools = m2mk('div', 'm2slottools', row);
+  const reorder = m2mk('button', 'm2rowgrip', tools);
+  reorder.type = 'button';
+  gripIcon(reorder);
+  const del = m2mk('button', 'm2slotx', tools);
   del.type = 'button';
   setGlyph(del, 'close', { size: 14, label: 'Delete ' + (trigger ? 'trigger ' : 'macro ') + index });
 
@@ -783,7 +789,7 @@ export function buildMacroSlot(slotbox, m, index) {
 
   return {
     id: m && m.id, kind: trigger ? 'trigger' : 'knob', index,
-    root, row, grip, del, val: trigger ? null : face, pad: trigger ? face : null,
+    root, row, grip, tools, reorder, del, val: trigger ? null : face, pad: trigger ? face : null,
     numSeat: numbered.seat, num: numbered.num, depthArc: numbered.depthArc,
     vname: parts.vname, vnum: parts.vnum, signal: parts.signal,
     marker: parts.marker, fill: parts.fill, spark: parts.spark,

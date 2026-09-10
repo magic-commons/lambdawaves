@@ -305,7 +305,8 @@ body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /*
 #title .ms { margin-left: 10px; }
 body[data-theme="light"] #title .word { color: #000; }
 /* the logo sits on the stage directly: no glass, no background, one word */
-#title { pointer-events: auto; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
+#title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
+#title .mark { align-self: center; }
 
 /* LIGHT: light cards, dark ink; the accent darkens so it still marks state on a light surface.  The stage
    underneath is set by the THEME control (mat.bg) and the cloud is drawn as ink (INVERT), so the whole layer adapts. */

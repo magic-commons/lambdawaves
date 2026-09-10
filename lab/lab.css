@@ -215,10 +215,10 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--dim); }
 .nb-foot button, .nb-dump { height: 26px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
 .nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
-.nb-logo { display: flex; align-items: center; gap: 0; font-size: 35px; margin: 6px 0 4px; }
+.nb-logo { display: flex; align-items: baseline; gap: 0; font-size: 35px; margin: 6px 0 4px; }
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
 .nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
-.nb-logo .mark { height: 1.05em; width: 1.05em; margin-left: .05em; }
+.nb-logo .mark { align-self: center; height: 1.05em; width: 1.05em; margin-left: .05em; }
 .ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
 .ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
 .ab-tag { text-transform: uppercase; }

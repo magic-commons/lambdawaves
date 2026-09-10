@@ -1056,11 +1056,11 @@ export function createModulation(host, port) {
     });
   }
 
-  /* Horizontal travel still sets a hand macro. Vertical travel over the same
-     indicator face reorders the stable macro identities. Moving the DOM while
-     dragging gives direct feedback; the model commits once on release. */
-  function wireMacroReorder(rec, macroId) {
+  /* Reordering has a dedicated grip. The value face is therefore only a value
+     control, and compact mode can hide that face without losing rearranging. */
+  function wireMacroReorder(rec, macroId, rename) {
     let d = null;
+    const renameTap = tapWatcher(rename);
     const detach = () => {
       document.removeEventListener('pointermove', move, true);
       document.removeEventListener('pointerup', up, true);
@@ -1068,12 +1068,8 @@ export function createModulation(host, port) {
     };
     const move = (e) => {
       if (!d || e.pointerId !== d.pointerId) return;
-      const dx = Math.abs(e.clientX - d.x), dy = Math.abs(e.clientY - d.y);
-      if (!d.mode) {
-        if (Math.max(dx, dy) < 7) return;
-        d.mode = dy > dx + 2 ? 'reorder' : 'value';
-      }
-      if (d.mode !== 'reorder') return;
+      if (!d.moved && Math.abs(e.clientY - d.y) < 6) return;
+      d.moved = true;
       e.preventDefault(); e.stopPropagation();
       rec.root.classList.add('m2reorder');
       const rows = [...rackEl.slots.querySelectorAll(':scope > .m2slot')].filter((r) => r !== rec.root);
@@ -1082,11 +1078,11 @@ export function createModulation(host, port) {
     };
     const stop = (e, cancel) => {
       if (!d || e.pointerId !== d.pointerId) return;
-      const reorder = d.mode === 'reorder'; d = null;
+      const moved = d.moved; d = null;
       detach();
-      if (!reorder) return;
-      e.preventDefault(); e.stopPropagation();
       rec.root.classList.remove('m2reorder');
+      if (!moved) { if (!cancel) renameTap(); return; }
+      e.preventDefault(); e.stopPropagation();
       if (!cancel) {
         const to = [...rackEl.slots.querySelectorAll(':scope > .m2slot')].indexOf(rec.root);
         M.moveMacro(macroId, to); apply();
@@ -1095,13 +1091,24 @@ export function createModulation(host, port) {
     };
     const up = (e) => stop(e, false);
     const cancel = (e) => stop(e, true);
-    rec.root.addEventListener('pointerdown', (e) => {
-      if (e.button || e.target.closest('.m2grip,.m2numseat,.m2slotx,.m2namerow,.m2pad')) return;
-      d = { x: e.clientX, y: e.clientY, pointerId: e.pointerId, mode: '' };
+    rec.reorder.addEventListener('pointerdown', (e) => {
+      if (e.button) return;
+      e.preventDefault(); e.stopPropagation();
+      try { rec.reorder.setPointerCapture(e.pointerId); } catch (_) {}
+      d = { y: e.clientY, pointerId: e.pointerId, moved: false };
       document.addEventListener('pointermove', move, true);
       document.addEventListener('pointerup', up, true);
       document.addEventListener('pointercancel', cancel, true);
-    }, true);
+    });
+    rec.reorder.addEventListener('keydown', (e) => {
+      if (!['ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter', 'NumpadEnter'].includes(e.key)) return;
+      e.preventDefault(); e.stopPropagation();
+      if (e.key === 'Enter' || e.key === 'NumpadEnter') { rename(); return; }
+      const list = M.macroList(), at = list.findIndex((m) => m.id === macroId);
+      const to = e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1
+        : at + (e.key === 'ArrowUp' ? -1 : 1);
+      M.moveMacro(macroId, to); apply(); rebuild();
+    });
   }
 
   function rebuildMacros() {
@@ -1111,11 +1118,18 @@ export function createModulation(host, port) {
       n++;
       const rec = mw.addMacro(m, n);
       rec.root.addEventListener('pointerdown', () => { if (m.kind !== 'trigger') selectMacro(m.id); });
-    rec.grip.title = 'Drag to route; tap to arm; double-tap to reset';
+      const rename = () => {
+        rec.erow.hidden = false;
+        rec.name.value = M.macroOf(m.id).name;
+        rec.name.focus(); rec.name.select();
+      };
+      rec.grip.title = 'Drag to route; tap to arm; double-tap to reset';
       rec.grip.setAttribute('aria-label', 'route ' + m.name + ' — drag onto a control, or tap to arm');
       wireGrip(rec.grip, m.id);
-      wireMacroReorder(rec, m.id);
-    rec.del.title = 'delete ' + m.name + ' and its routes';
+      rec.reorder.title = 'Drag to reorder; double-tap to rename';
+      rec.reorder.setAttribute('aria-label', 'reorder or rename ' + m.name);
+      wireMacroReorder(rec, m.id, rename);
+      rec.del.title = 'delete ' + m.name + ' and its routes';
       rec.del.setAttribute('aria-label', rec.del.title);
       rec.del.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1126,15 +1140,15 @@ export function createModulation(host, port) {
          sends, on the artifact's own 34-px ring.  A double-tap puts it back to 100 %, which is
          what the window's own hint line promises. */
       const numberInput = {
-        get: () => P.macroMin ? M.macroOf(m.id).value : M.macroOf(m.id).masterDepth,
-        set: (v) => { const mm = M.macroOf(m.id); if (P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:clamp01(v)} : {masterDepth:clamp01(v)}); apply(); paint(true); },
-        reset: () => { const mm=M.macroOf(m.id); if(P.macroMin && mm.sourceId) return; M.setMacro(m.id, P.macroMin ? {value:0} : {masterDepth:1}); apply(); paint(true); },
+        get: () => M.macroOf(m.id).masterDepth,
+        set: (v) => { M.setMacro(m.id, { masterDepth: clamp01(v) }); apply(); paint(true); },
+        reset: () => { M.setMacro(m.id, { masterDepth: 1 }); apply(); paint(true); },
         axis: 'y',
-        editable: () => !P.macroMin || !M.macroOf(m.id).sourceId
+        editable: () => true
       };
       wireSlider(rec.numSeat, numberInput);
       bindSliderKeys(rec.numSeat, numberInput);
-    rec.numSeat.title = 'Master depth for this macro. Double-tap for 100%.';
+      rec.numSeat.title = 'Master depth for this macro. Double-tap for 100%.';
       /* THE ARIA IS THE HOST'S, AND THE ARTIFACT SAYS SO.  `buildMacroSlot` sets role="slider"
          "because that is what it is; the host's registry writes the aria range and value" — so it
          is written here, on all three of the plugin's slider kinds, and B122's document-wide sweep
@@ -1145,7 +1159,7 @@ export function createModulation(host, port) {
         rec.pad.addEventListener('pointerdown', (e) => { e.preventDefault(); M.fireMacro(m.id); apply(); paint(true); });
         rec.pad.addEventListener('pointerup', () => { M.releaseMacro(m.id); apply(); paint(true); });
         rec.pad.addEventListener('pointercancel', () => { M.releaseMacro(m.id); apply(); });
-    rec.pad.title = 'Fire this trigger';
+        rec.pad.title = 'Fire this trigger';
       } else {
         /* A HAND MACRO IS A BAR YOU DRAG SIDEWAYS.  A SOURCE-DRIVEN one is a LOCKED meter: you
            cannot turn a knob a source owns, because there is no knob there to turn. */
@@ -1164,15 +1178,18 @@ export function createModulation(host, port) {
         };
         wireSlider(rec.val, valueInput);
         bindSliderKeys(rec.val, valueInput);
-    rec.val.title = 'Drag sideways to set; drag vertically to reorder';
+        rec.val.title = 'Drag sideways to set; double-tap the row grip to rename';
         aria(rec.val, m.name + ' value', 0, 100, 100 * M.macroOf(m.id).value, '0%');
         /* a DOUBLE-click opens the rename row, which is a sibling already in the DOM: opening it
            only clears `hidden` — nothing is ever reparented. */
-        rec.val.addEventListener('dblclick', () => { rec.erow.hidden = false; rec.name.value = M.macroOf(m.id).name; rec.name.focus(); rec.name.select(); });
+        rec.val.addEventListener('dblclick', rename);
       }
-      rec.name.addEventListener('change', () => { M.setMacro(m.id, { name: rec.name.value }); rec.erow.hidden = true; paint(true); });
-      rec.name.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); rec.erow.hidden = true; } });
-    rec.clr.title = 'Disconnect the source from this macro';
+      rec.name.addEventListener('blur', () => { M.setMacro(m.id, { name: rec.name.value }); rec.erow.hidden = true; paint(true); });
+      rec.name.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); rec.erow.hidden = true; }
+        if (e.key === 'Enter') { e.preventDefault(); rec.name.blur(); }
+      });
+      rec.clr.title = 'Disconnect the source from this macro';
       rec.clr.addEventListener('click', () => { M.setMacro(m.id, { sourceId: null }); rec.erow.hidden = true; clock.recomputeRunning(); apply(); rebuild(); });
       macRows.set(m.id, rec);
     }
@@ -2508,7 +2525,7 @@ export function createModulation(host, port) {
     for (const m of M.macroList()) {
       const rec = macRows.get(m.id); if (!rec) continue;
       const src = m.sourceId ? M.sourceOf(m.sourceId) : null;
-      const shownDepth = P.macroMin ? m.value : m.masterDepth;
+      const shownDepth = m.masterDepth;
       if (force) {
         rec.vname.textContent = m.name;
         rec.root.classList.toggle('m2locked', !!m.sourceId);
@@ -2517,9 +2534,9 @@ export function createModulation(host, port) {
         rec.drive.textContent = src ? (src.kind.toUpperCase() + ' ' + (src.label || src.id)) : 'HAND';
         rec.depthArc.style.strokeDasharray = clamp01(shownDepth).toFixed(4) + ' 1';
         rec.numSeat.classList.toggle('m2zero', shownDepth <= 1e-6);
-        rec.numSeat.setAttribute('aria-disabled',String(P.macroMin && !!m.sourceId));
+        rec.numSeat.setAttribute('aria-disabled','false');
         if(rec.val)rec.val.setAttribute('aria-disabled',String(!!m.sourceId));
-        rec.numSeat.title = P.macroMin ? m.name+' value'+(m.sourceId?' — driven by source':'') : 'MASTER DEPTH';
+        rec.numSeat.title = 'Master depth for ' + m.name;
       }
       if (rec.kind === 'trigger') {
         rec.signal.style.setProperty('--hit', M.triggerLevel(m.id).toFixed(4));
@@ -2530,7 +2547,7 @@ export function createModulation(host, port) {
       }
 
 
-      aria(rec.numSeat, P.macroMin ? m.name+' VALUE' : 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
+      aria(rec.numSeat, 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
       if (rec.val) aria(rec.val, m.name + ' value', 0, 100, 100 * m.value, rec.vnum.textContent);
     }
 

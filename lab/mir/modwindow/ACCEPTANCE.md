@@ -67,7 +67,8 @@ If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:ro
 | `.m2namerow` | left 48, right 48, top 9, height **44** | host macro revision |
 | `.m2mclr` | **44 × 44** | anim.js:2012 |
 | `.m2macadd` / `.m2devadd` | height **44**, text `ADD MACRO` / `ADD DEVICE` | host macro revision |
-| `.m2slotx` | **44 × 44** delete seat on every macro row | host macro revision |
+| `.m2slottools` | **44 × 44**, fixed final column in full and minimized rows | host macro revision |
+| `.m2rowgrip` / `.m2slotx` | **44 × 22** reorder and delete halves | host macro revision |
 | the track line | is `.m2signal::before` — **a pseudo-element, not a node** | anim.js:1981 |
 
 ## 4. A DEVICE CARD

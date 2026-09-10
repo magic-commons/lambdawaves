@@ -1836,23 +1836,32 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   content:"";position:absolute;left:50%;top:-4px;width:4px;height:4px;
   margin-left:-2px;border-radius:50%;background:var(--acc2);pointer-events:none; }
 
-/* The macro rail has two explicit add verbs and one delete seat per row. The
-   indicator face accepts horizontal value travel and vertical reorder travel. */
+/* The macro rail has two explicit add verbs. Macro value, route, depth,
+   reorder and delete each keep one job and one stable seat. */
 :root:root:root #modwin.mir-modwindow .m2rail { width:224px; }
 :root:root:root #modwin.mir-modwindow .m2slots { padding-left:4px;padding-right:4px; }
 :root:root:root #modwin.mir-modwindow .m2slotrow {
   grid-template-columns:44px 44px minmax(0,1fr) 44px;gap:0; }
 :root:root:root #modwin.mir-modwindow .m2grip svg { width:18px;height:18px; }
 :root:root:root #modwin.mir-modwindow .m2depthring { width:30px;height:30px;left:7px;margin-top:-15px; }
-:root:root:root #modwin.mir-modwindow .m2val { cursor:move; }
+:root:root:root #modwin.mir-modwindow .m2val { cursor:ew-resize; }
 :root:root:root #modwin.mir-modwindow .m2slot.m2reorder {
   background:var(--acc2-soft);box-shadow:inset 0 0 0 1px var(--acc2);z-index:2; }
+:root:root:root #modwin.mir-modwindow .m2slottools {
+  width:44px;min-width:44px;height:44px;align-self:center;display:grid;
+  grid-template-rows:22px 22px;overflow:hidden;border-radius:8px; }
+:root:root:root #modwin.mir-modwindow .m2rowgrip,
 :root:root:root #modwin.mir-modwindow .m2slotx {
-  width:44px;min-width:44px;height:44px;min-height:44px;align-self:center;
+  width:44px;min-width:44px;height:22px;min-height:0;align-self:stretch;
   display:flex;align-items:center;justify-content:center;padding:0;border:0;
-  border-radius:8px;background:transparent;color:var(--m2-ink-faint); }
+  border-radius:0;background:transparent;color:var(--m2-ink-faint); }
+:root:root:root #modwin.mir-modwindow .m2rowgrip {
+  touch-action:none;cursor:ns-resize;border-bottom:1px solid var(--m2-rule); }
+:root:root:root #modwin.mir-modwindow .m2rowgrip svg { width:13px;height:13px;pointer-events:none; }
 :root:root:root #modwin.mir-modwindow .m2slotx svg { width:13px;height:13px;pointer-events:none; }
-:root:root:root #modwin.mir-modwindow .m2slotx:active { background:var(--glass-press);color:var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2rowgrip:active,
+:root:root:root #modwin.mir-modwindow .m2slotx:active {
+  background:var(--glass-press);color:var(--m2-ink); }
 :root:root:root #modwin.mir-modwindow .m2vinfo {
   left:3px;right:3px;grid-template-columns:minmax(0,1fr) 22px;gap:2px; }
 :root:root:root #modwin.mir-modwindow .m2vname { font-size:9px; }
@@ -1862,21 +1871,40 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2devadd {
   flex:1 1 0;min-width:0;height:44px;min-height:44px;padding:0 5px;border:0;
   border-radius:7px;background:hsl(0 0% 100% / .06);color:var(--acc2);
-  font:700 8px var(--font-sans);letter-spacing:.08em;white-space:nowrap; }
+  font:700 8px/1 var(--font-sans);letter-spacing:.08em;white-space:nowrap;
+  transition:transform .1s ease,background-color .12s ease,box-shadow .12s ease; }
 :root:root:root body[data-theme="light"] #modwin.mir-modwindow .m2macadd,
 :root:root:root body[data-theme="light"] #modwin.mir-modwindow .m2devadd {
   background:hsl(214 30% 40% / .09); }
+:root:root:root #modwin.mir-modwindow .m2macadd:hover:not(:disabled),
+:root:root:root #modwin.mir-modwindow .m2devadd:hover:not(:disabled) {
+  background:var(--glass-raise);box-shadow:inset 0 0 0 1px var(--glass-hairline); }
 :root:root:root #modwin.mir-modwindow .m2macadd:active:not(:disabled),
-:root:root:root #modwin.mir-modwindow .m2devadd:active:not(:disabled),
-:root:root:root #modwin.mir-modwindow .m2devadd.on { background:var(--acc2-soft); }
+:root:root:root #modwin.mir-modwindow .m2devadd:active:not(:disabled) {
+  transform:translateY(1px) scale(.985);background:var(--glass-press);
+  box-shadow:inset 1px 1px 3px hsl(0 0% 0% / .18); }
+:root:root:root #modwin.mir-modwindow .m2devadd.on {
+  background:var(--glass-well);box-shadow:var(--neu-inset); }
 
-/* Minimized macros use three fixed 44 px columns. The value face hides, while
-   routing, depth/value and delete remain in the same place for every row. */
+/* Minimized macros remove only the value face. Route and depth stay at the
+   same coordinates, and the right tool seat still offers reorder, rename and
+   delete. Row height is unchanged, preventing the rail from reformatting. */
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:144px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots {
   display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:0 4px 4px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slot {
-  flex:0 0 48px;height:48px;margin:0; }
+  flex:0 0 64px;height:64px;margin:0; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow {
-  height:46px;grid-template-columns:44px 44px 44px;gap:0; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotx { display:flex;grid-column:3; }
+  height:62px;grid-template-columns:44px 44px 44px;gap:0; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slottools {
+  display:grid;grid-column:3; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macrow { display:flex; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macadd,
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2devadd {
+  font-size:0;letter-spacing:0; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macadd::after {
+  content:"+ MACRO";font:700 8px/1 var(--font-sans);letter-spacing:.04em; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2devadd::after {
+  content:"+ DEVICE";font:700 8px/1 var(--font-sans);letter-spacing:.04em; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow:not([hidden]) {
+  display:flex;left:4px;right:4px;top:9px; }

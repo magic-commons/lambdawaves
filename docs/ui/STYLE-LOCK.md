@@ -482,9 +482,10 @@ SHADOW's disclosure starts closed and groups its Hamiltonian readout and exact-r
 caption. UI accents sample the λWAVES preset while PALETTE is off; when enabled,
 they follow the active palette. Saved accent angles remain independent of this rule.
 
-The user clarified macro minimization: narrow the rail to 112px, retaining each
-macro's value knob and routing grip. Do not collapse it to a header or hide its
-number seats. The separately archived macro relocation and matrix launchers stay off.
+Macro minimization narrows the rail to 144px and removes only the live value face.
+The routing grip, master-depth dial and reorder/delete tool retain their row positions
+and height. `+ MACRO` and `+ DEVICE` remain at the rail foot. The separately archived
+macro relocation and matrix launchers stay off.
 
 ### Default refinements and transport placement
 
@@ -493,5 +494,5 @@ Saved settings retain their values. SHADOW uses PHASORS / OSC / LISSA, followed 
 a separate 32px disclosure. Docking reopens the transport at the left rack's top
 unless a project/layout or prior undock supplied a remembered side and slot.
 Loading a layout must place the transport in array order like every other card.
-Macro folding refreshes the displayed value/depth immediately and restores its
-expanded accessibility state; repeated close/reopen must preserve values and width.
+Macro folding refreshes the displayed depth immediately and restores its expanded
+accessibility state; repeated close/reopen must preserve values and width.
