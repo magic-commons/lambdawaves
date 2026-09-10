@@ -86,14 +86,27 @@ try {
   __LW.layout.reopen('settings','R');__LW.layout.reopen('state','R');await w(200);
   __LW.camera.setAutoRotate(true);__LW.camera.setFriction(0.31);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
   const tr=[...document.querySelectorAll('.dev[data-id=state] .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
-  const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
+  const sc=document.querySelectorAll('.stage-colour')[1];sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
   const S=__LW.serialize();S.presentation.ui.theme=theme0==='light'?'dark':'light';
   __LW.camera.setAutoRotate(false);__LW.camera.setFriction(0.1);__LW.kepler.setOn(false);__LW.vortex.setOn(false);__LW.spectrum.setDials(false);__LW.layout.notebookResize(300,200);document.querySelector('.stage-follow').click();__LW.loadPreset('1s');M.deserialize(null);
   const ok=__LW.restore(S);await w(600);const q=__LW.serialize().presentation;const errs=__e.slice();
-  return {ok,theme:document.body.dataset.theme,want:S.presentation.ui.theme,stage:q.ui.stage.custom,auto:q.camera.autoRotate,friction:q.camera.friction,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
+  return {ok,theme:document.body.dataset.theme,want:S.presentation.ui.theme,stage:q.ui.stage.b,auto:q.camera.autoRotate,friction:q.camera.friction,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
  assert.equal(daw.ok,true); assert.equal(daw.theme,daw.want); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.auto,true); assert.equal(daw.friction,0.31);
  assert.equal(daw.kepler,true); assert.equal(daw.vortex,true); assert.equal(daw.dials,true); assert.equal(daw.ab,true); assert.deepEqual(daw.nb,{w:520,h:380}); assert.deepEqual(daw.routes,[[0.5,1]]); assert.equal(daw.modwin,true); assert.ok(daw.cards>20); assert.deepEqual(daw.errs,[]);
  console.log('PASS the DAW law: theme, stage colour, camera, overlays, dials, A/B, notebook size, modulation placement, arrangement and routes round-trip through the project');
+ /* THE HAND ON A ROUTED KNOB (Josh, 2026-09-10): a click leaves the base and the range alone; a drag moves the BASE by
+    the drag — never to where the modulator happened to be showing the needle. */
+ const hand=await g.ev(`const M=__LW.mod.model,R=__LW.mod.registry,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.loadPreset('1s+2pz');
+  M.addSource('lfo');__LW.layout.modulation.expand();await w(300);const m=M.macroList()[0];M.addRoute(m.id,'material.exposure',0.5,4);M.setMacro(m.id,{value:0.8});__LW.mod.clock.applyAll(true);await w(300);
+  const k=[...document.querySelectorAll('.k')].find(e=>e.querySelector('.k-lbl')?.textContent==='EXPOSURE'),d=k.querySelector('.k-dial'),b=d.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2;
+  const base=()=>+R.baseOf('material.exposure').toFixed(3);const shown0=+__LW.mat.exposure.toFixed(3),base0=base();
+  d.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:71,isPrimary:true}));d.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:71,isPrimary:true}));await w(200);
+  const click={base:base(),shown:+__LW.mat.exposure.toFixed(3)};
+  d.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:72,isPrimary:true}));for(let i=1;i<=3;i++)d.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:cx,clientY:cy+10*i,pointerId:72,isPrimary:true}));d.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:cx,clientY:cy+30,pointerId:72,isPrimary:true}));await w(300);
+  return {shown0,base0,click,drag:{base:base(),shown:+__LW.mat.exposure.toFixed(3)},errs:__e.slice()}`);
+ assert.ok(hand.shown0>hand.base0*2, 'the modulator shows well above the base: '+JSON.stringify(hand)); assert.equal(hand.click.base,hand.base0); assert.equal(hand.click.shown,hand.shown0);
+ assert.ok(hand.drag.base<hand.base0&&hand.drag.base>hand.base0*0.4,'a 30 px drag moved the base by the drag, not to the shown value: '+JSON.stringify(hand.drag)); assert.deepEqual(hand.errs,[]);
+ console.log('PASS the hand on a routed knob: a click leaves base and range; a drag moves the base by the drag, not to the modulated needle');
 } catch(error) { failed=true;console.error(error); }
 finally {
  // The Snap driver has previously hung during quit; a cleanup failure is reported

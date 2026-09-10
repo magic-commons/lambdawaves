@@ -2384,3 +2384,21 @@ On the macros "moving the entire region": that is the pause law working as desig
 knob moves its BASE and the ring is the range; the route's `min`/`max` and the base are in the file and
 round-trip (the proof routes `material.exposure` over 0.5…4). If a demo shows otherwise, a screenshot of
 the route and the knob before/after the save will find it.
+
+## 2026-09-10 · The hand on a routed knob, and a stage with two ends
+
+**The bug Josh saw.** A click on a macro'd dial "teleported the entire range" to where the needle was.
+Cause: the registry drove the knob through `set()`, so the knob's own value became the modulated one, and
+a drag — or a click that ended in `onChange` — started from THAT and wrote it back as the base. The kit's
+`knob` now keeps two numbers (MIR 1.0.1): the base the hand owns (`set`, `get`, where a drag starts) and a
+painted value (`show`) the modulator writes over it; `setKnob` in rack.js paints routed ids and sets
+unrouted ones. Measured with EXPOSURE routed 0.5…1 at macro 0.8: the needle showed 7.42 over a base of
+1.000; a click left base and range at 1.000 / 0.5…1; a 30-px drag put the base at 0.505 — the base moved
+by the drag, and the range with it. In the shipped gate as "the hand on a routed knob".
+
+**The stage has two ends.** A is the knob at 0, B at 1. Unnamed, A is this theme's ground and B the
+other theme's, so DARK runs black → light and LIGHT runs white → dark, and a theme flip swaps both
+(before, the mix always ran dark → light whatever the theme, which is why it "went to white"). Each end
+has its swatch; a named end is kept across flips and travels in the project (`ui.stage.{mix,a,b}`; a
+file that still says `custom` reads as B). FOLLOW THEME forgets both. Measured: LIGHT → DARK gave the
+dark ground; naming B kept it across the flip back; the DAW law in the gate reads B back from the file.

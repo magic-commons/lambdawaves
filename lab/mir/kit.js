@@ -100,6 +100,7 @@ export function knob(o) {
   const needle = el('i', 'k-needle', dial);
   const val = el('div', 'k-val', root);
   let v = o.value, def = o.value, dragging = false, disabled = false;
+  let shown = null;                 // a value PAINTED over the base by a modulator (show()); the base v is what the hand owns
   const lo = o.min, hi = o.max, log = !!o.log;
   const norm = (x) => log ? (Math.log(x) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) : (x - lo) / (hi - lo);
   const denorm = (p) => log ? Math.exp(Math.log(lo) + p * (Math.log(hi) - Math.log(lo))) : lo + p * (hi - lo);
@@ -148,9 +149,10 @@ export function knob(o) {
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
   function paint(fromUser) {
-    const p = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v));
+    const shownV = (shown !== null && !dragging) ? shown : v;
+    const p = o.wrap ? (norm(shownV) % 1 + 1) % 1 : clamp01(norm(shownV));
     needle.style.setProperty('--turn', (o.wrap ? p * 360 : -135 + p * 270) + 'deg');
-    val.textContent = fmt(v);
+    val.textContent = fmt(shownV);
     announce(fromUser);
   }
   /** WAVE 68 · ONE QUANTISER, ONE FOLD, ONE CLAMP — and BOTH ROADS TAKE IT.  The fold lived in the
@@ -168,7 +170,7 @@ export function knob(o) {
   dial.addEventListener('pointerdown', (e) => {
     if (disabled) return;
     e.preventDefault(); try { dial.setPointerCapture(e.pointerId); } catch (_) {}   // a pointer already gone (or a synthetic one) must not abort the drag
-    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); x0 = e.clientX; y0 = e.clientY; acc = 0;
+    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); x0 = e.clientX; y0 = e.clientY; acc = 0;   // p0 is the BASE: a routed knob's drag moves the range, never teleports it to where the modulator was
     tap();
   });
   dial.addEventListener('pointermove', (e) => {
@@ -234,7 +236,9 @@ export function knob(o) {
   });
   root.addEventListener('blur', () => announce(false));     // the tree catches up the moment nobody is listening
   paint();
-  return { root, get: () => v, set(x, silent = true) { v = x; paint(); if (!silent && o.onChange) o.onChange(v); }, setDefault(x) { def = x; },
+  return { root, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },
+    /** paint a modulated value over the base — the needle dances, the base (and a drag's start) stays the hand's */
+    show(x) { shown = x; paint(); }, get shown() { return shown; }, setDefault(x) { def = x; },
     /* WAVE 68 · A DEAD CONTROL SAYS SO, AND DOES NOT KEEP THE SEAT.  This wrote a class and a
        tabIndex and nothing else, so λ SCALE, HALF-WIDTH and STRENGTH mounted as sliders holding a
        live `aria-valuenow` that no key could move — and rack.js's single-key guard, keyed on the
