@@ -1,7 +1,7 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
-import { el, seg, sw, trig, chip } from './kit.js';
+import { el, seg, sw, trig, chip, knob } from './kit.js';
 
-const HELP_HOVER_DELAY = 800;
+const HELP_HOVER_DELAY = 600;
 
 // Explanations are out-of-flow: a live formula can never resize its instrument.
 export function infoPanel(content, label = 'Information') {
@@ -104,7 +104,13 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
     g.beginPath();g.moveTo(...project(n.map(a=>a*pos)));g.lineTo(...project(n.map(a=>a*(pos+.8))));g.stroke();
     g.fillStyle=ink;g.font='18px sans-serif';for(const [i,label] of ['X','Y','Z'].entries()){const p=[0,0,0];p[i]=1.18;g.fillText(label,...project(p));}
   }
-  function turn(dx,dy) { const n=unit(getNormal()),a=Math.atan2(n[1],n[0])+dx,b=Math.max(-Math.PI/2+.001,Math.min(Math.PI/2-.001,Math.asin(n[2])+dy));onTurn([Math.cos(a)*Math.cos(b),Math.sin(a)*Math.cos(b),Math.sin(b)]);paint(true); }
+  /* Two small rotations about the world X and Y axes, not azimuth/elevation: the old parametrisation was
+     degenerate at the pole, which is exactly where the plane STARTS (normal = z), so a horizontal drag did
+     nothing and an upward one was clamped — "the control is not sliding the plane". Every drag now tilts. */
+  function turn(dx,dy) { let [x,y,z]=unit(getNormal());
+    let cy=Math.cos(dy),sy=Math.sin(dy); [y,z]=[y*cy-z*sy, y*sy+z*cy];            // about X: a vertical drag tips the plane forward/back
+    let cx=Math.cos(dx),sx=Math.sin(dx); [x,z]=[x*cx+z*sx, -x*sx+z*cx];           // about Y: a horizontal drag tips it left/right
+    onTurn(unit([x,y,z]));paint();paint(true); }
   let drag=null;
   cv.addEventListener('pointerdown',e=>{if(cv.getAttribute('aria-disabled')==='true')return;drag=[e.clientX,e.clientY];try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.focus();});
   cv.addEventListener('pointermove',e=>{if(!drag)return;const gain=e.shiftKey?.003:.015;turn((e.clientX-drag[0])*gain,(drag[1]-e.clientY)*gain);drag=[e.clientX,e.clientY];});
@@ -133,9 +139,11 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   ui.styleSeg.root.addEventListener('click',syncFinish);ui.styleSeg.root.addEventListener('keydown',syncFinish);syncFinish();
 
   const waveHelp=[...wave.querySelectorAll('.note:not(.link-note), .sturm-note, .sp-fx')];
-  const waveRows=[['spaceSeg'],['viewSeg'],['expK','softK','hueK'],['styleSeg'],['finishSeg'],['isoK','grainK','kneeK'],['ditherSeg','ditherK']];
+  // Row indices are part of the skin (wave-row-2 and wave-row-6 have their own rules), so the material knobs
+  // merge into row 2 and row 5 is simply absent: ISO, GRAIN and KNEE sit under EXPOSURE, SOFT and HUE (Josh, 2026-09-10).
+  const waveRows=[[0,['spaceSeg']],[1,['viewSeg']],[2,['expK','softK','hueK','isoK','grainK','kneeK']],[3,['styleSeg']],[4,['finishSeg']],[6,['ditherSeg','ditherK']]];
   const flat=document.createDocumentFragment();
-  for(const [i,names] of waveRows.entries()){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
+  for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);
   const palette=document.querySelector('.dev[data-id="palette"]');
   const reverse=[...palette.querySelectorAll('.trig')].find(b=>b.textContent.trim()==='REVERSE');
@@ -232,17 +240,61 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   expand.addEventListener('pointerup',endTempoDrag);expand.addEventListener('pointercancel',()=>{tempoDrag=null;});
   expand.addEventListener('click',()=>{if(tempoDragged){tempoDragged=false;return;}toggleTempo();});
   expand.addEventListener('keydown',e=>{const step=e.shiftKey?.1:e.code.startsWith('Page')?10:1;const dir=e.code==='ArrowUp'||e.code==='ArrowRight'||e.code==='PageUp'?1:e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='PageDown'?-1:0;if(!dir)return;e.preventDefault();C.setBpm(M.transport.bpm+dir*step);sync();ui.saveNative();});
-  const bpmField=el('div','native-tempo-field',panel);
+  /* 2026-09-10 (Josh): the expanded bar is two panes of square-ish tiles, not a strip of long buttons.
+     LEFT — MACROS: the modulation model's first four macros as knobs, a second place to play them without
+     opening the window (the window stays the only place that BUILDS them — STYLE-LOCK). RIGHT — CLOCK: one
+     BPM field (the pill already carries the readout, so the second BPM/Hz line is gone), TAP, sync, the DJ
+     bends ÷2 / ×2 (hold to bend, release to return; a quick tap latches, a second tap releases), the HOLD
+     stutters and the cadence. */
+  const macroPane=el('div','tempo-pane tempo-macros',panel);
+  el('div','tempo-eyebrow',macroPane,'MACROS');
+  const macroRow=el('div','tempo-macro-row',macroPane);
+  const macroKnobs=new Map();let macroSig='';
+  function buildMacros(){
+    const list=M.macroList().filter(m=>m.kind!=='trigger').slice(0,4);
+    const sig=list.map(m=>m.id+':'+(m.name||'')).join('|');
+    if(sig===macroSig)return;macroSig=sig;macroRow.textContent='';macroKnobs.clear();
+    for(const m of list){
+      const k=knob({label:String(m.name||'MACRO').toUpperCase().slice(0,7),min:0,max:1,value:m.value||0,fmt:v=>(v*100).toFixed(0)+'%',
+        title:'Macro '+(m.name||m.id)+' — the same value the modulation window shows',
+        onInput:v=>{const mm=M.macroOf(m.id);if(!mm||mm.sourceId)return;M.setMacro(m.id,{value:Math.max(0,Math.min(1,v))});C.applyAll(false);repaint();}});
+      macroRow.appendChild(k.root);macroKnobs.set(m.id,k);
+    }
+    if(!list.length)el('div','tempo-empty',macroRow,'No macros yet — add one in the modulation window.');
+  }
+  function syncMacros(){buildMacros();for(const [id,k] of macroKnobs){const m=M.macroOf(id);if(!m)continue;if(!k.root.contains(document.activeElement)&&!k.root.classList.contains('drag'))k.set(m.value||0);if(k.setDisabled)k.setDisabled(!!m.sourceId);}}
+  const clockPane=el('div','tempo-pane tempo-clock',panel);
+  const clockHead=el('div','tempo-eyebrow',clockPane,'CLOCK');clockHead.appendChild(repeatInfo);
+  const grid=el('div','tempo-grid',clockPane);
+  const bpmField=el('div','native-tempo-field',grid);
   const bpm=el('input','native-bpm',bpmField);bpm.type='number';bpm.min=String(M.BPM_MIN);bpm.max=String(M.BPM_MAX);bpm.step='.1';bpm.setAttribute('aria-label','Tempo in beats per minute');bpm.title='BPM';
   el('span','native-tempo-unit',bpmField,'BPM');
-  const hzGroup=el('div','native-tempo-hz',bpmField);const hz=el('span','',hzGroup);hzGroup.appendChild(repeatInfo);
-  const play=trig({label:'MOD PLAY',title:'Play/pause modulation independently of physics',onFire:()=>{arm(true);C.toggle(performance.now()/1000);sync();}});panel.appendChild(play.root);
   bpm.addEventListener('change',()=>{if(Number.isFinite(bpm.valueAsNumber))C.setBpm(bpm.valueAsNumber);sync();ui.saveNative();});
-  let taps=[];panel.appendChild(trig({label:'TAP',onFire:()=>{const r=M.tapTempo(taps,performance.now());taps=r.taps;if(r.bpm)C.setBpm(r.bpm);sync();ui.saveNative();}}).root);
-  const syncB=trig({label:'WALL',onFire:()=>{C.setSync(M.syncMode()==='wall'?'free':'wall');sync();ui.saveNative();}});panel.appendChild(syncB.root);
-  const cad=trig({label:'60 Hz',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});panel.appendChild(cad.root);
-  const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+note,onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});panel.appendChild(b.root);return b;});
-  function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;hz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');}
+  let taps=[];grid.appendChild(trig({label:'TAP',title:'Tap the tempo',onFire:()=>{const r=M.tapTempo(taps,performance.now());taps=r.taps;if(r.bpm)C.setBpm(r.bpm);sync();ui.saveNative();}}).root);
+  const syncB=trig({label:'WALL',title:'Sync the modulation clock to the wall clock or run it free',onFire:()=>{C.setSync(M.syncMode()==='wall'?'free':'wall');sync();ui.saveNative();}});grid.appendChild(syncB.root);
+  /* THE DJ BENDS. One base tempo is remembered while a bend is in force, so ÷2 after ×2 bends the same
+     base rather than compounding; releasing puts the base back exactly. A BPM-synced ramp LFO doubles or
+     halves its rate with it — the transition move Josh asked for. */
+  const clampBpm=v=>Math.min(M.BPM_MAX,Math.max(M.BPM_MIN,v));
+  const bend={base:null,which:null,latched:false,downAt:0};
+  const bends=[[0.5,'÷2'],[2,'×2']].map(([factor,label])=>{
+    const b=trig({label,title:'Hold to '+(factor>1?'double':'halve')+' the tempo, release to return · tap to latch, tap again to release',onFire:()=>{}});
+    b.root.setAttribute('aria-pressed','false');
+    const on=()=>{if(bend.base===null)bend.base=M.transport.bpm;bend.which=label;C.setBpm(clampBpm(bend.base*factor));sync();};
+    const off=()=>{if(bend.base!==null)C.setBpm(bend.base);bend.base=null;bend.which=null;bend.latched=false;sync();};
+    b.root.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();bend.downAt=performance.now();
+      if(bend.which===label&&bend.latched){off();return;}
+      if(bend.which&&bend.which!==label)off();
+      on();try{b.root.setPointerCapture(e.pointerId);}catch(_){}});
+    b.root.addEventListener('pointerup',()=>{if(bend.which!==label||bend.latched)return;if(performance.now()-bend.downAt<240){bend.latched=true;sync();return;}off();});
+    b.root.addEventListener('pointercancel',()=>{if(bend.which===label&&!bend.latched)off();});
+    b.root.addEventListener('keydown',e=>{if(e.repeat||(e.code!=='Space'&&e.code!=='Enter'))return;e.preventDefault();if(bend.which===label){off();return;}if(bend.which)off();on();bend.latched=true;sync();});
+    grid.appendChild(b.root);return {b,label};
+  });
+  const play=trig({label:'MOD PLAY',title:'Play/pause modulation independently of physics',onFire:()=>{arm(true);C.toggle(performance.now()/1000);sync();}});grid.appendChild(play.root);
+  const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+note,title:'Stutter: hold the beat at this note value',onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});grid.appendChild(b.root);return b;});
+  const cad=trig({label:'60 Hz',title:'Modulation cadence',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});grid.appendChild(cad.root);
+  function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
   sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
   consolidateWindowHelp();

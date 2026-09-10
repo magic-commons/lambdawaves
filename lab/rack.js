@@ -243,7 +243,7 @@ export async function boot(dom) {
   /* CARD STYLE has one official first-run default on every layout. A browser that has named a surface still
      gets exactly what it named; the phone's rendering budget is handled by the renderer rather than by changing
      the material under the user's hand. */
-  const defaultCard = () => 'refractive';
+  const defaultCard = () => 'tinted';   // 2026-09-10: tinted ships — the look of frost with no backdrop filter, so no compositor cost on the iPad
   /* `cardChosen` is the difference between "this browser wants TINTED" and "this browser has never said":
      without it the first saveSettings() of a session freezes whatever the default happened to be, and the
      surface could never follow the device again.  The seg — the one place a HAND can say it — sets it. */
@@ -419,7 +419,7 @@ export async function boot(dom) {
      paused, nothing is governed and the user's grid comes back at once.  quality.res stays the USER's choice (and the
      project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
-  const gov = { on: true, drop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
+  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
@@ -427,6 +427,7 @@ export async function boot(dom) {
     const hold = frostMode === 'still' && clock.playing;
     if (hold !== document.body.classList.contains('frost-hold')) document.body.classList.toggle('frost-hold', hold);
   }
+  const STEP_LADDER = [1, 0.7, 0.5];                 // the governor's ray-step multipliers, tried before the grid ladder
   const effectiveRes = () => { if (!gov.drop) return quality.res; let i = RES_LADDER.findIndex((r) => r >= quality.res); if (i < 0) i = RES_LADDER.length - 1; return RES_LADDER[Math.max(0, i - gov.drop)]; };
   const READER_LAW = { park: 16, slow: 6, parkDrop: 8, slowDrop: 3, probeMs: 3000 };   // ms per update: parked while playing / slowed to every 6 × cost — and the tighter pair once stepped down
 
@@ -515,7 +516,7 @@ export async function boot(dom) {
     if (!clock.playing || !gov.on) { if (gov.parked.has(name)) unpark(name, w); return true; }
     const now = performance.now();
     if (now - gov.scroll < 150) return false;
-    const cost = perf.work[name] || 0, park = gov.drop ? READER_LAW.parkDrop : READER_LAW.park, slow = gov.drop ? READER_LAW.slowDrop : READER_LAW.slow;
+    const cost = perf.work[name] || 0, park = (gov.drop || gov.stepDrop) ? READER_LAW.parkDrop : READER_LAW.park, slow = (gov.drop || gov.stepDrop) ? READER_LAW.slowDrop : READER_LAW.slow;
     /* THE RE-PROBE (wave 50).  A parked reader never runs, so its cost is never measured again, so it stays parked
        for the whole session even after the thing that made it dear has gone (a one-off hitch during its measurement,
        a smaller state, a window that got cheaper, a governor notch that made every reader cheaper).  Once every
@@ -886,6 +887,9 @@ export async function boot(dom) {
   document.addEventListener('freeze', () => setPageHidden(true, 'freeze'));
   document.addEventListener('resume', () => setPageHidden(false, 'resume'));
   window.addEventListener('pagehide', () => setPageHidden(true, 'pagehide'));
+  /* A pagehide that is NOT going into the back-forward cache is a real unload: release the GPU in order
+     (textures, buffers, context, device) before the navigation tears the page down under the driver. */
+  window.addEventListener('pagehide', (e) => { if (!e.persisted && field && field.dispose) field.dispose(); });
   window.addEventListener('pageshow', () => setPageHidden(document.visibilityState === 'hidden', 'pageshow'));
 
   /* ── the router ───────────────────────────────────────────────────────── */
@@ -1136,7 +1140,7 @@ export async function boot(dom) {
     }
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
-      field.setStepCap(tabletMotion ? tablet.steps : Infinity);       // full saved quality returns on the first still frame
+      field.setStepCap(Math.min(tabletMotion ? tablet.steps : Infinity, gov.stepDrop ? Math.max(24, Math.round(mat.steps * STEP_LADDER[gov.stepDrop])) : Infinity));   // full saved quality returns on the first still frame; the governor's step cap rides on top
       tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat }); });
       pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
@@ -1173,12 +1177,17 @@ export async function boot(dom) {
           gov.okSince = 0;
 
 
-          if (gov.drop < 2) { gov.drop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
-        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && gov.drop > 0) { gov.drop--; gov.changes++; gov.okSince = nowMs; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
+          /* 2026-09-10: RAY STEPS FIRST, GRID SECOND. A step cap is a present-time number — applied on the next
+             frame, no texture destroyed or rebuilt — and the ray-march cost is linear in it. Only when two step
+             drops (×0.7, ×0.5) are not enough does the grid ladder move, which is the destroy/recreate that a
+             driver under load likes least. Recovery walks back in the opposite order: grid, then steps. */
+          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.PRESENT); }
+          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
+        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
         else gov.okSince = 0;
       }
     }
-    if (!clock.playing && gov.drop) { gov.drop = 0; gov.okSince = 0; gov.changes++; schedule(TIER.REBUILD); }   // paused: nothing to govern — the user's grid comes back at once
+    if (!clock.playing && (gov.drop || gov.stepDrop)) { const rebuild = gov.drop > 0; gov.drop = 0; gov.stepDrop = 0; gov.okSince = 0; gov.changes++; schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }   // paused: nothing to govern — the user's grid and steps come back at once
     perf.counts.frames++;
     const cpuTick = !clock.playing || (perf.counts.frames % perf.cpuEvery) === 0;   // the CPU windows' cadence
     if (cpuTick) {
@@ -1271,7 +1280,7 @@ export async function boot(dom) {
     if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame; and so is a NON-ZERO ROTATION RATE, which the hand can set on a paused instrument with no modulator running at all — without this clause it would turn exactly once
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
     if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
-    if (ui.sliceMini && canPresent(wSlice)) ui.sliceMini.paint();
+    if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
     const spent = performance.now() - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[perf.counts.frames % 60] = spent;                        // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
@@ -1287,8 +1296,8 @@ export async function boot(dom) {
   /** the METERS line for the governor: its state, the median it judged, the grid it runs, and what it parked */
   function paintGovernor() {
     if (!ui.govRo) return;
-    const st = !gov.on ? 'OFF' : gov.drop ? 'STEPPED −' + gov.drop : 'nominal';
-    ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
+    const st = !gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop + (gov.stepDrop ? ' · STEPS ×' + STEP_LADDER[gov.stepDrop] : '') : gov.stepDrop ? 'STEPS ×' + STEP_LADDER[gov.stepDrop] : 'nominal';
+    ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : (gov.drop || gov.stepDrop) ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
     ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 1.68).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');
   }
@@ -1576,9 +1585,11 @@ export async function boot(dom) {
       { id: 'bands', label: 'BANDS', title: 'Draw amplitude level bands; GRAIN sets their count' }],
       onChange: (v) => { mat.style = STYLE[v]; schedule(TIER.PRESENT); } });
     rd.appendChild(ui.styleSeg.root);
-    ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.isoK.root);
-    ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.grainK.root);
-    ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.kneeK.root);
+    /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
+       material row above STYLE — instead of a second row below the style seg. */
+    ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
+    ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
+    ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
 
 
     const rdd = el('div', 'row tight', gd);

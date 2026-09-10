@@ -2190,3 +2190,49 @@ that carried this machine's home directory now derive it from `import.meta.url`
 (`tests/mir.test.mjs` takes `LW_MIR_SRC`). `tools/gate/drv.js` is `drv.mjs`, which is what it was.
 `package.json` names the project, the licence, the homepage, Node ≥ 22 and `npm run serve|test|test:browser|test:all|build`.
 What remains open is off this machine: iPad/phone acceptance, installed-PWA update, a real microphone, and the deploy.
+
+## 2026-09-10 · Real-time pass: steps before grid, a clean GPU exit, and the transport's second face
+
+**The governor caps ray steps before it drops the grid.** The quality governor's only lever was the
+resolution ladder 128³ → 96³ → 64³, and a rung is a `setResolution()`: two rgba16float N³ textures
+destroyed and recreated (32 MiB at 128³) — the costliest thing the renderer does and the allocation
+pattern a WebGPU driver under load likes least. `field.setStepCap()` already existed for tablet motion.
+The governor now walks a STEP ladder first (×0.7, ×0.5 of `mat.steps`, present-time, nothing rebuilt)
+and only then the grid; recovery returns the grid first, then the steps. METERS reads `STEPS ×0.7` /
+`GRID −1 · STEPS ×0.5`. Ray-march cost is linear in the step count, so this is the largest single
+frame-time lever the audit found; the renderer's frame path itself was already tight — one submit per
+frame, no readbacks on the frame path, camera-only frames skip the reconstruct compute, persistent typed
+scratch everywhere (audited 2026-09-10; the 2026-09-09 claims held).
+
+**A real unload releases the GPU in order.** `field.dispose()` destroys the two textures, the five
+buffers, unconfigures the context and destroys the device; `rack.js` calls it on `pagehide` when the page
+is not entering the back-forward cache. Backgrounding is untouched (the textures stay warm on purpose).
+This is the mitigation for Firefox occasionally crashing whole on a reload of the lab: the driver was
+reaping 13–32 MiB of textures and a live device behind a navigation. If it still happens, it is
+Firefox's WebGPU on this driver, not the page — `about:support` → Graphics → WebGPU has the failure.
+
+**Three.js, and what transfers.** Nothing specifically Japanese surfaced (the nearest: takahirox's
+original experimental `THREE.WebGPURenderer`, and the Expo 2025 Osaka "Waves of Connection" million-
+particle installation). The 2025–26 advances that do transfer to a raw-WGSL ray marcher: GPU timestamp
+queries for per-pass ms instead of wall-clock; a compute-pass brick-occupancy grid so rays skip regions
+whose contribution cannot change an 8-bit output level (the empty-space-skipping pattern behind
+three.js's compute-node work); WebGPU now default in iPadOS 26 Safari. Subgroup ops are Chrome-only
+(Firefox blocked, Safari absent) and are not worth a branch. The brick skip is the next renderer wave;
+the timestamp query is how to measure it.
+
+**The transport's second face (Josh).** The expanded bar is two panes of square tiles: MACROS — the
+model's first four macros as named knobs, written through `setMacro` + `applyAll`, the window still the
+only place that builds them — and CLOCK: one BPM field (the pill carries the readout; the second BPM/Hz
+line is gone), TAP, WALL/FREE, the DJ bends ÷2 / ×2 (hold to bend, release returns the base exactly; a
+tap under 240 ms latches, a second tap releases; one base is remembered so ×2 then ÷2 does not compound),
+HOLD 1/4, HOLD 1, cadence. Measured: 60 → 120 held → 60 released → 120 latched → 60.
+
+**Shipped defaults and small laws (Josh).** TINTED is the card style (`--card-opacity: .76`, a little
+more of the field through it): the look of frost with no backdrop filter, so no compositor cost on the
+iPad. Control hints at 600 ms. SPECTRUM's NORMALIZE reads NORM with the hint "Normalize"; its live law
+`c(t) = e^{−iE t} c(0)` no longer reflows the card (nowrap, fixed slot widths for t and arg c). ISO,
+GRAIN and KNEE sit under EXPOSURE, SOFT and HUE as one material row. **Two bugs in SLICE / CLIP:** the
+plane model was repainted only while the *other* SLICE window presented (`canPresent(wSlice)` gating a
+control that lives in `wClip`), so a drag changed the normal and nothing on screen moved; and its
+azimuth/elevation parametrisation was degenerate at the pole, which is where the plane starts, so a
+horizontal drag did nothing there. It repaints on its own window and turns by two axis tilts.

@@ -1104,6 +1104,17 @@ export async function createField(canvas, opts = {}) {
        three physical pixels per CSS pixel of a ray-marched volume is 2.25 x the fragments for a difference
        nobody can see at arm's length.  The cap is a NUMBER the caller owns (rack.js drops it at the phone
        breakpoint), not a branch in here: the renderer knows nothing about layout. */
+    /* REAL UNLOAD ONLY (pagehide without bfcache). GPU state is deliberately kept across backgrounding
+       (rack.js keeps the textures warm on unified-memory hardware); this is the other case — the page is
+       going away — and here the ordered teardown is the mitigation for a driver that otherwise has to reap
+       two 16 MiB textures and a device behind a navigation. Firefox has crashed whole on exactly that. */
+    dispose() {
+      if (out.disposed) return; out.disposed = true; out.ok = false;
+      try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
+      try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); palBuf.destroy(); } catch (_) {}
+      try { ctx.unconfigure(); } catch (_) {}
+      try { device.destroy(); } catch (_) {}
+    },
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
     /* The CSS size is read from a ResizeObserver, not from clientWidth on every frame: the frame loop writes

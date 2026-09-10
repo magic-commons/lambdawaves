@@ -304,6 +304,14 @@ m { font-family: var(--font-math); font-style: normal; font-size: 1.10em; line-h
 .fx-v { font-style: normal; font-family: var(--font-num); font-size: .92em; font-variant-numeric: tabular-nums;
         color: var(--fg); letter-spacing: var(--tr-tight); }
 .fx.dim .fx-l { color: var(--ink-faint); }
+/* SPECTRUM's live law never reflows the window: a number that grows (t, arg c) cannot wrap the line or
+   change the card's height. Each slot holds its widest value; the line clips instead of wrapping. */
+.sp-fx .fx-l { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.sp-fx .fx-v { display: inline-block; text-align: right; }
+.sp-fx .fx-v[data-s="lab"] { text-align: left; }
+.sp-fx .fx-v[data-s="t"] { min-width: 7ch; }      /* t grows to four figures; E, |c| are fixed-format, arg c is at most 5 */
+.sp-fx .fx-v[data-s="arg"] { min-width: 6ch; }
+.sp-fx .fx-l + .fx-l { font-size: calc(var(--fs-small) * .93); }   /* the numbers line fits the card at its narrowest without clipping |c| */
 /* THE PILL IS A 32-px STRIP AND A DERIVATION HAS NO PLACE IN IT.  The transport's REPEATS formula
    lives on the DOCKED card; undocked, the same DOM is restyled as a 560 x 32 pill with twelve seats
    in one flex row, and a two-line expression there would either be clipped or would break the row.

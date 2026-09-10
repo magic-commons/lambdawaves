@@ -8,7 +8,8 @@
 :root {
   --rack-w: 300px;                                                /* narrower rack (was 372) — the layout still reads this one variable */
   --glass-hue: 214; --glass-sat-tint: 16%; --glass-lum: 13%;     /* card tint hsl(214 16% 13%) = #191d23 */
-  --glass-opacity: .84;                                           /* opaque enough that the field cannot pull text under 4.5:1 */
+  --glass-opacity: .84;
+  --card-opacity: .76;                                             /* the TINTED pane alone: a little more of the field shows through than the pills and chips allow */                                           /* opaque enough that the field cannot pull text under 4.5:1 */
   --glass-border-color: hsl(0 0% 100% / .14);                     /* card edge hairline */
   --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
   --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */
@@ -327,7 +328,7 @@ body[data-theme="light"] .badge { color: var(--dim); }
 body[data-card="refractive"] .dev, body[data-card="refractive"] .glass
   { background: transparent; }                                                /* the blur alone */
 body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
-  { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--glass-opacity)); }    /* the blur under a tinted pane */
+  { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }    /* the tinted pane: no filter, so no compositor cost — the shipped default since 2026-09-10 */
 
 /* CARD STYLE owns the pane even with FROST on. An enabled FROST policy otherwise
    overrode both choices with the same veil, making the setting inert. Refractive keeps
@@ -374,7 +375,7 @@ body.disconnected:not(.phone) .dev > .dev-head { background: var(--glass-raise);
   -webkit-backdrop-filter: brightness(1.03) saturate(1.03);
   backdrop-filter: brightness(1.03) saturate(1.03); }
 /* THE BODY-CARD wears whatever CARD STYLE says the pane is — REFRACTIVE leaves it the field itself. */
-body.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--glass-opacity)); }
+body.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
 /* FROST reaches the constellation the same way it reaches a joined card: the veil, then the filter, and the
    filter alone answers `frost-hold`.  The chip keeps its own lighter fill — the difference is the point. */
 body.disconnected.frost[data-card="refractive"]:not(.phone) .dev > .dev-body { background: hsl(0 0% 100% / .10); }
@@ -660,10 +661,19 @@ body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
 body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport .tempo-expand { order: 8; }
-#transport .native-tempo { order: 9; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; width: 100%; }
+#transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.35fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK */
 #transport .native-tempo[hidden] { display: none; }
+.tempo-pane { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tempo-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 14px; font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
+.tempo-macro-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px 4px; align-items: start; }   /* 2×2: room for the macro's name under its knob */
+.tempo-macro-row .k { width: auto; min-width: 0; }
+#transport.mini .tempo-macro-row .k, #transport .tempo-macro-row .k { width: auto; min-width: 0; }
+#transport .tempo-macro-row .k-lbl { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }   /* the macro's NAME is the point of the knob */
+#transport .tempo-macro-row .k-dial { width: 40px; height: 40px; }
+.tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
+.tempo-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px; }
 #transport.tempo-open { flex-wrap: wrap; }
-.native-tempo .trig, .native-bpm { min-width: 0; height: 34px; font-size: var(--fs-micro); }
+.native-tempo .trig, .native-bpm { min-width: 0; font-size: var(--fs-micro); }
 .native-bpm { width: 100%; box-sizing: border-box; border: 0; border-radius: 6px; background: var(--glass-well); color: var(--fg); text-align: center; font-variant-numeric: tabular-nums; }
 /* Motion can change ink, never the dimensions of the controls around it. */
 .native-clean .formula { white-space: normal; }
@@ -734,13 +744,10 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport .tempo-chevron { position:absolute;right:6px;top:50%;width:5px;height:5px;margin-top:-4px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);transition:transform var(--t-fast);color:var(--dim); }
 #transport .tempo-expand[aria-expanded="true"] .tempo-chevron { transform:translateY(3px) rotate(225deg); }
 #transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px;background:linear-gradient(180deg,var(--glass-well),transparent); }
-#transport .native-tempo-field { grid-column:span 2;min-width:0;height:34px;padding:0 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:6px;align-items:center;border:1px solid color-mix(in srgb,var(--acc2) 38%,var(--glass-hairline));border-radius:8px;background:var(--glass-well);box-shadow:var(--neu-inset); }
-#transport .native-bpm { grid-area:1/1/3/2;width:100%;height:30px;padding:0;border:0;background:transparent;box-shadow:none;color:var(--acc2);font:var(--w-bold) 15px/1 var(--font-num);text-align:left; }
+#transport .native-tempo-field { min-width:0;min-height:40px;padding:0 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:4px;border:1px solid color-mix(in srgb,var(--acc2) 35%,transparent);border-radius:9px;background:var(--glass-well); }
+#transport .native-bpm { width:100%;height:100%;padding:0;border:0;background:transparent;box-shadow:none;color:var(--acc2);font:var(--w-bold) 15px/1 var(--font-num);text-align:left;-moz-appearance:textfield;appearance:textfield; }
 #transport .native-bpm:focus { outline:0;color:var(--fg); }
-#transport .native-tempo-unit { align-self:end;font:var(--w-bold) var(--fs-micro)/1 var(--font-ui);letter-spacing:var(--tr-wide);color:var(--ink-key); }
-#transport .native-tempo-hz { align-self:start;justify-content:flex-start;font-size:var(--fs-micro);line-height:1; }
-#transport .native-tempo-hz .native-info { height:14px; }
-#transport .native-tempo-hz .native-info-button { height:14px;line-height:14px; }
+#transport .native-tempo-unit { font:var(--w-bold) var(--fs-micro)/1 var(--font-ui);letter-spacing:var(--tr-wide);color:var(--ink-key); }
 #transport.mini { width:min(640px,calc(100vw - 24px));contain:layout paint; }
 #transport.mini .tempo-expand { flex-basis:72px;width:72px;min-width:72px; }
 #transport.mini .native-play-row { flex-wrap:nowrap; }
@@ -767,22 +774,19 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 #transport.docked .native-play-row .ro-sub { display:none; }
 #transport.docked .native-play-row .ro-val { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 #transport.docked .native-play-row .k-val { position:absolute;top:100%;left:50%;transform:translateX(-50%); }
-#transport .native-tempo .trig { min-width:0;height:34px;padding:0 5px; }
+#transport .native-tempo .trig { min-width:0;height:auto;min-height:40px;padding:0 4px;justify-content:center; }
 #transport .k-val { display:none; }
 #transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
-#transport .native-tempo-hz { gap:4px; }
-#transport .native-tempo-hz .native-info { flex:0 0 20px; }
-#transport .native-tempo-hz .native-info-button { width:20px; }
 #transport.docked .native-play-row { grid-template-columns:repeat(5,minmax(0,1fr)); }
 #transport.docked .native-play-row > .fd { grid-column:1/5; }
 #transport.docked .native-play-row > .ro { grid-column:span 2; }
 #transport.docked .native-play-row > .ro.period { grid-column:span 3; }
 #transport.docked .native-play-row .k-lbl { display:none; }
-#transport .native-tempo .trig { min-height:34px; }
+#transport .native-tempo .trig { min-height:40px; }
 #transport.docked .native-play-row .fd-val { display:none; }
 #transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
 #transport.docked .tempo-expand { grid-column:span 2;width:100%; }
-#transport.docked .native-tempo { width:100%;grid-template-columns:repeat(2,minmax(0,1fr)); }
+#transport.docked .native-tempo { width:100%;grid-template-columns:minmax(0,1fr); }
 #transport.docked .play { grid-area:1/1; }
 #transport.docked .modb { grid-area:1/2; }
 #transport.docked .transport-home { grid-area:1/3; }

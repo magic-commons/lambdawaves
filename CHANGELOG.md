@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 33 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 36 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -52,6 +52,7 @@ stable enough to gate on.
 - `79d7a4d` 2026-09-07 — the closing for wave 107, written from the diff and a full gate run
 - `d9b57fa` 2026-09-07 — Compare computed frost values and reconcile the closing review
 - `9eb463d` 2026-09-07 — Record the green wave 107 gate and completed local task board
+- `dfcdaa2` 2026-09-08 — Plan Beta causal atoms and flexible benzene update
 - `5f6421e` 2026-09-08 — Freeze app for Claude Code debugging and refactoring handoff
 - `78ecb30` 2026-09-08 — Make macro value and depth controls keyboard accessible
 - `23328bf` 2026-09-08 — Prepare shipping checkpoint and Claude debugging handoff
@@ -75,6 +76,8 @@ stable enough to gate on.
 - `12fc572` 2026-09-10 — Polish About actions and workbar modes
 - `84c3e33` 2026-09-10 — Reduce tablet compositor and idle modulation work
 - `35aa0c5` 2026-09-10 — Improve update and history workflows
+- `d218878` 2026-09-10 — Senior review pass: green shipped gate, pruned cascade, cold hot paths, repo hygiene
+- `dfa9b19` 2026-09-10 — Merge branch 'dev' into codex/macro-keyboard-fixes
 
 </details>
 

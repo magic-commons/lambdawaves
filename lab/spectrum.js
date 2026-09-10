@@ -39,7 +39,7 @@ export function createSpectrum(host, api) {
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
   const clrBtn = el('button', 'trig', head); clrBtn.type = 'button'; clrBtn.textContent = 'CLEAR'; clrBtn.title = 'c ↦ 0 for every label';
-  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORMALIZE'; nrmBtn.title = 'Normalize the state coefficients';
+  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORM'; nrmBtn.title = 'Normalize';
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
