@@ -2236,3 +2236,42 @@ plane model was repainted only while the *other* SLICE window presented (`canPre
 control that lives in `wClip`), so a drag changed the normal and nothing on screen moved; and its
 azimuth/elevation parametrisation was degenerate at the pole, which is where the plane starts, so a
 horizontal drag did nothing there. It repaints on its own window and turns by two axis tilts.
+
+## 2026-09-10 · The transport's second face, second pass: a miniature rail, the law of the two clocks, hints that step aside
+
+**What Josh asked, in his words:** keep the expanded bar's dimensions; put a miniature of the modulation
+window's MACROS rail in it, not knobs; remove the BPM field (the pill already has it) and put in its
+place a toggle for the two clocks — synced or separate — because "the app sort of functions in between
+and gets buggy because of the lack of law"; make the rail's COMPACT cut information instead of moving
+it; and make control hints get out of the way of a hand on a control.
+
+**The miniature rail** (`lab/native-ui.js`, `.tm-*` in `skin.css`): number badge, name, value and the
+same thin fader as the window, at two-thirds scale, one row per macro (four at most) in the 72 px the
+two tile rows take. It reads and writes the model (`macroOf`, `setMacro` + `applyAll`), so it IS the
+macro, not a copy; a driven macro shows its accent fill; a trigger macro shows TRIG and no fader. The
+window remains the only place that builds macros (STYLE-LOCK). Drag sets it; arrows step it; Home/End.
+
+**The law of the two clocks.** `clockLink` (this browser's, persisted beside the arm; LINKED is the
+default). LINKED: the modulation clock is a follower of the transport, held there by the frame loop on
+every play-edge of the physics clock — a scrub, a preset, a project open, a HOLD can no longer leave one
+clock running and the other stopped. A refused play (the host's own "nothing-to-run": no route and no
+open window) is retried once a second, so a source routed later joins within a second. SEPARATE: the
+transport does not touch the modulation clock; MOD ▶ / MOD ❚❚ runs it alone. The tile reads
+LINKED / SEPARATE; MOD ▶ is disabled while linked. Measured with a live LFO and the window open: app
+play → both run; app pause → both stop; SEPARATE + app play → the modulation clock stays; MOD ▶ starts
+it alone. **A latent bug went with it:** MOD PLAY did `arm(true)` and then a blind `toggle()`, and
+arming while the transport plays starts the clock by itself, so the toggle stopped it again — pressing
+MOD PLAY while playing did nothing. It now decides before it arms.
+
+**The clock pane** is two rows of 34 px tiles, the bar's original height (89 px measured): LINKED · MOD ▶
+· TAP · WALL · 60 Hz / ÷2 · ×2 · HOLD ¼ · HOLD 1 · ⓘ (the repeat mathematics). The BPM field is gone.
+
+**COMPACT cuts, it does not reflow** (`modhost.css`): the rail narrows to 144 px and clips; every row keeps
+the full rail's grid at its full width, so the badge, the seat and the start of the name stay exactly
+where they were (measured: seat at 50 → 51 px, value at 94 → 95, tools at 175 → 179, all clipped by the
+edge rather than moved). What it costs: the tool seat is behind the edge while compact. Josh's
+screencast of the old behaviour could not be decoded (VP8 stream reports invalid packets), so this is
+the reading of his words and the measured old layout, in which the tools jumped 81 px left.
+
+**Hints step aside** (`installControlHelp`): a press, a wheel, or any key that operates the control closes
+the hint, and it does not reopen until the pointer leaves and returns; a drag never opens one.

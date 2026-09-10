@@ -277,7 +277,7 @@ export async function boot(dom) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain, modCadence: MOD.hz, modArm: modArm,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN; wave 65: the MOD arm is one too
+        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain, modCadence: MOD.hz, modArm: modArm, clockLink,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN; wave 65: the MOD arm is one too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -366,6 +366,7 @@ export async function boot(dom) {
     if (typeof s.fling === 'number') camera.setFling(s.fling);
     MOD.hz = s.modCadence === 120 ? 120 : 60; if (modView) modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
     if (s.modArm === false) setModArm(false, { quiet: true });   // wave 65: the arm is this browser's, and ARMED is the default a fresh visit gets
+    if (s.clockLink === false) clockLink = false;                 // 2026-09-10: LINKED is the default a fresh visit gets
     if (s.frame === false) { mat.frame = false; if (ui.frameSw) ui.frameSw.set(false); }     // wave 53: FRAME and AXIS, independently
     if (['box','lattice','dots'].includes(s.frameMode)) mat.frameMode=s.frameMode;
     if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
@@ -654,6 +655,7 @@ export async function boot(dom) {
 
 
   let modArm = true;
+  let clockLink = true, linkFollowed = null, linkRetryAt = 0;   // 2026-09-10 · THE LAW OF THE TWO CLOCKS: linked, the modulation clock follows the transport; free, it is its own (MOD PLAY). This browser's, never the project's.
   const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
   /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
    *  Found here and fixed here: every transport EDGE calls the host's applyAll(force), which hands
@@ -1110,6 +1112,17 @@ export async function boot(dom) {
         if (modRunning || (audioCap && audioCap.live) || rotDriving()) {
           feedAudio(feedHz);
           modHost.clock.advanceTo(now);
+        }
+        /* LINKED means linked every frame, not only on the press that toggled play: a scrub, a preset,
+           a project open or a HOLD can stop or start either clock on its own, and this is what closes
+           the in-between state (one clock running, the other not) that used to appear afterwards. */
+        if (clockLink && modArm && clock.playing !== linkFollowed && nowMs >= linkRetryAt) {
+          linkFollowed = clock.playing;
+          const r = clock.playing ? modHost.clock.play(now) : modHost.clock.pause(now);
+          /* a refused play ("nothing-to-run": no route and no open window) is retried once a second, not
+             every frame — so a source routed later joins a running transport within a second */
+          if (r && r.ok === false) { linkFollowed = null; linkRetryAt = nowMs + 1000; }
+          if (modView) modView.sync();
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
@@ -2891,7 +2904,7 @@ export async function boot(dom) {
 
 
   function playMod(on) {
-    if (!modHost || !modArm) return null;
+    if (!modHost || !modArm || !clockLink) return null;          // FREE: the transport does not touch the modulation clock
     const w = performance.now() / 1000;
     const r = on ? modHost.clock.play(w) : modHost.clock.pause(w);
     if (modView) modView.sync();
@@ -5326,6 +5339,7 @@ export async function boot(dom) {
       setCadence(hz) { MOD.hz = hz === 120 ? 120 : 60; if (modView) modView.sync(); saveSettings(); return MOD.hz; },
       /* ── WAVE 65 · THE ARM, THE ONE KEY AND THE RESUME LAW, all readable from outside ────────── */
       get armed() { return modArm; },
+      get clockLink() { return clockLink; }, set clockLink(v) { ui.setClockLink(v); },
       arm(on) { return setModArm(!!on); },
       /** which law the rack's own chips put on the next resume, and what the last one actually did */
       resume() { return modHost ? modHost.clock.resumePlan() : null; },
@@ -5585,6 +5599,7 @@ export async function boot(dom) {
       get remembered() { return seen(); }, get open() { return open; } };
   })();
   ui.saveNative = saveSettings;
+  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; linkFollowed = null; saveSettings(); };   // the frame loop's edge takes it from here
   reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();

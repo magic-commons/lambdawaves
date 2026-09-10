@@ -1808,7 +1808,6 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin { height:336px;max-height:336px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2numseat { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2num { display:flex; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2val,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2erow { display:none; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2railhead { padding-left:4px;gap:2px;font-size:10px; }
@@ -1892,15 +1891,13 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 /* Minimized macros remove only the value face. Route and depth stay at the
    same coordinates, and the right tool seat still offers reorder, rename and
    delete. Row height is unchanged, preventing the rail from reformatting. */
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:144px; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots {
-  display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:0 4px 4px; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slot {
-  flex:0 0 64px;height:64px;margin:0; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow {
-  height:62px;grid-template-columns:44px 44px 44px;gap:0; }
-:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slottools {
-  display:grid;grid-column:3; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin { width:144px; overflow:hidden; }
+/* 2026-09-10 (Josh): COMPACT CUTS, IT DOES NOT REFLOW. The rail narrows and clips at 144 px; every row keeps
+   the full rail's grid at its full width, so the badge, the seat and the start of the name stay exactly
+   where they were and the value fader and the tool seat are what the edge cuts off. */
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slots { display:block; padding:0 5px 4px; }   /* entry 81 above hid it; compact shows the same list, clipped */
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slot { width:216px; }
+:root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2slotrow { width:216px; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macrow { display:flex; }
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2macadd,
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2devadd {

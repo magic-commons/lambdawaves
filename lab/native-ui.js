@@ -57,11 +57,15 @@ export function installControlHelp(root = document) {
   adopt(root.documentElement || root);
   new MutationObserver((records) => { for (const r of records) { if (r.type === 'attributes') adopt(r.target); else for (const n of r.addedNodes) adopt(n); } })
     .observe(root.documentElement || root, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
-  root.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse' || document.body.classList.contains('control-hints-off')) return; const n = e.target.closest?.('[data-help]'); if (!n || n === owner || n === pending) return; close(); pending=n; hoverTimer=setTimeout(()=>{hoverTimer=0;const target=pending;pending=null;if(target?.isConnected&&target.matches(':hover'))open(target);},HELP_HOVER_DELAY); });
+  root.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse' || document.body.classList.contains('control-hints-off')) return; if (e.buttons) return; const n = e.target.closest?.('[data-help]'); if (!n || n === owner || n === pending) return; close(); pending=n; hoverTimer=setTimeout(()=>{hoverTimer=0;const target=pending;pending=null;if(target?.isConnected&&target.matches(':hover'))open(target);},HELP_HOVER_DELAY); });
   root.addEventListener('pointerout', (e) => { const n=e.target.closest?.('[data-help]'); if(n && !n.contains(e.relatedTarget) && (n===owner||n===pending))close(); });
   root.addEventListener('focusin', (e) => { const n = e.target.closest?.('[data-help]'); if (n) open(n); });
   root.addEventListener('focusout', (e) => { if (owner && owner.contains(e.target) && !owner.contains(e.relatedTarget)) close(); });
-  root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && owner) close(); });
+  /* A HAND ON A CONTROL CLOSES THE HINT (Josh, 2026-09-10): a press, a drag, a wheel or a key that operates
+     the control means the reader is done reading. It stays closed until the pointer leaves and returns. */
+  root.addEventListener('pointerdown', () => close(), { capture: true });
+  root.addEventListener('wheel', () => close(), { capture: true, passive: true });
+  root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (owner) close(); return; } if (owner && !/^(Tab|Shift|Control|Alt|Meta)$/.test(e.key)) close(); });
   addEventListener('resize', close, { passive: true }); addEventListener('scroll', close, { passive: true, capture: true });
   root.addEventListener('controlhintschange', close);
 }
@@ -240,38 +244,55 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   expand.addEventListener('pointerup',endTempoDrag);expand.addEventListener('pointercancel',()=>{tempoDrag=null;});
   expand.addEventListener('click',()=>{if(tempoDragged){tempoDragged=false;return;}toggleTempo();});
   expand.addEventListener('keydown',e=>{const step=e.shiftKey?.1:e.code.startsWith('Page')?10:1;const dir=e.code==='ArrowUp'||e.code==='ArrowRight'||e.code==='PageUp'?1:e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='PageDown'?-1:0;if(!dir)return;e.preventDefault();C.setBpm(M.transport.bpm+dir*step);sync();ui.saveNative();});
-  /* 2026-09-10 (Josh): the expanded bar is two panes of square-ish tiles, not a strip of long buttons.
-     LEFT — MACROS: the modulation model's first four macros as knobs, a second place to play them without
-     opening the window (the window stays the only place that BUILDS them — STYLE-LOCK). RIGHT — CLOCK: one
-     BPM field (the pill already carries the readout, so the second BPM/Hz line is gone), TAP, sync, the DJ
-     bends ÷2 / ×2 (hold to bend, release to return; a quick tap latches, a second tap releases), the HOLD
-     stutters and the cadence. */
-  const macroPane=el('div','tempo-pane tempo-macros',panel);
-  el('div','tempo-eyebrow',macroPane,'MACROS');
-  const macroRow=el('div','tempo-macro-row',macroPane);
-  const macroKnobs=new Map();let macroSig='';
+  /* 2026-09-10 (Josh, second pass): the expanded bar keeps its two-row height. LEFT — a MINIATURE of the
+     modulation window's macro rail: number badge, name, value, the same thin fader — read and written
+     through the model, so it is the same macro, not a copy. The window is still the only place that BUILDS
+     macros (STYLE-LOCK). RIGHT — the CLOCK in two rows of tiles. The BPM field is gone: the pill already
+     carries the tempo (drag, arrows, TAP). In its place is the LAW the two clocks were missing — LINK: the
+     modulation clock follows the transport, no in-between state; FREE: it runs on its own MOD PLAY. */
+  const macroPane=el('div','tempo-pane tempo-macros',panel);macroPane.setAttribute('aria-label','macros');
+  const macroRail=el('div','tempo-rail',macroPane);
+  const macroRows=new Map();let macroSig='';
   function buildMacros(){
-    const list=M.macroList().filter(m=>m.kind!=='trigger').slice(0,4);
-    const sig=list.map(m=>m.id+':'+(m.name||'')).join('|');
-    if(sig===macroSig)return;macroSig=sig;macroRow.textContent='';macroKnobs.clear();
-    for(const m of list){
-      const k=knob({label:String(m.name||'MACRO').toUpperCase().slice(0,7),min:0,max:1,value:m.value||0,fmt:v=>(v*100).toFixed(0)+'%',
-        title:'Macro '+(m.name||m.id)+' — the same value the modulation window shows',
-        onInput:v=>{const mm=M.macroOf(m.id);if(!mm||mm.sourceId)return;M.setMacro(m.id,{value:Math.max(0,Math.min(1,v))});C.applyAll(false);repaint();}});
-      macroRow.appendChild(k.root);macroKnobs.set(m.id,k);
-    }
-    if(!list.length)el('div','tempo-empty',macroRow,'No macros yet — add one in the modulation window.');
+    const list=M.macroList().slice(0,4);
+    const sig=list.map(m=>m.id+':'+(m.name||'')+':'+m.kind).join('|');
+    if(sig===macroSig)return;macroSig=sig;macroRail.textContent='';macroRows.clear();
+    list.forEach((m,i)=>{
+      const row=el('div','tm-row'+(m.kind==='trigger'?' tm-trig':''),macroRail);row.dataset.id=m.id;
+      const num=el('span','tm-num',row,String(i+1));num.setAttribute('aria-hidden','true');
+      const face=el('div','tm-face',row);face.tabIndex=0;face.setAttribute('role','slider');face.setAttribute('aria-valuemin','0');face.setAttribute('aria-valuemax','100');
+      face.setAttribute('aria-label','Macro '+(m.name||i+1));face.title=m.kind==='trigger'?'A trigger macro: fire it from the modulation window':'Drag to set the macro; arrows step it';
+      const info=el('div','tm-info',face);el('span','tm-name',info,m.name||('MACRO '+(i+1)));const val=el('span','tm-val',info,'');
+      const sig2=el('div','tm-signal',face);const fill=el('span','tm-fill',sig2);const edge=el('span','tm-edge',sig2);
+      const write=v=>{const mm=M.macroOf(m.id);if(!mm||mm.sourceId||mm.kind==='trigger')return;M.setMacro(m.id,{value:Math.max(0,Math.min(1,v))});C.applyAll(false);repaint();paintRow(row);};
+      let drag=null;
+      face.addEventListener('pointerdown',e=>{if(e.button||m.kind==='trigger')return;e.preventDefault();face.focus();const b=sig2.getBoundingClientRect();drag={x0:e.clientX,v0:(M.macroOf(m.id)||{}).value||0,w:Math.max(24,b.width)};face.classList.add('drag');try{face.setPointerCapture(e.pointerId);}catch(_){}
+        if(Math.abs(e.clientX-b.left-drag.v0*drag.w)>10)write((e.clientX-b.left)/drag.w),drag.v0=(M.macroOf(m.id)||{}).value||0,drag.x0=e.clientX;});
+      face.addEventListener('pointermove',e=>{if(!drag)return;write(drag.v0+(e.clientX-drag.x0)/drag.w);});
+      for(const t of ['pointerup','pointercancel'])face.addEventListener(t,()=>{drag=null;face.classList.remove('drag');});
+      face.addEventListener('keydown',e=>{const step=e.shiftKey?.01:e.code.startsWith('Page')?.1:.05;const d=/ArrowRight|ArrowUp|PageUp/.test(e.code)?1:/ArrowLeft|ArrowDown|PageDown/.test(e.code)?-1:0;
+        if(e.code==='Home'){e.preventDefault();write(0);return;}if(e.code==='End'){e.preventDefault();write(1);return;}if(!d)return;e.preventDefault();write(((M.macroOf(m.id)||{}).value||0)+d*step);});
+      macroRows.set(m.id,{row,val,fill,edge,face});paintRow(row);
+    });
+    if(!list.length)el('div','tempo-empty',macroRail,'No macros yet — add one in the modulation window.');
   }
-  function syncMacros(){buildMacros();for(const [id,k] of macroKnobs){const m=M.macroOf(id);if(!m)continue;if(!k.root.contains(document.activeElement)&&!k.root.classList.contains('drag'))k.set(m.value||0);if(k.setDisabled)k.setDisabled(!!m.sourceId);}}
-  const clockPane=el('div','tempo-pane tempo-clock',panel);
-  const clockHead=el('div','tempo-eyebrow',clockPane,'CLOCK');clockHead.appendChild(repeatInfo);
+  function paintRow(row){const rec=macroRows.get(row.dataset.id);const m=M.macroOf(row.dataset.id);if(!rec||!m)return;
+    const v=Math.max(0,Math.min(1,m.value||0));const pct=Math.round(v*100)+'%';
+    if(m.kind==='trigger'){rec.val.textContent='TRIG';rec.fill.style.width='0%';rec.edge.style.left='0%';}
+    else{rec.val.textContent=pct;rec.fill.style.width=(v*100)+'%';rec.edge.style.left=(v*100)+'%';rec.face.setAttribute('aria-valuenow',String(Math.round(v*100)));rec.face.setAttribute('aria-valuetext',pct);}
+    rec.row.classList.toggle('tm-driven',!!m.sourceId);}
+  function syncMacros(){buildMacros();for(const [,rec] of macroRows)if(!rec.face.classList.contains('drag'))paintRow(rec.row);}
+  const clockPane=el('div','tempo-pane tempo-clock',panel);clockPane.setAttribute('aria-label','clock');
   const grid=el('div','tempo-grid',clockPane);
-  const bpmField=el('div','native-tempo-field',grid);
-  const bpm=el('input','native-bpm',bpmField);bpm.type='number';bpm.min=String(M.BPM_MIN);bpm.max=String(M.BPM_MAX);bpm.step='.1';bpm.setAttribute('aria-label','Tempo in beats per minute');bpm.title='BPM';
-  el('span','native-tempo-unit',bpmField,'BPM');
-  bpm.addEventListener('change',()=>{if(Number.isFinite(bpm.valueAsNumber))C.setBpm(bpm.valueAsNumber);sync();ui.saveNative();});
+  /* THE LAW OF THE TWO CLOCKS. Linked, the modulation clock is a follower of the transport — rack.js
+     holds it there every frame, so there is no state where one runs and the other does not. Free, the
+     modulation clock is its own instrument: MOD PLAY starts and stops it, the transport does not. */
+  const linkB=trig({label:'LINKED',title:'Modulation clock follows the transport (LINKED) or runs on its own MOD PLAY (SEPARATE)',onFire:()=>{ui.setClockLink(!ui.clockLink());sync();ui.saveNative();}});grid.appendChild(linkB.root);
+  const play=trig({label:'MOD ▶',title:'Play/pause the modulation clock on its own (SEPARATE only)',onFire:()=>{if(ui.clockLink())return;const want=!C.isPlaying();arm(true);const r=want?C.play(performance.now()/1000):C.pause(performance.now()/1000);   // decide BEFORE arming: arming while the transport plays starts the clock itself, and a blind toggle then stopped it again
+    play.root.title=r&&r.ok===false?'Nothing to run — add a source in the modulation window':'Play/pause the modulation clock on its own (SEPARATE only)';sync();}});grid.appendChild(play.root);
   let taps=[];grid.appendChild(trig({label:'TAP',title:'Tap the tempo',onFire:()=>{const r=M.tapTempo(taps,performance.now());taps=r.taps;if(r.bpm)C.setBpm(r.bpm);sync();ui.saveNative();}}).root);
   const syncB=trig({label:'WALL',title:'Sync the modulation clock to the wall clock or run it free',onFire:()=>{C.setSync(M.syncMode()==='wall'?'free':'wall');sync();ui.saveNative();}});grid.appendChild(syncB.root);
+  const cad=trig({label:'60 Hz',title:'Modulation cadence',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});grid.appendChild(cad.root);
   /* THE DJ BENDS. One base tempo is remembered while a bend is in force, so ÷2 after ×2 bends the same
      base rather than compounding; releasing puts the base back exactly. A BPM-synced ramp LFO doubles or
      halves its rate with it — the transition move Josh asked for. */
@@ -291,10 +312,9 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
     b.root.addEventListener('keydown',e=>{if(e.repeat||(e.code!=='Space'&&e.code!=='Enter'))return;e.preventDefault();if(bend.which===label){off();return;}if(bend.which)off();on();bend.latched=true;sync();});
     grid.appendChild(b.root);return {b,label};
   });
-  const play=trig({label:'MOD PLAY',title:'Play/pause modulation independently of physics',onFire:()=>{arm(true);C.toggle(performance.now()/1000);sync();}});grid.appendChild(play.root);
-  const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+note,title:'Stutter: hold the beat at this note value',onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});grid.appendChild(b.root);return b;});
-  const cad=trig({label:'60 Hz',title:'Modulation cadence',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});grid.appendChild(cad.root);
-  function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
+  const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+(note==='1/4'?'¼':note),title:'Stutter: hold the beat at this note value',onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});grid.appendChild(b.root);return b;});
+  const infoSeat=el('div','tempo-info',grid);infoSeat.appendChild(repeatInfo);   // the tenth tile: the repeat mathematics
+  function sync(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});const linked=ui.clockLink();linkB.root.classList.toggle('on',linked);linkB.root.setAttribute('aria-pressed',String(linked));linkB.setLabel(linked?'LINKED':'SEPARATE');play.root.disabled=linked;play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD ❚❚':'MOD ▶');for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
   sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
   consolidateWindowHelp();
