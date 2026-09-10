@@ -329,9 +329,21 @@ console.log('\n══ 7 · THE UNITS THE SEAM DEPENDS ON ══');
   M.setSource(a.id,{audio:{outs:{level:{attackMs:99999,releaseMs:99999,holdMs:99999}}}});
   ro=M.audioReadout(a.id);
   ok('audio timing controls cap at two seconds',ro.outs.level.attackMs===2000 && ro.outs.level.releaseMs===2000 && ro.outs.level.holdMs===2000);
+  M.setSource(a.id,{audio:{levelMix:{low:.35}}});
   const saved=M.serialize();M.modReset();M.deserialize(saved);
   const restored=M.sourceOf(a.id);
-  ok('ranges, gate bypass and timing survive a saved patch',restored.audio.gateEnabled===false && restored.audio.outs.level.floorDb===-40 && restored.audio.outs.level.ceilingDb===-20 && restored.audio.outs.level.attackMs===2000 && restored.audio.outs.level.holdMs===2000 && restored.audio.outs.low.floorDb===-50);
+  ok('ranges, level mix, gate bypass and timing survive a saved patch',restored.audio.gateEnabled===false && restored.audio.outs.level.floorDb===-40 && restored.audio.outs.level.ceilingDb===-20 && restored.audio.outs.level.attackMs===2000 && restored.audio.outs.level.holdMs===2000 && restored.audio.outs.low.floorDb===-50 && restored.audio.levelMix.low===.35);
+  M.setSource(a.id,{audio:{levelMix:{level:1,low:0,mid:1,high:1},outs:{
+    level:{floorDb:-60,ceilingDb:-6,attackMs:0,releaseMs:0,holdMs:0},
+    low:{floorDb:-60,ceilingDb:-6,attackMs:0,releaseMs:0,holdMs:0}}}});
+  M.modFeedAudio(a.id,{rms:.5,bandPower:[.25,0,0],flux:0,feedHz:100,capturedAt:frame++/100});
+  ro=M.audioReadout(a.id);
+  ok('LOW mix can remove bass from LEVEL without muting the LOW output',ro.outs.level.out===0 && ro.outs.low.out>.99,JSON.stringify({level:ro.outs.level.out,low:ro.outs.low.out,mix:ro.levelMix}));
+  M.setSource(a.id,{audio:{levelMix:{low:.25}}});
+  M.modFeedAudio(a.id,{rms:.5,bandPower:[.25,0,0],flux:0,feedHz:100,capturedAt:frame++/100});
+  ro=M.audioReadout(a.id);
+  const mixedExpected=M.audioRangeNorm(20*Math.log10(.125),0,{floorDb:-60,ceilingDb:-6});
+  ok('a partial band mix attenuates LEVEL continuously',near(ro.outs.level.out,mixedExpected,1e-12),JSON.stringify({level:ro.outs.level.out,mix:ro.levelMix}));
   M.setSource(a.id,{audio:{outs:{level:{floorDb:20,ceilingDb:-100}}}});
   ok('malformed endpoints stay bounded and cannot cross',restored.audio.outs.level.floorDb===-1 && restored.audio.outs.level.ceilingDb===0);
   const legacy=M.addSource('audio',{audio:{outs:{level:{attackMs:12}}}});

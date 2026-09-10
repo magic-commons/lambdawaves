@@ -61,14 +61,14 @@ export const MACRO_MAX = 8;
    version-INDISTINGUISHABLE.  The λWAVES namespace starts at 100 (= 100 + the upstream
    version this model is derived from) so our 104 can never be mistaken for an upstream 5,
    and an upstream 5 we have never seen is refused here rather than half-read. */
-export const MOD_STATE_V = 107;
+export const MOD_STATE_V = 108;
 /** Every model version whose racks and presets THIS build can read.  A version
     outside it is refused loudly and the stored blob is left untouched. */
 /* λWAVES: forced edit 8/8 — and 3 and 4 are still read: a rack with no `bi` on any route
    is byte-identical on the wire to one written before the flag existed, so there is nothing
    to migrate in that direction and refusing it would throw away every patch made before
    wave 61.  The refusal only runs the other way. */
-export const MOD_STATE_READS = Object.freeze([3, 4, 104, 105, 106, 107]);
+export const MOD_STATE_READS = Object.freeze([3, 4, 104, 105, 106, 107, 108]);
 /** Is this stamped model version one this build understands?  An ABSENT stamp
     is NOT handled here — it is the callers' (library.js reads absent as
     "predates the stamp, fine"; the preset store has stamped every record since
@@ -218,6 +218,7 @@ export const AUDIO_RANGE_GAP = 1;       // dB; endpoints never cross
 export const AUDIO_TIME_MAX = 2000;
 export const AUDIO_DB_SPAN  = AUDIO_DB_TOP - AUDIO_DB_FLOOR;      // 54
 export const AUDIO_GAIN_MAX = 24;       // +/- dB
+export const AUDIO_LEVEL_MIX_DEFAULTS = Object.freeze({ level: 1, low: 1, mid: 1, high: 1 });
 
 /** attack/release TIME CONSTANTS in ms, per output.  See the essay above for
     why MID and LEVEL are the arithmetic midpoint and why 5 ms is a snap. */
@@ -521,6 +522,9 @@ function audioPatchFrom(raw) {
   const o = raw && typeof raw === 'object' ? raw : {};
   const outs = {};
   for (const k of AUDIO_OUTPUTS) outs[k] = audioOutFrom(o.outs && o.outs[k], k);
+  const mixIn = o.levelMix && typeof o.levelMix === 'object' ? o.levelMix : {};
+  const levelMix = {};
+  for (const k of AUDIO_FOLLOWED) levelMix[k] = Number.isFinite(mixIn[k]) ? clamp01(mixIn[k]) : AUDIO_LEVEL_MIX_DEFAULTS[k];
   const g = AUDIO_GATE_DEFAULTS;
   return {
     gateEnabled: o.gateEnabled !== false,
@@ -533,7 +537,7 @@ function audioPatchFrom(raw) {
     holdMs: Number.isFinite(o.holdMs) ? Math.max(0, Math.min(4000, o.holdMs)) : g.holdMs,
     fluxFloor: Number.isFinite(o.fluxFloor) && o.fluxFloor > 0
       ? Math.min(10, o.fluxFloor) : AUDIO_FLUX_FLOOR,
-    outs
+    levelMix, outs
   };
 }
 /** The patch, out of a live device — the exact shape audioPatchFrom reads. */
@@ -548,13 +552,15 @@ function audioPatchOf(s) {
   }
   return { gateEnabled: s.audio.gateEnabled, source: s.audio.source, gainDb: s.audio.gainDb,
            thresholdDb: s.audio.thresholdDb, hysteresisDb: s.audio.hysteresisDb,
-           holdMs: s.audio.holdMs, fluxFloor: s.audio.fluxFloor, outs };
+           holdMs: s.audio.holdMs, fluxFloor: s.audio.fluxFloor,
+           levelMix: { ...s.audio.levelMix }, outs };
 }
 function audioPatchApply(s, q) {
   const p = audioPatchFrom(q);
   s.audio.source = p.source; s.audio.gainDb = p.gainDb; s.audio.gateEnabled = p.gateEnabled;
   s.audio.thresholdDb = p.thresholdDb; s.audio.hysteresisDb = p.hysteresisDb;
   s.audio.holdMs = p.holdMs; s.audio.fluxFloor = p.fluxFloor;
+  for (const k of AUDIO_FOLLOWED) s.audio.levelMix[k] = p.levelMix[k];
   for (const k of AUDIO_OUTPUTS) {
     s.audio.outs[k].floorDb = p.outs[k].floorDb; s.audio.outs[k].ceilingDb = p.outs[k].ceilingDb;
     s.audio.outs[k].attackMs = p.outs[k].attackMs;
@@ -1280,6 +1286,7 @@ export function setSource(id, patch) {
     if (p.source !== undefined && AUDIO_SOURCES.indexOf(p.source) < 0) refused = true;
     if (refused) modStat.audioSetRefused++;
     else audioPatchApply(s, { ...audioPatchOf(s), ...p,
+                              levelMix: { ...s.audio.levelMix, ...(p.levelMix && typeof p.levelMix === 'object' ? p.levelMix : {}) },
                               outs: audioMergeOuts(s, p.outs) });
   }
   /* ARM: a permission gesture, transient, and only an audio device has one. */
@@ -1774,9 +1781,18 @@ export function modFeedAudio(deviceId, feed) {
   const flux = Number.isFinite(feed.flux) ? Math.max(0, feed.flux) : 0;
   const dtFeed = 1 / feedHz;
 
-  /* ── 1 · CALIBRATE.  Fixed dB, post-gain, exact 0 at the floor. ── */
-  const db = audioDbAmp(rms) + a.gainDb;              // post-gain level, dBFS
-  const level = audioRangeNorm(audioDbAmp(rms), a.gainDb, a.outs.level);
+  /* ── 1 · CALIBRATE.  The four small face dials shape LEVEL only: one master
+     and three spectral contributions. At unity this is bit-for-bit the raw RMS. */
+  const powers = [0, 1, 2].map((i) => Math.max(0, Number(bp[i]) || 0));
+  const mix = a.levelMix;
+  let levelRms = rms;
+  if (mix.level !== 1 || mix.low !== 1 || mix.mid !== 1 || mix.high !== 1) {
+    const total = powers[0] + powers[1] + powers[2];
+    if (total > 0) levelRms *= Math.sqrt((powers[0] * mix.low ** 2 + powers[1] * mix.mid ** 2 + powers[2] * mix.high ** 2) / total);
+    levelRms *= mix.level;
+  }
+  const db = audioDbAmp(levelRms) + a.gainDb;
+  const level = audioRangeNorm(audioDbAmp(levelRms), a.gainDb, a.outs.level);
 
   /* ── 2 · GATE.  One decision for the whole device, from the LEVEL. ── */
   const open = a.gateEnabled ? audioGateStep(s, db, dtFeed) : true;
@@ -1784,12 +1800,12 @@ export function modFeedAudio(deviceId, feed) {
 
   /* ── 3 · FOLLOW.  Four outputs, each its own pair of time constants. ── */
   const bandNorm = [
-    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[0]) || 0)), a.gainDb, a.outs.low),
-    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[1]) || 0)), a.gainDb, a.outs.mid),
-    audioRangeNorm(audioDbPow(Math.max(0, Number(bp[2]) || 0)), a.gainDb, a.outs.high)
+    audioRangeNorm(audioDbPow(powers[0]), a.gainDb, a.outs.low),
+    audioRangeNorm(audioDbPow(powers[1]), a.gainDb, a.outs.mid),
+    audioRangeNorm(audioDbPow(powers[2]), a.gainDb, a.outs.high)
   ];
-  r.inputDb = { level: db, low: audioDbPow(Math.max(0, Number(bp[0]) || 0)) + a.gainDb,
-    mid: audioDbPow(Math.max(0, Number(bp[1]) || 0)) + a.gainDb, high: audioDbPow(Math.max(0, Number(bp[2]) || 0)) + a.gainDb };
+  r.inputDb = { level: db, low: audioDbPow(powers[0]) + a.gainDb,
+    mid: audioDbPow(powers[1]) + a.gainDb, high: audioDbPow(powers[2]) + a.gainDb };
   let vLevel = 0, vLow = 0, vMid = 0, vHigh = 0;
   if (open) {
     vLevel = audioFollow(s, 'level', level, feedHz);
@@ -1951,7 +1967,7 @@ export function audioReadout(deviceId) {
     id: s.id, on: !!s.on, armed: !!s.armed, source: a.source,
     fed: r.fed, frames: r.frames, feedHz: hz, sampleRate: r.sampleRate,
     feedMs: 1000 / hz, capturedAt: r.capturedAt,
-    gainDb: a.gainDb, dbfs: r.lastDb, gateOpen: r.gateOpen,
+    gainDb: a.gainDb, dbfs: r.lastDb, levelMix: { ...a.levelMix }, gateOpen: r.gateOpen,
     gateEnabled: a.gateEnabled, thresholdDb: a.thresholdDb, hysteresisDb: a.hysteresisDb, holdMs: a.holdMs,
     flux: r.lastFlux, fluxThreshold: r.threshold, fluxFloor: a.fluxFloor,
     hits: r.hits, hitAgeSeconds: r.hitAgeSeconds,

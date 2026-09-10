@@ -2287,21 +2287,40 @@ export function createModulation(host, port) {
     const rows = {};
     const select = key => { audBands.set(s.id, key); audRoutes.set(s.id, key); syncKnobs(rec); paintAudio(rec); };
     const patch = (key, q) => { for(const k of ['floorDb','ceilingDb'])if(Number.isFinite(q[k]))q[k]=Math.round(q[k]*10)/10; M.setSource(s.id, {audio:{outs:{[key]:q}}}); apply(); paintAudio(rec); };
+    const patchMix = (key, value) => {
+      value=clamp01(value);M.setSource(s.id,{audio:{levelMix:{[key]:value}}});
+      apply();paintAudio(rec);return value;
+    };
+    const makeMix = (row, key) => {
+      const root=el('div','aud-level-mix',row),dial=el('div','aud-level-mix-dial',root),value=el('output','aud-level-mix-value',root);
+      dial.tabIndex=0;dial.setAttribute('role','slider');dial.setAttribute('aria-valuemin','0');dial.setAttribute('aria-valuemax','100');
+      dial.setAttribute('aria-label',(key==='level'?'LEVEL master':key.toUpperCase()+' contribution')+' to LEVEL');
+      let drag=null;
+      const set=v=>{select(key);patchMix(key,v);};
+      dial.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();select(key);drag={y:e.clientY,v:s.audio.levelMix[key]};row.classList.add('editing');dial.setPointerCapture(e.pointerId);dial.focus();});
+      dial.addEventListener('pointermove',e=>{if(drag)set(drag.v+(drag.y-e.clientY)/70);});
+      const end=()=>{drag=null;row.classList.remove('editing');};dial.addEventListener('pointerup',end);dial.addEventListener('pointercancel',end);dial.addEventListener('lostpointercapture',end);
+      dial.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();set(s.audio.levelMix[key]+(e.deltaY<0?.05:-.05));},{passive:false});
+      dial.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();e.stopPropagation();const d=['ArrowRight','ArrowUp'].includes(e.key)?.05:-.05;set(e.key==='Home'?0:e.key==='End'?1:s.audio.levelMix[key]+d);});
+      dial.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();set(1);});
+      return {root,dial,value};
+    };
     const shift = (key, delta, base=s.audio.outs[key]) => {
       delta = Math.max(M.AUDIO_RANGE_MIN-base.floorDb, Math.min(M.AUDIO_RANGE_MAX-base.ceilingDb, delta));
       patch(key, {floorDb:base.floorDb+delta, ceilingDb:base.ceilingDb+delta});
     };
     for (const key of M.AUDIO_FOLLOWED) {
       const row = el('div', 'aud-range-row', root); row.dataset.band=key;
+      const mix=makeMix(row,key);
       const head = el('button', 'aud-range-name', row); head.type='button';
       el('b','',head,key.toUpperCase()); const text=el('output','aud-range-value',row);
       head.addEventListener('click',()=>select(key));
       head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD';
       const track=el('div','aud-range-track',row);
-      const fill=el('div','aud-range-output',track), zone=el('div','aud-range-zone',track), cursor=el('i','aud-range-input',track);
+      const low=el('div','aud-range-low',track),high=el('div','aud-range-high',track),zone=el('div','aud-range-zone',track),fill=el('div','aud-range-output',track),cursor=el('i','aud-range-input',track);
       const handles={};
       for(const endpoint of ['floorDb','ceilingDb']) {
-        const handle=el('button','aud-range-handle',track); handle.type='button'; handle.dataset.endpoint=endpoint;
+        const handle=el('button','aud-range-handle '+(endpoint==='floorDb'?'lower':'upper'),track); handle.type='button'; handle.dataset.endpoint=endpoint;
         handle.setAttribute('role','slider'); handle.setAttribute('aria-orientation','horizontal');
         handle.setAttribute('aria-label',key.toUpperCase()+' '+(endpoint==='floorDb'?'lower':'upper')+' response boundary dB');
         handle.addEventListener('keydown',e=>{
@@ -2321,7 +2340,7 @@ export function createModulation(host, port) {
         const db=M.AUDIO_RANGE_MIN+(e.clientX-b.left)/b.width*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
         const endpoint=e.target.dataset.endpoint || (db<o.floorDb?'floorDb':db>o.ceilingDb?'ceilingDb':null);
         drag={x:e.clientX,w:b.width,base:{...o},endpoint};
-        track.setPointerCapture(e.pointerId); if(endpoint)handles[endpoint].focus();
+        row.classList.add('editing');track.setPointerCapture(e.pointerId); if(endpoint)handles[endpoint].focus();
       });
       track.addEventListener('pointermove',e=>{
         if(!drag)return;const delta=(e.clientX-drag.x)/drag.w*(M.AUDIO_RANGE_MAX-M.AUDIO_RANGE_MIN);
@@ -2332,11 +2351,11 @@ export function createModulation(host, port) {
           patch(key,{[drag.endpoint]:Math.max(lo,Math.min(hi,drag.base[drag.endpoint]+delta))});
         }
       });
-      const end=()=>{drag=null;};track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);
+      const end=()=>{drag=null;row.classList.remove('editing');};track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);
       track.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();select(key);shift(key,(e.deltaY<0?1:-1)*(e.shiftKey ? .1 : 1));},{passive:false});
       track.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();patch(key,{floorDb:M.AUDIO_DB_FLOOR,ceilingDb:M.AUDIO_DB_TOP});});
     track.title='Resize at the edges; shift inside; double-click to reset';
-      rows[key]={row,head,text,fill,zone,cursor,handles};
+      rows[key]={row,head,text,mix,low,high,fill,zone,cursor,handles};
     }
     const hint=el('div','aud-range-hint',root,'Select a band for timing');
     const latency=el('output','aud-latency',root,'LATENCY —');
@@ -2402,8 +2421,12 @@ export function createModulation(host, port) {
       row.row.dataset.selected=String(key===selected);
       const db=v=>(v>0?'+':'')+(Math.abs(v)<.05?'0':v.toFixed(1));
       row.text.textContent=db(o.floorDb)+'…'+db(o.ceilingDb)+' dB';
-      row.fill.style.width=(o.out*100).toFixed(1)+'%';row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
-      row.cursor.style.left=position(o.inputDb)+'%';
+      const input=position(o.inputDb),mix=ro.levelMix[key];
+      row.low.style.width=lo+'%';row.high.style.left=hi+'%';row.high.style.width=(100-hi)+'%';
+      row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
+      row.fill.style.width=input+'%';row.cursor.style.left=input+'%';
+      row.mix.dial.style.setProperty('--mix-angle',(-145+mix*290).toFixed(1)+'deg');
+      row.mix.value.textContent=Math.round(mix*100)+'%';row.mix.dial.setAttribute('aria-valuenow',String(Math.round(mix*100)));row.mix.dial.setAttribute('aria-valuetext',Math.round(mix*100)+' percent');
       for(const endpoint of ['floorDb','ceilingDb']) {
         const h=row.handles[endpoint];h.style.left=position(o[endpoint])+'%';
         h.setAttribute('aria-valuemin',endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP);

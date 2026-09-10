@@ -88,17 +88,27 @@ try {
  // value survives a collapse/expand. The macro VALUE is the rail's own control, not this seat's.
  assert.equal(Number(macro.value),100); assert.equal(macro.reopened,macro.value);assert.deepEqual(macro.errors,[]);
  console.log('PASS macro keyboard: the seat edits depth folded or not, and close/reopen keeps it; no page errors');
- const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await w(250);
+ const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await w(250);const audio=M.sourceList().find(s=>s.kind==='audio');
   const card=document.querySelector('.m2dev.audio'),rows=[...card.querySelectorAll('.aud-range-row')];
-  const outside=rows.every(e=>{const v=e.querySelector('.aud-range-value').getBoundingClientRect(),t=e.querySelector('.aud-range-track').getBoundingClientRect();return v.bottom<=t.top+.5});
   const bands=['low','mid','high'].map(k=>card.querySelector('[data-band="'+k+'"]').getBoundingClientRect().x);
+  const level=card.querySelector('[data-band="level"]'),track=level.querySelector('.aud-range-track'),lower=level.querySelector('.aud-range-handle.lower'),upper=level.querySelector('.aud-range-handle.upper');
+  const probe=document.createElement('i');card.append(probe);probe.style.background='var(--acc)';const accA=getComputedStyle(probe).backgroundColor;probe.style.background='var(--acc2)';const accB=getComputedStyle(probe).backgroundColor;probe.remove();
+  const ott={mixers:card.querySelectorAll('.aud-level-mix-dial').length,valuesHidden:rows.every(e=>getComputedStyle(e.querySelector('.aud-range-value')).opacity==='0'),
+    border:getComputedStyle(track).borderTopWidth,live:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor,
+    devicePalette:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor===accA&&getComputedStyle(lower).color===accA&&getComputedStyle(upper).color===accA&&accA!==accB,
+    oneGrip:getComputedStyle(card.querySelector('.m2head'),'::before').content==='none'&&Math.round(card.querySelector('.m2grab i').getBoundingClientRect().width)===13};
+  card.style.setProperty('--acc','#0b528f');await w(250);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===paletteLive;card.style.removeProperty('--acc');
+  lower.focus();await w(250);ott.valuesReveal=getComputedStyle(level.querySelector('.aud-range-value')).opacity==='1';lower.blur();
+  const lowMix=card.querySelector('[data-band="low"] .aud-level-mix-dial');lowMix.focus();lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));
+  ott.lowMixHome=M.audioReadout(audio.id).levelMix.low===0;lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));
   const compact=[...document.querySelectorAll('.kwin-chiprail button')].find(e=>e.getAttribute('aria-label')==='COMPACT');compact.click();await w(180);
   const card2=document.querySelector('.m2dev.audio'),tops=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>Math.round(e.getBoundingClientRect().top));
-  const result={outside,ordered:bands[0]<bands[1]&&bands[1]<bands[2],allBands:[...card2.querySelectorAll('.aud-range-row')].every(e=>getComputedStyle(e).display!=='none'),
+  const result={ordered:bands[0]<bands[1]&&bands[1]<bands[2],allBands:[...card2.querySelectorAll('.aud-range-row')].every(e=>getComputedStyle(e).display!=='none'),
     oneKnobRow:new Set(tops).size===1,setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),
-    latency:card2.querySelector('.aud-latency').textContent,errors:__e.slice()};M.deserialize(null);return result;`);
- assert.deepEqual(audioFace,{outside:true,ordered:true,allBands:true,oneKnobRow:true,setVisible:true,latency:'LATENCY —',errors:[]});
- console.log('PASS Audio face: values clear the bars, LOW/MID/HIGH read left to right, and compact keeps all ranges, SET and four controls');
+    ott,latency:card2.querySelector('.aud-latency').textContent,errors:__e.slice()};M.deserialize(null);return result;`);
+ assert.equal(audioFace.ordered,true);assert.equal(audioFace.allBands,true);assert.equal(audioFace.oneKnobRow,true);assert.equal(audioFace.setVisible,true);assert.equal(audioFace.latency,'LATENCY —');assert.deepEqual(audioFace.errors,[]);
+ assert.equal(audioFace.ott.mixers,4);assert.equal(audioFace.ott.valuesHidden,true);assert.equal(audioFace.ott.valuesReveal,true);assert.equal(audioFace.ott.lowMixHome,true);assert.equal(audioFace.ott.border,'0px');assert.equal(audioFace.ott.devicePalette,true);assert.equal(audioFace.ott.followsPalette,true);assert.equal(audioFace.ott.oneGrip,true);assert.match(audioFace.ott.live,/rgb/);
+ console.log('PASS Audio face: OTT signal ranges, transient values, four LEVEL mix dials, one reorder grip, and complete compact controls');
  /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — theme, stage colour, camera feel and
     auto-rotate, overlays, SPECTRUM's DIALS fold, the A/B transition, the notebook's size, the modulation window's
     placement, the arrangement, the routes with their ranges — and comes back from it. */

@@ -1502,8 +1502,8 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2mintfill { fill: var(--acc); opacity: 0.10; stroke: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2mintpath { stroke: var(--m2-env-ink); }
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2mintfill { fill: var(--m2-env-ink); }
-:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintpath { stroke: var(--acc2); }
-:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintfill { fill: var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintpath { stroke: var(--acc); }
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintfill { fill: var(--acc); }
 /* THE DOT IS AN ELEMENT AND NOT A CIRCLE IN THE SVG, and that is forced by the line above: under
    `preserveAspectRatio: none` an SVG circle is stretched into an ellipse by exactly the box's aspect.
    Two custom properties place it; it is round at every height.  Same idiom as the artifact's own
@@ -1513,7 +1513,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%;
   background: var(--acc); box-shadow: 0 0 0 1px hsl(0 0% 0% / 0.38); pointer-events: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2mintdot { background: var(--m2-env-ink); }
-:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintdot { background: var(--acc2); }
+:root:root:root #modwin.mir-modwindow .m2dev.audio .m2mintdot { background: var(--acc); }
 /* a bypassed device keeps its shape and stops claiming to be running */
 :root:root:root #modwin.mir-modwindow .m2dev.m2off .m2mintdot { opacity: 0.32; }                      /* 100 */
 
@@ -1691,26 +1691,43 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .mod-matrix-bars .m2prebar { position:relative; height:48px; flex:0 0 auto; }
 :root:root:root #modwin .mod-matrix input,:root:root:root #modwin .mod-matrix select,:root:root:root #modwin .mod-matrix button { color:var(--fg); background:hsl(var(--glass-tint) / 1); border:1px solid var(--glass-hairline); border-radius:5px; }
 
-/* Audio response editing stays inside the existing plot. LEVEL spans the face; LOW, MID and HIGH
-   form the three-band row beneath it. Values sit outside their bars so no live ink collides. */
+/* OTT-style audio response geometry in the house palette. The live input and both
+   response boundaries belong to the device, so they use Accent A. */
 :root:root:root #modwin .audio-ranges .m2edit > svg { visibility:hidden; }
 :root:root:root #modwin .aud-ranges { position:absolute; inset:4px; overflow:hidden; display:grid; grid-template:38px minmax(0,1fr) 13px / repeat(3,minmax(0,1fr)); gap:3px 5px; color:var(--fg); }
-:root:root:root #modwin .aud-range-row { position:relative; min-width:0; min-height:0; padding:0; display:grid; grid-template:12px minmax(18px,1fr) / minmax(0,1fr) auto; column-gap:3px; }
+:root:root:root #modwin .aud-range-row { --aud-live:var(--acc);position:relative;min-width:0;min-height:0;padding:0;display:grid;grid-template:12px minmax(18px,1fr) / 25px minmax(0,1fr);column-gap:4px; }
 :root:root:root #modwin .aud-range-row[data-band="level"] { grid-column:1 / -1; }
-:root:root:root #modwin .aud-range-name { position:relative; z-index:2; grid-area:1 / 1; align-self:center; justify-self:start; width:auto; height:12px; min-width:0; padding:0; border:0; background:transparent; color:var(--dim); font:700 8px/1 var(--font-ui); letter-spacing:.08em; cursor:pointer; }
+:root:root:root #modwin .aud-range-name { position:relative; z-index:2; grid-area:1 / 2; align-self:center; justify-self:start; width:auto; height:12px; min-width:0; padding:0; border:0; background:transparent; color:var(--dim); font:700 8px/1 var(--font-ui); letter-spacing:.08em; cursor:pointer; }
 :root:root:root #modwin .aud-range-name::before { content:""; position:absolute; inset:-5px; }
-:root:root:root #modwin .aud-range-name[aria-pressed=true] { color:var(--acc2); }
-:root:root:root #modwin .aud-range-value { grid-area:1 / 2; align-self:center; justify-self:end; padding:0; border:0; background:transparent; font:600 7.5px/1 var(--font-num); color:var(--fg-soft); font-variant-numeric:tabular-nums; white-space:nowrap; }
-:root:root:root #modwin .aud-range-track { position:relative; grid-area:2 / 1 / 3 / -1; min-width:0; min-height:18px; border-radius:5px; background:var(--glass-well); box-shadow:inset 0 0 0 1px var(--glass-hairline); touch-action:none; cursor:ew-resize; overflow:hidden; }
-:root:root:root #modwin .aud-range-output { position:absolute; inset:0 auto 0 0; background:var(--acc2-soft); border-radius:4px; pointer-events:none; }
-:root:root:root #modwin .aud-range-zone { position:absolute; top:3px; bottom:3px; border-block:1px solid var(--acc2); background:var(--acc2-soft); pointer-events:none; }
-:root:root:root #modwin .aud-range-input { position:absolute; top:5px; bottom:5px; width:2px; background:var(--fg); pointer-events:none; }
+:root:root:root #modwin .aud-range-name[aria-pressed=true] { color:var(--acc); }
+:root:root:root #modwin .aud-range-value { grid-area:1 / 2;align-self:center;justify-self:end;padding:2px 4px;border:0;border-radius:3px;background:hsl(var(--glass-tint) / .94);font:600 7.5px/1 var(--font-num);color:var(--fg-soft);font-variant-numeric:tabular-nums;white-space:nowrap;opacity:0;transform:translateY(2px);pointer-events:none;transition:opacity .12s ease,transform .12s ease; }
+:root:root:root #modwin .aud-range-row:hover .aud-range-value,
+:root:root:root #modwin .aud-range-row:focus-within .aud-range-value,
+:root:root:root #modwin .aud-range-row.editing .aud-range-value { opacity:1;transform:none; }
+:root:root:root #modwin .aud-range-track { position:relative;grid-area:2 / 2;min-width:0;min-height:18px;border:0;border-radius:2px;background:var(--glass-well);box-shadow:var(--neu-inset);touch-action:none;cursor:ew-resize;overflow:hidden; }
+:root:root:root #modwin .aud-range-low,:root:root:root #modwin .aud-range-high,:root:root:root #modwin .aud-range-zone { position:absolute;inset-block:0;pointer-events:none; }
+:root:root:root #modwin .aud-range-low { left:0;background:color-mix(in srgb,var(--acc) 14%,transparent); }
+:root:root:root #modwin .aud-range-high { background:color-mix(in srgb,var(--acc) 25%,transparent); }
+:root:root:root #modwin .aud-range-zone { background:color-mix(in srgb,var(--fg) 9%,var(--glass-well)); }
+:root:root:root #modwin .aud-range-output { position:absolute;left:0;top:50%;height:2px;margin-top:-1px;background:var(--aud-live);box-shadow:0 0 5px color-mix(in srgb,var(--aud-live) 45%,transparent);pointer-events:none; }
+:root:root:root #modwin .aud-range-input { position:absolute;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:var(--aud-live);pointer-events:none; }
 :root:root:root #modwin .aud-range-handle { position:absolute; z-index:3; top:0; bottom:0; width:14px; padding:0; transform:translateX(-50%); border:0; background:transparent; color:var(--acc2); cursor:ew-resize; touch-action:none; }
-:root:root:root #modwin .aud-range-handle::after { content:''; position:absolute; top:2px; bottom:2px; left:6px; width:2px; border-radius:2px; background:currentColor; }
-:root:root:root #modwin .aud-range-handle:focus-visible { outline:1px solid var(--acc2); border-radius:3px; }
+:root:root:root #modwin .aud-range-handle.lower { color:var(--acc);opacity:.68; }
+:root:root:root #modwin .aud-range-handle.upper { color:var(--acc); }
+:root:root:root #modwin .aud-range-handle::after { content:'';position:absolute;inset-block:1px;left:6px;width:2px;border-radius:2px;background:currentColor;opacity:.82; }
+:root:root:root #modwin .aud-range-handle:focus-visible { outline:0; }
+:root:root:root #modwin .aud-range-handle:focus-visible::after { opacity:1;width:3px;left:5.5px; }
+:root:root:root #modwin .aud-level-mix { grid-area:1 / 1 / 3;align-self:center;justify-self:center;position:relative;width:23px;height:23px; }
+:root:root:root #modwin .aud-level-mix-dial { position:absolute;inset:1px;border-radius:50%;background:hsl(var(--glass-tint) / .26);box-shadow:inset 0 1px 2px hsl(0 0% 0% / .42);touch-action:none;cursor:ns-resize; }
+:root:root:root #modwin .aud-level-mix-dial::after { content:'';position:absolute;left:50%;top:3px;width:1.5px;height:7px;margin-left:-.75px;border-radius:2px;background:var(--aud-live);transform-origin:50% 7.5px;transform:rotate(var(--mix-angle,-145deg)); }
+:root:root:root #modwin .aud-level-mix-dial:focus-visible { outline:0;box-shadow:inset 0 1px 2px hsl(0 0% 0% / .42),0 0 0 1px color-mix(in srgb,var(--aud-live) 55%,transparent); }
+:root:root:root #modwin .aud-level-mix-value { position:absolute;left:50%;bottom:calc(100% + 3px);z-index:5;transform:translate(-50%,2px);padding:2px 4px;border-radius:3px;background:hsl(var(--glass-tint) / .96);color:var(--fg-soft);font:600 7px/1 var(--font-num);opacity:0;pointer-events:none;white-space:nowrap; }
+:root:root:root #modwin .aud-level-mix:hover .aud-level-mix-value,
+:root:root:root #modwin .aud-level-mix:focus-within .aud-level-mix-value,
+:root:root:root #modwin .aud-range-row.editing .aud-level-mix-value { opacity:1;transform:translate(-50%,0); }
 :root:root:root #modwin .aud-range-hint { grid-area:3 / 1 / 4 / 3; align-self:end; min-width:0; overflow:hidden; text-overflow:ellipsis; font:600 7px/1 var(--font-ui); letter-spacing:.035em; color:var(--dim); white-space:nowrap; text-align:left; }
 :root:root:root #modwin .aud-latency { grid-area:3 / 3; align-self:end; justify-self:end; padding:0; border:0; background:transparent; color:var(--dim); font:700 7px/1 var(--font-num); letter-spacing:.035em; white-space:nowrap; }
-:root:root:root #modwin .aud-latency.on { color:var(--acc2); }
+:root:root:root #modwin .aud-latency.on { color:var(--acc); }
 :root:root:root #modwin .audio-ranges .m2audsheet { overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
 :root:root:root #modwin .aud-setting-input { width:100%; min-width:0; border:0; color:var(--fg); background:transparent; text-align:center; font:inherit; font-variant-numeric:tabular-nums; }
 :root:root:root #modwin .audio-ranges .m2audsheet { bottom:6px; }
@@ -1779,13 +1796,13 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   height: 3px; border-radius: 3px; background: var(--m2-rule); }
 :root:root:root #modwin.mir-modwindow .aud-setting-input::-webkit-slider-thumb {
   width: 15px; height: 15px; margin-top: -6px; border: 0; border-radius: 50%;
-  appearance: none; -webkit-appearance: none; background: var(--acc2); box-shadow: none; }
+  appearance: none; -webkit-appearance: none; background: var(--acc); box-shadow: none; }
 :root:root:root #modwin.mir-modwindow .aud-setting-input::-moz-range-track {
   height: 3px; border: 0; border-radius: 3px; background: var(--m2-rule); }
 :root:root:root #modwin.mir-modwindow .aud-setting-input::-moz-range-thumb {
-  width: 15px; height: 15px; border: 0; border-radius: 50%; background: var(--acc2); box-shadow: none; }
+  width: 15px; height: 15px; border: 0; border-radius: 50%; background: var(--acc); box-shadow: none; }
 :root:root:root #modwin.mir-modwindow .m2audsreadout {
-  color: var(--acc2); text-align: right; font: 650 9px var(--font-num); font-variant-numeric: tabular-nums; }
+  color: var(--acc); text-align: right; font: 650 9px var(--font-num); font-variant-numeric: tabular-nums; }
 :root:root:root #modwin.mir-modwindow .m2audsleg:empty { display: none; }
 
 /* One minimized anatomy for LFO, ENV and AUDIO. Removing the duplicate state
@@ -1917,14 +1934,12 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2rail.m2railmin .m2namerow:not([hidden]) {
   display:flex;left:4px;right:4px;top:9px; }
 
-/* ── 2026-09-10 · THE DOT GRIP ON EVERY DEVICE CARD (Josh) ─────────────────────────────────────────────
-   The card's header is its drag surface and had no mark. It wears the kit's 3 × 3 dot grip — the same mark as
-   the rack windows' headers, the rail's reorder handle and the transport's tiles — at the left of the head in
-   COMPACT and FULL, and at the top of the rotated MINIMISED bar. */
-:root:root:root #modwin.mir-modwindow .m2head { position: relative; }
-:root:root:root #modwin.mir-modwindow .m2head::before { content: ""; position: absolute; left: 5px; top: 50%; width: 13px; height: 13px; margin-top: -6.5px;
-  color: var(--m2-ink-faint); pointer-events: none; opacity: .9;
-  background-image: radial-gradient(circle at 50% 50%, currentColor 1.1px, transparent 1.3px); background-size: 4.333px 4.333px; background-position: 0 0; }
-:root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2headl { padding-left: 22px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2head::before { left: 50%; top: 4px; margin: 0 0 0 -6.5px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2headl { padding-top: 18px; }
+/* One device reorder grip. The working button uses the same 3 × 3 dot mark as
+   the macro rail; the duplicate decoration that sat beside it is gone. */
+:root:root:root #modwin.mir-modwindow .m2head::before { content:none; }
+:root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2headl { padding-left:0; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min .m2headl { padding-top:0; }
+:root:root:root #modwin.mir-modwindow .m2grab i {
+  width:13px;height:13px;color:var(--m2-ink-faint);opacity:.9;
+  background-image:radial-gradient(circle at 50% 50%,currentColor 1.1px,transparent 1.3px);
+  background-size:4.333px 4.333px;background-position:0 0; }
