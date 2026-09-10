@@ -418,7 +418,7 @@ export class Register {
       modes.push({ id: s.id, n: s.n, l: s.l, m: s.m, re: this.re0[a], im: this.im0[a], muted: !!this.muted[a], solo: !!this.solo[a] });
     }
     return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
-      field: { ...this.field }, status: this.P ? 'EXACT IN THE PROPAGATOR\'S BASIS (Sturmian: VARIATIONAL eigenvalues, S-norm)' : this.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark)' : 'EXACT ANALYTIC' };
+      field: { ...this.field }, status: this.P ? 'STURMIAN BASIS' : this.field.Fz !== 0 ? 'STARK SHELL MODEL' : 'HYDROGEN' };
   }
   restore(obj) {
     this.clear();
@@ -441,50 +441,37 @@ export const T_BEAT_12 = 2 * Math.PI / (E(2) - E(1));   // 16.755… a.u. — th
 function gauss(nbar, sigma, ns) { return ns.map((n) => ({ n, w: Math.exp(-((n - nbar) ** 2) / (4 * sigma * sigma)) })); }
 
 export const PRESETS = [
-  { id: '1s', label: '1s', note: 'ground state · stationary density', status: 'EXACT ANALYTIC',
+  { id: '1s', label: '1s', note: 'ground state · stationary density', status: 'HYDROGEN',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.5, view: 'density' } },
-  { id: '2pz', label: '2p_z', note: 'stationary · one nodal plane', status: 'EXACT ANALYTIC',
+  { id: '2pz', label: '2p_z', note: 'stationary · one nodal plane', status: 'HYDROGEN',
     modes: [{ n: 2, l: 1, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'real' } },
-  { id: '1s+2s', label: '1s + 2s  beat', note: 'radial breathing · T = 2π/(E₂−E₁) = 16.755 a.u.', status: 'EXACT ANALYTIC',
+  { id: '1s+2s', label: '1s + 2s  beat', note: 'radial breathing · T = 2π/(E₂−E₁) = 16.755 a.u.', status: 'HYDROGEN',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 0, m: 0, amp: 1 }], visual: { rate: 4, window: T_BEAT_12, view: 'density' } },
-  { id: '1s+2pz', label: '1s + 2p_z  dipole', note: 'the dipole beat: density sloshes along z at T = 16.755 a.u.', status: 'EXACT ANALYTIC',
+  { id: '1s+2pz', label: '1s + 2p_z  dipole', note: 'the dipole beat: density sloshes along z at T = 16.755 a.u.', status: 'HYDROGEN',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 1, m: 0, amp: 1 }], visual: { rate: 4, window: T_BEAT_12, view: 'density' } },
-  { id: '2p+', label: '2p₊ = (2p_x + i·2p_y)/√2', note: 'circular current · stationary torus, the current lives in arg ψ = φ', status: 'EXACT ANALYTIC',
+  { id: '2p+', label: '2p₊ = (2p_x + i·2p_y)/√2', note: 'circular current · stationary torus, the current lives in arg ψ = φ', status: 'HYDROGEN',
     modes: [{ n: 2, l: 1, m: 1, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'phase' } },
-  { id: '2s+2pz', label: '2s + 2p_z  (Stark, degenerate)', note: 'same energy → no motion: the Stark state, a coherent state of the two rotors (ORBIT: Schmidt (1,0), e = ½, ⟨z⟩ = −3)', status: 'EXACT ANALYTIC',
+  { id: '2s+2pz', label: '2s + 2p_z  (Stark, degenerate)', note: 'same energy → no motion: the Stark state, a coherent state of the two rotors (ORBIT: Schmidt (1,0), e = ½, ⟨z⟩ = −3)', status: 'HYDROGEN',
     modes: [{ n: 2, l: 0, m: 0, amp: 1 }, { n: 2, l: 1, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'density' } },
-  { id: '2px', label: '2p_x = (Y₁⁻¹ − Y₁¹)/√2', note: 'one nodal plane x = 0 · VORTEX: two unimodular roots at φ = ±π/2 on every coaxial circle', status: 'EXACT ANALYTIC',
+  { id: '2px', label: '2p_x = (Y₁⁻¹ − Y₁¹)/√2', note: 'one nodal plane x = 0 · VORTEX: two unimodular roots at φ = ±π/2 on every coaxial circle', status: 'HYDROGEN',
     modes: [{ n: 2, l: 1, m: -1, amp: Math.SQRT1_2 }, { n: 2, l: 1, m: 1, amp: -Math.SQRT1_2 }], visual: { rate: 4, window: 2 * Math.PI / 0.125, view: 'real' } },
-  { id: 'recon', label: '3d₊₂ + 4p₊₁ + 5s  (reconnection)', note: 'three stretched modes: vortex lines reconnect at ten points, at two phases of the discriminant beat T_d = 481.27 a.u. (VORTEX census)', status: 'EXACT ANALYTIC',
+  { id: 'recon', label: '3d₊₂ + 4p₊₁ + 5s  (reconnection)', note: 'three stretched modes: vortex lines reconnect at ten points, at two phases of the discriminant beat T_d = 481.27 a.u. (VORTEX census)', status: 'HYDROGEN',
     modes: [{ n: 3, l: 2, m: 2, amp: 1 }, { n: 4, l: 1, m: 1, amp: 1 }, { n: 5, l: 0, m: 0, amp: 1 }], visual: { rate: 60, window: 2 * Math.PI / Math.abs(E(3) + E(5) - 2 * E(4)), view: 'phase' } },
-  { id: '3dz2', label: '3d_z²', note: 'stationary · two conical nodes', status: 'EXACT ANALYTIC',
+  { id: '3dz2', label: '3d_z²', note: 'stationary · two conical nodes', status: 'HYDROGEN',
     modes: [{ n: 3, l: 2, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / (1 / 18), view: 'real' } },
-  { id: 'rydberg', label: 'Rydberg packet n = 4…6', note: 'circular states |n,n−1,n−1⟩, Gaussian in n about n̄ = 5 · orbits in xy, T_cl = 2π n̄³ ≈ 785 a.u.', status: 'EXACT ANALYTIC',
+  { id: 'rydberg', label: 'Rydberg packet n = 4…6', note: 'circular states |n,n−1,n−1⟩, Gaussian in n about n̄ = 5 · orbits in xy, T_cl = 2π n̄³ ≈ 785 a.u.', status: 'HYDROGEN',
     modes: gauss(5, 1, [4, 5, 6]).map(({ n, w }) => ({ n, l: n - 1, m: n - 1, amp: w })),
     visual: { rate: 160, window: 2 * Math.PI * 125, view: 'density' } },
-  { id: 'shadow-pair', label: '1s + 2s + 3s  (shadow trio)', note: 'three uncoupled oscillators at ω = ½, ⅛, 1⁄18 — watch SHADOW', status: 'EXACT ANALYTIC',
+  { id: 'shadow-pair', label: '1s + 2s + 3s  (shadow trio)', note: 'three uncoupled oscillators at ω = ½, ⅛, 1⁄18 — watch SHADOW', status: 'HYDROGEN',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 0, m: 0, amp: 1 }, { n: 3, l: 0, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / (1 / 18 - 0) * 1, view: 'density' } },
 
-  /* ══ WAVE 106 · THE PRESET SUITE (Josh, and a collaboration with Gemini 3.8 at high effort) ═════
-     Josh: "Create a suite of presets (now you get a chance to mathematically shine and show me all
-     the realistic atoms, shapes, demonstrations and simulations and also perhaps personal debugging
-     presets so that when we finally return to QCD or Molecules or whatever, we flesh it out and have
-     the preset essentially be our 'reset button'."
-       Drafted by the second lab and then CHECKED HERE rather than taken on trust, twice:
-         · every mode is inside the register — 1 ≤ n ≤ 6, l < n, |m| ≤ l.  0 violations of 20 entries.
-         · every `window` was recomputed from its OWN modes in exact rational arithmetic: T = 2π
-           divided by the gcd of all pairwise |E_i − E_j| (one phase cycle 2π/|E_n| for a stationary
-           state), with E_n = −1/(2n²).  ALL TWENTY land on that recurrence exactly, so each of these
-           animations closes on itself instead of drifting.
-       The five groups are Josh's: realistic orbitals · shapes · demonstrations · simulations · and the
-       DEBUG set, whose notes say what a correct render should look like — those are the reset buttons,
-       and a note that names what you should see is what makes a preset a test. */
+
   /* Physics justification: Linear combination (Y₂² + Y₂⁻²)/√2 ∝ sin²θ cos(2φ) = (x²−y²)/r² forms the canonical real d_x²-y² orbital with four lobes lying directly along the x and y Cartesian axes. As a single-energy eigenstate (E₃ = −1/18 a.u.), its density is strictly stationary; the display window is set to one quantum phase cycle 2π/|E₃| = 36π ≈ 113.097 a.u. */
   {
     id: '3dx2y2',
     label: '3d_x²-y²',
     note: 'the textbook dx2-y2 orbital · 4 lobes on x and y axes · stationary · phase cycle T = 2π/|E₃| = 36π = 113.097 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 3, l: 2, m: -2, amp: Math.SQRT1_2 },
       { n: 3, l: 2, m: 2, amp: Math.SQRT1_2 }
@@ -496,7 +483,7 @@ export const PRESETS = [
     id: '3dxy',
     label: '3d_xy',
     note: 'cloverleaf orbital bisecting x and y axes · stationary · phase cycle T = 2π/|E₃| = 36π = 113.097 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 3, l: 2, m: -2, amp: Math.SQRT1_2, phase: Math.PI / 2 },
       { n: 3, l: 2, m: 2, amp: Math.SQRT1_2, phase: -Math.PI / 2 }
@@ -508,7 +495,7 @@ export const PRESETS = [
     id: '4fxyz',
     label: '4f_xyz',
     note: 'cubic octupole: 8 alternating lobes in the 8 octants · stationary · phase cycle T = 2π/|E₄| = 64π = 201.062 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 4, l: 3, m: -2, amp: Math.SQRT1_2, phase: Math.PI / 2 },
       { n: 4, l: 3, m: 2, amp: Math.SQRT1_2, phase: -Math.PI / 2 }
@@ -520,7 +507,7 @@ export const PRESETS = [
     id: '2sp3',
     label: '2sp³  tetrahedral',
     note: 'directed tetrahedral hybrid along (1,1,1) · n=2 Coulomb degeneracy freezes density (|A(t)| = 1) · phase cycle T = 16π = 50.265 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 2, l: 0, m: 0, amp: 0.5 },
       { n: 2, l: 1, m: 0, amp: 0.5 },
@@ -534,7 +521,7 @@ export const PRESETS = [
     id: '6h-circ',
     label: '6h₅  circular torus',
     note: 'maximum angular momentum in n≤6: razor-thin equatorial torus with winding number m = +5 vortex in arg ψ',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [{ n: 6, l: 5, m: 5, amp: 1 }],
     visual: { rate: 8, window: 144 * Math.PI, view: 'phase' }
   },
@@ -543,7 +530,7 @@ export const PRESETS = [
     id: '6s-onion',
     label: '6s  nested shells',
     note: 'pure radial nodal structure: five concentric spherical nodal shells (n−l−1 = 5) out to r ≈ 80 a.u. · stationary',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [{ n: 6, l: 0, m: 0, amp: 1 }],
     visual: { rate: 4, window: 144 * Math.PI, view: 'real' }
   },
@@ -552,7 +539,7 @@ export const PRESETS = [
     id: '4f-hex',
     label: '4f_x(x²-3y²)',
     note: 'hexagonal 6-petaled planar rosette with D₃ₕ symmetry · 3 vertical nodal planes slicing through z · stationary',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 4, l: 3, m: -3, amp: Math.SQRT1_2 },
       { n: 4, l: 3, m: 3, amp: -Math.SQRT1_2 }
@@ -564,7 +551,7 @@ export const PRESETS = [
     id: '3s-3dz2',
     label: '3s − 3d_z²  toroidal node',
     note: 'Coulomb l-interference: polar lobes cancel while equatorial ring reinforces, pinching a closed toroidal nodal bubble',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 3, l: 0, m: 0, amp: Math.SQRT1_2 },
       { n: 3, l: 2, m: 0, amp: -Math.SQRT1_2 }
@@ -576,7 +563,7 @@ export const PRESETS = [
     id: 'demo-degen',
     label: '3s + 3p_z + 3d_z²  degeneracy',
     note: 'degeneracy means no motion: 3s + 3p_z + 3d_z² shares E = −1/18 a.u. · strongly polar density is frozen (|A(t)| = 1)',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 3, l: 0, m: 0, amp: 1 },
       { n: 3, l: 1, m: 0, amp: 1 },
@@ -589,7 +576,7 @@ export const PRESETS = [
     id: 'demo-rabi',
     label: '2p_z + 3d_z²  Balmer-α beat',
     note: 'the microscopic Balmer-α radiator: density sloshes at T = 2π/(E₃−E₂) = 144π/5 = 90.478 a.u. (1.89 eV, 656.3 nm photon)',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 2, l: 1, m: 0, amp: 1 },
       { n: 3, l: 2, m: 0, amp: 1 }
@@ -601,7 +588,7 @@ export const PRESETS = [
     id: 'demo-current',
     label: '3d₊₂  circulating current',
     note: 'angular momentum as current: arg ψ = 2φ winds twice around z · probability current j = 2|ψ|²/(r sin θ) φ̂',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [{ n: 3, l: 2, m: 2, amp: 1 }],
     visual: { rate: 6, window: 36 * Math.PI, view: 'phase' }
   },
@@ -610,7 +597,7 @@ export const PRESETS = [
     id: 'demo-revival',
     label: '2p_z + 3p_z + 6p_z  packet revival',
     note: 'rational packet revival at T_rev = 2π/(1/72) = 144π = 452.389 a.u. · fractional revivals at T/8 (56.5 a.u.), T/5 (90.5 a.u.), T/3 (150.8 a.u.)',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 2, l: 1, m: 0, amp: 1 },
       { n: 3, l: 1, m: 0, amp: 1 },
@@ -623,7 +610,7 @@ export const PRESETS = [
     id: 'demo-corresp',
     label: '5g₄ + 6h₅  Bohr correspondence',
     note: 'circular wavepacket revolving at T = 2π/(11/1800) = 3600π/11 = 1028.157 a.u. · matches classical Kepler orbit T_cl = 2π·n̄³ = 1045.36 a.u. to 1.6%',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 5, l: 4, m: 4, amp: 1 },
       { n: 6, l: 5, m: 5, amp: 1 }
@@ -635,7 +622,7 @@ export const PRESETS = [
     id: 'sim-ladder',
     label: '1s + 2p_z + 3s + 4p_z  dipole cascade',
     note: 'four-shell dipole ladder: multi-harmonic slosh disperses into fine interferogram and collapses at grand period T = 576π = 1809.557 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 1, l: 0, m: 0, amp: 1 },
       { n: 2, l: 1, m: 0, amp: 1 },
@@ -649,7 +636,7 @@ export const PRESETS = [
     id: 'sim-churn',
     label: '3d₊₂ + 4d₊₂ + 6d₊₂  quadrupole churn',
     note: 'three-mode m=2 vortex: radial breathing and shear across shells with exact rational recurrence at T = 576π = 1809.557 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 3, l: 2, m: 2, amp: 1 },
       { n: 4, l: 2, m: 2, amp: 1 },
@@ -662,7 +649,7 @@ export const PRESETS = [
     id: 'sim-kepler',
     label: '4f₊₃ + 5f₊₂ + 5g₊₄  eccentric orbit',
     note: 'azimuthally asymmetric Keplerian clump revolving and breathing with exact closed recurrence at T = 2π/(9/800) = 1600π/9 = 558.505 a.u.',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 4, l: 3, m: 3, amp: 1 },
       { n: 5, l: 3, m: 2, amp: 1 },
@@ -675,7 +662,7 @@ export const PRESETS = [
     id: 'debug-stat',
     label: '4f₀  [TEST: density invariance]',
     note: 'WHAT AN OBSERVER SHOULD SEE: volume in density view is 100% frozen for all t; phase and real view rotate at T = 64π = 201.062 a.u. · any density motion is a bug',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [{ n: 4, l: 3, m: 0, amp: 1 }],
     visual: { rate: 10, window: 64 * Math.PI, view: 'density' }
   },
@@ -684,7 +671,7 @@ export const PRESETS = [
     id: 'debug-clock',
     label: '2s + 4s  [TEST: clock & stopwatch]',
     note: 'beat period T = 2π/(E₄−E₂) = 64π/3 = 67.021 a.u. · at rate 6.702064 a.u./s, 1 beat cycle = exactly 10.000 wall seconds · WHAT AN OBSERVER SHOULD SEE: stopwatch reads 10.00 s peak to peak',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 2, l: 0, m: 0, amp: 1 },
       { n: 4, l: 0, m: 0, amp: 1 }
@@ -696,7 +683,7 @@ export const PRESETS = [
     id: 'debug-nodes',
     label: '5d₀  [TEST: node count]',
     note: 'WHAT AN OBSERVER SHOULD SEE: in real view, exactly 2 radial spherical nodes and 2 angular conical nodes partition space into 3×3 = 9 sign-alternating cells; nodes must never drift',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [{ n: 5, l: 2, m: 0, amp: 1 }],
     visual: { rate: 4, window: 100 * Math.PI, view: 'real' }
   },
@@ -705,7 +692,7 @@ export const PRESETS = [
     id: 'debug-bisect',
     label: '1s + 3s  [TEST: bisection baseline]',
     note: 'purely isotropic radial beat at T = 9π/2 = 14.137 a.u. · WHAT AN OBSERVER SHOULD SEE: perfect spherical symmetry at all times; any angular variation isolates a renderer bug',
-    status: 'EXACT ANALYTIC',
+    status: 'HYDROGEN',
     modes: [
       { n: 1, l: 0, m: 0, amp: 1 },
       { n: 3, l: 0, m: 0, amp: 1 }

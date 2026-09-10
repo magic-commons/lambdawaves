@@ -1,34 +1,15 @@
-/* pulseview.js — the PULSE segment of the MOLECULE card (W-PULSE, board #24, ledger §2.6 C1).
- *
- * lab/modrive.js is Astra's field-driven H₂⁺ and lab/pulse.js is the run over it; nothing here re-derives either.
- * This is the face: four pulse parameters, a FIRE, and the three numbers the contract asks to be shown WHILE it
- * runs — the population that left the ground state, ⟨z⟩, and the absorbed energy — over a trace of all three.
- *
- * THE CLOCK IS THE LAB'S, and there is not a third one.  FIRE remembers the lab's logical time t₀; from then on the
- * drive's own time is t_lab − t₀, in the same atomic units, stepped in whole Δt until it catches the clock.  So
- * RATE decides how fast you WATCH the pulse and Δt decides how accurately it is SOLVED, and the two cannot be
- * confused: at the shipped rate of 4 a.u./s the default 96 a.u. run takes 24 seconds of wall.  Pausing stops it
- * where it is; scrubbing FORWARD runs it on; scrubbing BACK cannot un-integrate a driven state, so the run HOLDS
- * and says so rather than pretending (RESET re-arms it at the clock's new position).  A frame gets a 6 ms budget
- * and no more, and the readout says when the drive is behind the clock instead of eating the frame to catch up.
- *
- * THE FIELD SIGN IS kick.js'S — V = +E z for a charge of −1, so E > 0 pushes the electron toward −z, which is the
- * impulsive Stark limit kick.js already ships (Δp = −∫E dt).  Judged in tests/pulse.test.mjs P2.
- *
- * STATUS, in one line and also on the card: NUMERICAL propagation (exponential midpoint, second order in Δt,
- * S-unitary to 1e-13, no renormalisation) of a VARIATIONAL two-centre model with EXACT integrals — EXACT within
- * the basis at a constant field; the length of the free-evolution tail is a DESIGN CHOICE.
- */
+
+
 import { createMO } from './mo.js';
 import { createPulseRun, rabiRWA } from './pulse.js';
 import { el, seg, knob, trig, readout, group, nRGB, themeInk, graphHover, fitText } from './kit.js';
 
 const KINDS = {
-  lcao1s: { label: '1s LCAO', nMax: 1, n: 2, title: 'one 1s on each proton — two functions, one g and one u, and the pulse drives exactly the g → u transition Astra\'s reference trace was built on' },
-  sturmian: { label: 'STURMIAN n ≤ 3', nMax: 3, n: 12, title: 'the Coulomb Sturmians n ≤ 3 at λ = 1.7611 on both nuclei — twelve σ functions, whose g and u blocks the field couples at every step, so the drive solves the FULL matrix and not a parity block' },
+  lcao1s: { label: '1s LCAO', nMax: 1, n: 2, title: 'Two 1s functions: one bonding and one antibonding state' },
+  sturmian: { label: 'STURMIAN n ≤ 3', nMax: 3, n: 12, title: 'Twelve Sturmian σ functions with field-coupled parity blocks' },
 };
 const BUDGET_MS = 6;                    // a frame's share of the drive, and the readout says when it is not enough
-const LABEL = 'NUMERICAL propagation (exponential midpoint, 2nd order in Δt, S-unitary, nothing renormalised) of a VARIATIONAL model with EXACT integrals — EXACT in the basis at constant field. The tail is a DESIGN CHOICE.';
+const LABEL = 'Finite-basis propagation · exponential midpoint · fixed nuclei · no ionisation continuum';
 
 export function createPulse(host, api = {}) {
   let kind = 'lcao1s', lambda = 1.7611, R = 2, dt = 0.05;
@@ -37,38 +18,38 @@ export function createPulse(host, api = {}) {
   const cache = new Map();
   const basis = () => { const key = kind + ':' + lambda; if (!cache.has(key)) cache.set(key, createMO({ kind, nMax: KINDS[kind].nMax, lambda })); return cache.get(key); };
 
-  const box = group(host, 'PULSE  ·  i S ċ = (H₀ + E_z(t) Z) c  ·  LENGTH GAUGE, FIXED NUCLEI');
+  const box = group(host, 'PULSE');
   const rA = el('div', 'row tight', box);
   const kindSeg = seg({ label: 'BASIS', value: 'lcao1s', options: Object.keys(KINDS).map((k) => ({ id: k, label: KINDS[k].label, title: KINDS[k].title })),
     onChange: (v) => { kind = v; reset(); refresh(); } });
   rA.appendChild(kindSeg.root);
   const rKnob = knob({ label: 'R  (a₀)', min: 0.8, max: 6, value: 2, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; reset(); refresh(); } });
-  rKnob.root.title = 'the nuclei are FIXED at this separation for the whole pulse — R = 2 is the reference trace\'s own';
+  rKnob.root.title = 'Fixed nuclear separation during the pulse';
   rA.appendChild(rKnob.root);
   const dtSeg = seg({ label: 'Δt  (a.u.)', value: '0.05', options: [{ id: '0.2', label: '0.2' }, { id: '0.1', label: '0.1' }, { id: '0.05', label: '0.05' }, { id: '0.025', label: '0.025' }],
     onChange: (v) => { dt = +v; reset(); refresh(); } });
-  dtSeg.root.title = 'the timestep the equation is SOLVED at — not the speed it is watched at, which is RATE. The scheme is second order: halving this quarters the error (9.27e-5 · 2.32e-5 · 5.80e-6 against the reference at 0.2 · 0.1 · 0.05)';
+  dtSeg.root.title = 'Set the integration step';
   rA.appendChild(dtSeg.root);
 
   const rB = el('div', 'row', box);
   const ampK = knob({ label: 'AMPLITUDE', min: 0, max: 0.2, value: 0.02, step: 0.001, fmt: (v) => v.toFixed(3) + ' Eh/a₀', onInput: (v) => { amplitude = v; reset(); refresh(); } });
-  ampK.root.title = 'the peak electric field E₀ in atomic units. 0.02 is the reference pulse: weak, a Rabi angle of 0.30 rad';
+  ampK.root.title = 'Peak electric field E₀ in atomic units';
   rB.appendChild(ampK.root);
   const omK = knob({ label: 'ω', min: 0.05, max: 2, value: 0.3929175, log: true, fmt: (v) => v.toFixed(4) + ' Eh', onInput: (v) => { omega = v; reset(); refresh(); } });
-  omK.root.title = 'the carrier frequency. RESONANT sets it to the field-free gap E₁ − E₀ at this R and basis';
+  omK.root.title = 'Carrier frequency. RESONANT sets the field-free energy gap.';
   rB.appendChild(omK.root);
   const durK = knob({ label: 'DURATION', min: 6, max: 200, value: 48, log: true, fmt: (v) => v.toFixed(0) + ' a.u.', onInput: (v) => { duration = v; reset(); refresh(); } });
-  durK.root.title = 'the sin² envelope\'s full width. The run is this long, then an equal tail of FREE evolution, so the default ends at t = 96';
+  durK.root.title = 'Set pulse width';
   rB.appendChild(durK.root);
   const phK = knob({ label: 'PHASE', min: -Math.PI, max: Math.PI, value: 0, fmt: (v) => (v / Math.PI).toFixed(2) + 'π', onInput: (v) => { phase = v; reset(); refresh(); } });
-  phK.root.title = 'the carrier–envelope phase φ in cos(ωu + φ). It is a real physical parameter of a short pulse, not a cosmetic offset';
+  phK.root.title = 'Carrier-envelope phase φ in cos(ωu + φ)';
   rB.appendChild(phK.root);
 
   const rC = el('div', 'row tight', box);
-  rC.appendChild(trig({ label: 'FIRE', title: 'arm the drive at the lab clock\'s current time and let the pulse run with it — the drive\'s t is t_lab − t₀ in the same atomic units', onFire: () => fire() }).root);
-  rC.appendChild(trig({ label: 'HOLD', title: 'stop advancing; the state stays exactly where the drive left it', onFire: () => { held = true; refresh(); } }).root);
-  rC.appendChild(trig({ label: 'RESET', title: 'throw the run away and go back to the field-free ground state at this R', onFire: () => { reset(); refresh(); } }).root);
-  rC.appendChild(trig({ label: 'RESONANT', title: 'set ω to the field-free gap E₁ − E₀ at this R and basis — 0.3929 at the 1s LCAO, R = 2', onFire: () => { omega = gap(); omK.set(omega); reset(); refresh(); } }).root);
+  rC.appendChild(trig({ label: 'FIRE', title: 'Start the pulse at the current lab time', onFire: () => fire() }).root);
+  rC.appendChild(trig({ label: 'HOLD', title: 'Stop the current run', onFire: () => { held = true; refresh(); } }).root);
+  rC.appendChild(trig({ label: 'RESET', title: 'Reset to the field-free ground state', onFire: () => { reset(); refresh(); } }).root);
+  rC.appendChild(trig({ label: 'RESONANT', title: 'Set ω to the field-free energy gap', onFire: () => { omega = gap(); omK.set(omega); reset(); refresh(); } }).root);
 
   const cv = el('canvas', 'mol-c', box);
   const g = cv.getContext('2d');
@@ -82,7 +63,7 @@ export function createPulse(host, api = {}) {
   rr.appendChild(roP.root); rr.appendChild(roZ.root); rr.appendChild(roE.root);
   const lab = el('div', 'sturm-note', box);                 // the LABEL line: its own class, so the ⓘ sweep cannot fold the one sentence that says what this is
   lab.textContent = LABEL;
-  el('div', 'note', box).innerHTML = '<b>The molecule in a laser pulse.</b> A sin² envelope on a cosine carrier, E(t) = E₀sin²(πu/D)cos(ωu + φ), enters the Hamiltonian in the <b>length gauge</b> as H₀ + E(t)z — the electron\'s charge is −1, so a positive field pushes it toward −z, which is exactly <b>kick.js</b>\'s own impulsive Stark limit (Δp = −∫E dt). The propagator is the <b>exponential midpoint</b>: the full generalised eigenproblem is re-solved at every distinct field value, including the g/u coupling the field creates, and the state is carried forward with no renormalisation anywhere — <b>c†Sc is conserved by the equation itself</b> and is reported, not repaired. <b>It is second order in Δt and that is the claim that matters</b>: against an independent DOP853 integration the worst amplitude error is 9.27e-5, 2.32e-5 and 5.80e-6 at Δt = 0.2, 0.1 and 0.05 — <b>halving Δt quarters it</b>, twice, and a scheme that ran without that would be moving rather than working. The <b>absorbed energy</b> is shown against its own work integral ∫Ė⟨z⟩dt, which the identity d⟨H₀⟩/dt = −E d⟨z⟩/dt makes exact: the two are computed on the same trace by different routes, so their difference measures the scheme (5.4e-7 at Δt = 0.05, and second order down to 8.4e-9 at 0.00625). Numbers to land on, at R = 2 with the shipped pulse: <b>0.0852227 out of the ground state and ⟨z⟩ = −0.0170653 at t = 96</b>, an absorbed 3.3487e-2 hartree, and an S-norm that has not moved by 1e-12. The <b>Sturmian n ≤ 3</b> basis runs the same pulse in twelve functions and stays S-unitary to 2e-10. Everything here is <b>fixed nuclei, one electron, no ionisation and no continuum</b>: population that would leave the molecule has nowhere to go but the highest function in the basis, and the basis is the approximation.';
+  el('div', 'note', box).innerHTML = '<b>Laser pulse.</b> A sin² electric-field envelope drives H₂⁺ in the length gauge. The midpoint propagator updates the selected finite basis at each step; NORM DRIFT and WORK BALANCE show integration error. The model uses fixed nuclei and has no ionisation continuum.';
 
   /* ── the run ────────────────────────────────────────────────────────────────────────────────────────────────── */
   function gap() { const sol = basis().solve(R); return sol.E[1] - sol.E[0]; }
@@ -116,18 +97,18 @@ export function createPulse(host, api = {}) {
   function refresh() {
     if (!run) {
       const y = KINDS[kind].n === 2 ? rabiRWA(basis(), R, pulseObj()) : null;
-      roP.set('—', ''); roP.setSub(`armed: ${KINDS[kind].label}, ${basis().n} functions at R = ${R.toFixed(2)} · gap E₁ − E₀ = ${gap().toFixed(6)} Eh${y ? ` · RWA area ${y.area.toFixed(4)} rad predicts ${y.population.toFixed(6)}` : ''}`);
-      roZ.set('—', ''); roZ.setSub('press FIRE: the pulse runs on the lab clock from that moment');
-      roE.set('—', ''); roE.setSub(`E₀ ${amplitude.toFixed(3)} · ω ${omega.toFixed(4)} · D ${duration.toFixed(0)} · φ ${(phase / Math.PI).toFixed(2)}π · Δt ${dt} → ${Math.round(duration * 2 / dt)} steps over ${(duration * 2).toFixed(0)} a.u.`);
+      roP.set('—', ''); roP.setSub(`Ready · ${KINDS[kind].label} · ${basis().n} functions · gap ${gap().toFixed(6)} Eh${y ? ` · RWA ${y.population.toFixed(6)}` : ''}`);
+      roZ.set('—', ''); roZ.setSub('Press FIRE to start at the current lab time');
+      roE.set('—', ''); roE.setSub(`E₀ ${amplitude.toFixed(3)} · ω ${omega.toFixed(4)} · D ${duration.toFixed(0)} · φ ${(phase / Math.PI).toFixed(2)}π · Δt ${dt}`);
       paint(); return;
     }
     const s = run.read();
     roP.set(s.popOut.toFixed(7), s.done ? 'ok' : 'live');
-    roP.setSub(`t = ${s.t.toFixed(2)} / ${s.total.toFixed(0)} a.u. · step ${s.steps} of ${s.N} at Δt = ${dt} · ground ${s.popGround.toFixed(7)}${rewound ? ' · HELD: the clock went back and a driven state cannot be un-integrated — RESET to re-arm' : behind > 1e-6 ? ` · ${behind.toFixed(2)} a.u. behind the clock (${lastMs.toFixed(1)} ms of budget spent)` : ''}`);
+    roP.setSub(`t ${s.t.toFixed(2)} / ${s.total.toFixed(0)} · step ${s.steps}/${s.N} · ground ${s.popGround.toFixed(7)}${rewound ? ' · RESET required after rewind' : behind > 1e-6 ? ` · ${behind.toFixed(2)} a.u. behind` : ''}`);
     roZ.set(s.z.toFixed(7), Math.abs(s.z) > 1e-9 ? 'ok' : '');
-    roZ.setSub(`electron dipole ${s.electronDipole.toFixed(6)} · E(t) = ${s.field.toFixed(6)} · S-norm ${s.norm.toFixed(12)} (drift ${s.normDrift.toExponential(2)}, nothing renormalised)`);
+    roZ.setSub(`dipole ${s.electronDipole.toFixed(6)} · field ${s.field.toFixed(6)} · S norm ${s.norm.toFixed(12)} · drift ${s.normDrift.toExponential(2)}`);
     roE.set(s.absorbed.toExponential(6), Math.abs(s.balance) < 1e-5 ? 'ok' : 'warn');
-    roE.setSub(`= ∫Ė⟨z⟩dt ${s.work.toExponential(6)} to ${s.balance.toExponential(2)} — the same trace by two routes, so the gap is the SCHEME (second order in Δt) · instantaneous total ${s.instantaneousTotal.toFixed(8)} Eh`);
+    roE.setSub(`work ${s.work.toExponential(6)} · difference ${s.balance.toExponential(2)} · total ${s.instantaneousTotal.toFixed(8)} Eh`);
     paint();
   }
 

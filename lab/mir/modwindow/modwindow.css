@@ -1,42 +1,4 @@
-/* ══════════════════════════════════════════════════════════════════════════
-   mir/modwindow/modwindow.css — THE MODULATION WINDOW, PORTABLE.
 
-   This is not a design.  It is BASINS' modulation window, copied.  Josh spent
-   three to four weeks on its dimensions, material, chips, booleans and layout,
-   and three separate ports threw the window away and re-implemented its
-   FUNCTIONS in the host's idiom.  This file exists so that never happens again.
-
-   PROVENANCE BASELINE:
-     PART A  the chrome the window sits in — 42 rules out of index.html,
-             via EXTRACT-MODWINDOW.md files 02 (WindowKit) and 04 (material).
-     PART B  the window's own sheet — anim.js:1782–3306, originally imported
-             as 664 rules.  Shipping revisions are called out where they occur;
-             the macro rail rules intentionally follow the revised builder.
-
-   PART A COMES FIRST ON PURPOSE.  In the running app the chrome lives in
-   index.html and the window's own sheet is appended to <head> at first open,
-   so file 01 wins every tie inside the portable sheet.  Several rules depend
-   on that — notably
-   `#modwin .m2edit { background: transparent }` beating
-   `.m2edit { background: var(--m2-recess) }` in the SAME sheet, and
-   `#modwin.modwin { overflow: visible; contain: layout }` undoing `.kwin`'s
-   `overflow: hidden; contain: layout paint` so the work bars can paint beyond
-   the window.  Keep this internal order.  The host sheet loads afterwards and
-   uses explicit high-specificity overrides for documented λWAVES integration.
-
-   ONE NAMESPACE CLASS: `mir-modwindow`, on the window root.  Nothing else
-   needs it.  See MANIFEST.md for the six-branch scoping law and every
-   deviation from source, and host-contract.md for what a host must supply.
-
-   WHAT THIS FILE DOES **NOT** CARRY, deliberately:
-     · the 117 `:root.skin-frost` constellation rules — without .skin-frost the
-       classic connected form paints, and it is correct and complete;
-     · .kwin-halo / .kwin-grip / .kwin-edge — this window is resizable:false
-       and never builds them;
-     · the host's own design tokens.  It reads about forty of them and declares
-       none but its own twenty --m2-mat-*.  host-contract.md lists the lot with
-       BASINS' shipping values.
-   ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
    PART A — THE CHROME.  42 rules, each labelled with the index.html line it
@@ -99,36 +61,8 @@
   overflow: hidden;
   border-radius: var(--r-lg);
   box-shadow: var(--glass-shadow), var(--glass-bevel);
-  /* ⟡ W-ANDROIDGLASS — TWO BELTS, AND WHY A WINDOW NOW WEARS BOTH.
-     THE REPORT (Josh, on the Pixel): "all the windows inner layout are over
-     other windows".  The first suspect was the z ladder — that Blink builds
-     the window's own paint order differently.  MEASURED ON THE RIG AND IT IS
-     NOT THAT: with all three windows open, every root already forms its own
-     stacking context THREE ways over — `position: fixed`, `z-index: 12..19`,
-     and `contain: layout` — and stripping the z-index outright still left two.
-     Nothing inside a window can out-stack another window by that route.
-     WHAT IS ACTUALLY LOAD-BEARING IS THE CLIP, and only one line was holding
-     it.  Fifty-five descendants deliberately overhang their own window's box
-     (the 44 px close target's negative margins are the biggest of them); the
-     same probe run with `overflow: hidden` taken away found one of them
-     painted AND hit-testable four pixels outside the window — a control from
-     one window, sitting over the window beside it.  On a 448 px phone every
-     window is the width of the screen, so "beside it" is always another
-     window.  That is the shape of what Josh is looking at.
-       `contain: paint` says "no descendant paints outside this box" at a level
-     a compositor does not get to re-decide per layer, which is where the
-     engine-specific bugs in this family live.  `isolation: isolate` states the
-     stacking half outright instead of leaving it inferred from three
-     properties that are each there for another reason — and it makes the
-     window its own BACKDROP ROOT, so a frosted surface inside a window can
-     never sample, or spill, past its edge.
-       COST ON GECKO: none, and that is measured rather than assumed.  One
-     session, three windows open, transport paused, screenshotted without /
-     with / without these two lines: sha 681d81d4e1568e22 all three times, byte
-     for byte — glass, outer shadow and every rect unchanged.  Repeated with
-     the Julia window and its live WebGPU canvas up: 7a4282c194f14354 x3.
-     (`contain: paint` clips DESCENDANTS, not this element's own box
-     decorations, which is why the outer shadow is still there.) */
+
+
   contain: layout paint;
   isolation: isolate;
 }

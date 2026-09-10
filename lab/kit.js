@@ -45,46 +45,10 @@
  */
 import { setGlyph } from './mir/glyph.js';
 
-/* ── WAVE 55 · A DRAWN CHIP WHERE A DRAWN CHIP EXISTS ───────────────────────────────────────────
- * The header's marks were literal characters — '×', '▾' — which is a request to whichever font the
- * device resolves, and the three devices this lab ships to answer it differently (iOS substitutes a
- * COLOUR emoji for several of them; the advance width is the font's business, not the layout's).
- * Josh's own drawings answer all of them: lab/mir/glyph.js is his glyph library, vendored.  `chip()`
- * is the one call site — it sets the drawing, the `data-gly` name a gate can read, and the accessible
- * name in ONE place, because a button whose only content is an aria-hidden drawing has no name.
- * SIZING IS OURS AND LIVES IN lab.css: presentation attributes are the lowest-priority source, so the
- * stylesheet wins over the module's 20-px default without the module having to know we exist. */
+
 export const chip = (btn, name, label) => setGlyph(btn, name, { label });
 
-/* ── WAVE 69 · THE MATH FACE, AND THE ONE MARKER THAT PUTS IT ON ────────────────────────────────
- * `lab/fonts/STIXTwoMath-subset.woff2` has shipped since wave 59 and rescued exactly one glyph: the
- * title's λ.  This is where it starts doing the job it was cut for.  The rule Josh set is MATHEMATICS
- * ONLY, NEVER CHROME — an English word stays in the UI face — so the face cannot be applied by
- * selector (a seg label is chrome in one window and an operator in the next) and it must not be
- * applied by a tokenizer either: `Re ψ` is mathematics and `SLICE / CLIP` is furniture, and no regex
- * over the characters can tell them apart.  So it is DECLARED, one marker, in the string itself:
- *
- *     seg({ options: [{ id: 'density', label: '<m>ρ = |ψ|²</m>' }] })
- *     el('div', 'note', g).innerHTML = 'the boosted state <m>e^{ik·x}ψ</m>, its fringes tightening'
- *
- * `<m>` is an unknown element, so an innerHTML note gets it for free from ONE CSS rule and needs no
- * code at all; every plain-text call site goes through `mathText()` below, which SPLITS the string
- * and builds text nodes and elements — never innerHTML, so the marker opens no road a string could
- * be injected down.  `mathPlain()` strips it for the places a string has to stay a string (a `title`,
- * an `aria-label`), which is why the same source line can feed both.
- *
- * THE GLYPH LIST IS A CONTRACT AND IT IS NOW GATED.  `fonts/STIXTwoMath-SOURCE.txt` has always said
- * that a glyph outside the subset falls back SILENTLY to a serif and looks almost right — the worst
- * kind of wrong.  `tests/pwa.test.mjs §G` reads the subset's own cmap out of the WOFF2 and fails on
- * any character this tree puts inside `<m>` that the face does not carry, so the sentence is now a
- * red gate instead of a warning nobody can run.  Extend the list, re-subset, state the byte cost.
- *
- * DIGITS.  A wobbling digit column would be a regression no amount of nice ψ makes up for, so the
- * ten figures were MEASURED in the shipped subset before any of this: all ten are 495/1000 em, a
- * genuinely tabular set, and B163 re-measures them in the browser.  A formula therefore keeps its own
- * numbers — `2π`, `−1/2n²` — and reads as one expression.  What does NOT move is `--font-num`: every
- * value field, knob readout and clock in the lab is still Roboto with `tabular-nums`, because those
- * are COLUMNS and a column has nothing to gain from a serif. */
+
 const M_RUN = /<m>([\s\S]*?)<\/m>/g;
 /** true if `s` carries at least one marked run — one indexOf, so every call site can ask cheaply */
 export const hasMath = (s) => typeof s === 'string' && s.indexOf('<m>') >= 0;
@@ -289,11 +253,8 @@ export function knob(o) {
 export function sw(o) {
   const b = el('button', 'sw' + (o.cls ? ' ' + o.cls : ''));
   b.type = 'button';
-  /* WAVE 69 · `o.title` WAS IGNORED, and had been since sw() was written.  Fifteen call sites pass one
-     — several of them the longest explanations in the lab (DISCONNECTED's is 340 characters of Josh's
-     own words about the look) — and not one of them has ever appeared under a pointer.  Wave 53 found
-     it and correctly left it to a polish wave.  `mathPlain` because a title is a STRING: a marker that
-     reached an attribute would print as literal `<m>`. */
+
+
   if (o.title) b.title = mathPlain(o.title);
   el('i', 'sw-led', b); el('span', 'sw-lbl', b, o.label);
   let v = !!o.value;
@@ -448,29 +409,7 @@ export function readout(o) {
   return { root, set(t, cls) { if (wasV !== t) { wasV = t; mathText(val, t); } if (cls !== undefined) val.className = 'ro-val ' + cls; }, setSub(t) { let s = root.querySelector('.ro-sub'); if (!s) { s = el('div', 'ro-sub', root); wasS = null; } const next = t === undefined || t === null ? '' : String(t).trim(); if (wasS !== next) { wasS = next; mathText(s, next); } } };
 }
 
-/* ── WAVE 69 · formula() — A CLOSED FORM WITH LIVE SLOTS, AND WHY IT IS HONEST HERE ─────────────
- * Josh: *"I was inspired by 'Brilliant' app's visually dynamic displays of mathematics and
- * 3Blue1Brown's video and interactives that I must mimic that style of showing math numbers moving
- * dynamically."*  The straight mimicry would be a TWEEN — a number eased from one value to another
- * because the motion teaches.  This lab can do something better and it costs less: the register's
- * law is `c(t) = e^{−iEt}c(0)`, so a number sliding across a formula here can be **the true value at
- * every intermediate frame**.  Nothing is interpolated, nothing is illustrative, and the substitution
- * a knob drives is exact at every pixel of the drag.  That is the whole argument for building it.
- *
- * THE PARTS ARE AN ARRAY, NOT A TEMPLATE, and that is deliberate: the mathematics itself is full of
- * braces (`gcd{|ΔE|}`), so any `{slot}` syntax would need escaping in the one language it is meant
- * to carry.  A line is `['T = 2π/gcd{|ΔE|} = ', { s: 'T' }, ' a.u.']` and there is nothing to parse.
- *
- * THE TWO FACES ARE THE POINT, not a compromise.  The expression is the math face; a SLOT is
- * `--font-num` with tabular figures, because a slot is where the digits are and STYLE-LOCK's rule is
- * that a numeral column does not dance.  It also does the job a highlight would: the eye lands on
- * the substituted values because they are a different colour and a different face, with no motion at
- * all — which is what MOTION-LAW gate 3 wants, since a term pulsing five times a second next to the
- * live field is decorative motion in the signal register.  The number's own change IS the motion.
- *
- * NOTHING ANNOUNCES.  There is no `aria-live` here and there must never be one (wave 62's ceiling):
- * a screen reader reads this on demand like any other text, and a formula whose slots move at 5 Hz
- * behind a live region would be a hundred utterances a minute. */
+
 export function formula(o) {
   const root = el('div', 'fx' + (o.cls ? ' ' + o.cls : ''));
   const slots = new Map();
@@ -498,12 +437,12 @@ export function formula(o) {
 /** device({ id, eyebrow, title, status }) — a rack window: identity | live status | utilities */
 export function device(o) {
   const root = el('section', 'dev'); root.dataset.id = o.id;
-  const head = el('header', 'dev-head', root);   // the long title is a hover hint; the eyebrow is the name
+  const head = el('header', 'dev-head', root);
   /* THE STATUS IS NOT ALWAYS VISIBLE (wave 44).  The header is one grid row — eyebrow, status, buttons — and on a
      274 px card a long eyebrow beside six utility buttons leaves the status NO width at all: ELECTROSTATICS'
      'hydrogen only: no closed-form field for the scaled radials' measured 0 px wide, so the reason the overlay had
      stood down was on the card and unreadable.  The header's hover hint carries it now, whatever the width. */
-  const headHint = (st) => { head.title = mathPlain(st ? (o.title || '') + '  ·  ' + st : (o.title || '')); };
+  const headHint = (st) => { const name = mathPlain(o.eyebrow || o.id || 'window'); head.title = st ? name + ': ' + mathPlain(st) : name; };
   headHint(o.status || '');
   const idz = el('div', 'dev-id', head);
   el('div', 'dev-eyebrow', idz, o.eyebrow || '');
@@ -512,14 +451,14 @@ export function device(o) {
      screen-reader user navigates this rack BY REGION rather than by four hundred Tab presses.  This is
      the real answer to "hundreds of tab stops" for the population that has region navigation; the two
      skip links in index.html are the answer for the population that does not. */
-  const h2 = el('h2', 'dev-title', idz, o.title);
+  const h2 = el('h2', 'dev-title', idz, o.eyebrow || o.id || 'window');
   h2.id = 'devt-' + o.id;
   root.setAttribute('aria-labelledby', h2.id);
   const stat = el('div', 'dev-stat', head, o.status || '');
   const util = el('div', 'dev-util', head);
-  const power = el('button', 'dev-power', util, ''); power.type = 'button'; power.title = 'switch this device off — its reader stops computing (saves CPU); on again restores it'; power.setAttribute('aria-pressed', 'true');
+  const power = el('button', 'dev-power', util, ''); power.type = 'button'; power.title = 'Turn this window on or off'; power.setAttribute('aria-pressed', 'true');
   power.setAttribute('aria-label', 'power');                 // it has no content, so that 90-character `title` WAS its accessible name
-  const fold = el('button', 'dev-fold', util); fold.type = 'button'; fold.title = 'fold / unfold (layout only — never touches the state)';
+  const fold = el('button', 'dev-fold', util); fold.type = 'button'; fold.title = 'Collapse or expand this window';
   chip(fold, 'chevronDown', 'fold or unfold this window');   // ONE drawing: `.folded` turns it a quarter turn, which is the caret's own idiom (glyph.js, chevronDown)
   /* ── WAVE 55 · THE POP-OUT, and the rail beside it ──────────────────────────────────────────────
    * Every window gains the control the transport has always had.  device() builds the two chips and
@@ -529,11 +468,11 @@ export function device(o) {
    * header's box never changes shape when a window comes off the rack. */
   const pop = el('button', 'dev-pop', util); pop.type = 'button';
   chip(pop, 'north', 'take this window off the rack');
-  pop.title = 'take this window off the rack — it floats over the stage, dragged by its header; the same button (or a drop back onto a rack) puts it home';
+  pop.title = 'Move this window between the rack and stage';
   const rail = el('button', 'dev-rail', util); rail.type = 'button';
   chip(rail, 'compact', 'narrow this window to its rail');
-  rail.title = 'COMPACT: narrow this floating window to a rail that keeps its name, its power switch and its close';
-  const close = el('button', 'dev-close', util); close.type = 'button'; close.title = 'close this window — reopen it from the + at the top of a rack, or the WINDOW menu';
+  rail.title = 'Use the compact window layout';
+  const close = el('button', 'dev-close', util); close.type = 'button'; close.title = 'Close this window';
   chip(close, 'close', 'close this window');
   let off = false;
   /* WAVE 62 · THE ONE `inert` IN THE LAB.  Every other hidden state is already out of the tab order and
@@ -588,14 +527,6 @@ export function group(parent, label) {
 export const N_COLOR = ['', 'var(--n1)', 'var(--n2)', 'var(--n3)', 'var(--n4)', 'var(--n5)', 'var(--n6)'];
 export const N_RGB = ['', [255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255]];
 
-/* ═══ wave 46 — THE MINIMALIST GRAPH: one tip, vivid ink, clamped glyphs ════════════════════════
- * Josh: "all of the random floating colored texts in the graphs … what if it's a minimalist graph
- * with no text and subtle information, and hovering over the corresponding object like a line/curve/dot
- * will reveal that specific object's information."  So every canvas view registers, at the END of each
- * redraw, the objects it just drew — each with the EXACT text its floating label used to carry — and one
- * shared tip (#graphTip) shows the nearest object within 8 px of the pointer.  The tip is glass and ink:
- * no colour overlay, because the highlight drawn on the object itself is what carries the colour.
- */
 
 /* ── the light-theme shell ink ──────────────────────────────────────────────────────────────────
  * --n1…--n6 (lab.css:29) were chosen on the dark ground.  Measured against the light card they run

@@ -38,9 +38,9 @@ Load order: `lab.css` then `skin.css`. The skin only re-points lab.css's custom 
 
 ## Checklist for the follow-up layout work
 1. Add `<link rel="stylesheet" href="./skin.css">` after lab.css in index.html.
-2. Add `class="mini"` to `#transport`; move `#hint` up if it collides (skin puts it at bottom 44 px).
+2. Add `class="mini"` to `#transport`.
 3. Mount `<button class="ui-hide" title="hide UI (H)">×</button>` in `#stage`, wired to the existing `body.ui-hidden` toggle (rack.js:744). Hover-reveal of the *hidden* rack needs a hover zone; `body.ui-hidden #rack` is `display:none` in lab.css, so give the follow-up a `body.ui-hidden.peek` rule or an edge strip.
-4. Drag: on `.dev-head` pointerdown add `dragging` to the `.dev`, reorder in `#rack` on pointermove, remove on up. Skip when the target is `.dev-fold` or `.note.hinted`. The header already has `cursor: grab`.
+4. Drag: on `.dev-head` pointerdown add `dragging` to the `.dev`, reorder in `#rack` on pointermove, remove on up. Skip when the target is `.dev-fold`. The header already has `cursor: grab`.
 5. Floating rack: set `#rack { position: absolute; right: 0; top: 0; bottom: 0 }` and `#lab { grid-template-columns: minmax(0,1fr) 0 }`; cards need no change. Keep `--rack-w` as the width.
 6. Add `hinted` to the long `.note`s (rack.js 270/287/341/353/380/413/417/451/462/532 and the view files); give each `tabindex="0"` so keyboards open them. Leave `presetNote` (rack.js:334) and the inline bar notes (spectrum.js:17, orbit.js:21) plain — they are status lines.
 7. `.k.active` / `[data-live]`: set them from the model when a parameter is being driven by keys or the BOW, so the value shows without a pointer.

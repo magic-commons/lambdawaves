@@ -294,8 +294,8 @@ fn bayer8(px: vec2<f32>) -> f32 {
       wEff = band * 2.2;
       if (band > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }   // shade the plateau by its own gradient, as an overlay
     } else if (style == 3u) {
-      /* SIGNED: the wave as flat ±1 lobes — opacity saturates just above the nodal surface, so a real orbital reads as
-         solid positive and negative regions meeting at a hard node (Josh's "the orbital becomes plus or minus 1") */
+
+
       let sv = select(s.y, s.x, mode == 2u) / ampMax;
       let mag = select(sqrt(dot(s, s) / rhoMax), abs(sv), mode == 2u || mode == 3u);
       let iso = max(V.p3.y, 1e-6);
@@ -546,7 +546,7 @@ export async function createField(canvas, opts = {}) {
   const gamutMap = (rgb) => (gamut === 'srgb' ? rgb : gamut === 'p3-vivid' ? vividP3(rgb) : srgbToP3(rgb));
   const cssP3 = !!(window.CSS && CSS.supports && CSS.supports('color', 'color(display-p3 1 0 0)'));
   const displayP3 = !!(window.matchMedia && matchMedia('(color-gamut: p3)').matches);
-  const GAMUT_WHY = 'this browser\u2019s WebGPU canvas has no colorSpace: Gecko leaves the WebIDL member out (Bug 1834395), so the canvas stays sRGB \u2014 and styling the interface in P3 while the field is sRGB would put the same accent in two different colours';
+  const GAMUT_WHY = 'Display P3 is unavailable on this canvas';
   let lastLUT = null;
   /** the palette reaches the GPU through the gamut, so the field and the interface can never disagree */
   function uploadPalette() {
@@ -603,12 +603,8 @@ export async function createField(canvas, opts = {}) {
   let latticeStart = 38, latticeCount = 0, cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
-  /* WAVE 53 — THE FRAME AND THE AXES ARE TWO OBJECTS (Josh, board #40: "an 'Axis' button alongside frame to make the
-     axis and frame two individual objects").  One switch used to draw both, so the xyz axes could not be seen without
-     the cube around them and the cube could not be seen without the axes through it.  THE BUFFER'S LAYOUT DOES NOT
-     MOVE — the box's twelve edges are vertices 0…23, the three axes 24…29 and the slice rectangle 30…37, which is
-     exactly what lineColors() reads — and the two switches are two DRAW CALLS into it, so either object can be off
-     without shifting the other by a byte.  The slice rectangle stays with the FRAME: it is a frame, not an axis. */
+
+
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
   const cornerVP = device.createBuffer({ size:64, usage:GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   device.queue.writeBuffer(cornerVP,0,new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]));
@@ -699,31 +695,14 @@ export async function createField(canvas, opts = {}) {
     device.queue.writeBuffer(vpBuf, 0, M_VP);
     return cam;
   }
-  /* THE FRAME'S INK (wave 48, Josh: "make the cube frame become black when in lightmode", "darkmode turns the xyz
-     axis to a vivid CMY color").  The domain cube and the three axes are the only chrome the GPU draws, so they are
-     the only chrome that cannot read a CSS token: rack.js hands the resolved theme down as mat.lightUI and the two
-     palettes live here, one per theme.  DARK keeps the shipped box (white at .13 over a near-black stage) and takes
-     the NEW axes; LIGHT takes the new near-black box and keeps the shipped warm/cool axes.  The light box's alpha is
-     .42, not the dark box's .13: matched CONTRAST would be .14, but Josh asked for a line that READS black, and .42
-     of #05080d over the #eef1f6 stage is one. */
+
+
   const FRAME_INK = {
     dark:  { box: [1, 1, 1, 0.13],          x: [0.0, 1.0, 1.0, 0.85],  y: [1.0, 0.0, 1.0, 0.85], z: [1.0, 1.0, 0.0, 0.9] },   // vivid CMY: x = cyan, y = magenta, z = yellow
     light: { box: [0.02, 0.03, 0.05, 0.42], x: [1.0, 0.45, 0.35, 0.45], y: [0.45, 1.0, 0.5, 0.45], z: [0.45, 0.65, 1.0, 0.6] },
   };
-  /* ⚠ WAVE 106 · THE AXES' COLOUR IS THE USER'S NOW, AND ONLY THE BOX IS STILL THE THEME'S.
-     Josh: "frame and axis in draw should move to settings alongside a toggle to make the axis RBG or CMY."
-     The table above stops being a per-theme LAW for the three axes and becomes the two PALETTES that toggle
-     picks between — the dark row's CMY and the light row's warm/cool RGB.  It is deliberately the SAME table
-     and not a new one: a second copy of a colour is a colour that goes stale.
-       TWO THINGS ARE SPLIT APART HERE, AND THE SPLIT IS THE DESIGN.  THE HUE is the user's choice.  THE ALPHA
-     STAYS THE THEME'S, because how hard a line has to push is a property of the GROUND it is drawn on and not
-     of the hue it is drawn in: the light row's .45 laid over the near-black stage measures (0.47, 0.23, 0.19),
-     a muddy orange, where the dark theme's own .85 puts the same hue on at (0.86, 0.39, 0.31).  So the seat
-     picks the row and the theme keeps the fourth number.
-       `mat.axisInk` is 'theme' — the shipped binding, and what an older settings key, an older project and an
-     older link all resolve to — or 'cmy' or 'rgb'.  ON 'theme' THIS IS BIT-IDENTICAL to what wave 48 shipped:
-     axc(INK.x, INK.x[3]) writes INK.x back unchanged, which is why the theme proof's pixel counts did not have
-     to move.  AND THE BOX NEVER MOVES in any of the three. */
+
+
   const AXIS_HUE = { cmy: FRAME_INK.dark, rgb: FRAME_INK.light };
   const AXC = [0, 0, 0, 1];                                        // ONE scratch, not one array per axis per frame: push() copies out of it before the next call
   const axc = (hue, a) => { AXC[0] = hue[0]; AXC[1] = hue[1]; AXC[2] = hue[2]; AXC[3] = a; return AXC; };

@@ -82,12 +82,12 @@ export function createSliceView(host, api) {
   const r1 = el('div', 'row tight', host);
   const modeSeg = seg({ label: 'PLANE', value: 'space', options: [
     { id: 'space', label: 'ℝ³', title: 'a 2-plane through ordinary space' },
-    { id: 'ks', label: 'KS ℝ⁴', title: 'a 2-plane in the Kustaanheimo–Stiefel 4-space, mapped down by the quadratic KS map — the plane the grand tour rotates' }],
+    { id: 'ks', label: 'KS ℝ⁴', title: 'Map a rotating four-dimensional plane into three dimensions' }],
     onChange: (v) => { mode = v; dirty = true; api.repaint(); } });
   r1.appendChild(modeSeg.root);
   r1.appendChild(knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } }).root);
   r1.appendChild(knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } }).root);
-  const holo = sw({ label: 'HOLO U(2)', value: false, title: 'snap the plus rotor to the holomorphic sheet: every motion then keeps n₊ fixed', onChange: (v) => { if (v) { rotor = canonicaliseRotors(projectToU2(rotor.qL), rotor.qR); dirty = true; api.repaint(); } } });
+  const holo = sw({ label: 'HOLO U(2)', value: false, title: 'Keep n₊ fixed on the holomorphic sheet', onChange: (v) => { if (v) { rotor = canonicaliseRotors(projectToU2(rotor.qL), rotor.qR); dirty = true; api.repaint(); } } });
   r1.appendChild(holo.root);
 
   const mini = planeModel(host, {
@@ -101,7 +101,7 @@ export function createSliceView(host, api) {
   r2.appendChild(trig({ label: 'RESET', onFire: () => { rotor = { ...IDENTITY }; tour = null; res = 128; dirty = true; api.repaint(); } }).root);
   const ro = readout({ label: 'PLANE  n₊ · n₋', value: '—', cls: 'wide', sub: '' });
   el('div', 'row tight', host).appendChild(ro.root);
-  el('div', 'note', host).innerHTML = 'ψ sampled on the plane and <b>domain-coloured</b>: hue is arg ψ through the phase palette, brightness is |ψ| through the same bounded knee the field uses, and the faint bands are contours of |ψ|. <b>Drag</b> to turn the plane — plain drag moves the minus rotor, which is a <b>holomorphic U(2) motion</b> (n₊ never moves), shift-drag moves the plus rotor, which is not. In <b>KS</b> the plane lives in hydrogen\'s own 4-space; its image is a <b>cone over a circle</b> (Round 10, a theorem, gated): axis on the plus sphere, half-angle arccos|n₋z| from the minus sphere. It never folds — it flattens to a plane at the minus sphere\'s equator and collapses to a ray at its poles, and the readout says which.';
+  el('div', 'note', host).innerHTML = '<b>Slice.</b> Hue shows arg ψ, brightness shows |ψ|, and faint bands trace |ψ| contours. Drag rotates the plane; Shift-drag rotates the other SO(4) factor. KS maps a plane in four dimensions into a cone-like surface in three dimensions.';
 
 
   /** the ImageData for a resolution, seeded by rescaling whatever is on screen so a res change never flashes empty */

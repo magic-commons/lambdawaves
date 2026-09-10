@@ -1,4 +1,3 @@
-import { infoPanel } from './native-ui.js';
 /* spectrum.js — the SPECTRUM rail: eigenvalue ladder, one lane per populated mode.
  *
  * A lane shows the ENERGY (eigenvalue, hartree), the degeneracy group (colour = n), the
@@ -37,10 +36,10 @@ export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
   const lcv = el('canvas', '', ladder);
   const head = el('div', 'row tight sp-head', host);
-  const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'hide / show the channels (layout only — the state keeps every c)';
+  const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
   const clrBtn = el('button', 'trig', head); clrBtn.type = 'button'; clrBtn.textContent = 'CLEAR'; clrBtn.title = 'c ↦ 0 for every label';
-  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORMALIZE'; nrmBtn.title = 'c ↦ c / √(c†c) — explicit, never silent; the status says what ‖c‖ was';
+  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORMALIZE'; nrmBtn.title = 'Normalize the state coefficients';
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
@@ -52,21 +51,14 @@ export function createSpectrum(host, api) {
   const psiFx = formula({ cls: 'sp-fx', lines: [
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
-  host.appendChild(psiFx.root); head.appendChild(infoPanel(psiFx.root, 'Live evolution equation'));
+  host.appendChild(psiFx.root);
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
   clrBtn.addEventListener('click', () => { if (api.clear) api.clear(); });
   nrmBtn.addEventListener('click', () => { if (api.normalize) api.normalize(); });
   const rowsEl = el('div', 'sp-rows', host);
-  /* ══ WAVE 106 · THE CHANNELS START FOLDED (Josh: "For spectrum, always 'Hide' the spinny wheels
-     for new users") ═══════════════════════════════════════════════════════════════════════════
-     The lanes are the deepest thing in the instrument and the first thing a stranger meets, because
-     SPECTRUM is the window this rack opens on.  Ninety-one spinning phase dials is not an
-     introduction, it is a wall.  The LADDER above them is the picture that reads without a caption,
-     so that is what a new visitor gets; the lanes are one press away and the button says SHOW.
-       IT IS A DEFAULT AND NOT A LAW: the state keeps every coefficient either way — the button's own
-     title has always said "layout only" — and a browser that has pressed SHOW keeps it for the
-     session.  Nothing about the register, the mask or the reconstruction changes. */
+
+
   rowsEl.hidden = true;
   hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
@@ -119,7 +111,7 @@ export function createSpectrum(host, api) {
   const LANE_BUDGET_MS = 6;
   let want = [], wantAt = new Map(), pending = [], laneMs = 1;
   let n2 = 1, anySolo = false, rateOff = false;        // the snapshot the cheap half took, reused by lanes built later in the same state
-  const RATE_TITLE = 'RATE: this label\'s phase speed as a multiple of its own E — 1× is the Hamiltonian in force; anything else is a TOY and the status says so (double-tap resets)';
+  const RATE_TITLE = 'Set this state’s phase-rate multiplier; double-tap resets';
   /** W-STURMIAN: RATE is a diagonal-phase feature — disabled, with the note on it, while a propagator is in force */
   function paintRate(L, off) { if (off === L.rateOff) return; L.rateOff = off; L.rate.setDisabled(off); L.rate.root.title = off ? (api.rateNote ? api.rateNote() : 'off') : RATE_TITLE; }
 

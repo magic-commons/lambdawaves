@@ -46,22 +46,22 @@ export function createAtoms(host, api) {
   const roQD = readout({ label: 'QUANTUM DEFECT  δ_l', value: '—', sub: '' });
   r1.appendChild(roIP.root); r1.appendChild(roKo.root); r1.appendChild(roQD.root);
 
-  const lad = el('canvas', 'atm-c', host); lad.title = 'the shell ladder: every occupied shell, its occupancy and its eigenvalue in hartree and eV; the bar is log₁₀|ε|';
-  const rad = el('canvas', 'atm-r', host); rad.title = 'u_nl(r) = r·R_nl(r) of the occupied shells, on a √r axis so the core and the valence are on one picture';
+  const lad = el('canvas', 'atm-c', host); lad.title = 'Show occupied shells, occupancy, and eigenvalue';
+  const rad = el('canvas', 'atm-r', host); rad.title = 'Occupied radial orbitals on a √r axis';
   /* WAVE 46: the bars and the radial curves answer for themselves; the ladder's own columns stay (a measured
      TABLE is not a floating label), and the radial plot lost the names it used to stack over its curves. */
   const ladHover = graphHover(lad, { repaint: () => paintLadder() });
   const radHover = graphHover(rad, { repaint: () => paintRadial() });
 
   const r2 = el('div', 'row tight', host);
-  r2.appendChild(trig({ label: '◂ Z', title: 'the previous element (the ELEMENT knob in SPECTRUM is the same control)', onFire: () => api.step(-1) }).root);
+  r2.appendChild(trig({ label: '◂ Z', title: 'Select the previous element', onFire: () => api.step(-1) }).root);
   r2.appendChild(trig({ label: 'Z ▸', title: 'the next element', onFire: () => api.step(1) }).root);
-  r2.appendChild(trig({ label: 'FILL THE VALENCE', title: 'put the outermost occupied shell in the register: every m of it, equally and in phase, normalised — the ATOM Hamiltonian first if it is not already in force', onFire: () => api.fill() }).root);
+  r2.appendChild(trig({ label: 'FILL THE VALENCE', title: 'Load the outer occupied shell into the register', onFire: () => api.fill() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
 
   const alpha = el('div', 'note atm-alpha', host); alpha.hidden = true;
-  el('div', 'note', host).innerHTML = '<b>NUMERICAL (self-consistent).</b> One central potential per element, shared by every shell: −Z/r + V<sub>H</sub> + V<sub>x</sub> with <b>Xα, α = 2/3</b> (Kohn–Sham–Gáspár–Dirac, not Slater\'s α = 1) and the <b>LATTER TAIL</b>, V ← min(V, −(Z−N+1)/r) — without which an LDA potential dies exponentially and the valence electron sees no Coulomb tail at all, so the quantum defect would have nothing to be defined against. Solved on a logarithmic mesh, twice (M and 2M points) and <b>Richardson-extrapolated</b> in dx², Anderson-mixed to ‖ΔV·r‖ &lt; 10<sup>−8</sup>. <b>WHAT THIS IS NOT.</b> An Xα eigenvalue is <b>not</b> a Koopmans energy (Slater 1970): for Ne, −ε(2p) = 15.08 eV against a measured 21.56, while the <b>Δ-SCF</b> of the same functional — the self-consistent ion minus the self-consistent neutral — gives 21.09. Both are printed; only the Δ-SCF is ever called an ionisation energy. Xα(2/3), Slater\'s α = 1, HFS and nonlocal Hartree–Fock are four different models, so the α travels with every number. A shell the ground configuration does not occupy is <b>virtual</b> (marked ° in the channels): it keeps this frozen field\'s eigenvalue, and atoms.js refuses to invent a radial for it — such a label carries an energy and draws nothing. Momentum space is not built for this operator: the selector forces position space, as it does for the box and quarkonium.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> Uses one self-consistent Xα central field per element with α = 2/3 and a Latter tail. Δ-SCF estimates ionisation energy; −ε is shown separately. A ° marks a virtual shell with an energy but no drawable radial. Position space only.';
 
   /* ── the model, once per element (≈ 0.3 s for the neutral, the ion and the α = 1 comparison, then cached) ── */
   function compute() {
@@ -97,7 +97,7 @@ export function createAtoms(host, api) {
     alpha.hidden = !near;
     if (near) {
       const a = C.top[1], b = C.top[0];                                  // a is the least bound of the two
-      alpha.innerHTML = `<b>THE ORDER OF ${b.n}${SPD[b.l]} AND ${a.n}${SPD[a.l]} IS α-DEPENDENT.</b> They differ by ${C.gap.toFixed(4)} Eh (${(C.gap * HARTREE_EV).toFixed(3)} eV) in this model — closer than the exchange approximation itself is trustworthy — so the lab reports both eigenvalues (${b.n}${SPD[b.l]} ${b.eps.toFixed(5)}, ${a.n}${SPD[a.l]} ${a.eps.toFixed(5)} Eh at α = 2/3) and <b>asserts no order</b>.${Z === 21 ? ' For Sc the two cross at α* = 0.839: 4s lies below 3d at α = 2/3 and above it at α = 1.' : ''}`;
+      alpha.innerHTML = `<b>Close shell order.</b> ${b.n}${SPD[b.l]} and ${a.n}${SPD[a.l]} differ by ${C.gap.toFixed(4)} Eh (${(C.gap * HARTREE_EV).toFixed(3)} eV), within the model’s exchange uncertainty. Values: ${b.n}${SPD[b.l]} ${b.eps.toFixed(5)} Eh; ${a.n}${SPD[a.l]} ${a.eps.toFixed(5)} Eh.${Z === 21 ? ' They cross at α = 0.839.' : ''}`;
     }
   }
 

@@ -234,11 +234,8 @@ export const GLYPHS = {
     '<path ' + STROKE + ' d="M11.6 9.4 L16.8 14.6 M16.8 9.4 L11.6 14.6"/>',
   close:
     '<path ' + STROKE + ' d="M7.1 7.1 L16.9 16.9 M16.9 7.1 L7.1 16.9"/>',
-  /* ⚠ dirPrev and dirNext are NOT in EXTRACT file 05's checklist, which scanned
-     only the direct `setGlyph(...)` calls.  These two reach setGlyph through
-     buildPresetStrip's local `btn()` helper (anim.js:3809, 3811) and they are
-     the ◀ ▶ beside the name field in every one of Josh's frames.  Verbatim
-     from glyph.js:163 and :166. */
+
+
   dirNext:
     '<path fill="currentColor" d="M9.4 6.4 L17.4 11.4 A0.7 0.7 0 0 1 17.4 12.6 ' +
     'L9.4 17.6 A0.7 0.7 0 0 1 8.3 17 L8.3 7 A0.7 0.7 0 0 1 9.4 6.4 Z"/>',
@@ -1342,11 +1339,7 @@ export function buildGhost(text) {
    All four are appended to the WINDOW ROOT (panelWin.root), not to the panel.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/** anim.js:3982.  ⚠ `.m2pick` reads --m2-plate, which is declared on .m2root
- *  — a SIBLING SUBTREE, not an ancestor of this element.  The substitution is
- *  invalid at computed-value time and the background falls back to
- *  transparent.  You can see it in vid/f02.png.  IT IS COPIED AS IT IS.
- *  See MANIFEST.md; the fix, if Josh wants one, is one word. */
+
 export function buildDevicePick(windowRoot, copyIn) {
   const copy = Object.assign({}, COPY, copyIn || {});
   const root = m2mk('div', 'm2pick', windowRoot);

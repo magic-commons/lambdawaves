@@ -1,71 +1,4 @@
-/* ══════════════════════════════════════════════════════════════════════════════
- * VENDORED FILE — lab/mir/glyph.js
- *
- *   Source     $MB/app/glyph.js  (MB = the local MANDELBROT checkout; see PORT-NOTES.md — wave 68
- *              took the absolute path out of a file that ships)
- *   Taken      2026-09-05, at 453 lines
- *   sha256     513cd3120ec539f13e139d940d089f29cf71cbbc5cad427445351fb6c3ab3831
- *   Forced     2 edits — both the M4 overlay sink, which is MANDELBROT's diagnostics
- *              bus and does not exist here.  Every other byte below this header is
- *              the source, unmodified.  No glyph was redrawn, re-scaled or renamed.
- *
- * THE LAW OF THIS FILE: IT IS MAINTAINED BY DIFF AGAINST ITS SOURCE, NEVER
- * REWRITTEN.  These are JOSH'S OWN DRAWINGS and an upstream correction to one of
- * them must still be a three-line patch a year from now.  So: do not reformat it,
- * do not re-order it, do not tidy it, do not "improve" a comment, do not add a
- * glyph here — add it upstream and re-take the file — and do not let a linter near
- * it.  Every forced change carries a `λWAVES:` marker on the line above and is
- * listed in PORT-NOTES.md with its reason.
- *
- * WHAT USES IT: lab/kit.js (`device()`'s header chips) and lab/rack.js (the rack's
- * own chrome).  Sizing is the caller's, exactly as the module says; our surfaces
- * pass no `size` and let lab.css own it, which is why every call site here reads
- * `glyphEl(name, cls)` and never a pixel count.
- *
- * To take an upstream fix:
- *   diff -u "<source>/glyph.js" lab/mir/glyph.js     # the header + the two marked lines
- *   cp "<source>/glyph.js" lab/mir/glyph.js && re-apply this header and the markers
- * ══════════════════════════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════════════════════
- * glyph.js — ONE DRAWING PER MEANING, and never a text character
- *
- * WHY THIS MODULE EXISTS.  The app had been spelling its small icons as
- * literal characters in strings: 'X' for close, an info symbol for the hint
- * button, a shaded square for a folder, a lozenge for render.  Each of those
- * is a request to whatever font the device happens to resolve, and the three
- * devices this app ships to answer it differently:
- *
- *   - iOS/iPadOS substitutes its own EMOJI for many of them, arriving in full
- *     colour with a baked-in shape, ignoring the surrounding `color` entirely.
- *     Josh's chrome is monochrome; a colour emoji is instantly foreign.
- *   - the glyph's ADVANCE WIDTH is the font's business, not the layout's, so a
- *     character centred on one device sits off-centre on another.
- *   - a font without the codepoint at all renders the notdef box.
- *
- * A path is none of those things.  It is the same shape everywhere, it takes
- * its colour from `currentColor` like text does, and it is centred because the
- * geometry says so.
- *
- * ⟡ THE GLYPHS CARRY THEIR OWN PAINT.  Every shape below states `fill` or
- * `stroke` as a PRESENTATION ATTRIBUTE, not through a stylesheet.  Two reasons,
- * and the second is the load-bearing one:
- *
- *   1. a glyph can then be dropped into any surface — window, rail, chip,
- *      toast — without that surface needing a rule for it;
- *   2. THE APP HAS ALREADY LOST A RULE THIS WAY.  On 2026-08-26 an
- *      unterminated comment in index.html silently swallowed `.circ > svg`;
- *      the rule was in the file, it matched its element, and it was absent
- *      from the CSSOM.  The corner icons had never been sized.  A drawing that
- *      depends on no stylesheet cannot be erased by a stylesheet's accident.
- *
- * Presentation attributes are also the LOWEST-priority source of colour, below
- * every CSS rule, so a surface that DOES want to restyle a glyph still can.
- * They are a floor, not a ceiling.
- *
- * THE GRID IS 24×24 for every glyph, matching the app's existing `ico-mandel`,
- * with an optical margin of about 2.5 units. Sizing is the caller's — set
- * width/height in CSS on the parent, or pass `size`.
- * ═══════════════════════════════════════════════════════════════════════════ */
+
 
 /* λWAVES: forced edit 1/2 — overlay.js is MANDELBROT's M4 diagnostics sink and has no counterpart here; our gate reads the DOM. */
 // import { publishM4 } from './overlay.js';
@@ -159,10 +92,7 @@ const GLYPHS = {
     '<rect x="3.3" y="13.1" width="7.6" height="7.6" rx="1.5" ' + STROKE + '/>' +
     '<rect x="13.1" y="13.1" width="7.6" height="7.6" rx="1.5" ' + STROKE + '/>',
 
-  /* ── render.  The lozenge Josh already had, kept because it is HIS ink for
-     this button — but drawn as a rotated square with a true centre, and given
-     an inner facet so it reads as an object being cut rather than an empty
-     outline.  Render is the act that produces a thing. */
+
   render:
     '<path ' + STROKE + ' d="M12 2.7 L21.3 12 L12 21.3 L2.7 12 Z"/>' +
     '<path ' + STROKE + ' opacity="0.55" d="M12 7.4 L16.6 12 L12 16.6 L7.4 12 Z"/>',
@@ -323,27 +253,13 @@ const GLYPHS = {
   check:
     '<path ' + STROKE + ' d="M4.9 12.6 L9.7 17.4 L19.1 6.9"/>',
 
-  /* ── compact.  THE SIZE CHIP (Josh, Note 9: "Compact (idk what icon this
-     should be)").  TWO BARS CLOSING ON THE VERTICAL AXIS, with the arrows that
-     say which way they travel: the card narrows and grows taller, which is his
-     whole sentence — "this will increase the height while narrowing the device"
-     — so the mark has to say NARROW rather than SMALLER.  A plain shrink-arrow
-     square would have said the second thing.
-     Drawn, not typed: the obvious characters here are U+2B0C and the CJK
-     bracket forms, and iOS resolves both from faces this app does not ship. */
+
   compact:
     '<path ' + STROKE + ' d="M7.6 3.9 L7.6 20.1 M16.4 3.9 L16.4 20.1"/>' +
     '<path ' + STROKE + ' d="M2.2 12 L6.5 12 M4.5 9.6 L6.9 12 L4.5 14.4"/>' +
     '<path ' + STROKE + ' d="M21.8 12 L17.5 12 M19.5 9.6 L17.1 12 L19.5 14.4"/>',
 
-  /* ── save.  A FLOPPY DISK IN A CIRCLE — Josh, Note 9, in those words: *"the
-     save button … Let it be an icon that's a floppy disk in a circle."*  R4
-     drew it in anim.js as a stopgap (the m2powIcon precedent) and wrote down
-     that glyph.js should own it; this is that.
-     The floppy is R4's outline scaled 0.62 about the box centre so its rounded
-     corners clear the ring by 1.3 units — the diagonal is what binds, not the
-     width, because a square inside a circle meets it at the corner.  Never a
-     text character: U+1F4BE arrives from iOS as a colour emoji. */
+
   save:
     '<circle cx="12" cy="12" r="9.2" ' + STROKE + '/>' +
     '<path ' + STROKE + ' d="M7.78 6.79 H14.23 L17.21 9.77 V16.22 ' +

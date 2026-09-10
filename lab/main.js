@@ -4,7 +4,7 @@ window.__e = window.__e || [];
 addEventListener('error', (e) => __e.push('ERR ' + e.message));
 addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason && e.reason.message || e.reason)));
 const $ = (id) => document.getElementById(id);
-boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner: $('banner'), hint: $('hint') })
+boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner: $('banner') })
   .then((LW) => { try { installLayer(LW); } catch (e) { if (LW && LW.sw) { LW.sw.mode = 'failed'; LW.sw.error = String(e && e.message || e); } } })
   .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); const b = $('banner'); b.hidden = false; b.querySelector('h3').textContent = 'boot failed'; b.querySelector('p').textContent = String(e && e.message || e); });
 /* WAVE 59 · THE BANNER'S × IS WIRED HERE TOO, and it must be: this is the ONE path where rack.js never ran

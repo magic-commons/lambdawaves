@@ -1,6 +1,8 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
 import { el, seg, sw, trig, chip } from './kit.js';
 
+const HELP_HOVER_DELAY = 800;
+
 // Explanations are out-of-flow: a live formula can never resize its instrument.
 export function infoPanel(content, label = 'Information') {
   const anchor = el('span', 'native-info');
@@ -8,15 +10,16 @@ export function infoPanel(content, label = 'Information') {
   b.setAttribute('aria-label', label); b.setAttribute('aria-expanded', 'false');
   content.before(anchor); anchor.appendChild(content); content.classList.add('native-info-content');
   content.setAttribute('popover','manual');
-  let pinned=false;
-  const close=()=>{if(content.matches(':popover-open'))content.hidePopover();b.setAttribute('aria-expanded','false');};
+  let pinned=false, hoverTimer=0;
+  const cancelHover=()=>{if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=0;}};
+  const close=()=>{cancelHover();if(content.matches(':popover-open'))content.hidePopover();b.setAttribute('aria-expanded','false');};
   const open=()=>{if(document.body.classList.contains('window-info-off'))return;if(!content.matches(':popover-open'))content.showPopover();const r=b.getBoundingClientRect();
     content.style.left=Math.max(8,Math.min(innerWidth-content.offsetWidth-8,r.left))+'px';
     content.style.top=Math.max(8,Math.min(innerHeight-content.offsetHeight-8,r.bottom+6))+'px';
     b.setAttribute('aria-expanded','true');};
-  b.addEventListener('click',()=>{pinned=!pinned;pinned?open():close();});
-  anchor.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')open();});
-  anchor.addEventListener('pointerleave',()=>{if(!pinned&&!anchor.contains(document.activeElement))close();});
+  b.addEventListener('click',()=>{cancelHover();pinned=!pinned;pinned?open():close();});
+  anchor.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!pinned){cancelHover();hoverTimer=setTimeout(()=>{hoverTimer=0;open();},HELP_HOVER_DELAY);}});
+  anchor.addEventListener('pointerleave',()=>{cancelHover();if(!pinned&&!anchor.contains(document.activeElement))close();});
   anchor.addEventListener('focusin',open);
   anchor.addEventListener('focusout',()=>{if(!pinned)close();});
   anchor.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();pinned=false;close();b.focus();close();}});
@@ -24,10 +27,63 @@ export function infoPanel(content, label = 'Information') {
   return anchor;
 }
 
+/* One quiet tooltip surface for short control hints. Window explanations use the
+   adjacent info button below, so every kind of help has one predictable home. */
+export function installControlHelp(root = document) {
+  if (document.getElementById('controlHelp')) return;
+  const tip = el('div', 'control-help', document.body); tip.id = 'controlHelp'; tip.hidden = true;
+  tip.setAttribute('role', 'tooltip');
+  let owner = null, hoverTimer = 0, pending = null;
+  function cancelHover() { if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = 0; } pending = null; }
+  function close() { cancelHover(); if (owner) owner.removeAttribute('aria-describedby'); owner = null; tip.hidden = true; }
+  const adopt = (node) => {
+    if (!(node instanceof Element)) return;
+    const nodes = [node, ...node.querySelectorAll('[title]')];
+    for (const n of nodes) {
+      if (!n.hasAttribute('title')) continue;
+      const copy = (n.getAttribute('title') || '').trim();
+      if (!copy) { n.removeAttribute('title'); n.removeAttribute('data-help'); if (n === owner) close(); continue; }
+      n.dataset.help = copy; n.removeAttribute('title');
+      if (!n.getAttribute('aria-label') && /^(BUTTON|INPUT|SELECT|CANVAS)$/.test(n.tagName) && !n.textContent.trim()) n.setAttribute('aria-label', copy);
+    }
+  };
+  const open = (node) => {
+    const copy = node?.dataset?.help; if (!copy || document.body.classList.contains('control-hints-off')) return;
+    close(); owner = node; tip.textContent = copy; tip.hidden = false; node.setAttribute('aria-describedby', tip.id);
+    const r = node.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+    tip.style.top = (r.bottom + h + 8 <= innerHeight ? r.bottom + 7 : Math.max(8, r.top - h - 7)) + 'px';
+  };
+  adopt(root.documentElement || root);
+  new MutationObserver((records) => { for (const r of records) { if (r.type === 'attributes') adopt(r.target); else for (const n of r.addedNodes) adopt(n); } })
+    .observe(root.documentElement || root, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
+  root.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse' || document.body.classList.contains('control-hints-off')) return; const n = e.target.closest?.('[data-help]'); if (!n || n === owner || n === pending) return; close(); pending=n; hoverTimer=setTimeout(()=>{hoverTimer=0;const target=pending;pending=null;if(target?.isConnected&&target.matches(':hover'))open(target);},HELP_HOVER_DELAY); });
+  root.addEventListener('pointerout', (e) => { const n=e.target.closest?.('[data-help]'); if(n && !n.contains(e.relatedTarget) && (n===owner||n===pending))close(); });
+  root.addEventListener('focusin', (e) => { const n = e.target.closest?.('[data-help]'); if (n) open(n); });
+  root.addEventListener('focusout', (e) => { if (owner && owner.contains(e.target) && !owner.contains(e.relatedTarget)) close(); });
+  root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && owner) close(); });
+  addEventListener('resize', close, { passive: true }); addEventListener('scroll', close, { passive: true, capture: true });
+  root.addEventListener('controlhintschange', close);
+}
+
+export function consolidateWindowHelp(root = document) {
+  for (const card of root.querySelectorAll('.dev')) {
+    if (card.querySelector(':scope > .dev-head .window-help')) continue;
+    const sources = [...card.querySelectorAll('.note:not(.link-note)')]
+      .filter((n) => !n.closest('.native-info') && n.textContent.trim());
+    if (!sources.length) continue;
+    const book = el('div', 'window-help-book');
+    for (const n of sources) book.appendChild(n);
+    const name = card.querySelector('.dev-eyebrow')?.textContent.trim() || 'Window';
+    const control = infoPanel(book, name + ' help'); control.classList.add('window-help');
+    card.querySelector('.dev-util')?.prepend(control);
+  }
+}
+
 export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   const cv = el('canvas', 'plane-model', host); cv.width = 400; cv.height = 280; cv.tabIndex = 0;
   cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.');
-  cv.title = 'Drag to orient the plane · arrow keys rotate · Shift for fine motion · Home resets';
+  cv.title = 'Orient the plane. Shift gives finer motion; Home resets.';
   const unit = a => { const n = Math.hypot(...a) || 1; return a.map(v => v / n); };
   const cross = (a,b) => [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
   const project = p => [200+85*Math.SQRT1_2*(p[0]-p[1]),140+85*((p[0]+p[1])/Math.sqrt(6)-p[2]*Math.sqrt(2/3))];
@@ -60,7 +116,6 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
 export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, arm }) {
   const ids=['spectrum','state','palette','observer','camera','clip','slice','settings'];
   for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
-    for(const n of d.querySelectorAll('.note:not(.link-note), .sturm-note, .sp-fx')) { if(n.hidden || n.closest('.native-info'))continue;infoPanel(n,`${id} information`); }
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
   }
   const wave=ui.spaceSeg.root.closest('.dev-body');
@@ -71,24 +126,17 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   ui.styleSeg.root.after(finish.root);ui.finishSeg=finish;
   const syncFinish=()=>{const matte=finish.button('matte'),glass=finish.button('glass');
     matte.disabled=![1,3,6].includes(mat.style);matte.title=matte.disabled?'This shape has no surface lighting to remove':'Unlit surface colour';
-    glass.disabled=mat.style===6;glass.title=glass.disabled?'SHELL already uses translucent glass':'Translucent finish on this shape; stylized highlights, without physical refraction';
+    glass.disabled=mat.style===6;glass.title=glass.disabled?'SHELL already uses translucent glass':'Use a translucent highlighted finish';
     if((mat.finish==='matte'&&matte.disabled)||(mat.finish==='glass'&&glass.disabled)){mat.finish='lit';finish.set('lit');}
   };
   const setStyle=ui.styleSeg.set;ui.styleSeg.set=v=>{setStyle(v);syncFinish();};
   ui.styleSeg.root.addEventListener('click',syncFinish);ui.styleSeg.root.addEventListener('keydown',syncFinish);syncFinish();
 
-  const waveHelp=[...wave.querySelectorAll('.native-info')];
+  const waveHelp=[...wave.querySelectorAll('.note:not(.link-note), .sturm-note, .sp-fx')];
   const waveRows=[['spaceSeg'],['viewSeg'],['expK','softK','hueK'],['styleSeg'],['finishSeg'],['isoK','grainK','kneeK'],['ditherSeg','ditherK']];
   const flat=document.createDocumentFragment();
   for(const [i,names] of waveRows.entries()){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);
-  // A single reading pocket per instrument replaces scattered info buttons and empty rows.
-  for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d || id==='settings' || id==='spectrum')continue;
-    const pockets=[...d.querySelectorAll('.native-info')];if(pockets.length<2)continue;
-    const contents=document.createElement('div');contents.className='native-help-book';d.querySelector('.dev-body').appendChild(contents);
-    for(const pocket of pockets){const content=pocket.querySelector('.native-info-content');if(content){content.classList.remove('native-info-content');content.removeAttribute('popover');contents.appendChild(content);}pocket.remove();}
-    infoPanel(contents,`${id} information`);
-  }
   const palette=document.querySelector('.dev[data-id="palette"]');
   const reverse=[...palette.querySelectorAll('.trig')].find(b=>b.textContent.trim()==='REVERSE');
   if(reverse){reverse.parentElement.appendChild(ui.invertSw.root);ui.invertSw.root.classList.add('palette-action');reverse.classList.add('palette-action');}
@@ -141,19 +189,20 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['appearance','display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  let showWindowInfo=false;try{showWindowInfo=localStorage.getItem('lw-window-info')==='on';}catch(_){}
+  let showWindowInfo=true;try{showWindowInfo=localStorage.getItem('lw-window-info')!=='off';}catch(_){}
   const applyWindowInfo=on=>{document.body.classList.toggle('window-info-off',!on);
-    if(!on){for(const p of document.querySelectorAll('.native-info-content:popover-open'))p.hidePopover();document.querySelectorAll('.native-info-button').forEach(b=>b.setAttribute('aria-expanded','false'));const old=document.getElementById('infoPop');if(old)old.hidden=true;}
+    if(!on){for(const p of document.querySelectorAll('.native-info-content:popover-open'))p.hidePopover();document.querySelectorAll('.native-info-button').forEach(b=>b.setAttribute('aria-expanded','false'));}
     try{localStorage.setItem('lw-window-info',on?'on':'off');}catch(_){}
   };
-  ui.windowInfoSw=sw({label:'WINDOW INFO',value:showWindowInfo,title:'Show explanatory info buttons and hover panels in windows',onChange:applyWindowInfo});applyWindowInfo(showWindowInfo);
+  ui.setWindowInfo=applyWindowInfo;
+  ui.windowInfoSw=sw({label:'HELP',value:showWindowInfo,title:'Show window help buttons',onChange:applyWindowInfo});applyWindowInfo(showWindowInfo);
   row('appearance',['themeSeg']);row('appearance',['cardSeg']);row('appearance',['frostSeg']);row('appearance',['discSw','blurK']);row('appearance',['accA','accB','vivid']);
-  row('display',['badgesSw','hintSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.appearance);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
   const help=el('div','settings-help',pages.appearance);
-  for(const g of oldGroups){if(g===quality)continue;for(const n of g.querySelectorAll('.native-info'))help.appendChild(n);g.remove();}
+  for(const g of oldGroups){if(g===quality)continue;for(const n of g.querySelectorAll('.note:not(.link-note), .sturm-note'))help.appendChild(n);g.remove();}
   const rotations=ui.rotZRate.root.parentElement;
   const actionRow=el('div','row tight');rotations.before(actionRow);
   for(const t of [...rotations.querySelectorAll(':scope > .trig')])actionRow.appendChild(t);
@@ -184,4 +233,6 @@ export function reworkNative({ ui, mat, repaint, modHost, cadence, setCadence, a
   function sync(){hz.textContent=(M.transport.bpm/60).toFixed(2)+' Hz';if(document.activeElement!==bpm)bpm.value=String(Math.round(M.transport.bpm*10)/10);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD PAUSE':'MOD PLAY');}
   sync();
   const select=e=>{if(e.target.closest('#modwin')){document.querySelector('.native-selected')?.classList.remove('native-selected');return;}const d=e.target.closest('.dev');if(!d||d.classList.contains('mir-modwindow'))return;document.querySelector('.native-selected')?.classList.remove('native-selected');d.classList.add('native-selected');};document.addEventListener('pointerdown',select);document.addEventListener('focusin',select);
+  consolidateWindowHelp();
+  installControlHelp();
 }

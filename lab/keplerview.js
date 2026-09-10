@@ -12,7 +12,7 @@ const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [1
 
 export function createKepler(canvas) {
   const cv = canvas, g = cv.getContext('2d');
-  let on = false, orbits = [], lastKey = '';                    // off by default (Josh, 2026-09-04)
+  let on = false, orbits = [], lastKey = '';
   let handles = [], hover = null;                       // the perihelion handles of the last draw (canvas pixels), and the hovered one
   let lastPointer = null;                               // where the rack last asked hit(): the tip goes there
   /* WAVE 46 — the caption used to carry every orbit's numbers in one line ("n2 a=4 e=0.833 L_orbit=1.73 vs

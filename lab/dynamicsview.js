@@ -22,28 +22,28 @@ export function createDynamics(host, api) {
      ("L(t)" and "S(t)", right where L crosses on a fresh register).  The curves ARE the objects. */
   let hovers = [], rect = null, lastT = 0;
   const hover = graphHover(pcv, { repaint: () => paint(lastT), plot: () => rect });
-  el('div', 'note', host).innerHTML = 'The Schrödinger field Lagrangian restricted to this basis IS the shadow\'s L = Σp<sub>a</sub>q̇<sub>a</sub> − H<sub>C</sub>: uncoupled oscillators of mass 1/E<sub>a</sub> and stiffness E<sub>a</sub> — <b>both negative</b> for a bound state, ratio ω² = E<sub>a</sub>². Euler–Lagrange gives q̈ = −E²q, which is the Schrödinger equation. Over a period ⟨T⟩ = ⟨V⟩ = ½⟨H⟩ and ⟨L⟩ = 0 (the virial theorem), so <b>S(t) is bounded and periodic</b>.';
+  el('div', 'note', host).innerHTML = '<b>Mode dynamics.</b> In this basis, each coefficient maps to a harmonic oscillator in the shadow view. The action stays bounded and repeats with the state.';
 
-  const gAA = group(host, 'ACTION–ANGLE  ·  J_a = (1/2π)∮p dq = |c_a|² = the POPULATION  ·  θ_a = arg c_a');
+  const gAA = group(host, 'ACTION–ANGLE');
   const aaRows = el('div', 'dyn-rows', gAA);
-  el('div', 'note', gAA).innerHTML = 'So the SPECTRUM rail <b>is</b> the action–angle chart of the SHADOW\'s phase space, and every population being constant is Liouville\'s theorem for this system.';
+  el('div', 'note', gAA).innerHTML = '<b>Action and angle.</b> Spectrum populations are the conserved actions; their phases are the angles.';
 
-  const gM = group(host, 'EXACT MOMENTS');
+  const gM = group(host, 'MOMENTS');
   const r2 = el('div', 'row tight', gM);
   ui.Lz = readout({ label: '⟨L_z⟩  ħ', value: '—' }); ui.L2 = readout({ label: '⟨L²⟩  ħ²', value: '—', sub: 'l(l+1)' });
   ui.ent = readout({ label: 'ROTOR ENTANGLEMENT', value: '—', sub: '−Σλ² ln λ², per shell' });
   ui.rr = readout({ label: '⟨r⟩  a₀', value: '—', sub: '' });
   ui.vir = readout({ label: 'ATOM VIRIAL  2⟨T⟩/(−⟨V⟩)', value: '—', sub: '⟨T⟩ = ⟨H⟩ + ⟨1/r⟩' });
   for (const k of ['Lz', 'L2', 'ent', 'rr', 'vir']) r2.appendChild(ui[k].root);
-  el('div', 'note', gM).innerHTML = 'Two virial theorems hold at once and say different things: the <b>shadow\'s</b> harmonic one (⟨T⟩ = ⟨V⟩ = ½⟨H⟩ in the mode coordinates, above) and the <b>atom\'s</b> Coulomb one (2⟨T⟩ = −⟨V⟩, i.e. ⟨T⟩ = −E, here). ⟨r⟩ and ⟨1/r⟩ are Simpson integrals; for an eigenstate they are (3n² − l(l+1))/2 and 1/n².';
+  el('div', 'note', gM).innerHTML = '<b>Virial readings.</b> These are Coulomb-space averages. The shadow window uses a separate oscillator virial relation.';
 
-  const gD = group(host, 'DIPOLE  ·  ⟨z⟩ = Σ c*_a c_b ⟨a|z|b⟩  ·  z couples l → l ± 1 at fixed m');
+  const gD = group(host, 'DIPOLE');
   const r3 = el('div', 'row tight', gD);
   ui.dz = readout({ label: '⟨z⟩  a₀', value: '—', sub: '' }); ui.lines = readout({ label: 'EMISSION LINES', value: '—', cls: 'two', sub: '' });
   for (const k of ['dz', 'lines']) r3.appendChild(ui[k].root);
-  el('div', 'note', gD).innerHTML = 'A state built from ONE l has no dipole however it is prepared. The power quoted is what a classical dipole of this amplitude <i>would</i> radiate at that frequency (Larmor, ⅔ω⁴d²/2 a.u.); <b>this lab has no radiation reaction</b> — the state never decays.';
+  el('div', 'note', gD).innerHTML = '<b>Dipole.</b> A state with one l value has no electric dipole. Radiated power is a classical estimate; it does not drain or alter the state.';
 
-  const gP = group(host, 'PARTICLES  ·  de Broglie–Bohm trajectories of the same ψ  (an observer product: ψ is untouched)');
+  const gP = group(host, 'PARTICLES');
   const r4 = el('div', 'row tight', gP);
   ui.on = sw({ label: 'PARTICLES', value: false, onChange: (v) => { api.particles.setOn(v); if (v) api.seedParticles(Math.round(ui.n.get())); api.repaint(); } });
   r4.appendChild(ui.on.root);
@@ -54,7 +54,7 @@ export function createDynamics(host, api) {
   r4.appendChild(trig({ label: 'RESEED', title: 'sample a fresh cloud from |ψ|² at the current time', onFire: () => { if (ui.on.get()) { api.seedParticles(Math.round(ui.n.get())); api.repaint(); } } }).root);
   ui.pstat = readout({ label: 'CLOUD', value: '—', cls: 'two', sub: '' });
   el('div', 'row tight', gP).appendChild(ui.pstat.root);
-  el('div', 'note', gP).innerHTML = 'Seeded by rejection sampling from |ψ|², which is the equilibrium distribution: a cloud that starts as |ψ|² stays |ψ|² (equivariance), so the cloud <b>is</b> the density, drawn one trajectory at a time. Trajectories never cross a nodal surface, and they are singular exactly on VORTEX\'s lines. The speed is clamped for drawing near a node.';
+  el('div', 'note', gP).innerHTML = '<b>Particles.</b> Seeds follow |ψ|² and move with the probability current. Paths stop at the domain edge or near a node; speed is capped for display.';
 
   for (const [k, r] of Object.entries(ui)) if (r && r.root && r.root.classList.contains('ro')) r.root.dataset.dq = k;
   let hist = [], lastVersion = -1;

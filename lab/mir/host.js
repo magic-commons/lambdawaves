@@ -51,47 +51,7 @@ export const MAX_WALL_STEP = 0.25;
  *  where the modulator had it. */
 export const PAUSE_MODES = Object.freeze(['BASE', 'HOLD']);
 
-/* ═══════════ WAVE 65 · THE RESUME LAW — and the beat is the one thing that is GLOBAL ═══════
- *
- * Josh: "ANCH can hold the current state in the curve it was on during the pause, and then
- * resume when unpaused.  TRIG resets the phase of the curve position — space bar starts over
- * essentially.  BPM means that it's always following a global BPM and divisors line up with an
- * existing global clock, and hitting space bar in between a note simply jumps to the truncated
- * note."  Three behaviours, chosen by three chips the ported window already draws — `s.anchor`,
- * `s.trig` and `s.sync` — so nothing new is invented and the arithmetic is the model's.
- *
- * TWO OF THE THREE WERE ALREADY BUILT and this file only had to stop standing in their way:
- *   ANCH  `modPlayEdge`'s middle branch leaves an anchored synced source alone ("the bar wins")
- *         and `recomputeRunning` re-anchors at the wall, so the beat is CONTINUOUS across the
- *         pause and the phase resumes exactly where it was.  That is Josh's sentence verbatim.
- *   TRIG  `modPlayEdge`'s first branch calls `triggerSource`, which rewinds the phase to 0.
- *
- * THE THIRD IS THIS FUNCTION, and the one thing that makes it hard is that THE BEAT IS GLOBAL:
- * `transport` carries ONE beat accumulator for the whole rack, and under WALL sync every synced
- * source's phase is `frac(beats / beatsPerCycle)` — derived from that one number on every frame.
- * So "jump back to the note boundary just passed" cannot be done per source; it is a move of the
- * beat, and the grid has to be one number.  The grid is THE COARSEST LIVE NOTE, because that is
- * the only grid on which every faster note also has a boundary: floor the beat to the slowest
- * modulator's own cycle and every plain division of it lands on its own boundary too.  With one
- * BPM source in the rack — the ordinary case — the grid IS that source's note and the jump is
- * literally "the truncated note".
- *
- * THE CLAIM ORDER, stated because a global number can only obey one law at a time:
- *   ANCH outranks the grid.  A rack with one anchored source is a rack that has asked for a
- *   continuous beat, and a quantised beat is not one.  So one ANCH chip anywhere in the rack
- *   holds the beat still, and the BPM sources beside it continue rather than jumping back.
- *   TRIG ON A FREE-HZ SOURCE claims nothing — its phase is its own and `triggerSource` rewinds
- *   it, so it composes with either of the others.  TRIG ON A SYNCED SOURCE claims the grid at
- *   its own note, because under a bar mode the beat OWNS that phase: a rewind the next frame
- *   overwrites is a control that changes nothing, and the note boundary is where "start over"
- *   and "the truncated note" turn out to be the same number.
- *
- * AND THE FLAVOUR JOSH NAMED: "BPM has WALL/FREE".  Under WALL the beat is the phase, so the
- * quantise is the beat move below.  Under FREE a non-anchored synced source ACCUMULATES its own
- * phase and the beat means nothing to it — and `modPlayEdge`'s last branch already floors that
- * phase to 0 on every play edge.  So the same law arrives by two mechanisms and the beat is left
- * alone under FREE, where moving it would buy nothing.  Two flavours, one behaviour.
- */
+
 export const RESUME_LAWS = Object.freeze(['ANCH', 'BPM', 'TRIG', 'FREE']);
 
 /**
@@ -258,15 +218,8 @@ export function createModClock(opts) {
 
   const requestPresentation = (reason) => { stats.presents++; present(String(reason || 'modulation')); };
   const anyRouted = () => M.needsClock() || demands.size > 0;
-  /* WAVE 84 · WHAT "THERE IS SOMETHING TO RUN" MEANS HAS CHANGED, AND THE GUARD HAD NOT.
-     Josh: "the mod-play button should always work, currently it *must* be routed AND the macro *must*
-     be routed to the native knob/param which shouldn't be the case."
-       `anyRouted` asks whether the modulation reaches a HOST PARAMETER, and refusing on it was right
-     when this window had no picture: a clock driving nothing changed nothing on screen.  It has a
-     picture now — every device draws its own curve with a playhead running along it — so a rack with
-     an LFO in it and no macro routed anywhere still has something to show, and pressing play on it
-     should show it.  A rack with no sources at all is the genuinely empty case, and THAT still
-     refuses, which keeps the honest half of the original rule. */
+
+
   const anyLive = () => anyRouted() ||
     (typeof M.sourceList === 'function' &&
      M.sourceList().some((s) => s && s.kind !== 'audioout' && s.on !== false));
@@ -513,12 +466,7 @@ export function createModClock(opts) {
     },
     pauseMode: () => pauseMode,
 
-    /** WAVE 65 · THE ARM.  Josh: "the play/pause button should have a small MOD button that glows
-     *  on or off.  When this is on, the modulations are active and the parameters move on all the
-     *  racks."  OFF is not a pause: `livePos` hands back the base for EVERY target, hand macros
-     *  included, so every routed control sits on the number its own knob holds.  `playing` is
-     *  deliberately NOT touched — the modulation transport keeps its own position, so re-arming
-     *  resumes the rack the user left rather than a rack that quietly stopped. */
+
     setEnabled(on) {
       const want = !!on;
       if (want === enabled) return enabled;
@@ -746,8 +694,7 @@ export const LAB_PRESET_FOLDER = 'λWAVES';
 export const LAB_PRESETS = [
   {
     id: 'lw.oneturn', lab: 1, name: 'ONE TURN',
-    hint: 'one complete revolution of the camera per bar, rising above the equator and ' +
-          'dropping below it once a lap — the preset written to be RECORDED',
+    hint: 'One camera orbit per bar, with a vertical sweep.',
     /* ── WHY IT EXISTS ────────────────────────────────────────────────────────────
      * A still camera hides exactly the half of a hydrogenic state that the quantum
      * numbers l and m live in.  |ψ_{nlm}|² has ANGULAR nodes — a 2p_z is a dumbbell on
@@ -812,8 +759,7 @@ export const LAB_PRESETS = [
 
   {
     id: 'lw.peel', lab: 1, name: 'PEEL',
-    hint: 'twelve levels of |ψ|², climbed and descended — the density as a contour map ' +
-          'played in time, so the shells can be counted',
+    hint: 'Step through twelve density levels to reveal shells.',
     /* ── WHY IT EXISTS ────────────────────────────────────────────────────────────
      * A volume render shows one level of the density at a time and the viewer has no way
      * to know which.  |ψ_{nl}|² has n − l − 1 RADIAL nodes, and they are invisible until
@@ -864,8 +810,7 @@ export const LAB_PRESETS = [
 
   {
     id: 'lw.globalphase', lab: 1, name: 'GLOBAL PHASE',
-    hint: 'one full turn of the colour wheel per bar in the PHASE view — the whole of ψ ' +
-          'rotated by e^{iθ}, and nothing about the state moves',
+    hint: 'Rotate phase colour once per bar without moving the state.',
     /* ── WHY IT EXISTS ────────────────────────────────────────────────────────────
      * In the PHASE view (the shipped one) the hue of a voxel IS arg ψ there: field.js
      * paints `h = atan2(Im, Re)/2π + ½ + hueShift`.  So the HUE knob is not a colour

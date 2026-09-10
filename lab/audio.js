@@ -240,7 +240,7 @@ export function createAudioCapture(opts) {
       /* a context created before a gesture can start SUSPENDED; the press that got us here IS the
          gesture, so resuming is allowed and is what makes the first frame arrive */
       if (c.state === 'suspended') { try { await c.resume(); } catch (_) {} }
-      if (disposed || mine !== startSeq) { try { await c.close(); } catch (_) {} 
+      if (disposed || mine !== startSeq) { try { await c.close(); } catch (_) {}
         for (const t of stream.getTracks()) { try { t.stop(); } catch (_) {} } stream = null; return state; }
       ctx = c;
       srcNode = ctx.createMediaStreamSource(stream);

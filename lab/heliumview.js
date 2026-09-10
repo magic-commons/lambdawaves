@@ -12,7 +12,7 @@ export function createHelium(host, api) {
   const ensureSol = () => { if (!sol) { generation++; sol = hylleraas(BASES[basis]); } return sol; };
   const x1 = () => x1v || [r1 * Math.sin(th1), 0, r1 * Math.cos(th1)];
   const r0 = el('div', 'row tight', host);
-  const onSw = sw({ label: 'HELIUM ON', value: false, title: 'hand the FIELD to helium: the cloud of electron 2 given electron 1 at the marked point', onChange: (v) => { on = v; api.setOn(v); } });
+  const onSw = sw({ label: 'HELIUM ON', value: false, title: 'Show helium’s conditional density in the field', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
   const bSeg = seg({ label: 'HYLLERAAS TERMS', value: 'six', options: [
     { id: 'one', label: '1', title: 'e^{−ζs}: the screened product, ζ = 27/16' }, { id: 'three', label: '3', title: 'Hylleraas 1929: {1, u, t²}' },
@@ -23,11 +23,11 @@ export function createHelium(host, api) {
   const kR = knob({ label: 'ELECTRON 1  r₁', min: 0.05, max: 3, value: 0.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { r1 = v; x1v = null; api.repaint(true); refresh(); } }); r1row.appendChild(kR.root);
   const kT = knob({ label: 'ELECTRON 1  θ₁', min: 0, max: Math.PI, value: 0, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { th1 = v; x1v = null; api.repaint(true); refresh(); } }); r1row.appendChild(kT.root);
   const rr = el('div', 'row tight', host);
-  const roE = readout({ label: 'E  variational · exact  (hartree)', value: '—', sub: '' });
+  const roE = readout({ label: 'ENERGY · MODEL / REFERENCE (hartree)', value: '—', sub: '' });
   const roZ = readout({ label: 'ζ · Kato cusp (½)', value: '—', sub: '' });
   const roH = readout({ label: 'CORRELATION HOLE', value: '—', sub: 'ρ(x₂ = x₁ | x₁) ÷ ρ(x₂ = −x₁ | x₁)' });
   rr.appendChild(roE.root); rr.appendChild(roZ.root); rr.appendChild(roH.root);
-  el('div', 'note', host).innerHTML = '<b>Helium, the hard way.</b> Two electrons, one nucleus of charge 2, no mean field: Hylleraas\'s ψ = e^{−ζs}Σc·s^a t^b u^c in s = r₁+r₂, t = r₁−r₂, u = r₁₂. Every matrix element is <b>EXACT</b> (a finite sum of factorials); the energy is <b>VARIATIONAL</b>, a rigorous upper bound on the exact −2.903724 — one term gives −2.8477, Hylleraas\'s three −2.9024, ten terms come within a millihartree. The cloud shown is <b>the conditional density of electron 2 given electron 1</b> at the marked point, ρ(x₂ | x₁) ∝ |ψ(x₁, x₂)|²: its <b>shape</b> is the Born rule and nothing else (the brightness is normalised to the frame\'s peak — a rendering choice — so it does not track the conditional normalisation as electron 1 moves). Move electron 1 and the cloud of electron 2 moves away from it — that is electron correlation, and the entanglement of the singlet pair, made visible; the Kato cusp ∂ψ/∂u = ψ/2 at coalescence is the two electrons feeling each other. Position space; the atom\'s windows stand down while helium holds the field.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> A Hylleraas basis approximates the correlated two-electron ground state. The energy approaches −2.903724 Eh as terms are added. The field shows electron 2 conditioned on electron 1 at the marker; brightness is normalised per frame. Position space only.';
   function prepare() {
     if (sol) return Promise.resolve(sol);
     if (solving) return solving;
@@ -49,7 +49,7 @@ export function createHelium(host, api) {
     if (!sol) { prepare(); return; }
     const solved = ensureSol();
     roE.set(`${solved.E.toFixed(5)} · ${EXACT_E.toFixed(6)}`, solved.E > EXACT_E ? 'ok' : 'bad');
-    roE.setSub(`${solved.terms.length} terms · above exact by ${((solved.E - EXACT_E) * 1000).toFixed(2)} mEh · known anchor ${KNOWN[basis] !== undefined ? KNOWN[basis] : '—'}`);
+    roE.setSub(`${solved.terms.length} terms · reference gap ${((solved.E - EXACT_E) * 1000).toFixed(2)} mEh`);
     const cusp = cuspRatio(solved);
     roZ.set(`${solved.zeta.toFixed(4)} · ${Number.isFinite(cusp) ? cusp.toFixed(3) : '—'}`, Number.isFinite(cusp) && Math.abs(cusp - 0.5) < 0.15 ? 'ok' : '');
     const p = x1(), same = psiPair(solved, p, p) ** 2, opp = psiPair(solved, p, [-p[0], -p[1], -p[2]]) ** 2;

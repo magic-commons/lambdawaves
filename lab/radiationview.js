@@ -65,7 +65,7 @@ export function createRadiation(host, api = {}) {
   const roP = readout({ label: 'P = |c₁|²|c₂|² ħωA', value: '—', cls: 'wide', sub: 'field of a coherent superposition, radiating |c₁|²|c₂|² ħωA' });
   r3.appendChild(roD.root); r3.appendChild(roP.root);
 
-  el('div', 'note', host).innerHTML = '<b>EXACT + NUMERICAL.</b> ⟨a|r|b⟩ is the Condon–Shortley angular factor (l′ = l ± 1, m′ = m, m ± 1) times <b>dynamics.js\'s own radial integral</b> — the same one the A / B TRANSITION\'s ⟨z⟩ prints, so this window and that readout cannot disagree. <b>A = (4/3)α³ω³|⟨a|r|b⟩|²</b> in atomic units, divided by t_au and multiplied by μ/m once (energies scale as μ, lengths as 1/μ, so A ∝ μ exactly once): 2p → 1s gives (2/3)<sup>8</sup>α³ = 1.5162329e−8 a.u. = <b>6.2649 × 10⁸ s⁻¹</b>, which is NIST\'s value, and τ = <b>1.596 ns</b>. <b>THE FIELD:</b> for d(t) = 2Re(d e<sup>−iωt</sup>) the radiation zone carries E = [n̂(n̂·d̈) − d̈]/(c²r), B = n̂ × E, and the time-averaged power is P = (4/3)ω⁴|d|²/c³ = <b>|c₁|²|c₂|² ħωA</b> — certified in the tests by integrating the Poynting flux over a sphere and a period, not by algebra. At the equal mix that is ħωA/4. The plot is <b>the pattern of the instantaneous dipole, at its own scale</b>: λ = 2296 a₀ for Lyman-α, so it can never be drawn over the orbital. <b>The near and induction zones are not in this expression</b>, and no radiation reaction acts on the register: this is what such a dipole WOULD radiate.';
+  el('div', 'note', host).innerHTML = '<b>Interpretation.</b> Matrix elements set the transition rate, lifetime, wavelength, and far-field dipole pattern. The plot rescales the radiation pattern to fit; it omits near fields and radiation reaction, so the state does not decay.';
 
   /* ── the pair ────────────────────────────────────────────────────────── */
   function choose(reg, t, ab) {
@@ -174,19 +174,19 @@ export function createRadiation(host, api = {}) {
     if (!cache) { for (const r of [roPair, roA, roTau, roLam, roHw, roD, roP]) { r.set('—', 'warn'); r.setSub(''); } cap.textContent = ''; return; }
     const C = cache;
     roPair.set(`${C.la}  →  ${C.lb}    Δm = ${C.dm}`, 'live');
-    roPair.setSub(`${C.src} · |c₁|² = ${C.w1.toFixed(4)}, |c₂|² = ${C.w2.toFixed(4)} · ‖c‖² = ${C.norm2.toFixed(6)} (taken per unit norm)`);
+    roPair.setSub(`${C.src} · |c₁|² ${C.w1.toFixed(4)} · |c₂|² ${C.w2.toFixed(4)} · norm ${C.norm2.toFixed(6)}`);
     roA.set(sci(C.A, 4) + ' s⁻¹', 'ok');
     roA.setSub(`μ/m = ${MU_H.toFixed(9)} · ${sci(C.A / MU_H, 4)} s⁻¹ at infinite nuclear mass`);
     roTau.set((C.tau * 1e9).toFixed(3) + ' ns');
-    roTau.setSub(`${sci(C.tau, 4)} s · this channel alone`);
+    roTau.setSub(`${sci(C.tau, 4)} s · selected channel`);
     roLam.set(C.lambda.toFixed(0) + ' a₀  ·  ' + (C.lambda * A0_NM).toFixed(1) + ' nm');
-    roLam.setSub(C.lyman ? 'Lyman-α — three orders of magnitude off the stage' : 'three orders of magnitude off the stage');
+    roLam.setSub(C.lyman ? 'Lyman-α · rescaled for display' : 'rescaled for display');
     roHw.set((C.omega * HARTREE_EV).toFixed(4) + ' eV');
     roHw.setSub(`ω = ${C.omega.toFixed(6)} a.u.`);
     roD.set(C.dabs.toFixed(6));
     roD.setSub(`radial ${C.M.radial.toFixed(6)} a₀ · |⟨a|r|b⟩|² = ${C.M.abs2.toFixed(6)}`);
     roP.set(`${sci(C.P, 4)} a.u.  ·  ${sci(C.P * W_PER_AU, 3)} W`, C.P > 0 ? 'ok' : 'warn');
-    roP.setSub(`field of a coherent superposition, radiating |c₁|²|c₂|² ħωA · weight ${C.weight.toFixed(6)} × ħωA = ${sci(C.hbarOmegaA, 4)} a.u.`);
+    roP.setSub(`weight ${C.weight.toFixed(6)} · ħωA ${sci(C.hbarOmegaA, 4)} a.u.`);
     cap.textContent = `far field at its own scale (λ = ${C.lambda.toFixed(0)} a₀${C.lyman ? ' for Lyman-α' : ''})`;
   }
 

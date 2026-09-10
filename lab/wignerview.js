@@ -68,7 +68,7 @@ export function createWigner(host, api = {}) {
   const roMs = readout({ label: 'COMPUTE', value: '—', sub: '64 × 64 · order normal · throttled to 2 Hz while playing' });
   for (const r of [roPeak, roMin, roMax, roMs]) rr.appendChild(r.root);
 
-  el('div', 'note', host).innerHTML = '<b>NUMERICAL, on EXACT inputs.</b> W(r, p) = π<sup>−3</sup>∫ψ*(r + s)ψ(r − s)e<sup>2ip·s</sup>d³s, cut at <b>x = y = 0, p_x = p_y = 0</b>. On that axis the azimuth is analytic and only <b>equal-m pairs</b> radiate into W; what is left is one chord integral per (z, s<sub>z</sub>) and a Fourier integral, with the cusps at the nucleus turned into endpoints — which is what makes a 64 × 64 map cheap enough to draw. <b>THIS IS A SLICE, NOT A MARGINAL:</b> ∫∫W dz dp<sub>z</sub> = 1/π² = 0.1013 for the 1s, not 1; the true marginals are ∫W d³p = |ψ|² and ∫W d³r = |φ(p)|², and neither is what you are looking at. <b>W IS REAL AND NOT POSITIVE</b> (Wigner 1932; Dahl–Springborg 1982): the 1s dips to −3.09726 × 10⁻⁴ at (1.3295, 1.3791), and that negative lobe is drawn in the second accent. The map\'s <b>opacity</b> is |W/W<sub>max</sub>|<sup>0.35</sup> — a display law, so that a lobe 1 % of the peak is visible; the readouts print the true numbers, the minimum refined off the grid. The state is taken <b>per unit norm</b> and capped at the six most populated labels. <b>Hydrogenic register only:</b> under another Hamiltonian, or the Sturmian scale, this window stands down.';
+  el('div', 'note', host).innerHTML = '<b>Phase-space slice.</b> This is W(z,p<sub>z</sub>) at x = y = p<sub>x</sub> = p<sub>y</sub> = 0, not a marginal distribution. Negative values use Accent B. Opacity is display-scaled; readouts retain the signed values. Hydrogenic position-space states only.';
 
   /* ── the map ─────────────────────────────────────────────────────────── */
   function clear() { const W = cv.clientWidth, H = cv.clientHeight; if (W > 0 && H > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); } }
@@ -166,13 +166,13 @@ export function createWigner(host, api = {}) {
     if (!cache) { for (const r of [roPeak, roMin, roMax, roMs]) r.set('—', 'warn'); return; }
     const C = cache;
     roPeak.set(C.peak.toFixed(7), 'live');
-    roPeak.setSub(`a.u.⁻³ · 1/π³ = 0.0322515 for the 1s · ‖c‖² = ${norm2.toFixed(6)} (taken per unit norm)`);
+    roPeak.setSub(`a.u.⁻³ · 1s reference 0.0322515 · norm ${norm2.toFixed(6)}`);
     roMin.set(`${C.min.v.toExponential(4)}  at  z = ${C.min.z.toFixed(4)},  p_z = ${C.min.p.toFixed(4)}`, C.min.v < 0 ? 'ok' : '');
-    roMin.setSub(`refined off the grid (${C.min.evals} evaluations) · W is real and NOT positive`);
+    roMin.setSub(`refined off-grid · ${C.min.evals} evaluations · negative values use Accent B`);
     roMax.set(C.slice.max.toExponential(4));
-    roMax.setSub(`on the 64 × 64 grid · ${C.labels}${capped ? ' · ' + capped + ' more label' + (capped > 1 ? 's' : '') + ' dropped (cap 6)' : ''}`);
+    roMax.setSub(`64 × 64 · ${C.labels}${capped ? ' · ' + capped + ' omitted' : ''}`);
     roMs.set(`${C.ms.toFixed(0)} ms  +  ${C.refineMs.toFixed(0)} ms`, C.ms > 400 ? 'warn' : '');
-    roMs.setSub(`the 64 × 64 map and the refinement of its minimum · ${terms} label${terms > 1 ? 's' : ''} · throttled to 2 Hz while playing`);
+    roMs.setSub(`map and minimum · ${terms} label${terms > 1 ? 's' : ''} · 2 Hz while playing`);
   }
 
   /**

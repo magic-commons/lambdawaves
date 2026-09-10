@@ -271,22 +271,7 @@ export const PRESETS = [
     note: 'the woodblock pigments: beni · tan · ukon · moegi · asagi · bero-ai · sumi · murasaki',
     stops: ring('#cb5e73', '#ce7a3b', '#e8cd62', '#668e4f', '#49a8b3', '#10427b', '#0f1624', '#723c7e') },
 
-/* ⚠ THREE AMBERS WERE PULLED OFF THE GAMUT CORNER BEFORE THESE LANDED.  `neon`, `enamel` and
-   `supernova` each carried a maximally saturated yellow with blue = 0 — #ffb703, #ffaa00, #ffd000 —
-   and ink.test's W57-2 caught them: darkening a colour that sits ON the sRGB corner to reach 3 : 1
-   against the pale card puts it OUTSIDE the gamut, the encoder clamps, and the clamp is the one thing
-   that moves hue.  Measured across 33 palettes × 360 hues, those three were the only samples over the
-   law's 8° ceiling (9.32°, 8.94°, 8.52° — 18 samples in all).  The smallest correction that clears it
-   was searched for rather than guessed: red and green untouched, blue lifted 42 / 32 / 38 of 255, which
-   holds the hue and the vividness and brings the worst swing to 7.45° / 7.40° / 7.50°.  A vivid palette
-   is one Josh asked for; a palette that drags the λ's hue when it is dimmed is a different colour. */
 
-/* ══ WAVE 106 · TEN MORE, AND THEY ARE THE VIVID ONES (Josh: "moar palettes to choose from with
-   vivid color choices") ═══════════════════════════════════════════════════════════════════════════
-   A collaboration with Gemini 3.8 at high effort, written to this file's own standard: a cyclic map
-   is a CLOSED loop, each carries a one-line provenance, and no entry claims `constL` or `cvd` it has
-   not reasoned through.  The palette gate (tests/palette.test.mjs) is the arbiter of those claims and
-   these were landed against it rather than beside it. */
   /* PROVENANCE: the three subtractive process printing primaries (process cyan, process yellow, process magenta)
      pushed to maximum sRGB gamut saturation at each hue angle.
      MEASURED: seam 0.0052, LUT step 0.0055, leg 0.458, L range 0.287, anti 0.210, anti(deut) 0.171.

@@ -82,62 +82,6 @@
  * count written in prose here — count the numbered end-of-rule tags instead (103 live, 2026-09-07).
  */
 
-/* ⟪ BEGIN THE SKIN SEAT — λWAVES GLASS.  Replaces BASINS' shipping block wholesale (wave 66) ⟫
- *
- * THE LAW THIS BLOCK OBEYS:  ONE TINT, FIVE DEPTHS, AND THE DEPTHS ARE MADE OF LIGHT.
- * Only the window root carries a colour plate.  Every surface inside it is that same plate seen
- * through a SHADE (black at an alpha — subtractive, so luminance drops while the field's hue and
- * structure come through) or lifted by an EDGE (a 1 px inner light and a hairline).  Nothing
- * inside the window introduces a new grey.
- *
- * WHY, IN TWO NUMBERS.  BASINS stacked four more semi-opaque grey plates inside the pane, so the
- * live field was 32 % visible at the window edge, 9.3 % in a device, 4.2 % in a control and 0.5 %
- * in the status capsule: depth was being paid for in opacity.  Under this block the pane goes
- * DENSER (0.677 → 0.80) and everything inside it goes thin, so the field is 20 % visible at the
- * edge, 18 % in a device, 16.9 % in a control and 11.2 % in the capsule — and the worst-case white
- * ink contrast RISES on every tier, because the one surface that carries the contract got stronger.
- * The pane is NOT a tint and may not be thinned: solved against hsl(212 14% 13%) over a worst-case
- * WHITE field (the light stage really does approach it), #fff body ink needs α ≥ 0.619 for 4.5 : 1.
- * 0.62 IS THE FLOOR.  "More transparent" is refused here and delivered everywhere else.
- *
- * THE EIGHT --gl-* TOKENS ARE THE TEXTURE, and they were declared and shipped INERT.  modwindow.css
- * builds --glass-bevel out of --gl-t/r/b/l/-w/-glow (four one-sided 1.04 px inner edges plus a 14 px
- * outer spill) and reads --gl-fill-a/-b as a two-stop vertical wash in `.glass`'s background-image.
- * Both were `transparent` only because BASINS' glasslight.js probes the picture behind each surface
- * and we have no probe.  Static values cost ONE raster and nothing per frame, and the directional
- * rim — brightest at the top, dark at the bottom lip — is the Fresnel signal that makes a surface
- * read as a material at all.  A probe is a capability wave, not a skin wave.
- *
- * WHAT MAY NOT MOVE.  Not one pixel: lab/mir/modwindow/ACCEPTANCE.md is a GEOMETRY gate and this is
- * a MATERIAL wave.  No width, padding, gap, radius, font-size or grid template is touched, and the
- * ONE geometry-adjacent number below, `--gl-w: 1.6px`, is BASINS' own and unchanged — it is an inner
- * box-shadow spread, not a layout dimension, and it appears nowhere in the acceptance table.
- * A STATE MAY CHANGE THE LIGHT AND THE SHADE ON A SURFACE; IT MAY NOT INTRODUCE A NEW PLATE.  A
- * fifth `background-color` with a new lightness is the plates growing back one wave at a time.
- *
- * WHERE THE LADDER IS DECLARED, and it is not where the research spec put it.  modwindow.css
- * declares the twenty --m2-mat-* tokens on `:root`, so the obvious lever is to re-point them at
- * `:root:root`.  MEASURED, THAT LEVER LOSES THE LIGHT THEME: λWAVES carries the theme on `body`, and
- * `body[data-theme="light"] :root:root` matches NOTHING — `:root` is <html> and can never be a
- * descendant of <body> — while a light override written on `.mir-modwindow` cannot reach a
- * `--m2-mat-pane` that was already substituted up at the root.  So the whole ladder is declared HERE,
- * on the seat's own three selectors, where every token substitutes on the element that declares it
- * and the theme prefix works.  All TWELVE rules in the artifact that consume the ladder — 31 selectors
- * once the groups are expanded — match inside one of the three; B135 reads the result back.
- * The DERIVED names are supplied, never the inputs, so the result does not depend on BASINS'
- * derivation surviving — which also makes `:root.fr-light` inert, and that is the intended answer:
- * it was designed for BASINS' own light skin and composites to 3.59 : 1 over λWAVES' light stage.
- *
- * THREE NAMES ARE DELIBERATELY NOT DECLARED HERE: --m2-plate, --m2-recess and --m2-recess-deep.
- * They are `.m2root`-local aliases, and two of the port's three COPIED DEFECTS (a transparent
- * `.m2pick`, a transparent `.m2clr` on a host control) exist precisely because those elements sit
- * OUTSIDE `.m2root` and the alias does not reach them.
- *   WAVE 69: JOSH RULED THE OTHER WAY — "the modulation window is broken … whatever problem it has
- * we will try to fix here" — so all three copied defects are now fixed, and the fix is still not a
- * declaration in this scope, because a blanket `--m2-plate` here would reach twelve rules to correct
- * two.  See § THE THREE DIVERGENCES at the foot of this file; the entries are 16, 17 and 18 of the
- * reach list and lab/mir/PORT-NOTES.md carries the diff for the port back.
- */
 
 .mir-modwindow,
 .kwin-chiprail,
@@ -149,21 +93,8 @@
   --hue-bad: 4;
 
   /* ── T1 · THE ONE PLATE, and the five tiers.  L1 is a colour; L2–L5 are SHADES. ─── */
-  /* WAVE 69 · THE PANE IS THE HOUSE'S PANE, AND IT IS THE HOUSE'S TOKENS THAT SAY SO.
-     Josh, three times now, most recently against his own recordings: the ABOUT card and the KEYS
-     sheet wear our glass and the field's colour comes through them; the plugin was "a flat dark
-     slab" beside them.  It was not a colour mismatch — hsl(212 14% 13%) and the house's
-     hsl(214 16% 13%) are rgb(28, 33, 38) either way — it was that the plugin ANSWERED NOTHING:
-     reach-list 15 pinned it opaque at a specificity CARD STYLE cannot reach, so every other card in
-     the lab went REFRACTIVE (the shipped default) and this one stayed a plate.
-       So the private tint is DELETED rather than re-tuned.  `--glass-tint` and `--glass-opacity` are
-     now the ones lab.css and skin.css declare — one declaration in the tree, which is what makes
-     "the plugin follows the house glass" true tomorrow as well as today — and `--m2-scrim` is the
-     house opacity, still overridable to 1 by the two accessibility arms at the foot of this seat,
-     which is the whole reason the name survives.
-       WHAT DID NOT CHANGE, because Josh named it: the BUTTONS keep their dark-on-light inversion
-     (--m2-mat-control below, and its light block).  Wave 66's error was applying that inversion to
-     the DEVICE and then to the window; it was only ever for the buttons. */
+
+
   --m2-scrim: var(--glass-opacity);              /* the house's own .84 — and 1 under reduced transparency */
   --m2-mat-pane:        hsl(var(--glass-tint) / var(--m2-scrim));
   /* THE WINDOW'S OWN FILL, and the one token in this sheet that CARD STYLE writes.  Default is the
@@ -172,9 +103,9 @@
      they are menus over a card, and the house's own menus (`.mb-list` at .97) are near-opaque for the
      same reason a transparent popover over a transparent window cannot be read. */
 /* RETIRED wave 105 — --m2-pane / --m2-pane-wash: zero readers once 15a went. */
-  --m2-mat-chassis:     transparent;             /* L2 device card · rail · workbar.  WAVE 71 · JOSH: the same
-                                                    material as the ABOUT card, and the ABOUT card is `.glass`
-                                                    under REFRACTIVE — it has no fill at all. */
+  --m2-mat-chassis:     transparent;
+
+
   --m2-mat-control:     transparent;             /* L3 button · chip · seat · field.  WAVE 71: "remove any
                                                     shading or tinting off everything" — a control is now
                                                     its hairline and its label, nothing more. */
@@ -247,37 +178,8 @@
      is a 60 fps WebGPU canvas — so a CONSTANT radius is still a per-frame cost.  LOCKED OFF.  Every
      glassmorphism recipe that asks for blur(12–20px) assumes a static background; this is why our
      tint is 0.80 where that field says 0.08–0.25. */
-  /* ⚠ WAVE 74 · THIS PIN IS REMOVED, AND IT WAS THE SINGLE REASON FROST COULD NEVER REACH THE
-     PLUGIN.  The paragraph above is still true about the COST, but it was being enforced in the wrong
-     place: `none` declared HERE, on the window, overrode whatever the house said, so `body.frost`
-     could turn the ABOUT card frosted and this window would sit beside it unchanged.  The house
-     already declares `--glass-filter: none` at lab.css:25 for exactly the reason above, and FROST in
-     skin.css:325 works by naming --frost-filter directly rather than by moving this token — so
-     inheriting the house value is the same number today AND follows the house tomorrow, which is the
-     whole of Josh's acceptance test.  The window does what the ABOUT card does, or it fails. */
-  /* ⚠ WAVE 97 · THE 8-px PIN IS GONE, AND IT WAS THE WHOLE OF WHY FROST LOOKED DIFFERENT HERE.
-     JOSH: "Have the material of the plugin's frost mode have the same CSS blend style (no saturation,
-     no brightening, etc. follow the 'about' info's window styling and everything about it)."
-       MEASURED, and it is not the saturation.  skin.css declared, AT THE TIME OF THIS WAVE,
-       `--frost-filter: blur(var(--glass-blur)) saturate(188%) brightness(108%)` on `:root` — and a
-     custom property's `var()` is substituted ON THE ELEMENT THAT USES IT, not where it is declared.
-     ⚠ READ THIS AS HISTORY, NOT AS THE PRESENT: wave 98 took the saturate and the brightness out on
-     Josh's second, verbatim-repeated instruction, so skin.css now reads `--frost-filter:
-     blur(var(--glass-blur))`, and wave 101 moved the house radius to 22 px.  The FINDING below still
-     holds — the divergence was the radius — but neither number quoted in it is current.
-     The house then ran `--glass-blur: 15px` (Josh's own number from wave 89); this seat pinned
-     8 px on `.mir-modwindow`, so every frosted surface in this plugin was resolving the SAME recipe at
-     ROUGHLY HALF THE RADIUS as the ABOUT card beside it.  The saturate and the brightness were always
-     identical — an 8-px blur simply leaves the field's structure and colour standing where 15 smears
-     them flat, which is exactly what "more saturated, brighter" looks like from the outside.
-       The pin was BASINS' own 8 and the comment on it ("declared only so blur(var(--glass-blur)) stays
-     valid") was wrong about needing to exist: `--glass-blur` is declared at `:root` and inherits in
-     here like every other house token.  Removing it makes the plugin's frost the ABOUT card's frost by
-     CONSTRUCTION rather than by two numbers agreeing — and it means SETTINGS · GLASS BLUR now moves
-     this window with every other card, which is the whole of "and everything about it".
-       `--glass-sat` and `--glass-bright` go with it: they were declared here and read by NOTHING (one
-     grep, one hit — this line), so they were two dead tokens whose names claimed the plugin had its own
-     saturation and brightening when it never did. */
+
+
   --glass-border: 0.6px;
   --glass-border-color: var(--m2-mat-edge);
   --glass-hairline:     hsl(0 0% 100% / 0.09);   /* dark; the light host overrides below */
@@ -294,8 +196,8 @@
      pickers and the work bars.  The light source is ABOVE: top brightest, sides half and a quarter,
      and the bottom lip DARK rather than white — that asymmetry is the whole effect. */
   --gl-w: 1.6px;
-  /* WAVE 71 · INERT AGAIN, on both themes.  The directional rim is a Fresnel signal painted on a
-     SURFACE; the ABOUT card has no surface, and Josh asked for the shading off everything. */
+
+
   --gl-t: transparent;                           /* TOP    — was hsl(0 0% 100% / 0.20) */
   --gl-l: transparent;                           /* LEFT   — was 0.11 */
   --gl-r: transparent;                           /* RIGHT  — was 0.07 */
@@ -308,7 +210,7 @@
   --gl-fill-a: transparent;                      /* THE TWO-STOP WASH — off: a wash needs a surface */
   --gl-fill-b: transparent;
 
-  /* ── THE TYPE.  OURS, not BASINS'.  Josh: "our fonts". ─────────────────────────── */
+
   /* the artifact reads --font-sans and --font-num in 75 of its 76 font declarations, so pointing the
      two names at the house face is the whole change; the 76th is a literal on the chip rail and it is
      item 14 of the reach list below.  --font-num follows lab.css:8, which already says the house
@@ -349,42 +251,16 @@
    overrides that one, so the line is kept as the floor it always was rather than as a lever. */
 :root:root { --m2-mat-hue: 212; }
 
-/* ── THE LIGHT HOST.  Not a light device — a DARKER one, and the rim inverts. ─────────────────────
-   JOSH'S RULING, and it is the whole of the inversion: DARK-ON-LIGHT ONLY.  The device inverts on
-   the light theme — --m2-mat-control and --glass-raise go 2.7× the shade of their chassis, so a
-   button is unmistakably a DARK button, darker than the device it sits in, which is darker again
-   than the pale stage: three unambiguous steps down from the host.  On dark, the rim and the density
-   carry the identity instead, and they carry it further than a polarity would: on a stage where every
-   house window is literally transparent, THE ONE OPAQUE, LIT-RIMMED SLAB IS THE DEVICE.
-   No accent-B chip fills (the artifact's law is "selection is an underline, never a filled accent
-   chip", and Accent B says only live modulation) and no full ink inversion (~50 forced edits against
-   a vendored-artifact law that says spend a forced edit on a capability, never on a nicety). */
+
 body[data-theme="light"] .mir-modwindow,
 body[data-theme="light"] .kwin-chiprail,
 body[data-theme="light"] .m2ghost {
-  /* ⚠ WAVE 70 SUPERSEDES THE PARAGRAPH BELOW.  The light theme no longer keeps a pane: the density
-     it describes moved into --m2-mat-chassis (the device card) and the window went transparent on
-     BOTH themes.  The paragraph is kept because its CONTRAST ARITHMETIC is still the live constraint
-     — it is why the chassis is 0.66 of the same dark literal, and why the ink was not flipped.
-     See § THE BACKGROUND GOES at the foot of this seat.
-     WAVE 69 · THE ONE PLACE THE PANE IS NOT THE HOUSE'S, AND THE REASON IS THE INK.
-     On DARK the window is refractive like every other card and Josh's frames are dark.  On LIGHT it
-     keeps a pane, because the artifact's ink ladder (T3 above) is 52 white-alpha rungs on BOTH themes
-     — that was decided at the port, on the stated grounds that a full ink inversion is ~50 forced
-     edits against a vendored-artifact law, and it has not changed.  White ink on a transparent card
-     over a near-white stage is not a style, it is unreadable, which is a worse failure than a plate.
-     So the pane here is skin.css:10-11's DARK card — hsl(214 16% 13%) at .84, the two numbers quoted
-     because the light theme redefines the tokens that hold them — and it sits at 0.62, the CONTRAST
-     CONTRACT'S OWN FLOOR as this file has always stated it, which is the MOST field it can let through
-     and still carry white ink (white on the composite is ~6.8 : 1 over the pale stage).  So the plugin
-     reads as a λWAVES surface with the field showing through it rather than as a foreign slab.  Flip
-     the ink and this exception goes and the window is refractive on both themes. */
+
+
   --m2-scrim:           0.62;
   --m2-mat-pane:        hsl(214 16% 13% / var(--m2-scrim));
-  /* WAVE 71 · the light host is now the SAME material as the dark one, because the material is the
-     house's own glass and the house already themes it.  The dark-on-light button inversion Josh ruled
-     in wave 66 goes with the fills it was made of: with no fill anywhere there is no polarity left to
-     invert, and the ink flip at the foot of this file is what carries the light theme instead. */
+
+
   --m2-mat-chassis:     transparent;
   --m2-mat-control:     transparent;
   --m2-mat-recess:      hsl(214 30% 40% / 0.07);
@@ -400,19 +276,12 @@ body[data-theme="light"] .m2ghost {
        Flipping the five rungs here fixes the aliases, every rule this file has written in house
      names, and every one it writes later.  Same alphas, same hue as wave 71's generated flip
      (hsl(214 30% 12%)), so the artifact's five-rung hierarchy is preserved exactly. */
-  /* WAVE 78 · AND THE FIVE RUNGS ARE THE LAB'S OWN FIVE GREYS, not a shade near them.  Josh:
-     "make the dark text match whatever dark 'grey' or idk if it's black in our own native UI."  It is
-     not black — skin.css:269 sets --fg to hsl(214 30% 10%) and four greys under it, and those five
-     literals are copied here in order, so the plugin's ink IS the rack's ink rather than a lookalike. */
-  /* WAVE 86 · THE PLOT'S RULES.  Josh: "a subtle light grey on light mode or dark grey on dark
-     mode" — read literally, and it is right: with the plot's own tint gone the ground IS the card, so
-     a LIGHT grey recedes correctly on the pale card and a DARK grey recedes correctly on the dark
-     one.  Each stays a few steps away from its own ground, which is what makes it subtle rather than
-     invisible. */
+
+
   --m2-env-ink: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%);   /* the artifact declares this
                                                     on `.m2dev.env` only; the macro rail's indicator needs
                                                     it too (wave 79), so it is raised to the seat. */
-  --m2-rule: hsl(214 12% 72% / 0.34);            /* wave 91: very, very light on the pale ground (Josh) */
+  --m2-rule: hsl(214 12% 72% / 0.34);
   --m2-ink-hi:    hsl(214 30% 10%);              /* = skin.css:269 --fg        */
   --m2-ink:       hsl(214 20% 18%);              /* = skin.css:269 --fg-soft   */
   --m2-ink-soft:  hsl(214 12% 30%);              /* = skin.css:269 --ink-key   */
@@ -497,11 +366,8 @@ body[data-theme="light"] .m2ghost {
    even where our own rules out-specify all three. */
 
 /* SUPERSEDED BY 21 (wave 70): both picker sheets wear the house glass. */                          /* 15b */
-/* 15c · WAVE 69 · AND THE WINDOW ANSWERS CARD STYLE.  Two rules, the same two the house writes for
-   `.dev` and `.glass` in skin.css §14c, at a specificity that beats the artifact's own officiation
-   rule (`:root:not(.skin-frost) #modwin.mir-modwindow.glass`, (1,4,0)).  REFRACTIVE is what ships and
-   it is Josh's ruling — the pane goes, the bevel and the shadow stay, and the field comes through the
-   plugin the way it comes through every other card on the stage. */
+
+
 /* RETIRED wave 105 — 15c: CARD STYLE wrote --m2-pane, whose only reader was 15a. */
 
 /* THE THREE INSIDE THE OFFICIATION BLOCK.  Already correct in KIND — a wash, a wash, a shade — and
@@ -515,24 +381,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow [role="slider"].drag {
   background-color: var(--m2-st-press); }
 
-/* ══ WAVE 69 · THE THREE DIVERGENCES — the copied defects, fixed HERE and nowhere else ═══════════
-   Josh, 2026-09-06: *"The modulation window is broken when we were even working on it on basins so
-   whatever problem it has we will try to fix here."*  So the three defects ACCEPTANCE §9 asks a mount
-   to REPRODUCE are corrected — at that wave the staged artifact remained byte-identical because
-   every correction was written in THIS sheet.  Later macro-rail edits are documented at their
-   source.  That is what made the
-   reciprocal port back to MANDELBROT a diff of eighteen reach-list lines rather than an archaeology.
-   lab/mir/PORT-NOTES.md § THE THREE DIVERGENCES carries the same three with their measurements.
 
-   AND MANIFEST.md's PRESCRIPTION FOR THE FIRST TWO IS WRONG FOR THIS MOUNT, which is worth writing
-   down because it is the obvious thing to try.  It says the fix is "one word: add `glass` to the class
-   string, exactly as `.m2ppick` and `.m2deadpick` already do".  Those two sheets carry NO background
-   of their own, which is the whole reason `glass` works for them.  `.m2pick` DOES —
-   `.mir-modwindow .m2pick { background: var(--m2-plate) }` at (0,2,0) — and a declaration that is
-   INVALID AT COMPUTED-VALUE TIME still WINS the cascade first and only then computes to `unset`.
-   `.glass` is (0,1,0) and loses; `.m2clr`'s own (0,1,0) beats `.glass` on source order, since
-   modwindow.css loads after skin.css.  The word would have changed nothing, silently, and the gate
-   would have stayed green on `rgba(0, 0, 0, 0)`.  Give the var a REACHABLE value instead.        */
 /* 16 · D1 · `.m2pick`, the ADD LFO / ADD ENV / ADD AUDIO sheet, and the macro sheet beside it.  Both
    are appended to the WINDOW root — a sibling subtree of `.m2root`, where the alias is declared — so
    `var(--m2-plate)` was invalid and the sheet painted transparent over the cards.  The fallback names
@@ -604,22 +453,6 @@ body[data-theme="light"] .m2ghost {
   /* RETIRED wave 105 — the prefers-contrast pane override: byte-identical to the reduced-transparency one, and equally unread. */
 }
 
-/* ══ WAVE 70 · THE BACKGROUND GOES, AND THE DEVICES BECOME THE CARDS ═══════════════════════════
-   JOSH, on the LIGHT theme, against his own screen: "Remove the background and make it just
-   scrolling windows for the ENV/LFO/AUDIO to sit in."
-     15c already took the pane away on DARK.  Light kept it, and the reason given above — the
-   artifact's ink is 80 literal white `color:` declarations in 26 rungs, and white ink over a pale
-   stage is unreadable — was right about the INK and wrong about WHERE THE DENSITY BELONGS.  The
-   WINDOW does not have to carry it.  The DEVICE does.
-     So the plate moves one level in.  --m2-mat-chassis is L2, and the artifact spends L2 on exactly
-   the three surfaces that should read as free-floating objects — the device card, the macro rail and
-   the work bar — so it stops being a 10 %/12 % black wash over a pane and becomes the card itself.
-   Every one of the 80 white inks stays valid, because every one of them sits on an L2 surface or
-   deeper.  What was "the background" was only ever the gaps BETWEEN those three, and the gaps are
-   now the live field — which is what BASINS does, and what Josh's reference recording shows.
-     NO GEOMETRY MOVES.  This is a colour on three surfaces plus a scroller that already scrolled:
-   `.m2run` (modwindow.css:741) has been `overflow-x: auto` since the port, so "scrolling windows for
-   them to sit in" is the structure that was already there with the slab taken off it. */
 
 /* 19 · the device card FLOATS, now that there is nothing behind it to sit on.  The artifact gives
    `.m2dev` a radius and a hairline but no shadow — it never needed one, because it sat on a plate.
@@ -627,33 +460,14 @@ body[data-theme="light"] .m2ghost {
    (a key + an ambient, themed, declared in the seat block above). */
 :root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) { box-shadow: var(--m2-mat-shadow); }        /* 19 */
 
-/* 20 · THE ADD BUTTON IS RETIRED, BECAUSE THE VERB MOVED TO THE RAIL (wave 75).  Wave 72 made this
-   a chip where it stood; Josh then put it where this window's other verbs live, so the in-run button
-   stands down rather than being styled twice.  It is HIDDEN, not deleted: it is the artifact's own
-   node, `lab/modwindow.js` still listens to it, and a host that un-hides it gets a working control. */
+
 :root:root:root #modwin.mir-modwindow .m2add { display: none; }                                        /* 20 */
 
-/* 20b · THE RAIL CHIP, AND ITS MARK IS THE CLOSE GLYPH TURNED AN EIGHTH.  Josh: "Use the 'X' glyph
-   from the chip and just rotate it 45 degrees and center it."  The chip itself needs no rules — it is
-   built with the artifact's own classes, so all five chip-rail rules already dress it — and this is
-   the whole of the difference: one transform about the drawing's own centre.  `transform-origin` is
-   stated rather than left to the default because the SVG carries a viewBox whose box is the glyph's,
-   and an eighth turn about anything else would walk the plus off the 48-px disc. */
+
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .m2addchip .crail-ink {
   transform: rotate(45deg); transform-origin: 50% 50%; }                                              /* 20b */
 
-/* 21 · AND THE SHEET IT OPENS WEARS THE ABOUT CARD'S GLASS.  Josh: "have the dropdown menu also use
-   the 'about' page glass css."  Reach-list 16 gave the picker the ladder's chassis, which was the
-   right answer while the chassis was a wash inside a pane; now that the chassis IS the device card,
-   a menu wearing it would be the same material as the thing it floats above.  So both picker sheets
-   take #sheet's recipe — the house tint, the house border, the house shadow — and, because a sheet
-   that wears the house's glass must also wear the house's INK or it is unreadable on the light
-   theme, `--fg` comes with it.  That ink flip is safe here and nowhere else in this window: the
-   picker subtree is three buttons and their rows, it is built OUTSIDE `.m2root`, and it inherits
-   colour rather than declaring it, so no white literal is being fought.
-     The tint is taken at .97, not at --glass-opacity: a menu is the one surface that may be
-   near-opaque, for the same reason the house's own `.mb-list` is, and a transparent popover over a
-   now-transparent window cannot be read at all.  This REPLACES reach-list 16 and 15b. */
+
 :root:root:root #modwin.mir-modwindow .m2pick,
 :root:root:root #modwin.mir-modwindow .m2ppick.glass,
 :root:root:root #modwin.mir-modwindow .m2deadpick.glass {
@@ -674,46 +488,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2ppick .m2prowtag,
 :root:root:root #modwin.mir-modwindow .m2deadpick .m2prowtag { color: var(--fg-soft); }
 
-/* ══ WAVE 71 · THE PLUGIN WEARS THE ABOUT CARD, AND THAT MEANS FLIPPING THE INK ═══════════════
-   JOSH: "make the macro section, the preset bar and tempo bar, scrolling devices, to be the same
-   material as our 'about' info glass … Remove the background that is currently clear transparent and
-   remove any shading or tinting off everything."
-     The ABOUT card is #sheet, which is `.glass`, which under the shipped CARD STYLE (refractive) has
-   NO FILL AT ALL — a hairline, a shadow, and the live field straight through it.  That is the whole
-   material, and it is why the field reads so vividly through it.  So the plugin's three object
-   surfaces (device card, macro rail, work bar — L2, --m2-mat-chassis) go transparent, the interior
-   shades go with them, and the edge and the float become the house's own two tokens.
-     THIS IS THE INK FLIP THE PORT DEFERRED THREE TIMES, and it is finally cheap because it was
-   MEASURED rather than estimated: the artifact's white ink is 55 selectors in 25 alpha rungs and its
-   white washes are 22 selectors in 13, so the whole inversion is 38 GENERATED RULES below — not the
-   "~50 forced edits against a vendored-artifact law" the port feared, and at that wave changed no
-   imported CSS.  White at alpha on a dark ground becomes the house's
-   own near-black at the SAME alpha on a pale ground, so the artifact's five-rung hierarchy survives
-   intact; only its polarity changes, and only on the light theme.
-     The washes split by what they are: at or below 0.15 a white wash was a SURFACE TINT and is
-   deleted outright (that is "remove any shading or tinting"); above it, it was a MARK — a meter, a
-   dot, a pad — and is inverted so it still reads. */
-/* ⚠ GENERATED, AND THE GENERATOR HAS BEEN WRONG THREE TIMES — every time about what it SCANNED or
-   WHERE it applied, never about what it wrote.  (1) It scoped the selector STRING, so in a comma
-   group every part after the first kept the artifact's specificity.  (2) It matched only
-   `rgba(255,255,255,a)` and `#fff`, missing 25 declarations in `hsl(0 0% 100% / a)` — the OUT caption
-   among them.  (3) IT ONLY EVER RAN FOR THE LIGHT THEME, which is this pass: Josh, "I notice that the
-   dark texts and the light texts are exactly black and white.  They should just be whatever the
-   darkest color or lightest text is like on our native UI."  On DARK the artifact's literals are
-   PURE WHITE and were left alone, because the flip was written as a light-theme fix rather than as
-   what it actually is — a re-basing of BASINS' ink onto λWAVES'.
-     Both themes now, from one pass over the artifact: light on skin.css:283's hsl(214 30% 10%), dark
-   on hsl(210 20% 96%), which is #f2f5f7 — skin.css:26's own --fg, not #fff.  Same alphas, so the
-   artifact's five-rung hierarchy survives on both grounds; only the endpoints are ours. */
 
-/* ⟡ WAVE 98 · THE BASE STEPS ONE RUNG IN FROM THE EXTREME, ON BOTH THEMES.  Josh: "Have the rest of
-   the white text in the plugin match the next darkest text in dark mode or the next lightest text in
-   light mode."  Wave 77 based this whole flip on the ladder's END — #f2f5f7 on dark and
-   hsl(214 30% 10%) on light, which are `--m2-ink-hi`, the lab's own --fg — and across thirty-odd rungs
-   of one hue that end still reads as plain white on a dark card.  Every rung is re-based on
-   `--m2-ink`: hsl(0 0% 88%) on dark, hsl(214 20% 18%) on light.
-     THE ALPHAS DO NOT MOVE.  Only the endpoint the ladder hangs from does, so the artifact's five-rung
-   hierarchy is preserved exactly as wave 71 measured it — this is a re-basing, not a re-ranking. */
 /* ── LIGHT ───────────────────────────────────────────────────────────── */
 :root:root:root body[data-theme="light"] .mir-modwindow .m2prenav:active:not(:disabled),
 :root:root:root body[data-theme="light"] .mir-modwindow .m2presave:active:not(:disabled),
@@ -728,7 +503,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root body[data-theme="light"] .mir-modwindow .m2pickb,
 :root:root:root body[data-theme="light"] .m2clr:active,
 :root:root:root body[data-theme="light"] .mir-modwindow .m2prowdel:active,
-:root:root:root body[data-theme="light"] .mir-modwindow .m2audsx { color: var(--m2-ink); }   /* wave 98: one rung in from the extreme (Josh) */
+:root:root:root body[data-theme="light"] .mir-modwindow .m2audsx { color: var(--m2-ink); }
 :root:root:root body[data-theme="light"] .mir-modwindow .m2prename,
 :root:root:root body[data-theme="light"] .mir-modwindow .m2prename::placeholder,
 :root:root:root body[data-theme="light"] .mir-modwindow .m2vname,
@@ -845,7 +620,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2pickb,
 :root:root:root body[data-theme="dark"] .m2clr:active,
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2prowdel:active,
-:root:root:root body[data-theme="dark"] .mir-modwindow .m2audsx { color: var(--m2-ink); }   /* wave 98: one rung in from the extreme (Josh) */
+:root:root:root body[data-theme="dark"] .mir-modwindow .m2audsx { color: var(--m2-ink); }
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2prename,
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2prename::placeholder,
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2vname,
@@ -948,38 +723,13 @@ body[data-theme="light"] .m2ghost {
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2audsrc { background-color: transparent; }
 :root:root:root body[data-theme="dark"] .mir-modwindow .m2audout { background-color: transparent; }
 
-/* ══ WAVE 72 · THE HINT GOES, THE WRAPPERS GO, AND THE LAST ABOUT-CARD EFFECTS COME OVER ═══════
-   JOSH: "remove the hints text in the bottom of the window … copy any more window styling effects
-   from the 'about glass' into the modulation plugin … the window layer underneath the entire
-   modulation plugin is still visible, can you remove it?"
 
-   22 · THE HINT ROW.  `.m2hint` is the artifact's status line, and lab/modwindow.js:165 fills it with
-   the MOD-IS-OFF paragraph.  It is nine-pixel prose across the foot of an instrument; the same fact is
-   already carried by the MOD lamp on both playheads, which is where a player actually looks. */
 :root:root:root #modwin.mir-modwindow .m2hint { display: none; }                                      /* 22 */
 
-/* ══ WAVE 105 · 113 · A TRIG IN THAT NAMES A SIGNAL, NOT A HAND ═══════════════════════════════
-   Josh: "Hit for envelope is a shortcut key."  The TRIG IN seat now walks the AUDIO devices' HIT
-   sockets after the trigger macros, and prints `H` (or `H2`…) instead of a rail number when one is
-   bound.  A hand fires a macro; a HIT fires off the signal itself — a different KIND of binding, so
-   it takes Accent B, the same ink the AUDIO device's own trace wears (reach 86/107), rather than the
-   neutral number ink.  One declaration: the seat is the artifact's and its geometry is not ours. */
+
 :root:root:root #modwin.mir-modwindow .m2dev .m2bus.m2bushit { color: var(--acc2); }                   /* 113 */
 
-/* ══ WAVE 105 · 112 · THE WINDOW GETS ITS VOICE BACK, WITHOUT GETTING ITS FURNITURE BACK ══════
-   TWO INDEPENDENT REVIEWS FOUND THE SAME DEFECT: reach 22 above hides `.m2hint` and reach 35 hides
-   `.m2note`, and between them they are the ONLY surfaces lab/modwindow.js writes to — 29 `status()`
-   sites and 25 `say()` sites, every one computing a sentence into a hidden node.  Pressing SAVE with
-   an empty name did nothing at all; so did arming a macro, exhausting the macros, and — the one that
-   matters most — being refused the microphone.
-     JOSH'S RULINGS ARE KEPT.  He removed the permanent hint line and the text inside the curve
-   windows, and neither returns: at REST this seat is still `display: none`, exactly as reach 22 left
-   it.  What he objected to was prose sitting on the glass whether or not it had anything to say, and
-   a refusal is not that.  The seat appears only while it carries a message and fades when it expires.
-     IT MUST ALSO BE HANDED VISIBILITY EXPLICITLY.  Reach 25 makes the whole window root
-   `visibility: hidden` and reach 27 gives it back to exactly six subtrees; `.m2hint` is in none of
-   them, so `display: block` alone would have shown nothing — a second, quieter reason the messages
-   were invisible.  It takes `pointer-events: none` with it: a message is never a target. */
+
 :root:root:root #modwin.mir-modwindow .m2hint.m2say {
   display: flex; align-items: center; visibility: visible; pointer-events: none;
   position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
@@ -998,52 +748,16 @@ body[data-theme="light"] .m2ghost {
   @keyframes m2-say-in { from { opacity: 0; } to { opacity: 1; } }
 }                                                                                                     /* 112 */
 
-/* 23 · EVERY WRAPPER, NOT JUST THE WINDOW.  Measured in a docked mount, `#modwin` itself and
-   `.kwin-body` under it are both already `rgba(0, 0, 0, 0)` down to `#stage` — so the pane really is
-   gone THERE.  What that mount does not exercise is the FLOAT host: wave 53 lets any window pop out
-   into `#floats`, where it is wrapped by a card that paints on its own account, and a popped-out
-   plugin is what Josh is looking at.  Rather than guess which wrapper it is, all of them are named:
-   the window, its body, its panel, and the float host in both spellings.  None of these may carry a
-   fill under a plugin whose whole material is "the field, straight through". */
+
 /* RETIRED wave 105 — 23: all five arms superseded — arms 1/4 by entry 25, arms 2/3/5 by entry 26, which repeats them verbatim. */
 /* 23b · the float host, in its OWN rule.  `:has()` is a live selector and an unsupported one
    invalidates the whole comma group it sits in — alone here, it can only fail alone. */
 /* RETIRED wave 105 — 23b: the window is appended straight to #floats as a .kwin (rack.js:2326) and is never wrapped in a .dev. */
 
-/* 24 · AND THE REST OF THE ABOUT CARD'S RECIPE, which is smaller than it sounds because #sheet is
-   `.glass` and `.glass` is four declarations.  Three were already here (the edge, the float, the
-   absent fill).  The fourth is the CORNER: #sheet rounds at --r-lg and every house card at --card-r,
-   while this window kept BASINS' own.  The window takes the house corner; the DEVICE cards keep the
-   artifact's 16 px, because a device radius is in the geometry acceptance table and this is a
-   material wave.  The sheen is deliberately NOT copied: it is an image the house paints only under
-   TINTED, and under REFRACTIVE — what ships, and what Josh is looking at — the ABOUT card has none. */
+
 /* RETIRED wave 105 — 24: entry 25 sets border-radius:0 at (1,5,0) on an element it also makes visibility:hidden. MEASURED 2026-09-07: computed border-radius is 0px. */
 
-/* ══ WAVE 73 · THE CONSTELLATION, AND ONLY HERE ═══════════════════════════════════════════════
-   JOSH: "scope it to the modulation window alone.  Also I refreshed page and it still does not look
-   like the basins window.  It's been 3 prompts Claude."
-     He is right, and the reason is that the last three waves changed the plugin's MATERIAL when the
-   thing his reference recording shows is a different SHAPE.  In BASINS there is no window: the
-   transport is a floating pill, MACROS is its own card, and LFO / ENV / AUDIO are separate columns
-   with real air between them.  Making that slab transparent was never going to produce it, because
-   the slab was still there doing the layout — one box with everything welded inside it.
-     So this is skin.css §DISCONNECTED's recipe, applied to `#modwin` alone and permanently on.  Its
-   load-bearing declarations are copied for the reasons that sheet already gives, with one WebKit
-   exception: the window stays `visibility:visible`.  An iPad can fail to composite `.m2dev` children
-   inside the momentum-scrolling `.m2run` when an ancestor is hidden and only the children opt back
-   into visibility; the cards then appear only after ADD or COMPACT/FULL invalidates that layer.
-   The window still paints nothing because every shell has a transparent fill, edge and shadow, and
-   its `pointer-events:none` still makes the air real.  `contain: layout` + `isolation: auto`, because
-   a paint root between a surface and the
-   canvas is what stops FROST reaching the constellation; `border-radius: 0`, because a rounded clip
-   on an ancestor kills a descendant's backdrop-filter; and `pointer-events: none` with the surfaces
-   `auto`, SO THE GAPS ARE REAL HOLES a press falls through to the field.
-     THE MAPPING.  Their `.kwin` is our `#modwin`; the surfaces that become free-floating objects are
-   the TWO work bars the artifact already builds as independent boxes (`.m2prebar` the preset pill,
-   `.m2pre` the tempo pill), the macro rail, and each device card.  Everything between them — the
-   window body, the panel, the root row, the device run, the foot — is a LAYOUT box now and paints and
-   catches nothing.  Nothing outside `#modwin` is touched: `body.disconnected` stays off and stays the
-   user's, which is wave 67's mistake not repeated. */
+
 :root:root:root #modwin.mir-modwindow:not(.phone) {
   background: transparent; border-color: transparent; box-shadow: none;
   border-radius: 0; contain: layout; isolation: auto;
@@ -1069,15 +783,12 @@ body[data-theme="light"] .m2ghost {
   visibility: visible; pointer-events: auto;
   border: var(--glass-border) solid var(--glass-border-color);
   border-radius: var(--disc-r); box-shadow: var(--glass-shadow); }                                    /* 27 */
-/* 28 · THE MACRO RAIL STOPS BEING A REGION OF THE WINDOW AND BECOMES A CARD BESIDE IT.  Its
-   `border-right` was a divider inside a slab; with the slab gone a divider divides nothing.  And the
-   row it sits in gets the house's constellation gap, which is the air Josh means by "more of the
-   background shows" — the devices already had 7 px between them and the rail had none. */
+
+
 :root:root:root #modwin.mir-modwindow .m2rail { border-right: 0; }                                    /* 28 */
 :root:root:root #modwin.mir-modwindow .m2root { gap: var(--disc-gap); }                               /* 28b */
-/* 29 · THE BAR-CHIP IS THE LIGHT ONE — Josh: "I absolutely love the top draggable bar's glass over
-   the dark tint of the other parts."  Same token the house spends on `.dev-head` in its own
-   constellation, so the two agree by construction rather than by coincidence. */
+
+
 /* RETIRED wave 105 — 29: entry 39 re-declares it with --m2-mat-chassis; its comment ('the raise comes off') was the retraction. */
 
 /* ══ WAVE 74 · THE SETTINGS REACH THE FILL, BY THE HOUSE'S OWN SWITCHES ═══════════════════════
@@ -1119,58 +830,32 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2pick.m2pick-at-chip {
   position: fixed; right: auto; bottom: auto; transform: none; z-index: calc(var(--z-banner) + 6); }   /* 30 */
 
-/* ══ WAVE 76 · THE CHIPS, THE INK, THE KNOB ORDER, THE SWITCH ROW, THE NOTES ══════════════════
 
-   31 · THE CHIPS WEAR THE DEVICE'S GLASS.  The artifact paints each chip's disc with an OPAQUE
-   `hsl(var(--glass-tint) / var(--glass-opacity))` — correct in BASINS, where the rail floats over a
-   frosted skin, and wrong here now that every other surface in this plugin is `.glass` under CARD
-   STYLE.  The disc takes the same three declarations the device card takes and nothing else, so a
-   chip is the same material as the thing it opens.  ITS ONLY STATE IS THE PRESS (Josh): no lit fill,
-   no accent wash — `:active` and an open chip darken, and that is the whole vocabulary. */
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip::before {
   background-color: transparent;
   background-image: none;
   border-color: var(--glass-border-color);
   box-shadow: var(--glass-shadow); }                                                                  /* 31 */
-/* ⚠ WAVE 94 · `.on` COMES OFF THIS RULE.  Josh: "there appears to be a circle that shows up on the
-   activated chips … They're toggle buttons and shouldn't show activation of some kind."  Wave 76's
-   ruling was "only darken when clicking" and I read `.on` as a kind of click — it is not: `:active`
-   lasts as long as the finger and `.on` lasts until the state changes, so the second one is exactly
-   the persistent activation mark Josh is saying these chips must not carry.  The PRESS stays. */
+
+
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip:active::before {
   background-color: var(--glass-press); border-color: var(--glass-border-color); }                     /* 31b */
 
-/* 32 · THE GLYPH IS NEUTRAL GREY, LIT THE WAY THE KNOBS ARE LIT.  The artifact colours the ink
-   `--dim` and leaves it flat; Josh asked for the knobs' own 1-px inner light on it.  An SVG cannot
-   take an inset box-shadow, so the equivalent is a 1-px drop-shadow in the house's own raise colour —
-   the same top-left light `--neu-raise` puts on every dial in the lab, at the same one pixel.  The
-   ink itself is `--ink-key`, the house's neutral grey, which is rated ≥ 4.5 : 1 on the card in BOTH
-   themes, so this is one declaration for light and dark rather than two. */
+
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip .crail-ink,
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .kwin-grip-dots {
   color: var(--ink-key);
   filter: drop-shadow(0 1px 0 var(--glass-raise)); }                                                   /* 32 */
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip:active .crail-ink { color: var(--fg); }
 
-/* 33 · THE KNOB READS THE WAY OURS READ: VALUE ABOVE, DIAL, TITLE BENEATH.  Josh: "the knob title is
-   in the bottom and the popup info goes on top of the knobs not hiding the arc."  The artifact stacks
-   dial · caption · value and ALSO prints the number inside the dial (`.ckval`, at `top: 50%`), which
-   is the thing sitting on the arc.  So the in-dial number goes, and the two lines under the dial swap
-   by `order` alone — THE COLUMN'S HEIGHT IS UNCHANGED, which matters because the device body is a
-   fixed 216 px grid and the acceptance table measures it. */
+
 :root:root:root #modwin.mir-modwindow .m2k { flex-direction: column; }
 :root:root:root #modwin.mir-modwindow .m2kval { order: 1; }
 :root:root:root #modwin.mir-modwindow .m2kd   { order: 2; }
 :root:root:root #modwin.mir-modwindow .m2kcap { order: 3; }
 :root:root:root #modwin.mir-modwindow .m2dialink .ckval { display: none; }                             /* 33 */
 
-/* 34 · THE SWITCH ROW STOPS PRETENDING TO BE BUTTONS.  Josh, naming them: "remove the 'button-like'
-   visuals when pressing TRIG, FLIP, OFF, INVERT, etc … instead let it be those glowing dots on the
-   left that glows on and off with the accent color."  So the seats lose their fill, their rim and
-   their press wash — they keep their 44-px targets, which are the artifact's and are not ours to
-   spend — and the DOT carries the state, lit in Accent A with a glow, dark when off.  The dot is
-   already in the DOM for every checked control; the three that have none (TRIG · FLIP · OFF) become
-   plain labels, which is what "not button-like" means for a control with no lamp. */
+
 :root:root:root #modwin.mir-modwindow .m2dev .m2swb,
 :root:root:root #modwin.mir-modwindow .m2dev .m2chk,
 :root:root:root #modwin.mir-modwindow .m2dev .m2flipb,
@@ -1193,10 +878,7 @@ body[data-theme="light"] .m2ghost {
   background: var(--acc); border-color: var(--acc);
   box-shadow: 0 0 6px var(--acc), 0 0 2px var(--acc); }                                                 /* 34b */
 
-/* 35 · THE CURVE WINDOWS LOSE THEIR CAPTION (Josh: "Remove the text within the curve windows").
-   `.m2note` is the artifact's sentence across the foot of the plot — "SINE — an analytic wave…",
-   "ENV — 0.910 s drawn over a 4.00 s window…".  It is prose inside a picture, and the picture is the
-   instrument; the same facts are on the status capsule and in the knob values beneath. */
+
 :root:root:root #modwin.mir-modwindow .m2note { display: none; }                                       /* 35 */
 
 /* 42 · THE CARD'S FLOAT GETS SOMEWHERE TO LAND.  MEASURED, and it is not a clip to fight but an
@@ -1207,11 +889,8 @@ body[data-theme="light"] .m2ghost {
    and the card and the macro rail both keep their exact height.  (⚠ that height was 368 when this
    was written and is 336 since reach 96 — the argument is unchanged, the number is not.)  `place()` adds the same number to the
    window so nothing is clipped one level up. */
-/* ⚠ WAVE 95 · 18 → 6, AND THE REASON IS THAT WAVE 80 MOVED THE SHADOW.  This room was measured for
-   a float of `0 5px 12px` — seventeen pixels of reach BELOW the card.  Wave 80 then inverted every
-   window float upward (`0 -2px 6px`), so the downward reach has been about two pixels ever since and
-   sixteen of these eighteen were holding nothing.  That surplus is most of the gap Josh is asking to
-   close: six leaves the float its room and takes twelve out of the lane. */
+
+
 :root:root:root #modwin.mir-modwindow .m2root { height: calc(var(--m2-view-h) + 6px); }
 :root:root:root #modwin.mir-modwindow .m2run { padding-bottom: 6px; }                                  /* 42 */
 
@@ -1223,12 +902,7 @@ body[data-theme="light"] .m2ghost {
    gone, so the height is the box's. */
 :root:root:root #modwin.mir-modwindow .m2svg { height: 100%; }                                         /* 36 */
 
-/* 37 · THE THREE SEATS WITH NO LAMP GET ONE, AND ALL EIGHT BECOME THE SAME CONTROL.  Josh: "TRIG,
-   FLIP, and OFF, need their own lights too and be the same class or type of button the other 5
-   buttons are."  They are `.m2swb` / `.m2flipb` in the artifact and the other five are `.m2chk`,
-   which carries a real `.m2dot` child — so rather than change the artifact's DOM, the two seats grow
-   the same lamp as a `::before` with the dot's own geometry, and take the check's row layout.  What
-   the eye gets is eight identical controls; what the DOM keeps is the artifact, byte for byte. */
+
 :root:root:root #modwin.mir-modwindow .m2dev .m2swb,
 :root:root:root #modwin.mir-modwindow .m2dev .m2flipb {
   display: flex; align-items: center; justify-content: flex-start; gap: 5px; padding: 0 3px; }
@@ -1241,12 +915,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2dev .m2flipb.on::before {
   background: var(--acc); box-shadow: 0 0 6px var(--acc), 0 0 2px var(--acc); }                        /* 37 */
 
-/* 38 · AND THE LABEL NEVER CHANGES COLOUR.  Josh: "Don't let text on the TRIG, FLIP, OFF, etc buttons
-   switch to white or black when clicking, must stay the same, the light turning on and off + mouseover
-   and whatever is the only thing that changes."  The artifact writes `color: #fff` on `.m2chk.on`, on
-   `.m2swb.on` and on every `:active` in this row; wave 71's ink flip turned those into `var(--fg)`,
-   which is the same defect in the other polarity.  ONE ink for all eight seats, in every state — the
-   LAMP says on or off, and hover is the only other thing that moves. */
+
 :root:root:root #modwin.mir-modwindow .m2dev .m2swb,
 :root:root:root #modwin.mir-modwindow .m2dev .m2chk,
 :root:root:root #modwin.mir-modwindow .m2dev .m2flipb,
@@ -1262,10 +931,7 @@ body[data-theme="light"] .m2ghost {
   :root:root:root #modwin.mir-modwindow .m2dev .m2flipb:hover { color: var(--fg); }
 }                                                                                                      /* 38 */
 
-/* 39 · THE TWO WORK BARS ARE THE SAME MATERIAL AS EVERYTHING ELSE.  Wave 73 gave them
-   `--glass-raise` on BASINS' own reasoning ("the bar-chip is the light one"); Josh has now looked at
-   it beside the cards and ruled the other way — one material for the device, the macro rail and both
-   bars.  So the raise comes off and they fall back to L2, which is what the rail and the cards take. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar { background: var(--m2-mat-chassis); }                /* 39 */
 
 /* 40 · NO SHADOW UNDER ANY TEXT.  The artifact inherits `text-shadow: var(--ink-shadow)` from its
@@ -1275,12 +941,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow *,
 :root:root:root .kwin-chiprail[aria-label$="window controls"] * { text-shadow: none; }                 /* 40 */
 
-/* 41 · THE WORK BARS CARRY NO ACCENT.  Josh: "Preset bar text, play button and whatever is accent
-   colored on the preset and tempo bar needs to match the styling of the left and right buttons in the
-   preset bar and/or the hold 1/4 and hold 1 buttons on the tempo bar."  Those two are the plain
-   neutral seats, so neutral is the lane's whole vocabulary: every control in both bars takes the
-   house ink, and an ON state is the seat's own press wash and the artifact's underline — never a hue.
-   The DEVICES keep their accents (Josh: "leave accent color choices"); this is the lane only. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar,
 :root:root:root #modwin.mir-modwindow .m2workbar * { color: var(--fg-soft); }
 :root:root:root #modwin.mir-modwindow .m2workbar svg { fill: currentColor; stroke: currentColor; }
@@ -1290,15 +951,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2workbar .on,
 :root:root:root #modwin.mir-modwindow .m2workbar *:active { color: var(--fg); }                        /* 41 */
 
-/* ══ WAVE 78 · THE DIGITS · ONE KNOB SIZE · THE CAPTIONS · THE PRESET GLYPHS · NO ARROWS ══════
 
-   43 · THE ROUTING COUNT IS A TWO-DIGIT READOUT.  Josh asked for "01" and for a digital-clock face.
-   The zero-padding is `lab/modwindow.js`'s (a counter that changes width makes the row twitch); the
-   FACE is `--font-mono`, which is the house's own `ui-monospace / SF Mono / Menlo / Consolas` stack
-   with tabular figures — an instrument readout, at zero bytes and no licence to carry.
-     WHAT THIS IS NOT: a true seven-segment face (DSEG, Segment7).  Those are SIL OFL and shippable,
-   but each is a vendored binary, a subset, a licence file, a NOTICE entry and a line in the precache
-   cmap gate — a wave of its own, not a token.  Say the word and it is a real job rather than a guess. */
 :root:root:root #modwin.mir-modwindow .m2lfoout,
 :root:root:root #modwin.mir-modwindow .m2envout,
 :root:root:root #modwin.mir-modwindow .m2audioout,
@@ -1307,27 +960,14 @@ body[data-theme="light"] .m2ghost {
   font-family: var(--font-mono); font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em; }                                                                            /* 43 */
 
-/* 44 · ONE KNOB SIZE.  The artifact sizes dials by importance — LFO 48 with RATE at 56, ENV 42 with
-   A/D/R at 48 — which is a real idiom and reads as unevenness once the captions moved and the arcs
-   became the loudest thing on the row.  Josh: "Knobs seem to be random sizes and uneven."  So they
-   are all 48, which is the LFO's own base and the size the grids were laid out around: six ENV dials
-   at 48 plus their gaps measure 298 in a 348-px track, so nothing reflows. */
+
 :root:root:root #modwin.mir-modwindow .m2dev .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2k[data-knob="rate"] .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2k[data-knob="a"] .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2k[data-knob="d"] .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2k[data-knob="r"] .m2kd,
-/* ⟡ WAVE 105 · AND THE ONE KNOB THAT ESCAPED IT FOR TWENTY WAVES.  Reach 44 was written before the
-   AUDIO card was buildable (`ADD AUDIO` was disabled until wave 102), so it never listed AUDIO's own
-   oversized dial.  The artifact's `.m2dev.audio .m2k[data-knob="sens"] .m2kd { 56px }`
-   (modwindow.css:1784) is (1,6,0) — a TIE with this rule's own `.m2dev .m2kd` base arm — and the
-   artifact loads LAST, so it won and SENS stayed 56 while every other knob in the window went to 48.
-     IT WAS MEASURABLE, AND MEASURED: with one of each device built, every knob in the LFO and the ENV
-   is 70 px tall; AUDIO's THRESH and HOLD are 70; SENS alone was 78.  The card is 336 and the knob row
-   seats at 262, so 262 + 78 = 340 — the SENS caption hung FOUR PIXELS BELOW THE CARD and was clipped,
-   the only overflowing element in the whole window.  Named here at (1,9,0), it takes the house size
-   the other two already had, and Josh's ruling above — "Knobs seem to be random sizes and uneven" —
-   is finally true of every knob rather than of most of them. */
+
+
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2k[data-knob="sens"] .m2kd { width: 48px; height: 48px; }  /* 44 */
 
 /* 45 · THE KNOB CAPTION TAKES THE THEME.  It was white-at-alpha in the artifact and wave 71 flipped
@@ -1335,10 +975,7 @@ body[data-theme="light"] .m2ghost {
    secondary ink in both themes — which is exactly what the ladder above now is. */
 /* RETIRED wave 105 — 45: every .m2kcap sits inside .m2dev .m2dial, which the ink-flip colours at (1,8,1) — this (1,5,0) rule never applied. */
 
-/* 46 · THE CURVE PRESETS ARE LIT LIKE THE CHIP GLYPHS.  Josh: "Let the glyph lightness and darkness
-   … affect the curve preset glyphs."  Same ink, same 1-px light, same rule as reach 32 — the six
-   shape buttons are drawings on a surface exactly as the rail's chips are.  The CHOSEN one keeps the
-   accent, because that is the one place in this row a colour carries meaning. */
+
 :root:root:root #modwin.mir-modwindow .m2preset .m2gl {
   stroke: var(--ink-key);
   filter: drop-shadow(0 1px 0 var(--glass-raise)); }
@@ -1350,17 +987,10 @@ body[data-theme="light"] .m2ghost {
 /* 47 · THE REORDER ARROWS GO — the switch is reach-list 18 itself, turned off at source (see there).
    18b STAYS: the head's middle track still needs the bank told not to shrink. */
 
-/* ══ WAVE 79 · NO OUTLINES · HIDDEN VALUES · A NARROWER RAIL · BEVEL · A TICK ═════════════════
 
-   48 · THE MODE LABEL GOES.  Josh: "Remove the 'FULL' and 'CMP' text when changing to compact mode."
-   `setDeviceMode` writes it and the artifact may not be edited, so the seat hides it; the kind (LFO ·
-   ENV) beside it stays, which is the half that names the device. */
 :root:root:root #modwin.mir-modwindow .m2modelabel { display: none; }                                  /* 48 */
 
-/* 49 · THE OUT BOX JOINS THE GLYPH STACK.  Josh: "Make the routing 'out' box also match the
-   chip/other glyphs in the stack.  Make it have no border and instead have a styling (like the drop
-   shadow) when mouse over and no outline ever."  So: no rim at rest, the glyph ink, and the float
-   arrives under the pointer rather than a fill. */
+
 :root:root:root #modwin.mir-modwindow .m2mac,
 :root:root:root #modwin.mir-modwindow .m2maccap {
   border-color: transparent; background: transparent; color: var(--ink-key);
@@ -1372,11 +1002,7 @@ body[data-theme="light"] .m2ghost {
 }
 :root:root:root #modwin.mir-modwindow .m2mac.on { border-color: transparent; color: var(--acc); }      /* 49 */
 
-/* 50 · NO OUTLINE, ANYWHERE IN THIS WINDOW — AND FOCUS IS STILL VISIBLE.  Josh: "no outline ever.
-   Anything else with an outline must do the same."  A bare `outline: none` would be the one change in
-   this whole build that takes something away from a keyboard user, so the outline is REPLACED rather
-   than deleted: the same float the hover uses, in the accent, which is a ring the eye finds and the
-   spec is happy with (a visible focus indicator is required; it is not required to be an outline). */
+
 :root:root:root #modwin.mir-modwindow *,
 :root:root:root .kwin-chiprail[aria-label$="window controls"] * { outline: none; }
 :root:root:root #modwin.mir-modwindow *:focus-visible,
@@ -1388,10 +1014,7 @@ body[data-theme="light"] .m2ghost {
   box-shadow: 0 0 0 3px hsl(var(--hue-acc) var(--sat-acc) 66% / 0.30),
               0 0 0 1px hsl(var(--hue-acc) var(--sat-acc) 52%); }                                      /* 50 */
 
-/* 51 · A KNOB SAYS ITS NUMBER WHEN A HAND IS ON IT.  Josh: "Have information of knobs be hidden
-   until mouseover or editing."  This is the lab's own idiom, not a new one — skin.css §5 has hidden
-   `.k-val` behind hover / drag / focus-within since the kit was written, with the same fade and the
-   same linger.  The CAPTION stays: it is the control's name, not its reading. */
+
 :root:root:root #modwin.mir-modwindow .m2kval {
   opacity: 0; transition: opacity var(--t-soft, .35s) ease var(--t-linger, .7s); }
 :root:root:root #modwin.mir-modwindow .m2k:hover .m2kval,
@@ -1399,38 +1022,22 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2k .m2dialink.drag ~ .m2kval,
 :root:root:root #modwin.mir-modwindow .m2kd.drag ~ .m2kval {
   opacity: 1; transition: opacity var(--t-fast, .12s); }
-/* ⚠ WAVE 101 · THE TOUCH ARM IS GONE, AND THAT IS JOSH'S CALL AGAINST WAVE 79's.  "Currently on iPad
-   I can see all the knob labels as if I were touching it, perhaps only when messing with a knob does
-   the number show up just like desktop."  Wave 79 forced every value visible where there is no hover,
-   on the house's own reasoning that nothing should hide behind an interaction a touch screen cannot
-   perform — but a knob HAS an interaction a finger can perform, and `.drag` is it.  With this arm
-   removed the base rule above governs both kinds of pointer: the value appears on drag and on focus,
-   which is what "just like desktop" means, and an iPad reaches both. */                              /* 51 */
 
-/* 52 · A NARROWER MACRO RAIL (Josh).  224 → 176: the slot's three zones are a 44-px grip, a 44-px
-   number seat and the information face, so 132 px of the width is the two fixed seats and only the
-   face gives room up — it loses 48 and keeps 88, which still holds "MACRO 1" and its value on one
-   line.  Nothing else in the window is measured against the rail. */
+
+                              /* 51 */
+
+
 /* RETIRED wave 105 — 52: entry 65 sets 200px on the same selector, later, and says so. */
 
-/* 53 · THE INDICATOR STOPS FLASHING AND STARTS SAYING WHOSE IT IS.  Josh: "not make the 'animated
-   indicator' have a tappable animation over the box" and "have that indicator also match the colors
-   of the curves into the indicator".  The press wash on the seat goes; the ring takes
-   `--m2-slot-ink`, which lab/modwindow.js sets per slot from the source driving it — Accent A for an
-   LFO, the ENV's own derived ink for an envelope, the faint rung for a macro still on HAND. */
+
 :root:root:root #modwin.mir-modwindow .m2numseat:active,
 :root:root:root #modwin.mir-modwindow .m2numseat.drag { background: transparent; }
-/* ⚠ SUPERSEDED IN PART BY WAVE 87.  The slot ink stays on the FOLLOWER (reach 75); the numeral and
-   the arc are now two fixed accents, which is Josh's own split: "let the param range knob on the
-   macros like '1' and '2' text be accent 2 but the knob arc itself to be accent 1". */
+
+
 :root:root:root #modwin.mir-modwindow .m2num { color: var(--acc2); border: 0; }
 :root:root:root #modwin.mir-modwindow .m2deptharc { stroke: var(--acc); }                              /* 53 */
 
-/* 54 · THE DIAL IS BEVELLED, NOT RECESSED.  Josh: "make the knobs a bevel instead of an inner drop
-   shadow."  The artifact rings the dial face with one flat inner hairline; a bevel is the same one
-   pixel spent DIRECTIONALLY — light along the top, shade along the bottom lip — which is the house's
-   own neumorphic law (skin.css: the light comes from the top-left) applied to the one control that
-   did not have it. */
+
 /* ⚠ AND THE TOP EDGE IS NOT `--glass-raise`.  Inside this window that token is `hsl(0 0% 0% / 0.06)`
    — a DARK wash, because the seat re-points it for the buttons — so the first cut read back dark on
    top AND dark on the lip, which is a smudge and not a bevel.  Measured; written as two explicit
@@ -1440,39 +1047,19 @@ body[data-theme="light"] .m2ghost {
 :root:root:root body[data-theme="light"] #modwin.mir-modwindow .m2dialink::before {
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.85), inset 0 -1px 0 hsl(214 30% 40% / 0.26); }            /* 54 */
 
-/* 55 · AND ITS POINTER IS OUR TICK.  The artifact marks the value with a 6-px DOT at the end of an
-   invisible arm; every dial in λWAVES marks it with a 1.5-px bar (kit.js `.k-needle`, skin.css §5).
-   Josh asked for ours, so the arm becomes the mark: same width, same radius, same half-pixel dark
-   halo that keeps it legible on a pale face, and the dot stands down. */
+
 :root:root:root #modwin.mir-modwindow .m2dialink .m2kn {
   width: 1.5px; margin-left: -0.75px; height: 34%; border-radius: 1px;
   background: var(--m2-ink-hi); box-shadow: 0 0 0 0.5px hsl(0 0% 0% / 0.38); }
-/* ⟡ WAVE 101 · AND THE DOT COMES BACK, GREY, ON THE END OF THE TICK.  Josh: "Make the dot indicator
-   on the plugin's knobs to be a grey dot instead of accent color[2] and have it follow the tick mark
-   on the dial of the knobs."  The artifact draws `.m2kn::before` as a 6-px ACCENT dot at the outer end
-   of the needle arm and wave 79 hid it outright when the arm became our tick.  It returns at 4 px in
-   the neutral ink — the same `--m2-ink-soft` the captions wear — and because it is a child of the arm
-   it rotates WITH the tick by construction rather than being placed a second time.
-     It goes ACCENT while the dial is held, with the tick, so the pair reads as one mark. */
+
+
 :root:root:root #modwin.mir-modwindow .m2dialink.drag .m2kn { background: var(--acc); }                 /* 55 */
 
-/* ══ WAVE 80 · JUST THE ARC · THE TEMPO READOUT STACKS · THE LANE SHAVES ══════════════════════
 
-   56 · THE TRACK GOES; ONLY THE VALUE ARC REMAINS.  Josh: "I see a very transparent arc where the
-   colored arc would go, can you make it so it's just the arc."  `.ckarc-trk` is the artifact's full
-   circle behind the value — a socket, drawn so an empty dial still reads as a dial.  With the bevel
-   doing that job now (wave 79) the ghost ring is a second outline of the same shape, and it is the
-   faint grey Josh is seeing behind every coloured arc.  The HOVER lift goes with it: there is nothing
-   left to lift. */
 :root:root:root #modwin.mir-modwindow .m2dialink .ckarc-trk,
 :root:root:root #modwin.mir-modwindow .m2dialink:hover .ckarc-trk { stroke: transparent; }              /* 56 */
 
-/* 57 · THE TEMPO READOUT STACKS ITS UNIT AND ITS DERIVED READING.  Josh: "Make the Hz be written
-   underneath the BPM text so that we can fit more in."  The artifact lays `60.0 · BPM · 1.000 Hz` in
-   one flex row, which spends the lane's width on two short words side by side.  A two-column grid
-   puts the NUMBER at full height on the left and stacks its unit over its consequence on the right —
-   the same hierarchy, a third of the width.  The seat grows 22 → 30 px, which the lane has.
-   (⚠ the "52-px lane" this once named is 46 px since reach 89, and the seat 36 px since reach 67.) */
+
 :root:root:root #modwin.mir-modwindow .modtempo {
   display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto;
   align-items: center; justify-items: start; column-gap: calc(4px * var(--ui-scale)); row-gap: 0;
@@ -1490,24 +1077,14 @@ body[data-theme="light"] .m2ghost {
    width was the only thing stopping this box from shrinking. */
 :root:root:root #modwin.mir-modwindow .m2pre { width: fit-content; min-width: 0; }                      /* 58 */
 
-/* ══ WAVE 82 · THE DIAL FACE · THE NODES · THE POWER GLYPH · THE HEAD · THE PLOT · THE RAIL ═════
 
-   59 · THE PLUGIN'S DIAL IS OUR DIAL.  Josh: "don't let the knob be covered in a dark shading and
-   instead behave like the labdawaves knobs."  The artifact paints one flat disc at .98 of the card
-   tint, which on the dark theme is the dark shading he means.  skin.css §5's `.k-dial` is three
-   layers — a fine conic groove, a top-left specular, then the tint — and it is copied here rather
-   than approximated, so the two controls are the same object in two windows. */
 :root:root:root #modwin.mir-modwindow .m2dialink::before {
   background:
     repeating-conic-gradient(var(--glass-groove) 0deg 1.6deg, transparent 1.6deg 30deg),
     radial-gradient(circle at 35% 30%, hsl(0 0% 100% / .07), transparent 62%),
     hsl(var(--glass-tint) / 1); }                                                                      /* 59 */
 
-/* 60 · A CURVE NODE IS A HOLE WITH A RIM.  Josh: "Clickable points on the curve needs to be wholes
-   with an outline, not a solid something underneath."  `fill: transparent` rather than `fill: none`
-   ON PURPOSE — SVG hit-testing follows the fill, and `none` would make every handle on the curve
-   ungrabbable; `transparent` paints nothing and still takes the pointer, and `pointer-events: all`
-   says so outright rather than relying on the default. */
+
 :root:root:root #modwin.mir-modwindow .m2pt,
 :root:root:root #modwin.mir-modwindow .m2tn,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt,
@@ -1516,83 +1093,45 @@ body[data-theme="light"] .m2ghost {
 /* RETIRED wave 105 — 60: entry 71 (wave 82) re-declares this whole block — the same four selectors, the same
    `pointer-events`/`stroke-width`, the same two strokes — and changes only the fill. */
 
-/* 61 · THE POWER SWITCH LOSES ITS DISC AND BECOMES ITS MARK.  Josh: "Lose the power button icon's
-   circle and replace it with the glyph glowing accent color 1."  The 40-px target stays — it is the
-   artifact's and it is the law — and only the paint goes; the glyph itself carries the state, lit in
-   Accent A when the device is live and dropped to the faint rung when it is bypassed. */
+
 :root:root:root #modwin.mir-modwindow .m2pow {
   border: 0; background: transparent; border-radius: 0;
-  color: var(--acc); filter: none; }                                 /* wave 93: no glow (Josh) */
+  color: var(--acc); filter: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2off .m2pow,
 :root:root:root #modwin.mir-modwindow .m2pow[aria-pressed="false"] {
   color: var(--m2-ink-faint); filter: none; }                                                          /* 61 */
 
-/* 62 · NO RIMS ON THE CLIPBOARD ROW.  Josh: "Remove the outline on 'A/B, COPY/PASTE".  They are text
-   verbs in a head full of them; the press is the feedback and it already has one. */
+
 :root:root:root #modwin.mir-modwindow .m2ab { border: 0; background: transparent; }                    /* 62 */
 /* RETIRED wave 105 — 62 arms 2-4: .m2clip/.m2copy/.m2paste occur nowhere else in the tree; the pair is built as two .m2ab buttons. */
 
-/* 63 · THE CURVE'S NAME SITS ON THE PICTURE IT NAMES — AND WAVE 82 PUT IT ON THE WRONG ANCESTOR.
-   Josh, seeing it: the word ended up ABOVE "LFO", outside the card.  The reason is plain in the
-   markup: `.m2lfowave` lives in `.m2headc`, in the HEAD — so making `.m2body` relative gave it no
-   containing block at all and it resolved against `.m2dev`, whose origin is the card's top-left,
-   which is exactly where it appeared.  It is anchored to `.m2edit` instead, which is the plot, which
-   is `position: relative` in the artifact's own sheet (935) and is the box actually meant. */
+
 /* RETIRED wave 105 — 63, all four arms: seatCurveName() re-parents .m2lfowave into .m2presets on every rebuild, so the
    two arms naming it under .m2headc / .m2edit match nothing and entry 104 dresses it at its real home;
    `position: static` is the initial value; and the `.m2edit { position: relative }` arm restates the
    artifact's own modwindow.css:935. */
 
-/* 64 · THE STATUS DROPS ITS WORD AND KEEPS ITS LAMP.  Josh: "Remove the text that says Run/idle.
-   Redundant as it's in macros."  The word is a bare text node beside `.m2statuslamp`, so it is the
-   FONT that is taken away, not a node — the lamp is sized in px and does not shrink with it, and the
-   output reading beside it keeps its own size. */
+
 :root:root:root #modwin.mir-modwindow .m2statusmain { font-size: 0; gap: 0; }
 :root:root:root #modwin.mir-modwindow .m2statusmain .m2statuslamp { font-size: 0; }                     /* 64 */
 
-/* 65 · AND THE MACRO NAME GETS ITS ROOM BACK.  Wave 79 narrowed the rail to 176 on Josh's word and
-   the name came out as "M…" — the slot's face is what is left after two fixed 44-px seats, so at 176
-   it was 88 px shared with the value.  200 keeps most of the narrowing and gives the face 112; the
-   value is pinned to its content so every pixel of the growth lands on the NAME. */
+
 :root:root:root #modwin.mir-modwindow .m2rail { width: 200px; }
 :root:root:root #modwin.mir-modwindow .m2vname { flex: 1 1 auto; min-width: 0; }
 :root:root:root #modwin.mir-modwindow .m2vnum { flex: 0 0 auto; }                                       /* 65 */
 
-/* ══ WAVE 83 · THE GRIP DOES NOT MOVE · AND THE TEMPO READS LIKE AN INSTRUMENT ═══════════════
 
-   66 · THE DRAG HANDLE KEEPS ITS SEAT ACROSS THE TWO MODES.  Josh: "Notice the minimized device
-   mode's drag icon placement.  Let it stay there when switching between expand and minimized.  This
-   means the expanded mode has to shift the LFO/ENV title to the right a slight bit."
-     MEASURED RATHER THAN NUDGED, because "a slight bit" has exactly one right answer here:
-       · MINIMISED — the strip is 64 px (GEOM.STRIP_W), its head pads `4px 2px 2px` and centres its
-         column, so the 16-px grab starts at 2 + (60 − 16)/2 = 24 px from the card's left edge.
-       · EXPANDED  — the head pads 5 px and the grab is the first thing in `.m2headl`, so it starts
-         at 5 px.
-     19 px is the difference the paddings predict, and the ANSWER IS 18 — read back off the running
-   page, where the full head measured 25 and the strip 24.  The missing pixel is the card's own
-   `--glass-border` (0.6 px, rounded up) sitting inside the full card and not inside the strip's
-   centred column, which is precisely the kind of thing arithmetic on two paddings does not see.
-     It is spent as the head's own left padding so the grab AND everything after it — the caret,
-   LFO/ENV, the mode row — move together, out of `.m2headl`'s `minmax(0, 1fr)` track, which is the
-   one the artifact built to give room up.  Both modes now read 24. */
 :root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2headl { padding-left: 18px; }               /* 66 */
 
-/* 67 · THE TEMPO READOUT IS THE ONE NUMBER ON THAT BAR AND IT SHOULD LOOK LIKE IT.  Josh: "have no
-   outline on the bpm, make the BPM a much larger text, BPM text sits across the number and the hz
-   sits underneath the BPM title."  The grid from wave 80 already puts the unit across from the
-   number and the derived reading under the unit; what it kept was the artifact's 12-px figure and a
-   rim around the whole seat.  The rim goes — nothing else on this bar wears one now — and the number
-   goes to 22 px, which is the largest figure anywhere in the window and correct: it is the one value
-   the whole lane exists to set.  The seat grows to 36 px, which the lane still holds.
-   (⚠ that lane is 46 px since reach 89, not the 52 this line used to quote.) */
+
 :root:root:root #modwin.mir-modwindow .modtempo {
   border: 0; background: transparent;
   height: calc(36px * var(--ui-scale)); min-height: calc(36px * var(--ui-scale));
   column-gap: calc(6px * var(--ui-scale)); }
 :root:root:root #modwin.mir-modwindow .modtempo b {
   font: 700 calc(22px * var(--ui-scale)) var(--font-num); line-height: 1;
-  /* wave 98: one rung in from the extreme, with the rest of the plugin's ink (Josh).  This is the
-     largest figure in the window, so it was the loudest thing still reading as plain white. */
+
+
   color: var(--m2-ink); font-variant-numeric: tabular-nums; }
 :root:root:root #modwin.mir-modwindow .modtempo span {
   font: 700 calc(9px * var(--ui-scale)) var(--font-sans); letter-spacing: 0.12em;
@@ -1602,27 +1141,12 @@ body[data-theme="light"] .m2ghost {
   color: var(--m2-ink-faint); opacity: 1; }
 :root:root:root #modwin.mir-modwindow .modtempo.on { border: 0; color: var(--acc); }                    /* 67 */
 
-/* ══ WAVE 84 · THE A/B BANK LOSES ITS BOX ═══════════════════════════════════════════════════════
-   68 · Josh: "A/B shouldn't have an outline, just a light up indicator when it's an A vs B."  Wave
-   82 took the rim off `.m2ab` — the wrong element: the box the eye sees is `.m2bank`, the 46-px seat
-   the two letters sit in, and it carries its own `--glass-hairline` border.  The letters already say
-   which bank is live (`.m2bank span.on` is the accent), so the box is a second, quieter way of
-   saying nothing.  The press wash stays: it is the only feedback the control has left. */
+
 :root:root:root #modwin.mir-modwindow .m2bank { border: 0; background: transparent; }
 :root:root:root #modwin.mir-modwindow .m2bank span { color: var(--m2-ink-faint); }
 :root:root:root #modwin.mir-modwindow .m2bank span.on { color: var(--acc); }                           /* 68 */
 
-/* ══ WAVE 85 · THE FIELD PRESSES IN · THE ± ARE SEATS · THE JOINTS ARE HOLES ══════════════════
 
-   69 · A TEXT FIELD UNDER THE HAND IS A WELL, NOT A LIT RIM.  Josh: "Clicking the preset typable bar
-   shouldn't be a highlighted outline with the accent color but rather another neumorphism button like
-   how it gains drop shadow."  The artifact lights the border in Accent A on focus; reach 50 then adds
-   this window's accent focus ring on top, so the field was wearing two accent marks at once.  Both
-   come off and the house's own `--neu-inset` goes on — the same well `select.sel` and every fader
-   track in the lab wear, which is what "pressed in" means here.
-     IT IS STILL A VISIBLE FOCUS INDICATOR, which is the one thing reach 50 may not give up: the well
-   is a change of state a keyboard user can see, and it is paired with the hairline going darker so
-   the change does not rest on shadow alone. */
 :root:root:root #modwin.mir-modwindow .m2prename:focus,
 :root:root:root #modwin.mir-modwindow .m2prename:focus-visible,
 :root:root:root #modwin.mir-modwindow .m2name:focus,
@@ -1632,11 +1156,7 @@ body[data-theme="light"] .m2ghost {
   background: transparent;
   box-shadow: var(--neu-inset); }                                                                      /* 69 */
 
-/* 70 · THE MACRO ± ARE SEATS, NOT OUTLINED BUTTONS.  Josh: "Remove the outline in the plus and minus
-   sign in the macro window and instead have a lighter shade space, (if on light mode then vice
-   versa)."  So the rim goes and the SHAPE is carried by a wash that steps away from the ground in
-   whichever direction the ground is not: a lift on the dark theme, a recess on the light one — which
-   is the same rule the rest of this window's material follows and the reason it is two rules. */
+
 :root:root:root #modwin.mir-modwindow .m2macadd,
 :root:root:root #modwin.mir-modwindow .m2macdel {
   border: 0; background: hsl(0 0% 100% / 0.06); }
@@ -1646,13 +1166,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2macadd:active:not(:disabled) { background: var(--acc2-soft); }
 :root:root:root #modwin.mir-modwindow .m2macdel:active:not(:disabled) { background: var(--glass-press); }  /* 70 */
 
-/* 71 · A JOINT IS A HOLE IN THE LINE, NOT A WINDOW ONTO IT.  Josh: "The holes in the clickable points
-   on the curve should also not show the curve, it should just look like an empty joint … I'm
-   referring to the ENV window but copy this for the LFO as well."  Wave 82 made them
-   `fill: transparent`, which is a hole you can see the curve through — the stroke runs straight
-   under every node.  The fill becomes the plot's own ground instead, so the line is INTERRUPTED at
-   each joint and what is left is a ring with nothing in it.  Both kinds, one rule: the artifact
-   already gives ENV its own stroke and that is the only thing that differs between them. */
+
 :root:root:root #modwin.mir-modwindow .m2pt,
 :root:root:root #modwin.mir-modwindow .m2tn,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt,
@@ -1666,72 +1180,33 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt.sel,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2tn.sel { fill: var(--acc); }                       /* 71 */
 
-/* ══ WAVE 86 · THE CURVE WINDOW: NO TINT, ALMOST NO SHADOW, THEMED RULES, NO TEXT ═════════════
 
-   72 · THE PLOT'S OWN PAINT COMES OFF.  MEASURED before it was touched: the box was carrying a
-   `rgba(71, 98, 133, 0.1)` fill, a white two-stop gradient over it, and an INSET `0 1px 3px` at 0.32
-   — which is the "drop shadow" Josh means; it is a recess cut into the top of the plot, and at 0.32
-   it was the darkest thing in the card.  The fill and the gradient go entirely; the recess is kept
-   at a twelfth of its weight, which is enough to say "the picture sits IN something" and not enough
-   to be seen as a band.  The hairline stays — that is the box's edge, and it is doing the work now. */
 :root:root:root #modwin.mir-modwindow .m2edit,
 :root:root:root #modwin.mir-modwindow .m2hero {
   background-color: transparent; background-image: none;
-  /* ⟡ WAVE 98 · AND THE RIM GOES TOO (Josh: "Remove the outline around the curve windows in both ENV
-     and LFO").  Wave 86 kept the hairline as "the box's edge, and it is doing the work now"; with the
-     median line hover-revealed (reach 83) the picture is the only thing left in that box, and a rim
-     round a picture that has no fill is drawing a box for its own sake.  The 1/12-weight inset recess
-     stays — it is what says the plot sits IN something. */
+
+
   border-color: transparent;
   box-shadow: inset 0 1px 2px hsl(0 0% 0% / 0.045); }                                                  /* 72 */
 
-/* 73 · AND ITS RULES ARE THEMED, WHICH THEY HAVE NEVER BEEN.  Both read back `rgba(255,255,255,0.12)`
-   on LIGHT as well as dark — white lines on a pale card.  The reason is a THIRD gap in wave 71's
-   generated flip, after the comma groups and the `hsl()` notation: it scans `color:` and
-   `background`, and a plot draws with `stroke:` and `fill:`.  There are eleven white strokes in the
-   artifact; these are the two Josh named, and the rest are accents or `--fg` and are correct.
-   A SCANNER THAT KNOWS SOME OF THE PROPERTIES IS A SCANNER THAT SILENTLY SKIPS THE REST — same
-   lesson as the notation, one property list further on. */
+
 :root:root:root #modwin.mir-modwindow .m2mid,
 :root:root:root #modwin.mir-modwindow .m2gridline,
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2mid,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2mid,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2gridline { stroke: var(--m2-rule); }                /* 73 */
 
-/* 74 · AND THE LAST WORDS IN THE PICTURE GO (Josh: "Remove the remaining text in the curve window").
-   `.m2gridtxt` is the axis's own tick labels — "1s", "2s", "3s" — and the grid lines they name are
-   still there, evenly spaced, which is the whole of what they were saying.  The curve's NAME stays,
-   because Josh put it there two waves ago, and so does the status capsule's reading. */
+
 :root:root:root #modwin.mir-modwindow .m2gridtxt { display: none; }                                     /* 74 */
 /* RETIRED wave 105 — 74 arm 2: .cv-tlbl is a calculus-view class defined in lab.css and built by no JS. */
 
-/* ══ WAVE 87 · THE FOLLOWER TAKES THE DEVICE'S COLOUR · THE TRACK RING GOES ══════════════════
 
-   75 · THE DOT THAT RIDES THE MACRO IS THE DEVICE'S OWN.  Josh: "The little circle that follows the
-   parameter in the macro section should be the same color as whatever the device is."  `.m2vedge` is
-   that dot, and it was `--fg` — one colour for every row, whichever source was driving it.  It takes
-   `--m2-slot-ink`, the per-slot colour lab/modwindow.js already writes from the driving source
-   (Accent A for an LFO, the ENV's own ink for an envelope, the faint rung on HAND), so the dot and
-   the numeral beside it now say the same thing.  The dark halo stays: it is what keeps a 7-px dot
-   legible when it rides over its own fill. */
 :root:root:root #modwin.mir-modwindow .m2vedge { background: var(--m2-slot-ink, var(--fg)); }           /* 75 */
 
-/* 76 · AND THE RING BEHIND THE ARC GOES.  Josh: "Remove the circle ring that's not the movable arc on
-   that knob."  There were TWO circles round that numeral and neither was the arc: `.m2depthtrack`,
-   the socket the depth arc sweeps along, and `.m2num`'s own 1.2-px border (reach 53 above).  Both
-   off — what is left is the numeral in Accent B with Accent A's arc around it, which is exactly the
-   two-colour reading Josh asked for and nothing else. */
+
 :root:root:root #modwin.mir-modwindow .m2depthtrack { stroke: transparent; }                            /* 76 */
 
-/* 77 · THE WORK LANE MOVES; NOTHING ELSE DOES.  Josh: "whenever the chip that switches the preset &
-   tempo bar up and down, it shouldn't move the chips or scroller but rather only those two bars."
-   `setWorkLane` flips `.m2foot` between `order: 2` and `order: 0`, and because the foot is a 52-px
-   flex item that RE-LAYS the column — the rail and the device run slide down or up with it.
-     So the foot keeps its seat in the flow, always, and the two BARS translate instead.  They are
-   already absolutely positioned inside a foot the artifact deliberately leaves `overflow: visible`
-   (BARS-012B: "deliberately lets those boxes paint beyond the rack-owned window"), so moving them
-   past the window's edge is the behaviour that sheet already licenses.  The distance is the row's own
-   height plus the lane's — both are tokens, so this cannot drift from the layout. */
+
 /* ⚠ AND ITS MARGIN GOES WITH ITS ORDER.  modwindow.css:1189 gives the foot `margin-bottom: 8px` in
    this state — correct for the artifact's version, where the foot really does move to the TOP and
    needs air under it.  Here the foot never moves, so that margin was pure error: measured, the bar
@@ -1746,16 +1221,7 @@ body[data-theme="light"] .m2ghost {
 :root:root:root #modwin.mir-modwindow .m2bars-top .m2workbar {
   transform: translateY(calc(-1 * var(--m2-lane-lift, 438px))); }                                       /* 77 */
 
-/* ══ WAVE 89 · THE CHIPS FROST · THE SAVE RIM · THE RIBBON CHIP · THE MACRO HEAD ══════════════
 
-   78 · THE CHIPS TAKE THE FROST.  Josh: "Chips need to also match with the frost skinning … Preset
-   bar and chips is the one that needs to match with everybody's material."  The two BARS already do
-   — they are `.glass`, so `body.frost .glass` reaches them and their fill is `--m2-mat-chassis`,
-   which wave 74 put on the house's own switches.  A CHIP cannot be: its surface is a PSEUDO-element
-   (`.crail-chip::before`), and no class can be put on one.  So the same three declarations the house
-   writes for `.glass` are written here for that pseudo-element, in the same order and with the same
-   values — including `frost-hold`, which takes the filter off while the field runs and leaves the
-   fill alone, because a material may not change because a finger landed on the screen. */
 body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip::before,
 :root:root:root body.frost .kwin-chiprail[aria-label$="window controls"] .crail-chip::before {
   -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter);
@@ -1775,47 +1241,21 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root body.frost.frost-hold #modwin.mir-modwindow .m2workbar {
   -webkit-backdrop-filter: none; backdrop-filter: none; }                                              /* 78b */
 
-/* 79 · THE SAVE BUTTON LOSES ITS RIM (Josh), like every other verb on that bar. */
+
 :root:root:root #modwin.mir-modwindow .m2presave,
 :root:root:root #modwin.mir-modwindow .m2predel,
 :root:root:root #modwin.mir-modwindow .m2prenav { border: 0; background: transparent; }                 /* 79 */
 
-/* 101 · THE DEAD-SEND WARNING LOSES ITS RIM, AND STOPS BEING CLIPPED.  Josh: "There also seems to be
-   a bit of a cutoff of the warning located in the preset bar … remove the outline of the warning
-   routes and fix overlaps."
-     THE RIM: wave 79 took the border off the three preset verbs beside it and did not name this one,
-   so `.m2predead` was the last outlined box on that bar — the artifact gives it `var(--bad)` on all
-   four sides.  The COLOUR still carries the warning, which is the artifact's own MODUX idiom and the
-   half worth keeping; the box around it was the half that made it a fourth kind of control.
-     THE CUTOFF was measured, and it is a TIMING bug rather than a width one: the bar grows by
-   GEOM.PRE_DEAD_EXT_W (46 px) only inside `place()`, and `place()` runs when a card is added, removed,
-   folded or dragged — never when a ROUTE goes dormant.  So the chip un-hid itself on the next paint
-   while the bar was still at its no-dead width, and 39 of its 44 px sat outside a box that is
-   `overflow: hidden`.  Measured: chip right 603 against bar right 564.  lab/modwindow.js now re-places
-   the lane when the dormant count changes, which is the moment the width law's own input moves. */
+
 :root:root:root #modwin.mir-modwindow .m2predead { border: 0; background: transparent; }
-/* ⚠ AND THIS IS THE CUTOFF ITSELF, WHICH IS NOT A WIDTH BUG AT ALL.  The artifact hides the chip when
-   nothing is dormant — `.mir-modwindow .m2predead.off { display: none }` — at (0,3,0).  skin.css §12c
-   (wave 93, centring the bar's glyphs) writes `#modwin.mir-modwindow .m2workbar button
-   { display: inline-flex }` at (1,2,0), and an ID beats three classes: SO THE WARNING HAS PAINTED ON
-   EVERY BUILD SINCE WAVE 93, DEAD ROUTES OR NONE.  With none the lane carries no 46-px extension for
-   it, so it laid out past the preset core and `overflow: hidden` cut it down to the sliver on the
-   right that Josh is looking at.  Measured: display `flex` where the artifact asked for `none`.
-   The hide is restored at a specificity §12c cannot reach. */
+
+
 :root:root:root #modwin.mir-modwindow .m2workbar .m2predead.off { display: none; }                     /* 101 */
 
-/* 80 · THE RIBBON CHIP GOES.  Josh: "remove the minimize all chip between the add and top/bottom
-   toggle."  RIBBON folds every device to a strip at once — a mode this window has not needed since
-   the devices got their own fold, and the one rail control whose effect was invisible until you
-   pressed it.  Hidden rather than deleted: it is the artifact's own chip and `copy.chips` still
-   builds it, so a host that wants the mode back has it. */
+
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip[data-rail="ribbon"] { display: none; }                      /* 80 */
 
-/* 81 · THE MACRO RAIL'S HEAD IS A DEVICE'S HEAD.  Josh asked for "the same buffer as LFO and ENV for
-   the row it's in and … the similar dropdown arrow to minimize; no drag option however."  The head
-   takes the device head's own height and padding so the three cards line up across the top, and the
-   caret is the artifact's `.m2chev` — the same triangle, turned the same quarter turn when folded.
-   Folding hides the slot list and the ± row and leaves the head, which is what a folded device does. */
+
 :root:root:root #modwin.mir-modwindow .m2railhead {
   display: flex; align-items: center; gap: 4px;
   height: 48px; min-height: 48px; padding: 2px 5px 2px 18px;
@@ -1829,31 +1269,12 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   :root:root:root #modwin.mir-modwindow .m2railhead:hover { color: var(--m2-ink-hi); }
 }                                                                                                      /* 81 */
 
-/* ══ WAVE 90 · THE PLUGIN'S PLAYHEAD WEARS THE ACCENT ════════════════════════════════════════
-   82 · Josh: "Have the play/pause button on the plugin be the accent color, no glow."  Reach 41 took
-   every accent out of the two work bars — right for the readouts and the HOLD seats, which are
-   neutral by his own ruling, and wrong for this one control: it is the modulation playhead, the only
-   thing on that bar that STARTS something, and the lab's own transport marks its play seat in the
-   accent too.  So it is carved back out, in both faces (play and pause), and it is FLAT — no glow,
-   no halo, no lit ring.  The SVG takes `currentColor` so the mark follows the text rather than
-   needing its own rule. */
-/* RETIRED wave 105 — 82: entry 92 (wave 98) re-declares every one of these at the same selectors — Josh's later
-   ruling that this seat wears the MOD button's flat ink switch, not the accent fill wave 90 gave it. */
 
-/* ══ WAVE 91 · THE PLOT, THE MACRO TRACE, THE HEAD'S HEIGHT ═══════════════════════════════════
-
-   83 · ONE HORIZONTAL RULE, AND THE LFO'S ARRIVES ON HOVER.  Josh: "Only have the median horizontal
-   line (not the top and bottom lines) in the curve window; when mouseover the curve window, reveal a
-   center line for the LFO window."  `.m2gridline` is the top and bottom pair and goes; `.m2mid` is
-   the median and stays — except on the LFO, where the curve is the whole picture and the centre is
-   only wanted while a hand is over it. */
 :root:root:root #modwin.mir-modwindow .m2gridline,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2gridline,
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2gridline { stroke: transparent; }
-/* ⟡ WAVE 97 · AND THE ENV JOINS IT (Josh: "Have the subtle lines also disappear on the ENV curve when
-   mouse-away").  Wave 91 gave the reveal to the LFO alone on the reasoning that the LFO's curve IS the
-   whole picture; an envelope's is too, and the rule was never about the kind of device.  Same three
-   arms — the resting zero, the hover, and the touch screen that has no hover to reveal with. */
+
+
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2mid,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2mid { opacity: 0; transition: opacity var(--t-fast, .12s); }
 @media (hover: hover) {
@@ -1865,40 +1286,24 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   :root:root:root #modwin.mir-modwindow .m2dev.env .m2mid { opacity: 1; }
 }                                                                                                      /* 83 */
 
-/* 84 · THE POINTS ARE SOLID AGAIN, THE TENSION HANDLES STAY HOLES.  Josh: "my mistake.  The points on
-   the curves should be solid color and the tension points are perfect as they are."  So wave 85's
-   hole treatment is kept for `.m2tn` alone and lifted off `.m2pt`.  The PLAYHEAD dot joins the
-   points, which is the other half of the same note — it is a point on the curve, drawn where the
-   time is, and it should not be a third kind of mark. */
+
 :root:root:root #modwin.mir-modwindow .m2pt { fill: var(--acc); stroke: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt { fill: var(--m2-env-ink); stroke: none; }
 /* RETIRED wave 105 — 84's two .m2playdot arms: entry 95 (wave 108's playhead recipe) sets --m2-rule on all three, later. */
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2pt.sel { fill: var(--acc); }                        /* 84 */
 
-/* 85 · AND THE PICTURE CARRIES NO WORDS AT ALL.  Josh: "Text on the curve window need to dis[app]ear
-   like the accent color2 text on the curve window."  Both go — the curve's NAME (the Accent-B word)
-   and the status capsule's reading.  The lamp survives, because a lamp is not text and it is the one
-   thing that says whether the source is running. */
+
 :root:root:root #modwin.mir-modwindow .m2edit .m2status { display: none; }                              /* 85 */
 /* RETIRED wave 105 — 85 arm 1: .m2lfowave is no longer a child of .m2edit (seatCurveName), and entry 104 deliberately shows it. */
 
-/* 86 · THE MACRO'S TRACE IS ITS DEVICE'S COLOUR, like the dot that draws it (Josh).  `.m2vfill` was
-   a flat white 0.44 — one colour for every row — while `.m2vedge` has ridden the slot ink since
-   wave 87.  The bar and its head are one object and now read as one. */
+
 :root:root:root #modwin.mir-modwindow .m2vfill { background: var(--m2-slot-ink, var(--m2-ink-soft)); }  /* 86 */
 
-/* 87 · THE MACRO SLOTS LOSE THEIR RIMS (Josh: "Remove the outlines in the macro sections from 1 and
-   2").  The rail is one card and its rows are rows, not eight little cards; the row's own hairline
-   was the last box-in-a-box left in this window. */
+
 :root:root:root #modwin.mir-modwindow .m2slot { border-color: transparent; background: transparent; }
 :root:root:root #modwin.mir-modwindow .m2slot .m2armed { background: var(--acc2-soft); }                 /* 87 */
 
-/* 88 · THE HEAD GIVES ITS HEIGHT TO THE PICTURE.  Josh: "Have the LFO/ENV with the draggable section
-   be shortened vertically to make more room for the curve sections and adjust every button that is
-   affected to be resized too."  The device is a FIXED 368 px, so this is a transfer and not a
-   stretch: the head goes 48 → 40 and the plot's grid row takes the same 8 px, LFO and ENV alike.
-   Every seat in that head comes down with it — the grip, the fold, the clipboard pair, the power and
-   the close — because a 40-px row with 40-px buttons in it has no padding left at all. */
+
 /* ⚠ WAVE 97 · `:not(.m2min)`, AND ITS ABSENCE WAS A REAL BUG FOR SIX WAVES.  This rule is about the
    EXPANDED card — it takes 8 px off the head and gives them to the plot — but it was written unscoped,
    at (3,2,0), and the artifact's own folded-strip head is `.mir-modwindow .m2dev.m2min .m2head
@@ -1922,23 +1327,11 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.env:not(.m2cmp):not(.m2min) .m2body {
   grid-template: 172px 44px / minmax(0, 1fr) 90px; }                                                    /* 88 */
 
-/* 89 · AND THE TWO BARS SIT LOWER AND CLOSER (Josh: "slightly reduce the height dimensions of the
-   preset bar and tempo bar; have them sit a bit closer to scroller").  52 → 46, and the foot's own
-   margin comes down from 8 to 2 — the lane's gap is measured and re-solved by `place()`, so both
-   sides follow the new number and stay equal without a second constant. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar { height: 46px; }
 :root:root:root #modwin.mir-modwindow .m2foot { margin-top: 2px; }                                      /* 89 */
 
-/* ══ WAVE 92 · THE DIAL'S PRESS · THE GRAB'S DOTS · THE PLAYHEAD'S FILL ══════════════════════
 
-   90 · THE DARK DISC UNDER A HELD KNOB.  Josh: "a dark circle still appears on the plugin's knobs
-   when click and holding.  Make it animate like the native UI's knobs."  Its source is this file's
-   own officiation rule — `button:active` AND `[role="slider"].drag` both paint `--m2-st-press`, and
-   the dial IS a slider, so holding it filled the puck with a 16 % black wash.  That rule is right for
-   every OTHER control in the window and is left alone; the dial is carved out of it and given
-   skin.css §5's own drag behaviour instead: the rim goes to the accent, the tick goes to the accent,
-   and NOTHING fills.  The transition is the house's `--t-fast`, so it eases in and out exactly as a
-   rack knob does rather than snapping. */
 :root:root:root #modwin.mir-modwindow .m2dialink:active,
 :root:root:root #modwin.mir-modwindow .m2dialink.drag,
 :root:root:root #modwin.mir-modwindow .m2kd:active,
@@ -1954,32 +1347,18 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.85), inset 0 -1px 0 hsl(214 30% 40% / 0.26),
               0 0 0 1px var(--acc); }                                                                  /* 90 */
 
-/* 91 · THE DEVICE'S GRAB IS THE CHIP'S GRIP.  Josh: "Update the drag section icon on the devices and
-   minimized mode to match the icon in the drag in the chips."  The rail's grip is a 3 × 3 of nine
-   dots (`.kwin-grip-dots`); the device's is a 2 × 3 of six, drawn as a repeating radial-gradient at a
-   different pitch — two drawings of one idea.  The gradient is re-pitched to the chip's grid: same
-   14 × 14 box, same 3 columns, same dot, so the two read as the same handle at two sizes. */
+
 :root:root:root #modwin.mir-modwindow .m2grab i {
   width: 14px; height: 14px;
   background-image: radial-gradient(circle at 50% 50%, currentColor 1px, transparent 1.1px);
   background-size: 4.667px 4.667px; }                                                                  /* 91 */
 
-/* 92 · AND THE PLAYHEAD IS FILLED, NOT JUST TINTED.  Josh: "Play/[p]ause button still doesn't have an
-   accent color1 fill."  Wave 90 gave it accent INK on a transparent seat, which is not what was
-   asked: the lab's own transport paints its play seat SOLID in the accent with the accent's ink over
-   it (`.tbtn.play`), and this is that seat's counterpart.  Still flat — no glow, no ring. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar .modxport,
 :root:root:root #modwin.mir-modwindow .m2workbar .modxport.on,
 :root:root:root #modwin.mir-modwindow .m2workbar .modxport:active {
-  /* ⚠ WAVE 94 · THE SHAPE IS THE ARTIFACT'S AND WAS NEVER MINE TO CHANGE.  Wave 92 wrote
-     `border-radius: 50%` here on the native playhead's logic — its play seat is a disc — but Josh
-     asked to rework the NATIVE playhead and for a FILL on this one, nothing else.  The artifact says
-     `border-radius: var(--r-sm)` (modwindow.css:1105) and that is what it goes back to; only the
-     fill, the ink and the flatness are ours. */
-  /* ⟡ WAVE 98 · AND IT TAKES THE MOD BUTTON'S DESIGN (Josh).  The fill goes: this seat is now the
-     flat ink switch its twin on the native playhead became — `--ink-faint` at rest and `--acc` while
-     the modulation is running — so both playheads say the same thing the same way.  The SHAPE stays
-     the artifact's `--r-sm`, which is wave 94's ruling and is not Josh's to lose twice. */
+
+
   background: transparent; color: var(--m2-ink-faint);
   border: 0; border-radius: var(--r-sm);
   filter: none; box-shadow: none; text-shadow: none; }
@@ -1988,18 +1367,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2workbar .modxport svg {
   fill: currentColor; stroke: currentColor; }                                                          /* 92 */
 
-/* ══ WAVE 93 · A TEMPO THAT DOES NOT BREATHE · THE OUT SEAT · THE TRACKER'S COLOUR ═══════════
 
-   93 · THE TEMPO READOUT IS A FIXED BOX WITH A LEFT-SET NUMBER.  Josh: "The tempo indicator needs to
-   stay fixed in width, whenever the number has a decimal it slightly extends the window.  Make 'BPM'
-   and the Hz reader have a buffer so that [i]t doesn't move and the BPM number stay fixed to the
-   leftmost number and expand/shrink towards the right."
-     Two things were moving and only one of them looked like it.  `60` and `60.0` are different
-   widths, so the auto-sized grid column grew — and because the whole bar is `width: fit-content`
-   since wave 80, that reached the WINDOW.  The number's column is pinned to the widest string it can
-   hold ("300.0" at 22 px tabular ≈ 62 px), the digits are left-aligned inside it so they grow to the
-   RIGHT into their own slack, and the unit column is pinned to its own longest ("1.00 Hz").  Nothing
-   downstream of a digit can move now, which is what a fixed readout means. */
 :root:root:root #modwin.mir-modwindow .modtempo {
   grid-template-columns: calc(62px * var(--ui-scale)) calc(52px * var(--ui-scale)); }
 :root:root:root #modwin.mir-modwindow .modtempo b {
@@ -2015,11 +1383,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   color: var(--acc2); font: 700 13px var(--font-num); font-variant-numeric: tabular-nums; }
 :root:root:root #modwin.mir-modwindow .m2mac.on { color: var(--acc2); }                                /* 94 */
 
-/* 95 · THE TRACKER IS A RULE, NOT A SIGNAL.  Josh: "have the progress line and dot on the curve be
-   the background subtle line color and not accent color2."  Accent B means A RELATIONSHIP in this
-   lab — a macro holding a parameter — and the playhead is neither: it is where time is, drawn on the
-   picture's own grid.  It takes `--m2-rule`, the same grey the median line takes, so the two read as
-   one family and the accents are left to mean what they mean. */
+
 :root:root:root #modwin.mir-modwindow .m2play,
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2play,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2play { stroke: var(--m2-rule); opacity: 1; }
@@ -2027,52 +1391,20 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2playdot,
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2playdot { fill: var(--m2-rule); stroke: none; }    /* 95 */
 
-/* ══ WAVE 95 · A SHORTER CARD, OUT OF THE KNOB ROW'S SLACK ═══════════════════════════════════
 
-   96 · Josh: "I think we can reduce the height of the entire scroller (macros+devices) where the
-   knobs are by reducing the height space for the knobs.  Watch out for compact mode as well."
-     MEASURED FIRST, because the card is a fixed 368 and the question is where the spare is: head 40
-   + body 216 leaves 112 for the knob row, and a knob column is a 48-px dial over a value and a
-   caption — 68 px — inside 9 px of the row's own padding.  77 of 112 used; 35 spare.  The card takes
-   32 of that and keeps three, so nothing in the row is squeezed and the whole scroller — rail,
-   devices and the window with them — comes down by 32.
-     COMPACT TAKES IT TOO, which is the half Josh flagged: `.m2dev.m2cmp` states its own 368 and would
-   otherwise have stayed tall beside a shorter FULL card. */
 :root:root:root #modwin.mir-modwindow .m2root { --m2-device-h: 336px; }
 :root:root:root #modwin.mir-modwindow .m2dev { height: 336px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp { height: 336px; }
 :root:root:root #modwin.mir-modwindow .m2rail,
 :root:root:root #modwin.mir-modwindow .m2rail:not(.m2railmin) { height: 336px; max-height: 336px; }     /* 96 */
 
-/* 97 · AND COMPACT'S RIGHT-HAND BANK GOES FLAT.  Josh: "For the bo[tt]ons on the right side for
-   LFO/ENV in compact mode, change the[i]r dimensions to make them much flatter so that the compact
-   resizing could work."  `.m2lfocmpzone` is four rows of 44 px pinned to the card's bottom-right —
-   176 px of stack in a card that is now 336 — so it was the one block that could not follow the
-   height down.  Four rows of 30 is 120, which fits with room, and the seats keep their full WIDTH so
-   the labels are unchanged. */
-/* ⟡ WAVE 99 · THE ZONE FILLS THE COLUMN INSTEAD OF HANGING OFF ITS FOOT.  Josh: "for LFO, there is an
-   empty space above the macro and other buttons, making it look cutoff where there's clearly free
-   space to occupy above."  Wave 95 pinned four 30-px rows to `bottom: 2px` to make the card's new 336
-   fit, which solved the overflow and left the surplus as a HOLE at the top of the right-hand column —
-   the card is head 40 + body 136 = 176 down to 334, i.e. 158 px of column for 120 px of buttons.
-     The zone now spans that column outright and the four rows share it, so the eight seats grow into
-   the room rather than sitting at the bottom of it.  176 is not a magic number: it is this card's own
-   head (reach 88, 40) plus its own compact body (the artifact's 136), and both are stated above. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpzone {
   grid-template-rows: repeat(4, minmax(0, 1fr)); top: 176px; bottom: 2px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmpcmd {
   height: auto; min-height: 0; }
 
-/* ══ WAVE 99 · COMPACT GETS THE LAMPS, AND ENV GETS THE LFO'S SHAPE ═══════════════════════════
-   102 · THE COMPACT TOGGLES ARE THE EXPANDED ONES.  Josh: "For the anch, trig, invert, etc, give it
-   that same glowing button design similar to how the default expanded mode looked like."  In FULL,
-   reach 34 and 37 made every one of those eight seats a label beside a 9-px lamp that lights in
-   Accent A — no fill, no rim, the lamp carries the state.  COMPACT kept the artifact's own vocabulary
-   instead: a washed seat with an accent UNDERLINE (`inset 0 -2px 0`) and a lit border.  Two designs
-   for one control, decided by which mode the card happens to be in.
-     These are `.m2lfocmptoggle` and they carry no `.m2dot` child, so the lamp is a `::before` with the
-   dot's own geometry — exactly the trick reach 37 used to give TRIG and FLIP a lamp without touching
-   the artifact's DOM. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle {
   display: flex; align-items: center; justify-content: flex-start; gap: 5px; padding: 0 4px;
   background: transparent; border-color: transparent; box-shadow: none; }
@@ -2099,20 +1431,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
     color: var(--fg); }
 }                                                                                                     /* 102 */
 
-/* 103 · COMPACT ENV TAKES COMPACT LFO'S SHAPE.  Josh: "In ENV I want to narrow the curve window so
-   that there's room to add all of the buttons in the row with macros, trig route, gate, invert … for
-   the right side of the curve; this means that the 6 knobs in ENV can occupy the same height as all
-   the other LFO's 4 knobs."
-     The artifact lays compact ENV as 174 px of body with the curve spanning BOTH columns and a 44-px
-   strip of controls underneath it — so the buttons cost the card a whole row, and ENV's six knobs
-   were left 38 px less than the LFO's four.  The LFO solved this two rules up: a narrow curve with a
-   button column beside it.  ENV takes the same shape, so the two compact faces are one design.
-     THE FOUR SEATS ARE THE FOUR JOSH NAMED — OUT and TRIG IN (`.m2col`'s macro box) over INVERT and
-   GATE (`.m2rt`'s checks) — in a 2 × 2 to the right of a 190-px curve, which is the LFO's own curve
-   width.  The body comes to 136, the same as the LFO's, so both cards give their knob rows the
-   identical 160 px and ENV's six dials finally sit at the LFO's four.
-     THE CHECKS NEED NO LAMP RULE: `.m2chk` carries a real `.m2dot` and reach 34 already lights it in
-   every mode, so INVERT and GATE are the glowing design Josh asked for the moment they are re-seated. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.env .m2body {
   flex: 0 0 136px; height: 136px; min-height: 136px; box-sizing: border-box;
   display: grid; grid-template-columns: 190px minmax(0, 1fr);
@@ -2134,32 +1453,12 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   height: 100%; min-height: 0; }                                                                      /* 103 */
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp .m2body { flex: 0 0 auto; min-height: 0; }           /* 97 */
 
-/* 98 · THE PRESET NAME LOSES ITS RIM (Josh).  It is the last outlined box on that bar — the field
-   already says it is a field by pressing in when focused (reach 69), which is the whole affordance. */
+
 :root:root:root #modwin.mir-modwindow .m2prename { border-color: transparent; }
 :root:root:root #modwin.mir-modwindow .m2prename:focus,
 :root:root:root #modwin.mir-modwindow .m2prename:focus-visible { border-color: transparent; }          /* 98 */
 
-/* ══ WAVE 97 · THE LANE'S SEATS GO FLAT AND KEEP THEIR 44 px ═══════════════════════════════════
-   99 · JOSH: "For all the buttons on the preset and tempo bar, make them much flatter so that there is
-   a margin around the glass underlayer; currently the play button's top and bottom section is touching
-   the top and bottom edges of the glass."
-     MEASURED, AND IT IS NOT A ROUNDING ERROR.  The bar is 46 px (reach 89) and the artifact pads it
-   `2px 7px 3px`, so its CONTENT box is 41 px — and every seat standing in it is the artifact's own 44.
-   Three pixels of every button have been painting outside the glass at each end since the bar came down
-   from 52; the play button is simply the only seat with a FILL behind it (reach 92), so it is the only
-   one where you can see it happening.
-     THE PAINT COMES DOWN TO 34 AND THE TARGET STAYS 44.  That is this house's own density law read in
-   the direction this case needs — the phone block grows the SEAT and never the mark, and here the MARK
-   shrinks and the seat may not follow it down.  The 44-px band comes back as a `::before`, which is THE
-   ARTIFACT'S OWN IDIOM for exactly this and not an invention: `.m2pow`, `.m2x`, `.m2ab`, `.m2move`,
-   `.m2fold` and `.modtempo` each already carry one, and `.modxport`/`.modtap`/`.modsync` were getting
-   the same 44 px by hanging −12 px of margin off both ends of a 26-px bar that no longer exists.
-     WHY 34 AND NOT A NEW NUMBER: it is the native playhead's own seat in its own 46-px bar
-   (skin.css:243), so the two transports agree by construction rather than by coincidence, and it leaves
-   (41 − 34) / 2 = 3.5 px of glass above and below every button — the margin Josh is asking for.
-     THE TEMPO READOUT IS EXCLUDED BY NAME (Josh: "Tempo reader is fine").  It is 36 px by reach 67, it
-   is a READING and not a button, and it carries the one `::before` band this rule must not overwrite. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar button:not(.modtempo),
 :root:root:root #modwin.mir-modwindow .m2workbar .m2prename {
   height: 34px; min-height: 34px; margin-top: 0; margin-bottom: 0; }
@@ -2168,29 +1467,14 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2workbar button:not(.modtempo)::before {
   content: ""; position: absolute; left: 0; right: 0; top: 50%;
   height: 44px; margin-top: -22px; }
-/* SAVE IS A DISC AND MUST STAY ONE.  The artifact gives it `width: 44px; border-radius: 50%`; at 34 px
-   tall that is an ellipse, so the width comes down with the height.  Its 26-px drawing (reach 12c, the
-   size Josh asked for) still has 4 px of seat on every side. */
+
+
 :root:root:root #modwin.mir-modwindow .m2workbar .m2presave { width: 34px; min-width: 34px; }
 /* AND THE PRESET BAR'S OWN FLEX ROW COMES DOWN WITH ITS CHILDREN.  `.m2precore` states `height: 44px`,
    so leaving it would keep a 44-px box inside the 41-px lane whatever the buttons in it did. */
 :root:root:root #modwin.mir-modwindow .m2precore { height: 34px; }                                     /* 99 */
 
-/* ══ WAVE 97 · THE FOLDED STRIP'S INDICATOR — ONE OBJECT FOR ALL THREE KINDS ═══════════════════
-   100 · JOSH: "can we rework the animation/indicator of the LFO/ENV/AUDIO when it's minimized?  We
-   need a new better design for it."
-     WHAT IT REPLACES, and why it could not be tuned: THREE DIFFERENT WIDGETS for three kinds of one
-   device.  A folded LFO drew `.m2lfominshape` — its curve with TIME on X and VALUE on Y, into a box
-   22 px wide and ~200 tall with `preserveAspectRatio: none`, so a whole cycle was crushed into 22 px
-   while the value was stretched over ten times that.  A folded ENV drew `.m2envminprog`, a 5-px
-   progress column carrying no shape at all.  AUDIO drew four LED bars.  And `.m2meter`, an 11-px level
-   rail, stood beside whichever of the three it was.  Folding a device did not SHRINK what you were
-   reading; it swapped it for something else, and for a different something per kind.
-     THE NEW ONE IS THE FULL CARD'S PLOT, TRANSPOSED: time runs DOWN the strip and the value across it,
-   which is the right way round for 26 × 200, with the same live dot the big plot has riding the same
-   curve in the same ink.  A folded device is now the same instrument at a smaller size.
-     The artifact's three are HIDDEN, never deleted, so a host that wants them back still has them.
-   The builder is `seatMinTrace` in lab/modwindow.js. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2meter,
 :root:root:root #modwin.mir-modwindow .m2dev.m2min.lfo .m2lfominshape,
 :root:root:root #modwin.mir-modwindow .m2dev.m2min.env .m2envminprog,
@@ -2237,19 +1521,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 /* a bypassed device keeps its shape and stops claiming to be running */
 :root:root:root #modwin.mir-modwindow .m2dev.m2off .m2mintdot { opacity: 0.32; }                      /* 100 */
 
-/* ══ WAVE 100 · THE PRESET ROW RE-DEALT · THE ENV STATE GOES · THE HEAD BREATHES ══════════════
-   104 · JOSH: "I decided to delete the '4' saw preset curve glyph and add the cycling curve presets
-   that currently [sit] in between the LFO title bar of the device and the 'A/B' thingy.  Move the
-   curve cycler to where the 4-triangle curve preset would be, move the 4-triangle to where the old
-   4-saw used to be, delete the 4-saw."
-     ONE NODE MOVES AND ONE HIDES, and the grid does the rest.  MULTI-SAW goes `display: none`, and
-   because `.m2presets` is a six-column template with auto-flow, MULTI-TRI slides up into the fifth
-   seat by itself — the seat the 4-saw used to hold, which is exactly what Josh asked for and needed
-   no re-ordering by hand.  lab/modwindow.js's `seatCurveName` then APPENDS `.m2lfowave` into the grid,
-   which lands it in the sixth seat the multi-triangle just left.
-     THE CYCLER IS A SEAT NOW, not a caption, so it takes the preset button's box: the same 44 px, the
-   same corner, the same neutral ink the five glyphs beside it wear (reach 46), and its Accent-B text
-   colour goes — that was the artifact's "this is a live reading" ink, and this is a control. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2preset[data-preset="msaw"] { display: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2presets .m2lfowave {
   display: flex; align-items: center; justify-content: center;
@@ -2265,34 +1537,11 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
    faint rung rather than naming a wave the engine is not running */
 :root:root:root #modwin.mir-modwindow .m2dev.lfo .m2presets .m2lfowave:active { color: var(--acc); }  /* 104 */
 
-/* 105 · THE ENV'S STATE CAPTION GOES (Josh: "delete the state indicator right next to 'ENV'").  It
-   is `.m2envstage` — IDLE / RUN / REL / GATE — and every word of it is already on the status capsule
-   inside the plot, which is where a reading belongs.  Beside the device's NAME it was a second, quieter
-   copy that changed under your eye while you were reading the name.
-     AND THE NAME MOVES OFF THE GRIP.  Josh: "now we can move the LFO/ENV text a little further away
-   from the drag corner."  The margin goes on `.m2fold` — the caret, the kind and the mode label ride
-   it together — and NOT on `.m2headl`, whose 18-px padding is reach 66's measured answer for keeping
-   the grab handle in the same seat across FULL and MINIMISED.  Move that and the handle moves. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.env .m2envstage { display: none; }
 :root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2fold { margin-left: 7px; }                /* 105 */
 
-/* ══ WAVE 100 · AUDIO, PREPARED FOR ADOPTION ══════════════════════════════════════════════════
-   106 · Josh: "prep for everything you need for the AUDIO devices minimized, compact, and default
-   adoption into lambdawaves."  The third sibling has been in the tree since the port and has never
-   been buildable here (`ADD AUDIO` was disabled in lab/modwindow.js, because its capture half was
-   deliberately not ported), so its three faces have never been dressed.  ⚠ WAVE 102 PORTED THE
-   CAPTURE HALF (lab/audio.js) and the button is live; this entry stopped being preparation and
-   became the AUDIO card's actual dress.  Two things are wrong on
-   sight, and both are the same bugs already found and fixed elsewhere in this window:
-     · ITS COMPACT BODY IS 216 px where the LFO's and the ENV's are 136, so its knob row would sit
-       80 px lower than theirs on the same 336-px card — the identical mismatch reach 103 just fixed
-       between ENV and LFO.  It takes the same shape they take: a 190-px curve with its controls in a
-       column beside it, so all THREE compact faces are one design.
-     · ITS CONDITIONING SHEET IS TRANSPARENT.  `.m2audsheet` paints `var(--m2-plate)`, which is the
-       `.m2root`-local alias of `--m2-mat-chassis` — and under REFRACTIVE that is `transparent`, so a
-       five-row settings sheet would open over the card and be unreadable through itself.  That is
-       exactly the defect reach 21 fixed for the two picker sheets, and it takes reach 21's answer:
-       a menu is the one surface in this window that may be near-opaque. */
+
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2body {
   flex: 0 0 136px; height: 136px; min-height: 136px; box-sizing: border-box;
   display: grid; grid-template-columns: 190px minmax(0, 1fr);
@@ -2326,22 +1575,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
    take Accent B, which is what the rest of this window already spends on a live signal */
 :root:root:root #modwin.mir-modwindow .m2audout.on .m2audled { background: var(--acc2); }             /* 107 */
 
-/* ══ WAVE 103 · THE PLUGIN'S BARS AND CHIPS WEAR THE NATIVE PLAYHEAD'S OWN RECIPE ════════════
-   108 · JOSH, on wave 101's attempt: "the style doesn't match the image's button, look and study how
-   it's done in our own native playhead and copy the style [to] the tempo bar, preset bar, chips, and
-   main texts (not the little ones, only the big bold texts)."
-     HE IS RIGHT AND THE LAST PASS WAS AN INVENTION.  Wave 101 built a two-part emboss out of the
-   house's lights, which is a plausible reading of a screenshot and is NOT what this lab already does.
-   The native playhead has had the answer since wave 92, in four declarations (skin.css §55 and §12):
-       .dock-btn, .mod-exp { border: var(--glass-border) solid var(--glass-border-color);
-                             background: transparent; box-shadow: var(--glass-shadow);
-                             color: var(--ink-key); }
-       .dock-btn > svg     { filter: drop-shadow(0 1px 0 var(--glass-raise)); }
-       :hover              { color: var(--fg); }
-       :active             { background: var(--glass-press); }
-   A HAIRLINE DISC, THE HOUSE FLOAT, NEUTRAL INK, AND ONE PIXEL OF TOP LIGHT ON THE DRAWING — and the
-   only things that move are the ink and the press wash.  That is the button in Josh's picture, and
-   copying it is the whole of this rule.  No emboss, no lift, no second shadow: those were mine. */
+
 :root:root:root #modwin.mir-modwindow .m2workbar button:not(.modtempo),
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip {
   color: var(--ink-key);
@@ -2362,28 +1596,19 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 }
 :root:root:root #modwin.mir-modwindow .m2workbar button:not(.modtempo):active {
   background-color: var(--glass-press); }
-/* THE BIG BOLD TEXTS ONLY — the device's own name, the macro rail's head and the tempo figure.  Josh
-   named the little ones out: a 7-px caption with a light under it is a smudge, not relief. */
+
+
 :root:root:root #modwin.mir-modwindow .m2kind,
 :root:root:root #modwin.mir-modwindow .m2railhead,
 :root:root:root #modwin.mir-modwindow .modtempo b {
   text-shadow: 0 1px 0 var(--glass-raise); }                                                          /* 108 */
 
-/* 109 · AND THE CHIP'S 'ON' CIRCLE GOES.  Josh: "I still see circles around the chips when in
-   'activated' or 'on' mode."  Reach 31b took `.on` off the ::before and MEASURED the ::before, which
-   is why it looked fixed — the ring is on the BUTTON.  `.crail-chip` is built as `kwin-tab crail-chip`,
-   and the artifact gives `.kwin-tab.on` an `inset 0 0 0 var(--glass-border) var(--glass-border-color)`
-   box-shadow plus a `--bar-raise` fill; on a `border-radius: 50%` element an inset ring IS a circle.
-   Measured: `.on` read back `rgba(71,98,133,.22) 0 0 0 0.6px inset` where OFF read `none`. */
+
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-chip.on,
 :root:root:root .kwin-chiprail[aria-label$="window controls"] .kwin-tab.on {
   box-shadow: none; background: transparent; }                                                        /* 109 */
 
-/* 110 · THE ENV IS ACCENT A (Josh: "ENV seems to be a different color than LFO, it's supposed to be
-   accent color1").  The artifact derives its own envelope ink 52° off the accent — a real idea, and
-   not this lab's: here Accent A means the live signal and an envelope IS one, so the two devices draw
-   in the same colour and the DIFFERENCE between them is the shape, not the hue.  One token, so the
-   plot, the nodes, the minimised trace, the macro indicator and the knob values all follow. */
+
 :root:root:root #modwin.mir-modwindow,
 :root:root:root #modwin.mir-modwindow .m2dev.env { --m2-env-ink: var(--acc); }                        /* 110 */
 
@@ -2453,7 +1678,6 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 .k-route-depth .k-dial { width:22px; height:22px; }
 .k-route-depth .k-lbl, .k-route-depth .k-val { display:none; }
 .mod-matrix { background:var(--pane, #171b22); }
-
 
 
 :root:root:root #modwin .mod-matrix { position:fixed; margin:auto; inset:0; background:hsl(var(--glass-tint) / 1); color:var(--fg); border-color:var(--glass-hairline); font-size:12px; }

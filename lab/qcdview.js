@@ -34,7 +34,7 @@ export function createQCD(host, api) {
   const roLus = readout({ label: 'LÜSCHER at r = 1 fm', value: '—', sub: 'exact · universal' });
   const roW = readout({ label: 'TUBE WIDTH per e-fold', value: '—', sub: 'exact · (d−2)/2πσ' });
   rs.appendChild(roRegge.root); rs.appendChild(roLus.root); rs.appendChild(roW.root);
-  el('div', 'note', host).innerHTML = '<b>NUMERICAL.</b> S-wave levels by Numerov shooting on the radial equation, M = 2m_q + E; the constant V₀ every potential model carries is a <b>FIT</b> to the ground state, after which the 2S mass is a prediction. <b>THE AIRY BRIDGE, REFUTED AS SPECTROSCOPY:</b> for V = σr the radial equation <i>is</i> Airy\'s equation, so the levels are Airy zeros — the print\'s own function — but their ratio is rigid and every splitting scales as μ^{−1/3}, forcing bb̄/cc̄ = 0.679 where the measurement is 0.956. The data wants a <b>logarithm</b>, for which the spacing is mass-independent exactly. The string numbers are exact; a drawn tube interior would be a model.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> Numerov shooting solves S-wave levels for the selected quark potential. V₀ is fitted to the ground state, so higher levels test the potential shape. A pure linear potential gives mass-dependent spacing that does not match both charmonium and bottomonium.';
 
   function compute() {
     const sys = MEASURED[kind];
@@ -82,10 +82,10 @@ export function createQCD(host, api) {
     if (dirty) { compute(); paint(); }
     const { sp, flav, v0, sys } = cache;
     roSplit.set(`${sp.split.toFixed(4)} · ${sp.measuredSplit.toFixed(4)}`, Math.abs(sp.split / sp.measuredSplit - 1) < 0.05 ? 'ok' : 'warn');
-    roSplit.setSub(`${(100 * (sp.split / sp.measuredSplit - 1)).toFixed(1)}% · numerical (Numerov)`);
+    roSplit.setSub(`${(100 * (sp.split / sp.measuredSplit - 1)).toFixed(1)}% · Numerov`);
     const airyBad = pot === 'linear';
     roFlav.set(`${flav.predRatio.toFixed(4)} · ${flav.measRatio.toFixed(4)}`, Math.abs(flav.predRatio / flav.measRatio - 1) < 0.05 ? 'ok' : 'bad');
-    roFlav.setSub(airyBad ? `REFUTED: Airy forces (μ_c/μ_b)^{1/3} = ${flav.airyRatio.toFixed(3)}; data exponent ${flav.fittedExponent.toFixed(3)} ≈ 0 (a log)` : `predicted · measured; a pure linear law would give ${flav.airyRatio.toFixed(3)}`);
+    roFlav.setSub(airyBad ? `linear ratio ${flav.airyRatio.toFixed(3)} · fitted exponent ${flav.fittedExponent.toFixed(3)}` : `predicted · measured · linear ratio ${flav.airyRatio.toFixed(3)}`);
     const m2 = sp.levels[1] && sys.levels[1] ? `${sp.levels[1].M.toFixed(4)} · ${sys.levels[1].M.toFixed(4)}` : '—';
     roMass.set(m2, sp.levels[1] && sys.levels[1] && Math.abs(sp.levels[1].M - sys.levels[1].M) < 0.03 ? 'ok' : 'warn');
     roMass.setSub(`V₀ = ${v0.toFixed(4)} GeV (fit) · ${sp.levels[1] && sys.levels[1] ? ((sp.levels[1].M - sys.levels[1].M) * 1000).toFixed(0) + ' MeV off' : ''}`);

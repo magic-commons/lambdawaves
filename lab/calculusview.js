@@ -11,7 +11,7 @@ export function createCalculus(host, api) {
   const liveSw = sw({ label: 'LIVE', value: true, title: 'recompute every update (throttled while playing)', onChange: (v) => { on = v; } });
   r0.appendChild(liveSw.root);
   const table = el('div', 'calc-table', host);
-  el('div', 'note', host).innerHTML = '<b>THE STATS, DERIVED.</b> Each row is an expectation value computed from the register with exact matrix elements, the law that constrains it, the value the law predicts, and the <b>residual</b>. Time derivatives are centred differences of the <i>exact</i> evolution (h = 10⁻³ a.u., error O(h²)), so a residual is quadrature and truncation, not integration error. <b>Ehrenfest I</b>: d⟨z⟩/dt = ⟨p_z⟩ with ⟨a|p_z|b⟩ = i(E_a−E_b)⟨a|z|b⟩. <b>Ehrenfest II</b>: d⟨p_z⟩/dt = ⟨−∂V/∂z⟩ — for hydrogen −Z⟨z/r³⟩, exact within the register by the dipole-acceleration identity (E_a−E_b)²⟨a|z|b⟩ = ⟨a|∂_zV|b⟩; for the oscillator −⟨z⟩, which is Newton; in the box the wall is not an operator of the register, so the residual there IS the wall\'s force. With the DRAG toy on, the conservation rows show what the toy takes.';
+  el('div', 'note', host).innerHTML = '<b>Interpretation.</b> Each row compares a measured expectation-value change with the corresponding Ehrenfest prediction. The residual includes basis truncation, quadrature, and the centred finite-difference error. In the box, it also contains the wall force.';
   function render(S) {
     table.innerHTML = '';
     for (const r of S.rows) {

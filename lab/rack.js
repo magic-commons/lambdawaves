@@ -83,19 +83,16 @@ export async function boot(dom) {
   let history = null;
   const hNote = () => { if (history) history.note(); };
   const clock = new Clock();
-  /* WAVE 106 · THE CAMERA SHIPS FREE (Josh: "Have the default camera be 'free'").  TURNTABLE keeps a
-     world up-vector and clamps pitch; FREE carries a real orientation and lets the hand roll the
-     scene.  The seed is unchanged and the two agree at t = 0 by construction — `quat` is built FROM
-     the same yaw and pitch — so booting in FREE moves no pixel and only changes what the next drag
-     is allowed to do.  The switch stays in CAMERA for anyone who wants the rail back. */
+
+
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38) };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT
   const mat = { view: VIEW.phase, exposure: 1, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, invert: false, frame: true, axis: true, axisInk: 'theme', paletteOn: false, style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, bg: [0.028, 0.038, 0.058], gamma: 1, lightUI: false };
   let palette = null;
-  /* per-label RATE (Josh): a multiplier on each label's own E — 1 everywhere is the Hamiltonian in force; anything else is a TOY */
+
   const rates = new Float64Array(91).fill(1);
   const energyOf = (a) => getHamiltonian().energy(a) * rates[a];
-  /* W-STURMIAN (Josh: a SWITCH — HYDROGEN is today's code path, untouched; STURMIAN adds).  The SCALE λ gives all 91 radials one
-     exponent; sturm.P is the propagator in force (null = the diagonal law) and sturm.rec the records the FIELD draws (n_rec = 1/λ) */
+
+
   const sturm = { on: false, lambda: 1, P: null, rec: null, buildMs: 0, roVersion: -1 };
   const labelExpect = (a) => sturm.P.H[a * 91 + a] / sturm.P.S[a * 91 + a];          // a label's ⟨a|H|a⟩/⟨a|S|a⟩ under the scale — NOT an eigenvalue
   /* ── THE WHEEL AS THE UI's ACCENT ──────────────────────────────────────────
@@ -111,7 +108,7 @@ export async function boot(dom) {
      above the first reader. */
   const SETTINGS_KEY = 'lambdawaves.q0.settings';
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
-  const PAL_DEF = 'prism';          // WAVE 54 · board #51, Josh's ruling: the 6-stop CIE spectral map ships as the default; λWAVES stays one click away
+  const PAL_DEF = 'prism';
   let palChoice = (() => { const id = readSettings().palette; return id && PALETTE_BY_ID.get(id) ? id : PAL_DEF; })();   // a DEFAULT IS FOR A FIRST VISIT — never a retroactive edit of someone's settings
   const nativeAccentLUT=toLUT(PALETTE_BY_ID.get('lambda').stops);
   let wheelLUT = toLUT(PALETTE_BY_ID.get(palChoice).stops);
@@ -149,33 +146,11 @@ export async function boot(dom) {
     if (modView) modView.setAccent(hueSat(A), hueSat(B));
     paintMarks();
   }
-  /* THE MARK IS PAINTED IN ONE PLACE (wave 48, Josh: "Continue letting the about page logo match the dynamic logo
-     up top").  There are three copies of the wheel now — the header's, the ABOUT face's clone and the BUSY mark's —
-     and before this they diverged the moment the clone was taken, because only '#title .mark rect' was ever repainted.
-     One selector, nine samples, `i % 9` so every copy gets the SAME nine: λ at 0°, the squares at 0°, 40°, … 320°. */
+
+
   const MARK_N = 9, MARK_STEP = 40;          // nine squares, 40° apart on the wheel, in reading order
-  /* ── WAVE 57 · THE λ IS TYPE; THE NINE SQUARES ARE THE PALETTE.  They are not the same object and they
-   * do not get the same treatment.
-   * THE λ is a LETTERFORM — a thin 13-px bold-italic stroke, the only coloured half of a two-part wordmark
-   * whose other half (`.word`) already abandons the wheel for #000 on light.  It took `wheelColor(0)` raw,
-   * so it wore whatever luminance the palette happened to have at 0°, and measured over 23 palettes × 360°
-   * of HUE it reached **1.00 : 1 on BOTH stages** — `ember` @0° on light (#fff0c8 on #eef1f6) and
-   * `aurora` @6° on dark (#01051b on #070a0f).  Not faint: absent.  It now goes through `visibleInk`,
-   * which keeps the hue and the chroma EXACTLY and moves only OKLab L, only when the raw colour is under
-   * the floor, and only as far as the floor demands — a no-op on 47 % of the light wheel and 66 % of the
-   * dark one, so a vivid λ stays exactly as vivid as it was.  The floor is 3 : 1, WCAG's non-text /
-   * graphical-object ratio; 1.4.11 exempts logotypes outright, so this is a floor we CHOOSE, and it is the
-   * same one the audit holds every other mark in the interface to.  It is measured against the harder of
-   * the two grounds the λ is drawn on — the CARD (the notebook's ABOUT face) rather than the stage — so
-   * the stage, which the gate reads, comes out at ≥ 3.06 : 1 on light and ≥ 4.29 : 1 on dark.
-   * THE NINE SQUARES ARE LEFT ALONE, deliberately.  They are a swatch grid: the palette showing itself,
-   * beside a palette editor that draws the same stops.  A swatch corrected for its ground is lying about
-   * the colour it is a swatch of, and the two would disagree.  What that costs is on the record and is
-   * NOT hidden: on the light stage `opal` can put all nine squares under 3 : 1 with the best of them at
-   * 1.59 : 1 (dark's worst case still has three of nine over 3 : 1 and a best of 5.74 : 1), so on a pale
-   * palette the ornament goes quiet while the wordmark beside it stays.  The fix if Josh ever wants it is
-   * an edge, not a recolour — a hairline stroke in the theme's ink gives every cell a border and changes
-   * no fill by one bit — and that is a design decision, not a correctness one. */
+
+
   const MARK_GROUND = { light: [236, 239, 243].map((v) => v / 255), dark: [41, 45, 50].map((v) => v / 255) };   // the card MEASURED in the page, and the dark card at its sheen's brightest corner
   const MARK_FLOOR = 3;
   /* ── WAVE 59 · THE λ HAS TWO GROUNDS AND ONLY ONE OF THEM IS A CONSTANT ───────────────────────────────
@@ -216,22 +191,8 @@ export async function boot(dom) {
     });
     turnDirty = true;                       // the wheel moved under the mark: the turn's keyframes are stale
   }
-  /* ── THE PALETTE TURNS; THE MARK DOES NOT (wave 53, Josh, board #45) ──────────────────────────────────
-   * "The logo shouldn't be spinning, and it also shouldn't be going 360 … it's more like the current palette
-   * itself rotating 360, not hue phase 360."  Read literally, and it is not a hue-rotate of anything.
-   *
-   * Square i RESTS at the wheel's colour at i·40° (that is wave 48's mark, unchanged).  A TURN advances every
-   * square around THE SAME WHEEL — square i shows (i·40° + φ) as φ runs 0 → 360° — so what moves is the palette
-   * THROUGH the mark: the identity of the palette is preserved exactly, and on a four-stop palette the nine
-   * squares march that palette's own four colours around themselves rather than nine arbitrary hues.  Nothing
-   * rotates: no transform, no filter, no hue-rotate anywhere in the logo any more.
-   *
-   * The keyframes are GENERATED from the same wheelColor() the static fills come from — one @keyframes per
-   * square, 36 samples 10° apart, and because 40 is a multiple of 10 every square's list is the SAME 36 palette
-   * samples rotated by four places.  That identity is what "the palette itself turning" means, and it is what
-   * the gate reads.  It is CSS and not JS for wave 48's reason: the mark's whole job is to go on moving while
-   * the main thread is the thing that is stuck.  It is rebuilt only when a turn STARTS — a HUE drag would
-   * otherwise rewrite eight kilobytes of stylesheet sixty times a second, and restart the animation with it. */
+
+
   const TURN_STOPS = 36;
   let turnSheet = null, turnDirty = true;
   /** the nine × 37 colours the turn actually animates through, from the CURRENT palette */
@@ -310,7 +271,7 @@ export async function boot(dom) {
          scratch, so a key it does not name is destroyed on the next call — the exact hole waves 54 and
          59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
          else.  Pick an input, move any window, reload: back to the system default. */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), hint: !document.body.classList.contains('no-hint'), captions: !document.body.classList.contains('no-captions'),
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'),
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -346,9 +307,8 @@ export async function boot(dom) {
         closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) }));
     } catch (e) {}
   }
-  /* CARD STYLE (wave 47, Josh): the glass every card and chrome pane is made of.  REFRACTIVE is the blur alone — the
-     pane is transparent and what you read through it is the field; TINTED puts the theme's tinted pane back under the
-     blur.  The rules are skin.css §14c; this only says which of the two the body wears, and remembers it per browser. */
+
+
   /** wear a surface without claiming anyone chose it — the phone's default and the way back use this */
   function applyCard(c) {
     document.body.dataset.card = c;
@@ -362,28 +322,8 @@ export async function boot(dom) {
     if (named) cardChosen = true;
     return applyCard(named ? id : defaultCard());
   }
-  /* ── WAVE 67 · THE TWO NEW SURFACE CONTROLS.  Both are THIS BROWSER's preference and neither is ever in a
-   * project file, exactly like FROST, CARD STYLE and the theme beside them.
-   *   setFrost(mode)      OFF · STILL · ALWAYS — the vividness and WHEN it is affordable (see frostSync).
-   *   setDisconnected(v)  the window as a CONSTELLATION (a bar-chip and a body-card with real air between
-   *                       them) or as one slab.
-   *
-   * ── WAVE 69 · THE DEFAULT IS **OFF**, AND THIS IS A REVERT ─────────────────────────────────────
-   * Wave 67 read Josh's two sentences — *"I love that disconnected look, it allows for more of the
-   * background to show"* and *"can you make it like the webm where the window is disconnected"* — as
-   * being about λWAVES' own rack, and shipped every window as a constellation.  They were about the
-   * MODULATION WINDOW.  Josh, 2026-09-06: *"Why was the design of our own UI changed?? Please Claude
-   * I meant the design of the Modulation window only."*
-   *   So OUR windows go back to exactly what they were before wave 67 — one card, header attached —
-   * and the constellation stays only as an off-by-default switch in SETTINGS, because the code is
-   * twenty-one CSS rules and one class and costs nothing while it is off.  The two things wave 67
-   * did that were FIXES and not design are kept and are untouched by this: the drag rewrite (40
-   * forced layouts and 40 synchronous writes per drag down to one write per frame) and the pick-up
-   * transition at the 120 ms rung instead of 350, which brought it back inside MOTION-LAW's ceiling.
-   * FROST is independent; its first-run default is OFF because backdrop capture remains costly.
-   *   `!!v` and not `v !== false`: NOTHING SAID MEANS JOINED now, on both roads — `applySettings`
-   * reads `s.disc === true` for the same reason, so a profile that predates the switch opens joined
-   * rather than inheriting a default nobody asked for. */
+
+
   function setFrost(mode, opt) {
     frostMode = mode === 'still' || mode === 'always' ? mode : 'off';
     document.body.classList.toggle('frost', frostMode !== 'off');
@@ -402,18 +342,15 @@ export async function boot(dom) {
     const s = readSettings();
     if (__LW_hooks.setTheme) __LW_hooks.setTheme(s.theme || 'light');
     if (s.badges === false) { document.body.classList.add('no-badges'); if (ui.badgesSw) ui.badgesSw.set(false); }
-    if (s.hint === false) { document.body.classList.add('no-hint'); if (ui.hintSw) ui.hintSw.set(false); }
+    const controlHints = s.controlHints === undefined ? s.hint !== false : s.controlHints !== false;
+    document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
     if (s.captions === false) { document.body.classList.add('no-captions'); if (ui.capSw) ui.capSw.set(false); }
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default, OFF. */
     setFrost(s.frost === true ? 'always' : (s.frost || frostMode), { quiet: true });
-    /* ⚠ WAVE 101 · DISCONNECTED IS ON BY DEFAULT NOW, AND THAT REVERSES WAVE 69 ON JOSH'S OWN WORD.
-       Wave 67 shipped it on, Josh said "Why was the design of our own UI changed?? I meant the design
-       of the Modulation window only", and wave 69 made it an off-by-default switch.  He has now looked
-       at the constellation for a week beside the plugin's and asked for it as a first-run default:
-       "Disconnected on by default".  `!== false` and not `=== true`, so a browser that has SAID off
-       stays off and only a profile with nothing saved gets the new default. */
+
+
     setDisconnected(s.disc !== false, { quiet: true });
     cardChosen = s.cardSet === true;                                          // whether this browser has SAID is part of what applySettings restores
     setCardStyle(s.cardSet === true ? s.card : undefined);                    // wave 47: the glass of the cards — REFRACTIVE unless this browser SAID otherwise (wave 51: said, not merely saved)
@@ -448,19 +385,15 @@ export async function boot(dom) {
        frame. */
     if (s.camMode === 'free' || s.camMode === 'turntable') setCamMode(s.camMode, { now: true });
     if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');
-    /* WAVE 101 · DISPLAY-P3 ON AN APPLE DEVICE, sRGB EVERYWHERE ELSE (Josh's new default).  Every
-       Mac, iPhone and iPad this lab will meet ships a P3 panel and a colour-managed compositor, so the
-       wider gamut is what those screens are FOR; a PC panel is usually sRGB and asking for P3 there
-       buys a conversion and no colour.  It is a FIRST-RUN default only — `s.gamut` present means this
-       browser has said, and what it said wins — and it still cannot be honoured unless the canvas
-       agrees, which is what the `setGamut(...) === 'srgb'` fallback below reads. */
+
+
     const wantP3 = s.gamut ? s.gamut === 'p3' : appleDevice();
     if (wantP3 && ui.gamutSeg) ui.gamutSeg.set(field.ok && field.setGamut ? (field.setGamut(s.p3Mode === 'vivid' ? 'p3-vivid' : 'p3') === 'srgb' ? 'srgb' : 'p3') : 'srgb');   // it can only come back if the canvas can honour it
     document.body.dataset.gamut = field.ok && field.gamut !== 'srgb' ? 'p3' : 'srgb';
     settingsLoaded = true;
   }
-  /* the window taxonomy (Josh, 2026-09-04): CORE is the instrument; INFO panels read and report — they keep their
-     captions visible and carry a COPY digest for the notebook; CONTROL surfaces and OTHER models are niche and start folded */
+
+
   const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', modulation: 'control', settings: 'other', about: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
@@ -474,10 +407,8 @@ export async function boot(dom) {
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
   const DIGESTS = {};
   let space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
-  /* WAVE 101 · THE SHIPPED GRID IS 64³ (Josh's new first-run default).  It is the FIRST rung of
-     RES_LADDER, so the governor has two notches to give back rather than one, and a first visit costs
-     a fraction of the fill 96³ did.  A browser that has chosen a grid keeps it — this is the value a
-     profile with nothing saved starts on. */
+
+
   const quality = { res: 64, steps: 160, scale: 1, auto: true, autoScale: 1, minScale: 0.35 };
   /* AUTO render scale: the canvas backing resolution follows the measured frame interval (rAF cadence, which is what a GPU-bound
      device shows), targeting 60 Hz in FULL and the observed cadence up to 120 Hz in 120 mode. */
@@ -489,29 +420,8 @@ export async function boot(dom) {
      project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
   const gov = { on: true, drop: 0, median: 0, ring: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
-  /* ── WAVE 67 · THE FROST POLICY, AND THE GOVERNOR NO LONGER STEALS THE GLASS ──────────────────────────
-   * Wave 45 gave the governor a lever on FROST: when the frame was far longer than the maths in it, it
-   * STRIPPED `body.frost` while the transport played and put it back on pause.  That is exactly the bug
-   * Josh filed against BASINS in his own words — *"Glass only works when still or when animation is
-   * running.  It returns to grey whenever I tap the screen"* — and BASINS answered it with a law this lab
-   * now keeps too: THE MATERIAL MAY ECONOMISE, IT MAY NOT CHANGE APPEARANCE.  Stripping the class took the
-   * FILL with the filter, which is the whole grey.  So the lever is gone from the governor and the same
-   * economy is a POLICY THE USER NAMED, which is BASINS' own answer as well (their four blur policies).
-   *
-   * THE MEASUREMENT THAT SHAPES IT, on our own rig, 360 rAF intervals per arm over a live field:
-   *     none 17.10 ms / 58.5 fps  ·  saturate(1.8) alone 50.32  ·  blur(8px) 50.30  ·  BASINS' full
-   *     8/188/108 recipe 50.30  —  identical, because THE COST IS THE BACKDROP CAPTURE, NOT THE KERNEL.
-   *     With the field PAUSED every one of those arms reads 17.10 ms: free.
-   * So there is no cheap half to buy and the only lever that exists is WHEN.  Three seats:
-   *     OFF     no filter.
-   *     STILL   the filter is on while the transport is stopped and held while it runs.
-   *     ALWAYS  the exact BASINS look, at 58.5 → 19.9 fps over a moving field, by the user's own word.
-   * WHY OFF WAS THE ORIGINAL DEFAULT: the capture is paid for ANY canvas
-   * that changes, so a camera orbit or a knob drag over a paused field costs the same 33 ms as playback.
-   * A default of STILL would therefore either take a third of the frame rate off a gesture Josh performs a
-   * hundred times a day, or twitch the material under his hand every time he touched it — and he has ruled
-   * against both (he keeps all the motion; the glass may not go grey when he taps).  The vividness is one
-   * press away. Wave 89 temporarily changed the default to ALWAYS; the current shipping choice restores OFF. */
+
+
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
   function frostSync() {
     const hold = frostMode === 'still' && clock.playing;
@@ -519,9 +429,8 @@ export async function boot(dom) {
   }
   const effectiveRes = () => { if (!gov.drop) return quality.res; let i = RES_LADDER.findIndex((r) => r >= quality.res); if (i < 0) i = RES_LADDER.length - 1; return RES_LADDER[Math.max(0, i - gov.drop)]; };
   const READER_LAW = { park: 16, slow: 6, parkDrop: 8, slowDrop: 3, probeMs: 3000 };   // ms per update: parked while playing / slowed to every 6 × cost — and the tighter pair once stepped down
-  /* KEEP FRAMES (wave 45, Josh): off by default — the playhead does not follow the clock, the scrub bar is disabled
-     and never repainted (each repaint was a style write on the transport's glass at the display rate); RATE and
-     play / pause work as before.  A SETTINGS switch; this browser's, never a project's. */
+
+
   const keep = { frames: false };
   const domain = { auto: true, half: 7 };
   /* ── THE CAMERA LAW (wave 50, W-CAMERA) ─────────────────────────────────────────────────────────────────────
@@ -552,22 +461,8 @@ export async function boot(dom) {
     turntable: 'TURNTABLE: the horizon stays level, and the pitch stops at the poles.',
     free: 'FREE: there are no poles, and the horizon rolls — a closed drag loop leaves a turn behind it, because [ĵ, k̂] = 2î.',
   };
-  /* ── THE TWO DIALS FROM THE VIEW WINDOW (wave 58, board #63 — Josh: "can I also copy the View window's drag gain
-   * and fling slider?").  NEBULA's own pair is dragGain 0.2 … 8 default 3.14 and flingGain 0 … 2 default 1, and the
-   * FIRST of those numbers does not travel: THEIR gain is radians per SCREEN WIDTH (3.14 = a full-width drag turns
-   * π), which on our 1400-px stage would be 0.00224 rad/px against the 0.0065 this instrument was built on.  A dial
-   * whose default silently retunes the feel of the shipped camera is the wrong port (ANTI-PATTERN 7's cousin), so
-   * the RANGE and the STEP are theirs and the UNIT is ours: DRAG GAIN multiplies CAM.SENS, and 1.00 is exactly the
-   * camera Josh already has.  (Their 3.14 in our units is 3.14/(0.0065·W) — about 0.34 on a 1400-px stage.)
-   *   THE TWO DIALS COMPOSE WITH THE FRICTION LAW, they do not compete with it.  FLING decides how much velocity a
-   * release GIVES you; μ decides how fast it decays; μ = 0 still spins for ever whatever FLING is.  FLING = 0 is
-   * "pure trackball" — the drag still turns the view, and the moment you let go there is nothing left — which is
-   * NOT what μ = 12 does (that is a fling that dies in a quarter turn, and it dies over time). */
-  /* WAVE 106 · MU_DEF 2.5 -> 1.0 (Josh: "the friction to be quite low but not too low").  The law is
-     omega decaying as e^(-mu*t), so mu IS the reciprocal e-folding time: 2.5 stopped a flick in 0.4 s,
-     which reads as sticky, and 1.0 gives it a full second of coast without tipping into the frictionless
-     feel that makes a scene impossible to park.  The knob's own default reads this same constant, so
-     the dial and the seed cannot drift apart. */
+
+
   const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
     GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
   const camera = {
@@ -654,7 +549,7 @@ export async function boot(dom) {
     if (!ui.scrub) return;
     const r = ui.scrub.root; r.classList.toggle('disabled', !keep.frames); r.style.opacity = keep.frames ? '' : '.35'; r.style.pointerEvents = keep.frames ? '' : 'none';
     r.tabIndex = keep.frames ? 0 : -1; r.setAttribute('aria-disabled', String(!keep.frames));   // wave 62: a control the pointer cannot reach must not be reachable by Tab either
-    r.title = keep.frames ? '' : 'KEEP FRAMES is off (SETTINGS): the playhead does not follow the clock — RATE and play / pause still work';
+    r.title = keep.frames ? '' : 'Enable KEEP FRAMES to animate the playhead';
     if (!keep.frames) ui.scrub.set(0);
     schedule(TIER.PRESENT);
   }
@@ -676,40 +571,8 @@ export async function boot(dom) {
      guard on it before the window that shows it has been built. */
   let modHost = null, modView = null, modWall = 0, modExpOn = null, modSyncing = false;
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
-  /* ══ THE ROTATION AND DEFLECTION RATES — A RATE IS A NUMBER, AN ANGLE IS NOT ══════════════════
-   * Josh: "modulation parameters for those rotation and deflection knobs seem juicy" — and, on the
-   * problem below, "rotation/deflection could be like how you suggest."
-   *
-   * THE PROBLEM, MEASURED.  ROTATE z, STARK K_z and DEFECT L² are JOG WHEELS.  kit.js:213 —
-   * `if (o.onDelta) { … o.onDelta(d * 2π); announce(true); return; }` — returns BEFORE touching `v`,
-   * so `k.get()` hands back the constructor's `value` (0) for the life of the control.  And the
-   * quantity does not exist underneath either: reg.rotateZ / rotateK / defectWait mutate the
-   * coefficient vector in place (state.js:276, 291, 297) and NO angle is stored anywhere in the lab.
-   * So these three cannot be ABSOLUTE modulation targets: the registry would believe it owns a
-   * number the program does not keep, `modSyncBases` would re-base it from a getter that lies, and
-   * the arc would be anchored to a fiction.
-   *
-   * ⚠ THE LAW THAT CHANGES.  The block above the `defs` array says "MODULATION IS AN OBSERVER
-   * INSTRUMENT: … it never touches ψ."  That sentence is now half wrong, and the new line is drawn
-   * on the DERIVATIVE, not on the target: a macro may drive dθ/dt, never θ.  Nothing accumulates a
-   * fictional angle, so nothing can go stale; the register is still the hand's, and what the
-   * modulator holds is HOW FAST the hand is turning.  reg.re0/im0 remain the only truth.
-   *
-   * THE RANGES ARE DERIVED, NOT CHOSEN — the house rule ("ranges are the dials' own … a registry
-   * whose range disagrees with the knob lies") applied to a control that has no range of its own:
-   *   · z   — D(R_z(α)) is a rigid spatial turn of the density, exact for any α, so it cannot
-   *           alias: 2π rad/s is exactly ONE TURN A SECOND at full deflection.
-   *   · K_z — applyRotateK's K_z blocks have INTEGER eigenvalues on every shell (the parabolic
-   *           n₁ − n₂), so e^{−iθK_z} is 2π-periodic: 2π rad/s is one full Stark cycle a second.
-   *   · L²  — applyDefectWait phases by l(l+1), which for l = 0…5 is {0, 2, 6, 12, 20, 30} — EVERY
-   *           ONE EVEN, gcd 2 — so e^{iαL²} is π-PERIODIC, not 2π.  π rad/s is one full defect
-   *           cycle a second, and the range is π rather than 2π because the operator says so.
-   *
-   * ZERO COSTS NOTHING, and that is the first line of rotStep: at rate zero not one coefficient is
-   * touched, reg.version does not move, none of the twelve version-keyed caches is invalidated, and
-   * the frame loop is given no reason to re-arm (§45, idle is zero work).  `map: 'bipolar'` makes
-   * that exact rather than approximate — zero is a detent, and the registry's zero-depth
-   * short-circuit hands back r.base ITSELF (B119), so an LFO parked at depth 0 writes exactly 0. */
+
+
   const ROT_LIMIT = { z: 2 * Math.PI, kz: 2 * Math.PI, def: Math.PI };
   const rotRate = { z: 0, kz: 0, def: 0 };            // rad/s.  THE ANGLE IS NOT STORED AND NEVER WILL BE.
   const rotDriving = () => rotRate.z !== 0 || rotRate.kz !== 0 || rotRate.def !== 0;
@@ -787,13 +650,8 @@ export async function boot(dom) {
     for (const q of modHost.model.sourceList()) if (q.kind === 'audio') modHost.model.audioReset(q.id);
   }
   const MOD = { hz: 60, get step() { return 1000 / this.hz - 0.5; } };   /* the cadence cap: 60 or 120, never the display's */
-  /* ── WAVE 65 · THE ARM.  Josh: "the play/pause button should have a small MOD button that glows on
-   * or off.  When this is on, the modulations are active and the parameters move on all the racks."
-   * ARMED IS THE SHIPPED DEFAULT, deliberately: `anyRouted()` already refuses to run a transport with
-   * nothing routed, so an armed rack on a fresh visit behaves exactly as every build before this one
-   * did, and the switch is a way to take the modulation OFF rather than a gate that has to be found
-   * before it will go on.  It is this BROWSER's preference (`modArm` in the settings key) and never a
-   * project's, on FROST's and KEEP FRAMES' own pattern. */
+
+
   let modArm = true;
   const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
   /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
@@ -846,21 +704,7 @@ export async function boot(dom) {
   let refSnapshot = null;        // { re, im, ids } — the DIFF reference state
   let pendingRef = null;
 
-  /* ── THE BUSY MARK (wave 48, Josh) ─────────────────────────────────────────
-   * "When things are loading/frozen in the app, show the little square logo next to the 'WAVES' text right next to
-   * the cursor where loading would be and let it hue cycle around the current palette; no shadow."
-   *
-   * A COUNTER, not a flag: begin() / end() nest, so a bow inside a rebuild inside a project load is one mark, and it
-   * goes when the LAST of them lands.  Three kinds of work raise it — every Worker call (the bow's slap, the BOX
-   * packet, the period scan), every atom solve and project load, and every field rebuild — plus one rule that needs
-   * no instrumentation at all: a frame gap over 250 ms means the main thread WAS blocked by something nobody wrapped,
-   * so the mark shows for 600 ms after it.  That last rule is why the mark is honest about freezes it was never told
-   * about.  Its motion is CSS (lab.css §48d): a thread that is stuck cannot animate anything from JS, so it doesn't try.
-   * WAVE 53 took the ROTATION and the HUE CYCLE out of it (Josh: no spin anywhere in the logo, and colour motion is
-   * the palette turning, not a hue phase).  What is left says "busy" two ways, neither of them a rotation: the mark
-   * BREATHES in opacity, and the palette turns through its nine squares — the same turn the header mark runs.
-   * The position is written as two custom properties on a pointermove — a WRITE, never a read, and only while the
-   * mark is up, so a moving pointer over an idle lab costs one assignment and no style work at all. */
+
   const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0 };
   function busyHost() {
     if (busy.host) return busy.host;
@@ -1138,24 +982,8 @@ export async function boot(dom) {
     stats.rebuilds++;
     ui.domainKnob.set(domain.half);
   }
-  /* ── THE CAMERA'S SECOND MODE (wave 54, board #43 — Josh: "I can't rotate past the poles") ───────────────────
-   * TURNTABLE is the shipped camera, unchanged: two Euler angles about a world up of +z, a level horizon, and a
-   * pitch clamp at ±1.52 rad because that is where the azimuth stops being defined.
-   * FREE is NEBULA's: one unit quaternion, no angles, and therefore NO CLAMP TO HIT.  A drag builds a rotor in the
-   * CAMERA's own frame and multiplies it on the right, so the axes are screen-relative at every pose and a drag
-   * that would stop dead at the pole in TURNTABLE goes straight over it.  The price is written on the card:
-   *
-   *      A LEVEL HORIZON WITH POLES, OR NO POLES WITH A HORIZON THAT ROLLS.
-   *
-   * The roll is not a defect and cannot be removed: the drag's two generators are the camera's up and right, and
-   * [ĵ, k̂] = 2î — a closed loop in the screen plane leaves a commutator along î, which IS the roll axis.  Any
-   * "fix" is a re-levelling, i.e. TURNTABLE.
-   * THE FRICTION LAW IS THE SAME LAW IN BOTH MODES.  ω = ω_amb + d with ḋ = −μd, integrated in closed form, is
-   * arithmetic on two scalars and does not care what they turn: what changes is the AXIS each scalar turns about.
-   * The AMBIENT stays a WORLD-z drive in both modes — AUTO-ROTATE turns the cloud about the quantization axis, and
-   * that is physics — while the RESIDUAL is world-z-yaw + clamped-pitch in TURNTABLE and screen-relative in FREE.
-   * At a level horizon the two bases coincide and FREE reproduces TURNTABLE exactly; tilted, the residual follows
-   * the screen, which is the whole point of a trackball. */
+
+
   const camTravel = { yaw: 0, pitch: 0 };     // the turn a drag has APPLIED, in the turntable's units — the FLING reads this in BOTH modes
   const camLevel = { from: null, to: null, t0: 0, ms: 150, yaw: 0, pitch: 0 };   // FREE → TURNTABLE levels the roll over 150 ms; it never snaps
   /** in FREE the two angles are a READOUT of the look direction — kept live so every dial, digest and cache key still moves */
@@ -1335,10 +1163,8 @@ export async function boot(dom) {
         const budget = perfBudgetMs();
         if (gov.median > budget * 1.68) {
           gov.okSince = 0;
-          /* WAVE 67: the FROST arm is GONE from here.  It used to strip `body.frost` when the frame was far
-             longer than the maths in it — which took the FILL with the filter and is the grey Josh filed as a
-             bug.  The same economy is now the user's own FROST · STILL policy, which moves the filter and
-             nothing else.  What is left is the grid notch, which changes no appearance at all. */
+
+
           if (gov.drop < 2) { gov.drop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
         } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && gov.drop > 0) { gov.drop--; gov.changes++; gov.okSince = nowMs; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
         else gov.okSince = 0;
@@ -1456,18 +1282,18 @@ export async function boot(dom) {
     const st = !gov.on ? 'OFF' : gov.drop ? 'STEPPED −' + gov.drop : 'nominal';
     ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
-    ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') + ' · re-probed every ' + (READER_LAW.probeMs / 1000).toFixed(0) + ' s' : 'nothing parked') + ' · budget ' + (perfBudgetMs() * 1.68).toFixed(0) + ' ms over the last 60 frames · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%' + (maths.ok && scan.ok ? ' · the impulse, the packet and the period scan off the frame' : ' · no worker: the maths runs on the frame'));
+    ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 1.68).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');
   }
   function statusLine() {
     const rs = stateReaders().rendered;
-    let s = reg.field.Fz !== 0 ? 'EXACT WITHIN EACH SHELL (Stark) · EXACT REAL shadow · NUMERICAL field'
-      : reg.field.Bz !== 0 ? 'EXACT ANALYTIC state + evolution (Zeeman) · EXACT REAL shadow · NUMERICAL field'
-      : 'EXACT ANALYTIC state + evolution · EXACT REAL shadow · NUMERICAL field';
-    if (sturm.P) s = 'EXACT EVOLUTION IN THE STURMIAN BASIS λ = ' + sturm.lambda.toFixed(3) + ' (S⁻¹H, VARIATIONAL eigenvalues, S-norm' + (reg.field.Bz !== 0 ? ', Zeeman' : '') + ') · EXACT REAL shadow · NUMERICAL field';
-    if (h2 && h2.on) return 'H₂ · Heitler–London · EXACT integrals · VARIATIONAL curves · CLASSICAL nuclei (Born–Oppenheimer) · one-electron DENSITY · NUMERICAL field';
-    if (helium && helium.on) return 'HELIUM · Hylleraas · EXACT integrals · VARIATIONAL energy · the conditional density of electron 2 given electron 1 · NUMERICAL field';
-    if (molecule && molecule.on) return 'H₂⁺ · EXACT integrals · VARIATIONAL energies · EXACT evolution in the LCAO space · NUMERICAL field';
-    if (reg.damping > 0) s = 'TOY DRAG γ = ' + reg.damping.toFixed(3) + ' · NON-UNITARY · ' + s;
+    let s = reg.field.Fz !== 0 ? 'STARK SHELL MODEL · FIELD GRID'
+      : reg.field.Bz !== 0 ? 'ZEEMAN MODEL · FIELD GRID'
+      : 'HYDROGEN · FIELD GRID';
+    if (sturm.P) s = 'STURMIAN λ = ' + sturm.lambda.toFixed(3) + ' · S-NORM' + (reg.field.Bz !== 0 ? ' · ZEEMAN' : '') + ' · FIELD GRID';
+    if (h2 && h2.on) return 'H₂ · HEITLER–LONDON · CLASSICAL NUCLEI · ONE-ELECTRON DENSITY · FIELD GRID';
+    if (helium && helium.on) return 'HELIUM · HYLLERAAS · CONDITIONAL DENSITY · FIELD GRID';
+    if (molecule && molecule.on) return 'H₂⁺ · LCAO · CLASSICAL NUCLEI · FIELD GRID';
+    if (reg.damping > 0) s = 'DRAG γ = ' + reg.damping.toFixed(3) + ' · ' + s;
     if (!field.ok) s += ' (no GPU)';
     if (rs.masked) s += ` · MASKED ${rs.masked}`;
     if (rs.truncated) s += ` · TRUNCATED ${rs.truncated}`;
@@ -1552,7 +1378,7 @@ export async function boot(dom) {
       if (sturm.P) return false;                                     // W-STURMIAN: RATE is a diagonal-phase feature — off under the scale
       const c = reg.coeffAt(a, clock.t); rates[a] = r; reg.setEnergies(energyOf); reg.set(a, c.re, c.im, clock.t); touchState();   // re-anchored: c(t) is continuous, only its speed changes
       const toy = rates.some((v) => Math.abs(v - 1) > 1e-9);
-      wSpec.setStatus(toy ? 'RATES ≠ 1 · TOY: H rescaled per label' : getHamiltonian().label, toy ? 'warn' : (getHamiltonian().id === 'hydrogen' ? '' : 'live'));
+      wSpec.setStatus(toy ? 'CUSTOM RATES · H RESCALED' : getHamiltonian().label, toy ? 'warn' : (getHamiltonian().id === 'hydrogen' ? '' : 'live'));
     },
     addPhase(a, d) { const c = reg.coeffAt(a, clock.t); reg.setPolar(a, Math.hypot(c.re, c.im), Math.atan2(c.im, c.re) + d, clock.t); touchState(); },
     setPhase(a, ph) { const c = reg.coeffAt(a, clock.t); reg.setPolar(a, Math.hypot(c.re, c.im), ph, clock.t); touchState(); },
@@ -1565,38 +1391,23 @@ export async function boot(dom) {
   const ui = {};
   const rack = dom.rack;
 
-  /* ── WAVE 56 · THE MERGED **WAVE** WINDOW (board #59) ──────────────────────────────────────────
-   * Josh: "Space and Draw windows together. Space layout up top and then the draw layout below, have
-   * invert, frame, and axis be located in the bottom of this new window. Just title this window 'wave'
-   * and then the two sections within are space and draw."  Asked whether it wanted an id of its own:
-   * "we don't need to make a new wave id".
-   * SO THIS IS A RETITLE AND AN ABSORPTION, NOT A NEW DEVICE.  The id stays `observer` because five
-   * things read it and none of them is this file: lab.css and skin.css make the 3×2 observables grid
-   * and its touch sizing from `.dev[data-id="observer"]`, the settings key's `closed[]` names it, a
-   * saved LAYOUT names it, and the browser gate measures it.  `wStyle` IS `wObs` from here on, so every
-   * line below that still says `wStyle.body` still says exactly where that control lives. */
-  const wObs = device({ id: 'observer', eyebrow: 'WAVE', title: 'SPACE · DRAW · WHAT IS DRAWN OVER THE FIELD', status: 'never mutates ψ' });
-  const wPal = device({ id: 'palette', eyebrow: 'PALETTE', title: 'THE COLOURING OF THE COMPLEX PLANE', status: 'design choice · ψ untouched' });
+
+  const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
+  const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wStyle = wObs;                    // WAVE 56: DRAW STYLE was its own window (id `style`) until board #59 merged it in
-  const wCam = device({ id: 'camera', eyebrow: 'CAMERA', title: 'ORBIT · SPIN · THE <m>Δρ</m> REFERENCE', status: 'observer only' });
+  const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
-  const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', title: 'VOLUME · CLIP · SLAB', status: 'observer only' });
+  const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
   {
-    /* THE THREE SECTIONS, created here in the order they are read so that the two groups filled later
-       (DRAW is filled ~130 lines down, where the style controls have always been built) still land in
-       Josh's order: SPACE on top, DRAW below it, and the three overlay switches at the foot. */
-    /* ⚠ WAVE 106 · THE TWO SECTIONS.  It was THREE — SPACE, DRAW, and a bare `row tight` at the foot
-       holding INVERT, FRAME and AXIS (wave 56, board #59) — until Josh moved all three out: "I think
-       invert in draw should move to pallete and frame and axis in draw should move to settings
-       alongside a toggle to make the axis RBG or CMY."  THE EMPTY ROW IS NOT LEFT STANDING: a `row`
-       with nothing in it is a gap in a card nobody can account for, and `.row` carries its own gap. */
+
+
     const gSpace = group(wObs.body, 'SPACE');
     const gDraw = group(wObs.body, 'DRAW');
     {
       const r0 = el('div', 'row', gSpace);
       ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
         { id: 'x', label: 'POSITION ψ(x)', title: 'the wavefunction in space' },
-        { id: 'p', label: 'MOMENTUM φ(p)', title: 'its Fourier transform in closed form (Podolsky–Pauling 1929) — under Fock\'s map every shell is rigid on S³, so the rotors merely TURN this picture' }],
+        { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the current state' }],
         onChange: (v) => { space = v; schedule(TIER.REBUILD); } });
       r0.appendChild(ui.spaceSeg.root);
       ui.spaceNote = el('div', 'sturm-note', gSpace); ui.spaceNote.hidden = true;          // its own class: the ⓘ sweep folds every .note away, and this one must be seen
@@ -1604,73 +1415,47 @@ export async function boot(dom) {
     }
     const r1 = el('div', 'row', gSpace);
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
-      /* WAVE 69 · THE OBSERVABLES ARE THE FIRST THING TO WEAR THE MATH FACE, and Josh chose them:
-         these six labels are the only place in the lab where the label IS the mathematics and nothing
-         else — no English word to protect, no unit, no digit column.  Each is one `<m>` run. */
+
+
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'probability density' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: orange +, blue −' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: yellow gain, blue loss' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'both parts superposed — a heuristic placement, two pictures in one volume: orange/blue for Re, green/violet for Im' }],
+      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: orange +, blue −' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: yellow gain, blue loss' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); } });
     r1.appendChild(ui.viewSeg.root);
     const r2 = el('div', 'row tight', gSpace);
     ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
     ui.softK = knob({ label: 'SOFT', min: 0.3, max: 2.2, value: 0.7, fmt: (v) => 'γ' + v.toFixed(2), onInput: (v) => { if (modHand('material.softness', v)) return; mat.softness = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.softK.root);
     ui.hueK = knob({ label: 'HUE', min: 0, max: 1, value: 0, wrap: true, fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
-    /* WAVE 56 (board #59): INVERT, FRAME and AXIS sit together at the FOOT of the window, out of SPACE and out
-       of DRAW, because the three of them are one thought — what is drawn OVER the field — and none of them is
-       about ψ.  INVERT flips the ink of the cloud itself; FRAME is the domain cube; AXIS is the three xyz lines.
-       WAVE 53 (Josh, board #40) built FRAME and AXIS as two objects with two switches: each has its own state in
-       `mat`, each rides in the settings key and in a project, and field.js draws them from one buffer in two draw
-       calls, so turning either off leaves the other exactly where it was. */
-    /* ⚠ INVERT, FRAME AND AXIS ARE NOT BUILT HERE ANY MORE.  Wave 56 put the three in one row at the
-       foot on the argument that they are one thought — what is drawn OVER the field.  Josh has split
-       that thought where it actually divides: INVERT is about the COLOURING of the cloud, so it goes
-       to PALETTE; FRAME and AXIS are furniture this browser remembers, so they go to SETTINGS beside
-       the other chrome switches.  Each is built at its new seat under its NEW window's own spelling.
-       `ui.invertSw`, `ui.frameSw` and `ui.axisSw` keep their names, which is why toggleUI, restore(),
-       hLookWrite and LW.setFrame/setAxis needed no edit at all — the handle IS the seam. */
+
+
     /* ── THEME and SURFACE: the interface's skin, and the stage underneath it ── */
-    ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', title: 'INTERFACE · THEME · QUALITY', status: 'saved in this browser' });
+    ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: true, title: 'the EXACT ANALYTIC / NUMERICAL tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
-    ui.hintSw = sw({ label: 'HINT BAR', value: true, title: 'the one-line gesture hint above the transport', onChange: (v) => { document.body.classList.toggle('no-hint', !v); saveSettings(); } }); ri.appendChild(ui.hintSw.root);
+    ui.badgesSw = sw({ label: 'STATUS TAGS', value: true, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
+    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: true, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'dock every floating window, reopen and unfold every one of them, undock the transport, both racks as shipped', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'clear what this browser remembers (theme, accents, tags, closed windows) and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
-    /* ⚠ WAVE 106 · THE FIELD'S OWN CHROME, MOVED HERE OUT OF THE WAVE WINDOW (Josh: "frame and axis
-       in draw should move to settings alongside a toggle to make the axis RBG or CMY", and "make the
-       buttons behave according to their window's peers").  STATUS TAGS · HINT BAR · STAGE CAPTIONS are
-       the chrome of the INTERFACE; these are the chrome of the FIELD, and all five are remembered by
-       this browser and touch ψ in no way whatever.
-         THEY WEAR THIS WINDOW'S SPELLING AND NOT THE ONE THEY ARRIVED IN: every peer here hands its
-       explanation to sw() as the `title:` OPTION, and an ENUMERATION here is a seg() and never a pair
-       of switches — which is why AXIS COLOUR is a seg.
-         ⚠ IT HAS THREE SEATS AND NOT THE TWO THE ASK READS LIKE, AND THE THIRD IS WHY WAVE 48 SURVIVES.
-       Josh ruled the theme's own binding himself — vivid CMY on DARK, warm/cool on LIGHT.  A two-seat
-       toggle would have had to DELETE that ruling: whichever seat shipped as default, one theme would
-       have lost the colours it was given.  THEME is that ruling, kept, and it is the shipped default,
-       so a browser that never touches this control sees exactly the picture wave 48 built. */
+    ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
+
+
     const rc = el('div', 'row tight', gi);
-    ui.frameSw = sw({ label: 'FRAME', value: true, title: 'the domain cube around the state — black on LIGHT, white on DARK; an observer object, never ψ', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
+    ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.frameSw.root);
-    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'the three xyz axes through the origin — z is the quantization axis. WHETHER they are drawn is this switch; WHAT COLOUR they are drawn in is the seg beside it', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis); ui.axisSw.root.title='AXIS · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
+    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis); ui.axisSw.root.title='AXIS · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.axisSw.root);
     ui.axisInkSeg = seg({ label: 'AXIS COLOUR', value: 'theme', options: [
-      { id: 'theme', label: 'THEME', title: 'follow the theme, as the lab has always done: vivid CMY on DARK (x cyan, y magenta, z yellow), warm/cool on LIGHT. This is the shipped seat and it changes nothing' },
-      { id: 'cmy', label: 'CMY', title: 'x cyan, y magenta, z yellow, in BOTH themes — the subtractive triple, and the one that stays legible across a coloured cloud' },
-      { id: 'rgb', label: 'RGB', title: 'x red, y green, z blue, in BOTH themes — the convention every other 3D tool draws its axis gizmo in' }],
+      { id: 'theme', label: 'THEME', title: 'Choose axis colours from the current theme' },
+      { id: 'cmy', label: 'CMY', title: 'Use cyan, magenta, and yellow axes' },
+      { id: 'rgb', label: 'RGB', title: 'Use red, green, and blue axes' }],
       onChange: (v) => { mat.axisInk = v; saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.axisInkSeg.root);
-    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'bring back the photosensitivity notice — the same pane this browser saw on its first load, and it is forgotten again so the NEXT load shows it too', onFire: () => { if (__LW_hooks.warning) { __LW_hooks.warning.reset(); __LW_hooks.warning.show(); } } }).root);
-    el('div', 'note', gi).innerHTML = '<b>SETTINGS</b> is the interface\'s own window: the theme and surface, the accent wheel, every key binding, the field\'s quality and the chrome switches. What you set here is remembered by this browser (FORGET clears it). Windows are of four kinds — the <b>core</b> instrument (PREPARE, EIGENVALUE, VIEW), <b>information panels</b> that read and report (captions always visible, a ⧉ COPY digest in the header), <b>control surfaces</b> and <b>other models</b> that start folded. Every window has ⏻ to stop its reader, ▾ to fold, × to close; the + at the top of a rack reopens.';
+    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'Show the photosensitivity notice now and on the next load', onFire: () => { if (__LW_hooks.warning) { __LW_hooks.warning.reset(); __LW_hooks.warning.show(); } } }).root);
+    el('div', 'note', gi).innerHTML = '<b>Settings.</b> Appearance and performance choices are stored in this browser. Window power stops its reader; collapse changes layout; close removes the window until reopened from + or WINDOW.';
     const gt = group(ui.set.body, 'THEME  ·  SURFACE');
     const rt = el('div', 'row tight', gt);
     const THEMES = { dark: { bg: [0.028, 0.038, 0.058], invert: false }, light: { bg: [0.93, 0.95, 0.975], invert: true } };
-    /* THE THEME HAS THREE SEATS AND TWO VALUES (wave 48, Josh).  `themeChoice` is what the user picked — light,
-       dark or SYSTEM — and is what the settings key remembers; `theme` is the RESOLVED one, always light or dark,
-       and is what body[data-theme], mat.bg, mat.lightUI, the accents and the warning pane all read.  SYSTEM follows
-       prefers-color-scheme live: the matchMedia listener re-resolves without touching the choice, so a user who
-       chose SYSTEM keeps SYSTEM when the OS flips.  The shipped default is LIGHT (applySettings' `|| 'light'`). */
+
+
     const sysMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     const systemTheme = () => (sysMQ && sysMQ.matches ? 'dark' : 'light');
     let themeChoice = 'dark', theme = 'dark';
@@ -1685,7 +1470,7 @@ export async function boot(dom) {
          #070a0f is lab.css's unconditional ground, which is what the document IS before a theme resolves. */
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
-      mat.bg = THEMES[theme].bg.slice();                                   // INVERT is the user's: a theme never flips it (Josh)
+      mat.bg = THEMES[theme].bg.slice();
       mat.lightUI = theme === 'light';                                     // wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads this
       if (ui.themeSeg) ui.themeSeg.set(themeChoice);
       if (__LW_hooks.themeChanged) __LW_hooks.themeChanged(theme);
@@ -1695,29 +1480,22 @@ export async function boot(dom) {
     if (sysMQ) { const onSys = () => { if (themeChoice === 'system') setTheme('system'); };
       if (sysMQ.addEventListener) sysMQ.addEventListener('change', onSys); else if (sysMQ.addListener) sysMQ.addListener(onSys); }
     ui.themeSeg = seg({ label: 'THEME', value: 'light', options: [
-      { id: 'light', label: 'LIGHT', title: 'light cards, dark ink — and the stage underneath goes light with the density drawn as ink (INVERT on); the domain cube is drawn in near-black' },
-      { id: 'dark', label: 'DARK', title: 'dark cards, light ink, a near-black stage — and the three axes in vivid CMY (x cyan, y magenta, z yellow)' },
-      { id: 'system', label: 'SYSTEM', title: 'follow the operating system’s light / dark setting, live — prefers-color-scheme decides, and a change out there changes the lab here without touching this choice' }],
+      { id: 'light', label: 'LIGHT', title: 'Use the light interface and stage' },
+      { id: 'dark', label: 'DARK', title: 'Use the dark interface and stage' },
+      { id: 'system', label: 'SYSTEM', title: 'Follow the operating system theme' }],
       onChange: (v) => setTheme(v) });
     rt.appendChild(ui.themeSeg.root);
-    /* ── WAVE 67 · THE WINDOW'S OWN SHAPE, and the vividness with its price on the label ────────────────
-     * DISCONNECTED is Josh's word for BASINS' FROST skin and it is a LOOK, not a drag mode: the window
-     * stops being one slab and becomes a bar-chip and a body-card with real air between them, the field
-     * showing through the gap — and on the stage that gap is a genuine hole you can turn the camera in.
-     * FROST is now a POLICY rather than a switch, because the cost was measured and it is conditional on
-     * MOTION and on nothing else: 17.10 ms with the field still, 50.3 ms with it moving, and the same
-     * 50.3 whether the filter is a blur, a saturate or all three of BASINS' terms — the bill is the
-     * backdrop CAPTURE.  So the seats are the three honest answers to "when", and the title says the
-     * number rather than implying one. */
-    ui.discSw = sw({ label: 'DISCONNECTED', value: false, title: 'take every window apart into a CONSTELLATION: its header becomes a floating bar-chip, its body a separate card, and the 7 px between them is a real hole — over the stage a press there turns the camera. OFF is the shipped look and is the one this rack has always had (wave 67 shipped it ON by mistake: Josh meant the MODULATION window only). Fused on a phone, where a constellation has no air to breathe', onChange: (v) => setDisconnected(v) });
+
+
+    ui.discSw = sw({ label: 'DISCONNECTED', value: false, title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
     rt.appendChild(ui.discSw.root);
     ui.frostSeg = seg({ label: 'FROST', value: 'off', options: [
-      { id: 'off', label: 'OFF', title: 'no backdrop filter: the card is its tint, its hairline and its sheen, and the field behind it is untouched. This is the shipped default and the only arm that costs nothing while anything moves' },
-      { id: 'still', label: 'STILL', title: 'the vividness while the transport is STOPPED, held while it runs. MEASURED on this rig: with the field paused every filter reads 17.10 ms — identical to no filter at all, i.e. free — and over a moving field the same filter reads 50.3 ms (58.5 → 19.9 fps). Only the FILTER moves: the fill, the border, the sheen and the shadow are the same either side of it, so the glass never goes grey under your hand' },
-      { id: 'always', label: 'ALWAYS', title: 'the exact BASINS recipe at all times — blur(GLASS BLUR) saturate(188%) brightness(108%), which is the vividness Josh named. MEASURED: 58.5 → 19.9 fps over a moving field, and it does NOT get cheaper by dropping the blur, because the cost is the backdrop capture and not the kernel (a saturate alone measured the same 50.3 ms). Worth it for a still, and it is a stated price rather than a surprise' }],
+      { id: 'off', label: 'OFF', title: 'Disable backdrop filtering' },
+      { id: 'still', label: 'STILL', title: 'Apply frost while the field is paused' },
+      { id: 'always', label: 'ALWAYS', title: 'Apply frost continuously. This can reduce frame rate.' }],
       onChange: (v) => setFrost(v) });
     rt.appendChild(ui.frostSeg.root);
-    el('div', 'note', rt, 'frost: the picture\u2019s colour through the glass \u00b7 free while the field is still, a third of the frame rate while it moves');
+    el('div', 'note', rt, 'Frost filters the field behind windows. STILL applies it while paused; ALWAYS keeps it during motion.');
     ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: 22, fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => { document.documentElement.style.setProperty('--glass-blur', v.toFixed(1) + 'px'); }, onChange: () => saveSettings() }); rt.appendChild(ui.blurK.root);
     /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
@@ -1729,37 +1507,24 @@ export async function boot(dom) {
     rt.appendChild(ui.stageK.root);
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
     ui.cardSeg = seg({ label: 'CARD STYLE', value: 'refractive', options: [
-      { id: 'refractive', label: 'REFRACTIVE', title: 'the pane is not there: every card, popover and chrome panel is transparent and you read the instrument through the blur behind it (with FROST off, through the field itself). This is the look the lab has shipped since wave 23 — for its first 24 waves by accident, and on purpose since wave 47' },
-      { id: 'tinted', label: 'TINTED', title: 'the theme\'s tinted pane comes back under the blur: the dark card at hsl(214 16% 13% / .84), the light card at 245,247,249 — more contrast for the ink, less of the field' },
+      { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
+      { id: 'tinted', label: 'TINTED', title: 'Add the theme tint behind window content' },
     ], onChange: (v) => setCardStyle(v) });
     rt.appendChild(ui.cardSeg.root);
-    el('div', 'note', gt, 'refractive: the blur alone · tinted: the blur under a tinted pane');
-    /* ── THE COLOUR GAMUT (wave 54, board #52) ───────────────────────────────────────────────────────────────
-     * Josh asked for P3 and asked whether we could default to it.  The honest answer is NO, NOT ON THIS BROWSER,
-     * and this control says so out loud instead of pretending.  The reason is not taste: Gecko does not implement
-     * GPUCanvasConfiguration.colorSpace at all (the WebIDL member is commented out, Bug 1834395), so the canvas
-     * stays sRGB whatever you pass it — while Firefox 113+ DOES render CSS color(display-p3 …).  Styling the
-     * interface in P3 over an sRGB field would put THE SAME ACCENT IN TWO DIFFERENT COLOURS, which is worse than
-     * not having the feature.  Hence THE LAW, and it is enforced in one place (field.setGamut refuses, and
-     * applyAccent reads back what is actually in force):
-     *
-     *      THE DOM AND THE CANVAS ARE IN THE SAME COLOUR SPACE, OR THE FEATURE IS OFF.  Never a third state.
-     *
-     * The detection is a real probe, not a version sniff — see field.js: configure() is handed an object whose
-     * `colorSpace` is a getter, and whether the browser CALLS it is whether the member exists in this build.
-     * The display query is REPORTED and never used as a gate, because privacy.resistFingerprinting makes Firefox
-     * answer false to it unconditionally and a wide-gamut screen would be locked out by a privacy setting. */
+    el('div', 'note', gt, 'Refractive shows the field through the blur. Tinted adds the theme panel colour.');
+
+
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
     const rg = el('div', 'row tight', gt);
     ui.gamutSeg = seg({ label: 'GAMUT', value: 'srgb', options: [
-      { id: 'srgb', label: 'sRGB', title: 'the shipped space: the interface and the field are both sRGB, and they agree by construction' },
+      { id: 'srgb', label: 'sRGB', title: 'Use the sRGB colour space' },
       { id: 'p3', label: 'DISPLAY-P3', title: gamutOK ? 'the wider space, on BOTH sides at once — the canvas is re-configured and every accent is re-expressed in it' : gamutSup.reason }],
       onChange: (v) => setGamut(v) });
     rg.appendChild(ui.gamutSeg.root);
     ui.p3Seg = seg({ label: 'IN P3', value: 'convert', options: [
-      { id: 'convert', label: 'CONVERT', title: 'the same colours, re-expressed in the wider basis: nothing looks different and the 8-bit banding improves' },
-      { id: 'vivid', label: 'VIVID', title: 'more chroma than was authored — a DESIGN CHOICE, and it is not accuracy: the colours are deliberately outside what the palette says' }],
+      { id: 'convert', label: 'CONVERT', title: 'Preserve authored colours in Display P3' },
+      { id: 'vivid', label: 'VIVID', title: 'Increase chroma in Display P3' }],
       onChange: () => { if (field.ok && field.gamut !== 'srgb') setGamut('p3'); } });
     rg.appendChild(ui.p3Seg.root);
     /** the ONE road into the gamut: it asks the canvas, believes the answer, and puts the DOM wherever the canvas ended up */
@@ -1782,45 +1547,43 @@ export async function boot(dom) {
       for (const id of ['convert', 'vivid']) { const b = ui.p3Seg.button(id); if (b) { b.disabled = true; b.classList.add('disabled'); b.title = gamutSup.reason; } }
     }
     ui.gamutRo.set('sRGB'); ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both sRGB' : gamutSup.reason);
-    el('div', 'note', gt).innerHTML = '<b>GAMUT.</b> Josh asked for Display P3 and for it to be the default if it looked good. It cannot be, and the reason is worth stating rather than hiding: <b>Firefox does not implement <code>GPUCanvasConfiguration.colorSpace</code></b> — the member is commented out in Gecko (Bug 1834395) and a WebIDL dictionary silently ignores a member it does not declare, so the string is accepted, nothing throws, and the canvas stays sRGB. Firefox 113+ <i>does</i> render CSS <code>color(display-p3 …)</code>, so a P3 interface over an sRGB field would show <b>the same accent in two different colours</b>. So the law here is absolute: <b>the interface and the field are in the same space, or the feature is off</b> — there is no state in which they can drift. Where the canvas can honour it, the two things it can do are offered separately and named honestly: <b>CONVERT</b> is a colorimetric re-expression (identical colours, and the banding improves because the codes are spread over a wider basis) and <b>VIVID</b> is a deliberate chroma expansion (more saturated than the palette says — a design choice, never accuracy). Note also that a wider gamut over the same 256 levels makes 8-bit banding <i>worse</i>, not better, which is why <b>DITHER</b> in DRAW STYLE is the fix that works on every browser today.';
+    el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
     const ra = el('div', 'row tight', gt);
     ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: 30, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => { accent.a = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accA.root);
-    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: 300, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the second UI accent (solo, the warm marks): an angle on the same wheel', onInput: (v) => { accent.b = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accB.root);
-    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .1, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'push both accents toward neon: more chroma and a wider glow (also for visibility)', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
-    el('div', 'note', gt).innerHTML = '<b>THEME</b> swaps the skin\'s tokens and adapts the layer underneath: LIGHT sets a light stage (INVERT is yours — turn it on if you want the cloud drawn as ink). <b>SURFACE</b> is the render of the object itself — STAGE is the background lightness, GAMMA the output curve, and with EXPOSURE (gain), HUE and INVERT above they are all presentation: none of them touches ψ. <b>FROST</b> is the blur behind the cards, OFF by default: measured over the live field it took the frame from 17 ms to 82 ms (13 fps) under software compositing and about 25 fps on a GPU desktop, because both racks are recomposited whenever the field changes — choose STILL for still images or ALWAYS when the vivid backdrop is worth that cost. The GOVERNOR preserves your chosen material. <b>ACCENT A · B</b> are two angles on the current palette wheel (the PHASE PALETTE editor\'s stops, shifted by HUE): every accent in the interface takes its colour from them, held to a legible lightness for the theme, so turning the wheel recolours the whole UI. The logo is the same wheel verbatim — λ at 0°, the nine squares at 0°, 40°, … 320°.';
+    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: 300, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => { accent.b = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accB.root);
+    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .1, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
+    el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
     __LW_hooks.setTheme = setTheme;
 
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: `wStyle` is `wObs`; this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
     ui.styleSeg = seg({ label: 'STYLE', value: 'cloud', options: [
       { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
-      { id: 'solid', label: 'SOLID', title: 'a bounded plateau: a lit isosurface whose level EXPOSURE moves — it cannot fill the box' },
-      { id: 'grain', label: 'GRAIN', title: 'the same field as noisy particles: a per-voxel hash keeps a fraction of the samples' },
-      { id: 'signed', label: 'SIGNED', title: 'the wave as flat ±1 lobes meeting at a hard nodal surface — best in the REAL and IMAG views' },
+      { id: 'solid', label: 'SOLID', title: 'Render a lit density shell' },
+      { id: 'grain', label: 'GRAIN', title: 'Render a sparse particle field' },
+      { id: 'signed', label: 'SIGNED', title: 'Render signed lobes and nodal surfaces' },
       { id:'dust',label:'DUST',title:'World-locked fine particles; GRAIN controls their count' },
-      { id:'glass',label:'SHELL',title:'A translucent lit density shell; ISO sets the shell. Stylized glass, without physical refraction' },
+      { id:'glass',label:'SHELL',title:'Render a translucent density shell' },
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
-      { id: 'bands', label: 'BANDS', title: 'the wave\'s own level lines: a cosine comb on the amplitude (GRAIN sets 2–16 bands) — an interference-fringe reading' }],
+      { id: 'bands', label: 'BANDS', title: 'Draw amplitude level bands; GRAIN sets their count' }],
       onChange: (v) => { mat.style = STYLE[v]; schedule(TIER.PRESENT); } });
     rd.appendChild(ui.styleSeg.root);
     ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.grainK.root);
     ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); rd.appendChild(ui.kneeK.root);
-    /* WAVE 54 (board #49, Josh: "is realtime dithering possible?").  It is, and it is nearly free — but "nearly
-       free" is not a claim until it has two numbers, so the REPORT carries the frame time with it off and on at the
-       same grid and the same canvas.  OFF is the default and OFF is exactly zero added to the colour, so every
-       pixel gate in the suite reads the same numbers it always did. */
+
+
     const rdd = el('div', 'row tight', gd);
     ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
       { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
-      { id: 'ordered', label: 'ORDERED 8×8', title: 'a Bayer 8×8 threshold added to the FINAL colour: the step between two adjacent codes becomes a spatial average between them, and a smooth phase ramp stops banding' }],
+      { id: 'ordered', label: 'ORDERED 8×8', title: 'Apply ordered dithering to reduce 8-bit colour bands' }],
       onChange: (v) => { mat.dither = v === 'off' ? 0 : (ui.ditherK ? ui.ditherK.get() : 1); if (ui.ditherK) ui.ditherK.setDisabled(v === 'off'); schedule(TIER.PRESENT); } });
     rdd.appendChild(ui.ditherSeg.root);
     ui.ditherK = knob({ label: 'STRENGTH', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' LSB', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') { mat.dither = v; schedule(TIER.PRESENT); } } });
-    ui.ditherK.root.title = 'the amplitude in LEAST SIGNIFICANT BITS of the 8-bit output: 1.00 is the textbook ±½ LSB, which is exactly one quantisation step peak-to-peak';
+    ui.ditherK.root.title = 'Dither strength in 8-bit output levels; 1 is ±½ level';
     ui.ditherK.setDisabled(true);
     rdd.appendChild(ui.ditherK.root);
-    el('div', 'note', gd).innerHTML = 'Every style passes its weight through a <b>saturation knee</b> w ↦ w/(1+kw), so the opacity of a step tends to a finite ceiling as EXPOSURE grows: cranking the knob deepens the blob instead of glowing the whole field. <b>SOLID</b> draws the plateau ρ ≈ ISO as a lit surface (shaded by the density gradient), so EXPOSURE moves the surface rather than flooding the volume; <b>GRAIN</b> stipples the same field into particles. All three are DESIGN CHOICES — the observable itself is chosen above. <b>DITHER</b> is the fourth, and it is about the OUTPUT rather than the field: the canvas is 8 bits per channel, a cyclic phase ramp crosses all 256 of them, and where two neighbouring codes meet the eye reads a <b>Mach band</b> that is not in the data. An <b>ordered (Bayer 8×8)</b> threshold added to the final colour — after the gamma, because the ladder it defeats is the swapchain\u2019s — turns that step into a spatial average and the band disappears. It is ORDERED and not blue noise on purpose: the pattern is fixed in screen space, so a paused instrument stays perfectly still, where a per-frame noise would shimmer at a state nobody is changing. <b>STRENGTH</b> 1.00 is ±½ LSB, the textbook amount; it is <b>OFF by default</b> and off adds exactly zero.';
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count. Ordered dithering reduces colour steps; strength 1 is ±½ output level.';
 
     ui.keysRefresh = () => {};
     ui.keysSay = text => { if(ui.set)ui.set.setStatus(text, 'warn'); };
@@ -1849,7 +1612,7 @@ export async function boot(dom) {
     r3.appendChild(ui.slicePosK.root);
     ui.sliceThickK = knob({ label: 'THICK', min: 0.01, max: 0.4, value: 0.03, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.slice.thick', v)) return; mat.slice.thick = v; schedule(TIER.PRESENT); } });
     r3.appendChild(ui.sliceThickK.root);
-    const gp = group(wPal.body, 'a DESIGN CHOICE; ψ untouched');
+    const gp = group(wPal.body, 'COLOUR');
     palette = createPaletteEditor(gp, {
       startId: palChoice,
       setLUT(lut) { wheelLUT = lut; if (field.ok) field.setPalette(lut); applyAccent(); },
@@ -1857,37 +1620,30 @@ export async function boot(dom) {
       chose(id) { palChoice = id; saveSettings(); },        // wave 54: naming one from the menu IS this browser's choice
       repaint() { schedule(TIER.PRESENT); }
     });
-    /* ⚠ WAVE 106 · INVERT IS THE PALETTE WINDOW'S NOW (Josh: "I think invert in draw should move to
-       pallete … make the buttons behave according to their window's peers").  It belongs here on the
-       MEANING and not merely on the tidying: PALETTE is the window that says how the complex plane is
-       coloured, INVERT says whether that colouring is laid down as light or as ink, and this card's own
-       status line — `a DESIGN CHOICE; ψ untouched` — is word for word the guarantee INVERT has always
-       carried.  It takes its window's spelling: `title:` as an OPTION to sw().
-         ⚠ AND IT SAVES NOW.  FRAME and AXIS have called saveSettings() since wave 53 and INVERT never
-       did, so of three switches in one row two survived a reload and one did not, for no reason anyone
-       recorded.  The call and the settings key are one change, not two. */
+
+
     const rInv = el('div', 'row tight', wPal.body);
-    ui.invertSw = sw({ label: 'INVERT', value: false, title: 'draw the cloud as ink rather than light — the transfer is inverted, ψ is not touched', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
+    ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     rInv.appendChild(ui.invertSw.root);
-    const gc = group(wCam.body, 'ONE LAW  ·  ω = ω_amb + (ω₀ − ω_amb) e^{−μt}');
+    const gc = group(wCam.body, 'CAMERA MOTION');
     /* WAVE 54 (board #43): the mode comes FIRST, because it decides what every dial below it turns. */
     const r4a = el('div', 'row tight', gc);
     ui.camSeg = seg({ label: 'CONTROL', value: 'free', options: [
-      { id: 'turntable', label: 'TURNTABLE', title: 'two angles about the quantization axis: the horizon stays level, and the pitch stops at the poles' },
-      { id: 'free', label: 'FREE', title: 'one unit quaternion, screen-relative axes: no poles at all — and the horizon rolls, because a closed drag loop leaves a turn behind it' }],
+      { id: 'turntable', label: 'TURNTABLE', title: 'Orbit with a level horizon' },
+      { id: 'free', label: 'FREE', title: 'Use unrestricted camera rotation with roll' }],
       onChange: (v) => setCamMode(v) });
     r4a.appendChild(ui.camSeg.root);
     ui.camNote = el('div', 'sturm-note', gc);            // its own class: the ⓘ sweep folds every .note away, and the trade must stay readable
     ui.camNote.textContent = CAM_TRADE.turntable;
     const r4 = el('div', 'row', gc);
     ui.spinSw = sw({ label: 'AUTO-ROTATE', value: false, onChange: (v) => { camera.autoRotate = v; camera.wake(); } });
-    ui.spinSw.root.title = 'the AMBIENT drive ω_amb = (SPIN, 0): a fling relaxes TO it rather than fighting it — off, the camera relaxes to rest';
+    ui.spinSw.root.title = 'Rotate continuously around the world z axis';
     r4.appendChild(ui.spinSw.root);
     ui.spinK = knob({ label: 'SPIN', min: 0.02, max: 2, value: 0.25, log: true, fmt: (v) => v.toFixed(2) + ' rad/s', onInput: (v) => { camera.speed = v; camera.wake(); }, onChange: () => saveSettings() });
-    ui.spinK.root.title = 'the ambient yaw rate the camera settles at while AUTO-ROTATE is on';
+    ui.spinK.root.title = 'Set the auto-rotate speed';
     r4.appendChild(ui.spinK.root);
     ui.fricK = knob({ label: 'FRICTION', min: 0, max: CAM.MU_MAX, value: CAM.MU_DEF, step: CAM.MU_STEP, fmt: (v) => (v > 0 ? 'μ ' + v.toFixed(2) + ' /s' : '∞ · forever'), onInput: (v) => { camera.friction = v; camera.wake(); }, onChange: () => saveSettings() });
-    ui.fricK.root.title = 'μ in ω̇ = −μ(ω − ω_amb): the ONE constant of the motion. 12 /s is "no momentum" (a flick dies in a quarter turn), 2.5 is the default (τ = 0.4 s, a flick coasts ≈ 2.8 s through 69°), and μ = 0 is NO DECAY — the view spins forever. Double-click resets it to 2.5';
+    ui.fricK.root.title = 'Set camera momentum decay; double-click to reset';
     r4.appendChild(ui.fricK.root);
     /* WAVE 58 (board #63): the View window's two dials, in OUR units — see the CAM block for why the range travels
        and the default does not.  Both sit with FRICTION because all three are the feel of the same hand. */
@@ -1895,12 +1651,12 @@ export async function boot(dom) {
     ui.gainK = knob({ label: 'DRAG GAIN', min: CAM.GAIN[0], max: CAM.GAIN[1], value: CAM.GAIN_DEF, step: CAM.GAIN_STEP,
       fmt: (v) => '×' + v.toFixed(2),                       // the MAPPING is a sentence, not a knob value: a .k-val is a floating tooltip and a long one spills off the card
       onInput: (v) => { camera.dragGain = v; camGainNote(); }, onChange: () => saveSettings() });
-    ui.gainK.root.title = 'how far the view turns per pixel of drag: rad/px = GAIN × 0.0065, so ×1.00 is the shipped camera and ×8 is eight times as fast. It scales the ONE sensitivity, so TURNTABLE and FREE move together and SHIFT still quarters it. (NEBULA\'s dial is radians per SCREEN WIDTH — a different quantity, which is why its 3.14 is not our 1.) Double-click resets it';
+    ui.gainK.root.title = 'Set drag sensitivity; Shift is finer; double-click resets';
     r4h.appendChild(ui.gainK.root);
     ui.flingK = knob({ label: 'FLING', min: CAM.FLING[0], max: CAM.FLING[1], value: CAM.FLING_DEF, step: CAM.FLING_STEP,
       fmt: (v) => '×' + v.toFixed(2),
       onInput: (v) => { camera.flingGain = v; camGainNote(); }, onChange: () => saveSettings() });
-    ui.flingK.root.title = 'the multiplier on the released angular velocity, before the friction law sees it. FLING decides how much velocity you GET, μ decides how fast it DECAYS, and the two never fight: at 0 the view stops dead the moment you let go — a pure trackball, and the drag still turns it — at 1 it is today\'s camera, at 2 it throws twice as hard, and at μ = 0 any of them spins for ever. Double-click resets it';
+    ui.flingK.root.title = 'Set released camera speed; double-click to reset';
     r4h.appendChild(ui.flingK.root);
     /* THE MAPPING IS ON THE CARD, not in a hover (ANTI-PATTERN 4): a .k-val is a floating tooltip that cannot hold
        "×1.00 · 0.0065 rad/px" without spilling off a 300-px card, and the number a gain MEANS is the point of it. */
@@ -1912,14 +1668,14 @@ export async function boot(dom) {
     ui.camGainNote = camGainNote; camGainNote();
     const r4b = el('div', 'row tight', gc);
     ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => setDist(v) });
-    ui.zoomK.root.title = 'the camera\'s distance in DOMAIN HALF-WIDTHS (the wheel and a pinch on the stage move the same number — every wheel modifier zooms and none of them rotates)';
+    ui.zoomK.root.title = 'Camera distance. Use the wheel or pinch on the stage.';
     r4b.appendChild(ui.zoomK.root);
     ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => setFov(v) });
-    ui.fovK.root.title = 'the vertical field of view the ray march is built with — narrow is nearly orthographic, wide is a fish-eye through the same voxels';
+    ui.fovK.root.title = 'Vertical field of view';
     r4b.appendChild(ui.fovK.root);
-    r4b.appendChild(trig({ label: 'RESET VIEW', title: 'the shipped pose — yaw 0.65, pitch 0.38, ×3.30, 34° — and the motion with it (a double-click or a double-tap on the stage does the same)', onFire: () => resetView() }).root);
-    r4b.appendChild(trig({ label: 'SET Δρ REF', title: 'capture ρ(now) as the DIFFERENCE reference (a field reference, not a state edit)', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
-    el('div', 'note', gc).innerHTML = 'The camera has an angular <b>velocity</b> and one constant: <b>ω̇ = −μ(ω − ω<sub>amb</sub>)</b>, integrated exactly every frame. <b>FRICTION</b> is μ. A <b>drag on the stage flings</b> — the mean angular velocity of its last 80 ms — and the fling then relaxes to the ambient rate ω<sub>amb</sub> = (SPIN, 0) when AUTO-ROTATE is on, or to rest when it is off, so the switch and the slider never fight: at <b>μ = 12</b> there is no momentum at all, at <b>2.5</b> a flick coasts about 2.8 s and turns through 69°, and at <b>μ = 0 · ∞ forever</b> nothing decays and the view keeps the rate you gave it. <b>SHIFT is the fine drag</b> (a quarter of the gain, as everywhere else) and pressing or releasing it mid-drag <b>clutches</b>: the velocity history is cleared, so the fling belongs to the final motion and not to the coarse one before it. <b>DRAG GAIN and FLING</b> are the two dials from NEBULA\'s View window (wave 58), and they <b>compose with the law above rather than competing with it</b>. DRAG GAIN scales the one sensitivity this camera has — <b>rad/px = GAIN × 0.0065</b>, ×1.00 being exactly the camera that shipped — in both control modes, with SHIFT still taking a quarter of whatever it is set to. FLING multiplies the released velocity ω₀ <i>before</i> it becomes the residual, so it decides <b>how much you get</b> while μ decides <b>how fast it goes</b>: at <b>FLING 0 the view stops dead the instant you let go</b> — a pure trackball, and the drag itself still turns it, which is a thing no value of FRICTION can do — at 1 nothing changes, at 2 the same flick throws twice as far, and the closed-form travel ω₀/μ holds at every setting of both. (NEBULA\'s own gain is radians per <i>screen width</i>; that number means nothing at a rack\'s width, so the range and the step are theirs and the unit is ours.) <b>CONTROL</b> is the trade Josh asked for, and it is a real one: <b>TURNTABLE</b> keeps the horizon level and stops at the poles, <b>FREE</b> has no poles and lets the horizon roll. TURNTABLE is two Euler angles about z (the quantization axis), so pitch is clamped at ±1.52 rad and a fling into a pole loses its pitch and keeps its yaw; FREE is <b>one unit quaternion</b> with a rotor multiplied on the right, so the drag axes are the screen\u2019s at every pose and a drag walks straight over the pole — at the cost of a horizon that tilts, which is not a defect and cannot be removed: the two drag generators are the camera\u2019s up and right, and <b>[ĵ, k̂] = 2î</b> means a closed loop leaves a roll behind it. Switching INTO free moves no pixel (it is an exact conversion); switching back <b>slerps the roll level over 150 ms</b> rather than snapping. The friction law above is the same law in both — what changes is the axis each of its two numbers turns about: the AMBIENT stays a world-z drive (AUTO-ROTATE turns the cloud about the quantization axis) and the residual becomes screen-relative. <b>Double-click or double-tap the stage</b> to reset the view. The wheel (with any modifier) and a two-finger pinch are the same ZOOM. All of it is <b>observer only</b>: the camera schedules a PRESENT and nothing else — never ψ, never the clock, never the undo stack — and a still camera schedules nothing at all. There is no <b>SEED</b> here: the one seed this lab has is the particle cloud, and it lives with the particles in <b>DYNAMICS</b> (RESEED, or Ctrl+R).';
+    r4b.appendChild(trig({ label: 'RESET VIEW', title: 'Restore the default camera pose and motion', onFire: () => resetView() }).root);
+    r4b.appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
+    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Double-click, double-tap, or RESET VIEW restores the camera.';
 
     /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────
      * lab/capture.js is 1033 lines, thirty node gates, and until this row nothing in the interface imported it.
@@ -1938,7 +1694,7 @@ export async function boot(dom) {
      * 1.2 s in wave 45; so it is computed on a press, on a control change and on the pointer entering this group,
      * and the readout says STALE (with the button down) when the state or the view has moved since.  A stale plan
      * is not an ok plan, which is exactly what `plan.ok` gating the button has to mean. */
-    const gcap = group(wCam.body, 'CAPTURE  ·  A PICTURE, A CLIP, AND ONE EXACT PERIOD');
+    const gcap = group(wCam.body, 'CAPTURE');
     let exact = null, exactRun = null;
     const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
@@ -1947,24 +1703,24 @@ export async function boot(dom) {
     const rc1 = el('div', 'row tight', gcap);
     ui.capScale = seg({ label: 'PICTURE', value: '2', options: [{ id: '1', label: '×1' }, { id: '2', label: '×2' }, { id: '3', label: '×3' }, { id: '4', label: '×4' }],
       onChange: () => capShowLimits() });
-    ui.capScale.root.title = 'a multiple of the stage, RE-RENDERED at that size — the ray march is run again, so it is a bigger picture and not a bigger copy of this one';
+    ui.capScale.root.title = 'Render scale for still images';
     rc1.appendChild(ui.capScale.root);
-    ui.capPic = trig({ label: 'TAKE A PICTURE', title: 'render one frame at the chosen size and save it as a PNG. The clock is paused, the ray-march jitter is pinned so the picture is a function of the STATE alone, and both are put back afterwards', onFire: () => capPicture() });
+    ui.capPic = trig({ label: 'TAKE A PICTURE', title: 'Render and save a PNG at the chosen size', onFire: () => capPicture() });
     rc1.appendChild(ui.capPic.root);
     const rc2 = el('div', 'row', gcap);
     ui.capSec = knob({ label: 'SECONDS', min: 1, max: 30, value: 6, step: 0.5, fmt: (v) => v.toFixed(1) + ' s', onInput: () => capStale() });
-    ui.capSec.root.title = 'how long a free CLIP runs, and the wall length a LOOP is fitted to (the loop always runs exactly one period — this only decides how many frames that is)';
+    ui.capSec.root.title = 'Duration for free recording and loop frame planning';
     rc2.appendChild(ui.capSec.root);
     ui.capFps = seg({ label: 'FPS', value: '30', options: [{ id: '15', label: '15' }, { id: '30', label: '30' }, { id: '60', label: '60' }], onChange: () => capStale() });
     rc2.appendChild(ui.capFps.root);
-    ui.capRec = trig({ label: 'RECORD', title: 'a free clip: the clock runs as it is and the frames are whatever the wall gives. The tempo is MEASURED and reported, never claimed', onFire: () => capRecord() });
+    ui.capRec = trig({ label: 'RECORD', title: 'Record using browser frame timing', onFire: () => capRecord() });
     rc2.appendChild(ui.capRec.root);
-    ui.capLoop = trig({ label: 'ONE PERIOD', title: 'record exactly one period, seamlessly — or refuse, and say by how much the best near-recurrence misses', onFire: () => capRecordLoop() });
+    ui.capLoop = trig({ label: 'ONE PERIOD', title: 'Record one usable recurrence period', onFire: () => capRecordLoop() });
     rc2.appendChild(ui.capLoop.root);
-    ui.capPlanT = trig({ label: 'PLAN', title: 'ask period.js what closes here, for this observable, now — never done on a frame, because a box full of impulses has 56 incommensurate energies and the scan is not free', onFire: () => capMakePlan(true) });
+    ui.capPlanT = trig({ label: 'PLAN', title: 'Find a recurrence for the current state and observable', onFire: () => capMakePlan(true) });
     rc2.appendChild(ui.capPlanT.root);
     const rx = el('div', 'row tight', gcap);
-    ui.capExact = trig({ label: 'EXPORT FRAMES', title: 'export a deterministic PNG sequence and manifest as a ZIP; starts physics and modulation together at zero; exports at least 30 seconds or a full phase loop', onFire: () => capExportFrames() });
+    ui.capExact = trig({ label: 'EXPORT FRAMES', title: 'Export deterministic PNG frames and a manifest as ZIP', onFire: () => capExportFrames() });
     rx.appendChild(ui.capExact.root);
     ui.capExactRo = readout({ label: 'FRAME EXPORT', cls: 'wide', value: '—', sub: 'At least 30 seconds · PNG sequence + manifest · modulation starts at beat zero' });
     gcap.appendChild(ui.capExactRo.root);
@@ -1972,7 +1728,7 @@ export async function boot(dom) {
     ui.capShot = readout({ label: 'PICTURE', value: '—', sub: '' });
     ui.capPlanRo = readout({ label: 'THE LOOP PLAN', cls: 'wide', value: '—', sub: '' });
     rc3.appendChild(ui.capShot.root); rc3.appendChild(ui.capPlanRo.root);
-    el('div', 'note', gcap).innerHTML = 'The stage is <b>ray-marched</b>, so a bigger picture is a bigger <b>render</b> and never an upscale: the backing store is resized, one frame is encoded at that size through the renderer’s own path, and the swapchain texture is copied straight back off the GPU — there is no 2-D canvas anywhere on that road. Two things would have broken it and both were measured: the march’s start offset is seeded from a 97-frame counter, so a capture <b>pins the seed</b> and puts it back (two pictures of the same paused state come back byte-identical); and <code>MediaRecorder</code> over <code>captureStream()</code> on a WebGPU canvas <b>works here</b> — four independent roads out of one frame agree on the lit fraction to three decimals — but the engine is chosen by a runtime <b>probe</b>, with a full GPU-readback <b>relay</b> behind it if a browser ever comes back blank. <b>ONE PERIOD is a theorem, not a guess.</b> The density recurs exactly at T = 2π/gcd{|ΔE|} while the energies are commensurate, so a loop of N frames samples [t₀, t₀ + T) and <b>drops the endpoint</b>, because ρ(t₀ + T) = ρ(t₀) is frame 0 again and keeping it holds one image for two frame times — a visible hitch once a lap. <b>The observable decides which period</b>: PHASE, REAL, IMAG and RE+IM paint the global phase of ψ, which returns only at T_ψ = 2π/gcd{|E|} — three density periods for 1s+2s — and PHASE is the shipped view, so the plan says which period it used and how many laps that is. <b>And a state with no exact period is REFUSED</b> — the box, a Stark field, a live A → B mix — with the best near-recurrence and how far it misses printed instead of a loop that does not close. The PNG frame sequence (<code>LW.capture.pngSequence</code>) is the only output whose <i>timing</i> is exact as well as its content, and it prints its own ffmpeg line.';
+    el('div', 'note', gcap).innerHTML = '<b>Capture.</b> Pictures render at the chosen size. RECORD follows browser timing. ONE PERIOD is available when the current observable has a usable recurrence; EXPORT FRAMES writes deterministic PNG frames and a manifest.';
 
     /* the ceiling is READ, never asserted — and read WITHOUT forcing the capture object into existence, because
        this runs while the window is being built and `LW` does not exist yet (a const in its own temporal dead zone) */
@@ -2029,7 +1785,7 @@ export async function boot(dom) {
       if (!P.ok) return;                                       // the readout already carries plan.message: the refusal IS the answer
       capBusy = true; ui.capLoop.on = true; capPaint();
       try { const run = capture().recordLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get() });
-        const r = await run.done; capBadge(P.kind === 'exact' ? 'EXACT LOOP' : 'NEAR', r); if (r && r.blob) capture().save(r);
+        const r = await run.done; capBadge(P.kind === 'exact' ? 'PERIOD LOOP' : 'NEAR', r); if (r && r.blob) capture().save(r);
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
       capBusy = false; ui.capLoop.on = false; capPaint();
     }
@@ -2079,7 +1835,7 @@ export async function boot(dom) {
     gcap.addEventListener('pointerenter', () => { if (!capBusy) capMakePlan(false); });
     capShowLimits(); capPaint();
     capApi = { exportFrames: capExportFrames, get exact() { return exactRenderer(); }, get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
-    const gq = group(ui.set.body, 'FIELD CACHE  ·  QUALITY  (changes the estimate, never the state)');
+    const gq = group(ui.set.body, 'FIELD QUALITY');
     const r5 = el('div', 'row', gq);
     ui.gridSeg = seg({ label: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
       onChange: (v) => { quality.res = +v; quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v]; schedule(TIER.REBUILD); } });
@@ -2087,8 +1843,8 @@ export async function boot(dom) {
     r5.appendChild(seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
       onChange: (v) => { fieldRate.capMs = +v; } }).root);
     const r5b = el('div', 'row tight', gq);
-    ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'lower the canvas resolution when the active frame budget is exceeded, raise it after sustained headroom — the estimate on screen, never the state', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
-    ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'when the last 60 frames exceed the active 60 Hz / 120 Hz budget the field grid steps one notch down and an over-budget window is parked while the transport plays; sustained headroom steps back up — off, nothing is governed', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
+    ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
+    ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
     const r6 = el('div', 'row', gq);
@@ -2098,12 +1854,12 @@ export async function boot(dom) {
     ui.domainKnob.setDisabled(true);
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
-    ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'the transport\'s playhead follows every frame (the scrub bar repaints on the glass at the display rate); off — the default — the bar is disabled while RATE and play / pause work as before', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>GOVERNOR.</b> The median of the last 60 presented frames is judged against the active frame budget while the transport plays: over it, the FIELD grid steps one notch down (128 → 96 → 64) and any window whose update was measured to cost more than a frame is <b>parked</b> — it runs on pause or edit and its status says so, and once every 3 s it is let through <b>once</b> to be measured again, so a window that has come back under budget unparks itself instead of staying parked for the session — while one over half a frame runs at most every six times its cost; sustained headroom steps back up, and pausing restores your grid at once. FULL targets 60 Hz; 120 Hz follows the fastest sustained browser cadence, up to 120 Hz. METERS shows its state. <b>KEEP FRAMES</b> is the playhead: on, the scrub bar follows every frame as it always did (a repaint on the transport\'s glass at the display rate); off, the default, the bar is disabled and the t readout runs at 5 Hz — RATE and play / pause are untouched. Both are this browser\'s settings, never a project\'s. The impulse vector\'s kick, the BOX packet and the REPEATS scan run in a worker off the frame, so the pointer is free the moment the finger lifts.';
+    ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
   // STATE — preparation. Everything here changes c.
-  const wState = device({ id: 'state', eyebrow: 'STATE', title: 'PREPARE · <m>|ψ⟩ = Σ c_nlm |nlm⟩</m>', status: 'changes c' });
+  const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
   rack.appendChild(wState.root);
   {
     const r1 = wState.row();
@@ -2111,29 +1867,15 @@ export async function boot(dom) {
     for (const p of PRESETS) { const o = el('option', '', ui.presetSel, p.label); o.value = p.id; }
     ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value));
     ui.presetSel.style.flex = '1 1 160px';
-    /* ── WAVE 55 · RIDER B (board #58): THERE WAS NO WAY BACK ─────────────────────────────────────
-     * Josh, throwing the bow: "It seems to accumulate speed as I throw bow on it and there's no way to
-     * reset it other than refresh page."  THE CREEP IS CORRECT PHYSICS — an impulse multiplies ψ by
-     * e^{ik·x}, which adds momentum AND energy, so repeated throws populate higher shells and the beats
-     * quicken.  The BUG was the absence of a way back: a preset is loaded on the select's `change` event,
-     * and re-picking the option that is already selected fires no change event at all, so re-choosing "1s"
-     * did nothing whatever.  RELOAD calls the same `loadPreset` unconditionally — the register, the clock
-     * and the scrub back to where the preset says.
-     * WHAT THIS DELIBERATELY IS NOT is a "remove the momentum" control: you cannot subtract momentum
-     * without applying the opposite boost, and a button that pretended otherwise would be a lie about the
-     * physics.  Reloading the preset is the honest reset. */
-    r1.appendChild(trig({ label: 'RELOAD', title: 'reload the preset that is already selected — the register, the clock and the scrub back to t = 0. Re-picking the same entry in the list fires no change event, which is why this button exists', onFire: () => loadPreset(ui.presetSel.value) }).root);
+
+
+    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value) }).root);
     r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { applyVisuals = v; } }).root);
     ui.presetNote = el('div', 'note', wState.body, '');
     const r2 = wState.row();
-    r2.appendChild(trig({ label: 'NORMALIZE', title: 'c ↦ c / √(c†c) — explicit, never silent; the status says what ‖c‖ was', onFire: () => normalizeNow() }).root);
-    /* ⚠ WAVE 106 · CLEAR NEVER TOUCHED THE CLOCK, AND THAT IS THE READOUT BUG (Josh: "the numbers or
-       text on the native playhead is broken and won't reset after a clear").  `reg.clear()` zeroes the
-       coefficients and nothing else, so the transport went on printing the accumulated t AND ITS LAP
-       COUNT — "147.32  (23)" — over an empty register, which is a number about a state that no longer
-       exists.  `loadPreset` is the reference and has always been right: it does `reg.load(p);
-       clock.reset(); … ui.scrub.set(0); shadowView.clearTrail();`.  CLEAR now says the same four
-       things, because clearing the state and rewinding its clock are one act. */
+    r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => normalizeNow() }).root);
+
+
     r2.appendChild(trig({ label: 'CLEAR', onFire: () => { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); } }).root);
     r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
     /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
@@ -2141,7 +1883,7 @@ export async function boot(dom) {
        real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
        modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
     ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
-      title: 'turn the state about z continuously: D(R_z(α̇ t)).  ±2π rad/s is one full turn a second; a double-click stops it',
+      title: 'Continuous state rotation about z. Double-click to stop.',
       fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
       onInput: (v) => { if (modHand('state.rot.z', v)) return; setRotationRate('z', v); } });
     r2.appendChild(ui.rotZRate.root);
@@ -2172,7 +1914,7 @@ export async function boot(dom) {
         let ov = 0; if (abA && abB) { let r = 0, im = 0; for (let a = 0; a < 91; a++) { r += abA.re[a] * abB.re[a] + abA.im[a] * abB.im[a]; im += abA.re[a] * abB.im[a] - abA.im[a] * abB.re[a]; } ov = Math.hypot(r, im); }
         const exact = nA === 1 && nB === 1 && ov < 1e-9;
         ui.abRo.set((abA ? nA + (nA === 1 ? ' mode' : ' modes') : '—') + '  /  ' + (abB ? nB + (nB === 1 ? ' mode' : ' modes') : '—'), reg.transition ? (exact ? 'ok' : 'warn') : '');
-        ui.abRo.setSub(reg.transition ? (exact ? 'EXACT · two-level Rabi, resonant drive, RWA · |⟨A|B⟩| = ' + ov.toFixed(3) : 'TOY · the Rabi envelope on composite states · |⟨A|B⟩| = ' + ov.toFixed(3)) : 'store two states, then TRANSITION plays A → B → A at Ω');
+        ui.abRo.setSub(reg.transition ? (exact ? 'two-level Rabi drive · |⟨A|B⟩| = ' + ov.toFixed(3) : 'composite-state envelope · |⟨A|B⟩| = ' + ov.toFixed(3)) : 'store two states, then TRANSITION plays A → B → A at Ω');
       }
       __LW_hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abStatus(); hNote(); }, storeB() { abB = snap(); abStatus(); hNote(); }, setStores(A, B) { abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
         /* WAVE 106 · Ω REACHES THE DEFS THROUGH HERE, and it has to.  `abOmega` is block-local (it is
@@ -2187,7 +1929,7 @@ export async function boot(dom) {
         setOmega(v) { const w = Math.max(0.005, Math.min(1, +v || 0.05));
           if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = w; reg.transition.t0 = clock.t - 2 * th / w; }
           abOmega = w; return w; } };
-      el('div', 'note', gab).innerHTML = '<b>A / B.</b> STORE keeps the register as it is now (its t = 0 anchor); A and B recall it. <b>TRANSITION</b> plays c(t) = cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t), with A(t), B(t) the exact evolutions. For two eigenstates under a resonant drive this is the <b>exact two-level Rabi solution</b> in the rotating-wave approximation, and the density breathes at E_B − E_A — the radiating dipole of the Falstad "atom radiative transitions" applet, here as an exact superposition you can watch in every window. With composite A or B the same envelope is a <b>TOY</b>, and the readout says so. While a transition plays, edits act on the stored anchors; turning it off freezes the mix as the new state.';
+      el('div', 'note', gab).innerHTML = '<b>A / B.</b> STORE A and STORE B capture two states. TRANSITION mixes them at Ω; composite states use the same envelope as an illustrative model. Turning the transition off keeps the current mix.';
     }
     ui.kzKnob = knob({ label: 'STARK K_z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
     r2.appendChild(ui.kzKnob.root);
@@ -2199,24 +1941,24 @@ export async function boot(dom) {
        read a rate that does nothing, and a knob that does not follow the value it owns is a knob
        that lies.  So: clamped here, zeroed and disabled in applySturmian, and ignored in rotStep. */
     ui.kzRate = knob({ label: 'SPIN K_z', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, value: 0, cls: 'rot',
-      title: 'precess the state through the Stark manifold continuously: e^{−iθ̇t·K_z}.  K_z has integer eigenvalues on every shell, so ±2π rad/s is one full cycle a second',
+      title: 'Continuous Stark rotation. Double-click to stop.',
       fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
       onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.kzRate.set(w); if (modHand('state.stark.kz', w)) return; setRotationRate('kz', w); } });
     r2.appendChild(ui.kzRate.root);
     ui.defRate = knob({ label: 'SPIN L²', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, value: 0, cls: 'rot',
-      title: 'run the quantum defect continuously: e^{iα̇t·L²}.  l(l+1) is EVEN for every l ≤ 5, so the phase is π-periodic and ±π rad/s is one full defect cycle a second',
+      title: 'Continuous l-dependent phase. Double-click to stop.',
       fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
       onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.defRate.set(w); if (modHand('state.defect.l2', w)) return; setRotationRate('def', w); } });
     r2.appendChild(ui.defRate.root);
-    el('div', 'note', wState.body).innerHTML = '<b>STATE ROTATE</b> applies D(R_z(α)) to the coefficients (c<sub>nlm</sub> → e<sup>−imα</sup>c<sub>nlm</sub>). <b>STARK ROTATE</b> applies e<sup>−iθK<sub>z</sub></sup>, K the Runge–Lenz vector: an SO(4) rotation mixing l at fixed (n, m) — the ORBIT invariants do not move. <b>DEFECT WAIT</b> applies e<sup>iαL²</sup> (a wait under an l-dependent phase, a quantum defect): unitary, in-shell, not an SO(4) element — the invariants move, and with the rotors it is a universal gate set. All three change c; <b>camera</b> orbit is in OBSERVER and never touches c. Edits happen at the current logical time; nothing is silently renormalized.';
-    /* ── IMPULSE (wave 53, Josh, board #44: SLAP → IMPULSE, BOW → IMPULSE VECTOR — every user-visible string; the
-       identifiers `slap`, `bow`, `bowRelease` and the __LW.bow / LW.kickAlong API keep their names) ── */
+    el('div', 'note', wState.body).innerHTML = '<b>State transforms.</b> STATE ROTATE changes m phase. STARK ROTATE mixes l within each (n,m) shell. DEFECT WAIT adds an l-dependent phase. Camera rotation changes only the view.';
+
+
     const gK = group(wState.body, 'BOW');
     mat.bow = { gain: 1, curve: 1, limit: 3, ...(mat.bow || {}) };
     const feel = el('div', 'row tight bow-feel', gK);
     ui.bowKnobs = {};
     for (const [key,label,min,max] of [['gain','PULL',.25,4],['curve','RESPONSE',.25,3],['limit','LIMIT',.1,3]]) {
-      const k = knob({ label, min, max, value:mat.bow[key], fmt:v=>v.toFixed(2), title: key==='curve'?'1 is linear; above 1 gives a softer start, below 1 a harder start':'Bow '+label.toLowerCase(), onInput:v=>{mat.bow[key]=v;} }); ui.bowKnobs[key]=k; feel.appendChild(k.root);
+      const k = knob({ label, min, max, value:mat.bow[key], fmt:v=>v.toFixed(2), title: key==='curve'?'Shape the response around linear':'Bow '+label.toLowerCase(), onInput:v=>{mat.bow[key]=v;} }); ui.bowKnobs[key]=k; feel.appendChild(k.root);
     }
     el('div','bow-hint',gK,'Ctrl + drag · release to fire');
     const rk = el('div', 'row tight', gK);
@@ -2224,12 +1966,12 @@ export async function boot(dom) {
     rk.appendChild(knob({ label: 'STRENGTH', min: 0.01, max: 1.5, value: 0.2, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', onInput: (v) => { kickK = v; } }).root);
     ui.kickAxis = seg({ label: 'ALONG', value: 'z', options: [{ id: 'x', label: 'x' }, { id: 'y', label: 'y' }, { id: 'z', label: 'z' }], onChange: (v) => { kickAxis = v; } });
     rk.appendChild(ui.kickAxis.root);
-    rk.appendChild(trig({ label: 'RELEASE', title: 'kick the electron: ψ ↦ e^{ik·x}ψ at the current logical time (also: the K key, along the X/Y/Z axis)', onFire: () => slap(kickK, kickAxis) }).root);
-    ui.dragKnob = knob({ label: 'DRAG <m>γ</m> (TOY)', min: 0, max: 0.5, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(3), onInput: (v) => { reg.setDamping(v); touchState(); } });
+    rk.appendChild(trig({ label: 'RELEASE', title: 'Apply ψ ↦ e^{ik·x}ψ on the selected axis', onFire: () => slap(kickK, kickAxis) }).root);
+    ui.dragKnob = knob({ label: 'DRAG <m>γ</m>', min: 0, max: 0.5, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(3), onInput: (v) => { reg.setDamping(v); touchState(); } });
     rk.appendChild(ui.dragKnob.root);
     ui.kickRo = readout({ label: 'BOW · escaped / momentum', value: '—', cls: 'two', sub: 'no impulse yet' });
     rk.appendChild(ui.kickRo.root);
-    el('div', 'note', gK).innerHTML = 'A sudden impulse multiplies <m>ψ</m> by a plane wave <m>e^{ik·x}</m>: exact, unitary on the full space, and the same thing a delta-pulse electric field does. The register keeps only its n ≤ 6 image, so the norm DROPS by the probability the electron was knocked out of the first six shells or ionised — <b>ESCAPED</b> is that number, never renormalised away. The momentum the register gains is Ehrenfest\'s k times the bound share of the Thomas–Reiche–Kuhn sum rule (0.546 for 1s): the missing part is the continuum. Then it <b>jiggles</b>: the state is a superposition and rings at its beats — watch DYNAMICS\' dipole. A magnetic impulse is a rotation of the state, which the rotor knobs already are. <b>THE IMPULSE VECTOR:</b> hold CTRL, press on the field and pull away to draw it — the picture switches to phase and shows the <i>exact</i> boosted state <m>e^{ik·x}ψ</m>, its fringes tightening as <m>k</m> grows (<m>λ = 2π/k</m>); release to apply the impulse in the direction the arrow points (opposite the pull, in the screen plane), release CTRL first to cancel. <b>DRAG γ is a TOY</b>, not physics: excited amplitudes decay as <m>e^{−γ(E_a−E_0)t}</m>, non-unitary, forward in time only, so the wave settles to the ground state. It is the <b>no-jump branch</b> of <m>H − iγ(H−E₀)</m>, <m>Γ_a = 2γ(E_a−E₀)</m>: the ground-state population is invariant and nothing is emitted anywhere — not Lindblad, not the Einstein rates — the norm it loses is simply discarded (Round 11 B4). The status line says TOY DRAG while it is on.';
+    el('div', 'note', gK).innerHTML = '<b>Impulse.</b> RELEASE applies e<sup>ik·x</sup> and keeps only the part represented by n ≤ 6; ESCAPED reports the omitted norm. Ctrl-drag on the field sets direction and strength. DRAG γ damps excited amplitudes as a display model and discards the lost norm.';
     function pAlong(axis) {
       const c = reg.at(clock.t);                                  // sum over the WHOLE register: a rotation moves amplitude between m
       if (axis === 'z') return momentumZ(c.re, c.im);
@@ -2239,7 +1981,7 @@ export async function boot(dom) {
     }
     function slap(k, axis) {
       const n0 = reg.norm2(), p0 = pAlong(axis);
-      if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);   // an empty box: SLAP conjures the ground state first (Josh)
+      if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
       reg.kick(k, axis, clock.t);
       const n1 = reg.norm2(), p1 = pAlong(axis);
       const esc = n0 > 0 ? 1 - n1 / n0 : 0;
@@ -2249,7 +1991,7 @@ export async function boot(dom) {
     }
     __LW_hooks.slap = slap;
 
-    const gF = group(wState.body, 'STATIC FIELD  (changes H, not ψ — the evolution law itself)');
+    const gF = group(wState.body, 'STATIC FIELD');
     const rf = el('div', 'row tight', gF);
     ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
     ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } reg.setField({ Fz: v }); touchState(); } });
@@ -2257,32 +1999,32 @@ export async function boot(dom) {
     rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
     ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
     rf.appendChild(ui.fieldRo.root);
-    el('div', 'note', gF).innerHTML = '<b>ZEEMAN</b> H = H₀ + (B/2)L<sub>z</sub> stays diagonal, so it is exact with no caveat (orbital only: this register has no spin). <b>STARK</b> H = H₀ + F·z is exact <i>within each shell</i> — on a shell z = −(3n/2)K<sub>z</sub>, whose eigenvectors are the parabolic states and are field-independent — but coupling between shells is neglected, which needs F ≪ 1/(3n⁵). Turn the field on and the Stark state stops moving: it has become an eigenstate.';
+    el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout.';
 
     const r3 = wState.row();
-    r3.appendChild(trig({ label: 'SAVE', title: 'experiment (state, time, rate) and presentation (camera, material) saved separately', onFire: () => { save(); } }).root);
+    r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { save(); } }).root);
     r3.appendChild(trig({ label: 'LOAD', onFire: () => { restore(); } }).root);
     r3.appendChild(trig({ label: 'COPY JSON', onFire: async () => { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} } }).root);
     /* WAVE 56 (board #55): the whole session as a URL.  Its seat is beside SAVE / LOAD / COPY JSON because
        that is where "this state, made portable" already lives — and the FILE menu names it too. */
-    r3.appendChild(trig({ label: 'COPY LINK', title: 'copy a link that reopens this exact state — the register, the clock, the operator, the camera, the material and the palette, in about three hundred characters of URL fragment. It says how long it is, and it says what it could not carry.', onFire: () => copyLink() }).root);
+    r3.appendChild(trig({ label: 'COPY LINK', title: 'Copy a link to the current state and presentation', onFire: () => copyLink() }).root);
     /* THE PLACE THE LINK SPEAKS.  A `.note` and not a hover: what a link dropped is information, and
        information reachable only by hover is unreachable on the iPad (ANTI-PATTERNS 4). */
     ui.linkNote = el('div', 'note link-note', wState.body, ''); ui.linkNote.hidden = true;
   }
 
   // SPECTRUM
-  const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', title: 'EIGENVALUE · POPULATION · PHASE', status: '' });
+  const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
   rack.appendChild(wSpec.root);
   {
     const hamGroup = group(wSpec.body, 'HAMILTONIAN');
     const rh = el('div', 'row tight', hamGroup);
     ui.hamSeg = seg({ label: 'OPERATOR', value: 'hydrogen', options: [
       { id: 'hydrogen', label: 'HYDROGEN', title: 'E = −1/(2n²); every window is a theorem about it' },
-      { id: 'qho', label: 'OSCILLATOR', title: 'E = ħω(N + 3/2), N = 2n_r + l; the same 91 labels via n_r = n − l − 1; an impulse makes an exact coherent state' },
-      { id: 'well', label: 'BOX', title: 'the infinite spherical well: ψ = j_l(kr)Y, E = z²/(2a²), a hard wall — a packet given an impulse bounces and disperses' },
-      { id: 'atom', label: 'ATOM', title: 'a real neutral atom (H … Kr) as ONE self-consistent central field: Xα(2/3) + the Latter tail, solved live on a log mesh and Richardson-extrapolated; the 91 labels become its shells, and a shell the ground configuration does not occupy is VIRTUAL (marked °) — it keeps the frozen field\'s eigenvalue and has no radial. The ATOMS window carries the model, the Δ-SCF ionisation and the quantum defect' },
-      { id: 'cornell', label: 'QUARKONIUM', title: 'a heavy quark pair in −4α_s/3r + σr: the 91 labels re-read as the 36 (n_r, l) levels of charmonium or bottomonium, NUMERICAL (Numerov); masses in GeV, lengths in GeV⁻¹; the QCD panel\'s knobs drive it' }],
+      { id: 'qho', label: 'OSCILLATOR', title: 'Harmonic oscillator levels with spacing ħω' },
+      { id: 'well', label: 'BOX', title: 'Infinite spherical well with a hard boundary' },
+      { id: 'atom', label: 'ATOM', title: 'Self-consistent Xα central-field atom from H to Kr' },
+      { id: 'cornell', label: 'QUARKONIUM', title: 'Solve heavy-quark levels with Numerov' }],
       onChange: (v) => { switchHamiltonian(v); if (v === 'well') enterBox(); } });
     rh.appendChild(ui.hamSeg.root);
     ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; }); schedule(TIER.REBUILD); } } });
@@ -2290,20 +2032,20 @@ export async function boot(dom) {
     {
       const rg = wSpec.row('tight');
       rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { gasWidth = v; } }).root);
-      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '91', title: 'the register\'s 91 labels (l ≤ 5): a packet no smaller than about a/6, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'the box\'s second register: m = 0 about z, n_r ≤ 15, l ≤ 15 — packets down to σ ≈ 0.6 a₀, launched along z; the channels do not list it (it is not the 91-label register)' }], onChange: (v) => { gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
+      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '91', title: 'the register\'s 91 labels (l ≤ 5): a packet no smaller than about a/6, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
       rg.appendChild(ui.gasBasis.root);
       ui.gasSpeed = knob({ label: 'GAS  |k|', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
       rg.appendChild(ui.gasSpeed.root);
-      rg.appendChild(trig({ label: 'LAUNCH', title: 'in the BOX: put a packet of width σ at −a/2 on the chosen axis, moving along it at |k| — then watch it bounce', onFire: () => {
+      rg.appendChild(trig({ label: 'LAUNCH', title: 'Launch a Gaussian packet in the box', onFire: () => {
         if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); }
         const ax = keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
         launchPacket(d.map((v) => -v * a / 2), d.map((v) => v * k), gasSigma(k));
       } }).root);
       ui.gasRo = readout({ label: 'GAS  packet held by the box', value: '—', sub: 'nothing launched' });
       rg.appendChild(ui.gasRo.root);
-      rg.appendChild(trig({ label: 'COHERENT BOUNCE', title: 'in the OSCILLATOR: the ground state given an impulse |k| is an exact Glauber coherent state — it swings through the centre for ever without spreading (period 2π)', onFire: () => coherentBounce() }).root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>COHERENT BOUNCE (EXACT).</b> In the oscillator a ground state given an impulse, e<sup>ikz</sup>ψ<sub>0</sub> is the coherent state |α⟩ with α = ik/√2: its centre follows the classical orbit ⟨z⟩ = k sin t, ⟨p⟩ = k cos t, and its width never changes — the packet Josh asked for, rigid and bouncing, with nothing approximate (truncation at N ≤ 10 holds e<sup>−k²/2</sup>Σ(k²/2)<sup>N</sup>/N! of the norm: 99.99% at k = 2). In the BOX the same impulse disperses, because a hard wall has no equally spaced ladder — that is physics, not a defect. The BOX\'s basis (six radial zeros, l ≤ 5) also bounds how compact a held packet can be: σ/a ≳ 1/6 for 95% capture, so the gas packet is always about a sixth of the box.';
-      el('div', 'note', wSpec.body).innerHTML = '<b>THE GAS.</b> In the BOX a packet is a Gaussian of width σ with momentum k, <b>projected onto the well\'s 91 eigenstates</b> and normalised as a new state; it then moves and bounces by the exact evolution. The register resolves nothing sharper than ≈ a/6, so the readout says how much of the packet it holds. The IMPULSE VECTOR launches a packet where you pressed, flying along the arrow; a harder pull launches a slightly tighter packet — a <b>DESIGN CHOICE</b> at launch (a boost by itself never changes a width).';
+      rg.appendChild(trig({ label: 'COHERENT BOUNCE', title: 'Launch a non-spreading oscillator packet', onFire: () => coherentBounce() }).root);
+      el('div', 'note', wSpec.body).innerHTML = '<b>Coherent bounce.</b> In the oscillator, an impulse moves the ground-state packet without changing its width. In the box, the packet disperses and reflects from the wall.';
+      el('div', 'note', wSpec.body).innerHTML = '<b>Gas packet.</b> LAUNCH projects a Gaussian packet into the box basis. CAPTURED reports how much fits. Ctrl-drag on the field sets its launch point, direction, and strength.';
     }
     /* WAVE 68 · `step: 1`, and it is the only knob in the lab that lacked one.  Without it an arrow
        moved 1/100 of the travel = 0.05 = a TWENTIETH of an integer, so eleven real presses produced
@@ -2313,24 +2055,24 @@ export async function boot(dom) {
     rh.appendChild(ui.zKnob.root);
     ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: 36, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(35, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
     rh.appendChild(ui.elemKnob.root);
-    {   /* W-STURMIAN: THE SCALE — a switch (Josh); hydrogen is today's code path, untouched */
+    {
       const rs = wSpec.row('tight');
       ui.scaleSeg = seg({ label: 'SCALE  ·  the exponent of the 91 radials  (hydrogen operator only)', value: 'hydrogen', options: [
-        { id: 'hydrogen', label: 'HYDROGEN  1/n', title: 'the shipped radials: each label n carries its own exponent 1/n — hydrogen\'s bound states, the diagonal law, every window' },
-        { id: 'sturmian', label: 'STURMIAN  λ', title: 'one common exponent λ for all 91 labels: the Coulomb Sturmians (Rotenberg 1962), a complete discrete set. The labels stop being eigenstates: the register evolves by C e^{−iEt} CᵀS with the VARIATIONAL eigenvalues of S⁻¹H, the ladder shows them with the state\'s population in each, and the kernel draws the same tables at n = 1/λ' }],
+        { id: 'hydrogen', label: 'HYDROGEN  1/n', title: 'Use standard hydrogen radial functions' },
+        { id: 'sturmian', label: 'STURMIAN  λ', title: 'Use one common radial exponent λ for every label' }],
         onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
       rs.appendChild(ui.scaleSeg.root);
       ui.lambdaKnob = knob({ label: 'λ  SCALE', min: 0.25, max: 3, value: 1, fmt: (v) => 'λ = ' + v.toFixed(3), onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = Math.max(0.25, Math.min(3, v)); } });
-      ui.lambdaKnob.root.title = 'λ, the common exponent (a₀⁻¹): λ = 1/n makes label n exact again (its eigenvalue −Z²/2n²); λ = Z makes the 1s Sturmian the exact ion ground state (He⁺ at λ = 2: −2 Eh). Shift = fine, double-tap = 1';
+      ui.lambdaKnob.root.title = 'Set the Sturmian exponent; Shift is finer; double-tap resets';
       ui.lambdaKnob.setDisabled(true);
       rs.appendChild(ui.lambdaKnob.root);
       ui.sturmRo = readout({ label: 'SCALE', value: 'HYDROGEN 1/n', cls: 'two', sub: 'the shipped radials · λ acts once STURMIAN is on' });
       rs.appendChild(ui.sturmRo.root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>SCALE (a switch).</b> <b>HYDROGEN</b> is today\'s instrument, untouched. <b>STURMIAN</b> gives every one of the 91 radials the same exponent λ — the Coulomb Sturmians S<sub>nlm</sub>(λ), the same Laguerre and Legendre tables drawn at n = 1/λ, a <b>complete</b> discrete set (the shipped n ≤ 6 hydrogen set is not: 23 % of He⁺ 1s lives in the continuum it lacks). The labels stop being eigenstates: the register evolves by the exact law in the basis, c(t) = C e<sup>−iEt</sup> CᵀS c(0), with the eigenvalues of S⁻¹H — <b>variational</b> upper bounds (Hylleraas–Undheim–MacDonald), exact where a label happens to be one: λ = 1/n reproduces −Z²/2n², λ = Z the ion\'s 1s at −Z²/2. The ladder shows those eigenvalues with the state\'s population in each (S-metric projections — what "population" means in a non-orthogonal basis; they are constants of the motion); click one to load its eigenvector. The lanes keep the labels\' coefficients; a lane\'s energy is the label\'s ⟨H⟩, not an eigenvalue; the norm is ⟨c|S|c⟩ and NORMALIZE normalises in it. RATE, A / B TRANSITION and the Stark field are diagonal-phase features and stand down, as do momentum space (no table built), ELECTROSTATICS and the hydrogen-theorem windows; the Zeeman field stays (exact). Everything comes back on HYDROGEN. Z is honoured: H = −½∇² − Z/r.';
+      el('div', 'note', wSpec.body).innerHTML = '<b>Radial scale.</b> HYDROGEN uses the standard n-dependent orbitals. STURMIAN gives all labels one exponent λ and evolves them in a non-orthogonal basis. Controls that require diagonal hydrogen phases are disabled while it is active.';
     }
-    el('div', 'note', wSpec.body).innerHTML = '<b>Z</b> makes the hydrogen-like ion (He⁺, Li²⁺, …) by <b>exact scaling</b>: lengths /Z, energies ×Z², momenta ×Z — nothing approximate anywhere; the hydrogen-theorem windows are written in hydrogen\'s own units and stand down for Z ≠ 1 (ORBIT\'s invariants are dimensionless and stay). The register holds coefficients on 91 labels (n, l, m); this chooses the operator they are eigenstates OF. <b>HYDROGEN</b>: <m>E = −1/(2n²)</m>, the Coulomb closed forms. <b>OSCILLATOR</b>: <m>E = ħω(N + 3/2)</m> with <m>N = 2n_r + l</m>, the Gaussian closed forms — exact, its own momentum picture up to a phase (−i)^N, and an <b>impulse on its ground state makes an exact coherent state</b> that sloshes forever without dispersing (Ehrenfest exact), where hydrogen\'s disperses and revives. Windows that are theorems about hydrogen (ORBIT, LADDER, VORTEX, DYNAMICS, SLICE, KEPLER) stand down when the operator is not hydrogen; the Stark field, exact within a Coulomb shell, is off there.';
+    el('div', 'note', wSpec.body).innerHTML = '<b>Hamiltonian.</b> Z rescales hydrogen-like ions. OSCILLATOR uses equally spaced levels; BOX uses spherical-well levels; ATOM and QUARKONIUM load numerical radial tables. Windows tied to hydrogen identities pause under other operators.';
   }
-    el('div', 'note', wSpec.body).innerHTML = '<b>ATOM</b> is the one operator here that is <b>not</b> a closed form: a real neutral atom, H … Kr, as a single self-consistent central field — −Z/r + V<sub>H</sub> + V<sub>x</sub> with <b>Xα, α = 2/3</b> and the <b>Latter tail</b> — solved live on a logarithmic mesh (twice, Richardson-extrapolated in dx²) and handed to the kernel as a tabulated radial, exactly as QUARKONIUM is. The 91 labels become that atom\'s shells: ε<sub>nl</sub> where the ground configuration occupies the shell, the same frozen field\'s eigenvalue where it does not — a <b>virtual</b> shell, marked <b>°</b>, which carries an energy and draws nothing, because atoms.js refuses to invent a radial for a shell the atom does not have. Momentum space is not built for it. <b>ε is not an ionisation energy</b>: the ATOMS window prints the Δ-SCF beside Koopmans\' −ε and never confuses them.';
+    el('div', 'note', wSpec.body).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
   api.hamiltonian = () => sturm.P ? sturmSpectrum() : getHamiltonian().spectrum;          // W-STURMIAN: the eigen ladder under the scale
   /* wave 50: THE RATE WAS MISSING HERE.  The register evolves label a at energyOf(a) = H.energy(a) · rates[a]
      (line 72, what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
@@ -2344,7 +2086,7 @@ export async function boot(dom) {
   api.unit = () => (getHamiltonian().unit === 'hartree' ? 'Eh' : getHamiltonian().unit);
   api.labelOf = (s) => getHamiltonian().labelOf(s);
   const spectrum = createSpectrum(wSpec.body, api);
-  { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }   // the Hamiltonian, the gas and the bounce sit BELOW the channels (Josh)
+  { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
   /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */
   function toggleFullscreen() { const d = document; if (d.fullscreenElement) { if (d.exitFullscreen) d.exitFullscreen(); } else { const e = d.documentElement; const f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) try { f.call(e); } catch (err) {} } }
   function normalizeNow() {
@@ -2370,14 +2112,8 @@ export async function boot(dom) {
     schedule(TIER.REBUILD);
   }
 
-  /* ── W-STURMIAN: THE SCALE (Josh: a switch — HYDROGEN is today's code path, untouched; STURMIAN adds) ─────────────────
-   * On: the 91 records become sturmianRecord(n, l, m, λ) for the kernel (n_rec = 1/λ; rebuilt on every λ or Z change,
-   * ≈ 1 ms + the GPU upload through TIER.REBUILD), the register evolves through the block-pure propagator C e^{−iEt} CᵀS
-   * (sturmianreg.js), the state c(t) is CONTINUOUS across the change (re-anchored at the current time, as a RATE change
-   * is), the norm is ⟨c|S|c⟩, the SPECTRUM ladder is the eigen-decomposition and its lanes the labels' coefficients, the
-   * clock reads the OCCUPIED eigenvalues, and the diagonal-phase features (RATE, A/B TRANSITION, Stark, momentum space)
-   * and the hydrogen-theorem windows stand down with a note.  Hydrogen operator only (Z honoured: H = −½∇² − Z/r). */
-  const sturmLabel = () => `STURMIAN  λ = ${sturm.lambda.toFixed(3)} · Z = ${getZ()} · S⁻¹H on the 91 labels · VARIATIONAL`;
+
+  const sturmLabel = () => `STURMIAN · λ ${sturm.lambda.toFixed(3)} · Z ${getZ()} · 91 labels`;
   /* the SAME sentence switchHamiltonian writes (wave 44): it used to drop the element, so an UNDO of an ELEMENT
      change or of FILL THE VALENCE left the status reading "ATOM  Xα(2/3) + Latter tail" with no atom named */
   const hamLabel = () => { const H = getHamiltonian(); return H.id === 'atom' ? H.label + '  ·  ' + H.short : H.label; };
@@ -2453,7 +2189,7 @@ export async function boot(dom) {
     const e = sturmEigen(), Z = getZ();
     const eigen = e.E.map((E, k) => ({ k, E, pop: e.pop[k], n: e.n[k], label: `${'spdfgh'[e.l[k]]}${e.m[k] >= 0 ? '₊' : '₋'}${Math.abs(e.m[k])}` }));
     return { eigen, Emin: Math.min(e.E[0], -0.5 * Z * Z) * 1.02, Etop: 0, Emax: e.E[e.rank - 1], levels: [], levelKey: () => 0,
-      footer: `EIGENVALUE  S⁻¹H at λ = ${sturm.lambda.toFixed(3)} · rank ${e.rank} · VARIATIONAL upper bounds · E > 0 pseudo-continuum`,
+      footer: `S⁻¹H · λ ${sturm.lambda.toFixed(3)} · rank ${e.rank} · E > 0 pseudo-continuum`,
       caption: 'non-orthogonal basis: populations are projections ⟨C_k|S|c⟩ (the ladder) · a lane\'s energy is the label\'s ⟨H⟩, not an eigenvalue' };
   }
   /** load the k-th eigenvector (S-normalised, real) into the labels AT the current time: a stationary state of the scale */
@@ -2487,7 +2223,7 @@ export async function boot(dom) {
     return { n: sh.n, l: sh.l, labels: 2 * sh.l + 1 };
   }
 
-  rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);   // Josh's order (wave 56: WAVE is one card, so `style` no longer takes a seat)
+  rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);
   rack.appendChild(ui.set.root);
   /* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS (wave 30), and its markup is lab/index.html's `.nb-aboutface`.
      A commented-out copy of the old in-window version sat here for twenty-nine waves; wave 59 deleted it,
@@ -2496,7 +2232,7 @@ export async function boot(dom) {
      deploy does not have.  Anyone who uncommented it would have shipped four wrong facts at once. */
 
   // SHADOW
-  const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', title: 'CLASSICAL SHADOW  <m>c = (q + ip)/√2</m>', status: 'same c(t), same time' });
+  const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
   const shCanvas = el('canvas', 'shadow-c', wSh.body);
   const shadowView = createShadowView(shCanvas, api);
@@ -2506,45 +2242,21 @@ export async function boot(dom) {
     r.appendChild(ui.shadowSeg.root);
     ui.hc = readout({ label: 'H_C = ½qᵀAq + ½pᵀAp = ⟨H⟩', value: '—' });
     r.appendChild(ui.hc.root);
-    el('div', 'epi', wSh.body, 'EXACT REAL REPRESENTATION OF FINITE UNITARY AMPLITUDE DYNAMICS');
-    el('div', 'note', wSh.body).innerHTML = 'For diagonal H each amplitude is an uncoupled harmonic oscillator: q̇<sub>a</sub> = E<sub>a</sub>p<sub>a</sub>, ṗ<sub>a</sub> = −E<sub>a</sub>q<sub>a</sub>, angular velocity −E<sub>a</sub>. Exact at the equation level; it is not a claim that the atom is classical.';
+    el('div', 'epi', wSh.body, 'THE SAME COEFFICIENTS IN q,p COORDINATES');
+  el('div', 'note', wSh.body).innerHTML = '<b>Shadow.</b> Each complex coefficient appears as one q,p oscillator. This is a coordinate map of the same quantum state, not a classical atom model.';
   }
 
   // ORBIT — the two rotors (print, Thread B)
-  const wOrb = device({ id: 'orbit', eyebrow: 'ORBIT', title: 'THE TWO ROTORS · <m>SO(4)</m> INVARIANTS', status: 'exact · per shell' });
+  const wOrb = device({ id: 'orbit', eyebrow: 'ORBIT', status: '' });
   rack.appendChild(wOrb.root);
   const orbit = createOrbit(wOrb.body, { reg, setStatus: (t, c) => wOrb.setStatus(t, c), rotor(spec) { reg.rotor(spec); touchState(); } });
   const kepler = createKepler(dom.kepler);
   {
     const rk = wOrb.row('tight');
-    /* ══ THE KEPLER KNOBS (Josh: "perhaps we can have some turnable knobs for kepler orbit that can
-     * allow us to mess with the rotations alongside the current touch/drag controls") ═════════════
-     *
-     * WHY THEY ARE JOG WHEELS AND HOLD NO VALUE.  Everywhere else in this lab a knob that holds no
-     * value is a defect (kit.js:213, and the three STATE wheels are the standing example).  HERE it
-     * is the only correct control, and for the opposite reason: EVERY KEPLER ROTATION QUANTITY IS
-     * DERIVED.  orbitOfShell(n) recomputes the orbit from reg.re0/im0 on every call; there is no
-     * orbit object to write to and no angle stored anywhere.  A knob bound to a stored angle would
-     * be a SECOND TRUTH, and it would drift the instant anything else edited the state — which the
-     * perihelion drag, IMPULSE, the presets, a project LOAD and every undo all do.  So these report
-     * deltas, they read the orbit FRESH inside every onDelta, and that fresh read is exactly what
-     * makes the knobs and the drag agree instead of fighting.
-     *
-     * ⚠ THE ROTORS ARE NOT PER-SHELL, AND THE SELECTOR DOES NOT PRETEND THEY ARE.  applyRotor
-     * (frontier.js) loops n = 2…6 and turns EVERY POPULATED SHELL.  SHELL picks whose geometry
-     * supplies the AXIS, not what moves — and that has always been true of the drag too: pulling
-     * n = 3's perihelion turns n = 4's orbit with it.  The note says so rather than leaving it to
-     * be discovered.
-     *
-     * ISOTROPIC IS DISABLED, INCOHERENT IS ONLY WARNED, and the line between them is where the AXIS
-     * lives.  An isotropic shell has ⟨L⟩ = ⟨K⟩ = 0: there is no normal, no node line and no
-     * perihelion, so there is no axis to turn about and the controls go dead — DISABLED, never a
-     * silent no-op.  Below coherence ½ the AXES still exist and the rotors are still exact SO(4)
-     * elements; what fails is the claim that the ellipse IS the state, which is a DRAWING refusal
-     * (keplerview.js:47) and nothing more.  Disabling a control because a picture stood down would
-     * be disabling it for a reason that has nothing to do with the operator it applies. */
+
+
     ui.kepShell = seg({ label: 'SHELL', value: '3', aria: 'Kepler shell',
-      options: [2, 3, 4, 5, 6].map((n) => ({ id: String(n), label: 'n' + n, title: `read the orbit axes off shell ${n} (the rotors act on the whole register)` })),
+      options: [2, 3, 4, 5, 6].map((n) => ({ id: String(n), label: 'n' + n, title: `Read orbit axes from shell ${n}` })),
       onChange: () => keplerRowSync(true) });
     rk.appendChild(ui.kepShell.root);
     {
@@ -2553,30 +2265,30 @@ export async function boot(dom) {
          keplerDragToPoint reaches for once it has worked out the φ that puts the perihelion under
          the pointer.  One entry point, one fresh read, one convention check, one touchState. */
       ui.kepSpin = knob({ label: 'SPIN  ω', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_L̂)',
-        title: 'carry the perihelion around inside its own plane — a spatial rotation about the orbit normal L̂. This is the drag\'s first leg, by the same call',
+        title: 'Rotate perihelion within the orbit plane',
         onDelta: (d) => keplerTurn('spin', d) });
       ui.kepTilt = knob({ label: 'TILT  ν', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_n̂)',
-        title: 'tip the orbit plane about its NODE LINE (ẑ × L̂) — the inclination changes, the ascending node does not. With the plane already level every in-plane axis is a node, and the perihelion û is taken',
+        title: 'Change inclination around the ascending node',
         onDelta: (d) => keplerTurn('tilt', d) });
       ui.kepTurn = knob({ label: 'TURN  Ω', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)',
-        title: 'turn the ascending node about world z. The SAME operator as STATE · ROTATE z, seated here because the node is a Kepler quantity — and the only one of the three that needs no conjugation, since axis z is native to reg.rotor',
+        title: 'Rotate the ascending node around world z',
         onDelta: (d) => keplerTurn('turn', d) });
       for (const k of [ui.kepSpin, ui.kepTilt, ui.kepTurn]) rkk.appendChild(k.root);
       ui.kepRo = readout({ label: 'ORBIT  a · e · coherence', cls: 'wide', value: '—', sub: 'pick a populated shell' });
       rkk.appendChild(ui.kepRo.root);
     }
-    rk.appendChild(sw({ label: 'KEPLER ORBIT', value: false, title: 'draw the classical orbit each shell carries — from the exact ⟨L⟩ and ⟨K⟩ — over the cloud', onChange: (v) => { kepler.setOn(v); schedule(TIER.PRESENT); } }).root);
-    el('div', 'note', wOrb.body).innerHTML = '<b>KEPLER ORBIT.</b> The two sphere points ARE a classical orbit: the shell sets a = n², the angle between n₊ and n₋ is the eccentricity, their sum is the angular momentum, and ⟨K⟩ points to the perihelion. It is drawn over the cloud with the perihelion dotted and the classical <b>time-averaged position</b> crossed — which equals the quantum ⟨x⟩ = −(3n/2)⟨K⟩ (Pauli\'s replacement, exact for every shell state) — an identity by construction once a = n² and e = |⟨K⟩|/n are read off the state. The ellipse carries the state\'s energy and eccentricity but NOT its angular momentum: its own L = n√(1−e²) exceeds |⟨L⟩| always (K² + L² ≤ n²−1), and the label prints both. A dashed orbit means the shell is not coherent; below coherence ½ none is drawn (Round 11 §3).';
+    rk.appendChild(sw({ label: 'KEPLER ORBIT', value: false, title: 'Draw the Kepler orbit over the field', onChange: (v) => { kepler.setOn(v); schedule(TIER.PRESENT); } }).root);
+  el('div', 'note', wOrb.body).innerHTML = '<b>Kepler overlay.</b> The selected shell sets the ellipse size and eccentricity from ⟨L⟩ and ⟨K⟩. Dashed lines indicate a low-coherence correspondence; no orbit is drawn below the threshold.';
   }
 
   // VORTEX — the nodal lines (print, Thread C)
-  const wVor = device({ id: 'vortex', eyebrow: 'VORTEX', title: 'NODAL LINES · UNIMODULAR ROOTS OF <m>P(w)</m>', status: 'exact on sampled circles' });
+  const wVor = device({ id: 'vortex', eyebrow: 'VORTEX', status: '' });
   rack.appendChild(wVor.root);
   const vortex = createVortex(wVor.body, dom.vortex, { reg, clock, scrubTo: (t) => { clock.scrub(t); schedule(TIER.EVOLVE); } });
 
   // DYNAMICS — the Lagrangian picture, the action–angle chart, the dipole, and the particle view
   const particles = createParticles(dom.particles, {});
-  const wDyn = device({ id: 'dynamics', eyebrow: 'DYNAMICS', title: 'LAGRANGIAN · ACTION · DIPOLE · PARTICLES', status: 'exact · reads c(t)' });
+  const wDyn = device({ id: 'dynamics', eyebrow: 'DYNAMICS', status: '' });
   rack.appendChild(wDyn.root);
   const dynamics = createDynamics(wDyn.body, {
     particles,
@@ -2585,7 +2297,7 @@ export async function boot(dom) {
   });
 
   // SLICE — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
-  const wSlice = device({ id: 'slice', eyebrow: 'SLICE', title: 'COMPLEX PLANE · ROTOR · KS <m>ℝ⁴</m>', status: 'observer · domain colouring' });
+  const wSlice = device({ id: 'slice', eyebrow: 'SLICE', status: '' });
   rack.appendChild(wSlice.root);
   const slice = createSliceView(wSlice.body, {
     lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
@@ -2593,21 +2305,20 @@ export async function boot(dom) {
   });
 
   // QCD — the confining side: quarkonium under a chosen potential, the flavour-independence verdict, the string
-  const wQCD = device({ id: 'qcd', eyebrow: 'QCD', title: 'QUARKONIUM · CORNELL · THE STRING', status: 'numerical · Numerov' });
+  const wQCD = device({ id: 'qcd', eyebrow: 'QCD', status: '' });
   rack.appendChild(wQCD.root);
   const qcd = createQCD(wQCD.body, { repaint() { schedule(TIER.PRESENT); }, onParams(kind, pot, p) { if (HAMILTONIANS.cornell.configure(kind, p, pot) && getHamiltonian().id === 'cornell') switchHamiltonian('cornell'); } });
 
   // MOLECULE — H₂⁺ in the 1s LCAO basis: the field is handed to two protons and one electron
-  const wMol = device({ id: 'molecule', eyebrow: 'MOLECULE', title: '<m>H₂⁺</m> · LCAO · TUNNELLING', status: 'exact integrals · variational · classical nuclei · Pulay bound' });
+  const wMol = device({ id: 'molecule', eyebrow: 'MOLECULE', status: '' });
   if (useCompactDefaults) wMol.root.classList.add('closed');   // do not paint the 200-point energy plot behind first-visit furniture
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
   moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
-  /* W-PULSE (wave 58, board #24): the third block on this card — Astra's field-driven H₂⁺ (lab/modrive.js), which
-     nothing in the interface reached until now.  It runs on the LAB's clock (t_drive = t_lab − t₀ at FIRE) and it
-     feeds nothing: the stage still draws whatever the two blocks above it hold, and the pulse is the card's own. */
+
+
   pulsePanel = createPulse(wMol.body, { now: () => clock.t });
   function moleculeMode(v) {
     for (const w of [wState, wSpec, wSh, wOrb, wVor, wDyn, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
@@ -2618,39 +2329,39 @@ export async function boot(dom) {
   }
 
   // HELIUM — two electrons, Hylleraas: the field becomes the conditional cloud of electron 2
-  const wHe = device({ id: 'helium', eyebrow: 'HELIUM', title: 'TWO ELECTRONS · HYLLERAAS · CORRELATION', status: 'exact integrals · variational' });
+  const wHe = device({ id: 'helium', eyebrow: 'HELIUM', status: '' });
   if (useCompactDefaults) wHe.root.classList.add('closed');     // defer the ~77 ms variational solve until this card is first shown
   rack.appendChild(wHe.root);
   const helium = createHelium(wHe.body, { active: () => canPresent(wHe), loading: cardLoading(wHe, 'helium'), solve: (basis) => solveCard({ op: 'helium', basis }, () => hylleraas(HELIUM_BASES[basis]), (r) => r.sol), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && molecule.on) molecule.setOn(false); moleculeMode(v); } });
 
   // H₂ — two atoms, Heitler–London: the curves, the collision, the one-electron density
-  const wH2 = device({ id: 'h2', eyebrow: '<m>H₂</m>', title: 'HEITLER–LONDON · THE BOND · THE COLLISION', status: 'exact integrals · variational · classical nuclei' });
+  const wH2 = device({ id: 'h2', eyebrow: '<m>H₂</m>', status: '' });
   if (useCompactDefaults) wH2.root.classList.add('closed');    // avoid the 221-point RHF/FCI plot until the user opens it
   rack.appendChild(wH2.root);
   const h2 = createH2(wH2.body, { active: () => canPresent(wH2), loading: cardLoading(wH2, 'curve'), solveCurve: (Rmin, Rmax, count) => solveCard({ op: 'h2curve', Rmin, Rmax, count }, () => h2CurveTable(Rmin, Rmax, count)), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); } moleculeMode(v); }, now: () => clock.t });
 
   // CALCULUS — the stats, derived live, with their laws and residuals
-  const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', title: 'THE STATS · DERIVED · EHRENFEST LIVE', status: 'exact within the register' });
+  const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
   rack.appendChild(wCalc.root);
   const calculus = createCalculus(wCalc.body, {});
 
   // METERS
-  const wMet = device({ id: 'meters', eyebrow: 'METERS', title: 'INVARIANTS · CLOCKS · STATUS', status: '' });
+  const wMet = device({ id: 'meters', eyebrow: 'METERS', status: '' });
   rack.appendChild(wMet.root);
   const meters = createMeters(wMet.body);
 
   {
     const rp = wMet.row('tight');
     ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [
-      { id: 'full', label: 'FULL', title: 'every window updates every frame; automatic quality protects a 60 Hz frame budget' },
-      { id: '120', label: '120 Hz', title: 'visible CPU windows update every 4th frame; the field still presents every frame. Automatic quality targets up to 120 Hz, following the fastest sustained cadence this browser has delivered' }],
+      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
+      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     rp.appendChild(ui.perfSeg.root);
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 28 ms over the last 60 frames' }); rp.appendChild(ui.govRo.root);
-    el('div', 'note', wMet.body).innerHTML = '<b>FRAME PROFILE</b> is an exponential average of what each stage costs per frame, in milliseconds, measured on this machine and this browser. The display refresh rate caps what the browser will deliver (Firefox follows the compositor; a 60 Hz monitor gives 60 Hz whatever the code does). <b>120 Hz</b> mode moves the CPU windows to every 4th frame and lets AUTO SCALE / GOVERNOR follow sustained browser delivery up to 120 Hz; it starts with a 60 Hz budget until faster delivery is observed; the physics clock and the field cadence are untouched (§12: four clocks).';
+  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. 120 Hz mode updates visible CPU readers every fourth frame while the field continues to present each frame.';
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
-  const wLad = device({ id: 'ladder', eyebrow: 'LADDER', title: 'RYDBERG REVIVAL · SPECTRAL', status: 'own register · no field' });
+  const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
@@ -2710,7 +2421,7 @@ export async function boot(dom) {
         hint: 'the camera azimuth — free-spinning, because an orbit that reaches the end of the dial and stops is not an orbit',
         get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; schedule(TIER.PRESENT); } },
       { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer',
-        hint: 'signed and detented at the horizon: 50 % is EXACTLY level',
+        hint: 'Pitch balance; 50% is level',
         get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; schedule(TIER.PRESENT); } },
       { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => ui.zoomK,
         hint: 'the ZOOM dial itself — log, because the interesting half of a zoom is always the near half',
@@ -2724,7 +2435,7 @@ export async function boot(dom) {
       { id: 'material.softness', label: 'SOFT', map: 'linear', min: 0.3, max: 2.2, group: 'material', knob: () => ui.softK,
         get: () => mat.softness, set: (v) => { mat.softness = v; setKnob(ui.softK, v); schedule(TIER.PRESENT); } },
       { id: 'material.hue', label: 'HUE', map: 'wrap', min: 0, max: 1, group: 'material', knob: () => ui.hueK,
-        hint: 'the palette wheel is a wheel: this one wraps, and the interface accents follow it at 10 Hz while the field follows every frame',
+        hint: 'Turn the palette and interface accents',
         get: () => mat.hueShift, set: (v) => { if (sameCycle(v, mat.hueShift, 1)) return; mat.hueShift = v; setKnob(ui.hueK, v); hueAccent(); schedule(TIER.PRESENT); } },
       { id: 'material.iso', label: 'ISO', map: 'log', min: 0.002, max: 0.9, group: 'material', knob: () => ui.isoK,
         get: () => mat.iso, set: (v) => { mat.iso = v; setKnob(ui.isoK, v); schedule(TIER.PRESENT); } },
@@ -2736,24 +2447,15 @@ export async function boot(dom) {
          is a thing an LFO may modulate, so it cannot also be the thing that says how fast the LFO runs.
          Its setter schedules NOTHING: while it matters the loop is already running an EVOLVE of its own. */
       { id: 'transport.rate', label: 'RATE', unit: ' a.u./s', map: 'log', min: 0.1, max: 3000, group: 'transport', knob: () => ui.rateKnob,
-        hint: 'the physics clock’s rate — a modulation TARGET, never the modulator’s own clock',
+        hint: 'Set the physics clock rate',
         get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); } },
 
-      /* ══ WAVE 106 · THREE MORE, AND THEY ARE THE THREE THAT PASS THE HOUSE RULE ═══════════════════
-         Josh named five places he wanted a macro.  The rule above this array is what decides which of
-         them may be one: a target's setter must be a PRESENT and must not bump `reg.version`, because
-         that is the UNDO ring's trigger and an LFO on it would push an entry every 400 ms.  These
-         three clear it; the other two are answered in the note under `state.rabi`.
-           SLICE POS and THICK are pure material writes — one uniform each, one PRESENT, no register
-         touched at all.  Registering them also repairs a bug nobody filed: `mat` is serialised whole
-         and restored by Object.assign, so after a project LOAD these two dials showed the OLD numbers
-         over the NEW slice.  A registered target is re-based from the model on restore
-         (`modSyncBases`), so the needle now follows the file. */
+
       { id: 'material.slice.pos', label: 'SLICE POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
-        hint: 'where the CLIP / SLAB plane cuts along the chosen axis — signed, so the centre is an exact detent. Acts only while SLICE MODE is not VOLUME',
+        hint: 'Set the clip or slab position',
         get: () => mat.slice.pos, set: (v) => { mat.slice.pos = v; setKnob(ui.slicePosK, v); schedule(TIER.PRESENT); } },
       { id: 'material.slice.thick', label: 'SLICE THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
-        hint: 'how deep the slab is. Acts only while SLICE MODE is not VOLUME',
+        hint: 'Set slab depth',
         get: () => mat.slice.thick, set: (v) => { mat.slice.thick = v; setKnob(ui.sliceThickK, v); schedule(TIER.PRESENT); } },
 
       /* Ω RABI is the cleanest of the five and the one worth having most: it is the RATE of the A→B→A
@@ -2777,20 +2479,20 @@ export async function boot(dom) {
        * `map: 'bipolar'` on all three, and it is load-bearing rather than decorative: it makes the
        * detent at zero EXACT, and zero is the state in which this whole feature costs nothing. */
       { id: 'state.rot.z', label: 'SPIN z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, def: 0, group: 'state', knob: () => ui.rotZRate,
-        hint: 'dθ/dt about z, in rad/s — a RATE, never an angle. ±2π is one full turn a second, and D(R_z) is a rigid spatial turn so it is exact at any rate',
+        hint: 'Set z-rotation speed',
         get: () => rotRate.z,
         set: (v) => { setRotationRate('z', v); } },
       { id: 'state.stark.kz', label: 'SPIN K_z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, def: 0, group: 'state', knob: () => ui.kzRate,
-        hint: 'dθ/dt of e^{−iθK_z}, in rad/s. K_z has integer eigenvalues on every shell, so ±2π is one full Stark cycle a second. Clamped to zero under STURMIAN',
+        hint: 'Set Stark rotation speed',
         get: () => rotRate.kz,
         set: (v) => { setRotationRate('kz', v); } },
       { id: 'state.defect.l2', label: 'SPIN L²', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, def: 0, group: 'state', knob: () => ui.defRate,
-        hint: 'dα/dt of e^{iαL²}, in rad/s. l(l+1) is EVEN for every l ≤ 5, so the phase is π-periodic and the range is π, not 2π: full deflection is one defect cycle a second. Clamped to zero under STURMIAN',
+        hint: 'Set defect phase speed',
         get: () => rotRate.def,
         set: (v) => { setRotationRate('def', v); } },
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
-        hint: 'the Rabi rate of the A → B → A mix. t₀ is re-solved on every change so the mix angle never jumps',
+        hint: 'Set the A–B transition rate',
         get: () => __LW_hooks.ab.omega,
         set: (v) => { __LW_hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
     ];
@@ -2832,26 +2534,8 @@ export async function boot(dom) {
     /* THE FOUR EDGES, HANDED TO THE PORTED WINDOW.  Registry · target host · clock ·
        presentation — the four `lab/mir/host.js` has provided since the MIR wave, and the four
        `host-contract.md` PART 3 says this window boots on and nothing else. */
-    /* ══ WAVE 81 · THE PLAYHEAD DODGES THE PLUGIN, AND TUNNELS TO THE OTHER SEAT ═══════════════
-     * Josh: "When moving the modulation plug in around, have the original playhead move to the top
-     * … perform an interesting animation when switching to the top and bottom like pac-man tunnel
-     * effect easing … whenever is at risk of being covered by the modulation plugin."
-     *
-     * THE DECISION IS THE HOST'S.  The window reports its rect (`port.moved`) and this picks the
-     * seat, because the transport is λWAVES' own chrome and the plugin may not restyle it.
-     *
-     * THE TEST IS ON THE SEAT, NOT ON THE PILL.  Asking "does the plugin overlap the pill where it
-     * is now?" cannot answer "would it overlap where it is going?", and a dodge decided from the
-     * current position oscillates the moment both seats are occupied.  So both candidate rects are
-     * computed from the pill's own size and the two anchors, and the answer is: keep the bottom if
-     * the bottom is clear, take the top if it is not and the top is, otherwise DO NOT MOVE — a
-     * window covering both seats is not a reason to flap between them.
-     *
-     * THE TUNNEL IS TWO HALVES OF ONE 300 ms MOVE (MOTION-LAW's ceiling, not a budget to beat): the
-     * pill leaves through the edge it is on, the seat swaps while it is off-screen, and it arrives
-     * through the opposite edge — which is why it reads as a tunnel and not as a jump.  Under
-     * `prefers-reduced-motion` the CSS keeps the fade and drops the travel ("fewer and gentler,
-     * never zero"), so the seat still changes and nothing slides. */
+
+
     let trSeat = 'bottom', trMoving = false;
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
@@ -2933,7 +2617,7 @@ export async function boot(dom) {
   }
 
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); a niche window: it ships CLOSED
-  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', title: 'THE PERIODIC TABLE · <m>Xα</m> · CENTRAL FIELD', status: 'numerical · SCF + Richardson' });
+  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
@@ -2943,7 +2627,7 @@ export async function boot(dom) {
   });
 
   // ELECTROSTATICS — the classical field of the register's own charge, in closed form; a niche window: it ships CLOSED
-  const wFld = device({ id: 'field', eyebrow: 'ELECTROSTATICS', title: 'POTENTIAL · FIELD · CURRENT · THE CLASSICAL FIELD OF <m>ρ</m>', status: 'exact · closed form · reads c(t)' });
+  const wFld = device({ id: 'field', eyebrow: 'ELECTROSTATICS', status: '' });
   rack.appendChild(wFld.root); wFld.root.classList.add('closed');                // reopened from the + at the top of the rack
   ui.fldWin = wFld;
   const fieldlines = createFieldLines(document.getElementById('fieldlines'), {
@@ -2954,17 +2638,17 @@ export async function boot(dom) {
     const rf = wFld.row('tight');
     ui.fldOv = seg({ label: 'OVERLAY  ·  facing the camera', value: 'off', options: [
       { id: 'off', label: 'OFF', title: 'no lines on the stage — the readouts stay live' },
-      { id: 'phi', label: 'Φ', title: 'equipotentials of the total potential, log-spaced between Φ(0.9·half) and Φ(0.25 a₀)' },
-      { id: 'E', label: 'E', title: 'field lines of E = −∇Φ, seeded on a small circle round the nucleus (they end on the electron density: the atom is neutral)' },
-      { id: 'j', label: 'j', title: 'streamlines of the probability current j = Im(ψ*∇ψ) — zero for every real orbital' }],
+      { id: 'phi', label: 'Φ', title: 'Show equipotential contours' },
+      { id: 'E', label: 'E', title: 'Draw electric-field lines in the current slice' },
+      { id: 'j', label: 'j', title: 'Show probability-current streamlines' }],
       onChange: (v) => { fieldlines.setOverlay(v); schedule(TIER.PRESENT); } });
     rf.appendChild(ui.fldOv.root);
     ui.fldLines = knob({ label: 'LINES', min: 4, max: 24, value: 10, step: 1, fmt: (v) => Math.round(v) + (fieldlines.overlay === 'phi' ? ' levels' : ' seeds'),
       onInput: (v) => { fieldlines.setLines(v); schedule(TIER.PRESENT); } });
     rf.appendChild(ui.fldLines.root);
     ui.fldSrc = seg({ label: 'SOURCE', value: 'total', options: [
-      { id: 'total', label: 'ρ + nucleus', title: 'Φ = Z/r + Φ_e and E = −∇Φ: the whole atom, monopole cancelled' },
-      { id: 'rho', label: 'ρ only', title: 'the electron cloud alone — Φ_e, and E with the nucleus’s exact Z r̂/r² removed (j is the electron’s either way)' }],
+      { id: 'total', label: 'ρ + nucleus', title: 'Show the total atomic field' },
+      { id: 'rho', label: 'ρ only', title: 'Show the electron contribution without the nucleus' }],
       onChange: (v) => { fieldlines.setSource(v); schedule(TIER.PRESENT); } });
     rf.appendChild(ui.fldSrc.root);
     const rr = wFld.row('tight');
@@ -2973,7 +2657,7 @@ export async function boot(dom) {
     ui.fldE = readout({ label: '|E|  at (0, 0, 1) a₀', value: '—', sub: 'a.u. · V/m (5.1422e11 V/m per a.u.)' });
     ui.fldB = readout({ label: 'B  nucleus  ·  1 a₀ on the axis', value: '—', cls: 'wide', sub: 'tesla — a quadrature, and off the axis it is not certified: never drawn' });
     for (const r of [ui.fldQ, ui.fldPhi, ui.fldE, ui.fldB]) rr.appendChild(r.root);
-    el('div', 'note', wFld.body).innerHTML = '<b>EXACT ANALYTIC.</b> ρ = |ψ|² is expanded on Y<sub>LM</sub> by exact Gaunt coefficients and <b>Poisson is solved in closed form</b>, slot by slot (finite polynomials × e<sup>−βr</sup> through the incomplete Γ functions), so Φ = Z/r + Φ<sub>e</sub>, <b>E = −∇Φ</b> and the probability current <b>j = Im(ψ*∇ψ)</b> are analytic — this window only samples them. <b>NUMERICAL:</b> the equipotentials are marching squares with a secant polish, the field lines RK4 on the unit tangent of the in-plane projection, and <b>B</b> is a quadrature. <b>B off the axis is NOT certified, so it is never drawn</b> — only the two axis numbers are printed (2p₊1: −0.521534 T at the nucleus, −0.429533 T at 1 a₀). The plane is cut through the nucleus facing the camera when the slice is built and then only re-projected, so orbiting shows you that same slice from a new angle. The closed form is <b>hydrogenic</b>: under any other Hamiltonian this window stands down.';
+  el('div', 'note', wFld.body).innerHTML = '<b>Electrostatics.</b> The window samples potential, electric field, and probability current from the hydrogenic density. Lines are drawn in the camera-facing plane. Magnetic field is reported only on the axis. Other Hamiltonians disable this window.';
   }
   /** the ELECTROSTATICS readouts, from the view's own stats block (fired after every rebuild) */
   function paintField(s) {
@@ -2993,12 +2677,12 @@ export async function boot(dom) {
   }
 
   // WIGNER — the one joint object of position and momentum, cut through the axis; a niche window: it ships CLOSED
-  const wWig = device({ id: 'wigner', eyebrow: 'WIGNER', title: 'PHASE SPACE · THE <m>(z, p_z)</m> SLICE', status: 'numerical · a slice, not a marginal' });
+  const wWig = device({ id: 'wigner', eyebrow: 'WIGNER', status: '' });
   rack.appendChild(wWig.root); wWig.root.classList.add('closed');                // reopened from the + at the top of the rack
   const wignerView = createWigner(wWig.body, { repaint() { schedule(TIER.PRESENT); } });
 
   // RADIATION — what the prepared pair would radiate, and the shape of its far field; also CLOSED
-  const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', title: 'THE DIPOLE · SPONTANEOUS EMISSION · THE FAR FIELD', status: 'exact matrix elements · classical far field' });
+  const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
   const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => __LW_hooks.ab });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
@@ -3024,31 +2708,17 @@ export async function boot(dom) {
     /* WAVE 62: the glyph is the drawing, the name is the word.  `play`'s NAME never changes when its
        glyph swaps ▶ ↔ ❚❚ — a control that renames itself is a different control to a screen reader;
        what changes is its `aria-pressed`, which is what "is it playing" actually means. */
-    const play = el('button', 'tbtn play', T, '▶'); play.type = 'button'; play.title = 'play / pause  (space) — one press, two clocks: ψ and, while MOD is on, the modulation'; play.setAttribute('aria-label', 'play or pause'); play.setAttribute('aria-pressed', 'false');
-    /* ── WAVE 65 · THE MOD ARM, BESIDE THE PLAY BUTTON ────────────────────────────────────────
-     * Josh: "the play/pause button should have a small MOD button that glows on or off."  ONE
-     * button covers both of the playheads he named, because `#transport` IS one element in two
-     * placements — the card `dockTransport()` puts in the rack, and the pill it moves to the stage.
-     * It is `.tbtn` so it keeps the 44-px seat every other transport button has, with `.modb`
-     * narrowing the INK and nothing else (the density law: grow the seat, never the mark), and it
-     * glows in ACCENT B because modulation is a RELATIONSHIP — the same colour the ⤢ lamp beside it
-     * already lights, and the same colour a held dial wears out in the rack. */
+    const play = el('button', 'tbtn play', T, '▶'); play.type = 'button'; play.title = 'Play or pause'; play.setAttribute('aria-label', 'play or pause'); play.setAttribute('aria-pressed', 'false');
+
+
     const modB = el('button', 'tbtn modb', T, 'MOD'); modB.type = 'button';
     modB.setAttribute('aria-label', 'modulation on or off');
     modB.setAttribute('aria-pressed', 'true');
-    modB.title = 'MOD (m) — when it glows, the modulation is live and every routed control moves; off, the rack is inert and every one of them sits on the number your hand left it on. SPACE is one key for both clocks: it plays and pauses ψ and the modulation together, and they stay two clocks (an LFO can hold the physics RATE, so the RATE cannot say how fast the LFO runs). What a resume DOES is the source’s own chips: ANCH holds the curve where the pause caught it, TRIG starts it over, BPM jumps back to the note boundary just passed';
+    modB.title = 'Enable modulation';
     modB.addEventListener('click', () => setModArm(!modArm));
     ui.modB = modB;
-    /* ══ WAVE 106 · THE REWIND MARK IS DRAWN NOW (Josh: "iPad is showing emojis for that icon") ═══
-       It was the literal character U+23EE with no U+FE0E after it, and U+23EE carries EMOJI
-       PRESENTATION by default — so iOS is not misbehaving, it is following the standard, substituting
-       its colour glyph and ignoring the button's `color` entirely.  A variation selector would silence
-       it, but this repo already ruled on that class of bug in kit.js — "which font the device resolves
-       … iOS substitutes a COLOUR emoji for several of them" — and in STYLE-LOCK: "if a mark must be
-       reliable, it has to be a drawing."  So it is a drawing, on the plugin's own SVG_PLAY geometry
-       (24-box, currentColor, 14 px, round joins) so it sits at the weight of its neighbours: the bar
-       and the triangle of a skip-to-start.  `currentColor` means it also follows the accent the other
-       transport marks follow, which the emoji never could. */
+
+
     const SVG_REWIND = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:13px;height:13px;display:block;margin:auto"><rect x="5" y="5" width="2.6" height="14" rx="1.1"/><polygon points="20 5 20 19 9.5 12 20 5"/></svg>';
     const rst = el('button', 'tbtn', T); rst.type = 'button'; rst.innerHTML = SVG_REWIND; rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0');
     const sm = el('button', 'tbtn', T, '‹'); sm.type = 'button'; sm.title = 'step back  (←)'; sm.setAttribute('aria-label', 'step back');
@@ -3137,13 +2807,13 @@ export async function boot(dom) {
       const src = sturm.P ? ' · from the occupied eigenvalues of S⁻¹H' : '';
       if (sturm.P && !P.exact && P.T > 0) {                          // W-STURMIAN: a "recurrence" shorter than one turn of the fastest beat is no recurrence (every phase is still small)
         const Es = occupiedEigen(); let dmax = 0; for (let i = 0; i < Es.length; i++) for (let j = i + 1; j < Es.length; j++) dmax = Math.max(dmax, Math.abs(Es[i] - Es[j]));
-        if (dmax > 0 && P.T < 2 * Math.PI / dmax) return ['—', 'NO EXACT PERIOD (' + P.count + ' incommensurate eigenvalues of S⁻¹H) · no near-recurrence within the horizon: the best found is shorter than one turn of the fastest beat', 'warn'];
+        if (dmax > 0 && P.T < 2 * Math.PI / dmax) return ['—', P.count + ' incommensurate eigenvalues · no recurrence within the search horizon', 'warn'];
       }
       if (P.stark) return ['— (Stark)', 'no exact period under a static field: the Stark energies are not commensurate', 'warn'];
       if (P.mix) return ['— (transition)', 'the A ↔ B mix has its own clock: the Rabi period', 'warn'];
       if (P.stationary) return ['stationary', 'one energy: the density never changes', ''];
-      if (P.exact) { const lap = Math.floor(clock.t / P.T), ph = clock.t - lap * P.T; return [fmtPeriod(P.T), 'EXACT · ' + P.count + ' energies, gcd ' + P.g.toPrecision(4) + ' Eh · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '% through' + src, 'ok']; }
-      return ['≈ ' + fmtPeriod(P.T), 'NO EXACT PERIOD (incommensurate energies) · nearest recurrence within ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
+      if (P.exact) { const lap = Math.floor(clock.t / P.T), ph = clock.t - lap * P.T; return [fmtPeriod(P.T), P.count + ' energies · gcd ' + P.g.toPrecision(4) + ' Eh · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '%' + src, 'ok']; }
+      return ['≈ ' + fmtPeriod(P.T), 'nearest recurrence · error ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
     }
     /** the four slots of the REPEATS formula, from the SAME `periodNow()` the readout above reads — one
         expression for one quantity (ANTI-PATTERN 20).  A state with no exact period prints an em dash in
@@ -3185,19 +2855,8 @@ export async function boot(dom) {
     setModArm(modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
     return { update, stepDt };
   })();
-  /* ── WAVE 65 · ONE CONTROL, TWO CLOCKS ──────────────────────────────────────────────────────
-   * Josh: "Space bar will affect everything — play and pause for modulation plugin and λWAVES."
-   * THE TWO CLOCKS STAY TWO, and that is a law from the MIR wave, not a convenience: physics time
-   * is analytic and SET (`clock.scrub`, `clock.step`, a rate in a.u. per wall second), modulation
-   * time is STEPPED in beats, and `transport.rate` is itself a modulation TARGET — merge them and
-   * an LFO holding RATE would be deciding how fast its own modulator runs.  So this is one PRESS
-   * over two clocks, never one clock: `clock` takes the wall stamp, `modHost.clock` takes the same
-   * stamp through its own door, and each keeps its own arithmetic on the other side of it.
-   *   THE MODULATION FOLLOWS THE PHYSICS ONLY WHILE MOD IS ARMED, and the plugin's own play button
-   * is deliberately still its own — "two play heads are considered different" — so the modulation
-   * can be stopped alone from the window and the next space re-joins the two.
-   *   The refusal `setPlaying` already carries (`nothing-routed`) is honoured in silence here: a
-   * transport with nothing routed has nothing to do, and ψ should still play. */
+
+
   function playMod(on) {
     if (!modHost || !modArm) return null;
     const w = performance.now() / 1000;
@@ -3209,7 +2868,7 @@ export async function boot(dom) {
     const want = !clock.playing;
     clock.toggle(performance.now() / 1000);
     playMod(want);
-    schedule(TIER.EVOLVE); hideHint();
+    schedule(TIER.EVOLVE);
   }
   /** THE ARM.  `setEnabled(false)` is not `pause()`: it hands every routed control back to its base
    *  — including the ones a HAND macro holds, which a stopped transport keeps by the pause law's own
@@ -3266,8 +2925,8 @@ export async function boot(dom) {
     const mk = (cls, text, onClick) => { const b = el('button', 'badge ' + cls, B); b.type = 'button'; el('i', '', b); el('span', '', b, text);
       if (!onClick) { b.setAttribute('aria-controls', 'sheet'); b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); }
       b.addEventListener('click', onClick || sheetToggle); return b; };
-    const b1 = mk('exact', 'EXACT ANALYTIC · state · evolution · shadow');
-    const b2 = mk('numerical', 'NUMERICAL · FIELD');
+    const b1 = mk('exact', 'STATE · EVOLUTION · SHADOW');
+    const b2 = mk('numerical', 'FIELD');
     const b3 = mk('warn', ''); b3.hidden = true;
     const b4 = mk('warn', ''); b4.hidden = true;
     /* WAVE 56: the fifth badge is the only one that is not about ψ — it is the offer of a NEW BUILD, and it
@@ -3305,22 +2964,22 @@ export async function boot(dom) {
          that moves by itself belongs. */
       const where = space === 'p' ? `momentum space, ${quality.res}³ grid` : `${quality.res}³ grid over ±${half} ${H.lengthUnit}`;
       const modes = `${rs.rendered} of ${rs.populated} modes, ${(rs.coveredFraction * 100).toFixed(0)} % of the norm` + (rs.masked ? ` (${rs.masked} muted)` : '');
-      const law = reg.field.Fz !== 0 ? `${H.short} + F z, F = ${reg.field.Fz.toExponential(1)}, exact within each shell`
-        : reg.field.Bz !== 0 ? `${H.short} + (B/2) L_z, B = ${reg.field.Bz.toFixed(4)}, diagonal and exact` : H.label;
+      const law = reg.field.Fz !== 0 ? `${H.short} + F z, F = ${reg.field.Fz.toExponential(1)}, within each shell`
+        : reg.field.Bz !== 0 ? `${H.short} + (B/2) L_z, B = ${reg.field.Bz.toFixed(4)}, diagonal` : H.label;
       const when = clock.playing ? 'playing' : `paused at t = ${clock.t.toFixed(2)} a.u.`;
       return `${names ? names + '; ' : ''}${VIEW_SAY[mat.view] || VIEW_NAMES[mat.view]}, drawn as ${STYLE_NAMES[mat.style]}; ${where}; ${modes}; ${law}; ${when}`;
     }
     function update() {
-      const f = reg.field.Fz !== 0 ? `STARK F = ${reg.field.Fz.toExponential(1)} · EXACT WITHIN EACH SHELL (F ≪ ${reg.fieldValidUpTo().toExponential(1)})`
-        : reg.field.Bz !== 0 ? `ZEEMAN B = ${reg.field.Bz.toFixed(4)} · exact` : '';
+      const f = reg.field.Fz !== 0 ? `STARK F = ${reg.field.Fz.toExponential(1)} · shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}`
+        : reg.field.Bz !== 0 ? `ZEEMAN B = ${reg.field.Bz.toFixed(4)}` : '';
       if (f !== lastF) { lastF = f; b4.hidden = !f; b4.lastChild.textContent = f; b4.className = 'badge ' + (reg.field.Fz !== 0 ? 'warn' : 'exact'); }
-      b1.lastChild.textContent = reg.field.Fz !== 0 ? 'EXACT ANALYTIC · state · shadow (evolution: per shell)' : 'EXACT ANALYTIC · state · evolution · shadow';
+      b1.lastChild.textContent = reg.field.Fz !== 0 ? 'STATE · SHADOW · SHELL EVOLUTION' : 'STATE · EVOLUTION · SHADOW';
       if (ui.fieldRo) {
         ui.fieldRo.set(reg.field.Fz !== 0 ? 'H₀ + F z' : reg.field.Bz !== 0 ? 'H₀ + (B/2)L_z' : 'H₀ (bare Coulomb)', reg.field.Fz !== 0 ? 'warn' : reg.field.Bz !== 0 ? 'live' : '');
-        ui.fieldRo.setSub(reg.field.Fz !== 0 ? `within-shell exact · needs F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal: exact, no caveat' : 'the register\'s own Hamiltonian');
+        ui.fieldRo.setSub(reg.field.Fz !== 0 ? `within-shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal in this basis' : 'current Hamiltonian');
       }
       const rs = stateReaders().rendered;
-      const t2 = field.ok ? `NUMERICAL · FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${space === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';
+      const t2 = field.ok ? `FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${space === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';
       if (b2.lastChild.textContent !== t2) b2.lastChild.textContent = t2;
       b2.className = 'badge ' + (field.ok ? 'numerical' : 'bad');
       const warn = rs.masked ? `RENDERED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM · ${rs.masked} MUTED` : rs.truncated ? `TRUNCATED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM` : '';
@@ -3403,7 +3062,7 @@ export async function boot(dom) {
     bow = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: e.clientX - r.left, y1: e.clientY - r.top, k: 0, dir: [0, 0, 1] };
     bowPrevView = mat.view; mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase');
     try { if (e.pointerId !== undefined) dom.canvas.setPointerCapture(e.pointerId); } catch (_) {}
-    hideHint(); kepler.setBow(bow); schedule(TIER.PRESENT);
+    kepler.setBow(bow); schedule(TIER.PRESENT);
   }
   function bowMove(e) {
     if (!bow) return;
@@ -3448,7 +3107,7 @@ export async function boot(dom) {
   async function slapAlongAsync(k, dir) {
     const H = getHamiltonian();
     if (!maths.ok || !(H.id === 'hydrogen' || H.id === 'qho')) { slapAlong(k, dir); return; }
-    if (!reg.populated().length) reg.set(0, 1, 0, clock.t);                              // an empty register: the bow conjures the ground state, then slaps it (Josh)
+    if (!reg.populated().length) reg.set(0, 1, 0, clock.t);
     const t0 = clock.t, v0 = reg.version, c = reg.at(t0), n0 = reg.norm2();
     const r = await maths.call({ op: 'kick', re: c.re, im: c.im, k, d: dir, ham: H.id, Z: getZ() }, [c.re.buffer, c.im.buffer]);
     if (!r || r.error) { slapAlong(k, dir); return; }
@@ -3626,7 +3285,7 @@ export async function boot(dom) {
     touchState();
   }
   let lastLaunch = null;
-  /** entering the BOX launches the gas at once (Josh: "let that thang bounce") */
+
   function enterBox() {
     const ax = keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed && ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
     launchPacket(d.map((v) => -v * a / 2), d.map((v) => v * k), gasSigma(k));
@@ -3654,7 +3313,7 @@ export async function boot(dom) {
     return momentumZ(re, im);
   }
   function slapAlong(k, dir) {
-    if (!reg.populated().length && getHamiltonian().id !== 'well') { reg.set(0, 1, 0, clock.t); }   // an empty box: the bow (or SLAP) conjures the ground state, then slaps it (Josh)
+    if (!reg.populated().length && getHamiltonian().id !== 'well') { reg.set(0, 1, 0, clock.t); }
     const n0 = reg.norm2(), p0 = pAlongDir(dir);
     reg.kickAlong(k, dir, clock.t);
     const n1 = reg.norm2(), p1 = pAlongDir(dir), esc = n0 > 0 ? 1 - n1 / n0 : 0;
@@ -3672,28 +3331,8 @@ export async function boot(dom) {
   /* body.rack-l says the mirror rack holds cards: the stage captions step right of it */
   if (rackL) { const syncL = () => document.body.classList.toggle('rack-l', rackL.children.length > 0); new MutationObserver(syncL).observe(rackL, { childList: true }); syncL(); }
   const LAYOUT_SLOTS = 4;      // wave 54: four favourite layouts, numbered — see the note at the ☆ button
-  /* ══ WAVE 55 · THE FLOATING WINDOW — the transport's dock, WIDENED to every card ═══════════════════
-   * Josh: "I was hoping the modulation window was going to be a floating draggable regular window like a
-   * VST plugin"; then, choosing the capability over the one-off, "yes! I was also thinking this idea
-   * where any window can be taken off the rack."
-   *
-   * IT IS THE SAME MECHANISM AS `dockTransport`, NOT A SECOND ONE BESIDE IT.  The transport moves one
-   * element between a rack card and the stage and remembers the slot it left (`dockIndex`); a floating
-   * window moves a `.dev` between a rack and `#floats` and remembers the slot it left (`home`).  The
-   * transport's own ⇱ is now this system's DOCK chip, its header carries the same `.dev-pop` every other
-   * window carries, and pressing it calls `dockTransport()` — so the pill IS the transport's floating
-   * mode and the lab has exactly ONE idea of what floating means.
-   *
-   * A FLOATING WINDOW IS NOT RESIZABLE, AND THAT IS THE DESIGN.  STYLE-LOCK: freedom outside, discipline
-   * inside — the workspace rearranges, a window's interior does not.  A corner grip would reflow every
-   * row in the card and cost exactly the muscle memory that law protects, so a floating window is as wide
-   * as a rack card (`rackCardWidth()`, read from the rack's own content box) and is pixel-identical on
-   * the stage and in the rack.  Josh asked for that in his own words: "Let it use the same dimensions or
-   * layout as it."  The one thing that changes the box is COMPACT, and compact is a MODE, not a reflow.
-   *
-   * NOTHING HERE TOUCHES ψ.  Floating is chrome. The visibility scheduler observes the same card in either
-   * parent, so a floating reader runs while its full face intersects the stage and sleeps in COMPACT mode.
-   */
+
+
   const floats = document.getElementById('floats');
   const floatState = new Map();        // id → { home:{side,index}, x, y, w, compact } — the ARRANGEMENT, never the physics
   let floatZ = 0;                      // the stacking counter; a press hands out the next one
@@ -3718,20 +3357,20 @@ export async function boot(dom) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
     if (d === wTr.root) {                                              // the transport's floating mode is the pill, and it has always had one
       chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the transport' : 'dock the transport');
-      b.title = 'dock / undock the transport (T) — the pill at the foot of the stage is its floating mode';
+      b.title = 'Dock or undock the transport';
       return;
     }
     const out = d.classList.contains('floating');
     chip(b, out ? 'reopen' : 'north', out ? 'dock this window back into the rack' : 'take this window off the rack');
-    b.title = out ? 'dock this window back into the rack it came from — or drag it onto a rack and drop it exactly where you want it'
-      : 'take this window off the rack — it floats over the stage, dragged by its header';
+    b.title = out ? 'Return this window to its rack'
+      : 'Move this window onto the stage';
   }
   function railFace(d) {
     const b = d && d.querySelector('.dev-rail'); if (!b) return;
     const c = d.classList.contains('compact');
     chip(b, c ? 'expand' : 'compact', c ? 'give this window its full width back' : 'narrow this window to its rail');
-    b.title = c ? 'FULL: give this floating window its full width back'
-      : 'COMPACT: narrow this floating window to a rail that keeps its name, its power switch and its close';
+    b.title = c ? 'Use the full window layout'
+      : 'Use the compact window layout';
   }
   /* ── WAVE 69 · THE ONE ENTRANCE IN THE LAB, and everything about it is a gate in MOTION-LAW ─────
    * FREQUENCY: "window open/close" is the OCCASIONAL tier, which is the one tier that gets a standard
@@ -3915,19 +3554,8 @@ export async function boot(dom) {
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
         nb: nb && nb.style.width ? [parseInt(nb.style.width, 10) || 0, parseInt(nb.style.height, 10) || 0] : null,
-        /* ══ WAVE 106 · A FAVOURITE REMEMBERS HOW IT LOOKED, NOT WHAT IT WAS SHOWING ═══════════════
-           Josh: "favourite layouts should also store color, draw, and camera states but not the actual
-           wave states."  That line draws the boundary exactly where it belongs.  A layout is a
-           WORKSPACE — where the windows are, what the instrument looks like, where you are standing —
-           and the STATE is the physics you are looking at.  Loading a workspace must never overwrite
-           the register: you press a favourite to change your desk, not your experiment.
-             SO: the palette, the two accents and the hue; the draw style, the dither, and the three
-           display flags; and the camera's POSE and its FEEL.  NOT the coefficients, not the preset,
-           not t, not the Hamiltonian, not the field — none of them are read here and none are written
-           on the way back in.  The mode masks and the mute/solo set are the register's too, and stay.
-             `v: 3`, and every key below is OPTIONAL on the way in, so a v1 (wave 54) or v2 (wave 55)
-           favourite saved before today still loads and simply says nothing about the look — which is
-           the truth about it. */
+
+
         look: { palette: palChoice, accA: accent.a, accB: accent.b, hue: mat.hueShift,
                 style: mat.style, dither: mat.dither, invert: !!mat.invert,
                 frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide, axisInk: mat.axisInk || 'theme' },
@@ -4046,7 +3674,7 @@ export async function boot(dom) {
   };
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
-  const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', title: 'PLAY · SCRUB · RATE', status: 'docked' });
+  const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
   wTr.root.hidden = true; (rackL || rack).appendChild(wTr.root);
   windowActivity.track(wTr);
   {
@@ -4067,38 +3695,22 @@ export async function boot(dom) {
     const tr = document.getElementById('transport');
     /* WAVE 55: the same drawing every floating window's DOCK chip wears — one mark, one meaning, and never
        a text character (glyph.js: iOS answers several of ours with a colour emoji). */
-    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button'; /* wave 106: the ↗ the modulation button gave up lands here, and Josh's reason is the whole of it —
-       "the icon for the button being replaced becomes the transporter transfer as that action makes more
-       sense".  A north-east arrow on a door to a window was decoration; on the control that MOVES THIS
-       BAR between the stage and the rack it is a direction. */
+    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button';
+
+
       chip(b, 'north', 'dock the transport into the rack'); b.title = 'move the transport between the stage and the rack (T)'; b.addEventListener('click', () => layout.dockTransport()); }
-    /* ── WAVE 52 · THE MINIMISED MODE ────────────────────────────────────────────────────────────
-     * The modulation window REPLACES the playhead, which means the playhead becomes its minimised
-     * mode: the same pill, the same proportions, the same controls, with ⤢ EXPAND taking a seat in
-     * the same flex row the ⇱ send-to-rack button already sits in — so the pill's own box does not
-     * move (its width and height are the stylesheet's, and the scrub is the flex: 1 that absorbs).
-     * There is deliberately NO bottom-left button (BASINS has one; Josh does not want it).  The
-     * button LIGHTS in ACCENT B while modulation time is running, which is how a user who has shut
-     * the window can still see that something is moving — the boundary law, made visible. */
+
+
     if (tr) {
       const e = el('button', 'mod-exp mod-logo', tr); e.type = 'button';
       /* WAVE 55: the mark is now the POP-OUT's, because that is literally what the press does — the pill's
          EXPAND opens modulation as a FLOATING window over the stage, not as a card in the rack. */
-      /* ══ WAVE 106 · THE LOGO IS THE DOOR (Josh: "the logo as the button that activates the modulation
-         window on the native playhead") ═══════════════════════════════════════════════════════════════
-         The mark is CLONED from the masthead rather than redrawn, for the reason wave 48 already gives
-         about the ABOUT face's copy: there is ONE nine-square mark in this lab and every copy of it is
-         painted from the same nine samples of the wheel.  `paintMarks()` is told about this one below,
-         so it turns with the accent like the other three and can never drift into being a fourth,
-         stale logo.
-           IT IS THE RIGHT MARK FOR THE ACT.  Modulation is the instrument's own motion — the thing the
-         wheel colours everything else by — so opening it behind the house mark reads as "the lab's own
-         machine", where an anonymous ↗ read as "some panel".  And the arrow is not wasted: it goes to
-         the seat where its meaning is literal (below). */
+
+
       const lg = document.querySelector('#title .mark');
       if (lg) { const c = lg.cloneNode(true); c.removeAttribute('aria-hidden'); e.appendChild(c); }
       e.setAttribute('aria-label', 'open the modulation window');
-      e.title = 'EXPAND the modulation window (this bar is its minimised mode) — it opens FLOATING over the stage: sources, macros and routes. It lights while modulation time is running, and closing the window does not stop it';
+      e.title = 'Open the modulation window';
       e.addEventListener('click', () => layout.modulation.toggle());
       const spinLogo = (reverse) => { const mark = e.querySelector('.mark'); if (!mark) return; if (e._spin) e._spin.cancel(); e._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
       e.addEventListener('pointerenter', () => spinLogo(false));
@@ -4107,15 +3719,8 @@ export async function boot(dom) {
     }
     /** THE EXPANSION.  Not layout.raise(): on a phone the transport is docked at the TOP of the one
      *  rack and must stay there, so the window opens directly BENEATH it rather than above it. */
-    /* ── WAVE 64 · THE SAME THREE VERBS OVER A DIFFERENT WINDOW ─────────────────────────────────
-     * Wave 55 made modulation the one window that DEFAULTS to the stage (Josh: "a floating
-     * draggable regular window like a VST plugin").  It is not a default any more, it is what the
-     * window IS: the ported artifact carries its own chrome and its own chip rail and lives in the
-     * float layer from the first frame.  So `expand` shows it where it was left, `collapse` hides
-     * it, and NEITHER reaches the clock, the model or the registry — the boundary law, unchanged.
-     * On a PHONE it still shows: it is `position: fixed` and its own drag grip moves it, so the
-     * wave-51 "one rack and nothing floats" rule has nothing to say about a window that was never
-     * on the rack. */
+
+
     layout.modulation = {
       get open() { return !!(modView && modView.isOpen); },
       expand() {
@@ -4129,37 +3734,6 @@ export async function boot(dom) {
       collapse() { if (!modView) return false; modView.close(); saveSettings(); schedule(TIER.PRESENT); return true; },
       toggle() { return layout.modulation.open ? layout.modulation.collapse() : layout.modulation.expand(); },
     };
-    /* every card's notes fold behind ONE ⓘ in its header; the panel opens OUTSIDE the rack on the stage side; clicks cycle */
-    const infoPop = el('div', 'info-pop glass', document.getElementById('lab')); infoPop.id = 'infoPop'; infoPop.hidden = true;
-    let infoTimer = 0, infoCard = null, infoIdx = 0;
-    function showInfo(card, idx) {
-      if (document.body.classList.contains('window-info-off')) return;
-      const notes = [...card.querySelectorAll('.note.hint-src')].filter((n) => n.textContent.trim()); if (!notes.length) return;   // a note with nothing in it is not a page (ATOMS' α-warning is empty until two shells are close)
-      infoCard = card; infoIdx = ((idx % notes.length) + notes.length) % notes.length;
-      infoPop.innerHTML = '';
-      el('div', 'info-title', infoPop, card.querySelector('.dev-title').textContent);
-      el('div', 'info-body', infoPop).innerHTML = notes[infoIdx].innerHTML;
-      el('div', 'info-foot', infoPop, notes.length > 1 ? (infoIdx + 1) + ' / ' + notes.length + '  ·  ⓘ again for the next' : 'ⓘ');
-      infoPop.hidden = false;
-      const r = card.getBoundingClientRect(), left = card.parentElement === rackL, h = (card.parentElement || rack).getBoundingClientRect();   // the panel clears the RACK's edge, scrollbar included
-      infoPop.style.top = Math.max(8, Math.min(window.innerHeight - infoPop.offsetHeight - 8, r.top)) + 'px';
-      if (left) { infoPop.style.left = (h.right + 10) + 'px'; infoPop.style.right = 'auto'; } else { infoPop.style.right = (window.innerWidth - h.left + 10) + 'px'; infoPop.style.left = 'auto'; }
-    }
-    function hideInfo() { infoPop.hidden = true; infoCard = null; }
-    infoPop.addEventListener('pointerenter', () => clearTimeout(infoTimer));
-    infoPop.addEventListener('pointerleave', () => { infoTimer = setTimeout(hideInfo, 250); });
-    for (const d of document.querySelectorAll('.dev')) {
-      const notes = [...d.querySelectorAll('.note')]; if (!notes.length) continue;
-      for (const n of notes) n.classList.add('hint-src');
-      const util = d.querySelector('.dev-util'); if (!util) continue;
-      const b = el('button', 'info-i', util); b.type = 'button'; chip(b, 'info', 'about this window'); b.title = notes.length > 1 ? 'about this window (' + notes.length + ' notes — click to cycle)' : 'about this window';
-      util.insertBefore(b, util.firstChild);
-      b.addEventListener('click', (e) => { e.stopPropagation(); if (infoCard === d) showInfo(d, infoIdx + 1); else showInfo(d, 0); });
-      b.addEventListener('pointerenter', (e) => { if (e.pointerType === 'touch') return; clearTimeout(infoTimer); if (infoCard !== d) showInfo(d, 0); });
-      b.addEventListener('pointerleave', () => { infoTimer = setTimeout(hideInfo, 350); });
-    }
-    layout.showInfo = (id, idx = 0) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); if (d) showInfo(d, idx); };
-    layout.hideInfo = hideInfo;
     /* the logo opens FILE · EDIT · WINDOW */
     const title = document.getElementById('title');
     if (title) {
@@ -4173,34 +3747,23 @@ export async function boot(dom) {
           ['SAVE the experiment (quick)', () => clickTrig('SAVE')], ['LOAD the last quick save', () => clickTrig('LOAD')], ['COPY as JSON', () => clickTrig('COPY JSON')],
           ['COPY a LINK to this state', () => clickTrig('COPY LINK'), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
         EDIT: () => [['UNDO\t' + keyName(ACTIONS.find((x) => x.id === 'undo')), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyName(ACTIONS.find((x) => x.id === 'redo')), () => historyApi.redo(), () => !historyApi.canRedo], ['PLAY / PAUSE\tSpace', () => runKey('Space')], ['NORMALIZE', () => clickTrig('NORMALIZE')], ['CLEAR the register', () => clickTrig('CLEAR')], ['RESET the view', () => clickTrig('RESET VIEW')], ['RESEED the particles\tctrl+R', () => runKey('KeyR')], ['RESET the key bindings', () => clickTrig('RESET KEYS')], ['SETTINGS…', () => layout.raise('settings')]],
-        /* wave 106 · and INVERT is here too (Josh: "Also Invert in view as well").  It moved to the
-           PALETTE window this wave, which is where it belongs by meaning — but it is also a thing you
-           reach for mid-look, and VIEW is the menu you are already in when you do.  One state, two
-           doors: the switch and this item read and write the same `mat.invert`. */
+
+
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\tV cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
           ['— style: CLOUD\tC cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['HINT BAR  on / off', () => ui.hintSw && ui.hintSw.root.click()], ['HIDE the interface\tH', () => runKey('KeyH')], ['FULL SCREEN / back\tF', () => toggleFullscreen()]],
-        /* wave 106 · MORE THAN ONE ROAD TO THE SAME ROOM (Josh: "I want multiple routes to the
-           modulation window", and "Can Modulation be reached via View or Window in the menu bar?").
-           It is FIRST in WINDOW because it is the only window in the lab that is not a rack card — it
-           floats over the stage and its minimised mode is the playhead — so a reader looking for it in
-           the rack list would not find it.  Three doors now: the logo on the playhead, M, and here. */
-        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE every note\tN', () => runKey('KeyN')], ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')],
-          ...[...document.querySelectorAll('.dev')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent + '  ·  ' + d.querySelector('.dev-title').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
-        /* WAVE 55 · RIDER A (board #54).  Josh: "in the menu should just say 'ABOUT λWAVES', SETTINGS, and
-           Notebook is already in window. We don't need links to report and other."  So: TWO items.  NOTEBOOK
-           duplicated the WINDOW menu; LICENCES merely opened this same ABOUT face, which already names the
-           licence in its text; and the REPORT.md item opened a SITE-ROOT path — one of the three that 404 the
-           moment `lab/` is deployed as the Cloudflare Pages root, which is why the ABOUT face lost its three
-           file links in the same edit.  Naming a licence is enough; linking a file that will not be there is not. */
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\tH', () => runKey('KeyH')], ['FULL SCREEN / back\tF', () => toggleFullscreen()]],
+
+
+        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')],
+          ...[...document.querySelectorAll('.dev')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
+
+
         ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['SETTINGS…', () => layout.raise('settings')]],
       };
       let openList = null;
       const closeLists = () => { for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
-      /* WAVE 53 (Josh, board #45): "the λWAVES logo should also stop spinning and instead should have the logo
-         slightly enlarge when mouse over and back to normal when file, edit, view, etc. disappear."  The enlarged
-         state therefore belongs to THE CHIPS BEING UP, not to the pointer — so `bar.hidden` and the class are
-         written in ONE place and can never disagree.  1.04 over --t-fast (120 ms, the press rung) on `ease`. */
+
+
       const LOGO_SCALE = 1.04;
       /* ── WAVE 62 · THE OPENER IS OPERABLE, AND IT IS A DISCLOSURE, NOT AN ARIA MENUBAR ────────────
        * A conformant role="menubar" needs role="menu"/"menuitem", a roving tabindex across five chips,
@@ -4221,18 +3784,8 @@ export async function boot(dom) {
       title.setAttribute('aria-label', 'λWAVES — the FILE, EDIT, VIEW, WINDOW and ABOUT menus');
       /* `bar.hidden` is written in exactly ONE place (wave 53 made barShown the single point of truth
          for the open state), so `aria-expanded` can only be written there too and can never disagree. */
-      /* ⚠ WAVE 106 · ON A PHONE THE BAR IS FURNITURE (Josh: "Always have the 'File, Edit, View' menu
-         bar be showing in the phone/android version and the hide rack button makes it disappear").
-           Two different things were wrong.  The bar is hidden by DEFAULT on every platform — `bar.hidden
-         = true` at construction — and its two openers are a hover, which is dead on touch by its own
-         guard, and a tap on the λ logo.  So on Android the only road to FILE/EDIT/VIEW was knowing to
-         tap the wordmark.  And the ROOT of the "hide rack button makes it disappear" report is not the
-         hide-rack button at all: `#rackToggle` lives in neither `#menubar` nor `#title`, so the
-         document-level outside-press dismiss below closes the bar on its `pointerdown`, BEFORE its own
-         click handler ever runs.  Nothing in either stylesheet ties `body.rack-hidden` to the bar.
-           Guarding HERE fixes every path at once, because wave 53 made this the single point of truth
-         for the open state — the outside-press, the 400 ms hover-out, the logo's toggle and Escape all
-         come through this one function.  Desktop is untouched, so B126's Escape law still holds. */
+
+
       const barShown = (v) => { const want = document.body.classList.contains('phone') ? true : !!v;
         bar.hidden = !want;if(want&&!bar.matches(':popover-open'))bar.showPopover();else if(!want&&bar.matches(':popover-open'))bar.hidePopover(); title.classList.toggle('menu-open', want); title.setAttribute('aria-expanded', String(want)); };
       for (const name of Object.keys(MENUS)) {
@@ -4271,22 +3824,16 @@ export async function boot(dom) {
       title.addEventListener('pointerleave', hideBarSoon);
       bar.addEventListener('pointerenter', () => clearTimeout(barTimer));
       bar.addEventListener('pointerleave', hideBarSoon);
-      /* wave 106: `#rackToggle` is excluded by name.  It is not part of the menu, so this handler
-         treated pressing it as "the user pressed somewhere else" and shut the bar on pointerdown —
-         which is exactly the disappearance Josh attributed to the hide-rack button.  Hiding the rack
-         and closing the menus are two different acts and pressing one must not perform the other. */
+
+
       const rackToggleEl = () => document.getElementById('rackToggle');
       document.addEventListener('pointerdown', (e) => { const rt = rackToggleEl();
         if (!bar.hidden && !bar.contains(e.target) && !title.contains(e.target) && !(rt && rt.contains(e.target))) { closeLists(); barShown(false); } });
       layout.menu = { open: showBar, close: () => { closeLists(); barShown(false); }, get isOpen() { return !bar.hidden; },
         get scale() { return LOGO_SCALE; }, get enlarged() { return title.classList.contains('menu-open'); } };
     }
-    /* ── '?' — A LIVE BINDINGS SHEET (wave 53, Josh, board #46: "? - shortcut key for keyboard binds (should also
-     * show the dynamic current keyboard binding)").  It is BUILT ON EVERY OPEN out of the one rebindable table
-     * (__LW_hooks.keys.actions) and formatted by the same keyName() the SETTINGS chips use, so a rebind made in
-     * SETTINGS is on this sheet the instant it is made and there is no second list anywhere to go stale —
-     * ANTI-PATTERN 6 is exactly that failure wearing a different hat.  '?' again or Escape closes it; the keydown
-     * road it rides already refuses to fire inside an INPUT, TEXTAREA or SELECT, so it cannot fire while you type. */
+
+
     {
       const ks = el('div', 'glass', document.getElementById('lab')); ks.id = 'keysheet'; ks.hidden = true;
       ks.setAttribute('role', 'dialog'); ks.setAttribute('aria-label', 'keyboard bindings');
@@ -4294,7 +3841,7 @@ export async function boot(dom) {
       el('h3', '', head, 'KEYBOARD');
       const x = el('button', 'ks-close', head, '×'); x.type = 'button'; x.title = 'close (? or Esc)';
       const list = el('div', 'ks-list', ks);
-      el('div', 'ks-note', ks, 'Read from the live binding table — rebind any of them in SETTINGS · KEYS and this sheet says so at once. Shift is the fine step for the stepping keys; keys never fire while you are typing.');
+      el('div', 'ks-note', ks, 'Bindings update here when changed. Shift gives finer steps. Shortcuts are disabled while typing.');
       const fill = () => {
         const K = __LW_hooks.keys; list.innerHTML = '';
         if (!K) return 0;
@@ -4351,7 +3898,7 @@ export async function boot(dom) {
     /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
     for (const d of document.querySelectorAll('.dev')) {
       const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
-      if (kind === 'info' || d.dataset.id === 'field') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'copy this panel\'s digest (every readout and the module\'s table) as text'; b.setAttribute('aria-label', 'copy this panel\'s digest as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
+      if (kind === 'info' || d.dataset.id === 'field') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
       if ((kind === 'control' || kind === 'other') && !d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
     }
     document.addEventListener('devclose', () => saveSettings());
@@ -4362,20 +3909,8 @@ export async function boot(dom) {
         chip(add, 'plus', 'reopen a closed window');   // wave 55: glyph.js's own chip, "for ADD COLOUR and any other 'one more of these' chip"
         const addShown = (v) => { list.hidden = !v; add.setAttribute('aria-expanded', String(!!v)); };
         add.setAttribute('aria-haspopup', 'true'); add.setAttribute('aria-expanded', 'false');
-        /* ── WAVE 103 · SHIFT-CLICK QUEUES, AND LETTING GO OPENS THE LOT ─────────────────────────
-         * JOSH: "holding shift+clicking while choosing windows to add, can it hold down multiple
-         * windows the moment the shift key is released so that it loads multiple windows at once?
-         * And let it remember the order of which it was clicked, have a little masked number in a
-         * filled circle."
-         *   THE ORDER IS THE POINT, not a nicety: `layout.reopen` PREPENDS each window to the top of
-         * its rack, so opening four in the order they were picked leaves them stacked in that order.
-         * A set would have opened them in DOM order and quietly thrown the user's sequence away.
-         *   A SECOND SHIFT-CLICK ON A QUEUED ITEM REMOVES IT and the rest renumber, because a queue
-         * you cannot correct without closing the menu is a queue nobody trusts.
-         *   THE RELEASE IS THE COMMIT, which is Josh's own word for it, and it is also the only edge
-         * available: a plain click has to keep meaning "open this one now" for everybody who does not
-         * know the shortcut exists.  Closing the menu any other way — Escape, an outside press, the
-         * chip again — DISCARDS the queue rather than firing it, because none of those mean yes. */
+
+
         let queue = [];
         const renumber = () => {
           for (const b of list.querySelectorAll('.mb-item')) {
@@ -4402,15 +3937,8 @@ export async function boot(dom) {
         add.addEventListener('click', (e) => {
           e.stopPropagation(); if (!list.hidden) { clearQueue(); addShown(false); return; }
           list.innerHTML = ''; clearQueue();
-          /* WAVE 104 · ALPHABETICAL, AND STARRED IF THE SAVED LAYOUT WANTS IT (Josh).
-             ORDER: the list used to come out in DOM order, which is the order the windows were BUILT
-             in — a fact about rack.js and about nothing the reader can see.  A catalogue you scan for
-             a name is sorted by that name.  `localeCompare` rather than `<`, because these are display
-             strings and a byte comparison is not an alphabet.
-             THE STAR: which closed windows belong to the arrangement this browser last saved, so the
-             way back to a favourite is visible from the one menu that can restore it.  The NEWEST
-             slot is the one consulted — "the current favourite" — and a window is starred only if that
-             layout has it OPEN, since a layout that also had it closed is not asking for it back. */
+
+
           const favIds = (() => {
             const m = readSettings().layouts || {};
             let best = null, at = -1;
@@ -4423,11 +3951,11 @@ export async function boot(dom) {
             .sort((a, b) => nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' }));
           if (!closed.length) el('div', 'rack-add-none', list, 'nothing is closed — × on a window closes it');
           for (const d of closed) {
-            const it = el('button', 'mb-item', list, '⊕  ' + d.querySelector('.dev-eyebrow').textContent + '  ·  ' + d.querySelector('.dev-title').textContent);
+            const it = el('button', 'mb-item', list, '⊕  ' + d.querySelector('.dev-eyebrow').textContent);
             it.type = 'button'; it.dataset.win = d.dataset.id;
             if (favIds && favIds.has(d.dataset.id)) {
               const st = el('span', 'mb-fav', it, '★');
-              st.title = 'this window is part of the favourite layout you saved last — reopening it puts that arrangement back together';
+              st.title = 'Included in the most recently saved layout';
               st.setAttribute('aria-label', 'in the saved favourite layout');
             }
             it.title = winHint(d) + '  ·  SHIFT-click to queue several; they open in the order you picked them when you let SHIFT go';
@@ -4450,33 +3978,20 @@ export async function boot(dom) {
           /* the queue, readable — a gate should not have to infer an order from four animations */
           get queued() { return queue.slice(); }, commit: flushQueue };
       }
-      /* ── FAVOURITE LAYOUTS (wave 54, board #48) ────────────────────────────────────────────────────────────
-       * Josh: "New button underneath the 'add window' button … a short drop-down menu option for 'Save Layout'
-       * and 'Load Layout'."  So it is one button in the same column, and its list is the SAME list the + uses —
-       * a .glass panel of .mb-item buttons dismissed by the same outside-pointerdown — because a second menu
-       * idiom in a rack this dense is a second thing to learn for nothing.
-       * WHAT A LAYOUT IS, and what it is emphatically NOT.  It is the arrangement: which windows exist, in what
-       * ORDER, in WHICH RACK, folded / closed / powered down, whether the transport is docked and the rack shown,
-       * plus the ONE size a hand can set in this instrument (the notebook's — rack cards are sized by their
-       * content, by law).  It is NOT the physics: no ψ, no clock, no register, no palette, no camera.  The gate
-       * proves that by deranging the rack, loading a layout back, and asserting reg.digest() never moved.
-       * NUMBERED, NOT NAMED, and the reason is that the alternative is worse: a name needs either a modal prompt
-       * (a browser dialog, in an instrument that has spent fifty waves not being a web page) or a text field
-       * inside the dropdown, which is the second menu idiom the paragraph above just refused.  Four slots, each
-       * carrying an AUTO-DESCRIPTION — how many windows, which racks, the time it was taken — which is the
-       * information a name would have carried anyway, and costs no new widget. */
+
+
       const favBtn = document.getElementById('rackFav'), favList = document.getElementById('rackFavList');
       if (favBtn && favList) {
         const draw = () => {
           favList.innerHTML = '';
           const saved = layout.layouts();
           const save = el('button', 'mb-item', favList, '☆  SAVE LAYOUT' + (saved.length >= LAYOUT_SLOTS ? '  ·  replaces the oldest' : ''));
-          save.type = 'button'; save.title = 'record this arrangement of windows — the order, the rack, folded / closed / off, the dock and the notebook\u2019s size. Never the state';
+          save.type = 'button'; save.title = 'Save the current window arrangement';
           save.addEventListener('click', (ev) => { ev.stopPropagation(); layout.saveLayout(); draw(); });
           el('div', 'rack-fav-head', favList, saved.length ? 'LOAD LAYOUT' : 'nothing saved yet');
           for (const L of saved) {
             const it = el('button', 'mb-item', favList, '⊙  ' + L.label);
-            it.type = 'button'; it.title = 'put the rack back exactly as this layout left it — layout only, the state is untouched';
+            it.type = 'button'; it.title = 'Restore this window layout';
             const x = el('span', 'fav-x', it, '×'); x.title = 'forget this layout';
             it.addEventListener('click', (ev) => { ev.stopPropagation(); if (ev.target === x) { layout.forgetLayout(L.slot); draw(); return; } layout.loadLayout(L.slot); favShown(false); });
           }
@@ -4611,18 +4126,8 @@ export async function boot(dom) {
         const list = nb.querySelector('.pj-list'); if (!list) return; list.innerHTML = '';
         const items = projects.list(); if (!items.length) { el('div', 'pj-none', list, 'no projects yet — name one above and SAVE AS'); return; }
         const byFolder = new Map(); for (const it of items) { const f = it.folder || '(root)'; if (!byFolder.has(f)) byFolder.set(f, []); byFolder.get(f).push(it); }
-        /* ══ WAVE 106 · THE ROOTS ARE SHOWN (Josh: "when 'saving as', I want it to show all my folders
-           I created aside from Root" … "Let's just show the roots then and it should be good") ══════
-           A folder in this app is NOT an object — there is no folder registry, no create, no delete.
-           It is the part of a project's path before the last slash, derived at save time and regrouped
-           at render; "(root)" is a display literal invented on the line above and the stored value is
-           the empty string.  So the honest reading of the ask is the one Josh landed on: SHOW the
-           folders that exist rather than build a system that does not.
-             Each chip writes its prefix into the name field, so SAVE AS puts the next project beside
-           its siblings without anyone typing a path twice — and typing a new folder still makes one,
-           exactly as before, because the field is still free text.  Nothing is stored for this: the
-           chips ARE the folder list, re-derived on every render, so a folder disappears when its last
-           project does, which is what "it was only ever a prefix" means. */
+
+
         let roots = nb.querySelector('.pj-roots');
         if (!roots) { roots = el('div', 'pj-roots', null); list.parentElement.insertBefore(roots, list); }
         roots.innerHTML = '';
@@ -4678,16 +4183,8 @@ export async function boot(dom) {
             nb.style.top = '12%';
           }
         }
-        /* ⚠ WAVE 106 · THE PROJECTS FACE PAINTED ITSELF ONLY IF YOU ARRIVED BY THE ONE DOOR THAT
-           PAINTED IT.  Josh: "I don't see all my projects".  It was not a scroll and not a cap —
-           `renderProjects()` had four callers (save, remove, import, and the ▤ button) and NONE of
-           them was this function, which is what every FILE-menu door goes through: OPEN a project…,
-           SAVE project AS…, and SAVE with nothing open.  So after a reload the list was the empty
-           `<div class="pj-list">` index.html ships and nothing else — not even the "no projects yet"
-           line, because that is written inside `renderProjects` too.  Every project was there in
-           storage the whole time and the window simply never asked.
-             It is painted on the way IN now, which is the only moment that can be right: the list is
-           read from localStorage on every render, so it also picks up a project saved in another tab. */
+
+
         if (face === 'projects') renderProjects();
         if (face === 'notes') ta.focus();
       };
@@ -4697,12 +4194,8 @@ export async function boot(dom) {
       const dump = nb.querySelector('.nb-dump');
       const dumpText = () => faces.about.innerText.replace(/\n{3,}/g, '\n\n') + '\n\nsettings ' + JSON.stringify(readSettings()) + '\nfield ' + JSON.stringify({ resolution: field.resolution, half: field.half, adapter: field.adapterInfo || null }) + '\n' + navigator.userAgent;
       if (dump) dump.addEventListener('click', async () => { try { await navigator.clipboard.writeText(dumpText()); } catch (e) {} });
-      /* THE RESIZE GRIP (wave 48, Josh: "Window in notebook/about currently not resizable on ipad").  CSS `resize`
-         is a mouse-only affordance — WebKit and Gecko both ignore a touch pointer on that corner — so the corner gets
-         an element of its own with real pointer events (pointerdown / move / up, so touch, pen and mouse all reach it).
-         `resize: both` stays in lab.css for the desktop; both roads end in the same inline width/height, the same
-         320 × 240 floor, and the same two numbers in the settings key.  The faces go on filling the glass by flex,
-         which is the wave-24 law and is why sizing the SHELL is the whole job. */
+
+
       const NB_MIN_W = 320, NB_MIN_H = 240;
       const nbClamp = (w, h) => [Math.max(NB_MIN_W, Math.min(w, window.innerWidth - 16)), Math.max(NB_MIN_H, Math.min(h, window.innerHeight - 16))];
       function nbResize(w, h) { const [cw, ch] = nbClamp(w, h); nb.style.width = cw + 'px'; nb.style.height = ch + 'px'; return [cw, ch]; }
@@ -4805,25 +4298,14 @@ export async function boot(dom) {
        geometry this reads is the geometry this pass itself just wrote. */
     const reorderTo = (p) => {
       if (!drag) return;
-      /* ⚠ WAVE 106 · A PHONE HAS ONE RACK, SO A REORDER HAS ONE DESTINATION.  This is the disappearance
-         Josh reported — "Tapping on a window makes it disappear off the rack" — and it is not a pop-out
-         at all.  The rule below reads "the left half of the window is the mirror rack", which is true on
-         a desktop with two racks and false on a phone, where wave 51 folds everything into ONE rack and
-         `#rackL` is `display: none !important` at the breakpoint (skin.css §5a).  A 500-px phone puts the
-         rack at x 0…300, so the middle of any header is around x 150 — inside the left half — and eight
-         pixels of thumb travel moved the card into a rack that cannot be seen.  Nothing was destroyed and
-         nothing floated: it was reparented into a hidden element, which looks exactly like vanishing.
-         MEASURED after the fix below: the card stays in `#rack`. */
+
+
       const want = (rackL && !document.body.classList.contains('phone') && p.x < window.innerWidth / 2) ? rackL : rack;          // which rack is under the pointer: the left half of the window is the mirror rack — and on a phone there is only one
       const cards = [...want.querySelectorAll('.dev')].filter((d) => d !== drag.card && !d.hidden);
       let ref = null; for (const c of cards) { const r = c.getBoundingClientRect(); if (p.y < r.top + r.height / 2) { ref = c; break; } }
       if (drag.card.parentElement !== want || ref !== drag.card.nextSibling) {
-        /* WAVE 96 · THE SIBLINGS SLIDE (Josh: "make it have reorganizing animations like sliding
-           around").  A DOM move is instantaneous and the eye loses which card went where, so this is
-           FLIP — read every card's box FIRST, move the node, then put each one back where it was with
-           a transform and let it transition to nothing.  It is the only way to animate a reorder that
-           layout, not style, performed.  Cards mid-drag are skipped: the dragged one is under a
-           finger and must not lag behind it. */
+
+
         const before = new Map();
         for (const c of [...want.children, ...(drag.card.parentElement === want ? [] : drag.card.parentElement.children)])
           if (c.classList && c.classList.contains('dev')) before.set(c, c.getBoundingClientRect().top);
@@ -4847,32 +4329,11 @@ export async function boot(dom) {
       if (!drag) return;
       if (!drag.moved && Math.abs(e.clientY - drag.y0) < 6) return;
       if (!drag.moved) { drag.moved = true; drag.card.classList.add('dragging'); }
-      /* ══ WAVE 96 · DRAGGING OFF THE RACK *IS* UNDOCKING ═══════════════════════════════════════
-       * Josh: "dragging window off the rack should have it already be a free window, this makes the
-       * button to dislodge it pointless."  The two gestures were already here and simply never met:
-       * this handler reorders inside a rack, `fdrag` below moves a window that is already floating,
-       * and the ONLY road between them was a chip.  The moment the pointer leaves every rack's
-       * column the card is floated and the gesture is handed to the float drag mid-flight — same
-       * finger, same pointer id, no release.  `dx/dy` are carried over so the window does not jump
-       * under the hand, and `dy` is clamped to the header so a card grabbed by its foot does not
-       * hang off the cursor. */
+
+
       measureRacks();
-      /* ⚠ WAVE 106 · AND IT IS A DESKTOP GESTURE.  Josh, on Android: "Tapping on a window makes it
-         disappear off the rack."  The chain is exact and every link is deliberate on its own:
-         `measureRacks()` returns an EMPTY list on a phone by design (wave 51 gives a phone one rack
-         and no floating), so `rackUnder()` answers null for every x — meaning "the pointer is off the
-         rack" is TRUE at every pixel of the screen.  Six pixels of thumb travel on a header therefore
-         ran this branch, and the header is `touch-action: none` inside a `pan-y` rack, so the browser
-         hands JS every move rather than eating it as a scroll: on a phone six pixels is not a drag,
-         it is a tap.
-           Then `toggleFloat` short-circuits the TRANSPORT before its own phone guard is reached —
-         `if (d === wTr.root) { layout.dockTransport(); return true; }` — and undocking sends the
-         transport to the stage as a `mini` pill that `body.rack-hidden` (the phone's boot default)
-         paints at opacity 0.  On a phone the transport is the FIRST header a thumb meets, at the top
-         of the one rack.  So: tap a window, the window disappears.  Every other card was saved only
-         because `popOut` refuses on a phone one call deeper.
-           The gesture simply does not exist here — there is nowhere to drag a window TO — so on a
-         phone the drag stays what it is on a phone: a reorder. */
+
+
       if (!rackUnder(e.clientX) && !document.body.classList.contains('phone')) {
         const card = drag.card, id = card.dataset.id, r = card.getBoundingClientRect();
         drag.card.classList.remove('dragging'); drag = null;
@@ -4964,23 +4425,11 @@ export async function boot(dom) {
     window.addEventListener('resize', () => { measureRacks(); for (const id of layout.floating()) { const st = floatState.get(id); if (st) placeFloat(devById(id), st.x, st.y); } }, { passive: true });
   }
 
-  /* ── WAVE 51 · W-MOBILE: THE PHONE ────────────────────────────────────────────────────────────────
-   * Josh: "MOBILE MODE (phones, vertical): one rack on the left; playhead docked at the top of the rack,
-   * HIDEABLE NOT CLOSABLE; opaque buttons/knobs (waves under glass are jarring); lower-PPI optimisation;
-   * the hide button becomes a toggle that FOLLOWS the rack (desktop's hide stays fixed); landscape still
-   * one rack."
-   *
-   * The BREAKPOINT is the stylesheet's (isPhone() up top reads its sentinel).  Everything here is what a
-   * media query cannot say: which rack a card is in, where the transport is docked, what the device-pixel
-   * ceiling is, and which grid the field runs.  Crossing the breakpoint either way is REVERSIBLE — every
-   * card that moved remembers the rack it came from — because a tablet in a stand rotates, and a desktop
-   * window is resized, and neither should cost the user their layout.
-   */
+
   const phone = { on: false, applied: false, hooked: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasCard: '', wasRackHidden: false, wasFrost: 'off', floats: null };
   function enterPhone() {
-    /* wave 106: FILE · EDIT · VIEW is permanent furniture here (Josh), so it is placed on the way in.
-       Deferred one frame because the placement reads the logo's rect and the phone crossing is still
-       re-laying the racks around it on this one. */
+
+
     requestAnimationFrame(() => { if (document.body.classList.contains('phone') && __LW_hooks.showMenuBar) __LW_hooks.showMenuBar(); });
     /* ── WAVE 55 · THE PHONE HAS NO FLOATING ───────────────────────────────────────────────────────
        One rack, everything docked: the pop-out chip stands down in CSS at this breakpoint (skin.css §5a)
@@ -5000,19 +4449,8 @@ export async function boot(dom) {
     wTr.root.classList.remove('closed');
     const s = readSettings();
     wTr.fold(s.phoneTr === true);
-    /* ── WAVE 59 · WHAT A SHARED LINK OPENS ONTO ─────────────────────────────────────────────────────
-       On a 390 × 844 phone the rack is 300 px of 390 — 77 % of the width, 95 % of the height — and at this
-       breakpoint it is OPAQUE (`--glass-opacity: 1`, above).  Nothing hid it at boot, and `#field` is a
-       full-stage canvas, so the volume rendered CENTRED AT x ≈ 195, behind it: the 90-px strip down the
-       right edge showed the far corner of the domain box, which is mostly empty.  Someone opening a shared
-       link met a wall of two hundred controls with a sliver of static colour beside it.
-       SO THE RACK STARTS HIDDEN HERE, and this is not "hide the rack on a phone": it is a DEFAULT, on
-       exactly CARD STYLE's and phoneTr's pattern — a default is for a first visit, and pressing ◧ IS this
-       browser saying which it wants (`saveSettings` derives `phoneRack` from the class; toggleRack saves).
-       Josh's wave-51 instruction is untouched: the transport stays DOCKED at the top of the rack, so the ▶
-       is exactly where he put it, one tap of the ◧ that sits in the thumb zone at the screen edge — and the
-       touch legend (skin.css §phone) names both.  The volume is NOT offset: moving the camera to dodge the
-       rack would be a lie about where the origin is, and a 90-px picture is not the fix for a 90-px picture. */
+
+
     phone.wasRackHidden = document.body.classList.contains('rack-hidden');   // the crossing is reversible in BOTH directions (wave 51's law)
     document.body.classList.toggle('rack-hidden', readSettings().phoneRack !== true);
     phone.wasCard = document.body.dataset.card;
@@ -5132,10 +4570,10 @@ export async function boot(dom) {
     }
     cv.addEventListener('pointerdown', (e) => { try { cv.focus({ preventScroll: true }); } catch (_) {}      // wave 57: a hand on the stage IS the stage having focus
       if (e.ctrlKey && pts.size === 0) { e.preventDefault(); bowStart(e); return; }
-      if (!e.shiftKey && pts.size === 0 && kepler.on) { const r = cv.getBoundingClientRect(); const h = kepler.hit(e.clientX - r.left, e.clientY - r.top); if (h) { e.preventDefault(); cv.setPointerCapture(e.pointerId); kdrag = { n: h.n, id: e.pointerId }; cv.classList.add('kdrag'); hideHint(); return; } }   // the KEPLER handle
+      if (!e.shiftKey && pts.size === 0 && kepler.on) { const r = cv.getBoundingClientRect(); const h = kepler.hit(e.clientX - r.left, e.clientY - r.top); if (h) { e.preventDefault(); cv.setPointerCapture(e.pointerId); kdrag = { n: h.n, id: e.pointerId }; cv.classList.add('kdrag'); return; } }   // the KEPLER handle
       if (e.shiftKey && helium && helium.on && pts.size === 0) { e.preventDefault(); const r = cv.getBoundingClientRect(); helium.placeAt(unproject(e.clientX - r.left, e.clientY - r.top)); schedule(TIER.RECONSTRUCT); return; }   // helium: put electron 1 where you click
       try { cv.setPointerCapture(e.pointerId); } catch (_) {}          // a synthetic pointer (a test, an assistive device) must not abort the drag
-      pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); dragging = true; cv.classList.add('drag'); hideHint();
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); dragging = true; cv.classList.add('drag');
       camera.stop(); histClear(); hShift = e.shiftKey; histPush(performance.now());   // the finger CLUTCHES: a live fling is caught, and this drag's history starts here
       down = { x: e.clientX, y: e.clientY, t: performance.now() };
       if (pts.size === 2) { histClear(); const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = obs.dist; } });
@@ -5176,15 +4614,6 @@ export async function boot(dom) {
     cv.addEventListener('dblclick', () => resetView());
     new ResizeObserver(() => schedule(TIER.PRESENT)).observe(cv);
   }
-  function hideHint() { if (dom.hint) dom.hint.classList.add('gone'); }
-  /* WAVE 59 · THE NINE SECONDS BELONG TO THE LAB, NOT TO THE MODAL.  This timer was armed here, ~700 lines
-     above `warning.show()`, in the same synchronous tail of the same boot — so a first visitor who actually
-     READ a 26-word notice about epilepsy pressed CONTINUE at eight seconds and watched the only legend in the
-     app fade one second later, or pressed at ten and never saw it at all.  `warning.onAccept` is the exact
-     hook (it fires immediately when the pane is down, so a returning visitor loses nothing) and it is armed
-     at the FOOT of boot beside `armAutoplay()`, which is where ANTI-PATTERN 18 says this kind of thing goes.
-     `hintTimer()` is called from there. */
-  function hintTimer() { warning.onAccept(() => setTimeout(hideHint, 9000)); }
   /**
    * KEYS.  Transport on the arrows and space; the camera on WASD/QE with shift for a fine step; the ROTATION AXIS
    * on X/Y/Z, so [ and ] turn the STATE about the chosen axis (and with shift, the Runge–Lenz rotation about it).
@@ -5195,23 +4624,8 @@ export async function boot(dom) {
   /* ── KEYS: a rebindable action table.  `fine` is shift for the stepping actions; actions that declare `shift`
      require it (so TAB and Shift+TAB are two actions).  Overrides live in localStorage. ── */
   const LS_KEYS = 'lambdawaves.q0.keys';
-  /* ── WAVE 57 · THE TAB RULE, AND THE KEYBOARD TRAP IT CLOSES ─────────────────────────────────────────
-   * Tab and Shift+Tab were bound as APPLICATION keys and `preventDefault()`ed on every match, with the
-   * dispatcher exempting only INPUT / TEXTAREA / SELECT.  Every one of the 461 controls in this lab is a
-   * <button> or a <div>, so KEYBOARD FOCUS COULD NOT MOVE AT ALL: reach the notebook textarea by pointer,
-   * press Tab once to leave it, and you were stuck for the rest of the session.  That is WCAG 2.1.2 in
-   * the literal sense, and no test in forty suites had ever pressed Tab, which is how it reached wave 56.
-   *
-   * THE RULE: **TAB CYCLES WINDOWS ONLY WHILE THE STAGE HAS FOCUS.  Everywhere else Tab is the browser's.**
-   * The brief's own suggestion was "body or canvas", and this is deliberately narrower, because "body"
-   * leaves the trap standing at the door: a keyboard user lands on <body> at load, and if that press
-   * cycles windows there is no press that ever lets them INTO the interface.  Focus on the stage is a
-   * thing a hand does — a press on the world, which is the case Josh actually uses the shortcut in, with
-   * a mouse already on the canvas — and it is a state the user can leave with Escape.  So every state has
-   * a keyboard way out: from the stage, Escape; from <body>, Tab walks in; from any control, Tab walks on.
-   * The shortcut survives exactly where it was being used, and the trap does not survive anywhere.
-   * The cost, stated: a keyboard user who has never touched the stage does not get the window cycle until
-   * they press it once, or rebind the action (the table is rebindable and `Backquote` is free). */
+
+
   const stageHasFocus = () => document.activeElement === dom.canvas;
   const setAxis = (a) => { keyState.axis = a; wState.setStatus(keyHelp(), 'live'); };
   const setWhich = (w) => { keyState.which = w; wState.setStatus(keyHelp(), 'live'); };
@@ -5252,36 +4666,21 @@ export async function boot(dom) {
     { id: 'prevWindow', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
     { id: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); if (ui.partOn) ui.partOn.set(true); schedule(TIER.PRESENT); } },
     { id: 'keysheet', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
-    { id: 'notes', label: 'show / hide every note', key: 'KeyN', run: () => document.body.classList.toggle('notes-open') },
+    { id: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
     { id: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
     /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the key
        sheet, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
-    /* ══ WAVE 106 · M OPENS THE WINDOW, Ctrl+Space ARMS IT (Josh: "'M' should activate the modulation
-       window.  Ctrl+space can be the alternate modulation pause that replaces the current 'M'
-       function") ═══════════════════════════════════════════════════════════════════════════════════
-       The two acts had one key between them and the wrong one had it.  ARMING is a transport act — it
-       decides whether Space plays one clock or two — so it belongs on a SPACE chord, where the hand
-       already is; OPENING the window is a navigation act, and M is the letter of the thing it opens.
-       Ctrl+Space is free: `matches()` makes a bare action refuse both Ctrl and Meta, so the transport's
-       own Space is untouched, and no role owns Space since wave 88. */
+
+
     { id: 'modArm', label: 'MOD \u2014 the modulation on / off (space then plays both clocks)', key: 'Space', ctrl: true, run: () => setModArm(!modArm) },
     { id: 'modWin', label: 'the modulation window \u2014 open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
     { id: 'modBar', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', label: 'undo the last edit to ψ or its law', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
     { id: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => historyApi.redo() },
-    /* ══ WAVE 106 · THE TWO ACCELERATORS EVERY APPLICATION HAS (Josh: "the classic ctrl+s,
-       ctrl+shift+s to save and save as") ══════════════════════════════════════════════════════════
-       They cost nothing to add because this table already carries modifiers — `undo` above is the
-       precedent, and `reseed` (Ctrl+R) already coexists with the bare `camReset` on the same code, so
-       the bare `KeyS` that lowers the pitch is untouched: `matches()` makes a bare action REFUSE both
-       Ctrl and Meta.  ⌘ is Ctrl here, so a Mac gets ⌘S for free.
-         SAVE FALLS BACK TO SAVE AS, which is the behaviour of every editor: with a project open it
-       writes it, and with nothing open it opens the face and lets you name one rather than inventing
-       a filename.  That is the FILE menu's own expression, reused rather than re-derived.
-         `preventDefault` happens in the matched-action branch below, so the browser's own Save dialog
-       is cancelled — exactly as Ctrl+R already suppresses the reload. */
+
+
     { id: 'save', label: 'save the open project (asks for a name when none is open)', key: 'KeyS', ctrl: true, shift: false,
       run: () => { if (layout.projects && layout.projects.current) layout.projects.save(); else layout.notebook.open('projects'); } },
     { id: 'saveAs', label: 'save the project under a new name', key: 'KeyS', ctrl: true, shift: true,
@@ -5293,17 +4692,12 @@ export async function boot(dom) {
   const MAC = /Mac|iPhone|iPad/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
   function keyName(a) { const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/');
     const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? 'Alt+' : '') + (a.shift ? 'Shift+' : '') + k;
-    return n === 'Shift+/' ? '?' : n; }                              // wave 53: the key Josh asked for is spelled '?', not 'Shift+/'
-  /* ⌘ IS ctrl here (Josh's Ctrl/⌘+Z), and an action with no ctrl now refuses BOTH modifiers rather than only one */
+    return n === 'Shift+/' ? '?' : n; }
+
   function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
   let capturing = null;
-  /* H (wave 48, Josh: "hide UI should be able to achieve the best framerate possible").  Hiding the interface used
-     to hide it only from the EYE: every reader still ran, every readout still wrote its string, and the notebook's
-     backdrop-filter was still recomposited on every frame the field changed.  `uiHidden` is now a real state — the
-     loop skips the readers whose only product is a display:none card, and lab.css §48a/§48b take the panes out of
-     paint. Window-owned stage overlays (vortex, particles, Kepler and field lines) sleep too: their switches remain
-     set, and visibility returning redraws them. Physics that produces the field still runs. Coming back forces one
-     presentation pass so nothing shows a stale number. */
+
+
   function toggleUI() {
     const on = document.body.classList.toggle('ui-hidden');
     uiHidden = on;
@@ -5339,17 +4733,8 @@ export async function boot(dom) {
   const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   const OWNED = {
     slider: new Set([...ARROWS, 'Home', 'End', 'PageUp', 'PageDown', 'Delete', 'Backspace']),
-    /* ══ WAVE 88 · SPACE IS THE TRANSPORT'S AND NOBODY ELSE'S ═══════════════════════════════════
-       JOSH, filed as an emergency: "currently if a 'last controlled' knob, dropdown or something in
-       the native UI and plugin is used, the space bar will act as a 'click' or an activate.  Can you
-       make it so that the space bar ONLY affects the playhead AND the modulation play."
-         Wave 62's law — "a key belongs to the focused control when that control's role would use it"
-       — is still right for every other key and stays.  SPACE IS THE EXCEPTION, and it has to be,
-       because it is the one binding a player uses without looking: after any click anywhere in this
-       lab something is focused, so the meaning of Space depended on what you last touched.  That is
-       not a shortcut, it is a coin toss.
-         ENTER IS NOW THE ACTIVATOR, alone, for both roles.  A keyboard user loses nothing they had —
-       Enter has always activated a button and a radio — and Space stops being ambiguous. */
+
+
     radio: new Set([...ARROWS, 'Home', 'End', 'Enter']),
     button: new Set(['Enter']),
     /* WAVE 68 · A LINK IS NOT A BUTTON, and the difference is exactly this key.  `a[href]` fell into
@@ -5376,9 +4761,8 @@ export async function boot(dom) {
   };
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
-    /* WAVE 88 · A TEXT FIELD KEEPS SPACE — it is a character there and nothing else can be meant.
-       A <select> DOES NOT: Josh named the dropdown, and a focused menu swallowing Space is the same
-       coin toss as a focused button.  It keeps every other key (the type-ahead, the arrows, Enter). */
+
+
     /* ⚠ WAVE 106 · TWO KEYS ESCAPE A TEXT FIELD, AND ONLY TWO.  This return sat ABOVE every modifier
        test, so Ctrl+S pressed with the caret in the project's name field or the notebook — the two
        places a hand most plausibly is when it reaches for save — reached nobody at all.
@@ -5475,7 +4859,7 @@ export async function boot(dom) {
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   function serialize() {
-    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI;   // the THEME is the browser's, never the project's (Josh)
+    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI;
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -5674,42 +5058,10 @@ export async function boot(dom) {
     return { ok, opened: true, code: null, message: null, warnings: got.warnings, unknownSections: got.unknownSections };
   }
 
-  /* ── UNDO / REDO (the last of the agreed order) ─────────────────────────────────────────────────
-   * The ring is lab/history.js; this is the port it works through.  READ takes the register side —
-   * the anchor c(0) with its mask and static field, the DRAG γ, the Hamiltonian selection, the SCALE,
-   * the 91 RATEs and the two A / B stores — and, SINCE WAVE 106, the MATERIAL too: the picture knobs,
-   * the draw style, the observable and the slice (Josh: "I want the undo to work for almost every
-   * knob").  It still takes nothing of the camera POSE, the play state, the layout or the theme — the
-   * reasons are written out at `hLook` below, and the short one is that navigation is not an edit.  WRITE goes through restore() itself with
-   * keepTime, so an undo travels the same road a project LOAD does (the kernel, the spectrum lanes,
-   * the knobs, the Sturmian ladder and the ATOMS card all follow) while the transport is left exactly
-   * where it is: the anchor is what travels, so the picture is continuous the way a RATE change is
-   * and only moves if the coefficients themselves did.  LIVEKEY is the cheap string that says whether
-   * any of that has changed.  The trigger is reg.version — every register mutation bumps it — plus
-   * hNote() at the few register-side setters that do not (the A / B stores, ELEMENT, GAS BASIS, WELL
-   * RADIUS).  Capture is BEFORE the mutation: that is what history.js's baseline is for. */
+
   const hAbCopy = (S) => S ? { re: Array.from(S.re), im: Array.from(S.im) } : null;
-  /* ══ WAVE 106 · THE UNDO REACHES THE KNOBS (Josh: "I want the undo to work for almost every knob,
-     try your best") ═══════════════════════════════════════════════════════════════════════════════
-     Until now the ring took the REGISTER side and nothing else, and the block above says so in a
-     sentence that is now half wrong: "nothing of the observer's — no camera, no palette, no draw
-     style".  Josh has ruled that boundary too tight.  Turning EXPOSURE, or SOFTNESS, or the SLICE, is
-     an edit; a hand that overshoots one wants the same Ctrl+Z as a hand that overshoots a coefficient,
-     and being told "that one is not undoable" is a distinction only the implementation can see.
-       WHERE THE NEW LINE IS, and why it is not simply "everything".  This block takes what changes the
-     PICTURE — the material knobs, the draw style, the observable, the three display flags and the whole
-     slice — and deliberately still refuses:
-       · THE CAMERA POSE.  An undo that teleports your viewpoint is not an undo, it is a jump cut, and
-         you would lose the framing you were working from to get a knob back.  Navigation is not an
-         edit.  (The camera's FEEL — friction, spin, the gains — is a preference, and lives in
-         SETTINGS with the other preferences.)
-       · THE PLAY STATE and the clock.  Ctrl+Z must never start or stop time.
-       · THE LAYOUT, the theme and the palette CHOICE — those are the workspace, and wave 106 gave the
-         workspace its own memory in the favourite layouts.
-     THE TRIGGER NEEDED NOTHING.  `hold()`/`release()` are already bound to document-level pointerdown
-     and pointerup, so every knob gesture in the lab ALREADY asks the ring to commit — it simply found
-     `dirty()` false, because `liveKey` could not see the material.  Putting the material in the key is
-     the whole mechanism; one drag is still one entry, by the same coalescing window as before. */
+
+
   const hLook = () => ({
     exposure: mat.exposure, softness: mat.softness, iso: mat.iso, grain: mat.grain, knee: mat.knee,
     dither: mat.dither, hue: mat.hueShift, style: mat.style, view: mat.view,
@@ -5834,25 +5186,16 @@ export async function boot(dom) {
     label(name) { history.label(name); },
   };
 
-  /* ══ WAVE 106 · THE HISTORY WINDOW (Josh: "fleshout and Polish the history system and make it
-     similar to FL studio's history system") ═══════════════════════════════════════════════════════
-     FL's history is not a pair of arrows — it is a LIST you can see and land on.  Every action is a
-     named row, the row you are standing on is marked, the rows above it are the future you stepped
-     back from and they grey out rather than vanishing, and doing something new from there truncates
-     them.  All four of those are properties of the ring now; this is the surface that shows them.
-       IT IS A RACK WINDOW and not a bespoke panel, so it folds, closes, floats and remembers its seat
-     like every other card, and costs no new furniture.  The rows come from `entries()` and a click is
-     `goto(i)` — ONE hop, not a run of undos, which is the whole point of a list: you land on a moment
-     rather than walking back to it. */
-  const wHist = device({ id: 'history', eyebrow: 'HISTORY', title: 'EVERY EDIT, AND THE ONE YOU ARE STANDING ON', status: '' });
+
+  const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
   rack.appendChild(wHist.root);
   const histList = el('div', 'hist-list', wHist.body);
   {
     const rh = wHist.row('tight');
     rh.appendChild(trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root);
     rh.appendChild(trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root);
-    rh.appendChild(trig({ label: 'CLEAR', title: 'forget every row and start the list from where the instrument is now — the STATE is not touched', onFire: () => { historyApi.clear(); } }).root);
-    el('div', 'note', wHist.body).innerHTML = '<b>THE LIST IS THE HISTORY.</b> Every row is one edit, named for the control that made it; a drag is one row, not one per pixel. Click any row to <b>land on that moment</b> — one hop, not a run of undos. Step back and the rows above grey out: they are still there, and doing something new from where you stand replaces them. The ring keeps the last 60. <b>What it does not carry:</b> the camera pose and the play state — an undo re-framing your view would be a jump cut, not an undo.';
+    rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
+    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Each row is one completed edit; a drag creates one row. Select a row to return to it. A new edit replaces any later rows. The last 60 edits are kept. Camera pose, layout, and play state are excluded.';
   }
   function renderHistory() {
     if (!histList) return;
@@ -6083,7 +5426,7 @@ export async function boot(dom) {
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');
-  mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase'); schedule(TIER.PRESENT);   // the shipped observable is arg ψ (Josh); a preset picked later still brings its own visuals
+  mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase'); schedule(TIER.PRESENT);
   if (q.get('view') && VIEW[q.get('view')] !== undefined) { mat.view = VIEW[q.get('view')]; ui.viewSeg.set(q.get('view')); }
   /* WAVE 57 · `?play=1` USED TO BE HERE, seventy-five lines above the photosensitivity notice — so a shared
      link animated the field underneath the warning while it was being read, which is exactly the thing the
@@ -6103,7 +5446,7 @@ export async function boot(dom) {
     molecule: () => (moPanel ? moPanel.table() : '') + (pulsePanel ? '\n\n' + pulsePanel.table() : ''),
     shadow: () => { const c = reg.at(clock.t); return 'label\tq\tp\n' + reg.populated().map((a) => getHamiltonian().labelOf(BASIS[a]) + '\t' + (c.re[a] * Math.SQRT2).toFixed(6) + '\t' + (c.im[a] * Math.SQRT2).toFixed(6)).join('\n'); },
   });
-  layout.moveToRack('spectrum', 'L'); spectrum.openPicker(true);                    // the official layout (Josh): SPECTRUM on the left, MODE open
+  layout.moveToRack('spectrum', 'L'); spectrum.openPicker(true);
   // First-visit furniture. Existing saved visibility and layouts are restored below.
   if(useCompactDefaults) {
     const left=['shadow','spectrum'],right=['settings','state','palette','observer','camera','clip'];
@@ -6123,20 +5466,7 @@ export async function boot(dom) {
   const linkAtBoot = openLink();
   addEventListener('hashchange', () => { openLink(); });   // the fragment is a live address, not only a start
 
-  /* ── THE PHOTOSENSITIVITY WARNING (wave 48, Josh) ─────────────────────────
-   * "Copy the text, design, layout, symbol, function from 'Mandelbrot' into this app… Let this be an entire frost
-   * glass transparent background to the current app when it loads (since Lambdawaves doesn't have a main menu) and
-   * let the text color (black or white) be whatever the user's last Light/Dark/Default setting is."
-   *
-   * The text, the caution triangle, the 34em card, the focus trap and the CONTINUE button are MANDELBROT's warn.js,
-   * carried over unchanged.  Three things are ours, and each is Josh's instruction:
-   *   GROUND   — MANDELBROT paints solid #000 because its pane stands in front of a MENU.  λWAVES has no menu, so
-   *              the lab is already running underneath and the pane is frost glass over it (lab.css §48f).
-   *   INK      — black or white by the RESOLVED theme, so LIGHT, DARK and SYSTEM all reach it, live.
-   *   MEMORY   — MANDELBROT deliberately shows on every cold start.  Ours is remembered in the settings key and
-   *              brought back by SETTINGS · SHOW THE WARNING AGAIN, which is why that row exists.
-   * The automation bypass is MANDELBROT's too (navigator.webdriver, ?warn=0, ?warn=1): a modal over the lab would
-   * otherwise stand in front of every screenshot the gate takes.  A driver can still force it with ?warn=1. */
+
   const warning = (() => {
     const pane = document.getElementById('warnPane');
     const seen = () => readSettings().warned === true;
@@ -6207,13 +5537,11 @@ export async function boot(dom) {
     return true;
   }
   armAutoplay();
-  hintTimer();                        // wave 59: and the hint bar's nine seconds start when the notice is DOWN, for the same reason and through the same hook
-  if (MOTION.reduced && ui.rateKnob) ui.rateKnob.root.title = 'RATE is at a quarter of what the preset asked for, because this browser prefers reduced motion — drag it and the number is yours';
+  if (MOTION.reduced && ui.rateKnob) ui.rateKnob.root.title = 'Reduced motion lowered RATE. Adjust it to override.';
   if (palette && palette.repaint) requestAnimationFrame(() => palette.repaint());   // the strip sat in a zero-size card when first painted
   history.clear();                    // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
-  /* ONE FULL TURN OF THE PALETTE ON BOOT (wave 53; wave 48's 360° SPIN was here, and Josh asked for it gone).
-     The mark never moves — the nine squares walk the current palette once round and come back to where they
-     rest, which is the same event said with colour instead of rotation.  Boot is the RARE tier, so it gets it. */
+
+
   markTurn();
   busyHost();                         // the mark is cloned and painted before anything can need it
   if (layout.projects) layout.projects.markClean();

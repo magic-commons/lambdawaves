@@ -1,69 +1,5 @@
-/* modwindow.js — THE HOST SIDE OF A PORTED WINDOW.  It wires; it does not design.
- *
- * `lab/mir/modwindow/` began as BASINS' modulation window under
- * docs/ui/STYLE-LOCK.md's PORTED-WINDOW EXCEPTION.  Its portable builder now includes the
- * user-approved macro rail revision; this host attaches the behavior, selection state, dial
- * paint, routing, persistence, and rearranging that the builder deliberately does not carry.
- * The split remains simple: the artifact builds stable element references and this file wires
- * them to λWAVES.
- *
- * THE ONE SENTENCE THAT MUST NOT APPEAR ANYWHERE BELOW is "the equivalent in our kit would
- * be".  Three previous passes at this port wrote it and each threw the window away.
- *
- * ── WHAT THE HOST SUPPLIES (host-contract.md PART 1, all six) ──────────────────────────────
- *   1. the id `modwin`               — unchanged; 164 selectors read it
- *   2. `title: 'MODULATION'`         — the chip rail's aria-label is built from it and 24
- *                                      rules select on the result byte for byte
- *   3. the two accent hues           — λWAVES' live palette wheel, written onto the window
- *                                      root and the rail by `setAccent()` below
- *   4. the two font names            — `lab/modhost.css`
- *   5. `--ui-scale: 1`               — the house value, already 1
- *   6. the persistence keys          — `lambdawaves.q0.settings`.`modwin`, through
- *                                      `presentation()` / `restore()`; the RACK itself rides
- *                                      in the project file, exactly as before
- *
- * ── THE FOUR EDGES (host-contract.md PART 3) ───────────────────────────────────────────────
- * `port` carries `registry` (edge 1), `targets` (edge 2), `clock` (edge 3) and `apply` — the
- * presentation callback (edge 4) — from `lab/mir/host.js`, which λWAVES has had since the MIR
- * wave.  The model is `lab/mir/mod.js`, the same singleton BASINS runs, so every control the
- * artifact draws already has a model behind it: banks, presets, holds, tap tempo, the dead-send
- * census and the whole AUDIO follower are in the file and were simply never surfaced.
- *
- * ── THE ROUTING OVERLAYS: A SPLIT, DECIDED ON EVIDENCE (see REPORT.md, wave 64) ─────────────
- * The artifact's overlays are the one part of its sheet that is NOT the window — they attach
- * into HOST controls in other windows, which is why the stager left their 39 rules unscoped.
- * ONE of the four travels and is used here: **`.m2ghost`**, the pill the finger carries.  It
- * is `position: fixed` at the pointer, it needs no room beside anything, and it is the
- * window's own material; λWAVES' `.mod-ghost` is deleted rather than shipped beside it.
- *   `.m2ring` and `.m2clr` do NOT travel, and the reason is a MEASUREMENT, not a taste: both
- * are `position: absolute; left: 100%; margin-left: 3px` with a 44 px `::before` band centred
- * on a 26 px box.  BASINS' routed controls stand in a window with room to their right; ours
- * are 34 px dials in 62 px cells packed three and four across a 286 px rack row, so `left:
- * 100%` puts the band on the NEXT knob.  On top of that, wave 61 built the arc Josh asked for
- * in writing ("the coloured arc AROUND the knob changes the arc length") with three things
- * BASINS' ring cannot express: CENTRE / UP / DOWN (the `bi` flag that cost five forced edits
- * in mod.js), the overflow SPUR, and a 360° ring for a WRAP dial.  `.m2clr`'s job — remove —
- * is the arc's double-tap and the popover's REMOVE / REMOVE ALL.
- *   `.m2span` does not travel either: our arc already draws the excursion ON the dial, and
- * two bands on one dial is the failure this wave was warned about.
- *   `[data-m2target].m2droppable / .m2drop` does not travel as PAINT — it is two outline
- * rules, where ours lights every valid target, marks a DUPLICATE differently, marks the one
- * under the pointer, and recedes every other control to .45, which is the whole answer to
- * "there is no hover on a touch screen".  The ATTRIBUTE is stamped anyway: `data-m2target`
- * is the artifact's own word for "this control is routable", and nothing is renamed.
- *   Every rule named above is still in the sheet, unscoped and intact — including `.m2clr`'s
- * copied-broken transparency, which the gate builds one button to prove.
- *
- * ── THE THREE DEFECTS THIS PORT INHERITED, AND WHERE EACH DIES ──────────────────────────────
- *   1. the ENV drag destroying two stages — `wireEditor` latches the KEY, not the index, at
- *      pointerdown (`down.key`), so a drag that takes `hold` to zero cannot re-mean index 2
- *   2. the grip's double-tap firing zero times — `reset()` runs on EVERY pointerup, before the
- *      arm/disarm branch decides anything, so the second tap is the second tap
- *   3. FIT not framing a GATE envelope — FIT frames `envDrawn(s)`, which is what `envPoints`
- *      actually draws (`a + hold + d + r`, always), and `gateMode` is in the render signature
- *      so the caption cannot go stale.  A stage clamped at t = 1 keeps its seconds, because
- *      `envMove` writes the KNOB and never re-reads the clamped point.
- */
+
+
 import { el, seg, trig, knob, tapWatcher } from './kit.js';
 import { bindSliderKeys } from './slider-keys.js';
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
@@ -117,19 +53,14 @@ const stochastic = (s) => s.wave === 'sh' || s.wave === 'drift';
 const cyclesShown = (s) => (stochastic(s) ? 4 : 1);
 const SHAPES = ['tri', 'sawup', 'sine', 'square', 'msaw', 'mtri'];
 
-/* ── WAVE 65 · THE THREE CHIPS ARE THE RESUME LAW, AND THEY SAY SO ──────────────────────────────
- * Josh: "inside the modulation window there are already useful buttons to link these behaviours to:
- * ANCH, TRIG, and BPM (from which BPM has WALL/FREE)."  Nothing was added to the artifact's card to
- * carry that — its layout is not ours (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION) — so the
- * meaning goes where a meaning belongs: on the control it is about.  `mir/host.js`'s `resumeGrid` is
- * the law; these are its sentences, and the window re-derives none of its arithmetic. */
+
 const CHECK_HINT = {
-  sync: 'BPM \u2014 this LFO\u2019s rate is a NOTE on the loop clock rather than a free Hz, so its divisions line up with the global grid. It also decides the RESUME: press play between notes and the beat jumps BACK to the note boundary just passed, so the cycle starts where a cycle starts. WALL and FREE on the strip are its two flavours \u2014 under WALL the beat is the phase and the jump is a beat move; under FREE the phase is this source\u2019s own and the play edge floors it. Same resume, two mechanisms',
-  anchor: 'ANCHOR \u2014 the phase is DERIVED from the beat rather than accumulated, in both sync modes. It is also the RESUME that holds: a pause catches the curve somewhere and the play button carries on from exactly there, to the double, however long the transport was down. One ANCHOR anywhere in the rack holds the beat still for the whole rack, so the BPM sources beside it continue rather than jumping back \u2014 the beat is one number and can only obey one law',
-  invert: 'read the shape upside down: 1 \u2212 v, after the curve and before SMOOTH and STEPS',
+  sync: 'BPM · quantise the LFO rate to the loop clock',
+  anchor: 'ANCHOR · resume from the paused phase',
+  invert: 'Invert the curve output: 1 \u2212 v',
   triplet: 'the note ladder \u00d7 2/3 \u2014 three in the space of two',
   dotted: 'the note ladder \u00d7 3/2 \u2014 a note and a half',
-  gate: 'GATE: the envelope holds its sustain while the trigger is held and releases on the lift; one-shot runs the whole shape from a single hit'
+  gate: 'GATE holds sustain until release; ONE-SHOT runs once'
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -165,19 +96,8 @@ export function createModulation(host, port) {
   /* THE STATUS LINE IS THE WINDOW'S OWN HINT ROW.  `.m2hint` is where BASINS prints the
      window's one sentence of instruction; a transient message takes that seat and the
      artifact's copy comes back verbatim when it clears — no second surface, nothing added. */
-  /* ══ WAVE 105 · THE WINDOW COULD NOT SPEAK ═══════════════════════════════════════════════════
-   * Two independent reviews found the same thing: `.m2hint` (reach 22) and `.m2note` (reach 35) are
-   * both `display: none`, and between them they are the ONLY surfaces this file writes to — 29
-   * `status()` sites and 25 `say()` sites, every one of them computing a sentence into a hidden node.
-   * So SAVE with an empty name did nothing, ARM said nothing, "every macro is already driven" said
-   * nothing, and the microphone's refusal — the one message a user cannot act without — said nothing.
-   *   JOSH'S TWO RULINGS STAND: he removed the permanent hint line ("nine-pixel prose across the foot
-   * of an instrument") and the text inside the curve windows, and neither is coming back.  What he
-   * objected to was FURNITURE — prose sitting on the glass whether or not it had anything to say.  A
-   * refusal is not furniture.  So the hint seat is shown ONLY while it carries a real message and
-   * fades when the message expires: nothing at rest, a sentence when the instrument needs to answer.
-   *   It is also the window's live region, so a screen reader hears the refusal it can otherwise only
-   * infer from a control that did nothing. */
+
+
   const SAY_MS = 4200;
   let hintMsg = '', hintCls = '', hintAt = 0, hintTimer = 0;
   mw.hint.setAttribute('role', 'status'); mw.hint.setAttribute('aria-live', 'polite');   /* ONE region, ONE line: access.test's A4 counts lines */
@@ -221,9 +141,9 @@ export function createModulation(host, port) {
   if (pick.btns.audio && !port.audio) {
     pick.btns.audio.disabled = true;
     pick.btns.audio.setAttribute('aria-disabled', 'true');
-    pick.btns.audio.title = 'this host supplies no audio capture, so an AUDIO device would have nothing to follow';
+      pick.btns.audio.title = 'Audio input is unavailable in this browser';
   } else if (pick.btns.audio) {
-    pick.btns.audio.title = 'add an AUDIO follower — four bands and an onset, from this machine’s audio input. Adding it opens nothing; its own AUDIO IN button asks for permission when you press it';
+      pick.btns.audio.title = 'Add an audio follower; AUDIO IN uses the microphone';
   }
 
   /* ── PRESENTATION STATE.  The window's own, never the model's, never the project's. ────── */
@@ -253,31 +173,14 @@ export function createModulation(host, port) {
     const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }) - macroTrim;
     const h = sizeLaw.height({ uiScale: 1 });
     const vw = window.innerWidth, vh = window.innerHeight;
-    /* ── WAVE 100 · THE WINDOW MAY NOT GROW PAST THE SCREEN ──────────────────────────────────────
-       JOSH: "sometimes adding a new device to the plugin makes all the devices invisible all of a
-       sudden, (the window remains fixed in size)."
-         REPRODUCED, and it is not invisibility — it is unbounded width.  `sizeLaw.width` adds a whole
-       card (360 + 7) per device and NOTHING clamped the result: measured on a 1600-px viewport, two
-       cards give 1083 and seven give 2918, while `placed` holds the left edge still at x = 259.  So
-       the window's right edge ends up 1577 px off-screen and every card but the first is past the
-       edge of the display — which from the outside is exactly "the devices disappeared and the window
-       stayed the same".
-         THE LAW IS NOT CHANGED, because the law is the artifact's and the acceptance table measures
-       it — `api.geometry()` still reports `lawW` beside the measured width.  What changes is that the
-       HOST refuses to paint a window wider than the screen it is on, and `.m2run` then does the job
-       the artifact built it for: it has been `overflow-x: auto` with a hidden scrollbar since the
-       port, and it never scrolled only because it was always given room for every card at once. */
+
+
     const w = Math.min(lawW, vw - 16);
     /* IT STAYS CENTRED UNTIL A HAND MOVES IT.  The window grows and shrinks with the rack — a
        card added is 367 px of new width — and a first appearance that was centred on one card
        and then grew off the right edge is a window nobody can reach the close chip of. */
-    /* ⚠ WAVE 93 · CENTRED ONCE, THEN NEVER AGAIN — and the missing `placed = true` is the whole of
-       what Josh saw: "when the window resizes in length, they shouldn't resize towards the center."
-       `placed` only became true on a DRAG or a restore, so until a hand had moved the window every
-       call re-centred it — and `place()` runs on every card added, removed, folded or minimised.  The
-       window therefore crept left as it grew and right as it shrank, which reads as resizing from the
-       middle.  It is centred on its FIRST appearance, which is the behaviour the paragraph above
-       actually describes, and after that the left edge is fixed and the right edge does the moving. */
+
+
     if (!placed) {
       P.x = Math.round((vw - w) / 2); P.y = Math.round(Math.max(56, (vh - h) / 2));
       placed = true;
@@ -316,20 +219,8 @@ export function createModulation(host, port) {
     const bars = sizeLaw.workBars(P.x + w, vw, M.dormantCount() > 0);
     foot.prebar.style.width = bars.presetW + 'px';
     foot.prebar.style.setProperty('--m2-precore-w', bars.coreW + 'px');
-    /* ── WAVE 75 · THE LANE, AND THE TWO THINGS JOSH ASKED OF IT ────────────────────────────────
-       "Have the preset bar and Tempo bar never overlap over each other.  Preset bar's left edge
-       always lines up with macro's left edge."
-         `workBars` RIGHT-ALIGNS the tempo bar to the window (`left = right - TIMING_W`) while the
-       preset bar sits at the artifact's `left: 0`, and it derives the preset bar's width from a
-       VIEWPORT coordinate.  Both are correct for a window at least 294 + 7 + 450 wide; below that —
-       which is every window with no devices in it, and that is the state Josh screenshotted — the two
-       boxes are laid on top of one another and the preset name prints through the tempo buttons.
-         So the lane is stated in ONE frame of reference, the foot's own, and measured rather than
-       assumed: the preset bar starts exactly where the MACRO RAIL starts (a rect difference, so it
-       holds whatever padding the panel carries), and the tempo bar may not begin before the preset
-       bar ends plus the artifact's own minimum gap.  The artifact's `overflow: visible` on the foot
-       is what makes the second rule safe — BARS-012B deliberately lets these boxes paint beyond the
-       window, so pushing the tempo bar right costs nothing but a wider lane. */
+
+
     let railX = 0;
     const footEl = foot.prebar.parentElement;
     if (footEl && rackEl.rail) {
@@ -338,17 +229,8 @@ export function createModulation(host, port) {
     }
     foot.prebar.style.left = railX + 'px';
     const minPre = railX + bars.presetW + GEOM.WORK_GAP_MIN;
-    /* WAVE 76 · AND ITS RIGHT EDGE IS THE LAST DEVICE'S, NOT THE WINDOW'S.  Josh: "the edge of the
-       tempo bar is going past the right-most device, I want it to always stay locked to the device's
-       farthest right edge."  `workBars` right-aligns to the WINDOW (`left = right - TIMING_W`), and
-       the window is sized by `sizeLaw.width` from the card modes — so whenever the window is wider
-       than the cards inside it, the bar hangs past the last card by exactly that surplus.
-         The devices are the thing the eye lines up against, so they are what the bar is measured
-       from: the last `.m2dev`'s right edge, read as a rect and converted into the foot's own frame
-       (the same frame the preset bar was put in above, so the whole lane is stated once).  With no
-       devices there is no card to align to and the run's own right edge stands in, which is where a
-       device would appear.  The no-overlap floor still wins over both — a bar that has been pushed
-       left by a narrow rack may not climb back over the preset name. */
+
+
     let preLeft = bars.left - P.x;
     if (footEl && rackEl.run) {
       const cards = rackEl.run.querySelectorAll('.m2dev');
@@ -381,30 +263,11 @@ export function createModulation(host, port) {
        set of moments the window's box can have changed. */
     if (port.moved) { try { port.moved(root.getBoundingClientRect()); } catch (_) {} }
 
-    /* the rail stands beside the window, on whichever side has room for its 62 px disc.
-       WAVE 92 · 10 → 4 (Josh: "Move the chips closer to the windows and in all directions as well").
-       `rw` is the chip target PLUS the gap and both branches spend it — the left as `P.x - rw`, the
-       right as `+ w + gap` — so one number moves every direction and the two sides cannot drift
-       apart.  The disc is 48 inside that 62-px target, so 4 px of box is still 11 px of air. */
-    /* WAVE 99 · 4 → 0 (Josh: "Move the chips a liiiittle closer towards the scroller; the gap is a
-       little to[o] far for my taste").  The number is the gap to the chip's 62-px TARGET box, and the
-       disc inside it is 48 — so seven of the pixels between the disc and the window were never this
-       constant's to give.  Zero leaves the visual gap at the disc's own 7 px plus the panel's padding,
-       and both sides move together because wave 97 made the right-hand seat read this same number. */
+
     const RAIL_GAP = 0;
     const rw = 62 + RAIL_GAP;
-    /* ── WAVE 97 · THE RIGHT-HAND SEAT IS MEASURED OFF THE LAST DEVICE, NOT OFF THE WINDOW ────────
-       JOSH: "When the chips move to teleport to the right when going off screen, they seem to be too
-       far away from the rightmost device, can you make the gap just as close as the left-side's way?"
-         The two branches were spending the SAME 4 px and still looked nothing alike, because they were
-       measured from different things.  The inherited size law includes historical room after the
-       cards, so the window's right edge stands past the last card and chips placed outside the WINDOW
-       are a hundred pixels from the DEVICE the eye lines them up against.  (Wave 76 found this same
-       surplus under the tempo bar, in this same function, for this same reason.)
-         So this side is measured too.  The LEFT gap is read as laid out — the chips' right edge to the
-       macro rail's left edge, which is RAIL_GAP plus whatever padding the panel carries — and the
-       right-hand seat puts the chips' LEFT edge exactly that far past the last card.  One measurement
-       feeds both sides, so they cannot drift apart the way two constants would. */
+
+
     let railLeft;
     if (P.x >= rw) railLeft = P.x - rw;
     else {
@@ -416,12 +279,8 @@ export function createModulation(host, port) {
       railLeft = Math.min(vw - 62, Math.round(edge3 + gap));
     }
     rail.style.left = (P.macroSide === 'right' ? Math.min(vw-38,P.x+w+4) : railLeft) + 'px';
-    /* WAVE 87 · THE CHIPS SIT ON THE SCROLLER'S CENTRE LINE (Josh: "Center the chips to the center
-       height of the scrolling windows (the macros and the devices)").  The rail used to be pinned to
-       the WINDOW's top, so it drifted off the cards as the row grew and the work lane came and went.
-       It is centred on `.m2root` — the row that actually holds the macro rail and the device run —
-       measured, because the rail's own height is its chip count and is not a constant.  The clamp is
-       the old one and stays: a rail that leaves the viewport is a rail with no controls. */
+
+
     const rootBox = rackEl.root ? rackEl.root.getBoundingClientRect() : null;
     /* WAVE 87 · THE LANE'S LIFT, WRITTEN WHERE THE BARS CAN READ IT.  modhost §77 moves the two work
        bars instead of re-laying the column, and its first cut asked for `var(--m2-view-h)` — which is
@@ -429,12 +288,8 @@ export function createModulation(host, port) {
        inherit DOWN, never sideways, so the calc was invalid and the transform silently did nothing
        (measured: the bars moved 8 px instead of the row's height).  The distance is written onto the
        window root, which is an ancestor of both, and it is measured rather than assumed. */
-    /* WAVE 89 · THE LIFT IS SOLVED FOR AN EQUAL GAP, NOT ASSUMED.  Josh: "Switching the preset bar
-       and tempo bar above and below the scroller is uneven."  It was: below, the bar starts at the
-       ROOT's bottom, and the root carries the run's 18-px shadow padding — so the gap under the cards
-       was 18 while the gap over them was the run's 6-px top padding.  `rootHeight + 52` could not see
-       either number.  The gap BELOW is measured as laid out, and the lift is whatever puts the bar's
-       bottom edge exactly that far above the first card. */
+
+
     const cardEl = rackEl.run && rackEl.run.querySelector('.m2dev');
     const laneTop = panel.classList.contains('m2bars-top');
     if (rootBox && rootBox.height > 0 && cardEl && !laneTop) {
@@ -532,14 +387,14 @@ export function createModulation(host, port) {
     else if (armed) status(r.playing ? resumeSentence() : '', '');
     sync();
   });
-  transport.xport.title = 'start modulation time. It is NOT the physics transport: an LFO keeps animating the camera while ψ is paused, and RATE — itself a modulation target — cannot set how fast the modulator runs. SPACE plays and pauses both clocks at once while MOD is on; this button is the modulation playhead alone';
+  transport.xport.title = 'Play or pause modulation';
 
   const nativeRate = port.rateControl && port.rateControl();
   if (nativeRate) { nativeRate.root.classList.add('m2-native-rate'); transport.xport.parentNode.insertBefore(nativeRate.root, transport.tempo); }
 
   /* THE TEMPO FIELD.  `.modtempo` and `.modtempoin` stand in the same seat and swap `hidden`;
      the number never goes, only its unit and its derived Hz (`.tight`, then `.tighter`). */
-  transport.tempo.title = 'the LOOP CLOCK, in beats per minute — not tempo: a captured loop CLOSES only when every modulator divides one period exactly. Tap to type it';
+  transport.tempo.title = 'Set the modulation clock in beats per minute';
   let tempoDragged = false;
   transport.tempo.addEventListener('click', () => {
     if (tempoDragged) { tempoDragged = false; return; }
@@ -589,7 +444,7 @@ export function createModulation(host, port) {
   /* `tapTempo` reads MILLISECONDS (TAP_GAP_MS is 2600) and hands back a NEW run rather than
      mutating the one it was given, so the run is reassigned and never appended to. */
   let taps = [];
-  transport.tap.title = 'tap four times to set the LOOP CLOCK by hand — the model\'s own estimator: a widening window, one wild interval restarts the count, and two that stray the same way shift it';
+  transport.tap.title = 'Tap repeatedly to set the modulation clock';
   transport.tap.addEventListener('click', () => {
     const r = M.tapTempo(taps, performance.now());
     taps = r.taps;
@@ -598,14 +453,14 @@ export function createModulation(host, port) {
     paint(true);
   });
 
-  transport.sync.title = 'WALL: beats are DERIVED from the absolute wall stamp, so a long frame cannot slow the LFO down. FREE: beats are ACCUMULATED from dt, and a frame over 0.25 s is clamped';
+  transport.sync.title = 'WALL follows elapsed time. FREE accumulates frame time.';
   transport.sync.addEventListener('click', () => { clock.setSync(M.syncMode() === 'wall' ? 'free' : 'wall'); sync(); });
-  transport.cad.title = 'the CADENCE CAP: the modulation applies at most this many times a second, whatever the display runs at. The cap is on the MODULATION, never on the field';
+  transport.cad.title = 'Limit modulation updates per second';
   transport.cad.addEventListener('click', () => { if (port.setCadence) port.setCadence(port.cadence() === 120 ? 60 : 120); sync(); });
 
   const HOLD_NOTE = ['1/4', '1'];
   transport.holds.forEach((b, i) => {
-    b.title = 'the stutter hold: fold the beat into ' + HOLD_NOTE[i] + ' and keep a shadow of the un-held run — release rejoins the shadow. A hold is a GESTURE, so closing this window never releases it';
+    b.title = 'Hold and repeat ' + HOLD_NOTE[i] + '; release to resume the original clock';
     b.addEventListener('click', () => {
       if (M.transport.hold && M.transport.holdNote === HOLD_NOTE[i]) { clock.release(); status('STUTTER released — rejoined the running beat', ''); }
       else { if (M.transport.hold) clock.release(); clock.hold(HOLD_NOTE[i]); status('STUTTER '+HOLD_NOTE[i]+' latched — applies to BPM-synced LFOs; press again to release', ''); }
@@ -627,12 +482,10 @@ export function createModulation(host, port) {
     else status(r && r.error === 'factory-name' ? 'that name belongs to a factory preset — try “' + r.suggest + '”' : 'could not save that preset', 'warn');
     if (presetOpen) openPresets();
   });
-  /* WAVE 100 · THE FACTORY BANK STANDS DOWN (Josh: "Delete the mod presets found in the plugin, I
-     will make new ones soon").  It is filtered HERE and not deleted from `lab/mir/mod.js`, which is
-     the vendored model and carries its own gates: FACTORY_PRESETS is model DATA, mod.js's own comment
-     says so, and a host that wants the bank back drops this one predicate.  Nothing can load one
-     either — `loadPreset` is only ever reached from a row this filter built. */
+
+
   const userPresets = () => M.presetList().filter((p) => !p.factory);
+  const folderLabel = (name) => name === M.PRESET_FOLDER_DEFAULT ? 'MY PRESETS' : name;
   const stepPreset = (dir) => {
     const list = userPresets();
     if (!list.length) { status('no presets yet — type a name and press SAVE', 'warn'); return; }
@@ -661,7 +514,7 @@ export function createModulation(host, port) {
     for (const f of M.presetFolders().filter((f) => !f.factory)) {
       const mine = all.filter((p) => p.folder === f.name);
       const shut = !!P.folder[f.name];
-      const grp = psheet.group(f.name, shut, false);
+      const grp = psheet.group(folderLabel(f.name), shut, false);
       grp.tag.textContent = String(mine.length);
       grp.fold.addEventListener('click', () => { P.folder[f.name] = !P.folder[f.name]; openPresets(); persist(); });
       if (shut) continue;
@@ -702,14 +555,7 @@ export function createModulation(host, port) {
   }
   dead.close.addEventListener('click', closeDead);
 
-  /* ═══════════════════════════════════════════════════════════════════════════════════════
-   *  WAVE 61, KEPT: THE MACRO IS THE ROUTER — the arc on the dial, and the two roads to it
-   * ═══════════════════════════════════════════════════════════════════════════════════════
-   * Everything from here to `removeEditRoute` is λWAVES' own, written to Josh's brief and
-   * gated since wave 61.  It is kept over the artifact's `.m2ring` for the reasons in the
-   * header, and it now shares the artifact's GHOST and its CLEAR button, so nothing is drawn
-   * twice.  The geometry: a 60-unit box over a 60-px dial, so a radius here IS a radius on
-   * the glass; two radii 3.5 apart, because at 2.5 the two strokes read as one thick arc. */
+
   const RING_C = 30, R_EDIT = 21.5, R_STACK = 18, R_HIT = 28, R_SPUR = 24.5, R_TICK0 = 19.6, R_TICK1 = 23.4;
   const ringGeom = (wrap) => (wrap ? { a0: -90, sweep: 360 } : { a0: -225, sweep: 270 });
   const ringPt = (u, r, g) => { const a = (g.a0 + g.sweep * u) * Math.PI / 180;
@@ -1131,9 +977,7 @@ export function createModulation(host, port) {
     return true;
   }
 
-  /* THE CONTEXT GESTURE: press and hold 450 ms, or the right button.  It is where CENTRE / UP /
-     DOWN lives — Josh's "center of dial or highest dial", the mode the model could not express
-     until forced edits 2/8–6/8 gave a route its `bi` flag. */
+
   let popEl = null;
   function closePop() { if (popEl) { popEl.remove(); popEl = null; } }
   function openPop(id, x, y) {
@@ -1146,19 +990,19 @@ export function createModulation(host, port) {
     el('span', '', head, er ? (M.macroOf(er.macroId) || { name: er.macroId }).name : (rs.length ? 'no route from the selected macro' : 'no route'));
     if (er) {
       const sg = seg({ label: 'RANGE', value: rangeMode(er), options: [
-        { id: 'centre', label: 'CENTRE', title: 'the knob\'s own position is the MIDDLE of the swing (bipolar) — Josh\'s "center of dial"' },
-        { id: 'up', label: 'UP', title: 'the position is the floor: the modulator only adds, and reaches the top exactly' },
-        { id: 'down', label: 'DOWN', title: 'the position is the ceiling: the modulator only subtracts, and reaches the bottom exactly' }],
+      { id: 'centre', label: 'CENTRE', title: 'Use the knob position as the centre of a bipolar range' },
+      { id: 'up', label: 'UP', title: 'Use the knob position as the minimum' },
+      { id: 'down', label: 'DOWN', title: 'Use the knob position as the maximum' }],
         onChange: (v) => { M.setRouteRange(er.id, rangeFor(id, v)); apply(); paintRings(); paint(true); } });
       popEl.appendChild(sg.root);
     }
     const rw = el('div', 'row tight', popEl);
-    if (er) rw.appendChild(trig({ label: 'REMOVE', title: 'remove this macro\'s route into this control — the target goes back to the hand\'s own number, bit for bit',
+    if (er) rw.appendChild(trig({ label: 'REMOVE', title: 'Remove this route',
       onFire: () => { closePop(); removeEditRoute(id); } }).root);
     if (rs.length) rw.appendChild(trig({ label: 'REMOVE ALL', title: 'remove every route into this control',
       onFire: () => { closePop(); M.removeRoutesOfTarget(id); if (registry.has(id)) registry.restoreBase(id);
         clock.recomputeRunning(); apply(); rebuild(); status('every route into ' + (d ? d.label : id) + ' removed', ''); } }).root);
-    if (d && d.def !== null && d.def !== undefined) rw.appendChild(trig({ label: 'RESET', title: 'put this control back on its own default — the BASE moves, the routes stay',
+    if (d && d.def !== null && d.def !== undefined) rw.appendChild(trig({ label: 'RESET', title: 'Reset the base value and keep its routes',
       onFire: () => { closePop(); registry.setBase(id, d.def); apply(); paintRings(); } }).root);
     if (rs.length > 1) {
       const l = el('div', 'mod-poprts', popEl);
@@ -1175,13 +1019,8 @@ export function createModulation(host, port) {
     popEl.style.left = Math.round(Math.max(6, Math.min(innerWidth - b.width - 6, x - b.width / 2))) + 'px';
     popEl.style.top = Math.round(Math.max(6, Math.min(innerHeight - b.height - 6, y + 14))) + 'px';
   }
-  /* ── WAVE 100 · A PRESS ANYWHERE ELSE CLOSES EITHER CHOOSER ──────────────────────────────────
-     JOSH: "When adding new macro or device in the plugin, a click anywhere else should close the
-     drop down menu."  Both sheets were toggle-only: the chip that opened one was the ONLY thing that
-     could shut it, so a sheet left open sat over the rack until you found that chip again.  The
-     popover one line down has had this since wave 61; the two pickers never got it.
-       The opener is excluded as well as the sheet, or the press that closes would be the same press
-     the chip re-opens on. */
+
+
   const pickAway = (e) => {
     const t = e.target;
     if (devPickOpen && !pick.root.contains(t) && !rackEl.devadd.contains(t)) setDevPick(false);
@@ -1200,7 +1039,7 @@ export function createModulation(host, port) {
    * ═══════════════════════════════════════════════════════════════════════════════════════ */
   const macRows = new Map();
   let macroPickOpen = false;
-  rackEl.macadd.title = 'add a macro: the thing a source or a hand drives, and a route carries to a target';
+  rackEl.macadd.title = 'Add a macro';
   rackEl.macadd.setAttribute('aria-expanded', 'false');
   rackEl.macadd.addEventListener('click', () => {
     if (M.macroList().length >= M.MACRO_MAX) { status('eight macros is the model\'s ceiling', 'warn'); return; }
@@ -1272,11 +1111,11 @@ export function createModulation(host, port) {
       n++;
       const rec = mw.addMacro(m, n);
       rec.root.addEventListener('pointerdown', () => { if (m.kind !== 'trigger') selectMacro(m.id); });
-      rec.grip.title = 'ROUTE this macro. DRAG it onto any dial — the range starts as the room that dial has left, so nothing clips. Or TAP to ARM it and then tap a lit dial. Double-tap resets the macro';
+    rec.grip.title = 'Drag to route; tap to arm; double-tap to reset';
       rec.grip.setAttribute('aria-label', 'route ' + m.name + ' — drag onto a control, or tap to arm');
       wireGrip(rec.grip, m.id);
       wireMacroReorder(rec, m.id);
-      rec.del.title = 'delete ' + m.name + ' and every route it carries';
+    rec.del.title = 'delete ' + m.name + ' and its routes';
       rec.del.setAttribute('aria-label', rec.del.title);
       rec.del.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1295,7 +1134,7 @@ export function createModulation(host, port) {
       };
       wireSlider(rec.numSeat, numberInput);
       bindSliderKeys(rec.numSeat, numberInput);
-      rec.numSeat.title = 'MASTER DEPTH — one gain over everything this macro sends. Drag up and down; double-tap for 100 %';
+    rec.numSeat.title = 'Master depth for this macro. Double-tap for 100%.';
       /* THE ARIA IS THE HOST'S, AND THE ARTIFACT SAYS SO.  `buildMacroSlot` sets role="slider"
          "because that is what it is; the host's registry writes the aria range and value" — so it
          is written here, on all three of the plugin's slider kinds, and B122's document-wide sweep
@@ -1306,7 +1145,7 @@ export function createModulation(host, port) {
         rec.pad.addEventListener('pointerdown', (e) => { e.preventDefault(); M.fireMacro(m.id); apply(); paint(true); });
         rec.pad.addEventListener('pointerup', () => { M.releaseMacro(m.id); apply(); paint(true); });
         rec.pad.addEventListener('pointercancel', () => { M.releaseMacro(m.id); apply(); });
-        rec.pad.title = 'fire this trigger by hand — every source bound to it rewinds and every HIT output fires';
+    rec.pad.title = 'Fire this trigger';
       } else {
         /* A HAND MACRO IS A BAR YOU DRAG SIDEWAYS.  A SOURCE-DRIVEN one is a LOCKED meter: you
            cannot turn a knob a source owns, because there is no knob there to turn. */
@@ -1325,7 +1164,7 @@ export function createModulation(host, port) {
         };
         wireSlider(rec.val, valueInput);
         bindSliderKeys(rec.val, valueInput);
-        rec.val.title = 'drag sideways to set this macro by hand; drag vertically to reorder it. A source-driven macro is locked because a hand and a modulator cannot share one number';
+    rec.val.title = 'Drag sideways to set; drag vertically to reorder';
         aria(rec.val, m.name + ' value', 0, 100, 100 * M.macroOf(m.id).value, '0%');
         /* a DOUBLE-click opens the rename row, which is a sibling already in the DOM: opening it
            only clears `hidden` — nothing is ever reparented. */
@@ -1333,7 +1172,7 @@ export function createModulation(host, port) {
       }
       rec.name.addEventListener('change', () => { M.setMacro(m.id, { name: rec.name.value }); rec.erow.hidden = true; paint(true); });
       rec.name.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); rec.erow.hidden = true; } });
-      rec.clr.title = 'unassign the source driving this macro — the value comes back to the hand';
+    rec.clr.title = 'Disconnect the source from this macro';
       rec.clr.addEventListener('click', () => { M.setMacro(m.id, { sourceId: null }); rec.erow.hidden = true; clock.recomputeRunning(); apply(); rebuild(); });
       macRows.set(m.id, rec);
     }
@@ -1392,7 +1231,7 @@ export function createModulation(host, port) {
      onset count the lamp compares against, and when it last flashed. */
   const audRings = new Map();
   let devPickOpen = false;
-  rackEl.devadd.title = 'add a modulation device — LFO, ENV or AUDIO';
+  rackEl.devadd.title = 'Add an LFO, envelope, or audio follower';
   rackEl.devadd.setAttribute('aria-expanded', 'false');
   /* The picker opens beside the explicit ADD DEVICE button and flips to its
      other side when the viewport has no room. */
@@ -1426,17 +1265,8 @@ export function createModulation(host, port) {
     else { pick.root.classList.remove('m2pick-at-chip'); pick.root.style.left = ''; pick.root.style.top = ''; }
   }
   rackEl.devadd.addEventListener('click', () => setDevPick(!devPickOpen));
-  /* WAVE 100 · ALL THREE KINDS ARE WIRED, AND AUDIO IS STILL DISABLED.  Josh: "prep for everything
-     you need for the AUDIO devices minimized, compact, and default adoption into lambdawaves."  The
-     loop used to name two kinds, so `ADD AUDIO` carried no listener at all on top of being disabled —
-     which meant the AUDIO face could not even be BUILT to dress or measure, and adoption would have
-     been a wiring job as well as a capture one.  It is wired now; the button stays disabled and keeps
-     the sentence saying why (above), so adoption is one flag rather than a search. */
-  /* WAVE 101 · A NEW DEVICE JOINS THE MODE THE RACK IS IN.  Josh: "adding a device adds it in
-     expanded mode, when in compact mode making it the odd one out."  `modeOf` answers FULL for any id
-     the presentation state has never seen, so every card arrived full whatever its neighbours were
-     doing.  The rack's mode is the COMPACT chip's own state — it is the control that put them there —
-     so the new source adopts it before the first paint rather than being corrected after one. */
+
+
   const rackMode = () => (chips.compact && chips.compact.classList.contains('on') ? 'C' : 'F');
   for (const kind of ['lfo', 'env', 'audio']) {
     if (!pick.btns[kind]) continue;
@@ -1480,21 +1310,21 @@ export function createModulation(host, port) {
         get: () => (s.sync ? s.mult / (nMult - 1) : s.ratePos),
         set: (u) => { if (s.sync) M.setSource(s.id, { mult: Math.round(clamp01(u) * (nMult - 1)) }); else M.setSource(s.id, { ratePos: clamp01(u) }); },
         text: () => (s.sync ? M.LFO_MULT_LABEL[s.mult] + ' · ' + M.lfoHz(s).toFixed(2) : M.lfoHz(s).toFixed(3) + ' Hz'),
-        hint: 'free: 0.01 … 3 Hz on a log dial. On the LOOP CLOCK grid: the note ladder, eight detents from a whole note to 1/128' };
+        hint: 'Set free rate or a loop-clock division' };
       case 'phase': return { get: () => s.phaseOff, set: (u) => M.setSource(s.id, { phaseOff: clamp01(u) }),
         text: () => (s.phaseOff * 360).toFixed(0) + '°', hint: 'the phase offset' };
       case 'smooth': return { get: () => s.smooth, set: (u) => M.setSource(s.id, { smooth: clamp01(u) }),
         text: () => (s.smooth > 0 ? (M.smoothTau(s.smooth) * 1000).toFixed(s.smooth < 0.2 ? 1 : 0) + ' ms' : 'OFF'),
-        hint: 'a one-pole filter on the LFO only: tau = 0.5 · v² seconds. With it on, the emitted dot LEAVES the drawn line — which is exactly what the control does' };
+        hint: 'Smooth the LFO output' };
       case 'steps': return { get: () => M.stepsRungIndex(s.steps) / (L.length - 1),
         set: (u) => M.setSource(s.id, { steps: L[Math.round(clamp01(u) * (L.length - 1))] }),
         text: () => (s.steps >= M.STEPS_MIN ? String(s.steps) : 'OFF'),
-        hint: 'quantise the output to N discrete levels — the 35-rung ladder, drawn as stairs on the picture' };
+        hint: 'Quantise output to discrete levels' };
       case 'hold':
       case 'a': case 'd': case 'r': return {
         get: () => SQ(s[key]), set: (u) => M.setSource(s.id, { [key]: clamp01(u) * clamp01(u) * M.ENV_MAX_S }),
         text: () => fmtSec(s[key]),
-        hint: 'a SQUARE law, because linear over 0 … 8 s on a 220-px travel is 36 ms a pixel and the default attack is 10' };
+        hint: 'Set the envelope stage time' };
       case 's': return { get: () => s.s, set: (u) => M.setSource(s.id, { s: clamp01(u) }),
         text: () => (100 * s.s).toFixed(0) + '%', hint: 'the sustain LEVEL — the one ADSR control that is not a time' };
       /* ⚠ WAVE 100 · THESE READ DEFENSIVELY, AND THAT IS NOT TIDINESS.  `M.addSource('audio')` does
@@ -1525,20 +1355,7 @@ export function createModulation(host, port) {
     }
   }
 
-  /* ── WAVE 74 · THE SURFACES WEAR THE HOUSE'S OWN GLASS CLASS ────────────────────────────────
-     JOSH'S ACCEPTANCE TEST, in his words: "it must follow what the 'about' glass window is doing.
-     If it does not do what the 'about' glass does: IT FAILS."
-       The ABOUT card is `#sheet`, and everything it does under a setting it does because it carries
-     ONE class — `.glass`.  skin.css spends three rules on that class and they are the whole of the
-     behaviour Josh is asking for: `body[data-card="refractive"] .glass` and `body[data-card="tinted"]
-     .glass` are CARD STYLE, and `body.frost .glass` is FROST (the backdrop filter AND its whisper of
-     white).  The artifact ALSO has its own `.mir-modwindow .glass` recipe, which reads --glass-tint,
-     --glass-opacity, --glass-border-color, --glass-sheen and `backdrop-filter: var(--glass-filter)`.
-       So the honest implementation is not to copy any of those rules.  It is to give the plugin's
-     surfaces the same class, and let every present and future house rule reach them by construction.
-     That is the only version of this that cannot drift out of agreement with the ABOUT card.
-       The artifact already ships `.m2prebar` as `m2workbar m2prebar glass` — this is its own idea,
-     applied to the three surfaces the extract left bare. */
+
   function dressGlass() {
     for (const n of root.querySelectorAll('.m2rail, .m2pre, .m2dev')) n.classList.add('glass');
   }
@@ -1550,14 +1367,8 @@ export function createModulation(host, port) {
      match.  Absolute positioning re-parents nothing; it only chooses which ancestor to measure from.
      So the node itself moves, once per build, into the box it names.  The artifact still BUILDS it
      where it always did — this is the host re-seating it, which is the host's own half of the port. */
-  /* ── WAVE 89 · THE MACRO RAIL GETS A DEVICE'S HEAD ────────────────────────────────────────────
-   * Josh: "Have clicking the macros text … give the macros window the same buffer as LFO and ENV for
-   * the row it's in and have the similar dropdown arrow to minimize; no drag option however."
-   *   The rail is a card beside two cards and it was the only one you could not fold.  It gets the
-   * SAME control the devices carry — a caret that turns a quarter turn — built from the artifact's own
-   * `.m2chev`, so it is the device's chevron and not a second drawing of one.  It gets NO grip: the
-   * rail's order is not the fire order and there is nothing to reorder it against, which is exactly
-   * the reason the devices have one and this does not. */
+
+
   function seatRailHead() {
     const head = root.querySelector('.m2railhead');
     if (!head || head.dataset.folder === '1') return;
@@ -1565,7 +1376,7 @@ export function createModulation(host, port) {
     head.setAttribute('role', 'button');
     head.tabIndex = 0;
     head.setAttribute('aria-expanded', 'true');
-    head.title = 'fold the macro rail — layout only, every macro keeps its value and its routes';
+  head.title = 'Collapse or expand the macro rail';
     const chev = document.createElement('i');
     chev.className = 'm2chev';
     head.insertBefore(chev, head.firstChild);
@@ -1588,7 +1399,7 @@ export function createModulation(host, port) {
   }
   const macroHead = root.querySelector('.m2railhead');
   const sideGrip = el('button', 'm2-side-grip', macroHead, '⠿');
-  sideGrip.hidden=true;sideGrip.disabled=true;sideGrip.type = 'button'; sideGrip.title = 'Drag macros to either end; double-click or use arrow keys to swap sides';
+  sideGrip.hidden=true;sideGrip.disabled=true;sideGrip.type = 'button'; sideGrip.title = 'Move macros to either side';
   sideGrip.setAttribute('aria-label', 'Move macros to left or right end');
   let sideDrag = null;
   sideGrip.addEventListener('click', (e) => e.stopPropagation());
@@ -1658,21 +1469,7 @@ export function createModulation(host, port) {
     matrix.showModal();
   });
 
-  /* WAVE 92 · AND IT GOES BACK TO THE HEAD, WHERE ENV'S OWN LABEL ALREADY LIVES.  Josh: "place it
-     similar to the 'REL' is on in ENV, not in the curve window."  `.m2envstage` — the word REL — is
-     built into `.m2headc` beside the device name, and `.m2lfowave` is its exact counterpart there;
-     the artifact had the two symmetrical and waves 82–84 moved one of them.  The move is undone
-     rather than re-aimed: the seat Josh is pointing at is the artifact's own. */
-  /* ── WAVE 100 · THE CURVE CYCLER JOINS THE PRESET ROW ────────────────────────────────────────
-     JOSH: "add the cycling curve presets that currently [sit] in between the LFO title bar of the
-     device and the 'A/B' thingy.  Move the curve cycler to where the 4-triangle curve preset would
-     be, move the 4-triangle to where the old 4-saw used to be, delete the 4-saw."
-       So the row becomes TRI · SAW↑ · SINE · SQR · MULTI-TRI · WAVE.  Only one node moves: MULTI-SAW
-     is hidden by modhost.css and the grid's own auto-flow slides MULTI-TRI up into the fifth seat, so
-     nothing is re-ordered by hand and the artifact's six-column template is untouched.  `.m2lfowave`
-     is APPENDED, which puts it in the sixth seat the multi-triangle just left.
-       It belongs here on its own terms, not only because it fits: it is the road back from a drawn
-     curve to an analytic wave, which is the one thing the other five buttons cannot do. */
+
   function seatCurveName() {
     for (const card of root.querySelectorAll('.m2dev.lfo')) {
       const name = card.querySelector('.m2lfowave'), grid = card.querySelector('.m2presets');
@@ -1680,30 +1477,7 @@ export function createModulation(host, port) {
     }
   }
 
-  /* ══ WAVE 97 · THE FOLDED STRIP GETS ONE INDICATOR, AND IT IS THE CURVE ═══════════════════════
-   * JOSH: "can we rework the animation/indicator of the LFO/ENV/AUDIO when it's minimized?  We need a
-   * new better design for it."
-   *
-   * WHAT WAS THERE, and why it could not be tuned into shape: THREE DIFFERENT WIDGETS for three kinds
-   * of one device.  An LFO folded to a strip showed `.m2lfominshape` — its curve drawn with TIME on X
-   * and VALUE on Y into a box 22 px wide and ~200 tall with `preserveAspectRatio: none`, so a whole
-   * cycle was crushed into 22 px while the value was stretched over ten times that; an ENV showed
-   * `.m2envminprog`, a 5-px progress column with no shape in it at all; AUDIO showed four little LED
-   * bars.  Beside them all sat `.m2meter`, an 11-px level rail.  Folding a device did not shrink what
-   * you were reading — it replaced it with something else, and a different something per kind.
-   *
-   * THE NEW ONE IS THE FULL CARD'S PLOT, TRANSPOSED.  Time runs DOWN the strip and the value across
-   * it, which is the right way round for a box that is 26 × 200 instead of 340 × 128, and the live dot
-   * is the same `.m2playdot` idea riding the same curve.  So a folded device is the same instrument at
-   * a smaller size — same shape, same ink, same playhead — which is what a minimised mode should be.
-   * ONE object covers all three kinds: LFO and ENV draw their curve, AUDIO draws its level as the line
-   * (it has no time base — its follower is a level, and saying so in the same visual language beats a
-   * fourth widget).  The artifact's three are hidden by modhost.css, never deleted.
-   *
-   * THE DOT IS AN ELEMENT, NOT A CIRCLE IN THE SVG, and that is forced: `preserveAspectRatio: none` is
-   * what lets the trace fill a tall narrow box, and under it an SVG circle is stretched into an ellipse
-   * by exactly the aspect the box has.  An absolutely-positioned `<i>` driven by two custom properties
-   * stays round at every height — which is the artifact's own answer for `.m2vedge` in the macro slot. */
+
   function seatMinTrace(rec) {
     const bay = rec.dev.minBay;
     if (!bay || bay.querySelector('.m2mintrace')) return;
@@ -1770,18 +1544,8 @@ export function createModulation(host, port) {
     for (const s of devOrder()) {
       if (P.modes[s.id] === undefined && saved[s.id] !== undefined) { P.modes[s.id] = saved[s.id]; delete saved[s.id]; }
     }
-    /* ── WAVE 100 · ONE DEVICE THAT WILL NOT BUILD MAY NOT EMPTY THE RACK ────────────────────────
-       JOSH: "sometimes adding a new device to the plugin makes all the devices invisible all of a
-       sudden, (the window remains fixed in size)."  FOUND, and it is this loop.  `buildCard` puts its
-       `rec` into `devRows` on its FIRST line and fills `rec.g` on its last, so a throw anywhere in
-       between — measured today with an AUDIO source, whose `s.gainDb` the model leaves undefined and
-       whose knob caption called `.toFixed` on it — leaves a half-built rec behind AND takes the loop
-       down with it.  `rebuildDevices` has already removed every existing card root by then, so every
-       device that had not yet been rebuilt simply never is: the rack goes empty, the window keeps
-       whatever size the last `place()` gave it, and `paint()` then throws on `rec.g.box` forever.
-         So each card is built on its own account.  A device that cannot be built is dropped from the
-       rack and SAID OUT LOUD on the window's own hint line rather than taking its neighbours with it —
-       the rest of the rack, and the window, stay usable. */
+
+
     const broken = [];
     for (const s of devOrder()) {
       try { buildCard(s); }
@@ -1805,26 +1569,24 @@ export function createModulation(host, port) {
     dev.root.addEventListener('pointerdown', () => selectSource(s.id));
 
     /* ── THE HEAD ── */
-    /* WAVE 79 · TWO STATES ON THIS BUTTON, NOT THREE (Josh): "let the behavior of that button be
-       'minimize' and 'expand' (to default size not compact (CMP) only).  Have compact only exist when
-       hitting compact chip button."  So the cycle drops its middle rung — a device folded from
-       COMPACT still expands to FULL, which is what "expand to default size" means from any state. */
-    dev.fold.title = 'minimise / expand — COMPACT is the chip on the rail, not this button';
+
+
+      dev.fold.title = 'Collapse or expand this device';
     dev.fold.addEventListener('click', () => {
       const next = modeOf(s.id) === 'M' ? 'F' : 'M';
       setMode(s.id, next);
       dev.fold.setAttribute('aria-expanded', next === 'F' ? 'true' : 'false');
       place(); paint(true); persist();
     });
-    dev.pow.title = 'bypass this device — every macro it drives goes quiet, and its patch is kept';
+      dev.pow.title = 'Bypass this device and keep its settings';
     dev.pow.addEventListener('click', () => { M.setSource(s.id, { on: !s.on }); clock.recomputeRunning(); apply(); sync(); });
-    dev.x.title = 'remove this device — every macro bound to it goes back to HAND';
+      dev.x.title = 'Remove this device and release its macros';
     dev.x.addEventListener('click', () => { M.removeSource(s.id); delete P.modes[s.id]; clock.recomputeRunning(); apply(); rebuild(); });
-    dev.bank.btn.title = 'TWO WHOLE SAVED PATCHES per device. Switching saves the side you are leaving and restores this one; the phase, the envelope clock and the power switch do not move';
+      dev.bank.btn.title = 'Switch between two saved patches for this device';
     dev.bank.btn.addEventListener('click', () => { M.setSource(s.id, { bank: s.bank === 'A' ? 'B' : 'A' }); apply(); sync(); });
     dev.cpy.title = 'copy this side\'s whole patch';
     dev.cpy.addEventListener('click', () => { clip = M.copyBank(s.id); say(rec, 'patch copied — PASTE onto any ' + s.kind.toUpperCase()); });
-    dev.pst.title = 'paste the copied patch onto the side showing — a patch of another kind is refused, and says so';
+      dev.pst.title = 'Paste a compatible device patch';
     dev.pst.addEventListener('click', () => {
       if (!clip) { say(rec, 'nothing copied yet — press COPY on a device first'); return; }
       const w = M.pasteBank(s.id, clip, s.bank);
@@ -1841,7 +1603,7 @@ export function createModulation(host, port) {
 
     if (dev.trig) {
       dev.trig.hidden=true;dev.trig.disabled=true;
-      dev.trig.title = 'fire this envelope by hand — an envelope moves on modulation time, so the transport has to be running for it to run its shape';
+        dev.trig.title = 'Trigger this envelope. Start modulation to advance it.';
       /* WAVE 105 · A GATE MUST NOT BE STRANDABLE.  `pointerup` on the BUTTON only fires if the
          finger is still over it; sliding off mid-gate left the envelope held with no way back
          but a second press.  The pointer is captured, and a cancel releases too. */
@@ -1859,7 +1621,7 @@ export function createModulation(host, port) {
     if (dev.kind === 'lfo') {
       for (const name of SHAPES) {
         const q = dev.presets[name]; if (!q) continue;
-        q.btn.title = PRESET_LABEL[name] + ' — tap to draw it; tap again for its mirror (a symmetric shape says so rather than pretending)';
+        q.btn.title = PRESET_LABEL[name] + ' · tap to draw; tap again to mirror';
         q.btn.addEventListener('click', () => {
           M.setSource(s.id, { preset: name });
           const lp = s.lastPreset || {};
@@ -1876,10 +1638,10 @@ export function createModulation(host, port) {
         const i = M.WAVES.indexOf(s.wave);
         const next = M.WAVES[((i < 0 ? 0 : i) + dir + M.WAVES.length) % M.WAVES.length];
         M.setSource(s.id, { wave: next, shapeMode: 'wave' });
-        say(rec, M.WAVE_LABEL[next] + ' — an analytic wave' + (stochastic({ wave: next }) ? ', four cycles shown' : ''));
+        say(rec, M.WAVE_LABEL[next] + ' · waveform' + (stochastic({ wave: next }) ? ', four cycles shown' : ''));
         apply(); paint(true);
       };
-      dev.lfoWave.title = 'the analytic wave this LFO is running — tap to walk the list. Tapping a shape below draws a CURVE instead, and this is the road back';
+      dev.lfoWave.title = 'Select the LFO waveform';
       dev.lfoWave.style.cursor = 'pointer';
       dev.lfoWave.addEventListener('click', () => cycleWave(1));
       if (dev.compactLfo) {
@@ -1893,13 +1655,13 @@ export function createModulation(host, port) {
         }
       }
       /* TRIG · FLIP · OFF — the retrigger pair and the time-reverse, the artifact's own three seats */
-      dev.sw.trig.title = 'TRIG — rewind this LFO\'s phase to 0 on a trigger and on the play edge: SPACE STARTS THE CURVE OVER, which is what makes a recorded run begin at the same phase every time. On a FREE-Hz source the rewind is the source\'s own and costs the rack nothing. On a BPM source it claims the note grid instead, because there the beat OWNS the phase and a rewind the next frame overwrites is a control that changes nothing — and the note boundary is where "start over" and "the truncated note" are the same number';
+      dev.sw.trig.title = 'Restart phase on triggers and playback';
       dev.sw.trig.addEventListener('click', () => { M.setSource(s.id, { trig: true }); apply(); sync(); });
-      dev.sw.off.title = 'free-running: the phase is wherever the beat put it, and a resume takes whatever ANCHOR and BPM decide between them';
+      dev.sw.off.title = 'Continue from the clock phase';
       dev.sw.off.addEventListener('click', () => { M.setSource(s.id, { trig: false }); apply(); sync(); });
-      dev.flipBtn.title = 'time-reverse the drawn curve: c(t) → c(1−t). A symmetric shape is invariant and says so';
+      dev.flipBtn.title = 'Reverse the curve in time';
       dev.flipBtn.addEventListener('click', () => {
-        if (s.shapeMode !== 'curve') { say(rec, 'an analytic wave has nothing to flip — tap a shape to draw it first'); return; }
+        if (s.shapeMode !== 'curve') { say(rec, 'Select a curve before reversing it'); return; }
         const h0 = curveHash(s.points);
         M.curveEdit(s.id, 'flip');
         say(rec, curveHash(s.points) === h0 ? 'this shape is its own mirror — nothing to flip' : 'flipped in time');
@@ -1910,11 +1672,11 @@ export function createModulation(host, port) {
          DRAWS (a + hold + d + r, always), not what `envDuration` returns (which drops `r`
          under GATE and framed 0.3565 s of a 0.910 s picture — 155 % past the right edge). */
       const [zin, zfit, zout] = dev.zoom;
-      zin.title = 'halve the display window — a VIEW quantity: the knobs stay in real seconds and the envelope does not change';
+      zin.title = 'Zoom into the envelope graph';
       zin.addEventListener('click', () => { M.setSource(s.id, { timeScale: s.timeScale * 0.5 }); paint(true); say(rec, 'window ' + s.timeScale.toFixed(2) + ' s'); });
-      zout.title = 'double the display window';
+      zout.title = 'Zoom out of the envelope graph';
       zout.addEventListener('click', () => { M.setSource(s.id, { timeScale: s.timeScale * 2 }); paint(true); say(rec, 'window ' + s.timeScale.toFixed(2) + ' s'); });
-      zfit.title = 'frame the whole envelope — the picture that is DRAWN, release included, which is what `envPoints` puts on the glass under GATE as well as one-shot';
+      zfit.title = 'Fit the full envelope in the graph';
       zfit.addEventListener('click', () => {
         M.setSource(s.id, { timeScale: Math.min(M.ENV_MAX_S, Math.max(0.25, envDrawn(s) * 1.15)) });
         paint(true); say(rec, 'fitted to ' + s.timeScale.toFixed(2) + ' s');
@@ -1937,7 +1699,7 @@ export function createModulation(host, port) {
          one check that makes an async handler safe here: the record this closure captured must
          still be THE record the rack holds for this source. */
       const stillMine = () => devRows.get(s.id) === rec;
-      A.srcBtn.title = 'open or close the microphone. Nothing is recorded, stored or sent — the graph is microphone → analyser and stops there, and what leaves it is six numbers a frame';
+      A.srcBtn.title = 'Open or close audio input. Audio is analysed locally and is not stored.';
       A.srcBtn.addEventListener('click', async () => {
         if (!port.audio) { say(rec, 'this host supplies no audio capture'); return; }
         const st = port.audio.state();
@@ -1953,7 +1715,7 @@ export function createModulation(host, port) {
         }
         sync(); paint(true);
       });
-      A.setBtn.title = 'Input, exact band ranges and timing, noise gate, gate HOLD and onset sensitivity';
+      A.setBtn.title = 'Audio input, band ranges, timing, gate, and onset settings';
       A.setBtn.addEventListener('click', () => {
         /* the sheet's whole content is the CAPTURE's — a host with none has nothing to condition.
            A restored session can carry an AUDIO source onto such a host, so this is reachable. */
@@ -1996,7 +1758,7 @@ export function createModulation(host, port) {
             syncKnobs(rec); paintAudio(rec);
           } else if (key !== 'hit') cycleAudioOut(rec, key);
         });
-        row.grip.title = 'this output is a source like any other: bind it from a macro’s own DRIVE, or here';
+        row.grip.title = 'Route this output to a macro';
       }
       /* WAVE 105 · THE LEVEL RING SURVIVES A REBUILD.  It was allocated per CARD, so binding a macro —
          or adding, removing or reordering any device — blanked the audio trace to zeros.  It is state
@@ -2010,23 +1772,13 @@ export function createModulation(host, port) {
 
     /* MACRO / TRIG IN — the device says which macro it drives, and which trigger fires it. */
     if (dev.mac) {
-      dev.mac.title = 'which MACRO this device drives — tap to walk the list. A macro a source owns has no fader: you cannot fight a modulator for one number';
+      dev.mac.title = 'Select the macro driven by this device';
       dev.mac.addEventListener('click', () => cycleMacro(rec));
     }
     if (dev.bus) {
-      /* ══ WAVE 105 · HIT IS THE SHORTCUT, AND THE FACE NEVER OFFERED IT ═══════════════════════
-         Josh: "Hit for envelope is a shortcut key."  That is exactly what an audio HIT socket is —
-         the fast way to fire an envelope off the signal itself, instead of routing a trigger macro
-         and firing that by hand.  THE MODEL HAS ALWAYS ALLOWED IT: `setSourceTrigger` admits any
-         `isFireSource(key)`, and that is `isTriggerMacro(id) || isHitOutput(id)` (mod.js:867).
-         Only the FACE was short — it cycled `triggerMacros()` and nothing else, so the one binding
-         the model went out of its way to support could not be made here at all.
-           AND A HIT THAT *WAS* BOUND READ AS UNBOUND.  The paint below asked `M.macroOf(triggerId)`
-         for the number to print; a socket id is not a macro, so it came back null and the seat
-         printed `--` — the same thing it prints for nothing at all.  It prints `H`, or `H2` when
-         there is more than one AUDIO device, so the binding is legible. */
-      dev.bus.title = 'what fires this envelope — tap to walk the TRIGGER macros and then every ' +
-        'AUDIO device\'s HIT socket, which fires it off the signal itself. Shift-tap to jump straight to the first HIT';
+
+
+      dev.bus.title = 'Select the envelope trigger; Shift-click selects AUDIO HIT';
       dev.bus.addEventListener('click', (e) => {
         const list = fireSources();
         if (e.shiftKey) {                                   // the shortcut, straight to the signal
@@ -2082,13 +1834,7 @@ export function createModulation(host, port) {
     if(s.kind==='audio')buildAudioRanges(rec);
     seatMinTrace(rec);                  // wave 97: the folded strip's one indicator
 
-    /* ── WAVE 99 · THE FOLDED STRIP'S NUMERAL SWITCHES THE MACRO, IT DOES NOT EXPAND ────────────
-       JOSH: "minimized mode tapping on macro routing number actually expands the window and not
-       route to a different macro."  He is quoting the artifact back at us: modwindow.js:827 says in
-       so many words "The macro numeral is the macro switcher", and the port wired it to `setMode`
-       instead — so the one control the folded strip has for changing what it drives did the same
-       thing as the caret two seats above it, and the strip had no way to re-route at all.
-       Expanding is still the CARET's job, which is where a fold control belongs. */
+
     if (dev.minNum) dev.minNum.addEventListener('click', () => {
       if (s.kind === 'audio') cycleAudioOut(rec, audRoutes.get(s.id) || audBands.get(s.id) || 'level');
       else cycleMacro(rec);
@@ -2096,26 +1842,14 @@ export function createModulation(host, port) {
     return rec;
   }
 
-  /** WAVE 78 · TWO DIGITS, ALWAYS.  Josh: "make it say '01' for the numbers".  A route counter that
-   *  is one character wide at 9 and two at 10 makes the whole readout twitch as routes come and go,
-   *  and this row sits beside a live meter — so the count is padded and the row stops moving.  Ten or
-   *  more prints its own width; the pad is a floor, not a truncation. */
+
   const pad2 = (n) => (n < 10 ? '0' + n : String(n));
 
   /** the device → macro assignment, in one direction: the DEVICE says which macro it drives.
    *  `setMacro` REFUSES a source change on a macro already bound to a live source, so this
    *  unbinds first — a face that just calls it reads as a control that does nothing. */
-  /* ── WAVE 100 · THE CYCLE ONLY OFFERS SEATS THAT ARE FREE ────────────────────────────────────
-     JOSH: "when the route is set to an already incumbent macro, have it be colored red with a red
-     outline until it cycles to the next filled one.  Or just cycle between only available routings."
-     The second, because the first paints a warning about a state this control should never be able
-     to reach.  What it used to do was worse than either: `setMacro(next, {sourceId: null})` SILENTLY
-     EVICTED whoever held that macro, so walking one device's OUT could quietly unpatch another one
-     two cards away, with nothing on the screen saying so.
-       The ring is HAND plus every macro that is unowned or already this source's own, in the model's
-     order, so a walk visits each reachable seat once and comes back to `--`.  A macro another source
-     drives is not in the ring at all, which is what "only available" means.  A rack with no free
-     seat leaves the ring at [HAND] and the control says so rather than doing nothing. */
+
+
   function cycleMacro(rec) {
     const s = rec.s;
     const all = M.macroList().filter((m) => m.kind !== 'trigger');
@@ -2152,14 +1886,9 @@ export function createModulation(host, port) {
   function wireGrab(rec) {
     const g = rec.dev.grab;
     let d = null;
-    g.title = 'drag to reorder — the rack runs left to right and run order is fire order';
-    /* ⚠ WAVE 84 · THE LISTENERS LIVE ON THE WINDOW, NOT ON THE HANDLE, AND THAT IS THE BUG JOSH HIT:
-       "letting go mouse when drag to reorganize LFOs does not work and stays stuck."  The move handler
-       calls `rebuildDevices()`, which REMOVES every device root and builds new ones — including the
-       very button the pointer was captured on.  A captured node that leaves the document takes its
-       capture and its pending `pointerup` with it, so the release never arrived and the drag never
-       ended.  The window outlives every rebuild, so the two live-drag listeners go there and are
-       taken off again when the gesture ends. */
+    g.title = 'Drag to reorder';
+
+
     let onMove = null, onUp = null;
     const release = () => {
       if (onMove) window.removeEventListener('pointermove', onMove);
@@ -2202,10 +1931,8 @@ export function createModulation(host, port) {
   }
 
   let clip = null;
-  /* WAVE 105 · A CARD'S MESSAGE GOES TO THE WINDOW'S ONE SEAT.  `.m2note` is `display: none` by
-     Josh's own ruling ("Remove the text within the curve windows"), so writing there was writing to
-     nobody.  The message is still the CARD's — it is prefixed with the device it came from — but it
-     is said where a message can be read. */
+
+
   const say = (rec, t) => {
     rec.say = t;
     if (rec.dev.ed.note) rec.dev.ed.note.textContent = t;   // kept for a host that un-hides the caption
@@ -2345,7 +2072,7 @@ export function createModulation(host, port) {
     }
     if (s.kind === 'env') return 'ENV — ' + envDrawn(s).toFixed(3) + ' s drawn over a ' + s.timeScale.toFixed(2) +
       ' s window. Drag the stages; FIT frames it.';
-    if (s.shapeMode !== 'curve') return M.WAVE_LABEL[s.wave] + ' — an analytic wave. Tap a shape to draw it.' +
+    if (s.shapeMode !== 'curve') return M.WAVE_LABEL[s.wave] + ' · tap a shape to draw it.' +
       (stochastic(s) ? ' Four cycles: each is a fresh hold.' : '');
     const info = curveInfo(s.points);
     return (info.preset ? PRESET_LABEL[info.preset] + (info.mirrored ? ' mirrored' : '') : 'CURVE') +
@@ -2456,7 +2183,7 @@ export function createModulation(host, port) {
     svg.addEventListener('pointerdown', (e) => {
       if (s.kind === 'audio') return;
       if (s.kind !== 'env' && s.shapeMode !== 'curve') {
-        say(rec, 'this is an analytic wave — tap a shape below to draw it, and then it is yours to bend');
+        say(rec, 'Select a shape below before editing the curve');
         return;
       }
       e.preventDefault();
@@ -2582,7 +2309,7 @@ export function createModulation(host, port) {
       const end=()=>{drag=null;};track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);
       track.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();select(key);shift(key,(e.deltaY<0?1:-1)*(e.shiftKey ? .1 : 1));},{passive:false});
       track.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();patch(key,{floorDb:M.AUDIO_DB_FLOOR,ceilingDb:M.AUDIO_DB_TOP});});
-      track.title='Drag either boundary to resize; drag inside or scroll to shift; double-click to reset. Fill = output, line = input dB.';
+    track.title='Resize at the edges; shift inside; double-click to reset';
       rows[key]={row,head,text,fill,zone,cursor,handles};
     }
     const hint=el('div','aud-range-hint',root,'Drag edges · scroll range · select band for timing');
@@ -2753,9 +2480,8 @@ export function createModulation(host, port) {
     }
     transport.xport.classList.toggle('on', clock.isRunning());
     transport.tempoNum.textContent = T.bpm.toFixed(T.bpm < 100 ? 1 : 0);
-    /* WAVE 83 · two decimals, not three (Josh: "have it only show up to .00 decimals").  The third
-       figure moved on its own at every tap and bought nothing: 1 BPM is 0.0167 Hz, so the second
-       decimal already resolves a single beat per minute. */
+
+
     transport.tempoHz.textContent = (T.bpm / 60).toFixed(2) + ' Hz';
     transport.sync.textContent = M.syncMode() === 'wall' ? 'WALL' : 'FREE';
     transport.sync.classList.toggle('on', M.syncMode() === 'wall');
@@ -2802,11 +2528,8 @@ export function createModulation(host, port) {
         rec.signal.style.setProperty('--fill', clamp01(m.value).toFixed(4));
         rec.vnum.textContent = (100 * m.value).toFixed(0) + '%';
       }
-      /* WAVE 79 · THE INDICATOR WEARS THE CURVE'S OWN COLOUR (Josh: "Have that indicator also match
-         the colors of the curves into the indicator").  The device draws its curve in Accent A for an
-         LFO and in the artifact's own derived ENV ink for an envelope; the ring on the macro that
-         curve is driving now reads the same, so a glance down the rail says WHICH source holds each
-         macro without reading the DRIVE line.  A macro on HAND keeps the neutral ring. */
+
+
       aria(rec.numSeat, P.macroMin ? m.name+' VALUE' : 'MACRO '+rec.index+' DEPTH', 0, 100, 100*shownDepth, (100*shownDepth).toFixed(0)+'%');
       if (rec.val) aria(rec.val, m.name + ' value', 0, 100, 100 * m.value, rec.vnum.textContent);
     }
@@ -2822,12 +2545,8 @@ export function createModulation(host, port) {
         dev.bank.A.classList.toggle('on', s.bank === 'A');
         dev.bank.B.classList.toggle('on', s.bank === 'B');
       }
-      /* WAVE 93 · THE OUT SEAT NAMES THE MACRO BY ITS NUMBER, NOT ITS NAME.  Josh: "OUT routing also
-         has to not be the renamed text of the macro name but rather be the number of the macro
-         similar to how the minimized version does it."  A macro is renameable, so the name is
-         whatever a user typed — it wraps, it truncates, and it changes the width of a fixed seat.
-         The NUMBER is what the rail's own indicator shows and it is one character; the minimised
-         device already reads that way (`.m2minnum`), so the full one now agrees with it. */
+
+
       const macros = M.macroList();
       const heldIx = macros.findIndex((m) => m.sourceId === s.id);
       const heldBy = heldIx >= 0 ? macros[heldIx] : null;
@@ -2854,12 +2573,7 @@ export function createModulation(host, port) {
       if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
                             dev.compactLfo.macroValue.textContent = heldBy ? heldBy.name : '--'; }
 
-      /* WAVE 101 · A COMPACT ENVELOPE IS ALWAYS FITTED.  Josh: "For ENV in compact mode, it should
-         automatically always be in 'fit' mode."  COMPACT hides the ↑ FIT ↓ column outright
-         (`.m2dev.m2cmp.env .m2zoom { display: none }`), so the one control that frames the picture is
-         not reachable there — a compact envelope could sit at whatever window the FULL card was left
-         on and show a flat line or a sliver.  FIT's own arithmetic, applied whenever the drawn length
-         has moved off the window by more than a hair, so it costs nothing on a settled card. */
+
       if (s.kind === 'env' && modeOf(s.id) === 'C') {
         const want = Math.min(M.ENV_MAX_S, Math.max(0.25, envDrawn(s) * 1.15));
         if (Math.abs(want - s.timeScale) > 1e-3) M.setSource(s.id, { timeScale: want });
@@ -3144,9 +2858,7 @@ export function createModulation(host, port) {
     performance: () => ({ calls: paintCalls, paints: paintRuns, ms: paintMs, averageMs: paintRuns ? paintMs / paintRuns : 0 })
   };
 
-  /* WAVE 75 · IT OPENS WITH AN LFO AND AN ENV (Josh, "have it by default have LFO and an ENV for
-     testing").  Only ever on a rack that is genuinely EMPTY — a browser that has saved a rack, or a
-     host that built one, keeps exactly what it had; this seeds a first run and nothing else. */
+
   if (devOrder().length === 0) { M.addSource('lfo'); M.addSource('env'); }
 
   rebuild();

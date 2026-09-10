@@ -26,9 +26,9 @@ export function createOrbit(host, api) {
   const drive = sw({ label: 'DRIVE  (changes ψ)', value: false, onChange: (v) => { cv.classList.toggle('drive', v); if (api.setStatus) api.setStatus(v ? 'DRIVE ON · changes c' : 'exact · per shell', v ? 'warn' : ''); } });
   bar.appendChild(drive.root);
   const hint = el('div', 'note', bar); hint.style.flex = '1 1 auto';
-  hint.innerHTML = 'drag a sphere: <b>⟨J₊⟩</b> or <b>⟨J₋⟩</b> alone is an SO(4) move that is <i>not</i> a spatial rotation; the <b>KEPLER</b> panel drags both together = the ordinary rotation D<sup>l</sup>(R).';
+  hint.innerHTML = 'Drag either sphere to apply one SO(4) rotor. Use KEPLER controls to rotate both as one spatial rotation.';
   const rows = el('div', 'orbit-rows', host);
-  el('div', 'note', host).innerHTML = '<b>EXACT.</b> The Schmidt spectrum is invariant under rotor pairs, but does not fully classify SO(4) orbits for n ≥ 3. Rank one means <b>separable rotors and nothing more</b>: |1,0⟩⊗|1,0⟩ = −0.5774·3s + 0.8165·3d₀ has Schmidt (1, 0, 0) and ⟨L⟩ = ⟨K⟩ = 0 — rank one, not coherent, no orbit. Coherence is one <b>SO(4)-invariant scalar</b>: |⟨L⟩|² + |⟨K⟩|² = (n−1)², saturated only when |⟨J₊⟩| = |⟨J₋⟩| = j, and that is what the label reads (to 1e-9). Its Kepler shadow uses e = |⟨K⟩|/n = ((n−1)/n)·sin(γ/2); the ellipse is an illustrative classical correspondence.';
+  el('div', 'note', host).innerHTML = '<b>Interpretation.</b> Schmidt values are unchanged by the two rotor controls. COHERENCE reaches 1 only when both rotor expectations are maximal. The Kepler ellipse is a classical shadow with eccentricity |⟨K⟩|/n.';
   const g = cv.getContext('2d');
   let lastVersion = -1, shells = [], lastObs = '', centres = [0, 0, 0], radius = 1, midY = 0, lastPaintObs = null, hovers = [], plot = null;
   /* WAVE 46 — the three panels carry no floating text.  "n2  e = 0.834  (rank > 1)" used to be stacked in the

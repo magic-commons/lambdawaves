@@ -29,12 +29,12 @@ function readRGB(g, name, fallback) {
 export function createMolecule(host, api) {
   let R = 2, kind = 'sigma_g', on = false, state = moState(kind, R);
   const r0 = el('div', 'row tight', host);
-  const onSw = sw({ label: 'MOLECULE ON', value: false, title: 'hand the FIELD to H₂⁺: two protons at ±R/2 on the z-axis, one electron in the LCAO space', onChange: (v) => { on = v; api.setOn(v); } });
+  const onSw = sw({ label: 'MOLECULE ON', value: false, title: 'Show H₂⁺ in the field', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
   r0.appendChild(knob({ label: 'R  (a₀)', min: 0.6, max: 8, value: 2, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; state = moState(kind, R); refresh(); api.repaint(true); if (api.onR) api.onR(v, false); } }).root);
   const stSeg = seg({ label: 'STATE', value: 'sigma_g', options: [
     { id: 'sigma_g', label: 'σg', title: 'bonding: (a + b)/√(2(1+S))' }, { id: 'sigma_u', label: 'σu', title: 'antibonding: (a − b)/√(2(1−S)), a nodal plane at z = 0' },
-    { id: 'on_A', label: 'ON A', title: 'the electron on proton A — it tunnels to B and back with period 2π/(E_u − E_g)' }],
+    { id: 'on_A', label: 'ON A', title: 'Start the electron on proton A' }],
     onChange: (v) => { kind = v; state = moState(kind, R); refresh(); api.repaint(true); } });
   r0.appendChild(stSeg.root);
   const cv = el('canvas', 'mol-c', host);
@@ -51,15 +51,15 @@ export function createMolecule(host, api) {
   /* the force on a proton is the GENERAL BASIS block's line now (wave 41, moview.js): F_elec, Z_AZ_B/R², F_HF,
      the Pulay term and its bound, for whichever basis is chosen — at the 1s LCAO it is this window's own number */
   rr.appendChild(roE.root); rr.appendChild(roD.root); rr.appendChild(roT.root); rr.appendChild(roP.root);
-  el('div', 'note', host).innerHTML = '<b>H₂⁺ in the 1s LCAO basis.</b> Two protons at ±R/2 on the z-axis, one electron. The three two-centre integrals S, J, K are <b>EXACT</b> closed forms (gated by direct quadrature); the two molecular orbitals σg, σu are the <b>VARIATIONAL</b> solutions of the 2×2 secular problem — an upper bound at every R, drawn with the <b>exact</b> Bates–Ledsham–Stewart energies as dots so the bound\'s cost is visible (LCAO: R_e = 2.49 a₀, D_e = 1.76 eV; exact: 2.00 a₀, 2.79 eV — the frozen 1s orbitals cannot contract toward the bond). The evolution is <b>EXACT</b> within the space: put the electron <b>ON A</b> and it tunnels to B and back with period 2π/(E_u − E_g), hydrogen\'s electron hopping between two protons. Position space only; the atom\'s windows stand down while the molecule holds the field.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> H₂⁺ uses bonding and antibonding combinations of two fixed 1s orbitals. The curves are upper bounds; dots show reference energies. ON A prepares tunnelling between the protons with period 2π/(E<sub>u</sub>−E<sub>g</sub>). Position space only.';
 
   function refresh() {
     const e = energies(R), eq = equilibrium(), T = tunnelPeriod(R);
     roE.set(`${e.Eg.toFixed(4)} · ${e.Eu.toFixed(4)}`, e.Eg < -0.5 ? 'ok' : 'warn');
     const ref = EXACT_REFERENCE.find((p) => Math.abs(p.R - R) < 1e-9);
-    roE.setSub(`S = ${e.S.toFixed(4)} · variational${ref ? ` · exact at this R: ${ref.E.toFixed(5)} (bound above by ${(e.Eg - ref.E).toFixed(4)})` : ''}`);
+    roE.setSub(`S ${e.S.toFixed(4)}${ref ? ` · reference ${ref.E.toFixed(5)} · gap ${(e.Eg - ref.E).toFixed(4)}` : ''}`);
     roD.set(`${eq.DeEV.toFixed(2)} · ${EXACT_DE_EV.toFixed(2)} eV`, '');
-    roD.setSub(`R_e ${eq.Re.toFixed(2)} · ${EXACT_RE.toFixed(2)} a₀ · the bound misses ${(EXACT_DE_EV - eq.DeEV).toFixed(2)} eV`);
+    roD.setSub(`R_e ${eq.Re.toFixed(2)} · reference ${EXACT_RE.toFixed(2)} a₀ · gap ${(EXACT_DE_EV - eq.DeEV).toFixed(2)} eV`);
     roT.set(`${T.toFixed(2)} a.u.`, 'ok'); roT.setSub(`E_u − E_g = ${(e.Eu - e.Eg).toFixed(4)} hartree at R = ${R.toFixed(2)}`);
     paint();
   }
@@ -71,7 +71,7 @@ export function createMolecule(host, api) {
     const Rmin = 0.6, Rmax = 8, Emin = -0.65, Emax = 0.1, L = 40, Rt = W - 10, Tp = 12;
     /* the caption is 380 px of type on a 264 px canvas and a canvas caption does not ellipsis (wave 41's lesson (ii),
        never applied here): it is measured, wrapped at its spaces, and it SETS the plot's floor (lesson (iii)). */
-    const CAP = 'dots = EXACT (Bates 1953) · LCAO is a bound from above';
+    const CAP = 'dots = reference · lines = LCAO basis';
     g.font = '8px ui-monospace, monospace';
     const capLines = []; { let ln = '';
       for (const word of CAP.split(' ')) { const nx = ln ? ln + ' ' + word : word; if (ln && g.measureText(nx).width > Rt - L) { capLines.push(ln); ln = word; } else ln = nx; }
@@ -95,7 +95,7 @@ export function createMolecule(host, api) {
     }
     for (const p of EXACT_REFERENCE) { g.fillStyle = ink(0.95); g.beginPath(); g.arc(x(p.R), y(p.E), 3, 0, 2 * Math.PI); g.fill();
       hovers.push({ kind: 'dot', key: 'x' + p.R, x: x(p.R), y: y(p.E), r: 3, colour: ink(1),
-        info: `EXACT (Bates 1953)  ·  R = ${p.R} a₀  ·  E = ${p.E.toFixed(4)} Eh` }); }
+        info: `reference · R = ${p.R} a₀ · E = ${p.E.toFixed(4)} Eh` }); }
     g.strokeStyle = ink(0.6); g.beginPath(); g.moveTo(x(R), Tp); g.lineTo(x(R), Bt); g.stroke();
     g.fillStyle = `rgb(${CG.join(',')})`; g.beginPath(); g.arc(x(R), y(Math.min(Emax, e.Eg)), 3.5, 0, 2 * Math.PI); g.fill();
     g.fillStyle = `rgb(${CU.join(',')})`; g.beginPath(); g.arc(x(R), y(Math.min(Emax, e.Eu)), 3.5, 0, 2 * Math.PI); g.fill();

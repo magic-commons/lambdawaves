@@ -84,13 +84,13 @@
     <canvas id="kepler" aria-hidden="true"></canvas>
     <div id="title"><span class="lam">λ</span><span class="word">WAVES</span><svg class="mark" viewBox="0 0 10 10" aria-hidden="true"><g transform="rotate(45 5 5)"><rect x="1.7" y="1.7" width="2.25" height="2.25" fill="#5ee7d8"/><rect x="3.95" y="1.7" width="2.25" height="2.25" fill="#78e1f0"/><rect x="6.2" y="1.7" width="2.25" height="2.25" fill="#f5f7fa"/><rect x="1.7" y="3.95" width="2.25" height="2.25" fill="#d97ce8"/><rect x="3.95" y="3.95" width="2.25" height="2.25" fill="#2b3f7a"/><rect x="6.2" y="3.95" width="2.25" height="2.25" fill="#5ee7d8"/><rect x="1.7" y="6.2" width="2.25" height="2.25" fill="#ffbe5a"/><rect x="3.95" y="6.2" width="2.25" height="2.25" fill="#d97ce8"/><rect x="6.2" y="6.2" width="2.25" height="2.25" fill="#78e1f0"/></g></svg><span class="ms">QWAVE-0 · HYDROGEN SHADOW LAB</span></div>
     <div id="badges"></div>
-    <button id="rackToggle" class="glass" type="button" aria-label="hide or show the rack" title="hide / show the rack (H hides everything; hover the right edge to peek)">◧</button>
+    <button id="rackToggle" class="glass" type="button" aria-label="hide or show the rack" title="Hide or show the rack">◧</button>
     <button id="rackAdd" class="glass" type="button" title="reopen a closed window">+</button>
-    <button id="rackFav" class="glass" type="button" aria-label="favourite layouts" title="favourite layouts: save this arrangement of windows, or load one back (layout only — never the physics)">☆</button>
+    <button id="rackFav" class="glass" type="button" aria-label="favourite layouts" title="Save or load a window layout">☆</button>
     <div id="rackAddList" class="glass" hidden></div>
     <div id="rackFavList" class="glass" hidden></div>
     <section id="notebook" class="nb" hidden aria-label="notebook" data-face="notes">
-      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div><span class="nb-tools"><button class="nb-mode" type="button" aria-label="edit or preview the notes" title="edit / preview (ctrl+enter) — markdown, $inline$ and $$display$$ maths">◐</button><button class="nb-projects-btn" type="button" aria-label="projects" title="projects: save, open, folders, recent">▤</button><button class="nb-about" type="button" aria-label="about λWAVES" title="about λWAVES (and back to the notes)">i</button><button class="nb-close" type="button" aria-label="close the notebook" title="close (J)">×</button></span></header>
+      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div><span class="nb-tools"><button class="nb-mode" type="button" aria-label="edit or preview the notes" title="Edit or preview the notebook">◐</button><button class="nb-projects-btn" type="button" aria-label="projects" title="projects: save, open, folders, recent">▤</button><button class="nb-about" type="button" aria-label="about λWAVES" title="about λWAVES (and back to the notes)">i</button><button class="nb-close" type="button" aria-label="close the notebook" title="close (J)">×</button></span></header>
       <div class="nb-face nb-notes">
         <textarea class="nb-text" spellcheck="false" placeholder="notes — markdown, $inline$ and $$display$$ maths; ctrl+enter previews — kept in this browser and in the project"></textarea>
         <div class="nb-view md"></div>
@@ -110,31 +110,27 @@
         <p class="ab-credit"><a href="https://play.google.com/store/apps/details?id=com.gputreats.orbitalexplorer" target="_blank" rel="noopener">‘Electron Orbitals’</a> Google Play Store App by Brian Johnson</p>
         <p class="ab-credit">Paul Falstad’s Math &amp; Physics Java Applets @ <a href="https://www.falstad.com/" target="_blank" rel="noopener">falstad.com</a></p>
         <p class="ab-credit ab-team">Seth Shultz · Beatriz Erranté · Independent research &amp; Assistance</p>
-        <p class="ab-fine">Made with</p>
-        <p class="ab-fine">Claude (Anthropic) · Gemini (Google Deepmind) · GPT (OpenAI)</p>
         <div class="ab-rule"></div>
         <p class="ab-fine">Type: <a href="./fonts/Spinwerad-OFL.txt" target="_blank" rel="noopener">LW&nbsp;Title</a>, a renamed subset of Spinwerad by gluk · <a href="./fonts/Roboto-OFL.txt" target="_blank" rel="noopener">Roboto</a> · <a href="./fonts/STIXTwoMath-OFL.txt" target="_blank" rel="noopener">STIX&nbsp;Two&nbsp;Math</a> — all SIL OFL 1.1, subset for this lab. Maths set with <a href="./vendor/katex/LICENSE" target="_blank" rel="noopener">KaTeX</a> (MIT; its <a href="./vendor/katex/fonts/OFL.txt" target="_blank" rel="noopener">fonts</a> SIL OFL 1.1) and <a href="./vendor/marked-LICENSE.md" target="_blank" rel="noopener">marked</a> (MIT).</p>
         <div class="ab-dumprow"><span>Copy dump</span><button class="nb-dump" type="button">COPY</button></div>
       </div>
-      <div class="nb-grip" title="drag to resize the notebook (works with touch: CSS resize does not)" aria-hidden="true"></div>
+      <div class="nb-grip" title="Drag to resize the notebook" aria-hidden="true"></div>
     </section>
     <div id="rackPeek" aria-hidden="true"></div>
     <div id="rackPeekL" aria-hidden="true"></div>
     <div id="sheet" class="glass" hidden>
-      <h3>WHAT IS EXACT, WHAT IS NOT</h3>
-      <p><b>EXACT ANALYTIC</b> — the 91 states n ≤ 6 are closed-form <m>R<sub>nl</sub>(r)Y<sub>l</sub><sup>m</sup>(θ,φ)</m> (complex Y, Condon–Shortley phase, atomic units); <m>E<sub>n</sub> = −1/(2n²)</m>; field-free evolution is <m>c<sub>a</sub>(t) = e<sup>−iE<sub>a</sub>t</sup>c<sub>a</sub>(0)</m>, a pure phase per mode. Norm, <m>⟨E⟩</m> and the autocorrelation are computed from these coefficients, not from the grid.</p>
-      <p><b>EXACT REAL REPRESENTATION</b> — SHADOW reads the same <m>c(t)</m> as <m>q = √2 Re c</m>, <m>p = √2 Im c</m>. For diagonal <m>H</m> that is exactly a set of uncoupled harmonic oscillators, and <m>H<sub>C</sub> = ⟨H⟩</m>. It is an equation-level identity, not a claim about ontology.</p>
-      <p><b>NUMERICAL</b> — FIELD is ψ sampled on an N³ grid (f16), trilinearly filtered and ray-marched. Voxel values agree with the closed form to ~10<sup>−5</sup>; the picture is limited by grid resolution and the transfer function, never by the physics. Quality settings change only this estimate.</p>
-      <p><b>TRUNCATED / MASKED</b> — muting or soloing removes modes from the reconstruction only; the state keeps them and the badge says what fraction of the norm you are looking at. A finite basis (n ≤ 6) is not the whole atom.</p>
-      <p><b>Camera</b> orbit, slice and clip are observer operations. <b>STATE ROTATE</b>, <b>STARK ROTATE</b> (<m>e<sup>−iθK<sub>z</sub></sup></m>, an <m>SO(4)</m> rotation) and <b>DEFECT WAIT</b> (<m>e<sup>iαL²</sup></m>, not one) are physical operations on <m>|ψ⟩</m>. They are never the same thing.</p>
-      <p><b>FRONTIER (2026-09-03)</b> — ORBIT: per shell, the Schmidt spectrum is invariant under SO(4), but is incomplete for n ≥ 3. Coherent shells have both spin expectations of length j; rank one alone means separable. The Kepler shadow uses e = |⟨K⟩|/n. VORTEX: the nodal lines of ψ on every coaxial circle are the unimodular roots of P(w) = Σ g<sub>m</sub>w<sup>m−m<sub>min</sub></sup> — exact where sampled; three stretched modes reconnect at the roots of Φ(r) = Â₀² − 4|Â₊Â₋| at two phases of one beat. LADDER: the Rydberg revival is a spectral observable — its own register on any n; the envelope is an Airy function, its maximiser has the integer series −3β + 54β³ − 4860β⁵ + …, and a comb of spacing d revives to 1 iff the reduced denominator of 4d³/3n̄ divides 6. The shell over 𝔽<sub>q</sub> has dimension n² iff q > n−1 (and n(2n²+1)/3 over 𝔽₂) — a sheet fact, not a control.</p>
+      <h3>MODEL AND DISPLAY</h3>
+      <p><b>STATE</b> — The register contains the 91 hydrogen basis states with <m>n ≤ 6</m>. Norm, energy, and autocorrelation come from their coefficients.</p>
+      <p><b>SHADOW</b> — The same coefficients appear as <m>q = √2 Re c</m> and <m>p = √2 Im c</m>. This is another view of the quantum state.</p>
+      <p><b>FIELD</b> — The renderer samples ψ on the selected 3D grid and ray-marches it. Grid size and quality change the picture, not the state.</p>
+      <p><b>MASKS</b> — Mute and solo affect the reconstruction only. The state keeps every coefficient, and the status shows how much norm is visible.</p>
+      <p><b>VIEW AND STATE</b> — Camera, slice, and clip controls change the view. State transforms change <m>|ψ⟩</m>.</p>
     </div>
     <!-- TWO LEGENDS, ONE BAR (wave 59).  `.keys` is the keyboard one and `.touch` is the phone's; skin.css's
          phone block swaps which is displayed, because suppressing the whole bar there took away the TOUCH
          gestures along with the keys — on the one device where discovery is hardest.  `shift+click = place
          electron 1` is gone: it is guarded on `helium && helium.on` and HELIUM ships folded and off, so it
          was the one clause of seven that did nothing on the screen that advertised it. -->
-    <div id="hint" class="glass"><span class="keys">drag to orbit · ctrl+drag = bow · space = play · H = hide · N = notes · ? = every key</span><span class="touch">drag to turn it · pinch to zoom · ◧ opens the rack, and ▶ is at the top of it</span></div>
     <div id="transport" class="glass mini"></div>
     <!-- WAVE 55 · THE FLOAT LAYER.  Every window that comes off a rack lives here: one absolutely
          positioned layer over the stage, pointer-transparent itself so the canvas gestures underneath
@@ -146,24 +142,18 @@
          without WebGPU ever sees, and until wave 59 it could not be read and could not be dismissed. -->
     <div id="banner" role="alert" hidden><button class="banner-x" type="button" aria-label="dismiss this message" title="dismiss">×</button><h3>WebGPU unavailable</h3><p></p></div>
   </div>
-  <!-- THE BUSY MARK (wave 48, Josh): the header's own 3×3 diamond, cloned by rack.js, parked at the pointer while
-       LW.busy is counting.  It lives OUTSIDE #stage so nothing on the stage can clip it, and every motion it makes is
-       a CSS animation — a blocked main thread must not be able to stop it. -->
+
+
   <div id="busyMark" aria-hidden="true" hidden></div>
-  <!-- THE PHOTOSENSITIVITY WARNING (wave 48, Josh: the text, design, layout, symbol and function copied from the
-       MANDELBROT app; ours is a frost-glass pane over the RUNNING lab, since λWAVES has no main menu to sit in
-       front of).  Shown once per browser, remembered in the settings key, brought back by SETTINGS · SHOW THE
-       WARNING AGAIN.  Ink is the RESOLVED theme's, so the pane obeys LIGHT / DARK / SYSTEM like everything else. -->
+
+
   <div id="warnPane" role="dialog" aria-modal="true" aria-labelledby="warnTitle" aria-describedby="warnBody" tabindex="-1" hidden>
     <div class="warn-card">
       <svg class="warn-sign" viewBox="0 0 120 106" role="img" aria-label="Caution triangle filled with a λWAVES orbital, the exclamation mark knocked out of it">
         <defs>
           <clipPath id="warnTri"><path d="M 52.20 21.50 A 9 9 0 0 1 67.80 21.50 L 104.20 84.50 A 9 9 0 0 1 96.41 98 L 23.59 98 A 9 9 0 0 1 15.80 84.50 Z"/></clipPath>
-          <!-- WAVE 53 (Josh, board #41): the "!" is KNOCKED OUT of the image-filled triangle, as in the MANDELBROT
-               reference — it used to be drawn on top in currentColor.  A luminance mask: white keeps the image,
-               BLACK cuts the hole, so whatever is behind the pane shows through the stroke and the dot.  Nothing
-               here reads the pane's own background or the theme, which is why it works on either and over both a
-               light and a dark stage: a hole is a hole in every colour. -->
+
+
           <mask id="warnBang" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="106">
             <rect x="0" y="0" width="120" height="106" fill="#fff"/>
             <g class="warn-bang" fill="#000" stroke="#000" stroke-width="3.5" stroke-linejoin="round">
@@ -172,8 +162,8 @@
             <circle class="warn-bang" cx="60" cy="78" r="5.6" fill="#000"/>
           </mask>
         </defs>
-        <!-- THE GRAPHIC Josh sent: a 512×512 λWAVES orbital, clipped to the rounded triangle and zoomed so the
-             lobes fill it rather than the render's black margin. Swap lab/img/warning-orbital.png to change it. -->
+
+
         <image href="./img/warning-orbital.png" x="-14" y="-12" width="148" height="148" clip-path="url(#warnTri)" mask="url(#warnBang)" preserveAspectRatio="xMidYMid slice"/>
       </svg>
       <h1 id="warnTitle" class="warn-title">PHOTOSENSITIVITY WARNING</h1>

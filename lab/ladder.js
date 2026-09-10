@@ -18,7 +18,7 @@ export function createLadder(host, api = {}) {
   ui.d = knob({ label: 'COMB <m>d</m>', min: 0, max: 24, value: 0, step: 1, fmt: (v) => v === 0 ? 'all n' : v.toFixed(0), onInput: (v) => { P.d = Math.round(v); schedule(); } });
   ui.teeth = knob({ label: 'TEETH <m>±</m>', min: 2, max: 12, value: 8, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { P.teeth = Math.round(v); schedule(); } });
   for (const k of ['nbar', 'sigma', 'd', 'teeth']) r1.appendChild(ui[k].root);
-  const gClk = group(host, 'CLOCKS  (exact: <m>T_cl = 2πn̄³ · T_rev = 4πn̄⁴/3 · T_sr = πn̄⁵</m>)');
+  const gClk = group(host, 'CLOCKS');
   /* WAVE 69 · THE SUBSTITUTION, UNDER THE FINGER.  The three clocks are closed forms in n̄ alone, so
      this line is exact at every pixel of the knob's travel — and it lands INSTANTLY, while the
      revival scan behind it (revivalScan is 400 periods × 20 samples) is still on its way.  That gap
@@ -30,23 +30,23 @@ export function createLadder(host, api = {}) {
   const r2 = el('div', 'row tight', gClk);
   ui.tcl = readout({ label: '<m>T_cl</m>  a.u.', value: '—' }); ui.trev = readout({ label: '<m>T_rev</m>  a.u.', value: '—', sub: '' }); ui.tsrClk = readout({ label: '<m>T_sr</m>  a.u.', value: '—' }); ui.beta = readout({ label: '<m>β₃ · β₄</m>', value: '—', sub: 'cubic · quartic strength' });
   for (const k of ['tcl', 'trev', 'tsrClk', 'beta']) r2.appendChild(ui[k].root);
-  const gLand = group(host, 'REVIVAL LANDSCAPE  ·  max <m>|A|</m> in each classical period  (EXACT)');
+  const gLand = group(host, 'REVIVAL LANDSCAPE');
   const land = el('div', 'ladder-c', gLand); const lcv = el('canvas', '', land);
-  const gFine = group(host, 'AT <m>T_rev</m>  ·  <m>|A(T_rev + x·T_cl)|</m>  ·  solid EXACT · dashed PREDICTION (Poisson sum of Airy envelopes)');
+  const gFine = group(host, 'AT <m>T_rev</m>');
   const fine = el('div', 'ladder-c', gFine); const fcv = el('canvas', '', fine);
   const r3 = el('div', 'row tight', host);
   ui.peak = readout({ label: 'PEAK  <m>|A|max</m>  (measured)', value: '—', sub: '' }); ui.pred = readout({ label: 'AIRY LAW  <m>|I|max(β₃)</m>', value: '—', sub: '' }); ui.atTrev = readout({ label: '<m>|A(T_rev)|</m>', value: '—' });
   for (const k of ['peak', 'pred', 'atTrev']) r3.appendChild(ui[k].root);
-  const gSuper = group(host, 'SUPERREVIVAL  ·  <m>T_sr = πn̄⁵</m>  ·  the CUSP: at <m>T_sr</m> the cubic phase vanishes and the QUARTIC is what is left');
+  const gSuper = group(host, 'SUPERREVIVAL');
   const r5 = el('div', 'row tight', gSuper);
   ui.tsr = readout({ label: '<m>T_sr</m>  a.u.', value: '—', sub: '' }); ui.cls = readout({ label: '<m>n̄ mod 4</m>  ·  CLASS', value: '—', cls: 'two', sub: '' });
-  ui.asr = readout({ label: '<m>|A(T_sr)|</m>  EXACT', value: '—', sub: 'integer phase reduction' }); ui.psr = readout({ label: 'CUSP LAW  (Pearcey)', value: '—', sub: '' });
+  ui.asr = readout({ label: '<m>|A(T_sr)|</m>', value: '—', sub: 'integer phase reduction' }); ui.psr = readout({ label: 'CUSP LAW  (Pearcey)', value: '—', sub: '' });
   for (const k of ['tsr', 'cls', 'asr', 'psr']) r5.appendChild(ui[k].root);
-  const gArith = group(host, 'THE ARITHMETIC  ·  <m>a/b = 4d³/3n̄</m>  ·  DEAF (peak 1) iff <m>b | 6</m>  (Fermat: <m>m³ ≡ m mod b</m>)');
+  const gArith = group(host, 'COMB ARITHMETIC');
   const r4 = el('div', 'row tight', gArith);
   ui.frac = readout({ label: '<m>a / b</m>', value: '—', sub: '' }); ui.verdict = readout({ label: 'VERDICT', value: '—', cls: 'two', sub: '' }); ui.cubic = readout({ label: 'CUBIC-LEVEL <m>A(p; a/b)</m>', value: '—', sub: '' }); ui.floor = readout({ label: 'PARSEVAL FLOOR <m>‖p‖₂/‖p‖₁</m>', value: '—' });
   for (const k of ['frac', 'verdict', 'cubic', 'floor']) r4.appendChild(ui[k].root);
-  el('div', 'note', host).innerHTML = '<b>EXACT · SPECTRAL.</b> The revival hears the packet, not the ladder: a comb of spacing d revives perfectly iff the reduced denominator of 4d³/3n̄ divides 6; every other packet sits between the Parseval floor and 1. The FIELD cannot draw n > 6 — this window is the spectrum alone, its own register.';
+  el('div', 'note', host).innerHTML = '<b>Revival.</b> The packet’s populated levels determine its return height and timing. A regular comb can revive fully; other packets remain between the Parseval floor and 1. Levels above n = 6 appear here but are not sent to the field renderer.';
 
   let pending = 0, last = null, dirty = true, running = false, task = null, generation = 0;
   let active = api.active ? !!api.active() : true;
@@ -85,7 +85,7 @@ export function createLadder(host, api = {}) {
     const reg = clocks.beta3 <= 0.25 ? ['tight', 'ok'] : clocks.beta3 <= 0.5 ? ['usable', ''] : clocks.beta3 <= 0.8 ? ['loose', 'warn'] : ['OUT OF RÉGIME', 'warn'];
     ui.tsr.set(fmtT(sup.Tsr)); ui.tsr.setSub(`= ${(sup.Tsr / clocks.Trev).toFixed(2)} T_rev · γ_sr = ${sup.gamma.toFixed(4)}`);
     ui.cls.set(`${sup.cls}  ·  ${sup.kind.toUpperCase()}`, sup.cls === 0 ? 'ok' : sup.cls === 2 ? 'warn' : ''); ui.cls.setSub(sup.note);
-    ui.asr.set(sup.exact.toFixed(6)); ui.asr.setSub(`exact for any n̄: t/(4πn²) = n̄⁵/(4n²) is rational`);
+    ui.asr.set(sup.exact.toFixed(6)); ui.asr.setSub(`t/(4πn²) = n̄⁵/(4n²)`);
     ui.psr.set(sup.predicted === null ? '—' : sup.predicted.toFixed(6), sup.trustworthy ? '' : 'warn');
     ui.psr.setSub(sup.trustworthy ? `quartic envelope + aliases · quintic γ₅ = ${sup.quintic.toExponential(1)}` : `quintic γ₅ = ${sup.quintic.toExponential(1)} — too large: the k-expansion is not converged`);
     ui.tcl.set(fmtT(clocks.Tcl)); ui.tsrClk.set(fmtT(clocks.Tsr));   /* WAVE 69: `ui.tsr` was assigned TWICE — the CLOCKS readout and the SUPERREVIVAL one had the same key, so the second overwrote the first and the CLOCKS T_sr has printed an em dash since it was written.  Two readouts, two names. */ ui.trev.set(fmtT(clocks.Trev)); ui.trev.setSub(`= ${(clocks.Trev / clocks.Tcl).toFixed(1)} T_cl · ${(clocks.Trev * 24.188843e-3).toExponential(2)} fs`); ui.tsr.set(fmtT(clocks.Tsr));
@@ -100,7 +100,7 @@ export function createLadder(host, api = {}) {
       ui.cubic.set(comb.peak.toFixed(6)); ui.cubic.setSub(`max over the classical phase x; at x = ${comb.x.toFixed(4)}`);
       ui.floor.set(comb.floor.toFixed(6));
     } else {
-      ui.frac.set('—'); ui.frac.setSub('Gaussian packet on every n'); ui.verdict.set('no comb: the arithmetic does not enter', ''); ui.verdict.setSub('Ω₁ is dead: the revival is analytic (Airy), not arithmetic');
+      ui.frac.set('—'); ui.frac.setSub('Gaussian packet on every n'); ui.verdict.set('Gaussian packet', ''); ui.verdict.setSub('Airy envelope without comb arithmetic');
       ui.cubic.set('—'); ui.cubic.setSub(''); ui.floor.set((Math.sqrt(pops.reduce((s, q) => s + q.p * q.p, 0))).toFixed(6));
     }
     paintLand(); paintFine();

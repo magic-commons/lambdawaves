@@ -1,26 +1,5 @@
-/* rotor4.js — 4D rotations as quaternion PAIRS, ported from the 4D ENGINE's grand-tour library.
- *
- * SOURCE: `MANDELBROT APP/project/research/lab/4dgrand/tour4.mjs` and its theory note `research/RES-4DGRAND.md`
- * (Josh's own work; conventions kept identical so the two apps agree bit for bit where they overlap).
- *
- * WHY IT BELONGS HERE.  λWAVES already lives on the same group: a hydrogen shell is V_j ⊗ V_j and SO(4) acts as a
- * PAIR of SU(2)s (the print's Theorem B.1/B.7), and the coherent states are the Grassmannian Gr⁺(2,4) ≅ S² × S².
- * The 4D engine reaches the same S² × S² from the other side — as the manifold of oriented 2-planes a camera can
- * look at — so its rotor algebra, its two-sphere control surface and its holomorphy law transfer unchanged:
- *
- *   ROTATION      x ↦ q_L · x · conj(q_R)  on quaternions x ∈ ℝ⁴          (`spinAction`)
- *   THE PLANE     n₊ = Ad(q̄_L)ê₁ , n₋ = −Ad(q̄_R)ê₁   on two unit spheres  (`spherePoint`)
- *   ANGLES        for q_L = exp(A û), q_R = exp(B v̂) the two rotation angles are A ± B, while the SPHERES turn
- *                 by 2A and 2B; B = 0 is left-isoclinic                    (`principalAngles`, `classifyManeuver`)
- *   HOLOMORPHY    the motion is U(2) ⊂ SO(4) — complex-linear — iff q_L commutes with i, and since Ad of a unit
- *                 complex fixes ê₁ that is exactly: **a motion is holomorphic iff n₊ never moves**   (`isHolomorphic`)
- *
- * In the instrument's own terms the last line reads: **driving only the MINUS rotor is a holomorphic motion of the
- * shell** — which is what ORBIT's second sphere already does, and what HOLO mode names.
- *
- * One warning carried over from their notes, because it cost them a bug: the (q_L, q_R) ~ (−q_L, −q_R) double
- * cover is invisible on screen but not in a checksum, so anything saved must be canonicalised first.
- */
+
+
 export const INV_SQRT2 = 1 / Math.SQRT2;
 export const BIVECTOR_PLANES = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
 export const E0 = [1, 0, 0, 0], E1 = [0, 1, 0, 0], E2 = [0, 0, 1, 0], E3 = [0, 0, 0, 1];

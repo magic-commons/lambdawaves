@@ -22,20 +22,20 @@ let CI_CURVE = null;
 export function createH2(host, api) {
   let on = false, active = api.active ? !!api.active() : true, curveTask = null, which = 'triplet', R = 6, ke = 0.02, run = null, kappa = 300, showCI = true;   // κ: nuclear time per logical time unit (a DISPLAY choice)
   const r0 = el('div', 'row tight', host);
-  const onSw = sw({ label: 'H₂ ON', value: false, title: 'hand the FIELD to two hydrogen atoms: the Heitler–London one-electron density on two moving nuclei', onChange: (v) => { on = v; api.setOn(v); } });
+  const onSw = sw({ label: 'H₂ ON', value: false, title: 'Show the H₂ density in the field', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
   const wSeg = seg({ label: 'SPIN STATE', value: 'triplet', options: [{ id: 'singlet', label: 'SINGLET (bond)' }, { id: 'triplet', label: 'TRIPLET (repel)' }], onChange: (v) => { which = v; run = null; refresh(); api.repaint(true); } });
   r0.appendChild(wSeg.root);
   /* WAVE 58 — THE CORRELATED PAIR IS A PAIR, AND IT CAN STAND DOWN.  Four curves on one 256-px canvas is a lot of
      ink for a card whose first claim is Heitler–London's; the switch takes the STO-3G pair and its own dissociation
      line away together, because RHF and FCI mean nothing apart — the whole point is the DISTANCE between them. */
-  const ciSw = sw({ label: 'CORRELATED PAIR', value: true, title: 'draw the STO-3G pair: full CI (exact in this basis) and restricted Hartree-Fock (variational), with their own H + H limit — the gap between them IS the correlation energy', onChange: (v) => { showCI = v; paint(); } });
+  const ciSw = sw({ label: 'CORRELATED PAIR', value: true, title: 'Show STO-3G full-CI and restricted Hartree-Fock curves', onChange: (v) => { showCI = v; paint(); } });
   r0.appendChild(ciSw.root);
   const r1 = el('div', 'row tight', host);
   r1.appendChild(knob({ label: 'R  (a₀)', min: 0.6, max: 10, value: 6, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; run = null; refresh(); api.repaint(true); } }).root);
   r1.appendChild(knob({ label: 'COLLIDE  KE', min: 0.002, max: 0.1, value: 0.02, log: true, fmt: (v) => v.toFixed(3) + ' Eh', onInput: (v) => { ke = v; } }).root);
   r1.appendChild(knob({ label: 'NUCLEAR CLOCK ×', min: 20, max: 2000, value: 300, log: true, fmt: (v) => '×' + v.toFixed(0), onInput: (v) => { kappa = v; } }).root);
-  r1.appendChild(trig({ label: 'COLLIDE', title: 'throw the two atoms at each other from R = 8 with this relative kinetic energy; the nuclei move classically on the chosen curve', onFire: () => { run = { t0: api.now(), traj: collide(8, -Math.sqrt(2 * ke / MU_H2), which, { dt: 2, steps: 40000 }) }; R = 8; refresh(); api.repaint(true); } }).root);
+  r1.appendChild(trig({ label: 'COLLIDE', title: 'Launch the nuclei from R = 8 on the selected curve', onFire: () => { run = { t0: api.now(), traj: collide(8, -Math.sqrt(2 * ke / MU_H2), which, { dt: 2, steps: 40000 }) }; R = 8; refresh(); api.repaint(true); } }).root);
   const cv = el('canvas', 'mol-c', host); const g = cv.getContext('2d');
   const rr = el('div', 'row tight', host);
   const roE = readout({ label: 'E  singlet · triplet  (hartree)', value: '—', sub: '' });
@@ -47,16 +47,16 @@ export function createH2(host, api) {
      readouts is the comparison, and burying one of them in the other's caption hid exactly that. */
   const roW = readout({ label: 'WEINBAUM 1933  E · ζ', value: '—', sub: '' });
   rr.appendChild(roE.root); rr.appendChild(roD.root); rr.appendChild(roC.root); rr.appendChild(roCI.root); rr.appendChild(roW.root);
-  el('div', 'note', host).innerHTML = '<b>H₂, Heitler–London 1927.</b> Two electrons on two protons: Ψ± = [a(1)b(2) ± b(1)a(2)]/√(2(1±S²)). All six integrals are <b>EXACT</b> closed forms (Sugiura\'s exchange integral with the exponential integral, gated against the tables); the energies are <b>VARIATIONAL</b>: R_e = 1.64 a₀, D_e = 3.14 eV against the exact 1.40 a₀, 4.75 eV, drawn as a dot. The triplet is repulsive at every R — <b>Pauli repulsion is the electrostatics of the exchange density</b>. <b>COLLIDE</b> throws the atoms at each other: the nuclei move classically on the curve (Born–Oppenheimer, μ = m_p/2 = 918 electron masses) with a NUCLEAR CLOCK that runs faster than the electron clock — a display choice, labelled. On the triplet they bounce; on the singlet they fall into the bond well and, with nothing to carry the energy away, climb back out. The cloud is the Heitler–London <b>one-electron density</b>, drawn as an incoherent sum of σg and σu because that density is not the square of any single orbital: correlation on screen. <b>WAVE 49 — THE CORRELATED CURVES</b> (lab/h2ci.js, no dependencies): the thin line is <b>STO-3G full CI</b> and the dashed one <b>STO-3G RHF</b>. They differ by the <b>correlation energy</b> (0.0206 hartree at R = 1.4, where RHF = −1.116714 and FCI = −1.137276 — Szabo–Ostlund, gated) and they separate without limit as the atoms part: at R = 8 a₀ the restricted determinant sits <b>0.32 hartree above</b> FCI, which has already reached 2E(H) on its own basis. A closed shell cannot dissociate. The Slater side is <b>Weinbaum 1933</b> — Heitler–London plus the ionic term with ζ optimised — reaching −1.14772 and D<sub>e</sub> = 4.02 eV against Heitler–London’s 3.16, printed at the marker. <b>WHICH CURVE IS WHICH, plainly (wave 58).</b> Heitler–London, Weinbaum and STO-3G <b>RHF are VARIATIONAL</b> — each is a bound from above, and each can only be improved by widening what it is allowed to be. <b>STO-3G FCI is EXACT IN THIS BASIS</b>: it is every determinant the two orbitals can make, so nothing is left to add without adding functions, and it is <b>not</b> the exact H₂ — the dot at (1.40, −1.1745) is, and FCI misses it by 0.037 hartree because a minimal basis is a minimal basis. The two dashed rules are <b>two different dissociation limits and say so</b>: −1 exactly, which is two real hydrogen atoms, and −0.933164, which is two <i>STO-3G</i> hydrogen atoms, 4.7e-4 higher. FCI arrives at the second one; RHF leaves the top of the box instead. The <b>CORRELATED PAIR</b> switch takes both curves and that second rule away together, because the pair is the point and either half alone is not.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> Heitler–London gives singlet and triplet energy bounds from two 1s orbitals. The chart can add STO-3G RHF and full-CI curves; full CI includes all determinants in that basis, while the reference dot represents the physical molecule. COLLIDE moves classical nuclei on the selected curve.';
   function refresh() {
     const e = h2Energies(R), eq = h2Equilibrium();
     roE.set(`${e.singlet.toFixed(4)} · ${e.triplet.toFixed(4)}`, e.singlet < -1 ? 'ok' : 'warn'); roE.setSub(`S = ${e.S.toFixed(4)} · J′ = ${e.J2.toFixed(4)} · K′ = ${e.K2.toFixed(4)} at R = ${R.toFixed(2)}`);
-    roD.set(`${eq.DeEV.toFixed(2)} · ${EXACT_H2.DeEV.toFixed(2)} eV`, ''); roD.setSub(`R_e ${eq.Re.toFixed(2)} · ${EXACT_H2.Re.toFixed(2)} a₀ · variational`);
+    roD.set(`${eq.DeEV.toFixed(2)} · ${EXACT_H2.DeEV.toFixed(2)} eV`, ''); roD.setSub(`R_e ${eq.Re.toFixed(2)} · reference ${EXACT_H2.Re.toFixed(2)} a₀`);
     { const c = sto3gH2(R), wb = weinbaumOptimal(R, { iters: 24 }), lim = 2 * sto3gHydrogen().E;   // the correlated numbers AT the marker (24 golden steps: 3e-6 on ζ, 1e-11 on E — a readout, on a knob drag)
       roCI.set(`${c.rhf.toFixed(6)} · ${c.fci.toFixed(6)}`, c.fci < lim ? 'ok' : '');
-      roCI.setSub(`FCI is EXACT IN THIS BASIS · RHF is VARIATIONAL above it · correlation ${(c.fci - c.rhf).toFixed(6)} · RHF − FCI ${(c.rhf - c.fci).toFixed(4)} (→ ∞ as R → ∞: a closed shell cannot dissociate) · H + H on this basis = ${lim.toFixed(6)}`);
+      roCI.setSub(`FCI ${c.fci.toFixed(6)} · RHF ${c.rhf.toFixed(6)} · gap ${(c.rhf - c.fci).toFixed(4)} · basis limit ${lim.toFixed(6)}`);
       roW.set(`${wb.fci.toFixed(6)} · ${wb.zeta.toFixed(4)}`, wb.fci < c.fci ? 'ok' : '');
-      roW.setSub(`the same 2 × 2 CI on SLATER orbitals with ζ free — VARIATIONAL, and below STO-3G's FCI by ${(c.fci - wb.fci).toFixed(6)} at this R · ionic mixing λ = ${wb.lambda.toFixed(4)} · D_e ${((-1 - wb.fci) * EV).toFixed(3)} eV against Heitler–London's 3.16 and the exact 4.75`); }
+      roW.setSub(`Slater orbitals · ζ free · ionic mix ${wb.lambda.toFixed(4)} · D_e ${((-1 - wb.fci) * EV).toFixed(3)} eV`); }
     paint();
   }
   function prepare() {
@@ -84,8 +84,8 @@ export function createH2(host, api) {
     /* the caption is 340 px of type on a 256 px canvas: it is measured, wrapped at its spaces, and it SETS the
        plot's floor — clipping it to one line lost the half that says WHAT the bound is (moleculeview's lesson) */
     g.font = '8px ui-monospace, monospace';
-    const CAP = 'dot = EXACT H₂ (1.40 a₀, −1.1745) · HL is a bound from above'
-      + (showCI ? ' · thin = STO-3G FCI, EXACT in this basis · dashed = STO-3G RHF, variational above it' : ' · the correlated pair is switched off');
+    const CAP = 'dot = reference H₂ · HL = Heitler–London'
+      + (showCI ? ' · thin = STO-3G FCI · dashed = STO-3G RHF' : ' · correlated pair off');
     const capLines = []; { let ln = '';
       for (const word of CAP.split(' ')) { const nx = ln ? ln + ' ' + word : word; if (ln && g.measureText(nx).width > Rt - L) { capLines.push(ln); ln = word; } else ln = nx; }
       if (ln) capLines.push(ln); }
@@ -98,7 +98,7 @@ export function createH2(host, api) {
     g.strokeStyle = T.ink(0.3); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(L, y(-1)); g.lineTo(Rt, y(-1)); g.stroke(); g.setLineDash([]);
     g.fillStyle = T.ink(0.7); g.textAlign = 'right'; g.fillText('H + H', L - 3, y(-1));      // the gutter's one end value — the EXACT one, 2 × (−½)
     hovers.push({ kind: 'line', key: 'limit-exact', points: [L, y(-1), Rt, y(-1)], lw: 1, colour: T.ink(1),
-      info: 'H + H, EXACTLY  ·  two hydrogen atoms at infinity, 2 × (−½) = −1 Eh  ·  the dissociation limit of the real molecule' });
+      info: 'H + H reference · dissociation limit −1 Eh' });
     for (const [key, rgb, what] of [['singlet', nRGB(2), 'the bond'], ['triplet', vividInk([255, 190, 90]), 'Pauli repulsion at every R']]) {
       const col = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.95)`, pts = [];
       g.strokeStyle = col; g.lineWidth = key === which ? 2.2 : 1.2; g.beginPath();
@@ -137,7 +137,7 @@ export function createH2(host, api) {
     }
     g.fillStyle = T.fg(0.95); g.beginPath(); g.arc(x(EXACT_H2.Re), y(EXACT_H2.E), 3, 0, 2 * Math.PI); g.fill();
     hovers.push({ kind: 'dot', key: 'exact', x: x(EXACT_H2.Re), y: y(EXACT_H2.E), r: 3, colour: T.fg(1),
-      info: `EXACT H₂  ·  R_e = ${EXACT_H2.Re} a₀  ·  E = ${EXACT_H2.E.toFixed(4)} Eh` });
+      info: `reference H₂ · R_e = ${EXACT_H2.Re} a₀ · E = ${EXACT_H2.E.toFixed(4)} Eh` });
     const e = eNow[which];
     g.strokeStyle = T.ink(0.5); g.beginPath(); g.moveTo(x(R), Tp); g.lineTo(x(R), Bt); g.stroke();
     g.fillStyle = T.fg(1); g.beginPath(); g.arc(x(R), y(e), 3.5, 0, 2 * Math.PI); g.fill();
