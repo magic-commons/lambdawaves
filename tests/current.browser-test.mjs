@@ -35,6 +35,12 @@ try {
  const opened=await g.ev(`const p=__LW.layout.projects,n=__LW.layout.notebook;n.text='saved notebook';p.save('acceptance/new');n.text='temporary edit';const ok=p.open('acceptance/new');return {ok,text:n.text,subtitle:n.subtitle,dirty:p.dirty}`);
  assert.deepEqual(opened,{ok:true,text:'saved notebook',subtitle:'edited subtitle',dirty:false});
  console.log('PASS new project save/open round trip restores notes and subtitle');
+ const longNotebook=await g.ev(`const p=__LW.layout.projects,n=__LW.layout.notebook;
+  const text=Array.from({length:30},(_,i)=>'## Section '+(i+1)+'\\n\\nParagraph '+(i+1)).join('\\n\\n');
+  n.text=text;p.save('acceptance/long-notebook');n.text='temporary';p.open('acceptance/long-notebook');
+  const view=document.querySelector('#notebook .nb-view');return {last:n.html.includes('Section 30'),more:!!view.querySelector('.nb-more'),scrolls:view.scrollHeight>view.clientHeight};`);
+ assert.deepEqual(longNotebook,{last:true,more:false,scrolls:true});
+ console.log('PASS project landing renders the complete Markdown notebook and scrolls instead of clipping it');
  const malformed = await g.ev(`const key='lambdawaves.q0.projects',old=localStorage.getItem(key);try{
   localStorage.setItem(key,'{"items":null}');const list=__LW.layout.projects.list();
   const saved=__LW.layout.projects.save('must-not-overwrite');
@@ -78,6 +84,17 @@ try {
  // value survives a collapse/expand. The macro VALUE is the rail's own control, not this seat's.
  assert.equal(Number(macro.value),100); assert.equal(macro.reopened,macro.value);assert.deepEqual(macro.errors,[]);
  console.log('PASS macro keyboard: the seat edits depth folded or not, and close/reopen keeps it; no page errors');
+ const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await w(250);
+  const card=document.querySelector('.m2dev.audio'),rows=[...card.querySelectorAll('.aud-range-row')];
+  const outside=rows.every(e=>{const v=e.querySelector('.aud-range-value').getBoundingClientRect(),t=e.querySelector('.aud-range-track').getBoundingClientRect();return v.bottom<=t.top+.5});
+  const bands=['low','mid','high'].map(k=>card.querySelector('[data-band="'+k+'"]').getBoundingClientRect().x);
+  const compact=[...document.querySelectorAll('.kwin-chiprail button')].find(e=>e.getAttribute('aria-label')==='COMPACT');compact.click();await w(180);
+  const card2=document.querySelector('.m2dev.audio'),tops=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>Math.round(e.getBoundingClientRect().top));
+  const result={outside,ordered:bands[0]<bands[1]&&bands[1]<bands[2],allBands:[...card2.querySelectorAll('.aud-range-row')].every(e=>getComputedStyle(e).display!=='none'),
+    oneKnobRow:new Set(tops).size===1,setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),
+    latency:card2.querySelector('.aud-latency').textContent,errors:__e.slice()};M.deserialize(null);return result;`);
+ assert.deepEqual(audioFace,{outside:true,ordered:true,allBands:true,oneKnobRow:true,setVisible:true,latency:'LATENCY —',errors:[]});
+ console.log('PASS Audio face: values clear the bars, LOW/MID/HIGH read left to right, and compact keeps all ranges, SET and four controls');
  /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — theme, stage colour, camera feel and
     auto-rotate, overlays, SPECTRUM's DIALS fold, the A/B transition, the notebook's size, the modulation window's
     placement, the arrangement, the routes with their ranges — and comes back from it. */

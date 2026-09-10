@@ -2294,12 +2294,9 @@ export function createModulation(host, port) {
     for (const key of M.AUDIO_FOLLOWED) {
       const row = el('div', 'aud-range-row', root); row.dataset.band=key;
       const head = el('button', 'aud-range-name', row); head.type='button';
-      const name=el('b','',head,key.toUpperCase()), text=el('span','aud-range-value',head);
-      head.addEventListener('click',()=>{
-        if(modeOf(s.id)==='C')select(M.AUDIO_FOLLOWED[(M.AUDIO_FOLLOWED.indexOf(key)+1)%M.AUDIO_FOLLOWED.length]);
-        else select(key);
-      });
-      head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD; in compact mode click again to cycle bands';
+      el('b','',head,key.toUpperCase()); const text=el('output','aud-range-value',row);
+      head.addEventListener('click',()=>select(key));
+      head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD';
       const track=el('div','aud-range-track',row);
       const fill=el('div','aud-range-output',track), zone=el('div','aud-range-zone',track), cursor=el('i','aud-range-input',track);
       const handles={};
@@ -2341,8 +2338,11 @@ export function createModulation(host, port) {
     track.title='Resize at the edges; shift inside; double-click to reset';
       rows[key]={row,head,text,fill,zone,cursor,handles};
     }
-    const hint=el('div','aud-range-hint',root,'Drag edges · scroll range · select band for timing');
-    rec.audRanges={root,rows,hint};
+    const hint=el('div','aud-range-hint',root,'Select a band for timing');
+    const latency=el('output','aud-latency',root,'LATENCY —');
+    latency.setAttribute('aria-label','Estimated audio input to visual latency');
+    latency.title='Estimated from capture latency, half the analyser window, and half a visual frame';
+    rec.audRanges={root,rows,hint,latency};
   }
 
   function wireAudioConditioning(rec, sh) {
@@ -2400,7 +2400,8 @@ export function createModulation(host, port) {
       const row=ui.rows[key],o=ro.outs[key],lo=position(o.floorDb),hi=position(o.ceilingDb);
       row.head.setAttribute('aria-pressed',String(key===selected));
       row.row.dataset.selected=String(key===selected);
-      row.text.textContent=o.floorDb.toFixed(1)+' / '+o.ceilingDb.toFixed(1)+' dB';
+      const db=v=>(v>0?'+':'')+(Math.abs(v)<.05?'0':v.toFixed(1));
+      row.text.textContent=db(o.floorDb)+'…'+db(o.ceilingDb)+' dB';
       row.fill.style.width=(o.out*100).toFixed(1)+'%';row.zone.style.left=lo+'%';row.zone.style.width=(hi-lo)+'%';
       row.cursor.style.left=position(o.inputDb)+'%';
       for(const endpoint of ['floorDb','ceilingDb']) {
@@ -2433,6 +2434,21 @@ export function createModulation(host, port) {
     A.note.textContent = cap.live
       ? (ro.sampleRate ? (ro.sampleRate / 1000).toFixed(1) + ' kHz · ' + ro.feedHz.toFixed(0) + ' Hz feed' : 'listening')
       : (cap.reason || 'audio input is closed — press AUDIO IN');
+    if (rec.audRanges && rec.audRanges.latency) {
+      const l = rec.audRanges.latency;
+      const latencyText = cap.live && Number.isFinite(cap.latencyMs)
+        ? 'LATENCY ' + (cap.latencyEstimated ? '≥' : '≈') + Math.round(cap.latencyMs) + ' ms'
+        : 'LATENCY —';
+      if (l.textContent !== latencyText) l.textContent = latencyText;
+      l.classList.toggle('on', cap.live);
+      const latencyTitle = cap.live
+        ? ((cap.latencyEstimated ? 'Minimum estimate' : 'Estimated input-to-visual delay') +
+           ' · capture ' + (cap.inputLatencyMs === null ? 'unreported' : Math.round(cap.inputLatencyMs) + ' ms') +
+           ' · analysis ' + Math.round(cap.analysisLatencyMs || 0) + ' ms' +
+           ' · display ' + Math.round(cap.visualLatencyMs || 0) + ' ms')
+        : 'Open AUDIO IN to estimate input-to-visual delay';
+      if (l.title !== latencyTitle) l.title = latencyTitle;
+    }
     if (dev.audioState) { dev.audioState.textContent = cap.live ? (ro.gateOpen ? 'OPEN' : 'GATED') : 'OFF';
       dev.audioState.classList.toggle('on', cap.live && ro.gateOpen);
       dev.audioState.classList.toggle('bad', cap.state === 'denied' || cap.state === 'error'); }

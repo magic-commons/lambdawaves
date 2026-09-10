@@ -2682,8 +2682,12 @@ export async function boot(dom) {
       audio: {
         state: () => (audioCap ? { state: audioCap.state, reason: audioCap.reason, live: audioCap.live,
                                    deviceId: audioCap.deviceId, sampleRate: audioCap.sampleRate,
-                                   frames: audioCap.frames }
-                               : { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0 }),
+                                   frames: audioCap.frames, inputLatencyMs: audioCap.inputLatencyMs,
+                                   analysisLatencyMs: audioCap.analysisLatencyMs, visualLatencyMs: audioCap.visualLatencyMs,
+                                   latencyMs: audioCap.latencyMs, latencyEstimated: audioCap.latencyEstimated }
+                               : { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0,
+                                   inputLatencyMs: null, analysisLatencyMs: 0, visualLatencyMs: 0,
+                                   latencyMs: 0, latencyEstimated: true }),
         support: () => audioCapture().support(),
         start: (id) => audioCapture().start(id === undefined ? (readSettings().audioDevice || '') : id)
           .then((st) => { if (audioCap && audioCap.live) { const S = readSettings();
@@ -4152,10 +4156,11 @@ export async function boot(dom) {
         });
       }
       const renderMarkdown = renderNotebook;
-      const CAP = { lines: 14, words: 140 };
-      function capText(t) { const lines = t.split('\n'); let out = [], words = 0, cut = false; for (const ln of lines) { if (out.length >= CAP.lines) { cut = true; break; } const w = ln.trim() ? ln.trim().split(/\s+/).length : 0; if (words + w > CAP.words) { cut = true; break; } words += w; out.push(ln); } return { text: out.join('\n'), cut }; }
-      function render(capped) { const src = capped ? capText(ta.value) : { text: ta.value, cut: false }; view.innerHTML = renderMarkdown(src.text || '*empty — press ◐ to write*') + (src.cut ? '<div class="nb-more">… the landing shows the first ' + CAP.lines + ' lines / ' + CAP.words + ' words · ◐ opens the whole notebook</div>' : ''); }
-      const setMode = (m) => { nb.dataset.mode = m; if (m === 'view') render(false); else ta.focus(); };
+      /* A project opens onto its notebook. The pane already scrolls, so a fixed line/word preview
+         limit only hid valid Markdown while leaving usable space empty. Render the complete note
+         here and let the pane's own geometry decide how much is visible at once. */
+      function render() { view.innerHTML = renderMarkdown(ta.value || '*empty — press ◐ to write*'); }
+      const setMode = (m) => { nb.dataset.mode = m; if (m === 'view') render(); else ta.focus(); };
       nb.dataset.mode = 'edit';
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
@@ -4232,7 +4237,7 @@ export async function boot(dom) {
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
           it.opened = new Date().toISOString(); pjTouch(P, path); const remembered = pjWrite(P); pjCurrent = path; pjStatus('opened ' + path + (remembered ? '' : ' — recent history could not be saved'));
-          projectClean(); show('notes'); nb.dataset.mode = 'view'; render(true);                      // the landing page: the notebook, capped
+          projectClean(); show('notes'); nb.dataset.mode = 'view'; render();                         // the complete notebook, in its scrollable pane
           return true;
         },
         remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },

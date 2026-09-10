@@ -120,6 +120,8 @@ export function createAudioCapture(opts) {
   let deviceId = o.deviceId || '';
   let started = 0;             // performance.now() when the stream opened
   let frames = 0;
+  let inputLatencyMs = null;   // MediaTrackSettings.latency, when the browser reports it
+  let visualLatencyMs = 0;     // half of the most recently requested display/feed interval
   let disposed = false;
   /* ⚠ THE IN-FLIGHT TOKEN.  `start()` awaits twice, and without this a second call — two presses on
      MIC, or a press while the permission prompt is up — ran straight through the first one's awaits
@@ -268,6 +270,7 @@ export function createAudioCapture(opts) {
            host that wants to warn "AGC is on, the envelope will fight it" needs to be able to see. */
         processing = { echoCancellation: st.echoCancellation, noiseSuppression: st.noiseSuppression,
                        autoGainControl: st.autoGainControl };
+        inputLatencyMs = Number.isFinite(st.latency) && st.latency >= 0 ? st.latency * 1000 : null;
         /* A TRACK THAT ENDS TEARS THE GRAPH DOWN.  Setting a word and leaving the context open held
            the hardware, kept three buffers alive, and — because the host's own closer only runs while
            a feed is being read — could never be reached again from that state. */
@@ -293,6 +296,7 @@ export function createAudioCapture(opts) {
     if (stream) { for (const t of stream.getTracks()) { try { t.stop(); } catch (_) {} } stream = null; }
     if (ctx) { const c = ctx; ctx = null; try { await c.close(); } catch (_) {} }
     freqDb = timeBuf = prevMag = null; bandBins = null; frames = 0; started = 0; processing = null;
+    inputLatencyMs = null; visualLatencyMs = 0;
     /* EVERY state that implied an open device becomes IDLE — ERROR included, which used to survive a
        close and leave the face painting a fault on a capture that was fully shut. */
     if (state !== AUDIO_STATE.UNAVAILABLE && state !== AUDIO_STATE.DENIED &&
@@ -374,12 +378,25 @@ export function createAudioCapture(opts) {
       count[2] ? power[2] / count[2] : 0
     ];
     frames++;
+    const measuredFeedHz = Number.isFinite(feedHz) && feedHz > 0 ? feedHz : 60;
+    visualLatencyMs = 500 / measuredFeedHz;
+    /* An analyser describes a window of samples rather than a single instant. Its useful centre is
+       half a window behind the newest sample. Add the browser-reported capture latency when it is
+       available, then half a visual interval for the next paint. This is an estimate; a calibrated
+       acoustic/electrical loopback is the only way to measure physical end-to-end delay exactly. */
+    const analysisLatencyMs = ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0;
+    const latencyMs = (inputLatencyMs || 0) + analysisLatencyMs + visualLatencyMs;
     const nowS = performance.now() / 1000;
     return {
-      feedHz: Number.isFinite(feedHz) && feedHz > 0 ? feedHz : 60,
+      feedHz: measuredFeedHz,
       capturedAt: nowS,
       now: nowS,
       sampleRate: ctx ? ctx.sampleRate : 0,
+      inputLatencyMs,
+      analysisLatencyMs,
+      visualLatencyMs,
+      latencyMs,
+      latencyEstimated: inputLatencyMs === null,
       rms, bandPower, flux
     };
   }
@@ -403,6 +420,11 @@ export function createAudioCapture(opts) {
     get deviceId() { return deviceId; },
     get frames() { return frames; },
     get sampleRate() { return ctx ? ctx.sampleRate : 0; },
+    get inputLatencyMs() { return inputLatencyMs; },
+    get analysisLatencyMs() { return ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0; },
+    get visualLatencyMs() { return visualLatencyMs; },
+    get latencyMs() { return (inputLatencyMs || 0) + (ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0) + visualLatencyMs; },
+    get latencyEstimated() { return inputLatencyMs === null; },
     get upMs() { return started ? performance.now() - started : 0; },
     /** what the browser actually granted for the three voice processors, or null before a stream */
     get processing() { return processing; },

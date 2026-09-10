@@ -39,7 +39,7 @@ function makeStream() {
   streamsMade++;
   const track = { live: true, stop() { if (this.live) { this.live = false; tracksStopped++; } },
                   addEventListener(k, fn) { if (k === 'ended') endedHandlers.push(fn); },
-                  getSettings: () => ({ deviceId: 'stub-mic', echoCancellation: false,
+                  getSettings: () => ({ deviceId: 'stub-mic', latency: 0.012, echoCancellation: false,
                                         noiseSuppression: false, autoGainControl: false }) };
   const st = { _track: track, getTracks: () => [track], getAudioTracks: () => [track] };
   return st;
@@ -111,6 +111,12 @@ ok('a permitted start goes LIVE', cap.state === AUDIO_STATE.LIVE, cap.state);
      ['feedHz', 'capturedAt', 'sampleRate', 'rms', 'bandPower', 'flux'].every((k) => p[k] !== undefined)
      && p.bandPower.length === 3, Object.keys(p).join(','));
   ok('feedHz is the rate the host passed, not a nominal', p.feedHz === 60, String(p.feedHz));
+  ok('latency estimate includes capture, half the analyser window, and half a display frame',
+     near(p.inputLatencyMs, 12, 1e-9) && near(p.analysisLatencyMs, FFT / SR * 500, 1e-9)
+       && near(p.visualLatencyMs, 500 / 60, 1e-9)
+       && near(p.latencyMs, 12 + FFT / SR * 500 + 500 / 60, 1e-9)
+       && p.latencyEstimated === false,
+     p.latencyMs.toFixed(2) + ' ms');
 }
 
 {

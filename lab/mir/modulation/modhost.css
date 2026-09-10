@@ -1691,27 +1691,32 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .mod-matrix-bars .m2prebar { position:relative; height:48px; flex:0 0 auto; }
 :root:root:root #modwin .mod-matrix input,:root:root:root #modwin .mod-matrix select,:root:root:root #modwin .mod-matrix button { color:var(--fg); background:hsl(var(--glass-tint) / 1); border:1px solid var(--glass-hairline); border-radius:5px; }
 
-/* Audio response editing stays inside the existing plot; card geometry does not grow. */
+/* Audio response editing stays inside the existing plot. LEVEL spans the face; LOW, MID and HIGH
+   form the three-band row beneath it. Values sit outside their bars so no live ink collides. */
 :root:root:root #modwin .audio-ranges .m2edit > svg { visibility:hidden; }
-:root:root:root #modwin .aud-ranges { position:absolute; inset:4px; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; display:flex; flex-direction:column; gap:2px; color:var(--fg); }
-:root:root:root #modwin .aud-range-row { position:relative; flex:0 0 22px; min-width:0; padding:0 7px; }
-:root:root:root #modwin .aud-range-name { position:absolute; inset:0 7px; z-index:2; pointer-events:none; display:flex; justify-content:space-between; align-items:center; gap:4px; width:calc(100% - 14px); height:22px; padding:0; border:0; background:transparent; color:var(--dim); font-size:9px; cursor:pointer; }
+:root:root:root #modwin .aud-ranges { position:absolute; inset:4px; overflow:hidden; display:grid; grid-template:38px minmax(0,1fr) 13px / repeat(3,minmax(0,1fr)); gap:3px 5px; color:var(--fg); }
+:root:root:root #modwin .aud-range-row { position:relative; min-width:0; min-height:0; padding:0; display:grid; grid-template:12px minmax(18px,1fr) / minmax(0,1fr) auto; column-gap:3px; }
+:root:root:root #modwin .aud-range-row[data-band="level"] { grid-column:1 / -1; }
+:root:root:root #modwin .aud-range-name { position:relative; z-index:2; grid-area:1 / 1; align-self:center; justify-self:start; width:auto; height:12px; min-width:0; padding:0; border:0; background:transparent; color:var(--dim); font:700 8px/1 var(--font-ui); letter-spacing:.08em; cursor:pointer; }
+:root:root:root #modwin .aud-range-name::before { content:""; position:absolute; inset:-5px; }
 :root:root:root #modwin .aud-range-name[aria-pressed=true] { color:var(--acc2); }
-:root:root:root #modwin .aud-range-value { padding-right:8px; font-size:8px; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap; }
-:root:root:root #modwin .aud-range-track { position:relative; margin-left:34px; height:22px; border-radius:4px; background:var(--glass-well); box-shadow:inset 0 0 0 1px var(--glass-hairline); touch-action:none; cursor:ew-resize; }
+:root:root:root #modwin .aud-range-value { grid-area:1 / 2; align-self:center; justify-self:end; padding:0; border:0; background:transparent; font:600 7.5px/1 var(--font-num); color:var(--fg-soft); font-variant-numeric:tabular-nums; white-space:nowrap; }
+:root:root:root #modwin .aud-range-track { position:relative; grid-area:2 / 1 / 3 / -1; min-width:0; min-height:18px; border-radius:5px; background:var(--glass-well); box-shadow:inset 0 0 0 1px var(--glass-hairline); touch-action:none; cursor:ew-resize; overflow:hidden; }
 :root:root:root #modwin .aud-range-output { position:absolute; inset:0 auto 0 0; background:var(--acc2-soft); border-radius:4px; pointer-events:none; }
 :root:root:root #modwin .aud-range-zone { position:absolute; top:3px; bottom:3px; border-block:1px solid var(--acc2); background:var(--acc2-soft); pointer-events:none; }
 :root:root:root #modwin .aud-range-input { position:absolute; top:5px; bottom:5px; width:2px; background:var(--fg); pointer-events:none; }
 :root:root:root #modwin .aud-range-handle { position:absolute; z-index:3; top:0; bottom:0; width:14px; padding:0; transform:translateX(-50%); border:0; background:transparent; color:var(--acc2); cursor:ew-resize; touch-action:none; }
 :root:root:root #modwin .aud-range-handle::after { content:''; position:absolute; top:2px; bottom:2px; left:6px; width:2px; border-radius:2px; background:currentColor; }
 :root:root:root #modwin .aud-range-handle:focus-visible { outline:1px solid var(--acc2); border-radius:3px; }
-:root:root:root #modwin .aud-range-hint { flex:0 0 12px; font-size:8px; color:var(--dim); white-space:nowrap; text-align:center; }
+:root:root:root #modwin .aud-range-hint { grid-area:3 / 1 / 4 / 3; align-self:end; min-width:0; overflow:hidden; text-overflow:ellipsis; font:600 7px/1 var(--font-ui); letter-spacing:.035em; color:var(--dim); white-space:nowrap; text-align:left; }
+:root:root:root #modwin .aud-latency { grid-area:3 / 3; align-self:end; justify-self:end; padding:0; border:0; background:transparent; color:var(--dim); font:700 7px/1 var(--font-num); letter-spacing:.035em; white-space:nowrap; }
+:root:root:root #modwin .aud-latency.on { color:var(--acc2); }
 :root:root:root #modwin .audio-ranges .m2audsheet { overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
 :root:root:root #modwin .aud-setting-input { width:100%; min-width:0; border:0; color:var(--fg); background:transparent; text-align:center; font:inherit; font-variant-numeric:tabular-nums; }
 :root:root:root #modwin .audio-ranges .m2audsheet { bottom:6px; }
 :root:root:root #modwin .audio-ranges .m2audshead { flex-shrink:0; position:sticky; top:0; background:hsl(var(--glass-tint) / 1); z-index:1; }
 :root:root:root #modwin .audio-ranges .m2audsleg { flex-shrink:0; }
-:root:root:root #modwin .aud-range-name b { pointer-events:auto; cursor:pointer; }
+:root:root:root #modwin .aud-range-name b { pointer-events:none; }
 
 /* The shared rate puck is centered independently of its transient value label. */
 :root:root:root #modwin .m2-native-rate { position:relative;overflow:visible; }
@@ -1726,35 +1731,34 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .m2dev.env .m2kind { color:var(--acc); }
 :root:root:root #modwin .modtempoin { box-sizing:border-box;min-width:0;max-width:none;margin:0; }
 
-/* Audio finishing pass: the four performance controls use one row at full
-   size and the same 2×2 dial bank as the other compact instruments. */
+/* The four performance controls remain a single bank in both views. */
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2knobs {
   grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 5px 7px 4px; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2k[data-knob="sens"] .m2kd {
   width: 48px; height: 48px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs {
-  width: 190px; align-self: flex-start; grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 2px; padding: 3px 4px 4px; }
+  width:auto; align-self:stretch; grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-rows:1fr; gap:2px; padding:5px 4px 4px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2kd,
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2k[data-knob="sens"] .m2kd {
-  width: 40px; height: 40px; }
+  width:42px; height:42px; }
 
-/* Compact Audio exposes one response band at a time. Its label is the band
-   switch, leaving the range itself broad enough for touch editing. */
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-row:not([data-selected="true"]) { display: none; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-ranges { justify-content: center; gap: 8px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-row { flex-basis: 42px; padding: 0 9px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-name {
-  inset: 0 9px; width: calc(100% - 18px); height: 42px; font-size: 10px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-track {
-  margin-left: 42px; height: 42px; border-radius: 7px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-zone { top: 7px; bottom: 7px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-input { top: 9px; bottom: 9px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-range-handle::after { top: 5px; bottom: 5px; }
+/* Compact keeps the complete response editor, exposes the conditioning door, and spends its lower
+   row on input plus the selected route. Nothing in the compact card is a decorative empty bay. */
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2body {
+  flex:0 0 176px; height:176px; min-height:176px;
+  grid-template:120px minmax(0,1fr) / 92px minmax(0,1fr); gap:4px 5px; padding:0 5px 4px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2edit { grid-area:1 / 1 / 2 / 3; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2col { grid-area:2 / 1; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2rt { grid-area:2 / 2; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2aud { height:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:2px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audsrc { height:100%; min-height:44px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audsrc:nth-child(3) { display:block; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-ranges { grid-template-rows:38px minmax(0,1fr) 13px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout:not([data-route-selected="true"]) { display: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] {
-  display: grid; flex: 1 1 auto; min-height: 0; grid-template: 1fr / 44px minmax(0, 1fr); }
+  display:grid; flex:1 1 auto; min-height:0; grid-template:1fr / 44px minmax(0,1fr); }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audgrip { width: 44px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audmac { width: auto; align-items: center; text-align: center; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audname { cursor: pointer; }
@@ -1924,4 +1928,3 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev:not(.m2min) .m2headl { padding-left: 22px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2head::before { left: 50%; top: 4px; margin: 0 0 0 -6.5px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2headl { padding-top: 18px; }
-

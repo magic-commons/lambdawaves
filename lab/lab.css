@@ -66,7 +66,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-view hr { border: 0; height: 1px; background: hsl(0 0% 50% / .3); margin: .8em 0; }
 .nb-view a { color: var(--acc); }
 .nb-view .katex { font-size: 1.08em; } .nb-view .katex-display { margin: .5em 0; overflow-x: auto; }
-.nb-view .nb-more { margin-top: 8px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--dim); }
 #notebook[data-mode="view"] .nb-text { display: none; } #notebook[data-mode="view"] .nb-view { display: block; }
 #notebook[data-mode="edit"] .nb-view { display: none !important; }
 .nb-mode, .nb-projects-btn { font-size: 12px; }
@@ -896,4 +895,3 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .stage-colour { width: 26px; height: 34px; padding: 2px; }
 .stage-colour.on { box-shadow: 0 0 0 1.5px var(--acc); }
 .stage-follow { height: 18px; min-height: 18px; padding: 0 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
-
