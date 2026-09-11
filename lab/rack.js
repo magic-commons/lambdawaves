@@ -4120,7 +4120,12 @@ export async function boot(dom) {
         const t = localStorage.getItem(NB_TITLE); if (t) titleIn.value = t;
         if (subIn) { const s = localStorage.getItem(NB_SUBTITLE); if (s) { subIn.value = s; subIn.hidden = false; } }
       } catch (e) {}
-      titleIn.addEventListener('input', () => { try { localStorage.setItem(NB_TITLE, titleIn.value); } catch (e) {} });
+      /* 2026-09-11: a synchronous localStorage write per keystroke became one write 300 ms after the last key; pagehide flushes */
+      const nbPending = new Map(); let nbTimer = 0;
+      const nbFlush = () => { nbTimer = 0; for (const [k, v] of nbPending) { try { localStorage.setItem(k, v); } catch (e) {} } nbPending.clear(); };
+      const nbStore = (k, v) => { nbPending.set(k, v); if (!nbTimer) nbTimer = setTimeout(nbFlush, 300); };
+      window.addEventListener('pagehide', nbFlush);
+      titleIn.addEventListener('input', () => nbStore(NB_TITLE, titleIn.value));
       titleIn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -4131,7 +4136,7 @@ export async function boot(dom) {
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
       });
       if (subIn) {
-        subIn.addEventListener('input', () => { try { localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {} });
+        subIn.addEventListener('input', () => nbStore(NB_SUBTITLE, subIn.value));
         subIn.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); subIn.blur(); }
           else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; try { localStorage.removeItem(NB_SUBTITLE); } catch (_) {} titleIn.focus(); }
@@ -4143,7 +4148,7 @@ export async function boot(dom) {
       /* A project opens onto its notebook. The pane already scrolls, so a fixed line/word preview
          limit only hid valid Markdown while leaving usable space empty. Render the complete note
          here and let the pane's own geometry decide how much is visible at once. */
-      function render() { view.innerHTML = renderMarkdown(ta.value || '*empty — press ◐ to write*'); }
+      function render() { const src = ta.value || '*empty — press ◐ to write*'; view.innerHTML = renderMarkdown(src.length > 200000 ? src.slice(0, 200000) + '\n\n*… preview truncated at 200 000 characters; the notes are kept whole*' : src); }   // 2026-09-11: a pasted book previews its first 200 k instead of one huge synchronous innerHTML
       const setMode = (m) => { nb.dataset.mode = m; if (m === 'view') render(); else ta.focus(); };
       nb.dataset.mode = 'edit';
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
@@ -4279,7 +4284,7 @@ export async function boot(dom) {
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
       layout.projects = projects;
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };
-      ta.addEventListener('input', () => { try { localStorage.setItem(NB_KEY, ta.value); } catch (e) {} count(); });
+      ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       const show = (face) => {

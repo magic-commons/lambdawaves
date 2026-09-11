@@ -2787,8 +2787,8 @@ export function createModulation(host, port) {
     ro = new ResizeObserver(() => {
       if (!P.open) return;
       const e = laneEdge();
-      if (e !== lastEdge) { lastEdge = e; place(); }
-      paint(true);
+      if (e !== lastEdge) { lastEdge = e; place(); paint(true); }   // 2026-09-11: only a moved lane edge earns a forced repaint; a resize that changed nothing gets the throttled one
+      else paint(false);
     });
     ro.observe(panel);
   }

@@ -12,7 +12,7 @@
   --rack-w: 300px;                                                /* narrower rack (was 372) — the layout still reads this one variable */
   --glass-hue: 214; --glass-sat-tint: 16%; --glass-lum: 13%;     /* card tint hsl(214 16% 13%) = #191d23 */
   --glass-opacity: .84;
-  --card-opacity: .76;                                             /* the TINTED pane alone: a little more of the field shows through than the pills and chips allow */                                           /* opaque enough that the field cannot pull text under 4.5:1 */
+  --card-opacity: .88;                                             /* the TINTED pane: a faint breath of the field through it, no more (Josh, 2026-09-11) */                                           /* opaque enough that the field cannot pull text under 4.5:1 */
   --glass-border-color: hsl(0 0% 100% / .14);                     /* card edge hairline */
   --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
   --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */

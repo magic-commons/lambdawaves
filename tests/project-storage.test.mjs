@@ -21,13 +21,16 @@ const rack = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
 const read = rack.split('\n').find(l => l.includes('const pjRead ='));
 const write = rack.split('\n').find(l => l.includes('const pjWrite ='));
 const touch = rack.split('\n').find(l => l.includes('const pjTouch ='));
+// 2026-09-11: save() composes the file through projectSnapshot(), which sits above the projects object; bring just that function
+const snapStart = rack.indexOf('function projectSnapshot()'), snapEnd = rack.indexOf('function projectKey()', snapStart);
 const start = rack.indexOf('const projects = {');
 const end = rack.indexOf('function renderProjects()', start);
-const source = rack.slice(start, end);
+const source = rack.slice(snapStart, snapEnd) + '\n' + rack.slice(start, end);
 const create = new Function('readProjectCollection', 'localStorage', `
  const PJ_KEY='projects'; let pjCurrent=null, status='', renders=0;
  const titleIn={value:'NOTEBOOK'},ta={value:'notes'},subIn={value:'subtitle'};
- const serialize=()=>({experiment:{modes:[]}}), projectClean=()=>{};
+ const serialize=()=>({experiment:{modes:[],t:0},presentation:{quality:{},obs:{},mat:{slice:{}},ui:{stage:{}},rotationRates:{},ab:{},domain:{}}}), modulationBases=()=>null;
+ const modHost=null, modSyncBases=()=>{}, projectClean=()=>{};
  const renderProjects=()=>renders++, pjStatus=s=>status=s;
  ${read}\n${write}\n${touch}\n${source}
  return {projects,status:()=>status,renders:()=>renders};
@@ -62,7 +65,7 @@ let state = {experiment:{t:0},presentation:{quality:{autoScale:1},domain:{auto:t
  obs:{},mat:{slice:{}},rotationRates:{}}};
 const subtitle={value:''};
 const makeKey = new Function('serialize','titleIn','subIn','ta','modHost',
- `${rack.slice(keyStart,keyEnd)};return projectKey;`);
+ `const modulationBases=()=>null;${rack.slice(snapStart,snapEnd)}\n${rack.slice(keyStart,keyEnd)};return projectKey;`);   // projectKey() reads through projectSnapshot() since 2026-09-11
 const projectKey=makeKey(()=>structuredClone(state),{value:'Study'},subtitle,{value:'notes'},null);
 const baseline=projectKey();
 state.presentation.domain.half=16;

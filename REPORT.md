@@ -2402,3 +2402,44 @@ other theme's, so DARK runs black → light and LIGHT runs white → dark, and a
 has its swatch; a named end is kept across flips and travels in the project (`ui.stage.{mix,a,b}`; a
 file that still says `custom` reads as B). FOLLOW THEME forgets both. Measured: LIGHT → DARK gave the
 dark ground; naming B kept it across the flip back; the DAW law in the gate reads B back from the file.
+
+## 2026-09-11 · Second optimisation pass: the side channels, the routing verdict, two materials
+
+**What the audit found.** The frame loop, its reader governor and the hidden-tab law are sound (the
+2026-09-09 pass holds); the waste was in side channels. Fixed: the tempo panel's 200-ms timer rewrote
+~15 DOM fields and every macro tile blind — it now writes only when a signature of its inputs changes;
+the modulation window's ResizeObserver force-painted every device row on any resize — a forced repaint
+now needs a moved lane edge, otherwise the throttled paint; the notebook's title, subtitle and text wrote
+localStorage synchronously on every keystroke — one write 300 ms after the last key, flushed on pagehide;
+the fader's fine drag read its rect per move — once per drag (MIR 1.1.2); the audio device's analysis
+latency had two copies of one formula — one; a pasted book in the notebook previews its first 200 000
+characters instead of one huge innerHTML. Left as documented, not changed: feedAudio fans out to every
+audio source per tick while the mic is live (by wave 105's design); the corner-axis transition runs its
+own 500-ms rAF chain.
+
+**What the last twelve GPT-team commits left.** Two dead CSS rules from the audio device's old cycling
+design (removed in MIR 1.1.2); no half-finished code. But those commits edited five MIR-owned files in
+place, including the "byte-frozen" window: the kit takes the work back (MIR 1.1.0 — the audio device
+redesign, the routing/compact layouts, the label pass) and the byte-frozen law is retired: MIR is the
+source of the window, the provenance patch records the delta from BASINS. Their `projectSnapshot()` also
+broke `tests/project-storage.test.mjs` (the suite slices rack.js by marker and the new helper sat outside
+the slice) — the slice now carries it; the gate had reported it red under the pwa hash message.
+
+**Saved projects, re-verified:** the DAW law and the routed-knob law both pass on the new tree; the
+storage suite is green again. Note: the GPT team replaced the two-end stage (A / B) with a single custom
+colour plus FOLLOW; the file carries theirs, and the DAW law reads it back.
+
+**The modulation system against industry practice** (research: CLAP `param_mod`, VST3 automation vs
+modulation, Bitwig's unified modulation, Live's envelopes, one-pole smoothing): the core is right by
+those standards — base and heard value are separate in the registry, modulation is an additive offset
+over the base (unipolar from `min`, bipolar from the midpoint, scaled by master depth), clamped or wrapped
+per map, never persisted into the base, released bit-exact on stop; sources are one-pole smoothed at
+block rate. Two conventions taken: the knob keeps its base visible under a modulator (a tick at the rim,
+MIR 1.1.1 — Bitwig shows the setting under the modulation, never hides it), and the hand law from
+yesterday (a drag moves the base by the drag). Not taken, on purpose: smoothing at the target on
+route enable/disable and on release (it would soften the "what the file says is what you see" law;
+these are visual parameters at 60 Hz, a one-frame step), and per-voice modulation (no voices here).
+
+**Two materials (Josh).** `--card-opacity` .76 → .88: the tinted pane keeps a faint breath of the field.
+The photosensitivity pane: blur at .55 of the glass blur with a faint ground (white .34 / near-black .42),
+so the field reads through as shapes and the text stays strong.

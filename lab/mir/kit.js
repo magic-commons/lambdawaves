@@ -153,6 +153,11 @@ export function knob(o) {
     const p = o.wrap ? (norm(shownV) % 1 + 1) % 1 : clamp01(norm(shownV));
     needle.style.setProperty('--turn', (o.wrap ? p * 360 : -135 + p * 270) + 'deg');
     val.textContent = fmt(shownV);
+    /* THE BASE STAYS VISIBLE UNDER A MODULATOR (Bitwig's convention): while a painted value dances the needle, a
+       small tick at the rim marks the base the hand owns — where a drag starts and what the file saves. */
+    const mod = shown !== null && !dragging;
+    root.classList.toggle('k-mod', mod);
+    if (mod) { const pb = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v)); dial.style.setProperty('--base-turn', (o.wrap ? pb * 360 : -135 + pb * 270) + 'deg'); }
     announce(fromUser);
   }
   /** WAVE 68 · ONE QUANTISER, ONE FOLD, ONE CLAMP — and BOTH ROADS TAKE IT.  The fold lived in the
@@ -386,8 +391,9 @@ export function fader(o) {
   const paint = (fromUser) => { const p = clamp01((v - lo) / (hi - lo)); root.style.setProperty('--fill', p); val.textContent = fmt(v); announce(fromUser); };
   const fromEvent = (e) => { const r = root.getBoundingClientRect(); return lo + clamp01((e.clientX - r.left) / Math.max(1, r.width)) * (hi - lo); };
   root.addEventListener('pointerdown', (e) => { e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; root.classList.add('drag'); tap(); lastX = e.clientX; if (!e.shiftKey) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
-  root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = root.getBoundingClientRect(); v = lo + clamp01((v - lo) / (hi - lo) + (e.clientX - lastX) / Math.max(1, r.width) * 0.2) * (hi - lo); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });   // shift = fine: a fifth of the travel
-  const end = () => { if (!dragging) return; dragging = false; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
+  let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
+  root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = lo + clamp01((v - lo) / (hi - lo) + (e.clientX - lastX) / Math.max(1, r.width) * 0.2) * (hi - lo); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });   // shift = fine: a fifth of the travel
+  const end = () => { if (!dragging) return; dragging = false; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
   root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end);
   const reset = () => { v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
   const tap = tapWatcher(reset);

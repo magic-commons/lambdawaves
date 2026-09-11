@@ -514,11 +514,13 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 
 
 #warnPane { position: fixed; inset: 0; z-index: calc(var(--z-banner) + 40); display: flex; align-items: center; justify-content: center;
-  padding: 1.5rem; background: transparent; color: #000;
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(.5); backdrop-filter: blur(var(--glass-blur)) saturate(.5);
+  padding: 1.5rem; background: hsl(0 0% 100% / .34); color: #000;
+  /* 2026-09-11 (Josh): less blur, still a strong veil — the blur drops to just over half the glass blur and a faint
+     ground takes over the legibility the blur used to carry, so the field reads through as shapes, not as haze */
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .55)) saturate(.6); backdrop-filter: blur(calc(var(--glass-blur) * .55)) saturate(.6);
   font-family: var(--font-ui); opacity: 1; animation: lw-warn-in 350ms ease-out forwards;
   transition: opacity 350ms cubic-bezier(.16, .84, .44, 1); }
-body[data-theme="dark"] #warnPane { color: #fff; }
+body[data-theme="dark"] #warnPane { color: #fff; background: hsl(0 0% 4% / .42); }
 
 
 @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {

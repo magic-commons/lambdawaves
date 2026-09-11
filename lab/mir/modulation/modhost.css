@@ -1484,7 +1484,6 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2mintrace {
   display: block; position: relative; order: 0; flex: 1 1 auto;
   min-width: 0; max-width: 30px; height: auto; align-self: stretch; }
-:root:root:root #modwin.mir-modwindow .m2dev.audio.m2min .m2mintrace { display: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minname { order: 1; }
 :root:root:root #modwin.mir-modwindow .m2mintsvg {
   position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -1833,8 +1832,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2chks {
   width:164px;height:88px;overflow:visible;display:grid;
   grid-template:repeat(2,44px) / repeat(6,minmax(0,1fr));gap:0; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout:not([data-route-selected="true"]),
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] {
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout {   /* 2026-09-11: the selected/unselected split carried one declaration — the cycling design it served is gone */
   display:grid;width:auto;height:44px;min-height:0; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="level"] { grid-area:1 / 1 / 2 / 4; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="hit"] { grid-area:1 / 4 / 2 / 7; }

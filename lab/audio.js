@@ -332,6 +332,7 @@ export function createAudioCapture(opts) {
    *        millisecond time constants into per-frame coefficients with it, so it must be the TRUE
    *        cadence and not a nominal 60.
    */
+  const analysisMs = () => (ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0);   // the FFT window's half-length in ms — one formula, two readers
   function read(feedHz) {
     if (!analyser || state !== AUDIO_STATE.LIVE) return null;
     if (ctx && ctx.state !== 'running') return null;              // suspended with the page
@@ -384,7 +385,7 @@ export function createAudioCapture(opts) {
        half a window behind the newest sample. Add the browser-reported capture latency when it is
        available, then half a visual interval for the next paint. This is an estimate; a calibrated
        acoustic/electrical loopback is the only way to measure physical end-to-end delay exactly. */
-    const analysisLatencyMs = ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0;
+    const analysisLatencyMs = analysisMs();
     const latencyMs = (inputLatencyMs || 0) + analysisLatencyMs + visualLatencyMs;
     const nowS = performance.now() / 1000;
     return {
@@ -421,7 +422,7 @@ export function createAudioCapture(opts) {
     get frames() { return frames; },
     get sampleRate() { return ctx ? ctx.sampleRate : 0; },
     get inputLatencyMs() { return inputLatencyMs; },
-    get analysisLatencyMs() { return ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0; },
+    get analysisLatencyMs() { return analysisMs(); },
     get visualLatencyMs() { return visualLatencyMs; },
     get latencyMs() { return (inputLatencyMs || 0) + (ctx && ctx.sampleRate ? FFT_SIZE * 500 / ctx.sampleRate : 0) + visualLatencyMs; },
     get latencyEstimated() { return inputLatencyMs === null; },

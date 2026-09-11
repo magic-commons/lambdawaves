@@ -192,6 +192,9 @@ button[data-gly="north"] > svg { width: 12px; height: 12px; }
 .k-needle { position: absolute; left: 50%; bottom: 50%; width: 1.5px; height: 13px; margin-left: -.75px; border-radius: 1px; background: var(--fg);
   box-shadow: 0 0 0 .5px hsl(0 0% 0% / .38); transform-origin: 50% 100%; transform: rotate(var(--turn, 0deg)); pointer-events: none; }
 .k-lg .k-needle { height: 17px; }
+/* the base tick of a modulated knob: a short accent mark at the rim where the hand's number is, under the dancing needle */
+.k.k-mod .k-dial::after { content: ''; position: absolute; left: 50%; bottom: 50%; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; pointer-events: none; transform-origin: 50% 100%; transform: rotate(var(--base-turn, 0deg)); background: linear-gradient(to top, transparent 11px, var(--acc) 11px); opacity: .85; }
+.k-lg.k-mod .k-dial::after { height: 20px; background: linear-gradient(to top, transparent 15px, var(--acc) 15px); }
 .k.live .k-needle { background: var(--acc); box-shadow: var(--acc-glow); }
 .k-val { font-size: var(--fs-tiny); color: var(--fg-soft); }
 .k.drag .k-val { color: var(--acc); font-weight: var(--w-bold); }

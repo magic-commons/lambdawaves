@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 42 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 55 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -84,6 +84,19 @@ stable enough to gate on.
 - `33341d3` 2026-09-10 — Transport fourth pass: dot grip, ×4, digit-under-pointer BPM, the transport follows card style
 - `ecd096a` 2026-09-10 — Adopt MIR: the interface kit lives in lab/mir, the app keeps only its own selectors
 - `342e52c` 2026-09-10 — The DAW law: a project carries everything a demo shows
+- `7635b58` 2026-09-10 — The hand on a routed knob, and a stage with two ends
+- `2efbc10` 2026-09-10 — Polish audio modulation and notebook preview
+- `a430d88` 2026-09-10 — Compact camera controls
+- `d998b92` 2026-09-10 — Fix stage colour blending and spectrum order
+- `c6f4681` 2026-09-10 — Rework Audio modulation meters
+- `a786085` 2026-09-10 — Refine Audio modulation layout
+- `3c9b471` 2026-09-10 — Recompose Audio compact and routing
+- `3baf1fc` 2026-09-10 — Tighten Audio routing controls
+- `1d31f10` 2026-09-10 — Separate Audio full and compact layouts
+- `9bf8ec7` 2026-09-10 — Align Audio routing and compact controls
+- `6dd239f` 2026-09-10 — Polish final Audio and Spectrum labels
+- `30307e1` 2026-09-11 — Redesign minimized Audio meter
+- `d380d35` 2026-09-11 — Fix complete project state round-trips
 
 </details>
 
