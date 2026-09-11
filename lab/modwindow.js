@@ -1776,16 +1776,9 @@ export function createModulation(host, port) {
       });
       for (const key of Object.keys(A.outs)) {
         const row = A.outs[key];
-        row.box.title = key === 'hit'
-          ? 'HIT is an EVENT, not a level: it fires an envelope whose TRIG IN names this socket, rather than driving a macro'
-          : 'which MACRO this output drives — tap to walk the list. Only macros nothing else is driving are offered';
-        row.box.addEventListener('click', (event) => {
-          if (modeOf(s.id) === 'C' && event.target === row.name) {
-            const keys = Object.keys(A.outs), next = keys[(keys.indexOf(key) + 1) % keys.length];
-            audRoutes.set(s.id, next);
-            if (M.AUDIO_FOLLOWED.includes(next)) audBands.set(s.id, next);
-            syncKnobs(rec); paintAudio(rec);
-          } else if (key !== 'hit') cycleAudioOut(rec, key);
+        row.box.title = key === 'hit' ? 'HIT event output' : 'Route '+key.toUpperCase()+' to a macro';
+        row.box.addEventListener('click', () => {
+          if (key !== 'hit') cycleAudioOut(rec, key);
         });
         row.grip.setAttribute('aria-hidden', 'true');
       }
@@ -2297,7 +2290,7 @@ export function createModulation(host, port) {
       const root=el('div','aud-level-mix',row),dial=el('div','aud-level-mix-dial m2numseat',root);
       const ring=svgEl('svg','m2depthring',dial);ring.setAttribute('viewBox','0 0 36 36');ring.setAttribute('aria-hidden','true');
       const track=svgEl('circle','m2depthtrack',ring),arc=svgEl('circle','m2deptharc',ring);
-      for(const node of [track,arc]){node.setAttribute('cx','18');node.setAttribute('cy','18');node.setAttribute('r','15');node.setAttribute('pathLength','1');}
+      for(const node of [track,arc]){node.setAttribute('cx','18');node.setAttribute('cy','18');node.setAttribute('r','15');node.setAttribute('pathLength','1');node.setAttribute('transform','rotate(135 18 18)');}
       track.setAttribute('stroke-dasharray','1 1');arc.setAttribute('stroke-dasharray','1 1');
       el('span','m2num aud-level-mix-core',dial).setAttribute('aria-hidden','true');
       const value=el('output','aud-level-mix-value',root);
@@ -2368,10 +2361,7 @@ export function createModulation(host, port) {
       rows[key]={row,head,text,mix,low,high,fill,zone,cursor,handles};
     }
     const hint=el('div','aud-range-hint',root,'Select a band for timing');
-    const latency=el('output','aud-latency',dev.col,'— ms');
-    latency.setAttribute('aria-label','Estimated audio input to visual latency');
-    latency.title='Estimated from capture latency, half the analyser window, and half a visual frame';
-    rec.audRanges={root,rows,hint,latency};
+    rec.audRanges={root,rows,hint};
   }
 
   function wireAudioConditioning(rec, sh) {
@@ -2440,7 +2430,7 @@ export function createModulation(host, port) {
         row.low.style.cssText='width:'+lo+'%;left:0';row.high.style.cssText='width:'+(100-hi)+'%;left:'+hi+'%';
         row.zone.style.cssText='width:'+(hi-lo)+'%;left:'+lo+'%';row.fill.style.cssText='width:'+input+'%;left:0';row.cursor.style.cssText='left:'+input+'%';
       }
-      row.mix.arc.style.strokeDasharray=clamp01(mix).toFixed(4)+' 1';row.mix.dial.classList.toggle('m2zero',mix<=0);
+      row.mix.arc.style.strokeDasharray=(clamp01(mix)*.75).toFixed(4)+' 1';row.mix.dial.classList.toggle('m2zero',mix<=0);
       row.mix.value.textContent=Math.round(mix*100)+'%';row.mix.dial.setAttribute('aria-valuenow',String(Math.round(mix*100)));row.mix.dial.setAttribute('aria-valuetext',Math.round(mix*100)+' percent');
       for(const endpoint of ['floorDb','ceilingDb']) {
         const h=row.handles[endpoint],p=position(o[endpoint]);
@@ -2473,21 +2463,6 @@ export function createModulation(host, port) {
     A.note.textContent = cap.live
       ? (ro.sampleRate ? (ro.sampleRate / 1000).toFixed(1) + ' kHz · ' + ro.feedHz.toFixed(0) + ' Hz feed' : 'listening')
       : (cap.reason || 'audio input is closed — press AUDIO IN');
-    if (rec.audRanges && rec.audRanges.latency) {
-      const l = rec.audRanges.latency;
-      const latencyText = cap.live && Number.isFinite(cap.latencyMs)
-        ? Math.round(cap.latencyMs) + ' ms'
-        : '— ms';
-      if (l.textContent !== latencyText) l.textContent = latencyText;
-      l.classList.toggle('on', cap.live);
-      const latencyTitle = cap.live
-        ? ((cap.latencyEstimated ? 'Minimum estimate' : 'Estimated input-to-visual delay') +
-           ' · capture ' + (cap.inputLatencyMs === null ? 'unreported' : Math.round(cap.inputLatencyMs) + ' ms') +
-           ' · analysis ' + Math.round(cap.analysisLatencyMs || 0) + ' ms' +
-           ' · display ' + Math.round(cap.visualLatencyMs || 0) + ' ms')
-        : 'Open AUDIO IN to estimate input-to-visual delay';
-      if (l.title !== latencyTitle) l.title = latencyTitle;
-    }
     if (dev.audioState) { dev.audioState.textContent = cap.live ? (ro.gateOpen ? 'OPEN' : 'GATED') : 'OFF';
       dev.audioState.classList.toggle('on', cap.live && ro.gateOpen);
       dev.audioState.classList.toggle('bad', cap.state === 'denied' || cap.state === 'error'); }
@@ -2510,7 +2485,6 @@ export function createModulation(host, port) {
       row.row.classList.toggle('on', cap.live && (key === 'hit' ? v > 0 : v > 0.02));
       row.box.classList.toggle('on', ix >= 0);
       row.row.dataset.routeSelected = String(key === selectedRoute);
-      row.name.title = modeOf(s.id) === 'C' ? 'Click the label to show the next Audio output' : '';
     }
     const selectedSock = M.scalarOutputId ? M.scalarOutputId(s.id, selectedRoute) : null;
     const selectedIx = selectedSock ? macros.findIndex((m) => m.sourceId === selectedSock) : -1;
