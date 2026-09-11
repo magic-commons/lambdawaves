@@ -366,11 +366,22 @@ fn bayer8(px: vec2<f32>) -> f32 {
 const LINE_WGSL = /* wgsl */`
 struct U { vp: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> U0: U;
+/* INK STAYS UNDER GLASS (2026-09-11): up to 32 window rectangles in framebuffer pixels. A frame, axis or slice
+   line is not drawn where a window covers the stage, so a translucent pane never shows a hairline through
+   its title — the 1-px box edge at 42 % alpha was the "vertical line plaguing the devices". */
+struct Occ { n: u32, pad0: u32, pad1: u32, pad2: u32, r: array<vec4<f32>, 32> };
+@group(0) @binding(1) var<uniform> OCC: Occ;
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 @vertex fn vs(@location(0) p: vec3<f32>, @location(1) c: vec4<f32>) -> VSOut {
   var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; return o;
 }
-@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> { return in.col; }`;
+@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+  for (var i = 0u; i < OCC.n; i++) {
+    let q = OCC.r[i];
+    if (in.pos.x >= q.x && in.pos.x <= q.z && in.pos.y >= q.y && in.pos.y <= q.w) { discard; }
+  }
+  return in.col;
+}`;
 
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
 const ORIGIN = [0, 0, 0], DEFAULT_BG = [0.028, 0.038, 0.058];
@@ -577,7 +588,7 @@ export async function createField(canvas, opts = {}) {
     { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
-  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
+  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
   const makeRenderPipeline = (fmt) => device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
   const renderPipeline = makeRenderPipeline(format);
@@ -608,8 +619,11 @@ export async function createField(canvas, opts = {}) {
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
   const cornerVP = device.createBuffer({ size:64, usage:GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   device.queue.writeBuffer(cornerVP,0,new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]));
-  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}}]});
-  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }] });
+  /* the occlusion block: n + 32 rects; the corner axis is a HUD and gets the empty block */
+  const OCC_BYTES = 16 + 32 * 16, occBuf = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), occNone = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const OCC = new ArrayBuffer(OCC_BYTES), OCC_U = new Uint32Array(OCC, 0, 4), OCC_F = new Float32Array(OCC, 16); let occSig = '';
+  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}}]});
+  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }] });
 
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
@@ -1114,6 +1128,15 @@ export async function createField(canvas, opts = {}) {
       try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); palBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
       try { device.destroy(); } catch (_) {}
+    },
+    /** the windows over the stage, as [x0, y0, x1, y1] in CSS pixels of the canvas box; at most 32. Returns
+     *  true when the block changed (the caller presents). Lines are not drawn inside these rectangles. */
+    setOcclusion(rects) {
+      const k = canvas.width / Math.max(1, cssW), n = Math.min(32, rects.length);
+      let sig = String(n); for (let i = 0; i < n; i++) sig += '|' + rects[i].map((v) => Math.round(v)).join(',');
+      if (sig === occSig) return false; occSig = sig;
+      OCC_U[0] = n; for (let i = 0; i < n; i++) { const r = rects[i]; OCC_F[i * 4] = r[0] * k; OCC_F[i * 4 + 1] = r[1] * k; OCC_F[i * 4 + 2] = r[2] * k; OCC_F[i * 4 + 3] = r[3] * k; }
+      device.queue.writeBuffer(occBuf, 0, OCC); return true;
     },
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },

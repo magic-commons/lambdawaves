@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `pre-alpha-2` — 21 waves, 55 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `pre-alpha-2` — 21 waves, 56 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -97,6 +97,7 @@ stable enough to gate on.
 - `6dd239f` 2026-09-10 — Polish final Audio and Spectrum labels
 - `30307e1` 2026-09-11 — Redesign minimized Audio meter
 - `d380d35` 2026-09-11 — Fix complete project state round-trips
+- `35b6d44` 2026-09-11 — Second optimisation pass: side channels, the routing verdict, two materials
 
 </details>
 

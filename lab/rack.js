@@ -650,6 +650,7 @@ export async function boot(dom) {
 
   let modArm = true;
   let clockLink = true, linkFollowed = null, linkRetryAt = 0;
+  let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
   const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
   /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
@@ -1067,6 +1068,7 @@ export async function boot(dom) {
     rafId = 0;
     if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
+    if (field.ok && field.setOcclusion && (occludeDirty || nowMs - occludeAt > 300)) refreshOcclusion(nowMs);   // layout is read HERE, before the writes below
     if (mat.axis!==false && mat.axisMode==='corner') placeCornerAxis();
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
@@ -2609,6 +2611,7 @@ export async function boot(dom) {
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     function modDodge(r) {
+      occludeDirty = true;
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
@@ -3464,6 +3467,33 @@ export async function boot(dom) {
 
 
   const floats = document.getElementById('floats');
+  /* ── INK STAYS UNDER GLASS (2026-09-11) ─────────────────────────────────────────────────────────
+   * The field's frame, axes and slice outline are 1-px lines drawn on the stage; a translucent pane over
+   * the stage showed them as a hairline through a device's title. The line pass now skips every window's
+   * rectangle. Rectangles are gathered here — one layout burst, at most every 300 ms while a frame runs
+   * and at once when something moved — and never inside a paint. */
+  function refreshOcclusion(nowMs) {
+    occludeDirty = false; occludeAt = nowMs;
+    const cb = dom.canvas.getBoundingClientRect(), out = [], body = document.body;
+    const add = (el) => { if (!el || el.hidden) return; const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
+      const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
+      if (x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height) return; out.push([x0, y0, x1, y1]); };
+    const rackShown = !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek');
+    const cards = [];
+    if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
+    for (const d of floats.children) if (!d.classList.contains('closed')) add(d);
+    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList', 'keysheet']) add(document.getElementById(id));
+    if (out.length + cards.length <= 32) for (const d of cards) add(d); else if (rackShown) { add(rack); add(rackL); }   // past the block's 32 the two columns stand in for their cards
+    if (field.setOcclusion(out)) schedule(TIER.PRESENT);
+  }
+  { const dirty = () => { occludeDirty = true; schedule(TIER.PRESENT); };
+    const mo = new MutationObserver(dirty);
+    for (const el of [floats, rack, rackL]) if (el) mo.observe(el, { childList: true });
+    for (const id of ['notebook', 'transport', 'sheet', 'rackAddList', 'rackFavList']) { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['style', 'hidden', 'class'] }); }
+    new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
+    window.addEventListener('resize', dirty, { passive: true });
+  }
   const floatState = new Map();        // id → { home:{side,index}, x, y, w, compact } — the ARRANGEMENT, never the physics
   let floatZ = 0;                      // the stacking counter; a press hands out the next one
   const devById = (id) => document.querySelector('.dev[data-id="' + id + '"]');
@@ -3478,7 +3508,7 @@ export async function boot(dom) {
   function placeFloat(d, x, y) {
     const st = floatState.get(d.dataset.id); if (!st) return;
     const [cx, cy] = clampFloat(x, y, st.w);
-    st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px';
+    st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px'; occludeDirty = true;
   }
   const raiseFloat = (d) => { if (!d || !d.classList.contains('floating')) return false; d.style.zIndex = String(++floatZ); return true; };
   const frontFloat = () => { let best = null, z = -1; if (floats) for (const d of floats.querySelectorAll('.dev')) { const q = +d.style.zIndex || 0; if (q > z) { z = q; best = d; } } return best; };
@@ -4121,6 +4151,9 @@ export async function boot(dom) {
         if (subIn) { const s = localStorage.getItem(NB_SUBTITLE); if (s) { subIn.value = s; subIn.hidden = false; } }
       } catch (e) {}
       /* 2026-09-11: a synchronous localStorage write per keystroke became one write 300 ms after the last key; pagehide flushes */
+      /* 2026-09-11: the notebook's move and resize write style once per FRAME, not once per pointer event */
+      let nbRaf = 0, nbNext = null;
+      const nbPost = (fn) => { nbNext = fn; if (!nbRaf) nbRaf = requestAnimationFrame(() => { nbRaf = 0; const f = nbNext; nbNext = null; if (f) f(); }); };
       const nbPending = new Map(); let nbTimer = 0;
       const nbFlush = () => { nbTimer = 0; for (const [k, v] of nbPending) { try { localStorage.setItem(k, v); } catch (e) {} } nbPending.clear(); };
       const nbStore = (k, v) => { nbPending.set(k, v); if (!nbTimer) nbTimer = setTimeout(nbFlush, 300); };
@@ -4343,7 +4376,7 @@ export async function boot(dom) {
         if (grip) { let gd = null;
           grip.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); const r = nb.getBoundingClientRect(); gd = { x: e.clientX, y: e.clientY, w: r.width, h: r.height };
             try { grip.setPointerCapture(e.pointerId); } catch (_) {} });   // a capture that cannot be taken (a synthesised pointer, a stale id) must not throw into the page — the drag works without it
-          grip.addEventListener('pointermove', (e) => { if (!gd) return; e.preventDefault(); nbResize(gd.w + (e.clientX - gd.x), gd.h + (e.clientY - gd.y)); });
+          grip.addEventListener('pointermove', (e) => { if (!gd) return; e.preventDefault(); const w = gd.w + (e.clientX - gd.x), h = gd.h + (e.clientY - gd.y); nbPost(() => nbResize(w, h)); });
           const gend = (e) => { if (!gd) return; gd = null; if (e && e.pointerId !== undefined && grip.hasPointerCapture && grip.hasPointerCapture(e.pointerId)) grip.releasePointerCapture(e.pointerId); nbSaveSize(); };
           grip.addEventListener('pointerup', gend); grip.addEventListener('pointercancel', gend);
         }
@@ -4355,7 +4388,7 @@ export async function boot(dom) {
       }
       let nd = null, nbMoved = false; const nhead = nb.querySelector('.nb-head');
       nhead.addEventListener('pointerdown', (e) => { if (e.target.closest('button, input')) return; const r = nb.getBoundingClientRect(); nd = { dx: e.clientX - r.left, dy: e.clientY - r.top }; nhead.setPointerCapture(e.pointerId); });
-      nhead.addEventListener('pointermove', (e) => { if (!nd) return; nbMoved = true; nb.style.left = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - nd.dx)) + 'px'; nb.style.top = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - nd.dy)) + 'px'; });
+      nhead.addEventListener('pointermove', (e) => { if (!nd) return; nbMoved = true; const L = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - nd.dx)) + 'px', T = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - nd.dy)) + 'px'; nbPost(() => { nb.style.left = L; nb.style.top = T; }); });
       const nend = () => { nd = null; }; nhead.addEventListener('pointerup', nend); nhead.addEventListener('pointercancel', nend);
       count();
       layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };

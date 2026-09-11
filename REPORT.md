@@ -2443,3 +2443,29 @@ these are visual parameters at 60 Hz, a one-frame step), and per-voice modulatio
 **Two materials (Josh).** `--card-opacity` .76 → .88: the tinted pane keeps a faint breath of the field.
 The photosensitivity pane: blur at .55 of the glass blur with a faint ground (white .34 / near-black .42),
 so the field reads through as shapes and the text stays strong.
+
+**Audit close-out (2026-09-11, later).** The remaining three findings, applied or answered: the
+notebook's move and resize now write style once per frame through a rAF coalescer (a header drag of
++60 / +30 and a grip drag of +60 / +40 measured after); the audio feed keeps feeding every audio device
+on purpose — an unrouted device's minimised meter is that signal, so skipping it would freeze the meter;
+the corner-axis "second animation chain" only sets a flag and schedules the main loop for 500 ms, there is
+no second render. The reader governor's `canPresent` already excludes folded and compact windows, so a
+minimised METERS does not compute its autocorrelation.
+
+## 2026-09-11 · Ink stays under glass
+
+Josh: a vertical line "cutting right down the LFO title and plaguing the entire devices." Investigated
+in the page, not by eye: a scan of the LFO card for hairline-thin tall elements found only the graph's
+own playhead (inside its SVG, clipped, innocent); switching the field's FRAME off made the line vanish.
+It was the stage's frame and axis ink — 1-px lines at 42 % alpha in light theme — showing through the
+.88 tinted pane, exactly where a cube edge happened to cross a window. Every window is translucent by
+Josh's choice, so the fix is neither opacity nor blur: **the line pass skips the pixels a window covers.**
+`field.setOcclusion(rects)` takes up to 32 window rectangles into a uniform block and the line
+fragment shader discards inside them (the corner-axis HUD binds an empty block); `rack.js` gathers the
+rectangles — each open card on both racks, every float and the modulation window, the transport, the
+notebook, the sheets and menus; past 32 the two rack columns stand in for their cards — in one layout
+burst at the top of a frame before any DOM write, at most every 300 ms while a frame runs and at once
+when a float is dragged, the modulation window is placed, a rack scrolls, the body's class changes or
+a window opens or closes. Measured: the cube edge that crossed the LFO's title now ends at the card's
+border. Cost: one uniform write when a rectangle moved, a 32-iteration loop per line fragment (a few
+thousand fragments).
