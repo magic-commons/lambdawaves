@@ -1603,7 +1603,7 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
    The third sibling uses the same chassis/header/dial grammar, but its hero is
    a measured external signal: LEVEL dominates, bands are subordinate, and HIT
    remains an event rather than a fifth generic meter. */
-.mir-modwindow .m2dev.audio .m2kind { color: var(--acc2); }
+.mir-modwindow .m2dev.audio .m2kind { color: var(--acc); }
 .mir-modwindow .m2audioheadstate { flex: 1 1 auto; min-width: 38px; max-width: 58px; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; text-align: center;
   color: hsl(0 0% 100% / .46); font: 700 7px var(--font-sans); letter-spacing: .07em; }

@@ -14,10 +14,10 @@ try {
  assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);assert.equal(boot.moCurveDone,0);
  console.log('PASS current boot: no page errors, clean new project');
  console.log('GPU status:',boot.gpu || 'available');
- const spectrumOrder=await g.ev(`const body=document.querySelector('.dev[data-id="spectrum"] .dev-body'),fx=body.querySelector('.sp-fx'),picker=body.querySelector('.picker'),rows=body.querySelector('.sp-rows');
-  return {afterPicker:!!(picker.compareDocumentPosition(fx)&Node.DOCUMENT_POSITION_FOLLOWING),afterRows:!!(rows.compareDocumentPosition(fx)&Node.DOCUMENT_POSITION_FOLLOWING)};`);
- assert.deepEqual(spectrumOrder,{afterPicker:true,afterRows:true});
- console.log('PASS Spectrum live readout sits below the scale and channel controls');
+ const spectrumHelp=await g.ev(`const card=document.querySelector('.dev[data-id="spectrum"]'),fx=card.querySelector('.sp-fx'),book=card.querySelector('.window-help-book'),button=card.querySelector('.window-help .native-info-button');
+  return {inHelp:!!book&&fx.parentElement===book,hidden:!!book&&!book.matches(':popover-open'),button:!!button,bodyFree:!card.querySelector(':scope > .dev-body > .sp-fx')};`);
+ assert.deepEqual(spectrumHelp,{inHelp:true,hidden:true,button:true,bodyFree:true});
+ console.log('PASS Spectrum coefficient details live in the window help surface');
  const lazy=await g.ev(`const ids=['helium','h2','ladder','molecule'];ids.forEach(id=>__LW.layout.reopen(id,'R'));
   const immediate={loading:Object.fromEntries(ids.map(id=>[id,document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')])),busy:__LW.busy.count,
     centered:ids.every(id=>!!document.querySelector('.dev[data-id="'+id+'"] .dev-loading .mark'))};
@@ -102,7 +102,7 @@ try {
     stacked:rowBoxes.every((b,i)=>i===0||b.y>rowBoxes[i-1].y)&&new Set(rowBoxes.map(b=>Math.round(b.x))).size===1,
     aligned:rows.every((e,i)=>Math.abs((ringBoxes[i].y+ringBoxes[i].height/2)-(trackBoxes[i].y+trackBoxes[i].height/2))<.1),
     labelsAfter:rows.every((e,i)=>e.querySelector('.aud-range-name').getBoundingClientRect().left>=trackBoxes[i].right),
-    shortLabels:rows.map(e=>e.querySelector('.aud-range-short').textContent).join('')==='MLMH'&&rows.every(e=>getComputedStyle(e.querySelector('.aud-range-full')).display==='none'),
+    shortLabels:rows.map(e=>e.querySelector('.aud-range-short').textContent).join('')==='ALMH'&&rows.every(e=>getComputedStyle(e.querySelector('.aud-range-full')).display==='none'),
     longMeters:trackBoxes.every(b=>b.width>=220&&b.height>=24),sourceNarrow:[...card.querySelectorAll('.m2audsrc')].every(e=>e.getBoundingClientRect().width<70),
     border:getComputedStyle(track).borderTopWidth,clearTrack:getComputedStyle(track).backgroundColor==='rgba(0, 0, 0, 0)',live:getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor,
     noPeakDots:rows.every(e=>getComputedStyle(e.querySelector('.aud-range-input')).display==='none'),rangeColor:getComputedStyle(level.querySelector('.aud-range-zone')).backgroundColor,
@@ -111,7 +111,7 @@ try {
     routingBand:Math.abs(routeBoxes.low.height-44)<1&&Math.abs(routeBoxes.level.height-22)<1&&Math.abs(routeBoxes.hit.height-22)<1&&['level','low','mid','high'].every(k=>Math.abs(routeBoxes[k].width-58)<1),routingSpacing:(()=>{const c=['level','low','mid','high'].map(k=>routeBoxes[k].x+routeBoxes[k].width/2),d=c.slice(1).map((v,i)=>v-c[i]);return Math.max(...d)-Math.min(...d)<.1})(),
     routingPlain:Object.values(routeEls).every(e=>getComputedStyle(e).borderTopWidth==='0px'&&getComputedStyle(e).backgroundColor==='rgba(0, 0, 0, 0)')&&card.querySelectorAll('.m2audgrip svg').length===0,
     routingContentsAligned:routesAligned(routeEls),
-    routeNamesNeutral:Object.values(routeEls).every(e=>getComputedStyle(e.querySelector('.m2audname')).color!==accB),
+    routeNamesNeutral:Object.values(routeEls).every(e=>getComputedStyle(e.querySelector('.m2audname')).color!==accB),audioTitleAccent:getComputedStyle(card.querySelector('.m2kind')).color===accA,
     noHeadStatus:getComputedStyle(card.querySelector('.m2audioheadstate')).display==='none',
     oneGrip:getComputedStyle(card.querySelector('.m2head'),'::before').content==='none'&&Math.round(card.querySelector('.m2grab i').getBoundingClientRect().width)===13};
   card.style.setProperty('--acc','#0b528f');card.style.setProperty('--acc2','#8f520b');await w(250);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===paletteLive&&getComputedStyle(card.querySelector('.m2audsrc')).color!==paletteLive&&getComputedStyle(level.querySelector('.aud-range-zone')).backgroundColor!==ott.rangeColor;card.style.removeProperty('--acc');card.style.removeProperty('--acc2');
@@ -125,14 +125,14 @@ try {
   const result={allBands:compactRows.every(e=>getComputedStyle(e).display!=='none'),twoByTwo:new Set(knobBoxes.map(b=>Math.round(b.top))).size===2&&new Set(knobBoxes.map(b=>Math.round(b.left))).size===2,
     sideLayout:Math.max(...knobBoxes.map(b=>b.right))<Math.min(...compactTracks.map(b=>b.left))&&sourceBox.right<editBox.left&&routeBox.right<editBox.left&&editBox.height>bodyBox.height-10,
     controlsAboveKnobs:sourceBox.bottom<Math.min(...knobBoxes.map(b=>b.top))&&routeBox.bottom<Math.min(...knobBoxes.map(b=>b.top)),verticalMeters:compactTracks.every(b=>b.height>b.width*10&&b.width>=23)&&compactTracks.every((b,i)=>i===0||b.x>compactTracks[i-1].x),
-    compactAligned:compactTracks.every((b,i)=>Math.abs((b.x+b.width/2)-(compactRings[i].x+compactRings[i].width/2))<.1),labelsBottom:compactNames.every((b,i)=>b.top>=compactTracks[i].bottom),shortLabels:compactRows.map(e=>e.querySelector('.aud-range-short').textContent).join('')==='MLMH',
+    compactAligned:compactTracks.every((b,i)=>Math.abs((b.x+b.width/2)-(compactRings[i].x+compactRings[i].width/2))<.1),labelsBottom:compactNames.every((b,i)=>b.top>=compactTracks[i].bottom),shortLabels:compactRows.map(e=>e.querySelector('.aud-range-short').textContent).join('')==='ALMH',
     verticalHandles:compactRows.every(e=>e.querySelector('.aud-range-handle').getAttribute('aria-orientation')==='vertical'),allRoutes:compactRoutes.every(e=>getComputedStyle(e).display==='grid'),compactRouting:(()=>{const q=Object.fromEntries(compactRoutes.map(e=>[e.dataset.out,e.getBoundingClientRect()]));return Math.abs(q.level.width-q.hit.width)<.1&&Math.abs(q.low.width-q.mid.width)<.1&&Math.abs(q.mid.width-q.high.width)<.1&&q.level.y===q.hit.y&&q.low.y===q.mid.y&&q.mid.y===q.high.y&&q.low.y>q.level.y})(),compactRouteContentsAligned:routesAligned(Object.fromEntries(compactRoutes.map(e=>[e.dataset.out,e]))),
     compactKnobRhythm:knobBoxes.every(b=>Math.abs(b.height-70)<.1)&&dialBoxes.every(b=>Math.abs(b.width-48)<.1&&Math.abs(b.height-48)<.1)&&new Set(dialBoxes.map(b=>Math.round(b.top*10))).size===2&&Math.abs(dialBoxes[2].top-dialBoxes[0].top-77)<.1&&referenceDialRows.every(r=>Math.abs(r[0]-dialBoxes[0].top)<.6&&Math.abs(r.at(-1)-dialBoxes.at(-1).top)<.6),
     compactRouteGeometry:(()=>{const q=Object.fromEntries(compactRoutes.map(e=>[e.dataset.out,e.getBoundingClientRect()]));return Math.abs(routeBox.width-164)<.1&&Math.abs(routeBox.height-88)<.1&&Math.abs(q.level.width-82)<.1&&Math.abs(q.hit.width-82)<.1&&Math.abs(q.low.width-164/3)<.1&&Math.abs(q.level.left-routeBox.left)<.1&&Math.abs(q.low.left-routeBox.left)<.1&&Math.abs(q.hit.right-routeBox.right)<.1&&Math.abs(q.high.right-routeBox.right)<.1})(),
     sourcePair:sourceButtons.length===2&&Math.abs(sourceButtons[0].width-sourceButtons[1].width)<.1&&sourceButtons[0].x<sourceButtons[1].x,setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),latencyGone:!card2.querySelector('.aud-latency'),
     ott,errors:__e.slice()};M.deserialize(null);return result;`);
  assert.equal(audioFace.allBands,true);assert.equal(audioFace.twoByTwo,true);assert.equal(audioFace.sideLayout,true);assert.equal(audioFace.controlsAboveKnobs,true);assert.equal(audioFace.verticalMeters,true);assert.equal(audioFace.compactAligned,true);assert.equal(audioFace.labelsBottom,true);assert.equal(audioFace.shortLabels,true);assert.equal(audioFace.verticalHandles,true);assert.equal(audioFace.allRoutes,true);assert.equal(audioFace.compactRouting,true);assert.equal(audioFace.compactRouteContentsAligned,true);assert.equal(audioFace.compactKnobRhythm,true);assert.equal(audioFace.compactRouteGeometry,true);assert.equal(audioFace.sourcePair,true);assert.equal(audioFace.setVisible,true);assert.equal(audioFace.latencyGone,true);assert.deepEqual(audioFace.errors,[]);
- for(const key of ['macroArc','openArc','equalRows','stacked','aligned','labelsAfter','shortLabels','longMeters','sourceNarrow','clearTrack','noPeakDots','palette','routingFour','routingBand','routingSpacing','routingPlain','routingContentsAligned','routeNamesNeutral','assignedNumber','noHeadStatus','valuesHidden','valuesReveal','lowMixHome','followsPalette','oneGrip'])assert.equal(audioFace.ott[key],true,key);
+ for(const key of ['macroArc','openArc','equalRows','stacked','aligned','labelsAfter','shortLabels','longMeters','sourceNarrow','clearTrack','noPeakDots','palette','routingFour','routingBand','routingSpacing','routingPlain','routingContentsAligned','routeNamesNeutral','audioTitleAccent','assignedNumber','noHeadStatus','valuesHidden','valuesReveal','lowMixHome','followsPalette','oneGrip'])assert.equal(audioFace.ott[key],true,key);
  assert.equal(audioFace.ott.mixers,4);assert.equal(audioFace.ott.border,'0px');assert.match(audioFace.ott.live,/rgb/);
  console.log('PASS Audio face: aligned open-arc mixers, four evenly spaced full routes, and independent compact routing and meter geometry');
  /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — theme, stage colour, camera feel and

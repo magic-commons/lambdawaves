@@ -2314,7 +2314,7 @@ export function createModulation(host, port) {
       const mix=makeMix(row,key);
       const head = el('button', 'aud-range-name', row); head.type='button';
       el('b','aud-range-full',head,key.toUpperCase());
-      el('span','aud-range-short',head,key==='level'?'M':key[0].toUpperCase());
+      el('span','aud-range-short',head,key==='level'?'A':key[0].toUpperCase());
       const text=el('output','aud-range-value',row);
       head.addEventListener('click',()=>select(key));
       head.title='Select '+key.toUpperCase()+' for ATTACK, RELEASE and HOLD';

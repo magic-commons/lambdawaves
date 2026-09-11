@@ -76,7 +76,7 @@ export function installControlHelp(root = document) {
 export function consolidateWindowHelp(root = document) {
   for (const card of root.querySelectorAll('.dev')) {
     if (card.querySelector(':scope > .dev-head .window-help')) continue;
-    const sources = [...card.querySelectorAll('.note:not(.link-note)')]
+    const sources = [...card.querySelectorAll('.note:not(.link-note), .sp-fx')]
       .filter((n) => !n.closest('.native-info') && n.textContent.trim());
     if (!sources.length) continue;
     const book = el('div', 'window-help-book');
@@ -86,4 +86,3 @@ export function consolidateWindowHelp(root = document) {
     card.querySelector('.dev-util')?.prepend(control);
   }
 }
-
