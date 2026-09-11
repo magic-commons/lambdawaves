@@ -1,0 +1,12 @@
+# The node half of the gate on every push and pull request: the maths, the file laws, the PWA integrity.
+# The browser half (a real Firefox with WebGPU) runs on a machine with a GPU — see README "The gate".
+name: gate
+on: [push, pull_request]
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm test

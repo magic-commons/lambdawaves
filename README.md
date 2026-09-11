@@ -7,7 +7,9 @@ viewpoints, then watch the eigenmodes interfere and the cloud bloom into motion.
 > λWAVES · QWAVE-0 · Hydrogen Shadow Lab
 
 Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)** · a
-[Magic Commons](https://magic-commons.com) project · GPL-3.0-only
+[Magic Commons](https://magic-commons.com) project · GPL-3.0-only · built on [MIR](https://github.com/magic-commons/mir)
+
+![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
 ---
 

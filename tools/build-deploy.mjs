@@ -72,7 +72,7 @@ import { assertPublicTree } from './release-inputs.mjs';
  * announced.  If real restriction is ever wanted it is Cloudflare Access, evaluated separately. */
 const BASE_PATH      = '';
 const OWN_ORIGIN     = true;
-const ALPHA_UNLISTED = true;
+const ALPHA_UNLISTED = false;   // 2026-09-11: public release — indexed, unfurled, announced
 /* DEPLOY_ORIGIN — the scheme + hostname the app is ANNOUNCED at, and the only thing in this tree that
  * needs it is `og:image`: a link unfurler is a crawler on another machine with no base URL to resolve
  * against, so that one meta tag must be absolute, and being absolute is exactly what makes it rot.
