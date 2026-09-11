@@ -1762,22 +1762,25 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2k[data-knob="sens"] .m2kd {
   width: 48px; height: 48px; }
 
-/* Audio uses separate, explicit full and compact geometries. Shared route
-   styling keeps the live lamp beside its name; only an assigned macro number
-   spends Accent B. */
+/* Audio uses separate, explicit full and compact geometries. Every route owns
+   one stable local coordinate system: its label and assignment share the
+   centre axis, while the signal lamp sits halfway from the left edge to that
+   axis. Only an assigned macro number spends Accent B. */
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audout {
-  min-width:0;min-height:0;display:grid;grid-template-columns:10px minmax(0,1fr);
+  position:relative;min-width:0;min-height:0;display:grid;
   align-items:stretch;overflow:visible;border:0;border-radius:0;background:transparent; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audgrip,
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audout[data-out="level"] .m2audgrip {
+  position:absolute;z-index:2;left:25%;top:0;transform:translateX(-50%);
   width:10px;min-width:10px;height:100%;min-height:0;padding:0;border:0;border-radius:0;
   background:transparent;display:flex;align-items:center;justify-content:center;
   pointer-events:none;cursor:default; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audled { width:7px;height:7px; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audmac,
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audout[data-out="level"] .m2audmac {
-  width:auto;min-width:0;height:100%;min-height:0;padding:0 2px 0 0;border:0;border-radius:5px;
-  background:transparent;align-items:flex-start;justify-content:center;text-align:left; }
+  position:absolute;z-index:1;inset:0;width:100%;min-width:0;height:100%;min-height:0;
+  padding:0;border:0;border-radius:5px;background:transparent;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:0;text-align:center; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audname,
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audout.on .m2audname { color:var(--m2-ink-soft); }
 :root:root:root #modwin.mir-modwindow .m2dev.audio .m2audslot { color:var(--m2-ink-faint); }
@@ -1806,22 +1809,11 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="high"] { grid-area:1 / 4 / 3 / 5; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="level"],
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="hit"] {
-  height:22px;grid-template:22px / 10px 48px; }
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="level"] .m2audmac,
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="hit"] .m2audmac {
-  width:48px;flex-direction:row;align-items:center;justify-content:flex-start;gap:3px;text-align:left; }
+  height:22px; }
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="low"],
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="mid"],
 :root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="high"] {
-  height:44px;grid-template:44px / 10px 48px; }
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="low"] .m2audgrip,
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="mid"] .m2audgrip,
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="high"] .m2audgrip {
-  width:10px;min-width:10px; }
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="low"] .m2audmac,
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="mid"] .m2audmac,
-:root:root:root #modwin.mir-modwindow .m2dev.audio:not(.m2cmp):not(.m2min) .m2audout[data-out="high"] .m2audmac {
-  width:48px;align-items:flex-start;text-align:left; }
+  height:44px; }
 
 /* Compact: source row, two-route row, three-route row and a 2×2 knob bank
    occupy the left 164px. All four meter channels have independent vertical
@@ -1843,25 +1835,20 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
   grid-template:repeat(2,44px) / repeat(6,minmax(0,1fr));gap:0; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout:not([data-route-selected="true"]),
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] {
-  display:grid;width:auto;height:44px;min-height:0;grid-template:44px / 10px minmax(0,1fr); }
+  display:grid;width:auto;height:44px;min-height:0; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="level"] { grid-area:1 / 1 / 2 / 4; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="hit"] { grid-area:1 / 4 / 2 / 7; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="low"] { grid-area:2 / 1 / 3 / 3; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="mid"] { grid-area:2 / 3 / 3 / 5; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-out="high"] { grid-area:2 / 5 / 3 / 7; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout .m2audgrip,
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audgrip {
-  width:10px;min-width:10px; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout .m2audmac,
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2audout[data-route-selected="true"] .m2audmac {
-  width:auto;min-width:0;padding:0 1px 0 0;align-items:flex-start;text-align:left; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs {
-  position:absolute;z-index:3;left:5px;bottom:5px;width:164px;height:154px;box-sizing:border-box;
-  display:grid;grid-template:repeat(2,56px) / repeat(2,56px);align-content:end;
-  justify-content:space-around;gap:12px 8px;padding:0; }
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs .m2k { width:56px;height:56px; }
+  position:absolute;z-index:3;left:5px;top:auto;bottom:0;width:164px;height:158px;box-sizing:border-box;
+  display:grid;grid-template:repeat(2,70px) / repeat(2,minmax(0,1fr));align-content:start;
+  justify-content:stretch;gap:7px 0;padding:3px 0 0; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2knobs .m2k { width:100%;height:70px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2kd,
-:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2k[data-knob="sens"] .m2kd { width:40px;height:40px; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2k[data-knob="sens"] .m2kd {
+  flex:0 0 48px;width:48px;height:48px; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .m2edit {
   grid-area:1 / 2 / 4 / 3;min-height:0; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2cmp.audio .aud-ranges {

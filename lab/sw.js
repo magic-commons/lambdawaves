@@ -90,7 +90,7 @@ const PRECACHE = [
   ['./mir/modulation/curve.js',                           'f5ccc9c84f11'],
   ['./mir/modulation/host.js',                            '27ddb69a20e0'],
   ['./mir/modulation/mod.js',                             '535142d3b50c'],
-  ['./mir/modulation/modhost.css',                        '38ce2f164bdf'],
+  ['./mir/modulation/modhost.css',                        '24682ed2b037'],
   ['./mir/modulation/modwindow/modwindow.css',            '74982d650631'],
   ['./mir/modulation/modwindow/modwindow.js',             '95b64fb8ffc1'],
   ['./mir/modulation/registry.js',                        '543131e58af4'],
