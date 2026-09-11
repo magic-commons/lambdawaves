@@ -148,9 +148,9 @@ export function createPaletteEditor(host, api) {
   }
   window.addEventListener('resize', () => paint());
   push();
-  return { get stops() { return stops; }, get on() { return ui.on.get(); }, setOn(v) { ui.on.set(v); api.setEnabled(v); push(); },
+  return { get stops() { return stops; }, get selected() { return sel; }, get on() { return ui.on.get(); }, setOn(v) { ui.on.set(v); api.setEnabled(v); push(); },
     get id() { return ui.sel.value; }, get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
     /** name a preset from the catalogue — the settings key's road back in, and LW.setPalette's */
     select(id) { if (!PRESET_BY_ID.get(id)) return false; ui.sel.value = id; stops = PRESET_BY_ID.get(id).stops.map((x) => ({ at: x.at, rgb: x.rgb.slice() })); sel = 0; push(); return true; },
-    load(s) { stops = normalize(s.map((x) => ({ at: x.at, rgb: x.rgb.slice() }))); sel = 0; push(); }, repaint: paint };
+    load(s, selected = 0) { stops = normalize(s.map((x) => ({ at: x.at, rgb: x.rgb.slice() }))); sel = Math.max(0, Math.min(stops.length - 1, Math.trunc(selected) || 0)); push(); }, repaint: paint };
 }

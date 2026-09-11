@@ -9,14 +9,17 @@ import { el, seg, knob, readout, nRGB, vividInk, themeInk, graphHover, fitText }
 export function createQCD(host, api) {
   let kind = 'charm', pot = 'cornell', params = { ...DEFAULTS }, cache = null, dirty = true;
   const r0 = el('div', 'row tight', host);
-  r0.appendChild(seg({ label: 'SYSTEM', value: 'charm', options: [{ id: 'charm', label: 'cc̄' }, { id: 'bottom', label: 'bb̄' }], onChange: (v) => { kind = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } }).root);
-  r0.appendChild(seg({ label: 'POTENTIAL', value: 'cornell', options: [
+  const systemSeg = seg({ label: 'SYSTEM', value: 'charm', options: [{ id: 'charm', label: 'cc̄' }, { id: 'bottom', label: 'bb̄' }], onChange: (v) => { kind = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } });
+  r0.appendChild(systemSeg.root);
+  const potentialSeg = seg({ label: 'POTENTIAL', value: 'cornell', options: [
     { id: 'cornell', label: 'CORNELL' }, { id: 'linear', label: 'LINEAR', title: 'the Airy limit' }, { id: 'log', label: 'LOG' }, { id: 'coulomb', label: 'COULOMB' }],
-    onChange: (v) => { pot = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } }).root);
+    onChange: (v) => { pot = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } });
+  r0.appendChild(potentialSeg.root);
   const r1 = el('div', 'row tight', host);
-  r1.appendChild(knob({ label: 'α_s', min: 0.1, max: 0.8, value: 0.39, fmt: (v) => v.toFixed(2), onInput: (v) => { params.alphaS = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } }).root);
-  r1.appendChild(knob({ label: 'σ GeV²', min: 0.05, max: 0.4, value: 0.18, fmt: (v) => v.toFixed(3), onInput: (v) => { params.sigma = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } }).root);
-  r1.appendChild(knob({ label: 'C (log)', min: 0.3, max: 1.2, value: 0.733, fmt: (v) => v.toFixed(3), onInput: (v) => { params.C = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } }).root);
+  const alphaKnob = knob({ label: 'α_s', min: 0.1, max: 0.8, value: 0.39, fmt: (v) => v.toFixed(2), onInput: (v) => { params.alphaS = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } });
+  const sigmaKnob = knob({ label: 'σ GeV²', min: 0.05, max: 0.4, value: 0.18, fmt: (v) => v.toFixed(3), onInput: (v) => { params.sigma = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } });
+  const cKnob = knob({ label: 'C (log)', min: 0.3, max: 1.2, value: 0.733, fmt: (v) => v.toFixed(3), onInput: (v) => { params.C = v; dirty = true; api.repaint(); if (api.onParams) api.onParams(kind, pot, params); } });
+  r1.appendChild(alphaKnob.root); r1.appendChild(sigmaKnob.root); r1.appendChild(cKnob.root);
   const cv = el('canvas', 'qcd-c', host);
   const g = cv.getContext('2d');
   /* WAVE 46 — the two ladders used to print every mass beside its own line in its own colour (a cyan
@@ -95,5 +98,6 @@ export function createQCD(host, api) {
     roW.set(`${widthCoefficient(params.sigma).fm2.toFixed(5)} fm²`, 'ok');
   }
   window.addEventListener('resize', () => paint());
-  return { update, get cache() { return cache; }, setPotential(p) { pot = p; dirty = true; }, setSystem(k) { kind = k; dirty = true; } };
+  return { update, get cache() { return cache; }, setPotential(p) { if (!POTENTIALS[p]) return false; pot = p; potentialSeg.set(p); dirty = true; if (api.onParams) api.onParams(kind, pot, params); return true; }, setSystem(k) { if (!MEASURED[k]) return false; kind = k; systemSeg.set(k); dirty = true; if (api.onParams) api.onParams(kind, pot, params); return true; },
+    save() { return { kind, potential: pot, params: { alphaS: params.alphaS, sigma: params.sigma, C: params.C } }; }, load(o = {}) { if (typeof o.kind === 'string') this.setSystem(o.kind); if (typeof o.potential === 'string') this.setPotential(o.potential); if (o.params) { for (const [key, control] of [['alphaS', alphaKnob], ['sigma', sigmaKnob], ['C', cKnob]]) if (Number.isFinite(o.params[key])) { params[key] = o.params[key]; control.set(params[key]); } dirty = true; if (api.onParams) api.onParams(kind, pot, params); } api.repaint(); return this.save(); } };
 }

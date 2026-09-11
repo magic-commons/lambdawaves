@@ -85,8 +85,10 @@ export function createSliceView(host, api) {
     { id: 'ks', label: 'KS ℝ⁴', title: 'Map a rotating four-dimensional plane into three dimensions' }],
     onChange: (v) => { mode = v; dirty = true; api.repaint(); } });
   r1.appendChild(modeSeg.root);
-  r1.appendChild(knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } }).root);
-  r1.appendChild(knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } }).root);
+  const extentK = knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } });
+  const gainK = knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } });
+  r1.appendChild(extentK.root);
+  r1.appendChild(gainK.root);
   const holo = sw({ label: 'HOLO U(2)', value: false, title: 'Keep n₊ fixed on the holomorphic sheet', onChange: (v) => { if (v) { rotor = canonicaliseRotors(projectToU2(rotor.qL), rotor.qR); dirty = true; api.repaint(); } } });
   r1.appendChild(holo.root);
 
@@ -278,8 +280,21 @@ export function createSliceView(host, api) {
   window.addEventListener('resize', () => { if (active) paint(); });
   /* `sampleAt` is the one-shot route kept for anything that wants a slice OUTSIDE the frame loop (a proof, a test):
      it is slice.js's own sampleSlice, unchunked, and it is what the chunked job reproduces row by row. */
-  return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); dirty = true; },
-    get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m; modeSeg.set(m); dirty = true; },
+  return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
+    get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m === 'ks' ? 'ks' : 'space'; modeSeg.set(mode); dirty = true; },
+    get half() { return half; }, get gain() { return gain; },
+    save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() } }; },
+    load(o) {
+      if (!o || typeof o !== 'object') return false;
+      mode = o.mode === 'ks' ? 'ks' : 'space'; modeSeg.set(mode);
+      if (Number.isFinite(o.half)) half = Math.max(1, Math.min(60, o.half));
+      if (Number.isFinite(o.gain)) gain = Math.max(0.1, Math.min(20, o.gain));
+      extentK.set(half); gainK.set(gain);
+      if (o.rotor && Array.isArray(o.rotor.qL) && o.rotor.qL.length === 4 && Array.isArray(o.rotor.qR) && o.rotor.qR.length === 4 &&
+          o.rotor.qL.every(Number.isFinite) && o.rotor.qR.every(Number.isFinite)) rotor = canonicaliseRotors(o.rotor.qL, o.rotor.qR);
+      tour = null; res = 128; job = null; key = ''; dirty = true; regain = true; api.repaint();
+      return true;
+    },
     sampleAt(reg, t, N = res) { return sampleSlice(reg, t, rotor, { mode, half, N }); },
     tourTo(name) { const p = NAMED.find((x) => x.key === name); if (p) startTour(p); } };
 }

@@ -187,6 +187,7 @@ export function createPulse(host, api = {}) {
       setDt(v) { dt = +v; dtSeg.set(String(v)); reset(); refresh(); return dt; }, get dt() { return dt; },
       setPulse(o = {}) { if (o.amplitude !== undefined) { amplitude = +o.amplitude; ampK.set(amplitude); } if (o.omega !== undefined) { omega = +o.omega; omK.set(omega); } if (o.duration !== undefined) { duration = +o.duration; durK.set(duration); } if (o.phase !== undefined) { phase = +o.phase; phK.set(phase); } reset(); refresh(); return pulseObj(); },
       get pulse() { return pulseObj(); }, gap, resonant() { omega = gap(); omK.set(omega); reset(); refresh(); return omega; },
+      save() { return { basis: kind, R, dt, pulse: pulseObj() }; }, load(o = {}) { if (typeof o.basis === 'string') this.setBasis(o.basis); if (Number.isFinite(o.R)) this.setR(o.R); if (Number.isFinite(o.dt)) this.setDt(o.dt); if (o.pulse) this.setPulse(o.pulse); reset(); refresh(); return this.save(); },
       /** run the whole schedule NOW, off the clock — the proof's road, and the only one that ignores the budget */
       runAll() { if (!run) fire(); if (!run) return null; run.advance(1e7); refresh(); return run.read(); },
       state() { const common = { kind, n: basis().n, label: LABEL, dt, R, pulse: pulseObj(), gap: gap(), held, rewound, behind };

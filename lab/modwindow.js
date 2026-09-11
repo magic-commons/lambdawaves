@@ -2797,7 +2797,9 @@ export function createModulation(host, port) {
   let persistFn = port.persist || (() => {});
   const persist = () => persistFn(presentation());
   function presentation() {
-    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, audioMini: { ...P.audioMini }, open: P.open, folder: { ...P.folder }, macroSide: P.macroSide, macroMin: P.macroMin };
+    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, audioMini: { ...P.audioMini }, open: P.open,
+      folder: { ...P.folder }, macroSide: P.macroSide, macroMin: P.macroMin, selectedMacro: selMacro, selectedSource: selSource,
+      audioBands: Object.fromEntries(audBands), audioRoutes: Object.fromEntries(audRoutes) };
   }
   /* WAVE 105 · THE CHIPS TOLD THE TRUTH ONLY UNTIL A RELOAD.  `.on` and `aria-pressed` were
      written by the three click handlers and by nothing else, so a window restored with the
@@ -2819,16 +2821,22 @@ export function createModulation(host, port) {
     if (Number.isFinite(o.x)) { P.x = o.x; P.y = o.y; placed = true; }   // a remembered position is a hand's
     P.lane = WORK_LANES.includes(o.lane) ? o.lane : 'bottom';
     setWorkLane(panel, P.lane);
-    if (o.ribbon) { P.ribbon = true; rackEl.root.classList.add('m2ribbon'); }
-    if (o.modes) Object.assign(saved, o.modes);      /* claimed once, by the first source to bear the id */
+    P.ribbon = !!o.ribbon; rackEl.root.classList.toggle('m2ribbon', P.ribbon);
+    for (const bag of [P.modes, P.audioMini, P.folder, saved]) for (const key of Object.keys(bag)) delete bag[key];
+    audBands.clear(); audRoutes.clear();
+    if (o.modes) { Object.assign(P.modes, o.modes); Object.assign(saved, o.modes); } // live project rows read P; boot-time rows claim saved once
     if (o.audioMini) for (const [id, mode] of Object.entries(o.audioMini)) if (mode === 'all') P.audioMini[id] = mode;
+    if (o.audioBands) for (const [id, band] of Object.entries(o.audioBands)) if (M.AUDIO_FOLLOWED.includes(band)) audBands.set(id, band);
+    if (o.audioRoutes) for (const [id, band] of Object.entries(o.audioRoutes)) if (M.AUDIO_FOLLOWED.includes(band) || band === 'hit') audRoutes.set(id, band);
+    selMacro = typeof o.selectedMacro === 'string' && M.macroOf(o.selectedMacro) ? o.selectedMacro : null;
+    selSource = typeof o.selectedSource === 'string' && M.sourceOf(o.selectedSource) ? o.selectedSource : null;
     if (o.folder) Object.assign(P.folder, o.folder);
     setMacroSide(o.macroSide === 'right' ? 'right' : 'left');
     P.macroMin = !!o.macroMin; root.querySelector('.m2rail').classList.toggle('m2railmin', P.macroMin);root.querySelector('.m2railhead').setAttribute('aria-expanded',String(!P.macroMin));
     for (const s of devOrder()) { const r = devRows.get(s.id); if (r) { setDeviceMode(r.dev, modeOf(s.id)); if (r.syncMiniMeter) r.syncMiniMeter(); } }
     syncChips();
     if (o.open) open();
-    else place();
+    else close();
   }
   function open() {
     P.open = true;

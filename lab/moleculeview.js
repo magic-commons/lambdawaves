@@ -31,7 +31,8 @@ export function createMolecule(host, api) {
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'MOLECULE ON', value: false, title: 'Show H₂⁺ in the field', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
-  r0.appendChild(knob({ label: 'R  (a₀)', min: 0.6, max: 8, value: 2, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; state = moState(kind, R); refresh(); api.repaint(true); if (api.onR) api.onR(v, false); } }).root);
+  const rKnob = knob({ label: 'R  (a₀)', min: 0.6, max: 8, value: 2, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; state = moState(kind, R); refresh(); api.repaint(true); if (api.onR) api.onR(v, false); } });
+  r0.appendChild(rKnob.root);
   const stSeg = seg({ label: 'STATE', value: 'sigma_g', options: [
     { id: 'sigma_g', label: 'σg', title: 'bonding: (a + b)/√(2(1+S))' }, { id: 'sigma_u', label: 'σu', title: 'antibonding: (a − b)/√(2(1−S)), a nodal plane at z = 0' },
     { id: 'on_A', label: 'ON A', title: 'Start the electron on proton A' }],
@@ -114,6 +115,7 @@ export function createMolecule(host, api) {
   }
   window.addEventListener('resize', () => paint());
   refresh();
-  return { update, refresh, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = v; state = moState(kind, R); refresh(); if (api.onR) api.onR(v, true); }, get kind() { return kind; }, setKind(k) { kind = k; stSeg.set(k); state = moState(kind, R); refresh(); },
+  return { update, refresh, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = v; rKnob.set(R); state = moState(kind, R); refresh(); if (api.onR) api.onR(v, true); }, get kind() { return kind; }, setKind(k) { kind = k; stSeg.set(k); state = moState(kind, R); refresh(); },
+    save() { return { on, R, kind }; }, load(o = {}) { if (Number.isFinite(o.R)) this.setR(o.R); if (typeof o.kind === 'string') this.setKind(o.kind); if (o.on !== undefined) this.setOn(!!o.on); return this.save(); },
     fieldModes(t) { return fieldModes(state, R, t); }, get half() { return domainFor(R); } };
 }

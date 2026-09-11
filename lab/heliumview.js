@@ -56,7 +56,8 @@ export function createHelium(host, api) {
     roH.set(opp > 0 ? (same / opp).toFixed(4) : '—', same < opp ? 'ok' : 'warn');
   }
   refresh();
-  return { update() {}, prepare, get on() { return on; }, setOn(v) { on = !!v; if (on) ensureSol(); if (onSw.set) onSw.set(on); api.setOn(on); }, get sol() { return ensureSol(); }, get computed() { return !!sol; }, setBasis(b) { basis = b; bSeg.set(b); sol = null; generation++; refresh(); },
+  return { update() {}, prepare, get on() { return on; }, setOn(v) { on = !!v; if (on) ensureSol(); if (onSw.set) onSw.set(on); api.setOn(on); }, get sol() { return ensureSol(); }, get computed() { return !!sol; }, get basis() { return basis; }, setBasis(b) { if (!BASES[b]) return false; basis = b; bSeg.set(b); sol = null; generation++; refresh(); return true; },
     setActive(v) { const next = !!v; if (next === active) return; active = next; if (active) refresh(); },
+    save() { return { on, basis, x1: x1().slice() }; }, load(o = {}) { if (typeof o.basis === 'string') this.setBasis(o.basis); if (Array.isArray(o.x1) && o.x1.length === 3 && o.x1.every(Number.isFinite)) this.placeAt(o.x1); if (o.on !== undefined) this.setOn(!!o.on); return this.save(); },
     get x1() { return x1(); }, place(r, th) { r1 = r; th1 = th; x1v = null; if (kR.set) kR.set(r); if (kT.set) kT.set(th); refresh(); }, placeAt(p) { x1v = p.slice(); r1 = Math.hypot(...p); th1 = r1 > 0 ? Math.acos(Math.max(-1, Math.min(1, p[2] / r1))) : 0; if (kR.set) kR.set(r1); if (kT.set) kT.set(th1); refresh(); }, fieldModes() { return conditionalModes(ensureSol(), x1()); }, get half() { return 4; } };
 }

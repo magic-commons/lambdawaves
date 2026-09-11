@@ -20,7 +20,7 @@ const T1S = modeTable(1, 0, 0);
 const CURVE_N = 221;
 let CI_CURVE = null;
 export function createH2(host, api) {
-  let on = false, active = api.active ? !!api.active() : true, curveTask = null, which = 'triplet', R = 6, ke = 0.02, run = null, kappa = 300, showCI = true;   // κ: nuclear time per logical time unit (a DISPLAY choice)
+  let on = false, active = api.active ? !!api.active() : true, curveTask = null, which = 'triplet', R = 6, handR = 6, ke = 0.02, run = null, kappa = 300, showCI = true;   // κ: nuclear time per logical time unit (a DISPLAY choice)
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'H₂ ON', value: false, title: 'Show the H₂ density in the field', onChange: (v) => { on = v; api.setOn(v); } });
   r0.appendChild(onSw.root);
@@ -32,9 +32,10 @@ export function createH2(host, api) {
   const ciSw = sw({ label: 'CORRELATED PAIR', value: true, title: 'Show STO-3G full-CI and restricted Hartree-Fock curves', onChange: (v) => { showCI = v; paint(); } });
   r0.appendChild(ciSw.root);
   const r1 = el('div', 'row tight', host);
-  r1.appendChild(knob({ label: 'R  (a₀)', min: 0.6, max: 10, value: 6, fmt: (v) => v.toFixed(2), onInput: (v) => { R = v; run = null; refresh(); api.repaint(true); } }).root);
-  r1.appendChild(knob({ label: 'COLLIDE  KE', min: 0.002, max: 0.1, value: 0.02, log: true, fmt: (v) => v.toFixed(3) + ' Eh', onInput: (v) => { ke = v; } }).root);
-  r1.appendChild(knob({ label: 'NUCLEAR CLOCK ×', min: 20, max: 2000, value: 300, log: true, fmt: (v) => '×' + v.toFixed(0), onInput: (v) => { kappa = v; } }).root);
+  const rKnob = knob({ label: 'R  (a₀)', min: 0.6, max: 10, value: 6, fmt: (v) => v.toFixed(2), onInput: (v) => { R = handR = v; run = null; refresh(); api.repaint(true); } });
+  const keKnob = knob({ label: 'COLLIDE  KE', min: 0.002, max: 0.1, value: 0.02, log: true, fmt: (v) => v.toFixed(3) + ' Eh', onInput: (v) => { ke = v; } });
+  const clockKnob = knob({ label: 'NUCLEAR CLOCK ×', min: 20, max: 2000, value: 300, log: true, fmt: (v) => '×' + v.toFixed(0), onInput: (v) => { kappa = v; } });
+  r1.appendChild(rKnob.root); r1.appendChild(keKnob.root); r1.appendChild(clockKnob.root);
   r1.appendChild(trig({ label: 'COLLIDE', title: 'Launch the nuclei from R = 8 on the selected curve', onFire: () => { run = { t0: api.now(), traj: collide(8, -Math.sqrt(2 * ke / MU_H2), which, { dt: 2, steps: 40000 }) }; R = 8; refresh(); api.repaint(true); } }).root);
   const cv = el('canvas', 'mol-c', host); const g = cv.getContext('2d');
   const rr = el('div', 'row tight', host);
@@ -167,8 +168,9 @@ export function createH2(host, api) {
       { table: T1S, re: nu, im: 0, center: A, group: 1 }, { table: T1S, re: -nu, im: 0, center: B, group: 1 }];
   }
   refresh();
-  return { update, refresh, prepare, setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) refresh(); return active; }, get curveReady() { return !!CI_CURVE; }, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = v; run = null; refresh(); }, get which() { return which; }, setWhich(w) { which = w; wSeg.set(w); run = null; refresh(); },
+  return { update, refresh, prepare, setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) refresh(); return active; }, get curveReady() { return !!CI_CURVE; }, get on() { return on; }, setOn(v) { on = !!v; if (onSw.set) onSw.set(on); api.setOn(on); }, get R() { return R; }, setR(v) { R = handR = v; rKnob.set(R); run = null; refresh(); }, get which() { return which; }, setWhich(w) { if (w !== 'singlet' && w !== 'triplet') return false; which = w; wSeg.set(w); run = null; refresh(); return true; },
     get showCI() { return showCI; }, setShowCI(v) { showCI = !!v; ciSw.set(showCI); paint(); return showCI; },
+    save() { return { on, R: handR, which, showCI, ke, kappa }; }, load(o = {}) { if (Number.isFinite(o.R)) this.setR(o.R); if (typeof o.which === 'string') this.setWhich(o.which); if (o.showCI !== undefined) this.setShowCI(!!o.showCI); if (Number.isFinite(o.ke)) { ke = o.ke; keKnob.set(ke); } if (Number.isFinite(o.kappa)) { kappa = o.kappa; clockKnob.set(kappa); } run = null; if (o.on !== undefined) this.setOn(!!o.on); return this.save(); },
     /** the correlated numbers AT R, for a proof that wants them without reading a readout's string */
     ci(r = R) { const c = sto3gH2(r), wb = weinbaumOptimal(r); return { R: r, rhf: c.rhf, fci: c.fci, correlation: c.fci - c.rhf, weinbaum: wb.fci, zeta: wb.zeta, lambda: wb.lambda, limit: 2 * sto3gHydrogen().E }; },
     collide(KE = ke) { ke = KE; run = { t0: api.now(), traj: collide(8, -Math.sqrt(2 * ke / MU_H2), which, { dt: 2, steps: 40000 }) }; R = 8; refresh(); return run.traj; }, get run() { return run; },

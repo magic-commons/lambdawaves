@@ -160,6 +160,45 @@ try {
  assert.equal(daw.auto,true); assert.equal(daw.friction,0.31);
  assert.equal(daw.kepler,true); assert.equal(daw.vortex,true); assert.equal(daw.dials,true); assert.equal(daw.ab,true); assert.deepEqual(daw.nb,{w:520,h:380}); assert.deepEqual(daw.routes,[[0.5,1]]); assert.equal(daw.modwin,true); assert.ok(daw.cards>20); assert.deepEqual(daw.errs,[]);
  console.log('PASS the DAW law: theme, stage colour, camera, overlays, dials, A/B, notebook size, modulation placement, arrangement and routes round-trip through the project');
+ /* A PROJECT STARTS AT ZERO AND SAVES THE HAND, NOT THE NEEDLE. This drives the actual Projects API
+    through a mid-route save, scrambles every covered surface, opens it, then presses Play once. */
+ const projectState=await g.ev(`const M=__LW.mod.model,R=__LW.mod.registry,P=__LW.projects,w=n=>new Promise(r=>setTimeout(r,n));
+  __LW.mod.reset();__LW.loadPreset('1s');__LW.ab.storeA();__LW.loadPreset('2p+');__LW.ab.storeB();__LW.ab.set(true);__LW.pause();__LW.scrub(137);
+  R.setBase('material.stage',.63);R.setBase('material.gamma',1.71);R.setBase('material.exposure',2.3);R.setBase('transport.rate',33);
+  __LW.camera.setAutoRotate(false);__LW.orbit(.27,-.14);const pose={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
+  __LW.spectrum.select(4);__LW.spectrum.setDials(false);
+  const rotor={qL:[.9238795325,.3826834324,0,0],qR:[.9659258263,0,.2588190451,0]};__LW.slice.load({mode:'ks',half:13.5,gain:3.25,rotor});
+  __LW.qcd.load({kind:'bottom',potential:'log',params:{alphaS:.51,sigma:.23,C:.81}});__LW.molecule.load({on:true,R:3.4,kind:'sigma_u'});
+  __LW.pulse.load({basis:'lcao1s',R:2.7,dt:.1,pulse:{amplitude:.041,omega:.62,duration:72,phase:.4}});__LW.helium.load({on:false,basis:'one',x1:[.3,.4,.5]});
+  __LW.h2.load({on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});__LW.ladder.set({nbar:42,sigma:3.5,d:4,teeth:6});__LW.particles.setTrail(37);__LW.dynamics.ui.n.set(230);__LW.dynamics.ui.trail.set(37);
+  const pal=__LW.paletteGroups.flatMap(g=>g.items).find(id=>id!==__LW.paletteId);__LW.setPalette(pal);__LW.palette.load([{at:.08,rgb:[.1,.2,.3]},{at:.47,rgb:[.7,.4,.2]},{at:.82,rgb:[.2,.8,.5]}],1);__LW.palette.setOn(true);
+  const macro=M.macroList()[0];M.setMacro(macro.id,{value:.88,masterDepth:.73});const added=M.addRoute(macro.id,'material.exposure',.12,.42);__LW.mod.clock.applyAll(true);
+  const current=R.state('material.exposure').current,base=R.baseOf('material.exposure'),route={...added.route};
+  __LW.layout.modulation.expand();const audioId=__LW.mod.addSource('audio');await w(250);document.querySelector('.m2dev.audio [data-band="high"] .aud-range-name').click();__LW.mod.view.select(macro.id);
+  __LW.history.note('project test edit');await w(450);const historyBefore=__LW.history.depth;
+  P.save('acceptance/complete-state');const disk=JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items['acceptance/complete-state'].data;
+  __LW.ab.set(false);R.setBase('material.gamma',.8);R.setBase('material.exposure',.4);R.setBase('transport.rate',4);__LW.spectrum.select(-1);__LW.spectrum.setDials(true);
+  __LW.slice.load({mode:'space',half:3,gain:.2,rotor:{qL:[1,0,0,0],qR:[1,0,0,0]}});__LW.setPalette(__LW.paletteGroups[0].items[0]);__LW.palette.load([{at:0,rgb:[1,0,0]},{at:.5,rgb:[0,0,1]}],0);
+  __LW.qcd.load({kind:'charm',potential:'cornell',params:{alphaS:.2,sigma:.1,C:.4}});__LW.molecule.load({on:false,R:1.1,kind:'sigma_g'});__LW.pulse.load({basis:'lcao1s',R:1.2,dt:.2,pulse:{amplitude:.01,omega:.2,duration:12,phase:0}});__LW.helium.load({on:false,basis:'six',x1:[0,0,.8]});__LW.h2.load({on:false,R:8,which:'triplet',showCI:true,ke:.01,kappa:100});__LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.dynamics.ui.n.set(40);
+  const opened=P.open('acceptance/complete-state');await w(600);const restored=__LW.serialize().presentation,restoredRoute=M.routeList().find(r=>r.id===route.id),restoredSlice=__LW.slice.save(),poseNow={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
+  const beforePlay={t:__LW.clock.t,playing:__LW.clock.playing,transition:__LW.ab.on,theta:__LW.reg.mixAngle(__LW.clock.t)};__LW.play();await w(250);
+  const afterPlay={t:__LW.clock.t,theta:__LW.reg.mixAngle(__LW.clock.t),transition:__LW.ab.on};__LW.pause();
+  const result={opened,diskT:disk.experiment.t,diskBase:disk.presentation.modulationBases['material.exposure'],diskMirror:disk.presentation.mat.exposure,
+    base,current,restoredBase:R.baseOf('material.exposure'),route:[route.min,route.max,route.bi,route.enabled,route.curve],restoredRoute:restoredRoute&&[restoredRoute.min,restoredRoute.max,restoredRoute.bi,restoredRoute.enabled,restoredRoute.curve],
+    rate:__LW.clock.rate,gamma:__LW.mat.gamma,stage:restored.ui.stage.mix,pose,poseNow,
+    spectrum:{selected:__LW.spectrum.selected,dials:__LW.spectrum.dials},slice:restoredSlice,palette:{id:__LW.paletteId,selected:__LW.palette.selected,stops:__LW.palette.stops.map(s=>({at:s.at,rgb:s.rgb.slice()}))},pal,
+    instruments:restored.instruments,modwin:restored.modwin,macro:{id:macro.id,value:M.macroOf(macro.id).value,depth:M.macroOf(macro.id).masterDepth},audioId,beforePlay,afterPlay,historyBefore,historyAfter:__LW.history.depth,dirty:P.dirty,errors:__e.slice()};
+  P.remove('acceptance/complete-state');return result;`);
+ assert.equal(projectState.opened,true);assert.equal(projectState.diskT,0);assert.notEqual(projectState.current,projectState.base);assert.equal(projectState.base,2.3);
+ assert.equal(projectState.diskBase,2.3);assert.equal(projectState.diskMirror,2.3);assert.equal(projectState.restoredBase,2.3);assert.deepEqual(projectState.restoredRoute,projectState.route);
+ assert.equal(projectState.rate,33);assert.equal(projectState.gamma,1.71);assert.equal(projectState.stage,.63);assert.ok(Math.abs(projectState.poseNow.yaw-projectState.pose.yaw)<1e-12);assert.ok(Math.abs(projectState.poseNow.pitch-projectState.pose.pitch)<1e-12);assert.deepEqual(projectState.poseNow.quat,projectState.pose.quat);
+ assert.deepEqual(projectState.spectrum,{selected:4,dials:false});assert.equal(projectState.slice.mode,'ks');assert.equal(projectState.slice.half,13.5);assert.equal(projectState.slice.gain,3.25);
+ assert.deepEqual(projectState.slice.rotor.qL.map(v=>+v.toFixed(8)),[.92387953,.38268343,0,0]);assert.equal(projectState.palette.id,projectState.pal);assert.equal(projectState.palette.selected,1);assert.equal(projectState.palette.stops.length,3);
+ assert.deepEqual(projectState.instruments.qcd,{kind:'bottom',potential:'log',params:{alphaS:.51,sigma:.23,C:.81}});assert.deepEqual(projectState.instruments.molecule,{on:true,R:3.4,kind:'sigma_u'});assert.deepEqual(projectState.instruments.pulse,{basis:'lcao1s',R:2.7,dt:.1,pulse:{amplitude:.041,omega:.62,duration:72,phase:.4,start:0}});assert.equal(projectState.instruments.helium.basis,'one');assert.deepEqual(projectState.instruments.helium.x1.map(v=>+v.toFixed(8)),[.3,.4,.5]);assert.deepEqual(projectState.instruments.h2,{on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});assert.deepEqual(projectState.instruments.ladder,{nbar:42,sigma:3.5,d:4,teeth:6});assert.deepEqual(projectState.instruments.particles,{count:230,trail:37});
+ assert.equal(projectState.modwin.selectedMacro,projectState.macro.id);assert.equal(projectState.modwin.audioBands[projectState.audioId],'high');assert.equal(projectState.macro.value,.88);assert.equal(projectState.macro.depth,.73);
+ assert.ok(projectState.historyBefore>0);assert.equal(projectState.historyAfter,0);assert.deepEqual(projectState.beforePlay,{t:0,playing:false,transition:true,theta:0});assert.equal(projectState.afterPlay.transition,true);assert.ok(projectState.afterPlay.t>0);assert.notEqual(projectState.afterPlay.theta,0);
+ assert.equal(projectState.dirty,false);assert.deepEqual(projectState.errors,[]);
+ console.log('PASS complete project round-trip: stable macro bases and ranges, full view state, clear history, t=0, and transition motion on first Play');
  /* THE HAND ON A ROUTED KNOB (Josh, 2026-09-10): a click leaves the base and the range alone; a drag moves the BASE by
     the drag — never to where the modulator happened to be showing the needle. */
  const hand=await g.ev(`const M=__LW.mod.model,R=__LW.mod.registry,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.loadPreset('1s+2pz');

@@ -4157,30 +4157,44 @@ export async function boot(dom) {
          belong here. Compare on a destructive act, never on a frame. Playback time and the
          quality governor are runtime; routed numbers compare their hand-owned bases so an
          LFO does not manufacture unsaved edits while the user listens. */
-      function projectKey() {
-        const data = serialize(), pr = data.presentation;
-        delete data.experiment.t;
-        delete pr.quality.autoScale;
-        /* THE DAW KEYS THAT DO NOT DIRTY A PROJECT: moving a window, the modulation window's placement, the
-           camera's feel, the theme and stage, the notebook's size are saved WITH the project but a demo-maker
-           dragging a window is not "unsaved work". The overlays and the A/B transition are content and do count. */
-        delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.ui; delete pr.notebook;
-        if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
+      function modulationBases() {
+        if (!modHost) return null;
+        modSyncBases(); // catch paused hand edits; routed targets keep their protected base by contract
+        return Object.fromEntries(modHost.registry.list().map((id) => [id, modHost.registry.baseOf(id)]));
+      }
+      /* A project stores the HAND values behind every routed control. The live Card values may be
+         anywhere in an LFO cycle when Save is pressed; those animated values are presentation for
+         this frame, not the parameter settings the artist made. Keep both the generic base table and
+         base-correct mirrors so this project also opens correctly in builds predating the table. */
+      function projectSnapshot() {
+        const data = serialize(), pr = data.presentation, bases = modulationBases();
+        data.experiment.t = 0;
+        pr.quality.autoScale = 1; // the governor's current drop is runtime, not part of the composition
+        if (!bases) return data;
+        pr.modulationBases = bases;
         const seats = {
           'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'],
           'observer.dist': [pr.obs, 'dist'], 'observer.fov': [pr.obs, 'fov'],
+          'material.stage': [pr.ui.stage, 'mix'], 'material.gamma': [pr.mat, 'gamma'],
           'material.exposure': [pr.mat, 'exposure'], 'material.softness': [pr.mat, 'softness'],
           'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'],
           'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
           'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'],
           'transport.rate': [data.experiment, 'rate'],
           'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'],
-          'state.defect.l2': [pr.rotationRates, 'def'],
+          'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
         };
-        for (const [id, [obj, key]] of Object.entries(seats)) {
-          const r = modHost && modHost.registry.state(id);
-          if (r && r.modulated) obj[key] = r.base;
-        }
+        for (const [id, seat] of Object.entries(seats)) if (seat[0] && Number.isFinite(bases[id])) seat[0][seat[1]] = bases[id];
+        return data;
+      }
+      function projectKey() {
+        const data = projectSnapshot(), pr = data.presentation;
+        delete pr.quality.autoScale;
+        /* THE DAW KEYS THAT DO NOT DIRTY A PROJECT: moving a window, the modulation window's placement, the
+           camera's feel, the theme and stage, the notebook's size are saved WITH the project but a demo-maker
+           dragging a window is not "unsaved work". The overlays and the A/B transition are content and do count. */
+        delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.ui; delete pr.notebook;
+        if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
         return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
       const projectClean = () => { pjBaseline = projectKey(); };
@@ -4210,13 +4224,13 @@ export async function boot(dom) {
           path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
           const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
           const P = pjRead(); if (!P) return false; const now = new Date().toISOString();
-          Object.defineProperty(P.items, path, { configurable: true, enumerable: true, writable: true, value: { path, folder, name, saved: now, opened: Object.hasOwn(P.items, path) ? P.items[path].opened : now, data: serialize(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } } });
+          Object.defineProperty(P.items, path, { configurable: true, enumerable: true, writable: true, value: { path, folder, name, saved: now, opened: Object.hasOwn(P.items, path) ? P.items[path].opened : now, data: projectSnapshot(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } } });
           pjTouch(P, path); if (!pjWrite(P)) return false; pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } projectClean(); renderProjects(); return true;
         },
         open(path) {
           const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
-          busy.n++; busySync(); try { restore(it.data); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          busy.n++; busySync(); try { restore(it.data, { project: true }); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
@@ -4225,7 +4239,7 @@ export async function boot(dom) {
           return true;
         },
         remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
-        fresh() { reg.clear(); refSnapshot = null; touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; if (subIn) { subIn.value = ''; subIn.hidden = true; } try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); if (subIn) localStorage.setItem(NB_SUBTITLE, ''); } catch (e) {} pjCurrent = null; projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
+        fresh() { reg.clear(); refSnapshot = null; clock.pause(); clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); dynamics.clearHistory(); particles.resetClock(0); touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; if (subIn) { subIn.value = ''; subIn.hidden = true; } try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); if (subIn) localStorage.setItem(NB_SUBTITLE, ''); } catch (e) {} pjCurrent = null; if (history) history.clear(); projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
         exportText(path) { const P = pjRead(), it = P && Object.hasOwn(P.items, path || pjCurrent) ? P.items[path || pjCurrent] : null; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
         importText(text) { const path = storeProjectImport(text, () => JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'), pjWrite); renderProjects(); return path; },
       };
@@ -4970,7 +4984,7 @@ export async function boot(dom) {
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   function serialize() {
-    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.gamma; delete m.lightUI; delete m.stageCustom;   // the stage travels under presentation.ui.stage
+    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.lightUI; delete m.stageCustom;   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -4980,10 +4994,16 @@ export async function boot(dom) {
     return { experiment: Object.assign(reg.serialize(clock.t), { rate: clock.rate, window: clock.window, damping: reg.damping }),
       presentation: { obs: { ...obs }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
         paletteId: palette ? palette.id : palChoice,
-        space, palette: palette ? { on: palette.on, stops: palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
+        space, palette: palette ? { on: palette.on, selected: palette.selected, stops: palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
         hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: gasAxial ? 'axial' : 'reg' },
         field: { overlay: fieldlines.overlay, lines: fieldlines.lines, source: fieldlines.source },
         wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
+        readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
+        /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
+           particles and pulse runs do not: every project still opens paused on its first frame. */
+        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), qcd: qcd.save(),
+          pulse: pulsePanel ? pulsePanel.api.save() : null, ladder: { ...ladder.params },
+          particles: { count: Math.round(dynamics.ui.n.get()), trail: particles.trailLen } },
         mo: moPanel ? moPanel.save() : null,
         rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: modHost ? modRackStamped() : null,
@@ -5021,7 +5041,7 @@ export async function boot(dom) {
    *  so the transport is put down first, every held parameter is handed back to its base, and the
    *  dormancy law is re-run — a route saved against a target this build does not have keeps its
    *  settings and sits inert rather than being thrown away. */
-  function restoreModulation(o) {
+  function restoreModulation(o, savedBases) {
     if (!modHost) return false;
     /* REFUSE WHAT THIS BUILD CANNOT HONOUR, and say so.  An ABSENT `v` is not a refusal — every
        rack written before wave 63 has none and means "predates the stamp", which is the same
@@ -5036,13 +5056,17 @@ export async function boot(dom) {
       return false;
     }
     modHost.clock.pause();
+    /* Capture the project values before restoreAll hands the previous rack's live targets back.
+       Old projects have no explicit base table; for those, the fully restored controls are the
+       migration source. New projects use savedBases, which remains stable through modulation. */
+    const incoming = Object.fromEntries(modHost.registry.list().map((id) => [id, modGets[id] ? Number(modGets[id]()) : NaN]));
     modHost.registry.restoreAll();
     const ok = modHost.model.deserialize(o || null);
     modHost.targets.sync();
-    /* THE FILE HAS JUST MOVED THE INSTRUMENT.  restore() writes obs / mat / quality BEFORE it gets here,
-       so the bases have to be re-read from them or the applyAll below hands every target back to the
-       base the PREVIOUS project left in the registry — which is B52's camera, restored and then undone. */
-    modSyncBases();
+    for (const id of modHost.registry.list()) {
+      const v = savedBases && Number.isFinite(savedBases[id]) ? savedBases[id] : incoming[id];
+      if (Number.isFinite(v)) modHost.registry.setBase(id, v);
+    }
     modHost.clock.applyAll(true);
     if (modView) modView.rebuild();
     schedule(TIER.PRESENT);
@@ -5055,7 +5079,18 @@ export async function boot(dom) {
     try {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
-      if (ex) { const t = reg.restore(ex); if (!(opt && opt.keepTime)) { clock.pause(); clock.scrub(t); } if (ex.rate) clock.setRate(paceRate(ex.rate)); if (ex.window) clock.window = ex.window; ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; lastNmax = -1; setReference(); }
+      if (ex) {
+        const t = reg.restore(ex);
+        if (!(opt && opt.keepTime)) {
+          clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
+          if (ui.scrub) ui.scrub.set(0);
+          shadowView.clearTrail(); dynamics.clearHistory(); particles.resetClock(clock.t);
+        }
+        if (Number.isFinite(ex.rate) && ex.rate > 0) clock.setRate(paceRate(ex.rate));
+        if (ex.window) clock.window = ex.window;
+        if (Number.isFinite(ex.damping)) { reg.setDamping(ex.damping); if (ui.dragKnob) ui.dragKnob.set(reg.damping); }
+        ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; lastNmax = -1; setReference();
+      }
       if (pr) { camLevel.from = null; Object.assign(obs, pr.obs || {}); obs.mode = obs.mode === 'free' ? 'free' : 'turntable'; if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
       A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
       ones the link carried, so mint(open(link)) stopped being byte-identical the moment the camera began booting
@@ -5064,7 +5099,21 @@ export async function boot(dom) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.gamma; delete pm.lightUI; Object.assign(mat, pm); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if(ui.frameModeSeg)ui.frameModeSeg.set(mat.frame===false?'off':mat.frameMode||'box'); if(ui.axisModeSeg)ui.axisModeSeg.set(mat.axis===false?'off':mat.axisMode||'box'); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.lightUI; Object.assign(mat, pm); if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if(ui.frameModeSeg)ui.frameModeSeg.set(mat.frame===false?'off':mat.frameMode||'box'); if(ui.axisModeSeg)ui.axisModeSeg.set(mat.axis===false?'off':mat.axisMode||'box'); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, pr.quality || {}); Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
+         field and quality control on the value that was just loaded before modulation reads it. */
+      if (pr) {
+        for (const [k, v] of [[ui.expK, mat.exposure], [ui.softK, mat.softness], [ui.hueK, mat.hueShift],
+          [ui.isoK, mat.iso], [ui.grainK, mat.grain], [ui.kneeK, mat.knee], [ui.slicePosK, mat.slice && mat.slice.pos],
+          [ui.sliceThickK, mat.slice && mat.slice.thick]]) if (k && Number.isFinite(v)) k.set(v);
+        if (ui.sliceModeSeg && mat.slice) ui.sliceModeSeg.set(['off', 'clip', 'slab'][mat.slice.mode] || 'off');
+        if (ui.sliceAxisSeg && mat.slice) ui.sliceAxisSeg.set(['x', 'y', 'z'][mat.slice.axis] || 'z');
+        if (ui.gridSeg && [64, 96, 128].includes(quality.res)) ui.gridSeg.set(String(quality.res));
+        if (ui.autoSw) ui.autoSw.set(!!quality.auto);
+        if (ui.domainKnob && Number.isFinite(domain.half)) ui.domainKnob.set(domain.half);
+        if (ui.bz) ui.bz.set(reg.field.Bz); if (ui.fz) ui.fz.set(reg.field.Fz);
+        applyAccent();
+      }
       if (pr) {
         /* WAVE 63 · A LINK'S MATERIAL WAS DISCARDED 16 ms AFTER IT OPENED.  `Object.assign` above has
            just put the sender's camera and material into `obs`/`mat`; for a target THIS browser has
@@ -5081,9 +5130,27 @@ export async function boot(dom) {
         if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(gasAxial ? 'axial' : 'reg'); if (!gasAxial) gas.off(); }
         if (pr.wigner) { const G = pr.wigner; wignerView.setRange(G.zmax, G.pmax); }
         if (pr.mo && moPanel) moPanel.load(pr.mo);                     // W-MO: the basis, λ, R and the two dynamics choices (never the theme)
+        if (pr.instruments) {
+          const I = pr.instruments;
+          if (I.qcd) qcd.load(I.qcd);
+          /* Set all field-owning instruments down before selecting the saved one. Their public
+             switches enforce mutual exclusion and also own the window-visibility policy. */
+          const fieldOwner = I.h2 && I.h2.on ? 'h2' : I.helium && I.helium.on ? 'helium' : I.molecule && I.molecule.on ? 'molecule' : null;
+          if (I.molecule) molecule.load({ ...I.molecule, on: false });
+          if (I.pulse && pulsePanel) pulsePanel.api.load(I.pulse);
+          if (I.helium) helium.load({ ...I.helium, on: false });
+          if (I.h2) h2.load({ ...I.h2, on: false });
+          if (fieldOwner === 'molecule') molecule.setOn(true);
+          else if (fieldOwner === 'helium') helium.setOn(true);
+          else if (fieldOwner === 'h2') h2.setOn(true);
+          if (I.ladder) ladder.set(I.ladder);
+          if (I.particles) {
+            if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
+            if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); dynamics.ui.trail.set(I.particles.trail); }
+          }
+        }
         if (pr.field) { const F = pr.field; if (F.overlay !== undefined) fieldlines.setOverlay(F.overlay); if (F.lines !== undefined) fieldlines.setLines(F.lines); if (F.source !== undefined) fieldlines.setSource(F.source); }
         if (Array.isArray(pr.rates) && pr.rates.length === 91) { rates.set(pr.rates); reg.setEnergies(energyOf); }
-        if (pr.modulation !== undefined) restoreModulation(pr.modulation);   // wave 52 (an UNDO's presentation has no such key, so undo never touches the rack)
         /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize) */
         if (pr.ui) { const U = pr.ui;
           if (U.theme && __LW_hooks.setTheme) __LW_hooks.setTheme(U.theme);
@@ -5101,11 +5168,15 @@ export async function boot(dom) {
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
           if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
-          if (O.particles) { if (O.particles.on) { particles.setOn(true); particles.seed(O.particles.count || 160, reg, clock.t, domain.half); } else particles.setOn(false); }
-          if (O.dials !== undefined && spectrum.setDials) spectrum.setDials(!!O.dials); }
+          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(count || 160, reg, clock.t, domain.half); } else particles.setOn(false); if (dynamics.ui.on) dynamics.ui.on.set(!!O.particles.on); }
+          if (O.dials !== undefined && spectrum.setDials && !(pr.readers && pr.readers.spectrum)) spectrum.setDials(!!O.dials); }
+        if (pr.readers) {
+          if (pr.readers.spectrum) { const S = pr.readers.spectrum; if (Number.isFinite(S.selected)) spectrum.select(S.selected); if (S.dials !== undefined) spectrum.setDials(!!S.dials); }
+          if (pr.readers.slice) slice.load(pr.readers.slice);
+          if (pr.readers.kepler && Number.isFinite(pr.readers.kepler.shell) && ui.kepShell) { ui.kepShell.set(String(pr.readers.kepler.shell)); keplerRowSync(true); }
+        }
         if (pr.ab && ui.ab) ui.ab.set(pr.ab);
         if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w)) layout.notebookResize(pr.notebook.w, pr.notebook.h);
-        if (pr.modwin && modView) modView.restore(pr.modwin);
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
@@ -5118,11 +5189,20 @@ export async function boot(dom) {
             const id = key === 'z' ? 'state.rot.z' : key === 'kz' ? 'state.stark.kz' : 'state.defect.l2';
             modHost.registry.setBase(id, v);
           }
-          modHost.clock.applyAll(true);
+          if (pr.modulation === undefined) modHost.clock.applyAll(true);
         }
         if (pr.space && pr.space !== space && !getHamiltonian().noMomentum && !sturm.P) { space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(space); }
-        if (pr.palette && palette) { if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops); palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]); }
+        if (pr.palette && palette) {
+          if (pr.paletteId && palette.select(pr.paletteId)) palChoice = pr.paletteId;
+          if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops, pr.palette.selected);
+          palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
+        }
+        /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
+           palette and state controls, so no later project step can overwrite a routed hand value. */
+        if (pr.modulation !== undefined) restoreModulation(pr.modulation, pr.modulationBases);
+        if (pr.modwin && modView) modView.restore(pr.modwin);
       }
+      if (opt && opt.project && history) history.clear();
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
