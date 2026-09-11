@@ -1473,8 +1473,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2meter,
 :root:root:root #modwin.mir-modwindow .m2dev.m2min.lfo .m2lfominshape,
-:root:root:root #modwin.mir-modwindow .m2dev.m2min.env .m2envminprog,
-:root:root:root #modwin.mir-modwindow .m2dev.audio.m2min .m2audminleds { display: none; }
+:root:root:root #modwin.mir-modwindow .m2dev.m2min.env .m2envminprog { display: none; }
 /* it exists on every card and paints only on a strip — the expanded card has its own plot */
 :root:root:root #modwin.mir-modwindow .m2mintrace { display: none; }
 /* ⚠ `align-self: stretch`, NOT `height: 100%` — MEASURED, and the first cut of this wave read back a
@@ -1485,6 +1484,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2mintrace {
   display: block; position: relative; order: 0; flex: 1 1 auto;
   min-width: 0; max-width: 30px; height: auto; align-self: stretch; }
+:root:root:root #modwin.mir-modwindow .m2dev.audio.m2min .m2mintrace { display: none; }
 :root:root:root #modwin.mir-modwindow .m2dev.m2min .m2minname { order: 1; }
 :root:root:root #modwin.mir-modwindow .m2mintsvg {
   position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }

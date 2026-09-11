@@ -999,20 +999,21 @@ export function buildDevice(run, add, src, copyIn) {
   const envMinProgFill = envMinProg ? m2mk('i', null, envMinProg) : null;
   const minName = m2mk('span', 'm2minname', minBay);   // the ROTATED label
   minName.setAttribute('aria-hidden', 'true');
-  let minWave = null, minWavePath = null, minLeds = null;
+  let minWave = null, minWavePath = null, minMeter = null, minLeds = null;
   if (kind === 'lfo') {
     minWave = m2svg('svg', 'm2lfominshape', minBay,
       { viewBox: '0 0 100 100', preserveAspectRatio: 'none' });
     minWavePath = m2svg('path', null, minWave);   // NO class
   }
   if (kind === 'audio') {
-    const lc = m2mk('div', 'm2audminleds', minBay);
-    lc.setAttribute('aria-hidden', 'true');
+    const lc = m2mk('button', 'm2audminleds', minBay);
+    lc.type = 'button';
     minLeds = {};
     for (const k of copy.audioOuts) {
       minLeds[k] = m2mk('i', null, lc);
       minLeds[k].dataset.out = k;
     }
+    minMeter = lc;
   }
   const minOut = m2mk('span', 'm2minstatus ' +
     (kind === 'lfo' ? 'm2lfominout' : kind === 'env' ? 'm2envminout' : 'm2audminout'), headl);
@@ -1196,7 +1197,7 @@ export function buildDevice(run, add, src, copyIn) {
     id: src.id, kind, root, swapBadge,
     head, headl, headc, headr, grab, fold, chev: fold.firstChild,
     kindEl, modeLabel, minNum, minBay, meter, meterFill, minName, minOut,
-    envMinProg, envMinProgFill, minWave, minWavePath, minLeds,
+    envMinProg, envMinProgFill, minWave, minWavePath, minMeter, minLeds,
     lfoWave, envStage, audioState, bank: { btn: bank, A: bankA, B: bankB },
     cpy, pst, mvL, mvR, trig, pow, x,
     body, col, colhead, presets, zoom, macbox, mac, bus, capbox,

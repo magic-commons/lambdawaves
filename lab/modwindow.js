@@ -147,7 +147,7 @@ export function createModulation(host, port) {
   }
 
   /* ── PRESENTATION STATE.  The window's own, never the model's, never the project's. ────── */
-  const P = { x: 0, y: 0, lane: 'bottom', ribbon: false, modes: {}, open: false, folder: {}, macroSide: 'left', macroMin: false };
+  const P = { x: 0, y: 0, lane: 'bottom', ribbon: false, modes: {}, audioMini: {}, open: false, folder: {}, macroSide: 'left', macroMin: false };
   /* THE STORED MODES ARE ADOPTED ONCE, AND A DEAD ID TAKES ITS MODE WITH IT.  `modReset()` recycles
      source ids — the next `s1` is a different device — so a mode kept by id and never pruned puts a
      brand-new LFO on the screen folded because something called `s1` was folded last session.  The
@@ -1508,6 +1508,7 @@ export function createModulation(host, port) {
 
 
   function seatMinTrace(rec) {
+    if (rec.kind === 'audio') return;
     const bay = rec.dev.minBay;
     if (!bay || bay.querySelector('.m2mintrace')) return;
     const box = document.createElement('div');
@@ -1570,6 +1571,7 @@ export function createModulation(host, port) {
     devRows.clear();
     const live = new Set(devOrder().map((s) => s.id));
     for (const k of Object.keys(P.modes)) if (!live.has(k)) delete P.modes[k];
+    for (const k of Object.keys(P.audioMini)) if (!live.has(k)) delete P.audioMini[k];
     for (const s of devOrder()) {
       if (P.modes[s.id] === undefined && saved[s.id] !== undefined) { P.modes[s.id] = saved[s.id]; delete saved[s.id]; }
     }
@@ -1610,7 +1612,7 @@ export function createModulation(host, port) {
       dev.pow.title = 'Bypass this device and keep its settings';
     dev.pow.addEventListener('click', () => { M.setSource(s.id, { on: !s.on }); clock.recomputeRunning(); apply(); sync(); });
       dev.x.title = 'Remove this device and release its macros';
-    dev.x.addEventListener('click', () => { M.removeSource(s.id); delete P.modes[s.id]; clock.recomputeRunning(); apply(); rebuild(); });
+    dev.x.addEventListener('click', () => { M.removeSource(s.id); delete P.modes[s.id]; delete P.audioMini[s.id]; clock.recomputeRunning(); apply(); rebuild(); });
       dev.bank.btn.title = 'Switch between two saved patches for this device';
     dev.bank.btn.addEventListener('click', () => { M.setSource(s.id, { bank: s.bank === 'A' ? 'B' : 'A' }); apply(); sync(); });
     dev.cpy.title = 'copy this side\'s whole patch';
@@ -1855,6 +1857,26 @@ export function createModulation(host, port) {
     wireEditor(rec);
     if(s.kind==='audio')buildAudioRanges(rec);
     seatMinTrace(rec);                  // wave 97: the folded strip's one indicator
+
+    if (s.kind === 'audio' && dev.minMeter) {
+      const syncMiniMeter = () => {
+        const all = P.audioMini[s.id] === 'all';
+        dev.minMeter.classList.toggle('is-all', all);
+        dev.minMeter.setAttribute('aria-pressed', String(all));
+        const label = all ? 'All' : 'Low, Mid and High';
+        const next = all ? 'Low, Mid and High' : 'All';
+        dev.minMeter.setAttribute('aria-label', 'Audio mini meter: ' + label + '. Click to show ' + next);
+        dev.minMeter.title = label + ' meter · click for ' + next;
+      };
+      rec.syncMiniMeter = syncMiniMeter;
+      syncMiniMeter();
+      dev.minMeter.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (P.audioMini[s.id] === 'all') delete P.audioMini[s.id];
+        else P.audioMini[s.id] = 'all';
+        syncMiniMeter(); persist();
+      });
+    }
 
 
     if (dev.minNum) dev.minNum.addEventListener('click', () => {
@@ -2486,6 +2508,12 @@ export function createModulation(host, port) {
       row.box.classList.toggle('on', ix >= 0);
       row.row.dataset.routeSelected = String(key === selectedRoute);
     }
+    if (dev.minLeds) {
+      for (const key of ['level', 'low', 'mid', 'high']) {
+        const lamp = dev.minLeds[key], out = ro.outs[key];
+        if (lamp) lamp.style.setProperty('--signal', clamp01(out ? out.out : 0).toFixed(4));
+      }
+    }
     const selectedSock = M.scalarOutputId ? M.scalarOutputId(s.id, selectedRoute) : null;
     const selectedIx = selectedSock ? macros.findIndex((m) => m.sourceId === selectedSock) : -1;
     if (dev.minNum) {
@@ -2769,7 +2797,7 @@ export function createModulation(host, port) {
   let persistFn = port.persist || (() => {});
   const persist = () => persistFn(presentation());
   function presentation() {
-    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, open: P.open, folder: { ...P.folder }, macroSide: P.macroSide, macroMin: P.macroMin };
+    return { x: P.x, y: P.y, lane: P.lane, ribbon: P.ribbon, modes: { ...P.modes }, audioMini: { ...P.audioMini }, open: P.open, folder: { ...P.folder }, macroSide: P.macroSide, macroMin: P.macroMin };
   }
   /* WAVE 105 · THE CHIPS TOLD THE TRUTH ONLY UNTIL A RELOAD.  `.on` and `aria-pressed` were
      written by the three click handlers and by nothing else, so a window restored with the
@@ -2793,10 +2821,11 @@ export function createModulation(host, port) {
     setWorkLane(panel, P.lane);
     if (o.ribbon) { P.ribbon = true; rackEl.root.classList.add('m2ribbon'); }
     if (o.modes) Object.assign(saved, o.modes);      /* claimed once, by the first source to bear the id */
+    if (o.audioMini) for (const [id, mode] of Object.entries(o.audioMini)) if (mode === 'all') P.audioMini[id] = mode;
     if (o.folder) Object.assign(P.folder, o.folder);
     setMacroSide(o.macroSide === 'right' ? 'right' : 'left');
     P.macroMin = !!o.macroMin; root.querySelector('.m2rail').classList.toggle('m2railmin', P.macroMin);root.querySelector('.m2railhead').setAttribute('aria-expanded',String(!P.macroMin));
-    for (const s of devOrder()) { const r = devRows.get(s.id); if (r) setDeviceMode(r.dev, modeOf(s.id)); }
+    for (const s of devOrder()) { const r = devRows.get(s.id); if (r) { setDeviceMode(r.dev, modeOf(s.id)); if (r.syncMiniMeter) r.syncMiniMeter(); } }
     syncChips();
     if (o.open) open();
     else place();

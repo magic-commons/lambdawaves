@@ -1755,21 +1755,27 @@ html body .crail.crail-float[aria-label="MODULATION window controls"] .crail-chi
 .mir-modwindow .m2audsbtn:active { background: var(--glass-press); }
 .mir-modwindow .m2audsleg { padding: 0 2px 2px; font: 500 8px var(--font-sans);
   color: rgba(255,255,255,0.46); letter-spacing: 0.04em; }
-/* Minimized AUDIO is a real monitor: LEVEL is the tall rail, three narrow
-   follower rails stay independent, and HIT is a separate square event lamp. */
+/* Minimized AUDIO keeps only live signal ink. Three hairlines show the band
+   followers; pressing the meter replaces them with one wider ALL follower. */
 .mir-modwindow .m2audminleds { display: none; }
-.mir-modwindow .m2dev.audio.m2min .m2audminleds { display: flex; flex-direction: column;
-  flex: 0 0 8px; width: 8px; gap: 4px; align-items: center; justify-content: center; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds { display: flex; flex-direction: row;
+  flex: 0 0 22px; width: 22px; height: 100%; min-height: 0; padding: 3px 1px;
+  gap: 4px; align-items: stretch; justify-content: center; border: 0; border-radius: 4px;
+  background: transparent; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .mir-modwindow .m2dev.audio.m2min .m2audminleds i { --signal: 0; display: block; position: relative;
-  width: 7px; height: 22px; overflow: hidden; border-radius: 3px;
-  background: hsl(0 0% 100% / .12); }
+  flex: 0 0 2px; width: 2px; height: 100%; overflow: visible; background: transparent; }
 .mir-modwindow .m2dev.audio.m2min .m2audminleds i::after { content: ""; position: absolute;
-  left: 0; right: 0; bottom: 0; height: calc(var(--signal) * 100%); background: var(--acc2); }
+  left: 0; right: 0; bottom: 0; height: calc(var(--signal) * 100%);
+  border-radius: 2px; background: var(--acc); box-shadow: 0 0 4px color-mix(in srgb,var(--acc) 38%,transparent); }
 .mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="level"] { display: none; }
-.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="hit"] { width: 9px; height: 9px;
-  border-radius: 1px; transform: rotate(45deg); }
-.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="hit"]::after { inset: 0; height: auto;
-  opacity: var(--signal); }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds i[data-out="hit"] { display: none; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="low"],
+.mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="mid"],
+.mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="high"] { display: none; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="level"] { display: block; flex-basis: 6px; width: 6px; }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds:active { background: var(--glass-press); }
+.mir-modwindow .m2dev.audio.m2min .m2audminleds:focus-visible { outline: 1px solid var(--acc); outline-offset: 1px; }
+.mir-modwindow .m2dev.audio.m2min.m2off .m2audminleds { opacity: .32; }
 .mir-modwindow .m2dev.audio.m2min .m2audminout { color: hsl(0 0% 100% / .44); }
 .mir-modwindow .m2dev.audio.m2min .m2audminout.on { color: var(--acc2); }
 .mir-modwindow .m2dev.audio.m2min .m2audminout.hit { color: var(--fg); background: var(--acc2-soft); }
