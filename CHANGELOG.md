@@ -11,12 +11,9 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
-## UNRELEASED — not frozen
+## `v0.1.0-alpha` — 2026-09-11
 
-Work since `pre-alpha-2` — 21 waves, 56 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
-still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
-any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
-stable enough to gate on.
+Commit `c10c386` · waves 50–107 · 67 commits.
 
 - **wave 50**: W-CAMERA — NEBULA's motion as ONE law with a friction constant, and the four rack leftovers
 - **wave 51**: W-MOBILE — one rack on the left, a 44-px finger on 22-px ink, and the low-power path
@@ -98,6 +95,17 @@ stable enough to gate on.
 - `30307e1` 2026-09-11 — Redesign minimized Audio meter
 - `d380d35` 2026-09-11 — Fix complete project state round-trips
 - `35b6d44` 2026-09-11 — Second optimisation pass: side channels, the routing verdict, two materials
+- `9df0421` 2026-09-11 — Ink stays under glass; the audit closed out
+- `ebaec4c` 2026-09-11 — Release touches: listed, the custom-domain route, CI for the node gate, a security note
+- `fca9372` 2026-09-11 — Release hygiene: the honest README, the AI disclosure, and the repo's standard files
+- `24dc174` 2026-09-11 — Credits: the agents built it; the human prompted, looked, and decided what stayed
+- `f4ea8a3` 2026-09-11 — ABOUT: built by the agents from iterative prompting; Gemini for graphics and icons
+- `c1f2ba2` 2026-09-11 — The tab says λWAVES · Magic Commons
+- `8e1c594` 2026-09-11 — The bundled demo: WAVE DANCER ships under lab/demos and opens from PROJECTS
+- `84f9a9a` 2026-09-11 — Update README.md
+- `601aae9` 2026-09-11 — Update README.md
+- `a9671a2` 2026-09-11 — Frost reads through tinted; the tinted pane wears the glass opacity again
+- `c10c386` 2026-09-11 — The freeze: main is the release, dev is the experimental copy
 
 </details>
 
