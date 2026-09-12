@@ -43,15 +43,20 @@ export function fockReal({ h, eri, n }, D) {
 }
 
 /**
- * rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, tol = 1e-10 })
+ * rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, tol = 1e-10, guess = 'core' })
  *   → { energy, electronic, orbitalEnergies, C, D, F, iterations, converged, history, diisUsed }
  * basis = { n, S, h, eri, Enuc } (gaussian.js's sBasis, or any real basis in the same shape).
+ * guess: 'core' (D = 0, so F = h) or an n × n starting density — N₂/STO-3G needs a non-core guess, because every
+ * option of this module started from the core converges on a SECOND aufbau RHF solution 0.7298 hartree up
+ * (MATH-H2O ROUND 4 · OPUS §5, and PySCF's init_guess='hcore' agrees).  lab/rhf-molecule.js supplies SAD.
  */
-export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, tol = 1e-10 } = {}) {
+export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, tol = 1e-10, guess = 'core' } = {}) {
   const { n, S, h, Enuc = 0 } = basis;
   if (!Number.isInteger(nElectrons) || nElectrons < 2 || nElectrons % 2) throw new Error('scf: rhf needs an even electron count ≥ 2');
   const nocc = nElectrons / 2, { X } = loewdin(S, n), Xt = tr(X, n);
-  let D = new Float64Array(n * n), Fprev = null, energy = NaN, converged = false, iterations = 0, diisUsed = 0;
+  if (guess && guess !== 'core' && guess.length !== n * n) throw new Error('scf: rhf guess must be "core" or an n × n density');
+  let D = guess && guess !== 'core' ? Float64Array.from(guess) : new Float64Array(n * n);
+  let Fprev = null, energy = NaN, converged = false, iterations = 0, diisUsed = 0;
   const history = [], Fs = [], Es = [];
   const energyOf = (Dm, F) => { let E = Enuc; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) E += 0.5 * Dm[i * n + j] * (h[i * n + j] + F[i * n + j]); return E; };
   let C = null, eps = null, F = null, errMax = Infinity;

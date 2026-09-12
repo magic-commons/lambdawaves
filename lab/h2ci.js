@@ -132,9 +132,15 @@ export function sto3gIntegrals(R, { Z = 1 } = {}) {
 export function eigSym(A, n) {
   const a = Array.from(A), v = new Float64Array(n * n);
   for (let i = 0; i < n; i++) v[i * n + i] = 1;
+  /* The stop is scale-free: an absolute 1e-34 is never reached by a matrix of norm ~30 (rounding leaves off ~ ε²‖A‖²),
+     so H₂O's Fock spent 96 sweeps per step instead of 12 — an 11× tax measured in MATH-H2O ROUND 2 · OPUS; a first
+     constant of 1e-34·max(1, ‖A‖²) was still under the floor (ROUND 4: 93 sweeps, 185/200 caps). 1e-30‖A‖_F² gives a
+     mean of 11.6 sweeps, no caps, and eigenvalues unchanged to 3.3e-13. */
+  let frob2 = 0; for (let k = 0; k < n * n; k++) frob2 += a[k] * a[k];
+  const stop = 1e-30 * Math.max(1e-300, frob2);
   for (let sweep = 0; sweep < 100; sweep++) {
     let off = 0; for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += a[p * n + q] ** 2;
-    if (off < 1e-34) break;
+    if (off < stop) break;
     for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
       const apq = a[p * n + q]; if (Math.abs(apq) < 1e-300) continue;
       const th = (a[q * n + q] - a[p * n + p]) / (2 * apq);

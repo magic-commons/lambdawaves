@@ -64,6 +64,16 @@ const ALLOWLIST = [
   { file: 'lab/scf.js', date: '2026-09-11', reason: 'rhf() is the ground state the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) starts every real-time run from; tests/scf.test.mjs is its only caller until that card is built' },
   { file: 'lab/density.js', date: '2026-09-11', reason: 'createRTHF() is the many-electron propagator the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) will drive from the rack; tests/density.test.mjs is its only caller until then' },
   { file: 'lab/absorb.js', date: '2026-09-11', reason: 'kickSpectrum()/spectrum()/peaks() draw the absorption spectrum in the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3); tests/absorb.test.mjs is the only caller until that card exists' },
+  /* The H₂O program of 2026-09-12 (research/MATH-H2O-2026-09-11.md, SYNTHESIS): five modules built to the corrected
+     contracts B-H2O-1/2/4/6/7, each with a node proof against PySCF fixtures.  Their caller is B-H2O-8, the ABSORB /
+     RT-HF card (lab/absorb-rthf-card.js), which imports md.js → rhf-molecule.js → rpa-inspector.js, response-fit.js
+     and molecular-field.js; until it lands the callers are tests/md, rhf-molecules, rpa-inspector, response-fit and
+     molecular-field. */
+  { file: 'lab/md.js', date: '2026-09-12', reason: 'Cartesian McMurchie–Davidson integrals (l ≤ 2) for any molecule; the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) calls it through rhf-molecule.js to build every molecule on screen; tests/md.test.mjs until then' },
+  { file: 'lab/rhf-molecule.js', date: '2026-09-12', reason: 'the molecule ground state (SAD guess, aufbau, stability) the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) starts every real-time run from; tests/rhf-molecules.test.mjs is its caller until that card lands' },
+  { file: 'lab/rpa-inspector.js', date: '2026-09-12', reason: 'the RPA/TDA inspector the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) shows beside the real-time sticks per contract B-H2O-7; tests/rpa-inspector.test.mjs is its caller until then' },
+  { file: 'lab/response-fit.js', date: '2026-09-12', reason: 'the exact-kernel pole fit with its certificate that the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) uses to place peaks per contract B-H2O-6; tests/response-fit.test.mjs is its caller until then' },
+  { file: 'lab/molecular-field.js', date: '2026-09-12', reason: 'the AO/orbital/density evaluator that feeds the 96³ field from the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) per contract B-H2O-4; tests/molecular-field.test.mjs is its caller until then' },
 ]; // Wave 107 wired the deterministic renderer into CAPTURE; that historical entry is closed.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
