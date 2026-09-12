@@ -19,8 +19,8 @@ I'm Joshua. I am not a programmer. I know nothing of computer science or softwar
 I did not write the code in this repository by hand. λWAVES came out of me talking to AI coding
 agents for weeks — describing what I wanted to see, sending screenshots of what was wrong, saying
 "no, like the modulation window does it," and running the app until it felt right. The agents
-wrote the code. I made the calls about what the instrument is, what it should look like, and what
-it must never do.
+wrote the code, the tests, the documents and the graphics. What I actually did is iterative
+prompting: describe, look, say what's wrong, repeat — and decide what stays.
 
 I'm telling you this first because it changes how you should read the rest. The README, the
 tests and the long notebook in `REPORT.md` were written by the same agents, and they describe the
@@ -32,12 +32,14 @@ would like to hear about it.
 - **Tools.** Claude Code with Anthropic's Claude models (Fable 5.1, Opus, Sonnet) wrote most of
   the code, the tests and the documents. OpenAI's Codex with GPT-5.6 built and refactored large
   parts, notably the modulation window's devices and the performance work. Google's Gemini
-  reviewed and proposed interface designs from screenshots. Commits carry the tools' own
+  made graphics and icons (the mark, the warning orbital, icon work) and proposed interface designs
+  from screenshots. Commits carry the tools' own
   attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is me.
 - **What was human-decided.** The idea, the physics to show (hydrogen, n ≤ 6, exact), the
-  instrument metaphor, the visual language (see `docs/ui`), the laws in `CONTRIBUTING.md`, what
-  shipped and what was cut. Every design decision the agents proposed went through my eyes and
-  my hands on the real app before it stayed.
+  instrument metaphor, and which of the agents' proposals stayed. The visual language in `docs/ui`,
+  the laws in `CONTRIBUTING.md` and the tests were written by the agents from what I asked for and
+  what I rejected. Every design decision went through my eyes and my hands on the real app before it
+  stayed; none of it was typed by me.
 - **What was verified, and how.** The physics is checked by 58 node suites that compare the
   reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
   to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). I have
