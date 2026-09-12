@@ -5,7 +5,7 @@ Two branches, two addresses, one rule: **`main` is what is live, and it only mov
 | Branch | Address | What it is |
 |---|---|---|
 | `main` | https://lambdawaves.magic-commons.com | The release. Frozen between releases; every commit on it is a tagged release or a hotfix. |
-| `dev` | https://dev.lambdawaves.magic-commons.com | The experimental copy. All iterative work — agents, prompts, screenshots, "no, like this" — lands here. |
+| `dev` | local only (`./serve.sh 8711` → https://127.0.0.1:8711/lab/) | The experimental copy. All iterative work — agents, prompts, screenshots, "no, like this" — lands here. It is NOT deployed anywhere public: the `dev.lambdawaves.magic-commons.com` worker was deleted on 2026-09-12 at Josh's request ("I'd rather it not, just the live one"). |
 
 ## Day to day (on `dev`)
 
@@ -14,10 +14,10 @@ git switch dev
 # … the agent edits lab/ …
 node tests/pwa.test.mjs --write && npm test        # rehash + the node gate
 git commit -am "…" && git push                     # CI runs the node gate
-node tools/build-deploy.mjs && npx wrangler deploy --env dev   # the experimental copy goes live at dev.…
+./serve.sh 8711                                   # the experimental copy is played locally; NO public dev deploy (see the table)
 ```
 
-Play the experimental copy on the real devices. Nothing here touches the release.
+Play the experimental copy on this machine (or on the LAN with LW_HOST). Nothing here touches the release. If a private dev URL is ever wanted for the iPad, put Cloudflare Access (Zero Trust, one-time-PIN policy on Josh's email) in front of the hostname BEFORE `npx wrangler deploy --env dev`; `wrangler.jsonc` keeps the env for that day.
 
 ## Cutting a release (dev → main)
 

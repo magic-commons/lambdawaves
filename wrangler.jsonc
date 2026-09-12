@@ -44,7 +44,8 @@
   // from a clean machine — DEPLOY.md step 10 no longer needs the dashboard. The zone must be on this account.
   "routes": [{ "pattern": "lambdawaves.magic-commons.com", "custom_domain": true }],
 
-  // THE EXPERIMENTAL COPY (2026-09-11). `npx wrangler deploy --env dev` publishes the same dist/ as a second
+  // THE EXPERIMENTAL COPY (2026-09-11) — NOT DEPLOYED since 2026-09-12: the public dev worker was deleted at Josh's
+  // request; a dev URL needs Cloudflare Access in front first (RELEASING.md). `npx wrangler deploy --env dev` publishes the same dist/ as a second
   // Worker with its own name and address, so the dev branch can be played on real devices without touching
   // the release. Everything not named here is inherited from the top level.
   "env": {
