@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.1.1-alpha` — 2026-09-11
+
+Commit `90ffc80` · no new waves · 2 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `4c43975` 2026-09-11 — CHANGELOG for v0.1.0-alpha
+- `90ffc80` 2026-09-11 — ABOUT credit: 'Built by AI coding agents' over 'Claude (Anthropic) · Gemini (Google) · GPT…
+
+</details>
+
+---
+
 ## `v0.1.0-alpha` — 2026-09-11
 
 Commit `c10c386` · waves 50–107 · 67 commits.
