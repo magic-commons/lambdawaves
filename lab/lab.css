@@ -152,6 +152,7 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .ab-tagline { margin: 4px 0; font-size: 13px; line-height: 1.45; color: var(--fg); max-width: 34ch; }
 .ab-credit { margin: 2px 0; font-size: 12px; line-height: 1.4; color: var(--fg-soft); }
 .ab-team { color: var(--fg); }
+.ab-made { text-align: center; }
 .ab-fine { margin: 1px 0; font-size: 10.5px; color: var(--dim); }
 .ab-fine code { font-family: var(--font-mono); }
 .nb-aboutface a { color: var(--acc); }
