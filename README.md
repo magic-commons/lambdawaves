@@ -12,7 +12,7 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
 **Status: pre-alpha** — `main` is what is live and is frozen between releases; the experimental build lives on `dev` at
-[dev.lambdawaves.magic-commons.com](https://dev.lambdawaves.magic-commons.com). `RELEASING.md` says how a release is cut.
+a local server only; it is not published. `RELEASING.md` says how a release is cut.
 
 ---
 
