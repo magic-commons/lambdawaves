@@ -70,7 +70,7 @@ const PRECACHE = [
   ['./img/icon-maskable.svg',                             '8a719456bbf1'],
   ['./img/icon.svg',                                      'd836bdb7bfea'],
   ['./img/warning-orbital.png',                           'fb796735bfd5'],
-  ['./index.html',                                        '05f0e262fdd9'],
+  ['./index.html',                                        'd6ea4029a0dd'],
   ['./kepler.js',                                         '11e0235e3f0d'],
   ['./keplerview.js',                                     'b822e144586e'],
   ['./keymap.js',                                         'e7223b63ae61'],

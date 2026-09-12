@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use λWAVES in a talk, a lesson or a paper, please cite it as below."
+title: "λWAVES — a real-time WebGPU instrument for the hydrogen eigenstates"
+type: software
+authors:
+  - family-names: Hosain
+    given-names: Joshua
+    affiliation: Magic Commons
+version: 0.1.0-alpha
+date-released: 2026-09-11
+license: GPL-3.0-only
+repository-code: https://github.com/magic-commons/lambdawaves
+url: https://lambdawaves.magic-commons.com
+abstract: >-
+  λWAVES reconstructs the 91 exact hydrogen eigenstates with n ≤ 6 on the GPU as a playable wave
+  field: amplitudes, phases, couplings and observers assemble into an evolving quantum field,
+  with a modulation rack, projects and shareable state links. Built with AI coding agents under
+  the author's direction; see the README's disclosure.
+keywords:
+  - hydrogen
+  - quantum mechanics
+  - WebGPU
+  - visualisation
+  - scientific instrument

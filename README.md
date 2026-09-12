@@ -13,6 +13,46 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ---
 
+## Who made this, honestly
+
+I'm Joshua. I am not a programmer. I know nothing of computer science or software engineering, and
+I did not write the code in this repository by hand. λWAVES came out of me talking to AI coding
+agents for weeks — describing what I wanted to see, sending screenshots of what was wrong, saying
+"no, like the modulation window does it," and running the app until it felt right. The agents
+wrote the code. I made the calls about what the instrument is, what it should look like, and what
+it must never do.
+
+I'm telling you this first because it changes how you should read the rest. The README, the
+tests and the long notebook in `REPORT.md` were written by the same agents, and they describe the
+code as they understood it. Where a claim and the code disagree, the code is the truth and I
+would like to hear about it.
+
+### AI disclosure
+
+- **Tools.** Claude Code with Anthropic's Claude models (Fable 5.1, Opus, Sonnet) wrote most of
+  the code, the tests and the documents. OpenAI's Codex with GPT-5.6 built and refactored large
+  parts, notably the modulation window's devices and the performance work. Google's Gemini
+  reviewed and proposed interface designs from screenshots. Commits carry the tools' own
+  attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is me.
+- **What was human-decided.** The idea, the physics to show (hydrogen, n ≤ 6, exact), the
+  instrument metaphor, the visual language (see `docs/ui`), the laws in `CONTRIBUTING.md`, what
+  shipped and what was cut. Every design decision the agents proposed went through my eyes and
+  my hands on the real app before it stayed.
+- **What was verified, and how.** The physics is checked by 58 node suites that compare the
+  reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
+  to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). I have
+  used the app on an RTX 3070 desktop and an iPad, daily, for weeks. I have not read the code.
+- **What was not verified.** No one with a computer-science background has reviewed this code.
+  It has not been tested with a real screen reader, on a phone in the wild, or by anyone but me
+  and the agents. Treat security claims with that in mind and read `SECURITY.md`.
+- **Known risks.** Vendored code (KaTeX, marked, the fonts) is attributed in `NOTICE` and was
+  not audited by me. The modulation window was ported from my other project by an agent and its
+  provenance notes are in `lab/mir/modulation/`. If an agent copied something it should not
+  have, tell me and it comes out.
+
+If that makes you want to help, `CONTRIBUTING.md` says how, and `AI_POLICY.md` says what I ask
+of contributions made the same way this was.
+
 ## What it actually is
 
 The core is exact, not a simulation of a simulation. λWAVES holds the hydrogen closed
@@ -83,6 +123,37 @@ npx wrangler deploy               # publish exactly that
 Read **[shipping readiness](docs/SHIPPING-READINESS.md)** and **[DEPLOY.md](DEPLOY.md)** first — it explains why λWAVES gets its own hostname
 (a service worker's scope is an origin, and it outlives the deploy that installed it),
 why `html_handling` is `"none"`, and what the build refuses to let you do.
+
+## Requirements and limitations
+
+| | |
+|---|---|
+| **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
+| **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
+| **Physics** | Hydrogen only, n ≤ 6, exact diagonal evolution. No molecules beyond the H₂ / H₂⁺ model cards, no ab initio, no spin. |
+| **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
+
+## Accessibility
+
+The instrument was built to be reachable by keyboard: every control is a real button or slider
+with a name, a value and arrow-key steps; windows are landmarks; the canvas is described in one
+sentence that changes only when the instrument's state changes. That was checked by a headless
+browser, not by a person using a screen reader. Motion: a photosensitivity notice stands before the
+first frame, and there is no strobe the user did not ask for. If something is unreachable or
+unreadable for you, please open an issue; that is the kind of bug I most want to hear about.
+
+## Privacy
+
+λWAVES is a static site. Nothing you do is sent anywhere: projects, notes and settings live in your
+browser's localStorage and in files you export yourself. The microphone is opened only when you add
+an AUDIO device to the modulation rack, its signal never leaves the page, and it is released when the
+last AUDIO device is removed. There is no analytics. Cloudflare serves the files and keeps its own
+ordinary server logs.
+
+## Citing
+
+If λWAVES helps a talk, a lesson or a paper, `CITATION.cff` has the reference (GitHub shows it as
+"Cite this repository").
 
 ## MIR
 
