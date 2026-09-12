@@ -261,7 +261,9 @@ function oneElectron(basis, atoms) {
  *   · skipping primitive quartet (k,m) when s_k·s_m < TAU_PQ drops ≤ 81 terms of < 1e-17 each.
  * Worst case 1.8e-14 + 1e-15 + 8.1e-15 < 3e-14, forty times under the 1e-12 gate and never observed above 1e-15.
  */
-const TAU_PRIM = 1e-15, TAU_SCHWARZ = 1e-15, TAU_PQ = 1e-17;
+const SCR = process.env.MDF_SCREEN !== '0', SYM = process.env.MDF_SYM !== '0';   // ABLATION FLAGS, scratch only
+const TAU_PRIM = SCR ? 1e-15 : 0, TAU_SCHWARZ = SCR ? Number(process.env.MDF_TAU ?? 1e-15) : 0, TAU_PQ = SCR ? 1e-17 : 0;
+const ST = globalThis.__MD_STATS = { pairs: 0, pairsKept: 0, ppTotal: 0, ppKept: 0, quartets: 0, quartetsDone: 0, primQ: 0 };
 const LMAX_AB = 4, LMAX_T = 8, PI25 = Math.pow(Math.PI, 2.5);                // l ≤ 2 ⇒ Lab ≤ 4, Lt = Lab + Lcd ≤ 8
 const HI = [], HN = [];                                                      // HI[L] = packed (t,u,v) with t+u+v ≤ L
 for (let L = 0; L <= LMAX_T; L++) {
@@ -304,7 +306,7 @@ function rInto(Lmax, zeta, Rx, Ry, Rz, pref) {
 /** the (ab) shell-pair table: p, P, and the weighted E^{ab}_{tuv} with its (−1)^{t+u+v} twin for the ket role */
 function buildPairs(basis) {
   const sh = basis.shells, ns = sh.length, out = [];
-  for (let i = 0; i < ns; i++) for (let j = i; j < ns; j++) {
+  for (let i = 0; i < ns; i++) for (let j = SYM ? i : 0; j < ns; j++) {
     const si = sh[i], sj = sh[j], Lab = si.l + sj.l, nh = HN[Lab], H = HI[Lab];
     const na = si.bfs.length, nb = sj.bfs.length, nc = na * nb, npi = si.exps.length, npj = sj.exps.length;
     const np = npi * npj, stride = nc * nh;
@@ -359,6 +361,7 @@ function quartetAcc(P, Q, ACC, thr, k0, k1, m0, m1) {
     const p = P.p[k], sk = P.s ? P.s[k] : 0, eP = k * strP, Ppx = P.Px[k], Ppy = P.Py[k], Ppz = P.Pz[k];
     for (let m = m0; m < m1; m++) {
       if (thr >= 0 && sk * Q.s[m] < thr) continue;
+      if (thr >= 0) ST.primQ++;
       const q = Q.p[m], pq = p + q;
       rInto(Lmax, p * q / pq, Ppx - Q.Px[m], Ppy - Q.Py[m], Ppz - Q.Pz[m], 2 * PI25 / (p * q * Math.sqrt(pq)));
       const eQ = m * strQ;
@@ -407,16 +410,20 @@ function twoElectron(basis) {
   for (const P of pairs) {
     const keep = [];
     for (let k = 0; k < P.np; k++) if (P.s[k] >= sMin) keep.push(k);
-    if (keep.length < P.np) compactPair(P, Int32Array.from(keep));
+    P.np0 = P.np; if (keep.length < P.np) compactPair(P, Int32Array.from(keep));
   }
+  ST.pairs = pairs.length; for (const P of pairs) ST.ppTotal += P.np0 ?? P.np;
   pairs = pairs.filter((P) => P.np > 0);
+  ST.pairsKept = pairs.length; for (const P of pairs) ST.ppKept += P.np;
   const NP = pairs.length, QN = new Float64Array(NP);
   for (let a = 0; a < NP; a++) QN[a] = diagNorm(pairs[a], 0, pairs[a].np, TAU_PQ);
   for (let a = 0; a < NP; a++) {
     const P = pairs[a], ncP = P.nc, qa = QN[a];
-    for (let b = a; b < NP; b++) {
+    for (let b = SYM ? a : 0; b < NP; b++) {
       const Q = pairs[b];
+      ST.quartets++;
       if (qa * QN[b] < TAU_SCHWARZ) continue;
+      ST.quartetsDone++;
       const ncQ = Q.nc;
       ACCBUF.fill(0, 0, ncP * ncQ);
       quartetAcc(P, Q, ACCBUF, TAU_PQ, 0, P.np, 0, Q.np);

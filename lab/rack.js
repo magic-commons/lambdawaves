@@ -40,6 +40,7 @@ import { createPulse } from './pulseview.js';
 import { createCapture, maxPictureSize } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
+import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
 import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
@@ -395,7 +396,7 @@ export async function boot(dom) {
   }
 
 
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', modulation: 'control', settings: 'other', about: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', modulation: 'control', settings: 'other', about: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
@@ -766,7 +767,7 @@ export async function boot(dom) {
      Every op is the same pure function this thread would call (mathworker.js imports the same modules), so an answer
      is bit-identical to the synchronous road; a worker that fails to load, errors or times out (8 s) hands the call
      back to that road.  The SLAP trigger, the K key, LAUNCH and every forced period reader stay synchronous. ── */
-  const makeWorker = (label) => {
+  const makeWorker = (label, timeoutMs = 8000) => {
     let w = null, seq = 0, failed = typeof Worker !== 'function', wantedParked = false, starts = 0; const waiting = new Map();
     const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
     /* Constructing a module worker fetches and parses its whole private module graph. Three identical workers used
@@ -782,7 +783,7 @@ export async function boot(dom) {
       } catch (e) { fail('worker construction failed: ' + (e && e.message || e)); }
       return w;
     };
-    const raw = (msg, transfer) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, 8000); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
+    const raw = (msg, transfer) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
     const call = (msg, transfer) => busyWrap(raw(msg, transfer));   // wave 48: every worker job is a BUSY job
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
     const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
@@ -792,10 +793,22 @@ export async function boot(dom) {
       stat: () => w ? raw({ op: 'stat' }) : Promise.resolve(idleStat()) };
   };
   const maths = makeWorker('bow'), scan = makeWorker('period'), cards = makeWorker('cards');   // separate queues: interaction, recurrence, and user-requested card preparation cannot block each other
+  /* CHEMISTRY gets a FOURTH queue and its own ceiling, for two reasons that are both measured rather than
+     aesthetic.  (1) Benzene/STO-3G is 36 s of McMurchie–Davidson integrals on this machine — the 8 s cap would
+     declare a timeout and hand that work to the FRAME THREAD, which is the one thing the card must never do.
+     (2) The real-time record (P, P(t−h), the trace) lives in ONE worker instance, so chem.rt.init and every
+     chem.rt.run after it must reach the same worker; sharing `cards` would also let a 36 s solve block HELIUM. */
+  const chemW = makeWorker('chem', 300000);
   const solveCard = (msg, fallback, pluck = (r) => r.result) => {
     const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));
     if (!cards.ok) return local();
     return cards.call(msg).then((r) => r && !r.error ? pluck(r) : local());
+  };
+  /** the chem road: same shape as solveCard, its own worker, and a fallback only a Worker-less browser reaches */
+  const solveChem = (msg, fallback, pluck = (r) => r.result) => {
+    const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));
+    if (!chemW.ok) return local();
+    return chemW.call(msg).then((r) => r && !r.error ? pluck(r) : local());
   };
   /* …and on this thread too (the K key and the IMPULSE trigger are synchronous). This used to spend 8 ms every
      40 ms beginning 1.5 s after boot: a deliberate 20% main-thread tax during the exact interval an iPad was
@@ -961,6 +974,7 @@ export async function boot(dom) {
   const modeState = { re: cRe, im: cIm };
   function modesAt(t) {
     modeStateT = NaN; modeStateVersion = -1;
+    if (chem && chem.on) return null;                                      // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely
     if (molecule && molecule.on) return molecule.fieldModes(t);           // the molecule holds the field
     if (helium && helium.on) return helium.fieldModes();                   // helium: the conditional cloud of electron 2
     if (h2 && h2.on) return h2.fieldModes();                               // H₂: the Heitler–London one-electron density
@@ -978,7 +992,7 @@ export async function boot(dom) {
   function applyRebuild() {
     busyWrap(null);                                                    // wave 48: a rebuild is BUSY work — synchronous, so it only shows when the frame-gap rule catches it running long
     const HH = getHamiltonian();
-    if (domain.auto) domain.half = (h2 && h2.on) ? h2.half : (helium && helium.on) ? helium.half : (molecule && molecule.on) ? molecule.half : (space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3)));   // ignore a slap's 1e-4 tails
+    if (domain.auto) domain.half = (chem && chem.on) ? chem.half : (h2 && h2.on) ? h2.half : (helium && helium.on) ? helium.half : (molecule && molecule.on) ? molecule.half : (space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3)));   // ignore a slap's 1e-4 tails
     if (field.ok) field.setSpace((h2 && h2.on) ? 5 : (helium && helium.on) ? 4 : (space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x));
     if (field.ok && HH.radialTable) field.setRadialTable(HH.radialTable());   // QUARKONIUM: the tabulated radial rows the kernel reads
     if (field.ok) {
@@ -1156,7 +1170,7 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(Math.min(tabletMotion ? tablet.steps : Infinity, gov.stepDrop ? Math.max(24, Math.round(mat.steps * STEP_LADDER[gov.stepDrop])) : Infinity));   // full saved quality returns on the first still frame; the governor's step cap rides on top
-      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat }); });
+      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat, molecule: !!(chem && chem.on) }); });
       pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }
@@ -1216,7 +1230,7 @@ export async function boot(dom) {
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
     const overlayDomain = space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P &&
-      !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on);
+      !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on) && !(chem && chem.on);
     if (overlayDomain) {
       const vortexVisible = canPresent(wVor);
       if (vortexVisible && may('vortex')) tick('vortex', () => vortex.update(reg, clock.t, obs, domain.half, clock.playing));
@@ -1246,6 +1260,8 @@ export async function boot(dom) {
     const molVisible = canPresent(wMol); if (moPanel) moPanel.setActive(molVisible);
     helium.setActive(canPresent(wHe));
     h2.setActive(canPresent(wH2));
+    chem.setActive(canPresent(wChem));
+    if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
     if (cpuTick) {
@@ -1270,7 +1286,7 @@ export async function boot(dom) {
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
-      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on)) calculus.update(reg, clock.t); });
+      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on) && !(chem && chem.on)) calculus.update(reg, clock.t); });
       if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
       if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
       if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) { const s = gas.stats(clock.t); ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn'); }
@@ -2377,7 +2393,8 @@ export async function boot(dom) {
   if (useCompactDefaults) wMol.root.classList.add('closed');   // do not paint the 200-point energy plot behind first-visit furniture
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
-  const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { moleculeMode(v); },
+  let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
+  const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
   moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
 
@@ -2395,13 +2412,34 @@ export async function boot(dom) {
   const wHe = device({ id: 'helium', eyebrow: 'HELIUM', status: '' });
   if (useCompactDefaults) wHe.root.classList.add('closed');     // defer the ~77 ms variational solve until this card is first shown
   rack.appendChild(wHe.root);
-  const helium = createHelium(wHe.body, { active: () => canPresent(wHe), loading: cardLoading(wHe, 'helium'), solve: (basis) => solveCard({ op: 'helium', basis }, () => hylleraas(HELIUM_BASES[basis]), (r) => r.sol), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && molecule.on) molecule.setOn(false); moleculeMode(v); } });
+  const helium = createHelium(wHe.body, { active: () => canPresent(wHe), loading: cardLoading(wHe, 'helium'), solve: (basis) => solveCard({ op: 'helium', basis }, () => hylleraas(HELIUM_BASES[basis]), (r) => r.sol), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (chem && chem.on) chem.setOn(false); } moleculeMode(v); } });
 
   // H₂ — two atoms, Heitler–London: the curves, the collision, the one-electron density
   const wH2 = device({ id: 'h2', eyebrow: '<m>H₂</m>', status: '' });
   if (useCompactDefaults) wH2.root.classList.add('closed');    // avoid the 221-point RHF/FCI plot until the user opens it
   rack.appendChild(wH2.root);
-  const h2 = createH2(wH2.body, { active: () => canPresent(wH2), loading: cardLoading(wH2, 'curve'), solveCurve: (Rmin, Rmax, count) => solveCard({ op: 'h2curve', Rmin, Rmax, count }, () => h2CurveTable(Rmin, Rmax, count)), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); } moleculeMode(v); }, now: () => clock.t });
+  const h2 = createH2(wH2.body, { active: () => canPresent(wH2), loading: cardLoading(wH2, 'curve'), solveCurve: (Rmin, Rmax, count) => solveCard({ op: 'h2curve', Rmin, Rmax, count }, () => h2CurveTable(Rmin, Rmax, count)), repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (chem && chem.on) chem.setOn(false); } moleculeMode(v); }, now: () => clock.t });
+
+  /* CHEMISTRY — eight molecules, RHF and the real-time δ-kick: the field becomes an AO density matrix.
+     It is a FIELD OWNER like MOLECULE, HELIUM and H₂, so it goes through the same moleculeMode() policy. */
+  let chemPrevView = null;   // the observable the field showed before CHEMISTRY took it
+  const wChem = device({ id: 'chem', eyebrow: 'CHEMISTRY', title: 'RHF · real time', status: '' });
+  if (useCompactDefaults) wChem.root.classList.add('closed');   // a first visit must not pay for a 7-AO solve behind furniture
+  rack.appendChild(wChem.root);
+  chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'),
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
+    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
+    status(t, cls) { wChem.setStatus(t, cls); },
+    get field() { return field; },
+    setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); },
+    /* the field's observable follows the card: a density has no phase, an orbital is a signed real amplitude; the
+       observable the user had before is handed back when the card releases the field (null) */
+    fieldView(name) {
+      if (!name) { if (chemPrevView !== null) { mat.view = chemPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[chemPrevView]); chemPrevView = null; } }
+      else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
+      schedule(TIER.PRESENT);
+    },
+    now: () => clock.t });
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
@@ -2433,6 +2471,7 @@ export async function boot(dom) {
   wMol.root.addEventListener('devopen', () => { if (moPanel) moPanel.whenReady(); });
   wHe.root.addEventListener('devopen', () => helium.prepare());
   wH2.root.addEventListener('devopen', () => h2.prepare());
+  wChem.root.addEventListener('devopen', () => chem.prepare());
   wLad.root.addEventListener('devopen', () => ladder.prepare());
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
@@ -2554,6 +2593,18 @@ export async function boot(dom) {
         get: () => rotRate.def,
         set: (v) => { setRotationRate('def', v); } },
 
+      /* CHEMISTRY offers exactly TWO targets and the choice is the same law as everywhere above: a κ and a
+         RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is already
+         running a frame of its own when either matters).  The ORBITAL INDEX is deliberately NOT registered:
+         it changes WHICH quantity the volume means, which is a rebuild of the picture's subject rather than
+         a value to sweep — the same line that keeps FIELD RESOLUTION and STEPS out of this array. */
+      { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (chem ? chem.knobs.kick() : null),
+        hint: 'the δ-kick strength the next KICK will use — linear response wants the smallest κ the trace can carry',
+        get: () => (chem ? chem.kappa : 1e-3), set: (v) => { if (chem) { chem.setKappa(v); setKnob(chem.knobs.kick(), chem.kappa); } } },
+      { id: 'chem.speed', label: 'CHEM SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (chem ? chem.knobs.speed() : null),
+        hint: 'real-time propagation steps asked of the worker each frame',
+        get: () => (chem ? chem.speed : 10), set: (v) => { if (chem) { chem.setSpeed(v); setKnob(chem.knobs.speed(), chem.speed); } } },
+
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',
         get: () => __LW_hooks.ab.omega,
@@ -2564,6 +2615,10 @@ export async function boot(dom) {
       available: () => field.ok,                          /* BASINS’s flowActive: is the reader live */
       present: () => schedule(TIER.PRESENT),               /* EDGE 4 — and never a tier above it */
       presentationActive: false,                           /* a closed editor has no preview demand */
+      /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the
+         vendored module: CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what
+         a saved route is addressed by — so it names the instrument, not the nearest existing group. */
+      roots: ['observer', 'material', 'state', 'transport', 'field', 'chem'],
     });
     modHost.install(defs.map(({ knob: _k, ...d }) => d));
     for (const d of defs) { if (d.knob) modKnobs[d.id] = d.knob; modGets[d.id] = d.get; }
@@ -5046,7 +5101,7 @@ export async function boot(dom) {
         readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
            particles and pulse runs do not: every project still opens paused on its first frame. */
-        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), qcd: qcd.save(),
+        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), qcd: qcd.save(),
           pulse: pulsePanel ? pulsePanel.api.save() : null, ladder: { ...ladder.params },
           particles: { count: Math.round(dynamics.ui.n.get()), trail: particles.trailLen } },
         mo: moPanel ? moPanel.save() : null,
@@ -5180,14 +5235,16 @@ export async function boot(dom) {
           if (I.qcd) qcd.load(I.qcd);
           /* Set all field-owning instruments down before selecting the saved one. Their public
              switches enforce mutual exclusion and also own the window-visibility policy. */
-          const fieldOwner = I.h2 && I.h2.on ? 'h2' : I.helium && I.helium.on ? 'helium' : I.molecule && I.molecule.on ? 'molecule' : null;
+          const fieldOwner = I.chem && I.chem.on ? 'chem' : I.h2 && I.h2.on ? 'h2' : I.helium && I.helium.on ? 'helium' : I.molecule && I.molecule.on ? 'molecule' : null;
           if (I.molecule) molecule.load({ ...I.molecule, on: false });
           if (I.pulse && pulsePanel) pulsePanel.api.load(I.pulse);
           if (I.helium) helium.load({ ...I.helium, on: false });
           if (I.h2) h2.load({ ...I.h2, on: false });
+          if (I.chem) chem.load({ ...I.chem, on: false });
           if (fieldOwner === 'molecule') molecule.setOn(true);
           else if (fieldOwner === 'helium') helium.setOn(true);
           else if (fieldOwner === 'h2') h2.setOn(true);
+          else if (fieldOwner === 'chem') chem.setOn(true);
           if (I.ladder) ladder.set(I.ladder);
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
@@ -5496,7 +5553,7 @@ export async function boot(dom) {
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */

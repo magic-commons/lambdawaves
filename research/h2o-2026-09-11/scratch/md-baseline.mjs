@@ -6,8 +6,6 @@
  * AO order: by atom, then l ascending (stable within l), then the component order s; x,y,z; xx,xy,xz,yy,yz,zz.
  * Boys: Kummer seed + downward below t = 44, F_0 seed + upward above it (Proposition 9); supersedes the per-m
  * asymptote, which is wrong by 1.4e-11 at m = 8.  lab/gaussian.js stays the s-type one-dimensional predecessor.
- * ERI speed (2026-09-12): shell-pair E tables built once, Cauchy–Schwarz screening, one contraction per unique
- * quartet filled through all eight symmetries, and a Taylor grid for the loop's Boys.  Benzene 37.0 s → 0.54 s.
  */
 
 export const ANGSTROM = 1 / 0.52917721092;                                   // bohr per ångström, PySCF's CODATA
@@ -15,8 +13,9 @@ const STOP = Math.pow(2, -55);                                               // 
 const T_SWITCH = 44, T_SMALL = 0.5;
 
 /* ── Boys function F_m(t) = ∫₀¹ x^{2m} e^{−t x²} dx ────────────────────────────────────────────────────────────── */
-/** F_0..F_mmax(t) into a caller-owned buffer; the three regimes of ROUND 2 · OPUS Propositions 6, 7 and 9 */
-function boysInto(F, mmax, t) {
+/** F_0..F_mmax(t) in one Float64Array; the three regimes of ROUND 2 · OPUS Propositions 6, 7 and 9 */
+export function boysTable(mmax, t) {
+  const F = new Float64Array(mmax + 1);
   if (t < T_SMALL) {                                                         // alternating series, Kahan-compensated
     for (let m = 0; m <= mmax; m++) {
       let a = 1 / (2 * m + 1), s = a, comp = 0;
@@ -46,40 +45,10 @@ function boysInto(F, mmax, t) {
   for (let m = 1; m <= mmax; m++) F[m] = ((2 * m - 1) * F[m - 1] - et) / (2 * t);
   return F;
 }
-/** F_0..F_mmax(t) in one Float64Array */
-export function boysTable(mmax, t) { return boysInto(new Float64Array(mmax + 1), mmax, t); }
 /** F_m(t) alone */
 export function boys(m, t) {
   if (!Number.isInteger(m) || m < 0) throw new Error('md: boys needs an integer order m ≥ 0');
   return boysTable(m, t)[m];
-}
-
-/* The ERI loop's Boys, where 40 % of the time went.  F_m' = −F_{m+1}, so one table of F_0..F_{16} on a 0.1 grid
- * gives every order by Taylor: F_m(t) = Σ_{k≤8} F_{m+k}(t_g)(t_g−t)^k/k!, truncation ≤ 0.05⁹/9! = 5.4e-18 relative
- * and no Math.exp per call.  MEASURED worst relative against the mpmath/70 fixture: 6.19e-16, below the Kummer
- * path's own 7.19e-16.  Above t = 44 it is Proposition 9 unchanged.  boysTable/boys stay the certified series. */
-const GK = 8, GH = 0.1, GINV = 1 / GH, GTOP = T_SWITCH, GNORD = 17, GNG = Math.round(GTOP * GINV) + 1;
-let GTAB = null;
-function gridBuild() {
-  const T = new Float64Array(GNG * GNORD), F = new Float64Array(GNORD);
-  for (let i = 0; i < GNG; i++) { boysInto(F, GNORD - 1, i * GH); T.set(F, i * GNORD); }
-  return (GTAB = T);
-}
-/** F_0..F_mmax(t) into a caller-owned buffer, mmax ≤ 8: the grid below t = 44, Proposition 9 above */
-function boysFast(F, mmax, t) {
-  if (t >= GTOP) {
-    F[0] = 0.5 * Math.sqrt(Math.PI / t);
-    const et = Math.exp(-t);
-    for (let m = 1; m <= mmax; m++) F[m] = ((2 * m - 1) * F[m - 1] - et) / (2 * t);
-    return F;
-  }
-  const T = GTAB || gridBuild(), o = Math.round(t * GINV) * GNORD, d = Math.round(t * GINV) * GH - t;
-  for (let m = 0; m <= mmax; m++) {
-    let s = T[o + m + GK];
-    for (let k = GK - 1; k >= 0; k--) s = T[o + m + k] + s * d / (k + 1);
-    F[m] = s;
-  }
-  return F;
 }
 
 /* ── Hermite expansion coefficients E_t^{ij} on one axis ──────────────────────────────────────────────────────── */
@@ -250,187 +219,43 @@ function oneElectron(basis, atoms) {
   return { S, T, V, M };
 }
 
-/* ── two electrons: shell-pair tables built once, Schwarz screening, the 8-fold tensor filled per unique quartet ──
- * The mathematics is Proposition 4 verbatim.  What changed is the order: E^{ab}_{tuv} is built once per shell pair
- * (not once per quartet), (−1)^{τ+ν+φ} is folded into the ket table, the 2π^{5/2}/(pq√(p+q)) prefactor into the R
- * seed, and the double Hermite sum is split into a bra half-transform and a ket contraction.  Screening is Cauchy–
- * Schwarz in the Coulomb metric, which is positive definite: |(f|g)| ≤ √(f|f)·√(g|g).  With s_k = √(Ω_k|Ω_k) the
- * norm of one primitive pair's weighted Hermite distribution and Q_P = max_{ab∈P} √(ab|ab):
- *   · dropping primitive pair k costs ≤ s_k·Q_max ≤ s_k·QB, so s_k < TAU_PRIM/QB drops ≤ 18 terms of ≤ 1e-15 each;
- *   · skipping quartet (P,Q) when Q_P·Q_Q < TAU_SCHWARZ drops that integral's ONLY term, by < 1e-15;
- *   · skipping primitive quartet (k,m) when s_k·s_m < TAU_PQ drops ≤ 81 terms of < 1e-17 each.
- * Worst case 1.8e-14 + 1e-15 + 8.1e-15 < 3e-14, forty times under the 1e-12 gate and never observed above 1e-15.
- */
-const TAU_PRIM = 1e-15, TAU_SCHWARZ = 1e-15, TAU_PQ = 1e-17;
-const LMAX_AB = 4, LMAX_T = 8, PI25 = Math.pow(Math.PI, 2.5);                // l ≤ 2 ⇒ Lab ≤ 4, Lt = Lab + Lcd ≤ 8
-const HI = [], HN = [];                                                      // HI[L] = packed (t,u,v) with t+u+v ≤ L
-for (let L = 0; L <= LMAX_T; L++) {
-  const a = [];
-  for (let tot = 0; tot <= L; tot++) for (let t = 0; t <= tot; t++) for (let u = 0; u <= tot - t; u++) a.push(t, u, tot - t - u);
-  HI.push(new Int32Array(a)); HN.push(a.length / 3);
-}
-/** IDX[L][N][h] = t·N² + u·N + v of HI[L]'s h-th triple; R^0 indices add, so (t+τ, u+ν, v+φ) is base[h] + off[h′] */
-const IDX = HI.map((H, L) => {
-  const byN = [];
-  for (let N = 0; N <= LMAX_T + 1; N++) {
-    const a = new Int32Array(HN[L]);
-    for (let h = 0; h < HN[L]; h++) a[h] = H[3 * h] * N * N + H[3 * h + 1] * N + H[3 * h + 2];
-    byN.push(a);
-  }
-  return byN;
-});
-const RBUF = new Float64Array((LMAX_T + 1) ** 4), FBUF = new Float64Array(LMAX_T + 1);
-const TBUF = new Float64Array(HN[LMAX_AB]), ACCBUF = new Float64Array(36 * 36);
-
-/** R^n_{tuv}(ζ, R) into RBUF at n·N³+t·N²+u·N+v, the ERI prefactor folded into the seed; Proposition 3's recursion */
-function rInto(Lmax, zeta, Rx, Ry, Rz, pref) {
-  boysFast(FBUF, Lmax, zeta * (Rx * Rx + Ry * Ry + Rz * Rz));
-  const N = Lmax + 1, N2 = N * N, N3 = N2 * N;
-  let f = pref;
-  for (let n = 0; n <= Lmax; n++) { RBUF[n * N3] = f * FBUF[n]; f *= -2 * zeta; }
-  for (let tot = 1; tot <= Lmax; tot++) for (let t = 0; t <= tot; t++) for (let u = 0; t + u <= tot; u++) {
-    const v = tot - t - u, base = t * N2 + u * N + v;
-    for (let n = 0; n + tot <= Lmax; n++) {
-      const o = n * N3 + base + N3;
-      let val;
-      if (t > 0) val = (t > 1 ? (t - 1) * RBUF[o - 2 * N2] : 0) + Rx * RBUF[o - N2];
-      else if (u > 0) val = (u > 1 ? (u - 1) * RBUF[o - 2 * N] : 0) + Ry * RBUF[o - N];
-      else val = (v > 1 ? (v - 1) * RBUF[o - 2] : 0) + Rz * RBUF[o - 1];
-      RBUF[n * N3 + base] = val;
-    }
-  }
-}
-
-/** the (ab) shell-pair table: p, P, and the weighted E^{ab}_{tuv} with its (−1)^{t+u+v} twin for the ket role */
-function buildPairs(basis) {
-  const sh = basis.shells, ns = sh.length, out = [];
-  for (let i = 0; i < ns; i++) for (let j = i; j < ns; j++) {
-    const si = sh[i], sj = sh[j], Lab = si.l + sj.l, nh = HN[Lab], H = HI[Lab];
-    const na = si.bfs.length, nb = sj.bfs.length, nc = na * nb, npi = si.exps.length, npj = sj.exps.length;
-    const np = npi * npj, stride = nc * nh;
-    const P = { Lab, nh, nc, np, p: new Float64Array(np), Px: new Float64Array(np), Py: new Float64Array(np),
-      Pz: new Float64Array(np), E: new Float64Array(np * stride), Es: new Float64Array(np * stride),
-      ai: new Int32Array(nc), bi: new Int32Array(nc), s: null };
-    for (let ca = 0; ca < na; ca++) for (let cb = 0; cb < nb; cb++) {
-      P.ai[ca * nb + cb] = si.bfs[ca].idx; P.bi[ca * nb + cb] = sj.bfs[cb].idx;
-    }
-    let k = 0;
-    for (let ip = 0; ip < npi; ip++) for (let jp = 0; jp < npj; jp++, k++) {
-      const a = si.exps[ip], b = sj.exps[jp];
-      const ex = etable(si.l, sj.l, a, b, si.c[0], sj.c[0]), ey = etable(si.l, sj.l, a, b, si.c[1], sj.c[1]),
-            ez = etable(si.l, sj.l, a, b, si.c[2], sj.c[2]);
-      P.p[k] = a + b; P.Px[k] = ex.Px; P.Py[k] = ey.Px; P.Pz[k] = ez.Px;
-      for (let ca = 0; ca < na; ca++) for (let cb = 0; cb < nb; cb++) {
-        const la = si.bfs[ca].l, lb = sj.bfs[cb].l, w = si.bfs[ca].d[ip] * sj.bfs[cb].d[jp];
-        const o = k * stride + (ca * nb + cb) * nh;
-        for (let h = 0; h < nh; h++) {
-          const t = H[3 * h], u = H[3 * h + 1], v = H[3 * h + 2];
-          if (t > la[0] + lb[0] || u > la[1] + lb[1] || v > la[2] + lb[2]) continue;
-          const val = w * ex.E[ex.at(la[0], lb[0], t)] * ey.E[ey.at(la[1], lb[1], u)] * ez.E[ez.at(la[2], lb[2], v)];
-          P.E[o + h] = val; P.Es[o + h] = ((t + u + v) & 1) ? -val : val;
-        }
-      }
-    }
-    out.push(P);
-  }
-  return out;
-}
-
-/** keep only the primitive pairs listed, in place */
-function compactPair(P, keep) {
-  const np = keep.length, stride = P.nc * P.nh, src = P;
-  const f = () => new Float64Array(np);
-  const p = f(), Px = f(), Py = f(), Pz = f(), s = f(), E = new Float64Array(np * stride), Es = new Float64Array(np * stride);
-  for (let t = 0; t < np; t++) {
-    const k = keep[t];
-    p[t] = src.p[k]; Px[t] = src.Px[k]; Py[t] = src.Py[k]; Pz[t] = src.Pz[k]; s[t] = src.s[k];
-    E.set(src.E.subarray(k * stride, k * stride + stride), t * stride);
-    Es.set(src.Es.subarray(k * stride, k * stride + stride), t * stride);
-  }
-  P.np = np; P.p = p; P.Px = Px; P.Py = Py; P.Pz = Pz; P.s = s; P.E = E; P.Es = Es;
-}
-
-/** ACC[ia·Q.nc + jc] += the contracted (ab|cd) over primitive pairs [k0,k1) × [m0,m1); thr < 0 disables the screen */
-function quartetAcc(P, Q, ACC, thr, k0, k1, m0, m1) {
-  const nhP = P.nh, nhQ = Q.nh, ncP = P.nc, ncQ = Q.nc, Lmax = P.Lab + Q.Lab;
-  const base = IDX[P.Lab][Lmax + 1], off = IDX[Q.Lab][Lmax + 1], EP = P.E, EQ = Q.Es;
-  const strP = ncP * nhP, strQ = ncQ * nhQ;
-  for (let k = k0; k < k1; k++) {
-    const p = P.p[k], sk = P.s ? P.s[k] : 0, eP = k * strP, Ppx = P.Px[k], Ppy = P.Py[k], Ppz = P.Pz[k];
-    for (let m = m0; m < m1; m++) {
-      if (thr >= 0 && sk * Q.s[m] < thr) continue;
-      const q = Q.p[m], pq = p + q;
-      rInto(Lmax, p * q / pq, Ppx - Q.Px[m], Ppy - Q.Py[m], Ppz - Q.Pz[m], 2 * PI25 / (p * q * Math.sqrt(pq)));
-      const eQ = m * strQ;
-      for (let ia = 0; ia < ncP; ia++) {
-        const eo = eP + ia * nhP;
-        let any = false;
-        for (let hp = 0; hp < nhQ; hp++) TBUF[hp] = 0;
-        for (let h = 0; h < nhP; h++) {
-          const e = EP[eo + h];
-          if (e === 0) continue;
-          const b = base[h]; any = true;
-          for (let hp = 0; hp < nhQ; hp++) TBUF[hp] += e * RBUF[b + off[hp]];
-        }
-        if (!any) continue;
-        for (let jc = 0; jc < ncQ; jc++) {
-          const fo = eQ + jc * nhQ; let acc = 0;
-          for (let hp = 0; hp < nhQ; hp++) { const f = EQ[fo + hp]; if (f !== 0) acc += f * TBUF[hp]; }
-          ACC[ia * ncQ + jc] += acc;
-        }
-      }
-    }
-  }
-}
-
-/** max_{ab∈P} (ab|ab) over the primitive-pair range, the square of the Cauchy–Schwarz norm */
-function diagNorm(P, k0, k1, thr) {
-  const nn = P.nc * P.nc;
-  ACCBUF.fill(0, 0, nn);
-  quartetAcc(P, P, ACCBUF, thr, k0, k1, k0, k1);
-  let mx = 0;
-  for (let ia = 0; ia < P.nc; ia++) { const d = ACCBUF[ia * P.nc + ia]; if (d > mx) mx = d; }
-  return Math.sqrt(mx > 0 ? mx : 0);
-}
-
-/** the full chemist's tensor (ij|kl), one contraction per unique shell quartet, filled through all eight symmetries */
+/** the full chemist's tensor (ij|kl), every ordered quartet computed independently */
 function twoElectron(basis) {
-  const n = basis.n, n2 = n * n, g = new Float64Array(n2 * n2);
-  let pairs = buildPairs(basis);
-  for (const P of pairs) {                                                   // s_k first, with no screen to seed it
-    P.s = new Float64Array(P.np);
-    for (let k = 0; k < P.np; k++) P.s[k] = diagNorm(P, k, k + 1, -1);
-  }
-  let QB = 0;                                                                // Σ_k s_k ≥ Q_P, so QB ≥ Q_max
-  for (const P of pairs) { let t = 0; for (let k = 0; k < P.np; k++) t += P.s[k]; if (t > QB) QB = t; }
-  const sMin = QB > 0 ? TAU_PRIM / QB : 0;
-  for (const P of pairs) {
-    const keep = [];
-    for (let k = 0; k < P.np; k++) if (P.s[k] >= sMin) keep.push(k);
-    if (keep.length < P.np) compactPair(P, Int32Array.from(keep));
-  }
-  pairs = pairs.filter((P) => P.np > 0);
-  const NP = pairs.length, QN = new Float64Array(NP);
-  for (let a = 0; a < NP; a++) QN[a] = diagNorm(pairs[a], 0, pairs[a].np, TAU_PQ);
-  for (let a = 0; a < NP; a++) {
-    const P = pairs[a], ncP = P.nc, qa = QN[a];
-    for (let b = a; b < NP; b++) {
-      const Q = pairs[b];
-      if (qa * QN[b] < TAU_SCHWARZ) continue;
-      const ncQ = Q.nc;
-      ACCBUF.fill(0, 0, ncP * ncQ);
-      quartetAcc(P, Q, ACCBUF, TAU_PQ, 0, P.np, 0, Q.np);
-      for (let ia = 0; ia < ncP; ia++) {
-        const i = P.ai[ia], j = P.bi[ia], pij = (i * n + j) * n2, pji = (j * n + i) * n2, qij = i * n + j, qji = j * n + i;
-        for (let jc = 0; jc < ncQ; jc++) {
-          const val = ACCBUF[ia * ncQ + jc], k = Q.ai[jc], l = Q.bi[jc];
-          const pkl = (k * n + l) * n2, plk = (l * n + k) * n2, qkl = k * n + l, qlk = l * n + k;
-          g[pij + qkl] = val; g[pji + qkl] = val; g[pij + qlk] = val; g[pji + qlk] = val;
-          g[pkl + qij] = val; g[plk + qij] = val; g[pkl + qji] = val; g[plk + qji] = val;
-        }
-      }
-    }
-  }
+  const { shells, n } = basis, g = new Float64Array(n ** 4);
+  const gi = (i, j, k, l) => ((i * n + j) * n + k) * n + l;
+  for (const sa of shells) for (const sb of shells) {
+    const A = sa.c, B = sb.c, Lab = sa.l + sb.l;
+    for (const sc of shells) for (const sd of shells) {
+      const C = sc.c, D = sd.c, Lt = Lab + sc.l + sd.l;
+      for (let ip = 0; ip < sa.exps.length; ip++) for (let jp = 0; jp < sb.exps.length; jp++) {
+        const a = sa.exps[ip], b = sb.exps[jp], p = a + b;
+        const ex = etable(sa.l, sb.l, a, b, A[0], B[0]), ey = etable(sa.l, sb.l, a, b, A[1], B[1]),
+              ez = etable(sa.l, sb.l, a, b, A[2], B[2]);
+        for (let kp = 0; kp < sc.exps.length; kp++) for (let lp = 0; lp < sd.exps.length; lp++) {
+          const c = sc.exps[kp], d = sd.exps[lp], q = c + d, rho = p * q / (p + q);
+          const fx = etable(sc.l, sd.l, c, d, C[0], D[0]), fy = etable(sc.l, sd.l, c, d, C[1], D[1]),
+                fz = etable(sc.l, sd.l, c, d, C[2], D[2]);
+          const { R, at } = rtable(Lt, rho, ex.Px - fx.Px, ey.Px - fy.Px, ez.Px - fz.Px);
+          const pref = 2 * Math.pow(Math.PI, 2.5) / (p * q * Math.sqrt(p + q));
+          for (const ba of sa.bfs) for (const bb of sb.bfs) {
+            const la = ba.l, lb = bb.l, wab = ba.d[ip] * bb.d[jp];
+            for (const bc of sc.bfs) for (const bd of sd.bfs) {
+              const lc = bc.l, ld = bd.l, w = wab * bc.d[kp] * bd.d[lp];
+              let acc = 0;
+              for (let t = 0; t <= la[0] + lb[0]; t++) { const e1 = ex.E[ex.at(la[0], lb[0], t)]; if (e1 === 0) continue;
+                for (let u = 0; u <= la[1] + lb[1]; u++) { const e2 = e1 * ey.E[ey.at(la[1], lb[1], u)]; if (e2 === 0) continue;
+                  for (let v = 0; v <= la[2] + lb[2]; v++) { const e3 = e2 * ez.E[ez.at(la[2], lb[2], v)]; if (e3 === 0) continue;
+                    for (let tau = 0; tau <= lc[0] + ld[0]; tau++) { const f1 = fx.E[fx.at(lc[0], ld[0], tau)]; if (f1 === 0) continue;
+                      for (let nu = 0; nu <= lc[1] + ld[1]; nu++) { const f2 = f1 * fy.E[fy.at(lc[1], ld[1], nu)]; if (f2 === 0) continue;
+                        for (let phi = 0; phi <= lc[2] + ld[2]; phi++) {
+                          const f3 = f2 * fz.E[fz.at(lc[2], ld[2], phi)]; if (f3 === 0) continue;
+                          const sg = ((tau + nu + phi) & 1) ? -1 : 1;
+                          acc += e3 * f3 * sg * R[at(0, t + tau, u + nu, v + phi)];
+                        } } } } } }
+              g[gi(ba.idx, bb.idx, bc.idx, bd.idx)] += w * pref * acc;
+            } }
+        } }
+    } }
   return g;
 }
 

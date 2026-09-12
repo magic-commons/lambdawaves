@@ -1,4 +1,4 @@
-/* gaussian.js — s-type contracted Gaussian integrals for any number of centres on the z axis, any exponents.
+/* gaussian.js — s-type contracted Gaussian integrals (superseded by lab/md.js; kept under tests/lib for the proofs) for any number of centres on the z axis, any exponents.
  * Atomic units.  STATUS: EXACT closed forms (Boys F₀ from h2ci.js); KNOWN formulas (Szabo–Ostlund App. A).
  *
  * Every primitive is a normalised 1s Gaussian N e^{−α r²}, N = (2α/π)^{3/4}.  For primitives a (centre A) and b
@@ -11,7 +11,7 @@
  * two-electron tensor g[((i n + j) n + k) n + l] = (ij|kl), and the nuclear repulsion.  h2ci.js's homonuclear
  * `sto3gIntegrals` is the special case this generalises; tests/scf.test.mjs holds the two against each other.
  */
-import { boys0, STO3G_H } from './h2ci.js';
+import { boys0, STO3G_H } from '../../lab/h2ci.js';
 
 /** the STO-3G 1s contraction at Slater exponent ζ: α_i(ζ) = α_i(1) ζ², the tabulated set being ζ = 1.24 (KNOWN) */
 export function sto3g1s(zeta) {

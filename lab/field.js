@@ -125,6 +125,107 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
   if (lid == 0u) { atomicMax(&stats[P.slot], atomicLoad(&wmax)); }
 }`;
 
+/* ── molWgsl — THE MOLECULAR VOLUME (wave: CHEMISTRY) ───────────────────────────────────────────────────────────
+ * The SAME texel convention as COMPUTE_WGSL, so RENDER_WGSL presents this volume with no change at all:
+ *   .r = the amplitude's real part, .g = its imaginary part, ρ = dot(s.rg, s.rg), stats[slot] = max ρ.
+ * A density writes (√ρ, 0): view 'density' reads dot(s,s) = ρ, 'phase' reads atan2(0, √ρ) = 0 — a flat phase, as a
+ * real density must have — and 'diff' reads ρ − ρ_ref against refTex.  An orbital writes (ψ, 0): 'real' reads
+ * s.x/ampMax = the signed orbital, 'phase' reads atan2(0, ψ) = 0 for ψ > 0 and π for ψ < 0, i.e. the two lobes.
+ * ONE exp per primitive per EXPONENTIAL GROUP.  Two things share: every Cartesian component of a shell (they carry
+ * the same exponents by construction), and every shell on one centre with one exponent list — which is what makes
+ * STO-3G water 12 exponentials a point and not 15, and benzene 54 and not 72, because lab/md.js splits an sp record
+ * into an l = 0 and an l = 1 shell over the SAME `exps` array (MATH-H2O ROUND 3 · SOL, kill 5).  The packer marks
+ * such a shell `share` and the kernel keeps the previous group's exponentials in a register array.
+ * f32 THROUGHOUT, and the O 1s hazard stated: the cusp sums three primitives of weight ≈ 4.25 against a total
+ * ρ(O) = 193.31, so the density at a nucleus is f32-accurate to about 1e-6 relative.  The rgba16float texel is the
+ * coarser number by three orders (an 11-bit mantissa on √ρ ⇒ ≈ 1e-3 relative on ρ) and it, not this sum, sets the
+ * tolerance any gate on a read-back voxel may ask for.  Sorting the small terms first is not required.
+ */
+/** ONE source, one knob: `cap` is the AO ceiling this pipeline's χ tile holds (see MOL_CAPS) */
+const molWgsl = (cap) => /* wgsl */`
+const WG: u32 = 64u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape
+struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };   // l carries bit 8 = share the previous group's exponentials
+struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ)
+@group(0) @binding(0) var<uniform> P: MP;
+@group(0) @binding(1) var<storage, read> shells: array<Shell>;
+@group(0) @binding(2) var<storage, read> alphas: array<f32>;
+@group(0) @binding(3) var<storage, read> wts: array<f32>;
+@group(0) @binding(4) var<storage, read> mat: array<f32>;
+@group(0) @binding(5) var outTex: texture_storage_3d<rgba16float, write>;
+@group(0) @binding(6) var<storage, read_write> stats: array<atomic<u32>>;
+/* χ LIVES IN WORKGROUP MEMORY, TRANSPOSED: invocation lid owns the column chiW[ao * WG + lid], so the 64 threads
+   of a workgroup read ${cap} consecutive addresses at every step of the contraction — bank-conflict-free, and off
+   the per-thread scratch that a var<function> array<f32, 64> lands in.  MEASURED on an RTX 3070 at 96³: benzene
+   went from 9.07 ms a dispatch to 2.80 ms and water from 0.84 to 0.50, because ~700 scratch loads a voxel through
+   L1 was the entire cost — 1.3k MACs a voxel is 1.15 GMAC for the volume, which this card does in a quarter of a
+   millisecond, so the arithmetic was never within an order of magnitude of being the problem. */
+var<workgroup> chiW: array<f32, ${cap}u * 64u>;
+
+@compute @workgroup_size(4, 4, 4)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
+  var dens = 0.0;
+  if (all(gid < vec3<u32>(P.n, P.n, P.n))) {
+    let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);   // the domain, exactly as COMPUTE_WGSL reads it
+    var ex: array<f32, 32>;                                   // the current exponential group's e^{−α r²}
+    for (var s = 0u; s < P.nShell; s++) {
+      let sh = shells[s];
+      let l = sh.l & 255u;
+      let dx = pos.x - sh.cx; let dy = pos.y - sh.cy; let dz = pos.z - sh.cz;
+      let r2 = dx * dx + dy * dy + dz * dz;
+      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
+      if ((sh.l & 256u) == 0u) {                              // a NEW group: one exp per primitive, and only here
+        for (var p = 0u; p < sh.nP; p++) { ex[p] = exp(-alphas[sh.pOff + p] * r2); }
+      }
+      var acc: array<f32, 6>;
+      for (var c = 0u; c < nc; c++) { acc[c] = 0.0; }
+      for (var p = 0u; p < sh.nP; p++) {
+        let e = ex[p];
+        let wb = sh.wOff + p * nc;
+        for (var c = 0u; c < nc; c++) { acc[c] += wts[wb + c] * e; }
+      }
+      let a0 = sh.aOff * WG + lid;
+      if (l == 0u) {
+        chiW[a0] = acc[0];
+      } else if (l == 1u) {
+        chiW[a0] = acc[0] * dx; chiW[a0 + WG] = acc[1] * dy; chiW[a0 + 2u * WG] = acc[2] * dz;
+      } else {
+        chiW[a0] = acc[0] * dx * dx; chiW[a0 + WG] = acc[1] * dx * dy; chiW[a0 + 2u * WG] = acc[2] * dx * dz;
+        chiW[a0 + 3u * WG] = acc[3] * dy * dy; chiW[a0 + 4u * WG] = acc[4] * dy * dz; chiW[a0 + 5u * WG] = acc[5] * dz * dz;
+      }
+    }
+    var amp = 0.0;
+    if (P.kind == 1u) {
+      for (var i = 0u; i < P.nAO; i++) { amp += mat[i] * chiW[i * WG + lid]; }   // ψ(r) = Σ_μ c_μ χ_μ(r), signed
+    } else {
+      var rho = 0.0;
+      for (var i = 0u; i < P.nAO; i++) {
+        let ci = chiW[i * WG + lid];
+        if (ci == 0.0) { continue; }
+        rho += mat[i * P.nAO + i] * ci * ci;                                     // the diagonal …
+        var off = 0.0;
+        let row = i * P.nAO;
+        for (var j = i + 1u; j < P.nAO; j++) { off += mat[row + j] * chiW[j * WG + lid]; }
+        rho += 2.0 * ci * off;                                                   // … and 2 Σ_{μ<ν}, M symmetric
+      }
+      amp = sqrt(max(rho, 0.0));
+    }
+    textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, 0.0, 0.0, 0.0));
+    dens = amp * amp;
+  }
+  /* the workgroup's max ρ, reduced THROUGH THE χ TILE — which is dead by now.  That is why there is no separate
+     var<workgroup> atomic: at cap 64 the tile is the whole 16 KiB workgroup budget and a spare word would not fit.
+     Each invocation writes only its OWN slot (ao = 0 of its column), so one barrier before the read is the whole
+     synchronisation. */
+  workgroupBarrier();
+  chiW[lid] = dens;
+  workgroupBarrier();
+  if (lid == 0u) {
+    var m = 0.0;
+    for (var k = 0u; k < WG; k++) { m = max(m, chiW[k]); }
+    atomicMax(&stats[P.slot], bitcast<u32>(m));
+  }
+}`;
+
 const RENDER_WGSL = /* wgsl */`
 struct View {
   cam: vec4<f32>,    // xyz camera position, w half-width
@@ -495,6 +596,64 @@ export function tableFor(s) {
   return T;
 }
 
+/* ── THE MOLECULAR SPEC, PACKED (wave: CHEMISTRY) ───────────────────────────────────────────────────────────────
+ * spec = { nAO, half, shells: [{ center: [x, y, z] bohr, l, prims: [{ alpha, w }], ao? }] }, `w` already carrying
+ * the contraction coefficient × primitive norm × per-component unit-self-overlap factor — the same numbers
+ * molecular-field.js's evaluator multiplies by, produced by its `fieldShells(basis)`.  Three flat STORAGE buffers,
+ * not uniform arrays: f32 values with integer offsets, so 64 AOs and 256 shells cost nothing per frame.
+ */
+export const MAX_MOL_AO = 64;                                 // the shader's var<function> array<f32, 64>
+export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: MAX_MOL_AO, prim: 32 };   // prim: the kernel's per-group register array
+/* THE AO TIERS.  The χ tile is cap × 64 × 4 bytes of WORKGROUP memory — 4, 10 and 16 KiB — and the workgroup budget
+   is 16 KiB, so how many workgroups an SM can hold is set by the SMALLEST tier the molecule fits in.  Three
+   pipelines off one source: water/STO-3G takes the 4 KiB one, benzene and H₂O/6-31+G* the 10 KiB one. */
+export const MOL_CAPS = [16, 40, MAX_MOL_AO];
+export const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
+  if (t < 0) throw new Error(`field: nAO ${nAO} is beyond the kernel's ${MAX_MOL_AO}`); return t; };
+const MOL_SHELL_U = new Uint32Array(MOL_LIMITS.shells * 8), MOL_SHELL_F = new Float32Array(MOL_SHELL_U.buffer);
+const MOL_ALPHA = new Float32Array(MOL_LIMITS.prims), MOL_W = new Float32Array(MOL_LIMITS.weights);
+const MOL_NC = [1, 3, 6];
+/** pack one spec into the module's three scratch arrays; returns the counts the kernel and the uploads need */
+export function packMolecule(spec) {
+  if (!spec || !Array.isArray(spec.shells) || !spec.shells.length) throw new Error('field: a molecule spec needs { nAO, shells: [...] }');
+  const nAO = spec.nAO | 0;
+  if (!(nAO > 0) || nAO > MAX_MOL_AO) throw new Error(`field: nAO ${spec.nAO} is outside 1..${MAX_MOL_AO}`);
+  let nShell = 0, pOff = 0, wOff = 0, ao = 0, nExp = 0, prev = null;
+  for (const sh of spec.shells) {
+    const nc = MOL_NC[sh.l];
+    if (nc === undefined) throw new Error(`field: molecular shells are Cartesian l ≤ 2, got l = ${sh.l}`);
+    if (!sh.center || sh.center.length !== 3) throw new Error('field: a molecular shell needs center: [x, y, z] in bohr');
+    if (!Array.isArray(sh.prims) || !sh.prims.length) throw new Error('field: a molecular shell needs prims: [{ alpha, w }]');
+    const nP = sh.prims.length;
+    if (nP > MOL_LIMITS.prim) throw new Error(`field: a shell of ${nP} primitives is beyond the kernel's ${MOL_LIMITS.prim}`);
+    if (nShell >= MOL_LIMITS.shells) throw new Error(`field: more than ${MOL_LIMITS.shells} shells`);
+    if (wOff + nP * nc > MOL_LIMITS.weights) throw new Error(`field: more than ${MOL_LIMITS.weights} primitive weights`);
+    const base = sh.ao === undefined ? ao : sh.ao | 0;
+    if (base !== ao) throw new Error(`field: shell AO base ${base} is not the running index ${ao} — the shells are not in AO order`);
+    /* ONE EXPONENTIAL GROUP is one centre and one exponent list, whatever the l: md.js splits an sp record into an
+       l = 0 and an l = 1 shell over the same `exps`, so sharing here is what takes STO-3G water from 15 exps a
+       voxel to 12 and benzene from 72 to 54.  The kernel keeps the group's e^{−α r²} in registers. */
+    const share = !!prev && prev.c[0] === sh.center[0] && prev.c[1] === sh.center[1] && prev.c[2] === sh.center[2]
+      && prev.nP === nP && sh.prims.every((pr, p) => pr.alpha === prev.alphas[p]);
+    const myOff = share ? prev.off : pOff;
+    if (!share && pOff + nP > MOL_LIMITS.prims) throw new Error(`field: more than ${MOL_LIMITS.prims} primitives`);
+    const o = nShell * 8;
+    MOL_SHELL_F[o] = sh.center[0]; MOL_SHELL_F[o + 1] = sh.center[1]; MOL_SHELL_F[o + 2] = sh.center[2];
+    MOL_SHELL_U[o + 3] = sh.l | (share ? 256 : 0); MOL_SHELL_U[o + 4] = myOff; MOL_SHELL_U[o + 5] = nP; MOL_SHELL_U[o + 6] = base; MOL_SHELL_U[o + 7] = wOff;
+    for (let p = 0; p < nP; p++) {
+      const pr = sh.prims[p];
+      if (!pr || !(pr.alpha > 0) || !pr.w || pr.w.length !== nc) throw new Error(`field: an l = ${sh.l} primitive needs a positive alpha and ${nc} weights`);
+      MOL_ALPHA[myOff + p] = pr.alpha;
+      for (let c = 0; c < nc; c++) MOL_W[wOff + p * nc + c] = pr.w[c];
+    }
+    if (!share) { pOff += nP; nExp += nP; }
+    prev = { c: sh.center, nP, off: myOff, alphas: sh.prims.map((pr) => pr.alpha) };
+    wOff += nP * nc; ao += nc; nShell++;
+  }
+  if (ao !== nAO) throw new Error(`field: the shells cover ${ao} AOs, the spec declares ${nAO}`);
+  return { nShell, nPrim: pOff, nWeight: wOff, nExp, nAO, shell: MOL_SHELL_U, alpha: MOL_ALPHA, weight: MOL_W };
+}
+
 export async function createField(canvas, opts = {}) {
   const out = { ok: false, error: null, adapterInfo: null, canvas };
   if (!navigator.gpu) { out.error = 'navigator.gpu is absent — WebGPU is not enabled in this browser'; return out; }
@@ -571,13 +730,15 @@ export async function createField(canvas, opts = {}) {
   const computeModule = device.createShaderModule({ code: COMPUTE_WGSL });
   const renderModule = device.createShaderModule({ code: RENDER_WGSL });
   const lineModule = device.createShaderModule({ code: LINE_WGSL });
+  const molModules = MOL_CAPS.map((cap) => device.createShaderModule({ code: molWgsl(cap) }));   // the molecular volume (CHEMISTRY), one pipeline per AO tier
   /* compile messages are kept, never swallowed: a broken shader must say where */
   out.shaderMessages = [];
-  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule]]) {
+  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + MOL_CAPS[i], m2])]) {
     try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
   }
   if (out.shaderMessages.some((m) => m.type === 'error')) { out.error = 'WGSL compile error: ' + JSON.stringify(out.shaderMessages.filter((m) => m.type === 'error')); return out; }
   const computePipeline = device.createComputePipeline({ layout: 'auto', compute: { module: computeModule, entryPoint: 'main' } });
+  const molPipelines = molModules.map((m) => device.createComputePipeline({ layout: 'auto', compute: { module: m, entryPoint: 'main' } }));
   /* EXPLICIT layouts: an 'auto' layout belongs to one pipeline, and the readback path
      renders the same scene through a second pipeline (rgba8unorm) with the same bind groups. */
   const renderBGL = device.createBindGroupLayout({ entries: [
@@ -609,6 +770,13 @@ export async function createField(canvas, opts = {}) {
   /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
   const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   { const init = new Float32Array(256 * 4); for (let i = 0; i < 256; i++) { init[i * 4] = 1; init[i * 4 + 1] = 1; init[i * 4 + 2] = 1; init[i * 4 + 3] = 1; } device.queue.writeBuffer(palBuf, 0, init); }
+  /* the MOLECULAR buffers: two param blocks (one per texture slot) and the four read-only tables */
+  const molParamsBuf = [0, 1].map(() => device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }));
+  const molShellBuf = device.createBuffer({ size: MOL_LIMITS.shells * 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const molAlphaBuf = device.createBuffer({ size: MOL_LIMITS.prims * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const molWBuf = device.createBuffer({ size: MOL_LIMITS.weights * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
   const lineVerts = 36000;
   let latticeStart = 38, latticeCount = 0, cornerStart = 38;
@@ -645,9 +813,14 @@ export async function createField(canvas, opts = {}) {
       }
     }
   }
-  let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null;
+  let res = 0, psiTex = null, refTex = null, computeBind = null, renderBind = null, molBind = null;
+  /* THE MOLECULAR STATE.  `molSpec` set marks the field molecular and the eigenmode reconstruct stands down:
+     the volume is static between updates, so it is re-dispatched on a DIRTY FLAG (matrix, spec, resolution or
+     domain changed), never once per frame. */
+  let molSpec = null, molPack = null, molMat = null, molKind = 0, molKindName = 'density', molDirty = false, molRefDirty = false;
+  const molParamSig = ['', '']; let molTier = 0;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
-  const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0 };
+  const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
   let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
   let cssW = canvas.clientWidth || 1, cssH = canvas.clientHeight || 1;   // the CSS box, kept current by the observer below
@@ -668,7 +841,13 @@ export async function createField(canvas, opts = {}) {
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
       { binding: 5, resource: { buffer: palBuf } }] });
-    refValid = false; stats.resolution = n;
+    molBind = molPipelines.map((pl) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
+      { binding: 0, resource: { buffer: molParamsBuf[i] } }, { binding: 1, resource: { buffer: molShellBuf } },
+      { binding: 2, resource: { buffer: molAlphaBuf } }, { binding: 3, resource: { buffer: molWBuf } },
+      { binding: 4, resource: { buffer: molMatBuf } }, { binding: 5, resource: tex.createView({ dimension: '3d' }) },
+      { binding: 6, resource: { buffer: statsBuf } }] })));
+    molDirty = molDirty || !!molSpec; stats.resolution = n;
+    refValid = false;
   }
   setResolution(opts.resolution || 96);
 
@@ -684,6 +863,24 @@ export async function createField(canvas, opts = {}) {
     const g = Math.ceil(res / 4); pass.dispatchWorkgroups(g, g, g);
     pass.end();
     return count;
+  }
+  /** ONE molecular dispatch into `slot` (0 = psiTex, 1 = refTex): the same ceil(n/4)³ grid of 4×4×4 workgroups
+      the eigenmode kernel uses, and the same stats[slot] the presenter normalises by. */
+  function writeMolParams(slot) {
+    const u = MOL_PARAMS_U, f = MOL_PARAMS_F;
+    u[0] = res; u[1] = molPack.nAO; u[2] = molPack.nShell; u[3] = molKind; f[4] = half; u[5] = slot;
+    const sig = `${res}|${molPack.nAO}|${molPack.nShell}|${molKind}|${half}`;
+    if (molParamSig[slot] === sig) return;                     // a queue.writeBuffer is ~2.5 ms of staging here
+    molParamSig[slot] = sig; device.queue.writeBuffer(molParamsBuf[slot], 0, MOL_PARAMS);
+  }
+  function encodeMolecule(enc, slot, tw) {
+    writeMolParams(slot);
+    device.queue.writeBuffer(statsBuf, slot * 4, ZERO_U32);     // the max accumulator: zeroed before every dispatch
+    const pass = enc.beginComputePass(tw ? { timestampWrites: tw } : {});
+    pass.setPipeline(molPipelines[molTier]); pass.setBindGroup(0, molBind[molTier][slot]);
+    const g = Math.ceil(res / 4); pass.dispatchWorkgroups(g, g, g);
+    pass.end();
+    return molPack.nAO;
   }
   function writeView(obs, mat, w, h) {
     const B = cameraBasis(obs);
@@ -909,12 +1106,24 @@ export async function createField(canvas, opts = {}) {
     pass.end();
   }
 
-  /** ONE submission: optional reference capture, optional reconstruct, then present. */
-  function frame({ modes = null, refModes = null, obs, mat }) {
+  /** ONE submission: optional reference capture, optional reconstruct, then present.
+      `molecule: true` (and a molecule set) dispatches molWgsl's kernel instead of packModes/encodeCompute, and only when
+      something it depends on changed.  A set molecule OWNS the volume: while one is set the eigenmode reconstruct
+      stands down whatever `modes` the caller passes, so the app loop cannot overwrite a molecular field — pass
+      `molecule: false`, or setMolecule(null), to hand the kernel back. */
+  function frame({ modes = null, refModes = null, obs, mat, molecule = undefined }) {
     const t0 = performance.now();
     const enc = device.createCommandEncoder();
+    const molOn = !!(molSpec && molMat) && molecule !== false;
+    if (molOn) {
+      if (molDirty || molRefDirty) {
+        if (molRefDirty) { encodeMolecule(enc, 1); refValid = true; refGeneration = generation + 1; molRefDirty = false; }
+        if (molDirty) { stats.molAO = encodeMolecule(enc, 0); stats.molDispatches++; molDirty = false; generation++; stats.generation = generation; stats.reconstructs++; stats.lastReconstructWall = t0; }
+      }
+    } else {
     if (refModes) { encodeCompute(enc, 1, refModes); refValid = true; refGeneration = generation + 1; }
     if (modes) { stats.modesRendered = encodeCompute(enc, 0, modes); generation++; stats.reconstructs++; stats.generation = generation; stats.lastReconstructWall = t0; }
+    }
     const w = canvas.width, h = canvas.height;
     if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
     device.queue.submit([enc.finish()]);
@@ -1078,17 +1287,82 @@ export async function createField(canvas, opts = {}) {
       return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
     } finally { tex.destroy(); }
   }
+  /* ── THE MOLECULAR API (wave: CHEMISTRY) ────────────────────────────────────────────────────────────────────
+     The call order is setMolecule → setMoleculeMatrix → frame({ molecule: true }) (or reconstructMolecule()). */
+  /** upload the shells and mark the field molecular; `null` hands the volume back to the eigenmode kernel */
+  function setMolecule(spec) {
+    if (!spec) { molSpec = null; molPack = null; molMat = null; molDirty = false; molRefDirty = false; refValid = false; return null; }
+    const pack = packMolecule(spec);
+    molTier = molTierFor(pack.nAO);
+    device.queue.writeBuffer(molShellBuf, 0, pack.shell, 0, pack.nShell * 8);
+    device.queue.writeBuffer(molAlphaBuf, 0, pack.alpha, 0, pack.nPrim);
+    device.queue.writeBuffer(molWBuf, 0, pack.weight, 0, pack.nWeight);
+    molSpec = spec; molPack = pack; molDirty = true;
+    if (spec.half !== undefined) { if (!(spec.half > 0)) throw new Error('field: a molecule spec half must be positive'); half = spec.half; }
+    return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier], half };
+  }
+  /** the volume's matrix.  'density' and 'diff': M = Float32Array(nAO²), symmetric Re D, ρ = Σ_μν M_μν χ_μ χ_ν and
+      the texel is (√ρ, 0).  'orbital': M = Float32Array(nAO), ψ = Σ_μ c_μ χ_μ and the texel is the signed (ψ, 0).
+      `ref: true` also writes this volume into refTex, which is the ρ_ref view 'diff' subtracts. */
+  function setMoleculeMatrix(M, { kind = 'density', ref = false } = {}) {
+    if (!molSpec) throw new Error('field: setMoleculeMatrix before setMolecule');
+    if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
+    const n = molPack.nAO, want = kind === 'orbital' ? n : n * n;
+    if (!M || M.length !== want) throw new Error(`field: kind '${kind}' needs ${want} numbers, got ${M ? M.length : 0}`);
+    const src = M instanceof Float32Array ? M : Float32Array.from(M);
+    device.queue.writeBuffer(molMatBuf, 0, src, 0, want);
+    molMat = src; molKind = kind === 'orbital' ? 1 : 0; molKindName = kind; molDirty = true;
+    if (ref) molRefDirty = true;
+    return { kind, nAO: n, length: want, ref: !!ref };
+  }
+  /** ONE molecular dispatch, submitted on its own — for a caller that does not own the app's frame loop */
+  function reconstructMolecule() {
+    if (!molSpec || !molMat) throw new Error('field: reconstructMolecule needs setMolecule then setMoleculeMatrix');
+    const t0 = performance.now();
+    const enc = device.createCommandEncoder();
+    if (molRefDirty) { encodeMolecule(enc, 1); refValid = true; refGeneration = generation + 1; molRefDirty = false; }
+    stats.molAO = encodeMolecule(enc, 0); stats.molDispatches++;
+    device.queue.submit([enc.finish()]);
+    molDirty = false; generation++; stats.generation = generation; stats.reconstructs++; stats.lastReconstructWall = t0;
+    stats.molMs = performance.now() - t0;
+    return { generation, res, half, nAO: molPack.nAO, nShell: molPack.nShell, kind: molKindName, encodeMs: +stats.molMs.toFixed(3) };
+  }
+  /** the honest dispatch cost: n dispatches in ONE compute pass, ONE wait, divided — the method `throughput` uses,
+      because Firefox zeroes timestamp queries and polls completion at ~100 ms.  NO queue.writeBuffer and no extra
+      pass inside the timed region: measured here, each of those costs about 2.5 ms of staging and would be read as
+      if it were the kernel — which is what a 64³ water volume timing the same as a 96³ one was telling us. */
+  async function moleculeThroughput({ n = 40 } = {}) {
+    if (!molSpec || !molMat) throw new Error('field: moleculeThroughput needs a molecule');
+    writeMolParams(0);
+    device.queue.writeBuffer(statsBuf, 0, ZERO_U32);
+    await device.queue.onSubmittedWorkDone();
+    const t0 = performance.now();
+    const enc = device.createCommandEncoder();
+    const pass = enc.beginComputePass();
+    pass.setPipeline(molPipelines[molTier]); pass.setBindGroup(0, molBind[molTier][0]);
+    const g = Math.ceil(res / 4);
+    for (let i = 0; i < n; i++) pass.dispatchWorkgroups(g, g, g);
+    pass.end();
+    device.queue.submit([enc.finish()]);
+    await device.queue.onSubmittedWorkDone();
+    const ms = (performance.now() - t0) / n;
+    return { msPerDispatch: +ms.toFixed(3), n, res, voxels: res ** 3, nAO: molPack.nAO, nShell: molPack.nShell, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName };
+  }
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
-    stepCap: { get: () => stepCap, enumerable: true } });
+    stepCap: { get: () => stepCap, enumerable: true },
+    /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
+    molecular: { get: () => !!molSpec, enumerable: true },
+    moleculeInfo: { get: () => (molSpec ? { nAO: molPack.nAO, nShell: molPack.nShell, nPrim: molPack.nPrim,
+      nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, dirty: molDirty, half, res } : null), enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
-    setResolution,
-    setDomain(h) { half = h; },
+    setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
+    setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
@@ -1126,6 +1400,7 @@ export async function createField(canvas, opts = {}) {
       if (out.disposed) return; out.disposed = true; out.ok = false;
       try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
       try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); palBuf.destroy(); } catch (_) {}
+      try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
       try { device.destroy(); } catch (_) {}
     },

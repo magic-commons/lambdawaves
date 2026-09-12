@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { rpa } from '../lab/rpa-inspector.js';
-import { sBasis, sto3g1s, ZETA } from '../lab/gaussian.js';
+import { sBasis, sto3g1s, ZETA } from './lib/gaussian.js';
 import { rhf } from '../lab/scf.js';
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);

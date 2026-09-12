@@ -38,6 +38,12 @@ import { densityPeriod } from './period.js';
 import { hylleraas, BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
+import { moleculeRHF, registerRecord, BASIS_FILES } from './rhf-molecule.js';
+import { rpa } from './rpa-inspector.js';
+import { fieldShells } from './molecular-field.js';
+import { createRTHF } from './density.js';
+import { spectrum, peaks } from './absorb.js';
+import { basisFrom, integrals } from './md.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -62,7 +68,23 @@ function run(m) {
   busyMs += performance.now() - t0; jobs++;
   return r;
 }
-self.onmessage = (e) => {
+/* THE SAME MODULE ON BOTH ROADS.  Every op above and below is an exported function, so rack.js can run it on the
+   frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
+   this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
+const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
+const CHEM = new Set(['chem.solve', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
+const CHEM_BASIS = new Set(['chem.solve', 'chem.rt.init']);
+/** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
+async function chemReady(m) {
+  const basis = m.basis || 'sto-3g';
+  if (m.record) { chemRegister(basis, m.record); return; }
+  if (chemRecords.has(basis)) return;
+  if (!BASIS_FILES[basis]) throw new Error(`chem: unknown basis '${basis}'`);
+  const r = await fetch(new URL('./vendor/bse/' + BASIS_FILES[basis], import.meta.url));
+  if (!r.ok) throw new Error(`chem: cannot load ${BASIS_FILES[basis]} (${r.status})`);
+  chemRegister(basis, await r.json());
+}
+if (IN_WORKER) self.onmessage = (e) => {
   const m = e.data;
   if (m.op === 'park') { if (!parked) { parked = true; parks++; parkedAt = Date.now(); } self.postMessage(Object.assign({ id: m.id, op: m.op, ok: true }, stat())); return; }
   if (m.op === 'stat') { self.postMessage(Object.assign({ id: m.id, op: m.op, ok: true }, stat())); return; }
@@ -70,6 +92,13 @@ self.onmessage = (e) => {
     if (parked) { parked = false; resumes++; parkedMs += Date.now() - parkedAt; }
     while (held.length) { const h = held.shift(); const r = run(h); self.postMessage(Object.assign({ id: h.id, op: h.op }, r.out), r.transfer); }
     self.postMessage(Object.assign({ id: m.id, op: m.op, ok: true }, stat())); return;
+  }
+  /* CHEMISTRY is work a hand asked for: it finishes parked or not, and it waits for the basis record first. */
+  if (CHEM.has(m.op)) {
+    (CHEM_BASIS.has(m.op) ? chemReady(m) : Promise.resolve()).then(
+      () => { const r = run(m); self.postMessage(Object.assign({ id: m.id, op: m.op }, r.out), r.transfer); },
+      (err) => self.postMessage({ id: m.id, op: m.op, error: String(err && err.message || err) }));
+    return;
   }
   if (parked && SPECULATIVE.has(m.op)) { held.push(m); return; }     // it waits; the answer comes on resume, once
   const r = run(m);
@@ -95,7 +124,141 @@ function work(m) {
     else if (m.op === 'helium') { if (!BASES[m.basis]) throw new Error('unknown helium basis ' + m.basis); out = { sol: hylleraas(BASES[m.basis]) }; }
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
     else if (m.op === 'h2curve') { out = { result: h2CurveTable(m.Rmin, m.Rmax, m.count) }; }
+    else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };
 }
+
+/* ── CHEMISTRY (wave: the CHEMISTRY window) ──────────────────────────────────────────────────────────────────────
+ * The molecule ops keep STATE INSIDE THE WORKER: one cached ground state and one live real-time propagator with its
+ * own dipole trace, so `chem.rt.run` is a bounded request ("take 200 steps") and no message ever carries a whole
+ * trajectory.  Every op is ALSO an exported synchronous function, because rack.js's makeWorker hands the call back
+ * to the main-thread road whenever the worker fails to load, errors or times out.
+ *   chem.solve        { atoms (bohr), basis, charge, record?, split? }   → the RHF ground state + the RPA roots + the field spec
+ *   chem.rt.init      { atoms, basis, charge, dt, integrator, kick: { axis, kappa }, restartEvery } → the kicked t = 0 state
+ *   chem.rt.run       { steps }                                          → Re D, the dipole trace of those steps, invariants
+ *   chem.rt.reset     {}                                                 → back to the kicked t = 0 state, trace cleared
+ *   chem.rt.spectrum  { dt, kappa, tau, wMin, wMax }                     → absorb.js's transform of the ACCUMULATED trace
+ * The accumulated trace is capped at 2e6 samples (16 MB of f64); past the cap the run keeps stepping and says so.
+ */
+const TRACE_CAP = 2e6;
+const chemRecords = new Map();
+let chemSol = null, chemKey = '', rtState = null;
+
+/** hand a parsed lab/vendor/bse record to the chemistry ops once; every chem op is then synchronous */
+export function chemRegister(basis, record) {
+  if (!BASIS_FILES[basis]) throw new Error(`chem: unknown basis '${basis}' — only ${Object.keys(BASIS_FILES).join(' and ')} are vendored`);
+  chemRecords.set(basis, record); registerRecord(basis, record); return record;
+}
+const recordOf = (basis) => {
+  const r = chemRecords.get(basis);
+  if (!r) throw new Error(`chem: basis '${basis}' is not registered — call chemRegister(name, record) or pass { record }`);
+  return r;
+};
+const AXIS = { x: 0, y: 1, z: 2 };
+const reD = (engine) => { const D = engine.D; return Float32Array.from(D.re); };   // Re D in the AO basis, for the field
+/** the converged ground state, its integrals and the report — cached on (atoms, basis, charge) */
+function ensureSolve(m = {}) {
+  const basis = m.basis || 'sto-3g';
+  if (m.record) chemRegister(basis, m.record);
+  if (!Array.isArray(m.atoms) || !m.atoms.length) throw new Error('chem: atoms = [{ Z, x, y, z }] in bohr');
+  const atoms = m.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z }));
+  const charge = m.charge || 0, key = JSON.stringify([basis, charge, atoms.map((a) => [a.Z, a.x, a.y, a.z])]);
+  if (chemSol && chemKey === key) return chemSol;
+  const rec = recordOf(basis);
+  /* THE SPLIT COSTS A SECOND INTEGRAL PASS, so it is off unless asked for: moleculeRHF owns the only pass it needs,
+     and `integrals: null` says the phase was not measured rather than pretending to a number.  `scf` is the whole
+     moleculeRHF wall and is NOT `integrals` subtracted from it — the second pass runs warm and the difference came
+     out negative for H₂O, which is how a subtracted timing announces that it was never a measurement. */
+  let tInt = null;
+  if (m.split) { const t0 = performance.now(); integrals(basisFrom(atoms, rec, { cart: true }), atoms); tInt = +(performance.now() - t0).toFixed(2); }
+  let t = performance.now();
+  const sol = moleculeRHF({ atoms, basis, charge, record: rec });
+  const tScf = +(performance.now() - t).toFixed(2);          // the whole ground state: integrals + SAD + the SCF runs
+  const I = sol.integrals, n = I.n;
+  t = performance.now();
+  const R = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc });
+  const tRpa = +(performance.now() - t).toFixed(2);
+  const extent = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0);
+  const fixed = { energy: sol.energy, Enuc: I.Enuc, nocc: sol.nocc, nAO: n, order: sol.basis.order,
+    hash: sol.hash, basis, charge, electrons: sol.electrons, converged: sol.converged,
+    roots: R.roots.map((r) => ({ omega: r.omega, omegaTDA: r.omegaTDA, f: r.f, mu: r.mu,
+      dominant: r.dominant.slice(0, 4).map((d) => ({ i: d.i, a: d.a, x: d.x, y: d.y })) })),
+    dipole: sol.dipole, half: extent + 6,
+    timings: { integrals: tInt, scf: tScf, rpa: tRpa }, stability: sol.stability, solutions: sol.solutions };
+  chemSol = { key, sol, I, fixed, atoms, basis, charge }; chemKey = key;
+  return chemSol;
+}
+/** chem.solve — THE ARRAYS ARE BUILT FRESH EVERY CALL, never cached: the reply TRANSFERS their buffers, so a
+    cached report would come back detached (zero-length) the second time the same molecule was asked for. */
+export function chemSolve(m = {}) {
+  const c = ensureSolve(m);
+  return { ...c.fixed, eps: Float64Array.from(c.sol.orbitalEnergies), C: Float64Array.from(c.sol.C),
+    D: Float64Array.from(c.sol.D), shells: fieldShells(c.sol.basis) };
+}
+/** chem.rt.init — runs (or reuses) the solve, builds the propagator, applies the δ-kick along the chosen axis */
+export function chemRtInit(m = {}) {
+  const { sol, I } = ensureSolve(m), n = I.n;
+  const kick = m.kick || {}, axis = kick.axis || 'z', kappa = kick.kappa === undefined ? 1e-3 : +kick.kappa;
+  if (AXIS[axis] === undefined) throw new Error(`chem: kick axis must be 'x', 'y' or 'z', got '${axis}'`);
+  const dt = m.dt === undefined ? 0.01 : +m.dt, integrator = m.integrator || 'mmut';
+  if (integrator !== 'mmut' && integrator !== 'magnus2') throw new Error(`chem: integrator must be 'mmut' or 'magnus2', got '${integrator}'`);
+  if (!(dt > 0)) throw new Error('chem: dt must be positive');
+  const restartEvery = m.restartEvery === undefined ? 50 : m.restartEvery | 0;
+  const engine = createRTHF({ n, S: I.S, h: I.h, eri: I.eri, Z: I.Z, mu: [I.X, I.Y, I.Z], Enuc: I.Enuc,
+    nuclearDipole: I.nuclearDipole[AXIS[axis]], nElectrons: sol.nElectrons, D0: sol.D, dt, integrator, restartEvery });
+  engine.kickAlong(axis, kappa);
+  const trace = new Float64Array(4096); trace[0] = engine.dipoleAlong(axis);
+  const ob = engine.observables();
+  rtState = { engine, axis, kappa, dt, integrator, restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
+    init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery },
+    E0: ob.fieldFreeTotal };
+  return { ok: true, t: 0, D_re: reD(engine), electrons: ob.electrons, idempotency: ob.idempotency,
+    E0: ob.fieldFreeTotal, nAO: n, dt, integrator, kick: { axis, kappa }, restartEvery };
+}
+/** the accumulated trace, grown by doubling to the cap */
+function traceAppend(v) {
+  if (rtState.nTrace >= TRACE_CAP) { rtState.capped = true; return; }
+  if (rtState.nTrace >= rtState.trace.length) {
+    const grown = new Float64Array(Math.min(TRACE_CAP, rtState.trace.length * 2));
+    grown.set(rtState.trace.subarray(0, rtState.nTrace)); rtState.trace = grown;
+  }
+  rtState.trace[rtState.nTrace++] = v;
+}
+/** chem.rt.run */
+export function chemRtRun(m = {}) {
+  if (!rtState) throw new Error('chem: chem.rt.run before chem.rt.init');
+  const steps = Math.max(1, Math.min(200000, (m.steps | 0) || 1)), t0 = performance.now();
+  const out = new Float64Array(steps);
+  for (let k = 0; k < steps; k++) {
+    rtState.engine.step();
+    out[k] = rtState.engine.dipoleAlong(rtState.axis);        // Tr(D M_q) only: observables() would rebuild the Fock matrix
+    traceAppend(out[k]);
+  }
+  rtState.steps += steps;
+  const ms = performance.now() - t0, ob = rtState.engine.observables();
+  return { t: rtState.engine.t, D_re: reD(rtState.engine), trace: out, electrons: ob.electrons,
+    idempotency: ob.idempotency, energy: ob.fieldFreeTotal, steps: rtState.steps, samples: rtState.nTrace,
+    capped: rtState.capped, msPerStep: +(ms / steps).toFixed(4) };
+}
+/** chem.rt.reset — the kicked t = 0 state again, trace cleared */
+export function chemRtReset() {
+  if (!rtState) throw new Error('chem: chem.rt.reset before chem.rt.init');
+  return chemRtInit(rtState.init);
+}
+/** chem.rt.spectrum — absorb.js's damped sine transform of the ACCUMULATED trace, plus its peaks */
+export function chemRtSpectrum(m = {}) {
+  if (!rtState || rtState.nTrace < 8) throw new Error('chem: chem.rt.spectrum needs an accumulated trace — run some steps first');
+  const dt = m.dt === undefined ? rtState.dt : +m.dt, kappa = m.kappa === undefined ? rtState.kappa : +m.kappa;
+  const tau = m.tau === undefined ? 500 : m.tau;
+  const sp = spectrum(rtState.trace.subarray(0, rtState.nTrace), { dt, kappa, tau, wMin: m.wMin, wMax: m.wMax, dw: m.dw });
+  return { omega: Float64Array.from(sp.omega), S: Float64Array.from(sp.S), ImAlpha: Float64Array.from(sp.ImAlpha),
+    peaks: peaks(sp, { fraction: m.fraction }), samples: rtState.nTrace, axis: rtState.axis, dt, kappa, tau };
+}
+/** every top-level typed array of a reply, so the structured clone moves the bytes instead of copying them */
+const chemTransfer = (out) => Object.values(out).filter((v) => v && v.buffer instanceof ArrayBuffer).map((v) => v.buffer);

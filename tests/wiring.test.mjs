@@ -55,26 +55,7 @@ const TODAY = new Date();
  *   · An entry EXPIRES.  Loud warning at 14 days, hard failure at 60.  This is a time bomb on purpose: the
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
-const ALLOWLIST = [
-  /* The ChronusQ ports of 2026-09-11 (research/MATH-CHRONUSQ-PORTS-2026-09-11.md): headless mathematics with node
-     proofs, staged ahead of the window that will show them.  The caller is the ABSORB / RT-HF card of the K wave
-     (research/chronusq-2026-09-11/SYNTHESIS.md §8, item 3), to be built from moview.js's nodes in the MO rack;
-     until it exists the only callers are tests/absorb.test.mjs, tests/density.test.mjs and tests/scf.test.mjs. */
-  { file: 'lab/gaussian.js', date: '2026-09-11', reason: 'sBasis feeds scf.js and density.js; the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) will call it through them to build H2, HeH+ and larger STO-3G molecules on screen' },
-  { file: 'lab/scf.js', date: '2026-09-11', reason: 'rhf() is the ground state the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) starts every real-time run from; tests/scf.test.mjs is its only caller until that card is built' },
-  { file: 'lab/density.js', date: '2026-09-11', reason: 'createRTHF() is the many-electron propagator the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) will drive from the rack; tests/density.test.mjs is its only caller until then' },
-  { file: 'lab/absorb.js', date: '2026-09-11', reason: 'kickSpectrum()/spectrum()/peaks() draw the absorption spectrum in the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3); tests/absorb.test.mjs is the only caller until that card exists' },
-  /* The H₂O program of 2026-09-12 (research/MATH-H2O-2026-09-11.md, SYNTHESIS): five modules built to the corrected
-     contracts B-H2O-1/2/4/6/7, each with a node proof against PySCF fixtures.  Their caller is B-H2O-8, the ABSORB /
-     RT-HF card (lab/absorb-rthf-card.js), which imports md.js → rhf-molecule.js → rpa-inspector.js, response-fit.js
-     and molecular-field.js; until it lands the callers are tests/md, rhf-molecules, rpa-inspector, response-fit and
-     molecular-field. */
-  { file: 'lab/md.js', date: '2026-09-12', reason: 'Cartesian McMurchie–Davidson integrals (l ≤ 2) for any molecule; the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) calls it through rhf-molecule.js to build every molecule on screen; tests/md.test.mjs until then' },
-  { file: 'lab/rhf-molecule.js', date: '2026-09-12', reason: 'the molecule ground state (SAD guess, aufbau, stability) the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) starts every real-time run from; tests/rhf-molecules.test.mjs is its caller until that card lands' },
-  { file: 'lab/rpa-inspector.js', date: '2026-09-12', reason: 'the RPA/TDA inspector the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) shows beside the real-time sticks per contract B-H2O-7; tests/rpa-inspector.test.mjs is its caller until then' },
-  { file: 'lab/response-fit.js', date: '2026-09-12', reason: 'the exact-kernel pole fit with its certificate that the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) uses to place peaks per contract B-H2O-6; tests/response-fit.test.mjs is its caller until then' },
-  { file: 'lab/molecular-field.js', date: '2026-09-12', reason: 'the AO/orbital/density evaluator that feeds the 96³ field from the ABSORB / RT-HF card B-H2O-8 (lab/absorb-rthf-card.js) per contract B-H2O-4; tests/molecular-field.test.mjs is its caller until then' },
-]; // Wave 107 wired the deterministic renderer into CAPTURE; that historical entry is closed.
+const ALLOWLIST = []; // Wave 107 wired the deterministic renderer into CAPTURE; the ChronusQ ports and the H₂O modules were staged here 2026-09-11/12 and reached by mathworker.js + chemview.js on 2026-09-12.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
  * Not a parser — a lexer, which is all an import graph needs and all that can be had from the standard

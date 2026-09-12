@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createMO } from '../lab/mo.js';
 import { createMODrive, sin2Pulse } from '../lab/modrive.js';
-import { sBasis, sto3g1s, ZETA } from '../lab/gaussian.js';
+import { sBasis, sto3g1s, ZETA } from './lib/gaussian.js';
 import { rhf } from '../lab/scf.js';
 import { sto3gH2 } from '../lab/h2ci.js';
 import { createRTHF, hermitianEigen, cmat, cmul, cadj, loewdin, sandwich, creal, unitaryOf, idempotencyDefect } from '../lab/density.js';

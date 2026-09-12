@@ -126,7 +126,7 @@ export function fieldOf({ shape = 'step', kappa = 0, omega = 0, tOn = 0, tOff = 
  * H'(t) = +E(t) ẑ per electron (λWAVES's convention, the one modrive.js and the ChronusQ papers use).
  * D0: the initial real AO density (spin-summed), e.g. scf.js's rhf().D.  Returns { step, observables, t, P, D }.
  */
-export function createRTHF({ n, S, h, eri = null, Z = null, Enuc = 0, nuclearDipole = 0, nElectrons, D0, field = () => 0, dt = 0.05, integrator = 'magnus2', restartEvery = 50 } = {}) {
+export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0, nuclearDipole = 0, nElectrons, D0, field = () => 0, dt = 0.05, integrator = 'magnus2', restartEvery = 50 } = {}) {
   const D0c = D0 && D0.re ? D0 : (D0 && D0.length === n * n ? creal(D0, n) : null);
   if (!D0c || D0c.re.length !== n * n) throw new Error('rthf: D0 (n×n density, real or { re, im }) required');
   const twoElectron = nElectrons > 1 && !!eri, f = nElectrons === 1 ? 1 : 2;
@@ -137,6 +137,26 @@ export function createRTHF({ n, S, h, eri = null, Z = null, Enuc = 0, nuclearDip
   function kick(kappa) {
     if (!Zt) throw new Error('rthf: no dipole matrix to kick with');
     P = similarity(unitaryOf(Zt, kappa), P); Pprev = null; sinceRestart = 0; return self;
+  }
+  /* ── THE OTHER TWO AXES.  `Z` alone kicks along z, which is the shipped path and the only one the length-gauge
+     field drives; `mu: [X, Y, Z]` (lab/md.js's three dipole matrices) adds x and y, each carried into the Löwdin
+     frame once and cached, so a three-polarisation absorption run pays one transform per axis it actually uses. */
+  const AXIS = { x: 0, y: 1, z: 2 }, muAO = mu || (Z ? [null, null, Z] : null), muL = [null, null, Zt];
+  const axisOf = (a) => { const q = typeof a === 'number' ? a : AXIS[a];
+    if (q !== 0 && q !== 1 && q !== 2) throw new Error("rthf: axis must be 'x', 'y' or 'z'"); return q; };
+  const muFrame = (q) => { if (!muL[q]) {
+    if (!muAO || !muAO[q]) throw new Error(`rthf: no dipole matrix for axis ${'xyz'[q]} — pass mu: [X, Y, Z]`);
+    muL[q] = sandwich(X, creal(muAO[q], n)); } return muL[q]; };
+  /** the δ-kick exp(−iκ q̂) along ONE axis: P ← U P U†, U = exp(−iκ μ̃_q) — exact, idempotency-preserving */
+  function kickAlong(axis, kappa) { const q = axisOf(axis);
+    P = similarity(unitaryOf(muFrame(q), kappa), P); Pprev = null; sinceRestart = 0; return self; }
+  /** the ELECTRON dipole along one axis, −Tr(D M_q) — the sign convention observables().electronDipole uses */
+  function dipoleAlong(axis) {
+    const q = axisOf(axis), M = muAO && muAO[q];
+    if (!M) throw new Error(`rthf: no dipole matrix for axis ${'xyz'[q]}`);
+    const D = sandwich(X, P); let s = 0;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) s += D.re[j * n + i] * M[i * n + j];
+    return -s;
   }
   const fockAO = (D, time) => {
     const F = cmat(n), E = field(time);
@@ -179,7 +199,7 @@ export function createRTHF({ n, S, h, eri = null, Z = null, Enuc = 0, nuclearDip
       fieldFreeTotal: electronic + Enuc, instantaneousTotal: electronic + Enuc - E * totalDipole,
       field: E, z, electronDipole, totalDipole };
   }
-  const self = { step, kick, observables, get t() { return t; }, get P() { return { re: Float64Array.from(P.re), im: Float64Array.from(P.im), n }; },
+  const self = { step, kick, kickAlong, dipoleAlong, observables, get t() { return t; }, get P() { return { re: Float64Array.from(P.re), im: Float64Array.from(P.im), n }; },
     get D() { return sandwich(X, P); }, X, W, model: `${nElectrons === 1 ? 'one electron, exact' : 'RT-RHF'}; length gauge; ${integrator}; Löwdin frame` };
   return self;
 }

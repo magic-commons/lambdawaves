@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { sBasis, sto3g1s, ZETA } from '../lab/gaussian.js';
+import { sBasis, sto3g1s, ZETA } from './lib/gaussian.js';
 import { rhf } from '../lab/scf.js';
 import { sto3gH2, sto3gIntegrals, eriTensor } from '../lab/h2ci.js';
 import { readFileSync } from 'node:fs';

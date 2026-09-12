@@ -111,3 +111,29 @@ export function evaluator(shells) {
   }
   return { n, groups, components, exponentialsPerPoint, stats, ao, orbital, density, supportRadius, uploadContract };
 }
+
+/* ── the GPU spec (wave: CHEMISTRY) ─────────────────────────────────────────────────────────────────────────────
+ * ONE source for the shell records the shader, the worker and the window all read.  A shell's primitives carry the
+ * exponent once and the per-component weight `bf.d` — contraction coefficient × primitive norm N_lmn(α) × the
+ * per-component unit-self-overlap factor — so the kernel's inner loop is exactly this evaluator's: one exp per
+ * primitive per shell, reused across its components, in the order s; x,y,z; xx,xy,xz,yy,yz,zz.
+ */
+/** fieldShells(basis) → [{ center: [x, y, z] bohr, l, prims: [{ alpha, w: Float64Array(ncomp) }], ao, nc }] */
+export function fieldShells(basis) {
+  if (!basis || !Array.isArray(basis.shells) || !basis.shells.length) throw new Error('molecular-field: fieldShells needs a lab/md.js basis with shells');
+  const NC = [1, 3, 6], out = [];
+  let ao = 0;
+  for (const sh of basis.shells) {
+    const nc = NC[sh.l];
+    if (nc === undefined) throw new Error(`molecular-field: fieldShells is Cartesian l ≤ 2, got l = ${sh.l}`);
+    if (!sh.bfs || sh.bfs.length !== nc) throw new Error(`molecular-field: an l = ${sh.l} shell has ${sh.bfs ? sh.bfs.length : 0} components, not ${nc}`);
+    if (!sh.exps || !sh.exps.length) throw new Error('molecular-field: a shell needs exps');
+    if (sh.bfs[0].idx !== ao) throw new Error(`molecular-field: shell AO base ${sh.bfs[0].idx} is not the running index ${ao} — the shell list is not in AO order`);
+    for (const b of sh.bfs) if (!b.d || b.d.length !== sh.exps.length) throw new Error('molecular-field: a component needs one weight per exponent');
+    out.push({ center: Array.from(sh.c, Number), l: sh.l,
+      prims: sh.exps.map((alpha, p) => ({ alpha: Number(alpha), w: Float64Array.from(sh.bfs, (b) => b.d[p]) })), ao, nc });
+    ao += nc;
+  }
+  if (basis.n !== undefined && ao !== basis.n) throw new Error(`molecular-field: fieldShells covers ${ao} AOs, the basis declares ${basis.n}`);
+  return out;
+}

@@ -261,6 +261,10 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
                                   stays (the subtitle is a hover-level fact); only the sledgehammer goes. */
 #badges { position: absolute; left: calc(var(--rack-w) + 340px); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
 #badges > * { pointer-events: auto; }
+/* On a phone the menu bar is always shown beside the title and the badges' box (rack-w + 340 … rack-w + 56 from the
+   right) has negative width, so its centred children spill left over FILE · EDIT · VIEW — a second row instead
+   (collision rect 124,10,210,24 at 375×812, Gemini 2026-09-12). */
+body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #sheet { position: absolute; right: var(--sp-4); top: 52px; z-index: var(--z-veil); width: min(440px, 80%); padding: var(--sp-4) var(--sp-5); border-radius: var(--r-lg);
   font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.5; color: var(--fg-soft); }
 #sheet h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
@@ -453,6 +457,9 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 /* ── shadow view ────────────────────────────────────────────────────────── */
 .shadow-c { width: 100%; height: 236px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); touch-action: none; }
 .mol-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
+.mol-c.mol-core { height: 84px; }                       /* CHEMISTRY's core inset: less screen than the inspector (answer 11) */
+.mol-c[hidden] { display: none; }                      /* `display: block` above outranks the UA's [hidden] rule, so say it here */
+.k.off { opacity: .4; }                                /* a dial whose quantity the current VIEW does not read */
 .qcd-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
 /* ATOMS: the shell ladder and the radials of the atom in force (wave 37) */
 .atm-c { width: 100%; height: 152px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
