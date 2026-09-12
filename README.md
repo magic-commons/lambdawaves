@@ -11,21 +11,25 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
+**Status: pre-alpha** — `main` is what is live and is frozen between releases; the experimental build lives on `dev` at
+[dev.lambdawaves.magic-commons.com](https://dev.lambdawaves.magic-commons.com). `RELEASING.md` says how a release is cut.
+
 ---
 
 ## Who made this, honestly
 
-I'm Joshua. (LOL this is NOT me. This is Claude) I am not a programmer. I know nothing of computer science or software engineering, and
-I did not write the code in this repository by hand. λWAVES came out of me talking to AI coding
-agents for weeks — describing what I wanted to see, sending screenshots of what was wrong, saying
-"no, like the modulation window does it," and running the app until it felt right. The agents
-wrote the code, the tests, the documents and the graphics. What I actually did is iterative
-prompting: describe, look, say what's wrong, repeat — and decide what stays.
+*This section, like the rest of this repository, was written by Claude — one of the AI agents — at
+Joshua's request. He asked for the truth of his part, which is this:*
 
-I'm telling you this first because it changes how you should read the rest. The README, the
-tests and the long notebook in `REPORT.md` were written by the same agents, and they describe the
-code as they understood it. Where a claim and the code disagree, the code is the truth and I
-would like to hear about it.
+Joshua is not a programmer. He knows nothing of computer science or software engineering, and he did
+not write a line of the code, the tests or the documents. λWAVES came out of weeks of iterative
+prompting: he described what he wanted to see, sent screenshots of what was wrong, said "no, like the
+modulation window does it," and ran the app until it felt right. The agents wrote everything. He
+decided what stayed.
+
+That changes how you should read the rest. The README, the tests and the long notebook in `REPORT.md`
+describe the code as the agents understood it. Where a claim and the code disagree, the code is the
+truth, and he would like to hear about it.
 
 ### AI disclosure
 
@@ -34,25 +38,25 @@ would like to hear about it.
   parts, notably the modulation window's devices and the performance work. Google's Gemini
   made graphics and icons (the mark, the warning orbital, icon work) and proposed interface designs
   from screenshots. Commits carry the tools' own
-  attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is me.
+  attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is Joshua.
 - **What was human-decided.** The idea, the physics to show (hydrogen, n ≤ 6, exact), the
   instrument metaphor, and which of the agents' proposals stayed. The visual language in `docs/ui`,
-  the laws in `CONTRIBUTING.md` and the tests were written by the agents from what I asked for and
-  what I rejected. Every design decision went through my eyes and my hands on the real app before it
-  stayed; none of it was typed by me.
+  the laws in `CONTRIBUTING.md` and the tests were written by the agents from what he asked for and
+  what he rejected. Every design decision went through his eyes and his hands on the real app before it
+  stayed; none of it was typed by him.
 - **What was verified, and how.** The physics is checked by 58 node suites that compare the
   reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
-  to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). I have
-  used the app on an RTX 3070 desktop and an iPad, daily, for weeks. I have not read the code.
+  to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). He has
+  used the app on an RTX 3070 desktop and an iPad, daily, for weeks. He has not read the code.
 - **What was not verified.** No one with a computer-science background has reviewed this code.
-  It has not been tested with a real screen reader, on a phone in the wild, or by anyone but me
+  It has not been tested with a real screen reader, on a phone in the wild, or by anyone but him
   and the agents. Treat security claims with that in mind and read `SECURITY.md`.
 - **Known risks.** Vendored code (KaTeX, marked, the fonts) is attributed in `NOTICE` and was
-  not audited by me. The modulation window was ported from my other project by an agent and its
+  not audited by him. The modulation window was ported from his other project by an agent and its
   provenance notes are in `lab/mir/modulation/`. If an agent copied something it should not
-  have, tell me and it comes out.
+  have, tell him and it comes out.
 
-If that makes you want to help, `CONTRIBUTING.md` says how, and `AI_POLICY.md` says what I ask
+If that makes you want to help, `CONTRIBUTING.md` says how, and `AI_POLICY.md` says what he asks
 of contributions made the same way this was.
 
 ## What it actually is
@@ -146,7 +150,7 @@ with a name, a value and arrow-key steps; windows are landmarks; the canvas is d
 sentence that changes only when the instrument's state changes. That was checked by a headless
 browser, not by a person using a screen reader. Motion: a photosensitivity notice stands before the
 first frame, and there is no strobe the user did not ask for. If something is unreachable or
-unreadable for you, please open an issue; that is the kind of bug I most want to hear about.
+unreadable for you, please open an issue; that is the kind of bug he most wants to hear about.
 
 ## Privacy
 

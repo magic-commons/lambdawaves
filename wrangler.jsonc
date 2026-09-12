@@ -44,6 +44,17 @@
   // from a clean machine — DEPLOY.md step 10 no longer needs the dashboard. The zone must be on this account.
   "routes": [{ "pattern": "lambdawaves.magic-commons.com", "custom_domain": true }],
 
+  // THE EXPERIMENTAL COPY (2026-09-11). `npx wrangler deploy --env dev` publishes the same dist/ as a second
+  // Worker with its own name and address, so the dev branch can be played on real devices without touching
+  // the release. Everything not named here is inherited from the top level.
+  "env": {
+    "dev": {
+      "name": "lambdawaves-dev",
+      "workers_dev": false,
+      "routes": [{ "pattern": "dev.lambdawaves.magic-commons.com", "custom_domain": true }]
+    }
+  },
+
   "assets": {
     // What `node tools/build-deploy.mjs` writes. NOT "lab/": the build is what adds LICENSE, NOTICE,
     // REPORT.md, CHANGELOG.md, robots.txt, _headers and _redirects, drops the ungated smoke.html bench,
