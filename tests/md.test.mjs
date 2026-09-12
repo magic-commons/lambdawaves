@@ -28,7 +28,12 @@ const maxAbs = (a, f) => { let w = 0; for (let k = 0; k < a.length; k++) w = Mat
     assert.equal(rec.name, r.name); assert.equal(rec.version, r.bse_version);
     assert.ok(/^https:\/\/www\.basissetexchange\.org\/api\/basis\//.test(r.source_url), 'a BSE source URL');
   }
-  assert.equal(index.records[0].sha256, 'db98a404682de686543ffe09b56f555d6fc11add3b289b35e74c11f9df91c609', 'STO-3G v1 hash of the ledger');
+  /* WIDENED 2026-09-12: the STO-3G record went from H, Li–F (db98a404…) to H–Kr (22ce59b9…) for lab/molecules.js.
+     The H and Li–F electron_shells are byte-identical decimals in both, so every energy pinned before the widening
+     is unchanged — which is what §6's `basisFrom` hash and tests/rhf-molecules.test.mjs actually prove. */
+  assert.equal(index.records[0].sha256, '22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b', 'STO-3G v1 (H–Kr) hash of the ledger');
+  assert.equal(index.records[0].sha256_superseded, 'db98a404682de686543ffe09b56f555d6fc11add3b289b35e74c11f9df91c609', 'the superseded H, Li–F hash is still named');
+  assert.deepEqual(index.records[0].elements, Array.from({ length: 36 }, (_, k) => k + 1), 'STO-3G v1 vendors elements 1–36');
   assert.equal(index.records[1].sha256, 'fee4f992bf8fe6a319350ff03a253d77004110eed0d34013b2af1fade4a71ac4', '6-31+G* v1 hash of the ledger');
   assert.equal(ANGSTROM, 1 / 0.52917721092, 'ANGSTROM = 1/0.52917721092');
   close(ANGSTROM, 1.8897261245650618, 1e-16, 'ANGSTROM vs the oracle ang_to_bohr');
@@ -178,7 +183,8 @@ let sto = null;
   assert.notEqual(basisFrom(a1, rec, { cart: true }).hash, basisFrom(a1, mutated, { cart: true }).hash, 'a mutated decimal changes the hash');
   assert.equal(basisFrom(a1, rec, { cart: true }).hash.length, 64, 'the hash is a SHA-256 hex digest');
   assert.throws(() => basisFrom(a1, rec, { cart: false }), /Cartesian only/, 'spherical is refused, not silently approximated');
-  assert.throws(() => basisFrom([{ Z: 2, x: 0, y: 0, z: 0 }], rec, { cart: true }), /no element Z=2/, 'a missing element is refused');
+  /* Z = 37 and not Z = 2: the widened record vendors 1–36, so helium IS in it now and rubidium is the first gap. */
+  assert.throws(() => basisFrom([{ Z: 37, x: 0, y: 0, z: 0 }], rec, { cart: true }), /no element Z=37/, 'a missing element is refused');
   console.log('PASS basis hash over the decimal strings: geometry-invariant, mutation-sensitive, 64 hex digits; spherical and missing elements refused.');
 }
 

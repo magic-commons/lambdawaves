@@ -131,6 +131,9 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * A density writes (√ρ, 0): view 'density' reads dot(s,s) = ρ, 'phase' reads atan2(0, √ρ) = 0 — a flat phase, as a
  * real density must have — and 'diff' reads ρ − ρ_ref against refTex.  An orbital writes (ψ, 0): 'real' reads
  * s.x/ampMax = the signed orbital, 'phase' reads atan2(0, ψ) = 0 for ψ > 0 and π for ψ < 0, i.e. the two lobes.
+ * A COMPLEX ORBITAL (kind 2, the ORBITALS register: ψ = Σ_k c_k e^{−iε_k t}φ_k, MATH-H2O Proposition 1) writes the
+ * full (ψ_re, ψ_im): 'phase' then reads arg ψ over the whole turn, 'density' reads |ψ|², 'real'/'imag' the parts.
+ * ONE matrix buffer holds both AO vectors — mat[0 … nAO) is the real part, mat[nAO … 2nAO) the imaginary one.
  * ONE exp per primitive per EXPONENTIAL GROUP.  Two things share: every Cartesian component of a shell (they carry
  * the same exponents by construction), and every shell on one centre with one exponent list — which is what makes
  * STO-3G water 12 exponentials a point and not 15, and benzene 54 and not 72, because lab/md.js splits an sp record
@@ -145,7 +148,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
 const molWgsl = (cap) => /* wgsl */`
 const WG: u32 = 64u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape
 struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };   // l carries bit 8 = share the previous group's exponentials
-struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ)
+struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ), 2 complex orbital (ψ_re, ψ_im)
 @group(0) @binding(0) var<uniform> P: MP;
 @group(0) @binding(1) var<storage, read> shells: array<Shell>;
 @group(0) @binding(2) var<storage, read> alphas: array<f32>;
@@ -194,8 +197,10 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       }
     }
     var amp = 0.0;
-    if (P.kind == 1u) {
+    var ampIm = 0.0;                                                             // kind 2 only: the imaginary AO vector's contraction
+    if (P.kind >= 1u) {
       for (var i = 0u; i < P.nAO; i++) { amp += mat[i] * chiW[i * WG + lid]; }   // ψ(r) = Σ_μ c_μ χ_μ(r), signed
+      if (P.kind == 2u) { for (var i = 0u; i < P.nAO; i++) { ampIm += mat[P.nAO + i] * chiW[i * WG + lid]; } }   // … and Σ_μ Im c_μ χ_μ(r)
     } else {
       var rho = 0.0;
       for (var i = 0u; i < P.nAO; i++) {
@@ -209,8 +214,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       }
       amp = sqrt(max(rho, 0.0));
     }
-    textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, 0.0, 0.0, 0.0));
-    dens = amp * amp;
+    textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, ampIm, 0.0, 0.0));
+    dens = amp * amp + ampIm * ampIm;
   }
   /* the workgroup's max ρ, reduced THROUGH THE χ TILE — which is dead by now.  That is why there is no separate
      var<workgroup> atomic: at cap 64 the tile is the whole 16 KiB workgroup budget and a spare word would not fit.
@@ -818,6 +823,7 @@ export async function createField(canvas, opts = {}) {
      the volume is static between updates, so it is re-dispatched on a DIRTY FLAG (matrix, spec, resolution or
      domain changed), never once per frame. */
   let molSpec = null, molPack = null, molMat = null, molKind = 0, molKindName = 'density', molDirty = false, molRefDirty = false;
+  let molCplx = null;                                          // the [re | im] staging vector a COMPLEX orbital is uploaded from (kind 2)
   const molParamSig = ['', '']; let molTier = 0;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
@@ -1302,18 +1308,32 @@ export async function createField(canvas, opts = {}) {
     return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier], half };
   }
   /** the volume's matrix.  'density' and 'diff': M = Float32Array(nAO²), symmetric Re D, ρ = Σ_μν M_μν χ_μ χ_ν and
-      the texel is (√ρ, 0).  'orbital': M = Float32Array(nAO), ψ = Σ_μ c_μ χ_μ and the texel is the signed (ψ, 0).
+      the texel is (√ρ, 0).  'orbital': M = Float32Array(nAO), ψ = Σ_μ c_μ χ_μ and the texel is the signed (ψ, 0),
+      or M = { re, im } — two Float32Array(nAO) — for a COMPLEX orbital, whose texel is the full (ψ_re, ψ_im) so
+      'phase' reads arg ψ over the whole turn (the ORBITALS register).  Both vectors ride in the one matrix buffer,
+      the real part at 0 and the imaginary part at nAO, which is what the kernel's kind 2 reads.
       `ref: true` also writes this volume into refTex, which is the ρ_ref view 'diff' subtracts. */
   function setMoleculeMatrix(M, { kind = 'density', ref = false } = {}) {
     if (!molSpec) throw new Error('field: setMoleculeMatrix before setMolecule');
     if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
-    const n = molPack.nAO, want = kind === 'orbital' ? n : n * n;
+    const n = molPack.nAO;
+    const cplx = !!(kind === 'orbital' && M && !M.length && M.re && M.im);      // a bare array is still the real path, untouched
+    if (cplx) {
+      if (M.re.length !== n || M.im.length !== n) throw new Error(`field: a complex orbital needs two vectors of ${n}, got ${M.re.length} and ${M.im.length}`);
+      if (!molCplx || molCplx.length !== 2 * n) molCplx = new Float32Array(2 * n);
+      molCplx.set(M.re, 0); molCplx.set(M.im, n);
+      device.queue.writeBuffer(molMatBuf, 0, molCplx, 0, 2 * n);
+      molMat = molCplx; molKind = 2; molKindName = kind; molDirty = true;
+      if (ref) molRefDirty = true;
+      return { kind, nAO: n, length: 2 * n, complex: true, ref: !!ref };
+    }
+    const want = kind === 'orbital' ? n : n * n;
     if (!M || M.length !== want) throw new Error(`field: kind '${kind}' needs ${want} numbers, got ${M ? M.length : 0}`);
     const src = M instanceof Float32Array ? M : Float32Array.from(M);
     device.queue.writeBuffer(molMatBuf, 0, src, 0, want);
     molMat = src; molKind = kind === 'orbital' ? 1 : 0; molKindName = kind; molDirty = true;
     if (ref) molRefDirty = true;
-    return { kind, nAO: n, length: want, ref: !!ref };
+    return { kind, nAO: n, length: want, complex: false, ref: !!ref };
   }
   /** ONE molecular dispatch, submitted on its own — for a caller that does not own the app's frame loop */
   function reconstructMolecule() {
@@ -1356,8 +1376,11 @@ export async function createField(canvas, opts = {}) {
     stepCap: { get: () => stepCap, enumerable: true },
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
     molecular: { get: () => !!molSpec, enumerable: true },
+    /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an
+       object, and the ORBITALS register asks this once a frame to notice when another card took the matrix back */
+    moleculeComplex: { get: () => molKind === 2, enumerable: true },
     moleculeInfo: { get: () => (molSpec ? { nAO: molPack.nAO, nShell: molPack.nShell, nPrim: molPack.nPrim,
-      nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, dirty: molDirty, half, res } : null), enumerable: true } });
+      nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true } });
   Object.assign(out, {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,

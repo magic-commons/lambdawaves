@@ -35,7 +35,10 @@ const recordFor = (name, given) => {
 };
 
 /* ── spherically averaged atomic occupations ───────────────────────────────────────────────────────────────────── */
-const AUFBAU = [[0, 2], [0, 2], [1, 6], [0, 2], [1, 6]];                     // [l, capacity], enough for Z ≤ 18
+/* [l, capacity] in MADELUNG order, through 4p: enough for every element the vendored STO-3G record carries (Z ≤ 36).
+   This is the SAD GUESS's spherically averaged configuration, not a spectroscopic term: Cu comes out 4s² 3d⁹ and not
+   4s¹ 3d¹⁰, which changes the starting density and nothing that is converged. */
+const AUFBAU = [[0, 2], [0, 2], [1, 6], [0, 2], [1, 6], [0, 2], [2, 10], [1, 6]];
 /** per-l lists of shell electron counts in energy order, e.g. O → { 0: [2, 2], 1: [4] } */
 export function atomicOccupations(Z) {
   let left = Z; const per = {};

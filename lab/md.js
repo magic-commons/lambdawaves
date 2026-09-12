@@ -132,7 +132,9 @@ export const CART = [
 export const COMPONENT_ORDER = ['s', 'x,y,z', 'xx,xy,xz,yy,yz,zz'];
 const LABEL = [['s'], ['x', 'y', 'z'], ['xx', 'xy', 'xz', 'yy', 'yz', 'zz']];
 const SHELL_LETTER = ['s', 'p', 'd'];
-const ELEMENT = ['X', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne'];
+const ELEMENT = ['X', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',   // through Kr: the vendored STO-3G record is H–Kr
+  'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn',
+  'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'];
 const df = (n) => { let r = 1; for (let k = n; k > 0; k -= 2) r *= k; return r; };   // (n)!!, (−1)!! = 1
 /** N_lmn(α) = (2α/π)^{3/4} [ (4α)^{l+m+n} / ((2l−1)!!(2m−1)!!(2n−1)!!) ]^{1/2} */
 export const primNorm = (al, l, m, n) =>

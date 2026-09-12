@@ -1,6 +1,13 @@
 /* chemview.js — THE CHEMISTRY WINDOW: contract B-H2O-8 of research/MATH-H2O-2026-09-11.md as an instrument.
- * Eight pinned molecules, RHF through the worker, the RPA/TDA inspector beside the live δ-kick trace, the fitted
+ * lab/molecules.js's library, RHF through the worker, the RPA/TDA inspector beside the live δ-kick trace, the fitted
  * poles with their certificate, and the AO density on the field.  Atomic units; atoms in bohr through ANGSTROM.
+ *
+ * THE MOLECULE CONTROL IS A DROPDOWN (2026-09-12, Josh: "this should be a dropdown menu hehe").  Fifty-four closed-
+ * shell species in seven <optgroup>s, each option carrying its Cartesian AO count and lab/molecules.js's PREDICTED
+ * solve time, and each over-cap or unsolvable entry disabled WITH ITS REASON on the option itself.  The node is
+ * paletteview.js's `<select class="sel">` — the same element, the same class, the same 44-px seat — because the
+ * lab already had a dropdown and a second one would have been a second design.  The CAP is benzene: ~9.6 s
+ * predicted, 36 AOs, 42 electrons, which is the longest wait this window asks anyone to accept.
  *
  * THE DIVISION OF LABOUR.  Nothing here does chemistry on the frame thread: `api.solve` is rack.js's chem worker
  * road and every op lands there (SYNTHESIS decision 3 — Δt = 0.01 on screen; decision 2 — unrestarted MMUT by
@@ -11,31 +18,18 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk } from './mir/kit.js';
-import { ANGSTROM } from './md.js';
+import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE } from './molecules.js';
 
-/* ── the eight, geometries pinned in ångström (× ANGSTROM is bit-identical to the oracle's atoms_bohr) ────────── */
-const D2H = (() => {                                        // C₂H₄ · r_CC 1.339, r_CH 1.087, ∠HCH 117.4°, the yz plane
-  const d = 1.339 / 2, h = 117.4 / 2 * Math.PI / 180, sy = 1.087 * Math.sin(h), sz = 1.087 * Math.cos(h);
-  return [[6, 0, 0, d], [6, 0, 0, -d], [1, 0, sy, d + sz], [1, 0, -sy, d + sz], [1, 0, sy, -d - sz], [1, 0, -sy, -d - sz]];
-})();
-const D6H = (() => {                                        // C₆H₆ · carbons at kπ/3 radius 1.39, hydrogens at 2.48, the xy plane
-  const out = [];
-  for (let k = 0; k < 6; k++) { const t = k * Math.PI / 3; out.push([6, 1.39 * Math.cos(t), 1.39 * Math.sin(t), 0]); out.push([1, 2.48 * Math.cos(t), 2.48 * Math.sin(t), 0]); }
-  return out;
-})();
-export const CHEM_PRESETS = [
-  { id: 'H2O', label: '<m>H₂O</m>', name: 'water', ang: [[8, 0, 0, 0.1173], [1, 0, 0.7572, -0.4692], [1, 0, -0.7572, -0.4692]] },
-  { id: 'NH3', label: '<m>NH₃</m>', name: 'ammonia', ang: [[7, 0, 0, 0], [1, 0.9375295736636662, 0, -0.38102794977012433], [1, -0.46876478683183287, 0.8119244275919292, -0.38102794977012433], [1, -0.46876478683183354, -0.8119244275919288, -0.38102794977012433]] },
-  { id: 'CH4', label: '<m>CH₄</m>', name: 'methane', ang: [[6, 0, 0, 0], [1, 0.6275797426091232, 0.6275797426091232, 0.6275797426091232], [1, 0.6275797426091232, -0.6275797426091232, -0.6275797426091232], [1, -0.6275797426091232, 0.6275797426091232, -0.6275797426091232], [1, -0.6275797426091232, -0.6275797426091232, 0.6275797426091232]] },
-  { id: 'HF', label: 'HF', name: 'hydrogen fluoride', ang: [[9, 0, 0, 0], [1, 0, 0, 0.9168]] },
-  { id: 'LiH', label: 'LiH', name: 'lithium hydride', ang: [[3, 0, 0, 0], [1, 0, 0, 1.595]] },
-  { id: 'N2', label: '<m>N₂</m>', name: 'dinitrogen', ang: [[7, 0, 0, 0], [7, 0, 0, 1.09768]] },
-  { id: 'C2H4', label: '<m>C₂H₄</m>', name: 'ethene', ang: D2H },
-  { id: 'C6H6', label: '<m>C₆H₆</m>', name: 'benzene', ang: D6H },
-];
+/* ── the library, under the names this window has always used ─────────────────────────────────────────────────
+ * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
+ * the first eight of their groups and their arrays are frozen there.  These three exports keep their old shapes so
+ * nothing that read them has to change: `label` is the entry's formula markup, `ang` its ångström array. */
+export const CHEM_PRESETS = MOLECULES.map((m) => ({ ...m, label: m.formula }));
 const PRESET_BY_ID = new Map(CHEM_PRESETS.map((p) => [p.id, p]));
 /** the preset's atoms in bohr, as the worker and lab/rhf-molecule.js want them */
-export const chemAtoms = (id) => (PRESET_BY_ID.get(id) || CHEM_PRESETS[0]).ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
+export const chemAtoms = moleculeAtoms;
+/** the preset's formal charge — 0 for every neutral, ±1 for the four ions */
+export const chemCharge = moleculeCharge;
 
 const AXES = ['x', 'y', 'z'], AXIS_N = { x: 2, y: 5, z: 6 };
 const W_MAX = 1.6, CORE_LO = 19, CORE_HI = 21;              // answer 11: the valence plot, and the core inset's own window
@@ -55,6 +49,13 @@ export function createChem(host, api) {
   let sol = null, rt = null, running = false, inflight = false;
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
   let fieldHash = null, mBuf = null, oBuf = null, statusText = 'no molecule solved yet', pending = null;
+  /* THE RESTORED ORBITAL INDEX HAS TO SURVIVE THE RE-SOLVE THAT RESTORING IT CAUSES.  A solve sets `orbital` to
+     HOMO, which is right for a molecule the hand just picked and WRONG for one a file just reopened: load() puts a
+     different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
+     (Invisible while there were eight presets and the laws only ever restored H₂O onto H₂O.)  One pending value,
+     consumed by the next solve and then cleared. */
+  let pendingOrbital = null;
+  const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
   function orbFmt(k) {
@@ -66,9 +67,33 @@ export function createChem(host, api) {
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'CHEM ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
   r0.appendChild(onSw.root);
-  const mSeg = seg({ label: 'MOLECULE', aria: 'molecule', value: 'H2O', options: CHEM_PRESETS.map((p) => ({ id: p.id, label: p.label, title: p.name + ' — fixed experimental geometry; not the RHF/STO-3G minimum' })),
-    onChange: (v) => { solve(v); } });
-  r0.appendChild(mSeg.root);
+  /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
+   * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
+   * changes, so re-picking what you are already on fires nothing.  Here that is correct rather than a trap —
+   * `solve()` returns the cached answer for the molecule already up, so a re-pick would be a no-op anyway, and
+   * the one road that must still work (force a re-solve) is `__LW.chem.solve(id, { force: true })`.
+   * A DISABLED option carries its reason in its own title, so the menu explains itself where it refuses. */
+  const mWrap = el('div', 'segw mol-pick', r0);
+  el('div', 'k-lbl', mWrap, 'MOLECULE');
+  const mSel = el('select', 'sel', mWrap);
+  mSel.setAttribute('aria-label', 'molecule');
+  mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
+  for (const g of GROUPS) {
+    const rows = CHEM_PRESETS.filter((p) => p.group === g.id);
+    if (!rows.length) continue;
+    const og = el('optgroup', '', mSel); og.label = g.label;
+    for (const p of rows) {
+      const o = el('option', '', og, optionLabel(p)); o.value = p.id;
+      o.disabled = !!p.disabled;
+      /* the source goes on `data-help` as well as `title`: lab/mir/control-help.js moves a title to data-help at
+         boot, which is fine for the control but leaves an <option> with neither unless both are set here. */
+      const why = p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source;
+      o.title = why; o.dataset.help = why;
+    }
+  }
+  mSel.value = 'H2O';
+  mSel.addEventListener('change', () => { solve(mSel.value); });
+  const mSeg = { root: mWrap, set(v) { if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
     { id: '6-31+g-star', label: '6-31+G*', title: 'H₂O only — 23 Cartesian AOs; the first root moves 0.483 → 0.341' }],
@@ -147,26 +172,33 @@ export function createChem(host, api) {
   function solve(id = preset, { force = false } = {}) {
     if (id !== preset) { preset = id; mSeg.set(id); }
     const P = PRESET_BY_ID.get(preset) || CHEM_PRESETS[0];
+    /* A DISABLED ENTRY IS REFUSED HERE AND NOT SENT.  CuH and ZnH₂ converge to an RHF solution that is not a
+       minimum (both A ± B blocks negative), so lab/rpa-inspector.js refuses them and chem.solve cannot answer at
+       all — the refusal belongs in front of the worker, with the reason, rather than as a failed solve. */
+    if (P.disabled) { status(P.name + ': ' + P.reason, 'warn'); return Promise.resolve(null); }
     if (preset !== 'H2O' && basis !== 'sto-3g') { basis = 'sto-3g'; bSeg.set('sto-3g'); }
     const b6 = bSeg.button('6-31+g-star'); if (b6) b6.disabled = preset !== 'H2O';
     /* THE ANSWER WE ALREADY HAVE IS THE ANSWER.  Beyond not paying twice, this is load-bearing: the worker caches
        its report on (atoms, basis, charge) and TRANSFERS that report's typed arrays, so a second chem.solve for the
        same key posts detached buffers, throws inside the worker's own handler, and never replies at all — the call
        then sits until its timeout.  Re-solving is what changing the molecule or the basis does; asking twice is not. */
-    const key = preset + '|' + basis;
+    const key = preset + '|' + basis + '|' + chemCharge(preset);
     if (!force && sol && sol.key === key) { refresh(); return Promise.resolve(sol); }
     if (!force && pending && pending.key === key) return pending.p;        // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null;
-    const atoms = chemAtoms(preset);
+    const atoms = chemAtoms(preset), charge = chemCharge(preset);
     /* the worker reports integral, scf and rpa times separately (split); benzene's integrals were 36 s before the
        2026-09-12 shell-pair rewrite of md.js and are 0.56 s after it, so the split is affordable for every preset. */
-    const seq = ++solveSeq, msg = { op: 'chem.solve', atoms, basis, charge: 0, split: true };   // integrals are 0.56 s for benzene since the shell-pair rewrite: the status line can afford the split timing
-    status('solving ' + P.name + '…', 'warn'); if (api.loading) api.loading(true);
+    const seq = ++solveSeq, msg = { op: 'chem.solve', atoms, basis, charge, split: true };   // integrals are 0.56 s for benzene since the shell-pair rewrite: the status line can afford the split timing
+    status(`solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`, 'warn');
+    if (api.loading) api.loading(true);
     const task = call(msg, () => localSolve(msg)).then((r) => {
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); return null; }
-      sol = r; sol.key = key; orbital = r.nocc; mBuf = oBuf = null; fieldHash = null;
-      rebuildOrbKnob(); pushField(); refresh();
+      if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
+      sol = r; sol.key = key; mBuf = oBuf = null; fieldHash = null;
+      orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
+      pendingOrbital = null;
+      rebuildOrbKnob(); pushField(); refresh(); notify();
       return r;
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('solve failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
@@ -190,7 +222,7 @@ export function createChem(host, api) {
   function kick() {
     if (!sol) return Promise.resolve(null);
     const seq = solveSeq;
-    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: 0, dt, integrator, kick: { axis, kappa } }).then((r) => {
+    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa } }).then((r) => {
       if (seq !== solveSeq) return null;
       if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && r.error) || 'no real-time engine'), 'warn'); return null; }
       rt = { t: r.t || 0, D_re: r.D_re || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0 };
@@ -296,7 +328,9 @@ export function createChem(host, api) {
   function refresh() {
     if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT]) r.set('—', ''); paint(); return; }
     roE.set(sol.energy.toFixed(9), 'ok');
-    roE.setSub(`${(PRESET_BY_ID.get(preset) || {}).name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
+    const P = PRESET_BY_ID.get(preset) || {};
+    roE.setSub(`${P.name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
+    roE.root.title = (P.source || '') + ' — a FIXED geometry, not the RHF/STO-3G minimum';
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     roEps.set(`${eH.toFixed(6)} · ${Number.isFinite(eL) ? eL.toFixed(6) : '—'}`, '');
     roEps.setSub(`gap ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} hartree · ${sol.nocc} occupied of ${sol.nAO}`);
@@ -464,7 +498,7 @@ export function createChem(host, api) {
   function record() {
     if (!MS || typeof MS.serializeMolecule !== 'function' || !sol) return null;
     try {
-      return MS.serializeMolecule({ atoms: chemAtoms(preset), charge: 0,
+      return MS.serializeMolecule({ atoms: chemAtoms(preset), charge: chemCharge(preset),
         basis: { name: basis, version: '1', hash: sol.hash },
         rhf: { energy: sol.energy, eps: sol.eps, C: sol.C, D: sol.D },
         presentation: { view, orbital: Number.isFinite(orbital) ? orbital - 1 : null, showCore: core } });
@@ -477,7 +511,7 @@ export function createChem(host, api) {
     if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
-    if (Number.isFinite(o.orbital)) orbital = Math.round(o.orbital);
+    if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
     if (typeof o.axis === 'string' && AXES.includes(o.axis)) { axis = o.axis; aSeg.set(axis); }
     if (Number.isFinite(o.kappa)) { kappa = o.kappa; kapKnob.set(kappa); }
     if (Number.isFinite(o.speed)) { speed = Math.max(1, Math.round(o.speed)); spdKnob.set(speed); }
@@ -499,6 +533,7 @@ export function createChem(host, api) {
     prepare() { return sol ? Promise.resolve(sol) : solve(preset); },
     setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) paint(); return active; },
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
+    solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
     /* the modulation registry's two targets — PRESENT-only setters, and the dials they write */
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },

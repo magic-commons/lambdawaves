@@ -41,6 +41,7 @@ import { createCapture, maxPictureSize } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
+import { createOrbitals } from './orbitalsview.js';   // ORBITALS: the MOLECULAR REGISTER over CHEMISTRY's canonical orbitals (MATH-H2O Proposition 1)
 import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
@@ -1262,6 +1263,12 @@ export async function boot(dom) {
     h2.setActive(canPresent(wH2));
     chem.setActive(canPresent(wChem));
     if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
+    /* THE REGISTER PUSHES AFTER THE CARD, AND THAT ORDER IS THE POLICY.  Both write the same molecular matrix,
+       so whichever writes last owns the frame: while REGISTER ON is up the register's ψ(t) wins, and the moment
+       it is switched off the card repushes its own view (orbitalsview setOn).  nAO complex MACs a frame, so no
+       tick() — and the register refuses to take the field at all while chem's RT RUN is propagating a density. */
+    orbitals.setActive(canPresent(wOrbs));
+    if (orbitals.on && powered(wOrbs)) orbitals.update(clock.t);
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
     if (cpuTick) {
@@ -2394,6 +2401,7 @@ export async function boot(dom) {
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
+  let orbitals = null;                                                 // ORBITALS: the molecular register, assigned beside CHEMISTRY below
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
   moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
@@ -2422,7 +2430,15 @@ export async function boot(dom) {
 
   /* CHEMISTRY — eight molecules, RHF and the real-time δ-kick: the field becomes an AO density matrix.
      It is a FIELD OWNER like MOLECULE, HELIUM and H₂, so it goes through the same moleculeMode() policy. */
-  let chemPrevView = null;   // the observable the field showed before CHEMISTRY took it
+  let chemPrevView = null;   // the observable the field showed before CHEMISTRY (or the ORBITALS register) took it
+  /* ONE ROAD to the field's observable for the molecular pair.  CHEMISTRY asks for density / real / diff, the
+     ORBITALS register asks for phase, and `null` hands back whatever the user had before either of them took it —
+     so handing the field between the two cards never loses the observable the user chose for themselves. */
+  function molFieldView(name) {
+    if (!name) { if (chemPrevView !== null) { mat.view = chemPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[chemPrevView]); chemPrevView = null; } }
+    else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
+    schedule(TIER.PRESENT);
+  }
   const wChem = device({ id: 'chem', eyebrow: 'CHEMISTRY', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // a first visit must not pay for a 7-AO solve behind furniture
   rack.appendChild(wChem.root);
@@ -2433,13 +2449,22 @@ export async function boot(dom) {
     get field() { return field; },
     setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); },
     /* the field's observable follows the card: a density has no phase, an orbital is a signed real amplitude; the
-       observable the user had before is handed back when the card releases the field (null) */
-    fieldView(name) {
-      if (!name) { if (chemPrevView !== null) { mat.view = chemPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[chemPrevView]); chemPrevView = null; } }
-      else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
-      schedule(TIER.PRESENT);
-    },
+       observable the user had before is handed back when the card releases the field (null).  ONE road, shared
+       with the ORBITALS register — see molFieldView above. */
+    fieldView: molFieldView,
     now: () => clock.t });
+
+  /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
+     is where a molecule's `arg` lives (MATH-H2O-2026-09-11, Proposition 1).  It is NOT a sixth field owner: it does
+     not upload a molecule and it does not touch moleculeMode() — CHEMISTRY owns the shells and this window owns the
+     matrix while REGISTER ON is up, so it stays visible and usable exactly when CHEMISTRY is on. */
+  const wOrbs = device({ id: 'orbitals', eyebrow: 'ORBITALS', title: 'molecular register', status: '' });
+  if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps: no solve behind furniture
+  rack.appendChild(wOrbs.root);
+  orbitals = createOrbitals(wOrbs.body, { active: () => canPresent(wOrbs),
+    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
+    status(t, cls) { wOrbs.setStatus(t, cls); },
+    now: () => clock.t, field: () => field, chem: () => chem, fieldView: molFieldView });
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
@@ -2472,6 +2497,7 @@ export async function boot(dom) {
   wHe.root.addEventListener('devopen', () => helium.prepare());
   wH2.root.addEventListener('devopen', () => h2.prepare());
   wChem.root.addEventListener('devopen', () => chem.prepare());
+  wOrbs.root.addEventListener('devopen', () => { chem.prepare(); orbitals.paint(); orbitals.refresh(); });   // the register runs on CHEMISTRY's ladder: opening it asks for one
   wLad.root.addEventListener('devopen', () => ladder.prepare());
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
@@ -5101,7 +5127,7 @@ export async function boot(dom) {
         readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
            particles and pulse runs do not: every project still opens paused on its first frame. */
-        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), qcd: qcd.save(),
+        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), orbitals: orbitals.save(), qcd: qcd.save(),
           pulse: pulsePanel ? pulsePanel.api.save() : null, ladder: { ...ladder.params },
           particles: { count: Math.round(dynamics.ui.n.get()), trail: particles.trailLen } },
         mo: moPanel ? moPanel.save() : null,
@@ -5241,10 +5267,14 @@ export async function boot(dom) {
           if (I.helium) helium.load({ ...I.helium, on: false });
           if (I.h2) h2.load({ ...I.h2, on: false });
           if (I.chem) chem.load({ ...I.chem, on: false });
+          /* the ORBITALS register lands OFF first, like every field-touching card, and is switched on only after
+             CHEMISTRY holds the volume — its own load() parks the selection until a ladder exists to hang it on */
+          if (I.orbitals) orbitals.load({ ...I.orbitals, on: false });
           if (fieldOwner === 'molecule') molecule.setOn(true);
           else if (fieldOwner === 'helium') helium.setOn(true);
           else if (fieldOwner === 'h2') h2.setOn(true);
           else if (fieldOwner === 'chem') chem.setOn(true);
+          if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') orbitals.setOn(true);
           if (I.ladder) ladder.set(I.ladder);
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
@@ -5585,6 +5615,23 @@ export async function boot(dom) {
     setPalette(id) { const ok = palette ? palette.select(id) : false; if (ok) { palChoice = id; saveSettings(); } return ok; },
     get paletteId() { return palette ? palette.id : null; }, get paletteGroups() { return palette ? palette.groups : []; },
     loadPreset, schedule, togglePlay, setReference, serialize, restore, api,
+    /* ── ORBITALS · the MOLECULAR REGISTER, one road (MATH-H2O Proposition 1) ─────────────────────
+     * ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals.  `ladder()` is the
+     * solved ε_k with their ground-state occupancies; `state()` carries the selection, Σ|c|² and the
+     * beat period 2π/Δε of the two strongest levels — the FROZEN-ORBITAL gap, never ω_RPA. */
+    orbitals: {
+      select(k, amp = 1, phase = 0) { return orbitals.select(k, amp, phase); },
+      deselect(k) { return orbitals.deselect(k); },
+      toggle(k) { return orbitals.toggle(k); },
+      clear() { return orbitals.clear(); },
+      norm() { return orbitals.norm(); },
+      setAmp(k, v) { return orbitals.setAmp(k, v); }, setPhase(k, v) { return orbitals.setPhase(k, v); },
+      setOn(v) { return orbitals.setOn(v); }, get on() { return orbitals.on; },
+      get dials() { return orbitals.dials; }, setDials(v) { return orbitals.setDials(v); },
+      ladder() { return orbitals.ladder(); }, state() { return orbitals.state(); },
+      solution() { return orbitals.solution(); },
+      save() { return orbitals.save(); }, load(r) { return orbitals.load(r); },
+    },
     /* ── WAVE 52 · THE MODULATION RACK.  One road to the model, the four edges, the window and the
      * three numbers the strip is showing — `read(id)` hands back exactly what is on the screen. ── */
     mod: {

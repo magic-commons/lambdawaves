@@ -60,6 +60,17 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
   const history = [], Fs = [], Es = [];
   const energyOf = (Dm, F) => { let E = Enuc; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) E += 0.5 * Dm[i * n + j] * (h[i * n + j] + F[i * n + j]); return E; };
   let C = null, eps = null, F = null, errMax = Infinity;
+  /* ── THE ROUND-OFF FLOOR, and why `errMax < tol` alone cannot be the whole test ──────────────────────────────
+   * `tol` is compared against an ABSOLUTE commutator residual, and the residual's floor is set by the size of F.
+   * H₂O's |F|max is 20 and it reaches 1e-12 in a dozen iterations; Br₂'s |F|max is 485 (the Br 1s sits near −490
+   * hartree), its residual bottoms out at 8e-12 by iteration 14 and then WANDERS in the 1e-11 band for ever — so at
+   * tol = 1e-12 the heavy molecules burned all 200 iterations, reported `converged: false`, and cost 13× what the
+   * answer cost, with the energy already right to 1e-12 from iteration 20.  So a second test: once the residual has
+   * stopped improving on its own best for STALL iterations, and the energy has stopped moving, this IS convergence
+   * at the arithmetic's floor, and the floor is reported.  It can only fire where the first test never would — a
+   * light molecule reaches tol first and exits at exactly the iteration it always did, with the same energy. */
+  const STALL = 25, FLOOR_MAX = 1e-6;
+  let best = Infinity, stall = 0, floor = null;
   for (let it = 0; it < maxIter; it++) {
     F = fockReal(basis, D);
     const Enow = energyOf(D, F);
@@ -69,6 +80,10 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
     errMax = 0; for (let k = 0; k < n * n; k++) errMax = Math.max(errMax, Math.abs(et[k]));
     history.push({ energy: Enow, error: errMax });
     if (it > 0 && errMax < tol && Math.abs(Enow - energy) < tol) { energy = Enow; converged = true; iterations = it; break; }
+    if (errMax < best * (1 - 1e-3)) { best = errMax; stall = 0; } else stall++;
+    if (it > 0 && stall >= STALL && best < FLOOR_MAX && Math.abs(Enow - energy) < tol) {
+      energy = Enow; converged = true; iterations = it; floor = best; break;           // the residual's round-off floor
+    }
     energy = Enow; iterations = it + 1;
     let Fuse = F;
     if (diis > 0 && it > 0) {
@@ -95,5 +110,5 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let s = 0; for (let o = 0; o < nocc; o++) s += C[i * n + o] * C[j * n + o]; Dn[i * n + j] = 2 * s; }
     D = Dn;
   }
-  return { energy, electronic: energy - Enuc, orbitalEnergies: eps, C, D, F, iterations, converged, history, diisUsed, error: errMax, nocc };
+  return { energy, electronic: energy - Enuc, orbitalEnergies: eps, C, D, F, iterations, converged, history, diisUsed, error: errMax, floor, nocc };
 }

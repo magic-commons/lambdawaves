@@ -35,7 +35,10 @@ const flat = (shells) => shells.map((s) => ({ center: s.center, l: s.l, ao: s.ao
   prims: s.prims.map((p) => ({ alpha: p.alpha, w: Array.from(p.w) })) }));
 const homo = new Float64Array(nAO);
 for (let i = 0; i < nAO; i++) homo[i] = sol.C[i * nAO + sol.nocc - 1];
+const lumo = new Float64Array(nAO);
+for (let i = 0; i < nAO; i++) lumo[i] = sol.C[i * nAO + sol.nocc];
 const psiAt = (p) => { const v = ev.ao(p); let s = 0; for (let i = 0; i < nAO; i++) s += homo[i] * v[i]; return s; };
+const psiLAt = (p) => { const v = ev.ao(p); let s = 0; for (let i = 0; i < nAO; i++) s += lumo[i] * v[i]; return s; };
 const PROBES = [
   { name: 'O nucleus', p: [0, 0, 0.22166487441148175], ref: 193.313905 },
   { name: 'O–H1 midpoint', p: [0, 0.7154503107603324, -0.3324973116172226], ref: 0.492165 },
@@ -50,7 +53,7 @@ const bzBasis = basisFrom(bzAtoms, record, { cart: true }), bzN = bzBasis.n;
 const bzD = new Float64Array(bzN * bzN);
 for (let i = 0; i < bzN; i++) for (let j = 0; j < bzN; j++) bzD[i * bzN + j] = Math.exp(-0.5 * Math.abs(i - j));
 const payload = { half: HALF, res: RES, idx: IDX, centre: CENTRE, nAO, shells: flat(fieldShells(basis)),
-  D: Array.from(sol.D), homo: Array.from(homo), probes: PROBES.map((p) => ({ name: p.name, p: p.p })),
+  D: Array.from(sol.D), homo: Array.from(homo), lumo: Array.from(lumo), probes: PROBES.map((p) => ({ name: p.name, p: p.p })),
   bz: { nAO: bzN, shells: flat(fieldShells(bzBasis)), D: Array.from(bzD) } };
 
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { width: 1200, height: 900, script: 300000 });
@@ -178,6 +181,46 @@ try {
     assert.equal(R.molecular, true);
     console.log(`PASS the call sequence: setMolecule → setMoleculeMatrix → frame({ molecule: true }) dispatched once (generation ${R.frame.gA} → ${R.frame.gB}),`
       + ` a second identical frame dispatched nothing, and setMolecule(null) returned the field to the eigenmode kernel.`);
+  }
+
+  /* 5b. THE COMPLEX ORBITAL (the ORBITALS register's kernel road).  ψ = φ_HOMO + i·φ_LUMO is pushed as two
+        Float32Array(nAO) and the texel must carry BOTH parts, because that is the only way the presenter's
+        `phase` view has an arg to show for a molecule at all (MATH-H2O Proposition 1).  The real path is
+        unchanged: a bare Float32Array is still the signed real orbital, gated in law 3 above.
+        The probe is voxel (48, 48, 49) — the one law 3 already reads — where φ_HOMO = 0.27863688 and
+        φ_LUMO = 0.40266354, so both orbitals are nonzero and Im ψ cannot be zero by accident. */
+  if (!R.skip) {
+    const K = await g.ev(`const P = arguments[0], f = __LW.field;
+      const re = new Float32Array(P.homo), im = new Float32Array(P.lumo);
+      const w = f.setMoleculeMatrix({ re, im }, { kind: 'orbital' });
+      f.reconstructMolecule();
+      const v = await f.sampleVoxel(P.idx, P.idx, P.idx + 1);
+      const out = { write: w, info: f.moleculeInfo, stats: await f.readStats(),
+        cplx: { re: v.re, im: v.im, rho: v.re * v.re + v.im * v.im, at: [v.x, v.y, v.z] } };
+      /* and the REAL path is untouched by the complex one: the same HOMO as a bare array reads law 3's number */
+      f.setMoleculeMatrix(re, { kind: 'orbital' });
+      f.reconstructMolecule();
+      const b = await f.sampleVoxel(P.idx, P.idx, P.idx + 1);
+      out.real = { re: b.re, im: b.im, complex: f.moleculeInfo.complex };
+      f.setMoleculeMatrix(new Float32Array(P.D), { kind: 'density', ref: true });   // hand the volume back for the picture
+      f.reconstructMolecule();
+      return out;`, [payload]);
+    assert.ok(!K.E, `the complex-orbital call threw: ${K.E}`);
+    const pt = [CENTRE, CENTRE, centreAt(IDX + 1)], cH = psiAt(pt), cL = psiLAt(pt), cRho = cH * cH + cL * cL;
+    assert.equal(K.write.complex, true); assert.equal(K.write.length, 2 * nAO);
+    assert.equal(K.info.kind, 'orbital'); assert.equal(K.info.complex, true);
+    assert.ok(Math.abs(K.cplx.im) > 1e-3, `Im ψ must not be zero where φ_LUMO = ${cL}: the texel says ${K.cplx.im}`);
+    assert.ok(Math.abs(K.cplx.re / cH - 1) < 0.01, `Re ψ = ${K.cplx.re} against the evaluator's φ_HOMO = ${cH}`);
+    assert.ok(Math.abs(K.cplx.im / cL - 1) < 0.01, `Im ψ = ${K.cplx.im} against the evaluator's φ_LUMO = ${cL}`);
+    const relC = Math.abs(K.cplx.rho - cRho) / cRho;
+    assert.ok(relC < 1e-3, `|ψ|² = re² + im² = ${K.cplx.rho} against the CPU's ${cRho} — ${(relC * 100).toFixed(4)} % over the 0.1 % budget`);
+    assert.equal(K.real.im, 0, 'a bare Float32Array is still the REAL orbital: the imaginary channel is exactly 0');
+    assert.equal(K.real.complex, false);
+    assert.ok(Math.abs(K.real.re / cH - 1) < 0.01, `and it still reads φ_HOMO = ${cH}, got ${K.real.re}`);
+    console.log(`PASS complex orbital kind: ψ = φ_HOMO + i·φ_LUMO at voxel (${IDX},${IDX},${IDX + 1}) reads (${K.cplx.re.toFixed(6)}, ${K.cplx.im.toFixed(6)})`
+      + ` against the evaluator's (${cH.toFixed(6)}, ${cL.toFixed(6)}); the density channel re² + im² = ${K.cplx.rho.toFixed(6)} against ${cRho.toFixed(6)}`
+      + ` (${(relC * 100).toFixed(4)} %), so 'phase' reads arg ψ = ${(Math.atan2(K.cplx.im, K.cplx.re) * 180 / Math.PI).toFixed(2)}° and not 0/π;`
+      + ` the real path is unchanged (im exactly 0, ψ = ${K.real.re.toFixed(6)}).`);
   }
 
   /* 6. The picture, through the app's OWN presenter — nothing about a molecular volume is special to it.

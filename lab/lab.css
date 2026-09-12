@@ -397,6 +397,10 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 .sp-b:active { background: var(--glass-press); }
 .sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: 13px; border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
+/* ORBITALS' register lane: a .row, not the 7-column .sp-row grid — two dials and an × beside the orbital's name */
+.orb-lane { align-items: center; }
+.orb-lane .sp-id { flex: 1 1 0; min-width: 0; }
+.orb-lane.sel .sp-name { color: var(--acc); }
 .pk-n { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 4px; }
 .pk-nl { font-size: var(--fs-small); color: var(--nc); padding-top: 9px; text-align: center; }
 .pk-chips { display: flex; flex-wrap: wrap; gap: 3px; }
@@ -908,3 +912,8 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 /* the bundled demos row in the PROJECTS face */
 .pj-demos { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
 .pj-demos .ab-eyebrow { margin: 0; }
+
+/* the MOLECULE dropdown (chemview.js): 54 entries in seven optgroups, so it takes the row's slack rather than
+   shrinking to fit its longest option — `.segw` is not in base.css's `.row >` flex list, so it says so itself. */
+.mol-pick { flex: 1 1 200px; }
+.mol-pick > select.sel { width: 100%; }
