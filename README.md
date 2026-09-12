@@ -15,7 +15,7 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ## Who made this, honestly
 
-I'm Joshua. I am not a programmer. I know nothing of computer science or software engineering, and
+I'm Joshua. (LOL this is NOT me this is Claude)I am not a programmer. I know nothing of computer science or software engineering, and
 I did not write the code in this repository by hand. λWAVES came out of me talking to AI coding
 agents for weeks — describing what I wanted to see, sending screenshots of what was wrong, saying
 "no, like the modulation window does it," and running the app until it felt right. The agents
