@@ -91,6 +91,10 @@ certificate on first run), and a browser with WebGPU.
 The lab is a static tree of ES modules. There is no build step for development — what
 you edit is what the browser runs.
 
+For a first look, open the notebook (◐), go to PROJECTS and press **WAVE DANCER** under DEMOS: a
+saved performance — an A/B transition between two four-state superpositions with a modulation rack
+driving exposure, softness and the stage — opens ready to play.
+
 ## The gate
 
 ```bash

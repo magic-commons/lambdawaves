@@ -212,6 +212,12 @@ try {
  assert.ok(hand.shown0>hand.base0*2, 'the modulator shows well above the base: '+JSON.stringify(hand)); assert.equal(hand.click.base,hand.base0); assert.equal(hand.click.shown,hand.shown0);
  assert.ok(hand.drag.base<hand.base0&&hand.drag.base>hand.base0*0.4,'a 30 px drag moved the base by the drag, not to the shown value: '+JSON.stringify(hand.drag)); assert.deepEqual(hand.errs,[]);
  console.log('PASS the hand on a routed knob: a click leaves base and range; a drag moves the base by the drag, not to the modulated needle');
+ /* THE BUNDLED DEMO (2026-09-11): WAVE DANCER ships under lab/demos/ and opens through the projects road — eight
+    modes, three macros, five routes, the A/B stores and the notebook, with no page error. */
+ const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));__LW.layout.notebook.open('projects');await w(200);document.querySelector('.pj-demo').click();await w(1500);
+  const S=__LW.serialize(),nb=document.getElementById('notebook');return {status:nb.querySelector('.pj-status')?.textContent||'',modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
+ assert.match(demo.status,/opened demo DEMOS\/WAVE DANCER/); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER'); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
+ console.log('PASS the bundled demo: WAVE DANCER opens with its modes, macros, routes, A/B and notebook');
 } catch(error) { failed=true;console.error(error); }
 finally {
  // The Snap driver has previously hung during quit; a cleanup failure is reported

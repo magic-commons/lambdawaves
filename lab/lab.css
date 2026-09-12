@@ -896,3 +896,7 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .stage-colour { width: 26px; height: 34px; padding: 2px; }
 .stage-colour:focus-visible { box-shadow: 0 0 0 1.5px var(--acc); }
 .stage-follow { height: 18px; min-height: 18px; padding: 0 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+
+/* the bundled demos row in the PROJECTS face */
+.pj-demos { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
+.pj-demos .ab-eyebrow { margin: 0; }

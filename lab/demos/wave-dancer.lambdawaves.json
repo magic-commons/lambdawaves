@@ -1,0 +1,1574 @@
+{
+ "lambdawaves": "project",
+ "version": 1,
+ "path": "DEMOS/WAVE DANCER",
+ "folder": "DEMOS",
+ "name": "WAVE DANCER",
+ "saved": "2026-09-10T21:18:35.342Z",
+ "opened": "2026-09-10T20:42:35.402Z",
+ "data": {
+  "experiment": {
+   "format": "lambdawaves/qwave-0/state",
+   "system": "hydrogen",
+   "basis": "n<=6 complex Y_lm, Condon-Shortley",
+   "units": "atomic",
+   "t": 225354.0871997584,
+   "preset": "1s+2pz",
+   "modes": [
+    {
+     "id": "h:2:0:0",
+     "n": 2,
+     "l": 0,
+     "m": 0,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:2:1:-1",
+     "n": 2,
+     "l": 1,
+     "m": -1,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:2:1:0",
+     "n": 2,
+     "l": 1,
+     "m": 0,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:2:1:1",
+     "n": 2,
+     "l": 1,
+     "m": 1,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:4:1:-1",
+     "n": 4,
+     "l": 1,
+     "m": -1,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:4:1:1",
+     "n": 4,
+     "l": 1,
+     "m": 1,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:4:2:-2",
+     "n": 4,
+     "l": 2,
+     "m": -2,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    },
+    {
+     "id": "h:4:2:2",
+     "n": 4,
+     "l": 2,
+     "m": 2,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    }
+   ],
+   "field": {
+    "Bz": 0,
+    "Fz": 0
+   },
+   "status": "HYDROGEN",
+   "rate": 111.41640045359902,
+   "window": 16.755160819145562,
+   "damping": 0
+  },
+  "presentation": {
+   "obs": {
+    "yaw": 1405.5176067747307,
+    "pitch": 0.6446697696623438,
+    "dist": 1.9327398088638708,
+    "fov": 1.2,
+    "mode": "free",
+    "quat": [
+     -0.5536772654702047,
+     -0.14143432014691718,
+     0.4237087132790336,
+     -0.7027864149778662
+    ]
+   },
+   "mat": {
+    "view": 1,
+    "exposure": 1.365423162256938,
+    "softness": 1.0805469387058584,
+    "steps": 240,
+    "slice": {
+     "mode": 0,
+     "axis": 2,
+     "pos": 0,
+     "thick": 0.03,
+     "normal": [
+      -0.5316062197320814,
+      -0.7801972975556913,
+      0.3296771208758079
+     ]
+    },
+    "hueShift": 0,
+    "invert": false,
+    "frame": false,
+    "axis": false,
+    "axisInk": "theme",
+    "paletteOn": true,
+    "style": 3,
+    "iso": 0.017767288986038646,
+    "grain": 0.35,
+    "knee": 0.6,
+    "dither": 0,
+    "boost": {
+     "k": [
+      0,
+      0,
+      0
+     ],
+     "on": false
+    },
+    "bow": {
+     "gain": 1,
+     "curve": 1,
+     "limit": 3
+    },
+    "cornerSide": "right",
+    "finish": "lit"
+   },
+   "quality": {
+    "res": 128,
+    "steps": 240,
+    "scale": 1,
+    "auto": false,
+    "autoScale": 1,
+    "minScale": 0.35
+   },
+   "domain": {
+    "auto": true,
+    "half": 46
+   },
+   "shadow": "phasors",
+   "paletteId": "phosphor",
+   "space": "x",
+   "palette": {
+    "on": true,
+    "stops": [
+     {
+      "at": 0,
+      "rgb": [
+       0.03529411764705882,
+       0.10196078431372549,
+       0.06666666666666667
+      ]
+     },
+     {
+      "at": 0.19999999999999996,
+      "rgb": [
+       0.19215686274509805,
+       0.8509803921568627,
+       0.42745098039215684
+      ]
+     },
+     {
+      "at": 0.3999999999999999,
+      "rgb": [
+       0.9098039215686274,
+       0.9725490196078431,
+       0.396078431372549
+      ]
+     },
+     {
+      "at": 0.6000000000000001,
+      "rgb": [
+       0.9882352941176471,
+       0.6196078431372549,
+       0.2784313725490196
+      ]
+     },
+     {
+      "at": 0.8,
+      "rgb": [
+       0.403921568627451,
+       0.2549019607843137,
+       0.792156862745098
+      ]
+     }
+    ]
+   },
+   "hamiltonian": {
+    "id": "hydrogen",
+    "Z": 1,
+    "atomZ": 10,
+    "well": 10,
+    "gasBasis": "reg"
+   },
+   "field": {
+    "overlay": "off",
+    "lines": 10,
+    "source": "total"
+   },
+   "wigner": {
+    "zmax": 8,
+    "pmax": 2
+   },
+   "mo": {
+    "kind": "lcao1s",
+    "lambda": 1.7611,
+    "R": 2,
+    "electron": "hold",
+    "force": "exact",
+    "connection": true,
+    "dt": 5
+   },
+   "rates": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "rotationRates": {
+    "z": 0,
+    "kz": 0,
+    "def": 0
+   },
+   "sturmian": {
+    "on": false,
+    "lambda": 1
+   },
+   "modulation": {
+    "seq": {
+     "macro": 3,
+     "source": 3,
+     "route": 5
+    },
+    "transport": {
+     "bpm": 60
+    },
+    "macros": [
+     {
+      "id": "m1",
+      "name": "Audio",
+      "named": 1,
+      "value": 0.381857338774537,
+      "masterDepth": 1,
+      "sourceId": "s3:low"
+     },
+     {
+      "id": "m2",
+      "name": "Stage",
+      "named": 1,
+      "value": 0.3501502661533806,
+      "masterDepth": 1,
+      "sourceId": "s3:high"
+     },
+     {
+      "id": "m3",
+      "name": "Cam POV",
+      "named": 1,
+      "value": 0.6819744316334886,
+      "masterDepth": 1,
+      "sourceId": "s1"
+     }
+    ],
+    "sources": [
+     {
+      "id": "s1",
+      "kind": "lfo",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "wave",
+      "wave": "sine",
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.630909090909091,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 139573449,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "banks": {
+       "A": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.630909090909091,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       },
+       "B": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       }
+      }
+     },
+     {
+      "id": "s3",
+      "kind": "audio",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "wave",
+      "wave": "sine",
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 106018211,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "banks": {
+       "A": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot",
+        "audio": {
+         "gateEnabled": true,
+         "source": "mic",
+         "gainDb": 0,
+         "thresholdDb": -55,
+         "hysteresisDb": 3,
+         "holdMs": 83,
+         "fluxFloor": 0.02,
+         "outs": {
+          "level": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "low": {
+           "floorDb": -55.1,
+           "ceilingDb": -16.7,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "mid": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "high": {
+           "floorDb": -72,
+           "ceilingDb": -40,
+           "attackMs": 5,
+           "releaseMs": 60,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "hit": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "trigger"
+          },
+          "beat": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          }
+         }
+        }
+       },
+       "B": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot",
+        "audio": {
+         "gateEnabled": true,
+         "source": "mic",
+         "gainDb": 0,
+         "thresholdDb": -55,
+         "hysteresisDb": 3,
+         "holdMs": 83,
+         "fluxFloor": 0.02,
+         "outs": {
+          "level": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "low": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 15,
+           "releaseMs": 180,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "mid": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "high": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 5,
+           "releaseMs": 60,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "hit": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "trigger"
+          },
+          "beat": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          }
+         }
+        }
+       }
+      },
+      "audio": {
+       "gateEnabled": true,
+       "source": "mic",
+       "gainDb": 0,
+       "thresholdDb": -55,
+       "hysteresisDb": 3,
+       "holdMs": 83,
+       "fluxFloor": 0.02,
+       "outs": {
+        "level": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "low": {
+         "floorDb": -55.1,
+         "ceilingDb": -16.7,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "mid": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 10,
+         "releaseMs": 120,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "high": {
+         "floorDb": -72,
+         "ceilingDb": -40,
+         "attackMs": 5,
+         "releaseMs": 60,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "hit": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "trigger"
+        },
+        "beat": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "follow"
+        }
+       }
+      }
+     }
+    ],
+    "routes": [
+     {
+      "id": "r1",
+      "macroId": "m1",
+      "targetId": "material.exposure",
+      "min": 0,
+      "max": 0.44545454545454555,
+      "bi": 1
+     },
+     {
+      "id": "r2",
+      "macroId": "m1",
+      "targetId": "material.softness",
+      "min": 0.4927273837002841,
+      "max": 0
+     },
+     {
+      "id": "r3",
+      "macroId": "m1",
+      "targetId": "material.iso",
+      "min": 0.5567293411479572,
+      "max": 0
+     },
+     {
+      "id": "r4",
+      "macroId": "m3",
+      "targetId": "observer.fov",
+      "min": 0,
+      "max": 0.6761246238598984
+     },
+     {
+      "id": "r5",
+      "macroId": "m2",
+      "targetId": "material.stage",
+      "min": 0,
+      "max": 0.15454545454545454
+     }
+    ],
+    "v": 107
+   },
+   "ui": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": {
+     "a": 30,
+     "b": 300,
+     "vivid": 0.1
+    },
+    "stage": {
+     "mix": 0.05411413204188609,
+     "custom": [
+      0.023529411764705882,
+      0.00392156862745098,
+      0.023529411764705882
+     ]
+    }
+   },
+   "layout": {
+    "v": 3,
+    "at": 1789075115343,
+    "cards": [
+     {
+      "id": "transport",
+      "side": "L",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "shadow",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "spectrum",
+      "side": "L",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "settings",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "orbit",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "vortex",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "dynamics",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "slice",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "qcd",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "molecule",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "helium",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "h2",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "calculus",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "meters",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "ladder",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "atoms",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "field",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "wigner",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "radiation",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "history",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "state",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "palette",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "observer",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "camera",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "clip",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     }
+    ],
+    "docked": false,
+    "rackHidden": false,
+    "nb": [
+     470,
+     670
+    ],
+    "look": {
+     "palette": "phosphor",
+     "accA": 30,
+     "accB": 300,
+     "hue": 0,
+     "style": 3,
+     "dither": 0,
+     "invert": false,
+     "frame": false,
+     "axis": false,
+     "cornerSide": "right",
+     "axisInk": "theme"
+    },
+    "cam": {
+     "yaw": 1405.5176067747307,
+     "pitch": 0.6446697696623438,
+     "dist": 1.9327398088638708,
+     "fov": 1.2,
+     "mode": "free",
+     "quat": [
+      -0.5536772654702047,
+      -0.14143432014691718,
+      0.4237087132790336,
+      -0.7027864149778662
+     ],
+     "friction": 0,
+     "spin": 0.25,
+     "autoRotate": false,
+     "dragGain": 1,
+     "fling": 1
+    }
+   },
+   "modwin": {
+    "x": 468,
+    "y": 588,
+    "lane": "bottom",
+    "ribbon": false,
+    "modes": {
+     "s1": "F",
+     "s3": "F"
+    },
+    "open": true,
+    "folder": {},
+    "macroSide": "left",
+    "macroMin": false
+   },
+   "camera": {
+    "autoRotate": false,
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1
+   },
+   "overlays": {
+    "vortex": {
+     "on": false,
+     "overlay": false
+    },
+    "kepler": false,
+    "particles": {
+     "on": false,
+     "count": 0
+    },
+    "dials": false
+   },
+   "ab": {
+    "a": {
+     "re": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "im": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "b": {
+     "re": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "im": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "omega": 0.14993758507139276,
+    "on": true
+   },
+   "notebook": {
+    "w": 470,
+    "h": 670
+   }
+  }
+ },
+ "notebook": {
+  "title": "WAVE DANCER",
+  "subtitle": "",
+  "text": "# What's going on?\nCurrently there's a transition from the 'State' window that's running $2p_{-1}$, $2p_{1}$, $4p_{-1}$, and $4d_{2}$ in STATE-A and $2s_{0}$, $2p_{0}$, $4p_{1}$, and $4d_{-2}$ in STATE-B. The level 2 and 4 shells make for some interesting geometries tri-bubbles from the center. STATE-A and B's level 4 orbitals\n\nNot to be confused with actual hybridized orbitals btw.\n\n# Styling\nBest in Dark Mode imo. This is a good time to test out palettes and see what kind of designs ya'll can do. I think the demo goes for 'signed' by default but I've set an inverse automation for 'exposure' and 'soft' so that if you want to switch to 'ADD' or 'CLOUD' styles, they go along with da beat.\n\nIf you're not into the flickering background, it can be disabled removing the macro in Settings > Display > Stage and then remove the macro by click and holding the knob's label. It looks sick with the 'ADD' wave style though.\n\n_- Josh_\n"
+ }
+}
