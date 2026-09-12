@@ -12,7 +12,7 @@
   --rack-w: 300px;                                                /* narrower rack (was 372) — the layout still reads this one variable */
   --glass-hue: 214; --glass-sat-tint: 16%; --glass-lum: 13%;     /* card tint hsl(214 16% 13%) = #191d23 */
   --glass-opacity: .84;
-  --card-opacity: .88;                                             /* the TINTED pane: a faint breath of the field through it, no more (Josh, 2026-09-11) */                                           /* opaque enough that the field cannot pull text under 4.5:1 */
+  --card-opacity: var(--glass-opacity);                            /* the TINTED pane wears the glass opacity — .84 dark, .86 light — as it originally did (Josh, 2026-09-11) */
   --glass-border-color: hsl(0 0% 100% / .14);                     /* card edge hairline */
   --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
   --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */
@@ -209,6 +209,12 @@ body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
    overrode both choices with the same veil, making the setting inert. Refractive keeps
    its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
 body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+/* FROST OVER TINTED (2026-09-11): a .88 pane hides the blur it sits on, so while frost is IN FORCE the tinted
+   pane thins to a glass the blur can be seen through; the moment the policy lifts (frost-hold while the
+   transport runs under STILL) the pane is a .88 pane again. Refractive is untouched — it was always the blur alone. */
+body.frost:not(.frost-hold)[data-card="tinted"] .dev, body.frost:not(.frost-hold)[data-card="tinted"] .glass,
+body.frost:not(.frost-hold)[data-card="tinted"] #transport.mini { background: var(--glass-sheen), hsl(var(--glass-tint) / .58); }
+body.disconnected.frost:not(.frost-hold)[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / .58); }
 body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card="refractive"][data-theme="dark"] .glass { background: hsl(0 0% 0% / .10); }
 
 /* A live WebGPU canvas makes every blurred/inset child shadow in a translucent rack a recurring
