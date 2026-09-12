@@ -150,7 +150,7 @@ export function eigSym(A, n) {
   return { values, vectors };
 }
 /** the full AO two-electron tensor from the four distinct integrals of a homonuclear two-function basis */
-function eriTensor({ aaaa, aabb, abab, aaab }) {
+export function eriTensor({ aaaa, aabb, abab, aaab }) {
   const g = new Float64Array(16), put = (i, j, k, l, val) => {
     for (const [p, q, r, s] of [[i, j, k, l], [j, i, k, l], [i, j, l, k], [j, i, l, k], [k, l, i, j], [l, k, i, j], [k, l, j, i], [l, k, j, i]]) g[((p * 2 + q) * 2 + r) * 2 + s] = val;
   };
@@ -238,7 +238,7 @@ export function minimalH2({ S, h, eri, Enuc }) {
   for (let m = 0; m < 4; m++) { let r = 0; for (let n = 0; n < 4; n++) r += Hci[m * 4 + n] * tv[n]; tripletResidual = Math.max(tripletResidual, Math.abs(r - triplet * tv[m])); }
   triplet += Enuc;
   return { rhf: Erhf, fci: levels[0], levels, triplet, tripletResidual, lambda: cov === 0 ? Infinity : ion / cov,
-    scfIterations, scfConverged: converged, Cocc, S, hMO: hM, ciVector: v0 };
+    scfIterations, scfConverged: converged, Cocc, S, hMO: hM, gMO: gM, ciVector: v0 };
 }
 
 /* ── the two curves ────────────────────────────────────────────────────────────────────────────────────────────── */

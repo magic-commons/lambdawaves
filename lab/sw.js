@@ -30,6 +30,7 @@
 /* ── 1. THE PRECACHE — every file under lab/ that the running lab actually loads ────────────────────────
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
+  ['./absorb.js',                                         '2eeb365fc087'],
   ['./atoms.js',                                          '1bfbfc778e10'],
   ['./atomsview.js',                                      '8a999c2c9509'],
   ['./audio.js',                                          '67458cc4f589'],
@@ -40,6 +41,7 @@ const PRECACHE = [
   ['./clock.js',                                          '6431963e1506'],
   ['./cornell.js',                                        '70b64dee2baa'],
   ['./demos/wave-dancer.lambdawaves.json',                '9ee0c86b6a22'],
+  ['./density.js',                                        'b8743270b452'],
   ['./dynamics.js',                                       'e45f1820ad91'],
   ['./dynamicsview.js',                                   'dde4262d990d'],
   ['./electrostatics.js',                                 '793bcb83905b'],
@@ -55,8 +57,9 @@ const PRECACHE = [
   ['./frame-settle.js',                                   'a3b2724d2033'],
   ['./frontier.js',                                       'dc07edd67f5c'],
   ['./gas.js',                                            'c08e2760306c'],
+  ['./gaussian.js',                                       'c5fb3e689f95'],
   ['./h2.js',                                             '5dc1410a91c0'],
-  ['./h2ci.js',                                           '85f80a0bc1f3'],
+  ['./h2ci.js',                                           '7f9e776a8b8c'],
   ['./h2view.js',                                         '280200cb670e'],
   ['./hamiltonian.js',                                    'd5a31e2ef118'],
   ['./helium.js',                                         'a6f522f5cc59'],
@@ -125,6 +128,7 @@ const PRECACHE = [
   ['./radiationview.js',                                  '655a6aef068a'],
   ['./render-exact.js',                                   'cf0cdb3eaeda'],
   ['./rotor4.js',                                         '074250aea7e6'],
+  ['./scf.js',                                            'a383cd1e442e'],
   ['./shadow.js',                                         '98d26391c1b5'],
   ['./shadowview.js',                                     'cdd5544049a9'],
   ['./skin.css',                                          '8ea7391e512f'],

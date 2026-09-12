@@ -55,7 +55,16 @@ const TODAY = new Date();
  *   · An entry EXPIRES.  Loud warning at 14 days, hard failure at 60.  This is a time bomb on purpose: the
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
-const ALLOWLIST = []; // Wave 107 wires the deterministic renderer into CAPTURE; the historical example above is now closed.
+const ALLOWLIST = [
+  /* The ChronusQ ports of 2026-09-11 (research/MATH-CHRONUSQ-PORTS-2026-09-11.md): headless mathematics with node
+     proofs, staged ahead of the window that will show them.  The caller is the ABSORB / RT-HF card of the K wave
+     (research/chronusq-2026-09-11/SYNTHESIS.md §8, item 3), to be built from moview.js's nodes in the MO rack;
+     until it exists the only callers are tests/absorb.test.mjs, tests/density.test.mjs and tests/scf.test.mjs. */
+  { file: 'lab/gaussian.js', date: '2026-09-11', reason: 'sBasis feeds scf.js and density.js; the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) will call it through them to build H2, HeH+ and larger STO-3G molecules on screen' },
+  { file: 'lab/scf.js', date: '2026-09-11', reason: 'rhf() is the ground state the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) starts every real-time run from; tests/scf.test.mjs is its only caller until that card is built' },
+  { file: 'lab/density.js', date: '2026-09-11', reason: 'createRTHF() is the many-electron propagator the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3) will drive from the rack; tests/density.test.mjs is its only caller until then' },
+  { file: 'lab/absorb.js', date: '2026-09-11', reason: 'kickSpectrum()/spectrum()/peaks() draw the absorption spectrum in the ABSORB / RT-HF card of the K wave (SYNTHESIS §8 item 3); tests/absorb.test.mjs is the only caller until that card exists' },
+]; // Wave 107 wired the deterministic renderer into CAPTURE; that historical entry is closed.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
  * Not a parser — a lexer, which is all an import graph needs and all that can be had from the standard
