@@ -20,6 +20,8 @@ framework; what you edit is what the browser runs. Keep it that way.
   `node ../MIR/tools/adopt.mjs .` copies the bytes in and writes `MIR-MANIFEST.json`. Never edit those files
   here: change MIR, re-adopt, commit both. `node ../MIR/tools/adopt.mjs . --check` must print "in step"
   before a commit. Reuse MIR's nodes, gestures and CSS; do not copy their look.
+  Commit the generated `MIR-MANIFEST.json` with each adoption. `npm test` checks its
+  complete file inventory and content hashes even on machines without a sibling MIR checkout.
 
 - **Exact physics stays exact.** Hydrogen coefficients evolve by `e^{-iE t}`; nothing is
   integrated. A change that makes a proof in `tests/` tolerate more error needs a reason in

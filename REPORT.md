@@ -2505,3 +2505,24 @@ stranding the hand. This measures scheduling, not a GPU frame-rate improvement. 
 ES-module metadata removes Node format re-detection, with a CommonJS boundary for the
 prebuilt UMD vendor scripts. Offline hashes were regenerated. The review and remaining
 MIR provenance/device-matrix findings are in `docs/REVIEW-2026-09-15.md`.
+
+
+## 2026-09-15 · MIR adoption restored
+
+Assisted by OpenAI Codex. Re-adopted MIR 1.1.3 from its clean source checkout at
+`05155da7e5ca0d2a85383242722db1b84a774e1f` using `tools/adopt.mjs`. Only `lab/mir/kit.js`
+differed: upstream adds configurable knob travel/fine sensitivity and logarithmic
+faders with a displayed modulation value separate from the hand-owned value. The
+adoption tool restored `MIR-MANIFEST.json`, covering all 29 toolkit/font files;
+`--check` now reports "in step with MIR 1.1.3". No source changes in MIR were needed.
+
+Added `tests/mir-manifest.test.mjs` to prove the exact inventory and content hashes
+in every Node gate, including CI without a sibling checkout. It first failed on the
+missing manifest. `tests/mir-controls.browser-test.mjs` measures the adopted controls
+in Firefox: default knob drag 55 px = 0.25 travel, fine 90 px = 0.10; fine fader drag
+half its width = 0.10; arrow = 0.01 and Shift+arrow = 0.0025. Those defaults passed
+before and after adoption. The configured 110 px knob travel test failed before
+adoption and now passes; a logarithmic 1–100 fader reaches 10 at its midpoint, and
+show(20) keeps its base at 10. Reset defaults and clearing the display override pass.
+The browser checks use synthetic control events; the existing input gate separately
+exercises real WebDriver mouse and touch. The PWA hashes were regenerated.

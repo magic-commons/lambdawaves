@@ -93,6 +93,11 @@ export function tapWatcher(fn) {
  * knob({ label, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, size })
  *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values.
  */
+/* THE DRAG LAW, as defaults an app may retune (BASINS asked for Shift = 1/8): travel = px for a full scale,
+   fine = the Shift divisor on a drag, keyFine = the Shift factor on an arrow step. A knob or fader may
+   carry its own `travel` / `fine`; the shipped defaults are the numbers the lab has always used. */
+const KNOB_LAW = { travel: 220, fine: 900 / 220, keyFine: 0.25, faderFine: 5 };   // the fader's Shift has always been a fifth
+export function setKnobLaw(o) { if (o && o.travel > 0) KNOB_LAW.travel = o.travel; if (o && o.fine > 0) { KNOB_LAW.fine = o.fine; KNOB_LAW.faderFine = o.fine; KNOB_LAW.keyFine = 1 / o.fine; } return { ...KNOB_LAW }; }
 export function knob(o) {
   const root = el('div', 'k' + (o.size === 'lg' ? ' k-lg' : '') + (o.cls ? ' ' + o.cls : ''));
   if (o.label) el('div', 'k-lbl', root, o.label);
@@ -180,7 +185,7 @@ export function knob(o) {
   });
   dial.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    const dp = ((y0 - e.clientY) + (e.clientX - x0)) / (e.shiftKey ? 900 : 220);
+    const dp = ((y0 - e.clientY) + (e.clientX - x0)) / ((o.travel || KNOB_LAW.travel) * (e.shiftKey ? (o.fine || KNOB_LAW.fine) : 1));
     if (o.onDelta) { const d = dp - acc; acc = dp; turn = ((turn + d * 360) % 360 + 360) % 360; o.onDelta(d * 2 * Math.PI); announce(true); return; }
     const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + dp)));
     if (nv !== v) { v = nv; paint(); if (o.onInput) o.onInput(v); }
@@ -226,7 +231,7 @@ export function knob(o) {
     if (dir) {
       if (o.step) nv = v + dir * o.step * (page ? 10 : 1);               // stepped: value space, Shift ignored
       else {
-        const dp = 0.01 * (page ? 10 : 1) * (e.shiftKey ? 0.25 : 1);     // the lab's own fine modifier, inherited
+        const dp = 0.01 * (page ? 10 : 1) * (e.shiftKey ? (o.fine ? 1 / o.fine : KNOB_LAW.keyFine) : 1);     // the lab's own fine modifier, inherited
         nv = denorm(o.wrap ? norm(v) + dir * dp : clamp01(norm(v) + dir * dp));
       }
     } else if (e.code === 'Home') nv = lo;
@@ -373,6 +378,11 @@ export function fader(o) {
   let v = o.value, def = o.value, dragging = false, lastX = 0;
   const lo = o.min, hi = o.max;
   const fmt = o.fmt || ((x) => x.toFixed(3));
+  const log = !!o.log && lo > 0 && hi > lo;   // a log fader: FREQ-shaped ranges on a slider
+  const norm = (x) => (log ? clamp01(Math.log(x / lo) / Math.log(hi / lo)) : clamp01((x - lo) / (hi - lo)));
+  const denorm = (u) => (log ? lo * Math.pow(hi / lo, clamp01(u)) : lo + clamp01(u) * (hi - lo));
+  const fine = o.fine || KNOB_LAW.faderFine;
+  let shown = null;                 // a value PAINTED over the base by a modulator (show()); v is the hand's
   /* WAVE 62 · the same slider as knob(), and all seven are linear: no log, no wrap, no step.  The
      chatter guard is what keeps a FOCUSED scrub silent while the transport writes it every frame. */
   root.tabIndex = 0;
@@ -388,11 +398,11 @@ export function fader(o) {
     if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
-  const paint = (fromUser) => { const p = clamp01((v - lo) / (hi - lo)); root.style.setProperty('--fill', p); val.textContent = fmt(v); announce(fromUser); };
-  const fromEvent = (e) => { const r = root.getBoundingClientRect(); return lo + clamp01((e.clientX - r.left) / Math.max(1, r.width)) * (hi - lo); };
+  const paint = (fromUser) => { const sv = (shown !== null && !dragging) ? shown : v; root.style.setProperty('--fill', norm(sv)); val.textContent = fmt(sv); root.classList.toggle('mod', shown !== null && !dragging); announce(fromUser); };
+  const fromEvent = (e) => { const r = root.getBoundingClientRect(); return denorm((e.clientX - r.left) / Math.max(1, r.width)); };
   root.addEventListener('pointerdown', (e) => { e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; root.classList.add('drag'); tap(); lastX = e.clientX; if (!e.shiftKey) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
   let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
-  root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = lo + clamp01((v - lo) / (hi - lo) + (e.clientX - lastX) / Math.max(1, r.width) * 0.2) * (hi - lo); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });   // shift = fine: a fifth of the travel
+  root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
   const end = () => { if (!dragging) return; dragging = false; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
   root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end);
   const reset = () => { v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
@@ -404,7 +414,7 @@ export function fader(o) {
     if (root.tabIndex < 0 || e.ctrlKey || e.metaKey || e.altKey) return;   // a fader taken out of the tab order (the scrub, with KEEP FRAMES off) takes no keys either
     const dir = FDIR[e.code] || 0, page = e.code === 'PageUp' || e.code === 'PageDown';
     let nv = v;
-    if (dir) nv = lo + clamp01((v - lo) / (hi - lo) + dir * 0.01 * (page ? 10 : 1) * (e.shiftKey ? 0.25 : 1)) * (hi - lo);
+    if (dir) nv = denorm(norm(v) + dir * 0.01 * (page ? 10 : 1) * (e.shiftKey ? (o.fine ? 1 / o.fine : KNOB_LAW.keyFine) : 1));
     else if (e.code === 'Home') nv = lo;
     else if (e.code === 'End') nv = hi;
     else if (e.code === 'Delete' || e.code === 'Backspace') { e.preventDefault(); reset(); announce(true); return; }
@@ -414,7 +424,7 @@ export function fader(o) {
   });
   root.addEventListener('blur', () => announce(false));
   paint();
-  return { root, get: () => v, set(x) { v = x; paint(); }, setLabel(t) { lbl.textContent = t; }, dragging: () => dragging };
+  return { root, get: () => v, set(x) { v = x; shown = null; paint(); }, show(x) { shown = x; paint(); }, get shown() { return shown; }, setBase() {}, paint, setDefault(x) { def = x; }, setLabel(t) { lbl.textContent = t; }, dragging: () => dragging };
 }
 
 /** readout({ label, value, cls }) — a labelled number */

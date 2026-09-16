@@ -92,7 +92,7 @@ const PRECACHE = [
   ['./mir/css/base.css',                                  'a8436a74724e'],
   ['./mir/css/skin.css',                                  'e2c89ea5c70e'],
   ['./mir/glyph.js',                                      '6941c8aa4fd7'],
-  ['./mir/kit.js',                                        '8163f225597f'],
+  ['./mir/kit.js',                                        '4ea0d816bf28'],
   ['./mir/modulation/curve.js',                           'f5ccc9c84f11'],
   ['./mir/modulation/host.js',                            '27ddb69a20e0'],
   ['./mir/modulation/mod.js',                             '535142d3b50c'],
