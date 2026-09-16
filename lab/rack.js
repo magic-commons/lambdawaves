@@ -1,3 +1,5 @@
+import { bindStageGestures } from './stage-gestures.js';
+import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
@@ -4233,8 +4235,7 @@ export async function boot(dom) {
       } catch (e) {}
       /* 2026-09-11: a synchronous localStorage write per keystroke became one write 300 ms after the last key; pagehide flushes */
       /* 2026-09-11: the notebook's move and resize write style once per FRAME, not once per pointer event */
-      let nbRaf = 0, nbNext = null;
-      const nbPost = (fn) => { nbNext = fn; if (!nbRaf) nbRaf = requestAnimationFrame(() => { nbRaf = 0; const f = nbNext; nbNext = null; if (f) f(); }); };
+      const nbPaint = coalesce(paint => paint());
       const nbPending = new Map(); let nbTimer = 0;
       const nbFlush = () => { nbTimer = 0; for (const [k, v] of nbPending) { try { localStorage.setItem(k, v); } catch (e) {} } nbPending.clear(); };
       const nbStore = (k, v) => { nbPending.set(k, v); if (!nbTimer) nbTimer = setTimeout(nbFlush, 300); };
@@ -4462,11 +4463,11 @@ export async function boot(dom) {
       }
       { const grip = nb.querySelector('.nb-grip');
         if (grip) { let gd = null;
-          grip.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); const r = nb.getBoundingClientRect(); gd = { x: e.clientX, y: e.clientY, w: r.width, h: r.height };
+          grip.addEventListener('pointerdown', (e) => { if (e.button !== 0 || gd) return; e.preventDefault(); e.stopPropagation(); const r = nb.getBoundingClientRect(); gd = { id: e.pointerId, x: e.clientX, y: e.clientY, w: r.width, h: r.height };
             try { grip.setPointerCapture(e.pointerId); } catch (_) {} });   // a capture that cannot be taken (a synthesised pointer, a stale id) must not throw into the page — the drag works without it
-          grip.addEventListener('pointermove', (e) => { if (!gd) return; e.preventDefault(); const w = gd.w + (e.clientX - gd.x), h = gd.h + (e.clientY - gd.y); nbPost(() => nbResize(w, h)); });
-          const gend = (e) => { if (!gd) return; gd = null; if (e && e.pointerId !== undefined && grip.hasPointerCapture && grip.hasPointerCapture(e.pointerId)) grip.releasePointerCapture(e.pointerId); nbSaveSize(); };
-          grip.addEventListener('pointerup', gend); grip.addEventListener('pointercancel', gend);
+          grip.addEventListener('pointermove', (e) => { if (!gd || e.pointerId !== gd.id) return; e.preventDefault(); const w = gd.w + (e.clientX - gd.x), h = gd.h + (e.clientY - gd.y); nbPaint.post(() => nbResize(w, h)); });
+          const gend = (e) => { if (!gd || e.pointerId !== gd.id) return; nbPaint.flush(); gd = null; if (e && e.pointerId !== undefined && grip.hasPointerCapture && grip.hasPointerCapture(e.pointerId)) grip.releasePointerCapture(e.pointerId); nbSaveSize(); };
+          for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) grip.addEventListener(type, gend);
         }
         /* the desktop's own CSS resize ends in a pointerup over the notebook — the same two numbers, the same key */
         nb.addEventListener('pointerup', () => nbSaveSize());
@@ -4475,9 +4476,10 @@ export async function boot(dom) {
         layout.notebookSize = () => { const w = Math.round(parseFloat(nb.style.width) || NOTES_DEF_W), h = Math.round(parseFloat(nb.style.height) || NOTES_DEF_H); return { w, h, custom: w !== NOTES_DEF_W || h !== NOTES_DEF_H }; };
       }
       let nd = null, nbMoved = false; const nhead = nb.querySelector('.nb-head');
-      nhead.addEventListener('pointerdown', (e) => { if (e.target.closest('button, input')) return; const r = nb.getBoundingClientRect(); nd = { dx: e.clientX - r.left, dy: e.clientY - r.top }; nhead.setPointerCapture(e.pointerId); });
-      nhead.addEventListener('pointermove', (e) => { if (!nd) return; nbMoved = true; const L = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - nd.dx)) + 'px', T = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - nd.dy)) + 'px'; nbPost(() => { nb.style.left = L; nb.style.top = T; }); });
-      const nend = () => { nd = null; }; nhead.addEventListener('pointerup', nend); nhead.addEventListener('pointercancel', nend);
+      nhead.addEventListener('pointerdown', (e) => { if (e.button !== 0 || nd || e.target.closest('button, input')) return; const r = nb.getBoundingClientRect(); nd = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top }; try { nhead.setPointerCapture(e.pointerId); } catch (_) {} });
+      nhead.addEventListener('pointermove', (e) => { if (!nd || e.pointerId !== nd.id) return; nbMoved = true; const L = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - nd.dx)) + 'px', T = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - nd.dy)) + 'px'; nbPaint.post(() => { nb.style.left = L; nb.style.top = T; }); });
+      const nend = (e) => { if (!nd || e.pointerId !== nd.id) return; nbPaint.flush(); nd = null; };
+      for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) nhead.addEventListener(type, nend);
       count();
       layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
     }
@@ -4529,18 +4531,6 @@ export async function boot(dom) {
      * position wins, which is the difference between a drop landing where you let go and where the last
      * frame happened to be.  MEASURED (B137): 40 synchronous moves used to force 40+ layouts and now force
      * ZERO, and the window still lands on the last pointer position exactly. */
-    const DRAG_FLOOR_MS = 32;                          // BASINS' own floor: a starved rAF must not freeze the window under the finger
-    function coalesce(apply) {
-      let raf = 0, tmr = 0, pend = null;
-      const flush = () => {
-        if (raf) { cancelAnimationFrame(raf); raf = 0; }
-        if (tmr) { clearTimeout(tmr); tmr = 0; }
-        if (!pend) return;
-        const p = pend; pend = null; apply(p);
-      };
-      return { post(p) { pend = p; if (raf || tmr) return; raf = requestAnimationFrame(flush); tmr = setTimeout(flush, DRAG_FLOOR_MS); }, flush };
-    }
-
     /* drag a card by its header to reorder the rack — or across to the other rack */
     let drag = null;
     const racks = [rack, rackL].filter(Boolean);
@@ -4793,78 +4783,47 @@ export async function boot(dom) {
   layout.phone = { get on() { return phone.on; }, get dprCap() { return field.dprCap; }, get transportFolded() { return wTr.root.classList.contains('folded'); }, get parkedFloats() { return phone.floats ? Object.keys(phone.floats) : []; }, sync: syncPhone };
   layout.tablet = { get on() { return tablet.on; }, get dprCap() { return field.dprCap; }, get stepCap() { return field.stepCap; }, sync: syncPhone };
 
-  /* ── canvas gestures: the observer ─────────────────────────────────────── */
-  {
-    const cv = dom.canvas, pts = new Map(); let pinch0 = 0, dist0 = 0;
-    /* WAVE 57 · THE STAGE IS A FOCUS TARGET, AND ONLY FOR THE POINTER.  tabIndex = -1 means the canvas can
-       HOLD focus but is not IN the tab sequence, so Tab never lands here by accident; a press on the stage
-       puts focus here deliberately.  That is what makes the TAB rule below decidable — "are your hands on
-       the world, or in the rack?" is a question the DOM can now answer. */
-    cv.tabIndex = -1;
-    /* ── THE FLING (wave 50; NEBULA's N1, N2) ──────────────────────────────────────────────────────────────────
-     * A drag records its own POSE, timestamped — not the pixels — so the fine modifier, the pole clamp and a
-     * pinch are already inside the numbers; on release the mean angular velocity over the last 80 ms IS the
-     * fling, handed to the law as ω₀.  THE CLUTCH: Shift pressed or released mid-drag, or a second finger
-     * landing, CLEARS the history, so the fling belongs only to the final generator.  Shift is the fine drag
-     * here (a quarter of the gain, as it is everywhere else in the lab), and because the gain multiplies a
-     * DELTA there is no pose jump when it changes hands mid-drag — the clutch costs the history, not the view. */
-    const hist = []; let hShift = false, down = null, lastTap = 0, tapX = 0, tapY = 0;
-    const histPush = (t) => { hist.push({ t, yaw: camTravel.yaw, pitch: camTravel.pitch }); while (hist.length > 2 && t - hist[0].t > CAM.HIST_MS) hist.shift(); };   // wave 54: the TRAVEL, not the pose — in FREE the pose has no yaw
-    const histClear = () => { hist.length = 0; };
-    /** the residual angular velocity of the last 80 ms, or nothing if the finger had already stopped */
-    function releaseFling() {
-      if (hist.length < 2) return 0;
-      const b = hist[hist.length - 1], a = hist[0], dt = (b.t - a.t) / 1000;
-      if (dt < 0.008 || performance.now() - b.t > CAM.STALE_MS) return 0;
-      const wy = (b.yaw - a.yaw) / dt, wp = (b.pitch - a.pitch) / dt;
-      return Math.hypot(wy, wp) < CAM.REST ? 0 : camera.fling(wy, wp);
-    }
-    cv.addEventListener('pointerdown', (e) => { try { cv.focus({ preventScroll: true }); } catch (_) {}      // wave 57: a hand on the stage IS the stage having focus
-      if (e.ctrlKey && pts.size === 0) { e.preventDefault(); bowStart(e); return; }
-      if (!e.shiftKey && pts.size === 0 && kepler.on) { const r = cv.getBoundingClientRect(); const h = kepler.hit(e.clientX - r.left, e.clientY - r.top); if (h) { e.preventDefault(); cv.setPointerCapture(e.pointerId); kdrag = { n: h.n, id: e.pointerId }; cv.classList.add('kdrag'); return; } }   // the KEPLER handle
-      if (e.shiftKey && helium && helium.on && pts.size === 0) { e.preventDefault(); const r = cv.getBoundingClientRect(); helium.placeAt(unproject(e.clientX - r.left, e.clientY - r.top)); schedule(TIER.RECONSTRUCT); return; }   // helium: put electron 1 where you click
-      try { cv.setPointerCapture(e.pointerId); } catch (_) {}          // a synthetic pointer (a test, an assistive device) must not abort the drag
-      pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); dragging = true; cv.classList.add('drag');
-      camera.stop(); histClear(); hShift = e.shiftKey; histPush(performance.now());   // the finger CLUTCHES: a live fling is caught, and this drag's history starts here
-      down = { x: e.clientX, y: e.clientY, t: performance.now() };
-      if (pts.size === 2) { histClear(); const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = obs.dist; } });
-    cv.addEventListener('pointermove', (e) => {
-      if (kdrag) { const r = cv.getBoundingClientRect(); keplerDragTo(kdrag.n, e.clientX - r.left, e.clientY - r.top); schedule(TIER.RECONSTRUCT); return; }
-      if (!pts.size && !bow && kepler.on) { const r = cv.getBoundingClientRect(); const h = kepler.hit(e.clientX - r.left, e.clientY - r.top); kepler.setHover(h); cv.classList.toggle('khover', !!h); }
-      if (bow) { bowMove(e); return; }
-      const p = pts.get(e.pointerId); if (!p) return;
-      if (pts.size === 1) {
-        if (e.shiftKey !== hShift) { hShift = e.shiftKey; histClear(); }              // THE CLUTCH (N2): the modifier changed hands mid-drag
-        const k = e.shiftKey ? CAM.FINE : 1;                                          // SHIFT is the fine drag, as it is at every other control
-        const G = CAM.SENS * camera.dragGain;                                         // DRAG GAIN scales the ONE sensitivity, in both control modes, and SHIFT still quarters it
-        orbitBy(-(e.clientX - p.x) * G * k, (e.clientY - p.y) * G * k);
-        histPush(performance.now());
+  /* Stage gestures own pointer lifetimes; these callbacks own the instrument. */
+  bindStageGestures(dom.canvas, {
+    camera, travel: camTravel, law: CAM,
+    getDistance: () => obs.dist, setDistance: setDist, orbitBy, resetView,
+    setDragging: value => { dragging = value; },
+    present: () => schedule(TIER.PRESENT),
+    startSpecial(e) {
+      if (e.ctrlKey) {
+        bowStart(e);
+        return { move: bowMove, end: bowRelease, cancel: bowCancel };
       }
-      p.x = e.clientX; p.y = e.clientY;
-      if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch0 > 0) setDist(dist0 * pinch0 / Math.max(1, d)); }
-      schedule(TIER.PRESENT);
-    });
-    const up = (e) => {
-      if (kdrag) { kdrag = null; cv.classList.remove('kdrag'); return; }
-      if (bow) { bowRelease(); return; }
-      pts.delete(e.pointerId);
-      if (pts.size) { histClear(); return; }                                          // one of two fingers left: the rest is not this gesture's fling
-      dragging = false; cv.classList.remove('drag');
-      releaseFling(); histClear();
-      /* DOUBLE-TAP = RESET VIEW.  dblclick is a mouse affordance a touch pointer may never raise (and the iPad is
-         a target), so the tap is counted here on the kit's own 320 ms — two taps that neither moved nor lingered. */
-      const now = performance.now(), tap = down && now - down.t < 300 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8;
-      down = null;
-      if (e.pointerType === 'touch' && tap) {
-        if (now - lastTap < CAM.TAP_MS && Math.hypot(e.clientX - tapX, e.clientY - tapY) < 40) { lastTap = 0; resetView(); }
-        else { lastTap = now; tapX = e.clientX; tapY = e.clientY; }
+      const r = dom.canvas.getBoundingClientRect();
+      if (!e.shiftKey && kepler.on) {
+        const hit = kepler.hit(e.clientX - r.left, e.clientY - r.top);
+        if (hit) {
+          kdrag = { n: hit.n, id: e.pointerId }; dom.canvas.classList.add('kdrag');
+          const end = () => { kdrag = null; dom.canvas.classList.remove('kdrag'); };
+          return {
+            move(event) {
+              const rect = dom.canvas.getBoundingClientRect();
+              keplerDragTo(hit.n, event.clientX - rect.left, event.clientY - rect.top);
+              schedule(TIER.RECONSTRUCT);
+            },
+            end, cancel: end,
+          };
+        }
       }
-    };
-    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    cv.addEventListener('wheel', (e) => { e.preventDefault(); setDist(obs.dist * Math.pow(1.1, e.deltaY / 100)); }, { passive: false });   // N8: EVERY modifier zooms, and none of them generates a rotational increment
-    cv.addEventListener('dblclick', () => resetView());
-    new ResizeObserver(() => schedule(TIER.PRESENT)).observe(cv);
-  }
+      if (e.shiftKey && helium && helium.on) {
+        helium.placeAt(unproject(e.clientX - r.left, e.clientY - r.top));
+        schedule(TIER.RECONSTRUCT);
+        return {}; // A placement consumes this pointer until it lifts.
+      }
+      return null;
+    },
+    hover(e) {
+      if (bow || !kepler.on) return;
+      const r = dom.canvas.getBoundingClientRect(), hit = kepler.hit(e.clientX - r.left, e.clientY - r.top);
+      kepler.setHover(hit); dom.canvas.classList.toggle('khover', !!hit);
+    },
+  });
+  new ResizeObserver(() => schedule(TIER.PRESENT)).observe(dom.canvas);
   /**
    * KEYS.  Transport on the arrows and space; the camera on WASD/QE with shift for a fine step; the ROTATION AXIS
    * on X/Y/Z, so [ and ] turn the STATE about the chosen axis (and with shift, the Runge–Lenz rotation about it).
@@ -5527,9 +5486,24 @@ export async function boot(dom) {
     const w = (win || '').trim();
     return w ? what + ' · ' + w : what;
   };
-  document.addEventListener('pointerdown', (e) => { pointerHeld = true; history.hold(hTouchName(e.target)); }, true);   // one drag is ONE step: the window opens on the way down …
-  document.addEventListener('pointerup', () => { pointerHeld = false; history.release(); });       // … and closes after the control's own onChange has run
-  document.addEventListener('pointercancel', () => { pointerHeld = false; history.release(); });
+  const heldPointers = new Set();
+  document.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || heldPointers.has(e.pointerId)) return;
+    heldPointers.add(e.pointerId); pointerHeld = true;
+    history.hold(hTouchName(e.target));
+  }, true);
+  const releasePointer = e => {
+    if (!heldPointers.delete(e.pointerId)) return;
+    pointerHeld = heldPointers.size > 0;
+    history.release(); // Commits on the next task, after the control's onChange.
+  };
+  // Capture also sees releases that a control stops from bubbling. An implicit
+  // lost capture after pointerup must not release a second finger's undo hold.
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) document.addEventListener(type, releasePointer, true);
+  const releasePointers = () => { for (const pointerId of heldPointers) releasePointer({ pointerId }); };
+  window.addEventListener('blur', releasePointers);
+  window.addEventListener('pagehide', releasePointers);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releasePointers(); });
   const historyApi = {
     undo() { const ok = history.undo(); if (ok) wState.setStatus('undone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
     redo() { const ok = history.redo(); if (ok) wState.setStatus('redone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },

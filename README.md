@@ -11,8 +11,8 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
-**Status: pre-alpha** — `main` is what is live and is frozen between releases; the experimental build lives on `dev` at
-a local server only; it is not published. `RELEASING.md` says how a release is cut.
+**Status: pre-alpha.** Release preparation and deployment are documented in
+[`DEPLOY.md`](DEPLOY.md) and [shipping readiness](docs/SHIPPING-READINESS.md).
 
 ---
 
@@ -44,7 +44,7 @@ truth, and he would like to hear about it.
   the laws in `CONTRIBUTING.md` and the tests were written by the agents from what he asked for and
   what he rejected. Every design decision went through his eyes and his hands on the real app before it
   stayed; none of it was typed by him.
-- **What was verified, and how.** The physics is checked by 58 node suites that compare the
+- **What was verified, and how.** The physics is checked by the Node suites in `tests/`, which compare the
   reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
   to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). He has
   used the app on an RTX 3070 desktop and an iPad, daily, for weeks. He has not read the code.
@@ -107,8 +107,8 @@ npm run test:browser     # a real headless Firefox drives the real UI (./test.sh
 npm run test:all         # both                                       (./test.sh)
 ```
 
-The browser gate runs every `tests/*.browser-test.mjs` — today the current-UI acceptance and the
-GPU boot/reload/grid recovery suite — against one owned HTTPS server. It needs Firefox and
+The browser gate runs every `tests/*.browser-test.mjs` — current UI, pointer input,
+GPU recovery, chemistry and molecular fields — against one owned HTTPS server. It needs Firefox and
 geckodriver on PATH. `./test.sh legacy` runs the historical wave-by-wave gate in
 `tests/legacy/`; it asserts laws later waves superseded and is not part of the shipped gate. It starts its own HTTPS server on 8701 and
 geckodriver on 5202; `LW_PORT` / `GD_PORT` select unused ports. `GECKODRIVER` and

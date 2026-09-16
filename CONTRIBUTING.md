@@ -27,7 +27,7 @@ framework; what you edit is what the browser runs. Keep it that way.
 - **`lab/mir/modwindow/` is a ported plugin and is byte-frozen.** Host-side behaviour lives in
   `lab/modwindow.js` and `lab/modhost.css`. See `docs/ui/STYLE-LOCK.md` before touching the UI.
 - **Idle is zero work.** Windows that are closed or off-screen must not compute; see
-  `lab/window-activity.js` and the work tiers in `lab/rack.js`.
+  `lab/mir/window-activity.js` and the work tiers in `lab/rack.js`.
 - **Write the law, then measure it.** Tests here are prose sentences followed by a
   measurement. Add a failing test with the change that makes it pass.
 - **No new dependencies at runtime.** `wrangler` is the only dev dependency and it is not
@@ -39,6 +39,8 @@ framework; what you edit is what the browser runs. Keep it that way.
 |---|---|
 | `lab/` | The app. `index.html` boots `main.js` → `rack.js` (the instrument) → the windows. |
 | `lab/field.js` | The WebGPU volume renderer. |
+| `lab/stage-gestures.js` | Stage pointer ownership, drag/fling, pinch, wheel zoom and interruption. Physics actions stay in the rack. |
+| `lab/frame-coalescer.js` | Shared drag painting: latest position per frame, a stalled-frame fallback, and a final flush before saving. |
 | `lab/hydrogen.js`, `lab/state.js` | The closed forms and the register of 91 states. |
 | `tests/` | Node suites (`*.test.mjs`), the browser gate (`*.browser-test.mjs`) and `tests/legacy/` (the historical gate, run by hand). |
 | `tools/` | The gate kit, the deploy builder, the changelog generator. |

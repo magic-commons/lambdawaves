@@ -2485,3 +2485,23 @@ Josh: "It's a go, don't feel restricted by the frozen environment … Do whateve
 ## 2026-09-12 · MOLECULES and ORBITALS — the dropdown, the cap, and arg for a molecule
 
 Josh: "What other molecules can we add? … this should be a dropdown menu … Have Benzene be the size cap, include large atoms as well … I want to be able to mess with LUMO and HOMO on a similar 91 thing spectrum … Chemistry can come with two windows … How can I get arg into molecules?" Two builders in parallel on one seam (the CHEMISTRY card's `solution()/subscribe()` hook, added by the lead first). LIBRARY (`lab/molecules.js`, `lab/vendor/bse/sto-3g-v1.json` now H–Kr with the superseded hash kept, `lab/oracles/sto-3g-v1.json` +54): 54 closed-shell molecules and ions in seven groups, every geometry with a named source (CCCBDB or a named gas-phase measurement; AlH₃ declared NOT A MEASUREMENT — it is this repo's own RHF/STO-3G scan), PySCF energies for all, and a cost model fitted by non-negative least squares to 54 measured solves: ms = 1.204e-4·(quartet-primitive trips) + 5.666e-5·(nocc·nvirt)²·nAO² + 10.8. THE FINDING: the model the lead named (AO count cubed) is wrong because it cannot see occupation — Br₂ at 38 AOs has 3 virtuals to benzene's 15, so its RPA costs 0.42 s to benzene's 4.2 s, and Br₂ is UNDER the benzene cap (4.0 s vs 10.1 s); the rejected fit is kept in the file so the finding is checkable. Nothing in the 54 is over the cap; CuH and ZnH₂ converge to RHF solutions whose singlet stability Hessian is negative (A+B −6.97e-3 and −1.88e-2), so they are listed and refused with the reason, PySCF agreeing on the sign. The MOLECULE control is paletteview's `<select class="sel">` with optgroups and rows like "C₅H₅N · 35 AO · ~8.1 s"; charge is wired through solve, rt.init and the worker cache key for the four ions. Out-of-lane edits, both forced: `rhf-molecule.js`'s AUFBAU table now runs Madelung order through 4p (it stopped at argon), and `scf.js` exits on a round-off floor (the absolute commutator residual scales with |F|, 485 on Br against 20 on H₂O, so Br₂ bottomed at 8e-12 and burned 200 iterations "unconverged"). REGISTER (`lab/orbitalsview.js`, `lab/field.js` complex orbital, `lab/rack.js` seams): the ORBITALS window is hydrogen's SPECTRUM for a molecule — the MO ladder (order-exact, gaps drawn to scale up to 3× the median so the O 1s at −20 hartree does not squeeze six levels into four pixels), click a level into the register, |c| and arg c dials per orbital, NORM, CLEAR, REGISTER ON takes the field and sets the phase observable; ψ(t) = Σ c_k e^{−iε_k t} φ_k is pushed as a complex AO vector each frame (the kernel writes (ψ_re, ψ_im)), so PLAY animates the beat at 2π/Δε; every readout says "frozen orbitals · beats at Δε, not at ω_RPA". Gates: chem 49/49, orbitals 24/24, molecules 8/8, field-molecule green; H₂O's HOMO+LUMO register measured on the GPU: arg ψ = 173.5° at t = 1 and the cross term flips at t + π/Δε (ρ 0.3846 → 0.1139, CPU 0.3849 → 0.1139). THE DISK: `research/DISK.md`, every research document in one markdown (38 documents, 1.38 MB, 215 artefacts indexed), built by `tools/disk.mjs`, rebuilt with every research commit; the disk-writer skill is now that format spec and nothing more.
+
+
+## 2026-09-15 · Pointer ownership and final-frame persistence
+
+Repository review assisted by OpenAI Codex. Six new browser regressions first reproduced:
+a foreign pointer could steer/release an impulse; pointer cancellation applied that impulse
+to the register; lost capture left the stage dragging; secondary mouse buttons rotated;
+wheel line/page units were interpreted as pixels; and a notebook resize saved its old size
+when release beat the next animation frame. Stage gesture ownership now lives in
+`lab/stage-gestures.js`, while the rack retains camera/physics operations. Cancel, lost
+capture, blur and hidden-page paths end a gesture without committing an impulse or fling.
+Undo holds use pointer IDs so duplicate and unrelated releases cannot end another finger's
+edit. Pinch handoff, fine drag, stale flings and intentional double-taps have executable laws.
+
+Notebook and rack drags share `lab/frame-coalescer.js`: a burst of 40 moves applies the last
+value once; release flushes before saving; a 32 ms fallback keeps a stalled frame from
+stranding the hand. This measures scheduling, not a GPU frame-rate improvement. Explicit
+ES-module metadata removes Node format re-detection, with a CommonJS boundary for the
+prebuilt UMD vendor scripts. Offline hashes were regenerated. The review and remaining
+MIR provenance/device-matrix findings are in `docs/REVIEW-2026-09-15.md`.
