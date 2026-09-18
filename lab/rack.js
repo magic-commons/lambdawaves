@@ -1174,7 +1174,7 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(Math.min(tabletMotion ? tablet.steps : Infinity, gov.stepDrop ? Math.max(24, Math.round(mat.steps * STEP_LADDER[gov.stepDrop])) : Infinity));   // full saved quality returns on the first still frame; the governor's step cap rides on top
-      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat, molecule: !!(chem && chem.on) }); });
+      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat, molecule: !!(molSession && molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
       pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }
@@ -1272,6 +1272,13 @@ export async function boot(dom) {
     if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
     register.setActive(canPresent(wOrbs));
     if ((orbitals.on || states.on) && powered(wOrbs)) register.update(clock.t);
+    if (flowTracers) {
+      const src = states.on && states.flowOn ? states.flowSource() : null;
+      if (src && src.ready) {
+        if (!flowTracers.on || flowEpoch !== states.flowEpoch) { flowTracers.setOn(true); flowTracers.setTrail(48); flowTracers.setCap(2.5); flowTracers.seedFrom(src, 220, clock.t, chem.half * 0.75); flowEpoch = states.flowEpoch; }
+        tick('particles', () => { flowTracers.advanceFrom(src, clock.t, chem.half * 0.75); flowTracers.draw(obs, domain.half); });
+      } else if (flowTracers.on) { flowTracers.setOn(false); flowEpoch = -1; }
+    }
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
     if (cpuTick) {
@@ -2377,6 +2384,11 @@ export async function boot(dom) {
 
   // DYNAMICS — the Lagrangian picture, the action–angle chart, the dipole, and the particle view
   const particles = createParticles(dom.particles, {});
+  /* FLOW (MOLECULAR WAVES stage 6): the SAME tracer view on its own canvas, riding a molecule's current v = j/ρ —
+     the STATES register hands it a source (lab/molecular-flow.js) whose matrices it rebuilds once a frame */
+  const flowTracers = dom.flow ? createParticles(dom.flow, { ink: () => (document.body.dataset.theme === 'light' ? { trail: 'rgba(16,36,84,0.42)', dot: 'rgba(10,22,56,0.92)', text: 'rgba(20,30,50,0.6)' } : { trail: 'rgba(190,230,255,0.4)', dot: 'rgba(235,248,255,0.95)', text: 'rgba(255,255,255,0.5)' }),
+    caption: (st) => `FLOW · ${st.alive}/${st.count} tracers on v = j/ρ of the TD-CIS density matrix · sense exact, magnitude qualitative in STO-3G` }) : null;
+  let flowEpoch = -1;
   const wDyn = device({ id: 'dynamics', eyebrow: 'DYNAMICS', status: '' });
   rack.appendChild(wDyn.root);
   const dynamics = createDynamics(wDyn.body, {
@@ -2404,6 +2416,7 @@ export async function boot(dom) {
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
+  let molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
   let orbitals = null, states = null, register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
@@ -2446,7 +2459,7 @@ export async function boot(dom) {
      PRODUCERS of its named models; it is the only module that touches the field's two molecular setters, and the
      only caller of the view road above, so the observable comes back to the user by the same rule whichever model
      let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
-  const molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
+  molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
   const wChem = device({ id: 'chem', eyebrow: 'CHEMISTRY', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // a first visit must not pay for a 7-AO solve behind furniture
@@ -2645,6 +2658,12 @@ export async function boot(dom) {
       { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (states ? states.knobs.morph() : null),
         hint: 'where the STATES register plays on the path from store A to store B (MORPH must be on)',
         get: () => (states ? states.morph : 0), set: (v) => { if (states) { states.setMorphValue(v); setKnob(states.knobs.morph(), states.morph); } } },
+      { id: 'reg.e0', label: 'DRIVE E₀', unit: ' a.u.', map: 'log', min: 1e-4, max: 0.2, def: 0.01, group: 'state', knob: () => (states ? states.knobs.driveE() : null),
+        hint: 'the STATES drive’s field amplitude — a live knob of the running propagation, never a restart',
+        get: () => (states ? states.drive.e0 : 0.01), set: (v) => { if (states) { states.setDriveParam('e0', v); setKnob(states.knobs.driveE(), states.drive.e0); } } },
+      { id: 'reg.w', label: 'DRIVE ω', unit: ' Eh', map: 'log', min: 0.05, max: 3, def: 0.4, group: 'state', knob: () => (states ? states.knobs.driveW() : null),
+        hint: 'the STATES drive’s carrier frequency — sweep it through a stick to watch the resonance',
+        get: () => (states ? states.drive.omega : 0.4), set: (v) => { if (states) { states.setDriveParam('omega', v); setKnob(states.knobs.driveW(), states.drive.omega); } } },
       ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.amp${i + 1}`, label: `REG |b|² ${i + 1}`, map: 'linear', min: 0, max: 1, def: 0, group: 'state',
         knob: () => (states ? states.knobs.pop(i) : null), hint: `the population of lane ${i + 1} of the STATES register (lane 1 is S₀)`,
         get: () => (states ? states.slotAmp(i) : 0), set: (v) => { if (states) { states.setSlotAmp(i, v); setKnob(states.knobs.pop(i), states.slotAmp(i)); } } })),
@@ -5636,6 +5655,8 @@ export async function boot(dom) {
       clear() { return states.clear(); }, norm() { return states.norm(); }, setAmp(k, v) { return states.setAmp(k, v); }, setPhase(k, v) { return states.setPhase(k, v); },
       preset(name) { return states.preset(name); }, play(k) { return states.play(k); }, store(w) { return states.store(w); },
       setMorph(on, s) { return states.setMorph(on, s); }, setView(v) { return states.setView(v); }, setRef(v) { return states.setRef(v); },
+      setFlow(v) { return states.setFlow(v); }, get flowOn() { return states.flowOn; }, flowState() { return flowTracers ? { on: flowTracers.on, ...flowTracers.state } : null; },
+      setDrive(v) { return states.setDrive(v); }, setDriveParam(k, v) { return states.setDriveParam(k, v); }, tune() { return states.tune(); }, get drive() { return states.drive; },
       setOn(v) { return states.setOn(v); }, get on() { return states.on; },
       ladder() { return states.ladder(); }, state() { return states.state(); }, save() { return states.save(); }, load(r) { return states.load(r); },
     },

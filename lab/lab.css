@@ -411,6 +411,11 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 .reg-bar .trig.on { color: var(--acc); }
 .reg-morph { align-items: center; justify-content: space-between; }
 .reg-morph .k { flex: 0 0 auto; }
+.reg-drive { align-items: center; }
+.reg-drive .sel { flex: 1 1 0; min-width: 0; }
+.reg-drive .trig { flex: 0 0 auto; padding: 0 8px; }
+.reg-drive .k { flex: 0 0 auto; }
+.sp-rows.reg-driven .fd, .sp-rows.reg-driven .k { pointer-events: none; }   /* under the DRIVE the lanes are read-outs: |b_K(t)|² and arg b_K(t) */
 .sp-rows.reg-morphing { opacity: .45; }            /* MORPH is playing the A → B path: the lanes are not what the field shows */
 .segw.off { opacity: .4; pointer-events: none; }
 /* ORBITALS' register lane: a .row, not the 7-column .sp-row grid — two dials and an × beside the orbital's name */
@@ -425,9 +430,9 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 .pk-c:active { background: var(--glass-press); }
 
 /* ── frontier: the vortex overlay, the orbit spheres, the ladder plots ──── */
-#fieldlines, #vortex, #particles, #kepler { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 5; }
+#fieldlines, #vortex, #particles, #flow, #kepler { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 5; }
 #fieldlines { z-index: 4; }   /* the classical field sits UNDER the quantum overlays */
-#particles { z-index: 6; }
+#particles, #flow { z-index: 6; }
 #kepler { z-index: 7; }
 /* H: the interface hides, the stage takes the whole window */
 

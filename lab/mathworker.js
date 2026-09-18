@@ -41,6 +41,8 @@ import { h2CurveTable } from './h2ci.js';
 import { moleculeRHF, registerRecord, BASIS_FILES } from './rhf-molecule.js';
 import { rpa } from './rpa-inspector.js';
 import { canonicaliseSpectrum, dipoleFamily, coordinateFamily } from './canon-gauge.js';
+import { sin2Pulse } from './modrive.js';
+import { eigSym } from './h2ci.js';
 import { fieldShells } from './molecular-field.js';
 import { createRTHF } from './density.js';
 import { spectrum, peaks } from './absorb.js';
@@ -72,7 +74,7 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
 const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
@@ -129,6 +131,9 @@ function work(m) {
     else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.states') { out = chemStates(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.state.vectors') { out = chemStateVectors(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.drive.init') { out = chemDriveInit(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.drive.run') { out = chemDriveRun(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.drive.set') { out = chemDriveSet(m); }
     else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
@@ -148,6 +153,9 @@ function work(m) {
  *   chem.spectrum     { atoms, basis, charge }                           → STAGE TWO: the RPA roots and the TDA ladder of that ground state
  *   chem.states       { atoms, basis, charge }                           → the STATE REGISTER's ladder: the TDA states in the CANONICAL GAUGE (ω, f, μ, cluster, pivot) + the MO position matrices
  *   chem.state.vectors { ks: [K…] }                                     → the canonical X^K amplitude vectors of those states, nocc·nvir numbers each
+ *   chem.drive.init   { pol, omega, e0, envelope, duration, phase, dt, t0, lanes } → the TD-CIS drive on the FULL singles space, at t0
+ *   chem.drive.run    { to, maxSteps }                                  → steps the driven state to clock time `to` (either direction): c₀, Z, populations, norm
+ *   chem.drive.set    { e0, omega, phase }                              → the live knobs of a running drive — a modulation target must not cost a re-init
  *   chem.rt.init      { atoms, basis, charge, dt, integrator, kick: { axis, kappa }, restartEvery } → the kicked t = 0 state
  *   chem.rt.run       { steps }                                          → Re D, the dipole trace of those steps, invariants
  *   chem.rt.reset     {}                                                 → back to the kicked t = 0 state, trace cleared
@@ -195,6 +203,7 @@ function ensureSolve(m = {}) {
     timings: { integrals: sol.timings.integrals, scf: tGround, rpa: null },
     stability: wireStability(sol.stability), solutions: (sol.solutions || []).map(wireSolution) };
   chemSol = { key, sol, I, ground, spectrum: null, R: null, states: null, atoms, basis, charge }; chemKey = key;
+  driveState = null;                                                          // a drive belongs to the molecule it was built on
   return chemSol;
 }
 /* THE STABILITY VERDICT ON THE WIRE.  stabilityHessian's `lowestApB`/`lowestAmB` are lazy getters and a structured
@@ -269,6 +278,115 @@ export function chemStateVectors(m = {}) {
   ks.forEach((k, r) => X.set(st.X.subarray(k * st.d, (k + 1) * st.d), r * st.d));
   return { hash: chemSol.ground.hash, ks, count: st.d, X };
 }
+/* ── THE DRIVE (MOLECULAR WAVES stage 5; JUDGMENT.md §3, proving/LEDGER.md Proposition 5) ───────────────────────
+ * TD-CIS in the length gauge the project already uses, on the WHOLE singles space (1 + n_o n_v states):
+ *
+ *     i ḃ = [ diag(0, ω_K) + E(t) · R ] b ,      R_AB = Σ_pq γ^{AB}_pq ⟨p| r |q⟩
+ *     R_0K = μ_K ,   R_KL = Σ X^K_ia X^L_jb (δ_ij r_ab − δ_ab r_ji) ,   ⟨0|R|0⟩ dropped everywhere (a global phase)
+ *
+ * It is hydrogen's register equation with a different table, so it resonates WHERE THE STICKS STAND and with their
+ * strengths — which the frozen-orbital drives of the rival plan could not (they resonate at orbital gaps).
+ * THE STEP IS STRANG AND EXACTLY UNITARY: e^{−iH₀Δt/2} · U e^{−iE r Δt} Uᵀ · e^{−iH₀Δt/2} with R = U r Uᵀ diagonalised
+ * ONCE per axis, E taken at the midpoint.  Two matrix–vector products a step (four for a circular field, where R_a
+ * and R_b do not commute and the split is symmetric in them); the norm is conserved to round-off, the error is
+ * second order, and a NEGATIVE Δt is the exact inverse, so a scrub backwards is a real un-propagation. */
+let driveState = null;
+function driveOperators(c, q) {
+  const st = c.states; st.Reig = st.Reig || [null, null, null];
+  if (st.Reig[q]) return st.Reig[q];
+  const { n, nocc, nvir, d, X, rMO } = st, r = rMO[q], N = d + 1, R = new Float64Array(N * N), M = new Float64Array(d);
+  for (let K = 0; K < d; K++) {
+    const XK = X.subarray(K * d, (K + 1) * d);
+    for (let j = 0; j < nocc; j++) for (let b = 0; b < nvir; b++) {              // M_jb = Σ_a X_ja r_ab − Σ_i X_ib r_ji
+      let sacc = 0;
+      for (let a = 0; a < nvir; a++) sacc += XK[j * nvir + a] * r[(nocc + a) * n + nocc + b];
+      for (let i = 0; i < nocc; i++) sacc -= XK[i * nvir + b] * r[j * n + i];
+      M[j * nvir + b] = sacc;
+    }
+    for (let L = K; L < d; L++) { let v = 0; const XL = X.subarray(L * d, (L + 1) * d); for (let p = 0; p < d; p++) v += M[p] * XL[p]; R[(K + 1) * N + L + 1] = R[(L + 1) * N + K + 1] = v; }
+    R[K + 1] = R[(K + 1) * N] = st.mu[3 * K + q];                                // R_0K = μ_Kq
+  }
+  const e = eigSym(R, N);
+  st.Reig[q] = { N, values: Float64Array.from(e.values), U: e.vectors, R };
+  return st.Reig[q];
+}
+const POLS = { x: [0], y: [1], z: [2], 'xy+': [0, 1, +1], 'xy-': [0, 1, -1], 'yz+': [1, 2, +1], 'yz-': [1, 2, -1], 'zx+': [2, 0, +1], 'zx-': [2, 0, -1] };
+function driveField(D) {
+  const { e0, omega, phase, envelope, duration, t0 } = D;
+  if (envelope === 'pulse') {
+    const a = sin2Pulse({ amplitude: e0, omega, duration, start: t0, phase }), b = sin2Pulse({ amplitude: e0 * (D.sense || 0), omega, duration, start: t0, phase: phase - Math.PI / 2 });
+    return [a, b];
+  }
+  return [(t) => e0 * Math.cos(omega * (t - t0) + phase), (t) => (D.sense || 0) * e0 * Math.sin(omega * (t - t0) + phase)];
+}
+export function chemDriveInit(m = {}) {
+  if (!chemSol || !chemSol.states) throw new Error('chem: no states in this worker yet — chem.states first');
+  const pol = POLS[m.pol || 'x']; if (!pol) throw new Error(`chem: drive polarisation must be one of ${Object.keys(POLS).join(', ')}`);
+  const st = chemSol.states, N = st.d + 1, dt = m.dt === undefined ? 0.05 : +m.dt;
+  if (!(dt > 0)) throw new Error('chem: drive dt must be positive');
+  const D = { pol: m.pol || 'x', axes: pol.slice(0, pol.length === 3 ? 2 : 1), sense: pol.length === 3 ? pol[2] : 0, ops: null,
+    e0: +m.e0 || 0, omega: Math.max(0, +m.omega || 0), phase: +m.phase || 0, envelope: m.envelope === 'pulse' ? 'pulse' : 'cw',
+    duration: Math.max(1e-6, +m.duration || 200), dt, t0: +m.t0 || 0, t: +m.t0 || 0, N, steps: 0,
+    br: new Float64Array(N), bi: new Float64Array(N), cr: new Float64Array(N), ci: new Float64Array(N), hash: chemSol.ground.hash };
+  D.ops = D.axes.map((q) => driveOperators(chemSol, q));
+  let n2 = 0;
+  for (const l of (Array.isArray(m.lanes) ? m.lanes : [])) { const k = (l.key | 0) + 1; if (k < 0 || k >= N) continue; D.br[k] += +l.re || 0; D.bi[k] += +l.im || 0; }
+  for (let k = 0; k < N; k++) n2 += D.br[k] ** 2 + D.bi[k] ** 2;
+  if (!(n2 > 0)) { D.br[0] = 1; n2 = 1; }
+  const inv = 1 / Math.sqrt(n2); for (let k = 0; k < N; k++) { D.br[k] *= inv; D.bi[k] *= inv; }
+  D.field = driveField(D);
+  driveState = D;
+  return driveReply(D, 0);
+}
+function driveStep(D, h) {
+  const { N, br, bi, cr, ci } = D, st = chemSol.states, tm = D.t + h / 2;
+  const free = (tau) => { for (let k = 1; k < N; k++) { const ph = -st.omega[k - 1] * tau, c = Math.cos(ph), sn = Math.sin(ph), x = br[k], y = bi[k]; br[k] = x * c - y * sn; bi[k] = x * sn + y * c; } };
+  const kick = (op, theta) => {
+    if (theta === 0) return;
+    const U = op.U, r = op.values;
+    for (let k = 0; k < N; k++) { let xr = 0, xi = 0; for (let i = 0; i < N; i++) { const u = U[i * N + k]; xr += u * br[i]; xi += u * bi[i]; } const ph = -theta * r[k], c = Math.cos(ph), sn = Math.sin(ph); cr[k] = xr * c - xi * sn; ci[k] = xr * sn + xi * c; }
+    for (let i = 0; i < N; i++) { let xr = 0, xi = 0; const row = i * N; for (let k = 0; k < N; k++) { const u = U[row + k]; xr += u * cr[k]; xi += u * ci[k]; } br[i] = xr; bi[i] = xi; }
+  };
+  free(h / 2);
+  if (D.ops.length === 1) kick(D.ops[0], D.field[0](tm) * h);
+  else { const ea = D.field[0](tm) * h, eb = D.field[1](tm) * h; kick(D.ops[0], ea / 2); kick(D.ops[1], eb); kick(D.ops[0], ea / 2); }
+  free(h / 2);
+  D.t += h; D.steps++;
+}
+function driveReply(D, taken) {
+  const st = chemSol.states, d = st.d, N = D.N, Zr = new Float64Array(d), Zi = new Float64Array(d), pops = new Float32Array(d);
+  let n2 = D.br[0] ** 2 + D.bi[0] ** 2;
+  for (let K = 0; K < d; K++) {
+    const xr = D.br[K + 1], xi = D.bi[K + 1], p = xr * xr + xi * xi; pops[K] = p; n2 += p;
+    if (p < 1e-30) continue;
+    const X = st.X.subarray(K * d, (K + 1) * d);
+    for (let q = 0; q < d; q++) { Zr[q] += xr * X[q]; Zi[q] += xi * X[q]; }
+  }
+  return { hash: D.hash, t: D.t, steps: D.steps, taken, norm: n2, c0: [D.br[0], D.bi[0]], p0: D.br[0] ** 2 + D.bi[0] ** 2, Zr, Zi, pops,
+    field: [D.field[0](D.t), D.field[1](D.t)], N };
+}
+/** chem.drive.run — step to clock time `to`, forwards or backwards, at most maxSteps a request (the rest is `lag`) */
+export function chemDriveRun(m = {}) {
+  const D = driveState; if (!D || !chemSol || D.hash !== chemSol.ground.hash) throw new Error('chem: no drive in this worker — chem.drive.init first');
+  const to = Number.isFinite(m.to) ? +m.to : D.t, cap = Math.max(1, (m.maxSteps | 0) || 2000);
+  let taken = 0;
+  while (taken < cap && Math.abs(to - D.t) > 1e-12) { const gap = to - D.t, h = Math.sign(gap) * Math.min(D.dt, Math.abs(gap)); driveStep(D, h); taken++; }
+  const out = driveReply(D, taken); out.lag = to - D.t;
+  /* the amplitudes of the lanes the window names, so DRIVE OFF can freeze the driven state back into them */
+  if (Array.isArray(m.keys)) { out.laneRe = new Float64Array(m.keys.length); out.laneIm = new Float64Array(m.keys.length); m.keys.forEach((key, i) => { const k = (key | 0) + 1; if (k >= 0 && k < D.N) { out.laneRe[i] = D.br[k]; out.laneIm[i] = D.bi[k]; } }); }
+  return out;
+}
+/** chem.drive.set — the live knobs: E₀, ω and the carrier phase of a running drive (the envelope's clock is kept) */
+export function chemDriveSet(m = {}) {
+  const D = driveState; if (!D) return { ok: false };
+  if (Number.isFinite(m.e0)) D.e0 = +m.e0; if (Number.isFinite(m.omega)) D.omega = Math.max(0, +m.omega); if (Number.isFinite(m.phase)) D.phase = +m.phase;
+  D.field = driveField(D);
+  return { ok: true, e0: D.e0, omega: D.omega, phase: D.phase };
+}
+/** the position operator of one axis in the [S₀, S₁ …] basis (⟨0|R|0⟩ removed), for the gate */
+export function chemDriveOperator(q) { if (!chemSol || !chemSol.states) throw new Error('chem: no states yet'); const op = driveOperators(chemSol, q | 0); return { N: op.N, R: Float64Array.from(op.R) }; }
+/** the drive's state vector, for the gate: Schrödinger amplitudes over [S₀, S₁ …] */
+export function chemDriveAmplitudes() { const D = driveState; return D ? { re: Float64Array.from(D.br), im: Float64Array.from(D.bi), t: D.t, N: D.N } : null; }
 /** chem.solve — THE ARRAYS ARE BUILT FRESH EVERY CALL, never cached: the reply TRANSFERS their buffers, so a
     cached report would come back detached (zero-length) the second time the same molecule was asked for. */
 export function chemSolve(m = {}) {

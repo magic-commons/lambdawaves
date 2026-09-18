@@ -172,13 +172,7 @@ export function createStatesModel({ n, nocc, C, D0, rMO }) {
       for (let p = 0; p < d; p++) { Zr[p] += br * X[p]; Zi[p] += bi * X[p]; }
     }
     state.c0re = c0r; state.c0im = c0i; state.excited = ex;
-    blocks(dMO, Zr, Zi, 1);
-    const r2 = Math.SQRT2;
-    for (let i = 0; i < nocc; i++) for (let a = 0; a < nvir; a++) {               // √2 Re(c̄₀ Z), symmetric
-      const v = r2 * (c0r * Zr[i * nvir + a] + c0i * Zi[i * nvir + a]);
-      dMO[i * n + nocc + a] = v; dMO[(nocc + a) * n + i] = v;
-    }
-    for (let q = 0; q < 3; q++) { let s = 0; const r = q * n * n; for (let k = 0; k < n * n; k++) s -= dMO[k] * rMO[r + k]; state.dipole[q] = s; }   // electronic dipole = −Tr(ΔD r)
+    finish();
     if (ref === 'mean') {                                                         // subtract the stationary part: each level's own Z_c
       sMO.fill(0);
       const seen = new Set();
@@ -195,6 +189,25 @@ export function createStatesModel({ n, nocc, C, D0, rMO }) {
       for (let k = 0; k < n * n; k++) dMO[k] -= sMO[k];
     }
     return state;
+  }
+  /** ΔD_MO and the dipole from the current (c₀, Z): the half of evaluate() the DRIVE shares */
+  function finish() {
+    const r2 = Math.SQRT2, c0r = state.c0re, c0i = state.c0im;
+    blocks(dMO, Zr, Zi, 1);
+    for (let i = 0; i < nocc; i++) for (let a = 0; a < nvir; a++) {               // √2 Re(c̄₀ Z), symmetric
+      const v = r2 * (c0r * Zr[i * nvir + a] + c0i * Zi[i * nvir + a]);
+      dMO[i * n + nocc + a] = v; dMO[(nocc + a) * n + i] = v;
+    }
+    for (let q = 0; q < 3; q++) { let s = 0; const r = q * n * n; for (let k = 0; k < n * n; k++) s -= dMO[k] * rMO[r + k]; state.dipole[q] = s; }   // electronic dipole = −Tr(ΔD r)
+  }
+  /**
+   * evaluateZ(c0re, c0im, zr, zi) — the DRIVEN state: the worker propagates b over the whole singles space and sends
+   * the pair-space image Z = Σ_K b_K X^K with c₀ (already normalised, Schrödinger picture).  Same ΔD, same dipole.
+   */
+  function evaluateZ(c0re, c0im, zr, zi) {
+    dMO.fill(0); Zr.set(zr); Zi.set(zi); state.c0re = c0re; state.c0im = c0im; state.norm2 = 1;
+    let ex = 0; for (let p = 0; p < d; p++) ex += zr[p] * zr[p] + zi[p] * zi[p]; state.excited = ex;
+    finish(); return state;
   }
   /** ΔD_AO = C ΔD_MO Cᵀ into the f64 buffer; returns max |ΔD_AO| */
   function toAO() {
@@ -216,6 +229,24 @@ export function createStatesModel({ n, nocc, C, D0, rMO }) {
     for (let k = 0; k < n * n; k++) out32[k] = dAO[k] * s;
     return out32;
   }
+  /**
+   * flowMatrices(re, im) — the WHOLE one-particle density matrix in the AO basis for the current (c₀, Z), whatever
+   * reference the last evaluate() used: Re D_AO = D₀ + C ΔD_MO Cᵀ (against the ground state) and Im D_AO = C Im D_MO Cᵀ.
+   * This is what the current j and the density ρ of FLOW are made of (lab/molecular-flow.js).
+   */
+  const fMO = new Float64Array(n * n), fIm = new Float64Array(n * n);
+  function transform(Min, outAO) {
+    for (let u = 0; u < n; u++) for (let q = 0; q < n; q++) { let s = 0; const r = u * n; for (let p = 0; p < n; p++) s += C[r + p] * Min[p * n + q]; half[r + q] = s; }
+    for (let u = 0; u < n; u++) for (let w = 0; w < n; w++) { let s = 0; for (let q = 0; q < n; q++) s += half[u * n + q] * C[w * n + q]; outAO[u * n + w] = s; }
+  }
+  function flowMatrices(re, im) {
+    fMO.fill(0); blocks(fMO, Zr, Zi, 1);
+    const r2 = Math.SQRT2, c0r = state.c0re, c0i = state.c0im;
+    for (let i = 0; i < nocc; i++) for (let a = 0; a < nvir; a++) { const v = r2 * (c0r * Zr[i * nvir + a] + c0i * Zi[i * nvir + a]); fMO[i * n + nocc + a] = v; fMO[(nocc + a) * n + i] = v; }
+    transform(fMO, re); for (let k = 0; k < n * n; k++) re[k] += D0[k];
+    transform(imagMO(fIm), im);
+    return { re, im };
+  }
   /** Im D_MO for the current Z — the carrier of the current j (stage 6); D_pq = ⟨a†_p a_q⟩ throughout */
   function imagMO(out = new Float64Array(n * n)) {
     out.fill(0); const r2 = Math.SQRT2, c0r = state.c0re, c0i = state.c0im;
@@ -230,7 +261,7 @@ export function createStatesModel({ n, nocc, C, D0, rMO }) {
     has: (key) => key === GROUND || vectors.has(key),
     energy: (key) => energies.get(key),
     clear() { vectors.clear(); energies.clear(); energies.set(GROUND, 0); },
-    evaluate, product, imagMO, toAO,
+    evaluate, evaluateZ, product, imagMO, flowMatrices, toAO,
     get deltaMO() { return dMO; }, get deltaAO() { return dAO; }, get state() { return state; },
   };
 }

@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-09-18 23:05 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-09-18 23:42 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -43,9 +43,9 @@ Built 2026-09-18 23:05 UTC by tools/disk.mjs from `research/`: 55 documents inli
 37. [MATH-CHRONUSQ-PORTS-2026-09-11.md](#doc-37) · 2026-09-11 · 13 kB
 38. [MATH-H2O-2026-09-11.md](#doc-38) · 2026-09-11 · 161 kB
 39. [astra-2026-09-18/COVERAGE.md](#doc-39) · 2026-09-18 · 6 kB
-40. [molecular-waves-2026-09-18/JUDGMENT.md](#doc-40) · 2026-09-18 · 24 kB
+40. [molecular-waves-2026-09-18/JUDGMENT.md](#doc-40) · 2026-09-18 · 25 kB
 41. [molecular-waves-2026-09-18/proving/LEDGER.md](#doc-41) · 2026-09-18 · 44 kB
-42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 14 kB
+42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 15 kB
 43. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/ACCEPTANCE.md](#doc-43) · 2026-09-18 · 12 kB
 44. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/host-contract.md](#doc-44) · 2026-09-18 · 15 kB
 45. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/MANIFEST.md](#doc-45) · 2026-09-18 · 10 kB
@@ -12755,7 +12755,7 @@ Labour, per the standing dial: Opus builds stages 0 to 2 and proves the $\gamma$
 ### 8 · Open problems and conjectures
 
 1. CLOSED 2026-09-18: the $\gamma^{KL}$ formulas are proved and independently verified (`proving/LEDGER.md`).
-2. Continuity $\partial_t\rho+\nabla\cdot\mathbf j=0$ is exact for TDHF and TD-CIS in a complete basis and is violated in a finite one. The size of the defect in STO-3G is unmeasured. It should be shown as a diagnostic, never asserted as an identity.
+2. MEASURED 2026-09-18 (`tests/molecular-flow.test.mjs`), and larger than this document expected. On benzene's RING in STO-3G, $\lVert\partial_t\rho+\nabla\cdot\mathbf j\rVert/\lVert\partial_t\rho\rVert=1.19$ over 400 points, and the integrated current is parallel to the dipole's own rate of change ($\cos=0.99997$) but only $0.149$ of its size ($0.73$ for water's BEAT). △ Correction to this entry's first sentence: continuity is not restored by a complete one-particle basis alone, because the generator $PHP$ of TD-CIS is non-local through the projector $P$; it is a truncated-CI property as well as a basis one (Hermann, Pohl, Tremblay and co-workers discuss the same defect for truncated-CI flux densities; HEARD, not re-fetched). What is exact and gated: the convention and sign of $\mathbf j$, the sense of a ring current, its reversal with the quarter turn, the vanishing angular momentum of a linear slosh, and the constancy of $\int(xj_y-yj_x)$ in time. FLOW is therefore labelled: sense exact, magnitude qualitative in a minimal basis. Open: whether a larger basis (6-31+G\*) closes the magnitude gap the way it closes the length and velocity gauge gap.
 3. TDA and RPA ladders cross (benzene roots 2 to 4). A character-based matching between them, by maximal overlap of $X^{\rm TDA}$ with $X+Y$, is needed before any per-root comparison is displayed. Whether the overlap matching is unique inside degenerate blocks is open.
 4. Conjecture: for the 52 accepted molecules the TD-CIS bright lines lie above the RPA ones by a margin that shrinks with the HOMO–LUMO gap. Untested; cheap to tabulate once stage 2 lands.
 5. Whether the iPad needs any renderer work at all is a measurement, not a design question. It has not been made.
@@ -13261,6 +13261,13 @@ All four open items are settled as recommended.
 4. `chem.run(n)`, the scripted road, never sets `running`, so a scripted run is the `ground` model and the register would out-rank it. The flag now means "the tdhf model claims the field" and both roads must set it.
 5. CuH and ZnH₂ no longer converge in 200 cycles and the interface does not say so; they are refused for a different sentence. The refusal should name both facts.
 6. Benzene's remaining preparation cost is the AO to MO transform inside `hessianBlocks`, 0.6 s of 2.5 s. It is the next optimisation, separate from the register.
+
+### 13 · As built, stages 5 and 6 (2026-09-18)
+
+- THE DRIVE. A DRIVE switch, a polarisation menu (three axes, six circular senses), $\omega$ and $E_0$ knobs (both live: `chem.drive.set`, no restart), a CW or $\sin^2$ PULSE envelope, and $\omega\to$ LANE, which tunes to the selected lane's stick and its dipole's axis, or to the pair's plane for a degenerate level. The worker propagates the whole singles space by a Strang step with the position operator diagonalised once per axis: unitary to $10^{-12}$, second order (halving ratio $4.03$), and a negative step is its inverse, so scrubbing backwards un-propagates. Water's bright line reaches $0.99975$ at $\pi/\Omega$ with $\Omega=E_0\mu$; a circular field fills benzene's two lanes equally, a quarter turn apart. While it runs the lanes are read-outs; DRIVE OFF freezes the state back into them and says how much had leaked to states without a lane. Modulation targets `reg.e0`, `reg.w`.
+- FLOW. A FLOW switch puts 220 tracers on the stage riding $\mathbf v=\mathbf j/\rho$ of the register's density matrix (`lab/molecular-flow.js`, the particle overlay generalised to a pluggable source). Seeded by $\lvert\mathbf j\rvert$ and reborn where the current still runs. See `JUDGMENT.md` §8.2 for what is exact and what is qualitative.
+- Carry-overs closed: the frame loop asks the session whether the volume is molecular; a scripted `chem.run(n)` claims the field as the `tdhf` model and publishes as it; the refusal of CuH and ZnH₂ names their non-convergence.
+- Still open: the AO to MO transform (0.6 s of benzene's preparation); the canonical gauge for degenerate ORBITAL pairs; FLOW for the ORBITAL mode and for a TDHF run; the drive's excited-state absorption is unexplored; larger bases.
 
 
 

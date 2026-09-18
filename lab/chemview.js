@@ -349,7 +349,8 @@ export function createChem(host, api) {
    */
   const S = () => api.session || null;
   const molView = () => (view === 'orbital' ? 'real' : view === 'diff' ? 'real' : 'density');   // a signed Δρ is READ as 'real': two-colour lobes
-  const model = () => (running ? 'tdhf' : 'ground');
+  let scripted = false;                       // chem.run(n) is propagating: the tdhf model's products, whichever road asked
+  const model = () => (running || scripted ? 'tdhf' : 'ground');
   const product = { kind: 'density', matrix: null, view: 'density', hash: null, solution: -1 };   // ONE record, reused: the frame loop allocates nothing
   function pushField() {
     const s = S(); if (!s) return false;
@@ -670,6 +671,11 @@ export function createChem(host, api) {
       if (!rt) { const k = await kick(); if (!k) return null; }
       const want = (rt ? rt.steps : 0) + Math.max(1, Math.round(n || speed));
       const t0 = Date.now();
+      /* THE SCRIPTED ROAD CLAIMS THE FIELD TOO.  `running` is the RUN switch; this road never set it, so a scripted
+         propagation was the `ground` model and the register out-ranked a run in progress.  The claim is the tdhf
+         model's, whichever road is propagating, and it is handed back in `finally` unless the switch holds it. */
+      const mine = !running; if (mine) { scripted = true; if (S()) S().claim('tdhf', true, 'a scripted RT run is propagating the density'); }
+      try {
       while (rt && rt.steps < want && Date.now() - t0 < 120000) {
         if (!inflight) { const left = want - rt.steps; inflight = true;
           /* eslint-disable no-await-in-loop */
@@ -683,6 +689,7 @@ export function createChem(host, api) {
           pushMatrix();
         } else await new Promise((res) => setTimeout(res, 8));
       }
+      } finally { if (mine) { scripted = false; if (!running && S()) S().claim('tdhf', false, 'the scripted RT run has finished'); pushMatrix(); } }   // and the card's own model repaints the last density
       refresh(); requestSpectrum(true);
       return this.state();
     },

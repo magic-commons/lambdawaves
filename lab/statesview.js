@@ -16,11 +16,18 @@
  * axis their transition dipole lies along, and the y lane's phase knob is the whole ring control —
  * 0° a diagonal slosh, 90° a ring current, 180° the other diagonal, 270° the ring the other way.
  *
+ * THE DRIVE (stage 5).  Free evolution only turns phases; a DRIVE moves populations, for a physical reason: the
+ * length-gauge field E(t)·r acting on the whole singles space, propagated in the chemistry worker by an exactly
+ * unitary Strang step (mathworker.js `chem.drive.*`).  It resonates where the sticks stand — tune ω to a lane and
+ * the population flops at Ω = E₀μ — and a circular field on a degenerate pair DRIVES the ring the RING preset only
+ * poses.  While it runs the lanes are read-outs: the faders show |b_K(t)|², the needles arg b_K(t).
+ *
  * THE FIELD.  CHANGE (default) hands the session a `signed` product, ΔD = Re D(t) − D_ref, shown as two-colour
  * lobes; DENSITY hands it Re D(t), honest and quiet (the 1s cores set the scale).  REF picks the reference of
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB } from './mir/kit.js';
+import { createFlow } from './molecular-flow.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
 const TAU = 2 * Math.PI;
@@ -47,6 +54,10 @@ export function createStates(host, api) {
   const product = { kind: 'signed', matrix: null, view: 'real', hash: null, solution: 0 };
   const evalList = [];                             // reused: what evaluate() is handed each frame
   const trail = new Float64Array(3 * 256); let trailN = 0, trailAt = 0, trailT = NaN;
+  /* FLOW (stage 6): the current's source for the stage's tracers, rebuilt once a frame from the same (c₀, Z) */
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+  /* the drive: its knobs, and the pump's one outstanding request */
+  const drive = { on: false, pol: 'x', omega: 0.4, e0: 0.01, envelope: 'cw', duration: 400, phase: 0, ready: false, busy: false, dirty: false, last: null, seq: 0, sent: 0 };
 
   /* ── the top: ladder + scope ──────────────────────────────────────────────────────────────────── */
   const top = el('div', 'row tight reg-top', host);
@@ -97,6 +108,29 @@ export function createStates(host, api) {
   const refSeg = seg({ label: 'REF', value: 'ground', options: [{ id: 'ground', label: 'GROUND' }, { id: 'mean', label: 'MEAN' }],
     onChange: (v) => setRef(v) });
   vr.appendChild(viewSeg.root); vr.appendChild(refSeg.root);
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage, riding the molecule’s current v = j/ρ — the many-electron carrier of phase. Its sense and symmetry are exact; its magnitude is qualitative in a minimal basis', onChange: (v) => setFlow(v) });
+  vr.appendChild(flowSw.root);
+
+  /* ── the drive ────────────────────────────────────────────────────────────────────────────────── */
+  const dr = el('div', 'row tight reg-drive', host);
+  const driveSw = sw({ label: 'DRIVE', value: false, title: 'Apply the field E(t)·r to the whole molecule: populations move, at the Rabi rate Ω = E₀μ when ω sits on a stick', onChange: (v) => setDrive(v) });
+  dr.appendChild(driveSw.root);
+  const polSel = el('select', 'sel', dr); polSel.setAttribute('aria-label', 'drive polarisation'); polSel.title = 'The field’s polarisation: linear along an axis, or circular in a plane (⟲ and ⟳ drive opposite ring currents)';
+  for (const [id, txt] of [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']]) { const o = el('option', '', polSel, txt); o.value = id; }
+  polSel.addEventListener('change', () => setDriveParam('pol', polSel.value));
+  const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune the drive to the selected lane: its ω, and the axis (or the plane, for a degenerate pair) of its dipole';
+  tuneBtn.addEventListener('click', () => tune());
+  const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
+  const dk = el('div', 'row tight reg-drive', host);
+  const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
+    title: 'The drive’s carrier frequency in hartree — resonance is a stick of the ladder', onInput: (v) => setDriveParam('omega', v) });
+  const eK = knob({ label: '<m>E₀</m>', aria: 'drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),
+    title: 'The field amplitude in atomic units; on resonance the population flops at Ω = E₀μ', onInput: (v) => setDriveParam('e0', v) });
+  const durK = knob({ label: 'PULSE', aria: 'pulse duration', min: 10, max: 4000, value: drive.duration, log: true, unit: ' a.u.', fmt: (v) => v.toFixed(0),
+    title: 'The sin² pulse’s duration — a π-pulse is π/Ω long', onInput: (v) => setDriveParam('duration', v) });
+  dk.appendChild(wK.root); dk.appendChild(eK.root); dk.appendChild(durK.root); dk.appendChild(envSeg.root);
+  const roDrive = readout({ label: 'DRIVE', cls: 'wide', value: 'off', sub: 'tune ω to a lane, then DRIVE: the population flops at Ω = E₀μ' });
+  el('div', 'row tight', host).appendChild(roDrive.root);
 
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
@@ -122,7 +156,7 @@ export function createStates(host, api) {
     return base + 'abcdefgh'[key - first];
   }
   const energyOf = (key) => (key === GROUND ? 0 : ladder.omega[key]);
-  const touch = () => { version++; pushedV = -1; };
+  const touch = () => { version++; pushedV = -1; if (drive.on) drive.dirty = true; };   // an edit under a running drive restarts it from the edited register
   const keys = () => [...lanes.keys()].sort((a, b) => a - b);
   const sum2 = () => { let s = 0; for (const c of lanes.values()) s += c.amp * c.amp; return s; };
 
@@ -212,6 +246,12 @@ export function createStates(host, api) {
     rowsEl.classList.toggle('reg-morphing', morphOn);
     touch(); refresh(); api.repaint(); return morphOn;
   }
+  function setFlow(v) {
+    flowOn = !!v && !!model && !!sol; flowSw.set(flowOn);
+    if (flowOn && !flow) { flow = createFlow(sol.shells); flowRe = new Float64Array(model.n * model.n); flowIm = new Float64Array(model.n * model.n); flowEpoch++; }
+    if (flowOn) { pushedV = -1; if (on) push(now(), true); }
+    api.repaint(); return flowOn;
+  }
   function setView(v) { view = v === 'density' ? 'density' : 'change'; viewSeg.set(view); refSeg.root.classList.toggle('off', view !== 'change'); touch(); if (on) push(now(), true); api.repaint(); return view; }
   function setRef(v) { ref = v === 'mean' ? 'mean' : 'ground'; refSeg.set(ref); touch(); if (on) push(now(), true); api.repaint(); return ref; }
 
@@ -229,12 +269,18 @@ export function createStates(host, api) {
   function push(t, force) {
     const s = S(); if (!s || !model || !sol) return false;
     if (!Number.isFinite(t)) t = 0;                                               // a clock that has not ticked yet must not put NaN in a density
+    if (drive.on) { if (drive.last) return publishState(model.state, t); return false; }   // the pump owns the state while the drive runs
     if (!force && t === pushedT && version === pushedV) return false;
     const st = model.evaluate(playing(), t, view === 'change' ? ref : 'ground');
+    return publishState(st, t);
+  }
+  function publishState(st, t) {
+    const s = S();
     product.kind = view === 'density' ? 'density' : 'signed';
     product.view = view === 'density' ? 'density' : 'real';
     product.matrix = model.product(product.kind); product.hash = sol.hash; product.solution = Number.isFinite(sol.seq) ? sol.seq : 0;
     if (!s.publish('states', product)) return false;
+    if (flowOn && flow) { model.flowMatrices(flowRe, flowIm); flow.set(flowRe, flowIm); }
     if (t !== trailT) { trail[3 * trailAt] = st.dipole[0]; trail[3 * trailAt + 1] = st.dipole[1]; trail[3 * trailAt + 2] = st.dipole[2]; trailAt = (trailAt + 1) % 256; if (trailN < 256) trailN++; trailT = t; }
     pushedT = t; pushedV = version;
     return true;
@@ -248,6 +294,7 @@ export function createStates(host, api) {
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
       if (S()) S().claim('states', true, 'the STATES register has the field');
     } else if (!want && on) {
+      if (drive.on) setDrive(false);
       on = false; onSw.set(false); pushedT = NaN; pushedV = -1;
       if (S()) S().claim('states', false, 'REGISTER OFF');
       api.repaint();
@@ -260,7 +307,92 @@ export function createStates(host, api) {
     const c = C(); if (!c || !c.setPopulations) return;
     if (!on) { c.setPopulations(null); return; }
     const n2 = sum2() || 1;
-    c.setPopulations((k) => { const l = lanes.get(k); return l ? l.amp * l.amp / n2 : 0; });
+    c.setPopulations((k) => (drive.on && drive.last ? drive.last.pops[k] || 0 : (lanes.get(k) ? lanes.get(k).amp ** 2 / n2 : 0)));
+  }
+
+  /* ── THE DRIVE's PUMP: one outstanding request, like CHEMISTRY's RT pump — no propagation on this thread ── */
+  function initDrive(t) {
+    if (!api.solve || !ladder) return;
+    const seq = ++drive.seq; drive.busy = true; drive.dirty = false; drive.ready = false;
+    const list = playing().map((c) => { const ph = -energyOf(c.key) * t, cs = Math.cos(ph), sn = Math.sin(ph); return { key: c.key, re: c.re * cs - c.im * sn, im: c.re * sn + c.im * cs }; });   // Schrödinger picture at t
+    Promise.resolve(api.solve({ op: 'chem.drive.init', pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase, dt: 0.05, t0: t, lanes: list }, () => null, (r) => r))
+      .then((r) => { if (seq !== drive.seq) return; drive.busy = false; if (!r || r.error || r.hash !== ladder.hash) { setDrive(false); status('the drive needs the chemistry worker' + (r && r.error ? ': ' + r.error : ''), 'warn'); return; } drive.ready = true; land(r); })
+      .catch(() => { if (seq === drive.seq) { drive.busy = false; setDrive(false); } });
+  }
+  function land(r) {
+    drive.last = r;
+    model.evaluateZ(r.c0[0], r.c0[1], r.Zr, r.Zi);
+    push(r.t, true);
+    const ks = keys();
+    for (const [k, L] of rows) { const p = k === GROUND ? r.p0 : r.pops[k]; if (Math.abs(L.pop.get() - p) > 1e-6) L.pop.set(p); }
+    if (r.laneRe) ks.forEach((k, i) => { const L = rows.get(k); if (L) L.ph.set(((Math.atan2(r.laneIm[i], r.laneRe[i]) % TAU) + TAU) % TAU); });
+    drive.laneKeys = ks; publishPopulations(); api.repaint();
+  }
+  function pumpDrive(t) {
+    if (!drive.on || drive.busy) return;
+    if (drive.dirty || !drive.ready) { initDrive(t); return; }
+    if (drive.last && Math.abs(t - drive.last.t) < 1e-12) return;
+    const seq = drive.seq; drive.busy = true;
+    Promise.resolve(api.solve({ op: 'chem.drive.run', to: t, maxSteps: 1500, keys: keys() }, () => null, (r) => r))
+      .then((r) => { if (seq !== drive.seq) return; drive.busy = false; if (!r || r.error) { setDrive(false); return; } land(r); })
+      .catch(() => { if (seq === drive.seq) { drive.busy = false; setDrive(false); } });
+  }
+  function setDrive(v) {
+    const want = !!v;
+    if (want && !drive.on) {
+      if (!on && !setOn(true)) { driveSw.set(false); return false; }
+      if (morphOn) setMorph(false, morphS);
+      drive.on = true; drive.last = null; drive.ready = false; drive.dirty = false; driveSw.set(true);
+      rowsEl.classList.add('reg-driven'); refSeg.root.classList.add('off');
+      initDrive(now());
+    } else if (!want && drive.on) {
+      /* DRIVE OFF freezes the driven state into the lanes it has: |b_K| and the phase that continues it in closed form.
+         What leaked into states without a lane is dropped, and the readout says how much. */
+      const r = drive.last; drive.on = false; drive.seq++; drive.busy = false; driveSw.set(false);
+      rowsEl.classList.remove('reg-driven'); refSeg.root.classList.toggle('off', view !== 'change');
+      if (r && r.laneRe && drive.laneKeys) {
+        let kept = 0;
+        drive.laneKeys.forEach((k, i) => { const c = lanes.get(k); if (!c) return; const a = Math.hypot(r.laneRe[i], r.laneIm[i]); c.amp = Math.min(1, a); c.phase = (((Math.atan2(r.laneIm[i], r.laneRe[i]) + energyOf(k) * r.t) % TAU) + TAU) % TAU; kept += a * a; });
+        status(`drive off — the lanes keep ${(100 * kept).toFixed(1)} % of the driven state; ${(100 * Math.max(0, 1 - kept)).toFixed(1)} % had leaked to states without a lane`, 'ok');
+      }
+      drive.last = null; version++; pushedV = -1; syncLanes(); paint(); refreshDrive(); publishPopulations();
+      if (on) push(now(), true);
+      api.repaint();
+    } else driveSw.set(drive.on);
+    refreshDrive();
+    return drive.on;
+  }
+  function setDriveParam(name, v) {
+    if (name === 'pol') { drive.pol = String(v); polSel.value = drive.pol; if (drive.on) drive.dirty = true; }
+    else if (name === 'envelope') { drive.envelope = v === 'pulse' ? 'pulse' : 'cw'; envSeg.set(drive.envelope); if (drive.on) drive.dirty = true; }
+    else if (name === 'duration') { drive.duration = Math.min(4000, Math.max(10, +v || 400)); if (drive.on) drive.dirty = true; }
+    else if (name === 'omega' || name === 'e0' || name === 'phase') {
+      drive[name] = name === 'omega' ? Math.min(3, Math.max(0.05, +v)) : name === 'e0' ? Math.min(0.2, Math.max(1e-4, +v)) : +v || 0;
+      /* the live knobs: no re-init, so an LFO on E₀ or ω is a modulation and not a restart */
+      if (drive.on && drive.ready && api.solve) Promise.resolve(api.solve({ op: 'chem.drive.set', e0: drive.e0, omega: drive.omega, phase: drive.phase }, () => null, (r) => r)).catch(() => {});
+    }
+    refreshDrive(); api.repaint();
+  }
+  /** tune to the selected lane: its ω; its dipole's axis; for a bright degenerate pair the pair's plane, circular */
+  function tune() {
+    const k = selected !== GROUND && lanes.has(selected) ? selected : keys().find((q) => q !== GROUND);
+    if (k === undefined || !ladder) { status('ω → LANE: add a state first', 'warn'); return false; }
+    setDriveParam('omega', ladder.omega[k]); wK.set(drive.omega);
+    if (isBright(k)) {
+      if (ladder.size[k] === 2) { let first = k; while (first > 0 && ladder.cluster[first - 1] === ladder.cluster[k]) first--; const a = axisOf(first), b = axisOf(first + 1), id = AX[a] + AX[b] + '+'; setDriveParam('pol', { 'xy+': 'xy+', 'yx+': 'xy-', 'yz+': 'yz+', 'zy+': 'yz-', 'zx+': 'zx+', 'xz+': 'zx-' }[id] || AX[a]); }
+      else setDriveParam('pol', AX[axisOf(k)]);
+    }
+    return true;
+  }
+  function refreshDrive() {
+    const k = selected !== GROUND && lanes.has(selected) ? selected : keys().find((q) => q !== GROUND);
+    const mu = k !== undefined && ladder ? Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]) : 0, Om = drive.e0 * mu;
+    const rabi = mu > 1e-6 ? `Ω = E₀μ = ${Om.toExponential(2)} · π/Ω = ${(Math.PI / Om).toFixed(0)} a.u. on ${label(k)}` + (Math.abs(drive.omega - ladder.omega[k]) > 5e-4 ? ` · detuned ${(drive.omega - ladder.omega[k]).toFixed(4)}` : ' · on resonance') : 'the selected lane is dark: a dipole field cannot move it directly';
+    if (!drive.on) { roDrive.set('off', ''); roDrive.setSub(rabi); return; }
+    const r = drive.last;
+    roDrive.set(r ? `P₀ ${r.p0.toFixed(4)} · E ${(r.field[0]).toExponential(2)}` : 'preparing…', r ? 'live' : 'warn');
+    const held = r && drive.laneKeys ? drive.laneKeys.reduce((s0, key, i) => s0 + r.laneRe[i] ** 2 + r.laneIm[i] ** 2, 0) : 1;
+    roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)} %` + (Math.abs(r.lag) > 1e-9 ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') : rabi);
   }
 
   /* ── the lanes: hydrogen's .sp-row, over the same kit nodes ───────────────────────────────────── */
@@ -437,10 +569,11 @@ export function createStates(host, api) {
     const fresh = !sol || !s || s.hash !== sol.hash || s.seq !== sol.seq;
     sol = s || null;
     if (!fresh) return;
-    ladder = null; model = null; pending.clear(); rows.forEach((L) => L.root.remove()); rows.clear();
+    ladder = null; model = null; flow = null; flowOn = false; flowSw.set(false); pending.clear(); rows.forEach((L) => L.root.remove()); rows.clear();
     lanes.clear(); lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND;
     storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); trailN = 0; trailAt = 0;
     pushedT = NaN; pushedV = -1; touch();
+    if (drive.on) { drive.on = false; drive.seq++; drive.busy = false; drive.last = null; driveSw.set(false); rowsEl.classList.remove('reg-driven'); }
     if (on) setOn(false);
     paint(); paintScope(); refresh();
     if (sol) fetchLadder();
@@ -470,6 +603,8 @@ export function createStates(host, api) {
     if (!on) return false;
     const why = refusal();
     if (why) { status('register off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (!Number.isFinite(t)) t = 0;
+    if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }
     const moved = push(t);
     if (active && shown) { if (moved) { spin(t); paintScope(); } paintMu(t); }
     return moved;
@@ -493,10 +628,13 @@ export function createStates(host, api) {
     if (storeA) request([...storeA.keys()]); if (storeB) request([...storeB.keys()]);
     view = r.view === 'density' ? 'density' : 'change'; ref = r.ref === 'mean' ? 'mean' : 'ground'; viewSeg.set(view); refSeg.set(ref);
     morphS = Math.min(1, Math.max(0, +r.morph || 0)); morphK.set(morphS); morphOn = !!r.morphOn && !!storeA && !!storeB; morphSw.set(morphOn);
+    if (r.flow !== undefined) setFlow(!!r.flow);
+    if (r.drive) { for (const k of ['pol', 'envelope', 'duration', 'omega', 'e0', 'phase']) if (r.drive[k] !== undefined) setDriveParam(k, r.drive[k]); wK.set(drive.omega); eK.set(drive.e0); durK.set(drive.duration); }
     selected = GROUND;
   }
   function save() {
-    return { on, view, ref, morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
+    return { on, view, ref, flow: flowOn, morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
+      drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
       lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }) };
   }
   function load(r) {
@@ -511,10 +649,12 @@ export function createStates(host, api) {
   return {
     update, setActive, setShown, paint, refresh,
     get on() { return on; }, setOn,
-    select, deselect, toggle, clear, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef,
+    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
+    select, deselect, toggle, clear, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,
+    get drive() { return { on: drive.on, ready: drive.ready, pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, last: drive.last ? { t: drive.last.t, p0: drive.last.p0, norm: drive.last.norm, steps: drive.last.steps, lag: drive.last.lag, pops: drive.last.pops } : null }; },
     get view() { return view; }, get ref() { return ref; }, get morph() { return morphS; }, get morphOn() { return morphOn; },
     /* the eight modulation slots: lane order, present-only */
-    knobs: { morph: () => morphK, pop: (i) => { const L = rows.get(slotKey(i)); return L ? L.pop : null; }, ph: (i) => { const L = rows.get(slotKey(i)); return L ? L.ph : null; } },
+    knobs: { morph: () => morphK, driveW: () => wK, driveE: () => eK, pop: (i) => { const L = rows.get(slotKey(i)); return L ? L.pop : null; }, ph: (i) => { const L = rows.get(slotKey(i)); return L ? L.ph : null; } },
     slotAmp: (i) => { const c = lanes.get(slotKey(i)); return c ? c.amp * c.amp : 0; },
     setSlotAmp(i, v) { const k = slotKey(i); if (k === undefined) return; const c = lanes.get(k); c.amp = Math.sqrt(Math.max(0, Math.min(1, v))); touch(); },
     slotPhase: (i) => { const c = lanes.get(slotKey(i)); return c ? c.phase : 0; },

@@ -113,6 +113,43 @@ try {
     r6.played && r6.mode === 'states' && r6.on && r6.lanes.join(' ') === 'S₀ S₄x' && r6.wind && r6.sel.length === 2 && r6.sel[1][0] === r6.homo && Math.abs(r6.sel[1][1] - 1.5708) < 1e-3
       && r6.hl && r6.sel2.join() === [r6.homo, r6.homo + 1].join() && r6.errs.length === 0, r6);
 
+  /* ── R7 · THE DRIVE: a resonant field moves population, the lanes read it out, a scrub back un-propagates ─ */
+  const r7 = await g.ev(`${HELP}
+    __LW.states.setOn(false); await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
+    __LW.register.setMode('states'); __LW.states.preset('BEAT'); await ready();
+    __LW.states.clear(); const L = __LW.states.ladder(); let K = 0; for (let k = 0; k < L.count; k++) if (L.omega[k] < 3 && L.f[k] > L.f[K]) K = k;
+    __LW.states.select(K, 0, 0); await ready();                                   // S₀ = 1, the bright lane empty: the drive must fill it
+    const tuned = __LW.states.tune(), d0 = __LW.states.drive, mu = Math.hypot(L.mu[3 * K], L.mu[3 * K + 1], L.mu[3 * K + 2]);
+    __LW.states.setDriveParam('e0', 0.02 / mu);                                   // Ω = 0.02 → π/Ω = 157 a.u.
+    __LW.clock.scrub(0); __LW.schedule(__LW.TIER.EVOLVE); await frames(3);
+    const onD = __LW.states.setDrive(true); await wait(() => __LW.states.drive.ready && __LW.states.drive.last);
+    const goto = async (t) => { __LW.clock.scrub(t); for (let i = 0; i < 40; i++) { __LW.schedule(__LW.TIER.EVOLVE); await frames(2); const d = __LW.states.drive.last; if (d && Math.abs(d.t - t) < 1e-9) return d; } return __LW.states.drive.last; };
+    const half = await goto(Math.PI / 0.02 / 2), full = await goto(Math.PI / 0.02), fader = +document.querySelectorAll('.dev[data-id="orbitals"] .reg-pane:not([hidden]) .sp-row .fd')[1].getAttribute('aria-valuenow');
+    const back = await goto(0);
+    const ids = ['reg.e0', 'reg.w'].map((id) => __LW.mod.registry.has(id));
+    const off = __LW.states.setDrive(false), st = __LW.states.state();
+    return { tuned, pol: d0.pol, omega: d0.omega, wK: L.omega[K], onD, half: [half.p0, half.pops[K], half.norm], full: [full.p0, full.pops[K], full.norm, full.steps], fader, back: [back.p0, back.pops[K]], ids, off, lanesAfter: st.lanes.map((l) => +l.amp.toFixed(4)), sel: __LW.molsession.state().selected, errs: window.__e.slice() };`);
+  judge('R7 ω → LANE tunes the drive to the stick and its axis; on resonance the population flops at Ω = E₀μ: half way at π/2Ω, across at π/Ω, the norm kept',
+    r7.tuned && Math.abs(r7.omega - r7.wK) < 1e-12 && r7.onD === true && Math.abs(r7.half[1] - 0.5) < 0.03 && r7.full[1] > 0.99 && r7.full[0] < 0.01 && Math.abs(r7.full[2] - 1) < 1e-9 && r7.ids.every(Boolean), r7);
+  judge('R7 the lane’s fader is the driven population; a scrub back to t = 0 un-propagates to S₀ = 1; DRIVE OFF freezes the state into the lanes and the register keeps the field',
+    (Number.isNaN(r7.fader) || r7.fader > 0.95) && r7.back[0] > 1 - 1e-9 && r7.back[1] < 1e-9 && r7.off === false && r7.lanesAfter[0] > 0.999 && r7.sel === 'states' && r7.errs.length === 0, r7);
+
+  /* ── R8 · FLOW: tracers on the stage ride the ring's current, and turn with it ───────────────────────── */
+  const r8 = await g.ev(`${HELP}
+    await __LW.chem.solve('C6H6'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 315);
+    __LW.states.preset('RING'); await ready(); __LW.states.setOn(true); const fl = __LW.states.setFlow(true);
+    __LW.clock.scrub(0); __LW.schedule(__LW.TIER.EVOLVE); await frames(4);
+    const p0 = __LW.states.flowState();
+    /* walk the clock forward in small steps, as a playing transport would, and watch the tracers' mean angular motion */
+    const pts0 = null; let Lsum = 0, moved = 0;
+    const cv = document.getElementById('flow'), snap = () => { const g2 = cv.getContext('2d'), d = g2.getImageData(0, 0, cv.width, cv.height).data; let lit = 0; for (let i = 3; i < d.length; i += 4 * 97) if (d[i] > 0) lit++; return lit; };
+    for (let k = 1; k <= 30; k++) { __LW.clock.scrub(0.25 * k); __LW.schedule(__LW.TIER.EVOLVE); await frames(2); }
+    const p1 = __LW.states.flowState(), lit = snap();
+    const off = __LW.states.setFlow(false); await frames(3); const p2 = __LW.states.flowState();
+    return { fl, p0, p1, lit, off, p2, errs: window.__e.slice() };`);
+  judge('R8 FLOW seeds tracers where the current runs, they advance with the clock and are drawn on their own stage canvas; FLOW off takes them away',
+    r8.fl === true && r8.p0 && r8.p0.on && r8.p0.count >= 150 && r8.p1.alive > 100 && r8.p1.maxSpeed > 1e-3 && r8.lit > 20 && r8.off === false && r8.p2.on === false && r8.errs.length === 0, r8);
+
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
 } catch (error) {

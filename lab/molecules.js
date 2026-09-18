@@ -457,7 +457,7 @@ export const CAP_RULE = `the cap is benzene: ~${(CAP_MS / 1000).toFixed(1)} s pr
 for (const m of MOLECULES) {
   m.over = m.predictedMs > CAP_MS * 1.02;                     // 2 %: benzene must never disable itself by rounding
   m.reason = m.over ? `over the benzene cap (~${(CAP_MS / 1000).toFixed(1)} s)`
-    : m.instability ? 'RHF/STO-3G is not a minimum here (A−B ≺ 0) — no RPA spectrum exists' : null;
+    : m.instability ? 'RHF/STO-3G is not a minimum here (A−B ≺ 0) and, since 2026-09-18, its SCF does not converge within 200 cycles on this engine — no spectrum and no state ladder exist' : null;
   /* the SHORT form goes in the option text itself.  A `title` on an <option> is unreliable in a native select and
      lab/mir/control-help.js moves titles to data-help anyway, so a menu that refuses has to say so in its own row. */
   m.shortReason = m.over ? 'over the cap' : m.instability ? 'not a minimum' : null;

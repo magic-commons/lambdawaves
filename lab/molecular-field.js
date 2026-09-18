@@ -77,6 +77,27 @@ export function evaluator(shells) {
     }
     return out;
   }
+  /**
+   * every AO value AND its gradient at one point (FLOW, stage 6).  For x^a y^b z^c Σ_i d_i e^{−α_i r²}:
+   * ∂_x = (a x^{a−1} S₀ − 2 x^{a+1} S₁) y^b z^c with S₀ = Σ d_i e_i and S₁ = Σ d_i α_i e_i — the same exponentials, once.
+   */
+  function aoGrad(point, v, gx, gy, gz) {
+    stats.calls++;
+    for (const g of groups) {
+      const dx = point[0] - g.c[0], dy = point[1] - g.c[1], dz = point[2] - g.c[2], r2 = dx * dx + dy * dy + dz * dz;
+      for (let i = 0; i < g.exps.length; i++) g.e[i] = Math.exp(-g.exps[i] * r2);
+      stats.exponentials += g.exps.length;
+      for (const b of g.comps) {
+        let s0 = 0, s1 = 0;
+        for (let i = 0; i < b.d.length; i++) { const w = b.d[i] * g.e[i]; s0 += w; s1 += w * g.exps[i]; }
+        const a = b.l[0], bb = b.l[1], c = b.l[2], px = power(dx, a), py = power(dy, bb), pz = power(dz, c);
+        v[b.idx] = s0 * px * py * pz;
+        gx[b.idx] = ((a ? a * power(dx, a - 1) * s0 : 0) - 2 * dx * px * s1) * py * pz;
+        gy[b.idx] = ((bb ? bb * power(dy, bb - 1) * s0 : 0) - 2 * dy * py * s1) * px * pz;
+        gz[b.idx] = ((c ? c * power(dz, c - 1) * s0 : 0) - 2 * dz * pz * s1) * px * py;
+      }
+    }
+  }
   /** ψ_k(r) = Σ_i C[i·n + k] χ_i(r) */
   function orbital(C, k, point) {
     if (!C || C.length !== n * n) throw new Error('molecular-field: orbital needs C[ao·n + mo] of length n²');
@@ -109,7 +130,7 @@ export function evaluator(shells) {
     for (let k = 0; k < 80; k++) { const mid = 0.5 * (lo + hi); if (f(mid) > 0) lo = mid; else hi = mid; }
     return hi;
   }
-  return { n, groups, components, exponentialsPerPoint, stats, ao, orbital, density, supportRadius, uploadContract };
+  return { n, groups, components, exponentialsPerPoint, stats, ao, aoGrad, orbital, density, supportRadius, uploadContract };
 }
 
 /* ── the GPU spec (wave: CHEMISTRY) ─────────────────────────────────────────────────────────────────────────────
@@ -118,6 +139,13 @@ export function evaluator(shells) {
  * per-component unit-self-overlap factor — so the kernel's inner loop is exactly this evaluator's: one exp per
  * primitive per shell, reused across its components, in the order s; x,y,z; xx,xy,xz,yy,yz,zz.
  */
+/** the inverse road: the GPU's shell records back into the evaluator's shape, so the main thread (which holds only
+    `sol.shells`) can evaluate χ and ∇χ on the CPU — component order s; x,y,z; xx,xy,xz,yy,yz,zz, as fieldShells packs it */
+const CART = [[[0, 0, 0]], [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [[2, 0, 0], [1, 1, 0], [1, 0, 1], [0, 2, 0], [0, 1, 1], [0, 0, 2]]];
+export function shellsFromField(fs) {
+  return fs.map((sh) => ({ c: Array.from(sh.center), l: sh.l, exps: sh.prims.map((q) => q.alpha),
+    bfs: CART[sh.l].map((l, k) => ({ l, d: sh.prims.map((q) => q.w[k]) })) }));
+}
 /** fieldShells(basis) → [{ center: [x, y, z] bohr, l, prims: [{ alpha, w: Float64Array(ncomp) }], ao, nc }] */
 export function fieldShells(basis) {
   if (!basis || !Array.isArray(basis.shells) || !basis.shells.length) throw new Error('molecular-field: fieldShells needs a lab/md.js basis with shells');

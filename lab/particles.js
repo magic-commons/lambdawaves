@@ -85,6 +85,46 @@ export function createParticles(canvas, api) {
     state.alive = alive; state.stalled = stalled; state.maxSpeed = vmax;
     lastT = t;
   }
+  /* ── A SECOND SOURCE (MOLECULAR WAVES stage 6, FLOW).  The trails, the projection and the drawing below are not
+     hydrogen's: they are a tracer view.  A source is { weight(x, y, z), step(p, h, cap) → q | null, speed(p) } with its
+     field FROZEN for the frame (a molecule's D(t) is rebuilt once a frame, not per substep).  Tracers are seeded by
+     rejection from `weight` — |j| for a molecule, so they sit where the current is — and one that stalls, leaves the
+     box or grows old is born again somewhere the current still runs, because a flow pattern moves and an ensemble
+     seeded once would drain out of it. */
+  let ages = new Int32Array(1);
+  function sampleFrom(src, half, peak) {
+    for (let tries = 0; tries < 4000; tries++) {
+      const x = (Math.random() * 2 - 1) * half, y = (Math.random() * 2 - 1) * half, z = (Math.random() * 2 - 1) * half;
+      if (src.weight(x, y, z) > Math.random() * peak) return [x, y, z];
+    }
+    return null;
+  }
+  let srcPeak = 0;
+  function peakOf(src, half) { let peak = 0; for (let k = 0; k < 3000; k++) peak = Math.max(peak, src.weight((Math.random() * 2 - 1) * half, (Math.random() * 2 - 1) * half, (Math.random() * 2 - 1) * half)); return peak; }
+  function seedFrom(src, n, t, half) {
+    srcPeak = peakOf(src, half); pts = [];
+    if (srcPeak > 0) while (pts.length < n) { const p = sampleFrom(src, half, srcPeak); if (!p) break; pts.push(p); }
+    allocTrails(); ages = new Int32Array(Math.max(1, pts.length)); for (let i = 0; i < pts.length; i++) ages[i] = (Math.random() * (src.lifetime || 240)) | 0;
+    lastT = t; state.count = pts.length; state.seededAt = t;
+    return pts.length;
+  }
+  function advanceFrom(src, t, half) {
+    if (!pts.length) return;
+    if (lastT === null) { lastT = t; return; }
+    const dt = t - lastT; if (dt === 0) return;
+    if (Math.abs(dt) > 4) { lastT = t; return; }
+    const sub = Math.min(8, Math.max(1, Math.ceil(Math.abs(dt) / 0.1))), h = dt / sub, life = src.lifetime || 240;
+    if ((state.frames = (state.frames || 0) + 1) % 30 === 0) srcPeak = Math.max(0.5 * srcPeak, peakOf(src, half));   // the pattern moves: keep the rejection bound honest
+    let alive = 0, stalled = 0, vmax = 0;
+    for (let i = 0; i < pts.length; i++) {
+      let p = pts[i], ok = ++ages[i] < life;
+      for (let s2 = 0; ok && s2 < sub; s2++) { const q = src.step(p, h, speedCap); if (!q || !isFinite(q[0]) || Math.hypot(q[0], q[1], q[2]) > half * 1.5) ok = false; else p = q; }
+      if (ok) { pts[i] = p; alive++; vmax = Math.max(vmax, src.speed(p)); if (state.frames % (src.stride || 1) === 0) pushTrail(i, p); }   // a slow current needs a trail that spans seconds, not frames
+      else { const q = srcPeak > 0 ? sampleFrom(src, half, srcPeak) : null; if (q) { pts[i] = q; ages[i] = 0; lens[i] = 0; heads[i] = 0; } stalled++; }
+    }
+    state.alive = alive; state.stalled = stalled; state.maxSpeed = vmax;
+    lastT = t;
+  }
   function project(p, B, cam, tanH, aspect, W, H, out) {
     const dx = p[0] - cam[0], dy = p[1] - cam[1], dz = p[2] - cam[2];
     const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2];
@@ -106,7 +146,8 @@ export function createParticles(canvas, api) {
     const B = cameraBasis(obs), D = obs.dist * half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
     g.lineCap = 'round';
-    g.strokeStyle = 'rgba(255,226,170,0.28)'; g.lineWidth = 1;
+    const ink = api && api.ink ? api.ink() : null;
+    g.strokeStyle = ink ? ink.trail : 'rgba(255,226,170,0.28)'; g.lineWidth = ink ? 1.3 : 1;
     for (let i = 0; i < pts.length; i++) {
       const n = lens[i];
       if (n > 1) {
@@ -118,17 +159,17 @@ export function createParticles(canvas, api) {
         g.stroke();
       }
     }
-    g.fillStyle = 'rgba(255,240,210,0.95)';
+    g.fillStyle = ink ? ink.dot : 'rgba(255,240,210,0.95)';
     for (let i = 0; i < pts.length; i++) {
       if (!project(pts[i], B, cam, tanH, aspect, W, H, S3)) continue;
       const sz = Math.max(1, 2.1 * Math.sqrt(D / S3[2]));
       g.beginPath(); g.arc(S3[0], S3[1], sz, 0, 2 * Math.PI); g.fill();
     }
-    g.fillStyle = 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
-    g.fillText(`PARTICLES · ${state.alive}/${state.count} on the exact field v = Im(∇ψ/ψ) · seeded from |ψ|²`, 12, H - 88);
+    g.fillStyle = ink ? ink.text : 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
+    g.fillText(api && api.caption ? api.caption(state) : `PARTICLES · ${state.alive}/${state.count} on the exact field v = Im(∇ψ/ψ) · seeded from |ψ|²`, 12, H - 88);
   }
   return {
-    seed, advance, draw, suspend, get state() { return state; },
+    seed, advance, seedFrom, advanceFrom, draw, suspend, get state() { return state; },
     setOn(v) { on = v; if (!v) { pts = []; allocTrails(); lastT = null; state.count = 0; state.alive = 0; release(); } },
     get on() { return on; }, get points() { return pts; },
     /** the trail of particle i as an array of [x, y, z], oldest first — for the proofs */

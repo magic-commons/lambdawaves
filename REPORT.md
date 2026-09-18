@@ -2539,3 +2539,11 @@ A rival plan (`research/astra-2026-09-18/`) was judged and refined (`research/mo
 Not built: the TD-CIS drive (stage 5) and FLOW from $\operatorname{Im}D$ (stage 6). Carry-overs still open: `rack.js` passes `molecule: chem.on` beside the session; `chem.run(n)` never sets `running`; CuH and ZnH₂'s non-convergence is unspoken; the AO → MO transform is the next preparation cost. Degenerate ORBITAL pairs are not yet in the canonical gauge, so WINDING's starting phase depends on the eigensolver (its winding does not).
 
 Gate: `./test.sh all` — node 0, browser 0, 1048 passing lines, 0 red.
+
+## 2026-09-18 · MOLECULAR WAVES, stages 5 and 6 — the drive and the flow
+
+- THE DRIVE (`chem.drive.*` in `lab/mathworker.js`, the DRIVE controls in `lab/statesview.js`): TD-CIS in the length gauge on the whole singles space, $i\dot b=[\operatorname{diag}(0,\omega_K)+E(t)R]b$, by a Strang step with $R$ diagonalised once per axis. Unitary to $10^{-12}$, second order (halving ratio 4.03), and a negative step is the inverse, so a scrub backwards un-propagates. It resonates where the sticks stand: water's bright line reaches 0.99975 at $\pi/\Omega$ with $\Omega=E_0\mu$; a circular field fills benzene's bright pair equally, a quarter turn apart. $\omega\to$ LANE tunes it; $E_0$ and $\omega$ are live modulation targets (`reg.e0`, `reg.w`). Benzene's 316-state drive costs 0.3 s to prepare and about 1 ms a step.
+- FLOW (`lab/molecular-flow.js`, the particle overlay generalised to a pluggable source, a `#flow` stage canvas): 220 tracers ride $\mathbf v=\mathbf j/\rho$ with $\mathbf j=\sum\operatorname{Im}D_{pq}\chi_p\nabla\chi_q$. Gated: analytic AO gradients, the sign against $\operatorname{Im}\bar\psi\nabla\psi$, the ring's sense and its reversal, zero angular momentum for a linear slosh. MEASURED and not hidden: continuity is violated at order one in STO-3G (1.19), and the integrated current is parallel to the dipole's rate of change but 0.15 of its size for benzene. FLOW's sense is exact; its magnitude is qualitative in a minimal basis, and the stage caption says so.
+- Carry-overs closed: one owner flag for the molecular volume; a scripted `chem.run(n)` is the `tdhf` model; CuH and ZnH₂'s refusal names their non-convergence.
+
+Gate: `./test.sh all` — node 0, browser 0, 1061 passing lines, 0 red.
