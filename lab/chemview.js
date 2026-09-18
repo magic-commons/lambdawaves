@@ -9,6 +9,10 @@
  * lab already had a dropdown and a second one would have been a second design.  The CAP is benzene: ~9.6 s
  * predicted, 36 AOs, 42 electrons, which is the longest wait this window asks anyone to accept.
  *
+ * THE FIELD IS NOT THIS WINDOW'S (2026-09-18).  lab/molecular-session.js owns the volume; this card is a PRODUCER
+ * of two of its models, 'ground' and 'tdhf', and hands it one tagged product a frame.  Nothing here calls the
+ * field, so nothing here depends on the order the frame loop updates the two molecular windows in.
+ *
  * THE DIVISION OF LABOUR.  Nothing here does chemistry on the frame thread: `api.solve` is rack.js's chem worker
  * road and every op lands there (SYNTHESIS decision 3 — Δt = 0.01 on screen; decision 2 — unrestarted MMUT by
  * default, Magnus-2 as the reference).  The ONE exception is the pole fit (lab/response-fit.js), which is cheap and
@@ -53,7 +57,7 @@ export function createChem(host, api) {
   let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false;
   let sol = null, rt = null, running = false, inflight = false;
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
-  let fieldHash = null, mBuf = null, oBuf = null, statusText = 'no molecule solved yet', pending = null;
+  let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'no molecule solved yet', pending = null;
   /* THE RESTORED ORBITAL INDEX HAS TO SURVIVE THE RE-SOLVE THAT RESTORING IT CAUSES.  A solve sets `orbital` to
      HOMO, which is right for a molecule the hand just picked and WRONG for one a file just reopened: load() puts a
      different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
@@ -109,7 +113,7 @@ export function createChem(host, api) {
   const vSeg = seg({ label: 'VIEW', value: 'density', options: [
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
-    { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick' }],
+    { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' }],
     onChange: (v) => { view = v; orbKnob.root.classList.toggle('off', v !== 'orbital'); pushMatrix(v === 'diff' && !rt); refresh(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   r1.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
@@ -164,11 +168,27 @@ export function createChem(host, api) {
   /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: it is the same pure maths, on the frame thread.
      `half` here is the shell support envelope; the worker's own `half` is authoritative whenever it answers.
      It answers the GROUND stage with the spectrum already attached, so the staged road simply skips stage two. */
+  /* the worker's own wire shape (lab/mathworker.js), so the two roads answer the SAME object: `lowestApB` and
+     `lowestAmB` are lazy getters over an eigensolve and are read only when the verdict FAILS, which is when they
+     are the evidence; `null` says "not computed" and never "zero". */
+  const wireHessian = (h) => (h ? { nOv: h.nOv, minimum: h.minimum, positiveDefinite: h.positiveDefinite,
+    lowestApB: h.minimum ? null : h.lowestApB, lowestAmB: h.minimum ? null : h.lowestAmB } : null);
+  const wireStability = (s) => (s ? { ...s, hessian: wireHessian(s.hessian) } : null);
   async function localSolve(msg) {
     const [{ loadRecord, moleculeRHF }, { rpa }, { evaluator, fieldShells }] =
       await Promise.all([import('./rhf-molecule.js'), import('./rpa-inspector.js'), import('./molecular-field.js')]);
     await loadRecord(msg.basis);
-    const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false, stability: false, hessian: false });
+    /* THE VERDICT COMES WITH THE SOLVE ON THIS ROAD TOO (2026-09-18).  This path ran with `stability: false,
+       hessian: false`, so a browser with no Worker got a report whose `stability` was null — the ONE field that
+       says whether the RHF reference is a minimum, silently absent on exactly the road nobody watches.  The
+       worker road has always sent it and now both send the same object.
+       WHAT IT COSTS, measured here rather than assumed (scratch/stage1/probe-localsolve.mjs, Node 22, Ryzen 5
+       5600G): H₂O 30 → 17 ms (inside the noise), benzene 783 → 1501 ms.  It is NOT the two Cholesky
+       factorisations that cost it — those are 1.3 ms — it is `hessianBlocks`, the AO → MO transform the A and B
+       blocks are built from, at 608 ms, plus 110 ms for the re-converge probe.  That is the same 718 ms the
+       worker pays for every solve; this road simply stopped hiding it.  `detect` stays off: naming a SECOND
+       aufbau solution costs a whole extra SCF, only N₂ has one, and this road is already on the frame thread. */
+    const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false });
     const I = r.integrals, P = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: r.C, eps: r.orbitalEnergies, nocc: r.nocc });
     const ev = evaluator(r.basis.shells);
     let half = 0; for (const sh of r.basis.shells) half = Math.max(half, ev.supportRadius(sh, 1e-10));
@@ -176,7 +196,8 @@ export function createChem(host, api) {
       nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
       roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
       tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
-      timings: { integrals: r.timings.integrals, scf: null, rpa: null }, stability: null, solutions: null, stage: 'full', local: true };
+      timings: { integrals: r.timings.integrals, scf: null, rpa: null }, stability: wireStability(r.stability),
+      solutions: (r.solutions || []).map((s) => ({ ...s, hessian: wireHessian(s.hessian) })), stage: 'full', local: true };
   }
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
@@ -209,7 +230,7 @@ export function createChem(host, api) {
     const task = call(msg, () => localSolve(msg)).then((r) => {
       if (seq !== solveSeq) return null;
       if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
-      sol = r; sol.key = key; mBuf = oBuf = null; fieldHash = null;
+      sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
       orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
       pendingOrbital = null;
       rebuildOrbKnob(); pushField(); refresh(); notify();
@@ -263,6 +284,9 @@ export function createChem(host, api) {
     const next = !!v && !!sol;
     if (next === running) { if (runSw.get() !== next) runSw.set(next); return running; }
     running = next; runSw.set(running);
+    /* the RUN switch IS the tdhf model's claim: while it is up the run outranks the register and the still card,
+       and when it goes down the session hands the field to whoever is next, in one place, by rank */
+    if (S()) S().claim('tdhf', running, 'CHEMISTRY RT RUN is propagating the density');
     if (running && !rt) kick();
     refresh(); return running;
   }
@@ -317,21 +341,35 @@ export function createChem(host, api) {
     }).catch(() => {});
   }
 
-  /* ── the field ────────────────────────────────────────────────────────────────────────────────── */
-  const F = () => (api.field && api.field.ok && typeof api.field.setMolecule === 'function' ? api.field : null);
+  /* ── the field: THIS WINDOW IS A PRODUCER, lab/molecular-session.js is the owner ───────────────────────────────
+   * Two models come from here, and the session decides which of them (or the ORBITALS register) is playing:
+   *   'ground'  the still molecule — its density, one canonical orbital, or the difference against the reference
+   *   'tdhf'    the real-time run, which outranks everything while it propagates
+   * Nothing in this file calls the field directly any more, so nothing here depends on when the frame loop runs it.
+   */
+  const S = () => api.session || null;
+  const molView = () => (view === 'orbital' ? 'real' : view === 'diff' ? 'real' : 'density');   // a signed Δρ is READ as 'real': two-colour lobes
+  const model = () => (running ? 'tdhf' : 'ground');
+  const product = { kind: 'density', matrix: null, view: 'density', hash: null, solution: -1 };   // ONE record, reused: the frame loop allocates nothing
   function pushField() {
-    const f = F(); if (!f) return false;
-    if (!on || !sol) { if (fieldHash !== null) { f.setMolecule(null); fieldHash = null; } return false; }
-    if (fieldHash !== sol.hash) { f.setMolecule({ nAO: sol.nAO, half: sol.half, shells: sol.shells }); fieldHash = sol.hash; api.repaint(true); }
+    const s = S(); if (!s) return false;
+    if (!on || !sol) { if (fieldHash !== null) { s.drop(); fieldHash = null; } return false; }
+    /* the hash is recorded only if the session ACTUALLY took the molecule: a browser with no WebGPU device must
+       not end up believing it owns a volume that was never uploaded, and never try again */
+    if (fieldHash !== sol.hash) {
+      if (!s.adopt({ hash: sol.hash, nAO: sol.nAO, half: sol.half, shells: sol.shells }, sol.seq)) return false;
+      fieldHash = sol.hash;
+    }
     return pushMatrix();
   }
-  const fieldView = () => { if (api.fieldView && on) api.fieldView(view === 'orbital' ? 'real' : view === 'diff' ? 'diff' : 'density'); };
   function pushMatrix(ref) {
-    const f = F(); if (!f || !on || !sol || fieldHash === null) return false;
-    fieldView();
-    if (view === 'orbital') { f.setMoleculeMatrix(orbitalColumn(), { kind: 'orbital' }); api.repaint(); return true; }
-    f.setMoleculeMatrix(densityRe(), { kind: view === 'diff' ? 'diff' : 'density', ref: !!ref });
-    api.repaint(); return true;
+    const s = S(); if (!s || !on || !sol || fieldHash === null) return false;
+    if (ref) captureRef();
+    product.hash = sol.hash; product.solution = sol.seq; product.view = molView();
+    if (view === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
+    else if (view === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
+    else { product.kind = 'density'; product.matrix = densityRe(); }
+    return s.publish(model(), product);
   }
   function densityRe() {
     const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
@@ -339,6 +377,25 @@ export function createChem(host, api) {
     if (!mBuf || mBuf.length !== n * n) mBuf = new Float32Array(n * n);
     for (let i = 0; i < n * n; i++) mBuf[i] = src[i];
     return mBuf;
+  }
+  /* ── Δρ, AND WHY IT IS A MATRIX DIFFERENCE AND NOT A VOLUME DIFFERENCE (2026-09-18) ────────────────────────────
+   * DIFF used to upload ρ(t) and ρ_ref as two rgba16float volumes of √ρ and subtract them in the fragment shader.
+   * An 11-bit mantissa on √ρ is about 1e-3 relative on ρ, and a κ = 1e-3 δ-kick moves ρ by about 1e-3 relative —
+   * so the picture was at best the same size as the format's own noise, and at κ = 1e-4 it was ten times under it.
+   * ΔD = Re D(t) − D_ref is formed HERE, in f64, and uploaded ONCE as a signed matrix: the quantisation then lands
+   * on the difference itself and not on the two large numbers it came from.  The reference is the matrix at the
+   * moment REF was taken (the kick, or switching to DIFF on a still molecule), kept in f64 beside it. */
+  function captureRef() {
+    const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
+    if (!dRef || dRef.length !== n * n) dRef = new Float64Array(n * n);
+    for (let i = 0; i < n * n; i++) dRef[i] = src[i];
+  }
+  function deltaD() {
+    const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
+    if (!dRef || dRef.length !== n * n) captureRef();                    // no reference yet: this instant IS the reference, Δ ≡ 0
+    if (!dBuf || dBuf.length !== n * n) dBuf = new Float32Array(n * n);
+    for (let i = 0; i < n * n; i++) dBuf[i] = src[i] - dRef[i];
+    return dBuf;
   }
   function orbitalColumn() {
     const n = sol.nAO, k = Math.min(Math.max(0, (orbital || sol.nocc) - 1), n - 1);
@@ -514,9 +571,14 @@ export function createChem(host, api) {
   function update() { if (!on) return; pump(); }
   function setOn(v) {
     on = !!v; if (onSw.get() !== on) onSw.set(on);
-    if (!on) { setRun(false); const f = F(); if (f && fieldHash !== null) { f.setMolecule(null); fieldHash = null; } }
+    if (!on) { setRun(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
     api.setOn(on);
-    if (on) { if (!sol) solve(preset); else pushField(); fieldView(); } else if (api.fieldView) api.fieldView(null);
+    /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
+       even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the
+       observable the user had before any molecule took it */
+    if (S()) S().claim('ground', on, 'CHEMISTRY has the field: the card’s own view');
+    if (on && sol) pushField();
+    else if (on) solve(preset);
     return on;
   }
   const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, on });
@@ -565,6 +627,11 @@ export function createChem(host, api) {
     else if (sol) { pushField(); refresh(); } else refresh();
     return save();
   }
+
+  /* the two models this window produces, named to the session once.  `push` is how the session asks this card to
+     paint when it becomes the owner; `view` is the observable that product wants shown. */
+  if (S()) { S().register('ground', { push: () => pushMatrix(), view: molView });
+    S().register('tdhf', { push: () => pushMatrix(), view: molView }); }
 
   refresh();
   return {

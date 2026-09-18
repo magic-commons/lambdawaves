@@ -1,0 +1,109 @@
+GREEN L0 boot: __LW.ready
+      {"ok":1,"i":5}
+GREEN L0 boot: no page error, CHEMISTRY window present
+      {"errs":[],"gpu":null,"dirty":false,"card":true,"eyebrow":"CHEMISTRY"}
+GREEN L1 H₂O energy = -74.963023162862 within 1e-8
+      {"energy":-74.96302316286251,"delta":-5.115907697472721e-13}
+GREEN L1 H₂O solve in ≤ 5 s off the frame thread
+      {"ms":153,"local":false,"status":"7 AOs · 10 electrons · ground 21 ms (integrals 11 of it) · rpa 2 ms"}
+GREEN L1 Tr(DS) = 10 within 1e-10
+      {"electrons":10,"delta":0}
+GREEN L1 roots[0].omega = 0.483101392 within 1e-8
+      {"omega":0.48310139157652926,"delta":-4.2347075845938775e-10,"omegaTDA":0.4846402119474292,"pol":"x"}
+GREEN L1 the field is molecular: nAO uploaded and dispatched
+      {"molAO":7,"molDispatches":1}
+GREEN L1 the CPU evaluator reproduces the pinned ρ(O) = 193.313905 and midpoint 0.492165 within 1e-5
+      {"rhoO":193.31390495487557,"rhoMid":0.49216529810955534}
+GREEN L1 GPU kernel = CPU evaluator at the voxel nearest the O nucleus, within 2 %
+      {"tag":"O nucleus","gpu":15.06106948852539,"cpu":15.065372907180208,"rel":0.00028564966040546026,"offset":0.19520334020319313,"note":"the pinned 193.313905 is 0.195 bohr away; the O 1s cusp width is 0.062 bohr"}
+GREEN L1 GPU kernel = CPU evaluator at the voxel nearest the O–H midpoint, within 2 %
+      {"tag":"O–H midpoint","gpu":0.4455301761627197,"cpu":0.44609497639765466,"rel":0.0012660986220823674,"offset":0.15231430833386495,"note":"the pinned 0.492165 is 0.152 bohr away"}
+GREEN L1 no page error
+      {"l1":[],"l1v":[]}
+GREEN L2 benzene energy = -227.891006464181 within 1e-6
+      {"energy":-227.8910064641795,"delta":1.5063505998114124e-12}
+GREEN L2 benzene is 36 AOs and 42 electrons
+      {"nAO":36,"electrons":42,"nocc":21}
+GREEN L2 the oracle's bright RPA pair at 0.360792434 within 1e-6, f = 0.812666 within 1e-3
+      {"pair":[{"omega":0.36079243372142444,"f":0.8126664099029293,"pol":"x"},{"omega":0.3607924337215367,"f":0.8126664099028617,"pol":"y"}],"degeneracy":2,"globallyBrightest":{"omega":0.8068944750268745,"f":3.611267333933595,"note":"a higher σ line, past the oracle's eight roots"}}
+GREEN L2 benzene solved in ≤ 30 s (38 s on 2026-09-12 morning, 35 s of it the ERI pass; shell-pair tables + 8-fold fill + primitive screening took the integrals to 0.56 s)
+      {"ms":2979,"status":"36 AOs · 42 electrons · ground 2002 ms (integrals 854 of it) · rpa 864 ms","note":"the cost is lab/md.js's McMurchie–Davidson pass over 630k unique ERIs; node measures 35.6 s of 38.4 s for the whole solve"}
+GREEN L2 the frame thread kept running while the worker solved
+      {"frames":191,"worstGapMs":131,"gapsOver2s":0,"local":false}
+GREEN L2 the field took benzene's 36 AOs, no page error
+      {"molAO":36,"owner":true,"errs":[]}
+GREEN L5 .tmp/chem-benzene.png exists and is over 50 kB
+      {"file":"/home/joshua-hosain/Documents/LAMBDAWAVES/.tmp/chem-benzene.png","bytes":270857}
+GREEN L5 the window is UNFOLDED on benzene in DENSITY view, its plot laid out
+      {"canvas":true,"painted":true,"folded":false,"rows":4,"controls":14,"view":"density","preset":"C6H6","errs":[]}
+GREEN L3 Tr(DS) = 10 within 1e-8 after 200 steps
+      {"electrons":10.000000000000155,"delta":1.545430450278218e-13}
+GREEN L3 idempotency ‖P² − P‖ < 1e-8
+      {"idempotency":1.576611461653889e-14}
+GREEN L3 the kick raised the energy above the RHF ground state by ½κ²Σf, under the TRK ceiling N_e/2 = 5
+      {"energy":-74.96302134127893,"groundState":-74.963023162862,"raised":0.0000018215830692724921,"ΔE/κ²":1.8215830692724921,"TRKceiling":5,"kappa":0.001}
+GREEN L3 field-free propagation conserves the kicked energy E₀ to 1e-9 over 200 steps
+      {"energy":-74.96302134127893,"E0":-74.96302134126218,"delta":-1.6754597709223162e-11,"note":"E₀ is the POST-kick energy, so this is conservation"}
+GREEN L3 200 steps, 200 new trace samples beside the t = 0 one, t = 2.0 a.u.
+      {"steps":200,"samples":201,"t":2.0000000000000013,"ms":30}
+GREEN L3 no page error
+      []
+GREEN L4 presentation.instruments.chem round-trips deep-equal
+      {"A":{"preset":"H2O","basis":"sto-3g","view":"orbital","orbital":3,"axis":"z","kappa":0.001,"speed":10,"dt":0.005,"integrator":"magnus2","tda":true,"core":true,"on":true},"B":{"preset":"H2O","basis":"sto-3g","view":"orbital","orbital":3,"axis":"z","kappa":0.001,"speed":10,"dt":0.005,"integrator":"magnus2","tda":true,"core":true,"on":true}}
+GREEN L4 the record carries the whole presentation and no solver cache
+      ["axis","basis","core","dt","integrator","kappa","on","orbital","preset","speed","tda","view"]
+GREEN L4 no page error
+      []
+GREEN L6 the MOLECULE control is a <select class="sel"> with an aria-label
+      {"tag":"SELECT","cls":"sel","aria":"molecule"}
+GREEN L6 ≥ 30 options in 7 optgroups, ≥ 1 disabled
+      {"options":54,"disabled":2,"groups":["DIATOMICS","HYDRIDES","TRIATOMICS · SMALL","SMALL ORGANICS","RINGS · BIOMOLECULES","IONS","HEAVY ATOMS"],"disabledText":["CuH · 20 AO · ~420 ms · not a minimum :: copper hydride — RHF/STO-3G is not a minimum here (A−B ≺ 0) — no RPA spectrum exists · CCCBDB experimental r(Cu–H) = 1.4626 Å (X¹Σ⁺, a closed-shell singlet; the Cu ATOM is ²S and cannot be done here)","ZnH₂ · 21 AO · ~503 ms · not a minimum :: zinc dihydride — RHF/STO-3G is not a minimum here (A−B ≺ 0) — no RPA spectrum exists · linear D∞h; r₀(Zn–H) = 1.5241 Å from the gas-phase IR emission spect
+GREEN L6 every option text carries its AO count and predicted time, and a disabled one says why
+      {"first":"H₂ · 2 AO · ~11 ms","benzene":"C₆H₆ · 36 AO · ~9.6 s","malformed":[],"disabledText":["CuH · 20 AO · ~420 ms · not a minimum","ZnH₂ · 21 AO · ~503 ms · not a minimum"]}
+GREEN L6 the select names the cap rule in its own help
+      {"help":"the cap is benzene: ~9.6 s predicted, 36 AOs, 42 electrons. An entry predicted slower than that is listed and disabled, and so are the two whose RHF reference is not a minimum (CuH, ZnH₂ — no RPA spectrum exists for them)."}
+GREEN L6 the library agrees with the menu on how many entries there are
+      {"menu":54,"library":54,"value":"H2O","errs":[]}
+GREEN L6 no page error
+      []
+GREEN L6 an unsolvable entry (CuH: RHF is not a minimum) is refused with its reason, not sent to the worker
+      {"r":null,"preset":"CuH","before":"H2O","status":"copper hydride: RHF/STO-3G is not a minimum here (A−B ≺ 0) — no RPA spectrum exists","errs":[]}
+GREEN L7 HCl = -455.134809703 within 1e-8 (10 AOs, 18 electrons)
+      {"energy":-455.13480970268756,"delta":3.410605131648481e-13,"nAO":10,"electrons":18,"status":"10 AOs · 18 electrons · ground 48 ms (integrals 15 of it) · rpa 6 ms"}
+GREEN L7 HCl solved off the frame thread in ≤ 400 ms (2× the predicted 31 ms, floor 400) and under 12 s
+      {"ms":63,"predictedMs":31,"budget":400,"local":false}
+GREEN L7 HCl no page error
+      []
+GREEN L7 CO2 = -185.064695727 within 1e-8 (15 AOs, 22 electrons)
+      {"energy":-185.06469572696017,"delta":-6.252776074688882e-13,"nAO":15,"electrons":22,"status":"15 AOs · 22 electrons · ground 92 ms (integrals 38 of it) · rpa 11 ms"}
+GREEN L7 CO2 solved off the frame thread in ≤ 400 ms (2× the predicted 120 ms, floor 400) and under 12 s
+      {"ms":108,"predictedMs":120,"budget":400,"local":false}
+GREEN L7 CO2 no page error
+      []
+GREEN L7 glycine = -279.088562183 within 1e-8 (30 AOs, 40 electrons)
+      {"energy":-279.08856218342737,"delta":0,"nAO":30,"electrons":40,"status":"30 AOs · 40 electrons · ground 1130 ms (integrals 396 of it) · rpa 346 ms"}
+GREEN L7 glycine solved off the frame thread in ≤ 6368 ms (2× the predicted 3.2 s, floor 400) and under 12 s
+      {"ms":1513,"predictedMs":3184,"budget":6368,"local":false}
+GREEN L7 glycine no page error
+      []
+GREEN L8 HBr = -2546.097097090 within 1e-8, 20 Cartesian AOs, 36 electrons
+      {"energy":-2546.0970970902927,"delta":-5.9117155615240335e-12,"nAO":20,"electrons":36}
+GREEN L8 the field takes bromine's 20 AOs (6 of them Cartesian d) and dispatches, with no page error
+      {"owner":true,"molAO":20,"dispatches":12,"half":8.67301760319728,"gpu":null,"errs":[]}
+GREEN L9 a non-default preset (PH₃) round-trips through save → scramble → restore, select and all
+      {"A":{"preset":"PH3","basis":"sto-3g","view":"orbital","orbital":6,"axis":"x","kappa":0.001,"speed":10,"dt":0.005,"integrator":"magnus2","tda":true,"core":true,"on":true},"B":{"preset":"PH3","basis":"sto-3g","view":"orbital","orbital":6,"axis":"x","kappa":0.001,"speed":10,"dt":0.005,"integrator":"magnus2","tda":true,"core":true,"on":true},"mid":"H2O","selValue":"PH3"}
+GREEN L9 and it re-derives PH₃'s own ground state -338.633616319 within 1e-8 at 12 AOs
+      {"energy":-338.63361631946367,"delta":3.979039320256561e-13,"nAO":12,"errs":[]}
+GREEN L10 the card runs UNRESTARTED MMUT and the engine says so (restartEvery 0, no restart in 120 steps)
+      {"restartEvery":0,"restartPolicy":"unrestarted","sinceRestart":119,"steps":120,"idem":1.0103057742612065e-14,"sub":"IDEMPOTENCY :: ‖P² − P‖ · MMUT, unrestarted · Δt 0.01","errs":[]}
+GREEN L10 …and the readout prints the policy in force, not an intention
+      {"sub":"IDEMPOTENCY :: ‖P² − P‖ · MMUT, unrestarted · Δt 0.01","idempotency":1.0103057742612065e-14,"errs":[]}
+GREEN L11 benzene ships both ladders, each ascending and the same length
+      {"rpaRoots":315,"tdaRoots":315,"ascending":true,"omegaTDAisTheIndexedTdaRoot":true}
+GREEN L11 the ladders CROSS: the first bright RPA root and the first bright TDA root are different indices
+      {"brightRPA":[2,0.36079243372142444,0.8126664099029293],"brightTDA":[3,0.3903266856910428,1.2808627775099404],"errs":[]}
+GREEN L12 a solve interrupted by another leaves the card on the second molecule, whole (ground AND spectrum)
+      {"preset":"H2O","stage":"full","energy":-74.96302316286251,"nAO":7,"roots":10,"tdaRoots":10,"omega0":0.48310139157652926,"errs":[]}
+GREEN LZ chem off hands the volume back to the eigenmode kernel
+      {"owner":false,"molDispatchesFrozen":7,"errs":[]}
+GREEN chem — 0 failing of 54

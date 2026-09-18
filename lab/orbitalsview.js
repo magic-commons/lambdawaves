@@ -16,11 +16,13 @@
  * while ω_RPA = 0.483101 — a factor of two apart.  Every readout here says "frozen orbitals · beats at Δε,
  * not at ω_RPA", because a beat labelled as an excitation would be a lie the picture cannot correct.
  *
- * THE FIELD.  While REGISTER ON is up this window owns the volume's matrix: each frame it contracts
- * ψ's complex AO vector (nAO complex MACs — negligible beside the kernel's 1.3k MACs a voxel) and pushes it
- * through field.setMoleculeMatrix({ re, im }, { kind: 'orbital' }), with the observable set to `phase`.
- * It does NOT own the molecule: CHEMISTRY uploads the shells, so CHEMISTRY must be ON, and while its
- * real-time RUN is propagating a density the register stands down rather than fight it for the texels.
+ * THE FIELD.  This window is a PRODUCER of lab/molecular-session.js's 'orbital-packet' model: each frame it
+ * contracts ψ's complex AO vector (nAO complex MACs — negligible beside the kernel's 1.3k MACs a voxel) and
+ * hands the session one tagged product, which the session paints if this model is the selected one.
+ * It does NOT own the molecule: CHEMISTRY uploads the shells, so CHEMISTRY must be ON, and the real-time run
+ * OUTRANKS this model, so while it propagates the session simply does not select the register.  That used to be
+ * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
+ * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from './mir/kit.js';
 
@@ -31,6 +33,7 @@ const LAW = 'frozen orbitals · beats at Δε, not at ω_RPA';
 export function createOrbitals(host, api) {
   const F = () => (api.field ? api.field() : null);
   const C = () => (api.chem ? api.chem() : null);
+  const S = () => api.session || null;
   const now = () => (api.now ? api.now() : 0);
   const status = (t, cls) => { statusText = t; if (api.status) api.status(t, cls === undefined ? '' : cls); };
 
@@ -116,30 +119,23 @@ export function createOrbitals(host, api) {
   function setPhase(k, v) { const c = sel.get(k); if (!c) return; c.phase = ((v % TAU) + TAU) % TAU; touch(); paint(); refresh(); api.repaint(); }
 
   /* ── the field ────────────────────────────────────────────────────────────────────────────────── */
-  /* chem.state() builds a thirty-field object, and update() asks "is the run live?" on every frame, so the
-     answer is cached for 200 ms — a run starting is a press, not something that needs frame-exact detection,
-     and setOn() / state() force a fresh read anyway (wave 45's law: no allocation on the frame loop). */
-  let runWall = 0, runCache = false;
-  function chemRunning(force) {
-    const c = C(); if (!c || !c.state) return false;
-    const ms = performance.now();
-    if (!force && ms - runWall < 200) return runCache;
-    runWall = ms; runCache = !!c.state().running;
-    return runCache;
-  }
-  /** why the register may NOT hold the field right now, or null when it may */
-  function refusal(force) {
+  /** why the register may NOT hold the field right now, or null when it may.  The RT-run clause is the session's
+   *  own answer — a boolean read of one model's claim, where this used to build CHEMISTRY's thirty-field state()
+   *  object and cache it for 200 ms to keep that allocation off the frame loop. */
+  function refusal() {
     const c = C();
     if (!c) return 'no CHEMISTRY window';
     if (!c.on) return 'CHEMISTRY OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
-    if (chemRunning(force)) return 'CHEMISTRY RT RUN has the field: stop the run to take it';
+    const s = S();
+    if (s && s.claimed('tdhf')) return 'CHEMISTRY RT RUN has the field: stop the run to take it';
     const f = F();
     if (!f || !f.ok) return 'no WebGPU field';
     if (!f.molecular) return 'the field is not molecular yet';
     return null;
   }
   const vec = { re: null, im: null };                 // the pushed pair, reused: the frame loop allocates nothing
+  const product = { kind: 'orbital', matrix: vec, view: 'phase', hash: null, solution: -1 };   // and so is the product record
   /** ψ's complex AO vector at t: re/im = Σ_k |c_k| e^{i(arg c_k − ε_k t)} C[:, k] — nAO complex MACs a frame */
   function vectors(t) {
     const n = nAO();
@@ -153,32 +149,31 @@ export function createOrbitals(host, api) {
     return vec;
   }
   /** push ψ(t) — only when t or the register moved, so a paused transport does not chase its own repaint.
-   *  `moleculeComplex` is the third reason to push: CHEMISTRY writes the same matrix buffer (a view change, a
-   *  re-solve, setOn), so if the volume is no longer OUR complex orbital the register takes it back at once —
-   *  otherwise `on` would be true with the card's density on the screen and nothing would ever correct it. */
+   *  There is no third reason any more: with one owner the volume cannot be taken out from under this model
+   *  while it is the selected one, so the old `moleculeComplex` re-take check has nothing left to catch. */
   function push(t, force) {
-    const f = F(); if (!f) return false;
-    if (!force && t === pushedT && version === pushedV && f.moleculeComplex) return false;
-    f.setMoleculeMatrix(vectors(t), { kind: 'orbital' });
+    const s = S(); if (!s || !sol) return false;
+    if (!force && t === pushedT && version === pushedV) return false;
+    product.matrix = vectors(t); product.hash = sol.hash; product.solution = Number.isFinite(sol.seq) ? sol.seq : 0;
+    if (!s.publish('orbital-packet', product)) return false;
     pushedT = t; pushedV = version;
-    api.repaint();
     return true;
   }
   function setOn(v) {
     const want = !!v;
     if (want && !on) {
-      const why = refusal(true);
+      const why = refusal();
       if (why) { onSw.set(false); status('register off — ' + why, 'warn'); return false; }
       on = true; onSw.set(true);
-      if (api.fieldView) api.fieldView('phase');
-      push(now(), true);
+      pushedT = NaN; pushedV = -1;
+      /* the claim is the whole handover: the session selects this model, asks for `phase`, and calls push() */
+      if (S()) S().claim('orbital-packet', true, 'the ORBITALS register has the field');
     } else if (!want && on) {
       on = false; onSw.set(false);
       pushedT = NaN; pushedV = -1;
-      /* the field goes back to the card that OWNS the molecule, by its own road — never by guessing a view here */
-      const c = C();
-      if (c && c.on && c.setView && c.state) c.setView(c.state().view);
-      else if (api.fieldView) api.fieldView(null);
+      /* and letting go is the same act in reverse: the session hands the field to the next model by RANK — the
+         card if it is on, the user's own observable if nothing claims it — never by guessing a view here */
+      if (S()) S().claim('orbital-packet', false, 'REGISTER OFF');
       api.repaint();
     } else { onSw.set(on); }
     refresh();
@@ -240,7 +235,7 @@ export function createOrbitals(host, api) {
     const s = sum2();
     roSum.set(sel.size ? s.toFixed(6) : '—', sel.size ? (Math.abs(s - 1) < 1e-9 ? 'ok' : 'warn') : '');
     roSum.setSub(`${sel.size} of ${sol.nAO} orbitals · ${sol.nocc} occupied · NORM sets this to 1`);
-    const why = refusal(true);
+    const why = refusal();
     status(on ? `register ON · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
       : why ? 'register off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · REGISTER ON gives the field arg ψ`,
       on ? 'live' : why ? 'warn' : 'ok');
@@ -363,7 +358,7 @@ export function createOrbitals(host, api) {
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone
     }
     touch(); rebuild(); paint(); refresh();
-    if (on) { const why = refusal(true); if (why) setOn(false); else push(now(), true); }
+    if (on) { const why = refusal(); if (why) setOn(false); else push(now(), true); }
     api.repaint();
   }
   function ensureSub() {
@@ -373,6 +368,9 @@ export function createOrbitals(host, api) {
     unsub = c.subscribe((s) => adopt(s));       // fires at once with the ground state already in hand, if there is one
     return true;
   }
+  /* the one model this window produces, named to the session once: `push` is how the session asks it to paint
+     when it becomes the owner, and `view` is the observable a complex orbital wants shown */
+  if (S()) S().register('orbital-packet', { push: () => push(now(), true), view: () => 'phase' });
   ensureSub();
 
   /* ── the frame ────────────────────────────────────────────────────────────────────────────────── */
@@ -425,7 +423,7 @@ export function createOrbitals(host, api) {
         epsHOMO: eH, epsLUMO: eL, gap: sol && Number.isFinite(eL) ? eL - eH : null,
         selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0 })),
         sum: sum2(), period: p ? p.period : null, dE: p ? p.dE : null, t: pushedT, law: LAW,
-        refusal: refusal(true), status: statusText, hash: sol ? sol.hash : null };
+        refusal: refusal(), status: statusText, hash: sol ? sol.hash : null };
     },
     save, load,
     dispose() { if (unsub) { unsub(); unsub = null; } },

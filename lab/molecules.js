@@ -421,6 +421,20 @@ export const predictMs = (work, rWork) => COST.a * work + COST.b * rWork + COST.
  * cannot answer for them at all, so they are LISTED with the finding and DISABLED, rather than quietly dropped.
  * This is minimal-basis RHF failing on a 3d¹⁰ metal hydride, not a bug: it is the same real-RHF instability the
  * N₂ second solution taught this engine to name, and it wants ROHF/UHF or a larger basis, not a looser gate. */
+/* PROVENANCE, 2026-09-18.  THE THREE NUMBERS IN EACH ROW BELOW ARE THE 2026-09-12 LANDING POINT and are kept
+ * because that is the point PySCF is compared against (tests/molecules.test.mjs: the oracle finds both blocks
+ * negative there too, and ZnH₂'s A − B and energy agree with this engine to 1e-6 and 1e-9).  They are NOT what
+ * this engine reaches today.  On these two the RHF fixed point is a SADDLE, and whether a fixed-point iteration
+ * sticks to a saddle is decided by round-off: the Householder–QL eigensolver of 2026-09-18 makes both SCF runs
+ * wander for all 200 cycles instead of settling in 26 and 28, and they stop somewhere else.  Measured today, on
+ * this tree (research/molecular-waves-2026-09-18/scratch/probe-unstable.mjs):
+ *     CuH   converged false, 200 cycles, E = −1620.955894746,  lowest A + B = +6.804e-9,  lowest A − B = −1.1857e-1
+ *     ZnH₂  converged false, 200 cycles, E = −1758.282399158,  lowest A + B = −8.033e-2,  lowest A − B = −1.5291e-1
+ * So CuH's A + B is no longer negative at the point this engine stops on, and the refusal rests on A − B alone —
+ * which is the block both this engine, the reference RPA road and PySCF agree is negative for both species, and
+ * the block the RPA equations actually need (tests/chem-sweep.test.mjs gates the SIGN, never these values).
+ * The isolation that this is the eigensolver and nothing else is scratch/probe-old-two.mjs: the shipped tree with
+ * only the QL dispatch added reproduces the new landing point to every digit. */
 const UNSTABLE = {
   CuH: { lowestApB: -6.966e-3, lowestAmB: -1.173e-1, energy: -1620.944903679 },
   ZnH2: { lowestApB: -1.885e-2, lowestAmB: -6.760e-2, energy: -1758.305613634 },

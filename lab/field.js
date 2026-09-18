@@ -134,6 +134,11 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * A COMPLEX ORBITAL (kind 2, the ORBITALS register: ψ = Σ_k c_k e^{−iε_k t}φ_k, MATH-H2O Proposition 1) writes the
  * full (ψ_re, ψ_im): 'phase' then reads arg ψ over the whole turn, 'density' reads |ψ|², 'real'/'imag' the parts.
  * ONE matrix buffer holds both AO vectors — mat[0 … nAO) is the real part, mat[nAO … 2nAO) the imaginary one.
+ * A SIGNED MATRIX (kind 3) is the density's own contraction with the square root left off: the texel is (Σ M_μν
+ * χ_μ χ_ν, 0) with its sign, so 'real' shows two-colour lobes normalised by max |value|.  It exists because a
+ * difference of densities is not a density — ΔD = Re D(t) − D_ref has both signs — and because subtracting two
+ * rgba16float volumes of √ρ cannot see a weak kick at all: an 11-bit mantissa on √ρ is ≈ 1e-3 relative on ρ, and
+ * a κ = 1e-3 kick moves ρ by about that much.  The difference is formed in f64 on the CPU and quantised ONCE.
  * ONE exp per primitive per EXPONENTIAL GROUP.  Two things share: every Cartesian component of a shell (they carry
  * the same exponents by construction), and every shell on one centre with one exponent list — which is what makes
  * STO-3G water 12 exponentials a point and not 15, and benzene 54 and not 72, because lab/md.js splits an sp record
@@ -148,7 +153,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
 const molWgsl = (cap) => /* wgsl */`
 const WG: u32 = 64u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape
 struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };   // l carries bit 8 = share the previous group's exponentials
-struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ), 2 complex orbital (ψ_re, ψ_im)
+struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ), 2 complex orbital (ψ_re, ψ_im), 3 signed matrix (Δρ, no root)
 @group(0) @binding(0) var<uniform> P: MP;
 @group(0) @binding(1) var<storage, read> shells: array<Shell>;
 @group(0) @binding(2) var<storage, read> alphas: array<f32>;
@@ -198,7 +203,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
     }
     var amp = 0.0;
     var ampIm = 0.0;                                                             // kind 2 only: the imaginary AO vector's contraction
-    if (P.kind >= 1u) {
+    if (P.kind == 1u || P.kind == 2u) {
       for (var i = 0u; i < P.nAO; i++) { amp += mat[i] * chiW[i * WG + lid]; }   // ψ(r) = Σ_μ c_μ χ_μ(r), signed
       if (P.kind == 2u) { for (var i = 0u; i < P.nAO; i++) { ampIm += mat[P.nAO + i] * chiW[i * WG + lid]; } }   // … and Σ_μ Im c_μ χ_μ(r)
     } else {
@@ -212,9 +217,13 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         for (var j = i + 1u; j < P.nAO; j++) { off += mat[row + j] * chiW[j * WG + lid]; }
         rho += 2.0 * ci * off;                                                   // … and 2 Σ_{μ<ν}, M symmetric
       }
-      amp = sqrt(max(rho, 0.0));
+      amp = select(sqrt(max(rho, 0.0)), rho, P.kind == 3u);                      // kind 3 SIGNED: the same contraction, no square root and no clamp
     }
     textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, ampIm, 0.0, 0.0));
+    /* stats[slot] = max(amp² + ampIm²) whatever the kind, and that is already the right accumulator for a SIGNED
+       field: the presenter's 'real' view divides by ampMax = sqrt(stats[0]), which is max |amp| here, so ±1 is the
+       extreme lobe either way.  A max over amp itself would have been max Δρ, not max |Δρ|, and a field whose
+       largest excursion is negative would have been normalised by its smaller positive one. */
     dens = amp * amp + ampIm * ampIm;
   }
   /* the workgroup's max ρ, reduced THROUGH THE χ TILE — which is dead by now.  That is why there is no separate
@@ -1308,14 +1317,16 @@ export async function createField(canvas, opts = {}) {
     return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier], half };
   }
   /** the volume's matrix.  'density' and 'diff': M = Float32Array(nAO²), symmetric Re D, ρ = Σ_μν M_μν χ_μ χ_ν and
-      the texel is (√ρ, 0).  'orbital': M = Float32Array(nAO), ψ = Σ_μ c_μ χ_μ and the texel is the signed (ψ, 0),
+      the texel is (√ρ, 0).  'signed': the same n² matrix WITHOUT the square root — the texel is the signed value,
+      read by 'real' as two-colour lobes, which is what a difference of densities needs (see the header).
+      'orbital': M = Float32Array(nAO), ψ = Σ_μ c_μ χ_μ and the texel is the signed (ψ, 0),
       or M = { re, im } — two Float32Array(nAO) — for a COMPLEX orbital, whose texel is the full (ψ_re, ψ_im) so
       'phase' reads arg ψ over the whole turn (the ORBITALS register).  Both vectors ride in the one matrix buffer,
       the real part at 0 and the imaginary part at nAO, which is what the kernel's kind 2 reads.
       `ref: true` also writes this volume into refTex, which is the ρ_ref view 'diff' subtracts. */
   function setMoleculeMatrix(M, { kind = 'density', ref = false } = {}) {
     if (!molSpec) throw new Error('field: setMoleculeMatrix before setMolecule');
-    if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
+    if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital' && kind !== 'signed') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
     const n = molPack.nAO;
     const cplx = !!(kind === 'orbital' && M && !M.length && M.re && M.im);      // a bare array is still the real path, untouched
     if (cplx) {
@@ -1331,7 +1342,7 @@ export async function createField(canvas, opts = {}) {
     if (!M || M.length !== want) throw new Error(`field: kind '${kind}' needs ${want} numbers, got ${M ? M.length : 0}`);
     const src = M instanceof Float32Array ? M : Float32Array.from(M);
     device.queue.writeBuffer(molMatBuf, 0, src, 0, want);
-    molMat = src; molKind = kind === 'orbital' ? 1 : 0; molKindName = kind; molDirty = true;
+    molMat = src; molKind = kind === 'orbital' ? 1 : kind === 'signed' ? 3 : 0; molKindName = kind; molDirty = true;
     if (ref) molRefDirty = true;
     return { kind, nAO: n, length: want, complex: false, ref: !!ref };
   }

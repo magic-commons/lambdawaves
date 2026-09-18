@@ -1,0 +1,49 @@
+GREEN L0 boot: __LW.ready
+      {"ok":1,"i":5}
+GREEN L0 boot: no page error, the ORBITALS window is on the rack and __LW.orbitals is wired
+      {"errs":[],"gpu":null,"card":true,"eyebrow":"ORBITALS","title":"ORBITALS","inMenu":true,"handle":true,"ladder0":0,"on0":false}
+GREEN L1 CHEMISTRY has H₂O on the field: E = -74.963023162862 within 1e-9
+      {"energy":-74.96302316286251,"delta":-5.115907697472721e-13,"owner":true,"molecular":true,"half":7.4309006215206646,"res":64}
+GREEN L2 the ladder is 7 levels with 5 occupied
+      {"levels":7,"occupied":5,"eps":[-20.241863,-1.268162,-0.617565,-0.453022,-0.391237,0.605172,0.741598]}
+GREEN L2 HOMO is level 5 at ε = -0.391237 and LUMO is level 6 at ε = 0.605172 (within 1e-6)
+      {"homoIndex":5,"lumoIndex":6,"epsHOMO":-0.39123679774070325,"epsLUMO":0.6051718826251006,"node":{"epsHOMO":-0.3912367977407039,"epsLUMO":0.6051718826251059}}
+GREEN L2 the frozen-orbital gap Δε = 0.996409 within 1e-6, and it is labelled as Δε and not ω_RPA
+      {"gap":0.9964086803658039,"node":0.9964086803658099,"omegaRPA":0.483101392,"label":"frozen orbitals · beats at Δε, not at ω_RPA"}
+GREEN L2 a new solve reset the register to the HOMO alone, and the ladder canvas is DPR-sized and laid out
+      {"selection":[{"k":4,"amp":1,"phase":0,"eps":-0.39123679774070325,"occ":2}],"canvas":{"w":254,"h":148},"errs":[]}
+GREEN L3 HOMO + LUMO at equal amplitude gives Σ|c|² = 2, and NORM makes it exactly 1
+      {"beforeSum":2,"afterSum":0.9999999999999998,"amps":[0.7071067811865475,0.7071067811865475]}
+GREEN L3 the DIALS row is two lanes with an amplitude and a phase knob each
+      {"lanes":2,"knobs":4,"errs":[]}
+GREEN L3 the beat readout is the period 2π/Δε = 6.305832 within 1e-4
+      {"period":6.3058315638849,"want":6.305831563884862,"Δε":0.9964086803658039,"note":"2π/0.996409 = 6.3058"}
+GREEN L4 the page call ran
+      "ok"
+GREEN L4 the probe voxel carries both lobes: φ_HOMO and φ_LUMO are both well away from zero
+      {"voxel":[30,32,31],"at":[-0.348323,0.116108,-0.116108],"phiHOMO":-0.49392238071160105,"phiLUMO":-0.5048543729106798}
+GREEN L4 REGISTER ON took the field and set the observable to phase (1)
+      {"view":1,"wasView":0,"kind":"orbital","complex":true,"dirty":false}
+GREEN L4 the texel carries an IMAGINARY part — arg ψ exists for a molecule
+      {"gpu":{"re":-0.6162109375,"im":0.06988525390625},"cpu":{"re":-0.6164522305593833,"im":0.06990808121266474},"argDeg":173.53,"t":1}
+GREEN L4 |ψ|² at t = 1 matches the register's own law within 2 % (rgba16float)
+      {"gpu":0.38459986820816994,"cpu":0.3849004923804755,"rel":-0.0007810438756425953}
+GREEN L5 half a beat later (t = 1 → 4.152916, π/Δε = 3.152916) the density at the probe CHANGES
+      {"rho_t0":0.38459986820816994,"rho_t1":0.1138920933008194,"ratio":0.29613138930971694,"cpu_t0":0.3849004923804755,"cpu_t1":0.11393676363437204,"note":"|ψ|² = ½(φ_H² + φ_L²) + φ_H φ_L cos(Δε t): the cross term flips, nothing else moves"}
+GREEN L5 the period readout is 2π/Δε = 6.305832 within 1e-4 and Σ|c|² is still 1
+      {"period":6.3058315638849,"want":6.305832,"sum":0.9999999999999998,"status":"register ON · 2 orbitals · frozen orbitals · beats at Δε, not at ω_RPA","errs":[]}
+GREEN L6 presentation.instruments.orbitals round-trips deep-equal
+      {"A":{"on":true,"selection":[{"k":4,"amp":0.5,"phase":0},{"k":5,"amp":0.7071067811865475,"phase":1.0471975511965974}]},"B":{"on":true,"selection":[{"k":4,"amp":0.5,"phase":0},{"k":5,"amp":0.7071067811865475,"phase":1.0471975511965974}]}}
+GREEN L6 the record is exactly { on, selection: [{ k, amp, phase }] }
+      {"keys":"on,selection","selection":[{"k":4,"amp":0.5,"phase":0},{"k":5,"amp":0.7071067811865475,"phase":1.0471975511965974}],"errs":[]}
+GREEN SHOT .tmp/orbitals-h2o.png exists and is over 50 kB, both windows open
+      {"file":"/home/joshua-hosain/Documents/LAMBDAWAVES/.tmp/orbitals-h2o.png","bytes":291426}
+GREEN L7 REGISTER OFF returns the observable (phase 1 → density 0) and the card's own density matrix
+      {"on":false,"view":0,"chemView":"density","kind":"density","complex":false}
+GREEN L8 the register takes the field when the run is stopped, and refuses it while the run is live
+      {"runSteps":20,"tookWhenStopped":true,"tookWhileRunning":false,"refusal":"CHEMISTRY RT RUN has the field: stop the run to take it"}
+GREEN L9 PLAY turns the register: t advances with the transport and every frame redispatches the volume
+      {"t0":0,"tAfter700ms":2.800079999999999,"rate":4,"dispatches":12,"stillComplex":true,"errs":[]}
+GREEN LZ no page error at any step
+      []
+GREEN orbitals — 0 failing of 24

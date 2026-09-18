@@ -44,6 +44,7 @@ import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
 import { createOrbitals } from './orbitalsview.js';   // ORBITALS: the MOLECULAR REGISTER over CHEMISTRY's canonical orbitals (MATH-H2O Proposition 1)
+import { createMolecularSession } from './molecular-session.js';   // the ONE owner of the molecular volume (MOLECULAR WAVES stage 1)
 import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
@@ -1264,11 +1265,11 @@ export async function boot(dom) {
     helium.setActive(canPresent(wHe));
     h2.setActive(canPresent(wH2));
     chem.setActive(canPresent(wChem));
+    /* ONE PRODUCT A FRAME, AND THE ORDER OF THESE TWO CALLS DECIDES NOTHING.  Both windows hand their product to
+       molSession, which selects a model by RANK (the real-time run, then the register, then the card) and drops
+       what the unselected ones offer — where this used to be "whoever writes the matrix last owns the frame". */
+    molSession.tick();
     if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
-    /* THE REGISTER PUSHES AFTER THE CARD, AND THAT ORDER IS THE POLICY.  Both write the same molecular matrix,
-       so whichever writes last owns the frame: while REGISTER ON is up the register's ψ(t) wins, and the moment
-       it is switched off the card repushes its own view (orbitalsview setOn).  nAO complex MACs a frame, so no
-       tick() — and the register refuses to take the field at all while chem's RT RUN is propagating a density. */
     orbitals.setActive(canPresent(wOrbs));
     if (orbitals.on && powered(wOrbs)) orbitals.update(clock.t);
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
@@ -2441,6 +2442,12 @@ export async function boot(dom) {
     else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
     schedule(TIER.PRESENT);
   }
+  /* THE MOLECULAR SESSION — one owner, and the end of "last writer wins".  CHEMISTRY and the ORBITALS register are
+     PRODUCERS of its named models; it is the only module that touches the field's two molecular setters, and the
+     only caller of the view road above, so the observable comes back to the user by the same rule whichever model
+     let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
+  const molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
+    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
   const wChem = device({ id: 'chem', eyebrow: 'CHEMISTRY', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // a first visit must not pay for a 7-AO solve behind furniture
   rack.appendChild(wChem.root);
@@ -2448,12 +2455,10 @@ export async function boot(dom) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
-    get field() { return field; },
     setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); },
-    /* the field's observable follows the card: a density has no phase, an orbital is a signed real amplitude; the
-       observable the user had before is handed back when the card releases the field (null).  ONE road, shared
-       with the ORBITALS register — see molFieldView above. */
-    fieldView: molFieldView,
+    /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
+       model is playing and which observable the field shows.  See molecular-session.js. */
+    session: molSession,
     now: () => clock.t });
 
   /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
@@ -2466,7 +2471,7 @@ export async function boot(dom) {
   orbitals = createOrbitals(wOrbs.body, { active: () => canPresent(wOrbs),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
-    now: () => clock.t, field: () => field, chem: () => chem, fieldView: molFieldView });
+    now: () => clock.t, field: () => field, chem: () => chem, session: molSession });
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
@@ -5605,6 +5610,14 @@ export async function boot(dom) {
       ladder() { return orbitals.ladder(); }, state() { return orbitals.state(); },
       solution() { return orbitals.solution(); },
       save() { return orbitals.save(); }, load(r) { return orbitals.load(r); },
+    },
+    /* the molecular funnel, readable: which model is playing, why, and what the session has dropped */
+    molsession: {
+      state() { return molSession.state(); },
+      get selected() { return molSession.selected; }, get reason() { return molSession.reason; },
+      get molecule() { return molSession.molecule; }, get solution() { return molSession.solution; },
+      get counters() { return { ...molSession.counters }; },
+      claimed(id) { return molSession.claimed(id); }, why(id) { return molSession.why(id); },
     },
     /* ── WAVE 52 · THE MODULATION RACK.  One road to the model, the four edges, the window and the
      * three numbers the strip is showing — `read(id)` hands back exactly what is on the screen. ── */
