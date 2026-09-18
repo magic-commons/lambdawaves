@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-09-18 19:35 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-09-18 23:05 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 

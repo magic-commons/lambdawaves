@@ -39,7 +39,7 @@
  */
 
 /** the selection order, and the whole of it: a producer names a model, the session owns its rank */
-export const MODEL_RANK = { tdhf: 0, 'orbital-packet': 1, ground: 2 };
+export const MODEL_RANK = { tdhf: 0, states: 1, 'orbital-packet': 2, ground: 3 };   // `states` = the REGISTER's many-electron mode (stage 4); the window's switch lets only one register claim at a time
 export const MODEL_IDS = Object.keys(MODEL_RANK);
 /** what a product may be.  'orbital' is an AO vector (real or { re, im }); the other two are symmetric n × n */
 export const PRODUCT_KINDS = ['orbital', 'density', 'signed'];

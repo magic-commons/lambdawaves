@@ -2526,3 +2526,16 @@ adoption and now passes; a logarithmic 1–100 fader reaches 10 at its midpoint,
 show(20) keeps its base at 10. Reset defaults and clearing the display override pass.
 The browser checks use synthetic control events; the existing input gate separately
 exercises real WebDriver mouse and touch. The PWA hashes were regenerated.
+
+## 2026-09-18 · MOLECULAR WAVES — the molecule becomes playable
+
+A rival plan (`research/astra-2026-09-18/`) was judged and refined (`research/molecular-waves-2026-09-18/JUDGMENT.md`), the mathematics was certified by a proving lab against PySCF (`proving/LEDGER.md`), and five stages landed in one day, each behind the full gate.
+
+- Stage 0, truth: the card's MMUT runs are really unrestarted and say so; the second integral pass and the duplicate stability Hessian are gone; the TDA ladder is its own list.
+- Stage 2, preparation: a Householder–QL eigensolver (`lab/linalg.js`), stability by Cholesky, RPA by one eigenproblem ($A-B=LL^{T}$, $W=L^{T}(A+B)L$), a staged solve. Benzene cold 9.27 s → 2.8–3.1 s in the browser. A Hermitian eigensolver that failed on degenerate spectra was found and rewritten: the shipped benzene z-kick run reached 54.26 electrons; it now holds 42.000000000001.
+- Stage 1, the funnel: `lab/molecular-session.js` is the one owner of the molecular volume; a `signed` kernel kind; CHEMISTRY's DIFF is formed in double precision (the old two-volume road returned zero at the peak voxel).
+- Stages 3 and 4, the REGISTER window (`lab/registerview.js`): one window, an ORBITAL | STATES switch. STATES (`lab/statesview.js`, `lab/molecular-register.js`) is a register over the many-electron states $S_0$ and the singlet CIS states in a canonical gauge (`lab/canon-gauge.js`, the worker's `chem.states`), exact in closed form and $N$-representable at any amplitude. Hydrogen's lanes, a dipole scope, presets by rule (BEAT, RING, LISSAJOUS, DARK, KICK X/Y/Z; HOMO + LUMO and WINDING in ORBITAL), A/B stores with a geodesic MORPH, CHANGE and DENSITY views against a GROUND or MEAN reference, nine-plus-eight modulation targets (`reg.morph`, `reg.amp1…8`, `reg.ph1…8`). A TDA stick clicked in CHEMISTRY is played. Benzene's RING is a dipole of constant length turning once every 389 attoseconds.
+
+Not built: the TD-CIS drive (stage 5) and FLOW from $\operatorname{Im}D$ (stage 6). Carry-overs still open: `rack.js` passes `molecule: chem.on` beside the session; `chem.run(n)` never sets `running`; CuH and ZnH₂'s non-convergence is unspoken; the AO → MO transform is the next preparation cost. Degenerate ORBITAL pairs are not yet in the canonical gauge, so WINDING's starting phase depends on the eigensolver (its winding does not).
+
+Gate: `./test.sh all` — node 0, browser 0, 1048 passing lines, 0 red.

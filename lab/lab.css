@@ -397,6 +397,22 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 .sp-b:active { background: var(--glass-press); }
 .sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: 13px; border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
+/* THE REGISTER WINDOW (registerview.js + statesview.js): the mode switch, the ladder beside its dipole scope, the A/B bar */
+.reg-mode { margin-bottom: var(--sp-2); }
+.reg-mode .segw { flex: 1 1 auto; }
+.reg-pane[hidden] { display: none; }
+.reg-pane > * + * { margin-top: var(--sp-2); }
+.reg-top { align-items: stretch; flex-wrap: nowrap; }
+.reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
+.reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
+.reg-bar { align-items: center; }
+.reg-bar .sel { flex: 1 1 0; min-width: 0; }
+.reg-bar .trig { flex: 0 0 auto; padding: 0 8px; }
+.reg-bar .trig.on { color: var(--acc); }
+.reg-morph { align-items: center; justify-content: space-between; }
+.reg-morph .k { flex: 0 0 auto; }
+.sp-rows.reg-morphing { opacity: .45; }            /* MORPH is playing the A → B path: the lanes are not what the field shows */
+.segw.off { opacity: .4; pointer-events: none; }
 /* ORBITALS' register lane: a .row, not the 7-column .sp-row grid — two dials and an × beside the orbital's name */
 .orb-lane { align-items: center; }
 .orb-lane .sp-id { flex: 1 1 0; min-width: 0; }

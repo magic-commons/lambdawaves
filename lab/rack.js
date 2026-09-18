@@ -43,7 +43,7 @@ import { createCapture, maxPictureSize } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
-import { createOrbitals } from './orbitalsview.js';   // ORBITALS: the MOLECULAR REGISTER over CHEMISTRY's canonical orbitals (MATH-H2O Proposition 1)
+import { createRegister } from './registerview.js';   // REGISTER: one window, two registers — ORBITAL (orbitalsview.js, MATH-H2O Proposition 1) and STATES (statesview.js, the many-electron TD-CIS register)
 import { createMolecularSession } from './molecular-session.js';   // the ONE owner of the molecular volume (MOLECULAR WAVES stage 1)
 import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
@@ -1270,8 +1270,8 @@ export async function boot(dom) {
        what the unselected ones offer — where this used to be "whoever writes the matrix last owns the frame". */
     molSession.tick();
     if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
-    orbitals.setActive(canPresent(wOrbs));
-    if (orbitals.on && powered(wOrbs)) orbitals.update(clock.t);
+    register.setActive(canPresent(wOrbs));
+    if ((orbitals.on || states.on) && powered(wOrbs)) register.update(clock.t);
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
     if (cpuTick) {
@@ -2404,7 +2404,7 @@ export async function boot(dom) {
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
-  let orbitals = null;                                                 // ORBITALS: the molecular register, assigned beside CHEMISTRY below
+  let orbitals = null, states = null, register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
   moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
@@ -2465,13 +2465,15 @@ export async function boot(dom) {
      is where a molecule's `arg` lives (MATH-H2O-2026-09-11, Proposition 1).  It is NOT a sixth field owner: it does
      not upload a molecule and it does not touch moleculeMode() — CHEMISTRY owns the shells and this window owns the
      matrix while REGISTER ON is up, so it stays visible and usable exactly when CHEMISTRY is on. */
-  const wOrbs = device({ id: 'orbitals', eyebrow: 'ORBITALS', title: 'molecular register', status: '' });
+  const wOrbs = device({ id: 'orbitals', eyebrow: 'REGISTER', title: 'molecular register', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps: no solve behind furniture
   rack.appendChild(wOrbs.root);
-  orbitals = createOrbitals(wOrbs.body, { active: () => canPresent(wOrbs),
+  register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
     now: () => clock.t, field: () => field, chem: () => chem, session: molSession });
+  orbitals = register.orbitals; states = register.states;
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
@@ -2637,6 +2639,18 @@ export async function boot(dom) {
       { id: 'chem.speed', label: 'CHEM SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (chem ? chem.knobs.speed() : null),
         hint: 'real-time propagation steps asked of the worker each frame',
         get: () => (chem ? chem.speed : 10), set: (v) => { if (chem) { chem.setSpeed(v); setKnob(chem.knobs.speed(), chem.speed); } } },
+      /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
+         PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
+         A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
+      { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (states ? states.knobs.morph() : null),
+        hint: 'where the STATES register plays on the path from store A to store B (MORPH must be on)',
+        get: () => (states ? states.morph : 0), set: (v) => { if (states) { states.setMorphValue(v); setKnob(states.knobs.morph(), states.morph); } } },
+      ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.amp${i + 1}`, label: `REG |b|² ${i + 1}`, map: 'linear', min: 0, max: 1, def: 0, group: 'state',
+        knob: () => (states ? states.knobs.pop(i) : null), hint: `the population of lane ${i + 1} of the STATES register (lane 1 is S₀)`,
+        get: () => (states ? states.slotAmp(i) : 0), set: (v) => { if (states) { states.setSlotAmp(i, v); setKnob(states.knobs.pop(i), states.slotAmp(i)); } } })),
+      ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.ph${i + 1}`, label: `REG PHASE ${i + 1}`, unit: ' rad', map: 'linear', min: 0, max: 2 * Math.PI, def: 0, group: 'state',
+        knob: () => (states ? states.knobs.ph(i) : null), hint: `the phase of lane ${i + 1} of the STATES register — on the y lane of a degenerate pair this sweeps slosh → ring → slosh → counter-ring`,
+        get: () => (states ? states.slotPhase(i) : 0), set: (v) => { if (states) states.setSlotPhase(i, v); } })),
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',
@@ -2651,7 +2665,7 @@ export async function boot(dom) {
       /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the
          vendored module: CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what
          a saved route is addressed by — so it names the instrument, not the nearest existing group. */
-      roots: ['observer', 'material', 'state', 'transport', 'field', 'chem'],
+      roots: ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg'],
     });
     modHost.install(defs.map(({ knob: _k, ...d }) => d));
     for (const d of defs) { if (d.knob) modKnobs[d.id] = d.knob; modGets[d.id] = d.get; }
@@ -5091,7 +5105,7 @@ export async function boot(dom) {
         readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
            particles and pulse runs do not: every project still opens paused on its first frame. */
-        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), orbitals: orbitals.save(), qcd: qcd.save(),
+        instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), orbitals: orbitals.save(), states: states.save(), register: { mode: register.mode }, qcd: qcd.save(),
           pulse: pulsePanel ? pulsePanel.api.save() : null, ladder: { ...ladder.params },
           particles: { count: Math.round(dynamics.ui.n.get()), trail: particles.trailLen } },
         mo: moPanel ? moPanel.save() : null,
@@ -5234,11 +5248,14 @@ export async function boot(dom) {
           /* the ORBITALS register lands OFF first, like every field-touching card, and is switched on only after
              CHEMISTRY holds the volume — its own load() parks the selection until a ladder exists to hang it on */
           if (I.orbitals) orbitals.load({ ...I.orbitals, on: false });
+          if (I.states) states.load({ ...I.states, on: false });
+          if (I.register) register.setMode(I.register.mode);
           if (fieldOwner === 'molecule') molecule.setOn(true);
           else if (fieldOwner === 'helium') helium.setOn(true);
           else if (fieldOwner === 'h2') h2.setOn(true);
           else if (fieldOwner === 'chem') chem.setOn(true);
           if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') orbitals.setOn(true);
+          if (I.states && I.states.on && fieldOwner === 'chem') states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
           if (I.ladder) ladder.set(I.ladder);
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
@@ -5606,10 +5623,21 @@ export async function boot(dom) {
       norm() { return orbitals.norm(); },
       setAmp(k, v) { return orbitals.setAmp(k, v); }, setPhase(k, v) { return orbitals.setPhase(k, v); },
       setOn(v) { return orbitals.setOn(v); }, get on() { return orbitals.on; },
+      preset(name) { return orbitals.preset(name); }, store(w) { return orbitals.store(w); }, setMorph(on, sv) { return orbitals.setMorph(on, sv); },
       get dials() { return orbitals.dials; }, setDials(v) { return orbitals.setDials(v); },
       ladder() { return orbitals.ladder(); }, state() { return orbitals.state(); },
       solution() { return orbitals.solution(); },
       save() { return orbitals.save(); }, load(r) { return orbitals.load(r); },
+    },
+    /* the REGISTER window's switch and its STATES mode: the many-electron register over S₀ and the TDA states */
+    register: { get mode() { return register.mode; }, setMode(v) { return register.setMode(v); }, save() { return register.save(); }, load(r) { return register.load(r); } },
+    states: {
+      select(k, amp, phase) { return states.select(k, amp, phase); }, deselect(k) { return states.deselect(k); }, toggle(k) { return states.toggle(k); },
+      clear() { return states.clear(); }, norm() { return states.norm(); }, setAmp(k, v) { return states.setAmp(k, v); }, setPhase(k, v) { return states.setPhase(k, v); },
+      preset(name) { return states.preset(name); }, play(k) { return states.play(k); }, store(w) { return states.store(w); },
+      setMorph(on, s) { return states.setMorph(on, s); }, setView(v) { return states.setView(v); }, setRef(v) { return states.setRef(v); },
+      setOn(v) { return states.setOn(v); }, get on() { return states.on; },
+      ladder() { return states.ladder(); }, state() { return states.state(); }, save() { return states.save(); }, load(r) { return states.load(r); },
     },
     /* the molecular funnel, readable: which model is playing, why, and what the session has dropped */
     molsession: {

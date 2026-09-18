@@ -57,8 +57,9 @@ try {
     inMenu: [...document.querySelectorAll('.dev')].map((d) => d.dataset.id).includes('orbitals'),
     handle: typeof __LW.orbitals === 'object' && typeof __LW.orbitals.select === 'function',
     ladder0: __LW.orbitals.ladder().length, on0: __LW.orbitals.on };`);
+  /* the window's eyebrow is REGISTER since 2026-09-18 (REGISTER-WINDOW-SPEC §11.1); its id, and this mode's handle, are unchanged */
   judge('L0 boot: no page error, the ORBITALS window is on the rack and __LW.orbitals is wired',
-    boot.errs.length === 0 && boot.card && boot.eyebrow === 'ORBITALS' && boot.inMenu && boot.handle && boot.on0 === false, boot);
+    boot.errs.length === 0 && boot.card && boot.eyebrow === 'REGISTER' && boot.inMenu && boot.handle && boot.on0 === false, boot);
   if (boot.gpu) judge('L0 a WebGPU device is required for this gate', false, { gpu: boot.gpu });
 
   /* ── L1 · CHEMISTRY solves the ladder the register runs on ───────────────────────────────────────── */

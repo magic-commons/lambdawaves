@@ -40,6 +40,7 @@ import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
 import { moleculeRHF, registerRecord, BASIS_FILES } from './rhf-molecule.js';
 import { rpa } from './rpa-inspector.js';
+import { canonicaliseSpectrum, dipoleFamily, coordinateFamily } from './canon-gauge.js';
 import { fieldShells } from './molecular-field.js';
 import { createRTHF } from './density.js';
 import { spectrum, peaks } from './absorb.js';
@@ -71,8 +72,8 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
-const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.rt.init']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
+const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
   const basis = m.basis || 'sto-3g';
@@ -126,6 +127,8 @@ function work(m) {
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.states') { out = chemStates(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.state.vectors') { out = chemStateVectors(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
@@ -143,6 +146,8 @@ function work(m) {
  *   chem.solve        { atoms (bohr), basis, charge, record? }           → the RHF ground state + the RPA roots + the field spec
  *   chem.ground       { atoms, basis, charge, record? }                  → STAGE ONE: the ground state alone, about a second earlier
  *   chem.spectrum     { atoms, basis, charge }                           → STAGE TWO: the RPA roots and the TDA ladder of that ground state
+ *   chem.states       { atoms, basis, charge }                           → the STATE REGISTER's ladder: the TDA states in the CANONICAL GAUGE (ω, f, μ, cluster, pivot) + the MO position matrices
+ *   chem.state.vectors { ks: [K…] }                                     → the canonical X^K amplitude vectors of those states, nocc·nvir numbers each
  *   chem.rt.init      { atoms, basis, charge, dt, integrator, kick: { axis, kappa }, restartEvery } → the kicked t = 0 state
  *   chem.rt.run       { steps }                                          → Re D, the dipole trace of those steps, invariants
  *   chem.rt.reset     {}                                                 → back to the kicked t = 0 state, trace cleared
@@ -189,7 +194,7 @@ function ensureSolve(m = {}) {
     dipole: sol.dipole, half: extent + 6,
     timings: { integrals: sol.timings.integrals, scf: tGround, rpa: null },
     stability: wireStability(sol.stability), solutions: (sol.solutions || []).map(wireSolution) };
-  chemSol = { key, sol, I, ground, spectrum: null, R: null, atoms, basis, charge }; chemKey = key;
+  chemSol = { key, sol, I, ground, spectrum: null, R: null, states: null, atoms, basis, charge }; chemKey = key;
   return chemSol;
 }
 /* THE STABILITY VERDICT ON THE WIRE.  stabilityHessian's `lowestApB`/`lowestAmB` are lazy getters and a structured
@@ -208,13 +213,61 @@ function ensureSpectrum(m = {}) {
   const R = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc });
   const tRpa = +(performance.now() - t).toFixed(2);
   c.R = R; c.ground.timings.rpa = tRpa;
+  c.states = canonicalStates(sol, I, R);
   c.spectrum = {
     roots: R.roots.map((r) => ({ omega: r.omega, omegaTDA: r.omegaTDA, f: r.f, mu: r.mu,
       dominant: r.dominant.slice(0, 4).map((d) => ({ i: d.i, a: d.a, x: d.x, y: d.y })) })),
     /* THE TDA LADDER IS ITS OWN LIST, ascending in its own ω: roots[k].omegaTDA is the k-th TDA root and NOT the
        partner of RPA root k (benzene: RPA root 2 is bright, TDA root 2 is dark).  The card draws from this list. */
-    tda: R.tda.map((r) => ({ omega: r.omega, f: r.f, mu: r.mu })) };
+    tda: R.tda.map((r, k) => ({ omega: r.omega, f: c.states.f[k], mu: [c.states.mu[3 * k], c.states.mu[3 * k + 1], c.states.mu[3 * k + 2]] })) };
   return c;
+}
+/* THE STATE REGISTER'S LADDER, IN THE CANONICAL GAUGE (REGISTER-WINDOW-SPEC §7, proving/LEDGER.md Definition 8).
+ * An eigensolver hands back an ARBITRARY orthonormal basis inside a degenerate level, so "TDA root 4" is not an
+ * identity: benzene's bright E₁u pair comes back rotated by whatever the round-off decided, and a saved register
+ * would mean something else after the next solve.  canon-gauge.js fixes every cluster by ordered functionals (the
+ * lab dipole axes x, y, z, then the amplitude coordinates) with a positive pivot — a function of the cluster's SPAN
+ * only — so the pair lands on (μ, 0, 0) and (0, μ, 0), lane "x" and lane "y", on every solve and with every solver.
+ * The shipped `tda` list draws its f and μ from HERE, so the card's sticks and the register's lanes agree; ω and
+ * the f-sum of a cluster are gauge-independent, which is why no existing number moves. */
+function canonicalStates(sol, I, R) {
+  const n = I.n, nocc = sol.nocc, nvir = n - nocc, d = nocc * nvir, C = sol.C, tda = R.tda;
+  const rMO = [I.X, I.Y, I.Z].map((M) => {
+    const half = new Float64Array(n * n), T = new Float64Array(n * n);
+    for (let u = 0; u < n; u++) for (let q = 0; q < n; q++) { let s = 0; for (let w = 0; w < n; w++) s += M[u * n + w] * C[w * n + q]; half[u * n + q] = s; }
+    for (let p = 0; p < n; p++) for (let q = 0; q < n; q++) { let s = 0; for (let u = 0; u < n; u++) s += C[u * n + p] * half[u * n + q]; T[p * n + q] = s; }
+    return T;
+  });
+  const X0 = new Float64Array(d * d), omega = new Float64Array(d);
+  tda.forEach((r, k) => { X0.set(r.X, k * d); omega[k] = r.omega; });
+  const dip = dipoleFamily(rMO, n, nocc, nvir);
+  const canon = canonicaliseSpectrum({ X: X0, omega, d, families: [dip, coordinateFamily(d)] });
+  const X = canon.X, mu = new Float64Array(3 * d), f = new Float64Array(d), cluster = new Int32Array(d), size = new Int32Array(d), pivot = new Float64Array(d);
+  for (let k = 0; k < d; k++) {
+    let m2 = 0;
+    for (let q = 0; q < 3; q++) { let s = 0; for (let p = 0; p < d; p++) s += dip.rows[q * d + p] * X[k * d + p]; mu[3 * k + q] = s; m2 += s * s; }
+    f[k] = (2 / 3) * omega[k] * m2;
+  }
+  canon.clusters.forEach(([s0, e0], ci) => {
+    let least = Infinity; for (const pv of canon.pivots[ci].pivots) least = Math.min(least, pv.norm);
+    for (let k = s0; k < e0; k++) { cluster[k] = ci; size[k] = e0 - s0; pivot[k] = least; }
+  });
+  return { n, nocc, nvir, d, omega, f, mu, cluster, size, pivot, X, rMO };
+}
+/** chem.states — the register's ladder.  Fresh arrays every call (the reply transfers them); X stays in the worker. */
+export function chemStates(m = {}) {
+  const c = ensureSpectrum(m), st = c.states, n = st.n, rMO = new Float64Array(3 * n * n);
+  for (let q = 0; q < 3; q++) rMO.set(st.rMO[q], q * n * n);
+  return { hash: c.ground.hash, n, nocc: st.nocc, nvir: st.nvir, count: st.d, omega: Float64Array.from(st.omega), f: Float64Array.from(st.f),
+    mu: Float64Array.from(st.mu), cluster: Int32Array.from(st.cluster), size: Int32Array.from(st.size), pivot: Float64Array.from(st.pivot), rMO };
+}
+/** chem.state.vectors — the canonical X^K of the states asked for, row-major [ks.length × nocc·nvir] */
+export function chemStateVectors(m = {}) {
+  if (!chemSol || !chemSol.states) throw new Error('chem: no states in this worker yet — chem.states first');
+  const st = chemSol.states, ks = (Array.isArray(m.ks) ? m.ks : []).map((k) => k | 0).filter((k) => k >= 0 && k < st.d);
+  const X = new Float64Array(ks.length * st.d);
+  ks.forEach((k, r) => X.set(st.X.subarray(k * st.d, (k + 1) * st.d), r * st.d));
+  return { hash: chemSol.ground.hash, ks, count: st.d, X };
 }
 /** chem.solve — THE ARRAYS ARE BUILT FRESH EVERY CALL, never cached: the reply TRANSFERS their buffers, so a
     cached report would come back detached (zero-length) the second time the same molecule was asked for. */

@@ -25,6 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from './mir/kit.js';
+import { slerpCoefficients } from './molecular-register.js';
 
 const DEG = 1e-6;                       // |Δε| below this is one degenerate row, drawn side by side
 const TAU = 2 * Math.PI;
@@ -61,6 +62,25 @@ export function createOrbitals(host, api) {
     title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — CHEMISTRY must be ON and not running',
     onChange: (v) => { setOn(v); } });
   head.appendChild(onSw.root);
+
+  /* THE SHARED BAR (REGISTER-WINDOW-SPEC §5, §9): the same PRESET · → A · → B · MORPH the STATES mode carries.  A preset
+     is a RULE, so it exists for every molecule or says why not; MORPH plays the normalised path between two stored
+     registers — for orthogonal stores cos/sin, hydrogen's TRANSITION envelope — and is a performance path, not dynamics. */
+  const ORB_PRESETS = ['HOMO + LUMO', 'WINDING'];
+  let storeA = null, storeB = null, morphOn = false, morphS = 0;
+  const bar = el('div', 'row tight reg-bar', host);
+  const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
+  presetSel.title = 'HOMO + LUMO: the frozen-orbital beat. WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density';
+  { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of ORB_PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
+  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p) preset(p); });
+  const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
+  const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
+  aBtn.addEventListener('click', () => store('A')); bBtn.addEventListener('click', () => store('B'));
+  const mrow = el('div', 'row tight reg-morph', host);
+  const morphSw = sw({ label: 'MORPH', value: false, title: 'Play the normalised path from A to B instead of the dials — a performance path, not dynamics', onChange: (v) => setMorph(v, morphS) });
+  const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
+    title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => setMorph(morphOn, v) });
+  mrow.appendChild(morphSw.root); mrow.appendChild(morphK.root);
 
   const rowsEl = el('div', 'sp-rows', host); rowsEl.hidden = true;
   dialsBtn.addEventListener('click', () => setDials(rowsEl.hidden));
@@ -115,6 +135,35 @@ export function createOrbitals(host, api) {
     for (const c of sel.values()) c.amp = Math.min(1, c.amp / s);
     touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
+  function preset(name) {
+    if (!sol) return false;
+    const h = sol.nocc - 1, l = sol.nocc, R = Math.SQRT1_2;
+    if (name === 'HOMO + LUMO') {
+      if (!(l < sol.nAO)) { status('HOMO + LUMO: this basis has no virtual orbital', 'warn'); return false; }
+      sel.clear(); sel.set(h, { amp: R, phase: 0 }); sel.set(l, { amp: R, phase: 0 }); selected = h;
+    } else if (name === 'WINDING') {
+      const pairAt = (k) => k >= 0 && k + 1 < sol.nAO && Math.abs(sol.eps[k + 1] - sol.eps[k]) < DEG;
+      let k = pairAt(h - 1) ? h - 1 : pairAt(l) ? l : -1;
+      if (k < 0) for (let q = sol.nAO - 2; q >= 0; q--) if (pairAt(q)) { k = q; break; }
+      if (k < 0) { status('WINDING: no degenerate orbital pair in this molecule — a winding phase needs a twofold level', 'warn'); return false; }
+      sel.clear(); sel.set(k, { amp: R, phase: 0 }); sel.set(k + 1, { amp: R, phase: Math.PI / 2 }); selected = k;
+    } else return false;
+    touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
+  }
+  function store(which) {
+    const M = new Map(); for (const [k, c] of sel) if (c.amp > 0) M.set(k, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) });
+    if (!M.size) return false;
+    if (which === 'A') { storeA = M; aBtn.classList.add('on'); } else { storeB = M; bBtn.classList.add('on'); }
+    touch(); return true;
+  }
+  function setMorph(v, sv) {
+    morphS = Math.min(1, Math.max(0, Number.isFinite(sv) ? sv : morphS));
+    const want = !!v && !!storeA && !!storeB;
+    if (v && !want) status('MORPH needs both stores: → A, change the register, → B', 'warn');
+    morphOn = want; morphSw.set(morphOn); if (morphK.get() !== morphS) morphK.set(morphS);
+    rowsEl.classList.toggle('reg-morphing', morphOn);
+    touch(); api.repaint(); return morphOn;
+  }
   function setAmp(k, v) { const c = sel.get(k); if (!c) return; c.amp = Math.max(0, Math.min(1, v)); touch(); paint(); refresh(); api.repaint(); }
   function setPhase(k, v) { const c = sel.get(k); if (!c) return; c.phase = ((v % TAU) + TAU) % TAU; touch(); paint(); refresh(); api.repaint(); }
 
@@ -141,11 +190,13 @@ export function createOrbitals(host, api) {
     const n = nAO();
     if (!re || re.length !== n) { re = new Float32Array(n); im = new Float32Array(n); vec.re = re; vec.im = im; }
     re.fill(0); im.fill(0);
-    for (const [k, c] of sel) {
-      if (!(c.amp > 0)) continue;
-      const th = c.phase - sol.eps[k] * t, cr = c.amp * Math.cos(th), ci = c.amp * Math.sin(th);
+    const add = (k, amp, phase) => {
+      if (!(amp > 0) || !(k >= 0) || k >= n) return;
+      const th = phase - sol.eps[k] * t, cr = amp * Math.cos(th), ci = amp * Math.sin(th);
       for (let mu = 0; mu < n; mu++) { const w = sol.C[mu * n + k]; if (w === 0) continue; re[mu] += cr * w; im[mu] += ci * w; }
-    }
+    };
+    if (morphOn && storeA && storeB) for (const [k, c] of slerpCoefficients(storeA, storeB, morphS)) add(k, Math.hypot(c.re, c.im), Math.atan2(c.im, c.re));
+    else for (const [k, c] of sel) add(k, c.amp, c.phase);
     return vec;
   }
   /** push ψ(t) — only when t or the register moved, so a paused transport does not chase its own repaint.
@@ -352,7 +403,7 @@ export function createOrbitals(host, api) {
   function adopt(s) {
     sol = s || null;
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
-    sel.clear();
+    sel.clear(); storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); rowsEl.classList.remove('reg-morphing');
     if (sol) {
       if (wanted) { applyRecord(wanted); wanted = null; }
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone
@@ -414,7 +465,8 @@ export function createOrbitals(host, api) {
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },
-    select, deselect, toggle, clear, norm, setAmp, setPhase,
+    select, deselect, toggle, clear, norm, setAmp, setPhase, preset, store, setMorph,
+    get morphOn() { return morphOn; }, get morph() { return morphS; },
     get selected() { return selected; },
     ladder() { return sol ? Array.from({ length: sol.nAO }, (_, k) => ({ k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0 })) : []; },
     state() {

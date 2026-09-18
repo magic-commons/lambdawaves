@@ -457,7 +457,11 @@ export function createChem(host, api) {
   const coreHover = graphHover(cvCore, { repaint: () => paint(), plot: () => coreRect });
   cv.addEventListener('click', () => { const h = hover.hit(); if (h && h.root) pick(h.root, h.index); });
   cvCore.addEventListener('click', () => { const h = coreHover.hit(); if (h && h.root) pick(h.root, h.index); });
-  function pick(k, i) { selected = k; roPick.set(`ω ${wOf(k).toFixed(6)} · f ${k.f.toFixed(6)}`, k.f > 1e-6 ? 'ok' : ''); roPick.setSub(infoOf(k, i || 0)); paint(); }
+  /* THE REGISTER's TWO HOOKS (stage 3).  `popOf(K)` lights a TDA stick with the STATES register's |b_K|² while that
+     register is the model playing; `pickHook(K)` tells it a TDA stick was clicked, which is how a stick is PLAYED.
+     Both speak TDA indices only: an RPA root has no partner in the register (JUDGMENT.md §8.3). */
+  let popOf = null, pickHook = null;
+  function pick(k, i) { if (tda && pickHook && Number.isInteger(i)) pickHook(i); selected = k; roPick.set(`ω ${wOf(k).toFixed(6)} · f ${k.f.toFixed(6)}`, k.f > 1e-6 ? 'ok' : ''); roPick.setSub(infoOf(k, i || 0)); paint(); }
 
   const size = (canvas, ctx) => {
     const W = canvas.clientWidth, H = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -517,6 +521,7 @@ export function createChem(host, api) {
       const hit = { kind: 'line', key: 'stick-' + wOf(k).toFixed(6) + pol, points: [px, Bt - hgt, px, Bt], lw: mine ? 3 : 2,
         colour: `rgb(${rgb.join(',')})`, info: infoOf(k, i), root: k, index: i };
       hovers.push(hit);
+      if (tda && popOf) { const p = popOf(i); if (p > 1e-6) { g.fillStyle = T.fg(0.92); g.beginPath(); g.arc(px, Bt - hgt, 2 + 5 * Math.sqrt(p), 0, 2 * Math.PI); g.fill(); } }   // the register's population on this state
       if (selected && selected === k) { g.fillStyle = T.fg(0.95); g.beginPath(); g.arc(px, Bt - hgt, 2.6, 0, 2 * Math.PI); g.fill(); }
     }
     /* the fitted poles, or the raw maxima when the certificate refuses */
@@ -639,6 +644,10 @@ export function createChem(host, api) {
     prepare() { return sol ? Promise.resolve(sol) : solve(preset); },
     setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) paint(); return active; },
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
+    /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
+    query() { return sol ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },
+    onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
+    setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
     /* the modulation registry's two targets — PRESENT-only setters, and the dials they write */
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },

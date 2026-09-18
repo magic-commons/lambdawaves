@@ -62,7 +62,7 @@ const product = (kind, matrix, view, hash, solution) => ({ kind, matrix, view, h
   assert.equal(s.why('orbital-packet'), 'REGISTER OFF');
   assert.deepEqual(views, ['density', 'phase', 'density', 'phase', 'density']);
   assert.deepEqual(Object.entries(MODEL_RANK).sort((a, b) => a[1] - b[1]).map(([k]) => k),
-    ['tdhf', 'orbital-packet', 'ground'], 'the rank order IS the policy, and it lives in the session');
+    ['tdhf', 'states', 'orbital-packet', 'ground'], 'the rank order IS the policy, and it lives in the session');
   console.log('PASS selection: rank decides, not call order — tdhf > orbital-packet > ground, each with its reason.');
 }
 
