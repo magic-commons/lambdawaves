@@ -263,6 +263,52 @@ try {
     near(l9.energy, LIB.PH3.energy, 1e-8) && l9.nAO === 12 && l9.errs.length === 0,
     { energy: l9.energy, delta: l9.energy - LIB.PH3.energy, nAO: l9.nAO, errs: l9.errs });
 
+  /* ── LAW 10 · THE MMUT RESTART POLICY THE CARD IS ACTUALLY RUNNING (2026-09-18) ───────────────
+   * The readout said "unrestarted MMUT" while the worker's chem.rt.init defaulted to a Magnus-2 restart every 50
+   * steps — a different trajectory under a label that denied it.  The card now SENDS restartEvery = 0 and prints
+   * the policy the engine reports back, so both halves are gated: the number in force and the words on screen. */
+  const l10 = await g.ev(`await __LW.chem.solve('H2O');
+    __LW.chem.setAxis('y'); __LW.chem.setDt(0.01); __LW.chem.setIntegrator('mmut');
+    await __LW.chem.kick(); await __LW.chem.run(120);
+    const st = __LW.chem.state();
+    const card = document.querySelector('.dev[data-id="chem"]');
+    const subs = [...card.querySelectorAll('.ro')].map((r) => (r.querySelector('.ro-lbl') || {}).textContent + ' :: ' + ((r.querySelector('.ro-sub') || {}).textContent || ''));
+    return { restartEvery: st.restartEvery, restartPolicy: st.restartPolicy, sinceRestart: st.sinceRestart, steps: st.steps,
+      idem: st.idempotency, sub: subs.find((s) => /IDEMPOTENCY/.test(s)) || '', errs: window.__e.slice() };`);
+  judge('L10 the card runs UNRESTARTED MMUT and the engine says so (restartEvery 0, no restart in 120 steps)',
+    l10.restartEvery === 0 && l10.restartPolicy === 'unrestarted' && l10.sinceRestart === l10.steps - 1 && l10.steps === 120, l10);
+  judge('L10 …and the readout prints the policy in force, not an intention', /MMUT, unrestarted/.test(l10.sub),
+    { sub: l10.sub, idempotency: l10.idem, errs: l10.errs });
+
+  /* ── LAW 11 · THE TDA LADDER IS ITS OWN LADDER ─────────────────────────────────────────────────
+   * roots[k].omegaTDA is the k-th TDA root BY INDEX, not the partner of RPA root k: for benzene the two ladders
+   * cross, the bright RPA line sitting at index 2 and the bright TDA line at index 3.  The TDA switch must
+   * therefore draw the TDA list — its ω, its f, its polarisation — and not RPA strengths at TDA positions. */
+  const l11 = await g.ev(`await __LW.chem.solve('C6H6');
+    const rpa = __LW.chem.roots(), tda = __LW.chem.tdaRoots();
+    const brightR = rpa.map((k, i) => [i, k.omega, k.f]).filter(([, , f]) => f > 0.5)[0];
+    const brightT = tda.map((k, i) => [i, k.omega, k.f]).filter(([, , f]) => f > 0.5)[0];
+    __LW.chem.setTda(true); const on = __LW.chem.state();
+    __LW.chem.setTda(false);
+    return { nR: rpa.length, nT: tda.length, brightR, brightT, byIndex: rpa.every((k, i) => k.omegaTDA === tda[i].omega),
+      ascending: tda.every((k, i) => i === 0 || k.omega >= tda[i - 1].omega), tdaRoots: on.tdaRoots, errs: window.__e.slice() };`);
+  judge('L11 benzene ships both ladders, each ascending and the same length', l11.nR === 315 && l11.nT === 315 && l11.ascending && l11.byIndex,
+    { rpaRoots: l11.nR, tdaRoots: l11.nT, ascending: l11.ascending, omegaTDAisTheIndexedTdaRoot: l11.byIndex });
+  judge('L11 the ladders CROSS: the first bright RPA root and the first bright TDA root are different indices',
+    l11.brightR && l11.brightT && l11.brightR[0] !== l11.brightT[0], { brightRPA: l11.brightR, brightTDA: l11.brightT, errs: l11.errs });
+
+  /* ── LAW 12 · THE STAGED REPLY CANNOT PUBLISH FOR THE MOLECULE YOU LEFT ────────────────────────
+   * chem.solve is now chem.ground followed by chem.spectrum.  Both replies are guarded by the card's solveSeq, so
+   * starting one molecule and immediately asking for another must leave the card wholly on the second one. */
+  const l12 = await g.ev(`const a = __LW.chem.solve('C2H4'); const b = __LW.chem.solve('H2O');
+    await Promise.all([a, b]); await new Promise((r) => setTimeout(r, 300));
+    const st = __LW.chem.state(), roots = __LW.chem.roots(1);
+    return { preset: st.preset, stage: st.stage, energy: st.energy, nAO: st.nAO, roots: st.roots, tdaRoots: st.tdaRoots,
+      omega0: roots[0] && roots[0].omega, errs: window.__e.slice() };`);
+  judge('L12 a solve interrupted by another leaves the card on the second molecule, whole (ground AND spectrum)',
+    l12.preset === 'H2O' && l12.stage === 'full' && near(l12.energy, H2O.energy, 1e-8) && l12.nAO === 7
+    && l12.roots === 10 && l12.tdaRoots === 10 && near(l12.omega0, H2O.omega0, 1e-8) && l12.errs.length === 0, l12);
+
   /* ── the field is handed back ───────────────────────────────────────────────────────────────── */
   const off = await g.ev(`__LW.chem.setOn(false); __LW.loadPreset('1s'); await __LW.settle();
     return { owner: __LW.chem.state().fieldOwner, molDispatchesFrozen: __LW.field.stats.molAO, errs: window.__e.slice() };`);

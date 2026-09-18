@@ -1,0 +1,157 @@
+{
+  "date": "2026-09-18T17:35:55.415Z",
+  "node": "v22.22.1",
+  "molecules": {
+    "H2O": {
+      "nAO": 7,
+      "nocc": 5,
+      "pairSpace": 10,
+      "shippedMs": {
+        "groundBare": 33.4,
+        "groundFull": 29.9,
+        "stabilityHessianOnce": 2.2,
+        "rpa": 8.2
+      },
+      "eigensolverMs": {
+        "jacobi": 0.1,
+        "householderQL": 0.9,
+        "ratio": 0.1,
+        "maxEigenvalueDiff": 1.4210854715202004e-14
+      },
+      "rpaCholeskyMs": 0.7,
+      "rpaCholeskyVsShipped": {
+        "maxOmegaDiff": 3.907985046680551e-14,
+        "maxOscillatorDiff": 1.3086753902769033e-14,
+        "stableApB": true
+      },
+      "cisRegister": {
+        "activeStates": [
+          4,
+          5,
+          6,
+          9
+        ],
+        "omegaTDA": [
+          0.8108265891044284,
+          1.0690492397783677,
+          1.4775248346021588,
+          20.15746786941505
+        ],
+        "trials": 40,
+        "occupationMin": 0.0195269014299312,
+        "occupationMax": 2.000000000000007,
+        "traceError": 7.105427357601002e-15,
+        "hermiticityError": 5.551115123125783e-17,
+        "linearCounterfactualOccupations": [
+          -0.2612407410853665,
+          2.2612407410853663
+        ]
+      }
+    },
+    "C2H4": {
+      "nAO": 14,
+      "nocc": 8,
+      "pairSpace": 48,
+      "shippedMs": {
+        "groundBare": 63.6,
+        "groundFull": 67.3,
+        "stabilityHessianOnce": 20.9,
+        "rpa": 54.3
+      },
+      "eigensolverMs": {
+        "jacobi": 1.4,
+        "householderQL": 16,
+        "ratio": 0.1,
+        "maxEigenvalueDiff": 4.796163466380676e-14
+      },
+      "rpaCholeskyMs": 10,
+      "rpaCholeskyVsShipped": {
+        "maxOmegaDiff": 4.340972026284362e-14,
+        "maxOscillatorDiff": 1.1876610805927612e-13,
+        "stableApB": true
+      },
+      "cisRegister": {
+        "activeStates": [
+          0,
+          9,
+          13,
+          18
+        ],
+        "omegaTDA": [
+          0.40865592625089053,
+          0.8065557148529388,
+          0.8564503341630321,
+          0.9954773859237042
+        ],
+        "trials": 40,
+        "occupationMin": 0.000027278280957404567,
+        "occupationMax": 2.0000000000000098,
+        "traceError": 1.4210854715202004e-14,
+        "hermiticityError": 5.551115123125783e-17,
+        "linearCounterfactualOccupations": [
+          -0.29205902094702413,
+          2.292059020947024
+        ]
+      }
+    },
+    "C6H6": {
+      "nAO": 36,
+      "nocc": 21,
+      "pairSpace": 315,
+      "shippedMs": {
+        "groundBare": 709.3,
+        "groundFull": 5510.9,
+        "stabilityHessianOnce": 2089.7,
+        "rpa": 4400.2
+      },
+      "eigensolverMs": {
+        "jacobi": 725.6,
+        "householderQL": 125.6,
+        "ratio": 5.8,
+        "maxEigenvalueDiff": 6.110667527536862e-13
+      },
+      "rpaCholeskyMs": 229.1,
+      "rpaCholeskyVsShipped": {
+        "maxOmegaDiff": 1.3287149158713873e-12,
+        "maxOscillatorDiff": 2.8255175976710234e-12,
+        "stableApB": true
+      },
+      "cisRegister": {
+        "activeStates": [
+          49,
+          50,
+          58,
+          59
+        ],
+        "omegaTDA": [
+          0.810811515289114,
+          0.8108115152891175,
+          0.8557191431458112,
+          0.8557191431458248
+        ],
+        "trials": 40,
+        "occupationMin": 8.264752768272336e-30,
+        "occupationMax": 2.000000000000065,
+        "traceError": 8.881784197001252e-13,
+        "hermiticityError": 5.551115123125783e-17,
+        "linearCounterfactualOccupations": [
+          -0.12287339478771045,
+          2.122873394787717
+        ]
+      },
+      "ringCurrent": {
+        "omegaTDA": 0.810811515289114,
+        "degeneracySplit": 3.552713678800501e-15,
+        "dipoleMagnitudeMin": 1.897932659278758,
+        "dipoleMagnitudeMax": 1.8979326592824115,
+        "outOfPlaneMax": 0,
+        "turnOver15of16PeriodInUnitsOf2Pi": -0.9374999999999606,
+        "d0": [
+          0.3027728682619138,
+          1.8736266889120108,
+          0
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,159 @@
+[
+  {
+    "id": "H2O",
+    "norb": 7,
+    "nocc": 5,
+    "states": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "determinants": 441,
+    "embedding_gram_error": 4.440892098500626e-16,
+    "embedding_overlap_with_ref": 0.0,
+    "convention_check": {
+      "occ_virt_norm": 1.414213562373095,
+      "virt_occ_norm": 0.0,
+      "pyscf_dm_is_transpose_of_E_pq": true
+    },
+    "gamma_max_abs_error": {
+      "00": 0.0,
+      "0K": 2.220446049250313e-16,
+      "K0": 2.220446049250313e-16,
+      "KL_oo": 6.661338147750939e-16,
+      "KL_vv": 2.220446049250313e-16,
+      "KL_ov": 0.0,
+      "KL_vo": 0.0,
+      "0K_other": 0.0
+    },
+    "gamma_pass": true,
+    "drive_matrix_max_abs_error": {
+      "x": 1.1102230246251565e-16,
+      "y": 6.661338147750939e-16,
+      "z": 2.220446049250313e-16
+    },
+    "pair_dipole_max_abs_error": {
+      "x": 1.1102230246251565e-16,
+      "y": 2.220446049250313e-16,
+      "z": 1.6653345369377348e-16
+    },
+    "nonsymmetric_operator": {
+      "0K_sqrt2_M_ia": 4.440892098500626e-16,
+      "with_minus_delta_ab_M_ij": 1.8966884345215445,
+      "with_minus_delta_ab_M_ji": 1.7763568394002505e-15
+    }
+  },
+  {
+    "id": "NH3",
+    "norb": 8,
+    "nocc": 5,
+    "states": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "determinants": 3136,
+    "embedding_gram_error": 2.220446049250313e-15,
+    "embedding_overlap_with_ref": 0.0,
+    "convention_check": {
+      "occ_virt_norm": 1.4072344400740164,
+      "virt_occ_norm": 0.0,
+      "pyscf_dm_is_transpose_of_E_pq": true
+    },
+    "gamma_max_abs_error": {
+      "00": 0.0,
+      "0K": 2.220446049250313e-16,
+      "K0": 2.220446049250313e-16,
+      "KL_oo": 6.661338147750939e-16,
+      "KL_vv": 2.220446049250313e-16,
+      "KL_ov": 0.0,
+      "KL_vo": 0.0,
+      "0K_other": 0.0
+    },
+    "gamma_pass": true,
+    "drive_matrix_max_abs_error": {
+      "x": 4.440892098500626e-16,
+      "y": 5.551115123125783e-16,
+      "z": 8.881784197001252e-16
+    },
+    "pair_dipole_max_abs_error": {
+      "x": 2.220446049250313e-16,
+      "y": 2.220446049250313e-16,
+      "z": 4.440892098500626e-16
+    },
+    "nonsymmetric_operator": {
+      "0K_sqrt2_M_ia": 4.440892098500626e-16,
+      "with_minus_delta_ab_M_ij": 2.7756645554116472,
+      "with_minus_delta_ab_M_ji": 1.7763568394002505e-15
+    },
+    "complex_amplitude_max_abs_error": 4.440892098500626e-16,
+    "complex_pair": [
+      1,
+      2
+    ]
+  },
+  {
+    "id": "CH4",
+    "norb": 9,
+    "nocc": 5,
+    "states": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "determinants": 15876,
+    "embedding_gram_error": 3.552713678800501e-15,
+    "embedding_overlap_with_ref": 0.0,
+    "convention_check": {
+      "occ_virt_norm": 0.8650089630664131,
+      "virt_occ_norm": 0.0,
+      "pyscf_dm_is_transpose_of_E_pq": true
+    },
+    "gamma_max_abs_error": {
+      "00": 0.0,
+      "0K": 1.1102230246251565e-16,
+      "K0": 1.1102230246251565e-16,
+      "KL_oo": 8.881784197001252e-16,
+      "KL_vv": 1.6653345369377348e-16,
+      "KL_ov": 0.0,
+      "KL_vo": 0.0,
+      "0K_other": 0.0
+    },
+    "gamma_pass": true,
+    "drive_matrix_max_abs_error": {
+      "x": 4.440892098500626e-16,
+      "y": 2.7755575615628914e-16,
+      "z": 2.7755575615628914e-16
+    },
+    "pair_dipole_max_abs_error": {
+      "x": 4.440892098500626e-16,
+      "y": 2.220446049250313e-16,
+      "z": 2.220446049250313e-16
+    },
+    "nonsymmetric_operator": {
+      "0K_sqrt2_M_ia": 4.440892098500626e-16,
+      "with_minus_delta_ab_M_ij": 2.804017588256081,
+      "with_minus_delta_ab_M_ji": 8.881784197001252e-16
+    },
+    "complex_amplitude_max_abs_error": 1.6184142622847341e-16,
+    "complex_pair": [
+      0,
+      1
+    ]
+  }
+]

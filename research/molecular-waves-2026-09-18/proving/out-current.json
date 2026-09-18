@@ -1,0 +1,12 @@
+{
+  "id": "C6H6",
+  "pair": [
+    19,
+    20
+  ],
+  "eps": -0.28133865869622954,
+  "max_abs_j": 0.003266062696098692,
+  "d_candidate_this_ledger": 2.168404344971009e-18,
+  "d_candidate_JUDGMENT_Observation_1": 0.0065321253921973845,
+  "circulation_direct": 0.0462975104968575
+}

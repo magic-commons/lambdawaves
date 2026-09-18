@@ -39,32 +39,86 @@ export function sandwich(X, A) {
   return C;
 }
 
-/** eigenpairs of a Hermitian matrix, ascending; V has the eigenvectors as columns (V[i*n+k]) */
+/**
+ * eigenpairs of a Hermitian matrix, ascending; V has the eigenvectors as columns (V[i*n+k]).
+ *
+ * THE REALIFICATION GIVES EVERY EIGENVALUE TWICE, and picking n independent COMPLEX vectors out of the 2n real
+ * ones is the whole difficulty.  A real eigenvector (u; v) of [[A,−B],[B,A]] is the complex z = u + iv, and so is
+ * (−v; u) — the same z times i.  Inside a cluster of 2p real vectors the p complex directions have to be sieved
+ * out, and a greedy sweep that takes them in the solver's own order and drops anything whose residual falls below
+ * a fixed floor DOES NOT WORK: which real basis the eigensolver returns for a degenerate cluster is arbitrary, and
+ * a residual of 1e-5 — above the floor, far below a real direction — is normalised into a vector that is not
+ * orthogonal to the ones already kept.  MEASURED on benzene/STO-3G, where symmetry gives twelve exactly degenerate
+ * pairs in the Löwdin Fock: the old sweep returned V with ‖V†V − I‖ = 9.7e-8 on the kicked Fock and 1.5 on the
+ * Magnus-2 average, so U = V e^{−iΔtw} V† was not unitary and one Magnus-2 step took the idempotency defect to
+ * 6.8 — the shipped card's benzene run was losing the determinant on its first step.
+ *
+ * WHAT IS DONE INSTEAD: the cluster is taken whole, and its complex directions are chosen BY PIVOTING — at each
+ * turn the remaining candidate with the LARGEST residual against what is already kept, orthogonalised twice
+ * (Kahan's "twice is enough"), and a residual below 0.1 is a REFUSAL rather than a vector.  This is independent of
+ * which orthonormal basis the real eigensolver happened to return for the cluster, which is what makes the answer
+ * the same for cyclic Jacobi and for Householder–QL.
+ */
 export function hermitianEigen(A) {
   const n = A.n, m = 2 * n, R = new Float64Array(m * m);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
     const a = A.re[i * n + j], b = A.im[i * n + j];
     R[i * m + j] = a; R[(i + n) * m + (j + n)] = a; R[i * m + (j + n)] = -b; R[(i + n) * m + j] = b;
   }
-  const e = eigSym(R, m), w = [], V = cmat(n);
+  const e = eigSym(R, m), V = cmat(n), w = new Float64Array(n);
   let scale = 0; for (let k = 0; k < m; k++) scale = Math.max(scale, Math.abs(e.values[k]));
-  const tol = 1e-9 * Math.max(scale, 1), kept = [];
-  for (let k = 0; k < m && kept.length < n; k++) {
-    const zr = new Float64Array(n), zi = new Float64Array(n);
-    for (let i = 0; i < n; i++) { zr[i] = e.vectors[i * m + k]; zi[i] = e.vectors[(i + n) * m + k]; }
-    for (const q of kept) {                                                   // Gram–Schmidt inside a degenerate cluster
-      if (Math.abs(q.w - e.values[k]) > tol) continue;
-      let pr = 0, pi = 0; for (let i = 0; i < n; i++) { pr += q.zr[i] * zr[i] + q.zi[i] * zi[i]; pi += q.zr[i] * zi[i] - q.zi[i] * zr[i]; }
+  const tol = 1e-9 * Math.max(scale, 1);
+  /** z ← z − Σ_q ⟨q, z⟩ q over an orthonormal complex set, twice, returning the residual norm */
+  const project = (zr, zi, basis) => {
+    for (let pass = 0; pass < 2; pass++) for (const q of basis) {
+      let pr = 0, pi = 0;
+      for (let i = 0; i < n; i++) { pr += q.zr[i] * zr[i] + q.zi[i] * zi[i]; pi += q.zr[i] * zi[i] - q.zi[i] * zr[i]; }
       for (let i = 0; i < n; i++) { zr[i] -= pr * q.zr[i] - pi * q.zi[i]; zi[i] -= pr * q.zi[i] + pi * q.zr[i]; }
     }
-    let nrm = 0; for (let i = 0; i < n; i++) nrm += zr[i] ** 2 + zi[i] ** 2; nrm = Math.sqrt(nrm);
-    if (nrm < 1e-6) continue;
-    for (let i = 0; i < n; i++) { zr[i] /= nrm; zi[i] /= nrm; }
-    kept.push({ w: e.values[k], zr, zi });
+    let nrm = 0; for (let i = 0; i < n; i++) nrm += zr[i] ** 2 + zi[i] ** 2;
+    return Math.sqrt(nrm);
+  };
+  /* THE PROJECTION IS AGAINST EVERYTHING KEPT, not only against the current cluster.  Two vectors from different
+     clusters are orthogonal only if they are exact eigenvectors of different eigenvalues, and a nearly degenerate
+     pair that the tolerance cuts in half is precisely the case where they are not: over 400 MMUT steps on benzene
+     that left ‖V†V − I‖ big enough to take the idempotency defect to 1.9e-8.  Orthogonalising globally costs one
+     n³ pass and makes V unitary by construction at every step, whatever the clustering did. */
+  const kept4 = [];
+  let kept = 0;
+  for (let k = 0; k < m;) {
+    let j = k; while (j < m && e.values[j] - e.values[k] <= tol) j++;          // the cluster [k, j), an anchor apart
+    const want = Math.round((j - k) / 2), cand = [];
+    for (let c = k; c < j; c++) {
+      const zr = new Float64Array(n), zi = new Float64Array(n);
+      for (let i = 0; i < n; i++) { zr[i] = e.vectors[i * m + c]; zi[i] = e.vectors[(i + n) * m + c]; }
+      cand.push({ zr, zi, live: true });
+    }
+    const basis = [];
+    for (let t = 0; t < want && kept + basis.length < n; t++) {
+      let best = -1, bestNorm = 0, bz = null;
+      for (let c = 0; c < cand.length; c++) {
+        if (!cand[c].live) continue;
+        const zr = Float64Array.from(cand[c].zr), zi = Float64Array.from(cand[c].zi);
+        const nrm = project(zr, zi, kept4.concat(basis));
+        if (nrm > bestNorm) { bestNorm = nrm; best = c; bz = { zr, zi }; }
+      }
+      if (best < 0 || bestNorm < 0.1) break;                                  // no independent direction left here
+      cand[best].live = false;
+      for (let i = 0; i < n; i++) { bz.zr[i] /= bestNorm; bz.zi[i] /= bestNorm; }
+      basis.push(bz);
+    }
+    /* each kept vector carries the MEAN of its own conjugate pair; inside a cluster the values agree to `tol` */
+    basis.forEach((q, t) => {
+      if (kept >= n) return;
+      const a = e.values[Math.min(j - 1, k + 2 * t)], b = e.values[Math.min(j - 1, k + 2 * t + 1)];
+      w[kept] = 0.5 * (a + b);
+      for (let i = 0; i < n; i++) { V.re[i * n + kept] = q.zr[i]; V.im[i * n + kept] = q.zi[i]; }
+      kept4.push(q); kept++;
+    });
+    k = j;
   }
-  if (kept.length !== n) throw new Error('density: Hermitian eigenproblem did not yield n independent vectors');
-  kept.forEach((q, k) => { w.push(q.w); for (let i = 0; i < n; i++) { V.re[i * n + k] = q.zr[i]; V.im[i * n + k] = q.zi[i]; } });
-  return { w: Float64Array.from(w), V };
+  if (kept !== n) throw new Error(`density: Hermitian eigenproblem yielded ${kept} independent vectors, not ${n}`);
+  return { w, V };
 }
 
 /** the Löwdin roots of a real symmetric positive metric: X = S^{−1/2}, W = S^{1/2} */
@@ -121,7 +175,9 @@ export function fieldOf({ shape = 'step', kappa = 0, omega = 0, tOn = 0, tOff = 
 }
 
 /**
- * createRTHF({ n, S, h, eri, Z, Enuc, nuclearDipole, nElectrons, D0, field, dt, integrator })
+ * createRTHF({ n, S, h, eri, Z, Enuc, nuclearDipole, nElectrons, D0, field, dt, integrator, restartEvery })
+ * `restartEvery`: MMUT steps between Magnus-2 restarts; 0 or null is the UNRESTARTED leapfrog.  The default stays
+ * 50 — node tests and the ledger's measurements were taken at it — and the card asks for 0, which is what it says.
  * Real-time restricted Hartree–Fock (or one-electron exact dynamics when nElectrons = 1) in the length gauge,
  * H'(t) = +E(t) ẑ per electron (λWAVES's convention, the one modrive.js and the ChronusQ papers use).
  * D0: the initial real AO density (spin-summed), e.g. scf.js's rhf().D.  Returns { step, observables, t, P, D }.
@@ -129,6 +185,13 @@ export function fieldOf({ shape = 'step', kappa = 0, omega = 0, tOn = 0, tOff = 
 export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0, nuclearDipole = 0, nElectrons, D0, field = () => 0, dt = 0.05, integrator = 'magnus2', restartEvery = 50 } = {}) {
   const D0c = D0 && D0.re ? D0 : (D0 && D0.length === n * n ? creal(D0, n) : null);
   if (!D0c || D0c.re.length !== n * n) throw new Error('rthf: D0 (n×n density, real or { re, im }) required');
+  /* THE RESTART POLICY, IN ONE PLACE.  0 and null both mean NEVER RESTART — SYNTHESIS decision 2's unrestarted
+     MMUT, which is what the CHEMISTRY card runs.  It cannot be spelled `Infinity` on the wire (JSON drops it, and
+     `Infinity | 0` is 0), and 0 read literally would make `sinceRestart < restartEvery` false forever and take the
+     Magnus-2 branch every step — the exact opposite of what it says.  So the wire value is normalised HERE and
+     nowhere else, and `policy` below is what the engine is actually doing. */
+  const restart = (restartEvery === null || restartEvery === 0) ? Infinity : Math.max(1, restartEvery | 0);
+  const policy = restart === Infinity ? 'unrestarted' : `restart every ${restart}`;
   const twoElectron = nElectrons > 1 && !!eri, f = nElectrons === 1 ? 1 : 2;
   const { X, W } = loewdin(S, n);
   let P = sandwich(W, D0c), t = 0, steps = 0, Pprev = null, sinceRestart = 0, lastMagnus = null;
@@ -177,7 +240,7 @@ export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0,
   const fockL = (Pm, time) => sandwich(X, fockAO(sandwich(X, Pm), time));
   function step(h_ = dt) {
     if (!Number.isFinite(h_) || h_ === 0) return self;
-    if (integrator === 'mmut' && Pprev && sinceRestart < restartEvery) {
+    if (integrator === 'mmut' && Pprev && sinceRestart < restart) {
       const Fnow = fockL(P, t), Pnext = mmut({ Pprev, Fnow, dt: h_ });
       Pprev = P; P = Pnext; sinceRestart++;
     } else {
@@ -197,9 +260,11 @@ export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0,
     const E = field(t), tr = ctrace(P), electronDipole = -z, totalDipole = nuclearDipole + electronDipole;
     return { t, steps, electrons: tr.re, electronsIm: tr.im, idempotency: idempotencyDefect(P, f), electronic,
       fieldFreeTotal: electronic + Enuc, instantaneousTotal: electronic + Enuc - E * totalDipole,
-      field: E, z, electronDipole, totalDipole };
+      field: E, z, electronDipole, totalDipole, restartPolicy: policy, sinceRestart };
   }
   const self = { step, kick, kickAlong, dipoleAlong, observables, get t() { return t; }, get P() { return { re: Float64Array.from(P.re), im: Float64Array.from(P.im), n }; },
-    get D() { return sandwich(X, P); }, X, W, model: `${nElectrons === 1 ? 'one electron, exact' : 'RT-RHF'}; length gauge; ${integrator}; Löwdin frame` };
+    get Pprev() { return Pprev ? { re: Float64Array.from(Pprev.re), im: Float64Array.from(Pprev.im), n } : null; },
+    get restartEvery() { return restart === Infinity ? 0 : restart; }, get restartPolicy() { return policy; }, get sinceRestart() { return sinceRestart; },
+    get D() { return sandwich(X, P); }, X, W, model: `${nElectrons === 1 ? 'one electron, exact' : 'RT-RHF'}; length gauge; ${integrator} (${policy}); Löwdin frame` };
   return self;
 }

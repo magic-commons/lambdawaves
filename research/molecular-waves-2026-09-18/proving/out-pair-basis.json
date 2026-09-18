@@ -1,0 +1,38 @@
+{
+  "H2O": {
+    "states": 7,
+    "trials": 30,
+    "pairBasisVsFullGamma": 2.220446049250313e-15,
+    "hermiticity": 5.551115123125783e-17,
+    "traceError": 5.329070518200751e-15,
+    "occupationMin": 0.014233326273055213,
+    "occupationMax": 2.0000000000000067
+  },
+  "NH3": {
+    "states": 7,
+    "trials": 30,
+    "pairBasisVsFullGamma": 3.552713678800501e-15,
+    "hermiticity": 1.3877787807814457e-16,
+    "traceError": 1.5987211554602254e-14,
+    "occupationMin": 0.0009932766115573258,
+    "occupationMax": 2.0000000000000098
+  },
+  "CH4": {
+    "states": 7,
+    "trials": 30,
+    "pairBasisVsFullGamma": 6.439293542825908e-15,
+    "hermiticity": 8.326672684688674e-17,
+    "traceError": 3.197442310920451e-14,
+    "occupationMin": 1.8805278654671118e-7,
+    "occupationMax": 2.000000000000006
+  },
+  "C6H6": {
+    "states": 7,
+    "trials": 30,
+    "pairBasisVsFullGamma": 4.063416270128073e-14,
+    "hermiticity": 8.326672684688674e-17,
+    "traceError": 8.313350008393172e-13,
+    "occupationMin": 0.000001174497417385041,
+    "occupationMax": 2.0000000000000626
+  }
+}

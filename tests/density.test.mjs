@@ -91,3 +91,49 @@ const H = (z) => ({ z, Z: 1, ...sto3g1s(ZETA.H) }), R = 1.4, basis = sBasis([H(-
   assert.ok(Math.abs(pk[0].omega - wFCI) > 1e-2, `the peak must NOT be the FCI gap ${wFCI}`); assert.ok(Math.abs(pk[0].omega - wTDA) > 1e-3, `nor the TDA value ${wTDA}`);
   console.log(`PASS linear response: peak ${pk[0].omega.toFixed(6)} = ω_RPA ${wRPA.toFixed(6)} (TDA ${wTDA.toFixed(6)}, FCI ¹Σu ${wFCI.toFixed(6)}); ε = [${eg.toFixed(6)}, ${eu.toFixed(6)}].`);
 }
+
+/* 5. THE DEGENERATE HERMITIAN EIGENPROBLEM, at the multiplicities a molecule with symmetry actually produces
+      (2026-09-18).  A realified 2n × 2n problem gives every eigenvalue twice, so a Hermitian eigenvalue of
+      multiplicity p arrives with multiplicity 2p, and picking n independent COMPLEX vectors out of that is the
+      whole of hermitianEigen.  Which orthonormal basis the real eigensolver returns for a cluster is arbitrary —
+      cyclic Jacobi and Householder–QL return different ones — so the gate is that V is unitary and A V = V w for
+      BOTH, on a matrix built from a known spectrum with multiplicities 4, 3, 2 and 1. */
+{
+  const n = 10, w0 = [-3, -3, -3, -3, -1, -1, -1, 0.5, 0.5, 2.25];
+  let seed = 4242; const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648 - 0.5);
+  const U = cmat(n);                                                            // a random unitary by complex Gram–Schmidt
+  for (let c = 0; c < n; c++) {
+    const zr = new Float64Array(n), zi = new Float64Array(n);
+    for (let i = 0; i < n; i++) { zr[i] = rnd(); zi[i] = rnd(); }
+    for (let p = 0; p < c; p++) {
+      let pr = 0, pi = 0;
+      for (let i = 0; i < n; i++) { pr += U.re[i * n + p] * zr[i] + U.im[i * n + p] * zi[i]; pi += U.re[i * n + p] * zi[i] - U.im[i * n + p] * zr[i]; }
+      for (let i = 0; i < n; i++) { zr[i] -= pr * U.re[i * n + p] - pi * U.im[i * n + p]; zi[i] -= pr * U.im[i * n + p] + pi * U.re[i * n + p]; }
+    }
+    let nn = 0; for (let i = 0; i < n; i++) nn += zr[i] ** 2 + zi[i] ** 2; nn = Math.sqrt(nn);
+    for (let i = 0; i < n; i++) { U.re[i * n + c] = zr[i] / nn; U.im[i * n + c] = zi[i] / nn; }
+  }
+  const D = cmat(n); for (let k = 0; k < n; k++) D.re[k * n + k] = w0[k];
+  const A = cmul(cmul(U, D), cadj(U));
+  for (let i = 0; i < n; i++) for (let j = i; j < n; j++) {                      // symmetrise away the 1e-16 asymmetry
+    const re = 0.5 * (A.re[i * n + j] + A.re[j * n + i]), im = 0.5 * (A.im[i * n + j] - A.im[j * n + i]);
+    A.re[i * n + j] = re; A.re[j * n + i] = re; A.im[i * n + j] = im; A.im[j * n + i] = -im;
+  }
+  const { w, V } = hermitianEigen(A), AV = cmul(A, V), VdV = cmul(cadj(V), V);
+  let dw = 0, res = 0, orth = 0;
+  for (let k = 0; k < n; k++) dw = Math.max(dw, Math.abs(w[k] - w0[k]));
+  for (let i = 0; i < n; i++) for (let k = 0; k < n; k++) {
+    res = Math.max(res, Math.abs(AV.re[i * n + k] - w[k] * V.re[i * n + k]), Math.abs(AV.im[i * n + k] - w[k] * V.im[i * n + k]));
+    orth = Math.max(orth, Math.abs(VdV.re[i * n + k] - (i === k ? 1 : 0)), Math.abs(VdV.im[i * n + k]));
+  }
+  assert.ok(dw < 1e-13, `degenerate spectrum recovered: max|Δw| ${dw}`);
+  assert.ok(res < 1e-13, `A V = V w on the degenerate problem: residual ${res}`);
+  assert.ok(orth < 1e-13, `V†V = I on the degenerate problem: ${orth}`);
+  /* and the propagator built from it is unitary, which is the property the whole RT path rests on */
+  const Uf = unitaryOf(A, 0.37), G = cmul(Uf, cadj(Uf));
+  let ud = 0;
+  for (let i = 0; i < n; i++) for (let k = 0; k < n; k++) ud = Math.max(ud, Math.abs(G.re[i * n + k] - (i === k ? 1 : 0)), Math.abs(G.im[i * n + k]));
+  assert.ok(ud < 1e-13, `exp(−i dt A) is unitary to ${ud} on a spectrum with multiplicities 4, 3, 2, 1`);
+  console.log(`PASS Hermitian eigenproblem with multiplicities 4·3·2·1: |Δw| ${dw.toExponential(2)}, residual ${res.toExponential(2)},`
+    + ` V†V − I ${orth.toExponential(2)}, UU† − I ${ud.toExponential(2)}.`);
+}

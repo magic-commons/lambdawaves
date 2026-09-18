@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-09-12 16:45 UTC by tools/disk.mjs from `research/`: 38 documents inlined in full (1.39 MB), 215 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-09-18 18:46 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 606 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -42,6 +42,23 @@ Built 2026-09-12 16:45 UTC by tools/disk.mjs from `research/`: 38 documents inli
 36. [chronusq-2026-09-11/SYNTHESIS.md](#doc-36) · 2026-09-11 · 22 kB
 37. [MATH-CHRONUSQ-PORTS-2026-09-11.md](#doc-37) · 2026-09-11 · 13 kB
 38. [MATH-H2O-2026-09-11.md](#doc-38) · 2026-09-11 · 161 kB
+39. [astra-2026-09-18/COVERAGE.md](#doc-39) · 2026-09-18 · 6 kB
+40. [molecular-waves-2026-09-18/JUDGMENT.md](#doc-40) · 2026-09-18 · 24 kB
+41. [molecular-waves-2026-09-18/proving/LEDGER.md](#doc-41) · 2026-09-18 · 44 kB
+42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 12 kB
+43. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/ACCEPTANCE.md](#doc-43) · 2026-09-18 · 12 kB
+44. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/host-contract.md](#doc-44) · 2026-09-18 · 15 kB
+45. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/MANIFEST.md](#doc-45) · 2026-09-18 · 10 kB
+46. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/PORT-NOTES.md](#doc-46) · 2026-09-18 · 28 kB
+47. [molecular-waves-2026-09-18/scratch/old-ql/lab/skin-notes.md](#doc-47) · 2026-09-18 · 5 kB
+48. [molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/marked-LICENSE.md](#doc-48) · 2026-09-18 · 3 kB
+49. [molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/ACCEPTANCE.md](#doc-49) · 2026-09-18 · 12 kB
+50. [molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/host-contract.md](#doc-50) · 2026-09-18 · 15 kB
+51. [molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/MANIFEST.md](#doc-51) · 2026-09-18 · 10 kB
+52. [molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/PORT-NOTES.md](#doc-52) · 2026-09-18 · 28 kB
+53. [molecular-waves-2026-09-18/scratch/old/lab/skin-notes.md](#doc-53) · 2026-09-18 · 5 kB
+54. [molecular-waves-2026-09-18/scratch/old/lab/vendor/marked-LICENSE.md](#doc-54) · 2026-09-18 · 3 kB
+55. [molecular-waves-2026-09-18/scratch/README-scratch.md](#doc-55) · 2026-09-18 · 1 kB
 
 ## ARTEFACTS (not inlined)
 
@@ -63,6 +80,14 @@ Built 2026-09-12 16:45 UTC by tools/disk.mjs from `research/`: 38 documents inli
 | astra-2026-09-05/reference-drive.json | 6817 |
 | astra-2026-09-05/reference-drive.py | 2049 |
 | astra-2026-09-05/validation-summary.json | 1906 |
+| astra-2026-09-18/corpus-index.json | 59981 |
+| astra-2026-09-18/measurements.json | 3691 |
+| astra-2026-09-18/node-validation.log | 269794 |
+| astra-2026-09-18/orbitals-validation.log | 4656 |
+| astra-2026-09-18/probe.log | 2196 |
+| astra-2026-09-18/probe.mjs | 9996 |
+| astra-2026-09-18/validation.json | 1559 |
+| astra-2026-09-18/water-slice.json | 109365 |
 | beta/math-probes.json | 646 |
 | beta/math-probes.py | 3554 |
 | chronusq-2026-09-11/oracle-pyscf.json | 846 |
@@ -157,6 +182,389 @@ Built 2026-09-12 16:45 UTC by tools/disk.mjs from `research/`: 38 documents inli
 | h2o-2026-09-11/scratch/sumrules.py | 2305 |
 | h2o-2026-09-11/sto-3g-h-kr.bse.json | 112427 |
 | h2o-2026-09-11/sto-3g.bse.json | 14603 |
+| molecular-waves-2026-09-18/measurements-fable.json | 4030 |
+| molecular-waves-2026-09-18/probe-fable.mjs | 14766 |
+| molecular-waves-2026-09-18/proving/canon-gauge.mjs | 7851 |
+| molecular-waves-2026-09-18/proving/canon-gauge.test.mjs | 17689 |
+| molecular-waves-2026-09-18/proving/check-current.py | 3832 |
+| molecular-waves-2026-09-18/proving/check-gamma-bitstring.py | 5411 |
+| molecular-waves-2026-09-18/proving/check-gamma-fci.py | 10360 |
+| molecular-waves-2026-09-18/proving/check-kick.py | 7088 |
+| molecular-waves-2026-09-18/proving/check-pair-basis.mjs | 6255 |
+| molecular-waves-2026-09-18/proving/check-tda-pyscf.py | 6907 |
+| molecular-waves-2026-09-18/proving/data/C6H6.json | 1604537 |
+| molecular-waves-2026-09-18/proving/data/CH4.json | 25621 |
+| molecular-waves-2026-09-18/proving/data/H2O.json | 8867 |
+| molecular-waves-2026-09-18/proving/data/NH3.json | 17788 |
+| molecular-waves-2026-09-18/proving/gamma_closed.py | 1585 |
+| molecular-waves-2026-09-18/proving/out-current.json | 277 |
+| molecular-waves-2026-09-18/proving/out-gamma-bitstring.json | 1153 |
+| molecular-waves-2026-09-18/proving/out-gamma-fci.json | 3764 |
+| molecular-waves-2026-09-18/proving/out-kick.json | 1356 |
+| molecular-waves-2026-09-18/proving/out-pair-basis.json | 1081 |
+| molecular-waves-2026-09-18/proving/out-tda-pyscf.json | 3635 |
+| molecular-waves-2026-09-18/proving/prep.mjs | 2685 |
+| molecular-waves-2026-09-18/proving/run-all.log | 19885 |
+| molecular-waves-2026-09-18/proving/run-all.sh | 957 |
+| molecular-waves-2026-09-18/proving/snapshot/HEAD.txt | 41 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/density.js | 14725 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/h2.js | 5632 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/h2ci.js | 23576 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/hydrogen.js | 8211 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/md.js | 29024 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/molecular-field.js | 9736 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/molecule.js | 5183 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/molecules.js | 40365 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/rhf-molecule.js | 15766 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/rpa-inspector.js | 8751 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/scf.js | 8657 |
+| molecular-waves-2026-09-18/proving/snapshot/lab/vendor/bse/sto-3g-v1.json | 112427 |
+| molecular-waves-2026-09-18/scratch/.gitignore | 13 |
+| molecular-waves-2026-09-18/scratch/after-browser.txt | 19688 |
+| molecular-waves-2026-09-18/scratch/after-node.txt | 274612 |
+| molecular-waves-2026-09-18/scratch/after-node2.txt | 274902 |
+| molecular-waves-2026-09-18/scratch/baseline-browser.txt | 18541 |
+| molecular-waves-2026-09-18/scratch/baseline-node.txt | 269778 |
+| molecular-waves-2026-09-18/scratch/bench-after.json | 983 |
+| molecular-waves-2026-09-18/scratch/bench-before.json | 978 |
+| molecular-waves-2026-09-18/scratch/bench-both.json | 783 |
+| molecular-waves-2026-09-18/scratch/bench-both.mjs | 2338 |
+| molecular-waves-2026-09-18/scratch/bench-chem.mjs | 1830 |
+| molecular-waves-2026-09-18/scratch/bench-eig-small.mjs | 1398 |
+| molecular-waves-2026-09-18/scratch/bench-eig.mjs | 1687 |
+| molecular-waves-2026-09-18/scratch/final-all.txt | 294579 |
+| molecular-waves-2026-09-18/scratch/idempotency.json | 695 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/absorb.js | 7050 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/atoms.js | 35702 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/atomsview.js | 16630 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/audio.js | 27237 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/bessel.js | 1168 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/calculus.js | 6263 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/calculusview.js | 2380 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/capture.js | 73172 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/chemview.js | 46226 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/clock.js | 1933 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/cornell.js | 7800 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/demos/wave-dancer.lambdawaves.json | 25839 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/density.js | 14725 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/dynamics.js | 20635 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/dynamicsview.js | 9574 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/electrostatics.js | 35595 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/field.js | 101145 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fieldview.js | 17024 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/LWTitle-title.woff2 | 10172 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/Roboto-OFL.txt | 4394 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/Roboto-SOURCE.txt | 2747 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/Roboto-ui.woff2 | 58592 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/STIXTwoMath-OFL.txt | 4519 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/STIXTwoMath-SOURCE.txt | 2527 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/STIXTwoMath-glyphs.txt | 358 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/STIXTwoMath-subset.woff2 | 40288 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/Spinwerad-OFL.txt | 4479 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/fonts/Spinwerad-SOURCE.txt | 3135 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/frame-budget.js | 839 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/frame-coalescer.js | 699 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/frame-settle.js | 702 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/frontier.js | 50288 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/gas.js | 7801 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/h2.js | 5632 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/h2ci.js | 23670 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/h2view.js | 16805 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/hamiltonian.js | 15033 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/helium.js | 10690 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/heliumview.js | 5689 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/history.js | 9193 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/hydrogen.js | 8211 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-192.png | 2886 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-512.png | 7398 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-apple-180.png | 2701 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-maskable-192.png | 2570 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-maskable-512.png | 6796 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon-maskable.svg | 1922 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/icon.svg | 1768 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/img/warning-orbital.png | 160100 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/index.html | 18595 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/kepler.js | 5766 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/keplerview.js | 8426 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/keymap.js | 42875 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/kick.js | 10619 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/lab.css | 81366 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/ladder-model.js | 1213 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/ladder.js | 13946 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/main.js | 7576 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/manifest.webmanifest | 990 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mathworker.js | 18824 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/md.js | 29024 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/meters.js | 3771 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/control-help.js | 6734 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/css/base.css | 34941 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/css/skin.css | 33574 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/glyph.js | 21052 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/kit.js | 63373 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/curve.js | 21396 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/host.js | 56773 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/mod.js | 137122 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modhost.css | 146195 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/modwindow.css | 127928 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/modwindow.js | 66901 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/registry.js | 25631 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/plane-model.js | 4446 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/slider-keys.js | 750 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mir/window-activity.js | 5241 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/mo.js | 46484 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/modrive.js | 5182 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/modwindow.js | 173561 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/molecular-field.js | 9736 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/molecule-state.js | 15390 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/molecule.js | 5183 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/molecules.js | 40365 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/moleculeview.js | 9815 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/momentum.js | 6487 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/moview.js | 33145 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/native-ui.js | 25217 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/notebook-math.js | 562 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/notebook-render.js | 3910 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/oracles/sto-3g-v1.json | 426719 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/orbit.js | 11068 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/orbitalsview.js | 27484 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/palette.js | 33166 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/paletteview.js | 10946 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/particles.js | 8441 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/period.js | 7033 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/project-import.js | 2495 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/project-storage.js | 1404 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/pulse.js | 4329 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/pulseview.js | 15375 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/qcd.js | 7560 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/qcdview.js | 9261 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/qho.js | 6820 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/rack.js | 509040 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/radiation.js | 14812 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/radiationview.js | 16863 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/render-exact.js | 94140 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/response-fit.js | 15875 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/rhf-molecule.js | 15766 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/rotor4.js | 5874 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/rpa-inspector.js | 8751 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/scf.js | 8657 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/shadow.js | 4429 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/shadowview.js | 9104 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/skin.css | 50646 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/slice.js | 6005 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/sliceview.js | 23930 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/smoke.html | 2241 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/spectrum.js | 30072 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/stage-gestures.js | 5212 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/state.js | 47104 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/statelink.js | 36447 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/sturmian.js | 18828 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/sturmianreg.js | 6632 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/sw.js | 26813 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/twocentre.js | 15680 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/bse/6-31+g-star-v1.json | 6293 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/bse/index.json | 2199 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/bse/sto-3g-v1.json | 112427 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/LICENSE | 1107 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_AMS-Regular.woff2 | 28076 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2 | 6912 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2 | 6908 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Fraktur-Bold.woff2 | 11348 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2 | 11316 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Main-Bold.woff2 | 25324 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2 | 16780 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Main-Italic.woff2 | 16988 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Main-Regular.woff2 | 26272 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Math-BoldItalic.woff2 | 16400 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Math-Italic.woff2 | 16440 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_SansSerif-Bold.woff2 | 12216 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_SansSerif-Italic.woff2 | 12028 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2 | 10344 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Script-Regular.woff2 | 9644 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Size1-Regular.woff2 | 5468 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Size2-Regular.woff2 | 5208 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Size3-Regular.woff2 | 3624 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Size4-Regular.woff2 | 4928 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2 | 13568 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/fonts/OFL.txt | 4776 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/katex.min.css | 23335 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/katex/katex.min.js | 275414 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/marked.min.js | 35479 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/package.json | 25 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/vortex.js | 8839 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/well.js | 6577 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/wigner.js | 24211 |
+| molecular-waves-2026-09-18/scratch/old-ql/lab/wignerview.js | 16215 |
+| molecular-waves-2026-09-18/scratch/old/lab/absorb.js | 7050 |
+| molecular-waves-2026-09-18/scratch/old/lab/atoms.js | 35702 |
+| molecular-waves-2026-09-18/scratch/old/lab/atomsview.js | 16630 |
+| molecular-waves-2026-09-18/scratch/old/lab/audio.js | 27237 |
+| molecular-waves-2026-09-18/scratch/old/lab/bessel.js | 1168 |
+| molecular-waves-2026-09-18/scratch/old/lab/calculus.js | 6263 |
+| molecular-waves-2026-09-18/scratch/old/lab/calculusview.js | 2380 |
+| molecular-waves-2026-09-18/scratch/old/lab/capture.js | 73172 |
+| molecular-waves-2026-09-18/scratch/old/lab/chemview.js | 46226 |
+| molecular-waves-2026-09-18/scratch/old/lab/clock.js | 1933 |
+| molecular-waves-2026-09-18/scratch/old/lab/cornell.js | 7800 |
+| molecular-waves-2026-09-18/scratch/old/lab/demos/wave-dancer.lambdawaves.json | 25839 |
+| molecular-waves-2026-09-18/scratch/old/lab/density.js | 14725 |
+| molecular-waves-2026-09-18/scratch/old/lab/dynamics.js | 20635 |
+| molecular-waves-2026-09-18/scratch/old/lab/dynamicsview.js | 9574 |
+| molecular-waves-2026-09-18/scratch/old/lab/electrostatics.js | 35595 |
+| molecular-waves-2026-09-18/scratch/old/lab/field.js | 101145 |
+| molecular-waves-2026-09-18/scratch/old/lab/fieldview.js | 17024 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/LWTitle-title.woff2 | 10172 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/Roboto-OFL.txt | 4394 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/Roboto-SOURCE.txt | 2747 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/Roboto-ui.woff2 | 58592 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/STIXTwoMath-OFL.txt | 4519 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/STIXTwoMath-SOURCE.txt | 2527 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/STIXTwoMath-glyphs.txt | 358 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/STIXTwoMath-subset.woff2 | 40288 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/Spinwerad-OFL.txt | 4479 |
+| molecular-waves-2026-09-18/scratch/old/lab/fonts/Spinwerad-SOURCE.txt | 3135 |
+| molecular-waves-2026-09-18/scratch/old/lab/frame-budget.js | 839 |
+| molecular-waves-2026-09-18/scratch/old/lab/frame-coalescer.js | 699 |
+| molecular-waves-2026-09-18/scratch/old/lab/frame-settle.js | 702 |
+| molecular-waves-2026-09-18/scratch/old/lab/frontier.js | 50288 |
+| molecular-waves-2026-09-18/scratch/old/lab/gas.js | 7801 |
+| molecular-waves-2026-09-18/scratch/old/lab/h2.js | 5632 |
+| molecular-waves-2026-09-18/scratch/old/lab/h2ci.js | 23576 |
+| molecular-waves-2026-09-18/scratch/old/lab/h2view.js | 16805 |
+| molecular-waves-2026-09-18/scratch/old/lab/hamiltonian.js | 15033 |
+| molecular-waves-2026-09-18/scratch/old/lab/helium.js | 10690 |
+| molecular-waves-2026-09-18/scratch/old/lab/heliumview.js | 5689 |
+| molecular-waves-2026-09-18/scratch/old/lab/history.js | 9193 |
+| molecular-waves-2026-09-18/scratch/old/lab/hydrogen.js | 8211 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-192.png | 2886 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-512.png | 7398 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-apple-180.png | 2701 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-maskable-192.png | 2570 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-maskable-512.png | 6796 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon-maskable.svg | 1922 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/icon.svg | 1768 |
+| molecular-waves-2026-09-18/scratch/old/lab/img/warning-orbital.png | 160100 |
+| molecular-waves-2026-09-18/scratch/old/lab/index.html | 18595 |
+| molecular-waves-2026-09-18/scratch/old/lab/kepler.js | 5766 |
+| molecular-waves-2026-09-18/scratch/old/lab/keplerview.js | 8426 |
+| molecular-waves-2026-09-18/scratch/old/lab/keymap.js | 42875 |
+| molecular-waves-2026-09-18/scratch/old/lab/kick.js | 10619 |
+| molecular-waves-2026-09-18/scratch/old/lab/lab.css | 81366 |
+| molecular-waves-2026-09-18/scratch/old/lab/ladder-model.js | 1213 |
+| molecular-waves-2026-09-18/scratch/old/lab/ladder.js | 13946 |
+| molecular-waves-2026-09-18/scratch/old/lab/main.js | 7576 |
+| molecular-waves-2026-09-18/scratch/old/lab/manifest.webmanifest | 990 |
+| molecular-waves-2026-09-18/scratch/old/lab/mathworker.js | 18824 |
+| molecular-waves-2026-09-18/scratch/old/lab/md.js | 29024 |
+| molecular-waves-2026-09-18/scratch/old/lab/meters.js | 3771 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/control-help.js | 6734 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/css/base.css | 34941 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/css/skin.css | 33574 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/glyph.js | 21052 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/kit.js | 63373 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/curve.js | 21396 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/host.js | 56773 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/mod.js | 137122 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modhost.css | 146195 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/modwindow.css | 127928 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/modwindow.js | 66901 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/registry.js | 25631 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/plane-model.js | 4446 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/slider-keys.js | 750 |
+| molecular-waves-2026-09-18/scratch/old/lab/mir/window-activity.js | 5241 |
+| molecular-waves-2026-09-18/scratch/old/lab/mo.js | 46484 |
+| molecular-waves-2026-09-18/scratch/old/lab/modrive.js | 5182 |
+| molecular-waves-2026-09-18/scratch/old/lab/modwindow.js | 173561 |
+| molecular-waves-2026-09-18/scratch/old/lab/molecular-field.js | 9736 |
+| molecular-waves-2026-09-18/scratch/old/lab/molecule-state.js | 15390 |
+| molecular-waves-2026-09-18/scratch/old/lab/molecule.js | 5183 |
+| molecular-waves-2026-09-18/scratch/old/lab/molecules.js | 40365 |
+| molecular-waves-2026-09-18/scratch/old/lab/moleculeview.js | 9815 |
+| molecular-waves-2026-09-18/scratch/old/lab/momentum.js | 6487 |
+| molecular-waves-2026-09-18/scratch/old/lab/moview.js | 33145 |
+| molecular-waves-2026-09-18/scratch/old/lab/native-ui.js | 25217 |
+| molecular-waves-2026-09-18/scratch/old/lab/notebook-math.js | 562 |
+| molecular-waves-2026-09-18/scratch/old/lab/notebook-render.js | 3910 |
+| molecular-waves-2026-09-18/scratch/old/lab/oracles/sto-3g-v1.json | 426719 |
+| molecular-waves-2026-09-18/scratch/old/lab/orbit.js | 11068 |
+| molecular-waves-2026-09-18/scratch/old/lab/orbitalsview.js | 27484 |
+| molecular-waves-2026-09-18/scratch/old/lab/palette.js | 33166 |
+| molecular-waves-2026-09-18/scratch/old/lab/paletteview.js | 10946 |
+| molecular-waves-2026-09-18/scratch/old/lab/particles.js | 8441 |
+| molecular-waves-2026-09-18/scratch/old/lab/period.js | 7033 |
+| molecular-waves-2026-09-18/scratch/old/lab/project-import.js | 2495 |
+| molecular-waves-2026-09-18/scratch/old/lab/project-storage.js | 1404 |
+| molecular-waves-2026-09-18/scratch/old/lab/pulse.js | 4329 |
+| molecular-waves-2026-09-18/scratch/old/lab/pulseview.js | 15375 |
+| molecular-waves-2026-09-18/scratch/old/lab/qcd.js | 7560 |
+| molecular-waves-2026-09-18/scratch/old/lab/qcdview.js | 9261 |
+| molecular-waves-2026-09-18/scratch/old/lab/qho.js | 6820 |
+| molecular-waves-2026-09-18/scratch/old/lab/rack.js | 509040 |
+| molecular-waves-2026-09-18/scratch/old/lab/radiation.js | 14812 |
+| molecular-waves-2026-09-18/scratch/old/lab/radiationview.js | 16863 |
+| molecular-waves-2026-09-18/scratch/old/lab/render-exact.js | 94140 |
+| molecular-waves-2026-09-18/scratch/old/lab/response-fit.js | 15875 |
+| molecular-waves-2026-09-18/scratch/old/lab/rhf-molecule.js | 15766 |
+| molecular-waves-2026-09-18/scratch/old/lab/rotor4.js | 5874 |
+| molecular-waves-2026-09-18/scratch/old/lab/rpa-inspector.js | 8751 |
+| molecular-waves-2026-09-18/scratch/old/lab/scf.js | 8657 |
+| molecular-waves-2026-09-18/scratch/old/lab/shadow.js | 4429 |
+| molecular-waves-2026-09-18/scratch/old/lab/shadowview.js | 9104 |
+| molecular-waves-2026-09-18/scratch/old/lab/skin.css | 50646 |
+| molecular-waves-2026-09-18/scratch/old/lab/slice.js | 6005 |
+| molecular-waves-2026-09-18/scratch/old/lab/sliceview.js | 23930 |
+| molecular-waves-2026-09-18/scratch/old/lab/smoke.html | 2241 |
+| molecular-waves-2026-09-18/scratch/old/lab/spectrum.js | 30072 |
+| molecular-waves-2026-09-18/scratch/old/lab/stage-gestures.js | 5212 |
+| molecular-waves-2026-09-18/scratch/old/lab/state.js | 47104 |
+| molecular-waves-2026-09-18/scratch/old/lab/statelink.js | 36447 |
+| molecular-waves-2026-09-18/scratch/old/lab/sturmian.js | 18828 |
+| molecular-waves-2026-09-18/scratch/old/lab/sturmianreg.js | 6632 |
+| molecular-waves-2026-09-18/scratch/old/lab/sw.js | 26813 |
+| molecular-waves-2026-09-18/scratch/old/lab/twocentre.js | 15680 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/bse/6-31+g-star-v1.json | 6293 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/bse/index.json | 2199 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/bse/sto-3g-v1.json | 112427 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/LICENSE | 1107 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_AMS-Regular.woff2 | 28076 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2 | 6912 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2 | 6908 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Fraktur-Bold.woff2 | 11348 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2 | 11316 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Main-Bold.woff2 | 25324 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2 | 16780 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Main-Italic.woff2 | 16988 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Main-Regular.woff2 | 26272 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Math-BoldItalic.woff2 | 16400 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Math-Italic.woff2 | 16440 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_SansSerif-Bold.woff2 | 12216 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_SansSerif-Italic.woff2 | 12028 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2 | 10344 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Script-Regular.woff2 | 9644 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Size1-Regular.woff2 | 5468 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Size2-Regular.woff2 | 5208 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Size3-Regular.woff2 | 3624 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Size4-Regular.woff2 | 4928 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2 | 13568 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/fonts/OFL.txt | 4776 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/katex.min.css | 23335 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/katex/katex.min.js | 275414 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/marked.min.js | 35479 |
+| molecular-waves-2026-09-18/scratch/old/lab/vendor/package.json | 25 |
+| molecular-waves-2026-09-18/scratch/old/lab/vortex.js | 8839 |
+| molecular-waves-2026-09-18/scratch/old/lab/well.js | 6577 |
+| molecular-waves-2026-09-18/scratch/old/lab/wigner.js | 24211 |
+| molecular-waves-2026-09-18/scratch/old/lab/wignerview.js | 16215 |
+| molecular-waves-2026-09-18/scratch/probe-blowup.mjs | 1524 |
+| molecular-waves-2026-09-18/scratch/probe-hermitian.mjs | 2714 |
+| molecular-waves-2026-09-18/scratch/probe-idempotency.mjs | 2329 |
+| molecular-waves-2026-09-18/scratch/probe-kicked-fock.mjs | 2656 |
+| molecular-waves-2026-09-18/scratch/probe-magnus.mjs | 2798 |
+| molecular-waves-2026-09-18/scratch/probe-old-two.mjs | 1300 |
+| molecular-waves-2026-09-18/scratch/probe-old-unstable.mjs | 1037 |
+| molecular-waves-2026-09-18/scratch/probe-unstable.mjs | 1994 |
+| molecular-waves-2026-09-18/scratch/profile-rpa.mjs | 1767 |
+| molecular-waves-2026-09-18/scratch/sweep-all.json | 10060 |
+| molecular-waves-2026-09-18/scratch/sweep-all.mjs | 1280 |
 | probes-fields/opus-q1-potential.py | 5320 |
 | probes-fields/opus-q2-atoms.py | 11481 |
 | probes-fields/opus-q3-twocentre.py | 22873 |
@@ -12086,4 +12494,2931 @@ Commissioned by Josh: "How can I get arg into molecules? Can we take advantage o
 **Proposition 3 (the compilers that exist).** Three things people mean by "compile the hard molecular request": (i) density fitting (RI): replace $(\mu\nu\vert\lambda\sigma)$ by $\sum_{PQ}(\mu\nu\vert P)(P\vert Q)^{-1}(Q\vert\lambda\sigma)$ with an auxiliary basis — $O(N^3)$ instead of $O(N^4)$ and the reason large molecules are routine; (ii) semi-empirical tight binding (GFN-xTB, DFTB): the integrals are replaced by parametrised tables, benzene in milliseconds, the honesty in the label; (iii) the screening we already do (Cauchy–Schwarz bounds with proved errors) — which on benzene/STO-3G removes nothing at the shell level (round BUILD), so the cheap wins are (i) and (ii). KNOWN.
 
 **Decision for the instrument.** Now: the ORBITALS register (Proposition 1) gives arg to every molecule the card can solve, with the label "frozen orbitals · beats at Δε, not at ω_RPA". Next: an RI-J Fock build (Proposition 3.i) if the SCF, now the dominant 5 s of benzene, is to fall further; then a Sturmian or NAO valence basis as the "bulb" rung, gated exactly as STO-3G was. A research round for Sol and Opus: (Q24) the smallest auxiliary basis for which RI-J reproduces the benzene RHF energy to $10^{-6}$; (Q25) whether a one-exponent Sturmian set on each centre can reach STO-3G's benzene energy with fewer functions, and what its two-electron integrals cost with the prolate quadrature already in the tree; (Q26) whether a natural-orbital phase of the real-time density matrix (the eigenvectors of $D(t)$ are complex) is a meaningful arg for a many-electron run, or only a coordinate artefact.
+
+
+
+---
+
+## <a id="doc-39"></a>DOC 39 · astra-2026-09-18/COVERAGE.md · 2026-09-18
+
+## Source coverage · 18 September 2026
+
+The existing research tree contains 38 original Markdown documents. `research/DISK.md` is their generated concatenation, not an additional independent source. This pass indexed headings and searched relevant topics across that corpus, then reviewed the molecular, finite-state, response, rendering and validation sections listed below against the current executable code. It did not independently re-prove every historical theorem or re-run every archived research experiment.
+
+The detailed index records file hashes, headings and topic counts. The PDF in the old Astra folder is an already-derived plot; its underlying numerical data and current code were more useful for this task. No PDF layout audit was required.
+
+| Source | Coverage |
+|---|---|
+| [FOR-JOSH-FIELDS-AND-MOLECULES-2026-09-04.md](../FOR-JOSH-FIELDS-AND-MOLECULES-2026-09-04.md) | indexed and topic-scanned; not independently audited |
+| [GATE-DIAGNOSIS-2026-09-07.md](../GATE-DIAGNOSIS-2026-09-07.md) | indexed and topic-scanned; not independently audited |
+| [LIT-FIELDS-AND-MOLECULES-2026-09-04.md](../LIT-FIELDS-AND-MOLECULES-2026-09-04.md) | indexed and topic-scanned; not independently audited |
+| [MATH-CHRONUSQ-PORTS-2026-09-11.md](../MATH-CHRONUSQ-PORTS-2026-09-11.md) | indexed and topic-scanned; not independently audited |
+| [MATH-FIELDS-AND-MOLECULES-2026-09-04.md](../MATH-FIELDS-AND-MOLECULES-2026-09-04.md) | targeted sections reviewed against code |
+| [MATH-H2O-2026-09-11.md](../MATH-H2O-2026-09-11.md) | targeted sections reviewed against code |
+| [MATH-LAMBDAWAVES-2026-09-02.md](../MATH-LAMBDAWAVES-2026-09-02.md) | targeted sections reviewed against code |
+| [MATH-MOLECULAR-PULSES-2026-09-05.md](../MATH-MOLECULAR-PULSES-2026-09-05.md) | targeted sections reviewed against code |
+| [MENU-HISTORY-WORKFLOW-2026-09-10.md](../MENU-HISTORY-WORKFLOW-2026-09-10.md) | indexed and topic-scanned; not independently audited |
+| [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](../RIVAL-FIELDS-AND-MOLECULES-OPUS.md) | targeted sections reviewed against code |
+| [SERUM-MASSIVE-MATRIX-2026-09-08.md](../SERUM-MASSIVE-MATRIX-2026-09-08.md) | indexed and topic-scanned; not independently audited |
+| [SYNTHESIS-APP-2026-09-03.md](../SYNTHESIS-APP-2026-09-03.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/01-fable.md](../adversarial-2026-09-02/01-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/02-opus.md](../adversarial-2026-09-02/02-opus.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/03-fable.md](../adversarial-2026-09-02/03-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/04-opus.md](../adversarial-2026-09-02/04-opus.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/05-fable.md](../adversarial-2026-09-02/05-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/06-opus.md](../adversarial-2026-09-02/06-opus.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/07-fable.md](../adversarial-2026-09-02/07-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/08-fable.md](../adversarial-2026-09-02/08-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/09-opus-qcd.md](../adversarial-2026-09-02/09-opus-qcd.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/10-fable.md](../adversarial-2026-09-02/10-fable.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/11-opus-audit.md](../adversarial-2026-09-02/11-opus-audit.md) | indexed and topic-scanned; not independently audited |
+| [adversarial-2026-09-02/PRINT-BEYOND-THE-FRONTIER-LAMBDAWAVES-2026-09-03.md](../adversarial-2026-09-02/PRINT-BEYOND-THE-FRONTIER-LAMBDAWAVES-2026-09-03.md) | indexed and topic-scanned; not independently audited |
+| [astra-2026-09-05/MATH-AUDIT.md](../astra-2026-09-05/MATH-AUDIT.md) | targeted sections reviewed against code |
+| [astra-2026-09-05/MOLECULAR-PLAN.md](../astra-2026-09-05/MOLECULAR-PLAN.md) | targeted sections reviewed against code |
+| [astra-2026-09-05/SOURCES-AND-COVERAGE.md](../astra-2026-09-05/SOURCES-AND-COVERAGE.md) | indexed and topic-scanned; not independently audited |
+| [beta/BUILD-CONTRACTS.md](../beta/BUILD-CONTRACTS.md) | targeted sections reviewed against code |
+| [beta/MASTER-DOSSIER.md](../beta/MASTER-DOSSIER.md) | targeted sections reviewed against code |
+| [beta/README.md](../beta/README.md) | indexed and topic-scanned; not independently audited |
+| [beta/RESEARCH-COMMISSIONS.md](../beta/RESEARCH-COMMISSIONS.md) | indexed and topic-scanned; not independently audited |
+| [beta/SOURCES.md](../beta/SOURCES.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/A-CHRONUSQ-MAP.md](../chronusq-2026-09-11/A-CHRONUSQ-MAP.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/B-CLAUDE-FOR-MATH.md](../chronusq-2026-09-11/B-CLAUDE-FOR-MATH.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/C-NAVIER-STOKES-AI.md](../chronusq-2026-09-11/C-NAVIER-STOKES-AI.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/D-KINETICS-LADDER.md](../chronusq-2026-09-11/D-KINETICS-LADDER.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/E-OPUS5-AS-FABLE.md](../chronusq-2026-09-11/E-OPUS5-AS-FABLE.md) | indexed and topic-scanned; not independently audited |
+| [chronusq-2026-09-11/SYNTHESIS.md](../chronusq-2026-09-11/SYNTHESIS.md) | targeted sections reviewed against code |
+
+Current source of truth: commit `8fcdcf85b04be268c2afc32d16391339e2bf182f`, with a clean working tree before this research pass. The README’s hydrogen-only limitation is stale relative to the executable molecule modules. New files in this folder are research artifacts; application code is unchanged.
+
+
+
+---
+
+## <a id="doc-40"></a>DOC 40 · molecular-waves-2026-09-18/JUDGMENT.md · 2026-09-18
+
+## Molecular waves — judgment of Astra's plan, and the refined plan
+
+Fable · 18 September 2026 · commissioned by Josh · judged against commit `8fcdcf8` on `dev`
+Subject: `OBSIDIAN/MOLECULAR-WAVES-PLAN.md` (Astra) with its folder `research/astra-2026-09-18/`
+Evidence for this document: `research/molecular-waves-2026-09-18/probe-fable.mjs` and `measurements-fable.json` (research only; nothing under `lab/` was changed)
+
+### 0 · Verdict
+
+Astra's plan is a very good audit and a mediocre design. Every code finding in it is true: I checked all seven line references and both behavioural claims (the second integral pass behind `split: true`, and the card that says "unrestarted MMUT" while the worker restarts every 50 steps). Its mathematics is correct wherever I re-derived it. Keep the audit whole.
+
+The design has four structural faults, and fixing them makes the plan smaller, faster and more physical at once.
+
+1. It builds the first deliverable on the wrong object. A frozen-orbital wave packet beats at an orbital-energy gap. The same instrument's spectrum window says the molecule rings somewhere else. For benzene the three numbers are 0.5516 (HOMO–LUMO gap), 0.3903 (bright pair, wavefunction model) and 0.3608 (bright pair, TDHF). A drive tuned to a stick in the spectrum would do nothing to Astra's register. Two windows of one instrument must not disagree about where the molecule absorbs.
+2. It treats the collective modes as a weak-signal overlay and defers real many-electron superposition to "later correlated dynamics". It is not later. The states are already computed (`XTDA`, `omegaTDA` in `lab/rpa-inspector.js`), and a superposition of them is a genuine $N$-electron wavefunction whose density is valid at any amplitude. Measured below.
+3. Its largest engineering item, three render backends with an automatic chooser, targets a non-bottleneck. Every model in the plan emits one AO vector or one AO matrix a frame, at most 1296 numbers for benzene, and the shipped kernel contracts that in 2.88 ms at $96^3$ (measured 2026-09-12 on the RTX 3070). Astra's own target is 4 ms. What is missing is one signed kernel kind, about ten lines of WGSL.
+4. It under-reads the preparation profile. It proposes 21 % off the RPA step. The measured truth is that benzene's 9.9 s is eight Jacobi diagonalisations of a $315\times315$ matrix where one is needed.
+
+### 1 · What is verified in Astra's plan
+
+| Astra's claim | Status | Note |
+|---|---|---|
+| `chemview.js:192` sends `split: true`, `mathworker.js:179` runs a discarded integral pass | SEEN, true | costs 0.56 s of 9.9 s on benzene; real, but the smallest of the wastes |
+| `symFunc(AmB)` diagonalises the same matrix twice (`rpa-inspector.js:84`) | SEEN, true | see §5 for the larger count |
+| the residual loop rebuilds the Fock matrix for every MO column | SEEN, true | an $n^5$ loop for a diagnostic |
+| the worker keeps only four dominant pairs per root, dropping $X$ and $Y$ | SEEN, true | blocks any response field; keep the vectors in the worker |
+| the density path stores $\sqrt{\max(\rho,0)}$ and DIFF subtracts two half-precision volumes | SEEN, true (`field.js:132`, `:215`) | a weak-kick difference is below the format's resolution; fix in §2 |
+| CHEMISTRY then ORBITALS write the volume, last writer wins | SEEN, true (`rack.js:1267`) | I wrote that comment as a stopgap; one owner is the right cure |
+| MMUT labelled "unrestarted" while `restartEvery` defaults to 50 | SEEN, true (`chemview.js:341`, `mathworker.js:212`) | a labelling bug that changes the numerical trajectory; fix first |
+| response replay $\delta\rho=-2\kappa\sum_K\mu_{Kq}\sin(\omega_Kt)\,\rho^{\rm tr}_K$ | re-derived, true | it is the first-order term of Proposition 2 below |
+| slerp morph for non-orthogonal endpoints; the real oscillator form $\dot q=Ap+Bq$, $\dot p=-Aq+Bp$ | re-derived, true | |
+| natural orbitals cannot supply a molecular phase | true | the occupied block is degenerate at occupation 2; §4 gives what can |
+| the water replay agrees with TDHF to 0.014 % | HEARD (Astra's probe, not re-run) | only to $t=2$ a.u., less than one period of the lowest mode; needs a long trace |
+
+One finding of mine that Astra missed: `roots[k].omegaTDA` pairs the $k$-th RPA root with the $k$-th TDA root by index, not by character. For benzene, RPA root 2 is the bright line and TDA root 2 is dark. Any per-root "TDA partner" reading in the interface is wrong wherever the two ladders cross.
+
+### 2 · Refinement one: the funnel
+
+**Observation 1 (every model emits one of two objects).** With fixed nuclei and a fixed real AO basis $\chi$, each dynamical model in either plan produces, per frame, either a complex AO vector $c(t)\in\mathbb C^{n}$ (one orbital amplitude, which has a phase) or a Hermitian AO matrix $D(t)\in\mathbb C^{n\times n}$ (a one-particle density matrix), and the fields are
+
+$$
+\psi(\mathbf r,t)=\chi(\mathbf r)^{T}c(t),\qquad
+\rho(\mathbf r,t)=\chi(\mathbf r)^{T}\,\operatorname{Re}D(t)\,\chi(\mathbf r),\qquad
+\mathbf j(\mathbf r,t)=\tfrac12\sum_{\mu\nu}\operatorname{Im}D_{\mu\nu}(t)\,\bigl(\chi_\mu\nabla\chi_\nu-\chi_\nu\nabla\chi_\mu\bigr),
+$$
+
+with the one convention $D_{pq}=\langle E_{pq}\rangle=\langle a_p^\dagger a_q\rangle$ used everywhere in this document (for one orbital, $D_{\mu\nu}=\overline{c_\mu}c_\nu$ and $\mathbf j=\operatorname{Im}\bar\psi\nabla\psi$). △ Correction, 2026-09-18: draft 0 printed this formula with $\mu$ and $\nu$ exchanged, which is the opposite convention to §3 and would have drawn every ring current backwards; the proving lab caught it against $\operatorname{Im}\bar\psi\nabla\psi$ on benzene's HOMO pair (`proving/LEDGER.md`, Proposition 7). No density view can see this sign; only FLOW can.
+
+The orbital packet, the state register of §3, the weak-kick replay and full TDHF differ only in how they advance $c$ or $D$. The renderer never needs to know which one is playing.
+
+Consequences for the build:
+
+- One owner, `molecular-session.js`, holds the selected model and hands the field exactly one tagged product per frame: `orbital` ($c$), `density` ($\operatorname{Re}D$), or `signed` ($\operatorname{Re}D-D_{\rm ref}$). This is Astra's controller, kept, with a smaller product list.
+- One new kernel kind, `signed`: the existing symmetric contraction without the square root, written signed into `.r` and read by the existing `real` view. The difference matrix is formed on the CPU in double precision before upload, which is exactly Astra's "form differences before quantisation", achieved without a second volume.
+- Astra's cached MO volumes, separable Gaussian tables and the backend chooser are dropped from the plan. They return only if one measurement on the iPad shows the shipped kernel missing the frame budget there. The separable-table algebra is correct and stays on file as the first candidate if that happens.
+- Worker replies carry a revision stamp (geometry, basis, solution, model), and a stale reply cannot publish. Astra's rule, kept.
+
+### 3 · Refinement two: the state register
+
+This is the centre of the refined plan. Hydrogen's STATE window is a register over exact eigenstates. The molecular analogue is a register over many-electron states: the ground determinant and the excited states the inspector already computes. The spectrum's sticks are its ladder.
+
+Let $\Phi_0$ be the converged RHF determinant, $\Psi_K=\sum_{ia}X^K_{ia}\,\tfrac{1}{\sqrt2}E_{ai}\Phi_0$ the singlet CIS (TDA) eigenvectors with energies $\omega_K$ above the ground state, $E_{pq}$ the spin-summed excitation operators, and
+
+$$
+\Psi(t)=b_0\,\Phi_0+\sum_K b_K\,e^{-i\omega_Kt}\,\Psi_K,\qquad \lvert b_0\rvert^2+\sum_K\lvert b_K\rvert^2=1 .
+$$
+
+**Proposition 1 (the register is a wavefunction).** (i) $\langle\Phi_0\vert H\vert\Psi_K\rangle=0$, so $\{\Phi_0,\Psi_K\}$ diagonalises $PHP$, where $P$ projects on the span of $\Phi_0$ and the singlet single excitations. (ii) $\Psi(t)$ solves $i\partial_t\Psi=PHP\,\Psi$ exactly, for all $t$, in closed form. (iii) Its one-particle density matrix
+
+$$
+D(t)=\sum_{A,B}\overline{b_A}\,b_B\,e^{i(E_A-E_B)t}\,\gamma^{AB},\qquad \gamma^{AB}_{pq}=\langle A\vert E_{pq}\vert B\rangle,
+$$
+
+is Hermitian, has trace $N$, and has all eigenvalues in $[0,2]$, for every normalised $b$ and every $t$.
+
+**Proof.** (i) is Brillouin's theorem for a converged RHF reference. (ii) follows from (i) since each term is an eigenvector of $PHP$. (iii) $D(t)$ is the spin-summed 1-RDM of a normalised $N$-electron state; for any normalised orbital $f$, $\langle\Psi\vert\hat n_f\vert\Psi\rangle\in[0,2]$ by the Pauli principle, and these expectation values are the Rayleigh quotients of $D$. $\blacksquare$
+
+The matrices $\gamma^{AB}$ in the MO basis ($i,j$ occupied, $a,b$ virtual):
+
+$$
+\gamma^{00}_{ij}=2\delta_{ij},\qquad
+\gamma^{0K}_{ia}=\sqrt2\,X^K_{ia},\qquad
+\gamma^{KL}_{ij}=2\delta_{ij}\langle X^K,X^L\rangle-\sum_a X^K_{ja}X^L_{ia},\qquad
+\gamma^{KL}_{ab}=\sum_i X^K_{ia}X^L_{ib},
+$$
+
+with $\gamma^{K0}=(\gamma^{0K})^{T}$ and all other blocks zero. The field $\chi^T C\gamma^{0K}C^T\chi=\sqrt2\sum_{ia}X^K_{ia}\phi_i\phi_a$ is Astra's transition density. It plays exactly the role the cross term $\phi_H\phi_L$ plays in the orbital beat, and the orbital beat is the special case of a single pair.
+
+**Proposition 2 (Astra's replay is the register's first order).** A $\delta$-kick $e^{-i\kappa R_q}$ on $\Phi_0$ gives $b_0=e^{-i\kappa\langle\Phi_0\vert R_q\vert\Phi_0\rangle}+O(\kappa^2)$ (which is $1+O(\kappa^2)$ only with the origin at the electronic centroid; △ corrected 2026-09-18, the draft's $b_0=1+O(\kappa^2)$ failed at first order, $\lvert b_0-1\rvert=6.8\times10^{-4}$ at $\kappa=10^{-3}$; only $\overline{b_0}b_K$ enters the density, so the replay formula is unaffected and the common phase drops out), $b_K=-i\kappa\,\mu_{Kq}+O(\kappa^2)$ with $\mu_{Kq}=\sqrt2\sum_{ia}X^K_{ia}\langle i\vert r_q\vert a\rangle$, hence
+
+$$
+\delta\rho(\mathbf r,t)=2\operatorname{Re}\!\bigl[\overline{b_0}b_Ke^{-i\omega_Kt}\bigr]\rho^{\rm tr}_K=-2\kappa\sum_K\mu_{Kq}\sin(\omega_Kt)\,\rho^{\rm tr}_K(\mathbf r)+O(\kappa^2).
+$$
+
+**Proof.** Expand the kick to first order and project on $\Psi_K$; $2\operatorname{Re}[-i\kappa\mu e^{-i\omega t}]=-2\kappa\mu\sin\omega t$. $\blacksquare$
+
+So Astra's §3 formula is this register in the weak limit, with RPA vectors substituted for TDA ones. The second-order terms Astra leaves out are what keep the density valid when the performer turns the amplitude up.
+
+**Measured (probe, 40 random normalised complex amplitude sets over the ground state and four excited states, at arbitrary times).**
+
+| Molecule | occupation range of $D(t)$ | trace error | the linear overlay $\rho_0+0.6\,\rho^{\rm tr}$ |
+|---|---|---|---|
+| H₂O | $[0.0195,\ 2+7\times10^{-15}]$ | $7\times10^{-15}$ | $[-0.261,\ 2.261]$, invalid |
+| C₂H₄ | $[2.7\times10^{-5},\ 2+10^{-14}]$ | $1.4\times10^{-14}$ | $[-0.292,\ 2.292]$, invalid |
+| C₆H₆ | $[8\times10^{-30},\ 2+6.5\times10^{-14}]$ | $8.9\times10^{-13}$ | $[-0.123,\ 2.123]$, invalid |
+
+The register stays $N$-representable at full amplitude. The linear overlay at a performance gain does not. This was computation as evidence, not proof. The proof and the independent gate now exist: `proving/LEDGER.md` derives every block from second quantisation and verifies them against PySCF transition density matrices in the full determinant space (H₂O 441, NH₃ 3136, CH₄ 15876 determinants) and against a from-scratch bitstring evaluator, to $9\times10^{-16}$; the pair-form blocks of this section to $4\times10^{-14}$ on benzene; the whole TDA matrix against PySCF to $2.7\times10^{-12}$ on benzene. One generalisation to keep: for a non-symmetric one-electron operator the drive's pair-basis block is $\delta_{ij}M_{ab}-\delta_{ab}M_{ji}$, with the transpose on the occupied indices; for position it makes no difference.
+
+**The drive.** In the length gauge the project already uses,
+
+$$
+i\,\dot b=\bigl[\operatorname{diag}(E)+\mathcal E(t)\,\mathbf R_q\bigr]b,\qquad (\mathbf R_q)_{AB}=\sum_{pq}\gamma^{AB}_{pq}\langle p\vert r_q\vert q\rangle .
+$$
+
+This is hydrogen's register equation with a different table, so the pulse panel, the modulation lanes and the selection-rule display carry over. It resonates at the sticks the spectrum shows, with the strengths the spectrum shows. For a fixed polarisation, diagonalise $\mathbf R_q=UrU^\dagger$ once; then a Strang step $e^{-iE\Delta t/2}\,U e^{-i\mathcal E r\Delta t}U^\dagger\,e^{-iE\Delta t/2}$ is exactly unitary, second order, and costs two matrix–vector products: about $2\times10^5$ multiply–adds a step for benzene's full 316-state space. The whole singles space can be propagated, the named dials expose up to eight states, and the spectrum window shows the populations $\lvert b_K\rvert^2$ on its sticks, as hydrogen's does. For assembling $D(t)$ with many states populated, work in the pair basis: with $c_0=b_0$ and $Z(t)=\sum_Kb_Ke^{-i\omega_Kt}X^K\in\mathbb C^{n_o\times n_v}$, the blocks are $D_{ov}=\sqrt2\,\overline{c_0}\,Z$, $D_{vo}=D_{ov}^{\dagger}$, $D_{vv}=Z^{\dagger}Z$ and $D_{oo}=2\cdot\mathbb 1-ZZ^{\dagger}$ (using $\lvert c_0\rvert^2+\lVert Z\rVert_F^2=1$), about $10^4$ multiply–adds.
+
+Prior art, so that nothing is claimed as new: this is time-dependent configuration interaction singles. [Krause, Klamroth and Saalfrank, J. Chem. Phys. 123, 074105 (2005)](https://pubs.aip.org/aip/jcp/article-abstract/123/7/074105/931439/Time-dependent-configuration-interaction) drive LiCN with it. What is ours is the instrument: a playable register over those states with a DAW modulation rack, in a browser. That sentence is the honest novelty claim and nothing beyond it should be asserted.
+
+What the model is not: it has no double excitations and no orbital relaxation, its line positions are TDA ones (benzene's bright pair at 0.3903 against TDHF's 0.3608), and strong fields that ionise are outside it. Full TDHF stays as the reference model, as Astra says, and the active model's name stays on screen.
+
+### 4 · Refinement three: how arg gets into a molecule
+
+Josh's question has three honest answers, in increasing physical weight. Astra's plan contains only the first.
+
+1. One orbital has a phase. The ORBITALS register already shows it. Zero-cost showpiece available today: benzene's HOMO and LUMO are each a degenerate pair, and amplitudes $(1,\,i)/\sqrt2$ on a pair give an angular-momentum orbital whose phase winds once or twice around the ring with a stationary density, the molecular cousin of hydrogen's $2p_{\pm1}$. It needs a preset, not code.
+2. A complex amplitude on a degenerate pair of states is a ring current. **Measured:** benzene's brightest degenerate pair with $b=(\sqrt{0.5},\ 0.5,\ 0.5\,i)$ gives a dipole of constant magnitude ($1.89793265928$, constant to $4\times10^{-12}$) that turns through exactly $15/16$ of a revolution in $15/16$ of a period, with zero out-of-plane component. The charge cloud rotates around the ring at $\omega_K$. This is the physics of [Barth, Manz, Shigeta and Yagi, J. Am. Chem. Soc. 128, 7043 (2006)](https://pubs.acs.org/doi/abs/10.1021/ja057197l), who drive exactly such a current in Mg-porphyrin with a circularly polarised pulse; a benzene study by Ulusoy and Nest (J. Am. Chem. Soc. 2011) is HEARD, not re-fetched. In the register it is one phase dial turned to a quarter.
+3. For all the electrons together, the gauge-invariant carrier of phase is the current $\mathbf j$ of Observation 1, read from $\operatorname{Im}D(t)$. For one orbital $\mathbf j=\rho\,\nabla\arg\psi$, so this is the same quantity the phase colour encodes, generalised. The app already owns streamline and particle overlays for hydrogen's flow; the molecular $\mathbf j$ can feed them. This is how a many-electron molecule shows its arg without pretending it has one wavefunction in 3-D.
+
+On "bulb harmonics" against "Taylor orbitals": Astra is right that a different spatial expansion creates no motion, and my note of 2026-09-12 (MATH-H2O, JOSH'S QUESTION) stands: STO-3G is a Slater fit, and better bases change accuracy, not the dance. The dance comes from superposed states, and §3 is where those live.
+
+### 5 · Refinement four: preparation, measured
+
+Benzene today, single thread, Node 22 on the Ryzen 5 5600G:
+
+| Piece | Time |
+|---|---|
+| integrals + SAD guess + SCF, nothing else | 0.71 s |
+| `moleculeRHF` as shipped | 5.51 s |
+| of which one `stabilityHessian` call | 2.09 s, and it runs twice |
+| `rpa` as shipped | 4.40 s |
+| one Jacobi `eigSym` of a $315\times315$ matrix | 0.73 s |
+
+Count of $315\times315$ Jacobi diagonalisations in one benzene preparation: two per stability Hessian, and the Hessian is evaluated for both the SAD and the core guess even though they converge to the same solution (four); then TDA, $\sqrt{A-B}$, $1/\sqrt{A-B}$ and the RPA matrix (four). Eight, plus two separate MO integral transformations.
+
+**Proposition 3 (one eigenproblem suffices).** Let $A-B=LL^{T}$ (Cholesky). Then $A-B\succ0$ iff the factorisation exists, $A+B\succ0$ likewise, and with $W=L^{T}(A+B)L$, $Wu=\omega^2u$, $\lVert u\rVert=1$:
+
+$$
+X+Y=\frac{Lu}{\sqrt\omega},\qquad X-Y=\frac{(A+B)(X+Y)}{\omega},\qquad (X+Y)^T(X-Y)=1 .
+$$
+
+**Proof.** $(A-B)(A+B)(X+Y)=\omega^2(X+Y)$; substitute $X+Y=Lu$ and cancel $L$. The normalisation is $u^TWu/\omega^2=1$. $\blacksquare$
+
+So stability is two Cholesky factorisations (a verdict without a spectrum) and RPA is one symmetric eigenproblem.
+
+**Measured.** A Householder tridiagonalisation with implicit QL (the EISPACK `tred2`/`tql2` pair) does the $315\times315$ problem in 0.126 s against Jacobi's 0.73 s, a factor 5.8, with eigenvalues equal to $6\times10^{-13}$. The whole Cholesky RPA, both stability verdicts included, takes 0.229 s and reproduces every shipped root to $1.3\times10^{-12}$ and every oscillator strength to $2.8\times10^{-12}$, for benzene's 315 roots. (For the $10\times10$ and $48\times48$ problems the probe's QL times are cold-JIT numbers and should not be read as slower.)
+
+| | shipped | Astra's proposal | this plan |
+|---|---|---|---|
+| benzene RPA step | 4.40 s | 3.37 s | 0.23 s, TDA 0.13 s more when asked for |
+| benzene cold preparation | about 9.9 s | about 8.4 s | projected 1.5 to 2 s; MEASURED after the stage 0 and 2 build: 2.49 s warm in Node (from 9.91 s), 2.8 to 3.1 s cold in the browser as the card reports it (from 9.27 s). The projection was optimistic: the AO to MO transform (0.6 s) is the next bottleneck |
+
+The same solver replaces the realified Jacobi inside `hermitianEigen`, which is the open item from 2026-09-12 (idempotency $8\times10^{-8}$ after 400 MMUT steps at $n=72$). Staged replies remain worth doing: the ground state can appear at about 0.7 s and the spectrum a second later. Prepared molecule packs are deferred; at these times they buy little and add a staleness hazard.
+
+### 6 · What is kept, changed and dropped
+
+Kept from Astra: the single field owner and tagged products; revision-stamped worker replies; full $X$, $Y$ kept in the worker; staged preparation; two clocks, and the temporal-aliasing guard at high playback speed; the slerp morph and A/B stores; the numerical acceptance list almost verbatim; "never interpolate between two molecules"; subspace tracking at degeneracies for saved states; the MMUT label fix; vibrations later, where a Taylor model does belong.
+
+Changed: the register's primary object is the many-electron state, with the orbital packet kept as a labelled one-electron mode of the same window; the response replay becomes the register's weak limit and the way the spectrum window comes alive; the projected drive moves from orbital amplitudes to state amplitudes.
+
+Dropped or deferred: three render backends and the chooser; molecule packs; the frozen-Fock occupation-matrix drive (it resonates at orbital gaps, the same fault as W1); the 21 % RPA patch, superseded.
+
+### 7 · Build order and gates
+
+| Stage | Deliverable | Gate |
+|---|---|---|
+| 0 · truth | MMUT label and saved restart policy; drop the second integral pass; skip the duplicate Hessian; fix the TDA-partner index | existing node and browser suites unchanged |
+| 1 · funnel | `molecular-session.js` as sole owner; products `orbital`, `density`, `signed`; the signed kernel kind; stamped replies. No new behaviour | the 49 chem and 24 orbitals browser checks pass untouched; a weak-kick signed field matches the CPU evaluator where DIFF today shows quantisation noise |
+| 2 · fast preparation | Householder–QL `eigSym`; Cholesky stability; Cholesky RPA; lazy TDA; staged reply | all 54 molecules: energies, roots and strengths unchanged to $10^{-10}$; the two refused molecules still refused; benzene cold time measured in the browser and reported |
+| 3 · the spectrum plays | click a stick, its mode sloshes; kick replay in closed form, scrubbable | agreement with TDHF over a long trace ($t\ge200$ a.u.), using the modified-generator frequencies of MATH-CHRONUSQ-PORTS so integrator phase error is not mistaken for model error; sign flips with the kick; degenerate-pair invariance |
+| 4 · the state register | lanes over ground + up to eight states, dials, A/B, slerp morph, presets BEAT, RING, BREATHE; the orbital packet as the window's second mode | $\gamma^{KL}$ against PySCF TDA transition and excited-state dipoles; occupations in $[0,2]$; trace $N$; exact beat periods; reversible scrubbing; fresh-page restore |
+| 5 · the drive | TD-CIS Strang propagator on the full singles space; populations on the spectrum sticks; the pulse panel and modulation lanes reused | norm to round-off; Rabi period against the two-level formula on an isolated bright line; $\Delta t$-halving ratio 4; weak-field spectrum equals the TDA sticks |
+| 6 · flow | $\mathbf j$ from $\operatorname{Im}D$ into the streamline and particle overlays | circulation of the RING preset equals its analytic value; continuity defect reported as a diagnostic |
+| later | iPad frame measurement decides any renderer work; vibrations; open shells | |
+
+Labour, per the standing dial: Opus builds stages 0 to 2 and proves the $\gamma$ formulas against PySCF; one light Sol prompt asks for TD-CIS pitfalls and the ring-current literature; Fable judges and keeps the ledger.
+
+### 8 · Open problems and conjectures
+
+1. CLOSED 2026-09-18: the $\gamma^{KL}$ formulas are proved and independently verified (`proving/LEDGER.md`).
+2. Continuity $\partial_t\rho+\nabla\cdot\mathbf j=0$ is exact for TDHF and TD-CIS in a complete basis and is violated in a finite one. The size of the defect in STO-3G is unmeasured. It should be shown as a diagnostic, never asserted as an identity.
+3. TDA and RPA ladders cross (benzene roots 2 to 4). A character-based matching between them, by maximal overlap of $X^{\rm TDA}$ with $X+Y$, is needed before any per-root comparison is displayed. Whether the overlap matching is unique inside degenerate blocks is open.
+4. Conjecture: for the 52 accepted molecules the TD-CIS bright lines lie above the RPA ones by a margin that shrinks with the HOMO–LUMO gap. Untested; cheap to tabulate once stage 2 lands.
+5. Whether the iPad needs any renderer work at all is a measurement, not a design question. It has not been made.
+6. Astra's replay check stops at $t=2$ a.u. The long-trace behaviour, and the separation of integrator phase error from model error, is untested by either plan so far.
+
+### 9 · References
+
+- P. Krause, T. Klamroth, P. Saalfrank, J. Chem. Phys. 123, 074105 (2005), time-dependent CIS for laser-driven dynamics. Verified by search 2026-09-18.
+- I. Barth, J. Manz, Y. Shigeta, K. Yagi, J. Am. Chem. Soc. 128, 7043 (2006), electronic ring currents from circularly polarised pulses. Verified by search 2026-09-18.
+- I. Ulusoy, M. Nest, J. Am. Chem. Soc. 133, 20230 (2011), benzene. HEARD, from memory only.
+- EISPACK `tred2`/`tql2` (Martin, Reinsch, Wilkinson), as transcribed in JAMA. The Cholesky reduction of the RPA problem is textbook; no novelty is claimed.
+- PySCF TDHF and TDA documentation, as cited by Astra.
+- Internal: `research/MATH-H2O-2026-09-11.md` (Proposition 1, JOSH'S QUESTION), `research/MATH-CHRONUSQ-PORTS-2026-09-11.md` (modified generators), `research/astra-2026-09-18/` (Astra's probe and measurements).
+
+### 10 · Decisions (commissioner, 2026-09-18)
+
+1. One register window with a two-position switch, ORBITAL PACKET and MOLECULE STATES, sharing lanes, dials, A/B stores, morph and modulation. Not two windows.
+2. Opus at maximum effort builds stages 0 to 2. Order of execution: stages 0 and 2 together first (they share the solver files and give the visible preparation win), then stage 1 (the funnel), sequentially in one working tree so no two builders write the same file.
+
+
+
+---
+
+## <a id="doc-41"></a>DOC 41 · molecular-waves-2026-09-18/proving/LEDGER.md · 2026-09-18
+
+## The state-register ledger — certification of the $\gamma^{AB}$ blocks, the drive, and the canonical gauge
+
+Opus · 18 September 2026 · commissioned by Josh · proving lab for `JUDGMENT.md` §3 and `REGISTER-WINDOW-SPEC.md` §7, §10
+Snapshot under test: `proving/snapshot/lab/`, taken from `git show HEAD:lab/…` at commit `8fcdcf8`. Nothing under `lab/` or `tests/` was read live or written.
+Reproduce every number: `bash proving/run-all.sh` (log in `proving/run-all.log`).
+
+### 0 · Verdict
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| $\gamma^{00}_{ij}=2\delta_{ij}$, other blocks zero | CERTIFIED | Proposition 3(i); max error $0$ |
+| $\gamma^{0K}_{ia}=\sqrt2\,X^K_{ia}$, $\gamma^{0K}_{ai}=0$, other blocks zero | CERTIFIED | Proposition 3(ii); max error $2.2\times10^{-16}$ |
+| $\gamma^{K0}=(\gamma^{0K})^{T}$ | CERTIFIED for real $X$; for complex $X$ it is $(\gamma^{0K})^{\dagger}$ | Proposition 3(v); max error $2.2\times10^{-16}$ real, $4.4\times10^{-16}$ complex |
+| $\gamma^{KL}_{ij}=2\delta_{ij}\langle X^K,X^L\rangle-\sum_a X^K_{ja}X^L_{ia}$ | CERTIFIED | Proposition 3(iii); max error $8.9\times10^{-16}$ |
+| $\gamma^{KL}_{ab}=\sum_i X^K_{ia}X^L_{ib}$ | CERTIFIED | Proposition 3(iii); max error $3.3\times10^{-16}$ |
+| $\gamma^{KL}$ occ–virt and virt–occ blocks zero | CERTIFIED | Proposition 3(iv); max error exactly $0$ |
+| $\langle 0\rvert R\lvert ia\rangle=\sqrt2\,r_{ia}$ | CERTIFIED, and it holds for an arbitrary one-electron operator | Proposition 5(i); max error $4.4\times10^{-16}$ |
+| $\langle ia\rvert R\lvert jb\rangle=\delta_{ij}r_{ab}-\delta_{ab}r_{ij}+\delta_{ij}\delta_{ab}\langle 0\rvert R\lvert 0\rangle$ | CERTIFIED as written for the position operator; CORRECTED in general to $-\delta_{ab}r_{ji}$ | Proposition 5(ii); the symmetric case $2.2\times10^{-16}$, the non-symmetric discriminator $1.8\times10^{-15}$ against $2.8$ |
+| $D_{ov}=\sqrt2\,\overline{c_0}Z$, $D_{vv}=Z^{\dagger}Z$, $D_{oo}=2\cdot\mathbb 1-ZZ^{\dagger}$ | CERTIFIED | Corollary 6; max error $4.1\times10^{-14}$ over benzene |
+| Proposition 2: $b_K=-i\kappa\mu_{Kq}+O(\kappa^2)$ | CERTIFIED | §5; error ratio $4.0000015$ at $\kappa\to\kappa/2$ |
+| Proposition 2: $b_0=1+O(\kappa^2)$ | CORRECTED: $b_0=e^{-i\kappa\langle 0\rvert R\lvert 0\rangle}+O(\kappa^2)$, equal to $1+O(\kappa^2)$ only with the origin at the ground-state electronic centroid | §5; $\lvert b_0-1\rvert=6.788\times10^{-4}$ at $\kappa=10^{-3}$, first order, and $6.5\times10^{-7}$ after the shift |
+| Proposition 2: the linear replay is the register's first order | CERTIFIED | §5; error ratio $4.000088$ |
+| `JUDGMENT.md` §2 Observation 1, $\mathbf j=\tfrac12\sum\operatorname{Im}D_{\mu\nu}(\chi_\nu\nabla\chi_\mu-\chi_\mu\nabla\chi_\nu)$ | REFUTED as a pair with the $\gamma_{pq}=\langle A\rvert E_{pq}\lvert B\rangle$ convention: the two differ by $-1$ | Proposition 7; $2.2\times10^{-18}$ for the corrected sign against $2\lVert\mathbf j\rVert_\infty$ for the published one |
+| `REGISTER-WINDOW-SPEC.md` §7 rule 2, "rotate the cluster so the dipoles are mutually orthogonal" | REFUTED as an identity rule: for an E or T cluster the dipoles are mutually orthogonal and equal in length in every gauge, so the clause constrains nothing | Proposition 10, measured on 45 clusters |
+| The canonical gauge, restated and implemented | CERTIFIED invariant | Definition 8, Proposition 9; max $\lvert\mathrm{canon}(VQ)-\mathrm{canon}(V)\rvert=7.7\times10^{-15}$ |
+
+Two abstentions are recorded in §9.
+
+### 1 · Conventions, fixed once
+
+Atomic units. $1\ \text{Å}=1/0.52917721092$ bohr, the project's constant. Real MO basis $\{\phi_p\}$, $i,j$ occupied, $a,b$ virtual, $p,q$ unrestricted, $n_o$ occupied orbitals, $n_v$ virtual, $N=2n_o$ electrons. The spin-summed excitation operator is $E_{pq}=\sum_{\sigma}a^{\dagger}_{p\sigma}a_{q\sigma}$.
+
+**Definition 1 (the register).** $\Phi_0$ is a converged RHF determinant; $\Psi_K=\sum_{ia}X^K_{ia}\tfrac{1}{\sqrt2}E_{ai}\Phi_0$ with $\sum_{ia}\lvert X^K_{ia}\rvert^2=1$; $\gamma^{AB}_{pq}=\langle A\rvert E_{pq}\lvert B\rangle$ with $A,B\in\{0,K\}$ and $\lvert 0\rangle=\Phi_0$.
+
+**Lemma 2 (the density and current in this convention).** With $\hat\psi_{\sigma}(\mathbf r)=\sum_p\phi_p(\mathbf r)a_{p\sigma}$,
+
+$$
+\hat\rho(\mathbf r)=\sum_{\sigma}\hat\psi^{\dagger}_{\sigma}\hat\psi_{\sigma}=\sum_{pq}\phi_p(\mathbf r)\phi_q(\mathbf r)E_{pq},
+\qquad
+\hat{\mathbf j}(\mathbf r)=\frac{1}{2i}\sum_{pq}\bigl[\phi_p\nabla\phi_q-\phi_q\nabla\phi_p\bigr]E_{pq},
+$$
+
+hence $\rho^{AB}(\mathbf r)=\sum_{pq}\gamma^{AB}_{pq}\phi_p\phi_q$ with no transposition, and for a Hermitian $D_{pq}=\langle E_{pq}\rangle$ in a real basis
+
+$$
+\mathbf j(\mathbf r)=\tfrac12\sum_{pq}\operatorname{Im}D_{pq}\bigl[\phi_p\nabla\phi_q-\phi_q\nabla\phi_p\bigr].
+$$
+
+**Proof.** The first is the definition of the density operator with the field expansion substituted. The second is $\hat{\mathbf j}=\tfrac{1}{2i}\sum_\sigma[\hat\psi^{\dagger}_\sigma\nabla\hat\psi_\sigma-(\nabla\hat\psi^{\dagger}_\sigma)\hat\psi_\sigma]$ with the same substitution. In the last step the bracket is antisymmetric under $p\leftrightarrow q$, so only the antisymmetric part of $D$ survives; for Hermitian $D$ and real orbitals that part is $i\operatorname{Im}D$, and $\tfrac{1}{2i}\cdot i=\tfrac12$. $\blacksquare$
+
+Two consequences the build needs. The density sees only the symmetric part of $\gamma^{AB}$, so no CHANGE or DENSITY view can detect a transposition error; the current sees only the antisymmetric part, so the FLOW view of stage 6 detects nothing else. Getting the transposition right is exactly a stage-6 question.
+
+**Charge and gauge (KNOWN, with a check).** The electron carries charge $-1$, so the electronic dipole is $\boldsymbol\mu_{\text{el}}=-\sum_{pq}\gamma_{pq}\mathbf r_{pq}$ and the total is $\sum_A Z_A\mathbf R_A-\sum_{pq}\gamma_{pq}\mathbf r_{pq}$. The project's length-gauge interaction is $H_{\text{int}}=+\boldsymbol{\mathcal E}(t)\cdot\sum_k\mathbf r_k$, which is $-\boldsymbol{\mathcal E}\cdot\hat{\boldsymbol\mu}_{\text{el}}$; the drive matrix $\mathbf R_q$ is therefore built from the POSITION matrix $r_{pq}$, not from the dipole. MEASURED against `mf.dip_moment` on the same primitives: max discrepancy $6.5\times10^{-11}$ (H₂O), $1.9\times10^{-10}$ (NH₃), $3.6\times10^{-15}$ (CH₄), $1.2\times10^{-13}$ (C₆H₆); script `check-tda-pyscf.py`, field `d_ground_dipole_nuc_minus_r`. PySCF's `tdscf` `transition_dipole` also returns $\sqrt2\sum_{ia}X_{ia}r_{ia}$ with no charge factor — read from its source, `_contract_multipole`, and confirmed by a ratio of exactly $\pm1$ against the project's $\mu_{Kq}$ on every non-degenerate state.
+
+### 2 · The algebra
+
+**Lemma 3 (KNOWN; Helgaker, Jørgensen and Olsen, §1.4).** $[E_{pq},E_{rs}]=\delta_{qr}E_{ps}-\delta_{ps}E_{rq}$, and on a closed-shell determinant
+
+$$
+E_{ij}\Phi_0=2\delta_{ij}\Phi_0,\qquad E_{ia}\Phi_0=0,\qquad E_{ab}\Phi_0=0,\qquad
+\langle\Phi_0\rvert E_{ia}E_{bj}\lvert\Phi_0\rangle=2\delta_{ij}\delta_{ab}.
+$$
+
+**Proof.** The commutator is the standard one-index contraction of $[a^{\dagger}_{p\sigma}a_{q\sigma},a^{\dagger}_{r\tau}a_{s\tau}]$ using $\{a_p,a^{\dagger}_r\}=\delta_{pr}\delta_{\sigma\tau}$. For the actions: $a_{a\sigma}\Phi_0=0$ because a virtual spin orbital is empty, which kills $E_{ia}$ and $E_{ab}$; $a^{\dagger}_{i\sigma}a_{j\sigma}\Phi_0=0$ for $i\ne j$ because $i$ is already occupied in both spins, and equals $\hat n_i\Phi_0=2\Phi_0$ for $i=j$. For the last: $E_{bj}E_{ia}\Phi_0=0$, so $\langle\Phi_0\rvert E_{ia}E_{bj}\lvert\Phi_0\rangle=\langle\Phi_0\rvert[E_{ia},E_{bj}]\lvert\Phi_0\rangle=\delta_{ab}\langle E_{ij}\rangle_0-\delta_{ij}\langle E_{ba}\rangle_0=2\delta_{ab}\delta_{ij}$. $\blacksquare$
+
+Lemma 3 also proves the normalisation asserted in Definition 1: $\langle\Psi_K\lvert\Psi_L\rangle=\tfrac12\sum X^K_{ia}X^L_{jb}\cdot2\delta_{ij}\delta_{ab}=\langle X^K,X^L\rangle$, so $\lVert X^K\rVert=1$ is exactly $\lVert\Psi_K\rVert=1$.
+
+### 3 · The $\gamma$ blocks
+
+**Proposition 3 (the state-to-state density matrices).** With Definition 1 and real $X$,
+
+$$
+\gamma^{00}_{ij}=2\delta_{ij},\qquad
+\gamma^{0K}_{ia}=\sqrt2\,X^K_{ia},\qquad
+\gamma^{KL}_{ij}=2\delta_{ij}\langle X^K,X^L\rangle-\sum_a X^K_{ja}X^L_{ia},\qquad
+\gamma^{KL}_{ab}=\sum_i X^K_{ia}X^L_{ib},
+$$
+
+with $\gamma^{K0}=(\gamma^{0K})^{T}$ and every block not listed equal to zero.
+
+**Proof.** (i) $\gamma^{00}_{pq}=\langle\Phi_0\rvert E_{pq}\lvert\Phi_0\rangle$. By Lemma 3 the only non-vanishing action of $E_{pq}$ on $\Phi_0$ that returns a component along $\Phi_0$ is $E_{ij}\Phi_0=2\delta_{ij}\Phi_0$; $E_{ai}\Phi_0$ is orthogonal to $\Phi_0$ and $E_{ia}\Phi_0=E_{ab}\Phi_0=0$. Hence $\gamma^{00}_{ij}=2\delta_{ij}$ and all else vanishes.
+
+(ii) $\gamma^{0K}_{pq}=\tfrac{1}{\sqrt2}\sum_{jb}X^K_{jb}\langle\Phi_0\rvert E_{pq}E_{bj}\lvert\Phi_0\rangle$. Taking $p=i$, $q=a$ and using the last identity of Lemma 3, $\gamma^{0K}_{ia}=\tfrac{1}{\sqrt2}\sum_{jb}X^K_{jb}\,2\delta_{ij}\delta_{ab}=\sqrt2X^K_{ia}$. For the other blocks use $\langle\Phi_0\rvert E_{pq}=\bigl(E_{qp}\Phi_0\bigr)^{\dagger}$: $E_{ia}\Phi_0=0$ gives $\gamma^{0K}_{ai}=0$; $E_{ba}\Phi_0=0$ gives $\gamma^{0K}_{ab}=0$; $E_{ji}\Phi_0=2\delta_{ij}\Phi_0$ gives $\gamma^{0K}_{ij}=2\delta_{ij}\langle\Phi_0\lvert\Psi_K\rangle=0$ by construction.
+
+(iii) $\gamma^{KL}_{pq}=\tfrac12\sum_{ia,jb}X^K_{ia}X^L_{jb}\langle\Phi_0\rvert E_{ia}E_{pq}E_{bj}\lvert\Phi_0\rangle$. For $p=k$, $q=l$ both occupied, Lemma 3 gives
+
+$$
+E_{kl}E_{bj}\Phi_0=\bigl([E_{kl},E_{bj}]+E_{bj}E_{kl}\bigr)\Phi_0
+=\bigl(\delta_{lb}E_{kj}-\delta_{kj}E_{bl}\bigr)\Phi_0+2\delta_{kl}E_{bj}\Phi_0
+=-\delta_{kj}E_{bl}\Phi_0+2\delta_{kl}E_{bj}\Phi_0,
+$$
+
+since $\delta_{lb}=0$ ($l$ occupied, $b$ virtual). Contracting with $\langle\Phi_0\rvert E_{ia}$ and using $\langle\Phi_0\rvert E_{ia}E_{bl}\lvert\Phi_0\rangle=2\delta_{il}\delta_{ab}$,
+
+$$
+\gamma^{KL}_{kl}=\tfrac12\sum_{ia,jb}X^K_{ia}X^L_{jb}\bigl[-2\delta_{kj}\delta_{il}\delta_{ab}+4\delta_{kl}\delta_{ij}\delta_{ab}\bigr]
+=2\delta_{kl}\langle X^K,X^L\rangle-\sum_a X^K_{la}X^L_{ka},
+$$
+
+which is the stated formula after renaming $(k,l)\to(i,j)$. For $p=c$, $q=d$ both virtual, $E_{cd}\Phi_0=0$ and $[E_{cd},E_{bj}]=\delta_{db}E_{cj}-\delta_{cj}E_{bd}$ with $\delta_{cj}=0$, so $E_{cd}E_{bj}\Phi_0=\delta_{db}E_{cj}\Phi_0$ and $\gamma^{KL}_{cd}=\tfrac12\sum X^K_{ia}X^L_{jb}\delta_{db}\,2\delta_{ij}\delta_{ac}=\sum_i X^K_{ic}X^L_{id}$.
+
+(iv) For $p=k$ occupied and $q=c$ virtual, $E_{kc}\Phi_0=0$ and $[E_{kc},E_{bj}]=\delta_{cb}E_{kj}-\delta_{kj}E_{bc}$, so $E_{kc}E_{bj}\Phi_0=2\delta_{cb}\delta_{kj}\Phi_0$; contracting with $\langle\Phi_0\rvert E_{ia}$ gives $2\delta_{cb}\delta_{kj}\langle\Phi_0\rvert E_{ia}\lvert\Phi_0\rangle=0$ by (i). The virt–occ block is the transpose of this one by (v).
+
+(v) $\overline{\gamma^{AB}_{pq}}=\langle B\rvert E^{\dagger}_{pq}\lvert A\rangle=\langle B\rvert E_{qp}\lvert A\rangle=\gamma^{BA}_{qp}$, because $E^{\dagger}_{pq}=E_{qp}$. For real states this is $\gamma^{AB}=(\gamma^{BA})^{T}$, in particular $\gamma^{K0}=(\gamma^{0K})^{T}$. $\blacksquare$
+
+**Corollary 4 (complex amplitudes).** If the $X^K$ are complex (a legitimate choice inside a degenerate cluster, where $(X^1\pm iX^2)/\sqrt2$ are eigenvectors of the same TDA matrix), every bra factor carries a conjugate:
+
+$$
+\gamma^{0K}_{ia}=\sqrt2\,X^K_{ia},\quad \gamma^{K0}=(\gamma^{0K})^{\dagger},\quad
+\gamma^{KL}_{ij}=2\delta_{ij}\langle X^K,X^L\rangle-\sum_a\overline{X^K_{ja}}X^L_{ia},\quad
+\gamma^{KL}_{ab}=\sum_i\overline{X^K_{ia}}X^L_{ib},
+$$
+
+with $\langle X^K,X^L\rangle=\sum_{ia}\overline{X^K_{ia}}X^L_{ia}$.
+
+**Proof.** The proof of Proposition 3 never used reality; it used only Lemma 3 and the expansion $\langle\Psi_K\rvert=\sum\overline{X^K_{ia}}\tfrac{1}{\sqrt2}\langle\Phi_0\rvert E_{ia}$. Carrying the conjugates through gives the four lines. Statement (v) is unchanged and now reads $\gamma^{K0}=(\gamma^{0K})^{\dagger}$. $\blacksquare$
+
+MEASURED, on the NH₃ and CH₄ E and T clusters with $X=(X^1\pm iX^2)/\sqrt2$, against a full-determinant-space evaluation: max error $4.4\times10^{-16}$ (NH₃), $1.6\times10^{-16}$ (CH₄). Script `check-gamma-fci.py`, field `complex_amplitude_max_abs_error`.
+
+### 4 · The drive
+
+**Proposition 5 (the one-electron matrix in the pair basis).** Let $M$ be any one-electron operator with MO matrix $M_{pq}=\langle p\rvert M\lvert q\rangle$ and $R_{AB}=\sum_{pq}\gamma^{AB}_{pq}M_{pq}$. Write $\lvert ia\rangle$ for the singlet single $\tfrac{1}{\sqrt2}E_{ai}\Phi_0$. Then
+
+$$
+\langle 0\rvert R\lvert 0\rangle=2\sum_k M_{kk},\qquad
+\langle 0\rvert R\lvert ia\rangle=\sqrt2\,M_{ia},\qquad
+\langle ia\rvert R\lvert jb\rangle=\delta_{ij}M_{ab}-\delta_{ab}M_{ji}+\delta_{ij}\delta_{ab}\langle 0\rvert R\lvert 0\rangle .
+$$
+
+For a symmetric $M$ — in particular the position operator in a real orbital basis — $M_{ji}=M_{ij}$ and the third line is the published one.
+
+**Proof.** Substitute Proposition 3 with $X^K=e_{ia}$, $X^L=e_{jb}$. The first two lines are immediate from $\gamma^{00}$ and $\gamma^{0K}$. For the third, the occupied block contributes $\sum_{kl}M_{kl}\bigl[2\delta_{kl}\delta_{ij}\delta_{ab}-\delta_{li}\delta_{kj}\delta_{ab}\bigr]=2\delta_{ij}\delta_{ab}\sum_kM_{kk}-\delta_{ab}M_{ji}$ and the virtual block contributes $\sum_{cd}M_{cd}\delta_{ij}\delta_{ca}\delta_{db}=\delta_{ij}M_{ab}$; the mixed blocks vanish by Proposition 3(iv). $\blacksquare$
+
+The index order of the second term is not a matter of taste. MEASURED with a pseudo-random non-symmetric $M$ (seed 20260918) on the full determinant space: the reading $-\delta_{ab}M_{ji}$ is right to $1.8\times10^{-15}$, the reading $-\delta_{ab}M_{ij}$ is wrong by $1.9$ (H₂O), $2.8$ (NH₃), $2.8$ (CH₄). Script `check-gamma-fci.py`, field `nonsymmetric_operator`.
+
+**Corollary 6 (the pair-basis assembly, `REGISTER-WINDOW-SPEC.md` §10).** With $c_0=b_0$, $c_K=b_Ke^{-i\omega_Kt}$, $Z=\sum_Kc_KX^K$ and $\lvert c_0\rvert^2+\sum_K\lvert c_K\rvert^2=1$,
+
+$$
+D_{ov}=\sqrt2\,\overline{c_0}\,Z,\qquad D_{vo}=D_{ov}^{\dagger},\qquad D_{vv}=Z^{\dagger}Z,\qquad D_{oo}=2\cdot\mathbb 1-ZZ^{\dagger}.
+$$
+
+**Proof.** $D=\sum_{AB}\overline{c_A}c_B\gamma^{AB}$. The occ–virt block gives $\overline{c_0}\sqrt2\sum_Kc_KX^K=\sqrt2\overline{c_0}Z$. The virtual block gives $\sum_{KL}\overline{c_K}c_L\sum_i\overline{X^K_{ia}}X^L_{ib}=\sum_i\overline{Z_{ia}}Z_{ib}=(Z^{\dagger}Z)_{ab}$. The occupied block gives $2\lvert c_0\rvert^2\delta_{ij}+2\delta_{ij}\sum_{KL}\overline{c_K}c_L\langle X^K,X^L\rangle-\sum_{KL}\overline{c_K}c_L\overline{X^K_{ja}}X^L_{ia}=2\delta_{ij}(\lvert c_0\rvert^2+\lVert Z\rVert_F^2)-(ZZ^{\dagger})_{ij}$, and $\lVert Z\rVert^2_F=\sum_K\lvert c_K\rvert^2$ by orthonormality of the $X^K$, so the prefactor is $2$. $\blacksquare$
+
+MEASURED against the full $\gamma$ assembly, 30 random normalised complex registers over the ground state and six excited states at arbitrary times: max $4.1\times10^{-14}$ (benzene), $\le6.4\times10^{-15}$ elsewhere; hermiticity $\le1.4\times10^{-16}$, trace error $\le8.3\times10^{-13}$, occupations inside $[0,2]$ throughout. Script `check-pair-basis.mjs`.
+
+**Proposition 7 (the current sign; a correction to `JUDGMENT.md` §2).** With $D_{pq}=\langle E_{pq}\rangle$ as in Definition 1, the published line
+
+> $\mathbf j(\mathbf r,t)=\tfrac12\sum_{\mu\nu}\operatorname{Im}D_{\mu\nu}(t)\bigl(\chi_\nu\nabla\chi_\mu-\chi_\mu\nabla\chi_\nu\bigr)$
+
+carries the wrong sign; the correct pairing is $\mathbf j=\tfrac12\sum_{pq}\operatorname{Im}D_{pq}(\phi_p\nabla\phi_q-\phi_q\nabla\phi_p)$, i.e. the published expression with $\mu$ and $\nu$ exchanged. It is consistent only with the opposite index convention $D_{pq}=\langle a^{\dagger}_qa_p\rangle$.
+
+**Proof.** Lemma 2. $\blacksquare$
+
+MEASURED independently of that derivation, with the elementary one-electron current $\mathbf j=\operatorname{Im}(\overline\psi\nabla\psi)$ for $\psi=(\phi_1+i\phi_2)/\sqrt2$ on benzene's degenerate HOMO pair, sampled on a ring of 24 points at radius $2.6$ bohr and height $0.5$ bohr, AO values and gradients from PySCF's `eval_gto('GTOval_sph_deriv1')`: the corrected form agrees to $2.2\times10^{-18}$, the published form is off by $6.5\times10^{-3}$, which is exactly twice the peak current $3.3\times10^{-3}$. Script `check-current.py`. A one-body operator's expectation is linear in $D$, so the verdict carries to the many-electron case unchanged. The visible consequence is the sense of the ring current in the FLOW view of stage 6.
+
+### 5 · Proposition 2, the $\delta$-kick
+
+**Proposition 2$'$ (restated).** Let $\hat R_q=\sum_{pq}r^q_{pq}E_{pq}$ and $\chi=e^{-i\kappa\hat R_q}\Phi_0$. Then, with $\mu_{Kq}=\sqrt2\sum_{ia}X^K_{ia}r^q_{ia}$,
+
+$$
+\langle\Psi_K\lvert\chi\rangle=-i\kappa\,\mu_{Kq}+O(\kappa^2),\qquad
+\langle\Phi_0\lvert\chi\rangle=e^{-i\kappa\langle 0\rvert R_q\lvert 0\rangle}+O(\kappa^2),\qquad
+1-\lVert P_{\text{reg}}\chi\rVert^2=O(\kappa^4),
+$$
+
+and the density of the register built from those amplitudes reproduces the published linear replay $\delta\rho=-2\kappa\sum_K\mu_{Kq}\sin(\omega_Kt)\rho^{\text{tr}}_K$ to $O(\kappa^2)$.
+
+**Proof.** $e^{-i\kappa\hat R}=1-i\kappa\hat R+O(\kappa^2)$; project on $\Psi_K$ and use $\langle\Psi_K\rvert\hat R\lvert\Phi_0\rangle=\sqrt2\sum X^K_{ia}r_{ia}$ from Proposition 5(ii); project on $\Phi_0$ and use $\langle 0\rvert R\lvert 0\rangle=2\sum_kr_{kk}$, which is not zero in general. The published $b_0=1+O(\kappa^2)$ holds after the origin shift $\mathbf r\to\mathbf r-\langle 0\rvert\mathbf R\lvert 0\rangle/N$, which sends $\hat R\to\hat R-\langle 0\rvert R\lvert 0\rangle\mathbb 1$ on the $N$-electron space and is therefore a global phase, changing no observable. The density depends on $\overline{b_0}b_K$, in which that phase cancels at leading order, so the replay formula is unaffected. $\blacksquare$
+
+MEASURED on H₂O/STO-3G, $q=z$, against the exact $441\times441$ matrix exponential of the full one-body $\hat R_z$ on the determinant space (script `check-kick.py`):
+
+| quantity | $\kappa=10^{-3}$ | $\kappa=5\times10^{-4}$ | ratio | expected |
+|---|---|---|---|---|
+| $\max_K\lvert b_K+i\kappa\mu_{Kq}\rvert$ | $5.000\times10^{-7}$ | $1.250\times10^{-7}$ | $4.0000015$ | $4$ |
+| $\lvert b_0-1\rvert$, origin as shipped | $6.788\times10^{-4}$ | $3.394\times10^{-4}$ | $2.000$ | $2$, i.e. first order |
+| $\lvert b_0-1\rvert$, centroid origin | $6.514\times10^{-7}$ | $1.629\times10^{-7}$ | $3.999$ | $4$ |
+| leakage $1-\lVert P_{\text{reg}}\chi\rVert^2$ | $6.23\times10^{-13}$ | $3.89\times10^{-14}$ | $16.02$ | $16$ |
+| $\lVert D_{\text{register}}-D_{\text{linear replay}}\rVert_\infty$ | $9.230\times10^{-7}$ | $2.307\times10^{-7}$ | $4.00009$ | $4$ |
+| $\lVert D_{\text{register}}-D_{\text{determinant space}}\rVert_\infty$ | $6.7\times10^{-16}$ | $8.9\times10^{-16}$ | — | round-off |
+
+The last row is the complex-amplitude gate on the whole $\gamma$ assembly: the register's closed-form $D(t)$ against the 1-RDM of the same superposition evaluated in the 441-dimensional determinant space, at three times.
+
+### 6 · Independent verification of §3 and §4
+
+Two routes were used, neither of which shares a line with the closed forms.
+
+Route A, `check-gamma-fci.py`. The TDA vectors are embedded in the full determinant space of the same MO set by applying PySCF's own creation and annihilation operators (`fci.addons.cre_a`/`des_a`/`cre_b`/`des_b`) to the RHF determinant; every fermionic sign and the determinant ordering are PySCF's. Transition 1-RDMs come from `fci.direct_spin1.trans_rdm1`. PySCF's convention is $\text{dm}[p,q]=\langle\text{bra}\rvert q^{\dagger}p\lvert\text{ket}\rangle$, the transpose of $\gamma_{pq}$; the script does not assume this but derives it from the block structure of $\gamma^{0K}$ (occ–virt norm $1.414$ against virt–occ norm exactly $0$). PySCF's `direct_spin1.contract_1e` packs only the lower triangle of its argument and must not be used with a non-symmetric one-electron matrix; that is why the operators route was taken.
+
+Route B, `check-gamma-bitstring.py`. No PySCF. An explicit occupation-number evaluator: spin orbital $s=p$ for $(p,\alpha)$ and $s=n+p$ for $(p,\beta)$, a determinant is the ordered product of creation operators in increasing bit index, and $a^{\dagger}_s$ carries $(-1)^{\text{popcount}(\text{occ}\wedge(2^s-1))}$. $E_{pq}$ is assembled as a sparse matrix from that rule alone.
+
+| Molecule | determinants | states compared | $\gamma^{00}$ | $\gamma^{0K}$ | $\gamma^{K0}$ | $\gamma^{KL}_{oo}$ | $\gamma^{KL}_{vv}$ | $\gamma^{KL}_{ov}$, $\gamma^{KL}_{vo}$ | drive $R_q$ | pair formulas |
+|---|---|---|---|---|---|---|---|---|---|---|
+| H₂O, route A | 441 | 0–7, all $K,L$ | $0$ | $2.2\times10^{-16}$ | $2.2\times10^{-16}$ | $6.7\times10^{-16}$ | $2.2\times10^{-16}$ | $0$ | $6.7\times10^{-16}$ | $2.2\times10^{-16}$ |
+| NH₃, route A | 3136 | 0–7, all $K,L$ | $0$ | $2.2\times10^{-16}$ | $2.2\times10^{-16}$ | $6.7\times10^{-16}$ | $2.2\times10^{-16}$ | $0$ | $8.9\times10^{-16}$ | $4.4\times10^{-16}$ |
+| CH₄, route A | 15876 | 0–7, all $K,L$ | $0$ | $1.1\times10^{-16}$ | $1.1\times10^{-16}$ | $8.9\times10^{-16}$ | $1.7\times10^{-16}$ | $0$ | $4.4\times10^{-16}$ | $4.4\times10^{-16}$ |
+| H₂O, route B | 441 | 0–4, all $K,L$ | $0$ | $2.2\times10^{-16}$ | $2.2\times10^{-16}$ | $6.7\times10^{-16}$ | $2.2\times10^{-16}$ | $0$ | — | $2.2\times10^{-16}$ |
+| NH₃, route B | 3136 | 0–4, all $K,L$ | $0$ | $2.2\times10^{-16}$ | $2.2\times10^{-16}$ | $8.9\times10^{-16}$ | $3.3\times10^{-16}$ | $0$ | — | $4.4\times10^{-16}$ |
+
+The "pair formulas" column is Proposition 5 evaluated on every single excitation: $n_on_v$ elements for $\langle 0\rvert R\lvert ia\rangle$ and $(n_on_v)^2$ for $\langle ia\rvert R\lvert jb\rangle$, for all three axes. NH₃ (E pairs) and CH₄ (a T₂ bright triple) supply the degenerate cases; H₂O has none among the compared states, which is why NH₃ and CH₄ carry the complex-amplitude gate.
+
+The physics gate, `check-tda-pyscf.py`, loads the project's own vendored BSE STO-3G decimals into PySCF so no basis difference remains, and compares the whole singlet TDA matrix (PySCF's `tdscf.rhf.get_ab`, mapped into the project's pair basis through $U=C^{T}_{\text{proj}}SC_{\text{PySCF}}$, which is exactly block-orthogonal here: max off-block element $7.2\times10^{-10}$).
+
+| Molecule | $\Delta E_{\text{RHF}}$ | $\Delta\varepsilon$ | whole $A$ matrix | all TDA roots | oscillator strengths | $\lvert\mu\rvert$ | cluster dipole tensor |
+|---|---|---|---|---|---|---|---|
+| H₂O | $3.7\times10^{-13}$ | $1.2\times10^{-10}$ | $1.1\times10^{-10}$ | 10 roots, $1.1\times10^{-10}$ | $5.4\times10^{-11}$ | $1.6\times10^{-10}$ | $1.1\times10^{-10}$ |
+| NH₃ | $1.7\times10^{-13}$ | $7.2\times10^{-10}$ | $7.2\times10^{-10}$ | 15 roots, $7.2\times10^{-10}$ | $5.4\times10^{-10}$ | $1.0\times10^{-9}$ | $9.7\times10^{-10}$ |
+| CH₄ | $1.2\times10^{-13}$ | $1.4\times10^{-12}$ | $1.3\times10^{-12}$ | 20 roots, $1.2\times10^{-12}$ | $6.7\times10^{-13}$ | $6.7\times10^{-12}$ | $1.1\times10^{-12}$ |
+| C₆H₆ | $1.8\times10^{-12}$ | $1.9\times10^{-12}$ | $2.7\times10^{-12}$ | 315 roots, $2.1\times10^{-12}$ | $3.9\times10^{-13}$ | $5.0\times10^{-12}$ | $2.2\times10^{-12}$ |
+
+NH₃'s floor of $7\times10^{-10}$ is the project's SCF convergence inside its degenerate MO block, not a basis or formula difference: the same floor appears in $\Delta\varepsilon$, in $A$ and in the roots. The individual $\boldsymbol\mu_K$ of a state inside a degenerate cluster is gauge-dependent and was not compared; the cluster tensor $T=\sum_{K\in\text{cluster}}\boldsymbol\mu_K\boldsymbol\mu_K^{T}$ was, and it is invariant (it depends only on the cluster projector; see the proof of Proposition 10). PySCF's Davidson TDA stalls on CH₄'s and benzene's degenerate manifolds, so `td.xy` was filled from an exact diagonalisation of PySCF's own $A$ in PySCF's own amplitude normalisation ($\sum x^2=1/2$, measured); `td.transition_dipole` and `td.oscillator_strength` are then PySCF's code unchanged.
+
+### 7 · The canonical gauge
+
+Write $V\in\mathbb R^{g\times d}$ for a cluster: $g$ vectors with orthonormal rows in the $d$-dimensional coordinate space ($d=n_on_v$ for states, $d=n$ for orbitals). An eigensolver returns $QV$ for an arbitrary $Q\in O(g)$, and only the row space is physics.
+
+**Definition 8 (the rule).** Fix, independently of the cluster, an ordered list of linear functionals $f_0,f_1,\dots$ on $\mathbb R^d$, grouped into families, each family with a threshold. Scan them in order; maintain the orthonormal set $u_0,\dots,u_{j-1}$ already accepted; for each $f_q$ form the residual $\Pi_jPf_q$, where $P$ projects on the row space of $V$ and $\Pi_j=1-\sum_{l<j}u_lu_l^{T}$; accept $u_j=\Pi_jPf_q/\lVert\Pi_jPf_q\rVert$ when $\lVert\Pi_jPf_q\rVert$ exceeds the family's threshold, and skip it otherwise; stop at $g$ vectors. For a state cluster the families are (1) the three lab transition-dipole functionals $f_q(X)=\sqrt2\sum_{ia}X_{ia}r^q_{ia}$ in the order $x,y,z$ with threshold $10^{-3}$ a.u., then (2) the $d$ amplitude coordinates in the project's pair order. For an orbital cluster the single family is the Löwdin-AO coordinates in AO order, applied to $\tilde C=S^{1/2}C$.
+
+**Proposition 9 (invariance and uniqueness).** For every $Q\in O(g)$, $\mathrm{canon}(QV)=\mathrm{canon}(V)$; and $\mathrm{canon}(V)$ is the unique orthonormal basis $u_0,\dots,u_{g-1}$ of the row space with $\langle f_{q_j},u_l\rangle=0$ for $l>j$ and $\langle f_{q_j},u_j\rangle>0$, where $q_0,q_1,\dots$ are the accepted functionals.
+
+**Proof.** $P$, and hence every residual and every acceptance decision, is a function of the row space alone, which $Q$ does not change; the $f_q$ are fixed. So the entire output is a function of (row space, fixed functionals). Concretely, in the implementation all arithmetic happens in $\mathbb R^g$ through $c_k=\langle V_k,f_q\rangle$: under $V\mapsto QV$ one has $c\mapsto Qc$, Gram–Schmidt commutes with the orthogonal $Q$ (it uses only inner products), so the coefficient matrix becomes $WQ^{T}$ and the output $WQ^{T}QV=WV$ is unchanged. For uniqueness: the stated conditions say the $g\times g$ matrix $\langle f_{q_j},u_l\rangle$ is lower triangular with positive diagonal, and a decomposition of a fixed full-rank matrix into (orthonormal) $\times$ (lower triangular with positive diagonal) is unique — the uniqueness of QR, equivalently of Cholesky. $\blacksquare$
+
+**Proposition 10 (what the draft rule does not do).** Let a cluster span a single $g$-dimensional irreducible representation $\Gamma$ of the molecular point group, with $g\in\{2,3\}$, and let $M\in\mathbb R^{3\times g}$ be its transition-dipole matrix. Then $T=MM^{T}$ is $\mu^2$ times an orthogonal projector, and consequently in EVERY orthonormal gauge of the cluster the $g$ dipoles are mutually orthogonal and all of length $\mu$. The instruction "rotate the cluster so the dipoles are mutually orthogonal" therefore constrains nothing for an E or T cluster; the identity comes entirely from the ordered functionals and the sign.
+
+**Proof.** $T_{qq'}=\langle 0\rvert r_q\,\Pi\,r_{q'}\lvert 0\rangle$ with $\Pi$ the projector on the cluster, which is invariant under the point group; so $T$ is an invariant symmetric tensor, $\mathcal R T\mathcal R^{T}=T$ for every group element in its $3$-dimensional vector representation. The range of $T$ is the set of lab directions coupling to $\Gamma$; the group acts on it irreducibly (it is the copy of $\Gamma$ inside the vector representation), so by Schur's lemma $T$ restricted to its range is a multiple of the identity, $T=\mu^2P_{\text{range}}$. Now take any $M$ with $MM^{T}=\mu^2P$, $P$ of rank $g$, and let $M=U\Sigma W^{T}$ be a singular value decomposition; then $U\Sigma^2U^{T}=\mu^2P$ forces $\Sigma=\mu\mathbb 1_g$, hence $M^{T}M=W\Sigma^2W^{T}=\mu^2\mathbb 1_g$: the columns of $M$ are orthogonal and of length $\mu$, for this and therefore for every gauge $MQ$. $\blacksquare$
+
+MEASURED on 45 degenerate bright clusters (NH₃ 5, CH₄ 4, C₆H₆ 36): the lengths inside a cluster agree to $\le10^{-8}$ and the largest $\boldsymbol\mu_j\cdot\boldsymbol\mu_l$ over all of them is $3.0\times10^{-13}$. After canonicalisation the dipoles sit exactly on the lab axes: E pairs give $(\mu,0,0)$ and $(0,\mu,0)$, CH₄'s T₂ triple gives $(\mu,0,0)$, $(0,\mu,0)$, $(0,0,\mu)$ with $\mu=1.66218936$. Script `canon-gauge.test.mjs`, test 8.
+
+**Corollary 11 (the RING preset is gauge-independent; the gauge only names it).** For a degenerate pair satisfying Proposition 10, the register $b=(b_0,c,ic)$ with real $b_0$ gives an electronic dipole
+
+$$
+\boldsymbol\mu(t)=\boldsymbol\mu_{\text{stat}}-2b_0\lvert c\rvert\bigl[\cos(\omega t+\varphi)\,\boldsymbol\mu^{(1)}+\sin(\omega t+\varphi)\,\boldsymbol\mu^{(2)}\bigr],
+$$
+
+a circle of radius $2b_0\lvert c\rvert\mu$ traversed uniformly at $\omega$, whose centre, componentwise in the axis $q$, is $(\boldsymbol\mu_{\text{stat}})_q=-\bigl[\lvert b_0\rvert^2R^q_{00}+\lvert c\rvert^2(R^q_{11}+R^q_{22})\bigr]$, and whose centre, radius, plane and sense are the same in every orthonormal gauge of the pair. Only the starting phase $\varphi$ depends on the gauge.
+
+**Proof.** The cluster–cluster part of $\langle R\rangle$ is $\sum_{K,L}\overline{c_K}c_LR_{KL}$ with $R$ real symmetric and $\overline{c_1}c_2=i\lvert c\rvert^2$ purely imaginary, so it equals $\lvert c\rvert^2\operatorname{tr}R_{\text{cluster}}$, which is a trace and hence gauge-invariant and time-independent; the $R_{00}$ term likewise. The cross term is $2\operatorname{Re}[\overline{b_0}(c_1\boldsymbol\mu^{(1)}+c_2\boldsymbol\mu^{(2)})]$ with $c_1=ce^{-i\omega t}$ and $c_2=ice^{-i\omega t}$, giving the displayed combination; by Proposition 10 $\boldsymbol\mu^{(1)}\perp\boldsymbol\mu^{(2)}$ with equal lengths, so the locus is a circle of the stated radius, and its plane is the range of $T$, which is invariant. $\blacksquare$
+
+MEASURED: for NH₃'s $\omega=0.598946$ pair and benzene's $\omega=0.390327$ bright pair, five random orthogonal scrambles move the circle's centre by $\le6.7\times10^{-16}$ and its radius by $\le6.7\times10^{-16}$, while the starting phase moves by up to $5.65$ rad; after canonicalisation the starting phase is reproduced to $3.6\times10^{-15}$ rad. The out-of-circle spread is $2.4\times10^{-14}$ over 64 samples of a period. This upgrades the benzene ring-current measurement of `probe-fable.mjs` from a measurement at one gauge to a theorem, and it says the RING preset cannot be broken by an eigensolver change; only its lane labels can.
+
+**Lemma 12 (conditioning).** If every accepted residual norm is at least $\delta$, then a perturbation of the row space of size $\varepsilon$ moves the canonical basis by at most $O(\varepsilon/\delta)$.
+
+**Proof.** Each accepted vector is $u_j=\Pi_jPf_{q_j}/\lVert\Pi_jPf_{q_j}\rVert$. The numerator is a smooth function of $P$ and of the earlier $u_l$, so perturbing $P$ by $\varepsilon$ perturbs it by $O(\varepsilon)$; dividing by a norm at least $\delta$ amplifies by at most $1/\delta$, and the errors accumulate through the $g\le3$ steps with bounded coefficients. $\blacksquare$
+
+MEASURED on benzene's bright pair: $\delta=2.2186$, a perturbation $\varepsilon=10^{-9}$ moves the output by $7.1\times10^{-10}$, against the bound $\varepsilon/\delta=4.5\times10^{-10}$.
+
+**Lemma 13 (why the coordinate family gets an adaptive threshold).** With $j$ directions already accepted, $\sum_{q=0}^{d-1}\lVert\Pi_je_q\rVert^2=\operatorname{tr}\Pi_j=g-j$, so some coordinate has residual at least $\sqrt{(g-j)/d}$. Setting the coordinate family's threshold to $\theta\sqrt{(g-j)/d}$ with $\theta<1$ therefore never exhausts the family, and it forces $\delta\ge\theta\sqrt{(g-j)/d}$, bounding the constant of Lemma 12 by $\sqrt{d/(g-j)}/\theta$ a priori.
+
+**Proof.** $\Pi_j$ is an orthogonal projector of rank $g-j$, so $\sum_q e_q^{T}\Pi_j^2e_q=\operatorname{tr}\Pi_j=g-j$; a maximum is at least the mean, giving $\max_q\lVert\Pi_je_q\rVert\ge\sqrt{(g-j)/d}$, strictly above $\theta\sqrt{(g-j)/d}$ for $\theta<1$. Lemma 12 then applies with that $\delta$. $\blacksquare$
+
+The default is $\theta=1/2$. This matters: with a flat $10^{-8}$ threshold, benzene's worst accepted pivot norm was $5.6\times10^{-8}$, a Lipschitz constant of $1.8\times10^{7}$ — an identity that a change of eigensolver would not reproduce. With Lemma 13's threshold and the dipole family's threshold raised from $10^{-6}$ to $10^{-3}$ a.u., benzene's worst pivot over all 210 clusters is $9.0\times10^{-3}$ and NH₃'s is $2.5\times10^{-3}$, bounding the constant by about $10^{2}$. Raising the dipole threshold is a deliberate trade: a cluster whose brightest lab component is below $10^{-3}$ a.u. ($f\lesssim10^{-6}$) loses its $x$/$y$/$z$ lane names and is identified by amplitudes instead. Such a lane had no stable name to lose.
+
+**The sign rule for a non-degenerate state (Task B(3)).** It is the $g=1$ case of Definition 8, with no special code: the sign of $X^K$ is fixed so that the first functional value above its threshold is positive — the first lab dipole component exceeding $10^{-3}$ a.u. for a bright state, the first amplitude coordinate exceeding $\theta/\sqrt d$ for a dark one. Unlike the $g\ge2$ case this output is locally constant in the span, so Lemma 12 does not apply to it; the sign is stable as long as that functional value stays away from zero, and $\delta$ is the distance to a flip. MEASURED: 120 non-degenerate states of H₂O, NH₃ and benzene, $\mathrm{canon}(-X)=\mathrm{canon}(X)$ to exactly $0$.
+
+**Orbitals (Task B(2), the "what plays the role of the dipole" question).** Nothing does, and the reason is structural: Definition 8 needs LINEAR functionals, and an orbital's dipole $\langle\phi\rvert\mathbf r\lvert\phi\rangle$ is quadratic in $\phi$. A transition dipole to a fixed anchor orbital would be linear but vanishes for the cases that matter (benzene's $\pi$ HOMO pair has no dipole coupling to any non-degenerate occupied orbital). The coordinate family is therefore the rule for orbitals, applied in the Löwdin basis $\tilde C=S^{1/2}C$: those coordinates are Euclidean-orthonormal, so Proposition 9 applies verbatim, and $S^{1/2}$ depends only on the geometry and basis, so the functionals stay fixed under any change of eigensolver. The transform commutes with the scramble, $S^{1/2}(CQ)=(S^{1/2}C)Q$, so invariance carries. The physical showpiece does not suffer, by the orbital analogue of Corollary 11:
+
+**Observation 14 (winding needs no gauge).** On a two-dimensional degenerate orbital cluster, $L_z$ restricted to the cluster is purely imaginary and antisymmetric in any real orthonormal basis, hence equals $i\lambda\epsilon$ with $\epsilon=\bigl(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\bigr)$; its eigenvectors are $(\phi_1\mp i\phi_2)/\sqrt2$ with eigenvalues $\pm\lambda$, in every real orthonormal gauge. The winding density $\tfrac12(\phi_1^2+\phi_2^2)$ is the diagonal of the cluster projector and is likewise gauge-invariant. The gauge fixes which sense the WINDING preset calls positive, and nothing else.
+
+**Proof.** Matrix elements of $L_z=-i(x\partial_y-y\partial_x)$ between real functions are purely imaginary, and $L_z$ is Hermitian, so its $2\times2$ block is $i\lambda\epsilon$ for real $\lambda$; every real antisymmetric $2\times2$ matrix is a multiple of $\epsilon$, and $\epsilon$ is invariant under $SO(2)$ and changes sign under a reflection. The eigenvectors of $\epsilon$ are $(1,\mp i)/\sqrt2$. Invariance of $\sum_k\phi_k(\mathbf r)^2$ under $O(2)$ is immediate. $\blacksquare$
+
+#### The rule in five lines
+
+1. Cluster by consecutive gaps: $\lvert\omega_{k}-\omega_{k-1}\rvert<10^{-8}$ joins, maximal runs only.
+2. Scan fixed linear functionals in a fixed order — lab dipole $x$, $y$, $z$ (threshold $10^{-3}$ a.u.), then the amplitude coordinates (threshold $\tfrac12\sqrt{(g-j)/d}$) — and Gram–Schmidt their projections onto the cluster span, skipping any residual below its threshold.
+3. Normalise each accepted residual with a positive pivot; that fixes both the rotation and every sign, singletons included.
+4. Orbitals use the same rule with one family, the Löwdin coordinates of $S^{1/2}C$ in AO order.
+5. Publish the accepted pivot list and the smallest pivot norm $\delta$ with the state; an identity with small $\delta$ is a warning, not a name.
+
+Assumptions: the cluster rows are orthonormal to $10^{-9}$; the clustering is taken as given (the rule is invariant for a FIXED cluster membership, and membership itself is not continuous in the Hamiltonian); no accepted residual sits within solver noise of its threshold, which $\delta$ reports; Proposition 10 assumes a cluster spanning one irreducible representation, and an accidental degeneracy of two different irreps falls to the rank-deficient path, which is tested.
+
+#### What the tests measured
+
+`node --test canon-gauge.test.mjs`, 11 tests, all passing.
+
+| Test | Result |
+|---|---|
+| NH₃ states, 10 clusters (5 degenerate), 5 scrambles each | $\max\lvert\mathrm{canon}(VQ)-\mathrm{canon}(V)\rvert=4.4\times10^{-16}$, $\delta_{\min}=2.5\times10^{-3}$ |
+| CH₄ states, 9 clusters (6 degenerate, one of them $g=3$) | $3.4\times10^{-15}$, $\delta_{\min}=1.1\times10^{-2}$ |
+| C₆H₆ states, 210 clusters (105 degenerate), $d=315$ | $7.7\times10^{-15}$, $\delta_{\min}=9.0\times10^{-3}$ |
+| Degenerate MO clusters in Löwdin coordinates (NH₃ 2, CH₄ 2, C₆H₆ 12) | $\le4.9\times10^{-15}$ |
+| Sign rule, 120 non-degenerate states | exactly $0$ |
+| Bright-cluster dipole placement, 45 clusters | lower triangular, positive diagonal, $\max\boldsymbol\mu_j\cdot\boldsymbol\mu_l=3.0\times10^{-13}$ |
+| Rank-deficient: 69 benzene clusters needing the amplitude family | $3.2\times10^{-14}$ |
+| Rank-deficient: synthetic bright + dark accidental degeneracy | pivots `dipole:0`, `amplitude:285`; $4.7\times10^{-16}$ |
+| Conditioning, $\varepsilon=10^{-9}$ | output moves $7.1\times10^{-10}$, bound $4.5\times10^{-10}$ |
+| Ring current, NH₃ and C₆H₆, 5 scrambles | centre and radius invariant to $6.7\times10^{-16}$; canonical starting phase to $3.6\times10^{-15}$ rad |
+
+### 8 · What the build should change
+
+1. `JUDGMENT.md` §2 Observation 1: exchange $\mu$ and $\nu$ in the current formula, or state that its $D$ is $\langle a^{\dagger}_qa_p\rangle$; as the document stands, §2 and §3 use opposite conventions and stage 6 would render the ring current backwards.
+2. `JUDGMENT.md` §3 Proposition 2: $b_0=1+O(\kappa^2)$ becomes $b_0=e^{-i\kappa\langle 0\rvert R_q\lvert 0\rangle}+O(\kappa^2)$, or the sentence acquires "with the origin at the ground-state electronic centroid". The replay formula and the physics are unaffected.
+3. `REGISTER-WINDOW-SPEC.md` §7 rule 2: replace "rotate the cluster so the dipoles are mutually orthogonal and the first has the largest possible component along the first lab axis" with Definition 8. The orthogonality clause is automatic (Proposition 10) and "largest possible component" is not a rule, since for an E pair every rotation gives the same set of lengths.
+4. `REGISTER-WINDOW-SPEC.md` §7 rule 3: the pivoted amplitude rule needs Lemma 13's adaptive threshold, not a flat one, or benzene acquires state identities with a Lipschitz constant of $10^7$.
+5. The drive's diagonal $\langle ia\rvert R\lvert jb\rangle$ carries $-\delta_{ab}r_{ji}$; it is safe to write $r_{ij}$ only because the position matrix is symmetric. If the same table is ever reused for a non-symmetric one-electron operator — a velocity-gauge or magnetic term — the transpose must be restored.
+
+### 9 · Abstentions
+
+1. The continuity defect $\partial_t\rho+\nabla\cdot\mathbf j$ in STO-3G (open problem 2 of `JUDGMENT.md`) was not measured. It needs a real-space divergence and a time derivative of the density on the same grid, and a defensible grid; nothing here bounds it. UNVERIFIED.
+2. No claim is made about how the canonical gauge behaves across a geometry change, which is what a saved register would meet if the molecule were re-solved at a different geometry. Definition 8 is invariant at fixed geometry; its continuity in the geometry is untested, and the pivot set can change discontinuously when a dipole component passes through its threshold. UNVERIFIED.
+
+### 10 · Open problems
+
+1. Cluster membership is not invariant: a pair split by $1.1\times10^{-8}$ is two clusters and a pair split by $0.9\times10^{-8}$ is one, and the two give different gauges. Is there a rule whose output is continuous across the threshold — for instance, canonicalising the whole near-degenerate block and reporting the split as a diagnostic?
+2. The clustering by consecutive gaps is not transitive: a chain of states each within $10^{-8}$ of the next can join a cluster spanning far more than $10^{-8}$. MEASURED, the widest cluster actually produced is $1.6\times10^{-13}$ wide (benzene) against a threshold of $10^{-8}$, and the largest cluster is CH₄'s $g=3$, so no chaining occurred in the four molecules tested; whether any of the other 50 chains is untested.
+3. Lemma 12 is a local bound. A global statement — the canonical basis as a function on the Grassmannian, with its discontinuity set characterised — would let the window decide when to refuse a saved identity rather than warn.
+4. Proposition 10 assumed a single irreducible representation. For an accidental degeneracy of two different representations $T$ is not isotropic, the rank-deficient path takes over, and the resulting lane names are not symmetry labels. Whether any of the 54 molecules has such a degeneracy at $10^{-8}$ is untested.
+5. Whether the canonical gauge for TDA states and the canonical gauge for RPA states agree on a cluster's identity, so that the character-matching of open problem 3 in `JUDGMENT.md` can be done in the canonical basis, is open. The $X+Y$ vector is not normalised the way $X^{\text{TDA}}$ is, so Definition 8 needs its normalisation restated before the question is even well posed.
+6. The register's validity at full amplitude (Proposition 1(iii) of `JUDGMENT.md`) is re-measured here as a by-product — occupations stayed in $[0,2]$ over 120 random complex registers — but the sharp statement, that the minimum occupation is bounded below by a function of the amplitude on the excited states, is not proved.
+
+### 11 · References
+
+- T. Helgaker, P. Jørgensen, J. Olsen, Molecular Electronic-Structure Theory, Wiley 2000, §1.4 (the $E_{pq}$ commutator algebra and its action on a closed-shell determinant) — the source of Lemma 3. Cited from knowledge, not re-fetched.
+- P. Krause, T. Klamroth, P. Saalfrank, J. Chem. Phys. 123, 074105 (2005) — TD-CIS for laser-driven dynamics. The register of `JUDGMENT.md` §3 is this method; nothing in §3–§5 of this ledger is new physics. Attribution as recorded in `JUDGMENT.md` §9, verified there by search on 2026-09-18; not re-verified here.
+- I. Barth, J. Manz, Y. Shigeta, K. Yagi, J. Am. Chem. Soc. 128, 7043 (2006) — electronic ring currents from circularly polarised pulses; the physics Corollary 11 makes gauge-independent. As cited in `JUDGMENT.md`; not re-fetched.
+- PySCF 2.14.0: `fci.direct_spin1.trans_rdm1`, `fci.addons.cre_a`/`des_a`, `tdscf.rhf.get_ab`, `tdscf.rhf.TDA`, `scf.hf.dip_moment`, `gto.Mole.eval_gto`. Conventions read from the installed source, quoted in the script headers.
+- Schur's lemma, used in Proposition 10 in its standard form for real irreducible representations of a finite group.
+- Internal: `research/molecular-waves-2026-09-18/JUDGMENT.md` (Fable, 18 September 2026), `REGISTER-WINDOW-SPEC.md` (Fable, same date), `probe-fable.mjs` and `measurements-fable.json` (evidence, re-derived here where quoted), `research/h2o-2026-09-11/scratch/pinned.py` (the basis-pinning recipe this folder's PySCF scripts reuse).
+
+### 12 · Files
+
+All paths relative to `research/molecular-waves-2026-09-18/proving/`.
+
+| File | What it is |
+|---|---|
+| `run-all.sh`, `run-all.log` | every number in this ledger, in order |
+| `snapshot/lab/`, `snapshot/HEAD.txt` | the frozen copy of the eleven `lab/` modules and the vendored BSE STO-3G record, from commit `8fcdcf8` |
+| `prep.mjs` → `data/<id>.json` | RHF, TDA and RPA data for H₂O, NH₃, CH₄, C₆H₆ from the snapshot |
+| `gamma_closed.py` | the claimed closed forms, transcribed once; the statement under test |
+| `check-gamma-fci.py` → `out-gamma-fci.json` | route A: embedding in the determinant space, PySCF `trans_rdm1`; the non-symmetric-operator discriminator; the complex-amplitude gate |
+| `check-gamma-bitstring.py` → `out-gamma-bitstring.json` | route B: an explicit bitstring second-quantisation evaluator, no PySCF |
+| `check-pair-basis.mjs` → `out-pair-basis.json` | Corollary 6, hermiticity, trace, occupations |
+| `check-kick.py` → `out-kick.json` | Proposition 2$'$, the exact kicked state and the $\kappa$-scaling |
+| `check-current.py` → `out-current.json` | Proposition 7, the current sign, on real space |
+| `check-tda-pyscf.py` → `out-tda-pyscf.json` | the physics gate on the vendored primitives |
+| `canon-gauge.mjs` | the canonical gauge, dependency-free ES module |
+| `canon-gauge.test.mjs` | 11 tests; the gauge gate |
+
+
+
+---
+
+## <a id="doc-42"></a>DOC 42 · molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md · 2026-09-18
+
+## The register window — specification, draft 0
+
+Fable · 18 September 2026 · commissioned by Josh · companion to `JUDGMENT.md` (stages 3 to 5 of its §7)
+Status: draft 1. The four open items of draft 0 were settled by the commissioner on 2026-09-18 (§11); "OPEN n" marks in the text are resolved there.
+
+### 0 · What it is
+
+One window, the molecular counterpart of hydrogen's SPECTRUM rail, with a two-position switch:
+
+- ORBITAL: the one-electron packet over canonical orbitals that ships today as ORBITALS. It has a phase, beats at orbital gaps $\Delta\varepsilon$, and is labelled as such.
+- STATES: the many-electron register of `JUDGMENT.md` §3 over the ground determinant $S_0$ and the singlet excited states $S_K$. It beats at the excitation energies the spectrum shows, and is a valid $N$-electron state at any amplitude.
+
+The two modes share every control: ladder, lanes, NORM, CLEAR, A/B stores, MORPH, presets, modulation slots. Each mode keeps its own register; the switch chooses which one the molecular session plays. Window id stays `orbitals` so saved layouts survive; the eyebrow becomes REGISTER (OPEN 1).
+
+### 1 · Layout
+
+```
+┌ REGISTER · benzene ───────────────────── TD-CIS · frozen nuclei · STO-3G ┐
+│ [ ORBITAL | STATES ]      PRESET ▾      A   B   MORPH ◔     REGISTER ON ◉ │
+│ ┌ ladder ─────────────────────────────────┐  ┌ dipole scope ───────────┐ │
+│ │ 0.41 ─ ─                                │  │          ·  ·           │ │
+│ │ 0.39 ━━ ━━    bright pair  f 1.28       │  │       ·        ·        │ │
+│ │ 0.31 ─                                  │  │       ·        ·        │ │
+│ │ 0.28 ─                                  │  │          ·  ·           │ │
+│ │ 0    ━━━━━    S₀                        │  │  μ(t) traced in plane   │ │
+│ └─────────────────────────────────────────┘  └─────────────────────────┘ │
+│ HIDE   + STATE   CLEAR   NORM                                            │
+│ S₀    ground            |b|² ▮▮▮▮▮▯▯▯   φ ◔            M  S              │
+│ S₄x   0.3903  f 1.28    |b|² ▮▮▯▯▯▯▯▯   φ ◑            M  S  ×           │
+│ S₄y   0.3903  f 1.28    |b|² ▮▮▯▯▯▯▯▯   φ ◕  (quarter turn = ring)  ×    │
+│ VIEW [ CHANGE | DENSITY | FLOW ]        REF [ GROUND | MEAN ]            │
+│ Σ|b|² 1.000    BEAT 16.10 a.u. = 389 as    μ ( 0.30, 1.87, 0.00 )        │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+Every node is an existing kit node (`device`, `sw`, `knob`, `fader`, `readout`, the SPECTRUM lane), reused and never copied. The lane is hydrogen's lane: energy, population fader, a live phase needle that keeps turning while the clock plays and takes a drag as an added phase, MUTE and SOLO as reconstruction masks, remove.
+
+### 2 · The ladder
+
+- ORBITAL: the MO ladder as today ($\varepsilon_k$, occupied filled, virtual hollow, order-exact compressed axis).
+- STATES: $S_0$ at zero and the excitation ladder above it. Stick weight encodes oscillator strength, so bright states read at a glance and dark ones sit dim; hue encodes the transition-dipole direction ($x$, $y$, $z$ mixed as three hues), which is the molecular stand-in for hydrogen's colour by $n$. Degenerate levels are drawn side by side. The same compressed axis absorbs the core excitations near 10 to 20 hartree. A BRIGHT ONLY filter keeps benzene's 315 states navigable.
+- Click adds or removes a state. Clicking a stick in CHEMISTRY's absorption spectrum does the same, and populations $\lvert b_K\rvert^2$ light the sticks there, so the two windows are linked the way hydrogen's STATE and SPECTRUM are.
+- One law for coherence: the sticks on screen belong to the model that is playing. STATES shows the TDA ladder; a real-time TDHF run shows the RPA ladder.
+
+### 3 · Lanes, and how a ring is made
+
+Up to eight lanes, because eight is the number of modulation slots (§6). In STATES mode the $S_0$ lane is pinned first: without it a single excited state is stationary, and the slosh of a bright line is the $S_0$–$S_K$ cross term.
+
+Degenerate levels are given a canonical gauge so that a lane means the same thing on every solve and with every eigensolver (§7): inside a bright degenerate pair the basis is rotated until the transition dipoles lie along fixed axes, and the lanes are named by that axis, $S_{4x}$ and $S_{4y}$. Then the physics is on the phase knob:
+
+| phase of the $y$ lane relative to the $x$ lane | motion of the charge |
+|---|---|
+| $0^\circ$ | linear slosh along the diagonal |
+| $90^\circ$ | ring current, one sense |
+| $180^\circ$ | linear slosh along the other diagonal |
+| $270^\circ$ | ring current, the other sense |
+
+Measured on benzene (`probe-fable.mjs`): at $90^\circ$ the dipole keeps constant magnitude to $4\times10^{-12}$ and turns uniformly at $\omega_K$. An LFO on that one knob sweeps linear to circular to counter-circular. The alternative, a single pair lane with dedicated ELLIPTICITY and TILT knobs, is OPEN 2; the recommendation is the uniform lanes above, because they are hydrogen's lanes unchanged and they teach the mechanism.
+
+The same holds in ORBITAL mode for a degenerate orbital pair (benzene's HOMO and LUMO are both pairs): a quarter turn gives an angular-momentum orbital whose phase winds around the ring under a stationary density.
+
+### 4 · What the field shows
+
+| VIEW | product to the field | note |
+|---|---|---|
+| CHANGE (default in STATES) | `signed`: $\operatorname{Re}D(t)-D_{\rm ref}$ | two-colour lobes, like an orbital's REAL view |
+| DENSITY | `density`: $\operatorname{Re}D(t)$ | honest but quiet: the carbon $1s$ cores set the scale, and one moving electron in 42 is a small change |
+| FLOW (stage 6) | current $\mathbf j$ from $\operatorname{Im}D(t)$ | feeds the existing streamline and particle overlays |
+| PHASE (ORBITAL mode only) | `orbital`: $c(t)$ | as today |
+
+REF chooses the reference of CHANGE: GROUND is $D_0$; MEAN is the stationary part $\sum_{E_A=E_B}\overline{b_A}b_B\gamma^{AB}$, which leaves exactly the interference terms on screen, the pure dance. The default view is OPEN 3; the recommendation is CHANGE against GROUND.
+
+Rendering always uses the normalised register $b/\lVert b\rVert$, so Proposition 1's guarantees hold on screen; the readout shows the raw $\sum\lvert b\rvert^2$ and NORM remains an explicit act, as in hydrogen.
+
+### 5 · A, B and MORPH
+
+A and B store whole registers (state identities, complex amplitudes, epoch). MORPH $s\in[0,1]$ plays the normalised geodesic between them: align phases so $\langle A\vert B\rangle\ge0$, $\theta=\arccos\lvert\langle A\vert B\rangle\rvert$, and
+
+$$
+\Psi_s(t)=\frac{\sin((1-s)\theta)\,A(t)+\sin(s\theta)\,B(t)}{\sin\theta},
+$$
+
+with $A(t)$, $B(t)$ the exact evolutions of the anchors and the limit $\theta\to0$ handled explicitly. Because both anchors evolve under the same generator, $\langle A(t)\vert B(t)\rangle$ is constant, so $\theta$ and the alignment are computed once. For orthogonal anchors this is $\cos(s\pi/2)A+\sin(s\pi/2)B$, which is hydrogen's TRANSITION envelope; MORPH with a rate $\Omega$ therefore reproduces hydrogen's Rabi cycling and extends it to non-orthogonal anchors. The window labels MORPH a performance path. Stage 5's drive is where populations move for a physical reason.
+
+### 6 · Modulation
+
+Fixed target ids, present-only setters, in the existing registry: `reg.morph`, and per lane slot `reg.amp1…8`, `reg.ph1…8`. Slots follow lane order. No other new targets in this stage.
+
+### 7 · Identity, gauge and saving
+
+A saved register must restore on a fresh page before the molecule has finished preparing, and must mean the same thing after the eigensolver changes. Index alone is not an identity inside a degenerate cluster. The worker therefore publishes states in a canonical gauge:
+
+1. Cluster states by consecutive gaps $\lvert\Delta\omega\rvert<10^{-8}$, maximal runs only.
+2. Scan fixed linear functionals in a fixed order: the three lab transition-dipole functionals $x$, $y$, $z$ (threshold $10^{-3}$ a.u.), then the amplitude coordinates in the project's pair order (adaptive threshold $\tfrac12\sqrt{(g-j)/d}$). Project each on the cluster's span, Gram–Schmidt against the vectors already accepted, skip residuals under threshold, stop at $g$ vectors.
+3. Normalise each accepted residual with a positive pivot. That fixes the rotation and every sign, the non-degenerate case $g=1$ included.
+4. Orbital clusters use the same rule with one family, the Löwdin coordinates of $S^{1/2}C$ in AO order.
+5. Publish the pivot list and the smallest pivot norm $\delta$ with the state; a small $\delta$ is a warning that the identity is ill-conditioned.
+
+△ Correction, 2026-09-18: draft 0's rule 2 ("rotate so the dipoles are mutually orthogonal, the first with the largest component along the first axis") constrains nothing. For a cluster spanning one E or T irreducible representation the dipoles are mutually orthogonal and of equal length in every gauge (Schur; measured on 45 bright clusters). The identity comes entirely from the ordered functionals and the positive pivot. The rule is a function of the cluster's projector and fixed data only, so no scrambling can enter it, and the result is unique by uniqueness of QR (`proving/LEDGER.md`, Definition 8, Propositions 9 and 10, Lemma 13; reference implementation `proving/canon-gauge.mjs`, 11 of 11 tests). A consequence worth having: the RING preset's centre, radius, plane, sense and rate are the same in every gauge; only its starting phase is gauge-dependent, and the canonical gauge fixes that too. Not certified: continuity of the gauge across a geometry change.
+
+Gate: scramble each cluster by a random orthogonal matrix, canonicalise, and recover the same vectors to $10^{-10}$; repeat with the Jacobi and the QL solver. The same rule applies to degenerate orbital pairs for ORBITAL mode. The record carries mode, both registers, A, B, morph, view, reference, the energy reference and the epoch.
+
+### 8 · Readouts
+
+$\sum\lvert b\rvert^2$; the strongest beats present, $\lvert E_A-E_B\rvert$ weighted by $\lvert b_Ab_B\rvert$, each as a period in atomic units and in attoseconds (1 a.u. $=24.19$ as; benzene's bright slosh is 389 as); the live dipole vector; and the dipole scope, a goniometer that traces $\boldsymbol\mu(t)$ in its dominant plane: a line for BEAT, a circle for RING, a Lissajous figure for two lines of different colour. The scope is OPEN 4; it costs $n^2$ multiply–adds a frame.
+
+### 9 · Presets, defined by rule so they exist for every molecule
+
+| Preset | Rule | Mode |
+|---|---|---|
+| BEAT | $S_0$ plus the brightest state below the core window | STATES |
+| RING | $S_0$ plus the lowest bright degenerate pair at a quarter turn; disabled with a reason when the molecule has none | STATES |
+| LISSAJOUS | $S_0$ plus the two brightest states of different axis and different $\omega$ | STATES |
+| BREATHE | $S_0$ plus the lowest dark totally symmetric state, if the ladder has one | STATES |
+| HOMO + LUMO | the orbital beat that ships today | ORBITAL |
+| WINDING | a degenerate orbital pair at a quarter turn | ORBITAL |
+
+### 10 · Where the numbers are computed
+
+The excitation vectors are small: $X^K$ is $n_on_v$ numbers, 315 for benzene. On selection the main thread asks the worker for one canonical $X^K$, $\omega_K$ and its dipoles. Per frame it forms $Z(t)=\sum_Kb_Ke^{-i\omega_Kt}X^K$, the MO blocks $D_{ov}=\sqrt2\,\overline{b_0}Z$, $D_{vv}=Z^\dagger Z$, $D_{oo}=2\cdot\mathbb 1-ZZ^\dagger$, and $CDC^T$: about $10^5$ multiply–adds, far under a millisecond, then one $n^2$ upload through the molecular session. Time is evaluated in closed form, so scrubbing and reversal are exact.
+
+### 11 · Decisions (commissioner, 2026-09-18)
+
+All four open items are settled as recommended.
+
+1. The eyebrow is REGISTER; the window id stays `orbitals`.
+2. Degenerate pairs get uniform $x$/$y$ lanes in the canonical gauge; the phase knob of the second lane makes the ring. No dedicated pair lane.
+3. STATES opens on CHANGE against GROUND, with MEAN one click away.
+4. The dipole scope is included.
+
+
+
+---
+
+## <a id="doc-43"></a>DOC 43 · molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/ACCEPTANCE.md · 2026-09-18
+
+## ACCEPTANCE — the geometric test a correct mount passes
+
+**This is the reason this port is the last one.** Every number below is a literal in
+`modwindow.css` at the line named, or arithmetic from `anim.js`'s own constants. A
+re-implementation in a host's idiom cannot pass this table by accident, and it cannot pass
+it by trying — the only thing that passes is the window.
+
+Measure at `--ui-scale: 1`, one FULL LFO card, one FULL ENV, one FULL AUDIO and one
+MINIMIZED card. `_build/smoke.mjs` beside the staging directory is a working implementation of this gate
+(32 assertions, all green against the staged files on 2026-09-06, driven headless through
+`mbgate/gatekit.mjs`); the mounting wave should re-run it against the real host rather
+than write a new one.
+
+### 0. THE TWO THAT ARE NOT GEOMETRY, AND FAIL FIRST IF THE PORT WENT WRONG
+
+| # | assertion | value |
+|---|---|---|
+| A0 | the stylesheet parses whole — no rule is dropped by a scoping mistake | the live stylesheet rule count matches the current artifact revision |
+| A1 | the material ladder resolves, and the four surfaces are four different values | pane `rgba(31, 35, 41, 0.68)` · chassis `rgba(42, 48, 55, 0.712)` · control `rgba(22, 25, 29, 0.552)` · hero `rgba(10, 13, 15, 0.777)` — at `--m2-blend: .26` |
+
+If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:root`.
+
+### 1. THE FRAME
+
+| what | value | source |
+|---|---|---|
+| window border radius | `12px` | `--r-lg`, index.html:887 |
+| window border | `0.6px solid` (a browser may report the *used* width as `1px`) | `.glass`, index.html:1290 |
+| window box shadow | `inset 0 1px 0 var(--m2-mat-inner), var(--m2-mat-shadow), var(--glass-bevel)` | anim.js:3213 |
+| `.kwin-body` padding, this window only | `5px 10px 9px` | index.html:4660 |
+| `#modwin` overflow / contain | `visible` / `layout` — **not** `layout paint` | anim.js:1786 |
+| chip-rail disc target | `62 × 62` (`max(44px, 62px·scale)`), ink 26 | index.html:847 |
+| chip-rail grip dots | `14 × 14`, `repeat(3, 1fr)`, gap 2, dots `2 × 2`, **exactly nine** | index.html:7168 |
+
+### 2. THE WORK-BAR LANE — two boxes, one 52 px lane, a real hole between them
+
+| what | value | source |
+|---|---|---|
+| `.m2foot` | `flex: 0 0 52px`, height **52**, `z-index: 9`, `pointer-events: none` | anim.js:1795 |
+| `.m2workbar` (both) | height **52**, radius **16**, gap 2, padding `2px 7px 3px`, `pointer-events: auto` | anim.js:1800 |
+| `.m2prebar` | width **294** (the law clamps its core to [244, 294]) | anim.js:1804 |
+| `.m2pre` | width **450**, and it **never changes** | anim.js:1805 |
+| `.m2precore` | height **44** | anim.js:1806 |
+| `.m2prename` | height **44**, radius 5, `500 10.5px --font-sans`, letter-spacing `.05em`, centred | anim.js:1813 |
+| `.m2prenav` / `.m2presave` / `.m2predead` | min-width **44**, height **44** | anim.js:1823 |
+| `.m2presave` | `44` square, `border-radius: 50%`, svg `21 × 21` | anim.js:1830 |
+| `.m2predead` | `.off` ⇒ `display: none` | anim.js:1844 |
+| `.modxport` / `.modtap` / `.modsync` | `44 × 44` each (`var(--touch)`) | anim.js:2396 / 2447 / 2455 |
+| `.modtempo` | height **22**, with a `var(--touch)` `::before` band | anim.js:2406 / 2415 |
+| `.m2hold` ×2 | min-width **46**, height **44**, radius 7 | anim.js:2946 |
+| the strip's order | play · tempo · TAP · WALL · QUARTER · HOLD 1/4 · HOLD 1 | pure install order |
+
+### 3. THE MACROS RAIL
+
+| what | value | source |
+|---|---|---|
+| `.m2rail` | width **224**, height `var(--m2-view-h)` | anim.js:1903 |
+| `.m2railhead` | `700 10.5px --font-sans`, letter-spacing `.13em`, colour `--acc2` | anim.js:1908 |
+| `.m2slot` | height **64**, radius 8 | anim.js:1934 |
+| `.m2slotrow` | grid `44px 44px minmax(0,1fr) 44px`, height **62** (= 64 − 2) | host macro revision |
+| `.m2grip` | **44 × 44**, colour `--acc2`, svg `22 × 22` | anim.js:1944 |
+| `.m2numseat` | **44** wide × 100% | anim.js:1950 |
+| `.m2num` | `24 × 24` circle, border `1.2px`, `600 10px --font-num` | anim.js:1955 |
+| `.m2depthring` | `34 × 34`, left 5, `rotate(-90deg)`, stroke-width `2.2` | anim.js:1960 |
+| `.m2vedge` | `7 × 7` circle at `calc(var(--fill,0) * 100%)`, margin-left `-3.5px` | anim.js:1985 |
+| `.m2vmeta` | contains the drive/source label; the obsolete `OUT` label is removed | host macro revision |
+| `.m2namerow` | left 48, right 48, top 9, height **44** | host macro revision |
+| `.m2mclr` | **44 × 44** | anim.js:2012 |
+| `.m2macadd` / `.m2devadd` | height **44**, text `ADD MACRO` / `ADD DEVICE` | host macro revision |
+| `.m2slottools` | **44 × 44**, fixed final column in full and minimized rows | host macro revision |
+| `.m2rowgrip` / `.m2slotx` | **44 × 22** reorder and delete halves | host macro revision |
+| the track line | is `.m2signal::before` — **a pseudo-element, not a node** | anim.js:1981 |
+
+### 4. A DEVICE CARD
+
+| what | value | source |
+|---|---|---|
+| FULL | **360 × 368** | `M2_CARD.E` |
+| COMPACT (`.m2cmp`) | **320 × 368** | `M2_CARD.C` |
+| MINIMIZED (`.m2min`) | **64 × 368** | `M2_STRIP_W` |
+| card radius | **16** | anim.js:2038 |
+| `.m2head` | `getComputedStyle(...).height === '48px'`; the **border box is 52** (padding `2px 5px`, and BASINS has no global `border-box`) | anim.js:2046 |
+| `.m2body` | height **216** on all three kinds in FULL | 2704 / 2823 / 2972 |
+| `.m2kind` | `700 13px --font-sans`, letter-spacing `.09em`, colour `--acc` | anim.js:2049 |
+| `.m2bank` | **46 × 44** | anim.js:2052 |
+| `.m2ab` (COPY / PASTE) | `28 × 40` ink + a `44` `::before` band | anim.js:2084 |
+| `.m2pow` | `40 × 40` circle + a `44 × 44` `::before` band; svg `15 × 15` | anim.js:2163 |
+| `.m2x` | `40 × 40` + a `44 × 44` `::before` band | anim.js:2171 |
+| `.m2trig` (ENV) | min-width 48, height **44** | anim.js:2156 |
+| `.m2grab` | `16 × 40` ink, `::before` spanning `-14px / -14px`, height **44** | anim.js:2201 |
+| `.m2seat44` | 100% × **44** | anim.js:2615 |
+| `.m2chk` | min-height **44**, lamp `.m2dot` `9 × 9` | anim.js:2265 / 2270 |
+| `.m2preset` | **44 × 44**, six of them | anim.js:2184 |
+| `.m2mac` | 100% × **44**, border `1.3px`, `600 15px --font-num` | anim.js:2218 |
+| `.m2zoom` | 100% × **44**; `.m2fit` is `600 10px` | anim.js:2213 |
+| add-device control | the permanent `.m2devadd` rail button; no duplicate device-card chip | host macro revision |
+| `.m2edit.m2hero` | min-height 132, radius 7; `.m2svg` is `height: calc(100% - 14px)` | anim.js:2229 / 2234 |
+| **`.m2col` / `.m2rt`** | the base `92` / `104` are used by **no FULL card**. Measure per kind: **AUDIO `.m2col` 88**, **ENV `.m2rt` 90**, LFO's `.m2col` and `.m2rt` are full-width grid rows | 2704 / 2823 / 2972 |
+| `.m2move` (◂ ▸) | **`display: none` in every mode** — see MANIFEST | anim.js:2597 / 2107 |
+
+### 5. THE KNOBS — per kind and per mode, and they are all different on purpose
+
+| selector | `.m2kd` size |
+|---|---|
+| base `.m2kd` | `44 × 44`, `border-radius: 50%` |
+| LFO full | **48 × 48**, RATE **56 × 56**; grid `1.24fr repeat(3, minmax(0,1fr))`, gap 3, padding `5px 7px 4px` |
+| LFO compact | `40 × 40`, RATE `44 × 44`; grid `repeat(2,1fr) / repeat(2,1fr)`, gap 2 |
+| ENV full | **42 × 42**, A/D/R **48 × 48**; grid `1.12fr .9fr 1.12fr .9fr 1.12fr .9fr`, gap 2 |
+| ENV compact | `40 × 40` all; grid `repeat(3,1fr) / repeat(2,1fr)`, gap `2px 3px` |
+| AUDIO full | **50 × 50**, SENS **56 × 56**; grid `repeat(3, minmax(0,1fr))`, gap 4 |
+| AUDIO compact | `46 × 46` all; gap 3 |
+
+Arc geometry: `r1 = 40`, `r2 = 49`, every circle `transform="rotate(-240 50 50)"`
+(span 300, start −150). Track stroke-width 6, band 4. `.ckval` is `600 7.5px --font-num`
+inside `#modwin`. `.m2kends` is `display: none` inside `#modwin` — the range words never
+paint.
+
+### 6. THE FOLDED STRIP (the compact rail)
+
+| what | value |
+|---|---|
+| card | **64 × 368** |
+| head | flex **column**, gap 4, padding `4px 2px 2px`; `.m2headl` / `.m2headr` become `display: contents` |
+| order | grab 1 · fold 2 · bay 3 · power 4 · status 5 · numeral 6 · × 7 — **AUDIO puts × at 6 and hides the numeral** |
+| `.m2meter` | **11** wide, radius 6 |
+| `.m2minname` | `writing-mode: vertical-rl`, `rotate(180deg)`, `600 9px --font-sans` |
+| `.m2minstatus` | `flex: 0 0 18px`, `700 6px/18px --font-num` |
+| `.m2minnum` | 100% × **44**, `700 21px --font-num`, colour `--acc` |
+| `.m2lfominshape` | **22** wide, stroke-width 4, `vector-effect: non-scaling-stroke` |
+| `.m2envminprog` | **5** wide, radius 3 |
+| `.m2audminleds` | 8 wide, gap 4; each `i` **7 × 22** radius 3; HIT **9 × 9** radius 1, `rotate(45deg)` |
+| `.m2tdot` (comet) | `7 × 7`, ten of them, opacity `(0.10 + 0.90·k²)`, scale `0.32 + 0.68·k` |
+
+### 7. THE SIZE LAWS — arithmetic, never a measurement of the live window
+
+```
+width  = max(360, round(22·scale) + (ribbon ? 58 : 224) + 14 + 89 + Σ card + n·7)
+height = round(98·scale) + 368                                     = 466
+minH   = round(98·scale) + 220                                     = 318
+maxHFrac = 0.86 ;  minW = 360 ;  --m2-view-h clamped to [220, 368]
+```
+
+Worked cases a correct mount reproduces exactly:
+
+| rack | width × height |
+|---|---|
+| one FULL card | **716 × 466** |
+| three FULL + one MINIMIZED | **1521 × 466** |
+
+The work-bar law, with `ext = 46` when any send is dormant and `0` otherwise:
+
+```
+right = max(244 + ext + 7 + 450, min(max(rackRight, 294 + ext + 16 + 450), viewport))
+width = 450               left = right − 450
+coreW = clamp(244, 294, left − ext − 7)         presetW = coreW + ext
+```
+
+### 8. THE 44 px LAW — the assertion that catches a re-implementation
+
+> Every interactive element in this window is at least **44 px** on its short axis, and
+> where the ink is smaller the target is restored by a `::before` pseudo-element.
+
+| count | what |
+|---|---|
+| **135** | occurrences of the literal `44px` in the window's own sheet |
+| **33** | occurrences of `min-height: 44px` |
+| **9** | `::before` hit-band restorations — on `.m2fold`, `.m2ab`, `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and **`.modtempo`** |
+
+Assert all three counts, and assert that every seat, check, preset, bank, hold, transport
+button, macro grip, numbered seat, name field and clear button measures ≥ 44 on its short
+axis in the live DOM. **The `::before` bands mean the INK of `.m2ab`, `.m2move`, `.m2pow`
+and `.m2x` measures 40, not 44** — a mount that "fixes" that to 44 has changed the window.
+
+### 9. THE THREE COPIED DEFECTS — assert they are still there
+
+> **SUPERSEDED FOR THIS MOUNT, 2026-09-06 (wave 69), BY JOSH:** *"The modulation window is broken when
+> we were even working on it on basins so whatever problem it has we will try to fix here."*  All three
+> are FIXED in λWAVES and the three assertions below are INVERTED in `B129`.  The corrections are in
+> `lab/modhost.css` (reach-list 16, 17, 18) and **not one byte of this directory changed**, so this
+> table is still the right acceptance test for a mount that has not been told otherwise, and
+> `lab/mir/PORT-NOTES.md` § THE THREE DIVERGENCES carries the diff for the port back.
+
+A mount that renders these correctly has silently redesigned the window.
+
+| # | assertion |
+|---|---|
+| D1 | `getComputedStyle(.m2pick).backgroundColor === 'rgba(0, 0, 0, 0)'` — the ADD LFO / ADD ENV / ADD AUDIO sheet has no plate, as in `vid/f02.png` |
+| D2 | a `.m2clr` on a control **outside** `.m2root` also has a transparent background, for the same reason |
+| D3 | `getComputedStyle(.m2move).display === 'none'` in both `full` and `minimized` |
+
+### 10. THE STRING
+
+```
+.kwin-chiprail[aria-label="MODULATION window controls"]
+```
+
+Assert the rail's `aria-label` is that string **byte for byte**, and that
+`getComputedStyle(.crail-chip, '::before').backgroundColor` is the pane value from A1 and
+not `rgba(0, 0, 0, 0)`. This is the one failure mode with no visual hint beyond "the chips
+look wrong".
+
+### 11. GROUND TRUTH
+
+`vid/f01.png` … `f07.png` and `modmap/{lfo,env,audio}-card.png`,
+`modmap/macros-transport.png`, at 100 %. If the table above passes and the screenshot
+still does not match, the answer is in EXTRACT files 01–05 — **not in a redesign.**
+
+
+
+---
+
+## <a id="doc-44"></a>DOC 44 · molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/host-contract.md · 2026-09-18
+
+## host-contract.md — what a host supplies, and nothing more
+
+Two files mount this window: `modwindow.css` and `modwindow.js`. They carry their own
+material (twenty `--m2-mat-*` tokens), their own icons, their own geometry laws and their
+own chrome. What they do **not** carry is a theme, a model, and a clock.
+
+---
+
+## PART 1 — THE SIX HOST-SPECIFIC ITEMS
+
+EXTRACT-MODWINDOW.md §5 found six, and four of them are one-word substitutions.
+
+### 1. The id `modwin`
+
+`modwindow.css` reads `#modwin` **164 times**, at specificity `(1,x,y)`. Keep the literal
+id on the window root — `modwindow.js` sets it. If it is genuinely taken, run **one**
+substitution across `modwindow.css` (`#modwin` → `#yourwin`) and pass `host.id`. Do
+**not** demote the id selectors to classes: a host's own `.some-panel button { … }` would
+then win every tie.
+
+### 2. The aria-label `"MODULATION window controls"` — the most fragile thing here
+
+**24 rules** in `modwindow.css` select on this string byte-for-byte — the five the
+window's own sheet always had, plus the 19 chrome rules this port scoped through the
+same hook rather than inventing a second one:
+
+```css
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before { … }
+```
+
+`buildChipRail` builds the label as `(title || root.id) + ' window controls'`, so
+**passing `title: 'MODULATION'` is what makes it correct** — and it is the default.
+Translate the title, sentence-case it, or drop it, and the chip rail silently loses its
+material: no error, no console line, nothing but "the chips look wrong".
+
+If a host must rename the window, change all 24 to a `data-*` hook in the same pass —
+one find-and-replace. That removes the trap permanently.
+
+### 3. The accent hues — **this is the parameter. Two numbers.**
+
+```css
+--hue-acc: 172;   --sat-acc: 52%;      /* Accent A */
+--hue-acc2: 288;  --sat-acc2: 75%;     /* Accent B — falls back to A if unset */
+```
+
+Everything else derives, including the ENV's own green
+(`--m2-env-ink: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%)`).
+There is **not one literal hue** anywhere in this stylesheet.
+
+The colour law, from the source's own comment (`anim.js:2653`), is not decoration:
+
+> Shape/recess says control · **Accent A** says structural value/selection · **Accent B**
+> says only live modulation/signal · **white** says active interaction/focus.
+
+Selection is an **underline**, never a filled accent chip. That is the single most
+recognisable thing about these controls after the knobs.
+
+### 4. The fonts
+
+```css
+--font-sans: -apple-system, system-ui, sans-serif;
+--font-num:  ui-monospace, Menlo, monospace;
+```
+
+Supply the two names. Every size in this window is a literal and does not move.
+
+Separately: five elements paint with `font: inherit` (`.m2zoom`, `.m2audgrip`,
+`.m2audmac`, `.modxport`, `.modtempo`), so the window's **ambient** font matters. BASINS
+sets it on `body`; a host must set an equivalent on the window's container or on the root
+itself, or those five fall back to the UA font.
+
+### 5. `--ui-scale`
+
+One multiplier on `--touch`, `--fs-*`, `--r-*`, `--sp-*`, `--kwin-bar-h`,
+`--chrome-chip-*` and the whole transport strip. **Supply `1` and every computed value is
+byte-identical to what ships.**
+
+### 6. The persistence keys
+
+BASINS uses nine: `mandel.anim`, `mandel.animPlay`, `mandel.animPanel`, `mandel.win.mod`,
+`mandel.modsize`, `mandel.modcadence`, `mandel.modwin.bars`, `mandel.modwin.workBars`,
+`mandel.modwin.deviceModes`. `modwindow.js` reads and writes **none** of them — it has no
+persistence at all. Rename the prefix in whatever the host's own store is, and remember
+what the window's presentation state actually is: the work-bar lane (top / bottom / hidden), each
+device's mode (F / C / M), and the window geometry.
+
+---
+
+## PART 2 — THE TOKENS. Paste this block into the host's own `:root`.
+
+These are BASINS' shipping values, from `index.html`'s base `:root`. Every one is read by
+`modwindow.css` and declared by nothing in it.
+
+```css
+:root {
+  /* ── the two parameters ─────────────────────────────────────────────── */
+  --ui-scale: 1;
+  --hue-acc: 172;  --sat-acc: 52%;
+  --hue-acc2: var(--hue-acc);  --sat-acc2: var(--sat-acc);
+  --hue-bad: 4;
+
+  /* ── the ink ────────────────────────────────────────────────────────── */
+  --acc:       hsl(var(--hue-acc) var(--sat-acc) 68%);
+  --acc-soft:  hsl(var(--hue-acc) var(--sat-acc) 68% / 0.30);
+  --acc-ink:   hsl(var(--hue-acc) calc(var(--sat-acc) + 3%) 7%);
+  --acc-glow:  0 0 9px hsl(var(--hue-acc) calc(var(--sat-acc) + 8%) 64% / 0.60);
+  --acc2:      hsl(var(--hue-acc2) var(--sat-acc2) 68%);
+  --acc2-soft: hsl(var(--hue-acc2) var(--sat-acc2) 68% / 0.30);
+  --bad:       hsl(var(--hue-bad) 62% 74%);
+  --fg:        hsl(0 0% 100%);
+  --fg-soft:   hsl(210 8% 88%);
+  --dim:       hsl(210 7% 76%);
+  --ink-shadow: 0 1px 2px hsl(0 0% 0% / 0.58), 0 0 5px hsl(0 0% 0% / 0.34);
+  --mark-under: hsl(0 0% 0% / 0.38);
+
+  /* ── the type ───────────────────────────────────────────────────────── */
+  --font-sans: -apple-system, system-ui, sans-serif;
+  --font-num:  ui-monospace, Menlo, monospace;
+  --fs-lead:  calc(13px * var(--ui-scale));
+  --fs-small: calc(10px * var(--ui-scale));
+  --fs-tiny:  calc(9px  * var(--ui-scale));
+  --tr-wide: 0.12em;  --tr-wider: 0.14em;  --w-bold: 650;
+
+  /* ── the grid ───────────────────────────────────────────────────────── */
+  --touch:    calc(44px * var(--ui-scale));   /* THE 44 px LAW's unit */
+  --grip-hit: var(--touch);
+  --r-sm: calc(5px  * var(--ui-scale));
+  --r-md: calc(8px  * var(--ui-scale));
+  --r-lg: calc(12px * var(--ui-scale));
+  --sp-1: calc(3px  * var(--ui-scale));
+  --sp-2: calc(5px  * var(--ui-scale));
+  --sp-3: calc(7px  * var(--ui-scale));
+  --sp-4: calc(10px * var(--ui-scale));
+  --sp-5: calc(14px * var(--ui-scale));
+  --z-win: 12;
+  --kwin-bar-h:          calc(26px * var(--ui-scale));
+  --chrome-chip-disc:    calc(48px * var(--ui-scale));
+  --chrome-chip-target:  max(44px, calc(62px * var(--ui-scale)));
+
+  /* ── the glass ──────────────────────────────────────────────────────── */
+  --glass-hue: 212;  --glass-sat-tint: 12%;  --glass-lum: 17%;
+  --glass-tint: var(--glass-hue) var(--glass-sat-tint) var(--glass-lum);
+  --glass-opacity: 0.46;                     /* floor 0.42, stated in source */
+  --glass-blur: 8px;                         /* hard ceiling 20px, law L1 */
+  --glass-sat: 188%;  --glass-bright: 108%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  --glass-border: 0.6px;
+  --glass-border-color: hsl(0 0% 100% / 0.22);
+  --glass-hairline:     hsl(0 0% 100% / 0.11);
+  --glass-sheen:        hsl(0 0% 100% / 0.09);
+  --glass-shadow: 0 3px 13px hsl(0 0% 0% / 0.22);
+  --glass-raise:  hsl(0 0% 100% / 0.05);
+  --bar-raise:    var(--glass-raise);
+  --glass-press:  hsl(0 0% 100% / 0.15);
+  --glass-groove-hot: hsl(0 0% 100% / 0.18);
+  --glass-well:   hsl(var(--glass-tint) / 0.22);
+  --glass-canvas-scrim: 0.26;
+
+  /* ── the bevel's inputs.  ALL OPTIONAL and ALL ADDITIVE: BASINS' glasslight.js
+        samples the picture behind each surface and writes them INLINE on the
+        element.  With no such engine the bevel is `transparent` and NOTHING
+        LOOKS BROKEN — but the names must exist or the box-shadow that reads
+        them becomes invalid and takes the window's shadow down with it. ── */
+  --gl-w: 1.6px;
+  --gl-t: transparent;  --gl-r: transparent;
+  --gl-b: transparent;  --gl-l: transparent;
+  --gl-glow: transparent;
+  --gl-fill: transparent;
+  --gl-fill-a: var(--gl-fill);  --gl-fill-b: var(--gl-fill);
+}
+```
+
+**REQUIRED, and it is one line.** EXTRACT §7.8: `--fill`, `--hit`, `--signal` and
+`--needle` are written *inline on elements* by the paint, and they are four very generic
+names. Custom properties inherit, so a host that declares any of them on `:root` or on an
+ancestor has it inherited *into* these elements and used before the first paint writes the
+inline value — the fallback never fires and the first frame is wrong. Add:
+
+```css
+.m2root { --fill: 0; --hit: 0; --signal: 0; --needle: -150deg; }
+```
+
+**Optional.** `--m2-separation`, written on `<html>` by BASINS' `glass.js`, drives the
+whole material ladder through `--m2-blend`. With neither it nor `--glass-canvas-scrim`,
+`--m2-blend` falls back to `0.26` and the material is exactly what the default install
+paints. There is nothing to supply.
+
+---
+
+## PART 3 — THE FOUR BEHAVIOURAL EDGES
+
+The other project spent a whole mission proving one thing: this window boots on **four
+injected edges** and nothing else. Not on a renderer, not on a scheduler, not on a GPU,
+not on a canvas. **λWAVES already has all four, in `lab/mir/`.**
+
+| edge | what it is | λWAVES |
+|---|---|---|
+| 1 | **the parameter registry** — `has(id)`, `get(id)`, and a `label` per target; it is what makes a control routable, and `m2droppables()` walks it | `lab/mir/registry.js`, `createRegistry()` |
+| 2 | **a target host** — `install` / `sync` / `uninstall` / `available` | `lab/mir/host.js`, `createTargetHost()` |
+| 3 | **a clock that owns modulation time** — the whole of the risk, and six behaviours read the same two numbers (`dt`, wall stamp) and mean different things by them | `lab/mir/host.js`, `createModClock()` |
+| 4 | **presentation + geometry invalidation callbacks** — default no-ops | `lab/mir/host.js`, `createModHost()` |
+
+Plus the model itself: `lab/mir/mod.js` (LFO, ENV, AUDIO, macros, routes, transport,
+serialization, presets) and `lab/mir/curve.js` (the breakpoint mathematics it leans on).
+
+### What the host must do with the tree
+
+`modwindow.js` returns element references and wires nothing. For each of these, the host
+attaches the behaviour and does the painting:
+
+- **the transport strip** — `mw.transport.{xport, tempo, tempoNum, tempoUnit, tempoHz,
+  tempoIn, tap, sync, cad, holds}`. `xport` swaps between the two exported literals
+  `SVG_PLAY` and `SVG_PAUSE` through `innerHTML`. The responsive law is `.tight` (hides
+  the derived Hz) then `.tighter` (also hides the `BPM` unit); **the number itself never
+  goes.**
+- **the preset bar** — `mw.foot.{open, save, name, prev, next, dead}`. `dead` starts with
+  `.off`, which is `display: none`; a warning that is always on the glass is furniture.
+- **the macro rail** — `mw.addMacro({id, kind}, index)` per macro, 1-based. Paint
+  `.vname`, `.vnum`, `.drive`, and write `--fill` (knob) or `--hit` (trigger)
+  inline on `.signal`. The track line under the name is `.m2signal::before` — a
+  pseudo-element. `.m2rowgrip` is the dedicated vertical reorder surface and
+  `.m2slotx` is its lower-half delete action. Compact mode hides the value face
+  while retaining route, master depth and row tools. There is nothing in the DOM
+  to find for the track.
+- **the rack** — `mw.addDevice({id, kind})`, kind `'lfo' | 'env' | 'audio'`. Cards are
+  appended to the horizontal scroller. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
+  presentation tri-state.
+- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; the measuring law is
+  `w = max(60, round(box.clientWidth) || 206)`,
+  `h = max(60, round(box.clientHeight - 14) || 128)`,
+  `px(t, v) = [11 + t·(w − 22), h − 11 − v·(h − 22)]`.
+- **the knobs** — write `--needle` inline on `dev.knobs[k].dial` and paint the arc pack
+  `dev.knobs[k].arc` (`.trk` / `.band` / `.val`, `strokeDasharray`). The host's control
+  layer should add `.kctl` and `.ctl-round` to `.dial`; `modwindow.css` styles all four
+  states (`.kctl`, `.ctl-sel`, `.ctl-frozen`, `.drag`).
+- **routing** — `buildRing(control, o)`, `buildSpan(control, shape)`,
+  `buildClear(control, targetId)`, `buildGhost(text)`. **These attach to the routed
+  control, wherever it lives**, and their CSS is deliberately unscoped for that reason.
+  Rings stack at a 44 px pitch with the CLEAR button 46 px past the end, all by inline
+  `translateY(calc(-50% + Npx))`.
+- **the sheets** — `mw.buildDevicePick()`, `mw.buildMacroPick()`, `mw.buildPresetSheet()`,
+  `mw.buildDeadInspector()`, `buildAudioSheet(dev)`. All four live on the window root and
+  are born `hidden` so the first tap shows rather than hides.
+
+### The size laws, which the host applies and does not invent
+
+`sizeLaw` is exported and is arithmetic only — it never measures the live window.
+
+```js
+sizeLaw.width(['F','C','M', …], { uiScale, ribbon })  // 22·scale + 224 + 14 + 89 + Σ cards + n·7, floor 360
+sizeLaw.height({ uiScale })                           // 98·scale + 368  = 466
+sizeLaw.minHeight({ uiScale })                        // 98·scale + 220  = 318
+sizeLaw.workBars(rackRight, viewport, hasDeadSends)   // -> { left, width: 450, coreW, presetW }
+mw.setViewHeight(windowHeight)                        // writes --m2-view-h, clamped [220, 368]
+```
+
+**The timing bar is 450 px and never changes width.** The preset bar gives up width to it,
+clamped to [244, 294], and only then does the lane stop shrinking.
+
+### Four things a host must not undo
+
+1. **`#modwin.modwin { overflow: visible; contain: layout }`** and
+   **`#modwin.modwin > .kwin-body { overflow: visible }`**. `.kwin` carries
+   `contain: layout paint` precisely so no descendant paints outside a window — a real
+   Android bug. This window undoes half of it because the work bars are *allowed* to paint
+   beyond it. Keep `contain: paint` on the root, or `overflow: hidden` on the body, and
+   the transport strip is clipped with no error.
+2. **The cascade order.** In BASINS the window's own sheet is appended to `<head>` at
+   first open, so it wins every tie. `modwindow.css` reproduces that internally (chrome
+   first, PART B last). Do not load a host sheet after it that can reach inside
+   `.mir-modwindow`. If the host is layered, `@layer modwindow { … }` declared after every
+   host layer does the same job.
+3. **The 44 px law.** `44px` appears 135 times, `min-height: 44px` 33 times, and there are
+   nine `::before` hit-band restorations where the ink is smaller — `.m2fold`, `.m2ab`,
+   `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and `.modtempo`. It is the
+   reason the window works on an iPad and dropping it is the fastest way to make a copy
+   feel wrong.
+4. **`.m2retired` on the window root.** `modwindow.js` adds it; it is what hides the
+   retired tab strip.
+
+
+
+---
+
+## <a id="doc-45"></a>DOC 45 · molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/MANIFEST.md · 2026-09-18
+
+## MANIFEST — baseline import and shipping revisions
+
+`modwindow.css` and `modwindow.js` began as BASINS' modulation window. The table
+records the import transformation and the deliberate λWAVES revisions that now
+ship with it.
+
+### modwindow.css
+
+| # | change | why |
+|---|---|---|
+| C1 | The nine `${…}` template holes are substituted with the integers `anim.js` interpolates — 23 occurrences (52, 64, 294, 450, 64, 224, 368, 320, 368). | A `${}` is not CSS. The result is byte-for-byte the text the browser receives in BASINS. |
+| C2 | The baseline import rewrote selector text by the six-branch law printed at the head of PART B. Later rules explicitly revise the macro rail layout and controls. | The namespace keeps the portable window isolated while the current builder and stylesheet remain in sync. |
+| C10 | The macro rail uses fixed row columns, a dedicated reorder grip over a compact delete action, and labelled `ADD MACRO` / `ADD DEVICE` actions; the redundant `OUT` caption and add-device chip are gone. | Route, master depth and row tools stay fixed when the value face is hidden. Stable macro ids keep routes attached when rows move. |
+| C3 | **Not scoped, deliberately:** the five `:root`-subject blocks (the 20 `--m2-mat-*` tokens and the three motion tokens); the 5 `.kwin-chiprail[aria-label="MODULATION window controls"]` rules; 43 selector parts whose subject is `.m2ghost`, `.m2ring*`, `.m2clr*`, `.m2span*` or `[data-m2target]`. | Scoping any of these would **change what paints**. The chip rail is a DOM *sibling* of the window, so tokens on the window root would never reach it. The routing overlays are appended **into the routed control**, which `m2droppables()` takes from the app-wide `kit.controls` registry — in BASINS, `colors.js` registers 8 such controls in another window. Scoping them un-paints routing onto host controls. Every one of these names is already `--m2-*`, `.m2*` or a byte-exact aria-label, so none of them can fight a host. |
+| C4 | Restored one character: the `}` that closes `@media (prefers-reduced-motion: reduce)`. | `modwindow-01-anim.css` stops at `anim.js:3306`; the template literal actually runs 1782–**3307**. Without it the sheet is not valid CSS. |
+| C5 | 44 chrome rules brought, each labelled with its `index.html` line and its original selector, in ascending source order, **before** PART B. | The window sits in this chrome. Everything else — 117 `:root.skin-frost` rules, `.jwin*`, `.kwin-halo` / `.kwin-grip` / `.kwin-edge` (this window is `resizable:false`), `.kwin-chip-contentbar`, `.klock`, `.cpick`, `#banner-close`, `#zoe`, `#nebula-card`, `.save-sort-chip`, `:root.window-close-mode-*` — is not needed and is not here. Without `.skin-frost` the classic connected form paints, and it is correct and complete. |
+| C6 | Five of those 44 come from EXTRACT **file 04**, not file 02: the `.glass, .panel, .chip` recipe and the four `.kctl` rules. | `#modwin` reads its border-width and style from `.glass`; so do `.m2ppick.glass` and `.m2deadpick.glass`. `.kctl` / `.ctl-sel` / `.ctl-round` / `.ksel` come from `registerControl` and file 01 styles them but never declares them. |
+| C7 | Two of those 44 come from **`index.html` directly**: `button` (4802) and `button:active` (4812). **They are in no EXTRACT file.** | File 02's filter kept "every rule whose selector names `kwin` or `modwin`", and `index.html` has exactly four bare element selectors — `html`, `body`, `button`, `button:active`. **Measured headless, with and without:** 44 of the window's 48 buttons lose `cursor: pointer`; `.m2zoom`, `.m2audgrip`, `.m2audmac`, `.modxport` and `.modtempo` fall back to the UA font at 13.33 px because they rely on `font: inherit`; `.m2pickb` loses its `5px 9px` padding for the UA's `1px 6px`. |
+| C8 | Three chrome selectors trimmed or widened where the port's scope demanded it: `.jwin` dropped from `--glass-bevel` and from `.kwin.resizing`; `.panel, .chip` dropped from the glass recipe; the three `.kwin-tab` rules gained a second arm for the chip rail. | `.jwin`, `.panel` and `.chip` are other BASINS surfaces. The chips **are** `.kwin-tab` (`button.kwin-tab.crail-chip`) and the rail is outside the window, so the descendant scope alone would not reach them. |
+| C9 | **NOT added:** `.m2root { --fill: 0; --hit: 0; --signal: 0; --needle: -150deg; }` (EXTRACT §7.8). | It is an added rule, not a scoping change. It is a **required line in `host-contract.md`** instead, quoted verbatim, so the decision stays Josh's. |
+
+### modwindow.js
+
+| # | change | why |
+|---|---|---|
+| J1 | The element helper is `m2mk`, not `mk`. | EXTRACT §7.4: `window.js` exports a different `mk(tag, cls, txt)` whose third argument is TEXT and which does not append. One mechanical rename; zero behaviour change. |
+| J2 | `m2mkBarGrip` and `m2preDel` are not built. | Both are dead in the source and both are named as traps. Their CSS travels; their JS must not. |
+| J3 | It builds and does not wire. No model, no registry, no persistence, no paint. | The four host edges are the host's. See `host-contract.md`. |
+| J4 | Every model-derived `d` attribute is emitted **empty**: the six `.m2gl` preset glyph paths, the editor's `.m2path` / `.m2fill`, `.m2lfominshape > path`, `.m2lfocmpshape > svg > path`. | These are *sampled from the model* so the button can never draw a shape the engine would not produce. Geometry is layout; those paths are not. |
+| J5 | `dirPrev` and `dirNext` are added to `GLYPHS`, verbatim from `glyph.js:163` and `:166`. | **They are missing from EXTRACT file 05**, which scanned only the direct `setGlyph(...)` calls; these two reach `setGlyph` through `buildPresetStrip`'s local `btn()` helper (`anim.js:3809, 3811). They are the ◀ ▶ beside the name field in every one of Josh's frames. Without them the two buttons render the literal text `dirPrev` / `dirNext`. |
+| J6 | The two visible strings that say **MANDELBROT** become `{factory}`, default `'FACTORY'`, in `COPY`. | EXTRACT §5: "a word, not a mechanism". Set `host.copy.factory` to restore it. |
+| J7 | `COPY.knobs[…]` carries BASINS' `.m2kends` range labels as literals though the source derives them from the model (`String(M.ENV_MAX_S) + 's'`, `String(M.STEPS_MAX)`, …). | `#modwin .m2kends { display: none }` — nothing paints them. Overridable through `host.copy`. |
+| J8 | `data-reopens-window` on every chip is the literal `'false'`. | That is what all five of this window's chips resolve to (`reopensWindow: false` on the three `chipItems`; drag and close have their own structural paths). |
+| J9 | Macro rows expose a two-part reorder/delete tool and no route/OUT text. The rail exposes `ADD MACRO` and `ADD DEVICE`; device construction no longer needs a separate add-chip sentinel. | Reordering remains available after the value face is hidden, compact rows stay aligned, and both creation actions live in one predictable place. |
+
+### COPIED BROKEN — recorded, not fixed. These are Josh's to decide.
+
+| what | evidence |
+|---|---|
+| **`.m2pick` renders with no plate.** It reads `--m2-plate`, declared on `.m2root`; both `.m2pick` sheets are appended to the `.kwin` root, a *sibling ancestor* of `.m2root`. The substitution is invalid at computed-value time and `background` falls back to transparent. | `vid/f02.png` — the ADD LFO / ADD ENV / ADD AUDIO sheet has the cards showing through it. Measured in the staged copy: `rgba(0, 0, 0, 0)`. The fix, if wanted, is one word: add `glass` to the class string, exactly as `.m2ppick` and `.m2deadpick` already do. |
+| **`.m2clr` has the same defect, and the extraction does not name it.** `.m2clr { background: var(--m2-recess-deep) }` (file 01 line 603) and `--m2-recess-deep` is declared on `.m2root`; `m2ensureClear(targetId, host)` appends the button **into the routed control**, which for a host-registered control is outside `.m2root`. | `anim.js:5114`. Every CLEAR button on a control outside the modulation window is transparent. |
+| **The ◂ ▸ reorder buttons never paint, in any mode.** `.m2dev:not(.m2min) .m2move { display: none }` (`anim.js:2597`) and `.m2dev.m2min .m2move` is in the folded-strip hide list (`anim.js:2107`). | Measured: `display: none` in both `full` and `minimized`. `.m2grab`'s own aria-label still promises "The arrow buttons beside it do the same thing one place at a time." The buttons are built and wired; the CSS hides them. |
+| **The `.m2ribbon` class is never applied to anything.** `m2SetRibbon` only *removes* it, from `panelWin.root` and from `m2root`, "defensively". | `anim.js:7118–7119`, whose own comment says the ribbon name "no longer creates a second CSS presentation". The 21 `.m2ribbon …` rules in this sheet are dead, and EXTRACT §3.4's "ribbon form" table describes a form that cannot be reached. They are copied anyway, and cost nothing. |
+
+### THINGS IN THE EXTRACTION THAT TURNED OUT WRONG
+
+1. `modwindow-01-anim.css` is **missing its last line** — the `}` closing the reduced-motion `@media`. See C4.
+2. `modwindow-04-material.css` **is not valid CSS**: an orphan `html, body {` at line 60 with no declarations and no close, and an unclosed `@supports` at line 210. Brace-matching runs to EOF; the five rules taken from it were lifted by anchored regex instead.
+3. `modwindow-05-glyphs.js` misses **`dirPrev` and `dirNext`**. See J5.
+4. `modwindow-02-chrome.css` misses the **`button` reset**, which its own filter could not see. See C7.
+5. §3.4's 44-px table names nine `::before` hit bands "on `.m2fold`, `.m2ab`, `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and **`.m2swapbadge`**". `.m2swapbadge` is not a hit band — it is a `pointer-events: none` 44 × 44 indicator. The ninth `::before` is **`.modtempo`**, which the same paragraph then describes separately. The count of nine is right; one name is wrong. All nine are present and verified.
+6. §3.4 gives `.m2col { width: 92px }` and `.m2rt { width: 104px }`. Those are base values that **no FULL card uses** — each kind re-grids the body. Measured: AUDIO `.m2col` 88, ENV `.m2rt` 90, LFO's `.m2col` and `.m2rt` are full-width grid rows (346 at a 360 card).
+7. §3.4's frame table gives `.m2head` height 48 px. That is the **content** box: `.m2head` also carries `padding: 2px 5px` and there is **no global `box-sizing: border-box` in BASINS** (the only bare `*` rule in `index.html` sets `transition-duration`), so the border box is 52. Measure `getComputedStyle(...).height`, not the rect.
+
+
+
+---
+
+## <a id="doc-46"></a>DOC 46 · molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/PORT-NOTES.md · 2026-09-18
+
+## lab/mir — the port notes
+
+*What was vendored, from where, what was forced, and what was deliberately left alone.
+Read this before you touch `mod.js` or `curve.js`. Nothing in this directory is committed
+by the wave that wrote it.*
+
+### What is here
+
+| File | Origin | Status |
+|---|---|---|
+| `mod.js` | vendored | the modulation model — LFO, ENV, AUDIO, macros, routes, transport arithmetic, serialization, presets |
+| `curve.js` | vendored | the breakpoint-curve mathematics `mod.js` leans on |
+| `glyph.js` | vendored | **wave 55** — Josh's own glyph library: one SVG drawing per meaning, on a 24-unit grid. The rack's header chips and the two new float chips are drawn from it |
+| `registry.js` | **ours** | MIR edge 1 — the parameter registry |
+| `host.js` | **ours** | MIR edges 2, 3 and 4 — target host, clock, presentation |
+| `PORT-NOTES.md` | **ours** | this file |
+
+Proof: `node tests/mir.test.mjs` — 98 gates (53 at the port, 71 after wave 60's curve
+section, 75 after wave 61's bipolar route, 87 after wave 63's model version and header count,
+98 after wave 65's arm and resume law). It was deliberately not in `test.sh` when this
+was written; **wave 52 adopted it** (`MI_RC`, folded into `NODE_RC`), because wiring it in
+belonged to the rack wave, which owns that file.
+
+### Provenance
+
+Both vendored files were taken on **2026-09-05** from the MANDELBROT project's `app/` directory —
+`$MB/app/`, where **`MB` is wherever that repository is checked out on the machine doing the merge**.
+
+*(WAVE 68: this document and the three vendored headers used to print an absolute path from the
+machine they were taken on. These files SHIP — `dist/` serves them publicly — and dossier §27 asks
+for no accidental directory leakage, while this build's own `NOT SHIPPED` list gives "names local
+absolute paths" as a reason to withhold a directory. Either the rule applies or it does not. The
+provenance is unchanged and the diff command below still works; it takes `MB` from the environment
+instead of from one person's home directory.)*
+
+| File | Lines at take | sha256 of the source |
+|---|---|---|
+| `mod.js` | 2978 | `d76cc74f886357a35794519e0a953f8f0328abea91443a47811e26dec5777b74` |
+| `curve.js` | 416 | `9991eb71da046385d43cd51c8b63ab81bb2aac82fdd122a08d1dbaa7d089b485` |
+| `glyph.js` | 453 | `513cd3120ec539f13e139d940d089f29cf71cbbc5cad427445351fb6c3ab3831` |
+
+### THE LAW
+
+**These two files are maintained by DIFF against their source, never rewritten.**
+
+An upstream fix has to still be a three-line patch a year from now. So:
+
+- do not reformat, re-order, tidy, or "improve a comment" in either file;
+- do not point a linter or a formatter at this directory;
+- every forced change is **one line of code**, carries a `λWAVES: forced edit n/N` marker in
+  a comment on the line(s) above it, and is listed in the table below with its reason;
+- if you need different behaviour, **change `host.js`** — the host is ours, those two
+  files are theirs.
+
+Taking an upstream fix:
+
+```sh
+MB="${MB:?set MB to your local checkout of the MANDELBROT project}"
+diff -u "$MB/app/mod.js" lab/mir/mod.js   # expect: EIGHT hunks (measured 2026-09-06)
+```
+
+Eight and not nine for eight edits: `7/8` and `8/8` sit three lines apart, so `diff -u`'s context
+merges them into one hunk. If that command ever prints more than **eight** hunks in `mod.js`,
+somebody broke the law and the next upstream merge is going to be archaeology.  Every one of the eight is a marked line next to a
+comment that names its number, and `tests/mir.test.mjs §16` UNDOES all eight by their exact text and
+asserts the result is byte-identical to the source — so the law is gated, not merely written down.
+**And wave 63 gated the one thing §16 could not see**: it strips the provenance header before it
+diffs, so the header's own *"Forced 1 edit — every other byte below this header is the source"* stayed
+in the file for a whole wave with six edits under it.  §16 now reads the number out of the header and
+fails unless it equals the markers in the body and the entries in its own table. **If you add an
+edit, the header's count is part of the edit.**
+
+### The forced edit list — 10 edits, total
+
+`mod.js` carries **eight**, numbered `1/8` … `8/8` in the file itself. `glyph.js` carries two,
+which are a dead import and its one call site and are not numbered because they are not a
+behaviour change.
+
+| # | File | Line (ours) | Change | Why it was forced |
+|---|---|---|---|---|
+| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js`: `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). |
+| 2/8 | `mod.js` | `newRoute` | `bi: !!o.bi,` added to the route record | **wave 61 · THE BIPOLAR ROUTE.** See the block below. |
+| 3/8 | `mod.js` | `routeInfluence` | `lerped - r.min` → `lerped - (r.bi ? (r.min + r.max) / 2 : r.min)` | The one expression the flag is read in. |
+| 4/8 | `mod.js` | `setRouteRange` | `if (patch.bi !== undefined) r.bi = !!patch.bi;` | The flag is patchable, exactly like `min` and `max`. |
+| 5/8 | `mod.js` | `serialize()` | `bi: r.bi ? 1 : undefined` on the route record | It travels. `undefined` is dropped by `JSON.stringify`, so a rack with no bipolar route is byte-identical on the wire to one written before the edit existed. |
+| 6/8 | `mod.js` | `deserialize()` | `{ id: String(r.id), bi: !!r.bi }` | It comes back. **A flag that does not survive a preset does not change a control, it changes the sound of every patch ever saved with it.** |
+| 7/8 | `mod.js` | `MOD_STATE_V` | `4` → `104` | **wave 63 · THE VERSION THE BIPOLAR FLAG MADE NECESSARY.** See the block below. |
+| 8/8 | `mod.js` | `MOD_STATE_READS` | `[3, 4]` → `[3, 4, 104]` | So this build still reads every rack and preset written before wave 61. The refusal only runs the other way. |
+| g1 | `glyph.js` | `import { publishM4 }` | commented out | `overlay.js` is MANDELBROT's M4 diagnostics sink and has no counterpart in this lab. An unresolvable import is a module that does not load at all, so this one is not optional. |
+| g2 | `glyph.js` | `try { publishM4(…) }` | commented out (the two lines of the one statement) | The same sink at its one call site. Our gate reads the DOM — `data-gly` on every chip — rather than a published surface, so nothing is lost. |
+
+#### Why the bipolar route had to be a model edit (wave 61)
+
+Josh's brief for the macro router: *"clicking can choose 'center of dial' or 'highest dial'
+(where the arc goes from 0 to the dial current)."*  With
+`offset(m) = (r.max − r.min) · m · masterDepth` the second of those is already expressible
+(`min = b, max = 0`), and so is its opposite (`min = 0, max = 1 − b`).  **The first is not**,
+because the model's offset is **always 0 when the macro reads 0** — so a route whose base is
+the CENTRE of the swing needs a negative offset at `m = 0`, which the arithmetic cannot
+produce.
+
+Three workarounds were tried before the file was touched, and all three fail honestly:
+inverting the source still yields 0 … 1; two opposed routes both start at offset 0; and
+shifting the base down by a half-span would produce the right *picture* by **destroying the
+user's number** — which is precisely the failure `registry.js` exists to prevent
+(*"the base is the only copy of that number in the program"*, ANTI-PATTERN 13).
+
+So four touches, in five new hunks, each marked and each undone by the gate.  `diff -u` against
+the source grew from **two hunks to seven** — the provenance header plus the six marked ones — and
+an upstream fix is still a patch.  **Half of what Josh asked for is not worth protecting a
+two-hunk diff.**
+
+#### Why the model version had to move, and why it moved to 104 (wave 63)
+
+Edits 2/8 and 6/8 changed **what a stored route means**. A rack carrying `bi`, read by a build that
+took an upstream `mod.js` and did not re-apply those two markers, drops the flag; `routeInfluence`
+then measures from `r.min` again and the base walks from the *centre* of the swing to its *floor* —
+**30 % of scale at the macro's middle**, silently, on the second open. Measured:
+
+```
+THIS build (bi honoured):  macro 0 -> 0.2000   0.5 -> 0.5000   1 -> 0.8000
+without 2/8 + 6/8:         macro 0 -> 0.5000   0.5 -> 0.8000   1 -> 1.1000
+```
+
+A version stamp is the only thing such a build already reads, and at `MOD_STATE_V = 4` the change was
+**version-indistinguishable**. It is 104 now, and `MOD_STATE_READS` is `[3, 4, 104]`:
+
+- **our preset opened by a build without the edits** — `modStateReadable(104)` is false against that
+  build's `[3, 4]`, so `presetApply` refuses it *loudly*, by machinery that was already there;
+- **an upstream v4 rack opened here** — still read, and there is nothing to migrate: a rack with no
+  `bi` on any route is byte-identical on the wire to one written before the flag existed;
+- **a future upstream v5 opened here** — refused rather than half-read, which is correct, because we
+  have never seen it. **That is why the number is 104 and not 5.** The λWAVES model-version namespace
+  is `100 + the upstream version this model is derived from`, so ours can never collide with an
+  upstream sequence, and the divergence is legible in the number itself.
+
+**The rack road needed a second half, because it carries no stamp at all.** `mod.js` stamps `modV` on
+a PRESET record only; the model's own `serialize()` emits no version and `deserialize()` checks none —
+so a project file and this browser's `localStorage`, the road the lab uses every session, were
+version-blind. `lab/rack.js` stamps `v` onto the rack it writes (an additive key the model ignores in
+both directions) and `restoreModulation()` **refuses a stamp this build cannot honour**, saying both
+numbers on the card. An **absent** `v` is not a refusal: every rack written before wave 63 has none
+and means "predates the stamp", which is the reading `mod.js` prescribes for an absent preset stamp.
+`rack.js` is ours, so that guard survives an upstream re-take of the vendored file — which is exactly
+the scenario this file warns about.
+
+What was NOT edited, and why it does not need to be:
+- **`targetPos` / `targetValue`** only sum `influence`, so they follow for free.
+- **The `firstLerp` compatibility branch** (`!Number.isFinite(base)`) is no longer *the* lerp
+  for a bipolar route. That branch exists only for callers that omit `base`, which the engine
+  never does — it is stated here rather than pretended to be unaffected.
+- **`dump()`'s route block** carries no `bi`. `routeList()` hands back the live route objects,
+  so `r.bi` is readable without a sixth touch in a diagnostics-only serializer.
+- **Per-route BYPASS** (`r.off`) is Serum's second useful menu item and there is no field for
+  it. It is **not** in v1: it would have been a fifth touch bought for a convenience, where
+  `bi` bought a mode Josh named.
+
+`curve.js`: **zero** content edits. It is leaf mathematics with no identity of its own.
+
+`glyph.js`: **zero drawings touched.** Not one path, viewBox, stroke weight or name was changed — these are
+Josh's own marks and the whole point of vendoring rather than copying is that a correction to one of them
+upstream is still a three-line patch here. Sizing is the CALLER's by the module's own design (width/height
+are presentation attributes, the lowest-priority source of a value), so `lab/lab.css §55b` sizes every chip
+and no call site in this lab passes a pixel count.
+
+Both files also carry a prepended provenance header. That is the only other difference,
+it is one hunk at line 1, and it is what makes the diff above legible.
+
+#### The module system forced nothing
+
+`mod.js`'s only import is `./curve.js`, and `curve.js` sits beside it here, so the import
+graph needed no edit at all. `mod.js` boots under node **verbatim**, including
+`presetList()` — its `localStorage` reads are already inside a `try` that returns `null`
+when there is no storage.
+
+### What was deliberately NOT edited
+
+- **`FACTORY_PRESETS`** (≈90 lines of data, ids `freq` · `phase` · `bright` ·
+  `pal.e1.phase` · `pal.e2.phase`). These are BASINS target ids and they do not exist
+  here. Editing that block would be the rewrite this port exists to avoid, and it is not
+  needed: every route in them lands on a target our registry does not have, so
+  `syncDormant()` marks them **dormant** on the first `targets.sync()` and they sit there
+  inert, keeping their settings, exactly as the dormancy law intends. That is the designed
+  behaviour for a preset written against a foreign target set, not a bug we are tolerating.
+- **`PRESET_FOLDER_FACTORY = 'MANDELBROT'`.** Left as the honest provenance of the presets
+  it names. Relabelling that folder `λWAVES` while its contents route to `pal.e1.phase`
+  would be a *worse* lie than the foreign name. If the rack wave wants the factory folder
+  gone from the preset sheet it should filter `presetList()` on `factory: 1` in the view,
+  or empty the exported `FACTORY_PRESETS` array in place from `host.js` — both are host
+  decisions and neither is a file edit.
+- **`PRESET_FOLDER_DEFAULT = "Josh's Collection"`.** Correct in both projects.
+- **The AUDIO model.** `mod.js` carries the whole normalized follower/band/onset model.
+  It has no browser dependency (that lives in their `audio.js`, which we did not take) and
+  costs nothing dormant. If λWAVES ever wants audio-reactive modulation it is already here.
+
+#### What glyph.js was taken FOR (wave 55)
+
+The lab was spelling its header marks as literal characters — `×`, `▾`, `⇄`, `i`, `+`, `⇱`, `⤢`. Every one of
+those is a request to whichever font the device resolves, and glyph.js's own header lists the three ways that
+goes wrong (iOS substitutes a colour emoji; the advance width is the font's business, not the layout's; a
+missing codepoint is a notdef box). Wave 55 replaced the ones with a drawn equivalent and left the ones
+without, and REPORT.md wave 55 lists both sides of that line so the polish wave knows what is outstanding.
+The two NEW chips this wave needed — pop-out / dock, and compact / full — were already in the library:
+`north` and `reopen`, `compact` and `expand`.
+
+### THE THREE DIVERGENCES (wave 69) — the plugin's own defects, fixed HERE, and the diff for the port back
+
+`lab/mir/modwindow/ACCEPTANCE.md` §9 asks a mount to **reproduce** three measured defects, on the
+stated grounds that a mount rendering them correctly has silently redesigned the window. **Josh has
+ruled the other way**, 2026-09-06: *"The modulation window is broken when we were even working on it
+on basins so whatever problem it has we will try to fix here."*
+
+So all three are fixed — and **the artifact's own two source files, `modwindow.js` and
+`modwindow.css`, are still byte-identical to the staged copy** (only `ACCEPTANCE.md` gains a note
+saying its §9 is superseded for this mount, so a future reader is not left with a spec that
+contradicts a gate), because every correction is written in `lab/modhost.css`, which is ours. That is what keeps the
+reciprocal port back to MANDELBROT a **diff of three lines in a host sheet** rather than archaeology
+in a 132 KB stylesheet. Each is numbered in the reach list there (16, 17, 18) with its reasoning.
+
+| # | The defect, as measured | The fix, and where it lives |
+|---|---|---|
+| D1 | **`.m2pick` renders fully transparent.** The ADD LFO / ADD ENV / ADD AUDIO sheet and the macro sheet beside it read `--m2-plate`, declared on `.m2root`; both are appended to the WINDOW root, a *sibling* subtree. Invalid at computed-value time → `background` falls back to transparent. `vid/f02.png`. | `modhost.css` 16: `background-color: var(--m2-plate, var(--m2-mat-chassis))`. The fallback names the ladder's own chassis, which IS declared in this build's seat and IS themed, so the sheet wears exactly the plate it was written for. A `.m2pick` inside `.m2root` is unchanged. |
+| D2 | **`.m2clr` has the identical defect.** It reads `--m2-recess-deep` from `.m2root` while `m2ensureClear()` appends it INTO the routed control, which for a host-registered control is outside `.m2root` — so every CLEAR on a control outside the plugin is transparent. `anim.js:5114`. | `modhost.css` 17: `background-color: var(--m2-recess-deep, var(--glass-well))`. Outside the window the fallback is the HOUSE recess, which is themed and is the right answer twice over — a button that lands on a λWAVES dial should wear the λWAVES well. Nothing in this build BUILDS one (the overlay split, wave 64), so this is a fix for the port back and for any host that does route the artifact's own overlay. |
+| D3 | **The ◂ ▸ reorder arrows have never painted a pixel.** Built by `buildDevice()`, wired here to `M.moveSource`, and hidden by three rules that between them cover every mode: `.m2dev.m2cmp .m2move` (776), `.m2dev.m2min .m2move` (813) and `.m2dev:not(.m2min) .m2move` (1303). | `modhost.css` 18 brings them back in **FULL mode only**. Only 1303 is the accident; the other two are the artifact's own stated reasoning (*"Compact spends header room on identity and status, not clipboard/reorder"*, and a 64-px folded strip has no room) and they STAY. The run order that IS the fire order is now changeable without a drag. |
+
+**AND `MANIFEST.md`'s PRESCRIPTION FOR THE FIRST TWO IS WRONG FOR THIS MOUNT**, which is worth
+writing down because it is the obvious thing to try and it fails silently. It says the fix is *"one
+word: add `glass` to the class string, exactly as `.m2ppick` and `.m2deadpick` already do."* Those two
+sheets carry **no background of their own**, which is the whole reason `glass` works for them.
+`.m2pick` does — `.mir-modwindow .m2pick { background: var(--m2-plate) }` at (0,2,0) — and **a
+declaration that is invalid at computed-value time still WINS the cascade first and only then computes
+to `unset`**. `.glass` is (0,1,0) and loses; `.m2clr`'s own (0,1,0) beats `.glass` on source order,
+since `modwindow.css` loads after `skin.css`. The word would have changed nothing and the gate would
+have stayed green on `rgba(0, 0, 0, 0)`. **Give the var a reachable value instead.**
+
+**The gate that used to pin them is the gate that now proves them fixed.** `B129`'s `copiedBroken`
+arm is `fixed` and asserts the opposite of what it asserted, and `B131`'s clear-button measurement
+asserts a real plate. A gate that pins a defect is the defect (ANTI-PATTERN 13), and the way to
+retire one is to invert it in the same wave that fixes what it pinned — not to delete it.
+
+### THE PLUGIN WEARS THE HOUSE GLASS (wave 69)
+
+Josh, three times, most recently against his own screen recordings: the ABOUT card and the KEYS sheet
+wear our glass with the field's colour coming through them, and the plugin beside them was *"a flat
+dark slab"*. It was never a colour mismatch — wave 66's `hsl(212 14% 13%)` and the house's
+`hsl(214 16% 13%)` are `rgb(28, 33, 38)` either way. It was that **reach-list 15 pinned the window
+opaque at a specificity CARD STYLE cannot reach**, so every other card in the lab went REFRACTIVE and
+this one stayed a plate. The seat's private `--glass-hue / -sat-tint / -lum / -tint / -opacity` are
+deleted, `--m2-mat-pane` is `hsl(var(--glass-tint) / var(--m2-scrim))` with the house's own tokens,
+and `#modwin` answers the card switch like `.dev` does. **One exception, stated in the sheet**: on the
+LIGHT theme it keeps a pane, because the artifact's ink ladder is 52 white-alpha rungs on both themes
+by the port's own standing decision, and white ink on a transparent card over a near-white stage is
+not a style. Flip the ink and that exception goes.
+
+### What we did NOT port, and will not
+
+- **`anim.js` (9573 lines) — their modulation WINDOW.** Josh's word for its macro surface
+  is *buggy*. Board #34 writes our own view in kit.js idiom.
+- **`window.js` (4727 lines) — their WindowKit.** Our rack is our window kit.
+- **`basins-modulation-{host,targets,presentation}.js`.** Read as the specification of
+  what a host must supply; `host.js` is our answer to the same question. Their
+  `entryFreqPos`/`entryFreqRaw` constants (0.05 – 20 Hz) are reproduced exactly so a rack
+  serialized in one project reads the same in the other.
+
+### The one behavioural thing the vendored file does that will surprise you
+
+`M.advance(dt, wall)` treats its two arguments completely differently depending on the
+sync mode:
+
+- **wall sync** (the default): `beats` is *derived* from the absolute wall stamp —
+  `anchorBeats + bpm/60 * (wall − anchorAt)`. Clamping `dt` does nothing to it. Only
+  `reanchorTransport()` moves it.
+- **free sync**: `beats` is *accumulated* from `dt`. Clamping `dt` loses time here, which
+  is precisely what the clamp is for.
+- **envelope time** is `dt`, always, in both modes.
+
+`host.js` documents this at length because it is the trap in the whole architecture.
+
+---
+
+## What the rack wave must know
+
+### 1. The clock is not the clock
+
+λWAVES already has a `Clock` (`lab/clock.js`). **It must not be given this job.** They are
+two logical times over one wall clock:
+
+| | `lab/clock.js` | `lab/mir/host.js` `createModClock()` |
+|---|---|---|
+| owns | physics time *t*, atomic units | modulation time: beats, seconds, phases |
+| advances at | `rate` a.u. per wall second | BPM, or free Hz, per wall second |
+| paused by | the transport button | its own `playing`, and the availability gate |
+
+If they were one clock: pausing the physics would freeze an LFO that is animating the
+camera, and `transport.rate` — which is itself a modulation **target** in the shipped
+catalogue — would be modulating the thing that decides how fast the modulator runs.
+`tests/mir.test.mjs` gate 15 demonstrates exactly that, with an LFO swinging the physics
+rate from 4 to 100 a.u./s while the modulation transport keeps advancing 0.125 beats per
+0.125 s step.
+
+The rack's job is to call **one** function, once per frame, with a monotonic wall stamp
+in **seconds**:
+
+```js
+clock.advanceTo(performance.now() / 1000);
+```
+
+and to pass `present: (reason) => schedule(TIER.PRESENT)`.
+
+### 2. The six meanings of `dt`
+
+Documented at length in `host.js`'s header. The trap in one line: **clamping `dt` does
+not slow a wall-synced LFO**, because under wall sync `beats` is derived from the
+absolute stamp. Only `reanchorTransport()` moves it. The 0.25 s clamp (`MAX_WALL_STEP`,
+the source's own number) bites free sync and envelope time and nothing else.
+
+### 3. The pause law is four lines and all four matter — and wave 65 put a FIFTH above them
+
+Ported verbatim from the source's `livePos()` into `createModClock`:
+
+1. `targetValue()` returns **NaN** → no live route, or every route bypassed → the
+   parameter goes back to the user's knob.
+2. not source-driven (a hand macro) → keep the modulated value, **even stopped**. A hand
+   does not let go because the clock did.
+3. running → the modulated value.
+4. stopped and source-driven → `HOLD` freezes it, `BASE` returns it to the knob.
+   **`BASE` is what ships.**
+
+**THE ARM (wave 65) IS NOT A PAUSE, AND LINE 2 IS THE WHOLE REASON IT CANNOT BE ONE.**
+Josh asked for a MOD button beside play/pause: *"When this is on, the modulations are
+active and the parameters move on all the racks."*  Off has to mean every routed control
+sits on the number the hand left it on — and a stopped transport does **not** deliver
+that, because line 2 keeps a hand macro's value on its target for as long as the macro
+holds it.  So `clock.setEnabled(false)` sits ABOVE all four lines and returns the base for
+every target, hand macros included.  It deliberately does **not** touch `playing`: the
+modulation transport keeps its own position through a disarm, so re-arming picks up the
+rack the user left rather than one that quietly stopped.
+
+**THE ONE EXEMPTION IS `stepping`, AND IT IS THE RECORDER'S.**  `render-exact.js`'s
+`modulation: 'drive'` pin stops the clock and then calls `step(1/fps)` per frame, and that
+door applies as though running (line 3's `stepping > 0`).  An arm that reached inside
+`step` would render an exact-period take with every modulator flat while every witness the
+renderer checks — `LW.mod.running` false throughout — still passed.  The arm is therefore
+read only where `stepping === 0`, and `tests/mir.test.mjs §23b` proves 40 steps are
+**byte-identical** armed and disarmed, and that a 120-frame bar still closes either way.
+
+### 3b. The resume law (wave 65): three chips, and the beat is the one thing that is GLOBAL
+
+`resumeGrid(sources)` in `host.js` is a PURE read of the rack that says which of the
+ported window's own chips claims the play edge.  Two of the three were already the model's:
+**ANCH** is `modPlayEdge`'s middle branch plus the re-anchor (the beat is continuous, so
+the phase resumes exactly where the pause caught it), and **TRIG** is its first branch
+(`triggerSource` rewinds the phase).  **BPM** is the one this file adds: under a bar sync
+mode a synced source's phase IS `frac(beats / beatsPerCycle)`, so "jump to the truncated
+note" cannot be done per source — it is a move of the one global beat, floored to the
+COARSEST live note, which is the only grid on which every faster note also has a boundary.
+ANCH outranks it; TRIG on a **synced** source claims the grid at its own note, because
+there a rewind the next frame overwrites is a control that changes nothing.  Under FREE
+sync the beat is left alone: the phase is the source's own there and `modPlayEdge` already
+floors it.  `applyResume()` runs before `modPlayEdge`, and `placeOnResume()` after it —
+a `dt = 0` EDIT that puts every synced source where the beat says it is, so the resume's
+own `applyAll(true)` does not push one frame of a transient 0 out onto every dial.
+
+### 4. `mod.js` is a module SINGLETON
+
+There is one rack per page. Two modulation windows would share one model. Every test rig
+calls `M.modReset()` first for exactly this reason. If per-Card modulation is ever
+wanted, that is a model-factory extraction — the source project lists it as its own step 8
+and rates it RED.
+
+### 5. A rack serialized MID-RUN is idempotent, not byte-identical
+
+A source-driven macro's `value` is a live read-out of its source, and a load starts at bar
+1 with phase 0 (the model's own documented law). So `serialize → deserialize → serialize`
+differs on that one field the first time and is stable thereafter. **Do not write a
+"modulation is dirty" check that compares serializations of a running rack.** A rack at
+rest round-trips byte for byte.
+
+### 6. Two things the rack must wire that are stubbed here
+
+- **`available()`** — the capability gate, BASINS's `flowActive`. Defaults to `true`.
+  The right answer is probably "is the field reader live", the same question
+  `wState`/`gov` already answer. Until it is wired, modulation will run while the
+  instrument cannot show it.
+- **`present(reason)`** — defaults to a counted no-op. `schedule(TIER.PRESENT)` goes
+  here. The reasons already emitted are `transport-start` · `transport-stop` ·
+  `modulation-output` · `manual-step` · `paused-wall` · `transport-bpm` · `pause-mode` ·
+  `hold-start` · `hold-end` · `mod-arm` · `mod-disarm` (wave 65), plus `initial-output`
+  from whatever installs the rack.
+
+### 7. Things this wave deliberately did not do
+
+- No UI, no window, no chips, no CSS, no `kit.js` change — board #34's business.
+  (**Done by wave 52**: `lab/modview.js` is the face, and `REPORT.md` carries the MIR block.)
+- `tests/mir.test.mjs` was **not** wired into `test.sh`, and `REPORT.md` had no MIR block.
+  Both files belonged to the wave running beside this one, and **wave 52 wrote both**.
+- `labParameters()` in `host.js` is the *shape* of the shipped catalogue, written against
+  the real `obs` / `mat` / `quality` / `clock` objects in `rack.js`, and nothing in the
+  rack calls it. **Wave 52 chose the offered set and wrote the real adapters in `rack.js`**
+  instead: modulation there is an OBSERVER instrument (camera, material, the physics RATE),
+  every offered setter is a `TIER.PRESENT`, the ranges are the shipped dials' own rather
+  than the illustrative ones here, and `field.resolution` / `field.steps` and the whole of
+  `state.mode.*` are deliberately NOT offered (a rebuild per frame, and a `reg.version`
+  bump per frame into the undo ring). This function stays as the shape.
+- The AUDIO source needs `audio.js` (not ported) before it does anything; the model side
+  of it is present and inert.
+
+
+
+---
+
+## <a id="doc-47"></a>DOC 47 · molecular-waves-2026-09-18/scratch/old-ql/lab/skin-notes.md · 2026-09-18
+
+## skin.css — glass × neumorphism for λWAVES (rationale)
+
+Load order: `lab.css` then `skin.css`. The skin only re-points lab.css's custom properties and re-dresses its selectors; remove it and the lab is whole again.
+**No `backdrop-filter` anywhere** — measured at −26 fps (32 → 58) over the live canvas. The glass is tint + hairline + sheen gradient + shadow.
+
+### Palette tokens
+| token | value | hex | role |
+|---|---|---|---|
+| card tint | `hsl(214 16% 13%)` @ `--glass-opacity .84` | #191d23 over the stage | every card, chip, sheet |
+| `--fg` | #f2f5f7 | | primary numerals |
+| `--fg-soft` | `hsl(0 0% 88%)` | #e0e0e0 | titles, note body |
+| `--dim` | `hsl(0 0% 72%)` | #b8b8b8 | secondary text |
+| `--ink-key` | `hsl(0 0% 74%)` | #bdbdbd | control labels, resting glyphs |
+| `--ink-faint` | `hsl(0 0% 64%)` | #a3a3a3 | eyebrows, sub-lines, group labels |
+| `--acc` | #78e1f0 (`--hue-acc 188`, `--sat-acc 80%`) | #78e1f0 | LIVE / ACTIVE / ON only |
+| `--acc-ink` | #071114 | | text on the play button |
+| stage | #070a0f | | the field's black |
+| `--rack-w` | 300px (was 372) | | the one layout variable |
+
+### Shadow recipe (light from the top-left)
+- **raised** `--neu-raise`: `-2px -2px 5px hsl(0 0% 100% / .06), 3px 3px 7px hsl(0 0% 0% / .55), inset 0 1px 0 hsl(0 0% 100% / .09)` — knob pucks, triggers, the chosen segment, chips, the hint ⓘ.
+- **inset** `--neu-inset`: `inset 2px 2px 5px hsl(0 0% 0% / .55), inset -1px -1px 3px hsl(0 0% 100% / .05)` — faders, readouts, groups, seg tracks, canvases, anything ON (an ON control is pressed in and rimmed with accent at 35–60 %).
+- **flat** `--neu-flat`: `0 0 0 1px hsl(0 0% 100% / .05)` — resting seats (switches, rows, badges).
+- **card float** `--glass-shadow`: `inset 0 1px 0 #fff/.07` (the glass lip) `+ 0 12px 30px #000/.48 + 0 2px 6px #000/.35`. Dragging: `0 22px 44px #000/.6` + a cyan 1-px rim + `scale(1.012)`.
+- sheen `--glass-sheen`: `linear-gradient(160deg, #fff/.07, transparent 42%)` painted over the tint. Neumorphic surfaces are opaque `hsl(var(--glass-tint) / 1)` so the puck reads as solid on the translucent card.
+
+### Contrast on the card (WCAG, computed; card = tint @ .84 over stage / over a mid field #384048-ish / over a fully bright field)
+- fg 15.5 / 12.9 / 10.3 · fg-soft 12.9 / 10.8 / 8.5 · dim 8.5 / 7.1 / 5.6 · ink-key 9.0 / 7.5 / 6.0
+- ink-faint 6.7 / 5.6 / **4.46** (the only value under 4.5, and only when a bright ψ cloud sits directly behind a card; raise `--glass-opacity` to .88 or `--ink-faint` to 68 % if that case ever matters)
+- acc 11.2 / 9.3 / 7.4 · warn 10.0 · ok 9.8 · bad 7.6 · acc2 6.8 · acc-ink on acc 12.6 · acc on an opaque seg segment 10.7
+- rack at rest (opacity .86 over the stage): fg 11.7, ink-faint 5.3, acc 8.6 · mini transport bar (tint @ .72): ink-key 9.3 over stage, 6.7 over a mid field.
+
+### What is glass, what is neumorphic
+- **Glass**: the card (translucent tint, top lip, sheen, deep float shadow), the badges, the sheet, the mini transport, the value tooltips. Cards are individually shadowed on a transparent rack with a 10-px gap, so they already read as detached.
+- **Neumorphic**: every control. Knobs and triggers are raised pucks; faders, readouts, groups and seg tracks are wells; ON = pressed in + accent rim; the chosen segment rises out of its well. No neumorphic text: type never relies on emboss, so contrast is carried by ink on tint alone.
+- **Values on interaction**: `.k-val` / `.fd-val` are opacity-0 at rest; `:hover`, `.drag` (kit.js already sets it), `.active`, `[data-live]` or `:focus-within` fade them in at 120 ms; on release they linger 700 ms then fade over 350 ms. `.ro-sub` reveals on hover of its readout. Under `(hover: none)` nothing is hidden.
+- **Hint icons**: add class `hinted` to any `.note` → a 22-px ⓘ in the card header (right of the stat, left of fold); `:hover` / `:focus-within` grows it into a 320-px panel with the glyph holding its screen spot. Inside a `.grp` it sits on the group's top-right corner. Second/third hints in one container step 28 px left. Folded cards hide it (their `contain: paint` would clip the panel).
+
+### Checklist for the follow-up layout work
+1. Add `<link rel="stylesheet" href="./skin.css">` after lab.css in index.html.
+2. Add `class="mini"` to `#transport`.
+3. Mount `<button class="ui-hide" title="hide UI (H)">×</button>` in `#stage`, wired to the existing `body.ui-hidden` toggle (rack.js:744). Hover-reveal of the *hidden* rack needs a hover zone; `body.ui-hidden #rack` is `display:none` in lab.css, so give the follow-up a `body.ui-hidden.peek` rule or an edge strip.
+4. Drag: on `.dev-head` pointerdown add `dragging` to the `.dev`, reorder in `#rack` on pointermove, remove on up. Skip when the target is `.dev-fold`. The header already has `cursor: grab`.
+5. Floating rack: set `#rack { position: absolute; right: 0; top: 0; bottom: 0 }` and `#lab { grid-template-columns: minmax(0,1fr) 0 }`; cards need no change. Keep `--rack-w` as the width.
+6. Add `hinted` to the long `.note`s (rack.js 270/287/341/353/380/413/417/451/462/532 and the view files); give each `tabindex="0"` so keyboards open them. Leave `presetNote` (rack.js:334) and the inline bar notes (spectrum.js:17, orbit.js:21) plain — they are status lines.
+7. `.k.active` / `[data-live]`: set them from the model when a parameter is being driven by keys or the BOW, so the value shows without a pointer.
+8. Re-measure fps with the skin on; the only new costs are box-shadows and two gradients per card, no filters.
+
+
+
+---
+
+## <a id="doc-48"></a>DOC 48 · molecular-waves-2026-09-18/scratch/old-ql/lab/vendor/marked-LICENSE.md · 2026-09-18
+
+## License information
+
+### Contribution License Agreement
+
+If you contribute code to this project, you are implicitly allowing your code
+to be distributed under the MIT license. You are also implicitly verifying that
+all code is your original work. `</legalese>`
+
+### Marked
+
+Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+### Markdown
+
+Copyright © 2004, John Gruber
+http://daringfireball.net/
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name “Markdown” nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+This software is provided by the copyright holders and contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
+
+
+
+---
+
+## <a id="doc-49"></a>DOC 49 · molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/ACCEPTANCE.md · 2026-09-18
+
+## ACCEPTANCE — the geometric test a correct mount passes
+
+**This is the reason this port is the last one.** Every number below is a literal in
+`modwindow.css` at the line named, or arithmetic from `anim.js`'s own constants. A
+re-implementation in a host's idiom cannot pass this table by accident, and it cannot pass
+it by trying — the only thing that passes is the window.
+
+Measure at `--ui-scale: 1`, one FULL LFO card, one FULL ENV, one FULL AUDIO and one
+MINIMIZED card. `_build/smoke.mjs` beside the staging directory is a working implementation of this gate
+(32 assertions, all green against the staged files on 2026-09-06, driven headless through
+`mbgate/gatekit.mjs`); the mounting wave should re-run it against the real host rather
+than write a new one.
+
+### 0. THE TWO THAT ARE NOT GEOMETRY, AND FAIL FIRST IF THE PORT WENT WRONG
+
+| # | assertion | value |
+|---|---|---|
+| A0 | the stylesheet parses whole — no rule is dropped by a scoping mistake | the live stylesheet rule count matches the current artifact revision |
+| A1 | the material ladder resolves, and the four surfaces are four different values | pane `rgba(31, 35, 41, 0.68)` · chassis `rgba(42, 48, 55, 0.712)` · control `rgba(22, 25, 29, 0.552)` · hero `rgba(10, 13, 15, 0.777)` — at `--m2-blend: .26` |
+
+If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:root`.
+
+### 1. THE FRAME
+
+| what | value | source |
+|---|---|---|
+| window border radius | `12px` | `--r-lg`, index.html:887 |
+| window border | `0.6px solid` (a browser may report the *used* width as `1px`) | `.glass`, index.html:1290 |
+| window box shadow | `inset 0 1px 0 var(--m2-mat-inner), var(--m2-mat-shadow), var(--glass-bevel)` | anim.js:3213 |
+| `.kwin-body` padding, this window only | `5px 10px 9px` | index.html:4660 |
+| `#modwin` overflow / contain | `visible` / `layout` — **not** `layout paint` | anim.js:1786 |
+| chip-rail disc target | `62 × 62` (`max(44px, 62px·scale)`), ink 26 | index.html:847 |
+| chip-rail grip dots | `14 × 14`, `repeat(3, 1fr)`, gap 2, dots `2 × 2`, **exactly nine** | index.html:7168 |
+
+### 2. THE WORK-BAR LANE — two boxes, one 52 px lane, a real hole between them
+
+| what | value | source |
+|---|---|---|
+| `.m2foot` | `flex: 0 0 52px`, height **52**, `z-index: 9`, `pointer-events: none` | anim.js:1795 |
+| `.m2workbar` (both) | height **52**, radius **16**, gap 2, padding `2px 7px 3px`, `pointer-events: auto` | anim.js:1800 |
+| `.m2prebar` | width **294** (the law clamps its core to [244, 294]) | anim.js:1804 |
+| `.m2pre` | width **450**, and it **never changes** | anim.js:1805 |
+| `.m2precore` | height **44** | anim.js:1806 |
+| `.m2prename` | height **44**, radius 5, `500 10.5px --font-sans`, letter-spacing `.05em`, centred | anim.js:1813 |
+| `.m2prenav` / `.m2presave` / `.m2predead` | min-width **44**, height **44** | anim.js:1823 |
+| `.m2presave` | `44` square, `border-radius: 50%`, svg `21 × 21` | anim.js:1830 |
+| `.m2predead` | `.off` ⇒ `display: none` | anim.js:1844 |
+| `.modxport` / `.modtap` / `.modsync` | `44 × 44` each (`var(--touch)`) | anim.js:2396 / 2447 / 2455 |
+| `.modtempo` | height **22**, with a `var(--touch)` `::before` band | anim.js:2406 / 2415 |
+| `.m2hold` ×2 | min-width **46**, height **44**, radius 7 | anim.js:2946 |
+| the strip's order | play · tempo · TAP · WALL · QUARTER · HOLD 1/4 · HOLD 1 | pure install order |
+
+### 3. THE MACROS RAIL
+
+| what | value | source |
+|---|---|---|
+| `.m2rail` | width **224**, height `var(--m2-view-h)` | anim.js:1903 |
+| `.m2railhead` | `700 10.5px --font-sans`, letter-spacing `.13em`, colour `--acc2` | anim.js:1908 |
+| `.m2slot` | height **64**, radius 8 | anim.js:1934 |
+| `.m2slotrow` | grid `44px 44px minmax(0,1fr) 44px`, height **62** (= 64 − 2) | host macro revision |
+| `.m2grip` | **44 × 44**, colour `--acc2`, svg `22 × 22` | anim.js:1944 |
+| `.m2numseat` | **44** wide × 100% | anim.js:1950 |
+| `.m2num` | `24 × 24` circle, border `1.2px`, `600 10px --font-num` | anim.js:1955 |
+| `.m2depthring` | `34 × 34`, left 5, `rotate(-90deg)`, stroke-width `2.2` | anim.js:1960 |
+| `.m2vedge` | `7 × 7` circle at `calc(var(--fill,0) * 100%)`, margin-left `-3.5px` | anim.js:1985 |
+| `.m2vmeta` | contains the drive/source label; the obsolete `OUT` label is removed | host macro revision |
+| `.m2namerow` | left 48, right 48, top 9, height **44** | host macro revision |
+| `.m2mclr` | **44 × 44** | anim.js:2012 |
+| `.m2macadd` / `.m2devadd` | height **44**, text `ADD MACRO` / `ADD DEVICE` | host macro revision |
+| `.m2slottools` | **44 × 44**, fixed final column in full and minimized rows | host macro revision |
+| `.m2rowgrip` / `.m2slotx` | **44 × 22** reorder and delete halves | host macro revision |
+| the track line | is `.m2signal::before` — **a pseudo-element, not a node** | anim.js:1981 |
+
+### 4. A DEVICE CARD
+
+| what | value | source |
+|---|---|---|
+| FULL | **360 × 368** | `M2_CARD.E` |
+| COMPACT (`.m2cmp`) | **320 × 368** | `M2_CARD.C` |
+| MINIMIZED (`.m2min`) | **64 × 368** | `M2_STRIP_W` |
+| card radius | **16** | anim.js:2038 |
+| `.m2head` | `getComputedStyle(...).height === '48px'`; the **border box is 52** (padding `2px 5px`, and BASINS has no global `border-box`) | anim.js:2046 |
+| `.m2body` | height **216** on all three kinds in FULL | 2704 / 2823 / 2972 |
+| `.m2kind` | `700 13px --font-sans`, letter-spacing `.09em`, colour `--acc` | anim.js:2049 |
+| `.m2bank` | **46 × 44** | anim.js:2052 |
+| `.m2ab` (COPY / PASTE) | `28 × 40` ink + a `44` `::before` band | anim.js:2084 |
+| `.m2pow` | `40 × 40` circle + a `44 × 44` `::before` band; svg `15 × 15` | anim.js:2163 |
+| `.m2x` | `40 × 40` + a `44 × 44` `::before` band | anim.js:2171 |
+| `.m2trig` (ENV) | min-width 48, height **44** | anim.js:2156 |
+| `.m2grab` | `16 × 40` ink, `::before` spanning `-14px / -14px`, height **44** | anim.js:2201 |
+| `.m2seat44` | 100% × **44** | anim.js:2615 |
+| `.m2chk` | min-height **44**, lamp `.m2dot` `9 × 9` | anim.js:2265 / 2270 |
+| `.m2preset` | **44 × 44**, six of them | anim.js:2184 |
+| `.m2mac` | 100% × **44**, border `1.3px`, `600 15px --font-num` | anim.js:2218 |
+| `.m2zoom` | 100% × **44**; `.m2fit` is `600 10px` | anim.js:2213 |
+| add-device control | the permanent `.m2devadd` rail button; no duplicate device-card chip | host macro revision |
+| `.m2edit.m2hero` | min-height 132, radius 7; `.m2svg` is `height: calc(100% - 14px)` | anim.js:2229 / 2234 |
+| **`.m2col` / `.m2rt`** | the base `92` / `104` are used by **no FULL card**. Measure per kind: **AUDIO `.m2col` 88**, **ENV `.m2rt` 90**, LFO's `.m2col` and `.m2rt` are full-width grid rows | 2704 / 2823 / 2972 |
+| `.m2move` (◂ ▸) | **`display: none` in every mode** — see MANIFEST | anim.js:2597 / 2107 |
+
+### 5. THE KNOBS — per kind and per mode, and they are all different on purpose
+
+| selector | `.m2kd` size |
+|---|---|
+| base `.m2kd` | `44 × 44`, `border-radius: 50%` |
+| LFO full | **48 × 48**, RATE **56 × 56**; grid `1.24fr repeat(3, minmax(0,1fr))`, gap 3, padding `5px 7px 4px` |
+| LFO compact | `40 × 40`, RATE `44 × 44`; grid `repeat(2,1fr) / repeat(2,1fr)`, gap 2 |
+| ENV full | **42 × 42**, A/D/R **48 × 48**; grid `1.12fr .9fr 1.12fr .9fr 1.12fr .9fr`, gap 2 |
+| ENV compact | `40 × 40` all; grid `repeat(3,1fr) / repeat(2,1fr)`, gap `2px 3px` |
+| AUDIO full | **50 × 50**, SENS **56 × 56**; grid `repeat(3, minmax(0,1fr))`, gap 4 |
+| AUDIO compact | `46 × 46` all; gap 3 |
+
+Arc geometry: `r1 = 40`, `r2 = 49`, every circle `transform="rotate(-240 50 50)"`
+(span 300, start −150). Track stroke-width 6, band 4. `.ckval` is `600 7.5px --font-num`
+inside `#modwin`. `.m2kends` is `display: none` inside `#modwin` — the range words never
+paint.
+
+### 6. THE FOLDED STRIP (the compact rail)
+
+| what | value |
+|---|---|
+| card | **64 × 368** |
+| head | flex **column**, gap 4, padding `4px 2px 2px`; `.m2headl` / `.m2headr` become `display: contents` |
+| order | grab 1 · fold 2 · bay 3 · power 4 · status 5 · numeral 6 · × 7 — **AUDIO puts × at 6 and hides the numeral** |
+| `.m2meter` | **11** wide, radius 6 |
+| `.m2minname` | `writing-mode: vertical-rl`, `rotate(180deg)`, `600 9px --font-sans` |
+| `.m2minstatus` | `flex: 0 0 18px`, `700 6px/18px --font-num` |
+| `.m2minnum` | 100% × **44**, `700 21px --font-num`, colour `--acc` |
+| `.m2lfominshape` | **22** wide, stroke-width 4, `vector-effect: non-scaling-stroke` |
+| `.m2envminprog` | **5** wide, radius 3 |
+| `.m2audminleds` | 8 wide, gap 4; each `i` **7 × 22** radius 3; HIT **9 × 9** radius 1, `rotate(45deg)` |
+| `.m2tdot` (comet) | `7 × 7`, ten of them, opacity `(0.10 + 0.90·k²)`, scale `0.32 + 0.68·k` |
+
+### 7. THE SIZE LAWS — arithmetic, never a measurement of the live window
+
+```
+width  = max(360, round(22·scale) + (ribbon ? 58 : 224) + 14 + 89 + Σ card + n·7)
+height = round(98·scale) + 368                                     = 466
+minH   = round(98·scale) + 220                                     = 318
+maxHFrac = 0.86 ;  minW = 360 ;  --m2-view-h clamped to [220, 368]
+```
+
+Worked cases a correct mount reproduces exactly:
+
+| rack | width × height |
+|---|---|
+| one FULL card | **716 × 466** |
+| three FULL + one MINIMIZED | **1521 × 466** |
+
+The work-bar law, with `ext = 46` when any send is dormant and `0` otherwise:
+
+```
+right = max(244 + ext + 7 + 450, min(max(rackRight, 294 + ext + 16 + 450), viewport))
+width = 450               left = right − 450
+coreW = clamp(244, 294, left − ext − 7)         presetW = coreW + ext
+```
+
+### 8. THE 44 px LAW — the assertion that catches a re-implementation
+
+> Every interactive element in this window is at least **44 px** on its short axis, and
+> where the ink is smaller the target is restored by a `::before` pseudo-element.
+
+| count | what |
+|---|---|
+| **135** | occurrences of the literal `44px` in the window's own sheet |
+| **33** | occurrences of `min-height: 44px` |
+| **9** | `::before` hit-band restorations — on `.m2fold`, `.m2ab`, `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and **`.modtempo`** |
+
+Assert all three counts, and assert that every seat, check, preset, bank, hold, transport
+button, macro grip, numbered seat, name field and clear button measures ≥ 44 on its short
+axis in the live DOM. **The `::before` bands mean the INK of `.m2ab`, `.m2move`, `.m2pow`
+and `.m2x` measures 40, not 44** — a mount that "fixes" that to 44 has changed the window.
+
+### 9. THE THREE COPIED DEFECTS — assert they are still there
+
+> **SUPERSEDED FOR THIS MOUNT, 2026-09-06 (wave 69), BY JOSH:** *"The modulation window is broken when
+> we were even working on it on basins so whatever problem it has we will try to fix here."*  All three
+> are FIXED in λWAVES and the three assertions below are INVERTED in `B129`.  The corrections are in
+> `lab/modhost.css` (reach-list 16, 17, 18) and **not one byte of this directory changed**, so this
+> table is still the right acceptance test for a mount that has not been told otherwise, and
+> `lab/mir/PORT-NOTES.md` § THE THREE DIVERGENCES carries the diff for the port back.
+
+A mount that renders these correctly has silently redesigned the window.
+
+| # | assertion |
+|---|---|
+| D1 | `getComputedStyle(.m2pick).backgroundColor === 'rgba(0, 0, 0, 0)'` — the ADD LFO / ADD ENV / ADD AUDIO sheet has no plate, as in `vid/f02.png` |
+| D2 | a `.m2clr` on a control **outside** `.m2root` also has a transparent background, for the same reason |
+| D3 | `getComputedStyle(.m2move).display === 'none'` in both `full` and `minimized` |
+
+### 10. THE STRING
+
+```
+.kwin-chiprail[aria-label="MODULATION window controls"]
+```
+
+Assert the rail's `aria-label` is that string **byte for byte**, and that
+`getComputedStyle(.crail-chip, '::before').backgroundColor` is the pane value from A1 and
+not `rgba(0, 0, 0, 0)`. This is the one failure mode with no visual hint beyond "the chips
+look wrong".
+
+### 11. GROUND TRUTH
+
+`vid/f01.png` … `f07.png` and `modmap/{lfo,env,audio}-card.png`,
+`modmap/macros-transport.png`, at 100 %. If the table above passes and the screenshot
+still does not match, the answer is in EXTRACT files 01–05 — **not in a redesign.**
+
+
+
+---
+
+## <a id="doc-50"></a>DOC 50 · molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/host-contract.md · 2026-09-18
+
+## host-contract.md — what a host supplies, and nothing more
+
+Two files mount this window: `modwindow.css` and `modwindow.js`. They carry their own
+material (twenty `--m2-mat-*` tokens), their own icons, their own geometry laws and their
+own chrome. What they do **not** carry is a theme, a model, and a clock.
+
+---
+
+## PART 1 — THE SIX HOST-SPECIFIC ITEMS
+
+EXTRACT-MODWINDOW.md §5 found six, and four of them are one-word substitutions.
+
+### 1. The id `modwin`
+
+`modwindow.css` reads `#modwin` **164 times**, at specificity `(1,x,y)`. Keep the literal
+id on the window root — `modwindow.js` sets it. If it is genuinely taken, run **one**
+substitution across `modwindow.css` (`#modwin` → `#yourwin`) and pass `host.id`. Do
+**not** demote the id selectors to classes: a host's own `.some-panel button { … }` would
+then win every tie.
+
+### 2. The aria-label `"MODULATION window controls"` — the most fragile thing here
+
+**24 rules** in `modwindow.css` select on this string byte-for-byte — the five the
+window's own sheet always had, plus the 19 chrome rules this port scoped through the
+same hook rather than inventing a second one:
+
+```css
+.kwin-chiprail[aria-label="MODULATION window controls"] .crail-chip::before { … }
+```
+
+`buildChipRail` builds the label as `(title || root.id) + ' window controls'`, so
+**passing `title: 'MODULATION'` is what makes it correct** — and it is the default.
+Translate the title, sentence-case it, or drop it, and the chip rail silently loses its
+material: no error, no console line, nothing but "the chips look wrong".
+
+If a host must rename the window, change all 24 to a `data-*` hook in the same pass —
+one find-and-replace. That removes the trap permanently.
+
+### 3. The accent hues — **this is the parameter. Two numbers.**
+
+```css
+--hue-acc: 172;   --sat-acc: 52%;      /* Accent A */
+--hue-acc2: 288;  --sat-acc2: 75%;     /* Accent B — falls back to A if unset */
+```
+
+Everything else derives, including the ENV's own green
+(`--m2-env-ink: hsl(calc(var(--hue-acc) - 52) calc(var(--sat-acc) + 3%) 66%)`).
+There is **not one literal hue** anywhere in this stylesheet.
+
+The colour law, from the source's own comment (`anim.js:2653`), is not decoration:
+
+> Shape/recess says control · **Accent A** says structural value/selection · **Accent B**
+> says only live modulation/signal · **white** says active interaction/focus.
+
+Selection is an **underline**, never a filled accent chip. That is the single most
+recognisable thing about these controls after the knobs.
+
+### 4. The fonts
+
+```css
+--font-sans: -apple-system, system-ui, sans-serif;
+--font-num:  ui-monospace, Menlo, monospace;
+```
+
+Supply the two names. Every size in this window is a literal and does not move.
+
+Separately: five elements paint with `font: inherit` (`.m2zoom`, `.m2audgrip`,
+`.m2audmac`, `.modxport`, `.modtempo`), so the window's **ambient** font matters. BASINS
+sets it on `body`; a host must set an equivalent on the window's container or on the root
+itself, or those five fall back to the UA font.
+
+### 5. `--ui-scale`
+
+One multiplier on `--touch`, `--fs-*`, `--r-*`, `--sp-*`, `--kwin-bar-h`,
+`--chrome-chip-*` and the whole transport strip. **Supply `1` and every computed value is
+byte-identical to what ships.**
+
+### 6. The persistence keys
+
+BASINS uses nine: `mandel.anim`, `mandel.animPlay`, `mandel.animPanel`, `mandel.win.mod`,
+`mandel.modsize`, `mandel.modcadence`, `mandel.modwin.bars`, `mandel.modwin.workBars`,
+`mandel.modwin.deviceModes`. `modwindow.js` reads and writes **none** of them — it has no
+persistence at all. Rename the prefix in whatever the host's own store is, and remember
+what the window's presentation state actually is: the work-bar lane (top / bottom / hidden), each
+device's mode (F / C / M), and the window geometry.
+
+---
+
+## PART 2 — THE TOKENS. Paste this block into the host's own `:root`.
+
+These are BASINS' shipping values, from `index.html`'s base `:root`. Every one is read by
+`modwindow.css` and declared by nothing in it.
+
+```css
+:root {
+  /* ── the two parameters ─────────────────────────────────────────────── */
+  --ui-scale: 1;
+  --hue-acc: 172;  --sat-acc: 52%;
+  --hue-acc2: var(--hue-acc);  --sat-acc2: var(--sat-acc);
+  --hue-bad: 4;
+
+  /* ── the ink ────────────────────────────────────────────────────────── */
+  --acc:       hsl(var(--hue-acc) var(--sat-acc) 68%);
+  --acc-soft:  hsl(var(--hue-acc) var(--sat-acc) 68% / 0.30);
+  --acc-ink:   hsl(var(--hue-acc) calc(var(--sat-acc) + 3%) 7%);
+  --acc-glow:  0 0 9px hsl(var(--hue-acc) calc(var(--sat-acc) + 8%) 64% / 0.60);
+  --acc2:      hsl(var(--hue-acc2) var(--sat-acc2) 68%);
+  --acc2-soft: hsl(var(--hue-acc2) var(--sat-acc2) 68% / 0.30);
+  --bad:       hsl(var(--hue-bad) 62% 74%);
+  --fg:        hsl(0 0% 100%);
+  --fg-soft:   hsl(210 8% 88%);
+  --dim:       hsl(210 7% 76%);
+  --ink-shadow: 0 1px 2px hsl(0 0% 0% / 0.58), 0 0 5px hsl(0 0% 0% / 0.34);
+  --mark-under: hsl(0 0% 0% / 0.38);
+
+  /* ── the type ───────────────────────────────────────────────────────── */
+  --font-sans: -apple-system, system-ui, sans-serif;
+  --font-num:  ui-monospace, Menlo, monospace;
+  --fs-lead:  calc(13px * var(--ui-scale));
+  --fs-small: calc(10px * var(--ui-scale));
+  --fs-tiny:  calc(9px  * var(--ui-scale));
+  --tr-wide: 0.12em;  --tr-wider: 0.14em;  --w-bold: 650;
+
+  /* ── the grid ───────────────────────────────────────────────────────── */
+  --touch:    calc(44px * var(--ui-scale));   /* THE 44 px LAW's unit */
+  --grip-hit: var(--touch);
+  --r-sm: calc(5px  * var(--ui-scale));
+  --r-md: calc(8px  * var(--ui-scale));
+  --r-lg: calc(12px * var(--ui-scale));
+  --sp-1: calc(3px  * var(--ui-scale));
+  --sp-2: calc(5px  * var(--ui-scale));
+  --sp-3: calc(7px  * var(--ui-scale));
+  --sp-4: calc(10px * var(--ui-scale));
+  --sp-5: calc(14px * var(--ui-scale));
+  --z-win: 12;
+  --kwin-bar-h:          calc(26px * var(--ui-scale));
+  --chrome-chip-disc:    calc(48px * var(--ui-scale));
+  --chrome-chip-target:  max(44px, calc(62px * var(--ui-scale)));
+
+  /* ── the glass ──────────────────────────────────────────────────────── */
+  --glass-hue: 212;  --glass-sat-tint: 12%;  --glass-lum: 17%;
+  --glass-tint: var(--glass-hue) var(--glass-sat-tint) var(--glass-lum);
+  --glass-opacity: 0.46;                     /* floor 0.42, stated in source */
+  --glass-blur: 8px;                         /* hard ceiling 20px, law L1 */
+  --glass-sat: 188%;  --glass-bright: 108%;
+  --glass-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  --glass-border: 0.6px;
+  --glass-border-color: hsl(0 0% 100% / 0.22);
+  --glass-hairline:     hsl(0 0% 100% / 0.11);
+  --glass-sheen:        hsl(0 0% 100% / 0.09);
+  --glass-shadow: 0 3px 13px hsl(0 0% 0% / 0.22);
+  --glass-raise:  hsl(0 0% 100% / 0.05);
+  --bar-raise:    var(--glass-raise);
+  --glass-press:  hsl(0 0% 100% / 0.15);
+  --glass-groove-hot: hsl(0 0% 100% / 0.18);
+  --glass-well:   hsl(var(--glass-tint) / 0.22);
+  --glass-canvas-scrim: 0.26;
+
+  /* ── the bevel's inputs.  ALL OPTIONAL and ALL ADDITIVE: BASINS' glasslight.js
+        samples the picture behind each surface and writes them INLINE on the
+        element.  With no such engine the bevel is `transparent` and NOTHING
+        LOOKS BROKEN — but the names must exist or the box-shadow that reads
+        them becomes invalid and takes the window's shadow down with it. ── */
+  --gl-w: 1.6px;
+  --gl-t: transparent;  --gl-r: transparent;
+  --gl-b: transparent;  --gl-l: transparent;
+  --gl-glow: transparent;
+  --gl-fill: transparent;
+  --gl-fill-a: var(--gl-fill);  --gl-fill-b: var(--gl-fill);
+}
+```
+
+**REQUIRED, and it is one line.** EXTRACT §7.8: `--fill`, `--hit`, `--signal` and
+`--needle` are written *inline on elements* by the paint, and they are four very generic
+names. Custom properties inherit, so a host that declares any of them on `:root` or on an
+ancestor has it inherited *into* these elements and used before the first paint writes the
+inline value — the fallback never fires and the first frame is wrong. Add:
+
+```css
+.m2root { --fill: 0; --hit: 0; --signal: 0; --needle: -150deg; }
+```
+
+**Optional.** `--m2-separation`, written on `<html>` by BASINS' `glass.js`, drives the
+whole material ladder through `--m2-blend`. With neither it nor `--glass-canvas-scrim`,
+`--m2-blend` falls back to `0.26` and the material is exactly what the default install
+paints. There is nothing to supply.
+
+---
+
+## PART 3 — THE FOUR BEHAVIOURAL EDGES
+
+The other project spent a whole mission proving one thing: this window boots on **four
+injected edges** and nothing else. Not on a renderer, not on a scheduler, not on a GPU,
+not on a canvas. **λWAVES already has all four, in `lab/mir/`.**
+
+| edge | what it is | λWAVES |
+|---|---|---|
+| 1 | **the parameter registry** — `has(id)`, `get(id)`, and a `label` per target; it is what makes a control routable, and `m2droppables()` walks it | `lab/mir/registry.js`, `createRegistry()` |
+| 2 | **a target host** — `install` / `sync` / `uninstall` / `available` | `lab/mir/host.js`, `createTargetHost()` |
+| 3 | **a clock that owns modulation time** — the whole of the risk, and six behaviours read the same two numbers (`dt`, wall stamp) and mean different things by them | `lab/mir/host.js`, `createModClock()` |
+| 4 | **presentation + geometry invalidation callbacks** — default no-ops | `lab/mir/host.js`, `createModHost()` |
+
+Plus the model itself: `lab/mir/mod.js` (LFO, ENV, AUDIO, macros, routes, transport,
+serialization, presets) and `lab/mir/curve.js` (the breakpoint mathematics it leans on).
+
+### What the host must do with the tree
+
+`modwindow.js` returns element references and wires nothing. For each of these, the host
+attaches the behaviour and does the painting:
+
+- **the transport strip** — `mw.transport.{xport, tempo, tempoNum, tempoUnit, tempoHz,
+  tempoIn, tap, sync, cad, holds}`. `xport` swaps between the two exported literals
+  `SVG_PLAY` and `SVG_PAUSE` through `innerHTML`. The responsive law is `.tight` (hides
+  the derived Hz) then `.tighter` (also hides the `BPM` unit); **the number itself never
+  goes.**
+- **the preset bar** — `mw.foot.{open, save, name, prev, next, dead}`. `dead` starts with
+  `.off`, which is `display: none`; a warning that is always on the glass is furniture.
+- **the macro rail** — `mw.addMacro({id, kind}, index)` per macro, 1-based. Paint
+  `.vname`, `.vnum`, `.drive`, and write `--fill` (knob) or `--hit` (trigger)
+  inline on `.signal`. The track line under the name is `.m2signal::before` — a
+  pseudo-element. `.m2rowgrip` is the dedicated vertical reorder surface and
+  `.m2slotx` is its lower-half delete action. Compact mode hides the value face
+  while retaining route, master depth and row tools. There is nothing in the DOM
+  to find for the track.
+- **the rack** — `mw.addDevice({id, kind})`, kind `'lfo' | 'env' | 'audio'`. Cards are
+  appended to the horizontal scroller. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
+  presentation tri-state.
+- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; the measuring law is
+  `w = max(60, round(box.clientWidth) || 206)`,
+  `h = max(60, round(box.clientHeight - 14) || 128)`,
+  `px(t, v) = [11 + t·(w − 22), h − 11 − v·(h − 22)]`.
+- **the knobs** — write `--needle` inline on `dev.knobs[k].dial` and paint the arc pack
+  `dev.knobs[k].arc` (`.trk` / `.band` / `.val`, `strokeDasharray`). The host's control
+  layer should add `.kctl` and `.ctl-round` to `.dial`; `modwindow.css` styles all four
+  states (`.kctl`, `.ctl-sel`, `.ctl-frozen`, `.drag`).
+- **routing** — `buildRing(control, o)`, `buildSpan(control, shape)`,
+  `buildClear(control, targetId)`, `buildGhost(text)`. **These attach to the routed
+  control, wherever it lives**, and their CSS is deliberately unscoped for that reason.
+  Rings stack at a 44 px pitch with the CLEAR button 46 px past the end, all by inline
+  `translateY(calc(-50% + Npx))`.
+- **the sheets** — `mw.buildDevicePick()`, `mw.buildMacroPick()`, `mw.buildPresetSheet()`,
+  `mw.buildDeadInspector()`, `buildAudioSheet(dev)`. All four live on the window root and
+  are born `hidden` so the first tap shows rather than hides.
+
+### The size laws, which the host applies and does not invent
+
+`sizeLaw` is exported and is arithmetic only — it never measures the live window.
+
+```js
+sizeLaw.width(['F','C','M', …], { uiScale, ribbon })  // 22·scale + 224 + 14 + 89 + Σ cards + n·7, floor 360
+sizeLaw.height({ uiScale })                           // 98·scale + 368  = 466
+sizeLaw.minHeight({ uiScale })                        // 98·scale + 220  = 318
+sizeLaw.workBars(rackRight, viewport, hasDeadSends)   // -> { left, width: 450, coreW, presetW }
+mw.setViewHeight(windowHeight)                        // writes --m2-view-h, clamped [220, 368]
+```
+
+**The timing bar is 450 px and never changes width.** The preset bar gives up width to it,
+clamped to [244, 294], and only then does the lane stop shrinking.
+
+### Four things a host must not undo
+
+1. **`#modwin.modwin { overflow: visible; contain: layout }`** and
+   **`#modwin.modwin > .kwin-body { overflow: visible }`**. `.kwin` carries
+   `contain: layout paint` precisely so no descendant paints outside a window — a real
+   Android bug. This window undoes half of it because the work bars are *allowed* to paint
+   beyond it. Keep `contain: paint` on the root, or `overflow: hidden` on the body, and
+   the transport strip is clipped with no error.
+2. **The cascade order.** In BASINS the window's own sheet is appended to `<head>` at
+   first open, so it wins every tie. `modwindow.css` reproduces that internally (chrome
+   first, PART B last). Do not load a host sheet after it that can reach inside
+   `.mir-modwindow`. If the host is layered, `@layer modwindow { … }` declared after every
+   host layer does the same job.
+3. **The 44 px law.** `44px` appears 135 times, `min-height: 44px` 33 times, and there are
+   nine `::before` hit-band restorations where the ink is smaller — `.m2fold`, `.m2ab`,
+   `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and `.modtempo`. It is the
+   reason the window works on an iPad and dropping it is the fastest way to make a copy
+   feel wrong.
+4. **`.m2retired` on the window root.** `modwindow.js` adds it; it is what hides the
+   retired tab strip.
+
+
+
+---
+
+## <a id="doc-51"></a>DOC 51 · molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/modwindow/MANIFEST.md · 2026-09-18
+
+## MANIFEST — baseline import and shipping revisions
+
+`modwindow.css` and `modwindow.js` began as BASINS' modulation window. The table
+records the import transformation and the deliberate λWAVES revisions that now
+ship with it.
+
+### modwindow.css
+
+| # | change | why |
+|---|---|---|
+| C1 | The nine `${…}` template holes are substituted with the integers `anim.js` interpolates — 23 occurrences (52, 64, 294, 450, 64, 224, 368, 320, 368). | A `${}` is not CSS. The result is byte-for-byte the text the browser receives in BASINS. |
+| C2 | The baseline import rewrote selector text by the six-branch law printed at the head of PART B. Later rules explicitly revise the macro rail layout and controls. | The namespace keeps the portable window isolated while the current builder and stylesheet remain in sync. |
+| C10 | The macro rail uses fixed row columns, a dedicated reorder grip over a compact delete action, and labelled `ADD MACRO` / `ADD DEVICE` actions; the redundant `OUT` caption and add-device chip are gone. | Route, master depth and row tools stay fixed when the value face is hidden. Stable macro ids keep routes attached when rows move. |
+| C3 | **Not scoped, deliberately:** the five `:root`-subject blocks (the 20 `--m2-mat-*` tokens and the three motion tokens); the 5 `.kwin-chiprail[aria-label="MODULATION window controls"]` rules; 43 selector parts whose subject is `.m2ghost`, `.m2ring*`, `.m2clr*`, `.m2span*` or `[data-m2target]`. | Scoping any of these would **change what paints**. The chip rail is a DOM *sibling* of the window, so tokens on the window root would never reach it. The routing overlays are appended **into the routed control**, which `m2droppables()` takes from the app-wide `kit.controls` registry — in BASINS, `colors.js` registers 8 such controls in another window. Scoping them un-paints routing onto host controls. Every one of these names is already `--m2-*`, `.m2*` or a byte-exact aria-label, so none of them can fight a host. |
+| C4 | Restored one character: the `}` that closes `@media (prefers-reduced-motion: reduce)`. | `modwindow-01-anim.css` stops at `anim.js:3306`; the template literal actually runs 1782–**3307**. Without it the sheet is not valid CSS. |
+| C5 | 44 chrome rules brought, each labelled with its `index.html` line and its original selector, in ascending source order, **before** PART B. | The window sits in this chrome. Everything else — 117 `:root.skin-frost` rules, `.jwin*`, `.kwin-halo` / `.kwin-grip` / `.kwin-edge` (this window is `resizable:false`), `.kwin-chip-contentbar`, `.klock`, `.cpick`, `#banner-close`, `#zoe`, `#nebula-card`, `.save-sort-chip`, `:root.window-close-mode-*` — is not needed and is not here. Without `.skin-frost` the classic connected form paints, and it is correct and complete. |
+| C6 | Five of those 44 come from EXTRACT **file 04**, not file 02: the `.glass, .panel, .chip` recipe and the four `.kctl` rules. | `#modwin` reads its border-width and style from `.glass`; so do `.m2ppick.glass` and `.m2deadpick.glass`. `.kctl` / `.ctl-sel` / `.ctl-round` / `.ksel` come from `registerControl` and file 01 styles them but never declares them. |
+| C7 | Two of those 44 come from **`index.html` directly**: `button` (4802) and `button:active` (4812). **They are in no EXTRACT file.** | File 02's filter kept "every rule whose selector names `kwin` or `modwin`", and `index.html` has exactly four bare element selectors — `html`, `body`, `button`, `button:active`. **Measured headless, with and without:** 44 of the window's 48 buttons lose `cursor: pointer`; `.m2zoom`, `.m2audgrip`, `.m2audmac`, `.modxport` and `.modtempo` fall back to the UA font at 13.33 px because they rely on `font: inherit`; `.m2pickb` loses its `5px 9px` padding for the UA's `1px 6px`. |
+| C8 | Three chrome selectors trimmed or widened where the port's scope demanded it: `.jwin` dropped from `--glass-bevel` and from `.kwin.resizing`; `.panel, .chip` dropped from the glass recipe; the three `.kwin-tab` rules gained a second arm for the chip rail. | `.jwin`, `.panel` and `.chip` are other BASINS surfaces. The chips **are** `.kwin-tab` (`button.kwin-tab.crail-chip`) and the rail is outside the window, so the descendant scope alone would not reach them. |
+| C9 | **NOT added:** `.m2root { --fill: 0; --hit: 0; --signal: 0; --needle: -150deg; }` (EXTRACT §7.8). | It is an added rule, not a scoping change. It is a **required line in `host-contract.md`** instead, quoted verbatim, so the decision stays Josh's. |
+
+### modwindow.js
+
+| # | change | why |
+|---|---|---|
+| J1 | The element helper is `m2mk`, not `mk`. | EXTRACT §7.4: `window.js` exports a different `mk(tag, cls, txt)` whose third argument is TEXT and which does not append. One mechanical rename; zero behaviour change. |
+| J2 | `m2mkBarGrip` and `m2preDel` are not built. | Both are dead in the source and both are named as traps. Their CSS travels; their JS must not. |
+| J3 | It builds and does not wire. No model, no registry, no persistence, no paint. | The four host edges are the host's. See `host-contract.md`. |
+| J4 | Every model-derived `d` attribute is emitted **empty**: the six `.m2gl` preset glyph paths, the editor's `.m2path` / `.m2fill`, `.m2lfominshape > path`, `.m2lfocmpshape > svg > path`. | These are *sampled from the model* so the button can never draw a shape the engine would not produce. Geometry is layout; those paths are not. |
+| J5 | `dirPrev` and `dirNext` are added to `GLYPHS`, verbatim from `glyph.js:163` and `:166`. | **They are missing from EXTRACT file 05**, which scanned only the direct `setGlyph(...)` calls; these two reach `setGlyph` through `buildPresetStrip`'s local `btn()` helper (`anim.js:3809, 3811). They are the ◀ ▶ beside the name field in every one of Josh's frames. Without them the two buttons render the literal text `dirPrev` / `dirNext`. |
+| J6 | The two visible strings that say **MANDELBROT** become `{factory}`, default `'FACTORY'`, in `COPY`. | EXTRACT §5: "a word, not a mechanism". Set `host.copy.factory` to restore it. |
+| J7 | `COPY.knobs[…]` carries BASINS' `.m2kends` range labels as literals though the source derives them from the model (`String(M.ENV_MAX_S) + 's'`, `String(M.STEPS_MAX)`, …). | `#modwin .m2kends { display: none }` — nothing paints them. Overridable through `host.copy`. |
+| J8 | `data-reopens-window` on every chip is the literal `'false'`. | That is what all five of this window's chips resolve to (`reopensWindow: false` on the three `chipItems`; drag and close have their own structural paths). |
+| J9 | Macro rows expose a two-part reorder/delete tool and no route/OUT text. The rail exposes `ADD MACRO` and `ADD DEVICE`; device construction no longer needs a separate add-chip sentinel. | Reordering remains available after the value face is hidden, compact rows stay aligned, and both creation actions live in one predictable place. |
+
+### COPIED BROKEN — recorded, not fixed. These are Josh's to decide.
+
+| what | evidence |
+|---|---|
+| **`.m2pick` renders with no plate.** It reads `--m2-plate`, declared on `.m2root`; both `.m2pick` sheets are appended to the `.kwin` root, a *sibling ancestor* of `.m2root`. The substitution is invalid at computed-value time and `background` falls back to transparent. | `vid/f02.png` — the ADD LFO / ADD ENV / ADD AUDIO sheet has the cards showing through it. Measured in the staged copy: `rgba(0, 0, 0, 0)`. The fix, if wanted, is one word: add `glass` to the class string, exactly as `.m2ppick` and `.m2deadpick` already do. |
+| **`.m2clr` has the same defect, and the extraction does not name it.** `.m2clr { background: var(--m2-recess-deep) }` (file 01 line 603) and `--m2-recess-deep` is declared on `.m2root`; `m2ensureClear(targetId, host)` appends the button **into the routed control**, which for a host-registered control is outside `.m2root`. | `anim.js:5114`. Every CLEAR button on a control outside the modulation window is transparent. |
+| **The ◂ ▸ reorder buttons never paint, in any mode.** `.m2dev:not(.m2min) .m2move { display: none }` (`anim.js:2597`) and `.m2dev.m2min .m2move` is in the folded-strip hide list (`anim.js:2107`). | Measured: `display: none` in both `full` and `minimized`. `.m2grab`'s own aria-label still promises "The arrow buttons beside it do the same thing one place at a time." The buttons are built and wired; the CSS hides them. |
+| **The `.m2ribbon` class is never applied to anything.** `m2SetRibbon` only *removes* it, from `panelWin.root` and from `m2root`, "defensively". | `anim.js:7118–7119`, whose own comment says the ribbon name "no longer creates a second CSS presentation". The 21 `.m2ribbon …` rules in this sheet are dead, and EXTRACT §3.4's "ribbon form" table describes a form that cannot be reached. They are copied anyway, and cost nothing. |
+
+### THINGS IN THE EXTRACTION THAT TURNED OUT WRONG
+
+1. `modwindow-01-anim.css` is **missing its last line** — the `}` closing the reduced-motion `@media`. See C4.
+2. `modwindow-04-material.css` **is not valid CSS**: an orphan `html, body {` at line 60 with no declarations and no close, and an unclosed `@supports` at line 210. Brace-matching runs to EOF; the five rules taken from it were lifted by anchored regex instead.
+3. `modwindow-05-glyphs.js` misses **`dirPrev` and `dirNext`**. See J5.
+4. `modwindow-02-chrome.css` misses the **`button` reset**, which its own filter could not see. See C7.
+5. §3.4's 44-px table names nine `::before` hit bands "on `.m2fold`, `.m2ab`, `.m2move`, `.m2pow`, `.m2x`, `.m2grab`, `.m2ring`, `.m2clr` and **`.m2swapbadge`**". `.m2swapbadge` is not a hit band — it is a `pointer-events: none` 44 × 44 indicator. The ninth `::before` is **`.modtempo`**, which the same paragraph then describes separately. The count of nine is right; one name is wrong. All nine are present and verified.
+6. §3.4 gives `.m2col { width: 92px }` and `.m2rt { width: 104px }`. Those are base values that **no FULL card uses** — each kind re-grids the body. Measured: AUDIO `.m2col` 88, ENV `.m2rt` 90, LFO's `.m2col` and `.m2rt` are full-width grid rows (346 at a 360 card).
+7. §3.4's frame table gives `.m2head` height 48 px. That is the **content** box: `.m2head` also carries `padding: 2px 5px` and there is **no global `box-sizing: border-box` in BASINS** (the only bare `*` rule in `index.html` sets `transition-duration`), so the border box is 52. Measure `getComputedStyle(...).height`, not the rect.
+
+
+
+---
+
+## <a id="doc-52"></a>DOC 52 · molecular-waves-2026-09-18/scratch/old/lab/mir/modulation/PORT-NOTES.md · 2026-09-18
+
+## lab/mir — the port notes
+
+*What was vendored, from where, what was forced, and what was deliberately left alone.
+Read this before you touch `mod.js` or `curve.js`. Nothing in this directory is committed
+by the wave that wrote it.*
+
+### What is here
+
+| File | Origin | Status |
+|---|---|---|
+| `mod.js` | vendored | the modulation model — LFO, ENV, AUDIO, macros, routes, transport arithmetic, serialization, presets |
+| `curve.js` | vendored | the breakpoint-curve mathematics `mod.js` leans on |
+| `glyph.js` | vendored | **wave 55** — Josh's own glyph library: one SVG drawing per meaning, on a 24-unit grid. The rack's header chips and the two new float chips are drawn from it |
+| `registry.js` | **ours** | MIR edge 1 — the parameter registry |
+| `host.js` | **ours** | MIR edges 2, 3 and 4 — target host, clock, presentation |
+| `PORT-NOTES.md` | **ours** | this file |
+
+Proof: `node tests/mir.test.mjs` — 98 gates (53 at the port, 71 after wave 60's curve
+section, 75 after wave 61's bipolar route, 87 after wave 63's model version and header count,
+98 after wave 65's arm and resume law). It was deliberately not in `test.sh` when this
+was written; **wave 52 adopted it** (`MI_RC`, folded into `NODE_RC`), because wiring it in
+belonged to the rack wave, which owns that file.
+
+### Provenance
+
+Both vendored files were taken on **2026-09-05** from the MANDELBROT project's `app/` directory —
+`$MB/app/`, where **`MB` is wherever that repository is checked out on the machine doing the merge**.
+
+*(WAVE 68: this document and the three vendored headers used to print an absolute path from the
+machine they were taken on. These files SHIP — `dist/` serves them publicly — and dossier §27 asks
+for no accidental directory leakage, while this build's own `NOT SHIPPED` list gives "names local
+absolute paths" as a reason to withhold a directory. Either the rule applies or it does not. The
+provenance is unchanged and the diff command below still works; it takes `MB` from the environment
+instead of from one person's home directory.)*
+
+| File | Lines at take | sha256 of the source |
+|---|---|---|
+| `mod.js` | 2978 | `d76cc74f886357a35794519e0a953f8f0328abea91443a47811e26dec5777b74` |
+| `curve.js` | 416 | `9991eb71da046385d43cd51c8b63ab81bb2aac82fdd122a08d1dbaa7d089b485` |
+| `glyph.js` | 453 | `513cd3120ec539f13e139d940d089f29cf71cbbc5cad427445351fb6c3ab3831` |
+
+### THE LAW
+
+**These two files are maintained by DIFF against their source, never rewritten.**
+
+An upstream fix has to still be a three-line patch a year from now. So:
+
+- do not reformat, re-order, tidy, or "improve a comment" in either file;
+- do not point a linter or a formatter at this directory;
+- every forced change is **one line of code**, carries a `λWAVES: forced edit n/N` marker in
+  a comment on the line(s) above it, and is listed in the table below with its reason;
+- if you need different behaviour, **change `host.js`** — the host is ours, those two
+  files are theirs.
+
+Taking an upstream fix:
+
+```sh
+MB="${MB:?set MB to your local checkout of the MANDELBROT project}"
+diff -u "$MB/app/mod.js" lab/mir/mod.js   # expect: EIGHT hunks (measured 2026-09-06)
+```
+
+Eight and not nine for eight edits: `7/8` and `8/8` sit three lines apart, so `diff -u`'s context
+merges them into one hunk. If that command ever prints more than **eight** hunks in `mod.js`,
+somebody broke the law and the next upstream merge is going to be archaeology.  Every one of the eight is a marked line next to a
+comment that names its number, and `tests/mir.test.mjs §16` UNDOES all eight by their exact text and
+asserts the result is byte-identical to the source — so the law is gated, not merely written down.
+**And wave 63 gated the one thing §16 could not see**: it strips the provenance header before it
+diffs, so the header's own *"Forced 1 edit — every other byte below this header is the source"* stayed
+in the file for a whole wave with six edits under it.  §16 now reads the number out of the header and
+fails unless it equals the markers in the body and the entries in its own table. **If you add an
+edit, the header's count is part of the edit.**
+
+### The forced edit list — 10 edits, total
+
+`mod.js` carries **eight**, numbered `1/8` … `8/8` in the file itself. `glyph.js` carries two,
+which are a dead import and its one call site and are not numbered because they are not a
+behaviour change.
+
+| # | File | Line (ours) | Change | Why it was forced |
+|---|---|---|---|---|
+| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js`: `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). |
+| 2/8 | `mod.js` | `newRoute` | `bi: !!o.bi,` added to the route record | **wave 61 · THE BIPOLAR ROUTE.** See the block below. |
+| 3/8 | `mod.js` | `routeInfluence` | `lerped - r.min` → `lerped - (r.bi ? (r.min + r.max) / 2 : r.min)` | The one expression the flag is read in. |
+| 4/8 | `mod.js` | `setRouteRange` | `if (patch.bi !== undefined) r.bi = !!patch.bi;` | The flag is patchable, exactly like `min` and `max`. |
+| 5/8 | `mod.js` | `serialize()` | `bi: r.bi ? 1 : undefined` on the route record | It travels. `undefined` is dropped by `JSON.stringify`, so a rack with no bipolar route is byte-identical on the wire to one written before the edit existed. |
+| 6/8 | `mod.js` | `deserialize()` | `{ id: String(r.id), bi: !!r.bi }` | It comes back. **A flag that does not survive a preset does not change a control, it changes the sound of every patch ever saved with it.** |
+| 7/8 | `mod.js` | `MOD_STATE_V` | `4` → `104` | **wave 63 · THE VERSION THE BIPOLAR FLAG MADE NECESSARY.** See the block below. |
+| 8/8 | `mod.js` | `MOD_STATE_READS` | `[3, 4]` → `[3, 4, 104]` | So this build still reads every rack and preset written before wave 61. The refusal only runs the other way. |
+| g1 | `glyph.js` | `import { publishM4 }` | commented out | `overlay.js` is MANDELBROT's M4 diagnostics sink and has no counterpart in this lab. An unresolvable import is a module that does not load at all, so this one is not optional. |
+| g2 | `glyph.js` | `try { publishM4(…) }` | commented out (the two lines of the one statement) | The same sink at its one call site. Our gate reads the DOM — `data-gly` on every chip — rather than a published surface, so nothing is lost. |
+
+#### Why the bipolar route had to be a model edit (wave 61)
+
+Josh's brief for the macro router: *"clicking can choose 'center of dial' or 'highest dial'
+(where the arc goes from 0 to the dial current)."*  With
+`offset(m) = (r.max − r.min) · m · masterDepth` the second of those is already expressible
+(`min = b, max = 0`), and so is its opposite (`min = 0, max = 1 − b`).  **The first is not**,
+because the model's offset is **always 0 when the macro reads 0** — so a route whose base is
+the CENTRE of the swing needs a negative offset at `m = 0`, which the arithmetic cannot
+produce.
+
+Three workarounds were tried before the file was touched, and all three fail honestly:
+inverting the source still yields 0 … 1; two opposed routes both start at offset 0; and
+shifting the base down by a half-span would produce the right *picture* by **destroying the
+user's number** — which is precisely the failure `registry.js` exists to prevent
+(*"the base is the only copy of that number in the program"*, ANTI-PATTERN 13).
+
+So four touches, in five new hunks, each marked and each undone by the gate.  `diff -u` against
+the source grew from **two hunks to seven** — the provenance header plus the six marked ones — and
+an upstream fix is still a patch.  **Half of what Josh asked for is not worth protecting a
+two-hunk diff.**
+
+#### Why the model version had to move, and why it moved to 104 (wave 63)
+
+Edits 2/8 and 6/8 changed **what a stored route means**. A rack carrying `bi`, read by a build that
+took an upstream `mod.js` and did not re-apply those two markers, drops the flag; `routeInfluence`
+then measures from `r.min` again and the base walks from the *centre* of the swing to its *floor* —
+**30 % of scale at the macro's middle**, silently, on the second open. Measured:
+
+```
+THIS build (bi honoured):  macro 0 -> 0.2000   0.5 -> 0.5000   1 -> 0.8000
+without 2/8 + 6/8:         macro 0 -> 0.5000   0.5 -> 0.8000   1 -> 1.1000
+```
+
+A version stamp is the only thing such a build already reads, and at `MOD_STATE_V = 4` the change was
+**version-indistinguishable**. It is 104 now, and `MOD_STATE_READS` is `[3, 4, 104]`:
+
+- **our preset opened by a build without the edits** — `modStateReadable(104)` is false against that
+  build's `[3, 4]`, so `presetApply` refuses it *loudly*, by machinery that was already there;
+- **an upstream v4 rack opened here** — still read, and there is nothing to migrate: a rack with no
+  `bi` on any route is byte-identical on the wire to one written before the flag existed;
+- **a future upstream v5 opened here** — refused rather than half-read, which is correct, because we
+  have never seen it. **That is why the number is 104 and not 5.** The λWAVES model-version namespace
+  is `100 + the upstream version this model is derived from`, so ours can never collide with an
+  upstream sequence, and the divergence is legible in the number itself.
+
+**The rack road needed a second half, because it carries no stamp at all.** `mod.js` stamps `modV` on
+a PRESET record only; the model's own `serialize()` emits no version and `deserialize()` checks none —
+so a project file and this browser's `localStorage`, the road the lab uses every session, were
+version-blind. `lab/rack.js` stamps `v` onto the rack it writes (an additive key the model ignores in
+both directions) and `restoreModulation()` **refuses a stamp this build cannot honour**, saying both
+numbers on the card. An **absent** `v` is not a refusal: every rack written before wave 63 has none
+and means "predates the stamp", which is the reading `mod.js` prescribes for an absent preset stamp.
+`rack.js` is ours, so that guard survives an upstream re-take of the vendored file — which is exactly
+the scenario this file warns about.
+
+What was NOT edited, and why it does not need to be:
+- **`targetPos` / `targetValue`** only sum `influence`, so they follow for free.
+- **The `firstLerp` compatibility branch** (`!Number.isFinite(base)`) is no longer *the* lerp
+  for a bipolar route. That branch exists only for callers that omit `base`, which the engine
+  never does — it is stated here rather than pretended to be unaffected.
+- **`dump()`'s route block** carries no `bi`. `routeList()` hands back the live route objects,
+  so `r.bi` is readable without a sixth touch in a diagnostics-only serializer.
+- **Per-route BYPASS** (`r.off`) is Serum's second useful menu item and there is no field for
+  it. It is **not** in v1: it would have been a fifth touch bought for a convenience, where
+  `bi` bought a mode Josh named.
+
+`curve.js`: **zero** content edits. It is leaf mathematics with no identity of its own.
+
+`glyph.js`: **zero drawings touched.** Not one path, viewBox, stroke weight or name was changed — these are
+Josh's own marks and the whole point of vendoring rather than copying is that a correction to one of them
+upstream is still a three-line patch here. Sizing is the CALLER's by the module's own design (width/height
+are presentation attributes, the lowest-priority source of a value), so `lab/lab.css §55b` sizes every chip
+and no call site in this lab passes a pixel count.
+
+Both files also carry a prepended provenance header. That is the only other difference,
+it is one hunk at line 1, and it is what makes the diff above legible.
+
+#### The module system forced nothing
+
+`mod.js`'s only import is `./curve.js`, and `curve.js` sits beside it here, so the import
+graph needed no edit at all. `mod.js` boots under node **verbatim**, including
+`presetList()` — its `localStorage` reads are already inside a `try` that returns `null`
+when there is no storage.
+
+### What was deliberately NOT edited
+
+- **`FACTORY_PRESETS`** (≈90 lines of data, ids `freq` · `phase` · `bright` ·
+  `pal.e1.phase` · `pal.e2.phase`). These are BASINS target ids and they do not exist
+  here. Editing that block would be the rewrite this port exists to avoid, and it is not
+  needed: every route in them lands on a target our registry does not have, so
+  `syncDormant()` marks them **dormant** on the first `targets.sync()` and they sit there
+  inert, keeping their settings, exactly as the dormancy law intends. That is the designed
+  behaviour for a preset written against a foreign target set, not a bug we are tolerating.
+- **`PRESET_FOLDER_FACTORY = 'MANDELBROT'`.** Left as the honest provenance of the presets
+  it names. Relabelling that folder `λWAVES` while its contents route to `pal.e1.phase`
+  would be a *worse* lie than the foreign name. If the rack wave wants the factory folder
+  gone from the preset sheet it should filter `presetList()` on `factory: 1` in the view,
+  or empty the exported `FACTORY_PRESETS` array in place from `host.js` — both are host
+  decisions and neither is a file edit.
+- **`PRESET_FOLDER_DEFAULT = "Josh's Collection"`.** Correct in both projects.
+- **The AUDIO model.** `mod.js` carries the whole normalized follower/band/onset model.
+  It has no browser dependency (that lives in their `audio.js`, which we did not take) and
+  costs nothing dormant. If λWAVES ever wants audio-reactive modulation it is already here.
+
+#### What glyph.js was taken FOR (wave 55)
+
+The lab was spelling its header marks as literal characters — `×`, `▾`, `⇄`, `i`, `+`, `⇱`, `⤢`. Every one of
+those is a request to whichever font the device resolves, and glyph.js's own header lists the three ways that
+goes wrong (iOS substitutes a colour emoji; the advance width is the font's business, not the layout's; a
+missing codepoint is a notdef box). Wave 55 replaced the ones with a drawn equivalent and left the ones
+without, and REPORT.md wave 55 lists both sides of that line so the polish wave knows what is outstanding.
+The two NEW chips this wave needed — pop-out / dock, and compact / full — were already in the library:
+`north` and `reopen`, `compact` and `expand`.
+
+### THE THREE DIVERGENCES (wave 69) — the plugin's own defects, fixed HERE, and the diff for the port back
+
+`lab/mir/modwindow/ACCEPTANCE.md` §9 asks a mount to **reproduce** three measured defects, on the
+stated grounds that a mount rendering them correctly has silently redesigned the window. **Josh has
+ruled the other way**, 2026-09-06: *"The modulation window is broken when we were even working on it
+on basins so whatever problem it has we will try to fix here."*
+
+So all three are fixed — and **the artifact's own two source files, `modwindow.js` and
+`modwindow.css`, are still byte-identical to the staged copy** (only `ACCEPTANCE.md` gains a note
+saying its §9 is superseded for this mount, so a future reader is not left with a spec that
+contradicts a gate), because every correction is written in `lab/modhost.css`, which is ours. That is what keeps the
+reciprocal port back to MANDELBROT a **diff of three lines in a host sheet** rather than archaeology
+in a 132 KB stylesheet. Each is numbered in the reach list there (16, 17, 18) with its reasoning.
+
+| # | The defect, as measured | The fix, and where it lives |
+|---|---|---|
+| D1 | **`.m2pick` renders fully transparent.** The ADD LFO / ADD ENV / ADD AUDIO sheet and the macro sheet beside it read `--m2-plate`, declared on `.m2root`; both are appended to the WINDOW root, a *sibling* subtree. Invalid at computed-value time → `background` falls back to transparent. `vid/f02.png`. | `modhost.css` 16: `background-color: var(--m2-plate, var(--m2-mat-chassis))`. The fallback names the ladder's own chassis, which IS declared in this build's seat and IS themed, so the sheet wears exactly the plate it was written for. A `.m2pick` inside `.m2root` is unchanged. |
+| D2 | **`.m2clr` has the identical defect.** It reads `--m2-recess-deep` from `.m2root` while `m2ensureClear()` appends it INTO the routed control, which for a host-registered control is outside `.m2root` — so every CLEAR on a control outside the plugin is transparent. `anim.js:5114`. | `modhost.css` 17: `background-color: var(--m2-recess-deep, var(--glass-well))`. Outside the window the fallback is the HOUSE recess, which is themed and is the right answer twice over — a button that lands on a λWAVES dial should wear the λWAVES well. Nothing in this build BUILDS one (the overlay split, wave 64), so this is a fix for the port back and for any host that does route the artifact's own overlay. |
+| D3 | **The ◂ ▸ reorder arrows have never painted a pixel.** Built by `buildDevice()`, wired here to `M.moveSource`, and hidden by three rules that between them cover every mode: `.m2dev.m2cmp .m2move` (776), `.m2dev.m2min .m2move` (813) and `.m2dev:not(.m2min) .m2move` (1303). | `modhost.css` 18 brings them back in **FULL mode only**. Only 1303 is the accident; the other two are the artifact's own stated reasoning (*"Compact spends header room on identity and status, not clipboard/reorder"*, and a 64-px folded strip has no room) and they STAY. The run order that IS the fire order is now changeable without a drag. |
+
+**AND `MANIFEST.md`'s PRESCRIPTION FOR THE FIRST TWO IS WRONG FOR THIS MOUNT**, which is worth
+writing down because it is the obvious thing to try and it fails silently. It says the fix is *"one
+word: add `glass` to the class string, exactly as `.m2ppick` and `.m2deadpick` already do."* Those two
+sheets carry **no background of their own**, which is the whole reason `glass` works for them.
+`.m2pick` does — `.mir-modwindow .m2pick { background: var(--m2-plate) }` at (0,2,0) — and **a
+declaration that is invalid at computed-value time still WINS the cascade first and only then computes
+to `unset`**. `.glass` is (0,1,0) and loses; `.m2clr`'s own (0,1,0) beats `.glass` on source order,
+since `modwindow.css` loads after `skin.css`. The word would have changed nothing and the gate would
+have stayed green on `rgba(0, 0, 0, 0)`. **Give the var a reachable value instead.**
+
+**The gate that used to pin them is the gate that now proves them fixed.** `B129`'s `copiedBroken`
+arm is `fixed` and asserts the opposite of what it asserted, and `B131`'s clear-button measurement
+asserts a real plate. A gate that pins a defect is the defect (ANTI-PATTERN 13), and the way to
+retire one is to invert it in the same wave that fixes what it pinned — not to delete it.
+
+### THE PLUGIN WEARS THE HOUSE GLASS (wave 69)
+
+Josh, three times, most recently against his own screen recordings: the ABOUT card and the KEYS sheet
+wear our glass with the field's colour coming through them, and the plugin beside them was *"a flat
+dark slab"*. It was never a colour mismatch — wave 66's `hsl(212 14% 13%)` and the house's
+`hsl(214 16% 13%)` are `rgb(28, 33, 38)` either way. It was that **reach-list 15 pinned the window
+opaque at a specificity CARD STYLE cannot reach**, so every other card in the lab went REFRACTIVE and
+this one stayed a plate. The seat's private `--glass-hue / -sat-tint / -lum / -tint / -opacity` are
+deleted, `--m2-mat-pane` is `hsl(var(--glass-tint) / var(--m2-scrim))` with the house's own tokens,
+and `#modwin` answers the card switch like `.dev` does. **One exception, stated in the sheet**: on the
+LIGHT theme it keeps a pane, because the artifact's ink ladder is 52 white-alpha rungs on both themes
+by the port's own standing decision, and white ink on a transparent card over a near-white stage is
+not a style. Flip the ink and that exception goes.
+
+### What we did NOT port, and will not
+
+- **`anim.js` (9573 lines) — their modulation WINDOW.** Josh's word for its macro surface
+  is *buggy*. Board #34 writes our own view in kit.js idiom.
+- **`window.js` (4727 lines) — their WindowKit.** Our rack is our window kit.
+- **`basins-modulation-{host,targets,presentation}.js`.** Read as the specification of
+  what a host must supply; `host.js` is our answer to the same question. Their
+  `entryFreqPos`/`entryFreqRaw` constants (0.05 – 20 Hz) are reproduced exactly so a rack
+  serialized in one project reads the same in the other.
+
+### The one behavioural thing the vendored file does that will surprise you
+
+`M.advance(dt, wall)` treats its two arguments completely differently depending on the
+sync mode:
+
+- **wall sync** (the default): `beats` is *derived* from the absolute wall stamp —
+  `anchorBeats + bpm/60 * (wall − anchorAt)`. Clamping `dt` does nothing to it. Only
+  `reanchorTransport()` moves it.
+- **free sync**: `beats` is *accumulated* from `dt`. Clamping `dt` loses time here, which
+  is precisely what the clamp is for.
+- **envelope time** is `dt`, always, in both modes.
+
+`host.js` documents this at length because it is the trap in the whole architecture.
+
+---
+
+## What the rack wave must know
+
+### 1. The clock is not the clock
+
+λWAVES already has a `Clock` (`lab/clock.js`). **It must not be given this job.** They are
+two logical times over one wall clock:
+
+| | `lab/clock.js` | `lab/mir/host.js` `createModClock()` |
+|---|---|---|
+| owns | physics time *t*, atomic units | modulation time: beats, seconds, phases |
+| advances at | `rate` a.u. per wall second | BPM, or free Hz, per wall second |
+| paused by | the transport button | its own `playing`, and the availability gate |
+
+If they were one clock: pausing the physics would freeze an LFO that is animating the
+camera, and `transport.rate` — which is itself a modulation **target** in the shipped
+catalogue — would be modulating the thing that decides how fast the modulator runs.
+`tests/mir.test.mjs` gate 15 demonstrates exactly that, with an LFO swinging the physics
+rate from 4 to 100 a.u./s while the modulation transport keeps advancing 0.125 beats per
+0.125 s step.
+
+The rack's job is to call **one** function, once per frame, with a monotonic wall stamp
+in **seconds**:
+
+```js
+clock.advanceTo(performance.now() / 1000);
+```
+
+and to pass `present: (reason) => schedule(TIER.PRESENT)`.
+
+### 2. The six meanings of `dt`
+
+Documented at length in `host.js`'s header. The trap in one line: **clamping `dt` does
+not slow a wall-synced LFO**, because under wall sync `beats` is derived from the
+absolute stamp. Only `reanchorTransport()` moves it. The 0.25 s clamp (`MAX_WALL_STEP`,
+the source's own number) bites free sync and envelope time and nothing else.
+
+### 3. The pause law is four lines and all four matter — and wave 65 put a FIFTH above them
+
+Ported verbatim from the source's `livePos()` into `createModClock`:
+
+1. `targetValue()` returns **NaN** → no live route, or every route bypassed → the
+   parameter goes back to the user's knob.
+2. not source-driven (a hand macro) → keep the modulated value, **even stopped**. A hand
+   does not let go because the clock did.
+3. running → the modulated value.
+4. stopped and source-driven → `HOLD` freezes it, `BASE` returns it to the knob.
+   **`BASE` is what ships.**
+
+**THE ARM (wave 65) IS NOT A PAUSE, AND LINE 2 IS THE WHOLE REASON IT CANNOT BE ONE.**
+Josh asked for a MOD button beside play/pause: *"When this is on, the modulations are
+active and the parameters move on all the racks."*  Off has to mean every routed control
+sits on the number the hand left it on — and a stopped transport does **not** deliver
+that, because line 2 keeps a hand macro's value on its target for as long as the macro
+holds it.  So `clock.setEnabled(false)` sits ABOVE all four lines and returns the base for
+every target, hand macros included.  It deliberately does **not** touch `playing`: the
+modulation transport keeps its own position through a disarm, so re-arming picks up the
+rack the user left rather than one that quietly stopped.
+
+**THE ONE EXEMPTION IS `stepping`, AND IT IS THE RECORDER'S.**  `render-exact.js`'s
+`modulation: 'drive'` pin stops the clock and then calls `step(1/fps)` per frame, and that
+door applies as though running (line 3's `stepping > 0`).  An arm that reached inside
+`step` would render an exact-period take with every modulator flat while every witness the
+renderer checks — `LW.mod.running` false throughout — still passed.  The arm is therefore
+read only where `stepping === 0`, and `tests/mir.test.mjs §23b` proves 40 steps are
+**byte-identical** armed and disarmed, and that a 120-frame bar still closes either way.
+
+### 3b. The resume law (wave 65): three chips, and the beat is the one thing that is GLOBAL
+
+`resumeGrid(sources)` in `host.js` is a PURE read of the rack that says which of the
+ported window's own chips claims the play edge.  Two of the three were already the model's:
+**ANCH** is `modPlayEdge`'s middle branch plus the re-anchor (the beat is continuous, so
+the phase resumes exactly where the pause caught it), and **TRIG** is its first branch
+(`triggerSource` rewinds the phase).  **BPM** is the one this file adds: under a bar sync
+mode a synced source's phase IS `frac(beats / beatsPerCycle)`, so "jump to the truncated
+note" cannot be done per source — it is a move of the one global beat, floored to the
+COARSEST live note, which is the only grid on which every faster note also has a boundary.
+ANCH outranks it; TRIG on a **synced** source claims the grid at its own note, because
+there a rewind the next frame overwrites is a control that changes nothing.  Under FREE
+sync the beat is left alone: the phase is the source's own there and `modPlayEdge` already
+floors it.  `applyResume()` runs before `modPlayEdge`, and `placeOnResume()` after it —
+a `dt = 0` EDIT that puts every synced source where the beat says it is, so the resume's
+own `applyAll(true)` does not push one frame of a transient 0 out onto every dial.
+
+### 4. `mod.js` is a module SINGLETON
+
+There is one rack per page. Two modulation windows would share one model. Every test rig
+calls `M.modReset()` first for exactly this reason. If per-Card modulation is ever
+wanted, that is a model-factory extraction — the source project lists it as its own step 8
+and rates it RED.
+
+### 5. A rack serialized MID-RUN is idempotent, not byte-identical
+
+A source-driven macro's `value` is a live read-out of its source, and a load starts at bar
+1 with phase 0 (the model's own documented law). So `serialize → deserialize → serialize`
+differs on that one field the first time and is stable thereafter. **Do not write a
+"modulation is dirty" check that compares serializations of a running rack.** A rack at
+rest round-trips byte for byte.
+
+### 6. Two things the rack must wire that are stubbed here
+
+- **`available()`** — the capability gate, BASINS's `flowActive`. Defaults to `true`.
+  The right answer is probably "is the field reader live", the same question
+  `wState`/`gov` already answer. Until it is wired, modulation will run while the
+  instrument cannot show it.
+- **`present(reason)`** — defaults to a counted no-op. `schedule(TIER.PRESENT)` goes
+  here. The reasons already emitted are `transport-start` · `transport-stop` ·
+  `modulation-output` · `manual-step` · `paused-wall` · `transport-bpm` · `pause-mode` ·
+  `hold-start` · `hold-end` · `mod-arm` · `mod-disarm` (wave 65), plus `initial-output`
+  from whatever installs the rack.
+
+### 7. Things this wave deliberately did not do
+
+- No UI, no window, no chips, no CSS, no `kit.js` change — board #34's business.
+  (**Done by wave 52**: `lab/modview.js` is the face, and `REPORT.md` carries the MIR block.)
+- `tests/mir.test.mjs` was **not** wired into `test.sh`, and `REPORT.md` had no MIR block.
+  Both files belonged to the wave running beside this one, and **wave 52 wrote both**.
+- `labParameters()` in `host.js` is the *shape* of the shipped catalogue, written against
+  the real `obs` / `mat` / `quality` / `clock` objects in `rack.js`, and nothing in the
+  rack calls it. **Wave 52 chose the offered set and wrote the real adapters in `rack.js`**
+  instead: modulation there is an OBSERVER instrument (camera, material, the physics RATE),
+  every offered setter is a `TIER.PRESENT`, the ranges are the shipped dials' own rather
+  than the illustrative ones here, and `field.resolution` / `field.steps` and the whole of
+  `state.mode.*` are deliberately NOT offered (a rebuild per frame, and a `reg.version`
+  bump per frame into the undo ring). This function stays as the shape.
+- The AUDIO source needs `audio.js` (not ported) before it does anything; the model side
+  of it is present and inert.
+
+
+
+---
+
+## <a id="doc-53"></a>DOC 53 · molecular-waves-2026-09-18/scratch/old/lab/skin-notes.md · 2026-09-18
+
+## skin.css — glass × neumorphism for λWAVES (rationale)
+
+Load order: `lab.css` then `skin.css`. The skin only re-points lab.css's custom properties and re-dresses its selectors; remove it and the lab is whole again.
+**No `backdrop-filter` anywhere** — measured at −26 fps (32 → 58) over the live canvas. The glass is tint + hairline + sheen gradient + shadow.
+
+### Palette tokens
+| token | value | hex | role |
+|---|---|---|---|
+| card tint | `hsl(214 16% 13%)` @ `--glass-opacity .84` | #191d23 over the stage | every card, chip, sheet |
+| `--fg` | #f2f5f7 | | primary numerals |
+| `--fg-soft` | `hsl(0 0% 88%)` | #e0e0e0 | titles, note body |
+| `--dim` | `hsl(0 0% 72%)` | #b8b8b8 | secondary text |
+| `--ink-key` | `hsl(0 0% 74%)` | #bdbdbd | control labels, resting glyphs |
+| `--ink-faint` | `hsl(0 0% 64%)` | #a3a3a3 | eyebrows, sub-lines, group labels |
+| `--acc` | #78e1f0 (`--hue-acc 188`, `--sat-acc 80%`) | #78e1f0 | LIVE / ACTIVE / ON only |
+| `--acc-ink` | #071114 | | text on the play button |
+| stage | #070a0f | | the field's black |
+| `--rack-w` | 300px (was 372) | | the one layout variable |
+
+### Shadow recipe (light from the top-left)
+- **raised** `--neu-raise`: `-2px -2px 5px hsl(0 0% 100% / .06), 3px 3px 7px hsl(0 0% 0% / .55), inset 0 1px 0 hsl(0 0% 100% / .09)` — knob pucks, triggers, the chosen segment, chips, the hint ⓘ.
+- **inset** `--neu-inset`: `inset 2px 2px 5px hsl(0 0% 0% / .55), inset -1px -1px 3px hsl(0 0% 100% / .05)` — faders, readouts, groups, seg tracks, canvases, anything ON (an ON control is pressed in and rimmed with accent at 35–60 %).
+- **flat** `--neu-flat`: `0 0 0 1px hsl(0 0% 100% / .05)` — resting seats (switches, rows, badges).
+- **card float** `--glass-shadow`: `inset 0 1px 0 #fff/.07` (the glass lip) `+ 0 12px 30px #000/.48 + 0 2px 6px #000/.35`. Dragging: `0 22px 44px #000/.6` + a cyan 1-px rim + `scale(1.012)`.
+- sheen `--glass-sheen`: `linear-gradient(160deg, #fff/.07, transparent 42%)` painted over the tint. Neumorphic surfaces are opaque `hsl(var(--glass-tint) / 1)` so the puck reads as solid on the translucent card.
+
+### Contrast on the card (WCAG, computed; card = tint @ .84 over stage / over a mid field #384048-ish / over a fully bright field)
+- fg 15.5 / 12.9 / 10.3 · fg-soft 12.9 / 10.8 / 8.5 · dim 8.5 / 7.1 / 5.6 · ink-key 9.0 / 7.5 / 6.0
+- ink-faint 6.7 / 5.6 / **4.46** (the only value under 4.5, and only when a bright ψ cloud sits directly behind a card; raise `--glass-opacity` to .88 or `--ink-faint` to 68 % if that case ever matters)
+- acc 11.2 / 9.3 / 7.4 · warn 10.0 · ok 9.8 · bad 7.6 · acc2 6.8 · acc-ink on acc 12.6 · acc on an opaque seg segment 10.7
+- rack at rest (opacity .86 over the stage): fg 11.7, ink-faint 5.3, acc 8.6 · mini transport bar (tint @ .72): ink-key 9.3 over stage, 6.7 over a mid field.
+
+### What is glass, what is neumorphic
+- **Glass**: the card (translucent tint, top lip, sheen, deep float shadow), the badges, the sheet, the mini transport, the value tooltips. Cards are individually shadowed on a transparent rack with a 10-px gap, so they already read as detached.
+- **Neumorphic**: every control. Knobs and triggers are raised pucks; faders, readouts, groups and seg tracks are wells; ON = pressed in + accent rim; the chosen segment rises out of its well. No neumorphic text: type never relies on emboss, so contrast is carried by ink on tint alone.
+- **Values on interaction**: `.k-val` / `.fd-val` are opacity-0 at rest; `:hover`, `.drag` (kit.js already sets it), `.active`, `[data-live]` or `:focus-within` fade them in at 120 ms; on release they linger 700 ms then fade over 350 ms. `.ro-sub` reveals on hover of its readout. Under `(hover: none)` nothing is hidden.
+- **Hint icons**: add class `hinted` to any `.note` → a 22-px ⓘ in the card header (right of the stat, left of fold); `:hover` / `:focus-within` grows it into a 320-px panel with the glyph holding its screen spot. Inside a `.grp` it sits on the group's top-right corner. Second/third hints in one container step 28 px left. Folded cards hide it (their `contain: paint` would clip the panel).
+
+### Checklist for the follow-up layout work
+1. Add `<link rel="stylesheet" href="./skin.css">` after lab.css in index.html.
+2. Add `class="mini"` to `#transport`.
+3. Mount `<button class="ui-hide" title="hide UI (H)">×</button>` in `#stage`, wired to the existing `body.ui-hidden` toggle (rack.js:744). Hover-reveal of the *hidden* rack needs a hover zone; `body.ui-hidden #rack` is `display:none` in lab.css, so give the follow-up a `body.ui-hidden.peek` rule or an edge strip.
+4. Drag: on `.dev-head` pointerdown add `dragging` to the `.dev`, reorder in `#rack` on pointermove, remove on up. Skip when the target is `.dev-fold`. The header already has `cursor: grab`.
+5. Floating rack: set `#rack { position: absolute; right: 0; top: 0; bottom: 0 }` and `#lab { grid-template-columns: minmax(0,1fr) 0 }`; cards need no change. Keep `--rack-w` as the width.
+6. Add `hinted` to the long `.note`s (rack.js 270/287/341/353/380/413/417/451/462/532 and the view files); give each `tabindex="0"` so keyboards open them. Leave `presetNote` (rack.js:334) and the inline bar notes (spectrum.js:17, orbit.js:21) plain — they are status lines.
+7. `.k.active` / `[data-live]`: set them from the model when a parameter is being driven by keys or the BOW, so the value shows without a pointer.
+8. Re-measure fps with the skin on; the only new costs are box-shadows and two gradients per card, no filters.
+
+
+
+---
+
+## <a id="doc-54"></a>DOC 54 · molecular-waves-2026-09-18/scratch/old/lab/vendor/marked-LICENSE.md · 2026-09-18
+
+## License information
+
+### Contribution License Agreement
+
+If you contribute code to this project, you are implicitly allowing your code
+to be distributed under the MIT license. You are also implicitly verifying that
+all code is your original work. `</legalese>`
+
+### Marked
+
+Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+### Markdown
+
+Copyright © 2004, John Gruber
+http://daringfireball.net/
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name “Markdown” nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+This software is provided by the copyright holders and contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
+
+
+
+---
+
+## <a id="doc-55"></a>DOC 55 · molecular-waves-2026-09-18/scratch/README-scratch.md · 2026-09-18
+
+## scratch — 2026-09-18 preparation rewrite
+
+`old/` is `git archive HEAD lab` at commit 8fcdcf8 (the SHIPPED tree before this work); `old-ql/` is the same tree
+with two lines changed in `old-ql/lab/h2ci.js` — an import of `lab/linalg.js` and `if (n >= 8) return eigSymQL(A, n);`
+at the head of `eigSym` — and nothing else.  Recreate either with:
+
+    git archive 8fcdcf8 lab | tar -x -C research/molecular-waves-2026-09-18/scratch/old
+
+The probes import both trees so that "before" and "after" are measured in one process, on one machine, warm:
+
+    bench-both.mjs        benzene/C₂H₄/H₂O preparation, before and after, alternating, best of N
+    bench-eig.mjs         Jacobi vs Householder–QL by size (the QL_MIN = 8 measurement), bench-eig-small.mjs for n ≤ 23
+    probe-idempotency.mjs benzene, 400 MMUT steps, four solver/restart combinations
+    probe-blowup.mjs      when the benzene RT run loses idempotency, step by step
+    probe-magnus.mjs      inside the first Magnus-2 step: which matrix loses unitarity
+    probe-hermitian.mjs   hermitianEigen's V†V − I on the matrices benzene's RT hands it
+    probe-old-two.mjs     CuH/ZnH₂: the SCF landing point, Jacobi against QL, everything else held fixed
+    sweep-all.mjs         all 54 library entries against the PySCF oracle with the new code
+    profile-rpa.mjs       where benzene's RPA second goes
 

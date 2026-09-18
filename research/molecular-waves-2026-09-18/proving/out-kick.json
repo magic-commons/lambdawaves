@@ -1,0 +1,40 @@
+{
+  "id": "H2O",
+  "axis": "z",
+  "determinants": 441,
+  "register_states": 11,
+  "register_gram_error": 6.661338147750939e-16,
+  "Rfull_symmetry_error": 0.0,
+  "d_R0K_vs_sqrt2_mu": 1.6653345369377348e-16,
+  "kicks": [
+    {
+      "kappa": 0.001,
+      "leakage_out_of_register": 6.226130722097878e-13,
+      "b0_minus_1": 0.0006787874541734646,
+      "max_bK_minus_first_order": 4.999560741763972e-07,
+      "d_register_vs_determinant_rdm": 6.661338147750939e-16,
+      "d_linear_replay_vs_register": 9.229798002936037e-07,
+      "R00": 0.6787872931640743,
+      "b0_minus_1_centroid_origin": 6.514126478361339e-07,
+      "d_bK_between_origins": 2.168404344971009e-19
+    },
+    {
+      "kappa": 0.0005,
+      "leakage_out_of_register": 3.885780586188048e-14,
+      "b0_minus_1": 0.0003393936667082282,
+      "max_bK_minus_first_order": 1.2498897202975488e-07,
+      "d_register_vs_determinant_rdm": 8.881784197001252e-16,
+      "d_linear_replay_vs_register": 2.3073986311933772e-07,
+      "R00": 0.6787872931640743,
+      "b0_minus_1_centroid_origin": 1.6285319780983212e-07,
+      "d_bK_between_origins": 1.0842021724855044e-19
+    }
+  ],
+  "scaling": {
+    "kappa_ratio": 2.0,
+    "leakage_ratio": 16.02285714285714,
+    "bK_error_ratio": 4.0000014885903505,
+    "linear_replay_error_ratio": 4.000088185092848,
+    "expected_if_second_order": 4.0
+  }
+}

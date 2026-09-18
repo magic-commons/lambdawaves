@@ -1,0 +1,126 @@
+{
+  "date": "2026-09-18T17:07:31.042Z",
+  "commit": "8fcdcf85b04be268c2afc32d16391339e2bf182f",
+  "environment": {
+    "node": "v22.22.1",
+    "cpu": "AMD Ryzen 5 5600G with Radeon Graphics",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "note": "CPU wall times; single machine, no browser/GPU speedup claimed. First calls include warmup. RPA comparison uses one untimed warmup then alternating order across three measurements.",
+  "molecules": {
+    "H2O": {
+      "nAO": 7,
+      "nocc": 5,
+      "energy": -74.96302316286258,
+      "groundPreparationMs": 39.11543300000001,
+      "firstRpaMs": 6.247790999999978,
+      "firstReuseRpaMs": 6.02897200000001,
+      "rpaTrialsMs": {
+        "baseline": [
+          4.451623999999981,
+          1.7227629999999863,
+          3.6048389999999984
+        ],
+        "reuse": [
+          2.015687000000014,
+          1.5691769999999963,
+          3.1899679999999933
+        ]
+      },
+      "rpaMedianMs": 3.6048389999999984,
+      "reuseRpaMedianMs": 2.015687000000014,
+      "rpaSpeedRatio": 1.7883922454230112,
+      "rpaRootAndStrengthMaxChange": 0,
+      "gap": 0.9964086803658099,
+      "beatPeriodAu": 6.305831563884862,
+      "normDefect": 2.220446049250313e-16,
+      "interference": {
+        "point": [
+          -0.25,
+          0.25,
+          -0.25
+        ],
+        "H": -0.2848613463568538,
+        "L": -0.5384588773063967,
+        "rho0": 0.3389280953464524,
+        "rhoHalfBeat": 0.032155853851852184
+      },
+      "gaussianFactorization": {
+        "N": 32,
+        "half": 8,
+        "maxAbsoluteError": 1.1102230246251565e-16,
+        "maxAO": 0.7755037837133535,
+        "uniquePrimitives": 12,
+        "tableBytesAt96": 13824
+      },
+      "response": {
+        "modes": 10,
+        "transitionTraceError": 1.4432899320127035e-15,
+        "transitionDipoleError": 2.220446049250313e-16,
+        "replayCheck": {
+          "axis": "z",
+          "kappa": 0.0001,
+          "dt": 0.005,
+          "end": 2,
+          "maxAODensityError": 1.755997193068868e-8,
+          "maxLinearAODensitySignal": 0.0001252823450847313,
+          "relativeToMaxSignal": 0.00014016318036521805,
+          "maxDipoleError": 5.6360060960119855e-9,
+          "electronTraceError": 7.922551503725117e-13
+        }
+      }
+    },
+    "C6H6": {
+      "nAO": 36,
+      "nocc": 21,
+      "energy": -227.8910064641812,
+      "groundPreparationMs": 5272.26275,
+      "firstRpaMs": 4344.9090590000005,
+      "firstReuseRpaMs": 3437.77419,
+      "rpaTrialsMs": {
+        "baseline": [
+          4310.591532999999,
+          4215.421911999998,
+          4282.255137
+        ],
+        "reuse": [
+          3398.5583910000023,
+          3289.732243999999,
+          3370.7968770000007
+        ]
+      },
+      "rpaMedianMs": 4282.255137,
+      "reuseRpaMedianMs": 3370.7968770000007,
+      "rpaSpeedRatio": 1.2703984527276513,
+      "rpaRootAndStrengthMaxChange": 0,
+      "gap": 0.5515653327750398,
+      "beatPeriodAu": 11.391552249245933,
+      "normDefect": 2.886579864025407e-15,
+      "interference": {
+        "point": [
+          1.25,
+          2.25,
+          -0.75
+        ],
+        "H": 0.21051262928440992,
+        "L": -0.16611968939557192,
+        "rho0": 0.000985366555986987,
+        "rhoHalfBeat": 0.0709259517371297
+      },
+      "gaussianFactorization": {
+        "N": 32,
+        "half": 8,
+        "maxAbsoluteError": 4.440892098500626e-16,
+        "maxAO": 1.7570132956709021,
+        "uniquePrimitives": 54,
+        "tableBytesAt96": 62208
+      },
+      "response": {
+        "modes": 315,
+        "transitionTraceError": 3.2612801348363973e-15,
+        "transitionDipoleError": 3.378464880321381e-15
+      }
+    }
+  }
+}

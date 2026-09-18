@@ -40,6 +40,11 @@ const CERT = 1e-4;                                          // the precision the
    multiply-adds on the frame thread.  The fit takes the first T = 300 a.u. — 30 000 samples at Δt = 0.01, the
    ledger's own configuration, at T/τ = 12 — while the DISPLAYED curve is the worker's transform of everything. */
 const FIT_CAP = 30000;
+/* THE CARD'S MMUT RESTART POLICY, and it is a decision and not a dial: SYNTHESIS decision 2 (MATH-H2O, line 712)
+   makes the UNRESTARTED leapfrog the default on screen, with Magnus-2 as the reference integrator.  0 means never
+   restart on the wire (lab/density.js normalises it); the worker's own default for a caller that says nothing is
+   still 50, and what the readout prints is whatever chem.rt.init reports back, never this constant. */
+const RESTART_EVERY = 0;
 const AO_GUESS = (atoms) => atoms.reduce((k, a) => k + (a.Z === 1 ? 1 : 5), 0);   // STO-3G: H is one AO, first row is five
 
 export function createChem(host, api) {
@@ -110,7 +115,11 @@ export function createChem(host, api) {
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
   r1.appendChild(orbKnob.root);
-  const tdaSw = sw({ label: 'TDA', value: false, title: 'Draw the sticks at ω_TDA (Y = 0) instead of ω_RPA — never relabelled as RPA', onChange: (v) => { tda = v; paint(); } });
+  /* THE TDA TOGGLE SWAPS THE WHOLE LADDER, positions AND strengths.  It used to draw each RPA root's height and
+     polarisation at the k-th TDA root's ω — and the two ladders CROSS: for benzene RPA root 2 is the bright line
+     while TDA root 2 is dark, its bright pair sitting at roots 3 and 4.  The TDA ladder is its own ascending list
+     now (lab/rpa-inspector.js `tda`), and this switch shows that list, with ITS f and ITS μ. */
+  const tdaSw = sw({ label: 'TDA', value: false, title: 'Draw the TDA ladder — its own ω, f and polarisation, never relabelled as RPA', onChange: (v) => { tda = v; selected = null; paint(); } });
   r1.appendChild(tdaSw.root);
   const coreSw = sw({ label: 'CORE', value: false, title: 'The O 1s window, 19–21 hartree: a timestep diagnostic, not X-ray spectroscopy', onChange: (v) => { core = v; cvCore.hidden = !core; paint(); } });
   r1.appendChild(coreSw.root);
@@ -153,7 +162,8 @@ export function createChem(host, api) {
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));
   /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: it is the same pure maths, on the frame thread.
-     `half` here is the shell support envelope; the worker's own `half` is authoritative whenever it answers. */
+     `half` here is the shell support envelope; the worker's own `half` is authoritative whenever it answers.
+     It answers the GROUND stage with the spectrum already attached, so the staged road simply skips stage two. */
   async function localSolve(msg) {
     const [{ loadRecord, moleculeRHF }, { rpa }, { evaluator, fieldShells }] =
       await Promise.all([import('./rhf-molecule.js'), import('./rpa-inspector.js'), import('./molecular-field.js')]);
@@ -165,7 +175,8 @@ export function createChem(host, api) {
     return { energy: r.energy, Enuc: I.Enuc, eps: Float64Array.from(r.orbitalEnergies), C: Float64Array.from(r.C), D: Float64Array.from(r.D),
       nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
       roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
-      timings: null, stability: null, solutions: null, local: true };
+      tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
+      timings: { integrals: r.timings.integrals, scf: null, rpa: null }, stability: null, solutions: null, stage: 'full', local: true };
   }
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
@@ -187,9 +198,12 @@ export function createChem(host, api) {
     if (!force && pending && pending.key === key) return pending.p;        // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null;
     const atoms = chemAtoms(preset), charge = chemCharge(preset);
-    /* the worker reports integral, scf and rpa times separately (split); benzene's integrals were 36 s before the
-       2026-09-12 shell-pair rewrite of md.js and are 0.56 s after it, so the split is affordable for every preset. */
-    const seq = ++solveSeq, msg = { op: 'chem.solve', atoms, basis, charge, split: true };   // integrals are 0.56 s for benzene since the shell-pair rewrite: the status line can afford the split timing
+    /* TWO STAGES, ONE SEQUENCE NUMBER.  The ground state lands first — the molecule appears on the field, the
+       ORBITALS register gets its ladder, the readouts fill — and the spectrum follows, because it is the roots
+       that cost the seconds.  Both replies are guarded by the same `solveSeq`: a reply for a molecule the hand has
+       already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
+       that awaits it (the gate included) still gets the whole answer. */
+    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge };
     status(`solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`, 'warn');
     if (api.loading) api.loading(true);
     const task = call(msg, () => localSolve(msg)).then((r) => {
@@ -199,7 +213,13 @@ export function createChem(host, api) {
       orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
       pendingOrbital = null;
       rebuildOrbKnob(); pushField(); refresh(); notify();
-      return r;
+      if (r.roots) return r;                                                 // the frame-thread fallback answers whole
+      return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
+        if (seq !== solveSeq || sol !== r) return null;
+        if (!s || s.error || !s.roots) { status('spectrum failed: ' + ((s && s.error) || 'no answer'), 'warn'); return r; }
+        sol.roots = s.roots; sol.tda = s.tda; sol.timings = s.timings || sol.timings;
+        refresh(); return r;
+      });
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('solve failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
     pending = { key, p: task };
@@ -222,10 +242,13 @@ export function createChem(host, api) {
   function kick() {
     if (!sol) return Promise.resolve(null);
     const seq = solveSeq;
-    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa } }).then((r) => {
+    /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
+       never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
+    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY }).then((r) => {
       if (seq !== solveSeq) return null;
       if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && r.error) || 'no real-time engine'), 'warn'); return null; }
-      rt = { t: r.t || 0, D_re: r.D_re || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0 };
+      rt = { t: r.t || 0, D_re: r.D_re || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
+        restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
       pushMatrix(true);                                        // Δρ's reference IS the kicked t = 0
       refresh(); return r;
@@ -253,6 +276,7 @@ export function createChem(host, api) {
       if (!r || r.error) { status('real time stopped: ' + ((r && r.error) || 'no answer'), 'warn'); setRun(false); return; }
       rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
       rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep;   // `steps` is the worker's CUMULATIVE count
+      if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
       if (r.D_re) rt.D_re = r.D_re;
       rt.samples = r.samples || rt.samples; append(r.trace);
       pushMatrix(); requestSpectrum(); refresh();
@@ -338,31 +362,45 @@ export function createChem(host, api) {
     roTr.set(Number(ne).toFixed(10), Math.abs(ne - 2 * sol.nocc) < 1e-8 ? 'ok' : 'warn');
     roTr.setSub('Tr(DS), never a voxel sum · ' + (2 * sol.nocc) + ' electrons');
     roIdem.set(rt ? Number(rt.idempotency).toExponential(2) : '—', rt && rt.idempotency < 1e-8 ? 'ok' : rt ? 'warn' : '');
-    roIdem.setSub(rt ? `‖P² − P‖ · ${integrator === 'mmut' ? 'unrestarted MMUT' : 'Magnus-2'} · Δt ${dt}` : 'kick to begin');
+    /* THE POLICY IN FORCE, NOT THE ONE WE MEANT.  This line used to say "unrestarted MMUT" while the engine
+       restarted every 50 steps, which is a different trajectory; it now prints what chem.rt.init came back with. */
+    roIdem.setSub(rt ? `‖P² − P‖ · ${integrator === 'mmut' ? 'MMUT, ' + (rt.restartPolicy || 'policy unknown') : 'Magnus-2'} · Δt ${dt}` : 'kick to begin');
     roT.set(rt ? Number(rt.t).toFixed(3) : '—', running ? 'live' : '');
     roT.setSub(rt ? `${rt.samples || rt.trace.length} samples · E ${Number(rt.energy).toFixed(6)} · ΔE ${(rt.energy - rt.E0).toExponential(2)}` + (rt.msPerStep ? ` · ${Number(rt.msPerStep).toFixed(2)} ms/step` : '') : '');
     const tm = sol.timings || {};
-    status(`${sol.nAO} AOs · ${2 * sol.nocc} electrons` + (Number.isFinite(tm.integrals) ? ` · integrals ${Math.round(tm.integrals)} ms` : '') + (Number.isFinite(tm.scf) ? ` · scf ${Math.round(tm.scf)} ms` : '') + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : '') + (running ? ' · running' : ''), running ? 'live' : 'ok');
+    /* `ground` is the whole ground-state wall and `integrals` is the pass INSIDE it, measured by the pass itself */
+    status(`${sol.nAO} AOs · ${2 * sol.nocc} electrons`
+      + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
+      + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
+      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : sol.roots ? '' : ' · spectrum pending')
+      + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
   }
 
   /* ── the plot ─────────────────────────────────────────────────────────────────────────────────── */
   const bright = () => (sol && sol.roots ? sol.roots : []);
-  const wOf = (k) => (tda ? k.omegaTDA : k.omega);
+  /** the ladder on screen: the RPA roots, or the TDA ladder in its own order with its own strengths */
+  const ladder = () => (tda ? (sol && sol.tda ? sol.tda : []) : bright());
+  const wOf = (k) => k.omega;
   /** the polarisation of a root: the axis carrying most of |μ|² */
   const polOf = (k) => { const m = k.mu || [0, 0, 0]; let b = 0; for (let q = 1; q < 3; q++) if (m[q] * m[q] > m[b] * m[b]) b = q; return AXES[b]; };
   const dominantOf = (k) => {
     const d = (k.dominant || [])[0];
     return d ? `${d.i + 1}→${d.a + 1} (X ${d.x.toFixed(3)}, Y ${d.y.toFixed(3)})` : '—';
   };
-  const infoOf = (k) => `ω_RPA ${k.omega.toFixed(9)} · ω_TDA ${k.omegaTDA.toFixed(9)} · f ${k.f.toFixed(6)} · ${polOf(k)} · dominant ${dominantOf(k)}`;
+  /* A LINE NAMES ITS OWN LADDER.  The TDA number printed beside an RPA root is the k-th TDA ROOT BY INDEX and not
+     that root's partner — the matching by character is an open problem (JUDGMENT.md §8.3), so it is not implied. */
+  const infoOf = (k, i) => (tda
+    ? `ω_TDA ${k.omega.toFixed(9)} · f_TDA ${k.f.toFixed(6)} · ${polOf(k)} · TDA root ${i + 1}`
+    : `ω_RPA ${k.omega.toFixed(9)} · f ${k.f.toFixed(6)} · ${polOf(k)} · dominant ${dominantOf(k)}`
+      + (Number.isFinite(k.omegaTDA) ? ` · TDA root ${i + 1} (by index, not this root's partner) ${k.omegaTDA.toFixed(9)}` : ''));
 
   let rect = null, coreRect = null;
   const hover = graphHover(cv, { repaint: () => paint(), plot: () => rect });
   const coreHover = graphHover(cvCore, { repaint: () => paint(), plot: () => coreRect });
-  cv.addEventListener('click', () => { const h = hover.hit(); if (h && h.root) pick(h.root); });
-  cvCore.addEventListener('click', () => { const h = coreHover.hit(); if (h && h.root) pick(h.root); });
-  function pick(k) { selected = k; roPick.set(`ω ${wOf(k).toFixed(6)} · f ${k.f.toFixed(6)}`, k.f > 1e-6 ? 'ok' : ''); roPick.setSub(infoOf(k)); paint(); }
+  cv.addEventListener('click', () => { const h = hover.hit(); if (h && h.root) pick(h.root, h.index); });
+  cvCore.addEventListener('click', () => { const h = coreHover.hit(); if (h && h.root) pick(h.root, h.index); });
+  function pick(k, i) { selected = k; roPick.set(`ω ${wOf(k).toFixed(6)} · f ${k.f.toFixed(6)}`, k.f > 1e-6 ? 'ok' : ''); roPick.setSub(infoOf(k, i || 0)); paint(); }
 
   const size = (canvas, ctx) => {
     const W = canvas.clientWidth, H = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -377,6 +415,7 @@ export function createChem(host, api) {
     const { W, H } = s, L = 42, Rt = W - 8, Tp = 12;
     g.font = '8px ui-monospace, monospace';
     const CAP = sol ? `${tda ? 'TDA' : 'RPA'} sticks, h ∝ f · Im α from the ${axis} kick`
+      + (sol.roots ? '' : ' · spectrum pending')
       + (fit ? (fit.certified ? ` · ▲ poles, 4ε/σ = ${fit.bound.toExponential(1)}` : ` · ▽ raw maxima, UNCERTIFIED`) : spec ? ' · fitting…' : ' · kick and RUN')
       : 'no molecule solved';
     const caps = wrap(g, CAP, Rt - L);
@@ -386,8 +425,8 @@ export function createChem(host, api) {
     const T = themeInk(g);
     rect = { x0: L, y0: Tp, x1: Rt, y1: Bt };
     const x = (w) => L + (w / W_MAX) * (Rt - L);
-    const roots = bright().filter((k) => wOf(k) >= 0 && wOf(k) <= W_MAX);
-    let fMax = 0; for (const k of roots) fMax = Math.max(fMax, k.f);
+    const roots = ladder().map((k, i) => ({ k, i })).filter(({ k }) => wOf(k) >= 0 && wOf(k) <= W_MAX);
+    let fMax = 0; for (const { k } of roots) fMax = Math.max(fMax, k.f);
     let aMax = 0; if (spec) for (let i = 0; i < spec.ImAlpha.length; i++) if (spec.omega[i] <= W_MAX) aMax = Math.max(aMax, Math.abs(spec.ImAlpha[i]));
     const hovers = [];
     /* the axis, and the frame the sticks stand on */
@@ -412,14 +451,14 @@ export function createChem(host, api) {
         info: `Im α_${axis}${axis}(ω) · δ-kick trace, ${rt ? (rt.samples || rt.trace.length) : 0} samples · τ = ${spec.tau.toFixed(1)} · peak ${aMax.toExponential(3)}` });
     }
     /* the sticks: the kicked axis in its own ink at full weight, the others thin — a dark root still gets a foot */
-    for (const k of roots) {
+    for (const { k, i } of roots) {
       const pol = polOf(k), px = x(wOf(k)), mine = pol === axis;
       const rgb = mine ? accentRGB(g, 2) : vividInk(nRGB(AXIS_N[pol]));
       const hgt = fMax > 0 ? Math.max(2, k.f / fMax * (Bt - Tp) * 0.88) : 2;
       g.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${mine ? 0.95 : 0.5})`; g.lineWidth = mine ? 2 : 1;
       g.beginPath(); g.moveTo(px, Bt); g.lineTo(px, Bt - hgt); g.stroke();
       const hit = { kind: 'line', key: 'stick-' + wOf(k).toFixed(6) + pol, points: [px, Bt - hgt, px, Bt], lw: mine ? 3 : 2,
-        colour: `rgb(${rgb.join(',')})`, info: infoOf(k), root: k };
+        colour: `rgb(${rgb.join(',')})`, info: infoOf(k, i), root: k, index: i };
       hovers.push(hit);
       if (selected && selected === k) { g.fillStyle = T.fg(0.95); g.beginPath(); g.arc(px, Bt - hgt, 2.6, 0, 2 * Math.PI); g.fill(); }
     }
@@ -447,18 +486,18 @@ export function createChem(host, api) {
     const T = themeInk(gc);
     coreRect = { x0: L, y0: Tp, x1: Rt, y1: Bt };
     const x = (w) => L + (w - CORE_LO) / (CORE_HI - CORE_LO) * (Rt - L);
-    const roots = bright().filter((k) => wOf(k) >= CORE_LO && wOf(k) <= CORE_HI);
-    let fMax = 0; for (const k of roots) fMax = Math.max(fMax, k.f);
+    const roots = ladder().map((k, i) => ({ k, i })).filter(({ k }) => wOf(k) >= CORE_LO && wOf(k) <= CORE_HI);
+    let fMax = 0; for (const { k } of roots) fMax = Math.max(fMax, k.f);
     gc.strokeStyle = T.ink(0.4); gc.lineWidth = 1; gc.beginPath(); gc.moveTo(L, Bt); gc.lineTo(Rt, Bt); gc.stroke();
     gc.font = '8px ui-monospace, monospace'; gc.fillStyle = T.ink(0.75); gc.textBaseline = 'top'; gc.textAlign = 'center';
     for (let w = CORE_LO; w <= CORE_HI + 1e-9; w += 0.5) fitText(gc, w.toFixed(1), x(w), Bt + 2, { x0: 2, y0: 0, x1: W - 2, y1: H }, 'center');
     const hovers = [];
-    for (const k of roots) {
+    for (const { k, i } of roots) {
       const pol = polOf(k), px = x(wOf(k)), rgb = vividInk(nRGB(AXIS_N[pol]));
       const hgt = fMax > 0 ? Math.max(2, k.f / fMax * (Bt - Tp) * 0.8) : 2;
       gc.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.9)`; gc.lineWidth = 1.6;
       gc.beginPath(); gc.moveTo(px, Bt); gc.lineTo(px, Bt - hgt); gc.stroke();
-      hovers.push({ kind: 'line', key: 'core-' + wOf(k).toFixed(6), points: [px, Bt - hgt, px, Bt], lw: 3, colour: `rgb(${rgb.join(',')})`, info: infoOf(k), root: k });
+      hovers.push({ kind: 'line', key: 'core-' + wOf(k).toFixed(6), points: [px, Bt - hgt, px, Bt], lw: 3, colour: `rgb(${rgb.join(',')})`, info: infoOf(k, i), root: k, index: i });
     }
     gc.fillStyle = T.ink(0.85); gc.textBaseline = 'top';
     fitText(gc, 'core 19–21 Eh · Δt diagnostic', 6, Tp, { x0: 2, y0: 0, x1: W - 2, y1: H }, 'left', true);
@@ -563,6 +602,7 @@ export function createChem(host, api) {
           if (!r || r.error) return null;
           rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
           rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re;
+          if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
           rt.samples = r.samples || rt.samples; append(r.trace);
           pushMatrix();
         } else await new Promise((res) => setTimeout(res, 8));
@@ -579,10 +619,15 @@ export function createChem(host, api) {
         t: rt ? rt.t : 0, steps: rt ? rt.steps : 0, trace: rt ? (rt.samples || rt.trace.length) : 0, fitWindow: rt ? rt.trace.length : 0, E0: rt ? rt.E0 : null,
         energyRT: rt ? rt.energy : null, half: sol ? sol.half : null, hash: sol ? sol.hash : null,
         local: !!(sol && sol.local), status: statusText, roots: sol && sol.roots ? sol.roots.length : 0,
+        tdaRoots: sol && sol.tda ? sol.tda.length : 0, stage: sol ? (sol.roots ? 'full' : 'ground') : 'none',
+        restartEvery: rt ? rt.restartEvery : null, restartPolicy: rt ? rt.restartPolicy : null, sinceRestart: rt ? rt.sinceRestart : null,
         fitted: fit ? fit.poles.map((p) => p.omega) : null, certified: fit ? fit.certified : null,
         fieldOwner: fieldHash !== null, kappa, speed, dt, integrator, axis, tda, core, orbital };
     },
+    /** the RPA ladder; `omegaTDA` on an entry is the k-th TDA ROOT BY INDEX, never that root's partner */
     roots(n) { const r = bright(); return (Number.isFinite(n) ? r.slice(0, n) : r).map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu || []), pol: polOf(k), dominant: dominantOf(k) })); },
+    /** the TDA ladder as its own ascending list, with its own strengths and polarisations */
+    tdaRoots(n) { const r = (sol && sol.tda) || []; return (Number.isFinite(n) ? r.slice(0, n) : r).map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu || []), pol: polOf(k) })); },
     spectrum() { return spec ? { tau: spec.tau, peaks: spec.peaks, n: spec.omega.length } : null; },
     fit() { return fit; },
     save, load, record,

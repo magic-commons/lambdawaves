@@ -50,6 +50,7 @@
  */
 import { coulombJ2, exchangeK2, EV } from './h2.js';
 import { overlapS } from './molecule.js';
+import { eigSymQL } from './linalg.js';
 
 export const HARTREE_EV = EV;
 /** the STO-3G hydrogen 1s: three primitives, the ζ = 1.24 scaled exponents (KNOWN, Hehre–Stewart–Pople 1969) */
@@ -128,8 +129,26 @@ export function sto3gIntegrals(R, { Z = 1 } = {}) {
 }
 
 /* ── the two-orbital, two-electron machine ─────────────────────────────────────────────────────────────────────── */
-/** Jacobi eigenvalues + vectors of a small real symmetric matrix (row-major); values ascending */
+/* THE LAB'S ONE REAL-SYMMETRIC EIGENSOLVER, and it is now two of them behind one contract (2026-09-18).  Jacobi
+   sweeps, and the sweep count is what makes it lose at size: MEASURED warm on this machine (the bench is
+   research/molecular-waves-2026-09-18/scratch/bench-eig.mjs, numbers in µs at the small sizes),
+       Fock-like n = 4 · 7 · 8 · 16 · 72 · 315   jacobi/QL  1.03 · 1.00 · 1.04 · 1.35 · 2.53 · 3.09
+       dense     n = 4 · 7 · 8 · 16 · 72 · 315   jacobi/QL  1.15 · 1.58 · 1.76 · 2.46 · 4.97 · 7.62
+   so below n = 8 there is nothing to buy — the two are within 15 % on the diagonally dominant matrices the SCF
+   actually diagonalises — and above it the gap only opens.  QL_MIN = 8 therefore leaves every H₂ (2 × 2, 4 × 4)
+   and every H₂O AO block (7 × 7) on the Jacobi road with its measured sweep behaviour, and hands benzene's 36 × 36
+   Fock, its 72 × 72 realified Hermitian step and the 315 × 315 pair space to Householder–QL.
+   THE EIGENVECTORS INSIDE A DEGENERATE CLUSTER ARE NOT THE SAME between the two: each returns an orthonormal basis
+   of the eigenspace, and which one is arbitrary.  Everything that reads a single vector of a degenerate pair (the
+   ORBITALS register's saved indices, lab/density.js's cluster Gram–Schmidt, one root of a degenerate RPA pair)
+   must be invariant under that rotation or say which basis it means. */
+const QL_MIN = 8;
+/** eigenvalues + vectors of a real symmetric matrix (row-major); values ascending, eigenvector k in column k */
 export function eigSym(A, n) {
+  return n >= QL_MIN ? eigSymQL(A, n) : eigSymJacobi(A, n);
+}
+/** the cyclic Jacobi road, kept for small n and as the reference the 2026-09-18 sweep test compares against */
+export function eigSymJacobi(A, n) {
   const a = Array.from(A), v = new Float64Array(n * n);
   for (let i = 0; i < n; i++) v[i * n + i] = 1;
   /* The stop is scale-free: an absolute 1e-34 is never reached by a matrix of norm ~30 (rounding leaves off ~ ε²‖A‖²),

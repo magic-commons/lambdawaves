@@ -10,6 +10,8 @@ import { basisFrom, integrals } from './md.js';
 import { rhf, fockReal } from './scf.js';
 import { loewdin } from './density.js';
 import { eigSym } from './h2ci.js';
+import { cholesky } from './linalg.js';
+import { hessianBlocks } from './rpa-inspector.js';
 
 export const BASIS_FILES = { 'sto-3g': 'sto-3g-v1.json', '6-31+g-star': '6-31+g-star-v1.json' };
 const REGISTRY = new Map();
@@ -131,49 +133,33 @@ export function aufbauReport(I, out, nocc) {
   return { gap, homo: e.values[nocc - 1], lumo: e.values[nocc], densityDefect: defect, satisfied: gap > 0 && defect < 1e-8 };
 }
 /**
- * the singlet orbital-rotation Hessian blocks, from a converged solution alone and one nov × nov diagonalisation:
+ * the singlet orbital-rotation Hessian, from a converged solution alone.  The blocks are lab/rpa-inspector.js's
+ * (ONE implementation, shared with the RPA, which needs exactly the same (ia|jb), (ij|ab), (ib|ja)):
  *   A_ia,jb = δ_ij δ_ab (ε_a − ε_i) + 2(ia|jb) − (ij|ab),   B_ia,jb = 2(ia|jb) − (ib|ja)
  * A + B ≻ 0 is real RHF→RHF stability; both blocks go negative on N₂'s second solution (ROUND 4 question 21).
+ *
+ * THE VERDICT IS TWO CHOLESKY FACTORISATIONS, NOT TWO DIAGONALISATIONS (2026-09-18).  A ± B ≻ 0 is exactly the
+ * existence of the factorisation, at nov³/6 multiply-adds instead of a full spectrum: benzene's pair space is
+ * 315 × 315, where the two Cholesky runs cost 1.3 ms against the two eigensolves' 253 ms (measured, the sweep
+ * test's printout).  `lowestApB` and `lowestAmB` are still the same numbers and are still here — as LAZY GETTERS,
+ * computed on first read, and eagerly whenever the verdict FAILS, because a refusal must carry its evidence.
  */
 export function stabilityHessian(I, out, nocc) {
-  const n = I.n, nv = n - nocc, nov = nocc * nv, C = out.C, eps = out.orbitalEnergies, g = I.eri;
-  if (nv < 1) return { nOv: 0, lowestApB: Infinity, lowestAmB: Infinity, minimum: true };
-  const A1 = new Float64Array(nocc * n * n * n);                             // (i ν λ σ)
-  for (let i = 0; i < nocc; i++) for (let nu = 0; nu < n; nu++) for (let la = 0; la < n; la++) for (let si = 0; si < n; si++) {
-    let s = 0; for (let mu = 0; mu < n; mu++) s += C[mu * n + i] * g[((mu * n + nu) * n + la) * n + si];
-    A1[((i * n + nu) * n + la) * n + si] = s; }
-  const half = (second, third, fourth, d2, d3, d4) => {                      // three contractions on ν, λ, σ
-    const B2 = new Float64Array(nocc * d2 * n * n);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let la = 0; la < n; la++) for (let si = 0; si < n; si++) {
-      let s = 0; for (let nu = 0; nu < n; nu++) s += C[nu * n + second(p)] * A1[((i * n + nu) * n + la) * n + si];
-      B2[((i * d2 + p) * n + la) * n + si] = s; }
-    const B3 = new Float64Array(nocc * d2 * d3 * n);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let q = 0; q < d3; q++) for (let si = 0; si < n; si++) {
-      let s = 0; for (let la = 0; la < n; la++) s += C[la * n + third(q)] * B2[((i * d2 + p) * n + la) * n + si];
-      B3[((i * d2 + p) * d3 + q) * n + si] = s; }
-    const B4 = new Float64Array(nocc * d2 * d3 * d4);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let q = 0; q < d3; q++) for (let r = 0; r < d4; r++) {
-      let s = 0; for (let si = 0; si < n; si++) s += C[si * n + fourth(r)] * B3[((i * d2 + p) * d3 + q) * n + si];
-      B4[((i * d2 + p) * d3 + q) * d4 + r] = s; }
-    return B4;
-  };
-  const v = (a) => nocc + a, o = (i) => i;
-  const G = half(v, o, v, nv, nocc, nv), Q = half(o, v, v, nocc, nv, nv);    // (ia|jb) and (ij|ab)
-  const gAt = (i, a, j, b) => G[((i * nv + a) * nocc + j) * nv + b];
-  const qAt = (i, j, a, b) => Q[((i * nocc + j) * nv + a) * nv + b];
+  const n = I.n, nv = n - nocc, nov = nocc * nv;
+  if (nv < 1) return { nOv: 0, lowestApB: Infinity, lowestAmB: Infinity, minimum: true, positiveDefinite: { ApB: true, AmB: true } };
+  const { A, B } = hessianBlocks({ eri: I.eri, C: out.C, eps: out.orbitalEnergies, nocc, n });
   const ApB = new Float64Array(nov * nov), AmB = new Float64Array(nov * nov);
-  for (let i = 0; i < nocc; i++) for (let a = 0; a < nv; a++) for (let j = 0; j < nocc; j++) for (let b = 0; b < nv; b++) {
-    const row = i * nv + a, col = j * nv + b, d = row === col ? eps[v(a)] - eps[i] : 0;
-    const coul = gAt(i, a, j, b), x1 = qAt(i, j, a, b), x2 = gAt(i, b, j, a);
-    ApB[row * nov + col] = d + 4 * coul - x1 - x2;
-    AmB[row * nov + col] = d - x1 + x2;
+  for (let p = 0; p < nov; p++) for (let q = 0; q < nov; q++) {              // symmetrised: a Cholesky reads one triangle
+    const s = 0.5 * (A[p * nov + q] + A[q * nov + p]), d = 0.5 * (B[p * nov + q] + B[q * nov + p]);
+    ApB[p * nov + q] = s + d; AmB[p * nov + q] = s - d;
   }
-  const sym = (M) => { const T = new Float64Array(nov * nov);
-    for (let p = 0; p < nov; p++) for (let q = 0; q < nov; q++) T[p * nov + q] = 0.5 * (M[p * nov + q] + M[q * nov + p]);
-    return T; };
-  const lo = (M) => eigSym(sym(M), nov).values[0];
-  const lowestApB = lo(ApB), lowestAmB = lo(AmB);
-  return { nOv: nov, lowestApB, lowestAmB, minimum: lowestApB > 0 && lowestAmB > 0 };
+  const okP = !!cholesky(ApB, nov), okM = !!cholesky(AmB, nov), minimum = okP && okM;
+  let loP = null, loM = null;
+  const lo = (M) => eigSym(M, nov).values[0];
+  if (!minimum) { loP = lo(ApB); loM = lo(AmB); }                            // a refusal carries the eigenvalue that made it
+  return { nOv: nov, minimum, positiveDefinite: { ApB: okP, AmB: okM },
+    get lowestApB() { return loP === null ? (loP = lo(ApB)) : loP; },
+    get lowestAmB() { return loM === null ? (loM = lo(AmB)) : loM; } };
 }
 /** re-converge from a symmetrically perturbed density; the energy must come back */
 function stabilityProbe(basisArgs, opts, out, { seed = 20260912, amplitude = 0.05 } = {}) {
@@ -199,7 +185,11 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
   diis = 8, damping = 0, tol = 1e-12, maxIter = 200, stability = true, hessian = true } = {}) {
   if (!Array.isArray(atoms) || !atoms.length) throw new Error('rhf-molecule: atoms = [{ Z, x, y, z }] in bohr');
   const rec = recordFor(basis, record);
+  /* THE INTEGRAL PASS TIMES ITSELF.  The card used to ask the worker for a SECOND pass purely to time one, and a
+     second pass runs warm — a timing taken that way is not a measurement of the pass that was used.  This is. */
+  const tInt = performance.now();
   const b = basisFrom(atoms, rec, { cart: true }), I = integrals(b, atoms);
+  const integralMs = +(performance.now() - tInt).toFixed(2);
   const nElectrons = atoms.reduce((s, a) => s + a.Z, 0) - charge;
   if (nElectrons % 2 || nElectrons < 2) throw new Error(`rhf-molecule: RHF needs an even electron count ≥ 2, got ${nElectrons}`);
   const nocc = nElectrons / 2, args = { n: I.n, S: I.S, h: I.h, eri: I.eri, Enuc: I.Enuc };
@@ -210,8 +200,7 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
     if (runs.has(name)) return runs.get(name);
     const g = name === 'sad' ? sad() : name === 'core' ? 'core' : name;
     const out = rhf(args, { ...opts, guess: g });
-    const r = { guess: typeof name === 'string' ? name : 'given', out, aufbau: aufbauReport(I, out, nocc),
-      hessian: hessian && out.converged ? stabilityHessian(I, out, nocc) : null };
+    const r = { guess: typeof name === 'string' ? name : 'given', out, aufbau: aufbauReport(I, out, nocc), hessian: null };
     runs.set(name, r); return r;
   };
   const primary = run(guess);
@@ -219,18 +208,24 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
   const found = [...runs.values()].filter((r) => r.out.converged).sort((a, b2) => a.out.energy - b2.out.energy);
   const distinct = [];
   for (const r of found) if (!distinct.some((d) => Math.abs(d.out.energy - r.out.energy) < 1e-7)) distinct.push(r);
+  /* ONE HESSIAN PER DISTINCT SOLUTION.  `detect` runs SAD and the core guess, and for every molecule but N₂ they
+     converge to the SAME solution — the Hessian was then evaluated twice on one point, 2.1 s of benzene's wall
+     each time.  The distinctness test is the one this function already uses to name solutions, |ΔE| < 1e-7. */
+  for (const r of distinct) if (hessian) r.hessian = stabilityHessian(I, r.out, nocc);
   const ORD = ['ground state', 'second aufbau RHF solution', 'third aufbau RHF solution', 'fourth aufbau RHF solution'];
   const solutions = distinct.map((r, i) => ({ name: ORD[i] ?? `aufbau RHF solution ${i + 1}`, guess: r.guess,
     energy: r.out.energy, converged: r.out.converged, iterations: r.out.iterations,
     aufbau: r.aufbau, hessian: r.hessian, orbitalEnergies: [...r.out.orbitalEnergies] }));
   const mine = solutions.find((s) => Math.abs(s.energy - primary.out.energy) < 1e-7);
   const out = primary.out;
+  const own = distinct.find((r) => Math.abs(r.out.energy - out.energy) < 1e-7);   // the primary run's own distinct solution
+  const primaryHessian = out.converged && own ? own.hessian : null;
   return { energy: out.energy, electronic: out.electronic, orbitalEnergies: out.orbitalEnergies, C: out.C, D: out.D,
     F: out.F, converged: out.converged, iterations: out.iterations, nElectrons, nocc, charge,
     basis: b, integrals: I, hash: b.hash, guess: primary.guess, solutionName: mine?.name ?? null,
-    aufbau: primary.aufbau, solutions,
-    stability: stability ? { ...stabilityProbe(args, opts, out), hessian: primary.hessian,
-      minimum: primary.hessian ? primary.hessian.minimum : null } : null,
+    aufbau: primary.aufbau, solutions, timings: { integrals: integralMs },
+    stability: stability ? { ...stabilityProbe(args, opts, out), hessian: primaryHessian,
+      minimum: primaryHessian ? primaryHessian.minimum : null } : null,
     dipole: [0, 1, 2].map((q) => { const M = [I.X, I.Y, I.Z][q], n = I.n; let t = 0;
       for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) t += out.D[j * n + i] * M[i * n + j];
       return I.nuclearDipole[q] - t; }),

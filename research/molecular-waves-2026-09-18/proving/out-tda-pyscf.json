@@ -1,0 +1,114 @@
+[
+  {
+    "id": "H2O",
+    "pyscf": "2.14.0",
+    "nao": 7,
+    "dE_rhf": 3.552713678800501e-13,
+    "d_orbital_energies": 1.1667111721180845e-10,
+    "mo_rotation_offblock": 5.68461085398471e-11,
+    "d_TDA_matrix": 1.0808420825014764e-10,
+    "d_TDA_all_roots": 1.0807710282279004e-10,
+    "n_roots_compared": 10,
+    "converged_roots_used": 10,
+    "d_omega_davidson": 1.0802736483128683e-10,
+    "d_oscillator_TDA": 5.4158344475752074e-11,
+    "d_mu_magnitude": 1.6000545333128002e-10,
+    "d_cluster_dipole_tensor": 1.1421211199014181e-10,
+    "mu_pyscf_over_project_nondegenerate": [
+      -1.0000000002238076,
+      -0.9999999998240322,
+      -0.9999999995516808,
+      1.0000000000044353,
+      0.9999999999593285,
+      -1.0000000001770852,
+      0.9999999999589758,
+      -0.9999999999356888,
+      1.000000000007508
+    ],
+    "pyscf_amplitude_norm_convention": 0.4999999999999998,
+    "d_ground_dipole_nuc_minus_r": 6.460221246840092e-11,
+    "ground_dipole_au": [
+      0.0,
+      7.241792885845366e-16,
+      -0.6787872931640743
+    ]
+  },
+  {
+    "id": "NH3",
+    "pyscf": "2.14.0",
+    "nao": 8,
+    "dE_rhf": 1.5631940186722204e-13,
+    "d_orbital_energies": 7.2354566782451e-10,
+    "mo_rotation_offblock": 7.25644036583489e-10,
+    "d_TDA_matrix": 7.20536519338566e-10,
+    "d_TDA_all_roots": 7.206057972553026e-10,
+    "n_roots_compared": 15,
+    "converged_roots_used": 12,
+    "d_omega_davidson": 3.7392722251894384e-10,
+    "d_oscillator_TDA": 5.44517042566639e-10,
+    "d_mu_magnitude": 1.0512807985252337e-09,
+    "d_cluster_dipole_tensor": 9.7558250367058e-10,
+    "mu_pyscf_over_project_nondegenerate": [
+      -0.9999995740676574,
+      -0.9999999995512143,
+      1.000000002119911
+    ],
+    "pyscf_amplitude_norm_convention": 0.5000000000000004,
+    "d_ground_dipole_nuc_minus_r": 1.8821810776614711e-10,
+    "ground_dipole_au": [
+      -7.195632978351796e-15,
+      4.565792188770956e-15,
+      -0.7028329538518889
+    ]
+  },
+  {
+    "id": "CH4",
+    "pyscf": "2.14.0",
+    "nao": 9,
+    "dE_rhf": 1.1368683772161603e-13,
+    "d_orbital_energies": 1.3820056210533949e-12,
+    "mo_rotation_offblock": 1.0142208171232213e-13,
+    "d_TDA_matrix": 1.2434497875801753e-12,
+    "d_TDA_all_roots": 1.20614629395277e-12,
+    "n_roots_compared": 20,
+    "converged_roots_used": 12,
+    "d_omega_davidson": 1.0036416142611415e-13,
+    "d_oscillator_TDA": 6.609521957523512e-13,
+    "d_mu_magnitude": 6.650860417956039e-12,
+    "d_cluster_dipole_tensor": 1.0896821639461152e-12,
+    "mu_pyscf_over_project_nondegenerate": [],
+    "pyscf_amplitude_norm_convention": 0.5000000000000001,
+    "d_ground_dipole_nuc_minus_r": 6.6058269965196814e-15,
+    "ground_dipole_au": [
+      -6.5503158452884236e-15,
+      -3.885780586188048e-15,
+      -7.771561172376096e-16
+    ]
+  },
+  {
+    "id": "C6H6",
+    "pyscf": "2.14.0",
+    "nao": 36,
+    "dE_rhf": 7.105427357601002e-13,
+    "d_orbital_energies": 1.5453016644073614e-10,
+    "mo_rotation_offblock": 2.2866214653871717e-10,
+    "d_TDA_matrix": 1.609885558195856e-10,
+    "d_TDA_all_roots": 1.2529710602393607e-10,
+    "n_roots_compared": 315,
+    "converged_roots_used": 12,
+    "d_omega_davidson": 3.89089871433157e-11,
+    "d_oscillator_TDA": 7.816991498543757e-11,
+    "d_mu_magnitude": 3.7137937169973156e-10,
+    "d_cluster_dipole_tensor": 3.156772621082382e-10,
+    "mu_pyscf_over_project_nondegenerate": [
+      0.9999999970652202
+    ],
+    "pyscf_amplitude_norm_convention": 0.5000000000000001,
+    "d_ground_dipole_nuc_minus_r": 1.875431464036042e-13,
+    "ground_dipole_au": [
+      -9.233592385311414e-14,
+      -1.887485608651639e-14,
+      0.0
+    ]
+  }
+]

@@ -14,7 +14,10 @@
  *   E_MMUT_HISTORY   `integrator: 'mmut'` without P(t−Δt) and its step parity.  MMUT is a leapfrog on two
  *                    interleaved sublattices; SYNTHESIS decision 2 makes the unrestarted form the default, so the
  *                    history is part of the state and not an optional branch.  Restarting from a Magnus-2 step
- *                    instead is a DIFFERENT trajectory, so it is the caller's decision to take, not ours.
+ *                    instead is a DIFFERENT trajectory, so it is the caller's decision to take, not ours — which
+ *                    is why `rt.restartEvery` (0 = never) and `rt.sinceRestart` are part of the record too.  A
+ *                    record without them was written before 2026-09-18 under the worker's default of 50, and it
+ *                    restores as restart-every-50 with `restartPolicySource` saying the field was not in the file.
  *   E_TRACE          |Tr(DS) − N_e| over max(1e-12, 3nε·steps).  The bound is ROUND 4 §8's correction of Sol's flat
  *                    1e-12: at 120,000 steps the measured drift law (1.6e-15 electrons per step, a defect of
  *                    S^{±1/2} and never of the unitary integrator) puts the honest value at 10.00000000019.
@@ -89,9 +92,31 @@ function rtBlock(rt, n) {
   } else if (parity !== null && parity !== undefined && parity !== 0 && parity !== 1) {
     fail('E_SHAPE', `rt.parity must be 0, 1 or null, got ${JSON.stringify(parity)}`);
   }
+  /* THE RESTART POLICY IS PART OF THE TRAJECTORY, and so is where in the cycle P sits.  0 is the unrestarted
+     leapfrog (SYNTHESIS decision 2, and what the CHEMISTRY card runs); any positive n restarts with a Magnus-2
+     step every n MMUT steps, which is a DIFFERENT trajectory from the same P and P(t−Δt).
+     A RECORD WITH NO POLICY FIELD IS A LEGACY RECORD: every one of them was written before 2026-09-18, when the
+     worker's default of 50 was in force and nothing carried the field, so it restores AS restart-every-50 and
+     `restartPolicySource` says 'legacy default' rather than 'record'.  `sinceRestart` cannot be recovered from
+     such a record — a kick resets the cycle and the record never said when — so it restores as null and is
+     labelled, instead of being guessed from steps mod 50. */
+  const legacy = !hasPolicy(rt);
+  const restartEvery = legacy ? LEGACY_RESTART : rt.restartEvery;
+  if (!Number.isInteger(restartEvery) || restartEvery < 0) fail('E_SHAPE', `rt.restartEvery must be a non-negative integer (0 = never restart), got ${JSON.stringify(rt.restartEvery)}`);
+  const sinceGiven = rt.sinceRestart === undefined ? null : rt.sinceRestart;
+  if (sinceGiven !== null && (!Number.isInteger(sinceGiven) || sinceGiven < 0)) fail('E_SHAPE', `rt.sinceRestart must be null or a non-negative integer, got ${JSON.stringify(rt.sinceRestart)}`);
+  if (sinceGiven !== null && restartEvery > 0 && sinceGiven > restartEvery) fail('E_SHAPE', `rt.sinceRestart ${sinceGiven} is past the restart period ${restartEvery}`);
+  const sinceRestart = legacy ? null : sinceGiven;
   return { t: num(rt.t, 'rt.t'), dt, integrator, kick: { axis: kick.axis, kappa: num(kick.kappa, 'rt.kick.kappa') },
-    P, Pprev, parity: integrator === 'mmut' ? parity : (parity === 0 || parity === 1 ? parity : null), steps };
+    P, Pprev, parity: integrator === 'mmut' ? parity : (parity === 0 || parity === 1 ? parity : null), steps,
+    restartEvery, sinceRestart, ...restartLabels(restartEvery, !legacy) };
 }
+/** the MMUT restart policy's labels — derived, so they are reported and never written into the record */
+const LEGACY_RESTART = 50;
+const hasPolicy = (rt) => !!rt && rt.restartEvery !== undefined && rt.restartEvery !== null;
+const restartLabels = (every, fromRecord) => ({
+  restartPolicy: every === 0 ? 'unrestarted' : `restart every ${every}`,
+  restartPolicySource: fromRecord ? 'record' : `legacy default (no field in the record; the worker default before 2026-09-18 was ${LEGACY_RESTART})` });
 
 /* ── serialise ──────────────────────────────────────────────────────────────────────────────────────────────────── */
 /**
@@ -138,7 +163,10 @@ export function serializeMolecule(s) {
   const rt = rtBlock(s.rt, n);
   if (rt) rec.rt = { t: rt.t, dt: rt.dt, integrator: rt.integrator, kick: { axis: rt.kick.axis, kappa: rt.kick.kappa },
     P: { re: rt.P.re, im: rt.P.im }, Pprev: rt.Pprev ? { re: rt.Pprev.re, im: rt.Pprev.im } : null,
-    parity: rt.parity, steps: rt.steps };
+    parity: rt.parity, steps: rt.steps,
+    /* the policy and the position in its cycle are STATE; `restartPolicy` and its source are labels and are not
+       written — they are derived, and a derived value in the record is the thing this schema refuses to carry */
+    restartEvery: rt.restartEvery, sinceRestart: rt.sinceRestart };
   return rec;
 }
 /** the grid presentation — an OBSERVER choice, saved because it is what the window was showing, never as physics */
@@ -165,7 +193,11 @@ export function restoreMolecule(rec, { record = null, S = null } = {}) {
   if (rec.basis && rec.basis.kind !== undefined && rec.basis.kind !== BASIS_KIND) fail('E_SHAPE', `basis.kind must be '${BASIS_KIND}', got ${JSON.stringify(rec.basis.kind)}`);
   if (rec.basis && rec.basis.order !== undefined && rec.basis.order !== COMPONENT_ORDER_LINE) fail('E_SHAPE', `basis.order must be '${COMPONENT_ORDER_LINE}', got ${JSON.stringify(rec.basis.order)}`);
   const canon = serializeMolecule(rec);                                     // every shape law above, once
-  const n = canon.rhf.eps.length, checks = { n, basisHash: 'not checked (no vendored record supplied)', trace: 'not checked (no metric supplied)', mmut: canon.rt ? canon.rt.integrator : 'no rt block' };
+  /* the labels come from the canonical policy but the SOURCE from the file as it arrived: the canonical record
+     always carries the field, so asking it whether the field was there would answer 'record' for every legacy file */
+  const policy = canon.rt ? restartLabels(canon.rt.restartEvery, hasPolicy(rec.rt)) : null;
+  const n = canon.rhf.eps.length, checks = { n, basisHash: 'not checked (no vendored record supplied)', trace: 'not checked (no metric supplied)',
+    mmut: canon.rt ? `${canon.rt.integrator}, ${policy.restartPolicy} (${policy.restartPolicySource})` : 'no rt block' };
   if (record) {
     const built = basisFrom(canon.atoms.map((a) => ({ Z: a.Z, x: a.x, y: a.y, z: a.z })), record, { cart: true });
     if (built.n !== n) fail('E_SHAPE', `the vendored basis gives ${built.n} AOs, the record's C and D are ${n} × ${n}`);
@@ -190,7 +222,9 @@ export function restoreMolecule(rec, { record = null, S = null } = {}) {
     rt: canon.rt ? { t: canon.rt.t, dt: canon.rt.dt, integrator: canon.rt.integrator,
       kick: { ...canon.rt.kick }, P: { re: f64(canon.rt.P.re), im: f64(canon.rt.P.im) },
       Pprev: canon.rt.Pprev ? { re: f64(canon.rt.Pprev.re), im: f64(canon.rt.Pprev.im) } : null,
-      parity: canon.rt.parity, steps: canon.rt.steps } : null,
+      parity: canon.rt.parity, steps: canon.rt.steps,
+      restartEvery: canon.rt.restartEvery, sinceRestart: canon.rt.sinceRestart,
+      restartPolicy: policy.restartPolicy, restartPolicySource: policy.restartPolicySource } : null,
     presentation: { ...canon.presentation },
     checks,
   };

@@ -1,0 +1,39 @@
+{
+  "commit": "8fcdcf85b04be268c2afc32d16391339e2bf182f",
+  "applicationSourceChanged": false,
+  "nodeGate": {
+    "command": "npm test",
+    "suiteCount": 68,
+    "exitCode": 0,
+    "log": "node-validation.log"
+  },
+  "browserGate": {
+    "suite": "tests/orbitals.browser-test.mjs",
+    "checks": 24,
+    "failures": 0,
+    "exitCode": 0,
+    "log": "orbitals-validation.log"
+  },
+  "researchProbe": {
+    "command": "node research/astra-2026-09-18/probe.mjs",
+    "exitCode": 0,
+    "data": "measurements.json",
+    "note": "No production source changes; response optimization is tested through an in-memory research variant."
+  },
+  "notRun": [
+    "Full browser gate",
+    "New GPU cache/separable implementation benchmark",
+    "Tablet/device matrix",
+    "Long-duration response-mode validation"
+  ],
+  "fileHashes": {
+    "orbitals-validation.log": "0590977f6acbae52b4c4639d2611b53396d4cb95dc76f17098aba24a74696a11",
+    "water-slice.json": "619a4e96a18ad1bb78667a9a95fec19e0dcc393a91c8c930015bc5004cc83abc",
+    "corpus-index.json": "cd0d970ca6a5631d237dff4dbddb54bde0ece9d7234e923f32a69a62e35394e2",
+    "COVERAGE.md": "c521e6a56acab34cfdd32ccb89b4788940d38516e234bc1a267b79fe701288e0",
+    "probe.log": "a7f794b3fa0bb6a7bd857b013fde0f78eabf05c32a438d85da0dc420f9825a28",
+    "probe.mjs": "f36536211720a2bfdaef037973b81278fa271063c571d8c3c65729b9f374948a",
+    "measurements.json": "f8decba57d946c773ae2e8ecc8faf35c46d6be56badb35b2c2b13b2c51320f1d",
+    "node-validation.log": "f0ea8d6947a769a6444f4bd5846ec9229aac141af542cd96f4658410f5be1826"
+  }
+}

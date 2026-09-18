@@ -142,3 +142,50 @@ const rec1 = serializeMolecule(state);
   assert.equal(wideBasis, 'E_SHAPE', 'an 8 × 8 C against a 7-AO vendored basis is refused');
   console.log('PASS E_SHAPE: 18 defects refused — schema, C/eps/D dimensions, D symmetry, P Hermiticity (both parts), basis kind/order/name, electron count, dt, kick axis, steps, energy, Z, the shown orbital, and an AO count the vendored basis cannot give.');
 }
+
+/* 6. THE RESTART POLICY IS PART OF THE STATE (2026-09-18).  The card's readout said "unrestarted MMUT" while the
+      worker's default restarted every 50 steps — a DIFFERENT trajectory under a label that denied it.  Two things
+      are gated here: the engine does what the policy says and reports the policy it is running, and the record
+      carries both the policy and the position in its cycle, with an old record (no field at all) restoring as the
+      restart-every-50 it was written under, labelled as a legacy default rather than as the file's own word. */
+{
+  const engineWith = (restartEvery) => {
+    const e = createRTHF({ n, S: I.S, h: I.h, eri: I.eri, Z: I.Z, mu: [I.X, I.Y, I.Z], Enuc: I.Enuc,
+      nuclearDipole: I.nuclearDipole[2], nElectrons: sol.nElectrons, D0: sol.D, dt, integrator: 'mmut', restartEvery });
+    e.kickAlong('z', kappa); return e;
+  };
+  const STEPS = 120;
+  const never = engineWith(0), nulled = engineWith(null), fifty = engineWith(50);
+  for (let k = 0; k < STEPS; k++) { never.step(); nulled.step(); fifty.step(); }
+  assert.equal(never.restartPolicy, 'unrestarted', 'restartEvery 0 is the unrestarted leapfrog');
+  assert.equal(nulled.restartPolicy, 'unrestarted', 'and so is null on the wire');
+  assert.equal(fifty.restartPolicy, 'restart every 50', 'a positive period says its period');
+  assert.equal(never.restartEvery, 0, 'the engine reports 0 for never, which is what the wire carries');
+  /* step 1 is the Magnus-2 startup (there is no P(t−Δt) yet), so an unrestarted run has taken STEPS − 1 MMUT steps */
+  assert.equal(never.observables().sinceRestart, STEPS - 1, 'the unrestarted run never restarted');
+  assert.equal(nulled.observables().sinceRestart, STEPS - 1, 'nor did the null one');
+  assert.ok(fifty.observables().sinceRestart < 50, `the restarted run is inside its cycle at ${fifty.observables().sinceRestart}`);
+  const dNever = never.dipoleAlong('z'), dFifty = fifty.dipoleAlong('z');
+  assert.equal(never.dipoleAlong('z'), nulled.dipoleAlong('z'), '0 and null are the same trajectory to the last bit');
+  assert.ok(Math.abs(dNever - dFifty) > 1e-12, `the two policies are different trajectories: ${dNever} against ${dFifty}`);
+  /* the record: the policy and the cycle position survive a round trip, and a record without them is a legacy one */
+  const withPolicy = clone(rec1);
+  withPolicy.rt.restartEvery = 0; withPolicy.rt.sinceRestart = 7;
+  const back = restoreMolecule(withPolicy, { record, S: I.S });
+  assert.equal(back.rt.restartEvery, 0); assert.equal(back.rt.sinceRestart, 7);
+  assert.equal(back.rt.restartPolicy, 'unrestarted');
+  assert.equal(back.rt.restartPolicySource, 'record', 'a record that carries the field is believed');
+  assert.equal(JSON.stringify(serializeMolecule(back)), JSON.stringify(serializeMolecule(restoreMolecule(serializeMolecule(back), { record }))), 'the policy round-trips byte-identically');
+  const legacy = clone(rec1); delete legacy.rt.restartEvery; delete legacy.rt.sinceRestart;
+  const old = restoreMolecule(legacy, { record, S: I.S });
+  assert.equal(old.rt.restartEvery, 50, 'an old record restores as the restart-every-50 it was written under');
+  assert.equal(old.rt.sinceRestart, null, 'and its position in that cycle is not recoverable, so it is null');
+  assert.equal(old.rt.restartPolicy, 'restart every 50');
+  assert.match(old.rt.restartPolicySource, /legacy default/, 'labelled as a default, not as the file\'s own word');
+  assert.match(old.checks.mmut, /restart every 50 \(legacy default/, 'and the checks say so where a reader will see it');
+  assert.equal(codeOf(() => { const r = clone(rec1); r.rt.restartEvery = -1; return restoreMolecule(r, { record, S: I.S }); }), 'E_SHAPE', 'a negative period is refused');
+  assert.equal(codeOf(() => { const r = clone(rec1); r.rt.restartEvery = 10; r.rt.sinceRestart = 11; return restoreMolecule(r, { record, S: I.S }); }), 'E_SHAPE', 'a position past the period is refused');
+  console.log(`PASS the MMUT restart policy: 0 and null are unrestarted (${STEPS - 1} MMUT steps, no restart) and 50 restarts inside its cycle`
+    + ` — two different dipoles (${dNever.toExponential(9)} against ${dFifty.toExponential(9)}); the record carries the policy and the cycle position,`
+    + ` and a record written without them restores as "${old.rt.restartPolicy}" labelled "${old.rt.restartPolicySource}".`);
+}

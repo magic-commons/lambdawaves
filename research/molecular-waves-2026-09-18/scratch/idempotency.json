@@ -1,0 +1,29 @@
+{
+ "steps": 400,
+ "dt": 0.01,
+ "kappa": 0.001,
+ "oldRestart50": {
+  "idempotency": 9.978441038526707,
+  "electrons": 54.255192369626684,
+  "energy": -320.2219442187409,
+  "msPerStep": 17.1904086575
+ },
+ "oldUnrestarted": {
+  "idempotency": 2.9422353442568164e-11,
+  "electrons": 41.99999999996218,
+  "energy": -215.63985389337938,
+  "msPerStep": 25.222313159999995
+ },
+ "newRestart50": {
+  "idempotency": 5.2516351564236764e-14,
+  "electrons": 42.00000000000146,
+  "energy": -227.89100383020644,
+  "msPerStep": 9.691806310000002
+ },
+ "newUnrestarted": {
+  "idempotency": 5.2523552942056164e-14,
+  "electrons": 42.000000000001485,
+  "energy": -227.89100383019985,
+  "msPerStep": 9.4058425025
+ }
+}

@@ -1,0 +1,50 @@
+{
+ "H2O": {
+  "before": {
+   "ground": 5.9,
+   "rpa": 0.2,
+   "total": 6.1
+  },
+  "after": {
+   "ground": 5.8,
+   "rpa": 0.3,
+   "total": 6.1
+  },
+  "speedup": 1,
+  "energyDelta": 0,
+  "omegaDelta": -2.220446049250313e-16,
+  "roots": 10
+ },
+ "C2H4": {
+  "before": {
+   "ground": 49.5,
+   "rpa": 12.3,
+   "total": 61.8
+  },
+  "after": {
+   "ground": 37.5,
+   "rpa": 6.6,
+   "total": 44
+  },
+  "speedup": 1.4,
+  "energyDelta": -2.842170943040401e-14,
+  "omegaDelta": 5.645484080218921e-14,
+  "roots": 48
+ },
+ "C6H6": {
+  "before": {
+   "ground": 5520.5,
+   "rpa": 4391,
+   "total": 9911.4
+  },
+  "after": {
+   "ground": 1573.6,
+   "rpa": 917.4,
+   "total": 2491
+  },
+  "speedup": 3.98,
+  "energyDelta": 3.694822225952521e-13,
+  "omegaDelta": 5.0459636469213365e-14,
+  "roots": 315
+ }
+}
