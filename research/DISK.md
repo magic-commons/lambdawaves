@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-09-18 18:46 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 606 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-09-18 19:35 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -45,7 +45,7 @@ Built 2026-09-18 18:46 UTC by tools/disk.mjs from `research/`: 55 documents inli
 39. [astra-2026-09-18/COVERAGE.md](#doc-39) · 2026-09-18 · 6 kB
 40. [molecular-waves-2026-09-18/JUDGMENT.md](#doc-40) · 2026-09-18 · 24 kB
 41. [molecular-waves-2026-09-18/proving/LEDGER.md](#doc-41) · 2026-09-18 · 44 kB
-42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 12 kB
+42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 14 kB
 43. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/ACCEPTANCE.md](#doc-43) · 2026-09-18 · 12 kB
 44. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/host-contract.md](#doc-44) · 2026-09-18 · 15 kB
 45. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/MANIFEST.md](#doc-45) · 2026-09-18 · 10 kB
@@ -563,6 +563,17 @@ Built 2026-09-18 18:46 UTC by tools/disk.mjs from `research/`: 55 documents inli
 | molecular-waves-2026-09-18/scratch/probe-old-unstable.mjs | 1037 |
 | molecular-waves-2026-09-18/scratch/probe-unstable.mjs | 1994 |
 | molecular-waves-2026-09-18/scratch/profile-rpa.mjs | 1767 |
+| molecular-waves-2026-09-18/scratch/stage1/baseline-all.txt | 294578 |
+| molecular-waves-2026-09-18/scratch/stage1/chem-1.txt | 10163 |
+| molecular-waves-2026-09-18/scratch/stage1/final-all.txt | 301479 |
+| molecular-waves-2026-09-18/scratch/stage1/final-all2.txt | 301488 |
+| molecular-waves-2026-09-18/scratch/stage1/final-all3.txt | 301490 |
+| molecular-waves-2026-09-18/scratch/stage1/node-1.txt | 285951 |
+| molecular-waves-2026-09-18/scratch/stage1/node-2.txt | 275818 |
+| molecular-waves-2026-09-18/scratch/stage1/node-3.txt | 275815 |
+| molecular-waves-2026-09-18/scratch/stage1/orb-1.txt | 4655 |
+| molecular-waves-2026-09-18/scratch/stage1/probe-alloc.mjs | 1810 |
+| molecular-waves-2026-09-18/scratch/stage1/probe-localsolve.mjs | 1792 |
 | molecular-waves-2026-09-18/scratch/sweep-all.json | 10060 |
 | molecular-waves-2026-09-18/scratch/sweep-all.mjs | 1280 |
 | probes-fields/opus-q1-potential.py | 5320 |
@@ -13241,6 +13252,15 @@ All four open items are settled as recommended.
 2. Degenerate pairs get uniform $x$/$y$ lanes in the canonical gauge; the phase knob of the second lane makes the ring. No dedicated pair lane.
 3. STATES opens on CHANGE against GROUND, with MEAN one click away.
 4. The dipole scope is included.
+
+### 12 · Carry-overs into the stage 3 and 4 build (from the stage 1 report, 2026-09-18)
+
+1. The session hosts STATES with one row in `MODEL_RANK` and one `register()` call; CHANGE, DENSITY and PHASE are already its three product kinds.
+2. The signed texel holds $\Delta\rho$ absolutely, so a field whose peak is under about $6\times10^{-5}$ sits in half-precision subnormals (measured: relative $L^2$ $4.9\times10^{-3}$ at $\kappa=10^{-4}$ against $6.0\times10^{-4}$ at $10^{-3}$). The weak-kick replay of stage 3 will live there. Cure: upload $\Delta D/\max\lvert\Delta D\rvert$ and carry the scale beside it; the picture is identical because the `real` view divides by the volume's own maximum, and the readouts multiply the scale back.
+3. `rack.js` still passes `molecule: chem.on` to `field.frame`, a second owner flag beside the session. It must read the session.
+4. `chem.run(n)`, the scripted road, never sets `running`, so a scripted run is the `ground` model and the register would out-rank it. The flag now means "the tdhf model claims the field" and both roads must set it.
+5. CuH and ZnH₂ no longer converge in 200 cycles and the interface does not say so; they are refused for a different sentence. The refusal should name both facts.
+6. Benzene's remaining preparation cost is the AO to MO transform inside `hessianBlocks`, 0.6 s of 2.5 s. It is the next optimisation, separate from the register.
 
 
 
