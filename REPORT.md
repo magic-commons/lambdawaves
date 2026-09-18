@@ -2547,3 +2547,10 @@ Gate: `./test.sh all` — node 0, browser 0, 1048 passing lines, 0 red.
 - Carry-overs closed: one owner flag for the molecular volume; a scripted `chem.run(n)` is the `tdhf` model; CuH and ZnH₂'s refusal names their non-convergence.
 
 Gate: `./test.sh all` — node 0, browser 0, 1061 passing lines, 0 red.
+
+## 2026-09-18 · MOLECULAR WAVES — the orbitals' gauge and the transform
+
+- `canonicalOrbitals` (`lab/rhf-molecule.js`): every degenerate orbital level and every sign is fixed by the same rule as the states, with one family (the Löwdin coordinates of $S^{1/2}C$). The node gate rotates and sign-flips benzene's twelve degenerate pairs and recovers the solver's own $C$ to $3\times10^{-16}$; the density does not move. WINDING's starting phase and a saved ORBITAL register are now reproducible across solves and eigensolvers.
+- The AO → MO transform inside `hessianBlocks` runs over contiguous memory: 581 ms → 178 ms on benzene, checksum identical to ten decimals. Benzene cold in the browser, solve and state ladder together: 2.24 s.
+
+Gate: `./test.sh all` — node 0, browser 0, 1062 passing lines, 0 red.

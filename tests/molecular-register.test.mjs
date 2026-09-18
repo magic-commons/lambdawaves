@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import { chemRegister, chemGround, chemStates, chemStateVectors, chemSpectrum } from '../lab/mathworker.js';
 import { moleculeAtoms } from '../lab/molecules.js';
 import { hermitianEigen } from '../lab/density.js';
+import { moleculeRHF, canonicalOrbitals } from '../lab/rhf-molecule.js';
 import { GROUND, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from '../lab/molecular-register.js';
 
 chemRegister('sto-3g', JSON.parse(fs.readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8')));
@@ -156,4 +157,21 @@ for (const id of ['H2O', 'C6H6']) {
   assert.equal(beats.length, 2, 'a degenerate pair does not beat against itself');
   const y = softCapLevels([-20.2, -1.3, -0.6, -0.4, 0.6]); assert(y[0] === 0 && Math.abs(y[4] - 1) < 1e-12 && Math.abs(y[1] - 3 / 4.9) < 1e-12 && y[1] < 18.9 / 20.8, 'the soft cap clamps the core gap at three median gaps (0.61 of the plot, where a linear axis gives it 0.91)');
   console.log('PASS presets: every preset is a rule — water refuses RING with a sentence, benzene gets all seven; a degenerate pair has no self-beat; the ladder map is soft-capped.');
+}
+
+/* ── §9 · the orbitals' canonical gauge: a function of each level's span, so a scrambled solver changes nothing ── */
+{
+  const sol = moleculeRHF({ atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', detect: false, stability: false, hessian: false }), I = sol.integrals, n = I.n, eps = sol.orbitalEnergies;
+  const C2 = Float64Array.from(sol.C); let pairs = 0;
+  for (let k = 0; k + 1 < n; k++) if (Math.abs(eps[k + 1] - eps[k]) < 1e-8) {   // rotate every degenerate pair by its own angle, and flip a sign or two
+    const a = 0.3 + k, c = Math.cos(a), sn = Math.sin(a); pairs++;
+    for (let u = 0; u < n; u++) { const x = C2[u * n + k], y = C2[u * n + k + 1]; C2[u * n + k] = c * x - sn * y; C2[u * n + k + 1] = -(sn * x + c * y); }
+    k++;
+  }
+  for (let u = 0; u < n; u++) C2[u * n] = -C2[u * n];
+  const back = canonicalOrbitals(I.S, C2, eps, n); let worst = 0, D = 0;
+  for (let k = 0; k < n * n; k++) worst = Math.max(worst, Math.abs(back[k] - sol.C[k]));
+  for (let u = 0; u < n; u++) for (let w = 0; w < n; w++) { let s = 0; for (let o = 0; o < sol.nocc; o++) s += 2 * sol.C[u * n + o] * sol.C[w * n + o]; D = Math.max(D, Math.abs(s - sol.D[u * n + w])); }
+  assert(pairs >= 6 && worst < 1e-10 && D < 1e-10, `canonical orbitals: ${pairs} pairs scrambled, recovered to ${worst}; density from canonical C off by ${D}`);
+  console.log(`PASS the orbitals' gauge: ${pairs} degenerate pairs of benzene rotated and sign-flipped, canonicalOrbitals returns the solver's own canonical C to ${worst.toExponential(1)}; the density is untouched (${D.toExponential(1)}).`);
 }

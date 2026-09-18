@@ -29,6 +29,7 @@ try {
   /* ── R1 · water: the ladder arrives, a preset is a rule, the session hands over the field ─────────────── */
   const r1 = await g.ev(`${HELP}
     __LW.chem.setOn(true); await __LW.chem.solve('H2O');
+    document.querySelector('.dev[data-id="orbitals"]').classList.remove('closed', 'folded');   // the window's own repaint paths run only while it can be seen: gate them too
     const lad = await wait(() => __LW.states.ladder());
     __LW.register.setMode('states');
     const ring = __LW.states.preset('RING'), ringStatus = __LW.states.state().status;

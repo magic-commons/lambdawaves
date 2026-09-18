@@ -46,23 +46,29 @@ const pairList = (n, nocc) => {
  */
 export function hessianBlocks({ eri, C, eps, nocc, n }) {
   const nv = n - nocc, m = nocc * nv;
-  const A1 = new Float64Array(nocc * n * n * n);                             // (i ν λ σ)
-  for (let i = 0; i < nocc; i++) for (let nu = 0; nu < n; nu++) for (let la = 0; la < n; la++) for (let si = 0; si < n; si++) {
-    let s = 0; for (let mu = 0; mu < n; mu++) s += C[mu * n + i] * eri[((mu * n + nu) * n + la) * n + si];
-    A1[((i * n + nu) * n + la) * n + si] = s; }
+  /* EVERY CONTRACTION RUNS OVER CONTIGUOUS MEMORY (2026-09-18).  The first form of these loops summed over the
+     transformed index INNERMOST, which for the first quarter transform strides the AO tensor by n³ doubles a term —
+     a cache miss per multiply, 607 ms of benzene's 2.5 s.  The sums are the same; the loop nest is turned so the
+     innermost index is the trailing one of both arrays and the coefficient is hoisted out of it. */
+  const n2 = n * n, n3 = n2 * n;
+  const A1 = new Float64Array(nocc * n3);                                      // (i ν λ σ)
+  for (let mu = 0; mu < n; mu++) for (let i = 0; i < nocc; i++) {
+    const c = C[mu * n + i]; if (c === 0) continue;
+    const src = mu * n3, dst = i * n3;
+    for (let t = 0; t < n3; t++) A1[dst + t] += c * eri[src + t];
+  }
   const half = (second, third, fourth, d2, d3, d4) => {                      // three contractions on ν, λ, σ
-    const B2 = new Float64Array(nocc * d2 * n * n);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let la = 0; la < n; la++) for (let si = 0; si < n; si++) {
-      let s = 0; for (let nu = 0; nu < n; nu++) s += C[nu * n + second(p)] * A1[((i * n + nu) * n + la) * n + si];
-      B2[((i * d2 + p) * n + la) * n + si] = s; }
+    const B2 = new Float64Array(nocc * d2 * n2);
+    for (let i = 0; i < nocc; i++) for (let nu = 0; nu < n; nu++) { const src = (i * n + nu) * n2;
+      for (let p = 0; p < d2; p++) { const c = C[nu * n + second(p)]; if (c === 0) continue; const dst = (i * d2 + p) * n2;
+        for (let t = 0; t < n2; t++) B2[dst + t] += c * A1[src + t]; } }
     const B3 = new Float64Array(nocc * d2 * d3 * n);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let q = 0; q < d3; q++) for (let si = 0; si < n; si++) {
-      let s = 0; for (let la = 0; la < n; la++) s += C[la * n + third(q)] * B2[((i * d2 + p) * n + la) * n + si];
-      B3[((i * d2 + p) * d3 + q) * n + si] = s; }
-    const B4 = new Float64Array(nocc * d2 * d3 * d4);
-    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let q = 0; q < d3; q++) for (let r = 0; r < d4; r++) {
-      let s = 0; for (let si = 0; si < n; si++) s += C[si * n + fourth(r)] * B3[((i * d2 + p) * d3 + q) * n + si];
-      B4[((i * d2 + p) * d3 + q) * d4 + r] = s; }
+    for (let i = 0; i < nocc; i++) for (let p = 0; p < d2; p++) for (let la = 0; la < n; la++) { const src = ((i * d2 + p) * n + la) * n;
+      for (let q = 0; q < d3; q++) { const c = C[la * n + third(q)]; if (c === 0) continue; const dst = ((i * d2 + p) * d3 + q) * n;
+        for (let si = 0; si < n; si++) B3[dst + si] += c * B2[src + si]; } }
+    const B4 = new Float64Array(nocc * d2 * d3 * d4), col = new Float64Array(n);
+    for (let r = 0; r < d4; r++) { for (let si = 0; si < n; si++) col[si] = C[si * n + fourth(r)];
+      for (let ipq = 0, N3 = nocc * d2 * d3; ipq < N3; ipq++) { let s = 0; const src = ipq * n; for (let si = 0; si < n; si++) s += col[si] * B3[src + si]; B4[ipq * d4 + r] = s; } }
     return B4;
   };
   const v = (a) => nocc + a, o = (i) => i;

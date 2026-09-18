@@ -327,6 +327,7 @@ export function createStates(host, api) {
     for (const [k, L] of rows) { const p = k === GROUND ? r.p0 : r.pops[k]; if (Math.abs(L.pop.get() - p) > 1e-6) L.pop.set(p); }
     if (r.laneRe) ks.forEach((k, i) => { const L = rows.get(k); if (L) L.ph.set(((Math.atan2(r.laneIm[i], r.laneRe[i]) % TAU) + TAU) % TAU); });
     drive.laneKeys = ks; publishPopulations(); api.repaint();
+    const ms = performance.now(); if (ms - beatWall > 300) { beatWall = ms; refresh(); }
   }
   function pumpDrive(t) {
     if (!drive.on || drive.busy) return;
@@ -391,7 +392,7 @@ export function createStates(host, api) {
     if (!drive.on) { roDrive.set('off', ''); roDrive.setSub(rabi); return; }
     const r = drive.last;
     roDrive.set(r ? `P₀ ${r.p0.toFixed(4)} · E ${(r.field[0]).toExponential(2)}` : 'preparing…', r ? 'live' : 'warn');
-    const held = r && drive.laneKeys ? drive.laneKeys.reduce((s0, key, i) => s0 + r.laneRe[i] ** 2 + r.laneIm[i] ** 2, 0) : 1;
+    const held = r && r.laneRe && drive.laneKeys ? drive.laneKeys.reduce((s0, key, i) => s0 + r.laneRe[i] ** 2 + r.laneIm[i] ** 2, 0) : 1;
     roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)} %` + (Math.abs(r.lag) > 1e-9 ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') : rabi);
   }
 
@@ -452,7 +453,7 @@ export function createStates(host, api) {
   function spin(t) { for (const [k, L] of rows) { const c = lanes.get(k); if (!c) continue; const a = (((c.phase - energyOf(k) * t) % TAU) + TAU) % TAU; L.ph.set(a); } }
 
   /* ── the readouts ─────────────────────────────────────────────────────────────────────────────── */
-  let roWall = 0;
+  let roWall = 0, beatWall = 0;
   function refresh() {
     if (!sol || !ladder) {
       for (const r of [roSum, roBeat, roMu]) r.set('—', ''); roMu.setSub(LAW);
@@ -462,7 +463,9 @@ export function createStates(host, api) {
     const s = sum2();
     roSum.set(s.toFixed(6), Math.abs(s - 1) < 1e-9 ? 'ok' : 'warn');
     roSum.setSub(`${lanes.size} of ${LANE_CAP} lanes · ${ladder.count} states in the ladder · the field always plays b/‖b‖`);
-    const list = (morphOn && storeA && storeB ? [...slerpCoefficients(storeA, storeB, morphS)].map(([key, c]) => ({ key, energy: energyOf(key), amp: Math.hypot(c.re, c.im) }))
+    const dl = drive.on && drive.last ? drive.last : null;                        // under the DRIVE the beats are those of the driven populations
+    const list = (dl ? keys().map((key) => ({ key, energy: energyOf(key), amp: Math.sqrt(Math.max(0, key === GROUND ? dl.p0 : dl.pops[key])) }))
+      : morphOn && storeA && storeB ? [...slerpCoefficients(storeA, storeB, morphS)].map(([key, c]) => ({ key, energy: energyOf(key), amp: Math.hypot(c.re, c.im) }))
       : keys().filter((k) => !lanes.get(k).mute).map((key) => ({ key, energy: energyOf(key), amp: lanes.get(key).amp })));
     const beats = beatsOf(list), b = beats[0];
     roBeat.set(b ? `${b.period.toFixed(3)} a.u. = ${(b.period * AU_TIME_AS).toFixed(1)} as` : '—', b ? 'ok' : '');

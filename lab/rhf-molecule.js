@@ -12,6 +12,7 @@ import { loewdin } from './density.js';
 import { eigSym } from './h2ci.js';
 import { cholesky } from './linalg.js';
 import { hessianBlocks } from './rpa-inspector.js';
+import { clusterRanges, canonicaliseCluster, coordinateFamily } from './canon-gauge.js';
 
 export const BASIS_FILES = { 'sto-3g': 'sto-3g-v1.json', '6-31+g-star': '6-31+g-star-v1.json' };
 const REGISTRY = new Map();
@@ -181,6 +182,26 @@ function stabilityProbe(basisArgs, opts, out, { seed = 20260912, amplitude = 0.0
  * `solutions` names every converged aufbau solution found: the lowest is the ground state, any other is a second
  * (third, …) aufbau RHF solution, with the guess that reached it.
  */
+/**
+ * THE CANONICAL GAUGE OF THE ORBITALS (REGISTER-WINDOW-SPEC §7.4; proving/LEDGER.md Definition 8 with one family,
+ * the Löwdin coordinates of S^{1/2}C in AO order).  An eigensolver returns an ARBITRARY orthonormal basis inside a
+ * degenerate level and an arbitrary sign everywhere, so "orbital 20" of benzene's HOMO pair is not an identity: a
+ * saved register, or the WINDING preset's starting phase, would mean something else after the next solve or the next
+ * eigensolver.  The rule is a function of each level's SPAN only.  D, F, every energy, every RPA and TDA root are
+ * invariant under it; only the labels inside a level, and the signs, become reproducible.
+ */
+export function canonicalOrbitals(S, C, eps, n) {
+  const e = eigSym(S, n), half = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let s = 0; for (let k = 0; k < n; k++) s += e.vectors[i * n + k] * Math.sqrt(Math.max(e.values[k], 0)) * e.vectors[j * n + k]; half[i * n + j] = s; }
+  const out = Float64Array.from(C), fam = [coordinateFamily(n)];
+  for (const [s0, e0] of clusterRanges(Array.from(eps), 1e-8)) {
+    const g = e0 - s0, V = new Float64Array(g * n);                             // row k = the Löwdin image of orbital s0 + k
+    for (let k = 0; k < g; k++) for (let u = 0; u < n; u++) { let s = 0; for (let w = 0; w < n; w++) s += half[u * n + w] * C[w * n + s0 + k]; V[k * n + u] = s; }
+    const { W } = canonicaliseCluster(V, n, g, fam);
+    for (let j = 0; j < g; j++) for (let u = 0; u < n; u++) { let s = 0; for (let k = 0; k < g; k++) s += W[j * g + k] * C[u * n + s0 + k]; out[u * n + s0 + j] = s; }
+  }
+  return out;
+}
 export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad', record = null, detect = true,
   diis = 8, damping = 0, tol = 1e-12, maxIter = 200, stability = true, hessian = true } = {}) {
   if (!Array.isArray(atoms) || !atoms.length) throw new Error('rhf-molecule: atoms = [{ Z, x, y, z }] in bohr');
@@ -220,7 +241,7 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
   const out = primary.out;
   const own = distinct.find((r) => Math.abs(r.out.energy - out.energy) < 1e-7);   // the primary run's own distinct solution
   const primaryHessian = out.converged && own ? own.hessian : null;
-  return { energy: out.energy, electronic: out.electronic, orbitalEnergies: out.orbitalEnergies, C: out.C, D: out.D,
+  return { energy: out.energy, electronic: out.electronic, orbitalEnergies: out.orbitalEnergies, C: out.converged ? canonicalOrbitals(I.S, out.C, out.orbitalEnergies, I.n) : out.C, D: out.D,
     F: out.F, converged: out.converged, iterations: out.iterations, nElectrons, nocc, charge,
     basis: b, integrals: I, hash: b.hash, guess: primary.guess, solutionName: mine?.name ?? null,
     aufbau: primary.aufbau, solutions, timings: { integrals: integralMs },
