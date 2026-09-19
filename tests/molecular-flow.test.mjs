@@ -16,6 +16,9 @@ import { moleculeAtoms } from '../lab/molecules.js';
 import { evaluator, shellsFromField } from '../lab/molecular-field.js';
 import { createFlow } from '../lab/molecular-flow.js';
 import { GROUND, createStatesModel, presetLanes } from '../lab/molecular-register.js';
+import { moleculeRHF } from '../lab/rhf-molecule.js';
+import { createRTHF } from '../lab/density.js';
+import { fieldShells } from '../lab/molecular-field.js';
 
 chemRegister('sto-3g', JSON.parse(fs.readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8')));
 const msg = { atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0 }, g = chemGround(msg), st = chemStates(msg), n = st.n, nocc = st.nocc;
@@ -102,4 +105,22 @@ const toAO = (M) => { const half = new Float64Array(n * n), out = new Float64Arr
   const defect = Math.sqrt(num / den);
   assert(Number.isFinite(defect) && den > 0, 'the continuity defect is a number');
   console.log(`MEASURED continuity (NOT an identity in a finite basis): on 400 points of benzene's RING, ‖∂ρ/∂t + ∇·j‖ / ‖∂ρ/∂t‖ = ${defect.toFixed(4)} in STO-3G (worst ${worst.toExponential(2)} against a largest ∂ρ/∂t of ${scale.toExponential(2)}).`);
+}
+
+/* ── §5 · FLOW for a real-time TDHF run: density.js keeps D_μν = Σ c_μ c̄_ν, the transpose-conjugate of ⟨a†_μ a_ν⟩, so the
+      card hands the flow evaluator −Im D.  The sign-sensitive check is the same one: the current must point the way the
+      charge moves.  (With the imaginary part un-negated the cosine below is −1.) ─────────────────────────────────── */
+{
+  const sol = moleculeRHF({ atoms: moleculeAtoms('H2O'), basis: 'sto-3g', detect: false, stability: false, hessian: false }), I = sol.integrals, nw = I.n;
+  const eng = createRTHF({ n: nw, S: I.S, h: I.h, eri: I.eri, Z: I.Z, mu: [I.X, I.Y, I.Z], Enuc: I.Enuc, nuclearDipole: I.nuclearDipole[1], nElectrons: sol.nElectrons, D0: sol.D, dt: 0.01, integrator: 'magnus2', restartEvery: 0 });
+  eng.kickAlong('y', 0.02);
+  for (let k = 0; k < 60; k++) eng.step();
+  const dA = eng.dipoleAlong('y'); eng.step(); const D = eng.D, dMid = eng.dipoleAlong('y'); eng.step(); const dB = eng.dipoleAlong('y'), rate = (dB - dA) / 0.02;
+  const fw = createFlow(fieldShells(sol.basis)), re = Float64Array.from(D.re), imNeg = Float64Array.from(D.im, (x) => -x);
+  fw.set(re, imNeg);
+  const N = 36, H6 = 7, hq = 2 * H6 / N; let Jy = 0, Jx = 0, Jz = 0;
+  for (let ix = 0; ix < N; ix++) for (let iy = 0; iy < N; iy++) for (let iz = 0; iz < N; iz++) { const q = fw.at(-H6 + (ix + 0.5) * hq, -H6 + (iy + 0.5) * hq, -H6 + (iz + 0.5) * hq); Jx -= q.j[0] * hq ** 3; Jy -= q.j[1] * hq ** 3; Jz -= q.j[2] * hq ** 3; }
+  /* dipoleAlong is the ELECTRON dipole −Tr(D M_y): its rate is −d⟨y⟩/dt = −∫ j_y dV */
+  assert(Math.sign(Jy) === Math.sign(rate) && Math.abs(Jy) > 10 * Math.hypot(Jx, Jz) && Number.isFinite(dMid), `TDHF flow: d(dipole)/dt = ${rate}, −∫ j_y dV = ${Jy}, off-axis ${Math.hypot(Jx, Jz)}`);
+  console.log(`PASS TDHF flow: after a y kick the electron dipole moves at ${rate.toExponential(3)} and −∫ j_y dV = ${Jy.toExponential(3)} with −Im D (same sign, ratio ${(Jy / rate).toFixed(3)}; off-axis current ${Math.hypot(Jx, Jz).toExponential(1)}).`);
 }

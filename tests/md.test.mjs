@@ -34,7 +34,11 @@ const maxAbs = (a, f) => { let w = 0; for (let k = 0; k < a.length; k++) w = Mat
   assert.equal(index.records[0].sha256, '22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b', 'STO-3G v1 (H–Kr) hash of the ledger');
   assert.equal(index.records[0].sha256_superseded, 'db98a404682de686543ffe09b56f555d6fc11add3b289b35e74c11f9df91c609', 'the superseded H, Li–F hash is still named');
   assert.deepEqual(index.records[0].elements, Array.from({ length: 36 }, (_, k) => k + 1), 'STO-3G v1 vendors elements 1–36');
-  assert.equal(index.records[1].sha256, 'fee4f992bf8fe6a319350ff03a253d77004110eed0d34013b2af1fade4a71ac4', '6-31+G* v1 hash of the ledger');
+  /* WIDENED 2026-09-18 from H, O to H, C, N, O, F, exactly as STO-3G was widened on 2026-09-12: the old hash is still
+     named, and the H and O shells are byte-identical decimals, so nothing pinned before the widening moves. */
+  assert.equal(index.records[1].sha256, 'ddcbd84daf46557296a080db8a83087a2e63a99bc123cdcf8da69c8a0922d24d', '6-31+G* v1 (H, C, N, O, F) hash');
+  assert.equal(index.records[1].sha256_superseded, 'fee4f992bf8fe6a319350ff03a253d77004110eed0d34013b2af1fade4a71ac4', 'the superseded H, O hash of the ledger is still named');
+  assert.deepEqual(index.records[1].elements, [1, 6, 7, 8, 9], '6-31+G* v1 vendors H, C, N, O, F');
   assert.equal(ANGSTROM, 1 / 0.52917721092, 'ANGSTROM = 1/0.52917721092');
   close(ANGSTROM, 1.8897261245650618, 1e-16, 'ANGSTROM vs the oracle ang_to_bohr');
   console.log(`PASS vendored BSE records verbatim: STO-3G v1 ${index.records[0].sha256.slice(0, 8)}…, 6-31+G* v1 ${index.records[1].sha256.slice(0, 8)}… (node:crypto = md.js sha256Hex).`);

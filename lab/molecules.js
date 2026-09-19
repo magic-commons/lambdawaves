@@ -449,6 +449,20 @@ export const MOLECULES = RAW.map((m) => {
     instability: UNSTABLE[m.id] || null };
 });
 export const MOLECULE_BY_ID = new Map(MOLECULES.map((m) => [m.id, m]));
+/* ── THE LARGER BASIS (2026-09-18).  6-31+G* is vendored for H, C, N, O, F: 2 functions on hydrogen, 19 Cartesian ones on
+ * a heavy atom.  It is offered where every atom is in the record AND the molecule stays near the benzene cap — MEASURED
+ * on this engine (research/molecular-waves-2026-09-18/basis/engine-631.json): C₂H₄ at 46 AOs is 2.3 s, C₂H₆ at 50 is
+ * 3.7 s.  Nineteen library molecules agree with PySCF cart=True on the same decimals to 3e-12 (lab/oracles/). */
+export const BASIS_631 = { elements: [1, 6, 7, 8, 9], maxAO: 46 };
+export function basis631(id) {
+  const m = MOLECULE_BY_ID.get(id); if (!m) return { ok: false, nAO: 0, why: 'no such molecule' };
+  const atoms = moleculeAtoms(id), missing = atoms.find((a) => !BASIS_631.elements.includes(a.Z));
+  const nAO = atoms.reduce((s, a) => s + (a.Z === 1 ? 2 : 19), 0);
+  if (m.disabled) return { ok: false, nAO, why: m.reason };
+  if (missing) return { ok: false, nAO, why: '6-31+G* is vendored for H, C, N, O and F only' };
+  if (nAO > BASIS_631.maxAO) return { ok: false, nAO, why: `${nAO} Cartesian AOs in 6-31+G* — over the ${BASIS_631.maxAO}-AO cap that keeps a solve near benzene's time` };
+  return { ok: true, nAO, why: `${nAO} Cartesian AOs in 6-31+G*` };
+}
 
 /* THE CAP IS BENZENE'S OWN PREDICTION, so the rule is one sentence: nothing slower than benzene. */
 export const CAP_ID = 'C6H6';

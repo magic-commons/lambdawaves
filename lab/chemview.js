@@ -22,7 +22,7 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk } from './mir/kit.js';
-import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE } from './molecules.js';
+import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -105,7 +105,7 @@ export function createChem(host, api) {
   const mSeg = { root: mWrap, set(v) { if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
-    { id: '6-31+g-star', label: '6-31+G*', title: 'H₂O only — 23 Cartesian AOs; the first root moves 0.483 → 0.341' }],
+    { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
     onChange: (v) => { basis = v; solve(preset); } });
   r0.appendChild(bSeg.root);
 
@@ -138,6 +138,8 @@ export function createChem(host, api) {
   r2.appendChild(trig({ label: 'KICK', title: 'exp(−iκ q̂) on the converged density, then field-free propagation', onFire: () => { kick(); } }).root);
   const runSw = sw({ label: 'RUN', value: false, title: 'Propagate the density in real time', onChange: (v) => { setRun(v); } });
   r2.appendChild(runSw.root);
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding the current of the real-time density matrix, v = j/ρ — kick and RUN first: a still molecule has no current', onChange: (v) => { setFlow(v); } });
+  r2.appendChild(flowSw.root);
   const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, title: 'Propagation steps per frame — one outstanding worker request at a time',
     fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { speed = Math.max(1, Math.round(v)); } });
   r2.appendChild(spdKnob.root);
@@ -208,8 +210,9 @@ export function createChem(host, api) {
        minimum (both A ± B blocks negative), so lab/rpa-inspector.js refuses them and chem.solve cannot answer at
        all — the refusal belongs in front of the worker, with the reason, rather than as a failed solve. */
     if (P.disabled) { status(P.name + ': ' + P.reason, 'warn'); return Promise.resolve(null); }
-    if (preset !== 'H2O' && basis !== 'sto-3g') { basis = 'sto-3g'; bSeg.set('sto-3g'); }
-    const b6 = bSeg.button('6-31+g-star'); if (b6) b6.disabled = preset !== 'H2O';
+    const big = basis631(preset);
+    if (!big.ok && basis !== 'sto-3g') { basis = 'sto-3g'; bSeg.set('sto-3g'); status(`${P.name}: back to STO-3G — ${big.why}`, 'warn'); }
+    const b6 = bSeg.button('6-31+g-star'); if (b6) { b6.disabled = !big.ok; b6.title = big.why; }
     /* THE ANSWER WE ALREADY HAVE IS THE ANSWER.  Beyond not paying twice, this is load-bearing: the worker caches
        its report on (atoms, basis, charge) and TRANSFERS that report's typed arrays, so a second chem.solve for the
        same key posts detached buffers, throws inside the worker's own handler, and never replies at all — the call
@@ -225,7 +228,8 @@ export function createChem(host, api) {
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
     const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge };
-    status(`solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`, 'warn');
+    status(basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
+      : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
     if (api.loading) api.loading(true);
     const task = call(msg, () => localSolve(msg)).then((r) => {
       if (seq !== solveSeq) return null;
@@ -268,7 +272,7 @@ export function createChem(host, api) {
     return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY }).then((r) => {
       if (seq !== solveSeq) return null;
       if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && r.error) || 'no real-time engine'), 'warn'); return null; }
-      rt = { t: r.t || 0, D_re: r.D_re || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
+      rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
       pushMatrix(true);                                        // Δρ's reference IS the kicked t = 0
@@ -301,7 +305,7 @@ export function createChem(host, api) {
       rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
       rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep;   // `steps` is the worker's CUMULATIVE count
       if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
-      if (r.D_re) rt.D_re = r.D_re;
+      if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
       rt.samples = r.samples || rt.samples; append(r.trace);
       pushMatrix(); requestSpectrum(); refresh();
     }).catch(() => { inflight = false; });
@@ -370,7 +374,29 @@ export function createChem(host, api) {
     if (view === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
     else if (view === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
     else { product.kind = 'density'; product.matrix = densityRe(); }
-    return s.publish(model(), product);
+    const ok = s.publish(model(), product);
+    if (ok && flowOn) feedFlow();
+    return ok;
+  }
+  /* ── FLOW for the real-time run (stage 6): the TDHF density matrix carries a current too ───────────────────
+     Re D is the whole density; Im D is NEGATED on the way in, because density.js keeps D_μν = Σ c_μ c̄_ν and the flow
+     evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  A still molecule has Im D = 0 and no flow. */
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+  function feedFlow() {
+    if (!sol || !flowCreate) return;
+    const n = sol.nAO;
+    if (!flow || flow.n !== n || flowHash !== sol.hash) { flow = flowCreate(sol.shells); flowRe = new Float64Array(n * n); flowIm = new Float64Array(n * n); flowHash = sol.hash; flowEpoch++; }
+    const re = (rt && rt.D_re) || sol.D, im = rt && rt.D_im;
+    for (let i = 0; i < n * n; i++) { flowRe[i] = re[i]; flowIm[i] = im ? -im[i] : 0; }
+    flow.set(flowRe, flowIm);
+    flow.time = rt ? rt.t : 0;                  // the run keeps its OWN clock: the tracers ride rt.t, not the transport's
+  }
+  let flowCreate = null, flowHash = null;
+  function setFlow(v) {
+    flowOn = !!v; if (flowSw) flowSw.set(flowOn);
+    if (flowOn && !flowCreate) import('./molecular-flow.js').then((m) => { flowCreate = m.createFlow; if (flowOn) { feedFlow(); api.repaint(); } });
+    else if (flowOn) feedFlow();
+    api.repaint(); return flowOn;
   }
   function densityRe() {
     const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
@@ -646,6 +672,7 @@ export function createChem(host, api) {
     setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) paint(); return active; },
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
     /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
+    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
     query() { return sol ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
@@ -683,7 +710,7 @@ export function createChem(host, api) {
           inflight = false;
           if (!r || r.error) return null;
           rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
-          rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re;
+          rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
           if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
           rt.samples = r.samples || rt.samples; append(r.trace);
           pushMatrix();
@@ -693,6 +720,10 @@ export function createChem(host, api) {
       refresh(); requestSpectrum(true);
       return this.state();
     },
+    /** the BASIS control from outside: the same road as the segment — it re-solves, and falls back with a sentence where 6-31+G* is not offered */
+    setBasis(v) { basis = v === '6-31+g-star' ? v : 'sto-3g'; bSeg.set(basis); return solve(preset); }, get basis() { return basis; },
+    /** the RUN switch itself, from outside: the live pump (`run(n)` is the scripted, bounded road) */
+    setRun(v) { return setRun(v); },
     stop() { setRun(false); return false; },
     reset() { reset(); return true; },
     state() {

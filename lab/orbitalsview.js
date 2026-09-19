@@ -26,6 +26,7 @@
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from './mir/kit.js';
 import { slerpCoefficients } from './molecular-register.js';
+import { createFlow } from './molecular-flow.js';
 
 const DEG = 1e-6;                       // |Δε| below this is one degenerate row, drawn side by side
 const TAU = 2 * Math.PI;
@@ -81,6 +82,22 @@ export function createOrbitals(host, api) {
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
     title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => setMorph(morphOn, v) });
   mrow.appendChild(morphSw.root); mrow.appendChild(morphK.root);
+  /* FLOW for one orbital: D_μν = c̄_μ c_ν, so ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the
+     very phase the field is coloured by.  A WINDING orbital circulates; a real orbital stands still. */
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding this orbital’s current j = Im ψ̄∇ψ — the gradient of the phase you see', onChange: (v) => setFlow(v) });
+  mrow.appendChild(flowSw.root);
+  function setFlow(v) {
+    flowOn = !!v && !!sol; flowSw.set(flowOn);
+    if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowRe = new Float64Array(sol.nAO ** 2); flowIm = new Float64Array(sol.nAO ** 2); flowEpoch++; }
+    if (flowOn) { pushedV = -1; if (on) push(now(), true); }
+    api.repaint(); return flowOn;
+  }
+  function feedFlow(v) {
+    const n = sol.nAO, r = v.re, m = v.im;
+    for (let p = 0; p < n; p++) for (let q = 0; q < n; q++) { flowRe[p * n + q] = r[p] * r[q] + m[p] * m[q]; flowIm[p * n + q] = r[p] * m[q] - m[p] * r[q]; }
+    flow.set(flowRe, flowIm);
+  }
 
   const rowsEl = el('div', 'sp-rows', host); rowsEl.hidden = true;
   dialsBtn.addEventListener('click', () => setDials(rowsEl.hidden));
@@ -207,6 +224,7 @@ export function createOrbitals(host, api) {
     if (!force && t === pushedT && version === pushedV) return false;
     product.matrix = vectors(t); product.hash = sol.hash; product.solution = Number.isFinite(sol.seq) ? sol.seq : 0;
     if (!s.publish('orbital-packet', product)) return false;
+    if (flowOn && flow) feedFlow(product.matrix);
     pushedT = t; pushedV = version;
     return true;
   }
@@ -403,6 +421,7 @@ export function createOrbitals(host, api) {
   function adopt(s) {
     sol = s || null;
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
+    flow = null; flowOn = false; flowSw.set(false);
     sel.clear(); storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); rowsEl.classList.remove('reg-morphing');
     if (sol) {
       if (wanted) { applyRecord(wanted); wanted = null; }
@@ -465,6 +484,7 @@ export function createOrbitals(host, api) {
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },
+    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, store, setMorph,
     get morphOn() { return morphOn; }, get morph() { return morphS; },
     get selected() { return selected; },

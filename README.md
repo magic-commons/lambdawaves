@@ -140,7 +140,8 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 |---|---|
 | **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
-| **Physics** | Hydrogen only, n ≤ 6, exact diagonal evolution. No molecules beyond the H₂ / H₂⁺ model cards, no ab initio, no spin. |
+| **Physics (the release)** | Hydrogen only, n ≤ 6, exact diagonal evolution. No molecules beyond the H₂ / H₂⁺ model cards, no ab initio, no spin. |
+| **Physics (this branch, `dev`, unreleased)** | The above, plus ab initio molecules: restricted Hartree–Fock in a vendored Gaussian basis (STO-3G for H–Kr, 6-31+G\* for small H, C, N, O, F molecules) at fixed nuclei, 52 molecules up to benzene, each energy checked against PySCF; RPA and TDA spectra; real-time TDHF; and the REGISTER window, which plays the molecule as a superposition of its ground and excited states (time-dependent CIS), drives it with a field, and shows its current. Closed shells only: no open shells, no correlation beyond singles, no moving nuclei. See `REPORT.md`, 2026-09-18. |
 | **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
 
 ## Accessibility

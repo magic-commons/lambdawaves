@@ -2554,3 +2554,13 @@ Gate: `./test.sh all` — node 0, browser 0, 1061 passing lines, 0 red.
 - The AO → MO transform inside `hessianBlocks` runs over contiguous memory: 581 ms → 178 ms on benzene, checksum identical to ten decimals. Benzene cold in the browser, solve and state ladder together: 2.24 s.
 
 Gate: `./test.sh all` — node 0, browser 0, 1062 passing lines, 0 red.
+
+## 2026-09-18 · MOLECULAR WAVES — the last open items
+
+- FLOW follows whichever model is playing: the STATES register, the ORBITAL packet, or CHEMISTRY's real-time run (the worker ships $\operatorname{Im}D$, negated on the way in because `density.js` keeps the transpose-conjugate convention; the node gate holds the sign and a run's tracers ride the run's own clock).
+- Excited-state absorption: `chem.drive.coupling` gives $\langle A\vert\mathbf r\vert B\rangle$ between any two lanes and $\omega\to$ LANE tunes to the gap between the selected lane and the most populated other one. Water, from a pure $S_3$: 0.999 into $S_4$ at $\pi/\Omega$, $S_0$ untouched.
+- 6-31+G\* widened from H, O to H, C, N, O, F (byte-identical H and O shells, both hashes named); nineteen molecules agree with PySCF to $3\times10^{-12}$; the card offers it for the eighteen at or under 46 Cartesian AOs. The register runs in it (ammonia: 100 states in 0.28 s, its E pair rings).
+- MEASURED, and against the expectation recorded that morning: the larger basis does not close FLOW's magnitude gap (ratios 0.57–1.54 in STO-3G, 0.60–1.43 in 6-31+G\* for water's lowest bright states). It is the TDA's own length and velocity gauge disagreement.
+- The README's limitations table now separates the release from this branch.
+
+Gate: `./test.sh all` — node 0, browser 0, 1067 passing lines, 0 red.

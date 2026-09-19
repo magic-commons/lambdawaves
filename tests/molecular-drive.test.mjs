@@ -7,10 +7,13 @@
  *   §3  the Strang step is second order (Δt-halving ratio 4), unitary to round-off, and a negative Δt is its inverse
  *   §4  first-order perturbation theory: a weak constant field for a short time gives b_K = −E₀μ_K(1 − e^{−iω_K T})/ω_K,
  *       and the defect is second order in E₀ (halving E₀ quarters it)
+ *   §6  EXCITED-STATE ABSORPTION: from a pure excited state, a field tuned to the GAP to another one flops the population
+ *       at Ω = E₀|⟨K|r|L⟩| — a transition the sticks do not show, because they are all absorptions from S₀
  *   §5  a circular field on benzene's bright pair drives a ring: the two lanes fill equally, a quarter turn apart
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { chemDriveCoupling } from '../lab/mathworker.js';
 import { chemRegister, chemStates, chemStateVectors, chemDriveInit, chemDriveRun, chemDriveSet, chemDriveAmplitudes, chemDriveOperator } from '../lab/mathworker.js';
 import { moleculeAtoms } from '../lab/molecules.js';
 
@@ -83,6 +86,19 @@ const dist = (a, b) => { let e = 0; for (let k = 0; k < a.N; k++) e = Math.max(e
   const d1 = defect(2e-3), d2 = defect(1e-3);
   assert(d1 / d2 > 3.5 && d1 / d2 < 4.5 && d2 < 1e-6, `first-order defect ${d1} → ${d2}`);
   console.log(`PASS first order: b_K = −E₀μ_K(1 − e^{−iω_K T})/ω_K to ${d2.toExponential(2)} at E₀ = 1e-3, and the defect is second order in E₀ (ratio ${(d1 / d2).toFixed(3)}).`);
+}
+
+/* ── §6 · excited-state absorption, on water ───────────────────────────────────────────────────────────── */
+{
+  let best = null;
+  for (let K = 0; K < d; K++) for (let L = K + 1; L < d; L++) { if (st.omega[L] > 3) continue; const c = chemDriveCoupling({ a: K, b: L }), q = c.r.map(Math.abs).indexOf(Math.max(...c.r.map(Math.abs))); if (!best || Math.abs(c.r[q]) > Math.abs(best.r)) best = { K, L, q, r: c.r[q], gap: c.gap }; }
+  const g0 = chemDriveCoupling({ a: -1, b: best.L });
+  for (let q = 0; q < 3; q++) assert(Math.abs(g0.r[q] - st.mu[3 * best.L + q]) < 1e-14, 'the coupling from S₀ is the stick’s own μ');
+  const Om = 0.01, Tpi = Math.PI / Om;
+  chemDriveInit({ pol: 'xyz'[best.q], omega: best.gap, e0: Om / Math.abs(best.r), envelope: 'cw', dt: 0.05, t0: 0, lanes: [{ key: best.K, re: 1, im: 0 }] });
+  const r = chemDriveRun({ to: Tpi, maxSteps: 1e7 });
+  assert(r.pops[best.L] > 0.99 && r.pops[best.K] < 0.01 && r.p0 < 1e-3 && Math.abs(r.norm - 1) < 1e-10, `ESA: P_L = ${r.pops[best.L]}, P_K = ${r.pops[best.K]}, P_0 = ${r.p0}`);
+  console.log(`PASS excited-state absorption: S${best.K + 1} → S${best.L + 1} (gap ${best.gap.toFixed(4)} Eh, ⟨K|${'xyz'[best.q]}|L⟩ = ${best.r.toFixed(4)}) flops to ${r.pops[best.L].toFixed(5)} at π/Ω with Ω = E₀|r_KL|, S₀ untouched (${r.p0.toExponential(1)}) — a line no absorption spectrum from S₀ contains.`);
 }
 
 /* ── §5 · benzene: a circular field drives the ring ─────────────────────────────────────────────────────── */

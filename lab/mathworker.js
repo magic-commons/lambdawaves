@@ -74,7 +74,7 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
 const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
@@ -134,6 +134,7 @@ function work(m) {
     else if (m.op === 'chem.drive.init') { out = chemDriveInit(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.drive.run') { out = chemDriveRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.drive.set') { out = chemDriveSet(m); }
+    else if (m.op === 'chem.drive.coupling') { out = chemDriveCoupling(m); }
     else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
@@ -178,6 +179,10 @@ const recordOf = (basis) => {
 };
 const AXIS = { x: 0, y: 1, z: 2 };
 const reD = (engine) => { const D = engine.D; return Float32Array.from(D.re); };   // Re D in the AO basis, for the field
+/* Re D for the field AND Im D for FLOW, from ONE build of D = X P X†.  NOTE THE CONVENTION: density.js's D is the
+   quantum chemist's D_μν = Σ c_μ c̄_ν, the TRANSPOSE-CONJUGATE of the ⟨a†_μ a_ν⟩ the flow evaluator is written in, so the
+   card negates this imaginary part before handing it over (tests/molecular-flow.test.mjs holds the sign). */
+const bothD = (engine) => { const D = engine.D; return { D_re: Float32Array.from(D.re), D_im: Float32Array.from(D.im) }; };
 /** the converged ground state, its integrals and the report — cached on (atoms, basis, charge) */
 function ensureSolve(m = {}) {
   const basis = m.basis || 'sto-3g';
@@ -383,6 +388,16 @@ export function chemDriveSet(m = {}) {
   D.field = driveField(D);
   return { ok: true, e0: D.e0, omega: D.omega, phase: D.phase };
 }
+/** chem.drive.coupling — ⟨A| r |B⟩ between two register keys (−1 = S₀), all three axes: what a drive tuned to the GAP
+    between two lanes needs to know — its Rabi rate is E₀ times this, and a zero says the transition is dipole-forbidden.
+    S₀ → S_K is the stick's own μ_K; S_K → S_L is EXCITED-STATE ABSORPTION, which the sticks do not show. */
+export function chemDriveCoupling(m = {}) {
+  if (!chemSol || !chemSol.states) throw new Error('chem: no states in this worker yet — chem.states first');
+  const a = (m.a | 0) + 1, b = (m.b | 0) + 1, N = chemSol.states.d + 1;
+  if (a < 0 || b < 0 || a >= N || b >= N) throw new Error('chem: drive coupling keys out of range');
+  const r = [0, 1, 2].map((q) => driveOperators(chemSol, q).R[a * N + b]);
+  return { hash: chemSol.ground.hash, a: m.a | 0, b: m.b | 0, r, gap: Math.abs((a ? chemSol.states.omega[a - 1] : 0) - (b ? chemSol.states.omega[b - 1] : 0)) };
+}
 /** the position operator of one axis in the [S₀, S₁ …] basis (⟨0|R|0⟩ removed), for the gate */
 export function chemDriveOperator(q) { if (!chemSol || !chemSol.states) throw new Error('chem: no states yet'); const op = driveOperators(chemSol, q | 0); return { N: op.N, R: Float64Array.from(op.R) }; }
 /** the drive's state vector, for the gate: Schrödinger amplitudes over [S₀, S₁ …] */
@@ -434,7 +449,7 @@ export function chemRtInit(m = {}) {
   rtState = { engine, axis, kappa, dt, integrator, restartEvery: engine.restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
     init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery },
     E0: ob.fieldFreeTotal };
-  return { ok: true, t: 0, D_re: reD(engine), electrons: ob.electrons, idempotency: ob.idempotency,
+  return { ok: true, t: 0, ...bothD(engine), electrons: ob.electrons, idempotency: ob.idempotency,
     E0: ob.fieldFreeTotal, nAO: n, dt, integrator, kick: { axis, kappa },
     /* the policy IN FORCE, from the engine, not the request: the card prints this and never its own intention */
     restartEvery: engine.restartEvery, restartPolicy: engine.restartPolicy, sinceRestart: engine.sinceRestart };
@@ -460,7 +475,7 @@ export function chemRtRun(m = {}) {
   }
   rtState.steps += steps;
   const ms = performance.now() - t0, ob = rtState.engine.observables();
-  return { t: rtState.engine.t, D_re: reD(rtState.engine), trace: out, electrons: ob.electrons,
+  return { t: rtState.engine.t, ...bothD(rtState.engine), trace: out, electrons: ob.electrons,
     idempotency: ob.idempotency, energy: ob.fieldFreeTotal, steps: rtState.steps, samples: rtState.nTrace,
     capped: rtState.capped, msPerStep: +(ms / steps).toFixed(4),
     restartEvery: rtState.restartEvery, restartPolicy: ob.restartPolicy, sinceRestart: ob.sinceRestart };

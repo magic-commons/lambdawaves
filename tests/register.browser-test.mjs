@@ -151,6 +151,35 @@ try {
   judge('R8 FLOW seeds tracers where the current runs, they advance with the clock and are drawn on their own stage canvas; FLOW off takes them away',
     r8.fl === true && r8.p0 && r8.p0.on && r8.p0.count >= 150 && r8.p1.alive > 100 && r8.p1.maxSpeed > 1e-3 && r8.lit > 20 && r8.off === false && r8.p2.on === false && r8.errs.length === 0, r8);
 
+  /* ── R9 · FLOW follows the model that is playing: the ORBITAL packet's WINDING, then CHEMISTRY's real-time run ─ */
+  const r9 = await g.ev(`${HELP}
+    __LW.states.setOn(false); __LW.register.setMode('orbital'); __LW.orbitals.preset('WINDING'); __LW.orbitals.setOn(true); const fo = __LW.orbitals.setFlow(true);
+    for (let k = 1; k <= 24; k++) { __LW.clock.scrub(0.3 * k); __LW.schedule(__LW.TIER.EVOLVE); await frames(2); }
+    const orb = { sel: __LW.molsession.state().selected, flow: __LW.states.flowState() };
+    __LW.orbitals.setOn(false); __LW.orbitals.setFlow(false);
+    await __LW.chem.solve('H2O'); __LW.chem.setAxis('y'); __LW.chem.setFlow(true); await __LW.chem.kick(); await frames(3);
+    const still = __LW.states.flowState();
+    __LW.chem.setRun(true); await wait(() => __LW.chem.state().steps > 150, 600); await frames(6);
+    const run = { sel: __LW.molsession.state().selected, flow: __LW.states.flowState() };
+    __LW.chem.setRun(false); __LW.chem.setFlow(false); await frames(4);
+    return { fo, orb, still, run, after: __LW.states.flowState(), errs: window.__e.slice() };`);
+  judge('R9 FLOW in ORBITAL mode rides the WINDING orbital’s own phase gradient; in CHEMISTRY it rides the real-time TDHF current, under the tdhf model; off, the stage is clear',
+    r9.fo === true && r9.orb.sel === 'orbital-packet' && r9.orb.flow.on && r9.orb.flow.alive > 100 && r9.orb.flow.maxSpeed > 1e-3
+      && r9.run.sel === 'tdhf' && r9.run.flow.on && r9.run.flow.alive > 50 && r9.after.on === false && r9.errs.length === 0, r9);
+
+  /* ── R10 · THE LARGER BASIS: the whole register runs in 6-31+G* — ammonia's E pair is a ring there too ──── */
+  const r10 = await g.ev(`${HELP}
+    await __LW.chem.solve('NH3'); const t0 = performance.now(); await __LW.chem.setBasis('6-31+g-star');
+    const lad = await wait(() => __LW.states.ladder() && __LW.states.ladder().count > 50 && __LW.states.ladder()), ms = performance.now() - t0;
+    __LW.register.setMode('states'); const ring = __LW.states.preset('RING'); await ready(); __LW.states.setOn(true); await frames();
+    const st = __LW.states.state(), T = st.beat.period, mags = [];
+    for (let k = 0; k < 8; k++) { __LW.clock.scrub(T * k / 8); __LW.schedule(__LW.TIER.EVOLVE); await frames(3); const d = __LW.states.state().dipole; mags.push(Math.hypot(d[0], d[1], d[2])); }
+    const refused = await __LW.chem.solve('C6H6').then(() => __LW.chem.basis);
+    await __LW.chem.setBasis('sto-3g');
+    return { nAO: __LW.chem.solution() && 0, basisNH3: '6-31+g-star', count: lad && lad.count, ms, ring, labels: st.lanes.map((l) => l.label), spread: Math.max(...mags) - Math.min(...mags), mag: mags[0], refused, energy: null, errs: window.__e.slice() };`);
+  judge('R10 NH₃ in 6-31+G* (25 Cartesian AOs, 100 states): the canonical ladder arrives, RING finds the E pair and its dipole turns at constant length; benzene falls back to STO-3G with a sentence',
+    r10.count === 100 && r10.ring === true && r10.labels.length === 3 && /x$|y$|z$/.test(r10.labels[1]) && r10.spread < 1e-9 && r10.mag > 0.05 && r10.refused === 'sto-3g' && r10.errs.length === 0, r10);
+
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
 } catch (error) {

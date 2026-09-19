@@ -374,21 +374,43 @@ export function createStates(host, api) {
     }
     refreshDrive(); api.repaint();
   }
-  /** tune to the selected lane: its ω; its dipole's axis; for a bright degenerate pair the pair's plane, circular */
+  /**
+   * ω → LANE.  The drive is tuned to the GAP between the selected lane and the register's REFERENCE lane — the most
+   * populated other lane.  With S₀ holding the population that is the lane's own stick (its ω, its dipole's axis, or the
+   * pair's plane and a circular field for a bright twofold level).  With an EXCITED lane holding it, the gap is an
+   * excited-state absorption line no stick shows; the worker says which axis couples the two and how strongly.
+   */
   function tune() {
     const k = selected !== GROUND && lanes.has(selected) ? selected : keys().find((q) => q !== GROUND);
     if (k === undefined || !ladder) { status('ω → LANE: add a state first', 'warn'); return false; }
-    setDriveParam('omega', ladder.omega[k]); wK.set(drive.omega);
-    if (isBright(k)) {
+    let refKey = GROUND, top = -1;
+    for (const [key, c] of lanes) if (key !== k && c.amp > top) { top = c.amp; refKey = key; }
+    if (!(top > 0)) refKey = GROUND;
+    const gap = Math.abs(energyOf(k) - energyOf(refKey));
+    if (!(gap >= 0.05)) { status(`ω → LANE: ${label(refKey)} and ${label(k)} are ${gap.toFixed(4)} Eh apart — under the drive’s 0.05 Eh floor`, 'warn'); return false; }
+    setDriveParam('omega', gap); wK.set(drive.omega); drive.ref = refKey; drive.coupling = null;
+    if (refKey === GROUND && isBright(k)) {
       if (ladder.size[k] === 2) { let first = k; while (first > 0 && ladder.cluster[first - 1] === ladder.cluster[k]) first--; const a = axisOf(first), b = axisOf(first + 1), id = AX[a] + AX[b] + '+'; setDriveParam('pol', { 'xy+': 'xy+', 'yx+': 'xy-', 'yz+': 'yz+', 'zy+': 'yz-', 'zx+': 'zx+', 'xz+': 'zx-' }[id] || AX[a]); }
       else setDriveParam('pol', AX[axisOf(k)]);
+      drive.coupling = Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]);
+    } else if (api.solve) {
+      Promise.resolve(api.solve({ op: 'chem.drive.coupling', a: refKey, b: k }, () => null, (r) => r)).then((r) => {
+        if (!r || r.error || !ladder || r.hash !== ladder.hash) return;
+        const q = r.r.map(Math.abs).indexOf(Math.max(...r.r.map(Math.abs))); drive.coupling = Math.abs(r.r[q]);
+        if (drive.coupling > 1e-6) setDriveParam('pol', AX[q]);
+        status(drive.coupling > 1e-6 ? `ω → LANE: ${label(refKey)} → ${label(k)}, gap ${gap.toFixed(4)} Eh, ⟨${label(refKey)}|${AX[q]}|${label(k)}⟩ = ${r.r[q].toFixed(4)}` + (refKey !== GROUND ? ' — excited-state absorption, a line no stick shows' : '')
+          : `ω → LANE: ${label(refKey)} → ${label(k)} is dipole-forbidden — a field cannot drive it directly`, drive.coupling > 1e-6 ? 'ok' : 'warn');
+        refreshDrive();
+      }).catch(() => {});
     }
+    refreshDrive();
     return true;
   }
   function refreshDrive() {
     const k = selected !== GROUND && lanes.has(selected) ? selected : keys().find((q) => q !== GROUND);
-    const mu = k !== undefined && ladder ? Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]) : 0, Om = drive.e0 * mu;
-    const rabi = mu > 1e-6 ? `Ω = E₀μ = ${Om.toExponential(2)} · π/Ω = ${(Math.PI / Om).toFixed(0)} a.u. on ${label(k)}` + (Math.abs(drive.omega - ladder.omega[k]) > 5e-4 ? ` · detuned ${(drive.omega - ladder.omega[k]).toFixed(4)}` : ' · on resonance') : 'the selected lane is dark: a dipole field cannot move it directly';
+    /* the coupling the last ω → LANE measured (an excited-to-excited one comes from the worker); else the lane's own stick */
+    const mu = Number.isFinite(drive.coupling) && drive.coupling !== null ? drive.coupling : (k !== undefined && ladder ? Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]) : 0), Om = drive.e0 * mu;
+    const rabi = mu > 1e-6 ? `Ω = E₀μ = ${Om.toExponential(2)} · π/Ω = ${(Math.PI / Om).toFixed(0)} a.u. on ${label(k)}` + ((() => { const gp = Math.abs(energyOf(k) - energyOf(drive.ref === undefined || !lanes.has(drive.ref) ? GROUND : drive.ref)); return Math.abs(drive.omega - gp) > 5e-4 ? ` · detuned ${(drive.omega - gp).toFixed(4)}` : ' · on resonance'; })()) : 'the selected lane is dark: a dipole field cannot move it directly';
     if (!drive.on) { roDrive.set('off', ''); roDrive.setSub(rabi); return; }
     const r = drive.last;
     roDrive.set(r ? `P₀ ${r.p0.toFixed(4)} · E ${(r.field[0]).toExponential(2)}` : 'preparing…', r ? 'live' : 'warn');

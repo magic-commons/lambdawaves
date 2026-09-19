@@ -1273,11 +1273,13 @@ export async function boot(dom) {
     register.setActive(canPresent(wOrbs));
     if ((orbitals.on || states.on) && powered(wOrbs)) register.update(clock.t);
     if (flowTracers) {
-      const src = states.on && states.flowOn ? states.flowSource() : null;
+      /* the source belongs to the model that is PLAYING: the STATES register, the ORBITAL packet, or CHEMISTRY's run */
+      const playing = molSession ? molSession.selected : null;
+      const src = playing === 'states' ? (states.flowOn ? states.flowSource() : null) : playing === 'orbital-packet' ? orbitals.flowSource() : (playing === 'tdhf' || playing === 'ground') && chem ? chem.flowSource() : null;
       if (src && src.ready) {
-        if (!flowTracers.on || flowEpoch !== states.flowEpoch) { flowTracers.setOn(true); flowTracers.setTrail(48); flowTracers.setCap(2.5); flowTracers.seedFrom(src, 220, clock.t, chem.half * 0.75); flowEpoch = states.flowEpoch; }
-        tick('particles', () => { flowTracers.advanceFrom(src, clock.t, chem.half * 0.75); flowTracers.draw(obs, domain.half); });
-      } else if (flowTracers.on) { flowTracers.setOn(false); flowEpoch = -1; }
+        if (!flowTracers.on || flowEpoch !== src) { flowTracers.setOn(true); flowTracers.setTrail(48); flowTracers.setCap(2.5); flowTracers.seedFrom(src, 220, Number.isFinite(src.time) ? src.time : clock.t, chem.half * 0.75); flowEpoch = src; }
+        tick('particles', () => { flowTracers.advanceFrom(src, Number.isFinite(src.time) ? src.time : clock.t, chem.half * 0.75); flowTracers.draw(obs, domain.half); });
+      } else if (flowTracers.on) { flowTracers.setOn(false); flowEpoch = null; }
     }
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
@@ -2388,7 +2390,7 @@ export async function boot(dom) {
      the STATES register hands it a source (lab/molecular-flow.js) whose matrices it rebuilds once a frame */
   const flowTracers = dom.flow ? createParticles(dom.flow, { ink: () => (document.body.dataset.theme === 'light' ? { trail: 'rgba(16,36,84,0.42)', dot: 'rgba(10,22,56,0.92)', text: 'rgba(20,30,50,0.6)' } : { trail: 'rgba(190,230,255,0.4)', dot: 'rgba(235,248,255,0.95)', text: 'rgba(255,255,255,0.5)' }),
     caption: (st) => `FLOW · ${st.alive}/${st.count} tracers on v = j/ρ of the TD-CIS density matrix · sense exact, magnitude qualitative in STO-3G` }) : null;
-  let flowEpoch = -1;
+  let flowEpoch = null;                                                // the SOURCE the tracers were seeded from: a new source is a new ensemble
   const wDyn = device({ id: 'dynamics', eyebrow: 'DYNAMICS', status: '' });
   rack.appendChild(wDyn.root);
   const dynamics = createDynamics(wDyn.body, {
@@ -5642,6 +5644,7 @@ export async function boot(dom) {
       norm() { return orbitals.norm(); },
       setAmp(k, v) { return orbitals.setAmp(k, v); }, setPhase(k, v) { return orbitals.setPhase(k, v); },
       setOn(v) { return orbitals.setOn(v); }, get on() { return orbitals.on; },
+      setFlow(v) { return orbitals.setFlow(v); }, get flowOn() { return orbitals.flowOn; },
       preset(name) { return orbitals.preset(name); }, store(w) { return orbitals.store(w); }, setMorph(on, sv) { return orbitals.setMorph(on, sv); },
       get dials() { return orbitals.dials; }, setDials(v) { return orbitals.setDials(v); },
       ladder() { return orbitals.ladder(); }, state() { return orbitals.state(); },

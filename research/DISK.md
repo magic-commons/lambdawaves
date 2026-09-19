@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-09-18 23:42 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 617 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-09-19 00:54 UTC by tools/disk.mjs from `research/`: 55 documents inlined in full (1.63 MB), 623 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -45,7 +45,7 @@ Built 2026-09-18 23:42 UTC by tools/disk.mjs from `research/`: 55 documents inli
 39. [astra-2026-09-18/COVERAGE.md](#doc-39) · 2026-09-18 · 6 kB
 40. [molecular-waves-2026-09-18/JUDGMENT.md](#doc-40) · 2026-09-18 · 25 kB
 41. [molecular-waves-2026-09-18/proving/LEDGER.md](#doc-41) · 2026-09-18 · 44 kB
-42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 15 kB
+42. [molecular-waves-2026-09-18/REGISTER-WINDOW-SPEC.md](#doc-42) · 2026-09-18 · 17 kB
 43. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/ACCEPTANCE.md](#doc-43) · 2026-09-18 · 12 kB
 44. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/host-contract.md](#doc-44) · 2026-09-18 · 15 kB
 45. [molecular-waves-2026-09-18/scratch/old-ql/lab/mir/modulation/modwindow/MANIFEST.md](#doc-45) · 2026-09-18 · 10 kB
@@ -182,6 +182,12 @@ Built 2026-09-18 23:42 UTC by tools/disk.mjs from `research/`: 55 documents inli
 | h2o-2026-09-11/scratch/sumrules.py | 2305 |
 | h2o-2026-09-11/sto-3g-h-kr.bse.json | 112427 |
 | h2o-2026-09-11/sto-3g.bse.json | 14603 |
+| molecular-waves-2026-09-18/basis/6-31+gs-h-c-n-o-f.bse.json | 19163 |
+| molecular-waves-2026-09-18/basis/engine-631.json | 3025 |
+| molecular-waves-2026-09-18/basis/export-geoms.mjs | 535 |
+| molecular-waves-2026-09-18/basis/geoms-631.json | 3284 |
+| molecular-waves-2026-09-18/basis/oracle-631.json | 3270 |
+| molecular-waves-2026-09-18/basis/oracle-631.py | 1561 |
 | molecular-waves-2026-09-18/measurements-fable.json | 4030 |
 | molecular-waves-2026-09-18/probe-fable.mjs | 14766 |
 | molecular-waves-2026-09-18/proving/canon-gauge.mjs | 7851 |
@@ -12755,7 +12761,7 @@ Labour, per the standing dial: Opus builds stages 0 to 2 and proves the $\gamma$
 ### 8 · Open problems and conjectures
 
 1. CLOSED 2026-09-18: the $\gamma^{KL}$ formulas are proved and independently verified (`proving/LEDGER.md`).
-2. MEASURED 2026-09-18 (`tests/molecular-flow.test.mjs`), and larger than this document expected. On benzene's RING in STO-3G, $\lVert\partial_t\rho+\nabla\cdot\mathbf j\rVert/\lVert\partial_t\rho\rVert=1.19$ over 400 points, and the integrated current is parallel to the dipole's own rate of change ($\cos=0.99997$) but only $0.149$ of its size ($0.73$ for water's BEAT). △ Correction to this entry's first sentence: continuity is not restored by a complete one-particle basis alone, because the generator $PHP$ of TD-CIS is non-local through the projector $P$; it is a truncated-CI property as well as a basis one (Hermann, Pohl, Tremblay and co-workers discuss the same defect for truncated-CI flux densities; HEARD, not re-fetched). What is exact and gated: the convention and sign of $\mathbf j$, the sense of a ring current, its reversal with the quarter turn, the vanishing angular momentum of a linear slosh, and the constancy of $\int(xj_y-yj_x)$ in time. FLOW is therefore labelled: sense exact, magnitude qualitative in a minimal basis. Open: whether a larger basis (6-31+G\*) closes the magnitude gap the way it closes the length and velocity gauge gap.
+2. MEASURED 2026-09-18 (`tests/molecular-flow.test.mjs`), and larger than this document expected. On benzene's RING in STO-3G, $\lVert\partial_t\rho+\nabla\cdot\mathbf j\rVert/\lVert\partial_t\rho\rVert=1.19$ over 400 points, and the integrated current is parallel to the dipole's own rate of change ($\cos=0.99997$) but only $0.149$ of its size ($0.73$ for water's BEAT). △ Correction to this entry's first sentence: continuity is not restored by a complete one-particle basis alone, because the generator $PHP$ of TD-CIS is non-local through the projector $P$; it is a truncated-CI property as well as a basis one (Hermann, Pohl, Tremblay and co-workers discuss the same defect for truncated-CI flux densities; HEARD, not re-fetched). What is exact and gated: the convention and sign of $\mathbf j$, the sense of a ring current, its reversal with the quarter turn, the vanishing angular momentum of a linear slosh, and the constancy of $\int(xj_y-yj_x)$ in time. FLOW is therefore labelled: sense exact, magnitude qualitative in a minimal basis. ANSWERED 2026-09-18, in the negative: for water's four lowest bright states the ratio $\lvert\int\mathbf j\,dV\rvert/\lvert d\boldsymbol\mu/dt\rvert$ is $1.54,\ 0.67,\ 0.73,\ 0.57$ in STO-3G and $1.43,\ 1.16,\ 0.85,\ 0.60$ in 6-31+G\* — it scatters about one in both and the larger basis does not pull it in. The gap is the length and velocity gauge disagreement of the TDA itself (RPA restores it in a complete basis; CIS does not), so it is a property of the model, not mainly of the basis. For comparison, a real-time TDHF run on water in STO-3G gives $0.81$.
 3. TDA and RPA ladders cross (benzene roots 2 to 4). A character-based matching between them, by maximal overlap of $X^{\rm TDA}$ with $X+Y$, is needed before any per-root comparison is displayed. Whether the overlap matching is unique inside degenerate blocks is open.
 4. Conjecture: for the 52 accepted molecules the TD-CIS bright lines lie above the RPA ones by a margin that shrinks with the HOMO–LUMO gap. Untested; cheap to tabulate once stage 2 lands.
 5. Whether the iPad needs any renderer work at all is a measurement, not a design question. It has not been made.
@@ -13268,6 +13274,13 @@ All four open items are settled as recommended.
 - FLOW. A FLOW switch puts 220 tracers on the stage riding $\mathbf v=\mathbf j/\rho$ of the register's density matrix (`lab/molecular-flow.js`, the particle overlay generalised to a pluggable source). Seeded by $\lvert\mathbf j\rvert$ and reborn where the current still runs. See `JUDGMENT.md` §8.2 for what is exact and what is qualitative.
 - Carry-overs closed: the frame loop asks the session whether the volume is molecular; a scripted `chem.run(n)` claims the field as the `tdhf` model and publishes as it; the refusal of CuH and ZnH₂ names their non-convergence.
 - Still open: the AO to MO transform (0.6 s of benzene's preparation); the canonical gauge for degenerate ORBITAL pairs; FLOW for the ORBITAL mode and for a TDHF run; the drive's excited-state absorption is unexplored; larger bases.
+
+### 14 · As built, the last open items (2026-09-18)
+
+- FLOW follows the model that is playing: the STATES register, the ORBITAL packet ($D_{\mu\nu}=\overline{c_\mu}c_\nu$, so the tracers ride the gradient of the very phase on screen), or CHEMISTRY's real-time run (the worker ships $\operatorname{Im}D$; it is negated on the way in, because `density.js` keeps the transpose-conjugate convention, and the node gate holds the sign). A real-time run's tracers ride the run's own clock.
+- Excited-state absorption. `chem.drive.coupling` returns $\langle A\vert\mathbf r\vert B\rangle$ between any two register keys, and $\omega\to$ LANE now tunes to the gap between the selected lane and the most populated other lane. From a pure $S_3$ of water a field at the $S_3\to S_4$ gap ($0.0887$ hartree, $\langle 3\vert y\vert 4\rangle=-1.196$) moves $0.999$ of the population at $\pi/\Omega$ and leaves $S_0$ untouched: a line no absorption spectrum from the ground state contains.
+- The larger basis. 6-31+G\* is vendored for H, C, N, O, F (the record widened from H, O with byte-identical H and O shells, both hashes named). Nineteen library molecules agree with PySCF `cart=True` on the same decimals to $3\times10^{-12}$ (`basis/oracle-631.py`, `lab/oracles/6-31+g-star-v1.json`); the card offers it for the eighteen that stay at or under 46 Cartesian AOs and says why not for the rest. The whole register runs in it: ammonia's 100 states arrive in 0.28 s and its E pair rings.
+- Not done here, because it needs the device: the iPad frame measurement. The METERS window reads the frame time; serve the dev tree on the local network with `LW_HOST=0.0.0.0 ./serve.sh 8712` and open `https://<this machine's LAN address>:8712/lab/` on the iPad (accept the self-signed certificate). That address is reachable on the home network only.
 
 
 
