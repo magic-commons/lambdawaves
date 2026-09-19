@@ -4152,6 +4152,23 @@ export async function boot(dom) {
       layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
       layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
     }
+    /* LEAN (2026-09-18, the commissioner: "hide all of those visible texts and info").  Any window that carries model
+       notes or readouts gets one header button, Aa: pressed, the window keeps its controls, ladders and plots and drops
+       its paragraphs and readout tiles; the header's status line stays, so the window still says what it is doing.
+       Remembered per window in this browser.  A presentation choice only — nothing is computed differently. */
+    const LEAN_KEY = 'lw.lean.v1';
+    let leanSet = new Set(); try { leanSet = new Set(JSON.parse(localStorage.getItem(LEAN_KEY) || '[]')); } catch (e) { leanSet = new Set(); }
+    const setLean = (d, on) => { d.classList.toggle('lean', on); const b = d.querySelector('.dev-lean'); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); }
+      if (on) leanSet.add(d.dataset.id); else leanSet.delete(d.dataset.id); try { localStorage.setItem(LEAN_KEY, JSON.stringify([...leanSet])); } catch (e) { /* private mode: the choice lasts the session */ }
+      schedule(TIER.PRESENT); };
+    for (const d of document.querySelectorAll('.dev')) {
+      if (!d.querySelector('.dev-body .note, .dev-body .ro')) continue;
+      const util = d.querySelector('.dev-util'); if (!util) continue;
+      const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts — the controls, ladders and plots stay';
+      b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
+      b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
+      if (leanSet.has(d.dataset.id)) setLean(d, true);
+    }
     /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
     for (const d of document.querySelectorAll('.dev')) {
       const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
