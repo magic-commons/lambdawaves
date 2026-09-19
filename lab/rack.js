@@ -2418,6 +2418,7 @@ export async function boot(dom) {
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
+  let restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
   let molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
   let orbitals = null, states = null, register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
   const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
@@ -2484,6 +2485,7 @@ export async function boot(dom) {
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps: no solve behind furniture
   rack.appendChild(wOrbs.root);
   register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
+    stamp: () => { if (restampParams) requestAnimationFrame(restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
@@ -2709,7 +2711,7 @@ export async function boot(dom) {
        changes only when the user changes it — the mutation count stays at zero. */
     const stampParams = () => { for (const d of defs) { const k = d.knob && d.knob(); if (!k || !k.root) continue; k.root.dataset.param = d.id;
       if (k.setBase) k.setBase(() => { const R = modHost && modHost.registry; return R && R.has(d.id) && R.isModulated(d.id) ? R.baseOf(d.id) : null; }); } };
-    requestAnimationFrame(stampParams);
+    requestAnimationFrame(stampParams); restampParams = stampParams;
     /* A DIAL WHOSE PARAMETER A MODULATOR IS HOLDING WEARS ACCENT B, wherever in the rack it lives —
        and it keeps wearing it with this window closed, which is the boundary law made visible. */
     modHost.registry.subscribe('*', (ev) => {

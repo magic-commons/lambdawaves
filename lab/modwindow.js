@@ -670,7 +670,8 @@ export function createModulation(host, port) {
     const idx = routeIndex();
     for (const [id, rec] of rings) {
       if (idx.has(id) && registry.has(id) && rec.dial.isConnected) continue;
-      rec.svg.remove(); if(rec.depth) rec.depth.root.remove(); if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring', 'mod-selected');
+      rec.svg.remove(); if(rec.depth) rec.depth.root.remove(); if (rec.x) rec.x.remove(); if (ringFocus === id) ringFocus = null;
+      if (rec.dial.parentElement) rec.dial.parentElement.classList.remove('has-ring', 'mod-selected', 'ring-focus');
       rings.delete(id);
     }
     for (const id of idx.keys()) {
@@ -703,8 +704,49 @@ export function createModulation(host, port) {
     depth.root.classList.add('k-route-depth'); depth.root.title='Selected macro range; the large dial sets the base';
     depth.root.addEventListener('pointerdown',e=>e.stopPropagation());
     dial.parentElement.appendChild(depth.root); rec.depth=depth;
+    /* THE ROUTED KNOB's OWN TWO BADGES, AND ONLY ON THE ONE THE HAND IS ON (2026-09-18).  The range dial used to sit
+       beside EVERY routed dial, which pushed each dial 10 px off its own label and covered the right of its arc; and
+       the only ways to take a route off were a double-tap or a 450 ms hold on an 8-px ring band.  Now a routed dial
+       stays under its label (lab.css), and touching it gives THAT control its range dial at one corner and a × at
+       the other: × removes the selected macro's route, or opens the list when several macros hold the control.
+       A right-click or a held press on the DIAL ITSELF opens the same pop-over the ring band always had. */
+    const x = el('button', 'k-route-x', dial.parentElement, '×'); x.type = 'button';
+    x.title = 'Remove the macro from this control'; x.setAttribute('aria-label', 'remove the macro from this control');
+    x.addEventListener('pointerdown', (e) => e.stopPropagation());
+    x.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation();
+      const rs = M.routesOfTarget(id).filter((r) => !r.dormant);
+      if (rs.length > 1) { const b = x.getBoundingClientRect(); openPop(id, b.left, b.bottom + 4); return; }
+      if (!removeEditRoute(id) && rs.length) { M.removeRoute(rs[0].id); if (registry.has(id)) registry.restoreBase(id); clock.recomputeRunning(); apply(); rebuild(); }
+    });
+    rec.x = x;
+    let holdDial = 0;
+    dial.addEventListener('pointerdown', (e) => {
+      focusRing(id);
+      if (e.button) return;
+      const x0 = e.clientX, y0 = e.clientY; clearTimeout(holdDial);
+      holdDial = setTimeout(() => { holdDial = 0; openPop(id, x0, y0); }, 600);
+      const move = (ev) => { if (Math.abs(ev.clientX - x0) > 4 || Math.abs(ev.clientY - y0) > 4) done(); };
+      const done = () => { clearTimeout(holdDial); holdDial = 0; window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', done, true); window.removeEventListener('pointercancel', done, true); };
+      window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', done, true); window.addEventListener('pointercancel', done, true);
+    });
+    dial.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); focusRing(id); openPop(id, e.clientX, e.clientY); });
     return rec;
   }
+  /** one routed control at a time wears its badges: the one the hand last touched */
+  let ringFocus = null;
+  function focusRing(id) {
+    if (ringFocus === id) return;
+    const was = ringFocus && rings.get(ringFocus); if (was && was.dial.parentElement) was.dial.parentElement.classList.remove('ring-focus');
+    ringFocus = id;
+    const now = id && rings.get(id); if (now && now.dial.parentElement) now.dial.parentElement.classList.add('ring-focus');
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (!ringFocus) return;
+    const k = e.target.closest && e.target.closest('.k.has-ring');
+    if (k && k.dataset.param === ringFocus) return;
+    if (e.target.closest && e.target.closest('.mod-pop')) return;
+    focusRing(null);
+  }, true);
 
   /** ONE pass over the route list into a Map — every reader of a paint tick is handed the same
    *  index, rather than each slicing the whole list for itself. */

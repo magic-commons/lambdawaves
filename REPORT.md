@@ -2564,3 +2564,9 @@ Gate: `./test.sh all` — node 0, browser 0, 1062 passing lines, 0 red.
 - The README's limitations table now separates the release from this branch.
 
 Gate: `./test.sh all` — node 0, browser 0, 1067 passing lines, 0 red.
+
+## 2026-09-18 · A knob with a macro on it
+
+The commissioner's report: the arc is not aligned with the knob, small dials are everywhere, and there is no easy way to take a macro off. Cause: the kit seats a range dial beside every routed dial and slides the dial 10 px left to make room (`lab/mir/modulation/modhost.css`), so the dial and its arc sat off-centre under the label and the small dial covered the right of the arc; removal was a double-tap or a 450 ms hold on an 8-px ring band. The kit is not edited. `lab/lab.css` out-ranks it by one `:root` and `lab/modwindow.js` adds the behaviour: a routed dial stays centred; only the control the hand last touched wears its range dial and a ×; a held press or a right-click on the dial itself opens the pop-over (REMOVE, REMOVE ALL, RESET); the × removes the selected macro's route. The REGISTER's lane phase needles are re-tagged as drop targets whenever lanes are rebuilt. Gate: `tests/routed-knob.browser-test.mjs`, real pointer events. The upstream home of this fix is MIR.
+
+Gate: `./test.sh all` — node 0, browser 0, 1072 passing lines, 0 red.

@@ -397,6 +397,21 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 .sp-b:active { background: var(--glass-press); }
 .sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: 13px; border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
+/* A ROUTED KNOB STAYS UNDER ITS OWN LABEL, AND WEARS ITS BADGES ONE CONTROL AT A TIME (2026-09-18).  The kit seats a
+   range dial beside every routed dial and slides the dial 10 px left to make room (modhost.css); in this rack that put
+   the dial and its arc off-centre under the label, covered the right of the arc, and scattered small dials over every
+   routed control.  The kit is not edited: these rules out-rank it by one :root.  The dial keeps its seat; the control
+   the hand last touched (.ring-focus, lab/modwindow.js) shows its range dial at the top-right corner and a × at the
+   top-left, both outside the arc's circle; every other routed control shows its ring and nothing else. */
+:root:root:root:root .k.has-ring > .k-dial { transform: none; }
+:root:root:root:root .k.has-ring { position: relative; }
+:root:root:root:root .k-route-depth.k { display: none; top: -8px; right: -10px; bottom: auto; transform: none; width: 22px; min-width: 22px; height: 22px; z-index: 4; }
+:root:root:root:root .k.ring-focus > .k-route-depth.k { display: flex; }
+:root:root:root:root .k-route-depth .k-dial { width: 20px; height: 20px; }
+.k-route-x { display: none; position: absolute; top: -8px; left: -10px; width: 22px; height: 22px; padding: 0; border-radius: 50%; z-index: 4;
+  border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); color: var(--ink-key); font-size: 13px; line-height: 1; cursor: pointer; }
+.k.ring-focus > .k-route-x { display: grid; place-items: center; }
+.k-route-x:hover, .k-route-x:active { color: var(--bad); }
 /* THE REGISTER WINDOW (registerview.js + statesview.js): the mode switch, the ladder beside its dipole scope, the A/B bar */
 .reg-mode { margin-bottom: var(--sp-2); }
 .reg-mode .segw { flex: 1 1 auto; }

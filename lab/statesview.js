@@ -470,6 +470,7 @@ export function createStates(host, api) {
       prev = L.root;
     }
     markSel(); syncLanes();
+    if (api.stamp) api.stamp();                                                  // lanes come and go: their phase needles are the reg.ph slots' knobs, so re-tag them
   }
   /** the needles turn with the clock: arg b_K(t) = arg b_K − ω_K t */
   function spin(t) { for (const [k, L] of rows) { const c = lanes.get(k); if (!c) continue; const a = (((c.phase - energyOf(k) * t) % TAU) + TAU) % TAU; L.ph.set(a); } }
