@@ -1253,7 +1253,13 @@ export async function boot(dom) {
         if (!kepler.on && !bow) kepler.suspend();
       });
       else if (!keplerVisible) kepler.suspend();
-    } else { vortex.suspend(); particles.suspend(clock.t); if (!bow) kepler.suspend(); }
+    } else {
+      vortex.suspend(); particles.suspend(clock.t);
+      /* The impulse remains a stage gesture when a molecule, helium, H₂, momentum space or a
+         Sturmian owns the field.  Those modes deliberately skip the Kepler redraw above, so clear
+         its transparent canvas explicitly before bowFrame() paints the next arrow. */
+      if (bow) kepler.clear(); else kepler.suspend();
+    }
 
     const fieldVisible = fieldOn() && fieldlines.overlay !== 'off';
     if (fieldVisible && may('fieldlines')) tick('fieldlines', () => fieldlines.update(reg, clock.t, obs, domain.half, clock.playing, getZ(), true));

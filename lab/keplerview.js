@@ -66,6 +66,17 @@ export function createKepler(canvas) {
       fitText(g, `KEPLER${label.length ? ' · ' + label.join(' · ') : ''} · dot = perihelion (⟨K⟩) — drag it: around = D(R) about L̂, in/out = e^{−iθK} (exact rotors on the state) · cross = ⟨x⟩ (exact)`,
         cx, H - 128, { x0: cx, y0: 0, x1: W - 12, y1: H }, 'left', true);
   }
+  /** Clear the transparent overlay without collapsing it.  Outside hydrogen's overlay domain
+   *  there is no Kepler scene to redraw beneath an active impulse, but the impulse still needs a
+   *  clean frame; otherwise every arrow and text raster remains and the gesture turns into a trail. */
+  function clear() {
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (W < 32 || H < 32) return;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    handles = [];
+  }
   /* ── the IMPULSE VECTOR (wave 53; `bow` is still its name in the code): drawn over everything while ctrl+drag is held ── */
   let bow = null;
   function setBow(b) { bow = b; }
@@ -100,5 +111,5 @@ export function createKepler(canvas) {
     if (h && h.info && lastPointer) { const r = cv.getBoundingClientRect(); showGraphTip(cv, h.info, r.left + lastPointer[0], r.top + lastPointer[1]); }
     else hideGraphTip(cv);
   }
-  return { update, suspend, setBow, bowFrame, get on() { return on; }, setOn(v) { on = !!v; }, get orbits() { return orbits; }, hit, setHover, get handles() { return handles; } };
+  return { update, clear, suspend, setBow, bowFrame, get on() { return on; }, setOn(v) { on = !!v; }, get orbits() { return orbits; }, hit, setHover, get handles() { return handles; } };
 }
