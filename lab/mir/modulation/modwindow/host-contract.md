@@ -225,7 +225,13 @@ attaches the behaviour and does the painting:
 - **the rack** — `mw.addDevice({id, kind})`, kind `'lfo' | 'env' | 'audio'`. Cards are
   appended to the horizontal scroller. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
   presentation tri-state.
-- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; the measuring law is
+- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; bind its pointer surface through
+  `../curve-gesture.js`. MIR 1.4.2 follows FL Studio's editor law: right-drag empty space adds and
+  places a point; Shift-right-click adds at the curve's current value; left-drag moves a point or
+  tension handle; Ctrl fine-tunes tension; right-click resets a tension handle; Alt-left-click
+  deletes a point. Plain left-click on empty space is inert. Convert client pixels through the SVG
+  viewBox before hit testing, and materialize deterministic analytic waves on their first edit
+  without demanding a preset. The measuring law is
   `w = max(60, round(box.clientWidth) || 206)`,
   `h = max(60, round(box.clientHeight - 14) || 128)`,
   `px(t, v) = [11 + t·(w − 22), h − 11 − v·(h − 22)]`.

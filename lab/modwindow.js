@@ -6,6 +6,8 @@ import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GE
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modulation/modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
          pointsEqual, PRESET_LABEL } from './mir/modulation/curve.js';
+import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta,
+         editablePresetForWave } from './mir/modulation/curve-gesture.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const pct = (u) => (100 * clamp01(u)).toFixed(2) + '%';
@@ -19,7 +21,7 @@ const svgEl = (tag, cls, parent) => {
 /* the house drag ladder, from kit.js's own knob: 220 px is a full scale, 900 with Shift, 320
    under a finger.  Reused rather than re-chosen so the artifact's dials feel like the lab's. */
 const TRAVEL = (e, touch) => (e.shiftKey ? 900 : touch ? 320 : 220);
-const TAP_MS = 420, TAP_PX = 10, DTAP_MS = 450, TENSION_PX = 114, GRAB = 20;
+const TENSION_PX = 114, GRAB = 20;
 
 function fmtVal(d, v) {
   if (!d) return String(v);
@@ -2116,11 +2118,12 @@ export function createModulation(host, port) {
     }
     if (s.kind === 'env') return 'ENV — ' + envDrawn(s).toFixed(3) + ' s drawn over a ' + s.timeScale.toFixed(2) +
       ' s window. Drag the stages; FIT frames it.';
-    if (s.shapeMode !== 'curve') return M.WAVE_LABEL[s.wave] + ' · tap a shape to draw it.' +
-      (stochastic(s) ? ' Four cycles: each is a fresh hold.' : '');
+    if (s.shapeMode !== 'curve') return M.WAVE_LABEL[s.wave] + (stochastic(s)
+      ? ' · analytic: choose a breakpoint shape to edit it. Four cycles: each is a fresh hold.'
+      : ' · analytic: right-drag the curve to make it editable.');
     const info = curveInfo(s.points);
     return (info.preset ? PRESET_LABEL[info.preset] + (info.mirrored ? ' mirrored' : '') : 'CURVE') +
-      ' — ' + info.points + ' points, ' + info.bent + ' bent. Drag a dot; tap to add.';
+      ' — ' + info.points + ' points, ' + info.bent + ' bent. Right-drag empty space to add; drag dots and handles.';
   }
 
   const stateOf = (s) => (!s.on ? 'OFF'
@@ -2178,30 +2181,42 @@ export function createModulation(host, port) {
    * only ever write the stage the finger picked up. */
   function wireEditor(rec) {
     const s = rec.s, g = rec.g, svg = g.svg;
-    let mode = null, idx = -1, key = null, box = null, x0 = 0, y0 = 0, t0 = 0, base = 0, moved = false;
+    let pid = null, mode = null, idx = -1, key = null, y0 = 0, base = 0;
+    let anchor = { x: 0, y: 0 };
     let down = { key: null, t: 0, v: 0 };            // the LATCH: the stage, its seconds, and where the finger took it
-    let lastTapAt = 0, lastTapIdx = -1;
 
-    const local = (e) => ({ x: e.clientX - box.left, y: e.clientY - box.top });
+    const local = (e) => svgPoint(svg, e);
     const uv = (p) => ({ t: clamp01((p.x - PAD) / Math.max(1, g.w - 2 * PAD)),
                          v: clamp01(1 - (p.y - PAD) / Math.max(1, g.h - 2 * PAD)) });
 
     function hit(p) {
       const pts = g.pts; if (!pts) return { kind: null };
-      let bi = -1, bd = GRAB;
-      for (let i = 0; i < pts.length; i++) {
-        const d = Math.hypot(p.x - g.X(pts[i].t), p.y - g.Y(pts[i].v));
-        if (d < bd) { bd = d; bi = i; }
+      const points = pts.map((q, i) => ({ x: g.X(q.t), y: g.Y(q.v), i }));
+      const handles = g.hseg.map((i) => {
+        const mt = (pts[i].t + pts[i + 1].t) / 2;
+        return { x: g.X(mt), y: g.Y(curveEval(pts, mt)), i };
+      });
+      return curveHit(p, points, handles, GRAB);
+    }
+
+    function ensureCurve() {
+      if (s.kind === 'env' || s.shapeMode === 'curve') return true;
+      const preset = editablePresetForWave(s.wave);
+      if (!preset) {
+        say(rec, M.WAVE_LABEL[s.wave] + ' is stochastic — choose a breakpoint shape before editing');
+        return false;
       }
-      if (bi >= 0) return { kind: 'point', i: bi, d: bd };
-      let hi = -1, hd = GRAB;
-      for (let k = 0; k < g.hseg.length; k++) {
-        const i = g.hseg[k], mt = (pts[i].t + pts[i + 1].t) / 2;
-        const d = Math.hypot(p.x - g.X(mt), p.y - g.Y(curveEval(pts, mt)));
-        if (d < hd) { hd = d; hi = i; }
-      }
-      if (hi >= 0) return { kind: 'handle', i: hi, d: hd };
-      return { kind: null };
+      M.setSource(s.id, { preset });
+      apply(); paint(true);
+      return true;
+    }
+
+    function writeTension(i, value) {
+      if (s.kind === 'env') {
+        const k = envMapOf(s).tens[i];
+        if (k) { M.setSource(s.id, { [k]: value }); syncKnobs(rec); }
+      } else M.curveEdit(s.id, 'tension', { index: i, tension: value });
+      apply(); paint(true);
     }
 
     /** AN ENV STAGE DRAG, AND THE INVERSE IS RELATIVE ON PURPOSE.  The source's inverse was
@@ -2225,31 +2240,52 @@ export function createModulation(host, port) {
     }
 
     svg.addEventListener('pointerdown', (e) => {
-      if (s.kind === 'audio') return;
-      if (s.kind !== 'env' && s.shapeMode !== 'curve') {
-        say(rec, 'Select a shape below before editing the curve');
-        return;
-      }
+      if (s.kind === 'audio' || pid !== null) return;
+      const p = local(e), h = hit(p), action = curveAction(e, h);
+      if (!action) return;                // FL: a plain left click on empty curve is inert
       e.preventDefault();
-      try { svg.setPointerCapture(e.pointerId); } catch (_) {}
-      box = svg.getBoundingClientRect();
-      const p = local(e), h = hit(p);
-      x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); moved = false;
-      mode = h.kind; idx = h.i === undefined ? -1 : h.i;
+      if (action === 'point-menu') { say(rec, 'Alt-click deletes this point; drag it to move'); return; }
+      if (action === 'remove-point') {
+        if (s.kind === 'env') { say(rec, 'an envelope has fixed stages — drag a stage to zero instead'); return; }
+        const n0 = s.points.length;
+        M.curveEdit(s.id, 'remove', { index: h.i });
+        say(rec, s.points.length < n0 ? 'point removed' : 'a curve keeps at least two points');
+        apply(); paint(true); return;
+      }
+      if (action === 'reset-tension') { writeTension(h.i, 0); say(rec, 'tension reset'); return; }
+      if (action === 'add-point') {
+        if (s.kind === 'env') { say(rec, 'the ENV has fixed stages — drag a stage or its tension handle'); return; }
+        if (!ensureCurve()) return;
+        const q = uv(p), n0 = s.points.length;
+        q.v = pointAddValue(e, q.v, curveEval(g.pts, q.t));
+        M.curveEdit(s.id, 'add', { t: q.t, v: q.v, tension: 0 });
+        if (s.points.length === n0) { say(rec, 'thirty-two points is the curve\'s ceiling'); return; }
+        idx = s.points.reduce((best, x, i) => Math.abs(x.t - q.t) + Math.abs(x.v - q.v) < best.d
+          ? { i, d: Math.abs(x.t - q.t) + Math.abs(x.v - q.v) } : best, { i: 0, d: Infinity }).i;
+        mode = 'point';
+        apply(); paint(true);
+      } else {
+        mode = action === 'move-tension' ? 'handle' : 'point';
+        idx = h.i;
+      }
+      pid = e.pointerId;
+      try { svg.setPointerCapture(pid); } catch (_) {}
+      const q0 = uv(p), pt = g.pts && g.pts[idx];
+      anchor = { x: pt ? pt.t : q0.t, y: pt ? pt.v : q0.v };
       key = mode === 'point' && s.kind === 'env' ? envMapOf(s).keys[idx] : null;
-      down = { key, t: uv(p).t, v: key ? s[key] : 0 };
+      down = { key, t: q0.t, v: key ? s[key] : 0 };
+      y0 = p.y;
       if (mode === 'handle') base = g.pts[idx].tension;
       if (mode === 'handle' && s.kind === 'env') key = envMapOf(s).tens[idx];
     });
 
     svg.addEventListener('pointermove', (e) => {
-      if (!box) return;
-      if (!moved && Math.hypot(e.clientX - x0, e.clientY - y0) < 2) return;
-      moved = true;
+      if (pid !== e.pointerId) return;
       const p = local(e), q = uv(p);
       if (mode === 'point') {
-        if (s.kind === 'env') { if (envMove(q.t, q.v)) syncKnobs(rec); }
-        else M.curveEdit(s.id, 'move', { index: idx, t: q.t, v: q.v });
+        const locked = pointDrag(anchor, { x: q.t, y: q.v }, e);
+        if (s.kind === 'env') { if (envMove(e.ctrlKey ? down.t : locked.x, locked.y)) syncKnobs(rec); }
+        else M.curveEdit(s.id, 'move', { index: idx, t: locked.x, v: locked.y });
         apply();
         /* A paused host supplies only the one frame requested by apply().  That frame may land
            inside paint()'s 33 ms meter throttle and be discarded, leaving the edited geometry
@@ -2260,45 +2296,17 @@ export function createModulation(host, port) {
         /* UP RAISES THE CURVE, whichever way the segment runs. */
         const a = g.pts[idx], b = g.pts[idx + 1];
         const sgn = b.v < a.v ? -1 : 1;
-        const tau = Math.max(-1, Math.min(1, base + sgn * (e.clientY - y0) / TENSION_PX));
-        if (s.kind === 'env') { if (key) { M.setSource(s.id, { [key]: tau }); syncKnobs(rec); } }
-        else M.curveEdit(s.id, 'tension', { index: idx, tension: tau });
-        apply();
-        paint(true);
+        const tau = Math.max(-1, Math.min(1, base + sgn * tensionDelta(y0, p.y, e) / TENSION_PX));
+        writeTension(idx, tau);
       }
     });
 
-    const end = (e) => {
-      if (!box) return;
-      const wasMode = mode, wasIdx = idx;
-      mode = null; box = null; key = null;
-      if (moved) return;
-      if (performance.now() - t0 > TAP_MS || Math.hypot(e.clientX - x0, e.clientY - y0) > TAP_PX) return;
-      const now = performance.now();
-      if (wasMode === 'point') {
-        if (wasIdx === lastTapIdx && now - lastTapAt < DTAP_MS) {
-          lastTapIdx = -1;
-          if (s.kind === 'env') { say(rec, 'an envelope has exactly five stages — a point is not removable, but a stage can be dragged to zero'); return; }
-          const n0 = g.pts.length;
-          M.curveEdit(s.id, 'remove', { index: wasIdx });
-          say(rec, s.points.length < n0 ? 'point removed' : 'a curve is two points at the least — this one is at its floor');
-          apply();
-          paint(true);
-        } else { lastTapIdx = wasIdx; lastTapAt = now; }
-        return;
-      }
-      lastTapIdx = -1;
-      if (s.kind === 'env') { say(rec, 'the ENV follows its knobs — its shape is the five stages, not a drawn curve'); return; }
-      const r = svg.getBoundingClientRect();
-      const q = uv({ x: e.clientX - r.left, y: e.clientY - r.top });
-      const n0 = s.points.length;
-      M.curveEdit(s.id, 'add', { t: q.t, v: q.v });
-      say(rec, s.points.length > n0 ? 'point added' : 'thirty-two points is the curve\'s ceiling');
-      apply();
-      paint(true);
-    };
+    const end = (e) => { if (pid !== e.pointerId) return; pid = null; mode = null; key = null; };
     svg.addEventListener('pointerup', end);
-    svg.addEventListener('pointercancel', () => { mode = null; box = null; key = null; });
+    svg.addEventListener('pointercancel', end);
+    svg.addEventListener('lostpointercapture', end);
+    svg.addEventListener('contextmenu', (e) => e.preventDefault());
+    svg.setAttribute('aria-label', 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it; left-drag a tension handle to bend it; Ctrl makes tension fine; right-click a tension handle resets it; Alt-click a point deletes it.');
   }
 
   // Each meter is both an input-level display and a response-range editor.
@@ -2960,7 +2968,9 @@ export function createModulation(host, port) {
     at(id, t, v) {
       const rec = devRows.get(String(id)); if (!rec || !rec.g) return null;
       const b = rec.g.svg.getBoundingClientRect();
-      return { x: b.left + rec.g.X(t), y: b.top + rec.g.Y(v), box: { left: b.left, top: b.top, width: b.width, height: b.height } };
+      return { x: b.left + rec.g.X(t) * b.width / rec.g.w,
+        y: b.top + rec.g.Y(v) * b.height / rec.g.h,
+        box: { left: b.left, top: b.top, width: b.width, height: b.height } };
     },
     shapes: (id) => { const rec = devRows.get(String(id)); if (!rec || rec.dev.kind !== 'lfo') return null;
       return SHAPES.map((name) => { const q = rec.dev.presets[name];
