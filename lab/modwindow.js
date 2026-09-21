@@ -2251,6 +2251,11 @@ export function createModulation(host, port) {
         if (s.kind === 'env') { if (envMove(q.t, q.v)) syncKnobs(rec); }
         else M.curveEdit(s.id, 'move', { index: idx, t: q.t, v: q.v });
         apply();
+        /* A paused host supplies only the one frame requested by apply().  That frame may land
+           inside paint()'s 33 ms meter throttle and be discarded, leaving the edited geometry
+           stale until Play creates another frame.  The hand owns this picture now, so repaint
+           the editor synchronously; the scheduled host frame still presents the routed result. */
+        paint(true);
       } else if (mode === 'handle') {
         /* UP RAISES THE CURVE, whichever way the segment runs. */
         const a = g.pts[idx], b = g.pts[idx + 1];
@@ -2259,6 +2264,7 @@ export function createModulation(host, port) {
         if (s.kind === 'env') { if (key) { M.setSource(s.id, { [key]: tau }); syncKnobs(rec); } }
         else M.curveEdit(s.id, 'tension', { index: idx, tension: tau });
         apply();
+        paint(true);
       }
     });
 
@@ -2277,6 +2283,7 @@ export function createModulation(host, port) {
           M.curveEdit(s.id, 'remove', { index: wasIdx });
           say(rec, s.points.length < n0 ? 'point removed' : 'a curve is two points at the least — this one is at its floor');
           apply();
+          paint(true);
         } else { lastTapIdx = wasIdx; lastTapAt = now; }
         return;
       }
@@ -2288,6 +2295,7 @@ export function createModulation(host, port) {
       M.curveEdit(s.id, 'add', { t: q.t, v: q.v });
       say(rec, s.points.length > n0 ? 'point added' : 'thirty-two points is the curve\'s ceiling');
       apply();
+      paint(true);
     };
     svg.addEventListener('pointerup', end);
     svg.addEventListener('pointercancel', () => { mode = null; box = null; key = null; });
