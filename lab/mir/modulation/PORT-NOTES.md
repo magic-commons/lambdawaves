@@ -1,8 +1,17 @@
-# lab/mir — the port notes
+# MIR · modulation — the port notes
 
 *What was vendored, from where, what was forced, and what was deliberately left alone.
 Read this before you touch `mod.js` or `curve.js`. Nothing in this directory is committed
 by the wave that wrote it.*
+
+**Provenance.** Written in λWAVES as `lab/mir/PORT-NOTES.md`, when these files were a port of
+BASINS' (MANDELBROT) modulation model inside λWAVES; "ours", "here", "the lab" and the wave
+numbers are λWAVES'. Adopted into MIR on 2026-09-10, when `lab/mir/` became the kit's
+`mir/modulation/` (and `glyph.js` the kit's `mir/glyph.js`), and corrected for the kit on
+2026-09-16: a file only λWAVES has is marked "(λWAVES)", and so are its gates (`tests/*.mjs`,
+`B129`). **The counts in this file — eight forced edits, eight hunks, 98 gates — are the port
+as of 2026-09-05…09-07.** They have not been re-measured since `mod.js` changed in MIR 1.1.0
+and 1.4.0; treat them as history, and run the diff before trusting a number.
 
 ## What is here
 
@@ -10,12 +19,16 @@ by the wave that wrote it.*
 |---|---|---|
 | `mod.js` | vendored | the modulation model — LFO, ENV, AUDIO, macros, routes, transport arithmetic, serialization, presets |
 | `curve.js` | vendored | the breakpoint-curve mathematics `mod.js` leans on |
-| `glyph.js` | vendored | **wave 55** — Josh's own glyph library: one SVG drawing per meaning, on a 24-unit grid. The rack's header chips and the two new float chips are drawn from it |
+| `glyph.js` | vendored | **wave 55** — Josh's own glyph library: one SVG drawing per meaning, on a 24-unit grid. The rack's header chips and the two new float chips are drawn from it. *In the kit it is `mir/glyph.js`, one level up.* |
 | `registry.js` | **ours** | MIR edge 1 — the parameter registry |
 | `host.js` | **ours** | MIR edges 2, 3 and 4 — target host, clock, presentation |
 | `PORT-NOTES.md` | **ours** | this file |
 
-Proof: `node tests/mir.test.mjs` — 98 gates (53 at the port, 71 after wave 60's curve
+*(Also in the kit's `mir/modulation/`, and not vendored: `modhost.css`, the host seat — λWAVES'
+`lab/modhost.css` — and `modwindow/`, BASINS' window as ported on 2026-09-06, whose source MIR
+has been since 1.1.0.)*
+
+Proof: `node tests/mir.test.mjs` (λWAVES) — 98 gates (53 at the port, 71 after wave 60's curve
 section, 75 after wave 61's bipolar route, 87 after wave 63's model version and header count,
 98 after wave 65's arm and resume law). It was deliberately not in `test.sh` when this
 was written; **wave 52 adopted it** (`MI_RC`, folded into `NODE_RC`), because wiring it in
@@ -27,7 +40,7 @@ Both vendored files were taken on **2026-09-05** from the MANDELBROT project's `
 `$MB/app/`, where **`MB` is wherever that repository is checked out on the machine doing the merge**.
 
 *(WAVE 68: this document and the three vendored headers used to print an absolute path from the
-machine they were taken on. These files SHIP — `dist/` serves them publicly — and dossier §27 asks
+machine they were taken on. These files SHIP — λWAVES' `dist/` serves them publicly — and dossier §27 asks
 for no accidental directory leakage, while this build's own `NOT SHIPPED` list gives "names local
 absolute paths" as a reason to withhold a directory. Either the rule applies or it does not. The
 provenance is unchanged and the diff command below still works; it takes `MB` from the environment
@@ -39,7 +52,20 @@ instead of from one person's home directory.)*
 | `curve.js` | 416 | `9991eb71da046385d43cd51c8b63ab81bb2aac82fdd122a08d1dbaa7d089b485` |
 | `glyph.js` | 453 | `513cd3120ec539f13e139d940d089f29cf71cbbc5cad427445351fb6c3ab3831` |
 
+*(2026-09-16: `mir/glyph.js` is 399 lines and no longer carries its provenance header. A λWAVES
+pass on 2026-09-09, before the extraction, removed that header, the source's 40-line header
+comment and the comments on three glyphs (`render`, `compact`, `save`). The two marked edits are
+still there, and a diff against the source still shows no drawing, viewBox, stroke weight or name
+changed; the table above is where its provenance now lives.)*
+
 ## THE LAW
+
+*(Status, 2026-09-16: this law, its hunk count and §16's undo describe the port as λWAVES held it
+on 2026-09-05…09-07. `mod.js` has since changed beyond its eight marked edits: the matrix/audio
+extensions its header names (λWAVES `docs/mir-matrix-patch.json`), the audio device work MIR
+1.1.0 took back from λWAVES. The law is still the right way to take an upstream fix, and λWAVES'
+§16 still proves the eight edits by their exact text — which is why MIR 1.4.0 left `mod.js` untouched
+rather than make the preset key injectable. The counts below are not re-measured.)*
 
 **These two files are maintained by DIFF against their source, never rewritten.**
 
@@ -56,13 +82,13 @@ Taking an upstream fix:
 
 ```sh
 MB="${MB:?set MB to your local checkout of the MANDELBROT project}"
-diff -u "$MB/app/mod.js" lab/mir/mod.js   # expect: EIGHT hunks (measured 2026-09-06)
+diff -u "$MB/app/mod.js" mir/modulation/mod.js   # EIGHT hunks when measured, 2026-09-06, on λWAVES' lab/mir/mod.js; not re-measured since (see the status note)
 ```
 
 Eight and not nine for eight edits: `7/8` and `8/8` sit three lines apart, so `diff -u`'s context
 merges them into one hunk. If that command ever prints more than **eight** hunks in `mod.js`,
 somebody broke the law and the next upstream merge is going to be archaeology.  Every one of the eight is a marked line next to a
-comment that names its number, and `tests/mir.test.mjs §16` UNDOES all eight by their exact text and
+comment that names its number, and `tests/mir.test.mjs §16` (λWAVES) UNDOES all eight by their exact text and
 asserts the result is byte-identical to the source — so the law is gated, not merely written down.
 **And wave 63 gated the one thing §16 could not see**: it strips the provenance header before it
 diffs, so the header's own *"Forced 1 edit — every other byte below this header is the source"* stayed
@@ -78,7 +104,7 @@ behaviour change.
 
 | # | File | Line (ours) | Change | Why it was forced |
 |---|---|---|---|---|
-| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js`: `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). |
+| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js` (λWAVES): `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). *(Still true in MIR 1.4.0, by choice: making the key injectable is a `mod.js` edit, and it waits for λWAVES' §16 byte gate to retire so the gate is not broken by an adopt.)* |
 | 2/8 | `mod.js` | `newRoute` | `bi: !!o.bi,` added to the route record | **wave 61 · THE BIPOLAR ROUTE.** See the block below. |
 | 3/8 | `mod.js` | `routeInfluence` | `lerped - r.min` → `lerped - (r.bi ? (r.min + r.max) / 2 : r.min)` | The one expression the flag is read in. |
 | 4/8 | `mod.js` | `setRouteRange` | `if (patch.bi !== undefined) r.bi = !!patch.bi;` | The flag is patchable, exactly like `min` and `max`. |
@@ -137,7 +163,7 @@ A version stamp is the only thing such a build already reads, and at `MOD_STATE_
 **The rack road needed a second half, because it carries no stamp at all.** `mod.js` stamps `modV` on
 a PRESET record only; the model's own `serialize()` emits no version and `deserialize()` checks none —
 so a project file and this browser's `localStorage`, the road the lab uses every session, were
-version-blind. `lab/rack.js` stamps `v` onto the rack it writes (an additive key the model ignores in
+version-blind. `lab/rack.js` (λWAVES) stamps `v` onto the rack it writes (an additive key the model ignores in
 both directions) and `restoreModulation()` **refuses a stamp this build cannot honour**, saying both
 numbers on the card. An **absent** `v` is not a refusal: every rack written before wave 63 has none
 and means "predates the stamp", which is the reading `mod.js` prescribes for an absent preset stamp.
@@ -160,7 +186,7 @@ What was NOT edited, and why it does not need to be:
 `glyph.js`: **zero drawings touched.** Not one path, viewBox, stroke weight or name was changed — these are
 Josh's own marks and the whole point of vendoring rather than copying is that a correction to one of them
 upstream is still a three-line patch here. Sizing is the CALLER's by the module's own design (width/height
-are presentation attributes, the lowest-priority source of a value), so `lab/lab.css §55b` sizes every chip
+are presentation attributes, the lowest-priority source of a value), so `mir/css/base.css` (λWAVES' `lab/lab.css §55b`) sizes every chip
 and no call site in this lab passes a pixel count.
 
 Both files also carry a prepended provenance header. That is the only other difference,
@@ -171,7 +197,9 @@ it is one hunk at line 1, and it is what makes the diff above legible.
 `mod.js`'s only import is `./curve.js`, and `curve.js` sits beside it here, so the import
 graph needed no edit at all. `mod.js` boots under node **verbatim**, including
 `presetList()` — its `localStorage` reads are already inside a `try` that returns `null`
-when there is no storage.
+when there is no storage. *(So the one-line summary under `mod.js`'s header — "Pure: no DOM, no
+renderer, no storage" — is the source's, and true of the model but not of its presets: those
+read and write `localStorage` under `PRESET_LS`.)*
 
 ## What was deliberately NOT edited
 
@@ -187,7 +215,8 @@ when there is no storage.
   would be a *worse* lie than the foreign name. If the rack wave wants the factory folder
   gone from the preset sheet it should filter `presetList()` on `factory: 1` in the view,
   or empty the exported `FACTORY_PRESETS` array in place from `host.js` — both are host
-  decisions and neither is a file edit.
+  decisions and neither is a file edit. *(A third — renaming the folder from the host — waits with the
+  injectable key, see 1/8.)*
 - **`PRESET_FOLDER_DEFAULT = "Josh's Collection"`.** Correct in both projects.
 - **The AUDIO model.** `mod.js` carries the whole normalized follower/band/onset model.
   It has no browser dependency (that lives in their `audio.js`, which we did not take) and
@@ -199,13 +228,13 @@ The lab was spelling its header marks as literal characters — `×`, `▾`, `�
 those is a request to whichever font the device resolves, and glyph.js's own header lists the three ways that
 goes wrong (iOS substitutes a colour emoji; the advance width is the font's business, not the layout's; a
 missing codepoint is a notdef box). Wave 55 replaced the ones with a drawn equivalent and left the ones
-without, and REPORT.md wave 55 lists both sides of that line so the polish wave knows what is outstanding.
+without, and REPORT.md wave 55 (λWAVES) lists both sides of that line so the polish wave knows what is outstanding.
 The two NEW chips this wave needed — pop-out / dock, and compact / full — were already in the library:
 `north` and `reopen`, `compact` and `expand`.
 
 ## THE THREE DIVERGENCES (wave 69) — the plugin's own defects, fixed HERE, and the diff for the port back
 
-`lab/mir/modwindow/ACCEPTANCE.md` §9 asks a mount to **reproduce** three measured defects, on the
+`modwindow/ACCEPTANCE.md` §9 asks a mount to **reproduce** three measured defects, on the
 stated grounds that a mount rendering them correctly has silently redesigned the window. **Josh has
 ruled the other way**, 2026-09-06: *"The modulation window is broken when we were even working on it
 on basins so whatever problem it has we will try to fix here."*
@@ -216,6 +245,11 @@ saying its §9 is superseded for this mount, so a future reader is not left with
 contradicts a gate), because every correction is written in `lab/modhost.css`, which is ours. That is what keeps the
 reciprocal port back to MANDELBROT a **diff of three lines in a host sheet** rather than archaeology
 in a 132 KB stylesheet. Each is numbered in the reach list there (16, 17, 18) with its reasoning.
+*(In the kit: that host sheet is `mir/modulation/modhost.css`. Its later waves moved two of the
+three: 16 is superseded by 21 (wave 70 — the sheet wears the house glass), and 18 is retired
+(wave 78 — the device grip reorders, so the arrows are hidden again); 17 stands. "Still
+byte-identical" was true on 2026-09-06; MIR 1.1.0 changed `modwindow.js` and `modwindow.css`, and
+MIR is their source now.)*
 
 | # | The defect, as measured | The fix, and where it lives |
 |---|---|---|
@@ -223,7 +257,7 @@ in a 132 KB stylesheet. Each is numbered in the reach list there (16, 17, 18) wi
 | D2 | **`.m2clr` has the identical defect.** It reads `--m2-recess-deep` from `.m2root` while `m2ensureClear()` appends it INTO the routed control, which for a host-registered control is outside `.m2root` — so every CLEAR on a control outside the plugin is transparent. `anim.js:5114`. | `modhost.css` 17: `background-color: var(--m2-recess-deep, var(--glass-well))`. Outside the window the fallback is the HOUSE recess, which is themed and is the right answer twice over — a button that lands on a λWAVES dial should wear the λWAVES well. Nothing in this build BUILDS one (the overlay split, wave 64), so this is a fix for the port back and for any host that does route the artifact's own overlay. |
 | D3 | **The ◂ ▸ reorder arrows have never painted a pixel.** Built by `buildDevice()`, wired here to `M.moveSource`, and hidden by three rules that between them cover every mode: `.m2dev.m2cmp .m2move` (776), `.m2dev.m2min .m2move` (813) and `.m2dev:not(.m2min) .m2move` (1303). | `modhost.css` 18 brings them back in **FULL mode only**. Only 1303 is the accident; the other two are the artifact's own stated reasoning (*"Compact spends header room on identity and status, not clipboard/reorder"*, and a 64-px folded strip has no room) and they STAY. The run order that IS the fire order is now changeable without a drag. |
 
-**AND `MANIFEST.md`'s PRESCRIPTION FOR THE FIRST TWO IS WRONG FOR THIS MOUNT**, which is worth
+**AND `modwindow/MANIFEST.md`'s PRESCRIPTION FOR THE FIRST TWO IS WRONG FOR THIS MOUNT**, which is worth
 writing down because it is the obvious thing to try and it fails silently. It says the fix is *"one
 word: add `glass` to the class string, exactly as `.m2ppick` and `.m2deadpick` already do."* Those two
 sheets carry **no background of their own**, which is the whole reason `glass` works for them.
@@ -233,7 +267,7 @@ to `unset`**. `.glass` is (0,1,0) and loses; `.m2clr`'s own (0,1,0) beats `.glas
 since `modwindow.css` loads after `skin.css`. The word would have changed nothing and the gate would
 have stayed green on `rgba(0, 0, 0, 0)`. **Give the var a reachable value instead.**
 
-**The gate that used to pin them is the gate that now proves them fixed.** `B129`'s `copiedBroken`
+**The gate that used to pin them is the gate that now proves them fixed.** `B129`'s (λWAVES) `copiedBroken`
 arm is `fixed` and asserts the opposite of what it asserted, and `B131`'s clear-button measurement
 asserts a real plate. A gate that pins a defect is the defect (ANTI-PATTERN 13), and the way to
 retire one is to invert it in the same wave that fixes what it pinned — not to delete it.
@@ -255,8 +289,10 @@ not a style. Flip the ink and that exception goes.
 ## What we did NOT port, and will not
 
 - **`anim.js` (9573 lines) — their modulation WINDOW.** Josh's word for its macro surface
-  is *buggy*. Board #34 writes our own view in kit.js idiom.
-- **`window.js` (4727 lines) — their WindowKit.** Our rack is our window kit.
+  is *buggy*. Board #34 writes our own view in kit.js idiom. *(Overtaken on 2026-09-06: the
+  window was then ported from `anim.js` after all, as an artifact — `modwindow/` — because
+  three re-implementations had each lost it; `docs/STYLE-LOCK.md` § THE PORTED-WINDOW EXCEPTION.)*
+- **`window.js` (4727 lines) — their WindowKit.** Our rack (λWAVES' `rack.js`) is our window kit.
 - **`basins-modulation-{host,targets,presentation}.js`.** Read as the specification of
   what a host must supply; `host.js` is our answer to the same question. Their
   `entryFreqPos`/`entryFreqRaw` constants (0.05 – 20 Hz) are reproduced exactly so a rack
@@ -278,14 +314,18 @@ sync mode:
 
 ---
 
-# What the rack wave must know
+# What the rack wave must know (λWAVES)
+
+*The integration notes for λWAVES' own rack (`lab/rack.js`, `lab/clock.js`, `lab/render-exact.js`,
+and the wave-52 face `lab/modview.js`, since replaced by the ported window — all λWAVES). The laws
+about the kit's `host.js` and `mod.js` hold for any host; the wiring is λWAVES'.*
 
 ## 1. The clock is not the clock
 
 λWAVES already has a `Clock` (`lab/clock.js`). **It must not be given this job.** They are
 two logical times over one wall clock:
 
-| | `lab/clock.js` | `lab/mir/host.js` `createModClock()` |
+| | `lab/clock.js` (λWAVES) | `mir/modulation/host.js` `createModClock()` |
 |---|---|---|
 | owns | physics time *t*, atomic units | modulation time: beats, seconds, phases |
 | advances at | `rate` a.u. per wall second | BPM, or free Hz, per wall second |

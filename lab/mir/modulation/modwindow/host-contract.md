@@ -1,6 +1,16 @@
-# host-contract.md — what a host supplies, and nothing more
+# MIR · modulation window — the host contract: what a host supplies, and nothing more
 
-Two files mount this window: `modwindow.css` and `modwindow.js`. They carry their own
+**Provenance.** Written on 2026-09-06, when this window was staged from BASINS (the MANDELBROT
+project) for λWAVES as a byte-frozen port. Adopted into MIR on 2026-09-10 and corrected for the
+kit on 2026-09-16. MIR 1.1.0 retired the byte-frozen law, and MIR is now the window's source.
+**BASINS-era references:** `anim.js:NNNN` and `index.html:NNNN` are lines of BASINS' own files as
+of 2026-09-06, `glass.js` and `glasslight.js` are BASINS' files in the MANDELBROT project, and
+`EXTRACT-MODWINDOW.md` was the extraction's staging report; none of them is in MIR. The counts below (`#modwin` 164 times, 24 aria-label rules, 135 × `44px`)
+were taken on the staged sheet that day; the sheet has changed since, so recount before asserting one.
+
+Two files mount this window: `modwindow.css` and `modwindow.js`. *(In MIR they are
+`mir/modulation/modwindow/`, and the kit's host seat `mir/modulation/modhost.css` loads just
+before `modwindow.css` — see `README.md`.)* They carry their own
 material (twenty `--m2-mat-*` tokens), their own icons, their own geometry laws and their
 own chrome. What they do **not** carry is a theme, a model, and a clock.
 
@@ -55,6 +65,15 @@ The colour law, from the source's own comment (`anim.js:2653`), is not decoratio
 Selection is an **underline**, never a filled accent chip. That is the single most
 recognisable thing about these controls after the knobs.
 
+*(In MIR 1.4.0 the house sheets speak the same parameter: `mir/css/base.css` and
+`mir/css/skin.css` derive `--acc` from `--hue-acc` / `--sat-acc` / `--lum-acc` and `--acc2`
+from `--hue-acc2` / `--sat-acc2` / `--lum-acc2`, and declare both again on `<body>` with
+`--acc-soft`, `--acc2-soft` and `--acc-glow`, so an app that writes the hues turns the house.
+The WINDOW does not follow by itself: `modhost.css` re-declares `--hue-acc` / `--sat-acc` (and B's) on
+`.mir-modwindow`, so the window's derived tints stay on its own hues until the host hands it the
+accents — λWAVES calls `modView.setAccent(hueSat(A), hueSat(B))`, which `shell/accent.js` offers as
+`onAccent`.)*
+
 ## 4. The fonts
 
 ```css
@@ -82,14 +101,21 @@ BASINS uses nine: `mandel.anim`, `mandel.animPlay`, `mandel.animPanel`, `mandel.
 `mandel.modwin.deviceModes`. `modwindow.js` reads and writes **none** of them — it has no
 persistence at all. Rename the prefix in whatever the host's own store is, and remember
 what the window's presentation state actually is: the work-bar lane (top / bottom / hidden), each
-device's mode (F / C / M), and the window geometry.
+device's mode (F / C / M), and the window geometry. *(The one key the kit itself writes is the
+model's preset store, `mod.js` `PRESET_LS` — λWAVES' `lambdawaves.q0.modpresets`, shared by every reader
+because each app has its own origin; it is not injectable yet, see PORT-NOTES 1/8.)*
 
 ---
 
 # PART 2 — THE TOKENS. Paste this block into the host's own `:root`.
 
 These are BASINS' shipping values, from `index.html`'s base `:root`. Every one is read by
-`modwindow.css` and declared by nothing in it.
+`modwindow.css` and declared by nothing in it. *(An app on MIR does not paste this block:
+with `mir/css/base.css`, `mir/css/skin.css` and `mir/modulation/modhost.css` loaded, every name
+the window reads is declared in the house's values (`--glass-sat` and `--glass-bright` only fed
+BASINS' `--glass-filter`, which the house sets to `none`; `--glass-canvas-scrim` is optional, below),
+and `modhost.css` carries the required `.m2root` line as well. The block is for a host that mounts
+`modwindow.css` without the kit's sheets.)*
 
 ```css
 :root {
@@ -191,22 +217,26 @@ paints. There is nothing to supply.
 
 The other project spent a whole mission proving one thing: this window boots on **four
 injected edges** and nothing else. Not on a renderer, not on a scheduler, not on a GPU,
-not on a canvas. **λWAVES already has all four, in `lab/mir/`.**
+not on a canvas. **MIR has all four, in `mir/modulation/`** (λWAVES had them in `lab/mir/`).
 
-| edge | what it is | λWAVES |
+| edge | what it is | MIR |
 |---|---|---|
-| 1 | **the parameter registry** — `has(id)`, `get(id)`, and a `label` per target; it is what makes a control routable, and `m2droppables()` walks it | `lab/mir/registry.js`, `createRegistry()` |
-| 2 | **a target host** — `install` / `sync` / `uninstall` / `available` | `lab/mir/host.js`, `createTargetHost()` |
-| 3 | **a clock that owns modulation time** — the whole of the risk, and six behaviours read the same two numbers (`dt`, wall stamp) and mean different things by them | `lab/mir/host.js`, `createModClock()` |
-| 4 | **presentation + geometry invalidation callbacks** — default no-ops | `lab/mir/host.js`, `createModHost()` |
+| 1 | **the parameter registry** — `has(id)`, `get(id)`, and a `label` per target; it is what makes a control routable, and `m2droppables()` walks it | `mir/modulation/registry.js`, `createRegistry()` |
+| 2 | **a target host** — `install` / `sync` / `uninstall` / `available` | `mir/modulation/host.js`, `createTargetHost()` |
+| 3 | **a clock that owns modulation time** — the whole of the risk, and six behaviours read the same two numbers (`dt`, wall stamp) and mean different things by them | `mir/modulation/host.js`, `createModClock()` |
+| 4 | **presentation + geometry invalidation callbacks** — default no-ops | `mir/modulation/host.js`, `createModHost()` |
 
-Plus the model itself: `lab/mir/mod.js` (LFO, ENV, AUDIO, macros, routes, transport,
-serialization, presets) and `lab/mir/curve.js` (the breakpoint mathematics it leans on).
+Plus the model itself: `mir/modulation/mod.js` (LFO, ENV, AUDIO, macros, routes, transport,
+serialization, presets) and `mir/modulation/curve.js` (the breakpoint mathematics it leans on).
 
 ## What the host must do with the tree
 
 `modwindow.js` returns element references and wires nothing. For each of these, the host
-attaches the behaviour and does the painting:
+attaches the behaviour and does the painting. *(MIR does not ship that host controller. λWAVES'
+`lab/modwindow.js` (λWAVES) is one, and BASINS and NEBULA copied it into their own trees; its API —
+`wireGrip`, `wireDepth`, `paintDepth`, `rebuildMacros`, and a `moveMacro` that calls the model's
+`M.moveMacro` and rebuilds the rail — is that file's, not the kit's. The kit supplies the tree
+below, the four edges and the model.)*
 
 - **the transport strip** — `mw.transport.{xport, tempo, tempoNum, tempoUnit, tempoHz,
   tempoIn, tap, sync, cad, holds}`. `xport` swaps between the two exported literals
@@ -225,7 +255,14 @@ attaches the behaviour and does the painting:
 - **the rack** — `mw.addDevice({id, kind})`, kind `'lfo' | 'env' | 'audio'`. Cards are
   appended to the horizontal scroller. `setDeviceMode(dev, 'F' | 'C' | 'M')` is the whole of the
   presentation tri-state.
-- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; the measuring law is
+- **the curve** — write `d` on `dev.ed.path` and `dev.ed.fill`; bind its pointer surface through
+  `../curve-gesture.js`. The 1.4.2 law is FL Studio's: right-drag empty space adds and places a point;
+  Shift-right-click adds at the curve's current value;
+  left-drag moves a point or tension handle; Ctrl fine-tunes tension; right-click resets a tension
+  handle; Alt-left-click deletes a point. Plain left-click on empty space is inert. `svgPoint()` must
+  transform client pixels into the SVG viewBox before `curveHit()` is asked, or a resized visible
+  tension handle becomes an empty-space press. A deterministic analytic wave materializes on its
+  first edit and never asks the user to select a preset. The measuring law is
   `w = max(60, round(box.clientWidth) || 206)`,
   `h = max(60, round(box.clientHeight - 14) || 128)`,
   `px(t, v) = [11 + t·(w − 22), h − 11 − v·(h − 22)]`.

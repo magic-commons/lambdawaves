@@ -346,7 +346,7 @@ const ALLOW = [
   [(f) => DOCS(f.rel), 'inside a shipped licence or note, not code'],
   [(f) => f.rel === 'index.html' && new RegExp('<a[^>]+href="' + f.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"').test(f.src),
     'an ABOUT credit link: a plain <a target="_blank"> the reader clicks, never a load'],
-  [(f) => f.rel.startsWith('vendor/'), 'a vendored library\'s own banner comment or error text (marked names its home page when it throws) — D1 above scans these same files for every loading construct, so an allowance here cannot hide a real fetch'],
+  [(f) => /(^|\/)vendor\//.test(f.rel), 'a vendored library\'s own banner comment or error text (marked names its home page when it throws) — D1 above scans these same files for every loading construct, so an allowance here cannot hide a real fetch'],
   /* WAVE 59 · og:image is METADATA, and it is the one absolute URL the lab is allowed to contain.  A link
      unfurler is a crawler on another machine with no base URL to resolve against, so a relative og:image is
      simply dropped; this page never fetches it, and D1 above proves that by construction (a <meta content=>
@@ -371,6 +371,7 @@ const dangling = [], uncached = [], beside = [];
 const BESIDE_LAB = { LICENSE: 1, NOTICE: 1 };
 const note = (fromRel, ref) => {
   if (/^(https?:|data:|blob:|#|mailto:)/.test(ref)) return;
+  if (/\/$/.test(ref.split(/[?#]/)[0])) return;              // a new URL directory base is joined before anything is fetched
   if (BESIDE_LAB[ref.replace(/^\.\//, '')]) {
     const f = ref.replace(/^\.\//, '');
     if (!existsSync(path.join(LAB, '..', f))) dangling.push(`lab/${fromRel} → ${ref}  (SHIP_EXTRA names it, but it is not in the repo root)`);
@@ -679,7 +680,11 @@ for (const rel of licenceTexts)
 const FACES = onDisk.filter((r) => /\.woff2$/i.test(r)).sort();
 const ours = FACES.filter((r) => r.startsWith('fonts/')), vendored = FACES.filter((r) => !r.startsWith('fonts/'));
 assert.equal(ours.length, 3, `expected the three subset interface faces in lab/fonts/, found ${ours.length}`);
-assert.equal(vendored.length, 20, `expected the twenty unmodified KaTeX faces, found ${vendored.length}`);
+for (const root of ['vendor/katex/fonts/', 'mir/shell/vendor/katex/fonts/']) {
+  const faces = vendored.filter((r) => r.startsWith(root));
+  assert.equal(faces.length, 20, `expected the twenty unmodified KaTeX faces under ${root}, found ${faces.length}`);
+}
+assert.equal(vendored.length, 40, `expected two complete sets of twenty unmodified KaTeX faces, found ${vendored.length}`);
 for (const rel of vendored) for (const m of (woff2Names(rel)[13] || '').matchAll(/Reserved Font Names?\s+([\w]+)/g)) RFN.add(m[1]);
 assert.ok(RFN.size >= 13, `only ${RFN.size} Reserved Font Names found across the licences and the faces — the scan has stopped reading them`);
 

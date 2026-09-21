@@ -1,9 +1,14 @@
 /* plane-model.js — MIR · a sphere-and-plane orientation control: drag or arrow keys tilt the plane's normal
- * about the world X and Y axes (never gimbal-locked at the pole), Home resets. Paints only when something moved. */
-import { el } from './kit.js';
+ * about the world X and Y axes (never gimbal-locked at the pole), Home resets. Paints only when something moved.
+ * 1.4.0: the drawing is 400 × 280 CSS units whatever the backing store, so it is sharp at every device-pixel
+ * ratio; a theme flip repaints it (it held the other theme's ink); an accent written inline on <body> (the kit's
+ * accent engine, λWAVES', BASINS') is noticed on the next paint().  Its size and material are mir/css/skin.css's. */
+import { el, onThemeChange } from './kit.js';
 
 export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   const cv = el('canvas', 'plane-model', host); cv.width = 400; cv.height = 280; cv.tabIndex = 0;
+  let dpr = 0;
+  const fitStore = () => { const d = Math.max(1, Math.min(3, globalThis.devicePixelRatio || 1)); if (d === dpr) return false; dpr = d; cv.width = Math.round(400 * d); cv.height = Math.round(280 * d); return true; };
   cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.');
   cv.title = 'Orient the plane. Shift gives finer motion; Home resets.';
   const unit = a => { const n = Math.hypot(...a) || 1; return a.map(v => v / n); };
@@ -12,12 +17,14 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   let lastX = NaN, lastY = NaN, lastZ = NaN, lastPos = NaN, lastTheme = '', lastCard = '', lastAccent = '';
   function paint(force = false) {
     const raw=getNormal(),len=Math.hypot(...raw)||1,nx=raw[0]/len,ny=raw[1]/len,nz=raw[2]/len,pos=getPosition();
-    const theme=document.body.dataset.theme||'',card=document.body.dataset.card||'',accent=document.documentElement.style.getPropertyValue('--acc');
+    const theme=document.body.dataset.theme||'',card=document.body.dataset.card||'',bs=document.body.style,accent=bs.getPropertyValue('--acc')+bs.getPropertyValue('--hue-acc')+document.documentElement.style.getPropertyValue('--acc');   /* inline reads only: this runs every frame in λWAVES, so no style resolution here (1.4.0) */
+    if(fitStore())force=true;
     if(!force && Object.is(nx,lastX) && Object.is(ny,lastY) && Object.is(nz,lastZ) && Object.is(pos,lastPos) && theme===lastTheme && card===lastCard && accent===lastAccent)return false;
     if(cv.clientWidth<2){lastX=lastY=lastZ=lastPos=NaN;return false;}
     lastX=nx;lastY=ny;lastZ=nz;lastPos=pos;lastTheme=theme;lastCard=card;lastAccent=accent;
     const n=[nx,ny,nz];
     const g = cv.getContext('2d'), css = getComputedStyle(cv), ink = css.getPropertyValue('--fg').trim(), cssAccent = css.getPropertyValue('--acc').trim();
+    g.setTransform(dpr,0,0,dpr,0,0);
     g.clearRect(0,0,400,280); g.strokeStyle = ink; g.globalAlpha = .25; g.lineWidth = 1.4;
     g.beginPath();g.arc(200,140,85,0,Math.PI*2);g.stroke();
     for (let axis=0;axis<3;axis++) { g.beginPath(); for(let j=0;j<=96;j++){ const a=j*Math.PI/48,p=[0,0,0];p[(axis+1)%3]=Math.cos(a);p[(axis+2)%3]=Math.sin(a);const q=project(p);j?g.lineTo(...q):g.moveTo(...q); }g.stroke(); }
@@ -38,6 +45,8 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   cv.addEventListener('pointermove',e=>{if(!drag)return;const gain=e.shiftKey?.003:.015;turn((e.clientX-drag[0])*gain,(drag[1]-e.clientY)*gain);drag=[e.clientX,e.clientY];});
   for(const type of ['pointerup','pointercancel'])cv.addEventListener(type,()=>{drag=null;});
   cv.addEventListener('keydown',e=>{if(cv.getAttribute('aria-disabled')==='true')return;const k=e.shiftKey?.015:.1;if(e.key==='Home'){onTurn([0,0,1]);paint(true);}else if(e.key.startsWith('Arrow'))turn(e.key==='ArrowLeft'?-k:e.key==='ArrowRight'?k:0,e.key==='ArrowUp'?k:e.key==='ArrowDown'?-k:0);else return;e.preventDefault();});
-  new ResizeObserver(()=>paint(true)).observe(cv); paint(true); return { root:cv, paint };
+  const ro = new ResizeObserver(()=>paint(true)); ro.observe(cv);
+  const offTheme = onThemeChange(()=>paint(true));
+  paint(true); return { root:cv, paint, destroy(){ offTheme(); ro.disconnect(); cv.remove(); } };
 }
 

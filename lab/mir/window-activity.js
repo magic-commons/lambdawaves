@@ -9,7 +9,12 @@
 
 const rootOf = (windowOrRoot) => windowOrRoot && (windowOrRoot.root || windowOrRoot);
 
-export function createWindowActivity({ body = document.body, onChange = () => {} } = {}) {
+/* createWindowActivity({ body, onChange, rackIds, classes }) — the rack ids and the three body classes are λWAVES'
+   by default and retunable (1.4.0): an app whose racks or hide switches are named differently says so here. */
+export function createWindowActivity({ body = document.body, onChange = () => {}, rackIds = ['rack', 'rackL'],
+  classes: { uiHidden = 'ui-hidden', rackHidden = 'rack-hidden', rackPeek = 'rack-peek' } = {} } = {}) {
+  const RACKS = new Set(rackIds);
+  const rackIsHidden = (host) => !!host && RACKS.has(host.id) && body.classList.contains(rackHidden) && !body.classList.contains(rackPeek);
   const records = new WeakMap();
   const roots = new Set();
   const IO = globalThis.IntersectionObserver;
@@ -18,12 +23,10 @@ export function createWindowActivity({ body = document.body, onChange = () => {}
   let offscreenOk = false;   // a proof harness may present windows the viewport cannot see; nothing else sets this
 
   const structurallyAvailable = (root) => {
-    if (!root || root.hidden || body.classList.contains('ui-hidden')) return false;
+    if (!root || root.hidden || body.classList.contains(uiHidden)) return false;
     if (root.classList.contains('off') || root.classList.contains('closed') ||
         root.classList.contains('folded') || root.classList.contains('compact')) return false;
-    const host = root.parentElement;
-    if (host && (host.id === 'rack' || host.id === 'rackL') &&
-        body.classList.contains('rack-hidden') && !body.classList.contains('rack-peek')) return false;
+    if (rackIsHidden(root.parentElement)) return false;
     return true;
   };
 
@@ -79,14 +82,13 @@ export function createWindowActivity({ body = document.body, onChange = () => {}
     refresh(root, false);
     const rec = records.get(root);
     let reason = '';
-    if (body.classList.contains('ui-hidden')) reason = 'interface-hidden';
+    if (body.classList.contains(uiHidden)) reason = 'interface-hidden';
     else if (root.hidden) reason = 'hidden';
     else if (root.classList.contains('off')) reason = 'powered-off';
     else if (root.classList.contains('closed')) reason = 'closed';
     else if (root.classList.contains('folded')) reason = 'folded';
     else if (root.classList.contains('compact')) reason = 'compact';
-    else if (root.parentElement && (root.parentElement.id === 'rack' || root.parentElement.id === 'rackL') &&
-        body.classList.contains('rack-hidden') && !body.classList.contains('rack-peek')) reason = 'rack-hidden';
+    else if (rackIsHidden(root.parentElement)) reason = 'rack-hidden';
     else if (!rec.intersecting) reason = 'offscreen';
     return { active: rec.active, intersecting: rec.intersecting, reason };
   }

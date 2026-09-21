@@ -1660,7 +1660,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 :root:root:root #modwin .m2-native-rate .k-val { font:600 8.5px var(--font-num, monospace); line-height:1; color:var(--acc); margin-top:2px; }
 :root:root:root #modwin .m2-native-rate.drag .k-val { color:var(--fg); font-weight:800; }
 
-.mod-matrix { width:min(1100px,calc(100vw - 24px)); height:calc(100dvh - 32px); box-sizing:border-box; border:1px solid var(--line); border-radius:14px; color:var(--fg); padding:16px; }
+.mod-matrix { width:min(1100px,calc(100vw - 24px)); height:calc(100dvh - 32px); box-sizing:border-box; border:1px solid var(--glass-border-color); border-radius:14px; color:var(--fg); padding:16px; }
 .mod-matrix::backdrop { background:#0008; backdrop-filter:blur(8px); }
 .mod-matrix-head,.mod-matrix-add,.mod-matrix-bars { display:flex; align-items:center; gap:12px; }
 .mod-matrix-head { justify-content:space-between; height:44px; }
@@ -1668,7 +1668,7 @@ body.frost :root:root:root .kwin-chiprail[aria-label$="window controls"] .crail-
 .mod-matrix-bars > * { position:relative!important; inset:auto!important; transform:none!important; flex-shrink:0; }
 .mod-matrix-body { overflow:auto; max-height:calc(100% - 110px); }
 .mod-matrix table { width:100%; table-layout:fixed; border-collapse:collapse; }
-.mod-matrix th,.mod-matrix td { padding:8px 4px; height:44px; border-bottom:1px solid var(--line); overflow:hidden; text-overflow:ellipsis; }
+.mod-matrix th,.mod-matrix td { padding:8px 4px; height:44px; border-bottom:1px solid var(--glass-border-color); overflow:hidden; text-overflow:ellipsis; }
 .mod-matrix input,.mod-matrix select { max-width:100%; box-sizing:border-box; }
 .mod-matrix th:first-child { width:36px; }
 .mod-matrix input[type=number] { width:80px; }

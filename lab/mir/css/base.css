@@ -29,14 +29,18 @@
   --glass-filter: none;   /* the frosted blur cost 26 fps over a live WebGPU canvas (32 → 58 measured); the tint carries the glass now */
   --fg: #fff; --fg-soft: hsl(0 0% 91%); --dim: hsl(0 0% 70%); --ink-key: hsl(0 0% 72%); --ink-faint: hsl(0 0% 48%);
   --ink-shadow: 0 1px 2px hsl(0 0% 0% / .58);
-  --hue-acc: 172; --sat-acc: 62%;
-  --acc: hsl(var(--hue-acc) var(--sat-acc) 66%); --acc-ink: #071114;
+  --hue-acc: 172; --sat-acc: 62%; --lum-acc: 66%;
+  --acc: hsl(var(--hue-acc) var(--sat-acc) var(--lum-acc)); --acc-ink: #071114;
   --acc-soft: color-mix(in srgb, var(--acc) 18%, transparent); --acc-glow: 0 0 9px color-mix(in srgb, var(--acc) 60%, transparent);
-  --acc2: hsl(288 70% 72%); --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
+  --hue-acc2: 288; --sat-acc2: 70%; --lum-acc2: 72%;
+  --acc2: hsl(var(--hue-acc2) var(--sat-acc2) var(--lum-acc2)); --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
   --ok: hsl(142 42% 70%); --warn: hsl(38 70% 70%); --bad: hsl(4 62% 74%);
   --n1: hsl(40 90% 80%); --n2: hsl(188 80% 68%); --n3: hsl(300 70% 76%); --n4: hsl(24 92% 66%); --n5: hsl(120 55% 68%); --n6: hsl(258 78% 78%);
   --rack-w: 372px; --rail-w: 46px; --z-chrome: 30; --z-veil: 40; --z-banner: 60;   /* --rail-w: a COMPACT floating window's strip (wave 55) */
   --phone: 0;   /* the sentinel skin.css's phone query raises to 1 — the breakpoint is written there, ONCE, and rack.js reads it back */
+  /* MOTION (moved here from skin.css in 1.4.0: base.css reads --t-fast, so base.css defines it) */
+  --t-fast: .12s; --t-soft: .35s; --t-linger: .7s;                /* the value tooltip: in fast, out soft after a linger */
+  --logo-turn: 1.2s;                                              /* wave 53: one turn of the PALETTE through the mark — the boot's, and the busy loop's */
 }
 * { box-sizing: border-box; }
 body { font: var(--fs-base)/var(--lh) var(--font-ui); color: var(--fg); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -199,6 +203,7 @@ button[data-gly="north"] > svg { width: 12px; height: 12px; }
 .k-val { font-size: var(--fs-tiny); color: var(--fg-soft); }
 .k.drag .k-val { color: var(--acc); font-weight: var(--w-bold); }
 .k.disabled { opacity: .38; pointer-events: none; }
+.fd.disabled { opacity: .38; pointer-events: none; }   /* 1.4.0: fader.setDisabled — the knob's law, the fader's look */
 .sw.disabled, .sw:disabled, .seg-b:disabled, .trig:disabled { opacity: .38; pointer-events: none; }   /* W-STURMIAN: a control that stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses) */
 
 /* ── switch, segmented select, trigger ───────────────────────────────────── */
@@ -304,6 +309,7 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
   .trig:active { transform: none; }
   .k .k-val, .fd .fd-val { transition-property: opacity; }
   .dev.dev-enter { animation-name: lw-dev-enter-quiet; }         /* the slide goes, the fade stays */
+  .dev-fold > svg { transition: none; }                           /* 1.4.0: the fold chevron (λWAVES lab.css carried this; the kit did not) */
 }
 .cv-grid { fill: none; stroke: var(--glass-hairline); stroke-width: 1; }
 .cv-tlbl { fill: var(--ink-faint); font-size: 7px; font-family: var(--font-ui); }

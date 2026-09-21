@@ -90,14 +90,33 @@ export function tapWatcher(fn) {
 }
 
 /**
- * knob({ label, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, size })
- *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values.
+ * knob({ label, aria, title, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, onReset, size, cls, travel, fine })
+ *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values (a JOG WHEEL);
+ *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
+ *   → { root, get, set(x, silent = true), show(x), shown, setDefault(x), setDisabled(on), setBase(fn), paint }
  */
 /* THE DRAG LAW, as defaults an app may retune (BASINS asked for Shift = 1/8): travel = px for a full scale,
    fine = the Shift divisor on a drag, keyFine = the Shift factor on an arrow step. A knob or fader may
    carry its own `travel` / `fine`; the shipped defaults are the numbers the lab has always used. */
-const KNOB_LAW = { travel: 220, fine: 900 / 220, keyFine: 0.25, faderFine: 5 };   // the fader's Shift has always been a fifth
-export function setKnobLaw(o) { if (o && o.travel > 0) KNOB_LAW.travel = o.travel; if (o && o.fine > 0) { KNOB_LAW.fine = o.fine; KNOB_LAW.faderFine = o.fine; KNOB_LAW.keyFine = 1 / o.fine; } return { ...KNOB_LAW }; }
+const KNOB_LAW = { travel: 220, fine: 900 / 220, keyFine: 0.25, faderFine: 5, touchTravel: 320 };   // the fader's Shift has always been a fifth
+/** setKnobLaw({ travel, fine, keyFine, faderFine, touchTravel }) → the law now in force.
+ *  `fine` alone retunes every Shift at once (knob drag, fader drag, arrow step = 1/fine) — BASINS' Shift = ⅛ is
+ *  setKnobLaw({ fine: 8 }).  A part named explicitly wins over the one `fine` implies, so the returned object
+ *  handed back is the identity: setKnobLaw(setKnobLaw()) changes nothing. */
+export function setKnobLaw(o) {
+  if (o && o.travel > 0) KNOB_LAW.travel = o.travel;
+  if (o && o.fine > 0) { KNOB_LAW.fine = o.fine; KNOB_LAW.faderFine = o.fine; KNOB_LAW.keyFine = 1 / o.fine; }
+  if (o && o.faderFine > 0) KNOB_LAW.faderFine = o.faderFine;
+  if (o && o.keyFine > 0) KNOB_LAW.keyFine = o.keyFine;
+  if (o && o.touchTravel > 0) KNOB_LAW.touchTravel = o.touchTravel;
+  return { ...KNOB_LAW };
+}
+/** the pixels of pointer travel for a full scale under the law, for a drag surface the kit did not build
+ *  (the modulation window's dials still carry their own copy: 220, 900 with Shift, 320 under a finger) */
+export function dragTravel(e, { touch = false, travel, fine } = {}) {
+  if (e && e.shiftKey) return (travel || KNOB_LAW.travel) * (fine || KNOB_LAW.fine);
+  return touch ? KNOB_LAW.touchTravel : (travel || KNOB_LAW.travel);
+}
 export function knob(o) {
   const root = el('div', 'k' + (o.size === 'lg' ? ' k-lg' : '') + (o.cls ? ' ' + o.cls : ''));
   if (o.label) el('div', 'k-lbl', root, o.label);
@@ -149,7 +168,9 @@ export function knob(o) {
       return;
     }
     if (!fromUser && focused) return;                                  // THE CHATTER GUARD: never announce a change the APP made to a control the user is sitting on
-    const now = String(wheel ? turn : v), text = wheel ? (turn ? '+' + turn.toFixed(0) + '° · ' : '') + val.textContent : val.textContent;
+    /* a value PAINTED by show() with no base road: valuenow is the hand's v, so valuetext must be too (1.4.0) */
+    const modulated = !wheel && shown !== null && !dragging;
+    const now = String(wheel ? turn : v), text = wheel ? (turn ? '+' + turn.toFixed(0) + '° · ' : '') + val.textContent : modulated ? fmt(v) + ' · modulated' : val.textContent;
     if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
@@ -368,7 +389,9 @@ export function trig(o) {
   return { root: b, setLabel(t) { mathText(b.querySelector('.trig-l'), t); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) s.textContent = g; }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
 }
 
-/** fader({ label, aria, min, max, value, fmt, onInput, onChange, showValue }) — a horizontal scalar */
+/** fader({ label, aria, min, max, value, fmt, log, fine, cls, onInput, onChange }) — a horizontal scalar
+ *   log: a log scale (min must be > 0); fine: this fader's Shift divisor (see setKnobLaw)
+ *   → { root, get, set(x), show(x), shown, setBase(fn), setDisabled(on), paint, setDefault(x), setLabel(t), dragging() } */
 export function fader(o) {
   const root = el('div', 'fd' + (o.cls ? ' ' + o.cls : ''));
   const fill = el('div', 'fd-fill', root);
@@ -379,39 +402,50 @@ export function fader(o) {
   const lo = o.min, hi = o.max;
   const fmt = o.fmt || ((x) => x.toFixed(3));
   const log = !!o.log && lo > 0 && hi > lo;   // a log fader: FREQ-shaped ranges on a slider
+  if (o.log && !log) console.warn('fader: log needs 0 < min < max; "' + (o.label || o.aria || '') + '" is linear');
   const norm = (x) => (log ? clamp01(Math.log(x / lo) / Math.log(hi / lo)) : clamp01((x - lo) / (hi - lo)));
   const denorm = (u) => (log ? lo * Math.pow(hi / lo, clamp01(u)) : lo + clamp01(u) * (hi - lo));
   const fine = o.fine || KNOB_LAW.faderFine;
   let shown = null;                 // a value PAINTED over the base by a modulator (show()); v is the hand's
-  /* WAVE 62 · the same slider as knob(), and all seven are linear: no log, no wrap, no step.  The
-     chatter guard is what keeps a FOCUSED scrub silent while the transport writes it every frame. */
+  /* WAVE 62 · the same slider as knob() — no wrap and no step (a log scale since 1.2.0).  The chatter guard is
+     what keeps a FOCUSED scrub silent while the transport writes it every frame. */
   root.tabIndex = 0;
   root.setAttribute('role', 'slider');
   const ariaName = o.aria || o.label;
   if (ariaName) root.setAttribute('aria-label', mathPlain(ariaName));
   root.setAttribute('aria-valuemin', String(lo));
   root.setAttribute('aria-valuemax', String(hi));
-  let saidNow = null, saidText = null;
+  let saidNow = null, saidText = null, baseOf = null, disabled = false;
+  /* the knob's law, the fader's now (1.4.0): a DRIVEN fader speaks its base; a painted one with no base road
+     speaks the hand's number, so aria-valuenow and aria-valuetext never name two different values */
   function announce(fromUser) {
+    let b = null;
+    if (baseOf) { try { const x = baseOf(); if (Number.isFinite(x)) b = x; } catch (_) {} }
+    if (b !== null) {
+      const now = String(fromUser ? v : b), text = fmt(fromUser ? v : b) + ' · base · modulated';
+      if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
+      if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
+      return;
+    }
     if (!fromUser && root === document.activeElement) return;
-    const now = String(v), text = val.textContent;
+    const now = String(v), text = shown !== null && !dragging ? fmt(v) + ' · modulated' : val.textContent;
     if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
   const paint = (fromUser) => { const sv = (shown !== null && !dragging) ? shown : v; root.style.setProperty('--fill', norm(sv)); val.textContent = fmt(sv); root.classList.toggle('mod', shown !== null && !dragging); announce(fromUser); };
   const fromEvent = (e) => { const r = root.getBoundingClientRect(); return denorm((e.clientX - r.left) / Math.max(1, r.width)); };
-  root.addEventListener('pointerdown', (e) => { e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; root.classList.add('drag'); tap(); lastX = e.clientX; if (!e.shiftKey) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
+  root.addEventListener('pointerdown', (e) => { if (disabled) return; e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; root.classList.add('drag'); tap(); lastX = e.clientX; if (!e.shiftKey) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
   let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
   root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
   const end = () => { if (!dragging) return; dragging = false; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
   root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end);
-  const reset = () => { v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
+  const reset = () => { if (disabled) return; v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };   // a disabled fader does not reset either (1.4.0)
   const tap = tapWatcher(reset);
   root.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });
   root.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
   const FDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
   root.addEventListener('keydown', (e) => {
-    if (root.tabIndex < 0 || e.ctrlKey || e.metaKey || e.altKey) return;   // a fader taken out of the tab order (the scrub, with KEEP FRAMES off) takes no keys either
+    if (disabled || root.tabIndex < 0 || e.ctrlKey || e.metaKey || e.altKey) return;   // a fader taken out of the tab order (the scrub, with KEEP FRAMES off) takes no keys either
     const dir = FDIR[e.code] || 0, page = e.code === 'PageUp' || e.code === 'PageDown';
     let nv = v;
     if (dir) nv = denorm(norm(v) + dir * 0.01 * (page ? 10 : 1) * (e.shiftKey ? (o.fine ? 1 / o.fine : KNOB_LAW.keyFine) : 1));
@@ -424,7 +458,13 @@ export function fader(o) {
   });
   root.addEventListener('blur', () => announce(false));
   paint();
-  return { root, get: () => v, set(x) { v = x; shown = null; paint(); }, show(x) { shown = x; paint(); }, get shown() { return shown; }, setBase() {}, paint, setDefault(x) { def = x; }, setLabel(t) { lbl.textContent = t; }, dragging: () => dragging };
+  return { root, get: () => v, set(x) { v = x; shown = null; paint(); }, show(x) { shown = x; paint(); }, get shown() { return shown; },
+    /** the host's road to the number the user owns, as the knob's: fn() → the base, or null when nothing drives it */
+    setBase(fn) { baseOf = typeof fn === 'function' ? fn : null; announce(false); },
+    /** a dead fader says so and gives up its seat, as the knob does */
+    setDisabled(on) { disabled = !!on; root.classList.toggle('disabled', disabled); root.tabIndex = disabled ? -1 : 0; root.setAttribute('aria-disabled', String(disabled));
+      if (disabled && root === document.activeElement) { const dev = root.closest('.dev'); const seat = dev && dev.querySelector('.dev-power'); if (seat) seat.focus(); else root.blur(); } },
+    paint, setDefault(x) { def = x; }, setLabel(t) { lbl.textContent = t; }, dragging: () => dragging };
 }
 
 /** readout({ label, value, cls }) — a labelled number */
@@ -532,7 +572,9 @@ export function device(o) {
      independent blocks in one card finish in either order without unlocking each other. */
   const loadingKeys = new Set();
   const loading = el('div', 'dev-loading', root); loading.hidden = true; loading.setAttribute('aria-hidden', 'true');
-  const loadingMark = document.querySelector('#title .mark'); if (loadingMark) loading.appendChild(loadingMark.cloneNode(true));
+  /* the mark a waiting card shows: o.loadingMark is an element, a selector, or false for none (default: the wordmark's) */
+  const markSrc = o.loadingMark === false ? null : o.loadingMark instanceof Element ? o.loadingMark : document.querySelector(typeof o.loadingMark === 'string' ? o.loadingMark : '#title .mark');
+  if (markSrc) loading.appendChild(markSrc.cloneNode(true));
   el('span', 'dev-loading-label', loading, 'CALCULATING');
   const setLoading = (v, key = 'work') => {
     if (v) loadingKeys.add(key); else loadingKeys.delete(key);

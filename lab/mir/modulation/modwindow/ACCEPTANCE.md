@@ -1,4 +1,13 @@
-# ACCEPTANCE — the geometric test a correct mount passes
+# MIR · modulation window — ACCEPTANCE: the geometric test a correct mount passes
+
+**Provenance.** Written on 2026-09-06, when this window was staged from BASINS (the MANDELBROT
+project) for λWAVES as a byte-frozen port. Adopted into MIR on 2026-09-10 and corrected for the
+kit on 2026-09-16. MIR 1.1.0 retired the byte-frozen law and MIR is now the window's source, so a
+number here changes only by a MIR change that says why. **BASINS-era references:** the `source`
+column's `anim.js:NNNN` / `index.html:NNNN` are lines of BASINS' own files as of 2026-09-06;
+`mbgate/gatekit.mjs` is the MANDELBROT project's gate kit; `_build/smoke.mjs`, `vid/`, `modmap/` and
+the EXTRACT files were the extraction's staging artefacts. None of them is in MIR. The literal
+counts in §8 were taken on the staged sheet that day.
 
 **This is the reason this port is the last one.** Every number below is a literal in
 `modwindow.css` at the line named, or arithmetic from `anim.js`'s own constants. A
@@ -6,7 +15,8 @@ re-implementation in a host's idiom cannot pass this table by accident, and it c
 it by trying — the only thing that passes is the window.
 
 Measure at `--ui-scale: 1`, one FULL LFO card, one FULL ENV, one FULL AUDIO and one
-MINIMIZED card. `_build/smoke.mjs` beside the staging directory is a working implementation of this gate
+MINIMIZED card. `_build/smoke.mjs` beside the staging directory (BASINS-era; not in MIR) is a
+working implementation of this gate
 (32 assertions, all green against the staged files on 2026-09-06, driven headless through
 `mbgate/gatekit.mjs`); the mounting wave should re-run it against the real host rather
 than write a new one.
@@ -96,7 +106,7 @@ If A1 gives `rgba(0, 0, 0, 0)` anywhere, a `--m2-mat-*` token was moved off `:ro
 | add-device control | the permanent `.m2devadd` rail button; no duplicate device-card chip | host macro revision |
 | `.m2edit.m2hero` | min-height 132, radius 7; `.m2svg` is `height: calc(100% - 14px)` | anim.js:2229 / 2234 |
 | **`.m2col` / `.m2rt`** | the base `92` / `104` are used by **no FULL card**. Measure per kind: **AUDIO `.m2col` 88**, **ENV `.m2rt` 90**, LFO's `.m2col` and `.m2rt` are full-width grid rows | 2704 / 2823 / 2972 |
-| `.m2move` (◂ ▸) | **`display: none` in every mode** — see MANIFEST | anim.js:2597 / 2107 |
+| `.m2move` (◂ ▸) | **`display: none` in every mode** — see MANIFEST. *(λWAVES wave 69 showed them in FULL through the host sheet's reach-list 18; wave 78 retired that — the device grip reorders now — so with the kit's `modhost.css` they are hidden in every mode again.)* | anim.js:2597 / 2107 |
 
 ## 5. THE KNOBS — per kind and per mode, and they are all different on purpose
 
@@ -175,10 +185,17 @@ and `.m2x` measures 40, not 44** — a mount that "fixes" that to 44 has changed
 
 > **SUPERSEDED FOR THIS MOUNT, 2026-09-06 (wave 69), BY JOSH:** *"The modulation window is broken when
 > we were even working on it on basins so whatever problem it has we will try to fix here."*  All three
-> are FIXED in λWAVES and the three assertions below are INVERTED in `B129`.  The corrections are in
+> are FIXED in λWAVES and the three assertions below are INVERTED in `B129` (λWAVES).  The corrections are in
 > `lab/modhost.css` (reach-list 16, 17, 18) and **not one byte of this directory changed**, so this
 > table is still the right acceptance test for a mount that has not been told otherwise, and
 > `lab/mir/PORT-NOTES.md` § THE THREE DIVERGENCES carries the diff for the port back.
+>
+> **In MIR (2026-09-16):** that host sheet is `mir/modulation/modhost.css` and the notes are
+> `mir/modulation/PORT-NOTES.md`. A mount that loads the kit's sheets gets D1 fixed (reach-list 21,
+> the house glass, which superseded 16) and D2 fixed (17). D3 went back on purpose: λWAVES wave 78
+> retired reach-list 18 because the device grip reorders, so the arrows are hidden in every mode and
+> D3's assertion holds on a kit mount as written. "Not one byte of this directory changed" was true
+> on 2026-09-06; MIR 1.1.0 changed `modwindow.js` and `modwindow.css`.
 
 A mount that renders these correctly has silently redesigned the window.
 
@@ -202,5 +219,5 @@ look wrong".
 ## 11. GROUND TRUTH
 
 `vid/f01.png` … `f07.png` and `modmap/{lfo,env,audio}-card.png`,
-`modmap/macros-transport.png`, at 100 %. If the table above passes and the screenshot
+`modmap/macros-transport.png`, at 100 % (BASINS-era staging files; not in MIR). If the table above passes and the screenshot
 still does not match, the answer is in EXTRACT files 01–05 — **not in a redesign.**

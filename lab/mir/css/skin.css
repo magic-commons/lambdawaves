@@ -3,7 +3,8 @@
 
 /* skin.css — the GLASS × NEUMORPHIC skin for λWAVES.
  * Loads AFTER lab.css and only re-points its tokens and re-dresses its selectors; lab.css stays whole without it.
- * Law 1: no frosted blur anywhere (the filter was measured at −26 fps over the live canvas). Glass = tint + hairline + sheen + shadow.
+ * Law 1: no frosted blur by default (the filter was measured at −26 fps over the live canvas). Glass = tint + hairline + sheen + shadow.
+ *        FROST (body.frost, §card style below) is the opt-in policy that brings the blur back; the tint thins so it reads.
  * Law 2: neumorphic light comes from the top-left; raised things cast dark to the bottom-right, wells the reverse.
  * Law 3: the accent marks LIVE / ACTIVE only; resting chrome is achromatic. */
 
@@ -28,8 +29,8 @@
   --neu-flat: 0 0 0 1px hsl(0 0% 100% / .05);                     /* a resting seat, neither up nor down */
   --fg: #f2f5f7; --fg-soft: hsl(0 0% 88%); --dim: hsl(0 0% 72%); --ink-key: hsl(0 0% 74%); --ink-faint: hsl(0 0% 64%);  /* all ≥ 4.5:1 on the card, see skin-notes */
   --ink-shadow: 0 1px 1px hsl(0 0% 0% / .5);
-  --hue-acc: 188; --sat-acc: 80%;                                 /* the derived hsl(...) tints follow the house cyan */
-  --acc: #78e1f0; --acc-ink: #071114;                             /* the house accent itself, verbatim */
+  --hue-acc: 188; --sat-acc: 80%; --lum-acc: 70.6%;               /* the house cyan, #78e1f0 to within one level of green */
+  --acc: hsl(var(--hue-acc) var(--sat-acc) var(--lum-acc)); --acc-ink: #071114;   /* 1.4.0: derived, not a literal, so an app that turns --hue-acc turns the accent */
   --acc-soft: color-mix(in srgb, var(--acc) 16%, transparent); --acc-glow: 0 0 8px color-mix(in srgb, var(--acc) 55%, transparent);
   --card-gap: 10px; --card-r: 14px;                               /* the air between floating cards, their corner */
   /* WAVE 67 · THE DISCONNECTED WINDOW.  Two numbers, and together they are a RHYTHM rather than a pair of
@@ -42,8 +43,17 @@
 
 
   --frost-filter: blur(var(--glass-blur));
-  --t-fast: .12s; --t-soft: .35s; --t-linger: .7s;                /* the value tooltip: in fast, out soft after a linger */
-  --logo-turn: 1.2s;                                              /* wave 53: one turn of the PALETTE through the mark — the boot's, and the busy loop's */
+}
+/* 1.4.0 · THE ACCENT IS DERIVED WHERE AN APP WRITES IT.  A custom property is resolved where it is DECLARED: the
+   accents and their soft tints declared on :root were resolved against :root's hue, so an app that set --hue-acc
+   on <body> (BASINS, NEBULA) moved the hsl tints but never --acc, and an app that set --acc itself (λWAVES) never
+   moved --acc-soft or --acc2-soft — every switch and trigger kept the house cyan fill whatever accent was chosen.
+   Declared again on <body>, they follow whatever the app writes there; an app's inline --acc still wins. */
+body {
+  --acc: hsl(var(--hue-acc) var(--sat-acc) var(--lum-acc));
+  --acc2: hsl(var(--hue-acc2) var(--sat-acc2) var(--lum-acc2));
+  --acc-soft: color-mix(in srgb, var(--acc) 16%, transparent); --acc-glow: 0 0 8px color-mix(in srgb, var(--acc) 55%, transparent);
+  --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
 }
 
 /* ── 3. the card (device) — glass tint, sheen, float; the header is the handle ── */
@@ -113,6 +123,7 @@
   transition: opacity var(--t-fast), transform var(--t-fast); }               /* in fast, no delay */
 .k.drag .k-val, .k.active .k-val { color: var(--acc); }
 .k.disabled { opacity: .3; }
+.fd.disabled { opacity: .3; }
 
 /* ── 6. switch, segmented select, trigger — flat seats that press in; the accent lights what is ON ── */
 .sw { border-color: transparent; background: hsl(0 0% 100% / .035); box-shadow: var(--neu-flat); color: var(--ink-key); transition: box-shadow var(--t-fast), background var(--t-fast); }
@@ -195,7 +206,7 @@ body[data-theme="light"] {
   --glass-shadow-flat: inset 0 1px 0 hsl(0 0% 100% / .8), 0 1px 2px hsl(214 40% 20% / .09);
   --neu-raise: -1px -1px 3px hsl(0 0% 100% / .9), 2px 2px 4px hsl(214 30% 40% / .22), inset 0 1px 0 hsl(0 0% 100% / .9);
   --neu-inset: inset 1px 1px 3px hsl(214 30% 40% / .24), inset -1px -1px 2px hsl(0 0% 100% / .8);
-  --acc: hsl(188 70% 34%); --acc-ink: hsl(0 0% 100%);
+  --lum-acc: 34%; --acc: hsl(var(--hue-acc) calc(var(--sat-acc) - 10%) var(--lum-acc)); --acc-ink: hsl(0 0% 100%);   /* hsl(188 70% 34%) by default, and it follows the hue */
 }
 body[data-theme="light"] .badge { color: var(--dim); }
 
@@ -209,9 +220,9 @@ body[data-card="tinted"] .dev, body[data-card="tinted"] .glass
    overrode both choices with the same veil, making the setting inert. Refractive keeps
    its thin frost veil; tinted keeps its tint. Both share the same filter and hold law. */
 body.frost .dev, body.frost .glass { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
-/* FROST OVER TINTED (2026-09-11): a .88 pane hides the blur it sits on, so while frost is IN FORCE the tinted
-   pane thins to a glass the blur can be seen through; the moment the policy lifts (frost-hold while the
-   transport runs under STILL) the pane is a .88 pane again. Refractive is untouched — it was always the blur alone. */
+/* FROST OVER TINTED (2026-09-11): a full tinted pane (--card-opacity: .84 dark, .86 light) hides the blur it sits
+   on, so while frost is IN FORCE the tinted pane thins to .58, a glass the blur can be seen through; the moment the
+   policy lifts (frost-hold while the transport runs under STILL) it is a full pane again. Refractive is untouched — it was always the blur alone. */
 body.frost:not(.frost-hold)[data-card="tinted"] .dev, body.frost:not(.frost-hold)[data-card="tinted"] .glass,
 body.frost:not(.frost-hold)[data-card="tinted"] #transport.mini { background: var(--glass-sheen), hsl(var(--glass-tint) / .58); }
 body.disconnected.frost:not(.frost-hold)[data-card="tinted"]:not(.phone) .dev > .dev-body { background: var(--glass-sheen), hsl(var(--glass-tint) / .58); }
@@ -367,7 +378,7 @@ body[data-theme="light"] {
 }
 .window-help-book > * { display: block !important; position: static !important; margin: 0; }
 .window-help-book > * + * { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--glass-hairline); }
-.window-help-book b { color: var(--fg); font-weight: var(--w-medium); }
+.window-help-book b { color: var(--fg); font-weight: var(--w-med); }   /* 1.4.0: was --w-medium, a token nothing defines */
 body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .dev .ro-sub, .dev .ro.wide .ro-val { overflow:hidden; }
 .camera-export-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
@@ -377,3 +388,58 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .accent-dial .k-dial::after { content:'';position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(var(--acc) var(--accent-sweep),transparent 0);mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 0);pointer-events:none; }
 .accent-dial-b .k-dial::after { background:conic-gradient(var(--acc2) var(--accent-sweep),transparent 0); }
 #menubar[popover] { position:fixed;inset:auto;margin:0;overflow:visible;border:0;padding:0;background:transparent;color:var(--fg); }
+
+/* ── 1.4.0 · THE PARTS THE KIT BUILDS, STYLED AS λWAVES STYLES THEM ──────────────────────────────────────────
+   kit.js builds the window status (.dev-stat) and the formula (.fx), control-help.js the ⓘ button, its panel and
+   the hover hint (.native-info, .control-help), plane-model.js the sphere-and-plane canvas (.plane-model) — and
+   until 1.4.0 the only CSS for any of them lived in λWAVES' own sheets, so every other app got them unstyled (the
+   gallery's header status ran into its title; a hint sat in the page flow).  These rules are λWAVES', byte for
+   byte, in the order its two sheets give them, trimmed of the selectors that only λWAVES' own DOM can match; in
+   λWAVES, BASINS and NEBULA (which carry the same sheets) they are duplicates and change nothing.
+   The switches: body.window-info-off hides every ⓘ (control-help.js HELP_CLASSES.infoOff). */
+/* from λWAVES lab/lab.css */
+.dev.off .dev-stat::after { content: ' · OFF'; color: var(--dim); }
+.dev.copied .dev-stat::after { content: ' · COPIED'; color: var(--acc); }
+.k-val, .fd-val, .ro-val, .ro-sub, .dev-stat { font-variant-numeric: tabular-nums; }
+.fx { margin: 3px 0 0; display: flex; flex-direction: column; gap: 1px; }
+.fx-l { display: block; font-size: var(--fs-small); line-height: 1.55; color: var(--ink-key); letter-spacing: 0; }
+.fx-v { font-style: normal; font-family: var(--font-num); font-size: .92em; font-variant-numeric: tabular-nums;
+        color: var(--fg); letter-spacing: var(--tr-tight); }
+.fx.dim .fx-l { color: var(--ink-faint); }
+.dev-stat { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: right; font-size: var(--fs-tiny); letter-spacing: var(--tr-tight); color: var(--dim); font-variant-numeric: tabular-nums;
+  padding: 0 var(--sp-2); }
+.dev-stat.live { color: var(--acc); }
+.dev-stat.warn { color: var(--warn); }
+.dev.floating.compact .dev-stat { display: none; }
+/* from λWAVES lab/skin.css */
+.dev-head > .dev-stat { display: none; }
+.dev-stat { color: var(--ink-faint); }
+.dev-stat.live { color: var(--acc); }
+.native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
+.native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) 12px Georgia, 'Times New Roman', serif; }
+.native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
+.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
+.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
+.control-help[hidden] { display: none; }
+.native-info .native-info-content, .control-help {
+  border: 1px solid hsl(0 0% 100% / .12) !important;
+  background: linear-gradient(160deg, hsl(0 0% 100% / .055), transparent 44%), hsl(214 16% 13% / .98) !important;
+  box-shadow: 0 8px 24px hsl(0 0% 0% / .34), inset 0 1px 0 hsl(0 0% 100% / .05) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+body[data-theme="light"] .native-info .native-info-content, body[data-theme="light"] .control-help {
+  color: hsl(214 18% 20%);
+  border-color: hsl(214 20% 74% / .72) !important;
+  background: linear-gradient(160deg, hsl(0 0% 100% / .72), transparent 46%), hsl(214 24% 93% / .99) !important;
+  box-shadow: 0 8px 24px hsl(214 28% 28% / .18), inset 0 1px 0 hsl(0 0% 100% / .9) !important;
+}
+.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
+.plane-model:active { cursor: grabbing; }
+.plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
+@media (pointer: coarse) { .native-info-button { min-width: 44px; min-height: 44px; } }
+.native-info .native-info-content { position:fixed !important; inset:auto; margin:0; border:0; }
+.native-info .native-info-content:popover-open { display:block !important; }
+.plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
+.plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
+body.window-info-off .native-info, body.window-info-off .native-info-content { display:none !important; }
+body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))) { display:none; }

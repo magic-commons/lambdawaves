@@ -1,4 +1,12 @@
-# MANIFEST — baseline import and shipping revisions
+# MIR · modulation window — MANIFEST: baseline import and shipping revisions
+
+**Provenance.** Written on 2026-09-06, when this window was staged from BASINS (the MANDELBROT
+project) for λWAVES, and revised in λWAVES after; adopted into MIR on 2026-09-10 and corrected for
+the kit on 2026-09-16. MIR 1.1.0 retired the byte-frozen law, and MIR is now the window's source:
+later revisions are in `CHANGELOG.md`, not here. **BASINS-era references:** `anim.js:NNNN`,
+`index.html:NNNN`, `glyph.js:NNN`, `colors.js` and `window.js` are BASINS' own files in the
+MANDELBROT project as of 2026-09-06; `vid/` and the EXTRACT files (`modwindow-0N-*.css`,
+§-numbers) were the extraction's staging artefacts. None of them is in MIR.
 
 `modwindow.css` and `modwindow.js` began as BASINS' modulation window. The table
 records the import transformation and the deliberate λWAVES revisions that now
@@ -34,6 +42,15 @@ ship with it.
 | J9 | Macro rows expose a two-part reorder/delete tool and no route/OUT text. The rail exposes `ADD MACRO` and `ADD DEVICE`; device construction no longer needs a separate add-chip sentinel. | Reordering remains available after the value face is hidden, compact rows stay aligned, and both creation actions live in one predictable place. |
 
 ## COPIED BROKEN — recorded, not fixed. These are Josh's to decide.
+
+*(Decided, 2026-09-06: Josh ruled the first three fixed — "whatever problem it has we will try to
+fix here". The fixes are in the host sheet, `mir/modulation/modhost.css`, not in this directory:
+`.m2pick` wears the house glass (reach-list 21), `.m2clr` gets a reachable recess (17), and the
+◂ ▸ arrows were shown in FULL (18) until λWAVES wave 78 hid them again because the device grip
+reorders. The one-word prescription below for `.m2pick` is wrong — ANTI-PATTERNS 22 and
+`mir/modulation/PORT-NOTES.md` § THE THREE DIVERGENCES say why. The `.m2ribbon` row: `modwindow.js`
+still never applies the class, but λWAVES' host controller, `lab/modwindow.js` (λWAVES), toggles it on
+the rack root from a RIBBON chip, so in that mount the 21 rules paint.)*
 
 | what | evidence |
 |---|---|
