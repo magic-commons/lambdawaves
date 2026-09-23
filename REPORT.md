@@ -2606,3 +2606,18 @@ right-click. The host asks MIR's shared gesture interpreter, hit-tests in SVG
 coordinates, and repaints immediately while paused. The browser gate drives
 real mouse double-clicks on both kinds of handle; the model gate checks the
 default and a saved-shape round trip.
+
+### wave 111: Official first-run defaults and palette-aware WAVE colours
+
+Fresh desktop profiles now open with STATUS TAGS, STAGE CAPTIONS, HELP and
+window notes off, but CONTROL HINTS, AUTO SCALE, DOMAIN AUTO and GOVERNOR on.
+The appearance defaults are LIGHT, REFRACTIVE, FROST ALWAYS, 22 px blur and
+50% VIVID. The phone's existing reversible frost-off rule still protects its
+render budget. Saved explicit browser choices retain their meanings, including
+older TINTED/OFF/10%-vivid combinations and per-window note visibility.
+
+In WAVE, ρ=|ψ|² now takes the palette colour at θ=0 (after HUE rotation),
+while Δρ gain/loss take −π/2 and +π/2, as Re/Im already do. With PALETTE
+off, both retain their original colours. A real Firefox/WebGPU proof varies
+those three palette seats independently and checks the rendered image hashes,
+then reloads an explicitly customized profile to check preference preservation.

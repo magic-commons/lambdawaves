@@ -32,3 +32,11 @@ never a transparent layout box: the modulation root, its chip rail, and
 disconnected rack cards all have intentional gaps. A moved or scrolled window
 must schedule a PRESENT even while paused. Run
 `tests/frame-occlusion.browser-test.mjs` after changing this geometry.
+
+First-run λWAVES preferences are specified in `lab/rack.js` and
+`lab/native-ui.js`: tags, captions, Help and window notes off; hints,
+AUTO SCALE, DOMAIN AUTO and governor on; light/refractive/ALWAYS frost,
+22 px blur and 50% VIVID on desktop. Stored choices and the phone's frost
+override win. In `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the
+same ±π/2 pair as Re/Im; palette OFF retains the old colors. Keep
+`tests/official-defaults-palette.browser-test.mjs` green when editing either.

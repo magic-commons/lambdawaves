@@ -2,11 +2,11 @@
  *
  * STATUS: a DESIGN CHOICE, and labelled as one.  A palette is a list of stops around the phase circle,
  *   { at: 0..1, rgb: [r, g, b] }   with at = 0 ↔ arg ψ = −π, at = 0.5 ↔ 0, wrapping at 1,
- * interpolated to a 256-entry lookup table which the FIELD's phase view samples.  Interpolation is done in
+ * interpolated to a 256-entry lookup table which WAVE's phase, density, signed and difference views sample.
+ * Density uses the zero-phase seat; signed and difference views use the opposite ±π/2 seats. Interpolation is done in
  * OKLab, not RGB: a straight RGB blend between two saturated hues passes through a grey, muddy middle, and on a
  * cyclic scale that reads as a false dark band at a phase where nothing is happening.  The palette never touches
- * ψ — it is an observer product, like the camera — and the instrument's own default is the HSV wheel it has
- * always used, so turning the palette OFF restores exactly the old picture.
+ * ψ — it is an observer product, like the camera — and turning the palette OFF restores each view's original colours.
  *
  * A cyclic palette should return to where it started: `cyclic()` reports the seam size, and the editor shows it,
  * because a discontinuity at the seam draws a false nodal line at arg ψ = ±π.

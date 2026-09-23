@@ -74,7 +74,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.2.2-alpha · editable LFO sine · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.3-alpha · official defaults and WAVE palette · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -117,7 +117,7 @@ export async function boot(dom) {
   let palChoice = (() => { const id = readSettings().palette; return id && PALETTE_BY_ID.get(id) ? id : PAL_DEF; })();   // a DEFAULT IS FOR A FIRST VISIT — never a retroactive edit of someone's settings
   const nativeAccentLUT=toLUT(PALETTE_BY_ID.get('lambda').stops);
   let wheelLUT = toLUT(PALETTE_BY_ID.get(palChoice).stops);
-  const accent = { a: 30, b: 300, vivid: .1 };
+  const accent = { a: 30, b: 300, vivid: .5 };
   function wheelColor(deg) { const u = ((deg / 360 + (mat.hueShift || 0)) % 1 + 1) % 1; const i = Math.min(255, Math.floor(u * 256)) * 4; return [wheelLUT[i], wheelLUT[i + 1], wheelLUT[i + 2]]; }
   function legible(rgb) { const lab = rgbToOklab(rgb), light = document.body.dataset.theme === 'light'; const L = light ? Math.min(lab[0], 0.62) : Math.max(lab[0], 0.62); return L === lab[0] ? rgb : oklabToRgb([L, lab[1], lab[2]]); }
   /* WAVE 54 · THE GAMUT LAW LIVES HERE TOO.  The accents are the one colour the DOM and the canvas BOTH wear, so
@@ -248,13 +248,13 @@ export async function boot(dom) {
   /* CARD STYLE has one official first-run default on every layout. A browser that has named a surface still
      gets exactly what it named; the phone's rendering budget is handled by the renderer rather than by changing
      the material under the user's hand. */
-  const defaultCard = () => 'tinted';   // 2026-09-10: tinted ships — the look of frost with no backdrop filter, so no compositor cost on the iPad
+  const defaultCard = () => 'refractive';   // new desktops get the clear glass; the phone can still shed costly frost
   /* `cardChosen` is the difference between "this browser wants TINTED" and "this browser has never said":
      without it the first saveSettings() of a session freezes whatever the default happened to be, and the
      surface could never follow the device again.  The seg — the one place a HAND can say it — sets it. */
   let cardChosen = readSettings().cardSet === true;
-  /* Backdrop capture is costly over a moving WebGPU canvas, so a fresh profile starts without it. */
-  let frostMode = 'off';                      // 'off' | 'still' | 'always'
+  /* The desktop's first-run glass stays frosted; the phone crossing temporarily disables it. */
+  let frostMode = 'always';                   // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
@@ -346,13 +346,15 @@ export async function boot(dom) {
   function applySettings() {
     const s = readSettings();
     if (__LW_hooks.setTheme) __LW_hooks.setTheme(s.theme || 'light');
-    if (s.badges === false) { document.body.classList.add('no-badges'); if (ui.badgesSw) ui.badgesSw.set(false); }
+    const badges = s.badges === true;
+    document.body.classList.toggle('no-badges', !badges); if (ui.badgesSw) ui.badgesSw.set(badges);
     const controlHints = s.controlHints === undefined ? s.hint !== false : s.controlHints !== false;
     document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
-    if (s.captions === false) { document.body.classList.add('no-captions'); if (ui.capSw) ui.capSw.set(false); }
+    const captions = s.captions === true;
+    document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
-       whatever the transport was doing.  Anything unreadable falls to the shipped default, OFF. */
+       whatever the transport was doing.  Anything unreadable falls to the shipped default, ALWAYS. */
     setFrost(s.frost === true ? 'always' : (s.frost || frostMode), { quiet: true });
 
 
@@ -1490,8 +1492,8 @@ export async function boot(dom) {
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
 
 
-      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'probability density' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: orange +, blue −' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: yellow gain, blue loss' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
+      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density; palette θ = 0 when enabled, original blue when off' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
+      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: palette −π/2 gain and +π/2 loss, or original yellow/blue' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); } });
     r1.appendChild(ui.viewSeg.root);
     const r2 = el('div', 'row tight', gSpace);
@@ -1504,9 +1506,9 @@ export async function boot(dom) {
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: true, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
+    ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
-    ui.capSw = sw({ label: 'STAGE CAPTIONS', value: true, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
+    ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -1563,7 +1565,7 @@ export async function boot(dom) {
 
     ui.discSw = sw({ label: 'DISCONNECTED', value: false, title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
     rt.appendChild(ui.discSw.root);
-    ui.frostSeg = seg({ label: 'FROST', value: 'off', options: [
+    ui.frostSeg = seg({ label: 'FROST', value: 'always', options: [
       { id: 'off', label: 'OFF', title: 'Disable backdrop filtering' },
       { id: 'still', label: 'STILL', title: 'Apply frost while the field is paused' },
       { id: 'always', label: 'ALWAYS', title: 'Apply frost continuously. This can reduce frame rate.' }],
@@ -1653,7 +1655,7 @@ export async function boot(dom) {
     const ra = el('div', 'row tight', gt);
     ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: 30, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => { accent.a = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accA.root);
     ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: 300, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => { accent.b = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accB.root);
-    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .1, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
+    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .5, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
     __LW_hooks.setTheme = setTheme;
 
@@ -4188,7 +4190,7 @@ export async function boot(dom) {
        its paragraphs and readout tiles; the header's status line stays, so the window still says what it is doing.
        Remembered per window in this browser.  A presentation choice only — nothing is computed differently. */
     const LEAN_KEY = 'lw.lean.v1';
-    let leanSet = new Set(); try { leanSet = new Set(JSON.parse(localStorage.getItem(LEAN_KEY) || '[]')); } catch (e) { leanSet = new Set(); }
+    let leanSet = new Set(), firstLean = true; try { const saved = localStorage.getItem(LEAN_KEY); firstLean = saved === null; leanSet = new Set(JSON.parse(saved || '[]')); } catch (e) { leanSet = new Set(); }
     const setLean = (d, on) => { d.classList.toggle('lean', on); const b = d.querySelector('.dev-lean'); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); }
       if (on) leanSet.add(d.dataset.id); else leanSet.delete(d.dataset.id); try { localStorage.setItem(LEAN_KEY, JSON.stringify([...leanSet])); } catch (e) { /* private mode: the choice lasts the session */ }
       schedule(TIER.PRESENT); };
@@ -4198,7 +4200,7 @@ export async function boot(dom) {
       const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts — the controls, ladders and plots stay';
       b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
       b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
-      if (leanSet.has(d.dataset.id)) setLean(d, true);
+      if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);
     }
     /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
     for (const d of document.querySelectorAll('.dev')) {

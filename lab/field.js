@@ -357,7 +357,10 @@ fn bayer8(px: vec2<f32>) -> f32 {
     if (mode == 0u) {
       let rho = dot(s, s) / rhoMax;
       w = pow(rho, soft);
-      c = mix(vec3<f32>(0.08, 0.45, 0.62), vec3<f32>(1.0, 1.0, 1.0), pow(rho, 0.45));
+      if (V.p2.z > 0.5) {
+        let i0 = u32(fract(0.5 + V.p2.x) * 256.0) % 256u;   // arg ψ = 0, on the same shifted wheel as PHASE
+        c = pal[i0].rgb;
+      } else { c = mix(vec3<f32>(0.08, 0.45, 0.62), vec3<f32>(1.0, 1.0, 1.0), pow(rho, 0.45)); }
     } else if (mode == 1u) {
       let rho = dot(s, s) / rhoMax;
       w = pow(rho, soft);
@@ -387,7 +390,10 @@ fn bayer8(px: vec2<f32>) -> f32 {
       let rf = textureSampleLevel(refTex, samp, uvw, 0.0).rg;
       let d = (dot(s, s) - dot(rf, rf)) / max(rhoMax, refMax);
       w = pow(abs(d), soft);
-      c = select(vec3<f32>(0.25, 0.48, 1.0), vec3<f32>(1.0, 0.86, 0.22), d > 0.0);
+      if (V.p2.z > 0.5) {                                  // Δρ uses the Re/Im polar pair: gain −π/2, loss +π/2
+        let i0 = u32(fract(0.25 + V.p2.x) * 256.0) % 256u; let i1 = u32(fract(0.75 + V.p2.x) * 256.0) % 256u;
+        c = select(pal[i1].rgb, pal[i0].rgb, d > 0.0);
+      } else { c = select(vec3<f32>(0.25, 0.48, 1.0), vec3<f32>(1.0, 0.86, 0.22), d > 0.0); }
     }
     if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
     /* ── DRAW STYLE ────────────────────────────────────────────────────────

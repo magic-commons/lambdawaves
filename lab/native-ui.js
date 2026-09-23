@@ -84,7 +84,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['appearance','display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  let showWindowInfo=true;try{showWindowInfo=localStorage.getItem('lw-window-info')!=='off';}catch(_){}
+  let showWindowInfo=false;try{showWindowInfo=localStorage.getItem('lw-window-info')==='on';}catch(_){}
   const applyWindowInfo=on=>{document.body.classList.toggle('window-info-off',!on);
     if(!on){for(const p of document.querySelectorAll('.native-info-content:popover-open'))p.hidePopover();document.querySelectorAll('.native-info-button').forEach(b=>b.setAttribute('aria-expanded','false'));}
     try{localStorage.setItem('lw-window-info',on?'on':'off');}catch(_){}
