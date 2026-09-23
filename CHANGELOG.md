@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.3-alpha` — 2026-09-23
+
+Commit `bd2b335` · wave 111 · 2 commits.
+
+- **wave 111**: Official first-run defaults and palette-aware WAVE colours
+
+<details><summary>commits</summary>
+
+- `d9e32cb` 2026-09-23 — CHANGELOG for v0.2.2-alpha
+- `bd2b335` 2026-09-23 — Set official first-run defaults and palette-aware WAVE colors
+
+</details>
+
+---
+
 ## `v0.2.2-alpha` — 2026-09-23
 
 Commit `c0fb9f6` · wave 110 · 2 commits.
