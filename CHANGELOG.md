@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.1-alpha` — 2026-09-23
+
+Commit `4743948` · wave 109 · 2 commits.
+
+- **wave 109**: The frame follows painted windows, not invisible layout boxes
+
+<details><summary>commits</summary>
+
+- `f1b61bd` 2026-09-23 — CHANGELOG for v0.2.0-alpha
+- `4743948` 2026-09-23 — Fix frame occlusion around floating windows
+
+</details>
+
+---
+
 ## `v0.2.0-alpha` — 2026-09-23
 
 Commit `e17e612` · wave 108 · 24 commits.
