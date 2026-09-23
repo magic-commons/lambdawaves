@@ -11,6 +11,74 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.0-alpha` — 2026-09-23
+
+Commit `e17e612` · wave 108 · 24 commits.
+
+- **wave 108**: MOLECULAR WAVES becomes the 0.2.0 alpha release, with one visible molecule window
+
+<details><summary>commits</summary>
+
+- `f6d200c` 2026-09-11 — Research day 2026-09-11: ChronusQ gap map, the kinetics ladder, the Navier–Stokes fact check,…
+- `12c0a14` 2026-09-11 — The ChronusQ ports: Gaussian integrals, RHF with DIIS, Löwdin-frame density propagation…
+- `f3f1638` 2026-09-12 — The H₂O program: two-lab ledger (Sol theorises, Opus proves), the McMurchie–Davidson engine, the…
+- `96d8813` 2026-09-12 — CHEMISTRY: benzene on the screen
+- `b2c92da` 2026-09-12 — MOLECULES and ORBITALS: 54 pinned molecules in a dropdown with a benzene-cost cap, STO-3G…
+- `fa117c6` 2026-09-12 — dev is local only: the public dev worker is deleted at Josh's request; RELEASING.md and…
+- `0ea6ad3` 2026-09-12 — Merge branch 'main' into dev
+- `d0b0e12` 2026-09-15 — Fix stage gesture ownership and persist final notebook geometry
+- `8fcdcf8` 2026-09-15 — Reconcile MIR 1.1.3 and verify the adopted file manifest
+- `7acc9d2` 2026-09-18 — MOLECULAR WAVES stages 0 and 2: truth fixes, the Householder–QL eigensolver, Cholesky stability…
+- `97e2ec5` 2026-09-18 — MOLECULAR WAVES stage 1: one owner for the molecular field, the signed kernel kind, and a DIFF…
+- `b7cb5e7` 2026-09-18 — Register spec: carry-overs from the stage 1 report; THE DISK rebuilt
+- `a587819` 2026-09-18 — MOLECULAR WAVES stages 3 and 4: the REGISTER window
+- `dec2365` 2026-09-18 — MOLECULAR WAVES stages 5 and 6: the TD-CIS drive (exactly unitary, reversible, resonant where…
+- `797e0c2` 2026-09-18 — MOLECULAR WAVES: the orbitals' canonical gauge, a cache-friendly AO → MO transform, and the…
+- `d8e6ac8` 2026-09-18 — MOLECULAR WAVES: FLOW for every model, excited-state absorption, and 6-31+G* for H, C, N, O, F
+- `f4e544d` 2026-09-18 — A knob with a macro on it: the dial stays under its label, badges on one control at a time, and…
+- `5a23a88` 2026-09-18 — LEAN: an Aa button in a window's header hides its notes and readout tiles and keeps its…
+- `b150927` 2026-09-21 — Fix paused curve edits and impulse trails
+- `778a4f4` 2026-09-21 — Refresh dev precache after rendering fixes
+- `c039347` 2026-09-21 — Adopt MIR 1.4.2 curve controls
+- `a4e4400` 2026-09-23 — Prepare Molecular Waves 0.2.0 release names and legacy layout
+- `44b9179` 2026-09-23 — Merge branch 'main' into dev
+- `e17e612` 2026-09-23 — Validate directory URL bases in release build
+
+</details>
+
+---
+
+## `v0.1.3-alpha` — 2026-09-21
+
+Commit `2ebad12` · no new waves · 1 commit.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `2ebad12` 2026-09-21 — Hotfix MIR 1.4.2 curve controls
+
+</details>
+
+---
+
+## `v0.1.2-alpha` — 2026-09-21
+
+Commit `628404d` · no new waves · 4 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `ff3f50e` 2026-09-11 — CHANGELOG for v0.1.1-alpha
+- `0d2007e` 2026-09-12 — README: the experimental copy is not published anywhere; only the release address is public
+- `064c153` 2026-09-21 — Fix paused curve edits and impulse trails
+- `628404d` 2026-09-21 — Refresh live precache after rendering fixes
+
+</details>
+
+---
+
 ## `v0.1.1-alpha` — 2026-09-11
 
 Commit `90ffc80` · no new waves · 2 commits.
