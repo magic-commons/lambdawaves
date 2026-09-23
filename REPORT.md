@@ -2621,3 +2621,23 @@ while Δρ gain/loss take −π/2 and +π/2, as Re/Im already do. With PALETTE
 off, both retain their original colours. A real Firefox/WebGPU proof varies
 those three palette seats independently and checks the rendered image hashes,
 then reloads an explicitly customized profile to check preference preservation.
+
+### wave 112: A floating MIR keyboard and collision-safe camera controls
+
+The keyboard manual is a 1080 × 590 draggable glass window with the app's
+light/dark and card/frost tokens, a layered five-row keyboard, Shift/Ctrl
+badges, and a searchable, categorized action catalog. Its position is a local
+preference, not part of a project save. The stage's frame occlusion follows
+the painted keyboard pane on open, drag and close, including while paused.
+
+Q/E dolly the camera; Shift+Q/E changes field of view without translating the
+camera; Ctrl+Shift+Q/E counterchanges distance and field of view so apparent
+scale is held (a dolly zoom). WASD orbit deltas ease to their target over
+successive presentation frames, without moving the simulation clock. The
+single binding law rejects reserved keys and overlapping shortcuts, including
+an unspecified Shift binding overlapping both Shift states. The settings
+capture and keyboard manual share that law; explicit steal atomically unbinds
+the old action. Old saved bindings are validated on load. The browser gate
+checks drag, occlusion, all Q/E layers, easing and rebinding; the Node gate
+exercises the binding law without a browser. Design draft:
+https://www.figma.com/design/RLCuo7Pb6ikE0RqTGqGIoZ

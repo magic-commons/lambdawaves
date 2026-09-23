@@ -121,6 +121,10 @@ const KNOWN_SHORTS = {
   pitchDn: 'pitch down',
   dollyIn: 'dolly in',
   dollyOut: 'dolly out',
+  povIn: 'POV tighter',
+  povOut: 'POV wider',
+  dollyZoomIn: 'dolly zoom in',
+  dollyZoomOut: 'dolly zoom out',
   camReset: 'cam reset',
   axisX: 'axis X',
   axisY: 'axis Y',
@@ -147,6 +151,7 @@ const KNOWN_SHORTS = {
   modBar: 'bar lock',
   undo: 'undo',
   redo: 'redo',
+  redoY: 'redo',
   save: 'save',
   saveAs: 'save as',
 };
@@ -220,6 +225,7 @@ function deriveShortName(a) {
 }
 
 function formatChord(spec, platform) {
+  if (!spec.key) return '—';
   const isMac = platform === 'mac';
   const parts = [];
   if (spec.ctrl) parts.push(isMac ? '⌘' : 'Ctrl');
@@ -256,19 +262,63 @@ export function createKeymap(host, keys, options = {}) {
   const rowDomMap = new Map();
 
   // Root screen
-  const root = el('div', 'km-panel', host);
+  const root = el('div', 'km-panel glass', host);
   root.hidden = true;
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-label', 'Keyboard shortcuts and bindings');
+  root.setAttribute('aria-modal', 'false');
 
   // ── Header
   const header = el('div', 'km-header', root);
+  el('span', 'km-drag-mark', header, '⠿').setAttribute('aria-hidden', 'true');
   const titles = el('div', 'km-header-titles', header);
   el('div', 'km-eyebrow', titles, 'λWAVES · CONTROLS');
-  el('h2', 'km-title', titles, 'CUSTOMIZE KEYBINDS');
+  el('h2', 'km-title', titles, 'KEYBOARD');
+  el('span', 'km-header-hint', header, 'DRAG TO MOVE');
 
   const closeBtn = el('button', 'km-close', header, '×');
   closeBtn.type = 'button';
   closeBtn.setAttribute('aria-label', 'Close keybindings editor');
   closeBtn.addEventListener('click', () => close());
+
+  const POSITION_KEY = 'lw.keyboard.position.v1';
+  let position = null;
+  try { const saved = JSON.parse(localStorage.getItem(POSITION_KEY) || 'null');
+    if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) position = saved; } catch (_) {}
+  function place() {
+    if (root.hidden) return;
+    const width = root.offsetWidth, height = root.offsetHeight;
+    const x = position ? position.x : (window.innerWidth - width) / 2;
+    const y = position ? position.y : (window.innerHeight - height) / 2;
+    position = { x: Math.max(8, Math.min(x, Math.max(8, window.innerWidth - width - 8))),
+      y: Math.max(8, Math.min(y, Math.max(8, window.innerHeight - height - 8))) };
+    root.style.left = `${position.x}px`;
+    root.style.top = `${position.y}px`;
+    if (options.onMove) options.onMove();
+  }
+  let dragging = null;
+  header.addEventListener('pointerdown', e => {
+    if (e.button || e.target.closest('button')) return;
+    e.preventDefault();
+    place();
+    dragging = { x: e.clientX - position.x, y: e.clientY - position.y };
+    header.setPointerCapture(e.pointerId);
+    root.classList.add('km-dragging');
+  });
+  header.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    position = { x: e.clientX - dragging.x, y: e.clientY - dragging.y };
+    place();
+  });
+  const stopDrag = () => {
+    if (!dragging) return;
+    dragging = null;
+    root.classList.remove('km-dragging');
+    try { localStorage.setItem(POSITION_KEY, JSON.stringify(position)); } catch (_) {}
+  };
+  header.addEventListener('pointerup', stopDrag);
+  header.addEventListener('pointercancel', stopDrag);
+  window.addEventListener('resize', place);
 
   // ── Two Columns
   const cols = el('div', 'km-columns', root);
@@ -298,6 +348,8 @@ export function createKeymap(host, keys, options = {}) {
   el('span', 'km-legend-text', legend, 'Unbound');
   el('span', 'km-legend-shift-sample', legend, '⇧');
   el('span', 'km-legend-text', legend, 'Shift');
+  el('span', 'km-legend-ctrl-sample', legend, '⌃');
+  el('span', 'km-legend-text', legend, 'Ctrl / ⌘');
 
   // Keyboard Container
   const kbContainer = el('div', 'km-keyboard', colLeft);
@@ -305,8 +357,14 @@ export function createKeymap(host, keys, options = {}) {
   // Right Column: Actions List
   const colRight = el('div', 'km-col km-col-right', cols);
   const rightHeader = el('div', 'km-col-header', colRight);
-  el('span', 'km-col-title', rightHeader, 'ACTIONS LIST');
+  el('span', 'km-col-title', rightHeader, 'ACTIONS');
   const countEl = el('span', 'km-count', rightHeader, '0 BINDINGS');
+
+  const searchEl = el('input', 'km-search', colRight);
+  searchEl.type = 'search';
+  searchEl.placeholder = 'Find an action or key…';
+  searchEl.setAttribute('aria-label', 'Find a keyboard action');
+  searchEl.addEventListener('input', () => renderActionsList());
 
   const listEl = el('div', 'km-list', colRight);
 
@@ -362,6 +420,14 @@ export function createKeymap(host, keys, options = {}) {
 
   function getActions() {
     return Array.isArray(keys && keys.actions) ? keys.actions : [];
+  }
+
+  function categoryOf(a) {
+    if (['play','home','stepBack','stepFwd','modArm','modBar'].includes(a.id)) return 'TRANSPORT';
+    if (['zoomIn','zoomOut','yawL','yawR','pitchUp','pitchDn','dollyIn','dollyOut','povIn','povOut','dollyZoomIn','dollyZoomOut','camReset'].includes(a.id)) return 'CAMERA';
+    if (['axisX','axisY','axisZ','rotorBoth','rotorPlus','rotorMinus','rotorK','turnNeg','turnPos','slap','reseed'].includes(a.id)) return 'STATE';
+    if (['undo','redo','redoY','historyUndo','save','saveAs'].includes(a.id)) return 'PROJECT';
+    return 'WINDOWS & DISPLAY';
   }
 
   function getSelectedAction() {
@@ -477,7 +543,12 @@ export function createKeymap(host, keys, options = {}) {
               const hasAlt = rep.alt;
 
               badge.className = 'km-badge';
-              if (hasCtrl && hasShift) {
+              const layers = [...new Set(matching.map(a => (a.ctrl ? (isMac ? '⌘' : '⌃') : '') + (a.alt ? '⌥' : '') + (a.shift ? '⇧' : '')))].filter(Boolean);
+              if (!isSelected && layers.length > 1) {
+                badge.textContent = layers.join(' · ');
+                badge.classList.add('km-badge-combo');
+                badge.hidden = false;
+              } else if (hasCtrl && hasShift) {
                 badge.textContent = (isMac ? '⌘' : 'Ctrl') + '+⇧';
                 badge.classList.add('km-badge-combo');
                 badge.hidden = false;
@@ -498,7 +569,7 @@ export function createKeymap(host, keys, options = {}) {
               }
             }
 
-            btn.title = `${matching.map((a) => a.label).join(' · ')}`;
+            btn.title = matching.map(a => `${formatChord(a, platform)} · ${a.label}`).join('\n');
           } else {
             // Lit modifier key
             if (sub) sub.textContent = '';
@@ -540,12 +611,20 @@ export function createKeymap(host, keys, options = {}) {
     listEl.textContent = '';
     rowDomMap.clear();
 
-    const actions = getActions();
-    countEl.textContent = `${actions.length} BINDINGS`;
+    const allActions = getActions();
+    const term = searchEl.value.trim().toLowerCase();
+    const order = ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT'];
+    const actions = (term ? allActions.filter(a => (a.label + ' ' + formatChord(a, platform)).toLowerCase().includes(term)) : [...allActions])
+      .sort((a, b) => order.indexOf(categoryOf(a)) - order.indexOf(categoryOf(b)));
+    countEl.textContent = term ? `${actions.length} / ${allActions.length}` : `${actions.length} BINDINGS`;
     const isMac = platform === 'mac';
+    let lastCategory = '';
 
     for (let i = 0; i < actions.length; i++) {
       const a = actions[i];
+      const category = categoryOf(a);
+      if (category !== lastCategory) el('div', 'km-action-group', listEl, category);
+      lastCategory = category;
       const isSel = a.id === selectedActionId;
 
       const row = el('button', 'km-action-row' + (isSel ? ' km-action-row-selected' : ''), listEl);
@@ -557,7 +636,11 @@ export function createKeymap(host, keys, options = {}) {
         row.classList.add('km-action-row-recording');
       }
 
-      // Left: key chips
+      // The action names form one aligned column; chords form the centered right column.
+      const textWrap = el('span', 'km-action-text', row);
+      const shortName = deriveShortName(a);
+      el('span', 'km-action-label', textWrap, shortName.toUpperCase());
+      if (a.label.toLowerCase() !== shortName.toLowerCase()) el('span', 'km-action-desc', textWrap, a.label);
       const chips = el('span', 'km-chips', row);
       if (isSel && recording) {
         el('span', 'km-chip km-chip-recording', chips, 'press a key…');
@@ -567,15 +650,6 @@ export function createKeymap(host, keys, options = {}) {
         if (a.shift) el('span', 'km-chip km-chip-mod', chips, '⇧');
         if (a.key) el('span', 'km-chip km-chip-key', chips, displayKey(a.key));
         else el('span', 'km-chip km-chip-unbound', chips, '—');
-      }
-
-      // Middle: action label middot description
-      const textWrap = el('span', 'km-action-text', row);
-      const { label, desc } = getActionLabelAndDesc(a);
-      el('span', 'km-action-label', textWrap, label);
-      if (desc) {
-        el('span', 'km-action-sep', textWrap, ' · ');
-        el('span', 'km-action-desc', textWrap, desc);
       }
 
       // Interaction
@@ -761,7 +835,7 @@ export function createKeymap(host, keys, options = {}) {
       }
 
       // Check for collision with another action
-      const conflict = getActions().find((a) => a.id !== sel.id && isSameChord(a, proposed));
+      const conflict = keys.conflicts(sel.id, proposed)[0];
       const chordStr = formatChord(proposed, platform);
 
       if (conflict) {
@@ -772,10 +846,8 @@ export function createKeymap(host, keys, options = {}) {
           isSameChord(pendingSteal.binding, proposed)
         ) {
           // Second identical press: confirm the steal!
-          try {
-            keys.bind(conflict.id, { key: null, ctrl: false, alt: false, shift: false });
-          } catch (_) {}
-          keys.bind(sel.id, proposed);
+          const result = keys.bind(sel.id, proposed, { steal: true });
+          if (!result.ok) { setStatus(result.reason, true); return; }
           recording = false;
           pendingSteal = null;
           refresh();
@@ -795,7 +867,8 @@ export function createKeymap(host, keys, options = {}) {
 
       // No collision: bind immediately through host API
       pendingSteal = null;
-      keys.bind(sel.id, proposed);
+      const result = keys.bind(sel.id, proposed);
+      if (!result.ok) { setStatus(result.reason, true); return; }
       recording = false;
       refresh();
       setStatus(`“${sel.label}” is now bound to ${chordStr}`);
@@ -806,7 +879,8 @@ export function createKeymap(host, keys, options = {}) {
     if (e.code === 'Escape') {
       e.preventDefault();
       e.stopPropagation();
-      close();
+      if (document.activeElement === searchEl && searchEl.value) { searchEl.value = ''; renderActionsList(); }
+      else close();
     }
   }
 
@@ -834,6 +908,7 @@ export function createKeymap(host, keys, options = {}) {
     if (!root) return false;
     isOpen = true;
     root.hidden = false;
+    place();
     refresh();
     const sel = getSelectedAction();
     setStatus(sel ? `“${sel.label}” selected · press RECORD INPUT to rebind` : 'Ready · tap an action or key to inspect and rebind');
@@ -852,6 +927,7 @@ export function createKeymap(host, keys, options = {}) {
   function destroy() {
     close();
     window.removeEventListener('keydown', onWindowKeyDown, { capture: true });
+    window.removeEventListener('resize', place);
     if (root && root.parentNode) {
       root.parentNode.removeChild(root);
     }
@@ -884,7 +960,7 @@ export function createKeymap(host, keys, options = {}) {
  * Every class used in this module is prefixed with `km-`.  The visual design
  * contract below defines the layout, geometry, typography, and contrast rules:
  *
- * .km-panel                 - Full-panel overlay container filling the host or viewport with a deep frosted glass background (rgba(11, 15, 25, 0.94), backdrop-filter: blur(28px)), dark border, flex column.
+ * .km-panel                 - Draggable MIR glass window, viewport-bounded without blocking the stage outside it.
  * .km-header                - Top title bar flex row with space-between alignment, padding 20px 24px, subtle bottom divider line rgba(255,255,255,0.08).
  * .km-header-titles         - Vertical flex container holding the dim eyebrow and bright headline with a 4px gap.
  * .km-eyebrow               - Uppercase dim letter-spaced kicker text (font-size 11px, font-weight 600, letter-spacing 0.12em, color #94a3b8).
@@ -965,4 +1041,3 @@ export function createKeymap(host, keys, options = {}) {
  * .km-status-conflict       - Amber warning text color (#fbbf24) when a key collision requires confirmation.
  * .km-hint                  - Dim usage guidance hint (font-size 11px, color #64748b, letter-spacing 0.02em).
  * ════════════════════════════════════════════════════════════════════════════════ */
-

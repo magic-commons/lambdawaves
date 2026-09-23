@@ -33,6 +33,7 @@ import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
 import { createExactRenderer } from './render-exact.js';
 import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
+import { bindAction, bindingConflicts, normalizeBinding } from './shortcuts.js';
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
 import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
@@ -74,7 +75,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.2.3-alpha · official defaults and WAVE palette · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.3-alpha.1 · keyboard redesign and camera controls · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -1030,6 +1031,23 @@ export async function boot(dom) {
     }
     return camTravel;
   }
+  /* Key presses add a small orbit to a time-based easing queue. Repeats accumulate while held;
+     a released key finishes its queued travel without leaving a perpetual camera drive. */
+  const keyOrbit = { yaw: 0, pitch: 0 };
+  const keyOrbitMoving = () => Math.abs(keyOrbit.yaw) + Math.abs(keyOrbit.pitch) > 0;
+  function queueKeyOrbit(yaw, pitch) { if (!keyOrbitMoving()) lastWall = performance.now() / 1000;
+    keyOrbit.yaw += yaw; keyOrbit.pitch += pitch; schedule(TIER.PRESENT); }
+  function stepKeyOrbit(dt) {
+    if (!keyOrbitMoving()) return false;
+    const k = 1 - Math.exp(-Math.max(0, dt) / 0.065);
+    const y = Math.abs(keyOrbit.yaw) < 0.00015 ? keyOrbit.yaw : keyOrbit.yaw * k;
+    const p = Math.abs(keyOrbit.pitch) < 0.00015 ? keyOrbit.pitch : keyOrbit.pitch * k;
+    keyOrbit.yaw -= y; keyOrbit.pitch -= p;
+    if (Math.abs(keyOrbit.yaw) < 0.00015) { orbitBy(keyOrbit.yaw, 0); keyOrbit.yaw = 0; }
+    if (Math.abs(keyOrbit.pitch) < 0.00015) { orbitBy(0, keyOrbit.pitch); keyOrbit.pitch = 0; }
+    orbitBy(y, p);
+    return true;
+  }
   /** TURNTABLE ⇄ FREE.  Into FREE is an EXACT conversion and moves no pixel; out of it slerps the roll away. */
   function setCamMode(m, opt) {
     const want = m === 'free' ? 'free' : 'turntable';
@@ -1157,6 +1175,7 @@ export async function boot(dom) {
     if (page.firstDt === null) { page.firstDt = dt; page.firstWall = Math.max(0, now - lastWall); if (dt > 0.5 * clock.rate) page.jumped++; }   // wave 54: the first frame after a resume, kept so the gate can read it rather than infer it
     if (dt !== 0) { tier = Math.max(tier, TIER.EVOLVE); stats.evolves++; winSteps++; }
     if (camLevel.from && camLevelStep(nowMs)) tier = Math.max(tier, TIER.PRESENT);   // wave 54: FREE → TURNTABLE levels the roll, it never snaps
+    if (stepKeyOrbit(Math.min(0.1, Math.max(0, now - lastWall)))) tier = Math.max(tier, TIER.PRESENT);
     if (!dragging && camera.moving) {                                // CAMERA clock: observer only (§12) — the law, never the state
       if (cameraStep(Math.min(0.1, Math.max(0, now - lastWall)))) tier = Math.max(tier, TIER.PRESENT);
     }
@@ -1335,7 +1354,7 @@ export async function boot(dom) {
        quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
        the transport stopped opened the device and then never read it: the meter sat at 0.00, the
        followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
-    if (clock.playing || camera.moving || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // wave 50: while |ω| is above REST too — and a camera at rest schedules NOTHING; wave 52: a running modulation is its own reason to keep the frame; and so is a NON-ZERO ROTATION RATE, which the hand can set on a paused instrument with no modulator running at all — without this clause it would turn exactly once
+    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
     if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
@@ -3635,6 +3654,7 @@ export async function boot(dom) {
     if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
     for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
     for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList', 'keysheet']) add(document.getElementById(id));
+    add(document.querySelector('#keymap .km-panel'));
     const rackRects = [];
     for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
     if (out.length + rackRects.length <= 32) out.push(...rackRects);
@@ -4164,14 +4184,17 @@ export async function boot(dom) {
      * other two in the same tick.  Escape closes it, as it closes the sheet. */
     {
       const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
-      km.setAttribute('role', 'dialog'); km.setAttribute('aria-label', 'the keyboard, and every binding on it');
+      km.setAttribute('aria-label', 'Keyboard shortcuts window');
       let returnFocus = null;
+      const keymapMoved = () => { occludeDirty = true; schedule(TIER.PRESENT); };
       const man = createKeymap(km, {
         get actions() { return __LW_hooks.keys ? __LW_hooks.keys.actions : []; },
-        bind(id, spec) { return __LW_hooks.keys.bind(id, spec); },
+        bind(id, spec, options) { return __LW_hooks.keys.bind(id, spec, options); },
+        conflicts(id, spec) { return __LW_hooks.keys.conflicts(id, spec); },
         reset() { return __LW_hooks.keys.reset(); }
-      }, { onClose() {
+      }, { onMove: keymapMoved, onClose() {
         km.hidden = true;
+        keymapMoved();
         if (returnFocus && returnFocus.isConnected) returnFocus.focus();
       } });
       // The editor owns a second hidden root and its recording lifecycle. Showing only
@@ -4931,6 +4954,19 @@ export async function boot(dom) {
   const stageHasFocus = () => document.activeElement === dom.canvas;
   const setAxis = (a) => { keyState.axis = a; wState.setStatus(keyHelp(), 'live'); };
   const setWhich = (w) => { keyState.which = w; wState.setStatus(keyHelp(), 'live'); };
+  const dolly = (direction, fine) => setDist(direction < 0 ? obs.dist / (1 + 0.1 * fine) : obs.dist * (1 + 0.1 * fine));
+  const pov = (direction, fine) => setFov(2 * Math.atan(Math.tan(obs.fov / 2) * (direction < 0 ? 1 / (1 + 0.1 * fine) : 1 + 0.1 * fine)));
+  /* Preserve the apparent size at the origin: distance × tan(FOV/2) is invariant.
+     When either camera limit is reached, stop the coupled move at that limit. */
+  function dollyZoom(direction, fine) {
+    const invariant = obs.dist * Math.tan(obs.fov / 2);
+    let dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], direction < 0 ? obs.dist / (1 + 0.1 * fine) : obs.dist * (1 + 0.1 * fine)));
+    let fov = 2 * Math.atan(invariant / dist);
+    fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], fov));
+    dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], invariant / Math.tan(fov / 2)));
+    const actual = setDist(dist);
+    if (Math.abs(actual - dist) < 1e-9) setFov(2 * Math.atan(invariant / actual));
+  }
   const ACTIONS = [
     { id: 'play', label: 'play / pause', key: 'Space', run: () => togglePlay() },
     { id: 'fullscreen', label: 'full screen (the browser) / back', key: 'KeyF', run: () => toggleFullscreen() },
@@ -4943,12 +4979,16 @@ export async function boot(dom) {
     { id: 'stepFwd', label: 'step time forward (shift: fine)', key: 'ArrowRight', run: (f) => { clock.step(transport.stepDt() * f); schedule(TIER.EVOLVE); } },
     { id: 'zoomIn', label: 'camera closer', key: 'ArrowUp', run: (f) => { setDist(obs.dist / (1 + 0.12 * f)); } },
     { id: 'zoomOut', label: 'camera farther', key: 'ArrowDown', run: (f) => { setDist(obs.dist * (1 + 0.12 * f)); } },
-    { id: 'yawL', label: 'camera yaw left', key: 'KeyA', run: (f) => { orbitBy(-0.12 * f, 0); schedule(TIER.PRESENT); } },
-    { id: 'yawR', label: 'camera yaw right', key: 'KeyD', run: (f) => { orbitBy(0.12 * f, 0); schedule(TIER.PRESENT); } },
-    { id: 'pitchUp', label: 'camera pitch up', key: 'KeyW', run: (f) => { orbitBy(0, 0.12 * f); schedule(TIER.PRESENT); } },
-    { id: 'pitchDn', label: 'camera pitch down', key: 'KeyS', run: (f) => { orbitBy(0, -0.12 * f); schedule(TIER.PRESENT); } },
-    { id: 'dollyIn', label: 'dolly in', key: 'KeyQ', run: (f) => { obs.dist = Math.max(1.2, obs.dist / (1 + 0.1 * f)); schedule(TIER.PRESENT); } },
-    { id: 'dollyOut', label: 'dolly out', key: 'KeyE', run: (f) => { obs.dist = Math.min(8, obs.dist * (1 + 0.1 * f)); schedule(TIER.PRESENT); } },
+    { id: 'yawL', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0) },
+    { id: 'yawR', label: 'camera yaw right', key: 'KeyD', run: (f) => queueKeyOrbit(0.12 * f, 0) },
+    { id: 'pitchUp', label: 'camera pitch up', key: 'KeyW', run: (f) => queueKeyOrbit(0, 0.12 * f) },
+    { id: 'pitchDn', label: 'camera pitch down', key: 'KeyS', run: (f) => queueKeyOrbit(0, -0.12 * f) },
+    { id: 'dollyIn', label: 'dolly in', key: 'KeyQ', shift: false, run: (f) => dolly(-1, f) },
+    { id: 'dollyOut', label: 'dolly out', key: 'KeyE', shift: false, run: (f) => dolly(1, f) },
+    { id: 'povIn', label: 'POV tighter (field of view)', key: 'KeyQ', shift: true, run: () => pov(-1, 1) },
+    { id: 'povOut', label: 'POV wider (field of view)', key: 'KeyE', shift: true, run: () => pov(1, 1) },
+    { id: 'dollyZoomIn', label: 'dolly zoom in (size held)', key: 'KeyQ', ctrl: true, shift: true, run: () => dollyZoom(-1, 1) },
+    { id: 'dollyZoomOut', label: 'dolly zoom out (size held)', key: 'KeyE', ctrl: true, shift: true, run: () => dollyZoom(1, 1) },
     { id: 'camReset', label: 'reset the camera', key: 'KeyR', run: () => resetView() },
     { id: 'axisX', label: 'rotation axis x', key: 'KeyX', run: () => setAxis('x') },
     { id: 'axisY', label: 'rotation axis y', key: 'KeyY', run: () => setAxis('y') },
@@ -4981,6 +5021,7 @@ export async function boot(dom) {
     { id: 'modBar', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', label: 'undo the last edit to ψ or its law', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
     { id: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => historyApi.redo() },
+    { id: 'redoY', label: 'redo (Ctrl+Y)', key: 'KeyY', ctrl: true, shift: false, run: () => historyApi.redo() },
     { id: 'historyUndo', label: 'return from the last history jump', key: 'KeyZ', ctrl: true, alt: true, shift: false, run: () => historyApi.historyUndo() },
     { id: 'settings', label: 'settings', key: 'Comma', ctrl: true, shift: false, run: () => layout.raise('settings') },
 
@@ -4991,15 +5032,17 @@ export async function boot(dom) {
       run: () => layout.notebook.open('projects') },
   ];
   const DEFAULT_KEYS = Object.fromEntries(ACTIONS.map((a) => [a.id, { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }]));
-  try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) if (ov[a.id]) Object.assign(a, ov[a.id]); } catch (_) {}
+  /* Saved chords pass the same collision/reservation law as a live edit. Old corrupt
+     overrides cannot silently shadow a newer default action. */
+  try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) if (ov[a.id]) bindAction(ACTIONS, a.id, ov[a.id]); } catch (_) {}
   function saveKeys() { try { const ov = {}; for (const a of ACTIONS) { const d = DEFAULT_KEYS[a.id]; if (a.key !== d.key || !!a.ctrl !== d.ctrl || !!a.alt !== d.alt || a.shift !== d.shift) ov[a.id] = { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }; } localStorage.setItem(LS_KEYS, JSON.stringify(ov)); } catch (_) {} }
   const MAC = /Mac|iPhone|iPad/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
-  function keyName(a) { const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/').replace('Comma', ',');
+  function keyName(a) { if (!a.key) return '—'; const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/').replace('Comma', ',');
     const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? (MAC ? '⌥+' : 'Alt+') : '') + (a.shift ? 'Shift+' : '') + k;
     return n === 'Shift+/' ? '?' : n; }
 
   function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
-  let capturing = null;
+  let capturing = null, capturePending = null;
 
 
   function toggleUI() {
@@ -5078,7 +5121,7 @@ export async function boot(dom) {
     if (tag === 'SELECT' && e.code !== 'Space') return;
     if (capturing) {                                               // the KEYS panel is listening for a new binding
       e.preventDefault();
-      if (e.code === 'Escape') { capturing = null; if (ui.keysRefresh) ui.keysRefresh(); return; }
+      if (e.code === 'Escape') { capturing = null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); return; }
       if (['ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(e.code)) return;
       /* WAVE 68 · THE ONE KEY THIS PANEL MAY NOT GIVE AWAY.  Tab off the stage is the browser's (wave
          57's TAB RULE), so an action that is not stage-gated could take the binding and never fire —
@@ -5086,8 +5129,16 @@ export async function boot(dom) {
          the dispatcher's own guard were ever weakened.  Refused here, with the reason, rather than
          accepted and quietly disabled. */
       if (e.code === 'Tab' && !capturing.stage) { const lbl = capturing.label; capturing = null; if (ui.keysRefresh) ui.keysRefresh(); if (ui.keysSay) ui.keysSay('TAB is the browser’s way through the interface and cannot be bound to “' + lbl + '” — only the two window-cycle actions take it, and only while the stage has focus.'); return; }
-      capturing.key = e.code; capturing.ctrl = e.ctrlKey; capturing.alt = e.altKey; if (capturing.shift !== undefined) capturing.shift = e.shiftKey;
-      capturing = null; saveKeys(); if (ui.keysRefresh) ui.keysRefresh();
+      const proposed = { key: e.code, ctrl: !!(e.ctrlKey || e.metaKey), alt: !!e.altKey, shift: !!e.shiftKey };
+      const samePending = capturePending && capturePending.id === capturing.id && JSON.stringify(capturePending.binding) === JSON.stringify(proposed);
+      const result = bindAction(ACTIONS, capturing.id, proposed, { steal: !!samePending });
+      if (!result.ok && result.conflicts) {
+        capturePending = { id: capturing.id, binding: proposed };
+        if (ui.keysSay) ui.keysSay('Shortcut belongs to ' + result.conflicts.map(id => ACTIONS.find(a => a.id === id)?.label || id).join(', ') + '. Press again to reassign, or Escape to cancel.');
+        return;
+      }
+      if (!result.ok) { if (ui.keysSay) ui.keysSay(result.reason); return; }
+      capturing = null; capturePending = null; saveKeys(); if (ui.keysRefresh) ui.keysRefresh();
       return;
     }
     if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape, like the sheet
@@ -5116,7 +5167,6 @@ export async function boot(dom) {
       const own = seatOf(e.target);                                // wave 68: roles, not tags — and never a control that will not act
       if (own && own.has(e.code)) return;
     }
-    if (e.code === 'KeyY' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && history) { e.preventDefault(); historyApi.redo(); return; }   // the alias; the rebindable REDO is in the table
     /* ── WAVE 68 · TWO LAWS THE ACTIONS LOOP HAS TO OBEY BEFORE IT RUNS ANYTHING ──────────────────
      * (1) A HANDLED EVENT IS HANDLED.  `#title`'s own keydown calls preventDefault() on Space and the
      *     loop never asked, so both ran: one press opened the menu and started the physics clock.
@@ -5149,9 +5199,10 @@ export async function boot(dom) {
   });
   __LW_hooks.keys = {
     actions: ACTIONS,
-    bind(id, b) { const a = ACTIONS.find((x) => x.id === id); if (!a) return false; Object.assign(a, b); saveKeys(); if (ui.keysRefresh) ui.keysRefresh(); return true; },
+    bind(id, b, options) { const result = bindAction(ACTIONS, id, b, options); if (result.ok) { saveKeys(); if (ui.keysRefresh) ui.keysRefresh(); } return result; },
+    conflicts(id, b) { const a = ACTIONS.find(x => x.id === id); return a ? bindingConflicts(ACTIONS, id, normalizeBinding(a, b)) : []; },
     reset() { for (const a of ACTIONS) Object.assign(a, DEFAULT_KEYS[a.id]); try { localStorage.removeItem(LS_KEYS); } catch (_) {} if (ui.keysRefresh) ui.keysRefresh(); },
-    name: keyName, capture(id) { capturing = ACTIONS.find((x) => x.id === id) || null; if (ui.keysRefresh) ui.keysRefresh(); }, get capturing() { return capturing ? capturing.id : null },
+    name: keyName, capture(id) { capturing = ACTIONS.find((x) => x.id === id) || null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); }, get capturing() { return capturing ? capturing.id : null },
     /* WAVE 55: the frozen cycle, readable and re-freezable — the ONE road to a stated order rather than a
        gate re-deriving it from the DOM and calling its own guess the law. */
     get tabOrder() { return (tabOrder || []).map((d) => d.dataset.id); },

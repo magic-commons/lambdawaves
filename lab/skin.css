@@ -143,6 +143,11 @@ body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--
 
 body.frost[data-card="refractive"] .dev, body.frost[data-card="refractive"] .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }
 
+/* The keyboard is a dense editor rather than an airy instrument card. Keep its
+   MIR tint and frost, but give the small legends a readable surface in either theme. */
+body[data-card="refractive"] .km-panel.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / .94); }
+body[data-card="tinted"] .km-panel.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
+
 
 body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold #transport { -webkit-backdrop-filter: none; backdrop-filter: none; }
 /* `#floats > .dev { pointer-events: auto }` and `#rack > *` are ID rules (lab.css §55, §2) and a class-only

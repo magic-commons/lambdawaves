@@ -33,6 +33,15 @@ disconnected rack cards all have intentional gaps. A moved or scrolled window
 must schedule a PRESENT even while paused. Run
 `tests/frame-occlusion.browser-test.mjs` after changing this geometry.
 
+The keyboard editor is app-owned (`lab/keymap.js`, `lab/lab.css`), not an
+adopted MIR file. It is a floating MIR-skinned pane, whose occlusion follows
+its drag. `lab/shortcuts.js` is the common law for defaults, saved bindings,
+the Settings recorder and the keyboard editor: reject overlapping chords and
+reserved keys, and only unbind another action after an explicit steal.
+Shift+Q/E adjusts POV; Ctrl+Shift+Q/E is a coupled dolly zoom; WASD orbit is
+eased through the presentation loop. Run `tests/keyboard-shortcuts.test.mjs`
+and `tests/keyboard-window.browser-test.mjs` when changing these controls.
+
 First-run λWAVES preferences are specified in `lab/rack.js` and
 `lab/native-ui.js`: tags, captions, Help and window notes off; hints,
 AUTO SCALE, DOMAIN AUTO and governor on; light/refractive/ALWAYS frost,
