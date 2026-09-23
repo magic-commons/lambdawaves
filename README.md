@@ -11,7 +11,7 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
-**Status: 0.2.1 alpha.** Release preparation and deployment are documented in
+**Status: 0.2.2 alpha.** Release preparation and deployment are documented in
 [`DEPLOY.md`](DEPLOY.md) and [shipping readiness](docs/SHIPPING-READINESS.md).
 
 ---

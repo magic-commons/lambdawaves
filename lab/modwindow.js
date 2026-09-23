@@ -2167,6 +2167,11 @@ export function createModulation(host, port) {
     return (info.preset ? PRESET_LABEL[info.preset] + (info.mirrored ? ' mirrored' : '') : 'CURVE') +
       ' — ' + info.points + ' points, ' + info.bent + ' bent. Right-drag empty space to add; drag dots and handles.';
   }
+  const shapeLabel = (s) => {
+    if (s.shapeMode !== 'curve') return M.WAVE_LABEL[s.wave];
+    const preset = curveInfo(s.points).preset;
+    return preset ? PRESET_LABEL[preset] : 'CURVE';
+  };
 
   const stateOf = (s) => (!s.on ? 'OFF'
     : s.kind === 'env' ? (s.gate ? 'GATE' : s.fired ? (s.releasedAt !== null ? 'REL' : 'RUN') : 'IDLE')
@@ -2347,8 +2352,15 @@ export function createModulation(host, port) {
     svg.addEventListener('pointerup', end);
     svg.addEventListener('pointercancel', end);
     svg.addEventListener('lostpointercapture', end);
+    svg.addEventListener('dblclick', (e) => {
+      const h = hit(local(e));
+      if (curveAction(e, h) !== 'reset-tension') return;
+      e.preventDefault();
+      writeTension(h.i, 0);
+      say(rec, 'tension reset');
+    });
     svg.addEventListener('contextmenu', (e) => e.preventDefault());
-    svg.setAttribute('aria-label', 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it; left-drag a tension handle to bend it; Ctrl makes tension fine; right-click a tension handle resets it; Alt-click a point deletes it.');
+    svg.setAttribute('aria-label', 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it; left-drag a tension handle to bend it; Ctrl makes tension fine; right-click or double-click a tension handle resets it; Alt-click a point deletes it.');
   }
 
   // Each meter is both an input-level display and a response-range editor.
@@ -2700,7 +2712,7 @@ export function createModulation(host, port) {
         dev.bus.textContent = f ? f.label : '--';
         dev.bus.classList.toggle('m2bushit', !!(f && f.hit));   /* a signal binding, not a hand one */
       }
-      if (force && dev.lfoWave) dev.lfoWave.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
+      if (force && dev.lfoWave) dev.lfoWave.textContent = shapeLabel(s);
       if (dev.envStage) dev.envStage.textContent = stateOf(s);
       const outs = outsOf(s);
       if (dev.status) {
@@ -2714,7 +2726,7 @@ export function createModulation(host, port) {
       if (dev.minOut) dev.minOut.textContent = stateOf(s);
       if (force && dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
       if (dev.envMinProgFill) dev.envMinProgFill.style.height = pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0);
-      if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = s.shapeMode === 'curve' ? 'CURVE' : M.WAVE_LABEL[s.wave];
+      if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = shapeLabel(s);
                             dev.compactLfo.macroValue.textContent = heldBy ? heldBy.name : '--'; }
 
 

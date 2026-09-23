@@ -2594,3 +2594,15 @@ still use their one pane. Scrolled-away modulation cards are clipped to the
 run. Movement and scrolling schedule a PRESENT frame even when paused, so the
 mask cannot trail the window. `tests/frame-occlusion.browser-test.mjs` checks
 all three frame modes, a real mouse drag, and detached versus joined cards.
+
+### wave 110: The LFO is editable when it opens
+
+A new LFO now starts on MIR's actual editable SINE breakpoint preset, with its
+SINE button and label selected; it no longer displays an analytic sine while
+asking for a preset before editing. Explicitly selected analytic waves and old
+saved `shapeMode` values remain intact. MIR 1.4.3 also makes a double-click on
+a tension handle reset that segment to zero, for both LFO and ENV, alongside
+right-click. The host asks MIR's shared gesture interpreter, hit-tests in SVG
+coordinates, and repaints immediately while paused. The browser gate drives
+real mouse double-clicks on both kinds of handle; the model gate checks the
+default and a saved-shape round trip.

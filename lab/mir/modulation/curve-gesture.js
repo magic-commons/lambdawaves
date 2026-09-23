@@ -1,4 +1,4 @@
-/* MIR 1.4.2 — the curve editor's pointer law.
+/* MIR 1.4.3 — the curve editor's pointer law.
  *
  * This is FL Studio's envelope-editor workflow, not a look-alike inferred from
  * the drawing:
@@ -7,6 +7,7 @@
  *   left-drag a point       move it (Shift locks value, Ctrl locks time)
  *   left-drag a handle      change tension (Ctrl is fine adjustment)
  *   right-click a handle    reset tension
+ *   double-click a handle   reset tension
  *   Alt-left-click a point  delete it
  *
  * Source: Image-Line's Automation Clips and Fruity Envelope Controller manuals.
@@ -21,6 +22,7 @@ export const CURVE_GESTURES = Object.freeze({
   tension: 'left-drag tension handle',
   fineTension: 'Ctrl + left-drag tension handle',
   resetTension: 'right-click tension handle',
+  resetTensionDouble: 'double-click tension handle',
   deletePoint: 'Alt + left-click point'
 });
 
@@ -66,6 +68,7 @@ export function curveHit(point, points, handles, radius = 20) {
 /** Translate one pointerdown into the one allowed editor action. */
 export function curveAction(event, hit) {
   const h = hit || { kind: null };
+  if (event.type === 'dblclick') return h.kind === 'handle' ? 'reset-tension' : null;
   if (event.button === 2) {
     if (h.kind === 'handle') return 'reset-tension';
     if (h.kind === 'point') return 'point-menu';

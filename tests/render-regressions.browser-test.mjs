@@ -18,6 +18,10 @@ try {
     const id = __LW.mod.addSource('lfo');
     V.sync();
     const svg = document.querySelector('.m2dev[data-id="' + id + '"] .m2svg');
+    const defaultMode = M.sourceOf(id).shapeMode;
+    const defaultPreset = V.shapes(id).find(s => s.name === 'sine').on;
+    M.setSource(id, { wave: 'sine', shapeMode: 'wave' });
+    V.sync();
     const analytic = V.curve(id), p = V.at(id, 0.5, 0.8);
     const send = (type, button, at = p, extra = {}) => svg.dispatchEvent(new PointerEvent(type, {
       bubbles: true, cancelable: true, pointerId: 81, pointerType: 'mouse', button,
@@ -39,13 +43,14 @@ try {
     send('pointerup', 0, { x: handle.x, y: handle.y + 36 });
     const afterTension = M.sourceOf(id).points[i].tension;
     const after = V.curve(id);
-    return { analyticMode: analytic.mode, afterLeft, afterRightMode: afterRight.mode,
+    return { defaultMode, defaultPreset, analyticMode: analytic.mode, afterLeft, afterRightMode: afterRight.mode,
       rightAdded: afterRight.points.length, model: M.sourceOf(id).points.length,
       shiftAddedAtLevel: Math.abs(shifted.v - shiftExpected) < 1e-9,
       tensionMoved: afterTension !== beforeTension, countHeld: M.sourceOf(id).points.length === beforeCount,
       painted: after.points.length, pathChanged: afterRight.sig !== after.sig, errors: __e.slice() };
   `);
-  assert.deepEqual(curve, { analyticMode: 'wave', afterLeft: { mode: 'wave', points: 5 },
+  assert.deepEqual(curve, { defaultMode: 'curve', defaultPreset: true,
+    analyticMode: 'wave', afterLeft: { mode: 'wave', points: 5 },
     afterRightMode: 'curve', rightAdded: 6, model: 7, shiftAddedAtLevel: true, tensionMoved: true, countHeld: true,
     painted: 7, pathChanged: true, errors: [] });
   console.log('PASS FL curve gestures: left-empty is inert, right-empty materializes/adds, Shift-right preserves level, and a handle drag bends without adding');

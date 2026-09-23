@@ -466,9 +466,13 @@ function newMacro(name, opts) {
 }
 
 /** A source's shape, in one object, so 'wave' and 'curve' can never half-apply. */
-function newShape(o) {
+function newShape(o, kind) {
   const wave = (o && WAVES.indexOf(o.wave) >= 0) ? o.wave : 'sine';
-  const mode = (o && o.shapeMode === 'curve') ? 'curve' : 'wave';
+  /* A fresh LFO IS the editable sine preset. Explicit wave/shape fields remain
+     authoritative so old saves, factory patches and requested analytic waves
+     keep their exact meaning. */
+  const explicitShape = o && (Object.hasOwn(o, 'shapeMode') || Object.hasOwn(o, 'wave') || Object.hasOwn(o, 'points'));
+  const mode = (o && o.shapeMode === 'curve') || (kind === 'lfo' && !explicitShape) ? 'curve' : 'wave';
   const points = (o && Array.isArray(o.points) && o.points.length)
     ? normalizePoints(o.points) : presetPoints('sine');
   return { mode, wave, points };
@@ -594,7 +598,7 @@ function audioResetRuntime(s) {
 function newSource(kind, opts) {
   const o = opts || {};
   const id = o.id || ('s' + (++seq.source));
-  const shape = newShape(o);
+  const shape = newShape(o, kind);
   const gate = migrateGate(o, kind !== 'env', null);
   const s = {
     id,

@@ -836,8 +836,31 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
       if (ourMod.indexOf(ours2) < 0) missed.push(i + 1);
       undone = undone.split(ours2).join(theirs);
     }
+    /* MIR 1.4.3 deliberately changes its own model's fresh-LFO default. Undo
+       that small upstream evolution too before comparing with the original
+       MANDELBROT extraction; the adopted-file manifest separately proves the
+       current bytes match MIR's committed source. */
+    const MIR_143 = [
+      [`function newShape(o, kind) {
+  const wave = (o && WAVES.indexOf(o.wave) >= 0) ? o.wave : 'sine';
+  /* A fresh LFO IS the editable sine preset. Explicit wave/shape fields remain
+     authoritative so old saves, factory patches and requested analytic waves
+     keep their exact meaning. */
+  const explicitShape = o && (Object.hasOwn(o, 'shapeMode') || Object.hasOwn(o, 'wave') || Object.hasOwn(o, 'points'));
+  const mode = (o && o.shapeMode === 'curve') || (kind === 'lfo' && !explicitShape) ? 'curve' : 'wave';
+`, `function newShape(o) {
+  const wave = (o && WAVES.indexOf(o.wave) >= 0) ? o.wave : 'sine';
+  const mode = (o && o.shapeMode === 'curve') ? 'curve' : 'wave';
+`],
+      [`  const shape = newShape(o, kind);\n`, `  const shape = newShape(o);\n`]
+    ];
+    for (let i = 0; i < MIR_143.length; i++) {
+      const [current, original] = MIR_143[i];
+      if (!undone.includes(current)) missed.push('MIR 1.4.3/' + (i + 1));
+      undone = undone.replace(current, original);
+    }
     const markers = (ourMod.match(/λWAVES:/g) || []).length;
-    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES: reverse the documented Final II matrix patch, strip the provenance headers, undo the EIGHT marked edits by their exact text, and both files are byte-identical to their sources — the whole port is one storage key, one bipolar flag and the model version that flag made necessary, and an upstream fix is still a patch rather than archaeology',
+    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES: reverse the documented Final II matrix patch, MIR 1.4.3 default-shape change, provenance headers and EIGHT marked edits, and both files are byte-identical to their MANDELBROT sources',
       ourCurve === theirCurve && undone === theirMod && markers === EDITS.length && missed.length === 0,
       { curveIdentical: ourCurve === theirCurve, modIdenticalOnceUndone: undone === theirMod,
         markedEdits: markers, wantEdits: EDITS.length, editsNotFound: missed, modBytes: ourMod.length });

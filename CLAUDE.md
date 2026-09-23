@@ -12,6 +12,10 @@ Shift locks a moved point's value and Ctrl locks its time. Plain left-click on
 empty space is inert. A deterministic analytic wave becomes its equivalent
 editable curve on first edit and must never demand a preset first.
 
+MIR 1.4.3 starts a new LFO on the editable SINE preset. An explicitly chosen
+analytic wave or an older saved source retains its mode. Double-clicking an
+LFO or ENV tension handle resets that segment's tension, as right-click does.
+
 Run `bash test.sh node` and the focused curve/impulse browser regression before
 shipping modulation edits. Keep `tests/render-regressions.browser-test.mjs` as
 the permanent guard against the paused-redraw, scaled-hit-test, and impulse
