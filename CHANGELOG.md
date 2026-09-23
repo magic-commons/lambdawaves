@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.3-alpha.1` — 2026-09-23
+
+Commit `de7bf5c` · wave 112 · 2 commits.
+
+- **wave 112**: A floating MIR keyboard and collision-safe camera controls
+
+<details><summary>commits</summary>
+
+- `bff99b2` 2026-09-23 — CHANGELOG for v0.2.3-alpha
+- `de7bf5c` 2026-09-23 — Redesign floating keyboard and layer camera shortcuts
+
+</details>
+
+---
+
 ## `v0.2.3-alpha` — 2026-09-23
 
 Commit `bd2b335` · wave 111 · 2 commits.
