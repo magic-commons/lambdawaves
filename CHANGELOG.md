@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.2-alpha` — 2026-09-23
+
+Commit `c0fb9f6` · wave 110 · 2 commits.
+
+- **wave 110**: The LFO is editable when it opens
+
+<details><summary>commits</summary>
+
+- `41b1b65` 2026-09-23 — CHANGELOG for v0.2.1-alpha
+- `c0fb9f6` 2026-09-23 — Default LFO to editable sine and reset tension on double-click
+
+</details>
+
+---
+
 ## `v0.2.1-alpha` — 2026-09-23
 
 Commit `4743948` · wave 109 · 2 commits.
