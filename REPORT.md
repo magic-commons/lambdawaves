@@ -2580,3 +2580,17 @@ card is hidden from the ordinary window pickers; a project that saved it as the
 active field owner reveals its controls on load, even if its layout had the card
 closed. The longer MO-REGISTRY switch has its own row at rack width. The browser
 gate checks the visible names, the retired card, and a legacy save round trip.
+
+### wave 109: The frame follows painted windows, not invisible layout boxes
+
+The modulation window's outer `#modwin` box is transparent, but the stage's
+WebGPU line pass treated its whole 1083 × 440 rectangle as opaque. That cut
+LATTICE, BOX, DOTS and the axes out of the gaps between devices, below the
+work bars, and wherever the window was moved. The floating chip rail and
+disconnected rack cards had the same rectangular-mask error. Occlusion now
+uses the actual modulation rail, source cards, work bars and individual chips;
+disconnected rack windows use their head and body surfaces, while joined cards
+still use their one pane. Scrolled-away modulation cards are clipped to the
+run. Movement and scrolling schedule a PRESENT frame even when paused, so the
+mask cannot trail the window. `tests/frame-occlusion.browser-test.mjs` checks
+all three frame modes, a real mouse drag, and detached versus joined cards.

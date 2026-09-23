@@ -74,7 +74,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.2.0-alpha · Molecular Waves · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.1-alpha · frame occlusion hotfix · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -2747,6 +2747,7 @@ export async function boot(dom) {
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     function modDodge(r) {
       occludeDirty = true;
+      schedule(TIER.PRESENT);   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
@@ -3604,26 +3605,45 @@ export async function boot(dom) {
   const floats = document.getElementById('floats');
   /* ── INK STAYS UNDER GLASS (2026-09-11) ─────────────────────────────────────────────────────────
    * The field's frame, axes and slice outline are 1-px lines drawn on the stage; a translucent pane over
-   * the stage showed them as a hairline through a device's title. The line pass now skips every window's
-   * rectangle. Rectangles are gathered here — one layout burst, at most every 300 ms while a frame runs
-   * and at once when something moved — and never inside a paint. */
+   * the stage showed them as a hairline through a device's title. Skip only PAINTED surfaces, not the
+   * transparent layout box around a disconnected card or the modulation constellation. Otherwise the
+   * frame is cut into a moving rectangle wherever that box goes. Rectangles are gathered here — one
+   * layout burst, at most every 300 ms while a frame runs, and never inside a paint. */
   function refreshOcclusion(nowMs) {
     occludeDirty = false; occludeAt = nowMs;
     const cb = dom.canvas.getBoundingClientRect(), out = [], body = document.body;
-    const add = (el) => { if (!el || el.hidden) return; const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
-      const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
-      if (x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height) return; out.push([x0, y0, x1, y1]); };
+    const rect = (el) => { if (!el || el.hidden || getComputedStyle(el).visibility === 'hidden') return null;
+      const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return null;
+      let x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
+      /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
+      if (el.classList.contains('m2dev')) { const clip = el.closest('.m2run')?.getBoundingClientRect();
+        if (clip) { x0 = Math.max(x0, clip.left - cb.left); y0 = Math.max(y0, clip.top - cb.top);
+          x1 = Math.min(x1, clip.right - cb.left); y1 = Math.min(y1, clip.bottom - cb.top); } }
+      return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
+    const add = (el) => { const r = rect(el); if (r) out.push(r); };
+    const disconnected = body.classList.contains('disconnected') && !body.classList.contains('phone');
+    const surfaces = (d) => {
+      if (d.id === 'modwin') return d.querySelectorAll('.m2rail, .m2dev, .m2workbar');
+      if (d.classList.contains('kwin-chiprail')) return d.querySelectorAll('.crail-chip');
+      if (disconnected && d.classList.contains('dev')) return [d.querySelector('.dev-head'), d.querySelector('.dev-body')];
+      return [d];
+    };
     const rackShown = !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek');
     const cards = [];
     if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
-    for (const d of floats.children) if (!d.classList.contains('closed')) add(d);
+    for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
     for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList', 'keysheet']) add(document.getElementById(id));
-    if (out.length + cards.length <= 32) for (const d of cards) add(d); else if (rackShown) { add(rack); add(rackL); }   // past the block's 32 the two columns stand in for their cards
+    const rackRects = [];
+    for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
+    if (out.length + rackRects.length <= 32) out.push(...rackRects);
+    else if (rackShown) { add(rack); add(rackL); }   // past the block's 32 the two columns stand in for their cards
     if (field.setOcclusion(out)) schedule(TIER.PRESENT);
   }
   { const dirty = () => { occludeDirty = true; schedule(TIER.PRESENT); };
     const mo = new MutationObserver(dirty);
     for (const el of [floats, rack, rackL]) if (el) mo.observe(el, { childList: true });
+    /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
+    if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
     for (const id of ['notebook', 'transport', 'sheet', 'rackAddList', 'rackFavList']) { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['style', 'hidden', 'class'] }); }
     new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
@@ -3644,6 +3664,7 @@ export async function boot(dom) {
     const st = floatState.get(d.dataset.id); if (!st) return;
     const [cx, cy] = clampFloat(x, y, st.w);
     st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px'; occludeDirty = true;
+    schedule(TIER.PRESENT);   // detached windows move over a paused canvas too
   }
   const raiseFloat = (d) => { if (!d || !d.classList.contains('floating')) return false; d.style.zIndex = String(++floatZ); return true; };
   const frontFloat = () => { let best = null, z = -1; if (floats) for (const d of floats.querySelectorAll('.dev')) { const q = +d.style.zIndex || 0; if (q > z) { z = q; best = d; } } return best; };
