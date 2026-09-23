@@ -386,7 +386,7 @@ if (!missing.length && !wrong.length && !unexplained.length) {
 rule('V2 · LINKS  (walked over dist/, resolved against the deployment root)');
 const stripJS   = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^[ \t]*\/\/.*$/gm, '');
 const stripHTML = (s) => s.replace(/<!--[\s\S]*?-->/g, ' ');
-const refs = [];                                              // { from, ref, kind: load|link }
+const refs = [];                                              // { from, ref, kind: load|link|base }
 const add = (from, ref, kind) => refs.push({ from, ref, kind });
 
 for (const rel of distFiles.filter((r) => /\.(html|svg)$/i.test(r))) {
@@ -399,7 +399,9 @@ for (const rel of distFiles.filter((r) => /\.js$/i.test(r) && r !== at('sw.js'))
   for (const m of src.matchAll(/\bimport\s+(?:[^'";]*?\bfrom\s*)?['"]([^'"]+)['"]/g)) add(rel, m[1], 'load');
   for (const m of src.matchAll(/\bexport\s+[^'";]*?\bfrom\s*['"]([^'"]+)['"]/g)) add(rel, m[1], 'load');
   for (const m of src.matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]/g)) add(rel, m[1], 'load');
-  for (const m of src.matchAll(/new URL\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url/g)) add(rel, m[1], 'load');
+  // A trailing-slash URL may be a base for later resource paths. It is not
+  // fetched itself, so verify that the directory has shipped contents.
+  for (const m of src.matchAll(/new URL\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url/g)) add(rel, m[1], m[1].endsWith('/') ? 'base' : 'load');
   /* HTML built in JS strings — this is where the three site-root links (/LICENSE, /NOTICE, /REPORT.md) lived. */
   for (const m of src.matchAll(/href=\\?["']([^"'\\ >]+)/g)) add(rel, m[1], 'link');
 }
@@ -436,6 +438,12 @@ for (const { from, ref, kind } of refs) {
   const root = clean.startsWith('/');
   let target = root ? clean.slice(1) : path.posix.normalize(path.posix.join(path.posix.dirname(from), clean));
   if (target.startsWith('..')) { escaped.add(`dist/${from} → ${ref}  (climbs above the deployment root)`); continue; }
+  if (kind === 'base') {
+    const prefix = target.endsWith('/') ? target : target + '/';
+    if (![...inDist].some((file) => file.startsWith(prefix)))
+      dangling.add(`dist/${from} → ${ref}  [base]  (no shipped file under dist/${prefix})`);
+    continue;
+  }
   /* A reference to a DIRECTORY — the manifest's start_url and scope are "./" — is a request for that
      directory's index.html, which is what the asset server returns under html_handling and what the
      worker's navigate arm serves. */
