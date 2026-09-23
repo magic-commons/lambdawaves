@@ -74,7 +74,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = 'PRE-ALPHA · waves 5–107 · 2026-09-07';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.0-alpha · Molecular Waves · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -2419,15 +2419,19 @@ export async function boot(dom) {
   const qcd = createQCD(wQCD.body, { repaint() { schedule(TIER.PRESENT); }, onParams(kind, pot, p) { if (HAMILTONIANS.cornell.configure(kind, p, pot) && getHamiltonian().id === 'cornell') switchHamiltonian('cornell'); } });
 
   // MOLECULE — H₂⁺ in the 1s LCAO basis: the field is handed to two protons and one electron
-  const wMol = device({ id: 'molecule', eyebrow: 'MOLECULE', status: '' });
+  const wMol = device({ id: 'molecule', eyebrow: 'H₂⁺ · LEGACY', status: '' });
   if (useCompactDefaults) wMol.root.classList.add('closed');   // do not paint the 200-point energy plot behind first-visit furniture
+  // Retain its stable id, model and save record for old H₂⁺ projects. The newer
+  // molecular instrument is the visible MOLECULES card; an active legacy project
+  // reveals this card so its field owner still has a reachable OFF switch.
+  wMol.root.hidden = true;
   rack.appendChild(wMol.root);
   let moPanel = null, pulsePanel = null;                               // W-MO: the general basis block, and W-PULSE below it
   let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
   let restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
   let molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
   let orbitals = null, states = null, register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
-  const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v && chem && chem.on) chem.setOn(false); moleculeMode(v); },
+  const molecule = createMolecule(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, setOn(v) { if (v) { wMol.root.hidden = false; wMol.root.classList.remove('closed'); if (chem && chem.on) chem.setOn(false); } moleculeMode(v); },
     onR(v, sync) { if (moPanel) moPanel.setR(v, sync); } });           // one R for both blocks: the knob and the API move the force line too
   moPanel = createMOPanel(wMol.body, { repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }, active: () => canPresent(wMol), loading: cardLoading(wMol, 'basis') });
 
@@ -2470,7 +2474,7 @@ export async function boot(dom) {
      let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
   molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
-  const wChem = device({ id: 'chem', eyebrow: 'CHEMISTRY', title: 'RHF · real time', status: '' });
+  const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // a first visit must not pay for a 7-AO solve behind furniture
   rack.appendChild(wChem.root);
   chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'),
@@ -2487,7 +2491,7 @@ export async function boot(dom) {
      is where a molecule's `arg` lives (MATH-H2O-2026-09-11, Proposition 1).  It is NOT a sixth field owner: it does
      not upload a molecule and it does not touch moleculeMode() — CHEMISTRY owns the shells and this window owns the
      matrix while REGISTER ON is up, so it stays visible and usable exactly when CHEMISTRY is on. */
-  const wOrbs = device({ id: 'orbitals', eyebrow: 'REGISTER', title: 'molecular register', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
+  const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps: no solve behind furniture
   rack.appendChild(wOrbs.root);
   register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
@@ -2659,7 +2663,7 @@ export async function boot(dom) {
       { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (chem ? chem.knobs.kick() : null),
         hint: 'the δ-kick strength the next KICK will use — linear response wants the smallest κ the trace can carry',
         get: () => (chem ? chem.kappa : 1e-3), set: (v) => { if (chem) { chem.setKappa(v); setKnob(chem.knobs.kick(), chem.kappa); } } },
-      { id: 'chem.speed', label: 'CHEM SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (chem ? chem.knobs.speed() : null),
+      { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (chem ? chem.knobs.speed() : null),
         hint: 'real-time propagation steps asked of the worker each frame',
         get: () => (chem ? chem.speed : 10), set: (v) => { if (chem) { chem.setSpeed(v); setKnob(chem.knobs.speed(), chem.speed); } } },
       /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
@@ -3814,7 +3818,7 @@ export async function boot(dom) {
     /** reopen a closed window into a rack (default: the one it was in) */
     reopen(id, side) {
       const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (!dev) return false;
-      dev.classList.remove('closed'); const host = side === 'L' ? rackL : side === 'R' ? rack : dev.parentElement || rack;
+      dev.hidden = false; dev.classList.remove('closed'); const host = side === 'L' ? rackL : side === 'R' ? rack : dev.parentElement || rack;
       const first = host.querySelector('.dev'); if (first) host.insertBefore(dev, first); else host.appendChild(dev);
       enterWindow(dev);
       dev.dispatchEvent(new CustomEvent('devopen'));
@@ -4049,7 +4053,7 @@ export async function boot(dom) {
 
 
         WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
-          ...[...document.querySelectorAll('.dev')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
+          ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
         ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('keysheet'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
@@ -4227,7 +4231,7 @@ export async function boot(dom) {
             return new Set(best.cards.filter((c) => !c.closed).map((c) => c.id));
           })();
           const nameOf = (d) => (d.querySelector('.dev-eyebrow').textContent || d.dataset.id || '').trim();
-          const closed = [...document.querySelectorAll('.dev.closed')]
+          const closed = [...document.querySelectorAll('.dev.closed:not([hidden])')]
             .sort((a, b) => nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' }));
           if (!closed.length) el('div', 'rack-add-none', list, 'nothing is closed — × on a window closes it');
           for (const d of closed) {
@@ -5337,6 +5341,9 @@ export async function boot(dom) {
         if (pr.ab && ui.ab) ui.ab.set(pr.ab);
         if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w)) layout.notebookResize(pr.notebook.w, pr.notebook.h);
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
+        // A legacy H₂⁺ file can carry a closed old layout and an active field
+        // owner. Keep its controls reachable after applying that layout.
+        if (molecule.on) { wMol.root.hidden = false; wMol.root.classList.remove('closed'); }
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         // Restore operator rates AFTER the destination scale is installed. The old project's

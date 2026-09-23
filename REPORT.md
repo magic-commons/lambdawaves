@@ -2570,3 +2570,13 @@ Gate: `./test.sh all` — node 0, browser 0, 1067 passing lines, 0 red.
 The commissioner's report: the arc is not aligned with the knob, small dials are everywhere, and there is no easy way to take a macro off. Cause: the kit seats a range dial beside every routed dial and slides the dial 10 px left to make room (`lab/mir/modulation/modhost.css`), so the dial and its arc sat off-centre under the label and the small dial covered the right of the arc; removal was a double-tap or a 450 ms hold on an 8-px ring band. The kit is not edited. `lab/lab.css` out-ranks it by one `:root` and `lab/modwindow.js` adds the behaviour: a routed dial stays centred; only the control the hand last touched wears its range dial and a ×; a held press or a right-click on the dial itself opens the pop-over (REMOVE, REMOVE ALL, RESET); the × removes the selected macro's route. The REGISTER's lane phase needles are re-tagged as drop targets whenever lanes are rebuilt. Gate: `tests/routed-knob.browser-test.mjs`, real pointer events. The upstream home of this fix is MIR.
 
 Gate: `./test.sh all` — node 0, browser 0, 1072 passing lines, 0 red.
+
+### wave 108: MOLECULAR WAVES becomes the 0.2.0 alpha release, with one visible molecule window
+
+The newer RHF and real-time card is named MOLECULES. The ORBITAL | STATES window is
+MO-REGISTRY. Their saved window IDs (`chem`, `orbitals`), modulation target IDs,
+`reg-*` and `mol-*` CSS hooks, and project records stay in place. The earlier H₂⁺
+card is hidden from the ordinary window pickers; a project that saved it as the
+active field owner reveals its controls on load, even if its layout had the card
+closed. The longer MO-REGISTRY switch has its own row at rack width. The browser
+gate checks the visible names, the retired card, and a legacy save round trip.

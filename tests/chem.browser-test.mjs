@@ -47,7 +47,7 @@ try {
   judge('L0 boot: __LW.ready', ready.ok === 1, ready);
   const boot = await g.ev(`return { errs: window.__e.slice(), gpu: __LW.field.error || null, dirty: __LW.layout.projects.dirty,
     card: !!document.querySelector('.dev[data-id="chem"]'), eyebrow: document.querySelector('.dev[data-id="chem"] .dev-eyebrow').textContent };`);
-  judge('L0 boot: no page error, CHEMISTRY window present', boot.errs.length === 0 && boot.card && boot.eyebrow === 'CHEMISTRY', boot);
+  judge('L0 boot: no page error, MOLECULES window present', boot.errs.length === 0 && boot.card && boot.eyebrow === 'MOLECULES', boot);
 
   /* ── LAW 1 · H₂O: the ground state, the first RPA root, and the kernel on the grid ──────────── */
   const l1 = await g.ev(`__LW.layout.reopen('chem','R');

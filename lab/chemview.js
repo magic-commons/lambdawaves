@@ -74,7 +74,7 @@ export function createChem(host, api) {
   }
   /* ── the rows ─────────────────────────────────────────────────────────────────────────────────── */
   const r0 = el('div', 'row tight', host);
-  const onSw = sw({ label: 'CHEM ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
+  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
   r0.appendChild(onSw.root);
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
    * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
@@ -290,7 +290,7 @@ export function createChem(host, api) {
     running = next; runSw.set(running);
     /* the RUN switch IS the tdhf model's claim: while it is up the run outranks the register and the still card,
        and when it goes down the session hands the field to whoever is next, in one place, by rank */
-    if (S()) S().claim('tdhf', running, 'CHEMISTRY RT RUN is propagating the density');
+    if (S()) S().claim('tdhf', running, 'MOLECULES RT RUN is propagating the density');
     if (running && !rt) kick();
     refresh(); return running;
   }
@@ -608,7 +608,7 @@ export function createChem(host, api) {
     /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
        even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the
        observable the user had before any molecule took it */
-    if (S()) S().claim('ground', on, 'CHEMISTRY has the field: the card’s own view');
+    if (S()) S().claim('ground', on, 'MOLECULES has the field: the card’s own view');
     if (on && sol) pushField();
     else if (on) solve(preset);
     return on;

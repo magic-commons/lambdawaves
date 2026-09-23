@@ -59,8 +59,8 @@ export function createOrbitals(host, api) {
   clrBtn.title = 'Empty the register (c ↦ 0 for every orbital)';
   const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORM';
   nrmBtn.title = 'Renormalise the register so Σ|c|² = 1';
-  const onSw = sw({ label: 'REGISTER ON', value: false, cls: 'orb-on',
-    title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — CHEMISTRY must be ON and not running',
+  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on',
+    title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — MOLECULES must be ON and not running',
     onChange: (v) => { setOn(v); } });
   head.appendChild(onSw.root);
 
@@ -111,10 +111,10 @@ export function createOrbitals(host, api) {
   const roSum = readout({ label: '<m>Σ|c|²</m>', value: '—', sub: '' });
   const roPsi = readout({ label: '<m>ψ(t)</m>', cls: 'wide', value: '—', sub: LAW });
   for (const r of [roGap, roBeat, roSum, roPsi]) rr.appendChild(r.root);
-  el('div', 'note', host).innerHTML = '<b>Model.</b> The one-electron register over CHEMISTRY’s canonical orbitals: '
+  el('div', 'note', host).innerHTML = '<b>Model.</b> The one-electron register over MOLECULES’ canonical orbitals: '
     + '<m>ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k(r)</m> with <m>φ_k = Σ_μ C_μk χ_μ</m> — hydrogen’s register with the molecule’s ladder. '
     + 'The ladder is <b>frozen</b>: a HOMO + LUMO pair beats at the Koopmans gap <m>Δε</m>, not at the RPA excitation <m>ω</m> the '
-    + 'CHEMISTRY sticks stand at. Occupancies are the ground state’s; putting a virtual orbital in the register does not excite the molecule, '
+    + 'MOLECULES sticks stand at. Occupancies are the ground state’s; putting a virtual orbital in the register does not excite the molecule, '
     + 'it asks what one electron in that superposition would look like. The field shows <m>arg ψ</m> in PHASE and <m>|ψ|²</m> in DENSITY.';
 
   /* ── the register ─────────────────────────────────────────────────────────────────────────────── */
@@ -190,11 +190,11 @@ export function createOrbitals(host, api) {
    *  object and cache it for 200 ms to keep that allocation off the frame loop. */
   function refusal() {
     const c = C();
-    if (!c) return 'no CHEMISTRY window';
-    if (!c.on) return 'CHEMISTRY OFF: the register needs its molecule on the field';
+    if (!c) return 'no MOLECULES window';
+    if (!c.on) return 'MOLECULES OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
     const s = S();
-    if (s && s.claimed('tdhf')) return 'CHEMISTRY RT RUN has the field: stop the run to take it';
+    if (s && s.claimed('tdhf')) return 'MOLECULES RT RUN has the field: stop the run to take it';
     const f = F();
     if (!f || !f.ok) return 'no WebGPU field';
     if (!f.molecular) return 'the field is not molecular yet';
@@ -232,7 +232,7 @@ export function createOrbitals(host, api) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('register off — ' + why, 'warn'); return false; }
+      if (why) { onSw.set(false); status('MO-REGISTRY off — ' + why, 'warn'); return false; }
       on = true; onSw.set(true);
       pushedT = NaN; pushedV = -1;
       /* the claim is the whole handover: the session selects this model, asks for `phase`, and calls push() */
@@ -242,7 +242,7 @@ export function createOrbitals(host, api) {
       pushedT = NaN; pushedV = -1;
       /* and letting go is the same act in reverse: the session hands the field to the next model by RANK — the
          card if it is on, the user's own observable if nothing claims it — never by guessing a view here */
-      if (S()) S().claim('orbital-packet', false, 'REGISTER OFF');
+      if (S()) S().claim('orbital-packet', false, 'MO-REGISTRY OFF');
       api.repaint();
     } else { onSw.set(on); }
     refresh();
@@ -291,7 +291,7 @@ export function createOrbitals(host, api) {
     if (!sol) {
       for (const r of [roGap, roBeat, roSum, roPsi]) { r.set('—', ''); }
       roPsi.setSub(LAW);
-      status('no molecule solved yet — CHEMISTRY solves the ladder this register runs on', 'warn');
+      status('no molecule solved yet — MOLECULES solves the ladder this register runs on', 'warn');
       return;
     }
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
@@ -305,8 +305,8 @@ export function createOrbitals(host, api) {
     roSum.set(sel.size ? s.toFixed(6) : '—', sel.size ? (Math.abs(s - 1) < 1e-9 ? 'ok' : 'warn') : '');
     roSum.setSub(`${sel.size} of ${sol.nAO} orbitals · ${sol.nocc} occupied · NORM sets this to 1`);
     const why = refusal();
-    status(on ? `register ON · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
-      : why ? 'register off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · REGISTER ON gives the field arg ψ`,
+    status(on ? `MO-REGISTRY ON · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
+      : why ? 'MO-REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · MO-REGISTRY ON gives the field arg ψ`,
       on ? 'live' : why ? 'warn' : 'ok');
     paintPsi(pushedT);
   }
@@ -363,7 +363,7 @@ export function createOrbitals(host, api) {
     const rows = rowsOf();
     if (!rows.length) {
       g.fillStyle = T.ink(0.85); g.textAlign = 'center';
-      g.fillText('no molecule solved — CHEMISTRY solves the ladder this register runs on', W / 2, H / 2);
+      g.fillText('no molecule solved — MOLECULES solves the ladder this register runs on', W / 2, H / 2);
       hover.set([], plot); return;
     }
     /* the soft-capped y map, by ROW index: to scale up to 3 × the median gap, clamped beyond it */
@@ -448,7 +448,7 @@ export function createOrbitals(host, api) {
     if (!ensureSub()) return false;
     if (!on) { if (active) paintPsi(t); return false; }
     const why = refusal();
-    if (why) { status('register off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (why) { status('MO-REGISTRY off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
     const moved = push(t);
     if (active) paintPsi(t);
     return moved;

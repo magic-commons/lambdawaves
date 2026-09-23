@@ -74,8 +74,8 @@ export function createStates(host, api) {
   const hideBtn = mk('HIDE', 'Hide or show the lanes');
   const clrBtn = mk('CLEAR', 'Empty the register: S₀ alone');
   const nrmBtn = mk('NORM', 'Renormalise the register so Σ|b|² = 1');
-  const onSw = sw({ label: 'REGISTER ON', value: false, cls: 'orb-on',
-    title: 'Give the field this register’s many-electron state — CHEMISTRY must be ON and not running a real-time propagation',
+  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on',
+    title: 'Give the field this register’s many-electron state — MOLECULES must be ON and not running a real-time propagation',
     onChange: (v) => { setOn(v); } });
   head.appendChild(onSw.root);
 
@@ -211,7 +211,7 @@ export function createStates(host, api) {
   function setAmp(key, v) { const c = lanes.get(key); if (!c) return; c.amp = Math.max(0, Math.min(1, v)); touch(); paint(); refresh(); publishPopulations(); api.repaint(); }
   function setPhase(key, v) { const c = lanes.get(key); if (!c) return; c.phase = ((v % TAU) + TAU) % TAU; touch(); refresh(); api.repaint(); }
   function preset(name) {
-    if (!ladder) { status('no state ladder yet — CHEMISTRY solves it', 'warn'); return false; }
+    if (!ladder) { status('no state ladder yet — MOLECULES solves it', 'warn'); return false; }
     const P = presetLanes(name, ladder, { lanes: LANE_CAP });
     if (!P.lanes) { status(`${name}: ${P.why}`, 'warn'); return false; }
     lanes.clear();
@@ -258,12 +258,12 @@ export function createStates(host, api) {
   /* ── the field ────────────────────────────────────────────────────────────────────────────────── */
   function refusal() {
     const c = C(), s = S();
-    if (!c) return 'no CHEMISTRY window';
-    if (!c.on) return 'CHEMISTRY OFF: the register needs its molecule on the field';
+    if (!c) return 'no MOLECULES window';
+    if (!c.on) return 'MOLECULES OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
     if (!ladder || !model) return 'the state ladder is still being solved';
     if (!s) return 'no molecular session';
-    if (s.claimed('tdhf')) return 'CHEMISTRY RT RUN has the field: stop the run to take it';
+    if (s.claimed('tdhf')) return 'MOLECULES RT RUN has the field: stop the run to take it';
     return null;
   }
   function push(t, force) {
@@ -289,14 +289,14 @@ export function createStates(host, api) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('register off — ' + why, 'warn'); return false; }
+      if (why) { onSw.set(false); status('MO-REGISTRY off — ' + why, 'warn'); return false; }
       on = true; onSw.set(true); pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
       if (S()) S().claim('states', true, 'the STATES register has the field');
     } else if (!want && on) {
       if (drive.on) setDrive(false);
       on = false; onSw.set(false); pushedT = NaN; pushedV = -1;
-      if (S()) S().claim('states', false, 'REGISTER OFF');
+      if (S()) S().claim('states', false, 'MO-REGISTRY OFF');
       api.repaint();
     } else onSw.set(on);
     refresh(); publishPopulations();
@@ -480,7 +480,7 @@ export function createStates(host, api) {
   function refresh() {
     if (!sol || !ladder) {
       for (const r of [roSum, roBeat, roMu]) r.set('—', ''); roMu.setSub(LAW);
-      status(sol ? 'the state ladder is on its way — CHEMISTRY’s spectrum comes first' : 'no molecule solved yet — CHEMISTRY solves the ladder this register runs on', 'warn');
+      status(sol ? 'the state ladder is on its way — MOLECULES’ spectrum comes first' : 'no molecule solved yet — MOLECULES solves the ladder this register runs on', 'warn');
       return;
     }
     const s = sum2();
@@ -494,8 +494,8 @@ export function createStates(host, api) {
     roBeat.set(b ? `${b.period.toFixed(3)} a.u. = ${(b.period * AU_TIME_AS).toFixed(1)} as` : '—', b ? 'ok' : '');
     roBeat.setSub(b ? `${label(b.a)} × ${label(b.b)} · ΔE ${b.dE.toFixed(6)} Eh` + (beats.length > 1 ? ` · ${beats.length - 1} more beat${beats.length > 2 ? 's' : ''}` : '') : 'one level has no beat: add a state');
     const why = refusal();
-    status(on ? `register ON · ${morphOn ? 'MORPH A ↔ B' : lanes.size + ' lane' + (lanes.size === 1 ? '' : 's')} · ${LAW}`
-      : why ? 'register off — ' + why : `${ladder.count} states · REGISTER ON plays the many-electron state`, on ? 'live' : why ? 'warn' : 'ok');
+    status(on ? `MO-REGISTRY ON · ${morphOn ? 'MORPH A ↔ B' : lanes.size + ' lane' + (lanes.size === 1 ? '' : 's')} · ${LAW}`
+      : why ? 'MO-REGISTRY off — ' + why : `${ladder.count} states · MO-REGISTRY ON plays the many-electron state`, on ? 'live' : why ? 'warn' : 'ok');
   }
   function paintMu(t) {
     const ms = performance.now(); if (ms - roWall < 200) return; roWall = ms;
@@ -527,7 +527,7 @@ export function createStates(host, api) {
     const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const T = themeInk(g), left = 44, right = W - 8, top0 = 10, bot = H - 15, plot = { x0: left, y0: top0, x1: right, y1: bot };
     hovers = []; hits = []; g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
-    if (!ladder) { g.fillStyle = T.ink(0.85); g.textAlign = 'center'; g.fillText(sol ? 'the state ladder is on its way…' : 'no molecule solved — CHEMISTRY solves this ladder', W / 2, H / 2); hover.set([], plot); return; }
+    if (!ladder) { g.fillStyle = T.ink(0.85); g.textAlign = 'center'; g.fillText(sol ? 'the state ladder is on its way…' : 'no molecule solved — MOLECULES solves this ladder', W / 2, H / 2); hover.set([], plot); return; }
     const lv = levels(), ys = softCapLevels(lv.map((l) => l.E)), n2 = sum2() || 1;
     let fMax = 0; for (let k = 0; k < ladder.count; k++) fMax = Math.max(fMax, ladder.f[k]);
     const used = []; g.textAlign = 'right';
@@ -628,7 +628,7 @@ export function createStates(host, api) {
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
-    if (why) { status('register off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (why) { status('MO-REGISTRY off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
     if (!Number.isFinite(t)) t = 0;
     if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }
     const moved = push(t);

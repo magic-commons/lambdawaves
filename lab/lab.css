@@ -416,11 +416,13 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
   border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); color: var(--ink-key); font-size: 13px; line-height: 1; cursor: pointer; }
 .k.ring-focus > .k-route-x { display: grid; place-items: center; }
 .k-route-x:hover, .k-route-x:active { color: var(--bad); }
-/* THE REGISTER WINDOW (registerview.js + statesview.js): the mode switch, the ladder beside its dipole scope, the A/B bar */
+/* MO-REGISTRY (registerview.js + statesview.js): keep the stable reg-* hooks used by both modes. */
 .reg-mode { margin-bottom: var(--sp-2); }
 .reg-mode .segw { flex: 1 1 auto; }
 .reg-pane[hidden] { display: none; }
 .reg-pane > * + * { margin-top: var(--sp-2); }
+.reg-pane .sp-head { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reg-pane .sp-head > .sw { grid-column: 1 / -1; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }

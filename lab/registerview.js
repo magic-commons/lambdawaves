@@ -16,7 +16,7 @@ import { createStates } from './statesview.js';
 export function createRegister(host, api) {
   let mode = 'orbital';
   const bar = el('div', 'row tight reg-mode', host);
-  const modeSeg = seg({ label: 'REGISTER', value: mode, options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
+  const modeSeg = seg({ label: 'MO-REGISTRY', value: mode, options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
     onChange: (v) => setMode(v) });
   modeSeg.root.title = 'ORBITAL: one electron over the molecule’s orbitals — it has a phase, and beats at orbital gaps. '
     + 'STATES: the whole molecule over its ground and excited states — it beats where the spectrum’s sticks stand.';

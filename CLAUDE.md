@@ -16,3 +16,8 @@ Run `bash test.sh node` and the focused curve/impulse browser regression before
 shipping modulation edits. Keep `tests/render-regressions.browser-test.mjs` as
 the permanent guard against the paused-redraw, scaled-hit-test, and impulse
 overlay regressions.
+
+The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
+(`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
+and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
+at startup but must be shown if an older project restores it as field owner.

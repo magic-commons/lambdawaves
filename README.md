@@ -11,7 +11,7 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
-**Status: pre-alpha.** Release preparation and deployment are documented in
+**Status: 0.2.0 alpha.** Release preparation and deployment are documented in
 [`DEPLOY.md`](DEPLOY.md) and [shipping readiness](docs/SHIPPING-READINESS.md).
 
 ---
@@ -74,7 +74,7 @@ presenter draws density, phase, Re ψ, Im ψ or a difference. The measured throu
 closed form to 2e-5.
 
 Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, SLICE,
-KEPLER, VORTEX, MOLECULE, WIGNER, RADIATION, …), a transport with four clocks, a
+KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with four clocks, a
 modulation plug-in with drag-to-patch macros, presets, projects, shareable state links,
 and an offline-capable PWA.
 
@@ -140,8 +140,7 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 |---|---|
 | **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
-| **Physics (the release)** | Hydrogen only, n ≤ 6, exact diagonal evolution. No molecules beyond the H₂ / H₂⁺ model cards, no ab initio, no spin. |
-| **Physics (this branch, `dev`, unreleased)** | The above, plus ab initio molecules: restricted Hartree–Fock in a vendored Gaussian basis (STO-3G for H–Kr, 6-31+G\* for small H, C, N, O, F molecules) at fixed nuclei, 52 molecules up to benzene, each energy checked against PySCF; RPA and TDA spectra; real-time TDHF; and the REGISTER window, which plays the molecule as a superposition of its ground and excited states (time-dependent CIS), drives it with a field, and shows its current. Closed shells only: no open shells, no correlation beyond singles, no moving nuclei. See `REPORT.md`, 2026-09-18. |
+| **Physics (the release)** | Exact hydrogen (n ≤ 6), plus MOLECULES: restricted Hartree–Fock with vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for small H, C, N, O, F molecules), 54 library entries with 52 enabled, RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Closed shells and fixed nuclei only; no correlation beyond singles. The earlier H₂⁺ card remains available to projects that use it. See `REPORT.md`, 2026-09-18. |
 | **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
 
 ## Accessibility
