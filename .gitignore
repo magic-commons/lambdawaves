@@ -22,3 +22,6 @@ dist/
 *.p12
 *.pfx
 __pycache__/
+shells/electron/out/
+# Store trailer/screenshot raw material (21 MB of .mkv), kept beside the repo, never in it.
+LANDING PAGE VIDEOS/
