@@ -138,7 +138,7 @@ const NOT_PRECACHED = (labRel) =>
   labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'vendor/katex/LICENSE';
 
 /* Deploy-only files: correctly absent from the precache, because they are not in lab/ at all. */
-const DEPLOY_ONLY = new Set(['_headers', '_redirects', 'robots.txt', ...SHIP_EXTRA.map(([f]) => at(f))]);
+const DEPLOY_ONLY = new Set(['_headers', '_redirects', 'robots.txt', '.well-known/assetlinks.json', ...SHIP_EXTRA.map(([f]) => at(f))]);
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const problems = [];
@@ -197,6 +197,8 @@ for (const [file] of SHIP_EXTRA) {
   mkdirSync(path.dirname(dst), { recursive: true });
   copyFileSync(path.join(ROOT, file), dst);
 }
+mkdirSync(path.join(DIST, '.well-known'), { recursive: true });   // Android TWA: Digital Asset Links, origin root
+copyFileSync(path.join(ROOT, 'shells/android/assetlinks.json'), path.join(DIST, '.well-known/assetlinks.json'));
 console.log(`lab/ → dist/${SITE} : ${labFiles.length - dropped.size} files`);
 for (const [f, why] of DROP)       console.log(`  dropped  ${f.padEnd(16)} ${QUIET ? '' : why}`);
 for (const [f, why] of SHIP_EXTRA) console.log(`  added    ${f.padEnd(16)} ${QUIET ? '' : why}`);
