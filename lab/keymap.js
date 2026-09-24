@@ -272,9 +272,7 @@ export function createKeymap(host, keys, options = {}) {
   const header = el('div', 'km-header', root);
   el('span', 'km-drag-mark', header, '⠿').setAttribute('aria-hidden', 'true');
   const titles = el('div', 'km-header-titles', header);
-  el('div', 'km-eyebrow', titles, 'λWAVES · CONTROLS');
   el('h2', 'km-title', titles, 'KEYBOARD');
-  el('span', 'km-header-hint', header, 'DRAG TO MOVE');
 
   const closeBtn = el('button', 'km-close', header, '×');
   closeBtn.type = 'button';
@@ -326,22 +324,9 @@ export function createKeymap(host, keys, options = {}) {
   // Left Column: Keyboard Layout
   const colLeft = el('div', 'km-col km-col-left', cols);
   const leftHeader = el('div', 'km-col-header', colLeft);
-  el('span', 'km-col-title', leftHeader, 'KEYBOARD LAYOUT');
 
-  // Platform Segmented Switch
-  const switchBox = el('div', 'km-platform-switch', leftHeader);
-  const btnMac = el('button', 'km-platform-btn', switchBox, 'MAC / IPAD');
-  btnMac.type = 'button';
-  btnMac.setAttribute('aria-label', 'Show Mac / iPad modifier names (⌘ and ⌥)');
-  btnMac.addEventListener('click', () => setPlatform('mac'));
-
-  const btnWin = el('button', 'km-platform-btn', switchBox, 'WINDOWS');
-  btnWin.type = 'button';
-  btnWin.setAttribute('aria-label', 'Show Windows modifier names (Ctrl and Alt)');
-  btnWin.addEventListener('click', () => setPlatform('windows'));
-
-  // Legend
-  const legend = el('div', 'km-legend', colLeft);
+  // A single low chrome row: legend first, platform marks at the far edge.
+  const legend = el('div', 'km-legend', leftHeader);
   el('span', 'km-legend-dot km-legend-active', legend);
   el('span', 'km-legend-text', legend, 'Active');
   el('span', 'km-legend-dot km-legend-unbound', legend);
@@ -351,14 +336,46 @@ export function createKeymap(host, keys, options = {}) {
   el('span', 'km-legend-ctrl-sample', legend, '⌃');
   el('span', 'km-legend-text', legend, 'Ctrl / ⌘');
 
+  const switchBox = el('div', 'km-platform-switch', leftHeader);
+  const btnMac = el('button', 'km-platform-btn', switchBox);
+  btnMac.type = 'button';
+  btnMac.title = 'Mac / iPad';
+  btnMac.setAttribute('aria-label', 'Show Mac / iPad modifier names (⌘ and ⌥)');
+  el('span', 'km-os-mac', btnMac, '⌘').setAttribute('aria-hidden', 'true');
+  btnMac.addEventListener('click', () => setPlatform('mac'));
+
+  const btnWin = el('button', 'km-platform-btn', switchBox);
+  btnWin.type = 'button';
+  btnWin.title = 'Windows';
+  btnWin.setAttribute('aria-label', 'Show Windows modifier names (Ctrl and Alt)');
+  const winMark = el('span', 'km-os-windows', btnWin);
+  winMark.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < 4; i++) el('span', '', winMark);
+  btnWin.addEventListener('click', () => setPlatform('windows'));
+
   // Keyboard Container
   const kbContainer = el('div', 'km-keyboard', colLeft);
 
   // Right Column: Actions List
   const colRight = el('div', 'km-col km-col-right', cols);
-  const rightHeader = el('div', 'km-col-header', colRight);
-  el('span', 'km-col-title', rightHeader, 'ACTIONS');
-  const countEl = el('span', 'km-count', rightHeader, '0 BINDINGS');
+  const editorActions = el('div', 'km-editor-actions', colRight);
+
+  const recBtn = el('button', 'km-btn km-btn-record', editorActions);
+  recBtn.type = 'button';
+  recBtn.setAttribute('aria-pressed', 'false');
+  const recMain = el('span', 'km-btn-main', recBtn, 'RECORD INPUT');
+  recBtn.addEventListener('click', () => {
+    if (recording) cancelRecording('button');
+    else startRecording('button');
+  });
+
+  const resetBtn = el('button', 'km-btn km-btn-reset', editorActions);
+  resetBtn.type = 'button';
+  el('span', 'km-btn-main', resetBtn, 'RESET TO DEFAULT');
+  resetBtn.addEventListener('click', () => resetAll('button'));
+
+  const statusEl = el('div', 'km-status', colRight, '');
+  statusEl.hidden = true;
 
   const searchEl = el('input', 'km-search', colRight);
   searchEl.type = 'search';
@@ -368,38 +385,12 @@ export function createKeymap(host, keys, options = {}) {
 
   const listEl = el('div', 'km-list', colRight);
 
-  // ── Footer
-  const footer = el('div', 'km-footer', root);
-  const footerActions = el('div', 'km-footer-actions', footer);
-
-  // Button 1: RECORD INPUT
-  const recBtn = el('button', 'km-btn km-btn-record', footerActions);
-  recBtn.type = 'button';
-  recBtn.setAttribute('aria-pressed', 'false');
-  el('span', 'km-btn-main', recBtn, 'RECORD INPUT');
-  const recSub = el('span', 'km-btn-sub', recBtn, 'choose an action first');
-  recBtn.addEventListener('click', () => {
-    if (recording) cancelRecording('button');
-    else startRecording('button');
-  });
-
-  // Button 2: RESET TO DEFAULT
-  const resetBtn = el('button', 'km-btn km-btn-reset', footerActions);
-  resetBtn.type = 'button';
-  el('span', 'km-btn-main', resetBtn, 'RESET TO DEFAULT');
-  el('span', 'km-btn-sub', resetBtn, 'every key as shipped');
-  resetBtn.addEventListener('click', () => resetAll('button'));
-
-  // Footer Right Messages (Ordinary text nodes — never live regions)
-  const footerInfo = el('div', 'km-footer-info', footer);
-  const statusEl = el('div', 'km-status', footerInfo, '');
-  const hintEl = el('div', 'km-hint', footerInfo, 'Tap an action, RECORD INPUT, then press its new key · hover any key to see what it does');
-
   /* ── 4. DOM REPAINT & INTERACTION LOGIC ─────────────────────────────────────────────────────── */
 
   function setStatus(text, isConflict = false) {
     statusEl.textContent = text || '';
     statusEl.className = 'km-status' + (isConflict ? ' km-status-conflict' : '');
+    statusEl.hidden = !text;
   }
 
   function setPlatform(p) {
@@ -407,7 +398,7 @@ export function createKeymap(host, keys, options = {}) {
     platform = p;
     paintPlatform();
     refresh();
-    setStatus(platform === 'mac' ? 'Mac / iPad layout · modifier displayed as ⌘' : 'Windows layout · modifier displayed as Ctrl');
+    setStatus('');
   }
 
   function paintPlatform() {
@@ -616,7 +607,6 @@ export function createKeymap(host, keys, options = {}) {
     const order = ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT'];
     const actions = (term ? allActions.filter(a => (a.label + ' ' + formatChord(a, platform)).toLowerCase().includes(term)) : [...allActions])
       .sort((a, b) => order.indexOf(categoryOf(a)) - order.indexOf(categoryOf(b)));
-    countEl.textContent = term ? `${actions.length} / ${allActions.length}` : `${actions.length} BINDINGS`;
     const isMac = platform === 'mac';
     let lastCategory = '';
 
@@ -664,17 +654,9 @@ export function createKeymap(host, keys, options = {}) {
   }
 
   function paintRecordBtn() {
-    const sel = getSelectedAction();
     recBtn.classList.toggle('km-btn-recording', recording);
     recBtn.setAttribute('aria-pressed', recording ? 'true' : 'false');
-
-    if (recording) {
-      recSub.textContent = pendingSteal ? 'press again to confirm steal · Esc cancels' : 'press a key… · Esc cancels';
-    } else if (sel) {
-      recSub.textContent = `for “${deriveShortName(sel) || sel.label}”`;
-    } else {
-      recSub.textContent = 'choose an action first';
-    }
+    recMain.textContent = recording ? 'LISTENING…' : 'RECORD INPUT';
   }
 
   /* ── 5. TWO-WAY SELECTION & HOVER HIGHLIGHTING ──────────────────────────────────────────────── */
@@ -697,7 +679,7 @@ export function createKeymap(host, keys, options = {}) {
     const sel = getSelectedAction();
     if (sel) {
       paintRecordBtn();
-      setStatus(`Selected “${sel.label}” (${formatChord(sel, platform)}) · press RECORD INPUT to rebind`);
+      setStatus('');
       if (via === 'key') {
         const row = rowDomMap.get(id);
         if (row) {
@@ -718,9 +700,6 @@ export function createKeymap(host, keys, options = {}) {
         const row = rowDomMap.get(a.id);
         if (row) row.classList.add('km-action-row-hovered');
       }
-      hintEl.textContent = `${kDef.label} · ${acts.map((a) => a.label).join(' · ')}`;
-    } else {
-      hintEl.textContent = `${kDef.label} (unbound)`;
     }
   }
 
@@ -750,7 +729,6 @@ export function createKeymap(host, keys, options = {}) {
       for (const b of (keyDomMap.get('AltRight') || [])) b.classList.add('km-key-hovered');
     }
 
-    hintEl.textContent = `“${a.label}” · shortcut: ${formatChord(a, platform)}`;
   }
 
   function clearHover() {
@@ -760,7 +738,6 @@ export function createKeymap(host, keys, options = {}) {
     for (const row of rowDomMap.values()) {
       row.classList.remove('km-action-row-hovered');
     }
-    hintEl.textContent = 'Tap an action, RECORD INPUT, then press its new key · hover any key to see what it does';
   }
 
   /* ── 6. RECORDING ENGINE & CONFLICT RESOLUTION ──────────────────────────────────────────────── */
@@ -911,7 +888,7 @@ export function createKeymap(host, keys, options = {}) {
     place();
     refresh();
     const sel = getSelectedAction();
-    setStatus(sel ? `“${sel.label}” selected · press RECORD INPUT to rebind` : 'Ready · tap an action or key to inspect and rebind');
+    setStatus('');
     return true;
   }
 
@@ -954,90 +931,3 @@ export function createKeymap(host, keys, options = {}) {
     destroy,
   };
 }
-
-/* ════════════════════════════════════════════════════════════════════════════════
- * STYLESHEET SPECIFICATION FOR lab/keymap.js
- * Every class used in this module is prefixed with `km-`.  The visual design
- * contract below defines the layout, geometry, typography, and contrast rules:
- *
- * .km-panel                 - Draggable MIR glass window, viewport-bounded without blocking the stage outside it.
- * .km-header                - Top title bar flex row with space-between alignment, padding 20px 24px, subtle bottom divider line rgba(255,255,255,0.08).
- * .km-header-titles         - Vertical flex container holding the dim eyebrow and bright headline with a 4px gap.
- * .km-eyebrow               - Uppercase dim letter-spaced kicker text (font-size 11px, font-weight 600, letter-spacing 0.12em, color #94a3b8).
- * .km-title                 - Prominent headline text (font-size 22px, font-weight 700, letter-spacing 0.03em, color #f8fafc).
- * .km-close                 - Round 44×44px button with centered cross glyph ('×'), border-radius 50%, glass background rgba(255,255,255,0.08), hover glow.
- * .km-columns               - Flex row container (flex: 1) dividing the screen into left keyboard column and right actions list with 24px column gap, padding 20px 24px.
- * .km-col                   - Flex column card with background rgba(255,255,255,0.02), border 1px solid rgba(255,255,255,0.06), border-radius 12px, padding 18px.
- * .km-col-left              - Left column wrapper sized to house the drawn keyboard comfortably (flex: 1.4).
- * .km-col-right             - Right column wrapper housing the scrollable action rows and count header (flex: 1.0, min-width 360px).
- * .km-col-header            - Header flex row within each column with space-between alignment and margin-bottom 14px.
- * .km-col-title             - Small-caps column section heading (font-size 11px, font-weight 700, letter-spacing 0.1em, color #94a3b8).
- * .km-platform-switch       - Two-seat segmented button switch with capsule border (border-radius 24px), background rgba(255,255,255,0.05), padding 3px.
- * .km-platform-btn          - Segmented button seat with min 44px touch target, border-radius 20px, font-size 11px, font-weight 600, padding 6px 14px, color #94a3b8.
- * .km-platform-active       - Active switch seat state with bright contrast fill (background rgba(255,255,255,0.18)), color #ffffff, box-shadow.
- * .km-legend                - Horizontal legend flex row displaying indicator dots and labels (font-size 11px, color #94a3b8, gap 12px, align-items center, margin-bottom 14px).
- * .km-legend-dot            - 7×7px circular dot indicator.
- * .km-legend-active         - Glowing emerald/cyan dot (#34d399) indicating active bound keys on the keyboard.
- * .km-legend-unbound        - Dim slate dot (#475569) indicating unbound keys.
- * .km-legend-shift-sample   - Small blue badge sample matching Shift badges (#2563eb, color #fff, border-radius 3px, padding 1px 5px, font-size 10px, font-weight 700).
- * .km-legend-text           - Caption text following legend indicator dots.
- * .km-keyboard              - Flex column holding the 5 drawn keyboard rows with a consistent 6px row gap.
- * .km-kb-row                - Flex row containing key buttons with a consistent 6px horizontal gap between keys.
- * .km-key                   - Interactive key cap button with minimum 44×44px hit area provided via a padded ::before pseudo-element, border-radius 6px, flex-column alignment.
- * .km-key-w-1               - Standard 1.0 flex unit width for alphanumeric keys.
- * .km-key-w-esc             - 1.25 flex unit width for the Escape key in row 0.
- * .km-key-w-bksp            - 1.6 flex unit width for the Backspace key in row 0.
- * .km-key-w-tab             - 1.5 flex unit width for the Tab key in row 1.
- * .km-key-w-backslash       - 1.35 flex unit width for the Backslash key in row 1.
- * .km-key-w-caps            - 1.8 flex unit width for the Caps Lock key in row 2.
- * .km-key-w-enter           - 2.05 flex unit width for the Enter key in row 2.
- * .km-key-w-lshift          - 2.2 flex unit width for the left Shift key in row 3.
- * .km-key-w-rshift          - 1.8 flex unit width for the right Shift key in row 3.
- * .km-key-w-ctrl            - 1.4 flex unit width for Control modifier keys in row 4.
- * .km-key-w-win             - 1.3 flex unit width for Windows/Meta/Command keys in row 4.
- * .km-key-w-alt             - 1.3 flex unit width for Alt/Option modifier keys in row 4.
- * .km-key-w-space           - 5.2 flex unit width for the Space bar in row 4.
- * .km-key-w-arrow           - 1.0 flex unit width for arrow navigation keys in row 4.
- * .km-key-bound             - Bound key state: raised dark keycap surface (background #1e2536, border 1px solid #3b4660, text #f8fafc).
- * .km-key-unbound           - Unbound key state: flat, dim surface (background rgba(255,255,255,0.02), border 1px solid rgba(255,255,255,0.05), text #475569).
- * .km-key-selected          - High-contrast selection outline (outline 2px solid #38bdf8, box-shadow 0 0 14px rgba(56,189,248,0.4)).
- * .km-key-hovered           - Brightened keycap background and border glow when hovered or focused.
- * .km-key-recording         - Flashing amber/red border (2px solid #f59e0b) indicating this key is actively waiting for input.
- * .km-key-top               - Flex row at the top of a key cell with space-between alignment for shift character on left and badge on right.
- * .km-key-shift-char        - Dim tiny shifted symbol (font-size 10px, opacity 0.5) in the top-left of a keycap.
- * .km-key-cap               - Large, bright primary key character (font-size 13px, font-weight 700, color #ffffff, text-align center).
- * .km-key-sub               - Tiny dim action name (font-size 9px, color #94a3b8, letter-spacing 0.02em, text-overflow ellipsis) at bottom of keycap.
- * .km-badge                 - Pill badge in top-right corner of keycap (font-size 9px, font-weight 700, padding 1px 4px, border-radius 3px).
- * .km-badge-ctrl            - Amber modifier badge (background #d97706, color #ffffff) for Control or ⌘.
- * .km-badge-shift           - Blue modifier badge (background #2563eb, color #ffffff) for Shift (⇧).
- * .km-badge-alt             - Purple modifier badge (background #7c3aed, color #ffffff) for Alt or ⌥.
- * .km-badge-combo           - Gradient or dual-tint badge for combinations requiring both Control and Shift.
- * .km-count                 - Small-caps count readout (font-size 11px, font-weight 600, color #94a3b8) in actions list header.
- * .km-list                  - Vertically scrolling container for action rows (flex: 1, overflow-y: auto, scrollbar-width: thin, gap 4px).
- * .km-action-row            - Interactive action row button (width 100%, min-height 44px, padding 8px 12px, border-radius 6px, flex row, align-items center).
- * .km-action-row-selected   - Selected row highlight: accent background (rgba(56,189,248,0.12)), bright border (1px solid #38bdf8), bright text.
- * .km-action-row-hovered    - Hovered action row background highlight (rgba(255,255,255,0.06)).
- * .km-action-row-recording  - Recording state for action row: amber background glow with pulsing highlight.
- * .km-chips                 - Horizontal flex container holding the key chips on the left of an action row (gap 4px, min-width 90px).
- * .km-chip                  - Pill-shaped key chip (padding 3px 7px, font-size 11px, font-weight 600, border-radius 4px, font-family monospace).
- * .km-chip-mod              - Modifier key chip (background rgba(255,255,255,0.1), border 1px solid rgba(255,255,255,0.18), color #e2e8f0).
- * .km-chip-key              - Main key chip (background #1e293b, border 1px solid #475569, color #ffffff, box-shadow 0 1px 2px rgba(0,0,0,0.3)).
- * .km-chip-unbound          - Dim dash placeholder for actions lacking a binding.
- * .km-chip-recording        - Flashing amber chip displaying "press a key…" during active recording.
- * .km-action-text           - Text container for action sentence and description (flex: 1, font-size 12px, text-align left, margin-left 10px).
- * .km-action-label          - Bold readable action title (font-weight 500, color #f1f5f9).
- * .km-action-sep            - Dim middot character (' · ') separating action label and description (color #64748b).
- * .km-action-desc           - Dim muted description text (color #94a3b8, font-weight 400).
- * .km-footer                - Bottom bar flex row with space-between alignment, padding 18px 24px, border-top 1px solid rgba(255,255,255,0.08).
- * .km-footer-actions        - Flex row container holding the RECORD INPUT and RESET TO DEFAULT action buttons with a 12px gap.
- * .km-btn                   - Two-line action button with 44px min height, padding 8px 18px, border-radius 8px, frosted glass background, flex-column layout.
- * .km-btn-main              - Upper bold uppercase button label (font-size 12px, font-weight 700, letter-spacing 0.05em, color #f8fafc).
- * .km-btn-sub               - Lower secondary button caption (font-size 10px, opacity 0.65, color #cbd5e1).
- * .km-btn-record            - Primary action button styling for RECORD INPUT with accent border (border 1px solid #38bdf8).
- * .km-btn-recording         - Active recording state for RECORD INPUT button: flashing red/amber border (1px solid #f59e0b) and glowing text.
- * .km-btn-reset             - Secondary action button styling for RESET TO DEFAULT with neutral frosted glass appearance.
- * .km-footer-info           - Right-aligned vertical flex container holding the status message and usage hint.
- * .km-status                - High-contrast message line for rebind confirmations, collision alerts, and recording status (font-size 12px, font-weight 600, color #38bdf8).
- * .km-status-conflict       - Amber warning text color (#fbbf24) when a key collision requires confirmation.
- * .km-hint                  - Dim usage guidance hint (font-size 11px, color #64748b, letter-spacing 0.02em).
- * ════════════════════════════════════════════════════════════════════════════════ */

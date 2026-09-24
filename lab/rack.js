@@ -4178,10 +4178,9 @@ export async function boot(dom) {
     /* ── WAVE 106 · THE KEYBOARD MANUAL, and why it is a second thing beside the sheet ──────────────
      * The '?' sheet of wave 53 was a LIST you read; this is a PICTURE of the board you edit on — every bound
      * key lit in its own place, so "what is still free" is a glance rather than a search through forty
-     * rows.  They are the same table underneath (__LW_hooks.keys) and neither owns a copy of it, which
-     * is the whole of ANTI-PATTERN 6: the manual calls keys.bind() and keys.reset() and then re-reads
-     * keys.actions, exactly as the SETTINGS chips do, so a rebind made in any of the three is on the
-     * other two in the same tick.  Escape closes it, as it closes the sheet. */
+     * rows. The board and the searchable action list share __LW_hooks.keys rather than copying the
+     * binding table: the editor calls keys.bind()/reset(), then re-reads keys.actions in the same
+     * tick. Escape closes it, as it closes the sheet. */
     {
       const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
       km.setAttribute('aria-label', 'Keyboard shortcuts window');

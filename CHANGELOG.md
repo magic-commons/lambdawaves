@@ -11,6 +11,25 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## UNRELEASED — not frozen
+
+Work since `v0.2.3-alpha.1` — 3 waves, 1 commit.  **Nothing here is frozen**: no tag points at it, the numbers may
+still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
+any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
+stable enough to gate on.
+
+- **wave 113**: The keyboard gives its editor the space, not a footer
+- **wave 114**: The keyboard takes the shape of its keys
+- **wave 115**: The keyboard's legend and switch share a row
+
+<details><summary>commits</summary>
+
+- `23a3f83` 2026-09-23 — CHANGELOG for v0.2.3-alpha.1
+
+</details>
+
+---
+
 ## `v0.2.3-alpha.1` — 2026-09-23
 
 Commit `de7bf5c` · wave 112 · 2 commits.

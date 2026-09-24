@@ -840,36 +840,37 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
 .mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }
 #keymap { pointer-events: none; }
-.km-panel { position: absolute; width: min(1080px, calc(100vw - 16px)); height: min(590px, calc(100dvh - 16px));
+.km-panel.glass { position: absolute; width: min(1080px, calc(100vw - 16px)); height: min(416px, calc(100dvh - 16px));
   display: flex; flex-direction: column; pointer-events: auto; overflow: hidden; border-radius: var(--r-lg);
-  box-shadow: var(--glass-shadow), 0 -5px 14px hsl(0 0% 0% / .20); }
+  border: 0; box-shadow: var(--glass-shadow), 0 12px 32px hsl(0 0% 0% / .13); }
 .km-header { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 5px 12px;
-  border-bottom: 1px solid var(--glass-hairline); background: var(--glass-raise); flex: 0 0 auto;
+  background: var(--glass-raise); box-shadow: 0 5px 14px hsl(0 0% 0% / .035); flex: 0 0 auto;
   cursor: grab; touch-action: none; }
 .km-dragging .km-header { cursor: grabbing; }
 .km-drag-mark { color: var(--acc); font-size: 18px; line-height: 1; }
 .km-header-titles { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.km-eyebrow { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
-.km-title { font: var(--w-bold) 14px / 1.1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
-.km-header-hint { margin-left: auto; color: var(--dim); font: var(--w-bold) var(--fs-micro) var(--font-ui); letter-spacing: var(--tr-wide); }
-.km-close { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--glass-border-color);
-  background: var(--glass-raise); color: var(--fg); font-size: 19px; line-height: 1; cursor: pointer; }
-.km-close:hover, .km-close:focus-visible { background: var(--glass-press); box-shadow: 0 0 0 2px var(--acc-soft); }
+.km-title { font: var(--w-bold) 13px / 1.1 var(--font-ui); letter-spacing: .14em; color: var(--fg-soft); }
+.km-close { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; border: 0;
+  background: var(--glass-raise); box-shadow: var(--neu-raise); color: var(--ink-key); font-size: 19px; line-height: 1; cursor: pointer; }
+.km-close:hover, .km-close:focus-visible { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 0 2px var(--acc-soft); }
 
 .km-columns { flex: 1; display: flex; gap: 10px; padding: 10px; min-height: 0; }
 .km-col { display: flex; flex-direction: column; min-height: 0; padding: 10px;
-  background: var(--glass-well); border: 1px solid var(--glass-hairline); border-radius: var(--r-md); }
+  background: var(--glass-well); border: 0; box-shadow: var(--neu-inset); border-radius: var(--r-md); }
 .km-col-left { flex: 2.1; min-width: 0; }
 .km-col-right { flex: 1; min-width: 285px; }
-.km-col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex: 0 0 auto; }
-.km-col-title { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.km-col-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 34px; margin-bottom: 5px; flex: 0 0 auto; }
 
-.km-platform-switch { display: flex; gap: 2px; padding: 3px; border-radius: 24px; background: var(--glass-well); border: 1px solid var(--glass-hairline); }
-.km-platform-btn { min-height: 28px; padding: 3px 8px; border-radius: 20px; border: 0; background: transparent;
-  font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); color: var(--dim); cursor: pointer; }
-.km-platform-active { background: var(--glass-press); color: var(--fg); box-shadow: var(--neu-raise); }
+.km-platform-switch { display: flex; flex: 0 0 auto; gap: 2px; padding: 3px; border-radius: 24px; background: var(--glass-well); border: 0; box-shadow: var(--neu-inset); }
+.km-platform-btn { width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 0; background: transparent;
+  display: grid; place-items: center; color: var(--ink-key); cursor: pointer; }
+.km-platform-btn:focus-visible { box-shadow: 0 0 0 2px var(--acc); outline: 0; }
+.km-platform-active { background: var(--glass-press); color: var(--fg-soft); box-shadow: var(--neu-raise); }
+.km-os-mac { font: 20px / 1 system-ui, sans-serif; }
+.km-os-windows { width: 14px; height: 14px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; transform: skewY(-5deg); }
+.km-os-windows > span { background: currentColor; }
 
-.km-legend { display: flex; align-items: center; gap: 7px; margin: 6px 0 10px; font: var(--fs-micro) / 1 var(--font-ui); color: var(--dim); flex-wrap: wrap; }
+.km-legend { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; font: var(--fs-micro) / 1 var(--font-ui); color: var(--dim); }
 .km-legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: -1px; }
 .km-legend-active { background: var(--acc); box-shadow: 0 0 6px var(--acc-soft); }
 .km-legend-unbound { background: var(--ink-faint); }
@@ -880,9 +881,9 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 
 .km-keyboard { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 5px; min-height: 0; }
 .km-kb-row { display: flex; gap: 4px; }
-.km-key { position: relative; flex: 1 0 0; min-width: 0; min-height: 52px; padding: 15px 2px 4px; border-radius: var(--r-sm);
+.km-key { position: relative; flex: 1 0 0; min-width: 0; min-height: 52px; padding: 15px 2px 4px; border: 0; border-radius: var(--r-sm);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer;
-  font: var(--font-ui); text-align: center; overflow: hidden; box-shadow: var(--neu-flat); }
+  font: var(--font-ui); text-align: center; overflow: hidden; }
 /* the 44-px finger over smaller ink, the way every other control in this lab does it */
 .km-key::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: max(100%, 44px); height: max(100%, 44px); }
@@ -891,16 +892,21 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .km-key-w-enter { flex-grow: 2.05; } .km-key-w-lshift { flex-grow: 2.2; } .km-key-w-rshift { flex-grow: 1.8; }
 .km-key-w-ctrl { flex-grow: 1.4; } .km-key-w-win { flex-grow: 1.3; } .km-key-w-alt { flex-grow: 1.3; }
 .km-key-w-space { flex-grow: 5.2; } .km-key-w-arrow { flex-grow: 1; }
-.km-key-bound { background: var(--glass-raise); border: 1px solid var(--glass-border-color); color: var(--fg); }
-.km-key-unbound { background: var(--glass-well); border: 1px solid var(--glass-hairline); color: var(--ink-faint); }
-.km-key-selected { outline: 2px solid var(--acc); outline-offset: -1px; box-shadow: 0 0 14px var(--acc-soft); }
-.km-key-hovered, .km-key:hover, .km-key:focus-visible { background: var(--glass-press); border-color: var(--acc-soft); }
-.km-key-recording { border: 2px solid var(--bad); animation: km-pulse 1s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .km-key-recording { animation: none; }
+.km-key-bound { background: hsl(var(--glass-tint) / .96); box-shadow: var(--neu-raise); color: var(--ink-key); }
+.km-key-unbound { background: var(--glass-well); box-shadow: var(--neu-inset); color: var(--ink-faint); }
+body[data-theme="dark"] .km-col,
+body[data-theme="dark"] .km-platform-switch,
+body[data-theme="dark"] .km-search { background: hsl(var(--glass-tint) / .9); }
+body[data-theme="dark"] .km-key-unbound {
+  background: hsl(var(--glass-hue) var(--glass-sat-tint) calc(var(--glass-lum) - 2%));
 }
+.km-key-selected { background: var(--acc-soft); box-shadow: var(--neu-inset), 0 0 14px var(--acc-soft); }
+.km-key-hovered, .km-key:hover { background: var(--glass-press); box-shadow: var(--neu-inset); }
+.km-key:focus-visible { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 0 2px var(--acc); outline: 0; }
+.km-key-recording { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 14px var(--bad); }
 .km-key-top { position: absolute; inset: 2px 3px auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 2px; }
 .km-key-shift-char { font-size: 8px; opacity: .55; }
-.km-key-cap { font-size: 11px; font-weight: var(--w-bold); text-align: center; color: inherit; }
+.km-key-cap { font-size: 11px; font-weight: var(--w-bold); letter-spacing: .02em; text-align: center; color: inherit; }
 .km-key-sub { max-width: 100%; font-size: 8px; color: var(--dim); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .km-badge { font-size: 8px; font-weight: 700; padding: 0 2px; border-radius: 3px; color: var(--acc-ink); white-space: nowrap; }
@@ -909,52 +915,49 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .km-badge-alt { background: color-mix(in oklch, var(--acc) 50%, var(--acc2)); }
 .km-badge-combo { background: linear-gradient(90deg, var(--acc), var(--acc2)); }
 
-.km-count { font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); color: var(--dim); }
-.km-search { width: 100%; height: 30px; flex: 0 0 auto; margin: 0 0 6px; padding: 0 9px; border: 1px solid var(--glass-hairline);
-  border-radius: var(--r-sm); background: var(--glass-raise); color: var(--fg); outline: none; }
-.km-search:focus { border-color: var(--acc); }
+.km-editor-actions { display: flex; justify-content: center; gap: 6px; margin-bottom: 6px; flex: 0 0 auto; }
+.km-editor-actions .km-btn { flex: 0 1 128px; min-width: 0; padding: 5px 7px; }
+.km-editor-actions .km-btn-main { font-size: 10px; }
+.km-search { width: 100%; height: 30px; flex: 0 0 auto; margin: 0 0 6px; padding: 0 9px; border: 0;
+  border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--neu-inset); color: var(--fg); outline: none; }
+.km-search:focus { box-shadow: var(--neu-inset), 0 0 0 2px var(--acc-soft); }
 .km-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; scrollbar-width: thin; }
 .km-action-group { padding: 9px 5px 2px; color: var(--acc); font: var(--w-bold) var(--fs-micro) var(--font-ui); letter-spacing: var(--tr-wide); }
 .km-action-row { width: 100%; min-height: 38px; padding: 3px 7px; border-radius: var(--r-sm); display: grid; grid-template-columns: minmax(0,1fr) 118px; align-items: center; gap: 5px;
-  border: 1px solid transparent; background: transparent; color: var(--fg); cursor: pointer; text-align: left; }
-.km-action-row-selected { background: var(--acc-soft); border-color: var(--acc); }
-.km-action-row-hovered, .km-action-row:hover, .km-action-row:focus-visible { background: var(--glass-press); }
-.km-action-row-recording { background: var(--glass-press); box-shadow: inset 0 0 0 1px var(--bad); }
+  border: 0; background: transparent; color: var(--fg-soft); cursor: pointer; text-align: left; }
+.km-action-row-selected { background: var(--acc-soft); box-shadow: var(--neu-inset); }
+.km-action-row-hovered, .km-action-row:hover { background: var(--glass-press); }
+.km-action-row:focus-visible { background: var(--glass-press); box-shadow: 0 0 0 2px var(--acc); outline: 0; }
+.km-action-row-recording { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 12px var(--bad); }
 .km-chips { display: flex; justify-content: center; align-items: center; gap: 2px; min-width: 0; }
-.km-chip { padding: 3px 5px; font: 600 10px / 1 var(--font-mono); border-radius: 4px; }
-.km-chip-mod { background: var(--glass-raise); border: 1px solid var(--glass-border-color); color: var(--fg-soft); }
-.km-chip-key { background: var(--glass-press); border: 1px solid var(--glass-border-color); color: var(--fg); box-shadow: var(--neu-flat); }
-.km-chip-unbound { color: var(--ink-faint); border: 1px dashed var(--glass-hairline); }
-.km-chip-recording { color: var(--bad); border: 1px solid var(--bad); }
+.km-chip { padding: 3px 5px; font: 600 10px / 1 var(--font-mono); border-radius: 4px; border: 0; }
+.km-chip-mod { background: var(--glass-raise); color: var(--fg-soft); box-shadow: var(--neu-raise); }
+.km-chip-key { background: var(--glass-press); color: var(--fg); box-shadow: var(--neu-inset); }
+.km-chip-unbound { color: var(--ink-faint); background: var(--glass-well); }
+.km-chip-recording { color: var(--bad); background: var(--glass-press); }
 .km-action-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 11px; text-align: left; }
-.km-action-label { font-weight: 500; color: var(--fg); }
+.km-action-label { font-weight: var(--w-med); letter-spacing: .015em; color: var(--fg-soft); }
 .km-action-sep { color: var(--ink-faint); }
 .km-action-desc { color: var(--dim); font-size: 9px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.km-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px;
-  border-top: 1px solid var(--glass-hairline); flex: 0 0 auto; }
-.km-footer-actions { display: flex; gap: 8px; }
-.km-btn { min-height: 44px; padding: 7px 11px; border-radius: var(--r-md); display: flex; flex-direction: column; gap: 2px;
-  background: var(--glass-raise); border: 1px solid var(--glass-border-color); cursor: pointer; }
-.km-btn:hover, .km-btn:focus-visible { background: var(--glass-press); }
-.km-btn-main { font: var(--w-bold) 12px / 1 var(--font-ui); letter-spacing: .05em; text-transform: uppercase; color: var(--fg); }
-.km-btn-sub { font-size: 10px; opacity: .65; color: var(--fg-soft); }
-.km-btn-record { border-color: var(--acc); }
-.km-btn-recording { border-color: var(--bad); }
-.km-footer-info { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
-.km-status { font: 600 12px / 1.3 var(--font-ui); color: var(--acc); }
+.km-btn { min-height: 34px; padding: 7px 11px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; text-align: center;
+  background: var(--glass-raise); border: 0; box-shadow: var(--neu-raise); cursor: pointer; }
+.km-btn:hover { background: var(--glass-press); box-shadow: var(--neu-inset); }
+.km-btn:focus-visible { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 0 2px var(--acc); outline: 0; }
+.km-btn-main { font: var(--w-bold) 12px / 1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-soft); }
+.km-btn-record .km-btn-main { color: var(--acc); }
+.km-btn-recording { background: var(--glass-press); box-shadow: var(--neu-inset), 0 0 12px var(--bad); }
+.km-status { margin: 0 0 6px; font: 600 11px / 1.3 var(--font-ui); color: var(--acc); }
 .km-status-conflict { color: var(--bad); }
-.km-hint { font: 11px / 1.3 var(--font-ui); letter-spacing: .02em; color: var(--dim); }
 
 /* the phone gets one column: the drawn board needs ~700 px to stay legible, and below that the LIST is
    the manual — every binding, still rebindable, which is the part that has to work on a small screen */
 @media (max-width: 860px) {
+  .km-panel.glass { height: min(530px, calc(100dvh - 16px)); }
   .km-columns { flex-direction: column; padding: 12px; gap: 12px; }
   .km-col-left { display: none; }
   .km-col-right { min-width: 0; }
-  .km-footer { flex-direction: column; align-items: stretch; }
-  .km-footer-info { align-items: flex-start; text-align: left; }
-  .km-header-hint { display: none; }
+  .km-editor-actions .km-btn-main { font-size: 9px; }
 }
 body.ui-hidden #keymap { display: none; }
 #transport .mod-logo:active { transform:scale(.91); box-shadow:inset 0 2px 5px #0006; }

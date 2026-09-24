@@ -19,14 +19,35 @@ try {
     field.setOcclusion=function(rects){window.__frameMasks=rects.map(r=>r.slice());return original.call(field,rects)};
     __LW.keymap.open();await __LW.settle();const host=document.querySelector('#keymap'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
     const canvas=document.querySelector('#field').getBoundingClientRect(), mask=__frameMasks.some(r=>r[0]<=b.left-canvas.left+20&&r[1]<=b.top-canvas.top+20&&r[2]>=b.right-canvas.left-20&&r[3]>=b.bottom-canvas.top-20);
+    const col=p.querySelector('.km-col-left').getBoundingClientRect(),header=p.querySelector('.km-col-header').getBoundingClientRect(),rows=p.querySelectorAll('.km-kb-row');
+    const first=rows[0].getBoundingClientRect(),last=rows[rows.length-1].getBoundingClientRect();
+    const editor=p.querySelector('.km-col-right').getBoundingClientRect(),buttons=[...p.querySelectorAll('.km-editor-actions .km-btn')].map(e=>e.getBoundingClientRect());
+    const borders=['.km-panel','.km-col','.km-platform-switch','.km-key-bound','.km-key-unbound','.km-search','.km-action-row','.km-chip','.km-btn','.km-close']
+      .map(sel=>getComputedStyle(p.querySelector(sel)??p).borderWidth);
     return {width:b.width,height:b.height,x:b.x,y:b.y,hostPointer:getComputedStyle(host).pointerEvents,pointer:getComputedStyle(p).pointerEvents,
+      topGap:first.top-header.bottom,bottomGap:col.bottom-last.bottom,borders,
+      legendAndSwitch:p.querySelector('.km-legend').parentElement===p.querySelector('.km-platform-switch').parentElement,
+      platformIcons:[p.querySelector('.km-os-mac').textContent,p.querySelectorAll('.km-os-windows > span').length],
+      buttonCenter:Math.abs((buttons[0].left+buttons[1].right)/2-(editor.left+editor.right)/2),
+      buttonSubtitles:p.querySelectorAll('.km-editor-actions .km-btn-sub').length,
       rows:p.querySelectorAll('.km-kb-row').length,groups:p.querySelectorAll('.km-action-group').length,
       q:p.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent,card:document.body.dataset.card,mask,
-      tabLabel:p.querySelector('.km-action-row[data-id="povIn"] .km-chips').textContent,errors:__e.slice()};`);
-  assert.ok(geometry.width < 1440 && geometry.width > 900 && geometry.height < 900);
+      tabLabel:p.querySelector('.km-action-row[data-id="povIn"] .km-chips').textContent,
+      removed:p.querySelectorAll('.km-eyebrow,.km-header-hint,.km-col-title,.km-count,.km-footer,.km-hint').length,
+      editor:p.querySelector('.km-editor-actions')?.parentElement.classList.contains('km-col-right'),
+      controls:p.querySelectorAll('.km-editor-actions .km-btn').length,statusHidden:p.querySelector('.km-status').hidden,
+      errors:__e.slice()};`);
+  assert.ok(geometry.width < 1440 && geometry.width > 900 && geometry.height <= 416);
+  assert.ok(geometry.topGap >= 0 && geometry.topGap < 20 && geometry.bottomGap >= 0 && geometry.bottomGap < 20);
+  assert.deepEqual(geometry.borders, Array(10).fill('0px'));
+  assert.equal(geometry.legendAndSwitch, true);
+  assert.deepEqual(geometry.platformIcons, ['⌘', 4]);
+  assert.ok(geometry.buttonCenter < 2); assert.equal(geometry.buttonSubtitles, 0);
   assert.ok(geometry.x >= 8 && geometry.y >= 8);
   assert.equal(geometry.hostPointer, 'none'); assert.equal(geometry.pointer, 'auto');
   assert.equal(geometry.rows, 5); assert.ok(geometry.groups >= 4);
+  assert.equal(geometry.removed, 0); assert.equal(geometry.editor, true);
+  assert.equal(geometry.controls, 2); assert.equal(geometry.statusHidden, true);
   assert.equal(geometry.mask, true);
   assert.match(geometry.q, /⇧/); assert.match(geometry.tabLabel, /⇧/);
   assert.equal(geometry.card, 'refractive'); assert.deepEqual(geometry.errors, []);
@@ -68,5 +89,24 @@ try {
   assert.equal(collisions.tab.ok, false); assert.equal(collisions.esc.ok, false);
   assert.equal(collisions.free.ok, true); assert.equal(collisions.saved.key, 'KeyL');
   assert.equal(collisions.restored, collisions.before);
+  const editor = await g.ev(`__LW.keymap.open();const p=document.querySelector('.km-panel');
+    p.querySelector('.km-action-row[data-id="povIn"]').click();
+    p.querySelector('.km-btn-record').click();
+    const listening=!p.querySelector('.km-status').hidden;
+    window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyL',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));
+    const changed=__LW.keys.actions.find(a=>a.id==='povIn');
+    const rebound=[changed.key,changed.ctrl,changed.shift];
+    p.querySelector('.km-btn-reset').click();
+    const restored=__LW.keys.actions.find(a=>a.id==='povIn');
+    return {listening,rebound,restored:[restored.key,restored.ctrl,restored.shift],errors:__e.slice()};`);
+  assert.equal(editor.listening, true);
+  assert.deepEqual(editor.rebound, ['KeyL',true,true]);
+  assert.deepEqual(editor.restored, ['KeyQ',false,true]);
+  assert.deepEqual(editor.errors, []);
+  const dark = await g.ev(`__LW.setTheme('dark');const p=document.querySelector('.km-panel');
+    const bg=getComputedStyle(p).backgroundColor;
+    return {theme:document.body.dataset.theme,alpha:Number(bg.match(/,\\s*([0-9.]+)\\)$/)?.[1]),errors:__e.slice()};`);
+  assert.equal(dark.theme, 'dark'); assert.ok(dark.alpha >= .9);
+  assert.deepEqual(dark.errors, []);
   console.log('PASS keyboard window: floating MIR geometry, drag, layered chords, POV/dolly zoom, eased WASD, collision-safe rebinding');
 } finally { await g.close(); }

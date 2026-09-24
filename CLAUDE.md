@@ -41,6 +41,15 @@ reserved keys, and only unbind another action after an explicit steal.
 Shift+Q/E adjusts POV; Ctrl+Shift+Q/E is a coupled dolly zoom; WASD orbit is
 eased through the presentation loop. Run `tests/keyboard-shortcuts.test.mjs`
 and `tests/keyboard-window.browser-test.mjs` when changing these controls.
+Keep its always-visible chrome minimal: keyboard title, platform switch,
+modifier legend, board, action search/list, and Record/Reset above that list.
+Status appears only when needed; do not restore the redundant headings,
+binding count, drag instruction or bottom help strip.
+The desktop pane fits the five key rows in 416 px with no hard keyboard UI
+borders. Keep the legend and icon platform switch in one row and the centered,
+subtitle-free Record/Reset controls above search; contextual status carries
+the recording instructions. Preserve the raised/inset charcoal-blue skin,
+visible focus glows and the phone's taller action-only editor.
 
 First-run λWAVES preferences are specified in `lab/rack.js` and
 `lab/native-ui.js`: tags, captions, Help and window notes off; hints,

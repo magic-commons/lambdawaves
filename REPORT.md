@@ -2641,3 +2641,39 @@ the old action. Old saved bindings are validated on load. The browser gate
 checks drag, occlusion, all Q/E layers, easing and rebinding; the Node gate
 exercises the binding law without a browser. Design draft:
 https://www.figma.com/design/RLCuo7Pb6ikE0RqTGqGIoZ
+
+### wave 113: The keyboard gives its editor the space, not a footer
+
+The keyboard window keeps the drawn board, platform switch, modifier legend,
+searchable actions and collision-safe rebinding. The eyebrow, redundant column
+headings, binding count, drag instruction and persistent footer help are gone.
+RECORD INPUT and RESET TO DEFAULT sit together above the action search where
+the screenshot's arrows pointed; feedback appears there only while an action
+needs it. The pane is 60 px shorter, follows the existing MIR skin and
+occlusion law, and remains a one-column action editor on narrow screens.
+The browser gate checks the absent chrome, relocated working controls, drag,
+rebinding and reset.
+
+### wave 114: The keyboard takes the shape of its keys
+
+The desktop keyboard pane is 440 px tall instead of 530 px. Its five key rows
+now sit within about 15 px of the modifier legend and the well's lower edge,
+without shrinking their 52 px targets. The window, keycaps, search, action
+list, chips and editor controls have no hard borders: the existing glass tint
+and raised/inset skin tokens carry their depth, with visible focus glows still
+available for keyboard navigation. The phone keeps its taller action-only
+editor. The browser gate checks the spacing and zero-width borders as well as
+the controls and light/dark render.
+
+### wave 115: The keyboard's legend and switch share a row
+
+The active/unbound/modifier legend and the platform switch now share the same
+top line; the switch uses a Command mark and a four-pane Windows mark instead
+of long labels, while accessible names retain the full platform meaning. The
+desktop pane is 416 px tall, and its five key rows retain full-size targets.
+RECORD INPUT and RESET TO DEFAULT sit centered above search with no always-on
+subtitles; recording guidance remains in the contextual status line. Keyboard
+ink uses the house `--ink-key`/`--fg-soft` colors, and dark wells/keycaps use
+the charcoal-blue glass tint rather than near-black overlays. The browser
+gate checks the one-row arrangement, centered subtitle-free buttons, compact
+geometry and the existing rebind/reset flow.
