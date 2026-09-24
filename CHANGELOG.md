@@ -11,6 +11,21 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.2.3-alpha.3` — 2026-09-24
+
+Commit `ef322ce` · no new waves · 2 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `743012a` 2026-09-23 — CHANGELOG for v0.2.3-alpha.2
+- `ef322ce` 2026-09-24 — Use landing square lambda icon across app metadata
+
+</details>
+
+---
+
 ## `v0.2.3-alpha.2` — 2026-09-23
 
 Commit `ea0297c` · waves 113–115 · 2 commits.
