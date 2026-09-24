@@ -5,7 +5,7 @@
  *      (the ground colour is read out of lab.css, the icon list out of the directory);
  *   B  every icon file exists and is a valid PNG of its declared size — the IHDR and the pixels are decoded
  *      here, by hand, so a rasteriser that lied would be caught; the maskable variants honour the safe zone
- *      and the nine cell colours are the nine fills of #title .mark in index.html, verbatim;
+ *      and the λ-and-dot artwork matches the landing-page identity;
  *   C  sw.js's precache list is EXACTLY the files on disk, with EXACTLY their current content hashes — the
  *      check that rots first, so it can repair itself (--write) as well as fail;
  *   D  nothing the lab loads is external, and nothing it loads is missing (a 404 offline is a 404 forever);
@@ -110,8 +110,8 @@ assert.ok(text('index.html').includes('<title>λWAVES'), 'index.html no longer o
    theme_color and background_color are static; the lab's theme is not (LIGHT ships as the default, DARK and
    SYSTEM are a control away).  There is exactly one colour that is not a guess about which theme is on:
    lab.css's unconditional `html, body { background: … }`, which is what the document IS from first paint
-   until rack.js resolves a theme, in every theme.  It is also the ground the icons are drawn on, so the
-   Android splash (icon on background_color) is one seamless field instead of a dark square on white.
+   until rack.js resolves a theme, in every theme.  The icon is a separate, slightly bluer navy tile copied
+   from the landing page; the splash background still follows the app's own pre-paint ground.
    The LIVE, theme-correct chrome colour is the document's job, not the manifest's: <meta name="theme-color">
    overrides the manifest and setTheme() can rewrite it on every flip.  See the note at the foot of this file. */
 const GROUND = hex((text('lab.css').match(/html,\s*body\s*\{[^}]*background:\s*(#[0-9a-fA-F]{3,8})/) || [])[1] || '');
@@ -147,15 +147,20 @@ assert.ok(existsSync(path.join(LAB, ogRel)), `index.html: og:image names ${ogRel
 console.log(`PASS the link preview is the manifest's own words: description (${mf.description.length} chars) and og:title match the manifest and the ABOUT tagline exactly; og:image → ${ogRel}, ${statSync(path.join(LAB, ogRel)).size} bytes.`);
 
 /* ══ B.  THE ICONS ═══════════════════════════════════════════════════════════════════════════════════════ */
-/* The nine colours are read OUT OF index.html's #title .mark, so an icon that drifts from the real mark
-   fails here rather than looking subtly wrong on someone's home screen. */
-const markSVG = (text('index.html').match(/<svg class="mark"[\s\S]*?<\/svg>/) || [])[0];
-assert.ok(markSVG, 'index.html: could not find the #title .mark svg the icons are built from');
-const MARK = [...markSVG.matchAll(/fill="(#[0-9a-fA-F]{6})"/g)].map((m) => hex(m[1]));
-assert.equal(MARK.length, 9, `index.html: the mark should have nine fills, found ${MARK.length}`);
-assert.ok(/rotate\(45\s+5\s+5\)/.test(markSVG), 'index.html: the mark is no longer rotated 45° about (5,5) — the icons assume it is');
+/* Tabs, installed-app icons and the share image use the landing page's square λ-and-dot identity.
+   The in-app MIR mark remains the original nine-cell palette mark. */
+const iconSVG = text('img/icon.svg'), maskSVG = text('img/icon-maskable.svg');
+const iconPath = (iconSVG.match(/<path [^\n]+\/>/) || [])[0];
+const iconDot = (iconSVG.match(/<circle [^\n]+\/>/) || [])[0];
+assert.ok(iconPath && iconDot, 'icon.svg: the lambda and dot must both be present');
+assert.ok(iconSVG.includes('<rect width="512" height="512" rx="108" fill="#07111e"/>'), 'icon.svg: the landing-page rounded navy tile changed');
+assert.ok(iconPath.includes('fill="#ebb0f2"'), 'icon.svg: the landing-page pink lambda changed');
+assert.ok(iconDot.includes('cx="370" cy="388" r="34" fill="#59baa5"'), 'icon.svg: the landing-page teal dot changed');
+assert.ok(maskSVG.includes('<rect width="512" height="512" fill="#07111e"/>'), 'maskable icon must fill its whole ground');
+assert.ok(maskSVG.includes('scale(.8)'), 'maskable icon must pad the artwork for launcher masks');
+assert.ok(maskSVG.includes(iconPath) && maskSVG.includes(iconDot), 'maskable icon must use the same lambda and dot');
 const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const GROUND_RGB = rgb(GROUND);
+const ICON_GROUND_RGB = rgb('#07111e'), PINK_RGB = rgb('#ebb0f2'), DOT_RGB = rgb('#59baa5');
 
 /* Every icon in the manifest, plus the two the HTML links directly (apple-touch, and the SVG source). */
 const EXTRA = [{ src: './img/icon-apple-180.png', sizes: '180x180', type: 'image/png', purpose: 'any', _html: true }];
@@ -180,34 +185,34 @@ for (const ic of ICONS) {
   for (const [x, y] of [[0, 0], [im.w - 1, 0], [0, im.h - 1], [im.w - 1, im.h - 1], [im.w >> 1, 0], [0, im.h >> 1]]) {
     const p = im.px(x, y);
     assert.equal(p[3], 255, `${rel}: pixel (${x},${y}) is not opaque`);
-    assert.ok(Math.max(...p.slice(0, 3).map((v, i) => Math.abs(v - GROUND_RGB[i]))) <= 3,
-      `${rel}: edge pixel (${x},${y}) is ${p.slice(0, 3)}, expected the ground ${GROUND_RGB}`);
+    assert.ok(Math.max(...p.slice(0, 3).map((v, i) => Math.abs(v - ICON_GROUND_RGB[i]))) <= 3,
+      `${rel}: edge pixel (${x},${y}) is ${p.slice(0, 3)}, expected the navy tile ${ICON_GROUND_RGB}`);
   }
 
-  /* The nine cells, at the centres the geometry puts them.  cell = blockSide/3; the group is rotated 45°
-     about the icon's centre, so local (lx,ly) lands at C + ((lx−ly)/√2, (lx+ly)/√2). */
   const maskable = ic.purpose === 'maskable';
-  const cellUnits = maskable ? 84 : 96;                                   // lab/img/icon*.svg, authored at 512 units
-  const s = im.w / 512, C = im.w / 2, R2 = Math.SQRT1_2;
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
-    const lx = (c - 1) * cellUnits * s, ly = (r - 1) * cellUnits * s;
-    const px = Math.round(C + (lx - ly) * R2), py = Math.round(C + (lx + ly) * R2);
-    const got = im.px(px, py).slice(0, 3), want = rgb(MARK[r * 3 + c]);
-    assert.ok(Math.max(...got.map((v, i) => Math.abs(v - want[i]))) <= 4,
-      `${rel}: cell (${r},${c}) at (${px},${py}) is rgb(${got}); index.html's mark says ${MARK[r * 3 + c]} = rgb(${want})`);
-  }
+  const C = im.w / 2, s = im.w / 512, artScale = maskable ? .8 : 1;
+  const spot = (x, y, want, label) => {
+    const px = Math.round((256 + (x - 256) * artScale) * s);
+    const py = Math.round((256 + (y - 256) * artScale) * s);
+    const got = im.px(px, py).slice(0, 3);
+    assert.ok(Math.max(...got.map((v, i) => Math.abs(v - want[i]))) <= 8,
+      `${rel}: ${label} at (${px},${py}) is rgb(${got}); expected rgb(${want})`);
+  };
+  spot(190, 370, PINK_RGB, 'lambda lower stroke');
+  spot(320, 390, PINK_RGB, 'lambda tail');
+  spot(370, 388, DOT_RGB, 'period');
 
   /* How far the ink actually reaches, measured, not asserted from the source. */
   let maxR = 0, ink = 0;
   for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) {
     const p = im.px(x, y);
-    if (Math.max(...p.slice(0, 3).map((v, i) => Math.abs(v - GROUND_RGB[i]))) > 8) {
+    if (Math.max(...p.slice(0, 3).map((v, i) => Math.abs(v - ICON_GROUND_RGB[i]))) > 8) {
       ink++; maxR = Math.max(maxR, Math.hypot(x + 0.5 - C, y + 0.5 - C));
     }
   }
   const frac = maxR / im.w;
   inkRadius[`${ic.purpose}@${dw}`] = frac;
-  assert.ok(ink > im.w * im.h * 0.15, `${rel}: only ${ink} px of ink — the mark is not drawn`);
+  assert.ok(ink > im.w * im.h * 0.04, `${rel}: only ${ink} px of ink — the mark is not drawn`);
   if (maskable) {
     /* THE SAFE ZONE.  The maskable spec puts it at a centred circle of radius 40% of the icon's width;
        anything outside is the launcher's to eat.  We hold the mark to 38% so there is real clearance. */
@@ -224,13 +229,7 @@ for (const n of [192, 512])
   assert.ok(inkRadius[`maskable@${n}`] < inkRadius[`any@${n}`] - 0.02,
     `the ${n} px maskable icon is not more padded than the "any" one (${(inkRadius[`maskable@${n}`] * 100).toFixed(1)}% vs ${(inkRadius[`any@${n}`] * 100).toFixed(1)}%) — it is the same render under a different purpose`);
 
-/* The two SVG sources the PNGs are rasterised from carry the same nine fills. */
-for (const svg of ['img/icon.svg', 'img/icon-maskable.svg']) {
-  assert.ok(existsSync(path.join(LAB, svg)), `icon source missing: lab/${svg}`);
-  const fills = [...text(svg).matchAll(/<rect[^>]*fill="(#[0-9a-fA-F]{6})"\/>/g)].map((m) => hex(m[1])).slice(-9);
-  assert.deepEqual(fills, MARK, `lab/${svg}: the nine fills have drifted from index.html's mark`);
-}
-console.log(`PASS ${ICONS.length} icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, nine cells = index.html's mark; ink radius ` +
+console.log(`PASS ${ICONS.length} icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, λ-and-dot colours and maskable padding; ink radius ` +
   Object.entries(inkRadius).map(([k, v]) => `${k} ${(v * 100).toFixed(1)}%`).join(' · ') + ' (maskable safe zone 40%).');
 
 /* ══ C.  THE PRECACHE LIST vs THE DIRECTORY ══════════════════════════════════════════════════════════════ */
