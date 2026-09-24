@@ -1,0 +1,8 @@
+// P08 WebView host proof: AGP pinned to what Bubblewrap's shells/android builds with here.
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:8.9.1' }
+}
+allprojects {
+    repositories { google(); mavenCentral() }
+}
