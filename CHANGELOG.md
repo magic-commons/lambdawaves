@@ -11,12 +11,9 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
-## UNRELEASED — not frozen
+## `v0.2.3-alpha.2` — 2026-09-23
 
-Work since `v0.2.3-alpha.1` — 3 waves, 1 commit.  **Nothing here is frozen**: no tag points at it, the numbers may
-still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
-any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
-stable enough to gate on.
+Commit `ea0297c` · waves 113–115 · 2 commits.
 
 - **wave 113**: The keyboard gives its editor the space, not a footer
 - **wave 114**: The keyboard takes the shape of its keys
@@ -25,6 +22,7 @@ stable enough to gate on.
 <details><summary>commits</summary>
 
 - `23a3f83` 2026-09-23 — CHANGELOG for v0.2.3-alpha.1
+- `ea0297c` 2026-09-23 — Refine compact keyboard glass layout
 
 </details>
 
