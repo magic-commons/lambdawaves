@@ -1,0 +1,14 @@
+# Bubblewrap generates the Android project here; only these sources are tracked.
+/*
+!/.gitignore
+!/README.md
+!/build.sh
+!/twa-manifest.json
+!/assetlinks.json
+# explicit, in case the whitelist above is ever loosened
+local/
+out/
+app/build/
+*.apk
+*.aab
+*.keystore

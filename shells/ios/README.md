@@ -29,7 +29,7 @@ cp shells/ios/probe/probe.html shells/ios/www/probe.html
 3. Target **LambdaWaves ▸ General:**
    - Display Name `λWAVES`
    - Minimum Deployments **iOS 26.0**
-   - Supported Destinations: iPhone and iPad (remove the Mac and Vision rows)
+   - Supported Destinations: iPhone and iPad for THIS proof (remove the Mac and Vision rows). The 1.0 App Store record will be **iPad-only** (Josh's call, 2026-09-24): before the store submission, remove the iPhone destination; the iPhone joins the same listing in an update once MIR Focus is ready. Apple lets an app add a device family later, never remove one, so start narrow.
 4. **Signing & Capabilities:** turn on Automatically manage signing, set Team to *(you)* (Personal Team) and Bundle Identifier to `com.magiccommons.lambdawaves`. If a free team says that ID is taken, append `.josh`. A free Apple ID is enough for this proof: the app runs for 7 days per install.
 5. **Replace the template code.** In the navigator, select `ContentView.swift` and `LambdaWavesApp.swift` inside the `LambdaWaves` source folder. Choose Delete ▸ Move to Trash.
    - Drag these five files from `shells/ios/` in Finder onto the top **LambdaWaves** project row: `LambdaWavesApp.swift`, `WebView.swift`, `WebCoordinator.swift`, `BundleSchemeHandler.swift`, `LoopbackServer.swift`.
