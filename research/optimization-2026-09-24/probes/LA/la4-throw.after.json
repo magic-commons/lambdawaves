@@ -1,0 +1,37 @@
+{
+ "A": {
+  "framesDuring": 19,
+  "loopCalls": 20,
+  "errsAdded": [
+   "LOOP probe A: one throw in field.frame"
+  ],
+  "stillScheduling": true
+ },
+ "B": {
+  "loopCallsIn1500ms": 2,
+  "framesDuring": 0,
+  "framesAfterFix": 1,
+  "errsAdded": [
+   "LOOP probe B: a throw before the tier read, every frame"
+  ]
+ },
+ "C": {
+  "loopCallsIn1500ms": 92,
+  "errsAdded": [
+   "LOOP probe C: field.frame throws every frame"
+  ]
+ },
+ "D": {
+  "loopCallsIn1500ms": 1,
+  "framesAfterFix": 1,
+  "errsAdded": [
+   "LOOP probe D: field.frame throws every frame, paused"
+  ]
+ },
+ "errsAll": [
+  "LOOP probe A: one throw in field.frame",
+  "LOOP probe B: a throw before the tier read, every frame",
+  "LOOP probe C: field.frame throws every frame",
+  "LOOP probe D: field.frame throws every frame, paused"
+ ]
+}

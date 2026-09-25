@@ -978,7 +978,7 @@ export function createCapture(LW, opts = {}) {
    * one costs; it runs on a button press, not on a frame.)
    */
   function planLoop(o = {}) {
-    const P = LW.period;
+    const P = o.period || LW.period;   // a caller that already holds the density period (rack.js's CAPTURE hover) hands it in
     /* ── WAVE 58 (REVIEW-2 §1.2): THE ENERGIES MUST BE THE ONES THE LAB'S OWN PERIOD READER USES ────────────
      * `LW.period` is computed by rack.js from `sturm.P ? occupiedEigen() : reg.populated().map(reg.Ediag)`, and
      * its comment says why: under a PROPAGATOR (the STURMIAN switch, which ships) `reg.Ediag(a)` is the LABEL's
@@ -996,7 +996,7 @@ export function createCapture(LW, opts = {}) {
     })();
     const observable = o.observable || VIEW_NAMES[LW.mat.view | 0] || 'density';
     let wave = null;
-    if (energies && energies.length && (viewCarriesGlobalPhase(observable) || o.pixelExact)) {
+    if (o.wave === undefined && energies && energies.length && (viewCarriesGlobalPhase(observable) || o.pixelExact)) {   // …and the psi period, which then rides in through `o`
       try { wave = wavePeriod(energies); } catch (_) { wave = null; }
     }
     return planPeriodRecording(P, Object.assign({ t0: LW.clock.t, rate: LW.clock.rate, energies, observable, wave }, o));

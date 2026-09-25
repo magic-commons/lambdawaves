@@ -1,0 +1,37 @@
+{
+ "storm": {
+  "framesOfStimulus": 68,
+  "statAnswersAfterMs": 152700,
+  "statTries": 19,
+  "scansRunDuringAndAfter": null,
+  "workerBusyMs": null,
+  "readoutLandsAfterMs": null,
+  "readout": "…",
+  "lastBz": 0.0019
+ },
+ "stormErrs": [],
+ "timeout": {
+  "log": [
+   [
+    "key 1 (Bz .003)",
+    0
+   ],
+   [
+    "key 2 (Bz .004)",
+    1503
+   ],
+   [
+    "key 3 (Bz .005)",
+    3003
+   ]
+  ],
+  "readoutLandsAtMs": null,
+  "readout": "≈ 12563 a.u. · 303.9 fs",
+  "expectT": 12563.309235810799,
+  "readoutMatchesKey3": true,
+  "scansRun": 3,
+  "workerBusyMs": 43026,
+  "statAfterLandingMs": 1
+ },
+ "timeoutErrs": []
+}

@@ -40,7 +40,7 @@ import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
 import { createMolecule } from './moleculeview.js';
 import { createMOPanel } from './moview.js';
 import { createPulse } from './pulseview.js';
-import { createCapture, maxPictureSize } from './capture.js';
+import { createCapture, maxPictureSize, viewCarriesGlobalPhase } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
@@ -776,22 +776,26 @@ export async function boot(dom) {
      back to that road.  The SLAP trigger, the K key, LAUNCH and every forced period reader stay synchronous. ── */
   const makeWorker = (label, timeoutMs = 8000) => {
     let w = null, seq = 0, failed = typeof Worker !== 'function', wantedParked = false, starts = 0; const waiting = new Map();
-    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
+    /* LA6 · A TIMED-OUT JOB IS STILL RUNNING.  The worker is FIFO and cannot drop a job, so a caller that must know when
+       the WORKER is free again (the period scan's one-in-flight law) passes `onLate`: the real reply, or the failure, is
+       handed to it after the promise has already resolved { error: 'timeout' }.  Callers that pass nothing are untouched. */
+    const late = new Map();
+    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); for (const f of late.values()) f({ error: why }); late.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
     /* Constructing a module worker fetches and parses its whole private module graph. Three identical workers used
        to do that at the ready boundary even when the session never bowed, scanned or opened a heavy card. */
     const ensure = () => {
       if (w || failed) return w;
       try {
         w = new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' }); starts++;
-        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } };
+        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } else if (late.has(e.data.id)) { const f = late.get(e.data.id); late.delete(e.data.id); f(e.data); } };
         w.onerror = (e) => fail('worker error: ' + (e && e.message || e));
         /* Message order is FIFO. A worker first requested while the page is away sees PARK before speculative work. */
         if (wantedParked) w.postMessage({ id: 0, op: 'park' });
       } catch (e) { fail('worker construction failed: ' + (e && e.message || e)); }
       return w;
     };
-    const raw = (msg, transfer) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
-    const call = (msg, transfer) => busyWrap(raw(msg, transfer));   // wave 48: every worker job is a BUSY job
+    const raw = (msg, transfer, onLate) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); if (onLate) late.set(id, onLate); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
+    const call = (msg, transfer, onLate) => busyWrap(raw(msg, transfer, onLate));   // wave 48: every worker job is a BUSY job
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
     const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
     return { label, get ok() { return !failed; }, get started() { return !!w; }, get starts() { return starts; }, call, raw,
@@ -832,6 +836,11 @@ export async function boot(dom) {
        not raise the cursor busy mark; the first user-requested bow still starts the same worker immediately. */
     if (!workerWarmStarted && maths.ok && !clock.playing && room >= 1) { workerWarmStarted = true; maths.raw({ op: 'warm', ham: 'hydrogen', Z: 1 }); }
     if (!kickReady() && !clock.playing && room >= 1) kickWarm(Math.min(4, Math.max(1, room - 1)));
+    /* LA5 · NOTHING LEFT TO WARM, SO NOTHING IS ARMED.  This used to re-arm every 2 s forever — a timer and an idle
+       callback per tick on a paused, untouched instrument (AUDIT-B FB9, AUDIT-F F15).  The tables are keyed on the
+       Hamiltonian in force (kick.js tablesReady), so switchHamiltonian — the one funnel of every OPERATOR, Z, ELEMENT,
+       LAUNCH, restore and undo change — re-arms the chain; the resume road re-arms it too (warmArm(60)). */
+    if (kickReady() && (workerWarmStarted || !maths.ok)) return;
     warmArm(kickReady() ? 2000 : clock.playing ? 750 : 120);
   };
   const warmArm = (ms) => {
@@ -918,6 +927,13 @@ export async function boot(dom) {
 
   /* ── the router ───────────────────────────────────────────────────────── */
   let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9, dragging = false, inLoop = false;
+  /* OPTIMIZATION 2026-09-24 · LA1: the WHOLE loop's own ms, from entry (before the occlusion burst and the modulation
+     pump, which perf.ring's tFrame0 leaves out), 60 deep, beside perf.ring — LW.perf.loopMedian reads it.  Both rings
+     are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
+     last frame alone: AUDIT-B FB2, AUDIT-F F5). */
+  const loopRing = new Float64Array(60);
+  const loopFaults = new Set(); let lastFault = '';                  // LA4: the messages a thrown frame has reported, and the last frame's own
+  const ringMedian = (r) => { const a = Array.from(r).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; };
   let winStart = 0, winFrames = 0, winRecon = 0, winSteps = 0;
   /* a schedule() from INSIDE the loop only raises `pending` — the loop's own tail registers the next frame.  Before wave
      45 it registered a second callback (rafId is 0 while the loop runs), and every in-loop schedule — H₂ running, a
@@ -949,9 +965,13 @@ export async function boot(dom) {
   document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
   let exportLocked = false;
   function schedule(tier) {
-    if (exportLocked) return;
     if (modSyncing) return;                    // wave 52: a re-base writes what is already there (modSyncBases)
     if (tier > pending) pending = tier;
+    /* LA8 · AN EXPORT RECORDS THE ASK, IT ARMS NOTHING.  This return used to come first, so a REBUILD asked for
+       during an export (GRID, DOMAIN, SPACE, OPERATOR) was dropped: the export's finally raises only RECONSTRUCT, and
+       the field went on marching the old grid under a control that showed the new one (AUDIT-F F8).  No rAF is armed
+       while locked (render-exact's H9 witness); the finally's schedule() arms one frame at max(pending, RECONSTRUCT). */
+    if (exportLocked) return;
     /* WAVE 54 · A HIDDEN PAGE ASKS FOR NO FRAMES.  `pending` still rises, so nothing asked for is lost — the
        resume schedules once and the next frame does all of it.  See the measurement in setPageHidden. */
     if (page.hidden) { stats.scheduled = false; return; }
@@ -1106,6 +1126,9 @@ export async function boot(dom) {
     rafId = 0;
     if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
+    const tLoop0 = performance.now();                                 // LA1: the whole loop, timed from entry
+    let fault = '';
+    try {   /* LA4 · the body is deliberately NOT re-indented (one exception anywhere used to end the loop for the session: AUDIT-B FB7) */
     if (field.ok && field.setOcclusion && (occludeDirty || nowMs - occludeAt > 300)) refreshOcclusion(nowMs);   // layout is read HERE, before the writes below
     if (mat.axis!==false && mat.axisMode==='corner') placeCornerAxis();
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
@@ -1162,7 +1185,9 @@ export async function boot(dom) {
           /* a refused play ("nothing-to-run": no route and no open window) is retried once a second, not
              every frame — so a source routed later joins a running transport within a second */
           if (r && r.ok === false) { linkFollowed = null; linkRetryAt = nowMs + 1000; }
-          if (modView) modView.sync();
+          else if (modView) modView.sync();   /* LA2: a REFUSED play changed neither the model nor `playing` (host.js refuses
+                                                 before it touches either), so its repaint was the same window again —
+                                                 a whole closed window, once a second, while playing (AUDIT-B FB3) */
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
@@ -1210,7 +1235,7 @@ export async function boot(dom) {
     }
     if (autoQ.lastMs && nowMs - autoQ.lastMs > 250) busyFlash(600);    // wave 48: a gap that long means the thread WAS blocked by work nobody wrapped — say so for 600 ms
     autoQ.lastMs = nowMs;
-    perf.ring[perf.counts.frames % 60] = 0;                            // filled at the tail with this frame's own main-thread cost
+    const slot = perf.counts.frames % 60; perf.ring[slot] = 0; loopRing[slot] = 0;   // filled at the tail with this frame's own main-thread cost — the SAME slot (LA1)
     if (autoQ.n >= 24) {
       if (quality.auto && autoQ.presented >= 18 && autoQ.ema) {
         const budget = perfBudgetMs();
@@ -1350,17 +1375,40 @@ export async function boot(dom) {
       winStart = now; winFrames = winRecon = winSteps = 0;
     }
     inLoop = false;
-    /* WAVE 105 · A LIVE MICROPHONE IS ITS OWN REASON TO KEEP THE FRAME.  Without this the loop
-       quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
-       the transport stopped opened the device and then never read it: the meter sat at 0.00, the
-       followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
-    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
-    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
+    loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
     if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
-    const spent = performance.now() - tFrame0;
+    const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
-    perf.ring[perf.counts.frames % 60] = spent;                        // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
+    perf.ring[slot] = spent;                                          // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
+    loopRing[slot] = tEnd - tLoop0;                                   // LA1: …and the whole loop's, from entry — LW.perf.loopMedian
+    } catch (e) {
+      fault = String(e && e.message || e); loopFault(fault, e);
+    } finally {
+      /* A THROWN FRAME STILL ENDS LIKE A FRAME: `inLoop` comes down and the loop re-arms on the normal tail's own
+         condition — so a reader that throws once costs one frame, not the session.  A throw that REPEATS (the same
+         message on consecutive frames) does not re-arm on `pending` alone: a throw before the tier read leaves
+         `pending` unconsumed, and re-arming on it would spin a paused instrument at the display rate forever.  The
+         next schedule() arms a frame as it always does. */
+      if (inLoop) { inLoop = false; loopTail(fault !== '' && fault === lastFault); }
+      lastFault = fault;
+    }
+  }
+  /* WAVE 105 · A LIVE MICROPHONE IS ITS OWN REASON TO KEEP THE FRAME.  Without this the loop
+     quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
+     the transport stopped opened the device and then never read it: the meter sat at 0.00, the
+     followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
+  function loopTail(faultRepeat) {
+    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || (pending && !faultRepeat) || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
+    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
+  }
+  /** LA4: a thrown frame is REPORTED ONCE per distinct message (32 kept) to window.__e and the console — a throw that
+   *  repeats every frame must not flood either */
+  function loopFault(msg, e) {
+    if (loopFaults.has(msg) || loopFaults.size >= 32) return;
+    loopFaults.add(msg);
+    (window.__e = window.__e || []).push('LOOP ' + msg);
+    console.error('λWAVES frame loop: ' + msg + ' — that frame was abandoned; the loop goes on', e);
   }
   function meterSnapshot() {
     const rs = stateReaders().rendered;
@@ -1813,6 +1861,7 @@ export async function boot(dom) {
     let exact = null, exactRun = null;
     const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
+    let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩
     const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
     const rc1 = el('div', 'row tight', gcap);
@@ -1856,13 +1905,38 @@ export async function boot(dom) {
     }
     function capStale() { if (capPlan && capKey !== capKeyNow()) capPaint(); }
     function capMakePlan(force) {
-      if (!force && capPlan && capKey === capKeyNow()) return capPlan;
+      if (!force && capPlan && capKey === capKeyNow() && !capSoft) return capPlan;
+      capWait = false; capSoft = false;
       try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get() }); capKey = capKeyNow(); }
       catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
       capPaint(); return capPlan;
     }
+    /* LA7 · THE HOVER ASKS, IT DOES NOT FORCE.  Wave 58's hover plan ran the FORCED period read — one or two synchronous
+       2·10⁶-step scans on an incommensurate state (0.36 s on the BOX, 0.76 s in its phase view, 1.3 s under STURMIAN)
+       every time the pointer crossed this group (AUDIT-F F2).  The hover now takes the frame path's answer: fresh, the
+       exact half, or posted to the scan worker — and while it runs the readout says so and ONE PERIOD stays down; the
+       landing re-plans.  The plan it paints is the PLAN button's: the same density period (bit-identical in the worker)
+       and the same W, because W is used only when T_ψ is EXACT, and the exact half of T_ψ is microseconds.  The one
+       field it leaves unset is T_ψ's near-recurrence (Twave), which nothing reads; so a hover's plan is painted and never
+       handed to a caller (capSoft).  ⟳, G, PLAN, LW.period and LW.capturePlan stay forced. */
+    const capWaveExact = () => {
+      if (!viewCarriesGlobalPhase(mat.view | 0)) return null;
+      const E = periodEnergies(); return E && E.length ? densityPeriodExact([0].concat(Array.from(E))) : null;
+    };
+    function capHover() {
+      if (capPlan && capKey === capKeyNow() && !capWait) return;
+      const soon = __LW_hooks.periodSoon ? __LW_hooks.periodSoon() : null;
+      if (!soon) { capMakePlan(false); return; }
+      if (soon.settling) { if (!capWait) { capWait = true; capPaint(); } return; }
+      capWait = false; capSoft = true;
+      try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get(), period: soon.period, wave: capWaveExact() }); capKey = capKeyNow(); }
+      catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
+      capPaint();
+    }
+    __LW_hooks.onPeriodLand = () => { if (capWait) capHover(); };
     function capPaint() {
       const P = capPlan, stale = P && capKey !== capKeyNow();
+      if (capWait) { ui.capPlanRo.set('…', ''); ui.capPlanRo.setSub('settling — the recurrence scan runs off the frame; the plan appears when it lands'); ui.capLoop.root.disabled = true; return; }
       if (!P) { ui.capPlanRo.set('—', ''); ui.capPlanRo.setSub('press PLAN (or hover this group) and period.js will say what closes here, for the observable in force'); ui.capLoop.root.disabled = true; return; }
       ui.capPlanRo.set(stale ? P.label + ' · STALE' : P.label + (P.undersampled ? ' · UNDERSAMPLED' : ''), stale ? 'warn' : P.undersampled ? 'warn' : P.ok ? 'ok' : 'warn');
       ui.capPlanRo.setSub((stale ? 'THE STATE OR THE VIEW HAS MOVED since this plan was made — press PLAN. · ' : '')
@@ -1947,7 +2021,7 @@ export async function boot(dom) {
         ui.capExact.setLabel('EXPORT FRAMES'); ui.capExact.on = false; capPaint();
       }
     }
-    gcap.addEventListener('pointerenter', () => { if (!capBusy) capMakePlan(false); });
+    gcap.addEventListener('pointerenter', () => { if (!capBusy) capHover(); });
     capShowLimits(); capPaint();
     capApi = { exportFrames: capExportFrames, get exact() { return exactRenderer(); }, get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
     const gq = group(ui.set.body, 'FIELD QUALITY');
@@ -2222,6 +2296,7 @@ export async function boot(dom) {
     setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
   }
   function switchHamiltonian(id) {
+    if (!warmTimer && !warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
     const H = setHamiltonian(id);
     if (id !== 'well' && gas.on) { gas.off(); schedule(TIER.RECONSTRUCT); }
     reg.setEnergies(energyOf);
@@ -2979,6 +3054,35 @@ export async function boot(dom) {
     const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
     let periodVersion = -1, lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
+    /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
+       FIFO worker that cannot drop stale work: 4 s of a moving register (keyboard auto-repeat on ZEEMAN B, a script)
+       jammed it for over two minutes (AUDIT-F F3, REFUTE-B/D).  Now one scan runs; a newer key replaces `scanWant`; the
+       worker is free again only when ITS reply arrives — a timed-out scan is tracked to that reply (makeWorker onLate),
+       never to the promise, or a timeout plus a fresh post would put two scans back in the queue (REFUTE-D). */
+    let scanBusy = false, scanWant = null;
+    function scanPost(key, energies) {
+      if (scanBusy) { scanWant = { key, energies }; return; }
+      scanBusy = true;
+      const done = (r) => {
+        scanBusy = false; scanLand(key, r);
+        if (scanWant) { const q = scanWant; scanWant = null; if (periodPending && sameKey(periodPending, q.key)) scanPost(periodPending, q.energies); }
+      };
+      scan.call({ op: 'period', energies, horizon: 2e4 }, undefined, done).then((r) => { if (!(r && r.error === 'timeout')) done(r); });
+    }
+    function scanLand(key, r) {
+      if (!r || r.error) { if (periodPending && sameKey(periodPending, key)) periodPending = null; return; }
+      if (!periodPending || !sameKey(periodPending, key)) return;          // a later state: this answer is stale
+      const P = Object.assign({}, r); delete P.id; delete P.op;
+      lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
+      paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
+      if (__LW_hooks.onPeriodLand) __LW_hooks.onPeriodLand();          // LA7: a CAPTURE hover waiting on this scan plans now
+    }
+    /* …and a dial held down by an ARROW KEY is a gesture too (auto-repeat bumps reg.version ~30×/s with no pointer):
+       the wave-44 hold-off below reads it beside pointerHeld; a released key lets the settled scan run once. */
+    let keyHeld = false;
+    document.addEventListener('keydown', (e) => { if (e.repeat && e.target && e.target.closest && e.target.closest('.k, .fd')) keyHeld = true; }, true);
+    const keyReleased = () => { if (!keyHeld) return; keyHeld = false; if (periodSettling) schedule(TIER.PRESENT); };
+    document.addEventListener('keyup', keyReleased, true); window.addEventListener('blur', keyReleased);
     /* the scan's key, as numbers compared in place (wave 45: it was a string built on every frame) */
     const pk = { v: -2, fz: 0, bz: 0, h: '', mix: false, s: -1 };
     const keyNow = () => ({ v: reg.version, fz: reg.field.Fz, bz: reg.field.Bz, h: getHamiltonian().id, mix: !!reg.transition, s: sturm.P ? sturm.lambda : -1 });
@@ -3001,7 +3105,7 @@ export async function boot(dom) {
          periodPending got a new key sixty times a second and this posted a fresh O(pairs × 2·10⁶)
          scan to the worker on every one of them, for as long as the rate turned.  Same law, same
          line — an expensive answer waits until the movement stops. */
-      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
+      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
       if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
       if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
@@ -3014,16 +3118,7 @@ export async function boot(dom) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
            answer lands — a BOX bow populates 56 incommensurate well energies and the scan measured 1.2 s on the first
            frame after the pointer lifted.  Forced readers (LW.period, ⟳, the digest) still scan here, synchronously. */
-        if (!periodPending || !sameKey(periodPending, key)) {
-          periodPending = key;
-          scan.call({ op: 'period', energies: Array.from(Es), horizon: 2e4 }).then((r) => {
-            if (!r || r.error) { periodPending = null; return; }
-            if (periodPending !== key) return;                              // a later state: this answer is stale
-            const P = Object.assign({}, r); delete P.id; delete P.op;
-            lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
-            paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
-          });
-        }
+        if (!periodPending || !sameKey(periodPending, key)) { periodPending = key; scanPost(key, Array.from(Es)); }   // LA6: posted, or waiting behind the one in flight
         periodSettling = true; return lastPeriod;
       }
       const wasSettling = periodSettling;
@@ -3062,6 +3157,7 @@ export async function boot(dom) {
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
     function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
     __LW_hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
+    __LW_hooks.periodSoon = () => { const P = periodNow(); return { period: P, settling: periodSettling }; };   // LA7: the CAPTURE hover's read — the frame path's own, never forced
     const laps = () => Math.floor(clock.t / clock.window);
     const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
       ? v.toFixed(decimals)
@@ -3630,8 +3726,17 @@ export async function boot(dom) {
    * transparent layout box around a disconnected card or the modulation constellation. Otherwise the
    * frame is cut into a moving rectangle wherever that box goes. Rectangles are gathered here — one
    * layout burst, at most every 300 ms while a frame runs, and never inside a paint. */
+  const NO_OCCLUSION = [];
   function refreshOcclusion(nowMs) {
     occludeDirty = false; occludeAt = nowMs;
+    /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
+       (lab.css: the racks, transport, sheet and both lists !important; #floats and #notebook !important; #keymap), and
+       #keysheet no longer exists — so the burst's answer is exactly [] and its layout reads bought nothing, every 300 ms
+       (AUDIT-B FB5, REFUTE-E/F).  The empty block is still HANDED OVER, because the line pass still runs under H (the
+       slice outline) and the rectangles from before the hide must not punch holes in it; setOcclusion compares its
+       signature, so an already-empty block costs a string compare.  The body-class observer below re-dirties the
+       burst on the way back. */
+    if (document.body.classList.contains('ui-hidden')) { if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
     const cb = dom.canvas.getBoundingClientRect(), out = [], body = document.body;
     const rect = (el) => { if (!el || el.hidden || getComputedStyle(el).visibility === 'hidden') return null;
       const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return null;
@@ -5705,7 +5810,7 @@ export async function boot(dom) {
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { const a = Array.from(perf.ring).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }, resetRing() { perf.ring.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */

@@ -1,0 +1,378 @@
+{
+ "states": {
+  "1s+2pz": {
+   "hoverMs": 1.16,
+   "faceAtHover": "EXACT LOOP",
+   "landedMs": 238,
+   "hoverWasSoft": true,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 3,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    },
+    "forced": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 3,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "EXACT LOOP",
+    "cls": "ro wide",
+    "sub": "EXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 3 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the observable is phase, which paints the GLOBAL phase of psi, so the loop runs to T_psi = 2*pi/gcd{|E|} = 3 x T_rho and the hue closes with it. · period used: wave (3 laps of T_ρ)",
+    "onePeriodDisabled": false
+   },
+   "forcedFace": "EXACT LOOP",
+   "kind": "exact",
+   "label": "EXACT LOOP"
+  },
+  "box-density": {
+   "hoverMs": 1.6,
+   "faceAtHover": "…",
+   "landedMs": 557,
+   "hoverWasSoft": true,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (21 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 7893.6873 a.u. (190.94 fs), and it MISSES: the worst pair is 0.419 of a turn from closing (41.86% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  },
+  "box-phase": {
+   "hoverMs": 0.72,
+   "faceAtHover": "…",
+   "landedMs": 546,
+   "hoverWasSoft": true,
+   "plansDiffer": [
+    "plan",
+    "Twave"
+   ],
+   "planDiffDetail": [
+    [
+     "plan",
+     {
+      "T": 7893.687290000279,
+      "N": 180,
+      "fps": 30,
+      "dt": 43.853818277779325,
+      "seconds": 6,
+      "rate": 1315.6145483333798,
+      "requestedRate": 4,
+      "by": "seconds",
+      "idealFrames": 180,
+      "clamped": false,
+      "clampedLow": false,
+      "clampedHigh": false,
+      "rateShift": 327.90363708334496,
+      "seconds_fs": 190.9391646012709,
+      "observable": "phase",
+      "carriesGlobalPhase": true,
+      "usedPeriod": "density",
+      "Tdensity": 7893.687290000279,
+      "Twave": null,
+      "laps": 1,
+      "pixelExact": false,
+      "phaseNote": "WARNING: the observable is phase, which paints the GLOBAL phase of psi - psi(t+T_rho) = e^{i phi} psi(t), so the hue has turned by the seam and it WILL show. No exact psi period was available to loop to instead.",
+      "framesPerDensityPeriod": 180,
+      "undersampled": false,
+      "schedule": {
+       "T": 7893.687290000279,
+       "N": 180,
+       "t0": 0,
+       "dt": 43.853818277779325,
+       "endpoint": "exclusive"
+      }
+     },
+     {
+      "T": 7893.687290000279,
+      "N": 180,
+      "fps": 30,
+      "dt": 43.853818277779325,
+      "seconds": 6,
+      "rate": 1315.6145483333798,
+      "requestedRate": 4,
+      "by": "seconds",
+      "idealFrames": 180,
+      "clamped": false,
+      "clampedLow": false,
+      "clampedHigh": false,
+      "rateShift": 327.90363708334496,
+      "seconds_fs": 190.9391646012709,
+      "observable": "phase",
+      "carriesGlobalPhase": true,
+      "usedPeriod": "density",
+      "Tdensity": 7893.687290000279,
+      "Twave": 7893.698342426883,
+      "laps": 1,
+      "pixelExact": false,
+      "phaseNote": "WARNING: the observable is phase, which paints the GLOBAL phase of psi - psi(t+T_rho) = e^{i phi} psi(t), so the hue has turned by the seam and it WILL show. No exact psi period was available to loop to instead.",
+      "framesPerDensityPeriod": 180,
+      "undersampled": false,
+      "schedule": {
+       "T": 7893.687290000279,
+       "N": 180,
+       "t0": 0,
+       "dt": 43.853818277779325,
+       "endpoint": "exclusive"
+      }
+     }
+    ],
+    [
+     "Twave",
+     null,
+     7893.698342426883
+    ]
+   ],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 7893.698342426883
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (21 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 7893.6873 a.u. (190.94 fs), and it MISSES: the worst pair is 0.419 of a turn from closing (41.86% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  },
+  "stark": {
+   "hoverMs": 0.5,
+   "faceAtHover": "NO LOOP",
+   "landedMs": 11,
+   "hoverWasSoft": true,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": null,
+     "T": 0,
+     "laps": null,
+     "pixelExact": null,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": null,
+     "T": 0,
+     "laps": null,
+     "pixelExact": null,
+     "Twave": null
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "NO LOOP",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD and no near-recurrence to offer - a static Stark field: the Stark energies are not commensurate. There is nothing here that closes; record a free clip instead.",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NO LOOP",
+   "kind": "none",
+   "label": "NO LOOP"
+  },
+  "2p+-phase": {
+   "hoverMs": 0.58,
+   "faceAtHover": "EXACT LOOP",
+   "landedMs": 206,
+   "hoverWasSoft": true,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 1,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    },
+    "forced": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 1,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "EXACT LOOP",
+    "cls": "ro wide",
+    "sub": "EXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 2 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the DENSITY never changes here - one energy - but the observable is phase, which paints the GLOBAL phase of psi: it turns at T_psi = 2*pi/|E| and the picture turns with it, so the loop runs to T_psi and closes there. One frame would have been a still of something that moves.. · period used: wave (1 lap of T_ρ)",
+    "onePeriodDisabled": false
+   },
+   "forcedFace": "EXACT LOOP",
+   "kind": "exact",
+   "label": "EXACT LOOP"
+  },
+  "sturmian": {
+   "hoverMs": 0.8,
+   "faceAtHover": "…",
+   "landedMs": 784,
+   "hoverWasSoft": true,
+   "plansDiffer": [
+    "plan",
+    "Twave"
+   ],
+   "planDiffDetail": [
+    [
+     "plan",
+     {
+      "T": 10143.067491546042,
+      "N": 180,
+      "fps": 30,
+      "dt": 56.350374953033565,
+      "seconds": 6,
+      "rate": 1690.511248591007,
+      "requestedRate": 4,
+      "by": "seconds",
+      "idealFrames": 180,
+      "clamped": false,
+      "clampedLow": false,
+      "clampedHigh": false,
+      "rateShift": 421.62781214775174,
+      "seconds_fs": 245.34906972860858,
+      "observable": "phase",
+      "carriesGlobalPhase": true,
+      "usedPeriod": "density",
+      "Tdensity": 10143.067491546042,
+      "Twave": null,
+      "laps": 1,
+      "pixelExact": false,
+      "phaseNote": "WARNING: the observable is phase, which paints the GLOBAL phase of psi - psi(t+T_rho) = e^{i phi} psi(t), so the hue has turned by the seam and it WILL show. No exact psi period was available to loop to instead.",
+      "framesPerDensityPeriod": 180,
+      "undersampled": false,
+      "schedule": {
+       "T": 10143.067491546042,
+       "N": 180,
+       "t0": 0,
+       "dt": 56.350374953033565,
+       "endpoint": "exclusive"
+      }
+     },
+     {
+      "T": 10143.067491546042,
+      "N": 180,
+      "fps": 30,
+      "dt": 56.350374953033565,
+      "seconds": 6,
+      "rate": 1690.511248591007,
+      "requestedRate": 4,
+      "by": "seconds",
+      "idealFrames": 180,
+      "clamped": false,
+      "clampedLow": false,
+      "clampedHigh": false,
+      "rateShift": 421.62781214775174,
+      "seconds_fs": 245.34906972860858,
+      "observable": "phase",
+      "carriesGlobalPhase": true,
+      "usedPeriod": "density",
+      "Tdensity": 10143.067491546042,
+      "Twave": 10143.067491546042,
+      "laps": 1,
+      "pixelExact": false,
+      "phaseNote": "WARNING: the observable is phase, which paints the GLOBAL phase of psi - psi(t+T_rho) = e^{i phi} psi(t), so the hue has turned by the seam and it WILL show. No exact psi period was available to loop to instead.",
+      "framesPerDensityPeriod": 180,
+      "undersampled": false,
+      "schedule": {
+       "T": 10143.067491546042,
+       "N": 180,
+       "t0": 0,
+       "dt": 56.350374953033565,
+       "endpoint": "exclusive"
+      }
+     }
+    ],
+    [
+     "Twave",
+     null,
+     10143.067491546042
+    ]
+   ],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 10143.067491546042,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 10143.067491546042,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 10143.067491546042
+    }
+   },
+   "facesEqual": true,
+   "apiPlanFalseEqualsForced": true,
+   "apiRecomputed": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (11 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 10143.067 a.u. (245.35 fs), and it MISSES: the worst pair is 0.235 of a turn from closing (23.46% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  }
+ },
+ "found": true,
+ "errs": []
+}

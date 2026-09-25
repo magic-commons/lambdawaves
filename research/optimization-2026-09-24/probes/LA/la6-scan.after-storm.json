@@ -1,0 +1,15 @@
+{
+ "storm": {
+  "readoutMatchesLastKey": true,
+  "expectT": 5467.540705717647,
+  "framesOfStimulus": 72,
+  "statAnswersAfterMs": 3077,
+  "statTries": 1,
+  "scansRunDuringAndAfter": 2,
+  "workerBusyMs": 13946,
+  "readoutLandsAfterMs": 10006,
+  "readout": "≈ 5468 a.u. · 132.3 fs",
+  "lastBz": 0.0023
+ },
+ "stormErrs": []
+}
