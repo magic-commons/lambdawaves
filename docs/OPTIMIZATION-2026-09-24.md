@@ -115,6 +115,14 @@ a median (every earlier "loop median" was one frame).
 
 The factorised sum (26× faster on the same thread) was rejected by Sol's law check: it flips a displayed `-0.00`.
 
+### Wave 125 · Josh's rulings, built
+
+| item | what | proof | class |
+|---|---|---|---|
+| W125-1 | the gas table is the default; `?gastab=0` / `__LW.gasTable(false)` opt out; armed at boot, built in idle slices at the first AXIAL launch; an export in flight defers the landing | Electron BOX 128³ 28.2 → 73.5 fps, 96³ 54 → 117, 64³ 111 → 119 (cap); Firefox reconstruct 128³ 46.75 → 8.35 ms; ≤ 1 fp16 ulp, ≤ 0.021 % pixels one level; first AXIAL press 19.0 ms (20.6 before); a default boot builds nothing (0 idle callbacks in 10 s idle); old fixture GREEN with `--query gastab=0`, new fixture `digest-lock-base-w125.json` GREEN ×3 | N3, ruled |
+| W125-2 | AUTO SCALE → 1 on the playing→paused edge (+ PRESENT), its measurement window restarted on that edge | paused picture 0.85 → 1 on the edge frame; a 3 s paused drag 0.85 → 0.35 before, stays 1 after; auto-rotate while paused 0 changes; AUTO SCALE off: unchanged; render-exact 40/40 | BUG, ruled |
+| W125-3 | phone/tablet first-run material: tinted, frost OFF (`lab/first-run.js`); desktop unchanged; stored choices win; the phone's crossing override stays | `tests/first-run.test.mjs` 4/4; headless Firefox with touch prefs: tablet/phone newcomers tinted/off, a returning refractive+always choice kept; official-defaults-palette green. Note: a returning tablet user who never pressed CARD STYLE now gets TINTED (wave 51: a saved-but-never-chosen card is not a choice) | ruled |
+
 ### Lane N · archaeology (after the merge)
 
 | item | what | proof | class |

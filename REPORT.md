@@ -2823,3 +2823,19 @@ construction reads (h2view, chemview, and modDodge's pill read) are guarded like
 before ready 33.2 → 0 ms. And nine low-coupling blocks left `boot()` for their own modules — motion-pref, busy-mark,
 worker-pool, accent-wheel, sw-client, badges, rack-menus, menubar, window-chrome — one commit each with the lock, the
 node suites, the serialize bytes and the stylehash green after every one: rack.js 6238 → 5635 lines, no new globals.
+
+### wave 125: The commissioner's three rulings — the gas table by default, AUTO SCALE home on pause, tinted glass for a phone's first visit
+
+Josh read the run and ruled (2026-09-25 morning): the Hermite gas table becomes the default, since it touches only the
+BOX's axial-gas basis and nothing a first visit shows (`?gastab=0` and `__LW.gasTable(false)` opt out; the table is armed
+at boot but built only at the first AXIAL launch, in idle slices, and an export in flight defers its landing so a
+render-exact run never switches kernels midway). The BOX at 128³ runs at 73.5 fps in Electron where it ran at 28 after
+the exact trims and 6.7 before the run; the first AXIAL press costs 19 ms, the same as before; the lock has a second
+fixture with the table on, and the old fixture with `--query gastab=0` still proves everything else exact. AUTO SCALE
+returns to 1 on the playing→paused edge, once, with a PRESENT — and its measurement window restarts on that edge, because
+a paused pointer drag presents frames without new intervals and would otherwise walk the scale from 0.85 to 0.35 on the
+stale playing average; a 3 s paused drag now stays at 1. And a NEW user on a phone or a tablet meets tinted glass with
+frost OFF (`lab/first-run.js`, a pure function of the app's own phone/tablet predicate; the desktop's refractive frost
+ALWAYS is unchanged; stored choices win, and the phone's frost override at the crossing stays) — proven in headless
+Firefox with its own touch prefs, no stubs: tablet and phone newcomers tinted/off, a returning refractive choice kept.
+CLEAR stays STATE's. The glass on the desktop stays exactly as it is.
