@@ -4,7 +4,7 @@ import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
 import { renderNotebook } from './notebook-render.js';
-import { reworkNative, planeModel, infoPanel } from './native-ui.js';
+import { reworkNative, planeModel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -415,7 +415,7 @@ export async function boot(dom) {
   }
 
 
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', modulation: 'control', settings: 'other', about: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
@@ -440,7 +440,7 @@ export async function boot(dom) {
      paused, nothing is governed and the user's grid comes back at once.  quality.res stays the USER's choice (and the
      project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
-  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
+  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
@@ -1275,9 +1275,9 @@ export async function boot(dom) {
              frame, no texture destroyed or rebuilt — and the ray-march cost is linear in it. Only when two step
              drops (×0.7, ×0.5) are not enough does the grid ladder move, which is the destroy/recreate that a
              driver under load likes least. Recovery walks back in the opposite order: grid, then steps. */
-          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.PRESENT); }
-          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
-        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
+          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.n = 0; schedule(TIER.PRESENT); }
+          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
+        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
         else gov.okSince = 0;
       }
     }
@@ -1551,7 +1551,6 @@ export async function boot(dom) {
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
-  const wStyle = wObs;                    // WAVE 56: DRAW STYLE was its own window (id `style`) until board #59 merged it in
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
   const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
@@ -1741,7 +1740,7 @@ export async function boot(dom) {
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
     __LW_hooks.setTheme = setTheme;
 
-    const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: `wStyle` is `wObs`; this block is the DRAW section of the WAVE window
+    const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
     ui.styleSeg = seg({ label: 'STYLE', value: 'cloud', options: [
       { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
@@ -3074,7 +3073,7 @@ export async function boot(dom) {
     T.appendChild(ui.periodFx.root);
     const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
-    let periodVersion = -1, lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
+    let lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
     /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
        FIFO worker that cannot drop stale work: 4 s of a moving register (keyboard auto-repeat on ZEEMAN B, a script)
        jammed it for over two minutes (AUDIT-F F3, REFUTE-B/D).  Now one scan runs; a newer key replaces `scanWant`; the
@@ -3094,7 +3093,7 @@ export async function boot(dom) {
       if (!r || r.error) { if (periodPending && sameKey(periodPending, key)) periodPending = null; return; }
       if (!periodPending || !sameKey(periodPending, key)) return;          // a later state: this answer is stale
       const P = Object.assign({}, r); delete P.id; delete P.op;
-      lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
+      lastPeriod = P; Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null;
       paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
       if (__LW_hooks.onPeriodLand) __LW_hooks.onPeriodLand();          // LA7: a CAPTURE hover waiting on this scan plans now
     }
@@ -3128,13 +3127,13 @@ export async function boot(dom) {
          line — an expensive answer waits until the movement stops. */
       if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
-      if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
-      if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
+      if (reg.field.Fz !== 0) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
+      if (reg.transition) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
       const Es = periodEnergies();          // W-STURMIAN: the OCCUPIED eigenvalues (populations > 1e-6), never the labels' ⟨H⟩ — and wave 58 hands the SAME expression to capture.js
       /* Hydrogen, ions and the oscillator normally prove commensurate in microseconds. Answer that exact half here;
          only an actually incommensurate spectrum pays module-worker startup and the bounded two-million-step scan. */
       const exact = densityPeriodExact(Es);
-      if (exact) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
+      if (exact) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
       if (!force && scan.ok) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
            answer lands — a BOX bow populates 56 incommensurate well energies and the scan measured 1.2 s on the first
@@ -3143,7 +3142,7 @@ export async function boot(dom) {
         periodSettling = true; return lastPeriod;
       }
       const wasSettling = periodSettling;
-      Object.assign(pk, key); periodVersion = reg.version; periodSettling = false; periodPending = null;
+      Object.assign(pk, key); periodSettling = false; periodPending = null;
       const t0 = performance.now();
       lastPeriod = densityPeriod(Es, { horizon: 2e4 });
       periodCostMs = performance.now() - t0;
@@ -3650,10 +3649,8 @@ export async function boot(dom) {
     const n = kepShell(), o = lit.get(n);
     const dead = !o || o.isotropic;
     for (const k of [ui.kepSpin, ui.kepTilt, ui.kepTurn]) if (k) k.setDisabled(dead);
-    if (ui.kepEcc) ui.kepEcc.setDisabled(dead);
     if (!o) { ui.kepRo.set(`n${n} not populated`, 'warn'); ui.kepRo.setSub('this shell carries less than 1 % of the norm — nothing to turn'); return; }
     if (o.isotropic) { ui.kepRo.set(`n${n} isotropic`, 'warn'); ui.kepRo.setSub('⟨L⟩ = ⟨K⟩ = 0: no normal, no node line, no perihelion — there is no axis to turn about'); return; }
-    if (ui.kepEcc && !ui.kepEcc.root.classList.contains('drag')) ui.kepEcc.set(o.e);   // the eccentricity dial is RE-SEEDED from the fresh orbit, never trusted to remember: the orbit is derived and the dial is only its face
     const warn = o.coherence < 0.5;
     ui.kepRo.set(`a = ${o.a} a₀ · e = ${o.e.toFixed(3)} · coh ${o.coherence.toFixed(2)}`, warn ? 'warn' : 'ok');
     ui.kepRo.setSub(warn
@@ -5053,7 +5050,7 @@ export async function boot(dom) {
        createField finished) is createField's method-less failure object, and this line threw "boot failed —
        field.setDprCap is not a function" instead of leaving rack.js:762's banner up.  The METHOD is tested, not
        `field.ok`: a device lost after boot keeps its methods and keeps today's behaviour byte for byte. */
-    if (field.setDprCap) field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
+    if (field.setDprCap) field.setDprCap(phone.on ? phone.DPR : tablet.on ? tablet.DPR : 2);   // N5: the two DPR fields are READ (both 1.5; tablet.DPR was written and never read)
     schedule(TIER.PRESENT);
     return on;
   }
@@ -5170,7 +5167,7 @@ export async function boot(dom) {
     { id: 'hideUI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },
     { id: 'prevWindow', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
-    { id: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); if (ui.partOn) ui.partOn.set(true); schedule(TIER.PRESENT); } },
+    { id: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); schedule(TIER.PRESENT); } },
     { id: 'keysheet', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
     { id: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
