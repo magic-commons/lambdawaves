@@ -1,0 +1,36 @@
+{
+ "note": "Electron/RTX, WAVE DANCER opened while playing (gpu-open.expr.js full), CDP trace of the GPU process main thread over the 1000 ms after the open (trace-gpu.mjs). raster = RendererRasterWorker tasks (the compositor re-rastering the new look/windows), of which Skia GL program compiles; webgpu = DawnCommands (the long ones wait on the raster GPU work); first run on a cold driver shader cache.",
+ "coldBase": {
+  "busyMs": 572.8,
+  "rasterMs": 289.5,
+  "shaderCompileMs": 95.7,
+  "shaderCompiles": 31,
+  "webgpuMs": 149.8,
+  "compositeMs": 84.1,
+  "openMs": 130.2,
+  "forcedLayouts": 0,
+  "forcedMs": 0
+ },
+ "base": {
+  "busyMs": 478.4,
+  "rasterMs": 254.6,
+  "shaderCompileMs": 0,
+  "shaderCompiles": 0,
+  "webgpuMs": 135,
+  "compositeMs": 54.4,
+  "openMs": 102.2,
+  "forcedLayouts": 0,
+  "forcedMs": 0
+ },
+ "after": {
+  "busyMs": 481.5,
+  "rasterMs": 238.1,
+  "shaderCompileMs": 0,
+  "shaderCompiles": 0,
+  "webgpuMs": 131.3,
+  "compositeMs": 71.5,
+  "openMs": 89.2,
+  "forcedLayouts": 0,
+  "forcedMs": 0
+ }
+}

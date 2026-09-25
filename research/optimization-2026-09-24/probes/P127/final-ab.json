@@ -1,0 +1,110 @@
+{
+ "ff base": {
+  "runs": 5,
+  "same": "true,true,true,true,true",
+  "openMs": 103.92,
+  "openAll": [
+   124.68,
+   115.84,
+   93.28,
+   103.92,
+   95.24
+  ],
+  "openStyleLayoutMs": 6.28,
+  "openF1gpu": 25.5,
+  "openF2gpu": 79.9,
+  "openMaxGap": 133.6,
+  "restoreMs": 84.82,
+  "restoreAll": [
+   87.64,
+   89.6,
+   75.2,
+   84.82,
+   73.76
+  ],
+  "restoreF1gpu": 47.8,
+  "restoreMaxGap": 83.4
+ },
+ "ff new": {
+  "runs": 5,
+  "same": "true,true,true,true,true",
+  "openMs": 90.66,
+  "openAll": [
+   90.66,
+   88.88,
+   93.3,
+   103,
+   87.34
+  ],
+  "openStyleLayoutMs": 6.3,
+  "openF1gpu": 27.1,
+  "openF2gpu": 106.2,
+  "openMaxGap": 182.9,
+  "restoreMs": 66.9,
+  "restoreAll": [
+   67.24,
+   69.56,
+   60.68,
+   66.36,
+   66.9
+  ],
+  "restoreF1gpu": 82,
+  "restoreMaxGap": 83.5
+ },
+ "el base": {
+  "runs": 6,
+  "same": "true,true,true,true,true,true",
+  "openMs": 98,
+  "openAll": [
+   96.2,
+   98.4,
+   92.7,
+   109.8,
+   98,
+   118.6
+  ],
+  "openStyleLayoutMs": 8.7,
+  "openF1gpu": 26.1,
+  "openF2gpu": 179.6,
+  "openMaxGap": 133.3,
+  "restoreMs": 78.5,
+  "restoreAll": [
+   99.9,
+   84.8,
+   79.8,
+   69.1,
+   78.5,
+   75.9
+  ],
+  "restoreF1gpu": 91,
+  "restoreMaxGap": 83.3
+ },
+ "el new": {
+  "runs": 6,
+  "same": "true,true,true,true,true,true",
+  "openMs": 78.9,
+  "openAll": [
+   78.9,
+   92.1,
+   90.5,
+   78,
+   77.3,
+   92.9
+  ],
+  "openStyleLayoutMs": 9.1,
+  "openF1gpu": 27.9,
+  "openF2gpu": 150.6,
+  "openMaxGap": 125.1,
+  "restoreMs": 59.7,
+  "restoreAll": [
+   72.6,
+   59.7,
+   84.1,
+   53.1,
+   54.3,
+   65.4
+  ],
+  "restoreF1gpu": 87.7,
+  "restoreMaxGap": 66.7
+ }
+}
