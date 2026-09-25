@@ -17,7 +17,7 @@
 .ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker, .pal-ring { border-color: transparent; box-shadow: var(--neu-inset); }
 .sp-row, .orbit-row { border-color: transparent; background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 .sp-row.sel { background: var(--acc-soft); box-shadow: var(--neu-flat), 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
-.sp-b, .pk-c, .keys-chip, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--ink-key); }
+.sp-b, .pk-c, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--ink-key); }
 .sp-b:active, .pk-c:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
@@ -42,16 +42,6 @@
   border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .98); color: var(--fg); box-shadow: var(--neu-raise);
   font: var(--w-bold) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-decoration: none; }
 .pj-import:focus-within { border-color: var(--acc); color: var(--fg); }        /* the input is 1 px; the LABEL is what the eye finds */
-
-/* ── 11. the hide button (top-right) and the hidden state — the follow-up mounts `<button class="ui-hide">` ── */
-.ui-hide { position: absolute; right: var(--sp-4); top: var(--sp-4); z-index: var(--z-banner); width: 30px; height: 30px; border: 0; border-radius: 50%;
-  background: hsl(var(--glass-tint) / var(--glass-opacity)); box-shadow: var(--neu-raise); color: var(--ink-key); font-size: 12px;
-  display: inline-flex; align-items: center; justify-content: center; opacity: .55; transition: opacity var(--t-fast); }
-.ui-hide:hover, .ui-hide:focus-visible { opacity: 1; color: var(--fg); outline: none; }
-.ui-hide:active { box-shadow: var(--neu-inset); }
-body.ui-hidden .ui-hide { opacity: .25; }                                     /* stays as the way back; does not compete with the field */
-body.ui-hidden .ui-hide:hover { opacity: 1; }
-body.ui-hidden #badges + .ui-hide { right: var(--sp-4); }                     /* the badges are hidden then; the button keeps its corner */
 
 /* ── 12. the transport: `#transport.mini` — a 32-px subtitle bar, centred, the scrub a thin line ── */
 #transport { border-radius: var(--card-r); }
@@ -244,8 +234,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 
   .dev[data-id="observer"] .seg:has(> .seg-b:nth-child(6)) > .seg-b { min-width: var(--touch); }
   .pk-c { min-width: var(--touch); min-height: var(--touch); }   /* the mode chips wrap, so a wider seat costs a column, not a control */
-  .keys-chip { min-height: var(--touch); }
-  .hint-i { width: var(--touch); height: var(--touch); }
 
   /* (c) SPECTRUM's lane is the one interior this wave re-flows: seven controls in one 274-px row cannot
      all carry 44 px (4 + 50 + fader + 40 + 3 × 44 + gaps overruns by 20 px), so the lane becomes TWO
@@ -274,38 +262,22 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   .sp-b::after { content: ''; position: absolute; inset: -3px -6px; }
   .sp-x::after { content: ''; position: absolute; inset: -4px -9px; }
 
-  /* (d) WAVE 52 — the modulation window's own furniture, on the same law: the SEAT grows, the ink
-     does not.  The two round 22-px buttons (the row × and the playhead's ⤢ EXPAND) keep their puck
-     painted into the content box of a 44-px box, exactly as ⏻ ⓘ ⇱ already do above; the macro's
-     name field and its DRIVE menu take the full 44-px seat, and the strip — which is a READOUT and
-     takes no pointer — is left at the 12 px it is designed at. */
-  .mod-x, .mod-exp { width: var(--touch); height: var(--touch); padding: calc((var(--touch) - 22px) / 2);
+  /* (d) WAVE 52 — the playhead's ⤢ EXPAND, on the same law: the SEAT grows, the ink does not.  Its round
+     22-px puck is painted into the content box of a 44-px box, exactly as ⏻ ⓘ ⇱ already do above.
+     (The wave-52 modulation CARD's row ×, name field, DRIVE menu and strip left with the card in wave 64;
+     their rules were cut 2026-09-24, optimization N3.) */
+  .mod-exp { width: var(--touch); height: var(--touch); padding: calc((var(--touch) - 22px) / 2);
     border: 0; border-radius: 50%; background-origin: content-box; background-clip: content-box;
     background-image: radial-gradient(closest-side, var(--glass-raise) calc(100% - 1.5px), var(--glass-hairline) calc(100% - 1.5px) 100%, transparent 100%); }
   .mod-exp.live { background-image: radial-gradient(closest-side, var(--acc2-soft) calc(100% - 1.5px), color-mix(in srgb, var(--acc2) 55%, transparent) calc(100% - 1.5px) 100%, transparent 100%); }
-  .mod-name, .mod-drive, .mod-wave { min-height: var(--touch); }
-  .mod-mm { min-width: 64px; }
 
-  /* (e) WAVE 61 — the ROUTER's grip, on the same law again: a 22-px puck painted into the content
-     box of a 44-px button.  AND THE MACRO HEADER WRAPS, for the reason wave 60's `.mod-srch` had to:
-     the row now carries five things, four of which take 44-px seats on a phone, and 250 px of card
-     does not hold them — an un-wrapped row overflows the rack rather than folding, and puts a button
-     where elementFromPoint answers `#rack`.  Wrapping costs a row; not wrapping costs the control. */
-  .mod-macroh { flex-wrap: wrap; }
-  .mod-grip { width: var(--touch); height: var(--touch); padding: calc((var(--touch) - 22px) / 2);
-    border: 0; border-radius: 50%; background-origin: content-box; background-clip: content-box;
-    background-image: radial-gradient(closest-side, var(--acc2-soft) calc(100% - 1.5px),
-      color-mix(in srgb, var(--acc2) 45%, transparent) calc(100% - 1.5px) 100%, transparent 100%); }
-  .mod-grip.armed { box-shadow: none;
-    background-image: radial-gradient(closest-side, var(--acc2-soft) calc(100% - 2px), var(--acc2) calc(100% - 2px) 100%, transparent 100%); }
 }
 
 /* Native instruments, September 2026. Modulation retains its own vocabulary. */
 .native-clean .dev-body { padding: 10px 12px; }
-.native-clean .grp, .native-clean .grp .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
+.native-clean .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
 .native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: .12em; margin: 4px 0 8px; }
 .native-clean .row { gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
-.native-clean .seg-lbl { font-size: var(--fs-micro); }
 .native-clean .ro { min-width: 0; box-shadow:var(--neu-inset);border:0;background:var(--glass-well); }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
@@ -328,7 +300,6 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
   background: linear-gradient(160deg, hsl(0 0% 100% / .72), transparent 46%), hsl(214 24% 93% / .99) !important;
   box-shadow: 0 8px 24px hsl(214 28% 28% / .18), inset 0 1px 0 hsl(0 0% 100% / .9) !important;
 }
-.native-clean[data-id="observer"] .grp { margin-bottom: 6px; }
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="observer"] .row > .k { flex: 1 1 60px; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
@@ -336,7 +307,6 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
 .native-clean[data-id="camera"] .row > .k { flex: 0 0 68px; }
-.native-clean[data-id="palette"] .pal-preset { min-width: 0; }
 .native-clean[data-id="palette"] .pal-nav { flex: 0 0 32px; width: 32px; }
 .native-clean[data-id="palette"] .palette-action { flex: 1 1 90px; height: 34px; border-radius: 7px; justify-content: center; }
 .native-clean .bow-hint { text-align: center; font-size: var(--fs-micro); color: var(--dim); }
@@ -349,7 +319,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 #transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK, two tile rows high */
 #transport .native-tempo[hidden] { display: none; }
 .tempo-pane { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.tempo-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 14px; font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
 /* THE TRANSPORT'S MACRO TILES ARE THE WINDOW'S ROWS. These rules are the ported window's own (.mir-modwindow
    .m2grip / .m2numseat / .m2num / .m2depthring, modwindow.css 583–607) and the host's overrides for them
    (modhost.css 1037–1038, 1204, 1847–1848, 1865), re-scoped to the rail — copied, not redesigned. */
@@ -395,8 +364,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
 .native-clean[data-id="palette"] .palette-presets { display: grid; grid-template-columns: 30px minmax(0,1fr) 30px; gap: 5px; }
 .native-clean[data-id="palette"] .palette-presets .sel { width: 100%; min-width: 0; }
-.native-clean[data-id="palette"] .palette-seam .ro { padding: 2px; }
-.native-clean[data-id="palette"] .palette-seam .ro-sub { height: 1.3em; }
 .native-clean[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
 .native-clean[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
 .native-clean .segw { align-items: stretch; }
@@ -410,15 +377,13 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="observer"] .wave-row-6 > .segw { flex:1 1 150px;width:auto; }
 .native-clean[data-id="observer"] .wave-row-6 > .k { flex:0 0 64px; }
 .native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
-.native-clean[data-id="observer"] .wave-row-2, .native-clean[data-id="observer"] .wave-row-5 { margin-bottom:14px; }
+.native-clean[data-id="observer"] .wave-row-2 { margin-bottom:14px; }
 .native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
 .native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
-.native-clean[data-id="camera"] .camera-motion .sw { flex: 1 1 100%; }
 .native-clean .native-info-content .ro-sub { height:auto; }
 .native-clean .row:empty { display:none; }
 .native-info .native-info-content { position:fixed !important; inset:auto; margin:0; border:0; }
 .native-info .native-info-content:popover-open { display:block !important; }
-.native-tempo-hz { display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:var(--fs-micro);font-variant-numeric:tabular-nums; }
 .native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
 .native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
@@ -427,9 +392,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);z-index:2; }
 .native-clean .k:hover .k-val, .native-clean .k:focus-within .k-val, .native-clean .k.drag .k-val, .native-clean .k[data-live] .k-val { transform:translate(-50%,0); }
 .native-clean[data-id="observer"] .wave-row { margin-bottom:8px; }
-.native-clean[data-id="observer"] .wave-row-2, .native-clean[data-id="observer"] .wave-row-5 { margin-bottom:18px; }
-.native-clean[data-id="palette"] .palette-seam .ro { display:flex;align-items:center;gap:10px; }
-.native-clean[data-id="palette"] .palette-seam .ro-sub { display:none; }
+.native-clean[data-id="observer"] .wave-row-2 { margin-bottom:18px; }
 .native-clean[data-id="clip"] .grp > .row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center; }
 .native-clean[data-id="clip"] .grp > .row > .segw { grid-column:1/-1;width:100%; }
 .native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
@@ -465,7 +428,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
 .native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
-.native-clean[data-id="camera"] .camera-motion .sw { grid-column:1/-1;width:100%; }
 #transport .native-info { display:inline-flex;position:relative;align-items:center;flex:0 0 24px;order:7; }
 #transport .native-info-content:popover-open { display:block !important; }
 #transport.docked .native-play-row { display:grid;gap:5px; }
@@ -538,7 +500,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }
-.dev .picker, .dev .keys-list, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
+.dev .picker, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
 .native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
 .native-clean .sp-knobs .k-val { max-width:80px; }
 .native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }

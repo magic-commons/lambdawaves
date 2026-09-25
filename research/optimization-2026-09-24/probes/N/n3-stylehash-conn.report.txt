@@ -1,0 +1,21 @@
+# before b1c: http://127.0.0.1:8796/lab/?preset=1s%2B2pz&sw=0
+# after  a1c: http://127.0.0.1:8796/lab/?preset=1s%2B2pz&sw=0
+# noise  b2c (a second capture of the unchanged page; what differs there is masked)
+## dark-tinted-off: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## dark-tinted-on: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## dark-refractive-off: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## dark-refractive-on: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## light-tinted-off: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## light-tinted-on: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## light-refractive-off: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+## light-refractive-on: 3356 → 3356 elements · 0 changed · 0 gone · 0 new · (0 noisy masked)
+
+## pixels (beyond the pixels that moved between the two before-runs)
+dark-tinted-off: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-tinted-on: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-refractive-off: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-refractive-on: 0 pixels differ (0.000 %) · 0 masked as noise
+light-tinted-off: 0 pixels differ (0.000 %) · 0 masked as noise
+light-tinted-on: 0 pixels differ (0.000 %) · 0 masked as noise
+light-refractive-off: 0 pixels differ (0.000 %) · 0 masked as noise
+light-refractive-on: 0 pixels differ (0.000 %) · 0 masked as noise

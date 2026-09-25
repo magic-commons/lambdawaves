@@ -196,7 +196,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 #rack::-webkit-scrollbar-track, #rackL::-webkit-scrollbar-track { background: transparent; }
 #rack { direction: rtl; }
 #rack > * { direction: ltr; }
-.k-val, .fd-val, .ro-val, .ro-sub, .dev-stat, .sp-e, .sp-nm, .keys-chip, .tbtn, #transport .time { font-variant-numeric: tabular-nums; }
+.k-val, .fd-val, .ro-val, .ro-sub, .dev-stat, .sp-e, .sp-nm, .tbtn, #transport .time { font-variant-numeric: tabular-nums; }
 
 /* ═══ WAVE 69 · .fx — A CLOSED FORM WITH LIVE SLOTS (kit.js `formula`) ════════════════════════════
  * Two faces on one line, on purpose: the EXPRESSION is the math face and a SLOT is `--font-num` with
@@ -311,7 +311,6 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #transport.mini .ro { flex: 0 0 76px; min-width: 76px; width: 76px; }
 #transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
-#transport.mini .fd-label, #transport.mini .ro-label, #transport.mini .k-label { display: none; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
@@ -462,13 +461,6 @@ body.window-info-off .dev-lean { display: none; }
 body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
 body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
-.keys-list { display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow: auto; }
-.keys-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--fs-tiny); }
-.keys-label { color: var(--dim); }
-.keys-chip { font: inherit; color: var(--fg); background: hsl(0 0% 100% / .06); border: 1px solid var(--glass-hairline); border-radius: 4px; padding: 1px 8px; cursor: pointer; min-width: 64px; }
-.keys-chip.hot { border-color: var(--acc); color: var(--acc); }
-/* wave 68: the one refusal this panel can make (TAB), said where the eye and the ear both get it */
-.keys-say { font-size: var(--fs-tiny); color: var(--acc); margin-top: 6px; line-height: 1.4; }
 .dyn-c { position: relative; height: 84px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }   /* the well, not a hard black: the light theme has its own (wave 46) */
 .dyn-c canvas { width: 100%; height: 100%; display: block; }
 .slice-c { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline);
@@ -629,81 +621,21 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
   body.rack-hidden #transport.mini, body.rack-hidden.transport-peek #transport.mini {
     transition-property: opacity, visibility; }
   body.rack-hidden #rack, body.rack-hidden #rackL, body.rack-hidden #transport.mini { transform: none; }
-  .dev-fold > svg, .mod-fold > svg { transition: none; }
+  .dev-fold > svg { transition: none; }
   /* the PORTED plugin declares its own motion tokens and this is what they are for — one line
      reaches every `var(--m2-motion-*)` transition in modwindow.css without touching its sheet */
   .mir-modwindow, .kwin-chiprail { --m2-motion-structural: 0s; --m2-motion-micro: 0s; }
 }
 
-/* ═══ wave 52 — W-MODWINDOW: the modulation window's own furniture ════════════════════════════════
- * The window is built from the kit (knob · sw · seg · trig · fader) and these classes are its
- * FURNITURE, not new widgets: the lists the kit's controls sit in, the value strip that answers the
- * contract's "a modulated parameter must be readable while it moves", and the chips that name a
- * macro and a source.  Every colour is a token; ACCENT B carries the relationship (macros, routes,
- * the sweep band, the lit EXPAND) and ACCENT A carries the live signal (the meter, the NOW dot),
- * which is the material law in STYLE-LOCK read literally.  The gap inside a block is 3 px and the
- * gap between blocks is 7 px, so space carries the hierarchy before a word is read. */
-.mod-srcs, .mod-macros, .mod-targets { display: flex; flex-direction: column; gap: var(--sp-3); }
-.mod-empty { font-size: var(--fs-tiny); color: var(--ink-faint); padding: 2px 1px; }
-.mod-dead { opacity: .38; cursor: not-allowed; }
-.mod-beats { flex: 0 0 auto; min-width: 92px; padding: 0 6px; font-size: var(--fs-small); font-variant-numeric: tabular-nums;
-  color: var(--ink-key); align-self: center; white-space: nowrap; }
-.mod-beats.live { color: var(--acc); }
-
-/* a source: a head line (power · id · live meter · remove) over its own parameter row */
-.mod-src, .mod-macro { display: flex; flex-direction: column; gap: var(--sp-1); }
-.mod-srch, .mod-macroh { display: flex; align-items: center; gap: var(--sp-2); }
-.mod-src.mod-off { opacity: .5; }                                    /* bypassed: the material says so, not a colour */
-.mod-tag { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); flex: 0 0 auto; }
-.mod-meter { position: relative; flex: 1 1 auto; min-width: 24px; height: 4px; border-radius: 2px; background: var(--glass-well); overflow: hidden; }
-.mod-meter > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--acc); }
-.mod-x { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; border: var(--glass-border) solid var(--glass-hairline);
-  background: var(--glass-raise); color: var(--dim); font-size: 12px; line-height: 1; }
-.mod-x:hover { color: var(--fg); background: var(--glass-press); }
-.mod-x { position: relative; }                                       /* the 44-px finger is the phone block's, skin.css §5 */
-.mod-wave { flex: 0 1 110px; min-width: 96px; }                     /* the shape menu takes its own width, it does not eat the row */
-
-/* a macro: the name, the ONE drive control, its reach, and a value that is a fader or a meter — never both */
-.mod-name { flex: 1 1 60px; min-width: 40px; height: 30px; padding: 0 6px; border-radius: var(--r-sm);
-  border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); color: var(--fg); font-size: var(--fs-small); }
-.mod-drive { flex: 1 1 90px; min-width: 78px; }        /* select.sel already carries the 44-px seat */
-.mod-routes { flex: 0 0 auto; min-width: 18px; padding: 1px 5px; border-radius: var(--r-pill); font-size: var(--fs-micro);
-  text-align: center; color: var(--acc2); background: var(--acc2-soft); font-variant-numeric: tabular-nums; }
-.mod-val { flex: 1 1 auto; }
-/* the DRIVEN row is a METER, not a fader with its pointers off: it does not look like something to grab */
-.mod-mtr { position: relative; flex: 1 1 auto; min-width: 60px; height: 26px; border-radius: 6px; overflow: hidden;
-  background: var(--glass-well); box-shadow: inset 0 0 0 1px var(--glass-hairline); }
-.mod-mtr > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: color-mix(in srgb, var(--acc2) 30%, transparent);
-  border-right: 1px solid var(--acc2); }
-.mod-mtr > b { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); font-size: var(--fs-micro);
-  font-weight: var(--w-med); letter-spacing: var(--tr-wider); color: var(--acc2); }
-.mod-mtr > em { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-style: normal;
-  font-size: var(--fs-tiny); color: var(--fg-soft); font-variant-numeric: tabular-nums; }
-
-/* a routed target: the strip is the contract — base · sweep · now, all three at once */
-.mod-target { display: flex; flex-direction: column; gap: var(--sp-1); }
-.mod-th { display: flex; align-items: baseline; gap: var(--sp-2); }
-.mod-tlabel { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
-.mod-target.mod-live .mod-tlabel { color: var(--acc); }
-.mod-tgrp { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
-.mod-strip { position: relative; height: 12px; border-radius: 3px; background: var(--glass-well);
-  box-shadow: inset 0 0 0 1px var(--glass-hairline); overflow: hidden; }
-.mod-span { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--acc2) 40%, transparent);
-  border-left: 1px solid var(--acc2); border-right: 1px solid var(--acc2); }
-.mod-base { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg-soft); }
-.mod-now { position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--acc); }
-.mod-nums { display: flex; gap: var(--sp-2); }
-.mod-n { display: flex; flex-direction: column; gap: 0; min-width: 0; flex: 1 1 auto; }
-.mod-n > b { font-size: var(--fs-micro); font-weight: var(--w-med); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
-.mod-n > em { font-style: normal; font-size: var(--fs-small); color: var(--fg-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.mod-n.now > em { color: var(--acc); }
-.mod-n.span { flex: 1 1 110px; }
-.mod-n.span > em { color: var(--acc2); }
-.mod-rt { display: flex; align-items: center; gap: var(--sp-1); }
-.mod-rt.mod-dormant { opacity: .45; }
+/* ═══ wave 52 — W-MODWINDOW: the host's own furniture around the ported window ═══════════════════
+ * What is left here after wave 64 took the modulation CARD away (its lists, value strips, source and macro rows
+ * and grips were cut 2026-09-24, optimization N3 — the ported window in lab/mir/modulation/ draws those now):
+ * the route chip the pop-over lists, the playhead's EXPAND, the held-knob accent and the drop gesture below.
+ * Every colour is a token; ACCENT B carries the relationship (macros, routes, the lit EXPAND) and ACCENT A the
+ * live signal, which is the material law in STYLE-LOCK read literally. */
+/* a route, named: the chip the pop-over lists (`.mod-poprts > .mod-mchip`) */
 .mod-mchip { flex: 0 0 auto; max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   padding: 2px 6px; border-radius: var(--r-pill); font-size: var(--fs-micro); color: var(--acc2); background: var(--acc2-soft); }
-.mod-mm { flex: 1 1 60px; min-width: 52px; }
 
 /* THE MINIMISED MODE.  The playhead's geometry is untouched — the EXPAND button takes a seat in the
    same flex row the dock button already sits in, so the pill's box does not move.  It lights ACCENT B
@@ -723,88 +655,6 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
    Selecting the route's macro or source promotes it to ACCENT B in the host layer. */
 .k.mod-held .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 65%, transparent); }
 .k.mod-held .k-needle { background: var(--acc); }
-
-
-.mod-srcs { gap: var(--sp-4); }                                      /* a gap INSIDE a card is at most half the gap between cards */
-.mod-card { border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-md);
-  padding: var(--sp-2) var(--sp-1); gap: var(--sp-2); background: var(--glass-raise); }
-.mod-cardb { display: flex; flex-direction: column; gap: var(--sp-2); }
-/* THE HEADER WRAPS.  `.mod-srch` has never wrapped, and it did not need to while it carried three
-   things; it now carries six, and on the PHONE the four round chips take their 44-px seats — 290 px
-   of header in a 250-px card, which overflowed the rack rather than folding, and put two × buttons
-   where elementFromPoint answers `#rack` (found by the 44-px walk, not by looking). */
-.mod-card .mod-srch { flex-wrap: wrap; }
-.mod-card.mod-min .mod-cardb { display: none; }                      /* FOLD is a HEIGHT act; the state is in the MODEL and round-trips */
-.mod-x { display: inline-flex; align-items: center; justify-content: center; }
-.mod-x > svg { width: 12px; height: 12px; display: block; }
-.mod-fold > svg { transition: transform var(--t-fast) ease; }
-/* ONE drawing for the caret, turned a quarter turn when the card is folded — device()'s own idiom */
-.mod-card.mod-min .mod-fold > svg { transform: rotate(-90deg); }
-.mod-x:disabled { opacity: .3; cursor: default; }
-
-/* the picture: a well, and inside it the ONE renderer both kinds share */
-.mod-graph { position: relative; border-radius: var(--r-sm); background: var(--glass-well);
-  box-shadow: inset 0 0 0 1px var(--glass-hairline); overflow: hidden; }
-svg.mod-cv { display: block; width: 100%; height: 108px; touch-action: none; cursor: crosshair; }
-/* with the ladder on, the SHAPE stays under the stairs rather than being replaced by them */
-.mod-cv.stepped .cv-line { stroke: var(--ink-faint); stroke-width: 1; }
-.mod-cv.stepped .cv-fill { fill: color-mix(in srgb, var(--acc) 6%, transparent); }
-
-/* the caption says what the picture IS; the capsule says what the source is DOING, in numbers, on
-   the card — not in a hover tip (ANTI-PATTERN 4) */
-.mod-capr { display: flex; align-items: baseline; gap: var(--sp-2); }
-.mod-cap { flex: 1 1 auto; min-width: 0; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.35; }
-.mod-stat { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--acc); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.mod-src.mod-off .mod-stat { color: var(--ink-faint); }
-.mod-say { font-size: var(--fs-micro); color: var(--fg-soft); }
-.mod-say:empty { display: none; }                                    /* a line that has nothing to say takes no room */
-
-/* THE GLYPH ON A SHAPE BUTTON IS THE PRESET ITSELF, SAMPLED — a button can never draw a shape the
-   engine would not produce, and it redraws MIRRORED when the mirror is what is loaded */
-/* SIX BUTTONS, THREE TO A ROW.  The map's budget assumed a 286-px body; MEASURED, this window is
-   274 px wide floating (--float-w is the rack's content box, less its scrollbar) and the card's own
-   content box is 226 px — six 44-px seats in one row need 279 and would have come out at 36 px each.
-   Three to a row is 74 px a seat at any width this window can take, and it never has to be checked. */
-.mod-shapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-.mod-sh { height: var(--touch); padding: 0; border: var(--glass-border) solid var(--glass-hairline);
-  border-radius: var(--r-sm); background: var(--glass-raise); display: block; }
-.mod-sh:hover { background: var(--glass-press); }
-.mod-sh:active { background: var(--glass-press); }
-.mod-sh.on { background: var(--acc-soft); border-color: color-mix(in srgb, var(--acc) 50%, transparent); }
-.mod-sh.on .sh-p { stroke: var(--acc); }
-
-/* the compact seats.  A 44-px SEAT with micro ink is the wave-51 rule read literally: grow the seat,
-   never the mark — four chips fit a 268-px card row and none of their hit areas touch. */
-.mod-chip { min-width: 44px; padding: 0 4px; gap: 3px; }
-.mod-chip .sw-led { width: 6px; height: 6px; }
-.mod-chip .sw-lbl { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
-.mod-mini { min-width: 44px; padding: 0 5px; }
-.mod-mini .trig-l { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
-/* `.row > .sw` and `.row > .trig` are TWO classes and beat a one-class rule: a chip that stretched to
-   the whole row is what that specificity looks like from the outside (measured: DOTTED at 226 px). */
-.row > .mod-chip, .row > .mod-mini { flex: 0 0 auto; }
-.mod-seg, .mod-bank { flex: 0 0 auto; }
-/* a segment inside a shrink-to-fit `.segw` does not stretch, so its own min-width IS its finger:
-   44 px here, never the kit's 40, because 40 + the 2-px gap is 42 and B70 measures the real region */
-.mod-seg .seg-b, .mod-bank .seg-b { min-width: 44px; padding: 0 5px; font-size: var(--fs-micro); }
-.mod-bankr { align-items: center; }
-.mod-waver > .mod-wave { flex: 1 1 auto; min-width: 90px; }          /* the shape menu takes the rest of the row */
-
-
-/* THE GRIP.  A dedicated handle carrying the macro's ordinal, because the row beside it holds a text
-   field and a select and a draggable row would steal the caret and the menu. 22 px of ink; the phone
-   block gives it the 44-px seat on the same law as `.mod-x` — grow the seat, never the mark. */
-.mod-grip { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 7px; padding: 0; cursor: grab;
-  border: var(--glass-border) solid color-mix(in srgb, var(--acc2) 40%, var(--glass-hairline));
-  background: var(--glass-raise); color: var(--acc2); font: inherit; font-size: var(--fs-micro);
-  font-weight: var(--w-bold); font-variant-numeric: tabular-nums; touch-action: none;
-  display: inline-flex; align-items: center; justify-content: center; }
-.mod-grip:hover { background: var(--acc2-soft); }
-/* LATCHED reads as latched (material semantics: press/latched = darker, recessed) — and the ordinal
-   stays READABLE, which "accent ink on an accent ground" would not be on either theme. */
-.mod-grip.armed { background: var(--acc2-soft); border-color: var(--acc2); cursor: grabbing;
-  box-shadow: var(--neu-inset), 0 0 0 2px color-mix(in srgb, var(--acc2) 45%, transparent); }
-.mod-macro.sel > .mod-macroh > .mod-grip { box-shadow: 0 0 0 1px var(--acc2); }
 
 /* WHILE THE GESTURE IS LIVE.  There is no hover on a touch screen, so validity cannot be reported at
    the pointer (Serum's "+" cursor): it is reported ON THE SURFACE, for the whole gesture, and the
@@ -937,7 +787,6 @@ body[data-theme="dark"] .km-key-unbound {
 .km-chip-recording { color: var(--bad); background: var(--glass-press); }
 .km-action-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 11px; text-align: left; }
 .km-action-label { font-weight: var(--w-med); letter-spacing: .015em; color: var(--fg-soft); }
-.km-action-sep { color: var(--ink-faint); }
 .km-action-desc { color: var(--dim); font-size: 9px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .km-btn { min-height: 34px; padding: 7px 11px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; text-align: center;
