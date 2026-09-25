@@ -1,0 +1,190 @@
+{
+ "out": {
+  "A": {
+   "stallTen": 254.4,
+   "stallSix": 80.1,
+   "stallTen2": 238.1,
+   "digests": [
+    "{\"six\":\"{\\\"integral\\\":0.9438463769390033,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"cd59c10d\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":93}\",\"ten\":\"{\\\"integral\\\":0.9432116677114759,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"a6170599\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":94}\",\"one\":\"{\\\"integral\\\":1.013730723283594,\\\"maxRho\\\":1.0755958557128906,\\\"hash\\\":\\\"171f3a5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":95}\",\"three\":\"{\\\"integral\\\":0.9484757187850789,\\\"maxRho\\\":1.1164894104003906,\\\"hash\\\":\\\"24501ee5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":96}\"}",
+    "{\"six\":\"{\\\"integral\\\":0.9438463769390033,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"cd59c10d\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":94}\",\"ten\":\"{\\\"integral\\\":0.9432116677114759,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"a6170599\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":95}\",\"one\":\"{\\\"integral\\\":1.013730723283594,\\\"maxRho\\\":1.0755958557128906,\\\"hash\\\":\\\"171f3a5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":96}\",\"three\":\"{\\\"integral\\\":0.9484757187850789,\\\"maxRho\\\":1.1164894104003906,\\\"hash\\\":\\\"24501ee5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":97}\"}"
+   ],
+   "exact": [
+    "d3d1233c98335720,d3d1233c98335720 | d3d1233c98335720,d3d1233c98335720"
+   ],
+   "pic": [
+    "1629109492 | 1629109492"
+   ],
+   "exactSame": true,
+   "picSame": true,
+   "errs": [
+    0,
+    0,
+    0
+   ]
+  },
+  "B": {
+   "stallTen": 6.7,
+   "stallSix": 9.4,
+   "stallTen2": 7.8,
+   "digests": [
+    "{\"six\":\"{\\\"integral\\\":0.9438463769390033,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"cd59c10d\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":115}\",\"ten\":\"{\\\"integral\\\":0.9432116677114759,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"a6170599\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":116}\",\"one\":\"{\\\"integral\\\":1.013730723283594,\\\"maxRho\\\":1.0755958557128906,\\\"hash\\\":\\\"171f3a5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":117}\",\"three\":\"{\\\"integral\\\":0.9484757187850789,\\\"maxRho\\\":1.1164894104003906,\\\"hash\\\":\\\"24501ee5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":118}\"}",
+    "{\"six\":\"{\\\"integral\\\":0.9438463769390033,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"cd59c10d\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":113}\",\"ten\":\"{\\\"integral\\\":0.9432116677114759,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"a6170599\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":114}\",\"one\":\"{\\\"integral\\\":1.013730723283594,\\\"maxRho\\\":1.0755958557128906,\\\"hash\\\":\\\"171f3a5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":115}\",\"three\":\"{\\\"integral\\\":0.9484757187850789,\\\"maxRho\\\":1.1164894104003906,\\\"hash\\\":\\\"24501ee5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":116}\"}",
+    "{\"six\":\"{\\\"integral\\\":0.9438463769390033,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"cd59c10d\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":111}\",\"ten\":\"{\\\"integral\\\":0.9432116677114759,\\\"maxRho\\\":1.1268320083618164,\\\"hash\\\":\\\"a6170599\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":112}\",\"one\":\"{\\\"integral\\\":1.013730723283594,\\\"maxRho\\\":1.0755958557128906,\\\"hash\\\":\\\"171f3a5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":113}\",\"three\":\"{\\\"integral\\\":0.9484757187850789,\\\"maxRho\\\":1.1164894104003906,\\\"hash\\\":\\\"24501ee5\\\",\\\"nan\\\":0,\\\"res\\\":64,\\\"half\\\":4,\\\"generation\\\":114}\"}"
+   ],
+   "exact": [
+    "d3d1233c98335720,d3d1233c98335720 | d3d1233c98335720,d3d1233c98335720"
+   ],
+   "pic": [
+    "1629109492 | 1629109492"
+   ],
+   "exactSame": true,
+   "picSame": true,
+   "errs": [
+    0,
+    0,
+    0
+   ]
+  },
+  "sameDigests": false,
+  "sameExact": true,
+  "samePic": true
+ },
+ "rows": {
+  "A": [
+   {
+    "stall": {
+     "ten": 248.6,
+     "six": 79,
+     "ten2": 238.1
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":93}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":94}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":95}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":96}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":109}",
+    "errs": []
+   },
+   {
+    "stall": {
+     "ten": 311,
+     "six": 96.8,
+     "ten2": 230.2
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":93}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":94}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":95}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":96}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":109}",
+    "errs": []
+   },
+   {
+    "stall": {
+     "ten": 254.4,
+     "six": 80.1,
+     "ten2": 240.4
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":94}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":95}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":96}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":97}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":110}",
+    "errs": []
+   }
+  ],
+  "B": [
+   {
+    "stall": {
+     "ten": 6.3,
+     "six": 8.1,
+     "ten2": 6.7
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":115}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":116}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":117}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":118}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":131}",
+    "errs": []
+   },
+   {
+    "stall": {
+     "ten": 6.7,
+     "six": 11.3,
+     "ten2": 13.1
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":113}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":114}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":115}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":116}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":129}",
+    "errs": []
+   },
+   {
+    "stall": {
+     "ten": 8.3,
+     "six": 9.4,
+     "ten2": 7.8
+    },
+    "digests": {
+     "six": "{\"integral\":0.9438463769390033,\"maxRho\":1.1268320083618164,\"hash\":\"cd59c10d\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":111}",
+     "ten": "{\"integral\":0.9432116677114759,\"maxRho\":1.1268320083618164,\"hash\":\"a6170599\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":112}",
+     "one": "{\"integral\":1.013730723283594,\"maxRho\":1.0755958557128906,\"hash\":\"171f3a5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":113}",
+     "three": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":114}"
+    },
+    "exactRaced": "d3d1233c98335720,d3d1233c98335720",
+    "exactSettled": "d3d1233c98335720,d3d1233c98335720",
+    "exactSame": true,
+    "picRaced": 1629109492,
+    "picSettled": 1629109492,
+    "picSame": true,
+    "computedAfterExact": true,
+    "final": "{\"integral\":0.9484757187850789,\"maxRho\":1.1164894104003906,\"hash\":\"24501ee5\",\"nan\":0,\"res\":64,\"half\":4,\"generation\":127}",
+    "errs": []
+   }
+  ]
+ }
+}

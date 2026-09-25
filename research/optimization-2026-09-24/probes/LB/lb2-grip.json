@@ -1,0 +1,348 @@
+{
+ "out": {
+  "A": {
+   "msPerMove": 0.3423,
+   "gbcrPerMove": 14,
+   "burstAfter": [
+    "{\"x\":379,\"y\":344,\"w\":1083,\"h\":440,\"left\":\"379px\",\"top\":\"344px\",\"railLeft\":\"317px\",\"railTop\":\"387px\",\"pre\":\"484px\",\"saved\":[379,344],\"tr\":\"glass mini\"}"
+   ],
+   "realAfter": [
+    "{\"x\":759,\"y\":514,\"w\":1083,\"h\":440,\"left\":\"759px\",\"top\":\"514px\",\"railLeft\":\"697px\",\"railTop\":\"557px\",\"pre\":\"484px\",\"saved\":[759,514],\"tr\":\"glass mini at-top\"}"
+   ],
+   "errs": [
+    0,
+    0,
+    0
+   ]
+  },
+  "B": {
+   "msPerMove": 0.015,
+   "gbcrPerMove": 0,
+   "burstAfter": [
+    "{\"x\":379,\"y\":344,\"w\":1083,\"h\":440,\"left\":\"379px\",\"top\":\"344px\",\"railLeft\":\"317px\",\"railTop\":\"387px\",\"pre\":\"484px\",\"saved\":[379,344],\"tr\":\"glass mini\"}"
+   ],
+   "realAfter": [
+    "{\"x\":759,\"y\":514,\"w\":1083,\"h\":440,\"left\":\"759px\",\"top\":\"514px\",\"railLeft\":\"697px\",\"railTop\":\"557px\",\"pre\":\"484px\",\"saved\":[759,514],\"tr\":\"glass mini at-top\"}"
+   ],
+   "errs": [
+    0,
+    0,
+    0
+   ]
+  },
+  "sameBurst": true,
+  "sameReal": true
+ },
+ "rows": {
+  "A": [
+   {
+    "burst": {
+     "msPerMove": 0.3577,
+     "gbcrPerMove": 14,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   },
+   {
+    "burst": {
+     "msPerMove": 0.3333,
+     "gbcrPerMove": 14,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   },
+   {
+    "burst": {
+     "msPerMove": 0.3423,
+     "gbcrPerMove": 14,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   }
+  ],
+  "B": [
+   {
+    "burst": {
+     "msPerMove": 0.0113,
+     "gbcrPerMove": 0,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   },
+   {
+    "burst": {
+     "msPerMove": 0.015,
+     "gbcrPerMove": 0,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   },
+   {
+    "burst": {
+     "msPerMove": 0.0197,
+     "gbcrPerMove": 0,
+     "after": {
+      "x": 379,
+      "y": 344,
+      "w": 1083,
+      "h": 440,
+      "left": "379px",
+      "top": "344px",
+      "railLeft": "317px",
+      "railTop": "387px",
+      "pre": "484px",
+      "saved": [
+       379,
+       344
+      ],
+      "tr": "glass mini"
+     },
+     "grip": [
+      228,
+      505
+     ]
+    },
+    "real": {
+     "after": {
+      "x": 759,
+      "y": 514,
+      "w": 1083,
+      "h": 440,
+      "left": "759px",
+      "top": "514px",
+      "railLeft": "697px",
+      "railTop": "557px",
+      "pre": "484px",
+      "saved": [
+       759,
+       514
+      ],
+      "tr": "glass mini at-top"
+     },
+     "errs": 0
+    },
+    "start": [
+     348,
+     625
+    ],
+    "gx": 228,
+    "gy": 505
+   }
+  ]
+ }
+}

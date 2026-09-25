@@ -46,6 +46,7 @@ import { eigSym } from './h2ci.js';
 import { fieldShells } from './molecular-field.js';
 import { createRTHF } from './density.js';
 import { spectrum, peaks } from './absorb.js';
+import { fitPoles } from './response-fit.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -74,7 +75,7 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
 const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
@@ -139,6 +140,7 @@ function work(m) {
     else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };
@@ -161,6 +163,7 @@ function work(m) {
  *   chem.rt.run       { steps }                                          → Re D, the dipole trace of those steps, invariants
  *   chem.rt.reset     {}                                                 → back to the kicked t = 0 state, trace cleared
  *   chem.rt.spectrum  { dt, kappa, tau, wMin, wMax }                     → absorb.js's transform of the ACCUMULATED trace
+ *   chem.rt.fit       { trace, dt, kappa, tau, init, wMin, wMax, cert }  → response-fit.js's poles + certificate of the CARD's fit window
  * The accumulated trace is capped at 2e6 samples (16 MB of f64); past the cap the run keeps stepping and says so.
  */
 const TRACE_CAP = 2e6;
@@ -493,6 +496,19 @@ export function chemRtSpectrum(m = {}) {
   const sp = spectrum(rtState.trace.subarray(0, rtState.nTrace), { dt, kappa, tau, wMin: m.wMin, wMax: m.wMax, dw: m.dw });
   return { omega: Float64Array.from(sp.omega), S: Float64Array.from(sp.S), ImAlpha: Float64Array.from(sp.ImAlpha),
     peaks: peaks(sp, { fraction: m.fraction }), samples: rtState.nTrace, axis: rtState.axis, dt, kappa, tau };
+}
+/** chem.rt.fit — response-fit.js's fitPoles over the fit window THE CARD SENDS: a copy of its own first ≤ FIT_CAP samples,
+    the very array it fitted on the frame thread until 2026-09-24 (optimization LB5, AUDIT-F F4: 125–153 ms there every 2 s
+    on a long run), with the same options, so the poles and the certificate are the same doubles.  Nothing here reads or
+    detaches the worker's own trace.  A fit that REFUSES answers `fitError` — the card prints it, as it printed the throw —
+    and never `error`, which would send rack.js to run the whole fit again on the frame thread. */
+export function chemRtFit(m = {}) {
+  const trace = m.trace instanceof Float64Array ? m.trace : Float64Array.from(m.trace || []);
+  try {
+    const F = fitPoles(trace, { dt: m.dt, kappa: m.kappa, tau: m.tau, init: m.init, wMin: m.wMin, wMax: m.wMax });
+    return { poles: F.poles, certified: !!F.certified(m.cert), bound: F.bound, epsilon: F.epsilon, sigma: F.sigma,
+      refusal: F.refusal ? F.refusal(m.cert) : null, raw: F.raw };
+  } catch (e) { return { fitError: String(e && e.message || e) }; }
 }
 /** every top-level typed array of a reply, so the structured clone moves the bytes instead of copying them */
 const chemTransfer = (out) => Object.values(out).filter((v) => v && v.buffer instanceof ArrayBuffer).map((v) => v.buffer);

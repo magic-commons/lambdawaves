@@ -46,7 +46,9 @@
  *                  field.stats.presents mod 97, field.format, the canvas' gamut )
  *
  * and `modesAt(t)` is a pure function of t — `reg.at`, `molecule.fieldModes(t)`, `gas.fieldModes(t)` all are,
- * and `helium.fieldModes()` is t-independent — with ONE exception, H₂, which is hazard H7 below.  Everything
+ * and `helium.fieldModes()` is t-independent (while its worker solves a new basis it serves the LAST one, so the
+ * preflight demands `helium.sol` first: the render always marches the basis in force) — with ONE exception, H₂,
+ * which is hazard H7 below.  Everything
  * else in the lab (the meters, the spectrum, the shadow, the dipole, the Wigner slice) is outside the closure
  * and cannot reach the frame.
  *
@@ -1004,6 +1006,10 @@ export function createExactRenderer(LW, opts = {}) {
       const drained = !(LW.stats && LW.stats.scheduled);
       pins.interloper = drained ? 'the rack loop is idle' : 'THE RACK LOOP IS STILL ASKING FOR FRAMES — the witnesses will catch what it does';
 
+      /* HELIUM'S BASIS IS SOLVED BEFORE FRAME 0.  After a basis change the frame loop keeps the previous basis on the
+         field until the worker lands (heliumview.js, 2026-09-24); this synchronous demand makes the render's modes the
+         basis in force from its first frame, and the worker's late answer is then discarded (its generation is old). */
+      if (LW.helium && LW.helium.on) void LW.helium.sol;
       if (canvas) configure(true);
       const base = {
         resolution: f && f.ok ? f.resolution : null,

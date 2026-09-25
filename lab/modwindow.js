@@ -2,6 +2,7 @@
 
 import { el, seg, trig, knob, tapWatcher, gripDots } from './mir/kit.js';
 import { bindSliderKeys } from './mir/slider-keys.js';
+import { coalesce } from './frame-coalescer.js';
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modulation/modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -169,8 +170,18 @@ export function createModulation(host, port) {
     const s = M.sourceOf(id); return s && s.minimized ? 'M' : 'F'; };   /* the model's own folded flag, when the window has said nothing */
   const cardModes = () => devOrder().map((s) => modeOf(s.id));
 
+  /* 2026-09-24 · A CLOSED WINDOW ASKS FOR NO LAYOUT (optimization LB1; AUDIT-D FD5(a), AUDIT-E FE2).  Closed is
+     `root.hidden = rail.hidden = true`, i.e. `display: none`, so every rect place() reads below answered the ZERO
+     rect anyway — at the price of a forced style + layout of the whole, still-growing document, several times
+     during boot and again in every restoreModulation.  While closed the same zero rect is handed back without
+     asking; every style write keeps the value it had, and the host is still told `moved()` (rack.js modDodge
+     re-seats the transport and dirties the occlusion mask on it).  open() sets P.open BEFORE its own place(), so
+     the first open measures exactly as it always did. */
+  const ZERO_RECT = Object.freeze({ x: 0, y: 0, width: 0, height: 0, top: 0, right: 0, bottom: 0, left: 0 });
   function place() {
     if (root.querySelector('.mod-matrix[open]')) return;
+    const live = P.open;
+    const rectOf = (node) => (live ? node.getBoundingClientRect() : ZERO_RECT);
     const macroTrim = P.macroMin && !P.ribbon ? GEOM.RAIL_W - MACRO_MIN_W : 0;
     const lawW = sizeLaw.width(cardModes(), { uiScale: 1, ribbon: P.ribbon }) - macroTrim;
     const h = sizeLaw.height({ uiScale: 1 });
@@ -226,7 +237,7 @@ export function createModulation(host, port) {
     let railX = 0;
     const footEl = foot.prebar.parentElement;
     if (footEl && rackEl.rail) {
-      const rr = rackEl.root.getBoundingClientRect(), fr = footEl.getBoundingClientRect();
+      const rr = rectOf(rackEl.root), fr = rectOf(footEl);
       if (rr.width > 0) railX = Math.round(rr.left - fr.left);
     }
     foot.prebar.style.left = railX + 'px';
@@ -238,9 +249,9 @@ export function createModulation(host, port) {
       const cards = rackEl.run.querySelectorAll('.m2dev');
       /* WAVE 100 · capped at the RUN's own right edge: once the run scrolls, the last card's rect is
          its scrolled position and can sit far off-screen, which would carry the bar out with it. */
-      const runR = rackEl.run.getBoundingClientRect().right;
-      const edge = Math.min(cards.length ? cards[cards.length - 1].getBoundingClientRect().right : runR, runR);
-      const fr = footEl.getBoundingClientRect();
+      const runR = rectOf(rackEl.run).right;
+      const edge = Math.min(cards.length ? rectOf(cards[cards.length - 1]).right : runR, runR);
+      const fr = rectOf(footEl);
       if (edge > fr.left) preLeft = (edge - fr.left) - bars.width;
     }
     /* WAVE 80 · THE BAR IS MEASURED, NOT DECLARED.  modhost §58 lets `.m2pre` size to its contents
@@ -249,12 +260,12 @@ export function createModulation(host, port) {
        box has laid out rather than written from the law.  The law's number is the fallback for the
        frame before layout exists. */
     foot.pre.style.width = '';
-    const tw = Math.round(foot.pre.getBoundingClientRect().width) || bars.width;
+    const tw = Math.round(rectOf(foot.pre).width) || bars.width;
     if (footEl && rackEl.run) {
       const cards2 = rackEl.run.querySelectorAll('.m2dev');
-      const runR2 = rackEl.run.getBoundingClientRect().right;
-      const edge2 = Math.min(cards2.length ? cards2[cards2.length - 1].getBoundingClientRect().right : runR2, runR2);
-      const fr2 = footEl.getBoundingClientRect();
+      const runR2 = rectOf(rackEl.run).right;
+      const edge2 = Math.min(cards2.length ? rectOf(cards2[cards2.length - 1]).right : runR2, runR2);
+      const fr2 = rectOf(footEl);
       if (edge2 > fr2.left) preLeft = (edge2 - fr2.left) - tw;
     }
     foot.pre.style.left = Math.round(Math.max(preLeft, minPre)) + 'px';
@@ -263,7 +274,7 @@ export function createModulation(host, port) {
        same thing about the clock).  It REPORTS its rect; rack.js decides whether its own playhead is
        in the way and which seat to take.  One call, at the end of every place, which is exactly the
        set of moments the window's box can have changed. */
-    if (port.moved) { try { port.moved(root.getBoundingClientRect()); } catch (_) {} }
+    if (port.moved) { try { port.moved(live ? root.getBoundingClientRect() : (typeof DOMRect === 'function' ? new DOMRect(0, 0, 0, 0) : { ...ZERO_RECT })); } catch (_) {} }
 
 
     const RAIL_GAP = 0;
@@ -273,17 +284,17 @@ export function createModulation(host, port) {
     let railLeft;
     if (P.x >= rw) railLeft = P.x - rw;
     else {
-      const rb = rackEl.rail ? rackEl.rail.getBoundingClientRect() : null;
+      const rb = rackEl.rail ? rectOf(rackEl.rail) : null;
       const gap = rb && rb.width > 0 ? Math.max(RAIL_GAP, Math.round(rb.left - (P.x - RAIL_GAP))) : RAIL_GAP;
       const cards3 = rackEl.run ? rackEl.run.querySelectorAll('.m2dev') : [];
-      const runR3 = rackEl.run ? rackEl.run.getBoundingClientRect().right : P.x + w;
-      const edge3 = Math.min(cards3.length ? cards3[cards3.length - 1].getBoundingClientRect().right : runR3, runR3);
+      const runR3 = rackEl.run ? rectOf(rackEl.run).right : P.x + w;
+      const edge3 = Math.min(cards3.length ? rectOf(cards3[cards3.length - 1]).right : runR3, runR3);
       railLeft = Math.min(vw - 62, Math.round(edge3 + gap));
     }
     rail.style.left = (P.macroSide === 'right' ? Math.min(vw-38,P.x+w+4) : railLeft) + 'px';
 
 
-    const rootBox = rackEl.root ? rackEl.root.getBoundingClientRect() : null;
+    const rootBox = rackEl.root ? rectOf(rackEl.root) : null;
     /* WAVE 87 · THE LANE'S LIFT, WRITTEN WHERE THE BARS CAN READ IT.  modhost §77 moves the two work
        bars instead of re-laying the column, and its first cut asked for `var(--m2-view-h)` — which is
        set on `.m2root` and therefore invisible to `.m2workbar`, a SIBLING of it: custom properties
@@ -300,14 +311,14 @@ export function createModulation(host, port) {
          ends (the foot has its own box, and the run's shadow padding sits between them).  The only
          honest source for "where is the bar" is the bar.  Skipped while the lane is ALREADY up,
          because the bar's rect is translated then and would fold the lift into itself. */
-      const cb = cardEl.getBoundingClientRect();
-      const bb = foot.prebar.getBoundingClientRect();
+      const cb = rectOf(cardEl);
+      const bb = rectOf(foot.prebar);
       const gap = Math.round(bb.top - cb.bottom);
       root.style.setProperty('--m2-lane-lift', Math.round(bb.top - (cb.top - gap - bb.height)) + 'px');
     } else if (rootBox && rootBox.height > 0 && !root.style.getPropertyValue('--m2-lane-lift')) {
       root.style.setProperty('--m2-lane-lift', Math.round(rootBox.height + 52) + 'px');
     }
-    const railH = rail.offsetHeight || 0;
+    const railH = live ? (rail.offsetHeight || 0) : 0;
     const wantTop = rootBox && rootBox.height > 0
       ? Math.round(rootBox.top + rootBox.height / 2 - railH / 2)
       : P.y;
@@ -379,8 +390,13 @@ export function createModulation(host, port) {
       placed = true;                                   // the hand owns the position from here
       grip.classList.add('drag');
     });
-    grip.addEventListener('pointermove', (e) => { if (!d) return; P.x = e.clientX - d.x; P.y = e.clientY - d.y; place(); });
-    const stop = () => { if (!d) return; d = null; grip.classList.remove('drag'); persist(); };
+    /* 2026-09-24 · ONE PLACE PER FRAME (optimization LB2, AUDIT-E FE11(b)).  place() is ~14 rect reads interleaved with
+       style writes (0.56 ms a call, measured), and it ran on every pointermove — 4–16 of them a frame on a fast mouse.
+       rack.js coalesces its own drags through frame-coalescer.js (wave 67); so does this grip now, and the release
+       FLUSHES before persist(), so the window lands, and is saved, exactly where the hand let go. */
+    const move = coalesce((p) => { P.x = p.x; P.y = p.y; place(); });
+    grip.addEventListener('pointermove', (e) => { if (!d) return; move.post({ x: e.clientX - d.x, y: e.clientY - d.y }); });
+    const stop = () => { if (!d) return; move.flush(); d = null; grip.classList.remove('drag'); persist(); };
     grip.addEventListener('pointerup', stop);
     grip.addEventListener('pointercancel', stop);
   }
@@ -2620,6 +2636,11 @@ export function createModulation(host, port) {
   const syncKnobs = (rec) => { for (const key in rec.knobs) paintKnob(rec, key); };
 
   let lastPaint = 0, paintCalls = 0, paintRuns = 0, paintMs = 0;
+  /* 2026-09-24 · THE WORDS A PAINT REWRITES ARE WRITTEN ONLY WHEN THEY CHANGE (optimization LB3, AUDIT-C FC5).  Every
+     node below is built text-only by the kit (or empty), so after the first paint the DOM is the same string either
+     way; an identical `textContent =` still replaced the text node — a childList record and a restyle in Gecko,
+     thirty times a second with the window open.  `attr()` above is the same guard for attributes. */
+  const text = (node, s) => { if (node.textContent !== s) node.textContent = s; };
   function paint(force) {
     const t = performance.now();
     paintCalls++;
@@ -2635,23 +2656,23 @@ export function createModulation(host, port) {
       transport.xport.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
     }
     transport.xport.classList.toggle('on', clock.isRunning());
-    transport.tempoNum.textContent = T.bpm.toFixed(T.bpm < 100 ? 1 : 0);
+    text(transport.tempoNum, T.bpm.toFixed(T.bpm < 100 ? 1 : 0));
 
 
-    transport.tempoHz.textContent = (T.bpm / 60).toFixed(2) + ' Hz';
-    transport.sync.textContent = M.syncMode() === 'wall' ? 'WALL' : 'FREE';
+    text(transport.tempoHz, (T.bpm / 60).toFixed(2) + ' Hz');
+    text(transport.sync, M.syncMode() === 'wall' ? 'WALL' : 'FREE');
     transport.sync.classList.toggle('on', M.syncMode() === 'wall');
     const hz = port.cadence ? port.cadence() : 60;
-    transport.cad.textContent = hz + ' HZ';
+    text(transport.cad, hz + ' HZ');
     transport.cad.classList.toggle('on', hz === 120);
     transport.holds.forEach((b, i) => {
       const on = !!T.hold && T.holdNote === HOLD_NOTE[i];
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      attr(b, 'aria-pressed', on ? 'true' : 'false');
       b.classList.toggle('on', on);
       b.classList.toggle('held', on);
     });
     const nd = M.dormantCount();
-    foot.dead.textContent = '⊘ ' + nd;
+    text(foot.dead, '⊘ ' + nd);
     foot.dead.classList.toggle('off', nd === 0);
     /* WAVE 98 · AND THE LANE IS RE-PLACED WHEN THAT NUMBER MOVES.  `sizeLaw.workBars` takes `dead` as
        an INPUT and adds 46 px of extension for the warning, but `place()` only ever ran on a card
@@ -2709,21 +2730,21 @@ export function createModulation(host, port) {
       if (force && dev.mac) dev.mac.textContent = heldBy ? String(heldIx + 1) : '--';
       if (dev.bus) {
         const f = s.triggerId ? fireSources().find((q) => q.id === s.triggerId) : null;
-        dev.bus.textContent = f ? f.label : '--';
+        text(dev.bus, f ? f.label : '--');
         dev.bus.classList.toggle('m2bushit', !!(f && f.hit));   /* a signal binding, not a hand one */
       }
       if (force && dev.lfoWave) dev.lfoWave.textContent = shapeLabel(s);
-      if (dev.envStage) dev.envStage.textContent = stateOf(s);
+      if (dev.envStage) text(dev.envStage, stateOf(s));
       const outs = outsOf(s);
       if (dev.status) {
         dev.status.main.classList.toggle('on', s.on && stateOf(s) !== 'IDLE' && stateOf(s) !== 'OFF');
-        dev.status.text.textContent = stateOf(s);
-        dev.status.out.textContent = s.out.toFixed(2) + ' · ' + pad2(outs) + ' OUT';
+        text(dev.status.text, stateOf(s));
+        text(dev.status.out, s.out.toFixed(2) + ' · ' + pad2(outs) + ' OUT');
       }
       /* the folded strip's bay */
       if (dev.meterFill) dev.meterFill.style.height = pct(s.out);
       if (force && dev.minName) dev.minName.textContent = s.label || s.kind.toUpperCase();
-      if (dev.minOut) dev.minOut.textContent = stateOf(s);
+      if (dev.minOut) text(dev.minOut, stateOf(s));
       if (force && dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
       if (dev.envMinProgFill) dev.envMinProgFill.style.height = pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0);
       if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = shapeLabel(s);
@@ -2742,6 +2763,11 @@ export function createModulation(host, port) {
       paintMinTrace(rec, s, force);
       if (rec.kind === 'audio') paintAudio(rec);
       if (force) {
+        /* 2026-09-24 · CLOSED IS `display: none`, so the read below could only answer 0 → `g.sig = ''` — the same
+           outcome, now without the forced layout it cost (optimization LB1, AUDIT-D FD5(a)).  Placed here and
+           nowhere earlier: the compact ENV's timeScale fit above is a MODEL write that saved projects carry, and the
+           strip, the audio face and the house-knob rings (after this loop) all keep painting while closed. */
+        if (!P.open) { g.sig = ''; continue; }
         const w = Math.round(g.box.clientWidth), h = Math.round(g.box.clientHeight);
         if (!(w > 8 && h > 8)) { g.sig = ''; continue; }        // folded, closed, or not laid out yet
         const sig = sigOf(s, w, h);

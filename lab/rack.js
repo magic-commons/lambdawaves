@@ -4168,7 +4168,10 @@ export async function boot(dom) {
       get open() { return !!(modView && modView.isOpen); },
       expand() {
         if (!modView) return false;
-        modView.open(); modView.wake();
+        /* 2026-09-24 · open() ALONE (optimization LB1, AUDIT-E FE3).  open() already runs rebuild(); place();
+           paint(true), and nothing between it and the old wake() touched the model or the registry, so wake()'s
+           second rebuild + paint re-read the same model into the same DOM for 15–28 ms per open. */
+        modView.open();
         document.body.classList.remove('rack-hidden');
         saveSettings(); schedule(TIER.PRESENT); return true;
       },
