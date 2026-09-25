@@ -1,3 +1,4 @@
+/* kick-base.mjs — lab/kick.js as it stood at 91c90bc (v0.2.3-alpha.3), imports re-pointed at lab/: the ORACLE for lb6-kick.mjs. */
 /* kick.js — the SLAP: a sudden momentum impulse on the electron, exactly.
  *
  * STATUS: EXACT operator, NUMERICAL matrix elements (1-D quadratures), with the truncation reported as physics.
@@ -17,11 +18,11 @@
  *
  * A kick along x or y is the z-kick conjugated by a spatial rotation: R⁻¹ e^{ikz} R = e^{i k (R⁻¹ẑ)·x}.
  */
-import { BASIS, radial, modeTable, orbitalFromTable } from './hydrogen.js';
-import { getHamiltonian } from './hamiltonian.js';
-import { sphericalBessel } from './bessel.js';
-import { applyRotor } from './frontier.js';
-import { angularDipoleZ, radialDipole } from './dynamics.js';
+import { BASIS, radial, modeTable, orbitalFromTable } from '../../../../lab/hydrogen.js';
+import { getHamiltonian } from '../../../../lab/hamiltonian.js';
+import { sphericalBessel } from '../../../../lab/bessel.js';
+import { applyRotor } from '../../../../lab/frontier.js';
+import { angularDipoleZ, radialDipole } from '../../../../lab/dynamics.js';
 
 const N = 91, LMAX = 10;
 export { sphericalBessel };                                   // lives in bessel.js (shared with the well; no import cycle)
@@ -45,7 +46,7 @@ function buildTables() { while (!warmStep(1e9)) { /* no budget: to the end */ } 
 export function warmStep(budgetMs = 8) {
   const H = getHamiltonian(), t0 = nowMs();
   if (ANG && RAD && RAD.id === H.id) return true;
-  if (!W) W = { theta: null, wT: null, PL: null, Th: [], a: 0, pairsA: 0, ang: null, radId: null, radRows: 0, rad: null, radNL: null };
+  if (!W) W = { theta: null, wT: null, PL: null, Th: [], a: 0, pairsA: 0, ang: null, radId: null, radRows: 0, rad: null };
   const over = () => nowMs() - t0 >= budgetMs;
   if (!ANG) {
     if (!W.theta) {
@@ -82,70 +83,46 @@ export function warmStep(budgetMs = 8) {
       /* radial: R_a of the Hamiltonian IN FORCE on a log grid, Simpson weights in u = ln r with the Jacobian r folded in */
       const r = new Float64Array(NR + 1), w = new Float64Array(NR + 1), wr2 = new Float64Array(NR + 1), du = Math.log(R1 / R0) / NR;
       for (let j = 0; j <= NR; j++) { r[j] = R0 * Math.exp(j * du); w[j] = ((j === 0 || j === NR) ? 1 : (j % 2 ? 4 : 2)) * du / 3 * r[j]; wr2[j] = w[j] * r[j] * r[j]; }
-      W.rad = { id: H.id, r, w, wr2, tab: [] }; W.radId = H.id; W.radRows = 0; W.radNL = new Map();
+      W.rad = { id: H.id, r, w, wr2, tab: [] }; W.radId = H.id; W.radRows = 0;
     }
     while (W.radRows < N) {
-      /* 2026-09-24 · ONE ROW PER (n, l) (optimization LB6): a row is H.radial(n, l, r_j) and does not depend on m, so
-         the 2l + 1 orbitals of a shell share one array — 21 row builds instead of 91, the same doubles. */
-      const s = BASIS[W.radRows], key = s.n * 16 + s.l, r = W.rad.r;
-      let row = W.radNL.get(key);
-      if (!row) { row = new Float64Array(NR + 1); for (let j = 0; j <= NR; j++) row[j] = H.radial(s.n, s.l, r[j]); W.radNL.set(key, row); }
+      const s = BASIS[W.radRows], row = new Float64Array(NR + 1), r = W.rad.r;
+      for (let j = 0; j <= NR; j++) row[j] = H.radial(s.n, s.l, r[j]);
       W.rad.tab.push(row); W.radRows++;
       if (over() && W.radRows < N) return false;
     }
-    RAD = W.rad; W.rad = null; W.radId = null; W.radNL = null;
+    RAD = W.rad; W.rad = null; W.radId = null;
   }
   W = null;
   return true;
 }
-/* 2026-09-24 · THE SAME MATRIX, SOONER (optimization LB6; AUDIT-F F13, REFUTE-A's wellPacket lead).  Two changes, both
- * bit-identical (tests: Object.is on every element and on the kicked register, every axis, several k, every
- * Hamiltonian): (1) the radial integral ∫ w r² R_a R_b j_L depends on (n_a, l_a, n_b, l_b, L) only — R is H.radial(n, l)
- * and m never enters it — so it is evaluated once per ordered key, by the same loop in the same order, and the 637
- * m-matched pairs reuse it; (2) the last matrix built is kept, keyed on (k, the radial table, the angular table), so a
- * repeated press of the same impulse — the K key, x, y or z (a kick along x or y is the z-boost between two rotors) —
- * does not rebuild it.  kickMatrixZ still hands every caller arrays of its own. */
-const IKEYS = 7 * 6 * 7 * 6 * (LMAX + 1);                       // n ≤ 6, l ≤ 5, L ≤ LMAX
-let MZ = null;                                                   // { k, rad, ang, re, im }: the last boost built (read-only)
-function boostZ(k) {
+/** the boost matrix along z for impulse k: complex, block-diagonal in m.  { re, im } as N×N Float64Arrays */
+export function kickMatrixZ(k) {
   buildTables();
-  if (MZ && MZ.k === k && MZ.rad === RAD && MZ.ang === ANG) return MZ;
   const re = new Float64Array(N * N), im = new Float64Array(N * N);
-  if (k === 0) { for (let a = 0; a < N; a++) re[a * N + a] = 1; MZ = { k, rad: RAD, ang: ANG, re, im }; return MZ; }
+  if (k === 0) { for (let a = 0; a < N; a++) re[a * N + a] = 1; return { re, im }; }
   const J = []; for (let L = 0; L <= LMAX; L++) { const row = new Float64Array(NR + 1); for (let j = 0; j <= NR; j++) row[j] = sphericalBessel(L, k * RAD.r[j]); J.push(row); }
   const IL = [[1, 0], [0, 1], [-1, 0], [0, -1]];                 // i^L
-  const Iv = new Float64Array(IKEYS), Ihave = new Uint8Array(IKEYS);
   for (let a = 0; a < N; a++) for (let b = a; b < N; b++) {
     const A = ANG[a * N + b]; if (!A) continue;
     let sr = 0, si = 0;
-    const ra = RAD.tab[a], rb = RAD.tab[b], Ba = BASIS[a], Bb = BASIS[b];
-    const lo = Math.abs(Ba.l - Bb.l), hi = Ba.l + Bb.l, base = (((Ba.n * 6 + Ba.l) * 7 + Bb.n) * 6 + Bb.l) * (LMAX + 1);
+    const ra = RAD.tab[a], rb = RAD.tab[b];
+    const lo = Math.abs(BASIS[a].l - BASIS[b].l), hi = BASIS[a].l + BASIS[b].l;
     for (let L = lo; L <= hi; L++) {
       if (Math.abs(A[L]) < 1e-14) continue;
-      let I;
-      if (Ihave[base + L]) I = Iv[base + L];
-      else {
-        I = 0; const jl = J[L];
-        const wr2 = RAD.wr2; for (let j = 0; j <= NR; j++) I += wr2[j] * ra[j] * rb[j] * jl[j];
-        Iv[base + L] = I; Ihave[base + L] = 1;
-      }
+      let I = 0; const jl = J[L];
+      const wr2 = RAD.wr2; for (let j = 0; j <= NR; j++) I += wr2[j] * ra[j] * rb[j] * jl[j];
       const v = (2 * L + 1) * A[L] * I, p = IL[L % 4];
       sr += v * p[0]; si += v * p[1];
     }
     re[a * N + b] = sr; im[a * N + b] = si;
     re[b * N + a] = sr; im[b * N + a] = si;                       // ⟨b|e^{ikz}|a⟩ = ⟨a|e^{ikz}|b⟩ (both real orbitals up to the shared e^{imφ}; symmetric)
   }
-  MZ = { k, rad: RAD, ang: ANG, re, im };
-  return MZ;
-}
-/** the boost matrix along z for impulse k: complex, block-diagonal in m.  { re, im } as N×N Float64Arrays (the caller's own) */
-export function kickMatrixZ(k) {
-  const M = boostZ(k);
-  return { re: Float64Array.from(M.re), im: Float64Array.from(M.im) };
+  return { re, im };
 }
 /** c ↦ M c in place */
 export function applyKickZ(re, im, k) {
-  const M = boostZ(k), or = new Float64Array(N), oi = new Float64Array(N);
+  const M = kickMatrixZ(k), or = new Float64Array(N), oi = new Float64Array(N);
   for (let a = 0; a < N; a++) {
     let sr = 0, si = 0;
     for (let b = 0; b < N; b++) { const mr = M.re[a * N + b], mi = M.im[a * N + b]; if (mr === 0 && mi === 0) continue; sr += mr * re[b] - mi * im[b]; si += mr * im[b] + mi * re[b]; }
