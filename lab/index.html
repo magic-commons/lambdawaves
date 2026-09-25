@@ -56,7 +56,7 @@
 <link rel="stylesheet" href="./skin.css">
     <link rel="stylesheet" href="./vendor/katex/katex.min.css">
 <!-- ── WAVE 64 · THE PORTED WINDOW'S TWO SHEETS, AND THEY ARE LAST ON PURPOSE ────────────────────────
-     `lab/mir/modwindow/modwindow.css` is BASINS' modulation window, 667 of 667 declaration blocks
+     `lab/mir/modulation/modwindow/modwindow.css` is BASINS' modulation window, 667 of 667 declaration blocks
      byte-identical to the source's, moved here whole under docs/ui/STYLE-LOCK.md's PORTED-WINDOW
      EXCEPTION.  In BASINS its own sheet is appended to <head> at first open, so it wins every tie;
      host-contract.md's rule four is "do not load a host sheet after it that can reach inside
@@ -136,11 +136,6 @@
       <p><b>MASKS</b> — Mute and solo affect the reconstruction only. The state keeps every coefficient, and the status shows how much norm is visible.</p>
       <p><b>VIEW AND STATE</b> — Camera, slice, and clip controls change the view. State transforms change <m>|ψ⟩</m>.</p>
     </div>
-    <!-- TWO LEGENDS, ONE BAR (wave 59).  `.keys` is the keyboard one and `.touch` is the phone's; skin.css's
-         phone block swaps which is displayed, because suppressing the whole bar there took away the TOUCH
-         gestures along with the keys — on the one device where discovery is hardest.  `shift+click = place
-         electron 1` is gone: it is guarded on `helium && helium.on` and HELIUM ships folded and off, so it
-         was the one clause of seven that did nothing on the screen that advertised it. -->
     <div id="transport" class="glass mini"></div>
     <!-- WAVE 55 · THE FLOAT LAYER.  Every window that comes off a rack lives here: one absolutely
          positioned layer over the stage, pointer-transparent itself so the canvas gestures underneath

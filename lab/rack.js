@@ -69,13 +69,13 @@ import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
 import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
-import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modwindow/ is the artifact
+import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.2.3-alpha.1 · keyboard redesign and camera controls · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.3-alpha.3 · the optimization pass · 2026-09-25';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -148,7 +148,7 @@ export async function boot(dom) {
     /* WAVE 64 · THE PORTED WINDOW'S ONE PARAMETER.  It derives 57 tints from `--hue-acc` /
        `--sat-acc` and their B pair, which this house has never written at runtime — it
        publishes RESOLVED colours instead.  So the two angles are handed over, on the window
-       and its rail only, and nothing on `:root` moves: see lab/modhost.css. */
+       and its rail only, and nothing on `:root` moves: see lab/mir/modulation/modhost.css. */
     if (modView) modView.setAccent(hueSat(A), hueSat(B));
     paintMarks();
   }
@@ -471,7 +471,8 @@ export async function boot(dom) {
    *        Δyaw = ω_amb·dt + d_y (1 − e^{−μ dt})/μ,   Δpitch = d_p (1 − e^{−μ dt})/μ        (→ d·dt as μ → 0)
    * which is why the whole travel of a fling is closed form — with the ambient off it turns through exactly ω₀/μ
    * and stops — and that identity is what the gate judges (B65), not a screenshot.
-   * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT 2.5: τ = 1/μ = 0.4 s,
+   * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT CAM.MU_DEF = 1.0 (wave 50
+   * shipped 2.5, and the figures that follow are 2.5's): τ = 1/μ = 0.4 s,
    * a hard flick (3 rad/s) coasts ln(ω₀/ω_rest)/μ ≈ 2.8 s and turns through ω₀/μ = 1.2 rad = 69° — two flicks to
    * walk right round the cloud — where μ = 12 gives 0.25 rad = 14° (a nudge) and μ = 1 gives most of a half turn.
    * REST = 0.003 rad/s is half a pixel a second at the drag's own 0.0065 rad/px: below it the residual is set to
@@ -491,7 +492,6 @@ export async function boot(dom) {
     get wp() { return this.dp; },                    // ω_pitch
     get omega() { return Math.hypot(this.wy, this.wp); },
     get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; },   // "the law has something to integrate"
-    /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb */
     /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb.
      *  FLING scales ω₀ FIRST — how much you get — and μ then decides how fast it goes: at gain 0 there is nothing
      *  to decay and the view stops dead on release (the drag itself is untouched), which no value of μ can do. */
@@ -889,7 +889,7 @@ export async function boot(dom) {
    * 50–200 ms of hitch — on the first frame back, on unified-memory hardware (the iPad is a target) where the
    * "saving" is not even a saving because CPU heap and GPU memory are the same pool.  So the GPU keeps everything.
    * RESUMING RE-ANCHORS, IT NEVER JUMPS, and it re-anchors the way the two clocks that already solved this do it
-   * (mir/host.js: prevWall = null, so the first dt after a stop is not a dt; camera.wake(): lastWall = now).  There
+   * (mir/modulation/host.js: prevWall = null, so the first dt after a stop is not a dt; camera.wake(): lastWall = now).  There
    * is no third mechanism here — every wall reference the loop holds is simply set to NOW before the first frame. */
   const page = { hidden: false, parks: 0, resumes: 0, hiddenAt: 0, hiddenMs: 0, firstDt: null, firstWall: 0, jumped: 0, mark: null, back: null, via: '' };
   function setPageHidden(on, via) {
@@ -920,7 +920,7 @@ export async function boot(dom) {
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
       if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
-      if (modHost) modHost.clock.setHidden(false);                // mir/host re-anchors itself: prevWall = null + reanchorTransport
+      if (modHost) modHost.clock.setHidden(false);                // mir/modulation/host.js re-anchors itself: prevWall = null + reanchorTransport
       if (audioCap && audioCap.setHidden) audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
       warmArm(60);
       schedule(TIER.PRESENT);
@@ -2088,7 +2088,7 @@ export async function boot(dom) {
     r2.appendChild(trig({ label: 'CLEAR', onFire: () => clearRegister() }).root);
     r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
     /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
-       applied and forgotten, holding nothing (kit.js:213).  This is a RATE, in rad/s, and it is a
+       applied and forgotten, holding nothing (mir/kit.js knob, `onDelta`).  This is a RATE, in rad/s, and it is a
        real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
        modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
     ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
@@ -2294,7 +2294,7 @@ export async function boot(dom) {
     el('div', 'note', wSpec.body).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
   api.hamiltonian = () => sturm.P ? sturmSpectrum() : getHamiltonian().spectrum;          // W-STURMIAN: the eigen ladder under the scale
   /* wave 50: THE RATE WAS MISSING HERE.  The register evolves label a at energyOf(a) = H.energy(a) · rates[a]
-     (line 72, what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
+     (`energyOf` at the top of boot(), what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
      the digests — returned H.energy(a) alone, so with any RATE ≠ 1 the card printed an energy the state was
      not moving with.  It is the same function now.  (Under STURMIAN the labels are not eigenstates, RATE is
      refused there, and the label's ⟨a|H|a⟩/⟨a|S|a⟩ stands.) */
@@ -2681,7 +2681,7 @@ export async function boot(dom) {
    * the value it owns is a knob that lies — and the hand's road back is modHand(), above.  */
   /* ── WAVE 64 · THERE IS NO MODULATION CARD ANY MORE ──────────────────────────────────────────
    * The modulation window is a PORTED ARTIFACT (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW
-   * EXCEPTION): `lab/mir/modwindow/`, BASINS' own window, moved here whole.  It is 716 × 466 at
+   * EXCEPTION): `lab/mir/modulation/modwindow/`, BASINS' own window, moved here whole.  It is 716 × 466 at
    * one card and it carries its own chrome, its own chip rail and its own drag grip — a 300 px
    * rack slot cannot hold it and wrapping it in `device()` would put the house's frame around a
    * window whose frame is the thing that travelled.  So it is built into the FLOAT LAYER by
@@ -2852,7 +2852,7 @@ export async function boot(dom) {
       if (k && k.root) k.root.classList.toggle('mod-held', held);
     });
     /* THE FOUR EDGES, HANDED TO THE PORTED WINDOW.  Registry · target host · clock ·
-       presentation — the four `lab/mir/host.js` has provided since the MIR wave, and the four
+       presentation — the four `lab/mir/modulation/host.js` has provided since the MIR wave, and the four
        `host-contract.md` PART 3 says this window boots on and nothing else. */
 
 
@@ -3255,7 +3255,7 @@ export async function boot(dom) {
    *  "an existing global clock" the instrument's clock rather than a number somebody typed, and what
    *  makes `capture.js`'s loop close on the same seam the physics closes on.  It is a KEY and not a
    *  new control, because the modulation window is a ported artifact and its timing bar is not ours
-   *  to grow; the sentence lives on the MOD button and in the key sheet.  It never guesses: no exact
+   *  to grow; the sentence lives on the MOD button and in the keyboard editor.  It never guesses: no exact
    *  period, no lock, and the refusal says which. */
   function barLock() {
     if (!modHost) return { ok: false, reason: 'no modulation rack' };
@@ -3530,7 +3530,6 @@ export async function boot(dom) {
     }
     touchState();
   }
-  /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   /* ── KEPLER AS A CONTROL SURFACE: the perihelion handle drives exact rotors on the state ── */
   function pointerRay(px, py) {
     const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
@@ -3665,6 +3664,7 @@ export async function boot(dom) {
       : `L̂ = (${o.normal.map((v) => v.toFixed(2)).join(', ')}) · û = (${o.u.map((v) => v.toFixed(2)).join(', ')}) · the rotors turn EVERY populated shell; this shell supplies the axes`);
   }
   let kdrag = null;
+  /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   function unproject(px, py) {
     const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
@@ -5178,8 +5178,8 @@ export async function boot(dom) {
     { id: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
     { id: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
-    /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the key
-       sheet, which is the visible seat neither could have inside the ported window: its timing bar is
+    /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the keyboard
+       editor, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
 
 

@@ -1,5 +1,8 @@
 # λWAVES — LANDSCAPE
 
+> **Superseded 2026-09-24 — see `research/optimization-2026-09-24/AUDIT-E.md` §6** (the seam table and the
+> measured sizes) and §7 (what in this file no longer matches the code). Kept as the 2026-09-07 record.
+
 **What the code is, and where.** Written 2026-09-07 for an LLM taking over cold.
 Companion to `HANDOFF.md` (what is left to do). Neither replaces `REPORT.md`, which is
 the lab notebook: every law, constant and named proof, and the place to look when you

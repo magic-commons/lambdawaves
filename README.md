@@ -69,9 +69,12 @@ The node gate holds norms to 3e-9 and the anchors to 2e-16.
 
 What the GPU does is **presentation**: `field.js` reconstructs ψ on an N³ rgba16float
 grid straight from the closed-form mode tables — no basis textures — and a raymarch
-presenter draws density, phase, Re ψ, Im ψ or a difference. The measured throughput is
-3.06 ms/frame at 96³ and 3.89 ms at 128³ × 16 modes. GPU voxels agree with the CPU
-closed form to 2e-5.
+presenter draws density, phase, Re ψ, Im ψ or a difference. Measured on an RTX 3070 (headless Firefox,
+1920 × 994, batches of at least 2.5 s, 2026-09-24): presenting the default 1s + 2p_z at 96³ and 160 steps
+takes 3.25 ms per frame in the phase view and 2.10 ms for density, and reconstructing it 0.1 ms;
+reconstructing all 91 labels takes 1.43 ms at 96³ and 3.40 ms at 128³
+(`research/optimization-2026-09-24/probes/K/k2-present.out.json`, `k9-throughput.out.json`,
+`k1-time.out.json`). GPU voxels agree with the CPU closed form to 2e-5.
 
 Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, SLICE,
 KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with four clocks, a
