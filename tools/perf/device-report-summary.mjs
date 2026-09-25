@@ -65,7 +65,8 @@ if (!brief) for (const { f, R } of reports) {
   /* other keys written while it ran: notebook + notebook.title + notebook.subtitle + projects together are a PROJECT OPEN's
      fingerprint (rack.js projects.open) — a hand on the page, whose restore then rides inside a scene */
   const other = R.held && R.held.otherWritesPassed ? Object.entries(R.held.otherWritesPassed).map(([k, v]) => k.replace(/^lambdawaves\.q0\./, '') + '×' + v).join(' ') : '';
-  out.push('- held settings writes ' + (R.held ? R.held.settingsWritesHeld : '—') + (other ? ' · other writes passed ' + other : '') + ' · restored ' + restoredOf(R) + ' · wall ' + n((R.wallMs || 0) / 1000, 0) + ' s' + ((R.errors || []).length ? ' · errors: ' + R.errors.join(' / ') : ''));
+  const ownOpen = Array.isArray(R.scenes) && R.scenes.some((x) => /^project open/.test(x.label) && typeof x.skipped !== 'string');   // then those keys are the scene's own open and put-back
+  out.push('- held settings writes ' + (R.held ? R.held.settingsWritesHeld : '—') + (other ? ' · other writes passed ' + other + (ownOpen ? ' (the project-open scene\'s own open and put-back among them)' : '') : '') + ' · restored ' + restoredOf(R) + ' · wall ' + n((R.wallMs || 0) / 1000, 0) + ' s' + ((R.errors || []).length ? ' · errors: ' + R.errors.join(' / ') : ''));
 
   if (R.gpu && Array.isArray(R.gpu.rows)) {
     out.push('\n**GPU** (`field.throughput`, batches ≥ ' + R.gpu.targetMs + ' ms; empty completion wait ' + n(R.gpu.tick && R.gpu.tick.medianMs, 1) + ' ms · ' + R.gpu.preset + ')\n');
@@ -111,6 +112,30 @@ if (!brief) for (const { f, R } of reports) {
         if (d.length) moves.push((i * W / 1000).toFixed(2) + ' s: ' + d.join(', '));
       }
       if (moves.length) out.push('  - ' + moves.slice(0, 14).join('\n  - ') + (moves.length > 14 ? '\n  - … ' + (moves.length - 14) + ' more' : ''));
+    }
+    /* THE PROJECT OPEN (2026-09-25): WAVE DANCER clicked open while playing, the state as found restored 4 s later */
+    const PO = R.scenes.find((x) => x.projectOpen);
+    if (PO) {
+      const po = PO.projectOpen;
+      out.push('\n**Project open** (' + PO.label.replace(/^project open \(|\)$/g, '') + '; sync = the call\'s own ms; style+layout = what it left to the next frame, forced and timed right after; rebuild frame = after · grid · encode · GPU; window = the next 2 s)\n');
+      out.push(head(['step', 'sync ms', 'style+layout ms', 'rebuild frame', 'second frame', 'window: worst gap · >100 ms · presents / reconstructs · held · in flight ≤ · queue ≤', 'loopMedian before → after', 'grid · governor · autoScale before']));
+      const fr = (f) => (f ? n(f.afterMs, 1) + ' · ' + n(f.encodeMs, 2) + ' · ' + (f.reconstructed ? 'R' : '—') + ' · ' + n(f.gpuDoneMs, 1) : '—');
+      const stepRow = (name, r) => {
+        if (!r) return row([name, '—', '', '', '', '', '', '']);
+        const F = r.rebuildFrame || {}, W = r.window || {}, B = r.before || {}, A = r.after || {};
+        const grid = F.fieldTo ? (F.from + '→' + F.fieldTo + ' ' + n(F.setResolutionMs, 2) + ' ms · ') : 'no grid change · ';
+        return row([name + (r.ok === false ? ' (FAILED)' : '') + (Number.isFinite(r.abStoodDownMs) ? ' (A/B stood down ' + n(r.abStoodDownMs, 2) + ' ms first)' : ''), n(r.syncMs, 2), n(r.styleLayoutMs, 2), grid + fr(F.firstFrame), fr(F.secondFrame),
+          W.maxGapMs === undefined ? '—' : n(W.maxGapMs, 1) + ' · ' + W.gaps100 + ' · ' + W.presents + ' / ' + W.reconstructs + ' · ' + n(W.held, 0) + ' · ' + n(W.inFlightMax, 0) + ' · ' + n(W.queueMsMax, 0),
+          n(B.loopMedianMs, 2) + ' → ' + n(A.loopMedianMs, 2), B.field + '³ · ' + B.gov + ' · ' + B.autoScale]);
+      };
+      if (po.importText) out.push(row(['projects.importText (' + po.importText.bytes + ' B, ' + n(po.importText.afterClickMs, 1) + ' ms after the click)', n(po.importText.syncMs, 2), '', '', '', '', '', '']));
+      out.push(stepRow('open ' + ((po.open && po.open.path) || ''), po.open));
+      out.push(stepRow('restore (the state as found)', po.restore));
+      for (const k of ['open', 'restore']) {
+        const b = po.breakdown && po.breakdown[k];
+        if (b && b.length) out.push('\n- ' + k + ' · self ms (inclusive, calls): ' + b.slice(0, 10).map((x) => x.label + ' ' + n(x.selfMs, 1) + (x.ms !== x.selfMs ? ' (' + n(x.ms, 1) + ')' : '') + (x.n > 1 ? ' ×' + x.n : '') + (x.bytes ? ' ' + x.bytes + ' B' : '')).join(' · '));
+      }
+      if (po.residue) out.push('- put back · ' + Object.entries(po.residue).filter(([k]) => k !== 'after').map(([k, v]) => k + ': ' + v).join(' · ') + (po.residue.after ? ' · after: current ' + po.residue.after.current + ', dirty ' + po.residue.after.dirty + ', stored ' + po.residue.after.storage : ''));
     }
     /* THE GRID EDGE (2026-09-25): each tap's sub-timeline, and each rebuild nobody tapped for (the governor's rung) */
     const G = R.scenes.filter((s) => Array.isArray(s.switches) && s.switches.length);

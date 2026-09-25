@@ -31,7 +31,9 @@
  *              (K2 specialises one per view × style; WEBKIT-FPS-RESEARCH §1.4) as a long gap in a bin · UI hidden (H) ·
  *              HIDE EDGE (3 s shown → H → 4 s) · frost flipped · card flipped · the modulation window flipped · and LAST the
  *              GRID EDGE (three GRID switches by the segment, playing, then again paused, each with its sub-timeline —
- *              runGridEdges below; `only: 'grid'` / `&only=grid` runs those two alone).
+ *              runGridEdges below; `only: 'grid'` / `&only=grid` runs those two alone) · then the PROJECT OPEN (the WAVE DANCER
+ *              demo clicked open while playing, the state as found restored 4 s later, each timed and broken down —
+ *              runProjectOpen below; `only: 'project'` / `&only=project`).
  *   long play  (PACE P3) right after the first scene: 30 s as found in 1 s bins — the iPad's cycle (well for a few seconds, ~5 fps
  *              for a while, then back) is longer than any 3 s scene.  Every bin of every scene also carries THE PACING: frames
  *              the loop held because four were still on the GPU (LW.stats.skipped), the most in flight (field.inFlight), the
@@ -260,9 +262,9 @@ function gridProbe(LW) {
     const r = origFrame.call(this, a);
     const t1 = performance.now(), res = field.resolution;
     for (const sw of all) {
-      if (sw.noRebuild || sw.frames >= 2 || t < sw.t) continue;
-      if (!sw.rebuilt) { sw.noRebuild = { field: res, gov: safe(() => LW.governor.state), afterMs: r1(t1 - sw.t) }; continue; }   // this loop frame ran its REBUILD first, and nothing was rebuilt
-      if (res !== sw.fieldTo) { sw.frames = 2; continue; }                                                                          // another rebuild came first: this record is closed
+      if (sw.frames >= 2 || t < sw.t || (sw.noRebuild && !sw.anyFrame)) continue;
+      if (!sw.rebuilt && !sw.noRebuild) { sw.noRebuild = { field: res, gov: safe(() => LW.governor.state), afterMs: r1(t1 - sw.t) }; if (!sw.anyFrame) continue; }   // this loop frame ran its REBUILD first, and nothing was rebuilt
+      if (sw.rebuilt && res !== sw.fieldTo) { sw.frames = 2; continue; }                                                           // another rebuild came first: this record is closed
       const fr = { afterMs: r1(t1 - sw.t), encodeMs: r3(t1 - t), reconstructed: st.reconstructs > rc, presented: st.presents > p, inFlightAtSubmit: fl, gpuDoneMs: null };
       sw.pending.push(done().then(() => { fr.gpuDoneMs = r1(performance.now() - t1); }, () => {}));
       if (sw.frames === 0) sw.firstFrame = fr; else sw.secondFrame = fr;
@@ -275,14 +277,15 @@ function gridProbe(LW) {
   return {
     all,
     start() { t0 = performance.now(); },
-    /** a tap about to be made: the state around it, read before it */
-    arm(from, to, firstSight) { const sw = record(from, to, 'tap', performance.now()); sw.firstSight = firstSight; all.push(sw); return sw; },
+    /** a tap about to be made: the state around it, read before it.  `anyFrame`: time the next two frames whether or not
+     *  the grid changes (a project open: its REBUILD frame rebuilds the grid only when the file's grid differs) */
+    arm(from, to, firstSight, anyFrame = false) { const sw = record(from, to, 'tap', performance.now()); sw.firstSight = firstSight; sw.anyFrame = anyFrame; all.push(sw); return sw; },
     /** the GPU answers for every record so far, waited at most `ms` (a lost device never answers) */
     settled(ms = 3000) { return Promise.race([Promise.all(all.flatMap((s) => s.pending)), sleep(ms)]); },
     release() { field.setResolution = origSet; field.frame = origFrame; },
     /** one record as the report keeps it (the working fields dropped) */
     out(sw) {
-      const { t, skipped0, rebuilt, frames, pending, firstReconstruct, ...o } = sw;
+      const { t, skipped0, rebuilt, frames, pending, firstReconstruct, anyFrame, ...o } = sw;
       o.firstReconstructGpuMs = firstReconstruct ? firstReconstruct.gpuDoneMs : null;
       return o;
     },
@@ -293,7 +296,7 @@ function gridProbe(LW) {
  * deviceReport(LW, opts) → one JSON-safe object.
  *   opts.targetMs     the throughput batch floor (1500)          opts.sceneMs   one scene's play (3000)
  *   opts.grids        [64, 96, 128]                              opts.scenes / opts.gpu   false skips that part
- *   opts.only         'grid': the scenes are the two grid edges alone
+ *   opts.only         'grid': the scenes are the two grid edges alone · 'project': the project open alone
  *   opts.readyAt      performance.now() at __LW.ready (the flag's road passes it)
  *   opts.onProgress   (text) → void, between steps (the flag's toast)          opts.skipEl   the toast (left out of dom/backdrops)
  */
@@ -463,7 +466,9 @@ async function measure(LW, opts) {
     serializeBytes: proofAfter.serialize ? proofAfter.serialize.length : null,
     settingsKey: proofBefore.storage[SETTINGS_KEY] === proofAfter.storage[SETTINGS_KEY] ? 'identical' : 'DIFFERENT',
     localStorage: changedKeys.length ? 'DIFFERENT: ' + changedKeys.join(', ') : 'identical',
-    history: JSON.stringify(proofBefore.history) === JSON.stringify(proofAfter.history) ? 'identical' : 'DIFFERENT',
+    history: JSON.stringify(proofBefore.history) === JSON.stringify(proofAfter.history) ? 'identical'
+      : found.projectScene ? 'CLEARED by the project open to one row (' + JSON.stringify(proofBefore.history) + ' → ' + JSON.stringify(proofAfter.history) + ') — the one thing that scene cannot put back'
+      : 'DIFFERENT',
     card: LW.cardStyle === found.card ? 'identical' : 'DIFFERENT',
     cardRoad: found.cardChosen ? 'setCardStyle (this browser had already chosen a card)' : 'the data-card attribute only (setCardStyle would have recorded a first choice)',
     frost: LW.frost === found.frost ? 'identical' : 'DIFFERENT',
@@ -473,6 +478,7 @@ async function measure(LW, opts) {
     traces: 'a play advances the SHADOW trail, the dynamics history and particles; none is project state',
   };
   if (R.restored.serialize === 'DIFFERENT') R.restored.serializeFirstDiff = firstDiff(proofBefore.serialize, proofAfter.serialize);
+  if (found.projectScene) R.restored.projectOpen = found.projectScene.residue;   // what the project open put back by hand, and what it could not
   R.errors = errors.concat((window.__e || []).slice(e0).map(String)).slice(0, 40);
   R.wallMs = Math.round(performance.now() - tStart);
   return R;
@@ -614,7 +620,9 @@ async function runScenes(LW, o, found, say, err, skipEl) {
   const EDGE = 10000;
 
   const gridEdges = () => runGridEdges(LW, found, S, scene, start, say, err);
+  const projectOpen = () => runProjectOpen(LW, found, S, scene, say, err);
   if (o.only === 'grid') { await gridEdges(); return S; }                 // `__LW.report({ only: 'grid' })`, `?report=1&only=grid`
+  if (o.only === 'project') { await projectOpen(); return S; }           // `__LW.report({ only: 'project' })`, `?report=1&only=project`
 
   await scene(found.uiHidden ? 'as found (UI hidden)' : 'as found (UI shown)');
   /* PACE P3 · THE LONG PLAY: 30 s as found in 1 s bins.  The iPad played well for a few seconds, fell to ~5 fps for a while and
@@ -666,8 +674,9 @@ async function runScenes(LW, o, found, say, err, skipEl) {
         () => { if (!neverPlaced) { LW.mod.collapse(); putPres(); if (found.rackHidden) document.body.classList.add('rack-hidden'); } });
     }
   }
-  /* THE GRID EDGE LAST, so every scene above stays comparable with the earlier reports; it still precedes the GPU rows */
+  /* THE GRID EDGE and THE PROJECT OPEN LAST, so every scene above stays comparable with the earlier reports; both precede the GPU rows */
   await gridEdges();
+  await projectOpen();
   return S;
 }
 
@@ -677,6 +686,24 @@ function rafWatch() {
   const f = (ts) => { if (last !== null) rows.push([performance.now(), ts - last]); last = ts; if (on) requestAnimationFrame(f); };
   requestAnimationFrame(f);
   return { stop() { on = false; return rows; } };
+}
+
+/** the per-frame record a played scene keeps for its windows: wall time, the rAF interval, the loop's presents / reconstructs /
+ *  held frames, frames in flight, the backlog (only where completion is prompt) and the specialised pipelines pending; win(t, ms)
+ *  reads the frames that ended in (t, t + ms] */
+function tapRecorder(LW) {
+  const field = LW.field, paced = !!safe(() => field.paced), rows = [];
+  const tap = (t, gap) => rows.push([t, gap, LW.stats.presents, LW.stats.reconstructs, LW.stats.skipped || 0, safe(() => field.inFlight, 0) || 0, paced ? safe(() => field.queueMs, null) : null, safe(() => field.renderPipelines.pending, 0) || 0]);
+  const win = (t0, ms) => {
+    const w = rows.filter(([t]) => t > t0 && t <= t0 + ms);
+    if (!w.length) return null;
+    const prev = rows.filter(([t]) => t <= t0).pop() || w[0], last = w[w.length - 1];
+    const qs = w.map((r) => r[6]).filter(Number.isFinite);
+    return { ms, frames: w.length, maxGapMs: r1(Math.max(...w.map((r) => r[1]))), gaps100: w.filter((r) => r[1] > 100).length,
+      presents: last[2] - prev[2], reconstructs: last[3] - prev[3], held: last[4] - prev[4], inFlightMax: Math.max(...w.map((r) => r[5])),
+      queueMsMax: qs.length ? r1(Math.max(...qs)) : null, pipesPendingMax: Math.max(...w.map((r) => r[7])) };
+  };
+  return { rows, tap, win };
 }
 
 /**
@@ -713,22 +740,10 @@ async function runGridEdges(LW, found, S, scene, start, say, err) {
 
   /* ── PLAYING ── */
   {
-    const P = gridProbe(LW), taps = [], WIN = 2000;
-    const paced = !!safe(() => field.paced);
+    const P = gridProbe(LW), T = tapRecorder(LW), WIN = 2000;
     let started = false;
-    const tap = (t, gap) => {
-      if (!started) { started = true; P.start(); }
-      taps.push([t, gap, LW.stats.presents, LW.stats.reconstructs, LW.stats.skipped || 0, safe(() => field.inFlight, 0) || 0, paced ? safe(() => field.queueMs, null) : null, safe(() => field.renderPipelines.pending, 0) || 0]);
-    };
-    const win = (sw) => {
-      const rows = taps.filter(([t]) => t > sw.t && t <= sw.t + WIN);
-      if (!rows.length) return null;
-      const prev = taps.filter(([t]) => t <= sw.t).pop() || rows[0], last = rows[rows.length - 1];
-      const qs = rows.map((r) => r[6]).filter(Number.isFinite);
-      return { ms: WIN, frames: rows.length, maxGapMs: r1(Math.max(...rows.map((r) => r[1]))), gaps100: rows.filter((r) => r[1] > 100).length,
-        presents: last[2] - prev[2], reconstructs: last[3] - prev[3], held: last[4] - prev[4], inFlightMax: Math.max(...rows.map((r) => r[5])),
-        queueMsMax: qs.length ? r1(Math.max(...qs)) : null, pipesPendingMax: Math.max(...rows.map((r) => r[7])) };
-    };
+    const tap = (t, gap) => { if (!started) { started = true; P.start(); } T.tap(t, gap); };
+    const win = (sw) => T.win(sw.t, WIN);
     const at = plan.map((g, i) => ({ ms: 3000 + 4000 * i, what: 'grid ' + cube(g), fn: () => tapSwitch(P, g).via }));
     try { await scene('grid edge (3 s → ' + plan.map(cube).join(' → 4 s → ') + ' → 4 s)', null, null, 15000, at, BIN_MS, tap); }
     finally {
@@ -774,13 +789,252 @@ async function runGridEdges(LW, found, S, scene, start, say, err) {
   }
 }
 
+/**
+ * THE PROFILER (project open, 2026-09-25): a stack of timed wrappers over whatever is reachable from tools/, recording only
+ * inside a PHASE (run(name, fn): the synchronous extent of one call).  Each label keeps calls, INCLUSIVE ms, SELF ms (minus the
+ * wrapped calls inside it) and bytes; the phase's own label is its root, so the root's self is what no wrapper could name
+ * (in a project open: restore()'s control writes, the theme / card / frost / accent, the modulation window's rebuild, the
+ * notebook's Markdown, serialize() — closures rack.js does not expose).  run() also wraps, for its extent only, JSON.parse /
+ * JSON.stringify (bytes), localStorage getItem / setItem / removeItem (bytes) and the notebook preview's innerHTML, and takes
+ * them off again before it returns.  Method wraps (wrap()) stay for the scene and pass straight through outside a phase.
+ */
+function profiler() {
+  const acc = {}, stack = [], undo = [];
+  let phase = null;
+  const add = (label, incl, self, bytes) => {
+    const A = acc[phase] || (acc[phase] = {}), a = A[label] || (A[label] = { n: 0, ms: 0, selfMs: 0, bytes: 0 });
+    a.n++; a.ms += incl; a.selfMs += self; a.bytes += bytes || 0;
+  };
+  const timed = (label, orig, size) => function (...args) {
+    if (!phase) return orig.apply(this, args);
+    const f = { t: performance.now(), child: 0 }; stack.push(f);
+    let r;
+    try { r = orig.apply(this, args); return r; }
+    finally {
+      stack.pop(); const incl = performance.now() - f.t;
+      if (stack.length) stack[stack.length - 1].child += incl;
+      let b = 0; if (size) try { b = size(args, r) || 0; } catch (_) {}
+      add(label, incl, incl - f.child, b);
+    }
+  };
+  /** replace obj[key] with a timed pass-through; the undo puts the exact property back (an own one, or none) */
+  const install = (list, obj, key, label, size) => {
+    try {
+      if (!obj || typeof obj[key] !== 'function') return false;
+      const orig = obj[key], own = Object.prototype.hasOwnProperty.call(obj, key), w = timed(label, orig, size);
+      obj[key] = w; if (obj[key] !== w) return false;
+      list.push(() => { if (own) obj[key] = orig; else delete obj[key]; });
+      return true;
+    } catch (_) { return false; }
+  };
+  const len = (v) => (typeof v === 'string' ? v.length : 0);
+  return {
+    acc,
+    wrap(obj, key, label) { return install(undo, obj, key, label); },
+    /** fn under the phase `name`, with the per-call wraps on for its extent; returns fn's value */
+    run(name, fn, previewEl) {
+      const inner = [];
+      const J = JSON, SP = window.Storage && Storage.prototype;
+      install(inner, J, 'parse', 'JSON.parse', (a) => len(a[0]));
+      install(inner, J, 'stringify', 'JSON.stringify', (a, r) => len(r));
+      if (SP) {
+        install(inner, SP, 'getItem', 'localStorage.getItem', (a, r) => len(r));
+        install(inner, SP, 'setItem', 'localStorage.setItem', (a) => len(a[1]));
+        install(inner, SP, 'removeItem', 'localStorage.removeItem');
+      }
+      if (previewEl) try {
+        const d = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        const set = timed('notebook preview innerHTML', function (v) { d.set.call(this, v); }, (a) => len(a[0]));
+        Object.defineProperty(previewEl, 'innerHTML', { configurable: true, get() { return d.get.call(this); }, set(v) { set.call(this, v); } });
+        inner.push(() => { delete previewEl.innerHTML; });
+      } catch (_) {}
+      const was = phase; phase = name;
+      const root = timed(name, fn);
+      try { return root(); }
+      finally { phase = was; for (let i = inner.length - 1; i >= 0; i--) try { inner[i](); } catch (_) {} }
+    },
+    release() { for (let i = undo.length - 1; i >= 0; i--) try { undo[i](); } catch (_) {} undo.length = 0; },
+    /** a phase's labels, heaviest SELF first, rounded */
+    out(name) {
+      const A = acc[name] || {};
+      return Object.entries(A).map(([label, a]) => ({ label, n: a.n, ms: r3(a.ms), selfMs: r3(a.selfMs), bytes: a.bytes || undefined }))
+        .sort((x, y) => y.selfMs - x.selfMs);
+    },
+  };
+}
+
+/** the notebook as the page shows it — nothing of it is in serialize(), and a project open rewrites all of it (show('notes'),
+ *  the file's text / title / subtitle, the rendered preview, the PROJECTS status line, the focus) */
+function notebookSnapshot() {
+  const nb = document.getElementById('notebook'); if (!nb) return null;
+  const q = (x) => nb.querySelector(x), sub = q('.nb-subtitle');
+  return { nb, hidden: nb.hidden, face: nb.dataset.face, mode: nb.dataset.mode, style: nb.getAttribute('style'),
+    faces: ['.nb-notes', '.nb-aboutface', '.nb-projectsface'].map((x) => { const e = q(x); return e ? [e, e.hidden] : null; }),
+    text: q('.nb-text') ? q('.nb-text').value : null, title: q('.nb-title') ? q('.nb-title').value : null, sub: sub ? [sub.value, sub.hidden] : null,
+    view: q('.nb-view') ? q('.nb-view').innerHTML : null, status: q('.pj-status') ? q('.pj-status').textContent : null, active: document.activeElement };
+}
+function notebookPut(S) {
+  if (!S) return;
+  const { nb } = S, q = (x) => nb.querySelector(x);
+  nb.hidden = S.hidden;
+  if (S.face === undefined) delete nb.dataset.face; else nb.dataset.face = S.face;
+  if (S.mode === undefined) delete nb.dataset.mode; else nb.dataset.mode = S.mode;
+  if (S.style === null) nb.removeAttribute('style'); else nb.setAttribute('style', S.style);
+  for (const f of S.faces) if (f) f[0].hidden = f[1];
+  if (S.text !== null) q('.nb-text').value = S.text;
+  if (S.title !== null) q('.nb-title').value = S.title;
+  if (S.sub) { q('.nb-subtitle').value = S.sub[0]; q('.nb-subtitle').hidden = S.sub[1]; }
+  if (S.view !== null && q('.nb-view').innerHTML !== S.view) q('.nb-view').innerHTML = S.view;
+  if (S.status !== null) q('.pj-status').textContent = S.status;
+  if (document.activeElement !== S.active) { try { if (S.active && S.active !== document.body && S.active.focus) S.active.focus({ preventScroll: true }); else if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {} }
+}
+
+/**
+ * THE PROJECT OPEN (2026-09-25).  The third and fourth iPad reports each froze 1.3–1.5 s where a hand opened NOTEBOOK →
+ * PROJECTS → WAVE DANCER mid-run (the four keys it writes, the register → 2s, the look → phase/signed, the transport stopped).
+ * Played as found: at 3 s the WAVE DANCER button is CLICKED (the demo's own road: fetch → projects.importText → projects.open →
+ * restore(file, { project: true })), at 7 s the state as found goes back through __LW.restore(snapshot) — a second open — then 4 s.
+ * Each of the two is timed: its synchronous ms, the style + layout it left to the next frame (forced and timed right after it),
+ * the loop's REBUILD frame after it (gridProbe: the grid rebuilt or not, encode, GPU done), and over the next 2 s the worst rAF
+ * gap, presents / reconstructs, held, in flight, the backlog and LW.perf.loopMedian before and after; plus the breakdown of the
+ * synchronous ms by the profiler above.  THE PUT-BACK, and what it cannot do: serialize() comes back through the restore; the
+ * stored projects and the three notebook keys go back byte for byte; the notebook's face, size, text, preview, status and the
+ * focus go back as found; the demo stops being the CURRENT project (projects.remove of the copy the open made current, then the
+ * stored collection as found); the unsaved-changes mark is re-armed against the state as found (projects.markClean — a page
+ * that never opened a project had none armed, so that guard now asks after a later edit); and THE UNDO RING is cleared to one
+ * row, the state as found (a project open clears it and its rows cannot be written back from outside: the one thing this
+ * scene cannot put back, and `restored.history` says so).  Skipped on a phone, while a project is current (opening another
+ * would change the file SAVE writes) or dirty, and where the button is not in the page.
+ */
+async function runProjectOpen(LW, found, S, scene, say, err) {
+  const label = 'project open (3 s → WAVE DANCER → 4 s → the state as found → 4 s)';
+  const P0 = safe(() => LW.projects), field = LW.field;
+  const demo = () => document.querySelector('#notebook .pj-demo[data-file="wave-dancer"]');
+  const why = safe(() => LW.layout.phone.on) ? 'a phone — the project open is read on a tablet or a desktop'
+    : !P0 || typeof P0.open !== 'function' ? 'no projects (NOTEBOOK) in this page'
+    : !demo() ? 'no WAVE DANCER button in the page'
+    : P0.current ? 'a project is current here (' + P0.current + ') — opening another would change the file SAVE writes, which cannot be put back'
+    : P0.dirty ? 'the project has unsaved changes — the report does not open another over them'
+    : !(field && field.ok) ? 'no WebGPU field' : null;
+  if (why) { S.push({ label, skipped: why }); return; }
+  const KEYS = ['lambdawaves.q0.projects', 'lambdawaves.q0.notebook', 'lambdawaves.q0.notebook.title', 'lambdawaves.q0.notebook.subtitle'];
+  const stored = Object.fromEntries(KEYS.map((k) => [k, safe(() => localStorage.getItem(k))]));
+  const nbFound = notebookSnapshot(), ringFound = historyState(LW);
+  const snap = JSON.stringify(LW.serialize());
+  const preview = document.querySelector('#notebook .nb-view');
+  const P = gridProbe(LW), T = tapRecorder(LW), prof = profiler(), WIN = 2000;
+  const ev = { click: null, importText: null, open: null, restore: null };
+  let opened = null; const openDone = new Promise((r) => { opened = r; });
+
+  /* the reachable seams restore() calls through an object (the rest are closures — they land in the phase's own self ms; MIR's
+     modulation host objects are frozen, so their four refuse the wrap and stay in the self ms too — `seams` lists what took) */
+  const host = safe(() => LW.mod.host), pal = safe(() => LW.palette);
+  const seams = [
+    [LW.reg, 'restore', 'reg.restore'], [LW.layout, 'applyLayout', 'layout.applyLayout'], [LW.layout, 'captureLayout', 'layout.captureLayout (in serialize)'],
+    [LW.layout, 'notebookResize', 'layout.notebookResize'], [LW.ladder, 'load', 'ladder.load'], [LW.molecule, 'load', 'molecule.load'],
+    [LW.helium, 'load', 'helium.load'], [LW.h2, 'load', 'h2.load'], [LW.chem, 'load', 'chem.load'], [LW.qcd, 'load', 'qcd.load'], [LW.slice, 'load', 'slice.load'],
+    [LW.spectrum, 'select', 'spectrum.select'], [LW.spectrum, 'setDials', 'spectrum.setDials'],
+    [pal, 'select', 'palette.select'], [pal, 'load', 'palette.load'], [pal, 'setOn', 'palette.setOn'],
+    [LW.fieldlines, 'setOverlay', 'fieldlines.setOverlay'], [LW.fieldlines, 'setLines', 'fieldlines.setLines'], [LW.fieldlines, 'setSource', 'fieldlines.setSource'],
+    [LW.particles, 'setOn', 'particles.setOn'], [LW.particles, 'seed', 'particles.seed'], [LW.particles, 'resetClock', 'particles.resetClock'],
+    [LW.dynamics, 'clearHistory', 'dynamics.clearHistory'], [LW.shadowView, 'clearTrail', 'shadowView.clearTrail'], [LW.shadowView, 'setMode', 'shadowView.setMode'],
+    [LW.camera, 'setAutoRotate', 'camera.setAutoRotate'], [LW.vortex, 'setOn', 'vortex.setOn'], [LW.kepler, 'setOn', 'kepler.setOn'],
+    [host && host.model, 'deserialize', 'modulation model.deserialize'], [host && host.registry, 'restoreAll', 'modulation registry.restoreAll'],
+    [host && host.targets, 'sync', 'modulation targets.sync'], [host && host.clock, 'applyAll', 'modulation clock.applyAll'],
+  ];
+  const wrapped = seams.filter(([o, k, l]) => prof.wrap(o, k, l)).map((x) => x[2]);
+
+  /* the demo's own road: the button's handler calls projects.importText then projects.open — both through the object */
+  const reading = () => ({ loopMedianMs: r3(safe(() => LW.perf.loopMedian)), inFlight: safe(() => field.inFlight), queueMs: safe(() => field.paced) ? r1(safe(() => field.queueMs)) : null,
+    field: field.resolution, gov: safe(() => LW.governor.state), autoScale: LW.quality.autoScale, playing: !!LW.clock.playing, pipesPending: safe(() => field.renderPipelines.pending) });
+  const origImport = P0.importText, origOpen = P0.open, ownImport = Object.prototype.hasOwnProperty.call(P0, 'importText'), ownOpen = Object.prototype.hasOwnProperty.call(P0, 'open');
+  P0.importText = function (text) {
+    const t = performance.now(); ev.importText = { afterClickMs: ev.click ? r1(t - ev.click.t) : null, bytes: typeof text === 'string' ? text.length : null };
+    const r = prof.run('importText', () => origImport.call(this, text));
+    ev.importText.syncMs = r3(performance.now() - t); ev.importText.path = r; return r;
+  };
+  P0.open = function (path) {
+    const rec = ev.open = { t: performance.now(), path, afterClickMs: ev.click ? r1(performance.now() - ev.click.t) : null, before: reading() };
+    rec.sw = P.arm(field.resolution, null, null, true);
+    let ok = false;
+    try { ok = prof.run('open', () => origOpen.call(this, path), preview); }
+    finally {
+      rec.syncMs = r3(performance.now() - rec.t);
+      const t1 = performance.now(); void document.body.offsetHeight; rec.styleLayoutMs = r3(performance.now() - t1);   // what the open left to the next frame's style + layout
+      rec.ok = ok; opened(rec);
+    }
+    return ok;
+  };
+  /* THE A/B TRANSITION: WAVE DANCER leaves one running, and restore() writes the file's register FIRST and turns the transition
+     off AFTER (`ui.ab.set(pr.ab)`), which freezes the demo's mix over the register it has just restored — measured: the modes came
+     back as the demo's.  The undo road stands the transition down before it restores (rack.js hWrite: "freeze the mix first: the
+     anchor restored below is the truth"); the put-back takes that road (LW.ab.set(false)), timed apart.  restore() also writes
+     mat.finish = 'lit' where the state as found had no finish (the same look): the key goes back to absent. */
+  const foundMat = safe(() => JSON.parse(snap).presentation.mat, {}) || {};
+  const restoreFound = (why) => {
+    const rec = { t: performance.now(), why, before: reading() };
+    const obj = JSON.parse(snap), ab = safe(() => LW.ab);
+    if (safe(() => LW.reg.transition) && ab && typeof ab.set === 'function') { const t = performance.now(); ab.set(false); rec.abStoodDownMs = r3(performance.now() - t); }
+    rec.sw = P.arm(field.resolution, null, null, true);
+    const t0 = performance.now();
+    let ok = false;
+    try { ok = prof.run('restore', () => LW.restore(obj), preview); }
+    finally {
+      rec.syncMs = r3(performance.now() - t0); const t1 = performance.now(); void document.body.offsetHeight; rec.styleLayoutMs = r3(performance.now() - t1); rec.ok = ok;
+      if (!('finish' in foundMat) && LW.mat.finish === 'lit') delete LW.mat.finish;
+    }
+    return rec;
+  };
+
+  let started = false, s = null;
+  const tap = (t, gap) => {
+    if (!started) { started = true; P.start(); }
+    T.tap(t, gap);
+    for (const rec of [ev.open, ev.restore]) if (rec && rec.after === undefined && t >= rec.t + WIN) rec.after = reading();   // LW.perf.loopMedian 2 s on
+  };
+  const at = [
+    { ms: 3000, what: 'WAVE DANCER', fn: () => { ev.click = { t: performance.now(), before: reading() }; demo().click(); ev.click.syncMs = r3(performance.now() - ev.click.t); return 'pj-demo'; } },
+    { ms: 7000, what: 'the state as found', fn: () => { if (!ev.open || !ev.open.ok) return 'skipped: the demo had not opened'; ev.restore = restoreFound('in play'); return '__LW.restore'; } },
+  ];
+  try { await scene(label, null, null, 11000, at, BIN_MS, tap); s = S[S.length - 1]; }
+  finally {
+    try {
+      /* the handler's fetch may still be in flight: the open lands first, then everything goes back */
+      if (ev.click && !ev.open) await Promise.race([openDone, sleep(10000)]);
+      if (ev.open && ev.open.ok && !(ev.restore && ev.restore.ok)) { await LW.settle(); ev.restore = restoreFound('after the play (the open came late)'); }
+      await P.settled(3000);
+      await sleep(600);                                                          // the restore's own tails (a deferred scan, the ring's quiet window)
+    } catch (e) { err('put back ' + label, e); }
+    prof.release(); P.release();
+    if (P0.importText !== origImport) { if (ownImport) P0.importText = origImport; else delete P0.importText; }
+    if (P0.open !== origOpen) { if (ownOpen) P0.open = origOpen; else delete P0.open; }
+    const residue = {};
+    try {
+      if (P0.current) { residue.current = 'the open made ' + P0.current + ' current — removed, then the stored collection as found'; P0.remove(P0.current); }
+      for (const k of KEYS) { const v = stored[k]; if (localStorage.getItem(k) !== v) { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } }
+      if (nbFound && nbFound.face === 'projects' && !nbFound.hidden && LW.notebook) LW.notebook.open('projects');   // its list re-renders from the collection as found
+      notebookPut(nbFound);
+      if (LW.history) { LW.history.clear(); residue.undoRing = 'cleared to one row, the state as found (' + (ringFound ? ringFound.rows + ' row' + (ringFound.rows === 1 ? '' : 's') + ', cursor ' + ringFound.cursor : '?') + ' before) — a project open clears it and its rows cannot be written back'; }
+      P0.markClean(); residue.unsavedGuard = 're-armed against the state as found (projects.markClean)';
+      residue.after = { current: P0.current, dirty: P0.dirty, storage: KEYS.every((k) => safe(() => localStorage.getItem(k)) === stored[k]) ? 'identical' : 'DIFFERENT' };
+    } catch (e) { err('put back ' + label, e); }
+    found.projectScene = { ringFound, residue };
+  }
+  if (!s || typeof s.skipped === 'string') return;
+  const one = (rec) => (rec ? { why: rec.why, path: rec.path, ok: rec.ok, afterClickMs: rec.afterClickMs, abStoodDownMs: rec.abStoodDownMs, syncMs: rec.syncMs, styleLayoutMs: rec.styleLayoutMs, before: rec.before, after: rec.after || null,
+    rebuildFrame: rec.sw ? P.out(rec.sw) : null, window: T.win(rec.t, WIN) } : null);
+  s.projectOpen = { demo: 'wave-dancer', click: ev.click ? { syncMs: ev.click.syncMs } : null, importText: ev.importText, open: one(ev.open), restore: one(ev.restore),
+    breakdown: { importText: prof.out('importText'), open: prof.out('open'), restore: prof.out('restore') }, seams: wrapped, residue: found.projectScene.residue };
+}
+
 /** one line for the console and the toast */
 export function summaryLine(R, bytes) {
   const a = R.adapter && R.adapter.info ? [R.adapter.info.vendor, R.adapter.info.architecture].filter(Boolean).join(' ') || 'adapter (no info)' : 'no adapter';
   const g = R.gpu && R.gpu.rows ? R.gpu.rows.filter((r) => r.frameMs !== undefined).map((r) => r.grid + ':' + r.frameMs.toFixed(2)).join(' ') : 'gpu —';
   const sc = Array.isArray(R.scenes) ? R.scenes.map((s) => (s.skipped ? s.label.split(' (')[0] + ' skip' : [s.label.split(' (')[0].replace('modulation window', 'mod'),
     s.error ? 'error' : s.rafFps !== undefined ? s.rafFps : null,
-    Array.isArray(s.switches) ? '[worst gap ms ' + s.switches.map((w) => (w.window ? Math.round(w.window.maxGapMs) : '—')).join('/') + ']' : null].filter((x) => x !== null).join(' '))).join(' · ') : 'scenes —';
+    Array.isArray(s.switches) ? '[worst gap ms ' + s.switches.map((w) => (w.window ? Math.round(w.window.maxGapMs) : '—')).join('/') + ']' : null,
+    s.projectOpen ? '[open ' + (s.projectOpen.open ? Math.round(s.projectOpen.open.syncMs) : '—') + ' ms · restore ' + (s.projectOpen.restore ? Math.round(s.projectOpen.restore.syncMs) : '—') + ' ms]' : null].filter((x) => x !== null).join(' '))).join(' · ') : 'scenes —';
   const s = R.settings && R.settings.quality ? R.settings.quality : {};
   const lp = Array.isArray(R.scenes) ? R.scenes.find((x) => /^long play/.test(x.label) && !x.skipped && !x.error) : null;
   return 'λWAVES device report · ' + R.device + ' · ' + a + ' · dpr ' + (R.platform && R.platform.dpr) + ' cap ' + (R.platform && R.platform.dprCap)
@@ -820,7 +1074,7 @@ async function runFromFlag(LW, qs, readyAt) {
   for (let i = 0; i < 600 && !LW.ready; i++) await sleep(50);
   await new Promise((r) => { try { LW.warning.onAccept(r); } catch (_) { r(); } });
   if (safe(() => LW.motion.reduced)) await toast.ask('reduced motion is on — the report plays the field for about a minute. Press RUN to measure.', 'RUN');
-  const only = qs.get('only') === 'grid' ? { only: 'grid', gpu: false } : {};    // `&only=grid`: the two grid edges alone (~30 s), no GPU rows
+  const only = ['grid', 'project'].includes(qs.get('only')) ? { only: qs.get('only'), gpu: false } : {};   // `&only=grid` (~25 s) · `&only=project` (~15 s): that scene alone, no GPU rows
   toast.say('device report · measuring — hands off the screen for about ' + (only.only ? 'half a minute' : 'three minutes'));
   let R;
   try { R = await deviceReport(LW, { readyAt, skipEl: toast.root, onProgress: (t) => toast.say('device report · ' + t + ' — hands off'), ...only }); }

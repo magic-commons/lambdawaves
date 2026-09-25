@@ -2,7 +2,9 @@
  * verdict, read __LW.lastReport and its in-page proof, and (with EXPECT_DIR) show the JSON file that landed there.
  *   BASE=https://127.0.0.1:8712 EXPECT_DIR=research/device-reports GD_PORT=5248 \
  *     node research/optimization-2026-09-24/probes/DR/report-flag.mjs [out.json] [extra query]
- * Also proves the flag's absence: the same page without ?report loads no device-report.js and paints no toast. */
+ * Also proves the flag's absence: the same page without ?report loads no device-report.js and paints no toast.
+ * THE CEILING (2026-09-25): the full report runs ~190 s in headless Firefox since the grid edge and the project open joined it
+ * (it was 150 s, and the old 1800 × 100 ms wait cut it at 180 s); the wait is 3600 × 100 ms now, and the run length is printed. */
 import { open } from '../../../../tools/gate/gatekit.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,8 +19,9 @@ const g = await open(`${BASE}/lab/?preset=1s%2B2pz&sw=0&report=1&post=1${EXTRA}`
 try {
   await g.waitFor('window.__LW && __LW.ready', 3000, 20);
   out.toastEarly = await g.ev(`const t = document.querySelector('[data-device-report]'); return t ? t.textContent : null;`);
-  const w = await g.waitFor(`(() => { const t = document.querySelector('[data-device-report]'); return t && /report (sent|ready)/.test(t.textContent); })()`, 1800, 100);
-  out.waited = w;
+  const tWait = Date.now();
+  const w = await g.waitFor(`(() => { const t = document.querySelector('[data-device-report]'); return t && /report (sent|ready)/.test(t.textContent); })()`, 3600, 100);
+  out.waited = w; out.waitSec = (Date.now() - tWait) / 1000;
   out.toast = await g.ev(`const t = document.querySelector('[data-device-report]'); return t ? { text: t.textContent, buttons: [...t.querySelectorAll('button')].map((b) => b.textContent) } : null;`);
   out.report = await g.ev('return __LW.lastReport;');
   out.reportJson = await g.ev('return JSON.stringify(__LW.lastReport);');   // the POST body's exact bytes (WebDriver turns undefined into null)
@@ -38,4 +41,4 @@ const landed = list().filter((f) => !before.has(f));
 out.landed = landed.map((f) => { const p = path.join(DIR, f); return { file: p, bytes: fs.statSync(p).size, same: fs.readFileSync(p, 'utf8') === out.reportJson }; });
 delete out.reportJson;
 fs.writeFileSync(OUT, JSON.stringify(out, null, 1));
-console.log(JSON.stringify({ toast: out.toast, landed: out.landed, restored: out.report && out.report.restored, errors: out.report && out.report.errors, errs: out.errs, noFlag: out.noFlag, error: out.error }, null, 1));
+console.log(JSON.stringify({ runSec: out.report && out.report.wallMs ? out.report.wallMs / 1000 : null, waitSec: out.waitSec, toast: out.toast, landed: out.landed, restored: out.report && out.report.restored, errors: out.report && out.report.errors, errs: out.errs, noFlag: out.noFlag, error: out.error }, null, 1));
