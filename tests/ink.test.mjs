@@ -35,7 +35,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PRESETS, toLUT, rgbToOklab, oklabToRgb, visibleInk, contrastRatio, relLuminance } from '../lab/palette.js';
+import { PRESETS, toLUT, rgbToOklab, oklabToRgb, visibleInk, contrastRatio, relLuminance } from '../lab/mir/palette.js';
 import { parseCssColor } from '../lab/mir/kit.js';
 
 const LAB = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'lab');
@@ -236,7 +236,7 @@ const STAGE_ENDS = { dark: [0.028, 0.038, 0.058], light: [0.93, 0.95, 0.975] };
     underBad > 0 && underInk === 0, { underBad, worstBad, underInk });
   judge('W59-4 the break-even constant is exactly where the two directions tie, checked as an identity rather than as a number typed twice: 1.05/(x+0.05) = (x+0.05)/0.05 at x = ' + (Math.sqrt(0.0525) - 0.05).toFixed(12),
     Math.abs(1.05 / (Math.sqrt(0.0525) - 0.05 + 0.05) - (Math.sqrt(0.0525) - 0.05 + 0.05) / 0.05) < 1e-12
-    && /INK_BREAKEVEN = Math\.sqrt\(0\.0525\) - 0\.05/.test(fs.readFileSync(path.join(LAB, 'palette.js'), 'utf8')),
+    && /INK_BREAKEVEN = Math\.sqrt\(0\.0525\) - 0\.05/.test(fs.readFileSync(path.join(LAB, 'mir', 'palette.js'), 'utf8')),
     { x: Math.sqrt(0.0525) - 0.05, tie: 1.05 / Math.sqrt(0.0525) });
 
   /* AND THE CARD IS STILL A CONSTANT.  The notebook's λ is drawn on a real card, so it keeps MARK_GROUND —

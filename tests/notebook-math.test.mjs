@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { renderNotebookMath } from '../lab/notebook-math.js';
+import { renderNotebookMath } from '../lab/mir/shell/notebook-math.js';
 
 const attack = '</code><img src=x onerror="alert(1)"><script>bad()</script>&';
 for (const renderer of [undefined, { renderToString() { throw new Error('renderer failure'); } }]) {

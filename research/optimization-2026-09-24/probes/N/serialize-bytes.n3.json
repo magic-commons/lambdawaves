@@ -1,0 +1,26 @@
+{
+ "states": {
+  "default": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "afterPlay": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "hideWorked": true,
+  "afterHide": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "box": {
+   "bytes": 20198,
+   "fnv": "1e89caa7"
+  },
+  "back": {
+   "bytes": 9920,
+   "fnv": "6cd8969"
+  }
+ },
+ "errs": []
+}

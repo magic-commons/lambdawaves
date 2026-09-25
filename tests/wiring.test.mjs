@@ -56,12 +56,9 @@ const TODAY = new Date();
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
 const ALLOWLIST = [
-  { file: 'lab/mir/palette.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages its palette owner until lab/paletteview.js replaces λWAVES’ older app-owned palette controller.' },
   { file: 'lab/mir/shell/about.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook and ABOUT face to it.' },
   { file: 'lab/mir/shell/accent.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned accent editor to it.' },
   { file: 'lab/mir/shell/menubar.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned menubar implementation to it.' },
-  { file: 'lab/mir/shell/notebook-math.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/notebook-render.js migrates λWAVES’ existing mathematics renderer to it.' },
-  { file: 'lab/mir/shell/notebook-render.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/notebook-render.js is replaced by this app-neutral notebook renderer.' },
   { file: 'lab/mir/shell/notebook.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook controller to it.' },
   { file: 'lab/mir/shell/vendor/katex/katex.min.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.' },
   { file: 'lab/mir/shell/vendor/marked.min.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.' },

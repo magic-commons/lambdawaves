@@ -1,0 +1,51 @@
+{
+ "read": {
+  "mode": "declined",
+  "state0": "idle",
+  "ready": true,
+  "afterReady": {
+   "state": "ready",
+   "badge": {
+    "hidden": false,
+    "text": "A NEW BUILD IS READY · RELOAD"
+   },
+   "status": "a new build is ready"
+  },
+  "accept": true,
+  "afterAccept": {
+   "state": "taking",
+   "asked": true,
+   "took": 1,
+   "badge": {
+    "hidden": false,
+    "text": "TAKING THE NEW BUILD…"
+   },
+   "status": "taking the new build"
+  },
+  "changed": "reloaded",
+  "reloads": 1,
+  "again": "reloaded",
+  "reloads2": 1,
+  "told": "told",
+  "afterTold": {
+   "state": "replaced",
+   "badge": {
+    "hidden": false,
+    "text": "THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY"
+   }
+  },
+  "msgs": [
+   "waiting",
+   "build",
+   null,
+   null
+  ],
+  "fields": {
+   "build": "x",
+   "files": 3,
+   "cache": "c",
+   "pending": true
+  },
+  "errors": []
+ }
+}

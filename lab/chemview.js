@@ -514,7 +514,13 @@ export function createChem(host, api) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     return { W, H };
   };
-  function paint() { paintMain(); if (core) paintCore(); }
+  /* OPTIMIZATION 2026-09-24 · N8: both canvases sit in this card, and a CLOSED or hidden card is `display: none
+     !important` (mir base.css): size() would read 0 and return null for each — after forcing the document's style +
+     layout, which at construction (a first visit ships MOLECULES closed) was the boot's next full flush in the chain lane
+     M measured.  The reveal road is unchanged: graphHover's ResizeObserver on each canvas repaints once it has a size,
+     and setActive(true) paints. */
+  const shown = () => cv.isConnected && !cv.closest('[hidden], .dev.closed');
+  function paint() { if (!shown()) return; paintMain(); if (core) paintCore(); }
   function paintMain() {
     const s = size(cv, g); if (!s) return;
     const { W, H } = s, L = 42, Rt = W - 8, Tp = 12;

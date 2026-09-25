@@ -58,7 +58,7 @@ try {
  }finally{window.katex=k}`);
  assert.equal(math.images,0); assert.match(math.text,/<img/);
  console.log('PASS malformed storage and unavailable math renderer fail safely');
- const notebook = await g.ev(String.raw`const {renderNotebook}=await import('./notebook-render.js');
+ const notebook = await g.ev(String.raw`const {renderNotebook}=await import('./mir/shell/notebook-render.js');
   const inspect=html=>{const t=document.createElement('template');t.innerHTML=html;return t.content};
   const attack='<a title="$x$" href="java&#9;script:alert(1)" onclick=bad()>link</a><img src=x onerror=bad()><svg onload=bad()></svg><script>bad()</script><input type=checkbox>';
   const safe=inspect(renderNotebook(attack));

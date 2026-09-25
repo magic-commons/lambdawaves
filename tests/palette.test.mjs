@@ -7,7 +7,7 @@
  * (a palette that fails that HIDES the π jump across a node), and that a palette calling itself isoluminant
  * really holds its lightness all the way round.
  *
- * Oracles, all independent of lab/palette.js:
+ * Oracles, all independent of lab/mir/palette.js:
  *   (a) OKLab by the OTHER route — sRGB → XYZ(D65) → LMS (Ottosson's M1) → cube root → M2 — where the module
  *       uses the fused linear-RGB → LMS matrix.  Different constants, same function: check (1) proves it.
  *   (b) the Viénot–Brettel–Mollon (1999) dichromat simulation, which the module does not contain at all.  Every
@@ -24,7 +24,7 @@
  *   anti   ≥ 0.100   the SMALLEST OKLab distance between a phase and its opposite — normal vision
  *   cvd    ≥ 0.100   the same, under the deuteranope simulation — the gate the `cvd` flag must agree with
  */
-import { PRESETS, PRESET_BY_ID, PRESET_GROUPS, toLUT, normalize, cyclic, rgbToOklab, oklabToRgb, rgbToHex, hexToRgb } from '../lab/palette.js';
+import { PRESETS, PRESET_BY_ID, PRESET_GROUPS, toLUT, normalize, cyclic, rgbToOklab, oklabToRgb, rgbToHex, hexToRgb } from '../lab/mir/palette.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

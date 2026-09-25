@@ -1,0 +1,32 @@
+{
+ "read": {
+  "boot": {
+   "count": 0,
+   "visible": false,
+   "host": true,
+   "clone": 9,
+   "fills": true
+  },
+  "up": {
+   "count": 1,
+   "visible": true,
+   "hidden": false,
+   "titleBusy": true
+  },
+  "at": [
+   "321px",
+   "123px"
+  ],
+  "moves": 1,
+  "down": {
+   "count": 0,
+   "visible": false,
+   "hidden": true
+  },
+  "flash": true,
+  "flashEnd": false,
+  "wrapUp": 1,
+  "wrapDown": 0,
+  "errors": []
+ }
+}

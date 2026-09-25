@@ -3,8 +3,8 @@ import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
-import { renderNotebook } from './notebook-render.js';
-import { reworkNative, planeModel, infoPanel } from './native-ui.js';
+import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
+import { reworkNative, planeModel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -22,7 +22,7 @@ import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
-import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, setAccentRGB, cssRGB, accentRGB, parseCssColor } from './mir/kit.js';
+import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor } from './mir/kit.js';
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
 import { createShadowView } from './shadowview.js';
@@ -59,7 +59,7 @@ import { createFieldLines } from './fieldview.js';
 import { createWigner } from './wignerview.js';
 import { createRadiation } from './radiationview.js';
 import { ATOMS, configOf } from './atoms.js';
-import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, rgbToOklab, oklabToRgb, rgbToHex, visibleInk, contrastRatio } from './palette.js';
+import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
 import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
@@ -69,13 +69,22 @@ import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
 import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
-import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modwindow/ is the artifact
+import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
+import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
+import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
+import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
+import { createAccentWheel } from './accent-wheel.js';  // N7 seam 4: the accent wheel, the mark and its turn, out of boot()
+import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
+import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
+import { installRackMenus } from './rack-menus.js';     // N7 seam 7: the + and ☆ lists, out of boot()
+import { installMenubar } from './menubar.js';           // N7 seam 8: the logo's bar, out of boot() (its MENUS table stays)
+import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.2.3-alpha.1 · keyboard redesign and camera controls · 2026-09-23';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.2.3-alpha.3 · the optimization pass · 2026-09-25';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -101,12 +110,6 @@ export async function boot(dom) {
 
   const sturm = { on: false, lambda: 1, P: null, rec: null, buildMs: 0, roVersion: -1 };
   const labelExpect = (a) => sturm.P.H[a * 91 + a] / sturm.P.S[a * 91 + a];          // a label's ⟨a|H|a⟩/⟨a|S|a⟩ under the scale — NOT an eigenvalue
-  /* ── THE WHEEL AS THE UI's ACCENT ──────────────────────────────────────────
-   * Two angles on the CURRENT palette (the editor's stops, whether or not the phase view uses them, shifted by the
-   * HUE knob) colour every accent in the interface — --acc and --acc2 on the body — so rotating the wheel recolours
-   * the whole UI.  The logo is the same wheel: λ is the colour at 0° and the nine squares are the wheel at 0°, 40°,
-   * … 320° in reading order.  For legibility the two UI accents have their OKLab lightness held to the theme's
-   * range (≥ 0.62 on DARK, ≤ 0.62 on LIGHT); the logo takes the wheel's colours verbatim. */
   /* WAVE 54 · THE KEY MOVED UP, and it had to.  readSettings() is a function declaration and hoists, but the
      const it reads did NOT — it sat 90 lines below this and every early call fell into readSettings' own catch and
      came back {}.  A silent {} is exactly the shape of "this browser has never said anything", so the palette this
@@ -116,132 +119,10 @@ export async function boot(dom) {
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
   const PAL_DEF = 'prism';
   let palChoice = (() => { const id = readSettings().palette; return id && PALETTE_BY_ID.get(id) ? id : PAL_DEF; })();   // a DEFAULT IS FOR A FIRST VISIT — never a retroactive edit of someone's settings
-  const nativeAccentLUT=toLUT(PALETTE_BY_ID.get('lambda').stops);
-  let wheelLUT = toLUT(PALETTE_BY_ID.get(palChoice).stops);
-  const accent = { a: 30, b: 300, vivid: .5 };
-  function wheelColor(deg) { const u = ((deg / 360 + (mat.hueShift || 0)) % 1 + 1) % 1; const i = Math.min(255, Math.floor(u * 256)) * 4; return [wheelLUT[i], wheelLUT[i + 1], wheelLUT[i + 2]]; }
-  function legible(rgb) { const lab = rgbToOklab(rgb), light = document.body.dataset.theme === 'light'; const L = light ? Math.min(lab[0], 0.62) : Math.max(lab[0], 0.62); return L === lab[0] ? rgb : oklabToRgb([L, lab[1], lab[2]]); }
-  /* WAVE 54 · THE GAMUT LAW LIVES HERE TOO.  The accents are the one colour the DOM and the canvas BOTH wear, so
-     they must be written through the same map the palette LUT goes through — `gamutCss` is that map, and it is a
-     hole the FIELD fills once it exists (applyAccent runs long before `field` is constructed).  While the canvas is
-     sRGB it is the identity and emits the same #rrggbb it always did; in P3 it emits color(display-p3 …) of the
-     SAME transformed numbers the shader will be handed.  There is no path by which the two can disagree. */
-  let gamutCss = (rgb) => rgbToHex(rgb);
-  /** an accent as the ported window wants it: [hue deg, saturation %] of the SAME rgb the
-   *  house is wearing, so the two can never disagree about which colour the accent is. */
-  function hueSat(rgb) {
-    const r = rgb[0], g = rgb[1], b = rgb[2];
-    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
-    if (d < 1e-9) return [0, 0];
-    const sat = d / (1 - Math.abs(2 * l - 1));
-    let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
-    h *= 60; if (h < 0) h += 360;
-    return [Math.round(h), Math.round(100 * Math.min(1, sat))];
-  }
-  function accentColor(deg) { if(mat.paletteOn)return wheelColor(deg);const i=Math.floor(((deg/360%1+1)%1)*256)*4;return [nativeAccentLUT[i],nativeAccentLUT[i+1],nativeAccentLUT[i+2]]; }
-  function applyAccent() {
-    const boost = (rgb) => { if (!accent.vivid) return rgb; const lab = rgbToOklab(rgb), k = 1 + 2.2 * accent.vivid; return oklabToRgb([lab[0], lab[1] * k, lab[2] * k]); };   // VIVID: more chroma toward neon
-    const A = boost(legible(accentColor(accent.a))), B = boost(legible(accentColor(accent.b))), st = document.body.style;
-    st.setProperty('--acc-glow', '0 0 ' + (8 + 18 * accent.vivid).toFixed(0) + 'px color-mix(in srgb, var(--acc) ' + Math.round(55 + 40 * accent.vivid) + '%, transparent)');
-    st.setProperty('--acc', gamutCss(A)); st.setProperty('--acc2', gamutCss(B)); st.setProperty('--acc-ink', rgbToOklab(A)[0] > 0.6 ? '#071114' : '#f2f5f7');
-    setAccentRGB(A.map((v) => Math.round(v * 255)), B.map((v) => Math.round(v * 255)));   // wave 57: the six canvas views draw THESE numbers, not the DOM string re-parsed through a gamut
-    /* WAVE 64 · THE PORTED WINDOW'S ONE PARAMETER.  It derives 57 tints from `--hue-acc` /
-       `--sat-acc` and their B pair, which this house has never written at runtime — it
-       publishes RESOLVED colours instead.  So the two angles are handed over, on the window
-       and its rail only, and nothing on `:root` moves: see lab/modhost.css. */
-    if (modView) modView.setAccent(hueSat(A), hueSat(B));
-    paintMarks();
-  }
-
-
-  const MARK_N = 9, MARK_STEP = 40;          // nine squares, 40° apart on the wheel, in reading order
-
-
-  const MARK_GROUND = { light: [236, 239, 243].map((v) => v / 255), dark: [41, 45, 50].map((v) => v / 255) };   // the card MEASURED in the page, and the dark card at its sheen's brightest corner
-  const MARK_FLOOR = 3;
-  /* ── WAVE 59 · THE λ HAS TWO GROUNDS AND ONLY ONE OF THEM IS A CONSTANT ───────────────────────────────
-   * Wave 57 corrected both copies of the λ against MARK_GROUND, the CARD.  That is right for the notebook's
-   * `.nb-logo`, which really is drawn on a card.  It is NOT right for `#title`: that one is `background: none`
-   * over `#field`, whose clear colour is `mat.bg` — and `mat.bg` is a SHIPPED KNOB (STAGE, the CAMERA window),
-   * not a constant.  Measured over 23 palettes × 256 hues on the dark theme, STAGE 0.20 puts 38.9 % of the
-   * wheel under 3 : 1, STAGE 0.50 puts 92.8 % under it with a worst case of 1.00 : 1, and on light STAGE 0.30
-   * reaches 1.00 : 1 across the whole wheel — 1.00 : 1 being the exact number this file's wave-57 header names
-   * as the failure it removed ("Not faint: absent").  A correction against a ground the user can drag away
-   * from is not a correction.  So: the header λ reads the LIVE stage, the notebook's reads the card, and
-   * "the harder of the two grounds" now means the harder of the two grounds each one is actually on. */
-  const stageGround = () => (mat.bg && mat.bg.length === 3 ? mat.bg : MARK_GROUND[document.body.dataset.theme === 'light' ? 'light' : 'dark']);
-  /* AND THE FLOOR IS ON THE COLOUR THE BROWSER ACTUALLY DRAWS.  `visibleInk` works in floats and stops at
-     the first lightness that clears the floor; `gamutCss` then writes 8-bit hex, and that rounding can put
-     the mark a thousandth UNDER it — measured 2.988 : 1 at STAGE 1 on `opal`, which is a floor the gate
-     cannot honestly assert.  So the mark is QUANTISED here and, if the rounded colour misses, the same
-     function is asked for a hair more; at most six tries, at most 0.05 of extra ratio, and a no-op wherever
-     the float already had room (which is everywhere except the last thousandth). */
-  const q8 = (c) => c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255) / 255);
-  const markInk = (deg, ground) => {
-    const g = ground || MARK_GROUND[document.body.dataset.theme === 'light' ? 'light' : 'dark'], raw = wheelColor(deg);
-    for (let f = MARK_FLOOR; f < MARK_FLOOR + 0.06; f += 0.01) {
-      const c = visibleInk(raw, g, f);
-      if (contrastRatio(q8(c), q8(g)) >= MARK_FLOOR) return c;   // the GROUND is 8-bit on the screen too
-    }
-    return visibleInk(raw, g, MARK_FLOOR + 0.06);
-  };
-  let inkCv = null;
-  const inkCtx = () => (inkCv || (inkCv = document.createElement('canvas'))).getContext('2d');   // one scratch context: the CSS colour parser the views use, reachable by a gate
-  /* OPTIMIZATION 2026-09-24 · M7 · ONE PAINT PER BATCH.  paintMarks is a pure function of (palette LUT, hue, theme, stage)
-     over every copy of the mark, and it ran 7× in the boot's one synchronous task and ~10× per project open, where only
-     the last call is ever seen.  Inside a batch (the boot's build, restore()) a call only marks the marks dirty — and
-     the turn's keyframes stale, as the full call does, so a busy mark raised inside the batch never animates the old
-     palette — and the batch's end paints once.  Batches are released in a `finally` (restore) or at the boot's tail. */
-  let markBatch = 0, marksDirty = false;
-  function markBatchEnd() { if (markBatch > 0 && --markBatch === 0 && marksDirty) { marksDirty = false; paintMarks(); } }
-  function paintMarks() {
-    if (markBatch) { marksDirty = true; turnDirty = true; return; }
-    for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamutCss(markInk(0, stageGround()));   // over the CANVAS: the live STAGE colour
-    for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamutCss(markInk(0));                  // over the CARD: the constant that really is one
-    document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
-      const k = i % MARK_N;
-      r.setAttribute('fill', gamutCss(wheelColor(k * MARK_STEP)));       // wave 54: the mark is DOM, so it wears the same gamut the canvas does
-      if (!r.classList.contains('sq' + k)) r.classList.add('sq' + k);      // which seat on the wheel this square holds
-    });
-    turnDirty = true;                       // the wheel moved under the mark: the turn's keyframes are stale
-  }
-
-
-  const TURN_STOPS = 36;
-  let turnSheet = null, turnDirty = true;
-  /** the nine × 37 colours the turn actually animates through, from the CURRENT palette */
-  function turnStops() {
-    const out = [];
-    for (let i = 0; i < MARK_N; i++) {
-      const row = [];
-      for (let k = 0; k <= TURN_STOPS; k++) row.push(rgbToHex(wheelColor(i * MARK_STEP + k * (360 / TURN_STOPS))));
-      out.push(row);
-    }
-    return out;
-  }
-  function ensureTurnCSS() {
-    if (turnSheet && !turnDirty) return turnSheet;
-    if (!turnSheet) { turnSheet = document.createElement('style'); turnSheet.id = 'lwTurn'; document.head.appendChild(turnSheet); }
-    const rows = turnStops(), css = [];
-    for (let i = 0; i < MARK_N; i++) {
-      css.push('@keyframes lw-turn-' + i + '{' + rows[i].map((hex, k) => (100 * k / TURN_STOPS).toFixed(3) + '%{fill:' + hex + '}').join('') + '}');
-      css.push('#title .mark.turn rect.sq' + i + ',#title .mark.busy rect.sq' + i + ',#busyMark .mark rect.sq' + i + ',.dev-loading .mark rect.sq' + i + '{animation-name:lw-turn-' + i + '}');
-    }
-    turnSheet.textContent = css.join('\n');
-    turnDirty = false;
-    return turnSheet;
-  }
-  /** ONE TURN of the palette through the header mark — the boot's own, in place of wave 48's 360° spin */
-  function markTurn() {
-    const m = document.querySelector('#title .mark'); if (!m) return false;
-    ensureTurnCSS();
-    m.classList.remove('turn'); void m.offsetWidth;          // a one-shot asked for again STARTS again (it is not retriggerable faster than the eye)
-    m.classList.add('turn');
-    const off = () => m.classList.remove('turn');
-    m.addEventListener('animationend', off, { once: true });
-    setTimeout(off, 2200);
-    return true;
-  }
+  /* THE WHEEL AS THE UI's ACCENT, the mark and its turn: lab/accent-wheel.js (N7 seam 4). */
+  const wheel = createAccentWheel({ mat, getModView: () => modView, lut: toLUT(PALETTE_BY_ID.get(palChoice).stops) });
+  const { accent, wheelColor, applyAccent, paintMarks, markBatchBegin, markBatchEnd, markInk, stageGround, inkCtx,
+    ensureTurnCSS, turnStops, markTurn, MARK_N, MARK_STEP, MARK_FLOOR, MARK_GROUND, TURN_STOPS } = wheel;
   /* THE PHONE SENTINEL (wave 51).  skin.css's LAST block raises `--phone` to 1 at a (hover: none) + size
      pair; the breakpoint is written THERE, once, and this reads it back out of the computed style — exactly
      as the peek handler already reads --rack-w — so the script can never disagree with the stylesheet about
@@ -415,7 +296,7 @@ export async function boot(dom) {
   }
 
 
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', modulation: 'control', settings: 'other', about: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
@@ -440,7 +321,7 @@ export async function boot(dom) {
      paused, nothing is governed and the user's grid comes back at once.  quality.res stays the USER's choice (and the
      project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
-  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, since: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
+  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
@@ -471,7 +352,8 @@ export async function boot(dom) {
    *        Δyaw = ω_amb·dt + d_y (1 − e^{−μ dt})/μ,   Δpitch = d_p (1 − e^{−μ dt})/μ        (→ d·dt as μ → 0)
    * which is why the whole travel of a fling is closed form — with the ambient off it turns through exactly ω₀/μ
    * and stops — and that identity is what the gate judges (B65), not a screenshot.
-   * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT 2.5: τ = 1/μ = 0.4 s,
+   * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT CAM.MU_DEF = 1.0 (wave 50
+   * shipped 2.5, and the figures that follow are 2.5's): τ = 1/μ = 0.4 s,
    * a hard flick (3 rad/s) coasts ln(ω₀/ω_rest)/μ ≈ 2.8 s and turns through ω₀/μ = 1.2 rad = 69° — two flicks to
    * walk right round the cloud — where μ = 12 gives 0.25 rad = 14° (a nudge) and μ = 1 gives most of a half turn.
    * REST = 0.003 rad/s is half a pixel a second at the drag's own 0.0065 rad/px: below it the residual is set to
@@ -491,7 +373,6 @@ export async function boot(dom) {
     get wp() { return this.dp; },                    // ω_pitch
     get omega() { return Math.hypot(this.wy, this.wp); },
     get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; },   // "the law has something to integrate"
-    /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb */
     /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb.
      *  FLING scales ω₀ FIRST — how much you get — and μ then decides how fast it goes: at gain 0 there is nothing
      *  to decay and the view stops dead on release (the drag itself is untouched), which no value of μ can do. */
@@ -730,36 +611,7 @@ export async function boot(dom) {
   let pendingRef = null;
 
 
-  const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0 };
-  function busyHost() {
-    if (busy.host) return busy.host;
-    const h = document.getElementById('busyMark'); if (!h) return null;
-    const src = document.querySelector('#title .mark');
-    if (src && !h.children.length) { h.appendChild(src.cloneNode(true)); paintMarks(); }
-    busy.host = h; return h;
-  }
-  function busySync() {
-    const want = busy.n > 0 || performance.now() < busy.until;
-    if (want === busy.shown) return;
-    busy.shown = want;
-    const h = busyHost(); if (h) { h.hidden = !want; if (want) busyWrite(); }
-    if (want) ensureTurnCSS();                                    // the loop reads the CURRENT palette's keyframes
-    const m = document.querySelector('#title .mark'); if (m) m.classList.toggle('busy', want);
-  }
-  function busyWrite() { const h = busy.host; if (!h) return; h.style.setProperty('--cx', busy.x + 'px'); h.style.setProperty('--cy', busy.y + 'px'); }
-  /** raise the mark for `ms` from now — the frame-gap rule and any caller that cannot bracket its own work */
-  function busyFlash(ms) { const t = performance.now() + ms; if (t > busy.until) busy.until = t; busySync();
-    clearTimeout(busy.timer); busy.timer = setTimeout(() => { busy.timer = 0; busySync(); }, Math.max(0, busy.until - performance.now()) + 30); }   // the window has to close itself: nothing else would ask again
-  /** bracket a promise (or a synchronous function) with the mark */
-  function busyWrap(p) { busy.n++; busySync(); const done = () => { busy.n = Math.max(0, busy.n - 1); busySync(); }; if (p && typeof p.then === 'function') { p.then(done, done); return p; } done(); return p; }
-  function cardLoading(w, key) {
-    let on = false;
-    return (v) => { const next = !!v; if (next === on) return; on = next; w.setLoading(next, key); if (next) { busy.n++; busySync(); } else { busy.n = Math.max(0, busy.n - 1); busySync(); } };
-  }
-  window.addEventListener('pointermove', (e) => {                       // the position: two writes, no read, and only while it is up
-    busy.x = e.clientX; busy.y = e.clientY;
-    if (busy.shown) { busy.moves++; busyWrite(); }
-  }, { passive: true });
+  const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, ensureTurnCSS });   // N7 seam 2: lab/busy-mark.js
 
   /* ── FIELD ────────────────────────────────────────────────────────────── */
   /* WAVE 59 · `onLost` WAS NEVER PASSED, and field.js has offered it since it was written: `device.lost`
@@ -770,11 +622,11 @@ export async function boot(dom) {
   const field = await createField(dom.canvas, { resolution: quality.res,
     onError: (m) => showBanner('GPU error', m),
     onLost: (i) => showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.') });
-  if (field.ok) gamutCss = (rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')');   // wave 54: one map, both sides
+  if (field.ok) wheel.setGamutCss((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
   if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
-  markBatch++;                        // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
+  markBatchBegin();                   // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
   /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
      down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
      — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
@@ -785,57 +637,10 @@ export async function boot(dom) {
     const x = dom.banner.querySelector('.banner-x');
     if (x && !x.dataset.wired) { x.dataset.wired = '1'; x.addEventListener('click', () => { dom.banner.hidden = true; }); }
   }
-  /* ── THE MATHS WORKER (wave 45): the bow's slap, the BOX packet and the transport's period scan run off the frame.
-     Every op is the same pure function this thread would call (mathworker.js imports the same modules), so an answer
-     is bit-identical to the synchronous road; a worker that fails to load, errors or times out (8 s) hands the call
-     back to that road.  The SLAP trigger, the K key, LAUNCH and every forced period reader stay synchronous. ── */
-  const makeWorker = (label, timeoutMs = 8000) => {
-    let w = null, seq = 0, failed = typeof Worker !== 'function', wantedParked = false, starts = 0; const waiting = new Map();
-    /* LA6 · A TIMED-OUT JOB IS STILL RUNNING.  The worker is FIFO and cannot drop a job, so a caller that must know when
-       the WORKER is free again (the period scan's one-in-flight law) passes `onLate`: the real reply, or the failure, is
-       handed to it after the promise has already resolved { error: 'timeout' }.  Callers that pass nothing are untouched. */
-    const late = new Map();
-    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); for (const f of late.values()) f({ error: why }); late.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
-    /* Constructing a module worker fetches and parses its whole private module graph. Three identical workers used
-       to do that at the ready boundary even when the session never bowed, scanned or opened a heavy card. */
-    const ensure = () => {
-      if (w || failed) return w;
-      try {
-        w = new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' }); starts++;
-        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } else if (late.has(e.data.id)) { const f = late.get(e.data.id); late.delete(e.data.id); f(e.data); } };
-        w.onerror = (e) => fail('worker error: ' + (e && e.message || e));
-        /* Message order is FIFO. A worker first requested while the page is away sees PARK before speculative work. */
-        if (wantedParked) w.postMessage({ id: 0, op: 'park' });
-      } catch (e) { fail('worker construction failed: ' + (e && e.message || e)); }
-      return w;
-    };
-    const raw = (msg, transfer, onLate) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); if (onLate) late.set(id, onLate); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
-    const call = (msg, transfer, onLate) => busyWrap(raw(msg, transfer, onLate));   // wave 48: every worker job is a BUSY job
-    /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
-    const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
-    return { label, get ok() { return !failed; }, get started() { return !!w; }, get starts() { return starts; }, call, raw,
-      park: () => { wantedParked = true; return w ? raw({ op: 'park' }) : Promise.resolve(idleStat()); },
-      resume: () => { wantedParked = false; return w ? raw({ op: 'resume' }) : Promise.resolve(idleStat()); },
-      stat: () => w ? raw({ op: 'stat' }) : Promise.resolve(idleStat()) };
-  };
-  const maths = makeWorker('bow'), scan = makeWorker('period'), cards = makeWorker('cards');   // separate queues: interaction, recurrence, and user-requested card preparation cannot block each other
-  /* CHEMISTRY gets a FOURTH queue and its own ceiling, for two reasons that are both measured rather than
-     aesthetic.  (1) Benzene/STO-3G is 36 s of McMurchie–Davidson integrals on this machine — the 8 s cap would
-     declare a timeout and hand that work to the FRAME THREAD, which is the one thing the card must never do.
-     (2) The real-time record (P, P(t−h), the trace) lives in ONE worker instance, so chem.rt.init and every
-     chem.rt.run after it must reach the same worker; sharing `cards` would also let a 36 s solve block HELIUM. */
-  const chemW = makeWorker('chem', 300000);
-  const solveCard = (msg, fallback, pluck = (r) => r.result) => {
-    const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));
-    if (!cards.ok) return local();
-    return cards.call(msg).then((r) => r && !r.error ? pluck(r) : local());
-  };
-  /** the chem road: same shape as solveCard, its own worker, and a fallback only a Worker-less browser reaches */
-  const solveChem = (msg, fallback, pluck = (r) => r.result) => {
-    const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));
-    if (!chemW.ok) return local();
-    return chemW.call(msg).then((r) => r && !r.error ? pluck(r) : local());
-  };
+  /* ── THE MATHS WORKERS (wave 45): lab/worker-pool.js (N7 seam 3) — bow · period · cards · chem, and the two card roads.
+     The constructor is the one literal worker road in the lab, so it stays here. ── */
+  const { maths, scan, cards, solveCard, solveChem } = createWorkerPool({ busyWrap,
+    spawn: () => new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' }) });
   /* …and on this thread too (the K key and the IMPULSE trigger are synchronous). This used to spend 8 ms every
      40 ms beginning 1.5 s after boot: a deliberate 20% main-thread tax during the exact interval an iPad was
      trying to settle its first field. Warm in short idle slices instead, after the first-use path is stable. */
@@ -889,7 +694,7 @@ export async function boot(dom) {
    * 50–200 ms of hitch — on the first frame back, on unified-memory hardware (the iPad is a target) where the
    * "saving" is not even a saving because CPU heap and GPU memory are the same pool.  So the GPU keeps everything.
    * RESUMING RE-ANCHORS, IT NEVER JUMPS, and it re-anchors the way the two clocks that already solved this do it
-   * (mir/host.js: prevWall = null, so the first dt after a stop is not a dt; camera.wake(): lastWall = now).  There
+   * (mir/modulation/host.js: prevWall = null, so the first dt after a stop is not a dt; camera.wake(): lastWall = now).  There
    * is no third mechanism here — every wall reference the loop holds is simply set to NOW before the first frame. */
   const page = { hidden: false, parks: 0, resumes: 0, hiddenAt: 0, hiddenMs: 0, firstDt: null, firstWall: 0, jumped: 0, mark: null, back: null, via: '' };
   function setPageHidden(on, via) {
@@ -920,7 +725,7 @@ export async function boot(dom) {
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
       if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
-      if (modHost) modHost.clock.setHidden(false);                // mir/host re-anchors itself: prevWall = null + reanchorTransport
+      if (modHost) modHost.clock.setHidden(false);                // mir/modulation/host.js re-anchors itself: prevWall = null + reanchorTransport
       if (audioCap && audioCap.setHidden) audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
       warmArm(60);
       schedule(TIER.PRESENT);
@@ -1275,9 +1080,9 @@ export async function boot(dom) {
              frame, no texture destroyed or rebuilt — and the ray-march cost is linear in it. Only when two step
              drops (×0.7, ×0.5) are not enough does the grid ladder move, which is the destroy/recreate that a
              driver under load likes least. Recovery walks back in the opposite order: grid, then steps. */
-          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.PRESENT); }
-          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
-        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.since = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
+          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.n = 0; schedule(TIER.PRESENT); }
+          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
+        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
         else gov.okSince = 0;
       }
     }
@@ -1457,38 +1262,10 @@ export async function boot(dom) {
     return s;
   }
 
-  /* ── WAVE 57 · WHAT "REDUCED MOTION" MEANS FOR A STROBING VOLUMETRIC RENDER ─────────────────────────
-   * `prefers-reduced-motion: reduce` is the strongest thing a user can say about movement, and until this
-   * wave the app's ENTIRE answer to it was to switch off a 120 ms scale on the logo.  The thing the
-   * photosensitivity notice exists to warn about — the field, evolving — never heard it.
-   *
-   * IT DOES NOT MEAN FROZEN, and that is a decision, not a shortcut.  This is a time-evolution instrument:
-   * a frozen field is not a reduced λWAVES, it is a broken one, and the preference asks for less motion,
-   * not for the physics to stop.  What makes a strobe dangerous is the RATE at which the luminance
-   * changes, and the rate is exactly the quantity the clock already owns (a.u. per wall second).  So:
-   *   1. NOTHING MOVES UNASKED.  `?play=1` — the one thing that starts the transport without a press, and
-   *      the thing a shared link can carry — is refused.  The PLAY button is untouched and always works.
-   *   2. WHEN IT IS ASKED TO MOVE IT MOVES AT A QUARTER SPEED, and only where nobody chose the number: a
-   *      rate a PRESET, a project or a link asks for is divided by 4; a rate the RATE knob was dragged to
-   *      is not touched, because a default is for a first visit and the hand always wins (STYLE-LOCK).
-   * `?motion=reduce` / `?motion=full` name the input the way `?warn=` does, so a gate can ask the question
-   * without a browser profile; otherwise it is the media query, live.
-   * WAVE 59 · AND BOTH OF THEM ARE BEHIND `navigator.webdriver` NOW.  `?motion=full` in a shared link
-   * overrode the visitor's OPERATING-SYSTEM `prefers-reduced-motion: reduce` — the strongest thing a person
-   * can say about movement, and the one this app's photosensitivity notice exists beside.  A link is somebody
-   * else's picture (wave 56's own law about the fragment); it does not get to answer that question for the
-   * reader.  `?motion=reduce` is gated with it for the same reason `?warn=1` is: a gate with one arm
-   * reachable from a public URL is not one rule. */
-  const MOTION = (() => {
-    const q0 = navigator.webdriver === true ? new URLSearchParams(location.search).get('motion') : null;
-    const mq = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)')) || null;
-    const forced = q0 === 'reduce' ? true : q0 === 'full' ? false : null;
-    const st = { divisor: 4, source: forced === null ? 'media' : 'query', reduced: forced === null ? !!(mq && mq.matches) : forced, autoplay: 'not asked' };
-    if (forced === null && mq && mq.addEventListener) mq.addEventListener('change', (e) => { st.reduced = e.matches; });
-    return st;
-  })();
-  /** the rate NOBODY CHOSE — a preset's, a project's, a link's — paced for this browser's motion preference */
-  const paceRate = (r) => (MOTION.reduced ? r / MOTION.divisor : r);
+  /* THE MOTION PREFERENCE (wave 57, wave 59): what `prefers-reduced-motion` means for a strobing volumetric render —
+     nothing moves unasked, and a rate nobody chose is paced by a quarter.  Its law and its reasons live in
+     lab/motion-pref.js (seam 1, optimization N7); MOTION is the live object LW.motion reads. */
+  const { MOTION, paceRate } = createMotionPref();
 
   /* ── state mutations: ONE road (finger, key, test, restore all come here) ─ */
   let lastNmax = 1;
@@ -1551,7 +1328,6 @@ export async function boot(dom) {
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
-  const wStyle = wObs;                    // WAVE 56: DRAW STYLE was its own window (id `style`) until board #59 merged it in
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
   const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
@@ -1670,7 +1446,6 @@ export async function boot(dom) {
       paintMarks(); schedule(TIER.PRESENT);
     }
     __LW_hooks.restage = () => setStageMix(stageMix);
-    const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255), rgbToHex = (c) => '#' + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
     function setStageColour(colour) {
       if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
       if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
@@ -1741,7 +1516,7 @@ export async function boot(dom) {
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
     __LW_hooks.setTheme = setTheme;
 
-    const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: `wStyle` is `wObs`; this block is the DRAW section of the WAVE window
+    const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
     ui.styleSeg = seg({ label: 'STYLE', value: 'cloud', options: [
       { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
@@ -1773,9 +1548,6 @@ export async function boot(dom) {
     rdd.appendChild(ui.ditherK.root);
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count. Ordered dithering reduces colour steps; strength 1 is ±½ output level.';
 
-    ui.keysRefresh = () => {};
-    ui.keysSay = text => { if(ui.set)ui.set.setStatus(text, 'warn'); };
-
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
     /* wave 106: these two keep their handles for the same reason POS and THICK now do — an undo has to
@@ -1803,7 +1575,7 @@ export async function boot(dom) {
     const gp = group(wPal.body, 'COLOUR');
     palette = createPaletteEditor(gp, {
       startId: palChoice,
-      setLUT(lut) { wheelLUT = lut; if (field.ok) field.setPalette(lut); applyAccent(); },
+      setLUT(lut) { wheel.setWheelLUT(lut); if (field.ok) field.setPalette(lut); applyAccent(); },
       setEnabled(v) { mat.paletteOn = v;applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } },
       chose(id) { palChoice = id; saveSettings(); },        // wave 54: naming one from the menu IS this browser's choice
       repaint() { schedule(TIER.PRESENT); }
@@ -2062,6 +1834,11 @@ export async function boot(dom) {
     el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
+  /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
+     reading CLEAR in document order — SPECTRUM's head row on a first visit (c ↦ 0, no clock reset), the undo ring's own
+     CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function now, and both the STATE trigger
+     and the menu row call it (the lead's ruling: STATE's CLEAR; Josh may reverse it). */
+  function clearRegister() { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); }
   // STATE — preparation. Everything here changes c.
   const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
   rack.appendChild(wState.root);
@@ -2080,10 +1857,10 @@ export async function boot(dom) {
     r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => normalizeNow() }).root);
 
 
-    r2.appendChild(trig({ label: 'CLEAR', onFire: () => { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); } }).root);
+    r2.appendChild(trig({ label: 'CLEAR', onFire: () => clearRegister() }).root);
     r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
     /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
-       applied and forgotten, holding nothing (kit.js:213).  This is a RATE, in rad/s, and it is a
+       applied and forgotten, holding nothing (mir/kit.js knob, `onDelta`).  This is a RATE, in rad/s, and it is a
        real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
        modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
     ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
@@ -2218,7 +1995,7 @@ export async function boot(dom) {
     const r3 = wState.row();
     r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { save(); } }).root);
     r3.appendChild(trig({ label: 'LOAD', onFire: () => { restore(); } }).root);
-    r3.appendChild(trig({ label: 'COPY JSON', onFire: async () => { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} } }).root);
+    r3.appendChild(trig({ label: 'COPY JSON', onFire: () => copyJSON() }).root);
     /* WAVE 56 (board #55): the whole session as a URL.  Its seat is beside SAVE / LOAD / COPY JSON because
        that is where "this state, made portable" already lives — and the FILE menu names it too. */
     r3.appendChild(trig({ label: 'COPY LINK', title: 'Copy a link to the current state and presentation', onFire: () => copyLink() }).root);
@@ -2289,7 +2066,7 @@ export async function boot(dom) {
     el('div', 'note', wSpec.body).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
   api.hamiltonian = () => sturm.P ? sturmSpectrum() : getHamiltonian().spectrum;          // W-STURMIAN: the eigen ladder under the scale
   /* wave 50: THE RATE WAS MISSING HERE.  The register evolves label a at energyOf(a) = H.energy(a) · rates[a]
-     (line 72, what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
+     (`energyOf` at the top of boot(), what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
      the digests — returned H.energy(a) alone, so with any RATE ≠ 1 the card printed an energy the state was
      not moving with.  It is the same function now.  (Under STURMIAN the labels are not eigenstates, RATE is
      refused there, and the label's ⟨a|H|a⟩/⟨a|S|a⟩ stands.) */
@@ -2676,7 +2453,7 @@ export async function boot(dom) {
    * the value it owns is a knob that lies — and the hand's road back is modHand(), above.  */
   /* ── WAVE 64 · THERE IS NO MODULATION CARD ANY MORE ──────────────────────────────────────────
    * The modulation window is a PORTED ARTIFACT (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW
-   * EXCEPTION): `lab/mir/modwindow/`, BASINS' own window, moved here whole.  It is 716 × 466 at
+   * EXCEPTION): `lab/mir/modulation/modwindow/`, BASINS' own window, moved here whole.  It is 716 × 466 at
    * one card and it carries its own chrome, its own chip rail and its own drag grip — a 300 px
    * rack slot cannot hold it and wrapping it in `device()` would put the house's frame around a
    * window whose frame is the thing that travelled.  So it is built into the FLOAT LAYER by
@@ -2847,7 +2624,7 @@ export async function boot(dom) {
       if (k && k.root) k.root.classList.toggle('mod-held', held);
     });
     /* THE FOUR EDGES, HANDED TO THE PORTED WINDOW.  Registry · target host · clock ·
-       presentation — the four `lab/mir/host.js` has provided since the MIR wave, and the four
+       presentation — the four `lab/mir/modulation/host.js` has provided since the MIR wave, and the four
        `host-contract.md` PART 3 says this window boots on and nothing else. */
 
 
@@ -2867,6 +2644,14 @@ export async function boot(dom) {
       if (!t || !t.classList.contains('mini')) return;
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
+      /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
+         modulation window reports the origin's empty rect (modwindow.js place(); `closed` sends −1s).  No seat can hit a
+         rect at or left of x = 0: a seat's left is (vw − w)/2 and the pill is `min(640px, 100vw − 24px)` wide
+         (skin.css), so it starts ≥ 12 px in — the old chain always answered 'bottom' (or 'top' on a narrow rack) for it.
+         When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
+         the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
+         (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
+      if (r.right <= 0 && r.bottom <= 0 && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -3072,11 +2857,11 @@ export async function boot(dom) {
     T.appendChild(ui.periodFx.root);
     const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
-    let periodVersion = -1, lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
+    let lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
     /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
        FIFO worker that cannot drop stale work: 4 s of a moving register (keyboard auto-repeat on ZEEMAN B, a script)
        jammed it for over two minutes (AUDIT-F F3, REFUTE-B/D).  Now one scan runs; a newer key replaces `scanWant`; the
-       worker is free again only when ITS reply arrives — a timed-out scan is tracked to that reply (makeWorker onLate),
+       worker is free again only when ITS reply arrives — a timed-out scan is tracked to that reply (worker-pool.js makeWorker, onLate),
        never to the promise, or a timeout plus a fresh post would put two scans back in the queue (REFUTE-D). */
     let scanBusy = false, scanWant = null;
     function scanPost(key, energies) {
@@ -3092,7 +2877,7 @@ export async function boot(dom) {
       if (!r || r.error) { if (periodPending && sameKey(periodPending, key)) periodPending = null; return; }
       if (!periodPending || !sameKey(periodPending, key)) return;          // a later state: this answer is stale
       const P = Object.assign({}, r); delete P.id; delete P.op;
-      lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
+      lastPeriod = P; Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null;
       paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
       if (__LW_hooks.onPeriodLand) __LW_hooks.onPeriodLand();          // LA7: a CAPTURE hover waiting on this scan plans now
     }
@@ -3126,13 +2911,13 @@ export async function boot(dom) {
          line — an expensive answer waits until the movement stops. */
       if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
-      if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
-      if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
+      if (reg.field.Fz !== 0) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
+      if (reg.transition) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
       const Es = periodEnergies();          // W-STURMIAN: the OCCUPIED eigenvalues (populations > 1e-6), never the labels' ⟨H⟩ — and wave 58 hands the SAME expression to capture.js
       /* Hydrogen, ions and the oscillator normally prove commensurate in microseconds. Answer that exact half here;
          only an actually incommensurate spectrum pays module-worker startup and the bounded two-million-step scan. */
       const exact = densityPeriodExact(Es);
-      if (exact) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
+      if (exact) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
       if (!force && scan.ok) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
            answer lands — a BOX bow populates 56 incommensurate well energies and the scan measured 1.2 s on the first
@@ -3141,7 +2926,7 @@ export async function boot(dom) {
         periodSettling = true; return lastPeriod;
       }
       const wasSettling = periodSettling;
-      Object.assign(pk, key); periodVersion = reg.version; periodSettling = false; periodPending = null;
+      Object.assign(pk, key); periodSettling = false; periodPending = null;
       const t0 = performance.now();
       lastPeriod = densityPeriod(Es, { horizon: 2e4 });
       periodCostMs = performance.now() - t0;
@@ -3250,7 +3035,7 @@ export async function boot(dom) {
    *  "an existing global clock" the instrument's clock rather than a number somebody typed, and what
    *  makes `capture.js`'s loop close on the same seam the physics closes on.  It is a KEY and not a
    *  new control, because the modulation window is a ported artifact and its timing bar is not ours
-   *  to grow; the sentence lives on the MOD button and in the key sheet.  It never guesses: no exact
+   *  to grow; the sentence lives on the MOD button and in the keyboard editor.  It never guesses: no exact
    *  period, no lock, and the refusal says which. */
   function barLock() {
     if (!modHost) return { ok: false, reason: 'no modulation rack' };
@@ -3274,191 +3059,13 @@ export async function boot(dom) {
   }
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
-  const badges = (() => {
-    const B = dom.badges; B.innerHTML = '';
-    const sheetToggle = () => { dom.sheet.hidden = !dom.sheet.hidden; for (const b of B.querySelectorAll('.badge[aria-controls]')) b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); };
-    const mk = (cls, text, onClick) => { const b = el('button', 'badge ' + cls, B); b.type = 'button'; el('i', '', b); el('span', '', b, text);
-      if (!onClick) { b.setAttribute('aria-controls', 'sheet'); b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); }
-      b.addEventListener('click', onClick || sheetToggle); return b; };
-    const b1 = mk('exact', 'STATE · EVOLUTION · SHADOW');
-    const b2 = mk('numerical', 'FIELD');
-    const b3 = mk('warn', ''); b3.hidden = true;
-    const b4 = mk('warn', ''); b4.hidden = true;
-    /* WAVE 56: the fifth badge is the only one that is not about ψ — it is the offer of a NEW BUILD, and it
-       is the only badge whose press is not the sheet.  It is hidden until the worker says a build is waiting
-       (lab/sw.js §3), and pressing it is the ONE thing in this app that can end a session's build. */
-    const b5 = mk('warn', '', () => swClient.accept()); b5.hidden = true;
-    let last = '', lastF = '', lastSay = '';
-    /* ── WAVE 62 · THE CANVAS SAYS WHAT IS DRAWN, AND SAYS IT RARELY ───────────────────────────────
-     * Everything the sentence needs is already assembled here, on the meters' 10 Hz tick, beside four
-     * writes that are already change-guarded.  A description that updates ten times a second is
-     * unusable, and the answer is NOT a longer throttle: it is that THE SENTENCE CONTAINS NOTHING
-     * THAT CHANGES ON ITS OWN.  That is why the clock appears only when the transport is PAUSED —
-     * while playing, `t` moves every frame and any string carrying it would defeat the guard below and
-     * rewrite the attribute at 10 Hz for the whole session.  With the clock out of it the string moves
-     * only when the INSTRUMENT moves: the observable, the style, the grid, the half-width, the mode
-     * count, the norm, the operator, the field, position or momentum — a handful of times a session,
-     * every one of them a user's own act.  (Field-free evolution moves phases, not amplitudes, so the
-     * mode count and the norm fraction are genuinely still while it runs.)
-     * WHAT IT DOES NOT DO is describe the ray-marched volume.  A density isosurface, a phase hue field
-     * and a nodal reconstruction are not text at any useful fidelity; describing the picture would be
-     * fabrication.  The honest claim, and the one this makes true: THE INSTRUMENT'S STATE IS FULLY
-     * READABLE; THE RENDERING IS NOT.
-     * And the mechanism cannot become a live region by accident: an `aria-label` on a non-live,
-     * tabIndex = -1 node is read on demand and never announced spontaneously. */
-    const VIEW_SAY = ['ρ = |ψ|² — density', 'arg ψ — phase', 'Re ψ', 'Im ψ', 'Δρ — difference', 'Re + Im superposed'];
-    function canvasSentence(rs) {
-      if (!field.ok) return 'no field — WebGPU unavailable';
-      const H = getHamiltonian(), who = stateReaders().populated;
-      const names = who.slice(0, 3).map((a) => H.labelOf(BASIS[a])).join(' + ') + (who.length > 3 ? ' + ' + (who.length - 3) + ' more' : '');
-      const half = Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2);
-      /* `quality.res`, NOT `field.resolution`: the governor drops the live grid under load and restores
-         it on pause, entirely on its own, and a sentence carrying that number rewrote itself twice in
-         three seconds of playback with nobody touching anything.  The chosen grid is the user's; the
-         governed one is already on the NUMERICAL badge and in the PERFORMANCE readouts, where a number
-         that moves by itself belongs. */
-      const where = space === 'p' ? `momentum space, ${quality.res}³ grid` : `${quality.res}³ grid over ±${half} ${H.lengthUnit}`;
-      const modes = `${rs.rendered} of ${rs.populated} modes, ${(rs.coveredFraction * 100).toFixed(0)} % of the norm` + (rs.masked ? ` (${rs.masked} muted)` : '');
-      const law = reg.field.Fz !== 0 ? `${H.short} + F z, F = ${reg.field.Fz.toExponential(1)}, within each shell`
-        : reg.field.Bz !== 0 ? `${H.short} + (B/2) L_z, B = ${reg.field.Bz.toFixed(4)}, diagonal` : H.label;
-      const when = clock.playing ? 'playing' : `paused at t = ${clock.t.toFixed(2)} a.u.`;
-      return `${names ? names + '; ' : ''}${VIEW_SAY[mat.view] || VIEW_NAMES[mat.view]}, drawn as ${STYLE_NAMES[mat.style]}; ${where}; ${modes}; ${law}; ${when}`;
-    }
-    function update() {
-      const f = reg.field.Fz !== 0 ? `STARK F = ${reg.field.Fz.toExponential(1)} · shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}`
-        : reg.field.Bz !== 0 ? `ZEEMAN B = ${reg.field.Bz.toFixed(4)}` : '';
-      if (f !== lastF) { lastF = f; b4.hidden = !f; b4.lastChild.textContent = f; b4.className = 'badge ' + (reg.field.Fz !== 0 ? 'warn' : 'exact'); }
-      b1.lastChild.textContent = reg.field.Fz !== 0 ? 'STATE · SHADOW · SHELL EVOLUTION' : 'STATE · EVOLUTION · SHADOW';
-      if (ui.fieldRo) {
-        ui.fieldRo.set(reg.field.Fz !== 0 ? 'H₀ + F z' : reg.field.Bz !== 0 ? 'H₀ + (B/2)L_z' : 'H₀ (bare Coulomb)', reg.field.Fz !== 0 ? 'warn' : reg.field.Bz !== 0 ? 'live' : '');
-        ui.fieldRo.setSub(reg.field.Fz !== 0 ? `within-shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal in this basis' : 'current Hamiltonian');
-      }
-      const rs = stateReaders().rendered;
-      const t2 = field.ok ? `FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${space === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';
-      if (b2.lastChild.textContent !== t2) b2.lastChild.textContent = t2;
-      b2.className = 'badge ' + (field.ok ? 'numerical' : 'bad');
-      const warn = rs.masked ? `RENDERED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM · ${rs.masked} MUTED` : rs.truncated ? `TRUNCATED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM` : '';
-      if (warn !== last) { last = warn; b3.hidden = !warn; b3.lastChild.textContent = warn; }
-      const say = canvasSentence(rs);
-      if (say !== lastSay) { lastSay = say; dom.canvas.setAttribute('aria-label', say); }   // one string build and one !== per 100 ms, the same shape as the four writes above
-    }
-    return { update, build: b5, say: () => lastSay };
-  })();
+  const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
+    getSpace: () => space, stateReaders, ui });   // N7 seam 6: lab/badges.js
 
-  /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF (board #56) ─────────────────────────────────────────
-   * lab/sw.js precaches the whole lab and then WAITS: it never calls skipWaiting() by itself, never claims
-   * a client, and has no timer.  The ONE thing that can end a session's build is a press, and this is it.
-   *
-   * THE LAW THE WORKER CANNOT KEEP ALONE — found by the adversarial review of 2026-09-05 §2.2, and it is
-   * right.  skipWaiting() activates the new worker, and the spec's Activate algorithm then re-points EVERY
-   * client in scope and fires `controllerchange` in all of them, not only in the tab that consented.  So
-   * "a new build is never swapped in under a running session" can only be true per TAB, and only if each
-   * tab decides for itself what a controllerchange MEANS.  That is what `asked` is:
-   *     the tab that PRESSED reloads, once — it asked for exactly this;
-   *     a tab that did NOT ask is TOLD and keeps running, with its unsaved superposition, its notebook page
-   *     and its layout intact, until its own press.
-   * The second tab is now standing on a controller whose activate has already collected the cache it booted
-   * on, so what it is told says exactly that.  A page cannot prevent it; it can refuse to throw the work
-   * away without being asked, and it can say what happened rather than reload in silence. */
-  const swClient = {
-    state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced
-    asked: false,                        // did THIS document ask for the swap?
-    reloads: 0,
-    build: null, cache: null, files: 0,
-    mode: 'boot', error: null, registration: null, pending: null,
-    take: null,
-    /** the one seam a gate replaces — nothing else in the lab reloads the page */
-    reload() { location.reload(); },
-    say(badge, status) {
-      const b = badges.build;
-      if (b) { b.hidden = false; b.lastChild.textContent = badge; }
-      if (ui.set) ui.set.setStatus(status, 'warn');       // …and a second place to find it, for a browser with STATUS TAGS off
-      return badge;
-    },
-    /** OFFER a waiting build.  It never takes it: `take` is called by the press and by nothing else. */
-    buildReady(take) {
-      if (typeof take === 'function') swClient.take = take;
-      if (!swClient.take) return false;
-      swClient.state = 'ready';
-      swClient.say('A NEW BUILD IS READY · RELOAD', 'a new build is ready');
-      return true;
-    },
-    /** the offer, pressed */
-    accept() {
-      if (swClient.state !== 'ready' || !swClient.take) return false;
-      swClient.asked = true; swClient.state = 'taking';
-      swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
-      try { swClient.take(); } catch (e) { swClient.error = String(e && e.message || e); return false; }
-      return true;
-    },
-    /** Explicit repair path from ABOUT > UPDATE APP. First ask the registration for a new worker. If
-     *  one installs, take it through the normal safe handoff. If the server has the same worker, remove
-     *  this app's registration and Cache Storage, then reload from the network; the next boot precaches
-     *  a clean copy. Project data lives in localStorage and is never touched here. */
-    async refresh() {
-      if (swClient.state === 'refreshing' || swClient.state === 'taking') return false;
-      let discardApproved = false;
-      if (layout.projects && layout.projects.dirty) {
-        if (!window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')) return false;
-        discardApproved = true;
-      }
-      swClient.state = 'refreshing';
-      swClient.say('CHECKING FOR A NEW BUILD…', 'checking for a new build');
-      try {
-        const reg = swClient.registration || (navigator.serviceWorker && await navigator.serviceWorker.getRegistration('./'));
-        if (reg) {
-          await reg.update();
-          const installing = reg.installing;
-          if (installing && !['installed', 'activated', 'redundant'].includes(installing.state)) {
-            await Promise.race([
-              new Promise((resolve) => installing.addEventListener('statechange', () => {
-                if (['installed', 'activated', 'redundant'].includes(installing.state)) resolve();
-              })),
-              new Promise((resolve) => setTimeout(resolve, 15000)),
-            ]);
-          }
-          if (reg.waiting) {
-            if (discardApproved) layout.projects.markClean();
-            swClient.asked = true; swClient.state = 'taking';
-            swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
-            reg.waiting.postMessage({ type: 'LW_SW_SKIP_WAITING' });
-            return true;
-          }
-          await reg.unregister();
-        }
-        if ('caches' in globalThis) {
-          const names = await caches.keys();
-          await Promise.all(names.filter((name) => name.startsWith('lw-lab-')).map((name) => caches.delete(name)));
-        }
-        if (discardApproved) layout.projects.markClean();
-        swClient.asked = true;
-        swClient.say('CACHE CLEARED · RELOADING…', 'cache cleared; reloading');
-        swClient.reload();
-        return true;
-      } catch (e) {
-        swClient.error = String(e && e.message || e); swClient.state = 'failed';
-        swClient.say('UPDATE FAILED · TRY AGAIN', 'update failed: ' + swClient.error);
-        return false;
-      }
-    },
-    /** the controller under this document changed.  ONLY the document that asked may reload. */
-    controllerChanged() {
-      if (swClient.asked) { if (swClient.reloads++ === 0) swClient.reload(); return 'reloaded'; }
-      swClient.state = 'replaced';
-      swClient.say('THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY', 'replaced in another tab');
-      return 'told';
-    },
-    /** a message from the worker.  LW_SW_WAITING is §3's announcement, which nothing used to listen for. */
-    message(d) {
-      if (!d || !d.type) return null;
-      if (d.type === 'LW_SW_WAITING') { swClient.pending = d; return 'waiting'; }
-      if (d.type === 'LW_SW_ACTIVE' || d.type === 'LW_SW_BUILD') {
-        swClient.build = d.build; swClient.files = d.files || 0; if (d.cache) swClient.cache = d.cache;
-        return d.type === 'LW_SW_BUILD' ? 'build' : 'active';
-      }
-      return null;
-    },
-  };
+  /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that
+     did not ask is told and keeps its work.  It is LW.sw. ── */
+  const swClient = createSwClient({ buildBadge: () => badges.build,
+    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
   let bow = null, bowPrevView = null;
@@ -3525,14 +3132,13 @@ export async function boot(dom) {
     }
     touchState();
   }
-  /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   /* ── KEPLER AS A CONTROL SURFACE: the perihelion handle drives exact rotors on the state ── */
   function pointerRay(px, py) {
     const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
     const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
-    return { cam, d };
+    return { cam, d, B };
   }
   function orbitOfShell(n, re, im) {
     const c = re ? { re, im } : (reg.field.Fz !== 0 ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
@@ -3649,10 +3255,8 @@ export async function boot(dom) {
     const n = kepShell(), o = lit.get(n);
     const dead = !o || o.isotropic;
     for (const k of [ui.kepSpin, ui.kepTilt, ui.kepTurn]) if (k) k.setDisabled(dead);
-    if (ui.kepEcc) ui.kepEcc.setDisabled(dead);
     if (!o) { ui.kepRo.set(`n${n} not populated`, 'warn'); ui.kepRo.setSub('this shell carries less than 1 % of the norm — nothing to turn'); return; }
     if (o.isotropic) { ui.kepRo.set(`n${n} isotropic`, 'warn'); ui.kepRo.setSub('⟨L⟩ = ⟨K⟩ = 0: no normal, no node line, no perihelion — there is no axis to turn about'); return; }
-    if (ui.kepEcc && !ui.kepEcc.root.classList.contains('drag')) ui.kepEcc.set(o.e);   // the eccentricity dial is RE-SEEDED from the fresh orbit, never trusted to remember: the orbit is derived and the dial is only its face
     const warn = o.coherence < 0.5;
     ui.kepRo.set(`a = ${o.a} a₀ · e = ${o.e.toFixed(3)} · coh ${o.coherence.toFixed(2)}`, warn ? 'warn' : 'ok');
     ui.kepRo.setSub(warn
@@ -3660,11 +3264,9 @@ export async function boot(dom) {
       : `L̂ = (${o.normal.map((v) => v.toFixed(2)).join(', ')}) · û = (${o.u.map((v) => v.toFixed(2)).join(', ')}) · the rotors turn EVERY populated shell; this shell supplies the axes`);
   }
   let kdrag = null;
+  /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   function unproject(px, py) {
-    const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
-    const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
+    const { cam, d, B } = pointerRay(px, py);                          // N6: the same four lines pointerRay computes, not a second copy of them
     const lam = -(cam[0] * B.fwd[0] + cam[1] * B.fwd[1] + cam[2] * B.fwd[2]) / (d[0] * B.fwd[0] + d[1] * B.fwd[1] + d[2] * B.fwd[2]);
     const p = [cam[0] + lam * d[0], cam[1] + lam * d[1], cam[2] + lam * d[2]];
     const a = HAMILTONIANS.well.radius, r = Math.hypot(...p), cap = 0.75 * a;
@@ -3806,7 +3408,7 @@ export async function boot(dom) {
     const cards = [];
     if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
     for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
-    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList', 'keysheet']) add(document.getElementById(id));
+    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList']) add(document.getElementById(id));
     add(document.querySelector('#keymap .km-panel'));
     const rackRects = [];
     for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
@@ -4230,9 +3832,14 @@ export async function boot(dom) {
     /* the logo opens FILE · EDIT · WINDOW */
     const title = document.getElementById('title');
     if (title) {
-      const bar = el('nav', 'menubar', document.getElementById('lab')); bar.id = 'menubar'; bar.setAttribute('popover','manual');bar.hidden = true;
-      const clickTrig = (label) => { const b = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === label); if (b) b.click(); };
-      const runKey = (code) => { const a = ACTIONS.find((x) => x.key === code && !x.ctrl); if (a) a.run(); };
+      /* OPTIMIZATION 2026-09-24 · N1 · THE ROWS CALL FUNCTIONS (AUDIT-E FE1, REFUTE-D/F).  They used to reach controls
+         by LABEL (`clickTrig`: the first `.trig` in document order with that text) and by KEY CODE (`runKey`: the first
+         ctrl-less action bound to a code), and three rows were wrong on a first visit: RESEED ran `camReset` (the
+         camera snapped home, no particles), RESET KEYS clicked a trigger deleted in 5f6421e, and CLEAR pressed one of
+         five CLEARs — the undo ring's once HISTORY floated.  Every row now names its act: an ACTION by id (run with
+         fine = 1, as a bare key press runs it) or a named function, and its key hint is read from the live binding
+         (keyFor), so a rebind renames the row (ANTI-PATTERN 6). */
+      const runAction = (id) => { const a = ACTIONS.find((x) => x.id === id); if (a) a.run(1); };
       const keyFor = (id) => { const a = ACTIONS.find((x) => x.id === id); return a ? keyName(a) : ''; };
       const MENUS = {
         FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
@@ -4240,94 +3847,26 @@ export async function boot(dom) {
           null,
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
           null,
-          ['SAVE the experiment (quick)', () => clickTrig('SAVE')], ['LOAD the last quick save', () => clickTrig('LOAD')], ['COPY as JSON', () => clickTrig('COPY JSON')],
-          ['COPY a LINK to this state', () => clickTrig('COPY LINK'), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
+          ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
+          ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\tSpace', () => runKey('Space')], ['NORMALIZE', () => clickTrig('NORMALIZE')], ['CLEAR the register', () => clickTrig('CLEAR')], ['RESET the view', () => clickTrig('RESET VIEW')], ['RESEED the particles\tCtrl+R', () => runKey('KeyR')], null, ['RESET the key bindings', () => clickTrig('RESET KEYS')], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
-        VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\tV cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
-          ['— style: CLOUD\tC cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\tH', () => runKey('KeyH')], ['FULL SCREEN / back\tF', () => toggleFullscreen()]],
+        VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
+          ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
         ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('keysheet'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
       };
-      let openList = null;
-      const closeLists = () => { for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
-
-
-      const LOGO_SCALE = 1.04;
-      /* ── WAVE 62 · THE OPENER IS OPERABLE, AND IT IS A DISCLOSURE, NOT AN ARIA MENUBAR ────────────
-       * A conformant role="menubar" needs role="menu"/"menuitem", a roving tabindex across five chips,
-       * Left/Right between menus with the open list following, Up/Down within, Home/End, first-letter
-       * typeahead, Escape at two levels, aria-haspopup, focus return — and, decisively, menu items must
-       * be UNREACHABLE BY TAB, which means rewriting fill() and every item handler.  That is days, and
-       * it earns nothing here, because the bar is a DUPLICATE surface: THEME is a seg in SETTINGS,
-       * raise() is duplicated by #rackAdd, the project verbs are in the notebook's PROJECTS face, and
-       * everything else has a key.  What was actually broken is that a <div> opener cannot be reached
-       * at all — so #title becomes operable WITHOUT becoming a <button> (it carries the wordmark, the
-       * nine-square SVG, the subtitle and wave 53's menu-open scale, all of which UA button styling
-       * would drag on), the bar takes focus on open, and Tab walks the rest, because Tab IS the
-       * disclosure pattern's own answer and arrows without the rest of the contract are worse. */
-      title.tabIndex = 0;
-      title.setAttribute('role', 'button');
-      title.setAttribute('aria-haspopup', 'true');
-      title.setAttribute('aria-expanded', 'false');
-      title.setAttribute('aria-label', 'λWAVES — the FILE, EDIT, VIEW, WINDOW and ABOUT menus');
-      /* `bar.hidden` is written in exactly ONE place (wave 53 made barShown the single point of truth
-         for the open state), so `aria-expanded` can only be written there too and can never disagree. */
-
-
-      const barShown = (v) => { const want = document.body.classList.contains('phone') ? true : !!v;
-        bar.hidden = !want;if(want&&!bar.matches(':popover-open'))bar.showPopover();else if(!want&&bar.matches(':popover-open'))bar.hidePopover(); title.classList.toggle('menu-open', want); title.setAttribute('aria-expanded', String(want)); };
-      for (const name of Object.keys(MENUS)) {
-        const grp = el('div', 'mb-group', bar);
-        const btn = el('button', 'mb-btn', grp, name); btn.type = 'button';
-        btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
-        const list = el('div', 'mb-list', grp); list.hidden = true;
-        const fill = () => { list.innerHTML = ''; for (const entry of MENUS[name]()) { if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; } const [label, run, dis, hint] = entry; const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true; it.addEventListener('click', (e) => { e.stopPropagation(); run(); closeLists(); barShown(false); }); } };
-        btn.addEventListener('click', (e) => { e.stopPropagation(); const was = openList === list; closeLists(); if (!was) { fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; } });
-        btn.addEventListener('pointerenter', (e) => { if (e.pointerType === 'touch' || !openList || openList === list) return; closeLists(); fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; });
-      }
-      let barTimer = 0;
-      /* THE BAR IS PLACED FROM THE GEOMETRY THE SCALE CANNOT MOVE.  The logo grows from `left center`, so its left
-         edge and its vertical centre are invariant under the transform while the 120 ms runs; the right edge is the
-         untransformed width times the scale.  Measuring r.right instead would put the chips wherever the transition
-         happened to be on the frame the menu opened. */
-      const showBar = (focusIt) => { clearTimeout(barTimer); barShown(true); const r = title.getBoundingClientRect();
-        bar.style.left = (r.left + title.offsetWidth + 8) + 'px';   /* WAVE 79 DELETED THE ENLARGE AND THIS TERM OUTLIVED IT: with nothing scaling, the FINAL right edge IS the plain one, and the LOGO_SCALE factor reserved 11 px for chips whose law is 8 */ bar.style.top = (r.top + r.height / 2 - bar.offsetHeight / 2) + 'px';
-        /* the bar is appended to #lab AFTER both racks, so its DOM position would put it 400 stops away.
-           Moving focus into it on a keyboard open is what makes that position irrelevant — and it is
-           only ever done for the KEYBOARD, so a pointer hover never steals the seat under the hand. */
-        if (focusIt) { const first = bar.querySelector('.mb-btn'); if (first) first.focus(); } };
-      /* wave 106: the phone crossing needs to PLACE the bar, not merely un-hide it — `barShown` above
-         only writes `hidden`, and the left/top are computed here from the logo's live rect.  Exposed
-         rather than duplicated, so there is one placement in the file and the phone uses it. */
-      __LW_hooks.showMenuBar = () => showBar(false);
-      const hideBarSoon = () => { clearTimeout(barTimer); barTimer = setTimeout(() => { if (!openList) barShown(false); }, 400); };
-      title.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') showBar(); });
-      title.addEventListener('click', () => { if (bar.hidden) showBar(); else { closeLists(); barShown(false); } });
-      title.addEventListener('keydown', (e) => {
-        if (e.ctrlKey || e.metaKey || e.altKey) return;
-        if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;   // wave 88: Space is the transport's — a numeric keypad's Return is 'NumpadEnter'
-        e.preventDefault();
-        if (bar.hidden) showBar(true); else { closeLists(); barShown(false); }
-      });
-      title.addEventListener('pointerleave', hideBarSoon);
-      bar.addEventListener('pointerenter', () => clearTimeout(barTimer));
-      bar.addEventListener('pointerleave', hideBarSoon);
-
-
-      const rackToggleEl = () => document.getElementById('rackToggle');
-      document.addEventListener('pointerdown', (e) => { const rt = rackToggleEl();
-        if (!bar.hidden && !bar.contains(e.target) && !title.contains(e.target) && !(rt && rt.contains(e.target))) { closeLists(); barShown(false); } });
-      layout.menu = { open: showBar, close: () => { closeLists(); barShown(false); }, get isOpen() { return !bar.hidden; },
-        get scale() { return LOGO_SCALE; }, get enlarged() { return title.classList.contains('menu-open'); } };
+      const mb = installMenubar({ title, host: document.getElementById('lab'), menus: MENUS });   // N7 seam 8: lab/menubar.js
+      __LW_hooks.showMenuBar = mb.showMenuBar;                 // wave 106: the phone crossing PLACES the bar through the one placement
+      layout.menu = mb.menu;
     }
 
 
@@ -4356,140 +3895,18 @@ export async function boot(dom) {
       // the host left a blank modal and a key listener whose isOpen guard never passed.
       const open = () => { returnFocus = document.activeElement; km.hidden = false; man.open(); man.root.querySelector('button').focus(); return true; };
       const close = () => { man.close(); return false; };
-      /* the same ONE ROAD the sheet rides: a rebind anywhere ends in ui.keysRefresh(), so the manual
-         hangs off that rather than owning a second notification of its own. */
-      const prevKR = ui.keysRefresh;
-      ui.keysRefresh = () => { if (prevKR) prevKR(); if (!km.hidden) man.refresh(); };
+      /* ONE ROAD: a rebind anywhere (keys.bind, keys.reset) ends in ui.keysRefresh(), so the manual hangs off that
+         rather than owning a second notification of its own.  (It used to chain onto a no-op stub left by the
+         SETTINGS KEYS panel 5f6421e deleted: optimization N4.) */
+      ui.keysRefresh = () => { if (!km.hidden) man.refresh(); };
       layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
       layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
     }
-    /* LEAN (2026-09-18, the commissioner: "hide all of those visible texts and info").  Any window that carries model
-       notes or readouts gets one header button, Aa: pressed, the window keeps its controls, ladders and plots and drops
-       its paragraphs and readout tiles; the header's status line stays, so the window still says what it is doing.
-       Remembered per window in this browser.  A presentation choice only — nothing is computed differently. */
-    const LEAN_KEY = 'lw.lean.v1';
-    let leanSet = new Set(), firstLean = true; try { const saved = localStorage.getItem(LEAN_KEY); firstLean = saved === null; leanSet = new Set(JSON.parse(saved || '[]')); } catch (e) { leanSet = new Set(); }
-    const setLean = (d, on) => { d.classList.toggle('lean', on); const b = d.querySelector('.dev-lean'); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); }
-      if (on) leanSet.add(d.dataset.id); else leanSet.delete(d.dataset.id); try { localStorage.setItem(LEAN_KEY, JSON.stringify([...leanSet])); } catch (e) { /* private mode: the choice lasts the session */ }
-      schedule(TIER.PRESENT); };
-    for (const d of document.querySelectorAll('.dev')) {
-      if (!d.querySelector('.dev-body .note, .dev-body .ro')) continue;
-      const util = d.querySelector('.dev-util'); if (!util) continue;
-      const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts — the controls, ladders and plots stay';
-      b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
-      b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
-      if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);
-    }
-    /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
-    for (const d of document.querySelectorAll('.dev')) {
-      const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
-      if (kind === 'info' || d.dataset.id === 'field') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
-      if ((kind === 'control' || kind === 'other') && !d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
-    }
+    /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
+    installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
     document.addEventListener('devclose', () => saveSettings());
-    /* the + under the hide button: a list of closed windows to reopen (into the rack they came from) */
-    {
-      const add = document.getElementById('rackAdd'), list = document.getElementById('rackAddList');
-      if (add && list) {
-        chip(add, 'plus', 'reopen a closed window');   // wave 55: glyph.js's own chip, "for ADD COLOUR and any other 'one more of these' chip"
-        const addShown = (v) => { list.hidden = !v; add.setAttribute('aria-expanded', String(!!v)); };
-        add.setAttribute('aria-haspopup', 'true'); add.setAttribute('aria-expanded', 'false');
-
-
-        let queue = [];
-        const renumber = () => {
-          for (const b of list.querySelectorAll('.mb-item')) {
-            const k = queue.indexOf(b.dataset.win);
-            b.classList.toggle('queued', k >= 0);
-            let n = b.querySelector('.mb-num');
-            if (k < 0) { if (n) n.remove(); continue; }
-            if (!n) { n = el('span', 'mb-num', b); }
-            n.textContent = String(k + 1);
-          }
-        };
-        const clearQueue = () => { queue = []; renumber(); };
-        const flushQueue = () => {
-          if (!queue.length) return false;
-          /* ⚠ OPENED IN REVERSE, SO THE NUMBERS READ DOWN THE RACK.  `layout.reopen` PREPENDS each
-             window to the top of its rack, so replaying the pick order puts the FIRST one chosen at
-             the BOTTOM — measured: picking slice · shadow · vortex left the rack reading shadow,
-             vortex, slice.  Walking the queue backwards makes the badge order and the rack order the
-             same list, which is the only reading of "remember the order" a user can actually see. */
-          const ids = queue.slice(); clearQueue(); addShown(false);
-          for (let i = ids.length - 1; i >= 0; i--) layout.reopen(ids[i], 'R');
-          return true;
-        };
-        add.addEventListener('click', (e) => {
-          e.stopPropagation(); if (!list.hidden) { clearQueue(); addShown(false); return; }
-          list.innerHTML = ''; clearQueue();
-
-
-          const favIds = (() => {
-            const m = readSettings().layouts || {};
-            let best = null, at = -1;
-            for (const k of Object.keys(m)) { const L = m[k]; if (L && (L.at || 0) > at) { at = L.at || 0; best = L; } }
-            if (!best || !Array.isArray(best.cards)) return null;
-            return new Set(best.cards.filter((c) => !c.closed).map((c) => c.id));
-          })();
-          const nameOf = (d) => (d.querySelector('.dev-eyebrow').textContent || d.dataset.id || '').trim();
-          const closed = [...document.querySelectorAll('.dev.closed:not([hidden])')]
-            .sort((a, b) => nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' }));
-          if (!closed.length) el('div', 'rack-add-none', list, 'nothing is closed — × on a window closes it');
-          for (const d of closed) {
-            const it = el('button', 'mb-item', list, '⊕  ' + d.querySelector('.dev-eyebrow').textContent);
-            it.type = 'button'; it.dataset.win = d.dataset.id;
-            if (favIds && favIds.has(d.dataset.id)) {
-              const st = el('span', 'mb-fav', it, '★');
-              st.title = 'Included in the most recently saved layout';
-              st.setAttribute('aria-label', 'in the saved favourite layout');
-            }
-            it.title = winHint(d) + '  ·  SHIFT-click to queue several; they open in the order you picked them when you let SHIFT go';
-            it.addEventListener('click', (ev) => {
-              ev.stopPropagation();
-              if (ev.shiftKey) {
-                const i = queue.indexOf(d.dataset.id);
-                if (i >= 0) queue.splice(i, 1); else queue.push(d.dataset.id);
-                renumber(); return;
-              }
-              clearQueue(); layout.reopen(d.dataset.id, 'R'); addShown(false);
-            });
-          }
-          addShown(true);
-        });
-        /* the COMMIT.  `key` rather than `code`, so either Shift answers. */
-        window.addEventListener('keyup', (ev) => { if (ev.key === 'Shift' && !list.hidden) flushQueue(); });
-        document.addEventListener('pointerdown', (ev) => { if (!list.hidden && !list.contains(ev.target) && ev.target !== add) { clearQueue(); addShown(false); } });
-        layout.addMenu = { open: () => { add.click(); return true; }, close: () => { clearQueue(); addShown(false); return true; }, get shown() { return !list.hidden; },
-          /* the queue, readable — a gate should not have to infer an order from four animations */
-          get queued() { return queue.slice(); }, commit: flushQueue };
-      }
-
-
-      const favBtn = document.getElementById('rackFav'), favList = document.getElementById('rackFavList');
-      if (favBtn && favList) {
-        const draw = () => {
-          favList.innerHTML = '';
-          const saved = layout.layouts();
-          const save = el('button', 'mb-item', favList, '☆  SAVE LAYOUT' + (saved.length >= LAYOUT_SLOTS ? '  ·  replaces the oldest' : ''));
-          save.type = 'button'; save.title = 'Save the current window arrangement';
-          save.addEventListener('click', (ev) => { ev.stopPropagation(); layout.saveLayout(); draw(); });
-          el('div', 'rack-fav-head', favList, saved.length ? 'LOAD LAYOUT' : 'nothing saved yet');
-          for (const L of saved) {
-            const it = el('button', 'mb-item', favList, '⊙  ' + L.label);
-            it.type = 'button'; it.title = 'Restore this window layout';
-            const x = el('span', 'fav-x', it, '×'); x.title = 'forget this layout';
-            it.addEventListener('click', (ev) => { ev.stopPropagation(); if (ev.target === x) { layout.forgetLayout(L.slot); draw(); return; } layout.loadLayout(L.slot); favShown(false); });
-          }
-          return saved.length;
-        };
-        const favShown = (v) => { favList.hidden = !v; favBtn.setAttribute('aria-expanded', String(!!v)); };
-        favBtn.setAttribute('aria-haspopup', 'true'); favBtn.setAttribute('aria-expanded', 'false');
-        favBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!favList.hidden) { favShown(false); return; } list.hidden = true; draw(); favShown(true); });
-        document.addEventListener('pointerdown', (ev) => { if (!favList.hidden && !favList.contains(ev.target) && ev.target !== favBtn) favShown(false); });
-        layout.favMenu = { open: () => { list.hidden = true; draw(); favShown(true); return true; }, close: () => { favShown(false); return true; },
-          get shown() { return !favList.hidden; }, get items() { return [...favList.querySelectorAll('.mb-item')].map((b) => b.textContent); }, redraw: draw };
-      }
-    }
+    /* the + (closed windows) and ☆ (favourite layouts) lists under the hide button: lab/rack-menus.js (N7 seam 7) */
+    installRackMenus({ layout, readSettings, winHint, LAYOUT_SLOTS });
     /* ── THE NOTEBOOK: a free glass over the stage; its ⓘ flips it into the ABOUT face ── */
     const nb = document.getElementById('notebook');
     if (nb) {
@@ -5066,7 +4483,7 @@ export async function boot(dom) {
        createField finished) is createField's method-less failure object, and this line threw "boot failed —
        field.setDprCap is not a function" instead of leaving rack.js:762's banner up.  The METHOD is tested, not
        `field.ok`: a device lost after boot keeps its methods and keeps today's behaviour byte for byte. */
-    if (field.setDprCap) field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
+    if (field.setDprCap) field.setDprCap(phone.on ? phone.DPR : tablet.on ? tablet.DPR : 2);   // N5: the two DPR fields are READ (both 1.5; tablet.DPR was written and never read)
     schedule(TIER.PRESENT);
     return on;
   }
@@ -5183,13 +4600,13 @@ export async function boot(dom) {
     { id: 'hideUI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },
     { id: 'prevWindow', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
-    { id: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); if (ui.partOn) ui.partOn.set(true); schedule(TIER.PRESENT); } },
+    { id: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); schedule(TIER.PRESENT); } },
     { id: 'keysheet', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
     { id: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
     { id: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
-    /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the key
-       sheet, which is the visible seat neither could have inside the ported window: its timing bar is
+    /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the keyboard
+       editor, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
 
 
@@ -5219,7 +4636,6 @@ export async function boot(dom) {
     return n === 'Shift+/' ? '?' : n; }
 
   function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
-  let capturing = null, capturePending = null;
 
 
   function toggleUI() {
@@ -5296,30 +4712,7 @@ export async function boot(dom) {
     const appCommandFromText = (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma');
     if ((tag === 'INPUT' || tag === 'TEXTAREA') && !appCommandFromText) return;
     if (tag === 'SELECT' && e.code !== 'Space') return;
-    if (capturing) {                                               // the KEYS panel is listening for a new binding
-      e.preventDefault();
-      if (e.code === 'Escape') { capturing = null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); return; }
-      if (['ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(e.code)) return;
-      /* WAVE 68 · THE ONE KEY THIS PANEL MAY NOT GIVE AWAY.  Tab off the stage is the browser's (wave
-         57's TAB RULE), so an action that is not stage-gated could take the binding and never fire —
-         ANTI-PATTERN 7, a control that changes nothing, with a keyboard trap on the other side of it if
-         the dispatcher's own guard were ever weakened.  Refused here, with the reason, rather than
-         accepted and quietly disabled. */
-      if (e.code === 'Tab' && !capturing.stage) { const lbl = capturing.label; capturing = null; if (ui.keysRefresh) ui.keysRefresh(); if (ui.keysSay) ui.keysSay('TAB is the browser’s way through the interface and cannot be bound to “' + lbl + '” — only the two window-cycle actions take it, and only while the stage has focus.'); return; }
-      const proposed = { key: e.code, ctrl: !!(e.ctrlKey || e.metaKey), alt: !!e.altKey, shift: !!e.shiftKey };
-      const samePending = capturePending && capturePending.id === capturing.id && JSON.stringify(capturePending.binding) === JSON.stringify(proposed);
-      const result = bindAction(ACTIONS, capturing.id, proposed, { steal: !!samePending });
-      if (!result.ok && result.conflicts) {
-        capturePending = { id: capturing.id, binding: proposed };
-        if (ui.keysSay) ui.keysSay('Shortcut belongs to ' + result.conflicts.map(id => ACTIONS.find(a => a.id === id)?.label || id).join(', ') + '. Press again to reassign, or Escape to cancel.');
-        return;
-      }
-      if (!result.ok) { if (ui.keysSay) ui.keysSay(result.reason); return; }
-      capturing = null; capturePending = null; saveKeys(); if (ui.keysRefresh) ui.keysRefresh();
-      return;
-    }
-    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape, like the sheet
-    if (e.code === 'Escape' && layout.keysheet && layout.keysheet.isOpen) { e.preventDefault(); layout.keysheet.close(); return; }   // wave 53: Escape closes the key sheet (and Escape is bound to nothing else)
+    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape (layout.keysheet is this same object)
     if (e.code === 'Escape' && stageHasFocus()) { try { dom.canvas.blur(); } catch (_) {} return; }   // wave 57: the keyboard way OFF the stage — the next Tab then walks the interface
     if (e.code === 'Escape' && layout.menu && layout.menu.isOpen) { e.preventDefault(); layout.menu.close(); const t = document.getElementById('title'); if (t) t.focus(); return; }   // wave 62: the ONE new key in the whole wave
     if (e.code === 'Escape' && layout.addMenu && layout.addMenu.shown) { e.preventDefault(); layout.addMenu.close(); const b = document.getElementById('rackAdd'); if (b) b.focus(); return; }
@@ -5337,9 +4730,8 @@ export async function boot(dom) {
      * MODIFIERS ARE NEVER OWNED — Ctrl/⌘+Z undoes from inside a knob, ? opens the sheet from inside a
      * button — but Shift IS let through, because Shift+Arrow is the fine step and Shift+Tab is the
      * browser's.  The guard returns WITHOUT preventDefault(): that is the whole point, because what
-     * runs next is the button's own native activation or the slider's own handler.
-     * IT SITS BELOW `capturing` ON PURPOSE: a KEYS chip is a focused <button>, so above it no capture
-     * could ever bind Space. */
+     * runs next is the button's own native activation or the slider's own handler.  (The keyboard editor
+     * records its chords with its own listener while it is open: lab/keymap.js.) */
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const own = seatOf(e.target);                                // wave 68: roles, not tags — and never a control that will not act
       if (own && own.has(e.code)) return;
@@ -5355,8 +4747,9 @@ export async function boot(dom) {
      *     KEYS panel — bind NOTES to Tab — put the trap straight back, persisted to localStorage.
      *     Wave 57's rule was never a property of those two actions: it is a property of THE KEY, and
      *     it is enforced here where no binding can get underneath it.  Shift+Tab with it, because
-     *     backwards walking is the same promise.  (The KEYS panel also refuses the binding now, so
-     *     nothing offers a chip that could never fire — but the trap is closed even if it did.) */
+     *     backwards walking is the same promise.  (The binding law refuses it too — lab/shortcuts.js
+     *     bindingError, the one road of the keyboard editor, the saved overrides and keys.bind — so
+     *     nothing offers a chord that could never fire; but the trap is closed even if it did.) */
     if (e.defaultPrevented) return;
     if (e.code === 'Tab' && !stageHasFocus()) return;
     /* WAVE 88 · AND THE NATIVE ACTIVATION IS CANCELLED HERE.  Taking Space out of OWNED above stops
@@ -5379,7 +4772,9 @@ export async function boot(dom) {
     bind(id, b, options) { const result = bindAction(ACTIONS, id, b, options); if (result.ok) { saveKeys(); if (ui.keysRefresh) ui.keysRefresh(); } return result; },
     conflicts(id, b) { const a = ACTIONS.find(x => x.id === id); return a ? bindingConflicts(ACTIONS, id, normalizeBinding(a, b)) : []; },
     reset() { for (const a of ACTIONS) Object.assign(a, DEFAULT_KEYS[a.id]); try { localStorage.removeItem(LS_KEYS); } catch (_) {} if (ui.keysRefresh) ui.keysRefresh(); },
-    name: keyName, capture(id) { capturing = ACTIONS.find((x) => x.id === id) || null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); }, get capturing() { return capturing ? capturing.id : null },
+    /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
+       deleted; the keyboard editor records its chords itself.  `capturing` stays readable (the legacy gate reads it). */
+    name: keyName, get capturing() { return null; },
     /* WAVE 55: the frozen cycle, readable and re-freezable — the ONE road to a stated order rather than a
        gate re-deriving it from the DOM and calling its own guess the law. */
     get tabOrder() { return (tabOrder || []).map((d) => d.dataset.id); },
@@ -5478,10 +4873,12 @@ export async function boot(dom) {
     return ok;
   }
   function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); } catch (e) { wState.setStatus('save failed', 'warn'); } }
+  /** the whole session as JSON on the clipboard — STATE's COPY JSON and the FILE menu's row are this one road (N1) */
+  async function copyJSON() { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} }
   /** opt.keepTime: leave the transport exactly where it is (UNDO / REDO) — the anchor c(0) is what travels, so the
    *  picture is continuous the way a RATE change is and only moves if the coefficients themselves did */
   function restore(obj, opt) {
-    markBatch++;                                                     // M7: released in the finally below
+    markBatchBegin();                                                // M7: released in the finally below
     try {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
@@ -6073,7 +5470,7 @@ export async function boot(dom) {
     logo: {
       colours(phi = 0) { return Array.from({ length: MARK_N }, (_, i) => rgbToHex(wheelColor(i * MARK_STEP + phi))); },
       get stops() { ensureTurnCSS(); return turnStops(); },
-      get css() { ensureTurnCSS(); return turnSheet ? turnSheet.textContent : ''; },
+      get css() { const sheet = ensureTurnCSS(); return sheet ? sheet.textContent : ''; },
       get steps() { return TURN_STOPS; }, get step() { return MARK_STEP; },
       turn() { return markTurn(); },
       get turning() { const m = document.querySelector('#title .mark'); return !!m && (m.classList.contains('turn') || m.classList.contains('busy')); },

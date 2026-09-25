@@ -113,7 +113,7 @@ export function createModulation(host, port) {
     if (hintTimer) { clearTimeout(hintTimer); hintTimer = 0; }
     if (hintMsg) hintTimer = setTimeout(() => { hintTimer = 0; status('', ''); }, SAY_MS);
   };
-  /** WHICH LAW THE RACK'S OWN CHIPS PUT ON THE NEXT RESUME — `mir/host.js`'s `resumeGrid`, printed.
+  /** WHICH LAW THE RACK'S OWN CHIPS PUT ON THE NEXT RESUME — `mir/modulation/host.js`'s `resumeGrid`, printed.
    *  The window re-derives NOTHING (ANTI-PATTERNS 20): the law, the counts and the grid are the
    *  clock's own answer and this only turns them into a sentence. */
   function resumeSentence() {
@@ -132,7 +132,7 @@ export function createModulation(host, port) {
 
   /* ADD AUDIO is offered by the artifact and refused by this host, out loud: `mod.js` carries
      the whole normalised follower, and their `audio.js` — its only feed — was deliberately not
-     ported (lab/mir/PORT-NOTES.md).  A control that changes nothing is not offered, and the
+     ported (lab/mir/modulation/PORT-NOTES.md).  A control that changes nothing is not offered, and the
      button stays in the sheet so the sheet keeps its geometry. */
   /* ── WAVE 102 · ADD AUDIO IS OFFERED, BECAUSE THERE IS NOW SOMETHING BEHIND IT ───────────────
      The refusal above was honest for six waves: `mod.js` carried the whole follower and BASINS'
@@ -2846,7 +2846,7 @@ export function createModulation(host, port) {
     M.syncDormant((id) => registry.has(id));
     /* WAVE 105 · TWO THINGS A REBUILD MUST TELL.  The chips, because adding or removing a card
        changes whether "all compact" is still true; and the HOST, because a newly built AUDIO
-       device is born unarmed and `audioDemand` is dead until something arms it (rack.js:655). */
+       device is born unarmed and `audioDemand` is dead until something arms it (rack.js `audioSync`). */
     syncChips();
     if (port.audio && port.audio.sync) port.audio.sync();
     place(); sync(); syncRings();

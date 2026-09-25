@@ -1,0 +1,182 @@
+{
+ "at": "2026-09-25T06:43:43.326Z",
+ "countA": {
+  "rules": 1124,
+  "sels": 1370
+ },
+ "countB": {
+  "rules": 1010,
+  "sels": 1236
+ },
+ "aa": [
+  {
+   "label": "light · disc · frost",
+   "n": 4607,
+   "differ": 13,
+   "who": [
+    "i.m2meterfill@387:dcd051ad / i.m2meterfill@387:51b062a7",
+    "i.m2mintdot@396:106a4e53 / i.m2mintdot@396:314f15b9",
+    "circle.m2playdot@450:27c9bc2e / circle.m2playdot@450:c4f3e6d5",
+    "i.@579:3547966d / i.@579:6e5cb459",
+    "i.m2mintdot@586:36641ab5 / i.m2mintdot@586:72ad0aff",
+    "circle.m2playdot@630:213f8024 / circle.m2playdot@630:2ba84ff",
+    "i.k-needle@1031:1e760c8c / i.k-needle@1031:cbb3608c",
+    "i.k-needle@1054:66b03446 / i.k-needle@1054:511dfd84",
+    "span.calc-res@2606:9f9d53cd / span.calc-res@2606:65b12d1d",
+    "span.calc-val@2617:7cca5e81 / span.calc-val@2617:240bdb63",
+    "span.calc-res@2618:7a2a9afb / span.calc-res@2618:628d7093",
+    "span.calc-res@2624:6de4d515 / span.calc-res@2624:9adeb53d"
+   ]
+  },
+  {
+   "label": "dark · disc · frost",
+   "n": 4607,
+   "differ": 13,
+   "who": [
+    "i.m2meterfill@387:b4ff1fee / i.m2meterfill@387:736924ea",
+    "i.m2mintdot@396:549171ca / i.m2mintdot@396:3c6072c6",
+    "circle.m2playdot@450:e4019d1c / circle.m2playdot@450:706da36f",
+    "i.@579:250bdc73 / i.@579:328344a3",
+    "i.m2mintdot@586:a306bb22 / i.m2mintdot@586:6e63aa02",
+    "circle.m2playdot@630:ec84565c / circle.m2playdot@630:4532c86f",
+    "i.k-needle@1031:ebeca2b6 / i.k-needle@1031:11c7cb06",
+    "i.k-needle@1054:26747c98 / i.k-needle@1054:fd361dee",
+    "span.calc-res@2606:ecdaa6b0 / span.calc-res@2606:10a0549e",
+    "span.calc-val@2617:14f8d43e / span.calc-val@2617:6946165e",
+    "span.calc-res@2618:4ed4a8c / span.calc-res@2618:f2c49264",
+    "span.calc-res@2624:a820ccdc / span.calc-res@2624:ea17433e"
+   ]
+  },
+  {
+   "label": "dark · connected · frost off",
+   "n": 4607,
+   "differ": 13,
+   "who": [
+    "i.m2meterfill@387:b4ff1fee / i.m2meterfill@387:736924ea",
+    "i.m2mintdot@396:549171ca / i.m2mintdot@396:3c6072c6",
+    "circle.m2playdot@450:e4019d1c / circle.m2playdot@450:706da36f",
+    "i.@579:250bdc73 / i.@579:328344a3",
+    "i.m2mintdot@586:a306bb22 / i.m2mintdot@586:6e63aa02",
+    "circle.m2playdot@630:ec84565c / circle.m2playdot@630:4532c86f",
+    "i.k-needle@1031:ebeca2b6 / i.k-needle@1031:11c7cb06",
+    "i.k-needle@1054:26747c98 / i.k-needle@1054:fd361dee",
+    "span.calc-res@2606:d76f287c / span.calc-res@2606:bf7933d2",
+    "span.calc-val@2617:14f8d43e / span.calc-val@2617:6946165e",
+    "span.calc-res@2618:2d9f3504 / span.calc-res@2618:a92a1470",
+    "span.calc-res@2624:aa429168 / span.calc-res@2624:a2d3e75a"
+   ]
+  },
+  {
+   "label": "light · connected · tinted",
+   "n": 4607,
+   "differ": 13,
+   "who": [
+    "i.m2meterfill@387:dcd051ad / i.m2meterfill@387:51b062a7",
+    "i.m2mintdot@396:106a4e53 / i.m2mintdot@396:314f15b9",
+    "circle.m2playdot@450:27c9bc2e / circle.m2playdot@450:c4f3e6d5",
+    "i.@579:3547966d / i.@579:6e5cb459",
+    "i.m2mintdot@586:36641ab5 / i.m2mintdot@586:72ad0aff",
+    "circle.m2playdot@630:213f8024 / circle.m2playdot@630:2ba84ff",
+    "i.k-needle@1031:1e760c8c / i.k-needle@1031:cbb3608c",
+    "i.k-needle@1054:66b03446 / i.k-needle@1054:511dfd84",
+    "span.calc-res@2606:a8df7a09 / span.calc-res@2606:965b2451",
+    "span.calc-val@2617:7cca5e81 / span.calc-val@2617:240bdb63",
+    "span.calc-res@2618:2b63c333 / span.calc-res@2618:fe116bf",
+    "span.calc-res@2624:60374c51 / span.calc-res@2624:bfa06c19"
+   ]
+  }
+ ],
+ "ab": [
+  {
+   "label": "light · disc · frost",
+   "differ": 9
+  },
+  {
+   "label": "dark · disc · frost",
+   "differ": 9
+  },
+  {
+   "label": "dark · connected · frost off",
+   "differ": 9
+  },
+  {
+   "label": "light · connected · tinted",
+   "differ": 9
+  }
+ ],
+ "beyondNoise": [
+  {
+   "label": "light · disc · frost",
+   "n": 4607,
+   "nB": 4607,
+   "idx": [],
+   "who": [
+    "i.m2meterfill@387:dcd051ad / i.m2meterfill@387:a3ec8ee7",
+    "i.m2mintdot@396:106a4e53 / i.m2mintdot@396:24d516e5",
+    "circle.m2playdot@450:27c9bc2e / circle.m2playdot@450:62dc3c",
+    "i.@579:3547966d / i.@579:a36b9639",
+    "i.m2mintdot@586:36641ab5 / i.m2mintdot@586:39353d41",
+    "circle.m2playdot@630:213f8024 / circle.m2playdot@630:90fc0472",
+    "i.k-needle@1031:1e760c8c / i.k-needle@1031:f4aa52a8",
+    "i.k-needle@1054:66b03446 / i.k-needle@1054:696bc5ba",
+    "i.@2695:653f155 / i.@2695:42e84e5d"
+   ]
+  },
+  {
+   "label": "dark · disc · frost",
+   "n": 4607,
+   "nB": 4607,
+   "idx": [],
+   "who": [
+    "i.m2meterfill@387:b4ff1fee / i.m2meterfill@387:a0273832",
+    "i.m2mintdot@396:549171ca / i.m2mintdot@396:42d499c0",
+    "circle.m2playdot@450:e4019d1c / circle.m2playdot@450:eec21b16",
+    "i.@579:250bdc73 / i.@579:12cf52e5",
+    "i.m2mintdot@586:a306bb22 / i.m2mintdot@586:1eb63c6e",
+    "circle.m2playdot@630:ec84565c / circle.m2playdot@630:8c585762",
+    "i.k-needle@1031:ebeca2b6 / i.k-needle@1031:7f678622",
+    "i.k-needle@1054:26747c98 / i.k-needle@1054:ea85161c",
+    "i.@2695:e7de180d / i.@2695:f4fa2e25"
+   ]
+  },
+  {
+   "label": "dark · connected · frost off",
+   "n": 4607,
+   "nB": 4607,
+   "idx": [],
+   "who": [
+    "i.m2meterfill@387:b4ff1fee / i.m2meterfill@387:a0273832",
+    "i.m2mintdot@396:549171ca / i.m2mintdot@396:42d499c0",
+    "circle.m2playdot@450:e4019d1c / circle.m2playdot@450:eec21b16",
+    "i.@579:250bdc73 / i.@579:12cf52e5",
+    "i.m2mintdot@586:a306bb22 / i.m2mintdot@586:1eb63c6e",
+    "circle.m2playdot@630:ec84565c / circle.m2playdot@630:8c585762",
+    "i.k-needle@1031:ebeca2b6 / i.k-needle@1031:7f678622",
+    "i.k-needle@1054:26747c98 / i.k-needle@1054:ea85161c",
+    "i.@2695:e7de180d / i.@2695:f4fa2e25"
+   ]
+  },
+  {
+   "label": "light · connected · tinted",
+   "n": 4607,
+   "nB": 4607,
+   "idx": [],
+   "who": [
+    "i.m2meterfill@387:dcd051ad / i.m2meterfill@387:a3ec8ee7",
+    "i.m2mintdot@396:106a4e53 / i.m2mintdot@396:24d516e5",
+    "circle.m2playdot@450:27c9bc2e / circle.m2playdot@450:62dc3c",
+    "i.@579:3547966d / i.@579:a36b9639",
+    "i.m2mintdot@586:36641ab5 / i.m2mintdot@586:39353d41",
+    "circle.m2playdot@630:213f8024 / circle.m2playdot@630:90fc0472",
+    "i.k-needle@1031:1e760c8c / i.k-needle@1031:f4aa52a8",
+    "i.k-needle@1054:66b03446 / i.k-needle@1054:696bc5ba",
+    "i.@2695:653f155 / i.@2695:42e84e5d"
+   ]
+  }
+ ],
+ "errors": {
+  "A1": [],
+  "A2": [],
+  "B": []
+ }
+}
