@@ -60,7 +60,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const shadowToggle=el('button','trig shadow-details-toggle',shadowRow);shadowToggle.type='button';chip(shadowToggle,'chevronDown','Show shadow details');shadowToggle.setAttribute('aria-controls',shadowDetails.id);shadowToggle.setAttribute('aria-expanded','false');
   shadowToggle.addEventListener('click',()=>{shadowDetails.hidden=!shadowDetails.hidden;shadowToggle.setAttribute('aria-expanded',String(!shadowDetails.hidden));shadowToggle.setAttribute('aria-label',shadowDetails.hidden?'Show shadow details':'Hide shadow details');});
   const settings=ui.set.body;
-  const keys=settings.querySelector('.keys-list')?.closest('.grp'); if(keys)keys.remove();
   const rows=[...settings.querySelectorAll(':scope > .grp')];
   for(const g of rows){g.classList.add('settings-section');}
   // Honest enum controls replace switches that secretly cycle through three/four modes.

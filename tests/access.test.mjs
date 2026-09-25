@@ -175,11 +175,13 @@ const roleAware = /\[role="button"\]/.test(rack) && /const seatOf = \(el\) =>/.t
 const notDead = /w\.disabled === true \|\| w\.getAttribute\('aria-disabled'\) === 'true'/.test(rack);
 const handled = /if \(e\.defaultPrevented\) return;/.test(rack);
 const tabLaw = /if \(e\.code === 'Tab' && !stageHasFocus\(\)\) return;/.test(rack);
-const tabRefused = /if \(e\.code === 'Tab' && !capturing\.stage\)/.test(rack);
+/* optimization N4: the refusal lived in the SETTINGS KEYS capture branch, dead since 5f6421e deleted its panel; the law is
+   lab/shortcuts.js bindingError now — the one road of the keyboard editor, the saved overrides and keys.bind. */
+const tabRefused = /if \(binding\.key === 'Tab' && !action\.stage\) return 'Tab is reserved for focus navigation\.';/.test(TEXT.get('lab/shortcuts.js') || '');
 judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT\'S (wave 88, Josh). No role owns it, the dispatcher cancels its native activation, and a focused <select> yields it too; Enter is the activator everywhere. And the dispatcher\'s stage guard is a `continue`, not a `return` — a `return` abandoned the whole ACTIONS loop rather than skipping one action',
   owned && sliderOwnsNoSpace && buttonOwnsEnterOnly && noRoleOwnsSpace && spaceCancelled && selectYieldsSpace && stageContinue,
   { owned, sliderOwnsNoSpace, buttonOwnsEnterOnly, noRoleOwnsSpace, spaceCancelled, selectYieldsSpace, stageContinue });
-judge('A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the ACTIONS loop honours e.defaultPrevented, and TAB off the stage is the browser\'s whatever the binding table says — enforced on THE KEY in the dispatcher and refused at the KEYS panel, so the trap wave 57 removed cannot be rebuilt by rebinding',
+judge('A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the ACTIONS loop honours e.defaultPrevented, and TAB off the stage is the browser\'s whatever the binding table says — enforced on THE KEY in the dispatcher and refused by the binding law (lab/shortcuts.js), so the trap wave 57 removed cannot be rebuilt by rebinding',
   roleAware && notDead && handled && tabLaw && tabRefused, { roleAware, notDead, handled, tabLaw, tabRefused });
 
 console.log('\n      ' + TEXT.size + ' files read (no recursion, no browser) · wall time ' + ((Date.now() - T0) / 1000).toFixed(2) + ' s');

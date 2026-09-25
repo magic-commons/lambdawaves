@@ -1773,9 +1773,6 @@ export async function boot(dom) {
     rdd.appendChild(ui.ditherK.root);
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count. Ordered dithering reduces colour steps; strength 1 is ±½ output level.';
 
-    ui.keysRefresh = () => {};
-    ui.keysSay = text => { if(ui.set)ui.set.setStatus(text, 'warn'); };
-
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
     /* wave 106: these two keep their handles for the same reason POS and THICK now do — an undo has to
@@ -3785,7 +3782,7 @@ export async function boot(dom) {
     const cards = [];
     if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
     for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
-    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList', 'keysheet']) add(document.getElementById(id));
+    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList']) add(document.getElementById(id));
     add(document.querySelector('#keymap .km-panel'));
     const rackRects = [];
     for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
@@ -4346,10 +4343,10 @@ export async function boot(dom) {
       // the host left a blank modal and a key listener whose isOpen guard never passed.
       const open = () => { returnFocus = document.activeElement; km.hidden = false; man.open(); man.root.querySelector('button').focus(); return true; };
       const close = () => { man.close(); return false; };
-      /* the same ONE ROAD the sheet rides: a rebind anywhere ends in ui.keysRefresh(), so the manual
-         hangs off that rather than owning a second notification of its own. */
-      const prevKR = ui.keysRefresh;
-      ui.keysRefresh = () => { if (prevKR) prevKR(); if (!km.hidden) man.refresh(); };
+      /* ONE ROAD: a rebind anywhere (keys.bind, keys.reset) ends in ui.keysRefresh(), so the manual hangs off that
+         rather than owning a second notification of its own.  (It used to chain onto a no-op stub left by the
+         SETTINGS KEYS panel 5f6421e deleted: optimization N4.) */
+      ui.keysRefresh = () => { if (!km.hidden) man.refresh(); };
       layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
       layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
     }
@@ -5209,7 +5206,6 @@ export async function boot(dom) {
     return n === 'Shift+/' ? '?' : n; }
 
   function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
-  let capturing = null, capturePending = null;
 
 
   function toggleUI() {
@@ -5286,30 +5282,7 @@ export async function boot(dom) {
     const appCommandFromText = (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma');
     if ((tag === 'INPUT' || tag === 'TEXTAREA') && !appCommandFromText) return;
     if (tag === 'SELECT' && e.code !== 'Space') return;
-    if (capturing) {                                               // the KEYS panel is listening for a new binding
-      e.preventDefault();
-      if (e.code === 'Escape') { capturing = null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); return; }
-      if (['ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'].includes(e.code)) return;
-      /* WAVE 68 · THE ONE KEY THIS PANEL MAY NOT GIVE AWAY.  Tab off the stage is the browser's (wave
-         57's TAB RULE), so an action that is not stage-gated could take the binding and never fire —
-         ANTI-PATTERN 7, a control that changes nothing, with a keyboard trap on the other side of it if
-         the dispatcher's own guard were ever weakened.  Refused here, with the reason, rather than
-         accepted and quietly disabled. */
-      if (e.code === 'Tab' && !capturing.stage) { const lbl = capturing.label; capturing = null; if (ui.keysRefresh) ui.keysRefresh(); if (ui.keysSay) ui.keysSay('TAB is the browser’s way through the interface and cannot be bound to “' + lbl + '” — only the two window-cycle actions take it, and only while the stage has focus.'); return; }
-      const proposed = { key: e.code, ctrl: !!(e.ctrlKey || e.metaKey), alt: !!e.altKey, shift: !!e.shiftKey };
-      const samePending = capturePending && capturePending.id === capturing.id && JSON.stringify(capturePending.binding) === JSON.stringify(proposed);
-      const result = bindAction(ACTIONS, capturing.id, proposed, { steal: !!samePending });
-      if (!result.ok && result.conflicts) {
-        capturePending = { id: capturing.id, binding: proposed };
-        if (ui.keysSay) ui.keysSay('Shortcut belongs to ' + result.conflicts.map(id => ACTIONS.find(a => a.id === id)?.label || id).join(', ') + '. Press again to reassign, or Escape to cancel.');
-        return;
-      }
-      if (!result.ok) { if (ui.keysSay) ui.keysSay(result.reason); return; }
-      capturing = null; capturePending = null; saveKeys(); if (ui.keysRefresh) ui.keysRefresh();
-      return;
-    }
-    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape, like the sheet
-    if (e.code === 'Escape' && layout.keysheet && layout.keysheet.isOpen) { e.preventDefault(); layout.keysheet.close(); return; }   // wave 53: Escape closes the key sheet (and Escape is bound to nothing else)
+    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape (layout.keysheet is this same object)
     if (e.code === 'Escape' && stageHasFocus()) { try { dom.canvas.blur(); } catch (_) {} return; }   // wave 57: the keyboard way OFF the stage — the next Tab then walks the interface
     if (e.code === 'Escape' && layout.menu && layout.menu.isOpen) { e.preventDefault(); layout.menu.close(); const t = document.getElementById('title'); if (t) t.focus(); return; }   // wave 62: the ONE new key in the whole wave
     if (e.code === 'Escape' && layout.addMenu && layout.addMenu.shown) { e.preventDefault(); layout.addMenu.close(); const b = document.getElementById('rackAdd'); if (b) b.focus(); return; }
@@ -5327,9 +5300,8 @@ export async function boot(dom) {
      * MODIFIERS ARE NEVER OWNED — Ctrl/⌘+Z undoes from inside a knob, ? opens the sheet from inside a
      * button — but Shift IS let through, because Shift+Arrow is the fine step and Shift+Tab is the
      * browser's.  The guard returns WITHOUT preventDefault(): that is the whole point, because what
-     * runs next is the button's own native activation or the slider's own handler.
-     * IT SITS BELOW `capturing` ON PURPOSE: a KEYS chip is a focused <button>, so above it no capture
-     * could ever bind Space. */
+     * runs next is the button's own native activation or the slider's own handler.  (The keyboard editor
+     * records its chords with its own listener while it is open: lab/keymap.js.) */
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const own = seatOf(e.target);                                // wave 68: roles, not tags — and never a control that will not act
       if (own && own.has(e.code)) return;
@@ -5345,8 +5317,9 @@ export async function boot(dom) {
      *     KEYS panel — bind NOTES to Tab — put the trap straight back, persisted to localStorage.
      *     Wave 57's rule was never a property of those two actions: it is a property of THE KEY, and
      *     it is enforced here where no binding can get underneath it.  Shift+Tab with it, because
-     *     backwards walking is the same promise.  (The KEYS panel also refuses the binding now, so
-     *     nothing offers a chip that could never fire — but the trap is closed even if it did.) */
+     *     backwards walking is the same promise.  (The binding law refuses it too — lab/shortcuts.js
+     *     bindingError, the one road of the keyboard editor, the saved overrides and keys.bind — so
+     *     nothing offers a chord that could never fire; but the trap is closed even if it did.) */
     if (e.defaultPrevented) return;
     if (e.code === 'Tab' && !stageHasFocus()) return;
     /* WAVE 88 · AND THE NATIVE ACTIVATION IS CANCELLED HERE.  Taking Space out of OWNED above stops
@@ -5369,7 +5342,9 @@ export async function boot(dom) {
     bind(id, b, options) { const result = bindAction(ACTIONS, id, b, options); if (result.ok) { saveKeys(); if (ui.keysRefresh) ui.keysRefresh(); } return result; },
     conflicts(id, b) { const a = ACTIONS.find(x => x.id === id); return a ? bindingConflicts(ACTIONS, id, normalizeBinding(a, b)) : []; },
     reset() { for (const a of ACTIONS) Object.assign(a, DEFAULT_KEYS[a.id]); try { localStorage.removeItem(LS_KEYS); } catch (_) {} if (ui.keysRefresh) ui.keysRefresh(); },
-    name: keyName, capture(id) { capturing = ACTIONS.find((x) => x.id === id) || null; capturePending = null; if (ui.keysRefresh) ui.keysRefresh(); }, get capturing() { return capturing ? capturing.id : null },
+    /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
+       deleted; the keyboard editor records its chords itself.  `capturing` stays readable (the legacy gate reads it). */
+    name: keyName, get capturing() { return null; },
     /* WAVE 55: the frozen cycle, readable and re-freezable — the ONE road to a stated order rather than a
        gate re-deriving it from the DOM and calling its own guess the law. */
     get tabOrder() { return (tabOrder || []).map((d) => d.dataset.id); },
