@@ -31,6 +31,7 @@
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
   ['./absorb.js',                                                   '2eeb365fc087'],
+  ['./accent-wheel.js',                                             '51ffa9486d0b'],
   ['./atoms.js',                                                    '1bfbfc778e10'],
   ['./atomsview.js',                                                '8a999c2c9509'],
   ['./audio.js',                                                    '67458cc4f589'],
@@ -164,7 +165,7 @@ const PRECACHE = [
   ['./qcd.js',                                                      'd719df2e6c5c'],
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],
-  ['./rack.js',                                                     '4fd181f84a47'],
+  ['./rack.js',                                                     '3c15cce3e0f7'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '655a6aef068a'],
   ['./registerview.js',                                             '6cd43624dafa'],
