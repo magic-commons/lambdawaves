@@ -2062,6 +2062,11 @@ export async function boot(dom) {
     el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
+  /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
+     reading CLEAR in document order — SPECTRUM's head row on a first visit (c ↦ 0, no clock reset), the undo ring's own
+     CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function now, and both the STATE trigger
+     and the menu row call it (the lead's ruling: STATE's CLEAR; Josh may reverse it). */
+  function clearRegister() { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); }
   // STATE — preparation. Everything here changes c.
   const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
   rack.appendChild(wState.root);
@@ -2080,7 +2085,7 @@ export async function boot(dom) {
     r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => normalizeNow() }).root);
 
 
-    r2.appendChild(trig({ label: 'CLEAR', onFire: () => { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); } }).root);
+    r2.appendChild(trig({ label: 'CLEAR', onFire: () => clearRegister() }).root);
     r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
     /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
        applied and forgotten, holding nothing (kit.js:213).  This is a RATE, in rad/s, and it is a
@@ -2218,7 +2223,7 @@ export async function boot(dom) {
     const r3 = wState.row();
     r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { save(); } }).root);
     r3.appendChild(trig({ label: 'LOAD', onFire: () => { restore(); } }).root);
-    r3.appendChild(trig({ label: 'COPY JSON', onFire: async () => { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} } }).root);
+    r3.appendChild(trig({ label: 'COPY JSON', onFire: () => copyJSON() }).root);
     /* WAVE 56 (board #55): the whole session as a URL.  Its seat is beside SAVE / LOAD / COPY JSON because
        that is where "this state, made portable" already lives — and the FILE menu names it too. */
     r3.appendChild(trig({ label: 'COPY LINK', title: 'Copy a link to the current state and presentation', onFire: () => copyLink() }).root);
@@ -4205,8 +4210,14 @@ export async function boot(dom) {
     const title = document.getElementById('title');
     if (title) {
       const bar = el('nav', 'menubar', document.getElementById('lab')); bar.id = 'menubar'; bar.setAttribute('popover','manual');bar.hidden = true;
-      const clickTrig = (label) => { const b = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === label); if (b) b.click(); };
-      const runKey = (code) => { const a = ACTIONS.find((x) => x.key === code && !x.ctrl); if (a) a.run(); };
+      /* OPTIMIZATION 2026-09-24 · N1 · THE ROWS CALL FUNCTIONS (AUDIT-E FE1, REFUTE-D/F).  They used to reach controls
+         by LABEL (`clickTrig`: the first `.trig` in document order with that text) and by KEY CODE (`runKey`: the first
+         ctrl-less action bound to a code), and three rows were wrong on a first visit: RESEED ran `camReset` (the
+         camera snapped home, no particles), RESET KEYS clicked a trigger deleted in 5f6421e, and CLEAR pressed one of
+         five CLEARs — the undo ring's once HISTORY floated.  Every row now names its act: an ACTION by id (run with
+         fine = 1, as a bare key press runs it) or a named function, and its key hint is read from the live binding
+         (keyFor), so a rebind renames the row (ANTI-PATTERN 6). */
+      const runAction = (id) => { const a = ACTIONS.find((x) => x.id === id); if (a) a.run(1); };
       const keyFor = (id) => { const a = ACTIONS.find((x) => x.id === id); return a ? keyName(a) : ''; };
       const MENUS = {
         FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
@@ -4214,18 +4225,18 @@ export async function boot(dom) {
           null,
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
           null,
-          ['SAVE the experiment (quick)', () => clickTrig('SAVE')], ['LOAD the last quick save', () => clickTrig('LOAD')], ['COPY as JSON', () => clickTrig('COPY JSON')],
-          ['COPY a LINK to this state', () => clickTrig('COPY LINK'), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
+          ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
+          ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\tSpace', () => runKey('Space')], ['NORMALIZE', () => clickTrig('NORMALIZE')], ['CLEAR the register', () => clickTrig('CLEAR')], ['RESET the view', () => clickTrig('RESET VIEW')], ['RESEED the particles\tCtrl+R', () => runKey('KeyR')], null, ['RESET the key bindings', () => clickTrig('RESET KEYS')], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
-        VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\tV cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
-          ['— style: CLOUD\tC cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\tH', () => runKey('KeyH')], ['FULL SCREEN / back\tF', () => toggleFullscreen()]],
+        VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
+          ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\tM', () => layout.modulation.toggle()], ['NOTEBOOK\tJ', () => layout.notebook.toggle()], ['HIDE / SHOW the rack\tB', () => layout.toggleRack()], ['DOCK / UNDOCK the transport\tT', () => layout.dockTransport()], ['HIDE the interface\tH', () => runKey('KeyH')], ['SHOW / HIDE help\tN', () => runKey('KeyN')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
@@ -4264,7 +4275,12 @@ export async function boot(dom) {
         const btn = el('button', 'mb-btn', grp, name); btn.type = 'button';
         btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
         const list = el('div', 'mb-list', grp); list.hidden = true;
-        const fill = () => { list.innerHTML = ''; for (const entry of MENUS[name]()) { if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; } const [label, run, dis, hint] = entry; const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true; it.addEventListener('click', (e) => { e.stopPropagation(); run(); closeLists(); barShown(false); }); } };
+        const fill = () => { list.innerHTML = ''; for (const entry of MENUS[name]()) { if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; } const [label, run, dis, hint] = entry; const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true;
+          /* N1 · A ROW THAT THROWS STILL CLOSES THE MENU.  `.click()` on a trigger swallowed a listener's exception
+             (dispatch reports it and returns), so the close below always ran; a direct call propagates, so the close and
+             the focus hand-back sit in a `finally`.  Focus returns to the opener only if it was left on the vanished
+             item (or on nothing): an act that moved focus on purpose (the keyboard editor, the notebook) keeps it. */
+          it.addEventListener('click', (e) => { e.stopPropagation(); try { run(); } finally { closeLists(); barShown(false); const f = document.activeElement; if (!f || f === document.body || bar.contains(f)) title.focus({ preventScroll: true }); } }); } };
         btn.addEventListener('click', (e) => { e.stopPropagation(); const was = openList === list; closeLists(); if (!was) { fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; } });
         btn.addEventListener('pointerenter', (e) => { if (e.pointerType === 'touch' || !openList || openList === list) return; closeLists(); fill(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openList = list; });
       }
@@ -5452,6 +5468,8 @@ export async function boot(dom) {
     return ok;
   }
   function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); } catch (e) { wState.setStatus('save failed', 'warn'); } }
+  /** the whole session as JSON on the clipboard — STATE's COPY JSON and the FILE menu's row are this one road (N1) */
+  async function copyJSON() { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} }
   /** opt.keepTime: leave the transport exactly where it is (UNDO / REDO) — the anchor c(0) is what travels, so the
    *  picture is continuous the way a RATE change is and only moves if the coefficients themselves did */
   function restore(obj, opt) {
