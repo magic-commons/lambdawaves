@@ -4925,6 +4925,7 @@ export async function boot(dom) {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
       if (ex) {
+        if (reg.transition && __LW_hooks.ab) __LW_hooks.ab.set(false);   // wave 127 · every road stands a running A/B transition down FIRST (UNDO's law): clearing it later froze its mix over the register written here
         const t = reg.restore(ex);
         if (!(opt && opt.keepTime)) {
           clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
@@ -5205,8 +5206,7 @@ export async function boot(dom) {
       look: hLook(), key: hLiveKey() };
   }
   function hWrite(S) {
-    const ab = __LW_hooks.ab;
-    if (reg.transition && ab) ab.set(false);                       // freeze the mix first: the anchor restored below is the truth
+    const ab = __LW_hooks.ab;                                      // restore() freezes a running mix first: the anchor it restores is the truth
     restore({ experiment: S.exp, presentation: { hamiltonian: S.ham, rates: S.rates, sturmian: S.sturmian } }, { keepTime: true });
     if (reg.damping !== S.damping) { reg.setDamping(S.damping); if (ui.dragKnob) ui.dragKnob.set(S.damping); }
     if (ab && ab.setStores) ab.setStores(S.ab.A, S.ab.B);
