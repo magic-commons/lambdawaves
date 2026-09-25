@@ -1,0 +1,101 @@
+{
+ "rows": {
+  "off+axes": {
+   "poseA": "1c2f1c95",
+   "poseB": "ea685e52",
+   "fresh": "ea685e52",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 0
+  },
+  "off+corner": {
+   "poseA": "973cb71a",
+   "poseB": "32bad365",
+   "fresh": "32bad365",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "off+noaxes": {
+   "poseA": "82ba6cc5",
+   "poseB": "82ba6cc5",
+   "fresh": "82ba6cc5",
+   "same": true,
+   "moved": false,
+   "rewroteOnTurn": 0
+  },
+  "box+axes": {
+   "poseA": "a8a575b3",
+   "poseB": "e4d38e3b",
+   "fresh": "e4d38e3b",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 0
+  },
+  "box+corner": {
+   "poseA": "cfb7a3c",
+   "poseB": "e6befd2",
+   "fresh": "e6befd2",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "box+noaxes": {
+   "poseA": "b0eb68b9",
+   "poseB": "d4444d62",
+   "fresh": "d4444d62",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 0
+  },
+  "lattice+axes": {
+   "poseA": "a69fd865",
+   "poseB": "3c87ff46",
+   "fresh": "3c87ff46",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "lattice+corner": {
+   "poseA": "a3d674d3",
+   "poseB": "bebee901",
+   "fresh": "bebee901",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "lattice+noaxes": {
+   "poseA": "948991fb",
+   "poseB": "dad25ea1",
+   "fresh": "dad25ea1",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "dots+axes": {
+   "poseA": "96c94e25",
+   "poseB": "de5bfff0",
+   "fresh": "de5bfff0",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "dots+corner": {
+   "poseA": "ff5cb1a5",
+   "poseB": "3615c876",
+   "fresh": "3615c876",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  },
+  "dots+noaxes": {
+   "poseA": "4fcaeb1e",
+   "poseB": "65160d2a",
+   "fresh": "65160d2a",
+   "same": true,
+   "moved": true,
+   "rewroteOnTurn": 1
+  }
+ },
+ "stale": 0
+}

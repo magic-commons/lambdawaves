@@ -497,9 +497,15 @@ struct U { vp: mat4x4<f32> };
    its title — the 1-px box edge at 42 % alpha was the "vertical line plaguing the devices". */
 struct Occ { n: u32, pad0: u32, pad1: u32, pad2: u32, r: array<vec4<f32>, 32> };
 @group(0) @binding(1) var<uniform> OCC: Occ;
+/* the LATTICE / DOTS ink (optimization 2026-09-24, K6): one colour per theme, so it rides here and their vertices carry
+   xyz + alpha (16 bytes, was 28) — the vertex stage hands the rasteriser the same four f32 either way */
+@group(0) @binding(2) var<uniform> INK: vec4<f32>;
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 @vertex fn vs(@location(0) p: vec3<f32>, @location(1) c: vec4<f32>) -> VSOut {
   var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; return o;
+}
+@vertex fn vsLattice(@location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
+  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.rgb, a); return o;
 }
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   for (var i = 0u; i < OCC.n; i++) {
@@ -774,15 +780,17 @@ export async function createField(canvas, opts = {}) {
     { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
-  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }] });
+  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
   const makeRenderPipeline = (fmt) => device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
   const renderPipeline = makeRenderPipeline(format);
-  const makeLinePipeline = (fmt) => device.createRenderPipeline({
-    layout: lineLayout,
-    vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] },
-    fragment: { module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] },
-    primitive: { topology: 'line-list' }
+  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] });
+  /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
+  const makeLinePipeline = (fmt) => ({
+    line: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
+      vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] } }),
+    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
+      vertex: { module: lineModule, entryPoint: 'vsLattice', buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] } }),
   });
   const linePipeline = makeLinePipeline(format);
 
@@ -803,10 +811,14 @@ export async function createField(canvas, opts = {}) {
   const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
-  const lineVerts = 36000;
-  let latticeStart = 38, latticeCount = 0, cornerStart = 38;
+  const lineVerts = 44;                                            // box 24 + axes 6 + slice 8, then the corner axis 6
+  const latticeVerts = 17 * 17 * 17 * 6;                           // the larger of the two: dots (6 per node) 29 478 · lattice 27 744
+  let latticeCount = 0; const cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
+  const latticeBuf = device.createBuffer({ size: latticeVerts * 16, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+  const LATTICE = new Float32Array(latticeVerts * 4);              // xyz + alpha; the ink is inkBuf's
+  const inkBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(4);
 
 
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
@@ -815,8 +827,8 @@ export async function createField(canvas, opts = {}) {
   /* the occlusion block: n + 32 rects; the corner axis is a HUD and gets the empty block */
   const OCC_BYTES = 16 + 32 * 16, occBuf = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), occNone = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const OCC = new ArrayBuffer(OCC_BYTES), OCC_U = new Uint32Array(OCC, 0, 4), OCC_F = new Float32Array(OCC, 16); let occSig = '';
-  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}}]});
-  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }] });
+  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}},{binding:2,resource:{buffer:inkBuf}}]});
+  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }, { binding: 2, resource: { buffer: inkBuf } }] });
 
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
@@ -964,8 +976,11 @@ export async function createField(canvas, opts = {}) {
     const axisInk = mat.axisInk === 'cmy' ? 1 : mat.axisInk === 'rgb' ? 2 : 0;
     const slice = mat.slice;
     const normal = slice && slice.normal;
+    /* the CAMERA is read only by the lattice/dots (the cut plane and the fade) and the corner axis (its screen basis);
+       the box, the axes and the slice are world geometry, so without those the camera is not part of the key (K6) */
+    const cam = (mat.frame !== false && frameMode !== 0) || (mat.axis !== false && axisMode === 1);
     changed = setLineState(i++, half) || changed;
-    for (let j = 0; j < 12; j++) changed = setLineState(i++, VIEW[j]) || changed;
+    for (let j = 0; j < 12; j++) changed = setLineState(i++, cam ? VIEW[j] : 0) || changed;
     changed = setLineState(i++, canvas.width) || changed;
     changed = setLineState(i++, canvas.height) || changed;
     changed = setLineState(i++, mat.lightUI ? 1 : 0) || changed;
@@ -1013,8 +1028,9 @@ export async function createField(canvas, opts = {}) {
       push(q(-h, -h), q(h, -h), c); push(q(h, -h), q(h, h), c); push(q(h, h), q(-h, h), c); push(q(-h, h), q(-h, -h), c);
       n += 4;
     }
-    k = latticeStart * 7; latticeCount = 0;
+    k = cornerStart * 7; latticeCount = 0;
     if (mat.frame !== false && (mat.frameMode === 'lattice' || mat.frameMode === 'dots')) {
+      const L = LATTICE; let q = 0;
       const radius = 8, spacing = h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
@@ -1022,6 +1038,7 @@ export async function createField(canvas, opts = {}) {
       const inkR = mat.lightUI ? 0.18 : 0.75;
       const inkG = mat.lightUI ? 0.22 : 0.80;
       const inkB = mat.lightUI ? 0.28 : 0.88;
+      INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
         const segCount = 13872;
@@ -1050,10 +1067,8 @@ export async function createField(canvas, opts = {}) {
           const dist = Math.max(distA, distB) * invMaxDist;
           const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
 
-          v[k++] = ax; v[k++] = ay; v[k++] = az;
-          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-          v[k++] = bx; v[k++] = by; v[k++] = bz;
-          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+          L[q++] = ax; L[q++] = ay; L[q++] = az; L[q++] = alpha;
+          L[q++] = bx; L[q++] = by; L[q++] = bz; L[q++] = alpha;
           latticeCount += 2;
         }
       } else {
@@ -1067,27 +1082,18 @@ export async function createField(canvas, opts = {}) {
               const dist = Math.hypot(px, py, pz) * invMaxDist;
               const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
 
-              v[k++] = px - tick; v[k++] = py; v[k++] = pz;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-              v[k++] = px + tick; v[k++] = py; v[k++] = pz;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-
-              v[k++] = px; v[k++] = py - tick; v[k++] = pz;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-              v[k++] = px; v[k++] = py + tick; v[k++] = pz;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-
-              v[k++] = px; v[k++] = py; v[k++] = pz - tick;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
-              v[k++] = px; v[k++] = py; v[k++] = pz + tick;
-              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
+              L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
+              L[q++] = px; L[q++] = py - tick; L[q++] = pz; L[q++] = alpha;
+              L[q++] = px; L[q++] = py + tick; L[q++] = pz; L[q++] = alpha;
+              L[q++] = px; L[q++] = py; L[q++] = pz - tick; L[q++] = alpha;
+              L[q++] = px; L[q++] = py; L[q++] = pz + tick; L[q++] = alpha;
               latticeCount += 6;
             }
           }
         }
       }
     }
-    cornerStart = k / 7;
     if (mat.axis !== false && mat.axisMode === 'corner') {
       const ink = AX;
       const px = mat.cornerX !== undefined ? mat.cornerX : 0.8;
@@ -1107,6 +1113,7 @@ export async function createField(canvas, opts = {}) {
       }
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k); stats.chromeWrites++;
+    if (latticeCount) { device.queue.writeBuffer(latticeBuf, 0, LATTICE, 0, latticeCount * 4); device.queue.writeBuffer(inkBuf, 0, INK_V); }
     cachedHasSlice = n > 15;
     return cachedHasSlice;                                        // whether the slice rectangle is in the buffer (the box and the axes always are)
   }
@@ -1114,9 +1121,9 @@ export async function createField(canvas, opts = {}) {
   function drawChrome(pass, lp, mat, hasSlice, all) {
     const box = all || mat.frame !== false, axes = all || mat.axis !== false, slice = hasSlice && box;
     if (!box && !axes) return;
-    pass.setPipeline(lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
+    pass.setPipeline(lp.line); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
     if (box && (all || !mat.frameMode || mat.frameMode === 'box')) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
-    if (box && !all && latticeCount) pass.draw(latticeCount,1,latticeStart);
+    if (box && !all && latticeCount) { pass.setPipeline(lp.lattice); pass.setVertexBuffer(0, latticeBuf); pass.draw(latticeCount, 1, 0); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
     if (axes && (all || mat.axisMode !== 'corner')) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
     if (axes && !all && mat.axisMode === 'corner') { pass.setBindGroup(0,cornerBind); pass.draw(6,1,cornerStart); pass.setBindGroup(0,lineBind); }
     if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
