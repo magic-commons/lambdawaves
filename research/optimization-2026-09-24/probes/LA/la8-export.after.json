@@ -1,0 +1,11 @@
+{
+ "exportDropsRebuild": {
+  "before": 64,
+  "askedDuringExport": 96,
+  "afterExport": 96,
+  "qualityRes": 96,
+  "exportResult": "stopped",
+  "scheduledDuring": false
+ },
+ "errs": []
+}

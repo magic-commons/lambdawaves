@@ -956,9 +956,13 @@ export async function boot(dom) {
   document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
   let exportLocked = false;
   function schedule(tier) {
-    if (exportLocked) return;
     if (modSyncing) return;                    // wave 52: a re-base writes what is already there (modSyncBases)
     if (tier > pending) pending = tier;
+    /* LA8 · AN EXPORT RECORDS THE ASK, IT ARMS NOTHING.  This return used to come first, so a REBUILD asked for
+       during an export (GRID, DOMAIN, SPACE, OPERATOR) was dropped: the export's finally raises only RECONSTRUCT, and
+       the field went on marching the old grid under a control that showed the new one (AUDIT-F F8).  No rAF is armed
+       while locked (render-exact's H9 witness); the finally's schedule() arms one frame at max(pending, RECONSTRUCT). */
+    if (exportLocked) return;
     /* WAVE 54 · A HIDDEN PAGE ASKS FOR NO FRAMES.  `pending` still rises, so nothing asked for is lost — the
        resume schedules once and the next frame does all of it.  See the measurement in setPageHidden. */
     if (page.hidden) { stats.scheduled = false; return; }
