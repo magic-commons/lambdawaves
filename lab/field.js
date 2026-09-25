@@ -1594,17 +1594,15 @@ export async function createField(canvas, opts = {}) {
     }
   });
   /* PACE (P1) · THE CAPABILITY, measured at boot: an empty submission's completion wait, judged only on a DRAINED queue — no
-     frame submitted during this wait or the one before it (a boot frame's compile, or a backlog, is not an answer).  Each try is
-     chained on the last one's completion (no timer), at most 30.  PROMPT = two judged waits in a row under 8 ms (Safari at once;
-     Chromium once its idle poll wakes, after a few ~17 ms tries); three judged waits in a row ≥ 50 ms are a poll tick and end
-     it (one could be a pipeline compiling).  Firefox resolves on a ~100 ms poll (AUDIT-A FA5) and early only when a present
-     lands in the wait (measured: 6 ms with one) — that try is not judged, the first try is never judged, and two fast judged
-     tries in a row cannot happen there. */
-  let paceTries = 0, paceFast = 0, paceSlow = 0; out.paceWaits = [];
+     frame presented during this wait or the one before it (a boot frame's compile, or a backlog, is not an answer).  Each try is
+     chained on the last one's completion (no timer), for at most 30 tries or 1.5 s.  PROMPT = ONE judged wait under 8 ms (wave
+     127: a GPU busy at boot only delays that answer — the 8th iPad report's 57/20/45 ms then 0 ms, which the old two-fast /
+     three-slow count could end on).  Firefox resolves on a ~100 ms poll (AUDIT-A FA5) and early only when a present lands in the
+     wait — that try is not judged, so a judged try there starts on a tick and waits for the next one: never under 8 ms. */
+  let paceTries = 0; const paceT0 = performance.now(); out.paceWaits = [];
   const probePace = (prev) => { const t = performance.now(), p = stats.presents; device.queue.submit([device.createCommandEncoder().finish()]);
-    device.queue.onSubmittedWorkDone().then(() => { const w = performance.now() - t, d = stats.presents - p, judged = prev === 0 && d === 0; out.paceWaits.push([+w.toFixed(2), d]);
-      paceFast = judged && w < 8 ? paceFast + 1 : 0; paceSlow = judged && w >= 50 ? paceSlow + 1 : 0;
-      if (paceFast === 2 || paceSlow === 3) paced = paceFast === 2; else if (++paceTries < 30) probePace(d); }, () => {}); };
+    device.queue.onSubmittedWorkDone().then(() => { const w = performance.now() - t, d = stats.presents - p; out.paceWaits.push([+w.toFixed(2), d]);
+      if (prev === 0 && d === 0 && w < 8) paced = true; else if (++paceTries < 30 && performance.now() - paceT0 < 1500) probePace(d); }, () => {}); };
   probePace(-1);
   return out;
 }
