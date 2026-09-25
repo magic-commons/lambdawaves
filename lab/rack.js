@@ -3669,8 +3669,17 @@ export async function boot(dom) {
    * transparent layout box around a disconnected card or the modulation constellation. Otherwise the
    * frame is cut into a moving rectangle wherever that box goes. Rectangles are gathered here — one
    * layout burst, at most every 300 ms while a frame runs, and never inside a paint. */
+  const NO_OCCLUSION = [];
   function refreshOcclusion(nowMs) {
     occludeDirty = false; occludeAt = nowMs;
+    /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
+       (lab.css: the racks, transport, sheet and both lists !important; #floats and #notebook !important; #keymap), and
+       #keysheet no longer exists — so the burst's answer is exactly [] and its layout reads bought nothing, every 300 ms
+       (AUDIT-B FB5, REFUTE-E/F).  The empty block is still HANDED OVER, because the line pass still runs under H (the
+       slice outline) and the rectangles from before the hide must not punch holes in it; setOcclusion compares its
+       signature, so an already-empty block costs a string compare.  The body-class observer below re-dirties the
+       burst on the way back. */
+    if (document.body.classList.contains('ui-hidden')) { if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
     const cb = dom.canvas.getBoundingClientRect(), out = [], body = document.body;
     const rect = (el) => { if (!el || el.hidden || getComputedStyle(el).visibility === 'hidden') return null;
       const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return null;
