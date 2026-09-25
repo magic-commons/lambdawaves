@@ -313,8 +313,18 @@ export async function boot(dom) {
 
   const quality = { res: 64, steps: 160, scale: 1, auto: true, autoScale: 1, minScale: 0.35 };
   /* AUTO render scale: the canvas backing resolution follows the measured frame interval (rAF cadence, which is what a GPU-bound
-     device shows), targeting 60 Hz in FULL and the observed cadence up to 120 Hz in 120 mode. */
+     device shows), targeting 60 Hz in FULL and the observed cadence up to 120 Hz in 120 mode.
+     W125 (Josh, 2026-09-25) · ON THE PAUSE EDGE IT RETURNS TO 1: the frame that sees the transport go from playing to paused
+     puts autoScale back to 1 and presents once, so the still picture is shown at the user's resolution and not at whatever
+     the load had forced (it stayed at 35 % until something else presented: AUDIT-A FA4) — and it RESTARTS THIS LAW'S WINDOW
+     (n, presented, ema, lastMs) on every pause edge, even at 1: a pointer drag asks a PRESENT per event, the loop re-arms per
+     event and rarely samples an interval, so the window's stale PLAYING ema — or the one interval straddling the edge, ~100 ms
+     while the GPU drains the last played frames — used to judge the paused drag and walk the scale down to 35 % (measured,
+     probes/W125/w125-pause-edge).  The EDGE only (`playedLast`), never every paused frame: paused camera
+     motion presents frames and this law may still lower the scale every 24 of them from what it measures then, which a
+     per-frame reset would fight.  With AUTO SCALE off nothing happens (the switch already put 1). */
   const autoQ = { n: 0, presented: 0, ema: 0, lastMs: 0, changes: 0 };
+  let playedLast = false;          // W125: was the transport playing on the last frame the loop ran?  The pause EDGE is playedLast && !playing
   /* ── THE GOVERNOR (wave 45): AUTO SCALE extended.  The last 60 presented frames' median is judged against the active
      frame budget: over it, the field grid steps one notch down (128 → 96 → 64) and the READER LAW tightens; sustained
      headroom steps back up;
@@ -1087,6 +1097,15 @@ export async function boot(dom) {
       }
     }
     if (!clock.playing && (gov.drop || gov.stepDrop)) { const rebuild = gov.drop > 0; gov.drop = 0; gov.stepDrop = 0; gov.okSince = 0; gov.changes++; schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }   // paused: nothing to govern — the user's grid and steps come back at once
+    if (playedLast && !clock.playing && quality.auto) {              // W125: …and AUTO SCALE's canvas, on the pause EDGE only (see its law at autoQ)
+      autoQ.n = 0; autoQ.presented = 0; autoQ.ema = 0; autoQ.lastMs = 0;   // its window restarts on EVERY pause edge (the resume-from-hidden reset's four): the play's intervals, and the edge's own transition interval, are not the still picture's
+      if (quality.autoScale < 1) {
+        quality.autoScale = 1; autoQ.changes++;
+        if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', '');
+        schedule(TIER.PRESENT);                                      // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
+      }
+    }
+    playedLast = clock.playing;
     perf.counts.frames++;
     const cpuTick = !clock.playing || (perf.counts.frames % perf.cpuEvery) === 0;   // the CPU windows' cadence
     if (cpuTick) {
