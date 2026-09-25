@@ -1,5 +1,5 @@
 {
- "at": "2026-09-25T16:50:41.643Z",
+ "at": "2026-09-25T17:37:43.903Z",
  "port": "8734",
  "viewport": [
   1920,
@@ -31,19 +31,19 @@
  "default": {
   "label": "as booted · 1s+2pz · 64³/160/1 · AUTO SCALE on · governor on",
   "seconds": 4.01,
-  "rafPerS": 118.3,
-  "loopFramesPerS": 118.3,
-  "presentsPerS": 116,
-  "submitsPerS": 116,
-  "completionsPerS": 115.8,
-  "queueDepthMax": 2,
-  "skipped": 9,
+  "rafPerS": 117.5,
+  "loopFramesPerS": 117.5,
+  "presentsPerS": 117.3,
+  "submitsPerS": 117.3,
+  "completionsPerS": 116.8,
+  "queueDepthMax": 4,
+  "skipped": 1,
   "skippedDefined": true,
   "paced": true,
-  "inFlightMax": 2,
+  "inFlightMax": 4,
   "presentIntervalMedianMs": 8.3,
-  "completionIntervalMedianMs": 8.3,
-  "loopMedianMs": 0.2,
+  "completionIntervalMedianMs": 8.2,
+  "loopMedianMs": 0.3,
   "autoScaleFirstChangeMs": null,
   "autoScaleTrace": [
    [
@@ -59,9 +59,9 @@
   ]
  },
  "gpuAtScale1": {
-  "frameMs": 32.5545,
-  "presentMs": 3.8835,
-  "reconstructMs": 28.9063,
+  "frameMs": 33.7655,
+  "presentMs": 3.9706,
+  "reconstructMs": 29.7213,
   "w": 1865,
   "h": 1011,
   "steps": 240,
@@ -69,20 +69,20 @@
  },
  "fixed": {
   "label": "128³ gas · AUTO SCALE off · governor off",
-  "seconds": 4.03,
-  "rafPerS": 55.6,
-  "loopFramesPerS": 55.6,
-  "presentsPerS": 28,
-  "submitsPerS": 28,
-  "completionsPerS": 27.5,
-  "queueDepthMax": 2,
-  "skipped": 111,
+  "seconds": 4.02,
+  "rafPerS": 28.4,
+  "loopFramesPerS": 28.4,
+  "presentsPerS": 28.1,
+  "submitsPerS": 28.1,
+  "completionsPerS": 27.1,
+  "queueDepthMax": 4,
+  "skipped": 1,
   "skippedDefined": true,
   "paced": true,
-  "inFlightMax": 2,
+  "inFlightMax": 4,
   "presentIntervalMedianMs": 33.4,
-  "completionIntervalMedianMs": 36.2,
-  "loopMedianMs": 0.3,
+  "completionIntervalMedianMs": 36.5,
+  "loopMedianMs": 0.4,
   "autoScaleFirstChangeMs": null,
   "autoScaleTrace": [
    [
@@ -99,32 +99,32 @@
  },
  "auto": {
   "label": "128³ gas · AUTO SCALE on · governor off",
-  "seconds": 4.02,
-  "rafPerS": 59.5,
-  "loopFramesPerS": 59.5,
-  "presentsPerS": 29.9,
-  "submitsPerS": 29.9,
-  "completionsPerS": 29.4,
-  "queueDepthMax": 2,
-  "skipped": 119,
+  "seconds": 4.03,
+  "rafPerS": 31.1,
+  "loopFramesPerS": 31.1,
+  "presentsPerS": 31.1,
+  "submitsPerS": 31.1,
+  "completionsPerS": 30.1,
+  "queueDepthMax": 4,
+  "skipped": 0,
   "skippedDefined": true,
   "paced": true,
-  "inFlightMax": 2,
+  "inFlightMax": 4,
   "presentIntervalMedianMs": 33.3,
-  "completionIntervalMedianMs": 33.6,
-  "loopMedianMs": 0.3,
-  "autoScaleFirstChangeMs": 258,
+  "completionIntervalMedianMs": 33,
+  "loopMedianMs": 0.4,
+  "autoScaleFirstChangeMs": 259,
   "autoScaleTrace": [
    [
     1,
     1
    ],
    [
-    258,
-    0.5
+    259,
+    0.55
    ],
    [
-    569,
+    571,
     0.35
    ]
   ],
@@ -138,31 +138,31 @@
  "autoGov": {
   "label": "128³ gas · AUTO SCALE on · governor on (as shipped)",
   "seconds": 4.01,
-  "rafPerS": 75.9,
-  "loopFramesPerS": 75.9,
-  "presentsPerS": 47.9,
-  "submitsPerS": 47.9,
-  "completionsPerS": 47.4,
-  "queueDepthMax": 2,
-  "skipped": 112,
+  "rafPerS": 59.1,
+  "loopFramesPerS": 59.1,
+  "presentsPerS": 59.1,
+  "submitsPerS": 59.1,
+  "completionsPerS": 58.6,
+  "queueDepthMax": 4,
+  "skipped": 0,
   "skippedDefined": true,
   "paced": true,
-  "inFlightMax": 2,
-  "presentIntervalMedianMs": 16.7,
-  "completionIntervalMedianMs": 16.7,
+  "inFlightMax": 4,
+  "presentIntervalMedianMs": 8.4,
+  "completionIntervalMedianMs": 11.1,
   "loopMedianMs": 0.3,
-  "autoScaleFirstChangeMs": 258,
+  "autoScaleFirstChangeMs": 259,
   "autoScaleTrace": [
    [
     1,
     1
    ],
    [
-    258,
-    0.55
+    259,
+    0.5
    ],
    [
-    541,
+    564,
     0.35
    ]
   ],

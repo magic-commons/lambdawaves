@@ -1,0 +1,126 @@
+{
+ "at": "2026-09-25T17:42:09.317Z",
+ "port": "8734",
+ "viewport": [
+  1600,
+  1000
+ ],
+ "dsf": "2",
+ "host": "electron",
+ "loop": "60 Hz timer in place of rAF (no GPU backpressure)",
+ "boot": {
+  "ok": true,
+  "dpr": 2,
+  "paced": true,
+  "waits": [
+   [
+    141.5,
+    2
+   ],
+   [
+    130,
+    1
+   ],
+   [
+    75,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    0.1,
+    0
+   ]
+  ]
+ },
+ "gpu": {
+  "frameMs": 27.4471,
+  "presentMs": 27.0221,
+  "reconstructMs": 0.1013,
+  "w": 4665,
+  "h": 2435,
+  "steps": 240,
+  "res": 128
+ },
+ "fixed": {
+  "label": "1s+2pz 128³ × 240 · AUTO SCALE off",
+  "seconds": 5,
+  "loopPerS": 60,
+  "presentsPerS": 36.8,
+  "submitsPerS": 36.8,
+  "completionsPerS": 36.6,
+  "queueDepthMax": 4,
+  "depthEvery30": [
+   4,
+   4,
+   4,
+   4,
+   3,
+   4,
+   4,
+   4,
+   4,
+   4
+  ],
+  "backlogAtPause": 4,
+  "drainMsAtPause": 107,
+  "skipped": 118,
+  "paced": true,
+  "presentIntervalMedianMs": 32.7,
+  "autoScaleFirstChangeMs": null,
+  "autoScaleTrace": [
+   [
+    19,
+    1
+   ]
+  ],
+  "canvas": [
+   4665,
+   2435
+  ]
+ },
+ "auto": {
+  "label": "1s+2pz 128³ × 240 · AUTO SCALE on",
+  "seconds": 5,
+  "loopPerS": 60,
+  "presentsPerS": 57.6,
+  "submitsPerS": 57.6,
+  "completionsPerS": 57.4,
+  "queueDepthMax": 4,
+  "depthEvery30": [
+   4,
+   2,
+   2,
+   3,
+   2,
+   2,
+   3,
+   3,
+   3,
+   2
+  ],
+  "backlogAtPause": 2,
+  "drainMsAtPause": 31,
+  "skipped": 13,
+  "paced": true,
+  "presentIntervalMedianMs": 16.6,
+  "autoScaleFirstChangeMs": 551,
+  "autoScaleTrace": [
+   [
+    18,
+    1
+   ],
+   [
+    551,
+    0.75
+   ]
+  ],
+  "canvas": [
+   3499,
+   1826
+  ]
+ },
+ "errs": []
+}

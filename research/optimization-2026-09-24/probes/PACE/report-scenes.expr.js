@@ -1,0 +1,1 @@
+(async()=>{ const R=await __LW.report({gpu:false, longMs:10000}); return { paced:R.pace?R.pace.paced:null, scenes:(R.scenes||[]).map(s=>s.label.split(" (")[0]+" "+s.rafFps+"/"+(s.presents/s.seconds).toFixed(1)+"/"+s.skipped+"/q"+s.queueMsMax), restored:R.restored.serialize }; })()

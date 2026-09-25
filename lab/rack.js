@@ -1062,15 +1062,17 @@ export async function boot(dom) {
       (modHost && modHost.clock.isRunning()) || rotDriving());
     if (tabletMotion !== document.body.classList.contains('tablet-motion'))
       document.body.classList.toggle('tablet-motion', tabletMotion);
-    /* PACE (P1, 2026-09-25) · WAIT FOR THE GPU where its completion is prompt (field.paced): while two submitted frames are
-       still in flight (one running, one queued) a third would only queue behind them — Safari before its frame pacer lets 60
-       frames/s pile onto a GPU that finishes 35, then stalls while they drain (WEBKIT-FPS-RESEARCH §1.3; the iPad report).
-       TWO, not one: one queued frame keeps the GPU fed, so the present interval IS the GPU's frame time (Electron, 128³ gas:
-       33.4 ms against 33.1) — waiting for zero adds the completion's delivery and a vsync to every frame (41.7 ms, 24 fps
-       where Chromium drew 29).  The ask is carried WHOLE to the next rAF (a REBUILD or RECONSTRUCT is never dropped: LA8's
+    /* PACE (P1, 2026-09-25) · A BOUNDED QUEUE where the GPU's completion is prompt (field.paced): with FOUR submitted frames
+       still unfinished, this one would only queue behind them — Safari before its frame pacer lets 60 frames/s pile onto a GPU
+       that finishes 35, then stalls while they drain (WEBKIT-FPS-RESEARCH §1.3; the iPad report).  Under a Safari-like loop
+       (probes/PACE/pace-safari-emu: rAF as a 60 Hz timer, a 27 ms frame) the queue ran 20–26 deep and AUTO SCALE read 16.6 ms
+       and never moved; held at four it stays ≤ 4, presents at the GPU's rate (32.7 ms) and AUTO SCALE steps once, at 0.55 s.
+       FOUR, not one or two: Chromium already paces its rAF and its completions arrive 20–60 ms late, so it runs ~4 in flight
+       by itself — holding at one cost it 17 % on a GPU-bound scene, at two 22 % with the modulation window open; at four it
+       draws what it drew.  The ask is carried WHOLE to the next rAF (a REBUILD or RECONSTRUCT is never dropped: LA8's
        discipline); the clocks and the CPU readers run as on any frame.  Only this rAF road: an export calls field.frame
        itself, and no rAF runs while one does (render-exact H9). */
-    const held = tier >= TIER.PRESENT && field.ok && field.paced && field.inFlight > 1;
+    const held = tier >= TIER.PRESENT && field.ok && field.paced && field.inFlight > 3;
     if (held) { if (tier > pending) pending = tier; tier = TIER.NONE; stats.skipped++; }
     if (tier >= TIER.REBUILD) applyRebuild();
     let modes = null;
