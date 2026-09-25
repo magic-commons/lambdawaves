@@ -1,0 +1,59 @@
+{
+ "steps": 9,
+ "differ": 0,
+ "first": [],
+ "sample": [
+  {
+   "open": true,
+   "rows": [
+    "⊕  ATOMS",
+    "⊕  CALCULUS",
+    "⊕  DYNAMICS",
+    "⊕  ELECTROSTATICS",
+    "⊕  H₂",
+    "⊕  HELIUM",
+    "⊕  HISTORY",
+    "⊕  LADDER",
+    "⊕  METERS",
+    "⊕  MO-REGISTRY",
+    "⊕  MOLECULES",
+    "⊕  ORBIT",
+    "⊕  QCD",
+    "⊕  RADIATION",
+    "⊕  SLICE",
+    "⊕  VORTEX",
+    "⊕  WIGNER"
+   ],
+   "aria": "true"
+  },
+  {
+   "afterClick": "shadow,spectrum,wigner,settings,state,palette,observer,camera,clip",
+   "shown": false
+  },
+  {
+   "queued": [
+    "vortex",
+    "slice",
+    "atoms"
+   ],
+   "rows": [
+    "⊕  ATOMS3#",
+    "⊕  CALCULUS",
+    "⊕  DYNAMICS",
+    "⊕  ELECTROSTATICS",
+    "⊕  H₂",
+    "⊕  HELIUM",
+    "⊕  HISTORY",
+    "⊕  LADDER",
+    "⊕  METERS",
+    "⊕  MO-REGISTRY",
+    "⊕  MOLECULES",
+    "⊕  ORBIT",
+    "⊕  QCD",
+    "⊕  RADIATION",
+    "⊕  SLICE2#",
+    "⊕  VORTEX1#"
+   ]
+  }
+ ]
+}
