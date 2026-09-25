@@ -489,6 +489,33 @@ fn bayer8(px: vec2<f32>) -> f32 {
   return vec4<f32>(o, 1.0);
 }`;
 
+/* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
+ * The present pass is ALU-bound, and RENDER_WGSL carries 6 views × 8 styles × finish × palette × invert × bow as uniform
+ * branches inside a 110–240-step march that the compiler cannot drop.  A copy with the VIEW and the STYLE folded to
+ * constants, the bow's phase line deleted and the glass-FINISH block deleted renders the same bytes 30–40 % faster
+ * (probes/K/k2-variants: FF phase/cloud 4.93 → 3.26 ms at 96³, 0 bytes differ on all 24 (view, style) of the set in
+ * Firefox and Chromium).  THE KEY decides when that copy is the same program: style ∈ {cloud, grain, bands, dust} (the
+ * lit and additive styles stay generic: their compiler-dependent last bits), view 0…5, the bow OFF (writeView's p4.w = 0,
+ * so the deleted line was a no-op) and finish ≠ glass (p6.w ∉ (½, 1½), so the deleted block was a no-op); palette,
+ * invert, matte and dither stay runtime.  A copy is compiled on first use with createRenderPipelineAsync — the generic
+ * pipeline draws until it resolves (the same pixels) — and a rejected compile marks its key failed for good. */
+const RENDER_BOW = '    if (V.p4.w > 0.5) { let ph = dot(V.p4.xyz, p); let cs = cos(ph); let sn = sin(ph); s = vec2<f32>(s.x * cs - s.y * sn, s.x * sn + s.y * cs); }';
+const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u) {
+      // A glass finish on the selected shape, including signed nodal lobes.
+      wEff *= .22;
+      if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
+    }`;
+export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
+/** RENDER_WGSL for one (view, style) of the key; throws when an anchor has moved (the key then fails: generic forever) */
+export function specRenderWGSL(view, style) {
+  const once = (src, from, to) => { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: the specialised present lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); };
+  let code = once(RENDER_WGSL, 'let mode = u32(V.p0.x);', `let mode = ${view | 0}u;`);
+  code = once(code, 'let style = u32(V.p3.x);', `let style = ${style | 0}u;`);
+  const cut = (src, from) => { const e = src.indexOf('\n', src.indexOf(from) + from.length - 1); return once(src, src.slice(src.indexOf(from), e + 1), ''); };   // the anchor through the end of its line (the bow line carries a comment)
+  code = cut(code, RENDER_BOW);
+  return cut(code, RENDER_GLASS_FINISH);
+}
+
 const LINE_WGSL = /* wgsl */`
 struct U { vp: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> U0: U;
@@ -782,8 +809,38 @@ export async function createField(canvas, opts = {}) {
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
   const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
-  const makeRenderPipeline = (fmt) => device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
+  /* makeRenderPipeline(fmt) builds the GENERIC pipeline; makeRenderPipeline(fmt, mat) SELECTS the one to draw with (K2):
+     the specialised copy when its key is ready and nothing pins the generic, else the generic.  One name for both on
+     purpose: tests/gpu-cleanup.test.mjs lifts readPixels/throughput out by source text and injects this name. */
+  const makeRenderPipeline = (fmt, mat) => mat ? pickRender(fmt, mat, fmt === format ? renderPipeline : out._rp)
+    : device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
   const renderPipeline = makeRenderPipeline(format);
+  const specCache = new Map();          // `${fmt}|${view}|${style}` → { pipeline, failed, promise }
+  let pinDepth = 0;                     // > 0: every draw takes the generic pipeline (render-exact, capture: an export never changes pipeline mid-run)
+  function specKey(fmt, mat) {
+    if (mat.finish === 'glass' || (mat.boost && mat.boost.on)) return null;       // writeView's p6.w = 1 / p4.w = 1: the deleted code would run
+    const v = mat.view | 0, st = mat.style | 0;                                   // exactly the words writeView writes into p0.x and p3.x
+    return v >= 0 && v <= 5 && SPEC_STYLES.includes(st) ? fmt + '|' + v + '|' + st : null;
+  }
+  function specEntry(key, fmt, v, st) {
+    let e = specCache.get(key);
+    if (e) return e;
+    e = { pipeline: null, failed: false, promise: null };
+    specCache.set(key, e);
+    try {
+      device.pushErrorScope('validation');
+      const module = device.createShaderModule({ code: specRenderWGSL(v, st) });
+      const scope = device.popErrorScope();
+      e.promise = Promise.all([scope, device.createRenderPipelineAsync({ layout: renderLayout, vertex: { module, entryPoint: 'vs' }, fragment: { module, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } })])
+        .then(([err, pl]) => { if (err) { e.failed = true; return false; } e.pipeline = pl; return true; }, () => { e.failed = true; return false; });
+    } catch (_) { e.failed = true; e.promise = Promise.resolve(false); }
+    return e;
+  }
+  function pickRender(fmt, mat, generic) {
+    if (pinDepth > 0) return generic;
+    const key = specKey(fmt, mat);
+    return key ? specEntry(key, fmt, mat.view | 0, mat.style | 0).pipeline || generic : generic;
+  }
   const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] });
   /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
   const makeLinePipeline = (fmt) => ({
@@ -1140,7 +1197,7 @@ export async function createField(canvas, opts = {}) {
     const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
     if (tw) desc.timestampWrites = tw;
     const pass = enc.beginRenderPass(desc);
-    pass.setPipeline(renderPipeline); pass.setBindGroup(0, renderBind); pass.draw(3);
+    pass.setPipeline(pickRender(format, mat, renderPipeline)); pass.setBindGroup(0, renderBind); pass.draw(3);
     drawChrome(pass, linePipeline, mat, sl);
     pass.end();
   }
@@ -1182,7 +1239,7 @@ export async function createField(canvas, opts = {}) {
     let buf;
     try {
       if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
-      const rp = out._rp, lp = out._lp;
+      const rp = makeRenderPipeline('rgba8unorm', mat), lp = out._lp;   // K2: selected synchronously — nothing awaits before the submit
       const enc = device.createCommandEncoder();
       writeView(obs, mat, w, h); const sl = writeLines(mat);
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
@@ -1317,7 +1374,7 @@ export async function createField(canvas, opts = {}) {
           if (doRender) {
             writeView(obs, mat, w, h); const sl = writeLines(mat);
             const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-            pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
+            pass.setPipeline(makeRenderPipeline('rgba8unorm', mat)); pass.setBindGroup(0, renderBind); pass.draw(3);
             drawChrome(pass, out._lp, mat, sl);
             pass.end();
           }
@@ -1415,6 +1472,8 @@ export async function createField(canvas, opts = {}) {
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
+    /* K2: the specialised present's ledger — compiled, compiling, failed for good, and whether an export pins the generic */
+    renderPipelines: { get: () => { let ready = 0, pending = 0, failed = 0; for (const e of specCache.values()) { if (e.pipeline) ready++; else if (e.failed) failed++; else pending++; } return { ready, pending, failed, pinned: pinDepth > 0 }; }, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
     stepCap: { get: () => stepCap, enumerable: true },
@@ -1429,6 +1488,17 @@ export async function createField(canvas, opts = {}) {
     ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
+    /** K2 · THE EXPORT PIN: pinRenderPipeline(true) … (false), nested by depth — while held every draw takes the generic
+     *  pipeline, so a specialised compile that resolves mid-run can never change an export's pipeline.  Returns the depth. */
+    pinRenderPipeline(on) { pinDepth = Math.max(0, pinDepth + (on ? 1 : -1)); return pinDepth; },
+    /** K2 · compile (if needed) and await the specialised pipelines this material would use, on the canvas' format and on
+     *  the readback's rgba8unorm; resolves true when both are ready, false when the material is outside the key or a
+     *  compile failed.  For tools and gates that must measure what the screen draws (the DIGEST LOCK). */
+    renderPipelineReady(mat) {
+      const keys = [format, 'rgba8unorm'].map((f) => [f, specKey(f, mat)]);
+      if (keys.some(([, k]) => !k)) return Promise.resolve(false);
+      return Promise.all(keys.map(([f, k]) => specEntry(k, f, mat.view | 0, mat.style | 0).promise)).then((r) => r.every(Boolean));
+    },
     setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },

@@ -4,6 +4,7 @@
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
  *   options:  --fixture <path>   (default research/optimization-2026-09-24/digest-lock-base.json)
  *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=1'   (appended to the lab URL)
+ *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:
@@ -45,13 +46,14 @@ const FIXTURE = path.resolve(ROOT, opt('--fixture', 'research/optimization-2026-
 const ONLY = opt('--only', 'states,styles,lines').split(',');
 const GRIDS = opt('--grids', '64,96,128').split(',').map(Number);
 const QUERY = opt('--query', '');
+const NOWARM = flag('--nowarm');           // K2: skip the specialised-pipeline warm-up (every readPixels then draws generic)
 const PORT = process.env.LW_PORT || '8721';
 const W = 1600, H = 1000;
 const url = `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0${QUERY ? '&' + QUERY : ''}`;
 
 /* ── the in-page helpers, installed once as window.__DL ─────────────────────────────────────────────────────── */
 const HELPERS = `
-const LW = __LW, F = LW.field, d = F.device;
+const LW = __LW, F = LW.field, d = F.device, WARM = ${NOWARM ? 'false' : 'true'};
 if (!F || !F.ok) throw new Error('no WebGPU field: ' + (F && F.error));
 const STEPS = { 64: 110, 96: 160, 128: 240 }, SEED = 13;
 const fnvU32 = (u32) => { let h = 2166136261 >>> 0; for (let i = 0; i < u32.length; i++) h = Math.imul(h ^ u32[i], 16777619) >>> 0; return h.toString(16); };
@@ -65,6 +67,10 @@ const MAT_KEYS = ['view', 'style', 'paletteOn', 'invert', 'finish', 'dither', 'f
 const restoreMat = () => { for (const k of MAT_KEYS) { if (mat0[k] === undefined) delete LW.mat[k]; else LW.mat[k] = JSON.parse(JSON.stringify(mat0[k])); } };
 /** the pinned readback: occlusion set, jitter seed pinned for the synchronous half of the call, then put back */
 async function rp(w, h, occ = []) {
+  /* K2: readPixels selects the specialised present pipeline when its key is compiled, and the generic one until then —
+     so the lock WARMS the key first (outside the pinned synchronous half) and compares what the screen draws.  A
+     material outside the key resolves false at once and stays generic.  --nowarm skips this (the generic pipeline). */
+  if (WARM && F.renderPipelineReady) await F.renderPipelineReady(LW.mat);
   F.setOcclusion(occ);
   const k = F.stats.presents; F.stats.presents = SEED;
   const p = F.readPixels(LW.obs, LW.mat, w, h);
@@ -200,6 +206,8 @@ try {
     console.log('state', s, GRIDS.map((gr) => gr + ':' + o[gr].digest + (o[gr].repeat ? '' : ' (NOT REPEATABLE)')).join(' '), ((Date.now() - t) / 1000).toFixed(1) + ' s');
   }
   result.pageErrors = await g.ev('return (window.__e || []).slice(0, 10);');
+  const ledger = await g.ev('return __LW.field.renderPipelines || null;');   // K2: which specialised present pipelines the run compiled
+  if (ledger) console.log('specialised present pipelines', JSON.stringify(ledger), NOWARM ? '(--nowarm)' : '');
 } catch (e) { failed = String(e && e.stack || e); }
 finally { await g.close(); }
 if (failed) { console.error('DIGEST LOCK: the run failed —', failed); process.exit(3); }

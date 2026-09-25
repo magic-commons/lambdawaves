@@ -973,6 +973,7 @@ export function createExactRenderer(LW, opts = {}) {
         obs: LW.obs ? Object.assign({}, LW.obs) : null,
       };
       const pins = {};
+      if (f && f.pinRenderPipeline) f.pinRenderPipeline(true);   // optimization K2: the whole run draws with the GENERIC present pipeline (restore() releases it)
 
       /* THE CLOCK IS PAUSED, AND THAT IS WHAT DISARMS THE GOVERNOR: the rack only judges while playing, and
          pausing actively resets its drop.  Turning the governor off is the belt beside that brace. */
@@ -1143,6 +1144,7 @@ export function createExactRenderer(LW, opts = {}) {
   function restore(before, pins, delivered = 0) {
     try {
       const f = field();
+      if (f && f.pinRenderPipeline) f.pinRenderPipeline(false);
       if (canvas && before.canvasW) { canvas.width = before.canvasW; canvas.height = before.canvasH; }
       if (LW.quality && before.qAuto !== null) { LW.quality.auto = before.qAuto; LW.quality.scale = before.qScale; }
       if (LW.camera && before.camAuto !== null) LW.camera.autoRotate = before.camAuto;

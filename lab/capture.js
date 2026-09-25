@@ -699,7 +699,8 @@ export function createCapture(LW, opts = {}) {
        so a copy taken in a later task gets a fresh, CLEARED texture - black.  Render and copy must sit in one
        synchronous block, and they do. */
     const jit = pinJitter();
-    f.frame({ modes: LW.modesAt(LW.clock.t), obs: LW.obs, mat: LW.mat });
+    if (f.pinRenderPipeline) f.pinRenderPipeline(true);   // optimization K2: an export frame draws with the GENERIC present pipeline
+    try { f.frame({ modes: LW.modesAt(LW.clock.t), obs: LW.obs, mat: LW.mat }); } finally { if (f.pinRenderPipeline) f.pinRenderPipeline(false); }
     unpinJitter(jit);
     const tex = c.getCurrentTexture();                    // the SAME texture frame() just rendered into
     const bpr = alignedBytesPerRow(w);
@@ -911,6 +912,7 @@ export function createCapture(LW, opts = {}) {
       const stopped = new Promise((r) => { rec.onstop = r; });
       const busy = LW.busy && LW.busy.begin ? (LW.busy.begin(), true) : false;
       const presents0 = f.stats.presents;
+      if (f.pinRenderPipeline) f.pinRenderPipeline(true);     // optimization K2: the rack's frames of the take draw with the GENERIC present pipeline
       const marks = new Array(N);
       let delivered = 0, err = null;
       const wall0 = performance.now();
@@ -942,6 +944,7 @@ export function createCapture(LW, opts = {}) {
       stream.getTracks().forEach((t) => t.stop());
       q.scale = q0.scale; q.auto = q0.auto;
       f.stats.presents = presents0 + delivered;               // the diagnostic counter, put back honestly
+      if (f.pinRenderPipeline) f.pinRenderPipeline(false);
       if (wasCfg !== 'copy') configure(false);
       LW.scrub(t0log);
       if (wasPlaying) LW.play();

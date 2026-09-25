@@ -1,0 +1,253 @@
+{
+ "W": 1920,
+ "H": 1043,
+ "format": "rgba8unorm",
+ "rows": 57,
+ "specRows": 39,
+ "differ": 0,
+ "ledger": {
+  "ready": 24,
+  "pending": 0,
+  "failed": 0,
+  "pinned": false
+ },
+ "exportPin": {
+  "verify": {
+   "ok": true,
+   "message": "DETERMINISTIC: 3 frames rendered twice, every digest identical."
+  },
+  "framesPinned": 8,
+  "framesUnpinned": 0
+ },
+ "detail": {
+  "density/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "density/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "density/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "density/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "phase/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "phase/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "phase/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "phase/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "real/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "real/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "real/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "real/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "imag/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "imag/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "imag/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "imag/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "diff/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "diff/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "diff/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "diff/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "reim/cloud": {
+   "eligible": true,
+   "same": true
+  },
+  "reim/grain": {
+   "eligible": true,
+   "same": true
+  },
+  "reim/bands": {
+   "eligible": true,
+   "same": true
+  },
+  "reim/dust": {
+   "eligible": true,
+   "same": true
+  },
+  "palette-on:density": {
+   "eligible": true,
+   "same": true
+  },
+  "palette-on:phase": {
+   "eligible": true,
+   "same": true
+  },
+  "palette-on:real": {
+   "eligible": true,
+   "same": true
+  },
+  "invert:density": {
+   "eligible": true,
+   "same": true
+  },
+  "invert:phase": {
+   "eligible": true,
+   "same": true
+  },
+  "invert:real": {
+   "eligible": true,
+   "same": true
+  },
+  "matte:density": {
+   "eligible": true,
+   "same": true
+  },
+  "matte:phase": {
+   "eligible": true,
+   "same": true
+  },
+  "matte:real": {
+   "eligible": true,
+   "same": true
+  },
+  "dither:density": {
+   "eligible": true,
+   "same": true
+  },
+  "dither:phase": {
+   "eligible": true,
+   "same": true
+  },
+  "dither:real": {
+   "eligible": true,
+   "same": true
+  },
+  "slab:density": {
+   "eligible": true,
+   "same": true
+  },
+  "slab:phase": {
+   "eligible": true,
+   "same": true
+  },
+  "slab:real": {
+   "eligible": true,
+   "same": true
+  },
+  "bow:density": {
+   "eligible": false,
+   "same": true
+  },
+  "bow:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "bow:real": {
+   "eligible": false,
+   "same": true
+  },
+  "finish-glass:density": {
+   "eligible": false,
+   "same": true
+  },
+  "finish-glass:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "finish-glass:real": {
+   "eligible": false,
+   "same": true
+  },
+  "solid:density": {
+   "eligible": false,
+   "same": true
+  },
+  "solid:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "solid:real": {
+   "eligible": false,
+   "same": true
+  },
+  "glass:density": {
+   "eligible": false,
+   "same": true
+  },
+  "glass:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "glass:real": {
+   "eligible": false,
+   "same": true
+  },
+  "additive:density": {
+   "eligible": false,
+   "same": true
+  },
+  "additive:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "additive:real": {
+   "eligible": false,
+   "same": true
+  },
+  "signed:density": {
+   "eligible": false,
+   "same": true
+  },
+  "signed:phase": {
+   "eligible": false,
+   "same": true
+  },
+  "signed:real": {
+   "eligible": false,
+   "same": true
+  }
+ },
+ "host": "electron-chromium152-dawn"
+}
