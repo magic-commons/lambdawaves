@@ -698,6 +698,7 @@ export function createCapture(LW, opts = {}) {
     /* THE RENDER IS RE-DONE HERE ON PURPOSE.  The swapchain texture EXPIRES at the end of the animation-frame task,
        so a copy taken in a later task gets a fresh, CLEARED texture - black.  Render and copy must sit in one
        synchronous block, and they do. */
+    if (LW.helium && LW.helium.on) void LW.helium.sol;     // 2026-09-24: HELIUM's basis in force, never the last one shown while its worker solves (heliumview.js)
     const jit = pinJitter();
     f.frame({ modes: LW.modesAt(LW.clock.t), obs: LW.obs, mat: LW.mat });
     unpinJitter(jit);
@@ -903,6 +904,7 @@ export function createCapture(LW, opts = {}) {
       let relay = null, relayCtx = null, src = canvas;
       if (engine === 'relay') { relay = document.createElement('canvas'); relay.width = W; relay.height = H; relayCtx = relay.getContext('2d'); src = relay; configure(true); }
       LW.clock.pause();
+      if (LW.helium && LW.helium.on) void LW.helium.sol;   // 2026-09-24: the take starts on HELIUM's basis in force, not the last one shown while its worker solves
       const stream = src.captureStream(0);
       const track = stream.getVideoTracks()[0];
       const rec = new MediaRecorder(stream, Object.assign({ mimeType: m }, bitrate ? { videoBitsPerSecond: bitrate } : {}));

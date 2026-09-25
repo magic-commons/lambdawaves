@@ -10,6 +10,14 @@ import { el, seg, sw, knob, readout } from './mir/kit.js';
 export function createHelium(host, api) {
   let basis = 'six', sol = null, solving = null, generation = 0, active = api.active ? !!api.active() : true, on = false, r1 = 0.8, th1 = 0, x1v = null;   // x1v: a point placed by hand on the field (shift-click), off the knobs' plane
   const ensureSol = () => { if (!sol) { generation++; sol = hylleraas(BASES[basis]); } return sol; };
+  /* 2026-09-24 · THE FRAME NEVER SOLVES WHILE THE WORKER IS SOLVING (optimization LB4, AUDIT-F F9).  A basis change nulls
+     `sol` and starts the worker; the next playing frame used to find no solution and run Hylleraas on the frame thread
+     (90–269 ms), and its generation++ threw the worker's answer away.  Now the field keeps the LAST solution it was
+     handed (`shown`) until the worker lands, and the landing asks for the RECONSTRUCT that shows it.  The settled volume
+     is the same hylleraas() either way.  With nothing to show yet (the first ON) the solve stays synchronous, as before,
+     so the field never shows a frame that is not helium; `get sol()` stays the synchronous demand, and the exports
+     (render-exact.js, capture.js) call it before they render, so an export never records a stale basis. */
+  let shown = null, servedStale = false;
   const x1 = () => x1v || [r1 * Math.sin(th1), 0, r1 * Math.cos(th1)];
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'HELIUM ON', value: false, title: 'Show helium’s conditional density in the field', onChange: (v) => { on = v; api.setOn(v); } });
@@ -35,8 +43,10 @@ export function createHelium(host, api) {
     if (api.loading) api.loading(true);
     const work = api.solve ? api.solve(requested) : new Promise((resolve) => requestAnimationFrame(() => setTimeout(() => resolve({ sol: hylleraas(BASES[requested]) }), 0)));
     solving = Promise.resolve(work).then((result) => {
-      if (mine === generation && requested === basis && result && !result.error) sol = result.sol || result;
+      const adopted = mine === generation && requested === basis && result && !result.error;
+      if (adopted) sol = result.sol || result;
       if (sol && active) refresh();
+      if (adopted && on && servedStale) api.repaint(true);        // a frame showed the previous basis meanwhile: show this one
       return sol;
     }).finally(() => {
       solving = null; if (api.loading) api.loading(false);
@@ -56,8 +66,10 @@ export function createHelium(host, api) {
     roH.set(opp > 0 ? (same / opp).toFixed(4) : '—', same < opp ? 'ok' : 'warn');
   }
   refresh();
-  return { update() {}, prepare, get on() { return on; }, setOn(v) { on = !!v; if (on) ensureSol(); if (onSw.set) onSw.set(on); api.setOn(on); }, get sol() { return ensureSol(); }, get computed() { return !!sol; }, get basis() { return basis; }, setBasis(b) { if (!BASES[b]) return false; basis = b; bSeg.set(b); sol = null; generation++; refresh(); return true; },
+  return { update() {}, prepare, get on() { return on; }, setOn(v) { on = !!v; if (on && !sol) { if (shown) prepare(); else ensureSol(); } if (onSw.set) onSw.set(on); api.setOn(on); }, get sol() { return ensureSol(); }, get computed() { return !!sol; }, get basis() { return basis; }, setBasis(b) { if (!BASES[b]) return false; basis = b; bSeg.set(b); sol = null; generation++; refresh(); return true; },
     setActive(v) { const next = !!v; if (next === active) return; active = next; if (active) refresh(); },
     save() { return { on, basis, x1: x1().slice() }; }, load(o = {}) { if (typeof o.basis === 'string') this.setBasis(o.basis); if (Array.isArray(o.x1) && o.x1.length === 3 && o.x1.every(Number.isFinite)) this.placeAt(o.x1); if (o.on !== undefined) this.setOn(!!o.on); return this.save(); },
-    get x1() { return x1(); }, place(r, th) { r1 = r; th1 = th; x1v = null; if (kR.set) kR.set(r); if (kT.set) kT.set(th); refresh(); }, placeAt(p) { x1v = p.slice(); r1 = Math.hypot(...p); th1 = r1 > 0 ? Math.acos(Math.max(-1, Math.min(1, p[2] / r1))) : 0; if (kR.set) kR.set(r1); if (kT.set) kT.set(th1); refresh(); }, fieldModes() { return conditionalModes(ensureSol(), x1()); }, get half() { return 4; } };
+    get x1() { return x1(); }, place(r, th) { r1 = r; th1 = th; x1v = null; if (kR.set) kR.set(r); if (kT.set) kT.set(th); refresh(); }, placeAt(p) { x1v = p.slice(); r1 = Math.hypot(...p); th1 = r1 > 0 ? Math.acos(Math.max(-1, Math.min(1, p[2] / r1))) : 0; if (kR.set) kR.set(r1); if (kT.set) kT.set(th1); refresh(); }, fieldModes() {
+      if (!sol && solving && shown) { servedStale = true; return conditionalModes(shown, x1()); }   // the last good basis while the worker solves
+      shown = ensureSol(); servedStale = false; return conditionalModes(shown, x1()); }, get half() { return 4; } };
 }
