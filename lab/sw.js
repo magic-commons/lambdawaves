@@ -39,7 +39,7 @@ const PRECACHE = [
   ['./calculusview.js',                                             '52b7e86057fc'],
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  'ce61dd15e8ec'],
-  ['./chemview.js',                                                 'f8c747bfef32'],
+  ['./chemview.js',                                                 'e5de579486e7'],
   ['./clock.js',                                                    '6431963e1506'],
   ['./cornell.js',                                                  '70b64dee2baa'],
   ['./demos/wave-dancer.lambdawaves.json',                          '9ee0c86b6a22'],
