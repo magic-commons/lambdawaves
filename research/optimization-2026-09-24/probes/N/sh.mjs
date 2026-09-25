@@ -1,6 +1,6 @@
 /* sh.mjs — lane N's MIR stylehash driver: every window open (the rack reset + unfolded, the hidden legacy card shown,
  * the modulation window, the notebook, the keyboard editor), both themes × card × frost, CONNECTED or DISCONNECTED.
- *   node research/optimization-2026-09-24/probes/N/sh.mjs capture <name> [disc|conn] [states]
+ *   node research/optimization-2026-09-24/probes/N/sh.mjs capture <name> [disc|conn|boot:<path>] [states]
  *   node research/optimization-2026-09-24/probes/N/sh.mjs compare <before> <after> <noise>
  * Serves from http://127.0.0.1:${SH_PORT||8796} (a plain static server over the worktree: 127.0.0.1 is a secure
  * context, so WebGPU is offered; Chromium would refuse the gate server's self-signed TLS). Out dir /tmp/lwN-sh. */
@@ -25,9 +25,12 @@ const setup = (disc) => `(async () => { try { if (__LW.warning && __LW.warning.d
   await __LW.settle(); await __LW.settle(); return true; })()`;
 let r;
 if (cmd === 'capture') {
-  const disc = (b || 'disc') === 'disc';
-  const args = [TOOL, 'capture', a, `http://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0`, OUT,
-    '--ready', '!!(window.__LW && __LW.ready)', '--setup', setup(disc),
+  /* mode `boot:<path>` — a FIRST VISIT as it boots (nothing opened; the warning dismissed, the clock paused), served from
+     <path> (e.g. research/…/probes/N/lab-n8-before/) — the boot-order items' view; `disc` / `conn` — every window open */
+  const boot = (b || '').startsWith('boot:'), disc = (b || 'disc') === 'disc';
+  const where = boot ? b.slice(5) : 'lab/';
+  const args = [TOOL, 'capture', a, `http://127.0.0.1:${PORT}/${where}?preset=1s%2B2pz&sw=0`, OUT,
+    '--ready', '!!(window.__LW && __LW.ready)', '--setup', boot ? "(async () => { try { __LW.warning.dismiss(); } catch (_) {} __LW.pause(); __LW.scrub(0); await __LW.settle(); await __LW.settle(); return true; })()" : setup(disc),
     '--theme', '__LW.setTheme(%s)', '--card', '__LW.setCardStyle(%s)', '--frost', "__LW.setFrost(%s ? 'always' : 'off')",
     '--gpu', '1', '--size', '1600x1000'];
   if (c) args.push('--states', c);

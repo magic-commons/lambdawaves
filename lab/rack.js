@@ -2867,6 +2867,14 @@ export async function boot(dom) {
       if (!t || !t.classList.contains('mini')) return;
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
+      /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
+         modulation window reports the origin's empty rect (modwindow.js place(); `closed` sends −1s).  No seat can hit a
+         rect at or left of x = 0: a seat's left is (vw − w)/2 and the pill is `min(640px, 100vw − 24px)` wide
+         (skin.css), so it starts ≥ 12 px in — the old chain always answered 'bottom' (or 'top' on a narrow rack) for it.
+         When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
+         the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
+         (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
+      if (r.right <= 0 && r.bottom <= 0 && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;

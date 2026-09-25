@@ -76,7 +76,15 @@ export function createH2(host, api) {
      here was rgba(255,255,255,…), white on white on the light card, so the ink is read from the body. */
   let rect = null;
   const hover = graphHover(cv, { repaint: () => paint(), plot: () => rect });
+  /* OPTIMIZATION 2026-09-24 · N8: a CLOSED or hidden card is `display: none !important` (mir base.css), so the read
+     below answers 0 and paint returns without a stroke — but the read forced the document's style + layout first, and
+     at construction (a first visit ships this card closed) that was the boot's first full flush once lane M's guards
+     moved it here: 26.5–28 ms (probes/N/n8-reads.mjs).  The same test M gave moleculeview/pulseview, widened to the
+     `.closed` class; the reveal road is unchanged — graphHover's ResizeObserver repaints the canvas the moment it has
+     a size, and setActive(true) refreshes it. */
+  const shown = () => cv.isConnected && !cv.closest('[hidden], .dev.closed');
   function paint() {
+    if (!shown()) return;
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (W < 32 || H < 32) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
