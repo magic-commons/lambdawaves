@@ -1,0 +1,30 @@
+{
+ "busyInGpuBoundScene": {
+  "busyFraction": 0.86,
+  "samples": 118,
+  "rafMedian": 300,
+  "rafMax": 317,
+  "gapsOver250": 15,
+  "frames": 20,
+  "loopMedianMs": 0.62,
+  "loopMaxMs": 10.6
+ },
+ "heliumBasisPlaying": [
+  {
+   "basis": "ten",
+   "worstStallMs": 268.6,
+   "computed": true
+  },
+  {
+   "basis": "six",
+   "worstStallMs": 90.1,
+   "computed": true
+  },
+  {
+   "basis": "ten",
+   "worstStallMs": 237.3,
+   "computed": true
+  }
+ ],
+ "errs": []
+}

@@ -1,0 +1,252 @@
+{
+ "at": "2026-09-25T02:20:06.293Z",
+ "host": "firefox-headed",
+ "secs": 3,
+ "reps": 3,
+ "exps": [
+  {
+   "name": "A/A calibration (nothing changes)",
+   "A": [
+    39.6,
+    40.95,
+    32.85
+   ],
+   "B": [
+    41.5,
+    30.3,
+    31.08
+   ],
+   "fpsA": 37.8,
+   "fpsB": 34.3,
+   "msA": 26.46,
+   "msB": 29.16,
+   "gpuMsSaved": -2.71,
+   "hashes": null
+  },
+  {
+   "name": "every backdrop-filter removed (diagnostic: the whole frost bill)",
+   "A": [
+    33.45,
+    33.71,
+    33.64
+   ],
+   "B": [
+    44.79,
+    46.12,
+    43.3
+   ],
+   "fpsA": 33.6,
+   "fpsB": 44.7,
+   "msA": 29.76,
+   "msB": 22.35,
+   "gpuMsSaved": 7.41,
+   "hashes": null
+  },
+  {
+   "name": "transport pill blur removed (diagnostic)",
+   "A": [
+    34.23,
+    33.58,
+    31.57
+   ],
+   "B": [
+    29.76,
+    31.4,
+    32.29
+   ],
+   "fpsA": 33.1,
+   "fpsB": 31.1,
+   "msA": 30.19,
+   "msB": 32.1,
+   "gpuMsSaved": -1.92,
+   "hashes": null
+  },
+  {
+   "name": "3 round rack buttons blur removed (diagnostic: per-layer overhead)",
+   "A": [
+    31,
+    30.53,
+    31.37
+   ],
+   "B": [
+    32.8,
+    32.21,
+    32.6
+   ],
+   "fpsA": 31,
+   "fpsB": 32.5,
+   "msA": 32.29,
+   "msB": 30.73,
+   "gpuMsSaved": 1.56,
+   "hashes": null
+  },
+  {
+   "name": "disconnected: head blur removed, body blur kept (diagnostic)",
+   "A": [
+    31.49,
+    30.8,
+    30.92
+   ],
+   "B": [
+    35.7,
+    34.57,
+    34.7
+   ],
+   "fpsA": 31.1,
+   "fpsB": 35,
+   "msA": 32.19,
+   "msB": 28.58,
+   "gpuMsSaved": 3.61,
+   "hashes": null
+  },
+  {
+   "name": "disconnected: body blur removed, head blur kept (diagnostic)",
+   "A": [
+    30.95,
+    30.34,
+    30.84
+   ],
+   "B": [
+    34.32,
+    32.4,
+    32.96
+   ],
+   "fpsA": 30.7,
+   "fpsB": 33.2,
+   "msA": 32.56,
+   "msB": 30.1,
+   "gpuMsSaved": 2.47,
+   "hashes": null
+  },
+  {
+   "name": "disconnected → connected (same frost; 18 → 12 layers)",
+   "A": [
+    31.15,
+    40.78,
+    32.28
+   ],
+   "B": [
+    37.9,
+    33.59,
+    33.24
+   ],
+   "fpsA": 34.7,
+   "fpsB": 34.9,
+   "msA": 28.79,
+   "msB": 28.65,
+   "gpuMsSaved": 0.14,
+   "hashes": null
+  },
+  {
+   "name": "blur radius 22 → 8 (diagnostic: does the radius cost?)",
+   "A": [
+    32.52,
+    32.7,
+    33.19
+   ],
+   "B": [
+    32.37,
+    32.45,
+    33.12
+   ],
+   "fpsA": 32.8,
+   "fpsB": 32.6,
+   "msA": 30.48,
+   "msB": 30.63,
+   "gpuMsSaved": -0.15,
+   "hashes": null
+  },
+  {
+   "name": "frost OFF · disconnected: the 8 head color-matrix layers removed (the OFF policy made backdrop-free)",
+   "A": [
+    37.54,
+    36.02,
+    37.21
+   ],
+   "B": [
+    45.46,
+    45.18,
+    45.59
+   ],
+   "fpsA": 36.9,
+   "fpsB": 45.4,
+   "msA": 27.08,
+   "msB": 22.02,
+   "gpuMsSaved": 5.06,
+   "hashes": null
+  },
+  {
+   "name": "overlay canvases display:none while empty (neutral candidate)",
+   "A": [
+    30.65,
+    30.3,
+    30.3
+   ],
+   "B": [
+    31.66,
+    30.22,
+    30.07
+   ],
+   "fpsA": 30.4,
+   "fpsB": 30.6,
+   "msA": 32.88,
+   "msB": 32.63,
+   "gpuMsSaved": 0.25,
+   "hashes": {
+    "a1": "a0dbee203931",
+    "a2": "5099cacb3776",
+    "b1": "a99a279ca4f3",
+    "floorSame": false,
+    "neutral": false
+   }
+  },
+  {
+   "name": "modulation window open vs closed (its 9 extra layers)",
+   "A": [
+    30.01,
+    34.47,
+    40.85
+   ],
+   "B": [
+    26.07,
+    38.09,
+    25.71
+   ],
+   "fpsA": 35.1,
+   "fpsB": 30,
+   "msA": 28.48,
+   "msB": 33.38,
+   "gpuMsSaved": -4.9,
+   "hashes": null
+  },
+  {
+   "name": "UI shown vs UI hidden (everything the interface costs in a GPU-bound frame)",
+   "A": [
+    32.62,
+    30.49,
+    31.28
+   ],
+   "B": [
+    50.27,
+    48.93,
+    50.45
+   ],
+   "fpsA": 31.5,
+   "fpsB": 49.9,
+   "msA": 31.78,
+   "msB": 20.05,
+   "gpuMsSaved": 11.74,
+   "hashes": null
+  }
+ ],
+ "boot": {
+  "dpr": 1,
+  "w": 1920,
+  "h": 995,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light"
+ },
+ "errs": []
+}

@@ -1,0 +1,299 @@
+{
+ "at": "2026-09-25T02:13:04.368Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "firefox-headed",
+ "secs": 3,
+ "exps": [
+  {
+   "name": "offscreen cards culled (camera+clip hidden) · default",
+   "A": [
+    88.3,
+    84.5,
+    84.9
+   ],
+   "B": [
+    89.6,
+    84,
+    82.9
+   ],
+   "meanA": 85.9,
+   "meanB": 85.5,
+   "delta": -0.4,
+   "neutral": true,
+   "hashA": "8ac3aa9751dd",
+   "hashB": "2d7646d3d04f",
+   "same": false
+  },
+  {
+   "name": "3 round rack buttons: no backdrop (diagnostic)",
+   "A": [
+    89.3,
+    81.8,
+    79.2
+   ],
+   "B": [
+    86.6,
+    87.5,
+    84.6
+   ],
+   "meanA": 83.4,
+   "meanB": 86.2,
+   "delta": 2.8,
+   "neutral": false,
+   "hashA": null,
+   "hashB": null,
+   "same": null
+  },
+  {
+   "name": "transport: no backdrop (diagnostic)",
+   "A": [
+    87.8,
+    89.9,
+    86.2
+   ],
+   "B": [
+    75.6,
+    77.6,
+    56.1
+   ],
+   "meanA": 88,
+   "meanB": 69.8,
+   "delta": -18.2,
+   "neutral": false,
+   "hashA": null,
+   "hashB": null,
+   "same": null
+  },
+  {
+   "name": "frost OFF · disconnected: heads without the color-matrix backdrop (look change)",
+   "A": [
+    85.5,
+    114.8,
+    112.8
+   ],
+   "B": [
+    119.5,
+    118.1,
+    114.5
+   ],
+   "meanA": 104.4,
+   "meanB": 117.4,
+   "delta": 13,
+   "neutral": false,
+   "hashA": null,
+   "hashB": null,
+   "same": null
+  },
+  {
+   "name": "frost ALWAYS · disconnected: spectrum body clipped to its visible part via clip-path (neutral?)",
+   "A": [
+    70.6,
+    62.1,
+    65
+   ],
+   "B": [
+    51.5,
+    52.1,
+    63.6
+   ],
+   "meanA": 65.9,
+   "meanB": 55.7,
+   "delta": -10.2,
+   "neutral": true,
+   "hashA": "a695d81b7514",
+   "hashB": "d2e673f8ae9f",
+   "same": false
+  },
+  {
+   "name": "will-change:transform on #rack,#rackL,#transport (neutral?)",
+   "A": [
+    62.2,
+    64.3,
+    60
+   ],
+   "B": [
+    51.8,
+    53.3,
+    48.7
+   ],
+   "meanA": 62.2,
+   "meanB": 51.3,
+   "delta": -10.9,
+   "neutral": true,
+   "hashA": "8704b5fe4448",
+   "hashB": "eef061b08bf7",
+   "same": false
+  },
+  {
+   "name": "contain:paint on disconnected card bodies (neutral?)",
+   "A": [
+    52.3,
+    52.3,
+    51.3
+   ],
+   "B": [
+    51.9,
+    42.8,
+    51.5
+   ],
+   "meanA": 52,
+   "meanB": 48.7,
+   "delta": -3.3,
+   "neutral": true,
+   "hashA": "891b06c04726",
+   "hashB": "f5d1917095de",
+   "same": false
+  },
+  {
+   "name": "every window open: content-visibility:auto on rack cards",
+   "A": [
+    48.8,
+    49.4,
+    49
+   ],
+   "B": [
+    48.8,
+    49.9,
+    48.9
+   ],
+   "meanA": 49.1,
+   "meanB": 49.2,
+   "delta": 0.1,
+   "neutral": true,
+   "hashA": "f5b7d5de226f",
+   "hashB": "912dbd6aa230",
+   "same": false
+  },
+  {
+   "name": "every window open: offscreen cards visibility:hidden (the cull, measured directly)",
+   "A": [
+    49.6,
+    50.5,
+    46.9
+   ],
+   "B": [
+    50.2,
+    50.6,
+    50.9
+   ],
+   "meanA": 49,
+   "meanB": 50.6,
+   "delta": 1.6,
+   "neutral": false,
+   "hashA": null,
+   "hashB": null,
+   "same": null
+  },
+  {
+   "name": "overlay canvases display:none while empty · default",
+   "A": [
+    89.8,
+    45.4,
+    44
+   ],
+   "B": [
+    75.1,
+    23.1,
+    54
+   ],
+   "meanA": 59.7,
+   "meanB": 50.7,
+   "delta": -9,
+   "neutral": true,
+   "hashA": "e5a81acd5dcd",
+   "hashB": "c665b37d7dc9",
+   "same": false
+  },
+  {
+   "name": "overlay canvases display:none · UI hidden · GPU-bound (glass style, 128³)",
+   "A": [
+    49.6,
+    39.9,
+    46.7
+   ],
+   "B": [
+    45.4,
+    46.3,
+    51.2
+   ],
+   "meanA": 45.4,
+   "meanB": 47.6,
+   "delta": 2.2,
+   "neutral": true,
+   "hashA": "562ba7f1d0c3",
+   "hashB": "508159e102d5",
+   "same": false
+  },
+  {
+   "name": "GPU-bound (glass 128³) · UI shown, frost vs no backdrop anywhere (diagnostic)",
+   "A": [
+    31.2,
+    31.2,
+    30.9
+   ],
+   "B": [
+    44.6,
+    43.9,
+    44.9
+   ],
+   "meanA": 31.1,
+   "meanB": 44.5,
+   "delta": 13.4,
+   "neutral": false,
+   "hashA": null,
+   "hashB": null,
+   "same": null
+  }
+ ],
+ "boot": {
+  "dpr": 1,
+  "w": 1920,
+  "h": 995,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light"
+ },
+ "hitch": [
+  {
+   "mode": "still",
+   "playMaxGap": 12,
+   "pauseMaxGap": 21,
+   "medianGap": 8
+  },
+  {
+   "mode": "always",
+   "playMaxGap": 41,
+   "pauseMaxGap": 20,
+   "medianGap": 8
+  },
+  {
+   "mode": "still",
+   "playMaxGap": 16,
+   "pauseMaxGap": 16,
+   "medianGap": 8
+  },
+  {
+   "mode": "always",
+   "playMaxGap": 53,
+   "pauseMaxGap": 21,
+   "medianGap": 8
+  },
+  {
+   "mode": "still",
+   "playMaxGap": 10,
+   "pauseMaxGap": 16,
+   "medianGap": 8
+  },
+  {
+   "mode": "always",
+   "playMaxGap": 21,
+   "pauseMaxGap": 45,
+   "medianGap": 8
+  }
+ ],
+ "errs": []
+}

@@ -1,0 +1,129 @@
+{
+ "install": {
+  "mode": "registered",
+  "registeredAtMs": 2815,
+  "registeredAfterReadyMs": 1477,
+  "installToActiveMs": 1391,
+  "entries": 201,
+  "bytes": 5520204,
+  "cache": [
+   "lw-lab-13m29y61gmg77p"
+  ]
+ },
+ "controlled": [
+  {
+   "ready": 449.9,
+   "controlled": true,
+   "dcl": 166.2,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 0,
+   "jsLastEnd": 154.6,
+   "medianFetchMs": 0
+  },
+  {
+   "ready": 441.5,
+   "controlled": true,
+   "dcl": 170.6,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 0,
+   "jsLastEnd": 161.1,
+   "medianFetchMs": 0
+  },
+  {
+   "ready": 568.7,
+   "controlled": true,
+   "dcl": 195.7,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 0,
+   "jsLastEnd": 183.5,
+   "medianFetchMs": 0
+  },
+  {
+   "ready": 488.6,
+   "controlled": true,
+   "dcl": 194.3,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 0,
+   "jsLastEnd": 175.2,
+   "medianFetchMs": 0
+  }
+ ],
+ "uncontrolled": [
+  {
+   "ready": 714,
+   "controlled": false,
+   "dcl": 427,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 3671202,
+   "jsLastEnd": 418.1,
+   "medianFetchMs": 103.78
+  },
+  {
+   "ready": 709.7,
+   "controlled": false,
+   "dcl": 414.1,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 3671202,
+   "jsLastEnd": 405.2,
+   "medianFetchMs": 92.76
+  },
+  {
+   "ready": 777.3,
+   "controlled": false,
+   "dcl": 404.3,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 3671202,
+   "jsLastEnd": 393.2,
+   "medianFetchMs": 107.56
+  },
+  {
+   "ready": 962.6,
+   "controlled": false,
+   "dcl": 663.9,
+   "navWorkerStart": 0,
+   "n": 113,
+   "viaWorker": 0,
+   "transfer": 3671202,
+   "jsLastEnd": 655.9,
+   "medianFetchMs": 112.26
+  }
+ ],
+ "cold": [
+  {
+   "ready": 1354.4,
+   "controlled": false,
+   "dcl": 600.5,
+   "navWorkerStart": 0,
+   "n": 116,
+   "viaWorker": 0,
+   "transfer": 3786710,
+   "jsLastEnd": 578.7,
+   "medianFetchMs": 104.48
+  },
+  {
+   "ready": 1541,
+   "controlled": false,
+   "dcl": 678,
+   "navWorkerStart": 0,
+   "n": 116,
+   "viaWorker": 0,
+   "transfer": 3786710,
+   "jsLastEnd": 657.9,
+   "medianFetchMs": 123.7
+  }
+ ]
+}

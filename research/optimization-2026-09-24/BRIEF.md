@@ -285,3 +285,24 @@ window / many windows cost more — the compositor work IS the desktop bottlenec
 mobile GPU. Chromium's compositor hides the same work at 117 fps. Lane C's target: the same pixels, fewer/smaller
 blurred layers, no per-frame invalidation of blurred surfaces. (The Electron "DSF 2" run used the same 1920 physical
 pixels at 960 CSS px, so it did not test the retina case; ignore it.)
+
+§8 addendum (lane C's catch): the first Electron runs had the photosensitivity pane up (Electron is not a webdriver
+session; its full-screen 12 px backdrop blur sat in every scene) and a shared profile. Re-run clean (fresh profile,
+`__LW.warning.dismiss()` after ready) — but under the fleet's concurrent GPU probes, so the absolutes are noisy (the
+128³ gas read 6.7 fps against 14.3 before): default frost 92 · UI hidden 113 · rack hidden 116 · frost OFF 110 · STILL
+114 · tinted+frost 108 · tinted 114 · disconnected+frost 91 · dark 115 · lattice 118 · off 104 · modulation open 83 ·
+every window open 102 · every window + UI hidden 116. Same shape as Gecko's (§9), smaller cost. A quiet re-run belongs
+to the verification phase; rank by §9.
+
+## 10. Correction from AUDIT-B (read before using any "loop median")
+
+`__LW.perf.median` reports the LAST frame's cost, not a median (rack.js:1213/1245/1363 — the ring zeroes slot f, then
+writes slot f+1, so one entry survives). Every "loopMedianMs" in §7–§9 and the "10.9 ms" of §8 are single-frame samples;
+the 10.9 was one `gas.stats` frame (8–17 ms per call on the frame thread, every 6th CPU tick when SPECTRUM is visible
+and the axial gas plays — AUDIT-B FB1). Whole-loop medians measured by lane B's shim: default 8 windows 0.84 ms (FF) /
+0.4 (Chromium); UI hidden 0.54 / 0.2; the modulation window open 2.78 (FF); 128³ gas 1.68 shown / 0.84 hidden. The
+loop's JS is small everywhere; the GPU kernel and the compositor set the frame rate. AUDIT-B also found: the closed
+modulation window is fully repainted once a second while playing in the default (unrouted) rack (FB3); a parked
+reader's 3 s re-probe is an 80–120 ms frame with WIGNER (FB4); refreshOcclusion runs while the UI is hidden (FB5); the
+gas allocates ~1 290 objects per reconstruct (FB6); ONE EXCEPTION IN loop() FREEZES THE INSTRUMENT FOR THE SESSION
+(FB7, `inLoop` never reset); a warm timer re-arms every 2 s forever (FB9).

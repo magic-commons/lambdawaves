@@ -1,0 +1,522 @@
+{
+ "at": "2026-09-25T02:05:18.403Z",
+ "boot": {
+  "readyMs": 1455,
+  "ok": true,
+  "errs": [],
+  "perfMode": "120",
+  "kickWarmStarted": {
+   "bow": false,
+   "scan": false,
+   "cards": false
+  }
+ },
+ "kickKeyCold": 135.46,
+ "kickKeyWarm": {
+  "n": 6,
+  "min": 13.7,
+  "p10": 13.7,
+  "median": 18.76,
+  "p90": 25.18,
+  "p99": 25.18,
+  "max": 25.18
+ },
+ "kickAlongWarm": {
+  "n": 4,
+  "min": 14.5,
+  "p10": 14.5,
+  "median": 15.94,
+  "p90": 19.18,
+  "p99": 19.18,
+  "max": 19.18
+ },
+ "bowWorkerWarm": [
+  {
+   "syncMs": 0.1,
+   "landMs": 214
+  },
+  {
+   "syncMs": 0.12,
+   "landMs": 18.2
+  },
+  {
+   "syncMs": 0.06,
+   "landMs": 13.6
+  }
+ ],
+ "boxLaunchSync": {
+  "ms": [
+   212.7,
+   188.5,
+   197.9
+  ],
+  "labels": 56
+ },
+ "boxPeriodForced": {
+  "labels": 91,
+  "firstMs": 364,
+  "cachedMs": 0,
+  "exact": false,
+  "T": 7893.687290000279
+ },
+ "captureHoverPlan": {
+  "density": {
+   "ms": 457.5,
+   "label": "NEAR",
+   "labels": 91
+  },
+  "phase": {
+   "ms": 999.6,
+   "label": "NEAR",
+   "labels": 91
+  }
+ },
+ "axialEnterBox": {
+  "ms": [
+   23.3,
+   20.2,
+   18
+  ],
+  "modes": 256
+ },
+ "sturmianLambdaDrag": {
+  "n": 8,
+  "min": 0.68,
+  "p10": 0.68,
+  "median": 1,
+  "p90": 2.68,
+  "p99": 2.68,
+  "max": 2.68
+ },
+ "elementKnob": [
+  {
+   "Z": 11,
+   "ms": 0.2
+  },
+  {
+   "Z": 19,
+   "ms": 0
+  },
+  {
+   "Z": 26,
+   "ms": 0
+  },
+  {
+   "Z": 36,
+   "ms": 0
+  }
+ ],
+ "saveSettings": {
+  "n": 20,
+  "min": 0.06,
+  "p10": 0.06,
+  "median": 0.08,
+  "p90": 0.42,
+  "p99": 0.58,
+  "max": 0.58,
+  "bytes": 911
+ },
+ "historyReads": {
+  "n": 20,
+  "min": 0.02,
+  "p10": 0.02,
+  "median": 0.04,
+  "p90": 0.06,
+  "p99": 0.08,
+  "max": 0.08
+ },
+ "projectDirty": {
+  "n": 10,
+  "min": 0.6,
+  "p10": 0.6,
+  "median": 0.82,
+  "p90": 1.76,
+  "p99": 1.76,
+  "max": 1.76
+ },
+ "themeFlip": [
+  {
+   "th": "dark",
+   "jsMs": 2.58,
+   "withStyleMs": 10.12
+  },
+  {
+   "th": "light",
+   "jsMs": 2.78,
+   "withStyleMs": 9.58
+  },
+  {
+   "th": "dark",
+   "jsMs": 2.98,
+   "withStyleMs": 12.92
+  },
+  {
+   "th": "light",
+   "jsMs": 2.76,
+   "withStyleMs": 11.56
+  }
+ ],
+ "paletteChange": [
+  {
+   "id": "beacon",
+   "jsMs": 6.8,
+   "withStyleMs": 6.86
+  },
+  {
+   "id": "opal",
+   "jsMs": 8.6,
+   "withStyleMs": 8.64
+  },
+  {
+   "id": "gaslamp",
+   "jsMs": 7,
+   "withStyleMs": 7.02
+  },
+  {
+   "id": "cym",
+   "jsMs": 6.08,
+   "withStyleMs": 6.12
+  }
+ ],
+ "modWindowOpen": [
+  {
+   "open": true,
+   "jsMs": 70.22,
+   "withStyleMs": 70.32
+  },
+  {
+   "open": false,
+   "jsMs": 1.52,
+   "withStyleMs": 5.72
+  },
+  {
+   "open": true,
+   "jsMs": 34.28,
+   "withStyleMs": 34.3
+  },
+  {
+   "open": false,
+   "jsMs": 1.28,
+   "withStyleMs": 3.12
+  }
+ ],
+ "heavyCardsFirstOpen": {
+  "helium": {
+   "jsMs": 3.74,
+   "withStyleMs": 15.68
+  },
+  "ladder": {
+   "jsMs": 4.4,
+   "withStyleMs": 6.92
+  },
+  "wigner": {
+   "jsMs": 3.08,
+   "withStyleMs": 3.78
+  },
+  "slice": {
+   "jsMs": 2.86,
+   "withStyleMs": 3.98
+  },
+  "chem": {
+   "jsMs": 2.42,
+   "withStyleMs": 5.18
+  },
+  "orbitals": {
+   "jsMs": 2.36,
+   "withStyleMs": 2.38
+  }
+ },
+ "heliumOn": {
+  "syncMs": 0.12,
+  "landMs": 10094,
+  "workers": {
+   "bow": true,
+   "scan": true,
+   "cards": true
+  }
+ },
+ "restore": {
+  "restores": [
+   {
+    "ok": true,
+    "ms": 503.6
+   },
+   {
+    "ok": true,
+    "ms": 554.9
+   },
+   {
+    "ok": true,
+    "ms": 500.5
+   }
+  ],
+  "applyLayoutMs": 2.6,
+  "bytes": 10596
+ },
+ "scene_simLadder96_ui": {
+  "frames": 57,
+  "total": {
+   "n": 57,
+   "min": 0.18,
+   "p10": 0.24,
+   "median": 0.38,
+   "p90": 1.14,
+   "p99": 1.48,
+   "max": 1.48
+  },
+  "raf": {
+   "n": 56,
+   "min": 16.1,
+   "p10": 50.3,
+   "median": 67.32,
+   "p90": 99.5,
+   "p99": 100.54,
+   "max": 100.54
+  },
+  "rafOver50": 51,
+  "rafOver250": 0,
+  "perReader": {
+   "field": {
+    "sum": 12.12,
+    "max": 0.4,
+    "calls": 57
+   },
+   "spectrum": {
+    "sum": 2.82,
+    "max": 0.32,
+    "calls": 14
+   },
+   "shadow": {
+    "sum": 6.24,
+    "max": 0.76,
+    "calls": 14
+   },
+   "molecule": {
+    "sum": 0.06,
+    "max": 0.02,
+    "calls": 3
+   }
+  },
+  "spikes": [],
+  "appMedian": 0.36,
+  "fps": 15,
+  "res": 96
+ },
+ "scene_axialGas128_ui": {
+  "frames": 34,
+  "total": {
+   "n": 34,
+   "min": 0.3,
+   "p10": 0.34,
+   "median": 0.42,
+   "p90": 0.76,
+   "p99": 11.96,
+   "max": 11.96
+  },
+  "raf": {
+   "n": 33,
+   "min": 16.16,
+   "p10": 67.36,
+   "median": 116.62,
+   "p90": 216.82,
+   "p99": 233.32,
+   "max": 233.32
+  },
+  "rafOver50": 32,
+  "rafOver250": 0,
+  "perReader": {
+   "field": {
+    "sum": 9.68,
+    "max": 0.58,
+    "calls": 34
+   },
+   "spectrum": {
+    "sum": 0.14,
+    "max": 0.02,
+    "calls": 7
+   },
+   "shadow": {
+    "sum": 2.14,
+    "max": 0.32,
+    "calls": 8
+   },
+   "molecule": {
+    "sum": 0.02,
+    "max": 0.02,
+    "calls": 1
+   }
+  },
+  "spikes": [
+   {
+    "i": 3,
+    "field": 0.34,
+    "spectrum": 0.02,
+    "shadow": 0.32,
+    "molecule": 0.02,
+    "total": 11.96
+   },
+   {
+    "i": 27,
+    "field": 0.36,
+    "spectrum": 0.02,
+    "shadow": 0.28,
+    "molecule": 0,
+    "total": 9.62
+   }
+  ],
+  "appMedian": 0.34,
+  "fps": 7.4,
+  "res": 128,
+  "gasFieldModes": {
+   "n": 34,
+   "min": 0.04,
+   "p10": 0.04,
+   "median": 0.08,
+   "p90": 0.14,
+   "p99": 0.2,
+   "max": 0.2
+  },
+  "gasStats": {
+   "n": 2,
+   "min": 8.6,
+   "p10": 8.6,
+   "median": 10.88,
+   "p90": 10.88,
+   "p99": 10.88,
+   "max": 10.88
+  }
+ },
+ "scene_axialGas128_hidden": {
+  "frames": 44,
+  "total": {
+   "n": 44,
+   "min": 0.26,
+   "p10": 0.32,
+   "median": 0.38,
+   "p90": 0.46,
+   "p99": 0.68,
+   "max": 0.68
+  },
+  "raf": {
+   "n": 43,
+   "min": 67.32,
+   "p10": 99.48,
+   "median": 100.02,
+   "p90": 199.12,
+   "p99": 216.54,
+   "max": 216.54
+  },
+  "rafOver50": 43,
+  "rafOver250": 0,
+  "perReader": {
+   "field": {
+    "sum": 13.08,
+    "max": 0.5,
+    "calls": 44
+   },
+   "molecule": {
+    "sum": 0.08,
+    "max": 0.02,
+    "calls": 4
+   }
+  },
+  "spikes": [],
+  "appMedian": 0.46,
+  "fps": 8.9,
+  "res": 128
+ },
+ "scene_axialGas64_ui": {
+  "frames": 40,
+  "total": {
+   "n": 40,
+   "min": 0.38,
+   "p10": 0.42,
+   "median": 0.58,
+   "p90": 1.28,
+   "p99": 13.14,
+   "max": 13.14
+  },
+  "raf": {
+   "n": 39,
+   "min": 82.56,
+   "p10": 83.46,
+   "median": 99.72,
+   "p90": 116.84,
+   "p99": 133.42,
+   "max": 133.42
+  },
+  "rafOver50": 39,
+  "rafOver250": 0,
+  "perReader": {
+   "field": {
+    "sum": 15.64,
+    "max": 0.6,
+    "calls": 40
+   },
+   "spectrum": {
+    "sum": 0.22,
+    "max": 0.04,
+    "calls": 9
+   },
+   "shadow": {
+    "sum": 3.8,
+    "max": 0.48,
+    "calls": 10
+   },
+   "molecule": {
+    "sum": 0.08,
+    "max": 0.02,
+    "calls": 4
+   }
+  },
+  "spikes": [
+   {
+    "i": 15,
+    "field": 0.3,
+    "spectrum": 0.02,
+    "shadow": 0.42,
+    "molecule": 0.02,
+    "total": 9.98
+   },
+   {
+    "i": 39,
+    "field": 0.5,
+    "spectrum": 0.02,
+    "shadow": 0.44,
+    "molecule": 0.02,
+    "total": 13.14
+   }
+  ],
+  "appMedian": 13.14,
+  "fps": 9.8,
+  "res": 64,
+  "gasStats": {
+   "n": 2,
+   "min": 8.82,
+   "p10": 8.82,
+   "median": 11.54,
+   "p90": 11.54,
+   "p99": 11.54,
+   "max": 11.54
+  }
+ },
+ "bodyClassToggleFrames": {
+  "framesAfterToggle": 1,
+  "framesAfterUntoggle": 1,
+  "scheduled": false
+ },
+ "busyFlashAfterIdle": {
+  "before": false,
+  "during": false
+ },
+ "deviceLost": {
+  "okAfter": false,
+  "error": "device lost: Device destroyed",
+  "bannerShown": true,
+  "bannerTitle": "the GPU device was lost",
+  "thrown": [],
+  "newErrs": [],
+  "scheduled": true
+ },
+ "errs": []
+}

@@ -1,0 +1,101 @@
+{
+ "W": 1920,
+ "H": 994,
+ "gpu": {
+  "off": {
+   "presentMs": 3.617,
+   "rounds": [
+    3.626,
+    3.617
+   ],
+   "tickErrMs": 0.1
+  },
+  "box": {
+   "presentMs": 3.608,
+   "rounds": [
+    3.608,
+    3.614
+   ],
+   "tickErrMs": 0.1
+  },
+  "dots": {
+   "presentMs": 3.615,
+   "rounds": [
+    3.615,
+    3.707
+   ],
+   "tickErrMs": 0.1
+  },
+  "lattice": {
+   "presentMs": 3.813,
+   "rounds": [
+    3.815,
+    3.813
+   ],
+   "tickErrMs": 0.1
+  }
+ },
+ "cpuMoving": {
+  "off": {
+   "medianEncodeMs": 0.02,
+   "p90": 0.04,
+   "chromeWrites": 1,
+   "frames": 240,
+   "stillMedianEncodeMs": 0.02,
+   "stillChromeWrites": 0
+  },
+  "box": {
+   "medianEncodeMs": 0.02,
+   "p90": 0.04,
+   "chromeWrites": 1,
+   "frames": 240,
+   "stillMedianEncodeMs": 0.02,
+   "stillChromeWrites": 0
+  },
+  "dots": {
+   "medianEncodeMs": 0.02,
+   "p90": 0.04,
+   "chromeWrites": 1,
+   "frames": 240,
+   "stillMedianEncodeMs": 0.02,
+   "stillChromeWrites": 0
+  },
+  "lattice": {
+   "medianEncodeMs": 0.02,
+   "p90": 0.04,
+   "chromeWrites": 1,
+   "frames": 240,
+   "stillMedianEncodeMs": 0.02,
+   "stillChromeWrites": 0
+  }
+ },
+ "live": {
+  "off": {
+   "fps": 58.7,
+   "fieldTickEmaMs": 0.189,
+   "loopMedianMs": 0.22
+  },
+  "box": {
+   "fps": 60,
+   "fieldTickEmaMs": 0.146,
+   "loopMedianMs": 0.18
+  },
+  "dots": {
+   "fps": 59.7,
+   "fieldTickEmaMs": 0.599,
+   "loopMedianMs": 0.62
+  },
+  "lattice": {
+   "fps": 60,
+   "fieldTickEmaMs": 0.827,
+   "loopMedianMs": 1
+  }
+ },
+ "writeBuffer": {
+  "16": "0.64 µs",
+  "64": "0.48 µs",
+  "176": "0.79 µs",
+  "28672": "37.7 µs",
+  "776832": "525.6 µs"
+ }
+}

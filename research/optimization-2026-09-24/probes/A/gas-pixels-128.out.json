@@ -1,0 +1,53 @@
+{
+ "grid": 128,
+ "W": 1920,
+ "H": 994,
+ "count": 256,
+ "tableMs": 26,
+ "tableBytes": 524288,
+ "appReadPixelsHash": "26303fca",
+ "views": {
+  "density": {
+   "shipHash": "1c21930b",
+   "tabHash": "d7d038c4",
+   "replicaIsApp": null,
+   "pixelsDiffering": 197,
+   "fraction": 0.0001032,
+   "channelBytesDiffering": 197,
+   "maxLevelDiff": 1,
+   "levelHist": {
+    "1": 197
+   }
+  },
+  "phase": {
+   "shipHash": "26303fca",
+   "tabHash": "2939640d",
+   "replicaIsApp": null,
+   "pixelsDiffering": 324,
+   "fraction": 0.0001698,
+   "channelBytesDiffering": 329,
+   "maxLevelDiff": 1,
+   "levelHist": {
+    "1": 329
+   }
+  },
+  "real": {
+   "shipHash": "10cb31b6",
+   "tabHash": "992363a0",
+   "replicaIsApp": null,
+   "pixelsDiffering": 201,
+   "fraction": 0.0001053,
+   "channelBytesDiffering": 203,
+   "maxLevelDiff": 1,
+   "levelHist": {
+    "1": 203
+   }
+  }
+ },
+ "shippedNextPresent": {
+  "pixelsDiffering": 14817,
+  "fraction": 0.007764,
+  "maxLevelDiff": 1
+ },
+ "replicaMatchesApp": true
+}

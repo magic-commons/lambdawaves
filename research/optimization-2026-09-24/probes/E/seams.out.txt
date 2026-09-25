@@ -1,0 +1,44 @@
+104–236     133L  in=  3 w= 0 own= 29  accent + mark + turn  | writes: 
+237–403     167L  in= 27 w= 2 own= 13  settings key (read/save/apply)  | writes: badges clockLink
+404–445      42L  in= 19 w= 0 own= 15  taxonomy + quality/governor state  | writes: 
+446–500      55L  in=  6 w= 1 own=  2  camera law (object)  | writes: lastWall
+501–572      72L  in= 22 w= 0 own= 21  perf + reader law  | writes: 
+573–719     147L  in=  7 w= 0 own= 36  mod glue: rotation rates + audio + bases  | writes: 
+720–751      32L  in=  2 w= 0 own=  7  busy mark  | writes: 
+752–846      95L  in=  5 w= 1 own= 15  field + banner + workers + warm  | writes: gamutCss
+847–918      72L  in= 23 w= 8 own=  2  page visibility  | writes: lastReconMs lastWall metersWall modWall winFrames winRecon winStart winSteps
+919–1015     97L  in= 29 w= 3 own= 35  router + loop + meters  | writes: pendingRef rack tick
+1016–1104    89L  in=  8 w= 1 own= 15  camera law (pose functions)  | writes: lastWall
+1105–1395   291L  in=139 w=19 own=  4  loop()  | writes: feedMs flowEpoch govVersion inLoop keplerDirty lastReconMs lastWall linkFollowed linkRetryAt metersWall modExpOn modWall pending pendingRef rafId winFrames winRecon winStart winSteps
+1396–1429    34L  in=  0 w= 0 own=  2  motion preference  | writes: 
+1430–1483    54L  in= 20 w= 2 own=  5  state API (touch/preset/ref/api)  | writes: pendingRef refSnapshot
+1484–1975   492L  in= 49 w=10 own=  8  win: WAVE/PALETTE/CAMERA/CLIP/SETTINGS  | writes: exportLocked lastWall modWall palChoice palette rafId space stageFollow stageMix wheelLUT
+1976–2140   165L  in= 23 w= 3 own=  1  win: STATE  | writes: applyVisuals esc refSnapshot
+2141–2350   210L  in= 39 w= 7 own= 18  win: SPECTRUM + H/Sturmian/element  | writes: gasAxial gasWidth keep lastNmax pendingRef refSnapshot space
+2351–2441    91L  in= 16 w= 0 own= 17  win: SHADOW..QCD  | writes: 
+2442–2468    27L  in= 20 w= 3 own= 11  win: legacy MOLECULE  | writes: pendingRef refSnapshot space
+2469–2525    57L  in= 19 w= 5 own=  8  win: HELIUM/H2/CHEM/REGISTER  | writes: chem molSession orbitals register states
+2526–2559    34L  in= 18 w= 0 own=  6  win: CALCULUS/METERS/LADDER  | writes: 
+2560–2851   292L  in= 37 w= 6 own=  0  modulation defs + host + window  | writes: knobIdCache modAdapters modHost modView occludeDirty restampParams
+2852–2937    86L  in= 36 w= 0 own= 13  win: ATOMS/FIELD/WIGNER/RADIATION  | writes: 
+2938–3099   162L  in= 18 w= 0 own=  1  transport strip + period  | writes: 
+3100–3160    61L  in=  9 w= 1 own=  4  clock link: playMod/togglePlay/arm/barLock  | writes: modArm
+3161–3232    72L  in=  8 w= 0 own=  1  badges  | writes: 
+3233–3347   115L  in=  5 w= 1 own=  1  swClient  | writes: reg
+3348–3617   270L  in= 17 w= 4 own= 34  bow + kepler surface + gas  | writes: esc keplerDirty q refSnapshot
+3618–4014   397L  in= 23 w= 5 own= 17  occlusion + floats + layout object  | writes: cards keep occludeAt occludeDirty q
+4015–4073    59L  in=  8 w= 0 own=  1  wTr + chrome (dock/peek/modexp)  | writes: 
+4074–4177   104L  in= 11 w= 0 own=  0  menubar  | writes: 
+4178–4209    32L  in=  5 w= 1 own=  0  keymap  | writes: occludeDirty
+4210–4233    24L  in=  4 w= 0 own=  0  LEAN + KIND passes  | writes: 
+4234–4336   103L  in=  5 w= 1 own=  0  + / ☆ lists  | writes: save
+4337–4599   263L  in= 21 w= 1 own=  0  notebook + projects  | writes: refSnapshot
+4600–4781   182L  in= 13 w= 1 own=  0  peek + drags + pop/rail  | writes: cards
+4782–4899   118L  in= 20 w= 1 own=  6  phone / tablet  | writes: cornerLayoutDirty
+4900–4940    41L  in= 19 w= 2 own=  0  stage gestures  | writes: dragging kdrag
+4941–5211   271L  in= 34 w= 3 own= 24  keyboard (ACTIONS + dispatcher)  | writes: govVersion metersWall uiHidden
+5212–5449   238L  in= 68 w= 5 own=  5  persistence (serialize/restore)  | writes: gasAxial lastNmax palChoice space stageMix
+5450–5527    78L  in=  9 w= 1 own=  8  links  | writes: palChoice
+5528–5705   178L  in= 21 w= 2 own= 20  history (look + ring + window)  | writes: history pointerHeld
+5706–5953   248L  in=160 w= 3 own=  1  LW surface  | writes: gasAxial palChoice space
+5954–6079   126L  in= 46 w= 2 own=  4  go (defaults, warning, rework, ready)  | writes: clockLink linkFollowed

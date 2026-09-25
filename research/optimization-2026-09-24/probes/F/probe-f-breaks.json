@@ -1,0 +1,49 @@
+{
+ "noGpu": {
+  "gpu": false,
+  "lw": true,
+  "ready": false,
+  "errs": [
+   "BOOT syncPhone@https://127.0.0.1:8721/lab/rack.js:4891:11\nboot@https://127.0.0.1:8721/lab/rack.js:5986:3\n"
+  ],
+  "banner": {
+   "hidden": false,
+   "title": "boot failed",
+   "text": "field.setDprCap is not a function"
+  },
+  "devs": 27,
+  "fieldOk": false,
+  "fieldErr": "navigator.gpu is absent — WebGPU is not enabled in this browser"
+ },
+ "medianIsLastFrame": [
+  {
+   "median": 0.26,
+   "lastFrameMs": 0.26
+  },
+  {
+   "median": 0.22,
+   "lastFrameMs": 0.22
+  },
+  {
+   "median": 0.22,
+   "lastFrameMs": 0.22
+  },
+  {
+   "median": 0.98,
+   "lastFrameMs": 0.98
+  }
+ ],
+ "idleBeforeLoss": {
+  "frames": 0,
+  "scheduled": false,
+  "modRunning": null
+ },
+ "idleAfterLoss": {
+  "ok": false,
+  "framesIn1500msIdle": 0,
+  "scheduled": false,
+  "playing": false,
+  "camMoving": false,
+  "errs": []
+ }
+}

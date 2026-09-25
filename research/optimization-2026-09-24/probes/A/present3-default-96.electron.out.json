@@ -1,0 +1,160 @@
+{
+ "scen": "default",
+ "grid": 96,
+ "n": 96,
+ "count": 2,
+ "W": 1920,
+ "H": 1043,
+ "steps": 160,
+ "appReadPixelsHash": "7bf1149",
+ "pixels": {
+  "density/cloud": {
+   "generic": "7bf1149",
+   "specialised": "7bf1149",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "phase/cloud": {
+   "generic": "167080ae",
+   "specialised": "167080ae",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "real/cloud": {
+   "generic": "32e2cd2",
+   "specialised": "32e2cd2",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "density/solid": {
+   "generic": "b95bc7e4",
+   "specialised": "b95bc7e4",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "density/glass": {
+   "generic": "9bc4e24d",
+   "specialised": "c47fe24d",
+   "bytesDiffering": 1,
+   "maxLevelDiff": 1
+  },
+  "phase/additive": {
+   "generic": "30ca3cb3",
+   "specialised": "699d4a88",
+   "bytesDiffering": 2,
+   "maxLevelDiff": 1
+  }
+ },
+ "timing": {
+  "density/cloud:gen": {
+   "min": 3.96,
+   "rounds": [
+    3.96,
+    4.069,
+    3.967
+   ],
+   "tickErrMs": 0.132
+  },
+  "density/cloud:spec": {
+   "min": 1.945,
+   "rounds": [
+    1.945,
+    2.039,
+    1.953
+   ],
+   "tickErrMs": 0.064
+  },
+  "phase/cloud:gen": {
+   "min": 5.418,
+   "rounds": [
+    5.418,
+    5.422,
+    5.43
+   ],
+   "tickErrMs": 0.18
+  },
+  "phase/cloud:spec": {
+   "min": 3.275,
+   "rounds": [
+    3.275,
+    3.279,
+    3.29
+   ],
+   "tickErrMs": 0.108
+  },
+  "real/cloud:gen": {
+   "min": 3.849,
+   "rounds": [
+    3.849,
+    3.861,
+    3.859
+   ],
+   "tickErrMs": 0.128
+  },
+  "real/cloud:spec": {
+   "min": 1.91,
+   "rounds": [
+    1.91,
+    1.92,
+    1.922
+   ],
+   "tickErrMs": 0.064
+  },
+  "density/solid:gen": {
+   "min": 4.291,
+   "rounds": [
+    4.291,
+    4.303,
+    4.306
+   ],
+   "tickErrMs": 0.142
+  },
+  "density/solid:spec": {
+   "min": 2.033,
+   "rounds": [
+    2.033,
+    2.048,
+    2.044
+   ],
+   "tickErrMs": 0.068
+  },
+  "density/glass:gen": {
+   "min": 12.278,
+   "rounds": [
+    12.278,
+    12.287,
+    12.302
+   ],
+   "tickErrMs": 0.408
+  },
+  "density/glass:spec": {
+   "min": 11.848,
+   "rounds": [
+    11.848,
+    11.864,
+    11.859
+   ],
+   "tickErrMs": 0.394
+  },
+  "phase/additive:gen": {
+   "min": 5.285,
+   "rounds": [
+    5.374,
+    5.285,
+    5.286
+   ],
+   "tickErrMs": 0.175
+  },
+  "phase/additive:spec": {
+   "min": 3.034,
+   "rounds": [
+    3.261,
+    3.034,
+    3.046
+   ],
+   "tickErrMs": 0.101
+  }
+ },
+ "specCompileMs": 56.2,
+ "host": "electron-chromium152-dawn"
+}

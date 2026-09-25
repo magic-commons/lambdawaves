@@ -1,0 +1,29 @@
+{
+ "defaultDisc": {
+  "rects": 11,
+  "cleanMs": 0.203,
+  "dirtyMs": 0.274,
+  "tabletToggleMs": 6.432,
+  "frostHoldToggleMs": 1.646,
+  "devDescendants": 3205,
+  "open": 8
+ },
+ "defaultConnected": {
+  "rects": 7,
+  "cleanMs": 0.109,
+  "dirtyMs": 0.162,
+  "tabletToggleMs": 5.948,
+  "frostHoldToggleMs": 0.66,
+  "devDescendants": 3205,
+  "open": 8
+ },
+ "allOpenModwin": {
+  "rects": 20,
+  "cleanMs": 0.542,
+  "dirtyMs": 0.782,
+  "tabletToggleMs": 11.206,
+  "frostHoldToggleMs": 2.678,
+  "devDescendants": 3241,
+  "open": 27
+ }
+}

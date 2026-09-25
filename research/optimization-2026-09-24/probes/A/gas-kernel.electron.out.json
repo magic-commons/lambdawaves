@@ -1,0 +1,472 @@
+{
+ "info": {
+  "count": 256,
+  "half": 10.8,
+  "space": 3,
+  "A": 10,
+  "fieldRes": 64,
+  "t": 0,
+  "adapterFeatures": [
+   "depth32float-stencil8",
+   "rg11b10ufloat-renderable",
+   "texture-formats-tier1",
+   "bgra8unorm-storage",
+   "texture-compression-bc",
+   "dual-source-blending",
+   "core-features-and-limits",
+   "float32-filterable",
+   "indirect-first-instance",
+   "float32-blendable",
+   "subgroup-size-control",
+   "depth-clip-control",
+   "texture-compression-bc-sliced-3d",
+   "timestamp-query",
+   "clip-distances",
+   "texture-formats-tier2",
+   "primitive-index",
+   "texture-component-swizzle",
+   "subgroups"
+  ],
+  "tableBuildMsAll": 102.8
+ },
+ "compileErrors": {},
+ "variants": [
+  "ship",
+  "early",
+  "earlyMemo",
+  "tab_lin2048",
+  "tab_herm256"
+ ],
+ "res": {
+  "64": {
+   "ampMax": 0.13095172071961347,
+   "nonzeroVoxelFraction": 0.4151,
+   "cmp": {
+    "ship": {
+     "ms": 9.224,
+     "rounds": [
+      9.187,
+      9.224,
+      9.231
+     ],
+     "n": 284,
+     "tickErrMs": 0.352,
+     "vsShip": {
+      "texelComponents": 524288,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4567,
+      "meanUlp": 0.725,
+      "maxUlp": 17,
+      "maxErrOverAmpMax": 0.0004425,
+      "rmsErrOverAmpMax": 0.00003271
+     }
+    },
+    "early": {
+     "ms": 5.673,
+     "rounds": [
+      5.647,
+      5.679,
+      5.673
+     ],
+     "n": 533,
+     "tickErrMs": 0.188,
+     "vsShip": {
+      "texelComponents": 524288,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4567,
+      "meanUlp": 0.725,
+      "maxUlp": 17,
+      "maxErrOverAmpMax": 0.0004425,
+      "rmsErrOverAmpMax": 0.00003271
+     }
+    },
+    "earlyMemo": {
+     "ms": 4.448,
+     "rounds": [
+      4.431,
+      4.448,
+      4.451
+     ],
+     "n": 681,
+     "tickErrMs": 0.147,
+     "vsShip": {
+      "texelComponents": 524288,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4567,
+      "meanUlp": 0.725,
+      "maxUlp": 17,
+      "maxErrOverAmpMax": 0.0004425,
+      "rmsErrOverAmpMax": 0.00003271
+     }
+    },
+    "tab_lin2048": {
+     "ms": 1.077,
+     "rounds": [
+      1.07,
+      1.077,
+      1.078
+     ],
+     "n": 2821,
+     "tickErrMs": 0.035,
+     "vsShip": {
+      "texelComponents": 524288,
+      "differ": 55704,
+      "maxUlp": 157,
+      "hist": {
+       "1": 41936,
+       "5-16": 2936,
+       "2-4": 10708,
+       "17-256": 124
+      },
+      "maxAbsOverAmpMax": 0.000233
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4942,
+      "meanUlp": 0.506,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004425,
+      "rmsErrOverAmpMax": 0.00003271
+     }
+    },
+    "tab_herm256": {
+     "ms": 1.072,
+     "rounds": [
+      1.069,
+      1.072,
+      1.074
+     ],
+     "n": 2821,
+     "tickErrMs": 0.035,
+     "vsShip": {
+      "texelComponents": 524288,
+      "differ": 55596,
+      "maxUlp": 157,
+      "hist": {
+       "1": 41880,
+       "5-16": 2936,
+       "2-4": 10656,
+       "17-256": 124
+      },
+      "maxAbsOverAmpMax": 0.000233
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4972,
+      "meanUlp": 0.503,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004425,
+      "rmsErrOverAmpMax": 0.00003272
+     }
+    }
+   }
+  },
+  "96": {
+   "ampMax": 0.13149471629881182,
+   "nonzeroVoxelFraction": 0.4155,
+   "cmp": {
+    "ship": {
+     "ms": 30.091,
+     "rounds": [
+      30.091,
+      30.094,
+      30.088
+     ],
+     "n": 101,
+     "tickErrMs": 0.99,
+     "vsShip": {
+      "texelComponents": 1769472,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4555,
+      "meanUlp": 0.712,
+      "maxUlp": 35,
+      "maxErrOverAmpMax": 0.0004419,
+      "rmsErrOverAmpMax": 0.00003595
+     }
+    },
+    "early": {
+     "ms": 16.853,
+     "rounds": [
+      16.853,
+      16.854,
+      16.85
+     ],
+     "n": 179,
+     "tickErrMs": 0.559,
+     "vsShip": {
+      "texelComponents": 1769472,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4555,
+      "meanUlp": 0.712,
+      "maxUlp": 35,
+      "maxErrOverAmpMax": 0.0004419,
+      "rmsErrOverAmpMax": 0.00003595
+     }
+    },
+    "earlyMemo": {
+     "ms": 12.922,
+     "rounds": [
+      12.919,
+      12.936,
+      12.922
+     ],
+     "n": 232,
+     "tickErrMs": 0.431,
+     "vsShip": {
+      "texelComponents": 1769472,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4555,
+      "meanUlp": 0.712,
+      "maxUlp": 35,
+      "maxErrOverAmpMax": 0.0004419,
+      "rmsErrOverAmpMax": 0.00003595
+     }
+    },
+    "tab_lin2048": {
+     "ms": 3.436,
+     "rounds": [
+      3.433,
+      3.436,
+      3.44
+     ],
+     "n": 873,
+     "tickErrMs": 0.115,
+     "vsShip": {
+      "texelComponents": 1769472,
+      "differ": 185964,
+      "maxUlp": 305,
+      "hist": {
+       "1": 138215,
+       "2-4": 37664,
+       "5-16": 9116,
+       "17-256": 965,
+       ">256": 4
+      },
+      "maxAbsOverAmpMax": 0.0004642
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4885,
+      "meanUlp": 0.511,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004419,
+      "rmsErrOverAmpMax": 0.0000359
+     }
+    },
+    "tab_herm256": {
+     "ms": 3.456,
+     "rounds": [
+      3.452,
+      3.46,
+      3.456
+     ],
+     "n": 870,
+     "tickErrMs": 0.115,
+     "vsShip": {
+      "texelComponents": 1769472,
+      "differ": 185126,
+      "maxUlp": 305,
+      "hist": {
+       "1": 137343,
+       "2-4": 37707,
+       "5-16": 9107,
+       "17-256": 965,
+       ">256": 4
+      },
+      "maxAbsOverAmpMax": 0.0004642
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4887,
+      "meanUlp": 0.511,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004419,
+      "rmsErrOverAmpMax": 0.0000359
+     }
+    }
+   }
+  },
+  "128": {
+   "ampMax": 0.1316602030155431,
+   "nonzeroVoxelFraction": 0.4155,
+   "cmp": {
+    "ship": {
+     "ms": 70.491,
+     "rounds": [
+      70.451,
+      70.491,
+      70.56
+     ],
+     "n": 43,
+     "tickErrMs": 2.326,
+     "vsShip": {
+      "texelComponents": 4194304,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4545,
+      "meanUlp": 0.794,
+      "maxUlp": 41,
+      "maxErrOverAmpMax": 0.0004638,
+      "rmsErrOverAmpMax": 0.00003831
+     }
+    },
+    "early": {
+     "ms": 38.688,
+     "rounds": [
+      38.685,
+      38.688,
+      38.703
+     ],
+     "n": 78,
+     "tickErrMs": 1.282,
+     "vsShip": {
+      "texelComponents": 4194304,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4545,
+      "meanUlp": 0.794,
+      "maxUlp": 41,
+      "maxErrOverAmpMax": 0.0004638,
+      "rmsErrOverAmpMax": 0.00003831
+     }
+    },
+    "earlyMemo": {
+     "ms": 29.364,
+     "rounds": [
+      29.366,
+      29.357,
+      29.364
+     ],
+     "n": 103,
+     "tickErrMs": 0.971,
+     "vsShip": {
+      "texelComponents": 4194304,
+      "differ": 0,
+      "maxUlp": 0,
+      "hist": {},
+      "maxAbsOverAmpMax": 0
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4545,
+      "meanUlp": 0.794,
+      "maxUlp": 41,
+      "maxErrOverAmpMax": 0.0004638,
+      "rmsErrOverAmpMax": 0.00003831
+     }
+    },
+    "tab_lin2048": {
+     "ms": 8.01,
+     "rounds": [
+      8.01,
+      8.01,
+      8.018
+     ],
+     "n": 375,
+     "tickErrMs": 0.267,
+     "vsShip": {
+      "texelComponents": 4194304,
+      "differ": 448612,
+      "maxUlp": 120,
+      "hist": {
+       "1": 328344,
+       "2-4": 88340,
+       "5-16": 27448,
+       "17-256": 4480
+      },
+      "maxAbsOverAmpMax": 0.0004636
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4998,
+      "meanUlp": 0.5,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004638,
+      "rmsErrOverAmpMax": 0.00003822
+     }
+    },
+    "tab_herm256": {
+     "ms": 8.079,
+     "rounds": [
+      8.077,
+      8.079,
+      8.081
+     ],
+     "n": 371,
+     "tickErrMs": 0.27,
+     "vsShip": {
+      "texelComponents": 4194304,
+      "differ": 447632,
+      "maxUlp": 120,
+      "hist": {
+       "1": 327520,
+       "2-4": 88244,
+       "5-16": 27440,
+       "17-256": 4428
+      },
+      "maxAbsOverAmpMax": 0.0004636
+     },
+     "vsOracle": {
+      "samples": 6000,
+      "exactF16": 0.4995,
+      "meanUlp": 0.5,
+      "maxUlp": 1,
+      "maxErrOverAmpMax": 0.0004638,
+      "rmsErrOverAmpMax": 0.00003774
+     }
+    }
+   }
+  }
+ },
+ "tables": {
+  "lin2048": 2097152,
+  "herm256": 524288
+ },
+ "host": "electron-chromium152-dawn"
+}

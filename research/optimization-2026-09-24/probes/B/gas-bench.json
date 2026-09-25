@@ -1,0 +1,30 @@
+{
+ "captured": 0.999965762874169,
+ "liveModes": 256,
+ "shipped": {
+  "name": "gas.fieldModes (shipped)",
+  "usPerCall": 47.2,
+  "heapGrowthKBPerCall_lowerBound": 0.26
+ },
+ "shippedPack": {
+  "name": "gas.fieldModes + packModes (shipped reconstruct CPU)",
+  "usPerCall": 55.57,
+  "heapGrowthKBPerCall_lowerBound": 1.01
+ },
+ "reuse": {
+  "name": "fieldModes (reused records)",
+  "usPerCall": 7.94,
+  "heapGrowthKBPerCall_lowerBound": 2.9
+ },
+ "reusePack": {
+  "name": "fieldModes reused + packModes",
+  "usPerCall": 11.44,
+  "heapGrowthKBPerCall_lowerBound": 2.96
+ },
+ "packedBytesIdentical": true,
+ "stats": {
+  "name": "gas.stats(t) (stride 2)",
+  "usPerCall": 9187.82,
+  "heapGrowthKBPerCall_lowerBound": 0.61
+ }
+}

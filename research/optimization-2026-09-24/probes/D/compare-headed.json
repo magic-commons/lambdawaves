@@ -1,0 +1,439 @@
+{
+ "runs": [
+  {
+   "first": 1220.3,
+   "ready": 1179.5,
+   "boot": 497.1,
+   "fieldStart": 499,
+   "fieldEnd": 1017.3,
+   "createField": 518.3,
+   "adapter": 404.1,
+   "device": 105.6,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 0,
+   "kind": "cold"
+  },
+  {
+   "first": 603.8,
+   "ready": 569.7,
+   "boot": 354.9,
+   "fieldStart": 358.7,
+   "fieldEnd": 469.5,
+   "createField": 110.8,
+   "adapter": 2.3,
+   "device": 102.3,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 0,
+   "kind": "warm"
+  },
+  {
+   "first": 811,
+   "ready": 746.3,
+   "boot": 503.9,
+   "fieldStart": 506.6,
+   "fieldEnd": 575.2,
+   "createField": 68.6,
+   "adapter": 0.1,
+   "device": 61.1,
+   "earlyAdapter": 399,
+   "earlyDevice": 107.8,
+   "earlyStart": 61,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 0,
+   "kind": "cold"
+  },
+  {
+   "first": 567.3,
+   "ready": 535.5,
+   "boot": 407.4,
+   "fieldStart": 408.5,
+   "fieldEnd": 416.5,
+   "createField": 8,
+   "adapter": 0.1,
+   "device": 0,
+   "earlyAdapter": 2.4,
+   "earlyDevice": 114.3,
+   "earlyStart": 35.3,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 0,
+   "kind": "warm"
+  },
+  {
+   "first": 1191.3,
+   "ready": 1154.1,
+   "boot": 468.8,
+   "fieldStart": 471,
+   "fieldEnd": 995.4,
+   "createField": 524.4,
+   "adapter": 412.9,
+   "device": 103.1,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 1,
+   "kind": "cold"
+  },
+  {
+   "first": 640.5,
+   "ready": 604.6,
+   "boot": 383.1,
+   "fieldStart": 384.3,
+   "fieldEnd": 492.7,
+   "createField": 108.4,
+   "adapter": 2.5,
+   "device": 99,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 1,
+   "kind": "warm"
+  },
+  {
+   "first": 937.2,
+   "ready": 875.1,
+   "boot": 672.6,
+   "fieldStart": 675.5,
+   "fieldEnd": 686.4,
+   "createField": 10.9,
+   "adapter": 0.2,
+   "device": 0,
+   "earlyAdapter": 434.6,
+   "earlyDevice": 111.5,
+   "earlyStart": 49.8,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 1,
+   "kind": "cold"
+  },
+  {
+   "first": 562.4,
+   "ready": 533.5,
+   "boot": 409.5,
+   "fieldStart": 410.8,
+   "fieldEnd": 419.3,
+   "createField": 8.5,
+   "adapter": 0.1,
+   "device": 0,
+   "earlyAdapter": 4.3,
+   "earlyDevice": 120.7,
+   "earlyStart": 17.6,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 1,
+   "kind": "warm"
+  },
+  {
+   "first": 1273.1,
+   "ready": 1237.7,
+   "boot": 521.6,
+   "fieldStart": 523.9,
+   "fieldEnd": 1080.5,
+   "createField": 556.6,
+   "adapter": 430.4,
+   "device": 118.7,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 2,
+   "kind": "cold"
+  },
+  {
+   "first": 643.9,
+   "ready": 611.7,
+   "boot": 383.3,
+   "fieldStart": 386.8,
+   "fieldEnd": 508,
+   "createField": 121.2,
+   "adapter": 2.2,
+   "device": 112.7,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 2,
+   "kind": "warm"
+  },
+  {
+   "first": 852.8,
+   "ready": 817.3,
+   "boot": 529.3,
+   "fieldStart": 531.9,
+   "fieldEnd": 603.6,
+   "createField": 71.7,
+   "adapter": 0.1,
+   "device": 54.8,
+   "earlyAdapter": 395.9,
+   "earlyDevice": 127,
+   "earlyStart": 63.9,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 2,
+   "kind": "cold"
+  },
+  {
+   "first": 525,
+   "ready": 497.1,
+   "boot": 389,
+   "fieldStart": 390.4,
+   "fieldEnd": 397.6,
+   "createField": 7.2,
+   "adapter": 0.1,
+   "device": 0,
+   "earlyAdapter": 4.4,
+   "earlyDevice": 127.1,
+   "earlyStart": 18.9,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 2,
+   "kind": "warm"
+  },
+  {
+   "first": 1216.4,
+   "ready": 1169.3,
+   "boot": 460.3,
+   "fieldStart": 462.4,
+   "fieldEnd": 1015.2,
+   "createField": 552.8,
+   "adapter": 415.4,
+   "device": 127.1,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 3,
+   "kind": "cold"
+  },
+  {
+   "first": 581.9,
+   "ready": 553.9,
+   "boot": 327.9,
+   "fieldStart": 331.2,
+   "fieldEnd": 453.8,
+   "createField": 122.6,
+   "adapter": 1.7,
+   "device": 114,
+   "earlyAdapter": null,
+   "earlyDevice": null,
+   "earlyStart": null,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "A",
+   "i": 3,
+   "kind": "warm"
+  },
+  {
+   "first": 1630.4,
+   "ready": 781.9,
+   "boot": 510.8,
+   "fieldStart": 513,
+   "fieldEnd": 601.9,
+   "createField": 88.9,
+   "adapter": 0.1,
+   "device": 80.4,
+   "earlyAdapter": 423.1,
+   "earlyDevice": 142.6,
+   "earlyStart": 27.8,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 3,
+   "kind": "cold"
+  },
+  {
+   "first": 1137.7,
+   "ready": 451,
+   "boot": 336.8,
+   "fieldStart": 337.9,
+   "fieldEnd": 345,
+   "createField": 7.1,
+   "adapter": 0.1,
+   "device": 0,
+   "earlyAdapter": 2.7,
+   "earlyDevice": 161.2,
+   "earlyStart": 13.1,
+   "ok": true,
+   "digest": "65025801",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767
+   },
+   "errs": [],
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+   "tag": "B",
+   "i": 3,
+   "kind": "warm"
+  }
+ ],
+ "summary": {
+  "A cold": {
+   "ready": 1179.5,
+   "first": 1220.3,
+   "createField": 552.8,
+   "adapter": 415.4,
+   "device": 118.7,
+   "fieldWaitAdapter": 415.4,
+   "readyRange": [
+    1154.1,
+    1237.7
+   ]
+  },
+  "A warm": {
+   "ready": 604.6,
+   "first": 640.5,
+   "createField": 121.2,
+   "adapter": 2.3,
+   "device": 112.7,
+   "fieldWaitAdapter": 2.3,
+   "readyRange": [
+    553.9,
+    611.7
+   ]
+  },
+  "B cold": {
+   "ready": 817.3,
+   "first": 937.2,
+   "createField": 71.7,
+   "adapter": 423.1,
+   "device": 127,
+   "fieldWaitAdapter": 0.1,
+   "readyRange": [
+    746.3,
+    875.1
+   ]
+  },
+  "B warm": {
+   "ready": 533.5,
+   "first": 567.3,
+   "createField": 8,
+   "adapter": 4.3,
+   "device": 127.1,
+   "fieldWaitAdapter": 0.1,
+   "readyRange": [
+    451,
+    535.5
+   ]
+  }
+ },
+ "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0"
+}

@@ -1,0 +1,8764 @@
+{
+ "at": "2026-09-25T02:01:57.019Z",
+ "inst": [
+  {
+   "nav": {
+    "domInteractive": 78.4,
+    "dcl": 550.9,
+    "load": 552,
+    "responseEnd": 13.8
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3059430,
+    "jsFirstStart": 74.6,
+    "jsLastEnd": 1434.4,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 131.5,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      159,
+      166
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      159,
+      170
+     ],
+     [
+      "LWTitle-title.woff2",
+      159,
+      169
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      74,
+      104,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      74.1,
+      104.4,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      74.2,
+      115.8,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      74.3,
+      123.7,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      74.4,
+      131.5,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      74.5,
+      119.4,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      74.6,
+      109.7,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      74.6,
+      125.3,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      74.7,
+      127.7,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      74.8,
+      135.3,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      74.9,
+      129.4,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      82.3,
+      586.9,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      82.6,
+      589.4,
+      628,
+      "other"
+     ],
+     [
+      "rack.js",
+      131.6,
+      137.4,
+      530047,
+      "script"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      159.2,
+      166.2,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      159.3,
+      169.9,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      159.4,
+      169,
+      10172,
+      "other"
+     ],
+     [
+      "stage-gestures.js",
+      194.8,
+      201.6,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      194.9,
+      205.7,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      195,
+      204.6,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      195,
+      213.7,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      195.1,
+      208.7,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      195.2,
+      214.6,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      195.2,
+      226.3,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      195.3,
+      216.6,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      195.4,
+      223.1,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      195.4,
+      218.4,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      195.5,
+      220.4,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      195.6,
+      229.2,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      195.6,
+      231.7,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      195.7,
+      234.4,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      195.8,
+      237.5,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      195.9,
+      240.7,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      195.9,
+      243.9,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      196,
+      246.8,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      196,
+      249.8,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      196.1,
+      253.2,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      196.2,
+      256.3,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      196.2,
+      258.9,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      196.3,
+      262.9,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      196.4,
+      272.9,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      196.4,
+      272.1,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      196.5,
+      277,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      196.5,
+      279.3,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      196.6,
+      284.1,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      196.6,
+      288,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      196.7,
+      289.2,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      196.7,
+      291.8,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      196.8,
+      295.5,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      196.9,
+      298.6,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      196.9,
+      301.7,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      197,
+      304.4,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      197.1,
+      307.7,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      197.1,
+      310.9,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      197.2,
+      313,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      197.3,
+      315.3,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      197.3,
+      318.4,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      197.4,
+      321.1,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      197.5,
+      324.5,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      197.5,
+      327.9,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      197.6,
+      332.2,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      197.6,
+      335.8,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      197.7,
+      339.1,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      197.7,
+      342,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      197.8,
+      344.7,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      197.8,
+      347.4,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      197.9,
+      349.8,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      197.9,
+      352.3,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      198,
+      354.8,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      198,
+      358.3,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      198.1,
+      361,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      198.1,
+      364.3,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      198.2,
+      367.4,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      198.2,
+      370.3,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      198.3,
+      373.1,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      198.3,
+      375.7,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      198.4,
+      378.9,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      198.4,
+      381.8,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      198.5,
+      384.7,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      198.5,
+      387.3,
+      36447,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      220.7,
+      390.3,
+      562,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      229.8,
+      393.3,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      230,
+      396,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      230.1,
+      398.6,
+      66901,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      240.1,
+      400.8,
+      21052,
+      "script"
+     ],
+     [
+      "shadow.js",
+      246.9,
+      403.4,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      258.4,
+      406,
+      20635,
+      "script"
+     ],
+     [
+      "molecule.js",
+      290.3,
+      408.5,
+      5183,
+      "script"
+     ],
+     [
+      "mo.js",
+      291.8,
+      410.9,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      293.7,
+      412.8,
+      4329,
+      "script"
+     ],
+     [
+      "h2.js",
+      303.9,
+      414.9,
+      5632,
+      "script"
+     ],
+     [
+      "molecules.js",
+      308.4,
+      417.9,
+      43258,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      309.1,
+      420.3,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      309.3,
+      422.5,
+      57188,
+      "script"
+     ],
+     [
+      "linalg.js",
+      321.3,
+      424.6,
+      6778,
+      "script"
+     ],
+     [
+      "calculus.js",
+      322.4,
+      427.3,
+      6263,
+      "script"
+     ],
+     [
+      "slice.js",
+      335.4,
+      429.7,
+      6005,
+      "script"
+     ],
+     [
+      "qcd.js",
+      337.8,
+      431.7,
+      7560,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      344.1,
+      433.8,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      346.5,
+      436.5,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      349.4,
+      439.3,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      370.7,
+      442,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      371.1,
+      445.1,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      371.2,
+      447.6,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      373.8,
+      449.9,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      392.3,
+      452.4,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      392.4,
+      454.5,
+      25631,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      401,
+      457.4,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      401.2,
+      460.8,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      401.3,
+      464.2,
+      4736,
+      "script"
+     ],
+     [
+      "modrive.js",
+      415.7,
+      468.3,
+      5182,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      418.2,
+      471.6,
+      15680,
+      "script"
+     ],
+     [
+      "md.js",
+      420.4,
+      473.2,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      436.9,
+      479.3,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      437,
+      480.6,
+      3880,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      494,
+      520.9,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1228.5,
+      1250.8,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1373.1,
+      1387.4,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1399.1,
+      1433.2,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1399.3,
+      1428.4,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1399.5,
+      1430.5,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1399.6,
+      1434.4,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [
+    [
+     "html-start",
+     75.4
+    ],
+    [
+     "boot-start",
+     538.6
+    ],
+    [
+     "field-start",
+     541.9
+    ],
+    [
+     "dcl",
+     542.7
+    ],
+    [
+     "fonts-ready",
+     578.7
+    ],
+    [
+     "field-end",
+     1156.1
+    ],
+    [
+     "windows-start",
+     1157.2
+    ],
+    [
+     "dev:observer",
+     1157.2
+    ],
+    [
+     "dev:palette",
+     1157.8
+    ],
+    [
+     "dev:camera",
+     1157.9
+    ],
+    [
+     "dev:clip",
+     1158.2
+    ],
+    [
+     "dev:settings",
+     1160
+    ],
+    [
+     "dev:state",
+     1165.7
+    ],
+    [
+     "dev:spectrum",
+     1168.1
+    ],
+    [
+     "dev:shadow",
+     1170.5
+    ],
+    [
+     "dev:orbit",
+     1176.2
+    ],
+    [
+     "dev:vortex",
+     1177.9
+    ],
+    [
+     "dev:dynamics",
+     1179.4
+    ],
+    [
+     "dev:slice",
+     1180.5
+    ],
+    [
+     "dev:qcd",
+     1211.9
+    ],
+    [
+     "dev:molecule",
+     1214.4
+    ],
+    [
+     "dev:helium",
+     1220.4
+    ],
+    [
+     "dev:h2",
+     1220.9
+    ],
+    [
+     "dev:chem",
+     1225.5
+    ],
+    [
+     "dev:orbitals",
+     1228.7
+    ],
+    [
+     "dev:calculus",
+     1230.6
+    ],
+    [
+     "dev:meters",
+     1230.9
+    ],
+    [
+     "dev:ladder",
+     1231.4
+    ],
+    [
+     "sec:modwin",
+     1234.3
+    ],
+    [
+     "sec:modView",
+     1237.6
+    ],
+    [
+     "sec:atoms",
+     1253.4
+    ],
+    [
+     "dev:atoms",
+     1253.4
+    ],
+    [
+     "dev:field",
+     1254.1
+    ],
+    [
+     "dev:wigner",
+     1255.5
+    ],
+    [
+     "dev:radiation",
+     1256.3
+    ],
+    [
+     "sec:transport-strip",
+     1257.1
+    ],
+    [
+     "sec:badges",
+     1265.1
+    ],
+    [
+     "sec:install",
+     1265.2
+    ],
+    [
+     "sec:bow",
+     1265.2
+    ],
+    [
+     "sec:gas",
+     1265.2
+    ],
+    [
+     "sec:floating",
+     1279.9
+    ],
+    [
+     "sec:layout",
+     1280.1
+    ],
+    [
+     "dev:transport",
+     1280.1
+    ],
+    [
+     "sec:gestures",
+     1293.2
+    ],
+    [
+     "sec:keys",
+     1293.4
+    ],
+    [
+     "sec:taborder",
+     1293.8
+    ],
+    [
+     "sec:persistence",
+     1294.3
+    ],
+    [
+     "sec:history",
+     1294.3
+    ],
+    [
+     "dev:history",
+     1294.4
+    ],
+    [
+     "sec:renderHistory",
+     1295.8
+    ],
+    [
+     "sec:LW",
+     1295.9
+    ],
+    [
+     "go:start",
+     1296.6
+    ],
+    [
+     "go:preset-done",
+     1298.4
+    ],
+    [
+     "go:digests-done",
+     1298.5
+    ],
+    [
+     "go:compact",
+     1299.1
+    ],
+    [
+     "go:applySettings",
+     1301.7
+    ],
+    [
+     "go:syncPhone",
+     1320.4
+    ],
+    [
+     "go:openLink",
+     1320.5
+    ],
+    [
+     "go:openLink-done",
+     1320.5
+    ],
+    [
+     "go:warning-built",
+     1320.5
+    ],
+    [
+     "go:reworkNative",
+     1320.6
+    ],
+    [
+     "go:reworkNative-done",
+     1327.4
+    ],
+    [
+     "go:history-clear",
+     1327.4
+    ],
+    [
+     "go:markTurn",
+     1327.9
+    ],
+    [
+     "go:markClean",
+     1329.7
+    ],
+    [
+     "lw-ready",
+     1331.3
+    ]
+   ],
+   "cnt": {
+    "readSettings": 8,
+    "ls.get": 15,
+    "ls.getBytes": 0,
+    "JSON.parse": 12,
+    "getContext:webgpu": 1,
+    "createElement": 3521,
+    "paintMarks": 7,
+    "schedule1": 41,
+    "applyAccent": 3,
+    "getContext:2d": 28,
+    "getComputedStyle": 35,
+    "getBoundingClientRect": 42,
+    "JSON.stringify": 26,
+    "ls.set": 25,
+    "ls.set:lw.lean.v1": 24,
+    "ls.setBytes": 2803,
+    "renderHistory": 2,
+    "schedule4": 1,
+    "saveSettings.early": 2,
+    "ls.set:lw-window-info": 1,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1
+   },
+   "t": {
+    "ls.get": 1.54,
+    "JSON.parse": 0.1,
+    "paintMarks": 5.4,
+    "applyAccent": 3.52,
+    "getComputedStyle": 0.06,
+    "getBoundingClientRect": 5.12,
+    "JSON.stringify": 0.22,
+    "ls.set": 0.32,
+    "renderHistory": 0.26,
+    "hLiveKey": 0.18,
+    "hRead": 0.22,
+    "serialize": 1.08,
+    "projectKey": 1.52
+   },
+   "dom": {
+    "elements": 4473,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 278,
+     "canvases": 1,
+     "knobs": 8
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true
+  },
+  {
+   "nav": {
+    "domInteractive": 94.6,
+    "dcl": 669.9,
+    "load": 670.9,
+    "responseEnd": 14.1
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3059430,
+    "jsFirstStart": 91.1,
+    "jsLastEnd": 1572.4,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 164.5,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      224,
+      233
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      224,
+      239
+     ],
+     [
+      "LWTitle-title.woff2",
+      224,
+      244
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      90.5,
+      124.4,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      90.6,
+      162.1,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      90.7,
+      137.8,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      90.8,
+      127.1,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      90.8,
+      150.7,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      90.9,
+      164.5,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      91,
+      130.2,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      91.1,
+      143.6,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      91.1,
+      153.7,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      91.2,
+      170.4,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      91.3,
+      157,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      98.9,
+      689.1,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      99.2,
+      691.7,
+      628,
+      "other"
+     ],
+     [
+      "rack.js",
+      161.7,
+      175.8,
+      530047,
+      "script"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      224.1,
+      233.3,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      224.2,
+      239.2,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      224.3,
+      244.4,
+      10172,
+      "other"
+     ],
+     [
+      "stage-gestures.js",
+      242.1,
+      255.1,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      242.3,
+      256.9,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      242.4,
+      255.9,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      242.5,
+      269.7,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      242.6,
+      271.5,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      242.7,
+      272.9,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      242.8,
+      272.8,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      242.8,
+      287,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      242.9,
+      450.3,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      243,
+      282.8,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      243.1,
+      273.6,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      243.1,
+      278.9,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      243.2,
+      291.2,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      243.2,
+      277.9,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      243.3,
+      295.4,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      243.4,
+      297.2,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      243.4,
+      300,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      243.5,
+      303.9,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      243.5,
+      305.5,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      243.6,
+      307.7,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      243.7,
+      311.1,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      243.7,
+      312.6,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      243.8,
+      315.2,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      243.8,
+      318.9,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      243.9,
+      322,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      244,
+      323.8,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      244,
+      326.1,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      244.1,
+      329.3,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      244.1,
+      332,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      244.2,
+      335.3,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      244.3,
+      338.7,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      244.3,
+      343.8,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      244.4,
+      348.5,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      244.4,
+      346.9,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      244.5,
+      349.7,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      244.6,
+      355.2,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      244.6,
+      359.2,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      244.7,
+      366.8,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      244.7,
+      373.1,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      244.8,
+      375.7,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      244.8,
+      379.8,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      244.9,
+      382.3,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      245,
+      391.2,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      245,
+      391.1,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      245.1,
+      394.5,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      245.2,
+      397.2,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      245.2,
+      403.3,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      245.3,
+      406.2,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      245.3,
+      410.5,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      245.4,
+      415.5,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      245.4,
+      414.4,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      245.5,
+      418.9,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      245.6,
+      422.1,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      245.7,
+      424.3,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      245.7,
+      426.5,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      245.8,
+      429.2,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      245.8,
+      432.5,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      245.9,
+      436.8,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      246,
+      440.5,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      246.1,
+      446.6,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      246.1,
+      288.5,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      246.2,
+      454.2,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      246.3,
+      458.1,
+      36447,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      276.4,
+      463.4,
+      562,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      277.7,
+      471.1,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      277.8,
+      472.2,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      277.9,
+      479,
+      66901,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      281.2,
+      480.5,
+      21052,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      298.6,
+      484.3,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      298.7,
+      487.8,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      298.8,
+      492.2,
+      4736,
+      "script"
+     ],
+     [
+      "shadow.js",
+      301,
+      496.1,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      312.4,
+      498.8,
+      20635,
+      "script"
+     ],
+     [
+      "molecule.js",
+      333.6,
+      505.7,
+      5183,
+      "script"
+     ],
+     [
+      "mo.js",
+      339.4,
+      503.8,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      341.4,
+      507,
+      4329,
+      "script"
+     ],
+     [
+      "h2.js",
+      349.2,
+      512.2,
+      5632,
+      "script"
+     ],
+     [
+      "molecules.js",
+      354.6,
+      514.3,
+      43258,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      356.7,
+      518.2,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      356.8,
+      519.3,
+      57188,
+      "script"
+     ],
+     [
+      "linalg.js",
+      380.8,
+      523.3,
+      6778,
+      "script"
+     ],
+     [
+      "calculus.js",
+      394.7,
+      526.1,
+      6263,
+      "script"
+     ],
+     [
+      "slice.js",
+      402.6,
+      530.7,
+      6005,
+      "script"
+     ],
+     [
+      "qcd.js",
+      407.8,
+      531.9,
+      7560,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      409.2,
+      537.3,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      409.8,
+      541.4,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      413.6,
+      543.2,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      431,
+      549.6,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      434.7,
+      548.7,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      435.8,
+      553.6,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      441.7,
+      555.6,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      458.3,
+      557.5,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      458.5,
+      558.9,
+      25631,
+      "script"
+     ],
+     [
+      "modrive.js",
+      511,
+      585.2,
+      5182,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      512.3,
+      589.2,
+      15680,
+      "script"
+     ],
+     [
+      "md.js",
+      522.6,
+      595.6,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      531.7,
+      600.9,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      531.9,
+      603.4,
+      3880,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      611.8,
+      630.7,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1368.8,
+      1404.2,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1547,
+      1555.1,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1557,
+      1570.5,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1557.1,
+      1565.6,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1557.2,
+      1567.7,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1557.3,
+      1572.4,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [
+    [
+     "html-start",
+     92.5
+    ],
+    [
+     "boot-start",
+     661.8
+    ],
+    [
+     "field-start",
+     664.7
+    ],
+    [
+     "dcl",
+     665.4
+    ],
+    [
+     "fonts-ready",
+     696.8
+    ],
+    [
+     "field-end",
+     1279.4
+    ],
+    [
+     "windows-start",
+     1280.7
+    ],
+    [
+     "dev:observer",
+     1280.7
+    ],
+    [
+     "dev:palette",
+     1281.4
+    ],
+    [
+     "dev:camera",
+     1281.6
+    ],
+    [
+     "dev:clip",
+     1281.9
+    ],
+    [
+     "dev:settings",
+     1284
+    ],
+    [
+     "dev:state",
+     1291.1
+    ],
+    [
+     "dev:spectrum",
+     1293.2
+    ],
+    [
+     "dev:shadow",
+     1295.9
+    ],
+    [
+     "dev:orbit",
+     1308.9
+    ],
+    [
+     "dev:vortex",
+     1310.6
+    ],
+    [
+     "dev:dynamics",
+     1313
+    ],
+    [
+     "dev:slice",
+     1314.2
+    ],
+    [
+     "dev:qcd",
+     1349.8
+    ],
+    [
+     "dev:molecule",
+     1352.2
+    ],
+    [
+     "dev:helium",
+     1359.3
+    ],
+    [
+     "dev:h2",
+     1359.9
+    ],
+    [
+     "dev:chem",
+     1365.5
+    ],
+    [
+     "dev:orbitals",
+     1369.2
+    ],
+    [
+     "dev:calculus",
+     1371.4
+    ],
+    [
+     "dev:meters",
+     1371.8
+    ],
+    [
+     "dev:ladder",
+     1372.3
+    ],
+    [
+     "sec:modwin",
+     1375.3
+    ],
+    [
+     "sec:modView",
+     1378.4
+    ],
+    [
+     "sec:atoms",
+     1392.1
+    ],
+    [
+     "dev:atoms",
+     1392.1
+    ],
+    [
+     "dev:field",
+     1392.7
+    ],
+    [
+     "dev:wigner",
+     1393.8
+    ],
+    [
+     "dev:radiation",
+     1394.6
+    ],
+    [
+     "sec:transport-strip",
+     1395.5
+    ],
+    [
+     "sec:badges",
+     1404.8
+    ],
+    [
+     "sec:install",
+     1405
+    ],
+    [
+     "sec:bow",
+     1405
+    ],
+    [
+     "sec:gas",
+     1405
+    ],
+    [
+     "sec:floating",
+     1423.4
+    ],
+    [
+     "sec:layout",
+     1423.7
+    ],
+    [
+     "dev:transport",
+     1423.7
+    ],
+    [
+     "sec:gestures",
+     1432.1
+    ],
+    [
+     "sec:keys",
+     1432.1
+    ],
+    [
+     "sec:taborder",
+     1432.4
+    ],
+    [
+     "sec:persistence",
+     1432.4
+    ],
+    [
+     "sec:history",
+     1432.4
+    ],
+    [
+     "dev:history",
+     1432.7
+    ],
+    [
+     "sec:renderHistory",
+     1433
+    ],
+    [
+     "sec:LW",
+     1433
+    ],
+    [
+     "go:start",
+     1433.3
+    ],
+    [
+     "go:preset-done",
+     1434.4
+    ],
+    [
+     "go:digests-done",
+     1434.5
+    ],
+    [
+     "go:compact",
+     1434.9
+    ],
+    [
+     "go:applySettings",
+     1436.6
+    ],
+    [
+     "go:syncPhone",
+     1455.1
+    ],
+    [
+     "go:openLink",
+     1455.2
+    ],
+    [
+     "go:openLink-done",
+     1455.2
+    ],
+    [
+     "go:warning-built",
+     1455.2
+    ],
+    [
+     "go:reworkNative",
+     1455.3
+    ],
+    [
+     "go:reworkNative-done",
+     1466.9
+    ],
+    [
+     "go:history-clear",
+     1466.9
+    ],
+    [
+     "go:markTurn",
+     1467.9
+    ],
+    [
+     "go:markClean",
+     1470
+    ],
+    [
+     "lw-ready",
+     1472
+    ]
+   ],
+   "cnt": {
+    "readSettings": 8,
+    "ls.get": 15,
+    "ls.getBytes": 0,
+    "JSON.parse": 12,
+    "getContext:webgpu": 1,
+    "createElement": 3544,
+    "paintMarks": 7,
+    "schedule1": 41,
+    "applyAccent": 3,
+    "getContext:2d": 28,
+    "getComputedStyle": 52,
+    "getBoundingClientRect": 60,
+    "JSON.stringify": 26,
+    "ls.set": 25,
+    "ls.set:lw.lean.v1": 24,
+    "ls.setBytes": 2803,
+    "renderHistory": 2,
+    "schedule4": 1,
+    "saveSettings.early": 2,
+    "ls.set:lw-window-info": 1,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1
+   },
+   "t": {
+    "ls.get": 1.74,
+    "JSON.parse": 0.04,
+    "paintMarks": 5.32,
+    "applyAccent": 2.96,
+    "getComputedStyle": 0.08,
+    "getBoundingClientRect": 4.74,
+    "JSON.stringify": 0.1,
+    "ls.set": 0.22,
+    "renderHistory": 0.36,
+    "hLiveKey": 0.38,
+    "hRead": 0.46,
+    "serialize": 1.5,
+    "projectKey": 2.02
+   },
+   "dom": {
+    "elements": 4496,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 301,
+     "canvases": 1,
+     "knobs": 10
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true
+  },
+  {
+   "nav": {
+    "domInteractive": 76.3,
+    "dcl": 560.9,
+    "load": 561.9,
+    "responseEnd": 13.8
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3059430,
+    "jsFirstStart": 72.4,
+    "jsLastEnd": 1319.8,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 144.9,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      180,
+      186
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      180,
+      189
+     ],
+     [
+      "LWTitle-title.woff2",
+      180,
+      192
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      71.8,
+      112.1,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      71.9,
+      112.3,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      72,
+      125.1,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      72.1,
+      135.2,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      72.2,
+      144.9,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      72.2,
+      129.8,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      72.3,
+      119,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      72.4,
+      137.4,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      72.4,
+      140.4,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      72.5,
+      149.6,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      72.6,
+      142.8,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      81.9,
+      586.5,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      82.5,
+      588.5,
+      628,
+      "other"
+     ],
+     [
+      "rack.js",
+      145.1,
+      154.5,
+      530047,
+      "script"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      180.3,
+      186.2,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      180.4,
+      189.2,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      180.4,
+      191.6,
+      10172,
+      "other"
+     ],
+     [
+      "stage-gestures.js",
+      211.2,
+      234.3,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      211.4,
+      234.3,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      211.5,
+      234.2,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      211.5,
+      236.5,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      211.6,
+      265.5,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      211.7,
+      250.3,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      211.8,
+      284.3,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      211.9,
+      245.9,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      211.9,
+      239.9,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      212,
+      235.8,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      212.1,
+      248.3,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      212.2,
+      242.8,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      212.2,
+      255,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      212.3,
+      257.5,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      212.4,
+      260,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      212.5,
+      263,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      212.5,
+      268.4,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      212.6,
+      271.2,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      212.6,
+      273.7,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      212.7,
+      276.2,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      212.8,
+      278.9,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      212.9,
+      281.5,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      212.9,
+      252.4,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      213,
+      287.5,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      213.1,
+      290.2,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      213.2,
+      292.7,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      213.2,
+      295.5,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      213.3,
+      298.2,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      213.4,
+      300.7,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      213.4,
+      303.6,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      213.5,
+      306.1,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      213.6,
+      309.3,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      213.7,
+      312.4,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      213.7,
+      315.1,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      213.8,
+      317.6,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      213.9,
+      320.4,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      214,
+      323,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      214.1,
+      325.5,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      214.1,
+      328.1,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      214.2,
+      331,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      214.3,
+      333.5,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      214.4,
+      336.3,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      214.4,
+      338.9,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      214.5,
+      341.5,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      214.6,
+      344,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      214.7,
+      347.7,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      214.8,
+      350.3,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      214.8,
+      352.6,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      214.9,
+      354.8,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      215,
+      358.3,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      215.1,
+      366.8,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      215.2,
+      368.3,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      215.2,
+      370.5,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      215.3,
+      373.4,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      215.4,
+      377.4,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      215.5,
+      379.8,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      215.6,
+      381.4,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      215.7,
+      384.6,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      215.7,
+      387.4,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      215.8,
+      389.4,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      215.9,
+      390.4,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      216,
+      394.6,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      216.1,
+      397.5,
+      36447,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      251.2,
+      400,
+      562,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      262.8,
+      404.2,
+      21052,
+      "script"
+     ],
+     [
+      "shadow.js",
+      269.7,
+      406.1,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      280.1,
+      408.5,
+      20635,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      287.7,
+      412.8,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      287.8,
+      414.5,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      287.9,
+      416.9,
+      66901,
+      "script"
+     ],
+     [
+      "molecule.js",
+      301.9,
+      419.7,
+      5183,
+      "script"
+     ],
+     [
+      "mo.js",
+      306.2,
+      422.5,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      309.6,
+      425.6,
+      4329,
+      "script"
+     ],
+     [
+      "h2.js",
+      317.3,
+      427.7,
+      5632,
+      "script"
+     ],
+     [
+      "molecules.js",
+      321.2,
+      431.4,
+      43258,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      321.7,
+      434.8,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      321.8,
+      436.6,
+      57188,
+      "script"
+     ],
+     [
+      "calculus.js",
+      339.2,
+      438.5,
+      6263,
+      "script"
+     ],
+     [
+      "linalg.js",
+      339.7,
+      440.8,
+      6778,
+      "script"
+     ],
+     [
+      "slice.js",
+      343.1,
+      442.9,
+      6005,
+      "script"
+     ],
+     [
+      "qcd.js",
+      346.2,
+      446.1,
+      7560,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      351.7,
+      449.4,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      356.6,
+      452.6,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      361.1,
+      455.5,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      374.8,
+      460.3,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      375.3,
+      461.8,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      375.4,
+      463.5,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      387.1,
+      466.3,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      392.9,
+      470.2,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      393,
+      473.4,
+      25631,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      402.3,
+      475.4,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      402.4,
+      479,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      402.5,
+      481.7,
+      4736,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      426.5,
+      483.4,
+      15680,
+      "script"
+     ],
+     [
+      "modrive.js",
+      427.3,
+      484.1,
+      5182,
+      "script"
+     ],
+     [
+      "md.js",
+      434.2,
+      485.9,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      456.7,
+      487.2,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      456.8,
+      488.7,
+      3880,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      514.8,
+      540.2,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1148.8,
+      1153.9,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1278.6,
+      1295.6,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1300.4,
+      1319.8,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1300.5,
+      1316.6,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1300.6,
+      1318.2,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1300.7,
+      1315.4,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [
+    [
+     "html-start",
+     73.2
+    ],
+    [
+     "boot-start",
+     552.5
+    ],
+    [
+     "field-start",
+     555.5
+    ],
+    [
+     "dcl",
+     556
+    ],
+    [
+     "fonts-ready",
+     579.9
+    ],
+    [
+     "field-end",
+     1081.2
+    ],
+    [
+     "windows-start",
+     1082.4
+    ],
+    [
+     "dev:observer",
+     1082.4
+    ],
+    [
+     "dev:palette",
+     1083.5
+    ],
+    [
+     "dev:camera",
+     1083.8
+    ],
+    [
+     "dev:clip",
+     1084.1
+    ],
+    [
+     "dev:settings",
+     1086.5
+    ],
+    [
+     "dev:state",
+     1091.2
+    ],
+    [
+     "dev:spectrum",
+     1092.8
+    ],
+    [
+     "dev:shadow",
+     1094.5
+    ],
+    [
+     "dev:orbit",
+     1099.3
+    ],
+    [
+     "dev:vortex",
+     1100.8
+    ],
+    [
+     "dev:dynamics",
+     1102.2
+    ],
+    [
+     "dev:slice",
+     1103
+    ],
+    [
+     "dev:qcd",
+     1134.3
+    ],
+    [
+     "dev:molecule",
+     1136.3
+    ],
+    [
+     "dev:helium",
+     1141.2
+    ],
+    [
+     "dev:h2",
+     1141.7
+    ],
+    [
+     "dev:chem",
+     1146.3
+    ],
+    [
+     "dev:orbitals",
+     1149
+    ],
+    [
+     "dev:calculus",
+     1150.4
+    ],
+    [
+     "dev:meters",
+     1150.7
+    ],
+    [
+     "dev:ladder",
+     1151.1
+    ],
+    [
+     "sec:modwin",
+     1153.7
+    ],
+    [
+     "sec:modView",
+     1156.4
+    ],
+    [
+     "sec:atoms",
+     1168.2
+    ],
+    [
+     "dev:atoms",
+     1168.2
+    ],
+    [
+     "dev:field",
+     1168.7
+    ],
+    [
+     "dev:wigner",
+     1169.6
+    ],
+    [
+     "dev:radiation",
+     1170.2
+    ],
+    [
+     "sec:transport-strip",
+     1170.7
+    ],
+    [
+     "sec:badges",
+     1178.3
+    ],
+    [
+     "sec:install",
+     1178.5
+    ],
+    [
+     "sec:bow",
+     1178.6
+    ],
+    [
+     "sec:gas",
+     1178.6
+    ],
+    [
+     "sec:floating",
+     1195.2
+    ],
+    [
+     "sec:layout",
+     1195.3
+    ],
+    [
+     "dev:transport",
+     1195.4
+    ],
+    [
+     "sec:gestures",
+     1202.3
+    ],
+    [
+     "sec:keys",
+     1202.4
+    ],
+    [
+     "sec:taborder",
+     1202.6
+    ],
+    [
+     "sec:persistence",
+     1202.8
+    ],
+    [
+     "sec:history",
+     1202.8
+    ],
+    [
+     "dev:history",
+     1202.8
+    ],
+    [
+     "sec:renderHistory",
+     1203.1
+    ],
+    [
+     "sec:LW",
+     1203.2
+    ],
+    [
+     "go:start",
+     1203.5
+    ],
+    [
+     "go:preset-done",
+     1204.4
+    ],
+    [
+     "go:digests-done",
+     1204.4
+    ],
+    [
+     "go:compact",
+     1204.9
+    ],
+    [
+     "go:applySettings",
+     1206.8
+    ],
+    [
+     "go:syncPhone",
+     1226.4
+    ],
+    [
+     "go:openLink",
+     1226.5
+    ],
+    [
+     "go:openLink-done",
+     1226.5
+    ],
+    [
+     "go:warning-built",
+     1226.6
+    ],
+    [
+     "go:reworkNative",
+     1226.6
+    ],
+    [
+     "go:reworkNative-done",
+     1233.2
+    ],
+    [
+     "go:history-clear",
+     1233.2
+    ],
+    [
+     "go:markTurn",
+     1233.6
+    ],
+    [
+     "go:markClean",
+     1235.2
+    ],
+    [
+     "lw-ready",
+     1236.4
+    ]
+   ],
+   "cnt": {
+    "readSettings": 8,
+    "ls.get": 15,
+    "ls.getBytes": 0,
+    "JSON.parse": 12,
+    "getContext:webgpu": 1,
+    "createElement": 3544,
+    "paintMarks": 7,
+    "schedule1": 41,
+    "applyAccent": 3,
+    "getContext:2d": 28,
+    "getComputedStyle": 35,
+    "getBoundingClientRect": 42,
+    "JSON.stringify": 26,
+    "ls.set": 25,
+    "ls.set:lw.lean.v1": 24,
+    "ls.setBytes": 2803,
+    "renderHistory": 2,
+    "schedule4": 1,
+    "saveSettings.early": 2,
+    "ls.set:lw-window-info": 1,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1
+   },
+   "t": {
+    "ls.get": 1.64,
+    "JSON.parse": 0.04,
+    "paintMarks": 4.62,
+    "applyAccent": 2.52,
+    "getComputedStyle": 0.12,
+    "getBoundingClientRect": 3.68,
+    "JSON.stringify": 0.12,
+    "ls.set": 0.16,
+    "renderHistory": 0.14,
+    "hLiveKey": 0.14,
+    "hRead": 0.2,
+    "serialize": 0.84,
+    "projectKey": 1.22
+   },
+   "dom": {
+    "elements": 4496,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 301,
+     "canvases": 1,
+     "knobs": 10
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true
+  }
+ ],
+ "plain": [
+  {
+   "nav": {
+    "domInteractive": 69.3,
+    "dcl": 513.2,
+    "load": 513.9,
+    "responseEnd": 17.3
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3054989,
+    "jsFirstStart": 68.1,
+    "jsLastEnd": 1271,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 134.4,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      176,
+      188
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      177,
+      183
+     ],
+     [
+      "LWTitle-title.woff2",
+      177,
+      185
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      67.6,
+      97,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      67.7,
+      98.7,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      67.8,
+      122.5,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      67.8,
+      117,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      67.9,
+      134.4,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      67.9,
+      125.4,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      68,
+      127.8,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      68.1,
+      105.6,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      68.1,
+      137.5,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      68.2,
+      144.3,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      68.3,
+      111.6,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      73.7,
+      546.3,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      73.9,
+      548.3,
+      628,
+      "other"
+     ],
+     [
+      "rack.js",
+      112.9,
+      140,
+      525606,
+      "script"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      176.5,
+      187.6,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      176.6,
+      183,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      176.6,
+      185,
+      10172,
+      "other"
+     ],
+     [
+      "stage-gestures.js",
+      201.7,
+      213.3,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      201.9,
+      214.2,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      202.1,
+      216.2,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      202.1,
+      224.7,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      202.2,
+      239.6,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      202.3,
+      218.6,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      202.3,
+      240.9,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      202.3,
+      226.9,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      202.4,
+      216.8,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      202.5,
+      229,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      202.5,
+      219.1,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      202.5,
+      233.9,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      202.6,
+      236.6,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      202.6,
+      244.8,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      202.7,
+      246.3,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      202.8,
+      249.9,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      202.8,
+      251.9,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      202.9,
+      254.5,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      202.9,
+      256.7,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      203,
+      258.9,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      203,
+      261.1,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      203.1,
+      263.2,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      203.2,
+      265.6,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      203.2,
+      267.9,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      203.3,
+      270.6,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      203.3,
+      273.1,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      203.4,
+      276.4,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      203.4,
+      278.8,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      203.5,
+      280.9,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      203.6,
+      282.9,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      203.6,
+      285.1,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      203.7,
+      287.7,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      203.7,
+      289.9,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      203.8,
+      292.4,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      203.9,
+      295.1,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      203.9,
+      297.8,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      204,
+      301.3,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      204,
+      302.3,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      204.1,
+      306.1,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      204.2,
+      308,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      204.2,
+      310.4,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      204.3,
+      317.4,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      204.4,
+      316.7,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      204.4,
+      319.5,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      204.5,
+      321.2,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      204.6,
+      324.8,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      204.6,
+      327,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      204.7,
+      329.1,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      204.8,
+      332.1,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      204.8,
+      334.6,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      204.9,
+      336.1,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      204.9,
+      337.9,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      205,
+      340.2,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      205.1,
+      342.4,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      205.1,
+      345.4,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      205.2,
+      349.2,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      205.3,
+      352.2,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      205.3,
+      355.9,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      205.4,
+      359,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      205.5,
+      363.3,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      205.5,
+      364.8,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      205.6,
+      367.1,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      205.6,
+      370.3,
+      36447,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      224.3,
+      377.2,
+      562,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      243,
+      379.8,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      243.1,
+      382.5,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      243.1,
+      386.3,
+      66901,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      248.5,
+      389.1,
+      21052,
+      "script"
+     ],
+     [
+      "shadow.js",
+      253.6,
+      391.1,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      262.1,
+      391.9,
+      20635,
+      "script"
+     ],
+     [
+      "molecule.js",
+      290.4,
+      395.8,
+      5183,
+      "script"
+     ],
+     [
+      "mo.js",
+      291.4,
+      397.1,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      291.6,
+      399.8,
+      4329,
+      "script"
+     ],
+     [
+      "h2.js",
+      298.3,
+      401.7,
+      5632,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      300.8,
+      405.9,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      301,
+      409.2,
+      57188,
+      "script"
+     ],
+     [
+      "molecules.js",
+      302.1,
+      411.4,
+      43258,
+      "script"
+     ],
+     [
+      "calculus.js",
+      311.5,
+      414,
+      6263,
+      "script"
+     ],
+     [
+      "linalg.js",
+      313.1,
+      417.4,
+      6778,
+      "script"
+     ],
+     [
+      "qcd.js",
+      326.9,
+      420.6,
+      7560,
+      "script"
+     ],
+     [
+      "slice.js",
+      327.4,
+      423.4,
+      6005,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      328.6,
+      426.2,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      347.1,
+      428.8,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      347.8,
+      431.5,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      348.7,
+      432.8,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      349.8,
+      435.4,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      349.8,
+      437.7,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      350.4,
+      440.3,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      383.4,
+      442.7,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      383.5,
+      445.4,
+      25631,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      390.9,
+      447.2,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      391.1,
+      448.8,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      391.2,
+      450.2,
+      4736,
+      "script"
+     ],
+     [
+      "modrive.js",
+      413.1,
+      457.6,
+      5182,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      415.8,
+      462.7,
+      15680,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      416.2,
+      461,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      416.2,
+      458.4,
+      3880,
+      "script"
+     ],
+     [
+      "md.js",
+      419.1,
+      460.1,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      464.6,
+      495.3,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1105.5,
+      1109.3,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1216.2,
+      1220.4,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1228.4,
+      1268.9,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1228.5,
+      1271,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1228.6,
+      1266.9,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1228.7,
+      1265.8,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [],
+   "cnt": null,
+   "t": null,
+   "dom": {
+    "elements": 4495,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 301,
+     "canvases": 1,
+     "knobs": 10
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true,
+   "readyPolled": 1214.7
+  },
+  {
+   "nav": {
+    "domInteractive": 59.9,
+    "dcl": 546.2,
+    "load": 547.1,
+    "responseEnd": 11.7
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3054989,
+    "jsFirstStart": 59,
+    "jsLastEnd": 1293.5,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 118.8,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      167,
+      177
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      167,
+      174
+     ],
+     [
+      "LWTitle-title.woff2",
+      167,
+      175
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      58.6,
+      86.5,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      58.6,
+      87.2,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      58.7,
+      104.9,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      58.7,
+      95.9,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      58.8,
+      107.7,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      58.8,
+      101.4,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      58.9,
+      118.8,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      59,
+      90.1,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      59,
+      112.6,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      59.1,
+      124.7,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      59.1,
+      116,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      62.8,
+      584.8,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      63,
+      586.9,
+      628,
+      "other"
+     ],
+     [
+      "rack.js",
+      120.9,
+      135.2,
+      525606,
+      "script"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      166.9,
+      177.5,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      167,
+      174.1,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      167.1,
+      175.3,
+      10172,
+      "other"
+     ],
+     [
+      "stage-gestures.js",
+      204.6,
+      228.3,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      204.7,
+      228.5,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      204.7,
+      228.8,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      204.8,
+      229.3,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      204.8,
+      229.4,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      204.9,
+      230,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      205,
+      283.6,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      205,
+      239.6,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      205.1,
+      281.7,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      205.2,
+      237.2,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      205.3,
+      236.2,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      205.3,
+      242.2,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      205.4,
+      241.2,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      205.5,
+      249.7,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      205.5,
+      251.2,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      205.6,
+      252.8,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      205.7,
+      254.9,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      205.7,
+      256.9,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      205.8,
+      258.9,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      205.8,
+      260.9,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      205.9,
+      262.8,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      205.9,
+      265.6,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      206,
+      268.3,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      206,
+      270.5,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      206.1,
+      272.9,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      206.1,
+      275.1,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      206.2,
+      277.5,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      206.3,
+      279.6,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      206.3,
+      246,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      206.4,
+      285.9,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      206.4,
+      288.4,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      206.5,
+      290.8,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      206.5,
+      292.8,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      206.6,
+      294.8,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      206.6,
+      296.8,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      206.7,
+      298.8,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      206.7,
+      300.8,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      206.8,
+      302.8,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      206.8,
+      305.1,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      206.9,
+      307.9,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      206.9,
+      310.8,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      207,
+      314.4,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      207,
+      317.6,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      207,
+      320.2,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      207.1,
+      322.6,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      207.1,
+      325.6,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      207.2,
+      328.9,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      207.2,
+      331.8,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      207.3,
+      334.4,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      207.3,
+      336.7,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      207.3,
+      339.6,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      207.4,
+      342.5,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      207.5,
+      345.1,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      207.6,
+      347.3,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      207.6,
+      350.1,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      207.6,
+      355.4,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      207.7,
+      356.8,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      207.7,
+      360.3,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      207.8,
+      362.7,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      207.8,
+      365.2,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      207.9,
+      367.5,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      207.9,
+      370.1,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      208,
+      372.9,
+      36447,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      234,
+      375.6,
+      562,
+      "script"
+     ],
+     [
+      "molecule.js",
+      247.2,
+      378.8,
+      5183,
+      "script"
+     ],
+     [
+      "shadow.js",
+      265.6,
+      382.1,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      266.3,
+      385,
+      20635,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      266.7,
+      387.4,
+      21052,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      309.1,
+      389.5,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      309.3,
+      391.6,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      309.4,
+      393.7,
+      66901,
+      "script"
+     ],
+     [
+      "mo.js",
+      309.8,
+      396.5,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      313.1,
+      399.1,
+      4329,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      313.8,
+      402,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      313.9,
+      404.6,
+      57188,
+      "script"
+     ],
+     [
+      "h2.js",
+      314.9,
+      407.3,
+      5632,
+      "script"
+     ],
+     [
+      "calculus.js",
+      316,
+      409.6,
+      6263,
+      "script"
+     ],
+     [
+      "molecules.js",
+      316.5,
+      411.9,
+      43258,
+      "script"
+     ],
+     [
+      "linalg.js",
+      317.1,
+      414.8,
+      6778,
+      "script"
+     ],
+     [
+      "qcd.js",
+      332,
+      417.5,
+      7560,
+      "script"
+     ],
+     [
+      "slice.js",
+      332.2,
+      420.9,
+      6005,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      344.1,
+      424.5,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      355.1,
+      427,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      355.5,
+      429.7,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      359,
+      432.3,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      359.8,
+      435.4,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      359.9,
+      438.6,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      360.6,
+      442.2,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      375.5,
+      446.7,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      375.6,
+      450.3,
+      25631,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      385.1,
+      454.2,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      385.2,
+      457.6,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      385.3,
+      458.3,
+      4736,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      403.4,
+      460.6,
+      15680,
+      "script"
+     ],
+     [
+      "modrive.js",
+      414.9,
+      462.3,
+      5182,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      417.1,
+      464.8,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      417.2,
+      466.5,
+      3880,
+      "script"
+     ],
+     [
+      "md.js",
+      421.2,
+      468,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      486,
+      491.9,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1151.4,
+      1170,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1266.5,
+      1277,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1282.8,
+      1292,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1283,
+      1293.5,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1283,
+      1290.3,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1283.1,
+      1289.1,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [],
+   "cnt": null,
+   "t": null,
+   "dom": {
+    "elements": 4495,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 301,
+     "canvases": 1,
+     "knobs": 10
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true,
+   "readyPolled": 1265.1
+  },
+  {
+   "nav": {
+    "domInteractive": 68.9,
+    "dcl": 575.1,
+    "load": 576.2,
+    "responseEnd": 12.4
+   },
+   "res": {
+    "n": 122,
+    "js": 109,
+    "jsBytes": 3054989,
+    "jsFirstStart": 68.1,
+    "jsLastEnd": 1340.2,
+    "css": 7,
+    "cssBytes": 510801,
+    "cssLastEnd": 123.1,
+    "fonts": [
+     [
+      "Roboto-ui.woff2",
+      167,
+      179
+     ],
+     [
+      "STIXTwoMath-subset.woff2",
+      167,
+      185
+     ],
+     [
+      "LWTitle-title.woff2",
+      167,
+      180
+     ]
+    ],
+    "all": [
+     [
+      "mir/css/base.css",
+      67.7,
+      99.1,
+      35706,
+      "link"
+     ],
+     [
+      "mir/css/skin.css",
+      67.8,
+      99,
+      39658,
+      "link"
+     ],
+     [
+      "lab.css",
+      67.8,
+      106.3,
+      86765,
+      "link"
+     ],
+     [
+      "skin.css",
+      67.9,
+      109.1,
+      51186,
+      "link"
+     ],
+     [
+      "vendor/katex/katex.min.css",
+      67.9,
+      115.2,
+      23335,
+      "link"
+     ],
+     [
+      "mir/modulation/modhost.css",
+      68,
+      119.3,
+      146223,
+      "link"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.css",
+      68,
+      123.1,
+      127928,
+      "link"
+     ],
+     [
+      "vendor/marked.min.js",
+      68.1,
+      132.5,
+      35479,
+      "script"
+     ],
+     [
+      "vendor/katex/katex.min.js",
+      68.1,
+      134.2,
+      275414,
+      "script"
+     ],
+     [
+      "img/warning-orbital.png",
+      68.2,
+      143.7,
+      160100,
+      "img"
+     ],
+     [
+      "main.js",
+      68.2,
+      138.4,
+      7593,
+      "script"
+     ],
+     [
+      "img/icon-192.png",
+      71.7,
+      593.9,
+      4328,
+      "other"
+     ],
+     [
+      "img/icon.svg",
+      71.9,
+      596.2,
+      628,
+      "other"
+     ],
+     [
+      "fonts/Roboto-ui.woff2",
+      167.3,
+      179.4,
+      58592,
+      "other"
+     ],
+     [
+      "fonts/STIXTwoMath-subset.woff2",
+      167.4,
+      185.4,
+      40288,
+      "other"
+     ],
+     [
+      "fonts/LWTitle-title.woff2",
+      167.5,
+      179.8,
+      10172,
+      "other"
+     ],
+     [
+      "rack.js",
+      170.9,
+      184,
+      525606,
+      "script"
+     ],
+     [
+      "stage-gestures.js",
+      222.2,
+      230.5,
+      5212,
+      "script"
+     ],
+     [
+      "frame-coalescer.js",
+      222.3,
+      238.3,
+      699,
+      "script"
+     ],
+     [
+      "frame-settle.js",
+      222.4,
+      241.5,
+      702,
+      "script"
+     ],
+     [
+      "project-storage.js",
+      222.4,
+      251.3,
+      1404,
+      "script"
+     ],
+     [
+      "project-import.js",
+      222.5,
+      261.9,
+      2495,
+      "script"
+     ],
+     [
+      "notebook-render.js",
+      222.5,
+      251.8,
+      3910,
+      "script"
+     ],
+     [
+      "native-ui.js",
+      222.6,
+      246.6,
+      25217,
+      "script"
+     ],
+     [
+      "hydrogen.js",
+      222.6,
+      253.8,
+      8211,
+      "script"
+     ],
+     [
+      "state.js",
+      222.7,
+      256.5,
+      47104,
+      "script"
+     ],
+     [
+      "clock.js",
+      222.7,
+      257.3,
+      1933,
+      "script"
+     ],
+     [
+      "frame-budget.js",
+      222.8,
+      266.1,
+      839,
+      "script"
+     ],
+     [
+      "mir/window-activity.js",
+      222.8,
+      267.9,
+      5466,
+      "script"
+     ],
+     [
+      "field.js",
+      222.9,
+      270.1,
+      103053,
+      "script"
+     ],
+     [
+      "mir/kit.js",
+      222.9,
+      272.6,
+      66972,
+      "script"
+     ],
+     [
+      "spectrum.js",
+      223,
+      275.3,
+      30072,
+      "script"
+     ],
+     [
+      "meters.js",
+      223,
+      278.3,
+      3771,
+      "script"
+     ],
+     [
+      "shadowview.js",
+      223.1,
+      281,
+      9104,
+      "script"
+     ],
+     [
+      "ladder.js",
+      223.1,
+      283.8,
+      13946,
+      "script"
+     ],
+     [
+      "orbit.js",
+      223.2,
+      286.4,
+      11068,
+      "script"
+     ],
+     [
+      "vortex.js",
+      223.3,
+      289.1,
+      8839,
+      "script"
+     ],
+     [
+      "particles.js",
+      223.3,
+      291.9,
+      11549,
+      "script"
+     ],
+     [
+      "keplerview.js",
+      223.4,
+      295.1,
+      9125,
+      "script"
+     ],
+     [
+      "render-exact.js",
+      223.4,
+      297.8,
+      94140,
+      "script"
+     ],
+     [
+      "keymap.js",
+      223.5,
+      300.5,
+      35045,
+      "script"
+     ],
+     [
+      "shortcuts.js",
+      223.6,
+      303,
+      2181,
+      "script"
+     ],
+     [
+      "kepler.js",
+      223.6,
+      306.1,
+      5766,
+      "script"
+     ],
+     [
+      "gas.js",
+      223.7,
+      309,
+      7801,
+      "script"
+     ],
+     [
+      "period.js",
+      223.7,
+      311.8,
+      7033,
+      "script"
+     ],
+     [
+      "moleculeview.js",
+      223.9,
+      314.5,
+      9815,
+      "script"
+     ],
+     [
+      "moview.js",
+      223.9,
+      316.9,
+      33145,
+      "script"
+     ],
+     [
+      "pulseview.js",
+      224,
+      319.3,
+      15375,
+      "script"
+     ],
+     [
+      "capture.js",
+      224,
+      322.4,
+      73172,
+      "script"
+     ],
+     [
+      "heliumview.js",
+      224.1,
+      327.3,
+      5689,
+      "script"
+     ],
+     [
+      "h2view.js",
+      224.2,
+      328.7,
+      16805,
+      "script"
+     ],
+     [
+      "chemview.js",
+      224.2,
+      330.3,
+      60619,
+      "script"
+     ],
+     [
+      "registerview.js",
+      224.3,
+      333.3,
+      3877,
+      "script"
+     ],
+     [
+      "molecular-session.js",
+      224.3,
+      337.6,
+      10333,
+      "script"
+     ],
+     [
+      "helium.js",
+      224.4,
+      340.5,
+      10690,
+      "script"
+     ],
+     [
+      "ladder-model.js",
+      224.5,
+      343,
+      1213,
+      "script"
+     ],
+     [
+      "h2ci.js",
+      224.5,
+      346.1,
+      25265,
+      "script"
+     ],
+     [
+      "calculusview.js",
+      224.6,
+      349.6,
+      2380,
+      "script"
+     ],
+     [
+      "dynamicsview.js",
+      224.7,
+      351.7,
+      9574,
+      "script"
+     ],
+     [
+      "paletteview.js",
+      224.7,
+      353.9,
+      10946,
+      "script"
+     ],
+     [
+      "sliceview.js",
+      224.8,
+      356.4,
+      23930,
+      "script"
+     ],
+     [
+      "qcdview.js",
+      224.9,
+      360.5,
+      9261,
+      "script"
+     ],
+     [
+      "atomsview.js",
+      224.9,
+      363.6,
+      16630,
+      "script"
+     ],
+     [
+      "fieldview.js",
+      225,
+      366.5,
+      17024,
+      "script"
+     ],
+     [
+      "wignerview.js",
+      225.1,
+      369.3,
+      16215,
+      "script"
+     ],
+     [
+      "radiationview.js",
+      225.1,
+      371.8,
+      16863,
+      "script"
+     ],
+     [
+      "atoms.js",
+      225.2,
+      374.3,
+      35702,
+      "script"
+     ],
+     [
+      "palette.js",
+      225.2,
+      376.8,
+      33221,
+      "script"
+     ],
+     [
+      "momentum.js",
+      225.3,
+      379.8,
+      6487,
+      "script"
+     ],
+     [
+      "kick.js",
+      225.3,
+      382.2,
+      10619,
+      "script"
+     ],
+     [
+      "hamiltonian.js",
+      225.4,
+      384.7,
+      15033,
+      "script"
+     ],
+     [
+      "sturmianreg.js",
+      225.5,
+      387.6,
+      6632,
+      "script"
+     ],
+     [
+      "well.js",
+      225.5,
+      390.3,
+      6577,
+      "script"
+     ],
+     [
+      "frontier.js",
+      225.6,
+      393.2,
+      50288,
+      "script"
+     ],
+     [
+      "history.js",
+      225.7,
+      395.7,
+      9193,
+      "script"
+     ],
+     [
+      "rotor4.js",
+      225.7,
+      398.2,
+      5874,
+      "script"
+     ],
+     [
+      "mir/modulation/host.js",
+      225.8,
+      400.9,
+      56773,
+      "script"
+     ],
+     [
+      "modwindow.js",
+      225.9,
+      404,
+      178412,
+      "script"
+     ],
+     [
+      "audio.js",
+      225.9,
+      407.7,
+      27237,
+      "script"
+     ],
+     [
+      "statelink.js",
+      226,
+      410.8,
+      36447,
+      "script"
+     ],
+     [
+      "mir/control-help.js",
+      253.4,
+      413.8,
+      8441,
+      "script"
+     ],
+     [
+      "mir/plane-model.js",
+      253.6,
+      416.4,
+      5406,
+      "script"
+     ],
+     [
+      "mir/modulation/modwindow/modwindow.js",
+      253.7,
+      418.9,
+      66901,
+      "script"
+     ],
+     [
+      "notebook-math.js",
+      254.8,
+      421.4,
+      562,
+      "script"
+     ],
+     [
+      "mir/glyph.js",
+      276.5,
+      423.8,
+      21052,
+      "script"
+     ],
+     [
+      "shadow.js",
+      282.3,
+      426.7,
+      4429,
+      "script"
+     ],
+     [
+      "dynamics.js",
+      293.8,
+      429.5,
+      20635,
+      "script"
+     ],
+     [
+      "molecule.js",
+      316.5,
+      431.9,
+      5183,
+      "script"
+     ],
+     [
+      "mo.js",
+      319.4,
+      434.2,
+      46484,
+      "script"
+     ],
+     [
+      "pulse.js",
+      321.1,
+      436.6,
+      4329,
+      "script"
+     ],
+     [
+      "h2.js",
+      330.9,
+      440.7,
+      5632,
+      "script"
+     ],
+     [
+      "molecules.js",
+      335.6,
+      447.5,
+      43258,
+      "script"
+     ],
+     [
+      "orbitalsview.js",
+      336.8,
+      451,
+      33833,
+      "script"
+     ],
+     [
+      "statesview.js",
+      336.9,
+      452.2,
+      57188,
+      "script"
+     ],
+     [
+      "linalg.js",
+      353.6,
+      455.1,
+      6778,
+      "script"
+     ],
+     [
+      "calculus.js",
+      359.5,
+      459.8,
+      6263,
+      "script"
+     ],
+     [
+      "slice.js",
+      362.3,
+      463.3,
+      6005,
+      "script"
+     ],
+     [
+      "qcd.js",
+      362.7,
+      465.2,
+      7560,
+      "script"
+     ],
+     [
+      "electrostatics.js",
+      368.3,
+      468.3,
+      35595,
+      "script"
+     ],
+     [
+      "wigner.js",
+      378.4,
+      469.1,
+      24211,
+      "script"
+     ],
+     [
+      "radiation.js",
+      378.8,
+      471.5,
+      14812,
+      "script"
+     ],
+     [
+      "bessel.js",
+      385.6,
+      474.2,
+      1168,
+      "script"
+     ],
+     [
+      "cornell.js",
+      387,
+      477.9,
+      7800,
+      "script"
+     ],
+     [
+      "qho.js",
+      387.1,
+      480.5,
+      6820,
+      "script"
+     ],
+     [
+      "sturmian.js",
+      404.7,
+      482.4,
+      18828,
+      "script"
+     ],
+     [
+      "mir/modulation/mod.js",
+      408.8,
+      485.2,
+      137484,
+      "script"
+     ],
+     [
+      "mir/modulation/registry.js",
+      408.9,
+      488.5,
+      25631,
+      "script"
+     ],
+     [
+      "mir/slider-keys.js",
+      422,
+      491.6,
+      750,
+      "script"
+     ],
+     [
+      "mir/modulation/curve.js",
+      422.1,
+      493.4,
+      21396,
+      "script"
+     ],
+     [
+      "mir/modulation/curve-gesture.js",
+      422.2,
+      496.2,
+      4736,
+      "script"
+     ],
+     [
+      "modrive.js",
+      449.8,
+      506.1,
+      5182,
+      "script"
+     ],
+     [
+      "twocentre.js",
+      451.8,
+      505.8,
+      15680,
+      "script"
+     ],
+     [
+      "md.js",
+      484.2,
+      522.2,
+      29024,
+      "script"
+     ],
+     [
+      "molecular-register.js",
+      487.3,
+      526.3,
+      18463,
+      "script"
+     ],
+     [
+      "molecular-flow.js",
+      487.4,
+      524.2,
+      3880,
+      "script"
+     ],
+     [
+      "molecular-field.js",
+      528.6,
+      554.5,
+      11537,
+      "script"
+     ],
+     [
+      "molecule-state.js",
+      1167.4,
+      1184.1,
+      18774,
+      "script"
+     ],
+     [
+      "rhf-molecule.js",
+      1299.8,
+      1316.2,
+      17545,
+      "script"
+     ],
+     [
+      "scf.js",
+      1322.7,
+      1338.3,
+      8657,
+      "script"
+     ],
+     [
+      "density.js",
+      1322.8,
+      1340.2,
+      19425,
+      "script"
+     ],
+     [
+      "rpa-inspector.js",
+      1323,
+      1336.5,
+      15610,
+      "script"
+     ],
+     [
+      "canon-gauge.js",
+      1323.1,
+      1335,
+      7977,
+      "script"
+     ]
+    ]
+   },
+   "marks": [],
+   "cnt": null,
+   "t": null,
+   "dom": {
+    "elements": 4495,
+    "rackEls": 2835,
+    "floatsEls": 534,
+    "transportEls": 93,
+    "styleSheets": 8,
+    "cssRules": 2789
+   },
+   "devs": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "els": 35,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 58,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 301,
+     "canvases": 1,
+     "knobs": 10
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 82,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 75,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 128,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 73,
+     "canvases": 2,
+     "knobs": 2
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 98,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "els": 223,
+     "canvases": 3,
+     "knobs": 8
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 76,
+     "canvases": 0,
+     "knobs": 2
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 95,
+     "canvases": 1,
+     "knobs": 3
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 201,
+     "canvases": 2,
+     "knobs": 3
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 218,
+     "canvases": 3,
+     "knobs": 5
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 47,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 95,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 174,
+     "canvases": 2,
+     "knobs": 4
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 82,
+     "canvases": 2,
+     "knobs": 0
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "els": 77,
+     "canvases": 0,
+     "knobs": 1
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 2
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 76,
+     "canvases": 1,
+     "knobs": 0
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "els": 53,
+     "canvases": 0,
+     "knobs": 0
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 207,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "els": 219,
+     "canvases": 0,
+     "knobs": 14
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 115,
+     "canvases": 2,
+     "knobs": 1
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 124,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 138,
+     "canvases": 0,
+     "knobs": 7
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "els": 59,
+     "canvases": 1,
+     "knobs": 2
+    }
+   ],
+   "canv": [
+    [
+     "field",
+     1920,
+     994
+    ],
+    [
+     "fieldlines",
+     1,
+     1
+    ],
+    [
+     "vortex",
+     1,
+     1
+    ],
+    [
+     "particles",
+     1,
+     1
+    ],
+    [
+     "flow",
+     300,
+     150
+    ],
+    [
+     "kepler",
+     1,
+     1
+    ],
+    [
+     "shadow-c",
+     254,
+     234
+    ],
+    [
+     "?",
+     244,
+     90
+    ],
+    [
+     "orbit-c",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "slice-c",
+     300,
+     150
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ],
+    [
+     "qcd-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c mol-core",
+     300,
+     150
+    ],
+    [
+     "mol-c",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-ladder",
+     300,
+     150
+    ],
+    [
+     "mol-c reg-scope",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "?",
+     300,
+     150
+    ],
+    [
+     "atm-c",
+     300,
+     150
+    ],
+    [
+     "atm-r",
+     300,
+     150
+    ],
+    [
+     "wig-c",
+     300,
+     150
+    ],
+    [
+     "rad-c",
+     300,
+     150
+    ],
+    [
+     "pal-strip",
+     177,
+     52
+    ],
+    [
+     "pal-ring",
+     60,
+     52
+    ],
+    [
+     "plane-model",
+     400,
+     280
+    ]
+   ],
+   "errs": [],
+   "ready": true,
+   "fieldOk": true,
+   "readyPolled": 1298.1
+  }
+ ]
+}

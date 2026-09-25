@@ -1,0 +1,29 @@
+{
+ "storm": {
+  "framesOfStimulus": 66,
+  "before": {
+   "id": 2,
+   "op": "stat",
+   "ok": true,
+   "parked": false,
+   "busyMs": 381,
+   "jobs": 1,
+   "parks": 0,
+   "resumes": 0,
+   "held": 0,
+   "parkedMs": 0
+  },
+  "afterStimulus": {
+   "error": "timeout"
+  },
+  "drained": {
+   "error": "timeout"
+  },
+  "drainMsAfterStimulus": 120007,
+  "statTries": 15,
+  "busyMarkUpOnPolls": 1,
+  "jobsTotal": null,
+  "busyMsTotal": null
+ },
+ "errs": []
+}

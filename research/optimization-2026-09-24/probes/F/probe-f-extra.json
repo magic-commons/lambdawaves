@@ -1,0 +1,74 @@
+{
+ "restoreBreakdown": {
+  "runs": [
+   {
+    "restoreMs": 469,
+    "ladderSetMs": 413.6,
+    "ladderCalls": 1
+   },
+   {
+    "restoreMs": 460.8,
+    "ladderSetMs": 421.5,
+    "ladderCalls": 1
+   },
+   {
+    "restoreMs": 455.1,
+    "ladderSetMs": 418.3,
+    "ladderCalls": 1
+   }
+  ],
+  "ladderParams": {
+   "nbar": 30,
+   "sigma": 2,
+   "d": 0,
+   "teeth": 8
+  }
+ },
+ "projectOpenStall": {
+  "actMs": 471.9,
+  "worstStallMs": 487.7,
+  "rafMax": 467.3,
+  "rafMedian": 17.1
+ },
+ "heliumBasisWhileOn": {
+  "toTen": {
+   "actMs": 0.4,
+   "worstStallMs": 6.3,
+   "rafMax": 34.2,
+   "rafMedian": 17.1
+  },
+  "toSix": {
+   "actMs": 0.4,
+   "worstStallMs": 5.9,
+   "rafMax": 50.3,
+   "rafMedian": 17.1
+  }
+ },
+ "wignerGovernorOn": {
+  "calls": [
+   {
+    "t": 3711,
+    "ms": 110.2
+   },
+   {
+    "t": 6862,
+    "ms": 90.6
+   },
+   {
+    "t": 9945,
+    "ms": 102.1
+   }
+  ],
+  "parked": [
+   "wigner"
+  ],
+  "probes": 3,
+  "stall": {
+   "actMs": 0,
+   "worstStallMs": 118.5,
+   "rafMax": 183.9,
+   "rafMedian": 83.4
+  }
+ },
+ "errs": []
+}

@@ -1,0 +1,148 @@
+== ui.* (133)
+ui.ab                              lab=  4 tests= 25 legacy= 35  rack.js:4
+ui.abOmega                         lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.abRo                            lab= 11 tests=  0 legacy=  0  rack.js:11
+ui.abSw                            lab= 14 tests=  0 legacy=  0  native-ui.js:1 rack.js:13
+ui.accA                            lab=  5 tests=  7 legacy=  0  rack.js:5
+ui.accB                            lab=  5 tests=  5 legacy=  0  rack.js:5
+ui.autoSw                          lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.axisInkSeg                      lab=  9 tests=  0 legacy=  0  rack.js:9
+ui.axisModeSeg                     lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.axisSw                          lab= 18 tests=  0 legacy=  9  native-ui.js:2 rack.js:16
+ui.axisWas                         lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.badgesSw                        lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.blurK                           lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.bowKnobs                        lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.bz                              lab=  4 tests= 14 legacy=  0  rack.js:4
+ui.camSeg                          lab=  8 tests=  0 legacy=  0  native-ui.js:3 rack.js:5
+ui.capExact                        lab=  7 tests=  0 legacy=  0  native-ui.js:2 rack.js:5
+ui.capExactRo                      lab= 12 tests=  0 legacy=  0  native-ui.js:1 rack.js:11
+ui.capFps                          lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.capLoop                         lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.capPic                          lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.capPlanRo                       lab= 14 tests=  0 legacy=  0  native-ui.js:1 rack.js:13
+ui.capPlanT                        lab=  1 tests=  0 legacy=  0  rack.js:1
+ui.capRec                          lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.capScale                        lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.capSec                          lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.capShot                         lab= 11 tests=  0 legacy=  0  native-ui.js:1 rack.js:10
+ui.capSw                           lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.cardSeg                         lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.clockLink                       lab=  4 tests=  0 legacy=  0  native-ui.js:4
+ui.controlHintsSw                  lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.defKnob                         lab=  5 tests=  0 legacy=  0  native-ui.js:1 rack.js:4
+ui.defRate                         lab=  9 tests=  0 legacy=  0  native-ui.js:1 rack.js:8
+ui.discSw                          lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.ditherK                         lab= 15 tests=  0 legacy=  0  rack.js:15
+ui.ditherSeg                       lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.domainAuto                      lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.domainKnob                      lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.dragKnob                        lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.elemKnob                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.expK                            lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.fieldRo                         lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.finishSeg                       lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.fldB                            lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.fldE                            lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.fldLines                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.fldOv                           lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.fldPhi                          lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.fldQ                            lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.fldSrc                          lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.fldWin                          lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.flingK                          lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.fovK                            lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.frameModeSeg                    lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.frameSw                         lab= 18 tests=  0 legacy=  7  native-ui.js:2 rack.js:16
+ui.frameWas                        lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.fricK                           lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.frostSeg                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.fz                              lab= 10 tests=  0 legacy=  0  rack.js:10
+ui.gainK                           lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.gammaK                          lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.gamutRo                         lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.gamutSeg                        lab= 10 tests=  0 legacy=  0  native-ui.js:1 rack.js:9
+ui.gamutToggle                     lab=  0 tests=  0 legacy=  0  
+ui.gasBasis                        lab=  5 tests=  3 legacy=  0  rack.js:5
+ui.gasRo                           lab= 15 tests=  0 legacy=  0  rack.js:15
+ui.gasSpeed                        lab=  9 tests=  0 legacy=  0  rack.js:9
+ui.govRo                           lab=  4 tests=  0 legacy=  3  rack.js:4
+ui.govSw                           lab=  3 tests=  0 legacy=  3  rack.js:3
+ui.grainK                          lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.gridSeg                         lab= 10 tests=  0 legacy=  0  native-ui.js:1 rack.js:9
+ui.hamSeg                          lab= 13 tests=  0 legacy=  0  rack.js:13
+ui.hc                              lab=  3 tests=  3 legacy=  5  native-ui.js:1 rack.js:2
+ui.hueK                            lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.invertSw                        lab= 11 tests=  0 legacy=  0  native-ui.js:2 rack.js:9
+ui.isoK                            lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.keepSw                          lab=  3 tests=  0 legacy=  3  rack.js:3
+ui.kepRo                           lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.kepShell                        lab= 11 tests=  0 legacy=  0  rack.js:11
+ui.kepSpin                         lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.kepTilt                         lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.kepTurn                         lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.keplerSw                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.keysRefresh                     lab= 14 tests=  0 legacy=  2  rack.js:14
+ui.keysSay                         lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.kickAxis                        lab=  1 tests=  0 legacy=  0  rack.js:1
+ui.kickRo                          lab=  9 tests=  0 legacy=  0  rack.js:9
+ui.kneeK                           lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.kzKnob                          lab=  5 tests=  0 legacy=  0  native-ui.js:1 rack.js:4
+ui.kzRate                          lab=  9 tests=  0 legacy=  0  native-ui.js:1 rack.js:8
+ui.lambdaKnob                      lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.linkNote                        lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.modB                            lab=  3 tests=  0 legacy= 42  rack.js:3
+ui.modExp                          lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.p3Seg                           lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.perfSeg                         lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.periodFx                        lab=  5 tests=  0 legacy=  0  native-ui.js:1 rack.js:4
+ui.periodRo                        lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.presetNote                      lab=  1 tests=  0 legacy=  0  rack.js:1
+ui.presetSel                       lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.rateKnob                        lab=  8 tests=  0 legacy=  0  rack.js:8
+ui.rotZRate                        lab=  5 tests=  0 legacy=  0  native-ui.js:2 rack.js:3
+ui.saveNative                      lab=  8 tests=  0 legacy=  0  native-ui.js:8
+ui.scaleRo                         lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.scaleSeg                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.scrub                           lab= 18 tests= 23 legacy= 65  rack.js:18
+ui.set                             lab=  9 tests=149 legacy=104  native-ui.js:1 rack.js:8
+ui.setClockLink                    lab=  2 tests=  0 legacy=  0  native-ui.js:1 rack.js:1
+ui.setWindowInfo                   lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.shadowSeg                       lab=  4 tests=  0 legacy=  0  native-ui.js:1 rack.js:3
+ui.sliceAxisSeg                    lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.sliceMini                       lab=  2 tests=  0 legacy=  0  rack.js:2
+ui.sliceModeSeg                    lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.slicePosK                       lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.sliceThickK                     lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.softK                           lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.spaceNote                       lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.spaceSeg                        lab= 14 tests=  0 legacy=  0  native-ui.js:1 rack.js:13
+ui.spinK                           lab=  4 tests=  0 legacy=  0  rack.js:4
+ui.spinSw                          lab=  7 tests=  0 legacy=  0  native-ui.js:3 rack.js:4
+ui.stageColour                     lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.stageFollow                     lab=  6 tests=  2 legacy=  0  rack.js:6
+ui.stageK                          lab=  6 tests=  0 legacy=  0  rack.js:6
+ui.stageSeat                       lab=  0 tests=  0 legacy=  0  
+ui.sturmRo                         lab=  7 tests=  0 legacy=  0  rack.js:7
+ui.styleSeg                        lab= 13 tests=  0 legacy=  0  native-ui.js:5 rack.js:8
+ui.themeSeg                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.viewSeg                         lab= 21 tests=  1 legacy=  0  rack.js:21
+ui.vivid                           lab=  5 tests= 11 legacy= 11  rack.js:5
+ui.wellKnob                        lab=  3 tests=  0 legacy=  0  rack.js:3
+ui.windowInfoSw                    lab=  3 tests=  0 legacy=  0  native-ui.js:1 rack.js:2
+ui.zKnob                           lab=  5 tests=  0 legacy=  0  rack.js:5
+ui.zoomK                           lab=  8 tests=  0 legacy=  0  rack.js:8
+
+== __LW_hooks.* (12)
+__LW_hooks.ab                      lab=  8 tests= 25 legacy= 35  rack.js:8
+__LW_hooks.keys                    lab=  7 tests= 52 legacy=136  rack.js:7
+__LW_hooks.period                  lab=  6 tests=101 legacy= 42  rack.js:6
+__LW_hooks.restage                 lab=  2 tests=  0 legacy=  0  rack.js:2
+__LW_hooks.setGamut                lab=  2 tests=  0 legacy=  0  rack.js:2
+__LW_hooks.setStage                lab=  3 tests=  2 legacy=  6  rack.js:3
+__LW_hooks.setStageColour          lab=  2 tests=  0 legacy=  0  rack.js:2
+__LW_hooks.setStageFollow          lab=  2 tests=  0 legacy=  0  rack.js:2
+__LW_hooks.setTheme                lab= 12 tests=  5 legacy= 50  rack.js:12
+__LW_hooks.showMenuBar             lab=  2 tests=  0 legacy=  0  rack.js:2
+__LW_hooks.slap                    lab=  4 tests=  6 legacy= 22  rack.js:4
+__LW_hooks.warning                 lab=  3 tests=  8 legacy= 40  rack.js:3

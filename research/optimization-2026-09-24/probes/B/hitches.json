@@ -1,0 +1,69 @@
+{
+ "link": {
+  "secs": 5,
+  "modPlaying": false,
+  "modRunning": false,
+  "sources": 2,
+  "routes": 0,
+  "forcedPaints": 5,
+  "paintCalls": 5,
+  "paintMsTotal": 3.66,
+  "msPerPaint": 0.732,
+  "frames": 64
+ },
+ "probe": {
+  "frames": 156,
+  "parked": [],
+  "probes": 3,
+  "work": 90.89999999999782,
+  "long": [
+   {
+    "at": 3.42,
+    "ms": 82.14
+   },
+   {
+    "at": 6.42,
+    "ms": 89.62
+   },
+   {
+    "at": 9.58,
+    "ms": 120.08
+   },
+   {
+    "at": 9.82,
+    "ms": 91.9
+   }
+  ]
+ },
+ "flash": {
+  "frames": 10,
+  "gapsOver250": 7,
+  "gapMedian": 503.8,
+  "framesWithBusyMark": 8,
+  "timers": 13
+ },
+ "pump": {
+  "ids": 40,
+  "syncBasesWalkUs": 41.49,
+  "applyAllNoRouteUs": 7.53,
+  "applyAllOneRouteUs": 6.56,
+  "stateObjUs": 0.43
+ },
+ "spin": {
+  "frames": 51,
+  "versions": 50,
+  "spectrumRebuilds": 0,
+  "loopMsMedian": 0.68,
+  "p90": 1.66
+ },
+ "spinBase": {
+  "frames": 51,
+  "loopMsMedian": 0.52,
+  "p90": 1.24
+ },
+ "errors": {
+  "errs": [],
+  "problems": [],
+  "problemsVia": "absent"
+ }
+}

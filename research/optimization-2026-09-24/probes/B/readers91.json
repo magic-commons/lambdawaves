@@ -1,0 +1,10 @@
+{
+ "lanes": 2,
+ "dialsOpen": false,
+ "spectrumUpdateDialsClosedMs": 0.4631,
+ "spectrumUpdateDialsOpenMs": 0.4593,
+ "shadowUpdate91Ms": 1.051,
+ "inkReadCleanUs": 2,
+ "inkReadAfterStyleWriteUs": 2588.5,
+ "canvasClientWidthAfterWriteUs": 2433.4
+}

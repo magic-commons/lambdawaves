@@ -1,0 +1,30 @@
+{
+ "patched_noGpu": {
+  "ready": true,
+  "fieldOk": false,
+  "banner": {
+   "hidden": false,
+   "title": "WebGPU unavailable"
+  },
+  "errsAtReady": [],
+  "framesWhilePlaying": 57,
+  "t": 4.792,
+  "energyRo": true,
+  "phoneDprCap": "undefined",
+  "errsAfterPlay": []
+ },
+ "patched_gpu": {
+  "ready": true,
+  "fieldOk": true,
+  "banner": {
+   "hidden": true,
+   "title": "WebGPU unavailable"
+  },
+  "errsAtReady": [],
+  "framesWhilePlaying": 24,
+  "t": 4.631,
+  "energyRo": true,
+  "phoneDprCap": 2,
+  "errsAfterPlay": []
+ }
+}

@@ -1,0 +1,3182 @@
+{
+ "at": "2026-09-25T02:02:26.667Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "scenes": [
+  {
+   "label": "default (disconnected · refractive · frost ALWAYS · light · 8 windows)",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 18,
+     "onScreenPx": 546220,
+     "visiblePx": 546220,
+     "screens": 0.286,
+     "visibleScreens": 0.286
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 215,
+     "blurShadowTerms": 404,
+     "textShadow": 18
+    },
+    "anims": [
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "transform@div.k-val",
+     "lw-turn-0@rect.sq0",
+     "lw-turn-1@rect.sq1",
+     "lw-turn-2@rect.sq2",
+     "lw-turn-3@rect.sq3",
+     "lw-turn-4@rect.sq4",
+     "lw-turn-5@rect.sq5",
+     "lw-turn-6@rect.sq6",
+     "lw-turn-7@rect.sq7",
+     "lw-turn-8@rect.sq8"
+    ]
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 18,
+     "onScreenPx": 546220,
+     "visiblePx": 546220,
+     "screens": 0.286,
+     "visibleScreens": 0.286
+    },
+    "anims": [
+     "lw-turn-0@rect.sq0",
+     "lw-turn-1@rect.sq1",
+     "lw-turn-2@rect.sq2",
+     "lw-turn-3@rect.sq3",
+     "lw-turn-4@rect.sq4",
+     "lw-turn-5@rect.sq5",
+     "lw-turn-6@rect.sq6",
+     "lw-turn-7@rect.sq7",
+     "lw-turn-8@rect.sq8"
+    ]
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 88835,
+     "visible": 88835,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 127949,
+     "visible": 127949,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": {
+    "frames": 50,
+    "records": 552,
+    "perFrame": 11,
+    "noopAttrPerFrame": 3.5,
+    "top": [
+     [
+      "attributes:style spectrum i.k-needle",
+      1.04
+     ],
+     [
+      "childList spectrum div.k-val",
+      1.04
+     ],
+     [
+      "attributes:aria-valuetext spectrum div.k",
+      1
+     ],
+     [
+      "childList spectrum i.fx-v",
+      0.6
+     ],
+     [
+      "childList modwin b.ckval",
+      0.6
+     ],
+     [
+      "childList modwin div.m2kval",
+      0.6
+     ],
+     [
+      "attributes:aria-valuenow modwin div.m2kd",
+      0.6
+     ],
+     [
+      "attributes:aria-valuetext modwin div.m2kd",
+      0.6
+     ],
+     [
+      "attributes:class transport div.ro-val",
+      0.52
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2chk",
+      0.42
+     ],
+     [
+      "childList transport div.ro-val",
+      0.24
+     ],
+     [
+      "childList transport i.fx-v",
+      0.24
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2lfocmpcmd",
+      0.24
+     ],
+     [
+      "attributes:title modwin div.m2numseat",
+      0.24
+     ],
+     [
+      "childList transport div.ro-sub",
+      0.18
+     ],
+     [
+      "childList modwin b",
+      0.18
+     ],
+     [
+      "childList modwin button.m2mac",
+      0.18
+     ],
+     [
+      "childList modwin div.k-val",
+      0.12
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2swb",
+      0.12
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2hold",
+      0.12
+     ],
+     [
+      "childList modwin span.m2vname",
+      0.12
+     ],
+     [
+      "childList modwin span.m2drive",
+      0.12
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2numseat",
+      0.12
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2val",
+      0.12
+     ],
+     [
+      "childList modwin span.m2vnum",
+      0.12
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2pow",
+      0.12
+     ],
+     [
+      "childList modwin span.m2minname",
+      0.12
+     ],
+     [
+      "childList modwin span.m2minstatus",
+      0.12
+     ],
+     [
+      "childList modwin button.m2minnum",
+      0.12
+     ],
+     [
+      "childList modwin span.m2lfocmpvalue",
+      0.12
+     ],
+     [
+      "attributes:d modwin path.m2mintpath",
+      0.12
+     ],
+     [
+      "attributes:d modwin path.m2mintfill",
+      0.12
+     ],
+     [
+      "attributes:data-help modwin div.m2numseat",
+      0.12
+     ],
+     [
+      "childList modwin i.modhz",
+      0.06
+     ],
+     [
+      "childList modwin #modsync.modsync",
+      0.06
+     ],
+     [
+      "childList modwin #modcad.modcad",
+      0.06
+     ],
+     [
+      "childList modwin #m2-dead-send-warning.m2predead",
+      0.06
+     ],
+     [
+      "childList modwin span.m2lfowave",
+      0.06
+     ],
+     [
+      "childList modwin span.m2lfoout",
+      0.06
+     ],
+     [
+      "childList modwin span.m2envstage",
+      0.06
+     ],
+     [
+      "childList modwin span.m2envout",
+      0.06
+     ],
+     [
+      "attributes:class settings div.ro-val",
+      0.04
+     ],
+     [
+      "childList transport button.tbtn",
+      0.02
+     ],
+     [
+      "attributes:class transport button.tbtn",
+      0.02
+     ],
+     [
+      "attributes:aria-pressed transport button.tbtn",
+      0.02
+     ]
+    ]
+   }
+  },
+  {
+   "label": "connected",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": false,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 12,
+     "onScreenPx": 560412,
+     "visiblePx": 560412,
+     "screens": 0.294,
+     "visibleScreens": 0.294
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 9,
+     "isolate": 0,
+     "blurShadowEls": 209,
+     "blurShadowTerms": 384,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": false,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 12,
+     "onScreenPx": 560412,
+     "visiblePx": 560412,
+     "screens": 0.294,
+     "visibleScreens": 0.294
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 340,
+     "onScreen": 93160,
+     "visible": 93160,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.native-clean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 1546,
+     "onScreen": 173716,
+     "visible": 173716,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.folded",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 36,
+     "onScreen": 9864,
+     "visible": 9864,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.folded",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 36,
+     "onScreen": 9864,
+     "visible": 9864,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.native-clean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 361,
+     "onScreen": 98804,
+     "visible": 98804,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.native-clean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 595,
+     "onScreen": 142864,
+     "visible": 142864,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.lean.native-clean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 753,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "section.dev.native-clean",
+     "f": "blur(22px)",
+     "w": 274,
+     "h": 337,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": null
+  },
+  {
+   "label": "connected · frost OFF",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": false,
+     "hold": false,
+     "disc": false,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 9,
+     "isolate": 0,
+     "blurShadowEls": 209,
+     "blurShadowTerms": 384,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": false,
+     "hold": false,
+     "disc": false,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "anims": []
+   },
+   "list": [],
+   "mutations": null
+  },
+  {
+   "label": "disconnected · frost OFF",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": false,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 8,
+     "onScreenPx": 55488,
+     "visiblePx": 55488,
+     "screens": 0.029,
+     "visibleScreens": 0.029
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 215,
+     "blurShadowTerms": 404,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": false,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 8,
+     "onScreenPx": 55488,
+     "visiblePx": 55488,
+     "screens": 0.029,
+     "visibleScreens": 0.029
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": null
+  },
+  {
+   "label": "disconnected · frost STILL",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 18,
+     "onScreenPx": 546220,
+     "visiblePx": 546220,
+     "screens": 0.286,
+     "visibleScreens": 0.286
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 215,
+     "blurShadowTerms": 404,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": true,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 88835,
+     "visible": 88835,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 127949,
+     "visible": 127949,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": null
+  },
+  {
+   "label": "disconnected · tinted · frost ALWAYS",
+   "idle": {
+    "state": {
+     "card": "tinted",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 18,
+     "onScreenPx": 546220,
+     "visiblePx": 546220,
+     "screens": 0.286,
+     "visibleScreens": 0.286
+    },
+    "counts": {
+     "elements": 581,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 215,
+     "blurShadowTerms": 404,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "tinted",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 18,
+     "onScreenPx": 546220,
+     "visiblePx": 546220,
+     "screens": 0.286,
+     "visibleScreens": 0.286
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 88835,
+     "visible": 88835,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 127949,
+     "visible": 127949,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": null
+  },
+  {
+   "label": "modulation window open (refractive · frost · disc)",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 27,
+     "onScreenPx": 908277,
+     "visiblePx": 908277,
+     "screens": 0.476,
+     "visibleScreens": 0.476
+    },
+    "counts": {
+     "elements": 960,
+     "filter": 17,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 223,
+     "blurShadowTerms": 418,
+     "textShadow": 22
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 27,
+     "onScreenPx": 908277,
+     "visiblePx": 908277,
+     "screens": 0.476,
+     "visibleScreens": 0.476
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "div.m2rail.glass",
+     "f": "blur(22px)",
+     "w": 224,
+     "h": 336,
+     "onScreen": 75264,
+     "visible": 75264,
+     "op": "1"
+    },
+    {
+     "el": "div.m2dev.lfo.glass",
+     "f": "blur(22px)",
+     "w": 360,
+     "h": 336,
+     "onScreen": 120960,
+     "visible": 120960,
+     "op": "1"
+    },
+    {
+     "el": "div.m2dev.env.glass",
+     "f": "blur(22px)",
+     "w": 360,
+     "h": 336,
+     "onScreen": 120960,
+     "visible": 120960,
+     "op": "1"
+    },
+    {
+     "el": "div.m2workbar.m2prebar.glass",
+     "f": "blur(22px)",
+     "w": 294,
+     "h": 46,
+     "onScreen": 13524,
+     "visible": 13524,
+     "op": "1"
+    },
+    {
+     "el": "div.m2workbar.m2pre.fr-bar",
+     "f": "blur(22px)",
+     "w": 481,
+     "h": 46,
+     "onScreen": 22133,
+     "visible": 22133,
+     "op": "1"
+    },
+    {
+     "el": "button.kwin-tab.crail-chip.kwin-close-chip::before",
+     "f": "blur(22px)",
+     "w": 48,
+     "h": 48,
+     "onScreen": 2304,
+     "visible": 2304
+    },
+    {
+     "el": "button.kwin-tab.crail-chip::before",
+     "f": "blur(22px)",
+     "w": 48,
+     "h": 48,
+     "onScreen": 2304,
+     "visible": 2304
+    },
+    {
+     "el": "button.kwin-tab.crail-chip::before",
+     "f": "blur(22px)",
+     "w": 48,
+     "h": 48,
+     "onScreen": 2304,
+     "visible": 2304
+    },
+    {
+     "el": "div.kwin-tab.crail-chip.crail-grip::before",
+     "f": "blur(22px)",
+     "w": 48,
+     "h": 48,
+     "onScreen": 2304,
+     "visible": 2304
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 88835,
+     "visible": 88835,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 127949,
+     "visible": 127949,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": {
+    "frames": 31,
+    "records": 1314,
+    "perFrame": 42.4,
+    "noopAttrPerFrame": 6.5,
+    "top": [
+     [
+      "attributes:style modwin i.m2mintdot",
+      3.23
+     ],
+     [
+      "childList modwin b",
+      2.9
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2hold",
+      1.94
+     ],
+     [
+      "childList modwin span.m2vnum",
+      1.94
+     ],
+     [
+      "childList modwin span.m2minstatus",
+      1.94
+     ],
+     [
+      "attributes:x1 modwin line.m2play",
+      1.94
+     ],
+     [
+      "attributes:x2 modwin line.m2play",
+      1.94
+     ],
+     [
+      "attributes:cx modwin circle.m2playdot",
+      1.94
+     ],
+     [
+      "attributes:cy modwin circle.m2playdot",
+      1.94
+     ],
+     [
+      "attributes:style modwin i.m2meterfill",
+      1.29
+     ],
+     [
+      "childList modwin button.m2mac",
+      1.1
+     ],
+     [
+      "childList modwin div.k-val",
+      1.03
+     ],
+     [
+      "attributes:style spectrum i.k-needle",
+      1.03
+     ],
+     [
+      "childList spectrum div.k-val",
+      1.03
+     ],
+     [
+      "attributes:aria-valuetext spectrum div.k",
+      1.03
+     ],
+     [
+      "childList modwin i.modhz",
+      0.97
+     ],
+     [
+      "childList modwin #modsync.modsync",
+      0.97
+     ],
+     [
+      "childList modwin #modcad.modcad",
+      0.97
+     ],
+     [
+      "childList modwin #m2-dead-send-warning.m2predead",
+      0.97
+     ],
+     [
+      "childList modwin span.m2lfoout",
+      0.97
+     ],
+     [
+      "childList modwin span.m2envstage",
+      0.97
+     ],
+     [
+      "childList modwin span.m2envout",
+      0.97
+     ],
+     [
+      "attributes:style modwin i",
+      0.97
+     ],
+     [
+      "attributes:class transport div.ro-val",
+      0.84
+     ],
+     [
+      "childList spectrum i.fx-v",
+      0.77
+     ],
+     [
+      "childList modwin b.ckval",
+      0.65
+     ],
+     [
+      "childList modwin div.m2kval",
+      0.65
+     ],
+     [
+      "attributes:aria-valuenow modwin div.m2kd",
+      0.65
+     ],
+     [
+      "attributes:aria-valuetext modwin div.m2kd",
+      0.65
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2chk",
+      0.45
+     ],
+     [
+      "childList transport div.ro-val",
+      0.42
+     ],
+     [
+      "childList transport i.fx-v",
+      0.42
+     ],
+     [
+      "childList transport div.ro-sub",
+      0.29
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2lfocmpcmd",
+      0.26
+     ],
+     [
+      "attributes:title modwin div.m2numseat",
+      0.26
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2swb",
+      0.13
+     ],
+     [
+      "childList modwin span.m2vname",
+      0.13
+     ],
+     [
+      "childList modwin span.m2drive",
+      0.13
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2numseat",
+      0.13
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2val",
+      0.13
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2pow",
+      0.13
+     ],
+     [
+      "childList modwin span.m2minname",
+      0.13
+     ],
+     [
+      "childList modwin button.m2minnum",
+      0.13
+     ],
+     [
+      "childList modwin span.m2lfocmpvalue",
+      0.13
+     ],
+     [
+      "attributes:d modwin path.m2mintpath",
+      0.13
+     ]
+    ]
+   }
+  },
+  {
+   "label": "notebook open",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 19,
+     "onScreenPx": 840620,
+     "visiblePx": 840620,
+     "screens": 0.44,
+     "visibleScreens": 0.44
+    },
+    "counts": {
+     "elements": 596,
+     "filter": 1,
+     "willChange": 0,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 216,
+     "blurShadowTerms": 405,
+     "textShadow": 18
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 19,
+     "onScreenPx": 840620,
+     "visiblePx": 840620,
+     "screens": 0.44,
+     "visibleScreens": 0.44
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#notebook.nb",
+     "f": "blur(22px) saturate(1.15)",
+     "w": 640,
+     "h": 460,
+     "onScreen": 294400,
+     "visible": 294400,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 88835,
+     "visible": 88835,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 127949,
+     "visible": 127949,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": null
+  },
+  {
+   "label": "every rack window open",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 27,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 54,
+     "onScreenPx": 547580,
+     "visiblePx": 547580,
+     "screens": 0.287,
+     "visibleScreens": 0.287
+    },
+    "counts": {
+     "elements": 1513,
+     "filter": 1,
+     "willChange": 1,
+     "containPaint": 1,
+     "isolate": 0,
+     "blurShadowEls": 456,
+     "blurShadowTerms": 824,
+     "textShadow": 18
+    },
+    "anims": [
+     "lw-turn-0@rect.sq0",
+     "lw-turn-1@rect.sq1",
+     "lw-turn-2@rect.sq2",
+     "lw-turn-3@rect.sq3",
+     "lw-turn-4@rect.sq4",
+     "lw-turn-5@rect.sq5",
+     "lw-turn-6@rect.sq6",
+     "lw-turn-7@rect.sq7",
+     "lw-turn-8@rect.sq8",
+     "lw-busy-breathe@#busyMark",
+     "lw-turn-0@rect.sq0",
+     "lw-turn-1@rect.sq1",
+     "lw-turn-2@rect.sq2",
+     "lw-turn-3@rect.sq3",
+     "lw-turn-4@rect.sq4",
+     "lw-turn-5@rect.sq5",
+     "lw-turn-6@rect.sq6",
+     "lw-turn-7@rect.sq7",
+     "lw-turn-8@rect.sq8",
+     "lw-busy-breathe@svg.mark",
+     "lw-turn-0@rect.sq0",
+     "lw-turn-1@rect.sq1",
+     "lw-turn-2@rect.sq2",
+     "lw-turn-3@rect.sq3",
+     "lw-turn-4@rect.sq4",
+     "lw-turn-5@rect.sq5",
+     "lw-turn-6@rect.sq6",
+     "lw-turn-7@rect.sq7",
+     "lw-turn-8@rect.sq8"
+    ]
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": false,
+     "tablet": false,
+     "open": 27,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 54,
+     "onScreenPx": 547580,
+     "visiblePx": 547580,
+     "screens": 0.287,
+     "visibleScreens": 0.287
+    },
+    "anims": []
+   },
+   "list": [
+    {
+     "el": "#rackToggle.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackAdd.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#rackFav.glass",
+     "f": "blur(22px)",
+     "w": 30,
+     "h": 30,
+     "onScreen": 900,
+     "visible": 900,
+     "op": "1"
+    },
+    {
+     "el": "#transport.glass.mini",
+     "f": "blur(22px)",
+     "w": 640,
+     "h": 46,
+     "onScreen": 29440,
+     "visible": 29440,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-shadow.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 306,
+     "onScreen": 83232,
+     "visible": 83232,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-spectrum.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1512,
+     "onScreen": 158576,
+     "visible": 158576,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-orbit.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 611,
+     "onScreen": 166260,
+     "visible": 166260,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-vortex.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 175,
+     "onScreen": 47491,
+     "visible": 47491,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 9248,
+     "visible": 9248,
+     "op": "1"
+    },
+    {
+     "el": "#devb-dynamics.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 452,
+     "onScreen": 13641,
+     "visible": 13641,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-slice.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 610,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-qcd.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 366,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-helium.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 195,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-h2.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 444,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-chem.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 720,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-orbitals.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 453,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-calculus.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 350,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-meters.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 84,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "0.38"
+    },
+    {
+     "el": "#devb-ladder.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 547,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "0.38"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-atoms.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 351,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-field.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 146,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-wigner.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 298,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-radiation.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 207,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-history.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 162,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-settings.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 607,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-state.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 1002,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-palette.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 327,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-observer.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 561,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-camera.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 719,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "header.dev-head",
+     "f": "blur(22px) brightness(1.03) saturate(1.03)",
+     "w": 272,
+     "h": 34,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    },
+    {
+     "el": "#devb-clip.dev-body",
+     "f": "blur(22px)",
+     "w": 272,
+     "h": 303,
+     "onScreen": 0,
+     "visible": 0,
+     "op": "1"
+    }
+   ],
+   "mutations": {
+    "frames": 44,
+    "records": 1614,
+    "perFrame": 36.7,
+    "noopAttrPerFrame": 11.5,
+    "top": [
+     [
+      "childList calculus div.calc-row",
+      6.25
+     ],
+     [
+      "childList dynamics div.ro-val",
+      1.75
+     ],
+     [
+      "childList calculus div.calc-table",
+      1.75
+     ],
+     [
+      "attributes:class meters div.ro-val",
+      1.75
+     ],
+     [
+      "attributes:class qcd div.ro-val",
+      1.5
+     ],
+     [
+      "attributes:class calculus span.calc-res",
+      1.25
+     ],
+     [
+      "childList meters div.ro-sub",
+      1.05
+     ],
+     [
+      "attributes:style spectrum i.k-needle",
+      1
+     ],
+     [
+      "childList spectrum div.k-val",
+      1
+     ],
+     [
+      "attributes:aria-valuetext spectrum div.k",
+      1
+     ],
+     [
+      "childList radiation div.ro-val",
+      0.95
+     ],
+     [
+      "childList meters div.ro-val",
+      0.93
+     ],
+     [
+      "childList radiation div.ro-sub",
+      0.82
+     ],
+     [
+      "attributes:class radiation div.ro-val",
+      0.75
+     ],
+     [
+      "childList spectrum i.fx-v",
+      0.68
+     ],
+     [
+      "childList modwin b.ckval",
+      0.68
+     ],
+     [
+      "childList modwin div.m2kval",
+      0.68
+     ],
+     [
+      "attributes:aria-valuenow modwin div.m2kd",
+      0.68
+     ],
+     [
+      "attributes:aria-valuetext modwin div.m2kd",
+      0.68
+     ],
+     [
+      "attributes:class transport div.ro-val",
+      0.64
+     ],
+     [
+      "attributes:class dynamics div.ro-val",
+      0.5
+     ],
+     [
+      "attributes:title slice canvas.plane-model",
+      0.5
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2chk",
+      0.48
+     ],
+     [
+      "childList wigner div.ro-val",
+      0.48
+     ],
+     [
+      "attributes:class wigner div.ro-val",
+      0.41
+     ],
+     [
+      "childList transport div.ro-val",
+      0.32
+     ],
+     [
+      "childList transport i.fx-v",
+      0.32
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2lfocmpcmd",
+      0.27
+     ],
+     [
+      "attributes:title modwin div.m2numseat",
+      0.27
+     ],
+     [
+      "childList dynamics div.ro-sub",
+      0.25
+     ],
+     [
+      "attributes:aria-disabled slice canvas.plane-model",
+      0.25
+     ],
+     [
+      "attributes:tabindex slice canvas.plane-model",
+      0.25
+     ],
+     [
+      "attributes:class slice div.ro-val",
+      0.25
+     ],
+     [
+      "attributes:class wigner div.dev-stat",
+      0.25
+     ],
+     [
+      "attributes:hidden wigner div.wig-stand",
+      0.25
+     ],
+     [
+      "childList radiation div.rad-cap",
+      0.25
+     ],
+     [
+      "attributes:hidden radiation div.rad-stand",
+      0.25
+     ],
+     [
+      "attributes:class radiation div.dev-stat",
+      0.25
+     ],
+     [
+      "attributes:style meters i",
+      0.25
+     ],
+     [
+      "childList badges span",
+      0.25
+     ],
+     [
+      "attributes:class state div.ro-val",
+      0.25
+     ],
+     [
+      "attributes:class badges button.badge",
+      0.25
+     ],
+     [
+      "attributes:data-help slice canvas.plane-model",
+      0.25
+     ],
+     [
+      "childList wigner div.ro-sub",
+      0.25
+     ],
+     [
+      "childList transport div.ro-sub",
+      0.23
+     ]
+    ]
+   }
+  },
+  {
+   "label": "every window open · UI hidden",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": true,
+     "tablet": false,
+     "open": 27,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "counts": {
+     "elements": 10,
+     "filter": 0,
+     "willChange": 0,
+     "containPaint": 0,
+     "isolate": 0,
+     "blurShadowEls": 0,
+     "blurShadowTerms": 0,
+     "textShadow": 0
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": true,
+     "tablet": false,
+     "open": 27,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "anims": []
+   },
+   "list": [],
+   "mutations": {
+    "frames": 98,
+    "records": 307,
+    "perFrame": 3.1,
+    "noopAttrPerFrame": 1.5,
+    "top": [
+     [
+      "childList modwin b.ckval",
+      0.31
+     ],
+     [
+      "childList modwin div.m2kval",
+      0.31
+     ],
+     [
+      "attributes:aria-valuenow modwin div.m2kd",
+      0.31
+     ],
+     [
+      "attributes:aria-valuetext modwin div.m2kd",
+      0.31
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2chk",
+      0.21
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2lfocmpcmd",
+      0.12
+     ],
+     [
+      "attributes:title modwin div.m2numseat",
+      0.12
+     ],
+     [
+      "childList modwin b",
+      0.09
+     ],
+     [
+      "childList modwin button.m2mac",
+      0.09
+     ],
+     [
+      "childList modwin div.k-val",
+      0.06
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2swb",
+      0.06
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2hold",
+      0.06
+     ],
+     [
+      "childList modwin span.m2vname",
+      0.06
+     ],
+     [
+      "childList modwin span.m2drive",
+      0.06
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2numseat",
+      0.06
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2val",
+      0.06
+     ],
+     [
+      "childList modwin span.m2vnum",
+      0.06
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2pow",
+      0.06
+     ],
+     [
+      "childList modwin span.m2minname",
+      0.06
+     ],
+     [
+      "childList modwin span.m2minstatus",
+      0.06
+     ],
+     [
+      "childList modwin button.m2minnum",
+      0.06
+     ],
+     [
+      "childList modwin span.m2lfocmpvalue",
+      0.06
+     ],
+     [
+      "attributes:d modwin path.m2mintpath",
+      0.06
+     ],
+     [
+      "attributes:d modwin path.m2mintfill",
+      0.06
+     ],
+     [
+      "attributes:data-help modwin div.m2numseat",
+      0.06
+     ],
+     [
+      "attributes:class settings div.ro-val",
+      0.04
+     ],
+     [
+      "childList modwin i.modhz",
+      0.03
+     ],
+     [
+      "childList modwin #modsync.modsync",
+      0.03
+     ],
+     [
+      "childList modwin #modcad.modcad",
+      0.03
+     ],
+     [
+      "childList modwin #m2-dead-send-warning.m2predead",
+      0.03
+     ],
+     [
+      "childList modwin span.m2lfowave",
+      0.03
+     ],
+     [
+      "childList modwin span.m2lfoout",
+      0.03
+     ],
+     [
+      "childList modwin span.m2envstage",
+      0.03
+     ],
+     [
+      "childList modwin span.m2envout",
+      0.03
+     ]
+    ]
+   }
+  },
+  {
+   "label": "default windows · UI hidden",
+   "idle": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": true,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "counts": {
+     "elements": 10,
+     "filter": 0,
+     "willChange": 0,
+     "containPaint": 0,
+     "isolate": 0,
+     "blurShadowEls": 0,
+     "blurShadowTerms": 0,
+     "textShadow": 0
+    },
+    "anims": []
+   },
+   "playing": {
+    "state": {
+     "card": "refractive",
+     "theme": "light",
+     "frost": true,
+     "hold": false,
+     "disc": true,
+     "uiHidden": true,
+     "tablet": false,
+     "open": 8,
+     "modwin": false,
+     "vw": 1920,
+     "vh": 994,
+     "dpr": 1
+    },
+    "backdrop": {
+     "layers": 0,
+     "onScreenPx": 0,
+     "visiblePx": 0,
+     "screens": 0,
+     "visibleScreens": 0
+    },
+    "anims": []
+   },
+   "list": [],
+   "mutations": {
+    "frames": 178,
+    "records": 311,
+    "perFrame": 1.7,
+    "noopAttrPerFrame": 0.9,
+    "top": [
+     [
+      "childList modwin b.ckval",
+      0.17
+     ],
+     [
+      "childList modwin div.m2kval",
+      0.17
+     ],
+     [
+      "attributes:aria-valuenow modwin div.m2kd",
+      0.17
+     ],
+     [
+      "attributes:aria-valuetext modwin div.m2kd",
+      0.17
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2chk",
+      0.12
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2lfocmpcmd",
+      0.07
+     ],
+     [
+      "attributes:title modwin div.m2numseat",
+      0.07
+     ],
+     [
+      "childList modwin b",
+      0.05
+     ],
+     [
+      "childList modwin button.m2mac",
+      0.05
+     ],
+     [
+      "attributes:class settings div.ro-val",
+      0.04
+     ],
+     [
+      "childList modwin div.k-val",
+      0.03
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2swb",
+      0.03
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2hold",
+      0.03
+     ],
+     [
+      "childList modwin span.m2vname",
+      0.03
+     ],
+     [
+      "childList modwin span.m2drive",
+      0.03
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2numseat",
+      0.03
+     ],
+     [
+      "attributes:aria-disabled modwin div.m2val",
+      0.03
+     ],
+     [
+      "childList modwin span.m2vnum",
+      0.03
+     ],
+     [
+      "attributes:aria-pressed modwin button.m2pow",
+      0.03
+     ],
+     [
+      "childList modwin span.m2minname",
+      0.03
+     ],
+     [
+      "childList modwin span.m2minstatus",
+      0.03
+     ],
+     [
+      "childList modwin button.m2minnum",
+      0.03
+     ],
+     [
+      "childList modwin span.m2lfocmpvalue",
+      0.03
+     ],
+     [
+      "attributes:d modwin path.m2mintpath",
+      0.03
+     ],
+     [
+      "attributes:d modwin path.m2mintfill",
+      0.03
+     ],
+     [
+      "attributes:data-help modwin div.m2numseat",
+      0.03
+     ],
+     [
+      "childList modwin i.modhz",
+      0.02
+     ],
+     [
+      "childList modwin #modsync.modsync",
+      0.02
+     ],
+     [
+      "childList modwin #modcad.modcad",
+      0.02
+     ],
+     [
+      "childList modwin #m2-dead-send-warning.m2predead",
+      0.02
+     ],
+     [
+      "childList modwin span.m2lfowave",
+      0.02
+     ],
+     [
+      "childList modwin span.m2lfoout",
+      0.02
+     ],
+     [
+      "childList modwin span.m2envstage",
+      0.02
+     ],
+     [
+      "childList modwin span.m2envout",
+      0.02
+     ]
+    ]
+   }
+  }
+ ],
+ "errs": []
+}

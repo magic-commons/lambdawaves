@@ -1,0 +1,171 @@
+{
+ "at": "2026-09-25T02:26:09.826Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "electron",
+ "dsf": "1",
+ "exps": [
+  {
+   "name": "A/A calibration (nothing changes)",
+   "A": [
+    40.44,
+    38.88,
+    38.79
+   ],
+   "B": [
+    38.45,
+    38.45,
+    39.88
+   ],
+   "fpsA": 39.4,
+   "fpsB": 38.9,
+   "msA": 25.4,
+   "msB": 25.69,
+   "gpuMsSaved": -0.29
+  },
+  {
+   "name": "every backdrop-filter removed (diagnostic: the whole frost bill)",
+   "A": [
+    40,
+    39.35,
+    37.58
+   ],
+   "B": [
+    45.08,
+    45.08,
+    43.67
+   ],
+   "fpsA": 39,
+   "fpsB": 44.6,
+   "msA": 25.66,
+   "msB": 22.42,
+   "gpuMsSaved": 3.24
+  },
+  {
+   "name": "disconnected: head blur removed, body blur kept (diagnostic)",
+   "A": [
+    38.33,
+    37.66,
+    37.9
+   ],
+   "B": [
+    38.24,
+    38.79,
+    43.87
+   ],
+   "fpsA": 38,
+   "fpsB": 40.3,
+   "msA": 26.34,
+   "msB": 24.81,
+   "gpuMsSaved": 1.53
+  },
+  {
+   "name": "3 round rack buttons blur removed (diagnostic: per-layer overhead)",
+   "A": [
+    39,
+    38.22,
+    38.88
+   ],
+   "B": [
+    39.88,
+    40,
+    39.66
+   ],
+   "fpsA": 38.7,
+   "fpsB": 39.8,
+   "msA": 25.84,
+   "msB": 25.1,
+   "gpuMsSaved": 0.74
+  },
+  {
+   "name": "blur radius 22 → 8 (diagnostic)",
+   "A": [
+    39,
+    38.81,
+    39.02
+   ],
+   "B": [
+    41.12,
+    39.33,
+    40
+   ],
+   "fpsA": 38.9,
+   "fpsB": 40.1,
+   "msA": 25.68,
+   "msB": 24.91,
+   "gpuMsSaved": 0.77
+  },
+  {
+   "name": "frost OFF · disconnected: the 8 head color-matrix layers removed",
+   "A": [
+    45.53,
+    46.08,
+    43.42
+   ],
+   "B": [
+    45.88,
+    47.2,
+    43.54
+   ],
+   "fpsA": 45,
+   "fpsB": 45.5,
+   "msA": 22.22,
+   "msB": 21.96,
+   "gpuMsSaved": 0.26
+  },
+  {
+   "name": "modulation window open vs closed",
+   "A": [
+    38,
+    38.89,
+    38.56
+   ],
+   "B": [
+    35.9,
+    34.78,
+    35.2
+   ],
+   "fpsA": 38.5,
+   "fpsB": 35.3,
+   "msA": 25.99,
+   "msB": 28.33,
+   "gpuMsSaved": -2.35
+  },
+  {
+   "name": "UI shown vs UI hidden",
+   "A": [
+    38.19,
+    38.88,
+    39.97
+   ],
+   "B": [
+    46.08,
+    46.33,
+    46.33
+   ],
+   "fpsA": 39,
+   "fpsB": 46.2,
+   "msA": 25.63,
+   "msB": 21.62,
+   "gpuMsSaved": 4.01
+  }
+ ],
+ "warn": {
+  "was": true,
+  "open": false
+ },
+ "boot": {
+  "ok": true,
+  "dpr": 1,
+  "w": 1920,
+  "h": 1043,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light",
+  "warn": false
+ },
+ "errs": []
+}

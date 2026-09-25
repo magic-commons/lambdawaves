@@ -1,0 +1,2788 @@
+{
+ "copy": "research/optimization-2026-09-24/probes/D/lab-i/",
+ "scenarios": [
+  {
+   "label": "open(default)",
+   "rep": 0,
+   "wall": 492.8,
+   "frameMs": 17.1,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.46
+    ],
+    [
+     "r:start",
+     0.6
+    ],
+    [
+     "r:ex-done",
+     0.9
+    ],
+    [
+     "r:obsmat-done",
+     1.32
+    ],
+    [
+     "r:controls-done",
+     3.12
+    ],
+    [
+     "r:modsync-done",
+     3.28
+    ],
+    [
+     "r:ham-done",
+     3.66
+    ],
+    [
+     "r:mo-done",
+     4.2
+    ],
+    [
+     "ri:qcd",
+     4.2
+    ],
+    [
+     "ri:molecule",
+     4.34
+    ],
+    [
+     "ri:pulse",
+     18.74
+    ],
+    [
+     "ri:helium",
+     19.2
+    ],
+    [
+     "ri:h2",
+     19.54
+    ],
+    [
+     "ri:chem",
+     21.76
+    ],
+    [
+     "ri:orbitals",
+     22.12
+    ],
+    [
+     "ri:states",
+     22.12
+    ],
+    [
+     "ri:register",
+     22.14
+    ],
+    [
+     "ri:owner",
+     22.18
+    ],
+    [
+     "ri:ladder",
+     22.18
+    ],
+    [
+     "ri:particles",
+     445.94
+    ],
+    [
+     "r:instruments-done",
+     446.06
+    ],
+    [
+     "r:fieldlines-done",
+     446.14
+    ],
+    [
+     "r:rates-done",
+     446.24
+    ],
+    [
+     "ru:theme-done",
+     449.18
+    ],
+    [
+     "ru:card-done",
+     449.6
+    ],
+    [
+     "ru:frostdisc-done",
+     449.64
+    ],
+    [
+     "ru:accent-done",
+     450.96
+    ],
+    [
+     "r:ui-done",
+     452.4
+    ],
+    [
+     "r:camera-done",
+     452.5
+    ],
+    [
+     "r:overlays-done",
+     452.56
+    ],
+    [
+     "r:readers-done",
+     453.02
+    ],
+    [
+     "r:ab-done",
+     453.06
+    ],
+    [
+     "r:notebook-done",
+     453.06
+    ],
+    [
+     "r:layout-done",
+     455.3
+    ],
+    [
+     "r:sturm",
+     455.3
+    ],
+    [
+     "r:sturm-done",
+     455.52
+    ],
+    [
+     "r:rotrates-done",
+     455.56
+    ],
+    [
+     "r:palette",
+     455.56
+    ],
+    [
+     "r:palette-done",
+     469.82
+    ],
+    [
+     "r:modulation-done",
+     474.1
+    ],
+    [
+     "r:modwin-done",
+     474.52
+    ],
+    [
+     "r:history-done",
+     474.7
+    ],
+    [
+     "r:end",
+     474.74
+    ],
+    [
+     "p:restore-done",
+     474.76
+    ],
+    [
+     "p:store-done",
+     474.94
+    ],
+    [
+     "p:clean-done",
+     475.86
+    ],
+    [
+     "p:show-done",
+     485.52
+    ],
+    [
+     "p:render-done",
+     492.78
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 6,
+    "ls.getBytes": 14484,
+    "JSON.parse": 7,
+    "createElement": 289,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 7,
+    "ls.set": 8,
+    "ls.setBytes": 14487,
+    "renderHistory": 1,
+    "schedule4": 12,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "ls.get": 0.04,
+    "JSON.parse": 0.42,
+    "paintMarks": 8.42,
+    "applyAccent": 6.74,
+    "getBoundingClientRect": 0.02,
+    "JSON.stringify": 0.14,
+    "ls.set": 0.08,
+    "renderHistory": 0.1,
+    "hLiveKey": 0.08,
+    "hRead": 0.08,
+    "serialize": 0.76,
+    "projectKey": 0.92,
+    "saveSettings": 0.92
+   },
+   "slow": [
+    [
+     "clientWidth",
+     4.5,
+     2.48,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "clientWidth",
+     456.6,
+     6,
+     "paint@paletteview.js:91 < push@paletteview.js:85 < select@paletteview.js:154 < restore@rack.js:5445"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.34,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.32,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.1,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.16,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "open(default)",
+   "rep": 1,
+   "wall": 462.76,
+   "frameMs": 12.8,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.26
+    ],
+    [
+     "r:start",
+     0.4
+    ],
+    [
+     "r:ex-done",
+     0.78
+    ],
+    [
+     "r:obsmat-done",
+     1.14
+    ],
+    [
+     "r:controls-done",
+     2.22
+    ],
+    [
+     "r:modsync-done",
+     2.3
+    ],
+    [
+     "r:ham-done",
+     2.46
+    ],
+    [
+     "r:mo-done",
+     2.76
+    ],
+    [
+     "ri:qcd",
+     2.76
+    ],
+    [
+     "ri:molecule",
+     2.82
+    ],
+    [
+     "ri:pulse",
+     11.44
+    ],
+    [
+     "ri:helium",
+     11.72
+    ],
+    [
+     "ri:h2",
+     11.86
+    ],
+    [
+     "ri:chem",
+     13.52
+    ],
+    [
+     "ri:orbitals",
+     13.7
+    ],
+    [
+     "ri:states",
+     13.7
+    ],
+    [
+     "ri:register",
+     13.72
+    ],
+    [
+     "ri:owner",
+     13.72
+    ],
+    [
+     "ri:ladder",
+     13.72
+    ],
+    [
+     "ri:particles",
+     434.76
+    ],
+    [
+     "r:instruments-done",
+     434.88
+    ],
+    [
+     "r:fieldlines-done",
+     434.98
+    ],
+    [
+     "r:rates-done",
+     435.02
+    ],
+    [
+     "ru:theme-done",
+     437.06
+    ],
+    [
+     "ru:card-done",
+     437.26
+    ],
+    [
+     "ru:frostdisc-done",
+     437.3
+    ],
+    [
+     "ru:accent-done",
+     438.02
+    ],
+    [
+     "r:ui-done",
+     439.94
+    ],
+    [
+     "r:camera-done",
+     440.02
+    ],
+    [
+     "r:overlays-done",
+     440.04
+    ],
+    [
+     "r:readers-done",
+     440.46
+    ],
+    [
+     "r:ab-done",
+     440.5
+    ],
+    [
+     "r:notebook-done",
+     440.5
+    ],
+    [
+     "r:layout-done",
+     442.64
+    ],
+    [
+     "r:sturm",
+     442.64
+    ],
+    [
+     "r:sturm-done",
+     442.88
+    ],
+    [
+     "r:rotrates-done",
+     442.9
+    ],
+    [
+     "r:palette",
+     442.9
+    ],
+    [
+     "r:palette-done",
+     456.04
+    ],
+    [
+     "r:modulation-done",
+     460.38
+    ],
+    [
+     "r:modwin-done",
+     460.68
+    ],
+    [
+     "r:history-done",
+     460.88
+    ],
+    [
+     "r:end",
+     460.9
+    ],
+    [
+     "p:restore-done",
+     460.92
+    ],
+    [
+     "p:store-done",
+     461.08
+    ],
+    [
+     "p:clean-done",
+     461.84
+    ],
+    [
+     "p:show-done",
+     462.32
+    ],
+    [
+     "p:render-done",
+     462.74
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 6,
+    "ls.getBytes": 15393,
+    "JSON.parse": 7,
+    "createElement": 289,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 7,
+    "ls.set": 8,
+    "ls.setBytes": 14486,
+    "renderHistory": 1,
+    "schedule4": 12,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "ls.get": 0.04,
+    "JSON.parse": 0.26,
+    "paintMarks": 7.1,
+    "applyAccent": 4.9,
+    "getBoundingClientRect": 0.02,
+    "JSON.stringify": 0.18,
+    "ls.set": 0.02,
+    "renderHistory": 0.12,
+    "hLiveKey": 0.04,
+    "hRead": 0.06,
+    "serialize": 0.58,
+    "projectKey": 0.76,
+    "saveSettings": 0.74
+   },
+   "slow": [
+    [
+     "clientWidth",
+     3,
+     1.6,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "clientWidth",
+     443.7,
+     6.16,
+     "paint@paletteview.js:91 < push@paletteview.js:85 < select@paletteview.js:154 < restore@rack.js:5445"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.32,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.16,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.12,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.14,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "open(default)",
+   "rep": 2,
+   "wall": 448.36,
+   "frameMs": 12.4,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.24
+    ],
+    [
+     "r:start",
+     0.4
+    ],
+    [
+     "r:ex-done",
+     0.7
+    ],
+    [
+     "r:obsmat-done",
+     1
+    ],
+    [
+     "r:controls-done",
+     2.02
+    ],
+    [
+     "r:modsync-done",
+     2.12
+    ],
+    [
+     "r:ham-done",
+     2.26
+    ],
+    [
+     "r:mo-done",
+     2.52
+    ],
+    [
+     "ri:qcd",
+     2.52
+    ],
+    [
+     "ri:molecule",
+     2.62
+    ],
+    [
+     "ri:pulse",
+     7.04
+    ],
+    [
+     "ri:helium",
+     7.18
+    ],
+    [
+     "ri:h2",
+     7.32
+    ],
+    [
+     "ri:chem",
+     8.5
+    ],
+    [
+     "ri:orbitals",
+     8.74
+    ],
+    [
+     "ri:states",
+     8.76
+    ],
+    [
+     "ri:register",
+     8.76
+    ],
+    [
+     "ri:owner",
+     8.76
+    ],
+    [
+     "ri:ladder",
+     8.78
+    ],
+    [
+     "ri:particles",
+     419.6
+    ],
+    [
+     "r:instruments-done",
+     419.78
+    ],
+    [
+     "r:fieldlines-done",
+     419.92
+    ],
+    [
+     "r:rates-done",
+     420
+    ],
+    [
+     "ru:theme-done",
+     424.14
+    ],
+    [
+     "ru:card-done",
+     424.26
+    ],
+    [
+     "ru:frostdisc-done",
+     424.28
+    ],
+    [
+     "ru:accent-done",
+     425
+    ],
+    [
+     "r:ui-done",
+     426.04
+    ],
+    [
+     "r:camera-done",
+     426.16
+    ],
+    [
+     "r:overlays-done",
+     426.18
+    ],
+    [
+     "r:readers-done",
+     426.38
+    ],
+    [
+     "r:ab-done",
+     426.44
+    ],
+    [
+     "r:notebook-done",
+     426.44
+    ],
+    [
+     "r:layout-done",
+     429.06
+    ],
+    [
+     "r:sturm",
+     429.06
+    ],
+    [
+     "r:sturm-done",
+     429.3
+    ],
+    [
+     "r:rotrates-done",
+     429.34
+    ],
+    [
+     "r:palette",
+     429.36
+    ],
+    [
+     "r:palette-done",
+     442.3
+    ],
+    [
+     "r:modulation-done",
+     445.86
+    ],
+    [
+     "r:modwin-done",
+     446.14
+    ],
+    [
+     "r:history-done",
+     446.36
+    ],
+    [
+     "r:end",
+     446.36
+    ],
+    [
+     "p:restore-done",
+     446.38
+    ],
+    [
+     "p:store-done",
+     446.54
+    ],
+    [
+     "p:clean-done",
+     447.44
+    ],
+    [
+     "p:show-done",
+     447.96
+    ],
+    [
+     "p:render-done",
+     448.34
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 6,
+    "ls.getBytes": 15393,
+    "JSON.parse": 7,
+    "createElement": 289,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 7,
+    "ls.set": 8,
+    "ls.setBytes": 14486,
+    "renderHistory": 1,
+    "schedule4": 12,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "JSON.parse": 0.24,
+    "paintMarks": 8.04,
+    "applyAccent": 5.48,
+    "getComputedStyle": 0.02,
+    "getBoundingClientRect": 0.02,
+    "JSON.stringify": 0.14,
+    "ls.set": 0.06,
+    "renderHistory": 0.12,
+    "hLiveKey": 0.06,
+    "hRead": 0.08,
+    "serialize": 0.68,
+    "projectKey": 0.9,
+    "saveSettings": 0.64
+   },
+   "slow": [
+    [
+     "clientWidth",
+     2.6,
+     1.62,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "clientWidth",
+     430.3,
+     6.06,
+     "paint@paletteview.js:91 < push@paletteview.js:85 < select@paletteview.js:154 < restore@rack.js:5445"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.28,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.08,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.14,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.14,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "restore(serialize())",
+   "rep": 0,
+   "wall": 464.42,
+   "frameMs": 13.6,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "r:start",
+     1
+    ],
+    [
+     "r:ex-done",
+     1.3
+    ],
+    [
+     "r:obsmat-done",
+     1.58
+    ],
+    [
+     "r:controls-done",
+     2.54
+    ],
+    [
+     "r:modsync-done",
+     2.6
+    ],
+    [
+     "r:ham-done",
+     2.98
+    ],
+    [
+     "r:mo-done",
+     3.28
+    ],
+    [
+     "ri:qcd",
+     3.3
+    ],
+    [
+     "ri:molecule",
+     3.36
+    ],
+    [
+     "ri:pulse",
+     14.08
+    ],
+    [
+     "ri:helium",
+     14.24
+    ],
+    [
+     "ri:h2",
+     14.36
+    ],
+    [
+     "ri:chem",
+     15.78
+    ],
+    [
+     "ri:orbitals",
+     15.92
+    ],
+    [
+     "ri:states",
+     15.94
+    ],
+    [
+     "ri:register",
+     15.94
+    ],
+    [
+     "ri:owner",
+     15.94
+    ],
+    [
+     "ri:ladder",
+     15.96
+    ],
+    [
+     "ri:particles",
+     439.2
+    ],
+    [
+     "r:instruments-done",
+     439.3
+    ],
+    [
+     "r:fieldlines-done",
+     439.42
+    ],
+    [
+     "r:rates-done",
+     439.46
+    ],
+    [
+     "ru:theme-done",
+     441.3
+    ],
+    [
+     "ru:card-done",
+     441.4
+    ],
+    [
+     "ru:frostdisc-done",
+     441.42
+    ],
+    [
+     "ru:accent-done",
+     442.02
+    ],
+    [
+     "r:ui-done",
+     443.12
+    ],
+    [
+     "r:camera-done",
+     443.22
+    ],
+    [
+     "r:overlays-done",
+     443.26
+    ],
+    [
+     "r:readers-done",
+     443.44
+    ],
+    [
+     "r:ab-done",
+     443.48
+    ],
+    [
+     "r:notebook-done",
+     443.48
+    ],
+    [
+     "r:layout-done",
+     451.5
+    ],
+    [
+     "r:sturm",
+     451.5
+    ],
+    [
+     "r:sturm-done",
+     451.7
+    ],
+    [
+     "r:rotrates-done",
+     451.72
+    ],
+    [
+     "r:palette",
+     451.72
+    ],
+    [
+     "r:palette-done",
+     460.32
+    ],
+    [
+     "r:modulation-done",
+     464
+    ],
+    [
+     "r:modwin-done",
+     464.38
+    ],
+    [
+     "r:history-done",
+     464.38
+    ],
+    [
+     "r:end",
+     464.4
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 5,
+    "ls.getBytes": 4590,
+    "JSON.parse": 6,
+    "createElement": 285,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 6,
+    "ls.set": 5,
+    "ls.setBytes": 4610,
+    "schedule4": 12,
+    "serialize": 1,
+    "ls.set:lambdawaves.q0.settings": 5,
+    "saveSettings": 4
+   },
+   "t": {
+    "ls.get": 0.04,
+    "JSON.parse": 0.14,
+    "paintMarks": 7.18,
+    "applyAccent": 5.74,
+    "getComputedStyle": 0.04,
+    "JSON.stringify": 0.04,
+    "ls.set": 0.06,
+    "serialize": 1,
+    "saveSettings": 0.58
+   },
+   "slow": [
+    [
+     "clientWidth",
+     3.4,
+     7.64,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "offsetWidth",
+     445.3,
+     5.78,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.16,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.06,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.16,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.2,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "restore(serialize())",
+   "rep": 1,
+   "wall": 478.66,
+   "frameMs": 14.6,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "r:start",
+     1.04
+    ],
+    [
+     "r:ex-done",
+     1.34
+    ],
+    [
+     "r:obsmat-done",
+     1.62
+    ],
+    [
+     "r:controls-done",
+     2.62
+    ],
+    [
+     "r:modsync-done",
+     2.7
+    ],
+    [
+     "r:ham-done",
+     3
+    ],
+    [
+     "r:mo-done",
+     3.24
+    ],
+    [
+     "ri:qcd",
+     3.24
+    ],
+    [
+     "ri:molecule",
+     3.32
+    ],
+    [
+     "ri:pulse",
+     14.06
+    ],
+    [
+     "ri:helium",
+     14.36
+    ],
+    [
+     "ri:h2",
+     14.52
+    ],
+    [
+     "ri:chem",
+     16.26
+    ],
+    [
+     "ri:orbitals",
+     16.44
+    ],
+    [
+     "ri:states",
+     16.44
+    ],
+    [
+     "ri:register",
+     16.46
+    ],
+    [
+     "ri:owner",
+     16.46
+    ],
+    [
+     "ri:ladder",
+     16.46
+    ],
+    [
+     "ri:particles",
+     449.82
+    ],
+    [
+     "r:instruments-done",
+     449.94
+    ],
+    [
+     "r:fieldlines-done",
+     450.04
+    ],
+    [
+     "r:rates-done",
+     450.06
+    ],
+    [
+     "ru:theme-done",
+     451.96
+    ],
+    [
+     "ru:card-done",
+     452.08
+    ],
+    [
+     "ru:frostdisc-done",
+     452.14
+    ],
+    [
+     "ru:accent-done",
+     452.9
+    ],
+    [
+     "r:ui-done",
+     454.12
+    ],
+    [
+     "r:camera-done",
+     454.22
+    ],
+    [
+     "r:overlays-done",
+     454.26
+    ],
+    [
+     "r:readers-done",
+     454.46
+    ],
+    [
+     "r:ab-done",
+     454.5
+    ],
+    [
+     "r:notebook-done",
+     454.5
+    ],
+    [
+     "r:layout-done",
+     463.68
+    ],
+    [
+     "r:sturm",
+     463.68
+    ],
+    [
+     "r:sturm-done",
+     463.9
+    ],
+    [
+     "r:rotrates-done",
+     463.92
+    ],
+    [
+     "r:palette",
+     463.92
+    ],
+    [
+     "r:palette-done",
+     473.36
+    ],
+    [
+     "r:modulation-done",
+     478.22
+    ],
+    [
+     "r:modwin-done",
+     478.64
+    ],
+    [
+     "r:history-done",
+     478.64
+    ],
+    [
+     "r:end",
+     478.64
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 5,
+    "ls.getBytes": 4650,
+    "JSON.parse": 6,
+    "createElement": 285,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 5,
+    "ls.set": 4,
+    "ls.setBytes": 3720,
+    "schedule4": 12,
+    "serialize": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4
+   },
+   "t": {
+    "JSON.parse": 0.12,
+    "paintMarks": 6.78,
+    "applyAccent": 5.28,
+    "JSON.stringify": 0.1,
+    "serialize": 1.02,
+    "saveSettings": 0.72
+   },
+   "slow": [
+    [
+     "clientWidth",
+     3.4,
+     7.34,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "offsetWidth",
+     457,
+     6.36,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.18,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.1,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.22,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.22,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "restore(serialize())",
+   "rep": 2,
+   "wall": 473.6,
+   "frameMs": 13,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "r:start",
+     0.98
+    ],
+    [
+     "r:ex-done",
+     1.32
+    ],
+    [
+     "r:obsmat-done",
+     1.7
+    ],
+    [
+     "r:controls-done",
+     3.14
+    ],
+    [
+     "r:modsync-done",
+     3.26
+    ],
+    [
+     "r:ham-done",
+     3.54
+    ],
+    [
+     "r:mo-done",
+     3.8
+    ],
+    [
+     "ri:qcd",
+     3.8
+    ],
+    [
+     "ri:molecule",
+     3.9
+    ],
+    [
+     "ri:pulse",
+     14.66
+    ],
+    [
+     "ri:helium",
+     14.8
+    ],
+    [
+     "ri:h2",
+     14.9
+    ],
+    [
+     "ri:chem",
+     15.82
+    ],
+    [
+     "ri:orbitals",
+     15.94
+    ],
+    [
+     "ri:states",
+     15.96
+    ],
+    [
+     "ri:register",
+     15.96
+    ],
+    [
+     "ri:owner",
+     15.96
+    ],
+    [
+     "ri:ladder",
+     15.96
+    ],
+    [
+     "ri:particles",
+     443.2
+    ],
+    [
+     "r:instruments-done",
+     443.42
+    ],
+    [
+     "r:fieldlines-done",
+     443.52
+    ],
+    [
+     "r:rates-done",
+     443.54
+    ],
+    [
+     "ru:theme-done",
+     448.66
+    ],
+    [
+     "ru:card-done",
+     449.12
+    ],
+    [
+     "ru:frostdisc-done",
+     449.18
+    ],
+    [
+     "ru:accent-done",
+     450.5
+    ],
+    [
+     "r:ui-done",
+     452.04
+    ],
+    [
+     "r:camera-done",
+     452.14
+    ],
+    [
+     "r:overlays-done",
+     452.16
+    ],
+    [
+     "r:readers-done",
+     452.38
+    ],
+    [
+     "r:ab-done",
+     452.42
+    ],
+    [
+     "r:notebook-done",
+     452.42
+    ],
+    [
+     "r:layout-done",
+     461.38
+    ],
+    [
+     "r:sturm",
+     461.38
+    ],
+    [
+     "r:sturm-done",
+     461.64
+    ],
+    [
+     "r:rotrates-done",
+     461.66
+    ],
+    [
+     "r:palette",
+     461.66
+    ],
+    [
+     "r:palette-done",
+     469.36
+    ],
+    [
+     "r:modulation-done",
+     473.16
+    ],
+    [
+     "r:modwin-done",
+     473.56
+    ],
+    [
+     "r:history-done",
+     473.58
+    ],
+    [
+     "r:end",
+     473.58
+    ]
+   ],
+   "cnt": {
+    "readSettings": 5,
+    "ls.get": 5,
+    "ls.getBytes": 4650,
+    "JSON.parse": 6,
+    "createElement": 285,
+    "paintMarks": 10,
+    "schedule1": 18,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 13,
+    "JSON.stringify": 5,
+    "ls.set": 4,
+    "ls.setBytes": 3720,
+    "schedule4": 12,
+    "serialize": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4
+   },
+   "t": {
+    "ls.get": 0.02,
+    "JSON.parse": 0.16,
+    "paintMarks": 10.2,
+    "applyAccent": 7.7,
+    "getComputedStyle": 0.02,
+    "getBoundingClientRect": 0.02,
+    "JSON.stringify": 0.1,
+    "ls.set": 0.02,
+    "serialize": 0.96,
+    "saveSettings": 1.24
+   },
+   "slow": [
+    [
+     "clientWidth",
+     4,
+     7.9,
+     "paint@moleculeview.js:68 < refresh@moleculeview.js:65 < setR@moleculeview.js:118 < load@moleculeview.js:119"
+    ],
+    [
+     "offsetWidth",
+     454.6,
+     6.44,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.42,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.38,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.2,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.24,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "dirty check",
+   "rep": 0,
+   "wall": 13.32,
+   "frameMs": 10.1,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "JSON.parse": 20,
+    "JSON.stringify": 40,
+    "serialize": 20,
+    "projectKey": 20
+   },
+   "t": {
+    "JSON.parse": 0.18,
+    "JSON.stringify": 1.06,
+    "serialize": 10.28,
+    "projectKey": 13.1
+   },
+   "slow": [],
+   "saves": []
+  },
+  {
+   "label": "saveSettings ×50",
+   "rep": 0,
+   "wall": 4.72,
+   "frameMs": 2.8,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "readSettings": 50,
+    "ls.get": 50,
+    "ls.getBytes": 46500,
+    "JSON.parse": 50,
+    "JSON.stringify": 50,
+    "ls.set": 50,
+    "ls.setBytes": 46500,
+    "ls.set:lambdawaves.q0.settings": 50,
+    "saveSettings": 50
+   },
+   "t": {
+    "ls.get": 0.06,
+    "JSON.parse": 0.5,
+    "JSON.stringify": 0.24,
+    "ls.set": 0.04,
+    "saveSettings": 4.1
+   },
+   "slow": [],
+   "saves": [
+    [
+     "save",
+     0.66,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.24,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.1,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.1,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.1,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.1,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.08,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.04,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.06,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.04,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.04,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ],
+    [
+     "save",
+     0.04,
+     "@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/D/lab-i/?preset=1s%2B2pz&sw=0:7:68"
+    ]
+   ]
+  },
+  {
+   "label": "setTheme dark",
+   "rep": 0,
+   "wall": 2.06,
+   "frameMs": 13.4,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "readSettings": 1,
+    "ls.get": 1,
+    "ls.getBytes": 930,
+    "JSON.parse": 1,
+    "paintMarks": 2,
+    "schedule1": 2,
+    "applyAccent": 1,
+    "JSON.stringify": 1,
+    "ls.set": 1,
+    "ls.setBytes": 929,
+    "ls.set:lambdawaves.q0.settings": 1,
+    "saveSettings": 1
+   },
+   "t": {
+    "JSON.parse": 0.02,
+    "paintMarks": 1.4,
+    "applyAccent": 0.62,
+    "ls.set": 0.02,
+    "saveSettings": 0.22
+   },
+   "slow": [],
+   "saves": [
+    [
+     "save",
+     0.22,
+     "setTheme@rack.js:1580:22"
+    ]
+   ]
+  },
+  {
+   "label": "setTheme light",
+   "rep": 0,
+   "wall": 2.34,
+   "frameMs": 88.5,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "readSettings": 1,
+    "ls.get": 1,
+    "ls.getBytes": 929,
+    "JSON.parse": 1,
+    "paintMarks": 2,
+    "schedule1": 2,
+    "applyAccent": 1,
+    "JSON.stringify": 1,
+    "ls.set": 1,
+    "ls.setBytes": 930,
+    "ls.set:lambdawaves.q0.settings": 1,
+    "saveSettings": 1
+   },
+   "t": {
+    "ls.get": 0.02,
+    "JSON.parse": 0.02,
+    "paintMarks": 1.72,
+    "applyAccent": 0.68,
+    "JSON.stringify": 0.02,
+    "ls.set": 0.02,
+    "saveSettings": 0.18
+   },
+   "slow": [],
+   "saves": [
+    [
+     "save",
+     0.18,
+     "setTheme@rack.js:1580:22"
+    ]
+   ]
+  },
+  {
+   "label": "history: hLiveKey via canUndo ×50",
+   "rep": 0,
+   "wall": 0.08,
+   "frameMs": 16,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {},
+   "t": {},
+   "slow": [],
+   "saves": []
+  },
+  {
+   "label": "open(WAVE DANCER)",
+   "rep": 0,
+   "wall": 104.18,
+   "frameMs": 34.8,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.42
+    ],
+    [
+     "r:start",
+     0.78
+    ],
+    [
+     "r:ex-done",
+     1.08
+    ],
+    [
+     "r:obsmat-done",
+     1.36
+    ],
+    [
+     "r:controls-done",
+     2.52
+    ],
+    [
+     "r:modsync-done",
+     2.9
+    ],
+    [
+     "r:ham-done",
+     3
+    ],
+    [
+     "r:mo-done",
+     3.22
+    ],
+    [
+     "r:instruments-done",
+     3.22
+    ],
+    [
+     "r:fieldlines-done",
+     3.28
+    ],
+    [
+     "r:rates-done",
+     3.3
+    ],
+    [
+     "ru:theme-done",
+     4.86
+    ],
+    [
+     "ru:card-done",
+     4.96
+    ],
+    [
+     "ru:frostdisc-done",
+     4.98
+    ],
+    [
+     "ru:accent-done",
+     5.64
+    ],
+    [
+     "r:ui-done",
+     6.74
+    ],
+    [
+     "r:camera-done",
+     6.82
+    ],
+    [
+     "r:overlays-done",
+     6.86
+    ],
+    [
+     "r:readers-done",
+     6.86
+    ],
+    [
+     "r:ab-done",
+     7.06
+    ],
+    [
+     "r:notebook-done",
+     19.16
+    ],
+    [
+     "r:layout-done",
+     31.22
+    ],
+    [
+     "r:sturm",
+     31.22
+    ],
+    [
+     "r:sturm-done",
+     31.5
+    ],
+    [
+     "r:rotrates-done",
+     31.52
+    ],
+    [
+     "r:palette",
+     31.52
+    ],
+    [
+     "r:palette-done",
+     45.86
+    ],
+    [
+     "r:modulation-done",
+     53.92
+    ],
+    [
+     "r:modwin-done",
+     94.76
+    ],
+    [
+     "r:history-done",
+     95.08
+    ],
+    [
+     "r:end",
+     95.08
+    ],
+    [
+     "p:restore-done",
+     95.12
+    ],
+    [
+     "p:store-done",
+     95.48
+    ],
+    [
+     "p:clean-done",
+     96.6
+    ],
+    [
+     "p:show-done",
+     97.34
+    ],
+    [
+     "p:render-done",
+     104.16
+    ]
+   ],
+   "cnt": {
+    "readSettings": 7,
+    "ls.get": 8,
+    "ls.getBytes": 31047,
+    "JSON.parse": 9,
+    "createElement": 800,
+    "paintMarks": 11,
+    "schedule1": 24,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 39,
+    "JSON.stringify": 8,
+    "ls.set": 9,
+    "ls.setBytes": 30131,
+    "renderHistory": 1,
+    "schedule4": 4,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 5,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "ls.get": 0.04,
+    "JSON.parse": 0.42,
+    "paintMarks": 7.16,
+    "applyAccent": 5.44,
+    "getBoundingClientRect": 22.96,
+    "JSON.stringify": 0.3,
+    "ls.set": 0.26,
+    "renderHistory": 0.12,
+    "hLiveKey": 0.14,
+    "hRead": 0.2,
+    "serialize": 0.9,
+    "projectKey": 1.1,
+    "saveSettings": 0.64
+   },
+   "slow": [
+    [
+     "offsetWidth",
+     7.1,
+     11.6,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < restore@rack.js:5425 < open@rack.js:4476"
+    ],
+    [
+     "offsetWidth",
+     23.3,
+     7.58,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ],
+    [
+     "clientWidth",
+     32.9,
+     5.78,
+     "paint@paletteview.js:91 < push@paletteview.js:85 < select@paletteview.js:154 < restore@rack.js:5445"
+    ],
+    [
+     "gBCR",
+     57.2,
+     21.38,
+     "place@modwindow.js:229 < rebuild@modwindow.js:2826 < open@modwindow.js:2915 < restore@modwindow.js:2908"
+    ],
+    [
+     "offsetHeight",
+     79.5,
+     3.02,
+     "place@modwindow.js:310 < rebuild@modwindow.js:2826 < open@modwindow.js:2915 < restore@modwindow.js:2908"
+    ],
+    [
+     "clientWidth",
+     83.3,
+     3.38,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ],
+    [
+     "clientWidth",
+     88.2,
+     2.54,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.14,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.06,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.22,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.22,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "open(WAVE DANCER)",
+   "rep": 1,
+   "wall": 88.3,
+   "frameMs": 106.4,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.36
+    ],
+    [
+     "r:start",
+     0.46
+    ],
+    [
+     "r:ex-done",
+     0.8
+    ],
+    [
+     "r:obsmat-done",
+     1.08
+    ],
+    [
+     "r:controls-done",
+     2.24
+    ],
+    [
+     "r:modsync-done",
+     2.34
+    ],
+    [
+     "r:ham-done",
+     2.54
+    ],
+    [
+     "r:mo-done",
+     2.74
+    ],
+    [
+     "r:instruments-done",
+     2.74
+    ],
+    [
+     "r:fieldlines-done",
+     2.82
+    ],
+    [
+     "r:rates-done",
+     2.84
+    ],
+    [
+     "ru:theme-done",
+     4.58
+    ],
+    [
+     "ru:card-done",
+     4.66
+    ],
+    [
+     "ru:frostdisc-done",
+     4.68
+    ],
+    [
+     "ru:accent-done",
+     5.46
+    ],
+    [
+     "r:ui-done",
+     10.9
+    ],
+    [
+     "r:camera-done",
+     11.04
+    ],
+    [
+     "r:overlays-done",
+     11.08
+    ],
+    [
+     "r:readers-done",
+     11.08
+    ],
+    [
+     "r:ab-done",
+     11.34
+    ],
+    [
+     "r:notebook-done",
+     13.56
+    ],
+    [
+     "r:layout-done",
+     24.4
+    ],
+    [
+     "r:sturm",
+     24.4
+    ],
+    [
+     "r:sturm-done",
+     24.68
+    ],
+    [
+     "r:rotrates-done",
+     24.7
+    ],
+    [
+     "r:palette",
+     24.7
+    ],
+    [
+     "r:palette-done",
+     35.22
+    ],
+    [
+     "r:modulation-done",
+     54.3
+    ],
+    [
+     "r:modwin-done",
+     80.2
+    ],
+    [
+     "r:history-done",
+     80.66
+    ],
+    [
+     "r:end",
+     80.66
+    ],
+    [
+     "p:restore-done",
+     80.7
+    ],
+    [
+     "p:store-done",
+     81.06
+    ],
+    [
+     "p:clean-done",
+     82.54
+    ],
+    [
+     "p:show-done",
+     83.12
+    ],
+    [
+     "p:render-done",
+     88.26
+    ]
+   ],
+   "cnt": {
+    "readSettings": 7,
+    "ls.get": 8,
+    "ls.getBytes": 31163,
+    "JSON.parse": 9,
+    "createElement": 770,
+    "paintMarks": 10,
+    "schedule1": 17,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 42,
+    "JSON.stringify": 7,
+    "ls.set": 8,
+    "ls.setBytes": 29256,
+    "renderHistory": 1,
+    "schedule4": 4,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "ls.get": 0.02,
+    "JSON.parse": 0.44,
+    "paintMarks": 12.08,
+    "applyAccent": 6.46,
+    "getComputedStyle": 0.02,
+    "getBoundingClientRect": 12.56,
+    "JSON.stringify": 0.34,
+    "ls.set": 0.06,
+    "renderHistory": 0.16,
+    "hLiveKey": 0.1,
+    "hRead": 0.24,
+    "serialize": 1.18,
+    "projectKey": 1.46,
+    "saveSettings": 0.92
+   },
+   "slow": [
+    [
+     "offsetWidth",
+     11.3,
+     2.08,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < restore@rack.js:5425 < open@rack.js:4476"
+    ],
+    [
+     "offsetWidth",
+     15.9,
+     8.08,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ],
+    [
+     "gBCR",
+     42.2,
+     4.56,
+     "place@modwindow.js:229 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308 < restore@rack.js:5451"
+    ],
+    [
+     "clientWidth",
+     47.7,
+     2.8,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308"
+    ],
+    [
+     "clientWidth",
+     51.6,
+     1.74,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308"
+    ],
+    [
+     "gBCR",
+     58.6,
+     7.32,
+     "place@modwindow.js:229 < rebuild@modwindow.js:2826 < open@modwindow.js:2915 < restore@modwindow.js:2908"
+    ],
+    [
+     "clientWidth",
+     66.8,
+     3.48,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ],
+    [
+     "clientWidth",
+     71.6,
+     1.86,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ],
+    [
+     "clientWidth",
+     75.5,
+     1.06,
+     "paint@modwindow.js:2745 < open@modwindow.js:2915 < restore@modwindow.js:2908 < restore@rack.js:5452"
+    ],
+    [
+     "clientWidth",
+     77.7,
+     1.4,
+     "paint@modwindow.js:2745 < open@modwindow.js:2915 < restore@modwindow.js:2908 < restore@rack.js:5452"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.14,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.06,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.2,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.52,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "open(WAVE DANCER)",
+   "rep": 2,
+   "wall": 76.28,
+   "frameMs": 22.8,
+   "rebuilds": 1,
+   "marks": [
+    [
+     "p:read-done",
+     0.38
+    ],
+    [
+     "r:start",
+     0.54
+    ],
+    [
+     "r:ex-done",
+     0.92
+    ],
+    [
+     "r:obsmat-done",
+     1.22
+    ],
+    [
+     "r:controls-done",
+     2.32
+    ],
+    [
+     "r:modsync-done",
+     2.46
+    ],
+    [
+     "r:ham-done",
+     2.7
+    ],
+    [
+     "r:mo-done",
+     3.1
+    ],
+    [
+     "r:instruments-done",
+     3.1
+    ],
+    [
+     "r:fieldlines-done",
+     3.14
+    ],
+    [
+     "r:rates-done",
+     3.18
+    ],
+    [
+     "ru:theme-done",
+     4.7
+    ],
+    [
+     "ru:card-done",
+     4.78
+    ],
+    [
+     "ru:frostdisc-done",
+     4.8
+    ],
+    [
+     "ru:accent-done",
+     5.56
+    ],
+    [
+     "r:ui-done",
+     6.84
+    ],
+    [
+     "r:camera-done",
+     6.94
+    ],
+    [
+     "r:overlays-done",
+     6.98
+    ],
+    [
+     "r:readers-done",
+     6.98
+    ],
+    [
+     "r:ab-done",
+     7.14
+    ],
+    [
+     "r:notebook-done",
+     9.78
+    ],
+    [
+     "r:layout-done",
+     21.58
+    ],
+    [
+     "r:sturm",
+     21.6
+    ],
+    [
+     "r:sturm-done",
+     21.96
+    ],
+    [
+     "r:rotrates-done",
+     21.98
+    ],
+    [
+     "r:palette",
+     21.98
+    ],
+    [
+     "r:palette-done",
+     30.4
+    ],
+    [
+     "r:modulation-done",
+     48.84
+    ],
+    [
+     "r:modwin-done",
+     70.28
+    ],
+    [
+     "r:history-done",
+     70.68
+    ],
+    [
+     "r:end",
+     70.7
+    ],
+    [
+     "p:restore-done",
+     70.74
+    ],
+    [
+     "p:store-done",
+     71.12
+    ],
+    [
+     "p:clean-done",
+     73.18
+    ],
+    [
+     "p:show-done",
+     73.76
+    ],
+    [
+     "p:render-done",
+     76.26
+    ]
+   ],
+   "cnt": {
+    "readSettings": 7,
+    "ls.get": 8,
+    "ls.getBytes": 31163,
+    "JSON.parse": 9,
+    "createElement": 770,
+    "paintMarks": 10,
+    "schedule1": 17,
+    "applyAccent": 7,
+    "getContext:2d": 6,
+    "getComputedStyle": 6,
+    "getBoundingClientRect": 42,
+    "JSON.stringify": 7,
+    "ls.set": 8,
+    "ls.setBytes": 29256,
+    "renderHistory": 1,
+    "schedule4": 4,
+    "hLiveKey": 2,
+    "hRead": 1,
+    "serialize": 1,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1,
+    "ls.set:lambdawaves.q0.settings": 4,
+    "saveSettings": 4,
+    "ls.set:lambdawaves.q0.notebook": 1,
+    "ls.set:lambdawaves.q0.notebook.title": 1,
+    "ls.set:lambdawaves.q0.notebook.subtitle": 1
+   },
+   "t": {
+    "ls.get": 0.02,
+    "JSON.parse": 0.4,
+    "paintMarks": 7.38,
+    "applyAccent": 5.92,
+    "getBoundingClientRect": 9.96,
+    "JSON.stringify": 0.4,
+    "ls.set": 0.14,
+    "renderHistory": 0.22,
+    "hLiveKey": 0.08,
+    "hRead": 0.16,
+    "serialize": 1.62,
+    "projectKey": 2.02,
+    "saveSettings": 0.9
+   },
+   "slow": [
+    [
+     "offsetWidth",
+     7.1,
+     2.48,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < restore@rack.js:5425 < open@rack.js:4476"
+    ],
+    [
+     "offsetWidth",
+     12.4,
+     8.76,
+     "nbSaveSize@rack.js:4577 < boot/layout.notebookResize@rack.js:4598 < applyLayout@rack.js:3972 < restore@rack.js:5426"
+    ],
+    [
+     "gBCR",
+     35.6,
+     4.8,
+     "place@modwindow.js:229 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308 < restore@rack.js:5451"
+    ],
+    [
+     "clientWidth",
+     41.4,
+     3.34,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308"
+    ],
+    [
+     "clientWidth",
+     46.2,
+     1.92,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < restoreModulation@rack.js:5308"
+    ],
+    [
+     "gBCR",
+     53.6,
+     4.64,
+     "place@modwindow.js:229 < rebuild@modwindow.js:2826 < open@modwindow.js:2915 < restore@modwindow.js:2908"
+    ],
+    [
+     "clientWidth",
+     59,
+     3.02,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ],
+    [
+     "clientWidth",
+     63.6,
+     2.38,
+     "paint@modwindow.js:2745 < sync@modwindow.js:2810 < rebuild@modwindow.js:2826 < open@modwindow.js:2915"
+    ]
+   ],
+   "saves": [
+    [
+     "save",
+     0.2,
+     "setTheme@rack.js:1580:22"
+    ],
+    [
+     "save",
+     0.06,
+     "applyCard@rack.js:329:5"
+    ],
+    [
+     "save",
+     0.28,
+     "applyLayout@rack.js:3973:7"
+    ],
+    [
+     "save",
+     0.36,
+     "persist@rack.js:2852:22"
+    ]
+   ]
+  },
+  {
+   "label": "dirty check (WAVE DANCER)",
+   "rep": 0,
+   "wall": 13.1,
+   "frameMs": 8.7,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "JSON.parse": 20,
+    "JSON.stringify": 40,
+    "serialize": 20,
+    "projectKey": 20
+   },
+   "t": {
+    "JSON.parse": 0.2,
+    "JSON.stringify": 1.82,
+    "serialize": 10.26,
+    "projectKey": 12.94
+   },
+   "slow": [],
+   "saves": []
+  },
+  {
+   "label": "save(WAVE DANCER)",
+   "rep": 0,
+   "wall": 3.78,
+   "frameMs": 9.2,
+   "rebuilds": 0,
+   "marks": [],
+   "cnt": {
+    "ls.get": 2,
+    "ls.getBytes": 64970,
+    "JSON.parse": 4,
+    "createElement": 16,
+    "JSON.stringify": 4,
+    "ls.set": 1,
+    "ls.setBytes": 40464,
+    "serialize": 2,
+    "projectKey": 1,
+    "ls.set:lambdawaves.q0.projects": 1
+   },
+   "t": {
+    "ls.get": 0.02,
+    "JSON.parse": 0.5,
+    "JSON.stringify": 0.5,
+    "ls.set": 0.2,
+    "serialize": 2.02,
+    "projectKey": 1
+   },
+   "slow": [],
+   "saves": []
+  }
+ ],
+ "boot": {
+  "settingsBytes": 0,
+  "lsBytes": 309
+ },
+ "demoPath": "DEMOS/WAVE DANCER",
+ "after": {
+  "settingsBytes": 951,
+  "projectsBytes": 40464,
+  "lsBytes": 49369,
+  "errs": []
+ }
+}

@@ -1,0 +1,1243 @@
+{
+ "at": "2026-09-25T02:31:57.372Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "electron",
+ "scenes": [
+  {
+   "label": "default (disc · refractive · frost ALWAYS · light)",
+   "layers": {
+    "layers": 34,
+    "drawing": 31,
+    "drawingPx": 9502192,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "19",
+      "node": 138,
+      "w": 286,
+      "h": 1679,
+      "area": 480194,
+      "who": "div#devb-spectrum.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "36",
+      "node": 698,
+      "w": 286,
+      "h": 790,
+      "area": 225940,
+      "who": "div#devb-camera.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "34",
+      "node": 562,
+      "w": 286,
+      "h": 581,
+      "area": 166166,
+      "who": "div#devb-observer.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "31",
+      "node": 497,
+      "w": 286,
+      "h": 397,
+      "area": 113542,
+      "who": "div#devb-palette.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "17",
+      "node": 109,
+      "w": 286,
+      "h": 324,
+      "area": 92664,
+      "who": "div#devb-shadow.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "41",
+      "node": 838,
+      "w": 286,
+      "h": 322,
+      "area": 92092,
+      "who": "div#devb-clip.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "49",
+      "node": 110,
+      "w": 250,
+      "h": 234,
+      "area": 58500,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "14",
+      "node": 5,
+      "w": 658,
+      "h": 64,
+      "area": 42112,
+      "who": "div#transport.glass.mini",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 849,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "11",
+      "node": 360,
+      "w": 240,
+      "h": 90,
+      "area": 21600,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 93.9,
+    "frames": 282,
+    "perFrame": {
+     "recalcStyle": 0.06,
+     "recalcStyleMs": 0.003,
+     "layout": 0.06,
+     "layoutMs": 0.008,
+     "scriptMs": 0.456,
+     "taskMs": 1.074
+    }
+   },
+   "trace": {
+    "frames": 142,
+    "events": 60179,
+    "perFrame": {
+     "paint": 0.11,
+     "paintMs": 0.027,
+     "raster": 0.06,
+     "rasterMs": 0.006,
+     "styleRecalc": 0.06,
+     "styleElements": 0,
+     "layout": 0.06,
+     "prePaint": 1,
+     "layerize": 1.01,
+     "commit": 1.01
+    }
+   }
+  },
+  {
+   "label": "frost OFF (disc)",
+   "layers": {
+    "layers": 24,
+    "drawing": 20,
+    "drawingPx": 8281010,
+    "top": [
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1046,
+      "area": 2008320,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "49",
+      "node": 110,
+      "w": 250,
+      "h": 234,
+      "area": 58500,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 849,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "11",
+      "node": 360,
+      "w": 240,
+      "h": 90,
+      "area": 21600,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "33",
+      "node": 547,
+      "w": 286,
+      "h": 53,
+      "area": 15158,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "35",
+      "node": 683,
+      "w": 286,
+      "h": 53,
+      "area": 15158,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "40",
+      "node": 823,
+      "w": 286,
+      "h": 53,
+      "area": 15158,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "16",
+      "node": 92,
+      "w": 286,
+      "h": 52,
+      "area": 14872,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "18",
+      "node": 123,
+      "w": 286,
+      "h": 52,
+      "area": 14872,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "28",
+      "node": 452,
+      "w": 286,
+      "h": 52,
+      "area": 14872,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "29",
+      "node": 467,
+      "w": 286,
+      "h": 52,
+      "area": 14872,
+      "who": "header.dev-head",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 117.2,
+    "frames": 352,
+    "perFrame": {
+     "recalcStyle": 0.05,
+     "recalcStyleMs": 0.002,
+     "layout": 0.05,
+     "layoutMs": 0.006,
+     "scriptMs": 0.346,
+     "taskMs": 0.851
+    }
+   },
+   "trace": {
+    "frames": 172,
+    "events": 57692,
+    "perFrame": {
+     "paint": 0.08,
+     "paintMs": 0.02,
+     "raster": 0.04,
+     "rasterMs": 0.003,
+     "styleRecalc": 0.04,
+     "styleElements": 0,
+     "layout": 0.04,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  },
+  {
+   "label": "frost OFF · connected",
+   "layers": {
+    "layers": 16,
+    "drawing": 12,
+    "drawingPx": 8161928,
+    "top": [
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1046,
+      "area": 2008320,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "50",
+      "node": 110,
+      "w": 252,
+      "h": 234,
+      "area": 58968,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 849,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "51",
+      "node": 360,
+      "w": 242,
+      "h": 90,
+      "area": 21780,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "15",
+      "w": 10,
+      "h": 1043,
+      "area": 10430,
+      "who": "",
+      "reasons": [
+       "Scrollbar"
+      ]
+     },
+     {
+      "id": "27",
+      "w": 10,
+      "h": 1043,
+      "area": 10430,
+      "who": "",
+      "reasons": [
+       "Scrollbar"
+      ]
+     },
+     {
+      "id": "8",
+      "node": 512,
+      "w": 175,
+      "h": 52,
+      "area": 9100,
+      "who": "canvas.pal-strip",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "9",
+      "node": 513,
+      "w": 60,
+      "h": 52,
+      "area": 3120,
+      "who": "canvas.pal-ring",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "2",
+      "w": 0,
+      "h": 0,
+      "area": 0,
+      "who": "",
+      "reasons": []
+     }
+    ]
+   },
+   "work": {
+    "fps": 109.1,
+    "frames": 328,
+    "perFrame": {
+     "recalcStyle": 0.05,
+     "recalcStyleMs": 0.002,
+     "layout": 0.05,
+     "layoutMs": 0.006,
+     "scriptMs": 0.37,
+     "taskMs": 0.884
+    }
+   },
+   "trace": {
+    "frames": 179,
+    "events": 62258,
+    "perFrame": {
+     "paint": 0.08,
+     "paintMs": 0.02,
+     "raster": 0.04,
+     "rasterMs": 0.003,
+     "styleRecalc": 0.04,
+     "styleElements": 0,
+     "layout": 0.04,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  },
+  {
+   "label": "frost ALWAYS · connected",
+   "layers": {
+    "layers": 28,
+    "drawing": 25,
+    "drawingPx": 9386616,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "54",
+      "node": 899,
+      "w": 276,
+      "h": 1701,
+      "area": 469476,
+      "who": "section.dev.lean.native-clean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "59",
+      "node": 902,
+      "w": 276,
+      "h": 760,
+      "area": 209760,
+      "who": "section.dev.lean.native-clean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "58",
+      "node": 901,
+      "w": 276,
+      "h": 601,
+      "area": 165876,
+      "who": "section.dev.lean.native-clean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "57",
+      "node": 900,
+      "w": 276,
+      "h": 419,
+      "area": 115644,
+      "who": "section.dev.lean.native-clean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "53",
+      "node": 898,
+      "w": 276,
+      "h": 346,
+      "area": 95496,
+      "who": "section.dev.lean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "60",
+      "node": 903,
+      "w": 276,
+      "h": 343,
+      "area": 94668,
+      "who": "section.dev.native-clean",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "50",
+      "node": 110,
+      "w": 252,
+      "h": 234,
+      "area": 58968,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "52",
+      "node": 5,
+      "w": 658,
+      "h": 64,
+      "area": 42112,
+      "who": "div#transport.glass.mini",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 849,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "51",
+      "node": 360,
+      "w": 242,
+      "h": 90,
+      "area": 21780,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 111.5,
+    "frames": 335,
+    "perFrame": {
+     "recalcStyle": 0.05,
+     "recalcStyleMs": 0.002,
+     "layout": 0.05,
+     "layoutMs": 0.006,
+     "scriptMs": 0.391,
+     "taskMs": 0.927
+    }
+   },
+   "trace": {
+    "frames": 173,
+    "events": 65637,
+    "perFrame": {
+     "paint": 0.08,
+     "paintMs": 0.021,
+     "raster": 0.04,
+     "rasterMs": 0.002,
+     "styleRecalc": 0.04,
+     "styleElements": 0,
+     "layout": 0.04,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  },
+  {
+   "label": "frost ALWAYS · disc · modulation window open",
+   "layers": {
+    "layers": 48,
+    "drawing": 44,
+    "drawingPx": 9949604,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "69",
+      "node": 138,
+      "w": 286,
+      "h": 1679,
+      "area": 480194,
+      "who": "div#devb-spectrum.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "77",
+      "node": 698,
+      "w": 286,
+      "h": 790,
+      "area": 225940,
+      "who": "div#devb-camera.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "75",
+      "node": 562,
+      "w": 286,
+      "h": 581,
+      "area": 166166,
+      "who": "div#devb-observer.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "90",
+      "node": 1102,
+      "w": 378,
+      "h": 354,
+      "area": 133812,
+      "who": "div.m2dev.lfo.glass",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "91",
+      "node": 1257,
+      "w": 378,
+      "h": 354,
+      "area": 133812,
+      "who": "div.m2dev.env.glass",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "73",
+      "node": 497,
+      "w": 286,
+      "h": 397,
+      "area": 113542,
+      "who": "div#devb-palette.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "67",
+      "node": 109,
+      "w": 286,
+      "h": 324,
+      "area": 92664,
+      "who": "div#devb-shadow.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "79",
+      "node": 838,
+      "w": 286,
+      "h": 322,
+      "area": 92092,
+      "who": "div#devb-clip.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "89",
+      "node": 1014,
+      "w": 242,
+      "h": 354,
+      "area": 85668,
+      "who": "div.m2rail.glass",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "64",
+      "node": 110,
+      "w": 250,
+      "h": 234,
+      "area": 58500,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 76.9,
+    "frames": 231,
+    "perFrame": {
+     "recalcStyle": 0.75,
+     "recalcStyleMs": 0.072,
+     "layout": 0.39,
+     "layoutMs": 0.153,
+     "scriptMs": 0.58,
+     "taskMs": 2.183
+    }
+   },
+   "trace": {
+    "frames": 112,
+    "events": 52645,
+    "perFrame": {
+     "paint": 3.47,
+     "paintMs": 0.518,
+     "raster": 1.42,
+     "rasterMs": 0.144,
+     "styleRecalc": 0.36,
+     "styleElements": 0,
+     "layout": 0.36,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  },
+  {
+   "label": "UI hidden",
+   "layers": {
+    "layers": 7,
+    "drawing": 4,
+    "drawingPx": 6007680,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "2",
+      "w": 0,
+      "h": 0,
+      "area": 0,
+      "who": "",
+      "reasons": []
+     }
+    ]
+   },
+   "work": {
+    "fps": 116.6,
+    "frames": 350,
+    "perFrame": {
+     "recalcStyle": 0,
+     "recalcStyleMs": 0,
+     "layout": 0,
+     "layoutMs": 0,
+     "scriptMs": 0.211,
+     "taskMs": 0.448
+    }
+   },
+   "trace": {
+    "frames": 176,
+    "events": 54111,
+    "perFrame": {
+     "paint": 0,
+     "paintMs": 0,
+     "raster": 0,
+     "rasterMs": 0,
+     "styleRecalc": 0,
+     "styleElements": 0,
+     "layout": 0,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  },
+  {
+   "label": "every window open",
+   "layers": {
+    "layers": 52,
+    "drawing": 49,
+    "drawingPx": 10589510,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 9,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 4,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "109",
+      "node": 138,
+      "w": 286,
+      "h": 1679,
+      "area": 480194,
+      "who": "div#devb-spectrum.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "127",
+      "node": 2951,
+      "w": 286,
+      "h": 739,
+      "area": 211354,
+      "who": "div#devb-chem.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "112",
+      "node": 2491,
+      "w": 286,
+      "h": 630,
+      "area": 180180,
+      "who": "div#devb-orbit.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "118",
+      "node": 2720,
+      "w": 286,
+      "h": 624,
+      "area": 178464,
+      "who": "div#devb-slice.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "116",
+      "node": 2627,
+      "w": 286,
+      "h": 472,
+      "area": 134992,
+      "who": "div#devb-dynamics.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "129",
+      "node": 3070,
+      "w": 286,
+      "h": 472,
+      "area": 134992,
+      "who": "div#devb-orbitals.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "125",
+      "node": 2889,
+      "w": 286,
+      "h": 464,
+      "area": 132704,
+      "who": "div#devb-h2.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "120",
+      "node": 2776,
+      "w": 286,
+      "h": 385,
+      "area": 110110,
+      "who": "div#devb-qcd.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "131",
+      "node": 3136,
+      "w": 286,
+      "h": 369,
+      "area": 105534,
+      "who": "div#devb-calculus.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "107",
+      "node": 109,
+      "w": 286,
+      "h": 324,
+      "area": 92664,
+      "who": "div#devb-shadow.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 88.6,
+    "frames": 267,
+    "perFrame": {
+     "recalcStyle": 0.87,
+     "recalcStyleMs": 0.056,
+     "layout": 0.54,
+     "layoutMs": 0.177,
+     "scriptMs": 4.914,
+     "taskMs": 6.181
+    }
+   },
+   "trace": {
+    "frames": 130,
+    "events": 61030,
+    "perFrame": {
+     "paint": 0.56,
+     "paintMs": 0.223,
+     "raster": 0.05,
+     "rasterMs": 0.014,
+     "styleRecalc": 0.78,
+     "styleElements": 8.6,
+     "layout": 0.51,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  }
+ ],
+ "warn": {
+  "was": true,
+  "open": false
+ },
+ "boot": {
+  "ok": true,
+  "dpr": 1,
+  "w": 1920,
+  "h": 1043,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light"
+ },
+ "errs": []
+}

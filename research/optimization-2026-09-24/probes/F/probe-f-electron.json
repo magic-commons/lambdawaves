@@ -1,0 +1,714 @@
+{
+ "at": "2026-09-25T02:11:36.179Z",
+ "scenes": [
+  {
+   "frames": 332,
+   "total": {
+    "n": 332,
+    "min": 0.1,
+    "p10": 0.2,
+    "median": 0.3,
+    "p90": 0.8,
+    "p99": 1.6,
+    "max": 2.5
+   },
+   "untracked": {
+    "n": 332,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.2,
+    "p99": 0.3,
+    "max": 0.4
+   },
+   "over8": 0,
+   "raf": {
+    "n": 331,
+    "min": 8.2,
+    "p10": 8.3,
+    "median": 8.4,
+    "p90": 16.7,
+    "p99": 33.3,
+    "max": 133.4
+   },
+   "rafOver2x": 17,
+   "rafFps": 82.9,
+   "perReader": {
+    "field": {
+     "mean": 0.233,
+     "max": 2.4
+    },
+    "spectrum": {
+     "mean": 0.04,
+     "max": 0.3
+    },
+    "shadow": {
+     "mean": 0.065,
+     "max": 0.9
+    },
+    "molecule": {
+     "mean": 0.001,
+     "max": 0.1
+    }
+   },
+   "perfMedianAsShipped": 0.5,
+   "label": "default (sim-ladder 96³, 8 windows)"
+  },
+  {
+   "frames": 343,
+   "total": {
+    "n": 343,
+    "min": 0.1,
+    "p10": 0.2,
+    "median": 0.3,
+    "p90": 0.7,
+    "p99": 1,
+    "max": 1.2
+   },
+   "untracked": {
+    "n": 343,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.4,
+    "p99": 0.5,
+    "max": 0.6
+   },
+   "over8": 0,
+   "raf": {
+    "n": 342,
+    "min": 6.6,
+    "p10": 8.3,
+    "median": 8.4,
+    "p90": 16.7,
+    "p99": 25,
+    "max": 50.1
+   },
+   "rafOver2x": 10,
+   "rafFps": 85.9,
+   "perReader": {
+    "field": {
+     "mean": 0.178,
+     "max": 0.5
+    },
+    "spectrum": {
+     "mean": 0.031,
+     "max": 0.3
+    },
+    "shadow": {
+     "mean": 0.047,
+     "max": 0.4
+    }
+   },
+   "perfMedianAsShipped": 0.2,
+   "label": "modulation window open"
+  },
+  {
+   "frames": 446,
+   "total": {
+    "n": 446,
+    "min": 0,
+    "p10": 0.1,
+    "median": 0.2,
+    "p90": 0.5,
+    "p99": 0.6,
+    "max": 0.9
+   },
+   "untracked": {
+    "n": 446,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.1,
+    "p99": 0.2,
+    "max": 0.3
+   },
+   "over8": 0,
+   "raf": {
+    "n": 445,
+    "min": 7.9,
+    "p10": 8.3,
+    "median": 8.3,
+    "p90": 8.4,
+    "p99": 16.7,
+    "max": 41.7
+   },
+   "rafOver2x": 14,
+   "rafFps": 111.5,
+   "perReader": {
+    "field": {
+     "mean": 0.13,
+     "max": 0.3
+    },
+    "spectrum": {
+     "mean": 0.024,
+     "max": 0.2
+    },
+    "shadow": {
+     "mean": 0.041,
+     "max": 0.3
+    },
+    "molecule": {
+     "mean": 0,
+     "max": 0.1
+    }
+   },
+   "perfMedianAsShipped": 0.1,
+   "label": "modulation window closed"
+  },
+  {
+   "frames": 382,
+   "total": {
+    "n": 382,
+    "min": 0.1,
+    "p10": 0.2,
+    "median": 0.3,
+    "p90": 1.5,
+    "p99": 62.3,
+    "max": 81.3
+   },
+   "untracked": {
+    "n": 382,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.2,
+    "p99": 0.4,
+    "max": 0.5
+   },
+   "over8": 8,
+   "raf": {
+    "n": 381,
+    "min": 8.2,
+    "p10": 8.3,
+    "median": 8.3,
+    "p90": 16.6,
+    "p99": 66.7,
+    "max": 83.1
+   },
+   "rafOver2x": 27,
+   "rafFps": 95.5,
+   "perReader": {
+    "field": {
+     "mean": 0.152,
+     "max": 0.4
+    },
+    "vortex": {
+     "mean": 0.002,
+     "max": 0.1
+    },
+    "spectrum": {
+     "mean": 0.02,
+     "max": 0.3
+    },
+    "shadow": {
+     "mean": 0.027,
+     "max": 0.4
+    },
+    "orbit": {
+     "mean": 0.003,
+     "max": 0.3
+    },
+    "dynamics": {
+     "mean": 0.046,
+     "max": 0.5
+    },
+    "slice": {
+     "mean": 0.027,
+     "max": 0.2
+    },
+    "qcd": {
+     "mean": 0.005,
+     "max": 0.1
+    },
+    "atoms": {
+     "mean": 0.003,
+     "max": 0.1
+    },
+    "wigner": {
+     "mean": 1.327,
+     "max": 78.4
+    },
+    "radiation": {
+     "mean": 0.108,
+     "max": 0.8
+    },
+    "calculus": {
+     "mean": 0.046,
+     "max": 0.4
+    },
+    "meters": {
+     "mean": 0.007,
+     "max": 0.2
+    }
+   },
+   "perfMedianAsShipped": 1.2,
+   "label": "every card open"
+  },
+  {
+   "frames": 476,
+   "total": {
+    "n": 476,
+    "min": 0,
+    "p10": 0.1,
+    "median": 0.2,
+    "p90": 0.3,
+    "p99": 0.4,
+    "max": 0.5
+   },
+   "untracked": {
+    "n": 476,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.1,
+    "p99": 0.2,
+    "max": 0.3
+   },
+   "over8": 0,
+   "raf": {
+    "n": 475,
+    "min": 7.8,
+    "p10": 8.3,
+    "median": 8.3,
+    "p90": 8.4,
+    "p99": 8.5,
+    "max": 33.3
+   },
+   "rafOver2x": 1,
+   "rafFps": 119.2,
+   "perReader": {
+    "field": {
+     "mean": 0.128,
+     "max": 0.4
+    },
+    "molecule": {
+     "mean": 0.001,
+     "max": 0.1
+    }
+   },
+   "perfMedianAsShipped": 0.1,
+   "label": "every card open · UI hidden"
+  },
+  {
+   "frames": 52,
+   "total": {
+    "n": 52,
+    "min": 0.1,
+    "p10": 0.2,
+    "median": 0.3,
+    "p90": 0.5,
+    "p99": 19.8,
+    "max": 19.8
+   },
+   "untracked": {
+    "n": 52,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.2,
+    "p99": 19.3,
+    "max": 19.3
+   },
+   "over8": 3,
+   "raf": {
+    "n": 51,
+    "min": 8.3,
+    "p10": 83.3,
+    "median": 133.2,
+    "p90": 133.4,
+    "p99": 133.5,
+    "max": 133.5
+   },
+   "rafOver2x": 0,
+   "rafFps": 8.6,
+   "perReader": {
+    "field": {
+     "mean": 0.21,
+     "max": 0.4
+    },
+    "shadow": {
+     "mean": 0.023,
+     "max": 0.2
+    }
+   },
+   "perfMedianAsShipped": 14.5,
+   "label": "128³ axial gas · UI shown"
+  },
+  {
+   "frames": 36,
+   "total": {
+    "n": 36,
+    "min": 0.1,
+    "p10": 0.2,
+    "median": 0.3,
+    "p90": 0.4,
+    "p99": 0.5,
+    "max": 0.5
+   },
+   "untracked": {
+    "n": 36,
+    "min": 0,
+    "p10": 0,
+    "median": 0.1,
+    "p90": 0.1,
+    "p99": 0.2,
+    "max": 0.2
+   },
+   "over8": 0,
+   "raf": {
+    "n": 35,
+    "min": 8.3,
+    "p10": 8.4,
+    "median": 183.4,
+    "p90": 200,
+    "p99": 366.7,
+    "max": 366.7
+   },
+   "rafOver2x": 0,
+   "rafFps": 6,
+   "perReader": {
+    "field": {
+     "mean": 0.211,
+     "max": 0.5
+    }
+   },
+   "perfMedianAsShipped": 0.2,
+   "label": "128³ axial gas · UI hidden"
+  }
+ ],
+ "profiles": {
+  "restore(serialize())": {
+   "wallMs": 784.9,
+   "samples": 4827,
+   "top": [
+    {
+     "fn": "envelope4C frontier.js:175",
+     "selfMs": 678.9
+    },
+    {
+     "fn": "(program) :0",
+     "selfMs": 134.7
+    },
+    {
+     "fn": "quarticEnvelopeC frontier.js:649",
+     "selfMs": 26.4
+    },
+    {
+     "fn": "paint paletteview.js:89",
+     "selfMs": 14.9
+    },
+    {
+     "fn": "querySelectorAll :0",
+     "selfMs": 6.8
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "selfMs": 6.7
+    },
+    {
+     "fn": "centre mo.js:162",
+     "selfMs": 3.7
+    },
+    {
+     "fn": "rebuild spectrum.js:189",
+     "selfMs": 3.5
+    },
+    {
+     "fn": "force mo.js:459",
+     "selfMs": 3.4
+    },
+    {
+     "fn": "at mo.js:185",
+     "selfMs": 2.9
+    },
+    {
+     "fn": "restore rack.js:5305",
+     "selfMs": 2.6
+    },
+    {
+     "fn": "minimalH2 h2ci.js:192",
+     "selfMs": 2.6
+    },
+    {
+     "fn": "ladderAutocorr frontier.js:135",
+     "selfMs": 2.5
+    },
+    {
+     "fn": "setAttribute :0",
+     "selfMs": 2.4
+    },
+    {
+     "fn": "solveLadder ladder-model.js:5",
+     "selfMs": 2.2
+    },
+    {
+     "fn": "paint moleculeview.js:67",
+     "selfMs": 2
+    },
+    {
+     "fn": "appendChild :0",
+     "selfMs": 1.9
+    },
+    {
+     "fn": "paintLadder spectrum.js:224",
+     "selfMs": 1.7
+    },
+    {
+     "fn": "envelopeI frontier.js:75",
+     "selfMs": 1.7
+    },
+    {
+     "fn": "sphere mo.js:484",
+     "selfMs": 1.6
+    },
+    {
+     "fn": "solveForce moview.js:97",
+     "selfMs": 1.1
+    },
+    {
+     "fn": "weinbaum h2ci.js:271",
+     "selfMs": 1.1
+    },
+    {
+     "fn": "put h2ci.js:179",
+     "selfMs": 0.9
+    },
+    {
+     "fn": "paint kit.js:177",
+     "selfMs": 0.9
+    },
+    {
+     "fn": "MutationObserver.observe.subtree control-help.js:72",
+     "selfMs": 0.9
+    }
+   ]
+  },
+  "restore again": {
+   "wallMs": 703.7,
+   "samples": 4501,
+   "top": [
+    {
+     "fn": "envelope4C frontier.js:175",
+     "selfMs": 637.3
+    },
+    {
+     "fn": "(program) :0",
+     "selfMs": 41.5
+    },
+    {
+     "fn": "quarticEnvelopeC frontier.js:649",
+     "selfMs": 23.9
+    },
+    {
+     "fn": "paint paletteview.js:89",
+     "selfMs": 9.4
+    },
+    {
+     "fn": "querySelectorAll :0",
+     "selfMs": 4.6
+    },
+    {
+     "fn": "force mo.js:459",
+     "selfMs": 1.7
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "selfMs": 1.5
+    },
+    {
+     "fn": "solveForce moview.js:97",
+     "selfMs": 1.5
+    },
+    {
+     "fn": "appendChild :0",
+     "selfMs": 1.5
+    },
+    {
+     "fn": "setAttribute :0",
+     "selfMs": 1.4
+    },
+    {
+     "fn": "sphereGrid mo.js:235",
+     "selfMs": 1.3
+    },
+    {
+     "fn": "paint moleculeview.js:67",
+     "selfMs": 1.3
+    },
+    {
+     "fn": "ladderAutocorr frontier.js:135",
+     "selfMs": 1.1
+    },
+    {
+     "fn": "sphere mo.js:484",
+     "selfMs": 1.1
+    },
+    {
+     "fn": "paintLadder spectrum.js:224",
+     "selfMs": 1
+    },
+    {
+     "fn": "paintMarks rack.js:190",
+     "selfMs": 0.7
+    },
+    {
+     "fn": "push paletteview.js:79",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "centre mo.js:162",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "twoCentre twocentre.js:134",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "paint kit.js:357",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "solveLadder ladder-model.js:5",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "restore rack.js:5305",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "prolateGrid mo.js:199",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "setProperty :0",
+     "selfMs": 0.5
+    },
+    {
+     "fn": "adopt control-help.js:53",
+     "selfMs": 0.5
+    }
+   ]
+  },
+  "modulation expand": {
+   "wallMs": 27,
+   "samples": 215,
+   "top": [
+    {
+     "fn": "(program) :0",
+     "selfMs": 36.1
+    },
+    {
+     "fn": "getBoundingClientRect :0",
+     "selfMs": 13.2
+    },
+    {
+     "fn": "paint modwindow.js:2623",
+     "selfMs": 6.5
+    },
+    {
+     "fn": "setAttribute :0",
+     "selfMs": 0.8
+    },
+    {
+     "fn": "get modwindow.js:1392",
+     "selfMs": 0.7
+    },
+    {
+     "fn": "MutationObserver.observe.subtree control-help.js:72",
+     "selfMs": 0.7
+    },
+    {
+     "fn": "(idle) :0",
+     "selfMs": 0.7
+    },
+    {
+     "fn": "querySelectorAll :0",
+     "selfMs": 0.7
+    },
+    {
+     "fn": "(anon) modwindow.js:167",
+     "selfMs": 0.6
+    },
+    {
+     "fn": "adopt control-help.js:53",
+     "selfMs": 0.5
+    },
+    {
+     "fn": "render modwindow.js:2071",
+     "selfMs": 0.5
+    },
+    {
+     "fn": "tickRaf :4",
+     "selfMs": 0.4
+    },
+    {
+     "fn": "rebuildMacros modwindow.js:1169",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "place modwindow.js:172",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "(anon) rack.js:313",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "querySelector :0",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "appendChild :0",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "wireSlider modwindow.js:1274",
+     "selfMs": 0.3
+    },
+    {
+     "fn": "mkKnob modwindow.js:901",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "paint kit.js:177",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "syncChips modwindow.js:2879",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "getPropertyValue :0",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "update rack.js:3083",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "buildDevice modwindow.js:939",
+     "selfMs": 0.2
+    },
+    {
+     "fn": "buildCard modwindow.js:1640",
+     "selfMs": 0.2
+    }
+   ]
+  }
+ },
+ "boot": {
+  "ok": true,
+  "adapter": {
+   "vendor": "nvidia",
+   "architecture": "ampere",
+   "device": "",
+   "description": ""
+  },
+  "dpr": 1,
+  "w": 1920,
+  "h": 1043,
+  "perfMode": "120"
+ },
+ "errs": []
+}

@@ -1,0 +1,746 @@
+{
+ "compileErrors": {},
+ "variants": [
+  "ship",
+  "early",
+  "memo",
+  "earlyMemo",
+  "earlyMemoExp",
+  "chunk",
+  "chunkEarlyMemoExp"
+ ],
+ "scen": {
+  "h91": {
+   "count": 91,
+   "half": 92,
+   "space": 0,
+   "res": {
+    "64": {
+     "ship": {
+      "min": 0.974,
+      "rounds": [
+       0.974,
+       1.123,
+       1.046
+      ],
+      "n": 2774,
+      "tickErrMs": 0.036,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 0.992,
+      "rounds": [
+       1.091,
+       1.096,
+       0.992
+      ],
+      "n": 3027,
+      "tickErrMs": 0.033,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 0.75,
+      "rounds": [
+       0.816,
+       0.815,
+       0.75
+      ],
+      "n": 3069,
+      "tickErrMs": 0.033,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 0.76,
+      "rounds": [
+       0.94,
+       0.76,
+       0.783
+      ],
+      "n": 3836,
+      "tickErrMs": 0.026,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 0.799,
+      "rounds": [
+       0.959,
+       0.822,
+       0.799
+      ],
+      "n": 4385,
+      "tickErrMs": 0.023,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 0.848,
+      "rounds": [
+       0.973,
+       0.88,
+       0.848
+      ],
+      "n": 3191,
+      "tickErrMs": 0.031,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 0.499,
+      "rounds": [
+       0.499,
+       0.599,
+       0.739
+      ],
+      "n": 5014,
+      "tickErrMs": 0.02,
+      "differFromShip": 0
+     }
+    },
+    "96": {
+     "ship": {
+      "min": 1.865,
+      "rounds": [
+       6.169,
+       2.008,
+       1.865
+      ],
+      "n": 698,
+      "tickErrMs": 0.143,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 1.827,
+      "rounds": [
+       5.115,
+       3.288,
+       1.827
+      ],
+      "n": 274,
+      "tickErrMs": 0.365,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 1.455,
+      "rounds": [
+       5.044,
+       1.747,
+       1.455
+      ],
+      "n": 1032,
+      "tickErrMs": 0.097,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 1.564,
+      "rounds": [
+       1.564,
+       1.564,
+       1.567
+      ],
+      "n": 256,
+      "tickErrMs": 0.391,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 1.668,
+      "rounds": [
+       2.919,
+       1.669,
+       1.668
+      ],
+      "n": 240,
+      "tickErrMs": 0.417,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 1.579,
+      "rounds": [
+       1.737,
+       1.579,
+       1.579
+      ],
+      "n": 634,
+      "tickErrMs": 0.158,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 1.235,
+      "rounds": [
+       1.576,
+       1.238,
+       1.235
+      ],
+      "n": 2350,
+      "tickErrMs": 0.043,
+      "differFromShip": 0
+     }
+    },
+    "128": {
+     "ship": {
+      "min": 4.302,
+      "rounds": [
+       4.304,
+       4.302,
+       4.302
+      ],
+      "n": 698,
+      "tickErrMs": 0.143,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 4.308,
+      "rounds": [
+       4.309,
+       4.311,
+       4.308
+      ],
+      "n": 697,
+      "tickErrMs": 0.143,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 3.286,
+      "rounds": [
+       3.286,
+       3.287,
+       3.403
+      ],
+      "n": 853,
+      "tickErrMs": 0.117,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 3.287,
+      "rounds": [
+       3.287,
+       3.287,
+       3.409
+      ],
+      "n": 853,
+      "tickErrMs": 0.117,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 3.412,
+      "rounds": [
+       3.412,
+       3.412,
+       3.534
+      ],
+      "n": 851,
+      "tickErrMs": 0.118,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 3.78,
+      "rounds": [
+       3.781,
+       3.78,
+       4.037
+      ],
+      "n": 768,
+      "tickErrMs": 0.13,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 2.923,
+      "rounds": [
+       2.923,
+       2.923,
+       2.945
+      ],
+      "n": 959,
+      "tickErrMs": 0.104,
+      "differFromShip": 0
+     }
+    }
+   }
+  },
+  "box": {
+   "count": 27,
+   "half": 10.8,
+   "space": 3,
+   "res": {
+    "64": {
+     "ship": {
+      "min": 2.22,
+      "rounds": [
+       2.22,
+       2.289,
+       2.347
+      ],
+      "n": 1535,
+      "tickErrMs": 0.065,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 1.474,
+      "rounds": [
+       1.524,
+       1.565,
+       1.474
+      ],
+      "n": 2175,
+      "tickErrMs": 0.046,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 1.986,
+      "rounds": [
+       2.179,
+       2.307,
+       1.986
+      ],
+      "n": 1562,
+      "tickErrMs": 0.064,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 1.254,
+      "rounds": [
+       1.288,
+       1.254,
+       1.254
+      ],
+      "n": 2875,
+      "tickErrMs": 0.035,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 1.202,
+      "rounds": [
+       1.202,
+       1.241,
+       1.241
+      ],
+      "n": 2501,
+      "tickErrMs": 0.04,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 2.156,
+      "rounds": [
+       2.156,
+       2.226,
+       2.157
+      ],
+      "n": 1439,
+      "tickErrMs": 0.069,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 1.22,
+      "rounds": [
+       1.22,
+       1.255,
+       1.43
+      ],
+      "n": 2871,
+      "tickErrMs": 0.035,
+      "differFromShip": 0
+     }
+    },
+    "96": {
+     "ship": {
+      "min": 2.609,
+      "rounds": [
+       8.866,
+       7.559,
+       2.609
+      ],
+      "n": 384,
+      "tickErrMs": 0.26,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 1.502,
+      "rounds": [
+       5.672,
+       5.173,
+       1.502
+      ],
+      "n": 600,
+      "tickErrMs": 0.167,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 2.296,
+      "rounds": [
+       8.265,
+       7.577,
+       2.296
+      ],
+      "n": 436,
+      "tickErrMs": 0.229,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 3.546,
+      "rounds": [
+       4.484,
+       3.65,
+       3.546
+      ],
+      "n": 960,
+      "tickErrMs": 0.104,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 1.147,
+      "rounds": [
+       3.299,
+       1.147,
+       3.155
+      ],
+      "n": 698,
+      "tickErrMs": 0.143,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 2.347,
+      "rounds": [
+       9.003,
+       2.347,
+       5.865
+      ],
+      "n": 256,
+      "tickErrMs": 0.391,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 1.276,
+      "rounds": [
+       2.711,
+       1.276,
+       4.589
+      ],
+      "n": 480,
+      "tickErrMs": 0.208,
+      "differFromShip": 0
+     }
+    },
+    "128": {
+     "ship": {
+      "min": 5.846,
+      "rounds": [
+       5.847,
+       5.846,
+       5.848
+      ],
+      "n": 274,
+      "tickErrMs": 0.365,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 3.274,
+      "rounds": [
+       3.274,
+       3.275,
+       3.275
+      ],
+      "n": 214,
+      "tickErrMs": 0.467,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 5.346,
+      "rounds": [
+       5.358,
+       5.346,
+       5.346
+      ],
+      "n": 206,
+      "tickErrMs": 0.485,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 2.608,
+      "rounds": [
+       2.608,
+       2.868,
+       2.87
+      ],
+      "n": 384,
+      "tickErrMs": 0.26,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 2.654,
+      "rounds": [
+       2.654,
+       2.654,
+       2.654
+      ],
+      "n": 1094,
+      "tickErrMs": 0.091,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 5.422,
+      "rounds": [
+       5.424,
+       5.422,
+       5.423
+      ],
+      "n": 480,
+      "tickErrMs": 0.208,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 2.555,
+      "rounds": [
+       2.555,
+       2.555,
+       2.557
+      ],
+      "n": 1097,
+      "tickErrMs": 0.091,
+      "differFromShip": 0
+     }
+    }
+   }
+  },
+  "gas": {
+   "count": 256,
+   "half": 10.8,
+   "space": 3,
+   "res": {
+    "64": {
+     "ship": {
+      "min": 15.121,
+      "rounds": [
+       15.121,
+       62.563,
+       61.008
+      ],
+      "n": 192,
+      "tickErrMs": 0.521,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 8.772,
+      "rounds": [
+       8.772,
+       33.784,
+       33.798
+      ],
+      "n": 320,
+      "tickErrMs": 0.313,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 14.049,
+      "rounds": [
+       14.049,
+       54.268,
+       55.204
+      ],
+      "n": 214,
+      "tickErrMs": 0.467,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 7.041,
+      "rounds": [
+       7.041,
+       30.498,
+       35.453
+      ],
+      "n": 384,
+      "tickErrMs": 0.26,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 7.052,
+      "rounds": [
+       21.637,
+       29.995,
+       7.052
+      ],
+      "n": 384,
+      "tickErrMs": 0.26,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 14.6,
+      "rounds": [
+       58.917,
+       62.043,
+       14.6
+      ],
+      "n": 192,
+      "tickErrMs": 0.521,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 7.042,
+      "rounds": [
+       32.589,
+       39.362,
+       7.042
+      ],
+      "n": 384,
+      "tickErrMs": 0.26,
+      "differFromShip": 0
+     }
+    },
+    "96": {
+     "ship": {
+      "min": 48.383,
+      "rounds": [
+       48.383,
+       48.408,
+       48.391
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 25.029,
+      "rounds": [
+       25.029,
+       25.865,
+       25.036
+      ],
+      "n": 120,
+      "tickErrMs": 0.833,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 45.05,
+      "rounds": [
+       45.055,
+       45.05,
+       46.721
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 20.021,
+      "rounds": [
+       20.021,
+       20.689,
+       22.703
+      ],
+      "n": 150,
+      "tickErrMs": 0.667,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 20.025,
+      "rounds": [
+       20.032,
+       20.025,
+       22.024
+      ],
+      "n": 150,
+      "tickErrMs": 0.667,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 46.754,
+      "rounds": [
+       48.385,
+       46.754,
+       48.386
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 20.022,
+      "rounds": [
+       20.022,
+       20.023,
+       20.026
+      ],
+      "n": 150,
+      "tickErrMs": 0.667,
+      "differFromShip": 0
+     }
+    },
+    "128": {
+     "ship": {
+      "min": 112.647,
+      "rounds": [
+       112.653,
+       112.647,
+       225.237
+      ],
+      "n": 24,
+      "tickErrMs": 4.167,
+      "differFromShip": 0
+     },
+     "early": {
+      "min": 58.403,
+      "rounds": [
+       58.41,
+       58.403,
+       116.778
+      ],
+      "n": 48,
+      "tickErrMs": 2.083,
+      "differFromShip": 0
+     },
+     "memo": {
+      "min": 104.28,
+      "rounds": [
+       104.36,
+       104.28,
+       221.063
+      ],
+      "n": 24,
+      "tickErrMs": 4.167,
+      "differFromShip": 0
+     },
+     "earlyMemo": {
+      "min": 45.055,
+      "rounds": [
+       45.055,
+       46.729,
+       95.091
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     },
+     "earlyMemoExp": {
+      "min": 45.059,
+      "rounds": [
+       45.059,
+       45.059,
+       93.455
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     },
+     "chunk": {
+      "min": 112.608,
+      "rounds": [
+       112.608,
+       125.128,
+       225.223
+      ],
+      "n": 24,
+      "tickErrMs": 4.167,
+      "differFromShip": 0
+     },
+     "chunkEarlyMemoExp": {
+      "min": 45.06,
+      "rounds": [
+       45.064,
+       93.434,
+       45.06
+      ],
+      "n": 60,
+      "tickErrMs": 1.667,
+      "differFromShip": 0
+     }
+    }
+   }
+  }
+ }
+}

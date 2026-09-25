@@ -1,0 +1,13 @@
+{
+ "lostBeforeListeners": {
+  "ready": false,
+  "fieldOk": false,
+  "error": "device lost: Device destroyed",
+  "bannerShown": true,
+  "bannerTitle": "the GPU device was lost",
+  "readPixels": null,
+  "errs": [
+   "BOOT syncPhone@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/F/lab-lostearly/rack.js:4891:11\nboot@https://127.0.0.1:8721/research/optimization-2026-09-24/probes/F/lab-lostearly/rack.js:5986:3\n"
+  ]
+ }
+}

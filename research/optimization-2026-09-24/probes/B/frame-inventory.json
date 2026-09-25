@@ -1,0 +1,2616 @@
+{
+ "at": "2026-09-25T02:10:53.739Z",
+ "scenes": {
+  "A default windows · 1s+2pz · 96³ · UI shown": {
+   "frames": 42,
+   "loopMs": {
+    "median": 0.84,
+    "p90": 1.98,
+    "max": 4.16,
+    "mean": 1.1267
+   },
+   "perFrame": {
+    "gbcr": 3.86,
+    "gcs": 4.12,
+    "gpv": 0.48,
+    "geom": 0.76,
+    "text": 5.6,
+    "cls": 0.64,
+    "attr": 3.71,
+    "tok": 3.21,
+    "sprop": 1.9,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0538,
+    "gpvPerFrame": 0.0019,
+    "geomPerFrame": 0.0224
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.214,
+    "loopMsMedian": 0.98,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17.2,
+    "gbcrMsPerOccFrame": 0.2511,
+    "otherFramesMedian": 0.82
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2038,
+     "msPerCall": 0.2038,
+     "maxInFrame": 0.38
+    },
+    "shadow.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.1305,
+     "msPerCall": 0.548,
+     "maxInFrame": 1
+    },
+    "spectrum.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.0614,
+     "msPerCall": 0.258,
+     "maxInFrame": 0.36
+    },
+    "wa.canPresent": {
+     "perFrame": 15.095,
+     "msPerFrame": 0.059,
+     "msPerCall": 0.0039,
+     "maxInFrame": 0.16
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0219,
+     "msPerCall": 0.0219,
+     "maxInFrame": 0.06
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0114,
+     "msPerCall": 0.0114,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0071,
+     "msPerCall": 0.0071,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0062,
+     "msPerCall": 0.0062,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.214,
+     "msPerFrame": 0.0052,
+     "msPerCall": 0.0244,
+     "maxInFrame": 0.06
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0052,
+     "msPerCall": 0.0052,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0052,
+     "msPerCall": 0.0052,
+     "maxInFrame": 0.04
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0043,
+     "msPerCall": 0.0043,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0038,
+     "msPerCall": 0.0038,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0038,
+     "msPerCall": 0.0038,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0033,
+     "msPerCall": 0.0033,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0024,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0019,
+     "msPerCall": 0.0019,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.0019,
+     "msPerCall": 0.008,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0,
+     "msPerCall": 0,
+     "maxInFrame": 0
+    }
+   },
+   "lwPerfMedian": 0.34,
+   "profile": {
+    "total": 0.686,
+    "field": 0.2049,
+    "spectrum": 0.5613,
+    "shadow": 0.4275,
+    "molecule": 0.0092
+   },
+   "tiers": {
+    "EVOLVE": 42
+   },
+   "rafReq": 43,
+   "rafRun": 42,
+   "timers": 3,
+   "intervals": 0,
+   "idleCb": 2,
+   "worst": [
+    {
+     "ms": 4.16,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 6,
+     "text": 56,
+     "top": [
+      "shadow.update 0.360",
+      "spectrum.update 0.140",
+      "field.frame 0.120",
+      "wa.canPresent 0.100"
+     ]
+    },
+    {
+     "ms": 3.46,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 4,
+     "text": 51,
+     "top": [
+      "field.frame 0.160",
+      "wa.canPresent 0.040",
+      "field.setOcclusion 0.020",
+      "reg.at 0.020"
+     ]
+    },
+    {
+     "ms": 2.28,
+     "gbcr": 18,
+     "gcs": 19,
+     "geom": 2,
+     "text": 7,
+     "top": [
+      "shadow.update 0.460",
+      "spectrum.update 0.300",
+      "field.frame 0.180",
+      "wa.canPresent 0.100"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "B default windows · UI hidden": {
+   "frames": 179,
+   "loopMs": {
+    "median": 0.54,
+    "p90": 0.76,
+    "max": 3.54,
+    "mean": 0.6241
+   },
+   "perFrame": {
+    "gbcr": 1.01,
+    "gcs": 0.95,
+    "gpv": 0,
+    "geom": 0.07,
+    "text": 0.84,
+    "cls": 0.04,
+    "attr": 0.75,
+    "tok": 0.64,
+    "sprop": 0.34,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0051,
+    "gpvPerFrame": 0,
+    "geomPerFrame": 0.0002
+   },
+   "occlusionFrames": {
+    "count": 10,
+    "share": 0.056,
+    "loopMsMedian": 1.02,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17,
+    "gbcrMsPerOccFrame": 0.092,
+    "otherFramesMedian": 0.52
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.1807,
+     "msPerCall": 0.1807,
+     "maxInFrame": 3.04
+    },
+    "wa.canPresent": {
+     "perFrame": 15.196,
+     "msPerFrame": 0.0611,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.46
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0191,
+     "msPerCall": 0.0191,
+     "maxInFrame": 0.1
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0104,
+     "msPerCall": 0.0104,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0089,
+     "msPerCall": 0.0089,
+     "maxInFrame": 0.08
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0065,
+     "msPerCall": 0.0065,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0061,
+     "msPerCall": 0.0061,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0059,
+     "msPerCall": 0.0059,
+     "maxInFrame": 0.04
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0059,
+     "msPerCall": 0.0059,
+     "maxInFrame": 0.04
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0048,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0047,
+     "msPerCall": 0.0047,
+     "maxInFrame": 0.04
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0044,
+     "msPerCall": 0.0044,
+     "maxInFrame": 0.04
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0041,
+     "msPerCall": 0.0041,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0039,
+     "msPerCall": 0.0039,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0025,
+     "msPerCall": 0.0025,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.246,
+     "msPerFrame": 0.001,
+     "msPerCall": 0.0041,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.056,
+     "msPerFrame": 0.0003,
+     "msPerCall": 0.006,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.38,
+   "profile": {
+    "total": 0.4263,
+    "field": 0.1832,
+    "spectrum": 0.5232,
+    "shadow": 0.4188,
+    "molecule": 0.0126
+   },
+   "tiers": {
+    "EVOLVE": 179
+   },
+   "rafReq": 180,
+   "rafRun": 179,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 3.54,
+     "gbcr": 0,
+     "gcs": 0,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "field.frame 3.040",
+      "wa.canPresent 0.040",
+      "reg.at 0.020",
+      "field.resize 0.020"
+     ]
+    },
+    {
+     "ms": 2.94,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "wa.canPresent 0.460",
+      "field.frame 0.160",
+      "field.setOcclusion 0.020",
+      "particles.suspend 0.020"
+     ]
+    },
+    {
+     "ms": 2.42,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "field.frame 0.240",
+      "wa.canPresent 0.100",
+      "reg.at 0.020",
+      "field.resize 0.020"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": true,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "C default windows · UI shown again": {
+   "frames": 39,
+   "loopMs": {
+    "median": 0.98,
+    "p90": 2.66,
+    "max": 3.38,
+    "mean": 1.3015
+   },
+   "perFrame": {
+    "gbcr": 4.15,
+    "gcs": 4.44,
+    "gpv": 0.51,
+    "geom": 0.82,
+    "text": 6,
+    "cls": 0.72,
+    "attr": 3.95,
+    "tok": 3.46,
+    "sprop": 2.05,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0267,
+    "gpvPerFrame": 0.0067,
+    "geomPerFrame": 0.0036
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.231,
+    "loopMsMedian": 1.42,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17.2,
+    "gbcrMsPerOccFrame": 0.1156,
+    "otherFramesMedian": 0.86
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2359,
+     "msPerCall": 0.2359,
+     "maxInFrame": 0.86
+    },
+    "shadow.update": {
+     "perFrame": 0.256,
+     "msPerFrame": 0.16,
+     "msPerCall": 0.624,
+     "maxInFrame": 1.58
+    },
+    "spectrum.update": {
+     "perFrame": 0.256,
+     "msPerFrame": 0.0815,
+     "msPerCall": 0.318,
+     "maxInFrame": 0.56
+    },
+    "wa.canPresent": {
+     "perFrame": 15.333,
+     "msPerFrame": 0.0744,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.46
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0231,
+     "msPerCall": 0.0231,
+     "maxInFrame": 0.16
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0123,
+     "msPerCall": 0.0123,
+     "maxInFrame": 0.04
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0092,
+     "msPerCall": 0.0092,
+     "maxInFrame": 0.02
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0087,
+     "msPerCall": 0.0087,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.231,
+     "msPerFrame": 0.0077,
+     "msPerCall": 0.0333,
+     "maxInFrame": 0.12
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0072,
+     "msPerCall": 0.0072,
+     "maxInFrame": 0.04
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0072,
+     "msPerCall": 0.0072,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0056,
+     "msPerCall": 0.0056,
+     "maxInFrame": 0.04
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0056,
+     "msPerCall": 0.0056,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0041,
+     "msPerCall": 0.0041,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0036,
+     "msPerCall": 0.0036,
+     "maxInFrame": 0.06
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0031,
+     "msPerCall": 0.0031,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0026,
+     "msPerCall": 0.0026,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.256,
+     "msPerFrame": 0.0026,
+     "msPerCall": 0.01,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0026,
+     "msPerCall": 0.0026,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 0.256,
+     "msPerFrame": 0.001,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.4,
+   "profile": {
+    "total": 1.024,
+    "field": 0.2781,
+    "spectrum": 0.4015,
+    "shadow": 0.592,
+    "molecule": 0.0133
+   },
+   "tiers": {
+    "EVOLVE": 39
+   },
+   "rafReq": 40,
+   "rafRun": 39,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 3.38,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 4,
+     "text": 50,
+     "top": [
+      "field.frame 0.240",
+      "wa.canPresent 0.060",
+      "field.setOcclusion 0.020",
+      "ladder.setActive 0.020"
+     ]
+    },
+    {
+     "ms": 3.18,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 2,
+     "text": 4,
+     "top": [
+      "shadow.update 1.580",
+      "spectrum.update 0.540",
+      "field.frame 0.240",
+      "wa.canPresent 0.140"
+     ]
+    },
+    {
+     "ms": 3.1,
+     "gbcr": 0,
+     "gcs": 0,
+     "geom": 0,
+     "text": 3,
+     "top": [
+      "field.frame 0.860",
+      "reg.at 0.160",
+      "wa.canPresent 0.060",
+      "kepler.bowFrame 0.060"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "D default · perf FULL": {
+   "frames": 41,
+   "loopMs": {
+    "median": 1.5,
+    "p90": 2.3,
+    "max": 3.78,
+    "mean": 1.6332
+   },
+   "perFrame": {
+    "gbcr": 4.39,
+    "gcs": 6.15,
+    "gpv": 2,
+    "geom": 2.29,
+    "text": 7.51,
+    "cls": 0.71,
+    "attr": 5.22,
+    "tok": 4.8,
+    "sprop": 3.46,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0249,
+    "gpvPerFrame": 0.0176,
+    "geomPerFrame": 0.0117
+   },
+   "occlusionFrames": {
+    "count": 10,
+    "share": 0.244,
+    "loopMsMedian": 1.98,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 19,
+    "gbcrMsPerOccFrame": 0.102,
+    "otherFramesMedian": 1.44
+   },
+   "fn": {
+    "shadow.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.4337,
+     "msPerCall": 0.4337,
+     "maxInFrame": 0.78
+    },
+    "spectrum.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.2195,
+     "msPerCall": 0.2195,
+     "maxInFrame": 0.4
+    },
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.1902,
+     "msPerCall": 0.1902,
+     "maxInFrame": 0.32
+    },
+    "wa.canPresent": {
+     "perFrame": 25,
+     "msPerFrame": 0.0863,
+     "msPerCall": 0.0035,
+     "maxInFrame": 0.18
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0205,
+     "msPerCall": 0.0205,
+     "maxInFrame": 0.08
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0127,
+     "msPerCall": 0.0127,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0078,
+     "msPerCall": 0.0078,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 1,
+     "msPerFrame": 0.0078,
+     "msPerCall": 0.0078,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0073,
+     "msPerCall": 0.0073,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0073,
+     "msPerCall": 0.0073,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.244,
+     "msPerFrame": 0.0068,
+     "msPerCall": 0.028,
+     "maxInFrame": 0.06
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0068,
+     "msPerCall": 0.0068,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0063,
+     "msPerCall": 0.0063,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0063,
+     "msPerCall": 0.0063,
+     "maxInFrame": 0.04
+    },
+    "molecule.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0054,
+     "msPerCall": 0.0054,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0054,
+     "msPerCall": 0.0054,
+     "maxInFrame": 0.04
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0049,
+     "msPerCall": 0.0049,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0044,
+     "msPerCall": 0.0044,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0044,
+     "msPerCall": 0.0044,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0034,
+     "msPerCall": 0.0034,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 1.1,
+   "profile": {
+    "total": 1.3267,
+    "field": 0.2261,
+    "spectrum": 0.2313,
+    "shadow": 0.4624,
+    "molecule": 0.0139
+   },
+   "tiers": {
+    "EVOLVE": 41
+   },
+   "rafReq": 42,
+   "rafRun": 41,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 3.78,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 6,
+     "text": 52,
+     "top": [
+      "shadow.update 0.780",
+      "field.frame 0.160",
+      "spectrum.update 0.100",
+      "wa.canPresent 0.060"
+     ]
+    },
+    {
+     "ms": 2.6,
+     "gbcr": 18,
+     "gcs": 19,
+     "geom": 6,
+     "text": 57,
+     "top": [
+      "shadow.update 0.280",
+      "spectrum.update 0.140",
+      "field.frame 0.120",
+      "wa.canPresent 0.040"
+     ]
+    },
+    {
+     "ms": 2.56,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 6,
+     "text": 52,
+     "top": [
+      "shadow.update 0.340",
+      "field.frame 0.160",
+      "spectrum.update 0.100",
+      "wa.canPresent 0.060"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "full",
+   "modRunning": false
+  },
+  "E every window open (presentOffscreen)": {
+   "frames": 40,
+   "loopMs": {
+    "median": 1.28,
+    "p90": 45.7,
+    "max": 53.2,
+    "mean": 7.2905
+   },
+   "perFrame": {
+    "gbcr": 12.6,
+    "gcs": 13.25,
+    "gpv": 5.13,
+    "geom": 2.8,
+    "text": 15.22,
+    "cls": 15.3,
+    "attr": 4.17,
+    "tok": 3.38,
+    "sprop": 2.25,
+    "hid": 1
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0545,
+    "gpvPerFrame": 0.025,
+    "geomPerFrame": 0.107
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.225,
+    "loopMsMedian": 1.44,
+    "gbcrPerOccFrame": 56,
+    "gcsPerOccFrame": 55.4,
+    "gbcrMsPerOccFrame": 0.2422,
+    "otherFramesMedian": 0.74
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.24,
+     "msPerCall": 0.24,
+     "maxInFrame": 2.78
+    },
+    "wa.canPresent": {
+     "perFrame": 15.5,
+     "msPerFrame": 0.14,
+     "msPerCall": 0.009,
+     "maxInFrame": 1.96
+    },
+    "calculus.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.125,
+     "msPerCall": 0.5,
+     "maxInFrame": 0.7
+    },
+    "shadow.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.1215,
+     "msPerCall": 0.486,
+     "maxInFrame": 1.02
+    },
+    "slice.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.0915,
+     "msPerCall": 0.366,
+     "maxInFrame": 0.64
+    },
+    "spectrum.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.057,
+     "msPerCall": 0.228,
+     "maxInFrame": 0.36
+    },
+    "reg.at": {
+     "perFrame": 2.375,
+     "msPerFrame": 0.026,
+     "msPerCall": 0.0109,
+     "maxInFrame": 0.1
+    },
+    "reg.renderSet": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.0175,
+     "msPerCall": 0.07,
+     "maxInFrame": 0.14
+    },
+    "atoms.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.017,
+     "msPerCall": 0.068,
+     "maxInFrame": 0.14
+    },
+    "qcd.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.0165,
+     "msPerCall": 0.066,
+     "maxInFrame": 0.14
+    },
+    "vortex.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.009,
+     "msPerCall": 0.009,
+     "maxInFrame": 0.02
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.008,
+     "msPerCall": 0.008,
+     "maxInFrame": 0.02
+    },
+    "reg.populated": {
+     "perFrame": 0.875,
+     "msPerFrame": 0.0075,
+     "msPerCall": 0.0086,
+     "maxInFrame": 0.06
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.007,
+     "msPerCall": 0.007,
+     "maxInFrame": 0.02
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.007,
+     "msPerCall": 0.007,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0065,
+     "msPerCall": 0.0065,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0055,
+     "msPerCall": 0.0055,
+     "maxInFrame": 0.02
+    },
+    "reg.norm2": {
+     "perFrame": 0.5,
+     "msPerFrame": 0.0055,
+     "msPerCall": 0.011,
+     "maxInFrame": 0.06
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.225,
+     "msPerFrame": 0.005,
+     "msPerCall": 0.0222,
+     "maxInFrame": 0.04
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.005,
+     "msPerCall": 0.005,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0045,
+     "msPerCall": 0.0045,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0035,
+     "msPerCall": 0.0035,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 0.75,
+     "msPerFrame": 0.003,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "reg.norm": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.003,
+     "msPerCall": 0.012,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.003,
+     "msPerCall": 0.003,
+     "maxInFrame": 0.02
+    },
+    "reg.autocorrelation": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.0025,
+     "msPerCall": 0.01,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0025,
+     "msPerCall": 0.0025,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0025,
+     "msPerCall": 0.0025,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.001,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.66,
+   "profile": {
+    "total": 5.4377,
+    "field": 0.2191,
+    "spectrum": 0.2339,
+    "shadow": 0.4644,
+    "vortex": 0.0095,
+    "slice": 0.3169,
+    "qcd": 1.9644,
+    "molecule": 0.0085,
+    "calculus": 0.4086,
+    "meters": 0.1766,
+    "atoms": 4.6576,
+    "wigner": 14.8839,
+    "radiation": 0.715
+   },
+   "tiers": {
+    "EVOLVE": 40
+   },
+   "rafReq": 79,
+   "rafRun": 77,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 53.2,
+     "gbcr": 0,
+     "gcs": 4,
+     "geom": 11,
+     "text": 43,
+     "top": [
+      "wa.canPresent 1.960",
+      "slice.update 0.640",
+      "shadow.update 0.560",
+      "calculus.update 0.420"
+     ]
+    },
+    {
+     "ms": 52.38,
+     "gbcr": 56,
+     "gcs": 59,
+     "geom": 11,
+     "text": 44,
+     "top": [
+      "shadow.update 0.460",
+      "calculus.update 0.460",
+      "slice.update 0.320",
+      "spectrum.update 0.240"
+     ]
+    },
+    {
+     "ms": 49.98,
+     "gbcr": 0,
+     "gcs": 4,
+     "geom": 11,
+     "text": 48,
+     "top": [
+      "calculus.update 0.500",
+      "shadow.update 0.400",
+      "slice.update 0.300",
+      "spectrum.update 0.240"
+     ]
+    }
+   ],
+   "open": 27,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "F every window open · UI hidden": {
+   "frames": 172,
+   "loopMs": {
+    "median": 0.52,
+    "p90": 0.76,
+    "max": 5.36,
+    "mean": 0.6574
+   },
+   "perFrame": {
+    "gbcr": 3.26,
+    "gcs": 3.2,
+    "gpv": 0,
+    "geom": 0.07,
+    "text": 0.87,
+    "cls": 0.05,
+    "attr": 0.78,
+    "tok": 0.66,
+    "sprop": 0.35,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0109,
+    "gpvPerFrame": 0,
+    "geomPerFrame": 0
+   },
+   "occlusionFrames": {
+    "count": 10,
+    "share": 0.058,
+    "loopMsMedian": 1.52,
+    "gbcrPerOccFrame": 56,
+    "gcsPerOccFrame": 55,
+    "gbcrMsPerOccFrame": 0.188,
+    "otherFramesMedian": 0.5
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.1506,
+     "msPerCall": 0.1506,
+     "maxInFrame": 0.34
+    },
+    "wa.canPresent": {
+     "perFrame": 15.25,
+     "msPerFrame": 0.0649,
+     "msPerCall": 0.0043,
+     "maxInFrame": 0.2
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0199,
+     "msPerCall": 0.0199,
+     "maxInFrame": 0.04
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.01,
+     "msPerCall": 0.01,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.009,
+     "msPerCall": 0.009,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0066,
+     "msPerCall": 0.0066,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.006,
+     "msPerCall": 0.006,
+     "maxInFrame": 0.06
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0057,
+     "msPerCall": 0.0057,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0052,
+     "msPerCall": 0.0052,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0042,
+     "msPerCall": 0.0042,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.004,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0033,
+     "msPerCall": 0.0033,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0031,
+     "msPerCall": 0.0031,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.04
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0023,
+     "msPerCall": 0.0023,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.25,
+     "msPerFrame": 0.0015,
+     "msPerCall": 0.006,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.058,
+     "msPerFrame": 0.0005,
+     "msPerCall": 0.008,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.38,
+   "profile": {
+    "total": 0.4316,
+    "field": 0.1664,
+    "spectrum": 0.2445,
+    "shadow": 0.484,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.0179,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 4.1998,
+    "wigner": 17.6955,
+    "radiation": 0.7175
+   },
+   "tiers": {
+    "EVOLVE": 172
+   },
+   "rafReq": 173,
+   "rafRun": 172,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 5.36,
+     "gbcr": 56,
+     "gcs": 55,
+     "geom": 4,
+     "text": 50,
+     "top": [
+      "field.frame 0.140",
+      "wa.canPresent 0.060",
+      "field.resize 0.020",
+      "ladder.setActive 0.020"
+     ]
+    },
+    {
+     "ms": 4.34,
+     "gbcr": 56,
+     "gcs": 55,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "field.frame 0.160",
+      "wa.canPresent 0.040",
+      "field.setOcclusion 0.020",
+      "kepler.suspend 0.020"
+     ]
+    },
+    {
+     "ms": 4.34,
+     "gbcr": 56,
+     "gcs": 55,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "field.frame 0.120",
+      "wa.canPresent 0.060",
+      "reg.at 0.020",
+      "field.resize 0.020"
+     ]
+    }
+   ],
+   "open": 27,
+   "uiHidden": true,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "G modulation window open": {
+   "frames": 25,
+   "loopMs": {
+    "median": 2.78,
+    "p90": 47.84,
+    "max": 72.04,
+    "mean": 10.9776
+   },
+   "perFrame": {
+    "gbcr": 24.48,
+    "gcs": 24.28,
+    "gpv": 1.36,
+    "geom": 2.16,
+    "text": 20.24,
+    "cls": 2.76,
+    "attr": 11.88,
+    "tok": 13.16,
+    "sprop": 7.76,
+    "hid": 0.96
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.1224,
+    "gpvPerFrame": 0.0152,
+    "geomPerFrame": 0.1896
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.36,
+    "loopMsMedian": 3.82,
+    "gbcrPerOccFrame": 68,
+    "gcsPerOccFrame": 65.8,
+    "gbcrMsPerOccFrame": 0.34,
+    "otherFramesMedian": 2.44
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2664,
+     "msPerCall": 0.2664,
+     "maxInFrame": 0.4
+    },
+    "shadow.update": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.1512,
+     "msPerCall": 0.63,
+     "maxInFrame": 0.72
+    },
+    "wa.canPresent": {
+     "perFrame": 15.12,
+     "msPerFrame": 0.1016,
+     "msPerCall": 0.0067,
+     "maxInFrame": 0.34
+    },
+    "spectrum.update": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0736,
+     "msPerCall": 0.3067,
+     "maxInFrame": 0.42
+    },
+    "reg.at": {
+     "perFrame": 1.4,
+     "msPerFrame": 0.0312,
+     "msPerCall": 0.0223,
+     "maxInFrame": 0.08
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.36,
+     "msPerFrame": 0.0168,
+     "msPerCall": 0.0467,
+     "maxInFrame": 0.12
+    },
+    "atoms.update": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0168,
+     "msPerCall": 0.07,
+     "maxInFrame": 0.08
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0136,
+     "msPerCall": 0.0136,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0104,
+     "msPerCall": 0.0104,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0096,
+     "msPerCall": 0.0096,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0064,
+     "msPerCall": 0.0064,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0064,
+     "msPerCall": 0.0064,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0064,
+     "msPerCall": 0.0064,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0056,
+     "msPerCall": 0.0056,
+     "maxInFrame": 0.04
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "reg.populated": {
+     "perFrame": 0.4,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.008,
+     "maxInFrame": 0.04
+    },
+    "reg.energy": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0133,
+     "maxInFrame": 0.06
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0024,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0016,
+     "msPerCall": 0.0067,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 1.6,
+   "profile": {
+    "total": 10.5364,
+    "field": 0.3163,
+    "spectrum": 0.283,
+    "shadow": 0.5605,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.015,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 2.0493,
+    "wigner": 26.1274,
+    "radiation": 1.1388
+   },
+   "tiers": {
+    "EVOLVE": 25
+   },
+   "rafReq": 26,
+   "rafRun": 25,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 72.04,
+     "gbcr": 0,
+     "gcs": 4,
+     "geom": 9,
+     "text": 27,
+     "top": [
+      "shadow.update 0.500",
+      "spectrum.update 0.260",
+      "field.frame 0.220",
+      "wa.canPresent 0.220"
+     ]
+    },
+    {
+     "ms": 50.74,
+     "gbcr": 68,
+     "gcs": 69,
+     "geom": 9,
+     "text": 25,
+     "top": [
+      "shadow.update 0.720",
+      "wa.canPresent 0.260",
+      "spectrum.update 0.240",
+      "field.frame 0.200"
+     ]
+    },
+    {
+     "ms": 47.84,
+     "gbcr": 0,
+     "gcs": 4,
+     "geom": 9,
+     "text": 25,
+     "top": [
+      "shadow.update 0.680",
+      "field.frame 0.360",
+      "spectrum.update 0.360",
+      "wa.canPresent 0.340"
+     ]
+    }
+   ],
+   "open": 27,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "H 128³ axial gas · UI shown (bench-chromium scene)": {
+   "frames": 17,
+   "loopMs": {
+    "median": 1.68,
+    "p90": 2.84,
+    "max": 13.18,
+    "mean": 2.2776
+   },
+   "perFrame": {
+    "gbcr": 9.53,
+    "gcs": 9.59,
+    "gpv": 0.59,
+    "geom": 1.53,
+    "text": 12.76,
+    "cls": 1.82,
+    "attr": 10.65,
+    "tok": 9.12,
+    "sprop": 4.94,
+    "hid": 0.12
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.2141,
+    "gpvPerFrame": 0.0035,
+    "geomPerFrame": 0.1129
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.529,
+    "loopMsMedian": 1.68,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17.4,
+    "gbcrMsPerOccFrame": 0.4044,
+    "otherFramesMedian": 1.72
+   },
+   "fn": {
+    "gas.stats": {
+     "perFrame": 0.059,
+     "msPerFrame": 0.5259,
+     "msPerCall": 8.94,
+     "maxInFrame": 8.94
+    },
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2694,
+     "msPerCall": 0.2694,
+     "maxInFrame": 0.36
+    },
+    "shadow.update": {
+     "perFrame": 0.294,
+     "msPerFrame": 0.1553,
+     "msPerCall": 0.528,
+     "maxInFrame": 0.8
+    },
+    "gas.fieldModes": {
+     "perFrame": 1,
+     "msPerFrame": 0.1518,
+     "msPerCall": 0.1518,
+     "maxInFrame": 0.46
+    },
+    "wa.canPresent": {
+     "perFrame": 12.824,
+     "msPerFrame": 0.0459,
+     "msPerCall": 0.0036,
+     "maxInFrame": 0.22
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.529,
+     "msPerFrame": 0.0118,
+     "msPerCall": 0.0222,
+     "maxInFrame": 0.04
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0094,
+     "msPerCall": 0.0094,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0071,
+     "msPerCall": 0.0071,
+     "maxInFrame": 0.02
+    },
+    "spectrum.update": {
+     "perFrame": 0.294,
+     "msPerFrame": 0.0071,
+     "msPerCall": 0.024,
+     "maxInFrame": 0.04
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0059,
+     "msPerCall": 0.0059,
+     "maxInFrame": 0.02
+    },
+    "reg.at": {
+     "perFrame": 0.294,
+     "msPerFrame": 0.0047,
+     "msPerCall": 0.016,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0047,
+     "msPerCall": 0.0047,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0047,
+     "msPerCall": 0.0047,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0047,
+     "msPerCall": 0.0047,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0035,
+     "msPerCall": 0.0035,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0035,
+     "msPerCall": 0.0035,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0035,
+     "msPerCall": 0.0035,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0024,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.294,
+     "msPerFrame": 0.0012,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 0.294,
+     "msPerFrame": 0.0012,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0,
+     "msPerCall": 0,
+     "maxInFrame": 0
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0,
+     "msPerCall": 0,
+     "maxInFrame": 0
+    }
+   },
+   "lwPerfMedian": 1.2,
+   "profile": {
+    "total": 3.0639,
+    "field": 0.2867,
+    "spectrum": 0.3464,
+    "shadow": 0.5509,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.0121,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 1.8483,
+    "wigner": 27.9827,
+    "radiation": 1.1189
+   },
+   "tiers": {
+    "EVOLVE": 17
+   },
+   "rafReq": 18,
+   "rafRun": 17,
+   "timers": 16,
+   "intervals": 0,
+   "idleCb": 6,
+   "worst": [
+    {
+     "ms": 13.18,
+     "gbcr": 18,
+     "gcs": 19,
+     "geom": 6,
+     "text": 53,
+     "top": [
+      "gas.stats 8.940",
+      "gas.fieldModes 0.460",
+      "field.frame 0.360",
+      "shadow.update 0.300"
+     ]
+    },
+    {
+     "ms": 2.84,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 4,
+     "text": 51,
+     "top": [
+      "field.frame 0.280",
+      "gas.fieldModes 0.140",
+      "wa.canPresent 0.040",
+      "field.setOcclusion 0.040"
+     ]
+    },
+    {
+     "ms": 2.48,
+     "gbcr": 0,
+     "gcs": 0,
+     "geom": 4,
+     "text": 51,
+     "top": [
+      "field.frame 0.280",
+      "gas.fieldModes 0.140",
+      "field.setStepCap 0.020",
+      "wa.canPresent 0.020"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 128,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "I 128³ axial gas · UI hidden": {
+   "frames": 25,
+   "loopMs": {
+    "median": 0.84,
+    "p90": 1.92,
+    "max": 2.72,
+    "mean": 1.0872
+   },
+   "perFrame": {
+    "gbcr": 7.92,
+    "gcs": 7.48,
+    "gpv": 0,
+    "geom": 0.64,
+    "text": 8,
+    "cls": 0.04,
+    "attr": 7.2,
+    "tok": 6.08,
+    "sprop": 3.2,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0344,
+    "gpvPerFrame": 0,
+    "geomPerFrame": 0.0024
+   },
+   "occlusionFrames": {
+    "count": 11,
+    "share": 0.44,
+    "loopMsMedian": 1.44,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17,
+    "gbcrMsPerOccFrame": 0.0782,
+    "otherFramesMedian": 0.64
+   },
+   "fn": {
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2488,
+     "msPerCall": 0.2488,
+     "maxInFrame": 0.36
+    },
+    "gas.fieldModes": {
+     "perFrame": 1,
+     "msPerFrame": 0.1008,
+     "msPerCall": 0.1008,
+     "maxInFrame": 0.42
+    },
+    "wa.canPresent": {
+     "perFrame": 12.12,
+     "msPerFrame": 0.0336,
+     "msPerCall": 0.0028,
+     "maxInFrame": 0.12
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0088,
+     "msPerCall": 0.0088,
+     "maxInFrame": 0.02
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0072,
+     "msPerCall": 0.0072,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0072,
+     "msPerCall": 0.0072,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0064,
+     "msPerCall": 0.0064,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0048,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0048,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.004,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.004,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0024,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.44,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0055,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.0024,
+     "maxInFrame": 0.02
+    },
+    "reg.at": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0024,
+     "msPerCall": 0.01,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0016,
+     "msPerCall": 0.0016,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.24,
+     "msPerFrame": 0.0008,
+     "msPerCall": 0.0033,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.36,
+   "profile": {
+    "total": 0.5969,
+    "field": 0.2597,
+    "spectrum": 0.3138,
+    "shadow": 0.5219,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.0133,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 1.8483,
+    "wigner": 27.9827,
+    "radiation": 1.1189
+   },
+   "tiers": {
+    "EVOLVE": 25
+   },
+   "rafReq": 26,
+   "rafRun": 25,
+   "timers": 7,
+   "intervals": 0,
+   "idleCb": 6,
+   "worst": [
+    {
+     "ms": 2.72,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 4,
+     "text": 50,
+     "top": [
+      "field.frame 0.300",
+      "wa.canPresent 0.120",
+      "gas.fieldModes 0.060",
+      "field.resize 0.020"
+     ]
+    },
+    {
+     "ms": 2.52,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 4,
+     "text": 50,
+     "top": [
+      "field.frame 0.180",
+      "gas.fieldModes 0.040",
+      "chem.setActive 0.020",
+      "fieldlines.update 0.020"
+     ]
+    },
+    {
+     "ms": 1.92,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 0,
+     "text": 0,
+     "top": [
+      "field.frame 0.260",
+      "gas.fieldModes 0.140",
+      "wa.canPresent 0.040",
+      "field.setStepCap 0.020"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": true,
+   "res": 128,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "J 128³ axial gas · UI shown · frost off": {
+   "frames": 21,
+   "loopMs": {
+    "median": 0.98,
+    "p90": 2.26,
+    "max": 9.54,
+    "mean": 1.7267
+   },
+   "perFrame": {
+    "gbcr": 8.57,
+    "gcs": 8.57,
+    "gpv": 0.48,
+    "geom": 1.24,
+    "text": 10.19,
+    "cls": 1.33,
+    "attr": 8.62,
+    "tok": 7.33,
+    "sprop": 3.9,
+    "hid": 0.05
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0705,
+    "gpvPerFrame": 0.0048,
+    "geomPerFrame": 0.0295
+   },
+   "occlusionFrames": {
+    "count": 10,
+    "share": 0.476,
+    "loopMsMedian": 1.66,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 17.2,
+    "gbcrMsPerOccFrame": 0.148,
+    "otherFramesMedian": 0.92
+   },
+   "fn": {
+    "gas.stats": {
+     "perFrame": 0.048,
+     "msPerFrame": 0.3962,
+     "msPerCall": 8.32,
+     "maxInFrame": 8.32
+    },
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.381,
+     "msPerCall": 0.381,
+     "maxInFrame": 3.18
+    },
+    "gas.fieldModes": {
+     "perFrame": 1,
+     "msPerFrame": 0.1105,
+     "msPerCall": 0.1105,
+     "maxInFrame": 0.46
+    },
+    "shadow.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.0733,
+     "msPerCall": 0.308,
+     "maxInFrame": 0.4
+    },
+    "wa.canPresent": {
+     "perFrame": 12.095,
+     "msPerFrame": 0.0352,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.1
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.476,
+     "msPerFrame": 0.0124,
+     "msPerCall": 0.026,
+     "maxInFrame": 0.06
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0086,
+     "msPerCall": 0.0086,
+     "maxInFrame": 0.02
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0086,
+     "msPerCall": 0.0086,
+     "maxInFrame": 0.02
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0067,
+     "msPerCall": 0.0067,
+     "maxInFrame": 0.02
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.0057,
+     "msPerCall": 0.0057,
+     "maxInFrame": 0.04
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0057,
+     "msPerCall": 0.0057,
+     "maxInFrame": 0.02
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0057,
+     "msPerCall": 0.0057,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0048,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0048,
+     "msPerCall": 0.0048,
+     "maxInFrame": 0.02
+    },
+    "spectrum.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.0038,
+     "msPerCall": 0.016,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0029,
+     "msPerCall": 0.0029,
+     "maxInFrame": 0.02
+    },
+    "reg.at": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.0019,
+     "msPerCall": 0.008,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 0.238,
+     "msPerFrame": 0.001,
+     "msPerCall": 0.004,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 0.238,
+     "msPerFrame": 0,
+     "msPerCall": 0,
+     "maxInFrame": 0
+    }
+   },
+   "lwPerfMedian": 3.58,
+   "profile": {
+    "total": 1.1449,
+    "field": 0.5476,
+    "spectrum": 0.1761,
+    "shadow": 0.4321,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.0101,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 1.8483,
+    "wigner": 27.9827,
+    "radiation": 1.1189
+   },
+   "tiers": {
+    "EVOLVE": 21
+   },
+   "rafReq": 22,
+   "rafRun": 21,
+   "timers": 8,
+   "intervals": 0,
+   "idleCb": 6,
+   "worst": [
+    {
+     "ms": 9.54,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 2,
+     "text": 2,
+     "top": [
+      "gas.stats 8.320",
+      "shadow.update 0.400",
+      "field.frame 0.240",
+      "wa.canPresent 0.060"
+     ]
+    },
+    {
+     "ms": 4.5,
+     "gbcr": 18,
+     "gcs": 17,
+     "geom": 0,
+     "text": 1,
+     "top": [
+      "field.frame 3.180",
+      "gas.fieldModes 0.100",
+      "field.setOcclusion 0.060",
+      "wa.canPresent 0.040"
+     ]
+    },
+    {
+     "ms": 2.26,
+     "gbcr": 0,
+     "gcs": 0,
+     "geom": 4,
+     "text": 50,
+     "top": [
+      "field.frame 0.240",
+      "gas.fieldModes 0.080",
+      "wa.canPresent 0.020",
+      "vortex.suspend 0.020"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 128,
+   "perfMode": "120",
+   "modRunning": false
+  },
+  "K 64³ axial gas · UI shown · perf FULL": {
+   "frames": 37,
+   "loopMs": {
+    "median": 1.32,
+    "p90": 12.26,
+    "max": 17.76,
+    "mean": 3.4065
+   },
+   "perFrame": {
+    "gbcr": 4.38,
+    "gcs": 6.14,
+    "gpv": 2,
+    "geom": 2.32,
+    "text": 4.59,
+    "cls": 0.89,
+    "attr": 3.68,
+    "tok": 3.11,
+    "sprop": 1.62,
+    "hid": 0
+   },
+   "layoutReadMs": {
+    "gbcrPerFrame": 0.0249,
+    "gpvPerFrame": 0.0357,
+    "geomPerFrame": 0.013
+   },
+   "occlusionFrames": {
+    "count": 9,
+    "share": 0.243,
+    "loopMsMedian": 1.92,
+    "gbcrPerOccFrame": 18,
+    "gcsPerOccFrame": 19,
+    "gbcrMsPerOccFrame": 0.1022,
+    "otherFramesMedian": 1.3
+   },
+   "fn": {
+    "gas.stats": {
+     "perFrame": 0.162,
+     "msPerFrame": 1.9432,
+     "msPerCall": 11.9833,
+     "maxInFrame": 16.18
+    },
+    "shadow.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.3032,
+     "msPerCall": 0.3032,
+     "maxInFrame": 0.76
+    },
+    "field.frame": {
+     "perFrame": 1,
+     "msPerFrame": 0.2984,
+     "msPerCall": 0.2984,
+     "maxInFrame": 0.42
+    },
+    "gas.fieldModes": {
+     "perFrame": 1,
+     "msPerFrame": 0.1016,
+     "msPerCall": 0.1016,
+     "maxInFrame": 0.6
+    },
+    "wa.canPresent": {
+     "perFrame": 22,
+     "msPerFrame": 0.0957,
+     "msPerCall": 0.0043,
+     "maxInFrame": 0.38
+    },
+    "spectrum.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0162,
+     "msPerCall": 0.0162,
+     "maxInFrame": 0.06
+    },
+    "reg.at": {
+     "perFrame": 1,
+     "msPerFrame": 0.0119,
+     "msPerCall": 0.0119,
+     "maxInFrame": 0.04
+    },
+    "field.resize": {
+     "perFrame": 1,
+     "msPerFrame": 0.0103,
+     "msPerCall": 0.0103,
+     "maxInFrame": 0.04
+    },
+    "field.setStepCap": {
+     "perFrame": 1,
+     "msPerFrame": 0.007,
+     "msPerCall": 0.007,
+     "maxInFrame": 0.02
+    },
+    "field.setOcclusion": {
+     "perFrame": 0.243,
+     "msPerFrame": 0.0065,
+     "msPerCall": 0.0267,
+     "maxInFrame": 0.04
+    },
+    "vortex.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0065,
+     "msPerCall": 0.0065,
+     "maxInFrame": 0.02
+    },
+    "kepler.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0065,
+     "msPerCall": 0.0065,
+     "maxInFrame": 0.04
+    },
+    "fieldlines.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0059,
+     "msPerCall": 0.0059,
+     "maxInFrame": 0.02
+    },
+    "particles.suspend": {
+     "perFrame": 1,
+     "msPerFrame": 0.0059,
+     "msPerCall": 0.0059,
+     "maxInFrame": 0.04
+    },
+    "slice.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0054,
+     "msPerCall": 0.0054,
+     "maxInFrame": 0.02
+    },
+    "ladder.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0049,
+     "msPerCall": 0.0049,
+     "maxInFrame": 0.02
+    },
+    "reg.energy": {
+     "perFrame": 1,
+     "msPerFrame": 0.0049,
+     "msPerCall": 0.0049,
+     "maxInFrame": 0.02
+    },
+    "chem.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0043,
+     "msPerCall": 0.0043,
+     "maxInFrame": 0.02
+    },
+    "kepler.bowFrame": {
+     "perFrame": 1,
+     "msPerFrame": 0.0032,
+     "msPerCall": 0.0032,
+     "maxInFrame": 0.02
+    },
+    "molecule.update": {
+     "perFrame": 1,
+     "msPerFrame": 0.0027,
+     "msPerCall": 0.0027,
+     "maxInFrame": 0.02
+    },
+    "helium.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0022,
+     "msPerCall": 0.0022,
+     "maxInFrame": 0.02
+    },
+    "h2.setActive": {
+     "perFrame": 1,
+     "msPerFrame": 0.0022,
+     "msPerCall": 0.0022,
+     "maxInFrame": 0.02
+    }
+   },
+   "lwPerfMedian": 0.96,
+   "profile": {
+    "total": 2.8782,
+    "field": 0.3487,
+    "spectrum": 0.0245,
+    "shadow": 0.3391,
+    "vortex": 0.0105,
+    "slice": 0.3312,
+    "qcd": 1.7759,
+    "molecule": 0.011,
+    "calculus": 0.4038,
+    "meters": 0.1789,
+    "atoms": 1.8483,
+    "wigner": 27.9827,
+    "radiation": 1.1189
+   },
+   "tiers": {
+    "EVOLVE": 37
+   },
+   "rafReq": 38,
+   "rafRun": 37,
+   "timers": 5,
+   "intervals": 0,
+   "idleCb": 4,
+   "worst": [
+    {
+     "ms": 17.76,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 2,
+     "text": 2,
+     "top": [
+      "gas.stats 16.180",
+      "shadow.update 0.320",
+      "field.frame 0.280",
+      "wa.canPresent 0.140"
+     ]
+    },
+    {
+     "ms": 17.06,
+     "gbcr": 18,
+     "gcs": 19,
+     "geom": 2,
+     "text": 1,
+     "top": [
+      "gas.stats 14.120",
+      "gas.fieldModes 0.600",
+      "shadow.update 0.560",
+      "field.frame 0.360"
+     ]
+    },
+    {
+     "ms": 16.6,
+     "gbcr": 0,
+     "gcs": 2,
+     "geom": 2,
+     "text": 1,
+     "top": [
+      "gas.stats 14.980",
+      "shadow.update 0.440",
+      "field.frame 0.320",
+      "wa.canPresent 0.100"
+     ]
+    }
+   ],
+   "open": 8,
+   "uiHidden": false,
+   "res": 64,
+   "perfMode": "full",
+   "modRunning": false
+  }
+ },
+ "idle": {
+  "paused · default windows · mod window closed": {
+   "loopFrames": 0,
+   "rafReq": 0,
+   "rafRun": 0,
+   "timers": 3,
+   "intervals": 0,
+   "idleCb": 2,
+   "secs": 5,
+   "scheduled": false,
+   "modRunning": false,
+   "modPaints": {
+    "calls": 79,
+    "paints": 76,
+    "ms": 103.04000000000292,
+    "averageMs": 1.3557894736842488
+   }
+  },
+  "paused · mod window open": {
+   "loopFrames": 0,
+   "rafReq": 0,
+   "rafRun": 0,
+   "timers": 3,
+   "intervals": 0,
+   "idleCb": 2,
+   "secs": 5,
+   "scheduled": false,
+   "modRunning": false,
+   "modPaints": {
+    "calls": 85,
+    "paints": 80,
+    "ms": 117.18000000000234,
+    "averageMs": 1.4647500000000293
+   }
+  },
+  "paused · pointer resting on a knob": {
+   "loopFrames": 0,
+   "rafReq": 0,
+   "rafRun": 0,
+   "timers": 3,
+   "intervals": 0,
+   "idleCb": 2,
+   "secs": 5,
+   "scheduled": false,
+   "modRunning": false,
+   "modPaints": {
+    "calls": 85,
+    "paints": 80,
+    "ms": 117.18000000000234,
+    "averageMs": 1.4647500000000293
+   }
+  },
+  "paused · synthetic pointermove on a knob every 50 ms (in-page dispatch)": {
+   "loopFrames": 0,
+   "rafReq": 0,
+   "rafRun": 0,
+   "timers": 3,
+   "intervals": 0,
+   "idleCb": 2,
+   "secs": 5,
+   "scheduled": false,
+   "modRunning": false,
+   "modPaints": {
+    "calls": 85,
+    "paints": 80,
+    "ms": 117.18000000000234,
+    "averageMs": 1.4647500000000293
+   }
+  }
+ },
+ "micro": {
+  "saveSettingsMs": 0.0356,
+  "settingsBytes": 913,
+  "meterSnapshotMs": 0.0141,
+  "serializeMs": 0.415,
+  "renderSet91Ms": 0.0141,
+  "populated91Ms": 0.0039,
+  "at91Ms": 0.0057,
+  "digest91Ms": 0.0498,
+  "normalAmplitudes91Ms": 0.0176,
+  "modesAt91Ms": 0.0079,
+  "historyNoteMs": 0.0043
+ },
+ "notes": [],
+ "shim": {
+  "wrapFail": []
+ },
+ "errors": {
+  "errs": [],
+  "problems": [],
+  "problemsVia": "absent"
+ }
+}

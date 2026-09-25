@@ -1,0 +1,81 @@
+{
+ "at": "2026-09-25T02:33:26.377Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "electron",
+ "dsf": "1",
+ "exps": [
+  {
+   "name": "A/A calibration (nothing changes)",
+   "A": [
+    37.47,
+    37.35,
+    36.66
+   ],
+   "B": [
+    35.8,
+    35.2,
+    41.2
+   ],
+   "fpsA": 37.2,
+   "fpsB": 37.4,
+   "msA": 26.91,
+   "msB": 26.74,
+   "gpuMsSaved": 0.17
+  },
+  {
+   "name": "offscreen cards culled (camera+clip, fully below the rack clip): does Chromium already skip them?",
+   "A": [
+    40.44,
+    39.89,
+    40.66
+   ],
+   "B": [
+    40.67,
+    39.33,
+    40.99
+   ],
+   "fpsA": 40.3,
+   "fpsB": 40.3,
+   "msA": 24.8,
+   "msB": 24.8,
+   "gpuMsSaved": 0
+  },
+  {
+   "name": "every window open: cards past the 6th in #rack hidden (all off-screen)",
+   "A": [
+    40.33,
+    33.17,
+    27.81
+   ],
+   "B": [
+    39.94,
+    27.15,
+    27.56
+   ],
+   "fpsA": 33.8,
+   "fpsB": 31.6,
+   "msA": 29.61,
+   "msB": 31.7,
+   "gpuMsSaved": -2.08
+  }
+ ],
+ "warn": {
+  "was": true,
+  "open": false
+ },
+ "boot": {
+  "ok": true,
+  "dpr": 1,
+  "w": 1920,
+  "h": 1043,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light",
+  "warn": false
+ },
+ "errs": []
+}

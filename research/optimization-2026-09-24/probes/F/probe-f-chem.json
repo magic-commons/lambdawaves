@@ -1,0 +1,30 @@
+{
+ "solve": {
+  "ms": 99,
+  "state": "full"
+ },
+ "early": {
+  "stepsPerSec": 557,
+  "traceSamples": 4461,
+  "fitWindow": 4460,
+  "fitted": true,
+  "rafMedian": 33.2,
+  "rafMax": 83.5,
+  "rafOver100": 0,
+  "frames": 222,
+  "worstStallMs": 49.3
+ },
+ "later": {
+  "stepsPerSec": 27,
+  "traceSamples": 124681,
+  "fitWindow": 30000,
+  "fitted": true,
+  "rafMedian": 17.1,
+  "rafMax": 150,
+  "rafOver100": 6,
+  "frames": 401,
+  "worstStallMs": 153.4,
+  "growMs": 8162
+ },
+ "errs": []
+}

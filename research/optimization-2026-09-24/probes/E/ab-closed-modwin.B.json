@@ -1,0 +1,98 @@
+{
+ "label": "B",
+ "runs": 7,
+ "median": {
+  "afterField": 141.38,
+  "mod": 12.58,
+  "applySettings": 2.92,
+  "ready": 700.62,
+  "f1": 743.86,
+  "f2": 752.68
+ },
+ "rows": [
+  {
+   "field": 587.28,
+   "ready": 717.96,
+   "f1": 761.14,
+   "f2": 768.26,
+   "afterField": 130.68,
+   "mod": 12.58,
+   "applySettings": 2.92,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 518.8,
+   "ready": 662.04,
+   "f1": 711.2,
+   "f2": 718.42,
+   "afterField": 143.24,
+   "mod": 11.2,
+   "applySettings": 2.98,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 560.66,
+   "ready": 685.5,
+   "f1": 741.56,
+   "f2": 748.46,
+   "afterField": 124.84,
+   "mod": 11.66,
+   "applySettings": 2.52,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 574.66,
+   "ready": 716.04,
+   "f1": 758.4,
+   "f2": 776.34,
+   "afterField": 141.38,
+   "mod": 14.94,
+   "applySettings": 2.66,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 568.9,
+   "ready": 700.62,
+   "f1": 743.86,
+   "f2": 752.68,
+   "afterField": 131.72,
+   "mod": 12.98,
+   "applySettings": 2.54,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 573.06,
+   "ready": 716.06,
+   "f1": 756.54,
+   "f2": 766.18,
+   "afterField": 143,
+   "mod": 12.9,
+   "applySettings": 3.72,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  },
+  {
+   "field": 549.52,
+   "ready": 694.94,
+   "f1": 735.06,
+   "f2": 743.04,
+   "afterField": 145.42,
+   "mod": 12.5,
+   "applySettings": 3.34,
+   "errs": 0,
+   "modwinNodes": 506,
+   "rings": 0
+  }
+ ]
+}

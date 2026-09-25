@@ -1,0 +1,59 @@
+{
+ "distinct": null,
+ "cases": [
+  {
+   "x0": [
+    -4,
+    0,
+    0
+   ],
+   "k": [
+    2,
+    0,
+    0
+   ],
+   "sigma": 1.2,
+   "shippedMs": 395.6,
+   "cachedMs": 125.8,
+   "speedup": 3.14,
+   "bitIdentical": true,
+   "captured": 0.15133293025821432
+  },
+  {
+   "x0": [
+    0,
+    0,
+    3
+   ],
+   "k": [
+    0,
+    0,
+    -1.5
+   ],
+   "sigma": 0.9,
+   "shippedMs": 374.6,
+   "cachedMs": 123.1,
+   "speedup": 3.04,
+   "bitIdentical": true,
+   "captured": 0.49121614070644065
+  },
+  {
+   "x0": [
+    1,
+    -2,
+    0.5
+   ],
+   "k": [
+    0.7,
+    0.3,
+    -0.4
+   ],
+   "sigma": 1.6,
+   "shippedMs": 394.1,
+   "cachedMs": 120.6,
+   "speedup": 3.27,
+   "bitIdentical": true,
+   "captured": 0.9238207873704644
+  }
+ ]
+}

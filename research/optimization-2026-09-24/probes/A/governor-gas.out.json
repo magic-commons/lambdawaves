@@ -1,0 +1,173 @@
+{
+ "scen": "gas",
+ "secs": 45,
+ "uiHidden": true,
+ "resChanges": 2,
+ "scaleChanges": 7,
+ "governorChanges": 5,
+ "rows": [
+  {
+   "t": 0.25,
+   "res": 128,
+   "stepCap": "inf",
+   "steps": 240,
+   "drop": 0,
+   "median": 0,
+   "autoScale": 1,
+   "cw": 1920,
+   "fps": 0,
+   "recon": 0
+  },
+  {
+   "t": 2.25,
+   "res": 128,
+   "stepCap": "inf",
+   "steps": 240,
+   "drop": 0,
+   "median": 0,
+   "autoScale": 0.9,
+   "cw": 1728,
+   "fps": 9,
+   "recon": 9
+  },
+  {
+   "t": 3.76,
+   "res": 128,
+   "stepCap": 168,
+   "steps": 240,
+   "drop": 0,
+   "median": 100.5,
+   "autoScale": 0.9,
+   "cw": 1728,
+   "fps": 8.8,
+   "recon": 8.8
+  },
+  {
+   "t": 5.01,
+   "res": 128,
+   "stepCap": 168,
+   "steps": 240,
+   "drop": 0,
+   "median": 100.5,
+   "autoScale": 0.8,
+   "cw": 1536,
+   "fps": 9.1,
+   "recon": 9.1
+  },
+  {
+   "t": 7.01,
+   "res": 128,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 0,
+   "median": 100.4,
+   "autoScale": 0.8,
+   "cw": 1536,
+   "fps": 8.9,
+   "recon": 8.9
+  },
+  {
+   "t": 7.76,
+   "res": 128,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 0,
+   "median": 100.4,
+   "autoScale": 0.7,
+   "cw": 1344,
+   "fps": 8.9,
+   "recon": 8.9
+  },
+  {
+   "t": 10.26,
+   "res": 128,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 1,
+   "median": 100.4,
+   "autoScale": 0.7,
+   "cw": 1344,
+   "fps": 9.1,
+   "recon": 9.1
+  },
+  {
+   "t": 10.51,
+   "res": 96,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 1,
+   "median": 100.4,
+   "autoScale": 0.6,
+   "cw": 1152,
+   "fps": 9.1,
+   "recon": 9.1
+  },
+  {
+   "t": 11.76,
+   "res": 96,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 1,
+   "median": 100.4,
+   "autoScale": 0.5,
+   "cw": 960,
+   "fps": 15.7,
+   "recon": 15.7
+  },
+  {
+   "t": 12.01,
+   "res": 64,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 2,
+   "median": 82.4,
+   "autoScale": 0.5,
+   "cw": 960,
+   "fps": 15.7,
+   "recon": 15.7
+  },
+  {
+   "t": 12.76,
+   "res": 64,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 2,
+   "median": 82.4,
+   "autoScale": 0.4,
+   "cw": 960,
+   "fps": 20,
+   "recon": 20
+  },
+  {
+   "t": 14.01,
+   "res": 64,
+   "stepCap": 120,
+   "steps": 240,
+   "drop": 2,
+   "median": 82.4,
+   "autoScale": 0.35,
+   "cw": 768,
+   "fps": 19,
+   "recon": 19
+  }
+ ],
+ "last": {
+  "t": 45.04,
+  "res": 64,
+  "stepCap": 120,
+  "steps": 240,
+  "drop": 2,
+  "median": 82.8,
+  "autoScale": 0.35,
+  "cw": 672,
+  "fps": 19.4,
+  "recon": 19.4
+ },
+ "afterPause": {
+  "res": 128,
+  "stepCap": "inf",
+  "autoScale": 0.35,
+  "cw": 672
+ },
+ "budgetMode": "120"
+}

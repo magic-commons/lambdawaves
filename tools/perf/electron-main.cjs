@@ -2,6 +2,7 @@
 // Loads the gate server's page over https (self-signed, so certificate errors are ignored) and exposes CDP on LW_CDP_PORT.
 'use strict';
 const { app, BrowserWindow } = require('electron');
+if (process.env.LW_PROFILE) app.setPath('userData', process.env.LW_PROFILE);   // a FRESH profile per run: localStorage (settings, warned) must not leak between scenes or runs
 app.commandLine.appendSwitch('ignore-certificate-errors');
 app.commandLine.appendSwitch('remote-debugging-port', process.env.LW_CDP_PORT || '9700');
 if (process.env.LW_NO_SANDBOX) app.commandLine.appendSwitch('no-sandbox');

@@ -1,0 +1,171 @@
+{
+ "scen": "default",
+ "grid": 96,
+ "n": 96,
+ "count": 2,
+ "W": 1920,
+ "H": 994,
+ "steps": 160,
+ "appReadPixelsHash": "7aba2d16",
+ "pixels": {
+  "density/cloud": {
+   "generic": "7aba2d16",
+   "specialised": "7aba2d16",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "phase/cloud": {
+   "generic": "f4eb283e",
+   "specialised": "f4eb283e",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "real/cloud": {
+   "generic": "e5a77d1f",
+   "specialised": "e5a77d1f",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "density/solid": {
+   "generic": "7cc21f8",
+   "specialised": "14063af8",
+   "bytesDiffering": 1,
+   "maxLevelDiff": 1
+  },
+  "density/glass": {
+   "generic": "3a227447",
+   "specialised": "c08e9d47",
+   "bytesDiffering": 1,
+   "maxLevelDiff": 1
+  },
+  "phase/additive": {
+   "generic": "c74af93f",
+   "specialised": "c74af93f",
+   "bytesDiffering": 0,
+   "maxLevelDiff": 0
+  }
+ },
+ "timing": {
+  "density/cloud:gen": {
+   "min": 3.656,
+   "rounds": [
+    3.656,
+    3.656,
+    3.657,
+    3.672
+   ],
+   "tickErrMs": 0.13
+  },
+  "density/cloud:spec": {
+   "min": 1.831,
+   "rounds": [
+    1.832,
+    1.831,
+    1.832,
+    1.832
+   ],
+   "tickErrMs": 0.065
+  },
+  "phase/cloud:gen": {
+   "min": 4.934,
+   "rounds": [
+    4.935,
+    4.935,
+    4.944,
+    4.934
+   ],
+   "tickErrMs": 0.182
+  },
+  "phase/cloud:spec": {
+   "min": 3.238,
+   "rounds": [
+    3.238,
+    3.239,
+    3.251,
+    3.238
+   ],
+   "tickErrMs": 0.104
+  },
+  "real/cloud:gen": {
+   "min": 3.414,
+   "rounds": [
+    3.414,
+    3.545,
+    3.544,
+    3.547
+   ],
+   "tickErrMs": 0.131
+  },
+  "real/cloud:spec": {
+   "min": 1.83,
+   "rounds": [
+    1.831,
+    1.836,
+    1.83,
+    1.83
+   ],
+   "tickErrMs": 0.065
+  },
+  "density/solid:gen": {
+   "min": 4.226,
+   "rounds": [
+    4.244,
+    4.227,
+    4.226,
+    4.23
+   ],
+   "tickErrMs": 0.156
+  },
+  "density/solid:spec": {
+   "min": 2.012,
+   "rounds": [
+    2.012,
+    2.015,
+    2.012,
+    2.012
+   ],
+   "tickErrMs": 0.072
+  },
+  "density/glass:gen": {
+   "min": 11.263,
+   "rounds": [
+    11.278,
+    11.265,
+    11.263,
+    11.277
+   ],
+   "tickErrMs": 0.417
+  },
+  "density/glass:spec": {
+   "min": 10.847,
+   "rounds": [
+    10.847,
+    10.848,
+    10.85,
+    10.85
+   ],
+   "tickErrMs": 0.417
+  },
+  "phase/additive:gen": {
+   "min": 4.694,
+   "rounds": [
+    4.696,
+    4.695,
+    4.694,
+    4.695
+   ],
+   "tickErrMs": 0.156
+  },
+  "phase/additive:spec": {
+   "min": 2.928,
+   "rounds": [
+    2.929,
+    2.93,
+    2.928,
+    2.929
+   ],
+   "tickErrMs": 0.104
+  }
+ },
+ "specCompileMs": 34.4
+}

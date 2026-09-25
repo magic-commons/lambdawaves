@@ -1,0 +1,146 @@
+{
+ "scen": "default",
+ "grid": 96,
+ "n": 96,
+ "count": 2,
+ "W": 1920,
+ "H": 994,
+ "steps": 160,
+ "view": 0,
+ "style": 0,
+ "appReadPixelsHash": "7aba2d16",
+ "rgCopyTexelsDiffering": 0,
+ "occBuildMs": 0.1501,
+ "replicaExact": true,
+ "pixels": {
+  "rg16": {
+   "pixelsDiffering": 0,
+   "fractionOfPixels": 0,
+   "channelBytesDiffering": 0,
+   "maxLevelDiff": 0
+  },
+  "occ1e5": {
+   "pixelsDiffering": 11252,
+   "fractionOfPixels": 0.005896,
+   "channelBytesDiffering": 11484,
+   "maxLevelDiff": 1
+  },
+  "occ1e4": {
+   "pixelsDiffering": 132944,
+   "fractionOfPixels": 0.06966,
+   "channelBytesDiffering": 144408,
+   "maxLevelDiff": 1
+  }
+ },
+ "timing": {
+  "ship": {
+   "min": 3.675,
+   "rounds": [
+    3.686,
+    3.676,
+    3.675,
+    3.675,
+    3.68
+   ],
+   "n": 736,
+   "tickErrMs": 0.136
+  },
+  "ship@2x": {
+   "min": 14.081,
+   "rounds": [
+    14.131,
+    14.083,
+    14.082,
+    14.127,
+    14.081
+   ],
+   "n": 192,
+   "tickErrMs": 0.521
+  },
+  "rg16": {
+   "min": 3.656,
+   "rounds": [
+    3.663,
+    3.668,
+    3.658,
+    3.656,
+    3.656
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "rg16@2x": {
+   "min": 14.079,
+   "rounds": [
+    14.079,
+    14.109,
+    14.083,
+    14.079,
+    14.089
+   ],
+   "n": 192,
+   "tickErrMs": 0.521
+  },
+  "texFloor": {
+   "min": 1.708,
+   "rounds": [
+    1.708,
+    1.708,
+    1.708,
+    1.708,
+    1.708
+   ],
+   "n": 1701,
+   "tickErrMs": 0.059
+  },
+  "aluFloor": {
+   "min": 3.26,
+   "rounds": [
+    3.267,
+    3.262,
+    3.26,
+    3.266,
+    3.261
+   ],
+   "n": 768,
+   "tickErrMs": 0.13
+  },
+  "occ1e5": {
+   "min": 3.787,
+   "rounds": [
+    3.794,
+    3.788,
+    3.787,
+    3.787,
+    3.787
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "occ1e5@2x": {
+   "min": 14.754,
+   "rounds": [
+    14.764,
+    14.764,
+    14.754,
+    14.758,
+    14.756
+   ],
+   "n": 190,
+   "tickErrMs": 0.526
+  },
+  "occ1e4": {
+   "min": 3.133,
+   "rounds": [
+    3.133,
+    3.138,
+    3.136,
+    3.146,
+    3.15
+   ],
+   "n": 959,
+   "tickErrMs": 0.104
+  }
+ },
+ "note": "interleaved rounds (5), min reported; 1x = 1920x994, 2x = 3840x1988; occ = brick-max skip at a-bound 1e-5 / 1e-4 (cloud style), the march t unchanged"
+}

@@ -1,0 +1,40 @@
+LANE E running notes (rack.js read)
+- 82 LS_EXP/LS_PRES consts
+- 86 __LW_hooks = {}
+- 148-151 comment "see lab/modhost.css" -> now lab/mir/modulation/modhost.css (stale path)
+- 116 useCompactDefaults: readSettings() called twice; 262 twice more; 118, 256 -> 6 JSON.parse of LS at top
+- 129 gamutCss default uses rgbToHex (palette.js import at 62)
+- 406 KIND table; 413 RETIRED_WINDOWS; 417 DIGESTS
+- 424 autoQ; 431 gov
+- 462 comment "DEFAULT 2.5" vs CAM.MU_DEF 1.0 (stale comment)
+- 482-483 duplicated JSDoc line on camera.fling
+- 505 perf.profile names; perf.counts
+- 568 stats
+- 1610 local hexToRgb/rgbToHex inside window block (1495-1974) shadowing palette.js rgbToHex import
+- 1713 ui.keysRefresh = ()=>{} ; ui.keysSay — keysheet leftovers? keysRefresh chained at 4205
+- 2130-2131 STATE window SAVE/LOAD trig -> save()/restore() LS_EXP/LS_PRES; FILE menu 4087 clickTrig('SAVE')/'LOAD'
+- 2200 note outside block (indent)
+- 2443-2467 wMol legacy hidden; createMolecule+createMOPanel+createPulse built at boot; loop 1291 canPresent(wMol), 1314 powered(wMol) -> molecule.update every cpuTick unless 'off' !!! check moleculeview update cost
+- 2584-2591 comment lab/mir/modwindow/ + lab/modview.js deleted (path?)
+- 2756 lab/mir/host.js comment path
+- 3138 "key sheet" mention
+- 3413 orphan comment (belongs to unproject)
+- 3415 pointerRay vs 3548 unproject duplicate first 4 lines
+- 3537/3540 ui.kepEcc referenced — assigned?
+- 3600 pAlongDir vs 2100 pAlong(axis) (block-local in STATE window)
+- 3656 refreshOcclusion 'keysheet' id
+- 4087 FILE menu quick save/load; 4090 clickTrig('RESET KEYS') - exists?
+- 4108 LOGO_SCALE (wave 79 deleted enlarge) still exported via layout.menu.scale
+- 4208 layout.keysheet = layout.keymap ; 5144 duplicate Escape check dead
+- 4229 KIND -> data-kind + dev-copy for info + fold control/other
+- 4689 measureRacks() per pointermove in rack reorder drag, contradicting 4731 comment
+- 5010 ui.setWindowInfo / ui.windowInfoSw ; 5008 ui.partOn ; 5791 ui.setClockLink (assigned 6051)
+- 5044 capturing/capturePending — set only via __LW_hooks.keys.capture (5204)
+- 5329 ui.finishSeg, ui.frameModeSeg, ui.axisModeSeg, mat.finish
+- 5597 reg.version accessor
+- 78 BUILD_LINE alpha.1 vs release alpha.3
+- 5950 LW.version 'QWAVE-0.1 ... 2026-09-03'
+- 417/5965 DIGESTS filled at go; read by layout.digest
+- 1336 ui.hc etc.
+- 1360 ui.sliceMini
+- chemW not parked on page hide (878/898)

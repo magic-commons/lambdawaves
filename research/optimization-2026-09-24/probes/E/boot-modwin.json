@@ -1,0 +1,2538 @@
+{
+ "summary": {
+  "url": "https://127.0.0.1:8721/research/optimization-2026-09-24/probes/E/lab-inst/?preset=1s%2B2pz&sw=0",
+  "runs": 4,
+  "bootT0Median": 516,
+  "readyMedian": 1248.9,
+  "nodesTotal": 4449,
+  "devices": 27,
+  "closedNodes": 2003,
+  "openNodes": 1183,
+  "modwinNodes": 507,
+  "transportNodes": 94,
+  "molecule": {
+   "id": "molecule",
+   "closed": true,
+   "hidden": true,
+   "folded": true,
+   "nodes": 224
+  },
+  "sections": [
+   {
+    "mark": "field created",
+    "atMs": 507.04,
+    "sectionMs": 0.04
+   },
+   {
+    "mark": "workers made",
+    "atMs": 507.1,
+    "sectionMs": 1.24
+   },
+   {
+    "mark": "windows: WAVE/PALETTE/CAMERA/CLIP/SETTINGS start",
+    "atMs": 508.56,
+    "sectionMs": 9.44
+   },
+   {
+    "mark": "windows: STATE start",
+    "atMs": 523.76,
+    "sectionMs": 1.78
+   },
+   {
+    "mark": "windows: SPECTRUM start",
+    "atMs": 525.82,
+    "sectionMs": 1.96
+   },
+   {
+    "mark": "windows: SHADOW start",
+    "atMs": 527.78,
+    "sectionMs": 5.46
+   },
+   {
+    "mark": "windows: ORBIT..QCD start",
+    "atMs": 533.24,
+    "sectionMs": 0.32
+   },
+   {
+    "mark": "  orbit",
+    "atMs": 533.52,
+    "sectionMs": 0.94
+   },
+   {
+    "mark": "  kepler",
+    "atMs": 534.34,
+    "sectionMs": 0.68
+   },
+   {
+    "mark": "  vortex",
+    "atMs": 534.96,
+    "sectionMs": 1.38
+   },
+   {
+    "mark": "  particles",
+    "atMs": 536.42,
+    "sectionMs": 0.4
+   },
+   {
+    "mark": "  dynamics",
+    "atMs": 536.82,
+    "sectionMs": 0.64
+   },
+   {
+    "mark": "  slice",
+    "atMs": 537.46,
+    "sectionMs": 30.36
+   },
+   {
+    "mark": "  qcd",
+    "atMs": 567.82,
+    "sectionMs": 1.56
+   },
+   {
+    "mark": "windows: legacy MOLECULE start",
+    "atMs": 569.24,
+    "sectionMs": 2.9
+   },
+   {
+    "mark": "  moPanel (legacy)",
+    "atMs": 571.7,
+    "sectionMs": 3.64
+   },
+   {
+    "mark": "windows: legacy MOLECULE end",
+    "atMs": 575.06,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "windows: HELIUM/H2/CHEM/REGISTER start",
+    "atMs": 575.08,
+    "sectionMs": 0.48
+   },
+   {
+    "mark": "  helium",
+    "atMs": 575.56,
+    "sectionMs": 0.76
+   },
+   {
+    "mark": "  h2",
+    "atMs": 576.32,
+    "sectionMs": 5.76
+   },
+   {
+    "mark": "  chem",
+    "atMs": 582.28,
+    "sectionMs": 3.02
+   },
+   {
+    "mark": "  register",
+    "atMs": 585.3,
+    "sectionMs": 1.28
+   },
+   {
+    "mark": "windows: CALCULUS/METERS/LADDER start",
+    "atMs": 586.58,
+    "sectionMs": 1.4
+   },
+   {
+    "mark": "modulation: start",
+    "atMs": 588.1,
+    "sectionMs": 5.94
+   },
+   {
+    "mark": "modulation: createModulation start",
+    "atMs": 594.26,
+    "sectionMs": 8.62
+   },
+   {
+    "mark": "place() 3.50 ms, open=false",
+    "atMs": 603.48,
+    "sectionMs": 1.12
+   },
+   {
+    "mark": "place() 0.32 ms, open=false",
+    "atMs": 604.6,
+    "sectionMs": 1.06
+   },
+   {
+    "mark": "paint(true) 1.84 ms, open=false",
+    "atMs": 605.66,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "rebuild() 9.24 ms, open=false",
+    "atMs": 605.68,
+    "sectionMs": 1.18
+   },
+   {
+    "mark": "modulation: end",
+    "atMs": 606.86,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "windows: ATOMS..RADIATION start",
+    "atMs": 606.86,
+    "sectionMs": 2.56
+   },
+   {
+    "mark": "transport start",
+    "atMs": 609.42,
+    "sectionMs": 5.72
+   },
+   {
+    "mark": "paint(true) 7.14 ms, open=false",
+    "atMs": 615.14,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "badges/sw/bow/layout start",
+    "atMs": 615.16,
+    "sectionMs": 0.12
+   },
+   {
+    "mark": "  swClient",
+    "atMs": 615.28,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "  bow fns",
+    "atMs": 615.3,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "  gas",
+    "atMs": 615.32,
+    "sectionMs": 14.64
+   },
+   {
+    "mark": "  layout obj",
+    "atMs": 634.06,
+    "sectionMs": 0.04
+   },
+   {
+    "mark": "  wTr",
+    "atMs": 634.1,
+    "sectionMs": 0.7
+   },
+   {
+    "mark": "menubar start",
+    "atMs": 634.76,
+    "sectionMs": 0.18
+   },
+   {
+    "mark": "keymap start",
+    "atMs": 635,
+    "sectionMs": 2.14
+   },
+   {
+    "mark": "LEAN+KIND passes start",
+    "atMs": 637.14,
+    "sectionMs": 1.34
+   },
+   {
+    "mark": "LEAN+KIND passes end",
+    "atMs": 638.58,
+    "sectionMs": 1.02
+   },
+   {
+    "mark": "drags start",
+    "atMs": 639.6,
+    "sectionMs": 1.28
+   },
+   {
+    "mark": "phone start",
+    "atMs": 640.72,
+    "sectionMs": 0.12
+   },
+   {
+    "mark": "keys/serialize/history start",
+    "atMs": 640.8,
+    "sectionMs": 0.44
+   },
+   {
+    "mark": "history window start",
+    "atMs": 641.16,
+    "sectionMs": 0.34
+   },
+   {
+    "mark": "LW object start",
+    "atMs": 641.5,
+    "sectionMs": 1.16
+   },
+   {
+    "mark": "go: loadPreset",
+    "atMs": 642.66,
+    "sectionMs": 0.52
+   },
+   {
+    "mark": "go: moveToRack+picker",
+    "atMs": 643.18,
+    "sectionMs": 2.84
+   },
+   {
+    "mark": "go: applySettings",
+    "atMs": 646.02,
+    "sectionMs": 0.04
+   },
+   {
+    "mark": "AS: setTheme",
+    "atMs": 646.04,
+    "sectionMs": 3.72
+   },
+   {
+    "mark": "AS: setFrost",
+    "atMs": 649.84,
+    "sectionMs": 0.04
+   },
+   {
+    "mark": "AS: disc/card/blur/accent/auto/gov/perf/camera",
+    "atMs": 649.9,
+    "sectionMs": 0.06
+   },
+   {
+    "mark": "AS: MOD.hz + modView.sync()",
+    "atMs": 649.96,
+    "sectionMs": 15.98
+   },
+   {
+    "mark": "paint(true) 14.62 ms, open=false",
+    "atMs": 667.64,
+    "sectionMs": 0
+   },
+   {
+    "mark": "AS: modArm..axisInk",
+    "atMs": 667.64,
+    "sectionMs": 0.02
+   },
+   {
+    "mark": "AS: closed + camMode + p3",
+    "atMs": 667.66,
+    "sectionMs": 0
+   },
+   {
+    "mark": "AS: gamut",
+    "atMs": 667.66,
+    "sectionMs": 0.08
+   },
+   {
+    "mark": "AS: end",
+    "atMs": 667.74,
+    "sectionMs": 0.1
+   },
+   {
+    "mark": "go: openLink",
+    "atMs": 667.82,
+    "sectionMs": 0.12
+   },
+   {
+    "mark": "go: reworkNative start",
+    "atMs": 667.98,
+    "sectionMs": 2.36
+   },
+   {
+    "mark": "rework: settings pages start",
+    "atMs": 670.18,
+    "sectionMs": 0.76
+   },
+   {
+    "mark": "rework: transport panel start",
+    "atMs": 670.72,
+    "sectionMs": 0.7
+   },
+   {
+    "mark": "rework: consolidateWindowHelp start",
+    "atMs": 671.2,
+    "sectionMs": 1.46
+   },
+   {
+    "mark": "rework: installControlHelp start",
+    "atMs": 672.12,
+    "sectionMs": 4.24
+   },
+   {
+    "mark": "rework: end",
+    "atMs": 675.96,
+    "sectionMs": 0
+   },
+   {
+    "mark": "go: reworkNative end",
+    "atMs": 675.96,
+    "sectionMs": 3.06
+   },
+   {
+    "mark": "notebook start",
+    "atMs": 680.24,
+    "sectionMs": 1.06
+   },
+   {
+    "mark": "go: ready",
+    "atMs": 681.76,
+    "sectionMs": 0
+   }
+  ],
+  "perDev": [
+   {
+    "id": "transport",
+    "closed": true,
+    "hidden": true,
+    "folded": false,
+    "nodes": 36
+   },
+   {
+    "id": "shadow",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 59
+   },
+   {
+    "id": "spectrum",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 256
+   },
+   {
+    "id": "orbit",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 83
+   },
+   {
+    "id": "vortex",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 76
+   },
+   {
+    "id": "dynamics",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 129
+   },
+   {
+    "id": "slice",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 74
+   },
+   {
+    "id": "qcd",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 99
+   },
+   {
+    "id": "molecule",
+    "closed": true,
+    "hidden": true,
+    "folded": true,
+    "nodes": 224
+   },
+   {
+    "id": "helium",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 77
+   },
+   {
+    "id": "h2",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 96
+   },
+   {
+    "id": "chem",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 202
+   },
+   {
+    "id": "orbitals",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 219
+   },
+   {
+    "id": "calculus",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 48
+   },
+   {
+    "id": "meters",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 96
+   },
+   {
+    "id": "ladder",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 175
+   },
+   {
+    "id": "atoms",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 83
+   },
+   {
+    "id": "field",
+    "closed": true,
+    "hidden": false,
+    "folded": true,
+    "nodes": 78
+   },
+   {
+    "id": "wigner",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 77
+   },
+   {
+    "id": "radiation",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 77
+   },
+   {
+    "id": "history",
+    "closed": true,
+    "hidden": false,
+    "folded": false,
+    "nodes": 54
+   },
+   {
+    "id": "settings",
+    "closed": false,
+    "hidden": false,
+    "folded": true,
+    "nodes": 208
+   },
+   {
+    "id": "state",
+    "closed": false,
+    "hidden": false,
+    "folded": true,
+    "nodes": 220
+   },
+   {
+    "id": "palette",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 116
+   },
+   {
+    "id": "observer",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 125
+   },
+   {
+    "id": "camera",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 139
+   },
+   {
+    "id": "clip",
+    "closed": false,
+    "hidden": false,
+    "folded": false,
+    "nodes": 60
+   }
+  ]
+ },
+ "runs": [
+  {
+   "bootT0": 426.9,
+   "marks": [
+    [
+     "field created",
+     455.36
+    ],
+    [
+     "workers made",
+     455.38
+    ],
+    [
+     "windows: WAVE/PALETTE/CAMERA/CLIP/SETTINGS start",
+     456.62
+    ],
+    [
+     "windows: STATE start",
+     466.06
+    ],
+    [
+     "windows: SPECTRUM start",
+     467.82
+    ],
+    [
+     "windows: SHADOW start",
+     469.84
+    ],
+    [
+     "windows: ORBIT..QCD start",
+     475.14
+    ],
+    [
+     "  orbit",
+     475.46
+    ],
+    [
+     "  kepler",
+     476.74
+    ],
+    [
+     "  vortex",
+     477.68
+    ],
+    [
+     "  particles",
+     479.06
+    ],
+    [
+     "  dynamics",
+     479.52
+    ],
+    [
+     "  slice",
+     480.42
+    ],
+    [
+     "  qcd",
+     515.8
+    ],
+    [
+     "windows: legacy MOLECULE start",
+     517.36
+    ],
+    [
+     "  moPanel (legacy)",
+     520.26
+    ],
+    [
+     "windows: legacy MOLECULE end",
+     523.96
+    ],
+    [
+     "windows: HELIUM/H2/CHEM/REGISTER start",
+     523.96
+    ],
+    [
+     "  helium",
+     524.26
+    ],
+    [
+     "  h2",
+     524.76
+    ],
+    [
+     "  chem",
+     530.24
+    ],
+    [
+     "  register",
+     533.14
+    ],
+    [
+     "windows: CALCULUS/METERS/LADDER start",
+     534.42
+    ],
+    [
+     "modulation: start",
+     535.82
+    ],
+    [
+     "modulation: createModulation start",
+     541.76
+    ],
+    [
+     "place() 3.50 ms, open=false",
+     550.38
+    ],
+    [
+     "place() 0.32 ms, open=false",
+     551.36
+    ],
+    [
+     "paint(true) 1.84 ms, open=false",
+     552.64
+    ],
+    [
+     "rebuild() 9.24 ms, open=false",
+     552.66
+    ],
+    [
+     "modulation: end",
+     553.92
+    ],
+    [
+     "windows: ATOMS..RADIATION start",
+     553.94
+    ],
+    [
+     "transport start",
+     556.8
+    ],
+    [
+     "paint(true) 7.14 ms, open=false",
+     564.78
+    ],
+    [
+     "badges/sw/bow/layout start",
+     564.8
+    ],
+    [
+     "  swClient",
+     564.92
+    ],
+    [
+     "  bow fns",
+     564.94
+    ],
+    [
+     "  gas",
+     564.94
+    ],
+    [
+     "  layout obj",
+     579.22
+    ],
+    [
+     "  wTr",
+     579.26
+    ],
+    [
+     "menubar start",
+     580.58
+    ],
+    [
+     "keymap start",
+     580.74
+    ],
+    [
+     "LEAN+KIND passes start",
+     583.16
+    ],
+    [
+     "LEAN+KIND passes end",
+     584.4
+    ],
+    [
+     "drags start",
+     585.36
+    ],
+    [
+     "phone start",
+     586.96
+    ],
+    [
+     "keys/serialize/history start",
+     587.08
+    ],
+    [
+     "history window start",
+     587.52
+    ],
+    [
+     "LW object start",
+     587.84
+    ],
+    [
+     "go: loadPreset",
+     588.72
+    ],
+    [
+     "go: moveToRack+picker",
+     589.2
+    ],
+    [
+     "go: applySettings",
+     592.98
+    ],
+    [
+     "AS: setTheme",
+     593.02
+    ],
+    [
+     "AS: setFrost",
+     596.74
+    ],
+    [
+     "AS: disc/card/blur/accent/auto/gov/perf/camera",
+     596.78
+    ],
+    [
+     "AS: MOD.hz + modView.sync()",
+     596.82
+    ],
+    [
+     "paint(true) 14.62 ms, open=false",
+     611.76
+    ],
+    [
+     "AS: modArm..axisInk",
+     611.76
+    ],
+    [
+     "AS: closed + camMode + p3",
+     611.78
+    ],
+    [
+     "AS: gamut",
+     611.78
+    ],
+    [
+     "AS: end",
+     611.84
+    ],
+    [
+     "go: openLink",
+     611.94
+    ],
+    [
+     "go: reworkNative start",
+     612
+    ],
+    [
+     "rework: settings pages start",
+     614.36
+    ],
+    [
+     "rework: transport panel start",
+     615.12
+    ],
+    [
+     "rework: consolidateWindowHelp start",
+     615.82
+    ],
+    [
+     "rework: installControlHelp start",
+     617.28
+    ],
+    [
+     "rework: end",
+     621.52
+    ],
+    [
+     "go: reworkNative end",
+     621.54
+    ],
+    [
+     "notebook start",
+     624.28
+    ],
+    [
+     "go: ready",
+     625.24
+    ]
+   ],
+   "domInteractive": 60.1,
+   "readyAt": 1105.7,
+   "nodesTotal": 4449,
+   "devices": 27,
+   "closedNodes": 2003,
+   "openNodes": 1183,
+   "modwinNodes": 507,
+   "transportNodes": 94,
+   "molecule": {
+    "id": "molecule",
+    "closed": true,
+    "hidden": true,
+    "folded": true,
+    "nodes": 224
+   },
+   "perDev": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "nodes": 36
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 59
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 256
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 83
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 76
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 129
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 74
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 99
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "nodes": 224
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 77
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 96
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 202
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 219
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 48
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 96
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 175
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 83
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 78
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 54
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 208
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 220
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 116
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 125
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 139
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 60
+    }
+   ],
+   "errs": [],
+   "fieldOk": true
+  },
+  {
+   "bootT0": 510.6,
+   "marks": [
+    [
+     "field created",
+     458.18
+    ],
+    [
+     "workers made",
+     458.2
+    ],
+    [
+     "windows: WAVE/PALETTE/CAMERA/CLIP/SETTINGS start",
+     459.16
+    ],
+    [
+     "windows: STATE start",
+     465.52
+    ],
+    [
+     "windows: SPECTRUM start",
+     467.16
+    ],
+    [
+     "windows: SHADOW start",
+     469.1
+    ],
+    [
+     "windows: ORBIT..QCD start",
+     475.3
+    ],
+    [
+     "  orbit",
+     475.62
+    ],
+    [
+     "  kepler",
+     476.56
+    ],
+    [
+     "  vortex",
+     477.24
+    ],
+    [
+     "  particles",
+     478.5
+    ],
+    [
+     "  dynamics",
+     478.9
+    ],
+    [
+     "  slice",
+     479.5
+    ],
+    [
+     "  qcd",
+     507.12
+    ],
+    [
+     "windows: legacy MOLECULE start",
+     508.5
+    ],
+    [
+     "  moPanel (legacy)",
+     510.74
+    ],
+    [
+     "windows: legacy MOLECULE end",
+     513.18
+    ],
+    [
+     "windows: HELIUM/H2/CHEM/REGISTER start",
+     513.2
+    ],
+    [
+     "  helium",
+     513.46
+    ],
+    [
+     "  h2",
+     513.84
+    ],
+    [
+     "  chem",
+     518.46
+    ],
+    [
+     "  register",
+     520.68
+    ],
+    [
+     "windows: CALCULUS/METERS/LADDER start",
+     521.86
+    ],
+    [
+     "modulation: start",
+     523.04
+    ],
+    [
+     "modulation: createModulation start",
+     528.24
+    ],
+    [
+     "place() 3.38 ms, open=false",
+     535.96
+    ],
+    [
+     "place() 0.24 ms, open=false",
+     536.62
+    ],
+    [
+     "paint(true) 1.22 ms, open=false",
+     537.5
+    ],
+    [
+     "rebuild() 7.86 ms, open=false",
+     537.52
+    ],
+    [
+     "modulation: end",
+     538.68
+    ],
+    [
+     "windows: ATOMS..RADIATION start",
+     538.68
+    ],
+    [
+     "transport start",
+     541.16
+    ],
+    [
+     "paint(true) 4.70 ms, open=false",
+     546.52
+    ],
+    [
+     "badges/sw/bow/layout start",
+     546.54
+    ],
+    [
+     "  swClient",
+     546.6
+    ],
+    [
+     "  bow fns",
+     546.6
+    ],
+    [
+     "  gas",
+     546.62
+    ],
+    [
+     "  layout obj",
+     560.58
+    ],
+    [
+     "  wTr",
+     560.6
+    ],
+    [
+     "menubar start",
+     561.1
+    ],
+    [
+     "keymap start",
+     561.24
+    ],
+    [
+     "LEAN+KIND passes start",
+     563
+    ],
+    [
+     "LEAN+KIND passes end",
+     564.3
+    ],
+    [
+     "drags start",
+     565.32
+    ],
+    [
+     "phone start",
+     566.4
+    ],
+    [
+     "keys/serialize/history start",
+     566.46
+    ],
+    [
+     "history window start",
+     566.76
+    ],
+    [
+     "LW object start",
+     567.04
+    ],
+    [
+     "go: loadPreset",
+     567.84
+    ],
+    [
+     "go: moveToRack+picker",
+     568.26
+    ],
+    [
+     "go: applySettings",
+     570.14
+    ],
+    [
+     "AS: setTheme",
+     570.14
+    ],
+    [
+     "AS: setFrost",
+     571.78
+    ],
+    [
+     "AS: disc/card/blur/accent/auto/gov/perf/camera",
+     571.8
+    ],
+    [
+     "AS: MOD.hz + modView.sync()",
+     571.82
+    ],
+    [
+     "paint(true) 12.00 ms, open=false",
+     584.02
+    ],
+    [
+     "AS: modArm..axisInk",
+     584.04
+    ],
+    [
+     "AS: closed + camMode + p3",
+     584.04
+    ],
+    [
+     "AS: gamut",
+     584.04
+    ],
+    [
+     "AS: end",
+     584.1
+    ],
+    [
+     "go: openLink",
+     584.16
+    ],
+    [
+     "go: reworkNative start",
+     584.24
+    ],
+    [
+     "rework: settings pages start",
+     586.04
+    ],
+    [
+     "rework: transport panel start",
+     586.52
+    ],
+    [
+     "rework: consolidateWindowHelp start",
+     586.96
+    ],
+    [
+     "rework: installControlHelp start",
+     587.84
+    ],
+    [
+     "rework: end",
+     589.9
+    ],
+    [
+     "go: reworkNative end",
+     589.9
+    ],
+    [
+     "notebook start",
+     592.08
+    ],
+    [
+     "go: ready",
+     592.8
+    ]
+   ],
+   "domInteractive": 71.8,
+   "readyAt": 1149.5,
+   "nodesTotal": 4495,
+   "devices": 27,
+   "closedNodes": 2003,
+   "openNodes": 1229,
+   "modwinNodes": 507,
+   "transportNodes": 94,
+   "molecule": {
+    "id": "molecule",
+    "closed": true,
+    "hidden": true,
+    "folded": true,
+    "nodes": 224
+   },
+   "perDev": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "nodes": 36
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 59
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 302
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 83
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 76
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 129
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 74
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 99
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "nodes": 224
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 77
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 96
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 202
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 219
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 48
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 96
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 175
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 83
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 78
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 54
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 208
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 220
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 116
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 125
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 139
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 60
+    }
+   ],
+   "errs": [],
+   "fieldOk": true
+  },
+  {
+   "bootT0": 516,
+   "marks": [
+    [
+     "field created",
+     526.34
+    ],
+    [
+     "workers made",
+     526.38
+    ],
+    [
+     "windows: WAVE/PALETTE/CAMERA/CLIP/SETTINGS start",
+     527.46
+    ],
+    [
+     "windows: STATE start",
+     534.46
+    ],
+    [
+     "windows: SPECTRUM start",
+     536.24
+    ],
+    [
+     "windows: SHADOW start",
+     538.14
+    ],
+    [
+     "windows: ORBIT..QCD start",
+     543.12
+    ],
+    [
+     "  orbit",
+     543.38
+    ],
+    [
+     "  kepler",
+     544.28
+    ],
+    [
+     "  vortex",
+     544.82
+    ],
+    [
+     "  particles",
+     545.96
+    ],
+    [
+     "  dynamics",
+     546.28
+    ],
+    [
+     "  slice",
+     546.84
+    ],
+    [
+     "  qcd",
+     575.82
+    ],
+    [
+     "windows: legacy MOLECULE start",
+     577.78
+    ],
+    [
+     "  moPanel (legacy)",
+     580.92
+    ],
+    [
+     "windows: legacy MOLECULE end",
+     584.56
+    ],
+    [
+     "windows: HELIUM/H2/CHEM/REGISTER start",
+     584.56
+    ],
+    [
+     "  helium",
+     585.06
+    ],
+    [
+     "  h2",
+     585.86
+    ],
+    [
+     "  chem",
+     591.62
+    ],
+    [
+     "  register",
+     594.66
+    ],
+    [
+     "windows: CALCULUS/METERS/LADDER start",
+     595.98
+    ],
+    [
+     "modulation: start",
+     597.22
+    ],
+    [
+     "modulation: createModulation start",
+     602.8
+    ],
+    [
+     "place() 3.70 ms, open=false",
+     611.26
+    ],
+    [
+     "place() 0.28 ms, open=false",
+     612.38
+    ],
+    [
+     "paint(true) 1.34 ms, open=false",
+     613.28
+    ],
+    [
+     "rebuild() 8.88 ms, open=false",
+     613.3
+    ],
+    [
+     "modulation: end",
+     614.32
+    ],
+    [
+     "windows: ATOMS..RADIATION start",
+     614.34
+    ],
+    [
+     "transport start",
+     616.5
+    ],
+    [
+     "paint(true) 4.74 ms, open=false",
+     621.82
+    ],
+    [
+     "badges/sw/bow/layout start",
+     621.84
+    ],
+    [
+     "  swClient",
+     621.94
+    ],
+    [
+     "  bow fns",
+     621.96
+    ],
+    [
+     "  gas",
+     621.98
+    ],
+    [
+     "  layout obj",
+     636.62
+    ],
+    [
+     "  wTr",
+     636.64
+    ],
+    [
+     "menubar start",
+     637.34
+    ],
+    [
+     "keymap start",
+     637.52
+    ],
+    [
+     "LEAN+KIND passes start",
+     639.28
+    ],
+    [
+     "LEAN+KIND passes end",
+     640.62
+    ],
+    [
+     "drags start",
+     641.64
+    ],
+    [
+     "phone start",
+     642.92
+    ],
+    [
+     "keys/serialize/history start",
+     643.04
+    ],
+    [
+     "history window start",
+     643.52
+    ],
+    [
+     "LW object start",
+     643.92
+    ],
+    [
+     "go: loadPreset",
+     645.1
+    ],
+    [
+     "go: moveToRack+picker",
+     645.74
+    ],
+    [
+     "go: applySettings",
+     648.42
+    ],
+    [
+     "AS: setTheme",
+     648.46
+    ],
+    [
+     "AS: setFrost",
+     651.56
+    ],
+    [
+     "AS: disc/card/blur/accent/auto/gov/perf/camera",
+     651.6
+    ],
+    [
+     "AS: MOD.hz + modView.sync()",
+     651.66
+    ],
+    [
+     "paint(true) 15.68 ms, open=false",
+     667.64
+    ],
+    [
+     "AS: modArm..axisInk",
+     667.64
+    ],
+    [
+     "AS: closed + camMode + p3",
+     667.66
+    ],
+    [
+     "AS: gamut",
+     667.66
+    ],
+    [
+     "AS: end",
+     667.74
+    ],
+    [
+     "go: openLink",
+     667.82
+    ],
+    [
+     "go: reworkNative start",
+     667.98
+    ],
+    [
+     "rework: settings pages start",
+     670.18
+    ],
+    [
+     "rework: transport panel start",
+     670.72
+    ],
+    [
+     "rework: consolidateWindowHelp start",
+     671.2
+    ],
+    [
+     "rework: installControlHelp start",
+     672.12
+    ],
+    [
+     "rework: end",
+     675.96
+    ],
+    [
+     "go: reworkNative end",
+     675.96
+    ],
+    [
+     "notebook start",
+     680.24
+    ],
+    [
+     "go: ready",
+     681.76
+    ]
+   ],
+   "domInteractive": 75,
+   "readyAt": 1248.9,
+   "nodesTotal": 4495,
+   "devices": 27,
+   "closedNodes": 2003,
+   "openNodes": 1229,
+   "modwinNodes": 507,
+   "transportNodes": 94,
+   "molecule": {
+    "id": "molecule",
+    "closed": true,
+    "hidden": true,
+    "folded": true,
+    "nodes": 224
+   },
+   "perDev": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "nodes": 36
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 59
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 302
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 83
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 76
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 129
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 74
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 99
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "nodes": 224
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 77
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 96
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 202
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 219
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 48
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 96
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 175
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 83
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 78
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 54
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 208
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 220
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 116
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 125
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 139
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 60
+    }
+   ],
+   "errs": [],
+   "fieldOk": true
+  },
+  {
+   "bootT0": 538.3,
+   "marks": [
+    [
+     "field created",
+     507.04
+    ],
+    [
+     "workers made",
+     507.1
+    ],
+    [
+     "windows: WAVE/PALETTE/CAMERA/CLIP/SETTINGS start",
+     508.56
+    ],
+    [
+     "windows: STATE start",
+     523.76
+    ],
+    [
+     "windows: SPECTRUM start",
+     525.82
+    ],
+    [
+     "windows: SHADOW start",
+     527.78
+    ],
+    [
+     "windows: ORBIT..QCD start",
+     533.24
+    ],
+    [
+     "  orbit",
+     533.52
+    ],
+    [
+     "  kepler",
+     534.34
+    ],
+    [
+     "  vortex",
+     534.96
+    ],
+    [
+     "  particles",
+     536.42
+    ],
+    [
+     "  dynamics",
+     536.82
+    ],
+    [
+     "  slice",
+     537.46
+    ],
+    [
+     "  qcd",
+     567.82
+    ],
+    [
+     "windows: legacy MOLECULE start",
+     569.24
+    ],
+    [
+     "  moPanel (legacy)",
+     571.7
+    ],
+    [
+     "windows: legacy MOLECULE end",
+     575.06
+    ],
+    [
+     "windows: HELIUM/H2/CHEM/REGISTER start",
+     575.08
+    ],
+    [
+     "  helium",
+     575.56
+    ],
+    [
+     "  h2",
+     576.32
+    ],
+    [
+     "  chem",
+     582.28
+    ],
+    [
+     "  register",
+     585.3
+    ],
+    [
+     "windows: CALCULUS/METERS/LADDER start",
+     586.58
+    ],
+    [
+     "modulation: start",
+     588.1
+    ],
+    [
+     "modulation: createModulation start",
+     594.26
+    ],
+    [
+     "place() 4.04 ms, open=false",
+     603.48
+    ],
+    [
+     "place() 0.34 ms, open=false",
+     604.6
+    ],
+    [
+     "paint(true) 1.56 ms, open=false",
+     605.66
+    ],
+    [
+     "rebuild() 9.86 ms, open=false",
+     605.68
+    ],
+    [
+     "modulation: end",
+     606.86
+    ],
+    [
+     "windows: ATOMS..RADIATION start",
+     606.86
+    ],
+    [
+     "transport start",
+     609.42
+    ],
+    [
+     "paint(true) 5.10 ms, open=false",
+     615.14
+    ],
+    [
+     "badges/sw/bow/layout start",
+     615.16
+    ],
+    [
+     "  swClient",
+     615.28
+    ],
+    [
+     "  bow fns",
+     615.3
+    ],
+    [
+     "  gas",
+     615.32
+    ],
+    [
+     "  layout obj",
+     634.06
+    ],
+    [
+     "  wTr",
+     634.1
+    ],
+    [
+     "menubar start",
+     634.76
+    ],
+    [
+     "keymap start",
+     635
+    ],
+    [
+     "LEAN+KIND passes start",
+     637.14
+    ],
+    [
+     "LEAN+KIND passes end",
+     638.58
+    ],
+    [
+     "drags start",
+     639.6
+    ],
+    [
+     "phone start",
+     640.72
+    ],
+    [
+     "keys/serialize/history start",
+     640.8
+    ],
+    [
+     "history window start",
+     641.16
+    ],
+    [
+     "LW object start",
+     641.5
+    ],
+    [
+     "go: loadPreset",
+     642.66
+    ],
+    [
+     "go: moveToRack+picker",
+     643.18
+    ],
+    [
+     "go: applySettings",
+     646.02
+    ],
+    [
+     "AS: setTheme",
+     646.04
+    ],
+    [
+     "AS: setFrost",
+     649.84
+    ],
+    [
+     "AS: disc/card/blur/accent/auto/gov/perf/camera",
+     649.9
+    ],
+    [
+     "AS: MOD.hz + modView.sync()",
+     649.96
+    ],
+    [
+     "paint(true) 21.72 ms, open=false",
+     672.18
+    ],
+    [
+     "AS: modArm..axisInk",
+     672.18
+    ],
+    [
+     "AS: closed + camMode + p3",
+     672.2
+    ],
+    [
+     "AS: gamut",
+     672.2
+    ],
+    [
+     "AS: end",
+     672.32
+    ],
+    [
+     "go: openLink",
+     672.44
+    ],
+    [
+     "go: reworkNative start",
+     672.56
+    ],
+    [
+     "rework: settings pages start",
+     675.76
+    ],
+    [
+     "rework: transport panel start",
+     676.92
+    ],
+    [
+     "rework: consolidateWindowHelp start",
+     677.7
+    ],
+    [
+     "rework: installControlHelp start",
+     679.66
+    ],
+    [
+     "rework: end",
+     683.94
+    ],
+    [
+     "go: reworkNative end",
+     683.94
+    ],
+    [
+     "notebook start",
+     687
+    ],
+    [
+     "go: ready",
+     688.06
+    ]
+   ],
+   "domInteractive": 77.8,
+   "readyAt": 1286.4,
+   "nodesTotal": 4449,
+   "devices": 27,
+   "closedNodes": 2003,
+   "openNodes": 1183,
+   "modwinNodes": 507,
+   "transportNodes": 94,
+   "molecule": {
+    "id": "molecule",
+    "closed": true,
+    "hidden": true,
+    "folded": true,
+    "nodes": 224
+   },
+   "perDev": [
+    {
+     "id": "transport",
+     "closed": true,
+     "hidden": true,
+     "folded": false,
+     "nodes": 36
+    },
+    {
+     "id": "shadow",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 59
+    },
+    {
+     "id": "spectrum",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 256
+    },
+    {
+     "id": "orbit",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 83
+    },
+    {
+     "id": "vortex",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 76
+    },
+    {
+     "id": "dynamics",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 129
+    },
+    {
+     "id": "slice",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 74
+    },
+    {
+     "id": "qcd",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 99
+    },
+    {
+     "id": "molecule",
+     "closed": true,
+     "hidden": true,
+     "folded": true,
+     "nodes": 224
+    },
+    {
+     "id": "helium",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 77
+    },
+    {
+     "id": "h2",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 96
+    },
+    {
+     "id": "chem",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 202
+    },
+    {
+     "id": "orbitals",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 219
+    },
+    {
+     "id": "calculus",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 48
+    },
+    {
+     "id": "meters",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 96
+    },
+    {
+     "id": "ladder",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 175
+    },
+    {
+     "id": "atoms",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 83
+    },
+    {
+     "id": "field",
+     "closed": true,
+     "hidden": false,
+     "folded": true,
+     "nodes": 78
+    },
+    {
+     "id": "wigner",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "radiation",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 77
+    },
+    {
+     "id": "history",
+     "closed": true,
+     "hidden": false,
+     "folded": false,
+     "nodes": 54
+    },
+    {
+     "id": "settings",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 208
+    },
+    {
+     "id": "state",
+     "closed": false,
+     "hidden": false,
+     "folded": true,
+     "nodes": 220
+    },
+    {
+     "id": "palette",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 116
+    },
+    {
+     "id": "observer",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 125
+    },
+    {
+     "id": "camera",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 139
+    },
+    {
+     "id": "clip",
+     "closed": false,
+     "hidden": false,
+     "folded": false,
+     "nodes": 60
+    }
+   ],
+   "errs": [],
+   "fieldOk": true
+  }
+ ]
+}

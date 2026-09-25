@@ -1,0 +1,3284 @@
+{
+ "at": "2026-09-25T02:11:21.545Z",
+ "nodes": 5540,
+ "steps": [
+  "open all windows ok",
+  "unhide legacy molecule ok",
+  "float + compact one ok",
+  "dock transport ok",
+  "modulation open ok",
+  "mod devices + macro + route ok",
+  "mod pop ok",
+  "audio SET sheet ok",
+  "notebook projects ok",
+  "notebook about ok",
+  "notebook notes view ok",
+  "keymap ok",
+  "menubar lists ok",
+  "rack add list ok",
+  "fav list ok",
+  "tempo panel ok",
+  "shadow + export details ok",
+  "settings pages ok",
+  "warning pane ok",
+  "banner ok"
+ ],
+ "tally": {
+  "lab.css MATCH": 396,
+  "lab.css ORPHAN": 211,
+  "lab.css STATE": 107,
+  "skin.css MATCH": 297,
+  "skin.css ORPHAN": 119,
+  "skin.css STATE": 35
+ },
+ "strongBytes": {
+  "lab.css": 9971,
+  "skin.css": 2916
+ },
+ "strong": [
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view .katex-display",
+   "verdict": "ORPHAN",
+   "bytes": 64,
+   "missing": [
+    "katex-display"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".hist-future",
+   "verdict": "ORPHAN",
+   "bytes": 31,
+   "missing": [
+    "hist-future"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".hist-future .hist-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 61,
+   "missing": [
+    "hist-future"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-chip",
+   "verdict": "ORPHAN",
+   "bytes": 136,
+   "missing": [
+    "keys-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .fd-label",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "fd-label"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .ro-label",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "ro-label"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .k-label",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "k-label"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-row",
+   "verdict": "ORPHAN",
+   "bytes": 118,
+   "missing": [
+    "keys-row"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-label",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [
+    "keys-label"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-chip",
+   "verdict": "ORPHAN",
+   "bytes": 199,
+   "missing": [
+    "keys-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-chip.hot",
+   "verdict": "ORPHAN",
+   "bytes": 63,
+   "missing": [
+    "keys-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-say",
+   "verdict": "ORPHAN",
+   "bytes": 94,
+   "missing": [
+    "keys-say"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": ".mod-fold > svg",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [
+    "mod-fold"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-srcs",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "mod-srcs"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-macros",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "mod-macros"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-targets",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "mod-targets"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-empty",
+   "verdict": "ORPHAN",
+   "bytes": 84,
+   "missing": [
+    "mod-empty"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-dead",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [
+    "mod-dead"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-beats",
+   "verdict": "ORPHAN",
+   "bytes": 193,
+   "missing": [
+    "mod-beats"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-beats.live",
+   "verdict": "ORPHAN",
+   "bytes": 38,
+   "missing": [
+    "mod-beats"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-src",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [
+    "mod-src"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-macro",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [
+    "mod-macro"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-srch",
+   "verdict": "ORPHAN",
+   "bytes": 80,
+   "missing": [
+    "mod-srch"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-macroh",
+   "verdict": "ORPHAN",
+   "bytes": 80,
+   "missing": [
+    "mod-macroh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-src.mod-off",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [
+    "mod-src",
+    "mod-off"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-tag",
+   "verdict": "ORPHAN",
+   "bytes": 113,
+   "missing": [
+    "mod-tag"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-meter",
+   "verdict": "ORPHAN",
+   "bytes": 149,
+   "missing": [
+    "mod-meter"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-meter > i",
+   "verdict": "ORPHAN",
+   "bytes": 108,
+   "missing": [
+    "mod-meter"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x",
+   "verdict": "ORPHAN",
+   "bytes": 214,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x:hover",
+   "verdict": "ORPHAN",
+   "bytes": 66,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x",
+   "verdict": "ORPHAN",
+   "bytes": 30,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-wave",
+   "verdict": "ORPHAN",
+   "bytes": 47,
+   "missing": [
+    "mod-wave"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-name",
+   "verdict": "ORPHAN",
+   "bytes": 240,
+   "missing": [
+    "mod-name"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-drive",
+   "verdict": "ORPHAN",
+   "bytes": 47,
+   "missing": [
+    "mod-drive"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-routes",
+   "verdict": "ORPHAN",
+   "bytes": 230,
+   "missing": [
+    "mod-routes"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-val",
+   "verdict": "ORPHAN",
+   "bytes": 28,
+   "missing": [
+    "mod-val"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mtr",
+   "verdict": "ORPHAN",
+   "bytes": 199,
+   "missing": [
+    "mod-mtr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mtr > i",
+   "verdict": "ORPHAN",
+   "bytes": 181,
+   "missing": [
+    "mod-mtr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mtr > b",
+   "verdict": "ORPHAN",
+   "bytes": 194,
+   "missing": [
+    "mod-mtr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mtr > em",
+   "verdict": "ORPHAN",
+   "bytes": 194,
+   "missing": [
+    "mod-mtr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-target",
+   "verdict": "ORPHAN",
+   "bytes": 72,
+   "missing": [
+    "mod-target"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-th",
+   "verdict": "ORPHAN",
+   "bytes": 67,
+   "missing": [
+    "mod-th"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-tlabel",
+   "verdict": "ORPHAN",
+   "bytes": 98,
+   "missing": [
+    "mod-tlabel"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-target.mod-live .mod-tlabel",
+   "verdict": "ORPHAN",
+   "bytes": 55,
+   "missing": [
+    "mod-target",
+    "mod-live",
+    "mod-tlabel"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-tgrp",
+   "verdict": "ORPHAN",
+   "bytes": 99,
+   "missing": [
+    "mod-tgrp"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-strip",
+   "verdict": "ORPHAN",
+   "bytes": 168,
+   "missing": [
+    "mod-strip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-span",
+   "verdict": "ORPHAN",
+   "bytes": 191,
+   "missing": [
+    "mod-span"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-base",
+   "verdict": "ORPHAN",
+   "bytes": 115,
+   "missing": [
+    "mod-base"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-now",
+   "verdict": "ORPHAN",
+   "bytes": 142,
+   "missing": [
+    "mod-now"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-nums",
+   "verdict": "ORPHAN",
+   "bytes": 46,
+   "missing": [
+    "mod-nums"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n",
+   "verdict": "ORPHAN",
+   "bytes": 91,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n > b",
+   "verdict": "ORPHAN",
+   "bytes": 127,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n > em",
+   "verdict": "ORPHAN",
+   "bytes": 143,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n.now > em",
+   "verdict": "ORPHAN",
+   "bytes": 38,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n.span",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-n.span > em",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [
+    "mod-n"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-rt",
+   "verdict": "ORPHAN",
+   "bytes": 65,
+   "missing": [
+    "mod-rt"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-rt.mod-dormant",
+   "verdict": "ORPHAN",
+   "bytes": 38,
+   "missing": [
+    "mod-rt",
+    "mod-dormant"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mm",
+   "verdict": "ORPHAN",
+   "bytes": 44,
+   "missing": [
+    "mod-mm"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-srcs",
+   "verdict": "ORPHAN",
+   "bytes": 31,
+   "missing": [
+    "mod-srcs"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-card",
+   "verdict": "ORPHAN",
+   "bytes": 182,
+   "missing": [
+    "mod-card"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-cardb",
+   "verdict": "ORPHAN",
+   "bytes": 71,
+   "missing": [
+    "mod-cardb"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-card .mod-srch",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [
+    "mod-card",
+    "mod-srch"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-card.mod-min .mod-cardb",
+   "verdict": "ORPHAN",
+   "bytes": 47,
+   "missing": [
+    "mod-card",
+    "mod-min",
+    "mod-cardb"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x",
+   "verdict": "ORPHAN",
+   "bytes": 78,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x > svg",
+   "verdict": "ORPHAN",
+   "bytes": 59,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-fold > svg",
+   "verdict": "ORPHAN",
+   "bytes": 61,
+   "missing": [
+    "mod-fold"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-card.mod-min .mod-fold > svg",
+   "verdict": "ORPHAN",
+   "bytes": 64,
+   "missing": [
+    "mod-card",
+    "mod-min",
+    "mod-fold"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-x:disabled",
+   "verdict": "ORPHAN",
+   "bytes": 50,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-graph",
+   "verdict": "ORPHAN",
+   "bytes": 162,
+   "missing": [
+    "mod-graph"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "svg.mod-cv",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [
+    "mod-cv"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-cv.stepped .cv-line",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [
+    "mod-cv",
+    "cv-line"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-cv.stepped .cv-fill",
+   "verdict": "ORPHAN",
+   "bytes": 82,
+   "missing": [
+    "mod-cv",
+    "cv-fill"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-capr",
+   "verdict": "ORPHAN",
+   "bytes": 69,
+   "missing": [
+    "mod-capr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-cap",
+   "verdict": "ORPHAN",
+   "bytes": 116,
+   "missing": [
+    "mod-cap"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-stat",
+   "verdict": "ORPHAN",
+   "bytes": 133,
+   "missing": [
+    "mod-stat"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-src.mod-off .mod-stat",
+   "verdict": "ORPHAN",
+   "bytes": 55,
+   "missing": [
+    "mod-src",
+    "mod-off",
+    "mod-stat"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-say",
+   "verdict": "ORPHAN",
+   "bytes": 63,
+   "missing": [
+    "mod-say"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-say:empty",
+   "verdict": "ORPHAN",
+   "bytes": 33,
+   "missing": [
+    "mod-say"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-shapes",
+   "verdict": "ORPHAN",
+   "bytes": 79,
+   "missing": [
+    "mod-shapes"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-sh",
+   "verdict": "ORPHAN",
+   "bytes": 180,
+   "missing": [
+    "mod-sh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-sh:hover",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [
+    "mod-sh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-sh:active",
+   "verdict": "ORPHAN",
+   "bytes": 50,
+   "missing": [
+    "mod-sh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-sh.on",
+   "verdict": "ORPHAN",
+   "bytes": 106,
+   "missing": [
+    "mod-sh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-sh.on .sh-p",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [
+    "mod-sh",
+    "sh-p"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-chip",
+   "verdict": "ORPHAN",
+   "bytes": 58,
+   "missing": [
+    "mod-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-chip .sw-led",
+   "verdict": "ORPHAN",
+   "bytes": 46,
+   "missing": [
+    "mod-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-chip .sw-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [
+    "mod-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mini",
+   "verdict": "ORPHAN",
+   "bytes": 48,
+   "missing": [
+    "mod-mini"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mini .trig-l",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [
+    "mod-mini"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".row > .mod-chip",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [
+    "mod-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".row > .mod-mini",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [
+    "mod-mini"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-seg",
+   "verdict": "ORPHAN",
+   "bytes": 39,
+   "missing": [
+    "mod-seg"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-bank",
+   "verdict": "ORPHAN",
+   "bytes": 39,
+   "missing": [
+    "mod-bank"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-seg .seg-b",
+   "verdict": "ORPHAN",
+   "bytes": 100,
+   "missing": [
+    "mod-seg"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-bank .seg-b",
+   "verdict": "ORPHAN",
+   "bytes": 100,
+   "missing": [
+    "mod-bank"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-bankr",
+   "verdict": "ORPHAN",
+   "bytes": 35,
+   "missing": [
+    "mod-bankr"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-waver > .mod-wave",
+   "verdict": "ORPHAN",
+   "bytes": 59,
+   "missing": [
+    "mod-waver",
+    "mod-wave"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-grip",
+   "verdict": "ORPHAN",
+   "bytes": 885,
+   "missing": [
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-grip:hover",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-grip.armed",
+   "verdict": "ORPHAN",
+   "bytes": 184,
+   "missing": [
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-macro.sel > .mod-macroh > .mod-grip",
+   "verdict": "ORPHAN",
+   "bytes": 79,
+   "missing": [
+    "mod-macro",
+    "mod-macroh",
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-action-sep",
+   "verdict": "ORPHAN",
+   "bytes": 43,
+   "missing": [
+    "km-action-sep"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".keys-chip",
+   "verdict": "ORPHAN",
+   "bytes": 160,
+   "missing": [
+    "keys-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".ui-hide",
+   "verdict": "ORPHAN",
+   "bytes": 403,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".ui-hide:hover",
+   "verdict": "ORPHAN",
+   "bytes": 87,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".ui-hide:focus-visible",
+   "verdict": "ORPHAN",
+   "bytes": 87,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".ui-hide:active",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.ui-hidden .ui-hide",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.ui-hidden .ui-hide:hover",
+   "verdict": "ORPHAN",
+   "bytes": 45,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.ui-hidden #badges + .ui-hide",
+   "verdict": "ORPHAN",
+   "bytes": 57,
+   "missing": [
+    "ui-hide"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".keys-chip",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [
+    "keys-chip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".hint-i",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [
+    "hint-i"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-x",
+   "verdict": "ORPHAN",
+   "bytes": 353,
+   "missing": [
+    "mod-x"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-name",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [
+    "mod-name"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-drive",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [
+    "mod-drive"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-wave",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [
+    "mod-wave"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-mm",
+   "verdict": "ORPHAN",
+   "bytes": 28,
+   "missing": [
+    "mod-mm"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-macroh",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [
+    "mod-macroh"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-grip",
+   "verdict": "ORPHAN",
+   "bytes": 377,
+   "missing": [
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-grip.armed",
+   "verdict": "ORPHAN",
+   "bytes": 174,
+   "missing": [
+    "mod-grip"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .seg-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [
+    "seg-lbl"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"palette\"] .pal-preset",
+   "verdict": "ORPHAN",
+   "bytes": 64,
+   "missing": [
+    "pal-preset"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-eyebrow",
+   "verdict": "ORPHAN",
+   "bytes": 226,
+   "missing": [
+    "tempo-eyebrow"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"observer\"] .wave-row-5",
+   "verdict": "ORPHAN",
+   "bytes": 117,
+   "missing": [
+    "wave-row-5"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-tempo-hz",
+   "verdict": "ORPHAN",
+   "bytes": 164,
+   "missing": [
+    "native-tempo-hz"
+   ],
+   "strong": true
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"observer\"] .wave-row-5",
+   "verdict": "ORPHAN",
+   "bytes": 117,
+   "missing": [
+    "wave-row-5"
+   ],
+   "strong": true
+  }
+ ],
+ "transient": [
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#field.khover",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#field.kdrag",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#field.drag",
+   "verdict": "ORPHAN",
+   "bytes": 33,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#rackL:empty",
+   "verdict": "ORPHAN",
+   "bytes": 38,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".dev.off .dev-stat::after",
+   "verdict": "ORPHAN",
+   "bytes": 67,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".dev.copied .dev-stat::after",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"about\"]",
+   "verdict": "ORPHAN",
+   "bytes": 115,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"about\"] .nb-titles",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"projects\"] .nb-titles",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"about\"] .nb-title",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"projects\"] .nb-title",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"about\"] .nb-subtitle",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-face=\"projects\"] .nb-subtitle",
+   "verdict": "ORPHAN",
+   "bytes": 279,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view h2",
+   "verdict": "ORPHAN",
+   "bytes": 120,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view h3",
+   "verdict": "ORPHAN",
+   "bytes": 120,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view h2",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view h3",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view ul",
+   "verdict": "ORPHAN",
+   "bytes": 59,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view ol",
+   "verdict": "ORPHAN",
+   "bytes": 59,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view li",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view code",
+   "verdict": "ORPHAN",
+   "bytes": 142,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view pre",
+   "verdict": "ORPHAN",
+   "bytes": 110,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view pre code",
+   "verdict": "ORPHAN",
+   "bytes": 60,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view blockquote",
+   "verdict": "ORPHAN",
+   "bytes": 119,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view table",
+   "verdict": "ORPHAN",
+   "bytes": 64,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view th",
+   "verdict": "ORPHAN",
+   "bytes": 98,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view td",
+   "verdict": "ORPHAN",
+   "bytes": 98,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view hr",
+   "verdict": "ORPHAN",
+   "bytes": 98,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".nb-view a",
+   "verdict": "ORPHAN",
+   "bytes": 33,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#notebook[data-mode=\"edit\"] .nb-view",
+   "verdict": "ORPHAN",
+   "bytes": 66,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".pj-none",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".ab-fine code",
+   "verdict": "ORPHAN",
+   "bytes": 48,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 125,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.rack-hidden #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 105,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.rack-hidden.transport-peek #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 114,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".fx.dim .fx-l",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .fx",
+   "verdict": "ORPHAN",
+   "bytes": 38,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mb-item > .mb-num",
+   "verdict": "ORPHAN",
+   "bytes": 626,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mb-item.queued",
+   "verdict": "ORPHAN",
+   "bytes": 66,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mb-item > .mb-fav",
+   "verdict": "ORPHAN",
+   "bytes": 121,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mb-item > .mb-fav ~ .mb-num",
+   "verdict": "ORPHAN",
+   "bytes": 50,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 211,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn",
+   "verdict": "ORPHAN",
+   "bytes": 89,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.play",
+   "verdict": "ORPHAN",
+   "bytes": 43,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .fd",
+   "verdict": "ORPHAN",
+   "bytes": 57,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .k",
+   "verdict": "ORPHAN",
+   "bytes": 35,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .ro",
+   "verdict": "ORPHAN",
+   "bytes": 69,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .ro.period",
+   "verdict": "ORPHAN",
+   "bytes": 79,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.jump",
+   "verdict": "ORPHAN",
+   "bytes": 47,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 67,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .ro-val",
+   "verdict": "ORPHAN",
+   "bytes": 67,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".tbtn.play.on",
+   "verdict": "ORPHAN",
+   "bytes": 69,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.modb",
+   "verdict": "ORPHAN",
+   "bytes": 101,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#rack.rack-drop",
+   "verdict": "ORPHAN",
+   "bytes": 142,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#rackL.rack-drop",
+   "verdict": "ORPHAN",
+   "bytes": 142,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-cap b",
+   "verdict": "ORPHAN",
+   "bytes": 78,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-row.muted",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-row.off",
+   "verdict": "ORPHAN",
+   "bytes": 30,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-row .k .k-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 36,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-b.on",
+   "verdict": "ORPHAN",
+   "bytes": 97,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-b.solo.on",
+   "verdict": "ORPHAN",
+   "bytes": 55,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ":root:root:root:root .k.ring-focus > .k-route-depth.k",
+   "verdict": "ORPHAN",
+   "bytes": 72,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".k.ring-focus > .k-route-x",
+   "verdict": "ORPHAN",
+   "bytes": 66,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-rows.reg-driven .fd",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-rows.reg-driven .k",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".sp-rows.reg-morphing",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".segw.off",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".keys-list",
+   "verdict": "ORPHAN",
+   "bytes": 98,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".dyn-row",
+   "verdict": "ORPHAN",
+   "bytes": 215,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-c.drive",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-c.drive:active",
+   "verdict": "ORPHAN",
+   "bytes": 43,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-row",
+   "verdict": "ORPHAN",
+   "bytes": 288,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-band",
+   "verdict": "ORPHAN",
+   "bytes": 96,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-id",
+   "verdict": "ORPHAN",
+   "bytes": 114,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".orbit-row .ro",
+   "verdict": "ORPHAN",
+   "bytes": 34,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.ui-hidden #graphTip",
+   "verdict": "ORPHAN",
+   "bytes": 157,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.rack-hidden #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 128,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.rack-hidden.transport-peek #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 135,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#warnPane.warn-out",
+   "verdict": "ORPHAN",
+   "bytes": 56,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "#transport.mini.at-top",
+   "verdict": "ORPHAN",
+   "bytes": 84,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": "#warnPane.warn-out",
+   "verdict": "ORPHAN",
+   "bytes": 45,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": "body.rack-hidden #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 245,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": "body.rack-hidden.transport-peek #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 245,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": "body.rack-hidden #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 102,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-mchip",
+   "verdict": "ORPHAN",
+   "bytes": 237,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-exp.live",
+   "verdict": "ORPHAN",
+   "bytes": 131,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".k.mod-held .k-dial",
+   "verdict": "ORPHAN",
+   "bytes": 112,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".k.mod-held .k-needle",
+   "verdict": "ORPHAN",
+   "bytes": 49,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.mod-arming .k[data-param].mod-drop > .k-dial",
+   "verdict": "ORPHAN",
+   "bytes": 144,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.mod-arming .k[data-param].mod-drop > .k-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 72,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.mod-arming .k[data-param].mod-drop.is-dup > .k-dial",
+   "verdict": "ORPHAN",
+   "bytes": 147,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": "body.mod-arming .k[data-param].mod-drop.is-over > .k-dial",
+   "verdict": "ORPHAN",
+   "bytes": 172,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-poprts",
+   "verdict": "ORPHAN",
+   "bytes": 65,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-poprts > .grp-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-poprts > .mod-mchip",
+   "verdict": "ORPHAN",
+   "bytes": 396,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".mod-poprts > .mod-mchip.on",
+   "verdict": "ORPHAN",
+   "bytes": 100,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-dragging .km-header",
+   "verdict": "ORPHAN",
+   "bytes": 45,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-key-selected",
+   "verdict": "ORPHAN",
+   "bytes": 105,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-key-hovered",
+   "verdict": "ORPHAN",
+   "bytes": 96,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-key-recording",
+   "verdict": "ORPHAN",
+   "bytes": 104,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-badge-alt",
+   "verdict": "ORPHAN",
+   "bytes": 79,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-action-row-selected",
+   "verdict": "ORPHAN",
+   "bytes": 86,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-action-row-hovered",
+   "verdict": "ORPHAN",
+   "bytes": 80,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-action-row-recording",
+   "verdict": "ORPHAN",
+   "bytes": 111,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-chip-unbound",
+   "verdict": "ORPHAN",
+   "bytes": 76,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-chip-recording",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-btn-recording",
+   "verdict": "ORPHAN",
+   "bytes": 104,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "lab.css",
+   "media": "",
+   "sel": ".km-status-conflict",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".orbit-row",
+   "verdict": "ORPHAN",
+   "bytes": 118,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".sp-b.on",
+   "verdict": "ORPHAN",
+   "bytes": 149,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".sp-b.solo.on",
+   "verdict": "ORPHAN",
+   "bytes": 127,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".dyn-row",
+   "verdict": "ORPHAN",
+   "bytes": 80,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 259,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn",
+   "verdict": "ORPHAN",
+   "bytes": 200,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn:hover",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.play",
+   "verdict": "ORPHAN",
+   "bytes": 124,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.play.on",
+   "verdict": "ORPHAN",
+   "bytes": 95,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.tempo-expand",
+   "verdict": "ORPHAN",
+   "bytes": 59,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.modb",
+   "verdict": "ORPHAN",
+   "bytes": 244,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.modb.on",
+   "verdict": "ORPHAN",
+   "bytes": 85,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd",
+   "verdict": "ORPHAN",
+   "bytes": 151,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd::before",
+   "verdict": "ORPHAN",
+   "bytes": 169,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd-fill",
+   "verdict": "ORPHAN",
+   "bytes": 142,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd-edge",
+   "verdict": "ORPHAN",
+   "bytes": 177,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd-val",
+   "verdict": "ORPHAN",
+   "bytes": 183,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k",
+   "verdict": "ORPHAN",
+   "bytes": 61,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 41,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k-dial",
+   "verdict": "ORPHAN",
+   "bytes": 54,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k-needle",
+   "verdict": "ORPHAN",
+   "bytes": 57,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 130,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k:hover .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 129,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k.drag .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 129,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k.active .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 129,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro",
+   "verdict": "ORPHAN",
+   "bytes": 85,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-val",
+   "verdict": "ORPHAN",
+   "bytes": 50,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-val.live",
+   "verdict": "ORPHAN",
+   "bytes": 51,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-sub",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro",
+   "verdict": "ORPHAN",
+   "bytes": 161,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro.period",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-val",
+   "verdict": "ORPHAN",
+   "bytes": 95,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-lbl",
+   "verdict": "ORPHAN",
+   "bytes": 42,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .k",
+   "verdict": "ORPHAN",
+   "bytes": 32,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .dock-btn",
+   "verdict": "ORPHAN",
+   "bytes": 65,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .mod-exp",
+   "verdict": "ORPHAN",
+   "bytes": 65,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd",
+   "verdict": "ORPHAN",
+   "bytes": 33,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(prefers-reduced-motion: reduce)",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 76,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body[data-card=\"tinted\"] #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 122,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body[data-card=\"refractive\"] #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.frost[data-card=\"tinted\"] #transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 88,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": "#graphTip",
+   "verdict": "ORPHAN",
+   "bytes": 87,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px)",
+   "sel": ".mod-exp.live",
+   "verdict": "ORPHAN",
+   "bytes": 195,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .grp .grp",
+   "verdict": "ORPHAN",
+   "bytes": 146,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-info-button[aria-expanded=\"true\"]",
+   "verdict": "ORPHAN",
+   "bytes": 210,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"observer\"] .grp",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.disconnected:not(.phone) .dev.native-selected > .dev-head",
+   "verdict": "ORPHAN",
+   "bytes": 181,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.disconnected:not(.phone) .dev.tab-hot > .dev-head",
+   "verdict": "ORPHAN",
+   "bytes": 181,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport .native-tempo[hidden]",
+   "verdict": "ORPHAN",
+   "bytes": 51,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-tile.m2reorder",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-tile .m2numseat.m2zero .m2deptharc",
+   "verdict": "ORPHAN",
+   "bytes": 57,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-tile .m2numseat.drag .m2deptharc",
+   "verdict": "ORPHAN",
+   "bytes": 62,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-empty",
+   "verdict": "ORPHAN",
+   "bytes": 87,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".tempo-empty",
+   "verdict": "ORPHAN",
+   "bytes": 108,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .formula",
+   "verdict": "ORPHAN",
+   "bytes": 47,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .sp-head .native-info",
+   "verdict": "ORPHAN",
+   "bytes": 52,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"palette\"] .palette-seam .ro",
+   "verdict": "ORPHAN",
+   "bytes": 68,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"palette\"] .palette-seam .ro-sub",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .window-help-book > .sturm-note",
+   "verdict": "ORPHAN",
+   "bytes": 148,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"camera\"] .camera-motion .sw",
+   "verdict": "ORPHAN",
+   "bytes": 70,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .native-info-content .ro-sub",
+   "verdict": "ORPHAN",
+   "bytes": 60,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"spectrum\"] .grp > .row:first-of-type .seg",
+   "verdict": "ORPHAN",
+   "bytes": 135,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .k.drag .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 165,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean .k[data-live] .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 165,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"palette\"] .palette-seam .ro",
+   "verdict": "ORPHAN",
+   "bytes": 101,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"palette\"] .palette-seam .ro-sub",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".plane-model[aria-disabled=\"true\"]",
+   "verdict": "ORPHAN",
+   "bytes": 70,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .native-play-row",
+   "verdict": "ORPHAN",
+   "bytes": 46,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini.tempo-open",
+   "verdict": "ORPHAN",
+   "bytes": 117,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 76,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tempo-expand",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .native-play-row",
+   "verdict": "ORPHAN",
+   "bytes": 55,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .fd",
+   "verdict": "ORPHAN",
+   "bytes": 56,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro",
+   "verdict": "ORPHAN",
+   "bytes": 73,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro.time",
+   "verdict": "ORPHAN",
+   "bytes": 41,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro.period",
+   "verdict": "ORPHAN",
+   "bytes": 43,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .ro-val",
+   "verdict": "ORPHAN",
+   "bytes": 87,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.modb",
+   "verdict": "ORPHAN",
+   "bytes": 78,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport.mini .tbtn.modb.on",
+   "verdict": "ORPHAN",
+   "bytes": 53,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".native-clean[data-id=\"camera\"] .camera-motion .sw",
+   "verdict": "ORPHAN",
+   "bytes": 88,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "#transport .k.drag .k-val",
+   "verdict": "ORPHAN",
+   "bytes": 108,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 1000px)",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 1000px)",
+   "sel": "#transport.mini.tempo-open",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 1000px)",
+   "sel": "#transport.mini .ro.period",
+   "verdict": "ORPHAN",
+   "bytes": 45,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini",
+   "verdict": "ORPHAN",
+   "bytes": 183,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini.tempo-open",
+   "verdict": "ORPHAN",
+   "bytes": 183,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini .fd",
+   "verdict": "ORPHAN",
+   "bytes": 40,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini .ro.time",
+   "verdict": "ORPHAN",
+   "bytes": 41,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini .tbtn.modb",
+   "verdict": "ORPHAN",
+   "bytes": 60,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "(max-width: 860px)",
+   "sel": "#transport.mini .tempo-expand",
+   "verdict": "ORPHAN",
+   "bytes": 81,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".dev .keys-list",
+   "verdict": "ORPHAN",
+   "bytes": 103,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".dev .pj-list",
+   "verdict": "ORPHAN",
+   "bytes": 103,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": ".dev[data-id=\"spectrum\"] .sp-b.on",
+   "verdict": "ORPHAN",
+   "bytes": 195,
+   "missing": [],
+   "strong": false
+  },
+  {
+   "file": "skin.css",
+   "media": "",
+   "sel": "body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info)))",
+   "verdict": "ORPHAN",
+   "bytes": 133,
+   "missing": [],
+   "strong": false
+  }
+ ],
+ "invalid": []
+}

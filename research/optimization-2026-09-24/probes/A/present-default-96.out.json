@@ -1,0 +1,229 @@
+{
+ "scen": "default",
+ "grid": 96,
+ "n": 96,
+ "count": 2,
+ "W": 1920,
+ "H": 994,
+ "steps": 160,
+ "view": 0,
+ "style": 0,
+ "appReadPixelsHash": "7aba2d16",
+ "rgCopyTexelsDiffering": 0,
+ "replicaHash": "7aba2d16",
+ "replicaExact": true,
+ "rg16": {
+  "hash": "7aba2d16",
+  "bytesDiffering": 0,
+  "maxLevelDiff": 0
+ },
+ "march": {
+  "pixels": 1908480,
+  "hitBoxFraction": 0.7101,
+  "meanSamplesPerHitPixel": 160,
+  "negligibleSampleFraction": 0.6028,
+  "earlyExitFraction": 0.0003,
+  "samplesPerFrameM": 216.8
+ },
+ "timing": {
+  "ship": {
+   "min": 3.788,
+   "rounds": [
+    3.917,
+    3.788
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "rg16": {
+   "min": 10.718,
+   "rounds": [
+    11.094,
+    10.718
+   ],
+   "n": 768,
+   "tickErrMs": 0.13
+  },
+  "texFloor": {
+   "min": 5.717,
+   "rounds": [
+    7.024,
+    5.717
+   ],
+   "n": 613,
+   "tickErrMs": 0.163
+  },
+  "texFloor_rg16": {
+   "min": 6.12,
+   "rounds": [
+    6.277,
+    6.12
+   ],
+   "n": 638,
+   "tickErrMs": 0.157
+  },
+  "dpr2": {
+   "min": 26.07,
+   "rounds": [
+    26.07,
+    27.111
+   ],
+   "n": 96,
+   "tickErrMs": 1.042
+  },
+  "dpr2_rg16": {
+   "min": 13.825,
+   "rounds": [
+    13.825,
+    13.835
+   ],
+   "n": 210,
+   "tickErrMs": 0.476
+  },
+  "steps110": {
+   "min": 2.511,
+   "rounds": [
+    2.511,
+    2.511
+   ],
+   "n": 1197,
+   "tickErrMs": 0.084
+  },
+  "steps160": {
+   "min": 3.656,
+   "rounds": [
+    3.657,
+    3.656
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "steps240": {
+   "min": 5.492,
+   "rounds": [
+    5.512,
+    5.492
+   ],
+   "n": 547,
+   "tickErrMs": 0.183
+  },
+  "view_density": {
+   "min": 3.651,
+   "rounds": [
+    3.653,
+    3.651
+   ],
+   "n": 768,
+   "tickErrMs": 0.13
+  },
+  "view_phase": {
+   "min": 4.934,
+   "rounds": [
+    4.934,
+    4.935
+   ],
+   "n": 548,
+   "tickErrMs": 0.182
+  },
+  "view_real": {
+   "min": 3.526,
+   "rounds": [
+    3.528,
+    3.526
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "view_reim": {
+   "min": 4.069,
+   "rounds": [
+    4.07,
+    4.069
+   ],
+   "n": 640,
+   "tickErrMs": 0.156
+  },
+  "style_cloud": {
+   "min": 3.656,
+   "rounds": [
+    3.657,
+    3.656
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "style_solid": {
+   "min": 4.236,
+   "rounds": [
+    4.236,
+    4.251
+   ],
+   "n": 639,
+   "tickErrMs": 0.156
+  },
+  "style_signed": {
+   "min": 4.231,
+   "rounds": [
+    4.231,
+    4.231
+   ],
+   "n": 639,
+   "tickErrMs": 0.156
+  },
+  "style_bands": {
+   "min": 4.069,
+   "rounds": [
+    4.069,
+    4.069
+   ],
+   "n": 640,
+   "tickErrMs": 0.156
+  },
+  "style_dust": {
+   "min": 4.382,
+   "rounds": [
+    4.385,
+    4.382
+   ],
+   "n": 640,
+   "tickErrMs": 0.156
+  },
+  "style_glass": {
+   "min": 11.264,
+   "rounds": [
+    11.264,
+    11.267
+   ],
+   "n": 240,
+   "tickErrMs": 0.417
+  },
+  "style_additive": {
+   "min": 3.527,
+   "rounds": [
+    3.527,
+    3.527
+   ],
+   "n": 767,
+   "tickErrMs": 0.13
+  },
+  "finish_glass": {
+   "min": 11.266,
+   "rounds": [
+    11.266,
+    11.315
+   ],
+   "n": 240,
+   "tickErrMs": 0.417
+  },
+  "palette_on_phase": {
+   "min": 5.116,
+   "rounds": [
+    5.116,
+    5.123
+   ],
+   "n": 548,
+   "tickErrMs": 0.182
+  }
+ },
+ "note": "min over 2 rounds of n back-to-back renders into a 1920x994 rgba8unorm target (2x = 3840x1988); tickErrMs = 100 ms / n"
+}

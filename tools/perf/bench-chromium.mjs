@@ -5,7 +5,11 @@
  * A window opens on the desktop for the run and closes itself. */
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import fs from 'node:fs';
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
+/* Electron is NOT a webdriver session: rack.js's photosensitivity pane (a full-screen backdrop blur) shows unless this browser has
+   already pressed CONTINUE, and Electron's default userData persists between runs — so every run gets a fresh profile and the
+   pane is dismissed through the app's own road before any scene is measured (lane C, 2026-09-24). */
+const PROFILE = fs.mkdtempSync(path.join(os.tmpdir(), 'lw-electron-'));
 const PORT = process.env.LW_PORT || '8721';
 const OUT = process.argv[2] || 'research/optimization-2026-09-24/baseline-chromium.json';
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
@@ -16,7 +20,7 @@ const R = { at: new Date().toISOString(), viewport: [W, H], host: 'electron', bo
 const t0 = Date.now();
 /* --no-sandbox is a LAUNCH argument: Chromium checks the SUID helper before any app code runs (this box's chrome-sandbox is not root-owned; see hosts-m0's ACCEPTANCE-MATRIX) */
 const proc = spawn(ELECTRON, [new URL('./electron-main.cjs', import.meta.url).pathname, ...(process.env.LW_SANDBOX ? [] : ['--no-sandbox'])], { stdio: ['ignore', 'ignore', 'pipe'],
-  env: { ...process.env, DISPLAY: process.env.DISPLAY || ':0', LW_CDP_PORT: String(cdpPort), LW_W: String(W), LW_H: String(H), LW_NO_SANDBOX: process.env.LW_NO_SANDBOX || '1',
+  env: { ...process.env, DISPLAY: process.env.DISPLAY || ':0', LW_CDP_PORT: String(cdpPort), LW_W: String(W), LW_H: String(H), LW_NO_SANDBOX: process.env.LW_NO_SANDBOX || '1', LW_PROFILE: PROFILE,
     LW_URL: `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0&warn=0` } });
 let stderr = ''; proc.stderr.on('data', (d) => { stderr += d; });
 let ws = null;
@@ -31,6 +35,7 @@ try {
   await send('Runtime.enable');
   for (let i = 0; i < 400; i++) { try { if (await ev('!!(window.__LW && __LW.ready)')) break; } catch {} await sleep(100); }
   R.boot = await ev(`({readyMs:+performance.now().toFixed(0), adapter:__LW.field.adapterInfo, ok:__LW.field.ok, err:__LW.field.error, errs:window.__e, dpr:devicePixelRatio, w:innerWidth, h:innerHeight, ua:navigator.userAgent, card:document.body.dataset.card, frost:__LW.frost, theme:__LW.theme, blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur')})`);
+  R.boot.warnDismissed = await ev(`(()=>{ const w=__LW.warning; const was=w.open; if (was) w.dismiss(); return { was, open: w.open, seen: w.seen }; })()`);
   console.log('boot', JSON.stringify(R.boot));
   if (!R.boot.ok) throw new Error('no WebGPU in this host: ' + R.boot.err);
   await ev(`(async()=>{ __LW.governor.on=false; __LW.quality.auto=false; __LW.quality.autoScale=1; __LW.loadPreset('sim-ladder'); __LW.pause(); __LW.quality.res=96; __LW.quality.steps=160; __LW.quality.scale=1; __LW.schedule(4); await __LW.settle(); return 1; })()`);
@@ -72,7 +77,7 @@ try {
   await scene('128³ · axial gas · UI shown · frost OFF', `if(__LW.uiHidden) __LW.keys.toggleUI(); __LW.setFrost('off')`);
   R.errs = await ev('window.__e');
 } catch (e) { console.error('BENCH ERROR', e); R.error = String(e && e.stack || e); R.stderr = stderr.slice(-2000); }
-finally { try { ws && ws.close(); } catch {} proc.kill('SIGTERM'); await sleep(500); if (proc.exitCode === null) proc.kill('SIGKILL'); }
+finally { try { ws && ws.close(); } catch {} proc.kill('SIGTERM'); await sleep(500); if (proc.exitCode === null) proc.kill('SIGKILL'); try { fs.rmSync(PROFILE, { recursive: true, force: true }); } catch {} }
 R.wallSec = +((Date.now() - t0) / 1000).toFixed(1);
 fs.mkdirSync('research/optimization-2026-09-24', { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(R, null, 1));
