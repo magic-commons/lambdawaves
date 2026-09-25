@@ -40,11 +40,6 @@ export function createGas(a = 10, opts = {}) {
   const NRQ = opts.nr || 200, NTQ = opts.nt || 160;          // the quadrature grid (r midpoints × θ midpoints)
   let A = a, modes = [], Rt = null, Pt = null, r = null, ct = null, w = null, rw = null;
   let re0 = null, im0 = null, t0 = 0, on = false, captured = 0, last = null;
-  /* THE RECORDS ARE PERSISTENT (optimization 2026-09-24, K3 · AUDIT-B FB6, F14): one kernel record per mode, built with
-     the tables, and fieldModes(t) writes only re/im into them and into ONE reused list — it was 256 records × 4 objects
-     (≈ 180 KB) per reconstruct.  The list is a reused buffer, exactly as rack.js' modesAt list is (render-exact H8). */
-  let recs = [];
-  const list = [];
   function build() {
     modes = [];
     for (let l = 0; l <= LMAX; l++) { const z = zerosOf(l, NRMAX); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; modes.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } }
@@ -55,7 +50,6 @@ export function createGas(a = 10, opts = {}) {
     Rt = modes.map((m) => { const row = new Float64Array(NRQ); for (let i = 0; i < NRQ; i++) row[i] = m.rnorm * sphj(m.l, m.k * r[i]); return row; });
     Pt = []; for (let l = 0; l <= LMAX; l++) { const row = new Float64Array(NTQ); const an = Math.sqrt((2 * l + 1) / (4 * Math.PI)); for (let j = 0; j < NTQ; j++) row[j] = an * legP(l, ct[j]); Pt.push(row); }
     re0 = new Float64Array(modes.length); im0 = new Float64Array(modes.length);
-    recs = modes.map((M) => ({ table: { n: 1, l: M.l, am: 0, m: 0, norm: M.rnorm * M.anorm, lag: Float64Array.from([M.k, A, 1, 0, 0, 0]), leg: new Float64Array(6), space: 'gas' }, re: 0, im: 0 }));
   }
   build();
   /** ⟨a|b⟩ over the radial quadrature (same l): the basis check */
@@ -88,15 +82,13 @@ export function createGas(a = 10, opts = {}) {
   }
   /** the kernel records: the well branch with P_l by recurrence (lag[2] = 1 says so) */
   function fieldModes(t) {
-    let k = 0;
+    const c = at(t), out = [];
     for (let m = 0; m < modes.length; m++) {
-      const ph = -modes[m].E * (t - t0), c = Math.cos(ph), s = Math.sin(ph);      // at(t)'s own expressions, without its two arrays
-      const re = re0[m] * c - im0[m] * s, im = re0[m] * s + im0[m] * c;
-      if (Math.abs(re) < 1e-7 && Math.abs(im) < 1e-7) continue;
-      const R = recs[m]; R.re = re; R.im = im; list[k++] = R;
+      if (Math.abs(c.re[m]) < 1e-7 && Math.abs(c.im[m]) < 1e-7) continue;
+      const M = modes[m];
+      out.push({ table: { n: 1, l: M.l, am: 0, m: 0, norm: M.rnorm * M.anorm, lag: Float64Array.from([M.k, A, 1, 0, 0, 0]), leg: new Float64Array(6), space: 'gas' }, re: c.re[m], im: c.im[m] });
     }
-    list.length = k;
-    return list;
+    return out;
   }
   /** ψ on a coarser grid → norm, ⟨z⟩, σ_z, ⟨r⟩ */
   function stats(t, stride = 2) {

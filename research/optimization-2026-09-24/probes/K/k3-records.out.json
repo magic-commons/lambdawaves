@@ -1,0 +1,17 @@
+{
+ "compared": 463400,
+ "differ": 0,
+ "lenDiffer": 0,
+ "modesPerCase": [
+  126,
+  256
+ ],
+ "msPerReconstruct": {
+  "base": 0.0639,
+  "built": 0.012
+ },
+ "heapBytesPerCall": {
+  "base": 178224,
+  "built": 72
+ }
+}

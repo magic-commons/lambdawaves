@@ -610,7 +610,7 @@ export function packModes(modes) {
     if (T.phase) { cre = re * T.phase.re - im * T.phase.im; cim = re * T.phase.im + im * T.phase.re; }   // momentum tables carry (−i)^l
     buf[o + 4] = cre; buf[o + 5] = cim; buf[o + 6] = T.norm; buf[o + 7] = T.expo !== undefined ? T.expo : T.n + 1;
     for (let j = 0; j < 6; j++) { buf[o + 8 + j] = T.lag[j]; buf[o + 16 + j] = T.leg[j]; }
-    const cc = center || [0, 0, 0]; buf[o + 24] = cc[0]; buf[o + 25] = cc[1]; buf[o + 26] = cc[2]; buf[o + 27] = modes[i].group || 0;
+    const cc = center || ORIGIN; buf[o + 24] = cc[0]; buf[o + 25] = cc[1]; buf[o + 26] = cc[2]; buf[o + 27] = modes[i].group || 0;
   }
   return { buf, count };
 }
