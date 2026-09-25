@@ -1,0 +1,169 @@
+{
+ "out": {
+  "objectIs": {
+   "n3000": {
+    "identical": true,
+    "bad": [],
+    "poles": 6,
+    "certified": false,
+    "bound": null,
+    "workerMs": 46.9,
+    "localMainThreadMs": 56.2
+   },
+   "n12000": {
+    "identical": true,
+    "bad": [],
+    "poles": 6,
+    "certified": false,
+    "bound": null,
+    "workerMs": 63.7,
+    "localMainThreadMs": 60.2
+   },
+   "refusal": {
+    "worker": "response-fit: dt > 0 and a non-zero kappa are required",
+    "local": "response-fit: dt > 0 and a non-zero kappa are required",
+    "same": true,
+    "noErrorKey": true
+   }
+  },
+  "cardFitSame": true,
+  "cardFitWindow": [
+   3000,
+   3000
+  ],
+  "early": {
+   "A": {
+    "stepsPerSec": 550,
+    "traceSamples": 4401,
+    "fitWindow": 4400,
+    "fitted": true,
+    "rafMedian": 33.2,
+    "rafMax": 100.6,
+    "rafOver100": 1,
+    "worstStallMs": 55.7
+   },
+   "B": {
+    "stepsPerSec": 467,
+    "traceSamples": 3741,
+    "fitWindow": 3740,
+    "fitted": true,
+    "rafMedian": 49.2,
+    "rafMax": 83.5,
+    "rafOver100": 0,
+    "worstStallMs": 32.9
+   }
+  },
+  "later": {
+   "A": {
+    "stepsPerSec": 27,
+    "traceSamples": 124621,
+    "fitWindow": 30000,
+    "fitted": true,
+    "rafMedian": 17.1,
+    "rafMax": 149.8,
+    "rafOver100": 7,
+    "worstStallMs": 124.7,
+    "growMs": 9368
+   },
+   "B": {
+    "stepsPerSec": 335,
+    "traceSamples": 126421,
+    "fitWindow": 30000,
+    "fitted": true,
+    "rafMedian": 33.2,
+    "rafMax": 133.2,
+    "rafOver100": 2,
+    "worstStallMs": 19.3,
+    "growMs": 9905
+   }
+  },
+  "errs": [
+   [],
+   []
+  ]
+ },
+ "A": {
+  "cardFit": {
+   "fit": "{\"poles\":[{\"omega\":0.48310139157652926,\"amplitude\":0,\"bound\":null,\"rawOmega\":0.48310139157652926,\"bias\":0},{\"omega\":0.556017951655619,\"amplitude\":0,\"bound\":null,\"rawOmega\":0.556017951655619,\"bias\":0},{\"omega\":0.612259624090393,\"amplitude\":0.005036005159619145,\"bound\":null,\"rawOmega\":0.612259624090393,\"bias\":0},{\"omega\":0.7022053816480113,\"amplitude\":0.054530401365537405,\"bound\":null,\"rawOmega\":0.7022053816480113,\"bias\":0},{\"omega\":0.8049228411155475,\"amplitude\":1.9923864182961508,\"bound\":null,\"rawOmega\":0.8049228411155475,\"bias\":0},{\"omega\":1.0465723368508335,\"amplitude\":0.013914704133412177,\"bound\":null,\"rawOmega\":1.0465723368508335,\"bias\":0}],\"certified\":false,\"bound\":null,\"epsilon\":4.317305323782406,\"sigma\":0,\"refusal\":\"response-fit: the certificate's precondition fails — ε = 4.317e+0 > σ²/(8 L_J) = 0.000e+0; lengthen the trace\",\"raw\":[{\"omega\":0.8049228411155475,\"height\":9.801343042027398,\"imAlpha\":19.125365322957453},{\"omega\":1.2549975960498188,\"height\":0.8928453642809847,\"imAlpha\":1.1175125251991858}]}",
+   "window": 3000,
+   "steps": 3000
+  },
+  "early": {
+   "stepsPerSec": 550,
+   "traceSamples": 4401,
+   "fitWindow": 4400,
+   "fitted": true,
+   "rafMedian": 33.2,
+   "rafMax": 100.6,
+   "rafOver100": 1,
+   "worstStallMs": 55.7
+  },
+  "later": {
+   "stepsPerSec": 27,
+   "traceSamples": 124621,
+   "fitWindow": 30000,
+   "fitted": true,
+   "rafMedian": 17.1,
+   "rafMax": 149.8,
+   "rafOver100": 7,
+   "worstStallMs": 124.7,
+   "growMs": 9368
+  },
+  "errs": []
+ },
+ "B": {
+  "objectIs": {
+   "n3000": {
+    "identical": true,
+    "bad": [],
+    "poles": 6,
+    "certified": false,
+    "bound": null,
+    "workerMs": 46.9,
+    "localMainThreadMs": 56.2
+   },
+   "n12000": {
+    "identical": true,
+    "bad": [],
+    "poles": 6,
+    "certified": false,
+    "bound": null,
+    "workerMs": 63.7,
+    "localMainThreadMs": 60.2
+   },
+   "refusal": {
+    "worker": "response-fit: dt > 0 and a non-zero kappa are required",
+    "local": "response-fit: dt > 0 and a non-zero kappa are required",
+    "same": true,
+    "noErrorKey": true
+   }
+  },
+  "cardFit": {
+   "fit": "{\"poles\":[{\"omega\":0.48310139157652926,\"amplitude\":0,\"bound\":null,\"rawOmega\":0.48310139157652926,\"bias\":0},{\"omega\":0.556017951655619,\"amplitude\":0,\"bound\":null,\"rawOmega\":0.556017951655619,\"bias\":0},{\"omega\":0.612259624090393,\"amplitude\":0.005036005159619145,\"bound\":null,\"rawOmega\":0.612259624090393,\"bias\":0},{\"omega\":0.7022053816480113,\"amplitude\":0.054530401365537405,\"bound\":null,\"rawOmega\":0.7022053816480113,\"bias\":0},{\"omega\":0.8049228411155475,\"amplitude\":1.9923864182961508,\"bound\":null,\"rawOmega\":0.8049228411155475,\"bias\":0},{\"omega\":1.0465723368508335,\"amplitude\":0.013914704133412177,\"bound\":null,\"rawOmega\":1.0465723368508335,\"bias\":0}],\"certified\":false,\"bound\":null,\"epsilon\":4.317305323782406,\"sigma\":0,\"refusal\":\"response-fit: the certificate's precondition fails — ε = 4.317e+0 > σ²/(8 L_J) = 0.000e+0; lengthen the trace\",\"raw\":[{\"omega\":0.8049228411155475,\"height\":9.801343042027398,\"imAlpha\":19.125365322957453},{\"omega\":1.2549975960498188,\"height\":0.8928453642809847,\"imAlpha\":1.1175125251991858}]}",
+   "window": 3000,
+   "steps": 3000
+  },
+  "early": {
+   "stepsPerSec": 467,
+   "traceSamples": 3741,
+   "fitWindow": 3740,
+   "fitted": true,
+   "rafMedian": 49.2,
+   "rafMax": 83.5,
+   "rafOver100": 0,
+   "worstStallMs": 32.9
+  },
+  "later": {
+   "stepsPerSec": 335,
+   "traceSamples": 126421,
+   "fitWindow": 30000,
+   "fitted": true,
+   "rafMedian": 33.2,
+   "rafMax": 133.2,
+   "rafOver100": 2,
+   "worstStallMs": 19.3,
+   "growMs": 9905
+  },
+  "errs": []
+ }
+}

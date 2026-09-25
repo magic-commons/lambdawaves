@@ -312,37 +312,54 @@ export function createChem(host, api) {
   }
   /** the fit's own copy of the trace, capped at its window; the worker keeps the authoritative one */
   function append(tr) { if (!tr || !rt) return; for (let i = 0; i < tr.length && rt.trace.length < FIT_CAP; i++) rt.trace.push(tr[i]); }
-  /** the transform is the worker's (it holds the trace); throttled to ~2 Hz, one in flight */
+  /** the transform is the worker's (it holds the trace); throttled to ~2 Hz, one in flight.
+   *  2026-09-24 · ONE IN FLIGHT, AND NO FASTER THAN IT COSTS (optimization LB5, AUDIT-F F4).  The transform covers the
+   *  whole accumulated trace and shares the worker's one queue with chem.rt.run, so once it cost more than its 500 ms
+   *  cadence the queue alternated spectrum / run and the moving field got one batch per spectrum (557 → 27 steps/s at
+   *  125 k samples).  A request now waits for the last one to land, and the cadence is max(500 ms, 4 × the last round
+   *  trip) — the reader law's own rule.  Every spectrum shown is still absorb.js of the whole trace; a forced request
+   *  (a KICK AXIS change, the end of a scripted run) still posts at once. */
+  let specBusy = 0, specRtt = 0;
   function requestSpectrum(force) {
     if (!sol || !rt || (rt.samples || 0) < 16) return;
     const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-    if (!force && nowMs - lastSpec < 500) return;
+    if (!force && (specBusy || nowMs - lastSpec < Math.max(500, 4 * specRtt))) return;
     lastSpec = nowMs;
     const seq = ++specTask, tau = Math.max(10, (rt.samples || rt.trace.length) * dt / 12);
+    specBusy = seq;
     call({ op: 'chem.rt.spectrum', dt, kappa, tau, wMin: 5e-4, wMax: W_MAX }).then((r) => {
+      if (specBusy === seq) { specBusy = 0; specRtt = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - nowMs; }
       if (seq !== specTask || !r || r.error || !r.omega) return;
       spec = { omega: r.omega, S: r.S, ImAlpha: r.ImAlpha, peaks: r.peaks || [], tau };
       refit(); paint();
-    }).catch(() => {});
+    }).catch(() => { if (specBusy === seq) specBusy = 0; });
   }
-  /* THE POLES ARE FITTED, NOT PICKED (decision 4).  The fit is the one piece of maths on this thread: R ≈ 1550
-     grid points over a handful of poles, throttled to 2 s, and it is the only road to the certificate. */
+  /* THE POLES ARE FITTED, NOT PICKED (decision 4).  R ≈ 1550 grid points over a handful of poles, throttled to 2 s, and
+     the only road to the certificate.  2026-09-24 · IN THE CHEM WORKER (optimization LB5, AUDIT-F F4): it cost the frame
+     thread 125–153 ms every 2 s on a long run.  The card sends the window it has always fitted — a copy of its own
+     ≤ FIT_CAP samples — with the same options, so the poles and the certificate are the same doubles (mathworker.js
+     chemRtFit); one fit at a time; an answer for a run the card has since left is dropped; a browser with no Worker fits
+     here, as before. */
+  let fitBusy = false;
+  const fitWire = (F) => ({ poles: F.poles, certified: !!F.certified(CERT), bound: F.bound, epsilon: F.epsilon, sigma: F.sigma,
+    refusal: F.refusal ? F.refusal(CERT) : null, raw: F.raw });
   function refit() {
     const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-    if (!spec || !rt || rt.trace.length < 400 || nowMs - lastFit < 2000) return;
+    if (fitBusy || !spec || !rt || rt.trace.length < 400 || nowMs - lastFit < 2000) return;
     lastFit = nowMs;
-    import('./response-fit.js').then(({ fitPoles }) => {
-      if (!spec || !rt) return;
-      const init = bright().filter((k) => k.omega > 0.05 && k.omega < W_MAX).slice(0, 6).map((k) => k.omega).sort((a, b) => a - b);
-      if (!init.length) return;
-      try {
-        const F = fitPoles(Float64Array.from(rt.trace), { dt, kappa, tau: spec.tau, init, wMin: 0.05, wMax: W_MAX });
-        fit = { poles: F.poles, certified: !!F.certified(CERT), bound: F.bound, epsilon: F.epsilon, sigma: F.sigma,
-          refusal: F.refusal ? F.refusal(CERT) : null, raw: F.raw };
-        fitErr = null;
-      } catch (e) { fit = null; fitErr = String(e && e.message || e); }
+    const init = bright().filter((k) => k.omega > 0.05 && k.omega < W_MAX).slice(0, 6).map((k) => k.omega).sort((a, b) => a - b);
+    if (!init.length) return;
+    const run = rt, trace = Float64Array.from(rt.trace), opts = { dt, kappa, tau: spec.tau, init, wMin: 0.05, wMax: W_MAX };
+    const local = () => import('./response-fit.js').then(({ fitPoles }) => {
+      try { return fitWire(fitPoles(Float64Array.from(trace), opts)); } catch (e) { return { fitError: String(e && e.message || e) }; } });
+    fitBusy = true;
+    call({ op: 'chem.rt.fit', trace, cert: CERT, ...opts }, local).then((r) => {
+      fitBusy = false;
+      if (!spec || rt !== run || !r) return;
+      if (r.fitError !== undefined) { fit = null; fitErr = r.fitError; }
+      else { fit = { poles: r.poles, certified: r.certified, bound: r.bound, epsilon: r.epsilon, sigma: r.sigma, refusal: r.refusal, raw: r.raw }; fitErr = null; }
       paint();
-    }).catch(() => {});
+    }).catch(() => { fitBusy = false; });
   }
 
   /* ── the field: THIS WINDOW IS A PRODUCER, lab/molecular-session.js is the owner ───────────────────────────────
