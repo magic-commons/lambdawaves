@@ -62,8 +62,8 @@ export async function open(url, opts = {}) {
   const gd = await drv.startDriver();
   let s;
   try {
-    s = await drv.newSession({ headless: true,
-      width: opts.width || 1300, height: opts.height || 850 });
+    s = await drv.newSession({ headless: opts.headless === false ? false : true,   // a benchmark may ask for a HEADED Firefox on the session display (the real compositor)
+      width: opts.width || 1300, height: opts.height || 850, prefs: opts.prefs });   // prefs are ADDITIVE (drv.mjs); a benchmark passes privacy.reduceTimerPrecision:false
     await drv.setTO(s, { script: opts.script || 600000, pageLoad: 120000 });
     await drv.go(s, url);
   } catch (error) {
