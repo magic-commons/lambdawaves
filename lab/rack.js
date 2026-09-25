@@ -1176,7 +1176,9 @@ export async function boot(dom) {
           /* a refused play ("nothing-to-run": no route and no open window) is retried once a second, not
              every frame — so a source routed later joins a running transport within a second */
           if (r && r.ok === false) { linkFollowed = null; linkRetryAt = nowMs + 1000; }
-          if (modView) modView.sync();
+          else if (modView) modView.sync();   /* LA2: a REFUSED play changed neither the model nor `playing` (host.js refuses
+                                                 before it touches either), so its repaint was the same window again —
+                                                 a whole closed window, once a second, while playing (AUDIT-B FB3) */
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the

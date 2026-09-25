@@ -1,0 +1,25 @@
+{
+ "shown": {
+  "scene": "UI shown, window closed",
+  "open": false,
+  "modPlaying": false,
+  "sources": 2,
+  "forcedPaints": 0,
+  "paintCalls": 0,
+  "paintMs": 0
+ },
+ "hidden": {
+  "scene": "UI hidden, window closed",
+  "open": false,
+  "modPlaying": false,
+  "sources": 2,
+  "forcedPaints": 0,
+  "paintCalls": 0,
+  "paintMs": 0
+ },
+ "retry": {
+  "playingBeforeRoute": false,
+  "joinedMs": 908
+ },
+ "errs": []
+}
