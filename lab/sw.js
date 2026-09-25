@@ -168,7 +168,7 @@ const PRECACHE = [
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],
   ['./rack-menus.js',                                               'adecc705a800'],
-  ['./rack.js',                                                     '0b3d99c10a4f'],
+  ['./rack.js',                                                     '1ce6e7d08565'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '655a6aef068a'],
   ['./registerview.js',                                             '6cd43624dafa'],
@@ -227,6 +227,7 @@ const PRECACHE = [
   ['./well.js',                                                     'fb6041eac116'],
   ['./wigner.js',                                                   '370c23027ea3'],
   ['./wignerview.js',                                               'e0a32cb0f767'],
+  ['./window-chrome.js',                                            '5821ff3f2ac9'],
   ['./worker-pool.js',                                              '393cc6e1cee2'],
 ];
 

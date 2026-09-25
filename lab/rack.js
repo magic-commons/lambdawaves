@@ -79,6 +79,7 @@ import { createSwClient } from './sw-client.js';        // N7 seam 5: the instal
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
 import { installRackMenus } from './rack-menus.js';     // N7 seam 7: the + and ☆ lists, out of boot()
 import { installMenubar } from './menubar.js';           // N7 seam 8: the logo's bar, out of boot() (its MENUS table stays)
+import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
@@ -3875,29 +3876,8 @@ export async function boot(dom) {
       layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
       layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
     }
-    /* LEAN (2026-09-18, the commissioner: "hide all of those visible texts and info").  Any window that carries model
-       notes or readouts gets one header button, Aa: pressed, the window keeps its controls, ladders and plots and drops
-       its paragraphs and readout tiles; the header's status line stays, so the window still says what it is doing.
-       Remembered per window in this browser.  A presentation choice only — nothing is computed differently. */
-    const LEAN_KEY = 'lw.lean.v1';
-    let leanSet = new Set(), firstLean = true; try { const saved = localStorage.getItem(LEAN_KEY); firstLean = saved === null; leanSet = new Set(JSON.parse(saved || '[]')); } catch (e) { leanSet = new Set(); }
-    const setLean = (d, on) => { d.classList.toggle('lean', on); const b = d.querySelector('.dev-lean'); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); }
-      if (on) leanSet.add(d.dataset.id); else leanSet.delete(d.dataset.id); try { localStorage.setItem(LEAN_KEY, JSON.stringify([...leanSet])); } catch (e) { /* private mode: the choice lasts the session */ }
-      schedule(TIER.PRESENT); };
-    for (const d of document.querySelectorAll('.dev')) {
-      if (!d.querySelector('.dev-body .note, .dev-body .ro')) continue;
-      const util = d.querySelector('.dev-util'); if (!util) continue;
-      const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts — the controls, ladders and plots stay';
-      b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
-      b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
-      if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);
-    }
-    /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
-    for (const d of document.querySelectorAll('.dev')) {
-      const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
-      if (kind === 'info' || d.dataset.id === 'field') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
-      if ((kind === 'control' || kind === 'other') && !d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
-    }
+    /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
+    installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
     document.addEventListener('devclose', () => saveSettings());
     /* the + (closed windows) and ☆ (favourite layouts) lists under the hide button: lab/rack-menus.js (N7 seam 7) */
     installRackMenus({ layout, readSettings, winHint, LAYOUT_SLOTS });
