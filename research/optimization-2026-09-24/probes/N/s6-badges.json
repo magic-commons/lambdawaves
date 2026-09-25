@@ -1,0 +1,25 @@
+{
+ "snapshots": 8,
+ "differ": 0,
+ "first": [],
+ "sample": {
+  "tag": "boot",
+  "badges": [
+   "badge exact|false|false|STATE · EVOLUTION · SHADOW",
+   "badge numerical|false|false|FIELD 64³ · ±16 a₀ · f16",
+   "badge warn|true|false|",
+   "badge warn|true|false|",
+   "badge warn|true||"
+  ],
+  "say": "1s₊0 + 2p₊0; arg ψ — phase, drawn as cloud; 64³ grid over ±16 a₀; 2 of 2 modes, 100 % of the norm; HYDROGEN  −½∇² − 1/r; paused at t = 0.00 a.u.",
+  "fieldRo": "BOW · escaped / momentum—no impulse yet"
+ },
+ "errors": [
+  {
+   "errors": []
+  },
+  {
+   "errors": []
+  }
+ ]
+}
