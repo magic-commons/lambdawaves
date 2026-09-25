@@ -21,6 +21,7 @@ try {
   out.waited = w;
   out.toast = await g.ev(`const t = document.querySelector('[data-device-report]'); return t ? { text: t.textContent, buttons: [...t.querySelectorAll('button')].map((b) => b.textContent) } : null;`);
   out.report = await g.ev('return __LW.lastReport;');
+  out.reportJson = await g.ev('return JSON.stringify(__LW.lastReport);');   // the POST body's exact bytes (WebDriver turns undefined into null)
   out.errs = await g.ev('return (window.__e || []).map(String).slice(0, 20)');
 } catch (e) { out.error = String(e && e.stack || e); console.error(e); }
 finally { await g.close(); }
@@ -34,6 +35,7 @@ try {
 } catch (e) { out.error2 = String(e && e.stack || e); }
 finally { await g2.close(); }
 const landed = list().filter((f) => !before.has(f));
-out.landed = landed.map((f) => { const p = path.join(DIR, f); return { file: p, bytes: fs.statSync(p).size, same: fs.readFileSync(p, 'utf8') === JSON.stringify(out.report) }; });
+out.landed = landed.map((f) => { const p = path.join(DIR, f); return { file: p, bytes: fs.statSync(p).size, same: fs.readFileSync(p, 'utf8') === out.reportJson }; });
+delete out.reportJson;
 fs.writeFileSync(OUT, JSON.stringify(out, null, 1));
 console.log(JSON.stringify({ toast: out.toast, landed: out.landed, restored: out.report && out.report.restored, errors: out.report && out.report.errors, errs: out.errs, noFlag: out.noFlag, error: out.error }, null, 1));
