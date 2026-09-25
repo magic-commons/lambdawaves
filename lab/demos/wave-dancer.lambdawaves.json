@@ -162,14 +162,6 @@
     "cornerSide": "right",
     "finish": "lit"
    },
-   "quality": {
-    "res": 128,
-    "steps": 240,
-    "scale": 1,
-    "auto": false,
-    "autoScale": 1,
-    "minScale": 0.35
-   },
    "domain": {
     "auto": true,
     "half": 46

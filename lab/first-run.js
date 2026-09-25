@@ -31,3 +31,29 @@ export function bootMaterial(s, mobile) {
   const d = firstRunMaterial(mobile);
   return { card: storedCard(s, d.card), frost: storedFrost(s, d.frost) };
 }
+
+/* ── THE QUALITY (PACE P2, 2026-09-25 — the commissioner: "don't drop below 50") ─────────────────────────────────────────
+ * The GRID segment's pairing (rack.js ui.gridSeg): each grid marches its own steps at its own render scale.  A TABLET's first
+ * run is the pairing's 64³ (110 steps × 0.75 — 11 ms a frame on the M5 iPad against 28 ms at the desktop's 160 × 1, the
+ * device report of 2026-09-25); a desktop's is 64³ × 160 × 1 exactly as before (AUDIT-A FA6 is the desktop's call); a phone
+ * keeps its own crossing (rack.js enterPhone: 64³ × 110 × 0.75, remembered and given back), so its seed is the desktop's.
+ * A saved quality (a project, a link, the quick save) is applied WITHIN the device's ceiling — a tablet marches at most 96³,
+ * a phone 64³, and a grid brought down takes that grid's pairing — and never carries AUTO SCALE: that switch is the
+ * device's (the settings key), so a file written on a desktop cannot turn it off on an iPad. */
+export const GRID_PAIRING = Object.freeze({ 64: Object.freeze({ steps: 110, scale: 0.75 }), 96: Object.freeze({ steps: 160, scale: 1 }), 128: Object.freeze({ steps: 240, scale: 1 }) });
+export const FIRST_RUN_QUALITY = Object.freeze({
+  desktop: Object.freeze({ res: 64, steps: 160, scale: 1 }),
+  tablet: Object.freeze({ res: 64, steps: 110, scale: 0.75 }),
+});
+export const QUALITY_CEILING = Object.freeze({ phone: 64, tablet: 96 });
+/** the grid, steps and scale a browser starts with on this device ('desktop' | 'tablet' | 'phone') */
+export function firstRunQuality(device) { return { ...(device === 'tablet' ? FIRST_RUN_QUALITY.tablet : FIRST_RUN_QUALITY.desktop) }; }
+/** a saved quality as this device applies it: every key but `auto`, the grid held to the device's ceiling (with that grid's
+ *  pairing when it had to come down); a desktop takes the grid as saved */
+export function deviceQuality(saved, device) {
+  const q = { ...(saved && typeof saved === 'object' ? saved : {}) };
+  delete q.auto;
+  const cap = QUALITY_CEILING[device];
+  if (cap && Number.isFinite(q.res) && q.res > cap) Object.assign(q, { res: cap }, GRID_PAIRING[cap]);
+  return q;
+}
