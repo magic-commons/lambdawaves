@@ -3,7 +3,7 @@
 performance.mark statements, for the M1/K10 A/B timing.  The source trees are never touched.
    probes/M/lab-base-mk  <- probes/M/lab-base (91c90bc)
    probes/M/lab-mk       <- lab/ (the built tree, whatever it is when this runs)
-   python3 research/optimization-2026-09-24/probes/M/mk-marks.py
+   python3 research/optimization-2026-09-24/probes/M/mk-marks.py [<src dir> <out dir> …]
 Marks: boot-start, field-start, field-end, lw-ready (rack.js); sm-start, ci-start, ci-end, pl-end (field.js createField:
 shader modules, the compile-info awaits, the pipelines); first-present (field.js frame); gb-start, gb-adapter,
 gb-device (gpu-boot.js, built only)."""
@@ -42,6 +42,9 @@ def build(src_dir, out, built):
     for f, s in txt.items(): open(os.path.join(out, f), 'w', encoding='utf-8').write(s)
 
 
-build(M + '/lab-base', M + '/lab-base-mk', False)
-build('lab', M + '/lab-mk', True)
-print('built lab-base-mk and lab-mk')
+if len(sys.argv) > 1:                       # extra pairs: mk-marks.py <src dir> <out dir> [<src> <out> …] (built copies, with gpu-boot)
+    for i in range(1, len(sys.argv), 2): build(sys.argv[i], sys.argv[i + 1], True); print('built', sys.argv[i + 1])
+else:
+    build(M + '/lab-base', M + '/lab-base-mk', False)
+    build('lab', M + '/lab-mk', True)
+    print('built lab-base-mk and lab-mk')

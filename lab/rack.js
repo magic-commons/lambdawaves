@@ -2443,11 +2443,15 @@ export async function boot(dom) {
 
   // SLICE — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'SLICE', status: '' });
-  rack.appendChild(wSlice.root);
   const slice = createSliceView(wSlice.body, {
     lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
   });
+  /* OPTIMIZATION 2026-09-24 · M6(b): appended AFTER its view is built (still before QCD, so the rack order and
+     LW.bootOrder are unchanged).  Appended first, the plane model's construction-time paint read `cv.clientWidth` on a
+     half-built rack and forced its first full style + layout (28.6 ms); disconnected, the read answers 0 without a
+     flush, and the plane model's own ResizeObserver paints it once it is laid out. */
+  rack.appendChild(wSlice.root);
 
   // QCD — the confining side: quarkonium under a chosen potential, the flavour-independence verdict, the string
   const wQCD = device({ id: 'qcd', eyebrow: 'QCD', status: '' });

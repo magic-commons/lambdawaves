@@ -9,7 +9,7 @@ const PORT = process.env.LW_PORT || '8723';
 const M = 'research/optimization-2026-09-24/probes/M/';
 const RUNS = +(process.argv[2] || 5);
 const OUT = process.argv[3] || '/tmp/lwM-compare.json';
-const V = [['base', M + 'lab-base-mk/'], ['built', M + 'lab-mk/']];
+const V = (process.env.VARIANTS || 'base:lab-base-mk,built:lab-mk').split(',').map((s) => { const [t, d] = s.split(':'); return [t, M + d + '/']; });   // VARIANTS=tag:dir,tag:dir (the first is 'base', the second 'built')
 const prefs = { 'privacy.reduceTimerPrecision': false };
 const res = { runs: [] };
 for (let i = 0; i < RUNS; i++) for (const [tag, p] of (i % 2 ? [...V].reverse() : V)) {
