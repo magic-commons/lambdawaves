@@ -1,0 +1,142 @@
+{
+ "scen": "default",
+ "grid": 96,
+ "n": 96,
+ "count": 2,
+ "W": 1920,
+ "H": 994,
+ "steps": 160,
+ "appReadPixelsHash": "7aba2d16",
+ "replicaExact": true,
+ "pixels": {
+  "phase/cloud": {
+   "generic": "f4eb283e",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  },
+  "density/cloud": {
+   "generic": "7aba2d16",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  },
+  "real/cloud": {
+   "generic": "e5a77d1f",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  },
+  "phase/grain": {
+   "generic": "ff29864a",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  },
+  "density/dust": {
+   "generic": "2a52d4fc",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  },
+  "phase/bands": {
+   "generic": "58142ec8",
+   "v1": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v2": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   },
+   "v3": {
+    "bytesDiffering": 0,
+    "maxLevelDiff": 0
+   }
+  }
+ },
+ "timing": {
+  "phase/cloud": {
+   "gen": 4.934,
+   "v1": 3.916,
+   "v2": 3.264,
+   "v3": 3.146
+  },
+  "density/cloud": {
+   "gen": 3.659,
+   "v1": 2.715,
+   "v2": 2.142,
+   "v3": 1.9
+  },
+  "real/cloud": {
+   "gen": 3.453,
+   "v1": 2.436,
+   "v2": 1.943,
+   "v3": 1.83
+  },
+  "phase/grain": {
+   "gen": 5.323,
+   "v1": 4.396,
+   "v2": 3.917,
+   "v3": 3.786
+  },
+  "density/dust": {
+   "gen": 4.382,
+   "v1": 3.395,
+   "v2": 2.924,
+   "v3": 2.61
+  },
+  "phase/bands": {
+   "gen": 5.299,
+   "v1": 4.224,
+   "v2": 3.535,
+   "v3": 3.395
+  }
+ },
+ "v2CompileMs": 2.9
+}

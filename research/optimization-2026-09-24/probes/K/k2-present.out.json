@@ -1,0 +1,40 @@
+{
+ "canvas": [
+  1920,
+  994
+ ],
+ "steps": 160,
+ "res": 96,
+ "present": {
+  "phase/cloud": {
+   "genericMs": 4.8684,
+   "specialisedMs": 3.2451,
+   "saved": 0.333
+  },
+  "density/cloud": {
+   "genericMs": 3.6716,
+   "specialisedMs": 2.101,
+   "saved": 0.428
+  },
+  "real/cloud": {
+   "genericMs": 3.5229,
+   "specialisedMs": 1.8999,
+   "saved": 0.461
+  },
+  "phase/grain": {
+   "genericMs": 5.4561,
+   "specialisedMs": 3.9144,
+   "saved": 0.283
+  },
+  "density/dust": {
+   "genericMs": 4.3061,
+   "specialisedMs": 2.9248,
+   "saved": 0.321
+  },
+  "phase/bands": {
+   "genericMs": 5.4502,
+   "specialisedMs": 3.5232,
+   "saved": 0.354
+  }
+ }
+}

@@ -13,7 +13,6 @@
  */
 import { modeTable } from './hydrogen.js';
 import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
-import { gpuBoot, requestGpu } from './gpu-boot.js';
 
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
@@ -32,7 +31,6 @@ struct Params { n: u32, count: u32, slot: u32, space: u32, half: f32, p1: f32, p
 @group(0) @binding(2) var outTex: texture_storage_3d<rgba16float, write>;
 @group(0) @binding(3) var<storage, read_write> stats: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> radial: array<f32>;   // space 6: tabulated radial functions, 256 samples per (n_r, l) row (QUARKONIUM)
-@group(0) @binding(5) var<storage, read> gtab: array<vec2<f32>>;   // space 3, OPT-IN (K7): the axial gas's Hermite-256 radial table, (j_l(z u), h·z·j_l′(z u)) per row
 var<workgroup> wmax: atomic<u32>;
 
 fn ipow(x: f32, k: u32) -> f32 { var r = 1.0; for (var i = 0u; i < k; i++) { r *= x; } return r; }
@@ -69,16 +67,13 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
     let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);
     var psi = vec2<f32>(0.0, 0.0);
     var psiB = vec2<f32>(0.0, 0.0);                          // space 5: a second COHERENT group; the two are summed incoherently
-    /* THE MEMOS (optimization 2026-09-24, K1 · AUDIT-A FA2): every mode of the gas (256), the register (91) and the box
-       (27) shares ONE centre, and 16 gas modes share each l.  So the geometry is computed once per centre, P_l(cos θ)
-       once per (centre, l) and e^{imφ} once per (centre, m) — the SAME expressions on the SAME inputs, skipped only
-       when repeated (every key is exact equality of a pure function's input; every memo resets on a new centre), so
-       every texel is bit-identical (the DIGEST LOCK, both browsers).  H₂'s alternating centres simply recompute. */
-    var gC = vec3<f32>(0.0); var gq = vec3<f32>(0.0); var gr = 0.0; var gct = 1.0; var gst = 0.0; var gphi = 0.0; var gL = 999u; var gP = 0.0; var gMM = -1e30; var gE = vec2<f32>(1.0, 0.0);
     for (var a = 0u; a < P.count; a++) {
       let M = modes[a];
-      if (a == 0u || any(M.ctr.xyz != gC)) { gC = M.ctr.xyz; gq = pos - gC; gr = length(gq); gct = select(gq.z / max(gr, 1e-12), 1.0, gr < 1e-9); gst = sqrt(max(0.0, 1.0 - gct * gct)); gphi = atan2(gq.y, gq.x); gL = 999u; gMM = -1e30; }
-      let q = gq; let r = gr; let ct = gct; let st = gst; let phi = gphi;   // geometry relative to the mode's centre
+      let q = pos - M.ctr.xyz;                               // geometry relative to the mode's centre
+      let r = length(q);
+      let ct = select(q.z / max(r, 1e-12), 1.0, r < 1e-9);
+      let st = sqrt(max(0.0, 1.0 - ct * ct));
+      let phi = atan2(q.y, q.x);
       let n = M.nlm.x; let l = u32(M.nlm.y); let am = u32(M.nlm.z); let m = M.nlm.w;
       let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * M.leg1.y))));
       var f = 0.0;
@@ -95,15 +90,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       } else if (P.space == 3u) {
         /* THE WELL  ψ = norm · j_l(k r) · Y inside r < a, 0 outside: lag0 = (k, a, …); the wall is the envelope */
         let kk = M.lag0.x; let aa = M.lag0.y;
-        var Dw = D; if (M.lag0.z > 0.5) { if (l != gL) { gL = l; gP = legP(l, ct); } Dw = gP; }   // lag0.z = 1: the angular part by recurrence (the axial gas)
-        if (r < aa) {                                          // a BRANCH, not select(): select ran the recurrence outside the wall too
-          if (M.lag0.w > 0.5) {                                // K7 (opt-in, lag0.w = row + 1): cubic Hermite on the gas table, u = r/a
-            let xq = clamp(r / aa, 0.0, 1.0) * 255.0; let i0 = min(u32(floor(xq)), 254u); let s = xq - f32(i0); let rb = (u32(M.lag0.w) - 1u) * 256u;
-            let p0 = gtab[rb + i0]; let p1 = gtab[rb + i0 + 1u]; let s2 = s * s; let s3 = s2 * s;
-            let R = (2.0 * s3 - 3.0 * s2 + 1.0) * p0.x + (s3 - 2.0 * s2 + s) * p0.y + (3.0 * s2 - 2.0 * s3) * p1.x + (s3 - s2) * p1.y;
-            f = M.c.z * R * ipow(st, am) * Dw;
-          } else { f = M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw; }   // lag0.w = 0, every record by default: the recurrence
-        }
+        let Dw = select(D, legP(l, ct), M.lag0.z > 0.5);        // lag0.z = 1: the angular part by recurrence (the axial gas)
+        f = select(0.0, M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw, r < aa);
       } else if (P.space == 6u) {
         /* QUARKONIUM (Cornell, NUMERICAL): R(r) read from its tabulated row, linear interpolation; lag0 = (row, 1/r_tab, r_tab) */
         let row = u32(M.lag0.x); let x = clamp(r * M.lag0.y, 0.0, 1.0) * 255.0;
@@ -113,11 +101,9 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       } else if (P.space == 2u) {
         /* OSCILLATOR  ψ = norm · r^l L(t) e^{−t/2} · Y,  t = r²  (L = the half-integer Laguerre; the same record serves
            momentum space, whose (−i)^N phase is folded into c on the CPU) */
-        /* r is re-derived here, in the pre-memo form, on purpose: the driver folds length(q)² back to dot(q, q) only when
-           it can see the length, and through the memo it cannot — 194 texels of the 96³ oscillator moved (probes/K/k1-osc) */
-        let qo = pos - M.ctr.xyz; let ro = length(qo); let t = ro * ro;
+        let t = r * r;
         let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
-        f = M.c.z * ipow(ro, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
+        f = M.c.z * ipow(r, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
       } else {
         /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
            the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */
@@ -126,7 +112,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         f = M.c.z * ipow(q, l) * L / pow(1.0 + t, M.c.w) * ipow(st, am) * D;     // c.w = the exponent n+1 (kept integer when the ρ-scale is n/Z)
       }
       let mm = select(m, 0.0, P.space == 4u);                // the pair branch keeps ζ in the m slot: no azimuthal phase
-      if (mm != gMM) { gMM = mm; gE = vec2<f32>(cos(mm * phi), sin(mm * phi)); } let e = gE;
+      let e = vec2<f32>(cos(mm * phi), sin(mm * phi));
       let ce = vec2<f32>(M.c.x * e.x - M.c.y * e.y, M.c.x * e.y + M.c.y * e.x);
       if (P.space == 5u && M.ctr.w > 0.5) { psiB += f * ce; } else { psi += f * ce; }
     }
@@ -498,33 +484,6 @@ fn bayer8(px: vec2<f32>) -> f32 {
   return vec4<f32>(o, 1.0);
 }`;
 
-/* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
- * The present pass is ALU-bound, and RENDER_WGSL carries 6 views × 8 styles × finish × palette × invert × bow as uniform
- * branches inside a 110–240-step march that the compiler cannot drop.  A copy with the VIEW and the STYLE folded to
- * constants, the bow's phase line deleted and the glass-FINISH block deleted renders the same bytes 30–40 % faster
- * (probes/K/k2-variants: FF phase/cloud 4.93 → 3.26 ms at 96³, 0 bytes differ on all 24 (view, style) of the set in
- * Firefox and Chromium).  THE KEY decides when that copy is the same program: style ∈ {cloud, grain, bands, dust} (the
- * lit and additive styles stay generic: their compiler-dependent last bits), view 0…5, the bow OFF (writeView's p4.w = 0,
- * so the deleted line was a no-op) and finish ≠ glass (p6.w ∉ (½, 1½), so the deleted block was a no-op); palette,
- * invert, matte and dither stay runtime.  A copy is compiled on first use with createRenderPipelineAsync — the generic
- * pipeline draws until it resolves (the same pixels) — and a rejected compile marks its key failed for good. */
-const RENDER_BOW = '    if (V.p4.w > 0.5) { let ph = dot(V.p4.xyz, p); let cs = cos(ph); let sn = sin(ph); s = vec2<f32>(s.x * cs - s.y * sn, s.x * sn + s.y * cs); }';
-const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u) {
-      // A glass finish on the selected shape, including signed nodal lobes.
-      wEff *= .22;
-      if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
-    }`;
-export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
-/** RENDER_WGSL for one (view, style) of the key; throws when an anchor has moved (the key then fails: generic forever) */
-export function specRenderWGSL(view, style) {
-  const once = (src, from, to) => { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: the specialised present lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); };
-  let code = once(RENDER_WGSL, 'let mode = u32(V.p0.x);', `let mode = ${view | 0}u;`);
-  code = once(code, 'let style = u32(V.p3.x);', `let style = ${style | 0}u;`);
-  const cut = (src, from) => { const e = src.indexOf('\n', src.indexOf(from) + from.length - 1); return once(src, src.slice(src.indexOf(from), e + 1), ''); };   // the anchor through the end of its line (the bow line carries a comment)
-  code = cut(code, RENDER_BOW);
-  return cut(code, RENDER_GLASS_FINISH);
-}
-
 const LINE_WGSL = /* wgsl */`
 struct U { vp: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> U0: U;
@@ -533,15 +492,9 @@ struct U { vp: mat4x4<f32> };
    its title — the 1-px box edge at 42 % alpha was the "vertical line plaguing the devices". */
 struct Occ { n: u32, pad0: u32, pad1: u32, pad2: u32, r: array<vec4<f32>, 32> };
 @group(0) @binding(1) var<uniform> OCC: Occ;
-/* the LATTICE / DOTS ink (optimization 2026-09-24, K6): one colour per theme, so it rides here and their vertices carry
-   xyz + alpha (16 bytes, was 28) — the vertex stage hands the rasteriser the same four f32 either way */
-@group(0) @binding(2) var<uniform> INK: vec4<f32>;
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 @vertex fn vs(@location(0) p: vec3<f32>, @location(1) c: vec4<f32>) -> VSOut {
   var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; return o;
-}
-@vertex fn vsLattice(@location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
-  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.rgb, a); return o;
 }
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   for (var i = 0u; i < OCC.n; i++) {
@@ -652,7 +605,7 @@ export function packModes(modes) {
     if (T.phase) { cre = re * T.phase.re - im * T.phase.im; cim = re * T.phase.im + im * T.phase.re; }   // momentum tables carry (−i)^l
     buf[o + 4] = cre; buf[o + 5] = cim; buf[o + 6] = T.norm; buf[o + 7] = T.expo !== undefined ? T.expo : T.n + 1;
     for (let j = 0; j < 6; j++) { buf[o + 8 + j] = T.lag[j]; buf[o + 16 + j] = T.leg[j]; }
-    const cc = center || ORIGIN; buf[o + 24] = cc[0]; buf[o + 25] = cc[1]; buf[o + 26] = cc[2]; buf[o + 27] = modes[i].group || 0;
+    const cc = center || [0, 0, 0]; buf[o + 24] = cc[0]; buf[o + 25] = cc[1]; buf[o + 26] = cc[2]; buf[o + 27] = modes[i].group || 0;
   }
   return { buf, count };
 }
@@ -724,22 +677,25 @@ export function packMolecule(spec) {
 export async function createField(canvas, opts = {}) {
   const out = { ok: false, error: null, adapterInfo: null, canvas };
   if (!navigator.gpu) { out.error = 'navigator.gpu is absent — WebGPU is not enabled in this browser'; return out; }
-  /* OPTIMIZATION 2026-09-24 · M1 · THE ADAPTER AND THE DEVICE WERE ASKED FOR AT THE TOP OF <head> (lab/gpu-boot.js),
-   * in parallel with the module graph — wave 58's `requiredLimits` block moved there whole.  This field takes that
-   * early request ONCE; any later createField asks for its own device through the same function, so one field's
-   * dispose() can never destroy another's.  The three sentences a failure says are this file's, as before. */
-  const b = await (gpuBoot() || requestGpu());
-  if (b.error) { out.error = 'WebGPU device request failed: ' + (b.error && b.error.message || b.error); return out; }
-  if (!b.adapter) { out.error = 'no WebGPU adapter'; return out; }
-  const adapter = b.adapter, device = b.device;
-  out.limitsRequested = b.limitsRequested;
+  let adapter, device;
+  try {
+    adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+    if (!adapter) { out.error = 'no WebGPU adapter'; return out; }
+    /* WAVE 58 — ASK FOR THE ADAPTER'S OWN CEILING, not WebGPU's default one.  `requestDevice()` with no
+     * `requiredLimits` gives the DEFAULT limits whatever the hardware can do — maxTextureDimension2D 8192 — and
+     * that number is the largest picture lab/capture.js can ever take, on an adapter that reports 32767.  The
+     * ceiling was a line of this file and not the GPU, which capture.js' header says in as many words.
+     * A device MUST grant a limit its own adapter reported, so this cannot fail on a conforming implementation;
+     * it is still wrapped, because a device that does not come up is the whole application and a bigger PNG is
+     * not worth that trade.  `capture.limits()` READS what was granted rather than believing this comment. */
+    const want = {};
+    for (const k of ['maxTextureDimension2D', 'maxTextureDimension1D']) if (adapter.limits && adapter.limits[k]) want[k] = adapter.limits[k];
+    try { device = await adapter.requestDevice({ requiredLimits: want }); out.limitsRequested = want; }
+    catch (_) { device = await adapter.requestDevice(); out.limitsRequested = null; }
+  } catch (e) { out.error = 'WebGPU device request failed: ' + (e && e.message || e); return out; }
   try { const info = adapter.info || (adapter.requestAdapterInfo && await adapter.requestAdapterInfo()); out.adapterInfo = info ? { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description } : null; } catch (_) {}
   device.addEventListener('uncapturederror', (e) => { out.lastGpuError = String(e.error && e.error.message || e.error); if (opts.onError) opts.onError(out.lastGpuError); });
   device.lost.then((info) => { out.ok = false; out.error = 'device lost: ' + info.message; if (opts.onLost) opts.onLost(info); });
-  /* M1 · A DEVICE LOST BEFORE THIS FIELD EXISTED (while the module graph loaded) is not a field: the handler above has
-     already been queued with the loss, so it says `device lost: …` and calls onLost; this returns the method-less
-     failure object rack.js already boots with (M3), instead of configuring a canvas on a dead device. */
-  if (b.lost) return out;
 
   const format = navigator.gpu.getPreferredCanvasFormat();
   const ctx = canvas.getContext('webgpu');
@@ -800,10 +756,6 @@ export async function createField(canvas, opts = {}) {
   for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + MOL_CAPS[i], m2])]) {
     try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
   }
-  /* M1 · …AND ONE LOST DURING THE COMPILE STRETCH ABOVE.  Before this line, Firefox took the WGSL branch below (a dead
-     device reports compile errors), overwrote `device lost` with "WGSL compile error" and returned the method-less
-     object; Chromium fell through to `ok: true` on a dead device.  Both now return here, lost and saying so. */
-  if (b.lost) return out;
   if (out.shaderMessages.some((m) => m.type === 'error')) { out.error = 'WGSL compile error: ' + JSON.stringify(out.shaderMessages.filter((m) => m.type === 'error')); return out; }
   const computePipeline = device.createComputePipeline({ layout: 'auto', compute: { module: computeModule, entryPoint: 'main' } });
   const molPipelines = molModules.map((m) => device.createComputePipeline({ layout: 'auto', compute: { module: m, entryPoint: 'main' } }));
@@ -817,47 +769,15 @@ export async function createField(canvas, opts = {}) {
     { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
-  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
+  const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
-  /* makeRenderPipeline(fmt) builds the GENERIC pipeline; makeRenderPipeline(fmt, mat) SELECTS the one to draw with (K2):
-     the specialised copy when its key is ready and nothing pins the generic, else the generic.  One name for both on
-     purpose: tests/gpu-cleanup.test.mjs lifts readPixels/throughput out by source text and injects this name. */
-  const makeRenderPipeline = (fmt, mat) => mat ? pickRender(fmt, mat, fmt === format ? renderPipeline : out._rp)
-    : device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
+  const makeRenderPipeline = (fmt) => device.createRenderPipeline({ layout: renderLayout, vertex: { module: renderModule, entryPoint: 'vs' }, fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } });
   const renderPipeline = makeRenderPipeline(format);
-  const specCache = new Map();          // `${fmt}|${view}|${style}` → { pipeline, failed, promise }
-  let pinDepth = 0;                     // > 0: every draw takes the generic pipeline (render-exact, capture: an export never changes pipeline mid-run)
-  function specKey(fmt, mat) {
-    if (mat.finish === 'glass' || (mat.boost && mat.boost.on)) return null;       // writeView's p6.w = 1 / p4.w = 1: the deleted code would run
-    const v = mat.view | 0, st = mat.style | 0;                                   // exactly the words writeView writes into p0.x and p3.x
-    return v >= 0 && v <= 5 && SPEC_STYLES.includes(st) ? fmt + '|' + v + '|' + st : null;
-  }
-  function specEntry(key, fmt, v, st) {
-    let e = specCache.get(key);
-    if (e) return e;
-    e = { pipeline: null, failed: false, promise: null };
-    specCache.set(key, e);
-    try {
-      device.pushErrorScope('validation');
-      const module = device.createShaderModule({ code: specRenderWGSL(v, st) });
-      const scope = device.popErrorScope();
-      e.promise = Promise.all([scope, device.createRenderPipelineAsync({ layout: renderLayout, vertex: { module, entryPoint: 'vs' }, fragment: { module, entryPoint: 'fs', targets: [{ format: fmt }] }, primitive: { topology: 'triangle-list' } })])
-        .then(([err, pl]) => { if (err) { e.failed = true; return false; } e.pipeline = pl; return true; }, () => { e.failed = true; return false; });
-    } catch (_) { e.failed = true; e.promise = Promise.resolve(false); }
-    return e;
-  }
-  function pickRender(fmt, mat, generic) {
-    if (pinDepth > 0) return generic;
-    const key = specKey(fmt, mat);
-    return key ? specEntry(key, fmt, mat.view | 0, mat.style | 0).pipeline || generic : generic;
-  }
-  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] });
-  /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
-  const makeLinePipeline = (fmt) => ({
-    line: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
-      vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] } }),
-    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
-      vertex: { module: lineModule, entryPoint: 'vsLattice', buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] } }),
+  const makeLinePipeline = (fmt) => device.createRenderPipeline({
+    layout: lineLayout,
+    vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] },
+    fragment: { module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] },
+    primitive: { topology: 'line-list' }
   });
   const linePipeline = makeLinePipeline(format);
 
@@ -878,14 +798,10 @@ export async function createField(canvas, opts = {}) {
   const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
-  const lineVerts = 44;                                            // box 24 + axes 6 + slice 8, then the corner axis 6
-  const latticeVerts = 17 * 17 * 17 * 6;                           // the larger of the two: dots (6 per node) 29 478 · lattice 27 744
-  let latticeCount = 0; const cornerStart = 38;
+  const lineVerts = 36000;
+  let latticeStart = 38, latticeCount = 0, cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
-  const latticeBuf = device.createBuffer({ size: latticeVerts * 16, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
-  const LATTICE = new Float32Array(latticeVerts * 4);              // xyz + alpha; the ink is inkBuf's
-  const inkBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(4);
 
 
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
@@ -894,14 +810,8 @@ export async function createField(canvas, opts = {}) {
   /* the occlusion block: n + 32 rects; the corner axis is a HUD and gets the empty block */
   const OCC_BYTES = 16 + 32 * 16, occBuf = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), occNone = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const OCC = new ArrayBuffer(OCC_BYTES), OCC_U = new Uint32Array(OCC, 0, 4), OCC_F = new Float32Array(OCC, 16); let occSig = '';
-  /* THE RECTANGLES ARE KEPT IN CSS PIXELS (optimization 2026-09-24, K12 · BUG).  The block is in DEVICE pixels, and the
-     factor k = canvas.width / cssW was applied only when the rectangle list changed — but the rack reads the rectangles
-     BEFORE field.resize, so a render-scale, AUTO SCALE or DPR change (and the boot's first resize from the 300-px default
-     canvas) left the mask at the old scale until a window moved.  Now resize() re-applies the new k to the same list. */
-  const OCC_CSS = new Float64Array(32 * 4);
-  function writeOcc() { const k = canvas.width / Math.max(1, cssW), n4 = OCC_U[0] * 4; for (let i = 0; i < n4; i++) OCC_F[i] = OCC_CSS[i] * k; device.queue.writeBuffer(occBuf, 0, OCC); }
-  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}},{binding:2,resource:{buffer:inkBuf}}]});
-  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }, { binding: 2, resource: { buffer: inkBuf } }] });
+  const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}}]});
+  const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }] });
 
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
@@ -939,23 +849,15 @@ export async function createField(canvas, opts = {}) {
     const r = entries[entries.length - 1].contentRect; cssW = r.width || cssW; cssH = r.height || cssH;
   }).observe(canvas);
 
-  /* K7: binding 5 is the gas table once uploaded, a 16-byte stand-in until then (the 'auto' layout needs the binding; no
-     record reads it while every lag[3] is 0) */
-  let gasTab = null, gasTabStandIn = null;
-  function bindCompute() {
-    const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
-    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: [
-      { binding: 0, resource: { buffer: paramsBuf[i] } }, { binding: 1, resource: { buffer: modesBuf[i] } },
-      { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }, { binding: 4, resource: { buffer: radialBuf } },
-      { binding: 5, resource: { buffer: tab } }] }));
-  }
   function setResolution(n) {
     if (n === res) return;
     res = n;
     if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy();
     const mk = () => device.createTexture({ size: [n, n, n], dimension: '3d', format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC });
     psiTex = mk(); refTex = mk();
-    bindCompute();
+    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: [
+      { binding: 0, resource: { buffer: paramsBuf[i] } }, { binding: 1, resource: { buffer: modesBuf[i] } },
+      { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }, { binding: 4, resource: { buffer: radialBuf } }] }));
     renderBind = device.createBindGroup({ layout: renderBGL, entries: [
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
@@ -1057,11 +959,8 @@ export async function createField(canvas, opts = {}) {
     const axisInk = mat.axisInk === 'cmy' ? 1 : mat.axisInk === 'rgb' ? 2 : 0;
     const slice = mat.slice;
     const normal = slice && slice.normal;
-    /* the CAMERA is read only by the lattice/dots (the cut plane and the fade) and the corner axis (its screen basis);
-       the box, the axes and the slice are world geometry, so without those the camera is not part of the key (K6) */
-    const cam = (mat.frame !== false && frameMode !== 0) || (mat.axis !== false && axisMode === 1);
     changed = setLineState(i++, half) || changed;
-    for (let j = 0; j < 12; j++) changed = setLineState(i++, cam ? VIEW[j] : 0) || changed;
+    for (let j = 0; j < 12; j++) changed = setLineState(i++, VIEW[j]) || changed;
     changed = setLineState(i++, canvas.width) || changed;
     changed = setLineState(i++, canvas.height) || changed;
     changed = setLineState(i++, mat.lightUI ? 1 : 0) || changed;
@@ -1109,9 +1008,8 @@ export async function createField(canvas, opts = {}) {
       push(q(-h, -h), q(h, -h), c); push(q(h, -h), q(h, h), c); push(q(h, h), q(-h, h), c); push(q(-h, h), q(-h, -h), c);
       n += 4;
     }
-    k = cornerStart * 7; latticeCount = 0;
+    k = latticeStart * 7; latticeCount = 0;
     if (mat.frame !== false && (mat.frameMode === 'lattice' || mat.frameMode === 'dots')) {
-      const L = LATTICE; let q = 0;
       const radius = 8, spacing = h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
@@ -1119,7 +1017,6 @@ export async function createField(canvas, opts = {}) {
       const inkR = mat.lightUI ? 0.18 : 0.75;
       const inkG = mat.lightUI ? 0.22 : 0.80;
       const inkB = mat.lightUI ? 0.28 : 0.88;
-      INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
         const segCount = 13872;
@@ -1148,8 +1045,10 @@ export async function createField(canvas, opts = {}) {
           const dist = Math.max(distA, distB) * invMaxDist;
           const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
 
-          L[q++] = ax; L[q++] = ay; L[q++] = az; L[q++] = alpha;
-          L[q++] = bx; L[q++] = by; L[q++] = bz; L[q++] = alpha;
+          v[k++] = ax; v[k++] = ay; v[k++] = az;
+          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+          v[k++] = bx; v[k++] = by; v[k++] = bz;
+          v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
           latticeCount += 2;
         }
       } else {
@@ -1163,18 +1062,27 @@ export async function createField(canvas, opts = {}) {
               const dist = Math.hypot(px, py, pz) * invMaxDist;
               const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
 
-              L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py - tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py + tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz - tick; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz + tick; L[q++] = alpha;
+              v[k++] = px - tick; v[k++] = py; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px + tick; v[k++] = py; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+
+              v[k++] = px; v[k++] = py - tick; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px; v[k++] = py + tick; v[k++] = pz;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+
+              v[k++] = px; v[k++] = py; v[k++] = pz - tick;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
+              v[k++] = px; v[k++] = py; v[k++] = pz + tick;
+              v[k++] = inkR; v[k++] = inkG; v[k++] = inkB; v[k++] = alpha;
               latticeCount += 6;
             }
           }
         }
       }
     }
+    cornerStart = k / 7;
     if (mat.axis !== false && mat.axisMode === 'corner') {
       const ink = AX;
       const px = mat.cornerX !== undefined ? mat.cornerX : 0.8;
@@ -1194,7 +1102,6 @@ export async function createField(canvas, opts = {}) {
       }
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k); stats.chromeWrites++;
-    if (latticeCount) { device.queue.writeBuffer(latticeBuf, 0, LATTICE, 0, latticeCount * 4); device.queue.writeBuffer(inkBuf, 0, INK_V); }
     cachedHasSlice = n > 15;
     return cachedHasSlice;                                        // whether the slice rectangle is in the buffer (the box and the axes always are)
   }
@@ -1202,9 +1109,9 @@ export async function createField(canvas, opts = {}) {
   function drawChrome(pass, lp, mat, hasSlice, all) {
     const box = all || mat.frame !== false, axes = all || mat.axis !== false, slice = hasSlice && box;
     if (!box && !axes) return;
-    pass.setPipeline(lp.line); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
+    pass.setPipeline(lp); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
     if (box && (all || !mat.frameMode || mat.frameMode === 'box')) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
-    if (box && !all && latticeCount) { pass.setPipeline(lp.lattice); pass.setVertexBuffer(0, latticeBuf); pass.draw(latticeCount, 1, 0); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
+    if (box && !all && latticeCount) pass.draw(latticeCount,1,latticeStart);
     if (axes && (all || mat.axisMode !== 'corner')) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
     if (axes && !all && mat.axisMode === 'corner') { pass.setBindGroup(0,cornerBind); pass.draw(6,1,cornerStart); pass.setBindGroup(0,lineBind); }
     if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
@@ -1215,7 +1122,7 @@ export async function createField(canvas, opts = {}) {
     const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
     if (tw) desc.timestampWrites = tw;
     const pass = enc.beginRenderPass(desc);
-    pass.setPipeline(pickRender(format, mat, renderPipeline)); pass.setBindGroup(0, renderBind); pass.draw(3);
+    pass.setPipeline(renderPipeline); pass.setBindGroup(0, renderBind); pass.draw(3);
     drawChrome(pass, linePipeline, mat, sl);
     pass.end();
   }
@@ -1257,7 +1164,7 @@ export async function createField(canvas, opts = {}) {
     let buf;
     try {
       if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
-      const rp = makeRenderPipeline('rgba8unorm', mat), lp = out._lp;   // K2: selected synchronously — nothing awaits before the submit
+      const rp = out._rp, lp = out._lp;
       const enc = device.createCommandEncoder();
       writeView(obs, mat, w, h); const sl = writeLines(mat);
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
@@ -1372,40 +1279,31 @@ export async function createField(canvas, opts = {}) {
    * polls completion at ~100 ms): encode n frames back-to-back into an offscreen target of the
    * canvas' size, wait once for the GPU, and divide.  Returns ms per frame for
    * reconstruct+present, reconstruct only, and present only.
-   * `targetMs` (optimization 2026-09-24, K9 · AUDIT-A FA5; tools only): grow n, for each of the three roads, until ONE
-   * batch lasts at least that long — Firefox resolves completion on a ~100 ms tick, so a sub-millisecond frame needs a
-   * batch of seconds before the division means anything (2500 is the audit's rule).  Absent, n and the result are what
-   * they always were.
    */
-  async function throughput({ modes, obs, mat, n = 60, targetMs = 0 }) {
+  async function throughput({ modes, obs, mat, n = 60 }) {
     const w = canvas.width, h = canvas.height;
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT });
     try {
       if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
       const view = tex.createView();
-      const run = async (doCompute, doRender, m = n) => {
+      const run = async (doCompute, doRender) => {
         await device.queue.onSubmittedWorkDone();
         const t0 = performance.now();
         const enc = device.createCommandEncoder();
-        for (let i = 0; i < m; i++) {
+        for (let i = 0; i < n; i++) {
           if (doCompute) encodeCompute(enc, 0, modes);
           if (doRender) {
             writeView(obs, mat, w, h); const sl = writeLines(mat);
             const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-            pass.setPipeline(makeRenderPipeline('rgba8unorm', mat)); pass.setBindGroup(0, renderBind); pass.draw(3);
+            pass.setPipeline(out._rp); pass.setBindGroup(0, renderBind); pass.draw(3);
             drawChrome(pass, out._lp, mat, sl);
             pass.end();
           }
         }
         device.queue.submit([enc.finish()]);
         await device.queue.onSubmittedWorkDone();
-        return (performance.now() - t0) / m;
+        return (performance.now() - t0) / n;
       };
-      if (targetMs > 0) {                                        // each road sized on its own: the reconstruct alone is ms, not the frame's
-        const grow = async (c, r) => { for (let m = n; ; ) { const T = (await run(c, r, m)) * m; if (T >= targetMs || m >= 100000) return { m, ms: T / m }; m = T < targetMs / 6 ? m * 4 : Math.ceil(m * targetMs * 1.2 / T); } };
-        const B = await grow(true, true), C = await grow(true, false), R = await grow(false, true);
-        return { frameMs: +B.ms.toFixed(4), reconstructMs: +C.ms.toFixed(4), presentMs: +R.ms.toFixed(4), n: B.m, nReconstruct: C.m, nPresent: R.m, targetMs, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
-      }
       const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
       return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
     } finally { tex.destroy(); }
@@ -1490,8 +1388,6 @@ export async function createField(canvas, opts = {}) {
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
-    /* K2: the specialised present's ledger — compiled, compiling, failed for good, and whether an export pins the generic */
-    renderPipelines: { get: () => { let ready = 0, pending = 0, failed = 0; for (const e of specCache.values()) { if (e.pipeline) ready++; else if (e.failed) failed++; else pending++; } return { ready, pending, failed, pinned: pinDepth > 0 }; }, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
     stepCap: { get: () => stepCap, enumerable: true },
@@ -1503,30 +1399,12 @@ export async function createField(canvas, opts = {}) {
     moleculeInfo: { get: () => (molSpec ? { nAO: molPack.nAO, nShell: molPack.nShell, nPrim: molPack.nPrim,
       nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true } });
   Object.assign(out, {
-    ok: !b.lost, device, adapter, format, stats,
+    ok: true, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
-    /** K2 · THE EXPORT PIN: pinRenderPipeline(true) … (false), nested by depth — while held every draw takes the generic
-     *  pipeline, so a specialised compile that resolves mid-run can never change an export's pipeline.  Returns the depth. */
-    pinRenderPipeline(on) { pinDepth = Math.max(0, pinDepth + (on ? 1 : -1)); return pinDepth; },
-    /** K2 · compile (if needed) and await the specialised pipelines this material would use, on the canvas' format and on
-     *  the readback's rgba8unorm; resolves true when both are ready, false when the material is outside the key or a
-     *  compile failed.  For tools and gates that must measure what the screen draws (the DIGEST LOCK). */
-    renderPipelineReady(mat) {
-      const keys = [format, 'rgba8unorm'].map((f) => [f, specKey(f, mat)]);
-      if (keys.some(([, k]) => !k)) return Promise.resolve(false);
-      return Promise.all(keys.map(([f, k]) => specEntry(k, f, mat.view | 0, mat.style | 0).promise)).then((r) => r.every(Boolean));
-    },
     setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },
-    /** K7 (opt-in): upload the axial gas's Hermite table (gas.js gasRadialTable: 256 rows × 256 × vec2) once, and bind it.
-     *  Answers true when the field holds it — only then may gas records carry their rows. */
-    setGasTable(arr) {
-      if (!out.ok || !(arr instanceof Float32Array) || arr.length !== 256 * 256 * 2) return false;
-      if (!gasTab) { gasTab = device.createBuffer({ size: arr.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); device.queue.writeBuffer(gasTab, 0, arr); bindCompute(); }
-      return true;
-    },
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
     setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
@@ -1569,11 +1447,11 @@ export async function createField(canvas, opts = {}) {
     /** the windows over the stage, as [x0, y0, x1, y1] in CSS pixels of the canvas box; at most 32. Returns
      *  true when the block changed (the caller presents). Lines are not drawn inside these rectangles. */
     setOcclusion(rects) {
-      const n = Math.min(32, rects.length);
+      const k = canvas.width / Math.max(1, cssW), n = Math.min(32, rects.length);
       let sig = String(n); for (let i = 0; i < n; i++) sig += '|' + rects[i].map((v) => Math.round(v)).join(',');
       if (sig === occSig) return false; occSig = sig;
-      OCC_U[0] = n; for (let i = 0; i < n; i++) { const r = rects[i]; OCC_CSS[i * 4] = r[0]; OCC_CSS[i * 4 + 1] = r[1]; OCC_CSS[i * 4 + 2] = r[2]; OCC_CSS[i * 4 + 3] = r[3]; }
-      writeOcc(); return true;
+      OCC_U[0] = n; for (let i = 0; i < n; i++) { const r = rects[i]; OCC_F[i * 4] = r[0] * k; OCC_F[i * 4 + 1] = r[1] * k; OCC_F[i * 4 + 2] = r[2] * k; OCC_F[i * 4 + 3] = r[3] * k; }
+      device.queue.writeBuffer(occBuf, 0, OCC); return true;
     },
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
@@ -1582,7 +1460,7 @@ export async function createField(canvas, opts = {}) {
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (scale || 1);
       const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
-      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; if (OCC_U[0]) writeOcc(); return true; }   // K12: the mask follows the new device-pixel size
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; return true; }
       return false;
     }
   });

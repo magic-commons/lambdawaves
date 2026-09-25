@@ -1,0 +1,13 @@
+{
+ "mode": "cold",
+ "firstAxialPressMs": 35.34,
+ "secondPressMs": 19.52,
+ "setRadiusBase": {
+  "median": 12.64,
+  "max": 16.36
+ },
+ "setRadiusBuilt": {
+  "median": 0,
+  "max": 0.02
+ }
+}

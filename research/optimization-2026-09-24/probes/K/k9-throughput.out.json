@@ -1,0 +1,42 @@
+{
+ "n60": [
+  {
+   "frameMs": 6.589,
+   "reconstructMs": 1.671,
+   "presentMs": 5.008,
+   "n": 60
+  },
+  {
+   "frameMs": 5.052,
+   "reconstructMs": 1.707,
+   "presentMs": 5.044,
+   "n": 60
+  },
+  {
+   "frameMs": 5.116,
+   "reconstructMs": 1.716,
+   "presentMs": 5.06,
+   "n": 60
+  }
+ ],
+ "target2500": [
+  {
+   "frameMs": 4.9153,
+   "reconstructMs": 0.1397,
+   "presentMs": 4.8557,
+   "n": 592
+  },
+  {
+   "frameMs": 4.869,
+   "reconstructMs": 0.1096,
+   "presentMs": 4.9308,
+   "n": 598
+  },
+  {
+   "frameMs": 4.8844,
+   "reconstructMs": 0.104,
+   "presentMs": 4.8698,
+   "n": 597
+  }
+ ]
+}

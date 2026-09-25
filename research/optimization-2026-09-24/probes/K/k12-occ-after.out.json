@@ -1,0 +1,17 @@
+{
+ "rects": 11,
+ "rectsMovedDuringScale": false,
+ "scale1": {
+  "rack": "aeaa5ec4",
+  "fresh": "aeaa5ec4",
+  "same": true,
+  "w": 1920
+ },
+ "scaleHalf": {
+  "rack": "cdbff442",
+  "fresh": "cdbff442",
+  "same": true,
+  "w": 960,
+  "h": 497
+ }
+}

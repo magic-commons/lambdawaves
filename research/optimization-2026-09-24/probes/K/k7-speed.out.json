@@ -1,0 +1,26 @@
+{
+ "table": "on",
+ "rows": {
+  "64": {
+   "gasOn": true,
+   "table": 1.1718,
+   "modes": 256,
+   "n": 360,
+   "recurrence": 7.2438
+  },
+  "96": {
+   "gasOn": true,
+   "table": 3.7629,
+   "modes": 256,
+   "n": 139,
+   "recurrence": 20.9035
+  },
+  "128": {
+   "gasOn": true,
+   "table": 8.3456,
+   "modes": 256,
+   "n": 60,
+   "recurrence": 46.7163
+  }
+ }
+}

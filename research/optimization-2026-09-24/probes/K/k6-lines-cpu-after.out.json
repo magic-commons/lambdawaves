@@ -1,0 +1,53 @@
+{
+ "camMode": "free",
+ "cpuMoving": {
+  "off": {
+   "medianEncodeMs": 0.04,
+   "p90": 0.08,
+   "chromeWrites": 1,
+   "frames": 300
+  },
+  "box": {
+   "medianEncodeMs": 0.04,
+   "p90": 0.06,
+   "chromeWrites": 1,
+   "frames": 300
+  },
+  "dots": {
+   "medianEncodeMs": 0.4,
+   "p90": 0.5,
+   "chromeWrites": 300,
+   "frames": 300
+  },
+  "lattice": {
+   "medianEncodeMs": 0.74,
+   "p90": 0.9,
+   "chromeWrites": 300,
+   "frames": 300
+  },
+  "off#2": {
+   "medianEncodeMs": 0.04,
+   "p90": 0.06,
+   "chromeWrites": 1,
+   "frames": 300
+  },
+  "box#2": {
+   "medianEncodeMs": 0.02,
+   "p90": 0.04,
+   "chromeWrites": 1,
+   "frames": 300
+  },
+  "dots#2": {
+   "medianEncodeMs": 0.36,
+   "p90": 0.48,
+   "chromeWrites": 300,
+   "frames": 300
+  },
+  "lattice#2": {
+   "medianEncodeMs": 0.54,
+   "p90": 0.8,
+   "chromeWrites": 300,
+   "frames": 300
+  }
+ }
+}

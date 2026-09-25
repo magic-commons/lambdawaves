@@ -1,0 +1,27 @@
+{
+ "compared": 1335,
+ "differ": 0,
+ "setRadiusMs": {
+  "base": {
+   "median": 13.105,
+   "max": 17.495
+  },
+  "lazy": {
+   "median": 0.0003,
+   "max": 0.0053
+  }
+ },
+ "firstLaunchAfterDragMs": {
+  "base": 32.05,
+  "lazy": 36.27
+ },
+ "constructMs": {
+  "base": 13.07,
+  "lazy": 0.181
+ },
+ "idleWarm": {
+  "slices": 6,
+  "maxSliceMs": 3.54,
+  "totalMs": 17.14
+ }
+}
