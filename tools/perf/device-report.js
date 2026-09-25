@@ -29,7 +29,9 @@
  *              AUTOSCALE EDGE · STYLE EDGE (cloud → grain) · VIEW EDGE (phase → density) — each 3 s as found → the change
  *              → 3 s → back → 4 s; the last two catch Safari 26's stall on a render pipeline's compile and first use
  *              (K2 specialises one per view × style; WEBKIT-FPS-RESEARCH §1.4) as a long gap in a bin · UI hidden (H) ·
- *              HIDE EDGE (3 s shown → H → 4 s) · frost flipped · card flipped · the modulation window flipped.
+ *              HIDE EDGE (3 s shown → H → 4 s) · frost flipped · card flipped · the modulation window flipped · and LAST the
+ *              GRID EDGE (three GRID switches by the segment, playing, then again paused, each with its sub-timeline —
+ *              runGridEdges below; `only: 'grid'` / `&only=grid` runs those two alone).
  *   long play  (PACE P3) right after the first scene: 30 s as found in 1 s bins — the iPad's cycle (well for a few seconds, ~5 fps
  *              for a while, then back) is longer than any 3 s scene.  Every bin of every scene also carries THE PACING: frames
  *              the loop held because four were still on the GPU (LW.stats.skipped), the most in flight (field.inFlight), the
@@ -202,11 +204,96 @@ function setCard(LW, found, c) {
   if (found.cardChosen) { LW.setCardStyle(c); return 'setCardStyle'; }
   document.body.dataset.card = c; return 'data-card';
 }
+/** GRID through its own segment (rack.js ui.gridSeg: a click on `96³` paints the group and runs its onChange — quality.res,
+ *  the pairing's steps and scale, schedule(REBUILD)); with no segment in the DOM, the onChange's own writes */
+const gridButton = (g) => { const r = document.querySelector('.seg[role="radiogroup"][aria-label="GRID"]'); return r ? [...r.querySelectorAll('button.seg-b')].find((b) => b.textContent.trim() === g + '³') || null : null; };
+function setGrid(LW, g) {
+  const q = LW.quality;
+  if (q.res === g) return 'unchanged';
+  const b = gridButton(g);
+  if (b && !b.disabled) { b.click(); if (q.res === g) return 'segment'; }
+  q.res = g; q.steps = PAIR[g].steps; q.scale = PAIR[g].scale; LW.schedule(LW.TIER.REBUILD);
+  return 'direct';
+}
+
+/** THE GRID PROBE (grid edge, 2026-09-25): field.setResolution and field.frame are plain properties the loop calls through
+ *  (rack.js applyRebuild → `field.setResolution(want)`, the loop → `field.frame({...})`), so they are WRAPPED from here for the
+ *  scene and put back after — no hook in lab/.  A TAP is armed before it is made; the next setResolution is its rebuild at
+ *  whatever grid the field takes (`fieldTo`: below `to` when the governor has stepped the grid ladder), and a tap whose loop
+ *  frame rebuilt nothing says so (`noRebuild`: the field already held that grid).  A setResolution nobody tapped for (the
+ *  governor's rung, a hand) is armed at its own call (`by: 'unarmed'`) and timed the same way.  Each record, from its t:
+ *    rebuildAfterMs    tap → applyRebuild's setResolution (the loop's next frame, later when PACE held it: `heldBeforeRebuild`)
+ *    setResolutionMs   its synchronous part: 2 × destroy + 2 × createTexture (n³ rgba16float 3D) + the bind groups
+ *    allocDoneMs       onSubmittedWorkDone asked right after it returns: the queue as it stood (inFlightAtAlloc frames still on
+ *                      the GPU) plus anything the implementation enqueued at creation — paused, that is the allocation alone
+ *    firstFrame        the first field.frame at the new grid: encodeMs (its synchronous part, submit included), whether it
+ *                      reconstructed and presented, gpuDoneMs (its submit → onSubmittedWorkDone: the first dispatch into the
+ *                      new textures, any lazy zero-fill, and the ray march), and when it ended after t (afterMs)
+ *    secondFrame       the same for the frame after it (paused: a present alone at the new grid)
+ *    firstPresentMs / firstReconstructMs   t → the end of the first frame at the new grid that presented / reconstructed
+ *  Firefox resolves onSubmittedWorkDone on a ~100 ms poll (AUDIT-A FA5): there a GPU ms is a tick, not a time; WebKit's is prompt. */
+function gridProbe(LW) {
+  const field = LW.field, dev = field.device;
+  const origSet = field.setResolution, origFrame = field.frame;
+  const all = [];
+  let t0 = performance.now();
+  const done = () => dev.queue.onSubmittedWorkDone();
+  const record = (from, to, by, t) => ({ by, from, to, fieldTo: null, firstSight: null, t, atMs: r1(t - t0), via: null, callMs: null,
+    before: { field: field.resolution, inFlight: safe(() => field.inFlight), queueMs: safe(() => field.paced) ? r1(safe(() => field.queueMs)) : null, pipesPending: safe(() => field.renderPipelines.pending), pipesReady: safe(() => field.renderPipelines.ready), stepCap: r3(safe(() => field.stepCap)), autoScale: LW.quality.autoScale, gov: safe(() => LW.governor.state) },
+    skipped0: safe(() => LW.stats.skipped, 0), rebuilt: false, noRebuild: null, frames: 0, pending: [],
+    rebuildAfterMs: null, setResolutionMs: null, inFlightAtAlloc: null, heldBeforeRebuild: null, allocDoneMs: null,
+    firstFrame: null, secondFrame: null, firstPresentMs: null, firstReconstructMs: null, firstReconstruct: null });
+  field.setResolution = function (n) {
+    const from = field.resolution, fl = safe(() => field.inFlight, 0), t = performance.now();
+    let sw = all.find((s) => s.by === 'tap' && !s.rebuilt && !s.noRebuild);
+    if (!sw) { sw = record(from, n, 'unarmed', t); all.push(sw); }
+    const r = origSet.call(this, n);
+    const t1 = performance.now();
+    sw.rebuilt = true; sw.fieldTo = n;
+    sw.rebuildAfterMs = r1(t - sw.t); sw.setResolutionMs = r3(t1 - t); sw.inFlightAtAlloc = fl;
+    sw.heldBeforeRebuild = safe(() => LW.stats.skipped - sw.skipped0, null);
+    if (from !== n) sw.pending.push(done().then(() => { sw.allocDoneMs = r1(performance.now() - t1); }, () => {}));
+    return r;
+  };
+  field.frame = function (a) {
+    const st = field.stats, p = st.presents, rc = st.reconstructs, t = performance.now(), fl = safe(() => field.inFlight, 0);
+    const r = origFrame.call(this, a);
+    const t1 = performance.now(), res = field.resolution;
+    for (const sw of all) {
+      if (sw.noRebuild || sw.frames >= 2 || t < sw.t) continue;
+      if (!sw.rebuilt) { sw.noRebuild = { field: res, gov: safe(() => LW.governor.state), afterMs: r1(t1 - sw.t) }; continue; }   // this loop frame ran its REBUILD first, and nothing was rebuilt
+      if (res !== sw.fieldTo) { sw.frames = 2; continue; }                                                                          // another rebuild came first: this record is closed
+      const fr = { afterMs: r1(t1 - sw.t), encodeMs: r3(t1 - t), reconstructed: st.reconstructs > rc, presented: st.presents > p, inFlightAtSubmit: fl, gpuDoneMs: null };
+      sw.pending.push(done().then(() => { fr.gpuDoneMs = r1(performance.now() - t1); }, () => {}));
+      if (sw.frames === 0) sw.firstFrame = fr; else sw.secondFrame = fr;
+      sw.frames++;
+      if (fr.presented && sw.firstPresentMs === null) sw.firstPresentMs = fr.afterMs;
+      if (fr.reconstructed && sw.firstReconstructMs === null) { sw.firstReconstructMs = fr.afterMs; sw.firstReconstruct = fr; }
+    }
+    return r;
+  };
+  return {
+    all,
+    start() { t0 = performance.now(); },
+    /** a tap about to be made: the state around it, read before it */
+    arm(from, to, firstSight) { const sw = record(from, to, 'tap', performance.now()); sw.firstSight = firstSight; all.push(sw); return sw; },
+    /** the GPU answers for every record so far, waited at most `ms` (a lost device never answers) */
+    settled(ms = 3000) { return Promise.race([Promise.all(all.flatMap((s) => s.pending)), sleep(ms)]); },
+    release() { field.setResolution = origSet; field.frame = origFrame; },
+    /** one record as the report keeps it (the working fields dropped) */
+    out(sw) {
+      const { t, skipped0, rebuilt, frames, pending, firstReconstruct, ...o } = sw;
+      o.firstReconstructGpuMs = firstReconstruct ? firstReconstruct.gpuDoneMs : null;
+      return o;
+    },
+  };
+}
 
 /**
  * deviceReport(LW, opts) → one JSON-safe object.
  *   opts.targetMs     the throughput batch floor (1500)          opts.sceneMs   one scene's play (3000)
  *   opts.grids        [64, 96, 128]                              opts.scenes / opts.gpu   false skips that part
+ *   opts.only         'grid': the scenes are the two grid edges alone
  *   opts.readyAt      performance.now() at __LW.ready (the flag's road passes it)
  *   opts.onProgress   (text) → void, between steps (the flag's toast)          opts.skipEl   the toast (left out of dom/backdrops)
  */
@@ -442,7 +529,7 @@ async function putBack(LW, found) {
  *  the GPU (LW.stats.skipped), the most frames in flight, the worst submit → done (field.queueMs — the backlog, read off the
  *  frame's own completion, so measuring it perturbs nothing; null where completion is not prompt and nothing is counted) and
  *  the rAF gaps over 100 ms; `at` = [{ ms, what, fn }] fired once each, from inside the rAF */
-async function play(LW, ms, at = [], binMs = BIN_MS) {
+async function play(LW, ms, at = [], binMs = BIN_MS, tap = null) {
   const field = LW.field, q = LW.quality, gov = LW.governor, st = LW.stats;
   const nb = Math.ceil(ms / binMs);
   const bins = Array.from({ length: nb }, () => ({ n: 0, maxMs: 0, presents: 0, reconstructs: 0, skipped: 0, inFlightMax: 0, queueMsMax: null, gaps100: 0, s: null }));
@@ -471,6 +558,7 @@ async function play(LW, ms, at = [], binMs = BIN_MS) {
       if (!B.s) B.s = stateSample(LW);
       if (q.autoScale < minScale) minScale = q.autoScale;
       if (frostSeen === null && el > ms / 2) frostSeen = safe(() => LW.frostLive);
+      if (tap) try { tap(performance.now(), iv.length ? iv[iv.length - 1] : 0); } catch (_) {}   // before `at`: a switch's own frame is not after it
       for (let i = 0; i < at.length; i++) if (!fired.has(i) && el >= at[i].ms) {
         fired.add(i); let via = null; try { via = at[i].fn(); } catch (e) { via = 'threw: ' + String(e && e.message || e); }
         marks.push({ ms: Math.round(el), what: at[i].what || 'mark', via: typeof via === 'string' ? via : null });
@@ -504,14 +592,14 @@ async function runScenes(LW, o, found, say, err, skipEl) {
     LW.pause(); if (LW.clock.t !== found.t) LW.scrub(found.t);
     await LW.settle(); await sleep(400);
   };
-  const scene = async (label, apply, undo, ms, at, binMs) => {
+  const scene = async (label, apply, undo, ms, at, binMs, tap) => {
     say('scene · ' + label);
     const s = { label };
     try {
       if (apply) { const why = await apply(); if (typeof why === 'string' && why.startsWith('skip:')) { s.skipped = why.slice(5).trim(); return S.push(s); } if (typeof why === 'string') s.via = why; }
       await start();
       s.backdrops = safe(() => backdropInventory(skipEl));
-      Object.assign(s, await play(LW, ms || o.sceneMs, at, binMs));
+      Object.assign(s, await play(LW, ms || o.sceneMs, at, binMs, tap));
     } catch (e) { err('scene ' + label, e); s.error = String(e && e.message || e); }
     finally {
       try { LW.pause(); if (undo) await undo(); } catch (e) { err('undo ' + label, e); }
@@ -524,6 +612,9 @@ async function runScenes(LW, o, found, say, err, skipEl) {
   const autoTo = !found.auto;
   /* an EDGE: 3 s as found → the change → 3 s → back → 4 s, in one binned series (10 s) */
   const EDGE = 10000;
+
+  const gridEdges = () => runGridEdges(LW, found, S, scene, start, say, err);
+  if (o.only === 'grid') { await gridEdges(); return S; }                 // `__LW.report({ only: 'grid' })`, `?report=1&only=grid`
 
   await scene(found.uiHidden ? 'as found (UI hidden)' : 'as found (UI shown)');
   /* PACE P3 · THE LONG PLAY: 30 s as found in 1 s bins.  The iPad played well for a few seconds, fell to ~5 fps for a while and
@@ -575,14 +666,121 @@ async function runScenes(LW, o, found, say, err, skipEl) {
         () => { if (!neverPlaced) { LW.mod.collapse(); putPres(); if (found.rackHidden) document.body.classList.add('rack-hidden'); } });
     }
   }
+  /* THE GRID EDGE LAST, so every scene above stays comparable with the earlier reports; it still precedes the GPU rows */
+  await gridEdges();
   return S;
+}
+
+/** a bare rAF sampler for a paused scene: every interval, stamped with the wall time it ended, until stop() */
+function rafWatch() {
+  const rows = []; let last = null, on = true;
+  const f = (ts) => { if (last !== null) rows.push([performance.now(), ts - last]); last = ts; if (on) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+  return { stop() { on = false; return rows; } };
+}
+
+/**
+ * THE GRID EDGE (2026-09-25).  The third iPad report froze the page 1.46 s (card edge, bins 15–19 empty) across a 128³ → 96³
+ * change, where a grid change costs 12–35 ms on the desktop.  Three switches by the GRID segment's own road — to 96³ (64³ when
+ * found at 96³), to 128³ (64³ when found at 128³), back to the grid as found — first PLAYING (3 s → A → 4 s → B → 4 s → back →
+ * 4 s, 250 ms bins) and then PAUSED (500 ms quiet before each tap, the rebuild frame, then one still present), each with its
+ * sub-timeline from gridProbe: the tap's synchronous part, tap → setResolution and its own ms, the queue drain behind it, the
+ * first frame at the new grid (encode, reconstruct?, GPU done), the first present and reconstruct, and over the next 2 s
+ * (paused 1.5 s) the worst rAF gap, the frames PACE held, in flight, the backlog and the specialised pipelines pending.
+ * `firstSight`: this grid had not been on the field earlier in the report (a first allocation of that size in the run).
+ * Only on a tablet or a desktop with AUTO SCALE on (a phone holds 64³).  The grid, steps and scale go back exactly (putQuality);
+ * the segment is left painted on the grid as found.
+ */
+async function runGridEdges(LW, found, S, scene, start, say, err) {
+  const field = LW.field, f0 = found.quality.res;
+  const why = safe(() => LW.layout.phone.on) ? 'a phone holds 64³ (rack.js enterPhone) — the grid edge is read on a tablet or a desktop'
+    : !found.auto ? 'AUTO SCALE is off here — the grid edge is read with AUTO SCALE on, as the governor meets it'
+    : !PAIR[f0] ? 'the grid as found (' + f0 + '³) is not one of the GRID segment\'s options'
+    : !(field && field.ok) ? 'no WebGPU field' : null;
+  if (why) { S.push({ label: 'grid edge', skipped: why }, { label: 'grid edge paused', skipped: why }); return; }
+  const a = f0 === 96 ? 64 : 96, b = f0 === 128 ? 64 : 128, plan = [a, b, f0], cube = (g) => g + '³';
+  const seen = new Set([f0]);
+  for (const s of S) for (const x of s.bins || []) if (Number.isFinite(x.field)) seen.add(x.field);
+  const putGrid = async () => { if (LW.quality.res !== f0) setGrid(LW, f0); await putQuality(LW, found); };
+  const tapSwitch = (P, g) => {
+    const sw = P.arm(LW.quality.res, g, !seen.has(g));
+    const t = performance.now(); sw.via = setGrid(LW, g); sw.callMs = r3(performance.now() - t);
+    return sw;
+  };
+  /* every record out in the order it happened: the taps, and the rebuilds nobody tapped for (the governor's rung) */
+  const records = (P, win) => P.all.map((sw) => ({ ...P.out(sw), window: win(sw) }));
+  const saw = (P) => { for (const r of P.all) if (r.fieldTo) seen.add(r.fieldTo); };      // `firstSight` counts what the field took, not what was asked
+
+  /* ── PLAYING ── */
+  {
+    const P = gridProbe(LW), taps = [], WIN = 2000;
+    const paced = !!safe(() => field.paced);
+    let started = false;
+    const tap = (t, gap) => {
+      if (!started) { started = true; P.start(); }
+      taps.push([t, gap, LW.stats.presents, LW.stats.reconstructs, LW.stats.skipped || 0, safe(() => field.inFlight, 0) || 0, paced ? safe(() => field.queueMs, null) : null, safe(() => field.renderPipelines.pending, 0) || 0]);
+    };
+    const win = (sw) => {
+      const rows = taps.filter(([t]) => t > sw.t && t <= sw.t + WIN);
+      if (!rows.length) return null;
+      const prev = taps.filter(([t]) => t <= sw.t).pop() || rows[0], last = rows[rows.length - 1];
+      const qs = rows.map((r) => r[6]).filter(Number.isFinite);
+      return { ms: WIN, frames: rows.length, maxGapMs: r1(Math.max(...rows.map((r) => r[1]))), gaps100: rows.filter((r) => r[1] > 100).length,
+        presents: last[2] - prev[2], reconstructs: last[3] - prev[3], held: last[4] - prev[4], inFlightMax: Math.max(...rows.map((r) => r[5])),
+        queueMsMax: qs.length ? r1(Math.max(...qs)) : null, pipesPendingMax: Math.max(...rows.map((r) => r[7])) };
+    };
+    const at = plan.map((g, i) => ({ ms: 3000 + 4000 * i, what: 'grid ' + cube(g), fn: () => tapSwitch(P, g).via }));
+    try { await scene('grid edge (3 s → ' + plan.map(cube).join(' → 4 s → ') + ' → 4 s)', null, null, 15000, at, BIN_MS, tap); }
+    finally {
+      await P.settled(3000);
+      P.release(); saw(P);
+      try { await putGrid(); } catch (e) { err('undo grid edge', e); }
+    }
+    const s = S[S.length - 1];                                                     // scene() always pushes its record
+    if (s && /^grid edge/.test(s.label) && typeof s.skipped !== 'string') s.switches = records(P, win);   // a play's own `skipped` is the NUMBER of frames PACE held
+  }
+
+  /* ── PAUSED: the allocation apart from a play's backlog; the rebuild frame, then a present alone ── */
+  {
+    const label = 'grid edge paused (' + [f0, ...plan].map(cube).join(' → ') + ', the transport stopped)';
+    say('scene · ' + label);
+    const s = { label };
+    let watch = null, P = null;
+    try {
+      await start();                                                   // paused and settled: the pause edge has put the governor's grid back
+      P = gridProbe(LW); watch = rafWatch(); P.start();
+      for (const g of plan) {
+        await sleep(500);
+        const sw = tapSwitch(P, g);
+        await LW.settle(); sw.settleMs = r1(performance.now() - sw.t);   // the loop's REBUILD frame (rebuild · reconstruct · present), painted
+        await P.settled(3000);
+        await LW.settle();                                               // one still present at the new grid
+        await P.settled(3000);
+        saw(P);
+      }
+      await sleep(300);
+    } catch (e) { err('scene ' + label, e); s.error = String(e && e.message || e); }
+    finally {
+      const rows = watch ? watch.stop() : [];
+      if (P) P.release();
+      try { await putGrid(); } catch (e) { err('undo ' + label, e); }
+      if (P) s.switches = records(P, (sw) => {
+        const w = rows.filter(([t]) => t > sw.t && t <= sw.t + 1500);
+        return w.length ? { ms: 1500, frames: w.length, maxGapMs: r1(Math.max(...w.map((r) => r[1]))), gaps100: w.filter((r) => r[1] > 100).length } : null;
+      });
+      s.fieldResolutionEnd = field.resolution;
+    }
+    S.push(s);
+  }
 }
 
 /** one line for the console and the toast */
 export function summaryLine(R, bytes) {
   const a = R.adapter && R.adapter.info ? [R.adapter.info.vendor, R.adapter.info.architecture].filter(Boolean).join(' ') || 'adapter (no info)' : 'no adapter';
   const g = R.gpu && R.gpu.rows ? R.gpu.rows.filter((r) => r.frameMs !== undefined).map((r) => r.grid + ':' + r.frameMs.toFixed(2)).join(' ') : 'gpu —';
-  const sc = Array.isArray(R.scenes) ? R.scenes.map((s) => (s.skipped ? s.label.split(' (')[0] + ' skip' : s.label.split(' (')[0].replace('modulation window', 'mod') + ' ' + s.rafFps)).join(' · ') : 'scenes —';
+  const sc = Array.isArray(R.scenes) ? R.scenes.map((s) => (s.skipped ? s.label.split(' (')[0] + ' skip' : [s.label.split(' (')[0].replace('modulation window', 'mod'),
+    s.error ? 'error' : s.rafFps !== undefined ? s.rafFps : null,
+    Array.isArray(s.switches) ? '[worst gap ms ' + s.switches.map((w) => (w.window ? Math.round(w.window.maxGapMs) : '—')).join('/') + ']' : null].filter((x) => x !== null).join(' '))).join(' · ') : 'scenes —';
   const s = R.settings && R.settings.quality ? R.settings.quality : {};
   const lp = Array.isArray(R.scenes) ? R.scenes.find((x) => /^long play/.test(x.label) && !x.skipped && !x.error) : null;
   return 'λWAVES device report · ' + R.device + ' · ' + a + ' · dpr ' + (R.platform && R.platform.dpr) + ' cap ' + (R.platform && R.platform.dprCap)
@@ -622,9 +820,10 @@ async function runFromFlag(LW, qs, readyAt) {
   for (let i = 0; i < 600 && !LW.ready; i++) await sleep(50);
   await new Promise((r) => { try { LW.warning.onAccept(r); } catch (_) { r(); } });
   if (safe(() => LW.motion.reduced)) await toast.ask('reduced motion is on — the report plays the field for about a minute. Press RUN to measure.', 'RUN');
-  toast.say('device report · measuring — hands off the screen for about three minutes');
+  const only = qs.get('only') === 'grid' ? { only: 'grid', gpu: false } : {};    // `&only=grid`: the two grid edges alone (~30 s), no GPU rows
+  toast.say('device report · measuring — hands off the screen for about ' + (only.only ? 'half a minute' : 'three minutes'));
   let R;
-  try { R = await deviceReport(LW, { readyAt, skipEl: toast.root, onProgress: (t) => toast.say('device report · ' + t + ' — hands off') }); }
+  try { R = await deviceReport(LW, { readyAt, skipEl: toast.root, onProgress: (t) => toast.say('device report · ' + t + ' — hands off'), ...only }); }
   catch (e) { R = { kind: 'lambdawaves-device-report', device: deviceLabel(), at: new Date().toISOString(), errors: ['report threw: ' + String(e && e.message || e)] }; }
   LW.lastReport = R;
   const json = JSON.stringify(R);
