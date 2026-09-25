@@ -1,0 +1,177 @@
+{
+ "at": "2026-09-25T17:00:42.249Z",
+ "port": "8734",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "electron",
+ "boot": {
+  "ok": true,
+  "adapter": {
+   "vendor": "nvidia",
+   "architecture": "ampere",
+   "device": "",
+   "description": ""
+  },
+  "dpr": 1,
+  "w": 1865,
+  "h": 1011,
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.130 Electron/44.4.5 Safari/537.36",
+  "paced": true,
+  "quality": {
+   "res": 64,
+   "steps": 160,
+   "scale": 1,
+   "auto": true,
+   "autoScale": 1,
+   "minScale": 0.35
+  }
+ },
+ "default": {
+  "label": "as booted · 1s+2pz · 64³/160/1 · AUTO SCALE on · governor on",
+  "seconds": 4.01,
+  "rafPerS": 118.5,
+  "loopFramesPerS": 118.5,
+  "presentsPerS": 109.8,
+  "submitsPerS": 109.8,
+  "completionsPerS": 109.6,
+  "queueDepthMax": 1,
+  "skipped": 35,
+  "skippedDefined": true,
+  "paced": true,
+  "inFlightMax": 1,
+  "presentIntervalMedianMs": 8.3,
+  "completionIntervalMedianMs": 8.4,
+  "loopMedianMs": 0.2,
+  "autoScaleFirstChangeMs": null,
+  "autoScaleTrace": [
+   [
+    8,
+    1
+   ]
+  ],
+  "autoScaleEnd": 1,
+  "governor": "nominal",
+  "canvas": [
+   1865,
+   1011
+  ]
+ },
+ "gpuAtScale1": {
+  "frameMs": 33.2527,
+  "presentMs": 3.9205,
+  "reconstructMs": 29.3787,
+  "w": 1865,
+  "h": 1011,
+  "steps": 240,
+  "res": 128
+ },
+ "fixed": {
+  "label": "128³ gas · AUTO SCALE off · governor off",
+  "seconds": 4.01,
+  "rafPerS": 105.5,
+  "loopFramesPerS": 105.5,
+  "presentsPerS": 25.9,
+  "submitsPerS": 25.9,
+  "completionsPerS": 25.7,
+  "queueDepthMax": 1,
+  "skipped": 319,
+  "skippedDefined": true,
+  "paced": true,
+  "inFlightMax": 1,
+  "presentIntervalMedianMs": 41.6,
+  "completionIntervalMedianMs": 38.3,
+  "loopMedianMs": 0.2,
+  "autoScaleFirstChangeMs": null,
+  "autoScaleTrace": [
+   [
+    1,
+    1
+   ]
+  ],
+  "autoScaleEnd": 1,
+  "governor": "off",
+  "canvas": [
+   1865,
+   1011
+  ]
+ },
+ "auto": {
+  "label": "128³ gas · AUTO SCALE on · governor off",
+  "seconds": 4,
+  "rafPerS": 111.5,
+  "loopFramesPerS": 111.5,
+  "presentsPerS": 28,
+  "submitsPerS": 28,
+  "completionsPerS": 27.7,
+  "queueDepthMax": 1,
+  "skipped": 334,
+  "skippedDefined": true,
+  "paced": true,
+  "inFlightMax": 1,
+  "presentIntervalMedianMs": 33.4,
+  "completionIntervalMedianMs": 34.3,
+  "loopMedianMs": 0.2,
+  "autoScaleFirstChangeMs": 256,
+  "autoScaleTrace": [
+   [
+    1,
+    1
+   ],
+   [
+    256,
+    0.5
+   ],
+   [
+    541,
+    0.35
+   ]
+  ],
+  "autoScaleEnd": 0.35,
+  "governor": "off",
+  "canvas": [
+   653,
+   354
+  ]
+ },
+ "autoGov": {
+  "label": "128³ gas · AUTO SCALE on · governor on (as shipped)",
+  "seconds": 4.01,
+  "rafPerS": 115,
+  "loopFramesPerS": 115,
+  "presentsPerS": 39.9,
+  "submitsPerS": 39.9,
+  "completionsPerS": 39.7,
+  "queueDepthMax": 1,
+  "skipped": 301,
+  "skippedDefined": true,
+  "paced": true,
+  "inFlightMax": 1,
+  "presentIntervalMedianMs": 25,
+  "completionIntervalMedianMs": 25.1,
+  "loopMedianMs": 0.2,
+  "autoScaleFirstChangeMs": 259,
+  "autoScaleTrace": [
+   [
+    1,
+    1
+   ],
+   [
+    259,
+    0.5
+   ],
+   [
+    541,
+    0.35
+   ]
+  ],
+  "autoScaleEnd": 0.35,
+  "governor": "stepped-2",
+  "canvas": [
+   653,
+   354
+  ]
+ },
+ "errs": []
+}

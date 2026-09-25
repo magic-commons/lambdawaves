@@ -489,7 +489,7 @@ export async function boot(dom) {
     frameBudget.breakSequence();
     if (ui.perfSeg) ui.perfSeg.set(perf.mode);
   }
-  const stats = { frames: 0, presents: 0, reconstructs: 0, evolves: 0, rebuilds: 0, tiers: { PRESENT: 0, RECONSTRUCT: 0, EVOLVE: 0, REBUILD: 0 }, lastTier: 'NONE', scheduled: false, fps: 0, reconPerSec: 0, stepsPerSec: 0, lastEncodeMs: 0, fieldT: 0 };
+  const stats = { frames: 0, presents: 0, skipped: 0, reconstructs: 0, evolves: 0, rebuilds: 0, tiers: { PRESENT: 0, RECONSTRUCT: 0, EVOLVE: 0, REBUILD: 0 }, lastTier: 'NONE', scheduled: false, fps: 0, reconPerSec: 0, stepsPerSec: 0, lastEncodeMs: 0, fieldT: 0 };
   const cRe = new Float64Array(91), cIm = new Float64Array(91);
   let pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
   let keplerDirty = true, govVersion = -1, metersWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
@@ -1062,6 +1062,16 @@ export async function boot(dom) {
       (modHost && modHost.clock.isRunning()) || rotDriving());
     if (tabletMotion !== document.body.classList.contains('tablet-motion'))
       document.body.classList.toggle('tablet-motion', tabletMotion);
+    /* PACE (P1, 2026-09-25) · WAIT FOR THE GPU where its completion is prompt (field.paced): while two submitted frames are
+       still in flight (one running, one queued) a third would only queue behind them — Safari before its frame pacer lets 60
+       frames/s pile onto a GPU that finishes 35, then stalls while they drain (WEBKIT-FPS-RESEARCH §1.3; the iPad report).
+       TWO, not one: one queued frame keeps the GPU fed, so the present interval IS the GPU's frame time (Electron, 128³ gas:
+       33.4 ms against 33.1) — waiting for zero adds the completion's delivery and a vsync to every frame (41.7 ms, 24 fps
+       where Chromium drew 29).  The ask is carried WHOLE to the next rAF (a REBUILD or RECONSTRUCT is never dropped: LA8's
+       discipline); the clocks and the CPU readers run as on any frame.  Only this rAF road: an export calls field.frame
+       itself, and no rAF runs while one does (render-exact H9). */
+    const held = tier >= TIER.PRESENT && field.ok && field.paced && field.inFlight > 1;
+    if (held) { if (tier > pending) pending = tier; tier = TIER.NONE; stats.skipped++; }
     if (tier >= TIER.REBUILD) applyRebuild();
     let modes = null;
     if (tier >= TIER.RECONSTRUCT) {
@@ -1077,15 +1087,17 @@ export async function boot(dom) {
     }
     if (modes) stats.reconstructs++;
     if (tier > 0) { stats.tiers[TIER_NAME[tier]]++; stats.lastTier = TIER_NAME[tier]; }
-    stats.frames++; winFrames++;
+    stats.frames++; if (!held) winFrames++;                            // PACE: the fps readout counts what the loop drew
     if (tier >= TIER.PRESENT && !autoQ.presented++) { autoQ.sinceMs = nowMs; autoQ.k = 0; }   // AUTO SCALE's window opens on its first presented frame
     if (autoQ.lastMs && tier >= TIER.PRESENT) {
       const iv = nowMs - autoQ.lastMs;
       frameBudget.sample(iv);
       if (iv <= 250) { autoQ.iv[autoQ.k++ & 31] = iv; gov.ring[gov.n % 60] = iv; gov.n++; }
     }
-    if (autoQ.lastMs && nowMs - autoQ.lastMs > 250) busyFlash(600);    // wave 48: a gap that long means the thread WAS blocked by work nobody wrapped — say so for 600 ms
-    autoQ.lastMs = nowMs;
+    if (!held) {                                                     // PACE: a held frame is not an interval — the next present's spans it, which is what the GPU delivered
+      if (autoQ.lastMs && nowMs - autoQ.lastMs > 250) busyFlash(600);    // wave 48: a gap that long means the thread WAS blocked by work nobody wrapped — say so for 600 ms
+      autoQ.lastMs = nowMs;
+    }
     const slot = perf.counts.frames % 60; perf.ring[slot] = 0; loopRing[slot] = 0;   // filled at the tail with this frame's own main-thread cost — the SAME slot (LA1)
     const nextScale = autoScaleStep(quality.autoScale, autoQ.iv, autoQ.k, perfBudgetMs(), quality.minScale, nowMs - autoQ.sinceMs, autoQ.presented);
     if (nextScale !== null) {                                        // AUTO SCALE's one rule has judged (its law at autoQ)

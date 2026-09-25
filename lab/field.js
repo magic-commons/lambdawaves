@@ -934,6 +934,11 @@ export async function createField(canvas, opts = {}) {
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
   let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
+  /* PACE (P1, 2026-09-25) · frames submitted whose onSubmittedWorkDone has not resolved — counted only where completion is
+     PROMPT (`paced`, measured at boot below: Safari and Chromium answer a drained queue in a few ms, Firefox on a ~100 ms
+     poll, AUDIT-A FA5), so the loop may wait for the GPU instead of queueing frames it cannot finish (WEBKIT-FPS-RESEARCH §1.3). */
+  let inFlight = 0, paced = false;
+  const landed = () => { inFlight--; };
   let cssW = canvas.clientWidth || 1, cssH = canvas.clientHeight || 1;   // the CSS box, kept current by the observer below
   if (typeof ResizeObserver === 'function') new ResizeObserver((entries) => {
     const r = entries[entries.length - 1].contentRect; cssW = r.width || cssW; cssH = r.height || cssH;
@@ -1241,6 +1246,7 @@ export async function createField(canvas, opts = {}) {
     const w = canvas.width, h = canvas.height;
     if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
     device.queue.submit([enc.finish()]);
+    if (paced) { inFlight++; device.queue.onSubmittedWorkDone().then(landed, landed); }
     stats.lastEncodeMs = performance.now() - t0;
   }
 
@@ -1495,6 +1501,7 @@ export async function createField(canvas, opts = {}) {
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
     stepCap: { get: () => stepCap, enumerable: true },
+    paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true },   // PACE (P1): read-only
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
     molecular: { get: () => !!molSpec, enumerable: true },
     /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an
@@ -1586,5 +1593,18 @@ export async function createField(canvas, opts = {}) {
       return false;
     }
   });
+  /* PACE (P1) · THE CAPABILITY, measured at boot: an empty submission's completion wait, judged only on a DRAINED queue — no
+     frame submitted during this wait or the one before it (a boot frame's compile, or a backlog, is not an answer).  Each try is
+     chained on the last one's completion (no timer), at most 30.  PROMPT = two judged waits in a row under 8 ms (Safari at once;
+     Chromium once its idle poll wakes, after a few ~17 ms tries); three judged waits in a row ≥ 50 ms are a poll tick and end
+     it (one could be a pipeline compiling).  Firefox resolves on a ~100 ms poll (AUDIT-A FA5) and early only when a present
+     lands in the wait (measured: 6 ms with one) — that try is not judged, the first try is never judged, and two fast judged
+     tries in a row cannot happen there. */
+  let paceTries = 0, paceFast = 0, paceSlow = 0; out.paceWaits = [];
+  const probePace = (prev) => { const t = performance.now(), p = stats.presents; device.queue.submit([device.createCommandEncoder().finish()]);
+    device.queue.onSubmittedWorkDone().then(() => { const w = performance.now() - t, d = stats.presents - p, judged = prev === 0 && d === 0; out.paceWaits.push([+w.toFixed(2), d]);
+      paceFast = judged && w < 8 ? paceFast + 1 : 0; paceSlow = judged && w >= 50 ? paceSlow + 1 : 0;
+      if (paceFast === 2 || paceSlow === 3) paced = paceFast === 2; else if (++paceTries < 30) probePace(d); }, () => {}); };
+  probePace(-1);
   return out;
 }
