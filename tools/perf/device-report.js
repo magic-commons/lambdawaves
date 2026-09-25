@@ -14,7 +14,8 @@
  *              cap at rest, the timer's resolution.
  *   display    rAF for 1 s with NOTHING playing, the UI as found and again with it hidden: the display's own cadence
  *              (60 vs 120 Hz — Safari's "Prefer Page Rendering Updates near 60fps" flag, iPadOS' Limit Frame Rate and Low
- *              Power Mode cap it), median and p95 Δt: the ceiling every scene's fps is read against.
+ *              Power Mode cap it), median and p95 Δt: the ceiling every scene's fps is read against.  Taken at the start
+ *              (`display`, which carries whatever the boot is still doing) and again at the end (`displayEnd`).
  *   adapter    adapterInfo, limitsRequested, features (shader-f16 / timestamp-query / texture-formats-tier1 flagged),
  *              navigator.gpu.wgslLanguageFeatures, getPreferredCanvasFormat(), the limits the field leans on.
  *   settings   card · frost · blur · theme · quality {res, steps, scale, auto, autoScale} · governor — as found.
@@ -58,6 +59,8 @@ import { VIEW_NAMES, STYLE_NAMES } from '../../lab/field.js';                   
 const SETTINGS_KEY = 'lambdawaves.q0.settings';                                    // rack.js SETTINGS_KEY
 const PAIR = { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } };   // rack.js ui.gridSeg's onChange
 const BIN_MS = 250;
+const LOOPBACK = /^(127\.\d+\.\d+\.\d+|localhost|\[?::1\]?)$/i;
+const PRIVATE_LAN = /^(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[a-z0-9-]+\.local)$/i;
 
 const r3 = (v) => (Number.isFinite(v) ? Math.round(v * 1000) / 1000 : v === Infinity ? 'Infinity' : null);
 const r1 = (v) => (Number.isFinite(v) ? Math.round(v * 10) / 10 : null);
@@ -338,6 +341,11 @@ async function measure(LW, opts) {
       R.gpu.gas128 = safe(() => LW.gas.on) ? (R.gpu.rows.find((r) => r.grid === 128) || null)
         : { skipped: 'not in the axial gas — entering the box rewrites the register and the undo ring, so it is not done for you; open OPERATOR → BOX with the AXIAL basis and run the report again to measure it' };
     } else R.gpu = { skipped: field && field.ok ? 'off' : 'no WebGPU field' };
+
+    /* ── the display cadence again, at the end: the start's reading carries whatever the boot was still doing ── */
+    say('the display cadence, again');
+    R.displayEnd = await cadence();
+    if (!found.uiHidden) { LW.keys.toggleUI(); try { await LW.settle(); R.displayEnd.uiHidden = await cadence(); } finally { LW.keys.toggleUI(); await LW.settle(); } }
   } catch (e) { err('report', e); }
   finally {
     /* ── put everything back, whatever threw; then let the page write again ── */
@@ -539,9 +547,79 @@ export function summaryLine(R, bytes) {
  * moment __LW.ready was set); anything else = `__LW.report(opts)` from a console (resolves the object, logs one line).
  */
 export async function run(LW, params, t) {
-  const flag = params instanceof URLSearchParams;
-  const R = await deviceReport(LW, flag ? { readyAt: t } : { ...(params || {}) });
+  if (params instanceof URLSearchParams) return runFromFlag(LW, params, t);
+  const R = await deviceReport(LW, { ...(params || {}) });
   LW.lastReport = R;
   try { console.log(summaryLine(R)); } catch (_) {}
   return R;
+}
+
+/* ══ THE FLAG · `?report=1` ═══════════════════════════════════════════════════════════════════════════════
+ * Runs once, after __LW.ready AND after the photosensitivity notice has been accepted (nothing plays before it);
+ * under prefers-reduced-motion it waits for a RUN press instead of starting the field by itself (?play=1's law).
+ * THE POST RULE: `post=1` always POSTs the JSON to `${origin}/report`; `post=0` never does; with neither, it POSTs
+ * only when the page was served from a private-LAN address (10/8, 172.16/12, 192.168/16, *.local) — the LAN dev
+ * server (serve-lan.py) — and never from loopback or a public host, where nothing is listening and a device's
+ * details have no business going.  Either way the toast offers COPY, so a device with no POST route can still
+ * hand the report over by pasting it. */
+let flagRan = false;
+async function runFromFlag(LW, qs, readyAt) {
+  if (flagRan) return null; flagRan = true;
+  const host = location.hostname;
+  const post = qs.get('post') === '1' ? true : qs.get('post') === '0' ? false : PRIVATE_LAN.test(host) && !LOOPBACK.test(host);
+  const toast = makeToast();
+  toast.say('device report · waiting for the instrument…');
+  for (let i = 0; i < 600 && !LW.ready; i++) await sleep(50);
+  await new Promise((r) => { try { LW.warning.onAccept(r); } catch (_) { r(); } });
+  if (safe(() => LW.motion.reduced)) await toast.ask('reduced motion is on — the report plays the field for about a minute. Press RUN to measure.', 'RUN');
+  toast.say('device report · measuring — hands off the screen for about three minutes');
+  let R;
+  try { R = await deviceReport(LW, { readyAt, skipEl: toast.root, onProgress: (t) => toast.say('device report · ' + t + ' — hands off') }); }
+  catch (e) { R = { kind: 'lambdawaves-device-report', device: deviceLabel(), at: new Date().toISOString(), errors: ['report threw: ' + String(e && e.message || e)] }; }
+  LW.lastReport = R;
+  const json = JSON.stringify(R);
+  const bytes = new TextEncoder().encode(json).length;
+  try { console.log(summaryLine(R, bytes)); } catch (_) {}
+  let sent = false, why = post ? '' : 'no POST (post=1 sends it)';
+  if (post) {
+    try {
+      const res = await fetch(location.origin + '/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json, cache: 'no-store' });
+      sent = res.ok; if (!sent) why = 'POST answered ' + res.status;
+    } catch (e) { why = 'POST failed: ' + String(e && e.message || e); }
+  }
+  toast.done(sent ? 'report sent · ' + bytes + ' bytes' : 'report ready · ' + bytes + ' bytes (' + why + ') — press COPY and paste it to Claude', json, summaryLine(R));
+  return R;
+}
+
+/* the toast: a plain, transient status line that exists only while the flag is in the URL — no stylesheet, no glass */
+function makeToast() {
+  const root = document.createElement('div');
+  root.setAttribute('role', 'status'); root.dataset.deviceReport = '1';
+  root.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483000;max-width:min(92vw,620px);box-sizing:border-box;'
+    + 'padding:10px 12px;border-radius:10px;background:rgba(10,14,22,.94);color:#e9eef7;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;'
+    + 'box-shadow:0 4px 18px rgba(0,0,0,.35);pointer-events:auto;';
+  const line = document.createElement('div'); line.style.cssText = 'white-space:pre-wrap;word-break:break-word;';
+  const row = document.createElement('div'); row.style.cssText = 'display:none;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;';
+  const btn = (t) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.style.cssText = 'font:inherit;font-weight:700;padding:6px 12px;border-radius:7px;border:1px solid #6f86b8;background:#1d2a44;color:#fff;cursor:pointer;'; return b; };
+  root.append(line, row); document.body.appendChild(root);
+  const say = (t) => { line.textContent = t; };
+  return {
+    root, say,
+    ask(text, label) { say(text); row.textContent = ''; row.style.display = 'flex'; const b = btn(label); row.appendChild(b); return new Promise((r) => b.addEventListener('click', () => { row.style.display = 'none'; r(); }, { once: true })); },
+    done(text, json, summary) {
+      say(text + (summary ? '\n' + summary : ''));
+      row.textContent = ''; row.style.display = 'flex';
+      const copy = btn('COPY'), close = btn('×');
+      const area = document.createElement('textarea');
+      area.readOnly = true; area.value = json; area.style.cssText = 'display:none;width:100%;height:120px;font:11px/1.3 ui-monospace,monospace;background:#0b0f18;color:#cfd8e8;border:1px solid #33415f;border-radius:6px;';
+      copy.addEventListener('click', async () => {
+        let ok = false;
+        try { await navigator.clipboard.writeText(json); ok = true; } catch (_) {}
+        if (!ok) { area.style.display = 'block'; area.focus(); area.select(); area.setSelectionRange(0, json.length); try { ok = document.execCommand('copy'); } catch (_) {} }
+        say(ok ? 'report copied — paste it to Claude' : 'select the text below and copy it — then paste it to Claude');
+      });
+      close.addEventListener('click', () => root.remove());
+      row.append(copy, close, area);
+    },
+  };
 }
