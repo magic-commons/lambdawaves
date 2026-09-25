@@ -2,6 +2,7 @@
 
 import { el, seg, trig, knob, tapWatcher, gripDots } from './mir/kit.js';
 import { bindSliderKeys } from './mir/slider-keys.js';
+import { coalesce } from './frame-coalescer.js';
 import { createModWindow, buildChipRail, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          SVG_PLAY, SVG_PAUSE, buildGhost, buildAudioSheet, COPY } from './mir/modulation/modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -389,8 +390,13 @@ export function createModulation(host, port) {
       placed = true;                                   // the hand owns the position from here
       grip.classList.add('drag');
     });
-    grip.addEventListener('pointermove', (e) => { if (!d) return; P.x = e.clientX - d.x; P.y = e.clientY - d.y; place(); });
-    const stop = () => { if (!d) return; d = null; grip.classList.remove('drag'); persist(); };
+    /* 2026-09-24 · ONE PLACE PER FRAME (optimization LB2, AUDIT-E FE11(b)).  place() is ~14 rect reads interleaved with
+       style writes (0.56 ms a call, measured), and it ran on every pointermove — 4–16 of them a frame on a fast mouse.
+       rack.js coalesces its own drags through frame-coalescer.js (wave 67); so does this grip now, and the release
+       FLUSHES before persist(), so the window lands, and is saved, exactly where the hand let go. */
+    const move = coalesce((p) => { P.x = p.x; P.y = p.y; place(); });
+    grip.addEventListener('pointermove', (e) => { if (!d) return; move.post({ x: e.clientX - d.x, y: e.clientY - d.y }); });
+    const stop = () => { if (!d) return; move.flush(); d = null; grip.classList.remove('drag'); persist(); };
     grip.addEventListener('pointerup', stop);
     grip.addEventListener('pointercancel', stop);
   }
