@@ -1291,18 +1291,22 @@ export async function createField(canvas, opts = {}) {
    * polls completion at ~100 ms): encode n frames back-to-back into an offscreen target of the
    * canvas' size, wait once for the GPU, and divide.  Returns ms per frame for
    * reconstruct+present, reconstruct only, and present only.
+   * `targetMs` (optimization 2026-09-24, K9 · AUDIT-A FA5; tools only): grow n, for each of the three roads, until ONE
+   * batch lasts at least that long — Firefox resolves completion on a ~100 ms tick, so a sub-millisecond frame needs a
+   * batch of seconds before the division means anything (2500 is the audit's rule).  Absent, n and the result are what
+   * they always were.
    */
-  async function throughput({ modes, obs, mat, n = 60 }) {
+  async function throughput({ modes, obs, mat, n = 60, targetMs = 0 }) {
     const w = canvas.width, h = canvas.height;
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT });
     try {
       if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
       const view = tex.createView();
-      const run = async (doCompute, doRender) => {
+      const run = async (doCompute, doRender, m = n) => {
         await device.queue.onSubmittedWorkDone();
         const t0 = performance.now();
         const enc = device.createCommandEncoder();
-        for (let i = 0; i < n; i++) {
+        for (let i = 0; i < m; i++) {
           if (doCompute) encodeCompute(enc, 0, modes);
           if (doRender) {
             writeView(obs, mat, w, h); const sl = writeLines(mat);
@@ -1314,8 +1318,13 @@ export async function createField(canvas, opts = {}) {
         }
         device.queue.submit([enc.finish()]);
         await device.queue.onSubmittedWorkDone();
-        return (performance.now() - t0) / n;
+        return (performance.now() - t0) / m;
       };
+      if (targetMs > 0) {                                        // each road sized on its own: the reconstruct alone is ms, not the frame's
+        const grow = async (c, r) => { for (let m = n; ; ) { const T = (await run(c, r, m)) * m; if (T >= targetMs || m >= 100000) return { m, ms: T / m }; m = T < targetMs / 6 ? m * 4 : Math.ceil(m * targetMs * 1.2 / T); } };
+        const B = await grow(true, true), C = await grow(true, false), R = await grow(false, true);
+        return { frameMs: +B.ms.toFixed(4), reconstructMs: +C.ms.toFixed(4), presentMs: +R.ms.toFixed(4), n: B.m, nReconstruct: C.m, nPresent: R.m, targetMs, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
+      }
       const both = await run(true, true), compute = await run(true, false), render = await run(false, true);
       return { frameMs: +both.toFixed(3), reconstructMs: +compute.toFixed(3), presentMs: +render.toFixed(3), n, w, h, res, modes: modes.length, steps: Math.min(mat.steps || 160, stepCap) };
     } finally { tex.destroy(); }
