@@ -67,16 +67,13 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
     let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);
     var psi = vec2<f32>(0.0, 0.0);
     var psiB = vec2<f32>(0.0, 0.0);                          // space 5: a second COHERENT group; the two are summed incoherently
-    /* THE MEMOS (optimization 2026-09-24, K1 · AUDIT-A FA2): every mode of the gas (256), the register (91) and the box
-       (27) shares ONE centre, and 16 gas modes share each l.  So the geometry is computed once per centre, P_l(cos θ)
-       once per (centre, l) and e^{imφ} once per (centre, m) — the SAME expressions on the SAME inputs, skipped only
-       when repeated (every key is exact equality of a pure function's input; every memo resets on a new centre), so
-       every texel is bit-identical (the DIGEST LOCK, both browsers).  H₂'s alternating centres simply recompute. */
-    var gC = vec3<f32>(0.0); var gq = vec3<f32>(0.0); var gr = 0.0; var gct = 1.0; var gst = 0.0; var gphi = 0.0; var gL = 999u; var gP = 0.0; var gMM = -1e30; var gE = vec2<f32>(1.0, 0.0);
     for (var a = 0u; a < P.count; a++) {
       let M = modes[a];
-      if (a == 0u || any(M.ctr.xyz != gC)) { gC = M.ctr.xyz; gq = pos - gC; gr = length(gq); gct = select(gq.z / max(gr, 1e-12), 1.0, gr < 1e-9); gst = sqrt(max(0.0, 1.0 - gct * gct)); gphi = atan2(gq.y, gq.x); gL = 999u; gMM = -1e30; }
-      let q = gq; let r = gr; let ct = gct; let st = gst; let phi = gphi;   // geometry relative to the mode's centre
+      let q = pos - M.ctr.xyz;                               // geometry relative to the mode's centre
+      let r = length(q);
+      let ct = select(q.z / max(r, 1e-12), 1.0, r < 1e-9);
+      let st = sqrt(max(0.0, 1.0 - ct * ct));
+      let phi = atan2(q.y, q.x);
       let n = M.nlm.x; let l = u32(M.nlm.y); let am = u32(M.nlm.z); let m = M.nlm.w;
       let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * M.leg1.y))));
       var f = 0.0;
@@ -93,8 +90,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       } else if (P.space == 3u) {
         /* THE WELL  ψ = norm · j_l(k r) · Y inside r < a, 0 outside: lag0 = (k, a, …); the wall is the envelope */
         let kk = M.lag0.x; let aa = M.lag0.y;
-        var Dw = D; if (M.lag0.z > 0.5) { if (l != gL) { gL = l; gP = legP(l, ct); } Dw = gP; }   // lag0.z = 1: the angular part by recurrence (the axial gas)
-        if (r < aa) { f = M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw; }   // a BRANCH, not select(): select ran the recurrence outside the wall too
+        let Dw = select(D, legP(l, ct), M.lag0.z > 0.5);        // lag0.z = 1: the angular part by recurrence (the axial gas)
+        f = select(0.0, M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw, r < aa);
       } else if (P.space == 6u) {
         /* QUARKONIUM (Cornell, NUMERICAL): R(r) read from its tabulated row, linear interpolation; lag0 = (row, 1/r_tab, r_tab) */
         let row = u32(M.lag0.x); let x = clamp(r * M.lag0.y, 0.0, 1.0) * 255.0;
@@ -104,11 +101,9 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       } else if (P.space == 2u) {
         /* OSCILLATOR  ψ = norm · r^l L(t) e^{−t/2} · Y,  t = r²  (L = the half-integer Laguerre; the same record serves
            momentum space, whose (−i)^N phase is folded into c on the CPU) */
-        /* r is re-derived here, in the pre-memo form, on purpose: the driver folds length(q)² back to dot(q, q) only when
-           it can see the length, and through the memo it cannot — 194 texels of the 96³ oscillator moved (probes/K/k1-osc) */
-        let qo = pos - M.ctr.xyz; let ro = length(qo); let t = ro * ro;
+        let t = r * r;
         let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
-        f = M.c.z * ipow(ro, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
+        f = M.c.z * ipow(r, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
       } else {
         /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
            the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */
@@ -117,7 +112,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         f = M.c.z * ipow(q, l) * L / pow(1.0 + t, M.c.w) * ipow(st, am) * D;     // c.w = the exponent n+1 (kept integer when the ρ-scale is n/Z)
       }
       let mm = select(m, 0.0, P.space == 4u);                // the pair branch keeps ζ in the m slot: no azimuthal phase
-      if (mm != gMM) { gMM = mm; gE = vec2<f32>(cos(mm * phi), sin(mm * phi)); } let e = gE;
+      let e = vec2<f32>(cos(mm * phi), sin(mm * phi));
       let ce = vec2<f32>(M.c.x * e.x - M.c.y * e.y, M.c.x * e.y + M.c.y * e.x);
       if (P.space == 5u && M.ctr.w > 0.5) { psiB += f * ce; } else { psi += f * ce; }
     }

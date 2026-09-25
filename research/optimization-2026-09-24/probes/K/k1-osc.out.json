@@ -1,0 +1,153 @@
+{
+ "compileErrors": {},
+ "variants": [
+  "ship",
+  "shipDot",
+  "geo",
+  "geoDot",
+  "geoDirect",
+  "geoDirectT"
+ ],
+ "states": {
+  "oscillator": {
+   "count": 2,
+   "space": 2,
+   "half": 5.645751311064591,
+   "res": {
+    "64": {
+     "shipDot": 0,
+     "geo": 52,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "96": {
+     "shipDot": 0,
+     "geo": 194,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "128": {
+     "shipDot": 0,
+     "geo": 608,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    }
+   }
+  },
+  "momentum": {
+   "count": 2,
+   "space": 1,
+   "half": 4,
+   "res": {
+    "64": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "96": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "128": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    }
+   }
+  },
+  "h91": {
+   "count": 91,
+   "space": 0,
+   "half": 92,
+   "res": {
+    "64": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "96": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "128": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    }
+   }
+  },
+  "gas": {
+   "count": 256,
+   "space": 3,
+   "half": 10.8,
+   "res": {
+    "64": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "96": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "128": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    }
+   }
+  },
+  "h2": {
+   "count": 4,
+   "space": 5,
+   "half": 5.7,
+   "res": {
+    "64": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "96": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    },
+    "128": {
+     "shipDot": 0,
+     "geo": 0,
+     "geoDot": 0,
+     "geoDirect": 0,
+     "geoDirectT": 0
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,181 @@
+{
+ "compileErrors": {},
+ "variants": [
+  "ship",
+  "early",
+  "geo",
+  "dw",
+  "e",
+  "cur"
+ ],
+ "states": {
+  "1s+2pz": {
+   "count": 2,
+   "space": 0,
+   "half": 16,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "rydberg": {
+   "count": 3,
+   "space": 0,
+   "half": 92,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "h91": {
+   "count": 91,
+   "space": 0,
+   "half": 92,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "box": {
+   "count": 27,
+   "space": 3,
+   "half": 10.8,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "gas": {
+   "count": 256,
+   "space": 3,
+   "half": 10.8,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "helium": {
+   "count": 6,
+   "space": 4,
+   "half": 4,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "h2": {
+   "count": 4,
+   "space": 5,
+   "half": 5.7,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "momentum": {
+   "count": 2,
+   "space": 1,
+   "half": 4,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "oscillator": {
+   "count": 2,
+   "space": 2,
+   "half": 5.645751311064591,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 194,
+     "dw": 0,
+     "e": 0,
+     "cur": 194
+    }
+   }
+  },
+  "quarkonium": {
+   "count": 2,
+   "space": 6,
+   "half": 9.773385356855263,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "sturmian": {
+   "count": 2,
+   "space": 0,
+   "half": 5.714285714285714,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  },
+  "h2plus": {
+   "count": 2,
+   "space": 0,
+   "half": 7,
+   "res": {
+    "96": {
+     "early": 0,
+     "geo": 0,
+     "dw": 0,
+     "e": 0,
+     "cur": 0
+    }
+   }
+  }
+ }
+}
