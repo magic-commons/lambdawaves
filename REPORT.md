@@ -2874,3 +2874,28 @@ near 60fps" feature flag off; Safari 26 stalls ~220–270 ms on a render pipelin
 new view or style; a warm-up at idle is the pixel-identical remedy, the commissioner's call); each backdrop-filter
 panel is its own Core Animation blur. Playable snapshots of every release now live in `~/Documents/LAMBDAWAVES-RELEASES/`
 (`tools/snapshot-release.mjs`, a RELEASING.md step).
+
+### wave 127: The project open, subtracted — and a transition that froze the old mix over a new file
+
+The iPad's own reports (a device self-report, `?report=1&post=1`, eight runs over the afternoon) showed every
+freeze the commissioner felt was a PROJECT OPEN, not a grid change: a grid tap costs 0–1 ms synchronous and a rebuild
+4–17 ms later on the M5 (playing or paused), while the old bundled demo carried a desktop's 128³ with AUTO SCALE off
+under the unpaced loop. With the tablet's quality and the pacing in place the open on the M5 is 44 ms synchronous with
+a 66 ms worst gap (the one second between the demo's tap and its import is the LAN's per-click TLS connection, not
+code). What remained was the desktop's own open: ~108 ms, 63 ms of it ten forced layouts — the notebook's size saved
+twice, the palette strip painted three times, the modulation window placed and painted twice, two canvases inside the
+hidden H₂⁺ card reading layout — and the 200 ms frame after an open, which a GPU-process trace showed to be the
+compositor rasterising the new theme and windows (240–290 ms of raster tasks, 96 ms of shader compiles on a cold
+driver cache), not WebGPU: nothing to cut there without changing what the file shows.
+
+Six subtractions, lab/ two lines shorter, every commit under the lock, the round-trip suites and a five-open
+serialize/pixel/DOM byte comparison: `restore()` stands a running A/B transition down BEFORE writing the register, as
+the undo road did (a running transition re-anchored `clearTransition` from the old mix and the register ended as the
+old modes — a bug on all three roads, fixed on all three; the undo road's own copy is deleted); a project that opens
+the modulation window rebuilds it once (`open()` rebuilds from the same model); the notebook is sized once (the layout's
+`nb` wins, `applyLayout` resizes last anyway); the palette is painted once (`load(stops, sel, id)`; `setOn` only asks
+for a repaint); the two hidden H₂⁺ canvases no longer read layout while hidden; and the pacing probe is one
+comparison (paced = a drained wait under 8 ms within 30 tries or 1.5 s), so a busy GPU at boot cannot read as "not
+paced" — the iPad's eighth run had. Measured uninstrumented on the report's own scene: WAVE DANCER open 98.0 → 78.9 ms
+(Electron, ×6) and 103.9 → 90.7 (Firefox, ×5); a saved project's restore 78.5 → 59.7 and 84.8 → 66.9; forced layout
+per open 63 → 24 ms.

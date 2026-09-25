@@ -132,8 +132,14 @@ The factorised sum (26× faster on the same thread) was rejected by Sol's law ch
 | PACE | the loop paced to the GPU where completion is prompt (probe at a drained moment; Firefox's 100 ms tick → not paced); `field.inFlight`, a hold at four in flight on the rAF path only, `LW.stats.skipped` | Safari-like loop: queue 20–26 → ≤ 4, presents 36.8/s = completions 36.6/s, AUTO SCALE steps at 0.55 s (never before); Chromium: presents already = completions, within 1 % on every scene; Firefox: not paced, 0 skipped, bench unchanged; exports byte-identical 8/8; lock GREEN | BUG (the overrun) |
 | TABLET | a tablet's first-run quality is the GRID pairing's 64³/110/0.75; `deviceQuality(saved, device)` clamps a file to 96³ (tablet) / 64³ (phone) with the pairing, and never applies a file's AUTO SCALE off; the WAVE DANCER demo loses its quality block | Firefox with the iPad UA boots 64/110/0.75; a 128/240/auto-off file → 96/160/1 with AUTO SCALE on (desktop: 128/240 as saved); `first-run.test` 8/8; official-defaults-palette; current 14/14 | defaults, ruled |
 
+| W127 | the project open, subtracted: `restore()` stands a running A/B transition down before writing the register (a bug on all three open roads); one modulation-window rebuild; one notebook size; one palette paint; the hidden H₂⁺ canvases read no layout while hidden; the pacing probe is one comparison (paced = a drained wait < 8 ms) | iPad (8th report, paced build, demo without quality): open 44 ms sync, 66 ms worst gap, no gap > 100 ms; desktop open 98 → 79 ms (Electron) / 104 → 91 (Firefox), restore 78 → 60, forced layouts per open 63 → 24 ms; five-open serialize/pixel/DOM bytes identical; lab/ −2 lines | BUG + N0 |
+
+The iPad, eight reports on: every scene at the display cap (120 fps with Safari's flag off, 60 with it on), a
+project open under 70 ms, grid changes 0–1 ms + one rebuild frame; the 313 ms GPU queue and the 1.3 s freezes gone.
+
 Not built (Josh's calls): the pipeline warm-up at idle; SHADOW folded on a mobile first visit; MOLECULES and
-MO-REGISTRY off the first-run rack; an upward probe for AUTO SCALE while playing; the Safari 60 fps flag.
+MO-REGISTRY off the first-run rack; an upward probe for AUTO SCALE while playing; the Safari 60 fps flag (a note for
+agents in the repo instead, wave 129).
 
 ### Lane N · archaeology (after the merge)
 
