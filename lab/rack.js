@@ -277,7 +277,11 @@ export async function boot(dom) {
          scratch, so a key it does not name is destroyed on the next call — the exact hole waves 54 and
          59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
          else.  Pick an input, move any window, reload: back to the system default. */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'),
+      /* OPTIMIZATION 2026-09-24 · M4 · `abW` / `abH` ARE THE SIXTH AND SEVENTH, and the fourth time this one hole has been
+         found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
+         preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
+         470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'),
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
