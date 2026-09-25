@@ -1,5 +1,5 @@
 /* tests/basis-631.test.mjs — THE LARGER BASIS: 6-31+G* (H, C, N, O, F), Cartesian d shells, against PySCF on the same
- * vendored decimals (lab/oracles/6-31+g-star-v1.json, written by research/molecular-waves-2026-09-18/basis/oracle-631.py).
+ * vendored decimals (tests/fixtures/oracles/6-31+g-star-v1.json, written by research/molecular-waves-2026-09-18/basis/oracle-631.py).
  * The gate runs the cheap half of the oracle (≤ 27 AOs, a few hundred ms each); the whole table — nineteen molecules
  * to 3e-12 — is the research record engine-631.json.  Also: the rule that decides where the card offers the basis. */
 import assert from 'node:assert/strict';
@@ -9,7 +9,7 @@ import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { moleculeAtoms, moleculeCharge, basis631, MOLECULES } from '../lab/molecules.js';
 
 const raw = fs.readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url));
-const oracle = JSON.parse(fs.readFileSync(new URL('../lab/oracles/6-31+g-star-v1.json', import.meta.url), 'utf8'));
+const oracle = JSON.parse(fs.readFileSync(new URL('./fixtures/oracles/6-31+g-star-v1.json', import.meta.url), 'utf8'));
 assert.equal(createHash('sha256').update(raw).digest('hex'), oracle.provenance.bse_sha256, 'the oracle names the vendored record');
 registerRecord('6-31+g-star', JSON.parse(raw));
 let worst = 0, ran = 0;

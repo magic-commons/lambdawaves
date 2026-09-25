@@ -187,7 +187,15 @@ export async function boot(dom) {
   };
   let inkCv = null;
   const inkCtx = () => (inkCv || (inkCv = document.createElement('canvas'))).getContext('2d');   // one scratch context: the CSS colour parser the views use, reachable by a gate
+  /* OPTIMIZATION 2026-09-24 · M7 · ONE PAINT PER BATCH.  paintMarks is a pure function of (palette LUT, hue, theme, stage)
+     over every copy of the mark, and it ran 7× in the boot's one synchronous task and ~10× per project open, where only
+     the last call is ever seen.  Inside a batch (the boot's build, restore()) a call only marks the marks dirty — and
+     the turn's keyframes stale, as the full call does, so a busy mark raised inside the batch never animates the old
+     palette — and the batch's end paints once.  Batches are released in a `finally` (restore) or at the boot's tail. */
+  let markBatch = 0, marksDirty = false;
+  function markBatchEnd() { if (markBatch > 0 && --markBatch === 0 && marksDirty) { marksDirty = false; paintMarks(); } }
   function paintMarks() {
+    if (markBatch) { marksDirty = true; turnDirty = true; return; }
     for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamutCss(markInk(0, stageGround()));   // over the CANVAS: the live STAGE colour
     for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamutCss(markInk(0));                  // over the CARD: the constant that really is one
     document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
@@ -277,7 +285,11 @@ export async function boot(dom) {
          scratch, so a key it does not name is destroyed on the next call — the exact hole waves 54 and
          59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
          else.  Pick an input, move any window, reload: back to the system default. */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'),
+      /* OPTIMIZATION 2026-09-24 · M4 · `abW` / `abH` ARE THE SIXTH AND SEVENTH, and the fourth time this one hole has been
+         found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
+         preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
+         470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'),
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -759,7 +771,10 @@ export async function boot(dom) {
     onError: (m) => showBanner('GPU error', m),
     onLost: (i) => showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.') });
   if (field.ok) gamutCss = (rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')');   // wave 54: one map, both sides
-  if (!field.ok) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
+     was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
+  if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  markBatch++;                        // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
   /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
      down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
      — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
@@ -2503,11 +2518,15 @@ export async function boot(dom) {
 
   // SLICE — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'SLICE', status: '' });
-  rack.appendChild(wSlice.root);
   const slice = createSliceView(wSlice.body, {
     lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
   });
+  /* OPTIMIZATION 2026-09-24 · M6(b): appended AFTER its view is built (still before QCD, so the rack order and
+     LW.bootOrder are unchanged).  Appended first, the plane model's construction-time paint read `cv.clientWidth` on a
+     half-built rack and forced its first full style + layout (28.6 ms); disconnected, the read answers 0 without a
+     flush, and the plane model's own ResizeObserver paints it once it is laid out. */
+  rack.appendChild(wSlice.root);
 
   // QCD — the confining side: quarkonium under a chosen potential, the flavour-independence verdict, the string
   const wQCD = device({ id: 'qcd', eyebrow: 'QCD', status: '' });
@@ -4572,7 +4591,25 @@ export async function boot(dom) {
         open(path) {
           const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
-          busy.n++; busySync(); try { restore(it.data, { project: true }); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          /* M5b (2026-09-24): the instrument as it stands, taken before the file touches it — the SAME road a saved project
+             takes (serialize → JSON → restore) — and whether it was clean, so a failed open can hand both back. */
+          const before = JSON.parse(JSON.stringify(serialize())), baseline = pjBaseline, wasClean = !projectDirty();
+          let restored = false, back = true;
+          busy.n++; busySync(); try { restored = restore(it.data, { project: true }); if (!restored) { try { back = restore(before) === true; } catch (_) { back = false; } } } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          /* OPTIMIZATION 2026-09-24 · M5 · A FAILED OPEN COMMITS NOTHING OF ITS OWN.  restore() answers false when the file's
+             data threw half-way (importText checks only the envelope), and this used to carry on regardless: the
+             notebook keys, `recent`, `current` = the broken path and a CLEAN mark over the half-applied state, so a
+             plain Ctrl+S overwrote the stored file with it.  Now the previous project stays current, the notebook and
+             the recent list are untouched, nothing is marked clean, and the status says so.
+             M5b · …AND THE INSTRUMENT COMES BACK.  A half-applied state left current was one Ctrl+S away from overwriting the
+             PREVIOUS project (measured), so the pre-open snapshot is restored through the same road and the pre-open
+             dirty state re-applied: clean if it was clean, dirty against the old baseline if it was not.  If even the
+             roll-back fails, nothing is current, so no SAVE can land on a file — and the status says that too. */
+          if (!restored) {
+            if (back) { if (wasClean && baseline !== null) projectClean(); else pjBaseline = baseline; pjStatus('open failed ' + path + ' — the previous state is back'); }
+            else { pjCurrent = null; pjStatus('open failed ' + path + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this'); }
+            return false;
+          }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
@@ -4622,7 +4659,7 @@ export async function boot(dom) {
          file from disk takes, then opened. Josh's WAVE DANCER is the first. */
       for (const b of nb.querySelectorAll('.pj-demo')) b.addEventListener('click', async () => {
         try { const r = await fetch('./demos/' + b.dataset.file + '.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status);
-          const p = projects.importText(await r.text()); projects.open(p); pjStatus('opened demo ' + p); }
+          const p = projects.importText(await r.text()); if (projects.open(p)) pjStatus('opened demo ' + p); }   // M5: a failed open keeps its own status
         catch (err) { pjStatus('demo failed: ' + err.message); }
       });
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
@@ -4922,7 +4959,7 @@ export async function boot(dom) {
        browser has SAID in SETTINGS still wins, exactly as CARD STYLE's default does. */
     if (!phone.applied) {
       phone.applied = true;
-      field.setDprCap(phone.DPR);                                   // 3 physical pixels per CSS pixel of a ray-marched volume buys nothing at arm's length
+      if (field.setDprCap) field.setDprCap(phone.DPR);              // 3 physical pixels per CSS pixel of a ray-marched volume buys nothing at arm's length
       /* ⚠ WAVE 106 · THE PHONE STOPPED GETTING ITS LOW-POWER PATH WHEN 64³ BECAME THE DEFAULT.
          This was ONE branch doing TWO jobs, and wave 101 silently switched it off.  The grid, the
          march steps and the render scale were all set inside `gridSeg.get() !== '64'` — which was
@@ -4979,7 +5016,7 @@ export async function boot(dom) {
        already off by the time this runs, so `popOut` is allowed to answer again). */
     if (phone.floats) { for (const id of Object.keys(phone.floats).sort((a, b) => (phone.floats[a].z || 0) - (phone.floats[b].z || 0))) layout.popOut(id, phone.floats[id]); phone.floats = null; }
     phone.applied = false;
-    field.setDprCap(2);
+    if (field.setDprCap) field.setDprCap(2);
     schedule(TIER.REBUILD);
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };
@@ -4996,7 +5033,11 @@ export async function boot(dom) {
       if (on) enterPhone(); else leavePhone();
     }
     tablet.on = isTablet();
-    field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
+    /* OPTIMIZATION 2026-09-24 · M3 (L6): a field that never came up (no WebGPU, no adapter, a device lost before
+       createField finished) is createField's method-less failure object, and this line threw "boot failed —
+       field.setDprCap is not a function" instead of leaving rack.js:762's banner up.  The METHOD is tested, not
+       `field.ok`: a device lost after boot keeps its methods and keeps today's behaviour byte for byte. */
+    if (field.setDprCap) field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
     schedule(TIER.PRESENT);
     return on;
   }
@@ -5411,6 +5452,7 @@ export async function boot(dom) {
   /** opt.keepTime: leave the transport exactly where it is (UNDO / REDO) — the anchor c(0) is what travels, so the
    *  picture is continuous the way a RATE change is and only moves if the coefficients themselves did */
   function restore(obj, opt) {
+    markBatch++;                                                     // M7: released in the finally below
     try {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
@@ -5487,7 +5529,7 @@ export async function boot(dom) {
           else if (fieldOwner === 'chem') chem.setOn(true);
           if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') orbitals.setOn(true);
           if (I.states && I.states.on && fieldOwner === 'chem') states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
-          if (I.ladder) ladder.set(I.ladder);
+          if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
             if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); dynamics.ui.trail.set(I.particles.trail); }
@@ -5553,6 +5595,9 @@ export async function boot(dom) {
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
+    /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
+       never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
+    finally { schedule(TIER.REBUILD); markBatchEnd(); }
   }
 
   /* ── WAVE 56 · SHAREABLE LINKS (board #55) ────────────────────────────────────────────────
@@ -6182,6 +6227,7 @@ export async function boot(dom) {
 
   markTurn();
   busyHost();                         // the mark is cloned and painted before anything can need it
+  markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) layout.projects.markClean();
   LW.ready = true;
   return LW;

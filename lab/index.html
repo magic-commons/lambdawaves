@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script type="module" async src="./gpu-boot.js"></script>
+<!-- OPTIMIZATION 2026-09-24 · M1 · FIRST ON PURPOSE, AND ASYNC: the WebGPU adapter + device request (lab/gpu-boot.js, no
+     imports) starts here, in parallel with the stylesheets and the ~100-module graph, instead of after all of them;
+     field.js imports the same URL and takes the promise.  A deferred or plain module script would wait for the
+     stylesheets below; an async one runs the moment it arrives. -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- WAVE 56: the shipped theme is LIGHT (rack.js applySettings' `|| 'light'`), so "dark" alone was a lie —
      and this meta is what the browser paints before the first frame, most visibly in a standalone window. -->

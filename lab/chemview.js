@@ -231,7 +231,7 @@ export function createChem(host, api) {
     status(basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
     if (api.loading) api.loading(true);
-    const task = call(msg, () => localSolve(msg)).then((r) => {
+    const task = Promise.all([call(msg, () => localSolve(msg)), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
       if (seq !== solveSeq) return null;
       if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
       sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
@@ -641,8 +641,12 @@ export function createChem(host, api) {
    * The record is still built, validated and handed out by `record()` below for the callers it is FOR: a state
    * link, a fixture, an export.  load() accepts one through restoreMolecule so a file that carries it still opens.
    */
-  let MS = null;
-  import('./molecule-state.js').then((m) => { MS = m; }).catch(() => { MS = null; });
+  let MS = null, msLoad = null;
+  /* OPTIMIZATION 2026-09-24 · M8: the record module (and its five chemistry imports, ~88 KB) is fetched on the FIRST
+     solve — every road into one: prepare(), setOn, the dropdown, the basis control, __LW.chem.solve — or when a file
+     carries a full record, instead of on every boot.  record() answers null until a solve exists, and a solve now
+     waits for this import before it publishes, so record() is never null after one where it was not before. */
+  const loadMS = () => msLoad || (msLoad = import('./molecule-state.js').then((m) => { MS = m; }).catch(() => { MS = null; }));
   function save() { return presentation(); }
   /** the canonical lab/molecule-state.js record of what is on screen — validated by serializeMolecule, or null */
   function record() {
@@ -656,6 +660,7 @@ export function createChem(host, api) {
   }
   function load(o = {}) {
     /* a file that DOES carry the full record gets it validated here; a project's presentation-only record does not */
+    if (o.molecule) loadMS();                                                     // M8: a file carrying a full record asks for the module too
     if (o.molecule && MS && typeof MS.restoreMolecule === 'function') { try { MS.restoreMolecule(o.molecule); } catch (_) {} }
     let resolve = false;
     if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }

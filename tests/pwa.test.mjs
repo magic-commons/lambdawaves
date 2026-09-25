@@ -241,7 +241,15 @@ console.log(`PASS ${ICONS.length} icons decoded by hand (signature, CRC, IHDR, u
    for.  The predicate is deliberately narrow: `*-SOURCE.txt` (the build records) and every other .md/.txt is
    still prose and still skipped, so a note edit still does not rebuild the cache. */
 const LICENCE = (rel) => /(^|\/)(LICENSE|OFL\.txt)$/.test(rel) || /-(OFL|LICENSE)\.(txt|md)$/i.test(rel);
-const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel));
+/* OPTIMIZATION 2026-09-24 · M10 · A MODULE STAGED UNDER tests/wiring.test.mjs's ALLOWLIST is, by that suite's own proof,
+   reached by no root, so no install fetches it.  The set is READ from wiring's list, never kept here: the day a staged
+   module is wired, wiring forces its entry out and the file rejoins the precache by itself (REFUTE-E FD8(b)). */
+const WIRING = readFileSync(path.join(LAB, '..', 'tests', 'wiring.test.mjs'), 'utf8');
+const ALLOW_BLOCK = (WIRING.match(/\nconst ALLOWLIST = \[\n([\s\S]*?)\n\];/) || [])[1];
+assert.ok(ALLOW_BLOCK !== undefined, 'tests/wiring.test.mjs: the ALLOWLIST array moved — the precache cannot derive its STAGED set');
+const STAGED = new Set([...ALLOW_BLOCK.matchAll(/\{ file: 'lab\/([^']+)'/g)].map((m) => m[1]));
+assert.equal(STAGED.size, (ALLOW_BLOCK.match(/\bfile:/g) || []).length, 'tests/wiring.test.mjs: an ALLOWLIST entry this parser cannot read');
+const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel);
 const walk = (d, out = []) => { for (const e of readdirSync(d, { withFileTypes: true })) {
   const f = path.join(d, e.name); if (e.isDirectory()) walk(f, out); else out.push(path.relative(LAB, f).split(path.sep).join('/')); } return out; };
 const onDisk = walk(LAB).sort();
@@ -294,7 +302,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -393,7 +401,7 @@ const live = (s, html) => (html ? s.replace(/<!--[\s\S]*?-->/g, ' ') : s)
 let refs = 0;
 const noteAll = (rel, src, re, g = 1) => { for (const m of src.matchAll(re)) { refs++; note(rel, m[g]); } };
 noteAll('index.html', live(text('index.html'), true), /(?:src|href)="([^"]+)"/g);
-for (const rel of onDisk.filter((r) => /\.js$/.test(r) && !r.startsWith('vendor/'))) {
+for (const rel of onDisk.filter((r) => /\.js$/.test(r) && !r.startsWith('vendor/') && !STAGED.has(r))) {   // M10: a staged module's imports are not loads of the running lab
   const src = live(text(rel));
   noteAll(rel, src, /(?:from|import)\s*\(?\s*['"](\.[^'"]+)['"]/g);
   noteAll(rel, src, /new URL\(\s*['"](\.[^'"]+)['"]\s*,\s*import\.meta\.url/g);

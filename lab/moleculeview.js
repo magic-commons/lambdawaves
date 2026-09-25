@@ -62,7 +62,10 @@ export function createMolecule(host, api) {
     roD.set(`${eq.DeEV.toFixed(2)} · ${EXACT_DE_EV.toFixed(2)} eV`, '');
     roD.setSub(`R_e ${eq.Re.toFixed(2)} · reference ${EXACT_RE.toFixed(2)} a₀ · gap ${(EXACT_DE_EV - eq.DeEV).toFixed(2)} eV`);
     roT.set(`${T.toFixed(2)} a.u.`, 'ok'); roT.setSub(`E_u − E_g = ${(e.Eu - e.Eg).toFixed(4)} hartree at R = ${R.toFixed(2)}`);
-    paint();
+    /* OPTIMIZATION 2026-09-24 · M6(c): the legacy card is `hidden` from boot, and paint() would force a layout only to
+       read a zero width and return (2.4 ms at construction, 8.6 per restore).  Neither test below reads layout; the
+       reveal road repaints through graphHover's ResizeObserver, exactly as a card that had no size does today. */
+    if (cv.isConnected && !cv.closest('[hidden]')) paint();
   }
   function paint() {
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);

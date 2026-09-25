@@ -1,5 +1,5 @@
 /* molecules.test.mjs — THE LIBRARY'S GATE.  lab/molecules.js against lab/md.js's own basis and against the PySCF
- * oracle research/h2o-2026-09-11/scratch/fix-molecules.py wrote into lab/oracles/sto-3g-v1.json (`library`).
+ * oracle research/h2o-2026-09-11/scratch/fix-molecules.py wrote into lab/oracles/sto-3g-v1.json (`library`), now tests/fixtures/oracles/sto-3g-v1.json.
  *
  *   node tests/molecules.test.mjs
  *
@@ -26,7 +26,7 @@ import { MOLECULES, MOLECULE_BY_ID, GROUPS, LEGACY_PRESETS, CAP_ID, CAP_MS, COST
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) <= tol, `${what}: ${a} vs ${b} (|Δ| ${Math.abs(a - b).toExponential(3)} > ${tol})`);
 const record = read('../lab/vendor/bse/sto-3g-v1.json');
-const oracle = read('../lab/oracles/sto-3g-v1.json');
+const oracle = read('./fixtures/oracles/sto-3g-v1.json');
 registerRecord('sto-3g', record);
 const LIB = oracle.library;
 const ws = (s) => String(s).replace(/\s+/g, ' ').trim();
@@ -34,7 +34,7 @@ const tolOf = (E) => Math.max(1e-9, 3e-12 * Math.abs(E));
 
 /* 0. The oracle was written against these bytes, and it covers every entry. */
 {
-  assert.ok(LIB && typeof LIB === 'object', 'lab/oracles/sto-3g-v1.json carries a `library` block');
+  assert.ok(LIB && typeof LIB === 'object', 'tests/fixtures/oracles/sto-3g-v1.json carries a `library` block');
   const prov = oracle.provenance.library;
   assert.equal(prov.bse_sha256, oracle.provenance.bse_sha256, 'the library block names the same record as the file');
   assert.equal(prov.cart, true); assert.equal(prov.unit, 'bohr');

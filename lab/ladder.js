@@ -157,5 +157,12 @@ export function createLadder(host, api = {}) {
   return { compute, prepare, setActive, params: P, get computed() { return !!last && !dirty; },
     /* Reading the mathematical result is an explicit demand (tests and copy/export use it), even if the card is hidden. */
     get last() { if (!last || dirty) compute(); return last; },
-    set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); compute(); } };
+    set(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); compute(); },
+    /* OPTIMIZATION 2026-09-24 · M2 · THE RESTORE ROAD DEFERS.  The 2026-09-09 demand-loaded pass moved the INITIAL solve
+       behind prepare()/the card worker and missed this road: every project open (and the quick LOAD) that carried
+       `instruments.ladder` solved synchronously — 0.42 s at the default n̄, 1.5 s at n̄ 42 — for a card that ships
+       closed.  load() lands the same params and the same knobs and the closed forms at once, and marks the scan
+       dirty exactly as a knob does: an open card re-solves on the worker (`schedule` → `arm` → prepare), a closed one
+       when it opens, and `last` still computes on demand.  set() above stays synchronous for every other caller. */
+    load(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); schedule(); } };
 }
