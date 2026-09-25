@@ -4466,7 +4466,14 @@ export async function boot(dom) {
         open(path) {
           const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
-          busy.n++; busySync(); try { restore(it.data, { project: true }); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          let restored = false;
+          busy.n++; busySync(); try { restored = restore(it.data, { project: true }); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          /* OPTIMIZATION 2026-09-24 · M5 · A FAILED OPEN COMMITS NOTHING OF ITS OWN.  restore() answers false when the file's
+             data threw half-way (importText checks only the envelope), and this used to carry on regardless: the
+             notebook keys, `recent`, `current` = the broken path and a CLEAN mark over the half-applied state, so a
+             plain Ctrl+S overwrote the stored file with it.  Now the previous project stays current, the notebook and
+             the recent list are untouched, nothing is marked clean, and the status says so. */
+          if (!restored) { pjStatus('open failed ' + path); return false; }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
@@ -4516,7 +4523,7 @@ export async function boot(dom) {
          file from disk takes, then opened. Josh's WAVE DANCER is the first. */
       for (const b of nb.querySelectorAll('.pj-demo')) b.addEventListener('click', async () => {
         try { const r = await fetch('./demos/' + b.dataset.file + '.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status);
-          const p = projects.importText(await r.text()); projects.open(p); pjStatus('opened demo ' + p); }
+          const p = projects.importText(await r.text()); if (projects.open(p)) pjStatus('opened demo ' + p); }   // M5: a failed open keeps its own status
         catch (err) { pjStatus('demo failed: ' + err.message); }
       });
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
@@ -5451,6 +5458,9 @@ export async function boot(dom) {
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
+    /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
+       never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
+    finally { schedule(TIER.REBUILD); }
   }
 
   /* ── WAVE 56 · SHAREABLE LINKS (board #55) ────────────────────────────────────────────────
