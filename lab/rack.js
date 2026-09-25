@@ -832,6 +832,11 @@ export async function boot(dom) {
        not raise the cursor busy mark; the first user-requested bow still starts the same worker immediately. */
     if (!workerWarmStarted && maths.ok && !clock.playing && room >= 1) { workerWarmStarted = true; maths.raw({ op: 'warm', ham: 'hydrogen', Z: 1 }); }
     if (!kickReady() && !clock.playing && room >= 1) kickWarm(Math.min(4, Math.max(1, room - 1)));
+    /* LA5 · NOTHING LEFT TO WARM, SO NOTHING IS ARMED.  This used to re-arm every 2 s forever — a timer and an idle
+       callback per tick on a paused, untouched instrument (AUDIT-B FB9, AUDIT-F F15).  The tables are keyed on the
+       Hamiltonian in force (kick.js tablesReady), so switchHamiltonian — the one funnel of every OPERATOR, Z, ELEMENT,
+       LAUNCH, restore and undo change — re-arms the chain; the resume road re-arms it too (warmArm(60)). */
+    if (kickReady() && (workerWarmStarted || !maths.ok)) return;
     warmArm(kickReady() ? 2000 : clock.playing ? 750 : 120);
   };
   const warmArm = (ms) => {
@@ -2261,6 +2266,7 @@ export async function boot(dom) {
     setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
   }
   function switchHamiltonian(id) {
+    if (!warmTimer && !warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
     const H = setHamiltonian(id);
     if (id !== 'well' && gas.on) { gas.off(); schedule(TIER.RECONSTRUCT); }
     reg.setEnergies(energyOf);

@@ -1,0 +1,20 @@
+{
+ "idle": {
+  "setTimeout": 5,
+  "requestIdleCallback": 5,
+  "frames": 0
+ },
+ "afterSwitch": {
+  "kickMsFiveSecondsAfterSwitch": 22.6,
+  "kickMsRightAfterSwitch": 57.8,
+  "timersIn5sAfterSwitch": {
+   "setTimeout": 7,
+   "requestIdleCallback": 7
+  },
+  "timersIn6sOnceWarm": {
+   "setTimeout": 3,
+   "requestIdleCallback": 3
+  }
+ },
+ "errs": []
+}
