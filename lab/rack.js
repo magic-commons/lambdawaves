@@ -5051,8 +5051,8 @@ export async function boot(dom) {
         }
         if (pr.space && pr.space !== space && !getHamiltonian().noMomentum && !sturm.P) { space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(space); }
         if (pr.palette && palette) {
-          if (pr.paletteId && palette.select(pr.paletteId)) palChoice = pr.paletteId;
-          if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops, pr.palette.selected);
+          if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
+          if (pr.paletteId && palette.id === pr.paletteId) palChoice = pr.paletteId;
           palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,

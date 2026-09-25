@@ -1,0 +1,56 @@
+[
+ {
+  "label": "boot",
+  "on": false,
+  "paletteOn": false,
+  "view": 1,
+  "acc": "#00a295 | #e05700 | #071114 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "897e9d54",
+  "pixels": "bda8693c"
+ },
+ {
+  "label": "P",
+  "on": true,
+  "paletteOn": true,
+  "view": 1,
+  "acc": "#6332ff | #ff0093 | #f2f5f7 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "897e9d54",
+  "pixels": "11a9906e"
+ },
+ {
+  "label": "P again",
+  "on": false,
+  "paletteOn": false,
+  "view": 1,
+  "acc": "#00a295 | #e05700 | #071114 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "897e9d54",
+  "pixels": "bda8693c"
+ },
+ {
+  "label": "setOn(true)",
+  "on": true,
+  "paletteOn": true,
+  "view": 1,
+  "acc": "#6332ff | #ff0093 | #f2f5f7 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "897e9d54",
+  "pixels": "11a9906e"
+ },
+ {
+  "label": "setPalette",
+  "on": true,
+  "paletteOn": true,
+  "view": 1,
+  "acc": "#24006d | #bd7700 | #f2f5f7 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "f7f005b2",
+  "pixels": "4e4ef462"
+ },
+ {
+  "label": "setOn(false)",
+  "on": false,
+  "paletteOn": false,
+  "view": 1,
+  "acc": "#00a295 | #e05700 | #071114 | 0 0 17px color-mix(in srgb, var(--acc) 75%, transparent)",
+  "strip": "f7f005b2",
+  "pixels": "bda8693c"
+ }
+]

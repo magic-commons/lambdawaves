@@ -1,0 +1,17 @@
+runs [33m5[39m syncMs 95.2 / 100.7 / 98.7 / 101.6 / 102.2 → median [33m100.7[39m · style+layout after [33m5.7[39m
+   2.12 open:snapshot              2.9 2.0 2.1 2.0 2.1
+  13.24 r:applyLayout              12.6 13.4 13.2 13.3 13.2
+   6.98 pal:select                 6.7 7.7 7.3 6.5 7.0
+   1.66 pal:load                   1.7 1.7 1.8 1.7 1.6
+   1.84 pal:setOn                  1.8 1.8 1.8 1.8 1.9
+   0.98 rb:macros                  0.9 1.0 1.0 2.8 1.0
+   3.60 rb:devices                 3.4 3.1 3.6 4.9 3.8
+  24.08 rb:place                   23.7 23.2 24.6 24.1 26.2
+   9.18 rb:sync                    8.1 8.4 9.4 9.2 9.2
+   0.92 rb:rings                   0.9 1.0 1.0 0.9 0.9
+   1.94 mw:open.place              1.8 2.4 2.0 1.9 1.9
+   2.54 mw:open.paint              2.3 3.7 2.5 2.6 2.4
+   1.12 open:restore               1.1 1.7 1.1 1.1 1.3
+   1.00 open:projectClean          1.0 1.4 0.9 1.0 1.1
+   9.78 open:show                  9.5 10.0 9.4 10.1 9.8
+  10.60 open:render                10.4 11.8 10.5 10.6 12.1

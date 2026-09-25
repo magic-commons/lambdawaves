@@ -6,6 +6,7 @@
  *       over a scrambled instrument
  *   3 · WAVE DANCER opened over the composed project (an open over an open)
  *   4 · the composed project with its modulation window CLOSED in the file
+ *   5 · the composed project with its palette OFF under another catalogue name, density view
  * After each: fnv + length of __LW.serialize() (layout.at and AUTO SCALE's notch normalised, as serialize-bytes.mjs does),
  * of the settings key, of the modulation window's DOM (outerHTML of #m2 root) and of the rack's order/class list.
  *   LW_PORT=8740 GD_PORT=5253 node research/optimization-2026-09-24/probes/P127/open-bytes.mjs <tag> */
@@ -24,11 +25,12 @@ try {
     const ser = () => { const o = LW.serialize(); if (o.presentation.layout) o.presentation.layout.at = 0; if (o.presentation.quality) o.presentation.quality.autoScale = 1; return JSON.stringify(o); };
     const modDom = () => [...document.querySelectorAll('.m2root, .crail')].map((r) => r.outerHTML).join('');
     const rackList = () => [...document.querySelectorAll('#rackL .dev, #rack .dev, #floats .dev')].map((d) => d.dataset.id + ':' + d.className + ':' + (d.parentElement && d.parentElement.id)).join('|');
-    const snap = (k) => { const s = ser(); out[k] = { ser: fnv(s), settings: fnv(localStorage.getItem('lambdawaves.q0.settings') || ''), modDom: fnv(modDom()), rack: fnv(rackList()), body: document.body.className + '|' + document.body.dataset.theme + '|' + document.body.dataset.card, nbStyle: document.getElementById('notebook').getAttribute('style'), modOpen: LW.mod.expanded, transition: !!LW.reg.transition, palette: LW.paletteId }; };
+    const px = async () => { const F = LW.field; await LW.settle(); if (F.renderPipelineReady) await F.renderPipelineReady(LW.mat); F.setOcclusion([]); const k = F.stats.presents; F.stats.presents = 13; const p = F.readPixels(LW.obs, LW.mat, 320, 240); F.stats.presents = k; return (await p).hash; };
+    const snap = async (k) => { const s = ser(); const pix = await px(); out[k] = { ser: fnv(s), settings: fnv(localStorage.getItem('lambdawaves.q0.settings') || ''), modDom: fnv(modDom()), rack: fnv(rackList()), body: document.body.className + '|' + document.body.dataset.theme + '|' + document.body.dataset.card, nbStyle: document.getElementById('notebook').getAttribute('style'), modOpen: LW.mod.expanded, transition: !!LW.reg.transition, palette: LW.paletteId, pixels: pix, paletteOn: LW.palette.on }; };
     const out = {};
     const dancer = await (await fetch('demos/wave-dancer.lambdawaves.json')).text();
     /* 1 */
-    const pd = P.importText(dancer); P.open(pd); await LW.settle(); await sleep(700); snap('1_dancer');
+    const pd = P.importText(dancer); P.open(pd); await LW.settle(); await sleep(700); await snap('1_dancer');
     P.remove(pd); P.markClean();
     /* compose */
     LW.loadPreset('1s'); LW.ab.storeA(); LW.loadPreset('2p+'); LW.ab.storeB(); LW.loadPreset('rydberg'); LW.pause(); LW.scrub(0);
@@ -43,11 +45,14 @@ try {
     /* scramble */
     LW.ab.set(false); LW.loadPreset('1s+2s'); LW.setTheme('dark'); LW.setCardStyle('refractive'); LW.layout.modulation.collapse(); LW.setPalette(LW.paletteGroups[0].items[0]); LW.layout.notebookResize(400, 300); await LW.settle();
     /* 2 */
-    P.open('p127/composed'); await LW.settle(); await sleep(700); snap('2_composed');
+    P.open('p127/composed'); await LW.settle(); await sleep(700); await snap('2_composed');
     /* 3 */
-    const pd3 = P.importText(dancer); P.open(pd3); await LW.settle(); await sleep(700); snap('3_dancerOverComposed');
+    const pd3 = P.importText(dancer); P.open(pd3); await LW.settle(); await sleep(700); await snap('3_dancerOverComposed');
     /* 4 */
-    const pc = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, ...closedFile })); P.open(pc); await LW.settle(); await sleep(700); snap('4_composedClosed');
+    const pc = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, ...closedFile })); P.open(pc); await LW.settle(); await sleep(700); await snap('4_composedClosed');
+    /* 5 · the composed project with its palette OFF, another catalogue name and the density view (setOn(false)'s road) */
+    const offFile = JSON.parse(JSON.stringify(composed)); offFile.path = 'p127/palette-off'; offFile.data.presentation.palette.on = false; offFile.data.presentation.paletteId = LW.paletteGroups[1].items[0]; offFile.data.presentation.mat.view = 0;
+    const po = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, ...offFile })); P.open(po); await LW.settle(); await sleep(700); await snap('5_paletteOff');
     out.errs = (window.__e || []).map(String).slice(0, 10);
     return out;`);
 } catch (e) { out = { error: String(e && e.stack || e) }; }
