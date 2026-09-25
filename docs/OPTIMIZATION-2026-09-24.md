@@ -8,6 +8,11 @@ gate on every commit. Everything is on branch `worktree-optimization-2026-09-24`
 baselines). This document is the summary; the numbers below are the auditors' and builders' own measurements on the
 RTX 3070, quoted with the probe that made them.
 
+The branch: 67 commits over the frozen base; 66 files under `lab/`, `tests/` and `tools/` changed (+2 676 / −1 728
+lines; rack.js 6 080 → 5 661); nine new modules out of `boot()`, one new module `lab/gpu-boot.js`, one new browser suite
+(`tests/menubar.browser-test.mjs`), one new tool (`tools/perf/digest-lock.mjs`), three byte-duplicate modules deleted,
+the PySCF oracles moved under `tests/fixtures/`. Nothing under `lab/mir/**` or `lab/fonts/**` was touched.
+
 ## 1. The law of the run, and how it was kept
 
 Every change is one of: **N0** bit-identical (texels, DOM, saved bytes), **N1** identical output later or on another
@@ -112,7 +117,16 @@ The factorised sum (26× faster on the same thread) was rejected by Sol's law ch
 
 ### Lane N · archaeology (after the merge)
 
-(filled from the N hand-back)
+| item | what | proof | class |
+|---|---|---|---|
+| N1 | menubar rows call their functions (`runAction`, `keyFor` hints, CLEAR = STATE's, RESET KEYS restored, every row in try/finally) | new `tests/menubar.browser-test.mjs`, 7 blocks green; run against the old rack it catches every defect (RESEED seeded 0 particles and moved the camera; RESET KEYS left PLAY rebound; CLEAR emptied the undo ring 1 → 0) | BUG |
+| N2 | build line `0.2.3-alpha.3 · the optimization pass · 2026-09-25`; stale comments; LANDSCAPE.md superseded; README's numbers from lane K's probes | ABOUT, `LW.build`, the copy dump | BUG/docs |
+| N3 | 134 orphan selectors cut (the filtered 124 + five second-tier + `.palette-seam`; the live orbit/dyn rows kept) | live-CSSOM probe 4 607 elements × 4 states: 0 differ beyond A/A noise; MIR stylehash every window × 8 states: 0 elements, 0 pixels | N0 |
+| N4 | SETTINGS-KEYS remnants out of the dispatcher (the `keysheet` alias and action id kept); A11 retargeted to shortcuts.js | access 11/11, keyboard suites | N0 |
+| N5 | seven write-only bindings cut after a fresh reader search; `LW.version` and the menu scale kept; `phone.DPR`/`tablet.DPR` read (1.5) | node + browser suites; serialize bytes | N0 |
+| N6 | the kit's palette and notebook modules imported; the three byte-identical lab copies deleted; three ALLOWLIST entries dropped | hexToRgb 24 096 / rgbToHex 30 782 / unproject 20 000 cases `Object.is`-equal; wiring, pwa (the kit files precached again by M10's rule) | N0 |
+| N8 | the last closed-card construction reads guarded (h2view, chemview, modDodge's pill read) | forced layout reads before ready 33.2 → 0 ms; ready 738 → 701 ms; all 30 2D canvases identical; stylehash 0/0 | N0 |
+| N7 | nine seams out of `boot()`: motion-pref, busy-mark, worker-pool, accent-wheel, sw-client, badges, rack-menus, menubar, window-chrome | one commit each with the lock, node suites, serialize bytes and stylehash green; rack.js 6238 → 5635 lines | N0 |
 
 ## 4. The before/after on the merged tree
 

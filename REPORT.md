@@ -2806,3 +2806,20 @@ stall). CHEMISTRY RT keeps one spectrum in flight paced by its own cost and fits
 steps/s at 125 k samples). kick.js memoises its radial integrals per (n, l) pair (the K key 13.7 → 1.7 ms warm, 1104
 `Object.is` checks). `gas.stats` runs in the maths worker on its own tables and paints when it lands (the BOX's 9–17 ms
 frame every 24th → none; 61/61 readout strings identical).
+
+### wave 124: The menubar calls its functions, and the code the waves left behind is gone
+
+Three menubar rows reached their controls by label text and key code and did the wrong thing (RESEED reset the camera,
+RESET KEYS clicked a trigger deleted on 2026-09-08, CLEAR pressed whichever of five CLEARs came first in the DOM — the
+undo ring's, with HISTORY floated); every row now calls its function, its key hint comes from `keyFor`, CLEAR is
+STATE's, and a throwing row still closes the bar — `tests/menubar.browser-test.mjs` clicks every row and, run against
+the old rack, catches every one of those defects. The build line says what it is. 134 CSS selectors that no code could
+ever match (98 of them the wave-52 modulation card whose JavaScript wave 64 deleted) are gone with 0 stylehash
+changes over 4 607 elements × 4 states; the five live second-tier selectors lane C found were kept. The SETTINGS-KEYS
+remnants left the dispatcher (the `keysheet` alias and action id stay for their readers); seven write-only bindings
+went after a fresh reader search (`LW.version` stays: an export reads it). The app imports the kit's palette and
+notebook modules instead of its byte-identical copies, and wiring's allowlist shrinks by three. The last closed-card
+construction reads (h2view, chemview, and modDodge's pill read) are guarded like the others: forced layout reads
+before ready 33.2 → 0 ms. And nine low-coupling blocks left `boot()` for their own modules — motion-pref, busy-mark,
+worker-pool, accent-wheel, sw-client, badges, rack-menus, menubar, window-chrome — one commit each with the lock, the
+node suites, the serialize bytes and the stylehash green after every one: rack.js 6238 → 5635 lines, no new globals.

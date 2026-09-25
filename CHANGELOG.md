@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## UNRELEASED — not frozen
 
-Work since `v0.2.3-alpha.3` — 8 waves, 50 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+Work since `v0.2.3-alpha.3` — 9 waves, 68 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
 still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
 any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
 stable enough to gate on.
@@ -26,6 +26,7 @@ stable enough to gate on.
 - **wave 121**: A project opens without solving the ladder, and a failed open leaves the instrument as it was
 - **wave 122**: The loop cannot be frozen by one throw, and the readers stop hitching
 - **wave 123**: The windows and the workers — the closed modulation window asks for no layout, the cards solve off-thread
+- **wave 124**: The menubar calls its functions, and the code the waves left behind is gone
 
 <details><summary>commits</summary>
 
@@ -78,7 +79,25 @@ stable enough to gate on.
 - `84c4424` 2026-09-25 — Merge branch 'worktree-agent-a864d03d804732e3a' into worktree-optimization-2026-09-24
 - `729f1a1` 2026-09-25 — OPTIMIZATION 2026-09-24 · merge fix: sw.js keeps M10's NEVER_PRECACHE prose row (lost when the K…
 - `6f3f3a6` 2026-09-25 — OPTIMIZATION 2026-09-24 · K5w gas.stats in the maths worker (bit-identical, one round trip…
+- `a5fac51` 2026-09-25 — OPTIMIZATION 2026-09-24 · N1 menubar rows call functions
 - `03cc83b` 2026-09-25 — OPTIMIZATION 2026-09-24 · Phase 4 (first pass): the AFTER benches on the five-lane tree,…
+- `751a03b` 2026-09-25 — OPTIMIZATION 2026-09-24 · N2 build line, stale-path comments, LANDSCAPE superseded, README…
+- `1e1e475` 2026-09-25 — OPTIMIZATION 2026-09-24 · REPORT.md: the run's section and waves 116–123; CHANGELOG regenerated…
+- `9ffa616` 2026-09-25 — OPTIMIZATION 2026-09-24 · N3 orphan CSS: the filtered 124 + the five + .palette-seam
+- `8762bed` 2026-09-25 — OPTIMIZATION 2026-09-24 · N4 the SETTINGS-KEYS remnants, narrowed
+- `1f51ba9` 2026-09-25 — OPTIMIZATION 2026-09-24 · N5 write-only bindings, narrowed
+- `27054e1` 2026-09-25 — OPTIMIZATION 2026-09-24 · N6 duplicates: the kit's palette + notebook modules, one hex pair, one…
+- `71ed5c7` 2026-09-25 — OPTIMIZATION 2026-09-24 · N8 the closed-card construction reads: H₂, MOLECULES, and the closed…
+- `6248371` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 1 motion-pref.js
+- `308f951` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 2 busy-mark.js
+- `b5ebff5` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 3 worker-pool.js
+- `0399f64` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 4 accent-wheel.js
+- `b125ae3` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 5 sw-client.js
+- `e9b5df2` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 6 badges.js
+- `fcf93e1` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 7 rack-menus.js
+- `83216d4` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 8 menubar.js (after N1)
+- `81fba5a` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 9 window-chrome.js
+- `6c5657b` 2026-09-25 — Merge branch 'worktree-agent-a6b9b4a8645613f0d' into worktree-optimization-2026-09-24
 
 </details>
 
