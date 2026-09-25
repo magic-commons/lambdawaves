@@ -187,7 +187,15 @@ export async function boot(dom) {
   };
   let inkCv = null;
   const inkCtx = () => (inkCv || (inkCv = document.createElement('canvas'))).getContext('2d');   // one scratch context: the CSS colour parser the views use, reachable by a gate
+  /* OPTIMIZATION 2026-09-24 · M7 · ONE PAINT PER BATCH.  paintMarks is a pure function of (palette LUT, hue, theme, stage)
+     over every copy of the mark, and it ran 7× in the boot's one synchronous task and ~10× per project open, where only
+     the last call is ever seen.  Inside a batch (the boot's build, restore()) a call only marks the marks dirty — and
+     the turn's keyframes stale, as the full call does, so a busy mark raised inside the batch never animates the old
+     palette — and the batch's end paints once.  Batches are released in a `finally` (restore) or at the boot's tail. */
+  let markBatch = 0, marksDirty = false;
+  function markBatchEnd() { if (markBatch > 0 && --markBatch === 0 && marksDirty) { marksDirty = false; paintMarks(); } }
   function paintMarks() {
+    if (markBatch) { marksDirty = true; turnDirty = true; return; }
     for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamutCss(markInk(0, stageGround()));   // over the CANVAS: the live STAGE colour
     for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamutCss(markInk(0));                  // over the CARD: the constant that really is one
     document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
@@ -766,6 +774,7 @@ export async function boot(dom) {
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
   if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  markBatch++;                        // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
   /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
      down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
      — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
@@ -5320,6 +5329,7 @@ export async function boot(dom) {
   /** opt.keepTime: leave the transport exactly where it is (UNDO / REDO) — the anchor c(0) is what travels, so the
    *  picture is continuous the way a RATE change is and only moves if the coefficients themselves did */
   function restore(obj, opt) {
+    markBatch++;                                                     // M7: released in the finally below
     try {
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
@@ -5464,7 +5474,7 @@ export async function boot(dom) {
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
     /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
        never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
-    finally { schedule(TIER.REBUILD); }
+    finally { schedule(TIER.REBUILD); markBatchEnd(); }
   }
 
   /* ── WAVE 56 · SHAREABLE LINKS (board #55) ────────────────────────────────────────────────
@@ -6094,6 +6104,7 @@ export async function boot(dom) {
 
   markTurn();
   busyHost();                         // the mark is cloned and painted before anything can need it
+  markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) layout.projects.markClean();
   LW.ready = true;
   return LW;
