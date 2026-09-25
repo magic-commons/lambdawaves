@@ -1,0 +1,24 @@
+{
+ "A": {
+  "framesDuring": 0,
+  "loopCalls": 1,
+  "errsAdded": [],
+  "stillScheduling": false
+ },
+ "B": {
+  "loopCallsIn1500ms": 0,
+  "framesDuring": 0,
+  "framesAfterFix": 0,
+  "errsAdded": []
+ },
+ "C": {
+  "loopCallsIn1500ms": 0,
+  "errsAdded": []
+ },
+ "D": {
+  "loopCallsIn1500ms": 0,
+  "framesAfterFix": 0,
+  "errsAdded": []
+ },
+ "errsAll": []
+}

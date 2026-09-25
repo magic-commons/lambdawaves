@@ -923,6 +923,7 @@ export async function boot(dom) {
      are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
      last frame alone: AUDIT-B FB2, AUDIT-F F5). */
   const loopRing = new Float64Array(60);
+  const loopFaults = new Set(); let lastFault = '';                  // LA4: the messages a thrown frame has reported, and the last frame's own
   const ringMedian = (r) => { const a = Array.from(r).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; };
   let winStart = 0, winFrames = 0, winRecon = 0, winSteps = 0;
   /* a schedule() from INSIDE the loop only raises `pending` — the loop's own tail registers the next frame.  Before wave
@@ -1113,6 +1114,8 @@ export async function boot(dom) {
     if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
     const tLoop0 = performance.now();                                 // LA1: the whole loop, timed from entry
+    let fault = '';
+    try {   /* LA4 · the body is deliberately NOT re-indented (one exception anywhere used to end the loop for the session: AUDIT-B FB7) */
     if (field.ok && field.setOcclusion && (occludeDirty || nowMs - occludeAt > 300)) refreshOcclusion(nowMs);   // layout is read HERE, before the writes below
     if (mat.axis!==false && mat.axisMode==='corner') placeCornerAxis();
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
@@ -1357,18 +1360,40 @@ export async function boot(dom) {
       winStart = now; winFrames = winRecon = winSteps = 0;
     }
     inLoop = false;
-    /* WAVE 105 · A LIVE MICROPHONE IS ITS OWN REASON TO KEEP THE FRAME.  Without this the loop
-       quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
-       the transport stopped opened the device and then never read it: the meter sat at 0.00, the
-       followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
-    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || pending || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
-    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
+    loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
     if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[slot] = spent;                                          // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
     loopRing[slot] = tEnd - tLoop0;                                   // LA1: …and the whole loop's, from entry — LW.perf.loopMedian
+    } catch (e) {
+      fault = String(e && e.message || e); loopFault(fault, e);
+    } finally {
+      /* A THROWN FRAME STILL ENDS LIKE A FRAME: `inLoop` comes down and the loop re-arms on the normal tail's own
+         condition — so a reader that throws once costs one frame, not the session.  A throw that REPEATS (the same
+         message on consecutive frames) does not re-arm on `pending` alone: a throw before the tier read leaves
+         `pending` unconsumed, and re-arming on it would spin a paused instrument at the display rate forever.  The
+         next schedule() arms a frame as it always does. */
+      if (inLoop) { inLoop = false; loopTail(fault !== '' && fault === lastFault); }
+      lastFault = fault;
+    }
+  }
+  /* WAVE 105 · A LIVE MICROPHONE IS ITS OWN REASON TO KEEP THE FRAME.  Without this the loop
+     quiesced the moment nothing else was moving — which is the BOOT DEFAULT — so pressing MIC with
+     the transport stopped opened the device and then never read it: the meter sat at 0.00, the
+     followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
+  function loopTail(faultRepeat) {
+    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || (pending && !faultRepeat) || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
+    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
+  }
+  /** LA4: a thrown frame is REPORTED ONCE per distinct message (32 kept) to window.__e and the console — a throw that
+   *  repeats every frame must not flood either */
+  function loopFault(msg, e) {
+    if (loopFaults.has(msg) || loopFaults.size >= 32) return;
+    loopFaults.add(msg);
+    (window.__e = window.__e || []).push('LOOP ' + msg);
+    console.error('λWAVES frame loop: ' + msg + ' — that frame was abandoned; the loop goes on', e);
   }
   function meterSnapshot() {
     const rs = stateReaders().rendered;
