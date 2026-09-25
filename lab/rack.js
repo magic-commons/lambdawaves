@@ -4814,7 +4814,7 @@ export async function boot(dom) {
        browser has SAID in SETTINGS still wins, exactly as CARD STYLE's default does. */
     if (!phone.applied) {
       phone.applied = true;
-      field.setDprCap(phone.DPR);                                   // 3 physical pixels per CSS pixel of a ray-marched volume buys nothing at arm's length
+      if (field.setDprCap) field.setDprCap(phone.DPR);              // 3 physical pixels per CSS pixel of a ray-marched volume buys nothing at arm's length
       /* ⚠ WAVE 106 · THE PHONE STOPPED GETTING ITS LOW-POWER PATH WHEN 64³ BECAME THE DEFAULT.
          This was ONE branch doing TWO jobs, and wave 101 silently switched it off.  The grid, the
          march steps and the render scale were all set inside `gridSeg.get() !== '64'` — which was
@@ -4871,7 +4871,7 @@ export async function boot(dom) {
        already off by the time this runs, so `popOut` is allowed to answer again). */
     if (phone.floats) { for (const id of Object.keys(phone.floats).sort((a, b) => (phone.floats[a].z || 0) - (phone.floats[b].z || 0))) layout.popOut(id, phone.floats[id]); phone.floats = null; }
     phone.applied = false;
-    field.setDprCap(2);
+    if (field.setDprCap) field.setDprCap(2);
     schedule(TIER.REBUILD);
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };
@@ -4888,7 +4888,11 @@ export async function boot(dom) {
       if (on) enterPhone(); else leavePhone();
     }
     tablet.on = isTablet();
-    field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
+    /* OPTIMIZATION 2026-09-24 · M3 (L6): a field that never came up (no WebGPU, no adapter, a device lost before
+       createField finished) is createField's method-less failure object, and this line threw "boot failed —
+       field.setDprCap is not a function" instead of leaving rack.js:762's banner up.  The METHOD is tested, not
+       `field.ok`: a device lost after boot keeps its methods and keeps today's behaviour byte for byte. */
+    if (field.setDprCap) field.setDprCap(phone.on || tablet.on ? 1.5 : 2);
     schedule(TIER.PRESENT);
     return on;
   }
