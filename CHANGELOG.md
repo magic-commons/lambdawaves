@@ -11,12 +11,9 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
-## UNRELEASED — not frozen
+## `v0.3.0-alpha` — 2026-09-25
 
-Work since `v0.2.3-alpha.3` — 9 waves, 68 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
-still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
-any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
-stable enough to gate on.
+Commit `3666d7e` · waves 116–125 · 75 commits.
 
 - **wave 116**: THE DIGEST LOCK — 1004 pinned readbacks prove the kernel, the present pass and the lines bit-identical
 - **wave 117**: The kernel remembers — bit-identical memos, the well's wall as a branch, persistent gas records, a 3× wellPacket
@@ -27,6 +24,7 @@ stable enough to gate on.
 - **wave 122**: The loop cannot be frozen by one throw, and the readers stop hitching
 - **wave 123**: The windows and the workers — the closed modulation window asks for no layout, the cards solve off-thread
 - **wave 124**: The menubar calls its functions, and the code the waves left behind is gone
+- **wave 125**: The commissioner's three rulings — the gas table by default, AUTO SCALE home on pause, tinted glass for a phone's first visit
 
 <details><summary>commits</summary>
 
@@ -98,6 +96,13 @@ stable enough to gate on.
 - `83216d4` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 8 menubar.js (after N1)
 - `81fba5a` 2026-09-25 — OPTIMIZATION 2026-09-24 · N7 seam 9 window-chrome.js
 - `6c5657b` 2026-09-25 — Merge branch 'worktree-agent-a6b9b4a8645613f0d' into worktree-optimization-2026-09-24
+- `366c2b4` 2026-09-25 — OPTIMIZATION 2026-09-24 · REPORT.md wave 124 (lane N), CHANGELOG regenerated (UNRELEASED: 9…
+- `5d91689` 2026-09-25 — RELEASING: playable snapshots of every release (Josh's rule, 2026-09-25)
+- `32f72b9` 2026-09-25 — OPTIMIZATION 2026-09-24 · W125-1 the gas table is the default
+- `08e7768` 2026-09-25 — OPTIMIZATION 2026-09-24 · W125-2 AUTO SCALE returns to 1 on the pause edge
+- `405e5d6` 2026-09-25 — OPTIMIZATION 2026-09-24 · W125-3 mobile first-run material: frost OFF, tinted
+- `9106dbd` 2026-09-25 — λWAVES 0.3.0-alpha · the optimization pass · 2026-09-25
+- `3666d7e` 2026-09-25 — OPTIMIZATION 2026-09-24 · the release tree's headed bench with the table on (default rack 80.5 →…
 
 </details>
 
