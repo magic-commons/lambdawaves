@@ -1,0 +1,26 @@
+{
+ "table": "building",
+ "rows": {
+  "64": {
+   "gasOn": true,
+   "table": 1.1851,
+   "modes": 256,
+   "n": 360,
+   "recurrence": 7.2365
+  },
+  "96": {
+   "gasOn": true,
+   "table": 3.6443,
+   "modes": 256,
+   "n": 139,
+   "recurrence": 20.9118
+  },
+  "128": {
+   "gasOn": true,
+   "table": 8.352,
+   "modes": 256,
+   "n": 60,
+   "recurrence": 46.75
+  }
+ }
+}

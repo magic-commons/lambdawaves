@@ -1,0 +1,74 @@
+{
+ "idle-default": {
+  "table": "building",
+  "gasOn": false,
+  "setTimeout": 0,
+  "requestIdleCallback": 0,
+  "frames": 0,
+  "idleCallbacksSinceReady": 21,
+  "firstGasRadialTableMs": 27.9,
+  "secondGasRadialTableMs": 0.02
+ },
+ "press-default": {
+  "tableBefore": "building",
+  "firstPressMs": 19.02,
+  "tableAtPress": "building",
+  "table": "on",
+  "settledAfterMs": 65,
+  "idleCallbacksDuringBuild": 8,
+  "longestIdleCallbackMs": 3.4,
+  "laterPressesMs": [
+   19.1,
+   17.12,
+   17.14
+  ],
+  "errs": []
+ },
+ "box": {
+  "64:table": {
+   "fps": 16.8,
+   "reconstructsPerS": 16.8,
+   "res": 64
+  },
+  "64:recurrence": {
+   "fps": 16.6,
+   "reconstructsPerS": 16.6,
+   "res": 64
+  },
+  "128:table": {
+   "fps": 16.8,
+   "reconstructsPerS": 16.8,
+   "res": 128
+  },
+  "128:recurrence": {
+   "fps": 15,
+   "reconstructsPerS": 15,
+   "res": 128
+  }
+ },
+ "idle-off": {
+  "table": "off",
+  "gasOn": false,
+  "setTimeout": 0,
+  "requestIdleCallback": 0,
+  "frames": 0,
+  "idleCallbacksSinceReady": 21,
+  "firstGasRadialTableMs": 27.3,
+  "secondGasRadialTableMs": 0.02
+ },
+ "press-off": {
+  "tableBefore": "off",
+  "firstPressMs": 20.64,
+  "tableAtPress": "off",
+  "table": "off",
+  "settledAfterMs": 21,
+  "idleCallbacksDuringBuild": 0,
+  "longestIdleCallbackMs": 0,
+  "laterPressesMs": [
+   17.52,
+   17.92,
+   14.8
+  ],
+  "errs": []
+ }
+}

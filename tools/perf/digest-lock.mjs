@@ -3,7 +3,9 @@
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --write    record the lock on THIS tree
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
  *   options:  --fixture <path>   (default research/optimization-2026-09-24/digest-lock-base.json)
- *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=1'   (appended to the lab URL)
+ *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; W125:
+ *             the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
+ *             digest-lock-base-w125.json is the base with it on)
  *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
@@ -114,13 +116,22 @@ async function base() {
   restoreMat(); LW.mat.view = 1; LW.mat.style = 0;          // the state rows present PHASE · CLOUD (the boot view)
   await settle(2);
 }
+/* W125: the gas table is the default and its idle build starts at the first AXIAL launch, so the gas state waits until the
+   table has LANDED (or was refused) before it is frozen — otherwise the digest would race the landing.  With the table
+   off ('off' at once: ?gastab=0) this returns immediately and the state is entered exactly as before. */
+async function gasTableSettled() {
+  if (!LW.gasTable || LW.gasTable() !== 'building') return;
+  LW.pause();
+  for (let i = 0; i < 500 && LW.gasTable() === 'building'; i++) await new Promise((r) => setTimeout(r, 20));
+  if (LW.gasTable() === 'building') throw new Error('the gas table never landed');
+}
 /* ── THE STATES.  Each one is entered from base() at t = 0, then frozen at its own fixed t. ── */
 const STATES = {
   '1s+2pz': async () => { await freeze(3.7); },
   rydberg: async () => { LW.loadPreset('rydberg'); LW.pause(); LW.clock.scrub(0); await freeze(3.7); },
   h91: async () => { LW.loadPreset('1s'); LW.pause(); LW.clock.scrub(0); for (let a = 0; a < 91; a++) LW.reg.set(a, 1, 0, 0); LW.reg.normalize(); await freeze(3.7); },
   box: async () => { LW.loadPreset('1s'); LW.setHamiltonian('well'); LW.setGasBasis('reg'); LW.pause(); LW.clock.scrub(0); LW.enterBox(); await freeze(2.0); },
-  gas: async () => { LW.setHamiltonian('well'); LW.setGasBasis('axial'); LW.pause(); LW.clock.scrub(0); LW.enterBox(); await freeze(2.0); },
+  gas: async () => { LW.setHamiltonian('well'); LW.setGasBasis('axial'); LW.pause(); LW.clock.scrub(0); LW.enterBox(); await gasTableSettled(); await freeze(2.0); },
   helium: async () => { LW.helium.load({ on: true, x1: [0.3, 0.4, 0.5] }); await freeze(3.7); },
   h2: async () => { LW.h2.load({ on: true, R: 1.4, which: 'singlet' }); await freeze(3.7); },
   momentum: async () => { LW.setSpace('p'); await freeze(3.7); },

@@ -30,8 +30,9 @@ function judge(name, ok, detail) {
   const fm = gas.fieldModes(0);
   judge('THE RECORDS: the field gets ≤ 256 well records with the recurrence flag set (lag[2] = 1), l up to 15', fm.length > 100 && fm.length <= 256 && fm.every((m) => m.table.lag[2] === 1) && Math.max(...fm.map((m) => m.table.l)) >= 12, { count: fm.length, lmax: Math.max(...fm.map((m) => m.table.l)) });
 }
-/* K7 (optimization 2026-09-24): the OPT-IN Hermite table.  The row a record points at must be its MODE index (l·16 + n_r, build()'s
-   order), never its position in fieldModes' filtered list (REFUTE-F §2 (i)); OFF — the default — every record carries 0. */
+/* K7 (optimization 2026-09-24): the Hermite table.  The row a record points at must be its MODE index (l·16 + n_r, build()'s
+   order), never its position in fieldModes' filtered list (REFUTE-F §2 (i)); OFF — a gas nobody asked, or `?gastab=0` — every
+   record carries 0. */
 {
   const { gasRadialTable, GAS_TABLE_N } = await import('../lab/gas.js');
   const gas = createGas(10, { warm: false });
@@ -48,8 +49,28 @@ function judge(name, ok, detail) {
   const afterRadius = rowOk(gas);
   gas.setTable(false);
   const off1 = gas.table === 'off' && gas.fieldModes(1.5).every((m) => m.table.lag[3] === 0);
-  judge('THE TABLE (K7, opt-in): off by default (lag[3] = 0), a refused upload stays off, on → every emitted record carries its MODE row + 1 (row = l·16 + n_r, checked against the mode\'s own l and k), also after a radius change; the table rows are f32(j_l(z u)); off again → 0',
+  judge('THE TABLE (K7): off until asked (lag[3] = 0), a refused upload stays off, on → every emitted record carries its MODE row + 1 (row = l·16 + n_r, checked against the mode\'s own l and k), also after a radius change; the table rows are f32(j_l(z u)); off again → 0',
     off0 && refused && on && tabOk && afterRadius && off1, { off0, refused, on, tabOk, afterRadius, off1 });
+}
+/* W125 (2026-09-25): the table is the APP's default (rack.js arms it at boot; `?gastab=0` opts out), so ARMED must cost
+   nothing: setTable(true) on a gas that holds no packet builds nothing and hands nothing to the field — the build starts at
+   the first launch().  An upload answering null (NOT NOW: an export holds the loop) leaves every record on the recurrence. */
+{
+  const gas = createGas(10, { warm: false });
+  let calls = 0, handed = null;
+  const armed = gas.setTable(true, (t) => { calls++; handed = t; return true; });
+  const waits = armed === 'building' && gas.table === 'building' && calls === 0;
+  gas.launch(-5, 2, 0.8, 0);
+  const rows = gas.fieldModes(1.5);
+  const landed = calls === 1 && gas.table === 'on' && rows.length > 100 && rows.every((R) => R.table.lag[3] >= 1);
+  const g2 = createGas(10, { warm: false });
+  g2.setTable(true, () => null); g2.launch(-5, 2, 0.8, 0);
+  const notNow = g2.table === 'building' && g2.fieldModes(1.5).every((R) => R.table.lag[3] === 0);
+  const g3 = createGas(10, { warm: false });
+  g3.setTable(true, () => { throw new Error('an opted-out table must never be uploaded'); }); g3.setTable(false); g3.launch(-5, 2, 0.8, 0);
+  const optOut = g3.table === 'off' && g3.fieldModes(1.5).every((R) => R.table.lag[3] === 0);
+  judge('THE TABLE ARMED (W125, the default): armed on an empty register builds and uploads nothing (\'building\', 0 uploads) until the first launch(), which lands it (1 upload, every record carries its row); an upload answering null (not now) keeps the recurrence; armed then opted out never uploads',
+    waits && landed && notNow && optOut && !!handed, { armed, waits, landed, notNow, optOut, calls });
 }
 /* K5w (optimization 2026-09-24): SPECTRUM's readout runs the UNCHANGED stats() in the maths worker (mathworker.js gasStats,
    the `gas.stats` op).  The worker's gas builds its own tables from the posted radius, so its answer must be the page's

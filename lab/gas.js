@@ -44,8 +44,11 @@ const zeros16 = (l) => Z16[l] || (Z16[l] = zerosOf(l, NRMAX));
  * (row = l·16 + n_r, build()'s own order) × 256 samples of (j_l(z u), h·z·j_l′(z u)), h = 1/255, which the kernel reads
  * with cubic Hermite instead of running the Miller recurrence per voxel per mode (128³: 46.8 → ~8 ms).  NOT bit-identical:
  * AUDIT-A measured every changed texel CLOSER to the exact value (≤ 1 fp16 ulp against the shipped ≤ 41) and ≤ 0.02 % of
- * pixels moved by one level; Sol showed that is strong evidence, not a proof — so it is Josh's to switch on (`?gastab=1`,
- * `__LW.gasTable(true)`) and OFF by default, where every record carries lag[3] = 0 and the kernel runs the recurrence. */
+ * pixels moved by one level; Sol showed that is strong evidence, not a proof — so it shipped OFF for Josh to judge, and on
+ * 2026-09-25 (W125) he made it THE DEFAULT: rack.js arms it at boot, `?gastab=0` / `__LW.gasTable(false)` is the opt-out,
+ * where every record carries lag[3] = 0 and the kernel runs the recurrence.  Armed is not built: setTable(true) on a gas
+ * that holds no packet only records the wish, and the idle slices start at the first launch() — a session that never
+ * opens AXIAL 256 builds nothing (idle is zero work). */
 export const GAS_TABLE_N = 256;
 const jprime = (l, x) => { if (x < 1e-6) return l === 1 ? 1 / 3 : 0; return l === 0 ? -sphj(1, x) : sphj(l - 1, x) - (l + 1) / x * sphj(l, x); };
 function* gasTableSteps(N) {
@@ -88,6 +91,7 @@ export function createGas(a = 10, opts = {}) {
      radius change mid-warm discards the half-built one. */
   let built = false, steps = null;
   let tableRows = false, tableWant = false, tableGen = 0;     // K7: the records carry their table rows only once the table is UPLOADED
+  let tableStart = null;                                      // W125: an armed table waits here for the first launch()
   function* building() {
     const ms = [];
     for (let l = 0; l <= LMAX; l++) { const z = zeros16(l); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; ms.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } yield; }
@@ -135,6 +139,7 @@ export function createGas(a = 10, opts = {}) {
     captured = n2 > 0 ? c2 / n2 : 0;
     const s = c2 > 0 ? 1 / Math.sqrt(c2) : 1; for (let m = 0; m < N; m++) { re0[m] *= s; im0[m] *= s; }
     t0 = t; on = true; last = { z0, k, sigma, t0, captured };
+    if (tableStart) { const start = tableStart; tableStart = null; start(); }   // W125: the register is IN USE now — an armed table starts its idle build
     return { captured, modes: N };
   }
   function at(t) {
@@ -171,20 +176,31 @@ export function createGas(a = 10, opts = {}) {
   return {
     get on() { return on; }, off() { on = false; }, launch, at, fieldModes, stats, overlap,
     get modes() { ensure(); return modes; },
-    /** K7 (opt-in): on → the table is built (idle slices in a browser, at once in node), handed to `upload(table)` — the
+    /** K7: on → the table is built (idle slices in a browser, at once in node), handed to `upload(table)` — the
      *  field's setGasTable, which answers true once it holds it — and only THEN do the records carry lag[3] = row + 1, so
      *  no frame ever reads a table that is not there (until then, and on a refusal, the kernel runs the recurrence).
-     *  off → every record back to lag[3] = 0 at once.  `landed()` is called after either change reaches the records. */
-    setTable(on, upload, landed) {
-      tableWant = !!on; const gen = ++tableGen;
+     *  `upload` may answer null for NOT NOW (an export is running): the landing is retried on a later idle slice, so a
+     *  deterministic render never straddles the switch.  off → every record back to lag[3] = 0 at once.  `landed()` is
+     *  called after either change reaches the records.
+     *  W125: while the register is not in use (no packet launched yet, or off() / a radius change took it away), on only
+     *  ARMS the table: nothing is sliced until launch() puts a packet in.  `table` reads 'building' from the moment it is
+     *  wanted until the records carry it — armed or slicing, the kernel runs the recurrence meanwhile. */
+    setTable(want, upload, landed) {
+      tableWant = !!want; const gen = ++tableGen; tableStart = null;
       const mark = (v) => { tableRows = v; if (built) for (let m = 0; m < recs.length; m++) recs[m].table.lag[3] = v ? m + 1 : 0; if (landed) landed(v); };
       if (!tableWant) { if (tableRows) mark(false); return 'off'; }
       if (tableRows) return 'on';
-      const land = () => { if (gen !== tableGen || !tableWant) return; if (upload && upload(gasRadialTable()) === false) { tableWant = false; return; } mark(true); };
-      if (typeof globalThis.requestIdleCallback !== 'function') { land(); return this.table; }
-      const slice = (dl) => { if (gen !== tableGen) return; if (gasTableSlice(dl)) land(); else requestIdleCallback(slice); };
-      requestIdleCallback(slice);
-      return 'building';
+      const idle = typeof globalThis.requestIdleCallback === 'function';
+      const land = () => { if (gen !== tableGen || !tableWant) return; const held = upload ? upload(gasRadialTable()) : true;
+        if (held === false) { tableWant = false; return; }
+        if (held === null) { if (idle) requestIdleCallback(land); return; }
+        mark(true); };
+      const start = () => { if (!idle) { land(); return; }
+        const slice = (dl) => { if (gen !== tableGen) return; if (gasTableSlice(dl)) land(); else requestIdleCallback(slice); };
+        requestIdleCallback(slice); };
+      if (!on) { tableStart = start; return this.table; }                // armed: the first launch() starts it
+      start();
+      return this.table;
     },
     get table() { return tableRows ? 'on' : tableWant ? 'building' : 'off'; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
     setRadius(v) { if (v !== A) { A = v; built = false; steps = null; on = false; } },   // K4: stale, not rebuilt — the next reader builds

@@ -1,0 +1,40 @@
+{
+ "canvas": [
+  1920,
+  1043
+ ],
+ "rows": {
+  "128:table": {
+   "fps": 73.5,
+   "reconstructsPerS": 73.5,
+   "res": 128
+  },
+  "128:recurrence": {
+   "fps": 28.2,
+   "reconstructsPerS": 28.2,
+   "res": 128
+  },
+  "96:table": {
+   "fps": 116.8,
+   "reconstructsPerS": 116.8,
+   "res": 96
+  },
+  "96:recurrence": {
+   "fps": 54.2,
+   "reconstructsPerS": 54.2,
+   "res": 96
+  },
+  "64:table": {
+   "fps": 118.7,
+   "reconstructsPerS": 118.7,
+   "res": 64
+  },
+  "64:recurrence": {
+   "fps": 111,
+   "reconstructsPerS": 111,
+   "res": 64
+  }
+ },
+ "landed": "on",
+ "host": "electron-chromium152-dawn"
+}
