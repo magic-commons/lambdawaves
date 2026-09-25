@@ -144,7 +144,7 @@ const PRECACHE = [
   ['./mir/window-activity.js',                                      '8eb6cefdf972'],
   ['./mo.js',                                                       'ef8b99702547'],
   ['./modrive.js',                                                  '89b99a6568d1'],
-  ['./modwindow.js',                                                '7e6589469566'],
+  ['./modwindow.js',                                                '70d57dbfc24c'],
   ['./molecular-field.js',                                          'caa6acc2bd92'],
   ['./molecular-flow.js',                                           '805b732eebdc'],
   ['./molecular-register.js',                                       'c274a236d6ef'],

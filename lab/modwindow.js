@@ -2630,6 +2630,11 @@ export function createModulation(host, port) {
   const syncKnobs = (rec) => { for (const key in rec.knobs) paintKnob(rec, key); };
 
   let lastPaint = 0, paintCalls = 0, paintRuns = 0, paintMs = 0;
+  /* 2026-09-24 · THE WORDS A PAINT REWRITES ARE WRITTEN ONLY WHEN THEY CHANGE (optimization LB3, AUDIT-C FC5).  Every
+     node below is built text-only by the kit (or empty), so after the first paint the DOM is the same string either
+     way; an identical `textContent =` still replaced the text node — a childList record and a restyle in Gecko,
+     thirty times a second with the window open.  `attr()` above is the same guard for attributes. */
+  const text = (node, s) => { if (node.textContent !== s) node.textContent = s; };
   function paint(force) {
     const t = performance.now();
     paintCalls++;
@@ -2645,23 +2650,23 @@ export function createModulation(host, port) {
       transport.xport.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
     }
     transport.xport.classList.toggle('on', clock.isRunning());
-    transport.tempoNum.textContent = T.bpm.toFixed(T.bpm < 100 ? 1 : 0);
+    text(transport.tempoNum, T.bpm.toFixed(T.bpm < 100 ? 1 : 0));
 
 
-    transport.tempoHz.textContent = (T.bpm / 60).toFixed(2) + ' Hz';
-    transport.sync.textContent = M.syncMode() === 'wall' ? 'WALL' : 'FREE';
+    text(transport.tempoHz, (T.bpm / 60).toFixed(2) + ' Hz');
+    text(transport.sync, M.syncMode() === 'wall' ? 'WALL' : 'FREE');
     transport.sync.classList.toggle('on', M.syncMode() === 'wall');
     const hz = port.cadence ? port.cadence() : 60;
-    transport.cad.textContent = hz + ' HZ';
+    text(transport.cad, hz + ' HZ');
     transport.cad.classList.toggle('on', hz === 120);
     transport.holds.forEach((b, i) => {
       const on = !!T.hold && T.holdNote === HOLD_NOTE[i];
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      attr(b, 'aria-pressed', on ? 'true' : 'false');
       b.classList.toggle('on', on);
       b.classList.toggle('held', on);
     });
     const nd = M.dormantCount();
-    foot.dead.textContent = '⊘ ' + nd;
+    text(foot.dead, '⊘ ' + nd);
     foot.dead.classList.toggle('off', nd === 0);
     /* WAVE 98 · AND THE LANE IS RE-PLACED WHEN THAT NUMBER MOVES.  `sizeLaw.workBars` takes `dead` as
        an INPUT and adds 46 px of extension for the warning, but `place()` only ever ran on a card
@@ -2719,21 +2724,21 @@ export function createModulation(host, port) {
       if (force && dev.mac) dev.mac.textContent = heldBy ? String(heldIx + 1) : '--';
       if (dev.bus) {
         const f = s.triggerId ? fireSources().find((q) => q.id === s.triggerId) : null;
-        dev.bus.textContent = f ? f.label : '--';
+        text(dev.bus, f ? f.label : '--');
         dev.bus.classList.toggle('m2bushit', !!(f && f.hit));   /* a signal binding, not a hand one */
       }
       if (force && dev.lfoWave) dev.lfoWave.textContent = shapeLabel(s);
-      if (dev.envStage) dev.envStage.textContent = stateOf(s);
+      if (dev.envStage) text(dev.envStage, stateOf(s));
       const outs = outsOf(s);
       if (dev.status) {
         dev.status.main.classList.toggle('on', s.on && stateOf(s) !== 'IDLE' && stateOf(s) !== 'OFF');
-        dev.status.text.textContent = stateOf(s);
-        dev.status.out.textContent = s.out.toFixed(2) + ' · ' + pad2(outs) + ' OUT';
+        text(dev.status.text, stateOf(s));
+        text(dev.status.out, s.out.toFixed(2) + ' · ' + pad2(outs) + ' OUT');
       }
       /* the folded strip's bay */
       if (dev.meterFill) dev.meterFill.style.height = pct(s.out);
       if (force && dev.minName) dev.minName.textContent = s.label || s.kind.toUpperCase();
-      if (dev.minOut) dev.minOut.textContent = stateOf(s);
+      if (dev.minOut) text(dev.minOut, stateOf(s));
       if (force && dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
       if (dev.envMinProgFill) dev.envMinProgFill.style.height = pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0);
       if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = shapeLabel(s);
