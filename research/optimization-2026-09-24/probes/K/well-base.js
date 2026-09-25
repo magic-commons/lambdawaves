@@ -1,3 +1,4 @@
+/* THE BASE well.js (git show 91c90bc:lab/well.js), imports re-pointed at lab/ — the K11 oracle */
 /* well.js — the infinite spherical well: a particle in a BOX, exactly.  ħ = m = 1, radius a.
  *
  * STATUS: EXACT ANALYTIC (the zeros of the spherical Bessel functions are found numerically to 1e-13, then
@@ -11,8 +12,8 @@
  * kernel draws nothing outside.  A slap on the ground state makes a packet that BOUNCES off the wall and
  * disperses (no Ehrenfest miracle here — the box is not quadratic), and with the DRAG toy it settles.
  */
-import { BASIS, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
-import { sphericalBessel } from './bessel.js';
+import { BASIS, ylmNorm, legendreDerivCoeffs } from '../../../../lab/hydrogen.js';
+import { sphericalBessel } from '../../../../lab/bessel.js';
 
 const ZEROS = new Map();
 /** the first k zeros of j_l, by bracketing on a fine grid then bisection */
@@ -75,40 +76,16 @@ export function wellPacket(x0, k, sigma, { G = 36 } = {}) {
   const re = new Float64Array(91), im = new Float64Array(91);
   const A = Math.pow(2 * Math.PI * sigma * sigma, -0.75);
   const tabs = BASIS.map((s) => wellTableFor(s));
-  /* THE FACTORS ONCE PER POINT (optimization 2026-09-24, K11 · REFUTE-A's answer to F7).  wellFromTable(tabs[q], …) for
-     all 91 labels re-derived the same geometry 91 times, a spherical Bessel per label where only 21 (l, k, a) exist, a
-     Legendre polynomial and st^|m| per label where only 21 (|m|, coefficients) exist, and e^{imφ} where only 11 m do.
-     Each distinct factor is now evaluated once per point by wellFromTable's own expression on the same inputs, and the
-     products keep its order (norm · j · st^|m| · D, then · cos/sin(mφ)), so every coefficient is the same double
-     (probes/K/k11-wellpacket: Object.is on all 91 re/im and `captured`).  The worker's `packet` op is this function. */
-  const kz = (v) => (Object.is(v, -0) ? '-0' : String(v));
-  const radKey = new Map(), angKey = new Map(), mKey = new Map(), radOf = new Int32Array(91), angOf = new Int32Array(91), mOf = new Int32Array(91);
-  const radT = [], angT = [], mT = [];
-  for (let q = 0; q < 91; q++) {
-    const T = tabs[q];
-    const rk = T.l + ':' + kz(T.lag[0]) + ':' + kz(T.lag[1]); if (!radKey.has(rk)) { radKey.set(rk, radT.length); radT.push(T); } radOf[q] = radKey.get(rk);
-    const ak = T.am + ':' + Array.from(T.leg, kz).join(','); if (!angKey.has(ak)) { angKey.set(ak, angT.length); angT.push(T); } angOf[q] = angKey.get(ak);
-    const mk = kz(T.m); if (!mKey.has(mk)) { mKey.set(mk, mT.length); mT.push(T.m); } mOf[q] = mKey.get(mk);
-  }
-  const J = new Float64Array(radT.length), SM = new Float64Array(angT.length), DV = new Float64Array(angT.length), EC = new Float64Array(mT.length), ES = new Float64Array(mT.length);
   for (let i = 0; i < G; i++) for (let j = 0; j < G; j++) for (let l = 0; l < G; l++) {
     const x = -a + (i + 0.5) * h, y = -a + (j + 0.5) * h, z = -a + (l + 0.5) * h;
     if (x * x + y * y + z * z >= a * a) continue;
     const dx = x - x0[0], dy = y - x0[1], dz = z - x0[2];
     const g = A * Math.exp(-(dx * dx + dy * dy + dz * dz) / (4 * sigma * sigma)), ph = k[0] * x + k[1] * y + k[2] * z;
     const pr = g * Math.cos(ph), pi = g * Math.sin(ph);
-    const r = Math.hypot(x, y, z);                                  // wellFromTable's geometry, once
-    const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x);
-    for (let u = 0; u < radT.length; u++) { const T = radT[u]; J[u] = r >= T.lag[1] ? 0 : sphericalBessel(T.l, T.lag[0] * r); }
-    for (let u = 0; u < angT.length; u++) { const T = angT[u]; let D = 0, xp = 1; for (let jj = 0; jj < 6; jj++) { D += T.leg[jj] * xp; xp *= ct; } DV[u] = D; let stm = 1; for (let s = 0; s < T.am; s++) stm *= st; SM[u] = stm; }
-    for (let u = 0; u < mT.length; u++) { EC[u] = Math.cos(mT[u] * phi); ES[u] = Math.sin(mT[u] * phi); }
-    for (let q = 0; q < 91; q++) {                                  // ⟨q|packet⟩ = ∫ ψ_q* packet
-      const T = tabs[q];
-      if (r >= T.lag[1]) continue;                                  // wellFromTable's { 0, 0 } outside the wall: the same `continue`
-      const f = T.norm * J[radOf[q]] * SM[angOf[q]] * DV[angOf[q]];
-      const vre = f * EC[mOf[q]], vim = f * ES[mOf[q]];
-      if (vre === 0 && vim === 0) continue;
-      re[q] += w * (vre * pr + vim * pi); im[q] += w * (vre * pi - vim * pr);
+    for (let q = 0; q < 91; q++) {
+      const v = wellFromTable(tabs[q], x, y, z);                   // ⟨q|packet⟩ = ∫ ψ_q* packet
+      if (v.re === 0 && v.im === 0) continue;
+      re[q] += w * (v.re * pr + v.im * pi); im[q] += w * (v.re * pi - v.im * pr);
     }
   }
   let captured = 0; for (let q = 0; q < 91; q++) captured += re[q] * re[q] + im[q] * im[q];

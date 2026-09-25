@@ -228,7 +228,7 @@ const PRECACHE = [
   ['./vendor/marked.min.js',                                        '15fabce5b658'],
   ['./vendor/package.json',                                         '8005a3491db7'],
   ['./vortex.js',                                                   '1f92837bb309'],
-  ['./well.js',                                                     '603218807b57'],
+  ['./well.js',                                                     'fb6041eac116'],
   ['./wigner.js',                                                   '370c23027ea3'],
   ['./wignerview.js',                                               'e0a32cb0f767'],
 ];

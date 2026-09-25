@@ -1,0 +1,10 @@
+{
+ "same": true,
+ "baseWellPacketMs": 182,
+ "builtWellPacketMs": 36.1,
+ "boxPressMs": [
+  48.9,
+  36.5,
+  37.5
+ ]
+}
