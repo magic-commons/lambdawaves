@@ -33,7 +33,8 @@
  *              GRID EDGE (three GRID switches by the segment, playing, then again paused, each with its sub-timeline —
  *              runGridEdges below; `only: 'grid'` / `&only=grid` runs those two alone) · then the PROJECT OPEN (the WAVE DANCER
  *              demo clicked open while playing, the state as found restored 4 s later, each timed and broken down —
- *              runProjectOpen below; `only: 'project'` / `&only=project`).
+ *              runProjectOpen below; `only: 'project'` / `&only=project`; it skips over a current project or unsaved
+ *              changes unless `force: true` / `&force=1`, which puts both back as found).
  *   long play  (PACE P3) right after the first scene: 30 s as found in 1 s bins — the iPad's cycle (well for a few seconds, ~5 fps
  *              for a while, then back) is longer than any 3 s scene.  Every bin of every scene also carries THE PACING: frames
  *              the loop held because four were still on the GPU (LW.stats.skipped), the most in flight (field.inFlight), the
@@ -115,6 +116,16 @@ function maskedSerialize(LW) {
 function historyState(LW) {
   const h = safe(() => LW.history);
   return h ? { cursor: safe(() => h.cursor), depth: safe(() => h.depth), redoDepth: safe(() => h.redoDepth), rows: safe(() => h.entries().length) } : null;
+}
+/** the current project and the unsaved-changes mark (projects.dirty compares a key of the state with the baseline the last
+ *  SAVE / open / NEW left — a read, no write) */
+function projectState(LW) {
+  const P = safe(() => LW.projects);
+  return P && typeof P.open === 'function' ? { current: safe(() => P.current, null), dirty: safe(() => P.dirty, null) } : null;
+}
+function projectProof(a, b) {
+  if (!a) return 'no projects (NOTEBOOK) in this page';
+  return b && a.current === b.current && a.dirty === b.dirty ? 'identical (current ' + a.current + ', dirty ' + a.dirty + ')' : 'DIFFERENT: ' + JSON.stringify(a) + ' → ' + JSON.stringify(b);
 }
 function firstDiff(a, b) {
   if (!a || !b) return null;
@@ -297,6 +308,8 @@ function gridProbe(LW) {
  *   opts.targetMs     the throughput batch floor (1500)          opts.sceneMs   one scene's play (3000)
  *   opts.grids        [64, 96, 128]                              opts.scenes / opts.gpu   false skips that part
  *   opts.only         'grid': the scenes are the two grid edges alone · 'project': the project open alone
+ *   opts.force        true: the project open runs over a current project and unsaved changes (`&force=1`), and puts
+ *                     the current project and the unsaved-changes mark back as found (runProjectOpen)
  *   opts.readyAt      performance.now() at __LW.ready (the flag's road passes it)
  *   opts.onProgress   (text) → void, between steps (the flag's toast)          opts.skipEl   the toast (left out of dom/backdrops)
  */
@@ -334,6 +347,7 @@ async function measure(LW, opts) {
     camera: { moving: !!safe(() => LW.camera.moving), obs: safe(() => { const O = LW.obs; return { yaw: O.yaw, pitch: O.pitch, dist: O.dist, fov: O.fov, mode: O.mode, quat: O.quat ? Array.from(O.quat) : null }; }) },
   };
   const proofBefore = { serialize: safe(() => maskedSerialize(LW)), storage: storageSnapshot(), history: historyState(LW) };
+  found.project = projectState(LW);                                              // the current project and the unsaved-changes mark, for the proof
   const hold = holdStorage();
 
   try {
@@ -475,6 +489,7 @@ async function measure(LW, opts) {
     viewStyle: VIEW_NAMES[LW.mat.view] === found.view && STYLE_NAMES[LW.mat.style] === found.style ? 'identical' : 'DIFFERENT',
     autoScaleSwitch: LW.quality.auto === found.auto && (!autoSwitch() || autoSwitch().classList.contains('on') === !!found.auto) ? 'identical' : 'DIFFERENT',
     bodyClass: document.body.className === found.bodyClass ? 'identical' : 'DIFFERENT: ' + document.body.className,
+    project: projectProof(found.project, projectState(LW)),
     traces: 'a play advances the SHADOW trail, the dynamics history and particles; none is project state',
   };
   if (R.restored.serialize === 'DIFFERENT') R.restored.serializeFirstDiff = firstDiff(proofBefore.serialize, proofAfter.serialize);
@@ -620,7 +635,7 @@ async function runScenes(LW, o, found, say, err, skipEl) {
   const EDGE = 10000;
 
   const gridEdges = () => runGridEdges(LW, found, S, scene, start, say, err);
-  const projectOpen = () => runProjectOpen(LW, found, S, scene, say, err);
+  const projectOpen = () => runProjectOpen(LW, found, S, scene, say, err, o.force === true);
   if (o.only === 'grid') { await gridEdges(); return S; }                 // `__LW.report({ only: 'grid' })`, `?report=1&only=grid`
   if (o.only === 'project') { await projectOpen(); return S; }           // `__LW.report({ only: 'project' })`, `?report=1&only=project`
 
@@ -889,6 +904,17 @@ function notebookPut(S) {
   if (document.activeElement !== S.active) { try { if (S.active && S.active !== document.body && S.active.focus) S.active.focus({ preventScroll: true }); else if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {} }
 }
 
+/** force=1 over unsaved changes: projects.markClean against the state as found with the notebook text one invisible character
+ *  longer (rack.js projectKey reads the textarea's value), then the text as found, its selection (when it has the focus) and
+ *  scroll — no input event, so nothing is stored.  → whether the mark now reads dirty */
+function armDirty(P0) {
+  const ta = document.querySelector('#notebook .nb-text'); if (!ta) return false;
+  const v = ta.value, top = ta.scrollTop, sel = document.activeElement === ta ? [ta.selectionStart, ta.selectionEnd, ta.selectionDirection] : null;
+  try { ta.value = v + '\u2063'; P0.markClean(); }
+  finally { ta.value = v; if (sel) { try { ta.setSelectionRange(sel[0], sel[1], sel[2]); } catch (_) {} } ta.scrollTop = top; }
+  return P0.dirty === true;
+}
+
 /**
  * THE PROJECT OPEN (2026-09-25).  The third and fourth iPad reports each froze 1.3–1.5 s where a hand opened NOTEBOOK →
  * PROJECTS → WAVE DANCER mid-run (the four keys it writes, the register → 2s, the look → phase/signed, the transport stopped).
@@ -905,16 +931,28 @@ function notebookPut(S) {
  * row, the state as found (a project open clears it and its rows cannot be written back from outside: the one thing this
  * scene cannot put back, and `restored.history` says so).  Skipped on a phone, while a project is current (opening another
  * would change the file SAVE writes) or dirty, and where the button is not in the page.
+ * FORCE (`force: true` · `&force=1`, 2026-09-25 — a fresh NEW project counts as unsaved the moment anything is touched, so on
+ * the commissioner's iPad the scene skipped twice): it runs over both, and puts both back as found.  THE CURRENT PROJECT: the
+ * one road that makes a path current without opening it is projects.save — so the path current as found is saved over the
+ * state as found, and then the stored collection goes back byte for byte (its stored copy as found; the notebook's title and
+ * status as found).  THE UNSAVED-CHANGES MARK: clean as found → markClean against the state as found, which IS the baseline
+ * the page had (clean means the two keys were equal); dirty as found → the baseline the page had (what its last SAVE / open /
+ * NEW left) was overwritten by the demo's open and cannot be read back from outside, so it is re-armed against a key the
+ * state as found does not match — the notebook text one invisible character (U+2063) longer for the one markClean, then the
+ * text, its selection and scroll as found — so the mark is dirty as found and stays dirty (and the guard asks) until a SAVE,
+ * an open or NEW.  Where no open landed the baseline was never touched and is left alone.  `residue.project` compares the
+ * two as found with the two after; the undo ring is still the one thing not put back.
  */
-async function runProjectOpen(LW, found, S, scene, say, err) {
+async function runProjectOpen(LW, found, S, scene, say, err, force) {
   const label = 'project open (3 s → WAVE DANCER → 4 s → the state as found → 4 s)';
   const P0 = safe(() => LW.projects), field = LW.field;
   const demo = () => document.querySelector('#notebook .pj-demo[data-file="wave-dancer"]');
+  const asFound = projectState(LW);                                               // { current, dirty } as found: what force=1 puts back
   const why = safe(() => LW.layout.phone.on) ? 'a phone — the project open is read on a tablet or a desktop'
-    : !P0 || typeof P0.open !== 'function' ? 'no projects (NOTEBOOK) in this page'
+    : !asFound ? 'no projects (NOTEBOOK) in this page'
     : !demo() ? 'no WAVE DANCER button in the page'
-    : P0.current ? 'a project is current here (' + P0.current + ') — opening another would change the file SAVE writes, which cannot be put back'
-    : P0.dirty ? 'the project has unsaved changes — the report does not open another over them'
+    : asFound.current && !force ? 'a project is current here (' + asFound.current + ') — opening another would change the file SAVE writes; add &force=1 to run it over a current project and unsaved changes (the undo ring is the one thing not put back)'
+    : asFound.dirty && !force ? 'the project has unsaved changes — add &force=1 to run it over unsaved changes (the undo ring is the one thing not put back)'
     : !(field && field.ok) ? 'no WebGPU field' : null;
   if (why) { S.push({ label, skipped: why }); return; }
   const KEYS = ['lambdawaves.q0.projects', 'lambdawaves.q0.notebook', 'lambdawaves.q0.notebook.title', 'lambdawaves.q0.notebook.subtitle'];
@@ -1010,20 +1048,33 @@ async function runProjectOpen(LW, found, S, scene, say, err) {
     if (P0.open !== origOpen) { if (ownOpen) P0.open = origOpen; else delete P0.open; }
     const residue = {};
     try {
-      if (P0.current) { residue.current = 'the open made ' + P0.current + ' current — removed, then the stored collection as found'; P0.remove(P0.current); }
+      /* the baseline of the unsaved-changes mark moves only where an open landed (projects.open → markClean) or the save below
+         runs; LW.restore leaves it alone */
+      const touched = !!(ev.open && ev.open.ok) || P0.current !== asFound.current;
+      if (P0.current !== asFound.current) {
+        if (asFound.current) {                                                   // force=1 over a current project: made current again, not opened
+          const was = P0.current, ok = P0.save(asFound.current);
+          residue.current = 'the open made ' + was + ' current — ' + asFound.current + ' made current again through projects.save' + (ok ? '' : ' (FAILED)') + ', then the stored collection as found (its stored copy byte for byte)';
+        } else if (P0.current) { residue.current = 'the open made ' + P0.current + ' current — removed, then the stored collection as found'; P0.remove(P0.current); }
+      }
       for (const k of KEYS) { const v = stored[k]; if (localStorage.getItem(k) !== v) { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } }
       if (nbFound && nbFound.face === 'projects' && !nbFound.hidden && LW.notebook) LW.notebook.open('projects');   // its list re-renders from the collection as found
       notebookPut(nbFound);
       if (LW.history) { LW.history.clear(); residue.undoRing = 'cleared to one row, the state as found (' + (ringFound ? ringFound.rows + ' row' + (ringFound.rows === 1 ? '' : 's') + ', cursor ' + ringFound.cursor : '?') + ' before) — a project open clears it and its rows cannot be written back'; }
-      P0.markClean(); residue.unsavedGuard = 're-armed against the state as found (projects.markClean)';
+      if (!asFound.dirty) { P0.markClean(); residue.unsavedGuard = 're-armed against the state as found (projects.markClean)'; }
+      else if (!touched) residue.unsavedGuard = 'dirty as found, and its baseline never moved (no open landed) — left alone';
+      else residue.unsavedGuard = armDirty(P0) ? 'dirty as found (force=1) — re-armed against a key the state as found does not match (the notebook text + U+2063 for the one markClean, then the text as found): the baseline the page had cannot be read back from outside, so the mark stays dirty until a SAVE, an open or NEW'
+        : 'dirty as found (force=1) — could NOT be re-armed dirty (no notebook text to mark)';
+      residue.asFound = { current: asFound.current, dirty: asFound.dirty, force: !!force };
       residue.after = { current: P0.current, dirty: P0.dirty, storage: KEYS.every((k) => safe(() => localStorage.getItem(k)) === stored[k]) ? 'identical' : 'DIFFERENT' };
+      residue.project = residue.after.current === asFound.current && residue.after.dirty === asFound.dirty ? 'identical' : 'DIFFERENT';
     } catch (e) { err('put back ' + label, e); }
     found.projectScene = { ringFound, residue };
   }
   if (!s || typeof s.skipped === 'string') return;
   const one = (rec) => (rec ? { why: rec.why, path: rec.path, ok: rec.ok, afterClickMs: rec.afterClickMs, abStoodDownMs: rec.abStoodDownMs, syncMs: rec.syncMs, styleLayoutMs: rec.styleLayoutMs, before: rec.before, after: rec.after || null,
     rebuildFrame: rec.sw ? P.out(rec.sw) : null, window: T.win(rec.t, WIN) } : null);
-  s.projectOpen = { demo: 'wave-dancer', click: ev.click ? { syncMs: ev.click.syncMs } : null, importText: ev.importText, open: one(ev.open), restore: one(ev.restore),
+  s.projectOpen = { demo: 'wave-dancer', force: !!force, click: ev.click ? { syncMs: ev.click.syncMs } : null, importText: ev.importText, open: one(ev.open), restore: one(ev.restore),
     breakdown: { importText: prof.out('importText'), open: prof.out('open'), restore: prof.out('restore') }, seams: wrapped, residue: found.projectScene.residue };
 }
 
@@ -1075,6 +1126,7 @@ async function runFromFlag(LW, qs, readyAt) {
   await new Promise((r) => { try { LW.warning.onAccept(r); } catch (_) { r(); } });
   if (safe(() => LW.motion.reduced)) await toast.ask('reduced motion is on — the report plays the field for about a minute. Press RUN to measure.', 'RUN');
   const only = ['grid', 'project'].includes(qs.get('only')) ? { only: qs.get('only'), gpu: false } : {};   // `&only=grid` (~25 s) · `&only=project` (~15 s): that scene alone, no GPU rows
+  if (qs.get('force') === '1') only.force = true;                                // `&force=1`: the project open runs over a current project and unsaved changes (runProjectOpen)
   toast.say('device report · measuring — hands off the screen for about ' + (only.only ? 'half a minute' : 'three minutes'));
   let R;
   try { R = await deviceReport(LW, { readyAt, skipEl: toast.root, onProgress: (t) => toast.say('device report · ' + t + ' — hands off'), ...only }); }

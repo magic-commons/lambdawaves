@@ -135,7 +135,10 @@ if (!brief) for (const { f, R } of reports) {
         const b = po.breakdown && po.breakdown[k];
         if (b && b.length) out.push('\n- ' + k + ' · self ms (inclusive, calls): ' + b.slice(0, 10).map((x) => x.label + ' ' + n(x.selfMs, 1) + (x.ms !== x.selfMs ? ' (' + n(x.ms, 1) + ')' : '') + (x.n > 1 ? ' ×' + x.n : '') + (x.bytes ? ' ' + x.bytes + ' B' : '')).join(' · '));
       }
-      if (po.residue) out.push('- put back · ' + Object.entries(po.residue).filter(([k]) => k !== 'after').map(([k, v]) => k + ': ' + v).join(' · ') + (po.residue.after ? ' · after: current ' + po.residue.after.current + ', dirty ' + po.residue.after.dirty + ', stored ' + po.residue.after.storage : ''));
+      const F = po.residue && po.residue.asFound;   // (force=1, 2026-09-25) the current project and the unsaved-changes mark as found, which it puts back
+      if (po.residue) out.push('- put back · ' + Object.entries(po.residue).filter(([k]) => k !== 'after' && k !== 'asFound').map(([k, v]) => k + ': ' + v).join(' · ')
+        + (F ? ' · as found: current ' + F.current + ', dirty ' + F.dirty + (F.force ? ' (force=1)' : '') : '')
+        + (po.residue.after ? ' · after: current ' + po.residue.after.current + ', dirty ' + po.residue.after.dirty + ', stored ' + po.residue.after.storage : ''));
     }
     /* THE GRID EDGE (2026-09-25): each tap's sub-timeline, and each rebuild nobody tapped for (the governor's rung) */
     const G = R.scenes.filter((s) => Array.isArray(s.switches) && s.switches.length);
