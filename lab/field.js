@@ -13,6 +13,7 @@
  */
 import { modeTable } from './hydrogen.js';
 import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
+import { gpuBoot, requestGpu } from './gpu-boot.js';
 
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
@@ -677,25 +678,22 @@ export function packMolecule(spec) {
 export async function createField(canvas, opts = {}) {
   const out = { ok: false, error: null, adapterInfo: null, canvas };
   if (!navigator.gpu) { out.error = 'navigator.gpu is absent — WebGPU is not enabled in this browser'; return out; }
-  let adapter, device;
-  try {
-    adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-    if (!adapter) { out.error = 'no WebGPU adapter'; return out; }
-    /* WAVE 58 — ASK FOR THE ADAPTER'S OWN CEILING, not WebGPU's default one.  `requestDevice()` with no
-     * `requiredLimits` gives the DEFAULT limits whatever the hardware can do — maxTextureDimension2D 8192 — and
-     * that number is the largest picture lab/capture.js can ever take, on an adapter that reports 32767.  The
-     * ceiling was a line of this file and not the GPU, which capture.js' header says in as many words.
-     * A device MUST grant a limit its own adapter reported, so this cannot fail on a conforming implementation;
-     * it is still wrapped, because a device that does not come up is the whole application and a bigger PNG is
-     * not worth that trade.  `capture.limits()` READS what was granted rather than believing this comment. */
-    const want = {};
-    for (const k of ['maxTextureDimension2D', 'maxTextureDimension1D']) if (adapter.limits && adapter.limits[k]) want[k] = adapter.limits[k];
-    try { device = await adapter.requestDevice({ requiredLimits: want }); out.limitsRequested = want; }
-    catch (_) { device = await adapter.requestDevice(); out.limitsRequested = null; }
-  } catch (e) { out.error = 'WebGPU device request failed: ' + (e && e.message || e); return out; }
+  /* OPTIMIZATION 2026-09-24 · M1 · THE ADAPTER AND THE DEVICE WERE ASKED FOR AT THE TOP OF <head> (lab/gpu-boot.js),
+   * in parallel with the module graph — wave 58's `requiredLimits` block moved there whole.  This field takes that
+   * early request ONCE; any later createField asks for its own device through the same function, so one field's
+   * dispose() can never destroy another's.  The three sentences a failure says are this file's, as before. */
+  const b = await (gpuBoot() || requestGpu());
+  if (b.error) { out.error = 'WebGPU device request failed: ' + (b.error && b.error.message || b.error); return out; }
+  if (!b.adapter) { out.error = 'no WebGPU adapter'; return out; }
+  const adapter = b.adapter, device = b.device;
+  out.limitsRequested = b.limitsRequested;
   try { const info = adapter.info || (adapter.requestAdapterInfo && await adapter.requestAdapterInfo()); out.adapterInfo = info ? { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description } : null; } catch (_) {}
   device.addEventListener('uncapturederror', (e) => { out.lastGpuError = String(e.error && e.error.message || e.error); if (opts.onError) opts.onError(out.lastGpuError); });
   device.lost.then((info) => { out.ok = false; out.error = 'device lost: ' + info.message; if (opts.onLost) opts.onLost(info); });
+  /* M1 · A DEVICE LOST BEFORE THIS FIELD EXISTED (while the module graph loaded) is not a field: the handler above has
+     already been queued with the loss, so it says `device lost: …` and calls onLost; this returns the method-less
+     failure object rack.js already boots with (M3), instead of configuring a canvas on a dead device. */
+  if (b.lost) return out;
 
   const format = navigator.gpu.getPreferredCanvasFormat();
   const ctx = canvas.getContext('webgpu');
@@ -756,6 +754,10 @@ export async function createField(canvas, opts = {}) {
   for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + MOL_CAPS[i], m2])]) {
     try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
   }
+  /* M1 · …AND ONE LOST DURING THE COMPILE STRETCH ABOVE.  Before this line, Firefox took the WGSL branch below (a dead
+     device reports compile errors), overwrote `device lost` with "WGSL compile error" and returned the method-less
+     object; Chromium fell through to `ok: true` on a dead device.  Both now return here, lost and saying so. */
+  if (b.lost) return out;
   if (out.shaderMessages.some((m) => m.type === 'error')) { out.error = 'WGSL compile error: ' + JSON.stringify(out.shaderMessages.filter((m) => m.type === 'error')); return out; }
   const computePipeline = device.createComputePipeline({ layout: 'auto', compute: { module: computeModule, entryPoint: 'main' } });
   const molPipelines = molModules.map((m) => device.createComputePipeline({ layout: 'auto', compute: { module: m, entryPoint: 'main' } }));
@@ -1399,7 +1401,7 @@ export async function createField(canvas, opts = {}) {
     moleculeInfo: { get: () => (molSpec ? { nAO: molPack.nAO, nShell: molPack.nShell, nPrim: molPack.nPrim,
       nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true } });
   Object.assign(out, {
-    ok: true, device, adapter, format, stats,
+    ok: !b.lost, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },

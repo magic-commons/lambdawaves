@@ -759,7 +759,9 @@ export async function boot(dom) {
     onError: (m) => showBanner('GPU error', m),
     onLost: (i) => showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.') });
   if (field.ok) gamutCss = (rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')');   // wave 54: one map, both sides
-  if (!field.ok) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
+     was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
+  if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
   /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
      down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
      — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
