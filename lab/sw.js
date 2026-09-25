@@ -104,14 +104,7 @@ const PRECACHE = [
   ['./mir/modulation/modwindow/modwindow.css',                      '8c97686a881b'],
   ['./mir/modulation/modwindow/modwindow.js',                       '4a7d7bf7f4b4'],
   ['./mir/modulation/registry.js',                                  '543131e58af4'],
-  ['./mir/palette.js',                                              '5c7332ba789c'],
   ['./mir/plane-model.js',                                          'b5353d801b68'],
-  ['./mir/shell/about.js',                                          'edd14291d382'],
-  ['./mir/shell/accent.js',                                         '7feb776b0e43'],
-  ['./mir/shell/menubar.js',                                        '2ddce59100cb'],
-  ['./mir/shell/notebook-math.js',                                  'fa1312541d4c'],
-  ['./mir/shell/notebook-render.js',                                '60f8e1193c27'],
-  ['./mir/shell/notebook.js',                                       '429a34158188'],
   ['./mir/shell/shell.css',                                         'fb45a401c1f3'],
   ['./mir/shell/stage.css',                                         '9ff6267f1b41'],
   ['./mir/shell/vendor/katex/LICENSE',                              '766ccc1f306c'],
@@ -137,10 +130,7 @@ const PRECACHE = [
   ['./mir/shell/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2', '71d517d67827'],
   ['./mir/shell/vendor/katex/fonts/OFL.txt',                        'fda55663cd51'],
   ['./mir/shell/vendor/katex/katex.min.css',                        '717bc9ae7853'],
-  ['./mir/shell/vendor/katex/katex.min.js',                         'e6bfe5deebd4'],
   ['./mir/shell/vendor/marked-LICENSE.md',                          '8e3a3f82f59a'],
-  ['./mir/shell/vendor/marked.min.js',                              '15fabce5b658'],
-  ['./mir/shell/wordmark.js',                                       '2b8e1ff6a4be'],
   ['./mir/slider-keys.js',                                          '87fbf95d5aa3'],
   ['./mir/window-activity.js',                                      '8eb6cefdf972'],
   ['./mo.js',                                                       'ef8b99702547'],
@@ -239,6 +229,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
+  ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
 ];
 
 /* AND WHAT THE FETCH HANDLER REFUSES TO CACHE AT RUNTIME (§4), each with its reason. */
