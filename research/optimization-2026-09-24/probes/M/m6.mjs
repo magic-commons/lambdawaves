@@ -30,7 +30,7 @@ for (const [tag, p] of [['base', M + 'lab-base-pre/'], ['base2', M + 'lab-base-p
       __LW.molecule.setOn(true); const saved = __LW.serialize(); saved.presentation.layout.cards.find((c) => c.id === 'molecule').closed = true; __LW.molecule.setOn(false);
       const ok = __LW.restore(saved); await frames(3); await new Promise((r) => setTimeout(r, 300));
       const mc = document.querySelector('.dev[data-id="molecule"] canvas.mol-c');
-      const legacy = { ok, on: __LW.molecule.on, visible: !mc.closest('.dev').hidden, size: mc.width + 'x' + mc.height, painted: (() => { const d = mc.getContext('2d').getImageData(0, 0, mc.width, mc.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; })(), hash: H(mc.toDataURL()) };
+      const legacy = { ok, on: __LW.molecule.on, visible: !mc.closest('.dev').hidden, size: mc.width + 'x' + mc.height, painted: (() => { const d = mc.getContext('2d').getImageData(0, 0, mc.width, mc.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; })(), hash: H(mc.toDataURL()), all: [...mc.closest('.dev').querySelectorAll('canvas')].map((c) => c.width + 'x' + c.height + ':' + H(c.toDataURL())).join(' ') };   /* every canvas of the revealed card: the H₂⁺ plot, the MO panel, the PULSE panel */
       return { slow, order, boot, sliceOpen, legacy, errs: window.__e };`);
     out[tag].readyAt = readyAt;
     console.log(tag, 'ready', readyAt, 'slow reads before ready+1s:', out[tag].slow.length);
@@ -49,7 +49,7 @@ console.log('canvases with SLICE open differing:', JSON.stringify(openDiff), ' n
 console.log('legacy reveal base', JSON.stringify(A.legacy), '\n              built', JSON.stringify(B.legacy));
 /* the revealed legacy plot is the SAME picture as base's — which today is a never-painted 300×150 canvas (REFUTE-F's
    pre-existing blank-after-reveal, measured here in both builds), so the gate is equality, not `painted` */
-const legacyOk = B.legacy.ok && B.legacy.visible && B.legacy.hash === A.legacy.hash && B.legacy.size === A.legacy.size;
+const legacyOk = B.legacy.ok && B.legacy.visible && B.legacy.hash === A.legacy.hash && B.legacy.size === A.legacy.size && B.legacy.all === A.legacy.all;
 const pass = orderSame && openDiff.length === 0 && legacyOk && B.errs.length === 0;
 console.log((pass ? 'GREEN' : 'RED') + ' M6(b,c): order, every 2D canvas with SLICE open, the legacy reveal plot; boot-closed SLICE canvas may differ (documented)');
 process.exit(pass ? 0 : 1);

@@ -158,7 +158,7 @@ const PRECACHE = [
   ['./project-import.js',                                           '1dcec46408e2'],
   ['./project-storage.js',                                          '7aab1a439779'],
   ['./pulse.js',                                                    '454ae330ee2f'],
-  ['./pulseview.js',                                                '8bd9386477e3'],
+  ['./pulseview.js',                                                'c70aec2c4e54'],
   ['./qcd.js',                                                      'd719df2e6c5c'],
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],

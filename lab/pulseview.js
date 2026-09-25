@@ -100,7 +100,7 @@ export function createPulse(host, api = {}) {
       roP.set('—', ''); roP.setSub(`Ready · ${KINDS[kind].label} · ${basis().n} functions · gap ${gap().toFixed(6)} Eh${y ? ` · RWA ${y.population.toFixed(6)}` : ''}`);
       roZ.set('—', ''); roZ.setSub('Press FIRE to start at the current lab time');
       roE.set('—', ''); roE.setSub(`E₀ ${amplitude.toFixed(3)} · ω ${omega.toFixed(4)} · D ${duration.toFixed(0)} · φ ${(phase / Math.PI).toFixed(2)}π · Δt ${dt}`);
-      paint(); return;
+      if (shown()) paint(); return;
     }
     const s = run.read();
     roP.set(s.popOut.toFixed(7), s.done ? 'ok' : 'live');
@@ -109,8 +109,13 @@ export function createPulse(host, api = {}) {
     roZ.setSub(`dipole ${s.electronDipole.toFixed(6)} · field ${s.field.toFixed(6)} · S norm ${s.norm.toFixed(12)} · drift ${s.normDrift.toExponential(2)}`);
     roE.set(s.absorbed.toExponential(6), Math.abs(s.balance) < 1e-5 ? 'ok' : 'warn');
     roE.setSub(`work ${s.work.toExponential(6)} · difference ${s.balance.toExponential(2)} · total ${s.instantaneousTotal.toFixed(8)} Eh`);
-    paint();
+    if (shown()) paint();
   }
+  /* OPTIMIZATION 2026-09-24 · M6(e): the legacy H₂⁺ card this panel lives in is `hidden` from boot, and paint() would force
+     a layout only to read a zero width and return — at construction that was the boot's first full style + layout
+     (24–33 ms, measured, once SLICE stopped paying it).  Neither test reads layout; the reveal road repaints through
+     graphHover's ResizeObserver, exactly as a card that had no size does today (moleculeview.js has the same guard). */
+  function shown() { return cv.isConnected && !cv.closest('[hidden]'); }
 
   /* ── the trace ──────────────────────────────────────────────────────────────────────────────────────────────── */
   function paint() {
