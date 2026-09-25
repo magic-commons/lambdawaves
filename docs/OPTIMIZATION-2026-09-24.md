@@ -194,9 +194,16 @@ within the run-to-run spread of the baseline. The glass menu (§5.2) is where th
 
 ## 5. For Josh — decisions, with prices
 
-1. **The gas table (K7)** is in the build, OFF. Try `?gastab=1` on the BOX › AXIAL 256 scene at 128³: 14 → ~70 fps on
-   this desktop. Every changed texel is closer to exact (41 → 1 fp16 ulp); ≤ 0.02 % of pixels move by one level, against
-   2.4 % from one present's jitter. Your eyes decide whether it becomes the default.
+**Josh's rulings (2026-09-25, morning), built as wave 125:** the gas table becomes the default (it touches only the
+BOX's axial-gas basis; `?gastab=0` / `__LW.gasTable(false)` opt out); the autoScale reset on the pause edge is built
+as the bug fix it is; CLEAR stays STATE's; the glass stays exactly as it is on the desktop, and on a phone or tablet a
+NEW user's first-run material is frost OFF, tinted (stored choices win); the version is his to name and the release is
+cut clean (no history rewriting). The consolidation of the mathematics into one paper is for the beta or 1.0.0. The
+list below is kept as the record of what was on the table.
+
+1. **The gas table (K7)** was in the build OFF; now ON by default (wave 125). Every changed texel is closer to exact
+   (41 → 1 fp16 ulp); ≤ 0.02 % of the axial-gas pixels move by one level, against 2.4 % from one present's jitter;
+   hydrogen and every other state are bit-identical to before.
 2. **The glass menu** (GPU ms/frame saved, WebRender / Chromium, DPR 1, from AUDIT-C): J1 FROST OFF drops the heads'
    `brightness(1.03) saturate(1.03)` (**5.1 / 0.3**) — this reverses your wave-103 words ("let it be 103 % … to
    distinguish the bar from the contents"); J2 STILL as the default policy (7.4 / 3.2, +4.9 / 2.4 with the modulation

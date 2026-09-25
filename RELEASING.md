@@ -28,6 +28,7 @@ git switch main && git merge --ff-only dev         # main takes exactly what dev
 ./test.sh                                          # the whole gate, browser half included, on the release
 git tag -a v0.2.0-alpha -m "…what changed…"        # semantic version + stage; the changelog is generated from tags
 node tools/changelog.mjs && git commit -am "CHANGELOG for v0.2.0-alpha" && git push --follow-tags
+node tools/snapshot-release.mjs v0.2.0-alpha       # the playable snapshot of the release (Josh's rule, 2026-09-25): ~/Documents/LAMBDAWAVES-RELEASES/<tag>/ + the vault index note
 node tools/build-deploy.mjs && npx wrangler deploy # the release goes live
 gh release create v0.2.0-alpha --generate-notes    # the GitHub Release page
 git switch dev
