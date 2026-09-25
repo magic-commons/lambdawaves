@@ -195,6 +195,12 @@ of three runs against the baseline's single run; the exact numbers (the GPU reco
 | boot ready (ms) | 1055 | 812 | 913 / 812 / 762 |
 | gpu 128³ axial gas reconstruct (ms) | 118.3 | 50.1 | 50.05 / 50.07 / 50.05 |
 
+**The release tree, table ON (v0.3.0-alpha, one headed Firefox run, `after-firefox-headed-release.json`):** default rack
+80.5 → **107** fps · UI hidden 119 → 133 · frost ALWAYS tinted 82 → 96 · disconnected 83.5 → 96 · dark 94 → 102 ·
+FRAME off 87 → 108 · 128³ sim-ladder 93 → 112 · **128³ axial gas 8.3 → 56.9 fps** (reconstruct 118.3 → 8.35 ms) ·
+boot ready 1055 → 723 ms. The scenes with the modulation window or every window open stay within the run-to-run spread
+of their baselines (76.8 → 75.8, 72.9 → 67.1): that frame is WIGNER's 2 Hz re-probe and the extra backdrop layers.
+
 Read it with the audits' finding in mind: in Gecko the default frame is the compositor's 18 backdrop layers (≈ 7.4 ms)
 plus the field (now 2.3 ms at 96³ instead of 3.8), so the shown-UI scenes move by the field's saving and the hidden-UI
 scenes sit at the cap; the scenes with every window open carry WIGNER's 2 Hz re-probe (FB4/F10, Josh's list) and are
