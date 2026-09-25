@@ -1,0 +1,23 @@
+{
+ "revealed": {
+  "ok": true,
+  "on": true,
+  "visible": true,
+  "canvases": [
+   "mol-c 300x150 8c1ab045",
+   "mol-c 300x150 8c1ab045",
+   "mol-c 300x150 8c1ab045"
+  ]
+ },
+ "back": {
+  "ok": true,
+  "on": false,
+  "hidden": false,
+  "canvases": [
+   "mol-c 300x150 8c1ab045",
+   "mol-c 300x150 8c1ab045",
+   "mol-c 300x150 8c1ab045"
+  ]
+ },
+ "errors": []
+}

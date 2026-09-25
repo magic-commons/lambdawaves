@@ -1,3 +1,4 @@
+window.__F127='restore';
 /* forced.expr.js — wave 127: which reads inside a project open force a style/layout flush.  Every layout-reading getter and
  * method on the prototypes is wrapped for the open's extent only; a read slower than 0.4 ms is recorded with its stack.
  * Playing, as the device report does; WAVE DANCER through the button's own road (importText → open). */

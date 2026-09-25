@@ -259,7 +259,7 @@ export function createMOPanel(host, api = {}) {
   let rect = null;
   const hover = graphHover(cv, { repaint: () => paint(), plot: () => rect });
   function paint() {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.closest('[hidden]')) return; const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);   // wave 127 (M6(c)'s law): in the hidden legacy card that read forced a whole layout (17 ms in a restore) to learn W = 0; the reveal repaints via graphHover's ResizeObserver
     if (W < 32 || H < 32 || !curve) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);

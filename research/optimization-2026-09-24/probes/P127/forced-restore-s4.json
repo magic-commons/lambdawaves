@@ -1,0 +1,163 @@
+{
+ "electron": {
+  "a": [
+   {
+    "syncMs": 87.8,
+    "forcedMs": 44.1,
+    "n": 6,
+    "rec": [
+     "18.9 clientWidth moview.js:262:18)",
+     "17.2 clientWidth paletteview.js:91:21)",
+     "4.6 getBoundingClientRect() modwindow.js:185:43)",
+     "2.1 clientWidth modwindow.js:2772:36)",
+     "0.7 clientWidth modwindow.js:2772:36)",
+     "0.6 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   },
+   {
+    "syncMs": 80.9,
+    "forcedMs": 46.4,
+    "n": 6,
+    "rec": [
+     "16.5 clientWidth moview.js:262:18)",
+     "21.5 clientWidth paletteview.js:91:21)",
+     "5 getBoundingClientRect() modwindow.js:185:43)",
+     "2.2 clientWidth modwindow.js:2772:36)",
+     "0.5 clientWidth modwindow.js:2772:36)",
+     "0.7 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   },
+   {
+    "syncMs": 82,
+    "forcedMs": 45.9,
+    "n": 6,
+    "rec": [
+     "15.9 clientWidth moview.js:262:18)",
+     "21.5 clientWidth paletteview.js:91:21)",
+     "5.3 getBoundingClientRect() modwindow.js:185:43)",
+     "2 clientWidth modwindow.js:2772:36)",
+     "0.5 clientWidth modwindow.js:2772:36)",
+     "0.7 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   }
+  ],
+  "b": [
+   {
+    "syncMs": 58.7,
+    "forcedMs": 27.3,
+    "n": 5,
+    "rec": [
+     "19.3 clientWidth paletteview.js:91:21)",
+     "5.2 getBoundingClientRect() modwindow.js:185:43)",
+     "1.7 clientWidth modwindow.js:2772:36)",
+     "0.5 clientWidth modwindow.js:2772:36)",
+     "0.6 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   },
+   {
+    "syncMs": 53.3,
+    "forcedMs": 23,
+    "n": 4,
+    "rec": [
+     "16.2 clientWidth paletteview.js:91:21)",
+     "4.3 getBoundingClientRect() modwindow.js:185:43)",
+     "1.9 clientWidth modwindow.js:2772:36)",
+     "0.6 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   },
+   {
+    "syncMs": 62.8,
+    "forcedMs": 24.1,
+    "n": 5,
+    "rec": [
+     "16.3 clientWidth paletteview.js:91:21)",
+     "4.8 getBoundingClientRect() modwindow.js:185:43)",
+     "1.7 clientWidth modwindow.js:2772:36)",
+     "0.6 clientWidth modwindow.js:2772:36)",
+     "0.7 getBoundingClientRect() rack.js:2701:21)"
+    ]
+   }
+  ]
+ },
+ "firefox": {
+  "a": [
+   {
+    "syncMs": 73.7,
+    "forcedMs": 38.3,
+    "n": 6,
+    "rec": [
+     "14.24 clientWidth moview.js:325:72",
+     "14.56 clientWidth paletteview.js:85:5",
+     "5.62 getBoundingClientRect() modwindow.js:241:24",
+     "2.12 clientWidth modwindow.js:2837:10",
+     "0.72 clientWidth modwindow.js:2837:10",
+     "1 getBoundingClientRect() rack.js:2734:75"
+    ]
+   },
+   {
+    "syncMs": 121.6,
+    "forcedMs": 70.9,
+    "n": 6,
+    "rec": [
+     "19.9 clientWidth moview.js:325:72",
+     "33.46 clientWidth paletteview.js:85:5",
+     "10.48 getBoundingClientRect() modwindow.js:241:24",
+     "4.06 clientWidth modwindow.js:2837:10",
+     "1.06 clientWidth modwindow.js:2837:10",
+     "1.98 getBoundingClientRect() rack.js:2734:75"
+    ]
+   },
+   {
+    "syncMs": 229.2,
+    "forcedMs": 123,
+    "n": 6,
+    "rec": [
+     "45.02 clientWidth moview.js:325:72",
+     "55.44 clientWidth paletteview.js:85:5",
+     "12.9 getBoundingClientRect() modwindow.js:241:24",
+     "5.42 clientWidth modwindow.js:2837:10",
+     "1.8 clientWidth modwindow.js:2837:10",
+     "2.46 getBoundingClientRect() rack.js:2734:75"
+    ]
+   }
+  ],
+  "b": [
+   {
+    "syncMs": 75.1,
+    "forcedMs": 35.9,
+    "n": 5,
+    "rec": [
+     "22.68 clientWidth paletteview.js:85:5",
+     "6.72 getBoundingClientRect() modwindow.js:241:24",
+     "4 clientWidth modwindow.js:2837:10",
+     "1.2 clientWidth modwindow.js:2837:10",
+     "1.32 getBoundingClientRect() rack.js:2734:75"
+    ]
+   },
+   {
+    "syncMs": 80.8,
+    "forcedMs": 39.7,
+    "n": 5,
+    "rec": [
+     "24.9 clientWidth paletteview.js:85:5",
+     "8.56 getBoundingClientRect() modwindow.js:241:24",
+     "3.74 clientWidth modwindow.js:2837:10",
+     "1.08 clientWidth modwindow.js:2837:10",
+     "1.4 getBoundingClientRect() rack.js:2734:75"
+    ]
+   },
+   {
+    "syncMs": 68.6,
+    "forcedMs": 31.7,
+    "n": 5,
+    "rec": [
+     "19.86 clientWidth paletteview.js:85:5",
+     "6.98 getBoundingClientRect() modwindow.js:241:24",
+     "2.88 clientWidth modwindow.js:2837:10",
+     "0.88 clientWidth modwindow.js:2837:10",
+     "1.14 getBoundingClientRect() rack.js:2734:75"
+    ]
+   }
+  ]
+ }
+}

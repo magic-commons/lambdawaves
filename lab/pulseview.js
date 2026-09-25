@@ -68,7 +68,7 @@ export function createPulse(host, api = {}) {
   /* ── the run ────────────────────────────────────────────────────────────────────────────────────────────────── */
   function gap() { const sol = basis().solve(R); return sol.E[1] - sol.E[0]; }
   function pulseObj() { return { amplitude, omega, duration, phase, start: 0 }; }
-  function reset() { run = null; held = false; rewound = false; behind = 0; lastMs = 0; paint(); }
+  function reset() { run = null; held = false; rewound = false; behind = 0; lastMs = 0; if (shown()) paint(); }   // wave 127: M6(e)'s guard on this road too — load() → reset() read layout inside the hidden card (16 ms in a restore)
   function fire() {
     mo = basis();
     try { run = createPulseRun(mo, { R, pulse: pulseObj(), dt }); } catch (e) { run = null; roP.set('—', 'warn'); roP.setSub(String(e && e.message || e)); return; }
