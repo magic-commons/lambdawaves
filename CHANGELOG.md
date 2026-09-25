@@ -11,6 +11,79 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## UNRELEASED — not frozen
+
+Work since `v0.2.3-alpha.3` — 8 waves, 50 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
+any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
+stable enough to gate on.
+
+- **wave 116**: THE DIGEST LOCK — 1004 pinned readbacks prove the kernel, the present pass and the lines bit-identical
+- **wave 117**: The kernel remembers — bit-identical memos, the well's wall as a branch, persistent gas records, a 3× wellPacket
+- **wave 118**: The present pass specialised by view and style, exports pinned to the generic pipeline
+- **wave 119**: The axial gas's Hermite table, opt-in and default off
+- **wave 120**: The GPU is asked for from the head of the page, and a lost device says so
+- **wave 121**: A project opens without solving the ladder, and a failed open leaves the instrument as it was
+- **wave 122**: The loop cannot be frozen by one throw, and the readers stop hitching
+- **wave 123**: The windows and the workers — the closed modulation window asks for no layout, the cards solve off-thread
+
+<details><summary>commits</summary>
+
+- `91c90bc` 2026-09-24 — CHANGELOG for v0.2.3-alpha.3
+- `73c169f` 2026-09-24 — OPTIMIZATION 2026-09-24 · the benchmark harness and the frozen build's baselines
+- `df1d81c` 2026-09-24 — OPTIMIZATION 2026-09-24 · Phase 1: the six Opus 5.5 audits (lanes A–F) + probes
+- `e8f67bc` 2026-09-24 — OPTIMIZATION 2026-09-24 · Phase 2: the cross-refutation round (REFUTE-A…F) and THE PLAN
+- `5d6764d` 2026-09-24 — OPTIMIZATION 2026-09-24 · Sol's review (SOL-REVIEW.md) and PLAN.md §9: the four accepted…
+- `3853ab4` 2026-09-24 — OPTIMIZATION 2026-09-24 · K0 the digest lock · DIAG · --check GREEN twice on base
+- `105491a` 2026-09-24 — OPTIMIZATION 2026-09-24 · M3 the L6 guard, method form
+- `cca4870` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA1 perf ring slot + LW.perf.loopMedian
+- `8a497be` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA4 loop() try/catch/finally
+- `0e934d5` 2026-09-24 — OPTIMIZATION 2026-09-24 · LB1 the closed modulation window asks for no layout; expand() opens…
+- `9092a3c` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA8 the export lock records `pending`
+- `ed8baed` 2026-09-24 — OPTIMIZATION 2026-09-24 · K1 bit-identical kernel trims
+- `cb05a1a` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA2 link retry without the repaint
+- `b5c2ee0` 2026-09-24 — OPTIMIZATION 2026-09-24 · K3 persistent gas records
+- `0490362` 2026-09-24 — OPTIMIZATION 2026-09-24 · LB3 the modulation window's paint() writes only the words that changed
+- `c9ef3c2` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA3 occlusion while the UI is hidden
+- `dc0dae4` 2026-09-24 — OPTIMIZATION 2026-09-24 · M1 gpu-boot (the pair)
+- `6d65042` 2026-09-24 — OPTIMIZATION 2026-09-24 · LB2 the modulation grip places once per frame through…
+- `5767d64` 2026-09-24 — OPTIMIZATION 2026-09-24 · K4 lazy gas tables + one idle warm
+- `acc752e` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA5 the warm chain stops when warm
+- `4f9b06c` 2026-09-24 — OPTIMIZATION 2026-09-24 · M2 ladder.load() on restore
+- `45522b6` 2026-09-24 — OPTIMIZATION 2026-09-24 · K6 FRAME lines: 16-byte lattice vertex, camera-free box key
+- `11b55a4` 2026-09-24 — OPTIMIZATION 2026-09-24 · M5 the failed restore
+- `8cd8b26` 2026-09-24 — OPTIMIZATION 2026-09-24 · LB4 HELIUM's basis is solved by the worker only; the field keeps the…
+- `f228eda` 2026-09-24 — OPTIMIZATION 2026-09-24 · M4 the ABOUT size carried
+- `5128f25` 2026-09-24 — OPTIMIZATION 2026-09-24 · LA6 one period scan in flight
+- `452e629` 2026-09-24 — OPTIMIZATION 2026-09-24 · K9 throughput({ targetMs })
+- `b11737c` 2026-09-25 — OPTIMIZATION 2026-09-24 · M7 paintMarks batched
+- `653a96c` 2026-09-25 — OPTIMIZATION 2026-09-24 · LA7 the CAPTURE hover asks without forcing
+- `c43e29b` 2026-09-25 — OPTIMIZATION 2026-09-24 · K11 wellPacket factor cache
+- `2bc72c6` 2026-09-25 — OPTIMIZATION 2026-09-24 · LB5 CHEMISTRY RT: one spectrum in flight at max(500 ms, 4× its round…
+- `0a8ebce` 2026-09-25 — OPTIMIZATION 2026-09-24 · LA10 CALCULUS rows updated in place
+- `3a555ff` 2026-09-25 — OPTIMIZATION 2026-09-24 · K12 occlusion mask follows the canvas scale (BUG)
+- `cc25c99` 2026-09-25 — Merge branch 'worktree-agent-ab0d84b035673d0c3' into worktree-optimization-2026-09-24
+- `26c019e` 2026-09-25 — OPTIMIZATION 2026-09-24 · LB6 kick.js: the same boost matrix, sooner (bit-identical)
+- `e9dfd37` 2026-09-25 — OPTIMIZATION 2026-09-24 · SOL-REVIEW.md: Sol's own final citation fixes (task completed after…
+- `a131674` 2026-09-25 — OPTIMIZATION 2026-09-24 · M6(b,c) boot forced layouts: SLICE appended after its view, the hidden…
+- `3dbd3fd` 2026-09-25 — Merge branch 'worktree-agent-a20bfd1acb9f02232' into worktree-optimization-2026-09-24
+- `f6c3ac2` 2026-09-25 — OPTIMIZATION 2026-09-24 · M8 chemview's record module on the first solve
+- `d10607b` 2026-09-25 — OPTIMIZATION 2026-09-24 · M9 the oracles out of the served tree
+- `fb33306` 2026-09-25 — OPTIMIZATION 2026-09-24 · M10 staged modules not precached
+- `1f08c12` 2026-09-25 — OPTIMIZATION 2026-09-24 · K2 specialised present pipelines + the export pin
+- `137cfff` 2026-09-25 — OPTIMIZATION 2026-09-24 · M5b a failed open leaves the instrument as it was
+- `20095e7` 2026-09-25 — OPTIMIZATION 2026-09-24 · M6(e) the hidden H₂⁺ card's PULSE panel skips its construction paint
+- `5756133` 2026-09-25 — Merge branch 'worktree-agent-a4b8b1adcec5e26e3' into worktree-optimization-2026-09-24
+- `04f5450` 2026-09-25 — OPTIMIZATION 2026-09-24 · K7 the axial gas's Hermite-256 table, OPT-IN (default OFF)
+- `84c4424` 2026-09-25 — Merge branch 'worktree-agent-a864d03d804732e3a' into worktree-optimization-2026-09-24
+- `729f1a1` 2026-09-25 — OPTIMIZATION 2026-09-24 · merge fix: sw.js keeps M10's NEVER_PRECACHE prose row (lost when the K…
+- `6f3f3a6` 2026-09-25 — OPTIMIZATION 2026-09-24 · K5w gas.stats in the maths worker (bit-identical, one round trip…
+- `03cc83b` 2026-09-25 — OPTIMIZATION 2026-09-24 · Phase 4 (first pass): the AFTER benches on the five-lane tree,…
+
+</details>
+
+---
+
 ## `v0.2.3-alpha.3` — 2026-09-24
 
 Commit `ef322ce` · no new waves · 2 commits.

@@ -2677,3 +2677,132 @@ ink uses the house `--ink-key`/`--fg-soft` colors, and dark wells/keycaps use
 the charcoal-blue glass tint rather than near-black overlays. The browser
 gate checks the one-row arrangement, centered subtitle-free buttons, compact
 geometry and the existing rebind/reset flow.
+
+## 2026-09-24 · THE OPTIMIZATION RUN — buttery smooth, without changing anything
+
+The commissioner's ask, on the frozen v0.2.3-alpha.3: "make it buttery smooth and usable **without changing or bugging
+anything**" — window loading, resources when features are off, the engine, the refactors the old sessions left behind
+(history checked before intent is inferred), boot, projects, stutters and breaks, the BOX at 256 axial modes, the
+64³/96³/128³ grids and the other QUALITY options, and the display options that were said to be expensive. The run:
+six Opus 5.5 audits (one lane each, every file read whole, every finding a number), a cross-refutation round where
+each auditor read the other five, Sol's law check per plan item, the lead's rulings, six builders in isolated
+worktrees with a gate on every commit, the lead's merges with the lock re-run after each. The record is
+`research/optimization-2026-09-24/` (BRIEF, AUDIT-A…F, REFUTE-A…F, SOL-REVIEW, PLAN, BUILD-BRIEF, the probes, the
+baselines and the after-benches); the summary and the commissioner's decision list are `docs/OPTIMIZATION-2026-09-24.md`.
+
+The law of the run was kept by construction: every change is bit-identical (texels, DOM, saved bytes), or identical
+output one thread or one round trip later, or a proven defect with its proof in the commit, or tooling. Two "almost
+neutral" roads were rejected on the way (a factored `gas.stats` that flips a displayed `-0.00`; an autoScale reset on
+pause that changes the paused image) and the one change inside fp16 precision but not bit-identical — the gas table —
+ships opt-in, default off, for the commissioner's eyes. Everything that would move a pixel of the glass, a physics
+number, a saved byte or a control is priced on his list, not built.
+
+What the audits established: hiding the UI already reached the display cap at 96³; the Gecko frame under the default
+rack is the compositor's 18 backdrop layers (≈ 7.4 ms, per layer, not per pixel — a look decision), the BOX at 256
+axial modes was the compute kernel's Miller recurrence per voxel per mode (112.6 ms per reconstruct at 128³), the boot
+was the serial GPU adapter request (415 ms) behind the module graph, every project open was a synchronous LADDER solve
+for a closed card (0.46–1.5 s), and the loop's JavaScript was small everywhere but one 9–17 ms `gas.stats` frame every
+24th. And ten defects with proofs: the no-GPU boot crashed; a device lost before the field existed was reported alive
+or crashed the boot; a failed project open was half-applied, marked clean, and a plain SAVE overwrote the file; a GRID
+change during an export was dropped; one thrown reader froze the loop for the session; three menubar rows did the wrong
+thing; ABOUT's size was erased by the next preference; the occlusion mask ignored the canvas scale; the period-scan
+worker could be jammed for minutes; and `perf.median` reported the last frame, so every earlier "loop median" was one frame.
+
+Measured on the merged tree (RTX 3070; the exact numbers first, the compositor's after): the 128³ axial-gas
+reconstruct 118.3 → 50.1 ms (→ 8.35 ms with the opt-in table); the present pass at 96³ 3.76 → 2.32 ms and at 128³
+5.51 → 3.28; the BOX packet 11.3 → 6.0 ms at 128³; a LAUNCH press 182 → 36 ms; a project open 490 → 69 ms and a restore
+463 → 43; cold boot ready 975 → 794 ms headless and 1055 → 812 headed; the WELL RADIUS drag 13 → 0.04 ms per move; a
+HELIUM basis change while playing 254 → 7 ms; CHEMISTRY at 125 k samples 27 → 335 steps/s; the scan storm's jam 153 → 3 s;
+the CAPTURE hover on the BOX 355–1274 → < 2 ms; idle timers 5 → 0 per 10 s. Electron: the default rack 92 → 116 fps, the
+modulation window open 83 → 118, the 128³ axial gas 6.7 → 30 fps. Headed Firefox (the commissioner's compositor, ± 10 fps
+run to run): the default rack 80.5 → 88–99, the 128³ axial gas 8.3 → 17.3, everything else at or above its baseline
+within the spread; the rest of that frame is the glass, priced on his list.
+
+Gate: THE DIGEST LOCK (1004 values) GREEN after every lane and every merge; `bash test.sh node` 77/77 after every
+commit; the browser gate 119 GREEN / 0 RED on the merged tree (one timing-flaky suite, `current`, green on its solo
+rerun as on the untouched base); `adopt --check` in step with MIR 1.4.3 throughout.
+
+### wave 116: THE DIGEST LOCK — 1004 pinned readbacks prove the kernel, the present pass and the lines bit-identical
+
+`tools/perf/digest-lock.mjs --write|--check`: 13 states × 3 grids of `fieldDigest` + `readPixels` at two sizes + the
+packed-record hash, 120 view × style × flag rows and 26 FRAME rows, every input pinned (the jitter seed on the
+synchronous half of each readback, governor and AUTO SCALE off, the clock frozen, occlusion explicit), recorded on the
+base tree and asserted equal after every change. The fixture is this machine's; the tool is the gate. It caught one
+thing on the way: the plain geometry memo let the compiler fold `length(q)²` back to `dot(q,q)` and moved 194 texels
+of the oscillator — the memo re-derives r in its old form and 0 texels differ on 12 states × 3 grids in both browsers.
+
+### wave 117: The kernel remembers — bit-identical memos, the well's wall as a branch, persistent gas records, a 3× wellPacket
+
+`COMPUTE_WGSL` memoises the geometry per centre, P_l per l and e^{imφ} per m across the modes that share them, and
+tests the well's wall with a branch instead of a `select` that ran the recurrence for the 58 % of the volume outside
+it: the axial gas 112.6 → 46.8 ms at 128³, the BOX packet 5.67 → 2.74, 91 labels 4.32 → 3.40, 0 texels differ. The gas
+keeps its 256 records for the session (178 KB → 72 B of heap per reconstruct), builds its f64 tables on first use with a
+one-shot idle warm, and marks them stale on a radius change instead of rebuilding on every pointermove of the WELL
+RADIUS knob (13 → 0.04 ms per move). `wellPacket` computes each of its 21 distinct Bessel and 21 Legendre factors once
+per point (182 → 36 ms per LAUNCH or OPERATOR → BOX press, `Object.is` on every output; the worker's bow inherits it).
+The FRAME's lattice and dots carry a 16-byte vertex with the ink in a uniform, and the box, axes and slice lines leave
+the camera out of their cache key (300 → 1 chrome uploads per 300 camera turns). `throughput({ targetMs })` sizes a
+batch so Firefox's 100 ms completion tick cannot be read as a sub-millisecond GPU number.
+
+### wave 118: The present pass specialised by view and style, exports pinned to the generic pipeline
+
+`RENDER_WGSL` carried six views × eight styles × finish × bow as uniform branches inside a 160–240-step loop. A pipeline
+per (view, style) with the bow and glass-finish branches removed by selection — 48 at most, compiled asynchronously,
+the generic one drawing until each lands, a failed compile failed for good — renders the same bytes in 3.25 ms instead of
+4.87 on the boot's phase/cloud view at 96³ (density/cloud 3.67 → 2.10, real/cloud 3.52 → 1.90; grain, dust and bands
+−28…−35 %); every one of the 48 pairs is bit-exact in both browsers. render-exact and capture pin the generic pipeline
+for a whole run, so an export can never straddle a compile: two exports of one state stay byte-identical, as Final II
+promised.
+
+### wave 119: The axial gas's Hermite table, opt-in and default off
+
+j_l(k r) = j_l(z u) with u = r/a is a fixed function of (l, n_r) on [0, 1]: 256 rows × 256 samples of (j_l, its
+derivative), cubic Hermite in the kernel, built once per session in idle slices and uploaded once, each record carrying
+its row (l·16 + n_r, encoded row+1 so the flag-off bytes are today's). ON, the 128³ reconstruct is 8.35 ms instead of
+46.7 (96³ 3.76, 64³ 1.17), every texel at most 1 fp16 ulp from the f64 value where the recurrence was 17–41, and at most
+0.022 % of pixels move by one level (one present's jitter moves 2.4 %). It is not bit-identical, so it ships OFF:
+`?gastab=1` or `__LW.gasTable(true)`; the lock proves OFF is today's picture to the bit.
+
+### wave 120: The GPU is asked for from the head of the page, and a lost device says so
+
+`lab/gpu-boot.js`, an async module script before the stylesheets, requests the adapter and the device with wave 58's
+limits while the 104-module graph loads; createField takes that one request (single-use, so a second field can never
+share a device another disposes). Cold headed Firefox: ready 1180 → 817 ms; the run's own measure 1055 → 812; headless
+975 → 794; Chromium ~−50. With it, two latent defects: a device lost before the field existed was reported alive by
+Chromium (the final `ok: true` overwrote the loss) and crashed Firefox's boot through the WGSL-error return, and the
+"WebGPU unavailable" banner overwrote a lost device's own — all three roads now say `device lost`, and the no-GPU boot
+that threw at `setDprCap` shows the banner it was designed to show (the method-form guard, byte-identical after a loss).
+
+### wave 121: A project opens without solving the ladder, and a failed open leaves the instrument as it was
+
+`ladder.load()` seats the card's params on restore and schedules the worker instead of solving on the frame thread
+(`set()` untouched for its callers): a project open 1479 → 38 ms at n̄ 42, the quick LOAD 1473 → 37, the default file
+490 → 69. A malformed project used to half-apply, mark itself clean and let a plain SAVE overwrite the stored file — or
+the previously current good one; open() now snapshots, rolls back on failure, keeps the current project and notebook
+and the dirty state, and says "open failed". The ABOUT face keeps its size across a preference change (the fourth
+instance of one carried-keys hole, named in the comment). paintMarks runs once per boot and once per open instead of 7
+and 11. chemview fetches its record module on the first solve, the PySCF oracles live under tests/, and modules that
+wiring proves unreachable are left out of the precache by a rule derived from wiring's own allowlist (201 → 190 files,
+5.26 → 4.49 MiB per new visitor).
+
+### wave 122: The loop cannot be frozen by one throw, and the readers stop hitching
+
+`loop()` runs in try/catch/finally, reporting once per distinct message and never hot-looping while paused; the perf
+ring holds a median again (`LW.perf.loopMedian` times the whole loop). The export lock records a REBUILD it used to
+drop. The transport's link retry keeps its law but no longer repaints the closed modulation window once a second; under
+H the occlusion burst reads nothing and sends `[]` once; the kick warm chain stops when warm and re-arms on an
+OPERATOR switch (idle is now literally zero); the period scan runs one at a time to the latest key and tracks a timed-out
+scan to its late reply (a 153 s worker jam → 3 s; scans over 8 s land at all); the CAPTURE hover asks the worker and
+paints when the plan lands (355–1274 → < 2 ms on the BOX; ⟳ and G stay forced); CALCULUS updates its rows in place. The
+occlusion mask follows the canvas scale (it was 2.9× too large after AUTO SCALE, and stale at every boot).
+
+### wave 123: The windows and the workers — the closed modulation window asks for no layout, the cards solve off-thread
+
+The closed modulation window's paint and place answer their rect reads with the zero rect `display:none` already gave
+(the compact ENV's time-scale fit kept; the house-knob rings kept), `expand()` opens once (33.6 → 23.2 ms), paint writes
+only the words that changed, and the grip places once per frame (14 → 0 rect reads per pointermove). HELIUM's basis is
+solved by the worker only, the field keeping the last basis meanwhile and exports forcing the fresh one (254 → 7 ms
+stall). CHEMISTRY RT keeps one spectrum in flight paced by its own cost and fits its poles in the chem worker (27 → 335
+steps/s at 125 k samples). kick.js memoises its radial integrals per (n, l) pair (the K key 13.7 → 1.7 ms warm, 1104
+`Object.is` checks). `gas.stats` runs in the maths worker on its own tables and paints when it lands (the BOX's 9–17 ms
+frame every 24th → none; 61/61 readout strings identical).

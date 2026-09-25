@@ -148,24 +148,35 @@ the after is one run; scenes at the display cap (~115–119 fps) cannot rise.
 | BOX axial gas 256, reconstruct, 64 / 128 | 16.7 / 118.3 ms | 10.0 / 50.1 ms |
 | loop, BOX gas 128³ UI hidden | 8.7 fps | 18.3 fps |
 
-**Headed Firefox 155 on DISPLAY :0** (WebRender — Josh's own compositor; first run, taken while lane N's probes shared
-the GPU; the quiet re-run replaces this table when it lands):
+**Headed Firefox 155 on DISPLAY :0** (WebRender — Josh's own compositor). This bench spreads by ±10 fps run to run on a
+live desktop (the default scene gave 87.7 / 98.7 / 86.8 in three back-to-back runs), so the after column is the median
+of three runs against the baseline's single run; the exact numbers (the GPU reconstruct, the boot) do not spread:
 
-| scene | before | after |
-|---|---|---|
-| default · refractive · frost ALWAYS · light · 96³ | 80.5 | 87.7 |
-| UI hidden | 119.1 | 115.0 |
-| frost ALWAYS · tinted | 82.4 | 96.4 |
-| refractive · frost · disconnected | 83.5 | 94.8 |
-| connected · dark | 93.9 | 104.4 |
-| 128³ · sim-ladder · UI shown | 93.3 | 96.5 |
-| **128³ · axial gas · UI shown** | **8.3** | **16.9** |
-| gpu 128³ axial gas reconstruct | 118.3 ms | 50.1 ms |
-| boot ready | 1055 ms | 913 ms |
+| scene | before (one run) | after (median of 3) | the three runs |
+|---|---|---|---|
+| default · refractive · frost ALWAYS · light · 96³ | 80.5 | 87.7 | 87.7 / 98.7 / 86.8 |
+| UI hidden (H) | 119.1 | 115.6 | 115 / 115.6 / 116.5 |
+| UI shown again | 88.0 | 95.3 | 86.2 / 95.6 / 95.3 |
+| frost OFF · refractive | 113.2 | 98.6 | 114.6 / 92 / 98.6 |
+| frost ALWAYS · tinted | 82.4 | 87.0 | 96.4 / 87 / 81.5 |
+| frost OFF · tinted | 117.7 | 103.3 | 95.7 / 103.3 / 109.5 |
+| refractive · frost ALWAYS · disconnected | 83.5 | 94.8 | 94.8 / 88 / 98.1 |
+| connected · dark theme | 93.9 | 101.6 | 104.4 / 101.6 / 100.5 |
+| light · FRAME lattice | 89.0 | 86.9 | 85.6 / 86.9 / 95.3 |
+| FRAME off | 87.4 | 101.4 | 78.8 / 101.4 / 108.8 |
+| FRAME box · modulation window open | 76.8 | 75.2 | 70.6 / 78.8 / 75.2 |
+| modulation closed · all windows open | 72.9 | 69.3 | 60.8 / 69.3 / 70.9 |
+| all windows open · UI hidden | 117.5 | 119.6 | 118.9 / 119.6 / 120.8 |
+| 128³ · sim-ladder · default windows · UI shown | 93.3 | 103.5 | 96.5 / 103.5 / 110.1 |
+| 128³ · UI hidden | 119.1 | 119.4 | 118 / 120.5 / 119.4 |
+| **128³ · axial gas · UI shown** | **8.3** | **17.3** | 16.9 / 17.5 / 17.3 |
+| boot ready (ms) | 1055 | 812 | 913 / 812 / 762 |
+| gpu 128³ axial gas reconstruct (ms) | 118.3 | 50.1 | 50.05 / 50.07 / 50.05 |
 
-Where the first headed run dipped (frost OFF · tinted 117.7 → 95.7, FRAME off 87.4 → 78.8, every window open 72.9 →
-60.8) the loop's own cost fell at the same time (1.74 → 0.28 ms on the last), which is the signature of GPU contention
-from another process, not of the change; see the re-run.
+Read it with the audits' finding in mind: in Gecko the default frame is the compositor's 18 backdrop layers (≈ 7.4 ms)
+plus the field (now 2.3 ms at 96³ instead of 3.8), so the shown-UI scenes move by the field's saving and the hidden-UI
+scenes sit at the cap; the scenes with every window open carry WIGNER's 2 Hz re-probe (FB4/F10, Josh's list) and are
+within the run-to-run spread of the baseline. The glass menu (§5.2) is where the rest of the Gecko frame is.
 
 ## 5. For Josh — decisions, with prices
 
