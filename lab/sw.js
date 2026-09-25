@@ -173,7 +173,7 @@ const PRECACHE = [
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '655a6aef068a'],
   ['./registerview.js',                                             '6cd43624dafa'],
-  ['./render-exact.js',                                             '61631b947aa8'],
+  ['./render-exact.js',                                             'd1446b122a49'],
   ['./response-fit.js',                                             'fe7942d74051'],
   ['./rhf-molecule.js',                                             'bbbcc7359d78'],
   ['./rotor4.js',                                                   '074250aea7e6'],
