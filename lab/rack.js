@@ -4483,14 +4483,25 @@ export async function boot(dom) {
         open(path) {
           const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
-          let restored = false;
-          busy.n++; busySync(); try { restored = restore(it.data, { project: true }); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
+          /* M5b (2026-09-24): the instrument as it stands, taken before the file touches it — the SAME road a saved project
+             takes (serialize → JSON → restore) — and whether it was clean, so a failed open can hand both back. */
+          const before = JSON.parse(JSON.stringify(serialize())), baseline = pjBaseline, wasClean = !projectDirty();
+          let restored = false, back = true;
+          busy.n++; busySync(); try { restored = restore(it.data, { project: true }); if (!restored) { try { back = restore(before) === true; } catch (_) { back = false; } } } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
           /* OPTIMIZATION 2026-09-24 · M5 · A FAILED OPEN COMMITS NOTHING OF ITS OWN.  restore() answers false when the file's
              data threw half-way (importText checks only the envelope), and this used to carry on regardless: the
              notebook keys, `recent`, `current` = the broken path and a CLEAN mark over the half-applied state, so a
              plain Ctrl+S overwrote the stored file with it.  Now the previous project stays current, the notebook and
-             the recent list are untouched, nothing is marked clean, and the status says so. */
-          if (!restored) { pjStatus('open failed ' + path); return false; }
+             the recent list are untouched, nothing is marked clean, and the status says so.
+             M5b · …AND THE INSTRUMENT COMES BACK.  A half-applied state left current was one Ctrl+S away from overwriting the
+             PREVIOUS project (measured), so the pre-open snapshot is restored through the same road and the pre-open
+             dirty state re-applied: clean if it was clean, dirty against the old baseline if it was not.  If even the
+             roll-back fails, nothing is current, so no SAVE can land on a file — and the status says that too. */
+          if (!restored) {
+            if (back) { if (wasClean && baseline !== null) projectClean(); else pjBaseline = baseline; pjStatus('open failed ' + path + ' — the previous state is back'); }
+            else { pjCurrent = null; pjStatus('open failed ' + path + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this'); }
+            return false;
+          }
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
