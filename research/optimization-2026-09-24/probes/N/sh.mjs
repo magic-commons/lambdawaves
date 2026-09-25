@@ -30,7 +30,7 @@ if (cmd === 'capture') {
   const boot = (b || '').startsWith('boot:'), disc = (b || 'disc') === 'disc';
   const where = boot ? b.slice(5) : 'lab/';
   const args = [TOOL, 'capture', a, `http://127.0.0.1:${PORT}/${where}?preset=1s%2B2pz&sw=0`, OUT,
-    '--ready', '!!(window.__LW && __LW.ready)', '--setup', boot ? "(async () => { try { __LW.warning.dismiss(); } catch (_) {} __LW.pause(); __LW.scrub(0); await __LW.settle(); await __LW.settle(); return true; })()" : setup(disc),
+    '--ready', '!!(window.__LW && __LW.ready && __LW.field.ok)', '--setup', boot ? "(async () => { try { __LW.warning.dismiss(); } catch (_) {} __LW.pause(); __LW.scrub(0); await __LW.settle(); await __LW.settle(); return true; })()" : setup(disc),
     '--theme', '__LW.setTheme(%s)', '--card', '__LW.setCardStyle(%s)', '--frost', "__LW.setFrost(%s ? 'always' : 'off')",
     '--gpu', '1', '--size', '1600x1000'];
   if (c) args.push('--states', c);
