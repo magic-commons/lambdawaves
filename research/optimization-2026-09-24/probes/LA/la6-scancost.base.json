@@ -1,0 +1,59 @@
+{
+ "cost": [
+  {
+   "bz": 0,
+   "ms": 348,
+   "populated": 91,
+   "P": {
+    "exact": false,
+    "count": 21,
+    "pairs": 210,
+    "T": 7893.687290000279
+   }
+  },
+  {
+   "bz": 0.001,
+   "ms": 6420,
+   "populated": 91,
+   "P": {
+    "exact": false,
+    "count": 91,
+    "pairs": 4095,
+    "T": 50.81589968719801
+   }
+  },
+  {
+   "bz": 0.003,
+   "ms": 6408,
+   "populated": 91,
+   "P": {
+    "exact": false,
+    "count": 91,
+    "pairs": 4095,
+    "T": 8374.96046969995
+   }
+  },
+  {
+   "bz": 0.01,
+   "ms": 6636,
+   "populated": 91,
+   "P": {
+    "exact": false,
+    "count": 91,
+    "pairs": 4095,
+    "T": 7540.306475285167
+   }
+  },
+  {
+   "bz": 0.03,
+   "ms": 6522,
+   "populated": 91,
+   "P": {
+    "exact": false,
+    "count": 91,
+    "pairs": 4095,
+    "T": 7538.885449007561
+   }
+  }
+ ]
+}

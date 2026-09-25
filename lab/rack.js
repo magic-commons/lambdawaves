@@ -776,22 +776,26 @@ export async function boot(dom) {
      back to that road.  The SLAP trigger, the K key, LAUNCH and every forced period reader stay synchronous. ── */
   const makeWorker = (label, timeoutMs = 8000) => {
     let w = null, seq = 0, failed = typeof Worker !== 'function', wantedParked = false, starts = 0; const waiting = new Map();
-    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
+    /* LA6 · A TIMED-OUT JOB IS STILL RUNNING.  The worker is FIFO and cannot drop a job, so a caller that must know when
+       the WORKER is free again (the period scan's one-in-flight law) passes `onLate`: the real reply, or the failure, is
+       handed to it after the promise has already resolved { error: 'timeout' }.  Callers that pass nothing are untouched. */
+    const late = new Map();
+    const fail = (why) => { for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: why }); } waiting.clear(); for (const f of late.values()) f({ error: why }); late.clear(); if (w) { try { w.terminate(); } catch (_) {} } w = null; failed = true; console.warn('λWAVES ' + label + ' worker: ' + why + ' — that maths runs on the frame thread'); };
     /* Constructing a module worker fetches and parses its whole private module graph. Three identical workers used
        to do that at the ready boundary even when the session never bowed, scanned or opened a heavy card. */
     const ensure = () => {
       if (w || failed) return w;
       try {
         w = new Worker(new URL('./mathworker.js', import.meta.url), { type: 'module' }); starts++;
-        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } };
+        w.onmessage = (e) => { const p = waiting.get(e.data.id); if (p) { waiting.delete(e.data.id); clearTimeout(p.timer); p.res(e.data); } else if (late.has(e.data.id)) { const f = late.get(e.data.id); late.delete(e.data.id); f(e.data); } };
         w.onerror = (e) => fail('worker error: ' + (e && e.message || e));
         /* Message order is FIFO. A worker first requested while the page is away sees PARK before speculative work. */
         if (wantedParked) w.postMessage({ id: 0, op: 'park' });
       } catch (e) { fail('worker construction failed: ' + (e && e.message || e)); }
       return w;
     };
-    const raw = (msg, transfer) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
-    const call = (msg, transfer) => busyWrap(raw(msg, transfer));   // wave 48: every worker job is a BUSY job
+    const raw = (msg, transfer, onLate) => { const worker = ensure(); if (!worker) return Promise.resolve(null); return new Promise((res) => { const id = ++seq; const timer = setTimeout(() => { if (waiting.has(id)) { waiting.delete(id); if (onLate) late.set(id, onLate); res({ error: 'timeout' }); } }, timeoutMs); waiting.set(id, { res, timer }); try { worker.postMessage(Object.assign({ id }, msg), transfer || []); } catch (err) { clearTimeout(timer); waiting.delete(id); res({ error: String(err && err.message || err) }); } }); };
+    const call = (msg, transfer, onLate) => busyWrap(raw(msg, transfer, onLate));   // wave 48: every worker job is a BUSY job
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
     const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
     return { label, get ok() { return !failed; }, get started() { return !!w; }, get starts() { return starts; }, call, raw,
@@ -3024,6 +3028,34 @@ export async function boot(dom) {
     const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
     let periodVersion = -1, lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
+    /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
+       FIFO worker that cannot drop stale work: 4 s of a moving register (keyboard auto-repeat on ZEEMAN B, a script)
+       jammed it for over two minutes (AUDIT-F F3, REFUTE-B/D).  Now one scan runs; a newer key replaces `scanWant`; the
+       worker is free again only when ITS reply arrives — a timed-out scan is tracked to that reply (makeWorker onLate),
+       never to the promise, or a timeout plus a fresh post would put two scans back in the queue (REFUTE-D). */
+    let scanBusy = false, scanWant = null;
+    function scanPost(key, energies) {
+      if (scanBusy) { scanWant = { key, energies }; return; }
+      scanBusy = true;
+      const done = (r) => {
+        scanBusy = false; scanLand(key, r);
+        if (scanWant) { const q = scanWant; scanWant = null; if (periodPending && sameKey(periodPending, q.key)) scanPost(periodPending, q.energies); }
+      };
+      scan.call({ op: 'period', energies, horizon: 2e4 }, undefined, done).then((r) => { if (!(r && r.error === 'timeout')) done(r); });
+    }
+    function scanLand(key, r) {
+      if (!r || r.error) { if (periodPending && sameKey(periodPending, key)) periodPending = null; return; }
+      if (!periodPending || !sameKey(periodPending, key)) return;          // a later state: this answer is stale
+      const P = Object.assign({}, r); delete P.id; delete P.op;
+      lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
+      paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
+    }
+    /* …and a dial held down by an ARROW KEY is a gesture too (auto-repeat bumps reg.version ~30×/s with no pointer):
+       the wave-44 hold-off below reads it beside pointerHeld; a released key lets the settled scan run once. */
+    let keyHeld = false;
+    document.addEventListener('keydown', (e) => { if (e.repeat && e.target && e.target.closest && e.target.closest('.k, .fd')) keyHeld = true; }, true);
+    const keyReleased = () => { if (!keyHeld) return; keyHeld = false; if (periodSettling) schedule(TIER.PRESENT); };
+    document.addEventListener('keyup', keyReleased, true); window.addEventListener('blur', keyReleased);
     /* the scan's key, as numbers compared in place (wave 45: it was a string built on every frame) */
     const pk = { v: -2, fz: 0, bz: 0, h: '', mix: false, s: -1 };
     const keyNow = () => ({ v: reg.version, fz: reg.field.Fz, bz: reg.field.Bz, h: getHamiltonian().id, mix: !!reg.transition, s: sturm.P ? sturm.lambda : -1 });
@@ -3046,7 +3078,7 @@ export async function boot(dom) {
          periodPending got a new key sixty times a second and this posted a fresh O(pairs × 2·10⁶)
          scan to the worker on every one of them, for as long as the rate turned.  Same law, same
          line — an expensive answer waits until the movement stops. */
-      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
+      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
       if (reg.field.Fz !== 0) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
       if (reg.transition) { Object.assign(pk, key); periodVersion = reg.version; periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
@@ -3059,16 +3091,7 @@ export async function boot(dom) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
            answer lands — a BOX bow populates 56 incommensurate well energies and the scan measured 1.2 s on the first
            frame after the pointer lifted.  Forced readers (LW.period, ⟳, the digest) still scan here, synchronously. */
-        if (!periodPending || !sameKey(periodPending, key)) {
-          periodPending = key;
-          scan.call({ op: 'period', energies: Array.from(Es), horizon: 2e4 }).then((r) => {
-            if (!r || r.error) { periodPending = null; return; }
-            if (periodPending !== key) return;                              // a later state: this answer is stale
-            const P = Object.assign({}, r); delete P.id; delete P.op;
-            lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
-            paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
-          });
-        }
+        if (!periodPending || !sameKey(periodPending, key)) { periodPending = key; scanPost(key, Array.from(Es)); }   // LA6: posted, or waiting behind the one in flight
         periodSettling = true; return lastPeriod;
       }
       const wasSettling = periodSettling;
