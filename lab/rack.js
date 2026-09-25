@@ -72,6 +72,7 @@ import { createModHost, labParameters, barTempo } from './mir/modulation/host.js
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
+import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
@@ -731,36 +732,7 @@ export async function boot(dom) {
   let pendingRef = null;
 
 
-  const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0 };
-  function busyHost() {
-    if (busy.host) return busy.host;
-    const h = document.getElementById('busyMark'); if (!h) return null;
-    const src = document.querySelector('#title .mark');
-    if (src && !h.children.length) { h.appendChild(src.cloneNode(true)); paintMarks(); }
-    busy.host = h; return h;
-  }
-  function busySync() {
-    const want = busy.n > 0 || performance.now() < busy.until;
-    if (want === busy.shown) return;
-    busy.shown = want;
-    const h = busyHost(); if (h) { h.hidden = !want; if (want) busyWrite(); }
-    if (want) ensureTurnCSS();                                    // the loop reads the CURRENT palette's keyframes
-    const m = document.querySelector('#title .mark'); if (m) m.classList.toggle('busy', want);
-  }
-  function busyWrite() { const h = busy.host; if (!h) return; h.style.setProperty('--cx', busy.x + 'px'); h.style.setProperty('--cy', busy.y + 'px'); }
-  /** raise the mark for `ms` from now — the frame-gap rule and any caller that cannot bracket its own work */
-  function busyFlash(ms) { const t = performance.now() + ms; if (t > busy.until) busy.until = t; busySync();
-    clearTimeout(busy.timer); busy.timer = setTimeout(() => { busy.timer = 0; busySync(); }, Math.max(0, busy.until - performance.now()) + 30); }   // the window has to close itself: nothing else would ask again
-  /** bracket a promise (or a synchronous function) with the mark */
-  function busyWrap(p) { busy.n++; busySync(); const done = () => { busy.n = Math.max(0, busy.n - 1); busySync(); }; if (p && typeof p.then === 'function') { p.then(done, done); return p; } done(); return p; }
-  function cardLoading(w, key) {
-    let on = false;
-    return (v) => { const next = !!v; if (next === on) return; on = next; w.setLoading(next, key); if (next) { busy.n++; busySync(); } else { busy.n = Math.max(0, busy.n - 1); busySync(); } };
-  }
-  window.addEventListener('pointermove', (e) => {                       // the position: two writes, no read, and only while it is up
-    busy.x = e.clientX; busy.y = e.clientY;
-    if (busy.shown) { busy.moves++; busyWrite(); }
-  }, { passive: true });
+  const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, ensureTurnCSS });   // N7 seam 2: lab/busy-mark.js
 
   /* ── FIELD ────────────────────────────────────────────────────────────── */
   /* WAVE 59 · `onLost` WAS NEVER PASSED, and field.js has offered it since it was written: `device.lost`
