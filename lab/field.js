@@ -827,6 +827,12 @@ export async function createField(canvas, opts = {}) {
   /* the occlusion block: n + 32 rects; the corner axis is a HUD and gets the empty block */
   const OCC_BYTES = 16 + 32 * 16, occBuf = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), occNone = device.createBuffer({ size: OCC_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const OCC = new ArrayBuffer(OCC_BYTES), OCC_U = new Uint32Array(OCC, 0, 4), OCC_F = new Float32Array(OCC, 16); let occSig = '';
+  /* THE RECTANGLES ARE KEPT IN CSS PIXELS (optimization 2026-09-24, K12 · BUG).  The block is in DEVICE pixels, and the
+     factor k = canvas.width / cssW was applied only when the rectangle list changed — but the rack reads the rectangles
+     BEFORE field.resize, so a render-scale, AUTO SCALE or DPR change (and the boot's first resize from the 300-px default
+     canvas) left the mask at the old scale until a window moved.  Now resize() re-applies the new k to the same list. */
+  const OCC_CSS = new Float64Array(32 * 4);
+  function writeOcc() { const k = canvas.width / Math.max(1, cssW), n4 = OCC_U[0] * 4; for (let i = 0; i < n4; i++) OCC_F[i] = OCC_CSS[i] * k; device.queue.writeBuffer(occBuf, 0, OCC); }
   const cornerBind = device.createBindGroup({layout:lineBGL,entries:[{binding:0,resource:{buffer:cornerVP}},{binding:1,resource:{buffer:occNone}},{binding:2,resource:{buffer:inkBuf}}]});
   const lineBind = device.createBindGroup({ layout: lineBGL, entries: [{ binding: 0, resource: { buffer: vpBuf } }, { binding: 1, resource: { buffer: occBuf } }, { binding: 2, resource: { buffer: inkBuf } }] });
 
@@ -1468,11 +1474,11 @@ export async function createField(canvas, opts = {}) {
     /** the windows over the stage, as [x0, y0, x1, y1] in CSS pixels of the canvas box; at most 32. Returns
      *  true when the block changed (the caller presents). Lines are not drawn inside these rectangles. */
     setOcclusion(rects) {
-      const k = canvas.width / Math.max(1, cssW), n = Math.min(32, rects.length);
+      const n = Math.min(32, rects.length);
       let sig = String(n); for (let i = 0; i < n; i++) sig += '|' + rects[i].map((v) => Math.round(v)).join(',');
       if (sig === occSig) return false; occSig = sig;
-      OCC_U[0] = n; for (let i = 0; i < n; i++) { const r = rects[i]; OCC_F[i * 4] = r[0] * k; OCC_F[i * 4 + 1] = r[1] * k; OCC_F[i * 4 + 2] = r[2] * k; OCC_F[i * 4 + 3] = r[3] * k; }
-      device.queue.writeBuffer(occBuf, 0, OCC); return true;
+      OCC_U[0] = n; for (let i = 0; i < n; i++) { const r = rects[i]; OCC_CSS[i * 4] = r[0]; OCC_CSS[i * 4 + 1] = r[1]; OCC_CSS[i * 4 + 2] = r[2]; OCC_CSS[i * 4 + 3] = r[3]; }
+      writeOcc(); return true;
     },
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
@@ -1481,7 +1487,7 @@ export async function createField(canvas, opts = {}) {
     resize(scale) {
       const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (scale || 1);
       const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
-      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; return true; }
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; if (OCC_U[0]) writeOcc(); return true; }   // K12: the mask follows the new device-pixel size
       return false;
     }
   });
