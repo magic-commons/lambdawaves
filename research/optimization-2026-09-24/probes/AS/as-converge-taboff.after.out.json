@@ -1,0 +1,113 @@
+{
+ "table": "off",
+ "style": 6,
+ "fullWidth": 1920,
+ "budgetMode": "120",
+ "budgetMs": 16.67,
+ "A": {
+  "frames": 168,
+  "changes": [
+   [
+    466,
+    0.5,
+    1920
+   ],
+   [
+    866,
+    0.35,
+    960
+   ]
+  ],
+  "firstDecision": {
+   "t": 466,
+   "scale": 0.5
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "k": 1,
+   "tailMedianMs": 83.4
+  }
+ },
+ "B": {
+  "edgeAutoScale": 1,
+  "pausedAutoScale": 1,
+  "pausedCw": 1920,
+  "firstPlayFrameAutoScale": 1,
+  "frames": 57,
+  "changes": [
+   [
+    453,
+    0.5,
+    1920
+   ],
+   [
+    854,
+    0.35,
+    960
+   ]
+  ],
+  "firstDecision": {
+   "t": 453,
+   "scale": 0.5
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "k": 5,
+   "tailMedianMs": 83.4
+  },
+  "settledInA": 0.35,
+  "firstDecisionWithinOneStep": false
+ },
+ "C": {
+  "button": true,
+  "before": 0.35,
+  "afterOff": {
+   "auto": false,
+   "autoScale": 1
+  },
+  "offPlaying": {
+   "autoScale": 1,
+   "cw": 1920,
+   "auto": false
+  },
+  "afterOn": {
+   "auto": true,
+   "autoScale": 1
+  },
+  "frames": 43,
+  "changes": [
+   [
+    30,
+    0.5,
+    1920
+   ],
+   [
+    533,
+    0.35,
+    960
+   ]
+  ],
+  "firstDecision": {
+   "t": 30,
+   "scale": 0.5
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "k": 6,
+   "tailMedianMs": 83.4
+  }
+ },
+ "E": {
+  "ok": true,
+  "digests": "fb62de3d386882d4,5e52ad4b85fd00e9,cdc250bf7b696203",
+  "autoAfter": true,
+  "autoScaleAfter": 0.5
+ },
+ "errs": []
+}

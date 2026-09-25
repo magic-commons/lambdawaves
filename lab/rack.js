@@ -325,18 +325,26 @@ export async function boot(dom) {
 
 
   const quality = { res: 64, steps: 160, scale: 1, auto: true, autoScale: 1, minScale: 0.35 };
-  /* AUTO render scale: the canvas backing resolution follows the measured frame interval (rAF cadence, which is what a GPU-bound
-     device shows), targeting 60 Hz in FULL and the observed cadence up to 120 Hz in 120 mode.
-     W125 (Josh, 2026-09-25) · ON THE PAUSE EDGE IT RETURNS TO 1: the frame that sees the transport go from playing to paused
-     puts autoScale back to 1 and presents once, so the still picture is shown at the user's resolution and not at whatever
-     the load had forced (it stayed at 35 % until something else presented: AUDIT-A FA4) — and it RESTARTS THIS LAW'S WINDOW
-     (n, presented, ema, lastMs) on every pause edge, even at 1: a pointer drag asks a PRESENT per event, the loop re-arms per
-     event and rarely samples an interval, so the window's stale PLAYING ema — or the one interval straddling the edge, ~100 ms
-     while the GPU drains the last played frames — used to judge the paused drag and walk the scale down to 35 % (measured,
-     probes/W125/w125-pause-edge).  The EDGE only (`playedLast`), never every paused frame: paused camera
-     motion presents frames and this law may still lower the scale every 24 of them from what it measures then, which a
-     per-frame reset would fight.  With AUTO SCALE off nothing happens (the switch already put 1). */
-  const autoQ = { n: 0, presented: 0, ema: 0, lastMs: 0, changes: 0 };
+  /* AUTO SCALE: the canvas backing resolution follows the rAF interval (what a GPU-bound device shows) against the frame
+     budget (60 Hz in FULL, the observed cadence up to 120 Hz in 120 mode) by ONE RULE (AS, 2026-09-25): autoScaleStep decides
+     once ≥ 250 ms and ≥ 6 presented frames of one running loop have passed, on the window's MEDIAN interval (a burst of slow
+     frames is not a slow scene).  Outside [budget·1.08, budget·4/3] it jumps ONCE to the scale that meets the target (cost ∝
+     scale²: scale·√(target/median), ×0.5…×1.15) on the 0.05 grid, rounded toward the current scale so it never overshoots, then
+     HOLDS: each step reallocates the canvas (a stall on WebKit), so at vsync, where the interval cannot show headroom, it does
+     not probe up — the next pause resets it.  (It was −0.1/+0.05 on an EMA every 24 frames: ~11 s to reach 35 %.)
+     W125 (Josh, 2026-09-25) · THE PAUSE EDGE returns it to 1 and presents once (the still picture at the user's resolution —
+     AUDIT-A FA4), and restarts the window on EVERY pause edge, even at 1, or the play's intervals (or the ~100 ms one straddling
+     the edge) judged a paused drag and walked it to 35 % (probes/W125/w125-pause-edge).  The EDGE only (`playedLast`): paused
+     camera motion presents frames this rule may still judge.  AUTO SCALE off: nothing (the switch already put 1). */
+  const autoQ = { presented: 0, sinceMs: 0, k: 0, iv: new Float64Array(32), lastMs: 0, changes: 0 };
+  function autoScaleStep(scale, iv, k, budgetMs, minScale, sinceMs, presented) {   // null until due, else the scale (the same one = hold)
+    if (presented < 6 || sinceMs < 250) return null;
+    const n = Math.min(k, iv.length), ms = n > 2 ? iv.subarray(0, n).sort()[n >> 1] : 0;   // sorts the window in place: it restarts after every decision
+    const over = ms > budgetMs * 4 / 3;
+    if (!over && !(ms > 0 && ms <= budgetMs * 1.08)) return scale;
+    const x = 20 * scale * Math.min(1.15, Math.max(0.5, Math.sqrt((over ? budgetMs : budgetMs * 1.08) / ms)));
+    return Math.min(1, Math.max(minScale, (over ? Math.ceil(x - 1e-9) : Math.floor(x + 1e-9)) / 20));
+  }
   let playedLast = false;          // W125: was the transport playing on the last frame the loop ran?  The pause EDGE is playedLast && !playing
   /* ── THE GOVERNOR (wave 45): AUTO SCALE extended.  The last 60 presented frames' median is judged against the active
      frame budget: over it, the field grid steps one notch down (128 → 96 → 64) and the READER LAW tightens; sustained
@@ -476,7 +484,7 @@ export async function boot(dom) {
   function setPerfMode(m) {
     perf.mode = m === '120' ? '120' : 'full';
     perf.cpuEvery = perf.mode === '120' ? 4 : 1;
-    autoQ.n = autoQ.presented = autoQ.lastMs = autoQ.ema = 0;
+    autoQ.presented = autoQ.lastMs = 0;
     gov.n = gov.okSince = 0;
     frameBudget.breakSequence();
     if (ui.perfSeg) ui.perfSeg.set(perf.mode);
@@ -743,7 +751,7 @@ export async function boot(dom) {
       clock._wall = null;                       // PHYSICS: clock.js's own idiom — "the next dt is NOT a dt" (what pause() leaves behind)
       lastWall = now / 1000;                    // CAMERA: exactly what camera.wake() does
       modWall = now; lastReconMs = -1e9;        // the modulation cadence and the FIELD clock start their windows here
-      autoQ.lastMs = 0; autoQ.n = 0; autoQ.presented = 0; autoQ.ema = 0;   // the auto-scale window, and the "the thread was blocked" flash that a 3-minute gap would otherwise fire
+      autoQ.lastMs = 0; autoQ.presented = 0;   // the auto-scale window, and the "the thread was blocked" flash that a 3-minute gap would otherwise fire
       gov.n = 0; gov.okSince = 0; metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
@@ -1070,24 +1078,19 @@ export async function boot(dom) {
     if (modes) stats.reconstructs++;
     if (tier > 0) { stats.tiers[TIER_NAME[tier]]++; stats.lastTier = TIER_NAME[tier]; }
     stats.frames++; winFrames++;
-    autoQ.n++; if (tier >= TIER.PRESENT) autoQ.presented++;
+    if (tier >= TIER.PRESENT && !autoQ.presented++) { autoQ.sinceMs = nowMs; autoQ.k = 0; }   // AUTO SCALE's window opens on its first presented frame
     if (autoQ.lastMs && tier >= TIER.PRESENT) {
       const iv = nowMs - autoQ.lastMs;
       frameBudget.sample(iv);
-      if (iv <= 250) { autoQ.ema = autoQ.ema ? autoQ.ema * 0.85 + iv * 0.15 : iv; gov.ring[gov.n % 60] = iv; gov.n++; }
+      if (iv <= 250) { autoQ.iv[autoQ.k++ & 31] = iv; gov.ring[gov.n % 60] = iv; gov.n++; }
     }
     if (autoQ.lastMs && nowMs - autoQ.lastMs > 250) busyFlash(600);    // wave 48: a gap that long means the thread WAS blocked by work nobody wrapped — say so for 600 ms
     autoQ.lastMs = nowMs;
     const slot = perf.counts.frames % 60; perf.ring[slot] = 0; loopRing[slot] = 0;   // filled at the tail with this frame's own main-thread cost — the SAME slot (LA1)
-    if (autoQ.n >= 24) {
-      if (quality.auto && autoQ.presented >= 18 && autoQ.ema) {
-        const budget = perfBudgetMs();
-        if (autoQ.ema > budget * 4 / 3 && quality.autoScale > quality.minScale) { quality.autoScale = Math.max(quality.minScale, +(quality.autoScale - 0.1).toFixed(2)); autoQ.changes++; }
-        // At vsync the interval cannot get shorter just because the GPU has
-        // headroom. Probe upward at the target cadence; back off if it misses.
-        else if (autoQ.ema <= budget * 1.08 && quality.autoScale < 1) { quality.autoScale = Math.min(1, +(quality.autoScale + 0.05).toFixed(2)); autoQ.changes++; }
-      }
-      autoQ.n = 0; autoQ.presented = 0;
+    const nextScale = autoScaleStep(quality.autoScale, autoQ.iv, autoQ.k, perfBudgetMs(), quality.minScale, nowMs - autoQ.sinceMs, autoQ.presented);
+    if (nextScale !== null) {                                        // AUTO SCALE's one rule has judged (its law at autoQ)
+      if (quality.auto && nextScale !== quality.autoScale) { quality.autoScale = nextScale; autoQ.changes++; }
+      autoQ.presented = 0;
       if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%', quality.auto && quality.autoScale < 1 ? 'warn' : '');
     }
     /* THE GOVERNOR: the median of the last 60 presented frames, judged every 30 frames while playing */
@@ -1111,12 +1114,8 @@ export async function boot(dom) {
     }
     if (!clock.playing && (gov.drop || gov.stepDrop)) { const rebuild = gov.drop > 0; gov.drop = 0; gov.stepDrop = 0; gov.okSince = 0; gov.changes++; schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }   // paused: nothing to govern — the user's grid and steps come back at once
     if (playedLast && !clock.playing && quality.auto) {              // W125: …and AUTO SCALE's canvas, on the pause EDGE only (see its law at autoQ)
-      autoQ.n = 0; autoQ.presented = 0; autoQ.ema = 0; autoQ.lastMs = 0;   // its window restarts on EVERY pause edge (the resume-from-hidden reset's four): the play's intervals, and the edge's own transition interval, are not the still picture's
-      if (quality.autoScale < 1) {
-        quality.autoScale = 1; autoQ.changes++;
-        if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', '');
-        schedule(TIER.PRESENT);                                      // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
-      }
+      autoQ.presented = autoQ.lastMs = 0;                            // its window restarts on EVERY pause edge: the play's intervals, and the edge's own transition interval, are not the still picture's
+      if (quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
     }
     playedLast = clock.playing;
     perf.counts.frames++;
@@ -1252,7 +1251,7 @@ export async function boot(dom) {
      followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
   function loopTail(faultRepeat) {
     if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || (pending && !faultRepeat) || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
-    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = 0; frameBudget.breakSequence(); }
+    else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = autoQ.presented = 0; frameBudget.breakSequence(); }
   }
   /** LA4: a thrown frame is REPORTED ONCE per distinct message (32 kept) to window.__e and the console — a throw that
    *  repeats every frame must not flood either */

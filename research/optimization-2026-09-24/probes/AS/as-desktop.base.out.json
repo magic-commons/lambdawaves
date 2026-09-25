@@ -1,0 +1,19 @@
+{
+ "res": 64,
+ "auto": true,
+ "governor": true,
+ "mode": "120",
+ "uiHidden": false,
+ "startScale": 1,
+ "startCw": 1920,
+ "frames": 68,
+ "medianMs": 67.3,
+ "p90Ms": 83.5,
+ "k": null,
+ "minScale": 0.7,
+ "minCw": 1536,
+ "endScale": 1,
+ "scaleChanges": 4,
+ "governorDrop": 0,
+ "errs": []
+}

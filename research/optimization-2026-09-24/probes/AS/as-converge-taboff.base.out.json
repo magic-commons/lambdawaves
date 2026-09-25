@@ -1,0 +1,128 @@
+{
+ "table": "off",
+ "style": 6,
+ "fullWidth": 1920,
+ "budgetMode": "120",
+ "budgetMs": 16.67,
+ "A": {
+  "frames": 162,
+  "changes": [
+   [
+    1486,
+    0.9,
+    1920
+   ],
+   [
+    3270,
+    0.8,
+    1728
+   ],
+   [
+    5087,
+    0.7,
+    1536
+   ],
+   [
+    6789,
+    0.6,
+    1344
+   ],
+   [
+    8505,
+    0.5,
+    1152
+   ],
+   [
+    10321,
+    0.4,
+    960
+   ]
+  ],
+  "firstDecision": {
+   "t": 1486,
+   "scale": 0.9
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.4,
+   "cw": 768,
+   "k": null,
+   "tailMedianMs": 83.6
+  }
+ },
+ "B": {
+  "edgeAutoScale": 1,
+  "pausedAutoScale": 1,
+  "pausedCw": 1920,
+  "firstPlayFrameAutoScale": 1,
+  "frames": 53,
+  "changes": [
+   [
+    1686,
+    0.9,
+    1920
+   ],
+   [
+    3486,
+    0.8,
+    1728
+   ]
+  ],
+  "firstDecision": {
+   "t": 1686,
+   "scale": 0.9
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.8,
+   "cw": 1536,
+   "k": null,
+   "tailMedianMs": 99.5
+  },
+  "settledInA": 0.4,
+  "firstDecisionWithinOneStep": false
+ },
+ "C": {
+  "button": true,
+  "before": 0.8,
+  "afterOff": {
+   "auto": false,
+   "autoScale": 1
+  },
+  "offPlaying": {
+   "autoScale": 1,
+   "cw": 1920,
+   "auto": false
+  },
+  "afterOn": {
+   "auto": true,
+   "autoScale": 1
+  },
+  "frames": 36,
+  "changes": [
+   [
+    1813,
+    0.9,
+    1920
+   ]
+  ],
+  "firstDecision": {
+   "t": 1813,
+   "scale": 0.9
+  },
+  "medianMeet": null,
+  "end": {
+   "autoScale": 0.9,
+   "cw": 1728,
+   "k": null,
+   "tailMedianMs": 99.6
+  }
+ },
+ "E": {
+  "ok": true,
+  "digests": "fb62de3d386882d4,5e52ad4b85fd00e9,cdc250bf7b696203",
+  "autoAfter": true,
+  "autoScaleAfter": 0.5
+ },
+ "errs": []
+}

@@ -1,0 +1,105 @@
+{
+ "table": "off",
+ "fullWidth": 1920,
+ "budgetMode": "120",
+ "play": {
+  "secs": 8,
+  "scaleTrace": [
+   [
+    0.25,
+    1,
+    1920
+   ],
+   [
+    0.5,
+    0.55,
+    1056
+   ],
+   [
+    1,
+    0.35,
+    672
+   ]
+  ],
+  "beforePause": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "res": 64,
+   "drop": 2,
+   "ema": 5
+  }
+ },
+ "pause": {
+  "edgeFrame": {
+   "autoScale": 1,
+   "cw": 672,
+   "presents": 1,
+   "playing": false
+  },
+  "nextFrame": {
+   "autoScale": 1,
+   "cw": 1920,
+   "presents": 2
+  },
+  "after6Frames": {
+   "autoScale": 1,
+   "cw": 1920,
+   "presents": 2,
+   "scheduled": false,
+   "res": 128
+  },
+  "autoQChanges": 1
+ },
+ "drag": {
+  "frames": 174,
+  "presents": 174,
+  "fps": 58,
+  "scaleChanges": 0,
+  "wentUp": 0,
+  "trace": [],
+  "end": {
+   "autoScale": 1,
+   "cw": 1920
+  },
+  "playing": false,
+  "ema": 0
+ },
+ "spin": {
+  "frames": 180,
+  "presents": 180,
+  "scaleChanges": 0,
+  "wentUp": 0,
+  "trace": [],
+  "end": {
+   "autoScale": 1,
+   "cw": 1920
+  },
+  "ema": 13,
+  "playing": false
+ },
+ "staleAtOne": {
+  "emaWhilePlaying": 2,
+  "emaAfterEdge": 0,
+  "drag": {
+   "frames": 180,
+   "presents": 180,
+   "fps": 60,
+   "scaleChanges": 0,
+   "wentUp": 0,
+   "trace": [],
+   "end": {
+    "autoScale": 1,
+    "cw": 1920
+   },
+   "playing": false,
+   "ema": 0
+  }
+ },
+ "autoOff": {
+  "autoScale": 1,
+  "cw": 1920,
+  "presentsAfterPause": 1,
+  "autoQChanges": 0
+ },
+ "errs": []
+}

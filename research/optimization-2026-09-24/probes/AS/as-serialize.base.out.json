@@ -1,0 +1,14 @@
+{
+ "boot": {
+  "hash": "d6e96c70",
+  "bytes": 9920,
+  "qualityKeys": "res,steps,scale,auto,autoScale,minScale"
+ },
+ "atHalf": {
+  "autoScaleWritten": 0.5
+ },
+ "again": {
+  "hash": "d6e96c70",
+  "same": true
+ }
+}

@@ -1,0 +1,197 @@
+{
+ "table": "on",
+ "style": 6,
+ "fullWidth": 1920,
+ "budgetMode": "120",
+ "budgetMs": 16.67,
+ "A": {
+  "frames": 418,
+  "changes": [
+   [
+    902,
+    0.9,
+    1920
+   ],
+   [
+    2104,
+    0.8,
+    1728
+   ],
+   [
+    3321,
+    0.7,
+    1536
+   ],
+   [
+    4450,
+    0.6,
+    1344
+   ],
+   [
+    5651,
+    0.5,
+    1152
+   ],
+   [
+    6337,
+    0.4,
+    960
+   ],
+   [
+    6737,
+    0.45,
+    768
+   ],
+   [
+    7137,
+    0.5,
+    864
+   ],
+   [
+    7537,
+    0.55,
+    960
+   ],
+   [
+    8151,
+    0.45,
+    1056
+   ],
+   [
+    9222,
+    0.5,
+    864
+   ],
+   [
+    10005,
+    0.4,
+    960
+   ],
+   [
+    10405,
+    0.45,
+    768
+   ],
+   [
+    11337,
+    0.35,
+    864
+   ],
+   [
+    11737,
+    0.4,
+    672
+   ]
+  ],
+  "firstDecision": {
+   "t": 902,
+   "scale": 0.9
+  },
+  "medianMeet": {
+   "t": 917,
+   "scale": 0.9
+  },
+  "end": {
+   "autoScale": 0.4,
+   "cw": 768,
+   "k": null,
+   "tailMedianMs": 17.1
+  }
+ },
+ "B": {
+  "edgeAutoScale": 1,
+  "pausedAutoScale": 1,
+  "pausedCw": 1920,
+  "firstPlayFrameAutoScale": 1,
+  "frames": 80,
+  "changes": [
+   [
+    1153,
+    0.9,
+    1920
+   ],
+   [
+    2354,
+    0.8,
+    1728
+   ],
+   [
+    3554,
+    0.7,
+    1536
+   ]
+  ],
+  "firstDecision": {
+   "t": 1153,
+   "scale": 0.9
+  },
+  "medianMeet": {
+   "t": 568,
+   "scale": 1
+  },
+  "end": {
+   "autoScale": 0.7,
+   "cw": 1344,
+   "k": null,
+   "tailMedianMs": 66.3
+  },
+  "settledInA": 0.4,
+  "firstDecisionWithinOneStep": false
+ },
+ "C": {
+  "button": true,
+  "before": 0.7,
+  "afterOff": {
+   "auto": false,
+   "autoScale": 1
+  },
+  "offPlaying": {
+   "autoScale": 1,
+   "cw": 1920,
+   "auto": false
+  },
+  "afterOn": {
+   "auto": true,
+   "autoScale": 1
+  },
+  "frames": 60,
+  "changes": [
+   [
+    312,
+    0.9,
+    1920
+   ],
+   [
+    1512,
+    0.8,
+    1728
+   ],
+   [
+    2712,
+    0.7,
+    1536
+   ]
+  ],
+  "firstDecision": {
+   "t": 312,
+   "scale": 0.9
+  },
+  "medianMeet": {
+   "t": 512,
+   "scale": 0.9
+  },
+  "end": {
+   "autoScale": 0.7,
+   "cw": 1344,
+   "k": null,
+   "tailMedianMs": 82.4
+  }
+ },
+ "E": {
+  "ok": true,
+  "digests": "309386b1341d9462,fa326d54f58a8cf2,389abbc879146591",
+  "autoAfter": true,
+  "autoScaleAfter": 0.5
+ },
+ "errs": []
+}

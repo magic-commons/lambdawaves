@@ -1,0 +1,117 @@
+{
+ "table": "on",
+ "style": 6,
+ "fullWidth": 1920,
+ "budgetMode": "120",
+ "budgetMs": 16.67,
+ "A": {
+  "frames": 693,
+  "changes": [
+   [
+    338,
+    0.5,
+    1920
+   ],
+   [
+    638,
+    0.35,
+    960
+   ]
+  ],
+  "firstDecision": {
+   "t": 338,
+   "scale": 0.5
+  },
+  "medianMeet": {
+   "t": 451,
+   "scale": 0.5
+  },
+  "end": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "k": 17,
+   "tailMedianMs": 17.1
+  }
+ },
+ "B": {
+  "edgeAutoScale": 1,
+  "pausedAutoScale": 1,
+  "pausedCw": 1920,
+  "firstPlayFrameAutoScale": 1,
+  "frames": 210,
+  "changes": [
+   [
+    321,
+    0.7,
+    1920
+   ],
+   [
+    621,
+    0.35,
+    1344
+   ]
+  ],
+  "firstDecision": {
+   "t": 321,
+   "scale": 0.7
+  },
+  "medianMeet": {
+   "t": 734,
+   "scale": 0.35
+  },
+  "end": {
+   "autoScale": 0.35,
+   "cw": 672,
+   "k": 5,
+   "tailMedianMs": 17.1
+  },
+  "settledInA": 0.35,
+  "firstDecisionWithinOneStep": false
+ },
+ "C": {
+  "button": true,
+  "before": 0.35,
+  "afterOff": {
+   "auto": false,
+   "autoScale": 1
+  },
+  "offPlaying": {
+   "autoScale": 1,
+   "cw": 1920,
+   "auto": false
+  },
+  "afterOn": {
+   "auto": true,
+   "autoScale": 1
+  },
+  "frames": 149,
+  "changes": [
+   [
+    230,
+    0.5,
+    1920
+   ]
+  ],
+  "firstDecision": {
+   "t": 230,
+   "scale": 0.5
+  },
+  "medianMeet": {
+   "t": 381,
+   "scale": 0.5
+  },
+  "end": {
+   "autoScale": 0.5,
+   "cw": 960,
+   "k": 1,
+   "tailMedianMs": 17.1
+  }
+ },
+ "E": {
+  "ok": true,
+  "digests": "309386b1341d9462,fa326d54f58a8cf2,389abbc879146591",
+  "autoAfter": true,
+  "autoScaleAfter": 0.5
+ },
+ "errs": []
+}
