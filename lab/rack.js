@@ -40,7 +40,7 @@ import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
 import { createMolecule } from './moleculeview.js';
 import { createMOPanel } from './moview.js';
 import { createPulse } from './pulseview.js';
-import { createCapture, maxPictureSize } from './capture.js';
+import { createCapture, maxPictureSize, viewCarriesGlobalPhase } from './capture.js';
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
@@ -1861,6 +1861,7 @@ export async function boot(dom) {
     let exact = null, exactRun = null;
     const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
+    let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩
     const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
     const rc1 = el('div', 'row tight', gcap);
@@ -1904,13 +1905,38 @@ export async function boot(dom) {
     }
     function capStale() { if (capPlan && capKey !== capKeyNow()) capPaint(); }
     function capMakePlan(force) {
-      if (!force && capPlan && capKey === capKeyNow()) return capPlan;
+      if (!force && capPlan && capKey === capKeyNow() && !capSoft) return capPlan;
+      capWait = false; capSoft = false;
       try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get() }); capKey = capKeyNow(); }
       catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
       capPaint(); return capPlan;
     }
+    /* LA7 · THE HOVER ASKS, IT DOES NOT FORCE.  Wave 58's hover plan ran the FORCED period read — one or two synchronous
+       2·10⁶-step scans on an incommensurate state (0.36 s on the BOX, 0.76 s in its phase view, 1.3 s under STURMIAN)
+       every time the pointer crossed this group (AUDIT-F F2).  The hover now takes the frame path's answer: fresh, the
+       exact half, or posted to the scan worker — and while it runs the readout says so and ONE PERIOD stays down; the
+       landing re-plans.  The plan it paints is the PLAN button's: the same density period (bit-identical in the worker)
+       and the same W, because W is used only when T_ψ is EXACT, and the exact half of T_ψ is microseconds.  The one
+       field it leaves unset is T_ψ's near-recurrence (Twave), which nothing reads; so a hover's plan is painted and never
+       handed to a caller (capSoft).  ⟳, G, PLAN, LW.period and LW.capturePlan stay forced. */
+    const capWaveExact = () => {
+      if (!viewCarriesGlobalPhase(mat.view | 0)) return null;
+      const E = periodEnergies(); return E && E.length ? densityPeriodExact([0].concat(Array.from(E))) : null;
+    };
+    function capHover() {
+      if (capPlan && capKey === capKeyNow() && !capWait) return;
+      const soon = __LW_hooks.periodSoon ? __LW_hooks.periodSoon() : null;
+      if (!soon) { capMakePlan(false); return; }
+      if (soon.settling) { if (!capWait) { capWait = true; capPaint(); } return; }
+      capWait = false; capSoft = true;
+      try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get(), period: soon.period, wave: capWaveExact() }); capKey = capKeyNow(); }
+      catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
+      capPaint();
+    }
+    __LW_hooks.onPeriodLand = () => { if (capWait) capHover(); };
     function capPaint() {
       const P = capPlan, stale = P && capKey !== capKeyNow();
+      if (capWait) { ui.capPlanRo.set('…', ''); ui.capPlanRo.setSub('settling — the recurrence scan runs off the frame; the plan appears when it lands'); ui.capLoop.root.disabled = true; return; }
       if (!P) { ui.capPlanRo.set('—', ''); ui.capPlanRo.setSub('press PLAN (or hover this group) and period.js will say what closes here, for the observable in force'); ui.capLoop.root.disabled = true; return; }
       ui.capPlanRo.set(stale ? P.label + ' · STALE' : P.label + (P.undersampled ? ' · UNDERSAMPLED' : ''), stale ? 'warn' : P.undersampled ? 'warn' : P.ok ? 'ok' : 'warn');
       ui.capPlanRo.setSub((stale ? 'THE STATE OR THE VIEW HAS MOVED since this plan was made — press PLAN. · ' : '')
@@ -1995,7 +2021,7 @@ export async function boot(dom) {
         ui.capExact.setLabel('EXPORT FRAMES'); ui.capExact.on = false; capPaint();
       }
     }
-    gcap.addEventListener('pointerenter', () => { if (!capBusy) capMakePlan(false); });
+    gcap.addEventListener('pointerenter', () => { if (!capBusy) capHover(); });
     capShowLimits(); capPaint();
     capApi = { exportFrames: capExportFrames, get exact() { return exactRenderer(); }, get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
     const gq = group(ui.set.body, 'FIELD QUALITY');
@@ -3049,6 +3075,7 @@ export async function boot(dom) {
       const P = Object.assign({}, r); delete P.id; delete P.op;
       lastPeriod = P; Object.assign(pk, key); periodVersion = key.v; periodCostMs = 0; periodSettling = false; periodPending = null;
       paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
+      if (__LW_hooks.onPeriodLand) __LW_hooks.onPeriodLand();          // LA7: a CAPTURE hover waiting on this scan plans now
     }
     /* …and a dial held down by an ARROW KEY is a gesture too (auto-repeat bumps reg.version ~30×/s with no pointer):
        the wave-44 hold-off below reads it beside pointerHeld; a released key lets the settled scan run once. */
@@ -3130,6 +3157,7 @@ export async function boot(dom) {
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
     function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
     __LW_hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
+    __LW_hooks.periodSoon = () => { const P = periodNow(); return { period: P, settling: periodSettling }; };   // LA7: the CAPTURE hover's read — the frame path's own, never forced
     const laps = () => Math.floor(clock.t / clock.window);
     const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
       ? v.toFixed(decimals)

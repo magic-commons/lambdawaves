@@ -1,0 +1,210 @@
+{
+ "states": {
+  "1s+2pz": {
+   "hoverMs": 1.1,
+   "faceAtHover": "EXACT LOOP",
+   "landedMs": 154,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 3,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    },
+    "forced": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 3,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "EXACT LOOP",
+    "cls": "ro wide",
+    "sub": "EXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 3 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the observable is phase, which paints the GLOBAL phase of psi, so the loop runs to T_psi = 2*pi/gcd{|E|} = 3 x T_rho and the hue closes with it. · period used: wave (3 laps of T_ρ)",
+    "onePeriodDisabled": false
+   },
+   "forcedFace": "EXACT LOOP",
+   "kind": "exact",
+   "label": "EXACT LOOP"
+  },
+  "box-density": {
+   "hoverMs": 354.8,
+   "faceAtHover": "NEAR",
+   "landedMs": 15,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": null
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (21 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 7893.6873 a.u. (190.94 fs), and it MISSES: the worst pair is 0.419 of a turn from closing (41.86% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  },
+  "box-phase": {
+   "hoverMs": 758.48,
+   "faceAtHover": "NEAR",
+   "landedMs": 16,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 7893.698342426883
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 7893.687290000279,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 7893.698342426883
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (21 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 7893.6873 a.u. (190.94 fs), and it MISSES: the worst pair is 0.419 of a turn from closing (41.86% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  },
+  "stark": {
+   "hoverMs": 0.54,
+   "faceAtHover": "NO LOOP",
+   "landedMs": 39,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": null,
+     "T": 0,
+     "laps": null,
+     "pixelExact": null,
+     "Twave": null
+    },
+    "forced": {
+     "usedPeriod": null,
+     "T": 0,
+     "laps": null,
+     "pixelExact": null,
+     "Twave": null
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "NO LOOP",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD and no near-recurrence to offer - a static Stark field: the Stark energies are not commensurate. There is nothing here that closes; record a free clip instead.",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NO LOOP",
+   "kind": "none",
+   "label": "NO LOOP"
+  },
+  "2p+-phase": {
+   "hoverMs": 0.36,
+   "faceAtHover": "EXACT LOOP",
+   "landedMs": 141,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 1,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    },
+    "forced": {
+     "usedPeriod": "wave",
+     "T": 50.26548245743669,
+     "laps": 1,
+     "pixelExact": true,
+     "Twave": 50.26548245743669
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "EXACT LOOP",
+    "cls": "ro wide",
+    "sub": "EXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 2 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the DENSITY never changes here - one energy - but the observable is phase, which paints the GLOBAL phase of psi: it turns at T_psi = 2*pi/|E| and the picture turns with it, so the loop runs to T_psi and closes there. One frame would have been a still of something that moves.. · period used: wave (1 lap of T_ρ)",
+    "onePeriodDisabled": false
+   },
+   "forcedFace": "EXACT LOOP",
+   "kind": "exact",
+   "label": "EXACT LOOP"
+  },
+  "sturmian": {
+   "hoverMs": 1274.1,
+   "faceAtHover": "NEAR",
+   "landedMs": 12,
+   "hoverWasSoft": false,
+   "plansDiffer": [],
+   "planDiffDetail": [],
+   "W": {
+    "hover": {
+     "usedPeriod": "density",
+     "T": 10143.067491546042,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 10143.067491546042
+    },
+    "forced": {
+     "usedPeriod": "density",
+     "T": 10143.067491546042,
+     "laps": 1,
+     "pixelExact": false,
+     "Twave": 10143.067491546042
+    }
+   },
+   "facesEqual": true,
+   "hoverFace": {
+    "val": "NEAR",
+    "cls": "ro wide",
+    "sub": "NO EXACT PERIOD (11 incommensurate energies) - the energies are incommensurate. The best near-recurrence within the horizon is T = 10143.067 a.u. (245.35 fs), and it MISSES: the worst pair is 0.235 of a turn from closing (23.46% of a beat), so the last frame does not meet the first. Record it as NEAR if you want it - the seam will be visible to that much. · period used: density (1 lap of T_ρ)",
+    "onePeriodDisabled": true
+   },
+   "forcedFace": "NEAR",
+   "kind": "near",
+   "label": "NEAR"
+  }
+ },
+ "found": true,
+ "errs": []
+}
