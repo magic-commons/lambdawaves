@@ -1,0 +1,23 @@
+{
+ "clickSyncMs": 0.5,
+ "importTextAfterClickMs": 4.9,
+ "openAfterClickMs": 5.7,
+ "openSyncMs": 123.3,
+ "resource": {
+  "name": "/lab/demos/wave-dancer.lambdawaves.json",
+  "protocol": "http/1.0",
+  "fetchStart": 0.3,
+  "workerStart": null,
+  "connectStart": 1.5,
+  "secureConnectionStart": 1.6,
+  "connectEnd": 3.2,
+  "requestStart": 3.2,
+  "responseStart": 3.2,
+  "responseEnd": 4.2,
+  "transferSize": 26007,
+  "encodedBodySize": 25707,
+  "durationMs": 3.9
+ },
+ "afterResponseToImportMs": 0.7,
+ "swControlled": false
+}

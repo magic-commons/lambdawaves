@@ -1,0 +1,47 @@
+{
+ "1_dancer": {
+  "ser": "2d785c59:13932",
+  "settings": "a3c62f6f:946",
+  "modDom": "5397880a:67900",
+  "rack": "1d4a41b7:860",
+  "body": "no-badges no-captions frost disconnected window-info-off rack-l|dark|refractive",
+  "nbStyle": "width: 320px; height: 240px; left: calc(50% - 0px); top: 12%;",
+  "modOpen": true,
+  "transition": true,
+  "palette": "phosphor"
+ },
+ "2_composed": {
+  "ser": "ed4f62f4:14771",
+  "settings": "a1af95d6:956",
+  "modDom": "a4171a58:93908",
+  "rack": "89bf989f:867",
+  "body": "no-badges no-captions frost disconnected window-info-off rack-l|light|tinted",
+  "nbStyle": "width: 540px; height: 420px; left: calc(50% - 270px); top: 12%;",
+  "modOpen": true,
+  "transition": true,
+  "palette": "beacon"
+ },
+ "3_dancerOverComposed": {
+  "ser": "60721ae7:13932",
+  "settings": "a135c2fd:950",
+  "modDom": "5397880a:67900",
+  "rack": "1d4a41b7:860",
+  "body": "no-badges no-captions frost disconnected window-info-off rack-l|dark|refractive",
+  "nbStyle": "width: 470px; height: 670px; left: calc(50% - 235px); top: 12%;",
+  "modOpen": true,
+  "transition": true,
+  "palette": "phosphor"
+ },
+ "4_composedClosed": {
+  "ser": "8cfc6c79:14772",
+  "settings": "f2e9e4ff:957",
+  "modDom": "573bc9e5:93918",
+  "rack": "89bf989f:867",
+  "body": "no-badges no-captions frost disconnected window-info-off rack-l|light|tinted",
+  "nbStyle": "width: 540px; height: 420px; left: calc(50% - 270px); top: 12%;",
+  "modOpen": false,
+  "transition": true,
+  "palette": "beacon"
+ },
+ "errs": []
+}

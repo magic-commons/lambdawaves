@@ -5031,7 +5031,7 @@ export async function boot(dom) {
           if (pr.readers.kepler && Number.isFinite(pr.readers.kepler.shell) && ui.kepShell) { ui.kepShell.set(String(pr.readers.kepler.shell)); keplerRowSync(true); }
         }
         if (pr.ab && ui.ab) ui.ab.set(pr.ab);
-        if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w)) layout.notebookResize(pr.notebook.w, pr.notebook.h);
+        if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w) && !(pr.layout && pr.layout.nb)) layout.notebookResize(pr.notebook.w, pr.notebook.h);   // wave 127: a layout carrying nb sizes it next (applyLayout), last
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
         // A legacy H₂⁺ file can carry a closed old layout and an active field
         // owner. Keep its controls reachable after applying that layout.

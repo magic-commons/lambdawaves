@@ -1,0 +1,109 @@
+{
+ "a": [
+  {
+   "syncMs": 106.3,
+   "forcedMs": 62.2,
+   "n": 10,
+   "rec": [
+    "14.1 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "7.8 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "10.5 clientWidth paint (paletteview.js:91:21)",
+    "11.7 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.2 offsetHeight place (modwindow.js:322:32)",
+    "3.2 clientWidth paint (modwindow.js:2772:36)",
+    "1.6 clientWidth paint (modwindow.js:2772:36)",
+    "2.2 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.6 clientWidth paint (modwindow.js:2772:36)",
+    "5.3 focus() show (rack.js:4190:34)"
+   ]
+  },
+  {
+   "syncMs": 108.3,
+   "forcedMs": 63.2,
+   "n": 11,
+   "rec": [
+    "13.7 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "10.4 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "8.6 clientWidth paint (paletteview.js:91:21)",
+    "12 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.2 offsetHeight place (modwindow.js:322:32)",
+    "2.9 clientWidth paint (modwindow.js:2772:36)",
+    "1.8 clientWidth paint (modwindow.js:2772:36)",
+    "1.7 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.4 clientWidth paint (modwindow.js:2772:36)",
+    "1 clientWidth paint (modwindow.js:2772:36)",
+    "5.5 focus() show (rack.js:4190:34)"
+   ]
+  },
+  {
+   "syncMs": 108.7,
+   "forcedMs": 63.4,
+   "n": 11,
+   "rec": [
+    "13 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "8.7 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "9.7 clientWidth paint (paletteview.js:91:21)",
+    "11.9 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.6 offsetHeight place (modwindow.js:322:32)",
+    "3.4 clientWidth paint (modwindow.js:2772:36)",
+    "1.9 clientWidth paint (modwindow.js:2772:36)",
+    "2.3 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.5 clientWidth paint (modwindow.js:2772:36)",
+    "0.9 clientWidth paint (modwindow.js:2772:36)",
+    "5.5 focus() show (rack.js:4190:34)"
+   ]
+  }
+ ],
+ "b": [
+  {
+   "syncMs": 94.8,
+   "forcedMs": 52.2,
+   "n": 10,
+   "rec": [
+    "13.4 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "8.4 clientWidth paint (paletteview.js:91:21)",
+    "11.8 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.3 offsetHeight place (modwindow.js:322:32)",
+    "2.6 clientWidth paint (modwindow.js:2772:36)",
+    "1.5 clientWidth paint (modwindow.js:2772:36)",
+    "2 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.5 clientWidth paint (modwindow.js:2772:36)",
+    "0.9 clientWidth paint (modwindow.js:2772:36)",
+    "5.8 focus() show (rack.js:4190:34)"
+   ]
+  },
+  {
+   "syncMs": 99.4,
+   "forcedMs": 56.5,
+   "n": 10,
+   "rec": [
+    "17.4 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "8.3 clientWidth paint (paletteview.js:91:21)",
+    "12.6 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.3 offsetHeight place (modwindow.js:322:32)",
+    "2.6 clientWidth paint (modwindow.js:2772:36)",
+    "1.7 clientWidth paint (modwindow.js:2772:36)",
+    "2 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.5 clientWidth paint (modwindow.js:2772:36)",
+    "0.8 clientWidth paint (modwindow.js:2772:36)",
+    "5.3 focus() show (rack.js:4190:34)"
+   ]
+  },
+  {
+   "syncMs": 99.8,
+   "forcedMs": 57.2,
+   "n": 9,
+   "rec": [
+    "11.7 offsetWidth nbSaveSize (rack.js:4207:33)",
+    "13.1 clientWidth paint (paletteview.js:91:21)",
+    "13.9 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "5.7 offsetHeight place (modwindow.js:322:32)",
+    "3.3 clientWidth paint (modwindow.js:2772:36)",
+    "1.9 clientWidth paint (modwindow.js:2772:36)",
+    "1.7 getBoundingClientRect() rectOf (modwindow.js:185:43)",
+    "0.7 clientWidth paint (modwindow.js:2772:36)",
+    "5.2 focus() show (rack.js:4190:34)"
+   ]
+  }
+ ]
+}
