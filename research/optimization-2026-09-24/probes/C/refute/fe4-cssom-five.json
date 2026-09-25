@@ -1,0 +1,365 @@
+{
+ "at": "2026-09-25T03:32:26.949Z",
+ "selectors": 124,
+ "aa": [
+  {
+   "label": "light · disc · frost",
+   "n": 4607,
+   "differ": 70,
+   "idx": [
+    41,
+    42,
+    45,
+    46,
+    47,
+    113,
+    129,
+    235,
+    371,
+    561,
+    737,
+    756,
+    855,
+    877,
+    891,
+    920,
+    950,
+    1004,
+    1253,
+    1284,
+    1362,
+    1391,
+    1438,
+    1474,
+    1577,
+    1606,
+    1651,
+    1680,
+    1750,
+    1784,
+    1974,
+    2002,
+    2051,
+    2081,
+    2147,
+    2175,
+    2349,
+    2390,
+    2568,
+    2597
+   ],
+   "who": [
+    "#rackToggle@41:f55e2052",
+    "#rackAdd@42:f281c95e",
+    "#rackFav@45:b1794f6e",
+    "#rackAddList@46:6c011049",
+    "#rackFavList@47:6c011049",
+    "#sheet@113:c03c5385",
+    "#transport@129:8ac26a8d",
+    "div.m2rail@235:ded5b404",
+    "div.m2dev@371:3d66195",
+    "div.m2dev@561:3d66195",
+    "div.m2workbar@737:5f209f4e",
+    "div.m2workbar@756:a4bf91eb"
+   ]
+  },
+  {
+   "label": "dark · disc · frost",
+   "n": 4607,
+   "differ": 69,
+   "idx": [
+    41,
+    42,
+    45,
+    46,
+    47,
+    113,
+    129,
+    235,
+    371,
+    561,
+    737,
+    756,
+    855,
+    877,
+    891,
+    920,
+    950,
+    1004,
+    1253,
+    1284,
+    1362,
+    1391,
+    1438,
+    1474,
+    1577,
+    1606,
+    1651,
+    1680,
+    1750,
+    1784,
+    1974,
+    2002,
+    2051,
+    2081,
+    2147,
+    2175,
+    2349,
+    2390,
+    2568,
+    2597
+   ],
+   "who": [
+    "#rackToggle@41:47c346c",
+    "#rackAdd@42:114a5688",
+    "#rackFav@45:ef1f6a7e",
+    "#rackAddList@46:55632fcf",
+    "#rackFavList@47:55632fcf",
+    "#sheet@113:d08c35dd",
+    "#transport@129:25b967cd",
+    "div.m2rail@235:6cd5a326",
+    "div.m2dev@371:b2c1e9dd",
+    "div.m2dev@561:b2c1e9dd",
+    "div.m2workbar@737:51413f5a",
+    "div.m2workbar@756:73781199"
+   ]
+  },
+  {
+   "label": "dark · connected · frost off",
+   "n": 4607,
+   "differ": 42,
+   "idx": [
+    41,
+    42,
+    45,
+    46,
+    47,
+    113,
+    129,
+    235,
+    371,
+    561,
+    737,
+    756,
+    855,
+    891,
+    950,
+    1253,
+    1362,
+    1438,
+    1577,
+    1651,
+    1750,
+    1974,
+    2051,
+    2147,
+    2349,
+    2568,
+    2647,
+    2743,
+    2918,
+    3001,
+    3079,
+    3156,
+    3233,
+    3287,
+    3342,
+    3343,
+    3495,
+    3715,
+    3831,
+    3968
+   ],
+   "who": [
+    "#rackToggle@41:ec342d03",
+    "#rackAdd@42:58a2f269",
+    "#rackFav@45:9e61d39b",
+    "#rackAddList@46:12b3911c",
+    "#rackFavList@47:12b3911c",
+    "#sheet@113:fbefd058",
+    "#transport@129:7ef812e1",
+    "div.m2rail@235:31c67805",
+    "div.m2dev@371:efc0d522",
+    "div.m2dev@561:efc0d522",
+    "div.m2workbar@737:81ac0ac3",
+    "div.m2workbar@756:e9f46e28"
+   ]
+  },
+  {
+   "label": "light · connected · tinted",
+   "n": 4607,
+   "differ": 0,
+   "idx": [],
+   "who": []
+  }
+ ],
+ "removeStrong": {
+  "removed": 124,
+  "rules": 112,
+  "matched": 118,
+  "wanted": 124,
+  "missing": []
+ },
+ "strong": [
+  {
+   "label": "light · disc · frost",
+   "n": 4607,
+   "differ": 0,
+   "idx": [],
+   "who": []
+  },
+  {
+   "label": "dark · disc · frost",
+   "n": 4607,
+   "differ": 0,
+   "idx": [],
+   "who": []
+  },
+  {
+   "label": "dark · connected · frost off",
+   "n": 4607,
+   "differ": 0,
+   "idx": [],
+   "who": []
+  },
+  {
+   "label": "light · connected · tinted",
+   "n": 4607,
+   "differ": 1,
+   "idx": [
+    3467
+   ],
+   "who": [
+    "div.ro-val@3467:e8a5484d"
+   ]
+  }
+ ],
+ "strongBeyondNoise": [
+  {
+   "label": "light · disc · frost",
+   "idx": []
+  },
+  {
+   "label": "dark · disc · frost",
+   "idx": []
+  },
+  {
+   "label": "dark · connected · frost off",
+   "idx": []
+  },
+  {
+   "label": "light · connected · tinted",
+   "idx": [
+    3467
+   ]
+  }
+ ],
+ "removeSecond": {
+  "removed": 6,
+  "rules": 6,
+  "matched": 5,
+  "wanted": 5,
+  "missing": []
+ },
+ "second": [
+  {
+   "label": "light · disc · frost",
+   "n": 4607,
+   "differ": 2,
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:8b634c62",
+    "div.ro-val@3467:e8a5484d"
+   ]
+  },
+  {
+   "label": "dark · disc · frost",
+   "n": 4607,
+   "differ": 2,
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:1cfd25d2",
+    "div.ro-val@3467:89d12cf2"
+   ]
+  },
+  {
+   "label": "dark · connected · frost off",
+   "n": 4607,
+   "differ": 2,
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:1cfd25d2",
+    "div.ro-val@3467:89d12cf2"
+   ]
+  },
+  {
+   "label": "light · connected · tinted",
+   "n": 4607,
+   "differ": 1,
+   "idx": [
+    4
+   ],
+   "who": [
+    "#field@4:8b634c62"
+   ]
+  }
+ ],
+ "secondBeyondNoise": [
+  {
+   "label": "light · disc · frost",
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:8b634c62",
+    "div.ro-val@3467:e8a5484d"
+   ]
+  },
+  {
+   "label": "dark · disc · frost",
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:1cfd25d2",
+    "div.ro-val@3467:89d12cf2"
+   ]
+  },
+  {
+   "label": "dark · connected · frost off",
+   "idx": [
+    4,
+    3467
+   ],
+   "who": [
+    "#field@4:1cfd25d2",
+    "div.ro-val@3467:89d12cf2"
+   ]
+  },
+  {
+   "label": "light · connected · tinted",
+   "idx": [
+    4
+   ],
+   "who": [
+    "#field@4:8b634c62"
+   ]
+  }
+ ],
+ "liveSecondTier": {
+  "orbitRows": 2,
+  "dynRows": 2,
+  "orbitC": 1
+ }
+}

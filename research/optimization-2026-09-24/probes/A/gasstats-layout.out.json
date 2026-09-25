@@ -1,0 +1,8 @@
+{
+ "copyMatchesGasStats": true,
+ "layoutBitIdentical": true,
+ "gasStatsMs": 12.76,
+ "shippedCopyMs": 13.65,
+ "layoutMs": 6.79,
+ "speedup": 1.88
+}

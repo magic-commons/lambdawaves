@@ -1,0 +1,13 @@
+{
+ "chromium": {
+  "ready": true,
+  "fieldOk": true,
+  "error": "device lost: Device was destroyed.",
+  "hasMethods": true,
+  "shaderMsgs": 0,
+  "bannerShown": true,
+  "bannerTitle": "the GPU device was lost",
+  "readPixels": "Failed to execute 'mapAsync' on 'GPUBuffer': The Device was lost before mapping was resolved.",
+  "errs": []
+ }
+}

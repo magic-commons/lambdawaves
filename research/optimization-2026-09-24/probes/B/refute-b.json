@@ -1,0 +1,53 @@
+{
+ "lines": [
+  {
+   "mode": "box",
+   "hidden": false,
+   "frames": 20,
+   "frameMsPerCall": 0.441,
+   "chromeWritesPerFrame": 1
+  },
+  {
+   "mode": "dots",
+   "hidden": false,
+   "frames": 20,
+   "frameMsPerCall": 1.479,
+   "chromeWritesPerFrame": 1
+  },
+  {
+   "mode": "lattice",
+   "hidden": false,
+   "frames": 20,
+   "frameMsPerCall": 1.81,
+   "chromeWritesPerFrame": 1
+  },
+  {
+   "mode": "lattice",
+   "hidden": true,
+   "frames": 41,
+   "frameMsPerCall": 0.278,
+   "chromeWritesPerFrame": 1
+  }
+ ],
+ "calculus": {
+  "updateMs": 0.9284,
+  "statsOnlyMs": 0.2936,
+  "rows": 5,
+  "mutationRecordsPerUpdate": 32
+ },
+ "grip": {
+  "msPerMove": 0.56,
+  "gbcrPerMove": 14,
+  "note": "each move = place() + one forced body.offsetWidth read standing in for the frame's layout"
+ },
+ "hiddenSync": {
+  "secs": 6,
+  "closedWindowForcedPaints": 7,
+  "playEdges": 1
+ },
+ "errors": {
+  "errs": [],
+  "problems": [],
+  "problemsVia": "absent"
+ }
+}

@@ -1,0 +1,418 @@
+{
+ "at": "2026-09-25T03:36:26.314Z",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "host": "electron",
+ "scenes": [
+  {
+   "label": "busy mark DOWN · playing",
+   "layers": {
+    "layers": 34,
+    "drawing": 31,
+    "drawingPx": 9502192,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 8,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 10,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "19",
+      "node": 139,
+      "w": 286,
+      "h": 1679,
+      "area": 480194,
+      "who": "div#devb-spectrum.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "36",
+      "node": 699,
+      "w": 286,
+      "h": 790,
+      "area": 225940,
+      "who": "div#devb-camera.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "34",
+      "node": 563,
+      "w": 286,
+      "h": 581,
+      "area": 166166,
+      "who": "div#devb-observer.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "31",
+      "node": 498,
+      "w": 286,
+      "h": 397,
+      "area": 113542,
+      "who": "div#devb-palette.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "17",
+      "node": 110,
+      "w": 286,
+      "h": 324,
+      "area": 92664,
+      "who": "div#devb-shadow.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "41",
+      "node": 839,
+      "w": 286,
+      "h": 322,
+      "area": 92092,
+      "who": "div#devb-clip.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "49",
+      "node": 111,
+      "w": 250,
+      "h": 234,
+      "area": 58500,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "14",
+      "node": 34,
+      "w": 658,
+      "h": 64,
+      "area": 42112,
+      "who": "div#transport.glass.mini",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 850,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "11",
+      "node": 361,
+      "w": 240,
+      "h": 90,
+      "area": 21600,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 118.3,
+    "frames": 355,
+    "perFrame": {
+     "recalcStyle": 0.05,
+     "recalcStyleMs": 0.002,
+     "layout": 0.05,
+     "layoutMs": 0.007,
+     "scriptMs": 0.439,
+     "taskMs": 1.031
+    }
+   },
+   "trace": {
+    "frames": 175,
+    "events": 70749,
+    "perFrame": {
+     "paint": 0.1,
+     "paintMs": 0.028,
+     "raster": 0.05,
+     "rasterMs": 0.007,
+     "styleRecalc": 0.05,
+     "styleElements": 0,
+     "layout": 0.05,
+     "prePaint": 1.01,
+     "layerize": 1.01,
+     "commit": 1.01
+    }
+   }
+  },
+  {
+   "label": "busy mark UP (flash 20 s) · playing",
+   "layers": {
+    "layers": 35,
+    "drawing": 32,
+    "drawingPx": 9502676,
+    "top": [
+     {
+      "id": "4",
+      "node": 2,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "",
+      "reasons": [
+       "RootScroller",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "12",
+      "node": 8,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "div#lab",
+      "reasons": [
+       "Viewport",
+       "OverflowScrolling"
+      ]
+     },
+     {
+      "id": "7",
+      "node": 10,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#field",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "13",
+      "node": 11,
+      "w": 1920,
+      "h": 1043,
+      "area": 2002560,
+      "who": "canvas#fieldlines",
+      "reasons": [
+       "Overlap"
+      ]
+     },
+     {
+      "id": "19",
+      "node": 139,
+      "w": 286,
+      "h": 1679,
+      "area": 480194,
+      "who": "div#devb-spectrum.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "36",
+      "node": 699,
+      "w": 286,
+      "h": 790,
+      "area": 225940,
+      "who": "div#devb-camera.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "34",
+      "node": 563,
+      "w": 286,
+      "h": 581,
+      "area": 166166,
+      "who": "div#devb-observer.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "31",
+      "node": 498,
+      "w": 286,
+      "h": 397,
+      "area": 113542,
+      "who": "div#devb-palette.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "17",
+      "node": 110,
+      "w": 286,
+      "h": 324,
+      "area": 92664,
+      "who": "div#devb-shadow.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "41",
+      "node": 839,
+      "w": 286,
+      "h": 322,
+      "area": 92092,
+      "who": "div#devb-clip.dev-body",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "49",
+      "node": 111,
+      "w": 250,
+      "h": 234,
+      "area": 58500,
+      "who": "canvas.shadow-c",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "14",
+      "node": 34,
+      "w": 658,
+      "h": 64,
+      "area": 42112,
+      "who": "div#transport.glass.mini",
+      "reasons": [
+       "BackdropFilter"
+      ]
+     },
+     {
+      "id": "10",
+      "node": 850,
+      "w": 214,
+      "h": 150,
+      "area": 32100,
+      "who": "canvas.plane-model",
+      "reasons": [
+       "Canvas"
+      ]
+     },
+     {
+      "id": "11",
+      "node": 361,
+      "w": 240,
+      "h": 90,
+      "area": 21600,
+      "who": "canvas",
+      "reasons": [
+       "Canvas"
+      ]
+     }
+    ]
+   },
+   "work": {
+    "fps": 117.6,
+    "frames": 353,
+    "perFrame": {
+     "recalcStyle": 1.01,
+     "recalcStyleMs": 0.177,
+     "layout": 0.05,
+     "layoutMs": 0.006,
+     "scriptMs": 0.38,
+     "taskMs": 1.662
+    }
+   },
+   "trace": {
+    "frames": 174,
+    "events": 78146,
+    "perFrame": {
+     "paint": 3.04,
+     "paintMs": 0.423,
+     "raster": 1.04,
+     "rasterMs": 0.055,
+     "styleRecalc": 1.01,
+     "styleElements": 19,
+     "layout": 0.04,
+     "prePaint": 1,
+     "layerize": 1,
+     "commit": 1
+    }
+   }
+  }
+ ],
+ "warn": {
+  "was": true,
+  "open": false
+ },
+ "boot": {
+  "ok": true,
+  "dpr": 1,
+  "w": 1920,
+  "h": 1043,
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "theme": "light"
+ },
+ "busyVisible": {
+  "shown": true,
+  "titleBusy": true,
+  "anims": 19
+ },
+ "errs": []
+}
