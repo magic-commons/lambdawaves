@@ -1,0 +1,52 @@
+{
+ "dom": [
+  {
+   "t": 0,
+   "rows": 5,
+   "bytes": 1567,
+   "fnv": "e6791e2d"
+  },
+  {
+   "t": 1.25,
+   "rows": 5,
+   "bytes": 1571,
+   "fnv": "1e7fee4b"
+  },
+  {
+   "t": 7.5,
+   "rows": 5,
+   "bytes": 1572,
+   "fnv": "f7e533a8"
+  },
+  {
+   "t": 33.3,
+   "rows": 5,
+   "bytes": 1571,
+   "fnv": "2a0c7668"
+  },
+  {
+   "t": 120.01,
+   "rows": 5,
+   "bytes": 1574,
+   "fnv": "9dd32750"
+  },
+  {
+   "t": "box@2",
+   "rows": 4,
+   "bytes": 1295,
+   "fnv": "4fcc74a8"
+  },
+  {
+   "t": "back@3",
+   "rows": 5,
+   "bytes": 1571,
+   "fnv": "33c56d4a"
+  }
+ ],
+ "cost": {
+  "updates": 11,
+  "msMedian": 0.24,
+  "recordsMedian": 8
+ },
+ "errs": []
+}

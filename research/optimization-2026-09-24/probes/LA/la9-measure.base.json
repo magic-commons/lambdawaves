@@ -1,0 +1,51 @@
+{
+ "runs": [
+  {
+   "movesPerFrame": 1,
+   "moves": 30,
+   "moveMsMedian": 0.14,
+   "moveMsP90": 1.08,
+   "rackRectMsMedian": 0.02,
+   "rackRectMsP90": 0.92,
+   "firstMoveAfterFrame": {
+    "moveMs": 0.14,
+    "rackRectMs": 0.02
+   },
+   "rectCallsPerMove": 2
+  },
+  {
+   "movesPerFrame": 2,
+   "moves": 60,
+   "moveMsMedian": 0.08,
+   "moveMsP90": 0.14,
+   "rackRectMsMedian": 0,
+   "rackRectMsP90": 0.02,
+   "firstMoveAfterFrame": {
+    "moveMs": 0.1,
+    "rackRectMs": 0
+   },
+   "rectCallsPerMove": 2
+  },
+  {
+   "movesPerFrame": 4,
+   "moves": 120,
+   "moveMsMedian": 0.04,
+   "moveMsP90": 0.12,
+   "rackRectMsMedian": 0,
+   "rackRectMsP90": 0.02,
+   "firstMoveAfterFrame": {
+    "moveMs": 0.12,
+    "rackRectMs": 0.02
+   },
+   "rectCallsPerMove": 2
+  }
+ ],
+ "errs": [
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id",
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id",
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id",
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id",
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id",
+  "ERR NotFoundError: Element.setPointerCapture: Invalid pointer id"
+ ]
+}

@@ -36,7 +36,7 @@ const PRECACHE = [
   ['./audio.js',                                                    '67458cc4f589'],
   ['./bessel.js',                                                   '0689408ac984'],
   ['./calculus.js',                                                 '43eae3b25a72'],
-  ['./calculusview.js',                                             '52b7e86057fc'],
+  ['./calculusview.js',                                             'aad0713b3853'],
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  '79d0b652f694'],
   ['./chemview.js',                                                 'f8c747bfef32'],
