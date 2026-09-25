@@ -188,6 +188,13 @@ export function createGas(a = 10, opts = {}) {
     },
     get table() { return tableRows ? 'on' : tableWant ? 'building' : 'off'; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
     setRadius(v) { if (v !== A) { A = v; built = false; steps = null; on = false; } },   // K4: stale, not rebuilt — the next reader builds
+    /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5): stats(t) is 8–17 ms, so SPECTRUM's readout
+       asks the maths worker for it.  These two only carry the register across: stats() itself is untouched, and the
+       worker's gas builds its own tables from the same radius by the same expressions — the same doubles. */
+    /** the register stats(t) evolves: c(t₀) (the page's own arrays — a postMessage copies them) and t₀ */
+    get register() { return re0 && { re0, im0, t0 }; },
+    /** the maths worker's side: take a posted register (copied), so stats(t) evolves the same c(t₀) over this gas's tables */
+    load(reg) { ensure(); re0 = Float64Array.from(reg.re0); im0 = Float64Array.from(reg.im0); t0 = reg.t0; on = true; },
     norm2(t) { const c = at(t); let s = 0; for (let m = 0; m < c.re.length; m++) s += c.re[m] ** 2 + c.im[m] ** 2; return s; },
   };
 }

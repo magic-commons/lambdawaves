@@ -51,5 +51,29 @@ function judge(name, ok, detail) {
   judge('THE TABLE (K7, opt-in): off by default (lag[3] = 0), a refused upload stays off, on → every emitted record carries its MODE row + 1 (row = l·16 + n_r, checked against the mode\'s own l and k), also after a radius change; the table rows are f32(j_l(z u)); off again → 0',
     off0 && refused && on && tabOk && afterRadius && off1, { off0, refused, on, tabOk, afterRadius, off1 });
 }
+/* K5w (optimization 2026-09-24): SPECTRUM's readout runs the UNCHANGED stats() in the maths worker (mathworker.js gasStats,
+   the `gas.stats` op).  The worker's gas builds its own tables from the posted radius, so its answer must be the page's
+   object bit for bit: Object.is on every field, 9 times × 3 radii (and back to the first, through the worker's own
+   setRadius rebuild), the message passed through structuredClone exactly as postMessage copies it — and a symmetric
+   packet whose ⟨z⟩ is rounding noise, where the rejected factorisation flipped the printed sign (PLAN §9). */
+{
+  const { gasStats } = await import('../lab/mathworker.js');
+  const T = [0, 0.3, 1, 2.5, 4, 6, 8, 10, 17.3];
+  const rows = []; let same = true, fields = 0, fresh = true;
+  for (const [A, z0, k, sigma, tl] of [[10, -5, 2, 0.8, 0], [7.5, 2, -1.5, 1, 0.7], [22.3, -8, 3, 1.2, 1.9], [10, 0, 0, 1, 0]]) {
+    const page = createGas(A, { warm: false }); page.launch(z0, k, sigma, tl);
+    for (const t of T) {
+      const want = page.stats(t), msg = structuredClone({ op: 'gas.stats', radius: page.radius, t, ...page.register });
+      fresh = fresh && msg.re0 !== page.register.re0;
+      const got = gasStats(msg).stats;
+      const keys = Object.keys(want);
+      const ok = keys.length === Object.keys(got).length && keys.every((f) => Object.is(want[f], got[f]));
+      fields += keys.length; if (!ok) { same = false; rows.push({ A, t, want, got }); }
+      if (A === 10 && z0 === 0 && t === 0) rows.push({ symmetric: { z: want.z, printed: want.z.toFixed(2), worker: got.z.toFixed(2) } });
+    }
+  }
+  judge('THE WORKER ROAD (K5w): the maths worker\'s gas.stats is the page\'s stats() bit for bit — Object.is on every field at 9 times × 3 radii and back, the register copied as postMessage copies it (a symmetric packet\'s noise ⟨z⟩ keeps its sign)',
+    same && fresh && fields === 4 * 4 * T.length, { fields, fresh, rows });
+}
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'gas.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

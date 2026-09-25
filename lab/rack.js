@@ -1375,7 +1375,7 @@ export async function boot(dom) {
       if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(molecule && molecule.on) && !(helium && helium.on) && !(h2 && h2.on) && !(chem && chem.on)) calculus.update(reg, clock.t); });
       if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
       if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
-      if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) { const s = gas.stats(clock.t); ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn'); }
+      if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) gasReadout(clock.t);   // K5w: the maths worker's stats(), painted when it lands
     }
     if (canPresentTransport()) transport.update();
     /* WAVE 52: the strip, the meters and the beat readout, at 30 Hz (modview throttles itself) — and
@@ -3673,6 +3673,32 @@ export async function boot(dom) {
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
   let gasWidth = 1.8, gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
+  /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5, PLAN §9) · SPECTRUM's `⟨z⟩ · σ_z` line.
+     gas.stats(t) is 8–17 ms and ran on the frame thread every 6th CPU tick while the gas played — outside tick(), so no
+     profile or governor saw it.  Now the maths worker runs the SAME stats() on its own gas (mathworker.js gasStats: its
+     tables from the same radius, the page's register copied by the message) and the line is painted when the answer
+     lands: the same doubles, the same strings, one round trip later (N1).  One request in flight; a tick that finds one
+     leaves only its t, asked when the answer lands.  An answer for another radius or another packet (WELL RADIUS, a new
+     LAUNCH, the 91 basis) or for a window that can no longer present is dropped.  `raw`, not `call`: this readout never
+     raised the busy mark and must not flash it at 2.5 Hz.  With no worker the old synchronous road runs, as it did. */
+  let gasAsk = null, gasNext = null;
+  const gasPaint = (s) => ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn');
+  const gasCurrent = (q) => { const R = gas.register; return !!(canPresent(wSpec) && gas.on && ui.gasRo && R && R.re0 === q.re0 && gas.radius === q.radius); };
+  function gasAskWorker(q) {
+    gasAsk = q;
+    maths.raw(q).then((r) => {
+      gasAsk = null;
+      if (r && r.stats) { if (gasCurrent(q)) gasPaint(r.stats); }
+      else if (!maths.ok && gasCurrent(q)) gasPaint(gas.stats(q.t));             // the worker died under this request: the old road answers it
+      const n = gasNext; gasNext = null;
+      if (n && gasCurrent(n)) { if (maths.ok) gasAskWorker(n); else gasPaint(gas.stats(n.t)); }
+    });
+  }
+  function gasReadout(t) {
+    if (!maths.ok) { gasPaint(gas.stats(t)); return; }
+    const R = gas.register, q = { op: 'gas.stats', radius: gas.radius, t, re0: R.re0, im0: R.im0, t0: R.t0 };   // posted, so COPIED — never transferred
+    if (gasAsk) gasNext = q; else gasAskWorker(q);
+  }
   /* optimization K7 · THE GAS TABLE, OPT-IN (`?gastab=1`, __LW.gasTable(true); default OFF): gas.js builds it in idle slices,
      the field uploads it, the records carry their rows only once it is held, and the landing repaints a live gas. */
   const gasTableOn = (on) => gas.setTable(on, (tab) => !!(field.ok && field.setGasTable && field.setGasTable(tab)), () => { if (gas.on) schedule(TIER.RECONSTRUCT); });

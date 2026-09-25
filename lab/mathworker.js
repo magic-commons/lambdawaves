@@ -11,6 +11,7 @@
  *   helium  { basis }                              → the selected Hylleraas variational solve
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   h2curve { Rmin, Rmax, count }                  → the correlated H₂ energy curves
+ *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
  * The tabulated Hamiltonians (ATOM, QUARKONIUM) are not mirrored: the rack keeps their slap on the main thread.
  *
  * ── PARKING (wave 54, board #42) ────────────────────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ import { fieldShells } from './molecular-field.js';
 import { createRTHF } from './density.js';
 import { spectrum, peaks } from './absorb.js';
 import { fitPoles } from './response-fit.js';
+import { createGas } from './gas.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -127,6 +129,7 @@ function work(m) {
     else if (m.op === 'helium') { if (!BASES[m.basis]) throw new Error('unknown helium basis ' + m.basis); out = { sol: hylleraas(BASES[m.basis]) }; }
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
     else if (m.op === 'h2curve') { out = { result: h2CurveTable(m.Rmin, m.Rmax, m.count) }; }
+    else if (m.op === 'gas.stats') { out = gasStats(m); }
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }
@@ -144,6 +147,21 @@ function work(m) {
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };
+}
+
+/* ── THE AXIAL GAS'S READOUT (optimization 2026-09-24, K5w · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5) ──────────────
+ * SPECTRUM's `⟨z⟩ · σ_z` line is gas.js stats(t): ψ on a 100 × 80 grid over all 256 modes, 8–17 ms, and it ran on the
+ * frame thread every 6th CPU tick while the gas played.  Here it is the SAME stats(), unchanged, on this worker's own
+ * gas: built lazily at the posted radius and marked stale when the radius changes (K4's setRadius), so its tables come
+ * from the same expressions over the same radius — the same f64 — and the page's register (c(t₀), t₀), copied by the
+ * message, is evolved to t by the same at().  The answer is the page's object, bit for bit, one round trip later.  The
+ * factorisation by l (26×) was REJECTED for this: it flips a printed `-0.00`/`0.00` at symmetric instants (PLAN §9). */
+let gasW = null;
+export function gasStats(m = {}) {
+  if (!gasW) gasW = createGas(m.radius, { warm: false });
+  else gasW.setRadius(m.radius);
+  gasW.load(m);
+  return { stats: gasW.stats(m.t, m.stride) };
 }
 
 /* ── CHEMISTRY (wave: the CHEMISTRY window) ──────────────────────────────────────────────────────────────────────
