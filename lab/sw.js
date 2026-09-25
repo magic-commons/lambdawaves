@@ -164,7 +164,7 @@ const PRECACHE = [
   ['./qcd.js',                                                      'd719df2e6c5c'],
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],
-  ['./rack.js',                                                     'ebbb9a49b95c'],
+  ['./rack.js',                                                     '4fd181f84a47'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '655a6aef068a'],
   ['./registerview.js',                                             '6cd43624dafa'],
@@ -222,6 +222,7 @@ const PRECACHE = [
   ['./well.js',                                                     'fb6041eac116'],
   ['./wigner.js',                                                   '370c23027ea3'],
   ['./wignerview.js',                                               'e0a32cb0f767'],
+  ['./worker-pool.js',                                              '393cc6e1cee2'],
 ];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */

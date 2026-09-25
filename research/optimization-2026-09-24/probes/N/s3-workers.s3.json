@@ -1,0 +1,47 @@
+{
+ "read": {
+  "boot": {
+   "bow": false,
+   "scan": false,
+   "cards": false
+  },
+  "ok": true,
+  "busyDuring": 1,
+  "warm": true,
+  "scan": true,
+  "helium": true,
+  "after": {
+   "bow": true,
+   "scan": true,
+   "cards": true
+  },
+  "busyAfter": 0,
+  "stat": {
+   "bow": {
+    "id": 2,
+    "op": "stat",
+    "ok": true,
+    "parked": false,
+    "busyMs": 98.58,
+    "jobs": 1,
+    "parks": 0,
+    "resumes": 0,
+    "held": 0,
+    "parkedMs": 0
+   },
+   "scan": {
+    "id": 2,
+    "op": "stat",
+    "ok": true,
+    "parked": false,
+    "busyMs": 0.12,
+    "jobs": 1,
+    "parks": 0,
+    "resumes": 0,
+    "held": 0,
+    "parkedMs": 0
+   }
+  },
+  "errors": []
+ }
+}
