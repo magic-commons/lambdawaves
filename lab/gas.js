@@ -45,23 +45,43 @@ export function createGas(a = 10, opts = {}) {
      (≈ 180 KB) per reconstruct.  The list is a reused buffer, exactly as rack.js' modesAt list is (render-exact H8). */
   let recs = [];
   const list = [];
-  function build() {
-    modes = [];
-    for (let l = 0; l <= LMAX; l++) { const z = zerosOf(l, NRMAX); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; modes.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } }
-    r = new Float64Array(NRQ); rw = new Float64Array(NRQ); const dr = A / NRQ;
-    for (let i = 0; i < NRQ; i++) { r[i] = (i + 0.5) * dr; rw[i] = r[i] * r[i] * dr; }
-    ct = new Float64Array(NTQ); w = new Float64Array(NTQ); const dth = Math.PI / NTQ;
-    for (let j = 0; j < NTQ; j++) { const th = (j + 0.5) * dth; ct[j] = Math.cos(th); w[j] = Math.sin(th) * dth * 2 * Math.PI; }
-    Rt = modes.map((m) => { const row = new Float64Array(NRQ); for (let i = 0; i < NRQ; i++) row[i] = m.rnorm * sphj(m.l, m.k * r[i]); return row; });
-    Pt = []; for (let l = 0; l <= LMAX; l++) { const row = new Float64Array(NTQ); const an = Math.sqrt((2 * l + 1) / (4 * Math.PI)); for (let j = 0; j < NTQ; j++) row[j] = an * legP(l, ct[j]); Pt.push(row); }
+  /* THE TABLES ARE BUILT ON FIRST USE (optimization 2026-09-24, K4 · AUDIT-D FD6, AUDIT-F, Sol §5.2).  They cost 14–18 ms,
+     every boot paid them for a register most sessions never open, and WELL RADIUS paid them again on EVERY pointermove.
+     Now setRadius only marks them stale; ensure() — at the top of every reader — builds them, in the same order from the
+     same expressions (so every number is the same f64); and one idle warm builds them in ~1 ms slices shortly after
+     boot, so the common first AXIAL press finds them ready.  The steps write the module's state only when complete: a
+     radius change mid-warm discards the half-built one. */
+  let built = false, steps = null;
+  function* building() {
+    const ms = [];
+    for (let l = 0; l <= LMAX; l++) { const z = zerosOf(l, NRMAX); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; ms.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } yield; }
+    const r1 = new Float64Array(NRQ), rw1 = new Float64Array(NRQ), dr = A / NRQ;
+    for (let i = 0; i < NRQ; i++) { r1[i] = (i + 0.5) * dr; rw1[i] = r1[i] * r1[i] * dr; }
+    const ct1 = new Float64Array(NTQ), w1 = new Float64Array(NTQ), dth = Math.PI / NTQ;
+    for (let j = 0; j < NTQ; j++) { const th = (j + 0.5) * dth; ct1[j] = Math.cos(th); w1[j] = Math.sin(th) * dth * 2 * Math.PI; }
+    const R1 = [];
+    for (const m of ms) { const row = new Float64Array(NRQ); for (let i = 0; i < NRQ; i++) row[i] = m.rnorm * sphj(m.l, m.k * r1[i]); R1.push(row); if (R1.length % 16 === 0) yield; }
+    const P1 = []; for (let l = 0; l <= LMAX; l++) { const row = new Float64Array(NTQ); const an = Math.sqrt((2 * l + 1) / (4 * Math.PI)); for (let j = 0; j < NTQ; j++) row[j] = an * legP(l, ct1[j]); P1.push(row); }
+    modes = ms; r = r1; rw = rw1; ct = ct1; w = w1; Rt = R1; Pt = P1;
     re0 = new Float64Array(modes.length); im0 = new Float64Array(modes.length);
     recs = modes.map((M) => ({ table: { n: 1, l: M.l, am: 0, m: 0, norm: M.rnorm * M.anorm, lag: Float64Array.from([M.k, A, 1, 0, 0, 0]), leg: new Float64Array(6), space: 'gas' }, re: 0, im: 0 }));
+    built = true;
   }
-  build();
+  function ensure() { if (built) return; if (!steps) steps = building(); while (!steps.next().done); steps = null; }
+  /* the ONE-SHOT idle warm (a browser only: node has no requestIdleCallback, and the node suites build on first read).
+     Armed like the kick warm — a first delay, then idle slices of at most one step past the deadline — and finished
+     for good once built: no timer or callback survives it. */
+  if (opts.warm !== false && typeof globalThis.requestIdleCallback === 'function') setTimeout(() => {
+    const slice = (dl) => { if (built) { steps = null; return; } if (!steps) steps = building();
+      do { if (steps.next().done) { steps = null; return; } } while (dl.timeRemaining() > 2);
+      requestIdleCallback(slice); };
+    requestIdleCallback(slice);
+  }, opts.warmDelay === undefined ? 3000 : opts.warmDelay);
   /** ⟨a|b⟩ over the radial quadrature (same l): the basis check */
-  function overlap(a, b) { if (modes[a].l !== modes[b].l) return 0; let s = 0; for (let i = 0; i < NRQ; i++) s += Rt[a][i] * Rt[b][i] * rw[i]; return s; }
+  function overlap(a, b) { ensure(); if (modes[a].l !== modes[b].l) return 0; let s = 0; for (let i = 0; i < NRQ; i++) s += Rt[a][i] * Rt[b][i] * rw[i]; return s; }
   /** project a Gaussian packet (centre z₀ on the axis, momentum k along z, width σ) at time t */
   function launch(z0, k, sigma, t = 0) {
+    ensure();
     const N = modes.length; re0 = new Float64Array(N); im0 = new Float64Array(N);
     let n2 = 0;
     const psiR = new Float64Array(NRQ * NTQ), psiI = new Float64Array(NRQ * NTQ);
@@ -82,12 +102,14 @@ export function createGas(a = 10, opts = {}) {
     return { captured, modes: N };
   }
   function at(t) {
+    ensure();
     const N = modes.length, re = new Float64Array(N), im = new Float64Array(N);
     for (let m = 0; m < N; m++) { const ph = -modes[m].E * (t - t0), c = Math.cos(ph), s = Math.sin(ph); re[m] = re0[m] * c - im0[m] * s; im[m] = re0[m] * s + im0[m] * c; }
     return { re, im };
   }
   /** the kernel records: the well branch with P_l by recurrence (lag[2] = 1 says so) */
   function fieldModes(t) {
+    ensure();
     let k = 0;
     for (let m = 0; m < modes.length; m++) {
       const ph = -modes[m].E * (t - t0), c = Math.cos(ph), s = Math.sin(ph);      // at(t)'s own expressions, without its two arrays
@@ -112,8 +134,8 @@ export function createGas(a = 10, opts = {}) {
   }
   return {
     get on() { return on; }, off() { on = false; }, launch, at, fieldModes, stats, overlap,
-    get modes() { return modes; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
-    setRadius(v) { if (v !== A) { A = v; build(); on = false; } },
+    get modes() { ensure(); return modes; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
+    setRadius(v) { if (v !== A) { A = v; built = false; steps = null; on = false; } },   // K4: stale, not rebuilt — the next reader builds
     norm2(t) { const c = at(t); let s = 0; for (let m = 0; m < c.re.length; m++) s += c.re[m] ** 2 + c.im[m] ** 2; return s; },
   };
 }

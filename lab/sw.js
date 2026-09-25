@@ -59,7 +59,7 @@ const PRECACHE = [
   ['./frame-coalescer.js',                                          '2488500d8bc5'],
   ['./frame-settle.js',                                             'a3b2724d2033'],
   ['./frontier.js',                                                 'dc07edd67f5c'],
-  ['./gas.js',                                                      'd0fa59154df8'],
+  ['./gas.js',                                                      '284e8486ca99'],
   ['./h2.js',                                                       '5dc1410a91c0'],
   ['./h2ci.js',                                                     '67b055dba05d'],
   ['./h2view.js',                                                   '280200cb670e'],
