@@ -25,7 +25,7 @@
  */
 import { Register, PRESETS } from '../lab/state.js';
 import { BASIS, BASIS_INDEX, psiAt, domainFor } from '../lab/hydrogen.js';
-import { PRESET_BY_ID as PALETTE_BY_ID } from '../lab/palette.js';
+import { PRESET_BY_ID as PALETTE_BY_ID } from '../lab/mir/palette.js';
 import {
   encodeState, decodeState, linkFor, readLink, fragmentFor,
   LinkError, LINK_VERSION, LINK_CHAR_CEILING, LINK_KEY, toBase64url, fromBase64url,

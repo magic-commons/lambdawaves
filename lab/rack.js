@@ -3,7 +3,7 @@ import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
-import { renderNotebook } from './notebook-render.js';
+import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
@@ -59,7 +59,7 @@ import { createFieldLines } from './fieldview.js';
 import { createWigner } from './wignerview.js';
 import { createRadiation } from './radiationview.js';
 import { ATOMS, configOf } from './atoms.js';
-import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, rgbToOklab, oklabToRgb, rgbToHex, visibleInk, contrastRatio } from './palette.js';
+import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, rgbToOklab, oklabToRgb, rgbToHex, hexToRgb, visibleInk, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
 import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
@@ -1669,7 +1669,6 @@ export async function boot(dom) {
       paintMarks(); schedule(TIER.PRESENT);
     }
     __LW_hooks.restage = () => setStageMix(stageMix);
-    const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255), rgbToHex = (c) => '#' + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
     function setStageColour(colour) {
       if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
       if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
@@ -3532,7 +3531,7 @@ export async function boot(dom) {
     const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
     const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
     const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
-    return { cam, d };
+    return { cam, d, B };
   }
   function orbitOfShell(n, re, im) {
     const c = re ? { re, im } : (reg.field.Fz !== 0 ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
@@ -3660,10 +3659,7 @@ export async function boot(dom) {
   let kdrag = null;
   /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   function unproject(px, py) {
-    const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
-    const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
+    const { cam, d, B } = pointerRay(px, py);                          // N6: the same four lines pointerRay computes, not a second copy of them
     const lam = -(cam[0] * B.fwd[0] + cam[1] * B.fwd[1] + cam[2] * B.fwd[2]) / (d[0] * B.fwd[0] + d[1] * B.fwd[1] + d[2] * B.fwd[2]);
     const p = [cam[0] + lam * d[0], cam[1] + lam * d[1], cam[2] + lam * d[2]];
     const a = HAMILTONIANS.well.radius, r = Math.hypot(...p), cap = 0.75 * a;

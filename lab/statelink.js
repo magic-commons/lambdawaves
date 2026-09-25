@@ -54,7 +54,7 @@
  */
 
 import { BASIS, BASIS_INDEX } from './hydrogen.js';
-import { PRESET_BY_ID as PALETTE_BY_ID } from './palette.js';
+import { PRESET_BY_ID as PALETTE_BY_ID } from './mir/palette.js';
 
 export const LINK_VERSION = 1;
 /** the practical ceiling a URL should stay under to survive browsers, chat apps and mail clients */

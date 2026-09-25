@@ -6,7 +6,7 @@
  * the seam at ±π is visible: a palette that does not close there paints a false nodal line into the picture.
  * This is an OBSERVER product and is labelled a DESIGN CHOICE — ψ is never touched.
  */
-import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID, PRESET_GROUPS } from './palette.js';
+import { toLUT, normalize, cyclic, rgbToHex, hexToRgb, PRESETS, PRESET_BY_ID, PRESET_GROUPS } from './mir/palette.js';
 import { el, sw, trig, knob, readout, themeInk, onThemeChange, chip } from './mir/kit.js';
 
 
