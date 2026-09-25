@@ -22,7 +22,7 @@ try {
     try { if (LW.warning && LW.warning.dismiss) LW.warning.dismiss(); } catch (_) {}
     LW.pause(); await LW.settle(); await sleep(300);
     const ser = () => { const o = LW.serialize(); if (o.presentation.layout) o.presentation.layout.at = 0; if (o.presentation.quality) o.presentation.quality.autoScale = 1; return JSON.stringify(o); };
-    const modDom = () => { const r = document.querySelector('.m2root') || document.querySelector('[class*="m2root"]'); return r ? r.outerHTML.replace(/ style="[^"]*"/g, (m) => m) : ''; };
+    const modDom = () => [...document.querySelectorAll('.m2root, .crail')].map((r) => r.outerHTML).join('');
     const rackList = () => [...document.querySelectorAll('#rackL .dev, #rack .dev, #floats .dev')].map((d) => d.dataset.id + ':' + d.className + ':' + (d.parentElement && d.parentElement.id)).join('|');
     const snap = (k) => { const s = ser(); out[k] = { ser: fnv(s), settings: fnv(localStorage.getItem('lambdawaves.q0.settings') || ''), modDom: fnv(modDom()), rack: fnv(rackList()), body: document.body.className + '|' + document.body.dataset.theme + '|' + document.body.dataset.card, nbStyle: document.getElementById('notebook').getAttribute('style'), modOpen: LW.mod.expanded, transition: !!LW.reg.transition, palette: LW.paletteId }; };
     const out = {};

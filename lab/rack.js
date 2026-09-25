@@ -4883,7 +4883,7 @@ export async function boot(dom) {
    *  so the transport is put down first, every held parameter is handed back to its base, and the
    *  dormancy law is re-run — a route saved against a target this build does not have keeps its
    *  settings and sits inert rather than being thrown away. */
-  function restoreModulation(o, savedBases) {
+  function restoreModulation(o, savedBases, opening) {
     if (!modHost) return false;
     /* REFUSE WHAT THIS BUILD CANNOT HONOUR, and say so.  An ABSENT `v` is not a refusal — every
        rack written before wave 63 has none and means "predates the stamp", which is the same
@@ -4910,7 +4910,7 @@ export async function boot(dom) {
       if (Number.isFinite(v)) modHost.registry.setBase(id, v);
     }
     modHost.clock.applyAll(true);
-    if (modView) modView.rebuild();
+    if (modView && !opening) modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (modwindow.js restore → open → rebuild)
     schedule(TIER.PRESENT);
     return ok;
   }
@@ -5057,7 +5057,7 @@ export async function boot(dom) {
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
            palette and state controls, so no later project step can overwrite a routed hand value. */
-        if (pr.modulation !== undefined) restoreModulation(pr.modulation, pr.modulationBases);
+        if (pr.modulation !== undefined) restoreModulation(pr.modulation, pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (pr.modwin && modView) modView.restore(pr.modwin);
       }
       if (opt && opt.project && history) history.clear();
