@@ -31,6 +31,7 @@ struct Params { n: u32, count: u32, slot: u32, space: u32, half: f32, p1: f32, p
 @group(0) @binding(2) var outTex: texture_storage_3d<rgba16float, write>;
 @group(0) @binding(3) var<storage, read_write> stats: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> radial: array<f32>;   // space 6: tabulated radial functions, 256 samples per (n_r, l) row (QUARKONIUM)
+@group(0) @binding(5) var<storage, read> gtab: array<vec2<f32>>;   // space 3, OPT-IN (K7): the axial gas's Hermite-256 radial table, (j_l(z u), h·z·j_l′(z u)) per row
 var<workgroup> wmax: atomic<u32>;
 
 fn ipow(x: f32, k: u32) -> f32 { var r = 1.0; for (var i = 0u; i < k; i++) { r *= x; } return r; }
@@ -94,7 +95,14 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         /* THE WELL  ψ = norm · j_l(k r) · Y inside r < a, 0 outside: lag0 = (k, a, …); the wall is the envelope */
         let kk = M.lag0.x; let aa = M.lag0.y;
         var Dw = D; if (M.lag0.z > 0.5) { if (l != gL) { gL = l; gP = legP(l, ct); } Dw = gP; }   // lag0.z = 1: the angular part by recurrence (the axial gas)
-        if (r < aa) { f = M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw; }   // a BRANCH, not select(): select ran the recurrence outside the wall too
+        if (r < aa) {                                          // a BRANCH, not select(): select ran the recurrence outside the wall too
+          if (M.lag0.w > 0.5) {                                // K7 (opt-in, lag0.w = row + 1): cubic Hermite on the gas table, u = r/a
+            let xq = clamp(r / aa, 0.0, 1.0) * 255.0; let i0 = min(u32(floor(xq)), 254u); let s = xq - f32(i0); let rb = (u32(M.lag0.w) - 1u) * 256u;
+            let p0 = gtab[rb + i0]; let p1 = gtab[rb + i0 + 1u]; let s2 = s * s; let s3 = s2 * s;
+            let R = (2.0 * s3 - 3.0 * s2 + 1.0) * p0.x + (s3 - 2.0 * s2 + s) * p0.y + (3.0 * s2 - 2.0 * s3) * p1.x + (s3 - s2) * p1.y;
+            f = M.c.z * R * ipow(st, am) * Dw;
+          } else { f = M.c.z * sphj(l, kk * r) * ipow(st, am) * Dw; }   // lag0.w = 0, every record by default: the recurrence
+        }
       } else if (P.space == 6u) {
         /* QUARKONIUM (Cornell, NUMERICAL): R(r) read from its tabulated row, linear interpolation; lag0 = (row, 1/r_tab, r_tab) */
         let row = u32(M.lag0.x); let x = clamp(r * M.lag0.y, 0.0, 1.0) * 255.0;
@@ -929,15 +937,23 @@ export async function createField(canvas, opts = {}) {
     const r = entries[entries.length - 1].contentRect; cssW = r.width || cssW; cssH = r.height || cssH;
   }).observe(canvas);
 
+  /* K7: binding 5 is the gas table once uploaded, a 16-byte stand-in until then (the 'auto' layout needs the binding; no
+     record reads it while every lag[3] is 0) */
+  let gasTab = null, gasTabStandIn = null;
+  function bindCompute() {
+    const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
+    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: [
+      { binding: 0, resource: { buffer: paramsBuf[i] } }, { binding: 1, resource: { buffer: modesBuf[i] } },
+      { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }, { binding: 4, resource: { buffer: radialBuf } },
+      { binding: 5, resource: { buffer: tab } }] }));
+  }
   function setResolution(n) {
     if (n === res) return;
     res = n;
     if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy();
     const mk = () => device.createTexture({ size: [n, n, n], dimension: '3d', format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC });
     psiTex = mk(); refTex = mk();
-    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: [
-      { binding: 0, resource: { buffer: paramsBuf[i] } }, { binding: 1, resource: { buffer: modesBuf[i] } },
-      { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }, { binding: 4, resource: { buffer: radialBuf } }] }));
+    bindCompute();
     renderBind = device.createBindGroup({ layout: renderBGL, entries: [
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
@@ -1502,6 +1518,13 @@ export async function createField(canvas, opts = {}) {
     setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },
+    /** K7 (opt-in): upload the axial gas's Hermite table (gas.js gasRadialTable: 256 rows × 256 × vec2) once, and bind it.
+     *  Answers true when the field holds it — only then may gas records carry their rows. */
+    setGasTable(arr) {
+      if (!out.ok || !(arr instanceof Float32Array) || arr.length !== 256 * 256 * 2) return false;
+      if (!gasTab) { gasTab = device.createBuffer({ size: arr.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); device.queue.writeBuffer(gasTab, 0, arr); bindCompute(); }
+      return true;
+    },
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
     setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },

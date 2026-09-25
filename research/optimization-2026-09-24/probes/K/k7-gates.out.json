@@ -1,0 +1,312 @@
+{
+ "tableAtReady": "building",
+ "firstAxialPressMs": 35.56,
+ "tableAtPress": "building",
+ "tableOnAfterMs": 88,
+ "table": "on",
+ "pressWithTableOnMs": 19.12,
+ "oracle": {
+  "0": {
+   "64": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "22847c5",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.503,
+     "exactF16": 0.4972
+    },
+    "recurrence": {
+     "maxUlp": 17,
+     "meanUlp": 0.725,
+     "exactF16": 0.4567
+    },
+    "texelComponentsDiffering": 55596,
+    "of": 524288
+   },
+   "96": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "196aae00",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.511,
+     "exactF16": 0.4887
+    },
+    "recurrence": {
+     "maxUlp": 35,
+     "meanUlp": 0.712,
+     "exactF16": 0.4555
+    },
+    "texelComponentsDiffering": 185126,
+    "of": 1769472
+   },
+   "128": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "2ba9eb0d",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.5,
+     "exactF16": 0.4995
+    },
+    "recurrence": {
+     "maxUlp": 41,
+     "meanUlp": 0.794,
+     "exactF16": 0.4545
+    },
+    "texelComponentsDiffering": 447632,
+    "of": 4194304
+   }
+  },
+  "2": {
+   "64": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "39edd31d",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.5,
+     "exactF16": 0.5002
+    },
+    "recurrence": {
+     "maxUlp": 17,
+     "meanUlp": 0.692,
+     "exactF16": 0.4565
+    },
+    "texelComponentsDiffering": 45180,
+    "of": 524288
+   },
+   "96": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "c4942e0c",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.511,
+     "exactF16": 0.489
+    },
+    "recurrence": {
+     "maxUlp": 33,
+     "meanUlp": 0.689,
+     "exactF16": 0.449
+    },
+    "texelComponentsDiffering": 153026,
+    "of": 1769472
+   },
+   "128": {
+    "rowsSet": 256,
+    "count": 256,
+    "replicaIsApp": true,
+    "recurrenceReplicaDigest": "253ed8d",
+    "table": {
+     "maxUlp": 1,
+     "meanUlp": 0.489,
+     "exactF16": 0.5105
+    },
+    "recurrence": {
+     "maxUlp": 30,
+     "meanUlp": 0.731,
+     "exactF16": 0.4682
+    },
+    "texelComponentsDiffering": 370464,
+    "of": 4194304
+   }
+  }
+ },
+ "pixels": {
+  "0": {
+   "64": {
+    "W": 1920,
+    "H": 994,
+    "density": {
+     "pixelsDiffering": 204,
+     "fraction": 0.0001069,
+     "maxLevelDiff": 1
+    },
+    "phase": {
+     "pixelsDiffering": 379,
+     "fraction": 0.0001986,
+     "maxLevelDiff": 1
+    },
+    "real": {
+     "pixelsDiffering": 207,
+     "fraction": 0.0001085,
+     "maxLevelDiff": 1
+    },
+    "shippedNextPresent": {
+     "pixelsDiffering": 33912,
+     "fraction": 0.01777,
+     "maxLevelDiff": 2
+    }
+   },
+   "128": {
+    "W": 1920,
+    "H": 994,
+    "density": {
+     "pixelsDiffering": 185,
+     "fraction": 0.00009694,
+     "maxLevelDiff": 1
+    },
+    "phase": {
+     "pixelsDiffering": 324,
+     "fraction": 0.0001698,
+     "maxLevelDiff": 1
+    },
+    "real": {
+     "pixelsDiffering": 223,
+     "fraction": 0.0001168,
+     "maxLevelDiff": 1
+    },
+    "shippedNextPresent": {
+     "pixelsDiffering": 14915,
+     "fraction": 0.007815,
+     "maxLevelDiff": 1
+    }
+   }
+  },
+  "2": {
+   "64": {
+    "W": 1920,
+    "H": 994,
+    "density": {
+     "pixelsDiffering": 262,
+     "fraction": 0.0001373,
+     "maxLevelDiff": 1
+    },
+    "phase": {
+     "pixelsDiffering": 396,
+     "fraction": 0.0002075,
+     "maxLevelDiff": 1
+    },
+    "real": {
+     "pixelsDiffering": 215,
+     "fraction": 0.0001127,
+     "maxLevelDiff": 1
+    },
+    "shippedNextPresent": {
+     "pixelsDiffering": 46648,
+     "fraction": 0.02444,
+     "maxLevelDiff": 2
+    }
+   },
+   "128": {
+    "W": 1920,
+    "H": 994,
+    "density": {
+     "pixelsDiffering": 193,
+     "fraction": 0.0001011,
+     "maxLevelDiff": 1
+    },
+    "phase": {
+     "pixelsDiffering": 303,
+     "fraction": 0.0001588,
+     "maxLevelDiff": 1
+    },
+    "real": {
+     "pixelsDiffering": 229,
+     "fraction": 0.00012,
+     "maxLevelDiff": 1
+    },
+    "shippedNextPresent": {
+     "pixelsDiffering": 20355,
+     "fraction": 0.01067,
+     "maxLevelDiff": 1
+    }
+   }
+  }
+ },
+ "trace": [
+  [
+   0,
+   64,
+   true,
+   "well",
+   "axial"
+  ],
+  [
+   0,
+   96,
+   true,
+   "well",
+   "axial"
+  ],
+  [
+   0,
+   128,
+   true,
+   "well",
+   "axial"
+  ],
+  [
+   2,
+   64,
+   true,
+   "well",
+   "axial"
+  ],
+  [
+   2,
+   96,
+   true,
+   "well",
+   "axial"
+  ],
+  [
+   2,
+   128,
+   true,
+   "well",
+   "axial"
+  ]
+ ],
+ "reconstructMs": {
+  "64": {
+   "table": 1.1646,
+   "modes": 256,
+   "nR": 353,
+   "frameMs": 8.9593,
+   "presentMs": 1.8849,
+   "recurrence": 7.2353
+  },
+  "96": {
+   "table": 3.6372,
+   "modes": 256,
+   "nR": 138,
+   "frameMs": 23.3662,
+   "presentMs": 2.7325,
+   "recurrence": 20.8944
+  },
+  "128": {
+   "table": 8.3484,
+   "modes": 256,
+   "nR": 60,
+   "frameMs": 51.6627,
+   "presentMs": 4.1804,
+   "recurrence": 46.7407
+  }
+ },
+ "beforeSpeed": {
+  "gpuError": null,
+  "pageErrors": [],
+  "writeBufferIsOwn": true,
+  "gasOn": true,
+  "hamiltonian": "well",
+  "basis": "axial",
+  "playing": false,
+  "t": 2,
+  "radius": 10,
+  "last": {
+   "z0": -5,
+   "k": 0.8,
+   "sigma": 1.5408,
+   "t0": 0,
+   "captured": 0.9998855691790473
+  }
+ }
+}

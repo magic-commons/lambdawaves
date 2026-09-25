@@ -34,6 +34,8 @@ const V = globalThis.__K_VARIANTS ? globalThis.__K_VARIANTS({ BASE, CUR, must, S
   cur: CUR,
 };
 const pipes = {}, msgs = {};
+/* K7 added binding 5 (the opt-in gas table) to COMPUTE_WGSL: a kernel that declares it gets the table when __K_GTAB holds one, else a stand-in */
+const GTAB = d.createBuffer({ size: globalThis.__K_GTAB ? globalThis.__K_GTAB.byteLength : 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); if (globalThis.__K_GTAB) d.queue.writeBuffer(GTAB, 0, globalThis.__K_GTAB);
 for (const [k, code] of Object.entries(V)) {
   const mod = d.createShaderModule({ code }); const ci = await mod.getCompilationInfo();
   const errs = ci.messages.filter((m) => m.type === 'error'); if (errs.length) { msgs[k] = errs.map((m) => m.lineNum + ':' + m.message); continue; }
@@ -83,7 +85,7 @@ for (const sn of SL) {
     const stats = d.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
     const radial = d.createBuffer({ size: 40 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); d.queue.writeBuffer(radial, 0, radialArr);
     const read = async (k) => {
-      const bg = d.createBindGroup({ layout: pipes[k].getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: params } }, { binding: 1, resource: { buffer: mb } }, { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: stats } }, { binding: 4, resource: { buffer: radial } }] });
+      const bg = d.createBindGroup({ layout: pipes[k].getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: params } }, { binding: 1, resource: { buffer: mb } }, { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: stats } }, { binding: 4, resource: { buffer: radial } }, ...(V[k].includes("@binding(5)") ? [{ binding: 5, resource: { buffer: GTAB } }] : [])] });
       const enc = d.createCommandEncoder(), pass = enc.beginComputePass(); pass.setPipeline(pipes[k]); pass.setBindGroup(0, bg);
       const g = Math.ceil(n / 4); pass.dispatchWorkgroups(g, g, g); pass.end();
       const bpr = n * 8, buf = d.createBuffer({ size: bpr * n * n, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -93,7 +95,7 @@ for (const sn of SL) {
     const ref = await read('ship'), cmp = {};
     for (const k of Object.keys(pipes)) { if (k === 'ship') continue; const u = await read(k); let diff = 0; for (let v = 0; v < u.length; v++) if (u[v] !== ref[v]) diff++; cmp[k] = diff; }
     if (globalThis.__K_TIME) {                                  // n dispatches / one pass / one wait, n grown until a batch is >= 2.5 s; interleaved rounds, min
-      const bgs = {}; for (const k of Object.keys(pipes)) bgs[k] = d.createBindGroup({ layout: pipes[k].getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: params } }, { binding: 1, resource: { buffer: mb } }, { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: stats } }, { binding: 4, resource: { buffer: radial } }] });
+      const bgs = {}; for (const k of Object.keys(pipes)) bgs[k] = d.createBindGroup({ layout: pipes[k].getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: params } }, { binding: 1, resource: { buffer: mb } }, { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: stats } }, { binding: 4, resource: { buffer: radial } }, ...(V[k].includes("@binding(5)") ? [{ binding: 5, resource: { buffer: GTAB } }] : [])] });
       const run = async (k, m) => { await d.queue.onSubmittedWorkDone(); const t0 = performance.now(); const enc = d.createCommandEncoder(), pass = enc.beginComputePass(); pass.setPipeline(pipes[k]); pass.setBindGroup(0, bgs[k]); const g = Math.ceil(n / 4); for (let i = 0; i < m; i++) pass.dispatchWorkgroups(g, g, g); pass.end(); d.queue.submit([enc.finish()]); await d.queue.onSubmittedWorkDone(); return (performance.now() - t0) / m; };
       const NN = {}, T = {}, target = globalThis.__K_TIME;
       for (const k of Object.keys(pipes)) { let m = 4; for (;;) { const T0 = (await run(k, m)) * m; if (T0 >= target || m >= 40000) break; m = T0 < target / 6 ? m * 4 : Math.ceil(m * target * 1.2 / T0); } NN[k] = m; T[k] = []; }

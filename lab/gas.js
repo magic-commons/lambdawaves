@@ -35,6 +35,41 @@ export function zerosOf(l, count) {
 }
 /** P_l(x) by Bonnet's recurrence */
 export function legP(l, x) { if (l === 0) return 1; let p0 = 1, p1 = x; for (let k = 2; k <= l; k++) { const p2 = ((2 * k - 1) * x * p1 - (k - 1) * p0) / k; p0 = p1; p1 = p2; } return p1; }
+/* the 16 zeros of each j_l are radius-free (z, never k = z/a): found once per session and shared by every build and the table */
+const Z16 = [];
+const zeros16 = (l) => Z16[l] || (Z16[l] = zerosOf(l, NRMAX));
+
+/* ── THE HERMITE-256 RADIAL TABLE (optimization 2026-09-24, K7 · AUDIT-A FA1, REFUTE-F §2, SOL-REVIEW §3a) — OPT-IN ──
+ * j_l(k r) = j_l(z u) with u = r/a, so each mode's radial is ONE fixed function of u ∈ [0, 1] whatever the radius: 256 rows
+ * (row = l·16 + n_r, build()'s own order) × 256 samples of (j_l(z u), h·z·j_l′(z u)), h = 1/255, which the kernel reads
+ * with cubic Hermite instead of running the Miller recurrence per voxel per mode (128³: 46.8 → ~8 ms).  NOT bit-identical:
+ * AUDIT-A measured every changed texel CLOSER to the exact value (≤ 1 fp16 ulp against the shipped ≤ 41) and ≤ 0.02 % of
+ * pixels moved by one level; Sol showed that is strong evidence, not a proof — so it is Josh's to switch on (`?gastab=1`,
+ * `__LW.gasTable(true)`) and OFF by default, where every record carries lag[3] = 0 and the kernel runs the recurrence. */
+export const GAS_TABLE_N = 256;
+const jprime = (l, x) => { if (x < 1e-6) return l === 1 ? 1 / 3 : 0; return l === 0 ? -sphj(1, x) : sphj(l - 1, x) - (l + 1) / x * sphj(l, x); };
+function* gasTableSteps(N) {
+  const arr = new Float32Array((LMAX + 1) * NRMAX * N * 2), h = 1 / (N - 1);
+  for (let l = 0; l <= LMAX; l++) {
+    const z = zeros16(l);
+    for (let nr = 0; nr < NRMAX; nr++) { const row = l * NRMAX + nr, Z = z[nr]; for (let j = 0; j < N; j++) { const u = j * h, o = (row * N + j) * 2; arr[o] = sphj(l, Z * u); arr[o + 1] = h * Z * jprime(l, Z * u); } yield; }
+  }
+  return arr;
+}
+let TABLE = null, tableSteps = null;
+/** the table (cached): Float32Array(256 rows × N × 2) — rows in build() order, radius-free */
+export function gasRadialTable(N = GAS_TABLE_N) {
+  if (N !== GAS_TABLE_N) { const g = gasTableSteps(N); let r; while (!(r = g.next()).done); return r.value; }
+  if (!TABLE) { if (!tableSteps) tableSteps = gasTableSteps(N); let r; while (!(r = tableSteps.next()).done); TABLE = r.value; tableSteps = null; }
+  return TABLE;
+}
+/** one idle slice of the table build: true once the table exists (the caller keeps slicing until then) */
+function gasTableSlice(dl) {
+  if (TABLE) return true;
+  if (!tableSteps) tableSteps = gasTableSteps(GAS_TABLE_N);
+  do { const r = tableSteps.next(); if (r.done) { TABLE = r.value; tableSteps = null; return true; } } while (!dl || dl.timeRemaining() > 2);
+  return false;
+}
 
 export function createGas(a = 10, opts = {}) {
   const NRQ = opts.nr || 200, NTQ = opts.nt || 160;          // the quadrature grid (r midpoints × θ midpoints)
@@ -52,9 +87,10 @@ export function createGas(a = 10, opts = {}) {
      boot, so the common first AXIAL press finds them ready.  The steps write the module's state only when complete: a
      radius change mid-warm discards the half-built one. */
   let built = false, steps = null;
+  let tableRows = false, tableWant = false, tableGen = 0;     // K7: the records carry their table rows only once the table is UPLOADED
   function* building() {
     const ms = [];
-    for (let l = 0; l <= LMAX; l++) { const z = zerosOf(l, NRMAX); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; ms.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } yield; }
+    for (let l = 0; l <= LMAX; l++) { const z = zeros16(l); for (let nr = 0; nr < NRMAX; nr++) { const k = z[nr] / A; ms.push({ nr, l, k, z: z[nr], E: k * k / 2, rnorm: Math.sqrt(2 / (A * A * A * sphj(l + 1, z[nr]) ** 2)), anorm: Math.sqrt((2 * l + 1) / (4 * Math.PI)) }); } yield; }
     const r1 = new Float64Array(NRQ), rw1 = new Float64Array(NRQ), dr = A / NRQ;
     for (let i = 0; i < NRQ; i++) { r1[i] = (i + 0.5) * dr; rw1[i] = r1[i] * r1[i] * dr; }
     const ct1 = new Float64Array(NTQ), w1 = new Float64Array(NTQ), dth = Math.PI / NTQ;
@@ -64,7 +100,7 @@ export function createGas(a = 10, opts = {}) {
     const P1 = []; for (let l = 0; l <= LMAX; l++) { const row = new Float64Array(NTQ); const an = Math.sqrt((2 * l + 1) / (4 * Math.PI)); for (let j = 0; j < NTQ; j++) row[j] = an * legP(l, ct1[j]); P1.push(row); }
     modes = ms; r = r1; rw = rw1; ct = ct1; w = w1; Rt = R1; Pt = P1;
     re0 = new Float64Array(modes.length); im0 = new Float64Array(modes.length);
-    recs = modes.map((M) => ({ table: { n: 1, l: M.l, am: 0, m: 0, norm: M.rnorm * M.anorm, lag: Float64Array.from([M.k, A, 1, 0, 0, 0]), leg: new Float64Array(6), space: 'gas' }, re: 0, im: 0 }));
+    recs = modes.map((M, m) => ({ table: { n: 1, l: M.l, am: 0, m: 0, norm: M.rnorm * M.anorm, lag: Float64Array.from([M.k, A, 1, tableRows ? m + 1 : 0, 0, 0]), leg: new Float64Array(6), space: 'gas' }, re: 0, im: 0 }));   // lag[3]: K7's row + 1, 0 = the recurrence
     built = true;
   }
   function ensure() { if (built) return; if (!steps) steps = building(); while (!steps.next().done); steps = null; }
@@ -134,7 +170,23 @@ export function createGas(a = 10, opts = {}) {
   }
   return {
     get on() { return on; }, off() { on = false; }, launch, at, fieldModes, stats, overlap,
-    get modes() { ensure(); return modes; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
+    get modes() { ensure(); return modes; },
+    /** K7 (opt-in): on → the table is built (idle slices in a browser, at once in node), handed to `upload(table)` — the
+     *  field's setGasTable, which answers true once it holds it — and only THEN do the records carry lag[3] = row + 1, so
+     *  no frame ever reads a table that is not there (until then, and on a refusal, the kernel runs the recurrence).
+     *  off → every record back to lag[3] = 0 at once.  `landed()` is called after either change reaches the records. */
+    setTable(on, upload, landed) {
+      tableWant = !!on; const gen = ++tableGen;
+      const mark = (v) => { tableRows = v; if (built) for (let m = 0; m < recs.length; m++) recs[m].table.lag[3] = v ? m + 1 : 0; if (landed) landed(v); };
+      if (!tableWant) { if (tableRows) mark(false); return 'off'; }
+      if (tableRows) return 'on';
+      const land = () => { if (gen !== tableGen || !tableWant) return; if (upload && upload(gasRadialTable()) === false) { tableWant = false; return; } mark(true); };
+      if (typeof globalThis.requestIdleCallback !== 'function') { land(); return this.table; }
+      const slice = (dl) => { if (gen !== tableGen) return; if (gasTableSlice(dl)) land(); else requestIdleCallback(slice); };
+      requestIdleCallback(slice);
+      return 'building';
+    },
+    get table() { return tableRows ? 'on' : tableWant ? 'building' : 'off'; }, get captured() { return captured; }, get last() { return last; }, get radius() { return A; },
     setRadius(v) { if (v !== A) { A = v; built = false; steps = null; on = false; } },   // K4: stale, not rebuilt — the next reader builds
     norm2(t) { const c = at(t); let s = 0; for (let m = 0; m < c.re.length; m++) s += c.re[m] ** 2 + c.im[m] ** 2; return s; },
   };

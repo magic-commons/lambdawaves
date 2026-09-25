@@ -30,5 +30,26 @@ function judge(name, ok, detail) {
   const fm = gas.fieldModes(0);
   judge('THE RECORDS: the field gets ≤ 256 well records with the recurrence flag set (lag[2] = 1), l up to 15', fm.length > 100 && fm.length <= 256 && fm.every((m) => m.table.lag[2] === 1) && Math.max(...fm.map((m) => m.table.l)) >= 12, { count: fm.length, lmax: Math.max(...fm.map((m) => m.table.l)) });
 }
+/* K7 (optimization 2026-09-24): the OPT-IN Hermite table.  The row a record points at must be its MODE index (l·16 + n_r, build()'s
+   order), never its position in fieldModes' filtered list (REFUTE-F §2 (i)); OFF — the default — every record carries 0. */
+{
+  const { gasRadialTable, GAS_TABLE_N } = await import('../lab/gas.js');
+  const gas = createGas(10, { warm: false });
+  gas.launch(-5, 2, 0.8, 0);
+  const off0 = gas.fieldModes(1.5).every((m) => m.table.lag[3] === 0);
+  const refused = gas.setTable(true, () => false) === 'off' && gas.table === 'off' && gas.fieldModes(1.5).every((m) => m.table.lag[3] === 0);
+  let handed = null; gas.setTable(true, (t) => { handed = t; return true; });
+  const rowOk = (G) => { const fm = G.fieldModes(1.5); return fm.length > 100 && fm.every((R) => { const row = R.table.lag[3] - 1, M = G.modes[row]; return row >= 0 && !!M && row === M.l * 16 + M.nr && M.l === R.table.l && M.k === R.table.lag[0]; }); };
+  const on = gas.table === 'on' && rowOk(gas);
+  const T = gasRadialTable(), h = 1 / (GAS_TABLE_N - 1);
+  let tabOk = handed === T && T.length === 256 * GAS_TABLE_N * 2;
+  for (const row of [0, 37, 131, 255]) { const M = gas.modes[row]; for (const j of [0, 100, 255]) { const u = j * h; if (T[(row * GAS_TABLE_N + j) * 2] !== Math.fround(sphj(M.l, M.z * u))) tabOk = false; } }
+  gas.setRadius(7.5); gas.launch(-3, 1, 1, 0);
+  const afterRadius = rowOk(gas);
+  gas.setTable(false);
+  const off1 = gas.table === 'off' && gas.fieldModes(1.5).every((m) => m.table.lag[3] === 0);
+  judge('THE TABLE (K7, opt-in): off by default (lag[3] = 0), a refused upload stays off, on → every emitted record carries its MODE row + 1 (row = l·16 + n_r, checked against the mode\'s own l and k), also after a radius change; the table rows are f32(j_l(z u)); off again → 0',
+    off0 && refused && on && tabOk && afterRadius && off1, { off0, refused, on, tabOk, afterRadius, off1 });
+}
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'gas.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);
