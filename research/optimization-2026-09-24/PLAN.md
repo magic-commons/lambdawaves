@@ -152,6 +152,33 @@ Not built (LB): FE8 `seatLook`, FE10, kit-side dirty checks (upstream), FB10.
 9. **FD4's class**: three waves patched the same hole; `{ ...S0, …owned }` ends it but keeps retired keys forever.
 10. **Unmeasured**: retina/iPad prices (WebKit), the deployed origin's RTT (FD10 modulepreload), FC8 after LA2 on a quiet GPU.
 
-## 9. Sol's amendments
+## 9. Sol's amendments (from `SOL-REVIEW.md`, read whole; these override the tables above where they conflict)
 
-(filled from `SOL-REVIEW.md` when it lands)
+Sol classed every item with the observable that catches a violation and agreed with the §0 rulings on M2 (`load()`),
+M1 (the pair), M3 (the method guard), LA3 (`[]` + one `setOcclusion([])`), K2 (view × style only, exports pinned), the
+wave-45 exemption (L8/L11 deferred), K7 (opt-in only). The dissents the lead accepts:
+
+| item | Sol | ruling now |
+|---|---|---|
+| **K5** `gas.stats` factored | "neither under strict law": the factored sum flips a displayed `-0.00`/`0.00` at symmetric instants; keep the loop or run the exact loop off-thread | **K5 is no longer the factorisation.** It becomes **K5w**: the UNCHANGED `stats()` runs in the maths worker (a `gas.stats` op; the worker builds its own `createGas(A)` — f64 tables are deterministic, so bit-identical) and the readout paints when it lands (N1: a 2.5 Hz readout arrives one round trip later). Built **after the merge** by one builder (it spans mathworker.js, gas.js and rack.js:1338). The factorisation stays in the report as the rejected road. |
+| **K8** autoScale reset on pause | "neither pending policy ruling": it changes the paused image | **K8 → J (for Josh)**, not built. Lane K skips it. |
+| **M6(d)** theme at the top of boot | "neither under strict pixel law": the cold boot's first frames change (a shorter dark→light flash) | **M6(d) → J**, not built. Lane M builds M6(b) and (c) only; (c) with the reveal-repaint check. |
+| **M10** precache exclusion | neutral for moving the oracles; "neither" for a broad `mir/shell/**` exclusion | **M10 dropped**; M9 (oracles) stays. The shell migration (Josh's list) ends the duplicate. |
+| **K4** lazy gas | N1, but "not a free latency win": the first axial use pays what boot paid | K4 = the `setRadius` dirty flag (the measured 22–34 ms per pointermove) + lazy `ensure()` + **a one-shot idle warm after ready** (`requestIdleCallback`, as the kick warm does), so the common first press pays nothing; the K4 gate measures cold `setRadius`, first BOX press and the settled digest separately (Sol §5.2). |
+| **N4** SETTINGS-KEYS remnants | legacy tests read `__LW.keys.capturing` and `LW.keysheet`; keep the alias and the action id | cut the capture branch, `capturing`'s dispatcher use, `ui.keysSay`, the dead Escape line, the dead occlusion id lookup and native-ui.js:63; **keep** `LW.keysheet`, `layout.keysheet` and the ACTION id `'keysheet'`; retarget access A11. |
+| **N5** write-only bindings | `LW.version` feeds export metadata (render-exact.js:1103); `layout.menu.scale/enlarged` have a legacy reader | **keep `LW.version`** (an export's saved bytes) and the menu scale fields; cut only `periodVersion`, `gov.since`, `wStyle`, the `infoPanel` import, KIND `modulation`/`about`, `kepEcc`, `partOn` after a fresh `rg` for each; read `tablet.DPR` preserving 1.5. |
+| **LA1** | time the whole loop from entry, before occlusion | already in LA1 (`loopMedian`). |
+| busy mark | a semantic indicator whose paint costs +0.42 ms/frame while up | stays J6-adjacent on Josh's list (§8 item 6). |
+
+Sol's "measure before building" list maps onto the gates: §5.2 → K4's gate; §5.3 → K2's gate (the matrix, compile
+memory, device loss during compile, the export pin in both engines); §5.5 → K0; §5.6 → LB1's gate (a closed compact ENV
+with a changing source, resize while closed, open after resize); §5.8 → LA6's gate (force a scan past the 8 s timeout,
+then latest-key changes, watch the queue until the late reply). §5.1 (a certified interpolation envelope for the gas
+table) and §5.4 (the occupancy break-even) are recorded as leads for the K7 ruling and a future quality tier; §5.7 (a
+headed interaction time-series) is the lead's to take on a quiet GPU during Phase 4.
+
+Sol's error bound for the table (§3a), for the record: cubic Hermite `|F − H| ≤ z⁴h⁴/384 · M₄(l,z)`, linear
+`|F − L| ≤ z²h²/8 · M₂(l,z)`, so a universal N cannot be read off "11-bit mantissa ≈ 5e-4" — the fp16 ULP depends on the
+exponent and the error is summed over 256 modes before the write; a same-texel guarantee needs the accumulated error and
+the distance to the nearest rounding midpoint. Lane A's 3 000-voxel ≤ 1 ULP evidence is strong but not a proof; the
+opt-in default-off ruling stands.
