@@ -97,7 +97,7 @@ function bisector(pts, k) {
 }
 
 /* ── the eight pinned presets, byte-for-byte as lab/chemview.js had them ──────────────────────────────────────
- * tests/chem.browser-test.mjs, tests/rhf-molecules.test.mjs and lab/oracles/sto-3g-v1.json all pin these eight
+ * tests/chem.browser-test.mjs, tests/rhf-molecules.test.mjs and tests/fixtures/oracles/sto-3g-v1.json all pin these eight
  * energies, so these eight arrays are FROZEN: the numbers below are the literals the window shipped with. */
 const ETHENE = (() => {                                      // C₂H₄ · r_CC 1.339, r_CH 1.087, ∠HCH 117.4°, the yz plane
   const d = 1.339 / 2, h = 117.4 / 2 * D, sy = 1.087 * Math.sin(h), sz = 1.087 * Math.cos(h);
@@ -452,7 +452,7 @@ export const MOLECULE_BY_ID = new Map(MOLECULES.map((m) => [m.id, m]));
 /* ── THE LARGER BASIS (2026-09-18).  6-31+G* is vendored for H, C, N, O, F: 2 functions on hydrogen, 19 Cartesian ones on
  * a heavy atom.  It is offered where every atom is in the record AND the molecule stays near the benzene cap — MEASURED
  * on this engine (research/molecular-waves-2026-09-18/basis/engine-631.json): C₂H₄ at 46 AOs is 2.3 s, C₂H₆ at 50 is
- * 3.7 s.  Nineteen library molecules agree with PySCF cart=True on the same decimals to 3e-12 (lab/oracles/). */
+ * 3.7 s.  Nineteen library molecules agree with PySCF cart=True on the same decimals to 3e-12 (tests/fixtures/oracles/). */
 export const BASIS_631 = { elements: [1, 6, 7, 8, 9], maxAO: 46 };
 export function basis631(id) {
   const m = MOLECULE_BY_ID.get(id); if (!m) return { ok: false, nAO: 0, why: 'no such molecule' };

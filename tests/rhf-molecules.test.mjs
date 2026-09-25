@@ -1,5 +1,5 @@
 /* rhf-molecules.test.mjs — B-H2O-2's gate.  The six pinned RHF/STO-3G energies, dipoles and orbital energies are
- * PySCF 2.14.0's on the vendored BSE decimals (lab/oracles/sto-3g-v1.json); the geometry placements are checked
+ * PySCF 2.14.0's on the vendored BSE decimals (tests/fixtures/oracles/sto-3g-v1.json); the geometry placements are checked
  * against the numbers MATH-H2O ROUND 4 · OPUS §5 printed.  N₂ is the rung that separates the guesses: SAD reaches
  * −107.495887883412, the bare core guess converges instead on a second aufbau RHF solution 0.7298 hartree up.
  */
@@ -13,7 +13,7 @@ const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8')
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) <= tol, `${what}: ${a} vs ${b} (tol ${tol})`);
 const raw = readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url));
 const record = JSON.parse(raw);
-const oracle = read('../lab/oracles/sto-3g-v1.json');
+const oracle = read('./fixtures/oracles/sto-3g-v1.json');
 registerRecord('sto-3g', record);
 
 /* 0. Provenance: the oracle was written against the bytes this test loads. */

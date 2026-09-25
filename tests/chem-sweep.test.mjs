@@ -11,7 +11,7 @@
  * `hessianBlocks`, shared with the stability Hessian) instead of the full n⁴ tensor, so the two roads differ at
  * round-off in the MATRICES as well as in the eigensolver.  The measured agreement below is over both.
  *
- * The ground-state energies are held to the INDEPENDENT oracle, PySCF 2.14.0 in lab/oracles/sto-3g-v1.json, at
+ * The ground-state energies are held to the INDEPENDENT oracle, PySCF 2.14.0 in tests/fixtures/oracles/sto-3g-v1.json, at
  * molecules.test.mjs's own scaled tolerance max(1e-9, 3e-12·|E|) — a stronger statement than old-versus-new, since
  * the eigensolver dispatch touches every Fock diagonalisation in the SCF.
  *
@@ -29,7 +29,7 @@ import { chemGround, chemSpectrum, chemSolve, chemRootVectors, chemRegister } fr
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 registerRecord('sto-3g', read('../lab/vendor/bse/sto-3g-v1.json'));
-const LIB = read('../lab/oracles/sto-3g-v1.json').library;
+const LIB = read('./fixtures/oracles/sto-3g-v1.json').library;
 const tolOf = (E) => Math.max(1e-9, 3e-12 * Math.abs(E));
 let fails = 0, checks = 0;
 const judge = (ok, what, detail) => { checks++; if (ok) console.log('GREEN ' + what); else { fails++; console.log('RED   ' + what + '\n      ' + JSON.stringify(detail)); } };

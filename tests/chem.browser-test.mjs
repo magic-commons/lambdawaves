@@ -25,14 +25,14 @@ const PORT = process.env.LW_PORT || 8704;
 const ROOT = new URL('..', import.meta.url).pathname;
 const SHOT = path.join(ROOT, '.tmp', 'chem-benzene.png');
 
-/* the pinned numbers: lab/oracles/sto-3g-v1.json (fix-mol6.py and fix-mol8.py) and the MATH-H2O ledger */
+/* the pinned numbers: tests/fixtures/oracles/sto-3g-v1.json (fix-mol6.py and fix-mol8.py) and the MATH-H2O ledger */
 const H2O = { energy: -74.963023162862, electrons: 10, omega0: 0.483101392, nAO: 7,
   atoms: [[8, 0, 0, 0.22166487441148175], [1, 0, 1.4309006215206648, -0.886659497645927], [1, 0, -1.4309006215206648, -0.886659497645927]],
   rhoO: 193.313905, rhoMid: 0.492165 };
 const BZ = { energy: -227.891006464181, nAO: 36, electrons: 42, omega: 0.360792434, f: 0.812666 };
 const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
 /* LAWS 6–9 (2026-09-12, the MOLECULE dropdown): the library's own oracle, read rather than retyped */
-const LIB = JSON.parse(fs.readFileSync(path.join(ROOT, 'lab', 'oracles', 'sto-3g-v1.json'), 'utf8')).library;
+const LIB = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'fixtures', 'oracles', 'sto-3g-v1.json'), 'utf8')).library;
 /* THE TIME BUDGET HAS A FLOOR, and the floor is the worker road, not the arithmetic.  lab/molecules.js predicts
    HCl at 25 ms; a browser solve pays a structured-clone round trip, a `chem.solve` report of typed arrays and a
    frame boundary on top of that, and no cost model of the MATHS can or should predict those.  So the budget is
