@@ -123,6 +123,18 @@ The factorised sum (26× faster on the same thread) was rejected by Sol's law ch
 | W125-2 | AUTO SCALE → 1 on the playing→paused edge (+ PRESENT), its measurement window restarted on that edge | paused picture 0.85 → 1 on the edge frame; a 3 s paused drag 0.85 → 0.35 before, stays 1 after; auto-rotate while paused 0 changes; AUTO SCALE off: unchanged; render-exact 40/40 | BUG, ruled |
 | W125-3 | phone/tablet first-run material: tinted, frost OFF (`lab/first-run.js`); desktop unchanged; stored choices win; the phone's crossing override stays | `tests/first-run.test.mjs` 4/4; headless Firefox with touch prefs: tablet/phone newcomers tinted/off, a returning refractive+always choice kept; official-defaults-palette green. Note: a returning tablet user who never pressed CARD STYLE now gets TINTED (wave 51: a saved-but-never-chosen card is not a choice) | ruled |
 
+### The iPad afternoon (after the v0.3.0-alpha tag): measured on the M5, built by subtraction
+
+| item | what | proof | class |
+|---|---|---|---|
+| Device report | `?report=1&post=1` → `tools/perf/device-report.js` (one dynamic-import line in rack.js), scripted scenes in 250 ms bins + a 30 s play, POST to `serve-lan.py` → `research/device-reports/`; `tools/perf/device-report-summary.mjs` | two iPad runs: rAF 58.8 Hz (Safari's cap) while the present pass costs 28 ms at 64³/160/1 on 2400×1671; an empty submit waited 313 ms behind queued work; every first use of a view/style stalls 220–270 ms; the instrument restored identical on all 13 counts | DIAG |
+| AS | AUTO SCALE as ONE rule (time-paced, proportional, rounded toward the current scale, then held); the frame counters, two branches and ±0.1 steps deleted | rack.js −1 line; `tests/auto-scale.test.mjs` 13/13; slow device 12.6 s → 1.05 s to the floor (sim), 128³ gas in Firefox 10.3 s → 0.87 s; canvas resizes 37 → ≤ 3; desktop 96³: 0 steps in 6/6 plays; render-exact 40/40; lock GREEN | BUG (dynamics) |
+| PACE | the loop paced to the GPU where completion is prompt (probe at a drained moment; Firefox's 100 ms tick → not paced); `field.inFlight`, a hold at four in flight on the rAF path only, `LW.stats.skipped` | Safari-like loop: queue 20–26 → ≤ 4, presents 36.8/s = completions 36.6/s, AUTO SCALE steps at 0.55 s (never before); Chromium: presents already = completions, within 1 % on every scene; Firefox: not paced, 0 skipped, bench unchanged; exports byte-identical 8/8; lock GREEN | BUG (the overrun) |
+| TABLET | a tablet's first-run quality is the GRID pairing's 64³/110/0.75; `deviceQuality(saved, device)` clamps a file to 96³ (tablet) / 64³ (phone) with the pairing, and never applies a file's AUTO SCALE off; the WAVE DANCER demo loses its quality block | Firefox with the iPad UA boots 64/110/0.75; a 128/240/auto-off file → 96/160/1 with AUTO SCALE on (desktop: 128/240 as saved); `first-run.test` 8/8; official-defaults-palette; current 14/14 | defaults, ruled |
+
+Not built (Josh's calls): the pipeline warm-up at idle; SHADOW folded on a mobile first visit; MOLECULES and
+MO-REGISTRY off the first-run rack; an upward probe for AUTO SCALE while playing; the Safari 60 fps flag.
+
 ### Lane N · archaeology (after the merge)
 
 | item | what | proof | class |

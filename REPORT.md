@@ -2839,3 +2839,38 @@ frost OFF (`lab/first-run.js`, a pure function of the app's own phone/tablet pre
 ALWAYS is unchanged; stored choices win, and the phone's frost override at the crossing stays) — proven in headless
 Firefox with its own touch prefs, no stubs: tablet and phone newcomers tinted/off, a returning refractive choice kept.
 CLEAR stays STATE's. The glass on the desktop stays exactly as it is.
+
+### wave 126: The iPad afternoon — the loop paced to the GPU, AUTO SCALE as one rule, the tablet's own quality
+
+The commissioner opened the release on his M5 iPad Pro over the LAN and it "lagged like hell", was fine after a toggle,
+and collapsed to ~5 fps every few seconds during play. No Mac, so the app measured itself: `?report=1&post=1` loads
+`tools/perf/device-report.js` (one dynamic-import line in rack.js, nothing precached), plays scripted scenes with
+250 ms bins, and posts the JSON to `serve-lan.py` (`research/device-reports/`). Two reports said what a desktop could
+not: Safari's rAF runs at 58.8 Hz whatever the GPU does (a WebKit preference caps it near 60), while the present pass at
+the stored quality (64³ at the boot seed's 160 steps and scale 1, 2400×1671 device pixels) costs 28 ms — the loop
+submitted 60 frames a second against a GPU finishing 35, the queue ran 313 ms deep, and the page stalled while it
+drained. AUTO SCALE and the governor read rAF intervals, so on Safari they were blind. And AUTO SCALE's own controller
+was paced in frames (a decision per 24 loop frames, ±0.1 fixed steps, from scale 1 at every play), so on a slow device
+its ramp took 10–30 s.
+
+Three subtractions, under the commissioner's rule that nothing is added to go faster. AUTO SCALE is ONE inline rule:
+every 250 ms of presented frames, outside the band it jumps once to the scale that meets the budget
+(scale·√(target/median), ≤ ×0.5 down, ×1.15 up, on the 0.05 grid rounded toward the current scale) and then holds; the
+two counters, two branches and fixed steps are gone (rack.js one line shorter; convergence 12.6 s → 1.05 s in
+simulation, 10.3 s → 0.87 s on the 128³ gas in Firefox; canvas resizes 37 → ≤ 3, which matters because WebKit
+reallocates the canvas on every resize). The loop is paced to the GPU where completion is prompt: createField probes an
+empty submit at a drained moment (Firefox's 100 ms completion tick reads as not prompt and is left alone), field.js
+counts frames in flight, and the rAF path holds a present at four in flight (Chromium runs four on its own; holding
+lower cost it 1–8 %), carrying the tier whole to the next frame — presents equal completions, rAF intervals become
+honest, and the two controllers see the GPU on Safari (on a Safari-like loop: queue 20–26 → ≤ 4, AUTO SCALE steps at
+0.55 s where it never moved). Exports are untouched; the desktop's lock stays GREEN. And quality belongs to the device:
+a tablet's first run is the GRID pairing's 64³ (110 steps, scale 0.75 — the report measured it at 11–13 ms, ~80 fps
+GPU-bound on the M5, where the desktop seed's 160/1 was 28 ms), a file cannot push a tablet past 96³ or a phone past 64³
+or switch AUTO SCALE off anywhere, and the bundled WAVE DANCER demo carries no quality (it shipped a desktop's 128³ with
+AUTO SCALE off, so every iPad that opened it lagged). The desktop's first run is unchanged.
+
+Also from the research (`WEBKIT-FPS-RESEARCH.md`, sourced): 120 Hz needs Safari's "Prefer Page Rendering Updates
+near 60fps" feature flag off; Safari 26 stalls ~220–270 ms on a render pipeline's first use (measured on the iPad per
+new view or style; a warm-up at idle is the pixel-identical remedy, the commissioner's call); each backdrop-filter
+panel is its own Core Animation blur. Playable snapshots of every release now live in `~/Documents/LAMBDAWAVES-RELEASES/`
+(`tools/snapshot-release.mjs`, a RELEASING.md step).

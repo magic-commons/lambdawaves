@@ -11,6 +11,34 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## UNRELEASED — not frozen
+
+Work since `v0.3.0-alpha` — 1 wave, 12 commits.  **Nothing here is frozen**: no tag points at it, the numbers may
+still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on
+any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay
+stable enough to gate on.
+
+- **wave 126**: The iPad afternoon — the loop paced to the GPU, AUTO SCALE as one rule, the tablet's own quality
+
+<details><summary>commits</summary>
+
+- `7dca938` 2026-09-25 — CHANGELOG for v0.3.0-alpha
+- `804e1e7` 2026-09-25 — OPTIMIZATION · WEBKIT-FPS-RESEARCH.md
+- `088687c` 2026-09-25 — OPTIMIZATION 2026-09-24 · R1 the device report: tools/perf/device-report.js + one line in…
+- `8c6dfae` 2026-09-25 — OPTIMIZATION 2026-09-24 · R2 the ?report=1 flag: toast, POST to /report, COPY
+- `43d8e69` 2026-09-25 — OPTIMIZATION 2026-09-24 · R3 serve-lan.py takes the device report: POST /report →…
+- `e048ec5` 2026-09-25 — OPTIMIZATION 2026-09-24 · R4 tools/perf/device-report-summary.mjs: a device at a glance
+- `e736c45` 2026-09-25 — OPTIMIZATION 2026-09-24 · AS AUTO SCALE: one rule, paced by time, proportional, then hold
+- `f14df11` 2026-09-25 — render-exact: hazard H3's note names the one-rule AUTO SCALE (time-paced, proportional, then…
+- `807fe82` 2026-09-25 — OPTIMIZATION 2026-09-24 · PACE1 pace the loop to the GPU where completion is prompt
+- `20d76e2` 2026-09-25 — OPTIMIZATION 2026-09-24 · PACE2 tablet quality: the GRID pairing's 64³ first, a device ceiling…
+- `12c9f81` 2026-09-25 — OPTIMIZATION 2026-09-24 · PACE1b the queue bound is four frames in flight, measured
+- `03b8b30` 2026-09-25 — OPTIMIZATION 2026-09-24 · PACE3 the device report: a 30 s long play with the pacing, and a…
+
+</details>
+
+---
+
 ## `v0.3.0-alpha` — 2026-09-25
 
 Commit `3666d7e` · waves 116–125 · 75 commits.
