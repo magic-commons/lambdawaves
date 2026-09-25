@@ -272,7 +272,7 @@ async function measure(LW, opts) {
       governor: { on: safe(() => LW.governor.on), state: safe(() => LW.governor.state) }, perfMode: safe(() => LW.perf.mode),
       modCadence: safe(() => LW.mod.cadence), modWindowOpen: found.modOpen, gasTable: safe(() => LW.gasTable()),
       hamiltonian: safe(() => LW.hamiltonian), gasOn: !!safe(() => LW.gas.on), preset: safe(() => LW.reg.preset), modes: safe(() => LW.reg.populated().length),
-      playing: found.playing, rate: clock.rate, frame: mat.frame !== false, frameMode: mat.frameMode, axis: mat.axis !== false,
+      playing: found.playing, rate: clock.rate, frame: mat.frame !== false, frameMode: mat.frameMode || null, axis: mat.axis !== false,
       openWindows: document.querySelectorAll('.dev:not(.closed)').length, floating: document.querySelectorAll('#floats .dev:not(.closed)').length,
       palette: safe(() => LW.paletteId),
     };
