@@ -5385,7 +5385,7 @@ export async function boot(dom) {
           else if (fieldOwner === 'chem') chem.setOn(true);
           if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') orbitals.setOn(true);
           if (I.states && I.states.on && fieldOwner === 'chem') states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
-          if (I.ladder) ladder.set(I.ladder);
+          if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
             if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); dynamics.ui.trail.set(I.particles.trail); }
