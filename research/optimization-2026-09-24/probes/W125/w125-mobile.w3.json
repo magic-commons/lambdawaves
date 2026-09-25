@@ -1,0 +1,91 @@
+{
+ "tablet": {
+  "fresh": {
+   "card": "tinted",
+   "frost": "off",
+   "frostClass": false,
+   "phone": false,
+   "tablet": true,
+   "coarse": true,
+   "hoverNone": true,
+   "w": 1280,
+   "h": 814,
+   "stored": null,
+   "errors": []
+  },
+  "returningSaid": {
+   "card": "refractive",
+   "frost": "always",
+   "frostClass": true,
+   "phone": false,
+   "tablet": true,
+   "coarse": true,
+   "hoverNone": true,
+   "w": 1280,
+   "h": 814,
+   "stored": "{\"card\":\"refractive\",\"cardSet\":true,\"frost\":\"always\"}",
+   "errors": []
+  },
+  "savedNotSaid": {
+   "card": "tinted",
+   "frost": "always",
+   "frostClass": true,
+   "phone": false,
+   "tablet": true,
+   "coarse": true,
+   "hoverNone": true,
+   "w": 1280,
+   "h": 814,
+   "stored": "{\"card\":\"refractive\",\"frost\":\"always\"}",
+   "errors": []
+  }
+ },
+ "phone": {
+  "fresh": {
+   "card": "tinted",
+   "frost": "off",
+   "frostClass": false,
+   "phone": true,
+   "tablet": false,
+   "coarse": true,
+   "hoverNone": true,
+   "w": 560,
+   "h": 814,
+   "stored": null,
+   "errors": []
+  },
+  "returningSaid": {
+   "card": "refractive",
+   "frost": "off",
+   "frostClass": false,
+   "phone": true,
+   "tablet": false,
+   "coarse": true,
+   "hoverNone": true,
+   "w": 560,
+   "h": 814,
+   "stored": "{\"card\":\"refractive\",\"cardSet\":true,\"frost\":\"always\"}",
+   "errors": []
+  },
+  "leave": {
+   "before": "off",
+   "afterLeaving": "always",
+   "backOnPhone": "off"
+  }
+ },
+ "desktop": {
+  "fresh": {
+   "card": "refractive",
+   "frost": "always",
+   "frostClass": true,
+   "phone": false,
+   "tablet": false,
+   "coarse": false,
+   "hoverNone": true,
+   "w": 1280,
+   "h": 814,
+   "stored": null,
+   "errors": []
+  }
+ }
+}

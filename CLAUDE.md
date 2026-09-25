@@ -54,7 +54,9 @@ visible focus glows and the phone's taller action-only editor.
 First-run λWAVES preferences are specified in `lab/rack.js` and
 `lab/native-ui.js`: tags, captions, Help and window notes off; hints,
 AUTO SCALE, DOMAIN AUTO and governor on; light/refractive/ALWAYS frost,
-22 px blur and 50% VIVID on desktop. Stored choices and the phone's frost
-override win. In `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the
-same ±π/2 pair as Re/Im; palette OFF retains the old colors. Keep
+22 px blur and 50% VIVID on desktop; on a phone or tablet (rack.js' own
+`isPhone()`/`isTablet()`, via `lab/first-run.js`) the first-run material is
+frost OFF, tinted. Stored choices and the phone's frost override win. In
+`lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
+Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either.

@@ -5,6 +5,7 @@ import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
+import { firstRunMaterial, storedCard, storedFrost } from './first-run.js';   // W125: the first-run material follows the device
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -129,22 +130,33 @@ export async function boot(dom) {
      what a phone is.  What CSS cannot do is move a card between racks, dock the transport, cap the device
      pixel ratio or pick a grid; that is all the phone module below does. */
   const isPhone = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--phone')) || 0) >= 1;
+  /* THE TABLET: the iPad (its UA, or the Mac-reporting iPad with touch points), or a coarse, hover-less pointer on a screen
+     at least 600 px on its short side — and never a phone.  syncPhone() reads it on every crossing (the DPR and step caps);
+     the first-run material below reads it once, at boot. */
+  const isTablet = () => { try {
+    const ipad = /iPad/.test(navigator.userAgent || '') || ((navigator.platform || '') === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const coarse = matchMedia('(hover: none) and (pointer: coarse)').matches;
+    return !isPhone() && (ipad || (coarse && Math.min(innerWidth, innerHeight) >= 600));
+  } catch (_) { return false; } };
+  /* W125 (Josh, 2026-09-25) · THE FIRST-RUN MATERIAL FOLLOWS THE DEVICE: a desktop's is REFRACTIVE + FROST ALWAYS, a phone's
+     or a tablet's is TINTED + FROST OFF (first-run.js, a pure function of this one answer).  It is only the DEFAULT —
+     what a browser that has never said anything gets; a stored choice always wins (applySettings). */
+  const FIRST_RUN = firstRunMaterial(isPhone() || isTablet());
   /** WAVE 101 · is this an Apple display?  Used for ONE first-run default (the colour gamut) and for
    *  nothing else — no capability is inferred from it, and a saved choice always wins. */
   const appleDevice = () => { try {
     const ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '') + ' ' + (navigator.vendor || '');
     return /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua);
   } catch (_) { return false; } };
-  /* CARD STYLE has one official first-run default on every layout. A browser that has named a surface still
-     gets exactly what it named; the phone's rendering budget is handled by the renderer rather than by changing
-     the material under the user's hand. */
-  const defaultCard = () => 'refractive';   // new desktops get the clear glass; the phone can still shed costly frost
+  /* CARD STYLE's first-run default is the device's (W125: REFRACTIVE on a desktop, TINTED on a phone or tablet). A browser
+     that has named a surface still gets exactly what it named. */
+  const defaultCard = () => FIRST_RUN.card;   // new desktops get the clear glass; new phones and tablets the tinted pane
   /* `cardChosen` is the difference between "this browser wants TINTED" and "this browser has never said":
      without it the first saveSettings() of a session freezes whatever the default happened to be, and the
      surface could never follow the device again.  The seg — the one place a HAND can say it — sets it. */
   let cardChosen = readSettings().cardSet === true;
-  /* The desktop's first-run glass stays frosted; the phone crossing temporarily disables it. */
-  let frostMode = 'always';                   // 'off' | 'still' | 'always'
+  /* The desktop's first-run glass is frosted, a phone's or tablet's is not (W125); the phone crossing also disables it. */
+  let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
@@ -248,13 +260,14 @@ export async function boot(dom) {
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
-       whatever the transport was doing.  Anything unreadable falls to the shipped default, ALWAYS. */
-    setFrost(s.frost === true ? 'always' : (s.frost || frostMode), { quiet: true });
+       whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
+       tablet since W125: first-run.js). */
+    setFrost(storedFrost(s, frostMode), { quiet: true });   // first-run.js: `true` = ALWAYS, unreadable → frostMode (at boot, the device's first-run policy)
 
 
     setDisconnected(s.disc !== false, { quiet: true });
     cardChosen = s.cardSet === true;                                          // whether this browser has SAID is part of what applySettings restores
-    setCardStyle(s.cardSet === true ? s.card : undefined);                    // wave 47: the glass of the cards — REFRACTIVE unless this browser SAID otherwise (wave 51: said, not merely saved)
+    setCardStyle(storedCard(s, undefined));                                   // wave 47: the glass of the cards — the device's default unless this browser SAID otherwise (wave 51: said, not merely saved; W125: the default is TINTED on a phone or tablet)
     if (typeof s.blur === 'number') { document.documentElement.style.setProperty('--glass-blur', s.blur.toFixed(1) + 'px'); if (ui.blurK) ui.blurK.set(s.blur); }
     if (Array.isArray(s.accent)) { accent.a = +s.accent[0] || 0; accent.b = +s.accent[1] || 0; if (ui.accA) ui.accA.set(accent.a); if (ui.accB) ui.accB.set(accent.b); accent.vivid = +s.accent[2] || 0; if (ui.vivid) ui.vivid.set(accent.vivid); applyAccent(); }
     if (s.auto === false) { quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
@@ -4486,12 +4499,7 @@ export async function boot(dom) {
     if (field.setDprCap) field.setDprCap(2);
     schedule(TIER.REBUILD);
   }
-  const tablet = { on: false, DPR: 1.5, steps: 110 };
-  const isTablet = () => { try {
-    const ipad = /iPad/.test(navigator.userAgent || '') || ((navigator.platform || '') === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const coarse = matchMedia('(hover: none) and (pointer: coarse)').matches;
-    return !isPhone() && (ipad || (coarse && Math.min(innerWidth, innerHeight) >= 600));
-  } catch (_) { return false; } };
+  const tablet = { on: false, DPR: 1.5, steps: 110 };   // isTablet() itself sits beside isPhone() at the top (W125: the first-run material asks it before any window exists)
   function syncPhone() {
     cornerLayoutDirty=true;
     const on = isPhone();

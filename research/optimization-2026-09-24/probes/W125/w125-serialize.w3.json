@@ -1,0 +1,31 @@
+{
+ "states": {
+  "default": {
+   "bytes": 9920,
+   "fnv": "d6e96c70",
+   "rawAutoScale": 1
+  },
+  "afterPlay": {
+   "bytes": 9920,
+   "fnv": "d6e96c70",
+   "rawAutoScale": 1
+  },
+  "hideWorked": true,
+  "afterHide": {
+   "bytes": 9920,
+   "fnv": "d6e96c70",
+   "rawAutoScale": 1
+  },
+  "box": {
+   "bytes": 20198,
+   "fnv": "1e89caa7",
+   "rawAutoScale": 1
+  },
+  "back": {
+   "bytes": 9920,
+   "fnv": "6cd8969",
+   "rawAutoScale": 1
+  }
+ },
+ "errs": []
+}
