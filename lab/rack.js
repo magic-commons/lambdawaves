@@ -5686,5 +5686,6 @@ export async function boot(dom) {
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) layout.projects.markClean();
   LW.ready = true;
+  LW.report = (o, t = performance.now()) => import('../tools/perf/device-report.js').then((m) => m.run(LW, o, t)); if (q.get('report') === '1') LW.report(q);   // THE DEVICE REPORT (2026-09-25): a diagnostic in tools/, never precached — `?report=1` or __LW.report() measures this device and puts every setting back
   return LW;
 }
