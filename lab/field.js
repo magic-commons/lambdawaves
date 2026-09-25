@@ -937,7 +937,7 @@ export async function createField(canvas, opts = {}) {
   /* PACE (P1, 2026-09-25) · frames submitted whose onSubmittedWorkDone has not resolved — counted only where completion is
      PROMPT (`paced`, measured at boot below: Safari and Chromium answer a drained queue in a few ms, Firefox on a ~100 ms
      poll, AUDIT-A FA5), so the loop may wait for the GPU instead of queueing frames it cannot finish (WEBKIT-FPS-RESEARCH §1.3). */
-  let inFlight = 0, paced = false;
+  let inFlight = 0, paced = false, queueMs = 0;   // queueMs (P3): the last landed frame's submit → done, the backlog the device report reads
   const landed = () => { inFlight--; };
   let cssW = canvas.clientWidth || 1, cssH = canvas.clientHeight || 1;   // the CSS box, kept current by the observer below
   if (typeof ResizeObserver === 'function') new ResizeObserver((entries) => {
@@ -1246,7 +1246,7 @@ export async function createField(canvas, opts = {}) {
     const w = canvas.width, h = canvas.height;
     if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
     device.queue.submit([enc.finish()]);
-    if (paced) { inFlight++; device.queue.onSubmittedWorkDone().then(landed, landed); }
+    if (paced) { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
     stats.lastEncodeMs = performance.now() - t0;
   }
 
@@ -1501,7 +1501,7 @@ export async function createField(canvas, opts = {}) {
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
     stepCap: { get: () => stepCap, enumerable: true },
-    paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true },   // PACE (P1): read-only
+    paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },   // PACE (P1, P3): read-only
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
     molecular: { get: () => !!molSpec, enumerable: true },
     /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an

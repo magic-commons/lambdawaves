@@ -30,6 +30,11 @@
  *              → 3 s → back → 4 s; the last two catch Safari 26's stall on a render pipeline's compile and first use
  *              (K2 specialises one per view × style; WEBKIT-FPS-RESEARCH §1.4) as a long gap in a bin · UI hidden (H) ·
  *              HIDE EDGE (3 s shown → H → 4 s) · frost flipped · card flipped · the modulation window flipped.
+ *   long play  (PACE P3) right after the first scene: 30 s as found in 1 s bins — the iPad's cycle (well for a few seconds, ~5 fps
+ *              for a while, then back) is longer than any 3 s scene.  Every bin of every scene also carries THE PACING: frames
+ *              the loop held because four were still on the GPU (LW.stats.skipped), the most in flight (field.inFlight), the
+ *              worst submit → done (field.queueMs, the backlog, read off the frame's own completion — null where completion is
+ *              not prompt and nothing is counted) and the rAF gaps over 100 ms.  `pace` records the boot probe's answer.
  *   gpu        AFTER the scenes: `field.throughput({ targetMs })` (K9) at 64³/96³/128³ with the GRID segment's pairing
  *              (110 steps × 0.75 · 160 × 1 · 240 × 1, rack.js ui.gridSeg), plus the current quality when it is not one of
  *              the three.  Each road's batch grows until it lasts ≥ targetMs, so a completion TICK (Firefox resolves
@@ -49,6 +54,10 @@
  * settings key's cardSet) — on one that has not, only the surface attribute moves, because setCardStyle would record a
  * first choice; AUTO SCALE goes through its own switch.  The report proves the put-back: `restored` compares
  * __LW.serialize() (layout.at / quality.autoScale masked), every localStorage key and the undo ring, before and after.
+ * The modulation window's remembered presentation is put back exactly after its scene (its first open prunes rows for sources
+ * that no longer exist), and the CAMERA's pose, which nothing here turns, is put back — a still camera stopped again — when a
+ * hand or a never-decaying fling moved it while the report ran (`restored.camera` says so); then the loop is let run the frame
+ * that drops its own body classes (tablet-motion, frost-hold) before the classes are compared.
  * What it cannot put back, and says so: the traces a play leaves (the SHADOW trail, the dynamics history, particles).
  *
  * WEBKIT: no Firefox prefs, no timestamp queries, no assumption about when onSubmittedWorkDone resolves.
@@ -209,7 +218,7 @@ export function deviceReport(LW, opts = {}) {
 }
 
 async function measure(LW, opts) {
-  const o = { targetMs: 1500, sceneMs: 3000, grids: [64, 96, 128], scenes: true, gpu: true, ...opts };
+  const o = { targetMs: 1500, sceneMs: 3000, longMs: 30000, grids: [64, 96, 128], scenes: true, gpu: true, ...opts };
   const say = typeof o.onProgress === 'function' ? (t) => { try { o.onProgress(t); } catch (_) {} } : () => {};
   const skipEl = o.skipEl || null;
   const errors = [];
@@ -231,6 +240,8 @@ async function measure(LW, opts) {
     view: VIEW_NAMES[mat.view], style: STYLE_NAMES[mat.style],
     rackHidden: document.body.classList.contains('rack-hidden'), modOpen: !!safe(() => LW.mod.expanded),
     bodyClass: document.body.className,
+    /* PACE P3 · the camera as found: nothing in the report turns it, so a pose that moves while it runs is put back */
+    camera: { moving: !!safe(() => LW.camera.moving), obs: safe(() => { const O = LW.obs; return { yaw: O.yaw, pitch: O.pitch, dist: O.dist, fov: O.fov, mode: O.mode, quat: O.quat ? Array.from(O.quat) : null }; }) },
   };
   const proofBefore = { serialize: safe(() => maskedSerialize(LW)), storage: storageSnapshot(), history: historyState(LW) };
   const hold = holdStorage();
@@ -276,6 +287,8 @@ async function measure(LW, opts) {
       openWindows: document.querySelectorAll('.dev:not(.closed)').length, floating: document.querySelectorAll('#floats .dev:not(.closed)').length,
       palette: safe(() => LW.paletteId),
     };
+    /* PACE P1 · the loop waits for the GPU only where completion is prompt: the boot probe's answer and its waits */
+    R.pace = { paced: safe(() => field.paced), inFlight: safe(() => field.inFlight), skipped: safe(() => LW.stats.skipped), waits: safe(() => field.paceWaits) };
     R.dom = { elements: document.getElementsByTagName('*').length - (skipEl ? skipEl.getElementsByTagName('*').length + 1 : 0) };
     R.backdrops = safe(() => backdropInventory(skipEl), null);
 
@@ -358,7 +371,8 @@ async function measure(LW, opts) {
   const changedKeys = storageDiff(proofBefore.storage, proofAfter.storage);
   R.held = hold.held;
   R.restored = {
-    serialize: found.playing ? 'not comparable (the transport was playing when the report began)' : proofBefore.serialize === proofAfter.serialize ? 'identical' : 'DIFFERENT',
+    serialize: found.playing ? 'not comparable (the transport was playing when the report began)' : found.camera.moving ? 'not comparable (the camera was turning when the report began)' : proofBefore.serialize === proofAfter.serialize ? 'identical' : 'DIFFERENT',
+    camera: found.camera.moving ? 'not comparable (turning when the report began)' : found.cameraPutBack ? 'put back (' + found.cameraPutBack + ')' : 'identical',
     serializeBytes: proofAfter.serialize ? proofAfter.serialize.length : null,
     settingsKey: proofBefore.storage[SETTINGS_KEY] === proofAfter.storage[SETTINGS_KEY] ? 'identical' : 'DIFFERENT',
     localStorage: changedKeys.length ? 'DIFFERENT: ' + changedKeys.join(', ') : 'identical',
@@ -398,23 +412,44 @@ async function putBack(LW, found) {
   if (!!LW.mod.expanded !== found.modOpen) { if (found.modOpen) LW.mod.expand(); else LW.mod.collapse(); }
   if (document.body.classList.contains('rack-hidden') !== found.rackHidden) document.body.classList.toggle('rack-hidden', found.rackHidden);
   await putQuality(LW, found);
+  /* PACE P3 · THE CAMERA.  The report never turns it, so a pose that moved while it ran was a hand on the glass (or a fling that
+     never decays: CAMERA friction 0) — the pose goes back and a still camera is stopped again, or serialize() differs and the
+     loop keeps `tablet-motion` on the body (the second iPad run: yaw 0.65 → 1186.9) */
+  const C = found.camera, O = LW.obs;
+  if (C && C.obs && !C.moving && O) {
+    const moved = O.yaw !== C.obs.yaw || O.pitch !== C.obs.pitch || O.dist !== C.obs.dist || O.fov !== C.obs.fov || O.mode !== C.obs.mode || String(O.quat ? Array.from(O.quat) : null) !== String(C.obs.quat);
+    const turning = !!safe(() => LW.camera.moving);
+    if (turning) LW.camera.stop();
+    if (moved) {
+      Object.assign(O, { yaw: C.obs.yaw, pitch: C.obs.pitch, mode: C.obs.mode }); if (C.obs.quat) O.quat = C.obs.quat.slice();
+      if (O.dist !== C.obs.dist) LW.camera.setDist(C.obs.dist); if (O.fov !== C.obs.fov) LW.camera.setFov(C.obs.fov);
+      LW.schedule(LW.TIER.PRESENT);
+    }
+    if (moved || turning) found.cameraPutBack = (turning ? 'still turning — stopped' : '') + (moved && turning ? '; ' : '') + (moved ? 'the pose had moved — a touch?' : '');
+  }
   if (!found.playing) { if (LW.clock.t !== found.t) LW.scrub(found.t); }
   else LW.play();
-  await LW.settle(); await LW.settle();
+  /* the loop owns two body classes (tablet-motion while anything moves, frost-hold while playing under STILL frost) and drops
+     them on its next frame: settle until it has run that frame, so the class list is read after it */
+  await LW.settle(); await LW.settle(); await LW.settle();
   /* a class toggled off and on comes back at the END of the list; the same set is put back in the order it was found */
   const now = document.body.className, a = now.split(/\s+/).filter(Boolean).sort().join(' '), b = found.bodyClass.split(/\s+/).filter(Boolean).sort().join(' ');
   if (now !== found.bodyClass && a === b) document.body.className = found.bodyClass;
 }
 
-/** one play, binned: rAF frames per BIN_MS, each bin with the state at its first frame and the loop's presents /
- *  reconstructs inside it; `at` = [{ ms, what, fn }] fired once each, from inside the rAF */
-async function play(LW, ms, at = []) {
+/** one play, binned: rAF frames per `binMs` (BIN_MS unless the scene says), each bin with the state at its first frame and
+ *  the loop's presents / reconstructs inside it, and THE PACING (PACE P3): the frames the loop held because four were still on
+ *  the GPU (LW.stats.skipped), the most frames in flight, the worst submit → done (field.queueMs — the backlog, read off the
+ *  frame's own completion, so measuring it perturbs nothing; null where completion is not prompt and nothing is counted) and
+ *  the rAF gaps over 100 ms; `at` = [{ ms, what, fn }] fired once each, from inside the rAF */
+async function play(LW, ms, at = [], binMs = BIN_MS) {
   const field = LW.field, q = LW.quality, gov = LW.governor, st = LW.stats;
-  const nb = Math.ceil(ms / BIN_MS);
-  const bins = Array.from({ length: nb }, () => ({ n: 0, maxMs: 0, presents: 0, reconstructs: 0, s: null }));
+  const nb = Math.ceil(ms / binMs);
+  const bins = Array.from({ length: nb }, () => ({ n: 0, maxMs: 0, presents: 0, reconstructs: 0, skipped: 0, inFlightMax: 0, queueMsMax: null, gaps100: 0, s: null }));
   const iv = []; let last = null;
-  const f0 = st.frames, p0 = st.presents, rc0 = st.reconstructs, g0 = safe(() => gov.changes, 0);
-  let lp = st.presents, lr = st.reconstructs;
+  const f0 = st.frames, p0 = st.presents, rc0 = st.reconstructs, k0 = st.skipped || 0, g0 = safe(() => gov.changes, 0);
+  let lp = st.presents, lr = st.reconstructs, lk = st.skipped || 0, inMax = 0, qMax = null;
+  const paced = !!safe(() => field.paced);
   const fired = new Set(), marks = [];
   let minScale = q.autoScale, frostSeen = null;
   LW.perf.resetRing();
@@ -426,10 +461,13 @@ async function play(LW, ms, at = []) {
       const el = performance.now() - t0;
       if (last !== null) iv.push(ts - last);
       last = ts;
-      const B = bins[Math.min(nb - 1, Math.floor(el / BIN_MS))];
+      const B = bins[Math.min(nb - 1, Math.floor(el / binMs))];
       B.n++;
-      if (iv.length) B.maxMs = Math.max(B.maxMs, iv[iv.length - 1]);
+      if (iv.length) { const g = iv[iv.length - 1]; B.maxMs = Math.max(B.maxMs, g); if (g > 100) B.gaps100++; }
       B.presents += st.presents - lp; B.reconstructs += st.reconstructs - lr; lp = st.presents; lr = st.reconstructs;
+      B.skipped += (st.skipped || 0) - lk; lk = st.skipped || 0;
+      const fl = safe(() => field.inFlight, 0) || 0; if (fl > B.inFlightMax) B.inFlightMax = fl; if (fl > inMax) inMax = fl;
+      if (paced) { const qm = safe(() => field.queueMs, null); if (Number.isFinite(qm)) { if (B.queueMsMax === null || qm > B.queueMsMax) B.queueMsMax = qm; if (qMax === null || qm > qMax) qMax = qm; } }
       if (!B.s) B.s = stateSample(LW);
       if (q.autoScale < minScale) minScale = q.autoScale;
       if (frostSeen === null && el > ms / 2) frostSeen = safe(() => LW.frostLive);
@@ -448,10 +486,12 @@ async function play(LW, ms, at = []) {
     loopMedianMs: r3(safe(() => LW.perf.loopMedian)), perfMedianMs: r3(safe(() => LW.perf.median)), fieldEmaMs: r3(safe(() => LW.perf.profile.field)),
     medianFrameMs: r3(median(iv)), p95FrameMs: r3(pct(iv, 0.95)), maxGapMs: r3(iv.length ? Math.max(...iv) : null),
     over2x: (() => { const m = median(iv) || 0; return iv.filter((v) => v > 2 * m).length; })(),
+    gaps100: iv.filter((v) => v > 100).length, paced, skipped: (st.skipped || 0) - k0, inFlightMax: inMax, queueMsMax: r1(qMax),
     minAutoScale: minScale, governorChanges: safe(() => gov.changes, 0) - g0, governorEnd: safe(() => gov.state), frostLiveMidScene: frostSeen,
     stepCapInPlay: r3(safe(() => field.stepCap)), fieldResolutionEnd: safe(() => field.resolution),
-    binMs: BIN_MS,
-    bins: bins.map((B) => ({ fps: Math.round(B.n / (BIN_MS / 1000)), maxMs: r1(B.maxMs), presents: B.presents, reconstructs: B.reconstructs, ...(B.s || { gap: true }) })),
+    binMs,
+    bins: bins.map((B) => ({ fps: Math.round(B.n / (binMs / 1000)), maxMs: r1(B.maxMs), presents: B.presents, reconstructs: B.reconstructs,
+      skipped: B.skipped, inFlightMax: B.inFlightMax, queueMsMax: r1(B.queueMsMax), gaps100: B.gaps100, ...(B.s || { gap: true }) })),
     marks, seconds: r3(dt),
   };
   LW.pause();
@@ -464,14 +504,14 @@ async function runScenes(LW, o, found, say, err, skipEl) {
     LW.pause(); if (LW.clock.t !== found.t) LW.scrub(found.t);
     await LW.settle(); await sleep(400);
   };
-  const scene = async (label, apply, undo, ms, at) => {
+  const scene = async (label, apply, undo, ms, at, binMs) => {
     say('scene · ' + label);
     const s = { label };
     try {
       if (apply) { const why = await apply(); if (typeof why === 'string' && why.startsWith('skip:')) { s.skipped = why.slice(5).trim(); return S.push(s); } if (typeof why === 'string') s.via = why; }
       await start();
       s.backdrops = safe(() => backdropInventory(skipEl));
-      Object.assign(s, await play(LW, ms || o.sceneMs, at));
+      Object.assign(s, await play(LW, ms || o.sceneMs, at, binMs));
     } catch (e) { err('scene ' + label, e); s.error = String(e && e.message || e); }
     finally {
       try { LW.pause(); if (undo) await undo(); } catch (e) { err('undo ' + label, e); }
@@ -486,6 +526,10 @@ async function runScenes(LW, o, found, say, err, skipEl) {
   const EDGE = 10000;
 
   await scene(found.uiHidden ? 'as found (UI hidden)' : 'as found (UI shown)');
+  /* PACE P3 · THE LONG PLAY: 30 s as found in 1 s bins.  The iPad played well for a few seconds, fell to ~5 fps for a while and
+     came back, over and over — frames queued faster than its GPU finished them, then the page stalled while they drained — and a
+     3 s scene cannot see that cycle.  Each bin carries the pacing beside the fps (held frames, frames in flight, submit → done). */
+  if (o.longMs > 0) await scene('long play (' + Math.round(o.longMs / 1000) + ' s as found, 1 s bins)', null, null, o.longMs, [], 1000);
   /* THE THREE EDGES (the commissioner: "tap CARD STYLE → tinted and fps jumps to 60 and STAYS at 60 even after tapping back
      to refractive; same with FROST; AUTO SCALE off → laggy, back on → still slow for 3–5 s") — first, so they start from
      the state the page opened in */
@@ -517,14 +561,18 @@ async function runScenes(LW, o, found, say, err, skipEl) {
   await scene('card ' + cardTo, () => setCard(LW, found, cardTo), () => { setCard(LW, found, found.card); });
   {
     const pres = safe(() => LW.serialize().presentation.modwin);
+    /* PACE P3 · the window's remembered presentation goes back EXACTLY: its first open prunes remembered rows for sources that no
+       longer exist (modwindow.js rebuildDevices) — the first iPad run lost `modes.s3` that way */
+    const modPres = safe(() => LW.mod.presentation());
+    const putPres = () => { if (modPres) safe(() => LW.mod.restorePresentation(modPres)); };
     if (found.modOpen) {
-      await scene('modulation window closed', () => { LW.mod.collapse(); }, () => { LW.mod.expand(); if (found.rackHidden) document.body.classList.add('rack-hidden'); });
+      await scene('modulation window closed', () => { LW.mod.collapse(); }, () => { LW.mod.expand(); putPres(); if (found.rackHidden) document.body.classList.add('rack-hidden'); });
     } else {
       /* a window that has never been placed centres itself on its FIRST open (modwindow.js place()); spending that here
          would move where the commissioner's own first open lands, so a never-opened window is not opened for him */
       const neverPlaced = !pres || (pres.x === 0 && pres.y === 0);
       await scene('modulation window open', () => { if (neverPlaced) return 'skip: the modulation window has never been opened here — its first placement is left for the hand'; LW.mod.expand(); },
-        () => { if (!neverPlaced) { LW.mod.collapse(); if (found.rackHidden) document.body.classList.add('rack-hidden'); } });
+        () => { if (!neverPlaced) { LW.mod.collapse(); putPres(); if (found.rackHidden) document.body.classList.add('rack-hidden'); } });
     }
   }
   return S;
@@ -536,8 +584,10 @@ export function summaryLine(R, bytes) {
   const g = R.gpu && R.gpu.rows ? R.gpu.rows.filter((r) => r.frameMs !== undefined).map((r) => r.grid + ':' + r.frameMs.toFixed(2)).join(' ') : 'gpu —';
   const sc = Array.isArray(R.scenes) ? R.scenes.map((s) => (s.skipped ? s.label.split(' (')[0] + ' skip' : s.label.split(' (')[0].replace('modulation window', 'mod') + ' ' + s.rafFps)).join(' · ') : 'scenes —';
   const s = R.settings && R.settings.quality ? R.settings.quality : {};
+  const lp = Array.isArray(R.scenes) ? R.scenes.find((x) => /^long play/.test(x.label) && !x.skipped && !x.error) : null;
   return 'λWAVES device report · ' + R.device + ' · ' + a + ' · dpr ' + (R.platform && R.platform.dpr) + ' cap ' + (R.platform && R.platform.dprCap)
-    + ' · display ' + (R.display ? R.display.rafHz : '?') + ' Hz · ' + s.res + '³/' + s.steps + '/' + s.scale + ' · fps ' + sc + ' · gpu ms ' + g
+    + ' · display ' + (R.display ? R.display.rafHz : '?') + ' Hz · ' + s.res + '³/' + s.steps + '/' + s.scale + ' · paced ' + (R.pace ? R.pace.paced : '?')
+    + (lp ? ' · long play ' + lp.rafFps + ' fps, ' + lp.presents + ' presents, ' + lp.skipped + ' held, queue ≤ ' + (lp.queueMsMax === null ? '—' : lp.queueMsMax + ' ms') : '') + ' · fps ' + sc + ' · gpu ms ' + g
     + ' · ' + (R.backdrops ? R.backdrops.layers : '?') + ' backdrops · ' + (R.dom ? R.dom.elements : '?') + ' els · restored ' + (R.restored ? R.restored.serialize + '/' + R.restored.settingsKey : '?')
     + (bytes ? ' · ' + bytes + ' B' : '');
 }

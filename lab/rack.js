@@ -5417,6 +5417,9 @@ export async function boot(dom) {
       barLock,
       get expanded() { return layout.modulation.open; },
       expand() { return layout.modulation.expand(); }, collapse() { return layout.modulation.collapse(); },
+      /** PACE P3 · the window's remembered presentation, and the road that puts one back (the device report's put-back: its
+       *  first open prunes remembered rows for sources that no longer exist, which is the report's doing, not the hand's) */
+      presentation() { return modView ? modView.presentation() : null; }, restorePresentation(o) { if (modView && o) modView.restore(o); return !!(modView && o); },
       play() { const r = modHost.clock.play(performance.now() / 1000); if (modView) modView.sync(); schedule(TIER.PRESENT); return r; },
       stop() { const r = modHost.clock.pause(performance.now() / 1000); if (modView) modView.sync(); schedule(TIER.PRESENT); return r; },
       /** a deterministic step — no realtime anywhere near it, which is what a proof wants */

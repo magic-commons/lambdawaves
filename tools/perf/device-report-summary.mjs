@@ -32,15 +32,18 @@ const adapterOf = (R) => { const i = R.adapter && R.adapter.info; const s = i ? 
 const qualityOf = (R) => { const q = R.settings && R.settings.quality; return q ? q.res + '³/' + q.steps + '/' + q.scale + (q.auto ? ' · auto' : '') : '—'; };
 const gpuCell = (R) => (R.gpu && Array.isArray(R.gpu.rows) ? R.gpu.rows.map((r) => (r.skipped ? r.label + ' skip' : short(r.label) + ' ' + n(r.frameMs) + '/' + n(r.reconstructMs) + '/' + n(r.presentMs))).join(' · ') : (R.gpu && R.gpu.skipped) || '—');
 const scenesCell = (R) => (Array.isArray(R.scenes) ? R.scenes.map((s) => short(s.label) + ' ' + (s.skipped ? 'skip' : s.error ? 'error' : n(s.rafFps, 0))).join(' · ') : (R.scenes && R.scenes.skipped) || '—');
+/* PACE P1/P3: does the loop wait for the GPU here (the boot probe), and what the long play held */
+const longOf = (R) => (Array.isArray(R.scenes) ? R.scenes.find((s) => /^long play/.test(s.label) && !s.skipped && !s.error) : null);
+const paceOf = (R) => { const lp = longOf(R); return (R.pace ? (R.pace.paced ? 'paced' : 'not paced') : '—') + (lp ? ' · ' + lp.skipped + ' held / ' + lp.presents + ' presents · queue ≤ ' + n(lp.queueMsMax, 0) + ' ms' : ''); };
 const restoredOf = (R) => { const r = R.restored || {}; const bad = Object.entries(r).filter(([k, v]) => typeof v === 'string' && /DIFFERENT/.test(v)).map(([k]) => k); return bad.length ? 'DIFFERENT: ' + bad.join(', ') : r.serialize ? (r.serialize === 'identical' ? 'identical' : r.serialize) : '—'; };
 
 const out = [];
 out.push('## λWAVES device reports (' + reports.length + ')\n');
-out.push(head(['device', 'at', 'adapter', 'dpr (cap)', 'display Hz start→end', 'grid/steps/scale', 'card · frost', 'GPU frame/recon/present ms', 'scene rAF fps', 'backdrops', 'dom', 'restored']));
+out.push(head(['device', 'at', 'adapter', 'dpr (cap)', 'display Hz start→end', 'grid/steps/scale', 'card · frost', 'paced · skipped (long play)', 'GPU frame/recon/present ms', 'scene rAF fps', 'backdrops', 'dom', 'restored']));
 for (const { R } of reports) {
   const P = R.platform || {}, S = R.settings || {};
   out.push(row([R.device, String(R.at || '').replace('T', ' ').slice(0, 19), adapterOf(R), n(P.dpr, 2) + ' (' + n(P.dprCap, 1) + ')',
-    n(R.display && R.display.rafHz, 1) + '→' + n(R.displayEnd && R.displayEnd.rafHz, 1), qualityOf(R), (S.card || '—') + ' · ' + (S.frost || '—'),
+    n(R.display && R.display.rafHz, 1) + '→' + n(R.displayEnd && R.displayEnd.rafHz, 1), qualityOf(R), (S.card || '—') + ' · ' + (S.frost || '—'), paceOf(R),
     gpuCell(R), scenesCell(R), R.backdrops ? R.backdrops.layers + ' (' + R.backdrops.areaPct + ' %)' : '—', R.dom ? R.dom.elements : '—', restoredOf(R)]));
 }
 
@@ -56,6 +59,7 @@ if (!brief) for (const { f, R } of reports) {
     + ' · tier1 ' + (A.featureFlags ? A.featureFlags.textureFormatsTier1 : '—') + ' · WGSL ' + ((A.wgslLanguageFeatures || []).length) + ' features');
   out.push('- settings · ' + qualityOf(R) + ' · autoScale ' + (S.quality ? S.quality.autoScale : '—') + ' · field ' + S.fieldResolution + '³ · card ' + S.card + (S.cardChosen ? ' (chosen)' : ' (default)') + ' · frost ' + S.frost + ' · blur ' + S.blur
     + ' · ' + S.theme + ' · ' + (S.disconnected ? 'disconnected' : 'connected') + ' · governor ' + (S.governor ? S.governor.state : '—') + ' · ' + S.view + '/' + S.style + ' · ' + S.hamiltonian + ' ' + (S.preset || '') + ' · ' + S.openWindows + ' windows');
+  if (R.pace) out.push('- pace · ' + (R.pace.paced ? 'PACED (the loop holds a present while four frames are unfinished on the GPU)' : 'not paced (completion is not prompt here, so nothing is held)') + ' · boot probe waits ms/presents ' + (Array.isArray(R.pace.waits) ? R.pace.waits.map((w) => w[0] + '/' + w[1]).join(' ') : '—'));
   if (R.boot) out.push('- boot · ' + (R.boot.sinceReadyMs !== null ? R.boot.sinceReadyMs + ' ms after ready' : R.boot.sinceNavigationMs + ' ms after navigation') + ' · canvas ' + (R.boot.canvas || []).join('×') + ' · autoScale ' + R.boot.autoScale + ' · stepCap ' + R.boot.stepCap + ' · ' + R.boot.cls);
   if (R.backdrops) out.push('- backdrops as found · ' + R.backdrops.layers + ' layers (' + R.backdrops.pseudo + ' pseudo, ' + R.backdrops.offscreen + ' off-screen) over ' + R.backdrops.areaPct + ' % · ' + (R.backdrops.top || []).join(' '));
   out.push('- held settings writes ' + (R.held ? R.held.settingsWritesHeld : '—') + ' · restored ' + restoredOf(R) + ' · wall ' + n((R.wallMs || 0) / 1000, 0) + ' s' + ((R.errors || []).length ? ' · errors: ' + R.errors.join(' / ') : ''));
@@ -68,11 +72,12 @@ if (!brief) for (const { f, R } of reports) {
   }
   if (Array.isArray(R.scenes)) {
     out.push('\n**Scenes** (rAF over the play; loop = LW.perf.loopMedian; gap = the worst rAF interval)\n');
-    out.push(head(['scene', 'rAF fps', 'app fps', 'loop ms', 'median / p95 / max gap ms', 'frames > 2× median', 'backdrops', 'min autoScale', 'governor', 'presents / reconstructs']));
+    out.push(head(['scene', 'rAF fps', 'app fps', 'loop ms', 'median / p95 / max gap ms', 'frames > 2× median', 'backdrops', 'min autoScale', 'governor', 'presents / reconstructs', 'held · in flight ≤ · queue ≤ ms · gaps > 100 ms']));
     for (const s of R.scenes) {
-      if (s.skipped || s.error) { out.push(row([s.label, s.skipped ? 'skipped: ' + s.skipped : 'error: ' + s.error, '', '', '', '', '', '', '', ''])); continue; }
+      if (typeof s.skipped === 'string' || s.error) { out.push(row([s.label, typeof s.skipped === 'string' ? 'skipped: ' + s.skipped : 'error: ' + s.error, '', '', '', '', '', '', '', '', ''])); continue; }
       out.push(row([s.label, n(s.rafFps, 1), n(s.appFps, 1), n(s.loopMedianMs, 2), n(s.medianFrameMs, 1) + ' / ' + n(s.p95FrameMs, 1) + ' / ' + n(s.maxGapMs, 1), s.over2x,
-        s.backdrops ? s.backdrops.layers : '—', s.minAutoScale, s.governorEnd + (s.governorChanges ? ' (' + s.governorChanges + ' changes)' : ''), s.presents + ' / ' + s.reconstructs]));
+        s.backdrops ? s.backdrops.layers : '—', s.minAutoScale, s.governorEnd + (s.governorChanges ? ' (' + s.governorChanges + ' changes)' : ''), s.presents + ' / ' + s.reconstructs,
+        s.skipped === undefined ? '—' : s.skipped + ' · ' + s.inFlightMax + ' · ' + n(s.queueMsMax, 0) + ' · ' + s.gaps100]));
     }
     out.push('\n**Series** (fps per ' + ((R.scenes.find((s) => s.binMs) || {}).binMs || 250) + ' ms bin; ▌ marks a change; then what moved between bins)\n');
     for (const s of R.scenes) {
@@ -81,6 +86,7 @@ if (!brief) for (const { f, R } of reports) {
       const at = new Map((s.marks || []).map((m) => [Math.min(B.length - 1, Math.floor(m.ms / W)), m]));
       const series = B.map((b, i) => (at.has(i) ? '▌' + at.get(i).what + (at.get(i).via ? ' [' + at.get(i).via + ']' : '') + '▌ ' : '') + (b.gap ? '·' : b.fps)).join(' ');
       out.push('- ' + s.label + ': `' + series + '`');
+      if (W >= 1000 && B.some((b) => b.presents !== undefined)) out.push('  - presents / held / queue ms per bin: `' + B.map((b) => b.presents + '/' + (b.skipped === undefined ? '—' : b.skipped) + '/' + n(b.queueMsMax, 0)).join(' ') + '`');
       const moves = [];
       for (let i = 1; i < B.length; i++) {
         const a = B[i - 1], b = B[i]; if (a.gap || b.gap) continue;
