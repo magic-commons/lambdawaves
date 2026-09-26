@@ -4203,7 +4203,7 @@ export async function boot(dom) {
       const nbClamp = (w, h) => [Math.max(NB_MIN_W, Math.min(w, window.innerWidth - 16)), Math.max(NB_MIN_H, Math.min(h, window.innerHeight - 16))];
       function nbResize(w, h) { const [cw, ch] = nbClamp(w, h); nb.style.width = cw + 'px'; nb.style.height = ch + 'px'; return [cw, ch]; }
       function nbSaveSize() {
-        const w = Math.round(nb.offsetWidth), h = Math.round(nb.offsetHeight);
+        const w = Math.round(parseFloat(nb.style.width)), h = Math.round(parseFloat(nb.style.height)); if (!(w > 0 && h > 0)) return;   // W129 · the size it was GIVEN (nbResize, the grip, the CSS resize all write the inline style; captureLayout reads it too), never its layout box: a closed notebook's box is 0 × 0, a phone's is its screen
         const S = readSettings();
         if (nb.dataset.face === 'about') {
           if (S.abW === w && S.abH === h) return;

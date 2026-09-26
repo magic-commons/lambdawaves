@@ -1,0 +1,270 @@
+{
+ "boot": {
+  "hidden": true,
+  "stored": [
+   500,
+   400,
+   470,
+   670
+  ]
+ },
+ "closedOpen": {
+  "hidden": false,
+  "storedAfterOpen": [
+   470,
+   670,
+   470,
+   670
+  ],
+  "layoutNb": [
+   470,
+   670
+  ],
+  "reopened": {
+   "style": [
+    "470px",
+    "670px"
+   ],
+   "offset": [
+    470,
+    670
+   ],
+   "rect": [
+    470,
+    670
+   ],
+   "boxSizing": "border-box",
+   "border": "1px"
+  },
+  "storedAfterReopen": [
+   470,
+   670,
+   470,
+   670
+  ]
+ },
+ "saves": {
+  "pointerup": [
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   }
+  ],
+  "notebookResize": [
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px"
+   }
+  ],
+  "project": [
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px",
+    "fileNb": [
+     470,
+     670
+    ]
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px",
+    "fileNb": [
+     470,
+     670
+    ]
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px",
+    "fileNb": [
+     470,
+     670
+    ]
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px",
+    "fileNb": [
+     470,
+     670
+    ]
+   },
+   {
+    "stored": [
+     470,
+     670,
+     470,
+     670
+    ],
+    "style": "470px 670px",
+    "fileNb": [
+     470,
+     670
+    ]
+   }
+  ]
+ },
+ "savesBox": {
+  "style": [
+   "470px",
+   "670px"
+  ],
+  "offset": [
+   470,
+   670
+  ],
+  "rect": [
+   470,
+   670
+  ],
+  "boxSizing": "border-box",
+  "border": "1px"
+ },
+ "reopenNotes": {
+  "style": [
+   "500px",
+   "400px"
+  ],
+  "offset": [
+   500,
+   400
+  ],
+  "rect": [
+   500,
+   400
+  ],
+  "boxSizing": "border-box",
+  "border": "1px"
+ },
+ "reopenAbout": {
+  "style": [
+   "470px",
+   "670px"
+  ],
+  "offset": [
+   470,
+   670
+  ],
+  "rect": [
+   470,
+   670
+  ],
+  "boxSizing": "border-box",
+  "border": "1px"
+ },
+ "aboutAfterUp": [
+  500,
+  400,
+  470,
+  670
+ ],
+ "carried": [
+  500,
+  400,
+  470,
+  670
+ ],
+ "errs": []
+}
