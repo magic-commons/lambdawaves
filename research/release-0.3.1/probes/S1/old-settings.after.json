@@ -1,0 +1,22 @@
+{
+ "seeded": 3,
+ "boot": {
+  "paletteId": "prism",
+  "camMode": "free",
+  "friction": 0.5,
+  "stored": {
+   "palette": "lambda",
+   "camMode": "turntable",
+   "friction": 0.5
+  },
+  "errs": []
+ },
+ "afterSave": {
+  "palette": false,
+  "camMode": false,
+  "friction": 0.5,
+  "theme": "light",
+  "keys": 32,
+  "errs": []
+ }
+}

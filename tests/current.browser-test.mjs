@@ -139,27 +139,54 @@ try {
  assert.equal(audioFace.ott.mixers,4);assert.equal(audioFace.ott.border,'0px');assert.match(audioFace.ott.live,/rgb/);
  assert.deepEqual(audioFace.mini.bands,['low','mid','high']);assert.equal(audioFace.mini.bandWidths.every(w=>Math.abs(w-2)<.1),true);assert.deepEqual(audioFace.mini.all,['level']);assert.equal(Math.abs(audioFace.mini.allWidth-6)<.1,true);assert.equal(audioFace.mini.bandInk,audioFace.mini.accent);assert.equal(audioFace.mini.allInk,audioFace.mini.accent);assert.equal(audioFace.mini.pressed,'true');assert.equal(audioFace.mini.survivesRebuild,true);assert.equal(audioFace.mini.noCurve,true);
  console.log('PASS Audio face: aligned full/compact geometry and a three-band minimized meter that toggles to All');
- /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — theme, stage colour, camera feel and
-    auto-rotate, overlays, SPECTRUM's DIALS fold, the A/B transition, the notebook's size, the modulation window's
-    placement, the arrangement, the routes with their ranges — and comes back from it. */
- const daw=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));const theme0=document.body.dataset.theme;
+ /* THE DAW LAW (2026-09-10): everything a demo shows rides in the project — stage colour, auto-rotate, overlays,
+    SPECTRUM's DIALS fold, the A/B transition, the notebook's size, the modulation window's placement, the arrangement,
+    the routes with their ranges — and comes back from it.  0.3.1 · S1 THE SCOPE LAW: the theme and the camera's feel
+    are PREFERENCE, so a file that still carries them (an older save) leaves both exactly as they were. */
+ const daw=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));const theme0=document.body.dataset.theme,fric0=__LW.camera.friction;
   __LW.loadPreset('1s+2pz');M.addSource('lfo');__LW.layout.modulation.expand();await w(400);M.addRoute(M.macroList()[0].id,'material.exposure',0.5,4);
   __LW.layout.reopen('settings','R');__LW.layout.reopen('state','R');await w(200);
-  __LW.camera.setAutoRotate(true);__LW.camera.setFriction(0.31);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
+  __LW.camera.setAutoRotate(true);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
   const tr=[...document.querySelectorAll('.dev[data-id=state] .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
   const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
   __LW.setStage(0);const stage0=__LW.mat.bg.slice();__LW.setStage(1);const stage1=__LW.mat.bg.slice();
   const follow=document.querySelector('.stage-follow');follow.click();const followed=__LW.mat.bg.slice(),retained=sc.value;follow.click();const resumed=__LW.mat.bg.slice();
-  const S=__LW.serialize();S.presentation.ui.theme=theme0==='light'?'dark':'light';
+  const S=__LW.serialize();S.presentation.ui.theme=theme0==='light'?'dark':'light';S.presentation.camera.friction=0.31;
   __LW.camera.setAutoRotate(false);__LW.camera.setFriction(0.1);__LW.kepler.setOn(false);__LW.vortex.setOn(false);__LW.spectrum.setDials(false);__LW.layout.notebookResize(300,200);follow.click();__LW.loadPreset('1s');M.deserialize(null);
-  const ok=__LW.restore(S);await w(600);const q=__LW.serialize().presentation;const errs=__e.slice();
-  return {ok,theme:document.body.dataset.theme,want:S.presentation.ui.theme,stage:q.ui.stage.custom,stageFollow:q.ui.stage.follow,
-    stageLaw:{stage0,stage1,followed,retained,resumed},auto:q.camera.autoRotate,friction:q.camera.friction,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
- assert.equal(daw.ok,true); assert.equal(daw.theme,daw.want); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.stageFollow,false);
+  const themeBefore=document.body.dataset.theme,frictionBefore=__LW.camera.friction;
+  const ok=__LW.restore(S);await w(600);const q=__LW.serialize().presentation;const errs=__e.slice();const theme=document.body.dataset.theme,friction=__LW.camera.friction;__LW.camera.setFriction(fric0);
+  return {ok,theme,themeBefore,foreignTheme:S.presentation.ui.theme,friction,frictionBefore,stage:q.ui.stage.custom,stageFollow:q.ui.stage.follow,
+    stageLaw:{stage0,stage1,followed,retained,resumed},auto:q.camera.autoRotate,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
+ assert.equal(daw.ok,true); assert.notEqual(daw.foreignTheme,daw.themeBefore); assert.equal(daw.theme,daw.themeBefore); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.stageFollow,false);
  assert.deepEqual(daw.stageLaw.stage1.map(v=>Math.round(v*255)),[32,48,64]); assert.deepEqual(daw.stageLaw.followed,daw.stageLaw.stage0); assert.equal(daw.stageLaw.retained,'#203040'); assert.deepEqual(daw.stageLaw.resumed,daw.stageLaw.stage1);
- assert.equal(daw.auto,true); assert.equal(daw.friction,0.31);
+ assert.equal(daw.auto,true); assert.equal(daw.frictionBefore,0.1); assert.equal(daw.friction,0.1);
  assert.equal(daw.kepler,true); assert.equal(daw.vortex,true); assert.equal(daw.dials,true); assert.equal(daw.ab,true); assert.deepEqual(daw.nb,{w:520,h:380}); assert.deepEqual(daw.routes,[[0.5,1]]); assert.equal(daw.modwin,true); assert.ok(daw.cards>20); assert.deepEqual(daw.errs,[]);
- console.log('PASS the DAW law: theme, stage colour, camera, overlays, dials, A/B, notebook size, modulation placement, arrangement and routes round-trip through the project');
+ console.log('PASS the DAW law: stage colour, auto-rotate, overlays, dials, A/B, notebook size, modulation placement, arrangement and routes round-trip through the project; a foreign theme and camera friction in the file leave this browser\'s own untouched');
+ /* 0.3.1 · S1 THE SCOPE LAW, the strong gate (PLAN §3.5): open a project that carries an older save's look — theme,
+    card style, frost, disconnected cards, accents, the camera's feel, the field chrome and another camera mode — and
+    this browser's settings, minus the WORKSPACE keys, are byte-identical; its theme, material, feel and chrome are
+    unchanged; and serialize() writes no PREFERENCE key.  The camera MODE is the project's (D4's escape hatch: a
+    TURNTABLE record's rotor is stale and a FREE one carries roll, so a pose is not read back without its mode). */
+ const scope=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n)),WS=['closed','nbW','nbH','abW','abH','modwin','layouts'];
+  const raw=()=>JSON.parse(localStorage.getItem('lambdawaves.q0.settings')||'{}'),strip=()=>{const o=raw();for(const k of WS)delete o[k];return JSON.stringify(o);};
+  const live=()=>({theme:document.body.dataset.theme,choice:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,disc:__LW.disconnected,accent:[__LW.accent.a,__LW.accent.b],
+    feel:[__LW.camera.friction,__LW.camera.speed,__LW.camera.dragGain,__LW.camera.flingGain],chrome:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk'].map(k=>__LW.mat[k])});
+  __LW.saveSettings();await w(50);const before=strip(),live0=live(),mode0=__LW.camMode;
+  const S=JSON.parse(JSON.stringify(__LW.serialize())),P=S.presentation;
+  Object.assign(P.ui,{theme:live0.theme==='light'?'dark':'light',card:live0.card==='tinted'?'refractive':'tinted',frost:live0.frost==='off'?'always':'off',disc:!live0.disc,accent:{a:123,b:234,vivid:.9}});
+  Object.assign(P.camera,{friction:.31,speed:.9,dragGain:3.3,fling:1.7});
+  Object.assign(P.mat,{frame:false,axis:false,frameMode:'dots',axisMode:'corner',cornerSide:'left',invert:true,axisInk:'rgb'});
+  P.obs.mode=mode0==='free'?'turntable':'free';
+  const ok=__LW.restore(S);await w(600);const after=strip(),live1=live(),mode1=__LW.camMode,settings=raw(),q=__LW.serialize().presentation;
+  const PREF={ui:['theme','card','frost','disc','accent'],camera:['friction','speed','dragGain','fling'],mat:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk']};
+  const leaked=Object.entries(PREF).flatMap(([s,ks])=>ks.filter(k=>q[s]&&k in q[s]).map(k=>s+'.'+k));
+  __LW.setCamMode(mode0,true);
+  return {ok,identical:before===after,bytes:[before.length,after.length],live0,live1,mode0,mode1,wantMode:P.obs.mode,settingsCam:'camMode' in settings,settingsPalette:'palette' in settings,
+    leaked,ui:Object.keys(q.ui),camera:Object.keys(q.camera),obsMode:'mode' in q.obs,layoutLook:!!(q.layout&&(q.layout.look||q.layout.cam)),errs:__e.slice()}`);
+ assert.equal(scope.ok,true); assert.equal(scope.identical,true,'settings changed: '+JSON.stringify(scope.bytes)); assert.deepEqual(scope.live1,scope.live0);
+ assert.notEqual(scope.wantMode,scope.mode0); assert.equal(scope.mode1,scope.wantMode); assert.equal(scope.settingsCam,false); assert.equal(scope.settingsPalette,false);
+ assert.deepEqual(scope.leaked,[]); assert.deepEqual(scope.ui,['stage']); assert.deepEqual(scope.camera,['autoRotate']); assert.equal(scope.obsMode,true); assert.equal(scope.layoutLook,false); assert.deepEqual(scope.errs,[]);
+ console.log('PASS the scope law: a project carrying a foreign theme, material, accents, camera feel and chrome leaves the settings byte-identical ('+scope.bytes[0]+' B outside the WORKSPACE keys) and the theme unchanged; serialize() carries no PREFERENCE key; the camera mode rides with the pose');
  /* A PROJECT STARTS AT ZERO AND SAVES THE HAND, NOT THE NEEDLE. This drives the actual Projects API
     through a mid-route save, scrambles every covered surface, opens it, then presses Play once. */
  const projectState=await g.ev(`const M=__LW.mod.model,R=__LW.mod.registry,P=__LW.projects,w=n=>new Promise(r=>setTimeout(r,n));

@@ -1,0 +1,84 @@
+{
+ "keys": {
+  "top": [
+   "ab",
+   "camera",
+   "domain",
+   "field",
+   "hamiltonian",
+   "instruments",
+   "layout",
+   "mat",
+   "mo",
+   "modulation",
+   "modwin",
+   "notebook",
+   "obs",
+   "overlays",
+   "palette",
+   "paletteId",
+   "quality",
+   "rates",
+   "readers",
+   "rotationRates",
+   "shadow",
+   "space",
+   "sturmian",
+   "ui",
+   "wigner"
+  ],
+  "ui": [
+   "stage"
+  ],
+  "camera": [
+   "autoRotate"
+  ],
+  "mat": [
+   "boost",
+   "bow",
+   "dither",
+   "exposure",
+   "gamma",
+   "grain",
+   "hueShift",
+   "iso",
+   "knee",
+   "paletteOn",
+   "slice",
+   "softness",
+   "steps",
+   "style",
+   "view"
+  ],
+  "obs": [
+   "dist",
+   "fov",
+   "mode",
+   "pitch",
+   "quat",
+   "yaw"
+  ],
+  "layout.look": null,
+  "layout.cam": null,
+  "bytes": 9326
+ },
+ "d4": {
+  "turntableQuatStale": 0.141339,
+  "turntableReadAsFree": 0.323095,
+  "freeRoll": 0.568266,
+  "freeReadAsTurntable": 0.68512
+ },
+ "settings": {
+  "ok": true,
+  "bytesBefore": 471,
+  "bytesAfter": 471,
+  "identical": true,
+  "changed": [],
+  "theme0": "light",
+  "themeAfter": "light",
+  "friction0": 1,
+  "frictionAfter": 1,
+  "camModeAfter": "turntable",
+  "errs": []
+ }
+}

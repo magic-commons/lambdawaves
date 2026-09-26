@@ -103,6 +103,7 @@ export async function boot(dom) {
 
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38) };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT
   const mat = { view: VIEW.phase, exposure: 1, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, invert: false, frame: true, axis: true, axisInk: 'theme', paletteOn: false, style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, bg: [0.028, 0.038, 0.058], gamma: 1, lightUI: false };
+  const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];   // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
   let palette = null;
 
   const rates = new Float64Array(91).fill(1);
@@ -118,10 +119,11 @@ export async function boot(dom) {
      above the first reader. */
   const SETTINGS_KEY = 'lambdawaves.q0.settings';
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
+  /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
+     (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
   const PAL_DEF = 'prism';
-  let palChoice = (() => { const id = readSettings().palette; return id && PALETTE_BY_ID.get(id) ? id : PAL_DEF; })();   // a DEFAULT IS FOR A FIRST VISIT — never a retroactive edit of someone's settings
   /* THE WHEEL AS THE UI's ACCENT, the mark and its turn: lab/accent-wheel.js (N7 seam 4). */
-  const wheel = createAccentWheel({ mat, getModView: () => modView, lut: toLUT(PALETTE_BY_ID.get(palChoice).stops) });
+  const wheel = createAccentWheel({ mat, getModView: () => modView, lut: toLUT(PALETTE_BY_ID.get(PAL_DEF).stops) });
   const { accent, wheelColor, applyAccent, paintMarks, markBatchBegin, markBatchEnd, markInk, stageGround, inkCtx,
     ensureTurnCSS, turnStops, markTurn, MARK_N, MARK_STEP, MARK_FLOOR, MARK_GROUND, TURN_STOPS } = wheel;
   /* THE PHONE SENTINEL (wave 51).  skin.css's LAST block raises `--phone` to 1 at a (hover: none) + size
@@ -202,18 +204,18 @@ export async function boot(dom) {
            `axisInk` is a BROWSER PREFERENCE like frame and axis, and NOT like `mat.lightUI`, which
            serialize() strips out of every project: lightUI is not a choice at all, it is the RESOLVED
            theme, and a file carrying it would impose the sender's theme on its reader.  AXIS COLOUR
-           *is* a choice, so it is remembered here AND rides in `mat` into a project and a link — and
-           the THEME seat is what keeps that honest, because a sender who never touched the control
-           sends 'theme' and the reader's own theme still decides. */
+           *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
+           their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
+           restore() ignores it in an older file, so no project or link can change a reader's axes. */
         invert: !!mat.invert, axisInk: mat.axisInk || 'theme',        // wave 53: the two chrome objects are this browser's, like FROST and the tags
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
         /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
            preference, derived from the DOM rather than tracked in a second place.  The DEFAULT (nothing said)
            is HIDDEN, and that default is the whole point: see enterPhone(). */
         phoneRack: document.body.classList.contains('phone') ? !document.body.classList.contains('rack-hidden') : S0.phoneRack,
-        /* WAVE 54: three more of this BROWSER's preferences — which camera the hand wants, which palette it named
-           (a default is for a first visit), and which colour space it asked for. None of them is a project's. */
-        camMode: obs.mode === 'free' ? 'free' : 'turntable', palette: palChoice,
+        /* WAVE 54: which colour space this BROWSER asked for.  0.3.1 · S1: the camera MODE and the palette left this key —
+           the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
+           TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
         closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) }));
     } catch (e) {}
@@ -292,13 +294,8 @@ export async function boot(dom) {
     if (s.invert === true) { mat.invert = true; if (ui.invertSw) ui.invertSw.set(true); }
     if (s.axisInk === 'cmy' || s.axisInk === 'rgb') { mat.axisInk = s.axisInk; if (ui.axisInkSeg) ui.axisInkSeg.set(s.axisInk); }
     if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id));   // the remembered set, exactly
-    /* ⚠ WAVE 106 · BOTH DIRECTIONS, because the default flipped.  This read `=== 'free'` and did
-       nothing otherwise, which was right while TURNTABLE was the seed: only the non-default needed
-       restoring.  With FREE shipping, a browser that deliberately chose TURNTABLE would have been
-       silently handed FREE on every reload.  `now: true` applies it instantly instead of starting the
-       levelling slerp, because a boot is not a gesture and nothing should animate before the first
-       frame. */
-    if (s.camMode === 'free' || s.camMode === 'turntable') setCamMode(s.camMode, { now: true });
+    /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
+       an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
     if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');
 
 
@@ -1215,7 +1212,7 @@ export async function boot(dom) {
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
     camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
-    modHand, saveSettings, resetWall: () => { lastWall = performance.now() / 1000; } });
+    modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
 
@@ -1467,10 +1464,9 @@ export async function boot(dom) {
     r3.appendChild(ui.sliceThickK.root);
     const gp = group(wPal.body, 'COLOUR');
     palette = createPaletteEditor(gp, {
-      startId: palChoice,
+      startId: PAL_DEF,
       setLUT(lut) { wheel.setWheelLUT(lut); if (field.ok) field.setPalette(lut); applyAccent(); },
       setEnabled(v) { mat.paletteOn = v;applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } },
-      chose(id) { palChoice = id; saveSettings(); },        // wave 54: naming one from the menu IS this browser's choice
       repaint() { schedule(TIER.PRESENT); }
     });
 
@@ -3541,16 +3537,9 @@ export async function boot(dom) {
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d.style.zIndex || 0), index: st.home.index } : null };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
-        nb: nb && nb.style.width ? [parseInt(nb.style.width, 10) || 0, parseInt(nb.style.height, 10) || 0] : null,
-
-
-        look: { palette: palChoice, accA: accent.a, accB: accent.b, hue: mat.hueShift,
-                style: mat.style, dither: mat.dither, invert: !!mat.invert,
-                frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide, axisInk: mat.axisInk || 'theme' },
-        cam: { yaw: obs.yaw, pitch: obs.pitch, dist: obs.dist, fov: obs.fov, mode: obs.mode,
-               quat: Array.isArray(obs.quat) ? obs.quat.slice() : null,
-               friction: camera.friction, spin: camera.speed, autoRotate: !!camera.autoRotate,
-               dragGain: camera.dragGain, fling: camera.flingGain } };
+        /* 0.3.1 · S1: the `look` and `cam` blocks this record carried are gone — applyLayout never read either, and between
+           them they wrote the accents, the field chrome and the camera's feel (PREFERENCE) into every project and link. */
+        nb: nb && nb.style.width ? [parseInt(nb.style.width, 10) || 0, parseInt(nb.style.height, 10) || 0] : null };
     },
     /** put it back.  Fold and power go through the BUTTONS, not the classes, because the glyph and the
      *  aria-pressed state live in device()'s closure and only the click keeps all three in step. */
@@ -3893,7 +3882,7 @@ export async function boot(dom) {
         const data = projectSnapshot(), pr = data.presentation;
         delete pr.quality.autoScale;
         /* THE DAW KEYS THAT DO NOT DIRTY A PROJECT: moving a window, the modulation window's placement, the
-           camera's feel, the theme and stage, the notebook's size are saved WITH the project but a demo-maker
+           auto-rotate switch, the stage, the notebook's size are saved WITH the project but a demo-maker
            dragging a window is not "unsaved work". The overlays and the A/B transition are content and do count. */
         delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.ui; delete pr.notebook;
         if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
@@ -4565,7 +4554,7 @@ export async function boot(dom) {
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   function serialize() {
-    const m = JSON.parse(JSON.stringify(mat)); delete m.bg; delete m.lightUI; delete m.stageCustom;   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value
+    const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', ...FIELD_CHROME]) delete m[k];   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -4574,7 +4563,7 @@ export async function boot(dom) {
        below is what applies them, because a link is the one road on which they are somebody else's. */
     return { experiment: Object.assign(reg.serialize(clock.t), { rate: clock.rate, window: clock.window, damping: reg.damping }),
       presentation: { obs: { ...obs }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
-        paletteId: palette ? palette.id : palChoice,
+        paletteId: palette ? palette.id : PAL_DEF,
         space, palette: palette ? { on: palette.on, selected: palette.selected, stops: palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
         hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: gasAxial ? 'axial' : 'reg' },
         field: { overlay: fieldlines.overlay, lines: fieldlines.lines, source: fieldlines.source },
@@ -4588,16 +4577,15 @@ export async function boot(dom) {
         mo: moPanel ? moPanel.save() : null,
         rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: modHost ? modRackStamped() : null,
-        /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT. Everything a demo can show rides in it — the theme, the
-           card style and frost, the accents, the stage; the window arrangement (every window as it stands,
-           floats included); the modulation window's placement; the camera's feel and auto-rotate; the overlays;
-           SPECTRUM's DIALS fold; the A/B transition; the notebook's size when it was resized. Every key is
-           additive: a file without it opens as before, and an UNDO record never carries them. */
-        ui: { theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'dark', card: document.body.dataset.card || null, frost: frostMode,
-              disc: document.body.classList.contains('disconnected'), accent: { ...accent }, stage: { mix: stageMix, custom: mat.stageCustom.slice(0, 3), follow: stageFollow } },
+        /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT — the stage, the window arrangement (every window as it stands,
+           floats included), the modulation window's placement, auto-rotate, the overlays, SPECTRUM's DIALS fold, the A/B
+           transition, the notebook's size when it was resized. Every key is additive: a file without it opens as before.
+           0.3.1 · S1 THE SCOPE LAW (docs/STATE-SCOPES.md): the theme, card style, frost, disconnected cards, accents and
+           the camera's feel are PREFERENCE — the reader's furniture — and are never written here again. */
+        ui: { stage: { mix: stageMix, custom: mat.stageCustom.slice(0, 3), follow: stageFollow } },
         layout: layout.captureLayout ? layout.captureLayout() : null,
         modwin: modView ? modView.presentation() : null,
-        camera: { autoRotate: !!camera.autoRotate, friction: camera.friction, speed: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain },
+        camera: { autoRotate: !!camera.autoRotate },
         overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
         ab: ui.ab ? ui.ab.get() : null,
         notebook: layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
@@ -4684,7 +4672,7 @@ export async function boot(dom) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; delete pm.bg; delete pm.lightUI; Object.assign(mat, pm); if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if(ui.frameModeSeg)ui.frameModeSeg.set(mat.frame===false?'off':mat.frameMode||'box'); if(ui.axisModeSeg)ui.axisModeSeg.set(mat.axis===false?'off':mat.axisMode||'box'); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } if (ui.invertSw) ui.invertSw.set(!!mat.invert); if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false); if (pm.axisInk !== undefined) mat.axisInk = (pm.axisInk === 'cmy' || pm.axisInk === 'rgb') ? pm.axisInk : 'theme'; if (ui.axisInkSeg) ui.axisInkSeg.set(mat.axisInk === 'cmy' || mat.axisInk === 'rgb' ? mat.axisInk : 'theme'); Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
       /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
          field and quality control on the value that was just loaded before modulation reads it. */
       if (pr) {
@@ -4745,20 +4733,17 @@ export async function boot(dom) {
         }
         if (pr.field) { const F = pr.field; if (F.overlay !== undefined) fieldlines.setOverlay(F.overlay); if (F.lines !== undefined) fieldlines.setLines(F.lines); if (F.source !== undefined) fieldlines.setSource(F.source); }
         if (Array.isArray(pr.rates) && pr.rates.length === 91) { rates.set(pr.rates); reg.setEnergies(energyOf); }
-        /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize) */
+        /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize).  0.3.1 · S1: of `ui` only the STAGE
+           is read; an older file's theme / card / frost / disc / accent, and its camera feel, are the sender's preferences
+           and are ignored — opening a project never changes this browser's settings (docs/STATE-SCOPES.md). */
         if (pr.ui) { const U = pr.ui;
-          if (U.theme && __LW_hooks.setTheme) __LW_hooks.setTheme(U.theme);
-          if (U.card) setCardStyle(U.card);
-          if (U.frost !== undefined) setFrost(U.frost, { quiet: true });
-          if (U.disc !== undefined) setDisconnected(!!U.disc, { quiet: true });
-          if (U.accent) { Object.assign(accent, U.accent); if (ui.accA) ui.accA.set(accent.a); if (ui.accB) ui.accB.set(accent.b); if (ui.vivid) ui.vivid.set(accent.vivid); applyAccent(); }
           if (U.stage) {
             if (Number.isFinite(U.stage.mix)) { stageMix = Math.max(0, Math.min(1, U.stage.mix)); if (ui.stageK) ui.stageK.set(stageMix); }
             const custom = Array.isArray(U.stage.custom) ? U.stage.custom : (Array.isArray(U.stage.b) ? U.stage.b : (Array.isArray(U.stage.a) ? U.stage.a : null));
             if (__LW_hooks.setStageColour) __LW_hooks.setStageColour(custom);
             if (__LW_hooks.setStageFollow) __LW_hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
           } }
-        if (pr.camera) { const C = pr.camera; if (Number.isFinite(C.friction)) camera.setFriction(C.friction); if (Number.isFinite(C.speed)) camera.setSpeed(C.speed); if (Number.isFinite(C.dragGain)) camera.setDragGain(C.dragGain); if (Number.isFinite(C.fling)) camera.setFling(C.fling); camera.setAutoRotate(!!C.autoRotate); }
+        if (pr.camera) camera.setAutoRotate(!!pr.camera.autoRotate);
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
           if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
@@ -4792,7 +4777,6 @@ export async function boot(dom) {
         if (pr.space && pr.space !== space && !getHamiltonian().noMomentum && !sturm.P) { space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(space); }
         if (pr.palette && palette) {
           if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
-          if (pr.paletteId && palette.id === pr.paletteId) palChoice = pr.paletteId;
           palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
@@ -4837,7 +4821,7 @@ export async function boot(dom) {
   }
 
   /** the href for the state as it stands, with everything encodeState measured about it */
-  function mintLink() { linkLast = linkFor(serialize(), { paletteId: palette ? palette.id : palChoice }); return linkLast; }
+  function mintLink() { linkLast = linkFor(serialize(), { paletteId: palette ? palette.id : PAL_DEF }); return linkLast; }
 
   /** MINT and copy.  Reports `chars`, and when something is not carried it SAYS SO. */
   async function copyLink() {
@@ -4873,7 +4857,7 @@ export async function boot(dom) {
     if (!got) return { ok: true, opened: false, code: null, message: null };
     /* THE PALETTE IS NAMED BEFORE THE STATE IS RESTORED, never after: select() re-reads the catalogue's own
        stops, so doing it second would throw away an EDITED palette that the link had carried in full. */
-    if (got.paletteId && palette && got.paletteId !== palette.id) { palette.select(got.paletteId); palChoice = got.paletteId; saveSettings(); }
+    if (got.paletteId && palette && got.paletteId !== palette.id) palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
     const ok = restore(got.state);
     const d = +(got.state.experiment && got.state.experiment.damping);
     if (Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }
@@ -5095,7 +5079,7 @@ export async function boot(dom) {
       state() { const c = field.ok ? field.gamut : 'srgb'; const d = document.body.dataset.gamut || 'srgb'; return { canvas: c === 'srgb' ? 'srgb' : 'p3', dom: d, agree: (c === 'srgb') === (d === 'srgb') }; },
       set(id) { return __LW_hooks.setGamut ? __LW_hooks.setGamut(id) : 'srgb'; } },
     /** THE PALETTE by NAME, and the menu's grouping by stop count */
-    setPalette(id) { const ok = palette ? palette.select(id) : false; if (ok) { palChoice = id; saveSettings(); } return ok; },
+    setPalette(id) { return palette ? palette.select(id) : false; },
     get paletteId() { return palette ? palette.id : null; }, get paletteGroups() { return palette ? palette.groups : []; },
     loadPreset, schedule, togglePlay, setReference, serialize, restore, api,
     /* ── ORBITALS · the MOLECULAR REGISTER, one road (MATH-H2O Proposition 1) ─────────────────────

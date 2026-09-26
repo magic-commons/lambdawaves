@@ -1,0 +1,76 @@
+{
+ "left": {
+  "ui": [
+   "accent",
+   "card",
+   "disc",
+   "frost",
+   "theme"
+  ],
+  "camera": [
+   "dragGain",
+   "fling",
+   "friction",
+   "speed"
+  ],
+  "mat": [
+   "axis",
+   "axisInk",
+   "cornerSide",
+   "frame",
+   "invert"
+  ],
+  "layout.look": [
+   "accA",
+   "accB",
+   "axis",
+   "axisInk",
+   "axisMode",
+   "cornerSide",
+   "dither",
+   "frame",
+   "frameMode",
+   "hue",
+   "invert",
+   "palette",
+   "style"
+  ],
+  "layout.cam": [
+   "autoRotate",
+   "dist",
+   "dragGain",
+   "fling",
+   "fov",
+   "friction",
+   "mode",
+   "pitch",
+   "quat",
+   "spin",
+   "yaw"
+  ]
+ },
+ "added": {},
+ "bytes": {
+  "before": 9932,
+  "after": 9326,
+  "saved": 606
+ },
+ "settings": {
+  "before": {
+   "identical": false,
+   "bytes": [
+    506,
+    547
+   ],
+   "changed": 18
+  },
+  "after": {
+   "identical": true,
+   "bytes": [
+    471,
+    471
+   ],
+   "changed": 0
+  }
+ }
+}

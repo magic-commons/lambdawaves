@@ -1,10 +1,11 @@
 /* camera-law.js — THE CAMERA LAW and the observer's pose: the one first-order law (wave 50), its constants CAM, the camera
  * object, the two modes (TURNTABLE ⇄ FREE, wave 54, and the levelling slerp between them), the one road for a relative
  * turn, the eased key orbit, and the ZOOM / FOV / RESET VIEW roads.  A seam out of rack.js boot() (optimization
- * 2026-09-24 · wave 130 seam 11, AUDIT-E §6).  Six edges, handed in: `obs` (the pose it writes), `ui` (the dials it
+ * 2026-09-24 · wave 130 seam 11, AUDIT-E §6).  Five edges, handed in: `obs` (the pose it writes), `ui` (the dials it
  * moves), `present` (schedule(TIER.PRESENT) — the only tier the camera may ask for), `modHand` (a routed ZOOM / FOV
- * turn moves the base), `saveSettings` (the mode is this browser's) and `resetWall` (the loop's camera clock starts
- * NOW: `lastWall = performance.now() / 1000`, the one write camera.wake() and the key orbit make).
+ * turn moves the base) and `resetWall` (the loop's camera clock starts NOW: `lastWall = performance.now() / 1000`, the
+ * one write camera.wake() and the key orbit make).  0.3.1 · S1: the MODE is the project's (`obs.mode`, D4 — a pose
+ * cannot be read back without it), so the sixth edge, `saveSettings`, is gone.
  * createCameraLaw() runs where the windows begin, before the first control that reads it is built. */
 import { quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
@@ -37,7 +38,7 @@ import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE ca
 export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
   GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
 
-export function createCameraLaw({ obs, ui, present, modHand, saveSettings, resetWall }) {
+export function createCameraLaw({ obs, ui, present, modHand, resetWall }) {
   const camera = {
     autoRotate: false, speed: 0.25, friction: CAM.MU_DEF,
     dragGain: CAM.GAIN_DEF, flingGain: CAM.FLING_DEF,   // wave 58: rad/px = dragGain × CAM.SENS · the release is multiplied by flingGain before the law sees it
@@ -114,7 +115,7 @@ export function createCameraLaw({ obs, ui, present, modHand, saveSettings, reset
       if (opt && opt.now) { obs.mode = 'turntable'; obs.yaw = yaw; obs.pitch = a.pitch; obs.quat = to; camLevel.from = null; }
       else { camLevel.from = obs.quat.slice(); camLevel.to = to; camLevel.yaw = yaw; camLevel.pitch = a.pitch; camLevel.t0 = performance.now(); }
     }
-    saveSettings(); present();
+    present();
     return obs.mode;
   }
   /** one step of the levelling slerp — the ONLY thing that writes the pose between the two modes */

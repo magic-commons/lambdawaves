@@ -368,8 +368,7 @@ export function encodeState(state, opts = {}) {
   const bytes = w.bytes();
   const text = toBase64url(bytes);
 
-  const notCarried = [];
-  for (const k of ['frameMode','axisMode','cornerSide']) if (mat[k]) notCarried.push('mat.'+k);
+  const notCarried = [];   // 0.3.1 · S1: the field chrome is the reader's (never "not carried"); v1's MAT chrome bits mint at defaults, restore() ignores them
   for (const k of ['mo', 'modulation']) if (pr[k] !== undefined && pr[k] !== null) notCarried.push(k);
 
   if (pr.rotationRates && Object.values(pr.rotationRates).some((v) => v !== 0)) notCarried.push('rotationRates');

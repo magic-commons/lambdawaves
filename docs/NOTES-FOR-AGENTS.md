@@ -111,6 +111,7 @@ and the code disagree, the code is right; please say so in an issue.
 - The physics proofs are the node suites: `tests/hydrogen.test.mjs`, `sturmian`, `helium`, `h2`, `scf`, `well`,
   `momentum`, `wigner`, `qho`, `kepler`, `radiation`, `gas` and the rest of `tests/*.test.mjs`. Each checks the
   code against an oracle outside it (tables, closed forms, quadrature). Derivations are under `research/`.
+- Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
 - The laws: CLAUDE.md (the standing rules for agents), REPORT.md (the notebook every session appends to), `docs/`
   (the optimization record, `ui/STYLE-LOCK.md`, `SHIPPING-READINESS.md`) and RELEASING.md.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit. It is read-only here: changes go to
