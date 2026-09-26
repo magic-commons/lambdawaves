@@ -3913,7 +3913,7 @@ export async function boot(dom) {
         get dirty() { return projectDirty(); },
         markClean: projectClean,
         requestOpen(path) { return discardProject('OPEN') && projects.open(path); },
-        requestFresh() { return discardProject('START A NEW PROJECT') && projects.fresh(); },
+        requestFresh() { return discardProject('START A NEW PROJECT') ? projects.fresh() : Promise.resolve(false); },
         save(path) {
           path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
           const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
@@ -3954,8 +3954,10 @@ export async function boot(dom) {
           else { pjCurrent = null; pjStatus('new'); }
           projectClean(); count();
           /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
-             notebook, in its scrollable pane.  A blank one stays shut, NEW's included.  "Edited" is read off the text: no flag. */
-          if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; render(); } else nb.hidden = true;
+             notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing: the pane keeps its
+             visibility and face, so a hand in PROJECTS stays in PROJECTS.  "Edited" is read off the text: no flag. */
+          if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; }
+          render();                                                                                // the preview never keeps the last project's notes
           return true;
         },
         remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
@@ -4670,6 +4672,7 @@ export async function boot(dom) {
   function restore(obj, opt) {
     markBatchBegin();                                                // M7: released in the finally below
     try {
+      if (opt && opt.project && modHost) { modHost.clock.pause(); modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
       if (ex) {
