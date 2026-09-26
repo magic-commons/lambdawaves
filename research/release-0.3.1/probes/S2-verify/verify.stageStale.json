@@ -1,0 +1,94 @@
+{
+ "file": {
+  "mix": 0.04,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6
+ },
+ "demoOpen": {
+  "mix": 0.05411413204188609,
+  "exposure": 1.365423162256938,
+  "softness": 1.0805469387058584,
+  "iso": 0.017767288986038646,
+  "fov": 1.2,
+  "knob": null
+ },
+ "newNoPlay": {
+  "mix": 0.04,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6,
+  "knob": null
+ },
+ "demoPlaying": {
+  "mix": 0.05411413204188609,
+  "exposure": 0.4472933014784878,
+  "softness": 1.0805469387058584,
+  "iso": 0.017767288986038646,
+  "fov": 1.2,
+  "knob": null
+ },
+ "demoPaused": {
+  "mix": 0.05411413204188609,
+  "exposure": 1.365423162256938,
+  "softness": 1.0805469387058584,
+  "iso": 0.017767288986038646,
+  "fov": 1.2,
+  "knob": null
+ },
+ "newAfterPlayPause": {
+  "mix": 0.04,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6,
+  "knob": null
+ },
+ "newAfterPlayPauseDirty": false,
+ "demoPlaying2": {
+  "mix": 0.05411413204188609,
+  "exposure": 0.4472933014784878,
+  "softness": 1.0805469387058584,
+  "iso": 0.017767288986038646,
+  "fov": 1.2,
+  "knob": null
+ },
+ "newWhilePlaying": {
+  "mix": 0.05411413204188609,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6,
+  "knob": null
+ },
+ "newWhilePlayingDirty": false,
+ "demoPlayingShut": {
+  "mix": 0.05411413204188609,
+  "exposure": 0.4472933014784878,
+  "softness": 1.0805469387058584,
+  "iso": 0.017767288986038646,
+  "fov": 1.2,
+  "knob": null
+ },
+ "newAfterShutPlay": {
+  "mix": 0.05411413204188609,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6,
+  "knob": null
+ },
+ "storedOpen": {
+  "ok": true,
+  "mix": 0.2,
+  "exposure": 1,
+  "softness": 0.7,
+  "iso": 0.06,
+  "fov": 0.6,
+  "knob": null,
+  "wanted": 0.2
+ },
+ "errs": []
+}

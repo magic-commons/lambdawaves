@@ -1,0 +1,28 @@
+{
+ "log": [
+  [
+   "before",
+   "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}",
+   0.05411413204188609,
+   "modPlaying",
+   true
+  ],
+  [
+   "after NEW (sync)",
+   0.05411413204188609,
+   "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":false,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.054114132041886"
+  ],
+  [
+   "after settle",
+   0.05411413204188609,
+   "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":false,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.054114132041886"
+  ],
+  [
+   "stored open while playing",
+   true,
+   0.05411413204188609,
+   "wanted 0.2"
+  ]
+ ],
+ "errs": []
+}

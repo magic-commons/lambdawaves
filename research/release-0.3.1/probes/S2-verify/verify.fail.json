@@ -1,0 +1,295 @@
+{
+ "http404": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — HTTP 404; nothing was changed",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "netReject": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — NetworkError when attempting to fetch resource.; nothing was changed",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "notJson": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — JSON.parse: expected property name or '}' at line 1 column 2 of the JSON data; nothing was changed",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "badEnvelope": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — unsupported project version; nothing was changed",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "paletteStops": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — the previous state is back",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "expModes": {
+  "ok": false,
+  "fetched": 1,
+  "status": "new project failed — the previous state is back",
+  "same": true,
+  "firstDiff": null,
+  "modSame": true,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   "DEMOS/WAVE DANCER"
+  ],
+  "dirty": [
+   true,
+   true
+  ],
+  "nbSame": true,
+  "nbOpen": [
+   true,
+   true
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true
+ },
+ "readersLate": {
+  "ok": true,
+  "fetched": 1,
+  "status": "new",
+  "same": false,
+  "firstDiff": [
+   "experiment.preset: \"1s+2pz\" | null",
+   "experiment.modes.0: {\"id\":\"h:2:0:0\",\"n\":2,\"l\":0,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.1: {\"id\":\"h:2:1:-1\",\"n\":2,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.2: {\"id\":\"h:2:1:0\",\"n\":2,\"l\":1,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.3: {\"id\":\"h:2:1:1\",\"n\":2,\"l\":1,\"m\":1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.4: {\"id\":\"h:4:1:-1\",\"n\":4,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined"
+  ],
+  "modSame": false,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   null
+  ],
+  "dirty": [
+   true,
+   false
+  ],
+  "nbSame": false,
+  "nbOpen": [
+   true,
+   false
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true,
+  "landed": true
+ },
+ "modwinLate": {
+  "ok": true,
+  "fetched": 1,
+  "status": "new",
+  "same": false,
+  "firstDiff": [
+   "experiment.preset: \"1s+2pz\" | null",
+   "experiment.modes.0: {\"id\":\"h:2:0:0\",\"n\":2,\"l\":0,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.1: {\"id\":\"h:2:1:-1\",\"n\":2,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.2: {\"id\":\"h:2:1:0\",\"n\":2,\"l\":1,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.3: {\"id\":\"h:2:1:1\",\"n\":2,\"l\":1,\"m\":1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.4: {\"id\":\"h:4:1:-1\",\"n\":4,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined"
+  ],
+  "modSame": false,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   null
+  ],
+  "dirty": [
+   true,
+   false
+  ],
+  "nbSame": false,
+  "nbOpen": [
+   true,
+   false
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true,
+  "landed": true
+ },
+ "modulationBad": {
+  "ok": true,
+  "fetched": 1,
+  "status": "new",
+  "same": false,
+  "firstDiff": [
+   "experiment.preset: \"1s+2pz\" | null",
+   "experiment.modes.0: {\"id\":\"h:2:0:0\",\"n\":2,\"l\":0,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.1: {\"id\":\"h:2:1:-1\",\"n\":2,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.2: {\"id\":\"h:2:1:0\",\"n\":2,\"l\":1,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.3: {\"id\":\"h:2:1:1\",\"n\":2,\"l\":1,\"m\":1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.4: {\"id\":\"h:4:1:-1\",\"n\":4,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined"
+  ],
+  "modSame": false,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   null
+  ],
+  "dirty": [
+   true,
+   false
+  ],
+  "nbSame": false,
+  "nbOpen": [
+   true,
+   false
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true,
+  "landed": true
+ },
+ "abBad": {
+  "ok": true,
+  "fetched": 1,
+  "status": "new",
+  "same": false,
+  "firstDiff": [
+   "experiment.preset: \"1s+2pz\" | null",
+   "experiment.modes.0: {\"id\":\"h:2:0:0\",\"n\":2,\"l\":0,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.1: {\"id\":\"h:2:1:-1\",\"n\":2,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.2: {\"id\":\"h:2:1:0\",\"n\":2,\"l\":1,\"m\":0,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.3: {\"id\":\"h:2:1:1\",\"n\":2,\"l\":1,\"m\":1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined",
+   "experiment.modes.4: {\"id\":\"h:4:1:-1\",\"n\":4,\"l\":1,\"m\":-1,\"re\":1,\"im\":0,\"muted\":false,\"solo\":false} | undefined"
+  ],
+  "modSame": false,
+  "current": [
+   "DEMOS/WAVE DANCER",
+   null
+  ],
+  "dirty": [
+   true,
+   false
+  ],
+  "nbSame": false,
+  "nbOpen": [
+   true,
+   false
+  ],
+  "depth": [
+   0,
+   0
+  ],
+  "wsSame": true,
+  "landed": true
+ },
+ "errs": []
+}

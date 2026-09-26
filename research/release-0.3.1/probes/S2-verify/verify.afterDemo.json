@@ -1,0 +1,174 @@
+{
+ "demo": {
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "dirtyAtOpen": false,
+  "clean1s": true,
+  "colourDirty": true,
+  "current": "DEMOS/WAVE DANCER",
+  "modOpen": true,
+  "errs": []
+ },
+ "busy": {
+  "t": 5.558639999999996,
+  "playing": true,
+  "abOn": true,
+  "transition": true,
+  "particles": 160,
+  "pOn": true,
+  "kepler": true,
+  "vortex": true,
+  "pop": 8,
+  "dirty": true
+ },
+ "fresh": {
+  "ok": true,
+  "isPromise": true,
+  "ms": 81,
+  "asked": 1,
+  "status": "new",
+  "spy": {
+   "clearTransition": 1,
+   "regRestore": 1,
+   "clockPause": 1,
+   "clockScrub": 1,
+   "trail": 1,
+   "dyn": 1,
+   "pclock": 1
+  },
+  "rawDiff": [
+   "mat.steps: 160 | undefined",
+   "domain.half: 7 | undefined",
+   "ui.stage.mix: 0.05411413204188609 | 0.04"
+  ],
+  "expDiff": [],
+  "extraKeys": [
+   "quality",
+   "layout",
+   "modwin",
+   "notebook"
+  ],
+  "mod": {
+   "sources": [
+    "s1:lfo:curve:sine",
+    "s2:audio:wave:sine"
+   ],
+   "macros": [
+    [
+     "m1",
+     "LFO",
+     1,
+     "s1",
+     1
+    ],
+    [
+     "m2",
+     "AUDIO",
+     1,
+     "s2:level",
+     1
+    ]
+   ],
+   "routes": 0,
+   "bpm": 60,
+   "v": 108,
+   "modelMacros": [
+    [
+     "LFO",
+     "s1"
+    ],
+    [
+     "AUDIO",
+     "s2:level"
+    ]
+   ]
+  },
+  "nb": {
+   "hidden": true,
+   "isOpen": false,
+   "text": "",
+   "title": "NOTEBOOK",
+   "subtitle": "",
+   "count": "empty · kept in this browser",
+   "stored": "",
+   "storedTitle": "NOTEBOOK"
+  },
+  "ab": {
+   "on": false,
+   "A": null,
+   "B": null,
+   "transition": false,
+   "abGet": {
+    "a": null,
+    "b": null,
+    "omega": 0.05,
+    "on": false
+   },
+   "status": "A / B—  /  —store two states, then TRANSITION plays A → B → A at Ω"
+  },
+  "after11": {
+   "pop": 0,
+   "t": 0,
+   "playing": false,
+   "particlesOn": false,
+   "particles": 0,
+   "kepler": false,
+   "vortex": false,
+   "preset": null
+  },
+  "ws": {
+   "same": true,
+   "rawSame": true,
+   "len": 455
+  },
+  "theme": [
+   "light",
+   "light",
+   "light",
+   "light"
+  ],
+  "arrSame": false,
+  "arrBefore": "{\"cards\":[{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"transport\",\"off\":false,\"side\":\"L\"},{\"closed\":false,\"float\":null,\"folded\":true,\"id\":\"shadow\",\"off\":false,\"side\":\"L\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"spectrum\",\"off\":false,\"side\":\"L\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"chem\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"orbitals\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"settings\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"orbit\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"vortex\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"dynamics\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"slice\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"qcd\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"molecule\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"helium\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"h2\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"calculus\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"meters\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"ladder\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"atoms\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"field\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"wigner\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"radiation\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"history\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"state\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"palette\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"observer\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"camera\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"clip\",\"off\":false,\"side\":\"R\"}],\"closed\":[\"atoms\",\"calculus\",\"chem\",\"dynamics\",\"field\",\"h2\",\"helium\",\"history\",\"ladder\",\"meters\",\"molecule\",\"orbit\",\"orbitals\",\"qcd\",\"radiation\",\"slice\",\"transport\",\"vortex\",\"wigner\"],\"docked\":false,\"modOpen\":true,\"modwin\":{\"audioBands\":{},\"audioMini\":{},\"audioRoutes\":{},\"folder\":{},\"lane\":\"bottom\",\"macroMin\":false,\"macroSide\":\"left\",\"modes\":{\"s1\":\"F\",\"s3\":\"F\"},\"open\":true,\"ribbon\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"x\":468,\"y\":588},\"nb\":[470,670],\"rackHidden\":false}",
+  "arrAfter": "{\"cards\":[{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"transport\",\"off\":false,\"side\":\"L\"},{\"closed\":false,\"float\":null,\"folded\":true,\"id\":\"shadow\",\"off\":false,\"side\":\"L\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"spectrum\",\"off\":false,\"side\":\"L\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"chem\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"orbitals\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"settings\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"orbit\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"vortex\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"dynamics\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"slice\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"qcd\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"molecule\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"helium\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"h2\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"calculus\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"meters\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"ladder\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"atoms\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":true,\"id\":\"field\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"wigner\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"radiation\",\"off\":false,\"side\":\"R\"},{\"closed\":true,\"float\":null,\"folded\":false,\"id\":\"history\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"state\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"palette\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"observer\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"camera\",\"off\":false,\"side\":\"R\"},{\"closed\":false,\"float\":null,\"folded\":false,\"id\":\"clip\",\"off\":false,\"side\":\"R\"}],\"closed\":[\"atoms\",\"calculus\",\"chem\",\"dynamics\",\"field\",\"h2\",\"helium\",\"history\",\"ladder\",\"meters\",\"molecule\",\"orbit\",\"orbitals\",\"qcd\",\"radiation\",\"slice\",\"transport\",\"vortex\",\"wigner\"],\"docked\":false,\"modOpen\":true,\"modwin\":{\"audioBands\":{},\"audioMini\":{},\"audioRoutes\":{},\"folder\":{},\"lane\":\"bottom\",\"macroMin\":false,\"macroSide\":\"left\",\"modes\":{\"s1\":\"F\"},\"open\":true,\"ribbon\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"x\":468,\"y\":588},\"nb\":[470,670],\"rackHidden\":false}",
+  "current": null,
+  "depth": 0,
+  "histRows": [
+   "start"
+  ],
+  "dirty": false,
+  "before": {
+   "abOn": true,
+   "dirty": true
+  },
+  "pjCollSame": true,
+  "matSteps": 160,
+  "qSteps": 160,
+  "domainHalf": 7,
+  "domainAuto": true,
+  "gum": 0,
+  "errs": []
+ },
+ "late": {
+  "stored": "",
+  "storedTitle": "NOTEBOOK",
+  "text": ""
+ },
+ "linked": {
+  "link": true,
+  "playing": true,
+  "fieldPlaying": true,
+  "moved": true,
+  "ms": 205,
+  "name": "LFO",
+  "v0": 0,
+  "vNow": 0.04179788052555369,
+  "audioMacro": [
+   0,
+   0
+  ],
+  "refused": 0,
+  "gum": 0,
+  "dirty": false,
+  "armed": true,
+  "errs": []
+ }
+}

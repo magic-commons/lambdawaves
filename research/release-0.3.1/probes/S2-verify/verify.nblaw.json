@@ -1,0 +1,43 @@
+{
+ "blank": {
+  "ok": true,
+  "open": false,
+  "count": "empty · kept in this browser",
+  "text": ""
+ },
+ "hello": {
+  "ok": true,
+  "open": true,
+  "face": "notes",
+  "mode": "view",
+  "count": "1 words · kept in this browser"
+ },
+ "many": {
+  "ok": true,
+  "open": true,
+  "count": "5 words · kept in this browser"
+ },
+ "wsOverOpen": {
+  "ok": true,
+  "open": false,
+  "count": "empty · kept in this browser",
+  "text": "\"  \\n\\t \""
+ },
+ "blankOverProjectsFace": {
+  "ok": true,
+  "open": false
+ },
+ "debounceOpen": {
+  "stored": "",
+  "text": ""
+ },
+ "debounceNew": {
+  "ms": 51,
+  "stored": "",
+  "text": "",
+  "count": "empty · kept in this browser",
+  "open": false,
+  "status": "new"
+ },
+ "errs": []
+}

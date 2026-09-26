@@ -1,0 +1,28 @@
+{
+ "tablet": true,
+ "opened": true,
+ "q": [
+  96,
+  160
+ ],
+ "steps": 160,
+ "dirty": false,
+ "demo": {
+  "q": [
+   96,
+   160
+  ],
+  "steps": 160,
+  "dirty": false
+ },
+ "fresh": true,
+ "afterNew": {
+  "q": [
+   96,
+   160
+  ],
+  "steps": 160,
+  "dirty": false
+ },
+ "errs": []
+}

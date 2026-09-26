@@ -1,0 +1,72 @@
+{
+ "ok": true,
+ "status": "new",
+ "scalars": {
+  "A": {
+   "view": 0,
+   "rate": 4,
+   "window": 16.755160819145562
+  },
+  "B": {
+   "view": 1,
+   "rate": 4,
+   "window": 16.755160819145562
+  }
+ },
+ "exp": [],
+ "pres": {
+  "mat": [
+   "mat.view: NEW+preset 0 | boot 1",
+   "mat.finish: NEW+preset \"lit\" | boot undefined"
+  ],
+  "modulation": [
+   "modulation.macros.0.name: NEW+preset \"LFO\" | boot \"MACRO 1\"",
+   "modulation.macros.0.named: NEW+preset 1 | boot 0",
+   "modulation.macros.0.sourceId: NEW+preset \"s1\" | boot null",
+   "modulation.macros.1.name: NEW+preset \"AUDIO\" | boot \"MACRO 2\"",
+   "modulation.macros.1.named: NEW+preset 1 | boot 0",
+   "modulation.macros.1.sourceId: NEW+preset \"s2:level\" | boot null",
+   "modulation.sources.1.kind: NEW+preset \"audio\" | boot \"env\"",
+   "modulation.sources.1.banks.A.audio: NEW+preset {\"gateEnabled\":true,\"source\":\"mic\",\"gainDb\":0,\"thresholdDb\":-55,\"hysteresisDb\":3,\"holdMs\":83,\"fluxFl | boot undefined",
+   "modulation.sources.1.banks.B.audio: NEW+preset {\"gateEnabled\":true,\"source\":\"mic\",\"gainDb\":0,\"thresholdDb\":-55,\"hysteresisDb\":3,\"holdMs\":83,\"fluxFl | boot undefined",
+   "modulation.sources.1.audio: NEW+preset {\"gateEnabled\":true,\"source\":\"mic\",\"gainDb\":0,\"thresholdDb\":-55,\"hysteresisDb\":3,\"holdMs\":83,\"fluxFl | boot undefined"
+  ],
+  "layout": [
+   "layout.at: NEW+preset 1790397511366 | boot 1790397517053"
+  ]
+ },
+ "modA": {
+  "sources": [
+   "s1:lfo",
+   "s2:audio"
+  ],
+  "macros": [
+   [
+    "LFO",
+    "s1"
+   ],
+   [
+    "AUDIO",
+    "s2:level"
+   ]
+  ],
+  "routes": 0
+ },
+ "modB": {
+  "sources": [
+   "s1:lfo",
+   "s2:env"
+  ],
+  "macros": [
+   [
+    "MACRO 1",
+    null
+   ],
+   [
+    "MACRO 2",
+    null
+   ]
+  ],
+  "routes": 0
+ }
+}
