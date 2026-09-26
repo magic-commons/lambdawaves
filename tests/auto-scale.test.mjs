@@ -1,16 +1,21 @@
-/* tests/auto-scale.test.mjs — AUTO SCALE's one rule (AS, 2026-09-25), judged on the REAL function: rack.js'
- * `autoScaleStep` is sliced out of the source and run here (the repo's pattern: gpu-cleanup, project-import), so this
- * suite cannot drift from the shipped rule.  The loop around it (the window opens on its first presented frame and closes
- * on a decision; it keeps the presented intervals ≤ 250 ms and is judged on their MEDIAN) is modelled line for line from
- * rack.js' frame loop, and the OLD rule it replaced (7dca938: an EMA at 0.15, −0.1 / +0.05 every 24 loop frames with ≥ 18
- * presented) is modelled beside it, so convergence times and canvas-resize counts print side by side.
+/* tests/auto-scale.test.mjs — THE ONE CONTROLLER (wave 128): AUTO SCALE's one rule (AS, 2026-09-25) and the GOVERNOR's grid
+ * rung as ONE decision, judged on the REAL code: rack.js' `controlStep` is sliced out of the source and run here (the repo's
+ * pattern: gpu-cleanup, project-import), and so is the frame loop's own bookkeeping — the window, the decision, the descent
+ * record and THE PAUSE EDGE, from `if (tier >= TIER.PRESENT && !autoQ.presented++)` to `playedLast = clock.playing;` — so
+ * this suite cannot drift from the shipped rule.  Part one is the scale lever alone (the AS suite, unchanged: the OLD rule it
+ * replaced, 7dca938's EMA at 0.15, −0.1 / +0.05 every 24 loop frames, is modelled beside it); part two drives the real loop
+ * block through present-bound and reconstruct-bound scenes, with and without vsync quantisation, and the pause edge.
  *   node tests/auto-scale.test.mjs */
 import { readFileSync } from 'node:fs';
 
 const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
-const start = src.indexOf('  function autoScaleStep('), end = src.indexOf('\n  }', start) + 4;
-if (start < 0 || end < start) throw new Error('autoScaleStep not found in lab/rack.js');
-const autoScaleStep = new Function(src.slice(start, end) + '; return autoScaleStep;')();
+const slice = (from, to, inclusive) => { const a = src.indexOf(from), b = src.indexOf(to, a); if (a < 0 || b < a) throw new Error('not found in lab/rack.js: ' + from.trim().slice(0, 60)); return src.slice(a, b + (inclusive ? to.length : 0)); };
+const controlStep = new Function(slice('  function controlStep(', '\n  }\n', true) + '; return controlStep;')();
+/** the scale lever alone, in AS's old signature: AUTO SCALE on, no grid rung free */
+const autoScaleStep = (scale, iv, k, budgetMs, minScale, sinceMs, presented) => {
+  const r = controlStep({ presented, sinceMs: 0, k, iv, m0: 0, s0: 1 }, sinceMs, scale, minScale, budgetMs, true, false);
+  return r && r.scale;
+};
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -118,5 +123,108 @@ const settleMs = (r, target) => { let at = 0; for (const [t, s] of r.trace) at =
   judge('R2 a desktop that meets its budget at scale 1 (60 Hz and 120 Hz panels) never leaves 1 — also through bursts of 100 ms frames at play start and mid-play: zero resizes', desk.resizes === 0 && desk120.resizes === 0 && burst.resizes === 0 && desk.final === 1, { desk: desk.resizes, desk120: desk120.resizes, burst: burst.resizes });
 }
 
-console.log(`\n${TOTAL - FAILED}/${TOTAL} GREEN — AUTO SCALE's one rule`);
+/* ══ PART TWO · THE ONE CONTROLLER on the loop's own bookkeeping ══════════════════════════════════════════════════════════ */
+const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
+const LOOP = slice('    if (tier >= TIER.PRESENT && !autoQ.presented++)', '    playedLast = clock.playing;\n', true);
+const EFFECTIVE = slice('  const effectiveRes = () =>', '\n', false);
+const frameBlock = new Function('S', `const { TIER, autoQ, quality, gov, clock, ui, perf, loopRing, frameBudget, RES_LADDER, schedule, busyFlash, perfBudgetMs, controlStep, effectiveRes } = S;
+  const tier = S.tier, nowMs = S.nowMs, held = false; let playedLast = S.playedLast;
+${LOOP}  S.playedLast = playedLast;`);
+/** a lab playing a scene whose frame costs recon·(grid/128)³ + present·scale² ms, presented on a paced loop: each interval is
+ *  the frame's cost (continuous) or that cost rounded up to whole refreshes (vsync-quantised); a grid rung's rebuild frame
+ *  costs `rebuildMs` more.  The loop bookkeeping above runs after every present, exactly as in rack.js. */
+function lab({ recon = 0, present = 0, budget = B60, refresh = budget, quant = false, auto = true, governor = true, res = 128, rebuildMs = 40 }) {
+  const S = { autoQ: { presented: 0, sinceMs: 0, k: 0, iv: new Float64Array(32), lastMs: 0, changes: 0, m0: 0, s0: 1 },
+    quality: { res, steps: { 64: 110, 96: 160, 128: 240 }[res], scale: 1, auto, autoScale: 1, minScale: MIN }, gov: { on: governor, drop: 0, median: 0, changes: 0 },
+    clock: { playing: true }, ui: {}, perf: { counts: { frames: 0 }, ring: [] }, loopRing: [], frameBudget: { sample() {} }, RES_LADDER: [64, 96, 128],
+    TIER, pending: 0, asked: [], busyFlash() {}, perfBudgetMs: () => budget, controlStep, playedLast: false, tier: TIER.EVOLVE, nowMs: 0 };
+  S.schedule = (t) => { S.pending = Math.max(S.pending, t); S.asked.push(t); };
+  S.effectiveRes = new Function('gov', 'quality', 'RES_LADDER', 'return ' + EFFECTIVE.replace(/^\s*const effectiveRes = /, '').replace(/;\s*$/, ''))(S.gov, S.quality, S.RES_LADDER);
+  let t = 0, grid = S.effectiveRes();
+  const stepsSeen = new Set([S.quality.steps]), trace = [], decisions = [];
+  const frame = (tier) => {
+    const g = S.effectiveRes(), s = S.quality.auto ? S.quality.autoScale : 1, rebuilt = g !== grid; grid = g;
+    const c = recon * (g / 128) ** 3 + present * s * s + (rebuilt ? rebuildMs : 0);
+    const k0 = S.autoQ.changes, d0 = S.gov.changes, p0 = S.autoQ.presented;
+    S.tier = tier; S.nowMs = t; S.pending = 0; frameBlock(S); stepsSeen.add(S.quality.steps);
+    if (S.autoQ.presented === 0 && p0 >= 6) decisions.push({ t: Math.round(t), median: +S.gov.median.toFixed(1), scale: S.quality.autoScale, grid: S.effectiveRes() });
+    if (S.autoQ.changes !== k0 || S.gov.changes !== d0) trace.push([Math.round(t), S.quality.autoScale, S.effectiveRes()]);
+    t += quant ? Math.max(1, Math.ceil(c / refresh - 1e-9)) * refresh : Math.max(refresh, c);
+  };
+  return { S, trace, decisions, stepsSeen,
+    play(ms) { S.clock.playing = true; const end = t + ms; while (t < end) frame(TIER.EVOLVE); return this; },
+    /** PAUSE: the transport stops and LW.pause asks one PRESENT; frames run while something is pending — how many after the edge? */
+    pause() { S.clock.playing = false; S.asked = []; frame(TIER.PRESENT); const onEdge = [...S.asked]; let after = 0; while (S.pending && after < 10) { const p = S.pending; frame(p); after++; } return { onEdge, after }; },
+    get scale() { return S.quality.autoScale; }, get grid() { return S.effectiveRes(); }, get rungs() { return S.gov.drop; } };
+}
+const over = (L) => L.S.gov.median > L.S.perfBudgetMs() * 4 / 3;
+const gridChanges = (trace) => trace.filter(([, , g], i, a) => g !== (i ? a[i - 1][2] : 128)).length;
+/* (a) PRESENT-BOUND: the scale mends it and the grid never moves — at every cost the floor can reach, both budgets, with and
+ *     without vsync quantisation (the case the scale² test must not misread: a drop that lands a hair over a refresh reads as
+ *     the same interval as before) */
+{
+  const rows = [], bad = [];
+  let n = 0;
+  for (const [budget, refresh] of [[B60, B60], [B120, B120], [B60, B120]]) for (const quant of [false, true]) for (let k = 12; k <= 8 * budget; k *= 1.06) {
+    const L = lab({ present: k, budget, refresh, quant }).play(10000); n++;
+    if (L.grid !== 128 || L.S.gov.changes || over(L) || L.trace.length > 3) bad.push({ budget: +budget.toFixed(1), refresh: +refresh.toFixed(1), quant, k: +k.toFixed(1), grid: L.grid, scale: L.scale, median: L.S.gov.median, trace: L.trace });
+    if (Math.abs(k - 40) < 1.3) rows.push(`k≈40 B${Math.round(1000 / budget)}/r${Math.round(1000 / refresh)}${quant ? 'q' : ''}: ${JSON.stringify(L.trace)} → ${L.scale} @ ${L.grid}³, median ${L.S.gov.median.toFixed(1)}`);
+  }
+  console.log('      ' + rows.join('\n      '));
+  judge(`A1 a present-bound frame (cost = k·scale², ${n} scenes: k from 12 ms to 8 budgets, 60 and 120 Hz budgets on 60/120 Hz refresh, continuous and vsync-quantised): the scale settles under the band's top in ≤ 3 resizes and the GRID NEVER MOVES (${bad.length} failures)`, bad.length === 0, bad.slice(0, 3));
+  const heavy = lab({ present: 200, budget: B60 }).play(10000);
+  judge(`A2 a present-bound frame the scale's floor cannot mend (200 ms at scale 1): the grid steps only once the scale is AT its floor, and the scale stays there (the descent measured a present-bound frame) — ${JSON.stringify(heavy.trace)}`,
+    heavy.trace.every(([, s, g]) => g === 128 || s === MIN) && heavy.scale === MIN && heavy.grid < 128, heavy.trace);
+}
+/* (b) RECONSTRUCT-BOUND: the scale's drop does not lower the median as scale² predicts → the scale is restored and the grid steps */
+{
+  const out = {};
+  for (const [name, recon, present, budget, refresh, quant] of [['50+5s² B60', 50, 5, B60, B60, false], ['50+5s² B60 q60', 50, 5, B60, B60, true], ['50+5s² B120 q120', 50, 5, B120, B120, true],
+    ['30+3s² B60', 30, 3, B60, B60, false], ['30+3s² B60 q120', 30, 3, B60, B120, true], ['100+5s² B60', 100, 5, B60, B60, false], ['100+5s² B60 q60', 100, 5, B60, B60, true]]) {
+    const L = lab({ recon, present, budget, refresh, quant }).play(15000);
+    const firstRung = L.trace.findIndex(([, , g]) => g < 128);
+    out[name] = { trace: L.trace, grid: L.grid, scale: L.scale, median: +L.S.gov.median.toFixed(1), scaleChangesBeforeRung: firstRung, restoredTo: firstRung >= 0 ? L.trace[firstRung][1] : null, steps: [...L.stepsSeen] };
+    console.log(`      ${name}: ${JSON.stringify(L.trace)} → ${L.scale} @ ${L.grid}³, median ${L.S.gov.median.toFixed(1)}`);
+  }
+  const A = ['50+5s² B60', '50+5s² B60 q60', '50+5s² B120 q120'].map((k) => out[k]);
+  judge('B1 the reconstruct-bound frame (50 ms flat + 5·scale²; 60/120 Hz budgets, continuous and quantised): ONE scale drop, then the grid rung at the next decision with the scale RESTORED to 1 on that same decision — never the old walk to 35 % — and the ray steps never change (no step rung exists)',
+    A.every((o) => o.scaleChangesBeforeRung === 1 && o.restoredTo === 1 && o.steps.length === 1 && o.grid < 128), A);
+  judge(`B2 one rung when one mends it: 30 ms flat + 3·scale² at 60 Hz ends at 96³ with the scale at ${out['30+3s² B60'].scale} (continuous) / ${out['30+3s² B60 q120'].scale} (quantised at 120 Hz), one grid change`,
+    ['30+3s² B60', '30+3s² B60 q120'].every((k) => out[k].grid === 96 && out[k].scale === 1 && gridChanges(out[k].trace) === 1), [out['30+3s² B60'], out['30+3s² B60 q120']]);
+  judge(`B3 the second rung only when the first did not mend it: 100 ms flat + 5·scale² at 60 Hz takes both and ends in the band (64³ at scale ${out['100+5s² B60'].scale} continuous / ${out['100+5s² B60 q60'].scale} quantised), each rung after a descent that failed its scale² test; 50 + 5·scale² takes its second only after its descent at 96³ failed`,
+    ['100+5s² B60', '100+5s² B60 q60', '50+5s² B60'].every((k) => out[k].grid === 64 && out[k].median <= B60 * 4 / 3 && gridChanges(out[k].trace) === 2), [out['100+5s² B60'], out['100+5s² B60 q60'], out['50+5s² B60']]);
+}
+/* (c) THE SWITCHES: each lever only when its switch is on */
+{
+  const r = [];
+  for (const [recon, present] of [[50, 5], [0, 40]]) {
+    const off = lab({ recon, present, auto: false, governor: false }).play(10000);
+    const gOnly = lab({ recon, present, auto: false, governor: true }).play(10000);
+    const sOnly = lab({ recon, present, auto: true, governor: false }).play(10000);
+    r.push({ recon, present, off: [off.scale, off.grid, off.trace.length], gridOnly: [gOnly.scale, gOnly.grid, gOnly.trace.length], scaleOnly: [sOnly.scale, sOnly.grid] });
+  }
+  console.log('      [scale, grid, changes]: ' + JSON.stringify(r));
+  judge('C1 both switches OFF: nothing moves (scale 1, 128³, zero changes) on the reconstruct-bound and the present-bound frame', r.every((x) => x.off[0] === 1 && x.off[1] === 128 && x.off[2] === 0), r);
+  judge('C2 AUTO SCALE off, GOVERNOR on: readers only — with no scale probe the grid never steps (scale 1, 128³, zero changes); AUTO SCALE on, GOVERNOR off: only the scale moves, the grid stays at 128³', r.every((x) => x.gridOnly[0] === 1 && x.gridOnly[1] === 128 && x.gridOnly[2] === 0 && x.scaleOnly[1] === 128), r);
+}
+/* (d) THE PAUSE EDGE (W125-2): the grid back to the user's, the scale to 1, once, with ONE frame */
+{
+  const L = lab({ recon: 50, present: 5, budget: B120, refresh: B120, quant: true }).play(8000);
+  const mid = { scale: L.scale, grid: L.grid, changes: L.S.gov.changes }, e = L.pause();
+  const again = L.pause();
+  judge(`D1 THE PAUSE EDGE: playing at ${mid.scale} × ${mid.grid}³, PAUSE puts back 128³ and scale ${L.scale} on the edge frame (asked ${JSON.stringify(e.onEdge)}), exactly ONE frame runs after it (${e.after}), one grid change counted for the restore; a second paused frame asks nothing (${again.after})`,
+    mid.grid < 128 && L.grid === 128 && L.scale === 1 && e.after === 1 && L.S.gov.changes === mid.changes + 1 && again.after === 0 && again.onEdge.length === 0, { mid, e, again });
+  const P = lab({ present: 40, budget: B60 }).play(3000), s0 = P.scale, pe = P.pause(), s1 = P.scale, n0 = P.trace.length;
+  P.play(3000);
+  judge(`D2 a present-bound play: the scale (${s0}) returns to 1 on the edge with one frame (${pe.after}), the grid untouched; PLAY again re-fits within its first decision (${P.scale}, ${P.trace.length - n0} resize after the edge)`,
+    s0 < 1 && s1 === 1 && pe.after === 1 && P.scale === s0 && P.trace.length - n0 === 1 && P.grid === 128, { s0, pe, trace: P.trace });
+}
+/* (e) THE STEP RUNG IS GONE: no code path lowers the ray steps under load */
+{
+  const caps = src.match(/setStepCap\([^;]*\)/g) || [], stepsW = src.match(/mat\.steps\s*=[^=][^;]*/g) || [];
+  judge(`E1 no step rung: rack.js has no STEP_LADDER / stepDrop, its one setStepCap is the tablet's while-moving cap (${JSON.stringify(caps)}), and mat.steps is written only from the user's quality (${JSON.stringify(stepsW)})`,
+    !/STEP_LADDER|stepDrop/.test(src) && caps.length === 1 && caps[0] === 'setStepCap(tabletMotion ? tablet.steps : Infinity)' && stepsW.length === 1 && /quality\.steps/.test(stepsW[0]), { caps, stepsW });
+}
+
+console.log(`\n${TOTAL - FAILED}/${TOTAL} GREEN — THE ONE CONTROLLER`);
 if (FAILED) process.exit(1);
