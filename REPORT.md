@@ -2918,3 +2918,29 @@ not reproduce; `#notebook` is border-box). And `docs/NOTES-FOR-AGENTS.md`, linke
 assistant reading this repository what a user on Apple hardware needs to know (Safari's 60 fps feature flag, Low Power
 Mode, Limit Frame Rate, the first-use pipeline stall), the grid pairing, AUTO SCALE under '120' vs FULL, the device
 self-report and the gates — every fact with its source.
+
+### wave 128: One controller — scale, then the grid only when the scale cannot mend the frame; the step ladder deleted
+
+Three regulators shared the loop and fought: AUTO SCALE (a scale stepper), the governor (a step ladder ×0.7/×0.5 on the
+ray march, then a grid ladder 128→96→64, judged from its own 60-interval ring every 30 frames, with an upward rung
+after 3 s under budget) and the reader law (park/probe by measured cost). On a compute-bound scene the audits watched
+them stack: scale to 0.35 for no gain, then the steps halved for no gain, then the grid, then a 64↔96 oscillation every
+3.5 s. Now there is one measurement — the window median of presented-frame intervals, honest on every browser since
+the loop is paced — one decision every ≥ 250 ms and ≥ 6 presents in one pure function, and at most one lever per
+decision. Scale first (the wave-126 rule, unchanged). The grid rung only when the scale cannot mend the frame: the
+descent reached the floor, or the descent failed the scale² test (the median did not fall as `m0·(s/s0)²` predicts,
+with one budget of allowance so a vsync-quantised present-bound frame can never fail it); on a rung the scale returns
+to what the present can afford. With AUTO SCALE off there is no probe, so the governor parks readers and leaves the
+grid alone. Readers as before. The pause edge is one block: grid back to the user's, scale to 1, one frame. Deleted:
+the governor's ring, sort and judgement, the STEP ladder and its cap, the 3 s upward rung, the second pause line —
+lab/ net −13 lines; `LW.governor`, `LW.autoQ`, METERS and render-exact's pins keep their shape.
+
+Measured (Electron on the RTX, 45 s, base → after): the 128³ axial gas with the table off (reconstruct-bound) —
+scale 0.35 at 0.75 s, steps 168→120, grid 96 then 64, then 20 grid changes oscillating, 96 fps → two rungs by 1.5 s to
+64³ at scale 1 and 240 steps, 2 grid changes, 0 step changes, 115 fps; GLASS at 128³ (present-bound) — 0.35 + steps 120
++ grid 64 oscillating → scale 0.55, grid 128, steps 240; the default 96³ scene — 1 of 2 plays dropped the scale → 0
+changes in 4/4; WIGNER open — parked exactly as before. On a Safari-like loop the scale settles in one decision as
+before and nothing else moves. Exact exports with both switches on give identical digests, one exported mid-governed
+play. 23/23 in `tests/auto-scale.test.mjs` (228 present-bound scenes never move the grid; a 50 ms floor + 5·s² takes
+one scale drop then a rung with the scale back to 1); the lock GREEN on both fixtures.
+One consequence is recorded rather than hidden: a user who switches AUTO SCALE off and keeps the governor on now gets full steps as well as full resolution on a heavy scene (GLASS at 128³: 55 fps at 240 steps, where the old step rung swung the march between 168 and 120 steps for 88 fps without asking) — the picture is what was asked for; if a step lever is wanted it will be an explicit choice, not a rung.
