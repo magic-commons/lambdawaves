@@ -134,6 +134,8 @@ The factorised sum (26× faster on the same thread) was rejected by Sol's law ch
 
 | W127 | the project open, subtracted: `restore()` stands a running A/B transition down before writing the register (a bug on all three open roads); one modulation-window rebuild; one notebook size; one palette paint; the hidden H₂⁺ canvases read no layout while hidden; the pacing probe is one comparison (paced = a drained wait < 8 ms) | iPad (8th report, paced build, demo without quality): open 44 ms sync, 66 ms worst gap, no gap > 100 ms; desktop open 98 → 79 ms (Electron) / 104 → 91 (Firefox), restore 78 → 60, forced layouts per open 63 → 24 ms; five-open serialize/pixel/DOM bytes identical; lab/ −2 lines | BUG + N0 |
 
+| W129 | first-run hygiene: the demo carries no look or quality (it wrote dark/refractive/ALWAYS/accent/friction 0 into the visitor's settings); SHADOW folded on a mobile first visit; the chem-owner restore law (MOLECULES back on the rack when a file leaves chem as owner, MO-REGISTRY when its register is on); the notebook's size saved from its inline style (no more 0×0, one forced layout per pointerup gone); `docs/NOTES-FOR-AGENTS.md` | a device's choices stand through the demo open; desktop first-visit stylehash 0/0; chem-owner round trip on four layouts; notebook reopens at its stored pixels, stable over five saves; `first-run.test` 10/10, `molecular-names` 4/4, `current` 14/14; lock GREEN | BUG + defaults |
+
 The iPad, eight reports on: every scene at the display cap (120 fps with Safari's flag off, 60 with it on), a
 project open under 70 ms, grid changes 0–1 ms + one rebuild frame; the 313 ms GPU queue and the 1.3 s freezes gone.
 

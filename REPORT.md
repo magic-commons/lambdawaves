@@ -2899,3 +2899,22 @@ comparison (paced = a drained wait under 8 ms within 30 tries or 1.5 s), so a bu
 paced" — the iPad's eighth run had. Measured uninstrumented on the report's own scene: WAVE DANCER open 98.0 → 78.9 ms
 (Electron, ×6) and 103.9 → 90.7 (Firefox, ×5); a saved project's restore 78.5 → 59.7 and 84.8 → 66.9; forced layout
 per open 63 → 24 ms.
+
+### wave 129: The first visit's hygiene — a demo that carries no look, a card that follows its owner, and the notes for agents
+
+Opening the bundled WAVE DANCER used to write the author's own look into the visitor's stored settings — dark theme,
+refractive card, frost ALWAYS, the accent, camera friction 0 (that is where the commissioner's iPad got its "refractive,
+chosen"). The demo now carries physics, register, modulation, layout, camera POSE, stage and notebook and nothing
+about the device's look or quality; a device's own choices stand through the open (before, all were overwritten), and
+a device that happened to match the old block serialises the same bytes as before. On a tablet or phone a first visit
+folds SHADOW (the seed lives in `lab/first-run.js` beside the material and the quality; the desktop's first visit is
+unchanged, stylehash 578 elements × 8 states, 0 changed). MOLECULES and MO-REGISTRY were already off a first visit's
+rack on every device and offered by + and WINDOWS; what they lacked was the H₂⁺ card's law: a project that leaves chem
+as the field owner now brings MOLECULES back onto the rack (and MO-REGISTRY when its register is on) even if the layout
+omits them — one line beside the H₂⁺ line, `molecular-names` retargeted to prove it. The notebook's size is saved from
+its inline style, which is what every resize road writes: a project opened while the notebook was closed no longer
+stores 0×0 and reopens at 320×240 off-centre, and one forced layout per pointerup is gone (the rumoured 2 px creep did
+not reproduce; `#notebook` is border-box). And `docs/NOTES-FOR-AGENTS.md`, linked from README and AI_POLICY, tells any
+assistant reading this repository what a user on Apple hardware needs to know (Safari's 60 fps feature flag, Low Power
+Mode, Limit Frame Rate, the first-use pipeline stall), the grid pairing, AUTO SCALE under '120' vs FULL, the device
+self-report and the gates — every fact with its source.
