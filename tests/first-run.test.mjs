@@ -6,7 +6,7 @@
  * when this browser SAID it (cardSet, wave 51), a legacy frost `true` is ALWAYS (wave 67), anything unreadable is the
  * default.  And the wiring: rack.js asks with its own crossings and feeds these into defaultCard / frostMode /
  * applySettings (a source read, because rack.js needs a DOM). */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { firstRunMaterial, storedCard, storedFrost, bootMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
 
 let FAILED = 0, TOTAL = 0;
@@ -82,17 +82,28 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const autoDropped = ['desktop', 'tablet', 'phone'].every((d) => !('auto' in deviceQuality({ res: 64, auto: false }, d)) && !('auto' in deviceQuality({ res: 64, auto: true }, d)));
   judge('A FILE NEVER CARRIES AUTO SCALE: `auto` is dropped on every device, whether the file says true or false (the switch is the device\'s, in the settings key; serialize() still writes it for older readers)', autoDropped);
   const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
-  const demo = JSON.parse(readFileSync(new URL('../lab/demos/wave-dancer.lambdawaves.json', import.meta.url), 'utf8'));
+  const demoDir = new URL('../lab/demos/', import.meta.url);
+  const demos = readdirSync(demoDir).filter((f) => f.endsWith('.lambdawaves.json')).map((f) => JSON.parse(readFileSync(new URL(f, demoDir), 'utf8')));
   const wires = {
     seed: src.includes("const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };"),
     restore: src.includes("Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));") && !src.includes('Object.assign(quality, pr.quality'),
     serializeStillWrites: src.includes('quality: { ...quality }'),
     gridPairingAgrees: src.includes('quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v];')
       && eq(GRID_PAIRING, { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } }),
-    demoCarriesNoQuality: !!demo.data && !!demo.data.presentation && !('quality' in demo.data.presentation),
+    demosCarryNoQuality: demos.length > 0 && demos.every((d) => !!d.data && !!d.data.presentation && !('quality' in d.data.presentation)),
   };
-  judge('THE WIRING: rack.js seeds `quality` from firstRunQuality with its own crossings (key order res, steps, scale, auto, autoScale, minScale — the serialize bytes), restore() applies a saved quality only through deviceQuality, serialize() still writes the whole block, the GRID segment\'s pairing is the one first-run.js states, and the bundled WAVE DANCER no longer carries a desktop\'s 128³ × 240 with AUTO SCALE off',
+  judge('THE WIRING: rack.js seeds `quality` from firstRunQuality with its own crossings (key order res, steps, scale, auto, autoScale, minScale — the serialize bytes), restore() applies a saved quality only through deviceQuality, serialize() still writes the whole block, the GRID segment\'s pairing is the one first-run.js states, and no bundled demo carries a quality (WAVE DANCER\'s desktop 128³ × 240 with AUTO SCALE off is gone)',
     Object.values(wires).every(Boolean), wires);
+  /* W129 (2026-09-25): A DEMO CARRIES NO LOOK.  restore() applies each ui/camera key only when the file carries it, and
+     every one of these is a key this browser's settings own (saveSettings): opening WAVE DANCER used to write dark /
+     refractive / ALWAYS / its accent / friction 0 into the device's STORED choices.  The demo keeps its physics, register,
+     modulation, layout, camera POSE (obs, layout.cam's pose), stage (a routed target) and notebook. */
+  const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'autoRotate', 'dragGain', 'fling'];
+  const looks = demos.map((d) => { const P = d.data.presentation;
+    return { name: d.name, ui: LOOK.filter((k) => P.ui && k in P.ui), camera: 'camera' in P, camFeel: FEEL.filter((k) => P.layout && P.layout.cam && k in P.layout.cam),
+      keeps: !!(P.obs && P.modulation && P.layout && Array.isArray(P.layout.cards) && P.ui && P.ui.stage && d.notebook && d.data.experiment) }; });
+  judge('A BUNDLED DEMO CARRIES NO LOOK (W129): no theme, card style, frost policy, disconnected cards or accent in ui, no camera feel (the camera block, layout.cam\'s friction / spin / auto-rotate / drag gain / fling) — the device\'s stored choices stand; the physics, modulation, layout, pose, stage and notebook stay',
+    demos.length > 0 && looks.every((r) => !r.ui.length && !r.camera && !r.camFeel.length && r.keeps), looks);
 }
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'first-run.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

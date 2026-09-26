@@ -45,7 +45,7 @@ const PRECACHE = [
   ['./chemview.js',                                                 'd418edafb436'],
   ['./clock.js',                                                    '6431963e1506'],
   ['./cornell.js',                                                  '70b64dee2baa'],
-  ['./demos/wave-dancer.lambdawaves.json',                          '656e0c627328'],
+  ['./demos/wave-dancer.lambdawaves.json',                          'd83b5515e161'],
   ['./density.js',                                                  'b7e7f8bde4fb'],
   ['./dynamics.js',                                                 'e45f1820ad91'],
   ['./dynamicsview.js',                                             'dde4262d990d'],

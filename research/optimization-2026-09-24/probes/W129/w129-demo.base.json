@@ -1,0 +1,267 @@
+{
+ "demos": [
+  "wave-dancer.lambdawaves.json"
+ ],
+ "wave-dancer.lambdawaves.json · own": {
+  "before": {
+   "live": {
+    "theme": "light",
+    "card": "tinted",
+    "frost": "off",
+    "disc": false,
+    "accent": [
+     40,
+     250
+    ],
+    "friction": 0.8,
+    "speed": 0.6,
+    "dragGain": 1.4,
+    "fling": 0.7,
+    "autoRotate": false,
+    "quality": {
+     "res": 64,
+     "steps": 160,
+     "scale": 1,
+     "auto": true,
+     "autoScale": 1,
+     "minScale": 0.35
+    }
+   },
+   "stored": {
+    "theme": "light",
+    "card": "tinted",
+    "cardSet": true,
+    "frost": "off",
+    "disc": false,
+    "accent": [
+     40,
+     250,
+     0.5
+    ],
+    "friction": 0.8,
+    "spin": 0.6,
+    "dragGain": 1.4,
+    "fling": 0.7,
+    "auto": true
+   }
+  },
+  "after": {
+   "live": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300
+    ],
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "autoRotate": false,
+    "quality": {
+     "res": 64,
+     "steps": 160,
+     "scale": 1,
+     "auto": true,
+     "autoScale": 1,
+     "minScale": 0.35
+    }
+   },
+   "stored": {
+    "theme": "dark",
+    "card": "refractive",
+    "cardSet": true,
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300,
+     0.1
+    ],
+    "friction": 0,
+    "spin": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "auto": true
+   }
+  },
+  "opened": {
+   "ok": true,
+   "full": "2d785c59:13932",
+   "masked": "39b419c0:13663",
+   "ui": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": {
+     "a": 30,
+     "b": 300,
+     "vivid": 0.1
+    },
+    "stage": null
+   },
+   "camera": {
+    "autoRotate": false,
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1
+   },
+   "fileCarries": {
+    "ui": [
+     "theme",
+     "card",
+     "frost",
+     "disc",
+     "accent",
+     "stage"
+    ],
+    "camera": true,
+    "quality": false,
+    "camFeel": [
+     "friction",
+     "spin",
+     "autoRotate",
+     "dragGain",
+     "fling"
+    ]
+   },
+   "errs": []
+  },
+  "stands": false
+ },
+ "wave-dancer.lambdawaves.json · matched": {
+  "before": {
+   "live": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300
+    ],
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "autoRotate": false,
+    "quality": {
+     "res": 64,
+     "steps": 160,
+     "scale": 1,
+     "auto": true,
+     "autoScale": 1,
+     "minScale": 0.35
+    }
+   },
+   "stored": {
+    "theme": "dark",
+    "card": "refractive",
+    "cardSet": true,
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300,
+     0.1
+    ],
+    "friction": 0,
+    "spin": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "auto": true
+   }
+  },
+  "after": {
+   "live": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300
+    ],
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "autoRotate": false,
+    "quality": {
+     "res": 64,
+     "steps": 160,
+     "scale": 1,
+     "auto": true,
+     "autoScale": 1,
+     "minScale": 0.35
+    }
+   },
+   "stored": {
+    "theme": "dark",
+    "card": "refractive",
+    "cardSet": true,
+    "frost": "always",
+    "disc": true,
+    "accent": [
+     30,
+     300,
+     0.1
+    ],
+    "friction": 0,
+    "spin": 0.25,
+    "dragGain": 1,
+    "fling": 1,
+    "auto": true
+   }
+  },
+  "opened": {
+   "ok": true,
+   "full": "2d785c59:13932",
+   "masked": "39b419c0:13663",
+   "ui": {
+    "theme": "dark",
+    "card": "refractive",
+    "frost": "always",
+    "disc": true,
+    "accent": {
+     "a": 30,
+     "b": 300,
+     "vivid": 0.1
+    },
+    "stage": null
+   },
+   "camera": {
+    "autoRotate": false,
+    "friction": 0,
+    "speed": 0.25,
+    "dragGain": 1,
+    "fling": 1
+   },
+   "fileCarries": {
+    "ui": [
+     "theme",
+     "card",
+     "frost",
+     "disc",
+     "accent",
+     "stage"
+    ],
+    "camera": true,
+    "quality": false,
+    "camFeel": [
+     "friction",
+     "spin",
+     "autoRotate",
+     "dragGain",
+     "fling"
+    ]
+   },
+   "errs": []
+  },
+  "stands": true
+ }
+}

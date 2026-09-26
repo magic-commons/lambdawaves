@@ -878,15 +878,6 @@
     "v": 107
    },
    "ui": {
-    "theme": "dark",
-    "card": "refractive",
-    "frost": "always",
-    "disc": true,
-    "accent": {
-     "a": 30,
-     "b": 300,
-     "vivid": 0.1
-    },
     "stage": {
      "mix": 0.05411413204188609,
      "custom": [
@@ -1131,12 +1122,7 @@
       -0.14143432014691718,
       0.4237087132790336,
       -0.7027864149778662
-     ],
-     "friction": 0,
-     "spin": 0.25,
-     "autoRotate": false,
-     "dragGain": 1,
-     "fling": 1
+     ]
     }
    },
    "modwin": {
@@ -1152,13 +1138,6 @@
     "folder": {},
     "macroSide": "left",
     "macroMin": false
-   },
-   "camera": {
-    "autoRotate": false,
-    "friction": 0,
-    "speed": 0.25,
-    "dragGain": 1,
-    "fling": 1
    },
    "overlays": {
     "vortex": {
