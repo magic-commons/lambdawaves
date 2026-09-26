@@ -1,14 +1,15 @@
 
 
 const STUCK_MS = 5000;      // a pointerdown whose pointerup never came stops holding the commit off after this
-const BOTTOM = 'start';     // the row no action produced: where a clear() (a link, a preset, the boot) puts you
+const BOTTOM = 'start';     // the row no action produced, from a clear() given no name (boot, link, open · … name theirs)
 const UNNAMED = 'edit';     // what an action nobody named is called — honest, and not the start of a taxonomy
 
 /**
- * createHistory({ read, write, liveKey, depth, quiet, onChange })
+ * createHistory({ read, write, liveKey, driven, depth, quiet, onChange })
  *   read()      → a snapshot object (must carry .key, the value liveKey() had when it was read)
  *   write(S)    → put the instrument back into snapshot S (called with notes suppressed)
  *   liveKey()   → a cheap string that changes exactly when the remembered state changes
+ *   driven()    → true while a continuous drive runs (one gesture: no keys hashed, no rows)
  *   onChange()  → called whenever the ring or the cursor moves (repaint the list, canUndo / canRedo)
  */
 export function createHistory(port) {
@@ -121,9 +122,10 @@ export function createHistory(port) {
     onChange();
     return true;
   }
-  function clear() {
+  /** a fresh timeline on the live state, its bottom row named for its origin */
+  function clear(name) {
     if (timer) { clearTimeout(timer); timer = 0; }
-    ring.length = 0; ring.push(row(port.read(), BOTTOM)); cursor = 0;
+    ring.length = 0; ring.push(row(port.read(), name || BOTTOM)); cursor = 0;
     held = 0; pending = null; returnBranch = null;
     onChange();
   }

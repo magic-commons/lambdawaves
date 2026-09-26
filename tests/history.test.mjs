@@ -278,5 +278,22 @@ function withClock(fn) {
     quiet && redo && restored && one && value === 2, { quiet, redo, restored, one, value });
 }
 
+{ /* 0.3.1 · S3: the bottom row names its origin — clear(name) — and a clear with no name still says 'start' */
+  const { st, H, edit } = toy();
+  H.clear('boot'); const boot = H.entries();
+  edit(1); H.flush(); H.clear(); const plain = H.entries();
+  edit(2); H.label('fader'); H.flush(); const named = H.entries();
+  H.clear('open · WAVE DANCER'); const opened = H.entries();
+  const shape = Object.keys(opened[0]).join(',');
+  const undone = H.undo();
+  judge('THE BOTTOM ROW NAMES ITS ORIGIN: clear(\'boot\') is one row called boot, a clear with no name is one row called start (the default callers keep), a clear(\'open · WAVE DANCER\') after an edit is again ONE row, current, carrying that name and standing on the live state (2) with nothing to undo; entries() keeps its shape (i, label, at, state)',
+    boot.length === 1 && boot[0].label === 'boot' && boot[0].state === 'current'
+    && plain.length === 1 && plain[0].label === 'start'
+    && named.map((r) => r.label).join(' · ') === 'start · fader'
+    && opened.length === 1 && opened[0].label === 'open · WAVE DANCER' && opened[0].state === 'current' && st.v === 2
+    && shape === 'i,label,at,state' && undone === false && H.depth === 0,
+    { boot, plain: plain.map((r) => r.label), named: named.map((r) => r.label), opened, shape, undone });
+}
+
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'history.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

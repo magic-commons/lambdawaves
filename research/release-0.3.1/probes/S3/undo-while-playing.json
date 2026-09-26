@@ -1,0 +1,81 @@
+{
+ "routes": [
+  "material.exposure",
+  "material.softness",
+  "material.iso",
+  "observer.fov",
+  "material.stage"
+ ],
+ "sources": [
+  "lfo",
+  "audio"
+ ],
+ "beforeEdit": {
+  "playing": true,
+  "running": true,
+  "macros": [
+   0,
+   0,
+   0.9907
+  ],
+  "exposure": 0.4473,
+  "t": 153.579,
+  "fieldPlaying": true
+ },
+ "afterEdit": {
+  "playing": true,
+  "running": true,
+  "macros": [
+   0,
+   0,
+   0.9907
+  ],
+  "exposure": 0.4473,
+  "t": 153.579,
+  "fieldPlaying": true
+ },
+ "undoMs": 14.180000000000291,
+ "afterUndo": {
+  "playing": true,
+  "running": true,
+  "macros": [
+   0,
+   0,
+   0.9907
+  ],
+  "exposure": 0.4473,
+  "t": 153.579,
+  "fieldPlaying": true
+ },
+ "rebuilds": 0,
+ "sameDevNode": true,
+ "later": {
+  "playing": true,
+  "running": true,
+  "macros": [
+   0,
+   0,
+   0.7888
+  ],
+  "exposure": 0.4473,
+  "t": 209.146,
+  "fieldPlaying": true
+ },
+ "later2": {
+  "playing": true,
+  "running": true,
+  "macros": [
+   0,
+   0,
+   0.003
+  ],
+  "exposure": 0.4473,
+  "t": 316.717,
+  "fieldPlaying": true
+ },
+ "rows": [
+  "open · WAVE DANCER:current",
+  "edit:future"
+ ],
+ "errs": []
+}
