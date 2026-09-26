@@ -104,12 +104,17 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
      every one of these is a key this browser's settings own (saveSettings): opening WAVE DANCER used to write dark /
      refractive / ALWAYS / its accent / friction 0 into the device's STORED choices.  The demo keeps its physics, register,
      modulation, layout, camera POSE (obs, layout.cam's pose), stage (a routed target) and notebook. */
-  const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'autoRotate', 'dragGain', 'fling'];
+  /* 0.3.1 · S2: …AND NO PREFERENCE KEY AT ALL — the field chrome in mat too (S1's FIELD_CHROME, D1), which restore() now ignores:
+     WAVE DANCER's dead frame / axis / invert / axisInk / cornerSide went.  tests/new-project.test.mjs holds the empty project to
+     these same three lists. */
+  const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'autoRotate', 'dragGain', 'fling'],
+    CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];
   const looks = demos.map((d) => { const P = d.data.presentation;
     return { name: d.name, ui: LOOK.filter((k) => P.ui && k in P.ui), camera: 'camera' in P, camFeel: FEEL.filter((k) => P.layout && P.layout.cam && k in P.layout.cam),
+      chrome: CHROME.filter((k) => P.mat && k in P.mat),
       keeps: !!(P.obs && P.modulation && P.layout && Array.isArray(P.layout.cards) && P.ui && P.ui.stage && d.notebook && d.data.experiment) }; });
-  judge('A BUNDLED DEMO CARRIES NO LOOK (W129): no theme, card style, frost policy, disconnected cards or accent in ui, no camera feel (the camera block, layout.cam\'s friction / spin / auto-rotate / drag gain / fling) — the device\'s stored choices stand; the physics, modulation, layout, pose, stage and notebook stay',
-    demos.length > 0 && looks.every((r) => !r.ui.length && !r.camera && !r.camFeel.length && r.keeps), looks);
+  judge('A BUNDLED DEMO CARRIES NO LOOK (W129, 0.3.1 · S2): no theme, card style, frost policy, disconnected cards or accent in ui, no camera feel (the camera block, layout.cam\'s friction / spin / auto-rotate / drag gain / fling), no field chrome in mat (frame / axis / frameMode / axisMode / cornerSide / invert / axisInk) — the device\'s stored choices stand; the physics, modulation, layout, pose, stage and notebook stay',
+    demos.length > 0 && looks.every((r) => !r.ui.length && !r.camera && !r.camFeel.length && !r.chrome.length && r.keeps), looks);
 }
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'first-run.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);
