@@ -1,0 +1,344 @@
+{
+ "at": "2026-09-26T00:21:44.540Z",
+ "port": "8742",
+ "secs": 45,
+ "scenes": {
+  "gas": {
+   "scene": "gas",
+   "split": {
+    "frameMs": 36.36,
+    "presentMs": 4.32,
+    "reconstructMs": 31.29,
+    "w": 1920,
+    "h": 1043
+   },
+   "mode": "120",
+   "secs": 45,
+   "meanFps": 91.8,
+   "fpsPer5s": [
+    41.7,
+    53.8,
+    96.4,
+    101,
+    104.7,
+    96.9,
+    105.2,
+    104.3,
+    101.3
+   ],
+   "resChanges": 2,
+   "scaleChanges": 7,
+   "stepCapChanges": 0,
+   "governorChanges": 3,
+   "final": {
+    "t": 45.03,
+    "res": 64,
+    "stepCap": "inf",
+    "steps": 240,
+    "drop": 2,
+    "state": "stepped-2",
+    "median": 8.3,
+    "autoScale": 0.75,
+    "cw": 1440,
+    "fps": 95
+   },
+   "rows": [
+    {
+     "t": 0.25,
+     "res": 128,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 0,
+     "state": "nominal",
+     "median": 0,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 0
+    },
+    {
+     "t": 0.5,
+     "res": 128,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 0,
+     "state": "nominal",
+     "median": 33.3,
+     "autoScale": 0.75,
+     "cw": 1440,
+     "fps": 0
+    },
+    {
+     "t": 0.75,
+     "res": 128,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 0,
+     "state": "nominal",
+     "median": 33.4,
+     "autoScale": 0.55,
+     "cw": 1056,
+     "fps": 0
+    },
+    {
+     "t": 1,
+     "res": 96,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 1,
+     "state": "stepped-1",
+     "median": 33.3,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 31
+    },
+    {
+     "t": 9.26,
+     "res": 96,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 1,
+     "state": "stepped-1",
+     "median": 16.7,
+     "autoScale": 0.75,
+     "cw": 1440,
+     "fps": 51.7
+    },
+    {
+     "t": 9.51,
+     "res": 96,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 1,
+     "state": "stepped-1",
+     "median": 16.7,
+     "autoScale": 0.55,
+     "cw": 1056,
+     "fps": 51.7
+    },
+    {
+     "t": 9.76,
+     "res": 64,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 2,
+     "state": "stepped-2",
+     "median": 16.7,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 51.7
+    },
+    {
+     "t": 44.03,
+     "res": 64,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 2,
+     "state": "stepped-2",
+     "median": 16.6,
+     "autoScale": 0.75,
+     "cw": 1440,
+     "fps": 98.2
+    }
+   ],
+   "parkedSeen": [],
+   "parkedEnd": [],
+   "probes": 0,
+   "afterPause": {
+    "res": 128,
+    "stepCap": "inf",
+    "steps": 240,
+    "drop": 0,
+    "autoScale": 1,
+    "cw": 1920
+   },
+   "errs": []
+  },
+  "glass": {
+   "scene": "glass",
+   "split": {
+    "frameMs": 18.78,
+    "presentMs": 18.68,
+    "reconstructMs": 0.1,
+    "w": 1920,
+    "h": 1043
+   },
+   "mode": "120",
+   "secs": 45,
+   "meanFps": 51.6,
+   "fpsPer5s": [
+    42.1,
+    51.3,
+    51.8,
+    51.2,
+    51.6,
+    51.5,
+    52,
+    50.9,
+    51.7
+   ],
+   "resChanges": 0,
+   "scaleChanges": 0,
+   "stepCapChanges": 0,
+   "governorChanges": 0,
+   "final": {
+    "t": 45.03,
+    "res": 128,
+    "stepCap": "inf",
+    "steps": 240,
+    "drop": 0,
+    "state": "nominal",
+    "median": 16.7,
+    "autoScale": 1,
+    "cw": 1920,
+    "fps": 51.6
+   },
+   "rows": [
+    {
+     "t": 0.25,
+     "res": 128,
+     "stepCap": "inf",
+     "steps": 240,
+     "drop": 0,
+     "state": "nominal",
+     "median": 0,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 0
+    }
+   ],
+   "parkedSeen": [],
+   "parkedEnd": [],
+   "probes": 0,
+   "afterPause": {
+    "res": 128,
+    "stepCap": "inf",
+    "steps": 240,
+    "drop": 0,
+    "autoScale": 1,
+    "cw": 1920
+   },
+   "errs": []
+  },
+  "default": {
+   "scene": "default",
+   "split": {
+    "frameMs": 2.22,
+    "presentMs": 2.16,
+    "reconstructMs": 0.05,
+    "w": 1920,
+    "h": 1043
+   },
+   "mode": "120",
+   "secs": 5,
+   "meanFps": 116.9,
+   "fpsPer5s": [
+    98.8
+   ],
+   "resChanges": 0,
+   "scaleChanges": 0,
+   "stepCapChanges": 0,
+   "governorChanges": 0,
+   "final": {
+    "t": 5,
+    "res": 96,
+    "stepCap": "inf",
+    "steps": 160,
+    "drop": 0,
+    "state": "nominal",
+    "median": 8.3,
+    "autoScale": 1,
+    "cw": 1920,
+    "fps": 120
+   },
+   "rows": [
+    {
+     "t": 0.25,
+     "res": 96,
+     "stepCap": "inf",
+     "steps": 160,
+     "drop": 0,
+     "state": "nominal",
+     "median": 0,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 0
+    }
+   ],
+   "parkedSeen": [],
+   "parkedEnd": [],
+   "probes": 0,
+   "afterPause": {
+    "res": 96,
+    "stepCap": "inf",
+    "steps": 160,
+    "drop": 0,
+    "autoScale": 1,
+    "cw": 1920
+   },
+   "errs": []
+  },
+  "wigner": {
+   "scene": "wigner",
+   "split": {
+    "frameMs": 2.17,
+    "presentMs": 2.17,
+    "reconstructMs": 0.03,
+    "w": 1920,
+    "h": 1043
+   },
+   "mode": "120",
+   "secs": 10,
+   "meanFps": 109.7,
+   "fpsPer5s": [
+    96.5,
+    106.4
+   ],
+   "resChanges": 0,
+   "scaleChanges": 0,
+   "stepCapChanges": 0,
+   "governorChanges": 0,
+   "final": {
+    "t": 10.01,
+    "res": 64,
+    "stepCap": "inf",
+    "steps": 160,
+    "drop": 0,
+    "state": "nominal",
+    "median": 8.3,
+    "autoScale": 1,
+    "cw": 1920,
+    "fps": 108
+   },
+   "rows": [
+    {
+     "t": 0.25,
+     "res": 64,
+     "stepCap": "inf",
+     "steps": 160,
+     "drop": 0,
+     "state": "nominal",
+     "median": 0,
+     "autoScale": 1,
+     "cw": 1920,
+     "fps": 0
+    }
+   ],
+   "parkedSeen": [
+    "wigner"
+   ],
+   "parkedEnd": [
+    "wigner"
+   ],
+   "probes": 3,
+   "afterPause": {
+    "res": 64,
+    "stepCap": "inf",
+    "steps": 160,
+    "drop": 0,
+    "autoScale": 1,
+    "cw": 1920
+   },
+   "errs": []
+  }
+ }
+}

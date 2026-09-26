@@ -1,0 +1,127 @@
+{
+ "at": "2026-09-26T00:30:19.518Z",
+ "port": "8743",
+ "viewport": [
+  1600,
+  1000
+ ],
+ "dsf": "2",
+ "host": "electron",
+ "loop": "60 Hz timer in place of rAF (no GPU backpressure)",
+ "boot": {
+  "ok": true,
+  "dpr": 2,
+  "paced": true,
+  "waits": [
+   [
+    187.9,
+    2
+   ],
+   [
+    118.5,
+    1
+   ],
+   [
+    82.6,
+    0
+   ],
+   [
+    4.8,
+    0
+   ]
+  ]
+ },
+ "gpu": {
+  "frameMs": 28.8226,
+  "presentMs": 28.5794,
+  "reconstructMs": 0.1036,
+  "w": 4800,
+  "h": 2515,
+  "steps": 240,
+  "res": 128
+ },
+ "fixed": {
+  "label": "1s+2pz 128³ × 240 · AUTO SCALE off",
+  "seconds": 5,
+  "loopPerS": 59.6,
+  "presentsPerS": 43.4,
+  "submitsPerS": 43.4,
+  "completionsPerS": 43.2,
+  "queueDepthMax": 4,
+  "depthEvery30": [
+   3,
+   4,
+   4,
+   4,
+   3,
+   3,
+   4,
+   4,
+   4
+  ],
+  "backlogAtPause": 4,
+  "drainMsAtPause": 98,
+  "skipped": 81,
+  "paced": true,
+  "presentIntervalMedianMs": 17.4,
+  "autoScaleFirstChangeMs": null,
+  "autoScaleTrace": [
+   [
+    19,
+    1
+   ]
+  ],
+  "canvas": [
+   4800,
+   2515
+  ],
+  "governor": true,
+  "maxGridDrop": 0,
+  "minStepCap": 168
+ },
+ "auto": {
+  "label": "1s+2pz 128³ × 240 · AUTO SCALE on",
+  "seconds": 5.02,
+  "loopPerS": 60,
+  "presentsPerS": 56,
+  "submitsPerS": 56,
+  "completionsPerS": 55.6,
+  "queueDepthMax": 4,
+  "depthEvery30": [
+   4,
+   1,
+   1,
+   3,
+   2,
+   2,
+   2,
+   1,
+   4,
+   4
+  ],
+  "backlogAtPause": 3,
+  "drainMsAtPause": 98,
+  "skipped": 21,
+  "paced": true,
+  "presentIntervalMedianMs": 17,
+  "autoScaleFirstChangeMs": 551,
+  "autoScaleTrace": [
+   [
+    19,
+    1
+   ],
+   [
+    551,
+    0.75
+   ]
+  ],
+  "canvas": [
+   4800,
+   2515
+  ],
+  "governor": true,
+  "maxGridDrop": 0,
+  "minStepCap": 168
+ },
+ "errs": []
+}

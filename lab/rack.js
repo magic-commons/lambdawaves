@@ -325,34 +325,39 @@ export async function boot(dom) {
 
 
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
-  /* AUTO SCALE: the canvas backing resolution follows the rAF interval (what a GPU-bound device shows) against the frame
-     budget (60 Hz in FULL, the observed cadence up to 120 Hz in 120 mode) by ONE RULE (AS, 2026-09-25): autoScaleStep decides
-     once ≥ 250 ms and ≥ 6 presented frames of one running loop have passed, on the window's MEDIAN interval (a burst of slow
-     frames is not a slow scene).  Outside [budget·1.08, budget·4/3] it jumps ONCE to the scale that meets the target (cost ∝
-     scale²: scale·√(target/median), ×0.5…×1.15) on the 0.05 grid, rounded toward the current scale so it never overshoots, then
-     HOLDS: each step reallocates the canvas (a stall on WebKit), so at vsync, where the interval cannot show headroom, it does
-     not probe up — the next pause resets it.  (It was −0.1/+0.05 on an EMA every 24 frames: ~11 s to reach 35 %.)
-     W125 (Josh, 2026-09-25) · THE PAUSE EDGE returns it to 1 and presents once (the still picture at the user's resolution —
-     AUDIT-A FA4), and restarts the window on EVERY pause edge, even at 1, or the play's intervals (or the ~100 ms one straddling
-     the edge) judged a paused drag and walked it to 35 % (probes/W125/w125-pause-edge).  The EDGE only (`playedLast`): paused
-     camera motion presents frames this rule may still judge.  AUTO SCALE off: nothing (the switch already put 1). */
-  const autoQ = { presented: 0, sinceMs: 0, k: 0, iv: new Float64Array(32), lastMs: 0, changes: 0 };
-  function autoScaleStep(scale, iv, k, budgetMs, minScale, sinceMs, presented) {   // null until due, else the scale (the same one = hold)
-    if (presented < 6 || sinceMs < 250) return null;
-    const n = Math.min(k, iv.length), ms = n > 2 ? iv.subarray(0, n).sort()[n >> 1] : 0;   // sorts the window in place: it restarts after every decision
-    const over = ms > budgetMs * 4 / 3;
-    if (!over && !(ms > 0 && ms <= budgetMs * 1.08)) return scale;
+  /* ── ONE CONTROLLER (wave 128; AUTO SCALE's one rule AS 2026-09-25 + the GOVERNOR of wave 45, merged) ─────────────────────
+     ONE measurement: the MEDIAN of the presented-frame intervals in a window of one running loop (the loop is paced, so rAF
+     is honest on every browser).  ONE decision, once ≥ 250 ms and ≥ 6 presented frames have passed, against the frame budget
+     (60 Hz in FULL, the observed cadence up to 120 Hz in 120 mode); the window restarts after every decision.  Its levers:
+     SCALE (the AUTO SCALE switch): outside [budget·1.08, budget·4/3] jump ONCE to the scale that meets the target (the present
+       costs ∝ scale²: scale·√(target/median), ×0.5…×1.15) on the 0.05 grid, rounded toward the current scale, then HOLD — each
+       step reallocates the canvas (a stall on WebKit), and at vsync the interval cannot show headroom, so it never probes up.
+     GRID (the GOVERNOR switch, while playing, above 64³): one rung down (128 → 96 → 64, the rebuild road) when the scale
+       cannot mend the frame — it is over with AUTO SCALE off or the scale at its floor, or the DESCENT the scale made did not
+       lower the median as scale² predicts (median > m0·(s/s0)² + budget: a vsync-quantised present-bound frame misses its
+       prediction by less than one refresh ≤ one budget, so only a reconstruct-bound frame fails it).  The scale then returns
+       to what the present measured on that descent can afford.  No rung comes back while playing.
+     READERS (the GOVERNOR switch): the reader law below, by measured cost.
+     THE PAUSE EDGE (W125-2, one place, in the loop): the user's grid and a scale of 1 come back at once with one frame, and the
+     window restarts — the play's intervals are not the still picture's.  quality.res stays the USER's (and the project's);
+     gov.drop is this browser's, never serialised.  (The step rung ×0.7/×0.5 of 2026-09-10 is gone: it only ever helped a
+     present-bound frame, which the scale mends for less, and on a compute-bound one it stacked on the scale — AUDIT-A FA4.) */
+  const autoQ = { presented: 0, sinceMs: 0, k: 0, iv: new Float64Array(32), lastMs: 0, changes: 0, m0: 0, s0: 1 };   // m0/s0: the median and scale where the current descent began
+  function controlStep(w, nowMs, scale, minScale, budgetMs, auto, gridFree) {   // null until due, else { median, scale, rung }
+    if (w.presented < 6 || nowMs - w.sinceMs < 250) return null;
+    const n = Math.min(w.k, w.iv.length), ms = n > 2 ? w.iv.subarray(0, n).sort()[n >> 1] : 0;   // sorts the window in place: it restarts after every decision
+    const over = ms > budgetMs * 4 / 3, failed = w.m0 > 0 && ms > w.m0 * (scale / w.s0) ** 2 + budgetMs;   // failed: the descent did not buy what scale² promised
+    if (gridFree && (failed || (over && (!auto || scale <= minScale)))) {
+      const P = w.m0 > ms ? (w.m0 - ms) / (w.s0 * w.s0 - scale * scale) : 0;   // the present's cost at scale 1, as the descent measured it
+      return { median: ms, rung: true, scale: auto && w.m0 > 0 ? Math.max(scale, P > 0 ? Math.min(1, Math.floor(20 * Math.sqrt(budgetMs / P) + 1e-9) / 20) : 1) : scale };
+    }
+    if (!auto || (!over && !(ms > 0 && ms <= budgetMs * 1.08))) return { median: ms, rung: false, scale };
     const x = 20 * scale * Math.min(1.15, Math.max(0.5, Math.sqrt((over ? budgetMs : budgetMs * 1.08) / ms)));
-    return Math.min(1, Math.max(minScale, (over ? Math.ceil(x - 1e-9) : Math.floor(x + 1e-9)) / 20));
+    return { median: ms, rung: false, scale: Math.min(1, Math.max(minScale, (over ? Math.ceil(x - 1e-9) : Math.floor(x + 1e-9)) / 20)) };
   }
   let playedLast = false;          // W125: was the transport playing on the last frame the loop ran?  The pause EDGE is playedLast && !playing
-  /* ── THE GOVERNOR (wave 45): AUTO SCALE extended.  The last 60 presented frames' median is judged against the active
-     frame budget: over it, the field grid steps one notch down (128 → 96 → 64) and the READER LAW tightens; sustained
-     headroom steps back up;
-     paused, nothing is governed and the user's grid comes back at once.  quality.res stays the USER's choice (and the
-     project's); gov.drop is this browser's, never serialised. ── */
   const RES_LADDER = [64, 96, 128];
-  const gov = { on: true, drop: 0, stepDrop: 0, median: 0, ring: new Float32Array(60), sorted: new Float32Array(60), n: 0, okSince: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
+  const gov = { on: true, drop: 0, median: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
   /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
@@ -360,7 +365,6 @@ export async function boot(dom) {
     const hold = frostMode === 'still' && clock.playing;
     if (hold !== document.body.classList.contains('frost-hold')) document.body.classList.toggle('frost-hold', hold);
   }
-  const STEP_LADDER = [1, 0.7, 0.5];                 // the governor's ray-step multipliers, tried before the grid ladder
   const effectiveRes = () => { if (!gov.drop) return quality.res; let i = RES_LADDER.findIndex((r) => r >= quality.res); if (i < 0) i = RES_LADDER.length - 1; return RES_LADDER[Math.max(0, i - gov.drop)]; };
   const READER_LAW = { park: 16, slow: 6, parkDrop: 8, slowDrop: 3, probeMs: 3000 };   // ms per update: parked while playing / slowed to every 6 × cost — and the tighter pair once stepped down
 
@@ -443,14 +447,14 @@ export async function boot(dom) {
     if (!clock.playing || !gov.on) { if (gov.parked.has(name)) unpark(name, w); return true; }
     const now = performance.now();
     if (now - gov.scroll < 150) return false;
-    const cost = perf.work[name] || 0, park = (gov.drop || gov.stepDrop) ? READER_LAW.parkDrop : READER_LAW.park, slow = (gov.drop || gov.stepDrop) ? READER_LAW.slowDrop : READER_LAW.slow;
+    const cost = perf.work[name] || 0, park = gov.drop ? READER_LAW.parkDrop : READER_LAW.park, slow = gov.drop ? READER_LAW.slowDrop : READER_LAW.slow;
     /* THE RE-PROBE (wave 50).  A parked reader never runs, so its cost is never measured again, so it stays parked
        for the whole session even after the thing that made it dear has gone (a one-off hitch during its measurement,
        a smaller state, a window that got cheaper, a governor notch that made every reader cheaper).  Once every
        PROBE_MS it is let through ONCE: perf.work is cleared first, so tick() writes a FRESH measurement rather than
        nudging a stale EMA (and a probe under 1 ms writes nothing at all, which reads as free).  The next may() then
-       unparks it on the new number, or parks it again on the old one.  PROBE_MS = 3 s is the governor's own recovery
-       cadence (3 s under budget lifts a grid notch): one probe of an over-budget reader costs at most its own frame,
+       unparks it on the new number, or parks it again on the old one.  PROBE_MS = 3 s was the old governor's recovery
+       cadence (3 s under budget lifted a grid notch): one probe of an over-budget reader costs at most its own frame,
        so the price of asking is under 1 % of the wall even for a 30 ms reader, and a window that came back under
        budget is live again within one cadence of the edit that freed it. */
     if (gov.parked.has(name)) { const p = gov.parked.get(name); if (now - p.probe >= READER_LAW.probeMs && gov.probeFrame !== perf.counts.frames) { gov.probeFrame = perf.counts.frames; p.probe = now; p.probes++; gov.probes++; perf.work[name] = 0; return true; } }   // ONE probe per frame: the law exists so that no frame carries two readers over budget, and a probe is a reader over budget
@@ -470,7 +474,7 @@ export async function boot(dom) {
   }
   function setGovernor(v) {
     gov.on = !!v; if (ui.govSw) ui.govSw.set(gov.on);
-    if (!gov.on) { gov.drop = 0; gov.okSince = 0; for (const name of [...gov.parked.keys()]) unpark(name, READERS[name]); schedule(TIER.REBUILD); }
+    if (!gov.on) { gov.drop = 0; for (const name of [...gov.parked.keys()]) unpark(name, READERS[name]); schedule(TIER.REBUILD); }
   }
   function setKeepFrames(v) {
     keep.frames = !!v; if (ui.keepSw) ui.keepSw.set(keep.frames);
@@ -485,7 +489,6 @@ export async function boot(dom) {
     perf.mode = m === '120' ? '120' : 'full';
     perf.cpuEvery = perf.mode === '120' ? 4 : 1;
     autoQ.presented = autoQ.lastMs = 0;
-    gov.n = gov.okSince = 0;
     frameBudget.breakSequence();
     if (ui.perfSeg) ui.perfSeg.set(perf.mode);
   }
@@ -751,8 +754,8 @@ export async function boot(dom) {
       clock._wall = null;                       // PHYSICS: clock.js's own idiom — "the next dt is NOT a dt" (what pause() leaves behind)
       lastWall = now / 1000;                    // CAMERA: exactly what camera.wake() does
       modWall = now; lastReconMs = -1e9;        // the modulation cadence and the FIELD clock start their windows here
-      autoQ.lastMs = 0; autoQ.presented = 0;   // the auto-scale window, and the "the thread was blocked" flash that a 3-minute gap would otherwise fire
-      gov.n = 0; gov.okSince = 0; metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
+      autoQ.lastMs = 0; autoQ.presented = 0;   // the controller's window, and the "the thread was blocked" flash that a 3-minute gap would otherwise fire
+      metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
       if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
@@ -1082,7 +1085,7 @@ export async function boot(dom) {
     }
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
-      field.setStepCap(Math.min(tabletMotion ? tablet.steps : Infinity, gov.stepDrop ? Math.max(24, Math.round(mat.steps * STEP_LADDER[gov.stepDrop])) : Infinity));   // full saved quality returns on the first still frame; the governor's step cap rides on top
+      field.setStepCap(tabletMotion ? tablet.steps : Infinity);   // full saved quality returns on the first still frame
       tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat, molecule: !!(molSession && molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
       pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
@@ -1090,46 +1093,30 @@ export async function boot(dom) {
     if (modes) stats.reconstructs++;
     if (tier > 0) { stats.tiers[TIER_NAME[tier]]++; stats.lastTier = TIER_NAME[tier]; }
     stats.frames++; if (!held) winFrames++;                            // PACE: the fps readout counts what the loop drew
-    if (tier >= TIER.PRESENT && !autoQ.presented++) { autoQ.sinceMs = nowMs; autoQ.k = 0; }   // AUTO SCALE's window opens on its first presented frame
+    if (tier >= TIER.PRESENT && !autoQ.presented++) { autoQ.sinceMs = nowMs; autoQ.k = 0; }   // the controller's window opens on its first presented frame
     if (autoQ.lastMs && tier >= TIER.PRESENT) {
       const iv = nowMs - autoQ.lastMs;
       frameBudget.sample(iv);
-      if (iv <= 250) { autoQ.iv[autoQ.k++ & 31] = iv; gov.ring[gov.n % 60] = iv; gov.n++; }
+      if (iv <= 250) autoQ.iv[autoQ.k++ & 31] = iv;
     }
     if (!held) {                                                     // PACE: a held frame is not an interval — the next present's spans it, which is what the GPU delivered
       if (autoQ.lastMs && nowMs - autoQ.lastMs > 250) busyFlash(600);    // wave 48: a gap that long means the thread WAS blocked by work nobody wrapped — say so for 600 ms
       autoQ.lastMs = nowMs;
     }
     const slot = perf.counts.frames % 60; perf.ring[slot] = 0; loopRing[slot] = 0;   // filled at the tail with this frame's own main-thread cost — the SAME slot (LA1)
-    const nextScale = autoScaleStep(quality.autoScale, autoQ.iv, autoQ.k, perfBudgetMs(), quality.minScale, nowMs - autoQ.sinceMs, autoQ.presented);
-    if (nextScale !== null) {                                        // AUTO SCALE's one rule has judged (its law at autoQ)
-      if (quality.auto && nextScale !== quality.autoScale) { quality.autoScale = nextScale; autoQ.changes++; }
-      autoQ.presented = 0;
+    const d = controlStep(autoQ, nowMs, quality.autoScale, quality.minScale, perfBudgetMs(), quality.auto, gov.on && clock.playing && effectiveRes() > RES_LADDER[0]);
+    if (d) {                                                         // THE ONE CONTROLLER has judged (its law at autoQ)
+      if (d.rung || !clock.playing || d.scale >= quality.autoScale) autoQ.m0 = 0;
+      else if (!autoQ.m0) { autoQ.m0 = d.median; autoQ.s0 = quality.autoScale; }   // a descent begins: the scale² test reads from here
+      if (d.rung) { gov.drop++; gov.changes++; schedule(TIER.REBUILD); }
+      if (d.scale !== quality.autoScale) { quality.autoScale = d.scale; autoQ.changes++; }
+      gov.median = d.median; autoQ.presented = 0;
       if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%', quality.auto && quality.autoScale < 1 ? 'warn' : '');
     }
-    /* THE GOVERNOR: the median of the last 60 presented frames, judged every 30 frames while playing */
-    if (gov.n >= 30 && (gov.n % 30) === 0) {
-      const m = Math.min(60, gov.n), s = gov.sorted.subarray(0, m); s.set(gov.ring.subarray(0, m)); s.sort(); gov.median = s[m >> 1];   // typed-array sort is numeric; no copy through a plain array
-      if (gov.on && clock.playing) {
-        const budget = perfBudgetMs();
-        if (gov.median > budget * 1.68) {
-          gov.okSince = 0;
-
-
-          /* 2026-09-10: RAY STEPS FIRST, GRID SECOND. A step cap is a present-time number — applied on the next
-             frame, no texture destroyed or rebuilt — and the ray-march cost is linear in it. Only when two step
-             drops (×0.7, ×0.5) are not enough does the grid ladder move, which is the destroy/recreate that a
-             driver under load likes least. Recovery walks back in the opposite order: grid, then steps. */
-          if (gov.stepDrop < STEP_LADDER.length - 1) { gov.stepDrop++; gov.changes++; gov.n = 0; schedule(TIER.PRESENT); }
-          else if (gov.drop < 2) { gov.drop++; gov.changes++; gov.n = 0; schedule(TIER.REBUILD); }   // the ring restarts: the next judgment measures the new state, not the old frames
-        } else if (gov.median < budget * 1.32) { if (!gov.okSince) gov.okSince = nowMs; else if (nowMs - gov.okSince >= 3000 && (gov.drop > 0 || gov.stepDrop > 0)) { if (gov.drop > 0) gov.drop--; else gov.stepDrop--; gov.changes++; gov.okSince = nowMs; gov.n = 0; schedule(TIER.REBUILD); } }
-        else gov.okSince = 0;
-      }
-    }
-    if (!clock.playing && (gov.drop || gov.stepDrop)) { const rebuild = gov.drop > 0; gov.drop = 0; gov.stepDrop = 0; gov.okSince = 0; gov.changes++; schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); }   // paused: nothing to govern — the user's grid and steps come back at once
-    if (playedLast && !clock.playing && quality.auto) {              // W125: …and AUTO SCALE's canvas, on the pause EDGE only (see its law at autoQ)
-      autoQ.presented = autoQ.lastMs = 0;                            // its window restarts on EVERY pause edge: the play's intervals, and the edge's own transition interval, are not the still picture's
-      if (quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
+    if (playedLast && !clock.playing) {                              // THE PAUSE EDGE (W125-2): the user's grid and canvas come back at once, and the window restarts
+      autoQ.presented = autoQ.lastMs = autoQ.m0 = 0;                 // the play's intervals, and the edge's own transition interval, are not the still picture's
+      if (gov.drop) { gov.drop = 0; gov.changes++; schedule(TIER.REBUILD); }
+      if (quality.auto && quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
     }
     playedLast = clock.playing;
     perf.counts.frames++;
@@ -1286,10 +1273,10 @@ export async function boot(dom) {
   /** the METERS line for the governor: its state, the median it judged, the grid it runs, and what it parked */
   function paintGovernor() {
     if (!ui.govRo) return;
-    const st = !gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop + (gov.stepDrop ? ' · STEPS ×' + STEP_LADDER[gov.stepDrop] : '') : gov.stepDrop ? 'STEPS ×' + STEP_LADDER[gov.stepDrop] : 'nominal';
-    ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : (gov.drop || gov.stepDrop) ? 'warn' : 'ok');
+    const st = !gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal';
+    ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
-    ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 1.68).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');
+    ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 4 / 3).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');
   }
   function statusLine() {
     const rs = stateReaders().rendered;
@@ -2456,7 +2443,7 @@ export async function boot(dom) {
       { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     rp.appendChild(ui.perfSeg.root);
-    ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 28 ms over the last 60 frames' }); rp.appendChild(ui.govRo.root);
+    ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 22 ms · the window median' }); rp.appendChild(ui.govRo.root);
   el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. 120 Hz mode updates visible CPU readers every fourth frame while the field continues to present each frame.';
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
