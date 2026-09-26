@@ -3139,11 +3139,25 @@ reading "A" on an iPad in portrait (1024 × 1366), a 20 px dot at 1000 × 700 �
 rack-w + 340; it now gives way so the row is never under 210 px (the badge needs 199), unchanged at 1206 px and wider.
 With STATUS TAGS on the build badge was created last and landed at the row's end: clipped on the phone's strip, wrapped
 under the pane at 1140, and at 1500 the computed caret pointed at FIELD. The badge is now first in the row, and the
-caret is measured (the badge's centre minus the pane's left, on show and on every resize) instead of computed from the
-row's geometry. The verifier also reported that a link session reads dirty and so is never taken; that was its probe's
-navigation, not a boot — changing only the fragment of an open page is the `hashchange` road, which opens the link over
-the running page's project and correctly reads unsaved against it. A real boot at a link reads clean at LW.ready and
-after register(), and is taken quietly (scene 13).
+caret is measured (the badge's centre minus the pane's left, on show, on every resize and on every body-class change,
+which is how STATUS TAGS moves it) instead of computed from the row's geometry. The verifier also reported that a link
+session reads dirty and so is never taken; that was its probe's navigation, not a boot — changing only the fragment of
+an open page is the `hashchange` road. A real boot at a link reads clean at LW.ready and after register(), and is taken
+quietly (scene 13).
+
+The last pass, from the same verifier's re-check (verdict MERGE; the caret within 0.3 px everywhere it looked; with two
+windows, one SKIP_WAITING per worker per window; a SKIP_WAITING-to-`controllerchange` gap of 4–9 ms, which makes the
+stuck-`taking` race below effectively unreachable). LATER now disarms the take-on-hide: scrubbed to t = 137, offered,
+LATER pressed, the page hidden 0.9 s later, and the session had still been taken and reloaded to t = 0 although the pane
+says "LATER keeps the badge"; the badge now stays, and the next take is a press or the next launch. The caret now
+follows STATUS TAGS switched while the pane is up (the badge moves about 130 px at 1500 × 1000; the caret stayed at 892).
+And a hole from wave 56 that the verifier found on the way, a silent loss of work: a link pasted into the address bar
+over an EDITED session replaced the edit and wiped the undo ring with no question (`boot, edit` → `link`, `canUndo` true
+→ false, no confirm), and over an unedited boot left the page reading dirty although a reload brings the same scene back
+clean. The `hashchange` road now asks first, with the house's own question (`OPEN THIS LINK WITHOUT SAVING?`, through
+the projects' `discard`), and a link that opened is the clean state. Only a fragment that carries a link asks — the skip
+links' `#rack` is a `hashchange` too — and a cancel leaves the new fragment in the address bar while the page keeps its
+scene (a reload would then open the link, and the `beforeunload` guard asks there).
 
 Measured (headless Firefox on the shared RTX, automation mode, so the worker's own activation is not in these):
 `buildReady` → the reload seam 1.6–3.1 ms on the first call, a median of 1.0–1.4 ms (max 2.8 ms) over 25 more — most of
@@ -3152,15 +3166,16 @@ since, because it now measures the caret, which forces the layout the next frame
 0.3–0.6 ms, paid once at boot. `sw.js` grows 32 759 → 33 975 bytes. The node gate is 843 GREEN with a new E5b in
 `tests/pwa.test.mjs` that drives the real worker: a quiet take with one window takes it, with two it does not and posts
 `LW_SW_BUSY { windows: 2 }` to the asker, through `waitUntil`. The new `tests/offer.browser-test.mjs` passes its
-thirteen scenes: an untouched boot takes quietly; a refusal is offered with the build badge visible under STATUS TAGS
+sixteen scenes: an untouched boot takes quietly; a refusal is offered with the build badge visible under STATUS TAGS
 off and every target topmost at its centre; LATER keeps the badge; a touched session is offered and never taken; a dirty
 project asks first; an untouched playing session is taken on hide; STATUS TAGS on shows all five; a moved clock and a
 capture in flight are offered, not taken; the badge is whole, on screen, first and aimed at within 0.6 px at 1500 ×
 1000, 1366 × 1024, 1024 × 1366, 1140 × 800, 1000 × 700 and the phone, tags on and off, the window really resized; a
 replaced tab's badge reloads; a build announced mid-take restarts nothing; `main.js` arms a worker named three times
-once (a fake container under `?sw=1`, and removing the guard turns that scene red); and a real link boot is taken
-quietly. Menubar, history, current, frame-occlusion, render-regressions and new-project stay green; MIR in step at
-1.4.3. The only stylesheet moves are the badge row (the STATUS TAGS rule, the narrow-stage left edge, the build badge
+once (a fake container under `?sw=1`, and removing the guard turns that scene red); a real link boot is taken
+quietly; LATER disarms the take-on-hide; the caret follows STATUS TAGS switched with the pane up; and a pasted link asks
+over an edit, opens clean over none, and an in-page anchor asks nothing. Menubar, history, current, frame-occlusion,
+render-regressions, new-project and keyboard-window stay green; MIR in step at 1.4.3. The only stylesheet moves are the badge row (the STATUS TAGS rule, the narrow-stage left edge, the build badge
 first) and the new `#offer` rules.
 
 The edges, found by reading and measuring rather than by the brief. The pane keeps the stage's centre: centring it on
@@ -3169,8 +3184,10 @@ at boot, like `#sheet`, because the occlusion observer attaches at boot: a pane 
 unobserved, and a paused field drew its frame lines through it until something else asked for a frame. `untouched`
 reads `warning.open` (the notice is up), not `warning.needed()`. A tab told its build was replaced in another tab hides
 the pane, whose UPDATE would otherwise stand dead. At the origin root a /REPORT.md or /LICENSE tab opened from ABOUT is a
-window in scope, so it refuses a quiet take — conservative, and the offer is shown. Recorded, not solved: the caret is
-re-aimed on a resize, not when STATUS TAGS is switched or a ψ-badge appears while the pane is up (the badge can shift in
-the row then); with STATUS TAGS on at 1140 px and narrower the ψ-badges wrap onto lines the pane covers until LATER; the
-build badge is first on screen but still last in the tab order; and a take whose worker is superseded by a newer deploy
-before it activates leaves the state at `taking`, which now also refuses the newer build's `buildReady` until a reload.
+window in scope, so it refuses a quiet take — conservative, and the offer is shown. A link opened over a saved project
+leaves that project's name as the current one while the scene is the link's (as before; it now also reads clean).
+Recorded, not solved: with STATUS TAGS on, a ψ-badge that appears while the pane is up (a field switched on) shifts the
+build badge and the caret waits for the next resize or class change; with STATUS TAGS on at 1140 px and narrower the
+ψ-badges wrap onto lines the pane covers until LATER; the build badge is first on screen but still last in the tab
+order; and a take whose worker is superseded by a newer deploy before it activates leaves the state at `taking`, which
+also refuses the newer build's `buildReady` until a reload — inside a 4–9 ms window, measured.

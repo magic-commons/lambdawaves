@@ -172,8 +172,9 @@ Two more worth checking while you are in DevTools, because they are what makes i
   session is untouched (nothing edited, nothing unsaved, no capture running, paused at t = 0, one window) is
   taken at once — one reload. Otherwise the build badge and its pane offer it, and STATUS TAGS, on or off,
   never hides them; a press takes it. An untouched session that is only playing, or whose clock has moved, is
-  offered it and takes it the next time the page is hidden (the take-on-hide rule: nobody is watching). The
-  next launch after every λWAVES window has closed serves it in any case. A return to the foreground re-checks
+  offered it and takes it the next time the page is hidden (the take-on-hide rule: nobody is watching); a
+  press on LATER disarms that — the badge stays, and the next take is a press or the next launch. The next
+  launch after every λWAVES window has closed serves it in any case. A return to the foreground re-checks
   for a new build at most once per 30 minutes (`lab/main.js`, the reader).
 
 ### Rollback (criterion 12) — test it on purpose

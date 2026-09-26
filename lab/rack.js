@@ -3929,6 +3929,7 @@ export async function boot(dom) {
         get current() { return pjCurrent; },
         get dirty() { return projectDirty(); },
         markClean: projectClean,
+        discard(action) { return discardProject(action); },   // wave 133: the same question for a link opened over unsaved work (the hashchange road)
         requestOpen(path) { return discardProject('OPEN') && projects.open(path); },
         requestFresh() { return discardProject('START A NEW PROJECT') ? projects.fresh() : Promise.resolve(false); },
         save(path) {
@@ -5410,7 +5411,20 @@ export async function boot(dom) {
    * browser's preferences are the reader's furniture, and the picture goes on top.
    * It is also before `history.clear()` below, which is the law: a link is the BOTTOM of the stack. */
   const linkAtBoot = openLink();
-  addEventListener('hashchange', () => { openLink(); });   // the fragment is a live address, not only a start
+  /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
+     over an EDITED session replaced the edit and wiped the undo ring without a question, and over an unedited one left the page
+     reading dirty although a reload brings the same scene back clean.  It now asks first, in the house's words, and a link
+     that opened is the clean state (the address bar can bring it back).  A cancel leaves the new fragment in the address bar
+     while the page keeps its scene: a reload would then open the link, and the beforeunload guard asks there.  Only a fragment
+     that CARRIES a link asks: the skip links' `#rack` is a hashchange too, and a malformed link changes nothing (openLink says so). */
+  addEventListener('hashchange', () => {
+    let got = null;
+    try { got = readLink(location.href); } catch (e) { openLink(); return; }
+    if (!got) return;
+    if (layout.projects && !layout.projects.discard('OPEN THIS LINK')) return;
+    const r = openLink();
+    if (r.opened && r.ok && layout.projects) layout.projects.markClean();
+  });
 
 
   const warning = (() => {

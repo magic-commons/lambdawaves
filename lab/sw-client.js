@@ -48,11 +48,15 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     for (const html of PANE_TEXT) el('p', '', pane).innerHTML = html;
     const row = el('div', 'offer-row', pane);
     row.appendChild(trig({ label: 'UPDATE', onFire: () => swClient.accept() }).root);
-    row.appendChild(trig({ label: 'LATER', onFire: () => { pane.hidden = true; } }).root);
+    /* LATER is the reader's answer, so it also disarms the take-on-hide: the badge stays, and the next take is a press or
+       the next launch — not a reload behind their back the moment they switch away (measured: t = 137 → LATER → hidden
+       0.9 s later → taken, reloaded to t = 0) */
+    row.appendChild(trig({ label: 'LATER', onFire: () => { pane.hidden = true;
+      if (onHide) { document.removeEventListener('visibilitychange', onHide); onHide = null; } } }).root);
   }
   const hidePane = () => { if (pane) pane.hidden = true; };
   /* THE CARET IS MEASURED, NOT COMPUTED: the badge's centre minus the pane's left edge, read when the pane is shown and again
-     on a resize while it is up — wherever the row puts the badge (first in it: lab.css `order: -1`), wrapped or not. */
+     on a resize or a body-class change (STATUS TAGS) while it is up — wherever the row puts the badge (first in it: lab.css `order: -1`), wrapped or not. */
   const aim = () => {
     const b = buildBadge();
     if (!pane || pane.hidden || !b) return;
@@ -61,6 +65,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     pane.style.setProperty('--caret-x', Math.round(Math.max(12, Math.min(pane.clientWidth - 12, x))) + 'px');   // kept on the pane's edge
   };
   addEventListener('resize', aim, { passive: true });
+  new MutationObserver(aim).observe(document.body, { attributes: true, attributeFilter: ['class'] });   // STATUS TAGS (body.no-badges) moves the badge in its row
   const swClient = {
     state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced | refreshing | failed
     asked: false,                        // did THIS document ask for the swap?

@@ -7,7 +7,8 @@
 // The fix pass (wave 133, from the fresh verifier's report) added scenes 8–13: a moved clock and a capture in flight are
 // offered, never taken; the badge is readable, first and aimed at from 500 to 1500 px, tags on and off, the window really
 // resized; a replaced tab's badge reloads; a build announced mid-take restarts nothing; main.js arms each worker once; and a
-// real boot at a link is clean and taken quietly.
+// real boot at a link is clean and taken quietly.  The last pass added 14–16: LATER disarms the take-on-hide; the caret
+// follows STATUS TAGS switched with the pane up; a link pasted over an edit asks first (the hashchange road, wave 56's hole).
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -78,7 +79,7 @@ const HELPERS = `
   return 1;`;
 
 let failed = false, scenes = 0, g = null, g2 = null, g3 = null;
-const TOTAL = 13;
+const TOTAL = 16;
 const pass = (line) => { scenes++; console.log('PASS ' + line); };
 try {
   g = await open(URL_, { width: 1500, height: 1000, script: 60000, prefs: PREFS });
@@ -186,6 +187,8 @@ try {
   assert.deepEqual(s5b.errors, []);
   pass(`a dirty project asks before the swap: "no" left take uncalled, state ready and the project dirty; "yes" marked it clean and took it as a press (${s5b.confirms} confirms)`);
   const linkHref = await g.ev(`return __LW.link.mint().href;`);   // for scene 13: a real boot at a link
+  const linkB = await g.ev(`__LW.mat.exposure = 1.9; return __LW.link.mint().href;`);   // for scene 16: a second link to paste over it
+  assert.equal(typeof linkB, 'string', 'no second link minted: ' + JSON.stringify(linkB));
   assert.equal(typeof linkHref, 'string', 'no link minted: ' + JSON.stringify(linkHref));
   await g.close(); g = null;
 
@@ -306,6 +309,34 @@ try {
     sw.state = 'idle'; return out;`);
   for (const st of ['refreshing', 'taking']) assert.deepEqual(s12[st], { r: false, state: st, stored: true, called: 0, pane: false }, st);
   pass(`buildReady during ${Object.keys(s12).join(' and ')} returns false, keeps the state, stores the newer take and calls nothing`);
+
+  /* ── 14 · LATER disarms the take-on-hide: the reader chose to wait, so switching away takes nothing and the badge stays ── */
+  const s14a = await g2.ev(`const sw = __LW.sw; __LW.scrub(137); await __LW.settle(); window.__taken = undefined;
+    sw.state = 'idle'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'later-disarms' };
+    const r = sw.buildReady((o) => { window.__taken = o; });
+    return { r, taken: window.__taken ?? null, pane: __pane().shown, state: sw.state };`);
+  assert.deepEqual(s14a, { r: true, taken: null, pane: true, state: 'ready' }, 'at t = 137 the session is offered, with the take-on-hide armed');
+  t = await g2.tap('#offer .offer-row .trig:last-child'); assert.equal(t.ok, 1, 'LATER not pressable: ' + JSON.stringify(t));
+  const s14b = await g2.ev(`await new Promise((q) => setTimeout(q, 900));
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange'));
+    const b = __badges().build, hid = { taken: window.__taken ?? null, state: __LW.sw.state, badge: b.text, badgeShown: b.display !== 'none', pane: __pane().shown };
+    delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'));
+    __LW.scrub(0); await __LW.settle(); return hid;`);
+  assert.deepEqual(s14b, { taken: null, state: 'ready', badge: 'A NEW BUILD IS READY · UPDATE', badgeShown: true, pane: false }, 'after LATER a hide must take nothing');
+  pass(`LATER disarms the take-on-hide: scrubbed to t = 137, offered, LATER pressed, the page hidden 0.9 s later — nothing taken, state ${s14b.state}, the badge "${s14b.badge}" stays`);
+
+  /* ── 15 · STATUS TAGS switched while the pane is up: the badge moves in its row, and the caret follows it ── */
+  const s15 = await g2.ev(`const sw = __LW.sw, frame = () => new Promise((q) => requestAnimationFrame(() => requestAnimationFrame(q)));
+    document.body.classList.add('no-badges'); await frame();
+    sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'tags-toggle' }; sw.offer();
+    const off0 = __caret();
+    document.body.classList.remove('no-badges'); await frame(); const on = __caret();
+    document.body.classList.add('no-badges'); await frame(); const off = __caret();
+    document.getElementById('offer').hidden = true; sw.state = 'idle';
+    return { off0, on, off };`);
+  for (const [k, m] of Object.entries(s15)) assert.ok(Math.abs(m.caretOff) <= 2 && m.paneShown, `${k}: the caret is ${m.caretOff} px off the badge's centre`);
+  assert.ok(Math.abs(s15.on.badge[0] - s15.off0.badge[0]) > 20, 'the toggle did not move the badge — the scene would prove nothing: ' + JSON.stringify([s15.off0.badge, s15.on.badge]));
+  pass(`STATUS TAGS switched with the pane up: the badge moved ${s15.on.badge[0] - s15.off0.badge[0]} px and back, the caret off by ${s15.off0.caretOff}, ${s15.on.caretOff}, ${s15.off.caretOff} px`);
   await g2.close(); g2 = null;
 
   /* ── 13 · main.js arms each worker ONCE (a fake container under ?sw=1), and a real boot at a link is clean and taken quietly ── */
@@ -338,6 +369,29 @@ try {
   assert.deepEqual(s13b.late, { dirty: false, rows: ['link'], reloads: 1 });
   assert.deepEqual(s13b.errors, []);
   pass(`a real boot at a link reads clean at LW.ready and after register() (origin ${JSON.stringify(s13b.late.rows)}) and is taken quietly — one SKIP_WAITING { alone: true } — while main.js armed its worker once though reg.waiting, the install's statechange and LW_SW_WAITING all named it; controllerchange reloaded it (${s13b.late.reloads})`);
+
+  /* ── 16 · a link pasted into the address bar (the hashchange road): over an unedited session it opens and reads clean; over
+          an edited one it asks first — no keeps the edit and the ring, yes opens it clean; an in-page anchor asks nothing ── */
+  const hashB = new URL(linkB).hash, hashA = new URL(linkHref).hash;
+  const s16 = await g3.ev(`const w = (n) => new Promise((q) => setTimeout(q, n)), H = __LW.history;
+    const read = () => ({ exposure: +__LW.mat.exposure.toFixed(3), rows: H.entries().map((e) => e.label), dirty: __LW.projects.dirty, canUndo: H.canUndo, confirms: window.__confirms });
+    window.__confirms = 0; const saved = window.confirm; let answer = false; window.confirm = () => { window.__confirms++; return answer; };
+    await __LW.settle(); const start = read();
+    location.hash = ${JSON.stringify(hashB)}; await w(400); await __LW.settle(); const unedited = read();
+    __LW.loadPreset('1s'); H.flush(); await __LW.settle(); const edited = read();
+    location.hash = ${JSON.stringify(hashA)}; await w(400); await __LW.settle(); const no = read();
+    answer = true; location.hash = ${JSON.stringify(hashB)}; await w(400); await __LW.settle(); const yes = read();
+    __LW.loadPreset('1s'); H.flush(); await __LW.settle(); location.hash = '#rack'; await w(400); const anchor = read();
+    window.confirm = saved;
+    return { start, unedited, edited, no, yes, anchor, errors: __e.slice() };`);
+  assert.equal(s16.start.dirty, false);
+  assert.deepEqual([s16.unedited.exposure, s16.unedited.rows, s16.unedited.dirty, s16.unedited.confirms], [1.9, ['link'], false, 0], 'an unedited session: the link opens, clean, no question');
+  assert.ok(s16.edited.dirty && s16.edited.rows.length === 2 && s16.edited.canUndo, 'the edit made no row: ' + JSON.stringify(s16.edited));
+  assert.deepEqual({ ...s16.no, confirms: s16.no.confirms }, { ...s16.edited, confirms: 1 }, 'a "no" must keep the scene, the ring and the unsaved mark');
+  assert.deepEqual([s16.yes.exposure, s16.yes.rows, s16.yes.dirty, s16.yes.confirms], [1.9, ['link'], false, 2], 'a "yes" opens the link as the clean state');
+  assert.equal(s16.anchor.confirms, 2, 'an in-page anchor (#rack) must not ask'); assert.equal(s16.anchor.rows.length, 2);
+  assert.deepEqual(s16.errors, []);
+  pass(`a pasted link over an unedited session opens clean with no question (ring ${JSON.stringify(s16.unedited.rows)}); over an edit it asks — "no" kept the scene, the ring ${JSON.stringify(s16.no.rows)} and the unsaved mark; "yes" opened it clean (ring ${JSON.stringify(s16.yes.rows)}); the skip links' #rack asked nothing`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {
