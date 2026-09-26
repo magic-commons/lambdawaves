@@ -1,0 +1,393 @@
+[
+ [
+  "1500×1000",
+  {
+   "shipped": {
+    "viewport": [
+     1500,
+     914
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     1144,
+     33
+    ],
+    "badge": [
+     793,
+     9,
+     991,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     540,
+     40,
+     960,
+     231
+    ]
+   },
+   "candidate": {
+    "viewport": [
+     1500,
+     914
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     1144,
+     33
+    ],
+    "badge": [
+     793,
+     9,
+     991,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     540,
+     40,
+     960,
+     231
+    ]
+   }
+  }
+ ],
+ [
+  "1366×1024",
+  {
+   "shipped": {
+    "viewport": [
+     1366,
+     938
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     1010,
+     33
+    ],
+    "badge": [
+     726,
+     9,
+     924,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     473,
+     40,
+     893,
+     231
+    ]
+   },
+   "candidate": {
+    "viewport": [
+     1366,
+     938
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     1010,
+     33
+    ],
+    "badge": [
+     726,
+     9,
+     924,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     473,
+     40,
+     893,
+     231
+    ]
+   }
+  }
+ ],
+ [
+  "1140×800",
+  {
+   "shipped": {
+    "viewport": [
+     1140,
+     714
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     784,
+     33
+    ],
+    "badge": [
+     640,
+     9,
+     784,
+     33
+    ],
+    "badgeW": 144,
+    "textNeeds": 166,
+    "textShownPx": 111,
+    "readable": false,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     360,
+     40,
+     780,
+     231
+    ]
+   },
+   "candidate": {
+    "viewport": [
+     1140,
+     714
+    ],
+    "phone": false,
+    "badgesBox": [
+     574,
+     9,
+     784,
+     33
+    ],
+    "badge": [
+     580,
+     9,
+     778,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     360,
+     40,
+     780,
+     231
+    ]
+   }
+  }
+ ],
+ [
+  "1024×1366",
+  {
+   "shipped": {
+    "viewport": [
+     1024,
+     1280
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     668,
+     33
+    ],
+    "badge": [
+     640,
+     9,
+     668,
+     33
+    ],
+    "badgeW": 28,
+    "textNeeds": 166,
+    "textShownPx": 0,
+    "readable": false,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     302,
+     40,
+     722,
+     231
+    ]
+   },
+   "candidate": {
+    "viewport": [
+     1024,
+     1280
+    ],
+    "phone": false,
+    "badgesBox": [
+     458,
+     9,
+     668,
+     33
+    ],
+    "badge": [
+     464,
+     9,
+     662,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     302,
+     40,
+     722,
+     231
+    ]
+   }
+  }
+ ],
+ [
+  "1000×700",
+  {
+   "shipped": {
+    "viewport": [
+     1000,
+     614
+    ],
+    "phone": false,
+    "badgesBox": [
+     640,
+     9,
+     644,
+     33
+    ],
+    "badge": [
+     632,
+     9,
+     652,
+     33
+    ],
+    "badgeW": 20,
+    "textNeeds": 166,
+    "textShownPx": 0,
+    "readable": false,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     290,
+     40,
+     710,
+     231
+    ]
+   },
+   "candidate": {
+    "viewport": [
+     1000,
+     614
+    ],
+    "phone": false,
+    "badgesBox": [
+     434,
+     9,
+     644,
+     33
+    ],
+    "badge": [
+     440,
+     9,
+     638,
+     33
+    ],
+    "badgeW": 199,
+    "textNeeds": 166,
+    "textShownPx": 166,
+    "readable": true,
+    "caretOffBy": -1,
+    "overlapsTitle": false,
+    "overlapsToggle": false,
+    "badgeHit": true,
+    "pane": [
+     290,
+     40,
+     710,
+     231
+    ]
+   }
+  }
+ ],
+ [
+  "phone",
+  {
+   "viewport": [
+    500,
+    996
+   ],
+   "phone": true,
+   "badgesBox": [
+    7,
+    44,
+    493,
+    90
+   ],
+   "badge": [
+    123,
+    55,
+    321,
+    79
+   ],
+   "badgeW": 198,
+   "textNeeds": 166,
+   "textShownPx": 166,
+   "readable": true,
+   "caretOffBy": 27,
+   "overlapsTitle": false,
+   "overlapsToggle": false,
+   "badgeHit": true,
+   "pane": [
+    40,
+    76,
+    460,
+    265
+   ]
+  }
+ ]
+]

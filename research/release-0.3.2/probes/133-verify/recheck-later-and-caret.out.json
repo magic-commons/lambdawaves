@@ -1,0 +1,183 @@
+[
+ [
+  "(a) LATER pressed, ring quiet, then hidden",
+  {
+   "tap": {
+    "ok": 1
+   },
+   "pre": {
+    "pane": false,
+    "pending": null,
+    "took": null
+   },
+   "hidden": {
+    "took": {
+     "alone": true
+    },
+    "state": "taking"
+   }
+  }
+ ],
+ [
+  "(a') playing, a press on the pane's heading, a hide 0 ms later, then another hide 0.9 s later",
+  {
+   "tap": {
+    "ok": 1
+   },
+   "pre": {
+    "pending": null,
+    "holding": null
+   },
+   "firstHide": {
+    "took": {
+     "alone": true
+    },
+    "state": "taking"
+   },
+   "secondHideLater": {
+    "took": {
+     "alone": true
+    },
+    "state": "taking"
+   }
+  }
+ ],
+ [
+  "(b) caret at 1500×1000",
+  {
+   "shown": {
+    "caretX": 892,
+    "badge": [
+     793,
+     991
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "tagsOn": {
+    "caretX": 892,
+    "badge": [
+     663,
+     862
+    ],
+    "offBy": 129.2,
+    "insideBadge": false
+   },
+   "tagsOffAgain": {
+    "caretX": 892,
+    "badge": [
+     793,
+     991
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "tagsOn2": {
+    "caretX": 892,
+    "badge": [
+     663,
+     862
+    ],
+    "offBy": 129.2,
+    "insideBadge": false
+   },
+   "psiTextLonger": {
+    "caretX": 892,
+    "badge": [
+     793,
+     991
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "racksHidden": {
+    "caretX": 892,
+    "badge": [
+     793,
+     991
+    ],
+    "offBy": 0,
+    "insideBadge": true,
+    "bodyRackHidden": true
+   },
+   "racksBack": {
+    "caretX": 892,
+    "badge": [
+     793,
+     991
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   }
+  }
+ ],
+ [
+  "(b) caret at 1140×800",
+  {
+   "shown": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "tagsOn": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "tagsOffAgain": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "tagsOn2": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "psiTextLonger": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "racksHidden": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true,
+    "bodyRackHidden": true
+   },
+   "racksBack": {
+    "caretX": 679,
+    "badge": [
+     580,
+     778
+    ],
+    "offBy": 0,
+    "insideBadge": true
+   }
+  }
+ ]
+]

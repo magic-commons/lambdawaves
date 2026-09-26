@@ -1,0 +1,576 @@
+[
+ [
+  "S0 boot",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   }
+  }
+ ],
+ [
+  "S1 played 1.5 s then paused",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   },
+   "afterReload": {
+    "t": 0,
+    "rows": [
+     "boot"
+    ]
+   }
+  }
+ ],
+ [
+  "S1b scrub to t=137",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 137,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   }
+  }
+ ],
+ [
+  "S2 real orbit drag",
+  {
+   "fieldPoint": {
+    "x": 700,
+    "y": 432
+   },
+   "yaw0": 0.65,
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "CANVAS.",
+    "warnOpen": false,
+    "yaw": -0.2284,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   },
+   "afterReload": {
+    "yaw": 0.65
+   }
+  }
+ ],
+ [
+  "S3 WASD orbit (a, 400 ms)",
+  {
+   "yaw0": 0.65,
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   }
+  }
+ ],
+ [
+  "S4 auto-rotate on, paused",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   }
+  }
+ ],
+ [
+  "S5 notebook opened and moved",
+  {
+   "head": {
+    "cls": "nb-head",
+    "x": 411,
+    "y": 136
+   },
+   "moved": [
+    [
+     380,
+     103.66667175292969
+    ],
+    [
+     380,
+     103.66667175292969
+    ]
+   ],
+   "settingsChanged": true,
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "INPUT.nb-title",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   },
+   "afterReload": {
+    "open": false,
+    "at": [
+     0,
+     0
+    ]
+   }
+  }
+ ],
+ [
+  "S6 notebook typed then blurred",
+  {
+   "whileFocused": {
+    "typing": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "pending": null,
+     "holding": null,
+     "dirty": true,
+     "playing": false,
+     "t": 0,
+     "active": "TEXTAREA.nb-text",
+     "warnOpen": false,
+     "yaw": 0.65,
+     "hash": ""
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offered": true
+    }
+   },
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   },
+   "afterReload": "hello"
+  }
+ ],
+ [
+  "S7 modulation: add an LFO",
+  {
+   "read": {
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "canUndo": true,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   }
+  }
+ ],
+ [
+  "S8 demo opened",
+  {
+   "current": "DEMOS/WAVE DANCER",
+   "read": {
+    "rows": [
+     "open · WAVE DANCER"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "TEXTAREA.nb-text",
+    "warnOpen": false,
+    "yaw": 1405.5176,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   }
+  }
+ ],
+ [
+  "S9 NEW",
+  {
+   "read": {
+    "rows": [
+     "new project"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   }
+  }
+ ],
+ [
+  "S10 link boot",
+  {
+   "hrefLen": 310,
+   "read": {
+    "rows": [
+     "link"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": "#s=AXavtmEBEAD0BDU_AgD_f"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   },
+   "scene": {
+    "exposure": 2.5,
+    "hashKept": true
+   },
+   "afterReload": {
+    "exposure": 2.5,
+    "rows": [
+     "link"
+    ],
+    "hashKept": true
+   }
+  }
+ ],
+ [
+  "S11 ?preset=2pz",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offered": false
+   },
+   "search": "?preset=2pz"
+  }
+ ],
+ [
+  "S12 notice up",
+  {
+   "paneVisible": true,
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "holding": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BUTTON.warn-btn",
+    "warnOpen": true,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   }
+  }
+ ],
+ [
+  "S13 knob mid-drag",
+  {
+   "knob": {
+    "x": 1162,
+    "y": 418,
+    "lbl": "ROTATE"
+   },
+   "held": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": true,
+     "pending": null,
+     "holding": null,
+     "dirty": true,
+     "playing": false,
+     "t": 0,
+     "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+     "warnOpen": false,
+     "yaw": 0.65,
+     "hash": ""
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offered": true
+    }
+   },
+   "released": {
+    "read": {
+     "rows": [
+      "boot",
+      "ROTATE · PALETTE"
+     ],
+     "canUndo": true,
+     "pending": null,
+     "holding": null,
+     "dirty": true,
+     "playing": false,
+     "t": 0,
+     "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+     "warnOpen": false,
+     "yaw": 0.65,
+     "hash": ""
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offered": true
+    }
+   }
+  }
+ ],
+ [
+  "S14 keyboard ArrowUp on a focused knob",
+  {
+   "knob": {
+    "tag": "DIV",
+    "cls": "k",
+    "focused": true
+   },
+   "within400ms": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": true,
+     "pending": null,
+     "holding": null,
+     "dirty": true,
+     "playing": false,
+     "t": 0,
+     "active": "DIV.k",
+     "warnOpen": false,
+     "yaw": 0.65,
+     "hash": ""
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offered": true
+    }
+   },
+   "settled": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": true,
+     "pending": null,
+     "holding": null,
+     "dirty": true,
+     "playing": false,
+     "t": 0,
+     "active": "DIV.k",
+     "warnOpen": false,
+     "yaw": 0.65,
+     "hash": ""
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offered": true
+    }
+   }
+  }
+ ],
+ [
+  "S15 A/B stored (no preset change)",
+  {
+   "read": {
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "canUndo": true,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   },
+   "ab": {
+    "on": false
+   }
+  }
+ ],
+ [
+  "S16 AUDIO source added",
+  {
+   "read": {
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "canUndo": true,
+    "pending": null,
+    "holding": null,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-captions frost disconnected window-info-off rack-l",
+    "warnOpen": false,
+    "yaw": 0.65,
+    "hash": ""
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offered": true
+   }
+  }
+ ],
+ [
+  "PROBE ERROR",
+  "Error: POST /session/fbd425fb-5111-4698-822d-6a2ff7e17fbf/execute/async -> 500 {\"value\":{\"error\":\"script timeout\",\"message\":\"Timed out after 600000 ms\",\"stacktrace\":\"RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8\\nWebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:169:5\\nScriptTimeoutError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:797:5\\nevaluate.sandbox/timeoutPromise</scriptTimeoutID<@chrome://remote/content/marionette/evaluate.sys.mjs:97:11\\nnotify@resource://gre/modules/Timer.sys.mjs:66:16\\n\"}}\n    at IncomingMessage.<anonymous> (file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-aed266f4fc7620d71/tools/gate/drv.mjs:72:18)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)"
+ ]
+]

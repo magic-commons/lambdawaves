@@ -1,0 +1,1634 @@
+[
+ [
+  "1500×1000 tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1500,
+    914
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    540,
+    40,
+    960,
+    231
+   ],
+   "badgesBox": [
+    640,
+    9,
+    1144,
+    33
+   ],
+   "badge": {
+    "rect": [
+     793,
+     9,
+     991,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 892,
+    "badgeCentre": 892,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      1156,
+      8,
+      1186,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      1156,
+      44,
+      1186,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      1156,
+      80,
+      1186,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      430,
+      808,
+      1070,
+      854
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      1200,
+      0,
+      1500,
+      914
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      914
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1500×1000 tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1500,
+    914
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    540,
+    40,
+    960,
+    231
+   ],
+   "badgesBox": [
+    640,
+    9,
+    1144,
+    33
+   ],
+   "badge": {
+    "rect": [
+     663,
+     9,
+     862,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 763,
+    "badgeCentre": 762.8,
+    "offBy": 0.2,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      1156,
+      8,
+      1186,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      1156,
+      44,
+      1186,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      1156,
+      80,
+      1186,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      430,
+      808,
+      1070,
+      854
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      1200,
+      0,
+      1500,
+      914
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      914
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1366×1024 tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1366,
+    938
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    473,
+    40,
+    893,
+    231
+   ],
+   "badgesBox": [
+    640,
+    9,
+    1010,
+    33
+   ],
+   "badge": {
+    "rect": [
+     726,
+     9,
+     924,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 825,
+    "badgeCentre": 825,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      1022,
+      8,
+      1052,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      1022,
+      44,
+      1052,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      1022,
+      80,
+      1052,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      363,
+      832,
+      1003,
+      878
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      1066,
+      0,
+      1366,
+      938
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      938
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1366×1024 tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1366,
+    938
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    473,
+    40,
+    893,
+    231
+   ],
+   "badgesBox": [
+    640,
+    9,
+    1010,
+    62
+   ],
+   "badge": {
+    "rect": [
+     726,
+     9,
+     924,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 825,
+    "badgeCentre": 825,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      1022,
+      8,
+      1052,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      1022,
+      44,
+      1052,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      1022,
+      80,
+      1052,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      363,
+      832,
+      1003,
+      878
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      1066,
+      0,
+      1366,
+      938
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      938
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1024×1366 tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "OFFER",
+    "OFFER"
+   ],
+   "viewport": [
+    1024,
+    1280
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    302,
+    40,
+    722,
+    231
+   ],
+   "badgesBox": [
+    458,
+    9,
+    668,
+    33
+   ],
+   "badge": {
+    "rect": [
+     464,
+     9,
+     662,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 563,
+    "badgeCentre": 563,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      680,
+      8,
+      710,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      680,
+      44,
+      710,
+      74
+     ],
+     "overlapped": true
+    },
+    "rackFav": {
+     "rect": [
+      680,
+      80,
+      710,
+      110
+     ],
+     "overlapped": true
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      192,
+      1174,
+      832,
+      1220
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      724,
+      0,
+      1024,
+      1280
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      1280
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 14
+  }
+ ],
+ [
+  "1024×1366 tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "OFFER",
+    "OFFER"
+   ],
+   "viewport": [
+    1024,
+    1280
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    302,
+    40,
+    722,
+    231
+   ],
+   "badgesBox": [
+    458,
+    9,
+    668,
+    91
+   ],
+   "badge": {
+    "rect": [
+     464,
+     9,
+     662,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 563,
+    "badgeCentre": 563,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      680,
+      8,
+      710,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      680,
+      44,
+      710,
+      74
+     ],
+     "overlapped": true
+    },
+    "rackFav": {
+     "rect": [
+      680,
+      80,
+      710,
+      110
+     ],
+     "overlapped": true
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      192,
+      1174,
+      832,
+      1220
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      724,
+      0,
+      1024,
+      1280
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      1280
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 14
+  }
+ ],
+ [
+  "1140×800 tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1140,
+    714
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    360,
+    40,
+    780,
+    231
+   ],
+   "badgesBox": [
+    574,
+    9,
+    784,
+    33
+   ],
+   "badge": {
+    "rect": [
+     580,
+     9,
+     778,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 679,
+    "badgeCentre": 679,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      796,
+      8,
+      826,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      796,
+      44,
+      826,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      796,
+      80,
+      826,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      250,
+      608,
+      890,
+      654
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      840,
+      0,
+      1140,
+      714
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      714
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1140×800 tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "rackAdd",
+    "rackFav"
+   ],
+   "viewport": [
+    1140,
+    714
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    360,
+    40,
+    780,
+    231
+   ],
+   "badgesBox": [
+    574,
+    9,
+    784,
+    91
+   ],
+   "badge": {
+    "rect": [
+     580,
+     9,
+     778,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 679,
+    "badgeCentre": 679,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      796,
+      8,
+      826,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      796,
+      44,
+      826,
+      74
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      796,
+      80,
+      826,
+      110
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      250,
+      608,
+      890,
+      654
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      840,
+      0,
+      1140,
+      714
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      714
+     ],
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1000×700 tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "OFFER",
+    "OFFER"
+   ],
+   "viewport": [
+    1000,
+    614
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    290,
+    40,
+    710,
+    231
+   ],
+   "badgesBox": [
+    434,
+    9,
+    644,
+    33
+   ],
+   "badge": {
+    "rect": [
+     440,
+     9,
+     638,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 539,
+    "badgeCentre": 539,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      656,
+      8,
+      686,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      656,
+      44,
+      686,
+      74
+     ],
+     "overlapped": true
+    },
+    "rackFav": {
+     "rect": [
+      656,
+      80,
+      686,
+      110
+     ],
+     "overlapped": true
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      220,
+      508,
+      780,
+      554
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      700,
+      0,
+      1000,
+      614
+     ],
+     "overlapped": true
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      614
+     ],
+     "overlapped": true
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "1000×700 tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "OFFER",
+    "OFFER"
+   ],
+   "viewport": [
+    1000,
+    614
+   ],
+   "dpr": 1,
+   "phone": false,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    290,
+    40,
+    710,
+    231
+   ],
+   "badgesBox": [
+    434,
+    9,
+    644,
+    91
+   ],
+   "badge": {
+    "rect": [
+     440,
+     9,
+     638,
+     33
+    ],
+    "w": 199,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 539,
+    "badgeCentre": 539,
+    "offBy": 0,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "SPAN"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      656,
+      8,
+      686,
+      38
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      656,
+      44,
+      686,
+      74
+     ],
+     "overlapped": true
+    },
+    "rackFav": {
+     "rect": [
+      656,
+      80,
+      686,
+      110
+     ],
+     "overlapped": true
+    },
+    "menubar": {
+     "rect": null,
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      314,
+      6,
+      399,
+      37
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      220,
+      508,
+      780,
+      554
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      700,
+      0,
+      1000,
+      614
+     ],
+     "overlapped": true
+    },
+    "rackL": {
+     "rect": [
+      0,
+      0,
+      300,
+      614
+     ],
+     "overlapped": true
+    }
+   },
+   "masked": true,
+   "maskCount": 12
+  }
+ ],
+ [
+  "390×844 phone tags off",
+  {
+   "tagsOn": false,
+   "plusStarWinner": [
+    "field",
+    "field"
+   ],
+   "viewport": [
+    500,
+    996
+   ],
+   "dpr": 1.2765957446808511,
+   "phone": true,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    40,
+    76,
+    460,
+    265
+   ],
+   "badgesBox": [
+    7,
+    44,
+    493,
+    90
+   ],
+   "badge": {
+    "rect": [
+     123,
+     55,
+     321,
+     79
+    ],
+    "w": 198,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 221.9,
+    "badgeCentre": 222.2,
+    "offBy": -0.3,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "badge warn build"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      6,
+      952,
+      36,
+      982
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      6,
+      906,
+      36,
+      936
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      6,
+      860,
+      36,
+      890
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": [
+      93,
+      10,
+      346,
+      36
+     ],
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      8,
+      3,
+      85,
+      43
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      -294,
+      108,
+      -36,
+      299
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      -312,
+      46,
+      -12,
+      996
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": null,
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 1
+  }
+ ],
+ [
+  "390×844 phone tags ON",
+  {
+   "tagsOn": true,
+   "plusStarWinner": [
+    "field",
+    "field"
+   ],
+   "viewport": [
+    500,
+    996
+   ],
+   "dpr": 1.2765957446808511,
+   "phone": true,
+   "took": false,
+   "state": "ready",
+   "paneShown": true,
+   "pane": [
+    40,
+    76,
+    460,
+    265
+   ],
+   "badgesBox": [
+    7,
+    44,
+    493,
+    90
+   ],
+   "badge": {
+    "rect": [
+     123,
+     55,
+     321,
+     79
+    ],
+    "w": 198,
+    "text": "A NEW BUILD IS READY · UPDATE",
+    "clipped": false,
+    "spanW": 166,
+    "spanScrollW": 166,
+    "lines": 2
+   },
+   "caret": {
+    "x": 221.9,
+    "badgeCentre": 222.2,
+    "offBy": -0.3,
+    "insideBadge": true
+   },
+   "hits": {
+    "UPDATE": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "LATER": {
+     "ok": true,
+     "by": "trig-l"
+    },
+    "badge": {
+     "ok": true,
+     "by": "badge warn build"
+    }
+   },
+   "others": {
+    "rackToggle": {
+     "rect": [
+      6,
+      952,
+      36,
+      982
+     ],
+     "overlapped": false
+    },
+    "rackAdd": {
+     "rect": [
+      6,
+      906,
+      36,
+      936
+     ],
+     "overlapped": false
+    },
+    "rackFav": {
+     "rect": [
+      6,
+      860,
+      36,
+      890
+     ],
+     "overlapped": false
+    },
+    "menubar": {
+     "rect": [
+      93,
+      10,
+      346,
+      36
+     ],
+     "overlapped": false
+    },
+    "title": {
+     "rect": [
+      8,
+      3,
+      85,
+      43
+     ],
+     "overlapped": false
+    },
+    "transport": {
+     "rect": [
+      -294,
+      108,
+      -36,
+      299
+     ],
+     "overlapped": false
+    },
+    "rack": {
+     "rect": [
+      -312,
+      46,
+      -12,
+      996
+     ],
+     "overlapped": false
+    },
+    "rackL": {
+     "rect": null,
+     "overlapped": false
+    }
+   },
+   "masked": true,
+   "maskCount": 1
+  }
+ ]
+]
