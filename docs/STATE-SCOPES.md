@@ -99,8 +99,17 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 - Switching MOLECULES on commits its row at the press. Its solution lands about 150 ms later and fills derived defaults
   (the chem orbital, the MO-REGISTRY selection and the STATES ground lane). Since S4 that landing runs through the ring's
   `absorb()`, which re-keys the press's row on the fill when nothing else is pending, so the switch is one row and the
-  first undo turns it off. That undo leaves the chem orbital and the STATES lane standing while MOLECULES is off: a null
-  or empty value in the record does not clear them, and the next ON derives them again.
+  first undo turns it off. A record's null orbital and empty STATES lane list are restored as null and empty, so that
+  undo is byte-identical and NEW after MOLECULES is the empty file for both keys. What remains: a later ON that reuses
+  the cached solution (no new solve) leaves them unfilled. The orbital then reads null and draws the HOMO, and the
+  ground lane is seeded when MO-REGISTRY STATES next plays.
+- While a rotation drive is actually turning the register (a p-state under ROTATE z, paused or playing), the ring is
+  `driven` and commits nothing. UNDO cannot take back an edit made in the meantime (it is grey when nothing lies below),
+  and those edits merge into the one `rotation drive` row committed when the drive stops. A record of the unrotated
+  anchor, which would let them be rows, is the 0.3.2 candidate.
+- Edits within the same 400 ms quiet window coalesce into one row, so three fast taps of C are one undo.
+- A click on a HISTORY row within about 250 ms of a keyboard or API edit can be lost, because the list repaints under
+  the pointer on the next frame.
 - Opening the bundled demo `lab/demos/wave-dancer.lambdawaves.json` no longer switches a reader's frame and axes off.
   This is D1's stated cost. S2 stripped its dead field chrome from `mat`; its `layout.look` and `layout.cam` blocks
   (written before S1, never read by `applyLayout`) are still in the file.

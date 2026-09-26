@@ -782,7 +782,8 @@ export async function boot(dom) {
   }
   /* The frame loop asks this cached service instead of reading layout geometry. IntersectionObserver accounts for
      both viewport clipping and a rack's scrollport; class/hidden mutations wake one catch-up frame on re-entry. */
-  const windowActivity = createWindowActivity({ onChange: () => schedule(TIER.PRESENT) });
+  let histShown = null;                // S4: the HISTORY card's reveal (below) rides the one activity hook the rack already has
+  const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); if (histShown) histShown(); } });
   const canPresent = (w) => windowActivity.canPresent(w);
   const canPresentTransport = () => !uiHidden && (layout.docked ? canPresent(wTr)
     : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
@@ -4527,8 +4528,9 @@ export async function boot(dom) {
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
      at the next commit under whatever name was standing (probes/S3-verify/edges*.mjs).  An edit still pending under another name
      commits first; a held key repeats under one name and stays one row; a key that changed nothing drops its name like any gesture. */
+  const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo']);
   const keyEdit = (a, run) => {
-    if (!history || history.holding) return run();
+    if (!history || history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
     const name = a.label + ' · ' + keyName(a);
     if (history.pendingLabel !== name) history.flush();
     run(); history.note(name);
@@ -5067,20 +5069,28 @@ export async function boot(dom) {
     const rows = historyApi.entries();
     let h = '';
     for (let j = rows.length - 1; j >= 0; j--) {
-      const r = rows[j], attr = r.state === 'current' ? ' aria-current="true" title="where the instrument is standing"' : ' title="land on this moment"';
-      h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + attr + '><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + esc(r.label || 'edit') + '</span></button>';
+      const r = rows[j], name = esc(r.label || 'edit');   /* the title is the WHOLE name (a key's row is a long sentence the column cuts) */
+      h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + (r.state === 'current' ? ' aria-current="true"' : '')
+        + ' title="' + name.replace(/"/g, '&quot;') + (r.state === 'current' ? ' — where the instrument is standing' : ' — land on this moment') + '"><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + name + '</span></button>';
     }
     histList.innerHTML = h;
-    const here = histList.querySelector('[aria-current]');
-    if (here && histList.clientHeight) {
-      const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
-      if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
-    }
+    histHere();
     if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
     if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
     if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
     wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
   }
+  /** keep the current row inside the list's box (a closed or folded card has no box: it is done when the card shows) */
+  function histHere() {
+    const here = histList.querySelector('[aria-current]');
+    if (!here || !histList.clientHeight) return;
+    const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
+    if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
+  }
+  /* S4 · …and when the card comes back into view (opened, unfolded, its rack shown or scrolled to): a jump made while it was
+     closed left its list at the top.  window-activity's onChange already fires on each of those flips; this reads one flag. */
+  let histWas = canPresent(wHist);   // tracks the card, so its flips reach onChange
+  histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
   let histRaf = 0;
   hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
   renderHistory();

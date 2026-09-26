@@ -18,5 +18,14 @@
   "molRows": "mol-rows.js: MOLECULES ON by its switch → rows [start, 'MOLECULES ON · MOLECULES'] (was [..., 'edit'] — the fill as a second row the first undo was spent on)",
   "curveShiftClick": "curve-shiftclick.mjs: on a fresh LFO the spot (0.62, 0.12) of the editor is the SINE's segment-2 tension handle, so a Shift-right-click there RESET its tension (0.275 → 0) — one named row; the suite now targets the spot farthest from every drawn point and handle"
  },
+ "followUp": {
+  "note": "the S4 verifier's two fixes and two polish items (after 927bd03)",
+  "molCycle": { "probe": "mol-cycle.js: NEW → ON → undo → ON again → NEW → ON (orbital, register selection count, STATES lane count)",
+   "before": { "on1": [5, 0, 1], "undo": { "orbital": 5, "lanes": 1, "sameAsPreOn": false, "dirty": true }, "newAfterMolecules": { "orbital": 5, "lanes": 1 } },
+   "after": { "on1": [5, 0, 1], "undo": { "orbital": null, "lanes": 0, "sameAsPreOn": true, "dirty": false }, "newAfterMolecules": { "orbital": null, "lanes": 0 }, "onAgainCached": { "orbital": null, "lanes": 0 } } },
+  "reveal": "reveal.js: a goto(1) while the card is closed, then layout.reopen('history') → the current row in view: with the window-activity hook shown true (scrollTop 344); with the hook removed shown false (scrollTop 0)",
+  "tooltips": "each row's title is its whole name + ' — land on this moment' / ' — where the instrument is standing'; the lab's CONTROL HINTS move a title into data-help and show it on hover",
+  "travelKeys": "the verifier's travel-names: Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y then an API edit at 100 or 300 ms took the key's name; now 'edit'"
+ },
  "stylehash": "disc and conn, 8 theme × card × frost states each, before = the S3 tip 737d5bb, noise pairs b2 / cb2: 8 element differences each, every one `.hist-list` max-height 260px → 250px in the HISTORY card; 0 pixels (stylehash.disc.report.txt, stylehash.conn.report.txt)"
 }

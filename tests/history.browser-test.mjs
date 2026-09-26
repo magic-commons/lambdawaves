@@ -93,9 +93,15 @@ try {
     await actions(g.s, [{ type: 'key', id: 'sk' + (++rN), actions: k }, { type: 'pointer', id: 'rc' + rN, parameters: { pointerType: 'mouse' }, actions: p }]); await relActions(g.s);
   };
   /** a REAL key press (the dispatcher ignores synthetic keys), with the focus off any control first */
-  const realKey = async (value) => {
-    await g.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
-    await actions(g.s, [{ type: 'key', id: 'k' + (++rN), actions: [{ type: 'keyDown', value }, { type: 'pause', duration: 30 }, { type: 'keyUp', value }] }]); await relActions(g.s);
+  const realKey = async (value, mods = [], gg = g) => {
+    await gg.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
+    const a = [...mods.map((m) => ({ type: 'keyDown', value: m })), { type: 'keyDown', value }, { type: 'pause', duration: 30 }, { type: 'keyUp', value }, ...mods.map((m) => ({ type: 'keyUp', value: m }))];
+    await actions(gg.s, [{ type: 'key', id: 'k' + (++rN), actions: a }]); await relActions(gg.s);
+  };
+  const CTRL = '\uE009', SHIFT = '\uE008';
+  /** a REAL left click at a point, on any session */
+  const realClick = async ([x, y], gg = g) => {
+    await actions(gg.s, [{ type: 'pointer', id: 'c' + (++rN), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(x), y: Math.round(y) }, { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }] }]); await relActions(gg.s);
   };
 
   /* ── 1 · THE BOOT IS THE BOTTOM, and it says so ── */
@@ -122,16 +128,24 @@ try {
     const clicks = [await click(3), await click(17), await click(0)];
     /* the current row is KEPT in view: the list scrolled away from it, then a jump by the API */
     const kept = []; for (const [k, st] of [[1, 0], [25, 1e6], [2, 0]]) { list.scrollTop = st; H.goto(k); await __frame(); kept.push({ k, lands: __ser() === readings[k], current: cur().map(idx), shown: inView(cur()[0]) }); }
+    /* every row's tooltip is its WHOLE name (the lab's CONTROL HINTS move a title into data-help and show it on hover) */
+    const titled = rowEls().every((b) => (b.dataset.help || b.title).startsWith(b.querySelector('.hist-lbl').textContent + ' — '));
+    /* a jump made while the card is CLOSED is in view when the card opens again (window-activity's flip) */
+    list.scrollTop = 0; dev.classList.add('closed'); await __frame(); H.goto(1); await __frame(); await __w(50);
+    __LW.layout.reopen('history'); await __frame(); await __frame(); await __w(150);
+    const reopened = { current: cur().map(idx), shown: inView(cur()[0]), closed: dev.classList.contains('closed') };
     H.goto(25); await __w(450); H.flush();
-    return { top, clicks, kept, rows: rowEls().length, back: __ser() === readings[25], errs: __e.slice() };`);
+    return { top, clicks, kept, titled, reopened, rows: rowEls().length, back: __ser() === readings[25], errs: __e.slice() };`);
   assert.equal(card.top.n, 26, '25 edits + the bottom, not ' + card.top.n + ' rows');
   assert.equal(card.top.order, Array.from({ length: 26 }, (_, i) => 25 - i).join(','), 'not newest at the top: ' + card.top.order);
   assert.equal(card.top.bottom, 'boot'); assert.deepEqual(card.top.current, [25]); assert.equal(card.top.currentShown, true);
   assert.equal(card.top.scrolls, true, 'the list does not scroll'); assert.equal(card.top.h25, card.top.h12, 'the card grew from ' + card.top.h12 + ' to ' + card.top.h25 + ' px');
   assert.ok(card.top.listH <= 250.5, 'the list is ' + card.top.listH + ' px tall');
   for (const c of [...card.clicks, ...card.kept]) { assert.equal(c.lands, true, 'row ' + c.k + ' did not land on its reading'); assert.deepEqual(c.current, [c.k]); assert.equal(c.shown, true, 'row ' + c.k + ' is current but out of view'); }
+  assert.equal(card.titled, true, 'a row without its whole name as its tooltip');
+  assert.deepEqual(card.reopened, { current: [1], shown: true, closed: false }, 'a jump made while the card was closed: ' + JSON.stringify(card.reopened));
   assert.equal(card.rows, 26); assert.equal(card.back, true); assert.deepEqual(card.errs, []);
-  pass(`the HISTORY card lists every row: 25 edits → 26 rows newest first with boot at the bottom, one aria-current row in view; clicks on rows 3, 17 and boot land on their readings; jumps by the API keep the current row in view; the list scrolls (${card.top.listH} px) and the card holds ${card.top.h25} px from 13 rows to 26`);
+  pass(`the HISTORY card lists every row: 25 edits → 26 rows newest first with boot at the bottom, one aria-current row in view; clicks on rows 3, 17 and boot land on their readings; jumps by the API keep the current row in view, and one made while the card was closed is in view when it reopens; every row's tooltip is its whole name; the list scrolls (${card.top.listH} px) and the card holds ${card.top.h25} px from 13 rows to 26`);
 
   /* ── 2 · ONE SCENE PER EDIT FAMILY ── */
   const undoMs = {};
@@ -276,6 +290,17 @@ try {
     await ev(`await __open(); return 1;`); await realKey(key);
     judgeScene(`the ${key.toUpperCase()} key (real input)`, await g.ev(`return await __close();`), name);
   }
+  /* the TRAVEL keys lend no name: Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, then an unnamed edit 100 ms later, is a row called "edit" */
+  const travels = {};
+  for (const [label, key, mods, setup] of [['Ctrl+Z', 'z', [CTRL], ''], ['Ctrl+Shift+Z', 'z', [CTRL, SHIFT], 'H.undo();'], ['Ctrl+Y', 'y', [CTRL], 'H.undo();']]) {
+    await ev(`const H = __LW.history; H.flush(); await __w(450); H.flush(); __room(); __LW.setStage(0.41 + Math.random() * 0.1); H.flush(); ${setup} window.__c0 = H.cursor; return 1;`);
+    await realKey(key, mods);
+    travels[label] = await ev(`const H = __LW.history, moved = H.cursor !== window.__c0; await __w(100); __LW.setStage(0.2 + Math.random() * 0.1); H.note(); await __w(520); H.flush();
+      return { moved, name: H.entries().at(-1).label, errs: __e.slice() };`);
+  }
+  for (const [label, r] of Object.entries(travels)) { assert.equal(r.moved, true, label + ' did not travel'); assert.equal(r.name, 'edit', label + ' then an API edit: ' + JSON.stringify(r)); assert.deepEqual(r.errs, []); }
+  pass('the travel keys lend no name: Ctrl+Z, Ctrl+Shift+Z and Ctrl+Y each travel, and an unnamed edit 100 ms later is a row called "edit"');
+
   /* a segment names its group: STYLE, not the bare option */
   const styleOpt = await ev(`const b = [...document.querySelectorAll('.seg-b')].find((b) => b.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'STYLE' && !b.classList.contains('on')); window.__styleB = b;
     return b ? [b.textContent.trim(), b.closest('.dev').querySelector('.dev-eyebrow').textContent.trim()] : { E: 'no STYLE option' };`);
@@ -411,9 +436,7 @@ try {
 
   /* ── 7b · S4 MOLECULES ON IS ONE ROW: the solve lands ~300 ms after the press and fills its defaults (chem.orbital, the register's
          selection, the STATES ground lane) into the press's row (absorb), so the first undo turns it off and redo brings the fill ── */
-  /* NOT a byte-identical scene: the undo turns MOLECULES off, but the chem / register restore leaves the derived defaults standing
-     (chem.orbital, the selection, the STATES lane — a null / empty in the record does not clear them; the next ON derives them
-     again).  The undo reading is reported, not asserted equal; redo IS byte-identical to the filled row. */
+  /* the undo is byte-identical: a record's null orbital and empty STATES lane list land as null and empty (S4 follow-up) */
   const mol = await ev(`const H = __LW.history, I = () => __LW.serialize({ scope: 'edit' }).presentation.instruments;
     const s = __sw('MOLECULES ON'); __show(s); await __w(100); await __open(); const { n0, pre } = window.__s0;
     await __press(s.querySelector('button') || s); await __w(1000); await __w(520); H.flush();
@@ -427,8 +450,8 @@ try {
   assert.deepEqual(mol.rows, ['MOLECULES ON · MOLECULES'], 'MOLECULES ON: ' + JSON.stringify(mol));
   assert.ok(Number.isFinite(mol.filled), 'the solve never filled the orbital'); assert.equal(mol.undid, true); assert.equal(mol.off, true, 'the first undo did not turn MOLECULES off');
   assert.equal(mol.redid, true); assert.equal(mol.on, true); assert.equal(mol.redoSame, true, 'redo is not the filled row'); assert.equal(mol.orbital, mol.filled);
-  assert.equal(mol.later, 1, 'a row appeared after the redo'); assert.deepEqual(mol.errs, []);
-  pass(`MOLECULES ON is one row: the solve's fill joined it (orbital ${mol.filled}), the first undo turned it off, redo brought it back byte for byte with its fill, no row after; the undo leaves the derived defaults standing while off: ${JSON.stringify(mol.undoLeft)}`);
+  assert.equal(mol.later, 1, 'a row appeared after the redo'); assert.deepEqual(mol.undoLeft, [], 'the undo left ' + JSON.stringify(mol.undoLeft)); assert.deepEqual(mol.errs, []);
+  pass(`MOLECULES ON is one row: the solve's fill joined it (orbital ${mol.filled}), the first undo turned it off byte for byte, redo brought it back byte for byte with its fill, no row after`);
 
   /* ── 8 · THE ORIGIN IS THE BOTTOM ROW'S NAME: a link, a project open, NEW ── */
   const origins = await ev(`const P = __LW.layout.projects, c0 = window.confirm; window.confirm = () => true;
@@ -469,6 +492,35 @@ try {
   const bootLink = await g2.ev(`return { rows: __LW.history.entries().map((r) => r.label), depth: __LW.history.depth, carried: Math.abs(__LW.mat.exposure - 2.5) < 1e-3, errs: __e.slice() };`);
   assert.deepEqual(bootLink, { rows: ['link'], depth: 0, carried: true, errs: [] });
   pass('a link opened at boot names the bottom row link (not boot)');
+  await g2.close(); g2 = null;
+
+  /* ── 9b · S4 THE MOLECULES UNDO LEAVES NOTHING (a fresh page, so this ON is the first solve and fills its defaults):
+         NEW → MOLECULES ON by a real click → Ctrl+Z is byte-identical to the pre-ON reading and the project is clean 1 s later;
+         MOLECULES back on (Ctrl+Shift+Z, filled) → NEW is the empty file for the orbital and the STATES lanes ── */
+  g2 = await open(LAB, { width: 1500, height: 1000, script: 60000, prefs: PREFS });
+  assert.equal((await g2.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
+  const molAt = await g2.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+    await __LW.layout.projects.fresh(); await __w(800); window.__pre = JSON.stringify(__LW.serialize({ scope: 'edit' }));
+    const s = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl')?.textContent || '').trim() === 'MOLECULES ON'), d = s.closest('.dev');
+    d.hidden = false; d.classList.remove('closed'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
+    const b = s.querySelector('button') || s; b.scrollIntoView({ block: 'center', behavior: 'instant' }); await __w(100);
+    const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, h = document.elementFromPoint(x, y);
+    return h && b.contains(h) ? [x, y] : { E: 'MOLECULES ON is covered' };`);
+  assert.ok(Array.isArray(molAt), JSON.stringify(molAt));
+  await realClick(molAt, g2);
+  const molOn = await g2.ev(`await __w(1000); const I = __LW.serialize({ scope: 'edit' }).presentation.instruments; return { on: __LW.chem.on, orbital: I.chem.orbital, lanes: I.states.lanes.length, rows: __LW.history.entries().map((e) => e.label) };`);
+  await realKey('z', [CTRL], g2);
+  const molUndo = await g2.ev(`await __w(1000); const P = __LW.layout.projects; return { on: __LW.chem.on, same: JSON.stringify(__LW.serialize({ scope: 'edit' })) === window.__pre, dirty: P.dirty, errs: __e.slice() };`);
+  await realKey('z', [CTRL, SHIFT], g2);
+  const molNew = await g2.ev(`await __w(800); const I0 = __LW.serialize({ scope: 'edit' }).presentation.instruments, before = { on: __LW.chem.on, orbital: I0.chem.orbital, lanes: I0.states.lanes.length };
+    const F = await (await fetch('./new-project.lambdawaves.json', { cache: 'no-cache' })).json(), FI = (F.data || F).presentation.instruments;
+    await __LW.layout.projects.fresh(); await __w(900); const I = __LW.serialize({ scope: 'edit' }).presentation.instruments;
+    return { before, orbital: I.chem.orbital, lanes: JSON.stringify(I.states.lanes), fileOrbital: FI.chem.orbital, fileLanes: JSON.stringify(FI.states.lanes), errs: __e.slice() };`);
+  assert.deepEqual({ on: molOn.on, filled: Number.isFinite(molOn.orbital), lanes: molOn.lanes, rows: molOn.rows }, { on: true, filled: true, lanes: 1, rows: ['new project', 'MOLECULES ON · MOLECULES'] }, 'NEW → MOLECULES ON: ' + JSON.stringify(molOn));
+  assert.deepEqual(molUndo, { on: false, same: true, dirty: false, errs: [] }, 'NEW → MOLECULES ON → Ctrl+Z: ' + JSON.stringify(molUndo));
+  assert.deepEqual(molNew.before, { on: true, orbital: molOn.orbital, lanes: 1 }, 'Ctrl+Shift+Z did not bring MOLECULES back filled: ' + JSON.stringify(molNew.before));
+  assert.equal(molNew.orbital, molNew.fileOrbital); assert.equal(molNew.lanes, molNew.fileLanes, 'NEW after MOLECULES is not the file: ' + JSON.stringify(molNew)); assert.deepEqual(molNew.errs, []);
+  pass(`the MOLECULES undo leaves nothing: NEW → a real click on MOLECULES ON (orbital ${molOn.orbital}, one STATES lane) → Ctrl+Z is byte-identical to the pre-ON reading and clean 1 s later; back on by Ctrl+Shift+Z, then NEW is the file (orbital ${molNew.orbital}, lanes ${molNew.lanes})`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {

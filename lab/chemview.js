@@ -678,6 +678,7 @@ export function createChem(host, api) {
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
     if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
+    else if (o.orbital === null) orbital = pendingOrbital = null;   // 0.3.1 · S4: the record's "not chosen" (HOMO by default) lands too — an undo of ON and NEW clear the fill
     if (typeof o.axis === 'string' && AXES.includes(o.axis)) { axis = o.axis; aSeg.set(axis); }
     if (Number.isFinite(o.kappa)) { kappa = o.kappa; kapKnob.set(kappa); }
     if (Number.isFinite(o.speed)) { speed = Math.max(1, Math.round(o.speed)); spdKnob.set(speed); }
