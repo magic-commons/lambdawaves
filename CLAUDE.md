@@ -56,10 +56,29 @@ visible focus glows and the phone's taller action-only editor.
 
 First-run λWAVES preferences are specified in `lab/rack.js` and
 `lab/native-ui.js`: tags, captions, Help and window notes off; hints,
-AUTO SCALE, DOMAIN AUTO and governor on; light/refractive/ALWAYS frost,
-22 px blur and 50% VIVID on desktop; on a phone or tablet (rack.js' own
+AUTO SCALE and governor on; light/refractive/ALWAYS frost, 22 px blur and
+50% VIVID on desktop; on a phone or tablet (rack.js' own
 `isPhone()`/`isTablet()`, via `lab/first-run.js`) the first-run material is
-frost OFF, tinted. Stored choices and the phone's frost override win. In
+frost OFF, tinted. Stored choices and the phone's frost override win. DOMAIN
+AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either.
+
+Every stored key lives in exactly one of three scopes (`docs/STATE-SCOPES.md`,
+0.3.1): PREFERENCE (the reader's furniture: theme, glass, hints, keys, the
+quality budget, camera feel and mode, frame and axes; never written into a
+project, a link or a history row, never changed by opening one), WORKSPACE
+(the window arrangement; travels with a project and the device remembers it,
+last one wins) and PROJECT (the work; the whole of the undo history except the
+camera pose, the notebook text and the quality hint). A project open must
+leave `lambdawaves.q0.settings` byte-identical outside the WORKSPACE keys.
+NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through
+the same restore-with-rollback road as any project; `tools/new-project.mjs`
+writes that file from the modulation model and the boot defaults and
+`--check` proves it byte-exact — run it after changing a default. The undo
+ring (`lab/history.js`) reads `serialize({ scope: 'edit' })` and writes
+`restore(S, { history: true })`; do not add a hand-kept key list beside it.
+An open never closes the notebook; it opens it only for non-blank text. Run
+`tests/history.browser-test.mjs`, `tests/new-project.browser-test.mjs` and
+`node tests/new-project.test.mjs` when touching any of this.

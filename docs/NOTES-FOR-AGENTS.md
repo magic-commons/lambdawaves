@@ -112,6 +112,7 @@ and the code disagree, the code is right; please say so in an issue.
   `momentum`, `wigner`, `qho`, `kepler`, `radiation`, `gas` and the rest of `tests/*.test.mjs`. Each checks the
   code against an oracle outside it (tables, closed forms, quadrature). Derivations are under `research/`.
 - Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
+- NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
 - The laws: CLAUDE.md (the standing rules for agents), REPORT.md (the notebook every session appends to), `docs/`
   (the optimization record, `ui/STYLE-LOCK.md`, `SHIPPING-READINESS.md`) and RELEASING.md.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit. It is read-only here: changes go to
