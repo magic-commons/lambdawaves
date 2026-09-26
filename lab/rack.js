@@ -449,6 +449,11 @@ export async function boot(dom) {
   const ROT_LIMIT = { z: 2 * Math.PI, kz: 2 * Math.PI, def: Math.PI };
   const rotRate = { z: 0, kz: 0, def: 0 };            // rad/s.  THE ANGLE IS NOT STORED AND NEVER WILL BE.
   const rotDriving = () => rotRate.z !== 0 || rotRate.kz !== 0 || rotRate.def !== 0;
+  /* S4 · THE RING'S `driven` IS "THE DRIVE MOVED THE REGISTER ON ITS LAST TICK", not "a rate is set": ROTATE z on an m = 0 state
+     turns nothing, and a set rate froze the ring over every edit (probes/S3-verify/rotdrive.mjs).  NOT "and the clock plays": the
+     drive integrates on the modulation tick's wall clock, and a paused 2p_x keeps turning (probes/S4/rot-paused.js).  The drive's
+     own version bumps note nothing (rotTicking): its stop notes 'rotation drive', once. */
+  let rotMoved = false, rotTicking = false;
   function setRotationRate(key, value) {
     if (!(key in ROT_LIMIT) || !Number.isFinite(value)) return false;
     const v = key !== 'z' && sturm.P ? 0 : Math.max(-ROT_LIMIT[key], Math.min(ROT_LIMIT[key], value));
@@ -456,7 +461,7 @@ export async function boot(dom) {
     rotRate[key] = v;
     const k = key === 'z' ? ui.rotZRate : key === 'kz' ? ui.kzRate : ui.defRate;
     setKnob(k, v);
-    if (!rotDriving() && history) history.note('rotation drive');
+    if (!rotDriving()) { rotMoved = false; if (history) history.note('rotation drive'); }
     schedule(TIER.PRESENT);
     return v;
   }
@@ -471,9 +476,11 @@ export async function boot(dom) {
        a modulated rate cannot creep past a disabled dial.  ROTATE z survives: m is still m. */
     const az = rotRate.z * dt, ak = sturm.P ? 0 : rotRate.kz * dt, ad = sturm.P ? 0 : rotRate.def * dt;
     if (az === 0 && ak === 0 && ad === 0) return false;
+    const d0 = reg.digest(); rotTicking = true;
     if (az !== 0) reg.rotateZ(az);
     if (ak !== 0) reg.rotateK(ak);                    // ≤ 35 blocks of ≤ 6×6 symEig, unpopulated ones skipped
     if (ad !== 0) reg.defectWait(ad);
+    rotTicking = false; rotMoved = reg.digest() !== d0;
     touchState();                                     // ONE schedule for all three, not three
     return true;
   }
@@ -2266,6 +2273,7 @@ export async function boot(dom) {
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: molSession,
+    derived: (fill) => (history ? history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
     now: () => clock.t });
 
   /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
@@ -4503,7 +4511,7 @@ export async function boot(dom) {
     { id: 'modArm', label: 'MOD \u2014 the modulation on / off (space then plays both clocks)', key: 'Space', ctrl: true, run: () => setModArm(!modArm) },
     { id: 'modWin', label: 'the modulation window \u2014 open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
     { id: 'modBar', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
-    { id: 'undo', label: 'undo the last edit to ψ or its law', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
+    { id: 'undo', label: 'undo the last edit', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
     { id: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => historyApi.redo() },
     { id: 'redoY', label: 'redo (Ctrl+Y)', key: 'KeyY', ctrl: true, shift: false, run: () => historyApi.redo() },
     { id: 'historyUndo', label: 'return from the last history jump', key: 'KeyZ', ctrl: true, alt: true, shift: false, run: () => historyApi.historyUndo() },
@@ -4516,7 +4524,16 @@ export async function boot(dom) {
       run: () => layout.notebook.open('projects') },
   ];
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
-  const keys = installKeys({ ACTIONS, layout, canvas: dom.canvas, stageHasFocus, refresh: () => { if (ui.keysRefresh) ui.keysRefresh(); } });
+  /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
+     at the next commit under whatever name was standing (probes/S3-verify/edges*.mjs).  An edit still pending under another name
+     commits first; a held key repeats under one name and stays one row; a key that changed nothing drops its name like any gesture. */
+  const keyEdit = (a, run) => {
+    if (!history || history.holding) return run();
+    const name = a.label + ' · ' + keyName(a);
+    if (history.pendingLabel !== name) history.flush();
+    run(); history.note(name);
+  };
+  const keys = installKeys({ ACTIONS, layout, canvas: dom.canvas, stageHasFocus, refresh: () => { if (ui.keysRefresh) ui.keysRefresh(); }, edit: keyEdit });
 
 
   function toggleUI() {
@@ -4827,8 +4844,10 @@ export async function boot(dom) {
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
            palette and state controls, so no later project step can overwrite a routed hand value. */
+        const modWas = hist && pr.modulation !== undefined && modHost && modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (hist && pr.modulation !== undefined) linkFollowed = null;   // a load is STOPPED: LINKED time re-follows the field next frame
+        if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · …and under SEPARATE nothing re-follows: an undo puts a playing transport back to playing
         if (pr.modwin && modView) modView.restore(pr.modwin);
       }
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
@@ -4921,12 +4940,12 @@ export async function boot(dom) {
      lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame */
   const hKey = (j) => { let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) h = Math.imul(h ^ j.charCodeAt(i), 0x01000193); return (h >>> 0).toString(36) + ':' + j.length; };
   let __hver = reg.version;
-  Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; hNote(); } });
+  Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!rotTicking) hNote(); } });
   /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
      every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
   let hRender = null;
   history = createHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
-    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: rotDriving,
+    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => rotMoved && rotDriving(),
     onChange: () => { if (hRender) hRender(); } });
   /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════
      An FL-style list is only worth having if a row says what it was — "Move Pattern", not "edit #17".
@@ -4953,29 +4972,42 @@ export async function boot(dom) {
     const k = t.closest('.k');
     if (k) what = txt(k.querySelector('.k-lbl')) || k.getAttribute('aria-label') || 'knob';
     if (!what) { const sw = t.closest('.sw'); if (sw) what = txt(sw.querySelector('.sw-lbl')) || 'switch'; }
-    /* a SEG labels itself with `.k-lbl` too (kit.js builds both from the same helper), and reaching it
-       through `.seg, .segw` is safe because the knob branch above already claimed anything inside a .k */
-    if (!what) { const sb = t.closest('.seg-b'); if (sb) { const g = sb.closest('.seg, .segw');
+    /* a SEG labels itself with `.k-lbl` too (kit.js builds both from the same helper) — on the `.segw` that wraps the
+       `.seg` (S4: `closest('.seg, .segw')` stopped at the `.seg`, so a row read DARK, not THEME DARK); safe because
+       the knob branch above already claimed anything inside a .k */
+    if (!what) { const sb = t.closest('.seg-b'); if (sb) { const g = sb.closest('.segw') || sb.closest('.seg');
       const gl = g ? txt(g.querySelector('.k-lbl')) : ''; what = (gl ? gl + ' ' : '') + txt(sb); } }
     if (!what) { const tr = t.closest('.trig'); if (tr) what = txt(tr.querySelector('.trig-l')) || txt(tr); }
     if (!what) { const fd = t.closest('.fd'); if (fd) what = txt(fd.querySelector('.fd-lbl')) || fd.getAttribute('aria-label') || 'fader'; }
     if (!what) { const f = t.closest('select, input'); if (f && f.type !== 'text' && f.type !== 'search') what = (f.getAttribute('aria-label') || f.title || (f.type === 'color' ? 'colour' : '')).toUpperCase(); }   // S3: a colour well or a <select>
-    /* S3 · the MODULATION window's controls: a dial by device and caption (LFO RATE), the curve as CURVE, the rest by device or macro
-       slot and short label (LFO SINE, MACRO 1 DEPTH); a label too long for a list gives its first word (LFO BYPASS) */
+    /* S3 · the MODULATION window's controls: a dial by device and caption (LFO RATE), the rest by device or macro slot and short
+       label (LFO SINE, MACRO 1 DEPTH); a label too long for a list gives its first word (LFO BYPASS).  S4 · the curve editor (the
+       `.m2svg` of an LFO or ENV; an AUDIO editor is a meter) names its source: its label, else its kind and its place among that
+       kind in the window — CURVE · LFO 1 · MODULATION */
     if (!what && mw) {
       const d = t.closest('.m2dev'), slot = t.closest('.m2slot'), k2 = t.closest('.m2k'), c = t.closest('button, input, [aria-label]');
-      let word = k2 ? txt(k2.querySelector('.m2kcap')) : t.closest('.m2edit') ? 'CURVE' : c ? (c.getAttribute('aria-label') || txt(c)).split(' — ')[0] : '';
-      if (word.length > 24) word = word.split(' ')[0];
-      const owner = (d ? txt(d.querySelector('.m2kind')) : slot ? txt(slot.querySelector('.m2vname')) : '').toUpperCase();
-      word = word.toUpperCase(); what = owner && !word.includes(owner) ? (owner + ' ' + word).trim() : word;
+      const curve = d && t.closest('.m2svg') && ['lfo', 'env'].find((x) => d.classList.contains(x));
+      if (curve) {
+        const own = txt(d.querySelector('.m2minname')).toUpperCase(), K = curve.toUpperCase();
+        what = 'CURVE · ' + (own && own !== K ? own : K + ' ' + ([...mw.querySelectorAll('.m2dev.' + curve)].indexOf(d) + 1));
+      } else {
+        let word = k2 ? txt(k2.querySelector('.m2kcap')) : c ? (c.getAttribute('aria-label') || txt(c)).split(' — ')[0] : '';
+        if (word.length > 24) word = word.split(' ')[0];
+        const owner = (d ? txt(d.querySelector('.m2kind')) : slot ? txt(slot.querySelector('.m2vname')) : '').toUpperCase();
+        word = word.toUpperCase(); what = owner && !word.includes(owner) ? (owner + ' ' + word).trim() : word;
+      }
     }
     if (!what) return '';
     const w = (win || '').trim();
     return w && w.toUpperCase() !== what.toUpperCase() ? what + ' · ' + w : what;
   };
   const heldPointers = new Set();
+  /* S4 · the RIGHT button is a gesture too: MIR's curve editor adds and places a point by right-drag and resets a tension handle by
+     right-click, so button 2 is held and released like button 0 (one row, named).  A pointer already held here lost its up (a
+     native context menu can take it): that hold is released first, so a stale count never outlives the next press. */
   document.addEventListener('pointerdown', e => {
-    if (e.button !== 0 || heldPointers.has(e.pointerId)) return;
+    if (e.button !== 0 && e.button !== 2) return;
+    if (heldPointers.has(e.pointerId)) releasePointer(e);
     heldPointers.add(e.pointerId); pointerHeld = true;
     history.hold(hTouchName(e.target));
   }, true);
@@ -5006,7 +5038,7 @@ export async function boot(dom) {
        `goto` commits first (that is the ring's own rule), so jumping away from an unbanked edit banks
        it rather than losing it. */
     entries() { return history.entries(); }, get cursor() { return history.cursor; },
-    render() { if (hRender) hRender(); },
+    render() { if (hRender) hRender(true); },   // S4: now (the ring's own onChange waits for the next frame)
     goto(i) { const ok = history.goto(i); if (ok) wState.setStatus('history · row ' + (history.cursor + 1) + ' of ' + history.entries().length, 'live'); return ok; },
     label(name) { history.label(name); },
   };
@@ -5022,27 +5054,35 @@ export async function boot(dom) {
     histRedoBtn = trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn);
     histReturnBtn = trig({ label: 'HISTORY UNDO', title: 'return once to the timeline from before the last history jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn);
     rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
-    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> The ten latest points are shown. Select one to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Sixty edits remain available to Undo and Redo.';
+    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
   }
+  /* S4 · EVERY ROW (≤ 61 with the bottom), newest at the top; the list scrolls inside the card (lab.css `.hist-list`) and the
+     current row is kept in view — measured against the list's own box, never scrollIntoView, which would scroll the rack too.
+     A full ring built node by node, a listener each, inside the ring's onChange made one flush 2.6–3.9 ms on the desktop, past
+     S3's < 2 ms (probes/S4/render-*.js): so the list is ONE string with ONE click listener, and onChange asks for ONE repaint
+     per frame (sixty flushes in a loop paint once; the boot's first paint is the first frame's, no layout forced mid-boot) */
+  histList.addEventListener('click', (e) => { const b = e.target.closest('.hist-row'); if (b) historyApi.goto(+b.dataset.i); });
   function renderHistory() {
-    if (!histList) return;
+    histRaf = 0;
     const rows = historyApi.entries();
-    histList.innerHTML = '';
-    const shown = rows.slice(-10).reverse();
-    for (const r of shown) {                              // newest at the top, capped so this is a glance, not a workspace
-      const b = el('button', 'hist-row hist-' + r.state, histList); b.type = 'button';
-      el('span', 'hist-i', b, String(r.i));
-      el('span', 'hist-lbl', b, r.label || 'edit');
-      if (r.state === 'current') b.setAttribute('aria-current', 'true');
-      b.title = r.state === 'current' ? 'where the instrument is standing' : 'land on this moment';
-      b.addEventListener('click', () => historyApi.goto(r.i));
+    let h = '';
+    for (let j = rows.length - 1; j >= 0; j--) {
+      const r = rows[j], attr = r.state === 'current' ? ' aria-current="true" title="where the instrument is standing"' : ' title="land on this moment"';
+      h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + attr + '><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + esc(r.label || 'edit') + '</span></button>';
+    }
+    histList.innerHTML = h;
+    const here = histList.querySelector('[aria-current]');
+    if (here && histList.clientHeight) {
+      const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
+      if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
     }
     if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
     if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
     if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
-    wHist.setStatus(shown.length + ' recent  ·  ' + rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
+    wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
   }
-  hRender = renderHistory;
+  let histRaf = 0;
+  hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
   renderHistory();
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */

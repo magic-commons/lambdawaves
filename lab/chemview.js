@@ -234,10 +234,15 @@ export function createChem(host, api) {
     const task = Promise.all([call(msg, () => localSolve(msg)), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
       if (seq !== solveSeq) return null;
       if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
-      sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
-      orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
-      pendingOrbital = null;
-      rebuildOrbKnob(); pushField(); refresh(); notify();
+      /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
+         ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
+      const fill = () => {
+        sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
+        orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
+        pendingOrbital = null;
+        rebuildOrbKnob(); pushField(); refresh(); notify();
+      };
+      if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
       return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
         if (seq !== solveSeq || sol !== r) return null;

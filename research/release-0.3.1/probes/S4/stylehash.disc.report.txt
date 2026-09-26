@@ -1,0 +1,37 @@
+# before b1: http://127.0.0.1:8748/lab/?preset=1s%2B2pz&sw=0
+# after  a2: http://127.0.0.1:8749/lab/?preset=1s%2B2pz&sw=0
+# noise  b2 (a second capture of the unchanged page; what differs there is masked)
+## dark-tinted-off: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## dark-tinted-on: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## dark-refractive-off: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## dark-refractive-on: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## light-tinted-off: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## light-tinted-on: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## light-refractive-off: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+## light-refractive-on: 3356 → 3356 elements · 1 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > aside#rack > section.dev:17 > div#devb-history.dev-body > div.hist-list:0
+      max-height: 260px → 250px
+
+## pixels (beyond the pixels that moved between the two before-runs)
+dark-tinted-off: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-tinted-on: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-refractive-off: 0 pixels differ (0.000 %) · 0 masked as noise
+dark-refractive-on: 0 pixels differ (0.000 %) · 0 masked as noise
+light-tinted-off: 0 pixels differ (0.000 %) · 0 masked as noise
+light-tinted-on: 0 pixels differ (0.000 %) · 0 masked as noise
+light-refractive-off: 0 pixels differ (0.000 %) · 0 masked as noise
+light-refractive-on: 0 pixels differ (0.000 %) · 0 masked as noise

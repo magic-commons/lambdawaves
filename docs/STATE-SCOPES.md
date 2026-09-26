@@ -97,8 +97,10 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
   layout folds the transport, or hides the rack on a phone, therefore changes those two settings keys through the
   WORKSPACE road, which is why they are WORKSPACE keys and the byte-identical settings gates strip them with the rest.
 - Switching MOLECULES on commits its row at the press. Its solution lands about 150 ms later and fills derived defaults
-  (the chem orbital, the MO-REGISTRY selection and the STATES ground lane) with no note, so that fill rides into the
-  next row. One row per switch needs a settle signal from the molecular session.
+  (the chem orbital, the MO-REGISTRY selection and the STATES ground lane). Since S4 that landing runs through the ring's
+  `absorb()`, which re-keys the press's row on the fill when nothing else is pending, so the switch is one row and the
+  first undo turns it off. That undo leaves the chem orbital and the STATES lane standing while MOLECULES is off: a null
+  or empty value in the record does not clear them, and the next ON derives them again.
 - Opening the bundled demo `lab/demos/wave-dancer.lambdawaves.json` no longer switches a reader's frame and axes off.
   This is D1's stated cost. S2 stripped its dead field chrome from `mat`; its `layout.look` and `layout.cam` blocks
   (written before S1, never read by `applyLayout`) are still in the file.
