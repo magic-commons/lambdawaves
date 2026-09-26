@@ -1,0 +1,49 @@
+{
+ "boot": {
+  "chemOnRack": false,
+  "orbsOnRack": false,
+  "chemOn": false,
+  "selected": null,
+  "errs": []
+ },
+ "closedLayout": {
+  "ok": true,
+  "chemOnRack": false,
+  "orbsOnRack": false,
+  "chemOn": true,
+  "selected": "ground",
+  "errs": []
+ },
+ "atomic": {
+  "chemOnRack": false,
+  "orbsOnRack": false,
+  "chemOn": false,
+  "selected": null,
+  "errs": []
+ },
+ "omittedLayout": {
+  "ok": true,
+  "chemOnRack": false,
+  "orbsOnRack": false,
+  "chemOn": true,
+  "selected": "ground",
+  "errs": []
+ },
+ "register": {
+  "ok": true,
+  "chemOnRack": false,
+  "orbsOnRack": false,
+  "chemOn": true,
+  "selected": "orbital-packet",
+  "errs": []
+ },
+ "reopened": {
+  "chemOnRack": true,
+  "orbsOnRack": false,
+  "chemOn": false,
+  "selected": null,
+  "errs": []
+ },
+ "atomicBytes": "3eb1e6cf:10003",
+ "errs": []
+}

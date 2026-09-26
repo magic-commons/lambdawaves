@@ -25,6 +25,9 @@ The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 (`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
 and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
 at startup but must be shown if an older project restores it as field owner.
+MOLECULES and MO-REGISTRY start off the first-run rack (offered by + and WINDOW)
+and, by the same law, come back onto it when a restored project's field owner
+is MOLECULES (MO-REGISTRY too when that file's register is on).
 
 The stage frame/axis mask is built in `lab/rack.js` `refreshOcclusion()` and
 consumed by the line shader in `lab/field.js`. Mask painted window surfaces,

@@ -5036,6 +5036,7 @@ export async function boot(dom) {
         // A legacy H₂⁺ file can carry a closed old layout and an active field
         // owner. Keep its controls reachable after applying that layout.
         if (molecule.on) { wMol.root.hidden = false; wMol.root.classList.remove('closed'); }
+        if (pr.instruments && chem.on) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         // Restore operator rates AFTER the destination scale is installed. The old project's
