@@ -1,0 +1,29 @@
+{"tag":"start","style":0,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":0,"cursor":0}
+{"tag":"after c","style":1,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":1,"cursor":0}
+{"tag":"after v (150 ms)","style":1,"view":2,"paletteOn":false,"rows":["cycle the draw style · C"],"pending":null,"depth":2,"cursor":1}
+{"tag":"+600 ms","style":1,"view":2,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":2,"cursor":2}
+{"tag":"undo #1","style":1,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":1,"cursor":1}
+{"tag":"undo #2","style":0,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":0,"cursor":0}
+{"tag":"----"}
+{"tag":"start","style":0,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":0,"cursor":0}
+{"tag":"after v","style":0,"view":2,"paletteOn":false,"rows":[],"pending":null,"depth":1,"cursor":0}
+{"tag":"after c (150 ms)","style":1,"view":2,"paletteOn":false,"rows":["cycle the observable · V"],"pending":null,"depth":2,"cursor":1}
+{"tag":"+600 ms","style":1,"view":2,"paletteOn":false,"rows":["cycle the observable · V","cycle the draw style · C"],"pending":null,"depth":2,"cursor":2}
+{"tag":"undo #1","style":0,"view":2,"paletteOn":false,"rows":["cycle the observable · V","cycle the draw style · C"],"pending":null,"depth":1,"cursor":1}
+{"tag":"undo #2","style":0,"view":1,"paletteOn":false,"rows":["cycle the observable · V","cycle the draw style · C"],"pending":null,"depth":0,"cursor":0}
+{"tag":"----"}
+{"tag":"start","style":0,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":0,"cursor":0}
+{"tag":"after c","style":1,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":1,"cursor":0}
+{"tag":"after p (150 ms)","style":1,"view":1,"paletteOn":true,"rows":["cycle the draw style · C"],"pending":null,"depth":2,"cursor":1}
+{"tag":"+600 ms","style":1,"view":1,"paletteOn":true,"rows":["cycle the draw style · C","toggle the phase palette · P"],"pending":null,"depth":2,"cursor":2}
+{"tag":"undo #1","style":1,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","toggle the phase palette · P"],"pending":null,"depth":1,"cursor":1}
+{"tag":"undo #2","style":0,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","toggle the phase palette · P"],"pending":null,"depth":0,"cursor":0}
+{"tag":"----"}
+{"tag":"start","style":0,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":0,"cursor":0}
+{"tag":"after c","style":1,"view":1,"paletteOn":false,"rows":[],"pending":null,"depth":1,"cursor":0}
+{"tag":"after v (700 ms)","style":1,"view":2,"paletteOn":false,"rows":["cycle the draw style · C"],"pending":null,"depth":2,"cursor":1}
+{"tag":"+600 ms","style":1,"view":2,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":2,"cursor":2}
+{"tag":"undo #1","style":1,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":1,"cursor":1}
+{"tag":"undo #2","style":0,"view":1,"paletteOn":false,"rows":["cycle the draw style · C","cycle the observable · V"],"pending":null,"depth":0,"cursor":0}
+{"tag":"----"}
+errs []

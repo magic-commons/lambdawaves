@@ -1,0 +1,18 @@
+── c
+  5 pending=undefined depth=0 rows=1 style=0
+  17 keydown:c
+  23 pending=undefined depth=1 rows=1 style=1
+  71 keyup:c
+  423 pending=undefined depth=1 rows=2 style=1
+  rows ["start","cycle the draw style · C"]
+── c then v
+  5 pending=undefined depth=0 rows=1 style=1
+  5 keydown:c
+  10 pending=undefined depth=1 rows=1 style=2
+  41 keyup:c
+  201 keydown:v
+  205 pending=undefined depth=2 rows=2 style=2
+  236 keyup:v
+  605 pending=undefined depth=2 rows=3 style=2
+  rows ["start","cycle the draw style · C","cycle the observable · V"]
+errs []

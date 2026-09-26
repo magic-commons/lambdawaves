@@ -1,0 +1,6 @@
+style option ["SOLID","WAVE"]
+SEPARATE, MOD playing {"link":false,"s0":{"mod":true,"field":false},"routed":{"mod":true,"modulated":true,"live":0.386},"undone":{"mod":true,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":26},"redone":{"mod":true,"modulated":true,"base":0.3,"live":0.33}}
+SEPARATE, MOD paused {"link":false,"s0":{"mod":false,"field":false},"routed":{"mod":false,"modulated":false,"live":0.3},"undone":{"mod":false,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":null},"redone":{"mod":false,"modulated":false,"base":0.3,"live":0.3}}
+LINKED, field playing {"link":true,"s0":{"mod":true,"field":true},"routed":{"mod":true,"modulated":true,"live":0.364},"undone":{"mod":true,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":25},"redone":{"mod":true,"modulated":true,"base":0.3,"live":0.335}}
+labels {"undoNew":true,"undoOld":false,"redo":true,"searchHits":["⌃ · ⌃⇧ · ⌃⌥Zaxis Z · undo · redo · return from","DOCKdock / undock the transportT","UNDOundo the last editCtrlZ"]}
+errs [] 

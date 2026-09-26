@@ -1,0 +1,6 @@
+(a) m = 0 under ROTATE z {"driving":true,"rows":["start","edit"]} {"driving":true,"rows":["STAGE · SETTINGS","edit"],"palIds":0} after stop ["STAGE · SETTINGS","edit","rotation drive"]
+(b) 2p_x under ROTATE z {"paused":{"rows":0,"labels":[],"playing":false},"playing":{"rows":0,"labels":[]},"stopped":["rotation drive"]}
+(c) during a turning drive: after a knob drag + C {"before":{"exposure":1,"style":0,"rows":["start"]},"exposure":3.921745747396515,"style":1,"rows":["start"],"canUndo":false,"depth":0,"cursor":0}
+    then Ctrl+Z {"exposure":3.921745747396515,"style":1,"driving":true,"rows":["start*"],"canRedo":false}
+    then Ctrl+Shift+Z {"exposure":3.921745747396515,"style":1,"driving":true,"rows":["start*"]}
+errs [] 

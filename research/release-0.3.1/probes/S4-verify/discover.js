@@ -1,0 +1,5 @@
+// S4 VERIFY: where the segments, switches and history triggers live (dev id, caption, options)
+const segs = [...document.querySelectorAll('.segw')].map((s) => ({ dev: s.closest('.dev')?.dataset.id || s.closest('[id]')?.id, lbl: s.querySelector('.k-lbl')?.textContent.trim(), opts: [...s.querySelectorAll('.seg-b')].map((b) => b.textContent.trim()).join('|') }));
+const sws = [...document.querySelectorAll('.sw')].map((s) => (s.closest('.dev')?.dataset.id || '?') + ':' + s.querySelector('.sw-lbl')?.textContent.trim());
+const devs = [...document.querySelectorAll('.dev')].map((d) => d.dataset.id + (d.classList.contains('closed') ? '(closed)' : '') + (d.hidden ? '(hidden)' : ''));
+return { segs: segs.filter((s) => /GRID|THEME|FRAME|STYLE|AXIS|VIEW/.test(s.lbl || '')), sws: sws.filter((s) => /KEPLER|FRAME|MOLECULES|VORTEX|AXIS/.test(s)), devs, mw: !!document.querySelector('#modwin'), tension: [...document.querySelectorAll('#modwin [class*=tn], #modwin [class*=tension]')].slice(0, 5).map((e) => e.tagName + '.' + (e.className.baseVal ?? e.className)) };

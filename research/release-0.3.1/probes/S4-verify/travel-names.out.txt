@@ -1,0 +1,19 @@
+Ctrl+Z · 100                 {"last":"undo the last edit · Ctrl+Z","rows":["start","edit","edit","undo the last edit · Ctrl+Z*"]}
+Ctrl+Shift+Z · 100           {"last":"redo it (Ctrl+Y too) · Ctrl+Shift+Z","rows":["start","edit","edit","edit","redo it (Ctrl+Y too) · Ctrl+Shift+Z*"]}
+Ctrl+Y · 100                 {"last":"redo (Ctrl+Y) · Ctrl+Y","rows":["start","edit","edit","edit","redo (Ctrl+Y) · Ctrl+Y*"]}
+UNDO button · 100            {"last":"edit","rows":["start","edit","edit","edit*"]}
+REDO button · 100            {"last":"edit","rows":["start","edit","edit","edit","edit*"]}
+row click (goto 1) · 100     {"last":"edit","rows":["start","edit","edit*"]}
+Ctrl+Z · 300                 {"last":"undo the last edit · Ctrl+Z","rows":["start","edit","edit","undo the last edit · Ctrl+Z*"]}
+Ctrl+Shift+Z · 300           {"last":"redo it (Ctrl+Y too) · Ctrl+Shift+Z","rows":["start","edit","edit","edit","redo it (Ctrl+Y too) · Ctrl+Shift+Z*"]}
+Ctrl+Y · 300                 {"last":"redo (Ctrl+Y) · Ctrl+Y","rows":["start","edit","edit","edit","redo (Ctrl+Y) · Ctrl+Y*"]}
+UNDO button · 300            {"last":"edit","rows":["start","edit","edit","edit*"]}
+REDO button · 300            {"last":"edit","rows":["start","edit","edit","edit","edit*"]}
+row click (goto 1) · 300     {"last":"edit","rows":["start","edit","edit*"]}
+Ctrl+Z · 500                 {"last":"edit","rows":["start","edit","edit","edit*"]}
+Ctrl+Shift+Z · 500           {"last":"edit","rows":["start","edit","edit","edit","edit*"]}
+Ctrl+Y · 500                 {"last":"edit","rows":["start","edit","edit","edit","edit*"]}
+UNDO button · 500            {"last":"edit","rows":["start","edit","edit","edit*"]}
+REDO button · 500            {"last":"edit","rows":["start","edit","edit","edit","edit*"]}
+row click (goto 1) · 500     {"last":"edit","rows":["start","edit","edit*"]}
+errs []
