@@ -26,7 +26,7 @@ this file.
 |---|---|---|
 | `theme` (light / dark / system) | settings | PREFERENCE |
 | `card`, `cardSet`, `frost`, `disc`, `blur`, `accent [a, b, vivid]` | settings | PREFERENCE |
-| tags (`badges`), `controlHints`, `captions`, Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout`, `phoneTr` / `phoneRack` | settings (and their own keys) | PREFERENCE |
+| tags (`badges`), `controlHints`, `captions`, Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout` | settings (and their own keys) | PREFERENCE |
 | AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode`, `modCadence`, `modArm`, `clockLink` | settings | PREFERENCE |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |
@@ -43,8 +43,9 @@ this file.
 | `quality {res, steps, scale}` | project, clamped by the device (`deviceQuality`; a file never switches AUTO SCALE off) | PROJECT, advisory, not in history (D5) |
 | notebook text, title and subtitle | beside the project data | PROJECT, not in history |
 | `layout` (cards, docked, rackHidden, nb), `closed[]`, `nbW/nbH`, `abW/abH`, `modwin` placement, favourite `layouts` | settings and project | WORKSPACE |
+| `phoneTr` / `phoneRack` (a phone's transport fold and hidden rack, read back from the page, so a project's layout writes them) | settings, through the layout | WORKSPACE (S2) |
 
-## What each road does (as of S1)
+## What each road does (as of S2)
 
 - `serialize()` writes `presentation.ui` as `{ stage }` only and `presentation.camera` as `{ autoRotate }` only. It
   strips the field chrome from `presentation.mat` in the same way it strips `bg`, `lightUI` and `stageCustom`
@@ -61,6 +62,10 @@ this file.
 - Share links are a codec over `serialize()` (`lab/statelink.js`), so a link carries no preference key. Format v1's
   MAT flags byte still has bits for invert, frame, axis and axis colour, but it is frozen. A new link writes them at
   their defaults and `restore()` ignores them.
+- NEW (S2) opens `lab/new-project.lambdawaves.json`, which `tools/new-project.mjs` writes: every PROJECT key at the
+  shipped default and nothing else, so it resets the work and leaves the preferences and the arrangement alone. The
+  unsaved-changes mark (`projectKey()`) ignores the WORKSPACE, the auto-rotate switch, `quality` and its shadow
+  `mat.steps` (advice the device clamps), and a bound macro's value (its source's output). The stage counts.
 
 ## D4, measured
 
@@ -77,10 +82,11 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 
 - `phoneTr` is read from the transport card's fold and `phoneRack` from `rack-hidden` (on a phone). A project whose
   layout folds the transport, or hides the rack on a phone, therefore changes those two settings keys through the
-  WORKSPACE road.
+  WORKSPACE road, which is why they are WORKSPACE keys and the byte-identical settings gates strip them with the rest.
 - The history ring's LOOK record (`hLook`) still carries the chrome. It drops it in S4.
-- The bundled demo `lab/demos/wave-dancer.lambdawaves.json` still has `mat.frame: false, axis: false` from before
-  S1. Opening it no longer switches a reader's frame and axes off. This is D1's stated cost.
+- Opening the bundled demo `lab/demos/wave-dancer.lambdawaves.json` no longer switches a reader's frame and axes off.
+  This is D1's stated cost. S2 stripped its dead field chrome from `mat`; its `layout.look` and `layout.cam` blocks
+  (written before S1, never read by `applyLayout`) are still in the file.
 
 ## Adding a key
 

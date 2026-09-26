@@ -1031,7 +1031,8 @@ async function runProjectOpen(LW, found, S, scene, say, err, force) {
     for (const rec of [ev.open, ev.restore]) if (rec && rec.after === undefined && t >= rec.t + WIN) rec.after = reading();   // LW.perf.loopMedian 2 s on
   };
   const at = [
-    { ms: 3000, what: 'WAVE DANCER', fn: () => { ev.click = { t: performance.now(), before: reading() }; demo().click(); ev.click.syncMs = r3(performance.now() - ev.click.t); return 'pj-demo'; } },
+    /* 0.3.1 · S2: the button asks before it discards unsaved changes (synchronously, before its first await) — force=1 already said yes */
+    { ms: 3000, what: 'WAVE DANCER', fn: () => { ev.click = { t: performance.now(), before: reading() }; const c0 = window.confirm; if (force) window.confirm = () => true; try { demo().click(); } finally { window.confirm = c0; } ev.click.syncMs = r3(performance.now() - ev.click.t); return 'pj-demo'; } },
     { ms: 7000, what: 'the state as found', fn: () => { if (!ev.open || !ev.open.ok) return 'skipped: the demo had not opened'; ev.restore = restoreFound('in play'); return '__LW.restore'; } },
   ];
   try { await scene(label, null, null, 11000, at, BIN_MS, tap); s = S[S.length - 1]; }

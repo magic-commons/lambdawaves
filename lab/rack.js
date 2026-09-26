@@ -2,7 +2,7 @@ import { bindStageGestures } from './stage-gestures.js';
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
-import { MAX_PROJECT_BYTES, storeProjectImport } from './project-import.js';
+import { MAX_PROJECT_BYTES, parseProjectImport, storeProjectImport } from './project-import.js';
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
 import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
@@ -3880,12 +3880,15 @@ export async function boot(dom) {
       }
       function projectKey() {
         const data = projectSnapshot(), pr = data.presentation;
-        delete pr.quality.autoScale;
-        /* THE DAW KEYS THAT DO NOT DIRTY A PROJECT: moving a window, the modulation window's placement, the
-           auto-rotate switch, the stage, the notebook's size are saved WITH the project but a demo-maker
-           dragging a window is not "unsaved work". The overlays and the A/B transition are content and do count. */
-        delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.ui; delete pr.notebook;
+        /* THE KEYS THAT DO NOT DIRTY A PROJECT (docs/STATE-SCOPES.md): the WORKSPACE — moving a window, the modulation window's
+           placement, the notebook's size — and the auto-rotate switch are saved WITH the project, but a demo-maker dragging a
+           window is not "unsaved work"; nor is QUALITY, advice the device clamps (D5), nor mat.steps, its shadow (applyRebuild
+           writes it from quality.steps: WAVE DANCER's 240 became this device's 160 a frame after its open and read as an edit).
+           0.3.1 · S2: the stage is the work (S1 left only the stage in `ui`) and counts, as the overlays and the A/B transition do. */
+        delete pr.quality; delete pr.mat.steps;
+        delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.notebook;
         if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
+        for (const m of (pr.modulation && pr.modulation.macros) || []) if (m.sourceId) delete m.value;   // S2: a bound macro reads its source (deserialize overwrites the value) — NEW's LFO playing is not an edit
         return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
       const projectClean = () => { pjBaseline = projectKey(); };
@@ -3910,7 +3913,7 @@ export async function boot(dom) {
         get dirty() { return projectDirty(); },
         markClean: projectClean,
         requestOpen(path) { return discardProject('OPEN') && projects.open(path); },
-        requestFresh() { return discardProject('START A NEW PROJECT') && projects.fresh(); },
+        requestFresh() { return discardProject('START A NEW PROJECT') ? projects.fresh() : Promise.resolve(false); },
         save(path) {
           path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
           const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
@@ -3918,8 +3921,11 @@ export async function boot(dom) {
           Object.defineProperty(P.items, path, { configurable: true, enumerable: true, writable: true, value: { path, folder, name, saved: now, opened: Object.hasOwn(P.items, path) ? P.items[path].opened : now, data: projectSnapshot(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } } });
           pjTouch(P, path); if (!pjWrite(P)) return false; pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } projectClean(); renderProjects(); return true;
         },
-        open(path) {
-          const P = pjRead(), it = P && Object.hasOwn(P.items, path) ? P.items[path] : null; if (!it) return false;
+        open(path, file) {
+          /* 0.3.1 · S2: `file` is a parsed project that is not in the collection (NEW's empty project, below): it takes this
+             same road, M5b's roll-back included, and stores nothing and leaves nothing current. */
+          const P = file ? null : pjRead(), it = file || (P && Object.hasOwn(P.items, path) ? P.items[path] : null); if (!it) return false;
+          const failed = file ? 'new project failed' : 'open failed ' + path;
           /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
           /* M5b (2026-09-24): the instrument as it stands, taken before the file touches it — the SAME road a saved project
              takes (serialize → JSON → restore) — and whether it was clean, so a failed open can hand both back. */
@@ -3936,19 +3942,35 @@ export async function boot(dom) {
              dirty state re-applied: clean if it was clean, dirty against the old baseline if it was not.  If even the
              roll-back fails, nothing is current, so no SAVE can land on a file — and the status says that too. */
           if (!restored) {
-            if (back) { if (wasClean && baseline !== null) projectClean(); else pjBaseline = baseline; pjStatus('open failed ' + path + ' — the previous state is back'); }
-            else { pjCurrent = null; pjStatus('open failed ' + path + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this'); }
+            if (back) { if (wasClean && baseline !== null) projectClean(); else pjBaseline = baseline; pjStatus(failed + ' — the previous state is back'); }
+            else { pjCurrent = null; pjStatus(failed + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this'); }
             return false;
           }
+          if (nbTimer) { clearTimeout(nbTimer); nbTimer = 0; } nbPending.clear();   // S2: the last project's keystrokes still in the 300 ms debounce must not land over this one's notebook
           ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
           if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
-          it.opened = new Date().toISOString(); pjTouch(P, path); const remembered = pjWrite(P); pjCurrent = path; pjStatus('opened ' + path + (remembered ? '' : ' — recent history could not be saved'));
-          projectClean(); show('notes'); nb.dataset.mode = 'view'; render();                         // the complete notebook, in its scrollable pane
+          if (P) { it.opened = new Date().toISOString(); pjTouch(P, path); const remembered = pjWrite(P); pjCurrent = path; pjStatus('opened ' + path + (remembered ? '' : ' — recent history could not be saved')); }
+          else { pjCurrent = null; pjStatus('new'); }
+          projectClean(); count();
+          /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
+             notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing: the pane keeps its
+             visibility and face, so a hand in PROJECTS stays in PROJECTS.  "Edited" is read off the text: no flag. */
+          if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; }
+          render();                                                                                // the preview never keeps the last project's notes
           return true;
         },
         remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
-        fresh() { reg.clear(); refSnapshot = null; clock.pause(); clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); dynamics.clearHistory(); particles.resetClock(0); touchState(); ta.value = ''; titleIn.value = 'NOTEBOOK'; if (subIn) { subIn.value = ''; subIn.hidden = true; } try { localStorage.setItem(NB_KEY, ''); localStorage.setItem(NB_TITLE, 'NOTEBOOK'); if (subIn) localStorage.setItem(NB_SUBTITLE, ''); } catch (e) {} pjCurrent = null; if (history) history.clear(); projectClean(); pjStatus('new'); show('notes'); setMode('edit'); return true; },
+        /* 0.3.1 · S2 NEW OPENS THE EMPTY PROJECT, lab/new-project.lambdawaves.json (tools/new-project.mjs writes it), through
+           open() above: restore(…, { project: true }) resets every PROJECT key — the register, clock, trails, reference, the
+           A/B transition (stood down first), the modulation, stage, look, palette, overlays, instruments — and the ring, and no
+           PREFERENCE or WORKSPACE key, because the file carries none.  A file that cannot be fetched changes nothing. */
+        async fresh() {
+          let file;
+          try { const r = await fetch('./new-project.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status); file = parseProjectImport(await r.text()); }
+          catch (err) { pjStatus('new project failed — ' + err.message + '; nothing was changed'); return false; }
+          return projects.open(null, file);
+        },
         exportText(path) { const P = pjRead(), it = P && Object.hasOwn(P.items, path || pjCurrent) ? P.items[path || pjCurrent] : null; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
         importText(text) { const path = storeProjectImport(text, () => JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'), pjWrite); renderProjects(); return path; },
       };
@@ -3988,6 +4010,7 @@ export async function boot(dom) {
       /* THE BUNDLED DEMOS (2026-09-11): a project file shipped under lab/demos/, imported through the same road a
          file from disk takes, then opened. Josh's WAVE DANCER is the first. */
       for (const b of nb.querySelectorAll('.pj-demo')) b.addEventListener('click', async () => {
+        if (!discardProject('OPEN')) return;                                                   // S2: a stored open's question, asked before anything is fetched or stored
         try { const r = await fetch('./demos/' + b.dataset.file + '.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status);
           const p = projects.importText(await r.text()); if (projects.open(p)) pjStatus('opened demo ' + p); }   // M5: a failed open keeps its own status
         catch (err) { pjStatus('demo failed: ' + err.message); }
@@ -4649,6 +4672,7 @@ export async function boot(dom) {
   function restore(obj, opt) {
     markBatchBegin();                                                // M7: released in the finally below
     try {
+      if (opt && opt.project && modHost) { modHost.clock.pause(); modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       const pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
       if (ex) {

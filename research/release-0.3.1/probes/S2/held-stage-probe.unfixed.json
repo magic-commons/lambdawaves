@@ -1,0 +1,46 @@
+{
+ "out": {
+  "a": {
+   "held": true,
+   "playing": true,
+   "mixPlaying": 0.05411413204188609,
+   "after": 0.05411413204188609,
+   "want": 0.04,
+   "ok": false
+  },
+  "b": {
+   "held": true,
+   "playing": true,
+   "mixPlaying": 0.05411413204188609,
+   "after": 0.2,
+   "want": 0.2,
+   "ok": true
+  },
+  "b2": {
+   "held": true,
+   "playing": true,
+   "mixPlaying": 0.05411413204188609,
+   "after": 0.05411413204188609,
+   "want": 0.2,
+   "bases": false,
+   "ok": false
+  },
+  "c2": {
+   "held": true,
+   "open": true,
+   "mixPlaying": 0.05411413204188609,
+   "after": 0.04,
+   "want": 0.04,
+   "ok": true
+  },
+  "c": {
+   "held": true,
+   "folded": true,
+   "mixPlaying": 0.05411413204188609,
+   "after": 0.04,
+   "want": 0.04,
+   "ok": true
+  },
+  "errs": []
+ }
+}

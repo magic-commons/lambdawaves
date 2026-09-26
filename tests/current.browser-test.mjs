@@ -167,7 +167,7 @@ try {
     this browser's settings, minus the WORKSPACE keys, are byte-identical; its theme, material, feel and chrome are
     unchanged; and serialize() writes no PREFERENCE key.  The camera MODE is the project's (D4's escape hatch: a
     TURNTABLE record's rotor is stale and a FREE one carries roll, so a pose is not read back without its mode). */
- const scope=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n)),WS=['closed','nbW','nbH','abW','abH','modwin','layouts'];
+ const scope=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n)),WS=['closed','nbW','nbH','abW','abH','modwin','layouts','phoneTr','phoneRack'];
   const raw=()=>JSON.parse(localStorage.getItem('lambdawaves.q0.settings')||'{}'),strip=()=>{const o=raw();for(const k of WS)delete o[k];return JSON.stringify(o);};
   const live=()=>({theme:document.body.dataset.theme,choice:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,disc:__LW.disconnected,accent:[__LW.accent.a,__LW.accent.b],
     feel:[__LW.camera.friction,__LW.camera.speed,__LW.camera.dragGain,__LW.camera.flingGain],chrome:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk'].map(k=>__LW.mat[k])});
@@ -240,8 +240,9 @@ try {
  assert.ok(hand.drag.base<hand.base0&&hand.drag.base>hand.base0*0.4,'a 30 px drag moved the base by the drag, not to the shown value: '+JSON.stringify(hand.drag)); assert.deepEqual(hand.errs,[]);
  console.log('PASS the hand on a routed knob: a click leaves base and range; a drag moves the base by the drag, not to the modulated needle');
  /* THE BUNDLED DEMO (2026-09-11): WAVE DANCER ships under lab/demos/ and opens through the projects road — eight
-    modes, three macros, five routes, the A/B stores and the notebook, with no page error. */
- const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));__LW.layout.notebook.open('projects');await w(200);document.querySelector('.pj-demo').click();await w(1500);
+    modes, three macros, five routes, the A/B stores and the notebook, with no page error.  0.3.1 · S2: the button asks before it
+    discards unsaved changes (the scenes above leave some), so the confirm is accepted here. */
+ const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.layout.notebook.open('projects');await w(200);document.querySelector('.pj-demo').click();await w(1500);
   const S=__LW.serialize(),nb=document.getElementById('notebook');return {status:nb.querySelector('.pj-status')?.textContent||'',modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
  assert.match(demo.status,/opened demo DEMOS\/WAVE DANCER/); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER'); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
  console.log('PASS the bundled demo: WAVE DANCER opens with its modes, macros, routes, A/B and notebook');
