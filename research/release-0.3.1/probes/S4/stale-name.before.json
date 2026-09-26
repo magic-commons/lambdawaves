@@ -1,0 +1,7 @@
+{
+ "note": "stale-name.js on the S3 tip (737d5bb), before S4: the THEME press left its name standing and the preset loaded through the API took it; the UNDO trigger's own name was taken by the next API edit",
+ "theme": { "rows": 0, "changedEditScope": false, "pending": "(no pendingLabel on the api)" },
+ "presetAfterTheme": { "rows": 1, "name": "DARK · SETTINGS" },
+ "editAfterUndoButton": { "name": "UNDO · HISTORY" },
+ "errs": []
+}

@@ -1,0 +1,5 @@
+{
+ "note": "curve-rdrag.mjs on the S3 tip (737d5bb), before S4: a real right-drag (button 2) on the first LFO's curve, resting 600 ms mid-drag, was two unnamed rows (the capture held button 0 only, so the quiet window cut the drag)",
+ "at": { "x": 569.2, "y": 287.12, "w": 344, "h": 126, "mode": "curve", "pts": 5 },
+ "r": { "rows": ["boot", "edit", "edit"], "added": 2, "changed": true, "pts": 6, "mode": "curve", "undosToPre": 2, "back": true, "errs": [] }
+}

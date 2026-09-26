@@ -295,5 +295,60 @@ function withClock(fn) {
     { boot, plain: plain.map((r) => r.label), named: named.map((r) => r.label), opened, shape, undone });
 }
 
+{ /* 0.3.1 · S4: A GESTURE THAT CHANGED NOTHING TAKES ITS NAME WITH IT (research/release-0.3.1/probes/S4/stale-name.*) */
+  const r = withClock((clock) => {
+    const { st, H, edit } = toy(400);
+    const last = () => H.entries().at(-1).label;
+    H.clear('boot');
+    /* 1 · a press on a preference (THEME): nothing moves; the name stands through the quiet window a tap's late click needs, then goes */
+    H.hold('THEME DARK · SETTINGS'); H.release(); clock.advance(0);
+    const inGrace = H.pendingLabel;
+    clock.advance(400);
+    const afterGrace = H.pendingLabel;
+    edit(1); clock.advance(400);                                  // a preset by keyboard, an LW.* call: nobody named it
+    const r1 = last();
+    /* 2 · the deliberate case in the TOUCH order: the release's task runs first and finds nothing, THEN the click lands the edit */
+    H.hold('KEPLER ORBIT · ORBIT'); H.release(); clock.advance(0); edit(2); clock.advance(400);
+    const r2 = last();
+    /* 3 · a named note that moved nothing (a preference's input event) */
+    H.note('BLUR · SETTINGS'); clock.advance(400); const n3 = H.pendingLabel; edit(3); clock.advance(400);
+    const r3 = last();
+    /* 4 · a travel spends a finished gesture's name: the UNDO trigger's own press, then an unnamed edit */
+    H.hold('UNDO · HISTORY'); H.release(); const undid = H.undo(); edit(4); clock.advance(400);
+    const r4 = last();
+    /* 5 · an unnamed gesture right after a named one that moved nothing: the new gesture ends the old one's claim */
+    H.hold('GRID 96³ · SETTINGS'); H.release(); clock.advance(0); H.hold(); edit(5); H.release(); clock.advance(0);
+    const r5 = last();
+    /* 6 · label() is not a gesture: its name waits for its action through quiet windows that find nothing */
+    H.label('typed'); H.note(); clock.advance(900); const l6 = H.pendingLabel; edit(6); clock.advance(400);
+    const r6 = last();
+    return { inGrace, afterGrace, r1, r2, n3, r3, undid, r4, r5, l6, r6, v: st.v, rows: H.entries().map((e) => e.label) };
+  });
+  judge('A GESTURE THAT CHANGED NOTHING TAKES ITS NAME WITH IT: a press on THEME that moves no key keeps its name only through the quiet window (a tap\'s click may land after the release\'s task) and then drops it, so the next unnamed edit is \'edit\', not \'THEME DARK · SETTINGS\'; a switch whose click lands AFTER the release\'s task still names its row; a named note that moved nothing drops its name the same way; an undo spends the UNDO trigger\'s own name; an unnamed press straight after a named no-op does not inherit it; a label() still waits for its action',
+    r.inGrace === 'THEME DARK · SETTINGS' && r.afterGrace === null && r.r1 === 'edit' && r.r2 === 'KEPLER ORBIT · ORBIT'
+    && r.n3 === null && r.r3 === 'edit' && r.undid === true && r.r4 === 'edit' && r.r5 === 'edit' && r.l6 === 'typed' && r.r6 === 'typed' && r.v === 6, r);
+}
+
+{ /* 0.3.1 · S4: A DERIVED FILL JOINS THE ROW THAT ASKED FOR IT — absorb(fn) (MOLECULES ON: the solve lands ~300 ms after the press) */
+  const r = withClock((clock) => {
+    const { st, H, edit } = toy(400);
+    H.clear('boot');
+    H.hold('MOLECULES ON · MOLECULES'); edit(1); H.release(); clock.advance(0);   // the press is a row
+    clock.advance(300); H.absorb(() => { st.v = 2; });                            // the solve fills its defaults, no note
+    const one = { rows: H.entries().map((e) => e.label), depth: H.depth };
+    const undid = H.undo(), atUndo = st.v, redid = H.redo(), atRedo = st.v;
+    /* an unrecorded edit before the fill (an API road with no note): the row is left alone and the fill rides with that edit */
+    st.v = 7; H.absorb(() => { st.v = 8; }); const dirtyFirst = { depth: H.depth, rows: H.entries().length };
+    H.flush(); const afterFlush = { rows: H.entries().length, v: st.v };
+    /* a pending note: the fill rides into that commit, one row */
+    edit(9); H.absorb(() => { st.v = 10; }); clock.advance(400);
+    const pendingNote = { rows: H.entries().length, v: st.v, undone: (H.undo(), st.v) };
+    return { one, undid, atUndo, redid, atRedo, dirtyFirst, afterFlush, pendingNote };
+  });
+  judge('A DERIVED FILL JOINS THE ROW THAT ASKED FOR IT: the MOLECULES ON press is one row, and the solve landing 300 ms later re-keys that row on its defaults (absorb) instead of leaving a pending edit — ONE row, depth 1, the first undo turns it off (0) and redo brings it back WITH the fill (2). With an unrecorded edit already standing, or a note pending, absorb leaves the row alone and the fill rides with that edit, as before',
+    r.one.rows.join(' · ') === 'boot · MOLECULES ON · MOLECULES' && r.one.depth === 1 && r.undid === true && r.atUndo === 0 && r.redid === true && r.atRedo === 2
+    && r.dirtyFirst.depth === 2 && r.afterFlush.rows === 3 && r.afterFlush.v === 8 && r.pendingNote.rows === 4 && r.pendingNote.v === 10 && r.pendingNote.undone === 8, r);
+}
+
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'history.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);
