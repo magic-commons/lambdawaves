@@ -1,0 +1,33 @@
+{
+ "demoClean1s": true,
+ "demoPlaying": {
+  "dirty": false,
+  "modPlaying": true
+ },
+ "demoPaused": false,
+ "grid": {
+  "from": 64,
+  "to": 96,
+  "clicked": "96³",
+  "candidates": 2,
+  "dirty": false,
+  "steps": 160
+ },
+ "newClean": true,
+ "lfoPlaying": {
+  "dirty": false,
+  "v": 0.1623384496570843,
+  "modPlaying": true
+ },
+ "lfoPaused": false,
+ "addMacroDirty": true,
+ "unboundTurned": {
+  "found": true,
+  "dirty": true
+ },
+ "renamed": true,
+ "depthDirty": true,
+ "colour": true,
+ "stageMix": true,
+ "errs": []
+}

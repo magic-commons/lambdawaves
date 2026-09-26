@@ -1,0 +1,55 @@
+{
+ "bootDirty": false,
+ "cleanNew": {
+  "asked": 0,
+  "ok": true,
+  "status": "new",
+  "fetched": 1
+ },
+ "cleanDemo": {
+  "asked": 0,
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "fetched": 1,
+  "current": "DEMOS/WAVE DANCER"
+ },
+ "dirty": true,
+ "newCancel": {
+  "asked": 1,
+  "returned": false,
+  "isPromise": false,
+  "fetched": 0,
+  "same": true,
+  "pjSame": true,
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "current": "DEMOS/WAVE DANCER",
+  "stillDirty": true
+ },
+ "demoCancel": {
+  "wasDirty": true,
+  "syncAsked": 1,
+  "asked": 1,
+  "fetched": 0,
+  "same": true,
+  "pjSame": true,
+  "stored": [],
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "current": null
+ },
+ "newAccept": {
+  "asked": 1,
+  "ok": true,
+  "status": "new",
+  "current": null,
+  "dirty": false
+ },
+ "newAfterNew": {
+  "asked": 0,
+  "ok": true,
+  "status": "new"
+ },
+ "demoAfterNew": {
+  "asked": 0,
+  "status": "opened demo DEMOS/WAVE DANCER"
+ },
+ "errs": []
+}

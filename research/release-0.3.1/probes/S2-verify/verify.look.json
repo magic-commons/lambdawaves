@@ -1,0 +1,91 @@
+{
+ "cmp": {
+  "pxStats": true,
+  "fieldDigest": true,
+  "pxHash": true,
+  "mat": true,
+  "pres": true
+ },
+ "thisTree": {
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "fieldDigest": {
+   "integral": 3.998104366700896,
+   "maxRho": 0.012592691520694643,
+   "hash": "d83ea2dd",
+   "nan": 0,
+   "res": 64,
+   "half": 46,
+   "generation": 2
+  },
+  "presentSig": null,
+  "pxStats": {
+   "w": 320,
+   "h": 240,
+   "total": 76800,
+   "nonBlack": 76652,
+   "bright": 73285,
+   "meanLum": 220.41960937499582,
+   "meanChroma": 11.7685546875,
+   "hash": "8e0fe091"
+  },
+  "pxHash": 0,
+  "pxLen": 0,
+  "t": 0,
+  "chrome": [
+   true,
+   true,
+   false,
+   "theme",
+   "right"
+  ],
+  "q": [
+   64,
+   160
+  ],
+  "steps": 160,
+  "matCanon": "{\"boost\":{\"k\":[0,0,0],\"on\":false},\"bow\":{\"curve\":1,\"gain\":1,\"limit\":3},\"dither\":0,\"exposure\":1.365423162256938,\"finish\":\"lit\",\"gamma\":1,\"grain\":0.35,\"hueShift\":0,\"iso\":0.017767288986038646,\"knee\":0.6,\"paletteOn\":true,\"slice\":{\"axis\":2,\"mode\":0,\"normal\":[-0.5316062197320814,-0.7801972975556913,0.3296771208758079],\"pos\":0,\"thick\":0.03},\"softness\":1.0805469387058584,\"steps\":160,\"style\":3,\"view\":1}",
+  "presCanon": 9880
+ },
+ "preS2": {
+  "status": "opened demo DEMOS/WAVE DANCER",
+  "fieldDigest": {
+   "integral": 3.998104366700896,
+   "maxRho": 0.012592691520694643,
+   "hash": "d83ea2dd",
+   "nan": 0,
+   "res": 64,
+   "half": 46,
+   "generation": 2
+  },
+  "presentSig": null,
+  "pxStats": {
+   "w": 320,
+   "h": 240,
+   "total": 76800,
+   "nonBlack": 76652,
+   "bright": 73285,
+   "meanLum": 220.41960937499582,
+   "meanChroma": 11.7685546875,
+   "hash": "8e0fe091"
+  },
+  "pxHash": 0,
+  "pxLen": 0,
+  "t": 0,
+  "chrome": [
+   true,
+   true,
+   false,
+   "theme",
+   "right"
+  ],
+  "q": [
+   64,
+   160
+  ],
+  "steps": 160,
+  "matCanon": "{\"boost\":{\"k\":[0,0,0],\"on\":false},\"bow\":{\"curve\":1,\"gain\":1,\"limit\":3},\"dither\":0,\"exposure\":1.365423162256938,\"finish\":\"lit\",\"gamma\":1,\"grain\":0.35,\"hueShift\":0,\"iso\":0.017767288986038646,\"knee\":0.6,\"paletteOn\":true,\"slice\":{\"axis\":2,\"mode\":0,\"normal\":[-0.5316062197320814,-0.7801972975556913,0.3296771208758079],\"pos\":0,\"thick\":0.03},\"softness\":1.0805469387058584,\"steps\":160,\"style\":3,\"view\":1}",
+  "presCanon": 9880
+ },
+ "matA": "{\"boost\":{\"k\":[0,0,0],\"on\":false},\"bow\":{\"curve\":1,\"gain\":1,\"limit\":3},\"dither\":0,\"exposure\":1.365423162256938,\"finish\":\"lit\",\"gamma\":1,\"grain\":0.35,\"hueShift\":0,\"iso\":0.017767288986038646,\"knee\":0.6,\"paletteOn\":true,\"slice\":{\"axis\":2,\"mode\":0,\"normal\":[-0.5316062197320814,-0.7801972975556913,0.3296771208758079],\"pos\":0,\"thick\":0.03},\"softness\":1.0805469387058584,\"steps\":160,\"style\":3,\"view\":1}",
+ "matB": "{\"boost\":{\"k\":[0,0,0],\"on\":false},\"bow\":{\"curve\":1,\"gain\":1,\"limit\":3},\"dither\":0,\"exposure\":1.365423162256938,\"finish\":\"lit\",\"gamma\":1,\"grain\":0.35,\"hueShift\":0,\"iso\":0.017767288986038646,\"knee\":0.6,\"paletteOn\":true,\"slice\":{\"axis\":2,\"mode\":0,\"normal\":[-0.5316062197320814,-0.7801972975556913,0.3296771208758079],\"pos\":0,\"thick\":0.03},\"softness\":1.0805469387058584,\"steps\":160,\"style\":3,\"view\":1}"
+}

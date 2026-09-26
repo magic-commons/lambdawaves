@@ -1,0 +1,23 @@
+{
+ "dbl": {
+  "results": [
+   true,
+   true
+  ],
+  "asked": 2,
+  "status": "new",
+  "diff": [],
+  "current": null,
+  "dirty": false,
+  "depth": 0
+ },
+ "mix": {
+  "asked": 0,
+  "status": "new",
+  "current": null,
+  "modes": 0,
+  "dirty": false,
+  "diffVsFile": 0
+ },
+ "errs": []
+}
