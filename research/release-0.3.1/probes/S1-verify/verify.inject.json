@@ -1,0 +1,87 @@
+{
+ "ok": true,
+ "live0": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "live1": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "liveSame": true,
+ "settingsIdentical": true,
+ "settingsDiff": [],
+ "midDiff": [],
+ "fullSettingsDiff": [],
+ "stage": [
+  64,
+  80,
+  96
+ ],
+ "follow": false,
+ "kepler": true,
+ "vortex": true,
+ "dials": true,
+ "ab": true,
+ "nb": {
+  "w": 520,
+  "h": 380
+ },
+ "routes": [
+  [
+   0.5,
+   1
+  ]
+ ],
+ "modwin": true,
+ "cards": 27,
+ "errs": []
+}

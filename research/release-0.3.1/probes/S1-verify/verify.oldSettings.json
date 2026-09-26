@@ -1,0 +1,59 @@
+{
+ "old": {
+  "palette": "lambda",
+  "camMode": "turntable",
+  "friction": 0.31,
+  "spin": 0.9,
+  "dragGain": 3.3,
+  "fling": 1.7,
+  "theme": "dark",
+  "card": "tinted",
+  "frost": "off",
+  "frame": false,
+  "axis": false,
+  "invert": true,
+  "axisInk": "rgb"
+ },
+ "boot": {
+  "paletteId": "prism",
+  "paletteOn": false,
+  "camMode": "free",
+  "live": {
+   "theme": "dark",
+   "choice": "dark",
+   "card": "tinted",
+   "frost": "off",
+   "disc": false,
+   "bodyClass": "no-badges no-captions rack-l window-info-off",
+   "accent": [
+    123,
+    234
+   ],
+   "rootAccent": "||||",
+   "feel": [
+    0.31,
+    0.9,
+    3.3,
+    1.7
+   ],
+   "chrome": [
+    false,
+    false,
+    null,
+    null,
+    "right",
+    true,
+    "rgb"
+   ]
+  },
+  "storedPalette": "lambda",
+  "storedCamMode": "turntable",
+  "errs": []
+ },
+ "save": {
+  "hasPalette": false,
+  "hasCamMode": false,
+  "diffMinusDead": [],
+  "errs": []
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "undo": {
+  "f0": [
+   true,
+   true
+  ],
+  "rows": 1,
+  "undone": true,
+  "f1": [
+   true,
+   true
+  ],
+  "storedBefore": [
+   true,
+   true
+  ],
+  "storedAfter": [
+   true,
+   true
+  ]
+ },
+ "phoneTr": [
+  false,
+  true
+ ],
+ "errs": []
+}

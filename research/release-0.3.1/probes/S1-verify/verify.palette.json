@@ -1,0 +1,31 @@
+{
+ "a": {
+  "viaMenu": "ember",
+  "api": true,
+  "afterApi": "sea",
+  "storedPalette": null,
+  "stopsChanged": true,
+  "errs": []
+ },
+ "b": {
+  "afterReload": "prism"
+ },
+ "c": {
+  "saved": true,
+  "want": "[{\"at\":0,\"rgb\":[0.9,0.1,0.1]},{\"at\":0.33000000000000007,\"rgb\":[0.1,0.9,0.2]},{\"at\":0.6600000000000001,\"rgb\":[0.2,0.3,0.95]}]",
+  "sel": 1,
+  "id": "twilight",
+  "on": true
+ },
+ "d": {
+  "booted": "prism",
+  "opened": true,
+  "id": "twilight",
+  "on": true,
+  "stops": "[{\"at\":0,\"rgb\":[0.9,0.1,0.1]},{\"at\":0.33000000000000007,\"rgb\":[0.1,0.9,0.2]},{\"at\":0.6600000000000001,\"rgb\":[0.2,0.3,0.95]}]",
+  "sel": 1,
+  "storedPalette": false,
+  "errs": []
+ },
+ "customBack": true
+}

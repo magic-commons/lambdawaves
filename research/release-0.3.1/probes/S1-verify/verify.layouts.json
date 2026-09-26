@@ -1,0 +1,22 @@
+{
+ "slot": 1,
+ "keys": [
+  "v",
+  "at",
+  "cards",
+  "docked",
+  "rackHidden",
+  "nb"
+ ],
+ "hasLook": false,
+ "hasCam": false,
+ "openAfterChange": true,
+ "back": true,
+ "wasClosed": false,
+ "stateClosedAfter": false,
+ "restoredState": true,
+ "list": [
+  "1  ·  8 windows  ·  both racks  ·  22:48"
+ ],
+ "errs": []
+}

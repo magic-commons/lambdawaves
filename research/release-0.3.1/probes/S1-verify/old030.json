@@ -1,0 +1,1632 @@
+{
+ "ok": true,
+ "settings": "{\"nativeLayout\":1,\"nbW\":520,\"nbH\":380,\"theme\":\"dark\",\"badges\":false,\"controlHints\":true,\"captions\":false,\"frost\":\"off\",\"disc\":false,\"blur\":22,\"card\":\"tinted\",\"cardSet\":true,\"accent\":[123,234,0.5],\"auto\":true,\"governor\":true,\"keepFrames\":false,\"perfMode\":\"120\",\"friction\":0.31,\"spin\":0.9,\"dragGain\":3.3,\"fling\":1.7,\"modCadence\":60,\"modArm\":true,\"clockLink\":true,\"modwin\":{\"x\":142,\"y\":224,\"lane\":\"bottom\",\"ribbon\":false,\"modes\":{},\"audioMini\":{},\"open\":true,\"folder\":{},\"macroSide\":\"left\",\"macroMin\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"audioBands\":{},\"audioRoutes\":{}},\"frame\":false,\"axis\":false,\"cornerSide\":\"right\",\"invert\":true,\"axisInk\":\"rgb\",\"phoneTr\":false,\"camMode\":\"turntable\",\"palette\":\"lambda\",\"gamut\":\"srgb\",\"p3Mode\":\"convert\",\"closed\":[\"transport\",\"orbit\",\"vortex\",\"dynamics\",\"slice\",\"qcd\",\"molecule\",\"helium\",\"h2\",\"chem\",\"orbitals\",\"calculus\",\"meters\",\"ladder\",\"atoms\",\"field\",\"wigner\",\"radiation\",\"history\"]}",
+ "exportText": "{\n \"lambdawaves\": \"project\",\n \"version\": 1,\n \"path\": \"verify/old030\",\n \"folder\": \"verify\",\n \"name\": \"old030\",\n \"saved\": \"2026-09-26T03:43:44.693Z\",\n \"opened\": \"2026-09-26T03:43:44.693Z\",\n \"data\": {\n  \"experiment\": {\n   \"format\": \"lambdawaves/qwave-0/state\",\n   \"system\": \"hydrogen\",\n   \"basis\": \"n<=6 complex Y_lm, Condon-Shortley\",\n   \"units\": \"atomic\",\n   \"t\": 0,\n   \"preset\": \"2p+\",\n   \"modes\": [\n    {\n     \"id\": \"h:2:1:1\",\n     \"n\": 2,\n     \"l\": 1,\n     \"m\": 1,\n     \"re\": 1,\n     \"im\": 0,\n     \"muted\": false,\n     \"solo\": false\n    }\n   ],\n   \"field\": {\n    \"Bz\": 0,\n    \"Fz\": 0\n   },\n   \"status\": \"HYDROGEN\",\n   \"rate\": 4,\n   \"window\": 50.26548245743669,\n   \"damping\": 0\n  },\n  \"presentation\": {\n   \"obs\": {\n    \"yaw\": 0.9500000000000002,\n    \"pitch\": 0.4800000000000002,\n    \"dist\": 3.3,\n    \"fov\": 0.6,\n    \"mode\": \"turntable\",\n    \"quat\": [\n     0.3678512056453586,\n     0.24918324108421966,\n     0.502441516652707,\n     0.7417180901203284\n    ]\n   },\n   \"mat\": {\n    \"view\": 1,\n    \"exposure\": 1,\n    \"softness\": 0.7,\n    \"steps\": 160,\n    \"slice\": {\n     \"mode\": 0,\n     \"axis\": 2,\n     \"pos\": 0,\n     \"thick\": 0.03\n    },\n    \"hueShift\": 0,\n    \"invert\": true,\n    \"frame\": false,\n    \"axis\": false,\n    \"axisInk\": \"rgb\",\n    \"paletteOn\": false,\n    \"style\": 0,\n    \"iso\": 0.06,\n    \"grain\": 0.35,\n    \"knee\": 0.6,\n    \"dither\": 0,\n    \"boost\": {\n     \"k\": [\n      0,\n      0,\n      0\n     ],\n     \"on\": false\n    },\n    \"gamma\": 1,\n    \"bow\": {\n     \"gain\": 1,\n     \"curve\": 1,\n     \"limit\": 3\n    },\n    \"cornerSide\": \"right\"\n   },\n   \"quality\": {\n    \"res\": 64,\n    \"steps\": 160,\n    \"scale\": 1,\n    \"auto\": true,\n    \"autoScale\": 1,\n    \"minScale\": 0.35\n   },\n   \"domain\": {\n    \"auto\": true,\n    \"half\": 16\n   },\n   \"shadow\": \"phasors\",\n   \"paletteId\": \"lambda\",\n   \"space\": \"x\",\n   \"palette\": {\n    \"on\": false,\n    \"selected\": 0,\n    \"stops\": [\n     {\n      \"at\": 0,\n      \"rgb\": [\n       0.3686274509803922,\n       0.9058823529411765,\n       0.8470588235294118\n      ]\n     },\n     {\n      \"at\": 0.19999999999999996,\n      \"rgb\": [\n       0.9607843137254902,\n       0.9686274509803922,\n       0.9803921568627451\n      ]\n     },\n     {\n      \"at\": 0.44999999999999996,\n      \"rgb\": [\n       0.8509803921568627,\n       0.48627450980392156,\n       0.9098039215686274\n      ]\n     },\n     {\n      \"at\": 0.6200000000000001,\n      \"rgb\": [\n       0.16862745098039217,\n       0.24705882352941178,\n       0.47843137254901963\n      ]\n     },\n     {\n      \"at\": 0.8199999999999998,\n      \"rgb\": [\n       1,\n       0.7019607843137254,\n       0.3607843137254902\n      ]\n     }\n    ]\n   },\n   \"hamiltonian\": {\n    \"id\": \"hydrogen\",\n    \"Z\": 1,\n    \"atomZ\": 10,\n    \"well\": 10,\n    \"gasBasis\": \"reg\"\n   },\n   \"field\": {\n    \"overlay\": \"off\",\n    \"lines\": 10,\n    \"source\": \"total\"\n   },\n   \"wigner\": {\n    \"zmax\": 8,\n    \"pmax\": 2\n   },\n   \"readers\": {\n    \"spectrum\": {\n     \"selected\": -1,\n     \"dials\": true\n    },\n    \"slice\": {\n     \"mode\": \"space\",\n     \"half\": 8,\n     \"gain\": 1.6,\n     \"rotor\": {\n      \"qL\": [\n       1,\n       0,\n       0,\n       0\n      ],\n      \"qR\": [\n       1,\n       0,\n       0,\n       0\n      ]\n     }\n    },\n    \"kepler\": {\n     \"shell\": 3\n    }\n   },\n   \"instruments\": {\n    \"molecule\": {\n     \"on\": false,\n     \"R\": 2,\n     \"kind\": \"sigma_g\"\n    },\n    \"helium\": {\n     \"on\": false,\n     \"basis\": \"six\",\n     \"x1\": [\n      0,\n      0,\n      0.8\n     ]\n    },\n    \"h2\": {\n     \"on\": false,\n     \"R\": 6,\n     \"which\": \"triplet\",\n     \"showCI\": true,\n     \"ke\": 0.02,\n     \"kappa\": 300\n    },\n    \"chem\": {\n     \"preset\": \"H2O\",\n     \"basis\": \"sto-3g\",\n     \"view\": \"density\",\n     \"orbital\": null,\n     \"axis\": \"y\",\n     \"kappa\": 0.001,\n     \"speed\": 10,\n     \"dt\": 0.01,\n     \"integrator\": \"mmut\",\n     \"tda\": false,\n     \"core\": false,\n     \"on\": false\n    },\n    \"orbitals\": {\n     \"on\": false,\n     \"selection\": []\n    },\n    \"states\": {\n     \"on\": false,\n     \"view\": \"change\",\n     \"ref\": \"ground\",\n     \"flow\": false,\n     \"morph\": 0,\n     \"morphOn\": false,\n     \"A\": null,\n     \"B\": null,\n     \"drive\": {\n      \"pol\": \"x\",\n      \"omega\": 0.4,\n      \"e0\": 0.01,\n      \"envelope\": \"cw\",\n      \"duration\": 400,\n      \"phase\": 0\n     },\n     \"lanes\": []\n    },\n    \"register\": {\n     \"mode\": \"orbital\"\n    },\n    \"qcd\": {\n     \"kind\": \"charm\",\n     \"potential\": \"cornell\",\n     \"params\": {\n      \"alphaS\": 0.39,\n      \"sigma\": 0.18,\n      \"C\": 0.733\n     }\n    },\n    \"pulse\": {\n     \"basis\": \"lcao1s\",\n     \"R\": 2,\n     \"dt\": 0.05,\n     \"pulse\": {\n      \"amplitude\": 0.02,\n      \"omega\": 0.3929175297217954,\n      \"duration\": 48,\n      \"phase\": 0,\n      \"start\": 0\n     }\n    },\n    \"ladder\": {\n     \"nbar\": 30,\n     \"sigma\": 2,\n     \"d\": 0,\n     \"teeth\": 8\n    },\n    \"particles\": {\n     \"count\": 160,\n     \"trail\": 24\n    }\n   },\n   \"mo\": {\n    \"kind\": \"lcao1s\",\n    \"lambda\": 1.7611,\n    \"R\": 2,\n    \"electron\": \"hold\",\n    \"force\": \"exact\",\n    \"connection\": true,\n    \"dt\": 5\n   },\n   \"rates\": [\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1,\n    1\n   ],\n   \"rotationRates\": {\n    \"z\": 0,\n    \"kz\": 0,\n    \"def\": 0\n   },\n   \"sturmian\": {\n    \"on\": false,\n    \"lambda\": 1\n   },\n   \"modulation\": {\n    \"seq\": {\n     \"macro\": 2,\n     \"source\": 3,\n     \"route\": 1\n    },\n    \"transport\": {\n     \"bpm\": 60\n    },\n    \"macros\": [\n     {\n      \"id\": \"m1\",\n      \"name\": \"MACRO 1\",\n      \"named\": 0,\n      \"value\": 0,\n      \"masterDepth\": 1,\n      \"sourceId\": null\n     },\n     {\n      \"id\": \"m2\",\n      \"name\": \"MACRO 2\",\n      \"named\": 0,\n      \"value\": 0,\n      \"masterDepth\": 1,\n      \"sourceId\": null\n     }\n    ],\n    \"sources\": [\n     {\n      \"id\": \"s1\",\n      \"kind\": \"lfo\",\n      \"bank\": \"A\",\n      \"on\": 1,\n      \"label\": \"\",\n      \"shapeMode\": \"curve\",\n      \"wave\": \"sine\",\n      \"points\": [\n       {\n        \"t\": 0,\n        \"v\": 0,\n        \"tension\": 0.2750049581538431\n       },\n       {\n        \"t\": 0.25,\n        \"v\": 0.5,\n        \"tension\": -0.2750049581538431\n       },\n       {\n        \"t\": 0.5,\n        \"v\": 1,\n        \"tension\": 0.2750049581538431\n       },\n       {\n        \"t\": 0.75,\n        \"v\": 0.5,\n        \"tension\": -0.2750049581538431\n       },\n       {\n        \"t\": 1,\n        \"v\": 0,\n        \"tension\": 0\n       }\n      ],\n      \"sync\": 0,\n      \"mult\": 2,\n      \"triplet\": 0,\n      \"dotted\": 0,\n      \"ratePos\": 0.39,\n      \"phaseOff\": 0,\n      \"smooth\": 0,\n      \"steps\": 0,\n      \"trig\": 0,\n      \"mode\": \"off\",\n      \"anchor\": 0,\n      \"rseed\": 139573449,\n      \"a\": 0.01,\n      \"hold\": 0,\n      \"d\": 0.3,\n      \"s\": 0.5,\n      \"r\": 0.6,\n      \"ta\": 0,\n      \"td\": 0,\n      \"tr\": 0,\n      \"invert\": 0,\n      \"timeScale\": 4,\n      \"gateMode\": \"oneshot\",\n      \"minimized\": 0,\n      \"banks\": {\n       \"A\": {\n        \"shapeMode\": \"curve\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       },\n       \"B\": {\n        \"shapeMode\": \"curve\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       }\n      }\n     },\n     {\n      \"id\": \"s2\",\n      \"kind\": \"env\",\n      \"bank\": \"A\",\n      \"on\": 1,\n      \"label\": \"\",\n      \"shapeMode\": \"wave\",\n      \"wave\": \"sine\",\n      \"sync\": 0,\n      \"mult\": 2,\n      \"triplet\": 0,\n      \"dotted\": 0,\n      \"ratePos\": 0.39,\n      \"phaseOff\": 0,\n      \"smooth\": 0,\n      \"steps\": 0,\n      \"trig\": 0,\n      \"mode\": \"off\",\n      \"anchor\": 0,\n      \"rseed\": 89240592,\n      \"a\": 0.01,\n      \"hold\": 0,\n      \"d\": 0.3,\n      \"s\": 0.5,\n      \"r\": 0.6,\n      \"ta\": 0,\n      \"td\": 0,\n      \"tr\": 0,\n      \"invert\": 0,\n      \"timeScale\": 4,\n      \"gateMode\": \"oneshot\",\n      \"minimized\": 0,\n      \"banks\": {\n       \"A\": {\n        \"shapeMode\": \"wave\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       },\n       \"B\": {\n        \"shapeMode\": \"wave\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       }\n      }\n     },\n     {\n      \"id\": \"s3\",\n      \"kind\": \"lfo\",\n      \"bank\": \"A\",\n      \"on\": 1,\n      \"label\": \"\",\n      \"shapeMode\": \"curve\",\n      \"wave\": \"sine\",\n      \"points\": [\n       {\n        \"t\": 0,\n        \"v\": 0,\n        \"tension\": 0.2750049581538431\n       },\n       {\n        \"t\": 0.25,\n        \"v\": 0.5,\n        \"tension\": -0.2750049581538431\n       },\n       {\n        \"t\": 0.5,\n        \"v\": 1,\n        \"tension\": 0.2750049581538431\n       },\n       {\n        \"t\": 0.75,\n        \"v\": 0.5,\n        \"tension\": -0.2750049581538431\n       },\n       {\n        \"t\": 1,\n        \"v\": 0,\n        \"tension\": 0\n       }\n      ],\n      \"sync\": 0,\n      \"mult\": 2,\n      \"triplet\": 0,\n      \"dotted\": 0,\n      \"ratePos\": 0.39,\n      \"phaseOff\": 0,\n      \"smooth\": 0,\n      \"steps\": 0,\n      \"trig\": 0,\n      \"mode\": \"off\",\n      \"anchor\": 0,\n      \"rseed\": 106018211,\n      \"a\": 0.01,\n      \"hold\": 0,\n      \"d\": 0.3,\n      \"s\": 0.5,\n      \"r\": 0.6,\n      \"ta\": 0,\n      \"td\": 0,\n      \"tr\": 0,\n      \"invert\": 0,\n      \"timeScale\": 4,\n      \"gateMode\": \"oneshot\",\n      \"minimized\": 0,\n      \"banks\": {\n       \"A\": {\n        \"shapeMode\": \"curve\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       },\n       \"B\": {\n        \"shapeMode\": \"curve\",\n        \"wave\": \"sine\",\n        \"points\": [\n         {\n          \"t\": 0,\n          \"v\": 0,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.25,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 0.5,\n          \"v\": 1,\n          \"tension\": 0.2750049581538431\n         },\n         {\n          \"t\": 0.75,\n          \"v\": 0.5,\n          \"tension\": -0.2750049581538431\n         },\n         {\n          \"t\": 1,\n          \"v\": 0,\n          \"tension\": 0\n         }\n        ],\n        \"sync\": false,\n        \"mult\": 2,\n        \"triplet\": false,\n        \"dotted\": false,\n        \"ratePos\": 0.39,\n        \"phaseOff\": 0,\n        \"smooth\": 0,\n        \"steps\": 0,\n        \"trig\": false,\n        \"mode\": \"off\",\n        \"anchor\": false,\n        \"a\": 0.01,\n        \"hold\": 0,\n        \"d\": 0.3,\n        \"s\": 0.5,\n        \"r\": 0.6,\n        \"ta\": 0,\n        \"td\": 0,\n        \"tr\": 0,\n        \"invert\": false,\n        \"timeScale\": 4,\n        \"gateMode\": \"oneshot\"\n       }\n      }\n     }\n    ],\n    \"routes\": [\n     {\n      \"id\": \"r1\",\n      \"macroId\": \"m1\",\n      \"targetId\": \"material.exposure\",\n      \"min\": 0.5,\n      \"max\": 1\n     }\n    ],\n    \"v\": 108\n   },\n   \"ui\": {\n    \"theme\": \"dark\",\n    \"card\": \"tinted\",\n    \"frost\": \"off\",\n    \"disc\": false,\n    \"accent\": {\n     \"a\": 123,\n     \"b\": 234,\n     \"vivid\": 0.5\n    },\n    \"stage\": {\n     \"mix\": 0.04,\n     \"custom\": [\n      0.12549019607843137,\n      0.18823529411764706,\n      0.25098039215686274\n     ],\n     \"follow\": false\n    }\n   },\n   \"layout\": {\n    \"v\": 3,\n    \"at\": 1790394224693,\n    \"cards\": [\n     {\n      \"id\": \"transport\",\n      \"side\": \"L\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"shadow\",\n      \"side\": \"L\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"spectrum\",\n      \"side\": \"L\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"state\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"settings\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"orbit\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"vortex\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"dynamics\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"slice\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"qcd\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"molecule\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"helium\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"h2\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"chem\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"orbitals\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"calculus\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"meters\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"ladder\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"atoms\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"field\",\n      \"side\": \"R\",\n      \"folded\": true,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"wigner\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"radiation\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"history\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": true,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"palette\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"observer\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"camera\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     },\n     {\n      \"id\": \"clip\",\n      \"side\": \"R\",\n      \"folded\": false,\n      \"closed\": false,\n      \"off\": false,\n      \"float\": null\n     }\n    ],\n    \"docked\": false,\n    \"rackHidden\": false,\n    \"nb\": [\n     520,\n     380\n    ],\n    \"look\": {\n     \"palette\": \"lambda\",\n     \"accA\": 123,\n     \"accB\": 234,\n     \"hue\": 0,\n     \"style\": 0,\n     \"dither\": 0,\n     \"invert\": true,\n     \"frame\": false,\n     \"axis\": false,\n     \"cornerSide\": \"right\",\n     \"axisInk\": \"rgb\"\n    },\n    \"cam\": {\n     \"yaw\": 0.9500000000000002,\n     \"pitch\": 0.4800000000000002,\n     \"dist\": 3.3,\n     \"fov\": 0.6,\n     \"mode\": \"turntable\",\n     \"quat\": [\n      0.3678512056453586,\n      0.24918324108421966,\n      0.502441516652707,\n      0.7417180901203284\n     ],\n     \"friction\": 0.31,\n     \"spin\": 0.9,\n     \"autoRotate\": false,\n     \"dragGain\": 3.3,\n     \"fling\": 1.7\n    }\n   },\n   \"modwin\": {\n    \"x\": 142,\n    \"y\": 224,\n    \"lane\": \"bottom\",\n    \"ribbon\": false,\n    \"modes\": {},\n    \"audioMini\": {},\n    \"open\": true,\n    \"folder\": {},\n    \"macroSide\": \"left\",\n    \"macroMin\": false,\n    \"selectedMacro\": \"m1\",\n    \"selectedSource\": null,\n    \"audioBands\": {},\n    \"audioRoutes\": {}\n   },\n   \"camera\": {\n    \"autoRotate\": false,\n    \"friction\": 0.31,\n    \"speed\": 0.9,\n    \"dragGain\": 3.3,\n    \"fling\": 1.7\n   },\n   \"overlays\": {\n    \"vortex\": {\n     \"on\": true,\n     \"overlay\": false\n    },\n    \"kepler\": true,\n    \"particles\": {\n     \"on\": false,\n     \"count\": 0\n    },\n    \"dials\": true\n   },\n   \"ab\": {\n    \"a\": {\n     \"re\": [\n      0.7071067811865475,\n      0,\n      0,\n      0.7071067811865475,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0\n     ],\n     \"im\": [\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0\n     ]\n    },\n    \"b\": {\n     \"re\": [\n      0,\n      0,\n      0,\n      0,\n      1,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0\n     ],\n     \"im\": [\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0,\n      0\n     ]\n    },\n    \"omega\": 0.05,\n    \"on\": false\n   },\n   \"notebook\": {\n    \"w\": 520,\n    \"h\": 380\n   },\n   \"modulationBases\": {\n    \"observer.yaw\": 0.9500000000000002,\n    \"observer.pitch\": 0.4800000000000002,\n    \"observer.dist\": 3.3,\n    \"observer.fov\": 0.6,\n    \"material.stage\": 0.04,\n    \"material.gamma\": 1,\n    \"material.exposure\": 1,\n    \"material.softness\": 0.7,\n    \"material.hue\": 0,\n    \"material.iso\": 0.06,\n    \"material.grain\": 0.35,\n    \"material.knee\": 0.6,\n    \"transport.rate\": 4,\n    \"material.slice.pos\": 0,\n    \"material.slice.thick\": 0.03,\n    \"state.rot.z\": 0,\n    \"state.stark.kz\": 0,\n    \"state.defect.l2\": 0,\n    \"chem.kick\": 0.001,\n    \"chem.speed\": 10,\n    \"reg.morph\": 0,\n    \"reg.e0\": 0.01,\n    \"reg.w\": 0.4,\n    \"reg.amp1\": 0,\n    \"reg.amp2\": 0,\n    \"reg.amp3\": 0,\n    \"reg.amp4\": 0,\n    \"reg.amp5\": 0,\n    \"reg.amp6\": 0,\n    \"reg.amp7\": 0,\n    \"reg.amp8\": 0,\n    \"reg.ph1\": 0,\n    \"reg.ph2\": 0,\n    \"reg.ph3\": 0,\n    \"reg.ph4\": 0,\n    \"reg.ph5\": 0,\n    \"reg.ph6\": 0,\n    \"reg.ph7\": 0,\n    \"reg.ph8\": 0,\n    \"state.rabi\": 0.05\n   }\n  }\n },\n \"notebook\": {\n  \"title\": \"old030\",\n  \"subtitle\": \"\",\n  \"text\": \"\"\n }\n}",
+ "link": "https://127.0.0.1:8734/lab/?preset=1s%2B2pz&sw=0#s=AXLhfZkBCwAAAIA_AQT_fwAAAy8HAAAAAAAAAAAAAIBA2w9JQgAAAAAAAAAAAAAAAAUBAACAPwoAACBBAAAAAIA_AAQhADMzcz-PwvU-MzNTQJqZGT_-Vrw-5Cl_PgKgAD894T0_BTcBAAAAgD8zMzM_AAAAAI_CdT0zM7M-mpkZPwAAAACgAEEAAAAAAAAAAAAAAAAAAgAAAACPwvU8BiQfAQAAgEFAAKAAAACAPwEAAIA_MzOzPgEBCgABAAAAQQAAAEAHAgUBCAIAAA",
+ "serialize": {
+  "experiment": {
+   "format": "lambdawaves/qwave-0/state",
+   "system": "hydrogen",
+   "basis": "n<=6 complex Y_lm, Condon-Shortley",
+   "units": "atomic",
+   "t": 0,
+   "preset": "2p+",
+   "modes": [
+    {
+     "id": "h:2:1:1",
+     "n": 2,
+     "l": 1,
+     "m": 1,
+     "re": 1,
+     "im": 0,
+     "muted": false,
+     "solo": false
+    }
+   ],
+   "field": {
+    "Bz": 0,
+    "Fz": 0
+   },
+   "status": "HYDROGEN",
+   "rate": 4,
+   "window": 50.26548245743669,
+   "damping": 0
+  },
+  "presentation": {
+   "obs": {
+    "yaw": 0.9500000000000002,
+    "pitch": 0.4800000000000002,
+    "dist": 3.3,
+    "fov": 0.6,
+    "mode": "turntable",
+    "quat": [
+     0.3678512056453586,
+     0.24918324108421966,
+     0.502441516652707,
+     0.7417180901203284
+    ]
+   },
+   "mat": {
+    "view": 1,
+    "exposure": 1,
+    "softness": 0.7,
+    "steps": 160,
+    "slice": {
+     "mode": 0,
+     "axis": 2,
+     "pos": 0,
+     "thick": 0.03
+    },
+    "hueShift": 0,
+    "invert": true,
+    "frame": false,
+    "axis": false,
+    "axisInk": "rgb",
+    "paletteOn": false,
+    "style": 0,
+    "iso": 0.06,
+    "grain": 0.35,
+    "knee": 0.6,
+    "dither": 0,
+    "boost": {
+     "k": [
+      0,
+      0,
+      0
+     ],
+     "on": false
+    },
+    "gamma": 1,
+    "bow": {
+     "gain": 1,
+     "curve": 1,
+     "limit": 3
+    },
+    "cornerSide": "right"
+   },
+   "quality": {
+    "res": 64,
+    "steps": 160,
+    "scale": 1,
+    "auto": true,
+    "autoScale": 1,
+    "minScale": 0.35
+   },
+   "domain": {
+    "auto": true,
+    "half": 16
+   },
+   "shadow": "phasors",
+   "paletteId": "lambda",
+   "space": "x",
+   "palette": {
+    "on": false,
+    "selected": 0,
+    "stops": [
+     {
+      "at": 0,
+      "rgb": [
+       0.3686274509803922,
+       0.9058823529411765,
+       0.8470588235294118
+      ]
+     },
+     {
+      "at": 0.19999999999999996,
+      "rgb": [
+       0.9607843137254902,
+       0.9686274509803922,
+       0.9803921568627451
+      ]
+     },
+     {
+      "at": 0.44999999999999996,
+      "rgb": [
+       0.8509803921568627,
+       0.48627450980392156,
+       0.9098039215686274
+      ]
+     },
+     {
+      "at": 0.6200000000000001,
+      "rgb": [
+       0.16862745098039217,
+       0.24705882352941178,
+       0.47843137254901963
+      ]
+     },
+     {
+      "at": 0.8199999999999998,
+      "rgb": [
+       1,
+       0.7019607843137254,
+       0.3607843137254902
+      ]
+     }
+    ]
+   },
+   "hamiltonian": {
+    "id": "hydrogen",
+    "Z": 1,
+    "atomZ": 10,
+    "well": 10,
+    "gasBasis": "reg"
+   },
+   "field": {
+    "overlay": "off",
+    "lines": 10,
+    "source": "total"
+   },
+   "wigner": {
+    "zmax": 8,
+    "pmax": 2
+   },
+   "readers": {
+    "spectrum": {
+     "selected": -1,
+     "dials": true
+    },
+    "slice": {
+     "mode": "space",
+     "half": 8,
+     "gain": 1.6,
+     "rotor": {
+      "qL": [
+       1,
+       0,
+       0,
+       0
+      ],
+      "qR": [
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "kepler": {
+     "shell": 3
+    }
+   },
+   "instruments": {
+    "molecule": {
+     "on": false,
+     "R": 2,
+     "kind": "sigma_g"
+    },
+    "helium": {
+     "on": false,
+     "basis": "six",
+     "x1": [
+      0,
+      0,
+      0.8
+     ]
+    },
+    "h2": {
+     "on": false,
+     "R": 6,
+     "which": "triplet",
+     "showCI": true,
+     "ke": 0.02,
+     "kappa": 300
+    },
+    "chem": {
+     "preset": "H2O",
+     "basis": "sto-3g",
+     "view": "density",
+     "orbital": null,
+     "axis": "y",
+     "kappa": 0.001,
+     "speed": 10,
+     "dt": 0.01,
+     "integrator": "mmut",
+     "tda": false,
+     "core": false,
+     "on": false
+    },
+    "orbitals": {
+     "on": false,
+     "selection": []
+    },
+    "states": {
+     "on": false,
+     "view": "change",
+     "ref": "ground",
+     "flow": false,
+     "morph": 0,
+     "morphOn": false,
+     "A": null,
+     "B": null,
+     "drive": {
+      "pol": "x",
+      "omega": 0.4,
+      "e0": 0.01,
+      "envelope": "cw",
+      "duration": 400,
+      "phase": 0
+     },
+     "lanes": []
+    },
+    "register": {
+     "mode": "orbital"
+    },
+    "qcd": {
+     "kind": "charm",
+     "potential": "cornell",
+     "params": {
+      "alphaS": 0.39,
+      "sigma": 0.18,
+      "C": 0.733
+     }
+    },
+    "pulse": {
+     "basis": "lcao1s",
+     "R": 2,
+     "dt": 0.05,
+     "pulse": {
+      "amplitude": 0.02,
+      "omega": 0.3929175297217954,
+      "duration": 48,
+      "phase": 0,
+      "start": 0
+     }
+    },
+    "ladder": {
+     "nbar": 30,
+     "sigma": 2,
+     "d": 0,
+     "teeth": 8
+    },
+    "particles": {
+     "count": 160,
+     "trail": 24
+    }
+   },
+   "mo": {
+    "kind": "lcao1s",
+    "lambda": 1.7611,
+    "R": 2,
+    "electron": "hold",
+    "force": "exact",
+    "connection": true,
+    "dt": 5
+   },
+   "rates": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "rotationRates": {
+    "z": 0,
+    "kz": 0,
+    "def": 0
+   },
+   "sturmian": {
+    "on": false,
+    "lambda": 1
+   },
+   "modulation": {
+    "seq": {
+     "macro": 2,
+     "source": 3,
+     "route": 1
+    },
+    "transport": {
+     "bpm": 60,
+     "sync": null
+    },
+    "macros": [
+     {
+      "id": "m1",
+      "name": "MACRO 1",
+      "named": 0,
+      "value": 0,
+      "masterDepth": 1,
+      "sourceId": null,
+      "kind": null
+     },
+     {
+      "id": "m2",
+      "name": "MACRO 2",
+      "named": 0,
+      "value": 0,
+      "masterDepth": 1,
+      "sourceId": null,
+      "kind": null
+     }
+    ],
+    "sources": [
+     {
+      "id": "s1",
+      "kind": "lfo",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "curve",
+      "wave": "sine",
+      "points": [
+       {
+        "t": 0,
+        "v": 0,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.25,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 0.5,
+        "v": 1,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.75,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 1,
+        "v": 0,
+        "tension": 0
+       }
+      ],
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 139573449,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "triggerId": null,
+      "autoHit": null,
+      "banks": {
+       "A": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       },
+       "B": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       }
+      }
+     },
+     {
+      "id": "s2",
+      "kind": "env",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "wave",
+      "wave": "sine",
+      "points": null,
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 89240592,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "triggerId": null,
+      "autoHit": null,
+      "banks": {
+       "A": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       },
+       "B": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       }
+      }
+     },
+     {
+      "id": "s3",
+      "kind": "lfo",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "curve",
+      "wave": "sine",
+      "points": [
+       {
+        "t": 0,
+        "v": 0,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.25,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 0.5,
+        "v": 1,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.75,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 1,
+        "v": 0,
+        "tension": 0
+       }
+      ],
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 106018211,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "triggerId": null,
+      "autoHit": null,
+      "banks": {
+       "A": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       },
+       "B": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       }
+      }
+     }
+    ],
+    "routes": [
+     {
+      "id": "r1",
+      "macroId": "m1",
+      "targetId": "material.exposure",
+      "min": 0.5,
+      "max": 1,
+      "bi": null,
+      "enabled": null,
+      "curve": null
+     }
+    ],
+    "v": 108
+   },
+   "ui": {
+    "theme": "dark",
+    "card": "tinted",
+    "frost": "off",
+    "disc": false,
+    "accent": {
+     "a": 123,
+     "b": 234,
+     "vivid": 0.5
+    },
+    "stage": {
+     "mix": 0.04,
+     "custom": [
+      0.12549019607843137,
+      0.18823529411764706,
+      0.25098039215686274
+     ],
+     "follow": false
+    }
+   },
+   "layout": {
+    "v": 3,
+    "at": 1790394224700,
+    "cards": [
+     {
+      "id": "transport",
+      "side": "L",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "shadow",
+      "side": "L",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "spectrum",
+      "side": "L",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "state",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "settings",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "orbit",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "vortex",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "dynamics",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "slice",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "qcd",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "molecule",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "helium",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "h2",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "chem",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "orbitals",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "calculus",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "meters",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "ladder",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "atoms",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "field",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "wigner",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "radiation",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "history",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "palette",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "observer",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "camera",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "clip",
+      "side": "R",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     }
+    ],
+    "docked": false,
+    "rackHidden": false,
+    "nb": [
+     520,
+     380
+    ],
+    "look": {
+     "palette": "lambda",
+     "accA": 123,
+     "accB": 234,
+     "hue": 0,
+     "style": 0,
+     "dither": 0,
+     "invert": true,
+     "frame": false,
+     "axis": false,
+     "frameMode": null,
+     "axisMode": null,
+     "cornerSide": "right",
+     "axisInk": "rgb"
+    },
+    "cam": {
+     "yaw": 0.9500000000000002,
+     "pitch": 0.4800000000000002,
+     "dist": 3.3,
+     "fov": 0.6,
+     "mode": "turntable",
+     "quat": [
+      0.3678512056453586,
+      0.24918324108421966,
+      0.502441516652707,
+      0.7417180901203284
+     ],
+     "friction": 0.31,
+     "spin": 0.9,
+     "autoRotate": false,
+     "dragGain": 3.3,
+     "fling": 1.7
+    }
+   },
+   "modwin": {
+    "x": 142,
+    "y": 224,
+    "lane": "bottom",
+    "ribbon": false,
+    "modes": {},
+    "audioMini": {},
+    "open": true,
+    "folder": {},
+    "macroSide": "left",
+    "macroMin": false,
+    "selectedMacro": "m1",
+    "selectedSource": null,
+    "audioBands": {},
+    "audioRoutes": {}
+   },
+   "camera": {
+    "autoRotate": false,
+    "friction": 0.31,
+    "speed": 0.9,
+    "dragGain": 3.3,
+    "fling": 1.7
+   },
+   "overlays": {
+    "vortex": {
+     "on": true,
+     "overlay": false
+    },
+    "kepler": true,
+    "particles": {
+     "on": false,
+     "count": 0
+    },
+    "dials": true
+   },
+   "ab": {
+    "a": {
+     "re": [
+      0.7071067811865475,
+      0,
+      0,
+      0.7071067811865475,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "im": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "b": {
+     "re": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "im": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "omega": 0.05,
+    "on": false
+   },
+   "notebook": {
+    "w": 520,
+    "h": 380
+   }
+  }
+ },
+ "theme": "dark",
+ "errs": []
+}

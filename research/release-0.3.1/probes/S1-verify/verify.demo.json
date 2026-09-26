@@ -1,0 +1,79 @@
+{
+ "current": "DEMOS/WAVE DANCER",
+ "status": "opened demo DEMOS/WAVE DANCER",
+ "paletteId": "phosphor",
+ "paletteOn": true,
+ "live0": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "live1": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#006d00|#6800ff",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "liveSame": false,
+ "settingsIdentical": true,
+ "settingsDiff": [],
+ "fullDiff": [
+  "modwin: {\"x\":259,\"y\":224,\"lane\":\"bottom\",\"ribbon\":false,\"modes\":{},\"audioMini\":{},\"open\":false,\"folder\":{},\"macroSide\":\"left\",\"macroMin\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"audioBands\":{},\"audioRoutes\":{}} -> {\"x\":468,\"y\":588,\"lane\":\"bottom\",\"ribbon\":false,\"modes\":{\"s1\":\"F\",\"s3\":\"F\"},\"audioMini\":{},\"open\":true,\"folder\":{},\"macroSide\":\"left\",\"macroMin\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"audioBands\":{},\"audioRoutes\":{}}",
+  "closed: [\"transport\",\"orbit\",\"vortex\",\"dynamics\",\"slice\",\"qcd\",\"molecule\",\"helium\",\"h2\",\"chem\",\"orbitals\",\"calculus\",\"meters\",\"ladder\",\"atoms\",\"field\",\"wigner\",\"radiation\",\"history\"] -> [\"transport\",\"chem\",\"orbitals\",\"orbit\",\"vortex\",\"dynamics\",\"slice\",\"qcd\",\"molecule\",\"helium\",\"h2\",\"calculus\",\"meters\",\"ladder\",\"atoms\",\"field\",\"wigner\",\"radiation\",\"history\"]",
+  "nbW: undefined -> 470",
+  "nbH: undefined -> 670"
+ ],
+ "notebookText": 935,
+ "notebookTitle": "WAVE DANCER",
+ "routes": 5,
+ "macros": 3,
+ "modes": 8,
+ "mode": "free",
+ "dirty": true,
+ "errs": []
+}

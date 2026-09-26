@@ -1,0 +1,44 @@
+{
+ "a": {
+  "mode": "turntable",
+  "stored": {
+   "friction": 0.42,
+   "spin": 0.7,
+   "dragGain": 2.2,
+   "fling": 1.3,
+   "camMode": null
+  }
+ },
+ "b": {
+  "mode": "free",
+  "feel": [
+   0.42,
+   0.7,
+   2.2,
+   1.3
+  ],
+  "seg": [
+   "FREE"
+  ]
+ },
+ "c": {
+  "saved": true,
+  "modeMid": "free",
+  "opened": true,
+  "modeAfter": "turntable",
+  "poseSame": false,
+  "pose": "{\"yaw\":0.8500000000000001,\"pitch\":0.4800000000000002,\"dist\":3.3,\"fov\":0.6,\"mode\":\"turntable\",\"quat\":[0.3678512056453586,0.24918324108421966,0.502441516652707,0.7417180901203284]}",
+  "pose2": "{\"yaw\":0.8500000000000002,\"pitch\":0.4800000000000002,\"dist\":3.3,\"fov\":0.6,\"mode\":\"turntable\",\"quat\":[0.3678512056453586,0.24918324108421966,0.502441516652707,0.7417180901203284]}",
+  "settingsHasCamMode": false,
+  "errs": []
+ },
+ "d": {
+  "modeAfterReload": "free",
+  "feel": [
+   0.42,
+   0.7,
+   2.2,
+   1.3
+  ]
+ }
+}

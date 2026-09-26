@@ -1,0 +1,120 @@
+{
+ "live0": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   false,
+   true,
+   null,
+   null,
+   "right",
+   true,
+   "cmy"
+  ]
+ },
+ "newLink": {
+  "chars": 280,
+  "notCarried": [
+   "mo",
+   "modulation"
+  ],
+  "mat": {
+   "invert": false,
+   "frame": true,
+   "axis": true,
+   "axisInk": "theme"
+  },
+  "presKeys": [
+   "hamiltonian",
+   "sturmian",
+   "space",
+   "obs",
+   "mat",
+   "domain",
+   "quality",
+   "shadow",
+   "field",
+   "wigner",
+   "palette",
+   "paletteId",
+   "rates"
+  ],
+  "camera": null,
+  "ui": null
+ },
+ "oldBits": {
+  "invert": true,
+  "frame": false,
+  "axis": false,
+  "axisInk": "rgb",
+  "paletteId": "lambda",
+  "mode": "turntable"
+ },
+ "afterOld": {
+  "r": {
+   "ok": true,
+   "opened": true
+  },
+  "liveSame": true,
+  "live1": {
+   "theme": "light",
+   "choice": "light",
+   "card": "refractive",
+   "frost": "always",
+   "disc": true,
+   "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+   "accent": [
+    30,
+    300
+   ],
+   "rootAccent": "#00a295|#e05700",
+   "feel": [
+    1,
+    0.25,
+    1,
+    1
+   ],
+   "chrome": [
+    false,
+    true,
+    null,
+    null,
+    "right",
+    true,
+    "cmy"
+   ]
+  },
+  "settingsIdentical": true,
+  "diff": [],
+  "paletteId": "lambda",
+  "mode": "turntable"
+ },
+ "afterNew": {
+  "ok": true,
+  "liveSame": true,
+  "settingsIdentical": true,
+  "diff": []
+ },
+ "afterHash": {
+  "liveSame": true,
+  "settingsIdentical": true,
+  "diff": [],
+  "paletteId": "lambda"
+ },
+ "errs": []
+}

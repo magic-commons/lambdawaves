@@ -1,0 +1,27 @@
+{
+ "dirty": [
+  [
+   25,
+   true
+  ],
+  [
+   100,
+   true
+  ],
+  [
+   400,
+   true
+  ],
+  [
+   1000,
+   true
+  ],
+  [
+   2500,
+   true
+  ]
+ ],
+ "playing": false,
+ "moved": [],
+ "errs": []
+}

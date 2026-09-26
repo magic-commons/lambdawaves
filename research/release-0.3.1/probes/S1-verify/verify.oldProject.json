@@ -1,0 +1,119 @@
+{
+ "ok": true,
+ "path": "verify/old030",
+ "dirty": [
+  false,
+  false,
+  false
+ ],
+ "settingsIdentical": true,
+ "settingsDiff": [],
+ "fullSettingsDiff": [
+  "modwin: {\"x\":259,\"y\":224,\"lane\":\"bottom\",\"ribbon\":false,\"modes\":{},\"audioMini\":{},\"open\":false,\"folder\":{},\"macroSide\":\"left\",\"macroMin\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"audioBands\":{},\"audioRoutes\":{}} -> {\"x\":142,\"y\":224,\"lane\":\"bottom\",\"ribbon\":false,\"modes\":{},\"audioMini\":{},\"open\":true,\"folder\":{},\"macroSide\":\"left\",\"macroMin\":false,\"selectedMacro\":\"m1\",\"selectedSource\":null,\"audioBands\":{},\"audioRoutes\":{}}",
+  "nbW: undefined -> 520",
+  "nbH: undefined -> 380"
+ ],
+ "live0": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "live1": {
+  "theme": "light",
+  "choice": "light",
+  "card": "refractive",
+  "frost": "always",
+  "disc": true,
+  "bodyClass": "disconnected frost no-badges no-captions rack-l window-info-off",
+  "accent": [
+   30,
+   300
+  ],
+  "rootAccent": "#00a295|#e05700",
+  "feel": [
+   1,
+   0.25,
+   1,
+   1
+  ],
+  "chrome": [
+   true,
+   true,
+   null,
+   null,
+   "right",
+   false,
+   "theme"
+  ]
+ },
+ "liveSame": true,
+ "mode0": "free",
+ "mode1": "turntable",
+ "pal0": "prism",
+ "pal1": "lambda",
+ "stage": [
+  32,
+  48,
+  64
+ ],
+ "follow": false,
+ "kepler": true,
+ "vortex": true,
+ "dials": true,
+ "ab": true,
+ "nb": {
+  "w": 520,
+  "h": 380
+ },
+ "routes": [
+  [
+   0.5,
+   1
+  ]
+ ],
+ "modwin": true,
+ "cards": 27,
+ "ui": [
+  "stage"
+ ],
+ "camera": [
+  "autoRotate"
+ ],
+ "layoutLook": false,
+ "dirtyAfterReopen": false,
+ "resaveIdentical": false,
+ "resaveBytes": [
+  12437,
+  12437
+ ],
+ "projectKeyDiffOldVsResave": [
+  "data.presentation.mat.finish: undefined -> \"lit\""
+ ],
+ "resaveDiff": [
+  "data.presentation.layout.at: 1790394438999 -> 1790394439725"
+ ],
+ "errs": []
+}

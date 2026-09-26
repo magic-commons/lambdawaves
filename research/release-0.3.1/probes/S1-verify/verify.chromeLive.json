@@ -1,0 +1,21 @@
+{
+ "serializeMat": [],
+ "savedMat": [],
+ "ui": [
+  "stage"
+ ],
+ "camera": [
+  "autoRotate"
+ ],
+ "layoutKeys": [
+  "v",
+  "at",
+  "cards",
+  "docked",
+  "rackHidden",
+  "nb"
+ ],
+ "anyTheme": false,
+ "obsMode": "free",
+ "errs": []
+}
