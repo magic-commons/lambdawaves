@@ -37,7 +37,7 @@ body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opaci
 #rackAddList, #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
-body.no-badges #badges { display: none !important; }
+body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
 /* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
 #notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
@@ -271,6 +271,25 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #sheet h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
 #sheet p { margin: 0 0 8px; }
 #sheet b { color: var(--fg); }
+/* WAVE 133 · THE OFFER'S PANE (lab/sw-client.js): the sheet's glass and typography, on the stage's centre under the badge row,
+   with a caret pointing up at it — no colour, material, animation or transition of its own.  The caret is a 10 px square in the pane's own
+   background and border, turned 45° and clipped to its upper half so only the point shows above the pane's edge.
+   THE CARET AIMS AT THE ROW'S CENTRE, which is not the stage's: #badges spans rack-w + 340 … rack-w + 56 from the right, so its
+   centre is 50vw + (340 − 56)/2 = 50vw + 142px, and where that box has collapsed (a narrow stage) its centred content sits on its
+   left edge, rack-w + 340.  A caret at the pane's own centre pointed 43 px left of the lone build badge (measured, 1500 × 1000);
+   centring the PANE there instead put it over the + and ☆ column below 1392 px.  So the pane keeps the stage's centre and the
+   caret moves: 50% of the pane plus that offset, kept inside the pane. */
+#offer { position: absolute; left: 50%; transform: translateX(-50%); top: 40px; z-index: var(--z-veil); width: min(420px, calc(100% - 32px));
+  padding: var(--sp-4) var(--sp-5); border-radius: var(--card-r); font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.5; color: var(--fg-soft); }
+#offer::before { content: ''; position: absolute; left: min(calc(100% - 12px), calc(50% + max(142px, var(--rack-w) + 340px - 50vw))); top: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
+  background: inherit; border-top: inherit; border-left: inherit; clip-path: polygon(0 0, 100% 0, 0 100%); pointer-events: none; }
+#offer h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
+#offer p { margin: 0 0 8px; }
+#offer b { color: var(--fg); }
+#offer .offer-row { display: flex; gap: var(--sp-2); }
+body.phone #offer { top: 76px; }
+body.phone #offer::before { left: 50%; }   /* the phone's badge row is the full width (sp-3 each side): its centre is the stage's */
+body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE takes the badge it points at, so it takes the pane */
 #banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: var(--z-banner); max-width: 520px; padding: var(--sp-5); border-radius: var(--r-lg);
   font-family: var(--font-sans); background: hsl(350 40% 18% / .95); border: 1px solid hsl(350 60% 50% / .6); }
 /* WAVE 59 · THE BANNER IS THE ONE PANE THAT DOES NOT FOLLOW THE THEME, so its ink is written here and not

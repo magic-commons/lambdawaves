@@ -22,8 +22,9 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
   const b4 = mk('warn', ''); b4.hidden = true;
   /* WAVE 56: the fifth badge is the only one that is not about ψ — it is the offer of a NEW BUILD, and it
      is the only badge whose press is not the sheet.  It is hidden until the worker says a build is waiting
-     (lab/sw.js §3), and pressing it is the ONE thing in this app that can end a session's build. */
-  const b5 = mk('warn', '', () => accept()); b5.hidden = true;
+     (lab/sw.js §3), and pressing it is the ONE thing in this app that can end a session's build.
+     WAVE 133: it wears `build` so STATUS TAGS (body.no-badges) hides the four ψ-badges and never this one. */
+  const b5 = mk('warn build', '', () => accept()); b5.hidden = true;
   let last = '', lastF = '', lastSay = '';
   /* ── WAVE 62 · THE CANVAS SAYS WHAT IS DRAWN, AND SAYS IT RARELY ───────────────────────────────
    * Everything the sentence needs is already assembled here, on the meters' 10 Hz tick, beside four

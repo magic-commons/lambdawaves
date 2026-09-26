@@ -624,9 +624,29 @@ SW.handlers.message[0]({ data: { type: 'LW_SW_NOT_A_THING' }, ports: [] });
 assert.equal(SW.skip, 0, 'sw.js: an unknown message took the update');
 SW.handlers.message[0]({ data: { type: 'LW_SW_SKIP_WAITING' }, ports: [] });
 assert.equal(SW.skip, 1, 'sw.js: LW_SW_SKIP_WAITING is the interface\'s explicit "the user said yes" and must be the one thing that takes the update');
+/* E5b — WAVE 133 · THE QUIET TAKE.  An untouched session's page asks with `alone: true`; the worker takes it only while ONE
+   window is in scope, because skipWaiting() re-points every client and a second window may hold work.  Refused, it tells
+   the asking page LW_SW_BUSY and the page offers the build instead.  The handler hands its promise to waitUntil. */
+const quietTake = async (windows) => {
+  const busy = [];
+  const saved = SW.self_.clients.matchAll;
+  SW.self_.clients.matchAll = async () => Array.from({ length: windows }, () => ({ postMessage: () => {} }));
+  let p = null;
+  SW.handlers.message[0]({ data: { type: 'LW_SW_SKIP_WAITING', alone: true }, ports: [], source: { postMessage: (m) => busy.push(m) }, waitUntil: (x) => { p = x; } });
+  assert.ok(p && typeof p.then === 'function', 'sw.js: a SKIP_WAITING message must hand its work to waitUntil, or the worker may be stopped mid-count');
+  await p;
+  SW.self_.clients.matchAll = saved;
+  return busy;
+};
+let busy = await quietTake(1);
+assert.equal(SW.skip, 2, 'sw.js: a quiet take with ONE window in scope must take the update');
+assert.deepEqual(busy, [], 'sw.js: a quiet take that was taken must not also report busy');
+busy = await quietTake(2);
+assert.equal(SW.skip, 2, 'sw.js: a quiet take with a SECOND window in scope took the update — that window may hold work');
+assert.deepEqual(busy, [{ type: 'LW_SW_BUSY', windows: 2 }], 'sw.js: a refused quiet take must tell the asking page LW_SW_BUSY with the window count');
 /* on the CODE, not the prose — the header of sw.js discusses skipWaiting and clients.claim at length. */
 const swCode = live(swSrc);
-assert.equal((swCode.match(/skipWaiting\(\)/g) || []).length, 1, 'sw.js: skipWaiting() appears more than once in the code — there must be exactly one path to it, the user-driven message');
+assert.equal((swCode.match(/skipWaiting\(\)/g) || []).length, 1, 'sw.js: skipWaiting() appears more than once in the code — there must be exactly one path to it, the interface\'s message (a press, or a quiet take for an untouched session)');
 assert.ok(!/clients\.claim\(/.test(swCode), 'sw.js: clients.claim() is in the code — a page that started uncontrolled would begin taking assets from a build it did not boot on');
 assert.ok(!/\bsetTimeout\b|\bsetInterval\b/.test(swCode), 'sw.js: a timer in a service worker is a build swapping itself in on a clock');
 assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split('addEventListener(\'message\'')[0]), 'sw.js: skipWaiting() is reachable outside the message handler');
@@ -634,7 +654,7 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +
   `activate collects only stale lw-lab-* and does NOT claim; fetch is cache-first over the precache and refuses POST / Range / cross-origin / out-of-scope / unlisted, growing nothing; ` +
   `the fetch matrix ran AT BOTH MOUNTS — ${mLab.mount} (scope ${mLab.scope}) and ${mRoot.mount} (scope ${mRoot.scope}, which is what ships) — and a navigation is answered ONLY at the app entry (${mRoot.entry.join(' ')}), so /LICENSE, /NOTICE, /REPORT.md, the six licence texts and a typo all reach the network at either address; ` +
-  `the one path to a new build is the interface's LW_SW_SKIP_WAITING. Cache name ${SW.LW_SW.CACHE}, derived — the string appears nowhere in the source.`);
+  `the one path to a new build is the interface's LW_SW_SKIP_WAITING — a press takes it at once, and a quiet take (alone: true, an untouched session) is taken with one window in scope and refused with LW_SW_BUSY at two. Cache name ${SW.LW_SW.CACHE}, derived — the string appears nowhere in the source.`);
 
 /* ══ F.  THE FONT LICENCES, READ OUT OF THE BINARIES (wave 59) ═══════════════════════════════════════════
  * A licence audit found the one defect in this tree with real consequences: our five-glyph subset of gluk's
@@ -858,8 +878,14 @@ console.log(`PASS the math face covers what the lab sets in it: ${runs} <m> runs
  *    field a quiet lead before the whole-app precache begins in idle time.
  *    IT ALSO DOES NOT RELOAD BLINDLY.  skipWaiting() re-points EVERY client in scope, so a page cannot
  *    keep this file's ONE LAW by reloading on `controllerchange`: the tab that pressed would take the
- *    unsaved state of every other tab with it.  rack.js's `swClient` decides instead — the tab that ASKED
+ *    unsaved state of every other tab with it.  sw-client.js decides instead — the tab that ASKED
  *    reloads once, a tab that did not ask is TOLD and keeps running.  See ANTI-PATTERNS 15.
+ *    WAVE 133 · THE QUIET TAKE.  The page may now ask FOR AN UNTOUCHED SESSION (rack.js `untouched`: a
+ *    reload would lose nothing) with `alone: true`, and the worker takes it only while ONE window is in
+ *    scope — a second window may hold work, and skipWaiting() would re-point it too — else it answers
+ *    LW_SW_BUSY and the page offers the build (the badge, never hidden by STATUS TAGS, and its pane).
+ *    Every other session is only ever taken by a press, which asks first when the project is unsaved.
+ *    A return to the foreground re-asks the registration (at most once per 30 minutes, never on a timer).
  *    The registration argument and its scope are BOTH RELATIVE ('./sw.js', { scope: './' }): the lab
  *    deploys under a path, and an absolute '/sw.js' is how a root scope sneaks back in.
  * 5. THE AUTOMATION BYPASS, which nothing prescribed and which the browser gate needs: main.js does not

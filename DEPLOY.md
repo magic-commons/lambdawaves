@@ -166,9 +166,13 @@ Two more worth checking while you are in DevTools, because they are what makes i
 
 - **Application → Manifest** shows the name, both icon sizes and both maskable ones, no warnings.
 - **Application → Service Workers** shows one worker, scope `/`. Reload once, tick **Network → Offline**,
-  reload again → λWAVES boots with no network. It works from the **second** launch, never the first:
-  `sw.js` refuses to `skipWaiting()` so a new build is never swapped in under a running session. That is
-  deliberate and is not a bug to chase.
+  reload again → λWAVES boots with no network. Offline works from the **second** launch, never the first:
+  the first visit runs uncontrolled because `sw.js` never calls `clients.claim()`. That is deliberate and is
+  not a bug to chase. An UPDATE is different since wave 133: a build that finishes installing while the
+  session is untouched (nothing edited, nothing unsaved, paused, one window) is taken at once — one reload;
+  otherwise the build badge and its pane offer it (STATUS TAGS never hides them), a press takes it, and the
+  next launch after every λWAVES window has closed serves it. A return to the foreground re-checks for a new
+  build at most once per 30 minutes (`lab/main.js`, the reader).
 
 ### Rollback (criterion 12) — test it on purpose
 

@@ -33,8 +33,10 @@ boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow:
  *
  * THE ONE LAW, and the half of it that is this file's: the worker never takes itself (no skipWaiting on
  * install, no clients.claim, no timer), and the only message that can end a session's build is sent from
- * LW.sw.accept() — a press on the badge, and nothing else.  What a controllerchange MEANS is the page's
- * decision, and rack.js's swClient makes it: the tab that asked reloads, a tab that did not ask is told.
+ * LW.sw.accept().  Since wave 133 the page may send it FOR AN UNTOUCHED SESSION (rack.js `untouched`: a
+ * reload would lose nothing) as a quiet take, `alone: true`, which the worker refuses while a second window
+ * is open; otherwise only on a press — the badge or the offer's UPDATE.  What a controllerchange MEANS is
+ * the page's decision, and sw-client.js makes it: the tab that asked reloads, a tab that did not ask is told.
  *
  * THE AUTOMATION BYPASS is exactly the photosensitivity warning's (rack.js `warning.needed`), for a reason
  * of the same size: a worker installed on the gate's origin would serve every later navigation out of a
@@ -61,8 +63,9 @@ function installLayer(LW) {
     catch (e) { sw.mode = 'failed'; sw.error = String(e && e.message || e); return; }
     sw.registration = reg; sw.mode = 'registered';
 
-    /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does, on a press. */
-    const arm = (w) => { if (w) sw.buildReady(() => w.postMessage({ type: 'LW_SW_SKIP_WAITING' })); };
+    /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does — on a press, or quietly
+        (`alone`) for an untouched session. */
+    const arm = (w) => { if (w) sw.buildReady((opt) => w.postMessage(opt && opt.alone ? { type: 'LW_SW_SKIP_WAITING', alone: true } : { type: 'LW_SW_SKIP_WAITING' })); };
     const watch = (w) => {
       if (!w) return;
       const check = () => { if (w.state === 'installed' && navigator.serviceWorker.controller) arm(w); };
@@ -72,7 +75,7 @@ function installLayer(LW) {
     reg.addEventListener('updatefound', () => watch(reg.installing));
 
     navigator.serviceWorker.addEventListener('message', async (ev) => {     // (a): §3's announcement, listened for
-      if (sw.message(ev.data) !== 'waiting') return;
+      const kind = sw.message(ev.data); if (kind !== 'waiting') return;     // LW_SW_BUSY ('busy') is handled inside sw.message
       for (let i = 0; i < 40 && !reg.waiting; i++) await new Promise((r) => setTimeout(r, 250));
       arm(reg.waiting);
     });
@@ -85,6 +88,18 @@ function installLayer(LW) {
       ch.port1.onmessage = (e) => sw.message(e.data);
       navigator.serviceWorker.controller.postMessage({ type: 'LW_SW_HELLO' }, [ch.port2]);
     }
+
+    /* WAVE 133 · THE READER.  The browser byte-compares sw.js only at a navigation, so a tab left open — or a home-screen
+       app switched back to and never relaunched — never asked again.  A return to the foreground asks, at most once per
+       30 minutes: a user coming back after a while gets the check once, and one flipping between tabs does not fetch
+       33 KB each time.  There is no timer, deliberately: a hidden page must not touch the network, and the visible
+       moment is the one that matters.  A new worker found here installs and reaches buildReady through `updatefound`. */
+    let checked = performance.now();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || performance.now() - checked < 30 * 60e3) return;
+      checked = performance.now(); sw.checks++;
+      reg.update().catch(() => {});
+    });
   };
   /* Installing the first worker precaches the whole local lab. Starting those fetches at the ready boundary used
      to compete with WebGPU's first field and the user's first gesture, especially in mobile Safari. Give the live

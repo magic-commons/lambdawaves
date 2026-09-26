@@ -3076,3 +3076,71 @@ holds none. Stylehash: every window but HISTORY pixel-neutral, the one changed r
 `rotation drive` row when it stops (a record of the unrotated anchor is the candidate); edits within one 400 ms quiet
 window coalesce into one row; a row click within about 250 ms of a keyboard edit can be lost to the repaint under the
 pointer.
+
+## 2026-09-26 · 0.3.2
+
+### wave 133: The offer — a new build is seen, taken quietly when nothing is at stake, and explained when something is
+
+Users were coming back on builds weeks old without ever having seen that a new one was waiting. The install layer of
+wave 56 already found a new deploy at every launch, precached it, waited and told the page; the offer was then lost in
+three measured places. It was invisible by default: the only on-screen offer was the fifth badge, first-run STATUS TAGS
+is off, and `body.no-badges #badges { display: none }` hid the whole row, the offer with it (the second channel,
+SETTINGS' status line, shows only with SETTINGS open). The check ran only at a navigation: nothing called
+`registration.update()` but ABOUT › UPDATE APP, so a tab left open, or a home-screen app switched back to and never
+relaunched, never asked again. And it was one launch behind by design: the worker never takes itself, so the launch
+during which an update installed ran the old build to its end, and the new one was served only after every window of
+the old one had closed. The network was never the problem: `sw.js` is served `public, max-age=0, must-revalidate` with
+an ETag, 32 759 bytes (9 841 compressed), and a conditional GET answers 304 with no body.
+
+THE ONE LAW STANDS — a build is never swapped under a session that holds work — and three things changed around it.
+The offer is never hidden by a preference: the build badge wears a class of its own and STATUS TAGS now hides the four
+ψ-badges only (HIDE THE INTERFACE still hides the whole row, and the new pane with it). The reader: a return to the
+foreground asks the registration for a new worker, at most once per 30 minutes, with no timer and no version file (the
+precache digest already is the version). The quiet take: a session that holds no work takes the build itself, at once,
+and reloads. "Holds no work" is defined once, in `rack.js` `untouched`: the undo ring holds only its origin row, named
+`boot` or `link` (an `open · …` or `new project` origin is a scene a reload would not bring back); nothing pending or
+held; the project clean; no pointer down; the photosensitivity notice not up; nothing being typed; and the transport
+paused — or playing, when the caller says that is fine. An untouched session that is only playing is offered the build
+and takes it the next time the page hides. Every other session is offered it and keeps its work until a press. In the
+worker the quiet take asks with `alone: true` and is refused, with `LW_SW_BUSY`, while a second window is in scope —
+`skipWaiting()` re-points every client and the other window may hold work — and the page then offers it instead. The
+press path still reaches the file's one `skipWaiting()` without an await.
+
+The offer itself is a small glass pane under the badge row with the sheet's typography and two kit triggers, UPDATE
+and LATER (Josh's words; the badge reads `A NEW BUILD IS READY · UPDATE`, the same word for the same act), a
+mini-tutorial in his word: it points at the badge with a caret, says what UPDATE does (a reload, a few seconds),
+what is kept (saved projects, settings, keys, the notebook) and what is lost (unsaved changes and the undo list), and
+that LATER keeps the badge and ABOUT › UPDATE APP works any time. It is shown once per waiting build, never for a quiet
+take, is not a live region (wave 62's ceiling is spoken for), is masked out of the frame lines exactly as the sheet is,
+and is never modal: the field, the racks and the menus keep working around it (below about 1110 px wide it sits over
+the + and ☆ column, as the sheet does, until LATER). A latent defect went on the way: a press on the badge sent SKIP_WAITING without asking about unsaved
+work, so the `beforeunload` guard asked only after the swap, and a Cancel left the page on a controller whose old cache
+was already collected. A press now asks first, as UPDATE APP always did, and a "no" changes nothing.
+
+Measured over three runs (headless Firefox on the shared RTX, automation mode, so the worker's own activation is not in
+these): `buildReady` → the reload seam 1.6–2.4 ms on the first call, a median of 1.0–1.2 ms (max 2.4 ms) over 25 more —
+most of it `untouched` reading the edit scope once for `canUndo`; `offer()` 0.10–0.14 ms, the forced layout after it
+2.0–10.6 ms, the next frame 57–63 ms after the call; building the pane 0.30–0.34 ms, paid once at boot. `sw.js` grows 32 759 →
+33 975 bytes. The node gate is 843 GREEN with a new E5b in `tests/pwa.test.mjs` that drives the real worker: a quiet
+take with one window takes it, with two it does not and posts `LW_SW_BUSY { windows: 2 }` to the asker, through
+`waitUntil`. The new `tests/offer.browser-test.mjs` passes its seven scenes — an untouched boot takes quietly, a refusal
+is offered with the build badge visible under STATUS TAGS off and every target topmost at its centre, LATER keeps the
+badge, a touched session is offered and never taken, a dirty project asks first, an untouched playing session is taken
+on hide, STATUS TAGS on shows all five — and menubar, history, current, frame-occlusion, render-regressions, new-project
+and official-defaults-palette stay green; MIR in step at 1.4.3. The only stylesheet moves are the badge-row rule and
+the new `#offer` rules.
+
+The edges, found by reading and measuring rather than by the brief. The badge row is not centred on the stage: it spans
+rack-w + 340 … rack-w + 56 from the right, so its centre is 50vw + 142 px (and, where the box collapses on a narrow
+stage, its left edge); a caret at the pane's own centre pointed 43 px left of the lone build badge at 1500 × 1000, and
+centring the pane there instead covered the + and ☆ column below 1392 px, so the pane keeps the stage's centre and the
+caret aims at the row — measured on the badge's centre at 1500, 1300 and 1000 px. The pane is built hidden at boot, like
+`#sheet`, because the occlusion observer attaches at boot: a pane built on the first offer went unobserved, and a paused
+field drew its frame lines through it until something else asked for a frame. `untouched` reads `warning.open` (the
+notice is up), not `warning.needed()`. A tab told its build was replaced in another tab now hides the pane, whose
+UPDATE would otherwise stand dead. The statechange and the `LW_SW_WAITING` roads can both arm the same worker, so a quiet
+take may post twice (harmless — `skipWaiting` is idempotent) and the pane is keyed by the build digest. At the origin
+root a /REPORT.md or /LICENSE tab opened from ABOUT is a window in scope, so it refuses a quiet take — conservative, and
+the offer is shown. Recorded, not solved: below about 1140 px the desktop badge row collapses and squeezes the build
+badge to its dot and an ellipsis (20 px at 1000 px wide); in the "replaced" state the badge says RELOAD WHEN READY but
+its press does nothing; and the quiet take has not been driven end to end against a real second deploy.

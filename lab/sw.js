@@ -9,7 +9,8 @@
  * superposition, a notebook page, a layout — and half of an old build talking to half of a new one is the
  * worst failure a cache can cause.  So: no skipWaiting() on install, no clients.claim() ever.  A new worker
  * precaches itself and then WAITS; the old worker keeps serving every byte of the build the session started
- * on until the last tab of that session closes.  The UI is told a build is ready (§5) and the USER decides.
+ * on until the last tab of that session closes.  The UI is told a build is ready (§5); an untouched session
+ * takes it (main.js, rack.js `untouched`), and any other session's USER decides.
  * The price is honest and small: the very first visit runs uncontrolled, so offline works from the SECOND
  * launch onward.  We pay it rather than swap assets under a page that is already running.
  *
@@ -35,7 +36,7 @@ const PRECACHE = [
   ['./atoms.js',                                                    '1bfbfc778e10'],
   ['./atomsview.js',                                                '8a999c2c9509'],
   ['./audio.js',                                                    '67458cc4f589'],
-  ['./badges.js',                                                   '5239d7793533'],
+  ['./badges.js',                                                   '3f7e286d3328'],
   ['./bessel.js',                                                   '0689408ac984'],
   ['./busy-mark.js',                                                '82df631a48f7'],
   ['./calculus.js',                                                 '43eae3b25a72'],
@@ -88,11 +89,11 @@ const PRECACHE = [
   ['./keymap.js',                                                   '5fa3b8dc5d14'],
   ['./keys.js',                                                     'ab919a7877db'],
   ['./kick.js',                                                     '586697c01ee5'],
-  ['./lab.css',                                                     '95601438d1ca'],
+  ['./lab.css',                                                     '527ae2e03705'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./linalg.js',                                                   'da2367cdcb97'],
-  ['./main.js',                                                     '4ec1c1243d0b'],
+  ['./main.js',                                                     'b200673a96d6'],
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
   ['./mathworker.js',                                               'c16223e58013'],
   ['./md.js',                                                       'a9db55460cc1'],
@@ -172,7 +173,7 @@ const PRECACHE = [
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],
   ['./rack-menus.js',                                               'adecc705a800'],
-  ['./rack.js',                                                     'd8a4d024dea4'],
+  ['./rack.js',                                                     '8c5aabde18db'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '655a6aef068a'],
   ['./registerview.js',                                             '6cd43624dafa'],
@@ -195,7 +196,7 @@ const PRECACHE = [
   ['./statesview.js',                                               '1d880ae0c28b'],
   ['./sturmian.js',                                                 '47ed5b7c81da'],
   ['./sturmianreg.js',                                              '1ce5f44b2fae'],
-  ['./sw-client.js',                                                'becabe4f6e4e'],
+  ['./sw-client.js',                                                'fb2d7ce59eb4'],
   ['./twocentre.js',                                                'ee6db36dfc49'],
   ['./vendor/bse/6-31+g-star-v1.json',                              'ddcbd84daf46'],
   ['./vendor/bse/index.json',                                       'ed5f82e3438e'],
@@ -364,14 +365,18 @@ async function serve(pathname, req) {
 /* ── 6. THE UI CHANNEL — how the lab asks, and how the USER (never the worker) takes an update ──────────
  *   page → worker  { type: 'LW_SW_HELLO' }         → replies { type:'LW_SW_BUILD', build, files, cache }
  *   page → worker  { type: 'LW_SW_SKIP_WAITING' }  → this waiting worker takes over; the page reloads on
- *                                                    navigator.serviceWorker's 'controllerchange'.
+ *                                                    navigator.serviceWorker's 'controllerchange'.  A PRESS.
+ *   page → worker  { type: 'LW_SW_SKIP_WAITING', alone: true }
+ *                                                  → a QUIET TAKE (wave 133: an untouched session) — taken
+ *                                                    only while ONE window is in scope, else refused with:
+ *   worker → page  { type: 'LW_SW_BUSY', windows }  → the quiet take was refused; the page offers it instead.
  *   worker → page  { type: 'LW_SW_WAITING', build } → a new build finished installing and is waiting (§3).
  *   worker → page  { type: 'LW_SW_ACTIVE',  build } → a build took over (first install, or after a skip).
  * SKIP_WAITING is the ONLY thing in this file that can end a session's build, and only the interface can
  * send it — the worker never sends it to itself, and no timer sends it either. */
 self.addEventListener('message', (event) => {
   const d = event.data || {};
-  if (d.type === 'LW_SW_SKIP_WAITING') { self.skipWaiting(); return; }
+  if (d.type === 'LW_SW_SKIP_WAITING') { const p = takeover(event, d); if (event.waitUntil) event.waitUntil(p); return; }
   if (d.type === 'LW_SW_HELLO') {
     const msg = { type: 'LW_SW_BUILD', build: BUILD, files: PRECACHE.length, cache: CACHE };
     const port = event.ports && event.ports[0];
@@ -379,6 +384,17 @@ self.addEventListener('message', (event) => {
     else if (event.source && event.source.postMessage) event.source.postMessage(msg);
   }
 });
+
+/* A QUIET TAKE (page: an untouched session) asks with `alone: true` and is refused when another window is in scope —
+   skipWaiting() re-points every client, and the second window may hold work.  A PRESS never asks; the user said yes.
+   The press path reaches skipWaiting() without an await, so it is taken in the same turn as the message. */
+async function takeover(event, d) {
+  if (d.alone) {
+    const windows = (await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })).length;
+    if (windows > 1) { if (event.source && event.source.postMessage) event.source.postMessage({ type: 'LW_SW_BUSY', windows }); return; }
+  }
+  self.skipWaiting();
+}
 
 async function announce(msg) {
   if (!self.clients || !self.clients.matchAll) return;

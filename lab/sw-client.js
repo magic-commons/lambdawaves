@@ -1,10 +1,13 @@
 /* sw-client.js — THE INSTALL LAYER'S INTERFACE HALF (wave 56): the page's side of lab/sw.js — the offer of a waiting build,
  * the press that takes it, what a controllerchange means in THIS tab, the worker's messages, and ABOUT › UPDATE APP's
- * repair road.  A seam out of rack.js boot() (optimization 2026-09-24 · N7 seam 5, AUDIT-E §6); three closure edges,
- * handed in: `buildBadge` (the fifth badge, whose press is the offer), `setStatus` (SETTINGS' status line) and
- * `getProjects` (UPDATE APP asks before discarding an unsaved project).  The object it returns IS LW.sw — main.js
- * arms it, gates replace its reload() — so it is created once, where the block stood. */
-export function createSwClient({ buildBadge, setStatus, getProjects }) {
+ * repair road.  A seam out of rack.js boot() (optimization 2026-09-24 · N7 seam 5, AUDIT-E §6); five closure edges,
+ * handed in: `buildBadge` (the fifth badge, whose press is the offer), `setStatus` (SETTINGS' status line),
+ * `getProjects` (a take asks before discarding an unsaved project), and since wave 133 `untouched` (rack.js' one
+ * definition of a session a reload loses nothing from) and `host` (#stage, where the offer's pane lives).  The object
+ * it returns IS LW.sw — main.js arms it, gates replace its reload() — so it is created once, where the block stood. */
+import { el, trig } from './mir/kit.js';
+
+export function createSwClient({ buildBadge, setStatus, getProjects, untouched, host }) {
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF (board #56) ─────────────────────────────────────────
    * lab/sw.js precaches the whole lab and then WAITS: it never calls skipWaiting() by itself, never claims
    * a client, and has no timer.  The ONE thing that can end a session's build is a press, and this is it.
@@ -19,14 +22,43 @@ export function createSwClient({ buildBadge, setStatus, getProjects }) {
    *     and its layout intact, until its own press.
    * The second tab is now standing on a controller whose activate has already collected the cache it booted
    * on, so what it is told says exactly that.  A page cannot prevent it; it can refuse to throw the work
-   * away without being asked, and it can say what happened rather than reload in silence. */
+   * away without being asked, and it can say what happened rather than reload in silence.
+   *
+   * ── WAVE 133 · THE OFFER ────────────────────────────────────────────────────────────────────────────
+   * The badge was the whole offer, and first-run STATUS TAGS hid it, so users stayed on old builds without
+   * ever seeing one was waiting.  Now: a session that holds NO work (rack.js `untouched`) takes the build at
+   * once and reloads — a QUIET TAKE, which the worker refuses when a second window is open (LW_SW_BUSY).  An
+   * untouched session that is only PLAYING is offered it and takes it the next time the page hides.  Every
+   * other session is OFFERED it — the badge (never hidden by STATUS TAGS) and a pane under it that says what
+   * to press, what is kept and what is lost — and keeps its work until a press.  A press on unsaved work asks
+   * first, as UPDATE APP always did (it used to ask only in the beforeunload guard, AFTER the swap). */
+  let pane = null, onHide = null;
+  const PANE_TEXT = [
+    'A newer λWAVES is installed and waiting. Press <b>UPDATE</b> — or the badge above — to reload into it. It takes a few seconds.',
+    '<b>KEPT:</b> saved projects, settings, keys, the notebook. <b>LOST:</b> unsaved changes and the undo list — save first.',
+    '<b>LATER</b> keeps the badge; ABOUT › UPDATE APP works any time.',
+  ];
+  /* the pane is built here, once, hidden — like #sheet it exists from boot, so rack.js' occlusion burst and its
+     observer treat it exactly as they treat #sheet — and offer() only shows it */
+  if (host) {
+    pane = el('section', 'glass', host); pane.id = 'offer'; pane.hidden = true;
+    pane.setAttribute('role', 'region'); pane.setAttribute('aria-label', 'a new build is ready');   // not a live region: wave 62's ceiling is spoken for
+    el('h3', '', pane, 'A NEW BUILD IS READY');
+    for (const html of PANE_TEXT) el('p', '', pane).innerHTML = html;
+    const row = el('div', 'offer-row', pane);
+    row.appendChild(trig({ label: 'UPDATE', onFire: () => swClient.accept() }).root);
+    row.appendChild(trig({ label: 'LATER', onFire: () => { pane.hidden = true; } }).root);
+  }
+  const hidePane = () => { if (pane) pane.hidden = true; };
   const swClient = {
-    state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced
+    state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced | refreshing | failed
     asked: false,                        // did THIS document ask for the swap?
     reloads: 0,
     build: null, cache: null, files: 0,
     mode: 'boot', error: null, registration: null, pending: null,
     take: null,
+    checks: 0,                           // the reader's count (main.js): update checks asked on a return to the foreground
+    offered: null,                       // the build digest the pane was shown for ('' when the worker named none) — once per waiting build
     /** the one seam a gate replaces — nothing else in the lab reloads the page */
     reload() { location.reload(); },
     say(badge, status) {
@@ -35,20 +67,46 @@ export function createSwClient({ buildBadge, setStatus, getProjects }) {
       setStatus(status);                                   // …and a second place to find it, for a browser with STATUS TAGS off (SETTINGS' status line)
       return badge;
     },
-    /** OFFER a waiting build.  It never takes it: `take` is called by the press and by nothing else. */
+    /** A build is waiting.  An untouched session takes it quietly; an untouched one that is only playing is offered it
+     *  and takes it when the page next hides; any other session is offered it and keeps its work until a press. */
     buildReady(take) {
       if (typeof take === 'function') swClient.take = take;
       if (!swClient.take) return false;
       swClient.state = 'ready';
-      swClient.say('A NEW BUILD IS READY · RELOAD', 'a new build is ready');
+      if (untouched && untouched(false)) { swClient.accept({ quiet: true }); return true; }
+      swClient.offer();
+      if (untouched && untouched(true)) {
+        if (onHide) document.removeEventListener('visibilitychange', onHide);
+        onHide = () => {
+          if (document.visibilityState !== 'hidden') return;
+          document.removeEventListener('visibilitychange', onHide); onHide = null;   // one shot: the first hide decides
+          if (swClient.state === 'ready' && untouched(true)) swClient.accept({ quiet: true });
+        };
+        document.addEventListener('visibilitychange', onHide);
+      }
       return true;
     },
-    /** the offer, pressed */
-    accept() {
+    /** the visible offer: the badge, SETTINGS' status line, and the pane — the pane at most once per waiting build */
+    offer() {
+      swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
+      const build = (swClient.pending && swClient.pending.build) || '';
+      if (!pane || swClient.offered === build) return false;
+      swClient.offered = build; pane.hidden = false;
+      return true;
+    },
+    /** the offer, pressed (the badge, UPDATE) — or, with { quiet: true }, taken for an untouched session */
+    accept(opt) {
       if (swClient.state !== 'ready' || !swClient.take) return false;
+      const quiet = !!(opt && opt.quiet), projects = getProjects();
+      if (projects && projects.dirty) {
+        if (quiet) return false;                           // cannot happen — untouched() includes !dirty — but the guard stays
+        if (!window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')) return false;
+        projects.markClean();
+      }
       swClient.asked = true; swClient.state = 'taking';
       swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
-      try { swClient.take(); } catch (e) { swClient.error = String(e && e.message || e); return false; }
+      hidePane();
+      try { swClient.take(quiet ? { alone: true } : {}); } catch (e) { swClient.error = String(e && e.message || e); return false; }
       return true;
     },
     /** Explicit repair path from ABOUT > UPDATE APP. First ask the registration for a new worker. If
@@ -82,6 +140,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects }) {
             if (discardApproved) projects.markClean();
             swClient.asked = true; swClient.state = 'taking';
             swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
+            hidePane();
             reg.waiting.postMessage({ type: 'LW_SW_SKIP_WAITING' });
             return true;
           }
@@ -105,14 +164,16 @@ export function createSwClient({ buildBadge, setStatus, getProjects }) {
     /** the controller under this document changed.  ONLY the document that asked may reload. */
     controllerChanged() {
       if (swClient.asked) { if (swClient.reloads++ === 0) swClient.reload(); return 'reloaded'; }
-      swClient.state = 'replaced';
+      swClient.state = 'replaced'; hidePane();              // wave 133: the offer is void here, so its UPDATE must not stand
       swClient.say('THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY', 'replaced in another tab');
       return 'told';
     },
-    /** a message from the worker.  LW_SW_WAITING is §3's announcement, which nothing used to listen for. */
+    /** a message from the worker.  LW_SW_WAITING is §3's announcement, which nothing used to listen for.
+     *  LW_SW_BUSY (wave 133): the worker refused a quiet take because another window is open — offer it instead. */
     message(d) {
       if (!d || !d.type) return null;
       if (d.type === 'LW_SW_WAITING') { swClient.pending = d; return 'waiting'; }
+      if (d.type === 'LW_SW_BUSY') { swClient.asked = false; swClient.state = 'ready'; swClient.offer(); return 'busy'; }
       if (d.type === 'LW_SW_ACTIVE' || d.type === 'LW_SW_BUILD') {
         swClient.build = d.build; swClient.files = d.files || 0; if (d.cache) swClient.cache = d.cache;
         return d.type === 'LW_SW_BUILD' ? 'build' : 'active';

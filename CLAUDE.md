@@ -59,7 +59,10 @@ First-run λWAVES preferences are specified in `lab/rack.js` and
 AUTO SCALE and governor on; light/refractive/ALWAYS frost, 22 px blur and
 50% VIVID on desktop; on a phone or tablet (rack.js' own
 `isPhone()`/`isTablet()`, via `lab/first-run.js`) the first-run material is
-frost OFF, tinted. Stored choices and the phone's frost override win. DOMAIN
+frost OFF, tinted. Stored choices and the phone's frost override win.
+STATUS TAGS off hides the four ψ-badges, never the build offer; an untouched
+session takes a waiting build itself (`lab/sw-client.js`, `rack.js`
+`untouched`), any other session only on a press. DOMAIN
 AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep

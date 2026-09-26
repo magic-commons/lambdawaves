@@ -2963,7 +2963,22 @@ export async function boot(dom) {
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that
      did not ask is told and keeps its work.  It is LW.sw. ── */
   const swClient = createSwClient({ buildBadge: () => badges.build,
-    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects });
+    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects,
+    untouched: (ignorePlaying) => {
+      /* THE QUIET TAKE'S ONE DEFINITION (wave 133): the session shows exactly what a fresh boot — or the same link — would show,
+         so a reload loses nothing.  The ring holds only its origin row and that origin is `boot` or `link` (an `open · …` or
+         `new project` origin is a scene a reload would not bring back: there is no reopen-last-project at boot); nothing is pending
+         or held; no unsaved work; no gesture in flight; the photosensitivity notice is not up; nothing is being typed; and, unless
+         the caller says playing is fine, the transport is paused.  Read only after boot (register waits ≥ 1.5 s past load). */
+      const rows = history ? history.entries() : [];
+      return rows.length === 1 && !history.canUndo && !history.pendingLabel && !history.holding
+        && (rows[0].label === 'boot' || rows[0].label === 'link')
+        && !(layout.projects && layout.projects.dirty) && !pointerHeld
+        && !(warning && warning.open)
+        && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
+        && (ignorePlaying || !clock.playing);
+    },
+    host: dom.badges.parentElement });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
   let bow = null, bowPrevView = null;
@@ -3308,7 +3323,7 @@ export async function boot(dom) {
     const cards = [];
     if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
     for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
-    for (const id of ['transport', 'notebook', 'sheet', 'rackAddList', 'rackFavList']) add(document.getElementById(id));
+    for (const id of ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList']) add(document.getElementById(id));
     add(document.querySelector('#keymap .km-panel'));
     const rackRects = [];
     for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
@@ -3321,7 +3336,7 @@ export async function boot(dom) {
     for (const el of [floats, rack, rackL]) if (el) mo.observe(el, { childList: true });
     /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
     if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
-    for (const id of ['notebook', 'transport', 'sheet', 'rackAddList', 'rackFavList']) { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['style', 'hidden', 'class'] }); }
+    for (const id of ['notebook', 'transport', 'sheet', 'offer', 'rackAddList', 'rackFavList']) { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['style', 'hidden', 'class'] }); }
     new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
     window.addEventListener('resize', dirty, { passive: true });
