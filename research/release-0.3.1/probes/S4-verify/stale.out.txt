@@ -1,0 +1,16 @@
+GRID 96³ then ] key {"rows":["turn ψ about the axis, + · ]"],"pending":null}
+GRID 64³ then LW.setStage+note {"rows":["edit"],"pending":null}
+THEME other then LW.mod.addSource {"rows":["edit"],"pending":null}
+FRAME OFF then a stage edit {"rows":["edit"],"pending":null}
+FRAME BOX back then nothing {"rows":[],"pending":null}
+THEME other then C key 60 ms later {"rows":["cycle the draw style · C"],"pending":null}
+THEME other, 5 s, then LW.setStage+note {"rows":["edit"],"pending":null}
+UNDO button (real) then API edit {"rows":[],"pending":null}
+UNDO button with nothing to undo, then API edit 100 ms later {"E":"covered row tight hist-actions @1288,110 box 127x44"}
+THEME other then LW.setStage+note 150 ms later (inside the 400 ms grace) {"rows":["THEME LIGHT · SETTINGS"],"pending":null}
+GRID 96³ then LW.loadPreset 150 ms later {"rows":["GRID 96³ · SETTINGS"],"pending":null}
+Ctrl+Z pending {"pending":null,"cursor":2} then API edit {"rows":["THEME LIGHT · SETTINGS","GRID 96³ · SETTINGS","undo the last edit · Ctrl+Z"],"cursor":3,"n":4}
+real knob drag {"rows":["EXPOSURE · WAVE"]}
+touch-order tap {"was":false,"now":true,"rows":["KEPLER ORBIT · ORBIT"],"rows2":["KEPLER ORBIT · ORBIT","KEPLER ORBIT · ORBIT"],"target":"sw"}
+touch-order tap, click 450 ms late {"rows":["edit"]}
+errs [] 

@@ -1,0 +1,4 @@
+(a) right-clicks where the page does not suppress the menu {"stage":{"edit100msLater":1,"name":"edit","secondEdit":1},"row":{"edit100msLater":1,"name":"edit","secondEdit":1}}
+(b) goto(2) while closed, then opened {"current":2,"inView":false,"listTop":0}
+(c) phone 390×844 {"phone":true,"card":[274,409],"list":[258,250,737],"hOverflow":false,"rows":31,"rowOverflow":false,"status":"31 kept  ·  on 31"}
+errs [] 

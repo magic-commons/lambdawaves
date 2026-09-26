@@ -1,0 +1,103 @@
+fresh {"n":1,"bottom":"boot","hasI":true,"cur":1,"closed":true,"folded":false}
+geom {
+ "sc0": [
+  [
+   "HTML",
+   0,
+   0
+  ],
+  [
+   "rack",
+   0,
+   0
+  ]
+ ],
+ "sc30": [
+  [
+   "HTML",
+   0,
+   0
+  ],
+  [
+   "rack",
+   0,
+   0
+  ]
+ ],
+ "devTop0": 10,
+ "devTop30": 10,
+ "hs": {
+  "13": {
+   "card": 408,
+   "list": 250,
+   "sh": 308
+  },
+  "26": {
+   "card": 408,
+   "list": 250,
+   "sh": 618
+  },
+  "31": {
+   "card": 408,
+   "list": 250,
+   "sh": 737
+  }
+ },
+ "top": {
+  "n": 31,
+  "first": 30,
+  "last": 0,
+  "bottomName": "start",
+  "cur": [
+   30
+  ],
+  "curInView": true,
+  "status": null,
+  "listTop": 0
+ },
+ "g3": {
+  "cur": [
+   3
+  ],
+  "curInView": true,
+  "listTop": 415,
+  "sc": [
+   [
+    "HTML",
+    0,
+    0
+   ],
+   [
+    "rack",
+    0,
+    0
+   ]
+  ],
+  "devTop": 10,
+  "lands": true,
+  "status": null
+ },
+ "note": "History. Every edit to the project is a row, newest at the top. The last 60 are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.",
+ "statusEls": [
+  "dev-stat live: 31 kept  ·  on 31"
+ ]
+}
+clicks [{"k":5,"cursor":5,"lands":true,"curIdx":5,"inView":true,"rows":31,"scMoved":false,"sc":[["HTML",0,0],["rack",0,0]]},{"k":22,"cursor":22,"lands":true,"curIdx":22,"inView":true,"rows":31,"scMoved":false,"sc":[["HTML",0,0],["rack",0,0]]},{"k":0,"cursor":0,"lands":true,"curIdx":0,"inView":true,"rows":31,"scMoved":false,"sc":[["HTML",0,0],["rack",0,0]]},{"k":30,"cursor":30,"lands":true,"curIdx":30,"inView":true,"rows":31,"scMoved":false,"sc":[["HTML",0,0],["rack",0,0]]}]
+pendingClick [
+ {
+  "delay": 60,
+  "rows": "0:start | 1:edit | 2:edit | 3:edit | 4:edit | 5:edit | 6:edit | 7:edit | 8:edit | 9:edit",
+  "cursor": 3,
+  "landsOn3": true,
+  "stillOnEdit": false
+ },
+ {
+  "delay": 250,
+  "rows": "0:start | 1:edit | 2:edit | 3:edit | 4:edit | 5:edit | 6:edit | 7:edit | 8:edit | 9:edit",
+  "cursor": 9,
+  "landsOn3": false,
+  "stillOnEdit": true
+ }
+]
+paint {"rows":61,"flushMed":0.42,"flushMax":0.5,"renderMed":2.22,"renderMax":2.6,"layoutMed":0.06,"frameGapMovedMed":11.82,"frameGapStillMed":2.76}
+errs [] 

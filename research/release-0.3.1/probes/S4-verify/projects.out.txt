@@ -1,0 +1,18 @@
+{"tag":"after NEW","rows":["new project*"],"dirty":false,"current":null,"canUndo":false,"canRedo":false,"chemOn":false,"card":["new project"],"undoBtn":true}
+{"tag":"knob drag","rows":["new project","EXPOSURE · WAVE*"],"dirty":true,"current":null,"canUndo":true,"canRedo":false,"chemOn":false,"card":["EXPOSURE · WAVE","new project"],"undoBtn":false}
+{"tag":"Ctrl+Z","rows":["new project*","EXPOSURE · WAVE"],"dirty":false,"current":null,"canUndo":false,"canRedo":true,"chemOn":false,"card":["EXPOSURE · WAVE","new project"],"undoBtn":true}
+{"tag":"MOLECULES ON","rows":["new project","MOLECULES ON · MOLECULES*"],"dirty":true,"current":null,"canUndo":true,"canRedo":false,"chemOn":true,"card":["MOLECULES ON · MOLECULES","new project"],"undoBtn":false}
+{"tag":"Ctrl+Z (MOLECULES off)","rows":["new project*","MOLECULES ON · MOLECULES"],"dirty":true,"current":null,"canUndo":false,"canRedo":true,"chemOn":false,"card":["MOLECULES ON · MOLECULES","new project"],"undoBtn":true}
+{"tag":"requestFresh after MOLECULES ON + undo","rows":["new project*"],"dirty":false,"current":null,"canUndo":false,"canRedo":false,"chemOn":false,"card":["new project"],"undoBtn":true}
+{"tag":"saved","rows":["new project*"],"dirty":false,"current":"probe-s4-verify","canUndo":false,"canRedo":false,"chemOn":false,"card":["new project"],"undoBtn":true}
+{"tag":"knob drag after save","rows":["new project","EXPOSURE · WAVE*"],"dirty":true,"current":"probe-s4-verify","canUndo":true,"canRedo":false,"chemOn":false,"card":["EXPOSURE · WAVE","new project"],"undoBtn":false}
+{"tag":"Ctrl+Z after save","rows":["new project*","EXPOSURE · WAVE"],"dirty":false,"current":"probe-s4-verify","canUndo":false,"canRedo":true,"chemOn":false,"card":["EXPOSURE · WAVE","new project"],"undoBtn":true}
+{"tag":"Ctrl+Shift+Z","rows":["new project","EXPOSURE · WAVE*"],"dirty":true,"current":"probe-s4-verify","canUndo":true,"canRedo":false,"chemOn":false,"card":["EXPOSURE · WAVE","new project"],"undoBtn":false}
+{"tag":"open probe-s4-verify","rows":["open · probe-s4-verify*"],"dirty":false,"current":"probe-s4-verify","canUndo":false,"canRedo":false,"chemOn":false,"card":["open · probe-s4-verify"],"undoBtn":true}
+{"tag":"Ctrl+Z right after open","rows":["open · probe-s4-verify*"],"dirty":false,"current":"probe-s4-verify","canUndo":false,"canRedo":false,"chemOn":false,"card":["open · probe-s4-verify"],"undoBtn":true}
+{"tag":"open WAVE DANCER","rows":["open · WAVE DANCER*"],"dirty":false,"current":"DEMOS/WAVE DANCER","canUndo":false,"canRedo":false,"chemOn":false,"card":["open · WAVE DANCER"],"undoBtn":true}
+{"tag":"knob drag in the demo","rows":["open · WAVE DANCER","EXPOSURE · WAVE*"],"dirty":true,"current":"DEMOS/WAVE DANCER","canUndo":true,"canRedo":false,"chemOn":false,"card":["EXPOSURE · WAVE","open · WAVE DANCER"],"undoBtn":false}
+{"tag":"goto(0) in the demo","rows":["open · WAVE DANCER*","EXPOSURE · WAVE"],"dirty":false,"current":"DEMOS/WAVE DANCER","canUndo":false,"canRedo":true,"chemOn":false,"card":["EXPOSURE · WAVE","open · WAVE DANCER"],"undoBtn":true}
+{"tag":"HISTORY UNDO","rows":["open · WAVE DANCER","EXPOSURE · WAVE*"],"dirty":true,"current":"DEMOS/WAVE DANCER","canUndo":true,"canRedo":false,"chemOn":false,"card":["EXPOSURE · WAVE","open · WAVE DANCER"],"undoBtn":false}
+askNew {"asked":0} saved true
+errs []

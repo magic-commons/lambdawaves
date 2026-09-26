@@ -1,0 +1,10 @@
+{"tag":"right-drag, quick","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"right-drag, 700 ms rest","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"Shift-right-click","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"tension bent (left drag)","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"tension reset (right-click)","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"tension reset (double-click)","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+{"tag":"Alt-left-click on a point","rows":["CURVE · LFO 1 · MODULATION"],"changed":true,"modelChanged":true,"undoBack":true,"modelBack":true,"redoSame":true,"after":1}
+right-click on the stage, then an API edit {"rows":["LFO BPM · MODULATION"]}
+lost releases (1 = the probe edit committed as its own row) {"whileStale":0,"afterSameIdPress":1,"afterOtherIdPress":0,"after5s":1,"afterBlur":1}
+errs [] 

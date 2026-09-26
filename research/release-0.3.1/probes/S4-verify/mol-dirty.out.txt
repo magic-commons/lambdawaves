@@ -1,0 +1,34 @@
+key {
+ "dirtyAfterNew": false,
+ "chemOn": false,
+ "dirtyOver3s": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ],
+ "diff": [
+  ".p.instruments.chem.orbital: null → 5",
+  ".p.instruments.states.lanes.0: undefined → {\"key\":-1,\"omega\":0,\"amp\":1,\"phase\":0,\"mute\":false,\"solo\":false}"
+ ],
+ "requestFreshAsked": 1,
+ "requestFreshResult": false
+}
+api {
+ "dirtyAfterNew": false,
+ "chemOn": false,
+ "dirtyOver3s": [
+  false,
+  false,
+  false,
+  false,
+  false,
+  false
+ ],
+ "diff": [],
+ "requestFreshAsked": 0,
+ "requestFreshResult": true
+}
+errs [] 

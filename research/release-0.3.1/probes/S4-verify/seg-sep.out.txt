@@ -1,0 +1,11 @@
+STYLE segment {"rows":["STYLE SOLID · WAVE"],"moved":true}
+FRAME segment LATTICE (a preference) {"rows":[],"moved":false}
+FRAME segment BOX (back) {"rows":[],"moved":false}
+FINISH segment GLASS {"rows":["FINISH GLASS · WAVE"],"moved":true}
+VIEW segment (caption removed by native-ui) {"rows":["Δρ · WAVE"],"moved":true}
+style option ["SOLID","WAVE"]
+SEPARATE, MOD playing {"link":false,"s0":{"mod":false,"field":false},"routed":{"mod":false,"modulated":false,"live":0.3},"undone":{"mod":false,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":null},"redone":{"mod":false,"modulated":false,"base":0.3,"live":0.3}}
+SEPARATE, MOD paused {"link":false,"s0":{"mod":false,"field":false},"routed":{"mod":false,"modulated":false,"live":0.3},"undone":{"mod":false,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":null},"redone":{"mod":false,"modulated":false,"base":0.3,"live":0.3}}
+LINKED, field playing {"link":true,"s0":{"mod":false,"field":true},"routed":{"mod":false,"modulated":false,"live":0.3},"undone":{"mod":false,"modulated":false,"base":0.3,"live":0.3,"playingAgainAfterMs":null},"redone":{"mod":true,"modulated":true,"base":0.3,"live":0.322}}
+labels {"undoNew":true,"undoOld":false,"redo":true,"searchHits":["⌃ · ⌃⇧ · ⌃⌥Zaxis Z · undo · redo · return from","DOCKdock / undock the transportT","UNDOundo the last editCtrlZ"]}
+errs [] 
