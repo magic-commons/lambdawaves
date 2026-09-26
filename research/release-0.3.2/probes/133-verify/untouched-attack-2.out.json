@@ -1,0 +1,201 @@
+[
+ [
+  "P1 play 2 s, pause",
+  {
+   "E": "Render did not settle: animation frames stopped | waitForPaint/</timer<@https://127.0.0.1:8732/lab/frame-settle.js:9:14\n",
+   "afterReload": {
+    "t": 0
+   }
+  }
+ ],
+ [
+  "P2 notebook moved by its head",
+  {
+   "spot": {
+    "x": 1013,
+    "y": 109,
+    "on": "nb-head"
+   },
+   "before": [
+    380,
+    104
+   ],
+   "after": [
+    260,
+    174
+   ],
+   "settingsChanged": true,
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-caption",
+    "yaw": 0.65
+   },
+   "untouchedFalse": true,
+   "afterReload": {
+    "shown": false,
+    "at": [
+     0,
+     0
+    ]
+   }
+  }
+ ],
+ [
+  "P2b modulation window expanded",
+  {
+   "before": "none",
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-caption",
+    "yaw": 0.65
+   },
+   "untouchedFalse": true,
+   "afterReload": {
+    "cls": "kwin glass kwin-kind-persistent kwin-chips-only modwin mir-m",
+    "h": 440
+   }
+  }
+ ],
+ [
+  "P3 pointer held on the stage, no move",
+  {
+   "fp": {
+    "x": 700,
+    "y": 605
+   },
+   "held": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "pending": null,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "active": "CANVAS.drag",
+     "yaw": 0.65
+    },
+    "untouchedFalse": false
+   },
+   "released": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "pending": null,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "active": "CANVAS.",
+     "yaw": 0.65
+    },
+    "untouchedFalse": true
+   }
+  }
+ ],
+ [
+  "P4 EXPORT FRAMES in flight (short)",
+  {
+   "seen": {
+    "atMs": 17,
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "pending": null,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "active": "BODY.no-badges no-caption",
+     "yaw": 0.65
+    },
+    "untouchedFalse": true
+   },
+   "polls": 1,
+   "result": "timeout",
+   "totalMs": 90023
+  }
+ ],
+ [
+  "P5 RECORD in flight",
+  {
+   "seen": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "pending": null,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "active": "BODY.no-badges no-caption",
+     "yaw": 0.65
+    },
+    "untouchedFalse": true
+   },
+   "busyAfterStop": true
+  }
+ ],
+ [
+  "P6 theme flipped",
+  {
+   "theme0": "light",
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "active": "BODY.no-badges no-caption",
+    "yaw": 0.65
+   },
+   "untouchedFalse": true,
+   "stored": "dark",
+   "afterReload": "dark"
+  }
+ ],
+ [
+  "P7 link boot · exposure only ERROR",
+  "POST /session/f85e6cd5-7dbc-44bd-a5ab-1a64b8db24d5/url -> 400 {\"value\":{\"error\":\"invalid argument\",\"message\":\"invalid type: map, expected a string at line 1 column 7\",\"stacktrace\":\"\"}}"
+ ],
+ [
+  "P7 link boot · nothing changed ERROR",
+  "POST /session/f85e6cd5-7dbc-44bd-a5ab-1a64b8db24d5/url -> 400 {\"value\":{\"error\":\"invalid argument\",\"message\":\"invalid type: map, expected a string at line 1 column 7\",\"stacktrace\":\"\"}}"
+ ],
+ [
+  "P7b plain boot (control)",
+  {
+   "earlyDirty": false,
+   "lateDirty": false
+  }
+ ],
+ [
+  "errors",
+  {
+   "errs": [],
+   "problems": [],
+   "problemsVia": "absent"
+  }
+ ]
+]

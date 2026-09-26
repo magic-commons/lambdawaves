@@ -1,0 +1,70 @@
+[
+ [
+  "P1 play 2 s, pause",
+  {
+   "t0": 0,
+   "mid": {
+    "t": 7.6655999999999995,
+    "playing": true,
+    "rate": 4
+   },
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "pending": null,
+    "dirty": false,
+    "playing": false,
+    "t": 7.666,
+    "active": "BODY.no-badges no-caption",
+    "yaw": 0.65
+   },
+   "untouchedFalse": true,
+   "afterReload": {
+    "t": 0
+   }
+  }
+ ],
+ [
+  "P7 link boot · exposure only",
+  {
+   "earlyDirty": true,
+   "lateDirty": true,
+   "rows": [
+    "link"
+   ],
+   "untouchedFalse": false,
+   "movedKeys": [],
+   "dirtyAgainAfterMarkClean": false
+  }
+ ],
+ [
+  "P7 link boot · nothing changed",
+  {
+   "earlyDirty": true,
+   "lateDirty": true,
+   "rows": [
+    "link"
+   ],
+   "untouchedFalse": false,
+   "movedKeys": [],
+   "dirtyAgainAfterMarkClean": false
+  }
+ ],
+ [
+  "P7b plain boot (control)",
+  {
+   "earlyDirty": false,
+   "lateDirty": false
+  }
+ ],
+ [
+  "errors",
+  {
+   "errs": [],
+   "problems": [],
+   "problemsVia": "absent"
+  }
+ ]
+]

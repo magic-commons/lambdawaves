@@ -1,0 +1,237 @@
+[
+ [
+  "1500×1000",
+  {
+   "viewport": [
+    1500,
+    914
+   ],
+   "phone": false,
+   "rowBox": [
+    640,
+    1144
+   ],
+   "rowOverflow": "visible",
+   "badges": [
+    {
+     "build": false,
+     "text": "STATE · EVOLUTION · SHADOW",
+     "x": [
+      867,
+      1054
+     ]
+    },
+    {
+     "build": false,
+     "text": "FIELD",
+     "x": [
+      1059,
+      1121
+     ]
+    },
+    {
+     "build": true,
+     "text": "A NEW BUILD IS READY · UPD",
+     "x": [
+      663,
+      862
+     ]
+    }
+   ],
+   "buildInsideRow": true,
+   "buildOnScreen": true,
+   "buildHitAtItsCentre": true,
+   "hitBy": "SPAN",
+   "caretX": 891,
+   "caretPointsAt": "STATE · EVOLUTION · SHADOW"
+  }
+ ],
+ [
+  "1366×1024",
+  {
+   "viewport": [
+    1366,
+    938
+   ],
+   "phone": false,
+   "rowBox": [
+    640,
+    1010
+   ],
+   "rowOverflow": "visible",
+   "badges": [
+    {
+     "build": false,
+     "text": "STATE · EVOLUTION · SHADOW",
+     "x": [
+      698,
+      885
+     ]
+    },
+    {
+     "build": false,
+     "text": "FIELD",
+     "x": [
+      890,
+      952
+     ]
+    },
+    {
+     "build": true,
+     "text": "A NEW BUILD IS READY · UPD",
+     "x": [
+      726,
+      924
+     ]
+    }
+   ],
+   "buildInsideRow": true,
+   "buildOnScreen": true,
+   "buildHitAtItsCentre": true,
+   "hitBy": "SPAN",
+   "caretX": 824,
+   "caretPointsAt": "the build badge"
+  }
+ ],
+ [
+  "1140×800",
+  {
+   "viewport": [
+    1140,
+    714
+   ],
+   "phone": false,
+   "rowBox": [
+    574,
+    784
+   ],
+   "rowOverflow": "visible",
+   "badges": [
+    {
+     "build": false,
+     "text": "STATE · EVOLUTION · SHADOW",
+     "x": [
+      586,
+      772
+     ]
+    },
+    {
+     "build": false,
+     "text": "FIELD",
+     "x": [
+      648,
+      710
+     ]
+    },
+    {
+     "build": true,
+     "text": "A NEW BUILD IS READY · UPD",
+     "x": [
+      580,
+      778
+     ]
+    }
+   ],
+   "buildInsideRow": true,
+   "buildOnScreen": true,
+   "buildHitAtItsCentre": true,
+   "hitBy": "SPAN",
+   "caretX": 711,
+   "caretPointsAt": "the build badge"
+  }
+ ],
+ [
+  "1000×700",
+  {
+   "viewport": [
+    1000,
+    614
+   ],
+   "phone": false,
+   "rowBox": [
+    434,
+    644
+   ],
+   "rowOverflow": "visible",
+   "badges": [
+    {
+     "build": false,
+     "text": "STATE · EVOLUTION · SHADOW",
+     "x": [
+      446,
+      632
+     ]
+    },
+    {
+     "build": false,
+     "text": "FIELD",
+     "x": [
+      508,
+      570
+     ]
+    },
+    {
+     "build": true,
+     "text": "A NEW BUILD IS READY · UPD",
+     "x": [
+      440,
+      638
+     ]
+    }
+   ],
+   "buildInsideRow": true,
+   "buildOnScreen": true,
+   "buildHitAtItsCentre": true,
+   "hitBy": "SPAN",
+   "caretX": 641,
+   "caretPointsAt": "field"
+  }
+ ],
+ [
+  "500×930",
+  {
+   "viewport": [
+    500,
+    844
+   ],
+   "phone": true,
+   "rowBox": [
+    7,
+    493
+   ],
+   "rowOverflow": "hidden",
+   "badges": [
+    {
+     "build": false,
+     "text": "STATE · EVOLUTION · SHADOW",
+     "x": [
+      327,
+      513
+     ]
+    },
+    {
+     "build": false,
+     "text": "FIELD",
+     "x": [
+      518,
+      580
+     ]
+    },
+    {
+     "build": true,
+     "text": "A NEW BUILD IS READY · UPD",
+     "x": [
+      123,
+      322
+     ]
+    }
+   ],
+   "buildInsideRow": true,
+   "buildOnScreen": true,
+   "buildHitAtItsCentre": true,
+   "hitBy": "badge warn build",
+   "caretX": 249,
+   "caretPointsAt": "the build badge"
+  }
+ ]
+]

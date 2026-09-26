@@ -1,0 +1,128 @@
+[
+ [
+  "UPDATE APP in an untouched tab with a second window open",
+  {
+   "build1": "16pz1j538sbdn",
+   "cache2": "lw-lab-1so9zsgn6syn",
+   "result": {
+    "outcome": "reloaded",
+    "ms": 2991,
+    "build": "1so9zsgn6syn"
+   },
+   "final": {
+    "origin": 1790452826062,
+    "ready": true,
+    "build": "1so9zsgn6syn",
+    "state": "idle",
+    "badge": null
+   },
+   "log": [
+    [
+     920,
+     "message:in",
+     "refreshing",
+     false,
+     "LW_SW_WAITING"
+    ],
+    [
+     920,
+     "message:out",
+     "refreshing",
+     false,
+     "waiting"
+    ],
+    [
+     920,
+     "buildReady:in",
+     "refreshing",
+     false,
+     null
+    ],
+    [
+     922,
+     "accept:in",
+     "ready",
+     false,
+     "{\"quiet\":true}"
+    ],
+    [
+     923,
+     "accept:out",
+     "taking",
+     true,
+     true
+    ],
+    [
+     923,
+     "buildReady:out",
+     "taking",
+     true,
+     true
+    ],
+    [
+     926,
+     "message:in",
+     "taking",
+     true,
+     "LW_SW_BUSY"
+    ],
+    [
+     926,
+     "message:out",
+     "ready",
+     false,
+     "busy"
+    ],
+    [
+     1035,
+     "controllerChanged:in",
+     "taking",
+     true,
+     null
+    ],
+    [
+     1035,
+     "reload:in",
+     "taking",
+     true,
+     null
+    ],
+    [
+     1036,
+     "reload:out",
+     "taking",
+     true,
+     null
+    ],
+    [
+     1036,
+     "controllerChanged:out",
+     "taking",
+     true,
+     "reloaded"
+    ],
+    [
+     1037,
+     "message:in",
+     "taking",
+     true,
+     "LW_SW_ACTIVE"
+    ],
+    [
+     1037,
+     "message:out",
+     "taking",
+     true,
+     "active"
+    ]
+   ]
+  }
+ ],
+ [
+  "restored lab/ bytes",
+  {
+   "abs": true,
+   "sw": true
+  }
+ ]
+]
