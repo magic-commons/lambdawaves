@@ -5605,7 +5605,7 @@ export async function boot(dom) {
   if(useCompactDefaults) {
     const left=['shadow','spectrum'],right=['settings','state','palette','observer','camera','clip'];
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
-    for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=['settings','state'].includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
+    for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
   }
   applySettings();
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them

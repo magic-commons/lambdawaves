@@ -1,0 +1,105 @@
+{
+ "desktop": {
+  "phone": false,
+  "tablet": false,
+  "rack": [
+   "shadow",
+   "spectrum",
+   "settings(folded)",
+   "state(folded)",
+   "palette",
+   "observer",
+   "camera",
+   "clip"
+  ],
+  "plus": [
+   "atoms",
+   "calculus",
+   "dynamics",
+   "field",
+   "h2",
+   "helium",
+   "history",
+   "ladder",
+   "meters",
+   "orbitals",
+   "chem",
+   "orbit",
+   "qcd",
+   "radiation",
+   "slice",
+   "vortex",
+   "wigner"
+  ],
+  "errors": []
+ },
+ "tablet": {
+  "phone": false,
+  "tablet": true,
+  "rack": [
+   "shadow(folded)",
+   "spectrum",
+   "settings(folded)",
+   "state(folded)",
+   "palette",
+   "observer",
+   "camera",
+   "clip"
+  ],
+  "plus": [
+   "atoms",
+   "calculus",
+   "dynamics",
+   "field",
+   "h2",
+   "helium",
+   "history",
+   "ladder",
+   "meters",
+   "orbitals",
+   "chem",
+   "orbit",
+   "qcd",
+   "radiation",
+   "slice",
+   "vortex",
+   "wigner"
+  ],
+  "errors": []
+ },
+ "phone": {
+  "phone": true,
+  "tablet": false,
+  "rack": [
+   "transport",
+   "shadow(folded)",
+   "spectrum",
+   "settings(folded)",
+   "state(folded)",
+   "palette",
+   "observer",
+   "camera",
+   "clip"
+  ],
+  "plus": [
+   "atoms",
+   "calculus",
+   "dynamics",
+   "field",
+   "h2",
+   "helium",
+   "history",
+   "ladder",
+   "meters",
+   "orbitals",
+   "chem",
+   "orbit",
+   "qcd",
+   "radiation",
+   "slice",
+   "vortex",
+   "wigner"
+  ],
+  "errors": []
+ }
+}

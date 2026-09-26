@@ -56,9 +56,15 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     applyFrost: src.includes('setFrost(storedFrost(s, frostMode), { quiet: true });'),
     applyCard: src.includes('setCardStyle(storedCard(s, undefined));'),
     phoneOverrideKept: src.includes("phone.wasFrost = frostMode; setFrost('off', { quiet: true });"),
+    foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
   };
-  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds defaultCard and frostMode from the answer, reads stored choices through storedFrost / storedCard, and the phone crossing\'s FROST OFF override is untouched',
+  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds defaultCard, frostMode and the furniture\'s folds from the answer, reads stored choices through storedFrost / storedCard, and the phone crossing\'s FROST OFF override is untouched',
     Object.values(wires).every(Boolean), wires);
+}
+{
+  const rows = { desktop: firstRunMaterial(false).folded, mobile: firstRunMaterial(true).folded };
+  judge('THE FIRST-RUN FOLDS (W129): the furniture folds SETTINGS and STATE on every device, and SHADOW too on a phone or tablet; the desktop\'s list is exactly the one it always folded; both frozen',
+    eq(rows.desktop, ['settings', 'state']) && eq(rows.mobile, ['settings', 'state', 'shadow']) && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
 /* ── PACE P2 (2026-09-25): THE FIRST-RUN QUALITY and THE DEVICE'S CEILING ─────────────────────────────────────────────── */
 {

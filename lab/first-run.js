@@ -10,10 +10,13 @@
  *          and the device's default applies (wave 51: said, not merely saved);
  *   frost  a stored policy; a legacy boolean `true` means ALWAYS (wave 67); anything unreadable falls to the default.
  * The phone crossing's FROST OFF override (enterPhone) is a separate, later law and is not decided here.
+ * W129 (Josh, 2026-09-25) · `folded`: the first-visit furniture's folded windows — SETTINGS and STATE everywhere, and SHADOW
+ * too on a phone or tablet, whose rack is the screen's scarcest room.  A fold is not a stored choice (the settings key keeps
+ * none); a project's or a ☆ layout's folds win when it loads.
  * Node-testable: tests/first-run.test.mjs. */
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always' }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off' }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: Object.freeze(['settings', 'state']) }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow']) }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }
