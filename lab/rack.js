@@ -2965,18 +2965,23 @@ export async function boot(dom) {
   const swClient = createSwClient({ buildBadge: () => badges.build,
     setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects,
     untouched: (ignorePlaying) => {
-      /* THE QUIET TAKE'S ONE DEFINITION (wave 133): the session shows exactly what a fresh boot — or the same link — would show,
-         so a reload loses nothing.  The ring holds only its origin row and that origin is `boot` or `link` (an `open · …` or
-         `new project` origin is a scene a reload would not bring back: there is no reopen-last-project at boot); nothing is pending
-         or held; no unsaved work; no gesture in flight; the photosensitivity notice is not up; nothing is being typed; and, unless
-         the caller says playing is fine, the transport is paused.  Read only after boot (register waits ≥ 1.5 s past load). */
+      /* THE QUIET TAKE'S ONE DEFINITION (wave 133): a reload would bring back the same scene — a fresh boot, or the same link —
+         and this browser's settings, so it loses nothing the reader made.  What a reload does NOT keep is the clock's position,
+         a capture in flight and the AUTO-ROTATE switch; a capture is excluded here, and so, in the foreground, is a clock that
+         has moved (played and paused, or scrubbed): that session is offered, not taken.  The take-on-hide road (ignorePlaying)
+         keeps ignoring the clock — it takes while nobody watches.  So: the ring holds only its origin row, named `boot` or `link`
+         (an `open · …` or `new project` origin is a scene a reload would not bring back: there is no reopen-last-project at
+         boot); nothing is pending or held; the project is clean; no pointer is down; the photosensitivity notice is not up;
+         nothing is being typed; no capture is running; and, unless the caller says playing is fine, the transport is paused at
+         t = 0.  Read only after boot (register waits ≥ 1.5 s past load). */
       const rows = history ? history.entries() : [];
       return rows.length === 1 && !history.canUndo && !history.pendingLabel && !history.holding
         && (rows[0].label === 'boot' || rows[0].label === 'link')
         && !(layout.projects && layout.projects.dirty) && !pointerHeld
         && !(warning && warning.open)
         && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
-        && (ignorePlaying || !clock.playing);
+        && !(capApi && capApi.busy)
+        && (ignorePlaying || (!clock.playing && !clock.t));
     },
     host: dom.badges.parentElement });
 

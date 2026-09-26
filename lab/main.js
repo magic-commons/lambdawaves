@@ -64,8 +64,15 @@ function installLayer(LW) {
     sw.registration = reg; sw.mode = 'registered';
 
     /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does — on a press, or quietly
-        (`alone`) for an untouched session. */
-    const arm = (w) => { if (w) sw.buildReady((opt) => w.postMessage(opt && opt.alone ? { type: 'LW_SW_SKIP_WAITING', alone: true } : { type: 'LW_SW_SKIP_WAITING' })); };
+        (`alone`) for an untouched session.  ONCE PER WORKER (wave 133): `reg.waiting`, the install's statechange and §3's
+        LW_SW_WAITING can all name the same worker, and a second buildReady re-ran the quiet take — measured on the real
+        worker in a second window: a second SKIP_WAITING, a second BUSY, and the pane hidden with only the badge left. */
+    let armed = null;
+    const arm = (w) => {
+      if (!w || w === armed) return;
+      armed = w;
+      sw.buildReady((opt) => w.postMessage(opt && opt.alone ? { type: 'LW_SW_SKIP_WAITING', alone: true } : { type: 'LW_SW_SKIP_WAITING' }));
+    };
     const watch = (w) => {
       if (!w) return;
       const check = () => { if (w.state === 'installed' && navigator.serviceWorker.controller) arm(w); };

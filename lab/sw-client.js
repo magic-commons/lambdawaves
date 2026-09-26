@@ -28,7 +28,8 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
    * The badge was the whole offer, and first-run STATUS TAGS hid it, so users stayed on old builds without
    * ever seeing one was waiting.  Now: a session that holds NO work (rack.js `untouched`) takes the build at
    * once and reloads — a QUIET TAKE, which the worker refuses when a second window is open (LW_SW_BUSY).  An
-   * untouched session that is only PLAYING is offered it and takes it the next time the page hides.  Every
+   * untouched session that is only PLAYING, or whose clock has moved, is offered it and takes it the next time the
+   * page hides (nobody is watching then, so the clock does not count).  Every
    * other session is OFFERED it — the badge (never hidden by STATUS TAGS) and a pane under it that says what
    * to press, what is kept and what is lost — and keeps its work until a press.  A press on unsaved work asks
    * first, as UPDATE APP always did (it used to ask only in the beforeunload guard, AFTER the swap). */
@@ -50,6 +51,16 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     row.appendChild(trig({ label: 'LATER', onFire: () => { pane.hidden = true; } }).root);
   }
   const hidePane = () => { if (pane) pane.hidden = true; };
+  /* THE CARET IS MEASURED, NOT COMPUTED: the badge's centre minus the pane's left edge, read when the pane is shown and again
+     on a resize while it is up — wherever the row puts the badge (first in it: lab.css `order: -1`), wrapped or not. */
+  const aim = () => {
+    const b = buildBadge();
+    if (!pane || pane.hidden || !b) return;
+    const br = b.getBoundingClientRect(), pr = pane.getBoundingClientRect();
+    const x = br.left + br.width / 2 - pr.left - pane.clientLeft;
+    pane.style.setProperty('--caret-x', Math.round(Math.max(12, Math.min(pane.clientWidth - 12, x))) + 'px');   // kept on the pane's edge
+  };
+  addEventListener('resize', aim, { passive: true });
   const swClient = {
     state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced | refreshing | failed
     asked: false,                        // did THIS document ask for the swap?
@@ -67,9 +78,11 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       setStatus(status);                                   // …and a second place to find it, for a browser with STATUS TAGS off (SETTINGS' status line)
       return badge;
     },
-    /** A build is waiting.  An untouched session takes it quietly; an untouched one that is only playing is offered it
+    /** A build is waiting.  An untouched session takes it quietly; one that is only playing (or whose clock moved) is offered it
      *  and takes it when the page next hides; any other session is offered it and keeps its work until a press. */
     buildReady(take) {
+      /* a build announced while UPDATE APP runs or a take is under way does not restart the state machine */
+      if (swClient.state === 'refreshing' || swClient.state === 'taking') { if (typeof take === 'function') swClient.take = take; return false; }
       if (typeof take === 'function') swClient.take = take;
       if (!swClient.take) return false;
       swClient.state = 'ready';
@@ -91,11 +104,14 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
       const build = (swClient.pending && swClient.pending.build) || '';
       if (!pane || swClient.offered === build) return false;
-      swClient.offered = build; pane.hidden = false;
+      swClient.offered = build; pane.hidden = false; aim();
       return true;
     },
     /** the offer, pressed (the badge, UPDATE) — or, with { quiet: true }, taken for an untouched session */
     accept(opt) {
+      /* a tab whose build another tab replaced: the swap has already happened, so its badge's press is a plain reload (the
+         beforeunload guard still asks for a dirty project — after the swap, which here is the only order there is) */
+      if (swClient.state === 'replaced') { swClient.reload(); return true; }
       if (swClient.state !== 'ready' || !swClient.take) return false;
       const quiet = !!(opt && opt.quiet), projects = getProjects();
       if (projects && projects.dirty) {

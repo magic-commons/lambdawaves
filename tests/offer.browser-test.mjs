@@ -4,11 +4,25 @@
 // without `alone`, whether the pane is up, whether STATUS TAGS can hide the offer, and whether a press on a dirty
 // project asks first.  The glass law: every press is a real pointer on a target that elementFromPoint says is on top.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
+// The fix pass (wave 133, from the fresh verifier's report) added scenes 8–13: a moved clock and a capture in flight are
+// offered, never taken; the badge is readable, first and aimed at from 500 to 1500 px, tags on and off, the window really
+// resized; a replaced tab's badge reloads; a build announced mid-take restarts nothing; main.js arms each worker once; and a
+// real boot at a link is clean and taken quietly.
 import assert from 'node:assert/strict';
+import http from 'node:http';
 import { open } from '../tools/gate/gatekit.mjs';
 
 const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`;
 const PREFS = { 'privacy.reduceTimerPrecision': false };   // the latencies are sub-millisecond; Firefox's default clamp is 1 ms
+/* WebDriver's Set Window Rect, on the session gatekit opened: the real window resized, so the page's own `resize` fires */
+const setRect = (s, width, height) => new Promise((res, rej) => {
+  const body = JSON.stringify({ width, height });
+  const r = http.request({ host: '127.0.0.1', port: process.env.GD_PORT || 4444, path: '/session/' + s + '/window/rect', method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (x) => {
+    let b = ''; x.on('data', (d) => { b += d; }); x.on('end', () => { try { res(JSON.parse(b).value); } catch (e) { rej(e); } });
+  });
+  r.on('error', rej); r.end(body);
+});
 const TEXT = {
   h3: 'A NEW BUILD IS READY',
   p: ['A newer λWAVES is installed and waiting. Press UPDATE — or the badge above — to reload into it. It takes a few seconds.',
@@ -35,9 +49,36 @@ const HELPERS = `
     const p = document.getElementById('offer').getBoundingClientRect(), cb = document.getElementById('field').getBoundingClientRect();
     const want = [p.left - cb.left, p.top - cb.top, p.right - cb.left, p.bottom - cb.top];
     return (window.__masks || []).some((r) => r.every((n, i) => Math.abs(n - want[i]) < 1.5)); };
+  /* what buildReady does with THIS session right now — taken quietly (untouched) or offered — and then put back */
+  window.__pn = 0;
+  window.__probe = () => { const sw = __LW.sw; let took = null;
+    sw.state = 'idle'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'probe-' + (++window.__pn) };
+    sw.buildReady((o) => { took = o || {}; });
+    const out = { quiet: !!(took && took.alone), taken: !!took, pane: __pane().shown };
+    sw.state = 'idle'; sw.asked = false; sw.pending = null; sw.offered = null; document.getElementById('offer').hidden = true;
+    return out; };
+  /* the build badge and the caret at this size, raised the way a touched session sees it (offer()), tags on or off */
+  window.__sizeRead = async (tagsOn) => {
+    document.body.classList.toggle('no-badges', !tagsOn);
+    await new Promise((q) => requestAnimationFrame(() => requestAnimationFrame(q)));
+    const sw = __LW.sw; sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'size-' + innerWidth + '-' + tagsOn }; sw.offer();
+    return __caret(); };
+  window.__caret = () => {
+    const P = document.getElementById('offer'), B = document.querySelector('#badges > .badge.build'), S = B.querySelector('span'), row = document.getElementById('badges');
+    const pr = P.getBoundingClientRect(), br = B.getBoundingClientRect(), sr = S.getBoundingClientRect(), rr = row.getBoundingClientRect();
+    const caretX = pr.left + P.clientLeft + parseFloat(getComputedStyle(P, '::before').left), centre = br.left + br.width / 2;
+    const others = [...row.querySelectorAll('.badge:not(.build)')].filter((b) => getComputedStyle(b).display !== 'none');
+    const first = others.every((o) => { const r = o.getBoundingClientRect(); return br.top < r.top - 1 || br.right <= r.left + 1; });
+    const over = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+    const phone = document.body.classList.contains('phone'), clip = getComputedStyle(row).overflow === 'hidden' ? rr : { left: 0, right: innerWidth };
+    return { vw: innerWidth, phone, text: B.lastChild.textContent, badge: [Math.round(br.left), Math.round(br.right)], rowW: Math.round(rr.width),
+      textFits: sr.left >= br.left + 1 && sr.right <= br.right - 1, onScreen: br.left >= clip.left - 1 && br.right <= clip.right + 1,
+      hit: __hit(B), first, others: others.length, caretOff: Math.round((caretX - centre) * 10) / 10, paneShown: __pane().shown,
+      overTitle: over(br, document.getElementById('title').getBoundingClientRect()), overToggle: !phone && over(br, document.getElementById('rackToggle').getBoundingClientRect()) }; };
   return 1;`;
 
-let failed = false, scenes = 0, g = null, g2 = null;
+let failed = false, scenes = 0, g = null, g2 = null, g3 = null;
+const TOTAL = 13;
 const pass = (line) => { scenes++; console.log('PASS ' + line); };
 try {
   g = await open(URL_, { width: 1500, height: 1000, script: 60000, prefs: PREFS });
@@ -46,7 +87,7 @@ try {
 
   /* ── 1 · an untouched boot takes the build quietly: alone, no pane, the badge says so ── */
   const s1 = await g.ev(`const quiet = await __quiet();
-    const pre = { rows: __LW.history.entries().map((e) => e.label), dirty: __LW.projects.dirty, playing: __LW.clock.playing };
+    const pre = { rows: __LW.history.entries().map((e) => e.label), dirty: __LW.projects.dirty, playing: __LW.clock.playing, t: __LW.clock.t };
     window.__taken = undefined;
     const t0 = performance.now();
     const r = __LW.sw.buildReady((opt) => { window.__taken = opt; window.__takeAt = performance.now(); __LW.sw.controllerChanged(); });   // the browser's controllerchange, at once
@@ -59,14 +100,14 @@ try {
     seam.sort((x, y) => x - y); out.seamMedian = seam[12]; out.seamMax = seam[24];
     return out;`);
   assert.equal(s1.quiet, true, 'the boot ring never went quiet: ' + JSON.stringify(s1.pre));
-  assert.deepEqual(s1.pre, { rows: ['boot'], dirty: false, playing: false });
+  assert.deepEqual(s1.pre, { rows: ['boot'], dirty: false, playing: false, t: 0 });
   assert.equal(s1.r, true);
   assert.equal(s1.taken && s1.taken.alone, true, 'a quiet take must ask with alone: true');
   assert.equal(s1.state, 'taking'); assert.equal(s1.asked, true);
   assert.equal(s1.pane.shown, false, 'a quiet take shows no pane');
   assert.equal(s1.badge, 'TAKING THE NEW BUILD…');
   assert.equal(s1.reloads, 1, 'the tab that asked reloads, once');
-  pass(`an untouched boot (ring ${JSON.stringify(s1.pre.rows)}, clean, paused) takes the waiting build itself: take({ alone: true }), state taking, no pane, badge "${s1.badge}"; ` +
+  pass(`an untouched boot (ring ${JSON.stringify(s1.pre.rows)}, clean, paused at t = 0) takes the waiting build itself: take({ alone: true }), state taking, no pane, badge "${s1.badge}"; ` +
     `buildReady → take ${s1.takeMs.toFixed(2)} ms, → the reload seam ${s1.seamMs.toFixed(2)} ms (median of 25 more ${s1.seamMedian.toFixed(2)} ms, max ${s1.seamMax.toFixed(2)} ms; the worker's own activation is not in it)`);
 
   /* ── 2 · the worker refused (a second window): offered — the pane up, the build badge visible under STATUS TAGS off ── */
@@ -144,6 +185,8 @@ try {
   assert.equal(s5b.dirty, false, 'yes must mark the project clean before the take'); assert.equal(s5b.shown, false);
   assert.deepEqual(s5b.errors, []);
   pass(`a dirty project asks before the swap: "no" left take uncalled, state ready and the project dirty; "yes" marked it clean and took it as a press (${s5b.confirms} confirms)`);
+  const linkHref = await g.ev(`return __LW.link.mint().href;`);   // for scene 13: a real boot at a link
+  assert.equal(typeof linkHref, 'string', 'no link minted: ' + JSON.stringify(linkHref));
   await g.close(); g = null;
 
   /* ── 6 · untouched but PLAYING: offered now, taken quietly when the page hides ── */
@@ -175,11 +218,132 @@ try {
   assert.ok(s7.on.others.filter((b) => !b.hidden).length >= 2, 'STATE and FIELD show with STATUS TAGS on');
   assert.notEqual(s7.off.build.display, 'none'); assert.ok(s7.off.others.every((b) => b.display === 'none'));
   pass(`STATUS TAGS on: the build badge and ${s7.on.others.filter((b) => b.display !== 'none').length} ψ-badges show (the rest are hidden by their own state); off: only the build badge`);
+
+  /* ── 8 · a moved clock is offered in the foreground — a reload would return it to t = 0 — and the hide still takes it ── */
+  const s8 = await g2.ev(`__LW.scrub(0); await __LW.settle(); const zero = __probe();
+    __LW.scrub(5); await __LW.settle(); const scrubbed = __probe();
+    __LW.scrub(0); __LW.play(); await new Promise((q) => setTimeout(q, 500)); __LW.pause(); await __LW.settle(); const tPlayed = __LW.clock.t; const played = __probe();
+    window.__taken = undefined; const sw = __LW.sw; sw.state = 'idle'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'clock-hide' };
+    sw.buildReady((o) => { window.__taken = o; });
+    const shown = { taken: window.__taken ?? null, pane: __pane().shown };
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange'));
+    const hid = { taken: window.__taken ?? null, state: sw.state };
+    delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'));
+    sw.state = 'idle'; sw.asked = false; __LW.scrub(0); await __LW.settle();
+    return { zero, scrubbed, tPlayed, played, shown, hid };`);
+  assert.equal(s8.zero.quiet, true, 'control: at t = 0 the session must still be taken quietly');
+  assert.deepEqual([s8.scrubbed.taken, s8.scrubbed.pane], [false, true], 'a scrubbed clock (t = 5) must be offered, not taken');
+  assert.ok(s8.tPlayed > 0); assert.deepEqual([s8.played.taken, s8.played.pane], [false, true], 'a played-then-paused clock must be offered, not taken');
+  assert.deepEqual(s8.shown, { taken: null, pane: true });
+  assert.equal(s8.hid.taken && s8.hid.taken.alone, true, 'the take-on-hide road ignores the clock'); assert.equal(s8.hid.state, 'taking');
+  pass(`a moved clock is offered in the foreground (scrubbed to t = 5; played to t = ${s8.tPlayed.toFixed(2)} and paused), taken quietly at t = 0, and the next hide still takes it — take(${JSON.stringify(s8.hid.taken)})`);
+
+  /* ── 9 · a capture in flight is offered, never taken ── */
+  const s9 = await g2.ev(`const before = __probe();
+    window.__exp = __LW.captureUI.exportFrames({ download: false, fps: 2, seconds: 6 });
+    let busy = false; for (let i = 0; i < 100 && !(busy = __LW.captureUI.busy); i++) await new Promise((q) => setTimeout(q, 20));
+    const during = __probe();
+    __LW.captureUI.exportFrames();   // the same act again is STOP EXPORT
+    let r = null; try { r = await Promise.race([window.__exp, new Promise((q) => setTimeout(() => q('timeout'), 30000))]); } catch (e) { r = String(e); }
+    let idle = false; for (let i = 0; i < 300 && !(idle = !__LW.captureUI.busy); i++) await new Promise((q) => setTimeout(q, 50));
+    await __LW.settle(); await new Promise((q) => setTimeout(q, 500)); __LW.scrub(0); await __LW.settle();
+    const after = __probe();
+    return { before, busy, during, result: r && typeof r === 'object' ? { ok: !!r.ok, stopped: !!r.stopped } : r, idle, after, errors: __e.slice() };`);
+  assert.equal(s9.before.quiet, true, 'control: before the export the session is taken quietly');
+  assert.equal(s9.busy, true, 'the export never reported busy');
+  assert.deepEqual([s9.during.taken, s9.during.pane], [false, true], 'a capture in flight must be offered, never taken');
+  assert.equal(s9.idle, true, 'STOP EXPORT did not end the capture: ' + JSON.stringify(s9.result));
+  assert.deepEqual(s9.errors, []);
+  pass(`a capture in flight (EXPORT FRAMES, busy) is offered with the pane, never taken; taken quietly before it${s9.after.quiet ? ' and again once STOP EXPORT ended it' : ' (after STOP it read ' + JSON.stringify(s9.after) + ')'}`);
+
+  /* ── 10 · the badge at six sizes, the window really resized: readable, first with STATUS TAGS on, the caret on its centre ── */
+  const SIZES = [[1500, 1000], [1366, 1024], [1024, 1366], [1140, 800], [1000, 700], [500, 930]];
+  const reads = [];
+  for (const [W, H] of SIZES) {
+    await setRect(g2.s, W, H);
+    await g2.ev(`await new Promise((q) => setTimeout(q, 500)); try { await __LW.settle(); } catch (e) {} return 1;`);
+    const resized = reads.length ? await g2.ev(`return __caret();`) : null;   // the pane left up from the last size: re-aimed by the resize alone
+    const off = await g2.ev(`return await __sizeRead(false);`), on = await g2.ev(`return await __sizeRead(true);`);
+    reads.push({ W, H, resized, off, on });
+  }
+  await g2.ev(`document.body.classList.add('no-badges'); document.getElementById('offer').hidden = true; __LW.sw.state = 'idle'; return 1;`);
+  await setRect(g2.s, 1500, 1000); await g2.ev(`await new Promise((q) => setTimeout(q, 500)); return 1;`);
+  for (const r of reads) {
+    for (const [tag, m] of [['off', r.off], ['on', r.on]]) {
+      const at = `${r.W}×${r.H} tags ${tag}`;
+      assert.equal(m.text, 'A NEW BUILD IS READY · UPDATE', at);
+      assert.ok(m.textFits, `${at}: the badge's text is cut (badge ${JSON.stringify(m.badge)})`);
+      assert.ok(m.onScreen, `${at}: the badge is off the screen or the phone's strip`);
+      assert.ok(m.hit, `${at}: the badge is not topmost at its centre`);
+      assert.ok(Math.abs(m.caretOff) <= 2, `${at}: the caret is ${m.caretOff} px off the badge's centre`);
+      assert.ok(!m.overTitle && !m.overToggle, `${at}: the badge overlaps the title or the hide toggle`);
+      if (!m.phone) assert.ok(m.rowW >= 209, `${at}: the badge row is ${m.rowW} px`);
+    }
+    assert.ok(r.on.first && r.on.others >= 2, `${r.W}×${r.H}: with STATUS TAGS on the build badge must come first (${r.on.others} others)`);
+    if (r.resized) assert.ok(Math.abs(r.resized.caretOff) <= 2, `${r.W}×${r.H}: after the resize alone the caret is ${r.resized.caretOff} px off`);
+  }
+  const phoneRead = reads.find((r) => r.W === 500);
+  assert.equal(phoneRead.off.phone, true, 'the 500 px window did not become the phone layout');
+  const worst = Math.max(...reads.flatMap((r) => [r.off, r.on, r.resized].filter(Boolean).map((m) => Math.abs(m.caretOff))));
+  const narrowest = Math.min(...reads.filter((r) => !r.off.phone).map((r) => r.off.rowW));
+  pass(`the badge at ${SIZES.map(([W, H]) => W + '×' + H).join(', ')} (the last is the phone), the window resized for real: its text whole, on screen, topmost, first with STATUS TAGS on, ` +
+    `the desktop row ≥ ${narrowest} px; the caret off by at most ${worst} px, tags on and off, and re-aimed by a resize alone`);
+
+  /* ── 11 · a tab whose build another tab replaced: its badge's press reloads ── */
+  const s11a = await g2.ev(`const sw = __LW.sw; window.__reloads = 0; sw.state = 'ready'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'replaced' }; sw.offer();
+    const told = sw.controllerChanged();
+    return { told, state: sw.state, pane: __pane().shown, badge: __badges().build.text };`);
+  assert.deepEqual(s11a, { told: 'told', state: 'replaced', pane: false, badge: 'THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY' });
+  t = await g2.tap('#badges > .badge.build'); assert.equal(t.ok, 1, 'the replaced badge not pressable: ' + JSON.stringify(t));
+  const s11b = await g2.ev(`return { reloads: window.__reloads, state: __LW.sw.state };`);
+  assert.equal(s11b.reloads, 1, 'a press on the replaced badge must reload');
+  pass(`a tab told its build was replaced hides the pane, and a real press on its badge ("${s11a.badge}") reloads (${s11b.reloads})`);
+
+  /* ── 12 · a build announced while UPDATE APP runs, or while a take is under way, restarts nothing ── */
+  const s12 = await g2.ev(`const sw = __LW.sw, out = {};
+    for (const st of ['refreshing', 'taking']) { let called = 0; const t2 = () => { called++; }; sw.state = st;
+      const r = sw.buildReady(t2); out[st] = { r, state: sw.state, stored: sw.take === t2, called, pane: __pane().shown }; }
+    sw.state = 'idle'; return out;`);
+  for (const st of ['refreshing', 'taking']) assert.deepEqual(s12[st], { r: false, state: st, stored: true, called: 0, pane: false }, st);
+  pass(`buildReady during ${Object.keys(s12).join(' and ')} returns false, keeps the state, stores the newer take and calls nothing`);
+  await g2.close(); g2 = null;
+
+  /* ── 13 · main.js arms each worker ONCE (a fake container under ?sw=1), and a real boot at a link is clean and taken quietly ── */
+  const lu = new URL(linkHref); lu.search = '?sw=1';
+  g3 = await open(lu.href, { width: 1500, height: 1000, script: 60000, prefs: PREFS });
+  const s13a = await g3.ev(`for (let i = 0; i < 3000 && !(window.__LW && __LW.ready); i++) await new Promise((q) => setTimeout(q, 5));
+    const early = { dirty: __LW.projects.dirty, rows: __LW.history.entries().map((e) => e.label), mode: __LW.sw.mode };
+    /* in before main.js' deferred register() (≥ 1.5 s after load): one worker, a registration that names it, a container */
+    window.__W = { state: 'installed', sent: [], postMessage(m) { this.sent.push(m); }, addEventListener(t, fn) { (this.h ||= {})[t] = fn; } };
+    window.__SWH = {}; window.__REGH = {};
+    const reg = window.__REG = { waiting: __W, installing: null, addEventListener: (t, fn) => { __REGH[t] = fn; }, update: async () => {} };
+    Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: { controller: { postMessage() {} }, register: async () => reg,
+      addEventListener: (t, fn) => { __SWH[t] = fn; }, getRegistration: async () => reg } });
+    window.__br = 0; const orig = __LW.sw.buildReady; __LW.sw.buildReady = function (t) { window.__br++; return orig.call(this, t); };
+    window.__reloads = 0; __LW.sw.reload = () => { window.__reloads++; };
+    return early;`);
+  const s13b = await g3.ev(`for (let i = 0; i < 300 && !(__LW.sw.mode === 'registered' && window.__br > 0); i++) await new Promise((q) => setTimeout(q, 50));
+    const first = { br: __br, sent: __W.sent.slice(), state: __LW.sw.state, mode: __LW.sw.mode };
+    __REG.installing = __W; if (__REGH.updatefound) __REGH.updatefound();                                // the install's statechange road names it again
+    if (__SWH.message) await __SWH.message({ data: { type: 'LW_SW_WAITING', build: 'fake-build' } });   // and §3's announcement a third time
+    await new Promise((q) => setTimeout(q, 100));
+    const after = { br: __br, sent: __W.sent.slice(), state: __LW.sw.state };
+    if (__SWH.controllerchange) __SWH.controllerchange();
+    return { first, after, late: { dirty: __LW.projects.dirty, rows: __LW.history.entries().map((e) => e.label), reloads: __reloads }, errors: __e.slice() };`);
+  assert.deepEqual(s13a, { dirty: false, rows: ['link'], mode: 'arming' }, 'a real link boot at LW.ready');
+  assert.equal(s13b.first.mode, 'registered'); assert.equal(s13b.first.br, 1);
+  assert.deepEqual(s13b.first.sent, [{ type: 'LW_SW_SKIP_WAITING', alone: true }], 'the clean link session must be taken quietly');
+  assert.equal(s13b.after.br, 1, 'the same worker named three times must reach buildReady once');
+  assert.equal(s13b.after.sent.length, 1, 'a second SKIP_WAITING was posted');
+  assert.deepEqual(s13b.late, { dirty: false, rows: ['link'], reloads: 1 });
+  assert.deepEqual(s13b.errors, []);
+  pass(`a real boot at a link reads clean at LW.ready and after register() (origin ${JSON.stringify(s13b.late.rows)}) and is taken quietly — one SKIP_WAITING { alone: true } — while main.js armed its worker once though reg.waiting, the install's statechange and LW_SW_WAITING all named it; controllerchange reloaded it (${s13b.late.reloads})`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {
   if (g) await g.close();
   if (g2) await g2.close();
+  if (g3) await g3.close();
 }
-console.log((failed ? 'RED' : 'GREEN') + ` offer.browser-test — ${scenes} of 7 scenes`);
+console.log((failed ? 'RED' : 'GREEN') + ` offer.browser-test — ${scenes} of ${TOTAL} scenes`);
 process.exit(failed ? 1 : 0);

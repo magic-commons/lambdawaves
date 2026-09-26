@@ -260,8 +260,13 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
                                   regardless of specificity, so QWAVE-0 · HYDROGEN SHADOW LAB — the ONLY on-screen string
                                   containing the word "hydrogen" — could never render, on hover or otherwise.  The rule
                                   stays (the subtitle is a hover-level fact); only the sledgehammer goes. */
-#badges { position: absolute; left: calc(var(--rack-w) + 340px); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
+#badges { position: absolute; left: min(calc(var(--rack-w) + 340px), calc(100% - var(--rack-w) - 266px)); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
 #badges > * { pointer-events: auto; }
+/* WAVE 133: the row's left edge gives way on a narrow stage so the row is never under 210 px — at rack-w + 340 alone it
+   collapsed below ~1140 px and squeezed the build badge to "A" (1024 × 1366, an iPad in portrait) or a 20 px dot (1000 × 700);
+   the offer itself needs 199 px.  Unchanged at 1206 px and wider.  The build badge is FIRST in the row, so with STATUS TAGS
+   on it is neither pushed off the phone's strip nor wrapped under the offer's pane. */
+#badges > .badge.build { order: -1; }
 /* On a phone the menu bar is always shown beside the title and the badges' box (rack-w + 340 … rack-w + 56 from the
    right) has negative width, so its centred children spill left over FILE · EDIT · VIEW — a second row instead
    (collision rect 124,10,210,24 at 375×812, Gemini 2026-09-12). */
@@ -272,23 +277,20 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #sheet p { margin: 0 0 8px; }
 #sheet b { color: var(--fg); }
 /* WAVE 133 · THE OFFER'S PANE (lab/sw-client.js): the sheet's glass and typography, on the stage's centre under the badge row,
-   with a caret pointing up at it — no colour, material, animation or transition of its own.  The caret is a 10 px square in the pane's own
-   background and border, turned 45° and clipped to its upper half so only the point shows above the pane's edge.
-   THE CARET AIMS AT THE ROW'S CENTRE, which is not the stage's: #badges spans rack-w + 340 … rack-w + 56 from the right, so its
-   centre is 50vw + (340 − 56)/2 = 50vw + 142px, and where that box has collapsed (a narrow stage) its centred content sits on its
-   left edge, rack-w + 340.  A caret at the pane's own centre pointed 43 px left of the lone build badge (measured, 1500 × 1000);
-   centring the PANE there instead put it over the + and ☆ column below 1392 px.  So the pane keeps the stage's centre and the
-   caret moves: 50% of the pane plus that offset, kept inside the pane. */
+   with a caret pointing up at the build badge — no colour, material, animation or transition of its own.  The caret is a 10 px
+   square in the pane's own background and border, turned 45° and clipped to its upper half so only the point shows above the
+   pane's edge.  Its x is MEASURED (sw-client.js aim(): the badge's centre, on show and on resize) because the badge is not at
+   the stage's centre — the row is offset, it can wrap, STATUS TAGS can put badges beside it.  Centring the pane on the badge
+   instead put it over the + and ☆ column below 1392 px, so the pane keeps the stage's centre and the caret moves. */
 #offer { position: absolute; left: 50%; transform: translateX(-50%); top: 40px; z-index: var(--z-veil); width: min(420px, calc(100% - 32px));
   padding: var(--sp-4) var(--sp-5); border-radius: var(--card-r); font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.5; color: var(--fg-soft); }
-#offer::before { content: ''; position: absolute; left: min(calc(100% - 12px), calc(50% + max(142px, var(--rack-w) + 340px - 50vw))); top: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
+#offer::before { content: ''; position: absolute; left: var(--caret-x, 50%); top: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
   background: inherit; border-top: inherit; border-left: inherit; clip-path: polygon(0 0, 100% 0, 0 100%); pointer-events: none; }
 #offer h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
 #offer p { margin: 0 0 8px; }
 #offer b { color: var(--fg); }
 #offer .offer-row { display: flex; gap: var(--sp-2); }
 body.phone #offer { top: 76px; }
-body.phone #offer::before { left: 50%; }   /* the phone's badge row is the full width (sp-3 each side): its centre is the stage's */
 body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE takes the badge it points at, so it takes the pane */
 #banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: var(--z-banner); max-width: 520px; padding: var(--sp-5); border-radius: var(--r-lg);
   font-family: var(--font-sans); background: hsl(350 40% 18% / .95); border: 1px solid hsl(350 60% 50% / .6); }

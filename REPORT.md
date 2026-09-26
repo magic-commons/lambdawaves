@@ -3097,12 +3097,15 @@ The offer is never hidden by a preference: the build badge wears a class of its 
 ψ-badges only (HIDE THE INTERFACE still hides the whole row, and the new pane with it). The reader: a return to the
 foreground asks the registration for a new worker, at most once per 30 minutes, with no timer and no version file (the
 precache digest already is the version). The quiet take: a session that holds no work takes the build itself, at once,
-and reloads. "Holds no work" is defined once, in `rack.js` `untouched`: the undo ring holds only its origin row, named
-`boot` or `link` (an `open · …` or `new project` origin is a scene a reload would not bring back); nothing pending or
-held; the project clean; no pointer down; the photosensitivity notice not up; nothing being typed; and the transport
-paused — or playing, when the caller says that is fine. An untouched session that is only playing is offered the build
-and takes it the next time the page hides. Every other session is offered it and keeps its work until a press. In the
-worker the quiet take asks with `alone: true` and is refused, with `LW_SW_BUSY`, while a second window is in scope —
+and reloads. "Holds no work" is defined once, in `rack.js` `untouched`: a reload keeps the scene (a fresh boot, or the
+same link) and this browser's settings, and loses the clock's position, a capture in flight and the AUTO-ROTATE switch.
+So the undo ring holds only its origin row, named `boot` or `link` (an `open · …` or `new project` origin is a scene a
+reload would not bring back); nothing pending or held; the project clean; no pointer down; the photosensitivity notice
+not up; nothing being typed; no capture running; and the transport paused at t = 0. A session that has played and
+paused, or been scrubbed, is offered in the foreground, not taken. An untouched session that is only playing (or whose
+clock has moved) is offered the build and takes it the next time the page hides — that road ignores the clock, because
+it takes while nobody watches. Every other session is offered it and keeps its work until a press. In the worker the
+quiet take asks with `alone: true` and is refused, with `LW_SW_BUSY`, while a second window is in scope —
 `skipWaiting()` re-points every client and the other window may hold work — and the page then offers it instead. The
 press path still reaches the file's one `skipWaiting()` without an await.
 
@@ -3113,34 +3116,61 @@ what is kept (saved projects, settings, keys, the notebook) and what is lost (un
 that LATER keeps the badge and ABOUT › UPDATE APP works any time. It is shown once per waiting build, never for a quiet
 take, is not a live region (wave 62's ceiling is spoken for), is masked out of the frame lines exactly as the sheet is,
 and is never modal: the field, the racks and the menus keep working around it (below about 1110 px wide it sits over
-the + and ☆ column, as the sheet does, until LATER). A latent defect went on the way: a press on the badge sent SKIP_WAITING without asking about unsaved
-work, so the `beforeunload` guard asked only after the swap, and a Cancel left the page on a controller whose old cache
-was already collected. A press now asks first, as UPDATE APP always did, and a "no" changes nothing.
+the + and ☆ column, as the sheet does, until LATER). A latent defect went on the way: a press on the badge sent
+SKIP_WAITING without asking about unsaved work, so the `beforeunload` guard asked only after the swap, and a Cancel left
+the page on a controller whose old cache was already collected. A press now asks first, as UPDATE APP always did, and a
+"no" changes nothing.
 
-Measured over three runs (headless Firefox on the shared RTX, automation mode, so the worker's own activation is not in
-these): `buildReady` → the reload seam 1.6–2.4 ms on the first call, a median of 1.0–1.2 ms (max 2.4 ms) over 25 more —
-most of it `untouched` reading the edit scope once for `canUndo`; `offer()` 0.10–0.14 ms, the forced layout after it
-2.0–10.6 ms, the next frame 57–63 ms after the call; building the pane 0.30–0.34 ms, paid once at boot. `sw.js` grows 32 759 →
-33 975 bytes. The node gate is 843 GREEN with a new E5b in `tests/pwa.test.mjs` that drives the real worker: a quiet
-take with one window takes it, with two it does not and posts `LW_SW_BUSY { windows: 2 }` to the asker, through
-`waitUntil`. The new `tests/offer.browser-test.mjs` passes its seven scenes — an untouched boot takes quietly, a refusal
-is offered with the build badge visible under STATUS TAGS off and every target topmost at its centre, LATER keeps the
-badge, a touched session is offered and never taken, a dirty project asks first, an untouched playing session is taken
-on hide, STATUS TAGS on shows all five — and menubar, history, current, frame-occlusion, render-regressions, new-project
-and official-defaults-palette stay green; MIR in step at 1.4.3. The only stylesheet moves are the badge-row rule and
-the new `#offer` rules.
+The fix pass, from a fresh verifier who drove the real worker end to end (a second deploy made by bumping one file and
+regenerating §1, restored byte for byte afterwards). What worked: an untouched tab navigated to the new deploy reached
+`buildReady` at 1795 ms, took it quietly at 1797, saw `controllerchange` at 1801, was ready again on the reload at 2064
+and reported the new build at 3611 ms; with two windows the quiet take was refused with `LW_SW_BUSY`, and a press on
+UPDATE brought the new build in 1887 ms; the reader, after a patched +31 min, asked `update()` once on the next flip and
+the new build installed, was taken and reported in 2720 ms with no navigation. What it found, and what this pass fixed:
+`untouched` missed a capture in flight (EXPORT FRAMES, RECORD, ONE PERIOD, PICTURE: `capApi.busy` is now in it) and a
+moved clock (paused at t = 7.67, taken, reloaded to t = 0: the foreground now asks for t = 0). The double arm was not
+harmless, as this entry first said: `reg.waiting`, the install's statechange and `LW_SW_WAITING` all named the same
+worker, and in a second window the second `buildReady` re-ran the quiet take — a second SKIP_WAITING, a second BUSY,
+and the pane refused as already shown, so it vanished and only the badge was left; `main.js` now arms each worker once.
+A `buildReady` arriving during UPDATE APP or a take restarted the state machine; it now stores the newer take and
+changes nothing. The "replaced" badge's press did nothing; it now reloads (the swap has already happened; the
+`beforeunload` guard still asks for a dirty project). The build badge was unreadable below about 1140 px — a 28 px pill
+reading "A" on an iPad in portrait (1024 × 1366), a 20 px dot at 1000 × 700 — because the row's left edge stayed at
+rack-w + 340; it now gives way so the row is never under 210 px (the badge needs 199), unchanged at 1206 px and wider.
+With STATUS TAGS on the build badge was created last and landed at the row's end: clipped on the phone's strip, wrapped
+under the pane at 1140, and at 1500 the computed caret pointed at FIELD. The badge is now first in the row, and the
+caret is measured (the badge's centre minus the pane's left, on show and on every resize) instead of computed from the
+row's geometry. The verifier also reported that a link session reads dirty and so is never taken; that was its probe's
+navigation, not a boot — changing only the fragment of an open page is the `hashchange` road, which opens the link over
+the running page's project and correctly reads unsaved against it. A real boot at a link reads clean at LW.ready and
+after register(), and is taken quietly (scene 13).
 
-The edges, found by reading and measuring rather than by the brief. The badge row is not centred on the stage: it spans
-rack-w + 340 … rack-w + 56 from the right, so its centre is 50vw + 142 px (and, where the box collapses on a narrow
-stage, its left edge); a caret at the pane's own centre pointed 43 px left of the lone build badge at 1500 × 1000, and
-centring the pane there instead covered the + and ☆ column below 1392 px, so the pane keeps the stage's centre and the
-caret aims at the row — measured on the badge's centre at 1500, 1300 and 1000 px. The pane is built hidden at boot, like
-`#sheet`, because the occlusion observer attaches at boot: a pane built on the first offer went unobserved, and a paused
-field drew its frame lines through it until something else asked for a frame. `untouched` reads `warning.open` (the
-notice is up), not `warning.needed()`. A tab told its build was replaced in another tab now hides the pane, whose
-UPDATE would otherwise stand dead. The statechange and the `LW_SW_WAITING` roads can both arm the same worker, so a quiet
-take may post twice (harmless — `skipWaiting` is idempotent) and the pane is keyed by the build digest. At the origin
-root a /REPORT.md or /LICENSE tab opened from ABOUT is a window in scope, so it refuses a quiet take — conservative, and
-the offer is shown. Recorded, not solved: below about 1140 px the desktop badge row collapses and squeezes the build
-badge to its dot and an ellipsis (20 px at 1000 px wide); in the "replaced" state the badge says RELOAD WHEN READY but
-its press does nothing; and the quiet take has not been driven end to end against a real second deploy.
+Measured (headless Firefox on the shared RTX, automation mode, so the worker's own activation is not in these):
+`buildReady` → the reload seam 1.6–3.1 ms on the first call, a median of 1.0–1.4 ms (max 2.8 ms) over 25 more — most of
+it `untouched` reading the edit scope once for `canUndo`; `offer()` 0.10–0.14 ms before the fix pass and 2.7–2.8 ms
+since, because it now measures the caret, which forces the layout the next frame would do anyway; building the pane
+0.3–0.6 ms, paid once at boot. `sw.js` grows 32 759 → 33 975 bytes. The node gate is 843 GREEN with a new E5b in
+`tests/pwa.test.mjs` that drives the real worker: a quiet take with one window takes it, with two it does not and posts
+`LW_SW_BUSY { windows: 2 }` to the asker, through `waitUntil`. The new `tests/offer.browser-test.mjs` passes its
+thirteen scenes: an untouched boot takes quietly; a refusal is offered with the build badge visible under STATUS TAGS
+off and every target topmost at its centre; LATER keeps the badge; a touched session is offered and never taken; a dirty
+project asks first; an untouched playing session is taken on hide; STATUS TAGS on shows all five; a moved clock and a
+capture in flight are offered, not taken; the badge is whole, on screen, first and aimed at within 0.6 px at 1500 ×
+1000, 1366 × 1024, 1024 × 1366, 1140 × 800, 1000 × 700 and the phone, tags on and off, the window really resized; a
+replaced tab's badge reloads; a build announced mid-take restarts nothing; `main.js` arms a worker named three times
+once (a fake container under `?sw=1`, and removing the guard turns that scene red); and a real link boot is taken
+quietly. Menubar, history, current, frame-occlusion, render-regressions and new-project stay green; MIR in step at
+1.4.3. The only stylesheet moves are the badge row (the STATUS TAGS rule, the narrow-stage left edge, the build badge
+first) and the new `#offer` rules.
+
+The edges, found by reading and measuring rather than by the brief. The pane keeps the stage's centre: centring it on
+the badge instead covered the + and ☆ column below 1392 px, so the caret moves, not the pane. The pane is built hidden
+at boot, like `#sheet`, because the occlusion observer attaches at boot: a pane built on the first offer went
+unobserved, and a paused field drew its frame lines through it until something else asked for a frame. `untouched`
+reads `warning.open` (the notice is up), not `warning.needed()`. A tab told its build was replaced in another tab hides
+the pane, whose UPDATE would otherwise stand dead. At the origin root a /REPORT.md or /LICENSE tab opened from ABOUT is a
+window in scope, so it refuses a quiet take — conservative, and the offer is shown. Recorded, not solved: the caret is
+re-aimed on a resize, not when STATUS TAGS is switched or a ψ-badge appears while the pane is up (the badge can shift in
+the row then); with STATUS TAGS on at 1140 px and narrower the ψ-badges wrap onto lines the pane covers until LATER; the
+build badge is first on screen but still last in the tab order; and a take whose worker is superseded by a newer deploy
+before it activates leaves the state at `taking`, which now also refuses the newer build's `buildReady` until a reload.
