@@ -432,14 +432,26 @@ for (const [rel, needle] of [[at('main.js'), './rack.js'], [INDEX, './main.js'],
     fail('V2', `the comment stripper removed ${needle} from dist/${rel} — it is over-eager and this check is not proving anything`);
 if (refs.length < 150) fail('V2', `only ${refs.length} references found across dist/ — the scan has stopped seeing the source`);
 
-const dangling = new Set(), escaped = new Set(), siteRoot = new Map(), external = new Map();
+/* DEV-ONLY REFERENCES — the one kind of escape that is by design.  Each entry names a reference that resolves only
+   where the repo root is served (serve-lan.py, tools/gate/server.py) and is meant to 404 on the deployed origin, where
+   nothing reaches it but an explicit flag.  Every other escape is a broken link. */
+const DEV_ONLY = {
+  [`${at('rack.js')} → ../tools/perf/device-report.js`]:
+    'THE DEVICE REPORT (2026-09-25): a diagnostic behind ?report=1 / __LW.report(); it lives in tools/ and is never shipped (its header says so); a normal boot never fetches it',
+};
+const dangling = new Set(), escaped = new Set(), siteRoot = new Map(), external = new Map(), devOnly = [];
 for (const { from, ref, kind } of refs) {
   const clean = ref.split('#')[0].split('?')[0];
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(ref)) { external.set(ref, (external.get(ref) || 0) + 1); continue; }
   if (!clean) continue;                                                       // a bare "#…"
   const root = clean.startsWith('/');
   let target = root ? clean.slice(1) : path.posix.normalize(path.posix.join(path.posix.dirname(from), clean));
-  if (target.startsWith('..')) { escaped.add(`dist/${from} → ${ref}  (climbs above the deployment root)`); continue; }
+  if (target.startsWith('..')) {
+    const why = DEV_ONLY[`${from} → ${ref}`];
+    if (why) devOnly.push(`dist/${from} → ${ref}  climbs above the deployment root BY DESIGN — ${why}`);
+    else escaped.add(`dist/${from} → ${ref}  (climbs above the deployment root)`);
+    continue;
+  }
   if (kind === 'base') {
     const prefix = target.endsWith('/') ? target : target + '/';
     if (![...inDist].some((file) => file.startsWith(prefix)))
@@ -458,8 +470,9 @@ for (const { from, ref, kind } of refs) {
 }
 for (const d of dangling) fail('V2', d);
 for (const e of escaped)  fail('V2', e);
+for (const d of devOnly)  note(d);
 if (!dangling.size && !escaped.size)
-  console.log(`PASS  ${refs.length} relative src / href / import / url() / manifest references walked; every one resolves to a file that is in dist/. None climbs above the deployment root.`);
+  console.log(`PASS  ${refs.length} relative src / href / import / url() / manifest references walked; every one resolves to a file that is in dist/. ${devOnly.length ? `${devOnly.length} dev-only reference(s) climb above the deployment root by design (see NOTES).` : 'None climbs above the deployment root.'}`);
 console.log(`      site-root ("/…") paths found: ${siteRoot.size ? '' : 'none — the ABOUT face\'s three file links were removed by wave 55; the FILES ship anyway (dossier §8), so /LICENSE, /NOTICE and /REPORT.md all answer'}`);
 for (const [k, kind] of siteRoot) console.log(`        [${kind}] ${k}`);
 console.log(`      absolute URLs (clicked, never loaded — V1's precache and the worker's cross-origin refusal keep them off the critical path): ${[...external.keys()].join(' ') || 'none'}`);
