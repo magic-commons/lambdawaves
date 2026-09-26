@@ -205,7 +205,7 @@ const gridChanges = (trace) => trace.filter(([, , g], i, a) => g !== (i ? a[i - 
   }
   console.log('      [scale, grid, changes]: ' + JSON.stringify(r));
   judge('C1 both switches OFF: nothing moves (scale 1, 128³, zero changes) on the reconstruct-bound and the present-bound frame', r.every((x) => x.off[0] === 1 && x.off[1] === 128 && x.off[2] === 0), r);
-  judge('C2 AUTO SCALE off, GOVERNOR on: the scale never moves, only the grid steps; AUTO SCALE on, GOVERNOR off: only the scale moves, the grid stays at 128³', r.every((x) => x.gridOnly[0] === 1 && x.gridOnly[1] < 128 && x.scaleOnly[1] === 128), r);
+  judge('C2 AUTO SCALE off, GOVERNOR on: readers only — with no scale probe the grid never steps (scale 1, 128³, zero changes); AUTO SCALE on, GOVERNOR off: only the scale moves, the grid stays at 128³', r.every((x) => x.gridOnly[0] === 1 && x.gridOnly[1] === 128 && x.gridOnly[2] === 0 && x.scaleOnly[1] === 128), r);
 }
 /* (d) THE PAUSE EDGE (W125-2): the grid back to the user's, the scale to 1, once, with ONE frame */
 {

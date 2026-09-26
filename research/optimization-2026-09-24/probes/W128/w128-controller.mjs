@@ -6,6 +6,7 @@
  *   glass    hydrogen 1s+2pz at 128³ × 240 × 1 in the GLASS style (present-bound: ~18 ms present, 0.1 ms reconstruct)
  *   default  1s+2pz at 96³ × 160 × 1, UI shown, 5 s: nothing may move
  *   wigner   sim-ladder with WIGNER open, 10 s (probes/F/probe-f-extra's scene): which readers park, and the probes
+ * AUTO=0 plays with AUTO SCALE off (the GOVERNOR on).
  * WARM=1 plays the default scene 1.5 s before the setup (the 120 Hz budget learned, as in a session in use).
  * Every 250 ms: grid, stepCap, mat.steps, governor drop/state/median, autoScale, canvas width, fps.  Then PAUSE: what the pause
  * law put back. */
@@ -19,7 +20,7 @@ const SECS = +(process.env.SECS || 45);
 const ELECTRON = process.env.ELECTRON || createRequire('/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/hosts-m0/shells/electron/package.json')('electron');
 const MAIN = new URL('../../../../tools/perf/electron-main.cjs', import.meta.url).pathname;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const R = { at: new Date().toISOString(), port: PORT, secs: SECS, warm: !!process.env.WARM, scenes: {} };
+const R = { at: new Date().toISOString(), port: PORT, secs: SECS, warm: !!process.env.WARM, autoScale: process.env.AUTO !== "0", scenes: {} };
 async function boot(fn) {
   const PROFILE = fs.mkdtempSync(path.join(os.tmpdir(), 'lw-w128-'));
   const cdpPort = 9300 + Math.floor(Math.random() * 180);
@@ -55,7 +56,7 @@ for (const sc of SCENES) for (let attempt = 0; attempt < 2 && !(R.scenes[sc] && 
   try {
     R.scenes[sc] = await boot(async (ev) => ev(`(async()=>{ ${process.env.WARM ? `__LW.loadPreset('1s+2pz'); __LW.play(); await new Promise((r)=>setTimeout(r,1500)); __LW.pause(); await __LW.settle();` : ''} const L=__LW, F=L.field, canvas=document.getElementById("field"), trail=[]; const ST=async(w)=>{ const a=performance.now(); try { await L.settle(); } catch(e) { throw new Error("settle#"+trail.length+" after "+(performance.now()-a).toFixed(0)+" ms: "+e.message+" frames "+L.stats.frames+" sched "+L.stats.scheduled+" vis "+document.visibilityState); } trail.push(1); };
       ${SETUP[sc]} L.schedule(4); await ST("x"); await ST("x");
-      L.governor.on=true; L.quality.auto=true; L.quality.autoScale=1;
+      L.governor.on=true; L.quality.auto=${process.env.AUTO === "0" ? "false" : "true"}; L.quality.autoScale=1;
       ${HIDE[sc] ? `if (!L.uiHidden) L.keys.toggleUI();` : ''} await ST("x");
       const split = await F.throughput({modes:L.modesAt(L.clock.t), obs:L.obs, mat:L.mat, n:20, targetMs:1200});
       await ST("x");

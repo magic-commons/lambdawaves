@@ -332,11 +332,11 @@ export async function boot(dom) {
      SCALE (the AUTO SCALE switch): outside [budget·1.08, budget·4/3] jump ONCE to the scale that meets the target (the present
        costs ∝ scale²: scale·√(target/median), ×0.5…×1.15) on the 0.05 grid, rounded toward the current scale, then HOLD — each
        step reallocates the canvas (a stall on WebKit), and at vsync the interval cannot show headroom, so it never probes up.
-     GRID (the GOVERNOR switch, while playing, above 64³): one rung down (128 → 96 → 64, the rebuild road) when the scale
-       cannot mend the frame — it is over with AUTO SCALE off or the scale at its floor, or the DESCENT the scale made did not
-       lower the median as scale² predicts (median > m0·(s/s0)² + budget: a vsync-quantised present-bound frame misses its
-       prediction by less than one refresh ≤ one budget, so only a reconstruct-bound frame fails it).  The scale then returns
-       to what the present measured on that descent can afford.  No rung comes back while playing.
+     GRID (the GOVERNOR switch, while playing, above 64³, and only from the scale's own probe — with AUTO SCALE off it never
+       steps): one rung down (128 → 96 → 64, the rebuild road) when the DESCENT the scale made did not lower the median as scale²
+       predicts (median > m0·(s/s0)² + budget: a vsync-quantised present-bound frame misses its prediction by less than one
+       refresh ≤ one budget, so only a reconstruct-bound frame fails it), or reached the floor still over.  The scale then
+       returns to what the present measured on that descent can afford.  No rung comes back while playing.
      READERS (the GOVERNOR switch): the reader law below, by measured cost.
      THE PAUSE EDGE (W125-2, one place, in the loop): the user's grid and a scale of 1 come back at once with one frame, and the
      window restarts — the play's intervals are not the still picture's.  quality.res stays the USER's (and the project's);
@@ -347,9 +347,9 @@ export async function boot(dom) {
     if (w.presented < 6 || nowMs - w.sinceMs < 250) return null;
     const n = Math.min(w.k, w.iv.length), ms = n > 2 ? w.iv.subarray(0, n).sort()[n >> 1] : 0;   // sorts the window in place: it restarts after every decision
     const over = ms > budgetMs * 4 / 3, failed = w.m0 > 0 && ms > w.m0 * (scale / w.s0) ** 2 + budgetMs;   // failed: the descent did not buy what scale² promised
-    if (gridFree && (failed || (over && (!auto || scale <= minScale)))) {
+    if (auto && gridFree && (failed || (over && scale <= minScale))) {
       const P = w.m0 > ms ? (w.m0 - ms) / (w.s0 * w.s0 - scale * scale) : 0;   // the present's cost at scale 1, as the descent measured it
-      return { median: ms, rung: true, scale: auto && w.m0 > 0 ? Math.max(scale, P > 0 ? Math.min(1, Math.floor(20 * Math.sqrt(budgetMs / P) + 1e-9) / 20) : 1) : scale };
+      return { median: ms, rung: true, scale: w.m0 > 0 ? Math.max(scale, P > 0 ? Math.min(1, Math.floor(20 * Math.sqrt(budgetMs / P) + 1e-9) / 20) : 1) : scale };
     }
     if (!auto || (!over && !(ms > 0 && ms <= budgetMs * 1.08))) return { median: ms, rung: false, scale };
     const x = 20 * scale * Math.min(1.15, Math.max(0.5, Math.sqrt((over ? budgetMs : budgetMs * 1.08) / ms)));
