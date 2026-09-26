@@ -169,10 +169,12 @@ Two more worth checking while you are in DevTools, because they are what makes i
   reload again → λWAVES boots with no network. Offline works from the **second** launch, never the first:
   the first visit runs uncontrolled because `sw.js` never calls `clients.claim()`. That is deliberate and is
   not a bug to chase. An UPDATE is different since wave 133: a build that finishes installing while the
-  session is untouched (nothing edited, nothing unsaved, paused, one window) is taken at once — one reload;
-  otherwise the build badge and its pane offer it (STATUS TAGS never hides them), a press takes it, and the
-  next launch after every λWAVES window has closed serves it. A return to the foreground re-checks for a new
-  build at most once per 30 minutes (`lab/main.js`, the reader).
+  session is untouched (nothing edited, nothing unsaved, no capture running, paused at t = 0, one window) is
+  taken at once — one reload. Otherwise the build badge and its pane offer it, and STATUS TAGS, on or off,
+  never hides them; a press takes it. An untouched session that is only playing, or whose clock has moved, is
+  offered it and takes it the next time the page is hidden (the take-on-hide rule: nobody is watching). The
+  next launch after every λWAVES window has closed serves it in any case. A return to the foreground re-checks
+  for a new build at most once per 30 minutes (`lab/main.js`, the reader).
 
 ### Rollback (criterion 12) — test it on purpose
 
