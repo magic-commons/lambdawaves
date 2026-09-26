@@ -1,5 +1,14 @@
 # λWAVES 0.3.1 · THE EMPTY PROJECT AND THE TRUE HISTORY — the plan (Fable, 2026-09-25, for Josh)
 
+**STATUS 2026-09-26: S1–S4 BUILT, VERIFIED AND MERGED on `release-0.3.1` (tip after 980affa).** Each stage: one Opus 5.5
+builder in an isolated worktree → a fresh-context Opus verifier (S1 11/11, S2 fix-first then 11/11, S3 12/12, S4 12/12
+with a follow-up) → Fable's merge with the node gate, the touched suites and THE DIGEST LOCK. D4 took its escape hatch
+(`obs.mode` stays PROJECT; `camMode` left settings). Two older bugs fixed on the way: the demo opened dirty (device-clamped
+steps), a route holding the stage wrote its base over a fresh open. Rulings that moved: a stage change is unsaved work
+(the 2026-09-10 rule reversed, since the stage is PROJECT); the notebook law never closes an open notebook. lab/ for 0.3.1
+(code files, excluding the empty-project JSON and sw.js): +605 −496 over 33 commits. REPORT.md waves 131–132. S5 left:
+Josh applies `MIR-CONTRACT-THREE-SCOPES.md` to MIR; the release (RELEASING.md) on his word.
+
 Branch `release-0.3.1` (from `dev` = 4c79b15, after the public `v0.3.0-alpha`). Two large tasks, both Josh's, in his words:
 
 > "What if there was a hidden 'empty project' save file. It has defaults … extremely similar to the new user defaults but
