@@ -18,7 +18,7 @@ this file.
 - **PROJECT**: the work, meaning the physics, the picture and the modulation. It is saved in a project and a link
   carries what link format v1 has room for. Every PROJECT key is a history row except the camera pose (a view is
   not an edit), the notebook (text has its own editor) and quality (a device budget that rides along as advice).
-  The history today covers only the register side and the LOOK knobs. Stages S3 and S4 widen it to this scope.
+  Since S3 the history covers exactly this: the edit scope below.
 
 ## The table
 
@@ -30,7 +30,7 @@ this file.
 | AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode`, `modCadence`, `modArm`, `clockLink` | settings | PREFERENCE |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |
-| camera MODE, `presentation.obs.mode` (free / turntable) | project | PROJECT (D4's escape hatch, see below) |
+| camera MODE, `presentation.obs.mode` (free / turntable) | project | PROJECT (D4's escape hatch, see below), not in history (it travels with the pose) |
 | palette: `paletteId`, `palette {on, selected, stops}` | project | PROJECT (D2) |
 | `ui.stage {mix, custom, follow}` | project | PROJECT |
 | `experiment` (modes, preset, Bz/Fz, t, rate, window, damping) | project | PROJECT |
@@ -66,6 +66,19 @@ this file.
   shipped default and nothing else, so it resets the work and leaves the preferences and the arrangement alone. The
   unsaved-changes mark (`projectKey()`) ignores the WORKSPACE, the auto-rotate switch, `quality` and its shadow
   `mat.steps` (advice the device clamps), and a bound macro's value (its source's output). The stage counts.
+- THE HISTORY (S3) reads, keys and writes one record, `serialize({ scope: 'edit' })`: the PROJECT keys minus `obs`
+  (the pose and its mode), `camera`, `quality`, the notebook and the WORKSPACE (`layout`, `modwin`, the notebook size;
+  no DOM is read). It also leaves out every number that a clock or a modulator moves rather than a hand:
+  `experiment.t`, a bound macro's value, `mat.steps`, `domain.half` under AUTO, and the output of a modulated target,
+  whose seat holds its registry base (`modSeats()`, the table `projectSnapshot()` also uses). The key is FNV-1a over
+  that record's JSON. `restore(S, { history: true })` puts it back without moving the clock, the camera, the
+  notebook or the arrangement, and without clearing the ring. It re-applies the modulation, palette, instruments and
+  overlays only when their JSON moved (an unchanged rack reloaded under a playing LFO stopped it). A modulated target's
+  base comes from the record, never from a control the modulator is moving. The ring's bottom row names its origin:
+  `boot`, `link`, `open · <project>`, `new project` (and `start` after CLEAR).
+- The history and the unsaved-changes mark differ in three places. The mark counts the camera pose and the notebook text,
+  and the history does not (D6: a view and a text are not edits). A STATES lane slot's base is seated only in the
+  history, because a square root would move a hand-set lane by an ulp in a saved file.
 
 ## D4, measured
 
@@ -83,7 +96,9 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 - `phoneTr` is read from the transport card's fold and `phoneRack` from `rack-hidden` (on a phone). A project whose
   layout folds the transport, or hides the rack on a phone, therefore changes those two settings keys through the
   WORKSPACE road, which is why they are WORKSPACE keys and the byte-identical settings gates strip them with the rest.
-- The history ring's LOOK record (`hLook`) still carries the chrome. It drops it in S4.
+- Switching MOLECULES on commits its row at the press. Its solution lands about 150 ms later and fills derived defaults
+  (the chem orbital, the MO-REGISTRY selection and the STATES ground lane) with no note, so that fill rides into the
+  next row. One row per switch needs a settle signal from the molecular session.
 - Opening the bundled demo `lab/demos/wave-dancer.lambdawaves.json` no longer switches a reader's frame and axes off.
   This is D1's stated cost. S2 stripped its dead field chrome from `mat`; its `layout.look` and `layout.cam` blocks
   (written before S1, never read by `applyLayout`) are still in the file.
