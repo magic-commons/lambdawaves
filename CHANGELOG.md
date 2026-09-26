@@ -11,6 +11,30 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.3.2-alpha` — 2026-09-26
+
+Commit `3bb823d` · wave 133 · 11 commits.
+
+- **wave 133**: The offer — a new build is seen, taken quietly when nothing is at stake, and explained when something is
+
+<details><summary>commits</summary>
+
+- `2e7515a` 2026-09-26 — CHANGELOG for v0.3.1-alpha
+- `c8facca` 2026-09-26 — device report: the M5 iPad on the 0.3.1 candidate (2026-09-26)
+- `db11a75` 2026-09-26 — 0.3.2 · wave 133 THE OFFER: the build badge is never hidden by STATUS TAGS and gets a glass pane…
+- `3e90196` 2026-09-26 — 0.3.2 · wave 133 verify: the real worker end to end, `untouched` attacked, the pane and badge at…
+- `6ac486f` 2026-09-26 — 0.3.2 · wave 133 fix pass (fresh verifier): untouched excludes a capture in flight and, in the…
+- `e9f25bd` 2026-09-26 — Merge branch 'worktree-agent-afb0d9884dd3de0d3' into worktree-agent-aed266f4fc7620d71
+- `408756c` 2026-09-26 — 0.3.2 · wave 133 re-verify of the fix pass (6ac486f): the real worker, untouched, the badge and…
+- `65a1338` 2026-09-26 — 0.3.2 · wave 133 last pass (verifier: MERGE): LATER disarms the take-on-hide; the caret follows…
+- `404852c` 2026-09-26 — Merge branch 'worktree-agent-aed266f4fc7620d71' into release-0.3.2
+- `2e72109` 2026-09-26 — 0.3.2 · BRIEF-133: Josh's amendment on record
+- `3bb823d` 2026-09-26 — 0.3.2-alpha: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.3.1-alpha` — 2026-09-26
 
 Commit `88e9cc0` · waves 130–132 · 36 commits.
