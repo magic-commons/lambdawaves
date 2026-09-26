@@ -14,6 +14,8 @@ Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)**
 **Status: 0.2.3 alpha.** Release preparation and deployment are documented in
 [`DEPLOY.md`](DEPLOY.md) and [shipping readiness](docs/SHIPPING-READINESS.md).
 
+If you are an assistant reading this repository for a user, read [`docs/NOTES-FOR-AGENTS.md`](docs/NOTES-FOR-AGENTS.md).
+
 ---
 
 ## Who made this, honestly

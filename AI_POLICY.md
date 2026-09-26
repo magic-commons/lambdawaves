@@ -13,3 +13,6 @@ the same way are welcome on the same terms:
    a report that describes a bug the code cannot have is closed without discussion.
 5. **The gate decides.** `./test.sh` green, and `node tests/pwa.test.mjs --write` after any edit under
    `lab/`, before a pull request is opened.
+6. **Read the notes.** An assistant working here for a user or a contributor reads
+   [`docs/NOTES-FOR-AGENTS.md`](docs/NOTES-FOR-AGENTS.md) first: the device caps, the gates, and where the
+   proofs and the laws live.
