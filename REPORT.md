@@ -2900,6 +2900,36 @@ paced" — the iPad's eighth run had. Measured uninstrumented on the report's ow
 (Electron, ×6) and 103.9 → 90.7 (Firefox, ×5); a saved project's restore 78.5 → 59.7 and 84.8 → 66.9; forced layout
 per open 63 → 24 ms.
 
+### wave 130: Two more seams out of `boot()` — the keyboard dispatcher and the camera law become modules; the phone block does not, and why
+
+`boot()` in rack.js is one closure of some 5,700 lines; wave 124's seams took nine blocks out of it as modules that
+carry no behaviour of their own, and wave 130 took two more, verbatim, one per commit. The keyboard dispatcher — the
+keydown listener, the owned-key seats, the chord matcher, the default and saved chords, `saveKeys` and `keyName` — is
+`lab/keys.js`, installed where the defaults stood so the listener registers in the same order; ACTIONS, toggleUI and
+the tab cycle stay with the rack, five edges cross the seam, and `__LW_hooks.keys` takes bind/conflicts/reset from the
+module. The camera law — both camera blocks, the CAM constants now exported — is `lab/camera-law.js`, built right after
+the ui object with six edges (`schedule(TIER.PRESENT)` became `present()`, the two wall-clock resets `resetWall()`);
+nothing calls the camera between the old seat and the new one, because boot has one await and runs synchronously after
+it. rack.js 5695 → 5447 lines; the two modules are 127 and 160; lab/ is net +41, about half of it the two headers and
+their imports. The third seam, the phone block, was not cut: it reads twenty boot bindings, eight of them the
+browser-preferences group (readSettings, saveSettings, setGovernor, setKeepFrames, frostMode, setFrost, cardChosen,
+applyCard), and its phone/tablet state is read from outside it (applyLayout and resetLayout write `phone.floats`,
+restore reads `phone.on` and `tablet.on`, the loop reads `tablet.on` and `tablet.steps`). It comes out cleanly only
+after that preferences group is one seam, or after the layout seam; seams 13–17 wait on the same decision.
+
+Proved per commit: node 79/79; `__LW.serialize()` bytes identical on eleven snapshots (a demo open, save and reopen, a
+link, a restore round trip, a fresh project) against a base that reproduced exactly over two runs; THE DIGEST LOCK
+208/208 at 96³ per commit and 1004/1004 on both fixtures at the end; stylehash neutral in the disconnected and the
+connected rack (8 states each, no element and no pixel changed); keyboard-window, input and render-regressions in the
+browser; adopt --check in step with MIR 1.4.3. On the merged tree: the precache stamps and the adopt check in step, the
+node gate green, THE DIGEST LOCK GREEN on both fixtures (1004 values each, 0 differences), the browser gate 120 GREEN
+with one suite red under a load average near 6 from other work on the machine (`current`: two "ResizeObserver loop
+completed with undelivered notifications" messages in the DAW-law scene, then its known 250 ms `valuesReveal` race on
+a first rerun) and 14/14 on the next solo run; with the suite's five 250 ms transition waits lengthened to 1.2 s it
+passes on the merged and on the pre-merge tree alike under that load, with no ResizeObserver message on either, so
+the seams are not what it measured. These two commits landed after `v0.3.0-alpha` went public, so they ship with the
+next release.
+
 ### wave 129: The first visit's hygiene — a demo that carries no look, a card that follows its owner, and the notes for agents
 
 Opening the bundled WAVE DANCER used to write the author's own look into the visitor's stored settings — dark theme,
