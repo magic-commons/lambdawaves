@@ -3019,3 +3019,35 @@ route holding the stage wrote its old base back over a freshly opened project, o
 now stands the running modulation down first, as it does A/B. Each stage was built by one Opus 5.5 agent in an
 isolated worktree and attacked by a second with fresh context before it merged; both digest-lock fixtures stayed
 green throughout.
+
+### wave 132: The true history — one reader, one writer, one key over the whole project
+
+The undo ring (`lab/history.js`, wave 106's FL-style timeline) had a scope written by hand: the register, its law, the
+A/B stores and the LOOK knobs, in six functions that each kept their own list of keys. Everything else the hand could
+edit — the modulation rack, the stage colour, the overlays, the palette, the field owners, a STATES lane — left no row,
+and the field chrome that wave 131 made a preference still travelled with an undo. The ring's scope is now the PROJECT
+scope itself, minus the view, the notebook and the quality hint (D6): `serialize({ scope: 'edit' })` builds the record
+without touching the DOM (no layout capture, no window placement, no notebook size) and with every time-driven value
+removed — the clock, a bound macro's driven value, a modulated route's output (its seat holds the base), the device's
+step count and the auto half-width — and `restore(S, { history: true })` writes it back without clearing the ring or
+moving the camera. One seat table serves the record and the saved project; the six functions and their lists are gone
+(lab/ −24 lines). A record's modulation bases are handed to the registry from the record itself, never read back off a
+control a modulator is moving, so undoing a route while its LFO plays lands the knob exactly on its base and a redo
+routes it again from there. The key is FNV-1a over the record's JSON, computed at a commit and when a menu asks, never
+per frame; the modulation host's `apply` port and the `LW.mod` wrappers note an edit, as does a colour well or a select
+that changes after the pointer is up. Rows are named for the control and its window — `LFO RATE · MODULATION`,
+`STAGE COLOUR · SETTINGS`, `PRESET SUPERPOSITION · STATE` — and the bottom row for where the timeline began: `boot`,
+`link`, `open · WAVE DANCER`, `new project`.
+
+One thing was added after a measurement, not before. Re-applying every section on an undo took 77 ms with WAVE DANCER
+playing, rebuilt the modulation window, stopped its transport under a playing field and reset the LFO macro from 0.9986
+to 0 so the routed exposure jumped from 0.45 to 1.37. The writer now re-applies the modulation, palette, instruments and
+overlays sections only when their JSON moved: 11.8 ms, no rebuild, the transport and the LFO carry on. Measured
+(headless Firefox on the RTX): reading the edit scope 0.08–0.10 ms, a commit 0.4–0.7 ms, a record 6.5–10.5 kB (a full
+ring ≈ 0.64 MB), an undo 4–7 ms for a look, preset or element edit, 18 ms for a palette, 24–42 ms when the rack must
+reload; during 5 s of play on the default scene, on WAVE DANCER with its routes running and with MOLECULES on, the ring
+gained zero rows and read the scope zero times. Twenty-five browser scenes pin one row per edit with byte-identical undo
+and redo for every family, none for a camera orbit, a window drag, a notebook keystroke, a GRID change or a preference
+switch, the depth of sixty, and the bottom-row names; `render-exact` 40/40 and both digest-lock fixtures unchanged.
+Recorded, not solved: MOLECULES ON fills its derived defaults about 150 ms after the press with no note, so that fill
+rides into the next row until the molecular session can say when it has settled.
