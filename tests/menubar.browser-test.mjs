@@ -188,7 +188,9 @@ try {
     { const r = await __row('FILE', 'SAVE project'); R.saveP = ok(r) && __LW.layout.notebook.face === 'projects'; __LW.layout.notebook.close(); }
     { const r = await __row('FILE', 'EXPORT project'); R.exportP = ok(r) && /nothing to export/.test(document.querySelector('.pj-status').textContent); }
     { const r = await __row('FILE', 'IMPORT project'); R.importP = ok(r); }
-    { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW project'); R.fresh = ok(r) && __LW.reg.populated().length === 0 && __LW.layout.projects.current === null; __LW.layout.notebook.close(); }
+    { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW project');   /* 0.3.1 · S2: NEW fetches the empty project before it opens it — wait for its status */
+      for (let i = 0; i < 60 && document.querySelector('.pj-status').textContent !== 'new'; i++) await new Promise((q) => setTimeout(q, 50));
+      R.fresh = ok(r) && __LW.reg.populated().length === 0 && __LW.layout.projects.current === null; __LW.layout.notebook.close(); }
     R.errors = __e.slice();
     return R;`);
   const want = Object.fromEntries(Object.keys(rest).filter((k) => k !== 'errors').map((k) => [k, true]));

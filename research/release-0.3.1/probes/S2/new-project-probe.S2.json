@@ -1,0 +1,123 @@
+{
+ "out": {
+  "build": "0.3.0-alpha · the optimization pass · 2026-09-25",
+  "boot": 9314,
+  "demo": 13273,
+  "edited": 12785,
+  "afterNew": 11377,
+  "freshReturned": true,
+  "newChanged": [
+   "obs",
+   "mat",
+   "domain",
+   "paletteId",
+   "palette",
+   "modulation",
+   "ui",
+   "modwin",
+   "overlays",
+   "ab"
+  ],
+  "newKept": [
+   "quality",
+   "shadow",
+   "space",
+   "hamiltonian",
+   "field",
+   "wigner",
+   "readers",
+   "instruments",
+   "mo",
+   "rates",
+   "rotationRates",
+   "sturmian",
+   "layout",
+   "camera",
+   "notebook"
+  ],
+  "experimentModes": 0,
+  "modwinChanged": [
+   "modes"
+  ],
+  "settings": {
+   "bytes": 455,
+   "identical": true,
+   "theme": [
+    "light",
+    "light"
+   ]
+  },
+  "notebook": {
+   "open": false,
+   "text": "",
+   "stored": ""
+  },
+  "abOn": false,
+  "current": null,
+  "dirty": false,
+  "depth": 0,
+  "file": {
+   "bytes": 16829,
+   "dataBytes": 8739,
+   "keys": 21,
+   "projectKeysDiffer": [],
+   "experimentSame": true,
+   "notCarried": [
+    "quality",
+    "layout",
+    "modwin",
+    "notebook"
+   ]
+  },
+  "timing": {
+   "runs": [
+    {
+     "totalMs": 75.16,
+     "first": true
+    },
+    {
+     "totalMs": 77.16,
+     "fetchMs": 6.2,
+     "restMs": 70.96
+    },
+    {
+     "totalMs": 63.62,
+     "fetchMs": 6.08,
+     "restMs": 57.54
+    },
+    {
+     "totalMs": 77.26,
+     "fetchMs": 6.8,
+     "restMs": 70.46
+    },
+    {
+     "totalMs": 73.94,
+     "fetchMs": 10.62,
+     "restMs": 63.32
+    },
+    {
+     "totalMs": 58.92,
+     "fetchMs": 5.46,
+     "restMs": 53.46
+    },
+    {
+     "totalMs": 57.18,
+     "fetchMs": 5.2,
+     "restMs": 51.98
+    },
+    {
+     "totalMs": 61.78,
+     "fetchMs": 7.4,
+     "restMs": 54.38
+    }
+   ],
+   "median": {
+    "totalMs": 63.62,
+    "fetchMs": 6.2,
+    "restMs": 57.54
+   }
+  },
+  "gum": 0,
+  "errs": []
+ }
+}

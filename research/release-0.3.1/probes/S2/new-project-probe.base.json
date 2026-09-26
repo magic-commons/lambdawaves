@@ -1,0 +1,111 @@
+{
+ "out": {
+  "build": "0.3.0-alpha · the optimization pass · 2026-09-25",
+  "boot": 9314,
+  "demo": 13273,
+  "edited": 12785,
+  "afterNew": 12632,
+  "freshReturned": true,
+  "newChanged": [
+   "domain"
+  ],
+  "newKept": [
+   "obs",
+   "mat",
+   "quality",
+   "shadow",
+   "paletteId",
+   "space",
+   "palette",
+   "hamiltonian",
+   "field",
+   "wigner",
+   "readers",
+   "instruments",
+   "mo",
+   "rates",
+   "rotationRates",
+   "sturmian",
+   "modulation",
+   "ui",
+   "layout",
+   "modwin",
+   "camera",
+   "overlays",
+   "ab",
+   "notebook"
+  ],
+  "experimentModes": 0,
+  "modwinChanged": [],
+  "settings": {
+   "bytes": 455,
+   "identical": true,
+   "theme": [
+    "light",
+    "light"
+   ]
+  },
+  "notebook": {
+   "open": true,
+   "text": "",
+   "stored": "typed into the demo"
+  },
+  "abOn": true,
+  "current": null,
+  "dirty": false,
+  "depth": 0,
+  "file": {
+   "none": "JSON.parse: unexpected character at line 1 column 1 of the JSON data"
+  },
+  "timing": {
+   "runs": [
+    {
+     "totalMs": 4.4,
+     "first": true
+    },
+    {
+     "totalMs": 3.48,
+     "fetchMs": null,
+     "restMs": 3.48
+    },
+    {
+     "totalMs": 5.72,
+     "fetchMs": null,
+     "restMs": 5.72
+    },
+    {
+     "totalMs": 3.46,
+     "fetchMs": null,
+     "restMs": 3.46
+    },
+    {
+     "totalMs": 3.28,
+     "fetchMs": null,
+     "restMs": 3.28
+    },
+    {
+     "totalMs": 3.3,
+     "fetchMs": null,
+     "restMs": 3.3
+    },
+    {
+     "totalMs": 4.68,
+     "fetchMs": null,
+     "restMs": 4.68
+    },
+    {
+     "totalMs": 3.96,
+     "fetchMs": null,
+     "restMs": 3.96
+    }
+   ],
+   "median": {
+    "totalMs": 3.48,
+    "fetchMs": null,
+    "restMs": 3.48
+   }
+  },
+  "gum": 0,
+  "errs": []
+ }
+}

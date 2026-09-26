@@ -136,10 +136,6 @@
      ]
     },
     "hueShift": 0,
-    "invert": false,
-    "frame": false,
-    "axis": false,
-    "axisInk": "theme",
     "paletteOn": true,
     "style": 3,
     "iso": 0.017767288986038646,
@@ -159,7 +155,6 @@
      "curve": 1,
      "limit": 3
     },
-    "cornerSide": "right",
     "finish": "lit"
    },
    "domain": {
