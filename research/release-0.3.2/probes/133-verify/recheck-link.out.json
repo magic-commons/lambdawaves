@@ -1,0 +1,104 @@
+[
+ [
+  "minted",
+  {
+   "len": 310,
+   "head": "https://127.0.0.1:8732/lab/#s=AXavtmEBEAD0BDU_AgD_fwAAA_9_AA"
+  }
+ ],
+ [
+  "(1) a real boot at the link (fresh open())",
+  {
+   "atReady": {
+    "dirty": false,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5
+   },
+   "oneSecondLater": {
+    "dirty": false,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5,
+    "hash": "#s=AXavtmEBEAD0B",
+    "t": 0
+   },
+   "afterRegisterWindow": {
+    "dirty": false,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5,
+    "hash": "#s=AXavtmEBEAD0B",
+    "t": 0,
+    "untouchedFalse": true,
+    "swMode": "automation"
+   }
+  }
+ ],
+ [
+  "(2) hashchange over an unedited boot",
+  {
+   "before": {
+    "dirty": false,
+    "rows": [
+     "boot"
+    ],
+    "exposure": 1,
+    "hash": "",
+    "t": 0,
+    "untouchedFalse": true
+   },
+   "afterHashchange": {
+    "dirty": true,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5,
+    "hash": "#s=AXavtmEBEAD0B",
+    "t": 0,
+    "untouchedFalse": false,
+    "confirms": 0
+   },
+   "afterReloadOfThatPage": {
+    "dirty": false,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5,
+    "hash": "#s=AXavtmEBEAD0B",
+    "t": 0,
+    "untouchedFalse": true
+   }
+  }
+ ],
+ [
+  "(3) hashchange over an edited session (confirm would answer NO)",
+  {
+   "edited": {
+    "dirty": true,
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "exposure": 1,
+    "hash": "",
+    "t": 0,
+    "canUndo": true
+   },
+   "afterHashchange": {
+    "dirty": true,
+    "rows": [
+     "link"
+    ],
+    "exposure": 2.5,
+    "hash": "#s=AXavtmEBEAD0B",
+    "t": 0,
+    "canUndo": false,
+    "confirmsAsked": 0
+   }
+  }
+ ]
+]

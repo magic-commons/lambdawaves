@@ -1,0 +1,426 @@
+[
+ [
+  "R0 plain boot",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offeredWithPane": false,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R1 scrubbed to t=137 (foreground)",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 137,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R2 played then paused (foreground)",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 5.862,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R3 t=137, offered, then the page hides",
+  {
+   "now": {
+    "r": true,
+    "took": null,
+    "state": "ready",
+    "pane": true
+   },
+   "hidden": {
+    "took": {
+     "alone": true
+    },
+    "state": "taking",
+    "t": 137
+   }
+  }
+ ],
+ [
+  "R4 t=137, offered, LATER pressed, then the page hides",
+  {
+   "tap": {
+    "ok": 1
+   },
+   "afterLater": {
+    "pane": false,
+    "took": null,
+    "state": "ready"
+   },
+   "hidden": {
+    "took": null,
+    "state": "ready"
+   }
+  }
+ ],
+ [
+  "R5 EXPORT FRAMES in flight",
+  {
+   "during": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": true,
+     "active": "BODY"
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offeredWithPane": true,
+     "returned": true
+    }
+   },
+   "stopResult": {
+    "ok": false,
+    "stopped": true
+   },
+   "after": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": false,
+     "active": "BODY"
+    },
+    "u": {
+     "untouchedFalse": true,
+     "offeredWithPane": false,
+     "returned": true
+    }
+   }
+  }
+ ],
+ [
+  "R6 RECORD in flight",
+  {
+   "during": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": true,
+     "active": "BODY"
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offeredWithPane": true,
+     "returned": true
+    }
+   },
+   "after": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": false,
+     "active": "BODY"
+    },
+    "u": {
+     "untouchedFalse": true,
+     "offeredWithPane": false,
+     "returned": true
+    }
+   }
+  }
+ ],
+ [
+  "R7 real orbit drag",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "CANVAS"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R8 pointer held on the stage (no move)",
+  {
+   "held": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": false,
+     "active": "CANVAS"
+    },
+    "u": {
+     "untouchedFalse": false,
+     "offeredWithPane": true,
+     "returned": true
+    }
+   },
+   "released": {
+    "read": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false,
+     "t": 0,
+     "busy": false,
+     "active": "CANVAS"
+    },
+    "u": {
+     "untouchedFalse": true,
+     "offeredWithPane": false,
+     "returned": true
+    }
+   }
+  }
+ ],
+ [
+  "R9 notebook typed then blurred",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R10 LFO added",
+  {
+   "read": {
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "canUndo": true,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R11 demo opened",
+  {
+   "read": {
+    "rows": [
+     "open · WAVE DANCER"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R12 NEW",
+  {
+   "read": {
+    "rows": [
+     "new project"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R13 ?preset=2pz",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offeredWithPane": false,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R14 notice up (?warn=1)",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BUTTON"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R15 AUDIO source",
+  {
+   "read": {
+    "rows": [
+     "boot",
+     "edit"
+    ],
+    "canUndo": true,
+    "dirty": true,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": false,
+    "offeredWithPane": true,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "R16 theme flipped",
+  {
+   "read": {
+    "rows": [
+     "boot"
+    ],
+    "canUndo": false,
+    "dirty": false,
+    "playing": false,
+    "t": 0,
+    "busy": false,
+    "active": "BODY"
+   },
+   "u": {
+    "untouchedFalse": true,
+    "offeredWithPane": false,
+    "returned": true
+   }
+  }
+ ],
+ [
+  "errors",
+  {
+   "errs": [],
+   "problems": [],
+   "problemsVia": "absent"
+  }
+ ]
+]

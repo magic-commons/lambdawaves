@@ -1,0 +1,929 @@
+{
+ "steps": [
+  [
+   "visit 1 (installs)",
+   {
+    "mode": "registered",
+    "active": true,
+    "controlled": false,
+    "scope": "https://127.0.0.1:8732/lab/"
+   }
+  ],
+  [
+   "visit 2 (controlled)",
+   {
+    "controlled": true,
+    "build": "1gwph111hwu22x",
+    "cache": "lw-lab-1gwph111hwu22x",
+    "files": 203,
+    "mode": "registered",
+    "untouched": {
+     "rows": [
+      "boot"
+     ],
+     "canUndo": false,
+     "dirty": false,
+     "playing": false
+    }
+   }
+  ],
+  [
+   "bumped absorb.js; sw.js §1 regenerated",
+   {
+    "newCache": "lw-lab-jyzgdxyo12n8"
+   }
+  ],
+  [
+   "untouched navigation → counts",
+   {
+    "buildReady": 1,
+    "skipWaitingPosted": [
+     "alone"
+    ],
+    "busy": 0
+   }
+  ],
+  [
+   "untouched navigation → result",
+   {
+    "build1": "1gwph111hwu22x",
+    "build2": "jyzgdxyo12n8",
+    "changed": true,
+    "cacheExpected": "lw-lab-jyzgdxyo12n8",
+    "buildMatchesCache": true,
+    "goReturnedMs": 159,
+    "hookedMs": 286,
+    "reloadNavStartMs": 1769,
+    "reloadedPageReadyMs": 2084,
+    "newBuildKnownMs": 3637,
+    "finalState": "idle",
+    "finalMode": "registered",
+    "badge": null,
+    "pane": false
+   }
+  ],
+  [
+   "event log (ms after navigation)",
+   [
+    [
+     285,
+     "hooked",
+     "idle",
+     false,
+     "o1",
+     "{\"build\":null,\"mode\":\"arming\",\"ready\":true,\"controlled\":true}"
+    ],
+    [
+     1761,
+     "buildReady:in",
+     "idle",
+     false,
+     "o1",
+     null
+    ],
+    [
+     1763,
+     "accept:in",
+     "ready",
+     false,
+     "o1",
+     "{\"quiet\":true}"
+    ],
+    [
+     1763,
+     "SKIP_WAITING posted",
+     "taking",
+     true,
+     "o1",
+     "{\"alone\":true,\"workerState\":\"installed\"}"
+    ],
+    [
+     1764,
+     "accept:out",
+     "taking",
+     true,
+     "o1",
+     true
+    ],
+    [
+     1764,
+     "buildReady:out",
+     "taking",
+     true,
+     "o1",
+     true
+    ],
+    [
+     1767,
+     "message:in",
+     "taking",
+     true,
+     "o1",
+     "LW_SW_BUILD"
+    ],
+    [
+     1767,
+     "message:out",
+     "taking",
+     true,
+     "o1",
+     "build"
+    ],
+    [
+     1768,
+     "controllerchange-event",
+     "taking",
+     true,
+     "o1",
+     null
+    ],
+    [
+     1768,
+     "controllerChanged:in",
+     "taking",
+     true,
+     "o1",
+     null
+    ],
+    [
+     1768,
+     "reload:in",
+     "taking",
+     true,
+     "o1",
+     null
+    ],
+    [
+     1769,
+     "reload:out",
+     "taking",
+     true,
+     "o1",
+     null
+    ],
+    [
+     1769,
+     "controllerChanged:out",
+     "taking",
+     true,
+     "o1",
+     "reloaded"
+    ],
+    [
+     1770,
+     "message:in",
+     "taking",
+     true,
+     "o1",
+     "LW_SW_ACTIVE"
+    ],
+    [
+     1770,
+     "message:out",
+     "taking",
+     true,
+     "o1",
+     "active"
+    ]
+   ]
+  ],
+  [
+   "state series (first 60)",
+   [
+    [
+     166,
+     "o1",
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     286,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     390,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     494,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     597,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     700,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     805,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     908,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1012,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1118,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1228,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1334,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1441,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1545,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1648,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1752,
+     "o1",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     1878,
+     "o2",
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     2084,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2188,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2291,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2395,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2501,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2603,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2706,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2809,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     2912,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3017,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3120,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3223,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3326,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3430,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     3534,
+     "o2",
+     "idle",
+     null,
+     false,
+     null,
+     null
+    ],
+    [
+     null,
+     null,
+     null,
+     null,
+     false,
+     null,
+     null
+    ]
+   ]
+  ],
+  [
+   "window B opened",
+   {
+    "controlled": true,
+    "build": "jyzgdxyo12n8",
+    "vis": "visible"
+   }
+  ],
+  [
+   "bumped again",
+   {
+    "newCache": "lw-lab-121w42ynf3n6v"
+   }
+  ],
+  [
+   "window A counts",
+   {
+    "buildReady": 1,
+    "skipWaitingPosted": [
+     "alone"
+    ],
+    "busy": 1
+   }
+  ],
+  [
+   "window A after navigation (2 windows)",
+   {
+    "reloaded": false,
+    "state": "ready",
+    "pane": true,
+    "badge": "A NEW BUILD IS READY · UPDATE",
+    "build": "jyzgdxyo12n8",
+    "log": [
+     [
+      355,
+      "hooked",
+      "idle",
+      ""
+     ],
+     [
+      1866,
+      "buildReady:in",
+      "idle",
+      null
+     ],
+     [
+      1868,
+      "accept:in",
+      "ready",
+      ""
+     ],
+     [
+      1869,
+      "SKIP_WAITING posted",
+      "taking",
+      ""
+     ],
+     [
+      1869,
+      "accept:out",
+      "taking",
+      true
+     ],
+     [
+      1869,
+      "buildReady:out",
+      "taking",
+      true
+     ],
+     [
+      1869,
+      "message:in",
+      "taking",
+      "LW_SW_BUILD"
+     ],
+     [
+      1869,
+      "message:out",
+      "taking",
+      "build"
+     ],
+     [
+      1869,
+      "message:in",
+      "taking",
+      "LW_SW_BUSY windows=2"
+     ],
+     [
+      1869,
+      "offer:in",
+      "ready",
+      null
+     ],
+     [
+      1872,
+      "offer:out",
+      "ready",
+      true
+     ],
+     [
+      1872,
+      "message:out",
+      "ready",
+      "busy"
+     ]
+    ]
+   }
+  ],
+  [
+   "window B counts",
+   {
+    "buildReady": 1,
+    "skipWaitingPosted": [
+     "alone"
+    ],
+    "busy": 1
+   }
+  ],
+  [
+   "window B meanwhile",
+   {
+    "state": "ready",
+    "pane": true,
+    "badge": "A NEW BUILD IS READY · UPDATE",
+    "build": "jyzgdxyo12n8",
+    "vis": "visible",
+    "log": [
+     [
+      -761,
+      "hooked",
+      "idle",
+      ""
+     ],
+     [
+      1500,
+      "message:in",
+      "idle",
+      "LW_SW_WAITING"
+     ],
+     [
+      1500,
+      "message:out",
+      "idle",
+      "waiting"
+     ],
+     [
+      1500,
+      "buildReady:in",
+      "idle",
+      null
+     ],
+     [
+      1502,
+      "accept:in",
+      "ready",
+      ""
+     ],
+     [
+      1503,
+      "SKIP_WAITING posted",
+      "taking",
+      ""
+     ],
+     [
+      1503,
+      "accept:out",
+      "taking",
+      true
+     ],
+     [
+      1503,
+      "buildReady:out",
+      "taking",
+      true
+     ],
+     [
+      1503,
+      "message:in",
+      "taking",
+      "LW_SW_BUSY windows=2"
+     ],
+     [
+      1503,
+      "offer:in",
+      "ready",
+      null
+     ],
+     [
+      1505,
+      "offer:out",
+      "ready",
+      true
+     ],
+     [
+      1505,
+      "message:out",
+      "ready",
+      "busy"
+     ]
+    ]
+   }
+  ],
+  [
+   "A: a real press on UPDATE",
+   {
+    "tapped": {
+     "ok": 1,
+     "x": 486,
+     "y": 198,
+     "w": 62.03334045410156,
+     "h": 44,
+     "by": "trig-l"
+    },
+    "aReload": {
+     "ms": 1942,
+     "build": "121w42ynf3n6v",
+     "state": "idle"
+    },
+    "cache3": "lw-lab-121w42ynf3n6v",
+    "buildMatches": true
+   }
+  ],
+  [
+   "B after A pressed",
+   {
+    "reloaded": false,
+    "state": "replaced",
+    "badge": "THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY",
+    "pane": false,
+    "build": "121w42ynf3n6v",
+    "lastEvents": [
+     [
+      "message:out",
+      "ready",
+      false
+     ],
+     [
+      "controllerChanged:in",
+      "ready",
+      false
+     ],
+     [
+      "controllerChanged:out",
+      "replaced",
+      false
+     ],
+     [
+      "controllerchange-event",
+      "replaced",
+      false
+     ],
+     [
+      "message:in",
+      "replaced",
+      false
+     ],
+     [
+      "message:out",
+      "replaced",
+      false
+     ]
+    ]
+   }
+  ],
+  [
+   "B counts over the whole run",
+   {
+    "buildReady": 1,
+    "skipWaitingPosted": [
+     "alone"
+    ],
+    "busy": 1
+   }
+  ],
+  [
+   "B: a real press on the 'replaced' badge",
+   {
+    "bTap": {
+     "ok": 1,
+     "x": 792,
+     "y": 21,
+     "w": 304,
+     "h": 24,
+     "by": "SPAN"
+    },
+    "reloaded": true,
+    "state": "idle",
+    "badge": null,
+    "acceptResult": [
+     true
+    ]
+   }
+  ],
+  [
+   "reader within 30 min (4 visibility flips)",
+   {
+    "checks": 0,
+    "updates": 0,
+    "mode": "registered"
+   }
+  ],
+  [
+   "reader after a patched +31 min",
+   {
+    "checksAfter31min": 1,
+    "updatesAfter31min": 1,
+    "checksAfterSecondFlip": 1
+   }
+  ],
+  [
+   "reader counts",
+   {
+    "buildReady": 1,
+    "skipWaitingPosted": [
+     "alone"
+    ],
+    "busy": 0
+   }
+  ],
+  [
+   "reader → install → quiet take → reload (no navigation)",
+   {
+    "rReload": {
+     "ms": 2731,
+     "build": "mgy4sbbxnhu0",
+     "state": "idle"
+    },
+    "cache4": "lw-lab-mgy4sbbxnhu0",
+    "buildMatches": true,
+    "log": [
+     [
+      -615,
+      "hooked",
+      "idle",
+      ""
+     ],
+     [
+      927,
+      "message:in",
+      "idle",
+      "LW_SW_WAITING"
+     ],
+     [
+      927,
+      "message:out",
+      "idle",
+      "waiting"
+     ],
+     [
+      927,
+      "buildReady:in",
+      "idle",
+      null
+     ],
+     [
+      930,
+      "accept:in",
+      "ready",
+      ""
+     ],
+     [
+      931,
+      "SKIP_WAITING posted",
+      "taking",
+      ""
+     ],
+     [
+      931,
+      "accept:out",
+      "taking",
+      true
+     ],
+     [
+      931,
+      "buildReady:out",
+      "taking",
+      true
+     ],
+     [
+      940,
+      "controllerChanged:in",
+      "taking",
+      null
+     ],
+     [
+      940,
+      "reload:in",
+      "taking",
+      null
+     ],
+     [
+      942,
+      "reload:out",
+      "taking",
+      null
+     ],
+     [
+      942,
+      "controllerChanged:out",
+      "taking",
+      "reloaded"
+     ],
+     [
+      942,
+      "controllerchange-event",
+      "taking",
+      null
+     ],
+     [
+      943,
+      "message:in",
+      "taking",
+      "LW_SW_ACTIVE"
+     ],
+     [
+      943,
+      "message:out",
+      "taking",
+      "active"
+     ]
+    ]
+   }
+  ],
+  [
+   "restored lab/ bytes",
+   {
+    "abs": true,
+    "sw": true
+   }
+  ],
+  [
+   "pwa.test after restore (no --write)",
+   [
+    "lw-lab-1gwph111hwu22x"
+   ]
+  ]
+ ]
+}
