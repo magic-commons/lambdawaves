@@ -3051,3 +3051,28 @@ and redo for every family, none for a camera orbit, a window drag, a notebook ke
 switch, the depth of sixty, and the bottom-row names; `render-exact` 40/40 and both digest-lock fixtures unchanged.
 Recorded, not solved: MOLECULES ON fills its derived defaults about 150 ms after the press with no note, so that fill
 rides into the next row until the molecular session can say when it has settled.
+
+The HISTORY card now lists every row, newest at the top, the bottom row named for the timeline's origin, the current
+row marked and kept in view inside the list's own box (the rack never moves: scrolled to 3305 it stays at 3305 through
+thirty edits and two jumps); the list is 250 px tall so ten rows and half of the eleventh show and the cut row says
+"this scrolls", and the card holds 408 px from thirteen rows to sixty. Building sixty-one rows node by node inside the
+ring's own change hook had pushed a commit to 2.6–3.9 ms, past the budget; the list is now one string, painted at most
+once per frame — a commit is 0.42 ms at a full ring, the repaint 2.2 ms in the frame the ring moved, and sixty commits
+in one task paint once. The ring's edges, each measured by the S3 verifier and closed here: a gesture that changed
+nothing drops its name once it is 400 ms old (a touch tap's click can land after the release), a new press ends the
+previous claim and an undo, a redo or a jump spends a leftover name — so a GRID press no longer names the next preset
+`96³ · SETTINGS`, and the UNDO button no longer names the next API edit `UNDO · HISTORY`; every keyboard edit (C, V,
+P) runs through one hook that commits what is pending and names its own row after the action and the key, and the
+travel keys run without noting; the right button is held like the left, so a right-drag, a Shift-right-click, a
+tension bend or reset and an Alt-click delete in the curve editor each make exactly one `CURVE · LFO 1 · MODULATION`
+row, and a lost release is released by the next press; a segment names its group (`STYLE SOLID · WAVE`); an undo that
+re-applies the modulation restarts a transport that was playing under SEPARATE time; the ring counts itself "driven"
+only when the last drive tick actually moved the register (a paused 2pₓ keeps turning on the modulation tick's wall
+clock, so "rate set and playing" would have made phantom rows, while ROTATE on 1s+2pz turns nothing and no longer
+freezes the ring); and MOLECULES ON is one row — the solve's fill re-keys the press's row — so the first Ctrl+Z turns
+it off and a redo turns it on with its defaults filled, the record clearing the derived orbital and STATES lane when it
+holds none. Stylehash: every window but HISTORY pixel-neutral, the one changed rule the list's height. Recorded for
+0.3.2: while a rotation drive is actually turning a p-state, the ring commits nothing, so UNDO cannot take back an edit made meanwhile and those edits merge into the one
+`rotation drive` row when it stops (a record of the unrotated anchor is the candidate); edits within one 400 ms quiet
+window coalesce into one row; a row click within about 250 ms of a keyboard edit can be lost to the repaint under the
+pointer.
