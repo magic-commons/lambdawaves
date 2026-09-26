@@ -1,0 +1,58 @@
+{
+ "states": {
+  "default": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "afterPlay": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "hideWorked": true,
+  "afterHide": {
+   "bytes": 9920,
+   "fnv": "d6e96c70"
+  },
+  "box": {
+   "bytes": 20198,
+   "fnv": "1e89caa7"
+  },
+  "back": {
+   "bytes": 9920,
+   "fnv": "6cd8969"
+  },
+  "rtOk": true,
+  "roundTrip": {
+   "bytes": 9935,
+   "fnv": "362d51c3"
+  },
+  "linkChars": 280,
+  "linkOk": true,
+  "link": {
+   "bytes": 10136,
+   "fnv": "f6123fad"
+  },
+  "demoOpen": true,
+  "demoCurrent": "DEMOS/WAVE DANCER",
+  "demoDirty": false,
+  "nbTitle": "WAVE DANCER",
+  "nbFace": "notes",
+  "demo": {
+   "bytes": 13947,
+   "fnv": "37f849c0"
+  },
+  "saved": true,
+  "reopen": true,
+  "reDirty": false,
+  "reopened": {
+   "bytes": 13947,
+   "fnv": "4765be90"
+  },
+  "fresh": {
+   "bytes": 13329,
+   "fnv": "4f0c49cd"
+  },
+  "freshTitle": "NOTEBOOK"
+ },
+ "errs": []
+}

@@ -22,7 +22,7 @@ import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
+import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor } from './mir/kit.js';
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
@@ -34,7 +34,7 @@ import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
 import { createExactRenderer } from './render-exact.js';
 import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
-import { bindAction, bindingConflicts, normalizeBinding } from './shortcuts.js';
+import { installKeys, keyName } from './keys.js';   // wave 130 seam 10: the keyboard dispatcher, out of boot() (its ACTIONS table stays)
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
 import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
@@ -68,7 +68,7 @@ import { createRegisterSturmian } from './sturmianreg.js';
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
-import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
+import { CAM, createCameraLaw } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
@@ -371,61 +371,6 @@ export async function boot(dom) {
 
   const keep = { frames: false };
   const domain = { auto: true, half: 7 };
-  /* ── THE CAMERA LAW (wave 50, W-CAMERA) ─────────────────────────────────────────────────────────────────────
-   * NEBULA carries four motion modes (AUTO-ROTATE × MOMENTUM) and a fling that fights whichever one is on.  We
-   * carry ONE first-order law and one constant.  The camera's angular velocity is an AMBIENT drive plus a
-   * RESIDUAL, and only the residual relaxes — at the rate μ = FRICTION (1/s):
-   *
-   *        ω(t) = ω_amb + d(t),     ḋ = −μ d     ⇒     ω(t) = ω_amb + (ω₀ − ω_amb) e^{−μt}
-   *        ω_amb = (AUTO-ROTATE ? SPIN : 0,  0)                    — a yaw drive; PITCH has no ambient
-   *
-   * so a fling COMPOSES with the ambient spin and relaxes TO it, never against it (NEBULA's N7, "one coalesced
-   * strongest request", as a single equation instead of a state machine).  The four booleans become two dials:
-   * μ large is "no momentum" (a flick dies inside half a second), μ moderate is momentum, μ = 0 is NO DECAY —
-   * the residual never dies and the view spins forever — crossed with the ambient switch, and every combination
-   * is reachable and legible.  THE ANGLE IS THE INTEGRAL of ω, not ω·dt: over a frame of dt the exact solution is
-   *        Δyaw = ω_amb·dt + d_y (1 − e^{−μ dt})/μ,   Δpitch = d_p (1 − e^{−μ dt})/μ        (→ d·dt as μ → 0)
-   * which is why the whole travel of a fling is closed form — with the ambient off it turns through exactly ω₀/μ
-   * and stops — and that identity is what the gate judges (B65), not a screenshot.
-   * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT CAM.MU_DEF = 1.0 (wave 50
-   * shipped 2.5, and the figures that follow are 2.5's): τ = 1/μ = 0.4 s,
-   * a hard flick (3 rad/s) coasts ln(ω₀/ω_rest)/μ ≈ 2.8 s and turns through ω₀/μ = 1.2 rad = 69° — two flicks to
-   * walk right round the cloud — where μ = 12 gives 0.25 rad = 14° (a nudge) and μ = 1 gives most of a half turn.
-   * REST = 0.003 rad/s is half a pixel a second at the drag's own 0.0065 rad/px: below it the residual is set to
-   * ZERO, the camera is still, and the loop stops scheduling — idle is zero work (§45).  |ω| is capped at 12 rad/s
-   * (two turns a second) so no flick can outrun the picture.  A fling that hits the POLE CLAMP loses its pitch
-   * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
-   * not on the undo stack, and reg.version cannot move because of it (§14). */
-  const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
-    GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
-  const camera = {
-    autoRotate: false, speed: 0.25, friction: CAM.MU_DEF,
-    dragGain: CAM.GAIN_DEF, flingGain: CAM.FLING_DEF,   // wave 58: rad/px = dragGain × CAM.SENS · the release is multiplied by flingGain before the law sees it
-    dy: 0, dp: 0,                                    // THE RESIDUAL d = ω − ω_amb (rad/s): the only state the law carries
-    t: 0, steps: 0, flings: 0, last: null,           // t: the seconds the law has integrated — the CAMERA clock (§12)
-    get ambient() { return this.autoRotate ? this.speed : 0; },
-    get wy() { return this.ambient + this.dy; },     // ω_yaw
-    get wp() { return this.dp; },                    // ω_pitch
-    get omega() { return Math.hypot(this.wy, this.wp); },
-    get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; },   // "the law has something to integrate"
-    /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb.
-     *  FLING scales ω₀ FIRST — how much you get — and μ then decides how fast it goes: at gain 0 there is nothing
-     *  to decay and the view stops dead on release (the drag itself is untouched), which no value of μ can do. */
-    fling(wy, wp = 0) { const G = this.flingGain; wy *= G; wp *= G;
-      const m = Math.hypot(wy, wp), k = m > CAM.MAX ? CAM.MAX / m : 1;
-      if (m < CAM.REST) { wy = 0; wp = 0; }                                   // gain 0, and anything under half a pixel a second: REST is REST after the gain, not before
-      this.dy = k * wy - this.ambient; this.dp = k * wp; this.flings++; this.last = { wy: this.wy, wp: this.wp, mu: this.friction, gain: G }; this.wake(); return this.omega; },
-    stop() { this.dy = 0; this.dp = 0; },
-    /** the camera clock starts NOW: the first frame after an idle must not integrate the idle */
-    wake() { lastWall = performance.now() / 1000; schedule(TIER.PRESENT); },
-    setFriction(v) { this.friction = Math.max(0, Math.min(CAM.MU_MAX, v)); if (ui.fricK) ui.fricK.set(this.friction); this.wake(); return this.friction; },
-    setDragGain(v) { this.dragGain = Math.max(CAM.GAIN[0], Math.min(CAM.GAIN[1], +v || 0)); if (ui.gainK) ui.gainK.set(this.dragGain); return this.dragGain; },
-    setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); if (ui.flingK) ui.flingK.set(this.flingGain); return this.flingGain; },
-    get radPerPixel() { return this.dragGain * CAM.SENS; },
-    setAutoRotate(v) { this.autoRotate = !!v; if (ui.spinSw) ui.spinSw.set(this.autoRotate); this.wake(); return this.autoRotate; },
-    setSpeed(v) { this.speed = v; if (ui.spinK) ui.spinK.set(v); this.wake(); return v; },
-    setDist(v) { return setDist(v); }, setFov(v) { return setFov(v); }, reset() { resetView(); },
-  };
   const fieldRate = { capMs: 0 };
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
@@ -887,95 +832,6 @@ export async function boot(dom) {
   }
 
 
-  const camTravel = { yaw: 0, pitch: 0 };     // the turn a drag has APPLIED, in the turntable's units — the FLING reads this in BOTH modes
-  const camLevel = { from: null, to: null, t0: 0, ms: 150, yaw: 0, pitch: 0 };   // FREE → TURNTABLE levels the roll over 150 ms; it never snaps
-  /** in FREE the two angles are a READOUT of the look direction — kept live so every dial, digest and cache key still moves */
-  function syncFreeAngles() {
-    const a = yawPitchFromQuat(obs.quat, CAM.PITCH);
-    obs.yaw = a.yaw + 2 * Math.PI * Math.round((obs.yaw - a.yaw) / (2 * Math.PI));   // stay on the turn the instrument was already on: a fling must not lose 2π
-    obs.pitch = a.pitch;
-  }
-  /** THE ONE ROAD for a RELATIVE turn of the camera — the drag, the keys, LW.orbit and a modulated angle all come here */
-  function orbitBy(dyaw, dpitch) {
-    if (obs.mode === 'free') { obs.quat = turnFree(obs.quat, dyaw, dpitch); camTravel.yaw += dyaw; camTravel.pitch += dpitch; syncFreeAngles(); }
-    else {
-      obs.yaw += dyaw; camTravel.yaw += dyaw;
-      const held = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, obs.pitch + dpitch));
-      camTravel.pitch += held - obs.pitch; obs.pitch = held;                       // the clamp EATS the travel, so a fling into the pole inherits no phantom pitch
-    }
-    return camTravel;
-  }
-  /* Key presses add a small orbit to a time-based easing queue. Repeats accumulate while held;
-     a released key finishes its queued travel without leaving a perpetual camera drive. */
-  const keyOrbit = { yaw: 0, pitch: 0 };
-  const keyOrbitMoving = () => Math.abs(keyOrbit.yaw) + Math.abs(keyOrbit.pitch) > 0;
-  function queueKeyOrbit(yaw, pitch) { if (!keyOrbitMoving()) lastWall = performance.now() / 1000;
-    keyOrbit.yaw += yaw; keyOrbit.pitch += pitch; schedule(TIER.PRESENT); }
-  function stepKeyOrbit(dt) {
-    if (!keyOrbitMoving()) return false;
-    const k = 1 - Math.exp(-Math.max(0, dt) / 0.065);
-    const y = Math.abs(keyOrbit.yaw) < 0.00015 ? keyOrbit.yaw : keyOrbit.yaw * k;
-    const p = Math.abs(keyOrbit.pitch) < 0.00015 ? keyOrbit.pitch : keyOrbit.pitch * k;
-    keyOrbit.yaw -= y; keyOrbit.pitch -= p;
-    if (Math.abs(keyOrbit.yaw) < 0.00015) { orbitBy(keyOrbit.yaw, 0); keyOrbit.yaw = 0; }
-    if (Math.abs(keyOrbit.pitch) < 0.00015) { orbitBy(0, keyOrbit.pitch); keyOrbit.pitch = 0; }
-    orbitBy(y, p);
-    return true;
-  }
-  /** TURNTABLE ⇄ FREE.  Into FREE is an EXACT conversion and moves no pixel; out of it slerps the roll away. */
-  function setCamMode(m, opt) {
-    const want = m === 'free' ? 'free' : 'turntable';
-    if (ui.camSeg) ui.camSeg.set(want);
-    if (want === obs.mode && !camLevel.from) return obs.mode;
-    if (want === 'free') { camLevel.from = null; obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); obs.mode = 'free'; }
-    else {
-      const a = yawPitchFromQuat(obs.quat, CAM.PITCH);
-      const yaw = a.yaw + 2 * Math.PI * Math.round((obs.yaw - a.yaw) / (2 * Math.PI));
-      const to = quatFromYawPitch(yaw, a.pitch);
-      if (opt && opt.now) { obs.mode = 'turntable'; obs.yaw = yaw; obs.pitch = a.pitch; obs.quat = to; camLevel.from = null; }
-      else { camLevel.from = obs.quat.slice(); camLevel.to = to; camLevel.yaw = yaw; camLevel.pitch = a.pitch; camLevel.t0 = performance.now(); }
-    }
-    saveSettings(); schedule(TIER.PRESENT);
-    return obs.mode;
-  }
-  /** one step of the levelling slerp — the ONLY thing that writes the pose between the two modes */
-  function camLevelStep(nowMs) {
-    if (!camLevel.from) return false;
-    const u = Math.min(1, (nowMs - camLevel.t0) / camLevel.ms), e = u * u * (3 - 2 * u);
-    if (u >= 1) { obs.quat = camLevel.to; obs.mode = 'turntable'; obs.yaw = camLevel.yaw; obs.pitch = camLevel.pitch; camLevel.from = null; }
-    else { obs.quat = slerp(camLevel.from, camLevel.to, e); syncFreeAngles(); }
-    return true;
-  }
-  /** ONE tick of the CAMERA clock: the EXACT solution of ḋ = −μd over dt, and the exact INTEGRAL of ω for the pose.
-   *  Returns whether the pose moved.  Never called while a finger is on the field — the drag owns the pose then. */
-  function cameraStep(dt) {
-    if (!(dt > 0)) return false;
-    const mu = Math.max(0, camera.friction), wa = camera.ambient;
-    let iy, ip;                                                                      // ∫₀^dt d(s) ds — the residual's own travel
-    if (mu > 0) { const e = Math.exp(-mu * dt), s = (1 - e) / mu; iy = camera.dy * s; ip = camera.dp * s; camera.dy *= e; camera.dp *= e; }
-    else { iy = camera.dy * dt; ip = camera.dp * dt; }                               // μ = 0: no decay at all — the fling spins forever
-    if (!wa && Math.hypot(camera.dy, camera.dp) < CAM.REST) { camera.dy = 0; camera.dp = 0; }   // REST: the camera is still, and the loop may stop
-    camera.t += dt; camera.steps++;
-    if (obs.mode === 'free') {
-      const amb = wa * dt;                                                           // the AMBIENT is a WORLD axis: LEFT-multiply
-      if (amb) obs.quat = qnormalize(qmul([Math.cos(amb / 2), 0, 0, Math.sin(amb / 2)], obs.quat));
-      if (iy || ip) obs.quat = turnFree(obs.quat, iy, ip);                            // the RESIDUAL is screen-relative: RIGHT-multiply, and no clamp anywhere
-      if (amb || iy || ip) { syncFreeAngles(); return true; }
-      return false;
-    }
-    const dyaw = wa * dt + iy;
-    if (dyaw) obs.yaw += dyaw;
-    if (ip) { const want = obs.pitch + ip, held = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, want)); if (held !== want) camera.dp = 0; obs.pitch = held; }   // the pole clamp EATS the pitch fling; the yaw runs on
-    return dyaw !== 0 || ip !== 0;
-  }
-  /* the camera's pose has ONE road each: the ZOOM dial, the wheel, the pinch and the arrow keys all come through
-     setDist, so the dial can never lie about where the camera is (and neither can a restored project) */
-  function setDist(v) { if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); if (ui.zoomK) ui.zoomK.set(obs.dist); schedule(TIER.PRESENT); return obs.dist; }
-  function setFov(v) { if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); if (ui.fovK) ui.fovK.set(obs.fov); schedule(TIER.PRESENT); return obs.fov; }
-  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); }
-  /** RESET VIEW (the trigger, R, a double-click and a double-tap): the shipped pose and the motion with it —
-      AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
-  function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); syncCamUI(); schedule(TIER.PRESENT); }   // wave 54: the pose is the same pose in either mode
   function loop(nowMs) {
     rafId = 0;
     if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
@@ -1355,6 +1211,11 @@ export async function boot(dom) {
 
   /* ── windows ──────────────────────────────────────────────────────────── */
   const ui = {};
+  /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
+     RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
+  const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
+    modHand, saveSettings, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
 
@@ -4571,7 +4432,6 @@ export async function boot(dom) {
   function keyHelp() { return `axis ${keyState.axis.toUpperCase()} · rotor ${keyState.which}`; }
   /* ── KEYS: a rebindable action table.  `fine` is shift for the stepping actions; actions that declare `shift`
      require it (so TAB and Shift+TAB are two actions).  Overrides live in localStorage. ── */
-  const LS_KEYS = 'lambdawaves.q0.keys';
 
 
   const stageHasFocus = () => document.activeElement === dom.canvas;
@@ -4654,17 +4514,8 @@ export async function boot(dom) {
     { id: 'saveAs', label: 'save the project under a new name', key: 'KeyS', ctrl: true, shift: true,
       run: () => layout.notebook.open('projects') },
   ];
-  const DEFAULT_KEYS = Object.fromEntries(ACTIONS.map((a) => [a.id, { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }]));
-  /* Saved chords pass the same collision/reservation law as a live edit. Old corrupt
-     overrides cannot silently shadow a newer default action. */
-  try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) if (ov[a.id]) bindAction(ACTIONS, a.id, ov[a.id]); } catch (_) {}
-  function saveKeys() { try { const ov = {}; for (const a of ACTIONS) { const d = DEFAULT_KEYS[a.id]; if (a.key !== d.key || !!a.ctrl !== d.ctrl || !!a.alt !== d.alt || a.shift !== d.shift) ov[a.id] = { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }; } localStorage.setItem(LS_KEYS, JSON.stringify(ov)); } catch (_) {} }
-  const MAC = /Mac|iPhone|iPad/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
-  function keyName(a) { if (!a.key) return '—'; const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/').replace('Comma', ',');
-    const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? (MAC ? '⌥+' : 'Alt+') : '') + (a.shift ? 'Shift+' : '') + k;
-    return n === 'Shift+/' ? '?' : n; }
-
-  function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
+  /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
+  const keys = installKeys({ ACTIONS, layout, canvas: dom.canvas, stageHasFocus, refresh: () => { if (ui.keysRefresh) ui.keysRefresh(); } });
 
 
   function toggleUI() {
@@ -4699,108 +4550,9 @@ export async function boot(dom) {
     if (dev.classList.contains('folded')) { const f = dev.querySelector('.dev-fold'); if (f) f.click(); }
     dev.classList.add('tab-hot'); setTimeout(() => dev.classList.remove('tab-hot'), 600);
   }
-  const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-  const OWNED = {
-    slider: new Set([...ARROWS, 'Home', 'End', 'PageUp', 'PageDown', 'Delete', 'Backspace']),
-
-
-    radio: new Set([...ARROWS, 'Home', 'End', 'Enter']),
-    button: new Set(['Enter']),
-    /* WAVE 68 · A LINK IS NOT A BUTTON, and the difference is exactly this key.  `a[href]` fell into
-       the button set, so Space was taken from the app on all ten anchors in the page — and a link
-       does NOT activate on Space (it is the browser's scroll), so those presses reached nobody at
-       all.  Enter alone, which is the platform's own contract for an anchor. */
-    link: new Set(['Enter']),
-  };
-  /** WAVE 68 · WHO THE GUARD IS LOOKING AT.  The selector named the TAG `button` and never
-   *  `[role="button"]` — and `#title`, the λWAVES logo, is the one `<div role="button">` wave 62
-   *  itself created, so one Space on the focused logo opened the menu AND started the clock
-   *  (`playing` false→true, `t` 0 → 1.863 s).  A guard about ROLES has to read roles. */
-  const seatOf = (el) => {
-    const w = el && el.closest && el.closest('[role="slider"],[role="radio"],[role="button"],button,a[href]');
-    if (!w) return null;
-    /* A CONTROL THAT WILL NOT ACT DOES NOT OWN THE KEYS.  With KEEP FRAMES off — the shipped default —
-       the scrub is `aria-disabled` and its own keydown returns; the three knobs that mount disabled do
-       the same since kit.js's setDisabled writes the attribute.  Before this, three arrows at such a
-       control reached NOBODY: the control refused them and the guard had already taken them from the
-       app.  Either say you are disabled or let the app have them — never both. */
-    if (w.disabled === true || w.getAttribute('aria-disabled') === 'true') return null;
-    const r = w.getAttribute('role');
-    return OWNED[r === 'slider' ? 'slider' : r === 'radio' ? 'radio' : (w.tagName === 'A' && r !== 'button') ? 'link' : 'button'] || null;
-  };
-  window.addEventListener('keydown', (e) => {
-    const tag = (e.target && e.target.tagName) || '';
-
-
-    /* Project save and Settings escape a text field. This return sits above every modifier
-       test, so Ctrl+S pressed with the caret in the project's name field or the notebook — the two
-       places a hand most plausibly is when it reaches for save — reached nobody at all.
-         IT IS AN ALLOWLIST AND NOT A LOOSENING.  Ctrl+Z inside the notebook still does the TEXTAREA'S
-       undo and not the register's. Save and the platform-standard Settings shortcut have no useful
-       text-editing meaning, so they stay global while the caret is active. */
-    const appCommandFromText = (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma');
-    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !appCommandFromText) return;
-    if (tag === 'SELECT' && e.code !== 'Space') return;
-    if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape (layout.keysheet is this same object)
-    if (e.code === 'Escape' && stageHasFocus()) { try { dom.canvas.blur(); } catch (_) {} return; }   // wave 57: the keyboard way OFF the stage — the next Tab then walks the interface
-    if (e.code === 'Escape' && layout.menu && layout.menu.isOpen) { e.preventDefault(); layout.menu.close(); const t = document.getElementById('title'); if (t) t.focus(); return; }   // wave 62: the ONE new key in the whole wave
-    if (e.code === 'Escape' && layout.addMenu && layout.addMenu.shown) { e.preventDefault(); layout.addMenu.close(); const b = document.getElementById('rackAdd'); if (b) b.focus(); return; }
-    if (e.code === 'Escape' && layout.favMenu && layout.favMenu.shown) { e.preventDefault(); layout.favMenu.close(); const b = document.getElementById('rackFav'); if (b) b.focus(); return; }
-    /* ── WAVE 62 · WHOSE KEY IS THIS? ─────────────────────────────────────────────────────────────
-     * THE LAW: a key belongs to the focused control WHEN THAT CONTROL'S ROLE WOULD USE IT.  Every
-     * other key is the app's shortcut, including the bare letters, and including Space on a slider.
-     * Not "any control swallows everything" — that would take H, N, B and ? away from a keyboard user
-     * the moment they touched a knob — and not a `{ global: true }` flag on 38 actions, which is
-     * annotation to maintain and gets forgotten on the 39th.  It is a property of THE KEY AND THE
-     * ROLE, so it is one Set lookup, and it degrades correctly when an action is added.
-     *   Space on a focused MUTE presses MUTE and does not touch the transport (a button owns Space);
-     *   Space on a focused KNOB still plays (a slider has no use for Space);
-     *   ArrowRight on a focused knob turns the knob; ArrowRight on a focused SWITCH still steps time.
-     * MODIFIERS ARE NEVER OWNED — Ctrl/⌘+Z undoes from inside a knob, ? opens the sheet from inside a
-     * button — but Shift IS let through, because Shift+Arrow is the fine step and Shift+Tab is the
-     * browser's.  The guard returns WITHOUT preventDefault(): that is the whole point, because what
-     * runs next is the button's own native activation or the slider's own handler.  (The keyboard editor
-     * records its chords with its own listener while it is open: lab/keymap.js.) */
-    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-      const own = seatOf(e.target);                                // wave 68: roles, not tags — and never a control that will not act
-      if (own && own.has(e.code)) return;
-    }
-    /* ── WAVE 68 · TWO LAWS THE ACTIONS LOOP HAS TO OBEY BEFORE IT RUNS ANYTHING ──────────────────
-     * (1) A HANDLED EVENT IS HANDLED.  `#title`'s own keydown calls preventDefault() on Space and the
-     *     loop never asked, so both ran: one press opened the menu and started the physics clock.
-     *     The guard above is the general answer and this is the safety net under it — any element in
-     *     this lab that answers a key and says so is now believed, whatever its role happens to be.
-     * (2) TAB OFF THE STAGE IS THE BROWSER'S, WHATEVER THE TABLE SAYS.  Wave 57 removed a keyboard
-     *     trap by stage-gating the two window-cycle actions; wave 62's `continue` (which is correct,
-     *     and stays) let a LATER action reached by the same key claim it, so two clicks in the shipped
-     *     KEYS panel — bind NOTES to Tab — put the trap straight back, persisted to localStorage.
-     *     Wave 57's rule was never a property of those two actions: it is a property of THE KEY, and
-     *     it is enforced here where no binding can get underneath it.  Shift+Tab with it, because
-     *     backwards walking is the same promise.  (The binding law refuses it too — lab/shortcuts.js
-     *     bindingError, the one road of the keyboard editor, the saved overrides and keys.bind — so
-     *     nothing offers a chord that could never fire; but the trap is closed even if it did.) */
-    if (e.defaultPrevented) return;
-    if (e.code === 'Tab' && !stageHasFocus()) return;
-    /* WAVE 88 · AND THE NATIVE ACTIVATION IS CANCELLED HERE.  Taking Space out of OWNED above stops
-       the guard HANDING it to the control; it does not stop the browser, which fires a <button>'s
-       click from Space on its own.  One preventDefault at the top of the dispatch does, and it must
-       be before the loop rather than inside a matched action, so the cancellation does not depend on
-       Space still being bound to something. */
-    if (e.code === 'Space') e.preventDefault();
-    const fine = e.shiftKey ? 0.25 : 1;
-    for (const a of ACTIONS) {
-      if (!matches(a, e)) continue;
-      if (a.stage && !stageHasFocus()) continue;                   // wave 57: TAB is the browser's unless the hands are on the world — see THE TAB RULE.  wave 62: `continue`, not `return` — a `return` abandoned the whole loop rather than skipping this one action, which is harmless only while Tab is the sole stage: true binding
-      e.preventDefault();
-      a.run(fine);
-      return;
-    }
-  });
   __LW_hooks.keys = {
     actions: ACTIONS,
-    bind(id, b, options) { const result = bindAction(ACTIONS, id, b, options); if (result.ok) { saveKeys(); if (ui.keysRefresh) ui.keysRefresh(); } return result; },
-    conflicts(id, b) { const a = ACTIONS.find(x => x.id === id); return a ? bindingConflicts(ACTIONS, id, normalizeBinding(a, b)) : []; },
-    reset() { for (const a of ACTIONS) Object.assign(a, DEFAULT_KEYS[a.id]); try { localStorage.removeItem(LS_KEYS); } catch (_) {} if (ui.keysRefresh) ui.keysRefresh(); },
+    bind: keys.bind, conflicts: keys.conflicts, reset: keys.reset,   // wave 130 seam 10: the three storage verbs live in lab/keys.js
     /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
        deleted; the keyboard editor records its chords itself.  `capturing` stays readable (the legacy gate reads it). */
     name: keyName, get capturing() { return null; },

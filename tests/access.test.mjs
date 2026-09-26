@@ -149,7 +149,7 @@ judge('A6 index.html carries the two skip links, both racks as tabindex="-1" fra
   skipCount === 2 && racksNeg && fieldImg && importVh, { skipCount, racksNeg, fieldImg, importVh });
 
 /* ── 5 · the single-key law is still key-and-role shaped ─────────────────────────────────────── */
-const rack = TEXT.get('lab/rack.js') || '';
+const rack = TEXT.get('lab/keys.js') || '';   // wave 130 seam 10: the dispatcher and its key-and-role law live in lab/keys.js
 const owned = /const OWNED = \{/.test(rack);
 const sliderOwnsNoSpace = /slider:\s*new Set\(\[\.\.\.ARROWS[^\]]*\]\)/.test(rack) && !/slider:\s*new Set\(\[[^\]]*'Space'/.test(rack);
 /* WAVE 88 · THE LAW THIS LINE GUARDS HAS CHANGED, SO THE LINE CHANGES WITH IT — it is not deleted
