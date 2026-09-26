@@ -16,7 +16,7 @@ anyways. Let it sort of be a mini-tutorial pointing where the user must press."*
 
 The install layer from wave 56 already finds a new deploy at every launch, precaches it, waits, and tells the page (`LW_SW_WAITING` → `swClient.buildReady`). The offer is then lost in three places:
 
-- **The offer is invisible by default.** The only on-screen offer is the fifth badge (`A NEW BUILD IS READY · RELOAD`) in `#badges`. First-run STATUS TAGS is off (`rack.js:1265`, `value: false`) and `lab.css:40` `body.no-badges #badges { display: none !important; }` hides the row and the offer with it. The second channel is SETTINGS' status line, visible only with SETTINGS open.
+- **The offer is invisible by default.** The only on-screen offer is the fifth badge (`A NEW BUILD IS READY · RELOAD` today; this wave renames its press word to UPDATE) in `#badges`. First-run STATUS TAGS is off (`rack.js:1265`, `value: false`) and `lab.css:40` `body.no-badges #badges { display: none !important; }` hides the row and the offer with it. The second channel is SETTINGS' status line, visible only with SETTINGS open.
 - **The check runs only at a navigation.** Nothing calls `registration.update()` except ABOUT › UPDATE APP. A tab left open, or a home-screen app that is switched to but never relaunched, never asks again.
 - **One launch behind by design.** The worker never takes itself (THE ONE LAW). The launch during which an update installs runs the old build to its end; the new one is served at the launch after that, and only if every window of the old build was closed in between.
 
@@ -46,7 +46,7 @@ A latent defect to fix on the way: today's `accept()` (a badge press) sends SKIP
   - `untouched(false)` → `accept({ quiet: true })` and return `true` (badge says `TAKING THE NEW BUILD…`; no pane).
   - `untouched(true)` (untouched but playing) → `offer()` **and** arm a one-shot `visibilitychange` listener that, when `document.visibilityState === 'hidden'` and `untouched(true)` still holds and `state === 'ready'`, calls `accept({ quiet: true })`.
   - otherwise → `offer()`.
-- `offer()`: badge `A NEW BUILD IS READY · RELOAD` + status (as `say()` does today) **and** the pane, built once (`el` from `./mir/kit.js`, `trig` for the buttons) and reused; shown at most once per waiting build (`offered = pending && pending.build`); `LATER` hides the pane and leaves the badge; `TAKE IT` calls `accept()`.
+- `offer()`: badge `A NEW BUILD IS READY · UPDATE` + status (as `say()` does today) **and** the pane, built once (`el` from `./mir/kit.js`, `trig` for the buttons) and reused; shown at most once per waiting build (`offered = pending && pending.build`); `LATER` hides the pane and leaves the badge; `UPDATE` calls `accept()`.
 - `accept(opt)`: if `state !== 'ready' || !take` return false. **If `getProjects().dirty`**: for a quiet take return false (this cannot happen — `untouched` includes `!dirty` — but the guard stays); for a press, `window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')` and on yes `markClean()`, on no return false. Then `asked = true; state = 'taking'; say('TAKING THE NEW BUILD…', …)`, hide the pane, `take(opt && opt.quiet ? { alone: true } : {})`.
 - `message(d)`: add `LW_SW_BUSY` → the quiet take was refused because another window is open: `asked = false; state = 'ready'; offer(); return 'busy'`.
 - `refresh()` unchanged except it hides the pane when it takes.
@@ -54,10 +54,10 @@ A latent defect to fix on the way: today's `accept()` (a badge press) sends SKIP
 
   ```
   h3  A NEW BUILD IS READY
-  p   A newer λWAVES is installed and waiting. Press <b>TAKE IT</b> — or the badge above — to reload into it. It takes a few seconds.
+  p   A newer λWAVES is installed and waiting. Press <b>UPDATE</b> — or the badge above — to reload into it. It takes a few seconds.
   p   <b>KEPT:</b> saved projects, settings, keys, the notebook. <b>LOST:</b> unsaved changes and the undo list — save first.
   p   <b>LATER</b> keeps the badge; ABOUT › UPDATE APP works any time.
-  buttons  TAKE IT · LATER
+  buttons  UPDATE · LATER
   ```
 
   The pane is `role="region" aria-label="a new build is ready"` — **not** a live region (wave 62 allows at most three and they are spoken for). `id="offer"`, `hidden` when not shown.
@@ -114,10 +114,10 @@ host: dom.badges.parentElement,
 - `tests/pwa.test.mjs`: after E5 add **E5b**: (i) `{ type: 'LW_SW_SKIP_WAITING', alone: true }` with the stub's one window → `skip` rises by one; (ii) replace `self_.clients.matchAll` with one returning two windows, a `source` with a `postMessage` sink → `skip` unchanged and `LW_SW_BUSY { windows: 2 }` posted to the source (await the returned promise; the handler returns it through `waitUntil` when present — pass a `waitUntil` that captures it). Keep the "exactly one skipWaiting()" and "not reachable before the message handler" asserts green. Update the closing comment's prose to name the quiet take and the one-window rule. Update the PASS line.
 - **New `tests/offer.browser-test.mjs`** on the gate harness (`open(\`https://127.0.0.1:${LW_PORT}/lab/?preset=1s%2B2pz\`)`, wait for `__LW.ready`). The page runs in automation mode (no real worker), so drive `__LW.sw` directly and replace `__LW.sw.reload` with a counter, as the menubar suite does. Judge each scene by the act it names:
   1. **Untouched boot takes quietly.** `__LW.sw.buildReady((opt) => { window.__taken = opt; })` → returns `true`, `__taken.alone === true`, `state === 'taking'`, `#offer` absent or hidden, badge text `TAKING THE NEW BUILD…`.
-  2. **Busy → offered.** `__LW.sw.message({ type: 'LW_SW_BUSY', windows: 2 })` → `state === 'ready'`, `#offer` visible; `document.body.classList.contains('no-badges')` is `true` (first-run default) **and** `getComputedStyle(buildBadge).display !== 'none'` while each of the other four badges reads `display: none`; **hit-test** (the glass law): `document.elementFromPoint` at the centre of TAKE IT is that button (or inside it), at the centre of LATER that button, at the centre of the build badge the badge.
-  3. **LATER keeps the badge.** Press LATER → `#offer` hidden, badge still visible and reads `A NEW BUILD IS READY · RELOAD`. Press the badge → take called with no `alone`, `state === 'taking'`.
+  2. **Busy → offered.** `__LW.sw.message({ type: 'LW_SW_BUSY', windows: 2 })` → `state === 'ready'`, `#offer` visible; `document.body.classList.contains('no-badges')` is `true` (first-run default) **and** `getComputedStyle(buildBadge).display !== 'none'` while each of the other four badges reads `display: none`; **hit-test** (the glass law): `document.elementFromPoint` at the centre of UPDATE is that button (or inside it), at the centre of LATER that button, at the centre of the build badge the badge.
+  3. **LATER keeps the badge.** Press LATER → `#offer` hidden, badge still visible and reads `A NEW BUILD IS READY · UPDATE`. Press the badge → take called with no `alone`, `state === 'taking'`.
   4. **A touched session is offered, never taken.** Reset `__LW.sw.state = 'idle'`; make an edit (`__LW.loadPreset('2pz')` or a rate set — anything that makes a history row; confirm `__LW.history.depth > 0` or `entries().length > 1`); `buildReady(take)` → `true`, take **not** called, `#offer` visible.
-  5. **A dirty project asks first.** With the session dirty (`__LW.projects.dirty === true`), `window.confirm = () => false` → TAKE IT does nothing (`take` not called, state still `ready`); `window.confirm = () => true` → take called, `__LW.projects.dirty === false`. Restore `window.confirm`.
+  5. **A dirty project asks first.** With the session dirty (`__LW.projects.dirty === true`), `window.confirm = () => false` → UPDATE does nothing (`take` not called, state still `ready`); `window.confirm = () => true` → take called, `__LW.projects.dirty === false`. Restore `window.confirm`.
   6. **Untouched but playing: offered now, taken on hide.** Fresh page (a second `open()`, or reload the same and re-await ready): `__LW.play()`; `buildReady(take)` → `true`, not taken, `#offer` visible; then make the page hidden (`Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' })`, dispatch `visibilitychange`) → take called with `alone: true`; restore the property (delete it) and dispatch again.
   7. **STATUS TAGS on and off.** `document.body.classList.remove('no-badges')` → all five badges display (the four ψ-badges as before); add it back → only the build badge.
   Print one `PASS …` line per scene naming the measured thing, and a final count.
