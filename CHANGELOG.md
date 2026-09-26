@@ -11,6 +11,57 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.3.1-alpha` — 2026-09-26
+
+Commit `88e9cc0` · waves 130–132 · 36 commits.
+
+- **wave 130**: Two more seams out of `boot()` — the keyboard dispatcher and the camera law become modules; the phone block does not, and why
+- **wave 131**: Three scopes, one per key — and NEW opens the empty project
+- **wave 132**: The true history — one reader, one writer, one key over the whole project
+
+<details><summary>commits</summary>
+
+- `570991c` 2026-09-25 — CHANGELOG for v0.3.0-alpha
+- `4012a3e` 2026-09-25 — build-deploy: the device report's import is a dev-only escape by design (V2 DEV_ONLY table),…
+- `13ede80` 2026-09-25 — OPTIMIZATION 2026-09-24 · W130 seam 10 the keyboard dispatcher → lab/keys.js
+- `54ff360` 2026-09-25 — OPTIMIZATION 2026-09-24 · W130 seam 11 the camera law → lab/camera-law.js
+- `bbe4a1f` 2026-09-25 — Merge branch 'worktree-agent-a11847891ea8fef73' into worktree-optimization-2026-09-24
+- `4c79b15` 2026-09-25 — REPORT.md wave 130 (two seams: keys.js, camera-law.js; the phone block and why not), NEXT-MOVES…
+- `125884b` 2026-09-25 — 0.3.1 PLAN: the three scopes (PREFERENCE · WORKSPACE · PROJECT), the empty project NEW opens,…
+- `8d5c065` 2026-09-25 — 0.3.1 · S1 the scope law: serialize/restore carry no preference key; palette leaves settings;…
+- `283f109` 2026-09-25 — 0.3.1 · S1 verifier probes: a genuine pre-S1 save (old-export.mjs → old030.json) and verify.mjs…
+- `5bbe0a9` 2026-09-25 — 0.3.1 · BRIEF-S3: the true-history core, for the S3 builder
+- `e4b3298` 2026-09-25 — 0.3.1 · S2 the empty project: lab/new-project.lambdawaves.json + tools/new-project.mjs; NEW…
+- `7ae57e4` 2026-09-25 — Merge branch 'worktree-agent-ab4a30a4c964a87a0' into worktree-agent-a644c987eccdf0d65
+- `f5430ae` 2026-09-25 — 0.3.1 · S2 verifier probes: verify.mjs scenes (afterDemo, bootCompare, fail, prompts, nblaw,…
+- `c02a21d` 2026-09-26 — 0.3.1 · S2 follow-up: a project open puts the running modulation down first (a held stage no…
+- `365e5cc` 2026-09-26 — Merge branch 'worktree-agent-ab4a30a4c964a87a0' into release-0.3.1
+- `6c2740f` 2026-09-26 — Merge branch 'worktree-agent-a644c987eccdf0d65' into release-0.3.1
+- `a9571a0` 2026-09-26 — REPORT.md wave 131 (three scopes + the empty project); BRIEF-S4 (the HISTORY card)
+- `bd30f37` 2026-09-26 — 0.3.1 · the MIR CONTRACT §9 proposal (the three scopes), for Josh to apply in MIR
+- `f6bee32` 2026-09-26 — 0.3.1 · S3 the true history: one reader/writer/key over the PROJECT scope (serialize…
+- `737d5bb` 2026-09-26 — Merge branch 'worktree-agent-ac33fbe08a407ba1c' into worktree-agent-a638b5d535951773c
+- `e0bc0f7` 2026-09-26 — Merge branch 'worktree-agent-ac33fbe08a407ba1c' into worktree-agent-af15bcc86d628702b
+- `48f2e82` 2026-09-26 — 0.3.1 · S3 verifier probes (fresh context): families, no-row roads and every preference, play,…
+- `9d56ff5` 2026-09-26 — Merge branch 'worktree-agent-ac33fbe08a407ba1c' into release-0.3.1
+- `92d2803` 2026-09-26 — Merge branch 'worktree-agent-af15bcc86d628702b' into release-0.3.1
+- `36b966d` 2026-09-26 — Merge branch 'release-0.3.1' into worktree-agent-a638b5d535951773c
+- `34300a5` 2026-09-26 — REPORT.md wave 132 (the true history: one reader, one writer, one key over the project)
+- `4d526a8` 2026-09-26 — CLAUDE.md: the three scopes, the empty project and the history ring as standing rules; DOMAIN…
+- `927bd03` 2026-09-26 — 0.3.1 · S4 the HISTORY card lists every row; a no-op gesture drops its name; right-button…
+- `4a24681` 2026-09-26 — Merge branch 'worktree-agent-a638b5d535951773c' into worktree-agent-ab07102e14bca48b6
+- `97dc34b` 2026-09-26 — 0.3.1 · S4 verifier probes (fresh context): the card, the paint, stale names by real input,…
+- `13d5926` 2026-09-26 — 0.3.1 · S4 follow-up: the travel keys lend no name; a MOLECULES undo and NEW leave no fill…
+- `42b959e` 2026-09-26 — Merge branch 'worktree-agent-a638b5d535951773c' into release-0.3.1
+- `6446060` 2026-09-26 — Merge branch 'worktree-agent-ab07102e14bca48b6' into release-0.3.1
+- `980affa` 2026-09-26 — REPORT.md wave 132 addendum: the HISTORY card and the ring's edges (S4)
+- `1ce1110` 2026-09-26 — 0.3.1 PLAN: STATUS 2026-09-26
+- `88e9cc0` 2026-09-26 — 0.3.1-alpha: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.3.0-alpha` — 2026-09-25
 
 Commit `1402276` · waves 116–129 · 120 commits.
