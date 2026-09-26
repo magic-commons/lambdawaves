@@ -1,0 +1,11 @@
+key C (cycle style) {"rows":["start","edit"],"editMoved":true}
+key V (cycle view) {"rows":["start","edit"],"editMoved":true}
+key P (palette on/off) {"rows":["start","edit"],"editMoved":true}
+key ] (turn ψ +) {"rows":["start","edit"],"editMoved":true}
+key K (impulse) {"rows":["start","edit"],"editMoved":true}
+(a) {"gridThenKey":["start","96³ · SETTINGS"],"gridThenApi":["start","64³ · SETTINGS"],"themeThenModApi":["start","LIGHT · SETTINGS"],"themeThenKeyC":["start","DARK · SETTINGS"],"themeWait5sThenApi":["start","SYSTEM · SETTINGS"]}
+curve surface {"cls":"m2edit m2hero","rect":[298,271,346,128],"p":[426.02,309.4],"hitInside":true,"hit":"m2fill","pts":15}
+(b) one right-drag {"rows":["start","edit"],"modelMoved":true,"pts":15,"undo":{"ok":true,"rows":["start","edit"]}}
+(b) slow right-drag (700 ms hold mid-gesture) {"rows":["start","edit","edit"],"modelMoved":true}
+control: left drag of a point {"rows":["start"]}
+errs [] 

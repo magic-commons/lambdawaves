@@ -1,0 +1,10 @@
+key C {"rowsNoFlush":["start"],"editMoved":true}
+key V {"rowsNoFlush":["start"],"editMoved":true}
+key P {"rowsNoFlush":["start"],"editMoved":true}
+key ] {"rowsNoFlush":["start","edit"],"editMoved":true}
+key K {"rowsNoFlush":["start","edit"],"editMoved":true}
+editor points [{"cls":"m2playdot","x":477.01666259765625,"y":385.62498474121094,"w":7.23333740234375,"top":false},{"cls":"m2tn","x":517.25,"y":370.79998779296875,"w":8,"top":true},{"cls":"m2tn","x":597.75,"y":299.20001220703125,"w":8,"top":true},{"cls":"m2tn","x":678.25,"y":299.20001220703125,"w":8,"top":true},{"cls":"m2tn","x":758.75,"y":370.79998779296875,"w":8,"top":true},{"cls":"m2pt","x":476.9916458129883,"y":385.625,"w":8.816665649414062,"top":true},{"cls":"m2pt","x":557.5083160400391,"y":334.9833297729492,"w":8.850006103515625,"top":true},{"cls":"m2pt","x":638.0166397094727,"y":284.36666107177734,"w"
+left drag of a curve point {"rowsNoFlush":["start","LFO CURVE · MODULATION"],"modelMoved":true}
+left drag of another point (20 moves) {"rowsNoFlush":["start","LFO CURVE · MODULATION"],"modelMoved":true}
+shift-right-click {"rowsNoFlush":["start","edit"],"modelMoved":true}
+errs [] 

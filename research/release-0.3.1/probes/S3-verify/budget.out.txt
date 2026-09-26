@@ -1,0 +1,63 @@
+flush {"flushMed":0.46,"flushMax":1.24,"canUndoPendingMed":0,"canUndoMax":0.02,"editSerializeMed":0.18,"fullSerializeMed":0.28,"bytesDefault":6528}
+undo {"family":"look (STYLE)","med":4.58,"max":5.16,"all":[4.9,4.7,3.6,4.6,3.3,3.8,5.2]}
+undo {"family":"preset","med":3.38,"max":3.82,"all":[3.8,3.7,3.3,3.5,3.2,3.4,3.2]}
+undo {"family":"element","med":3.5,"max":4.18,"all":[3.5,4.1,3.3,4.2,3.3,4.2,2.9]}
+undo {"family":"palette","med":10.76,"max":16.64,"all":[10.8,10.7,10.1,10.5,16.6,13.2,11.4]}
+undo {"family":"modulation (addSource lfo, window open)","med":25.48,"max":27.5,"all":[23.2,26.1,25.5,25.9,24.5,24.1,27.5]}
+undo {"family":"modulation (addSource lfo, window closed)","med":6.06,"max":9.72,"all":[9.7,6.4,6.1,5.8,5.9,6.2,5.7]}
+undo {"family":"demo (STYLE under WAVE DANCER)","med":4.16,"max":4.6,"all":[4.1,4.6,4.5,4.6,4.2,4,3.6]}
+undo {"family":"demo playing (STYLE)","med":4.1,"max":6.24,"all":[4.3,4,4.1,4.1,6.2,3.7,3.7]}
+undo {"family":"demo modulation (addSource)","med":31.4,"max":36.04,"all":[36,31.4,31.7,32.1,27,28.6,28.1]}
+undo {"family":"MOLECULES scene (STYLE)","med":3.12,"max":30.54,"all":[3.1,30.5,4.9,0.3,3.3,0.4,3.1]}
+depth {"top":{"depth":60,"rows":61,"bottom":"edit","limit":60},"undos":60,"allUndoMs":135.3,"bottomMix":0.01,"startFellOff":true,"head":0.61,"jumped":true,"at20":0.21,"truncated":22,"back":true,"mixBack":0.61,"rowsBack":61,"secondHistoryUndo":false,"ringBytesApprox":524112,"errs":[]}
+{
+ "flush": {
+  "flushMed": 0.46,
+  "flushMax": 1.24,
+  "canUndoPendingMed": 0,
+  "canUndoMax": 0.02,
+  "editSerializeMed": 0.18,
+  "fullSerializeMed": 0.28,
+  "bytesDefault": 6528
+ },
+ "bytes": {
+  "default": 6528,
+  "dancer": 10360,
+  "chem": 8591
+ },
+ "undoMed": {
+  "look": 4.58,
+  "preset": 3.38,
+  "element": 3.5,
+  "palette": 10.76,
+  "modulation": 25.48,
+  "modulationClosed": 6.06,
+  "demo": 4.16,
+  "demoPlaying": 4.1,
+  "demoModulation": 31.4,
+  "chem": 3.12
+ },
+ "depth": {
+  "top": {
+   "depth": 60,
+   "rows": 61,
+   "bottom": "edit",
+   "limit": 60
+  },
+  "undos": 60,
+  "allUndoMs": 135.3,
+  "bottomMix": 0.01,
+  "startFellOff": true,
+  "head": 0.61,
+  "jumped": true,
+  "at20": 0.21,
+  "truncated": 22,
+  "back": true,
+  "mixBack": 0.61,
+  "rowsBack": 61,
+  "secondHistoryUndo": false,
+  "ringBytesApprox": 524112,
+  "errs": []
+ },
+ "errs": []
+}
