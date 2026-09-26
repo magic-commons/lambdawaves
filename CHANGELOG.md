@@ -13,7 +13,7 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ## `v0.3.0-alpha` — 2026-09-25
 
-Commit `1a48981` · waves 116–127 · 107 commits.
+Commit `1402276` · waves 116–129 · 120 commits.
 
 - **wave 116**: THE DIGEST LOCK — 1004 pinned readbacks prove the kernel, the present pass and the lines bit-identical
 - **wave 117**: The kernel remembers — bit-identical memos, the well's wall as a branch, persistent gas records, a 3× wellPacket
@@ -27,6 +27,8 @@ Commit `1a48981` · waves 116–127 · 107 commits.
 - **wave 125**: The commissioner's three rulings — the gas table by default, AUTO SCALE home on pause, tinted glass for a phone's first visit
 - **wave 126**: The iPad afternoon — the loop paced to the GPU, AUTO SCALE as one rule, the tablet's own quality
 - **wave 127**: The project open, subtracted — and a transition that froze the old mix over a new file
+- **wave 128**: One controller — scale, then the grid only when the scale cannot mend the frame; the step ladder deleted
+- **wave 129**: The first visit's hygiene — a demo that carries no look, a card that follows its owner, and the notes for agents
 
 <details><summary>commits</summary>
 
@@ -137,6 +139,19 @@ Commit `1a48981` · waves 116–127 · 107 commits.
 - `2947095` 2026-09-25 — OPTIMIZATION 2026-09-24 · W127-P the pacing probe is one comparison: paced = a drained wait…
 - `7f5e645` 2026-09-25 — OPTIMIZATION 2026-09-24 · W127 the project open, base vs after: the device report's scene on…
 - `1a48981` 2026-09-25 — REPORT.md wave 127 (the project open, subtracted; the transition bug), NEXT-MOVES 127 done (the…
+- `92e1b1f` 2026-09-25 — CHANGELOG for v0.3.0-alpha
+- `c8b9903` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129-1 a bundled demo carries no look and no quality
+- `adcc2ad` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129-2 the newcomer's rack on a tablet or phone: SHADOW folded
+- `240d623` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129-3 MOLECULES and MO-REGISTRY off the first-run rack; the…
+- `26d1c1b` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129-4 the notebook's remembered size: the size it was given, never…
+- `d1517c6` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129-5 docs/NOTES-FOR-AGENTS.md, linked from README and AI_POLICY
+- `dd06ed4` 2026-09-25 — OPTIMIZATION 2026-09-24 · W129 gates: the returning-user stylehash driver
+- `44e8687` 2026-09-25 — README: status 0.3.0 alpha
+- `0fd0c9e` 2026-09-25 — REPORT.md wave 129 (the first visit's hygiene, the chem-owner law, the notebook size, the notes…
+- `bace801` 2026-09-25 — OPTIMIZATION 2026-09-24 · W128 one controller: AUTO SCALE, the governor's grid rung and the…
+- `f26a1ac` 2026-09-25 — OPTIMIZATION 2026-09-24 · W128 the grid rung only from the scale's own probe: AUTO SCALE off →…
+- `fa102e8` 2026-09-25 — Merge branch 'worktree-agent-a911f8ee1936e5e9a' into worktree-optimization-2026-09-24
+- `1402276` 2026-09-25 — REPORT.md wave 128 (one controller), NEXT-MOVES 128 done, the report doc's W128 row
 
 </details>
 
