@@ -169,7 +169,7 @@ export function createStates(host, api) {
       if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { status('the state ladder needs the chemistry worker', 'warn'); } return; }
       ladder = r;
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
-      if (wanted) { applyRecord(wanted); wanted = null; }
+      if (wanted) { applyRecord(wanted, true); wanted = null; }
       request(keys().filter((k) => k !== GROUND));
       touch(); rebuild(); paint(); refresh(); publishPopulations();
       if (on) push(now(), true);
@@ -290,6 +290,7 @@ export function createStates(host, api) {
     if (want && !on) {
       const why = refusal();
       if (why) { onSw.set(false); status('MO-REGISTRY off — ' + why, 'warn'); return false; }
+      if (!lanes.size) { lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND; touch(); rebuild(); }   // S4: seeded where an empty record left none
       on = true; onSw.set(true); pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
       if (S()) S().claim('states', true, 'the STATES register has the field');
@@ -641,8 +642,8 @@ export function createStates(host, api) {
   /* ── the record ───────────────────────────────────────────────────────────────────────────────── */
   const packStore = (M) => (M ? [...M].map(([key, c]) => ({ key, re: c.re, im: c.im })) : null);
   const unpackStore = (a) => { if (!Array.isArray(a) || !a.length) return null; const M = new Map(); for (const e of a) { const key = Math.round(e && e.key); if (Number.isFinite(key) && key >= GROUND && ladder && key < ladder.count) M.set(key, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
-  function applyRecord(r) {
-    lanes.clear(); lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false });
+  function applyRecord(r, parked) {
+    lanes.clear(); if (parked || !emptyLanes(r)) lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false });
     for (const e of (Array.isArray(r.lanes) ? r.lanes : [])) {
       const key = Math.round(e && e.key);
       if (!Number.isFinite(key) || key < GROUND || key >= ladder.count || lanes.size >= LANE_CAP && !lanes.has(key)) continue;
@@ -663,9 +664,13 @@ export function createStates(host, api) {
       drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
       lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }) };
   }
+  /* 0.3.1 · S4: a record whose lane list is EMPTY was written before a solution seeded the ground lane (NEW, a MOLECULES ON
+     undone); on the ladder it was written beside it lands empty, and the ground lane is seeded again when the register next
+     plays (setOn).  Parked for a ladder still to come, it is a record OLDER than that ladder: its solve seeds the ground lane. */
+  const emptyLanes = (r) => Array.isArray(r.lanes) && r.lanes.length === 0;
   function load(r) {
     if (!r) return false;
-    if (!ladder) { wanted = r; if (on) setOn(false); return true; }
+    if (!ladder) { wanted = r; if (emptyLanes(r)) lanes.clear(); if (on) setOn(false); return true; }
     applyRecord(r); request(keys()); touch(); rebuild(); paint(); refresh();
     if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false); else if (on) push(now(), true);
     publishPopulations(); api.repaint();

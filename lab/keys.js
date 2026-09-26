@@ -3,7 +3,8 @@
  * a binding's printed name.  A seam out of rack.js boot() (optimization 2026-09-24 · wave 130 seam 10, AUDIT-E §6).
  * The ACTIONS table — the app's verbs and the boot bindings they reach — stays in rack.js; installKeys() takes five
  * edges: `ACTIONS`, `layout` (the Escape roads: the keyboard editor, the menubar, the + and ☆ lists), `canvas` and
- * `stageHasFocus` (the stage, and THE TAB RULE's one input) and `refresh` (a rebind repaints the editor: ui.keysRefresh).
+ * `stageHasFocus` (the stage, and THE TAB RULE's one input) and `refresh` (a rebind repaints the editor: ui.keysRefresh); since
+ * 0.3.1 S4 a sixth, `edit(action, run)`, through which every action runs so the host can name and arm a key's history row.
  * It runs where DEFAULT_KEYS stood, so the saved chords are applied and the listener registered in the same order as
  * before, and hands back the three verbs __LW_hooks.keys exposes over storage: bind, conflicts, reset. */
 import { bindAction, bindingConflicts, normalizeBinding } from './shortcuts.js';
@@ -45,7 +46,7 @@ const seatOf = (el) => {
   return OWNED[r === 'slider' ? 'slider' : r === 'radio' ? 'radio' : (w.tagName === 'A' && r !== 'button') ? 'link' : 'button'] || null;
 };
 
-export function installKeys({ ACTIONS, layout, canvas, stageHasFocus, refresh }) {
+export function installKeys({ ACTIONS, layout, canvas, stageHasFocus, refresh, edit = (a, run) => run() }) {
   const DEFAULT_KEYS = Object.fromEntries(ACTIONS.map((a) => [a.id, { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }]));
   /* Saved chords pass the same collision/reservation law as a live edit. Old corrupt
      overrides cannot silently shadow a newer default action. */
@@ -115,7 +116,7 @@ export function installKeys({ ACTIONS, layout, canvas, stageHasFocus, refresh })
       if (!matches(a, e)) continue;
       if (a.stage && !stageHasFocus()) continue;                   // wave 57: TAB is the browser's unless the hands are on the world — see THE TAB RULE.  wave 62: `continue`, not `return` — a `return` abandoned the whole loop rather than skipping this one action, which is harmless only while Tab is the sole stage: true binding
       e.preventDefault();
-      a.run(fine);
+      edit(a, () => a.run(fine));                                   // 0.3.1 · S4: the host names and arms the key's edit (rack.js keyEdit)
       return;
     }
   });

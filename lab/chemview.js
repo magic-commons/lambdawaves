@@ -234,10 +234,15 @@ export function createChem(host, api) {
     const task = Promise.all([call(msg, () => localSolve(msg)), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
       if (seq !== solveSeq) return null;
       if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
-      sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
-      orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
-      pendingOrbital = null;
-      rebuildOrbKnob(); pushField(); refresh(); notify();
+      /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
+         ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
+      const fill = () => {
+        sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
+        orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
+        pendingOrbital = null;
+        rebuildOrbKnob(); pushField(); refresh(); notify();
+      };
+      if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
       return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
         if (seq !== solveSeq || sol !== r) return null;
@@ -673,6 +678,7 @@ export function createChem(host, api) {
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
     if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
+    else if (o.orbital === null) orbital = pendingOrbital = null;   // 0.3.1 · S4: the record's "not chosen" (HOMO by default) lands too — an undo of ON and NEW clear the fill
     if (typeof o.axis === 'string' && AXES.includes(o.axis)) { axis = o.axis; aSeg.set(axis); }
     if (Number.isFinite(o.kappa)) { kappa = o.kappa; kapKnob.set(kappa); }
     if (Number.isFinite(o.speed)) { speed = Math.max(1, Math.round(o.speed)); spdKnob.set(speed); }

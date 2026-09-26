@@ -80,9 +80,10 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
      · FUTURE   the rows you stepped back from.  GREYED, NOT REMOVED — that is FL's behaviour and it
                 is the honest one: they are still reachable until you do something new, and a list
                 that deleted them would be lying about what the next click can still do.
-   The engine keeps 60 states, but the card renders only the ten latest points. This is a glanceable
-   recovery surface rather than another workspace; sequential Undo and Redo still reach the full ring. */
-.hist-list { display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: hidden auto;
+   0.3.1 · S4: the card lists EVERY row the ring keeps (≤ 61), and the list scrolls inside the card at a
+   fixed maximum height: 250 px is ten rows (pitch 23.8 px, measured) and half of the eleventh, so the cut
+   row says there is more, and the card stops growing about 13 px past the old ten-row card. */
+.hist-list { display: flex; flex-direction: column; gap: 1px; max-height: 250px; overflow: hidden auto;
   overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .hist-list::-webkit-scrollbar { width: 2px; }

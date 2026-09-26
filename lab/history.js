@@ -19,6 +19,7 @@ export function createHistory(port) {
   let cursor = -1;                    // the row standing under the instrument; −1 until the first read
   let returnBranch = null;            // one-use recovery from the most recent direct timeline jump
   let held = 0, heldAt = 0, timer = 0, applying = false, pending = null;
+  let endedAt = null;                 // when the gesture (or named note) whose name is pending ENDED; null while held, for a label(), once spent
 
   const row = (S, name) => ({ snapshot: S, label: name || UNNAMED, at: Date.now() });
   const here = () => ring[cursor] || null;
@@ -31,25 +32,40 @@ export function createHistory(port) {
    *  that is what lets hold('lane fader') survive the hundred anonymous notes the drag itself raises. */
   function note(name) {
     if (applying || (port.driven && port.driven())) return;
-    if (name) pending = name;
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => { timer = 0; commit(false); }, quiet);
+    if (name) { pending = name; if (!held) endedAt = Date.now(); }
+    arm(quiet);
+  }
+  const arm = (ms) => { if (timer) clearTimeout(timer); timer = setTimeout(settle, ms); };
+  /** 0.3.1 · S4 A GESTURE THAT CHANGED NOTHING TAKES ITS NAME WITH IT.  A press on a preference, a GRID
+   *  step, a card's background, a named note that moved no key: if the commit after it finds nothing,
+   *  its name must not wait for the next unnamed edit (a keyboard preset, an LW.* call) and take that.
+   *  It goes once the gesture is `quiet` ms old, not at the release's own task, because a tap's click
+   *  (the control's onChange) may land AFTER that task on a touch screen, and the name has to be there. */
+  function settle() {
+    timer = 0;
+    if (commit(false) || endedAt === null || held) return;
+    const age = Date.now() - endedAt;
+    if (!pending || age >= quiet) { pending = null; endedAt = null; } else arm(quiet - age);
   }
   /** close the pending entry and open a coalescing window (pointerdown).
    *  The name is set AFTER that commit, and the order is the meaning: the commit belongs to the action
-   *  that is ENDING, the name to the gesture that is starting. */
-  function hold(name) { if (held === 0) commit(true); if (name) pending = name; held++; heldAt = Date.now(); }
+   *  that is ENDING, the name to the gesture that is starting — so a finished gesture's name that the
+   *  commit did not spend goes here too (a label()'s does not: it names an action still to come). */
+  function hold(name) {
+    if (held === 0) { commit(true); if (endedAt !== null) pending = null; }
+    endedAt = null; if (name) pending = name; held++; heldAt = Date.now();
+  }
   /** pointerup / pointercancel: commit on the next task, so the control's own onChange lands first */
   function release() {
     held = Math.max(0, held - 1);
     if (held > 0) return;
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => { timer = 0; commit(false); }, 0);
+    endedAt = Date.now();
+    arm(0);
   }
   /** name the action that is pending (call with nothing to take the name back off it).  The name is
    *  consumed by the entry it produces; a commit that pushed NOTHING leaves it standing, because the
    *  action it names has not happened yet. */
-  function label(name) { pending = name || null; }
+  function label(name) { pending = name || null; endedAt = null; }
   /** append the live state above the baseline if it has moved off it */
   function commit(force) {
     if (timer) { clearTimeout(timer); timer = 0; }
@@ -60,7 +76,7 @@ export function createHistory(port) {
     ring.length = cursor + 1;                 // ⚠ the future this edit contradicts: TRUNCATED, not cleared
     ring.push(row(port.read(), pending));
     cursor = ring.length - 1;
-    pending = null;                           // the name has been spent on the row it made
+    pending = null; endedAt = null;           // the name has been spent on the row it made
     // THE RING, measured in UNDOS AVAILABLE (`cursor`) rather than in rows, because a row is also the
     // one you are standing on: the oldest falls off the FRONT and the cursor falls with it, so it goes
     // on pointing at the same state.  A bottom row that arrived this way keeps the name of the action
@@ -71,12 +87,14 @@ export function createHistory(port) {
   }
   /** put the instrument into S with notes suppressed, then re-baseline the row on what ACTUALLY landed
    *  (a write is best-effort: the row must key against the state that exists, not the one that was asked
-   *  for, or the very next dirty() reads true and an undo becomes an edit) */
+   *  for, or the very next dirty() reads true and an undo becomes an edit).  A travel is not an edit, so a
+   *  finished gesture's unspent name goes with it (the UNDO trigger's own press named nothing it did). */
   function apply(S) {
     applying = true;
     try { port.write(S); } finally {
       applying = false;
       if (timer) { clearTimeout(timer); timer = 0; }
+      if (endedAt !== null) { pending = null; endedAt = null; }
       const e = here(); if (e) e.snapshot = port.read();
     }
   }
@@ -122,11 +140,21 @@ export function createHistory(port) {
     onChange();
     return true;
   }
+  /** 0.3.1 · S4 · what `fn` changes is DERIVED from the row the instrument stands on (a solve landing after the press that asked
+   *  for it fills its defaults): if the state was that row before, the row is re-keyed on what `fn` left — the same re-baseline
+   *  apply() makes after a write — so the fill is not a row of its own and the first undo is not spent on it (probes/S4/mol-rows.js).
+   *  An edit already standing, a pending quiet window, an open gesture, a drive or a write in progress leaves the row alone: then
+   *  the fill rides with that edit into its row, as before. */
+  function absorb(fn) {
+    const clean = !held && !timer && !applying && !(port.driven && port.driven()) && !dirty();
+    fn();
+    const e = clean && here(); if (e) e.snapshot = port.read();
+  }
   /** a fresh timeline on the live state, its bottom row named for its origin */
   function clear(name) {
     if (timer) { clearTimeout(timer); timer = 0; }
     ring.length = 0; ring.push(row(port.read(), name || BOTTOM)); cursor = 0;
-    held = 0; pending = null; returnBranch = null;
+    held = 0; pending = null; endedAt = null; returnBranch = null;
     onChange();
   }
   /** the list a UI paints: one frozen row per state, oldest first, each with the index goto() takes,
@@ -144,7 +172,7 @@ export function createHistory(port) {
   }
 
   return {
-    note, hold, release, label, undo, redo, historyUndo, goto, clear, entries,
+    note, hold, release, label, undo, redo, historyUndo, goto, clear, entries, absorb,
     flush: () => commit(true),
     get canUndo() { return cursor > 0 || dirty(); },
     get canRedo() { return cursor < ring.length - 1 && !dirty(); },

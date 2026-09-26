@@ -1,0 +1,31 @@
+{
+ "note": "S4 probes after the change (8743/5243). stale-name.js: the THEME press no longer names the preset row, and the UNDO trigger's name is spent by the undo. curve-rdrag.mjs: the same real right-drag (600 ms rest mid-drag) is ONE row named for the curve and its window, one undo back byte for byte. card-geom.js: 250 px list = ten rows and half of the eleventh; the card stops at 408 px (395 px before with ten rows) and holds it from 14 rows to 27; the label column is 215 px wide while the list scrolls (221 px when it does not), the widest name measured 180 px, a relative time ('59 m') 27 px + the 8 px gap.",
+ "staleName": { "theme": { "rows": 0, "changedEditScope": false }, "presetAfterTheme": { "rows": 1, "name": "edit" }, "editAfterUndoButton": { "name": "edit" }, "errs": [] },
+ "curveRightDrag": { "rows": ["boot", "CURVE · LFO 1 · MODULATION"], "added": 1, "changed": true, "pts": "5 → 6", "undosToPre": 1, "back": true, "errs": [] },
+ "card": { "rowPitch": 23.8, "rowH": 22.8, "maxH": "250px", "list": 250, "scrollH27rows": 642, "cardAt14rows": 408, "cardAt27rows": 408, "cardBeforeS4TenRows": 395, "cardW": 274, "labelW": { "scrolling": 215.2, "notScrolling": 221.2 }, "widestName": ["PRESET SUPERPOSITION · STATE", 180], "timeW": 27, "gap": 8 },
+ "render": {
+  "note": "61 rows, card open, Firefox on the RTX desktop, medians of 15. The node-by-node list inside onChange broke S3's flush budget (< 2 ms); the string build + one repaint per frame restores it.",
+  "nodeByNodeInsideFlush": { "flushMs": [2.6, 3.92], "renderMs": 2.68, "split": { "buildMs": 1.86, "styleLayoutMs": 2.82 } },
+  "buildVariants": { "attachedEach": { "buildMs": 1.56, "layoutMs": 2.02, "closedBuildMs": 0.94 }, "fragment": { "buildMs": 1.5, "layoutMs": 1.84, "closedBuildMs": 0.84 }, "htmlString": { "buildMs": 0.66, "layoutMs": 1.74, "closedBuildMs": 0.28 } },
+  "layoutScope": { "oneRowTextMs": 1.06, "allRowsTextMs": 1.4, "withContainLayout": { "oneRowTextMs": 1.08, "allRowsTextMs": 1.26 } },
+  "shipped": { "flushMs": 0.44, "repaintPerFrameMs": [1.9, 2.36], "historyTestFlushMedianMs": 0.28, "historyTestFlushMaxMs": 0.5, "canUndoPendingMs": 0.14 }
+ },
+ "verifierEdges": {
+  "note": "the S3 verifier's edges, folded in (probes/S3-verify/edges*.mjs, rotdrive.mjs, chem-undo.mjs)",
+  "rotPaused": "rot-paused.js: ROTATE z 0.3 on 2px moves the edit scope while the field clock is PAUSED (moved1/moved2 true) and while playing — the drive integrates on the modulation tick's wall clock, so `driven` cannot be 'rate set AND clock playing'; on 1s+2pz (m = 0) it moves nothing. Shipped: driven = the last tick's digest moved AND a rate is set",
+  "driveStill": "drive-still.js: ROTATE z 0.3 on 1s+2pz, paused → a STAGE drag is ONE row 'STAGE · SETTINGS' (was 0: frozen into one 'rotation drive' row)",
+  "chemFillTiming": "chem-fill-timing.js: chem.orbital, orbitals.selection and states.lanes land in the same 4 ms poll (~300 ms after MOLECULES ON) — one task, chemview's solve landing and its notify()",
+  "molRows": "mol-rows.js: MOLECULES ON by its switch → rows [start, 'MOLECULES ON · MOLECULES'] (was [..., 'edit'] — the fill as a second row the first undo was spent on)",
+  "curveShiftClick": "curve-shiftclick.mjs: on a fresh LFO the spot (0.62, 0.12) of the editor is the SINE's segment-2 tension handle, so a Shift-right-click there RESET its tension (0.275 → 0) — one named row; the suite now targets the spot farthest from every drawn point and handle"
+ },
+ "followUp": {
+  "note": "the S4 verifier's two fixes and two polish items (after 927bd03)",
+  "molCycle": { "probe": "mol-cycle.js: NEW → ON → undo → ON again → NEW → ON (orbital, register selection count, STATES lane count)",
+   "before": { "on1": [5, 0, 1], "undo": { "orbital": 5, "lanes": 1, "sameAsPreOn": false, "dirty": true }, "newAfterMolecules": { "orbital": 5, "lanes": 1 } },
+   "after": { "on1": [5, 0, 1], "undo": { "orbital": null, "lanes": 0, "sameAsPreOn": true, "dirty": false }, "newAfterMolecules": { "orbital": null, "lanes": 0 }, "onAgainCached": { "orbital": null, "lanes": 0 } } },
+  "reveal": "reveal.js: a goto(1) while the card is closed, then layout.reopen('history') → the current row in view: with the window-activity hook shown true (scrollTop 344); with the hook removed shown false (scrollTop 0)",
+  "tooltips": "each row's title is its whole name + ' — land on this moment' / ' — where the instrument is standing'; the lab's CONTROL HINTS move a title into data-help and show it on hover",
+  "travelKeys": "the verifier's travel-names: Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y then an API edit at 100 or 300 ms took the key's name; now 'edit'"
+ },
+ "stylehash": "disc and conn, 8 theme × card × frost states each, before = the S3 tip 737d5bb, noise pairs b2 / cb2: 8 element differences each, every one `.hist-list` max-height 260px → 250px in the HISTORY card; 0 pixels (stylehash.disc.report.txt, stylehash.conn.report.txt)"
+}
