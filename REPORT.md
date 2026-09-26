@@ -2974,3 +2974,48 @@ before and nothing else moves. Exact exports with both switches on give identica
 play. 23/23 in `tests/auto-scale.test.mjs` (228 present-bound scenes never move the grid; a 50 ms floor + 5·s² takes
 one scale drop then a rung with the scale back to 1); the lock GREEN on both fixtures.
 One consequence is recorded rather than hidden: a user who switches AUTO SCALE off and keeps the governor on now gets full steps as well as full resolution on a heavy scene (GLASS at 128³: 55 fps at 240 steps, where the old step rung swung the march between 168 and 120 steps for 88 fps without asking) — the picture is what was asked for; if a step lever is wanted it will be an explicit choice, not a rung.
+
+
+## 2026-09-25 · 0.3.1 — THE EMPTY PROJECT AND THE TRUE HISTORY
+
+### wave 131: Three scopes, one per key — and NEW opens the empty project
+
+The commissioner's report was one sentence — "there's a bit of a problem with 'new project'" — and one diagnosis: the
+kit had no rule separating a preference from a project parameter. Measured, both were true. NEW cleared the register,
+the clock, the notebook and the undo ring and left everything else standing: the modulation rack, the A/B stores and
+even a running transition, the fields, the damping, the element, the rates, the camera, the stage, the look, the
+palette, the overlays, the field owners — the state after NEW serialised to 13 329 of the previous project's 13 947
+bytes. And any saved project, opened, wrote its author's theme, glass, accent, camera feel, field chrome, palette and
+window placement into the reader's stored settings (18 keys changed on one open; wave 129 had stripped those keys from
+the bundled demo only).
+
+The law now (`docs/STATE-SCOPES.md`): every key lives in exactly one of three scopes. PREFERENCE is the reader's
+furniture — theme, glass, hints, keys, the quality budget, camera feel and mode, frame and axes — never written into a
+project, a link or a history row, never changed by opening one. WORKSPACE is the arrangement — windows, sizes, folds —
+carried by a project and remembered by the device; the last one wins. PROJECT is the work — physics, picture,
+modulation, stage colour, palette, overlays, A/B, camera pose. `serialize()` writes `ui` as the stage alone and
+`camera` as auto-rotate alone, strips the seven chrome keys from `mat` as it already stripped the background, and
+`captureLayout` lost its write-only look and camera blocks; `restore()` ignores those keys in older files; the palette
+and the camera mode left the settings store (the boot is prism and FREE; a project brings its own). One escape hatch,
+measured: a camera pose cannot be read back without its mode — a turntable orbit never updates the stored quaternion
+(0.141 stale; read as FREE the basis moves 0.323; a FREE loop leaves roll 0.568 and read as turntable moves 0.685) — so
+`obs.mode` rides with the pose. Verified against saves, settings and links written by the previous build: settings
+byte-identical outside the workspace keys on every road, the theme unchanged, the demo's phosphor travelling, favourite
+layouts intact, an old project opening clean. lab/ −16 lines.
+
+NEW is "open the empty project". `lab/new-project.lambdawaves.json`, written by `tools/new-project.mjs` from the
+modulation model itself and the boot's own defaults (`--check` proves the shipped file byte-exact), carries every
+PROJECT key at its shipped value — an empty register, the default stage, look, palette and overlays, hydrogen — and a
+modulation rack of LFO and AUDIO with MACRO 1 named LFO bound to the LFO and MACRO 2 named AUDIO bound to the audio
+level, no routes; and no quality, layout or window-placement key, so the device's budget and the arrangement stand.
+`fresh()` fetches it and takes the stored-open road with its failed-open rollback; its own resets are gone (restore does
+every one, and stands a running A/B transition down, which NEW never did). The notebook law: an open never closes the
+notebook and opens it only for non-blank text; NEW empties it. Linked time needed nothing: LINKED ships on and the host
+clock runs on any live source while the window shows — the LFO macro moves within 205–251 ms of play; the microphone is
+never asked for. NEW takes 64 ms median on the RTX (6 ms fetch, 58 ms restore). Two bugs fell out. The demo opened
+dirty — its 240 steps clamped to 160 by the device — so the dirty key now ignores the device-clamped quality and a bound
+macro's driven value, and counts the stage (reversing the 2026-09-10 rule, since the stage is project work). And a
+route holding the stage wrote its old base back over a freshly opened project, older than this wave: the project road
+now stands the running modulation down first, as it does A/B. Each stage was built by one Opus 5.5 agent in an
+isolated worktree and attacked by a second with fresh context before it merged; both digest-lock fixtures stayed
+green throughout.
