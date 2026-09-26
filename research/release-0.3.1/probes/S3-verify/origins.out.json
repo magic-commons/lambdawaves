@@ -1,0 +1,120 @@
+{
+ "boot": {
+  "rows": [
+   "boot"
+  ],
+  "first": "boot",
+  "depth": 0
+ },
+ "dancer": {
+  "before": [
+   "boot",
+   "edit"
+  ],
+  "ok": true,
+  "now": {
+   "rows": [
+    "open · WAVE DANCER"
+   ],
+   "depth": 0
+  },
+  "later": {
+   "rows": [
+    "open · WAVE DANCER"
+   ],
+   "depth": 0,
+   "canUndo": false
+  }
+ },
+ "fresh": {
+  "before": [
+   "open · WAVE DANCER",
+   "edit"
+  ],
+  "ok": true,
+  "now": {
+   "rows": [
+    "new project"
+   ],
+   "depth": 0
+  },
+  "later": {
+   "rows": [
+    "new project"
+   ],
+   "depth": 0,
+   "canUndo": false
+  }
+ },
+ "linkInPage": {
+  "href": "https://127.0.0.1:8745/lab/#s=AeaDIM8BBgAAAAAAAAMvBwAAAAAAAAAAAACAQNsPyUAAAAAAAA…",
+  "opened": true,
+  "ok": true,
+  "rows": [
+   "link"
+  ],
+  "depth": 0
+ },
+ "failed": {
+  "r0": [
+   "link",
+   "edit",
+   "edit"
+  ],
+  "a": {
+   "ok": false,
+   "rows": [
+    "link",
+    "edit",
+    "edit"
+   ],
+   "same": true,
+   "sameRows": true
+  },
+  "b": {
+   "ok": false,
+   "rows": [
+    "link",
+    "edit",
+    "edit"
+   ],
+   "same": true,
+   "sameRows": true,
+   "diff": [],
+   "pendingDirty": false
+  },
+  "c": {
+   "ok": false,
+   "path": "probe/BROKEN",
+   "rows": [
+    "link",
+    "edit",
+    "edit"
+   ],
+   "sameRows": true,
+   "same": true
+  },
+  "undo": {
+   "ok": true,
+   "mix": 0.71
+  },
+  "errs": []
+ },
+ "bootHref": "https://127.0.0.1:8745/lab/#s=AR_20M0BBgAAAAAAAAMvBwAAAAAAAAAAAACAQNsPyUAAAAAAAAAAAAAAAAAAAQAAgD8KAAAgQQAAAACAPwAEIQFmZiY_XI_CPjMzU0CamRk__la8PuQpfz4CoAA_PeE9PwU3AQAAABBAMzMzPwAAAACPwnU9MzOzPpqZGT8AAAAAoAAGAAAAAAAAAAAAAAAAAAIAAAAAj8L1PAYkHwEAAOBAQACgAAAAgD8BAACAPzMzsz4BAQoAAQAAAEEAAABABwITAQgCAAA",
+ "bootLink": {
+  "rows": [
+   "link"
+  ],
+  "depth": 0,
+  "carried": true,
+  "hash": "#s=AR_20M0BBgAAAAAAA",
+  "errs": []
+ },
+ "badLink": {
+  "rows": [
+   "boot"
+  ],
+  "depth": 0,
+  "errs": []
+ }
+}

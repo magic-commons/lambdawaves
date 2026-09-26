@@ -1,0 +1,309 @@
+{
+ "routes": [
+  {
+   "t": "material.exposure",
+   "m": "m1"
+  },
+  {
+   "t": "material.softness",
+   "m": "m1"
+  },
+  {
+   "t": "material.iso",
+   "m": "m1"
+  },
+  {
+   "t": "observer.fov",
+   "m": "m3"
+  },
+  {
+   "t": "material.stage",
+   "m": "m2"
+  }
+ ],
+ "series": [
+  {
+   "t": 4303.8,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.7899
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 4345.2,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.7899
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 4386.5,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.707
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 4427.8,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.707
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 4469.1,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.6166
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  }
+ ],
+ "pre": {
+  "t": 5046.5,
+  "playing": true,
+  "macros": [
+   0,
+   0,
+   0.0931
+  ],
+  "live": {
+   "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":2}",
+   "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":2}",
+   "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":2}",
+   "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":2}",
+   "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":2}"
+  },
+  "exposure": 0.4473,
+  "stage": 0.0541
+ },
+ "post": {
+  "t": 5053.8,
+  "playing": true,
+  "macros": [
+   0,
+   0,
+   0.0931
+  ],
+  "live": {
+   "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+   "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+   "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+   "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+   "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+  },
+  "exposure": 0.4473,
+  "stage": 0.0541
+ },
+ "post2": [
+  {
+   "t": 5097.1,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.0378
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 5138.3,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.0378
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 5179.6,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.01
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 5220.9,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.01
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  },
+  {
+   "t": 5262.2,
+   "playing": true,
+   "macros": [
+    0,
+    0,
+    0.0002
+   ],
+   "live": {
+    "material.exposure": "{\"id\":\"material.exposure\",\"base\":1.365423162256938,\"current\":0.4472933014784878,\"modulated\":true,\"baseNorm\":0.5662341933416443,\"currentNorm\":0.34350692061437155,\"wrap\":false,\"writes\":3}",
+    "material.softness": "{\"id\":\"material.softness\",\"base\":1.0805469387058584,\"current\":1.0805469387058584,\"modulated\":true,\"baseNorm\":0.4108141782662412,\"currentNorm\":0.4108141782662412,\"wrap\":false,\"writes\":3}",
+    "material.iso": "{\"id\":\"material.iso\",\"base\":0.017767288986038646,\"current\":0.017767288986038646,\"modulated\":true,\"baseNorm\":0.35752551506494046,\"currentNorm\":0.35752551506494046,\"wrap\":false,\"writes\":3}",
+    "observer.fov": "{\"id\":\"observer.fov\",\"base\":1.2,\"current\":1.2,\"modulated\":true,\"baseNorm\":1,\"currentNorm\":1,\"wrap\":false,\"writes\":3}",
+    "material.stage": "{\"id\":\"material.stage\",\"base\":0.05411413204188609,\"current\":0.05411413204188609,\"modulated\":true,\"baseNorm\":0.05411413204188609,\"currentNorm\":0.05411413204188609,\"wrap\":false,\"writes\":3}"
+   },
+   "exposure": 0.4473,
+   "stage": 0.0541
+  }
+ ],
+ "movingMacro": 2,
+ "base0": 0.6,
+ "knee0": 0.6,
+ "routed": [
+  {
+   "knee": 8,
+   "base": 0.6,
+   "mod": true
+  },
+  {
+   "knee": 8,
+   "base": 0.6,
+   "mod": true
+  },
+  {
+   "knee": 8,
+   "base": 0.6,
+   "mod": true
+  },
+  {
+   "knee": 8,
+   "base": 0.6,
+   "mod": true
+  }
+ ],
+ "undone0": {
+  "knee": 0.6,
+  "base": 0.6,
+  "mod": false,
+  "playing": false
+ },
+ "undone": {
+  "knee": 0.6,
+  "base": 0.6,
+  "mod": false,
+  "playing": true,
+  "knob": "0.60"
+ },
+ "redone": [
+  {
+   "knee": 1.1856,
+   "base": 0.6,
+   "mod": true,
+   "playing": true
+  },
+  {
+   "knee": 1.7761,
+   "base": 0.6,
+   "mod": true,
+   "playing": true
+  },
+  {
+   "knee": 1.7761,
+   "base": 0.6,
+   "mod": true,
+   "playing": true
+  },
+  {
+   "knee": 3.1699,
+   "base": 0.6,
+   "mod": true,
+   "playing": true
+  }
+ ],
+ "errs": []
+}

@@ -1,0 +1,36 @@
+{
+ "note": "outputs of the probes whose results were printed to the terminal (headless Firefox, RTX 3070, gate server on 8745; pre-S3 copy on 8746)",
+ "canundo.mjs": { "canUndoPendingAtBottom": { "default": { "med": 0.2, "max": 0.46 }, "waveDancer": { "med": 0.22, "max": 0.36 } } },
+ "amp-roundtrip.mjs": {
+  "S3 (f6bee32)": { "paused": { "saved": 0.2025, "baseAfterOpen": 0.2025, "resaved": 0.2025 }, "playing": { "liveLane1": 0.6042, "base": 0.2025, "saved": 0.2025, "savedLane1": 0.6041548749695089, "baseAfterOpen": 0.36500311294942295, "resaved": 0.36500311294942295 } },
+  "pre-S3 (6c2740f rack.js/history.js/sw.js)": { "paused": { "saved": 0.2025, "baseAfterOpen": 0.2025, "resaved": 0.2025 }, "playing": { "liveLane1": 0.6068, "base": 0.2025, "saved": 0.2025, "savedLane1": 0.6068334195215546, "baseAfterOpen": 0.36824679904822305, "resaved": 0.36824679904822305 } }
+ },
+ "chem-undo.mjs": {
+  "afterClick": { "rows": ["boot", "MOLECULES ON · MOLECULES"], "depth": 2, "cursor": 1, "chemOn": true },
+  "afterFirstCtrlZ": { "rows": ["boot", "MOLECULES ON · MOLECULES", "edit"], "cursor": 1, "chemOn": true, "canRedo": true },
+  "afterSecondCtrlZ": { "rows": ["boot", "MOLECULES ON · MOLECULES", "edit"], "cursor": 0, "chemOn": false, "canRedo": true }
+ },
+ "rotdrive.mjs": {
+  "whileRateSet": { "rate": 0.3, "rows": ["start"], "canUndo": false, "driving": true },
+  "editsWhileSet (stage 0.37, a palette choice, LW.mod.addSource)": { "rows": ["start"], "canUndo": false, "undo": false },
+  "afterRateZero": { "rows": ["start", "rotation drive"], "canUndo": true },
+  "oneUndo": { "rate": 0, "stage": 0.04, "sources": 2 }
+ },
+ "quickload.mjs": { "loadedEqualsSaved": true, "rows": ["start", "LOAD · STATE"], "undoSame": true, "redoSame": true },
+ "final.mjs": {
+  "target": "material.grain",
+  "afterRoute": { "row": "ROUTE MACRO 1 · MODULATION", "routes": ["material.grain"], "rings": 1, "targetRing": true, "editArc": true },
+  "afterUndo": { "routes": [], "rings": 0, "targetRing": false },
+  "afterRedo": { "routes": ["material.grain"], "rings": 1, "targetRing": true, "editArc": true },
+  "clock": { "paused": { "before": 5, "after": 5 }, "playing": { "before": 7.996, "after": 7.996, "later": 9.328, "stillPlaying": true } }
+ },
+ "gates": {
+  "bash test.sh node": "exit 0, 80 suites",
+  "history.test": "0 failing of 16", "render-exact.test": "0 failing of 40",
+  "history.browser": "25 PASS", "current.browser": "run 1: 9 PASS then AssertionError followsPalette (CSS computed colour, load avg 5.0); run 2: 15 PASS exit 0",
+  "input.browser": "13 PASS", "render-regressions.browser": "2 PASS", "keyboard-window.browser": "PASS", "menubar.browser": "GREEN", "new-project.browser": "8 PASS", "official-defaults-palette.browser": "3 PASS",
+  "pwa.test": "exit 0", "digest-lock w125": "GREEN 1004 values, 0 readback, 0 record-byte, 50 s", "digest-lock gastab=0": "GREEN 1004 values, 0 readback, 0 record-byte, 51 s",
+  "adopt --check": "in step with MIR 1.4.3", "lab/mir + lab/fonts diff": "0 lines", "lab delta": "history.js +6 -4, rack.js +93 -119, sw.js +2 -2 = -24"
+ },
+ "load": { "before lock 1": "load 3.19/3.32/3.31 on 12 threads, GPU 0 %, 711 MiB, another session's headless Firefox running", "after lock 1": "2.07", "after lock 2": "3.91, GPU 4 %, 791 MiB" }
+}

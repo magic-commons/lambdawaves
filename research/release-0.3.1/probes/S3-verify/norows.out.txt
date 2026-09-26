@@ -1,0 +1,90 @@
+{"label":"camera orbit (real drag on the stage)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":""}
+{"label":"window drag (STATE eyebrow)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":""}
+{"label":"notebook typing (real keys)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":""}
+{"label":"notebook resize (real drag on its grip)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":""}
+{"label":"GRID 96³ (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (row @1350,196 box 76x38))"}
+{"label":"GRID 64³ (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (row @1272,196 box 76x38))"}
+{"label":"modulation window toggled twice (real clicks on its logo)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":""}
+{"label":"THEME LIGHT (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"THEME DARK (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"CARD STYLE TINTED (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"CARD STYLE REFRACTIVE (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"FROST OFF (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"FROST ALWAYS (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"GLASS BLUR knob drag","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"ACCENT A knob drag","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"VIVID knob drag","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"STATUS TAGS switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (sel @1290,157 box 119x44))"}
+{"label":"CONTROL HINTS switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"real"}
+{"label":"DISCONNECTED switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"DISPLAY P3 switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (grp @1353,457 box 248x44))"}
+{"label":"FRAME OFF (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+frame after {"frame":false,"frameMode":null} after an undo {"rows":["start","OFF · SETTINGS"],"undid":true,"frame":false,"frameMode":null,"sw":10}
+{"label":"FRAME BOX (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"AXES OFF (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+axes after an undo {"axis":false,"axisMode":null}
+{"label":"AXES BOX (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"AXIS COLOUR RGB (real click)","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (rackL @0,0 box 0x0))"}
+{"label":"palette INVERT switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"real"}
+{"label":"AUTO SCALE switch off","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (k-lbl @1289,318 box 120x44))"}
+{"label":"AUTO SCALE switch on","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (k-lbl @1289,318 box 120x44))"}
+{"label":"GOVERNOR switch off","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"real"}
+{"label":"GOVERNOR switch on","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"real"}
+{"label":"KEEP FRAMES switch","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (grp-lbl @1353,443 box 248x44))"}
+{"label":"FIELD CLOCK cap 30 Hz","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (trig @1321,256 box 62x38))"}
+{"label":"DOMAIN AUTO switch (PROJECT by the table: expected a row)","rows":1,"names":["DOMAIN AUTO · SETTINGS"],"canUndo":true,"dirty":true,"editMoved":true,"diff":[".presentation.domain.auto: true → false",".presentation.domain.half: undefined → 16"],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (k-lbl @1317,381 box 176x44))"}
+{"label":"camera SPIN knob","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (grp @1289,457 box 34x34))"}
+{"label":"camera FRICTION knob","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (grp @1417,457 box 34x34))"}
+{"label":"camera DRAG GAIN knob","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":true,"errs":[],"via":"synthetic (covered (grp @1289,457 box 34x34))"}
+{"label":"camera TURNTABLE (real click)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (grp @1269,457 box 72x38))"}
+{"label":"camera FREE (real click)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (grp @1344,457 box 72x38))"}
+{"label":"camera ZOOM knob (a view)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (grp @1263,457 box 34x34))"}
+{"label":"camera FOV knob (a view)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"synthetic (covered (grp @1339,457 box 34x34))"}
+{"label":"AUTOROTATE switch (PROJECT, not in history)","rows":0,"names":[],"canUndo":false,"dirty":true,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"real"}
+{"label":"METERS PERFORMANCE 120 Hz","rows":0,"names":[],"canUndo":false,"dirty":false,"editMoved":false,"diff":[],"pending":null,"settingsMoved":false,"errs":[],"via":"real"}
+
+SUMMARY
+  0 camera orbit (real drag on the stage): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via 
+  0 window drag (STATE eyebrow): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via 
+  0 notebook typing (real keys): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via 
+  0 notebook resize (real drag on its grip): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via 
+  0 GRID 96³ (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via synthetic (covered (row @1350,196 box 76x38))
+  0 GRID 64³ (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via synthetic (covered (row @1272,196 box 76x38))
+  0 modulation window toggled twice (real clicks on its logo): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via 
+  0 THEME LIGHT (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via synthetic (covered (rackL @0,0 box 0x0))
+  0 THEME DARK (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 CARD STYLE TINTED (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 CARD STYLE REFRACTIVE (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 FROST OFF (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 FROST ALWAYS (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 GLASS BLUR knob drag: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 ACCENT A knob drag: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 VIVID knob drag: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 STATUS TAGS switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (sel @1290,157 box 119x44))
+  0 CONTROL HINTS switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via real
+  0 DISCONNECTED switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 DISPLAY P3 switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via synthetic (covered (grp @1353,457 box 248x44))
+  0 FRAME OFF (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 FRAME BOX (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 AXES OFF (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 AXES BOX (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 AXIS COLOUR RGB (real click): rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (rackL @0,0 box 0x0))
+  0 palette INVERT switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via real
+  0 AUTO SCALE switch off: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (k-lbl @1289,318 box 120x44))
+  0 AUTO SCALE switch on: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (k-lbl @1289,318 box 120x44))
+  0 GOVERNOR switch off: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via real
+  0 GOVERNOR switch on: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via real
+  0 KEEP FRAMES switch: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (grp-lbl @1353,443 box 248x44))
+  0 FIELD CLOCK cap 30 Hz: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via synthetic (covered (trig @1321,256 box 62x38))
+ROW DOMAIN AUTO switch (PROJECT by the table: expected a row): rows 1 ["DOMAIN AUTO · SETTINGS"] canUndo true dirty true editMoved true pending null settingsMoved false via synthetic (covered (k-lbl @1317,381 box 176x44)) DIFF [".presentation.domain.auto: true → false",".presentation.domain.half: undefined → 16"]
+  0 camera SPIN knob: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (grp @1289,457 box 34x34))
+  0 camera FRICTION knob: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (grp @1417,457 box 34x34))
+  0 camera DRAG GAIN knob: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved true via synthetic (covered (grp @1289,457 box 34x34))
+  0 camera TURNTABLE (real click): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via synthetic (covered (grp @1269,457 box 72x38))
+  0 camera FREE (real click): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via synthetic (covered (grp @1344,457 box 72x38))
+  0 camera ZOOM knob (a view): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via synthetic (covered (grp @1263,457 box 34x34))
+  0 camera FOV knob (a view): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via synthetic (covered (grp @1339,457 box 34x34))
+  0 AUTOROTATE switch (PROJECT, not in history): rows 0 [] canUndo false dirty true editMoved false pending null settingsMoved false via real
+  0 METERS PERFORMANCE 120 Hz: rows 0 [] canUndo false dirty false editMoved false pending null settingsMoved false via real
+frame {"frame":false,"frameMode":null} {"rows":["start","OFF · SETTINGS"],"undid":true,"frame":false,"frameMode":null,"sw":10} axes {"axis":false,"axisMode":null}
+errs [] 
