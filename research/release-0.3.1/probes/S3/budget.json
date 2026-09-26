@@ -1,0 +1,84 @@
+{
+ "at": "2026-09-26T05:17:32.256Z",
+ "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:155.0) Gecko/20100101 Firefox/155.0",
+ "scenes": [
+  {
+   "label": "default boot",
+   "bytes": 6528,
+   "serEditMs": 0.1,
+   "serFullMs": 0.62,
+   "liveKeyMs": 0.3,
+   "flushMs": 0.66,
+   "undoMs": 5.14,
+   "redoMs": 4.06,
+   "canUndoPendingMs": 0,
+   "undoNonModulation": {
+    "ms": 4.74,
+    "rebuilds": 0
+   },
+   "undoModulation": {
+    "ms": 24,
+    "rebuilds": 1
+   },
+   "play5s": {
+    "rows": 0,
+    "editScopeReads": 0
+   },
+   "errs": []
+  },
+  {
+   "label": "WAVE DANCER (LFO routes on exposure, softness, iso, fov, stage)",
+   "bytes": 10360,
+   "serEditMs": 0.1,
+   "serFullMs": 0.32,
+   "liveKeyMs": 0.26,
+   "flushMs": 0.44,
+   "undoMs": 5.12,
+   "redoMs": 4.86,
+   "canUndoPendingMs": 0,
+   "undoNonModulation": {
+    "ms": 4.82,
+    "rebuilds": 0
+   },
+   "undoModulation": {
+    "ms": 36.52,
+    "rebuilds": 1
+   },
+   "play5s": {
+    "rows": 0,
+    "editScopeReads": 0
+   },
+   "errs": []
+  },
+  {
+   "label": "MOLECULES on (the demo, chem the field owner)",
+   "bytes": 10526,
+   "serEditMs": 0.08,
+   "serFullMs": 0.3,
+   "liveKeyMs": 0.24,
+   "flushMs": 0.4,
+   "undoMs": 4.2,
+   "redoMs": 4.92,
+   "canUndoPendingMs": 0.02,
+   "undoNonModulation": {
+    "ms": 3.76,
+    "rebuilds": 0
+   },
+   "undoModulation": {
+    "ms": 41.92,
+    "rebuilds": 1
+   },
+   "play5s": {
+    "rows": 0,
+    "editScopeReads": 0
+   },
+   "errs": []
+  }
+ ],
+ "worst": {
+  "bytesPerRow": 10048,
+  "rows": 61,
+  "ringBytes": 612928
+ },
+ "errs": []
+}

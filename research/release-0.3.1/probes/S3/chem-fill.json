@@ -1,0 +1,22 @@
+{
+ "immediate": [
+  ".presentation.mat.view: 1 → 0",
+  ".presentation.instruments.chem.on: false → true"
+ ],
+ "over3s": [
+  [
+   0,
+   [
+    ".presentation.instruments.chem.orbital: null → 5",
+    ".presentation.instruments.orbitals.selection.0: undefined → {\"k\":4,\"amp\":1,\"phase\":0}",
+    ".presentation.instruments.states.lanes.0: undefined → {\"key\":-1,\"omega\":0,\"amp\":1,\"phase\":0,\"mute\":false,\"solo\":fa"
+   ]
+  ]
+ ],
+ "rows": [
+  "boot"
+ ],
+ "playDiff": [],
+ "playRows": 0,
+ "errs": []
+}
