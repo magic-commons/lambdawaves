@@ -3191,3 +3191,58 @@ build badge and the caret waits for the next resize or class change; with STATUS
 ψ-badges wrap onto lines the pane covers until LATER; the build badge is first on screen but still last in the tab
 order; and a take whose worker is superseded by a newer deploy before it activates leaves the state at `taking`, which
 also refuses the newer build's `buildReady` until a reload — inside a 4–9 ms window, measured.
+
+## 2026-10-01 · 0.3.3 — THE EXPORTS
+
+### wave 135: THE COPY — SPECTRUM copies the state as LaTeX, in Josh's notebook style, in chemistry order
+
+Josh, admiring the shape-export idea for 0.3.3: *"Could the spectrum window perhaps have a 'copy' button on the
+window bar that allows it to copy the current orbitals (chemistry style in its ordering hehe) in latex format
+similar to how I wrote them in the 'Wave Dancer' notebook?"* The WAVE DANCER notebook already says it in his own
+words — "running $2p_{-1}$, $2p_{1}$, $4p_{-1}$, and $4d_{2}$ in STATE-A and $2s_{0}$, $2p_{0}$, $4p_{1}$, and
+$4d_{-2}$ in STATE-B" — and that sentence is now reproducible on demand. `lab/latex-state.js` (new, pure) takes the
+populated register at the clock's live t and the Hamiltonian in force and returns exactly two lines (PLAN R5): the
+prose list, and the ψ expansion with an amplitude and a phase on every term.
+
+The order is chemistry's (PLAN R4): Madelung — n + l ascending, then n, then l, then m from −l to l — so 4s sits
+before 3d, the laugh in Josh's own question. Amplitudes are |c_k| / √Σ|c|² to two decimals, dropped at 1.00 for a
+single state; phases are the LIVE relative phases φ_k = arg c_k − arg c_first (the first term in chemistry order
+carries 0), dropped below 0.005 rad, written as a multiple of π when φ/π is within 1e-3 of p/q (q ≤ 12) — e^{iπ/2},
+e^{-3iπ/4}, e^{iπ} (never e^{-iπ}: one spelling) — and in radians otherwise. Hydrogen-like labels are the notebook's
+own spelling, `${n}${spdfgh}_{${m}}`; any other Hamiltonian's own `labelOf` is made LaTeX-safe (`\mathrm{…}`, a
+trailing `₊2` / `₋2` bound to the word before it as `_{+2}` / `_{-2}` — KaTeX refuses a subscript straight after
+`\,` — remaining spaces become `\,`). An empty register is `''`; the caller says so and writes nothing to the
+clipboard.
+
+The button is SPECTRUM's own ⧉ — the INFO panels' own glyph and class (`window-chrome.js`'s `.dev-copy`), already
+styled in the kit's `base.css` to the power button's 22×22 box and tokens and stood down on a phone by `skin.css`;
+no `lab.css` rule was needed, and none was added. It is seated after ⏻ and before ▾ in `.dev-util`, the same seat
+an INFO panel's own ⧉ holds. EDIT › COPY the state as LaTeX calls the identical `copyLatex()`, disabled only while
+SPECTRUM itself stands down (a molecular field owner has the field; SPECTRUM is hidden and has nothing to show).
+Both roads write through one clipboard call: `layout.copyDigest` is now `layout.copyText(id, text)` plus a
+one-line `copyDigest(id)` that calls it with the panel's digest, so the INFO panels' digest and SPECTRUM's LaTeX
+share the same write-and-flash `copied`. SPECTRUM's own status line says what went — `4 states as LaTeX`, or the
+empty message — and restores itself after 1800 ms through a timer handle (`copySaid`) that a second press clears
+first, so two copies pressed in quick succession do not have the first's restore clip the second's message.
+
+`tests/latex-state.test.mjs` (node, 16 checks, all green): the WAVE DANCER A and B sets reproduce the notebook's
+own two sentences to the character; 2p₀ + i·2p₁ → e^{iπ/2}; a bare 0.37 rad phase → e^{0.37i}; −3π/4, π (never
+−π), 2π/3 all spelled in π with the global phase removed; 3d₀ + 4s₀ puts 4s first; m runs −1, 0, 1 inside a
+subshell; unnormalised input normalises; the empty register and a vanishing term copy nothing; an oscillator and a
+Cornell/BOX label keep a legal subscript; all 91 labels at once stay Madelung-ordered; every one of the 20 copies
+made in the run has balanced `$` / `{}` and parses under the vendored KaTeX with `throwOnError`, `strict: 'error'`.
+`tests/latex-copy.browser-test.mjs` drives the real app on WAVE DANCER: the head button sits alone in `.dev-util`,
+wins `elementFromPoint` at its centre, and a real press on the A and B sets copies the notebook's own sentences;
+scrubbed to t = 16π/3 the n = 4 terms carry e^{-iπ/2} against the n = 2 pair while the amplitudes stay 0.50 (the
+phases are c(t)'s, not a snapshot at t = 0); EDIT › COPY writes the identical text; pasted into the notebook both
+copies render as 10 KaTeX formulas with no `.katex-error`; the empty register writes nothing and SPECTRUM says so;
+under the MOLECULES field owner SPECTRUM stands down and the EDIT row disables, and going back it copies
+`$1s_{0}$ and $2p_{0}$`. `tests/menubar.browser-test.mjs` now drives the new EDIT row directly, pressing it on the
+`1s+2pz` preset and checking the copied text against the same two lines.
+
+What the brief (`research/release-0.3.3/BRIEF-135.md`) got wrong: §2.B said the button goes in `.dev-util`
+*before* the power button; the shipped seat is after ⏻ and before ▾, the INFO panels' own place — the only seat
+that also wins `elementFromPoint`, and the one the brief's own §3 test checks (`afterPower`, `beforeFold`). §2.D
+said the act "sets SETTINGS' status line `COPIED · 4 states as LaTeX`"; it is SPECTRUM's own `.dev-stat` (where
+the ⧉ lives, where `copied` flashes, and where the brief's own §3 test reads it), and the exact text has no
+`COPIED ·` prefix — just `4 states as LaTeX` — since `copied` is the CSS class that flashes, not a text prefix.

@@ -65,6 +65,7 @@ import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
+import { stateLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
@@ -1904,6 +1905,13 @@ export async function boot(dom) {
   // SPECTRUM
   const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
   rack.appendChild(wSpec.root);
+  /* 0.3.3 · wave 135 · THE COPY.  SPECTRUM's ⧉ is the INFO panels' ⧉ (window-chrome.js): the same class, the same glyph,
+     the same seat before the fold — the kit already styles `.dev-copy` in the power button's box and tokens (base.css)
+     and stands it down on a phone (skin.css §5), where EDIT › COPY the state as LaTeX is the road.  What it copies is
+     the state, not the panel's text: copyLatex() below. */
+  { const util = wSpec.root.querySelector('.dev-util'), b = el('button', 'dev-copy', null, '⧉'); b.type = 'button';
+    b.title = 'Copy the state as LaTeX'; b.setAttribute('aria-label', 'Copy the state as LaTeX');
+    util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); copyLatex(); }); }
   {
     const hamGroup = group(wSpec.body, 'HAMILTONIAN');
     const rh = el('div', 'row tight', hamGroup);
@@ -1983,6 +1991,19 @@ export async function boot(dom) {
     const msg = Math.abs(n - 1) < 5e-4 ? nm + ' was 1 already · nothing to do' : nm + ' ' + n.toFixed(4) + ' → 1';
     wState.setStatus(msg, 'live'); wSpec.setStatus(msg, 'live');
     setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
+  }
+  /** THE COPY (0.3.3 · wave 135): the populated register at the clock's t — c(t), the mix while A/B plays — as the notebook's
+   *  LaTeX in chemistry order (lab/latex-state.js), through copyDigest's one clipboard road and its `copied` flash.  SPECTRUM's
+   *  status line says what went: it is where the ⧉ is.  Under a molecular field owner SPECTRUM stands down (moleculeMode) and
+   *  shows no list, so there is nothing to copy and the EDIT row is disabled; an empty register says so and writes nothing. */
+  let copySaid = 0;                                                  // the status restore of the last copy: a second press restarts it
+  function copyLatex() {
+    const c = reg.at(clock.t), H = getHamiltonian();
+    const states = wSpec.root.hidden ? [] : reg.populated().map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: c.re[a], im: c.im[a] }));
+    const text = stateLatex({ states, H }), n = text ? text.split('\n')[0].split('$').length >> 1 : 0;
+    wSpec.setStatus(text ? n + (n === 1 ? ' state' : ' states') + ' as LaTeX' : wSpec.root.hidden ? 'nothing to copy — SPECTRUM stands down while a molecule owns the field' : 'nothing to copy — the register is empty', text ? 'live' : 'warn');
+    clearTimeout(copySaid); copySaid = setTimeout(() => wSpec.setStatus(...specStatus()), 1800);
+    return text ? layout.copyText('spectrum', text) : Promise.resolve('');
   }
   function switchHamiltonian(id) {
     if (!warmTimer && !warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
@@ -3676,7 +3697,9 @@ export async function boot(dom) {
       const extra = DIGESTS[id] ? DIGESTS[id]() : ''; if (extra) lines.push('', extra);
       return lines.join('\n');
     },
-    async copyDigest(id) { const t = layout.digest(id); try { await navigator.clipboard.writeText(t); } catch (e) {} const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (dev) { dev.classList.add('copied'); setTimeout(() => dev.classList.remove('copied'), 900); } return t; },
+    /** THE ONE CLIPBOARD ROAD for a window's copy: write the text, flash `copied` on the window (· COPIED on its status line) */
+    async copyText(id, t) { try { await navigator.clipboard.writeText(t); } catch (e) {} const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (dev) { dev.classList.add('copied'); setTimeout(() => dev.classList.remove('copied'), 900); } return t; },
+    copyDigest(id) { return layout.copyText(id, layout.digest(id)); },
   };
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
@@ -3763,7 +3786,7 @@ export async function boot(dom) {
           ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
           ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), () => wSpec.root.hidden, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
