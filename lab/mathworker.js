@@ -12,6 +12,8 @@
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   h2curve { Rmin, Rmax, count }                  → the correlated H₂ energy curves
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
+ *   export  { fmt, texels, N, half, rhoMax, … }    → FILE › EXPORT SHAPE / GRID (wave 134): the field's grid decoded, marched and written as
+ *                                                  one file (export3d.js buildFile) — the bytes come back, transferred; asked for, so it finishes parked
  * The tabulated Hamiltonians (ATOM, QUARKONIUM) are not mirrored: the rack keeps their slap on the main thread.
  *
  * ── PARKING (wave 54, board #42) ────────────────────────────────────────────────────────────────────────────────
@@ -49,6 +51,7 @@ import { createRTHF } from './density.js';
 import { spectrum, peaks } from './absorb.js';
 import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
+import { buildFile } from './export3d.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -130,6 +133,7 @@ function work(m) {
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
     else if (m.op === 'h2curve') { out = { result: h2CurveTable(m.Rmin, m.Rmax, m.count) }; }
     else if (m.op === 'gas.stats') { out = gasStats(m); }
+    else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes ? [out.bytes.buffer] : []; }
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }

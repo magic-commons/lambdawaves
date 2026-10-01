@@ -42,6 +42,7 @@ import { createMolecule } from './moleculeview.js';
 import { createMOPanel } from './moview.js';
 import { createPulse } from './pulseview.js';
 import { createCapture, maxPictureSize, viewCarriesGlobalPhase } from './capture.js';
+import { createExporter, EXPORTS as SHAPE_EXPORTS } from './export3d.js';   // wave 134: FILE › EXPORT SHAPE / GRID
 import { createHelium } from './heliumview.js';
 import { createH2 } from './h2view.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
@@ -1228,6 +1229,7 @@ export async function boot(dom) {
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
+  let exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
   const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
   {
 
@@ -3742,6 +3744,29 @@ export async function boot(dom) {
       collapse() { if (!modView) return false; modView.close(); saveSettings(); schedule(TIER.PRESENT); return true; },
       toggle() { return layout.modulation.open ? layout.modulation.collapse() : layout.modulation.expand(); },
     };
+    /* FILE › EXPORT SHAPE (GLB · OBJ · STL) and EXPORT GRID (NPZ · CUBE), wave 134.  THE LAW: what is on screen, by
+       the road it came — the grid is field.readGrid()'s own texels, the ISO is mat.iso, the colour is the phase
+       view's own LUT (toLUT(palette.stops), the same CPU function the SLICE plane reads), the camera is
+       cameraBasis(obs) at THIS press.  Marching cubes and every writer run in the `cards` worker queue (parked like
+       a card prep, never the frame thread); the download is capture()'s own save() (no copy of its ZIP writer). */
+    const exportLabel = () => { try { if (reg.preset) return reg.preset; const pop = reg.populated ? reg.populated() : []; return pop.length ? pop.length + 'modes' : 'state'; } catch (_) { return 'state'; } };
+    exporter3d = createExporter({
+      field: () => field,
+      scene: () => {
+        const B = cameraBasis(obs), w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
+        const q = chem && chem.on && chem.query ? chem.query() : null;
+        return {
+          label: exportLabel(), build: BUILD_LINE, t: clock.t, space, isoFrac: mat.iso,
+          colour: { on: !!(palette && palette.on), hue: mat.hueShift || 0, invert: !!mat.invert, lut: (palette && palette.on) ? toLUT(palette.stops) : null },
+          camera: { dir: B.dir, right: B.right, up: B.up, dist: obs.dist, yfov: obs.fov || 0.6, aspect: w / h },
+          atoms: q ? q.atoms : [{ Z: getZ(), x: 0, y: 0, z: 0 }],
+        };
+      },
+      post: (msg, transfer) => cards.call(msg, transfer),
+      save: (r) => capApi.capture.save(r),   /* capApi (depth-1, like exporter3d) wraps the CAPTURE group's own capture()/cap, built lazily there */
+      status: (text, cls) => { if (ui.set) ui.set.setStatus(text, cls); },
+    });
+
     /* the logo opens FILE · EDIT · WINDOW */
     const title = document.getElementById('title');
     if (title) {
@@ -3761,7 +3786,9 @@ export async function boot(dom) {
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
           null,
           ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
-          ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)']],
+          ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)'],
+          null,
+          ...SHAPE_EXPORTS.map((spec) => [spec.row, () => exporter3d.run(spec.fmt), () => exporter3d.busy || !field.ok, spec.tip])],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
           ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
@@ -5256,6 +5283,9 @@ export async function boot(dom) {
      *  pngSequence · probe · verifyVideo · save · limits, and `laws` for the pure schedule functions. */
     get capture() { return capApi ? capApi.capture : null; }, get capturePlan() { return capApi ? capApi.plan(true) : null; },
     get captureUI() { return capApi; },
+    /* W-EXPORT (wave 134): FILE › EXPORT SHAPE / GRID's own module instance — run(fmt), busy, last (the proof's hook;
+     *  the five rows call run(fmt) themselves and need nothing here) */
+    get shapeExport() { return exporter3d; },
     /* W-WIGNER: the (z, p_z) slice — the last map computed (recomputed if the state has moved), its two ranges, its numbers */
     wigner: { slice() { return hydroReader().on ? wignerView.slice(reg, clock.t) : null; }, setRange(z, p) { return wignerView.setRange(z, p); },
       get stats() { return wignerView.stats; }, get zmax() { return wignerView.zmax; }, get pmax() { return wignerView.pmax; },

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const source=readFileSync(new URL('../lab/field.js',import.meta.url),'utf8');
-for(const name of ['sampleVoxel','fieldDigest','readStats']) {
+for(const name of ['sampleVoxel','fieldDigest','readStats','readGrid']) {
  const start=source.indexOf('  async function '+name+'('),end=source.indexOf('\n  }',start)+4;
  const code=source.slice(start,end);
  for(const failure of ['submit','map']) {
