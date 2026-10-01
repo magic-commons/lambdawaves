@@ -202,7 +202,33 @@ try {
   assert.deepEqual(rest.errors, []);
   console.log(`PASS the other ${Object.keys(want).length} row groups each do what they name and close the bar (FULL SCREEN is left out: it needs a real user activation)`);
 
-  /* ── 7 · a row that throws still closes the bar and hands focus back ── */
+  /* ── 7 · FILE: the five EXPORT SHAPE / GRID rows (wave 134) are driven by the same press, with the download
+         road stubbed onto captureUI's own instance so each row is judged by what it actually exported, not by a
+         real download. The format bytes themselves are tests/export3d.browser-test.mjs's job; this is the wiring. ── */
+  const shapeExports = await g.ev(`__LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle();   /* section 6's NEW project left the register empty: no state, no surface to export */
+    window.__saved = [];
+    const cap = __LW.captureUI.capture, origSave = cap.save;
+    cap.save = (r) => { window.__saved.push(r); return true; };
+    const rows = ['EXPORT SHAPE · GLB', 'EXPORT SHAPE · OBJ', 'EXPORT SHAPE · STL', 'EXPORT GRID · NPZ', 'EXPORT GRID · CUBE'];
+    const out = [];
+    for (const label of rows) {
+      const n0 = window.__saved.length;
+      const r = await __row('FILE', label);
+      for (let i = 0; i < 300 && window.__saved.length === n0 && __LW.shapeExport.busy; i++) await new Promise((q) => setTimeout(q, 20));
+      const last = window.__saved[window.__saved.length - 1];
+      out.push({ label, found: r.found, closed: r.closed, listsDown: r.listsDown, disabled: r.disabled, got: window.__saved.length > n0, name: last && last.name });
+    }
+    cap.save = origSave;
+    return { out, errors: __e.slice() };`);
+  for (const row of shapeExports.out) {
+    assert.equal(row.found, true, row.label + ' must exist'); assert.equal(row.closed, true); assert.equal(row.listsDown, true);
+    assert.equal(row.disabled, false, row.label + ' must be enabled while the FIELD is up and no export is in flight');
+    assert.equal(row.got, true, row.label + ' must actually export a file'); assert.ok(row.name, row.label + ' must name a file');
+  }
+  assert.deepEqual(shapeExports.errors, []);
+  console.log('PASS FILE › the five EXPORT SHAPE / GRID rows (wave 134) each export a named file and close the bar: ' + shapeExports.out.map((r) => r.name).join(', '));
+
+  /* ── 8 · a row that throws still closes the bar and hands focus back ── */
   const thrower = await g.ev(`const saved = __LW.link.copy, lk = __LW.layout.modulation.toggle;
     __LW.layout.modulation.toggle = () => { throw new Error('probe: the act threw'); };
     window.addEventListener('error', (e) => { if (/probe: the act threw/.test(e.message)) e.preventDefault(); }, { once: true });

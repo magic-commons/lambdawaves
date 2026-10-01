@@ -1372,6 +1372,23 @@ export async function createField(canvas, opts = {}) {
       return { rhoMax: f[0], refMax: f[1] };
     } finally { buf.destroy(); }
   }
+  /** THE WHOLE CACHE AS THE PRESENTER SAMPLES IT (wave 134, FILE › EXPORT SHAPE / GRID): the raw rgba16float texels
+      (.r = Re ψ, .g = Im ψ, index x + N·y + N²·z) and stats[0], the ρmax the presenter divides by, in ONE copy and ONE
+      map — the grid and its normaliser can never come from two different reconstructs.  Decoding is the worker's. */
+  async function readGrid() {
+    const bpr = res * 8, size = bpr * res * res;
+    const buf = device.createBuffer({ size: size + 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    try {
+      const enc = device.createCommandEncoder();
+      enc.copyTextureToBuffer({ texture: psiTex }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: res }, [res, res, res]);
+      enc.copyBufferToBuffer(statsBuf, 0, buf, size, 16);
+      device.queue.submit([enc.finish()]);
+      await buf.mapAsync(GPUMapMode.READ);
+      const all = buf.getMappedRange(), texels = new Uint16Array(all.slice(0, size)), rhoMax = new Float32Array(all.slice(size, size + 4))[0];
+      buf.unmap();
+      return { texels, N: res, half, rhoMax, generation };
+    } finally { buf.destroy(); }
+  }
 
   /**
    * GPU THROUGHPUT, the honest number this browser can give (Firefox zeroes timestamp queries and
@@ -1511,7 +1528,7 @@ export async function createField(canvas, opts = {}) {
       nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
-    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, lineColors, linePixels,
+    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     /** K2 · THE EXPORT PIN: pinRenderPipeline(true) … (false), nested by depth — while held every draw takes the generic
      *  pipeline, so a specialised compile that resolves mid-run can never change an export's pipeline.  Returns the depth. */

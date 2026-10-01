@@ -81,7 +81,9 @@ reconstructing all 91 labels takes 1.43 ms at 96³ and 3.40 ms at 128³
 Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, SLICE,
 KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with four clocks, a
 modulation plug-in with drag-to-patch macros, presets, projects, shareable state links,
-and an offline-capable PWA.
+FILE › EXPORT SHAPE (GLB · OBJ · STL, the density isosurface on screen for Blender or Cinema 4D) and
+EXPORT GRID (NPZ · Gaussian cube, ψ on the grid for NumPy or a chemistry viewer) — see
+[`docs/EXPORT.md`](docs/EXPORT.md) — and an offline-capable PWA.
 
 **Requires a working WebGPU adapter in a secure context.** Browser support varies
 by OS, GPU and driver; see the [WebGPU compatibility reference](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API).

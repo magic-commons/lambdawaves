@@ -139,3 +139,13 @@ and the code disagree, the code is right; please say so in an issue.
   STATUS TAGS), a quiet take for an untouched session (`rack.js` `untouched`), or ABOUT › UPDATE APP; `?sw=0` declines
   the service worker for development. Source: `lab/main.js`, `lab/sw.js`, `lab/sw-client.js`, `tests/pwa.test.mjs`,
   `tests/offer.browser-test.mjs`.
+
+## 9. FILE › EXPORT SHAPE / GRID
+
+- Five rows, no dialog: EXPORT SHAPE writes the on-screen density isosurface as GLB (with the observer's camera),
+  OBJ or STL (vertex colour = the phase palette on screen); EXPORT GRID writes the field's own N³ grid as a NumPy
+  NPZ (`psi.npy`, complex64) or a Gaussian cube (the density, for Avogadro/VMD/VESTA). Nothing is recomputed on a
+  second road: the ISO, the palette and the camera are read at the press, off the frame path, in the maths
+  worker's `export` op; a row is disabled while one is in flight or the FIELD is down, and a second press is
+  refused, not queued. Source: `docs/EXPORT.md`, `lab/export3d.js` (header comment and `createExporter`),
+  `lab/mathworker.js`, `research/release-0.3.3/BRIEF-134.md`.
