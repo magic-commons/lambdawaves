@@ -30,6 +30,10 @@ No irrep, no σ/π, no lone pair, nothing a chemist would write. And Sol's own w
 index survives a different geometry or calculation"* — has no answer in the plan: datasets are keyed by hash, orbitals by
 index, so a preset saved against one dataset means nothing against another.
 
+**And one defect found on the way.** The app names frontier orbitals by index, not by level, so the members of a
+degenerate HOMO read `HOMO−2`, `HOMO−1`, `HOMO` — in CH₄ (1t₂), HF (1π), CO₂ (1π_g) and C₆H₆ (1e₁g), four of the ten
+probed molecules. A triply degenerate HOMO is one HOMO.
+
 ## 2 · The thesis: the name is the key
 
 A proper orbital name does three jobs, and the plan needs all three:
@@ -41,7 +45,9 @@ A proper orbital name does three jobs, and the plan needs all three:
    cross. `(irrep, count)` is therefore the join key between a live solve, a cached record and an imported pack — the
    thing an index never was. A project stores both the exact reference `{dataset hash, index}` and the portable one
    `{group, irrep, count}`; restore uses the exact one when the dataset matches and the portable one otherwise, and says
-   which it used.
+   which it used. **Measured, not argued:** in STO-3G the HOMO of N₂ is `3σ_g` (1π_u at −0.5730 below 3σ_g at −0.5394 Eh);
+   in the app's own 6-31+G* the two swap (3σ_g at −0.6349 below 1π_u at −0.6169) and the HOMO is `1π_u`. "HOMO" names a
+   different orbital in the two bases; `3σ_g` names the same one.
 3. **The address.** MO-REGISTRY's search, a modulation target's caption and the copy-as-LaTeX all resolve a name to the
    same stable id. The saved ids (`reg.*`, `chem.*`) do not change (CLAUDE.md's law); names are aliases onto them.
 
@@ -126,6 +132,16 @@ cluster must come out as exactly one irrep of its own dimension; anything else g
 Linear molecules need no table: |m| from χ(C_φ) at two generic angles, ± from one σ_v, g/u from inversion. Count within
 each irrep by energy.
 
+**Three numbers the probe fixed.** (1) The energy tolerance for a cluster: across all 52 solvable molecules the widest
+spread inside a degenerate level is 3.3e-13 Eh (GeH₄) and the narrowest gap between separate levels is 1.6e-7 Eh (Br₂);
+the app's 1e-8 sits in that window with a factor of 16 to spare, and 2e-10 is the safer rule. (2) The geometric
+tolerance: the ten probed frameworks are symmetric to 5e-15 bohr, but furan and pyridine are built by walking a polygon
+and close only to about 1e-3 bohr, so the record states its tolerance (1e-2 bohr) — or those two geometries are rebuilt
+symmetric. (3) A names record is **all or nothing**: after one refused level the counts above it are unreliable.
+
+**Where it runs.** In the worker, inside `ensureSolve`, attached to `ground`: the solve keeps S, F and the basis with
+atom indices there, and the reply to the page carries only ε, C and D. The cost is at most 10 ms (benzene).
+
 **The honesty rules** (Sol's ethos, extended):
 - A name is shown only when its residual is below tolerance; otherwise the orbital falls back to its index.
 - A name never asserts an ordering. RHF/STO-3G may order 1π_u and 3σ_g of N₂ differently from experiment; the label is
@@ -135,8 +151,36 @@ each irrep by energy.
 - Approximate symmetry carries its tolerance. Koopmans stays RHF-only; a DFT orbital is tagged Kohn–Sham.
 - Textbook and character names are tagged `derived` or `curated` with a source, never passed off as computed.
 
-**Probe.** `names-probe.mjs` beside this file runs the live solver on H₂O, NH₃, CH₄, N₂, CO, HF, CO₂, C₂H₄, H₂CO and
-C₆H₆ and compares the computed configurations with the textbook ones. Results: `PROBE.md`.
+**Probe (run 2026-10-01, `names-probe.mjs`, `PROBE.md`, `names-probe.json` beside this file).** The live solver, ten
+molecules, STO-3G, node, 8 s in all. Every level came out as exactly one irrep (worst multiplicity residual 9.8e-15) and
+every textbook comparison matched:
+
+| Molecule | Group | Computed configuration | HOMO / LUMO |
+|---|---|---|---|
+| H₂O | C₂v | (1a₁)²(2a₁)²(1b₂)²(3a₁)²(1b₁)² | 1b₁ / 4a₁ |
+| NH₃ | C₃v | (1a₁)²(2a₁)²(1e)⁴(3a₁)² | 3a₁ / 4a₁ |
+| CH₄ | T_d | (1a₁)²(2a₁)²(1t₂)⁶ | 1t₂ / 2t₂ |
+| N₂ | D∞h | (1σ_g)²(1σ_u)²(2σ_g)²(2σ_u)²(1π_u)⁴(3σ_g)² | 3σ_g / 1π_g |
+| CO | C∞v | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)² | 5σ / 2π |
+| HF | C∞v | (1σ)²(2σ)²(3σ)²(1π)⁴ | 1π / 4σ |
+| CO₂ | D∞h | (1σ_u)²(1σ_g)²(2σ_g)²(3σ_g)²(2σ_u)²(4σ_g)²(1π_u)⁴(3σ_u)²(1π_g)⁴ | 1π_g / 2π_u |
+| C₂H₄ | D₂h | (1a_g)²(1b₁u)²(2a_g)²(2b₁u)²(1b₂u)²(3a_g)²(1b₃g)²(1b₃u)² | 1b₃u (π) / 1b₂g (π*) |
+| H₂CO | C₂v | (1a₁)²(2a₁)²(3a₁)²(4a₁)²(1b₂)²(5a₁)²(1b₁)²(2b₂)² | 2b₂ / 2b₁ |
+| C₆H₆ | D₆h | …(3e₁u)⁴(1a₂u)²(3e₂g)⁴(1e₁g)⁴ | 1e₁g / 1e₂u |
+
+Labelling costs 0.4–3 ms (10 ms for benzene); a minimal names record is 155–618 bytes per molecule. Controls: a water
+with one hydrogen moved 0.02 Å is refused; a symmetry-broken second solution of N₂ is refused (residual 0.5); a tolerance
+set too wide reports `σ_g + π_u` rather than a label; a random rotation inside every degenerate cluster changes no label;
+the axis-convention aliases equal a real recomputation in the relabelled frame, five of five.
+
+Two things the names now make visible. Core levels sit 1e-5 to 1e-3 Eh apart, so the computed order begins `1e₁u` for
+benzene and `(1σ_u)²(1σ_g)²` for CO₂ — the counted labels are right, the books print the totally symmetric one first, and
+this is why a name must never assert an order. And benzene solved in 1.0 s here against the library's predicted 9.6 s:
+the cost model is stale, so the booster's saving must be measured on the iPad before the starter is sized around it.
+
+Not established: no independent program (PySCF, Psi4) produced the labels — the comparison is with the textbook
+configurations; Cartesian d shells (GeH₄, AsH₃, H₂Se, HBr, Br₂ and every 6-31+G* set) and the D₃h, D₃d, C₂h, C₂, C_s
+tables are unbuilt; 42 library molecules are unrun; nothing ran in a browser or the worker.
 
 ## 6 · The cache, further
 
@@ -163,7 +207,7 @@ C₆H₆ and compares the computed configurations with the textbook ones. Result
 
 | Stage | What | Done when |
 |---|---|---|
-| N1 · THE NAMES | `lab/names.js` (atoms + molecules, four forms, search), the declared groups in the library, `tools/orbital-names.mjs --check`; MO-REGISTRY lanes and the ORBITAL ladder read `1b₁ · HOMO`; copy and exports carry the names | the ten anchor configurations match the textbook; every enabled molecule is named or says why not; the four old formatters are one |
+| N1 · THE NAMES | `lab/names.js` (atoms + molecules, four forms, search), the declared groups in the library, the labelling in the worker's `ensureSolve`, Cartesian d and the five remaining tables, `tools/orbital-names.mjs --check` with one PySCF cross-check; MO-REGISTRY lanes and the ORBITAL ladder read `1b₁ · HOMO`; a degenerate HOMO is one HOMO; copy and exports carry the names | the ten anchor configurations match (they do, in the probe); every enabled molecule is named or says why not; the label sites in `orbitalsview.js` and `chemview.js` read one service |
 | N2 · THE BOOSTER PROOF | benzene's record (names inside) opens with no SCF; the `lw-data-` store; LIBRARY in the scope law | cached = fresh on energies, occupations, signed fields, canonical subspaces and names; zero solver calls on open |
 | N3 · THE STARTER | all 52 records, generator `--check`, a visible RECALCULATE | measured bytes and first-display time reported; live fallback when an input changes |
 | then Sol's 3–6 | pack import, the grid provider, C₆₀ and DMT, I_h labels, the library | as written in Sol's PLAN.md |
