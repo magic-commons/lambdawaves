@@ -154,6 +154,10 @@ try {
     /* EDIT */
     { __LW.pause(); const r = await __row('EDIT', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
     { __LW.loadPreset('1s+2pz'); const r = await __row('EDIT', 'NORMALIZE'); R.normalize = ok(r) && /‖c‖/.test(st()); }
+    { __LW.loadPreset('1s+2pz'); __LW.pause(); let clip = null; const cb = navigator.clipboard, orig = cb.writeText; cb.writeText = async (t) => { clip = t; };   /* 0.3.3 · wave 135 */
+      const r = await __row('EDIT', 'COPY the state as LaTeX'); await new Promise((q) => setTimeout(q, 30)); cb.writeText = orig;
+      const L = (clip || '').split(String.fromCharCode(10)); R.latex = ok(r) && L.length === 2 && L[0] === '$1s_{0}$ and $2p_{0}$' && L[1].startsWith('$' + String.fromCharCode(92) + 'psi = 0.71');
+      R.latexFlash = document.querySelector('.dev[data-id="spectrum"]').classList.contains('copied'); }
     { __LW.orbit(0.7, 0.2); const r = await __row('EDIT', 'RESET the view'); R.view = ok(r) && Math.abs(__LW.obs.yaw - 0.65) < 1e-12 && Math.abs(__LW.obs.dist - 3.3) < 1e-12; }
     { const r = await __row('EDIT', 'UNDO HISTORY'); R.hist = ok(r) && !document.querySelector('.dev[data-id="history"]').classList.contains('closed'); }
     { const r = await __row('EDIT', 'SETTINGS'); R.settings = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }

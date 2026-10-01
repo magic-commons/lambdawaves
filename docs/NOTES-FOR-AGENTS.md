@@ -120,6 +120,10 @@ and the code disagree, the code is right; please say so in an issue.
   --check` must say "in step". Source: CLAUDE.md, AI_POLICY.md.
 - The debug surface is `window.__LW` (`serialize()`, `restore()`, `fieldDigest()`, `readPixels()`, `perf`,
   `governor`, `quality`, `layout`, `report()`). Source: `lab/rack.js` (`const LW = {`).
+- A window's "copy" is one clipboard road: `layout.copyText(id, text)` writes and flashes `copied` on the named
+  card; `layout.copyDigest(id)` (the INFO panels' ⧉) and SPECTRUM's ⧉ / EDIT › COPY the state as LaTeX
+  (`copyLatex()`, `lab/latex-state.js`'s pure `stateLatex()`, chemistry/Madelung order, Josh's notebook spelling)
+  both go through it. Source: `lab/rack.js` (`layout.copyText`, `copyLatex`), `lab/window-chrome.js`.
 
 ## 8. Playing a release snapshot
 
