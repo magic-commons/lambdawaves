@@ -629,7 +629,8 @@ export function createStates(host, api) {
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
-    if (why) { status('MO-REGISTRY off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (why) { if (!C() || !C().on) { setOn(false); status('MO-REGISTRY standing by — turn MOLECULES on, then MO-REGISTRY ON', ''); return false; }   // MOLECULES went off: the window stays
+      status('MO-REGISTRY off — ' + why, 'warn'); return false; }
     if (!Number.isFinite(t)) t = 0;
     if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }
     const moved = push(t);

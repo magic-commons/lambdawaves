@@ -847,3 +847,17 @@ body.ui-hidden #keymap { display: none; }
    shrinking to fit its longest option — `.segw` is not in base.css's `.row >` flex list, so it says so itself. */
 .mol-pick { flex: 1 1 200px; }
 .mol-pick > select.sel { width: 100%; }
+
+/* MOLECULE FORMULA (Settings › Display; rack.js placeMolFormula): the MOLECULES pick, large, on the stage.  Transparent
+   text beneath every window (z 20 < rack 30 < #floats 32), never a pointer target, never in the occlusion mask.  Its
+   ink and halo are written by accent-wheel.js from the live STAGE colour; the side is chosen against the transport. */
+#molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
+  font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1; white-space: nowrap; letter-spacing: .01em;
+  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); }
+#molFormula.mf-top { top: 64px; }
+#molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+#molFormula[hidden] { display: none; }
+/* LEGACY WINDOWS (rack.js legacyWindow; docs/LEGACY-WINDOWS.md): the banner a hidden window wears if a project brings it
+   back.  Its own class, because LEAN (window-chrome.js) hides every `.note` and this one must always be read. */
+.legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
+  color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
