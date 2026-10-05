@@ -991,6 +991,7 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
+      if (molFormulaEl) stageTextTick();                                   // the stage text follows the atom register (rack.js placeMolFormula)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
@@ -1197,6 +1198,20 @@ export async function boot(dom) {
       else { const pop = reg.populated(); let amp = 1; if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } reg.set(a, amp, 0, clock.t); }
       touchState();
     },
+    /** 2026-10 · the PAINT stroke's batch (lab/paint-stroke.js on SPECTRUM's grid): add ⇒ every listed state not populated
+     *  joins at the mean |c| of those that were (toggleMode's rule, read ONCE before the stroke adds), phase 0; remove ⇒
+     *  each populated one goes to c = 0.  One touchState() however many states it covers. */
+    paintModes(list, add) {
+      let n = 0, amp = 1;
+      if (add) { const pop = reg.populated(); if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } }
+      for (const a of list) {
+        if (!(a >= 0) || a >= BASIS.length) continue;
+        const on = reg.population(a) > 0;
+        if (add && !on) { reg.set(a, amp, 0, clock.t); n++; } else if (!add && on) { reg.set(a, 0, 0, clock.t); n++; }
+      }
+      if (n) touchState();
+      return n;
+    },
     setPopulation(a, v) {
       const n = reg.norm() || 1; const c = reg.coeffAt(a, clock.t); const ph = Math.atan2(c.im, c.re);
       reg.setPolar(a, Math.sqrt(Math.max(0, v)) * n, ph, clock.t); touchState();
@@ -1268,7 +1283,7 @@ export async function boot(dom) {
     ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'MOLECULE FORMULA', value: true, title: 'Set the MOLECULES formula large on the stage while MOLECULES is on', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -2306,25 +2321,54 @@ export async function boot(dom) {
   function placeMolFormula() {
     const fe = molFormulaEl; if (!fe) return;                      // built at the end of boot, after `layout` exists
     const m = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
-    const text = m ? mathPlain(m.formula) : '';
+    const text = m ? mathPlain(m.formula) : registerText();
     const show = !!text && !document.body.classList.contains('no-mol-formula');
     if (fe.textContent !== text) fe.textContent = text;
     const tr = document.getElementById('transport');
     const foot = layout.docked || !!(tr && tr.classList.contains('at-top')) || !!(molFormulaNarrow && molFormulaNarrow.matches);
     fe.classList.toggle('mf-foot', foot); fe.classList.toggle('mf-top', !foot);
-    /* quite large (176 px on a desktop, 16 vw on a phone), then MEASURED down until it fits 86 % of the viewport */
+    /* 2026-10 (Josh) · HALF the first size (88 px on a desktop, 8 vw on a phone), and CAPPED TO THE MIDDLE: centred in the
+       open stage between the two racks, then MEASURED down until it fits that gap less a large margin each side. */
     if (show) {
       fe.hidden = false;
-      const cap = Math.round(Math.max(36, Math.min(176, window.innerWidth * 0.16))), room = window.innerWidth * 0.86;
+      let l = 0, r = window.innerWidth;
+      for (const rk of [rackL, rack]) {
+        if (!rk) continue;
+        const b = rk.getBoundingClientRect();
+        if (b.width < 2 || b.right <= 0 || b.left >= window.innerWidth || getComputedStyle(rk).display === 'none') continue;
+        if (b.left + b.width / 2 < window.innerWidth / 2) l = Math.max(l, b.right); else r = Math.min(r, b.left);
+      }
+      if (r - l < 120) { l = 0; r = window.innerWidth; }                // a phone's rack covers the stage: use the whole width
+      fe.style.left = Math.round((l + r) / 2) + 'px';
+      const gap = r - l, room = Math.max(80, gap - 2 * Math.max(48, gap * 0.12));       // a LARGE margin off each rack: ≥ 48 px or 12 % of the gap
+      const cap = Math.round(Math.max(24, Math.min(88, window.innerWidth * 0.08)));
       fe.style.fontSize = cap + 'px';
-      const w = fe.offsetWidth; if (w > room) fe.style.fontSize = Math.max(24, Math.floor((cap * room) / w)) + 'px';
+      const w = fe.offsetWidth; if (w > room) fe.style.fontSize = Math.max(16, Math.floor((cap * room) / w)) + 'px';
     }
     fe.hidden = !show;
+  }
+  /** 2026-10 (Josh) · the same stage text for SPECTRUM: the atom register's populated states, "2s₀, 2p₋₁"; under an A ↔ B
+   *  TRANSITION, A's states ↔ B's states.  Only while the atom register owns the field (no molecular owner is on). */
+  let molFormulaKey = '';
+  function registerText() {
+    if ((molecule && molecule.on) || (helium && helium.on) || (h2 && h2.on) || (chem && chem.on)) return '';
+    const H = getHamiltonian(), name = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
+    const list = (re, im) => { const out = []; for (let a = 0; a < BASIS.length; a++) if (re[a] * re[a] + im[a] * im[a] > 1e-12) out.push(name(a)); return out.join(', '); };
+    const mix = reg.transition;
+    if (mix) { const A = list(mix.reA, mix.imA), B = list(mix.reB, mix.imB); return A && B ? A + '  ↔  ' + B : A || B; }
+    return reg.populated().map(name).join(', ');
+  }
+  /** polled from the CPU tick: the register has no change event, so its version (and the transition flag) is the key */
+  function stageTextTick() {
+    const key = reg.version + '|' + (reg.transition ? 1 : 0) + '|' + getHamiltonian().id;
+    if (key !== molFormulaKey) { molFormulaKey = key; placeMolFormula(); }
   }
   function initMolFormula() {
     molFormulaEl = el('div', '', dom.stage); molFormulaEl.id = 'molFormula'; molFormulaEl.setAttribute('aria-hidden', 'true'); molFormulaEl.hidden = true;
     const tr = document.getElementById('transport');
     if (tr) new MutationObserver(placeMolFormula).observe(tr, { attributes: true, attributeFilter: ['class'] });   // dock / undock / .at-top
+    /* the racks hide, peek and slide (body classes), so the middle moves: place now and again once the slide has landed */
+    new MutationObserver(() => { placeMolFormula(); setTimeout(placeMolFormula, 400); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('resize', placeMolFormula, { passive: true });
     if (molFormulaNarrow && molFormulaNarrow.addEventListener) molFormulaNarrow.addEventListener('change', placeMolFormula);
     wChem.root.addEventListener('change', placeMolFormula);          // the pick lands in `preset` at once; the solve comes later
@@ -3826,7 +3870,7 @@ export async function boot(dom) {
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['MOLECULE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
         WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,

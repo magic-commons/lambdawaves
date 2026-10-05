@@ -38,13 +38,18 @@ export function createRegister(host, api) {
     const next = v === 'states' ? 'states' : 'orbital';
     if (next === mode) { modeSeg.set(mode); return mode; }
     mode = next; modeSeg.set(mode);
-    paneO.hidden = mode !== 'orbital'; paneS.hidden = mode !== 'states';
+    paneO.hidden = mode !== 'orbital'; paneS.hidden = mode !== 'states'; seatSwitches();
     states.setShown(mode === 'states');
     if (mode === 'orbital') { orbitals.paint(); orbitals.refresh(); }
     const st = statusOf[mode]; if (api.status && st[0]) api.status(st[0], st[1]);
     return mode;
   }
   states.setShown(false);
+  /* 2026-10 (Josh) · ONE ROW SAVED: each pane's MO-REGISTRY ON switch sits to the RIGHT of ORBITAL | STATES, the current
+     mode's one shown.  They stay each pane's own (their onChange and set() are untouched); only their seat moved. */
+  bar.appendChild(orbitals.onSwitch); bar.appendChild(states.onSwitch);
+  const seatSwitches = () => { orbitals.onSwitch.hidden = mode !== 'orbital'; states.onSwitch.hidden = mode !== 'states'; };
+  seatSwitches();
 
   return {
     orbitals, states,

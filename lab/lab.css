@@ -444,7 +444,9 @@ body.window-info-off .dev-lean { display: none; }
 .reg-pane[hidden] { display: none; }
 .reg-pane > * + * { margin-top: var(--sp-2); }
 .reg-pane .sp-head { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.reg-pane .sp-head > .sw { grid-column: 1 / -1; }
+.reg-mode { flex-wrap: nowrap; align-items: flex-end; }
+.reg-mode > .sw.orb-on { flex: 0 0 auto; white-space: nowrap; }   /* 2026-10: MO-REGISTRY ON beside ORBITAL | STATES (registerview.js) */
+.reg-mode > .sw[hidden] { display: none; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
@@ -861,3 +863,4 @@ body.ui-hidden #keymap { display: none; }
    back.  Its own class, because LEAN (window-chrome.js) hides every `.note` and this one must always be read. */
 .legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
+.mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js) */

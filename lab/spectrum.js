@@ -12,6 +12,7 @@
  */
 import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover } from './mir/kit.js';
+import { paintStroke } from './paint-stroke.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and
@@ -70,10 +71,16 @@ export function createSpectrum(host, api) {
     const cs = el('div', 'pk-chips', g);
     for (const s of BASIS) if (s.n === n) {
       const b = el('button', 'pk-c', cs, s.label); b.type = 'button'; b.title = `${s.id}  E = ${s.E.toFixed(5)}`;
-      b.addEventListener('click', () => api.toggleMode(s.index));
+      b.dataset.a = String(s.index);
+      b.addEventListener('click', () => api.toggleMode(s.index));       // the keyboard's road; a pointer is answered by the paint stroke below
       chips.set(s.index, b);
     }
   }
+  /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
+     crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint. */
+  const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
+  paintStroke(picker, { at: chipAt, apply: (as, add) => { if (api.paintModes) api.paintModes(as, add); },
+    across: (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 6), out = []; for (let i = 1; i < n; i++) out.push(...chipAt({ x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n })); return out; } });
   const lanes = new Map();     // index → the lane that IS built and in the DOM
   let selected = -1, lastVersion = -1;
   /* ── THE REBUILD IS INCREMENTAL, AND THE BOOKKEEPING IS NOT (wave 49) ────────────────────────────────

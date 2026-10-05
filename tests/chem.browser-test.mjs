@@ -130,6 +130,8 @@ try {
   const bytes = fs.statSync(SHOT).size;
   judge('L5 .tmp/chem-benzene.png exists and is over 50 kB', bytes > 50 * 1024, { file: SHOT, bytes });
   const l5 = await g.ev(`const d = document.querySelector('.dev[data-id="chem"]');
+    const more = d.querySelector('.mol-more'); if (more) more.hidden = false;   // 2026-10: the plot lives in the hidden section
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     const c = d.querySelector('canvas.mol-c'), b = c && c.getBoundingClientRect();
     return { canvas: !!c, painted: !!(b && b.width > 100 && b.height > 40), folded: d.classList.contains('folded'),
       rows: d.querySelectorAll('.row').length, controls: d.querySelectorAll('.k, .segw, .sw, .trig').length,
