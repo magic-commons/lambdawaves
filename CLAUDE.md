@@ -54,7 +54,11 @@ formula while MOLECULES is on, otherwise SPECTRUM's populated states ("2s₀,
 50–300 %), centred between the racks with a wide margin; it WRAPS inside that
 width (only an unbreakable word is shrunk); at the top while the transport pill
 floats at the foot, at the foot when the transport is docked or the pill is at
-the top. While a molecule owns the field SPECTRUM is FOLDED, not hidden
+the top. ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by default,
+13 px × SIZE) mark each MOLECULES nucleus with its element symbol at its
+projected position (`placeAtomLabels`, the PARTICLES projection), white under
+`mix-blend-mode: difference` so they invert whatever is beneath them. While a
+molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go.
 
 Palettes are MIR's (`lab/mir/palette.js`): add one in MIR, then adopt

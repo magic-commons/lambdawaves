@@ -865,3 +865,10 @@ body.ui-hidden #keymap { display: none; }
 .legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js) */
+/* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
+   position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
+   over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
+#atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;
+  mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
+#atomLabels[hidden] { display: none; }
+#atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }

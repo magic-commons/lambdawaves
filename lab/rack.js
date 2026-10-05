@@ -24,7 +24,8 @@ import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
-import { MOLECULE_BY_ID } from './molecules.js';   // the MOLECULE FORMULA overlay reads the pick's own formula
+import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
+import { ELEMENT } from './md.js';                 // the ATOM LABELS' symbols, H–Kr   // the MOLECULE FORMULA overlay reads the pick's own formula
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
 import { createShadowView } from './shadowview.js';
@@ -162,7 +163,7 @@ export async function boot(dom) {
   let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1;                     // the STAGE FORMULA's SIZE knob (Settings › Display): × the 88 px base, a PREFERENCE
+  let molFormulaScale = 1, atomLabelScale = 1;                     // the STAGE FORMULA's SIZE knob (Settings › Display): × the 88 px base, a PREFERENCE
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
@@ -186,7 +187,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale, atomLabels: !document.body.classList.contains('no-atom-labels'), atomLabelsSize: atomLabelScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -265,7 +266,10 @@ export async function boot(dom) {
     const molFormula = s.molFormula !== false;                       // MOLECULE FORMULA: nothing said means ON (it only shows while MOLECULES is on)
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
     molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
-    placeMolFormula();
+    const atomLabels = s.atomLabels !== false;                      // ATOM LABELS: nothing said means ON (they only show while MOLECULES is on)
+    document.body.classList.toggle('no-atom-labels', !atomLabels); if (ui.atomSw) ui.atomSw.set(atomLabels);
+    atomLabelScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : 1; if (ui.atomK) ui.atomK.set(atomLabelScale);
+    placeMolFormula(); atomLabelsKey = '';
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
@@ -994,7 +998,8 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (molFormulaEl) stageTextTick();                                   // the stage text follows the atom register (rack.js placeMolFormula)
+      if (molFormulaEl) stageTextTick();
+      if (atomLabelsEl) placeAtomLabels();                                // the ATOM LABELS follow the camera                                   // the stage text follows the atom register (rack.js placeMolFormula)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
@@ -1289,6 +1294,9 @@ export async function boot(dom) {
     ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is 88 px; it wraps inside the same width between the racks',
       onInput: (v) => { molFormulaScale = v; placeMolFormula(); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
+    ui.atomSw = sw({ label: 'ATOM LABELS', value: true, title: 'Mark each nucleus of the MOLECULES molecule with its element symbol, inverted against whatever is under it', onChange: (v) => { document.body.classList.toggle('no-atom-labels', !v); atomLabelsKey = ''; schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.atomSw.root);
+    ui.atomK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The ATOM LABELS\' size: 100% is 13 px',
+      onInput: (v) => { atomLabelScale = v; atomLabelsKey = ''; schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.atomK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -2385,7 +2393,37 @@ export async function boot(dom) {
     const key = reg.version + '|' + (reg.transition ? 1 : 0) + '|' + getHamiltonian().id;
     if (key !== molFormulaKey) { molFormulaKey = key; placeMolFormula(); }
   }
+  /* 2026-10 (Josh) · ATOM LABELS (Settings › Display, PREFERENCE `atomLabels` / `atomLabelsSize`): each nucleus of the
+     MOLECULES molecule marked with its element symbol, small, at its projected screen position.  The atoms are
+     moleculeAtoms(preset) in bohr — the very centres the field's shells sit on — projected through the camera exactly as
+     PARTICLES projects (cameraBasis, eye at obs.dist × half, the vertical fov).  The layer is white with
+     `mix-blend-mode: difference`, so every glyph INVERTS whatever is under it: dark on a light cloud, light on a dark one.
+     Transparent, no pointer, under every window, never in the occlusion mask.  Moved once per presented CPU tick. */
+  let atomLabelsEl = null, atomLabelsKey = '', atomSpans = [];
+  function placeAtomLabels() {
+    const L = atomLabelsEl; if (!L) return;
+    const on = !!(chem && chem.on) && !document.body.classList.contains('no-atom-labels');
+    if (!on) { if (!L.hidden) L.hidden = true; atomLabelsKey = ''; return; }
+    const id = chem.preset(), atoms = moleculeAtoms(id);
+    if (atomLabelsKey !== id + '|' + atomLabelScale) {
+      atomLabelsKey = id + '|' + atomLabelScale;
+      L.textContent = ''; atomSpans = atoms.map((a) => el('span', 'atom-label', L, ELEMENT[a.Z] || '?'));
+      L.style.fontSize = Math.round(13 * atomLabelScale) + 'px';
+    }
+    L.hidden = false;
+    const cv = dom.canvas, W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
+    const B = cameraBasis(obs), D = obs.dist * domain.half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
+    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
+    for (let i = 0; i < atoms.length; i++) {
+      const a = atoms[i], sp = atomSpans[i]; if (!sp) continue;
+      const dx = a.x - cam[0], dy = a.y - cam[1], dz = a.z - cam[2], depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2];
+      if (depth <= 0) { sp.style.display = 'none'; continue; }
+      const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
+      sp.style.display = ''; sp.style.transform = `translate(${((u + 1) / 2 * W).toFixed(1)}px, ${((1 - v) / 2 * H).toFixed(1)}px) translate(-50%, -50%)`;
+    }
+  }
   function initMolFormula() {
+    atomLabelsEl = el('div', '', dom.stage); atomLabelsEl.id = 'atomLabels'; atomLabelsEl.setAttribute('aria-hidden', 'true'); atomLabelsEl.hidden = true;
     molFormulaEl = el('div', '', dom.stage); molFormulaEl.id = 'molFormula'; molFormulaEl.setAttribute('aria-hidden', 'true'); molFormulaEl.hidden = true;
     const tr = document.getElementById('transport');
     if (tr) new MutationObserver(placeMolFormula).observe(tr, { attributes: true, attributeFilter: ['class'] });   // dock / undock / .at-top
