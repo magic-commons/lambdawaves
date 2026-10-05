@@ -98,6 +98,9 @@ export function createAccentWheel({ mat, getModView, lut }) {
   function paintMarks() {
     if (markBatch) { marksDirty = true; turnDirty = true; return; }
     for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamutCss(markInk(0, stageGround()));   // over the CANVAS: the live STAGE colour
+    { const mf = document.getElementById('molFormula');                                                                   // the MOLECULE FORMULA (rack.js) sits on the CANVAS too: plain ink, light or dark by the live STAGE, haloed in it
+      if (mf) { const g = stageGround(), L = 0.2126 * g[0] + 0.7152 * g[1] + 0.0722 * g[2];
+        mf.style.color = gamutCss(L > 0.35 ? [0.07, 0.08, 0.1] : [0.95, 0.96, 0.98]); mf.style.setProperty('--mf-halo', gamutCss(g)); } }
     for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamutCss(markInk(0));                  // over the CARD: the constant that really is one
     document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect').forEach((r, i) => {   // wave 106: …and the playhead's modulation door, which is the same mark and must turn with it
       const k = i % MARK_N;

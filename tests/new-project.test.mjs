@@ -37,7 +37,7 @@ assert.deepEqual(Object.keys(P.camera), ['autoRotate'], 'camera carries its feel
 for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'steps'])
   assert.equal(k in P.mat, false, 'mat carries ' + k);
 const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camMode',
-  'badges', 'controlHints', 'captions', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
+  'badges', 'controlHints', 'captions', 'molFormula', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
   'auto', 'governor', 'keepFrames', 'perfMode', 'modCadence', 'modArm', 'clockLink']);
 /* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its same three lists — the
    camera block itself is allowed here: the empty project carries auto-rotate, which is PROJECT */

@@ -13,10 +13,12 @@
  * W129 (Josh, 2026-09-25) · `folded`: the first-visit furniture's folded windows — SETTINGS and STATE everywhere, and SHADOW
  * too on a phone or tablet, whose rack is the screen's scarcest room.  A fold is not a stored choice (the settings key keeps
  * none); a project's or a ☆ layout's folds win when it loads.
+ * 2026-10 (Josh) · MOLECULES and MO-REGISTRY join the first-visit LEFT rack under SPECTRUM (rack.js); on a phone or tablet
+ * they arrive FOLDED, because enterPhone() puts the left rack's cards at the TOP of the one rack, above SETTINGS and STATE.
  * Node-testable: tests/first-run.test.mjs. */
 export const FIRST_RUN_MATERIAL = Object.freeze({
   desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: Object.freeze(['settings', 'state']) }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow']) }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow', 'chem', 'orbitals']) }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }
