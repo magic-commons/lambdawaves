@@ -444,7 +444,9 @@ body.window-info-off .dev-lean { display: none; }
 .reg-pane[hidden] { display: none; }
 .reg-pane > * + * { margin-top: var(--sp-2); }
 .reg-pane .sp-head { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.reg-pane .sp-head > .sw { grid-column: 1 / -1; }
+.reg-mode { flex-wrap: nowrap; align-items: flex-end; }
+.reg-mode > .sw.orb-on { flex: 0 0 auto; white-space: nowrap; }   /* 2026-10: MO-REGISTRY ON beside ORBITAL | STATES (registerview.js) */
+.reg-mode > .sw[hidden] { display: none; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
@@ -852,7 +854,8 @@ body.ui-hidden #keymap { display: none; }
    text beneath every window (z 20 < rack 30 < #floats 32), never a pointer target, never in the occlusion mask.  Its
    ink and halo are written by accent-wheel.js from the live STAGE colour; the side is chosen against the transport. */
 #molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
-  font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1; white-space: nowrap; letter-spacing: .01em;
+  font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1.08; letter-spacing: .01em;
+  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width rack.js sets */
   color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); }
 #molFormula.mf-top { top: 64px; }
 #molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
@@ -861,3 +864,11 @@ body.ui-hidden #keymap { display: none; }
    back.  Its own class, because LEAN (window-chrome.js) hides every `.note` and this one must always be read. */
 .legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
+.mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js) */
+/* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
+   position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
+   over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
+#atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;
+  mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
+#atomLabels[hidden] { display: none; }
+#atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
