@@ -175,6 +175,12 @@ export const PRESETS = [
      sodium is the bright one, as it is on the bench).  CVD: NOT safe — 0.028 to a deuteranope. */
   { id: 'gaslamp', label: 'gas lamp', points: 3, constL: false, harsh: false, cvd: false,
     note: 'sodium 589 · mercury 546 · mercury 436, from the CIE 1931 CMFs', stops: ring('#fca864', '#54bf5c', '#5c10b4') },
+  /* PROVENANCE: asked for by name (Josh, 2026-10) — three bands of pure #000000.  NOT A PHASE MAP and labelled as one:
+     every phase is the same black, so it reads no arg ψ at all; it is there to draw the cloud as a solid black body.
+     `flat: true` is the catalogue's word for that — a palette whose stops are meant to be identical — and the
+     phase-map gates (seam, step, antipode, CVD, variation) do not apply to it. */
+  { id: 'jetblack', label: 'Jet Black', points: 3, constL: true, harsh: false, cvd: false, flat: true,
+    note: 'three bands of pure black — a solid body, not a phase map', stops: ring('#000000', '#000000', '#000000') },
 
   /* ── 4 points ───────────────────────────────────────────────────────────────────────────────── */
   /* PROVENANCE: the magenta–yellow–green–blue hue order of CET-C2 (Peter Kovesi's cyclic set), evenly

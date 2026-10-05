@@ -162,6 +162,7 @@ export async function boot(dom) {
   let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
+  let molFormulaScale = 1;                     // the STAGE FORMULA's SIZE knob (Settings › Display): × the 88 px base, a PREFERENCE
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
@@ -185,7 +186,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'),
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -262,7 +263,9 @@ export async function boot(dom) {
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     const molFormula = s.molFormula !== false;                       // MOLECULE FORMULA: nothing said means ON (it only shows while MOLECULES is on)
-    document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula); placeMolFormula();
+    document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
+    molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
+    placeMolFormula();
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
@@ -1284,6 +1287,8 @@ export async function boot(dom) {
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is 88 px; it wraps inside the same width between the racks',
+      onInput: (v) => { molFormulaScale = v; placeMolFormula(); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -2257,8 +2262,16 @@ export async function boot(dom) {
 
 
   pulsePanel = createPulse(wMol.body, { now: () => clock.t });
+  let specFoldedByMol = false;           // 2026-10: SPECTRUM folded by a molecule taking the field (so the molecule's end unfolds it)
   function moleculeMode(v) {
-    for (const w of [wState, wSpec, wSh, wOrb, wVor, wDyn, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    for (const w of [wState, wSh, wOrb, wVor, wDyn, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    /* 2026-10 (Josh) · SPECTRUM is MINIMISED, not hidden: it stays on the rack, folded, while a molecule has the field, and
+       unfolds when the molecule lets go — unless the reader folded or unfolded it themselves in between. */
+    if (wSpec) {
+      const folded = wSpec.root.classList.contains('folded');
+      if (v && !folded) { wSpec.fold(true); specFoldedByMol = true; }
+      else if (!v && specFoldedByMol) { if (folded) wSpec.fold(false); specFoldedByMol = false; }
+    }
     if (v && space === 'p') { space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
     refSnapshot = null; pendingRef = null;
@@ -2341,9 +2354,18 @@ export async function boot(dom) {
       if (r - l < 120) { l = 0; r = window.innerWidth; }                // a phone's rack covers the stage: use the whole width
       fe.style.left = Math.round((l + r) / 2) + 'px';
       const gap = r - l, room = Math.max(80, gap - 2 * Math.max(48, gap * 0.12));       // a LARGE margin off each rack: ≥ 48 px or 12 % of the gap
-      const cap = Math.round(Math.max(24, Math.min(88, window.innerWidth * 0.08)));
-      fe.style.fontSize = cap + 'px';
-      const w = fe.offsetWidth; if (w > room) fe.style.fontSize = Math.max(16, Math.floor((cap * room) / w)) + 'px';
+      /* the SIZE knob scales the base; the width limit is unchanged, so a long line WRAPS inside it, and only a single
+         unbreakable word (a long formula) wider than the room is measured down to fit */
+      const cap = Math.round(Math.max(24, Math.min(88, window.innerWidth * 0.08)) * molFormulaScale);
+      fe.style.maxWidth = Math.round(room) + 'px'; fe.style.fontSize = cap + 'px';
+      if (fe.scrollWidth > fe.clientWidth + 1) fe.style.fontSize = Math.max(16, Math.floor((cap * fe.clientWidth) / fe.scrollWidth)) + 'px';
+      /* … and never past the MIDDLE of the screen: wrapped lines that would run beyond 45 % of the height shrink the
+         size until they fit (each pass re-wraps, so it converges in a few) */
+      const maxH = window.innerHeight * 0.45;
+      for (let i = 0; i < 8 && fe.offsetHeight > maxH; i++) {
+        const fs = parseFloat(fe.style.fontSize) || cap, next = Math.max(16, Math.floor(fs * Math.max(0.6, Math.sqrt(maxH / fe.offsetHeight))));
+        if (next >= fs) break; fe.style.fontSize = next + 'px';
+      }
     }
     fe.hidden = !show;
   }

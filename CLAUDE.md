@@ -50,9 +50,17 @@ WINDOW.
 The STAGE FORMULA (Settings › Display, PREFERENCE `molFormula`, on by
 default) writes what is playing in the maths face on the stage: the MOLECULES
 formula while MOLECULES is on, otherwise SPECTRUM's populated states ("2s₀,
-2p₋₁"; A ↔ B under a TRANSITION). At most 88 px, centred between the racks with
-a wide margin; at the top while the transport pill floats at the foot, at the
-foot when the transport is docked or the pill is at the top. It is
+2p₋₁"; A ↔ B under a TRANSITION). 88 px × its SIZE knob (`molFormulaSize`,
+50–300 %), centred between the racks with a wide margin; it WRAPS inside that
+width (only an unbreakable word is shrunk); at the top while the transport pill
+floats at the foot, at the foot when the transport is docked or the pill is at
+the top. While a molecule owns the field SPECTRUM is FOLDED, not hidden
+(`moleculeMode`), and unfolds when the molecule lets go.
+
+Palettes are MIR's (`lab/mir/palette.js`): add one in MIR, then adopt
+(`node tools/adopt.mjs ../lambdawaves` from the MIR checkout). `jetblack` (MIR
+1.4.4) is `flat: true` — a solid body, exempt from the phase-map gates in
+`tests/palette.test.mjs`. It is
 transparent text under every window and never part of the occlusion mask.
 
 The stage frame/axis mask is built in `lab/rack.js` `refreshOcclusion()` and
