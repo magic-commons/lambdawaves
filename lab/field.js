@@ -625,11 +625,33 @@ export function cameraBasis(obs) {
   const up = [ry * fwd[2] - rz * fwd[1], rz * fwd[0] - rx * fwd[2], rx * fwd[1] - ry * fwd[0]];
   return { dir, fwd, right: [rx, ry, rz], up };
 }
-/** the whole orientation as ONE string — what a cached 2-D overlay must key on, because a FREE camera can ROLL
- *  without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
+/** THE ONE EYE (0.4.0 S1′): the only place the observer becomes an eye.  The ray pass (writeView), the pointer
+ *  (pointerRay, unproject), the GLB camera and every 2-D overlay (toScreen) ask here.  The pivot is the origin (the
+ *  plan chose a lens shift over a target pivot); `shift` = the pivot's place in NDC, carried as zeros until S2 writes
+ *  it into writeView, toScreen and pointerRay — the three seats, each one line. */
+const NO_SHIFT = Object.freeze([0, 0]);
+export function cameraEye(obs, half) {
+  const basis = cameraBasis(obs), D = obs.dist * half, d = basis.dir;
+  return { eye: [d[0] * D, d[1] * D, d[2] * D], target: [0, 0, 0], basis, shift: obs.shift || NO_SHIFT, D, tanH: Math.tan((obs.fov || 0.6) / 2) };
+}
+/** the 2-D overlays' one road: cameraEye plus `at(x, y, z, out?)` → [px, py, depth] in stage CSS pixels of a W × H
+ *  canvas, or null behind the eye */
+export function toScreen(obs, half, W, H) {
+  const E = cameraEye(obs, half), { fwd, right, up } = E.basis, c = E.eye, tanH = E.tanH, aspect = W / H;
+  E.at = (x, y, z, out = [0, 0, 0]) => {
+    const dx = x - c[0], dy = y - c[1], dz = z - c[2], depth = dx * fwd[0] + dy * fwd[1] + dz * fwd[2];
+    if (depth <= 0) return null;
+    const u = (dx * right[0] + dy * right[1] + dz * right[2]) / (depth * tanH * aspect), v = (dx * up[0] + dy * up[1] + dz * up[2]) / (depth * tanH);
+    out[0] = (u + 1) / 2 * W; out[1] = (1 - v) / 2 * H; out[2] = depth; return out;
+  };
+  return E;
+}
+/** the whole orientation (and the lens shift) as ONE string — what a cached 2-D overlay must key on, because a FREE
+ *  camera can ROLL without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
 export function cameraKey(obs) {
-  if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',');
-  return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4);
+  const s = obs.shift ? '|' + obs.shift.map((v) => v.toFixed(4)).join(',') : '|0.0000,0.0000';
+  if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',') + s;
+  return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4) + s;
 }
 function f16(h) {
   const s = (h & 0x8000) ? -1 : 1, e = (h >> 10) & 0x1f, f = h & 0x3ff;
@@ -1007,10 +1029,7 @@ export async function createField(canvas, opts = {}) {
     return molPack.nAO;
   }
   function writeView(obs, mat, w, h) {
-    const B = cameraBasis(obs);
-    const D = obs.dist * half;
-    const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = w / h;
+    const E = cameraEye(obs, half), B = E.basis, cam = E.eye, tanH = E.tanH, aspect = w / h;
     const v = VIEW;
     v[0] = cam[0]; v[1] = cam[1]; v[2] = cam[2]; v[3] = half;
     v[4] = B.right[0]; v[5] = B.right[1]; v[6] = B.right[2]; v[7] = tanH * aspect;
@@ -1030,7 +1049,7 @@ export async function createField(canvas, opts = {}) {
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
     device.queue.writeBuffer(viewBuf, 0, v);
-    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lookAt(cam, ORIGIN, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
+    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
     device.queue.writeBuffer(vpBuf, 0, M_VP);
     return cam;
   }
