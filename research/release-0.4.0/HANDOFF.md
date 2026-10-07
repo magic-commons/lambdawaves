@@ -54,6 +54,24 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   in the `sos-s0` worktree, appends `## ROUND 2 · SOL` to the ledger, uncommitted until Sos commits it).
 > - A stale gate server from the dead builder (python, port 8731) is still running; the guard refused killing it. Use
 >   other ports or ask Josh to stop it.
+> - **S0-V DONE** (`e0d619f`, merged `eaf375b`): 23/24 browser suites green on the first full run; one BLOCKER (a stale
+>   `official-defaults-palette` assertion vs C3's MOLECULES `Aa` law) and one SHOULD (the LINKED wording) fixed by Sos in
+>   `ad9e8a0`, both suites re-run alone green. **Fit to cut: YES.**
+> - **v0.3.3-alpha CUT LOCALLY, NOT LIVE:** version line `9504700` (tag `v0.3.3-alpha`, annotated), CHANGELOG `eb3a132`,
+>   snapshot #15 in `~/Documents/LAMBDAWAVES-RELEASES/v0.3.3-alpha`, `dist/` built and verified (206 files, 5.23 MiB). The
+>   permission guard refused the push of `main`/`dev` as a production deploy. **Josh's ruling, 2026-10-07: "we don't have
+>   to push anything to live cloudflare or Github until the entire plan as run it's course, which is an extremely long
+>   plan."** So nothing is pushed, deployed or released until 0.4.0's plan is finished (this supersedes the HANDOFF §3.2
+>   "cut and go live" step; `sos-s0` was pushed once as a backup before the ruling). The road when that day comes, from
+>   the `sos-s0` worktree:
+>   `git push origin sos-s0 sos-s0:release-0.4.0 sos-s0:dev sos-s0:main --follow-tags` ·
+>   `npx wrangler deploy --env=""` · `gh release create v0.3.3-alpha --generate-notes --prerelease` ·
+>   `curl -s https://lambdawaves.magic-commons.com/rack.js | grep -o "BUILD_LINE = '[^']*'"`.
+> - **Briefs written for the rest of the road:** `BRIEF-S2-CAMERA.md` (one shift convention fixing PLAN F4's three
+>   disagreeing formulas), `BRIEF-S3-STAGE-AND-WINDOWS.md`, `BRIEF-S4-LIBRARY.md` (a/b/c), `BRIEF-S5-KIT-BRIEFS.md`.
+> - **Sol Round 2** (Codex task `task-muyncqpn-zablm5`, gpt-6.1-sol at xhigh) was still writing when this was recorded;
+>   its files are uncommitted in the `sos-s0` worktree (`tools/symmetry/round2-sol*`, `measure/*round2-sol*`). Josh:
+>   Sol 6.1 sits between Sonnet and Opus — re-run its headline numbers before the SYNTHESIS banks them.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
