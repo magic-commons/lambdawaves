@@ -283,8 +283,8 @@ export function cube({ re, im, N, half, atoms = [], label = '', build = '', spac
 /* ── THE WORKER OP: one message in (the grid and the scene at the press), one file out ─────────────────────── */
 const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 /** mathworker.js `export`: { fmt, texels, N, half, rhoMax, isoFrac, colour, camera, atoms, label, build, space, t } →
- *  { bytes, … } or { error }.  The camera arrives as the pose (dir, right, up, dist, yfov, aspect); its position is
- *  writeView's, dist·half along dir, with THIS grid's half. */
+ *  { bytes, … } or { error }.  The camera arrives as the pose (eye, dir, right, up, yfov, aspect); `eye` is cameraEye(obs, 1)'s,
+ *  in half-units, and its position is that times THIS grid's half. */
 export function buildFile(m) {
   const t0 = nowMs(), spec = EXPORTS.find((e) => e.fmt === m.fmt);
   if (!spec) return { error: 'unknown export ' + m.fmt };
@@ -302,7 +302,7 @@ export function buildFile(m) {
   const units = space === 'p' ? 'hbar/bohr (momentum space)' : 'bohr';
   let bytes;
   if (m.fmt === 'glb') {
-    const c = m.camera, cam = c ? { position: c.dir.map((d) => d * c.dist * half), right: c.right, up: c.up, dir: c.dir, yfov: c.yfov, aspect: c.aspect, znear: 0.05, zfar: 100 * half } : null;
+    const c = m.camera, cam = c ? { position: c.eye.map((e) => e * half), right: c.right, up: c.up, dir: c.dir, yfov: c.yfov, aspect: c.aspect, znear: 0.05, zfar: 100 * half } : null;
     bytes = glb(mesh, { name: 'λWAVES · ' + label + ' · ' + build, camera: cam, generator: 'lambdawaves ' + ascii(build),
       extras: { state: label, units, iso: { rho: iso, ofMax: isoFrac }, grid: N, half, axes: 'Y up: (x, z, -y) of the lab, whose z is up' } });
   } else if (m.fmt === 'obj') {

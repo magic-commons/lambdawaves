@@ -219,7 +219,7 @@ function readNpy(b) {
   const bad = new Uint16Array(tex); bad[4 * 7] = 0x7e00; assert.equal(decodeGrid(bad, N).nan, 1);
   let rhoMax = 0; for (let v = 0; v < sphere.re.length; v++) rhoMax = Math.max(rhoMax, sphere.re[v] ** 2);
   const base = { texels: tex, N, half: HALF, rhoMax, isoFrac: ISO / rhoMax, label: '1s₊0', build: 'test', space: 'r', t: 0, atoms: [{ Z: 1, x: 0, y: 0, z: 0 }],
-    colour: { on: false }, camera: { dir: [1, 0, 0], right: [0, 1, 0], up: [0, 0, 1], dist: 3.3, yfov: 0.6, aspect: 1.6 } };
+    colour: { on: false }, camera: { eye: [3.3, 0, 0], dir: [1, 0, 0], right: [0, 1, 0], up: [0, 0, 1], yfov: 0.6, aspect: 1.6 } };
   const out = Object.fromEntries(EXPORTS.map((e) => [e.fmt, buildFile({ ...base, fmt: e.fmt })]));
   for (const [f, r] of Object.entries(out)) assert.ok(!r.error && r.bytes instanceof Uint8Array && r.bytes.byteLength > 0, f + ' ' + r.error);
   const G = readGLB(out.glb.bytes);

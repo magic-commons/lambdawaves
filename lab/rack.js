@@ -23,7 +23,7 @@ import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, quatFromYawPitch } from './field.js';
+import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, cameraKey, toScreen, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
 import { ELEMENT } from './md.js';                 // the ATOM LABELS' symbols, H–Kr   // the MOLECULE FORMULA overlay reads the pick's own formula
@@ -3259,11 +3259,10 @@ export async function boot(dom) {
   }
   /* ── KEPLER AS A CONTROL SURFACE: the perihelion handle drives exact rotors on the state ── */
   function pointerRay(px, py) {
-    const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, B = cameraBasis(obs), D = obs.dist * domain.half;
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
-    const cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
+    const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, E = cameraEye(obs, domain.half), B = E.basis, cam = E.eye;
+    const tanH = E.tanH, aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
     const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
-    return { cam, d, B };
+    return { cam, d, B, target: E.target };
   }
   function orbitOfShell(n, re, im) {
     const c = re ? { re, im } : (reg.field.Fz !== 0 ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
@@ -3391,8 +3390,8 @@ export async function boot(dom) {
   let kdrag = null;
   /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   function unproject(px, py) {
-    const { cam, d, B } = pointerRay(px, py);                          // N6: the same four lines pointerRay computes, not a second copy of them
-    const lam = -(cam[0] * B.fwd[0] + cam[1] * B.fwd[1] + cam[2] * B.fwd[2]) / (d[0] * B.fwd[0] + d[1] * B.fwd[1] + d[2] * B.fwd[2]);
+    const { cam, d, B, target: T } = pointerRay(px, py);              // N6: pointerRay's ray met with the plane through the TARGET
+    const lam = ((T[0] - cam[0]) * B.fwd[0] + (T[1] - cam[1]) * B.fwd[1] + (T[2] - cam[2]) * B.fwd[2]) / (d[0] * B.fwd[0] + d[1] * B.fwd[1] + d[2] * B.fwd[2]);
     const p = [cam[0] + lam * d[0], cam[1] + lam * d[1], cam[2] + lam * d[2]];
     const a = HAMILTONIANS.well.radius, r = Math.hypot(...p), cap = 0.75 * a;
     return r > cap ? p.map((c) => c * cap / r) : p;                 // keep the launch point well inside the wall
@@ -3963,12 +3962,12 @@ export async function boot(dom) {
     exporter3d = createExporter({
       field: () => field,
       scene: () => {
-        const B = cameraBasis(obs), w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
+        const E = cameraEye(obs, 1), B = E.basis, w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
         const q = chem && chem.on && chem.query ? chem.query() : null;
         return {
           label: exportLabel(), build: BUILD_LINE, t: clock.t, space, isoFrac: mat.iso,
           colour: { on: !!(palette && palette.on), hue: mat.hueShift || 0, invert: !!mat.invert, lut: (palette && palette.on) ? toLUT(palette.stops) : null },
-          camera: { dir: B.dir, right: B.right, up: B.up, dist: obs.dist, yfov: obs.fov || 0.6, aspect: w / h },
+          camera: { eye: E.eye, dir: B.dir, right: B.right, up: B.up, yfov: obs.fov || 0.6, aspect: w / h },   // the eye in half-units: the worker scales it by its grid's half
           atoms: q ? q.atoms : [{ Z: getZ(), x: 0, y: 0, z: 0 }],
         };
       },
