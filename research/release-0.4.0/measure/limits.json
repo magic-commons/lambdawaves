@@ -1,0 +1,369 @@
+{
+ "at": "2026-10-07T19:25:58.968Z",
+ "host": "LUX",
+ "rows": {
+  "pw-headless": {
+   "label": "Chromium 153 (playwright chromium-1243), headless=new",
+   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:13.981Z",
+   "info": {
+    "vendor": "google",
+    "architecture": "swiftshader",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": true
+   },
+   "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxComputeWorkgroupSizeX": 256,
+    "maxComputeWorkgroupSizeY": 256,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 1073741824,
+    "maxBufferSize": 1073741824,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 10,
+    "maxStorageTexturesPerShaderStage": 4
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "chromium-experimental-sampling-resource-table",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-astc",
+    "texture-compression-astc-sliced-3d",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-etc2",
+    "texture-compression-unaligned",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 32768
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+  },
+  "pw-headless-vulkan": {
+   "label": "Chromium 153 (playwright chromium-1243), headless=new + Vulkan",
+   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:37.216Z",
+   "info": {
+    "vendor": "nvidia",
+    "architecture": "ampere",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+   },
+   "webglRenderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA GeForce RTX 3070 (0x00002484)), NVIDIA)",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 49152,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupSizeY": 1024,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 2147483644,
+    "maxBufferSize": 4294967292,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 16,
+    "maxStorageTexturesPerShaderStage": 8
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "chromium-experimental-multi-draw-indirect",
+    "chromium-experimental-sampling-resource-table",
+    "chromium-experimental-subgroup-matrix",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "primitive-index",
+    "rg11b10ufloat-renderable",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-unaligned",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 49152
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+  },
+  "snap-headless": {
+   "label": "Chromium 154 (/snap/bin/chromium), headless=new",
+   "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:16.517Z",
+   "info": {
+    "vendor": "google",
+    "architecture": "swiftshader",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": true
+   },
+   "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxComputeWorkgroupSizeX": 256,
+    "maxComputeWorkgroupSizeY": 256,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 1073741824,
+    "maxBufferSize": 1073741824,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 10,
+    "maxStorageTexturesPerShaderStage": 4
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "chromium-experimental-sampling-resource-table",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-astc",
+    "texture-compression-astc-sliced-3d",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-etc2",
+    "texture-compression-unaligned",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 32768
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+  },
+  "firefox": {
+   "label": "Firefox 157 (/usr/bin/firefox snap, geckodriver), headless, the gate's prefs",
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+   "at": "2026-10-07T19:25:18.469Z",
+   "info": {
+    "vendor": "",
+    "architecture": "",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+   },
+   "webglRenderer": "NVIDIA GeForce GTX 980, or similar",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 49152,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupSizeY": 1024,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 2147483644,
+    "maxBufferSize": 2147483644,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 64,
+    "maxStorageTexturesPerShaderStage": 64
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 49152
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0"
+  },
+  "m5": {
+   "label": "iPad M5, Safari",
+   "pending": true,
+   "how": "paste the one line in research/release-0.4.0/measure/MEASURE.md §1 into the Web Inspector console, or open tools/perf/limits.html from the LAN server"
+  },
+  "snap-headless-vulkan": {
+   "label": "Chromium 154 (/snap/bin/chromium), headless=new + Vulkan",
+   "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:39.095Z",
+   "error": "requestAdapter returned null",
+   "version": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+  },
+  "snap-headed": {
+   "label": "Chromium 154 (/snap/bin/chromium), headed on :0",
+   "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:48.345Z",
+   "info": {
+    "vendor": "google",
+    "architecture": "swiftshader",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": true
+   },
+   "webglRenderer": "ANGLE (NVIDIA Corporation, NVIDIA GeForce RTX 3070/PCIe/SSE2, OpenGL ES 3.2)",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxComputeWorkgroupSizeX": 256,
+    "maxComputeWorkgroupSizeY": 256,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 1073741824,
+    "maxBufferSize": 1073741824,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 10,
+    "maxStorageTexturesPerShaderStage": 4
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "chromium-experimental-sampling-resource-table",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-astc",
+    "texture-compression-astc-sliced-3d",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-etc2",
+    "texture-compression-unaligned",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 32768
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+  },
+  "snap-headed-vulkan": {
+   "label": "Chromium 154 (/snap/bin/chromium), headed on :0 + Vulkan",
+   "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+   "at": "2026-10-07T19:25:57.764Z",
+   "info": {
+    "vendor": "nvidia",
+    "architecture": "ampere",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+   },
+   "webglRenderer": "ANGLE (NVIDIA, Vulkan 1.4.329 (NVIDIA NVIDIA GeForce RTX 3070 (0x00002484)), NVIDIA)",
+   "limits": {
+    "maxComputeWorkgroupStorageSize": 49152,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupSizeY": 1024,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxStorageBufferBindingSize": 2147483644,
+    "maxBufferSize": 4294967292,
+    "maxComputeWorkgroupsPerDimension": 65535,
+    "maxStorageBuffersPerShaderStage": 16,
+    "maxStorageTexturesPerShaderStage": 8
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "chromium-experimental-multi-draw-indirect",
+    "chromium-experimental-sampling-resource-table",
+    "chromium-experimental-subgroup-matrix",
+    "chromium-experimental-timestamp-query-inside-passes",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "primitive-index",
+    "rg11b10ufloat-renderable",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-unaligned",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "timestamp-query"
+   ],
+   "timestampQuery": true,
+   "request32k": {
+    "ok": true,
+    "got": 32768
+   },
+   "requestAdapterMax": {
+    "ok": true,
+    "got": 49152
+   },
+   "defaultDeviceWorkgroupStorage": 16384,
+   "version": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+  }
+ }
+}

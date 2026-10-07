@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbital dispatch</title>
+<style>
+  body { font: 13px/1.4 ui-monospace, Menlo, monospace; margin: 16px; background: #10141a; color: #dfe6ee; }
+  pre { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<!-- tools/perf/orbital-dispatch.html — 0.4.0 S0 MEASURE §3 (F5's road to C₆₀, R-L2).
+     ONE ORBITAL ψ = Σ_μ c_μ χ_μ at 96³, accumulated shell by shell with NO χ tile: the shell evaluation of lab/field.js
+     molWgsl (the Shell struct, shells/alphas/wts, one exp per primitive per exponential group, the Cartesian angular
+     part), but each shell's components are contracted with their coefficients on the spot, so the cost is O(nAO) per
+     voxel and the only workgroup memory is the 64-float max reduction.  Synthetic inputs: the lab's own STO-3G shells
+     (lab/md.js basisFrom + lab/molecular-field.js fieldShells) on synthetic centres, random normalised coefficients.
+     Timing = moleculeThroughput's method (lab/field.js): n dispatches in ONE compute pass, one submit, one
+     onSubmittedWorkDone wait, divided; plus the pass's GPU timestamps where the adapter grants timestamp-query.
+     Driven headless by tools/perf/orbital-dispatch.mjs; nothing under lab/ is edited. -->
+<pre id="out">loading…</pre>
+<script type="module">
+import { basisFrom, ANGSTROM } from '../../lab/md.js';
+import { fieldShells, evaluator } from '../../lab/molecular-field.js';
+import { moleculeAtoms } from '../../lab/molecules.js';
+
+const out = document.getElementById('out');
+const log = (s) => { out.textContent += '\n' + s; };
+const RES = 96;
+const CUT = Math.log(1e10);                       // the screened variant drops a group where e^{−α_min r²} < 1e-10 (molecular-field supportRadius's 1e-10)
+
+/* ── synthetic molecules: nAO = 5·nC + nH (C: 1s, 2s, 2p; H: 1s) ── */
+function fibSphere(N, R) {
+  const P = [], g = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) { const y = 1 - (2 * i + 1) / N, r = Math.sqrt(1 - y * y), t = g * i; P.push([R * r * Math.cos(t), R * y, R * r * Math.sin(t)]); }
+  return P;
+}
+function molecule(nAO) {
+  if (nAO === 36) return { atoms: moleculeAtoms('C6H6'), geometry: 'benzene (the library geometry)' };
+  const nC = { 128: 24, 300: 60, 600: 120 }[nAO], nH = nAO - 5 * nC;
+  if (nC === undefined) throw new Error('no recipe for nAO ' + nAO);
+  const N = nC + nH, R = 6.7 * Math.sqrt(N / 60);                  // C₆₀'s 6.7 bohr shell at C₆₀'s centre spacing
+  const atoms = fibSphere(N, R).map((p, i) => ({ Z: i < nC ? 6 : 1, x: p[0], y: p[1], z: p[2] }));
+  return { atoms, geometry: `${nC} C + ${nH} H on a Fibonacci sphere, R = ${R.toFixed(2)} bohr` };
+}
+function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+/* mirror of lab/field.js packMolecule, without the 64-AO ceiling, plus a per-shell screening radius² */
+function pack(shells) {
+  const U = new Uint32Array(shells.length * 8), F = new Float32Array(U.buffer), alpha = [], w = [], cut = new Float32Array(shells.length);
+  let pOff = 0, wOff = 0, ao = 0, nExp = 0, prev = null;
+  shells.forEach((sh, i) => {
+    const nc = [1, 3, 6][sh.l], nP = sh.prims.length;
+    const share = !!prev && prev.c[0] === sh.center[0] && prev.c[1] === sh.center[1] && prev.c[2] === sh.center[2]
+      && prev.nP === nP && sh.prims.every((pr, p) => pr.alpha === prev.alphas[p]);
+    const myOff = share ? prev.off : pOff, o = i * 8;
+    F[o] = sh.center[0]; F[o + 1] = sh.center[1]; F[o + 2] = sh.center[2];
+    U[o + 3] = sh.l | (share ? 256 : 0); U[o + 4] = myOff; U[o + 5] = nP; U[o + 6] = ao; U[o + 7] = wOff;
+    sh.prims.forEach((pr, p) => { alpha[myOff + p] = pr.alpha; for (let c = 0; c < nc; c++) w[wOff + p * nc + c] = pr.w[c]; });
+    cut[i] = CUT / Math.min(...sh.prims.map((pr) => pr.alpha));
+    if (!share) { pOff += nP; nExp += nP; }
+    prev = { c: sh.center, nP, off: myOff, alphas: sh.prims.map((pr) => pr.alpha) };
+    wOff += nP * nc; ao += nc;
+  });
+  return { shell: U, alpha: Float32Array.from(alpha), weight: Float32Array.from(w), cut, nShell: shells.length, nAO: ao, nExp };
+}
+
+/* ── the kernel: molWgsl's shell evaluation, contracted on the spot ── */
+const wgsl = (screened) => /* wgsl */`
+const WG: u32 = 64u;
+struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };
+struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };
+@group(0) @binding(0) var<uniform> P: MP;
+@group(0) @binding(1) var<storage, read> shells: array<Shell>;
+@group(0) @binding(2) var<storage, read> alphas: array<f32>;
+@group(0) @binding(3) var<storage, read> wts: array<f32>;
+@group(0) @binding(4) var<storage, read> mat: array<f32>;
+@group(0) @binding(5) var outTex: texture_storage_3d<rgba16float, write>;
+@group(0) @binding(6) var<storage, read_write> stats: array<atomic<u32>>;
+${screened ? '@group(0) @binding(7) var<storage, read> cut: array<f32>;' : ''}
+var<workgroup> red: array<f32, 64>;                           // the max reduction: 256 B, the only workgroup memory
+@compute @workgroup_size(4, 4, 4)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
+  var dens = 0.0;
+  if (all(gid < vec3<u32>(P.n, P.n, P.n))) {
+    let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);
+    var ex: array<f32, 32>;
+    var amp = 0.0;
+    for (var s = 0u; s < P.nShell; s++) {
+      let sh = shells[s];
+      let l = sh.l & 255u;
+      let dx = pos.x - sh.cx; let dy = pos.y - sh.cy; let dz = pos.z - sh.cz;
+      let r2 = dx * dx + dy * dy + dz * dz;
+      ${screened ? 'if (r2 > cut[s]) { continue; }                    // a shared group has the same centre and exponents, so it skips with its leader' : ''}
+      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
+      if ((sh.l & 256u) == 0u) {
+        for (var p = 0u; p < sh.nP; p++) { ex[p] = exp(-alphas[sh.pOff + p] * r2); }
+      }
+      var acc: array<f32, 6>;
+      for (var c = 0u; c < nc; c++) { acc[c] = 0.0; }
+      for (var p = 0u; p < sh.nP; p++) {
+        let e = ex[p];
+        let wb = sh.wOff + p * nc;
+        for (var c = 0u; c < nc; c++) { acc[c] += wts[wb + c] * e; }
+      }
+      let a = sh.aOff;
+      if (l == 0u) {
+        amp += mat[a] * acc[0];
+      } else if (l == 1u) {
+        amp += mat[a] * acc[0] * dx + mat[a + 1u] * acc[1] * dy + mat[a + 2u] * acc[2] * dz;
+      } else {
+        amp += mat[a] * acc[0] * dx * dx + mat[a + 1u] * acc[1] * dx * dy + mat[a + 2u] * acc[2] * dx * dz
+             + mat[a + 3u] * acc[3] * dy * dy + mat[a + 4u] * acc[4] * dy * dz + mat[a + 5u] * acc[5] * dz * dz;
+      }
+    }
+    textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, 0.0, 0.0, 0.0));
+    dens = amp * amp;
+  }
+  red[lid] = dens;
+  workgroupBarrier();
+  if (lid == 0u) {
+    var m = 0.0;
+    for (var k = 0u; k < WG; k++) { m = max(m, red[k]); }
+    atomicMax(&stats[P.slot], bitcast<u32>(m));
+  }
+}`;
+
+const f16 = (h) => { const s = h & 0x8000 ? -1 : 1, e = (h >> 10) & 31, m = h & 1023;
+  return e === 0 ? s * m * 2 ** -24 : e === 31 ? (m ? NaN : s * Infinity) : s * (1 + m / 1024) * 2 ** (e - 15); };
+const med = (a) => { const s = [...a].sort((x, y) => x - y), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
+const st = (a) => (a.length ? { median: +med(a).toFixed(4), min: +Math.min(...a).toFixed(4), max: +Math.max(...a).toFixed(4), n: a.length } : null);
+
+async function run({ sizes = [36, 128, 300, 600], variants = ['plain', 'screened'], batches = 7, targetMs = 1200, check = true, fixedN = 0 } = {}) {
+  const R = { ua: navigator.userAgent, res: RES, cut: 'e^{-α_min r²} < 1e-10', rows: [] };
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+  const info = adapter.info || {};
+  R.adapter = { vendor: info.vendor, architecture: info.architecture, description: info.description };
+  const ts = adapter.features.has('timestamp-query');
+  const device = await adapter.requestDevice({ requiredFeatures: ts ? ['timestamp-query'] : [] });
+  R.timestampQuery = ts;
+  const errs = []; device.addEventListener('uncapturederror', (e) => errs.push(String(e.error && e.error.message)));
+  const record = await (await fetch('../../lab/vendor/bse/sto-3g-v1.json')).json();
+  const pipes = {};
+  for (const v of variants) {
+    const module = device.createShaderModule({ code: wgsl(v === 'screened') });
+    const ci = await module.getCompilationInfo(); const bad = ci.messages.filter((m) => m.type === 'error');
+    if (bad.length) throw new Error('WGSL: ' + bad.map((m) => m.message).join('; '));
+    pipes[v] = await device.createComputePipelineAsync({ layout: 'auto', compute: { module, entryPoint: 'main' } });
+  }
+  const tex = device.createTexture({ size: [RES, RES, RES], dimension: '3d', format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC });
+  const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
+  const statsRead = device.createBuffer({ size: 16, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+  const qs = ts ? device.createQuerySet({ type: 'timestamp', count: 2 }) : null;
+  const qBuf = ts ? device.createBuffer({ size: 16, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC }) : null;
+  const qRead = ts ? device.createBuffer({ size: 16, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST }) : null;
+  const buf = (data, usage = GPUBufferUsage.STORAGE) => { const b = device.createBuffer({ size: Math.max(16, Math.ceil(data.byteLength / 16) * 16), usage: usage | GPUBufferUsage.COPY_DST }); device.queue.writeBuffer(b, 0, data); return b; };
+  const g = Math.ceil(RES / 4);
+  async function batch(pipe, bind, n) {
+    device.queue.writeBuffer(statsBuf, 0, new Uint32Array(4));
+    await device.queue.onSubmittedWorkDone();
+    const t0 = performance.now();
+    const enc = device.createCommandEncoder();
+    const pass = enc.beginComputePass(ts ? { timestampWrites: { querySet: qs, beginningOfPassWriteIndex: 0, endOfPassWriteIndex: 1 } } : undefined);
+    pass.setPipeline(pipe); pass.setBindGroup(0, bind);
+    for (let i = 0; i < n; i++) pass.dispatchWorkgroups(g, g, g);
+    pass.end();
+    if (ts) { enc.resolveQuerySet(qs, 0, 2, qBuf, 0); enc.copyBufferToBuffer(qBuf, 0, qRead, 0, 16); }
+    device.queue.submit([enc.finish()]);
+    await device.queue.onSubmittedWorkDone();
+    const wall = (performance.now() - t0) / n;
+    let gpu = null;
+    if (ts) { await qRead.mapAsync(GPUMapMode.READ); const v = new BigUint64Array(qRead.getMappedRange().slice(0)); qRead.unmap(); const d = Number(v[1] - v[0]); gpu = d > 0 ? d / 1e6 / n : null; }
+    return { wall, gpu };
+  }
+  for (const nAO of sizes) {
+    const { atoms, geometry } = molecule(nAO);
+    const basis = basisFrom(atoms, record, { cart: true }), shells = fieldShells(basis), pk = pack(shells);
+    if (pk.nAO !== nAO || basis.n !== nAO) throw new Error(`recipe ${nAO} gave ${pk.nAO}`);
+    const extent = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0), half = extent + 6;   // the chem card's half (mathworker ensureSolve)
+    const rand = rng(1000 + nAO), c = new Float64Array(nAO); let nn = 0;
+    for (let i = 0; i < nAO; i++) { c[i] = rand() * 2 - 1; nn += c[i] * c[i]; }
+    for (let i = 0; i < nAO; i++) c[i] /= Math.sqrt(nn);
+    const P = new ArrayBuffer(32), Pu = new Uint32Array(P), Pf = new Float32Array(P);
+    Pu[0] = RES; Pu[1] = nAO; Pu[2] = pk.nShell; Pu[3] = 1; Pf[4] = half; Pu[5] = 0;
+    const uni = buf(new Uint8Array(P), GPUBufferUsage.UNIFORM);
+    const bShell = buf(pk.shell), bAlpha = buf(pk.alpha), bW = buf(pk.weight), bMat = buf(Float32Array.from(c)), bCut = buf(pk.cut);
+    for (const v of variants) {
+      const entries = [{ binding: 0, resource: { buffer: uni } }, { binding: 1, resource: { buffer: bShell } }, { binding: 2, resource: { buffer: bAlpha } },
+        { binding: 3, resource: { buffer: bW } }, { binding: 4, resource: { buffer: bMat } }, { binding: 5, resource: tex.createView() }, { binding: 6, resource: { buffer: statsBuf } }];
+      if (v === 'screened') entries.push({ binding: 7, resource: { buffer: bCut } });
+      const bind = device.createBindGroup({ layout: pipes[v].getBindGroupLayout(0), entries });
+      await batch(pipes[v], bind, 2);                                    // warm-up: compile, first-touch
+      /* the estimate is a 10-dispatch batch, by the GPU clock where there is one: Firefox resolves onSubmittedWorkDone on a
+         coarse tick, and a 3-dispatch wall estimate inherited that tick (n came out as targetMs / tick, not / cost) */
+      const e10 = await batch(pipes[v], bind, 10), est = e10.gpu || e10.wall;
+      const n = fixedN || Math.max(10, Math.min(4000, Math.round(targetMs / Math.max(est, 0.05))));
+      const walls = [], gpus = [];
+      for (let b = 0; b < batches; b++) { const r = await batch(pipes[v], bind, n); walls.push(r.wall); if (r.gpu) gpus.push(r.gpu); }
+      const row = { nAO, variant: v, geometry, nShell: pk.nShell, expsPerVoxel: pk.nExp, half: +half.toFixed(3), n, batches, wallMs: st(walls), gpuMs: st(gpus) };
+      /* the answer is the orbital: a handful of voxels against molecular-field.js's f64 evaluator, at the rgba16float figure */
+      if (check) {
+        const enc = device.createCommandEncoder();
+        const rb = device.createBuffer({ size: RES * RES * RES * 8, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+        enc.copyTextureToBuffer({ texture: tex }, { buffer: rb, bytesPerRow: RES * 8, rowsPerImage: RES }, [RES, RES, RES]);
+        enc.copyBufferToBuffer(statsBuf, 0, statsRead, 0, 16);
+        device.queue.submit([enc.finish()]);
+        await rb.mapAsync(GPUMapMode.READ); const h = new Uint16Array(rb.getMappedRange().slice(0)); rb.unmap(); rb.destroy();
+        await statsRead.mapAsync(GPUMapMode.READ); const smax = new Float32Array(statsRead.getMappedRange().slice(0))[0]; statsRead.unmap();
+        const ev = evaluator(basis.shells), pick = rng(7 + nAO);
+        let worst = 0, amax = 0; const probes = [];
+        for (let k = 0; k < 24; k++) {
+          /* half the probes near a centre (where ψ is large), half anywhere */
+          let ix, iy, iz;
+          if (k % 2 === 0) { const a = atoms[Math.floor(pick() * atoms.length)]; const ixf = (q) => Math.max(0, Math.min(RES - 1, Math.round((q + half) / (2 * half) * RES - 0.5 + (pick() * 4 - 2))));
+            ix = ixf(a.x); iy = ixf(a.y); iz = ixf(a.z); }
+          else { ix = Math.floor(pick() * RES); iy = Math.floor(pick() * RES); iz = Math.floor(pick() * RES); }
+          const p = [ix, iy, iz].map((i) => (i + 0.5) / RES * 2 * half - half);
+          const v2 = ev.ao(p); let cpu = 0; for (let i = 0; i < nAO; i++) cpu += c[i] * v2[i];
+          const gpuV = f16(h[((iz * RES + iy) * RES + ix) * 4]);
+          probes.push([ix, iy, iz, +cpu.toExponential(4), +gpuV.toExponential(4)]); amax = Math.max(amax, Math.abs(cpu)); worst = Math.max(worst, Math.abs(cpu - gpuV));
+        }
+        row.check = { probes: probes.length, maxAbsErr: +worst.toExponential(3), maxAbsPsi: +amax.toExponential(3), relToMax: +(worst / amax).toExponential(3), statsMaxPsi2: smax };
+      }
+      R.rows.push(row);
+      log(`${nAO} AO ${v}: ${row.wallMs.median} ms wall (${row.wallMs.min}–${row.wallMs.max}), gpu ${row.gpuMs ? row.gpuMs.median : '—'} · n ${n} · check ${row.check ? row.check.relToMax : '—'}`);
+    }
+    [uni, bShell, bAlpha, bW, bMat, bCut].forEach((b) => b.destroy());
+  }
+  R.errors = errs;
+  device.destroy();
+  return R;
+}
+window.__orb = { run };
+out.textContent = 'ready — window.__orb.run({ sizes, variants })';
+if (new URLSearchParams(location.search).get('auto') === '1') run().then((R) => log(JSON.stringify(R)), (e) => log('ERROR ' + e));
+</script>
+</body>
+</html>
