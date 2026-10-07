@@ -1294,7 +1294,7 @@ export async function createField(canvas, opts = {}) {
     const at = (i) => [LINES[i * 7 + 3], LINES[i * 7 + 4], LINES[i * 7 + 5], LINES[i * 7 + 6]];
     return { box: at(0), x: at(24), y: at(26), z: at(28) };      // 12 box edges = 24 vertices, then x, y, z
   }
-  async function readPixels(obs, mat, w = 320, h = 240) {
+  async function readPixels(obs, mat, w = 320, h = 240, keep = false) {   // keep: the pixels too ({ px, bpr }), for a gate that needs where (S2)
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
     let buf;
     try {
@@ -1319,15 +1319,15 @@ export async function createField(canvas, opts = {}) {
         hue += Math.abs(r - b);
         hsh = Math.imul(hsh ^ (r + (g << 8) + (b << 16)), 16777619) >>> 0;
       }
-      buf.unmap();
-      return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16) };
+      const kept = keep ? { px: px.slice(), bpr } : null; buf.unmap();
+      return { w, h, total: w * h, nonBlack, bright, meanLum: lum / (w * h), meanChroma: hue / (w * h), hash: hsh.toString(16), ...kept };
     } finally { buf?.destroy(); tex.destroy(); }
   }
   /** THE CHROME AS THE SCREEN GETS IT (wave 48).  readPixels renders the volume and returns aggregates; this
       renders the LINES ALONE over the stage's own ground (mat.bg, not black — the light theme's near-black frame
       is only legible against the light stage it is drawn on) and classifies every pixel that carries chroma.
       It is the colour proof that reads the rendered image rather than the buffer writeLines just filled. */
-  async function linePixels(obs, mat, w = 256, h = 256) {
+  async function linePixels(obs, mat, w = 256, h = 256, keep = false) {
     const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
     let buf;
     try {
@@ -1360,8 +1360,8 @@ export async function createField(canvas, opts = {}) {
         else if (hi(r) && hi(g) && lo(b)) { B.yellow++; if (!top.yellow || r + g > top.yellow[0] + top.yellow[1]) top.yellow = [r, g, b]; }
         else if (hi(r)) B.warm++; else if (hi(g)) B.green++; else B.blue++;
       }
-      buf.unmap();
-      return { w, h, buckets: B, top, ground, darkest: Math.round(darkest), darkestPx };
+      const kept = keep ? { px: px.slice(), bpr } : null; buf.unmap();
+      return { w, h, buckets: B, top, ground, darkest: Math.round(darkest), darkestPx, ...kept };
     } finally { buf?.destroy(); tex.destroy(); }
   }
   async function sampleVoxel(i, j, k) {

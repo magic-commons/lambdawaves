@@ -1252,7 +1252,7 @@ export async function boot(dom) {
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, setShift, panBy } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
@@ -4658,7 +4658,7 @@ export async function boot(dom) {
   /* Stage gestures own pointer lifetimes; these callbacks own the instrument. */
   bindStageGestures(dom.canvas, {
     camera, travel: camTravel, law: CAM,
-    getDistance: () => obs.dist, setDistance: setDist, orbitBy, resetView,
+    getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,
     setDragging: value => { dragging = value; },
     present: () => schedule(TIER.PRESENT),
     startSpecial(e) {
@@ -4756,6 +4756,10 @@ export async function boot(dom) {
     { id: 'turnNeg', label: 'turn ψ about the axis, −', key: 'BracketLeft', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: -0.12 * f, t: clock.t }); touchState(); } },
     { id: 'turnPos', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
     { id: 'slap', label: 'impulse along the axis (k = 0.2)', key: 'KeyK', run: (f) => { if (__LW_hooks.slap) __LW_hooks.slap(0.2 * f, keyState.axis); } },
+    { id: 'panLeft', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-0.05 * f, 0) },   // 0.4.0 S2: the lens shift, 0.05 of the half-frame a press
+    { id: 'panRight', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(0.05 * f, 0) },
+    { id: 'panUp', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, 0.05 * f) },
+    { id: 'panDown', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -0.05 * f) },
     { id: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'grain', 'signed', 'bands']; const nx = order[(order.indexOf(STYLE_NAMES[mat.style]) + 1) % 5]; mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = ['density', 'phase', 'real', 'imag', 'diff', 'reim']; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % 6]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (palette) palette.setOn(!palette.on); } },

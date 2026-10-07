@@ -10,12 +10,14 @@ function stage() {
   canvas.hasPointerCapture = id => captured.has(id);
   canvas.releasePointerCapture = id => { captured.delete(id); send('lostpointercapture', id); };
   canvas.focus = () => {}; canvas.clientHeight = 800;
+  canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1000, height: 800 });
   let time = 0;
-  const travel = { yaw: 0, pitch: 0 }, result = { distance: 3, held: false, resets: 0, flings: [], moved: 0, ended: 0, canceled: 0 };
+  const travel = { yaw: 0, pitch: 0 }, result = { distance: 3, held: false, resets: 0, flings: [], moved: 0, ended: 0, canceled: 0, anchors: [], pans: [] };
   bindStageGestures(canvas, {
     camera: { dragGain: 1, stop() {}, fling: (...v) => result.flings.push(v) }, travel,
     law: { HIST_MS: 80, STALE_MS: 120, REST: .003, SENS: .0065, FINE: .25, TAP_MS: 320 },
-    getDistance: () => result.distance, setDistance: v => { result.distance = v; },
+    getDistance: () => result.distance, zoomAt: (c, v) => { result.anchors.push(c); result.distance = v; },
+    pan: (du, dv) => result.pans.push([du, dv]),
     orbitBy: (yaw, pitch) => { travel.yaw += yaw; travel.pitch += pitch; },
     resetView: () => result.resets++, setDragging: v => { result.held = v; }, present() {}, hover() {}, now: () => time,
     startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null,
@@ -25,7 +27,7 @@ function stage() {
     Object.assign(event, { pointerId: id, clientX: x, clientY: y, pointerType: 'touch', button: 0, shiftKey: false, ...extra });
     canvas.dispatchEvent(event);
   }
-  return { send, result, travel, classes, win, doc, advance: ms => { time += ms; } };
+  return { send, result, travel, classes, win, doc, canvas, advance: ms => { time += ms; } };
 }
 
 // Drag keeps the original sensitivity and releases the measured pose velocity.
@@ -83,4 +85,31 @@ for (const lifted of [1, 2]) {
   s.advance(400); s.send('pointerdown', 1); s.send('pointerdown', 2); s.send('pointerup', 1); s.send('pointerup', 2);
   s.advance(100); s.send('pointerdown'); s.send('pointerup'); assert.equal(s.result.resets, 1);
 }
-console.log('PASS stage gestures: drag, fine gain, fling, interruption, special ownership, pinch handoff and deliberate double taps');
+// 0.4.0 S2 · the wheel zooms at the cursor and the pinch at the fingers' centroid, both in uv (+y up).
+{
+  const s = stage(), wheel = Object.assign(new Event('wheel', { cancelable: true }), { deltaY: 100, deltaMode: 0, clientX: 750, clientY: 200 });
+  s.canvas.dispatchEvent(wheel);
+  assert.ok(Math.abs(s.result.distance - 3.3) < 1e-12); assert.deepEqual(s.result.anchors, [[0.5, 0.5]]); assert.equal(wheel.defaultPrevented, true);
+}
+{
+  const s = stage(); s.send('pointerdown', 1, 100); s.send('pointerdown', 2, 200); s.send('pointermove', 2, 300);
+  assert.equal(s.result.distance, 1.5); assert.deepEqual(s.result.anchors, [[-0.6, 0.75]]);   // the centroid (200, 100) the fingers ended on
+  assert.equal(s.result.pans.length, 1); assert.equal(s.result.pans[0][0], 0.1); assert.equal(s.result.pans[0][1] + 0, 0);   // the centroid moved 50 px: 2·50/1000
+}
+// Two fingers dragged together slide the picture one pixel per pixel and zoom nowhere; the picture never turns.
+{
+  const s = stage(); s.send('pointerdown', 1, 100, 100); s.send('pointerdown', 2, 200, 100);
+  s.send('pointermove', 1, 100, 140); s.send('pointermove', 2, 200, 140);
+  const dv = s.result.pans.reduce((t, p) => t + p[1], 0), du = s.result.pans.reduce((t, p) => t + p[0], 0);
+  assert.ok(Math.abs(dv + 2 * 40 / 800) < 1e-12 && du === 0, 'down 40 px = −0.1 of the frame in uv');
+  assert.equal(s.result.distance, 3); assert.equal(s.travel.yaw, 0); assert.equal(s.travel.pitch, 0);
+}
+// Alt-drag on a mouse slides the picture (no orbit, no fling, no tap); Ctrl+Alt is still the instrument's special.
+{
+  const s = stage(); s.send('pointerdown', 1, 100, 100, { altKey: true, pointerType: 'mouse' }); s.advance(20);
+  s.send('pointermove', 1, 110, 90, { pointerType: 'mouse' }); s.send('pointerup', 1, 110, 90, { pointerType: 'mouse' });
+  assert.deepEqual(s.result.pans, [[0.02, 0.025]]); assert.equal(s.travel.yaw, 0); assert.deepEqual(s.result.flings, []); assert.equal(s.result.held, false);
+  s.send('pointerdown', 2, 100, 100, { altKey: true, ctrlKey: true }); s.send('pointermove', 2, 150); s.send('pointerup', 2, 150);
+  assert.equal(s.result.moved, 1); assert.equal(s.result.ended, 1); assert.equal(s.result.pans.length, 1);
+}
+console.log('PASS stage gestures: drag, fine gain, fling, interruption, special ownership, pinch handoff, deliberate double taps — and (S2) the wheel and the pinch zoom at the cursor / centroid, two fingers and Alt-drag slide the picture one pixel per pixel');

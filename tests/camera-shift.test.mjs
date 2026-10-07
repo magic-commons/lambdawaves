@@ -6,7 +6,7 @@
  * FRAME corner on one pixel through the line pass, the ray pass and the pointer — is tests/camera-shift.browser-test.mjs. */
 import assert from 'node:assert/strict';
 import { cameraEye, toScreen, lensShift, perspective, lookAt, quatFromYawPitch } from '../lab/field.js';
-import { clampShift } from '../lab/camera-law.js';
+import { clampShift, createCameraLaw, CAM } from '../lab/camera-law.js';
 
 const pass = (s) => console.log('PASS ' + s);
 const HALF = 7, W = 1300, H = 850, aspect = W / H;
@@ -95,3 +95,55 @@ assert.deepEqual(clampShift(null), [0, 0]);
 assert.ok(Object.is(clampShift([-0, 0])[0], 0), 'no negative zero');
 const s0 = [0.2, 0.1]; assert.notEqual(clampShift(s0), s0, 'a fresh array: never the caller\'s');
 pass('clampShift: each component in [−1, 1], a non-number reads 0, no −0, a fresh array');
+
+/* ── THE CAMERA LAW (lab/camera-law.js), built here as rack.js builds it: the pose, the dials (absent), present, modHand ── */
+const BOOT = () => ({ yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] });   // rack.js's boot pose
+function law(pose, held = () => false) {
+  const obs = pose, writes = [];
+  const L = createCameraLaw({ obs, ui: {}, present() {}, modHand: (id, v) => { if (held(id)) { writes.push([id, v]); return true; } return false; }, resetWall() {} });
+  return { obs, writes, ...L };
+}
+/** the point of the pivot plane under uv c: the pointer's ray met with the plane through the target ⟂ fwd (rack.js unproject, unclamped) */
+function planeUnder(obs, c) {
+  const S = toScreen(obs, HALF, W, H), d = S.ray((c[0] + 1) / 2 * W, (1 - c[1]) / 2 * H), e = S.eye, f = S.basis.fwd, lam = dot(sub(S.target, e), f) / dot(d, f);
+  return [e[0] + lam * d[0], e[1] + lam * d[1], e[2] + lam * d[2]];
+}
+const pixelOf = (obs, X) => toScreen(obs, HALF, W, H).at(...X);
+
+/* 5 · ZOOM TO THE CURSOR: p′ = c − (c − p)·k holds the pivot-plane point under the hand still — a wheel or pinch step (zoomAt,
+   k = D/D′), a FOV step (setFov(v, c), k = tanH/tanH′), and the dials and keys about the frame's centre (setDist, setFov(v)). */
+let drift = 0;
+for (const pose of [BOOT(), { ...BOOT(), mode: 'turntable', yaw: -1.3, pitch: -0.7 }]) for (const c of [[-0.5, 0.6], [0.9, -0.85], [0, 0]]) {
+  const L = law({ ...pose, shift: [0.4, -0.3] }), o = L.obs;
+  for (const step of [() => L.zoomAt(c, o.dist * 0.8), () => L.zoomAt(c, o.dist * 1.25), () => L.setFov(o.fov * 1.3, c), () => L.setFov(o.fov * 0.7, c)]) {
+    const X = planeUnder(o, c), before = pixelOf(o, X); step(); const after = pixelOf(o, X);
+    drift = Math.max(drift, Math.hypot(after[0] - before[0], after[1] - before[1]));
+    assert.ok(Math.hypot(after[0] - (c[0] + 1) / 2 * W, after[1] - (1 - c[1]) / 2 * H) < 1e-6, `the point under ${c} stays under it`);
+  }
+  assert.ok(Math.abs(o.shift[0]) <= 1 && Math.abs(o.shift[1]) <= 1);
+}
+{
+  const L = law({ ...BOOT(), shift: [0.4, -0.3] }), o = L.obs, X = planeUnder(o, [0, 0]);
+  L.setDist(2.2); L.setFov(0.9);
+  const q = pixelOf(o, X); assert.ok(Math.hypot(q[0] - W / 2, q[1] - H / 2) < 1e-6, 'the dials and the keys anchor at the centre');
+  assert.ok(Math.abs(o.shift[0] - 0.4 * (3.3 / 2.2) * (Math.tan(0.3) / Math.tan(0.45))) < 1e-12, 'p′ = p·k about the centre');
+  const s = o.shift; L.zoomAt([0.5, 0.5], CAM.DIST[1] * 10); const s1 = o.shift; L.zoomAt([0.5, 0.5], CAM.DIST[1] * 10);
+  assert.equal(o.shift, s1, 'a zoom held at the DIST limit (k = 1) leaves the shift alone'); assert.notEqual(s1, s);
+  const d0 = o.dist, z = law({ ...BOOT(), shift: [0.4, -0.3] }, (id) => id === 'observer.dist'); z.zoomAt([0.5, 0.5], 2);
+  assert.deepEqual(z.obs.shift, [0.4, -0.3], 'a modulated ZOOM moves its base, and the shift with the picture stays put'); assert.equal(d0, o.dist);
+}
+pass(`zoom to the cursor: the pivot-plane point under the hand stays on its pixel across wheel/pinch (zoomAt) and FOV steps at a non-zero shift, 2 poses × 3 cursors × 4 steps (worst ${drift.toExponential(1)} px — the gate's bound is 0.5); the dials and keys anchor at the centre (p′ = p·k); a zoom at the limit and a modulated ZOOM leave the shift alone`);
+
+/* 6 · THE PAN LAW and SHIFT THEN RESET = IDENTITY (the pose's bytes). */
+{
+  const L = law(BOOT()), o = L.obs;
+  L.panBy(0.05, 0); L.panBy(0, -0.05 * 0.25); assert.deepEqual(o.shift, [0.05, -0.0125]);
+  assert.deepEqual(L.setShift(5, -5), [1, -1], 'the pivot reaches the frame\'s edge and never leaves it'); L.panBy(0.3, -0.3); assert.deepEqual(o.shift, [1, -1]);
+  const held = law(BOOT(), (id) => id === 'observer.panx'); held.setShift(0.6, 0.2);
+  assert.deepEqual(held.obs.shift, [0, 0.2], 'a modulated PAN X moves its base (modHand), the other axis moves'); assert.deepEqual(held.writes, [['observer.panx', 0.6]]);
+  const boot = JSON.stringify(BOOT()), R = law(BOOT());
+  R.setShift(0.4, -0.3); R.zoomAt([-0.2, 0.7], 2.1); R.setFov(1.0, [0.3, 0.3]); R.panBy(0.1, 0); R.orbitBy(0.4, -0.2); R.resetView();
+  assert.equal(JSON.stringify(R.obs), boot, 'shift, zoom, FOV, pan and orbit, then RESET VIEW, is the boot pose byte for byte');
+  assert.deepEqual(CAM.HOME.shift, [0, 0]); assert.ok(Object.isFrozen(CAM.HOME.shift), 'HOME\'s shift cannot be written through obs');
+}
+pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a modulated PAN axis moves its base; shift then RESET VIEW = the boot pose, byte for byte (JSON)');
