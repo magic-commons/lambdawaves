@@ -11,6 +11,77 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.3.3-alpha` — 2026-10-07
+
+Commit `9504700` · waves 134–139 · 53 commits.
+
+- **wave 134**: THE SHAPE — FILE › EXPORT SHAPE (GLB · OBJ · STL) and EXPORT GRID (NPZ · CUBE)
+- **wave 135**: THE COPY — SPECTRUM copies the state as LaTeX, in Josh's notebook style, in chemistry order
+- **wave 136**: The take-in — Cloud's two PRs merged, the forged kit edit subtracted, Jet Black kept by a lawful road
+- **wave 137**: The cheap bugs — CALCULUS's copy, the tags off METERS' tick, WIGNER under MOLECULES, and the LINKED bug reproduced
+- **wave 138**: Wire, don't re-date — one KaTeX and one marked, the kit's; and the manifest pinned so a forgery fails everywhere
+- **wave 139**: Three demos as content — WATER, BENZENE and N₂, so a first visitor meets a molecule in the first minute
+
+<details><summary>commits</summary>
+
+- `a577e3b` 2026-09-26 — CHANGELOG for v0.3.2-alpha
+- `e87e3c7` 2026-09-26 — 0.3.3 PLAN + BRIEF-134 (the shape: GLB · OBJ · STL, the grid: NPZ · CUBE) + BRIEF-135…
+- `5cbff0c` 2026-10-01 — 0.3.3 · wave 135 THE COPY: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX, in Josh's notebook…
+- `101cc53` 2026-10-01 — Merge branch 'worktree-agent-a581c2dddd2a89767' into release-0.3.3
+- `c3dba65` 2026-10-01 — 0.3.3 · wave 134: THE SHAPE
+- `148b7b8` 2026-10-01 — Merge branch 'worktree-agent-a916fccc6fb676e96' into release-0.3.3
+- `0c66d1b` 2026-10-01 — research: MO symmetry-names feasibility probe (declare-and-verify on ten library molecules; all…
+- `6ba7cd6` 2026-10-01 — research: THE NAMES AND THE CACHE
+- `d47684d` 2026-10-01 — Merge branch 'worktree-agent-a145b16b9c45bfff7' into release-0.3.3
+- `f6ab660` 2026-10-01 — research: THE NAMES AND THE CACHE
+- `09d2492` 2026-10-04 — Molecule formula overlay, MO-REGISTRY paint, first-run molecules, legacy windows hidden
+- `1810ea6` 2026-10-05 — Bump wrangler 4.129.0 -> 4.147.0 for the undici advisories
+- `2a03c06` 2026-10-04 — Merge pull request #1 from magic-commons/claude/youthful-shannon-y0pdx5
+- `3fed5f2` 2026-10-05 — Stage formula for SPECTRUM, left/right paint everywhere, compact MOLECULES and MO-REGISTRY
+- `d917dc7` 2026-10-05 — Stage formula SIZE knob and wrapping, SPECTRUM folds for molecules, Jet Black palette
+- `00a15e4` 2026-10-05 — ATOM LABELS: each nucleus marked with its element symbol, inverted
+- `28fe445` 2026-10-04 — HOTADD (#2): stage formula + size, SPECTRUM states, left/right paint, atom labels, Jet Black
+- `5110a01` 2026-10-07 — 0.4.0 NACRE: the common file, four surveys (MIR 1.5 seams, siblings' harvest, the λWAVES audit…
+- `9bf6b25` 2026-10-07 — 0.4.0 NACRE: Sonnet's review of draft 0 and PLAN DRAFT 1 (the release split at the kit boundary,…
+- `fe9f112` 2026-10-07 — 0.4.0 NACRE: Opus's audit of draft 1 (the AO wall is the workgroup tile; the canary must be a…
+- `7950022` 2026-10-07 — 0.4.0 NACRE: the junior's pass on draft 2 and PLAN DRAFT 3 = PLAN.md (the engine-and-library…
+- `7a8fd89` 2026-10-07 — 0.4.0 PLAN §9: the rulings taken (Josh: defaults are good; branches may be pushed)
+- `61f7c2c` 2026-10-07 — 0.4.0 S0: the three briefs
+- `0242bff` 2026-10-07 — 0.4.0 S0 wave 136a: merge PR #1 (Cloud, 2a03c06)
+- `5c7109e` 2026-10-07 — 0.4.0 S0 wave 136b: merge PR #2 (Cloud, 28fe445)
+- `5012eec` 2026-10-07 — 0.4.0 S1: the three briefs
+- `791c8b4` 2026-10-07 — 0.4.0 S0 MEASURE §1: the adapter limits probe (tools/perf/gpu-limits.mjs + limits.html) and the…
+- `1e841c0` 2026-10-07 — 0.4.0 S0 MEASURE §2 (node): the worker path re-timed, ground + spectrum (RPA, TDA, canonical…
+- `8df080c` 2026-10-07 — S1 SOL brief: the vault spec's filename
+- `43e4ce9` 2026-10-07 — 0.4.0 S0 CANARY: the MIR 1.5.0-alpha.23 adoption row (boots; 7 node reds, 3/3 browser green,…
+- `4ca4f54` 2026-10-07 — Merge branch 'worktree-agent-a6bf03e4f65099a58' into release-0.4.0
+- `2a25db6` 2026-10-07 — 0.4.0 S0: the release verifier's brief (fresh eyes on the merged tree before the 0.3.3 cut)
+- `29e0480` 2026-10-07 — 0.4.0 S0 MEASURE §3: the orbital-only (no χ tile) dispatch at 96³, nAO 36/128/300/600, plain and…
+- `ebd45d5` 2026-10-07 — 0.4.0 S0 wave 136: the subtraction
+- `af91338` 2026-10-07 — 0.4.0 S0 MEASURE §2 (browser) + MEASURE.md: the card's real worker road in Firefox and Chromium,…
+- `efaaed8` 2026-10-07 — Merge branch 'worktree-agent-acd0063cf95654204' into release-0.4.0
+- `cba02a0` 2026-10-07 — 0.4.0 PLAN §10: the numbers taken
+- `1424d9f` 2026-10-07 — 0.4.0 S0 wave 137: the cheap bugs
+- `d5b9d1d` 2026-10-07 — HANDOFF: the baton from Claude Yan (Major Agent) to the next Major Session — where everything…
+- `eaecf5e` 2026-10-07 — 0.4.0 S0 wave 138: wire, don't re-date
+- `9090665` 2026-10-07 — Merge branch 'worktree-agent-ade297122bf2444a1' into sos-s0
+- `bff9057` 2026-10-07 — 0.4.0 S0 wave 139: three demos as content
+- `767ab6e` 2026-10-07 — 0.4.0 S0: S0-BUILD.md, the tree builder's hand-off
+- `bc103b3` 2026-10-07 — 0.4.0 S1″ THE SOL THREAD, ROUND 1 (Fable): the unique-quartet number and the cyclotomic reading
+- `3aeca82` 2026-10-07 — HANDOFF: Claude Sos takes the baton
+- `d897bf6` 2026-10-07 — 0.4.0 S2: the camera builder's brief
+- `207576a` 2026-10-07 — 0.4.0 S3: the stage-text-and-windows builder's brief
+- `4ffe640` 2026-10-07 — 0.4.0 S4: the library briefs
+- `5907283` 2026-10-07 — 0.4.0 S5: the kit-briefs writer's brief
+- `e0d619f` 2026-10-07 — 0.4.0 S0 VERIFY: the release verifier's report on bc103b3
+- `eaf375b` 2026-10-07 — Merge branch 'worktree-agent-af7ab2ad4ce005f29' into sos-s0
+- `ad9e8a0` 2026-10-07 — 0.4.0 S0 VERIFY: the one BLOCKER and the one SHOULD
+- `9504700` 2026-10-07 — 0.3.3-alpha: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.3.2-alpha` — 2026-09-26
 
 Commit `3bb823d` · wave 133 · 11 commits.
