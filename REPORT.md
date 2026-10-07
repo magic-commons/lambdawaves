@@ -3512,3 +3512,28 @@ DEMOS/…`, MOLECULES owns the field on the right molecule (`chem.state().fieldO
 BUNDLED DEMO CARRIES NO LOOK" and "no bundled demo carries a quality" read every file in `lab/demos/`, so the three
 new files are under the same law as WAVE DANCER (green). `node tests/pwa.test.mjs --write`: 185 entries (the three
 files precache like WAVE DANCER).
+
+## 2026-10-07 · 0.4.0 S1′ — ONE EYE
+
+### wave 144: `cameraEye` — nine copies of the eye become one helper and its consumer road
+
+PLAN B1 / audit C.3 item 1. `lab/field.js` now has, beside `cameraBasis`, `cameraEye(obs, half) → { eye, target,
+basis, shift, D, tanH }` (the pivot is the origin; `shift = obs.shift || [0, 0]`, carried as zeros) and `toScreen(obs,
+half, W, H)`, the 2-D overlays' one road: the same eye plus `at(x, y, z, out?) → [px, py, depth] | null`. Every site
+asks it: `writeView` (the uniform and `lookAt(eye, target, …)`), FIELDVIEW, KEPLER, PARTICLES (its private
+`project()` deleted), VORTEX, `pointerRay`, `unproject` (now the plane through the TARGET — the origin's arithmetic
+exactly at target 0), the GLB camera (the scene sends `cameraEye(obs, 1).eye` in half-units and the worker scales it by
+its own grid's half: the same `(dir·dist)·half` product, byte for byte) and the ATOM LABELS. No site computes
+`dist * half` or `lookAt(…, ORIGIN)` on its own. `cameraKey` gains the shift (`|sx,sy`, 4 decimals). S2's lens shift
+lands in three seats: `writeView`'s forward lane and `M_PERSP`, `toScreen.at`'s final two lines, and `pointerRay`'s u, v.
+
+Two B1/B3 laws rode along: the ATOM LABELS return at once unless cameraKey, dist, fov, half, the preset, the size or the
+canvas changed (they used to rewrite every span's transform every CPU tick); the STAGE TEXT keys on the string it would
+render (`stageText()`, shared with `placeMolFormula`), so a modulated coefficient that leaves the populated set alone
+costs one compare and no layout. VORTEX's cache key also carries the FOV (a FOV step used to leave its dots stale).
+
+`lab/*.js` 35,135 → 35,128. The digest lock (base fixture, `--grids 96 --query gastab=0`, 588 values at 96³) GREEN
+on the base and after each of the four commits; `bash test.sh node` green (61 suites), `new-project --check` in step,
+`keyboard-shortcuts` green; browser one at a time: `export3d` green, `render-regressions` green, `current` 15/15,
+`frame-occlusion` 7/7 (one red under a load of 18 from the sibling's runs — the scrolled-mask timing — green alone
+and green on the base tree). Light check: MOLECULES H₂O's three labels move on an orbit and hold still after.
