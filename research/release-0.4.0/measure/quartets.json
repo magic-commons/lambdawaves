@@ -1,0 +1,3305 @@
+{
+ "meta": {
+  "tool": "tools/symmetry/unique-quartets.mjs",
+  "date": "2026-10-07",
+  "node": "v22.22.1",
+  "basis": "sto-3g (lab/vendor/bse/sto-3g-v1.json)",
+  "solver": "moleculeRHF defaults (SAD + core guesses, Hessian, stability probe) — lab/mathworker.js ensureSolve's call",
+  "threshold": 1e-10,
+  "grid": 96,
+  "conventions": "chemist's (ij|kl) = ∫∫ φ_i*(1) φ_j(1) r12⁻¹ φ_k*(2) φ_l(2); canonical unique = i ≤ j, k ≤ l, (ij) ≤ (kl); SAO = unit eigenvectors of the Löwdin-frame projectors mapped back by S^{-1/2}",
+  "totalMs": 4424
+ },
+ "molecules": {
+  "H2O": {
+   "id": "H2O",
+   "formula": "H₂O",
+   "geometrySource": "CCCBDB experimental r(O–H) = 0.9578 Å, ∠HOH = 104.5° (the window's original preset, frozen)",
+   "solveMs": 34.8,
+   "nAO": 7,
+   "nocc": 5,
+   "nElectrons": 10,
+   "energy": -74.96302316286258,
+   "converged": true,
+   "integralMs": 17.64,
+   "eriWorkTrips": 44064,
+   "predictedMs": 16,
+   "basisHash": "d6aadbf2ff716c8699e9a5fca05aa079c9507d4c9b51a11a2563e22fd9ffd2fc",
+   "timingsMs": {
+    "integrals": 17.64,
+    "fockReal": 0.01,
+    "eigSymFock": 0.1,
+    "hessianBlocks": 0.8,
+    "pairSpace": 10
+   },
+   "frame": {
+    "convention": "Mulliken 1955 (planar C2v): z = the C2 axis (O toward the H midpoint), x PERPENDICULAR to the molecular plane (molecule in yz)",
+    "axesInLab": {
+     "x": [
+      -1,
+      0,
+      0
+     ],
+     "y": [
+      0,
+      1,
+      0
+     ],
+     "z": [
+      0,
+      0,
+      -1
+     ]
+    },
+    "centreOfNuclearChargeBohr": [
+     0,
+     0,
+     0
+    ]
+   },
+   "operations": {
+    "C2v": {
+     "order": 4,
+     "worstFrameworkResidualBohr": 0,
+     "worstOverlapInvariance": 0,
+     "worstFockInvariance": 8.881784197001252e-16,
+     "ops": [
+      {
+       "name": "E",
+       "class": "E",
+       "inFullGroup": "E",
+       "fixedAtoms": 3,
+       "aoCharacter": 7
+      },
+      {
+       "name": "C2",
+       "class": "C2",
+       "inFullGroup": "C2",
+       "fixedAtoms": 1,
+       "aoCharacter": 1
+      },
+      {
+       "name": "sv(xz)",
+       "class": "sv(xz)",
+       "inFullGroup": "sv(xz)",
+       "fixedAtoms": 1,
+       "aoCharacter": 3
+      },
+      {
+       "name": "sv(yz)",
+       "class": "sv(yz)",
+       "inFullGroup": "sv(yz)",
+       "fixedAtoms": 3,
+       "aoCharacter": 5
+      }
+     ]
+    },
+    "C2": {
+     "order": 2,
+     "worstFrameworkResidualBohr": 0,
+     "worstOverlapInvariance": 0,
+     "worstFockInvariance": 8.881784197001252e-16,
+     "ops": [
+      {
+       "name": "E",
+       "class": "E",
+       "inFullGroup": "E",
+       "fixedAtoms": 3,
+       "aoCharacter": 7
+      },
+      {
+       "name": "C2",
+       "class": "C2",
+       "inFullGroup": "C2",
+       "fixedAtoms": 1,
+       "aoCharacter": 1
+      }
+     ]
+    }
+   },
+   "groups": {
+    "C2v": {
+     "group": "C2v",
+     "order": 4,
+     "blocks": [
+      {
+       "label": "A1",
+       "size": 4,
+       "occupied": 3,
+       "virtual": 1
+      },
+      {
+       "label": "A2",
+       "size": 0,
+       "occupied": 0,
+       "virtual": 0
+      },
+      {
+       "label": "B1",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0
+      },
+      {
+       "label": "B2",
+       "size": 2,
+       "occupied": 1,
+       "virtual": 1
+      }
+     ],
+     "saoOrthonormalityDefect": 2.6645352591003757e-15,
+     "occupiedCountResidual": 8.881784197001252e-15,
+     "worstMoOffBlockLeakage": 3.885780586188048e-15,
+     "fock": {
+      "sumN2overN2": 0.42857142857142855,
+      "sumN3overN3": 0.21282798833819241,
+      "equalBlocksN2": 0.25,
+      "equalBlocksN3": 0.0625
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 2401,
+       "nonzero": 777,
+       "fraction": 0.3236151603498542,
+       "allowedByLabels": 777,
+       "allowedFraction": 0.3236151603498542,
+       "violations": 0,
+       "maxAbsForbidden": 6.219932338277778e-16,
+       "minAbsAllowedNonzero": 0.00017338149658378994,
+       "allowedFromBlockSizes": 777
+      },
+      "canonicalUnique": {
+       "quartets": 406,
+       "nonzero": 154,
+       "fraction": 0.3793103448275862,
+       "allowedByLabels": 154,
+       "allowedFraction": 0.3793103448275862
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 154,
+       "fractionOfCanonical": 0.3793103448275862,
+       "tensor4Invariants": 777,
+       "fractionOfN4": 0.3236151603498542,
+       "sym2Invariants": 14
+      },
+      "limitOneOverOrder": 0.25,
+      "transformMs": 3
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 5,
+       "shellPairs": 15,
+       "shellQuartets": 120,
+       "orbits": 76,
+       "fraction": 0.6333333333333333,
+       "orbitSizes": {
+        "1": 32,
+        "2": 44
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": true,
+       "canonicalQuartets": 406,
+       "orbits": 274,
+       "fraction": 0.6748768472906403,
+       "forcedZeroOrbits": 120,
+       "forcedZeroQuartets": 162,
+       "forcedZeroFraction": 0.39901477832512317,
+       "liveOrbits": 154,
+       "liveFraction": 0.3793103448275862,
+       "accidentalZeroOrbits": 16,
+       "maxAbsForcedZero": 0,
+       "minAbsLive": 0.0001643752166103642,
+       "orbitSizes": {
+        "1": 142,
+        "2": 132
+       }
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1",
+       "eps": -20.241863,
+       "occ": 2,
+       "decomposition": "A1"
+      },
+      {
+       "mo": "2",
+       "eps": -1.268162,
+       "occ": 2,
+       "decomposition": "A1"
+      },
+      {
+       "mo": "3",
+       "eps": -0.617565,
+       "occ": 2,
+       "decomposition": "B2"
+      },
+      {
+       "mo": "4",
+       "eps": -0.453022,
+       "occ": 2,
+       "decomposition": "A1"
+      },
+      {
+       "mo": "5",
+       "eps": -0.391237,
+       "occ": 2,
+       "decomposition": "B1"
+      },
+      {
+       "mo": "6",
+       "eps": 0.605172,
+       "occ": 0,
+       "decomposition": "A1"
+      },
+      {
+       "mo": "7",
+       "eps": 0.741598,
+       "occ": 0,
+       "decomposition": "B2"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -20.241862850153808,
+       "block": "A1",
+       "weight": 1.000000000000004
+      },
+      {
+       "k": 2,
+       "eps": -1.2681619053784454,
+       "block": "A1",
+       "weight": 1.0000000000000024
+      },
+      {
+       "k": 3,
+       "eps": -0.6175645594062323,
+       "block": "B2",
+       "weight": 1.0000000000000024
+      },
+      {
+       "k": 4,
+       "eps": -0.4530217125786362,
+       "block": "A1",
+       "weight": 1.0000000000000018
+      },
+      {
+       "k": 5,
+       "eps": -0.3912367977407039,
+       "block": "B1",
+       "weight": 1
+      },
+      {
+       "k": 6,
+       "eps": 0.6051718826251059,
+       "block": "A1",
+       "weight": 1.0000000000000016
+      },
+      {
+       "k": 7,
+       "eps": 0.7415975261329077,
+       "block": "B2",
+       "weight": 0.9999999999999961
+      }
+     ],
+     "rpaBlocks": {
+      "pairSpace": 10,
+      "blocks": [
+       {
+        "excitation": "A1",
+        "size": 4
+       },
+       {
+        "excitation": "A2",
+        "size": 1
+       },
+       {
+        "excitation": "B1",
+        "size": 1
+       },
+       {
+        "excitation": "B2",
+        "size": 4
+       }
+      ],
+      "sumM2overM2": 0.34,
+      "sumM3overM3": 0.13,
+      "equalBlocksM2": 0.25
+     }
+    },
+    "C2": {
+     "group": "C2",
+     "order": 2,
+     "blocks": [
+      {
+       "label": "A",
+       "size": 4,
+       "occupied": 3,
+       "virtual": 1
+      },
+      {
+       "label": "B",
+       "size": 3,
+       "occupied": 2,
+       "virtual": 1
+      }
+     ],
+     "saoOrthonormalityDefect": 2.6645352591003757e-15,
+     "occupiedCountResidual": 8.881784197001252e-15,
+     "worstMoOffBlockLeakage": 3.885780586188048e-15,
+     "fock": {
+      "sumN2overN2": 0.5102040816326531,
+      "sumN3overN3": 0.2653061224489796,
+      "equalBlocksN2": 0.5,
+      "equalBlocksN3": 0.25
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 2401,
+       "nonzero": 777,
+       "fraction": 0.3236151603498542,
+       "allowedByLabels": 1201,
+       "allowedFraction": 0.5002082465639317,
+       "violations": 0,
+       "maxAbsForbidden": 6.219932338277778e-16,
+       "minAbsAllowedNonzero": 0.00017338149658378994,
+       "allowedFromBlockSizes": 1201
+      },
+      "canonicalUnique": {
+       "quartets": 406,
+       "nonzero": 154,
+       "fraction": 0.3793103448275862,
+       "allowedByLabels": 214,
+       "allowedFraction": 0.5270935960591133
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 214,
+       "fractionOfCanonical": 0.5270935960591133,
+       "tensor4Invariants": 1201,
+       "fractionOfN4": 0.5002082465639317,
+       "sym2Invariants": 16
+      },
+      "limitOneOverOrder": 0.5,
+      "transformMs": 0
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 5,
+       "shellPairs": 15,
+       "shellQuartets": 120,
+       "orbits": 76,
+       "fraction": 0.6333333333333333,
+       "orbitSizes": {
+        "1": 32,
+        "2": 44
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": true,
+       "canonicalQuartets": 406,
+       "orbits": 274,
+       "fraction": 0.6748768472906403,
+       "forcedZeroOrbits": 60,
+       "forcedZeroQuartets": 60,
+       "forcedZeroFraction": 0.1477832512315271,
+       "liveOrbits": 214,
+       "liveFraction": 0.5270935960591133,
+       "accidentalZeroOrbits": 76,
+       "maxAbsForcedZero": 0,
+       "minAbsLive": 0.0001643752166103642,
+       "orbitSizes": {
+        "1": 142,
+        "2": 132
+       }
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1",
+       "eps": -20.241863,
+       "occ": 2,
+       "decomposition": "A"
+      },
+      {
+       "mo": "2",
+       "eps": -1.268162,
+       "occ": 2,
+       "decomposition": "A"
+      },
+      {
+       "mo": "3",
+       "eps": -0.617565,
+       "occ": 2,
+       "decomposition": "B"
+      },
+      {
+       "mo": "4",
+       "eps": -0.453022,
+       "occ": 2,
+       "decomposition": "A"
+      },
+      {
+       "mo": "5",
+       "eps": -0.391237,
+       "occ": 2,
+       "decomposition": "B"
+      },
+      {
+       "mo": "6",
+       "eps": 0.605172,
+       "occ": 0,
+       "decomposition": "A"
+      },
+      {
+       "mo": "7",
+       "eps": 0.741598,
+       "occ": 0,
+       "decomposition": "B"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -20.241862850153808,
+       "block": "A",
+       "weight": 1.000000000000004
+      },
+      {
+       "k": 2,
+       "eps": -1.2681619053784454,
+       "block": "A",
+       "weight": 1.0000000000000024
+      },
+      {
+       "k": 3,
+       "eps": -0.6175645594062323,
+       "block": "B",
+       "weight": 1.0000000000000024
+      },
+      {
+       "k": 4,
+       "eps": -0.4530217125786362,
+       "block": "A",
+       "weight": 1.0000000000000018
+      },
+      {
+       "k": 5,
+       "eps": -0.3912367977407039,
+       "block": "B",
+       "weight": 1
+      },
+      {
+       "k": 6,
+       "eps": 0.6051718826251059,
+       "block": "A",
+       "weight": 1.0000000000000016
+      },
+      {
+       "k": 7,
+       "eps": 0.7415975261329077,
+       "block": "B",
+       "weight": 0.9999999999999961
+      }
+     ],
+     "rpaBlocks": {
+      "pairSpace": 10,
+      "blocks": [
+       {
+        "excitation": "A",
+        "size": 5
+       },
+       {
+        "excitation": "B",
+        "size": 5
+       }
+      ],
+      "sumM2overM2": 0.5,
+      "sumM3overM3": 0.25,
+      "equalBlocksM2": 0.5
+     }
+    }
+   },
+   "grid": {
+    "live": {
+     "n": 96,
+     "voxels": 884736,
+     "centred": "cell-centred (half-integer centres, no centre on any coordinate plane)",
+     "signOps": [
+      "E",
+      "C2",
+      "sv(xz)",
+      "sv(yz)"
+     ],
+     "orbits": 221184,
+     "asymmetricUnitFraction": 0.25,
+     "boundaryVoxels": 0,
+     "boundaryFraction": 0,
+     "orbitSizes": {
+      "4": 221184
+     },
+     "latticeCompatible": []
+    },
+    "nodeCentredContrast": {
+     "n": 97,
+     "voxels": 912673,
+     "centred": "node-centred (a centre on every coordinate plane)",
+     "signOps": [
+      "E",
+      "C2",
+      "sv(xz)",
+      "sv(yz)"
+     ],
+     "orbits": 232897,
+     "asymmetricUnitFraction": 0.25518120948028483,
+     "boundaryVoxels": 18721,
+     "boundaryFraction": 0.02051227548092252,
+     "orbitSizes": {
+      "1": 97,
+      "2": 9312,
+      "4": 223488
+     },
+     "latticeCompatible": []
+    }
+   },
+   "oracle": {
+    "file": "/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a8356a853fc8a32d9/research/release-0.4.0/measure/pyscf-symm-oracle.json",
+    "pyscf": "2.14.0",
+    "topgroup": "C2v",
+    "groupname": "C2v",
+    "energy": -74.96302316286224,
+    "energyDifference": 3.410605131648481e-13,
+    "blockSizesPySCF": {
+     "A1": 4,
+     "B1": 1,
+     "B2": 2
+    },
+    "blockSizesHere": {
+     "A1": 4,
+     "A2": 0,
+     "B1": 1,
+     "B2": 2
+    },
+    "blockSizeMultisetsAgree": true,
+    "occupiedPerIrrepPySCF": {
+     "A1": 3,
+     "B2": 1,
+     "B1": 1
+    },
+    "occupiedMultisetsAgree": true,
+    "note": "PySCF re-orients the molecule into its own frame, so B1/B2/B3 names may permute; the multisets are the comparison"
+   }
+  },
+  "C6H6": {
+   "id": "C6H6",
+   "formula": "C₆H₆",
+   "geometrySource": "CCCBDB experimental r(C–C) = 1.39 Å, r(C–H) = 1.09 Å, D₆ₕ, hydrogens at radius 2.48 Å (the window's original preset, frozen) — THE CAP",
+   "solveMs": 1119.4,
+   "nAO": 36,
+   "nocc": 21,
+   "nElectrons": 42,
+   "energy": -227.89100646418083,
+   "converged": true,
+   "integralMs": 588.53,
+   "eriWorkTrips": 19063350,
+   "predictedMs": 9592,
+   "basisHash": "c34c7e69034823e55f9e9e6ed65521c094655b79229ddb5a9cfa2df216ae7912",
+   "timingsMs": {
+    "integrals": 588.53,
+    "fockReal": 3.5,
+    "eigSymFock": 0.19,
+    "hessianBlocks": 145.5,
+    "pairSpace": 315
+   },
+   "frame": {
+    "convention": "z = C6 axis (ring normal), x through carbon 0; C2' and sigma_v through atoms, C2'' and sigma_d through bond midpoints (pi = a2u + b2g + e1g + e2u)",
+    "axesInLab": {
+     "x": [
+      1,
+      0,
+      0
+     ],
+     "y": [
+      0,
+      1,
+      0
+     ],
+     "z": [
+      0,
+      0,
+      1
+     ]
+    },
+    "centreOfNuclearChargeBohr": [
+     5.2867763077388404e-17,
+     1.9032394707859825e-16,
+     0
+    ]
+   },
+   "operations": {
+    "D2h": {
+     "order": 8,
+     "worstFrameworkResidualBohr": 2.808666774861361e-15,
+     "worstOverlapInvariance": 5.551115123125783e-16,
+     "worstFockInvariance": 5.684341886080802e-14,
+     "ops": [
+      {
+       "name": "E",
+       "class": "E",
+       "inFullGroup": "E",
+       "fixedAtoms": 12,
+       "aoCharacter": 36
+      },
+      {
+       "name": "C2(z)",
+       "class": "C2(z)",
+       "inFullGroup": "C2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2(y)",
+       "class": "C2(y)",
+       "inFullGroup": "C2''(90deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2(x)",
+       "class": "C2(x)",
+       "inFullGroup": "C2'(0deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 4
+      },
+      {
+       "name": "i",
+       "class": "i",
+       "inFullGroup": "i",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "s(xy)",
+       "class": "s(xy)",
+       "inFullGroup": "sh",
+       "fixedAtoms": 12,
+       "aoCharacter": 24
+      },
+      {
+       "name": "s(xz)",
+       "class": "s(xz)",
+       "inFullGroup": "sv(0deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 8
+      },
+      {
+       "name": "s(yz)",
+       "class": "s(yz)",
+       "inFullGroup": "sd(90deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      }
+     ]
+    },
+    "C6": {
+     "order": 6,
+     "worstFrameworkResidualBohr": 3.7682219008410606e-15,
+     "worstOverlapInvariance": 6.106226635438361e-16,
+     "worstFockInvariance": 5.684341886080802e-14,
+     "ops": [
+      {
+       "name": "C6^0",
+       "class": "m0",
+       "inFullGroup": "E",
+       "fixedAtoms": 12,
+       "aoCharacter": 36
+      },
+      {
+       "name": "C6^1",
+       "class": "m1",
+       "inFullGroup": "C6^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^2",
+       "class": "m2",
+       "inFullGroup": "C3^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^3",
+       "class": "m3",
+       "inFullGroup": "C2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^4",
+       "class": "m4",
+       "inFullGroup": "C3^2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^5",
+       "class": "m5",
+       "inFullGroup": "C6^5",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      }
+     ]
+    },
+    "C6h": {
+     "order": 12,
+     "worstFrameworkResidualBohr": 3.7682219008410606e-15,
+     "worstOverlapInvariance": 6.106226635438361e-16,
+     "worstFockInvariance": 5.684341886080802e-14,
+     "ops": [
+      {
+       "name": "C6^0",
+       "class": "m0+",
+       "inFullGroup": "E",
+       "fixedAtoms": 12,
+       "aoCharacter": 36
+      },
+      {
+       "name": "C6^1",
+       "class": "m1+",
+       "inFullGroup": "C6^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^2",
+       "class": "m2+",
+       "inFullGroup": "C3^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^3",
+       "class": "m3+",
+       "inFullGroup": "C2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^4",
+       "class": "m4+",
+       "inFullGroup": "C3^2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^5",
+       "class": "m5+",
+       "inFullGroup": "C6^5",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh·C6^0",
+       "class": "m0-",
+       "inFullGroup": "sh",
+       "fixedAtoms": 12,
+       "aoCharacter": 24
+      },
+      {
+       "name": "sh·C6^1",
+       "class": "m1-",
+       "inFullGroup": "S6^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh·C6^2",
+       "class": "m2-",
+       "inFullGroup": "S3^2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh·C6^3",
+       "class": "m3-",
+       "inFullGroup": "i",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh·C6^4",
+       "class": "m4-",
+       "inFullGroup": "S3^4",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh·C6^5",
+       "class": "m5-",
+       "inFullGroup": "S6^5",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      }
+     ]
+    },
+    "D6h": {
+     "order": 24,
+     "worstFrameworkResidualBohr": 5.024584296811282e-15,
+     "worstOverlapInvariance": 6.38378239159465e-16,
+     "worstFockInvariance": 5.684341886080802e-14,
+     "ops": [
+      {
+       "name": "E",
+       "class": "E",
+       "inFullGroup": "E",
+       "fixedAtoms": 12,
+       "aoCharacter": 36
+      },
+      {
+       "name": "C6^1",
+       "class": "2C6",
+       "inFullGroup": "C6^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C6^5",
+       "class": "2C6",
+       "inFullGroup": "C6^5",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C3^1",
+       "class": "2C3",
+       "inFullGroup": "C3^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C3^2",
+       "class": "2C3",
+       "inFullGroup": "C3^2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2",
+       "class": "C2",
+       "inFullGroup": "C2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2'(0deg)",
+       "class": "3C2p",
+       "inFullGroup": "C2'(0deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 4
+      },
+      {
+       "name": "C2'(60deg)",
+       "class": "3C2p",
+       "inFullGroup": "C2'(60deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 4
+      },
+      {
+       "name": "C2'(120deg)",
+       "class": "3C2p",
+       "inFullGroup": "C2'(120deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 4
+      },
+      {
+       "name": "C2''(30deg)",
+       "class": "3C2pp",
+       "inFullGroup": "C2''(30deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2''(90deg)",
+       "class": "3C2pp",
+       "inFullGroup": "C2''(90deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "C2''(150deg)",
+       "class": "3C2pp",
+       "inFullGroup": "C2''(150deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "i",
+       "class": "i",
+       "inFullGroup": "i",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "S3^2",
+       "class": "2S3",
+       "inFullGroup": "S3^2",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "S3^4",
+       "class": "2S3",
+       "inFullGroup": "S3^4",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "S6^1",
+       "class": "2S6",
+       "inFullGroup": "S6^1",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "S6^5",
+       "class": "2S6",
+       "inFullGroup": "S6^5",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sh",
+       "class": "sh",
+       "inFullGroup": "sh",
+       "fixedAtoms": 12,
+       "aoCharacter": 24
+      },
+      {
+       "name": "sd(30deg)",
+       "class": "3sd",
+       "inFullGroup": "sd(30deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sd(90deg)",
+       "class": "3sd",
+       "inFullGroup": "sd(90deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sd(150deg)",
+       "class": "3sd",
+       "inFullGroup": "sd(150deg)",
+       "fixedAtoms": 0,
+       "aoCharacter": 0
+      },
+      {
+       "name": "sv(0deg)",
+       "class": "3sv",
+       "inFullGroup": "sv(0deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 8
+      },
+      {
+       "name": "sv(60deg)",
+       "class": "3sv",
+       "inFullGroup": "sv(60deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 8
+      },
+      {
+       "name": "sv(120deg)",
+       "class": "3sv",
+       "inFullGroup": "sv(120deg)",
+       "fixedAtoms": 4,
+       "aoCharacter": 8
+      }
+     ]
+    }
+   },
+   "groups": {
+    "D2h": {
+     "group": "D2h",
+     "order": 8,
+     "blocks": [
+      {
+       "label": "Ag",
+       "size": 9,
+       "occupied": 6,
+       "virtual": 3
+      },
+      {
+       "label": "B1g",
+       "size": 6,
+       "occupied": 3,
+       "virtual": 3
+      },
+      {
+       "label": "B2g",
+       "size": 2,
+       "occupied": 1,
+       "virtual": 1
+      },
+      {
+       "label": "B3g",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0
+      },
+      {
+       "label": "Au",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1
+      },
+      {
+       "label": "B1u",
+       "size": 2,
+       "occupied": 1,
+       "virtual": 1
+      },
+      {
+       "label": "B2u",
+       "size": 6,
+       "occupied": 4,
+       "virtual": 2
+      },
+      {
+       "label": "B3u",
+       "size": 9,
+       "occupied": 5,
+       "virtual": 4
+      }
+     ],
+     "saoOrthonormalityDefect": 1.4432899320127035e-14,
+     "occupiedCountResidual": 4.973799150320701e-14,
+     "worstMoOffBlockLeakage": 3.885780586188048e-15,
+     "fock": {
+      "sumN2overN2": 0.1882716049382716,
+      "sumN3overN3": 0.04089506172839506,
+      "equalBlocksN2": 0.125,
+      "equalBlocksN3": 0.015625
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 1679616,
+       "nonzero": 251968,
+       "fraction": 0.1500152415790276,
+       "allowedByLabels": 251968,
+       "allowedFraction": 0.1500152415790276,
+       "violations": 0,
+       "maxAbsForbidden": 3.44498464043691e-15,
+       "minAbsAllowedNonzero": 1.0828492234111163e-7,
+       "allowedFromBlockSizes": 251968
+      },
+      "canonicalUnique": {
+       "quartets": 222111,
+       "nonzero": 34187,
+       "fraction": 0.1539185362273818,
+       "allowedByLabels": 34187,
+       "allowedFraction": 0.1539185362273818
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 34187,
+       "fractionOfCanonical": 0.1539185362273818,
+       "tensor4Invariants": 251968,
+       "fractionOfN4": 0.1500152415790276,
+       "sym2Invariants": 140
+      },
+      "limitOneOverOrder": 0.125,
+      "transformMs": 323
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 24,
+       "shellPairs": 300,
+       "shellQuartets": 45150,
+       "orbits": 11678,
+       "fraction": 0.2586489479512735,
+       "orbitSizes": {
+        "1": 38,
+        "2": 724,
+        "4": 10916
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": true,
+       "canonicalQuartets": 222111,
+       "orbits": 56871,
+       "fraction": 0.2560476518497508,
+       "forcedZeroOrbits": 22684,
+       "forcedZeroQuartets": 88408,
+       "forcedZeroFraction": 0.3980352166259213,
+       "liveOrbits": 34187,
+       "liveFraction": 0.1539185362273818,
+       "accidentalZeroOrbits": 1611,
+       "maxAbsForcedZero": 8.578365739545436e-18,
+       "minAbsLive": 1.1743023239113606e-10,
+       "orbitSizes": {
+        "1": 75,
+        "2": 2574,
+        "4": 54222
+       }
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1-2",
+       "eps": -11.029266,
+       "occ": 4,
+       "decomposition": "B2u + B3u"
+      },
+      {
+       "mo": "3",
+       "eps": -11.029249,
+       "occ": 2,
+       "decomposition": "Ag"
+      },
+      {
+       "mo": "4-5",
+       "eps": -11.028882,
+       "occ": 4,
+       "decomposition": "Ag + B1g"
+      },
+      {
+       "mo": "6",
+       "eps": -11.028725,
+       "occ": 2,
+       "decomposition": "B3u"
+      },
+      {
+       "mo": "7",
+       "eps": -1.093063,
+       "occ": 2,
+       "decomposition": "Ag"
+      },
+      {
+       "mo": "8-9",
+       "eps": -0.955862,
+       "occ": 4,
+       "decomposition": "B2u + B3u"
+      },
+      {
+       "mo": "10-11",
+       "eps": -0.766515,
+       "occ": 4,
+       "decomposition": "Ag + B1g"
+      },
+      {
+       "mo": "12",
+       "eps": -0.662161,
+       "occ": 2,
+       "decomposition": "Ag"
+      },
+      {
+       "mo": "13",
+       "eps": -0.590944,
+       "occ": 2,
+       "decomposition": "B3u"
+      },
+      {
+       "mo": "14",
+       "eps": -0.55533,
+       "occ": 2,
+       "decomposition": "B2u"
+      },
+      {
+       "mo": "15-16",
+       "eps": -0.533677,
+       "occ": 4,
+       "decomposition": "B2u + B3u"
+      },
+      {
+       "mo": "17",
+       "eps": -0.458852,
+       "occ": 2,
+       "decomposition": "B1u"
+      },
+      {
+       "mo": "18-19",
+       "eps": -0.432116,
+       "occ": 4,
+       "decomposition": "Ag + B1g"
+      },
+      {
+       "mo": "20-21",
+       "eps": -0.281339,
+       "occ": 4,
+       "decomposition": "B2g + B3g"
+      },
+      {
+       "mo": "22-23",
+       "eps": 0.270227,
+       "occ": 0,
+       "decomposition": "Au + B1u"
+      },
+      {
+       "mo": "24",
+       "eps": 0.507267,
+       "occ": 0,
+       "decomposition": "B2g"
+      },
+      {
+       "mo": "25",
+       "eps": 0.572787,
+       "occ": 0,
+       "decomposition": "Ag"
+      },
+      {
+       "mo": "26-27",
+       "eps": 0.644064,
+       "occ": 0,
+       "decomposition": "B2u + B3u"
+      },
+      {
+       "mo": "28",
+       "eps": 0.719611,
+       "occ": 0,
+       "decomposition": "B3u"
+      },
+      {
+       "mo": "29-30",
+       "eps": 0.736314,
+       "occ": 0,
+       "decomposition": "Ag + B1g"
+      },
+      {
+       "mo": "31-32",
+       "eps": 0.883687,
+       "occ": 0,
+       "decomposition": "Ag + B1g"
+      },
+      {
+       "mo": "33-34",
+       "eps": 0.901354,
+       "occ": 0,
+       "decomposition": "B2u + B3u"
+      },
+      {
+       "mo": "35",
+       "eps": 1.094939,
+       "occ": 0,
+       "decomposition": "B1g"
+      },
+      {
+       "mo": "36",
+       "eps": 1.155946,
+       "occ": 0,
+       "decomposition": "B3u"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -11.029265570383723,
+       "block": "B3u",
+       "weight": 1.0000000000000082
+      },
+      {
+       "k": 2,
+       "eps": -11.029265570383695,
+       "block": "B2u",
+       "weight": 1.0000000000000087
+      },
+      {
+       "k": 3,
+       "eps": -11.029249396412867,
+       "block": "Ag",
+       "weight": 1.0000000000000109
+      },
+      {
+       "k": 4,
+       "eps": -11.02888223570848,
+       "block": "Ag",
+       "weight": 1.0000000000000075
+      },
+      {
+       "k": 5,
+       "eps": -11.028882235708432,
+       "block": "B1g",
+       "weight": 1.0000000000000118
+      },
+      {
+       "k": 6,
+       "eps": -11.028724839142685,
+       "block": "B3u",
+       "weight": 1.0000000000000073
+      },
+      {
+       "k": 7,
+       "eps": -1.093063137644108,
+       "block": "Ag",
+       "weight": 1.0000000000000084
+      },
+      {
+       "k": 8,
+       "eps": -0.955861838403655,
+       "block": "B3u",
+       "weight": 1.0000000000000127
+      },
+      {
+       "k": 9,
+       "eps": -0.9558618384036511,
+       "block": "B2u",
+       "weight": 1.0000000000000149
+      },
+      {
+       "k": 10,
+       "eps": -0.7665153565917607,
+       "block": "Ag",
+       "weight": 1.0000000000000124
+      },
+      {
+       "k": 11,
+       "eps": -0.7665153565917544,
+       "block": "B1g",
+       "weight": 1.0000000000000118
+      },
+      {
+       "k": 12,
+       "eps": -0.6621605601830456,
+       "block": "Ag",
+       "weight": 1.000000000000009
+      },
+      {
+       "k": 13,
+       "eps": -0.5909435025473377,
+       "block": "B3u",
+       "weight": 1.0000000000000153
+      },
+      {
+       "k": 14,
+       "eps": -0.5553298218365169,
+       "block": "B2u",
+       "weight": 0.999999999999997
+      },
+      {
+       "k": 15,
+       "eps": -0.533676835006793,
+       "block": "B3u",
+       "weight": 1.0000000000000087
+      },
+      {
+       "k": 16,
+       "eps": -0.5336768350067865,
+       "block": "B2u",
+       "weight": 1.0000000000000078
+      },
+      {
+       "k": 17,
+       "eps": -0.4588518066660984,
+       "block": "B1u",
+       "weight": 0.9999999999999978
+      },
+      {
+       "k": 18,
+       "eps": -0.43211576396887547,
+       "block": "Ag",
+       "weight": 0.9999999999999977
+      },
+      {
+       "k": 19,
+       "eps": -0.4321157639688658,
+       "block": "B1g",
+       "weight": 1.0000000000000022
+      },
+      {
+       "k": 20,
+       "eps": -0.28133865869626756,
+       "block": "B2g",
+       "weight": 1.000000000000002
+      },
+      {
+       "k": 21,
+       "eps": -0.28133865869625946,
+       "block": "B3g",
+       "weight": 0.9999999999999987
+      },
+      {
+       "k": 22,
+       "eps": 0.27022667407878254,
+       "block": "B1u",
+       "weight": 1.0000000000000009
+      },
+      {
+       "k": 23,
+       "eps": 0.27022667407878964,
+       "block": "Au",
+       "weight": 1.0000000000000013
+      },
+      {
+       "k": 24,
+       "eps": 0.5072667332069846,
+       "block": "B2g",
+       "weight": 1.0000000000000069
+      },
+      {
+       "k": 25,
+       "eps": 0.5727869810059387,
+       "block": "Ag",
+       "weight": 1.00000000000001
+      }
+     ],
+     "rpaBlocks": {
+      "pairSpace": 315,
+      "blocks": [
+       {
+        "excitation": "Ag",
+        "size": 57
+       },
+       {
+        "excitation": "B1g",
+        "size": 55
+       },
+       {
+        "excitation": "B2g",
+        "size": 25
+       },
+       {
+        "excitation": "B3g",
+        "size": 20
+       },
+       {
+        "excitation": "Au",
+        "size": 22
+       },
+       {
+        "excitation": "B1u",
+        "size": 23
+       },
+       {
+        "excitation": "B2u",
+        "size": 53
+       },
+       {
+        "excitation": "B3u",
+        "size": 60
+       }
+      ],
+      "sumM2overM2": 0.14835978835978836,
+      "sumM3overM3": 0.024407731346506856,
+      "equalBlocksM2": 0.125
+     }
+    },
+    "C6": {
+     "group": "C6",
+     "order": 6,
+     "blocks": [
+      {
+       "label": "k=0",
+       "size": 6,
+       "occupied": 4,
+       "virtual": 2,
+       "grade": 0,
+       "parity": null,
+       "character": "ζ₆^0"
+      },
+      {
+       "label": "k=1",
+       "size": 6,
+       "occupied": 4,
+       "virtual": 2,
+       "grade": 1,
+       "parity": null,
+       "character": "ζ₆^1"
+      },
+      {
+       "label": "k=2",
+       "size": 6,
+       "occupied": 3,
+       "virtual": 3,
+       "grade": 2,
+       "parity": null,
+       "character": "ζ₆^2"
+      },
+      {
+       "label": "k=3",
+       "size": 6,
+       "occupied": 3,
+       "virtual": 3,
+       "grade": 3,
+       "parity": null,
+       "character": "ζ₆^3"
+      },
+      {
+       "label": "k=4",
+       "size": 6,
+       "occupied": 3,
+       "virtual": 3,
+       "grade": 4,
+       "parity": null,
+       "character": "ζ₆^4"
+      },
+      {
+       "label": "k=5",
+       "size": 6,
+       "occupied": 4,
+       "virtual": 2,
+       "grade": 5,
+       "parity": null,
+       "character": "ζ₆^5"
+      }
+     ],
+     "saoOrthonormalityDefect": 1.927798163322044e-12,
+     "occupiedCountResidual": 4.218847493575595e-14,
+     "worstMoOffBlockLeakage": 0.5000000000000302,
+     "fock": {
+      "sumN2overN2": 0.16666666666666666,
+      "sumN3overN3": 0.027777777777777776,
+      "equalBlocksN2": 0.16666666666666666,
+      "equalBlocksN3": 0.027777777777777776
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 1679616,
+       "nonzero": 279936,
+       "fraction": 0.16666666666666666,
+       "allowedByLabels": 279936,
+       "allowedFraction": 0.16666666666666666,
+       "violations": 0,
+       "maxAbsForbidden": 7.248349982229801e-13,
+       "minAbsAllowedNonzero": 0.0000023553401649622147,
+       "allowedFromBlockSizes": 279936
+      },
+      "canonicalUnique": {
+       "quartets": 222111,
+       "nonzero": 30735,
+       "fraction": 0.13837675756716236,
+       "allowedByLabels": 30735,
+       "allowedFraction": 0.13837675756716236
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 37101,
+       "fractionOfCanonical": 0.16703810257033647,
+       "tensor4Invariants": 279936,
+       "fractionOfN4": 0.16666666666666666,
+       "sym2Invariants": 114
+      },
+      "limitOneOverOrder": 0.16666666666666666,
+      "transformMs": 580
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 24,
+       "shellPairs": 300,
+       "shellQuartets": 45150,
+       "orbits": 7562,
+       "fraction": 0.1674861572535991,
+       "orbitSizes": {
+        "3": 74,
+        "6": 7488
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": false
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1-2",
+       "eps": -11.029266,
+       "occ": 4,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "3",
+       "eps": -11.029249,
+       "occ": 2,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "4-5",
+       "eps": -11.028882,
+       "occ": 4,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "6",
+       "eps": -11.028725,
+       "occ": 2,
+       "decomposition": "k=3"
+      },
+      {
+       "mo": "7",
+       "eps": -1.093063,
+       "occ": 2,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "8-9",
+       "eps": -0.955862,
+       "occ": 4,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "10-11",
+       "eps": -0.766515,
+       "occ": 4,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "12",
+       "eps": -0.662161,
+       "occ": 2,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "13",
+       "eps": -0.590944,
+       "occ": 2,
+       "decomposition": "k=3"
+      },
+      {
+       "mo": "14",
+       "eps": -0.55533,
+       "occ": 2,
+       "decomposition": "k=3"
+      },
+      {
+       "mo": "15-16",
+       "eps": -0.533677,
+       "occ": 4,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "17",
+       "eps": -0.458852,
+       "occ": 2,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "18-19",
+       "eps": -0.432116,
+       "occ": 4,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "20-21",
+       "eps": -0.281339,
+       "occ": 4,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "22-23",
+       "eps": 0.270227,
+       "occ": 0,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "24",
+       "eps": 0.507267,
+       "occ": 0,
+       "decomposition": "k=3"
+      },
+      {
+       "mo": "25",
+       "eps": 0.572787,
+       "occ": 0,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "26-27",
+       "eps": 0.644064,
+       "occ": 0,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "28",
+       "eps": 0.719611,
+       "occ": 0,
+       "decomposition": "k=3"
+      },
+      {
+       "mo": "29-30",
+       "eps": 0.736314,
+       "occ": 0,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "31-32",
+       "eps": 0.883687,
+       "occ": 0,
+       "decomposition": "k=2 + k=4"
+      },
+      {
+       "mo": "33-34",
+       "eps": 0.901354,
+       "occ": 0,
+       "decomposition": "k=1 + k=5"
+      },
+      {
+       "mo": "35",
+       "eps": 1.094939,
+       "occ": 0,
+       "decomposition": "k=0"
+      },
+      {
+       "mo": "36",
+       "eps": 1.155946,
+       "occ": 0,
+       "decomposition": "k=3"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -11.029265570383723,
+       "block": "k=1",
+       "weight": 0.4999999999999903
+      },
+      {
+       "k": 2,
+       "eps": -11.029265570383695,
+       "block": "k=1",
+       "weight": 0.4999999999999908
+      },
+      {
+       "k": 3,
+       "eps": -11.029249396412867,
+       "block": "k=0",
+       "weight": 1.000000000000009
+      },
+      {
+       "k": 4,
+       "eps": -11.02888223570848,
+       "block": "k=2",
+       "weight": 0.5000000000000084
+      },
+      {
+       "k": 5,
+       "eps": -11.028882235708432,
+       "block": "k=2",
+       "weight": 0.5000000000000104
+      },
+      {
+       "k": 6,
+       "eps": -11.028724839142685,
+       "block": "k=3",
+       "weight": 1.0000000000000075
+      },
+      {
+       "k": 7,
+       "eps": -1.093063137644108,
+       "block": "k=0",
+       "weight": 1.0000000000000075
+      },
+      {
+       "k": 8,
+       "eps": -0.955861838403655,
+       "block": "k=1",
+       "weight": 0.4999999999999698
+      },
+      {
+       "k": 9,
+       "eps": -0.9558618384036511,
+       "block": "k=1",
+       "weight": 0.4999999999999762
+      },
+      {
+       "k": 10,
+       "eps": -0.7665153565917607,
+       "block": "k=2",
+       "weight": 0.4999999999999788
+      },
+      {
+       "k": 11,
+       "eps": -0.7665153565917544,
+       "block": "k=2",
+       "weight": 0.49999999999998457
+      },
+      {
+       "k": 12,
+       "eps": -0.6621605601830456,
+       "block": "k=0",
+       "weight": 1.0000000000000082
+      },
+      {
+       "k": 13,
+       "eps": -0.5909435025473377,
+       "block": "k=3",
+       "weight": 1.000000000000016
+      },
+      {
+       "k": 14,
+       "eps": -0.5553298218365169,
+       "block": "k=3",
+       "weight": 0.999999999999997
+      },
+      {
+       "k": 15,
+       "eps": -0.533676835006793,
+       "block": "k=1",
+       "weight": 0.5000000000000288
+      },
+      {
+       "k": 16,
+       "eps": -0.5336768350067865,
+       "block": "k=1",
+       "weight": 0.5000000000000251
+      },
+      {
+       "k": 17,
+       "eps": -0.4588518066660984,
+       "block": "k=0",
+       "weight": 0.9999999999999972
+      },
+      {
+       "k": 18,
+       "eps": -0.43211576396887547,
+       "block": "k=2",
+       "weight": 0.4999999999999874
+      },
+      {
+       "k": 19,
+       "eps": -0.4321157639688658,
+       "block": "k=2",
+       "weight": 0.4999999999999886
+      },
+      {
+       "k": 20,
+       "eps": -0.28133865869626756,
+       "block": "k=1",
+       "weight": 0.5000000000000004
+      },
+      {
+       "k": 21,
+       "eps": -0.28133865869625946,
+       "block": "k=1",
+       "weight": 0.4999999999999995
+      },
+      {
+       "k": 22,
+       "eps": 0.27022667407878254,
+       "block": "k=2",
+       "weight": 0.5000000000000054
+      },
+      {
+       "k": 23,
+       "eps": 0.27022667407878964,
+       "block": "k=2",
+       "weight": 0.5000000000000064
+      },
+      {
+       "k": 24,
+       "eps": 0.5072667332069846,
+       "block": "k=3",
+       "weight": 1.0000000000000069
+      },
+      {
+       "k": 25,
+       "eps": 0.5727869810059387,
+       "block": "k=0",
+       "weight": 1.0000000000000087
+      }
+     ],
+     "complexBasis": true,
+     "worstEigenvectorResidual": 7.993605777301127e-15,
+     "gradingRule": "−k_p + k_q − k_r + k_s ≡ 0 (mod 6)",
+     "rpaBlocks": {
+      "pairSpace": 315,
+      "blocks": [
+       {
+        "excitation": "k=0",
+        "size": 51
+       },
+       {
+        "excitation": "k=1",
+        "size": 52
+       },
+       {
+        "excitation": "k=2",
+        "size": 53
+       },
+       {
+        "excitation": "k=3",
+        "size": 54
+       },
+       {
+        "excitation": "k=4",
+        "size": 53
+       },
+       {
+        "excitation": "k=5",
+        "size": 52
+       }
+      ],
+      "sumM2overM2": 0.16672209624590578,
+      "sumM3overM3": 0.027805492567397328,
+      "equalBlocksM2": 0.16666666666666666
+     }
+    },
+    "C6h": {
+     "group": "C6h",
+     "order": 12,
+     "blocks": [
+      {
+       "label": "k=0g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 0,
+       "parity": "g",
+       "character": "ζ₆^0"
+      },
+      {
+       "label": "k=1g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 1,
+       "parity": "g",
+       "character": "ζ₆^1"
+      },
+      {
+       "label": "k=2g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 2,
+       "parity": "g",
+       "character": "ζ₆^2"
+      },
+      {
+       "label": "k=3g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 3,
+       "parity": "g",
+       "character": "ζ₆^3"
+      },
+      {
+       "label": "k=4g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 4,
+       "parity": "g",
+       "character": "ζ₆^4"
+      },
+      {
+       "label": "k=5g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "grade": 5,
+       "parity": "g",
+       "character": "ζ₆^5"
+      },
+      {
+       "label": "k=0u",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "grade": 0,
+       "parity": "u",
+       "character": "ζ₆^0"
+      },
+      {
+       "label": "k=1u",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "grade": 1,
+       "parity": "u",
+       "character": "ζ₆^1"
+      },
+      {
+       "label": "k=2u",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "grade": 2,
+       "parity": "u",
+       "character": "ζ₆^2"
+      },
+      {
+       "label": "k=3u",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "grade": 3,
+       "parity": "u",
+       "character": "ζ₆^3"
+      },
+      {
+       "label": "k=4u",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "grade": 4,
+       "parity": "u",
+       "character": "ζ₆^4"
+      },
+      {
+       "label": "k=5u",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "grade": 5,
+       "parity": "u",
+       "character": "ζ₆^5"
+      }
+     ],
+     "saoOrthonormalityDefect": 7.211965760343909e-14,
+     "occupiedCountResidual": 3.4638958368304884e-14,
+     "worstMoOffBlockLeakage": 0.5000000000000009,
+     "fock": {
+      "sumN2overN2": 0.12037037037037036,
+      "sumN3overN3": 0.016203703703703703,
+      "equalBlocksN2": 0.08333333333333333,
+      "equalBlocksN3": 0.006944444444444444
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 1679616,
+       "nonzero": 167616,
+       "fraction": 0.09979423868312758,
+       "allowedByLabels": 167616,
+       "allowedFraction": 0.09979423868312758,
+       "violations": 0,
+       "maxAbsForbidden": 3.045634240875861e-14,
+       "minAbsAllowedNonzero": 0.000019563149100391507,
+       "allowedFromBlockSizes": 167616
+      },
+      "canonicalUnique": {
+       "quartets": 222111,
+       "nonzero": 19255,
+       "fraction": 0.08669088878983931,
+       "allowedByLabels": 19255,
+       "allowedFraction": 0.08669088878983931
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 22521,
+       "fractionOfCanonical": 0.10139524832178505,
+       "tensor4Invariants": 167616,
+       "fractionOfN4": 0.09979423868312758,
+       "sym2Invariants": 84
+      },
+      "limitOneOverOrder": 0.08333333333333333,
+      "transformMs": 538
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 24,
+       "shellPairs": 300,
+       "shellQuartets": 45150,
+       "orbits": 7562,
+       "fraction": 0.1674861572535991,
+       "orbitSizes": {
+        "3": 74,
+        "6": 7488
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": false
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1-2",
+       "eps": -11.029266,
+       "occ": 4,
+       "decomposition": "k=1g + k=5g"
+      },
+      {
+       "mo": "3",
+       "eps": -11.029249,
+       "occ": 2,
+       "decomposition": "k=0g"
+      },
+      {
+       "mo": "4-5",
+       "eps": -11.028882,
+       "occ": 4,
+       "decomposition": "k=2g + k=4g"
+      },
+      {
+       "mo": "6",
+       "eps": -11.028725,
+       "occ": 2,
+       "decomposition": "k=3g"
+      },
+      {
+       "mo": "7",
+       "eps": -1.093063,
+       "occ": 2,
+       "decomposition": "k=0g"
+      },
+      {
+       "mo": "8-9",
+       "eps": -0.955862,
+       "occ": 4,
+       "decomposition": "k=1g + k=5g"
+      },
+      {
+       "mo": "10-11",
+       "eps": -0.766515,
+       "occ": 4,
+       "decomposition": "k=2g + k=4g"
+      },
+      {
+       "mo": "12",
+       "eps": -0.662161,
+       "occ": 2,
+       "decomposition": "k=0g"
+      },
+      {
+       "mo": "13",
+       "eps": -0.590944,
+       "occ": 2,
+       "decomposition": "k=3g"
+      },
+      {
+       "mo": "14",
+       "eps": -0.55533,
+       "occ": 2,
+       "decomposition": "k=3g"
+      },
+      {
+       "mo": "15-16",
+       "eps": -0.533677,
+       "occ": 4,
+       "decomposition": "k=1g + k=5g"
+      },
+      {
+       "mo": "17",
+       "eps": -0.458852,
+       "occ": 2,
+       "decomposition": "k=0u"
+      },
+      {
+       "mo": "18-19",
+       "eps": -0.432116,
+       "occ": 4,
+       "decomposition": "k=2g + k=4g"
+      },
+      {
+       "mo": "20-21",
+       "eps": -0.281339,
+       "occ": 4,
+       "decomposition": "k=1u + k=5u"
+      },
+      {
+       "mo": "22-23",
+       "eps": 0.270227,
+       "occ": 0,
+       "decomposition": "k=2u + k=4u"
+      },
+      {
+       "mo": "24",
+       "eps": 0.507267,
+       "occ": 0,
+       "decomposition": "k=3u"
+      },
+      {
+       "mo": "25",
+       "eps": 0.572787,
+       "occ": 0,
+       "decomposition": "k=0g"
+      },
+      {
+       "mo": "26-27",
+       "eps": 0.644064,
+       "occ": 0,
+       "decomposition": "k=1g + k=5g"
+      },
+      {
+       "mo": "28",
+       "eps": 0.719611,
+       "occ": 0,
+       "decomposition": "k=3g"
+      },
+      {
+       "mo": "29-30",
+       "eps": 0.736314,
+       "occ": 0,
+       "decomposition": "k=2g + k=4g"
+      },
+      {
+       "mo": "31-32",
+       "eps": 0.883687,
+       "occ": 0,
+       "decomposition": "k=2g + k=4g"
+      },
+      {
+       "mo": "33-34",
+       "eps": 0.901354,
+       "occ": 0,
+       "decomposition": "k=1g + k=5g"
+      },
+      {
+       "mo": "35",
+       "eps": 1.094939,
+       "occ": 0,
+       "decomposition": "k=0g"
+      },
+      {
+       "mo": "36",
+       "eps": 1.155946,
+       "occ": 0,
+       "decomposition": "k=3g"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -11.029265570383723,
+       "block": "k=1g",
+       "weight": 0.5000000000000083
+      },
+      {
+       "k": 2,
+       "eps": -11.029265570383695,
+       "block": "k=1g",
+       "weight": 0.5000000000000085
+      },
+      {
+       "k": 3,
+       "eps": -11.029249396412867,
+       "block": "k=0g",
+       "weight": 1.000000000000009
+      },
+      {
+       "k": 4,
+       "eps": -11.02888223570848,
+       "block": "k=2g",
+       "weight": 0.5000000000000031
+      },
+      {
+       "k": 5,
+       "eps": -11.028882235708432,
+       "block": "k=2g",
+       "weight": 0.5000000000000052
+      },
+      {
+       "k": 6,
+       "eps": -11.028724839142685,
+       "block": "k=3g",
+       "weight": 1.0000000000000067
+      },
+      {
+       "k": 7,
+       "eps": -1.093063137644108,
+       "block": "k=0g",
+       "weight": 1.000000000000008
+      },
+      {
+       "k": 8,
+       "eps": -0.955861838403655,
+       "block": "k=1g",
+       "weight": 0.5000000000000026
+      },
+      {
+       "k": 9,
+       "eps": -0.9558618384036511,
+       "block": "k=1g",
+       "weight": 0.5000000000000016
+      },
+      {
+       "k": 10,
+       "eps": -0.7665153565917607,
+       "block": "k=2g",
+       "weight": 0.5000000000000091
+      },
+      {
+       "k": 11,
+       "eps": -0.7665153565917544,
+       "block": "k=2g",
+       "weight": 0.5000000000000043
+      },
+      {
+       "k": 12,
+       "eps": -0.6621605601830456,
+       "block": "k=0g",
+       "weight": 1.0000000000000084
+      },
+      {
+       "k": 13,
+       "eps": -0.5909435025473377,
+       "block": "k=3g",
+       "weight": 1.000000000000015
+      },
+      {
+       "k": 14,
+       "eps": -0.5553298218365169,
+       "block": "k=3g",
+       "weight": 0.9999999999999968
+      },
+      {
+       "k": 15,
+       "eps": -0.533676835006793,
+       "block": "k=1g",
+       "weight": 0.5000000000000079
+      },
+      {
+       "k": 16,
+       "eps": -0.5336768350067865,
+       "block": "k=1g",
+       "weight": 0.5000000000000057
+      },
+      {
+       "k": 17,
+       "eps": -0.4588518066660984,
+       "block": "k=0u",
+       "weight": 0.9999999999999982
+      },
+      {
+       "k": 18,
+       "eps": -0.43211576396887547,
+       "block": "k=2g",
+       "weight": 0.5000000000000004
+      },
+      {
+       "k": 19,
+       "eps": -0.4321157639688658,
+       "block": "k=2g",
+       "weight": 0.5000000000000017
+      },
+      {
+       "k": 20,
+       "eps": -0.28133865869626756,
+       "block": "k=1u",
+       "weight": 0.5000000000000003
+      },
+      {
+       "k": 21,
+       "eps": -0.28133865869625946,
+       "block": "k=1u",
+       "weight": 0.4999999999999991
+      },
+      {
+       "k": 22,
+       "eps": 0.27022667407878254,
+       "block": "k=2u",
+       "weight": 0.5000000000000016
+      },
+      {
+       "k": 23,
+       "eps": 0.27022667407878964,
+       "block": "k=2u",
+       "weight": 0.500000000000001
+      },
+      {
+       "k": 24,
+       "eps": 0.5072667332069846,
+       "block": "k=3u",
+       "weight": 1.000000000000007
+      },
+      {
+       "k": 25,
+       "eps": 0.5727869810059387,
+       "block": "k=0g",
+       "weight": 1.0000000000000087
+      }
+     ],
+     "complexBasis": true,
+     "worstEigenvectorResidual": 6.439293542825908e-15,
+     "gradingRule": "−k_p + k_q − k_r + k_s ≡ 0 (mod 6) and the σh parities multiply to +1",
+     "rpaBlocks": {
+      "pairSpace": 315,
+      "blocks": [
+       {
+        "excitation": "k=0g",
+        "size": 36
+       },
+       {
+        "excitation": "k=1g",
+        "size": 37
+       },
+       {
+        "excitation": "k=2g",
+        "size": 38
+       },
+       {
+        "excitation": "k=3g",
+        "size": 39
+       },
+       {
+        "excitation": "k=4g",
+        "size": 38
+       },
+       {
+        "excitation": "k=5g",
+        "size": 37
+       },
+       {
+        "excitation": "k=0u",
+        "size": 15
+       },
+       {
+        "excitation": "k=1u",
+        "size": 15
+       },
+       {
+        "excitation": "k=2u",
+        "size": 15
+       },
+       {
+        "excitation": "k=3u",
+        "size": 15
+       },
+       {
+        "excitation": "k=4u",
+        "size": 15
+       },
+       {
+        "excitation": "k=5u",
+        "size": 15
+       }
+      ],
+      "sumM2overM2": 0.09869488536155203,
+      "sumM3overM3": 0.010790771334989022,
+      "equalBlocksM2": 0.08333333333333333
+     }
+    },
+    "D6h": {
+     "group": "D6h",
+     "order": 24,
+     "blocks": [
+      {
+       "label": "A1g·Ag",
+       "size": 4,
+       "occupied": 3,
+       "virtual": 1,
+       "d6hIrrep": "A1g",
+       "d2hPartner": "Ag",
+       "dimension": 1
+      },
+      {
+       "label": "A2g·B1g",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "d6hIrrep": "A2g",
+       "d2hPartner": "B1g",
+       "dimension": 1
+      },
+      {
+       "label": "B2g·B2g",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "d6hIrrep": "B2g",
+       "d2hPartner": "B2g",
+       "dimension": 1
+      },
+      {
+       "label": "E1g·B2g",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "d6hIrrep": "E1g",
+       "d2hPartner": "B2g",
+       "dimension": 2
+      },
+      {
+       "label": "E1g·B3g",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "d6hIrrep": "E1g",
+       "d2hPartner": "B3g",
+       "dimension": 2
+      },
+      {
+       "label": "E2g·Ag",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "d6hIrrep": "E2g",
+       "d2hPartner": "Ag",
+       "dimension": 2
+      },
+      {
+       "label": "E2g·B1g",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "d6hIrrep": "E2g",
+       "d2hPartner": "B1g",
+       "dimension": 2
+      },
+      {
+       "label": "A2u·B1u",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "d6hIrrep": "A2u",
+       "d2hPartner": "B1u",
+       "dimension": 1
+      },
+      {
+       "label": "B1u·B3u",
+       "size": 4,
+       "occupied": 2,
+       "virtual": 2,
+       "d6hIrrep": "B1u",
+       "d2hPartner": "B3u",
+       "dimension": 1
+      },
+      {
+       "label": "B2u·B2u",
+       "size": 1,
+       "occupied": 1,
+       "virtual": 0,
+       "d6hIrrep": "B2u",
+       "d2hPartner": "B2u",
+       "dimension": 1
+      },
+      {
+       "label": "E1u·B2u",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "d6hIrrep": "E1u",
+       "d2hPartner": "B2u",
+       "dimension": 2
+      },
+      {
+       "label": "E1u·B3u",
+       "size": 5,
+       "occupied": 3,
+       "virtual": 2,
+       "d6hIrrep": "E1u",
+       "d2hPartner": "B3u",
+       "dimension": 2
+      },
+      {
+       "label": "E2u·Au",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "d6hIrrep": "E2u",
+       "d2hPartner": "Au",
+       "dimension": 2
+      },
+      {
+       "label": "E2u·B1u",
+       "size": 1,
+       "occupied": 0,
+       "virtual": 1,
+       "d6hIrrep": "E2u",
+       "d2hPartner": "B1u",
+       "dimension": 2
+      }
+     ],
+     "saoOrthonormalityDefect": 1.4876988529977098e-14,
+     "occupiedCountResidual": 3.108624468950438e-14,
+     "worstMoOffBlockLeakage": 3.552713678800501e-15,
+     "fock": {
+      "sumN2overN2": 0.10802469135802469,
+      "sumN3overN3": 0.013631687242798354,
+      "equalBlocksN2": 0.07142857142857142,
+      "equalBlocksN3": 0.00510204081632653
+     },
+     "eri": {
+      "threshold": 1e-10,
+      "fullTensor": {
+       "entries": 1679616,
+       "nonzero": 227008,
+       "fraction": 0.13515470202713,
+       "allowedByLabels": 450624,
+       "allowedFraction": 0.2682898948331047,
+       "violations": 0,
+       "maxAbsForbidden": 2.319298182326679e-15,
+       "minAbsAllowedNonzero": 2.0589761218475083e-8
+      },
+      "canonicalUnique": {
+       "quartets": 222111,
+       "nonzero": 30755,
+       "fraction": 0.13846680263471867,
+       "allowedByLabels": 60363,
+       "allowedFraction": 0.27176952064508286
+      },
+      "independentIntegrals": {
+       "symSymInvariants": 11666,
+       "fractionOfCanonical": 0.05252328790559675,
+       "tensor4Invariants": 84352,
+       "fractionOfN4": 0.050221002895900015,
+       "sym2Invariants": 56
+      },
+      "limitOneOverOrder": 0.041666666666666664,
+      "transformMs": 270
+     },
+     "petiteList": {
+      "shellQuartets": {
+       "shells": 24,
+       "shellPairs": 300,
+       "shellQuartets": 45150,
+       "orbits": 4116,
+       "fraction": 0.09116279069767441,
+       "orbitSizes": {
+        "3": 38,
+        "6": 650,
+        "12": 3428
+       }
+      },
+      "aoQuartets": {
+       "signedPermutation": false
+      }
+     },
+     "clusters": [
+      {
+       "mo": "1-2",
+       "eps": -11.029266,
+       "occ": 4,
+       "decomposition": "E1u·B2u + E1u·B3u"
+      },
+      {
+       "mo": "3",
+       "eps": -11.029249,
+       "occ": 2,
+       "decomposition": "A1g·Ag"
+      },
+      {
+       "mo": "4-5",
+       "eps": -11.028882,
+       "occ": 4,
+       "decomposition": "E2g·Ag + E2g·B1g"
+      },
+      {
+       "mo": "6",
+       "eps": -11.028725,
+       "occ": 2,
+       "decomposition": "B1u·B3u"
+      },
+      {
+       "mo": "7",
+       "eps": -1.093063,
+       "occ": 2,
+       "decomposition": "A1g·Ag"
+      },
+      {
+       "mo": "8-9",
+       "eps": -0.955862,
+       "occ": 4,
+       "decomposition": "E1u·B2u + E1u·B3u"
+      },
+      {
+       "mo": "10-11",
+       "eps": -0.766515,
+       "occ": 4,
+       "decomposition": "E2g·Ag + E2g·B1g"
+      },
+      {
+       "mo": "12",
+       "eps": -0.662161,
+       "occ": 2,
+       "decomposition": "A1g·Ag"
+      },
+      {
+       "mo": "13",
+       "eps": -0.590944,
+       "occ": 2,
+       "decomposition": "B1u·B3u"
+      },
+      {
+       "mo": "14",
+       "eps": -0.55533,
+       "occ": 2,
+       "decomposition": "B2u·B2u"
+      },
+      {
+       "mo": "15-16",
+       "eps": -0.533677,
+       "occ": 4,
+       "decomposition": "E1u·B2u + E1u·B3u"
+      },
+      {
+       "mo": "17",
+       "eps": -0.458852,
+       "occ": 2,
+       "decomposition": "A2u·B1u"
+      },
+      {
+       "mo": "18-19",
+       "eps": -0.432116,
+       "occ": 4,
+       "decomposition": "E2g·Ag + E2g·B1g"
+      },
+      {
+       "mo": "20-21",
+       "eps": -0.281339,
+       "occ": 4,
+       "decomposition": "E1g·B2g + E1g·B3g"
+      },
+      {
+       "mo": "22-23",
+       "eps": 0.270227,
+       "occ": 0,
+       "decomposition": "E2u·Au + E2u·B1u"
+      },
+      {
+       "mo": "24",
+       "eps": 0.507267,
+       "occ": 0,
+       "decomposition": "B2g·B2g"
+      },
+      {
+       "mo": "25",
+       "eps": 0.572787,
+       "occ": 0,
+       "decomposition": "A1g·Ag"
+      },
+      {
+       "mo": "26-27",
+       "eps": 0.644064,
+       "occ": 0,
+       "decomposition": "E1u·B2u + E1u·B3u"
+      },
+      {
+       "mo": "28",
+       "eps": 0.719611,
+       "occ": 0,
+       "decomposition": "B1u·B3u"
+      },
+      {
+       "mo": "29-30",
+       "eps": 0.736314,
+       "occ": 0,
+       "decomposition": "E2g·Ag + E2g·B1g"
+      },
+      {
+       "mo": "31-32",
+       "eps": 0.883687,
+       "occ": 0,
+       "decomposition": "E2g·Ag + E2g·B1g"
+      },
+      {
+       "mo": "33-34",
+       "eps": 0.901354,
+       "occ": 0,
+       "decomposition": "E1u·B2u + E1u·B3u"
+      },
+      {
+       "mo": "35",
+       "eps": 1.094939,
+       "occ": 0,
+       "decomposition": "A2g·B1g"
+      },
+      {
+       "mo": "36",
+       "eps": 1.155946,
+       "occ": 0,
+       "decomposition": "B1u·B3u"
+      }
+     ],
+     "mos": [
+      {
+       "k": 1,
+       "eps": -11.029265570383723,
+       "block": "E1u·B3u",
+       "weight": 1.000000000000006
+      },
+      {
+       "k": 2,
+       "eps": -11.029265570383695,
+       "block": "E1u·B2u",
+       "weight": 1.0000000000000078
+      },
+      {
+       "k": 3,
+       "eps": -11.029249396412867,
+       "block": "A1g·Ag",
+       "weight": 1.000000000000009
+      },
+      {
+       "k": 4,
+       "eps": -11.02888223570848,
+       "block": "E2g·Ag",
+       "weight": 1.000000000000007
+      },
+      {
+       "k": 5,
+       "eps": -11.028882235708432,
+       "block": "E2g·B1g",
+       "weight": 1.0000000000000109
+      },
+      {
+       "k": 6,
+       "eps": -11.028724839142685,
+       "block": "B1u·B3u",
+       "weight": 1.0000000000000069
+      },
+      {
+       "k": 7,
+       "eps": -1.093063137644108,
+       "block": "A1g·Ag",
+       "weight": 1.0000000000000064
+      },
+      {
+       "k": 8,
+       "eps": -0.955861838403655,
+       "block": "E1u·B3u",
+       "weight": 1.0000000000000122
+      },
+      {
+       "k": 9,
+       "eps": -0.9558618384036511,
+       "block": "E1u·B2u",
+       "weight": 1.0000000000000155
+      },
+      {
+       "k": 10,
+       "eps": -0.7665153565917607,
+       "block": "E2g·Ag",
+       "weight": 1.000000000000011
+      },
+      {
+       "k": 11,
+       "eps": -0.7665153565917544,
+       "block": "E2g·B1g",
+       "weight": 1.0000000000000109
+      },
+      {
+       "k": 12,
+       "eps": -0.6621605601830456,
+       "block": "A1g·Ag",
+       "weight": 1.000000000000008
+      },
+      {
+       "k": 13,
+       "eps": -0.5909435025473377,
+       "block": "B1u·B3u",
+       "weight": 1.0000000000000142
+      },
+      {
+       "k": 14,
+       "eps": -0.5553298218365169,
+       "block": "B2u·B2u",
+       "weight": 0.9999999999999971
+      },
+      {
+       "k": 15,
+       "eps": -0.533676835006793,
+       "block": "E1u·B3u",
+       "weight": 1.000000000000009
+      },
+      {
+       "k": 16,
+       "eps": -0.5336768350067865,
+       "block": "E1u·B2u",
+       "weight": 1.0000000000000078
+      },
+      {
+       "k": 17,
+       "eps": -0.4588518066660984,
+       "block": "A2u·B1u",
+       "weight": 0.9999999999999982
+      },
+      {
+       "k": 18,
+       "eps": -0.43211576396887547,
+       "block": "E2g·Ag",
+       "weight": 0.9999999999999968
+      },
+      {
+       "k": 19,
+       "eps": -0.4321157639688658,
+       "block": "E2g·B1g",
+       "weight": 1.0000000000000018
+      },
+      {
+       "k": 20,
+       "eps": -0.28133865869626756,
+       "block": "E1g·B2g",
+       "weight": 1.0000000000000009
+      },
+      {
+       "k": 21,
+       "eps": -0.28133865869625946,
+       "block": "E1g·B3g",
+       "weight": 0.9999999999999982
+      },
+      {
+       "k": 22,
+       "eps": 0.27022667407878254,
+       "block": "E2u·B1u",
+       "weight": 1.0000000000000013
+      },
+      {
+       "k": 23,
+       "eps": 0.27022667407878964,
+       "block": "E2u·Au",
+       "weight": 1.0000000000000009
+      },
+      {
+       "k": 24,
+       "eps": 0.5072667332069846,
+       "block": "B2g·B2g",
+       "weight": 1.000000000000007
+      },
+      {
+       "k": 25,
+       "eps": 0.5727869810059387,
+       "block": "A1g·Ag",
+       "weight": 1.0000000000000084
+      }
+     ],
+     "partnerLabelling": "each D6h isotypic component split by the D2h label of its partner (E1g → B2g + B3g, E2g → Ag + B1g, E1u → B2u + B3u, E2u → Au + B1u)",
+     "irrepMultiplicities": {
+      "A1g": 4,
+      "A2g": 1,
+      "B1g": 0,
+      "B2g": 1,
+      "E1g": 1,
+      "E2g": 5,
+      "A1u": 0,
+      "A2u": 1,
+      "B1u": 4,
+      "B2u": 1,
+      "E1u": 5,
+      "E2u": 1
+     },
+     "rpaBlocks": {
+      "pairSpace": 315,
+      "residual": 6.394884621840902e-14,
+      "blocks": [
+       {
+        "excitation": "A1g",
+        "dimension": 1,
+        "multiplicity": 19
+       },
+       {
+        "excitation": "A2g",
+        "dimension": 1,
+        "multiplicity": 17
+       },
+       {
+        "excitation": "B1g",
+        "dimension": 1,
+        "multiplicity": 5
+       },
+       {
+        "excitation": "B2g",
+        "dimension": 1,
+        "multiplicity": 10
+       },
+       {
+        "excitation": "E1g",
+        "dimension": 2,
+        "multiplicity": 15
+       },
+       {
+        "excitation": "E2g",
+        "dimension": 2,
+        "multiplicity": 38
+       },
+       {
+        "excitation": "A1u",
+        "dimension": 1,
+        "multiplicity": 7
+       },
+       {
+        "excitation": "A2u",
+        "dimension": 1,
+        "multiplicity": 8
+       },
+       {
+        "excitation": "B1u",
+        "dimension": 1,
+        "multiplicity": 23
+       },
+       {
+        "excitation": "B2u",
+        "dimension": 1,
+        "multiplicity": 16
+       },
+       {
+        "excitation": "E1u",
+        "dimension": 2,
+        "multiplicity": 37
+       },
+       {
+        "excitation": "E2u",
+        "dimension": 2,
+        "multiplicity": 15
+       }
+      ],
+      "distinctEigenvalues": 210,
+      "sumM3overM3OnePartnerEach": 0.004552424144260879,
+      "sumM2overM2AllPartners": 0.08263038548752834,
+      "occupiedCharacter": {
+       "E": 21,
+       "C6^1": 2,
+       "C6^5": 2,
+       "C3^1": 0,
+       "C3^2": 0,
+       "C2": -1,
+       "C2'(0deg)": 3,
+       "C2'(60deg)": 3,
+       "C2'(120deg)": 3,
+       "C2''(30deg)": 1,
+       "C2''(90deg)": 1,
+       "C2''(150deg)": 1,
+       "i": 1,
+       "S3^2": 0,
+       "S3^4": 0,
+       "S6^1": -2,
+       "S6^5": -2,
+       "sh": 15,
+       "sd(30deg)": 3,
+       "sd(90deg)": 3,
+       "sd(150deg)": 3,
+       "sv(0deg)": 5,
+       "sv(60deg)": 5,
+       "sv(120deg)": 5
+      }
+     }
+    }
+   },
+   "piRing": {
+    "pzAO": [
+     4,
+     10,
+     16,
+     22,
+     28,
+     34
+    ],
+    "circulantDefect": {
+     "F": 1.5987211554602254e-14,
+     "S": 3.0531133177191805e-16
+    },
+    "dft": [
+     {
+      "k": 0,
+      "FtildeOverStilde": -0.45885180666610353,
+      "Ftilde": -0.6867504454474523,
+      "Stilde": 1.4966715516218632,
+      "imaginaryPart": 0
+     },
+     {
+      "k": 1,
+      "FtildeOverStilde": -0.2813386586962634,
+      "Ftilde": -0.3320575139302575,
+      "Stilde": 1.1802768786523248,
+      "imaginaryPart": 3.2751579226442118e-15
+     },
+     {
+      "k": 2,
+      "FtildeOverStilde": 0.27022667407878004,
+      "Ftilde": 0.20735604355201498,
+      "Stilde": 0.7673411378018286,
+      "imaginaryPart": 2.7755575615628914e-15
+     },
+     {
+      "k": 3,
+      "FtildeOverStilde": 0.5072667332069655,
+      "Ftilde": 0.3084650530833135,
+      "Stilde": 0.6080924154698302,
+      "imaginaryPart": 6.061045173049608e-16
+     },
+     {
+      "k": 4,
+      "FtildeOverStilde": 0.2702266740787807,
+      "Ftilde": 0.20735604355201537,
+      "Stilde": 0.7673411378018282,
+      "imaginaryPart": 2.886579864025407e-15
+     },
+     {
+      "k": 5,
+      "FtildeOverStilde": -0.2813386586962632,
+      "Ftilde": -0.3320575139302572,
+      "Stilde": 1.1802768786523246,
+      "imaginaryPart": 3.4139358007223564e-15
+     }
+    ],
+    "solverPiOrbitals": [
+     {
+      "k": 17,
+      "eps": -0.4588518066660984
+     },
+     {
+      "k": 20,
+      "eps": -0.28133865869626756
+     },
+     {
+      "k": 21,
+      "eps": -0.28133865869625946
+     },
+     {
+      "k": 22,
+      "eps": 0.27022667407878254
+     },
+     {
+      "k": 23,
+      "eps": 0.27022667407878964
+     },
+     {
+      "k": 24,
+      "eps": 0.5072667332069846
+     }
+    ],
+    "worstDifference": 1.9095836023552692e-14,
+    "reading": "ε_k = F̃(k)/S̃(k): the Hückel/Bloch diagonalisation of the live π Fock block by the C6 characters, no eigensolver; k = 0 ↔ a2u, ±1 ↔ e1g, ±2 ↔ e2u, 3 ↔ b2g"
+   },
+   "grid": {
+    "live": {
+     "n": 96,
+     "voxels": 884736,
+     "centred": "cell-centred (half-integer centres, no centre on any coordinate plane)",
+     "signOps": [
+      "E",
+      "C2(z)",
+      "C2(y)",
+      "C2(x)",
+      "i",
+      "s(xy)",
+      "s(xz)",
+      "s(yz)"
+     ],
+     "orbits": 110592,
+     "asymmetricUnitFraction": 0.125,
+     "boundaryVoxels": 0,
+     "boundaryFraction": 0,
+     "orbitSizes": {
+      "8": 110592
+     },
+     "latticeCompatible": [
+      {
+       "op": "C6^1",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C6^5",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C3^1",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C3^2",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C2'(60deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C2'(120deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C2''(30deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "C2''(150deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "S3^2",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "S3^4",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "S6^1",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "S6^5",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "sd(30deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "sd(150deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "sv(60deg)",
+       "voxelsMappedOntoLattice": 0
+      },
+      {
+       "op": "sv(120deg)",
+       "voxelsMappedOntoLattice": 0
+      }
+     ]
+    },
+    "nodeCentredContrast": {
+     "n": 97,
+     "voxels": 912673,
+     "centred": "node-centred (a centre on every coordinate plane)",
+     "signOps": [
+      "E",
+      "C2(z)",
+      "C2(y)",
+      "C2(x)",
+      "i",
+      "s(xy)",
+      "s(xz)",
+      "s(yz)"
+     ],
+     "orbits": 117649,
+     "asymmetricUnitFraction": 0.12890597179931915,
+     "boundaryVoxels": 27937,
+     "boundaryFraction": 0.0306100870739027,
+     "orbitSizes": {
+      "1": 1,
+      "2": 144,
+      "4": 6912,
+      "8": 110592
+     },
+     "latticeCompatible": []
+    }
+   },
+   "oracle": {
+    "file": "/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a8356a853fc8a32d9/research/release-0.4.0/measure/pyscf-symm-oracle.json",
+    "pyscf": "2.14.0",
+    "topgroup": "D6h",
+    "groupname": "D2h",
+    "energy": -227.89100646417995,
+    "energyDifference": 8.810729923425242e-13,
+    "blockSizesPySCF": {
+     "Ag": 9,
+     "B1g": 6,
+     "B2g": 2,
+     "B3g": 1,
+     "Au": 1,
+     "B1u": 2,
+     "B2u": 6,
+     "B3u": 9
+    },
+    "blockSizesHere": {
+     "Ag": 9,
+     "B1g": 6,
+     "B2g": 2,
+     "B3g": 1,
+     "Au": 1,
+     "B1u": 2,
+     "B2u": 6,
+     "B3u": 9
+    },
+    "blockSizeMultisetsAgree": true,
+    "occupiedPerIrrepPySCF": {
+     "B2u": 4,
+     "B3u": 5,
+     "Ag": 6,
+     "B1g": 3,
+     "B1u": 1,
+     "B2g": 1,
+     "B3g": 1
+    },
+    "occupiedMultisetsAgree": true,
+    "note": "PySCF re-orients the molecule into its own frame, so B1/B2/B3 names may permute; the multisets are the comparison"
+   }
+  }
+ }
+}
