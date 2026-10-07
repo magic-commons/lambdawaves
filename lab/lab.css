@@ -421,7 +421,8 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* LEAN: a window without its paragraphs and readout tiles (rack.js, the Aa header button) */
 .dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: 11px; font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
 .dev-lean.on { color: var(--acc); text-decoration: line-through; }
-body.window-info-off .dev-lean { display: none; }
+/* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
+body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .dev.lean .dev-body .note, .dev.lean .dev-body .ro, .dev.lean .dev-body .row:has(> .ro):not(:has(> :not(.ro))) { display: none; }
 /* A ROUTED KNOB STAYS UNDER ITS OWN LABEL, AND WEARS ITS BADGES ONE CONTROL AT A TIME (2026-09-18).  The kit seats a
    range dial beside every routed dial and slides the dial 10 px left to make room (modhost.css); in this rack that put
@@ -864,7 +865,8 @@ body.ui-hidden #keymap { display: none; }
    back.  Its own class, because LEAN (window-chrome.js) hides every `.note` and this one must always be read. */
 .legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
-.mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js) */
+.mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
+.dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
 /* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */

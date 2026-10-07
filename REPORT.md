@@ -3355,3 +3355,59 @@ that also wins `elementFromPoint`, and the one the brief's own §3 test checks (
 said the act "sets SETTINGS' status line `COPIED · 4 states as LaTeX`"; it is SPECTRUM's own `.dev-stat` (where
 the ⧉ lives, where `copied` flashes, and where the brief's own §3 test reads it), and the exact text has no
 `COPIED ·` prefix — just `4 states as LaTeX` — since `copied` is the CSS class that flashes, not a text prefix.
+
+## 2026-10-07 · 0.4.0 S0 — THE TAKE-IN
+
+### wave 136: The take-in — Cloud's two PRs merged, the forged kit edit subtracted, Jet Black kept by a lawful road
+
+The live site served Cloud's unreviewed `main` (`28fe445`) while `release-0.4.0` held 0.3.3 THE EXPORTS. S0 merges
+the two in two commits so a bisect stays possible — PR #1 (`2a03c06`, commit `0242bff`) and PR #2 (`28fe445`, commit
+`5c7109e`) — each conflicting in the generated `lab/sw.js` only (ours taken, regenerated with `pwa.test.mjs --write`:
+205 then 206 entries, `paint-stroke.js` the one added file). `bash test.sh node` was green after both merges (82
+suites) — including `tests/mir-manifest.test.mjs`, which could not see the forgery (it hashed the files against the
+manifest the same commit rewrote; wave 138 pins it). As the audit predicted, one browser red after PR #2:
+`tests/latex-copy.browser-test.mjs:144` asserted SPECTRUM `.hidden` under a molecule, and Cloud folds it.
+
+KEPT, because each is Josh's ask and sound: the PAINT GESTURE's behaviour (`lab/paint-stroke.js` — left adds, right
+removes, a drag crosses, Alt = right, a finger = left, one stroke one undo row; the code is generic and should move to
+MIR later, the behaviour stays); MO-REGISTRY "standing by" when MOLECULES is off, its ON switch beside ORBITAL | STATES;
+the first-run LEFT rack (SHADOW, SPECTRUM, MOLECULES, MO-REGISTRY; folded on a phone or tablet), which supersedes
+"MOLECULES start off the rack" — CLAUDE.md now states the first-run law once; `docs/LEGACY-WINDOWS.md` and the hidden
+legacy set; the STAGE FORMULA and ATOM LABELS as they are (S3 rewrites them); SPECTRUM folding, not hiding, under a
+molecule; the wrangler 4.129 → 4.147 devDependency bump (undici advisories; `package-lock.json` merged clean).
+
+SUBTRACTED: the direct edit of the adopted `lab/mir/palette.js`, the forged `MIR-MANIFEST.json` ("1.4.4", commit
+`f56cf16e9402`, a release MIR never cut) and Cloud's wording of the palette-test exemption — all three back to the 1.4.3
+bytes (`node tests/mir-manifest.test.mjs` → `PASS MIR 1.4.3: all 66 adopted files match`). JET BLACK STAYS LIVE by the
+app's road until MIR carries it (KIT BRIEF J): `lab/palette-app.js` appends one row — Cloud's own text, three `#000000`
+stops built with the kit's exported `hexToRgb`, `flat: true` — to the kit's `PRESETS`, `PRESET_BY_ID` and the 3-point
+group of `PRESET_GROUPS` (the menu's optgroups; `tests/palette.test.mjs`' partition check is what said the group must
+carry it too). `rack.js` imports it first, before anything reads the catalogue; a saved project or link naming
+`jetblack` resolves through `PRESET_BY_ID` exactly as before. `tests/palette.test.mjs` imports the app module, so the
+row is gated like the kit's own (16 GREEN), with the one-line rule "a `flat` palette is exempt from the phase-map
+gates" on the antipode check — the only gate an all-black palette fails (its CVD flag is measured false and declared
+false; its lightness is constant and declared so).
+
+THREE NEW LAWS. (c) Under a molecular field owner, EDIT › COPY copies the MOLECULE's page, never greyed: Cloud's fold
+made the old `wSpec.root.hidden` gate false, so it would have copied the atomic register under a molecule.
+`moleculeLatex({ molecule, basis, charge, ground })` (pure, beside `stateLatex` in `lab/latex-state.js`) writes the same
+two-line shape — a prose line with the formula as `\mathrm{H_{2}O}`, the name, RHF/basis, the charge, E in E_h and
+"5 occupied of 7 AO", then the ladder `\varepsilon_{i} = …` with every level tagged by index from the frontier (HOMO,
+HOMO−1 …, LUMO, LUMO+1 …; S1's symmetry names slot into the same function). The ground is accepted only when its
+solve key is the current molecule's, so a re-solve never copies the previous molecule's ladder; a legacy owner (H₂⁺,
+HELIUM, H₂) says it has no page and writes nothing. (d) `.mol-more` is a FOLD: the chevron at the end of MOLECULES'
+VIEW row is the in-card details idiom SHADOW and CAMERA already use (a trig with the kit's `chevronDown`,
+`aria-expanded`; `skin.css` gained the toggle's class on the three existing SHADOW chevron rules, nothing else), OPEN
+by default on a desktop and folded on a phone or tablet (`first-run.js` `more`), its state in the card's WORKSPACE
+record (`captureLayout` writes `more` for the one card that has the fold; `applyLayout` applies it through the button;
+an older record without it leaves the fold alone). MOLECULES' `Aa` stays visible with HELP off — LEAN is on by default,
+so its readouts had no other road back. (e) SPECTRUM's orphaned operators: ATOM brings the hidden ATOMS window (its
+element picker) back by the legacy un-hide road HELIUM and H₂ take, on a press and on a project restore; QUARKONIUM's
+button is hidden while QCD is — the button, not the value, so an older project's `cornell` still restores.
+
+Gates, run once: `bash test.sh node` green (82 suites); `node tools/new-project.mjs --check` in step (16829 B, no boot
+default changed); browser on 8731 — `latex-copy` 9/9 (the rewritten molecule law: SPECTRUM folded, the clipboard
+carries `\mathrm{H_{2}O}`, "5 occupied of 7 AO", `\varepsilon_{5}`, HOMO and LUMO; back on hydrogen it unfolds and
+copies `$1s_{0}$ and $2p_{0}$`), `menubar` 8/8, `molecular-names` 5/5 (one new: QUARKONIUM hidden, `cornell` restores,
+ATOM un-hides ATOMS), `register` 17/17, `chem` 54/54 (L5 now asserts the fold open by default and the `Aa` shown with
+HELP off, instead of un-hiding the div), `routed-knob` 4/4 (opens the fold through its chevron), `new-project` 8/8.

@@ -66,6 +66,11 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   judge('THE FIRST-RUN FOLDS (W129; 2026-10): the furniture folds SETTINGS and STATE on every device, and SHADOW, MOLECULES and MO-REGISTRY too on a phone or tablet; the desktop\'s list is exactly the one it always folded; both frozen',
     eq(rows.desktop, ['settings', 'state']) && eq(rows.mobile, ['settings', 'state', 'shadow', 'chem', 'orbitals']) && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
+{
+  const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8').includes('moreOpen: FIRST_RUN.more') };
+  judge('THE MOLECULES MORE FOLD (0.4.0 S0): KICK / RUN / TDA / the spectra are OPEN on a desktop and folded on a phone or tablet, and rack.js hands the answer to the card',
+    rows.desktop === true && rows.mobile === false && rows.wired, rows);
+}
 /* ── PACE P2 (2026-09-25): THE FIRST-RUN QUALITY and THE DEVICE'S CEILING ─────────────────────────────────────────────── */
 {
   const rows = { desktop: firstRunQuality('desktop'), tablet: firstRunQuality('tablet'), phone: firstRunQuality('phone'), unknown: firstRunQuality(undefined) };

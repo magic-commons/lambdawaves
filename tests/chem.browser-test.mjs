@@ -130,13 +130,15 @@ try {
   const bytes = fs.statSync(SHOT).size;
   judge('L5 .tmp/chem-benzene.png exists and is over 50 kB', bytes > 50 * 1024, { file: SHOT, bytes });
   const l5 = await g.ev(`const d = document.querySelector('.dev[data-id="chem"]');
-    const more = d.querySelector('.mol-more'); if (more) more.hidden = false;   // 2026-10: the plot lives in the hidden section
+    /* 0.4.0 S0: the plot lives in the MORE fold, OPEN by default on a desktop — reached through the UI a user has */
+    const tog = d.querySelector('.mol-more-toggle'), moreOpen = !!tog && tog.getAttribute('aria-expanded') === 'true' && !d.querySelector('.mol-more').hidden;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     const c = d.querySelector('canvas.mol-c'), b = c && c.getBoundingClientRect();
-    return { canvas: !!c, painted: !!(b && b.width > 100 && b.height > 40), folded: d.classList.contains('folded'),
+    const aa = d.querySelector('.dev-lean'), helpOff = document.body.classList.contains('window-info-off'), aaShown = !!aa && getComputedStyle(aa).display !== 'none';
+    return { moreOpen, helpOff, aaShown, canvas: !!c, painted: !!(b && b.width > 100 && b.height > 40), folded: d.classList.contains('folded'),
       rows: d.querySelectorAll('.row').length, controls: d.querySelectorAll('.k, .segw, .sw, .trig').length,
       view: __LW.chem.state().view, preset: __LW.chem.preset(), errs: window.__e.slice() };`);
-  judge('L5 the window is UNFOLDED on benzene in DENSITY view, its plot laid out', l5.canvas && l5.painted && !l5.folded
+  judge('L5 the window is UNFOLDED on benzene in DENSITY view, its MORE fold open (the desktop default), its Aa shown with HELP off, its plot laid out', l5.moreOpen && l5.helpOff && l5.aaShown && l5.canvas && l5.painted && !l5.folded
     && l5.preset === 'C6H6' && l5.view === 'density' && l5.rows >= 4 && l5.controls >= 12 && l5.errs.length === 0, l5);
 
   /* ── LAW 3 · the δ-kick and 200 MMUT steps at Δt = 0.01 ──────────────────────────────────────── */

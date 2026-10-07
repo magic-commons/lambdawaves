@@ -17,6 +17,7 @@ import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuali
  * reconstruction cadence (cappable, never alters c); the camera clock is observer motion; the
  * presentation clock is the display rate.  Observer controls never touch the register (§14).
  */
+import './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
 import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
@@ -68,7 +69,7 @@ import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
-import { stateLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX
+import { stateLatex, moleculeLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
@@ -1955,7 +1956,11 @@ export async function boot(dom) {
       { id: 'well', label: 'BOX', title: 'Infinite spherical well with a hard boundary' },
       { id: 'atom', label: 'ATOM', title: 'Self-consistent Xα central-field atom from H to Kr' },
       { id: 'cornell', label: 'QUARKONIUM', title: 'Solve heavy-quark levels with Numerov' }],
-      onChange: (v) => { switchHamiltonian(v); if (v === 'well') enterBox(); } });
+      onChange: (v) => { switchHamiltonian(v); if (v === 'well') enterBox(); if (v === 'atom') { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); } } });
+    /* 0.4.0 S0 · wave 136 (audit F6): the two operators whose only editors are LEGACY windows.  ATOM opens ATOMS again (its
+       element picker) by the legacy un-hide road HELIUM and H₂ take in their setOn; QUARKONIUM's button is HIDDEN while QCD
+       stays hidden — the button, not the value: an older project restoring `cornell` still sets it (set() paints any id). */
+    ui.hamSeg.button('cornell').hidden = true;
     rh.appendChild(ui.hamSeg.root);
     ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; }); schedule(TIER.REBUILD); } } });
     rh.appendChild(ui.wellKnob.root);
@@ -2028,14 +2033,24 @@ export async function boot(dom) {
   }
   /** THE COPY (0.3.3 · wave 135): the populated register at the clock's t — c(t), the mix while A/B plays — as the notebook's
    *  LaTeX in chemistry order (lab/latex-state.js), through copyDigest's one clipboard road and its `copied` flash.  SPECTRUM's
-   *  status line says what went: it is where the ⧉ is.  Under a molecular field owner SPECTRUM stands down (moleculeMode) and
-   *  shows no list, so there is nothing to copy and the EDIT row is disabled; an empty register says so and writes nothing. */
+   *  status line says what went: it is where the ⧉ is.  An empty register says so and writes nothing.
+   *  0.4.0 S0 · wave 136: under a MOLECULAR field owner the copy is the MOLECULE's page (moleculeLatex: the formula, RHF/basis,
+   *  E, the ε ladder), never greyed — SPECTRUM only folds there now (moleculeMode), so its own list is not what the field shows. */
   let copySaid = 0;                                                  // the status restore of the last copy: a second press restarts it
   function copyLatex() {
-    const c = reg.at(clock.t), H = getHamiltonian();
-    const states = wSpec.root.hidden ? [] : reg.populated().map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: c.re[a], im: c.im[a] }));
-    const text = stateLatex({ states, H }), n = text ? text.split('\n')[0].split('$').length >> 1 : 0;
-    wSpec.setStatus(text ? n + (n === 1 ? ' state' : ' states') + ' as LaTeX' : wSpec.root.hidden ? 'nothing to copy — SPECTRUM stands down while a molecule owns the field' : 'nothing to copy — the register is empty', text ? 'live' : 'warn');
+    let text, said;
+    if (molecule.on || helium.on || h2.on || (chem && chem.on)) {
+      const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null, sol = row ? chem.solution() : null;
+      const ground = sol && sol.key === chem.preset() + '|' + chem.basis + '|' + row.charge ? sol : null;   // chemview's own solve key: never the previous molecule's ladder
+      text = moleculeLatex({ molecule: row, basis: chem && chem.basis, charge: row && row.charge, ground });
+      said = text ? mathPlain(row.formula) + '’s page as LaTeX' : row ? 'nothing to copy — ' + mathPlain(row.formula) + ' is still solving' : 'nothing to copy — a legacy card holds the field and has no page';
+    } else {
+      const c = reg.at(clock.t), H = getHamiltonian();
+      const states = reg.populated().map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: c.re[a], im: c.im[a] }));
+      text = stateLatex({ states, H }); const n = text ? text.split('\n')[0].split('$').length >> 1 : 0;
+      said = text ? n + (n === 1 ? ' state' : ' states') + ' as LaTeX' : 'nothing to copy — the register is empty';
+    }
+    wSpec.setStatus(said, text ? 'live' : 'warn');
     clearTimeout(copySaid); copySaid = setTimeout(() => wSpec.setStatus(...specStatus()), 1800);
     return text ? layout.copyText('spectrum', text) : Promise.resolve('');
   }
@@ -2343,7 +2358,7 @@ export async function boot(dom) {
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
-  chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'),
+  chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
@@ -3745,10 +3760,11 @@ export async function boot(dom) {
              read it; only the capture did not, and the asymmetry was the bug.  With the shipped arrangement
              (SPECTRUM lives on the LEFT rack out of the box) that meant: rotate a tablet past the breakpoint,
              press ☆, rotate back, load — and the mirror rack is empty for ever. */
-          const st = floatState.get(d.dataset.id);
+          const st = floatState.get(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
           return { id: d.dataset.id, side: st ? st.home.side : (d.dataset.phoneFrom === 'L' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d.classList.contains('closed'), off: d.classList.contains('off'),
-            float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d.style.zIndex || 0), index: st.home.index } : null };
+            float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d.style.zIndex || 0), index: st.home.index } : null,
+            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}) };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
         /* 0.3.1 · S1: the `look` and `cam` blocks this record carried are gone — applyLayout never read either, and between
@@ -3810,6 +3826,8 @@ export async function boot(dom) {
         d.classList.toggle('closed', !!c.closed);
         if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
         if (d.classList.contains('off') !== !!c.off) { const pw = d.querySelector('.dev-power'); if (pw) pw.click(); }
+        const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
+        if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
       }
       if (!ph) for (const c of L.cards.filter((q) => q.float && !(RETIRED_WINDOWS[q.id] && named.has(RETIRED_WINDOWS[q.id]))).sort((a, b) => (a.float.z || 0) - (b.float.z || 0)))
         layout.popOut(heirOf(c.id), { x: c.float.x, y: c.float.y, w: c.float.w, compact: c.float.compact, home: { side: c.side, index: c.float.index } });
@@ -3975,7 +3993,7 @@ export async function boot(dom) {
           null,
           ...SHAPE_EXPORTS.map((spec) => [spec.row, () => exporter3d.run(spec.fmt), () => exporter3d.busy || !field.ok, spec.tip])],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), () => wSpec.root.hidden, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), null, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases; under a molecule, the molecule\'s page: formula, RHF/basis, E and the ε ladder'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
@@ -5057,6 +5075,7 @@ export async function boot(dom) {
         if (molecule.on && !hist) { wMol.root.hidden = false; wMol.root.classList.remove('closed'); }
         if (helium.on && !hist) { wHe.root.hidden = false; wHe.root.classList.remove('closed'); }   // LEGACY (2026-10): the same law for the two other hidden field owners
         if (h2.on && !hist) { wH2.root.hidden = false; wH2.root.classList.remove('closed'); }
+        if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
         if (fieldlines.overlay !== 'off' && !hist) layout.raise('field');   // a hidden ELECTROSTATICS cannot present, so a file whose overlay is on raises it (on, unfolded, on screen)
         if (pr.instruments && chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
         placeMolFormula();                                            // the MOLECULE FORMULA follows whatever MOLECULES the file left

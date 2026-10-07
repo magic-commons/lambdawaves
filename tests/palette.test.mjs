@@ -25,6 +25,7 @@
  *   cvd    ≥ 0.100   the same, under the deuteranope simulation — the gate the `cvd` flag must agree with
  */
 import { PRESETS, PRESET_BY_ID, PRESET_GROUPS, toLUT, normalize, cyclic, rgbToOklab, oklabToRgb, rgbToHex, hexToRgb } from '../lab/mir/palette.js';
+import '../lab/palette-app.js';   // Jet Black: the app's catalogue row until MIR carries it (KIT BRIEF J) — gated here like the kit's own
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -212,7 +213,7 @@ const MEAS = new Map(PRESETS.map((p) => [p.id, measure(p)]));
 }
 /* ── (10) opposite phases are different colours — the π jump across a node must be visible ─────────────── */
 {
-  /* a FLAT palette (MIR 1.4.4 `flat: true`, e.g. jetblack) is a solid body by design, not a phase map: it is the one exemption */
+  /* a `flat` palette is exempt from the phase-map gates (jetblack: a solid body by design, not a phase map) */
   const anti = PRESETS.filter((p) => !p.flat).map((p) => [p.id, MEAS.get(p.id).anti]).sort((a, b) => a[1] - b[1]);
   judge('OPPOSITE PHASES NEVER COLLIDE: for every palette and every phase, the colour at u and the colour at u + ½ differ by at least ' + TOL.anti + ' in OKLab (the tightest is ' + anti[0][0] + ' at ' + anti[0][1].toFixed(3) + ') — a palette that failed this would paint the two sides of a nodal surface the same colour and hide the very thing the phase view is for',
     anti[0][1] >= TOL.anti, { tightestFive: anti.slice(0, 5).map(([id, v]) => [id, +v.toFixed(3)]) });

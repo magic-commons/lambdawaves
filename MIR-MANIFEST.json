@@ -1,7 +1,7 @@
 {
   "kit": "MIR",
-  "version": "1.4.4",
-  "commit": "f56cf16e9402",
+  "version": "1.4.3",
+  "commit": "2e6b85a88fce",
   "files": {
     "lab/fonts/LWTitle-title.woff2": "8069abf19624158c",
     "lab/fonts/Roboto-OFL.txt": "061402327a96aadb",
@@ -30,7 +30,7 @@
     "lab/mir/modulation/modwindow/modwindow.css": "8c97686a881b33a9",
     "lab/mir/modulation/modwindow/modwindow.js": "4a7d7bf7f4b4f310",
     "lab/mir/modulation/registry.js": "543131e58af43c03",
-    "lab/mir/palette.js": "f2e32f6759367d55",
+    "lab/mir/palette.js": "5c7332ba789cb041",
     "lab/mir/plane-model.js": "b5353d801b6839a2",
     "lab/mir/shell/about.js": "edd14291d3824666",
     "lab/mir/shell/accent.js": "7feb776b0e43d321",

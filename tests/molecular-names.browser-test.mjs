@@ -44,6 +44,23 @@ try {
   assert.deepEqual(boot.errors, []);
   console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, saved IDs are stable');
 
+  /* 0.4.0 S0 · wave 136 (audit F6): SPECTRUM's two orphaned operators — QUARKONIUM's button is hidden while QCD is, but the
+     value still restores; a press on ATOM brings ATOMS (its element picker) back by the legacy un-hide road */
+  const ops = await g.ev(`
+    const card = id => document.querySelector('.dev[data-id="' + id + '"]');
+    const btns = [...card('spectrum').querySelectorAll('.segw')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'OPERATOR').querySelectorAll('.seg-b');
+    const b = (label) => [...btns].find(x => x.textContent === label);
+    const quarkHidden = b('QUARKONIUM').hidden && getComputedStyle(b('QUARKONIUM')).display === 'none';
+    __LW.setHamiltonian('cornell'); await __LW.settle(); const cornellRestores = __LW.hamiltonian === 'cornell';
+    __LW.setHamiltonian('hydrogen'); await __LW.settle();
+    const atomsHidden = card('atoms').hidden; b('ATOM').click(); await __LW.settle();
+    const atomsBack = !card('atoms').hidden && !card('atoms').classList.contains('closed'), op = __LW.hamiltonian;
+    __LW.setHamiltonian('hydrogen'); card('atoms').querySelector('.dev-close').click(); await __LW.settle();
+    return { quarkHidden, cornellRestores, atomsHidden, atomsBack, op, errors: __e.slice() };
+  `);
+  assert.deepEqual(ops, { quarkHidden: true, cornellRestores: true, atomsHidden: true, atomsBack: true, op: 'atom', errors: [] });
+  console.log('PASS SPECTRUM\'s QUARKONIUM button is hidden (the cornell value still restores) and ATOM brings the hidden ATOMS window back');
+
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');
     card('chem').querySelector('.dev-close').click();                 // it starts on the rack now: take it off first

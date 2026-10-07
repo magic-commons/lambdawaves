@@ -15,10 +15,12 @@
  * none); a project's or a ☆ layout's folds win when it loads.
  * 2026-10 (Josh) · MOLECULES and MO-REGISTRY join the first-visit LEFT rack under SPECTRUM (rack.js); on a phone or tablet
  * they arrive FOLDED, because enterPhone() puts the left rack's cards at the TOP of the one rack, above SETTINGS and STATE.
+ * 0.4.0 S0 · `more`: MOLECULES' MORE fold (KICK / RUN / TDA / the spectra, chemview.js) is OPEN on a desktop and folded on a
+ * phone or tablet; a project's or a ☆ layout's card record (`more`) wins when it loads.
  * Node-testable: tests/first-run.test.mjs. */
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: Object.freeze(['settings', 'state']) }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow', 'chem', 'orbitals']) }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: Object.freeze(['settings', 'state']), more: true }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow', 'chem', 'orbitals']), more: false }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }

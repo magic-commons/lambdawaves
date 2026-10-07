@@ -6,7 +6,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { stateLatex, stateTerms } from '../lab/latex-state.js';
+import { stateLatex, stateTerms, moleculeLatex, formulaLatex } from '../lab/latex-state.js';
+import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
+import { MOLECULE_BY_ID, moleculeAtoms } from '../lab/molecules.js';
 import { BASIS, stateOf } from '../lab/hydrogen.js';
 import { HAMILTONIANS } from '../lab/hamiltonian.js';
 
@@ -99,6 +101,24 @@ check('all 91 labels at once: 91 names, Madelung-ordered, the whole list one lin
   assert.ok(lines(t)[0].startsWith('$1s_{0}$, $2s_{0}$, $2p_{-1}$, $2p_{0}$, $2p_{1}$, $3s_{0}$, $3p_{-1}$'));
   assert.ok(lines(t)[0].endsWith(', and $6h_{5}$'));
   assert.ok(stateOf(6, 5, 5));
+});
+/* THE MOLECULE'S PAGE (0.4.0 S0 · wave 136): a real STO-3G water solve, through the same function EDIT › COPY calls */
+check('the molecule\'s page: water RHF/STO-3G — formula and name, 5 occupied of 7 AO, the ε ladder with HOMO and LUMO marked by index', () => {
+  registerRecord('sto-3g', JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8')));
+  const row = MOLECULE_BY_ID.get('H2O'), sol = moleculeRHF({ atoms: moleculeAtoms('H2O'), basis: 'sto-3g', charge: row.charge });
+  const ground = { energy: sol.energy, eps: sol.orbitalEnergies, nocc: sol.nocc, nAO: sol.integrals.n };
+  const t = moleculeLatex({ molecule: row, basis: 'sto-3g', charge: row.charge, ground }); all.push(t);
+  const [head, ladder] = lines(t);
+  assert.equal(lines(t).length, 2);
+  assert.ok(head.startsWith('$\\mathrm{H_{2}O}$, water — RHF/STO-3G, neutral, $E = -74.96'), head);
+  assert.ok(head.includes('5 occupied of 7 AO'), head);
+  assert.equal((ladder.match(/\\varepsilon_\{/g) || []).length, 7);
+  assert.ok(ladder.includes('\\varepsilon_{5} = ' + sol.orbitalEnergies[4].toFixed(4) + '\\ (\\mathrm{HOMO})'), ladder);
+  assert.ok(ladder.includes('\\varepsilon_{6} = ' + sol.orbitalEnergies[5].toFixed(4) + '\\ (\\mathrm{LUMO})'), ladder);
+  assert.ok(ladder.includes('(\\mathrm{HOMO{-}4})') && ladder.includes('(\\mathrm{LUMO{+}1})'), ladder);
+  assert.equal(moleculeLatex({ molecule: row, basis: 'sto-3g', ground: null }), '');
+  assert.equal(formulaLatex('<m>CO(NH₂)₂</m>'), '\\mathrm{CO(NH_{2})_{2}}');
+  assert.equal(formulaLatex('<m>NH₄⁺</m>'), '\\mathrm{NH_{4}^{+}}');
 });
 check(`every output (${all.length} copies) has balanced $ and braces and parses under KaTeX (throwOnError, strict 'error')`, () => {
   for (const t of all) {

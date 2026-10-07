@@ -537,9 +537,9 @@ body.window-info-off .settings-help { display:none; }
 .shadow-controls .seg { display:flex; }
 .shadow-controls .seg-b { min-width:0;padding:0 4px;flex:1; }
 .dev .shadow-controls > .shadow-details-toggle { flex:0 0 30px;padding:0; }
-.shadow-details-toggle::before { display:none !important; }
-.shadow-details-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
-.shadow-details-toggle[aria-expanded="true"] svg { transform:none; }
+.shadow-details-toggle::before, .mol-more-toggle::before { display:none !important; }
+.shadow-details-toggle svg, .mol-more-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
+.shadow-details-toggle[aria-expanded="true"] svg, .mol-more-toggle[aria-expanded="true"] svg { transform:none; }
 .shadow-details:not([hidden]) { display:flex;flex-direction:column;gap:8px; }
 
 .dev .shadow-controls { display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:stretch;gap:6px; }

@@ -21,7 +21,7 @@
  * window is a collapsible inset, off by default, on its own amplitude scale, badged as a timestep diagnostic.
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
-import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk } from './mir/kit.js';
+import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -164,13 +164,27 @@ export function createChem(host, api) {
   const roPick = readout({ label: 'INSPECTOR', cls: 'wide', value: '—', sub: 'hover or click a stick' });
   for (const r of [roE, roEps, roTr, roIdem, roT, roPick]) rr.appendChild(r.root);
   el('div', 'note', host).innerHTML = '<b>Model.</b> Restricted Hartree–Fock in a vendored Cartesian basis at a fixed experimental geometry — not the RHF minimum. Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
-  /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL IS HIDDEN: TDA / CORE, the kick and run controls, the spectrum, the
-     readouts and the note.  Hidden, not removed — every control keeps its state, save/load and API (__LW.chem.kick(), run,
-     setTda …), and `shown()` makes the hidden canvases' paint a no-op.  Un-hide `.mol-more` to bring the section back. */
+  /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL sits in `.mol-more`: TDA / CORE, the kick and run controls, the
+     spectrum, the readouts and the note — every control keeps its state, save/load and API (__LW.chem.kick(), run, setTda …),
+     and `shown()` makes a folded canvas's paint a no-op.
+     0.4.0 S0 · wave 136: it is a FOLD, not a permanently hidden div — the README's KICK / RUN / TDA / RPA spectra were
+     unreachable on a first run.  The chevron at the end of the VIEW row is the in-card details idiom SHADOW and CAMERA
+     already use (a trig with the kit's chevronDown, aria-expanded); OPEN by default on a desktop, folded on a phone or
+     tablet (`api.moreOpen`, first-run.js), and the open state rides in the window's WORKSPACE record (rack.js
+     captureLayout `more`). */
   const note = host.lastElementChild;
-  const more = el('div', 'mol-more', host); more.hidden = true;
+  const more = el('div', 'mol-more', host); more.id = 'mol-more';
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, cv, cvCore, rr, note]) more.appendChild(n);
+  const moreToggle = el('button', 'trig mol-more-toggle', r1); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
+  chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
+  const setMore = (open) => {
+    more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
+    moreToggle.setAttribute('aria-label', open ? 'Hide the kick, run and spectrum controls' : 'Show the kick, run and spectrum controls');
+    if (open) requestAnimationFrame(() => paint());
+  };
+  moreToggle.addEventListener('click', () => setMore(more.hidden));
+  setMore(api.moreOpen !== false);
 
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));
