@@ -1,5 +1,8 @@
 # λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
 
+> **New here? Read `research/release-0.4.0/HANDOFF.md` first** — the baton from Claude Yan, the Major Agent of the
+> previous Major Session: where everything is, the state of each stage, the laws, and what happens next.
+
 The third layer of the nacre: Fable's pre-draft → Sonnet's review → draft 1 → Opus's audit and edit → draft 2 → Sonnet's
 junior pass → this. The record is beside it: `NACRE.md` (Josh's ask verbatim, the laws), `survey/*` (the ground truth),
 `REVIEW-SONNET-0.md`, `AUDIT-OPUS-1.md`, `REVIEW-SONNET-2.md`. Numbers are the surveys' or the audits', each checked in
