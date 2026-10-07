@@ -1,6 +1,7 @@
 // The visible molecular names may change, while CSS hooks and project keys stay stable.
-// W129: MOLECULES and MO-REGISTRY are off the first-run rack, available in + and WINDOW, on the rack after an add, and back
-// on the rack for a project whose field owner is MOLECULES (MO-REGISTRY too when its register is on) — the H₂⁺ card's law.
+// 2026-10 (supersedes W129's first-run rule): MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack under SPECTRUM;
+// closed, + and WINDOW bring them back; a project whose field owner is MOLECULES brings them back onto the rack (MO-REGISTRY
+// too when its register is on) — the H₂⁺ card's law.  QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are hidden LEGACY windows.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -20,28 +21,49 @@ try {
     return {
       names: ['molecule', 'chem', 'orbitals'].map(id => card(id).querySelector('.dev-eyebrow').textContent),
       oldHidden: card('molecule').hidden && getComputedStyle(card('molecule')).display === 'none',
-      offRack: ['chem', 'orbitals'].map(id => card(id).classList.contains('closed') && getComputedStyle(card(id)).display === 'none'),
+      onLeft: ['chem', 'orbitals'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'),
+      underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 3); })(),
+      legacyHidden: ['qcd', 'helium', 'h2', 'atoms', 'field'].map(id => card(id).hidden),
       choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
   `);
   assert.deepEqual(boot.names, ['H₂⁺ · LEGACY', 'MOLECULES', 'MO-REGISTRY']);
   assert.equal(boot.oldHidden, true);
-  assert.deepEqual(boot.offRack, [true, true]);
+  assert.deepEqual(boot.onLeft, [true, true]);                       // 2026-10: the first-run LEFT rack, under SPECTRUM
+  assert.deepEqual(boot.underSpectrum, ['chem', 'orbitals']);
+  assert.deepEqual(boot.legacyHidden, [true, true, true, true, true]);
   assert.equal(boot.choices.includes('molecule'), false);
-  assert.equal(boot.choices.includes('chem'), true);
-  assert.equal(boot.choices.includes('orbitals'), true);
-  assert.equal(boot.windows.includes('⊕  MOLECULES'), true);
-  assert.equal(boot.windows.includes('⊕  MO-REGISTRY'), true);
+  for (const id of ['qcd', 'helium', 'h2', 'atoms', 'field']) assert.equal(boot.choices.includes(id), false);
+  assert.equal(boot.windows.includes('↑  MOLECULES'), true);
+  assert.equal(boot.windows.includes('↑  MO-REGISTRY'), true);
   for (const id of ['molecule', 'chem', 'orbitals']) {
     assert.equal(boot.ids.includes(id), true);
     assert.equal(boot.records.includes(id), true);
   }
   assert.deepEqual(boot.errors, []);
-  console.log('PASS Molecules and MO-Registry start off the rack, offered by + and WINDOW, with stable saved IDs');
+  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, saved IDs are stable');
+
+  /* 0.4.0 S0 · wave 136 (audit F6): SPECTRUM's two orphaned operators — QUARKONIUM's button is hidden while QCD is, but the
+     value still restores; a press on ATOM brings ATOMS (its element picker) back by the legacy un-hide road */
+  const ops = await g.ev(`
+    const card = id => document.querySelector('.dev[data-id="' + id + '"]');
+    const btns = [...card('spectrum').querySelectorAll('.segw')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'OPERATOR').querySelectorAll('.seg-b');
+    const b = (label) => [...btns].find(x => x.textContent === label);
+    const quarkHidden = b('QUARKONIUM').hidden && getComputedStyle(b('QUARKONIUM')).display === 'none';
+    __LW.setHamiltonian('cornell'); await __LW.settle(); const cornellRestores = __LW.hamiltonian === 'cornell';
+    __LW.setHamiltonian('hydrogen'); await __LW.settle();
+    const atomsHidden = card('atoms').hidden; b('ATOM').click(); await __LW.settle();
+    const atomsBack = !card('atoms').hidden && !card('atoms').classList.contains('closed'), op = __LW.hamiltonian;
+    __LW.setHamiltonian('hydrogen'); card('atoms').querySelector('.dev-close').click(); await __LW.settle();
+    return { quarkHidden, cornellRestores, atomsHidden, atomsBack, op, errors: __e.slice() };
+  `);
+  assert.deepEqual(ops, { quarkHidden: true, cornellRestores: true, atomsHidden: true, atomsBack: true, op: 'atom', errors: [] });
+  console.log('PASS SPECTRUM\'s QUARKONIUM button is hidden (the cornell value still restores) and ATOM brings the hidden ATOMS window back');
 
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');
+    card('chem').querySelector('.dev-close').click();                 // it starts on the rack now: take it off first
     __LW.layout.addMenu.open(); document.querySelector('#rackAddList .mb-item[data-win="chem"]').click();
     const chem = on('chem'); card('chem').querySelector('.dev-close').click();
     return { chem, closedAgain: !on('chem'), errors: __e.slice() };

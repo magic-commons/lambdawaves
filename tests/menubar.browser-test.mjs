@@ -180,7 +180,7 @@ try {
     { const r = await __row('WINDOW', 'HIDE the interface'); R.hideW = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); }
     { const w0 = document.body.classList.contains('window-info-off'); const r = await __row('WINDOW', 'SHOW / HIDE help'); R.help = ok(r) && document.body.classList.contains('window-info-off') === !w0; await __row('WINDOW', 'SHOW / HIDE help'); }
     { const t0 = __LW.themeChoice; R.theme = true; for (const [l, t] of [['THEME · DARK', 'dark'], ['THEME · SYSTEM', 'system'], ['THEME · LIGHT', 'light']]) { const r = await __row('WINDOW', l); R.theme = R.theme && ok(r) && __LW.themeChoice === t; } __LW.setTheme(t0); }
-    { document.querySelector('.dev[data-id="atoms"]').classList.add('closed'); const r = await __row('WINDOW', '⊕  ATOMS'); R.raise = ok(r) && !document.querySelector('.dev[data-id="atoms"]').classList.contains('closed'); document.querySelector('.dev[data-id="atoms"]').classList.add('closed'); }
+    { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', '⊕  WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
     /* ABOUT */
     { const r = await __row('ABOUT', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.notebook.isOpen && __LW.layout.notebook.face === 'about'; __LW.layout.notebook.close(); }
     { const r = await __row('ABOUT', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.getElementById('keymap').contains(document.activeElement); __LW.keymap.close(); }

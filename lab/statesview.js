@@ -28,6 +28,7 @@
  */
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB } from './mir/kit.js';
 import { createFlow } from './molecular-flow.js';
+import { paintStroke } from './paint-stroke.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
 const TAU = 2 * Math.PI;
@@ -63,7 +64,7 @@ export function createStates(host, api) {
   const top = el('div', 'row tight reg-top', host);
   const cv = el('canvas', 'mol-c reg-ladder', top);
   cv.title = 'The many-electron ladder: S₀ at zero and the singlet excited states above it, ω in hartree. Stick weight is oscillator strength, hue is the '
-    + 'axis of the transition dipole, degenerate levels sit side by side. Click a state to put it in the register, click it again to take it out.';
+    + 'axis of the transition dipole, degenerate levels sit side by side. Left-click a state to put it in the register, right-click to take it out; left-drag paints every state you cross in, right-drag paints them out.';
   const scope = el('canvas', 'mol-c reg-scope', top);
   scope.title = 'The dipole scope: the change of the electronic dipole δμ(t), traced in the plane it moves in. A line is a slosh, a circle is a ring current, '
     + 'two lines of different colour draw a Lissajous figure.';
@@ -206,6 +207,24 @@ export function createStates(host, api) {
     touch(); rebuild(); paint(); refresh(); publishPopulations(); api.repaint(); return true;
   }
   const toggle = (key) => (lanes.has(key) && key !== GROUND ? deselect(key) : select(key));
+  /** 2026-10 · a PAINT stroke's states in ONE pass (lab/paint-stroke.js): add ⇒ each new state joins at |c| 0.45 up to the
+   *  LANE_CAP (one warning, not one per row); remove ⇒ each leaves, S₀ pinned.  One request(), rebuild and repaint. */
+  function paintStates(keys, add) {
+    if (!ladder) return 0;
+    const fresh = []; let n = 0, capped = false;
+    for (const k0 of keys) {
+      const key = k0 | 0; if (key === GROUND || key < GROUND || key >= ladder.count) continue;
+      if (add) {
+        if (lanes.has(key)) continue;
+        if (lanes.size >= LANE_CAP) { capped = true; continue; }
+        lanes.set(key, { amp: 0.45, phase: 0, mute: false, solo: false }); selected = key; fresh.push(key); n++;
+      } else if (lanes.delete(key)) { if (selected === key) selected = GROUND; n++; }
+    }
+    if (capped) status(`the register holds ${LANE_CAP} lanes — one per modulation slot`, 'warn');
+    if (!n) return 0;
+    if (fresh.length) request(fresh);
+    touch(); rebuild(); paint(); refresh(); publishPopulations(); api.repaint(); return n;
+  }
   function clear() { lanes.clear(); lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND; touch(); rebuild(); paint(); refresh(); publishPopulations(); api.repaint(); return true; }
   function norm() { const s = Math.sqrt(sum2()); if (!(s > 0)) return false; for (const c of lanes.values()) c.amp = Math.min(1, c.amp / s); touch(); syncLanes(); paint(); refresh(); publishPopulations(); api.repaint(); return true; }
   function setAmp(key, v) { const c = lanes.get(key); if (!c) return; c.amp = Math.max(0, Math.min(1, v)); touch(); paint(); refresh(); publishPopulations(); api.repaint(); }
@@ -555,11 +574,24 @@ export function createStates(host, api) {
     fitText(g, `ω_TDA Eh · ${brightOnly ? 'bright valence states (f > ' + BRIGHT_F + ')' : 'all ' + ladder.count + ' states'} · TD-CIS, not ω_RPA`, left, H - 5, { x0: left, y0: H - 11, x1: W - 4, y1: H - 1 }, 'left', true);
     hover.set(hovers, plot);
   }
+  /* 2026-10 (Josh) · PAINT THE LADDER (lab/paint-stroke.js), the ORBITAL ladder's law: LEFT adds, RIGHT removes; a press
+     takes the state under it, a drag every row it crosses (a degenerate row whole) plus the state nearest the pointer.
+     S₀ is pinned: pressing it only focuses it, as a click always did. */
+  const local = (e) => {
+    const r = cv.getBoundingClientRect(), sx = r.width ? cv.offsetWidth / r.width : 1, sy = r.height ? cv.offsetHeight / r.height : 1;
+    return { x: (e.clientX - r.left) * sx - cv.clientLeft, y: (e.clientY - r.top) * sy - cv.clientTop };
+  };
+  const nearest = (p) => { let best = null, bd = Infinity; for (const h of hits) { const dy = Math.abs(h.y - p.y); if (dy > 8) continue; const dx = p.x < h.x0 ? h.x0 - p.x : p.x > h.x1 ? p.x - h.x1 : 0, d = dy * 1e4 + dx; if (d < bd) { bd = d; best = h; } } return best; };
+  paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
+    at: (p) => { const h = nearest(p); return h ? [h.key] : []; },
+    across: (a, b) => { const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y); return hi - lo < 0.5 ? [] : hits.filter((h) => h.y > lo && h.y < hi).map((h) => h.key); },
+    apply: (keys, add) => { if (keys.length === 1 && keys[0] === GROUND) { selected = GROUND; paint(); markSel(); return; } paintStates(keys, add); } });
+  /* a click no pointer made: the old law, minus the toggle-off (removal is a right press now) */
   cv.addEventListener('click', (e) => {
     let best = null;
     for (const h of hits) { if (e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const dd = Math.abs(h.y - e.offsetY); if (dd <= 8 && (!best || dd < best.d)) best = { d: dd, key: h.key }; }
     if (!best) return;
-    if (best.key === GROUND) { selected = GROUND; paint(); markSel(); } else toggle(best.key);
+    if (best.key === GROUND) { selected = GROUND; paint(); markSel(); } else paintStates([best.key], true);
   });
 
   /* ── THE DIPOLE SCOPE ─────────────────────────────────────────────────────────────────────────── */
@@ -629,7 +661,8 @@ export function createStates(host, api) {
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
-    if (why) { status('MO-REGISTRY off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (why) { if (!C() || !C().on) { setOn(false); status('MO-REGISTRY standing by — turn MOLECULES on, then MO-REGISTRY ON', ''); return false; }   // MOLECULES went off: the window stays
+      status('MO-REGISTRY off — ' + why, 'warn'); return false; }
     if (!Number.isFinite(t)) t = 0;
     if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }
     const moved = push(t);
@@ -678,7 +711,7 @@ export function createStates(host, api) {
   }
   const slotKey = (i) => keys()[i];
   return {
-    update, setActive, setShown, paint, refresh,
+    update, setActive, setShown, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
     get on() { return on; }, setOn,
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,

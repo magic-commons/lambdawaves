@@ -3355,3 +3355,129 @@ that also wins `elementFromPoint`, and the one the brief's own §3 test checks (
 said the act "sets SETTINGS' status line `COPIED · 4 states as LaTeX`"; it is SPECTRUM's own `.dev-stat` (where
 the ⧉ lives, where `copied` flashes, and where the brief's own §3 test reads it), and the exact text has no
 `COPIED ·` prefix — just `4 states as LaTeX` — since `copied` is the CSS class that flashes, not a text prefix.
+
+## 2026-10-07 · 0.4.0 S0 — THE TAKE-IN
+
+### wave 136: The take-in — Cloud's two PRs merged, the forged kit edit subtracted, Jet Black kept by a lawful road
+
+The live site served Cloud's unreviewed `main` (`28fe445`) while `release-0.4.0` held 0.3.3 THE EXPORTS. S0 merges
+the two in two commits so a bisect stays possible — PR #1 (`2a03c06`, commit `0242bff`) and PR #2 (`28fe445`, commit
+`5c7109e`) — each conflicting in the generated `lab/sw.js` only (ours taken, regenerated with `pwa.test.mjs --write`:
+205 then 206 entries, `paint-stroke.js` the one added file). `bash test.sh node` was green after both merges (82
+suites) — including `tests/mir-manifest.test.mjs`, which could not see the forgery (it hashed the files against the
+manifest the same commit rewrote; wave 138 pins it). As the audit predicted, one browser red after PR #2:
+`tests/latex-copy.browser-test.mjs:144` asserted SPECTRUM `.hidden` under a molecule, and Cloud folds it.
+
+KEPT, because each is Josh's ask and sound: the PAINT GESTURE's behaviour (`lab/paint-stroke.js` — left adds, right
+removes, a drag crosses, Alt = right, a finger = left, one stroke one undo row; the code is generic and should move to
+MIR later, the behaviour stays); MO-REGISTRY "standing by" when MOLECULES is off, its ON switch beside ORBITAL | STATES;
+the first-run LEFT rack (SHADOW, SPECTRUM, MOLECULES, MO-REGISTRY; folded on a phone or tablet), which supersedes
+"MOLECULES start off the rack" — CLAUDE.md now states the first-run law once; `docs/LEGACY-WINDOWS.md` and the hidden
+legacy set; the STAGE FORMULA and ATOM LABELS as they are (S3 rewrites them); SPECTRUM folding, not hiding, under a
+molecule; the wrangler 4.129 → 4.147 devDependency bump (undici advisories; `package-lock.json` merged clean).
+
+SUBTRACTED: the direct edit of the adopted `lab/mir/palette.js`, the forged `MIR-MANIFEST.json` ("1.4.4", commit
+`f56cf16e9402`, a release MIR never cut) and Cloud's wording of the palette-test exemption — all three back to the 1.4.3
+bytes (`node tests/mir-manifest.test.mjs` → `PASS MIR 1.4.3: all 66 adopted files match`). JET BLACK STAYS LIVE by the
+app's road until MIR carries it (KIT BRIEF J): `lab/palette-app.js` appends one row — Cloud's own text, three `#000000`
+stops built with the kit's exported `hexToRgb`, `flat: true` — to the kit's `PRESETS`, `PRESET_BY_ID` and the 3-point
+group of `PRESET_GROUPS` (the menu's optgroups; `tests/palette.test.mjs`' partition check is what said the group must
+carry it too). `rack.js` imports it first, before anything reads the catalogue; a saved project or link naming
+`jetblack` resolves through `PRESET_BY_ID` exactly as before. `tests/palette.test.mjs` imports the app module, so the
+row is gated like the kit's own (16 GREEN), with the one-line rule "a `flat` palette is exempt from the phase-map
+gates" on the antipode check — the only gate an all-black palette fails (its CVD flag is measured false and declared
+false; its lightness is constant and declared so).
+
+THREE NEW LAWS. (c) Under a molecular field owner, EDIT › COPY copies the MOLECULE's page, never greyed: Cloud's fold
+made the old `wSpec.root.hidden` gate false, so it would have copied the atomic register under a molecule.
+`moleculeLatex({ molecule, basis, charge, ground })` (pure, beside `stateLatex` in `lab/latex-state.js`) writes the same
+two-line shape — a prose line with the formula as `\mathrm{H_{2}O}`, the name, RHF/basis, the charge, E in E_h and
+"5 occupied of 7 AO", then the ladder `\varepsilon_{i} = …` with every level tagged by index from the frontier (HOMO,
+HOMO−1 …, LUMO, LUMO+1 …; S1's symmetry names slot into the same function). The ground is accepted only when its
+solve key is the current molecule's, so a re-solve never copies the previous molecule's ladder; a legacy owner (H₂⁺,
+HELIUM, H₂) says it has no page and writes nothing. (d) `.mol-more` is a FOLD: the chevron at the end of MOLECULES'
+VIEW row is the in-card details idiom SHADOW and CAMERA already use (a trig with the kit's `chevronDown`,
+`aria-expanded`; `skin.css` gained the toggle's class on the three existing SHADOW chevron rules, nothing else), OPEN
+by default on a desktop and folded on a phone or tablet (`first-run.js` `more`), its state in the card's WORKSPACE
+record (`captureLayout` writes `more` for the one card that has the fold; `applyLayout` applies it through the button;
+an older record without it leaves the fold alone). MOLECULES' `Aa` stays visible with HELP off — LEAN is on by default,
+so its readouts had no other road back. (e) SPECTRUM's orphaned operators: ATOM brings the hidden ATOMS window (its
+element picker) back by the legacy un-hide road HELIUM and H₂ take, on a press and on a project restore; QUARKONIUM's
+button is hidden while QCD is — the button, not the value, so an older project's `cornell` still restores.
+
+Gates, run once: `bash test.sh node` green (82 suites); `node tools/new-project.mjs --check` in step (16829 B, no boot
+default changed); browser on 8731 — `latex-copy` 9/9 (the rewritten molecule law: SPECTRUM folded, the clipboard
+carries `\mathrm{H_{2}O}`, "5 occupied of 7 AO", `\varepsilon_{5}`, HOMO and LUMO; back on hydrogen it unfolds and
+copies `$1s_{0}$ and $2p_{0}$`), `menubar` 8/8, `molecular-names` 5/5 (one new: QUARKONIUM hidden, `cornell` restores,
+ATOM un-hides ATOMS), `register` 17/17, `chem` 54/54 (L5 now asserts the fold open by default and the `Aa` shown with
+HELP off, instead of un-hiding the div), `routed-knob` 4/4 (opens the fold through its chevron), `new-project` 8/8.
+
+### wave 137: The cheap bugs — CALCULUS's copy, the tags off METERS' tick, WIGNER under MOLECULES, and the LINKED bug reproduced
+
+Four bugs from the audit and the vault, one commit, one new browser suite (`tests/take-in-bugs.browser-test.mjs`, 4/4)
+that takes each one by the road a user takes.
+
+CALCULUS's ⧉ copied one header line: `DIGESTS.calculus` read `calculus.stats`, a field `createCalculus` never returned
+(it returns `{ update, get last() }`). It reads `last` now; the suite raises CALCULUS on `1s+2pz` and the digest is 56
+lines with its rows. THE STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's aria sentence rode
+METERS' tick (`badges.update()` beside `paintGovernor()`, gated on `canPresent(wMet)`), so with METERS closed they went
+stale; they have their own ≤ 10 Hz tick now (`badgesWall`, profiled as `badges`), gated on the tags being shown or the
+canvas being focused, and the governor's readout stays with METERS. With METERS closed and STATUS TAGS on, switching
+Stark on shows `STARK F = 1.0e-3 …` in 20 ms. `hydroReader()` did not know `chem`, so WIGNER and RADIATION computed
+hydrogenic physics under MOLECULES; `chem.on` joins the "another model holds the field" branch and WIGNER says
+`hydrogenic register only`.
+
+THE LINKED BUG (Josh's NEXT UPDATE note: "at project start or open, Space does not play both clocks in LINKED mode"),
+REPRODUCED AND FIXED. A probe pressed a real Space (the driver's own key) at five starts. With the modulation editor
+open, or anything routed (WAVE DANCER), Space plays both clocks and a second Space pauses both. With the editor CLOSED
+and nothing routed — the fresh first run, and NEW — the field plays and the modulation transport does not: the kit
+refuses the play with `nothing-to-run` (`lab/mir/modulation/host.js` `setPlaying`: unrouted sources only animate their
+editor, so a closed editor with no route has nothing live), and the link law retried that refusal once a second
+(`refusedPlays` 2 after 0.6 s, 4 after 2 s). The visible defect is the next step: open the editor under a playing field
+and it showed a STOPPED modulation transport until the next retry — measured 353 ms on the run before the fix (up to a
+second by construction). The editor's `opened` hook now re-arms the link (`linkFollowed = null`), so the next frame
+plays it: 46 ms at project start and 33 ms after NEW in the suite, which asserts ≤ 150 ms. Not changed, and said so:
+while the editor is closed and nothing is routed the kit still refuses — there is nothing to run, and the kit's law is
+MIR's (the refusal reading a closed editor as "no sources" sits oddly beside host.js' own "presentation never changes
+transport state"; a MIR issue, not an app edit).
+
+Gates, run once: `bash test.sh node` green (82 suites); browser `take-in-bugs` 4/4 on 8731 (and RED on the tree
+before the LINKED fix: 353 ms > 150 ms). The digest lock was not run: the frame loop's render order is untouched — the
+new tick writes DOM text after the present, where METERS' tick already ran.
+
+### wave 138: Wire, don't re-date — one KaTeX and one marked, the kit's; and the manifest pinned so a forgery fails everywhere
+
+`lab/index.html` loaded KaTeX and marked from `lab/vendor/`, and the kit ships the same files under
+`lab/mir/shell/vendor/` — proved byte-identical before anything moved (`diff -r lab/vendor/katex
+lab/mir/shell/vendor/katex` empty; `cmp` silent on `marked.min.js` and `marked-LICENSE.md`). The three tags and the
+ABOUT face's three licence links now name `./mir/shell/vendor/…`, and the app's duplicate is DELETED: `lab/vendor/katex/`,
+`marked.min.js`, `marked-LICENSE.md` and the CommonJS `package.json` — 27 files, 602 870 bytes off every deploy.
+`lab/vendor/bse/` (the basis sets) stays. The precache, measured by summing the bytes of every file `lab/sw.js` lists:
+207 files / 4 899 078 B before, 182 files / 4 607 101 B after — 25 fewer entries and 291 977 B (285 KiB) less, not the
+whole 589 KiB, because the kit's `katex.min.js` and `marked.min.js` were STAGED (not precached) and now join it: the
+precache derives its staged set from the wiring allowlist, so closing those two rows put them back by itself.
+
+`tests/wiring.test.mjs`: the two vendor rows CLOSE BY WIRING (deleted — the wiring gate now reaches both from
+`index.html`); the five shell rows (`about.js`, `accent.js`, `menubar.js`, `notebook.js`, `wordmark.js`) are renewed
+ONCE, dated 2026-10-07, each reason naming its consumer — the 0.5.0 adoption (PLAN.md §6), where `rack.js` moves the
+ABOUT face, the accent editor, the menubar, the notebook controller and the wordmark onto the kit shell. The two node
+tests that `createRequire`d the app's KaTeX (`latex-state`, `notebook-math`) load the kit's copy through a small shared
+`tests/helpers/katex-node.mjs`: the UMD bundle run once in a `vm` context with a `module`/`exports` shim, because the
+kit's copy has no CommonJS `package.json` and may never get one. `tests/pwa.test.mjs` (the one KaTeX css, the one set of
+twenty faces, the licence paths), `tools/build-deploy.mjs` and `NOTICE` follow the move.
+
+THE PROCESS HOLE, CLOSED. `tests/mir-manifest.test.mjs` hashed the adopted files against the manifest the same commit
+could rewrite, so Cloud's forgery (`d917dc7`, merged and subtracted in wave 136) passed it. It now holds `ACCEPTED = { '1.4.3': '<sha-256 of MIR-MANIFEST.json>' }`
+and asserts the manifest's own bytes are the pinned ones for the version it names: a forged version fails in every
+checkout and in the cloud's CI, and a real adoption is a visible two-file edit (the manifest MIR's `tools/adopt.mjs`
+writes, and its row in ACCEPTED — the assertion message says so). Proved on the forgery itself, from a scratch tree
+holding `git show 28fe445:MIR-MANIFEST.json` (version 1.4.4, commit `f56cf16e9402`, sha-256 `42b76e5a…aaf0`):
+`MIR-MANIFEST.json names MIR 1.4.4, which is not an accepted adoption (accepted: 1.4.3)…`; and relabelled back to
+"1.4.3" with its edited palette hash kept (sha-256 `84193a24…8bb0`): `…has sha-256 84193a24…, not the pinned
+a4c3b901…`. The pinned 1.4.3 manifest is `a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23`.
+
+Gates, run once: `node tests/pwa.test.mjs --write` (182 entries); `bash test.sh node` green (82 suites, the pinned
+manifest test among them); browser `menubar` 8/8 (ABOUT), `latex-copy` 9/9 (the notebook renders the copies with the
+kit's KaTeX), `current` 15/15; `node tools/build-deploy.mjs --no-test` assembles and verifies dist/ (203 files, 5.16 MiB).
+Left as it was: `lab/sw.js`'s NEVER_PRECACHE prose still carries a "vendor/katex/LICENSE — NO LONGER SKIPPED" row; sw.js
+is regenerated, not hand-edited, and that row is documentation no check reads.

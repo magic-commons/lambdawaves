@@ -26,7 +26,7 @@ this file.
 |---|---|---|
 | `theme` (light / dark / system) | settings | PREFERENCE |
 | `card`, `cardSet`, `frost`, `disc`, `blur`, `accent [a, b, vivid]` | settings | PREFERENCE |
-| tags (`badges`), `controlHints`, `captions`, Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout` | settings (and their own keys) | PREFERENCE |
+| tags (`badges`), `controlHints`, `captions`, `molFormula` / `molFormulaSize` (the STAGE FORMULA and its SIZE), `atomLabels` / `atomLabelsSize` (the ATOM LABELS and their SIZE), Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout` | settings (and their own keys) | PREFERENCE |
 | AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode`, `modCadence`, `modArm`, `clockLink` | settings | PREFERENCE |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |
@@ -42,7 +42,7 @@ this file.
 | `ab` (A/B stores, omega, on) | project | PROJECT |
 | `quality {res, steps, scale}` | project, clamped by the device (`deviceQuality`; a file never switches AUTO SCALE off) | PROJECT, advisory, not in history (D5) |
 | notebook text, title and subtitle | beside the project data | PROJECT, not in history |
-| `layout` (cards, docked, rackHidden, nb), `closed[]`, `nbW/nbH`, `abW/abH`, `modwin` placement, favourite `layouts` | settings and project | WORKSPACE |
+| `layout` (cards — each with its fold, power, float and, for MOLECULES, its `more` fold — docked, rackHidden, nb), `closed[]`, `nbW/nbH`, `abW/abH`, `modwin` placement, favourite `layouts` | settings and project | WORKSPACE |
 | `phoneTr` / `phoneRack` (a phone's transport fold and hidden rack, read back from the page, so a project's layout writes them) | settings, through the layout | WORKSPACE (S2) |
 
 ## What each road does (as of S2)

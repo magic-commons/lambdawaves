@@ -133,18 +133,28 @@ try {
   assert.deepEqual(gotE.errs, []);
   console.log('PASS the empty register: the press and the EDIT row write nothing, SPECTRUM says "nothing to copy — the register is empty", no flash');
 
-  /* ── 8 · a molecular field owner stands SPECTRUM down: the EDIT row is disabled (there is no list to copy) ── */
-  const mol = await g.ev(`__LW.loadPreset('1s+2pz'); __LW.molecule.setOn(true); await __LW.settle();
-    const hidden = document.querySelector('.dev[data-id="spectrum"]').hidden; __clip.length = 0;
-    const r = await __row('EDIT', 'COPY the state as LaTeX');
-    __LW.molecule.setOn(false); await __LW.settle();
-    const back = !document.querySelector('.dev[data-id="spectrum"]').hidden;
+  /* ── 8 · 0.4.0 S0 (wave 136): under a molecular field owner SPECTRUM FOLDS (Cloud's fold) and EDIT › COPY copies the
+         MOLECULE's page — the formula, RHF/basis, E and the ε ladder — never greyed; back on hydrogen it copies the register ── */
+  const mol = await g.ev(`__LW.loadPreset('1s+2pz'); await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();
+    const card = document.querySelector('.dev[data-id="spectrum"]');
+    const hidden = card.hidden, folded = card.classList.contains('folded'); __clip.length = 0;
+    const r = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
+    const page = __clip.slice(), status = card.querySelector('.dev-stat').textContent;
+    __LW.chem.setOn(false); await __LW.settle(); __clip.length = 0;
+    const unfolded = !card.hidden && !card.classList.contains('folded');
     const r2 = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
-    return { hidden, disabled: r.disabled, back, enabled: !r2.disabled, clip: __clip.slice(), errs: __e.slice() };`);
-  assert.equal(mol.hidden, true); assert.equal(mol.disabled, true); assert.equal(mol.back, true); assert.equal(mol.enabled, true);
+    return { hidden, folded, disabled: r.disabled, page, status, unfolded, enabled: !r2.disabled, clip: __clip.slice(), errs: __e.slice() };`);
+  assert.equal(mol.hidden, false); assert.equal(mol.folded, true); assert.equal(mol.disabled, false);
+  assert.equal(mol.page.length, 1, JSON.stringify(mol));
+  const [molHead, molLadder] = mol.page[0].split('\n');
+  assert.ok(molHead.startsWith('$\\mathrm{H_{2}O}$, water — RHF/STO-3G'), molHead);
+  assert.ok(molHead.includes('5 occupied of 7 AO'), molHead);
+  assert.ok(molLadder.includes('\\varepsilon_{5}') && molLadder.includes('(\\mathrm{HOMO})') && molLadder.includes('(\\mathrm{LUMO})'), molLadder);
+  assert.match(mol.status, /H₂O’s page as LaTeX/);
+  assert.equal(mol.unfolded, true); assert.equal(mol.enabled, true);
   assert.equal(mol.clip.length, 1); assert.equal(mol.clip[0].split('\n')[0], '$1s_{0}$ and $2p_{0}$');
   assert.deepEqual(mol.errs, []);
-  console.log('PASS under the H₂⁺ field owner SPECTRUM stands down and the EDIT row is disabled; back on hydrogen the row copies "$1s_{0}$ and $2p_{0}$"');
+  console.log('PASS under MOLECULES (water) SPECTRUM folds and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder with HOMO and LUMO; back on hydrogen SPECTRUM unfolds and the row copies "$1s_{0}$ and $2p_{0}$"');
 } catch (e) {
   failed = true; console.error(e);
 } finally {

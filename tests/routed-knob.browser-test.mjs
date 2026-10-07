@@ -15,6 +15,7 @@ try {
   const r = await g.ev(`
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
     document.querySelector('.dev[data-id="chem"]').classList.remove('closed', 'folded');
+    { const t = document.querySelector('.dev[data-id="chem"] .mol-more-toggle'); if (t.getAttribute('aria-expanded') !== 'true') t.click(); }   // 0.4.0 S0: the kick/speed dials live in the MORE fold — opened through its chevron (open by default on a desktop)
     const modBtn = [...document.querySelectorAll('#transport button, #transport .trig')].find((b) => /MOD/.test(b.textContent)); if (modBtn) modBtn.click();
     await nap(900);
     const fire = (el, type, x, y) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId: 7, pointerType: 'mouse', button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: x, clientY: y, isPrimary: true }));

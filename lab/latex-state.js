@@ -78,3 +78,36 @@ export function stateLatex(o) {
   }).join(' + ');
   return list + '\n$\\psi = ' + psi + '$';
 }
+
+/* ── THE MOLECULE'S PAGE (0.4.0 S0 · wave 136): EDIT › COPY under a molecular field owner ─────────────────────────────
+ * `moleculeLatex({ molecule, basis, charge, ground })` — the library row (`{ formula, name }`, lab/molecules.js), the basis
+ * id, the formal charge and the RHF ground the worker returned (`{ energy, eps, nocc, nAO }`, mathworker.js chemGround) —
+ * in stateLatex's two-line shape:
+ *   line 1  prose: the formula and name, RHF/basis, the charge, the total energy in E_h, the occupied count of n AO
+ *   line 2  the ladder:  $\varepsilon_{1} = -20.2516\ (\mathrm{HOMO{-}4}),\ …,\ \varepsilon_{6} = 0.6037\ (\mathrm{LUMO}),\ …$
+ * Every level is tagged BY INDEX from the frontier (HOMO, HOMO−1, …, LUMO, LUMO+1, …).  '' when there is no ground. */
+const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+/** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'CO(NH₂)₂') as upright LaTeX: \mathrm{H_{2}O} */
+export function formulaLatex(f) {
+  const s = String(f || '').replace(/<\/?m>/g, '')
+    .replace(/[₀-₉]+/g, (d) => '_{' + [...d].map((c) => SUB.indexOf(c)).join('') + '}')
+    .replace(/⁺/g, '^{+}').replace(/⁻/g, '^{-}');
+  return '\\mathrm{' + s + '}';
+}
+/** the frontier name of orbital i (1-based) with nocc occupied: HOMO, HOMO−k, LUMO, LUMO+k */
+function frontier(i, nocc) {
+  if (i <= nocc) return i === nocc ? 'HOMO' : 'HOMO{-}' + (nocc - i);
+  return i === nocc + 1 ? 'LUMO' : 'LUMO{+}' + (i - nocc - 1);
+}
+export function moleculeLatex({ molecule, basis, charge, ground } = {}) {
+  if (!molecule || !ground || !Number.isFinite(ground.energy) || !ground.eps || !ground.eps.length) return '';
+  const nocc = ground.nocc, nAO = ground.nAO || ground.eps.length, q = charge || 0;
+  const head = '$' + formulaLatex(molecule.formula) + '$' + (molecule.name ? ', ' + molecule.name : '')
+    + ' — RHF/' + (BASIS_LABEL[basis] || String(basis || '').toUpperCase())
+    + ', ' + (q ? 'charge ' + (q > 0 ? '+' : '−') + Math.abs(q) : 'neutral')
+    + ', $E = ' + ground.energy.toFixed(6) + '\\,E_h$, ' + nocc + ' occupied of ' + nAO + ' AO, orbital energies $\\varepsilon_{i}$ in $E_h$:';
+  /* S1 slots the symmetry NAME of each level in beside its frontier tag here (e.g. `1b_{1}`, HOMO) — same function, same shape */
+  const ladder = Array.from(ground.eps, (e, k) => '\\varepsilon_{' + (k + 1) + '} = ' + e.toFixed(4) + '\\ (\\mathrm{' + frontier(k + 1, nocc) + '})');
+  return head + '\n$' + ladder.join(',\\ ') + '$';
+}

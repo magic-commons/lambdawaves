@@ -20,7 +20,7 @@ try {
   judge('R0 boot: __LW.ready', boot.ok === 1, boot);
   const r0 = await g.ev(`return { errs: window.__e.slice(),
     eyebrow: (document.querySelector('.dev[data-id="orbitals"] .dev-eyebrow') || {}).textContent,
-    seg: [...document.querySelectorAll('.dev[data-id="orbitals"] .reg-mode button')].map((b) => b.textContent),
+    seg: [...document.querySelectorAll('.dev[data-id="orbitals"] .reg-mode .seg-b')].map((b) => b.textContent),
     mode: __LW.register.mode, handles: typeof __LW.states.preset === 'function' && typeof __LW.register.setMode === 'function',
     rank: __LW.molsession.state().models.map((m) => m.id) };`);
   judge('R0 the window is MO-REGISTRY (id still `orbitals`), with an ORBITAL | STATES switch that opens on ORBITAL, and the session knows the `states` model',

@@ -25,9 +25,51 @@ The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 (`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
 and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
 at startup but must be shown if an older project restores it as field owner.
-MOLECULES and MO-REGISTRY start off the first-run rack (offered by + and WINDOW)
-and, by the same law, come back onto it when a restored project's field owner
-is MOLECULES (MO-REGISTRY too when that file's register is on).
+MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack directly under
+SPECTRUM (folded on a phone or tablet), unsolved until MOLECULES is switched on;
+a restored project whose field owner is MOLECULES brings them back onto the rack
+(MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
+closes MO-REGISTRY: its switch stands down (it must release the field) and the
+ladder stays painted and editable. Its MO-REGISTRY ON switch sits beside the
+ORBITAL | STATES seg (registerview.js). Below its top rows (ON, MOLECULE,
+BASIS, VIEW + ORBITAL) MOLECULES keeps KICK / RUN / TDA / the spectra in the
+`.mol-more` fold: open on a desktop, folded on a phone or tablet, its state in
+the card's WORKSPACE record (`more`); its `Aa` stays visible with HELP off.
+
+THE PAINT GESTURE (`lab/paint-stroke.js`) is one law for the ORBITAL and STATES
+ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every
+item it crosses; RIGHT click removes one, RIGHT drag removes every item it
+crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is
+taken whole. One stroke is one undo row.
+
+QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are hidden LEGACY windows (2026-10)
+that need an upgrade, re-adoption into MIR, or deletion — read
+`docs/LEGACY-WINDOWS.md` before touching them. They keep their ids, models and
+save records; HELIUM/H₂ resurface when a project turns them on as field owner,
+ELECTROSTATICS when a project's overlay is on, ATOMS when SPECTRUM's ATOM
+operator is chosen (QUARKONIUM's button is hidden while QCD is; the value still
+restores). Do not re-list them in + or WINDOW.
+
+The STAGE FORMULA (Settings › Display, PREFERENCE `molFormula`, on by
+default) writes what is playing in the maths face on the stage: the MOLECULES
+formula while MOLECULES is on, otherwise SPECTRUM's populated states ("2s₀,
+2p₋₁"; A ↔ B under a TRANSITION). 88 px × its SIZE knob (`molFormulaSize`,
+50–300 %), centred between the racks with a wide margin; it WRAPS inside that
+width (only an unbreakable word is shrunk); at the top while the transport pill
+floats at the foot, at the foot when the transport is docked or the pill is at
+the top. It is transparent text under every window and never part of the
+occlusion mask. ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by
+default, 13 px × SIZE) mark each MOLECULES nucleus with its element symbol at
+its projected position (`placeAtomLabels`, the PARTICLES projection), white
+under `mix-blend-mode: difference` so they invert whatever is beneath them.
+While a molecule owns the field SPECTRUM is FOLDED, not hidden
+(`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
+copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).
+
+Jet Black is the app's palette row (`lab/palette-app.js`, appended to the kit's
+catalogue at boot) until MIR carries it (KIT BRIEF J); every other palette is
+MIR's. Cloud: PRs only, never `lab/mir`; a kit need is a MIR issue or a line in
+the PR.
 
 The stage frame/axis mask is built in `lab/rack.js` `refreshOcclusion()` and
 consumed by the line shader in `lab/field.js`. Mask painted window surfaces,

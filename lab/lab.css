@@ -421,7 +421,8 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* LEAN: a window without its paragraphs and readout tiles (rack.js, the Aa header button) */
 .dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: 11px; font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
 .dev-lean.on { color: var(--acc); text-decoration: line-through; }
-body.window-info-off .dev-lean { display: none; }
+/* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
+body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .dev.lean .dev-body .note, .dev.lean .dev-body .ro, .dev.lean .dev-body .row:has(> .ro):not(:has(> :not(.ro))) { display: none; }
 /* A ROUTED KNOB STAYS UNDER ITS OWN LABEL, AND WEARS ITS BADGES ONE CONTROL AT A TIME (2026-09-18).  The kit seats a
    range dial beside every routed dial and slides the dial 10 px left to make room (modhost.css); in this rack that put
@@ -444,7 +445,9 @@ body.window-info-off .dev-lean { display: none; }
 .reg-pane[hidden] { display: none; }
 .reg-pane > * + * { margin-top: var(--sp-2); }
 .reg-pane .sp-head { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.reg-pane .sp-head > .sw { grid-column: 1 / -1; }
+.reg-mode { flex-wrap: nowrap; align-items: flex-end; }
+.reg-mode > .sw.orb-on { flex: 0 0 auto; white-space: nowrap; }   /* 2026-10: MO-REGISTRY ON beside ORBITAL | STATES (registerview.js) */
+.reg-mode > .sw[hidden] { display: none; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
@@ -847,3 +850,27 @@ body.ui-hidden #keymap { display: none; }
    shrinking to fit its longest option — `.segw` is not in base.css's `.row >` flex list, so it says so itself. */
 .mol-pick { flex: 1 1 200px; }
 .mol-pick > select.sel { width: 100%; }
+
+/* MOLECULE FORMULA (Settings › Display; rack.js placeMolFormula): the MOLECULES pick, large, on the stage.  Transparent
+   text beneath every window (z 20 < rack 30 < #floats 32), never a pointer target, never in the occlusion mask.  Its
+   ink and halo are written by accent-wheel.js from the live STAGE colour; the side is chosen against the transport. */
+#molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
+  font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1.08; letter-spacing: .01em;
+  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width rack.js sets */
+  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); }
+#molFormula.mf-top { top: 64px; }
+#molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+#molFormula[hidden] { display: none; }
+/* LEGACY WINDOWS (rack.js legacyWindow; docs/LEGACY-WINDOWS.md): the banner a hidden window wears if a project brings it
+   back.  Its own class, because LEAN (window-chrome.js) hides every `.note` and this one must always be read. */
+.legacy-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 10px; line-height: 1.35; letter-spacing: .04em;
+  color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
+.mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
+.dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
+/* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
+   position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
+   over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
+#atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;
+  mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
+#atomLabels[hidden] { display: none; }
+#atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }

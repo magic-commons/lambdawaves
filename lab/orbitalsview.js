@@ -25,6 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from './mir/kit.js';
+import { paintStroke } from './paint-stroke.js';
 import { slerpCoefficients } from './molecular-register.js';
 import { createFlow } from './molecular-flow.js';
 
@@ -47,7 +48,7 @@ export function createOrbitals(host, api) {
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
   const cv = el('canvas', 'mol-c', host);
   cv.title = 'The molecular orbital ladder: ε_k in hartree, occupied levels filled and virtual ones hollow, degenerate levels side by side. '
-    + 'Click a level to put it in the register, click it again to take it out. The axis is order-exact but not linear: every gap is drawn to scale '
+    + 'Left-click a level to put it in the register, right-click to take it out; left-drag paints every level you cross in, right-drag paints them out — a stroke down the ladder takes them all, one along a degenerate row takes its levels one by one. The axis is order-exact but not linear: every gap is drawn to scale '
     + 'up to three times the median gap and compressed beyond it, because H₂O’s O 1s at −20.24 would otherwise put the whole valence inside four pixels.';
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
@@ -144,6 +145,19 @@ export function createOrbitals(host, api) {
   }
   function deselect(k) { if (!sel.delete(k | 0)) return false; if (selected === (k | 0)) selected = -1; touch(); rebuild(); paint(); refresh(); api.repaint(); return true; }
   function toggle(k) { return sel.has(k | 0) ? deselect(k) : select(k, 1, 0); }
+  /** a PAINT stroke's levels in one pass: on ⇒ every level not already in the register joins at |c| 1, arg 0 (a level
+   *  already there keeps its dials); off ⇒ each leaves.  One rebuild / paint / repaint however many levels it covers. */
+  function paintLevels(ks, on) {
+    if (!sol || !ks.length) return 0;
+    let n = 0;
+    for (const k0 of ks) {
+      const k = k0 | 0; if (!(k >= 0) || k >= sol.nAO) continue;
+      if (on) { if (sel.has(k)) continue; sel.set(k, { amp: 1, phase: 0 }); selected = k; n++; }
+      else if (sel.delete(k)) { if (selected === k) selected = -1; n++; }
+    }
+    if (n) { touch(); rebuild(); paint(); refresh(); api.repaint(); }
+    return n;
+  }
   function clear() { if (!sel.size) return false; sel.clear(); selected = -1; touch(); rebuild(); paint(); refresh(); api.repaint(); return true; }
   /** NORM is an explicit act, exactly as it is in the hydrogen register: nothing here renormalises on its own */
   function norm() {
@@ -291,7 +305,7 @@ export function createOrbitals(host, api) {
     if (!sol) {
       for (const r of [roGap, roBeat, roSum, roPsi]) { r.set('—', ''); }
       roPsi.setSub(LAW);
-      status('no molecule solved yet — MOLECULES solves the ladder this register runs on', 'warn');
+      status('no molecule solved yet — MOLECULES solves the ladder this register runs on', '');   // not a fault: MO-REGISTRY sits on the first-run rack before anything is solved
       return;
     }
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
@@ -305,9 +319,13 @@ export function createOrbitals(host, api) {
     roSum.set(sel.size ? s.toFixed(6) : '—', sel.size ? (Math.abs(s - 1) < 1e-9 ? 'ok' : 'warn') : '');
     roSum.setSub(`${sel.size} of ${sol.nAO} orbitals · ${sol.nocc} occupied · NORM sets this to 1`);
     const why = refusal();
+    /* 2026-10 (Josh) · MOLECULES OFF IS NOT A FAULT.  The window stays on the rack with its ladder painted and editable;
+       only the switch stands down (it must let go of the field), and the status says how to bring it back. */
+    const standby = !on && (!C() || !C().on);
     status(on ? `MO-REGISTRY ON · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
+      : standby ? `MO-REGISTRY standing by · ${sol.nAO} orbitals · turn MOLECULES on, then MO-REGISTRY ON`
       : why ? 'MO-REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · MO-REGISTRY ON gives the field arg ψ`,
-      on ? 'live' : why ? 'warn' : 'ok');
+      on ? 'live' : standby ? '' : why ? 'warn' : 'ok');
     paintPsi(pushedT);
   }
   let psiWall = 0;
@@ -409,11 +427,39 @@ export function createOrbitals(host, api) {
     fitText(g, foot, left, H - 5, { x0: left, y0: H - 11, x1: W - 4, y1: H - 1 }, 'left', true);
     hover.set(hovers, plot);
   }
+  /* 2026-10 (Josh) · PAINT THE LADDER (lab/paint-stroke.js): LEFT adds, RIGHT removes; a press adds/removes the level under
+     it, a drag every level it crosses.  The levels are canvas hits in CSS px, so a stroke takes every ROW its segment
+     crosses — the WHOLE row, since a degenerate row is one energy level drawn side by side, and a stroke down the ladder
+     must take every orbital (GeH₄: 23 levels in 12 rows) — plus the one level nearest the pointer within 8 px, which is
+     how a stroke moving ALONG a row picks its levels one by one.  Never a halo, which on a dense ladder (C₆H₆: 36 levels
+     in 123 px) would paint neighbours the pointer never touched.  One stroke is one undo row. */
+  const local = (e) => {
+    const r = cv.getBoundingClientRect(), sx = r.width ? cv.offsetWidth / r.width : 1, sy = r.height ? cv.offsetHeight / r.height : 1;
+    return { x: (e.clientX - r.left) * sx - cv.clientLeft, y: (e.clientY - r.top) * sy - cv.clientTop };
+  };
+  /** the level nearest p within tol px of its row; among a degenerate row's side-by-side levels, the one nearest in x */
+  function nearestHit(p, tol) {
+    let best = null, bd = Infinity;
+    for (const h of hits) {
+      const dy = Math.abs(h.y - p.y); if (dy > tol) continue;
+      const dx = p.x < h.x0 ? h.x0 - p.x : p.x > h.x1 ? p.x - h.x1 : 0, d = dy * 1e4 + dx;
+      if (d < bd) { bd = d; best = h; }
+    }
+    return best;
+  }
+  /** every level on every row strictly between a and b */
+  function crossed(a, b) {
+    const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
+    return hi - lo < 0.5 ? [] : hits.filter((h) => h.y > lo && h.y < hi).map((h) => h.k);
+  }
+  paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
+    at: (p) => { const h = nearestHit(p, 8); return h ? [h.k] : []; }, across: crossed, apply: (ks, add) => paintLevels(ks, add) });
+  /* a click no pointer made (none can reach a canvas today, but the law is kept): the nearest level joins */
   cv.addEventListener('click', (e) => {
     if (!hits.length) return;
     let best = null;
     for (const h of hits) { if (e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
-    if (best) toggle(best.k);
+    if (best) paintLevels([best.k], true);
   });
   window.addEventListener('resize', () => paint());
 
@@ -448,7 +494,8 @@ export function createOrbitals(host, api) {
     if (!ensureSub()) return false;
     if (!on) { if (active) paintPsi(t); return false; }
     const why = refusal();
-    if (why) { status('MO-REGISTRY off — ' + why, 'warn'); if (!C() || !C().on) setOn(false); return false; }
+    if (why) { if (!C() || !C().on) { setOn(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
+      status('MO-REGISTRY off — ' + why, 'warn'); return false; }
     const moved = push(t);
     if (active) paintPsi(t);
     return moved;
@@ -479,7 +526,7 @@ export function createOrbitals(host, api) {
   }
 
   return {
-    update, setActive, paint, refresh,
+    update, setActive, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
     get on() { return on; }, setOn,
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,
