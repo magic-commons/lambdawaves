@@ -1,0 +1,608 @@
+{
+ "host": "LUX",
+ "browsers": {
+  "chromium": {
+   "orbital": {
+    "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "res": 96,
+    "cut": "e^{-α_min r²} < 1e-10",
+    "rows": [
+     {
+      "nAO": 36,
+      "variant": "plain",
+      "geometry": "benzene (the library geometry)",
+      "nShell": 24,
+      "expsPerVoxel": 54,
+      "half": 10.687,
+      "n": 1580,
+      "batches": 7,
+      "wallMs": {
+       "median": 1.5928,
+       "min": 1.5882,
+       "max": 1.5937,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 1.5891,
+       "min": 1.5838,
+       "max": 1.5896,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.0001077,
+       "maxAbsPsi": 0.2303,
+       "relToMax": 0.0004677,
+       "statsMaxPsi2": 0.6489554047584534
+      }
+     },
+     {
+      "nAO": 36,
+      "variant": "screened",
+      "geometry": "benzene (the library geometry)",
+      "nShell": 24,
+      "expsPerVoxel": 54,
+      "half": 10.687,
+      "n": 3382,
+      "batches": 7,
+      "wallMs": {
+       "median": 0.7469,
+       "min": 0.7451,
+       "max": 0.7472,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 0.7433,
+       "min": 0.741,
+       "max": 0.7437,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.0001077,
+       "maxAbsPsi": 0.2303,
+       "relToMax": 0.0004677,
+       "statsMaxPsi2": 0.6489554047584534
+      }
+     },
+     {
+      "nAO": 128,
+      "variant": "plain",
+      "geometry": "24 C + 8 H on a Fibonacci sphere, R = 4.89 bohr",
+      "nShell": 80,
+      "expsPerVoxel": 168,
+      "half": 10.867,
+      "n": 468,
+      "batches": 7,
+      "wallMs": {
+       "median": 5.3105,
+       "min": 5.3088,
+       "max": 5.3124,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 5.3053,
+       "min": 5.304,
+       "max": 5.3066,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00005484,
+       "maxAbsPsi": 0.0913,
+       "relToMax": 0.0006007,
+       "statsMaxPsi2": 0.5081247687339783
+      }
+     },
+     {
+      "nAO": 128,
+      "variant": "screened",
+      "geometry": "24 C + 8 H on a Fibonacci sphere, R = 4.89 bohr",
+      "nShell": 80,
+      "expsPerVoxel": 168,
+      "half": 10.867,
+      "n": 1233,
+      "batches": 7,
+      "wallMs": {
+       "median": 2.0454,
+       "min": 2.0331,
+       "max": 2.0469,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 2.0413,
+       "min": 2.0294,
+       "max": 2.0424,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00005484,
+       "maxAbsPsi": 0.0913,
+       "relToMax": 0.0006007,
+       "statsMaxPsi2": 0.5081247687339783
+      }
+     },
+     {
+      "nAO": 300,
+      "variant": "plain",
+      "geometry": "60 C + 0 H on a Fibonacci sphere, R = 6.70 bohr",
+      "nShell": 180,
+      "expsPerVoxel": 360,
+      "half": 12.602,
+      "n": 209,
+      "batches": 7,
+      "wallMs": {
+       "median": 11.9852,
+       "min": 11.9823,
+       "max": 11.9895,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 11.9763,
+       "min": 11.975,
+       "max": 11.9798,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00006025,
+       "maxAbsPsi": 0.06958,
+       "relToMax": 0.0008659,
+       "statsMaxPsi2": 0.12151741236448288
+      }
+     },
+     {
+      "nAO": 300,
+      "variant": "screened",
+      "geometry": "60 C + 0 H on a Fibonacci sphere, R = 6.70 bohr",
+      "nShell": 180,
+      "expsPerVoxel": 360,
+      "half": 12.602,
+      "n": 760,
+      "batches": 7,
+      "wallMs": {
+       "median": 3.2321,
+       "min": 3.23,
+       "max": 3.2333,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 3.2276,
+       "min": 3.226,
+       "max": 3.2283,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00006025,
+       "maxAbsPsi": 0.06958,
+       "relToMax": 0.0008659,
+       "statsMaxPsi2": 0.12151739001274109
+      }
+     },
+     {
+      "nAO": 600,
+      "variant": "plain",
+      "geometry": "120 C + 0 H on a Fibonacci sphere, R = 9.48 bohr",
+      "nShell": 360,
+      "expsPerVoxel": 720,
+      "half": 15.436,
+      "n": 105,
+      "batches": 7,
+      "wallMs": {
+       "median": 23.9543,
+       "min": 23.9429,
+       "max": 23.9686,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 23.9396,
+       "min": 23.9334,
+       "max": 23.9574,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00002788,
+       "maxAbsPsi": 0.07843,
+       "relToMax": 0.0003555,
+       "statsMaxPsi2": 0.1038835272192955
+      }
+     },
+     {
+      "nAO": 600,
+      "variant": "screened",
+      "geometry": "120 C + 0 H on a Fibonacci sphere, R = 9.48 bohr",
+      "nShell": 360,
+      "expsPerVoxel": 720,
+      "half": 15.436,
+      "n": 536,
+      "batches": 7,
+      "wallMs": {
+       "median": 4.7006,
+       "min": 4.6929,
+       "max": 4.7026,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 4.695,
+       "min": 4.6871,
+       "max": 4.6974,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00002788,
+       "maxAbsPsi": 0.07843,
+       "relToMax": 0.0003555,
+       "statsMaxPsi2": 0.1038835272192955
+      }
+     }
+    ],
+    "adapter": {
+     "vendor": "nvidia",
+     "architecture": "ampere",
+     "description": "NVIDIA GeForce RTX 3070"
+    },
+    "timestampQuery": true,
+    "errors": []
+   },
+   "reference": {
+    "adapter": {
+     "vendor": "nvidia",
+     "architecture": "ampere",
+     "device": "0x2484",
+     "description": "NVIDIA GeForce RTX 3070"
+    },
+    "info": {
+     "nAO": 36,
+     "nShell": 24,
+     "nPrim": 54,
+     "nWeight": 108,
+     "expsPerVoxel": 54,
+     "cap": 40,
+     "half": 10.3
+    },
+    "res": 96,
+    "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "density": {
+     "median": 2.717,
+     "min": 2.716,
+     "max": 2.731,
+     "runs": [
+      2.731,
+      2.719,
+      2.717,
+      2.716,
+      2.716,
+      2.717,
+      2.717
+     ],
+     "n": 800,
+     "cap": 40
+    },
+    "orbital": {
+     "median": 1.623,
+     "min": 1.623,
+     "max": 1.624,
+     "runs": [
+      1.623,
+      1.624,
+      1.623,
+      1.623,
+      1.623,
+      1.623,
+      1.623
+     ],
+     "n": 800,
+     "cap": 40
+    }
+   },
+   "logs": [],
+   "wallSec": 167.9,
+   "at": "2026-10-07T19:45:11.323Z"
+  },
+  "firefox": {
+   "orbital": {
+    "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+    "res": 96,
+    "cut": "e^{-α_min r²} < 1e-10",
+    "rows": [
+     {
+      "nAO": 36,
+      "variant": "plain",
+      "geometry": "benzene (the library geometry)",
+      "nShell": 24,
+      "expsPerVoxel": 54,
+      "half": 10.687,
+      "n": 1348,
+      "batches": 7,
+      "wallMs": {
+       "median": 1.7116,
+       "min": 1.7094,
+       "max": 1.7215,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 1.6628,
+       "min": 1.6625,
+       "max": 1.6809,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.0001077,
+       "maxAbsPsi": 0.2303,
+       "relToMax": 0.0004677,
+       "statsMaxPsi2": 0.6489553451538086
+      }
+     },
+     {
+      "nAO": 36,
+      "variant": "screened",
+      "geometry": "benzene (the library geometry)",
+      "nShell": 24,
+      "expsPerVoxel": 54,
+      "half": 10.687,
+      "n": 2912,
+      "batches": 7,
+      "wallMs": {
+       "median": 0.8947,
+       "min": 0.8617,
+       "max": 0.8964,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 0.86,
+       "min": 0.8594,
+       "max": 0.8637,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.0001077,
+       "maxAbsPsi": 0.2303,
+       "relToMax": 0.0004677,
+       "statsMaxPsi2": 0.6489553451538086
+      }
+     },
+     {
+      "nAO": 128,
+      "variant": "plain",
+      "geometry": "24 C + 8 H on a Fibonacci sphere, R = 4.89 bohr",
+      "nShell": 80,
+      "expsPerVoxel": 168,
+      "half": 10.867,
+      "n": 465,
+      "batches": 7,
+      "wallMs": {
+       "median": 5.6052,
+       "min": 5.3889,
+       "max": 5.6068,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 5.4218,
+       "min": 5.3825,
+       "max": 5.4231,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00005484,
+       "maxAbsPsi": 0.0913,
+       "relToMax": 0.0006007,
+       "statsMaxPsi2": 0.5081247687339783
+      }
+     },
+     {
+      "nAO": 128,
+      "variant": "screened",
+      "geometry": "24 C + 8 H on a Fibonacci sphere, R = 4.89 bohr",
+      "nShell": 80,
+      "expsPerVoxel": 168,
+      "half": 10.867,
+      "n": 1113,
+      "batches": 7,
+      "wallMs": {
+       "median": 2.3394,
+       "min": 2.3389,
+       "max": 2.3397,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 2.2521,
+       "min": 2.2512,
+       "max": 2.2566,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00005484,
+       "maxAbsPsi": 0.0913,
+       "relToMax": 0.0006007,
+       "statsMaxPsi2": 0.5081247687339783
+      }
+     },
+     {
+      "nAO": 300,
+      "variant": "plain",
+      "geometry": "60 C + 0 H on a Fibonacci sphere, R = 6.70 bohr",
+      "nShell": 180,
+      "expsPerVoxel": 360,
+      "half": 12.602,
+      "n": 207,
+      "batches": 7,
+      "wallMs": {
+       "median": 12.5747,
+       "min": 12.5731,
+       "max": 12.5779,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 12.1106,
+       "min": 12.1081,
+       "max": 12.1133,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00006025,
+       "maxAbsPsi": 0.06958,
+       "relToMax": 0.0008659,
+       "statsMaxPsi2": 0.12151741236448288
+      }
+     },
+     {
+      "nAO": 300,
+      "variant": "screened",
+      "geometry": "60 C + 0 H on a Fibonacci sphere, R = 6.70 bohr",
+      "nShell": 180,
+      "expsPerVoxel": 360,
+      "half": 12.602,
+      "n": 703,
+      "batches": 7,
+      "wallMs": {
+       "median": 3.5612,
+       "min": 3.5603,
+       "max": 3.5627,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 3.5517,
+       "min": 3.5403,
+       "max": 3.5557,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00006025,
+       "maxAbsPsi": 0.06958,
+       "relToMax": 0.0008659,
+       "statsMaxPsi2": 0.12151739001274109
+      }
+     },
+     {
+      "nAO": 600,
+      "variant": "plain",
+      "geometry": "120 C + 0 H on a Fibonacci sphere, R = 9.48 bohr",
+      "nShell": 360,
+      "expsPerVoxel": 720,
+      "half": 15.436,
+      "n": 103,
+      "batches": 7,
+      "wallMs": {
+       "median": 24.3109,
+       "min": 24.307,
+       "max": 24.314,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 24.1504,
+       "min": 24.1368,
+       "max": 24.1575,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00002788,
+       "maxAbsPsi": 0.07843,
+       "relToMax": 0.0003555,
+       "statsMaxPsi2": 0.1038835272192955
+      }
+     },
+     {
+      "nAO": 600,
+      "variant": "screened",
+      "geometry": "120 C + 0 H on a Fibonacci sphere, R = 9.48 bohr",
+      "nShell": 360,
+      "expsPerVoxel": 720,
+      "half": 15.436,
+      "n": 487,
+      "batches": 7,
+      "wallMs": {
+       "median": 5.1405,
+       "min": 5.1385,
+       "max": 5.1415,
+       "n": 7
+      },
+      "gpuMs": {
+       "median": 5.1187,
+       "min": 5.1127,
+       "max": 5.123,
+       "n": 7
+      },
+      "check": {
+       "probes": 24,
+       "maxAbsErr": 0.00002788,
+       "maxAbsPsi": 0.07843,
+       "relToMax": 0.0003555,
+       "statsMaxPsi2": 0.1038835272192955
+      }
+     }
+    ],
+    "adapter": {
+     "vendor": "",
+     "architecture": "",
+     "description": ""
+    },
+    "timestampQuery": true,
+    "errors": []
+   },
+   "reference": {
+    "adapter": {
+     "vendor": "",
+     "architecture": "",
+     "device": "",
+     "description": ""
+    },
+    "info": {
+     "nAO": 36,
+     "nShell": 24,
+     "nPrim": 54,
+     "nWeight": 108,
+     "expsPerVoxel": 54,
+     "cap": 40,
+     "half": 10.3
+    },
+    "res": 96,
+    "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+    "density": {
+     "median": 3.003,
+     "min": 3.003,
+     "max": 3.136,
+     "runs": [
+      3.136,
+      3.131,
+      3.005,
+      3.003,
+      3.003,
+      3.003,
+      3.003
+     ],
+     "n": 800,
+     "cap": 40
+    },
+    "orbital": {
+     "median": 1.877,
+     "min": 1.877,
+     "max": 1.878,
+     "runs": [
+      1.877,
+      1.877,
+      1.877,
+      1.877,
+      1.877,
+      1.878,
+      1.877
+     ],
+     "n": 800,
+     "cap": 40
+    }
+   },
+   "wallSec": 251.5,
+   "at": "2026-10-07T19:41:58.667Z"
+  }
+ }
+}
