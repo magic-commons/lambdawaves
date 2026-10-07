@@ -1,0 +1,222 @@
+ M MIR-MANIFEST.json
+ M lab/mir/control-help.js
+ M lab/mir/css/base.css
+ M lab/mir/css/skin.css
+ M lab/mir/glyph.js
+ M lab/mir/kit.js
+ M lab/mir/modulation/PORT-NOTES.md
+ M lab/mir/modulation/host.js
+ M lab/mir/modulation/mod.js
+ M lab/mir/modulation/modhost.css
+ M lab/mir/modulation/modwindow/MANIFEST.md
+ M lab/mir/modulation/modwindow/modwindow.css
+ M lab/mir/modulation/modwindow/modwindow.js
+ M lab/mir/modulation/registry.js
+ M lab/mir/palette.js
+ M lab/mir/plane-model.js
+ M lab/mir/shell/about.js
+ M lab/mir/shell/accent.js
+ M lab/mir/shell/menubar.js
+ M lab/mir/shell/notebook.js
+ M lab/mir/shell/shell.css
+ M lab/mir/shell/stage.css
+ M lab/mir/shell/wordmark.js
+ M lab/mir/slider-keys.js
+ M lab/new-project.lambdawaves.json
+ M lab/sw.js
+?? lab/fonts/info/AlegreyaSC-400-latin-ext.woff2
+?? lab/fonts/info/AlegreyaSC-400-latin.woff2
+?? lab/fonts/info/AlegreyaSC-OFL.txt
+?? lab/fonts/info/PlayfairDisplay-700-latin-ext.woff2
+?? lab/fonts/info/PlayfairDisplay-700-latin.woff2
+?? lab/fonts/info/PlayfairDisplay-700i-latin-ext.woff2
+?? lab/fonts/info/PlayfairDisplay-700i-latin.woff2
+?? lab/fonts/info/PlayfairDisplay-OFL.txt
+?? lab/fonts/info/SOURCE.txt
+?? lab/fonts/info/Spectral-400-latin-ext.woff2
+?? lab/fonts/info/Spectral-400-latin.woff2
+?? lab/fonts/info/Spectral-400i-latin-ext.woff2
+?? lab/fonts/info/Spectral-400i-latin.woff2
+?? lab/fonts/info/Spectral-600-latin-ext.woff2
+?? lab/fonts/info/Spectral-600-latin.woff2
+?? lab/fonts/info/Spectral-600i-latin-ext.woff2
+?? lab/fonts/info/Spectral-600i-latin.woff2
+?? lab/fonts/info/Spectral-OFL.txt
+?? lab/mir/app.js
+?? lab/mir/controls/arc.js
+?? lab/mir/controls/colour-controls.css
+?? lab/mir/controls/controls.css
+?? lab/mir/controls/factory.js
+?? lab/mir/controls/gesture.js
+?? lab/mir/controls/lane.js
+?? lab/mir/controls/list.js
+?? lab/mir/controls/number.js
+?? lab/mir/controls/range.js
+?? lab/mir/controls/select.js
+?? lab/mir/controls/stepper.js
+?? lab/mir/controls/swatch.js
+?? lab/mir/controls/xy.js
+?? lab/mir/core/assets.js
+?? lab/mir/core/core.css
+?? lab/mir/core/describe.js
+?? lab/mir/core/envelope.js
+?? lab/mir/core/frame.js
+?? lab/mir/core/i18n.js
+?? lab/mir/core/ink.js
+?? lab/mir/core/intake.js
+?? lab/mir/core/kbm.js
+?? lab/mir/core/look.js
+?? lab/mir/core/motion.js
+?? lab/mir/core/perf.js
+?? lab/mir/core/png.js
+?? lab/mir/core/pointer.js
+?? lab/mir/core/prefs.js
+?? lab/mir/core/project.js
+?? lab/mir/core/proximity.js
+?? lab/mir/core/session.js
+?? lab/mir/core/wakelock.js
+?? lab/mir/core/zip.js
+?? lab/mir/css/tokens.css
+?? lab/mir/folders/files.js
+?? lab/mir/folders/folders.css
+?? lab/mir/folders/folders.js
+?? lab/mir/folders/gallery.js
+?? lab/mir/folders/project.js
+?? lab/mir/folders/save-blob.js
+?? lab/mir/folders/seed.js
+?? lab/mir/folders/zip.js
+?? lab/mir/fx/fx.css
+?? lab/mir/fx/parallax.js
+?? lab/mir/fx/pointer-light.js
+?? lab/mir/history/domains.js
+?? lab/mir/history/gestures.js
+?? lab/mir/history/history-list.js
+?? lab/mir/history/history.css
+?? lab/mir/history/history.js
+?? lab/mir/history/window.js
+?? lab/mir/info/bodies.js
+?? lab/mir/info/faces.css
+?? lab/mir/info/info.css
+?? lab/mir/info/layer.js
+?? lab/mir/info/leader.js
+?? lab/mir/info/page.js
+?? lab/mir/info/seats.js
+?? lab/mir/keyboard/keyboard.css
+?? lab/mir/keyboard/keyboard.js
+?? lab/mir/locales/ar.json
+?? lab/mir/locales/bn.json
+?? lab/mir/locales/en.json
+?? lab/mir/locales/en.unreached.json
+?? lab/mir/locales/es.json
+?? lab/mir/locales/fr.json
+?? lab/mir/locales/hi.json
+?? lab/mir/locales/id.json
+?? lab/mir/locales/ja.json
+?? lab/mir/locales/locales.css
+?? lab/mir/locales/pseudo.js
+?? lab/mir/locales/pt-BR.json
+?? lab/mir/locales/ru.json
+?? lab/mir/locales/zh-Hans.json
+?? lab/mir/mir.css
+?? lab/mir/modulation/audio-capture.js
+?? lab/mir/modulation/bind.js
+?? lab/mir/modulation/layout-motion.js
+?? lab/mir/modulation/mod-cursor.js
+?? lab/mir/modulation/project.js
+?? lab/mir/modulation/window.js
+?? lab/mir/notes/face.js
+?? lab/mir/notes/notes.css
+?? lab/mir/notes/shelf.js
+?? lab/mir/panels/camera-rig.js
+?? lab/mir/panels/camera.css
+?? lab/mir/panels/camera.js
+?? lab/mir/panels/curves.css
+?? lab/mir/panels/curves.js
+?? lab/mir/panels/grade.css
+?? lab/mir/panels/grade.js
+?? lab/mir/panels/index.js
+?? lab/mir/panels/lanes.css
+?? lab/mir/panels/lanes.js
+?? lab/mir/panels/morph.js
+?? lab/mir/panels/picture-filter.js
+?? lab/mir/panels/ramp.css
+?? lab/mir/panels/ramp.js
+?? lab/mir/panels/xy.css
+?? lab/mir/panels/xy.js
+?? lab/mir/pattern/model.js
+?? lab/mir/pattern/pattern.css
+?? lab/mir/pattern/sequencer.js
+?? lab/mir/pattern/window.js
+?? lab/mir/render/clock.js
+?? lab/mir/render/encoder.js
+?? lab/mir/render/mp4.js
+?? lab/mir/render/panel.js
+?? lab/mir/render/plan.js
+?? lab/mir/render/recorder.js
+?? lab/mir/render/render.css
+?? lab/mir/render/selftest.js
+?? lab/mir/render/store-worker.js
+?? lab/mir/render/store.js
+?? lab/mir/shell/assets/LOGO-SOURCE.txt
+?? lab/mir/shell/assets/mir-dark.svg
+?? lab/mir/shell/assets/mir-light.svg
+?? lab/mir/shell/banner.css
+?? lab/mir/shell/banner.js
+?? lab/mir/shell/boot.js
+?? lab/mir/shell/busy.js
+?? lab/mir/shell/clipboard.js
+?? lab/mir/shell/dialog.js
+?? lab/mir/shell/flash-guard.js
+?? lab/mir/shell/gui.css
+?? lab/mir/shell/gui.js
+?? lab/mir/shell/keys.js
+?? lab/mir/shell/language.js
+?? lab/mir/shell/notice.js
+?? lab/mir/shell/opener.css
+?? lab/mir/shell/opener.js
+?? lab/mir/shell/pages.css
+?? lab/mir/shell/pages.js
+?? lab/mir/shell/parts.css
+?? lab/mir/shell/rack-scrollbar.js
+?? lab/mir/shell/rack.css
+?? lab/mir/shell/rack.js
+?? lab/mir/shell/scene-guard.js
+?? lab/mir/shell/share-link.js
+?? lab/mir/shell/themes.js
+?? lab/mir/shell/transport.css
+?? lab/mir/shell/transport.js
+?? lab/mir/timeline/audio-analysis.js
+?? lab/mir/timeline/audio-drop.js
+?? lab/mir/timeline/audio-kind.js
+?? lab/mir/timeline/audio-playback.js
+?? lab/mir/timeline/bind.js
+?? lab/mir/timeline/controller.js
+?? lab/mir/timeline/cursor.js
+?? lab/mir/timeline/curve-view.js
+?? lab/mir/timeline/draw.js
+?? lab/mir/timeline/editor.js
+?? lab/mir/timeline/geometry.js
+?? lab/mir/timeline/history.js
+?? lab/mir/timeline/icons.js
+?? lab/mir/timeline/kinds.js
+?? lab/mir/timeline/knobs.js
+?? lab/mir/timeline/model.js
+?? lab/mir/timeline/pattern-kind.js
+?? lab/mir/timeline/playhead.js
+?? lab/mir/timeline/project.js
+?? lab/mir/timeline/readout.js
+?? lab/mir/timeline/selection.js
+?? lab/mir/timeline/shortcuts.js
+?? lab/mir/timeline/slice.js
+?? lab/mir/timeline/source.js
+?? lab/mir/timeline/time-format.js
+?? lab/mir/timeline/timeline.css
+?? lab/mir/timeline/view.js
+?? lab/mir/timeline/window.js
+?? lab/mir/tokens.json
+?? lab/mir/version.js
+?? lab/mir/window/dock.js
+?? lab/mir/window/rail.js
+?? lab/mir/window/window.css
+?? lab/mir/window/window.js
+?? lab/mir/window/workspaces.js

@@ -1,0 +1,30 @@
+PASS manifest parses; 13 members, scope ./ display standalone orientation any, both colours = lab.css's ground #070a0f.
+PASS the link preview is the manifest's own words: description (215 chars) and og:title match the manifest and the ABOUT tagline exactly; og:image → img/icon-512.png, 12631 bytes.
+PASS 5 icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, λ-and-dot colours and maskable padding; ink radius any@192 40.7% · any@512 40.7% · maskable@192 32.6% · maskable@512 32.6% · any@180 40.9% (maskable safe zone 40%).
+
+  ── sw.js §1 is out of date.  Re-run with --write, or paste this over the PRECACHE array: ──
+
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: sw.js: 194 file(s) in lab/ are NOT precached — they will 404 offline
+[32m+ actual[39m [31m- expected[39m
+
+[32m+[39m [
+[32m+[39m   'fonts/info/AlegreyaSC-400-latin-ext.woff2',
+[32m+[39m   'fonts/info/AlegreyaSC-400-latin.woff2',
+[32m+[39m   'fonts/info/AlegreyaSC-OFL.txt',
+[32m+[39m   'fonts/info/PlayfairDisplay-700-latin-ext.woff2',
+[32m+[39m   'fonts/info/PlayfairDisplay-700-latin.woff2',
+[32m+[39m   'fonts/info/PlayfairDisplay-700i-latin-ext.woff2',
+[32m+[39m   'fonts/info/PlayfairDisplay-700i-latin.woff2',
+[32m+[39m   'fonts/info/PlayfairDisplay-OFL.txt',
+[32m+[39m   'fonts/info/Spectral-400-latin-ext.woff2',
+[32m+[39m   'fonts/info/Spectral-400-latin.woff2',
+[32m+[39m   'fonts/info/Spectral-400i-latin-ext.woff2',
+[32m+[39m   'fonts/info/Spectral-400i-latin.woff2',
+[32m+[39m   'fonts/info/Spectral-600-latin-ext.woff2',
+[32m+[39m   'fonts/info/Spectral-600-latin.woff2',
+[32m+[39m   'fonts/info/Spectral-600i-latin-ext.woff2',

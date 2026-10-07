@@ -1,0 +1,240 @@
+PASS tests/absorb.test.mjs
+FAIL tests/access.test.mjs (rc=1)
+    | GREEN A1 no positive tabindex in lab/ — every tabbable seat is 0 or −1, so the tab order is the DOM's and stays the DOM's
+    |       []
+    | GREEN A2 every role="slider" in kit.js is written with aria-valuemin, aria-valuemax, aria-valuenow and aria-valuetext, in BOTH writers (knob and fader) — a slider that does not say what it holds is a widget that refuses to answer
+    |       {"roleWrites":2,"missing":[],"thin":[]}
+    | GREEN A3 the chatter guard survives in both writers: the value is announced when the USER moved it or when nobody is sitting on the control, and never in the one case that would speak — paint() runs from the frame loop for the scrub, for [data-live] dials and for every modulated target, so an unguarded write is a screen-reader live region built by accident at 60 Hz
+    |       {"guarded":true,"guardN":2}
+    | RED   A8 a control the app is DRIVING under a focused user announces the base and says so: knob() takes setBase(fn), the announcement carries the word, and rack.js hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value
+    |       {"baseWire":true,"baseSaid":false,"rackWire":true}
+    | GREEN A9 the knob has ONE quantiser, ONE fold and ONE clamp and both roads take it (settle(), called by the pointer and by the key), and a disabled knob writes aria-disabled — a control that will not act must not look operable and must not swallow the keys
+    |       {"settleDef":true,"settleN":3,"dead":true}
+    | GREEN A10 a radiogroup can never ship with zero reachable seats: paint() seats the roving tab stop on the SAME predicate onKey moves it by (checked AND not disabled), the fallback seats the first LIVE option, and a MutationObserver on `disabled` re-seats the group whenever a caller disables one — which is the half that matters, since all three call sites disable AFTER seg() has painted
+    |       {"seat":true,"reseat":true}
+    | GREEN A4 at most 4 live regions in the whole of lab/ — and the four that exist are the four that change once per user act: #banner (role="alert", the one thing a visitor without WebGPU ever sees), .pj-status (role="status", a save or an open), wave 68's .keys-say (role="status", the one binding the KEYS panel refuses) and wave 105's .m2hint (role="status", the modulation window's one message seat — 54 sentences that were being written into a display:none node). The 107 readouts are NOT among them and must never be
+    |       ["lab/index.html:148  <div id=\"banner\" role=\"alert\" hidden><button class=\"banner-x\" type=\"button\" aria-label=\"di","lab/modwindow.js:106  mw.hint.setAttribute('role', 'status'); mw.hint.setAttribute('aria-live', 'polite');   /* ","lab/rack.js:3973  { const st = nb.querySelector('.pj-status'); if (st) st.setAttribute('role', 'status'); }"]
+    | GREEN A5 no live region is a readout or a .dev-stat — those rewrite on a 10 Hz change-guard, and a polite region on one of them queues an utterance per change on a queue that does not drop
+    |       []
+    | GREEN A6 index.html carries the two skip links, both racks as tabindex="-1" fragment targets (a target, never a stop), the canvas as role="img", and IMPORT's file input visually hidden rather than `hidden` — which resolved to display:none !important and took it out of the tab order AND out of the accessibility tree
+    |       {"skipCount":2,"racksNeg":true,"fieldImg":true,"importVh":true}
+    | GREEN A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT'S (wave 88, Josh). No role owns it, the dispatcher cancels its native activation, and a focused <select> yields it too; Enter is the activator everywhere. And the dispatcher's stage guard is a `continue`, not a `return` — a `return` abandoned the whole ACTIONS loop rather than skipping one action
+    |       {"owned":true,"sliderOwnsNoSpace":true,"buttonOwnsEnterOnly":true,"noRoleOwnsSpace":true,"spaceCancelled":true,"selectYieldsSpace":true,"stageContinue":true}
+    | GREEN A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the ACTIONS loop honours e.defaultPrevented, and TAB off the stage is the browser's whatever the binding table says — enforced on THE KEY in the dispatcher and refused by the binding law (lab/shortcuts.js), so the trap wave 57 removed cannot be rebuilt by rebinding
+    |       {"roleAware":true,"notDead":true,"handled":true,"tabLaw":true,"tabRefused":true}
+    | 
+    |       125 files read (no recursion, no browser) · wall time 0.05 s
+    | RED access.test — 1 failing of 11
+PASS tests/atoms.test.mjs
+PASS tests/audio.test.mjs
+PASS tests/auto-scale.test.mjs
+PASS tests/basis-631.test.mjs
+PASS tests/calculus.test.mjs
+PASS tests/capture.test.mjs
+PASS tests/card-solvers.test.mjs
+PASS tests/chem-sweep.test.mjs
+PASS tests/cornell.test.mjs
+PASS tests/density.test.mjs
+PASS tests/dynamics.test.mjs
+PASS tests/electrostatics.test.mjs
+PASS tests/export3d.test.mjs
+PASS tests/field-owner.test.mjs
+PASS tests/fields.test.mjs
+PASS tests/final-ii.test.mjs
+PASS tests/first-run.test.mjs
+PASS tests/frame-coalescer.test.mjs
+PASS tests/frame-settle.test.mjs
+PASS tests/frontier.test.mjs
+PASS tests/gas.test.mjs
+PASS tests/gate-tools.test.mjs
+PASS tests/gpu-cleanup.test.mjs
+PASS tests/h2ci.test.mjs
+PASS tests/h2.test.mjs
+PASS tests/helium.test.mjs
+PASS tests/history.test.mjs
+PASS tests/hydrogen.test.mjs
+PASS tests/ink.test.mjs
+PASS tests/kepler.test.mjs
+PASS tests/keyboard-shortcuts.test.mjs
+PASS tests/kick.test.mjs
+PASS tests/latex-state.test.mjs
+PASS tests/linalg.test.mjs
+PASS tests/math-audit.test.mjs
+PASS tests/md.test.mjs
+FAIL tests/mir-manifest.test.mjs (rc=1)
+    | node:internal/modules/run_main:123
+    |     triggerUncaughtException(
+    |     ^
+    | 
+    | AssertionError [ERR_ASSERTION]: The input did not match the regular expression /^\d+\.\d+\.\d+$/. Input:
+    | 
+    | '1.5.0-alpha.23'
+    | 
+    |     at [90mfile:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/[39mtests/mir-manifest.test.mjs:12:8
+    | [90m    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)[39m
+    | [90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)[39m
+    | [90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)[39m {
+    |   generatedMessage: [33mtrue[39m,
+    |   code: [32m'ERR_ASSERTION'[39m,
+    |   actual: [32m'1.5.0-alpha.23'[39m,
+    |   expected: [31m/^\d+\.\d+\.\d+$/[39m,
+    |   operator: [32m'match'[39m,
+    |   diff: [32m'simple'[39m
+    | }
+    | 
+    | Node.js v22.22.1
+FAIL tests/mir.test.mjs (rc=1)
+    | file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/tests/mir.test.mjs:27
+    |          LAB_PRESETS, LAB_PRESET_FOLDER, labPresetList, labPresetFolders, labPresetGet,
+    |                                                         ^^^^^^^^^^^^^^^^
+    | SyntaxError: The requested module '../lab/mir/modulation/host.js' does not provide an export named 'labPresetFolders'
+    | [90m    at ModuleJob._instantiate (node:internal/modules/esm/module_job:226:21)[39m
+    | [90m    at async ModuleJob.run (node:internal/modules/esm/module_job:335:5)[39m
+    | [90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)[39m
+    | [90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)[39m
+    | 
+    | Node.js v22.22.1
+PASS tests/modrive.test.mjs
+PASS tests/molecular-drive.test.mjs
+PASS tests/molecular-field.test.mjs
+PASS tests/molecular-flow.test.mjs
+PASS tests/molecular-register.test.mjs
+PASS tests/molecular-session.test.mjs
+PASS tests/molecule-state.test.mjs
+PASS tests/molecules.test.mjs
+PASS tests/molecule.test.mjs
+PASS tests/momentum.test.mjs
+PASS tests/mo.test.mjs
+PASS tests/native-ui.test.mjs
+FAIL tests/new-project.test.mjs (rc=1)
+    | node:internal/modules/run_main:123
+    |     triggerUncaughtException(
+    |     ^
+    | 
+    | AssertionError [ERR_ASSERTION]: tools/new-project.mjs --check: new-project: lab/new-project.lambdawaves.json is OUT OF STEP — run `node tools/new-project.mjs`
+    | 
+    | 
+    | 1 !== 0
+    | 
+    |     at [90mfile:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/[39mtests/new-project.test.mjs:19:8
+    | [90m    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)[39m
+    | [90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)[39m
+    | [90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)[39m {
+    |   generatedMessage: [33mfalse[39m,
+    |   code: [32m'ERR_ASSERTION'[39m,
+    |   actual: [33m1[39m,
+    |   expected: [33m0[39m,
+    |   operator: [32m'strictEqual'[39m,
+    |   diff: [32m'simple'[39m
+    | }
+    | 
+    | Node.js v22.22.1
+PASS tests/notebook-math.test.mjs
+PASS tests/palette.test.mjs
+PASS tests/perf.test.mjs
+PASS tests/period.test.mjs
+PASS tests/project-import.test.mjs
+PASS tests/project-storage.test.mjs
+PASS tests/pulse.test.mjs
+PASS tests/qcd.test.mjs
+PASS tests/qho.test.mjs
+PASS tests/radiation.test.mjs
+PASS tests/release-inputs.test.mjs
+PASS tests/render-exact.test.mjs
+PASS tests/response-fit.test.mjs
+PASS tests/rhf-molecules.test.mjs
+PASS tests/rotor4.test.mjs
+PASS tests/rpa-inspector.test.mjs
+PASS tests/scf.test.mjs
+FAIL tests/slider-keys.test.mjs (rc=1)
+    | node:internal/modules/run_main:123
+    |     triggerUncaughtException(
+    |     ^
+    | 
+    | AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+    | 
+    |   assert.ok(Math.abs(M.macroOf(macro.id).masterDepth - .709) < 1e-10)
+    | 
+    |     at [90mfile:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/[39mtests/slider-keys.test.mjs:28:8
+    | [90m    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)[39m
+    | [90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)[39m
+    | [90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)[39m {
+    |   generatedMessage: [33mtrue[39m,
+    |   code: [32m'ERR_ASSERTION'[39m,
+    |   actual: [33mfalse[39m,
+    |   expected: [33mtrue[39m,
+    |   operator: [32m'=='[39m,
+    |   diff: [32m'simple'[39m
+    | }
+    | 
+    | Node.js v22.22.1
+PASS tests/stage-gestures.test.mjs
+PASS tests/statelink.test.mjs
+PASS tests/sturmianreg.test.mjs
+PASS tests/sturmian.test.mjs
+PASS tests/twocentre.test.mjs
+PASS tests/well.test.mjs
+PASS tests/wigner.test.mjs
+PASS tests/window-activity.test.mjs
+FAIL tests/wiring.test.mjs (rc=1)
+    | 
+    |   ── THE ALLOWLIST (printed every run, passing or failing) ──────────────────────────────────
+    |     lab/mir/shell/about.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook and ABOUT face to it.
+    |     lab/mir/shell/accent.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned accent editor to it.
+    |     lab/mir/shell/menubar.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned menubar implementation to it.
+    |     lab/mir/shell/notebook.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook controller to it.
+    |     lab/mir/shell/vendor/katex/katex.min.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.
+    |     lab/mir/shell/vendor/marked.min.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.
+    |     lab/mir/shell/wordmark.js   staged 2026-09-21 · 16 days ago · expires in 44   ⚠ OVERDUE
+    |       MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned wordmark implementation to it.
+    | 
+    |   ── THE ROOTS ─────────────────────────────────────────────────────────────────────────────
+    |     lab/index.html  <script type="module" src="./gpu-boot.js">
+    |     lab/index.html  <script src="./vendor/marked.min.js">
+    |     lab/index.html  <script src="./vendor/katex/katex.min.js">
+    |     lab/index.html  <script type="module" src="./main.js">
+    |     lab/mathworker.js  ← new Worker(type: module) at lab/rack.js:628
+    |     lab/sw.js  ← serviceWorker.register(classic) at lab/main.js:62
+    |     (classic, so no static imports — scanned only for import(), importScripts() and new Worker(): lab/vendor/marked.min.js, lab/vendor/katex/katex.min.js, lab/sw.js)
+    | 
+    |   ── THE GRAPH ─────────────────────────────────────────────────────────────────────────────
+    |     152 files reached · 383 static edges · 8 dynamic edges (literal specifier)
+    |     267 .js files under lab/ · 399 entries in sw.js's precache table
+    |     bench pages (NOT roots): lab/smoke.html
+PASS tests/zion.test.mjs
+FAIL tests/pwa.test.mjs (rc=1)
+    | PASS manifest parses; 13 members, scope ./ display standalone orientation any, both colours = lab.css's ground #070a0f.
+    | PASS the link preview is the manifest's own words: description (215 chars) and og:title match the manifest and the ABOUT tagline exactly; og:image → img/icon-512.png, 12631 bytes.
+    | PASS 5 icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, λ-and-dot colours and maskable padding; ink radius any@192 40.7% · any@512 40.7% · maskable@192 32.6% · maskable@512 32.6% · any@180 40.9% (maskable safe zone 40%).
+    | node:internal/modules/run_main:123
+    |     triggerUncaughtException(
+    |     ^
+    | 
+    | AssertionError [ERR_ASSERTION]: precache is 9.46 MiB — over the 8 MiB ceiling; something large was added that should be fetched on demand instead
+    |     at [90mfile:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/[39mtests/pwa.test.mjs:298:8
+    | [90m    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)[39m
+    | [90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)[39m
+    | [90m    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)[39m {
+    |   generatedMessage: [33mfalse[39m,
+    |   code: [32m'ERR_ASSERTION'[39m,
+    |   actual: [33mfalse[39m,
+    |   expected: [33mtrue[39m,
+    |   operator: [32m'=='[39m,
+    |   diff: [32m'simple'[39m
+    | }
+    | 
+    | Node.js v22.22.1
+TOTAL suites=82 pass=75 fail=7
+FAILED: tests/access.test.mjs tests/mir-manifest.test.mjs tests/mir.test.mjs tests/new-project.test.mjs tests/slider-keys.test.mjs tests/wiring.test.mjs tests/pwa.test.mjs
+
+NOTE (added by hand): the per-suite capture above keeps only the first 30 lines of each red. Full first assertions:
+  wiring.test: AssertionError 109 !== 0 — '109 modules under lab/ that NO root reaches' (all 109 are NEW kit files under lab/mir/**, all PRECACHED after pwa --write; list in 02b-wiring-orphans.log; none of the 56 pre-adopt kit files became unreachable)
+  access.test: A8 RED {baseWire:true, baseSaid:false, rackWire:true} — lab/mir/kit.js now builds the string through tx('{value} · base · modulated', {value}) so the test regex /' · base · modulated'/ no longer matches the source text; 1 failing of 11
+  new-project.test: tools/new-project.mjs --check says OUT OF STEP; the one-line delta (02c): modulation bpm 60 -> 30 (the kit's new default tempo)
+  slider-keys.test: line 28 assert |masterDepth - .709| < 1e-10 after Shift+ArrowDown on .71 — the kit's Shift step is now .01*setKnobLaw().keyFine (an eighth), was .001

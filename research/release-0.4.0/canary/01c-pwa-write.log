@@ -1,0 +1,22 @@
+PASS manifest parses; 13 members, scope ./ display standalone orientation any, both colours = lab.css's ground #070a0f.
+PASS the link preview is the manifest's own words: description (215 chars) and og:title match the manifest and the ABOUT tagline exactly; og:image → img/icon-512.png, 12631 bytes.
+PASS 5 icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, λ-and-dot colours and maskable padding; ink radius any@192 40.7% · any@512 40.7% · maskable@192 32.6% · maskable@512 32.6% · any@180 40.9% (maskable safe zone 40%).
+      --write: sw.js §1 rewritten — 399 entries (194 added, 0 dropped, 16 re-hashed).
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: precache is 9.46 MiB — over the 8 MiB ceiling; something large was added that should be fetched on demand instead
+    at file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a6bf03e4f65099a58/tests/pwa.test.mjs:298:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.22.1

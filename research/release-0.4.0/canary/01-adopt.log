@@ -1,0 +1,25 @@
+ MIR-MANIFEST.json                          |  249 ++-
+ lab/mir/control-help.js                    |   30 +-
+ lab/mir/css/base.css                       |  277 ++--
+ lab/mir/css/skin.css                       |  595 +++++--
+ lab/mir/glyph.js                           |  265 ++-
+ lab/mir/kit.js                             |  358 ++--
+ lab/mir/modulation/PORT-NOTES.md           |    4 +-
+ lab/mir/modulation/host.js                 |  157 +-
+ lab/mir/modulation/mod.js                  |  176 +-
+ lab/mir/modulation/modhost.css             | 2489 ++++++++++++++++------------
+ lab/mir/modulation/modwindow/MANIFEST.md   |   10 +
+ lab/mir/modulation/modwindow/modwindow.css | 1413 ++++++++++------
+ lab/mir/modulation/modwindow/modwindow.js  |  441 +++--
+ lab/mir/modulation/registry.js             |    8 +
+ lab/mir/palette.js                         |   24 +-
+ lab/mir/plane-model.js                     |   19 +-
+ lab/mir/shell/about.js                     |   86 +-
+ lab/mir/shell/accent.js                    |  104 +-
+ lab/mir/shell/menubar.js                   |  102 +-
+ lab/mir/shell/notebook.js                  |  505 +++++-
+ lab/mir/shell/shell.css                    |  204 ++-
+ lab/mir/shell/stage.css                    |   15 +-
+ lab/mir/shell/wordmark.js                  |  128 +-
+ lab/mir/slider-keys.js                     |   14 +-
+ 24 files changed, 5132 insertions(+), 2541 deletions(-)

@@ -1,0 +1,57 @@
+# frame-occlusion.browser-test.mjs (LW_PORT=8737 GD_PORT=5207) rc=0 — adopted tree MIR 1.5.0-alpha.23
+PASS lattice clears only modulation cards, work bars and chips, not their empty gaps
+PASS box and dots use the same surface-accurate mask
+PASS real drag moves the masks with the visible surfaces, even while paused
+PASS scrolled-away modulation cards do not cut the stage outside their viewport
+PASS detached rack window keeps frame ink in the gap between its head and body
+PASS detached rack drag refreshes frame ink while paused
+PASS joined rack window still masks its single pane
+# history.browser-test.mjs rc=0
+PASS the boot is the bottom of the stack: one row, named boot, depth 0
+PASS the HISTORY card lists every row: 25 edits → 26 rows newest first with boot at the bottom, one aria-current row in view; clicks on rows 3, 17 and boot land on their readings; jumps by the API keep the current row in view, and one made while the card was closed is in view when it reopens; every row's tooltip is its whole name; the list scrolls (250 px) and the card holds 408 px from 13 rows to 26
+PASS a LOOK knob drag (twelve moves over 600 ms, longer than the quiet window): one row "EXPOSURE · WAVE", undo and redo byte-identical (undo 4.22 ms, modulation window rebuilt 0×)
+PASS the stage colour (its colour well): one row "STAGE COLOUR · SETTINGS", undo and redo byte-identical (undo 4.5 ms, modulation window rebuilt 0×)
+PASS an overlay switch (KEPLER ORBIT): one row "KEPLER ORBIT · ORBIT", undo and redo byte-identical (undo 2.8 ms, modulation window rebuilt 0×)
+PASS a preset (its select → loadPreset): one row "PRESET SUPERPOSITION · STATE", undo and redo byte-identical (undo 3.14 ms, modulation window rebuilt 0×)
+PASS an element change (ELEMENT Z dragged): one row "ELEMENT Z · SPECTRUM", undo and redo byte-identical (undo 5.96 ms, modulation window rebuilt 0×)
+PASS A/B · STORE A: one row "STORE A · STATE", undo and redo byte-identical (undo 3.28 ms, modulation window rebuilt 0×)
+PASS A/B · STORE B: one row "STORE B · STATE", undo and redo byte-identical (undo 2.9 ms, modulation window rebuilt 0×)
+PASS A/B · the transition on: one row "TRANSITION · STATE", undo and redo byte-identical (undo 3.26 ms, modulation window rebuilt 0×)
+PASS a palette choice (its select): one row "PALETTE", undo and redo byte-identical (undo 13.62 ms, modulation window rebuilt 0×)
+PASS a custom palette stop (its colour well): one row "COLOUR · PALETTE", undo and redo byte-identical (undo 13.8 ms, modulation window rebuilt 0×)
+PASS modulation · ADD DEVICE → ADD LFO (the window's own menu): one row "ADD LFO · MODULATION", undo and redo byte-identical (undo 40.98 ms, modulation window rebuilt 1×)
+PASS modulation · an LFO dial dragged (RATE): one row "LFO RATE · MODULATION", undo and redo byte-identical (undo 30 ms, modulation window rebuilt 1×)
+PASS modulation · a right-drag on LFO 1's curve (real input, button 2, a 700 ms rest mid-drag): one row "CURVE · LFO 1 · MODULATION", undo and redo byte-identical (undo 28.18 ms, modulation window rebuilt 1×)
+PASS modulation · a Shift-right-click on LFO 1's curve (real input): one row "CURVE · LFO 1 · MODULATION", undo and redo byte-identical (undo 27.38 ms, modulation window rebuilt 1×)
+PASS modulation · a route dragged from MACRO 1's grip onto a dial: one row "ROUTE MACRO 1 · MODULATION", undo and redo byte-identical (undo 30.12 ms, modulation window rebuilt 1×)
+PASS an edit outside the modulation undone with the window open (the rack is not reloaded): one row "STAGE COLOUR · SETTINGS", undo and redo byte-identical (undo 4.16 ms, modulation window rebuilt 0×)
+PASS modulation · LW.mod.addSource (the debug road) is a row too, and undoes byte for byte
+PASS the modulation plays through an undo: an unchanged rack is not reloaded (transport running, LFO continuous); an undo that reloads it is re-followed by LINKED time
+PASS a route undone while it plays: the stage returns to its hand value 0.3 exactly (it read 0.521 under the LFO), redo routes it again on base 0.3, and the hand on the routed STAGE knob (base → 0.756) undoes to its base with no rebuild
+PASS a gesture that changed nothing takes its name with it: THEME pressed (no row, the edit scope unmoved), then a preset through the API is one row named "edit"
+PASS the verifier's mislabelled rows: GRID 96³ then ] → "turn ψ about the axis, + · ]"; THEME then LW.mod.addSource → "edit"; FRAME OFF then a stage edit → "edit"; THEME then C 60 ms later → "cycle the draw style · C"
+PASS the C key (real input): one row "cycle the draw style · C", undo and redo byte-identical (undo 3.42 ms, modulation window rebuilt 0×)
+PASS the V key (real input): one row "cycle the observable · V", undo and redo byte-identical (undo 3.48 ms, modulation window rebuilt 0×)
+PASS the P key (real input): one row "toggle the phase palette · P", undo and redo byte-identical (undo 20.28 ms, modulation window rebuilt 0×)
+PASS the travel keys lend no name: Ctrl+Z, Ctrl+Shift+Z and Ctrl+Y each travel, and an unnamed edit 100 ms later is a row called "edit"
+PASS a STYLE segment press: one row "STYLE CLOUD · WAVE", undo and redo byte-identical (undo 3.26 ms, modulation window rebuilt 0×)
+PASS SEPARATE: a route undone under a playing modulation transport leaves it playing with the stage on its base 0.3; redo routes and holds it again (0.372 under the LFO)
+PASS the drive: ROTATE z on an m = 0 state (it turns nothing) leaves a STAGE drag its own named row; on 2p_x it is one gesture — 3 s of play made no row, and its stop made one "rotation drive" row
+PASS no row from a camera orbit, a window drag, typing in the notebook, a notebook resize, a GRID change, toggling the modulation window, or 5 s of play
+PASS the chrome leaves the ring: after an undo and a redo, frame / axis / frameMode / axisMode / cornerSide / invert / axisInk are exactly what they were
+PASS the depth: 61 distinct edits leave 60 undos and the start fell off the bottom; goto(10) then an edit truncates, and HISTORY UNDO restores the whole 61-row timeline at its head
+PASS the cost: a flush after an edit 0.3 ms median (max 0.48), canUndo with an edit pending (one liveKey) 0.16 ms; 5 s of play read the edit scope 0× and made 0 rows; 11999 bytes per row here
+PASS MOLECULES ON is one row: the solve's fill joined it (orbital 5), the first undo turned it off byte for byte, redo brought it back byte for byte with its fill, no row after
+PASS the origin names the bottom row: a link → [link], WAVE DANCER → [open · WAVE DANCER], NEW → [new project], each depth 0 and still depth 0 1.5 s later; the demo undoes byte for byte in 3.6 ms with no rebuild; 10446 bytes per demo row
+PASS undo latency (ms, one restore each): {"look":4.22,"preset":3.14,"element":5.96,"palette":13.8,"modulation":30,"demo":3.6}
+PASS a link opened at boot names the bottom row link (not boot)
+PASS the MOLECULES undo leaves nothing: NEW → a real click on MOLECULES ON (orbital 5, one STATES lane) → Ctrl+Z is byte-identical to the pre-ON reading and clean 1 s later; back on by Ctrl+Shift+Z, then NEW is the file (orbital null, lanes [])
+# new-project.browser-test.mjs rc=0
+PASS the empty project is the shipped default: a fresh boot serialises to the file on all 20 non-modulation presentation keys (no quality, layout, modwin or notebook size in it)
+PASS the demo button asks before discarding unsaved changes (Cancel fetched and stored nothing), then opens WAVE DANCER onto its notebook; untouched it is still clean 1 s later (mat.steps 240 in the file → 160 on this device), and a stage colour change dirties it
+PASS NEW (64.0 ms, fetch + restore): every PROJECT key is the file's, modulation = LFO + AUDIO bound (s1, s2:level), no routes; the open notebook stays open on NOTES, emptied, its empty placeholder shown (the debounced keystrokes did not flush back); A/B off, stores empty; settings minus WORKSPACE, theme and window arrangement byte-identical; nothing current, history depth 0, clean; no getUserMedia
+PASS linked time on the get-go: with the modulation window shown, play moved the mod transport and macro LFO in 155 ms, no refusal, no microphone, still clean
+PASS the notebook law: an open never closes the notebook — NEW and a blank project (whitespace only) leave a closed notebook closed and a PROJECTS pane on PROJECTS; a project with text opens onto its NOTES
+PASS a NEW that cannot land changes nothing: an unreachable file leaves serialize() byte-identical and says so; a file whose restore throws half-way is rolled back byte-identical (M5b), current and dirty as they were
+PASS a held stage does not outlive its project: with WAVE DANCER's Stage route playing (stage 0.0541), NEW lands 0.04, a stored 0.2 project lands 0.2 (saved with its bases table, and without one), and NEW after a folded play and a pause lands 0.04
+PASS on a tablet a saved 128³ × 240 project opens clamped to 96 × 160 and is still clean 1 s later; a stage colour dirties it; NEW there is clean and marches at the device's 160 steps

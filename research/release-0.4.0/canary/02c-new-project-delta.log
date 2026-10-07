@@ -1,0 +1,7 @@
+diff --git a/lab/new-project.lambdawaves.json b/lab/new-project.lambdawaves.json
+index b61f6de..8a3e173 100644
+--- a/lab/new-project.lambdawaves.json
++++ b/lab/new-project.lambdawaves.json
+@@ -393 +393 @@
+-     "bpm": 60
++     "bpm": 30

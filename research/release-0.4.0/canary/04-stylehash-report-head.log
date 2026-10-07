@@ -1,0 +1,150 @@
+# before before: http://127.0.0.1:8737/index.html
+# after  after: http://127.0.0.1:8737/index.html
+# noise  before2 (a second capture of the unchanged page; what differs there is masked)
+## dark-tinted-off: 595 → 595 elements · 136 changed · 0 gone · 0 new · (0 noisy masked)
+  ~ div#lab > div#stage > button#rackToggle.glass
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > div#stage > button#rackAdd.glass
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > div#stage > button#rackFav.glass
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > div#stage > div#transport.glass.mini
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north
+      width: 12px → 13px
+      height: 12px → 13px
+      #box: 899 810.5 12 12 → 898.5 810 13 13
+  ~ div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north > path
+      #box: 899.6 811.6 10.8 10 → 899.2 811.2 11.7 10.8
+  ~ div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.mod-exp.mod-logo:7
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > aside#rackL > section.dev.lean:1
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → none
+  ~ div#lab > aside#rackL > section.dev.lean:1 > header.dev-head
+      background-color: rgba(255, 255, 255, 0.043) → rgba(28, 32, 38, 0.84)
+      background-image: none → linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 42%), none
+      background-size: auto → auto, auto
+      background-position: 0% 0% → 0% 0%, 0% 0%
+      background-clip: border-box → border-box, border-box
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+      backdrop-filter: brightness(1.03) saturate(1.03) → none
+  ~ div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1
+      border-top-width: 1px → 0px
+      border-right-width: 1px → 0px
+      border-bottom-width: 1px → 0px
+      border-left-width: 1px → 0px
+      border-top-style: solid → none
+      border-right-style: solid → none
+      border-bottom-style: solid → none
+      border-left-style: solid → none
+      border-top-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-right-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-bottom-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-left-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      background-color: rgba(255, 255, 255, 0.043) → rgba(0, 0, 0, 0)
+      filter: none → drop-shadow(color(srgb 0.188235 0.996078 0.933333 / 0.7) 0px 0px 3px)
+      ::before width: 6px → 8px
+      ::before height: 6px → 8px
+  ~ div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > div.segw > div.seg > button.on.seg-b:0
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > div.segw > div.seg > button.seg-b:1
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > div.segw > div.seg > button.seg-b:2
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > button.shadow-details-toggle.trig
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → none
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > header.dev-head
+      background-color: rgba(255, 255, 255, 0.043) → rgba(28, 32, 38, 0.84)
+      background-image: none → linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 42%), none
+      background-size: auto → auto, auto
+      background-position: 0% 0% → 0% 0%, 0% 0%
+      background-clip: border-box → border-box, border-box
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+      backdrop-filter: brightness(1.03) saturate(1.03) → none
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > header.dev-head > div.dev-util:2 > button.dev-power:1
+      border-top-width: 1px → 0px
+      border-right-width: 1px → 0px
+      border-bottom-width: 1px → 0px
+      border-left-width: 1px → 0px
+      border-top-style: solid → none
+      border-right-style: solid → none
+      border-bottom-style: solid → none
+      border-left-style: solid → none
+      border-top-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-right-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-bottom-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      border-left-color: rgba(255, 255, 255, 0.08) → rgb(242, 245, 247)
+      background-color: rgba(255, 255, 255, 0.043) → rgba(0, 0, 0, 0)
+      filter: none → drop-shadow(color(srgb 0.188235 0.996078 0.933333 / 0.7) 0px 0px 3px)
+      ::before width: 6px → 8px
+      ::before height: 6px → 8px
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body
+      box-shadow: rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.trig:0
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1
+      text-shadow: none → color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1 > span.trig-g:0
+      text-shadow: none → color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1 > span.trig-l:1
+      text-shadow: none → color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.trig:2
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.trig:3
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.segw:0 > div.seg:1 > button.on.seg-b:0
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.segw:0 > div.seg:1 > button.seg-b:1
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.segw:0 > div.seg:1 > button.seg-b:2
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.segw:0 > div.seg:1 > button.seg-b:3
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.segw:0 > div.seg:1 > button.seg-b:4
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2
+      box-shadow: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.45) 0px 3px 8px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.38) 0px 10px 28px 0px, rgba(0, 0, 0, 0.2) 0px 2px 6px 0px
+      outline-style: none → solid
+      outline-width: 3px → 1px
+      outline-color: rgb(242, 245, 247) → rgba(255, 255, 255, 0.05)
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.k:2 > div.k-val:2
+      box-shadow: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.45) 0px 3px 8px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.38) 0px 10px 28px 0px, rgba(0, 0, 0, 0.2) 0px 2px 6px 0px
+      outline-style: none → solid
+      outline-width: 3px → 1px
+      outline-color: rgb(242, 245, 247) → rgba(255, 255, 255, 0.05)
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.k:3 > div.k-val:2
+      box-shadow: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.45) 0px 3px 8px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.38) 0px 10px 28px 0px, rgba(0, 0, 0, 0.2) 0px 2px 6px 0px
+      outline-style: none → solid
+      outline-width: 3px → 1px
+      outline-color: rgb(242, 245, 247) → rgba(255, 255, 255, 0.05)
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > div.k:0 > div.k-val:2
+      box-shadow: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.45) 0px 3px 8px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.38) 0px 10px 28px 0px, rgba(0, 0, 0, 0.2) 0px 2px 6px 0px
+      outline-style: none → solid
+      outline-width: 3px → 1px
+      outline-color: rgb(242, 245, 247) → rgba(255, 255, 255, 0.05)
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > div.segw:1 > div.seg:1 > button.on.seg-b:0
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > div.segw:1 > div.seg:1 > button.seg-b:1
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > div.k:2 > div.k-val:2
+      box-shadow: rgba(255, 255, 255, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.45) 0px 3px 8px 0px → rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.38) 0px 10px 28px 0px, rgba(0, 0, 0, 0.2) 0px 2px 6px 0px
+      outline-style: none → solid
+      outline-width: 3px → 1px
+      outline-color: rgb(242, 245, 247) → rgba(255, 255, 255, 0.05)
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > button.trig:0
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:2 > button.trig:1
+      transition: box-shadow 0.12s, transform 0.12s → box-shadow 0.12s, scale 0.12s, translate 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:3 > div.segw:0 > div.seg:1 > button.on.seg-b:0
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:3 > div.segw:0 > div.seg:1 > button.seg-b:1
+      transition: background 0.12s, box-shadow 0.12s → background 0.12s, box-shadow 0.12s, scale 0.12s
+  ~ div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:3 > div.disabled.k:1
+      box-shadow: none → rgba(0, 0, 0, 0) 0px 0px 0px 0px
