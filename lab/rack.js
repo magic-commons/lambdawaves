@@ -90,7 +90,7 @@ import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js'
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-const BUILD_LINE = '0.3.2-alpha · the offer · 2026-09-26';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+const BUILD_LINE = '0.3.3-alpha · the exports · 2026-10-07';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
