@@ -25,9 +25,27 @@ The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 (`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
 and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
 at startup but must be shown if an older project restores it as field owner.
-MOLECULES and MO-REGISTRY start off the first-run rack (offered by + and WINDOW)
-and, by the same law, come back onto it when a restored project's field owner
-is MOLECULES (MO-REGISTRY too when that file's register is on).
+MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack directly under
+SPECTRUM (folded on a phone or tablet), unsolved until MOLECULES is switched on;
+a restored project whose field owner is MOLECULES brings them back onto the rack
+(MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
+closes MO-REGISTRY: its switch stands down (it must release the field) and the
+ladder stays painted and editable. Its ORBITAL ladder paints: a press-and-drag
+puts every level it crosses in the register (a crossed degenerate row whole),
+Alt/Option-drag takes them out, a plain click still toggles one level.
+
+QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are hidden LEGACY windows (2026-10)
+that need an upgrade, re-adoption into MIR, or deletion — read
+`docs/LEGACY-WINDOWS.md` before touching them. They keep their ids, models and
+save records; HELIUM/H₂ resurface when a project turns them on as field owner,
+ELECTROSTATICS when a project's overlay is on. Do not re-list them in + or
+WINDOW.
+
+The MOLECULE FORMULA (Settings › Display, PREFERENCE `molFormula`, on by
+default) sets the MOLECULES pick large in the maths face on the stage while
+MOLECULES is on: at the top while the transport pill floats at the foot, at
+the foot when the transport is docked or the pill is at the top. It is
+transparent text under every window and never part of the occlusion mask.
 
 The stage frame/axis mask is built in `lab/rack.js` `refreshOcclusion()` and
 consumed by the line shader in `lab/field.js`. Mask painted window surfaces,

@@ -63,8 +63,8 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 }
 {
   const rows = { desktop: firstRunMaterial(false).folded, mobile: firstRunMaterial(true).folded };
-  judge('THE FIRST-RUN FOLDS (W129): the furniture folds SETTINGS and STATE on every device, and SHADOW too on a phone or tablet; the desktop\'s list is exactly the one it always folded; both frozen',
-    eq(rows.desktop, ['settings', 'state']) && eq(rows.mobile, ['settings', 'state', 'shadow']) && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
+  judge('THE FIRST-RUN FOLDS (W129; 2026-10): the furniture folds SETTINGS and STATE on every device, and SHADOW, MOLECULES and MO-REGISTRY too on a phone or tablet; the desktop\'s list is exactly the one it always folded; both frozen',
+    eq(rows.desktop, ['settings', 'state']) && eq(rows.mobile, ['settings', 'state', 'shadow', 'chem', 'orbitals']) && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
 /* ── PACE P2 (2026-09-25): THE FIRST-RUN QUALITY and THE DEVICE'S CEILING ─────────────────────────────────────────────── */
 {
