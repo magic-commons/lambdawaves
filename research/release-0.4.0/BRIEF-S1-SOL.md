@@ -34,7 +34,7 @@ tables, Schwarz screening, "one contraction per unique quartet filled through al
 `CAP_MS`, the cap-is-benzene law ~l.25), `research/molecular-orbitals-2026-10-01/names-probe.mjs` (the D₆h frame of
 benzene, the AO representation `M(R)`, the character tables as data — the machinery the number reuses),
 `research/molecular-orbitals-2026-10-01/PROBE.md`, `lab/field.js` ~170–190 (the χ tile and the density contraction on
-the 96³ grid), the MASTER GOAL SPEC §39 (`~/Documents/OBSIDIAN/LAMBDAWAVES CLAUDE MASTER GOAL SPEC:2026-09-02.md`), L-0408
+the 96³ grid), the MASTER GOAL SPEC §39 (`~/Documents/OBSIDIAN/LAMBDAWAVES CLAUDE MASTER GOAL SPEC 2026-09-02.md`), L-0408
 (grep the vault's `GENERAL MATHEMATICS LIBRARY II.md` under `~/Documents/OBSIDIAN` for `L-0408`), and `research/DISK.md`'s
 contents list for what the corpus already says about characters, rings and the ERI.
 
