@@ -409,3 +409,11 @@ quick-settings, ijk mini-maps, "2×6 layout"), the About/Notebook buttons at the
 pack delivery (Drive, R2). A symmetry saving on a Cartesian grid is bounded by its signed-permutation operations (at
 most 48, usually 8). The legal reading of CAS and NIST SRD is unverified. The YouTube video's content beyond its title
 and description is unknown.
+
+## 9 · RULINGS TAKEN (Josh, 2026-10-07: "defaults are good")
+
+- R-A1 0.3.3 is cut from the merged-and-subtracted tree; 0.4.0 starts from it.
+- R-L2 C₆₀'s HOMO and LUMO in 0.4.0 only if the one 300-AO orbital-only dispatch measures under the tier's budget; the rest in 0.4.1 BUCKYBALL.
+- R-U1 Josh first, visitors on the iPad second.
+- Every other ruling in §7 takes the first-named option until he says otherwise. The lens shift stays ("the planet photo is a bit of an over-explanation but that sounds like a cool feature").
+- The branches may be pushed ("yes to anything for the branches").
