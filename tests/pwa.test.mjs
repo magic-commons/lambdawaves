@@ -314,7 +314,7 @@ console.log(`PASS precache list == lab/ on disk: ${listed.length} files, ${(byte
 
 /* ══ D.  NOTHING EXTERNAL, AND NOTHING MISSING ═══════════════════════════════════════════════════════════ */
 const TEXTY = /\.(js|mjs|html|css|md|txt|webmanifest|svg)$/i;
-const DOCS = (r) => /\.(md|txt)$/i.test(r) || r === 'vendor/katex/LICENSE';
+const DOCS = (r) => /\.(md|txt)$/i.test(r) || r === 'mir/shell/vendor/katex/LICENSE';   // 0.4.0 S0: the one KaTeX copy is the kit's
 
 /* D1 — no absolute URL is ever LOADED.  Every way a browser can be told to go and get something. */
 const LOADERS = [
@@ -414,7 +414,7 @@ assert.ok(refs > 150, `D3 only found ${refs} relative references across lab/ —
 /* KaTeX offers each face as woff2, then woff, then ttf; only the woff2 files are shipped, and every browser
    that can run WebGPU takes the first.  So the check is: the FIRST source of every @font-face exists. */
 let faces = 0;
-for (const m of text('vendor/katex/katex.min.css').matchAll(/@font-face\s*\{[^}]*src:\s*url\(([^)]+)\)/g)) { faces++; note('vendor/katex/katex.min.css', m[1].replace(/["']/g, '')); }
+for (const m of text('mir/shell/vendor/katex/katex.min.css').matchAll(/@font-face\s*\{[^}]*src:\s*url\(([^)]+)\)/g)) { faces++; note('mir/shell/vendor/katex/katex.min.css', m[1].replace(/["']/g, '')); }
 assert.ok(faces >= 20, `katex.min.css: only ${faces} @font-face rules parsed — the regex has drifted`);
 assert.deepEqual(dangling, [], 'lab/ references a file that is not there — a 404 offline and online:\n  ' + dangling.join('\n  '));
 assert.deepEqual(uncached, [], 'lab/ loads a file that the precache does not hold — it will 404 offline:\n  ' + uncached.join('\n  '));
@@ -591,7 +591,7 @@ async function fetchMatrix(W, mount) {
     ['a NAVIGATION to a document beside the app', 'https://host.invalid/REPORT.md', { mode: 'navigate' }],
     ['a NAVIGATION to /LICENSE',     'https://host.invalid/LICENSE',    { mode: 'navigate' }],
     ['a NAVIGATION to /NOTICE',      'https://host.invalid/NOTICE',     { mode: 'navigate' }],
-    ['a NAVIGATION to a vendored licence text', 'https://host.invalid' + mount + 'vendor/katex/LICENSE', { mode: 'navigate' }],
+    ['a NAVIGATION to a vendored licence text', 'https://host.invalid' + mount + 'mir/shell/vendor/katex/LICENSE', { mode: 'navigate' }],
     ['a NAVIGATION to a font licence', 'https://host.invalid' + mount + 'fonts/Roboto-OFL.txt', { mode: 'navigate' }],
     /* and a typo: not_found_handling "404-page" must reach the visitor, not a 200 of HTML that fails later */
     ['a NAVIGATION to a typo',       'https://host.invalid' + mount + 'no-such-page', { mode: 'navigate' }],
@@ -707,11 +707,9 @@ for (const rel of licenceTexts)
 const FACES = onDisk.filter((r) => /\.woff2$/i.test(r)).sort();
 const ours = FACES.filter((r) => r.startsWith('fonts/')), vendored = FACES.filter((r) => !r.startsWith('fonts/'));
 assert.equal(ours.length, 3, `expected the three subset interface faces in lab/fonts/, found ${ours.length}`);
-for (const root of ['vendor/katex/fonts/', 'mir/shell/vendor/katex/fonts/']) {
-  const faces = vendored.filter((r) => r.startsWith(root));
-  assert.equal(faces.length, 20, `expected the twenty unmodified KaTeX faces under ${root}, found ${faces.length}`);
-}
-assert.equal(vendored.length, 40, `expected two complete sets of twenty unmodified KaTeX faces, found ${vendored.length}`);
+/* 0.4.0 S0 · wave 138: ONE set — lab/index.html loads the kit's KaTeX and the byte-identical lab/vendor/katex is deleted */
+assert.equal(vendored.filter((r) => r.startsWith('mir/shell/vendor/katex/fonts/')).length, 20, 'expected the twenty unmodified KaTeX faces under mir/shell/vendor/katex/fonts/');
+assert.equal(vendored.length, 20, `expected one complete set of twenty unmodified KaTeX faces (the kit's), found ${vendored.length}`);
 for (const rel of vendored) for (const m of (woff2Names(rel)[13] || '').matchAll(/Reserved Font Names?\s+([\w]+)/g)) RFN.add(m[1]);
 assert.ok(RFN.size >= 13, `only ${RFN.size} Reserved Font Names found across the licences and the faces — the scan has stopped reading them`);
 
@@ -743,7 +741,7 @@ for (const [fam, url] of faceRules) {
 }
 /* THE TWENTY KATEX FACES ARE UNMODIFIED, which is WHY their RFNs may stand — and it is also why they need
    their own licence, which NOTICE claimed was MIT and which did not ship at all before this wave. */
-const katexOFL = 'vendor/katex/fonts/OFL.txt';
+const katexOFL = 'mir/shell/vendor/katex/fonts/OFL.txt';
 assert.ok(existsSync(path.join(LAB, katexOFL)), `${katexOFL} is missing: the twenty KaTeX faces are SIL OFL 1.1, not MIT, and OFL §2 requires the licence to travel with each copy`);
 const kt = text(katexOFL);
 assert.ok(/SIL OPEN FONT LICENSE Version 1\.1/.test(kt), `${katexOFL} does not contain the OFL body`);

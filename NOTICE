@@ -73,15 +73,15 @@ Version under the SIL Open Font License, and each entry below says so.
                (https://github.com/chjj/)
                The licence file also carries the BSD 3-Clause notice for the
                original Markdown, Copyright © 2004 John Gruber.
-    Files:     lab/vendor/marked.min.js
-    Licence:   lab/vendor/marked-LICENSE.md
+    Files:     lab/mir/shell/vendor/marked.min.js
+    Licence:   lab/mir/shell/vendor/marked-LICENSE.md
 
 5.  KaTeX  —  the notebook's mathematics typesetting
     Version:   0.16.11
     Licence:   The MIT License (MIT)
     Notice:    Copyright (c) 2013-2020 Khan Academy and other contributors
-    Files:     lab/vendor/katex/katex.min.js, lab/vendor/katex/katex.min.css
-    Licence:   lab/vendor/katex/LICENSE
+    Files:     lab/mir/shell/vendor/katex/katex.min.js, lab/mir/shell/vendor/katex/katex.min.css
+    Licence:   lab/mir/shell/vendor/katex/LICENSE
 
 6.  The KaTeX fonts  —  redistributed UNMODIFIED with KaTeX
     Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
@@ -94,8 +94,8 @@ Version under the SIL Open Font License, and each entry below says so.
                KaTeX_Fraktur, KaTeX_Main, KaTeX_Math, KaTeX_SansSerif,
                KaTeX_Script, KaTeX_Size1, KaTeX_Size2, KaTeX_Size3,
                KaTeX_Size4 and KaTeX_Typewriter.
-    Files:     the twenty KaTeX_*.woff2 faces in lab/vendor/katex/fonts/
-    Licence:   lab/vendor/katex/fonts/OFL.txt
+    Files:     the twenty KaTeX_*.woff2 faces in lab/mir/shell/vendor/katex/fonts/
+    Licence:   lab/mir/shell/vendor/katex/fonts/OFL.txt
 
 7.  lab/mir/mod.js, lab/mir/curve.js, lab/mir/glyph.js
     From:      the MANDELBROT app, © 2026 Joshua Hosain · Magic Commons,

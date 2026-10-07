@@ -3444,3 +3444,40 @@ transport state"; a MIR issue, not an app edit).
 Gates, run once: `bash test.sh node` green (82 suites); browser `take-in-bugs` 4/4 on 8731 (and RED on the tree
 before the LINKED fix: 353 ms > 150 ms). The digest lock was not run: the frame loop's render order is untouched — the
 new tick writes DOM text after the present, where METERS' tick already ran.
+
+### wave 138: Wire, don't re-date — one KaTeX and one marked, the kit's; and the manifest pinned so a forgery fails everywhere
+
+`lab/index.html` loaded KaTeX and marked from `lab/vendor/`, and the kit ships the same files under
+`lab/mir/shell/vendor/` — proved byte-identical before anything moved (`diff -r lab/vendor/katex
+lab/mir/shell/vendor/katex` empty; `cmp` silent on `marked.min.js` and `marked-LICENSE.md`). The three tags and the
+ABOUT face's three licence links now name `./mir/shell/vendor/…`, and the app's duplicate is DELETED: `lab/vendor/katex/`,
+`marked.min.js`, `marked-LICENSE.md` and the CommonJS `package.json` — 27 files, 602 870 bytes off every deploy.
+`lab/vendor/bse/` (the basis sets) stays. The precache, measured by summing the bytes of every file `lab/sw.js` lists:
+207 files / 4 899 078 B before, 182 files / 4 607 101 B after — 25 fewer entries and 291 977 B (285 KiB) less, not the
+whole 589 KiB, because the kit's `katex.min.js` and `marked.min.js` were STAGED (not precached) and now join it: the
+precache derives its staged set from the wiring allowlist, so closing those two rows put them back by itself.
+
+`tests/wiring.test.mjs`: the two vendor rows CLOSE BY WIRING (deleted — the wiring gate now reaches both from
+`index.html`); the five shell rows (`about.js`, `accent.js`, `menubar.js`, `notebook.js`, `wordmark.js`) are renewed
+ONCE, dated 2026-10-07, each reason naming its consumer — the 0.5.0 adoption (PLAN.md §6), where `rack.js` moves the
+ABOUT face, the accent editor, the menubar, the notebook controller and the wordmark onto the kit shell. The two node
+tests that `createRequire`d the app's KaTeX (`latex-state`, `notebook-math`) load the kit's copy through a small shared
+`tests/helpers/katex-node.mjs`: the UMD bundle run once in a `vm` context with a `module`/`exports` shim, because the
+kit's copy has no CommonJS `package.json` and may never get one. `tests/pwa.test.mjs` (the one KaTeX css, the one set of
+twenty faces, the licence paths), `tools/build-deploy.mjs` and `NOTICE` follow the move.
+
+THE PROCESS HOLE, CLOSED. `tests/mir-manifest.test.mjs` hashed the adopted files against the manifest the same commit
+could rewrite, so Cloud's forgery (`d917dc7`, merged and subtracted in wave 136) passed it. It now holds `ACCEPTED = { '1.4.3': '<sha-256 of MIR-MANIFEST.json>' }`
+and asserts the manifest's own bytes are the pinned ones for the version it names: a forged version fails in every
+checkout and in the cloud's CI, and a real adoption is a visible two-file edit (the manifest MIR's `tools/adopt.mjs`
+writes, and its row in ACCEPTED — the assertion message says so). Proved on the forgery itself, from a scratch tree
+holding `git show 28fe445:MIR-MANIFEST.json` (version 1.4.4, commit `f56cf16e9402`, sha-256 `42b76e5a…aaf0`):
+`MIR-MANIFEST.json names MIR 1.4.4, which is not an accepted adoption (accepted: 1.4.3)…`; and relabelled back to
+"1.4.3" with its edited palette hash kept (sha-256 `84193a24…8bb0`): `…has sha-256 84193a24…, not the pinned
+a4c3b901…`. The pinned 1.4.3 manifest is `a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23`.
+
+Gates, run once: `node tests/pwa.test.mjs --write` (182 entries); `bash test.sh node` green (82 suites, the pinned
+manifest test among them); browser `menubar` 8/8 (ABOUT), `latex-copy` 9/9 (the notebook renders the copies with the
+kit's KaTeX), `current` 15/15; `node tools/build-deploy.mjs --no-test` assembles and verifies dist/ (203 files, 5.16 MiB).
+Left as it was: `lab/sw.js`'s NEVER_PRECACHE prose still carries a "vendor/katex/LICENSE — NO LONGER SKIPPED" row; sw.js
+is regenerated, not hand-edited, and that row is documentation no check reads.

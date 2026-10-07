@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
+import { loadKatex } from './helpers/katex-node.mjs';   // 0.4.0 S0: the kit's KaTeX (lab/mir/shell/vendor), loaded in a vm
 import { renderNotebookMath } from '../lab/mir/shell/notebook-math.js';
 
 const attack = '</code><img src=x onerror="alert(1)"><script>bad()</script>&';
@@ -16,7 +16,7 @@ const rendered = renderNotebookMath('x^2', true, { renderToString(tex, options) 
 assert.equal(rendered, '<span class="katex">rendered math</span>');
 assert.equal(called.tex, 'x^2');
 assert.deepEqual(called.options, { displayMode: true, throwOnError: false, output: 'html', trust: false });
-const katex = createRequire(import.meta.url)('../lab/vendor/katex/katex.min.js');
+const katex = loadKatex();
 assert.match(renderNotebookMath('x^2', false, katex), /class="katex"/);
 assert.doesNotMatch(renderNotebookMath(attack, false, katex), /<img|<script/);
 assert.doesNotMatch(renderNotebookMath(String.raw`\href{javascript:alert(1)}{click}`, false, katex), /href="javascript:/);

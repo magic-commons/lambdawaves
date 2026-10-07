@@ -5,14 +5,14 @@
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
+import { loadKatex } from './helpers/katex-node.mjs';   // 0.4.0 S0: the kit's KaTeX (lab/mir/shell/vendor), loaded in a vm
 import { stateLatex, stateTerms, moleculeLatex, formulaLatex } from '../lab/latex-state.js';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from '../lab/molecules.js';
 import { BASIS, stateOf } from '../lab/hydrogen.js';
 import { HAMILTONIANS } from '../lab/hamiltonian.js';
 
-const katex = createRequire(import.meta.url)('../lab/vendor/katex/katex.min.js');
+const katex = loadKatex();
 const H = HAMILTONIANS.hydrogen;
 let failed = 0;
 const all = [];

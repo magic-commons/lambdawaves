@@ -55,14 +55,14 @@ const TODAY = new Date();
  *   · An entry EXPIRES.  Loud warning at 14 days, hard failure at 60.  This is a time bomb on purpose: the
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
+/* 0.4.0 S0 · wave 138: the two vendor rows (katex.min.js, marked.min.js) CLOSED BY WIRING — lab/index.html loads the kit's
+   copies and the byte-identical lab/vendor duplicates are deleted.  The five shell rows are renewed ONCE, naming their consumer. */
 const ALLOWLIST = [
-  { file: 'lab/mir/shell/about.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook and ABOUT face to it.' },
-  { file: 'lab/mir/shell/accent.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned accent editor to it.' },
-  { file: 'lab/mir/shell/menubar.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned menubar implementation to it.' },
-  { file: 'lab/mir/shell/notebook.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned notebook controller to it.' },
-  { file: 'lab/mir/shell/vendor/katex/katex.min.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.' },
-  { file: 'lab/mir/shell/vendor/marked.min.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages this vendor runtime until lab/rack.js calls the shared shell notebook and its loadRenderer function.' },
-  { file: 'lab/mir/shell/wordmark.js', date: '2026-09-21', reason: 'MIR 1.4.2 stages the shared shell until lab/rack.js migrates λWAVES’ commissioned wordmark implementation to it.' },
+  { file: 'lab/mir/shell/about.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ ABOUT face onto the kit shell.' },
+  { file: 'lab/mir/shell/accent.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ accent editor onto the kit shell.' },
+  { file: 'lab/mir/shell/menubar.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ menubar onto the kit shell.' },
+  { file: 'lab/mir/shell/notebook.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ notebook controller onto the kit shell.' },
+  { file: 'lab/mir/shell/wordmark.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ wordmark onto the kit shell.' },
 ]; // Wave 107 wired the deterministic renderer into CAPTURE; the ChronusQ ports and the H₂O modules were staged here 2026-09-11/12 and reached by mathworker.js + chemview.js on 2026-09-12.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
