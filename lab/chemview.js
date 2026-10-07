@@ -212,6 +212,7 @@ export function createChem(host, api) {
        worker pays for every solve; this road simply stopped hiding it.  `detect` stays off: naming a SECOND
        aufbau solution costs a whole extra SCF, only N₂ has one, and this road is already on the frame thread. */
     const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false });
+    const names = (await import('./names.js')).namesOf(r, msg.atoms, msg.symmetry);
     const I = r.integrals, P = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: r.C, eps: r.orbitalEnergies, nocc: r.nocc });
     const ev = evaluator(r.basis.shells);
     let half = 0; for (const sh of r.basis.shells) half = Math.max(half, ev.supportRadius(sh, 1e-10));
@@ -219,7 +220,7 @@ export function createChem(host, api) {
       nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
       roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
       tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
-      timings: { integrals: r.timings.integrals, scf: null, rpa: null }, stability: wireStability(r.stability),
+      timings: { integrals: r.timings.integrals, scf: null, rpa: null, names: names.ms }, names, stability: wireStability(r.stability),
       solutions: (r.solutions || []).map((s) => ({ ...s, hessian: wireHessian(s.hessian) })), stage: 'full', local: true };
   }
 
@@ -248,7 +249,7 @@ export function createChem(host, api) {
        that cost the seconds.  Both replies are guarded by the same `solveSeq`: a reply for a molecule the hand has
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
-    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge };
+    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry };
     status(basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
     if (api.loading) api.loading(true);
