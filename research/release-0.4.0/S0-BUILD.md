@@ -11,7 +11,7 @@ every commit below is on top of it, in the brief's order. Nothing was pushed, ta
 3. Under a molecule EDIT › COPY now copies the molecule's page (`moleculeLatex`: formula, RHF/basis, E, the ε ladder with HOMO/LUMO by index).
 4. `.mol-more` is a fold (open on desktop, folded on phone/tablet, saved in the card's WORKSPACE record); MOLECULES' `Aa` shows with HELP off; ATOM brings ATOMS back, QUARKONIUM's button is hidden.
 5. Cheap bugs fixed with a test each: CALCULUS ⧉ copies its rows; STATUS TAGS tick with METERS closed; WIGNER/RADIATION stand down under MOLECULES.
-6. LINKED: REPRODUCED. Editor closed + nothing routed → the kit refuses the modulation play; the 1 s retry left a stopped transport for up to a second when the editor opened (353 ms measured). Fixed: opening the editor re-arms the link (46 ms / 33 ms).
+6. LINKED: REPRODUCED. Editor closed + nothing routed → the kit refuses the modulation play; the 1 s retry left a stopped transport for up to a second when the editor opened (353 ms measured). Fixed only that stall: opening the editor re-arms the link (46 ms / 33 ms). Josh's symptom itself stands — at a fresh start or after NEW, with the editor closed and nothing routed, Space plays the field and the kit refuses the modulation clock (`nothing-to-run`, MIR's law; a KIT BRIEF). (Wording corrected by Claude Sos after the release verifier's SHOULD 1.)
 7. KaTeX and marked load from the kit's `lab/mir/shell/vendor/`; the duplicate is deleted (27 files, 602 870 B off the deploy). Precache 207 files / 4 899 078 B → 182 / 4 607 101 B (−291 977 B); 185 after the demos.
 8. `tests/mir-manifest.test.mjs` pins the manifest's sha-256 per accepted version; the `28fe445` forgery fails ("names MIR 1.4.4, which is not an accepted adoption"), and so does a copy relabelled 1.4.3.
 9. Three demos made by the app — WATER, BENZENE, N₂ — each opening with MOLECULES on its HOMO, a notebook, and the visitor's settings untouched.
@@ -78,7 +78,7 @@ The pinned 1.4.3 manifest: `a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f2897
 
 ## The LINKED verdict
 
-**Reproduced on this tree, fixed in place, guarded.** A real Space (the driver's key) at five starts:
+**Reproduced on this tree; the editor-open stall fixed in place and guarded; the fresh-start symptom stands (the kit's refusal, below).** A real Space (the driver's key) at five starts:
 
 | start | field | modulation |
 |---|---|---|

@@ -65,7 +65,7 @@ try {
     }
     assert.equal(s.paused.field, false, 'a second Space pauses the field: ' + why); assert.equal(s.paused.mod, false, 'and the modulation clock: ' + why);
   }
-  console.log('PASS LINKED: a real Space plays both clocks and a second pauses both — ' + starts.map((s) => `${s.label}: t ${s.before.t.toFixed(2)} → ${s.after.t.toFixed(2)}, mod ${s.after.mod ? 'playing' : 'refused (nothing to run)'}` + (s.opened ? `, playing ${s.opened.ms.toFixed(0)} ms after the editor opened` : '')).join('; '));
+  console.log('PASS LINKED: a real Space plays the field, and the modulation clock wherever it has something to run (routed, or its editor open — then within 150 ms of opening); a second Space pauses both. At a fresh start and after NEW the kit refuses the modulation play (nothing-to-run): Josh\'s symptom, open as a KIT BRIEF — ' + starts.map((s) => `${s.label}: t ${s.before.t.toFixed(2)} → ${s.after.t.toFixed(2)}, mod ${s.after.mod ? 'playing' : 'refused (nothing to run)'}` + (s.opened ? `, playing ${s.opened.ms.toFixed(0)} ms after the editor opened` : '')).join('; '));
 
   /* ── 2 · CALCULUS's ⧉: the digest carries the rows ── */
   const calc = await g.ev(`__LW.loadPreset('1s+2pz'); __LW.layout.raise('calculus'); await __LW.settle(); await __w(300); await __LW.settle();

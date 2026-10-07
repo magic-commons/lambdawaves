@@ -136,3 +136,9 @@ C3(d)'s MOLECULES-`Aa` law, so it aborts before its palette-seat and saved-choic
 line. With that line scoped as described, the suite ran 3 / 3 here. Every other gate is green and every law in
 BRIEF-S0-VERIFY §2–§6 holds. After that fix and a lone re-run of the suite, the tree is fit to cut. SHOULD 1 is a
 wording fix for the release notes.
+
+## Resolution (Claude Sos, 2026-10-07)
+
+- **BLOCKER 1 fixed** in `tests/official-defaults-palette.browser-test.mjs`: the "every `Aa` hidden" row now excludes MOLECULES (`chem`), and a new row `chemAaShown` asserts its `Aa` is visible with HELP off — the verifier's tested scratch fix, verbatim. Re-run ALONE on 8721/5241: **3/3 PASS** (fresh defaults; WAVE density θ=0, Δρ ±π/2, palette OFF; saved choices survive) — the two checks the red line had hidden now ran.
+- **SHOULD 1 fixed**: REPORT wave 137, `S0-BUILD.md` (summary line 6 and the LINKED verdict) and the `take-in-bugs` PASS line now say the editor-open stall is fixed and Josh's fresh-start symptom stands (the kit's `nothing-to-run` refusal, a KIT BRIEF). `take-in-bugs` re-run ALONE: **4/4 GREEN**.
+- No `lab/` file changed, so no other suite is touched. **Fit to cut: YES.**

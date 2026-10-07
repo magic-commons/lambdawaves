@@ -12,12 +12,14 @@ try {
     return {tags:b.classList.contains('no-badges'),captions:b.classList.contains('no-captions'),
       hints:!b.classList.contains('control-hints-off'),helpOff:b.classList.contains('window-info-off'),
       lean:[...document.querySelectorAll('.dev-lean')].every(k=>k.closest('.dev').classList.contains('lean')),
-      aaHidden:[...document.querySelectorAll('.dev-lean')].every(k=>getComputedStyle(k).display==='none'),
+      // 0.4.0 S0 C3(d): MOLECULES' Aa stays visible with HELP off (its KICK / RUN / TDA / spectra are otherwise unreachable on a first run); every other window's Aa stays hidden
+      aaHidden:[...document.querySelectorAll('.dev-lean')].filter(k=>k.closest('.dev').dataset.id!=='chem').every(k=>getComputedStyle(k).display==='none'),
+      chemAaShown:getComputedStyle(document.querySelector('.dev[data-id="chem"] .dev-lean')).display!=='none',
       auto:__LW.quality.auto,domain:__LW.domain.auto,governor:__LW.governor.on,
       theme:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
       vivid:+vivid.getAttribute('aria-valuenow'),errors:__e.slice()};`);
-  assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,
+  assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,chemAaShown:true,
     auto:true,domain:true,governor:true,theme:'light',card:'refractive',frost:'always',
     blur:'22px',vivid:.5,errors:[] });
   console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur and 50% vivid');

@@ -3428,7 +3428,8 @@ hydrogenic physics under MOLECULES; `chem.on` joins the "another model holds the
 `hydrogenic register only`.
 
 THE LINKED BUG (Josh's NEXT UPDATE note: "at project start or open, Space does not play both clocks in LINKED mode"),
-REPRODUCED AND FIXED. A probe pressed a real Space (the driver's own key) at five starts. With the modulation editor
+REPRODUCED; THE STALL FIXED, THE SYMPTOM STANDS at a fresh start and after NEW (the kit's refusal, below — a MIR brief;
+wording corrected after the S0 release verifier, `research/release-0.4.0/S0-VERIFY.md` SHOULD 1). A probe pressed a real Space (the driver's own key) at five starts. With the modulation editor
 open, or anything routed (WAVE DANCER), Space plays both clocks and a second Space pauses both. With the editor CLOSED
 and nothing routed — the fresh first run, and NEW — the field plays and the modulation transport does not: the kit
 refuses the play with `nothing-to-run` (`lab/mir/modulation/host.js` `setPlaying`: unrouted sources only animate their
