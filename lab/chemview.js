@@ -164,6 +164,13 @@ export function createChem(host, api) {
   const roPick = readout({ label: 'INSPECTOR', cls: 'wide', value: '—', sub: 'hover or click a stick' });
   for (const r of [roE, roEps, roTr, roIdem, roT, roPick]) rr.appendChild(r.root);
   el('div', 'note', host).innerHTML = '<b>Model.</b> Restricted Hartree–Fock in a vendored Cartesian basis at a fixed experimental geometry — not the RHF minimum. Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
+  /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL IS HIDDEN: TDA / CORE, the kick and run controls, the spectrum, the
+     readouts and the note.  Hidden, not removed — every control keeps its state, save/load and API (__LW.chem.kick(), run,
+     setTda …), and `shown()` makes the hidden canvases' paint a no-op.  Un-hide `.mol-more` to bring the section back. */
+  const note = host.lastElementChild;
+  const more = el('div', 'mol-more', host); more.hidden = true;
+  const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
+  for (const n of [r2, cv, cvCore, rr, note]) more.appendChild(n);
 
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));
