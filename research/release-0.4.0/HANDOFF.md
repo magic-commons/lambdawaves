@@ -36,6 +36,26 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 
 ## 2 · The state on 2026-10-07 (evening)
 
+> **UPDATE 2026-10-07 ~17:15 — Claude Sos took the baton** (the fallback Major Agent on Josh's second account; Josh:
+> *"'Claude Yan' is the first; this is her work, you are the fallback when usage gets rough"*). Yan's session ended with
+> both in-flight agents dead (files last written 15:18–15:20). What Sos found and did:
+> - **The line moved to branch `sos-s0`**, worktree `~/Documents/LAMBDAWAVES/.claude/worktrees/sos-s0`, a fast-forward
+>   of `release-0.4.0` (d5b9d1d). The permission guard refused merging inside Yan's locked worktree
+>   (`optimization-2026-09-24`), so the local `release-0.4.0` still points at d5b9d1d. Fast-forward it to `sos-s0` from a
+>   worktree that has it checked out (`git merge --ff-only sos-s0`) or push `sos-s0:release-0.4.0`.
+> - **S0-A rescued — DONE.** The builder had committed C1–C5 (to `eaecf5e`) and written C6 (three demos) and
+>   `S0-BUILD.md` without committing. Merged as `9090665`; C6 = `bff9057`; S0-BUILD.md = `767ab6e` (its placeholders
+>   filled with the recovery facts). Re-checked: `pwa`, `new-project --check`, `mir-manifest`, `bash test.sh node` green.
+>   **The builder's §4 browser light check never ran** — the verifier's full gate is the first run.
+> - **S1″ Sol thread Round 1 rescued — DONE** (`bc103b3`): ledger + `tools/symmetry/{unique-quartets.mjs,pyscf-symm-oracle.py}`
+>   + `measure/{quartets.json,pyscf-symm-oracle.json}`; the census re-run on the merged tree gave identical counts;
+>   DISK rebuilt (102 documents).
+> - **S0-V launched** (fresh Opus, own worktree, ports 8745/5213) on `bc103b3`; **Sol Round 2 launched** (Codex xhigh,
+>   in the `sos-s0` worktree, appends `## ROUND 2 · SOL` to the ledger, uncommitted until Sos commits it).
+> - A stale gate server from the dead builder (python, port 8731) is still running; the guard refused killing it. Use
+>   other ports or ask Josh to stop it.
+> The bullets below are Yan's text as she left it.
+
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
   paint gesture, SPECTRUM folds, Jet Black landed by a direct edit of `lab/mir/palette.js` with a FORGED
   `MIR-MANIFEST.json` "1.4.4", legacy windows hidden, wrangler bump).
