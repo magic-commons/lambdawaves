@@ -72,6 +72,34 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Sol Round 2** (Codex task `task-muyncqpn-zablm5`, gpt-6.1-sol at xhigh) was still writing when this was recorded;
 >   its files are uncommitted in the `sos-s0` worktree (`tools/symmetry/round2-sol*`, `measure/*round2-sol*`). Josh:
 >   Sol 6.1 sits between Sonnet and Opus — re-run its headline numbers before the SYNTHESIS banks them.
+> **UPDATE 2026-10-07 ~18:25 — Claude Sos, third session (Fable).** Josh's coordination rule, verbatim: *"Two Claude
+> accounts work on this project. Before editing, identify your current directory, branch, assigned task, and worktree.
+> Use separate worktrees and branches for simultaneous implementation. Coordinate through written reports; do not assume
+> you can see or control the other account's conversation or workers. Stay inside your assigned worktree when editing
+> and running Git commands. Report your worktree path, branch, commits, tests, blockers, and next step in every handoff.
+> Preserve unfinished work, and do not remove another agent's worktree. Let one designated agent integrate changes. When
+> blocked, report the exact error and command. Avoid repeatedly creating replacement worktrees."*
+> - **The integrator is Claude Sos on `sos-s0`** (worktree `~/Documents/LAMBDAWAVES/.claude/worktrees/sos-s0`). Builders
+>   work in their own `.claude/worktrees/agent-*` worktrees and are merged here; nobody else merges into `sos-s0`. If
+>   Yan's account is active on λWAVES at the same time, hand branches over by a written report (this file's §2, a vault
+>   note, or a `*-BUILD.md` beside the briefs), never by editing `sos-s0`.
+> - **Landed since the previous update:** S0-V fixed (`ad9e8a0`); v0.3.3-alpha tagged locally at `9504700`, not live;
+>   Sol Round 2 committed (`58852c7`); **S1′ `cameraEye` merged** (`f247f0c`, wave 144, `S1-CAMERAEYE-BUILD.md`);
+>   **S1 NAMES merged** (`bd9b0e5`, waves 140–143, `S1-NAMES-BUILD.md` + the builder's `S1-NAMES-HANDOFF.md`). Tip of
+>   `sos-s0` at this update: `bd9b0e5`.
+> - **Running now, all from `bd9b0e5`:** the S2 CAMERA builder (Opus, `BRIEF-S2-CAMERA.md`, ports 8747/5215, waves from
+>   145); the S3 STAGE TEXT + WINDOWS builder (Opus, `BRIEF-S3-STAGE-AND-WINDOWS.md`, ports 8751/5219, waves from 155 —
+>   the integrator renumbers if the two collide); the Sol thread Round 3 + SYNTHESIS (Fable lead at max, own worktree,
+>   appends to the ledger and rebuilds the DISK); and Sol's LIBRARY CENSUS + C₆₀ frontier (Codex `task-muyotogt-mb4bgz`,
+>   gpt-6.1-sol at xhigh) writing UNTRACKED files into the `sos-s0` worktree under `research/release-0.4.0/library-census/`
+>   and `tools/library/` — leave those paths alone until Sos commits them. Merge order when they land: S2, then S3
+>   (`rack.js` is shared in disjoint regions), then the ledger; then the S2 verifier (8749/5217).
+> - **Still true:** local `release-0.4.0` sits at `d5b9d1d` in Yan's locked worktree (fast-forward it to `sos-s0` from a
+>   worktree that has it checked out); the stale gate server from Yan's dead S0 builder (python pid 1544349, port 8731)
+>   is still up; nothing is pushed or deployed (Josh's ruling above). The unused worktree `agent-a851ec0dd786a3819`
+>   (a Round 3 agent stopped before it wrote anything) is left for Josh to remove.
+> - **Next after this session's workers land:** S5 KIT BRIEFS (Sonnet or Sol; needs `S2-CAMERA-BUILD.md` and
+>   `S3-BUILD.md`), S4 LIBRARY a/b/c on the census's numbers, then the local 0.4.0-alpha cut on Josh's word.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
