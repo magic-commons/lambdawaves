@@ -1,0 +1,20 @@
+element-state diffs (beyond noise): 1172  token-text diffs: 235  distinct tokens: 16
+by property:
+  552 transition ["w.shadow-controls:0 > div.segw > div.seg > button.on.seg-b:0","background 0.12s, box-shadow 0.12s","background 0.12s, box-shadow 0.12s, scale 0.12s"]
+  448 box-shadow ["div#lab > div#stage > button#rackToggle.glass","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0p","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0"]
+  184 outline-style ["v-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2","none","solid"]
+  184 outline-width ["v-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2","3px","1px"]
+  184 outline-color ["v-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2","rgb(242, 245, 247)","rgba(255, 255, 255, 0.05)"]
+  165 background-color ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","rgba(255, 255, 255, 0.043)","rgba(28, 32, 38, 0.84)"]
+  132 text-shadow ["ectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1","none","color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px"]
+  64 backdrop-filter ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","brightness(1.03) saturate(1.03)","none"]
+  64 border-top-width ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  64 border-right-width ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  64 border-bottom-width ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  64 border-left-width ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  64 border-top-style ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+  64 border-right-style ["an:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+by subtree root:
+  728 div#lab > aside#rack
+  296 div#lab > aside#rackL
+  148 div#lab > div#stage
