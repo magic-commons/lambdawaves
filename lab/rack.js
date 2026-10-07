@@ -23,10 +23,10 @@ import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, cameraKey, toScreen, quatFromYawPitch } from './field.js';
+import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
-import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
-import { ELEMENT } from './md.js';                 // the ATOM LABELS' symbols, H–Kr   // the MOLECULE FORMULA overlay reads the pick's own formula
+import { MOLECULE_BY_ID } from './molecules.js';
+import { createStageText } from './stage-text.js';   // 0.4.0 S3 · F2: the STAGE TEXT — the interim renderer 0.5.0 deletes
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
 import { createShadowView } from './shadowview.js';
@@ -69,7 +69,7 @@ import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
-import { stateLatex, moleculeLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
+import { stateLatex, moleculeLatex, formulaLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
@@ -166,7 +166,7 @@ export async function boot(dom) {
   let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1, atomLabelScale = 1;                     // the STAGE FORMULA's SIZE knob (Settings › Display): × the 88 px base, a PREFERENCE
+  let molFormulaScale = 1, atomLabelScale = 1, atomLabelsOn = true;   // the STAGE FORMULA's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
@@ -269,10 +269,10 @@ export async function boot(dom) {
     const molFormula = s.molFormula !== false;                       // MOLECULE FORMULA: nothing said means ON (it only shows while MOLECULES is on)
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
     molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
-    const atomLabels = s.atomLabels !== false;                      // ATOM LABELS: nothing said means ON (they only show while MOLECULES is on)
-    document.body.classList.toggle('no-atom-labels', !atomLabels); if (ui.atomSw) ui.atomSw.set(atomLabels);
+    atomLabelsOn = s.atomLabels !== false;                          // ATOM LABELS: nothing said means ON (they only show while MOLECULES is on)
+    document.body.classList.toggle('no-atom-labels', !atomLabelsOn); if (ui.atomSw) ui.atomSw.set(atomLabelsOn);
     atomLabelScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : 1; if (ui.atomK) ui.atomK.set(atomLabelScale);
-    placeMolFormula(); atomLabelsKey = '';
+    if (stageText) { stageText.setScale(molFormulaScale); stageText.setLabelScale(atomLabelScale); stageText.setOn(molFormula); }
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
@@ -1001,8 +1001,7 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (molFormulaEl) stageTextTick();
-      if (atomLabelsEl) placeAtomLabels();                                // the ATOM LABELS follow the camera                                   // the stage text follows the atom register (rack.js placeMolFormula)
+      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half, atomLabelsOn); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (stage-text.js: compares only)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
@@ -1299,12 +1298,12 @@ export async function boot(dom) {
     ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
-    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is 88 px; it wraps inside the same width between the racks',
-      onInput: (v) => { molFormulaScale = v; placeMolFormula(); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
-    ui.atomSw = sw({ label: 'ATOM LABELS', value: true, title: 'Mark each nucleus of the MOLECULES molecule with its element symbol, inverted against whatever is under it', onChange: (v) => { document.body.classList.toggle('no-atom-labels', !v); atomLabelsKey = ''; schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.atomSw.root);
-    ui.atomK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The ATOM LABELS\' size: 100% is 13 px',
-      onInput: (v) => { atomLabelScale = v; atomLabelsKey = ''; schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.atomK.root);
+    ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is the notebook\'s title, 34 px; it wraps inside the same width between the racks',
+      onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
+    ui.atomSw = sw({ label: 'ATOM LABELS', value: true, title: 'Mark each nucleus of the MOLECULES molecule with its element symbol, inverted against whatever is under it', onChange: (v) => { atomLabelsOn = v; document.body.classList.toggle('no-atom-labels', !v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.atomSw.root);
+    ui.atomK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The ATOM LABELS\' size: 100% is the notebook\'s body, 14 px',
+      onInput: (v) => { atomLabelScale = v; if (stageText) stageText.setLabelScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.atomK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -2366,119 +2365,42 @@ export async function boot(dom) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
-    setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); placeMolFormula(); },
+    setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); stageTextTick(); },
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: molSession,
     derived: (fill) => (history ? history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
     now: () => clock.t });
 
-  /* MOLECULE FORMULA (Settings › Display, 2026-10; interim — the stage rework will reabsorb it).  The MOLECULES pick, set
-     large in the maths face on the stage while MOLECULES is on.  It sits on the side the transport is NOT on: the TOP
-     while the pill floats at the foot, the FOOT when the transport is docked or the pill has gone up (modDodge's
-     `.at-top`, or the narrow layout's top-right seat).  It is transparent text, so it is never in refreshOcclusion(),
-     never takes a pointer, and it sits beneath every window (z 20 < the rack's 30 < #floats' 32): the modulation window
-     may cover it.  Its ink follows the live STAGE colour (accent-wheel.js paintMarks), not the theme's. */
-  let molFormulaEl = null;
-  const molFormulaNarrow = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
-  function placeMolFormula() {
-    const fe = molFormulaEl; if (!fe) return;                      // built at the end of boot, after `layout` exists
-    const text = stageText();
-    const show = !!text && !document.body.classList.contains('no-mol-formula');
-    if (fe.textContent !== text) fe.textContent = text;
-    const tr = document.getElementById('transport');
-    const foot = layout.docked || !!(tr && tr.classList.contains('at-top')) || !!(molFormulaNarrow && molFormulaNarrow.matches);
-    fe.classList.toggle('mf-foot', foot); fe.classList.toggle('mf-top', !foot);
-    /* 2026-10 (Josh) · HALF the first size (88 px on a desktop, 8 vw on a phone), and CAPPED TO THE MIDDLE: centred in the
-       open stage between the two racks, then MEASURED down until it fits that gap less a large margin each side. */
-    if (show) {
-      fe.hidden = false;
-      let l = 0, r = window.innerWidth;
-      for (const rk of [rackL, rack]) {
-        if (!rk) continue;
-        const b = rk.getBoundingClientRect();
-        if (b.width < 2 || b.right <= 0 || b.left >= window.innerWidth || getComputedStyle(rk).display === 'none') continue;
-        if (b.left + b.width / 2 < window.innerWidth / 2) l = Math.max(l, b.right); else r = Math.min(r, b.left);
-      }
-      if (r - l < 120) { l = 0; r = window.innerWidth; }                // a phone's rack covers the stage: use the whole width
-      fe.style.left = Math.round((l + r) / 2) + 'px';
-      const gap = r - l, room = Math.max(80, gap - 2 * Math.max(48, gap * 0.12));       // a LARGE margin off each rack: ≥ 48 px or 12 % of the gap
-      /* the SIZE knob scales the base; the width limit is unchanged, so a long line WRAPS inside it, and only a single
-         unbreakable word (a long formula) wider than the room is measured down to fit */
-      const cap = Math.round(Math.max(24, Math.min(88, window.innerWidth * 0.08)) * molFormulaScale);
-      fe.style.maxWidth = Math.round(room) + 'px'; fe.style.fontSize = cap + 'px';
-      if (fe.scrollWidth > fe.clientWidth + 1) fe.style.fontSize = Math.max(16, Math.floor((cap * fe.clientWidth) / fe.scrollWidth)) + 'px';
-      /* … and never past the MIDDLE of the screen: wrapped lines that would run beyond 45 % of the height shrink the
-         size until they fit (each pass re-wraps, so it converges in a few) */
-      const maxH = window.innerHeight * 0.45;
-      for (let i = 0; i < 8 && fe.offsetHeight > maxH; i++) {
-        const fs = parseFloat(fe.style.fontSize) || cap, next = Math.max(16, Math.floor(fs * Math.max(0.6, Math.sqrt(maxH / fe.offsetHeight))));
-        if (next >= fs) break; fe.style.fontSize = next + 'px';
-      }
-    }
-    fe.hidden = !show;
+  /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2) — lab/stage-text.js renders it, and 0.5.0 deletes that file for the
+     kit's INFORMATIONAL layer.  Here is only its SOURCE: what is playing, as markdown — the MOLECULES formula
+     ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
+     own prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION).  The states go in with UNIT coefficients — the list line
+     depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
+     only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
+  let stageText = null;
+  const stageSrc = { v: -1, id: null, own: null };
+  function stageMd() {
+    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    if (row) return '$' + formulaLatex(row.formula) + '$';
+    if (molecule.on || helium.on || h2.on) return '';
+    const H = getHamiltonian(), line = (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0];
+    const mix = reg.transition, live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
+    if (mix) { const A = line(live(mix.reA, mix.imA)), B = line(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
+    return line(reg.populated());
   }
-  /** 2026-10 (Josh) · the same stage text for SPECTRUM: the atom register's populated states, "2s₀, 2p₋₁"; under an A ↔ B
-   *  TRANSITION, A's states ↔ B's states.  Only while the atom register owns the field (no molecular owner is on). */
-  let molFormulaKey = '';
-  function registerText() {
-    if ((molecule && molecule.on) || (helium && helium.on) || (h2 && h2.on) || (chem && chem.on)) return '';
-    const H = getHamiltonian(), name = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
-    const list = (re, im) => { const out = []; for (let a = 0; a < BASIS.length; a++) if (re[a] * re[a] + im[a] * im[a] > 1e-12) out.push(name(a)); return out.join(', '); };
-    const mix = reg.transition;
-    if (mix) { const A = list(mix.reA, mix.imA), B = list(mix.reB, mix.imB); return A && B ? A + '  ↔  ' + B : A || B; }
-    return reg.populated().map(name).join(', ');
-  }
-  function stageText() { const m = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null; return m ? mathPlain(m.formula) : registerText(); }
-  /** polled from the CPU tick (the register has no change event): the key is the string it would render, so a modulated
-   *  coefficient that leaves the populated set alone is one compare and no DOM */
   function stageTextTick() {
-    const key = stageText();
-    if (key !== molFormulaKey) { molFormulaKey = key; placeMolFormula(); }
+    if (!stageText) return;
+    const id = chem && chem.on ? chem.preset() : '', own = molecule.on || helium.on || h2.on;
+    if (reg.version === stageSrc.v && id === stageSrc.id && own === stageSrc.own) return;
+    stageSrc.v = reg.version; stageSrc.id = id; stageSrc.own = own;
+    stageText.setFormula(stageMd());
   }
-  /* 2026-10 (Josh) · ATOM LABELS (Settings › Display, PREFERENCE `atomLabels` / `atomLabelsSize`): each nucleus of the
-     MOLECULES molecule marked with its element symbol, small, at its projected screen position.  The atoms are
-     moleculeAtoms(preset) in bohr — the very centres the field's shells sit on — projected through toScreen (field.js),
-     the road every 2-D overlay takes.  The layer is white with
-     `mix-blend-mode: difference`, so every glyph INVERTS whatever is under it: dark on a light cloud, light on a dark one.
-     Transparent, no pointer, under every window, never in the occlusion mask.  Written only when the camera
-     (cameraKey, dist, fov), the preset, the size or the canvas changed (PLAN B3). */
-  let atomLabelsEl = null, atomLabelsKey = '', atomPlaceKey = '', atomSpans = [];
-  function placeAtomLabels() {
-    const L = atomLabelsEl; if (!L) return;
-    const on = !!(chem && chem.on) && !document.body.classList.contains('no-atom-labels');
-    if (!on) { if (!L.hidden) L.hidden = true; atomLabelsKey = atomPlaceKey = ''; return; }
-    const id = chem.preset(), atoms = moleculeAtoms(id);
-    if (atomLabelsKey !== id + '|' + atomLabelScale) {
-      atomLabelsKey = id + '|' + atomLabelScale; atomPlaceKey = '';
-      L.textContent = ''; atomSpans = atoms.map((a) => el('span', 'atom-label', L, ELEMENT[a.Z] || '?'));
-      L.style.fontSize = Math.round(13 * atomLabelScale) + 'px';
-    }
-    L.hidden = false;
-    const cv = dom.canvas, W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
-    const key = `${atomLabelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${domain.half}|${W}|${H}`;
-    if (key === atomPlaceKey) return;
-    atomPlaceKey = key;
-    const S = toScreen(obs, domain.half, W, H);
-    for (let i = 0; i < atoms.length; i++) {
-      const a = atoms[i], sp = atomSpans[i]; if (!sp) continue;
-      const q = S.at(a.x, a.y, a.z);
-      if (!q) { sp.style.display = 'none'; continue; }
-      sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
-    }
-  }
-  function initMolFormula() {
-    atomLabelsEl = el('div', '', dom.stage); atomLabelsEl.id = 'atomLabels'; atomLabelsEl.setAttribute('aria-hidden', 'true'); atomLabelsEl.hidden = true;
-    molFormulaEl = el('div', '', dom.stage); molFormulaEl.id = 'molFormula'; molFormulaEl.setAttribute('aria-hidden', 'true'); molFormulaEl.hidden = true;
-    const tr = document.getElementById('transport');
-    if (tr) new MutationObserver(placeMolFormula).observe(tr, { attributes: true, attributeFilter: ['class'] });   // dock / undock / .at-top
-    /* the racks hide, peek and slide (body classes), so the middle moves: place now and again once the slide has landed */
-    new MutationObserver(() => { placeMolFormula(); setTimeout(placeMolFormula, 400); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    window.addEventListener('resize', placeMolFormula, { passive: true });
-    if (molFormulaNarrow && molFormulaNarrow.addEventListener) molFormulaNarrow.addEventListener('change', placeMolFormula);
-    wChem.root.addEventListener('change', placeMolFormula);          // the pick lands in `preset` at once; the solve comes later
-    chem.subscribe(() => placeMolFormula());                         // … and a restore / undo / link that re-solves
-    paintMarks(); placeMolFormula();
+  function initStageText() {
+    stageText = createStageText({ stage: dom.stage, canvas: dom.canvas, racks: [rackL, rack], docked: () => layout.docked });
+    wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
+    chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
+    paintMarks(); stageTextTick();
   }
 
   /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
@@ -5091,7 +5013,7 @@ export async function boot(dom) {
         if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
         if (fieldlines.overlay !== 'off' && !hist) layout.raise('field');   // a hidden ELECTROSTATICS cannot present, so a file whose overlay is on raises it (on, unfolded, on screen)
         if (pr.instruments && chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
-        placeMolFormula();                                            // the MOLECULE FORMULA follows whatever MOLECULES the file left
+        stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
@@ -5653,7 +5575,7 @@ export async function boot(dom) {
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
   }
-  initMolFormula();
+  initStageText(); LW.stageText = stageText;   // the gate reads its string, its render count and its announcements
   applySettings();
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them
 

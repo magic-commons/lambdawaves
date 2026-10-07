@@ -851,13 +851,17 @@ body.ui-hidden #keymap { display: none; }
 .mol-pick { flex: 1 1 200px; }
 .mol-pick > select.sel { width: 100%; }
 
-/* MOLECULE FORMULA (Settings › Display; rack.js placeMolFormula): the MOLECULES pick, large, on the stage.  Transparent
-   text beneath every window (z 20 < rack 30 < #floats 32), never a pointer target, never in the occlusion mask.  Its
-   ink and halo are written by accent-wheel.js from the live STAGE colour; the side is chosen against the transport. */
+/* THE STAGE TEXT (Settings › Display; lab/stage-text.js, the interim renderer 0.5.0 deletes): what is playing, in the
+   notebook's markdown + KaTeX, on the stage.  Transparent text beneath every window (z 20 < rack 30 < #floats 32), never a
+   pointer target, never in the occlusion mask.  Its ink and halo are written by accent-wheel.js from the live STAGE colour
+   (KaTeX inherits both); the side is chosen against the transport; an announcement fades out and the formula fades back. */
 #molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
   font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1.08; letter-spacing: .01em;
-  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width rack.js sets */
-  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); }
+  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width stage-text.js sets */
+  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); transition: opacity .6s ease; }
+#molFormula p { margin: 0; }
+#molFormula .katex { font-size: 1.08em; }   /* the notebook's own KaTeX size (.nb-view .katex) */
+#molFormula.st-fade { opacity: 0; }
 #molFormula.mf-top { top: 64px; }
 #molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
 #molFormula[hidden] { display: none; }
@@ -867,7 +871,7 @@ body.ui-hidden #keymap { display: none; }
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
-/* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
+/* ATOM LABELS (Settings › Display; stage-text.js atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
 #atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;

@@ -51,17 +51,25 @@ operator is chosen (QUARKONIUM's button is hidden while QCD is; the value still
 restores). Do not re-list them in + or WINDOW.
 
 The STAGE FORMULA (Settings › Display, PREFERENCE `molFormula`, on by
-default) writes what is playing in the maths face on the stage: the MOLECULES
-formula while MOLECULES is on, otherwise SPECTRUM's populated states ("2s₀,
-2p₋₁"; A ↔ B under a TRANSITION). 88 px × its SIZE knob (`molFormulaSize`,
-50–300 %), centred between the racks with a wide margin; it WRAPS inside that
+default) writes what is playing on the stage in the notebook's own markdown +
+KaTeX (`lab/stage-text.js` — the interim renderer, which 0.5.0 deletes for the
+kit's INFORMATIONAL layer): the MOLECULES formula ($\mathrm{H_{2}O}$) while
+MOLECULES is on, otherwise SPECTRUM's populated states in `stateLatex`'s prose
+("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a live
+coefficient. Its key is the string it would render: the DOM moves only when
+the string does, KaTeX runs at most four times a second, and nothing reads
+layout per tick (only on a resize, a transport or rack move, a SIZE change or a
+new string). The type scale is the notebook's three sizes: the formula is its
+title (34 px), an atom label its body (14 px), each × SIZE (`molFormulaSize`,
+50–300 %); centred between the racks with a wide margin; it WRAPS inside that
 width (only an unbreakable word is shrunk); at the top while the transport pill
 floats at the foot, at the foot when the transport is docked or the pill is at
 the top. It is transparent text under every window and never part of the
 occlusion mask. ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by
-default, 13 px × SIZE) mark each MOLECULES nucleus with its element symbol at
-its projected position (`placeAtomLabels`, the PARTICLES projection), white
-under `mix-blend-mode: difference` so they invert whatever is beneath them.
+default) mark each MOLECULES nucleus with its element symbol at its projected
+position (`toScreen`, written only when the camera, molecule, size or canvas
+changed), white under `mix-blend-mode: difference` so they invert whatever is
+beneath them.
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).
