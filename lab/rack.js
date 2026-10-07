@@ -3770,10 +3770,11 @@ export async function boot(dom) {
              (SPECTRUM lives on the LEFT rack out of the box) that meant: rotate a tablet past the breakpoint,
              press ☆, rotate back, load — and the mirror rack is empty for ever. */
           const st = floatState.get(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
+          const ct = d.querySelector('.orb-core-toggle');                                      // 0.4.0 S1: MO-REGISTRY's CORE fold, the same kind of key
           return { id: d.dataset.id, side: st ? st.home.side : (d.dataset.phoneFrom === 'L' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d.classList.contains('closed'), off: d.classList.contains('off'),
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d.style.zIndex || 0), index: st.home.index } : null,
-            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}) };
+            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}) };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
         /* 0.3.1 · S1: the `look` and `cam` blocks this record carried are gone — applyLayout never read either, and between
@@ -3837,6 +3838,8 @@ export async function boot(dom) {
         if (d.classList.contains('off') !== !!c.off) { const pw = d.querySelector('.dev-power'); if (pw) pw.click(); }
         const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
         if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
+        const ct = typeof c.core === 'boolean' ? d.querySelector('.orb-core-toggle') : null;   // likewise MO-REGISTRY's CORE fold
+        if (ct && (ct.getAttribute('aria-expanded') === 'true') !== c.core) ct.click();
       }
       if (!ph) for (const c of L.cards.filter((q) => q.float && !(RETIRED_WINDOWS[q.id] && named.has(RETIRED_WINDOWS[q.id]))).sort((a, b) => (a.float.z || 0) - (b.float.z || 0)))
         layout.popOut(heirOf(c.id), { x: c.float.x, y: c.float.y, w: c.float.w, compact: c.float.compact, home: { side: c.side, index: c.float.index } });
@@ -3977,6 +3980,7 @@ export async function boot(dom) {
       post: (msg, transfer) => cards.call(msg, transfer),
       save: (r) => capApi.capture.save(r),   /* capApi (depth-1, like exporter3d) wraps the CAPTURE group's own capture()/cap, built lazily there */
       status: (text, cls) => { if (ui.set) ui.set.setStatus(text, cls); },
+      names: () => (chem && chem.on && chem.exportNames ? chem.exportNames() : null),   // 0.4.0 S1: the orbital's name rides in the file's metadata
     });
 
     /* the logo opens FILE · EDIT · WINDOW */

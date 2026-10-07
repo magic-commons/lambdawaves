@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadKatex } from './helpers/katex-node.mjs';   // 0.4.0 S0: the kit's KaTeX (lab/mir/shell/vendor), loaded in a vm
 import { stateLatex, stateTerms, moleculeLatex, formulaLatex } from '../lab/latex-state.js';
+import { namesOf } from '../lab/names.js';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from '../lab/molecules.js';
 import { BASIS, stateOf } from '../lab/hydrogen.js';
@@ -117,6 +118,14 @@ check('the molecule\'s page: water RHF/STO-3G — formula and name, 5 occupied o
   assert.ok(ladder.includes('\\varepsilon_{6} = ' + sol.orbitalEnergies[5].toFixed(4) + '\\ (\\mathrm{LUMO})'), ladder);
   assert.ok(ladder.includes('(\\mathrm{HOMO{-}4})') && ladder.includes('(\\mathrm{LUMO{+}1})'), ladder);
   assert.equal(moleculeLatex({ molecule: row, basis: 'sto-3g', ground: null }), '');
+  /* 0.4.0 S1: the worker's names ride in `ground.names` and the copy reads them — `$1b_{1}$ (HOMO)` in the ladder */
+  const named = moleculeLatex({ molecule: row, basis: 'sto-3g', charge: row.charge, ground: { ...ground, names: namesOf(sol, moleculeAtoms('H2O'), row.symmetry) } }); all.push(named);
+  assert.ok(lines(named)[1].includes('\\varepsilon_{5} = ' + sol.orbitalEnergies[4].toFixed(4) + '\\ (1b_{1},\\ \\mathrm{HOMO})'), named);
+  assert.ok(lines(named)[0].includes('Configuration in C2v: $(1a_{1})^{2}(2a_{1})^{2}(1b_{2})^{2}(3a_{1})^{2}(1b_{1})^{2}$.'), named);
+  { const b = MOLECULE_BY_ID.get('C6H6'), bs = moleculeRHF({ atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0 });
+    const t6 = moleculeLatex({ molecule: b, basis: 'sto-3g', charge: 0, ground: { energy: bs.energy, eps: bs.orbitalEnergies, nocc: bs.nocc, nAO: bs.integrals.n, names: namesOf(bs, moleculeAtoms('C6H6'), b.symmetry) } });
+    all.push(t6);
+    assert.ok(lines(t6)[1].includes('(1e_{1g}^{(a)},\\ \\mathrm{HOMO})') && lines(t6)[1].includes('(1e_{1g}^{(b)},\\ \\mathrm{HOMO})'), 'benzene: one HOMO, two components'); }
   assert.equal(formulaLatex('<m>CO(NH₂)₂</m>'), '\\mathrm{CO(NH_{2})_{2}}');
   assert.equal(formulaLatex('<m>NH₄⁺</m>'), '\\mathrm{NH_{4}^{+}}');
 });

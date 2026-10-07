@@ -3513,6 +3513,58 @@ BUNDLED DEMO CARRIES NO LOOK" and "no bundled demo carries a quality" read every
 new files are under the same law as WAVE DANCER (green). `node tests/pwa.test.mjs --write`: 185 entries (the three
 files precache like WAVE DANCER).
 
+## 2026-10-07 · 0.4.0 S1 — THE NAMES
+
+Built by the S1 NAMES builder (Opus) against `research/release-0.4.0/BRIEF-S1-NAMES.md`, branch `s1-names` from
+`58852c7`. The builder hit the account's session limit after N4 and its hand-off; these four entries and
+`S1-NAMES-BUILD.md` were written by Claude Sos from that hand-off (`S1-NAMES-HANDOFF.md`) and a fresh run of the check
+tool on the merged tree. Josh's ask: "the proper molecular orbital names and all the different names for it."
+
+### wave 140: THE NAMES — `lab/names.js`, one service for every orbital and state name
+
+Fifteen finite character tables as data (C1, Cs, C2, C2h, C2v, C3v, D2h, D3h, D3d, Td, D5h, D5d, D6h, Oh, Ih), their
+operations built by closure over generators and classified by det, trace and axis; every table self-tests (row and
+column orthogonality, Σ dim² = h, the vector representation whole). The linear groups D∞h / C∞v fit σ/π/δ at three
+angles with a fourth as the check. The AO representation is sparse and carries Cartesian d. Levels cluster at 2e-10 Eh;
+a record is named all or nothing; the frontier is named by level, so a degenerate HOMO is one HOMO. One `forms()` gives
+the plain, typeset, LaTeX, ASCII and spoken forms; the atomic labels (`atomForms`, `stateName`) come from the same
+service, so the four formatters became one. Also `coreCount`, the derived LCAO character for diatomics, and
+`CURATED_IE` for the ten probed molecules — **entered from memory and UNCHECKED**: they need NIST SRD 101 and the
+LEGAL-PROVENANCE reading before any store build. `tests/names.test.mjs` 5/5 blocks.
+
+### wave 141: The check tool — `tools/orbital-names.mjs --check`: every framework, the ten anchors, every molecule
+
+Applies every operation of its declared group to all 54 frameworks, solves the ten anchors against
+`names-probe.json` (all MATCH), and prints every molecule's configuration or its refusal. 52 enabled molecules are
+named; CuH and ZnH₂ are disabled ("not a minimum"). The worst residual on an exact group is 5.8e-10 (SO₂). Furan's
+approximate C2v at geomTol 1e-2 is refused (core residual 5.6e-2) and it falls back to exact Cs, saying so; pyridine is
+named in approximate C2v (residual 3.5e-3, framework 8.1e-4 bohr). Butadiene is built s-cis, not the trans its name
+says, and is declared C2v as built (its geometry is oracle-pinned). The PySCF cross-check (`--pyscf`): water's
+`label_orb_symm` A1 A1 B2 A1 B1 A1 B2 MATCHES in the same frame. The blocked-projector road from the Sol thread (Prop. 7,
+leakage 3.9e-15) would not have been simpler: it needs an SCF eigensolve change and full-group partner matching, while
+the cluster-character road needed no change to the solver.
+
+### wave 142: The names in the views, the copy and the exports
+
+`ensureSolve` in the worker attaches `ground.names` and `timings.names` (benzene named in 4 ms in the browser worker,
+≤ 10 ms cold in node). Every molecule in `lab/molecules.js` carries a `symmetry` record. MOLECULES' ORBITAL knob and ε
+readout read the names; MO-REGISTRY's rungs and lanes read `1b₁ · HOMO`, hover gives `about()`, and the frozen core folds
+into one `core ×n` rung (`.orb-core-toggle`, saved in the card's WORKSPACE record through `rack.js`' layout capture).
+The copy writes each level as `(1b_{1},\ \mathrm{HOMO})` with the configuration; the GLB extras, the cube's first
+comment line and the NPZ `meta.names` carry the names. Hydrogen, the Hamiltonian labels and STATES read the service.
+`lab/*.js` lines 35,135 → 35,745 (+610; `names.js` alone +497): the four formatters became one service, but the total
+grew, and it is reported that way.
+
+### wave 143: The demos learn their names; the N₂ teaching moment
+
+WATER, BENZENE and N₂ name their HOMO in their notebooks, and N₂'s notebook carries the teaching moment: its HOMO is
+`3σg` in STO-3G and `1πu` in 6-31+G*, so switching BASIS moves the name — a name never asserts an ordering.
+
+Gates at the builder's tip, run once: `bash test.sh node` 83 suites, exit 0; browser on 8741/5209, one at a time —
+`molecular-names`, `chem` (0 failing of 54), `register` (0 of 17), `latex-copy` (a pasted named page gives 0
+`.katex-error`), `export3d`, `new-project`, `current`, `molecule-demos`, all green; `tools/orbital-names.mjs --check
+--pyscf` exit 0. No digest lock: no frame-path change.
+
 ## 2026-10-07 · 0.4.0 S1′ — ONE EYE
 
 ### wave 144: `cameraEye` — nine copies of the eye become one helper and its consumer road

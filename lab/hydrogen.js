@@ -20,6 +20,8 @@
  * tests/hydrogen.test.mjs compares them against each other AND against hand-typed anchors.
  */
 
+import { atomForms } from './names.js';   // the one n l m name (0.4.0 S1): BASIS[a].label is its typeset form
+
 export const NMAX = 6;
 export const HARTREE_EV = 27.211386245988;
 export const AU_TIME_AS = 24.188843265857;
@@ -38,17 +40,13 @@ for (let n = 1; n <= NMAX; n++)
     for (let m = -l; m <= l; m++)
       BASIS.push(Object.freeze({
         id: `h:${n}:${l}:${m}`, index: BASIS.length, n, l, m, E: energy(n),
-        label: `${n}${'spdfgh'[l]}${subscript(m)}`
+        label: atomForms({ n, l, m }).typeset
       }));
 Object.freeze(BASIS);
 export const BASIS_INDEX = new Map(BASIS.map((s) => [s.id, s.index]));
 export function stateOf(n, l, m) { return BASIS[BASIS_INDEX.get(`h:${n}:${l}:${m}`)]; }
 export function idOf(n, l, m) { return `h:${n}:${l}:${m}`; }
 
-function subscript(m) {
-  const map = { '-': '₋', 0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅' };
-  return String(m).split('').map((ch) => map[ch] || ch).join('');
-}
 
 /* ── radial part: recurrence evaluator (oracle) ──────────────────────────────── */
 export function radialNorm(n, l) {

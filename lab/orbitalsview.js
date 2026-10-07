@@ -28,6 +28,7 @@ import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from 
 import { paintStroke } from './paint-stroke.js';
 import { slerpCoefficients } from './molecular-register.js';
 import { createFlow } from './molecular-flow.js';
+import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
 const DEG = 1e-6;                       // |Δε| below this is one degenerate row, drawn side by side
 const TAU = 2 * Math.PI;
@@ -64,6 +65,16 @@ export function createOrbitals(host, api) {
     title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — MOLECULES must be ON and not running',
     onChange: (v) => { setOn(v); } });
   head.appendChild(onSw.root);
+  /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
+     Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
+     the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
+  let coreOpen = false;
+  const coreBtn = el('button', 'trig orb-core-toggle', head); coreBtn.type = 'button'; coreBtn.textContent = 'CORE';
+  coreBtn.title = 'Fold or unfold the frozen-core levels (one `core ×n` rung on the ladder)';
+  coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true;
+  const setCoreOpen = (v) => { coreOpen = !!v; coreBtn.setAttribute('aria-expanded', String(coreOpen)); coreBtn.classList.toggle('on', coreOpen); paint(); };
+  coreBtn.addEventListener('click', () => setCoreOpen(!coreOpen));
+  const nCore = () => (sol && sol.names && sol.names.core) || 0;
 
   /* THE SHARED BAR (REGISTER-WINDOW-SPEC §5, §9): the same PRESET · → A · → B · MORPH the STATES mode carries.  A preset
      is a RULE, so it exists for every molecule or says why not; MORPH plays the normalised path between two stored
@@ -121,11 +132,39 @@ export function createOrbitals(host, api) {
   /* ── the register ─────────────────────────────────────────────────────────────────────────────── */
   const nAO = () => (sol ? sol.nAO : 0);
   const nocc = () => (sol ? sol.nocc : 0);
-  const label = (k) => {
-    if (!sol) return 'k' + (k + 1);
-    const d = k - (sol.nocc - 1);
-    return d === 0 ? 'HOMO' : d === 1 ? 'LUMO' : d < 0 ? 'HOMO−' + (-d) : 'LUMO+' + (d - 1);
-  };
+  /* THE NAMES (0.4.0 S1, lab/names.js): the worker names the ladder with the solve.  A rung reads `1b1 · HOMO`, `3a1`,
+     `1e1g (a)`; a degenerate HOMO is ONE HOMO (the frontier is by level).  No name (refused, C₁, unconverged): the
+     frontier word by level, and the hover says why. */
+  const moOf = (k) => (sol && sol.names && sol.names.mos ? sol.names.mos[k] || null : null);
+  const frontierOf = (k) => { const mo = moOf(k); return mo ? mo.frontier : frontierName(k - (sol.nocc - 1)); };
+  const label = (k) => (sol ? orbitalName(sol.names, k, sol.nocc) : 'k' + (k + 1));
+  /** the typeset name into a DOM node: the subscript in a real <sub> (a text node cannot subscript g) */
+  function writeName(node, k) {
+    const mo = moOf(k);
+    node.textContent = '';
+    if (!mo || !mo.label) { node.textContent = label(k); return; }
+    const p = forms(mo).parts, fr = frontierOf(k);
+    node.appendChild(document.createTextNode(p.count + p.body));
+    if (p.sub) el('sub', null, node, p.sub);
+    const tail = p.mark + (mo.member ? ` (${mo.member})` : '') + (/^(HOMO|LUMO)$/.test(fr) ? ' · ' + fr : '');
+    if (tail) node.appendChild(document.createTextNode(tail));
+  }
+  /** what a hover says about a name: the frame, where it came from, and why there is none */
+  function about(k) {
+    const N = sol && sol.names, mo = moOf(k);
+    if (!N) return '';
+    if (!mo || !mo.label) return 'no symmetry name: ' + (N.reason || 'not named');
+    const out = [`${forms(mo).plain} in ${N.group} (${N.frame}) — computed from the solve's characters`];
+    if (mo.member) out.push(`(${mo.member}) is one of the ${mo.dim === 2 ? 'two real combinations of the degenerate pair' : mo.dim + ' real combinations of the degenerate set'}`);
+    if (N.approximate) out.push(`approximate symmetry: the framework is ${N.group} to ${N.approximate.geometryBohr.toExponential(1)} bohr`);
+    if (N.downgraded) out.push('named in the exact subgroup — ' + N.downgraded);
+    if (mo.aliases && mo.aliases.length) out.push('other axis convention: ' + mo.aliases.map((a) => forms(a).plain).join(' / '));
+    const ch = mo.character;
+    if (ch && (ch.lcao || ch.kind)) out.push(`${ch.lcao || ch.kind}${ch.bonding ? ', ' + ch.bonding : ''} — derived`);
+    const ie = ionisation(String(sol.key || '').split('|')[0], mo, sol.eps[k]);
+    if (ie) out.push(`vertical IE ${ie.ev.toFixed(2)} eV beside Koopmans −ε ${ie.koopmansEv.toFixed(2)} eV — curated (${ie.source})`);
+    return out.join(' · ');
+  }
   const touch = () => { version++; pushedV = -1; };
   /** the register's own list, ascending in k: the one order every reader here uses */
   const keys = () => [...sel.keys()].sort((a, b) => a - b);
@@ -269,7 +308,7 @@ export function createOrbitals(host, api) {
     const c = sel.get(k);
     const root = el('div', 'row tight orb-lane'); root.dataset.k = String(k);
     const id = el('div', 'sp-id', root);
-    const nm = el('div', 'sp-name sp-nm', id, label(k));
+    const nm = el('div', 'sp-name sp-nm', id); writeName(nm, k); nm.title = about(k);
     const es = el('div', 'sp-sub sp-e', id, `k${k + 1} · ${sol.eps[k].toFixed(6)} Eh · ${k < nocc() ? '2 e⁻' : 'virtual'}`);
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
     const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
@@ -358,7 +397,9 @@ export function createOrbitals(host, api) {
   function rowsOf() {
     const out = [];
     if (!sol) return out;
-    for (let k = 0; k < sol.nAO; k++) {
+    const fold = coreOpen ? 0 : Math.min(nCore(), sol.nocc);
+    if (fold) out.push({ eps: sol.eps[fold - 1], items: [], core: fold });
+    for (let k = fold; k < sol.nAO; k++) {
       const lv = { k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0 };
       const last = out[out.length - 1];
       if (last && Math.abs(lv.eps - last.eps) < DEG) { last.items.push(lv); continue; }
@@ -398,7 +439,16 @@ export function createOrbitals(host, api) {
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     const names = [];
     for (let i = 0; i < m; i++) {
-      const row = rows[i], yy = yOf(i), seg = (right - left) / row.items.length;
+      const row = rows[i], yy = yOf(i), seg = (right - left) / Math.max(1, row.items.length);
+      if (row.core) {                                                       // the folded core: one dashed rung, a click opens it
+        g.strokeStyle = occInk(0.6); g.lineWidth = 1; g.setLineDash([3, 3]);
+        g.beginPath(); g.moveTo(left + 1, yy); g.lineTo(right - 1, yy); g.stroke(); g.setLineDash([]);
+        hits.push({ y: yy, x0: left, x1: right, core: true });
+        hovers.push({ kind: 'line', key: 'core', points: [left + 1, yy, right - 1, yy], lw: 1, colour: occInk(1),
+          info: `core ×${row.core}: the frozen-core levels (k1–k${row.core}, ε ≤ ${row.eps.toFixed(3)} Eh) · click to unfold` });
+        names.push({ y: yy, txt: `core ×${row.core}`, col: occInk(0.8), rank: 1 });
+        continue;
+      }
       for (let j = 0; j < row.items.length; j++) {
         const lv = row.items[j], x0 = left + j * seg + 1, x1 = x0 + seg - 2;
         const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk;
@@ -410,10 +460,13 @@ export function createOrbitals(host, api) {
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
+            + (sol.names ? '  ·  ' + about(lv.k) : '')
             + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : '  ·  click to add') });
       }
-      const nm = row.items.some((lv) => lv.k === sol.nocc - 1) ? 'HOMO' : row.items.some((lv) => lv.k === sol.nocc) ? 'LUMO' : 'k' + (row.items[0].k + 1);
-      names.push({ y: yy, txt: nm, col: row.items[0].occ ? occInk(nm === 'HOMO' ? 1 : 0.8) : virInk(nm === 'LUMO' ? 1 : 0.75), rank: nm === 'HOMO' || nm === 'LUMO' ? 0 : 1 });
+      /* the gutter: the level's plain name (no component tag: a row IS the level), with HOMO / LUMO beside it */
+      const mo0 = moOf(row.items[0].k), fr = frontierOf(row.items[0].k), edge = fr === 'HOMO' || fr === 'LUMO';
+      const nm = mo0 && mo0.label ? forms(mo0.label).plain + (edge ? ' ' + fr : '') : edge ? fr : 'k' + (row.items[0].k + 1);
+      names.push({ y: yy, txt: nm, col: row.items[0].occ ? occInk(fr === 'HOMO' ? 1 : 0.8) : virInk(fr === 'LUMO' ? 1 : 0.75), rank: edge ? 0 : 1 });
     }
     /* the 50 px gutter, one name a row and NOTHING NUDGED: a name away from its own level would lie (spectrum's law) */
     const used = [];
@@ -450,22 +503,26 @@ export function createOrbitals(host, api) {
   /** every level on every row strictly between a and b */
   function crossed(a, b) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
-    return hi - lo < 0.5 ? [] : hits.filter((h) => h.y > lo && h.y < hi).map((h) => h.k);
+    return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi).map((h) => h.k);
   }
-  paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
-    at: (p) => { const h = nearestHit(p, 8); return h ? [h.k] : []; }, across: crossed, apply: (ks, add) => paintLevels(ks, add) });
+  const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
+    at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
+    apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
+      if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
+      if (ks.length) paintLevels(ks, add);
+    } });
   /* a click no pointer made (none can reach a canvas today, but the law is kept): the nearest level joins */
   cv.addEventListener('click', (e) => {
     if (!hits.length) return;
     let best = null;
-    for (const h of hits) { if (e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
+    for (const h of hits) { if (h.core || e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
     if (best) paintLevels([best.k], true);
   });
   window.addEventListener('resize', () => paint());
 
   /* ── CHEMISTRY's road: the last ground state, and every new one ───────────────────────────────── */
   function adopt(s) {
-    sol = s || null;
+    sol = s || null; coreBtn.hidden = !nCore();
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
     flow = null; flowOn = false; flowSw.set(false);
     sel.clear(); storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); rowsEl.classList.remove('reg-morphing');
@@ -535,14 +592,16 @@ export function createOrbitals(host, api) {
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, store, setMorph,
     get morphOn() { return morphOn; }, get morph() { return morphS; },
     get selected() { return selected; },
-    ladder() { return sol ? Array.from({ length: sol.nAO }, (_, k) => ({ k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0 })) : []; },
+    ladder() { return sol ? Array.from({ length: sol.nAO }, (_, k) => ({ k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0, name: label(k), about: about(k) })) : []; },
+
     state() {
       const p = pair(), eH = sol ? sol.eps[sol.nocc - 1] : null, eL = sol ? sol.eps[sol.nocc] : null;
       return { on, nAO: nAO(), nocc: nocc(), homo: sol ? sol.nocc - 1 : null, lumo: sol ? sol.nocc : null,
         epsHOMO: eH, epsLUMO: eL, gap: sol && Number.isFinite(eL) ? eL - eH : null,
         selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0 })),
         sum: sum2(), period: p ? p.period : null, dE: p ? p.dE : null, t: pushedT, law: LAW,
-        refusal: refusal(), status: statusText, hash: sol ? sol.hash : null };
+        refusal: refusal(), status: statusText, hash: sol ? sol.hash : null,
+        coreOpen, rungs: rowsOf().map((r) => (r.core ? `core ×${r.core}` : label(r.items[0].k))) };
     },
     save, load,
     dispose() { if (unsub) { unsub(); unsub = null; } },

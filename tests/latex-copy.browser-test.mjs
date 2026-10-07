@@ -149,12 +149,22 @@ try {
   const [molHead, molLadder] = mol.page[0].split('\n');
   assert.ok(molHead.startsWith('$\\mathrm{H_{2}O}$, water — RHF/STO-3G'), molHead);
   assert.ok(molHead.includes('5 occupied of 7 AO'), molHead);
-  assert.ok(molLadder.includes('\\varepsilon_{5}') && molLadder.includes('(\\mathrm{HOMO})') && molLadder.includes('(\\mathrm{LUMO})'), molLadder);
+  /* 0.4.0 S1: the worker's names are in the copy — `1b_{1}` beside HOMO, `4a_{1}` beside LUMO, the configuration in the head */
+  assert.ok(molLadder.includes('\\varepsilon_{5}') && molLadder.includes('(1b_{1},\\ \\mathrm{HOMO})') && molLadder.includes('(4a_{1},\\ \\mathrm{LUMO})'), molLadder);
+  assert.ok(molHead.includes('Configuration in C2v: $(1a_{1})^{2}'), molHead);
   assert.match(mol.status, /H₂O’s page as LaTeX/);
+  /* 0.4.0 S1: the named page pasted into the notebook renders (head formula + E + configuration + the ladder), no error */
+  const molPaste = await g.ev(`const nb = document.getElementById('notebook'), ta = nb.querySelector('.nb-text');
+    __LW.layout.notebook.open('notes'); ta.value = ${JSON.stringify(mol.page[0])}; ta.dispatchEvent(new Event('input'));
+    __LW.layout.notebook.setMode('view'); const view = nb.querySelector('.nb-view');
+    const out = { formulas: view.querySelectorAll('.katex').length, errors: view.querySelectorAll('.katex-error').length, dollars: (view.textContent.match(/\\$/g) || []).length };
+    __LW.layout.notebook.setMode('edit'); ta.value = ''; ta.dispatchEvent(new Event('input')); __LW.layout.notebook.close();
+    return out;`);
+  assert.ok(molPaste.formulas >= 4 && molPaste.errors === 0 && molPaste.dollars === 0, JSON.stringify(molPaste));
   assert.equal(mol.unfolded, true); assert.equal(mol.enabled, true);
   assert.equal(mol.clip.length, 1); assert.equal(mol.clip[0].split('\n')[0], '$1s_{0}$ and $2p_{0}$');
   assert.deepEqual(mol.errs, []);
-  console.log('PASS under MOLECULES (water) SPECTRUM folds and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder with HOMO and LUMO; back on hydrogen SPECTRUM unfolds and the row copies "$1s_{0}$ and $2p_{0}$"');
+  console.log('PASS under MOLECULES (water) SPECTRUM folds and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder named (1b₁ HOMO, 4a₁ LUMO); back on hydrogen SPECTRUM unfolds and the row copies "$1s_{0}$ and $2p_{0}$"');
 } catch (e) {
   failed = true; console.error(e);
 } finally {

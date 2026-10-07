@@ -229,6 +229,12 @@ function readNpy(b) {
   assert.equal(out.obj.triangles, out.glb.triangles);
   assert.equal(new TextDecoder().decode(out.cube.bytes).split('\n').slice(7).join(' ').trim().split(/\s+/).length, N ** 3);
   assert.ok(buildFile({ ...base, fmt: 'glb', rhoMax: 0 }).error); assert.ok(buildFile({ ...base, fmt: 'glb', isoFrac: 2 }).error); assert.ok(buildFile({ ...base, fmt: 'x' }).error);
+  /* 0.4.0 S1: the orbital's names in all three metadata homes — the GLB's extras, the cube's comment line, the NPZ's meta.json */
+  const names = { group: 'C2v', config: '(1a1)²(2a1)²(1b2)²(3a1)²(1b1)²', orbital: { k: 5, frontier: 'HOMO', plain: '1b1', latex: '$1b_{1}$', ascii: '1b1' } };
+  const nGlb = readGLB(buildFile({ ...base, fmt: 'glb', names }).bytes), nCube = new TextDecoder().decode(buildFile({ ...base, fmt: 'cube', names }).bytes).split('\n')[0];
+  const nMeta = JSON.parse(new TextDecoder().decode(unzip(buildFile({ ...base, fmt: 'npz', names }).bytes)['meta.json']));
+  assert.deepEqual(nGlb.json.asset.extras.names.orbital, names.orbital); assert.deepEqual(nMeta.names, names);
+  assert.equal(nCube, '1s+0 - MO 5 1b1 $1b_{1}$ HOMO, C2v', nCube);
   assert.equal(ascii('0.3.2-alpha · the offer'), '0.3.2-alpha - the offer'); assert.equal(ascii('2p₋1 + 3d₊2'), '2p-1 + 3d+2');
   pass(`the worker op from half-float texels: all five files (${EXPORTS.map((e) => e.fmt + ' ' + out[e.fmt].bytes.byteLength).join(', ')} bytes), the GLB's and the STL's triangle counts agree (${out.glb.triangles}), the camera sits at dist·half, and an empty field, an ISO above the peak and an unknown format are refused`);
 }

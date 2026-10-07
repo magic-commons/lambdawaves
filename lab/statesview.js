@@ -26,6 +26,7 @@
  * lobes; DENSITY hands it Re D(t), honest and quiet (the 1s cores set the scale).  REF picks the reference of
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
+import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB } from './mir/kit.js';
 import { createFlow } from './molecular-flow.js';
 import { paintStroke } from './paint-stroke.js';
@@ -37,8 +38,6 @@ const BRIGHT_F = 0.02, CORE_W = 3;                 // the BRIGHT filter: oscilla
 const LAW = 'TD-CIS · frozen nuclei · TDA ladder, not the RPA one a TDHF run rings at';
 const AXIS_N = [1, 2, 3];                          // the rack's n-colours for x, y, z — CHEMISTRY's own choice
 const AX = ['x', 'y', 'z'];
-const SUB = '₀₁₂₃₄₅₆₇₈₉';
-const sub = (k) => String(k).split('').map((c) => SUB[+c]).join('');
 
 export function createStates(host, api) {
   const S = () => api.session || null;
@@ -148,9 +147,9 @@ export function createStates(host, api) {
   const axisOf = (k) => { let b = 0; for (let q = 1; q < 3; q++) if (Math.abs(ladder.mu[3 * k + q]) > Math.abs(ladder.mu[3 * k + b])) b = q; return b; };
   const isBright = (k) => ladder.f[k] > 1e-6;
   function label(key) {
-    if (key === GROUND) return 'S' + SUB[0];
+    if (key === GROUND) return stateName(0);
     /* numbered by LEVEL, so the two lanes of one degenerate level share a number: S₄x and S₄y */
-    const base = 'S' + sub((ladder ? ladder.cluster[key] : key) + 1);
+    const base = stateName((ladder ? ladder.cluster[key] : key) + 1);
     if (!ladder || ladder.size[key] < 2) return base;
     if (isBright(key)) return base + AX[axisOf(key)];
     let first = key; while (first > 0 && ladder.cluster[first - 1] === ladder.cluster[key]) first--;

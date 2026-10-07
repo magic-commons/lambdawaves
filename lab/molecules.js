@@ -440,11 +440,36 @@ const UNSTABLE = {
   ZnH2: { lowestApB: -1.885e-2, lowestAmB: -6.760e-2, energy: -1758.305613634 },
 };
 
+/* ── THE DECLARED SYMMETRY (0.4.0 S1, lab/names.js): DECLARE AND VERIFY, no detector.  `group` is the point group,
+ * `frame` its axes in this file's own coordinates (z the principal axis; a vector, or { atom: k } = from the centre of
+ * nuclear charge toward atom k; the default is the identity frame most builders above already use), `geomTol` the
+ * framework tolerance in bohr when it is not the default 1e-6.  tools/orbital-names.mjs --check applies every
+ * operation to every framework.  Furan and pyridine are ring walks that close to ~4e-4 Å: their C₂v holds to 1e-3
+ * bohr, stated here, and their names carry that approximation (lab/names.js `approximate`); where the approximate C₂v
+ * cannot name every level the record falls back to the EXACT planar mirror (`fallback: C_s`), and says so.
+ * "trans-1,3-butadiene" (C4H6) is BUILT s-cis — C1 and C4 land on the same side — so it is C₂v, declared as built
+ * (the geometry is pinned by the PySCF oracle; S1-NAMES-BUILD.md carries the finding). */
+const PLANE_YZ = { z: [1, 0, 0], x: [0, 0, 1] };            // a planar yz molecule whose only symmetry element is ⟂ x
+const RING = { z: { atom: 0 }, x: [0, 0, 1] };              // a ring walk in xy: C₂ through the heteroatom, x ⟂ the ring
+const SYMMETRY = {
+  Dinfh: ['H2', 'N2', 'F2', 'Cl2', 'Br2', 'CO2', 'C2H2', 'BeH2', 'MgH2', 'ZnH2'],
+  Cinfv: ['LiH', 'HF', 'CO', 'LiF', 'NaH', 'HCl', 'NaCl', 'HCN', 'N2O', 'OH-', 'CN-', 'HBr', 'CuH'],
+  Td: ['CH4', 'SiH4', 'GeH4', 'CF4', 'NH4+'], C3v: ['NH3', 'PH3', 'AsH3', 'H3O+', 'CH3CN'],
+  C2v: ['H2O', 'H2S', 'H2Se', 'O3', 'SO2', 'H2CO', 'urea', ['C4H6', { z: [0, 1, 0], x: [1, 0, 0] }],
+    ['C4H4O', RING, 1e-2, { group: 'Cs' }], ['C5H5N', RING, 1e-2, { group: 'Cs' }]],
+  D3h: ['BH3', 'AlH3', 'BF3', 'C3H6'], D2h: ['C2H4'], D3d: ['C2H6'], D6h: ['C6H6'],
+  C2: [['H2O2', { z: [0, 1, 0], x: [1, 0, 0] }]],
+  Cs: [['CH3OH', PLANE_YZ], ['HCOOH', PLANE_YZ], ['glycine', PLANE_YZ]],
+};
+const SYMMETRY_OF = new Map(Object.entries(SYMMETRY).flatMap(([group, ids]) => ids.map((e) => {
+  const [id, frame, geomTol, fallback] = Array.isArray(e) ? e : [e];
+  return [id, { group, ...(frame ? { frame } : {}), ...(geomTol ? { geomTol } : {}), ...(fallback ? { fallback } : {}) }];
+})));
 export const MOLECULES = RAW.map((m) => {
   const charge = m.charge || 0, c = counts(m.ang), work = eriWork(c.widths);
   const nElec = c.nElec - charge, nocc = nElec / 2;
   const rw = rpaWork(c.nAO, nocc);
-  return { ...m, charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
+  return { ...m, symmetry: SYMMETRY_OF.get(m.id) || { group: 'C1' }, charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
     eriWork: work, rpaWork: rw, predictedMs: Math.round(predictMs(work, rw)),
     instability: UNSTABLE[m.id] || null };
 });

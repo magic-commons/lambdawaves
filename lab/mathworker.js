@@ -52,6 +52,7 @@ import { spectrum, peaks } from './absorb.js';
 import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
+import { namesOf } from './names.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -232,6 +233,9 @@ function ensureSolve(m = {}) {
     dipole: sol.dipole, half: extent + 6,
     timings: { integrals: sol.timings.integrals, scf: tGround, rpa: null },
     stability: wireStability(sol.stability), solutions: (sol.solutions || []).map(wireSolution) };
+  /* THE NAMES (0.4.0 S1) ride with the ground: computed HERE, from the solve's own S, C and ε (S never leaves the
+     worker), against the library's declared group (`m.symmetry`); ≤ 10 ms for benzene, timed in the reply. */
+  ground.names = namesOf(sol, atoms, m.symmetry); ground.timings.names = ground.names.ms;
   chemSol = { key, sol, I, ground, spectrum: null, R: null, states: null, atoms, basis, charge }; chemKey = key;
   driveState = null;                                                          // a drive belongs to the molecule it was built on
   return chemSol;

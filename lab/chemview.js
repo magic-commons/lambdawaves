@@ -23,6 +23,7 @@
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
+import { orbitalName, forms } from './names.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -67,11 +68,7 @@ export function createChem(host, api) {
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
-  function orbFmt(k) {
-    if (!sol) return String(k);
-    const d = k - sol.nocc;
-    return d === 0 ? 'HOMO' : d === 1 ? 'LUMO' : d < 0 ? 'HOMO−' + (-d) : 'LUMO+' + (d - 1);
-  }
+  function orbFmt(k) { return sol ? orbitalName(sol.names, k - 1, sol.nocc) : String(k); }   // lab/names.js: '1b1 · HOMO' (a dial's text takes the plain form)
   /* ── the rows ─────────────────────────────────────────────────────────────────────────────────── */
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
@@ -212,6 +209,7 @@ export function createChem(host, api) {
        worker pays for every solve; this road simply stopped hiding it.  `detect` stays off: naming a SECOND
        aufbau solution costs a whole extra SCF, only N₂ has one, and this road is already on the frame thread. */
     const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false });
+    const names = (await import('./names.js')).namesOf(r, msg.atoms, msg.symmetry);
     const I = r.integrals, P = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: r.C, eps: r.orbitalEnergies, nocc: r.nocc });
     const ev = evaluator(r.basis.shells);
     let half = 0; for (const sh of r.basis.shells) half = Math.max(half, ev.supportRadius(sh, 1e-10));
@@ -219,7 +217,7 @@ export function createChem(host, api) {
       nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
       roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
       tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
-      timings: { integrals: r.timings.integrals, scf: null, rpa: null }, stability: wireStability(r.stability),
+      timings: { integrals: r.timings.integrals, scf: null, rpa: null, names: names.ms }, names, stability: wireStability(r.stability),
       solutions: (r.solutions || []).map((s) => ({ ...s, hessian: wireHessian(s.hessian) })), stage: 'full', local: true };
   }
 
@@ -248,7 +246,7 @@ export function createChem(host, api) {
        that cost the seconds.  Both replies are guarded by the same `solveSeq`: a reply for a molecule the hand has
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
-    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge };
+    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry };
     status(basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
     if (api.loading) api.loading(true);
@@ -484,7 +482,9 @@ export function createChem(host, api) {
     roE.root.title = (P.source || '') + ' — a FIXED geometry, not the RHF/STO-3G minimum';
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     roEps.set(`${eH.toFixed(6)} · ${Number.isFinite(eL) ? eL.toFixed(6) : '—'}`, '');
-    roEps.setSub(`gap ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} hartree · ${sol.nocc} occupied of ${sol.nAO}`);
+    const nmH = orbitalName(sol.names, sol.nocc - 1, sol.nocc), nmL = orbitalName(sol.names, sol.nocc, sol.nocc);
+    roEps.setSub(`${nmH}${Number.isFinite(eL) ? ' · ' + nmL : ''} · gap ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} hartree · ${sol.nocc} occupied of ${sol.nAO}`
+      + (sol.names && sol.names.group ? ` · ${sol.names.reliable ? sol.names.group : 'no names: ' + sol.names.reason}` : ''));
     const ne = rt ? rt.electrons : (Number.isFinite(sol.electrons) ? sol.electrons : 2 * sol.nocc);
     roTr.set(Number(ne).toFixed(10), Math.abs(ne - 2 * sol.nocc) < 1e-8 ? 'ok' : 'warn');
     roTr.setSub('Tr(DS), never a voxel sum · ' + (2 * sol.nocc) + ' electrons');
@@ -729,6 +729,13 @@ export function createChem(host, api) {
     /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
     query() { return sol ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },
+    /** the names an export carries (0.4.0 S1): the group and configuration, and the ORBITAL on the field when VIEW is one */
+    exportNames() {
+      if (!sol || !sol.names) return null;
+      const N = sol.names, k = (orbital || sol.nocc) - 1, mo = N.mos[k], f = mo && mo.label ? forms(mo) : null;
+      return { group: N.reliable ? N.group : null, config: N.reliable ? N.config : null, reason: N.reliable ? null : N.reason,
+        orbital: view === 'orbital' ? { k: k + 1, frontier: mo ? mo.frontier : null, plain: f ? f.plain : null, latex: f ? f.latex : null, ascii: f ? f.ascii : null } : null };
+    },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
@@ -784,6 +791,8 @@ export function createChem(host, api) {
     state() {
       return { preset, basis, view, on, running, nAO: sol ? sol.nAO : 0, nocc: sol ? sol.nocc : 0,
         energy: sol ? sol.energy : null, epsHOMO: sol ? sol.eps[sol.nocc - 1] : null, epsLUMO: sol ? sol.eps[sol.nocc] : null,
+        names: sol && sol.names ? { group: sol.names.group, reliable: sol.names.reliable, reason: sol.names.reason, config: sol.names.config, ms: sol.names.ms } : null,
+        orbitalName: sol ? orbFmt(orbital || sol.nocc) : null,
         electrons: rt ? rt.electrons : (sol ? 2 * sol.nocc : 0), idempotency: rt ? rt.idempotency : null,
         t: rt ? rt.t : 0, steps: rt ? rt.steps : 0, trace: rt ? (rt.samples || rt.trace.length) : 0, fitWindow: rt ? rt.trace.length : 0, E0: rt ? rt.E0 : null,
         energyRT: rt ? rt.energy : null, half: sol ? sol.half : null, hash: sol ? sol.hash : null,
