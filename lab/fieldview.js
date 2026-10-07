@@ -28,7 +28,7 @@
  * says so and draws nothing at all.
  */
 import { createElectrostatics, contours as contourLines, streamlines as streamLines, planeFrame } from './electrostatics.js';
-import { cameraBasis } from './field.js';
+import { cameraBasis, toScreen } from './field.js';
 import { fitText, accentRGB } from './mir/kit.js';
 import { BASIS, factorial } from './hydrogen.js';
 
@@ -169,15 +169,8 @@ export function createFieldLines(canvas, api = {}) {
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     if (!art || !art.polys.length || !plane) return;
-    const B = cameraBasis(obs), D = obs.dist * plane.half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
-    const F = planeFrame(plane);
-    const proj = (s, t) => {
-      const p = F.world(s, t), dx = p[0] - cam[0], dy = p[1] - cam[1], dz = p[2] - cam[2];
-      const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2]; if (depth <= 0) return null;
-      const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-      return [(u + 1) / 2 * W, (1 - v) / 2 * H];
-    };
+    const S = toScreen(obs, plane.half, W, H), F = planeFrame(plane);
+    const proj = (s, t) => { const p = F.world(s, t); return S.at(p[0], p[1], p[2]); };
     g.strokeStyle = art.second ? accentOf(g, 2) : accentOf(g, 1);
     g.lineWidth = 1; g.lineJoin = 'round'; g.lineCap = 'round';
     art.polys.forEach((line, i) => {

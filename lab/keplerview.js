@@ -4,7 +4,7 @@
  * in the same space as the cloud.  Marked on it: the perihelion (toward ⟨K⟩) and the classical time-averaged
  * position, which is exactly the quantum ⟨x⟩ of the shell (Pauli).  Position space only.
  */
-import { cameraBasis } from './field.js';
+import { toScreen } from './field.js';
 import { keplerOrbits, orbitPoints } from './kepler.js';
 import { vividInk, showGraphTip, hideGraphTip, fitText } from './mir/kit.js';
 
@@ -33,14 +33,7 @@ export function createKepler(canvas) {
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     handles = [];
     if (!on || !orbits.length) return;
-    const B = cameraBasis(obs), D = obs.dist * half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
-    const proj = (p) => {
-      const dx = p[0] - cam[0], dy = p[1] - cam[1], dz = p[2] - cam[2];
-      const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2]; if (depth <= 0) return null;
-      const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-      return [(u + 1) / 2 * W, (1 - v) / 2 * H];
-    };
+    const S = toScreen(obs, half, W, H), proj = (p) => S.at(p[0], p[1], p[2]);
     let label = [];
     for (const { share, orbit: o } of orbits) {
       if (o.isotropic) { label.push(`n${o.n} isotropic`); continue; }

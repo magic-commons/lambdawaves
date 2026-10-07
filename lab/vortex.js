@@ -11,7 +11,7 @@
  */
 import { BASIS } from './hydrogen.js';
 import { vortexPoints, stretchedCensus, threeModes } from './frontier.js';
-import { cameraBasis, cameraKey } from './field.js';
+import { cameraKey, toScreen } from './field.js';
 import { el, readout, sw, seg, trig } from './mir/kit.js';
 
 export function createVortex(host, overlay, api) {
@@ -57,20 +57,16 @@ export function createVortex(host, overlay, api) {
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const B = cameraBasis(obs), D = obs.dist * last.half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
+    const S = toScreen(obs, last.half, W, H), D = S.D;
     for (const p of last.points) {
-      const dx = p.x - cam[0], dy = p.y - cam[1], dz = p.z - cam[2];
-      const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2]; if (depth <= 0) continue;
-      const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-      const x = (u + 1) / 2 * W, y = (1 - v) / 2 * H;
-      const sz = Math.max(1.2, 2.6 * (D / depth) ** 0.5);
+      const q = S.at(p.x, p.y, p.z); if (!q) continue;
+      const [x, y, depth] = q, sz = Math.max(1.2, 2.6 * (D / depth) ** 0.5);
       g.fillStyle = 'rgba(255,255,255,0.92)'; g.beginPath(); g.arc(x, y, sz, 0, 2 * Math.PI); g.fill();
       g.fillStyle = 'rgba(120,225,240,0.55)'; g.beginPath(); g.arc(x, y, sz + 1.5, 0, 2 * Math.PI); g.fill();
     }
     if (last.axis) {       // the z-axis as a nodal line: draw it through the domain
-      const pts = [[0, 0, -last.half * 0.95], [0, 0, last.half * 0.95]].map((q) => { const dx = q[0] - cam[0], dy = q[1] - cam[1], dz = q[2] - cam[2]; const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2]; return [(1 + (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect)) / 2 * W, (1 - (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH)) / 2 * H, depth]; });
-      if (pts[0][2] > 0 && pts[1][2] > 0) { g.strokeStyle = 'rgba(120,225,240,0.5)'; g.lineWidth = 1.5; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[1][0], pts[1][1]); g.stroke(); g.setLineDash([]); }
+      const pts = [S.at(0, 0, -last.half * 0.95), S.at(0, 0, last.half * 0.95)];
+      if (pts[0] && pts[1]) { g.strokeStyle = 'rgba(120,225,240,0.5)'; g.lineWidth = 1.5; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[1][0], pts[1][1]); g.stroke(); g.setLineDash([]); }
     }
     g.fillStyle = document.body.dataset.theme === 'light' ? 'rgba(20,30,50,0.62)' : 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
     const cx = document.body.classList.contains('rack-l') ? 12 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300) + 8 : 12;
@@ -90,7 +86,7 @@ export function createVortex(host, overlay, api) {
     const key = `${reg.version}|${t.toFixed(6)}|${qual.get()}|${half}`;
     const now = performance.now();
     if (key !== lastKey && (!playing || now - lastLocateWall > 120 || dirty)) { lastKey = key; lastLocateWall = now; dirty = false; locate(reg, t, half); drawOverlay(obs); lastObs = ''; return; }
-    const ok = `${cameraKey(obs)}|${obs.dist.toFixed(4)}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;   // wave 54: the WHOLE orientation (a FREE camera rolls)
+    const ok = `${cameraKey(obs)}|${obs.dist.toFixed(4)}|${obs.fov}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;   // wave 54: the WHOLE orientation (a FREE camera rolls)
     if (ok !== lastObs) { lastObs = ok; drawOverlay(obs); }
   }
   return { update, suspend, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },

@@ -14,7 +14,7 @@
  * and the canvas is sized only while the view is on — off, it is a 1 × 1 bitmap, not a full-stage one at the DPR.
  */
 import { bohmStep, bohmVelocity, psiAndGrad } from './dynamics.js';
-import { cameraBasis } from './field.js';
+import { toScreen } from './field.js';
 
 export function createParticles(canvas, api) {
   const g = canvas.getContext('2d');
@@ -125,15 +125,6 @@ export function createParticles(canvas, api) {
     state.alive = alive; state.stalled = stalled; state.maxSpeed = vmax;
     lastT = t;
   }
-  function project(p, B, cam, tanH, aspect, W, H, out) {
-    const dx = p[0] - cam[0], dy = p[1] - cam[1], dz = p[2] - cam[2];
-    const depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2];
-    if (depth <= 0) return false;
-    const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect);
-    const v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-    out[0] = (u + 1) / 2 * W; out[1] = (1 - v) / 2 * H; out[2] = depth;
-    return true;
-  }
   const P3 = [0, 0, 0], S3 = [0, 0, 0];
   function release() { if (canvas.width !== 1 || canvas.height !== 1) { canvas.width = 1; canvas.height = 1; } }   // off: no full-stage bitmap kept
   function suspend(t) { if (Number.isFinite(t)) lastT = t; release(); }
@@ -143,8 +134,7 @@ export function createParticles(canvas, api) {
     if (W < 32 || H < 32) return;
     if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const B = cameraBasis(obs), D = obs.dist * half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
+    const S = toScreen(obs, half, W, H), D = S.D, project = (p) => S.at(p[0], p[1], p[2], S3);
     g.lineCap = 'round';
     const ink = api && api.ink ? api.ink() : null;
     g.strokeStyle = ink ? ink.trail : 'rgba(255,226,170,0.28)'; g.lineWidth = ink ? 1.3 : 1;
@@ -153,7 +143,7 @@ export function createParticles(canvas, api) {
       if (n > 1) {
         g.beginPath(); let started = false;
         for (let k = 0; k < n; k++) {
-          if (!project(trailAt(i, k, P3), B, cam, tanH, aspect, W, H, S3)) { started = false; continue; }
+          if (!project(trailAt(i, k, P3))) { started = false; continue; }
           if (!started) { g.moveTo(S3[0], S3[1]); started = true; } else g.lineTo(S3[0], S3[1]);
         }
         g.stroke();
@@ -161,7 +151,7 @@ export function createParticles(canvas, api) {
     }
     g.fillStyle = ink ? ink.dot : 'rgba(255,240,210,0.95)';
     for (let i = 0; i < pts.length; i++) {
-      if (!project(pts[i], B, cam, tanH, aspect, W, H, S3)) continue;
+      if (!project(pts[i])) continue;
       const sz = Math.max(1, 2.1 * Math.sqrt(D / S3[2]));
       g.beginPath(); g.arc(S3[0], S3[1], sz, 0, 2 * Math.PI); g.fill();
     }
