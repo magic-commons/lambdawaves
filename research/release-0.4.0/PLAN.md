@@ -417,3 +417,33 @@ and description is unknown.
 - R-U1 Josh first, visitors on the iPad second.
 - Every other ruling in §7 takes the first-named option until he says otherwise. The lens shift stays ("the planet photo is a bit of an over-explanation but that sounds like a cool feature").
 - The branches may be pushed ("yes to anything for the branches").
+
+## 10 · THE NUMBERS TAKEN (S0, 2026-10-07 — `research/release-0.4.0/measure/MEASURE.md`, `docs/MIR-1.5-CANARY.md`)
+
+- **N1 · The AO wall opens.** The RTX 3070 reports `maxComputeWorkgroupStorageSize` = 49152 in Chromium (Vulkan) and
+  Firefox 157, and both grant a device asked for 32768; a device asked for nothing gets 16384, and `lab/gpu-boot.js`
+  `requestGpu()` asks only for texture dimensions today. **S4c's cap-128 tier asks for 32 KiB in `want` and falls back to
+  the workgroup-32 variant where it is refused.** The M5 is pending (the one line for Josh is in MEASURE.md §1;
+  `tools/perf/limits.html` serves it); until then the fallback is the iPad's assumed path.
+- **N2 · Records GATE, they do not merely accelerate; the starter is not shipped.** Benzene (36 AO) ground + spectrum
+  is 1.57 s in node, 1.92 s in Firefox, 1.46 s in Chromium against 9.6 s predicted (the model is 5–6.6× slow; 8.1× at
+  58 AO). A 58-AO ground solve alone is ~8 s on this desktop (17.5 s with its spectrum), so "64 AO in a few seconds on the
+  M5" fails already here: **a record past the live cap is the only road to those molecules (DOWNLOAD, not DISABLED), the
+  live cap stays benzene, and the 52-record starter for ≤ 36-AO entries is NOT shipped** (it would save ≤ 2 s on a
+  desktop for its bytes). S4a refits `COST` from the measured rows (benzene, C₂H₄/6-31+G*, naphthalene) and moves the
+  "~9.6 s" menu text that `tests/chem.browser-test.mjs` pins.
+- **N3 · R-L2 resolves YES.** One 300-AO orbital-only dispatch at 96³ costs 12.0 ms of GPU time plain and **3.2–3.6 ms
+  with shells screened at 1e-10** (1.19× benzene's density dispatch, measured today at 2.72 / 3.00 ms), linear at 0.040
+  ms per AO; every row checked against the f64 evaluator to the rgba16float precision. A reconstruct runs once per
+  change, not per frame, so **C₆₀'s HOMO and LUMO draw in 0.4.0 (S4c ii) from a PySCF coefficient record, with shell
+  screening as the kernel**; the density, the I_h names and the grid record stay 0.4.1.
+- **N4 · The canary's seams for 0.4.0** (7 of 82 node suites red on a bare alpha.23 adopt; it boots; browser green):
+  a precache POLICY for kit files (9.46 MiB on a bare adopt against the 8 MiB ceiling; `locales/` + `tokens.json`
+  alone are 2.2 MB) — designed with S4a's `library/**` exemption as one rule, "precache what a root reaches"; the
+  gates that pin kit bytes or kit source text (`mir`, `mir-manifest`'s version regex, `access` A8, `slider-keys`) are
+  rewritten at 0.5.0 as the adoption's first commit, not before; `tools/new-project.mjs` regenerates inside the adoption
+  (BPM 30); three missing ADOPTING-1.5 entries (default BPM 30, the Shift step `.01·keyFine`, strings through `tx()`) go
+  to the MIR session in the KIT BRIEFS (S5).
+- Notes: Firefox's timestamp queries return real values now (the `field.js` comment that says they are zeroed is stale —
+  S4c fixes the comment); headless Chromium reaches the RTX only with `--enable-features=Vulkan --use-angle=vulkan`
+  (`tools/perf/` says so); Firefox reports `onSubmittedWorkDone` on a ~100 ms tick.
