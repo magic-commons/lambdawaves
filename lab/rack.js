@@ -1185,8 +1185,11 @@ export async function boot(dom) {
     if (domain.auto && nm !== lastNmax) { lastNmax = nm; schedule(TIER.REBUILD); }
     else schedule(TIER.RECONSTRUCT);
   }
-  function loadPreset(id) {
+  /** a preset into the atom register.  `opt.hand` is the PRESS (the STATE select and RELOAD): only a hand's preset is
+   *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
+  function loadPreset(id, opt) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
+    if (opt && opt.hand && stageText) stageText.announce(p.label.replace(/[\\`*_{}[\]()#+\-.!|$<>~]/g, '\\$&'));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); lastNmax = -1;
     clock.window = p.visual.window;
@@ -1782,11 +1785,11 @@ export async function boot(dom) {
     const r1 = wState.row();
     ui.presetSel = el('select', 'sel', r1); ui.presetSel.setAttribute('aria-label', 'preset superposition');
     for (const p of PRESETS) { const o = el('option', '', ui.presetSel, p.label); o.value = p.id; }
-    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value));
+    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value, { hand: true }));
     ui.presetSel.style.flex = '1 1 160px';
 
 
-    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value) }).root);
+    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value, { hand: true }) }).root);
     r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { applyVisuals = v; } }).root);
     ui.presetNote = el('div', 'note', wState.body, '');
     const r2 = wState.row();
@@ -2416,6 +2419,7 @@ export async function boot(dom) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
+    announce: (md) => stageText && stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
     now: () => clock.t, field: () => field, chem: () => chem, session: molSession });
   orbitals = register.orbitals; states = register.states;
 

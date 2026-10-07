@@ -59,8 +59,14 @@ MOLECULES is on, otherwise SPECTRUM's populated states in `stateLatex`'s prose
 coefficient. Its key is the string it would render: the DOM moves only when
 the string does, KaTeX runs at most four times a second, and nothing reads
 layout per tick (only on a resize, a transport or rack move, a SIZE change or a
-new string). The type scale is the notebook's three sizes: the formula is its
-title (34 px), an atom label its body (14 px), each × SIZE (`molFormulaSize`,
+new string). THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's
+WINDING / HOMO + LUMO and STATES presets) is announced in the same node —
+`WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js` — and fades back
+to the formula; the press threads `{ hand: true }`, so a restore, an undo, a
+project or link open never announces (`tests/stage-text.browser-test.mjs`).
+The type scale is the notebook's three sizes: the formula is its title
+(34 px), an announcement its heading (22 px), an atom label its body (14 px),
+each × SIZE (`molFormulaSize`,
 50–300 %); centred between the racks with a wide margin; it WRAPS inside that
 width (only an unbreakable word is shrunk); at the top while the transport pill
 floats at the foot, at the foot when the transport is docked or the pill is at

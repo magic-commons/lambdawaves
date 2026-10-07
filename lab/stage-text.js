@@ -28,8 +28,8 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
   const labels = el('div', '', stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
   const node = el('div', '', stage); node.id = 'molFormula'; node.setAttribute('aria-hidden', 'true'); node.hidden = true;
   const narrow = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
-  const stats = { renders: 0, announced: 0 };
-  let on = true, scale = 1, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0;
+  const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, layout reads, label moves
+  let on = true, scale = 1, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0;
 
   /** the markdown wanted now, rendered if it changed and KaTeX's quarter second has passed (else when it has) */
   function show() {
@@ -45,6 +45,7 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
   }
   /** the formula, centred in the open stage between the racks with a wide margin, on the side the transport is NOT on */
   function place() {
+    stats.places++;
     const vis = on && !!shown;
     const tr = document.getElementById('transport');
     const foot = docked() || !!(tr && tr.classList.contains('at-top')) || !!(narrow && narrow.matches);
@@ -74,6 +75,16 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
     }
   }
 
+  /** THE FADE (F2): `md` in the same node at the heading size; after `ttl` it fades out and the formula fades back.  Only a
+   *  HAND calls it — rack.js threads `{ hand: true }` from the press — never a restore, an undo, a project or link open. */
+  function announce(md, ttl = 2400) {
+    if (!on || !md) return false;
+    stats.announced++; clearTimeout(fadeT); node.classList.remove('st-fade');
+    banner = md; show();
+    fadeT = setTimeout(() => { node.classList.add('st-fade'); fadeT = setTimeout(() => { banner = null; node.classList.remove('st-fade'); show(); }, FADE_MS); }, ttl);
+    return true;
+  }
+
   /* ── the atom labels: one element symbol per nucleus at its projected position, written only when the camera, the
      molecule, the size or the canvas changed (PLAN B3); white under `difference`, so each glyph inverts what it is on ── */
   let cssW = canvas.clientWidth, cssH = canvas.clientHeight;
@@ -91,7 +102,7 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
     if (cssW < 32 || cssH < 32) return;
     const key = `${labelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${half}|${cssW}|${cssH}`;
     if (key === placeKey) return;
-    placeKey = key;
+    placeKey = key; stats.labelWrites++;
     const S = toScreen(obs, half, cssW, cssH);
     for (let i = 0; i < atoms.length; i++) {
       const a = atoms[i], sp = spans[i], q = S.at(a.x, a.y, a.z);
@@ -113,7 +124,7 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
   return {
     /** the formula's markdown ('' for none); the DOM moves only if the string did */
     setFormula(md) { formula = md || ''; if (banner === null) show(); },
-    atomLabels, place, stats,
+    announce, atomLabels, place, stats,
     setOn(v) { on = !!v; show(); },
     setScale(s) { scale = s; place(); },
     setLabelScale(s) { labelScale = s; labelsKey = ''; },
