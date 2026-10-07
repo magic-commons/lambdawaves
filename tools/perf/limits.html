@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebGPU limits</title>
+<style>
+  body { font: 14px/1.4 ui-monospace, Menlo, monospace; margin: 16px; background: #10141a; color: #dfe6ee; }
+  pre { white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<!-- tools/perf/limits.html — 0.4.0 S0 MEASURE §1.  Open on any device (a secure context: https or localhost); the page
+     prints the WebGPU adapter's compute limits and whether a device with a 32 KiB workgroup store can be created.
+     tools/perf/gpu-limits.mjs reads window.__limits headless; a human copies the JSON line below. -->
+<pre id="out">asking navigator.gpu…</pre>
+<script type="module">
+const out = document.getElementById('out');
+const KEYS = ['maxComputeWorkgroupStorageSize', 'maxComputeInvocationsPerWorkgroup', 'maxComputeWorkgroupSizeX',
+  'maxComputeWorkgroupSizeY', 'maxComputeWorkgroupSizeZ', 'maxStorageBufferBindingSize', 'maxBufferSize',
+  'maxComputeWorkgroupsPerDimension', 'maxStorageBuffersPerShaderStage', 'maxStorageTexturesPerShaderStage'];
+async function probe() {
+  const R = { ua: navigator.userAgent, at: new Date().toISOString() };
+  if (!navigator.gpu) { R.error = 'no navigator.gpu'; return R; }
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+  if (!adapter) { R.error = 'requestAdapter returned null'; return R; }
+  const info = adapter.info || {};
+  R.info = { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description,
+    isFallbackAdapter: info.isFallbackAdapter ?? adapter.isFallbackAdapter ?? null };
+  try { const g = document.createElement('canvas').getContext('webgl2'); const x = g && g.getExtension('WEBGL_debug_renderer_info');
+    R.webglRenderer = x ? g.getParameter(x.UNMASKED_RENDERER_WEBGL) : (g ? g.getParameter(g.RENDERER) : null); } catch (e) { R.webglRenderer = null; }
+  R.limits = {}; for (const k of KEYS) R.limits[k] = adapter.limits[k];
+  R.features = [...adapter.features].sort();
+  R.timestampQuery = adapter.features.has('timestamp-query');
+  /* a FRESH adapter per device: an adapter is consumed by its first requestDevice */
+  const tryDevice = async (required) => {
+    try { let a = null, tries = 0;                         // headless Chromium on Vulkan has answered null once between adapters: retry, and say so
+      while (!a && tries < 5) { tries++; a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' }); if (!a) await new Promise((r) => setTimeout(r, 200)); }
+      if (!a) return { ok: false, error: 'requestAdapter null ' + tries + '×' };
+      const d = await a.requestDevice({ requiredLimits: required }); const got = d.limits.maxComputeWorkgroupStorageSize; d.destroy(); return { ok: true, got }; }
+    catch (e) { return { ok: false, error: String(e && e.message || e) }; }
+  };
+  R.request32k = await tryDevice({ maxComputeWorkgroupStorageSize: 32768 });
+  R.requestAdapterMax = await tryDevice({ maxComputeWorkgroupStorageSize: adapter.limits.maxComputeWorkgroupStorageSize });
+  const def = await tryDevice({}); R.defaultDeviceWorkgroupStorage = def.got ?? null;
+  return R;
+}
+window.__limits = probe().catch((e) => ({ error: String(e && e.stack || e) }));
+window.__limits.then((R) => { out.textContent = JSON.stringify(R, null, 1) + '\n\nONE LINE:\n' + JSON.stringify(R); });
+</script>
+</body>
+</html>
