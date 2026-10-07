@@ -3261,11 +3261,9 @@ export async function boot(dom) {
     touchState();
   }
   /* ── KEPLER AS A CONTROL SURFACE: the perihelion handle drives exact rotors on the state ── */
-  function pointerRay(px, py) {
-    const W = dom.canvas.clientWidth, H = dom.canvas.clientHeight, E = cameraEye(obs, domain.half), B = E.basis, cam = E.eye;
-    const tanH = E.tanH, aspect = W / H, u = 2 * px / W - 1, v = 1 - 2 * py / H;
-    const d = [B.fwd[0] + u * tanH * aspect * B.right[0] + v * tanH * B.up[0], B.fwd[1] + u * tanH * aspect * B.right[1] + v * tanH * B.up[1], B.fwd[2] + u * tanH * aspect * B.right[2] + v * tanH * B.up[2]];
-    return { cam, d, B, target: E.target };
+  function pointerRay(px, py) {                                     // S2: toScreen's inverse, so the lens shift is the overlays' own
+    const S = toScreen(obs, domain.half, dom.canvas.clientWidth, dom.canvas.clientHeight);
+    return { cam: S.eye, d: S.ray(px, py), B: S.basis, target: S.target };
   }
   function orbitOfShell(n, re, im) {
     const c = re ? { re, im } : (reg.field.Fz !== 0 ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
@@ -3399,6 +3397,7 @@ export async function boot(dom) {
     const a = HAMILTONIANS.well.radius, r = Math.hypot(...p), cap = 0.75 * a;
     return r > cap ? p.map((c) => c * cap / r) : p;                 // keep the launch point well inside the wall
   }
+  camera.pointer = { ray: pointerRay, unproject };                  // S2: the pointer maths, for the camera-shift gate (__LW.camera.pointer)
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
   let gasWidth = 1.8, gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
@@ -3973,7 +3972,7 @@ export async function boot(dom) {
         return {
           label: exportLabel(), build: BUILD_LINE, t: clock.t, space, isoFrac: mat.iso,
           colour: { on: !!(palette && palette.on), hue: mat.hueShift || 0, invert: !!mat.invert, lut: (palette && palette.on) ? toLUT(palette.stops) : null },
-          camera: { eye: E.eye, dir: B.dir, right: B.right, up: B.up, yfov: obs.fov || 0.6, aspect: w / h },   // the eye in half-units: the worker scales it by its grid's half
+          camera: { eye: E.eye, dir: B.dir, right: B.right, up: B.up, yfov: obs.fov || 0.6, aspect: w / h, shift: E.shift },   // the eye in half-units: the worker scales it by its grid's half; S2: the lens shift rides as extras
           atoms: q ? q.atoms : [{ Z: getZ(), x: 0, y: 0, z: 0 }],
         };
       },

@@ -168,7 +168,8 @@ const yUp = (x, y, z) => [x, z, -y];
 
 /** GLB (glTF 2.0 binary): one mesh, one primitive — POSITION, NORMAL, COLOR_0 (VEC3 float, LINEAR as glTF requires, so
  *  the sRGB palette is linearised), UNSIGNED_INT indices — a plain material, and the observer as a perspective camera.
- *  camera = { position, right, up, dir (lab axes), yfov, aspect, znear, zfar } */
+ *  camera = { position, right, up, dir (lab axes), yfov, aspect, znear, zfar, shift? }.  glTF's perspective camera has no
+ *  principal point, so a lens shift (0.4.0 S2: the pivot's place on the frame, NDC) rides as the node's extras.lensShift. */
 export function glb(mesh, { name = 'lambdawaves', camera = null, extras = null, generator = 'lambdawaves' } = {}) {
   const nv = mesh.positions.length / 3, nt = mesh.indices.length / 3;
   const P = new Float32Array(3 * nv), NM = new Float32Array(3 * nv), CL = new Float32Array(3 * nv);
@@ -192,7 +193,8 @@ export function glb(mesh, { name = 'lambdawaves', camera = null, extras = null, 
   };
   if (camera) {
     json.cameras = [{ name: 'observer', type: 'perspective', perspective: { yfov: camera.yfov, aspectRatio: camera.aspect, znear: camera.znear, zfar: camera.zfar } }];
-    json.nodes.push({ name: 'observer', camera: 0, translation: yUp(...camera.position), rotation: quatOfBasis(yUp(...camera.right), yUp(...camera.up), yUp(...camera.dir)) });
+    json.nodes.push({ name: 'observer', camera: 0, translation: yUp(...camera.position), rotation: quatOfBasis(yUp(...camera.right), yUp(...camera.up), yUp(...camera.dir)),
+      extras: camera.shift && (camera.shift[0] || camera.shift[1]) ? { lensShift: camera.shift.slice() } : undefined });
   }
   const J = enc(JSON.stringify(json));
   const jl = (J.length + 3) & ~3, bl = (off + 3) & ~3, total = 12 + 8 + jl + 8 + bl;
@@ -311,7 +313,7 @@ export function buildFile(m) {
   const units = space === 'p' ? 'hbar/bohr (momentum space)' : 'bohr';
   let bytes;
   if (m.fmt === 'glb') {
-    const c = m.camera, cam = c ? { position: c.eye.map((e) => e * half), right: c.right, up: c.up, dir: c.dir, yfov: c.yfov, aspect: c.aspect, znear: 0.05, zfar: 100 * half } : null;
+    const c = m.camera, cam = c ? { position: c.eye.map((e) => e * half), right: c.right, up: c.up, dir: c.dir, yfov: c.yfov, aspect: c.aspect, znear: 0.05, zfar: 100 * half, shift: c.shift } : null;
     bytes = glb(mesh, { name: 'λWAVES · ' + label + ' · ' + build, camera: cam, generator: 'lambdawaves ' + ascii(build),
       extras: { state: label, units, iso: { rho: iso, ofMax: isoFrac }, grid: N, half, axes: 'Y up: (x, z, -y) of the lab, whose z is up', ...(m.names ? { names: m.names } : {}) } });
   } else if (m.fmt === 'obj') {

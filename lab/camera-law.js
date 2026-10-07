@@ -36,7 +36,11 @@ import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE ca
  * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
  * not on the undo stack, and reg.version cannot move because of it (§14). */
 export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
-  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
+  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
+/** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
+ *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything
+ *  that is not a finite number reads 0 (an older project, a hand-edited file). */
+export const clampShift = (s) => [0, 1].map((i) => { const v = s ? +s[i] : 0; return Math.max(-CAM.SHIFT, Math.min(CAM.SHIFT, Number.isFinite(v) ? v : 0)) + 0; });
 
 export function createCameraLaw({ obs, ui, present, modHand, resetWall }) {
   const camera = {

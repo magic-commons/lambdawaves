@@ -554,12 +554,12 @@ struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
 const ORIGIN = [0, 0, 0], DEFAULT_BG = [0.028, 0.038, 0.058];
 const AXIS_NORMALS = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-function perspective(fovy, aspect, near, far, out) {
+export function perspective(fovy, aspect, near, far, out) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far), o = out || new Float32Array(16);
   o.fill(0); o[0] = f / aspect; o[5] = f; o[10] = far * nf; o[11] = -1; o[14] = far * near * nf;
   return o;
 }
-function lookAt(eye, center, up, out) {
+export function lookAt(eye, center, up, out) {
   const zx = eye[0] - center[0], zy = eye[1] - center[1], zz = eye[2] - center[2];
   let len = Math.hypot(zx, zy, zz); const z = [zx / len, zy / len, zz / len];
   const xx = up[1] * z[2] - up[2] * z[1], xy = up[2] * z[0] - up[0] * z[2], xz = up[0] * z[1] - up[1] * z[0];
@@ -627,24 +627,40 @@ export function cameraBasis(obs) {
 }
 /** THE ONE EYE (0.4.0 S1′): the only place the observer becomes an eye.  The ray pass (writeView), the pointer
  *  (pointerRay, unproject), the GLB camera and every 2-D overlay (toScreen) ask here.  The pivot is the origin (the
- *  plan chose a lens shift over a target pivot); `shift` = the pivot's place in NDC, carried as zeros until S2 writes
- *  it into writeView, toScreen and pointerRay — the three seats, each one line. */
+ *  plan chose a lens shift over a target pivot); `shift` = the pivot's place on the frame in NDC (S2), which writeView
+ *  (lensShift), toScreen.at and pointerRay apply — the three seats, each one line. */
 const NO_SHIFT = Object.freeze([0, 0]);
 export function cameraEye(obs, half) {
   const basis = cameraBasis(obs), D = obs.dist * half, d = basis.dir;
   return { eye: [d[0] * D, d[1] * D, d[2] * D], target: [0, 0, 0], basis, shift: obs.shift || NO_SHIFT, D, tanH: Math.tan((obs.fov || 0.6) / 2) };
 }
 /** the 2-D overlays' one road: cameraEye plus `at(x, y, z, out?)` → [px, py, depth] in stage CSS pixels of a W × H
- *  canvas, or null behind the eye */
+ *  canvas, or null behind the eye, and its inverse `ray(px, py)` → the (unnormalised) direction from the eye through
+ *  that pixel — the pointer's (rack.js pointerRay).  The lens shift moves every point by (sx·W/2, −sy·H/2) pixels. */
 export function toScreen(obs, half, W, H) {
-  const E = cameraEye(obs, half), { fwd, right, up } = E.basis, c = E.eye, tanH = E.tanH, aspect = W / H;
+  const E = cameraEye(obs, half), { fwd, right, up } = E.basis, c = E.eye, tanH = E.tanH, aspect = W / H, s = E.shift;
   E.at = (x, y, z, out = [0, 0, 0]) => {
     const dx = x - c[0], dy = y - c[1], dz = z - c[2], depth = dx * fwd[0] + dy * fwd[1] + dz * fwd[2];
     if (depth <= 0) return null;
     const u = (dx * right[0] + dy * right[1] + dz * right[2]) / (depth * tanH * aspect), v = (dx * up[0] + dy * up[1] + dz * up[2]) / (depth * tanH);
-    out[0] = (u + 1) / 2 * W; out[1] = (1 - v) / 2 * H; out[2] = depth; return out;
+    out[0] = (u + s[0] + 1) / 2 * W; out[1] = (1 - v - s[1]) / 2 * H; out[2] = depth; return out;
+  };
+  E.ray = (px, py) => {
+    const u = (2 * px / W - 1 - s[0]) * tanH * aspect, v = (1 - 2 * py / H - s[1]) * tanH;   // pixel u marches the on-axis ray of u − p
+    return [fwd[0] + u * right[0] + v * up[0], fwd[1] + u * right[1] + v * up[1], fwd[2] + u * right[2] + v * up[2]];
   };
   return E;
+}
+/** THE LENS SHIFT (0.4.0 S2): the on-axis picture translated by p = E.shift in NDC; the view and the basis do not move,
+ *  only the principal point.  The ray pass's forward lane (lane[at..at+2]) becomes fwd − p·tanH·(aspect·right, up), so the
+ *  pixel at uv u marches the on-axis ray of u − p; the lines' perspective P gains P[8] = −px, P[9] = −py (column-major,
+ *  w = −z: x_clip += P[8]·z adds px to the NDC — the FRAME-corner gate confirms the sign on the GPU).  At p = 0 it writes
+ *  nothing: the lane stays fwd and P stays perspective()'s, byte for byte. */
+export function lensShift(E, aspect, lane, at, P) {
+  const s = E.shift; if (!s[0] && !s[1]) return false;
+  const a = s[0] * E.tanH * aspect, b = s[1] * E.tanH, { fwd, right, up } = E.basis;
+  for (let i = 0; i < 3; i++) lane[at + i] = fwd[i] - a * right[i] - b * up[i];
+  P[8] = -s[0]; P[9] = -s[1]; return true;
 }
 /** the whole orientation (and the lens shift) as ONE string — what a cached 2-D overlay must key on, because a FREE
  *  camera can ROLL without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
@@ -1048,8 +1064,9 @@ export async function createField(canvas, opts = {}) {
     const snLen = Math.hypot(sn[0], sn[1], sn[2]) || 1;
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
+    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
-    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
+    lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
     device.queue.writeBuffer(vpBuf, 0, M_VP);
     return cam;
   }
