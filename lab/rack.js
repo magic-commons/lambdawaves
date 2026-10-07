@@ -2383,8 +2383,7 @@ export async function boot(dom) {
   const molFormulaNarrow = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
   function placeMolFormula() {
     const fe = molFormulaEl; if (!fe) return;                      // built at the end of boot, after `layout` exists
-    const m = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
-    const text = m ? mathPlain(m.formula) : registerText();
+    const text = stageText();
     const show = !!text && !document.body.classList.contains('no-mol-formula');
     if (fe.textContent !== text) fe.textContent = text;
     const tr = document.getElementById('transport');
@@ -2430,38 +2429,42 @@ export async function boot(dom) {
     if (mix) { const A = list(mix.reA, mix.imA), B = list(mix.reB, mix.imB); return A && B ? A + '  ↔  ' + B : A || B; }
     return reg.populated().map(name).join(', ');
   }
-  /** polled from the CPU tick: the register has no change event, so its version (and the transition flag) is the key */
+  function stageText() { const m = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null; return m ? mathPlain(m.formula) : registerText(); }
+  /** polled from the CPU tick (the register has no change event): the key is the string it would render, so a modulated
+   *  coefficient that leaves the populated set alone is one compare and no DOM */
   function stageTextTick() {
-    const key = reg.version + '|' + (reg.transition ? 1 : 0) + '|' + getHamiltonian().id;
+    const key = stageText();
     if (key !== molFormulaKey) { molFormulaKey = key; placeMolFormula(); }
   }
   /* 2026-10 (Josh) · ATOM LABELS (Settings › Display, PREFERENCE `atomLabels` / `atomLabelsSize`): each nucleus of the
      MOLECULES molecule marked with its element symbol, small, at its projected screen position.  The atoms are
-     moleculeAtoms(preset) in bohr — the very centres the field's shells sit on — projected through the camera exactly as
-     PARTICLES projects (cameraBasis, eye at obs.dist × half, the vertical fov).  The layer is white with
+     moleculeAtoms(preset) in bohr — the very centres the field's shells sit on — projected through toScreen (field.js),
+     the road every 2-D overlay takes.  The layer is white with
      `mix-blend-mode: difference`, so every glyph INVERTS whatever is under it: dark on a light cloud, light on a dark one.
-     Transparent, no pointer, under every window, never in the occlusion mask.  Moved once per presented CPU tick. */
-  let atomLabelsEl = null, atomLabelsKey = '', atomSpans = [];
+     Transparent, no pointer, under every window, never in the occlusion mask.  Written only when the camera
+     (cameraKey, dist, fov), the preset, the size or the canvas changed (PLAN B3). */
+  let atomLabelsEl = null, atomLabelsKey = '', atomPlaceKey = '', atomSpans = [];
   function placeAtomLabels() {
     const L = atomLabelsEl; if (!L) return;
     const on = !!(chem && chem.on) && !document.body.classList.contains('no-atom-labels');
-    if (!on) { if (!L.hidden) L.hidden = true; atomLabelsKey = ''; return; }
+    if (!on) { if (!L.hidden) L.hidden = true; atomLabelsKey = atomPlaceKey = ''; return; }
     const id = chem.preset(), atoms = moleculeAtoms(id);
     if (atomLabelsKey !== id + '|' + atomLabelScale) {
-      atomLabelsKey = id + '|' + atomLabelScale;
+      atomLabelsKey = id + '|' + atomLabelScale; atomPlaceKey = '';
       L.textContent = ''; atomSpans = atoms.map((a) => el('span', 'atom-label', L, ELEMENT[a.Z] || '?'));
       L.style.fontSize = Math.round(13 * atomLabelScale) + 'px';
     }
     L.hidden = false;
     const cv = dom.canvas, W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
-    const B = cameraBasis(obs), D = obs.dist * domain.half, cam = [B.dir[0] * D, B.dir[1] * D, B.dir[2] * D];
-    const tanH = Math.tan((obs.fov || 0.6) / 2), aspect = W / H;
+    const key = `${atomLabelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${domain.half}|${W}|${H}`;
+    if (key === atomPlaceKey) return;
+    atomPlaceKey = key;
+    const S = toScreen(obs, domain.half, W, H);
     for (let i = 0; i < atoms.length; i++) {
       const a = atoms[i], sp = atomSpans[i]; if (!sp) continue;
-      const dx = a.x - cam[0], dy = a.y - cam[1], dz = a.z - cam[2], depth = dx * B.fwd[0] + dy * B.fwd[1] + dz * B.fwd[2];
-      if (depth <= 0) { sp.style.display = 'none'; continue; }
-      const u = (dx * B.right[0] + dy * B.right[1] + dz * B.right[2]) / (depth * tanH * aspect), v = (dx * B.up[0] + dy * B.up[1] + dz * B.up[2]) / (depth * tanH);
-      sp.style.display = ''; sp.style.transform = `translate(${((u + 1) / 2 * W).toFixed(1)}px, ${((1 - v) / 2 * H).toFixed(1)}px) translate(-50%, -50%)`;
+      const q = S.at(a.x, a.y, a.z);
+      if (!q) { sp.style.display = 'none'; continue; }
+      sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
     }
   }
   function initMolFormula() {
