@@ -3411,3 +3411,36 @@ carries `\mathrm{H_{2}O}`, "5 occupied of 7 AO", `\varepsilon_{5}`, HOMO and LUM
 copies `$1s_{0}$ and $2p_{0}$`), `menubar` 8/8, `molecular-names` 5/5 (one new: QUARKONIUM hidden, `cornell` restores,
 ATOM un-hides ATOMS), `register` 17/17, `chem` 54/54 (L5 now asserts the fold open by default and the `Aa` shown with
 HELP off, instead of un-hiding the div), `routed-knob` 4/4 (opens the fold through its chevron), `new-project` 8/8.
+
+### wave 137: The cheap bugs — CALCULUS's copy, the tags off METERS' tick, WIGNER under MOLECULES, and the LINKED bug reproduced
+
+Four bugs from the audit and the vault, one commit, one new browser suite (`tests/take-in-bugs.browser-test.mjs`, 4/4)
+that takes each one by the road a user takes.
+
+CALCULUS's ⧉ copied one header line: `DIGESTS.calculus` read `calculus.stats`, a field `createCalculus` never returned
+(it returns `{ update, get last() }`). It reads `last` now; the suite raises CALCULUS on `1s+2pz` and the digest is 56
+lines with its rows. THE STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's aria sentence rode
+METERS' tick (`badges.update()` beside `paintGovernor()`, gated on `canPresent(wMet)`), so with METERS closed they went
+stale; they have their own ≤ 10 Hz tick now (`badgesWall`, profiled as `badges`), gated on the tags being shown or the
+canvas being focused, and the governor's readout stays with METERS. With METERS closed and STATUS TAGS on, switching
+Stark on shows `STARK F = 1.0e-3 …` in 20 ms. `hydroReader()` did not know `chem`, so WIGNER and RADIATION computed
+hydrogenic physics under MOLECULES; `chem.on` joins the "another model holds the field" branch and WIGNER says
+`hydrogenic register only`.
+
+THE LINKED BUG (Josh's NEXT UPDATE note: "at project start or open, Space does not play both clocks in LINKED mode"),
+REPRODUCED AND FIXED. A probe pressed a real Space (the driver's own key) at five starts. With the modulation editor
+open, or anything routed (WAVE DANCER), Space plays both clocks and a second Space pauses both. With the editor CLOSED
+and nothing routed — the fresh first run, and NEW — the field plays and the modulation transport does not: the kit
+refuses the play with `nothing-to-run` (`lab/mir/modulation/host.js` `setPlaying`: unrouted sources only animate their
+editor, so a closed editor with no route has nothing live), and the link law retried that refusal once a second
+(`refusedPlays` 2 after 0.6 s, 4 after 2 s). The visible defect is the next step: open the editor under a playing field
+and it showed a STOPPED modulation transport until the next retry — measured 353 ms on the run before the fix (up to a
+second by construction). The editor's `opened` hook now re-arms the link (`linkFollowed = null`), so the next frame
+plays it: 46 ms at project start and 33 ms after NEW in the suite, which asserts ≤ 150 ms. Not changed, and said so:
+while the editor is closed and nothing is routed the kit still refuses — there is nothing to run, and the kit's law is
+MIR's (the refusal reading a closed editor as "no sources" sits oddly beside host.js' own "presentation never changes
+transport state"; a MIR issue, not an app edit).
+
+Gates, run once: `bash test.sh node` green (82 suites); browser `take-in-bugs` 4/4 on 8731 (and RED on the tree
+before the LINKED fix: 353 ms > 150 ms). The digest lock was not run: the frame loop's render order is untouched — the
+new tick writes DOM text after the present, where METERS' tick already ran.

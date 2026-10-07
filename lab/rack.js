@@ -385,7 +385,7 @@ export async function boot(dom) {
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
      the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */
-  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, fieldlines: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
+  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, fieldlines: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, badges: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
   const frameBudget = createFrameBudget();
   const perfBudgetMs = () => frameBudget.milliseconds(perf.mode);
   const tick = (name, fn) => { const a = performance.now(); fn(); const d = performance.now() - a; perf.profile[name] = perf.profile[name] * 0.9 + d * 0.1; if (d >= 1) { perf.work[name] = perf.work[name] ? perf.work[name] * 0.7 + d * 0.3 : d; perf.wall[name] = a; } };
@@ -450,7 +450,7 @@ export async function boot(dom) {
   const stats = { frames: 0, presents: 0, skipped: 0, reconstructs: 0, evolves: 0, rebuilds: 0, tiers: { PRESENT: 0, RECONSTRUCT: 0, EVOLVE: 0, REBUILD: 0 }, lastTier: 'NONE', scheduled: false, fps: 0, reconPerSec: 0, stepsPerSec: 0, lastEncodeMs: 0, fieldT: 0 };
   const cRe = new Float64Array(91), cIm = new Float64Array(91);
   let pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
-  let keplerDirty = true, govVersion = -1, metersWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
+  let keplerDirty = true, govVersion = -1, metersWall = 0, badgesWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
   let applyVisuals = true;
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
@@ -1104,7 +1104,11 @@ export async function boot(dom) {
     }
     inLoop = false;
     loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
-    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); badges.update(); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
+    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }
+    /* 0.4.0 S0 · wave 137: the STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's sentence tick on
+       their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
+       shown or the canvas being read (focused); the governor's readout stays with METERS. */
+    if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
@@ -2780,7 +2784,10 @@ export async function boot(dom) {
 
     modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), {
       moved: modDodge,
-      opened: () => modHost.clock.setPresentationActive(true),
+      /* 0.4.0 S0 · wave 137 (THE LINKED BUG, reproduced): with nothing routed the kit refuses a play until the editor shows
+         its preview ('nothing-to-run'), and the link law retried that refusal once a second — so opening the editor under a
+         playing field showed a STOPPED modulation transport for up to a second.  Opening it re-arms the link: the next frame plays. */
+      opened: () => { modHost.clock.setPresentationActive(true); linkFollowed = null; linkRetryAt = 0; schedule(TIER.PRESENT); },
       closed: () => { modHost.clock.setPresentationActive(false); modDodge({ left: -1, right: -1, top: -1, bottom: -1 }); },
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
       M: modHost.model, registry: modHost.registry, targets: modHost.targets, clock: modHost.clock,
@@ -2908,7 +2915,7 @@ export async function boot(dom) {
       why: 'the STURMIAN scale is on: the scaled radials are not the ones this window integrates — switch SCALE back to HYDROGEN' };
     if (H.id !== 'hydrogen') return { on: false, status: 'hydrogenic register only', why: 'hydrogenic register only — the operator in force is ' + H.label };
     if (getZ() !== 1) return { on: false, status: 'hydrogenic register only (Z = 1)', why: 'the ion at Z = ' + getZ() + ' scales every radial: this window reads the Z = 1 closed forms' };
-    if ((molecule && molecule.on) || (helium && helium.on) || (h2 && h2.on)) return { on: false, status: 'hydrogenic register only', why: 'another model holds the field — this window reads the hydrogenic register' };
+    if ((molecule && molecule.on) || (helium && helium.on) || (h2 && h2.on) || (chem && chem.on)) return { on: false, status: 'hydrogenic register only', why: 'another model holds the field — this window reads the hydrogenic register' };   // 0.4.0 S0 · wave 137: MOLECULES too
     return { on: true, status: null, why: '' };
   }
 
@@ -5620,7 +5627,7 @@ export async function boot(dom) {
      (or was accepted by this browser before).  See `armAutoplay` below. */
   Object.assign(DIGESTS, {
     meters: () => 'density period\t' + (() => { const P = __LW_hooks.period ? __LW_hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
-    calculus: () => calculus && calculus.stats ? JSON.stringify(calculus.stats, null, 1) : '',
+    calculus: () => calculus && calculus.last ? JSON.stringify(calculus.last, null, 1) : '',   // 0.4.0 S0 · wave 137: the view returns `last` (calculusview.js); `stats` never existed, so ⧉ copied the header alone
     vortex: () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '',
     spectrum: () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
       + (sturm.P ? (() => { const e = sturmEigen(); return '\n\nSTURMIAN λ = ' + sturm.lambda.toFixed(4) + ' · Z = ' + getZ() + ' · ⟨c|S|c⟩ = ' + e.norm.toFixed(6) + ' · ⟨H⟩ = ' + e.energy.toFixed(6) + '\neigenvalue\tpopulation\t(l, m)\n' + e.E.map((E, k) => E.toFixed(6) + '\t' + e.pop[k].toFixed(6) + '\t' + 'spdfgh'[e.l[k]] + (e.m[k] >= 0 ? '+' : '-') + Math.abs(e.m[k])).join('\n'); })() : ''); },
