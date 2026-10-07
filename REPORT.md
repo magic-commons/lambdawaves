@@ -3481,3 +3481,33 @@ manifest test among them); browser `menubar` 8/8 (ABOUT), `latex-copy` 9/9 (the 
 kit's KaTeX), `current` 15/15; `node tools/build-deploy.mjs --no-test` assembles and verifies dist/ (203 files, 5.16 MiB).
 Left as it was: `lab/sw.js`'s NEVER_PRECACHE prose still carries a "vendor/katex/LICENSE — NO LONGER SKIPPED" row; sw.js
 is regenerated, not hand-edited, and that row is documentation no check reads.
+
+### wave 139: Three demos as content — WATER, BENZENE and N₂, so a first visitor meets a molecule in the first minute
+
+`lab/demos/` held one project, WAVE DANCER. It now holds four: `water`, `benzene` and `n2` `.lambdawaves.json`, opened by
+three new PROJECTS-face buttons (`WATER`, `BENZENE`, `N₂`, beside WAVE DANCER, in its voice: "Open the bundled … demo
+project — …; a saved copy lands in your projects") through the road WAVE DANCER takes (fetch → `projects.importText` →
+`projects.open`). Each was MADE BY THE APP: a headless session on the gate server solved the molecule, switched
+MOLECULES on, set VIEW ORBITAL on the HOMO and a camera pose that shows the shape (water's out-of-plane lone pair from
+yaw 0.85 / pitch 0.30, benzene's π cloud from 0.55 / 0.75, N₂'s σ along the bond from 0.65 / 0.20 — each checked on a
+screenshot), saved it as `DEMOS/<NAME>` and exported it with `projects.exportText`. Then stripped by W129's law: the
+export's `quality` and `camera` blocks went (no look keys were there to strip — serialize() has written none since
+0.3.1 S1), the notebook was written, and nothing else was touched. Against WAVE DANCER the files carry three more
+PROJECT keys, all MOLECULES': `instruments`, `readers`, `modulationBases`. MO-REGISTRY rides on the rack in the layout;
+its register is off, so the field is MOLECULES' orbital view.
+
+The measured ladders the notebooks quote: water 7 AO / 5 occupied, E = −74.963023 E_h, HOMO ε₅ = −0.3912, LUMO
+ε₆ = 0.6052; benzene 36 / 21, E = −227.891006, HOMO ε₂₁ = −0.2813 (degenerate with ε₂₀), LUMO ε₂₂ = 0.2702 (degenerate
+with ε₂₃); N₂ 10 / 7, E = −107.495888, HOMO ε₇ = −0.5394 (a σ, the π pair ε₅ = ε₆ = −0.5730 just below), LUMO pair
+ε₈ = ε₉ = 0.2812. Each notebook is five short paragraphs for a first-minute visitor: what is on the stage, the HOMO by
+INDEX (S1 adds the symmetry names and will revise these lines), which ladder to press in MO-REGISTRY (and what the beat
+at Δε means — and, for benzene, why a degenerate pair alone stands still), and what KICK and RUN do.
+
+`tests/molecule-demos.browser-test.mjs` (new, 3/3) presses each button for real: the status says `opened demo
+DEMOS/…`, MOLECULES owns the field on the right molecule (`chem.state().fieldOwner`), VIEW ORBITAL sits on the HOMO
+(5 of 7, 21 of 36, 7 of 10), the notebook opens with its text, no microphone is asked for, and
+`lambdawaves.q0.settings` is byte-identical outside the WORKSPACE keys after the open. Water opened in 0.9 s, N₂ in
+0.6 s, benzene in 2.6 s — the cap, whose status line says it is solving while it does. `tests/first-run.test.mjs`' "A
+BUNDLED DEMO CARRIES NO LOOK" and "no bundled demo carries a quality" read every file in `lab/demos/`, so the three
+new files are under the same law as WAVE DANCER (green). `node tests/pwa.test.mjs --write`: 185 entries (the three
+files precache like WAVE DANCER).

@@ -1104,11 +1104,11 @@ export async function boot(dom) {
     }
     inLoop = false;
     loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
-    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }
+    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     /* 0.4.0 S0 · wave 137: the STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's sentence tick on
        their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
        shown or the canvas being read (focused); the governor's readout stays with METERS. */
-    if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
+    if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
