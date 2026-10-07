@@ -1,0 +1,1156 @@
+{
+ "host": "LUX",
+ "runs": 5,
+ "browsers": {
+  "firefox": {
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+   "hc": 12,
+   "runs": [
+    {
+     "run": 0,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 1156.4,
+     "fullWallMs": 1160.1,
+     "spectrumWallMs": 3.7,
+     "workerGroundMs": 29,
+     "workerIntegralsMs": 11,
+     "workerRpaMs": 3,
+     "status": "10 AOs · 14 electrons · ground 29 ms (integrals 11 of it) · rpa 3 ms"
+    },
+    {
+     "run": 0,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1486.8,
+     "fullWallMs": 2007.2,
+     "spectrumWallMs": 520.3,
+     "workerGroundMs": 1483,
+     "workerIntegralsMs": 840,
+     "workerRpaMs": 421,
+     "status": "36 AOs · 42 electrons · ground 1483 ms (integrals 840 of it) · rpa 421 ms"
+    },
+    {
+     "run": 0,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 10.4,
+     "fullWallMs": 11.3,
+     "spectrumWallMs": 0.8,
+     "workerGroundMs": 8,
+     "workerIntegralsMs": 5,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 8 ms (integrals 5 of it) · rpa 0 ms"
+    },
+    {
+     "run": 0,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1883.7,
+     "fullWallMs": 2378.1,
+     "spectrumWallMs": 494.4,
+     "workerGroundMs": 1877,
+     "workerIntegralsMs": 351,
+     "workerRpaMs": 401,
+     "status": "46 AOs · 16 electrons · ground 1877 ms (integrals 351 of it) · rpa 401 ms"
+    },
+    {
+     "run": 1,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": null,
+     "fullWallMs": 24.2,
+     "spectrumWallMs": null,
+     "workerGroundMs": 21,
+     "workerIntegralsMs": 9,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 21 ms (integrals 9 of it) · rpa 1 ms"
+    },
+    {
+     "run": 1,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1417.6,
+     "fullWallMs": 1910.6,
+     "spectrumWallMs": 493,
+     "workerGroundMs": 1416,
+     "workerIntegralsMs": 812,
+     "workerRpaMs": 398,
+     "status": "36 AOs · 42 electrons · ground 1416 ms (integrals 812 of it) · rpa 398 ms"
+    },
+    {
+     "run": 1,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 8.3,
+     "fullWallMs": 8.8,
+     "spectrumWallMs": 0.5,
+     "workerGroundMs": 7,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 7 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 1,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1758.9,
+     "fullWallMs": 2227.2,
+     "spectrumWallMs": 468.3,
+     "workerGroundMs": 1757,
+     "workerIntegralsMs": 345,
+     "workerRpaMs": 377,
+     "status": "46 AOs · 16 electrons · ground 1757 ms (integrals 345 of it) · rpa 377 ms"
+    },
+    {
+     "run": 2,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 36.6,
+     "fullWallMs": 38.4,
+     "spectrumWallMs": 1.8,
+     "workerGroundMs": 34,
+     "workerIntegralsMs": 14,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 34 ms (integrals 14 of it) · rpa 1 ms"
+    },
+    {
+     "run": 2,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1493,
+     "fullWallMs": 2009.7,
+     "spectrumWallMs": 516.7,
+     "workerGroundMs": 1488,
+     "workerIntegralsMs": 833,
+     "workerRpaMs": 423,
+     "status": "36 AOs · 42 electrons · ground 1488 ms (integrals 833 of it) · rpa 423 ms"
+    },
+    {
+     "run": 2,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": null,
+     "fullWallMs": 12.4,
+     "spectrumWallMs": null,
+     "workerGroundMs": 10,
+     "workerIntegralsMs": 5,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 10 ms (integrals 5 of it) · rpa 0 ms"
+    },
+    {
+     "run": 2,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1831.6,
+     "fullWallMs": 2341.6,
+     "spectrumWallMs": 510,
+     "workerGroundMs": 1828,
+     "workerIntegralsMs": 343,
+     "workerRpaMs": 410,
+     "status": "46 AOs · 16 electrons · ground 1828 ms (integrals 343 of it) · rpa 410 ms"
+    },
+    {
+     "run": 3,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 23.5,
+     "fullWallMs": 24.4,
+     "spectrumWallMs": 0.9,
+     "workerGroundMs": 21,
+     "workerIntegralsMs": 9,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 21 ms (integrals 9 of it) · rpa 1 ms"
+    },
+    {
+     "run": 3,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1444.6,
+     "fullWallMs": 1922.3,
+     "spectrumWallMs": 477.7,
+     "workerGroundMs": 1440,
+     "workerIntegralsMs": 817,
+     "workerRpaMs": 390,
+     "status": "36 AOs · 42 electrons · ground 1440 ms (integrals 817 of it) · rpa 390 ms"
+    },
+    {
+     "run": 3,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 11.6,
+     "fullWallMs": 12.3,
+     "spectrumWallMs": 0.7,
+     "workerGroundMs": 7,
+     "workerIntegralsMs": 4,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 7 ms (integrals 4 of it) · rpa 0 ms"
+    },
+    {
+     "run": 3,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1841.1,
+     "fullWallMs": 2312.6,
+     "spectrumWallMs": 471.5,
+     "workerGroundMs": 1838,
+     "workerIntegralsMs": 332,
+     "workerRpaMs": 379,
+     "status": "46 AOs · 16 electrons · ground 1838 ms (integrals 332 of it) · rpa 379 ms"
+    },
+    {
+     "run": 4,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 23.7,
+     "fullWallMs": 24.9,
+     "spectrumWallMs": 1.3,
+     "workerGroundMs": 22,
+     "workerIntegralsMs": 9,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 22 ms (integrals 9 of it) · rpa 1 ms"
+    },
+    {
+     "run": 4,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1393.8,
+     "fullWallMs": 1882.7,
+     "spectrumWallMs": 488.9,
+     "workerGroundMs": 1391,
+     "workerIntegralsMs": 772,
+     "workerRpaMs": 396,
+     "status": "36 AOs · 42 electrons · ground 1391 ms (integrals 772 of it) · rpa 396 ms"
+    },
+    {
+     "run": 4,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 9,
+     "fullWallMs": 9.6,
+     "spectrumWallMs": 0.7,
+     "workerGroundMs": 8,
+     "workerIntegralsMs": 4,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 8 ms (integrals 4 of it) · rpa 0 ms"
+    },
+    {
+     "run": 4,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1879.7,
+     "fullWallMs": 2393.1,
+     "spectrumWallMs": 513.4,
+     "workerGroundMs": 1878,
+     "workerIntegralsMs": 322,
+     "workerRpaMs": 418,
+     "status": "46 AOs · 16 electrons · ground 1878 ms (integrals 322 of it) · rpa 418 ms"
+    },
+    {
+     "run": 5,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341268,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 23.3,
+     "fullWallMs": 26.3,
+     "spectrumWallMs": 3,
+     "workerGroundMs": 22,
+     "workerIntegralsMs": 10,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 22 ms (integrals 10 of it) · rpa 1 ms"
+    },
+    {
+     "run": 5,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641795,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1441.2,
+     "fullWallMs": 1939.5,
+     "spectrumWallMs": 498.3,
+     "workerGroundMs": 1439,
+     "workerIntegralsMs": 822,
+     "workerRpaMs": 401,
+     "status": "36 AOs · 42 electrons · ground 1439 ms (integrals 822 of it) · rpa 401 ms"
+    },
+    {
+     "run": 5,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.96302316286251,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 11.5,
+     "fullWallMs": 12,
+     "spectrumWallMs": 0.5,
+     "workerGroundMs": 8,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 8 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 5,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.03503265062392,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1861.1,
+     "fullWallMs": 2350.8,
+     "spectrumWallMs": 489.7,
+     "workerGroundMs": 1859,
+     "workerIntegralsMs": 348,
+     "workerRpaMs": 381,
+     "status": "46 AOs · 16 electrons · ground 1859 ms (integrals 348 of it) · rpa 381 ms"
+    }
+   ],
+   "errs": [],
+   "wallSec": 30.4,
+   "at": "2026-10-07T19:46:22.168Z",
+   "summary": {
+    "H2O": {
+     "basis": "sto-3g",
+     "nAO": 7,
+     "cold": {
+      "ground": 10.4,
+      "full": 11.3
+     },
+     "groundWall": {
+      "median": 10.3,
+      "min": 8.3,
+      "max": 11.6,
+      "n": 4
+     },
+     "spectrumWall": {
+      "median": 0.6,
+      "min": 0.5,
+      "max": 0.7,
+      "n": 4
+     },
+     "fullWall": {
+      "median": 12,
+      "min": 8.8,
+      "max": 12.4,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 8,
+      "min": 7,
+      "max": 10,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 4,
+      "min": 3,
+      "max": 5,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "n": 5
+     },
+     "local": false
+    },
+    "N2": {
+     "basis": "sto-3g",
+     "nAO": 10,
+     "cold": {
+      "ground": 1156.4,
+      "full": 1160.1
+     },
+     "groundWall": {
+      "median": 23.6,
+      "min": 23.3,
+      "max": 36.6,
+      "n": 4
+     },
+     "spectrumWall": {
+      "median": 1.6,
+      "min": 0.9,
+      "max": 3,
+      "n": 4
+     },
+     "fullWall": {
+      "median": 24.9,
+      "min": 24.2,
+      "max": 38.4,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 22,
+      "min": 21,
+      "max": 34,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 9,
+      "min": 9,
+      "max": 14,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "n": 5
+     },
+     "local": false
+    },
+    "C6H6": {
+     "basis": "sto-3g",
+     "nAO": 36,
+     "cold": {
+      "ground": 1486.8,
+      "full": 2007.2
+     },
+     "groundWall": {
+      "median": 1441.2,
+      "min": 1393.8,
+      "max": 1493,
+      "n": 5
+     },
+     "spectrumWall": {
+      "median": 493,
+      "min": 477.7,
+      "max": 516.7,
+      "n": 5
+     },
+     "fullWall": {
+      "median": 1922.3,
+      "min": 1882.7,
+      "max": 2009.7,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 1439,
+      "min": 1391,
+      "max": 1488,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 817,
+      "min": 772,
+      "max": 833,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 398,
+      "min": 390,
+      "max": 423,
+      "n": 5
+     },
+     "local": false
+    },
+    "C2H4": {
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "cold": {
+      "ground": 1883.7,
+      "full": 2378.1
+     },
+     "groundWall": {
+      "median": 1841.1,
+      "min": 1758.9,
+      "max": 1879.7,
+      "n": 5
+     },
+     "spectrumWall": {
+      "median": 489.7,
+      "min": 468.3,
+      "max": 513.4,
+      "n": 5
+     },
+     "fullWall": {
+      "median": 2341.6,
+      "min": 2227.2,
+      "max": 2393.1,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 1838,
+      "min": 1757,
+      "max": 1878,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 343,
+      "min": 322,
+      "max": 348,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 381,
+      "min": 377,
+      "max": 418,
+      "n": 5
+     },
+     "local": false
+    }
+   }
+  },
+  "chromium": {
+   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+   "hc": 12,
+   "runs": [
+    {
+     "run": 0,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 156.2,
+     "fullWallMs": 162.6,
+     "spectrumWallMs": 6.4,
+     "workerGroundMs": 32,
+     "workerIntegralsMs": 13,
+     "workerRpaMs": 4,
+     "status": "10 AOs · 14 electrons · ground 32 ms (integrals 13 of it) · rpa 4 ms"
+    },
+    {
+     "run": 0,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1092.1,
+     "fullWallMs": 1955.3,
+     "spectrumWallMs": 863.2,
+     "workerGroundMs": 1089,
+     "workerIntegralsMs": 567,
+     "workerRpaMs": 772,
+     "status": "36 AOs · 42 electrons · ground 1089 ms (integrals 567 of it) · rpa 772 ms"
+    },
+    {
+     "run": 0,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 12,
+     "fullWallMs": 13.9,
+     "spectrumWallMs": 1.9,
+     "workerGroundMs": 9,
+     "workerIntegralsMs": 5,
+     "workerRpaMs": 1,
+     "status": "7 AOs · 10 electrons · ground 9 ms (integrals 5 of it) · rpa 1 ms"
+    },
+    {
+     "run": 0,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1552.4,
+     "fullWallMs": 1968.7,
+     "spectrumWallMs": 416.3,
+     "workerGroundMs": 1545,
+     "workerIntegralsMs": 239,
+     "workerRpaMs": 334,
+     "status": "46 AOs · 16 electrons · ground 1545 ms (integrals 239 of it) · rpa 334 ms"
+    },
+    {
+     "run": 1,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": null,
+     "fullWallMs": 19.2,
+     "spectrumWallMs": null,
+     "workerGroundMs": 16,
+     "workerIntegralsMs": 7,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 16 ms (integrals 7 of it) · rpa 1 ms"
+    },
+    {
+     "run": 1,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1048.4,
+     "fullWallMs": 1479.5,
+     "spectrumWallMs": 431.1,
+     "workerGroundMs": 1046,
+     "workerIntegralsMs": 578,
+     "workerRpaMs": 343,
+     "status": "36 AOs · 42 electrons · ground 1046 ms (integrals 578 of it) · rpa 343 ms"
+    },
+    {
+     "run": 1,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 8,
+     "fullWallMs": 9.1,
+     "spectrumWallMs": 1.1,
+     "workerGroundMs": 6,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 6 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 1,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1496.1,
+     "fullWallMs": 1930.4,
+     "spectrumWallMs": 434.3,
+     "workerGroundMs": 1493,
+     "workerIntegralsMs": 239,
+     "workerRpaMs": 350,
+     "status": "46 AOs · 16 electrons · ground 1493 ms (integrals 239 of it) · rpa 350 ms"
+    },
+    {
+     "run": 2,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 16.9,
+     "fullWallMs": 18.2,
+     "spectrumWallMs": 1.3,
+     "workerGroundMs": 15,
+     "workerIntegralsMs": 7,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 15 ms (integrals 7 of it) · rpa 1 ms"
+    },
+    {
+     "run": 2,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1024.8,
+     "fullWallMs": 1454.4,
+     "spectrumWallMs": 429.6,
+     "workerGroundMs": 1023,
+     "workerIntegralsMs": 551,
+     "workerRpaMs": 342,
+     "status": "36 AOs · 42 electrons · ground 1023 ms (integrals 551 of it) · rpa 342 ms"
+    },
+    {
+     "run": 2,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 7.5,
+     "fullWallMs": 8.1,
+     "spectrumWallMs": 0.6,
+     "workerGroundMs": 6,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 6 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 2,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1480.8,
+     "fullWallMs": 1888.5,
+     "spectrumWallMs": 407.7,
+     "workerGroundMs": 1479,
+     "workerIntegralsMs": 237,
+     "workerRpaMs": 325,
+     "status": "46 AOs · 16 electrons · ground 1479 ms (integrals 237 of it) · rpa 325 ms"
+    },
+    {
+     "run": 3,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 16.9,
+     "fullWallMs": 18.1,
+     "spectrumWallMs": 1.2,
+     "workerGroundMs": 15,
+     "workerIntegralsMs": 6,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 15 ms (integrals 6 of it) · rpa 1 ms"
+    },
+    {
+     "run": 3,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1012,
+     "fullWallMs": 1428.1,
+     "spectrumWallMs": 416.1,
+     "workerGroundMs": 1009,
+     "workerIntegralsMs": 546,
+     "workerRpaMs": 329,
+     "status": "36 AOs · 42 electrons · ground 1009 ms (integrals 546 of it) · rpa 329 ms"
+    },
+    {
+     "run": 3,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": 8.4,
+     "fullWallMs": 8.6,
+     "spectrumWallMs": 0.2,
+     "workerGroundMs": 6,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 6 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 3,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1472.1,
+     "fullWallMs": 1876.9,
+     "spectrumWallMs": 404.8,
+     "workerGroundMs": 1469,
+     "workerIntegralsMs": 236,
+     "workerRpaMs": 323,
+     "status": "46 AOs · 16 electrons · ground 1469 ms (integrals 236 of it) · rpa 323 ms"
+    },
+    {
+     "run": 4,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 16.6,
+     "fullWallMs": 17.6,
+     "spectrumWallMs": 1,
+     "workerGroundMs": 15,
+     "workerIntegralsMs": 6,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 15 ms (integrals 6 of it) · rpa 1 ms"
+    },
+    {
+     "run": 4,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1016.2,
+     "fullWallMs": 1439.3,
+     "spectrumWallMs": 423.1,
+     "workerGroundMs": 1014,
+     "workerIntegralsMs": 548,
+     "workerRpaMs": 331,
+     "status": "36 AOs · 42 electrons · ground 1014 ms (integrals 548 of it) · rpa 331 ms"
+    },
+    {
+     "run": 4,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": null,
+     "fullWallMs": 8.4,
+     "spectrumWallMs": null,
+     "workerGroundMs": 6,
+     "workerIntegralsMs": 3,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 6 ms (integrals 3 of it) · rpa 0 ms"
+    },
+    {
+     "run": 4,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1492.7,
+     "fullWallMs": 1903.9,
+     "spectrumWallMs": 411.2,
+     "workerGroundMs": 1491,
+     "workerIntegralsMs": 247,
+     "workerRpaMs": 324,
+     "status": "46 AOs · 16 electrons · ground 1491 ms (integrals 247 of it) · rpa 324 ms"
+    },
+    {
+     "run": 5,
+     "id": "N2",
+     "basis": "sto-3g",
+     "nAO": 10,
+     "energy": -107.49588788341292,
+     "roots": 21,
+     "local": false,
+     "groundWallMs": 20.5,
+     "fullWallMs": 22.1,
+     "spectrumWallMs": 1.6,
+     "workerGroundMs": 19,
+     "workerIntegralsMs": 8,
+     "workerRpaMs": 1,
+     "status": "10 AOs · 14 electrons · ground 19 ms (integrals 8 of it) · rpa 1 ms"
+    },
+    {
+     "run": 5,
+     "id": "C6H6",
+     "basis": "sto-3g",
+     "nAO": 36,
+     "energy": -227.8910064641807,
+     "roots": 315,
+     "local": false,
+     "groundWallMs": 1028.6,
+     "fullWallMs": 1467.6,
+     "spectrumWallMs": 439,
+     "workerGroundMs": 1026,
+     "workerIntegralsMs": 552,
+     "workerRpaMs": 344,
+     "status": "36 AOs · 42 electrons · ground 1026 ms (integrals 552 of it) · rpa 344 ms"
+    },
+    {
+     "run": 5,
+     "id": "H2O",
+     "basis": "sto-3g",
+     "nAO": 7,
+     "energy": -74.9630231628625,
+     "roots": 10,
+     "local": false,
+     "groundWallMs": null,
+     "fullWallMs": 19.8,
+     "spectrumWallMs": null,
+     "workerGroundMs": 16,
+     "workerIntegralsMs": 5,
+     "workerRpaMs": 0,
+     "status": "7 AOs · 10 electrons · ground 16 ms (integrals 5 of it) · rpa 0 ms"
+    },
+    {
+     "run": 5,
+     "id": "C2H4",
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "energy": -78.0350326506244,
+     "roots": 304,
+     "local": false,
+     "groundWallMs": 1500.1,
+     "fullWallMs": 1900.7,
+     "spectrumWallMs": 400.6,
+     "workerGroundMs": 1498,
+     "workerIntegralsMs": 241,
+     "workerRpaMs": 317,
+     "status": "46 AOs · 16 electrons · ground 1498 ms (integrals 241 of it) · rpa 317 ms"
+    }
+   ],
+   "errs": [],
+   "wallSec": 23.2,
+   "at": "2026-10-07T19:46:52.443Z",
+   "summary": {
+    "H2O": {
+     "basis": "sto-3g",
+     "nAO": 7,
+     "cold": {
+      "ground": 12,
+      "full": 13.9
+     },
+     "groundWall": {
+      "median": 8,
+      "min": 7.5,
+      "max": 8.4,
+      "n": 3
+     },
+     "spectrumWall": {
+      "median": 0.6,
+      "min": 0.2,
+      "max": 1.1,
+      "n": 3
+     },
+     "fullWall": {
+      "median": 8.6,
+      "min": 8.1,
+      "max": 19.8,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 6,
+      "min": 6,
+      "max": 16,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 3,
+      "min": 3,
+      "max": 5,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "n": 5
+     },
+     "local": false
+    },
+    "N2": {
+     "basis": "sto-3g",
+     "nAO": 10,
+     "cold": {
+      "ground": 156.2,
+      "full": 162.6
+     },
+     "groundWall": {
+      "median": 16.9,
+      "min": 16.6,
+      "max": 20.5,
+      "n": 4
+     },
+     "spectrumWall": {
+      "median": 1.3,
+      "min": 1,
+      "max": 1.6,
+      "n": 4
+     },
+     "fullWall": {
+      "median": 18.2,
+      "min": 17.6,
+      "max": 22.1,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 15,
+      "min": 15,
+      "max": 19,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 7,
+      "min": 6,
+      "max": 8,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "n": 5
+     },
+     "local": false
+    },
+    "C6H6": {
+     "basis": "sto-3g",
+     "nAO": 36,
+     "cold": {
+      "ground": 1092.1,
+      "full": 1955.3
+     },
+     "groundWall": {
+      "median": 1024.8,
+      "min": 1012,
+      "max": 1048.4,
+      "n": 5
+     },
+     "spectrumWall": {
+      "median": 429.6,
+      "min": 416.1,
+      "max": 439,
+      "n": 5
+     },
+     "fullWall": {
+      "median": 1454.4,
+      "min": 1428.1,
+      "max": 1479.5,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 1023,
+      "min": 1009,
+      "max": 1046,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 551,
+      "min": 546,
+      "max": 578,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 342,
+      "min": 329,
+      "max": 344,
+      "n": 5
+     },
+     "local": false
+    },
+    "C2H4": {
+     "basis": "6-31+g-star",
+     "nAO": 46,
+     "cold": {
+      "ground": 1552.4,
+      "full": 1968.7
+     },
+     "groundWall": {
+      "median": 1492.7,
+      "min": 1472.1,
+      "max": 1500.1,
+      "n": 5
+     },
+     "spectrumWall": {
+      "median": 407.7,
+      "min": 400.6,
+      "max": 434.3,
+      "n": 5
+     },
+     "fullWall": {
+      "median": 1900.7,
+      "min": 1876.9,
+      "max": 1930.4,
+      "n": 5
+     },
+     "workerGround": {
+      "median": 1491,
+      "min": 1469,
+      "max": 1498,
+      "n": 5
+     },
+     "workerIntegrals": {
+      "median": 239,
+      "min": 236,
+      "max": 247,
+      "n": 5
+     },
+     "workerRpa": {
+      "median": 324,
+      "min": 317,
+      "max": 350,
+      "n": 5
+     },
+     "local": false
+    }
+   }
+  }
+ }
+}
