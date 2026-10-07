@@ -67,7 +67,11 @@ console.log('PASS the controls: distorted water refused, a wide tolerance says "
   assert.ok(sol.basis.shells.some((s) => s.l === 2), 'GeH4 has a d shell');
   assert.ok(r.verification.overlap < 1e-12, `GeH4 DᵀSD = S to ${r.verification.overlap}`);
   assert.ok(r.reliable && r.mos[sol.nocc - 1].label === '4t2', r.config); }
-console.log('PASS the Cartesian d block: GeH₄ DᵀSD = S to 1e-12 and named (HOMO 4t2)');
+{ /* the teaching moment (the N₂ demo): 6-31+G* puts a Cartesian d shell on N, and its names swap the HOMO to 1πu */
+  const rec = JSON.parse(readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url), 'utf8')); registerRecord('6-31+g-star', rec);
+  const atoms = moleculeAtoms('N2'), sol = moleculeRHF({ atoms, basis: '6-31+g-star', charge: 0, record: rec }), r = nameOrbitals(input(sol, atoms), sym('N2'));
+  assert.ok(r.reliable, r.reason); assert.equal(r.config, '(1σg)²(1σu)²(2σg)²(2σu)²(3σg)²(1πu)⁴'); assert.equal(r.mos[sol.nocc - 1].label, '1πu'); }
+console.log('PASS the Cartesian d block: GeH₄ DᵀSD = S to 1e-12 and named (HOMO 4t2); N₂ in 6-31+G* names its HOMO 1πu (3σg below it)');
 
 /* 5 · the forms, the atoms, the core */
 assert.deepEqual(Object.fromEntries(Object.entries(forms('3σg')).filter(([k]) => k !== 'parts')),
