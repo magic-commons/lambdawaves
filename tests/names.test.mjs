@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { MOLECULE_BY_ID, moleculeAtoms, moleculeCharge } from '../lab/molecules.js';
-import { nameOrbitals, selfTest, forms, atomForms, coreCount, frontierName, GROUP_IDS, moLine } from '../lab/names.js';
+import { nameOrbitals, selfTest, forms, atomForms, coreCount, frontierName, GROUP_IDS, orbitalName } from '../lab/names.js';
 import { clusterRanges } from '../lab/canon-gauge.js';
 
 const record = JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8'));
@@ -77,7 +77,8 @@ assert.deepEqual(Object.fromEntries(Object.entries(forms('1e1g', 'a')).filter(([
 assert.equal(forms('1b1').typeset, '1b₁'); assert.equal(forms('1b1').latex, '$1b_{1}$'); assert.equal(forms('1b1').speech, 'one b one');
 assert.equal(forms('1t2').typeset, '1t₂'); assert.equal(forms('1t2').ascii, '1t2');
 assert.equal(forms("1a1′").latex, "$1a_{1}^{\\prime}$");
-assert.equal(moLine(kept.H2O.r.mos[4]), '1b₁ · HOMO');
+assert.equal(orbitalName(kept.H2O.r, 4, 5, 'typeset'), '1b₁ · HOMO'); assert.equal(orbitalName(kept.H2O.r, 3, 5), '3a1');
+assert.equal(orbitalName(null, 2, 5), 'HOMO−2', 'no record: the frontier by index');
 assert.deepEqual(atomForms({ n: 2, l: 1, m: -1 }), { plain: '2p₋1', typeset: '2p₋₁', latex: '2p_{-1}', ascii: '2p-1', speech: 'two p minus one' });
 assert.equal(frontierName(-2), 'HOMO−2'); assert.equal(frontierName(3), 'LUMO+2');
 assert.equal(coreCount(moleculeAtoms('C6H6')), 6); assert.equal(coreCount(moleculeAtoms('Br2')), 28); assert.equal(coreCount(moleculeAtoms('H2O')), 1);

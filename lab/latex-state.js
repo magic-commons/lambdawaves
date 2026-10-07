@@ -22,14 +22,15 @@
  *   and the remaining spaces become `\,`.
  */
 
-const L_LETTER = 'spdfgh';
+import { atomForms, forms, frontierName } from './names.js';
+
 const TERM_FLOOR = 1e-14;          // |c|²/Σ|c|² at or below this is not a term: the register's own EPS_POP, made relative
 const PHASE_FLOOR = 0.005;         // rad: below this the factor is 1 to the printed precision
 const PI_TOL = 1e-3, PI_QMAX = 12; // φ/π within PI_TOL of p/q, q ≤ PI_QMAX, is written as a multiple of π
 
 /** the notebook's name for a label: n l m for hydrogen and the atom, the operator's own label (LaTeX-safe) otherwise */
 export function latexName(s, H) {
-  if (!H || H.id === 'hydrogen' || H.id === 'atom' || typeof H.labelOf !== 'function') return `${s.n}${L_LETTER[s.l]}_{${s.m}}`;
+  if (!H || H.id === 'hydrogen' || H.id === 'atom' || typeof H.labelOf !== 'function') return atomForms(s).latex;
   const safe = String(H.labelOf(s)).trim()
     .replace(/\s*([₊₋])(\d+)/g, (_, sg, d) => `_{${sg === '₊' ? '+' : '-'}${d}}`)
     .replace(/\s+/g, '\\,');
@@ -85,7 +86,9 @@ export function stateLatex(o) {
  * in stateLatex's two-line shape:
  *   line 1  prose: the formula and name, RHF/basis, the charge, the total energy in E_h, the occupied count of n AO
  *   line 2  the ladder:  $\varepsilon_{1} = -20.2516\ (\mathrm{HOMO{-}4}),\ …,\ \varepsilon_{6} = 0.6037\ (\mathrm{LUMO}),\ …$
- * Every level is tagged BY INDEX from the frontier (HOMO, HOMO−1, …, LUMO, LUMO+1, …).  '' when there is no ground. */
+ * Every level carries its symmetry name when the worker named the solve (`ground.names`, lab/names.js) and its frontier tag
+ * BY LEVEL (a degenerate HOMO is one HOMO): `\varepsilon_{5} = -0.3913\ (1b_{1},\ \mathrm{HOMO})`.  With no names the tag is
+ * by level when the record has levels, by index otherwise.  '' when there is no ground. */
 const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
 const SUB = '₀₁₂₃₄₅₆₇₈₉';
 /** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'CO(NH₂)₂') as upright LaTeX: \mathrm{H_{2}O} */
@@ -95,10 +98,11 @@ export function formulaLatex(f) {
     .replace(/⁺/g, '^{+}').replace(/⁻/g, '^{-}');
   return '\\mathrm{' + s + '}';
 }
-/** the frontier name of orbital i (1-based) with nocc occupied: HOMO, HOMO−k, LUMO, LUMO+k */
-function frontier(i, nocc) {
-  if (i <= nocc) return i === nocc ? 'HOMO' : 'HOMO{-}' + (nocc - i);
-  return i === nocc + 1 ? 'LUMO' : 'LUMO{+}' + (i - nocc - 1);
+/** level k's tag in the copy: its symmetry name (math) and its frontier word, from the one service */
+function tag(names, k, nocc) {
+  const mo = names && names.mos ? names.mos[k] : null, f = mo && mo.label ? forms(mo).latex.slice(1, -1) : null;
+  const fr = '\\mathrm{' + (mo ? mo.frontier : frontierName(k - (nocc - 1))).replace('−', '{-}').replace('+', '{+}') + '}';
+  return f ? f + ',\\ ' + fr : fr;
 }
 export function moleculeLatex({ molecule, basis, charge, ground } = {}) {
   if (!molecule || !ground || !Number.isFinite(ground.energy) || !ground.eps || !ground.eps.length) return '';
@@ -107,7 +111,7 @@ export function moleculeLatex({ molecule, basis, charge, ground } = {}) {
     + ' — RHF/' + (BASIS_LABEL[basis] || String(basis || '').toUpperCase())
     + ', ' + (q ? 'charge ' + (q > 0 ? '+' : '−') + Math.abs(q) : 'neutral')
     + ', $E = ' + ground.energy.toFixed(6) + '\\,E_h$, ' + nocc + ' occupied of ' + nAO + ' AO, orbital energies $\\varepsilon_{i}$ in $E_h$:';
-  /* S1 slots the symmetry NAME of each level in beside its frontier tag here (e.g. `1b_{1}`, HOMO) — same function, same shape */
-  const ladder = Array.from(ground.eps, (e, k) => '\\varepsilon_{' + (k + 1) + '} = ' + e.toFixed(4) + '\\ (\\mathrm{' + frontier(k + 1, nocc) + '})');
-  return head + '\n$' + ladder.join(',\\ ') + '$';
+  const ladder = Array.from(ground.eps, (e, k) => '\\varepsilon_{' + (k + 1) + '} = ' + e.toFixed(4) + '\\ (' + tag(ground.names, k, nocc) + ')');
+  const N = ground.names, cfg = N && N.reliable ? ` Configuration in ${N.group}: $${N.config.replace(/\(([^)]+)\)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_, l, e) => '(' + forms(l).latex.slice(1, -1) + ')^{' + [...e].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join('') + '}')}$.` : '';
+  return head + cfg + '\n$' + ladder.join(',\\ ') + '$';
 }

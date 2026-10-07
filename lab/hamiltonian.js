@@ -10,6 +10,7 @@
  *   qho       E = N + 3/2  ·  ψ = e^{−r²/2} r^l L^{(l+½)}(r²) Y ·  no Stark (a displaced oscillator: not yet) ·
  *             momentum space = the same picture with the phase (−i)^N ·  a slap makes an exact coherent state
  */
+import { atomForms } from './names.js';
 import { BASIS, energy as hydrogenEnergy, radial as hydrogenRadial, domainFor as hydrogenDomainFor, psiAt as hydrogenPsiAt, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
 import { tableFor as hydrogenTableFor } from './field.js';
 import { momentumTableFor as hydrogenMomentumTableFor, domainForP as hydrogenDomainForP, phiAt as hydrogenPhiAt } from './momentum.js';
@@ -31,7 +32,7 @@ export const HAMILTONIANS = {
     domainFor: hydrogenDomainFor, domainForP: hydrogenDomainForP,
     kernelSpace: { x: 0, p: 1 },
     stark: true, hydrogenTheorems: true,
-    labelOf: (s) => `${s.n}${'spdfgh'[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+    labelOf: (s) => atomForms(s).plain,                             // lab/names.js: the one n l m name
     spectrum: null,                                                 // null = the built-in hydrogen ladder
   },
   qho: {
@@ -150,7 +151,7 @@ HAMILTONIANS.atom = {
   domainFor: () => atomState().half, domainForP: () => atomState().half,
   kernelSpace: { x: 6, p: 6 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
-  labelOf: (s) => `${s.n}${'spdfgh'[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}${atomOcc(s.n, s.l) ? '' : '°'}`,
+  labelOf: (s) => atomForms(s).plain + (atomOcc(s.n, s.l) ? '' : '°'),
   get spectrum() {
     if (atomSpec && atomSpec.Z === atomZ) return atomSpec;
     const levels = [];

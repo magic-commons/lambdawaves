@@ -248,11 +248,12 @@ const axisOf = (N, half) => Float32Array.from({ length: N }, (_, i) => (i + 0.5)
 
 /** NPZ: psi.npy (<c8, shape (N, N, N), psi[i, j, k] = ψ(x_i, y_j, z_k) — the cube's order), axis.npy (<f4, N) and
  *  meta.json, in render-exact.js's stored ZIP */
-export function npz({ re, im, N, half, space = 'r', t = 0, label = '', build = '' }) {
+export function npz({ re, im, N, half, space = 'r', t = 0, label = '', build = '', names = null }) {
   const n = N, psi = new Float32Array(2 * n * n * n);
   for (let i = 0, o = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++, o += 2) { const s = i + n * j + n * n * k; psi[o] = re[s]; psi[o + 1] = im[s]; }
   const meta = { label, t, half, N: n, spacing: 2 * half / n, space, units: space === 'p' ? 'hbar/bohr (momentum space)' : 'bohr',
-    index: 'psi[i, j, k] = psi(axis[i], axis[j], axis[k]) — x, y, z (the cube file\'s order); axis = voxel centres', build, generator: 'lambdawaves' };
+    index: 'psi[i, j, k] = psi(axis[i], axis[j], axis[k]) — x, y, z (the cube file\'s order); axis = voxel centres', build, generator: 'lambdawaves',
+    ...(names ? { names } : {}) };
   return zipStored([{ name: 'psi.npy', bytes: npy('<c8', [n, n, n], psi) }, { name: 'axis.npy', bytes: npy('<f4', [n], axisOf(n, half)) },
     { name: 'meta.json', bytes: enc(JSON.stringify(meta, null, 1) + '\n') }]);
 }
@@ -266,9 +267,9 @@ const e13 = (v) => {
 /** the Gaussian cube of the DENSITY |ψ|²: two comment lines, the atom count and the first voxel centre, three axis lines
  *  (N and the spacing 2·half/N; N > 0 means bohr), the atoms (Z, charge, position), then the values x outer, z inner,
  *  six to a line and a new line for each (x, y) column */
-export function cube({ re, im, N, half, atoms = [], label = '', build = '', space = 'r' }) {
+export function cube({ re, im, N, half, atoms = [], label = '', build = '', space = 'r', names = null }) {
   const n = N, h = 2 * half / n, x0 = h / 2 - half, I5 = (v) => String(v).padStart(5), F = (v) => (+v).toFixed(6).padStart(12);
-  const L = [ascii(label) || 'lambdawaves',
+  const L = [(ascii(label) || 'lambdawaves') + namesLine(names),
     (space === 'p' ? 'momentum density |phi|^2 in (hbar/bohr)^-3, axes in hbar/bohr' : 'density |psi|^2 in bohr^-3') + ', lambdawaves ' + ascii(build),
     I5(atoms.length) + F(x0) + F(x0) + F(x0), I5(n) + F(h) + F(0) + F(0), I5(n) + F(0) + F(h) + F(0), I5(n) + F(0) + F(0) + F(h)];
   for (const a of atoms) L.push(I5(a.Z) + F(a.Z) + F(a.x) + F(a.y) + F(a.z));
@@ -279,6 +280,13 @@ export function cube({ re, im, N, half, atoms = [], label = '', build = '', spac
   }
   return enc(L.join('\n') + '\n');
 }
+
+/** THE NAMES on a file's comment line (0.4.0 S1, lab/names.js): ' - MO 5 1b1 $1b_{1}$ HOMO, C2v' — ASCII, as a cube wants */
+const namesLine = (n) => {
+  if (!n) return '';
+  const o = n.orbital, mo = o ? ` - MO ${o.k}${o.ascii ? ' ' + o.ascii + ' ' + o.latex : ''}${o.frontier ? ' ' + ascii(o.frontier) : ''}` : '';
+  return mo + (n.group ? ', ' + n.group : '') + (o ? '' : n.config ? ' ' + ascii(n.config) : '');
+};
 
 /* ── THE WORKER OP: one message in (the grid and the scene at the press), one file out ─────────────────────── */
 const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -291,7 +299,8 @@ export function buildFile(m) {
   const N = m.N, half = m.half, label = m.label || '', build = m.build || '', space = m.space === 'p' ? 'p' : 'r';
   const { re, im, nan } = decodeGrid(m.texels, N);
   if (spec.kind === 'grid') {
-    const bytes = m.fmt === 'npz' ? npz({ re, im, N, half, space, t: m.t || 0, label, build }) : cube({ re, im, N, half, atoms: m.atoms || [], label, build, space });
+    const names = m.names || null;
+    const bytes = m.fmt === 'npz' ? npz({ re, im, N, half, space, t: m.t || 0, label, build, names }) : cube({ re, im, N, half, atoms: m.atoms || [], label, build, space, names });
     return { bytes, N, nan, ms: nowMs() - t0 };
   }
   const isoFrac = Math.max(m.isoFrac === undefined ? 0.06 : m.isoFrac, 1e-6), iso = isoFrac * m.rhoMax;
@@ -304,7 +313,7 @@ export function buildFile(m) {
   if (m.fmt === 'glb') {
     const c = m.camera, cam = c ? { position: c.dir.map((d) => d * c.dist * half), right: c.right, up: c.up, dir: c.dir, yfov: c.yfov, aspect: c.aspect, znear: 0.05, zfar: 100 * half } : null;
     bytes = glb(mesh, { name: 'λWAVES · ' + label + ' · ' + build, camera: cam, generator: 'lambdawaves ' + ascii(build),
-      extras: { state: label, units, iso: { rho: iso, ofMax: isoFrac }, grid: N, half, axes: 'Y up: (x, z, -y) of the lab, whose z is up' } });
+      extras: { state: label, units, iso: { rho: iso, ofMax: isoFrac }, grid: N, half, axes: 'Y up: (x, z, -y) of the lab, whose z is up', ...(m.names ? { names: m.names } : {}) } });
   } else if (m.fmt === 'obj') {
     bytes = obj(mesh, { head: ['lambdawaves ' + build, label + ' - the density isosurface on screen, rho = ' + iso.toExponential(4) + ' (' + isoFrac + ' of rho max, the ISO on screen), ' + N + '^3 grid',
       'units: 1 = 1 ' + units + ' - Y up: (x, z, -y) of the lab, which a Y-up importer turns back into z up', 'v x y z r g b: sRGB vertex colour = the phase palette on screen'] });
@@ -333,7 +342,7 @@ export function createExporter(env) {
       const scene = env.scene();
       const g = await f.readGrid();
       const readMs = nowMs() - t0, t1 = nowMs();
-      const msg = Object.assign({ op: 'export', fmt, texels: g.texels, N: g.N, half: g.half, rhoMax: g.rhoMax }, scene);
+      const msg = Object.assign({ op: 'export', fmt, texels: g.texels, N: g.N, half: g.half, rhoMax: g.rhoMax }, scene, { names: env.names ? env.names() : null });
       let r = await env.post(msg, [g.texels.buffer]);
       if (r === null && g.texels.byteLength) r = buildFile(msg);          // no worker at all: the same function, on this thread
       if (!r || r.error) throw new Error(r && r.error || 'the maths worker did not answer');

@@ -94,6 +94,39 @@ try {
   assert.deepEqual(owner.errors, []);
   console.log('PASS a MOLECULES-owned project brings its card back onto the rack (and MO-REGISTRY when its register is on), whatever its layout says');
 
+  /* 0.4.0 S1 · THE NAMES: the worker names the solve (ground.names, timed); the ORBITAL knob reads `1b1 · HOMO` (a dial
+     takes the plain form), the lane and the rung read the typeset one, a degenerate HOMO is ONE HOMO, the CORE fold */
+  const named = await g.ev(`
+    const card = id => document.querySelector('.dev[data-id="' + id + '"]');
+    await __LW.chem.solve('H2O'); await __LW.settle();
+    const knobText = [...card('chem').querySelectorAll('.k')].find(k => (k.querySelector('.k-lbl') || {}).textContent === 'ORBITAL').querySelector('.k-val').textContent;
+    const O = __LW.orbitals; O.clear(); O.select(4); await __LW.settle();
+    const lane = card('orbitals').querySelector('.orb-lane .sp-nm');
+    const water = { knob: knobText, lane: lane ? lane.textContent : null, sub: lane ? !!lane.querySelector('sub') : false, rungs: O.state().rungs,
+      core: O.state().coreOpen, coreBtn: !card('orbitals').querySelector('.orb-core-toggle').hidden, about: O.ladder()[4].about, ms: __LW.chem.solution().timings.names };
+    card('orbitals').querySelector('.orb-core-toggle').click(); const opened = [O.state().coreOpen, O.state().rungs[0]];
+    const ws = __LW.serialize().presentation.layout.cards.find(c => c.id === 'orbitals').core;
+    card('orbitals').querySelector('.orb-core-toggle').click();
+    await __LW.chem.solve('CH4'); await __LW.settle();
+    const ch4 = __LW.orbitals.ladder().slice(2, 5).map(r => r.name);
+    await __LW.chem.solve('C6H6'); await __LW.settle();
+    const benz = { ms: __LW.chem.solution().timings.names, homo: __LW.orbitals.ladder().slice(19, 21).map(r => r.name), about: __LW.orbitals.ladder()[19].about };
+    await __LW.chem.solve('H2O'); await __LW.settle();
+    return { water, opened, ws, ch4, benz, errors: __e.slice() };
+  `);
+  assert.equal(named.water.knob, '1b1 · HOMO');
+  assert.equal(named.water.lane, '1b1 · HOMO'); assert.equal(named.water.sub, true);    // the 1 sits in a <sub>
+  assert.deepEqual(named.water.rungs, ['core ×1', '2a1', '1b2', '3a1', '1b1 · HOMO', '4a1 · LUMO', '2b2']);
+  assert.equal(named.water.core, false); assert.equal(named.water.coreBtn, true);
+  assert.ok(/C2v .*computed/.test(named.water.about), named.water.about);
+  assert.deepEqual(named.opened, [true, '1a1']); assert.equal(named.ws, true);         // open, and a WORKSPACE key
+  assert.deepEqual(named.ch4, ['1t2 (a) · HOMO', '1t2 (b) · HOMO', '1t2 (c) · HOMO']);
+  assert.deepEqual(named.benz.homo, ['1e1g (a) · HOMO', '1e1g (b) · HOMO']);
+  assert.ok(/two real combinations of the degenerate pair/.test(named.benz.about), named.benz.about);
+  assert.ok(named.benz.ms > 0 && named.benz.ms <= 10, 'benzene named in ' + named.benz.ms + ' ms');
+  assert.deepEqual(named.errors, []);
+  console.log(`PASS the names: the knob reads "1b1 · HOMO", CH₄'s three HOMO members all read HOMO, the CORE fold opens (a WORKSPACE key), benzene named in ${named.benz.ms} ms`);
+
   const legacy = await g.ev(`
     __LW.molecule.setOn(true);
     const saved = __LW.serialize();

@@ -394,13 +394,22 @@ export function forms(label, member = null) {
     parts: p,
   };
 }
-/** the line a rung or a lane reads: '1b₁ · HOMO', '3a₁', '1e₁g (a) · HOMO', or the index when there is no name */
-export function moLine(mo, { form = 'typeset', index = true } = {}) {
-  if (!mo) return '';
-  const f = mo.label ? forms(mo)[form] : (index ? 'MO ' + mo.k : '');
-  const fr = mo.frontier && /^(HOMO|LUMO)$/.test(mo.frontier) ? mo.frontier : '';
-  return [f, fr].filter(Boolean).join(' · ');
+/**
+ * THE ONE ORBITAL NAME every surface reads (MO-REGISTRY's rungs and lanes, MOLECULES' ORBITAL knob, the copy):
+ * orbital k (0-based) of a names record → '1b1 · HOMO', '3a1', '1e1g (a) · HOMO' in `form`; with no name (refused, C₁,
+ * unconverged, no record) the frontier word BY LEVEL when the record has levels, by index otherwise.
+ */
+export function orbitalName(names, k, nocc, form = 'plain') {
+  const mo = names && names.mos ? names.mos[k] || null : null;
+  const fr = mo ? mo.frontier : frontierName(k - (nocc - 1));
+  if (!mo || !mo.label) return fr;
+  const f = forms(mo)[form];
+  return /^(HOMO|LUMO)$/.test(fr) ? f + ' · ' + fr : f;
 }
+
+/** a singlet excited STATE of the molecule (MO-REGISTRY's STATES ladder): S₀, S₄ + a lane tag ('x', 'a') — states are
+    upper case, numbered by LEVEL so the lanes of one degenerate level share a number */
+export const stateName = (level, tag = '') => 'S' + subDigits(String(level)) + tag;
 
 /* ── THE ATOMS: one n l m name, four forms (hydrogen.js's label, hamiltonian.js's labelOf, latex-state's latexName) ── */
 const L = 'spdfghik';
@@ -481,6 +490,7 @@ export function namesOf(sol, atoms, symmetry) {
   const input = { atoms, S: sol.integrals.S, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc, basis: sol.basis, converged: sol.converged };
   const r = nameOrbitals(input, symmetry), ch = characters(input, r);
   r.mos.forEach((m, i) => { m.character = ch[i]; });
+  r.core = Math.min(coreCount(atoms), sol.nocc);
   delete r.axes;
   r.ms = +((globalThis.performance || Date).now() - t0).toFixed(2);
   return r;
