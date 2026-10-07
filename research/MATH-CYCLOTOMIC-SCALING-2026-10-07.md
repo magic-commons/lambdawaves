@@ -136,3 +136,281 @@ Benzene, this run: 1119 ms = integrals 588.5 (52.6 %) + Hessian 145.5 (13.0 %) +
 - The 1e-10 threshold is arbitrary; the gap between forbidden (≤ 7.2e-13) and allowed (≥ 2.1e-8) leaves it five orders of room.
 
 **Files.** The tool `tools/symmetry/unique-quartets.mjs` (node, no dependencies, read-only on `lab/`); the oracle `tools/symmetry/pyscf-symm-oracle.py`; the measurements `research/release-0.4.0/measure/quartets.json` and `research/release-0.4.0/measure/pyscf-symm-oracle.json`; this ledger `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md`. Rebuild the DISK after every round: `node tools/disk.mjs research research/DISK.md`.
+
+---
+
+## ROUND 2 · SOL — 2026-10-07
+
+### 0 · Provenance and the live-loop number
+
+**MEASURED.** This round read BRIEF-S1-SOL.md and the complete 138-line ledger before writing; source HEAD is `bc103b3d3d986a3e0666f6758daba4d698fd82f1`, branch `sos-s0`. The original ledger is 37,575 bytes, SHA-256 `4d45dd7a1fc5ee76089ed14438d9ed819195af290f03c71011058df332ab916f`. Current evidence: `lab/md.js:255–436`, `lab/rhf-molecule.js:116–255`, `lab/scf.js:37–114`, `lab/rpa-inspector.js:39–118`, `lab/molecules.js:43–215,230–414,443–499`, `lab/field.js:167–250,351–368,923–976,1233–1249,1458–1476`; all 543 lines of `tools/symmetry/unique-quartets.mjs`. Also read the named names probe report, PLAN F5 and N2/N3, MASTER GOAL SPEC §39, and L-0408. No source under `lab/` was written. Node v22.22.1; SymPy 1.14.0; PySCF 2.14.0. New JSON files have exclusive-create writes.
+
+**MEASURED.** Rerunning the existing quartet tool into a NEW JSON reproduces benzene's D₂h numbers: 251,968/1,679,616 full entries, 34,187/222,111 canonical SAO entries and invariant parameters; 11,678/45,150 unscreened shell orbits. Water reproduces 777/2,401 and 154/406. These are different denominators, not interchangeable speedups.
+
+> “under D₂h, **11,678 of the 45,150 shell quartets `twoElectron` iterates are distinct**”
+
+**REFUTED · MEASURED — 42,486, not 45,150, iterations in the current screened main loop.** The new Node tool reads `md.js` into a data-URL module, adds counters IN MEMORY at unique source anchors, and compares its entire returned ERI with the unmodified module: max difference = **0 exactly**. It observes 291 surviving shell pairs, **42,486** candidate/contracted shell quartets, **0** Schwarz-rejected shell quartets, **2,733,372** primitive-pair-product visits, **149,857** primitive-quartet rejections (5.48250%). Thus “screening removes nothing” is true of the shell Schwarz test, false of screening collectively. The active pair set is verified closed under both D₂h and D₆h.
+
+| status · group | active shell orbits / 42,486 | fraction | primitive visits in representative quartets / 2,733,372 | component-weighted primitive visits / 15,977,316 |
+|---|---:|---:|---:|---:|
+| MEASURED · D₂h | **10,966** | **0.2581085534** | 705,743 = 0.2581950060 | 4,189,861 = 0.2622381006 |
+| MEASURED · D₆h | **3,854** | **0.0907122346** | 248,219 = 0.0908105446 | 1,503,705 = 0.0941149940 |
+
+**DERIVED-HERE.** Component weights count `(P.nc Q.nc P.np Q.np)` before the `TAU_PQ`, zero-Hermite and contraction skips; they are not actual MACs. Orbit representatives follow the live pair order. The D₂h active orbit histogram is {1:32, 2:641, 4:10,293}; D₆h is {3:32, 6:579, 12:3,243}. A build gate can assert `NP===291 && mainQuartets===42486 && schwarzRejected===0 && D2hOrbits===10966 && D6hOrbits===3854 && maxAbsERIReferenceDifference===0`. No measured skeleton-loop time follows from this gate.
+
+> “UNVERIFIED here (the loop is not instrumentable without editing `lab/`)”
+
+**REFUTED · MEASURED — 0 changed lab bytes and 0 ERI difference.** In-memory source instrumentation is sufficient; it is not a shipped engine change. Gate the source anchors and the returned tensor, not a copied mathematical model of its screening.
+
+### 1 · Q1 — the RPA's actual operations and repayment
+
+**DERIVED-HERE.** Let `n=(9,6,2,1,1,2,6,9)`, occupied `o=(6,3,1,1,0,1,4,5)`, virtual `v=(3,3,1,0,1,1,2,4)` in Round 1's D₂h order. Encode characters by XOR grades. For domains `d₁…d₄`, replacing axis r by a target domain t costs exactly
+
+`MAC(r;d,t) = Σ_{a⊕b⊕c⊕d=0} t[grade_r] Π_{j=1}^4 d_j[grade_j]`.
+
+**DERIVED-HERE · MEASURED (enumerated independently in Node).** These are potential multiply-adds with each within-block coefficient treated dense and every structurally forbidden integral omitted. The seven contractions in CURRENT `hessianBlocks:54–75`, sharing A1 between G and Q, give:
+
+| contraction | dense MACs | D₂h MACs |
+|---|---:|---:|
+| DERIVED-HERE · A1: `(μνλσ)→(iνλσ)` | 35,271,936 | 1,090,752 |
+| DERIVED-HERE · G2: `(iνλσ)→(iaλσ)` | 14,696,640 | 430,056 |
+| DERIVED-HERE · G3: `(iaλσ)→(iajσ)` | 8,573,040 | 263,016 |
+| DERIVED-HERE · G4: `(iajσ)→(iajb)` | 3,572,100 | 103,736 |
+| DERIVED-HERE · Q2: `(iνλσ)→(ijλσ)` | 20,575,296 | 646,296 |
+| DERIVED-HERE · Q3: `(ijλσ)→(ijaσ)` | 8,573,040 | 254,916 |
+| DERIVED-HERE · Q4: `(ijaσ)→(ijab)` | 3,572,100 | 103,736 |
+| DERIVED-HERE · total | **94,834,152** | **2,892,508 = 3.050070%** |
+
+**DERIVED-HERE.** Pair blocks are `(57,55,25,20,22,23,53,60)`. Assembly visits **14,721/99,225 = 14.835979%** pair-pair entries, writing both A and B, versus the dense 99,225. This is an entry count, not 14,721 MACs: the current assembly has scalar additions and multiplies. The 3.05% transform fraction differs substantially from the 15.00% ERI occupancy because every coefficient contraction also stays inside a character block.
+
+> “four quarter transforms O(n³·nocc) (89M multiply-adds per the comment at l.43–45)”
+
+**REFUTED · DERIVED-HERE — 94,834,152 and degree 5.** With `O=nocc`, `V=n−O`, the seven-loop dense count is `2 O n⁴ + 2 O² V n² + 2 O² V² n`. In particular the FIRST contraction alone is `O n⁴`, not `O n³`. At fixed occupancy fraction θ, the total is `[2θ+2θ²(1−θ)+2θ²(1−θ)²]n⁵`; θ=7/12 gives 1.56838348765 n⁵. Actual zero coefficients can lower execution counts in the original loops. Gate the loop-domain polynomial and the seven integers above; do not certify the source comment's asymptotic or 89M number.
+
+**MEASURED.** `round2-sol-final.json`: a Node prototype in `tools/`, not `lab/`, transforms to independent S-orthonormal SAOs and precomputes contraction schedules. Five dense timings: 131.786, 130.100, 131.568, 131.896, 132.501 ms, median **131.786 ms**. Five scheduled blocked timings: 24.699, 18.264, 16.474, 13.968, 13.552 ms, median **16.474 ms**: **115.312 ms saved**. Thus the proposed 0.1 s saving is within 2× FOR THE WARM CONTRACTION, not for the whole first call. An independent run in `round2-sol-validated.json` gives 133.890→14.928 ms. The earlier unscheduled prototype in `round2-sol.json` gives 147.628→134.517 ms despite the same MAC count: loop/schedule overhead is a measured counterexample to proportional timing from sparsity alone.
+
+**MEASURED.** Same transformed tensor and coefficients, dense versus scheduled blocked A/B: **0 maximum difference exactly**. Relative to the original solver's unprojected canonical C, max differences are **4.2269174e−10 in A**, **3.0108019e−11 in B** after forcing off-block coefficients to zero. The largest removed coefficient is **1.3548286e−9**, despite the original tool's ≈4e−15 *weight* leakage. A squared-weight diagnostic is not an amplitude-error certificate. This prototype's gate is `sameBasisMaxDiffA/B<1e-11`, `originalBasisMaxDiffA/B<1e-8`; tighter original-basis gates require an actual block eigensolve and a root/oscillator-strength comparison.
+
+**DERIVED-HERE.** Four dense AO→SAO quarters cost `4n⁵ = 241,864,704` MACs at 36 AO. Their arithmetic repayment is **241,864,704/(94,834,152−2,892,508)=2.630633 Hessians**, hence **3 calls**, before setup. Both numerator and denominator scale as n⁵ for fixed block and occupied proportions. There is **no special nAO crossover** where one dense adaptation suddenly pays for one RPA; already its first contraction costs more than the savings, and increasing n preserves the ratio under these assumptions. Measured adaptation is **416.418 ms**, so 416.418/115.312=**3.611232**, hence **4 warm calls** ignoring schedule setup. `moleculeRHF:235` builds one Hessian per distinct solution; `mathworker.js:248–250` builds/caches a separate spectrum. These are not four guaranteed calls.
+
+**DERIVED-HERE · MEASURED — the missing option.** S-orthonormalising the ERI basis is optional. Raw Euclidean-orthogonal symmetry-adapted linear combinations Q keep `S'=QᵀSQ` block diagonal; solve generalized Fock blocks and use `C'=QᵀC`. D₂h's signed AO orbits have at most 4 members. Our raw Q has **120 nonzero coefficients**, versus 1,296 possible: four quarter transforms need **4·120·36³=22,394,880 MACs**, at most O(|G|n⁴) for fixed-size signed orbits, not inherently O(n⁵). Arithmetic can therefore pay back on one RPA. HOWEVER `round2-sol-raw.json` measures **210.351 ms** for the transform, **244.811 ms** for the first blocked call including schedule construction, and warm medians **134.474→19.518 ms**. The measured first-call bill **455.163 ms** exceeds the dense bill. This machinery changes the asymptotic premise, not today's measured verdict. A production block layout or direct symmetry-reduced integrals must earn its own timing gate.
+
+### 2 · Q2 — the grid group includes stabilisers and the domain origin
+
+> “the asymmetric unit under the signed-permutation subgroup G ∩ O_h is exactly n³/|G ∩ O_h| with **zero boundary** … T_d … 1/24 … O_h … 1/48”
+
+**REFUTED · MEASURED — 39,200, not 36,864, representatives for T_d at 96³; 54,528 boundary voxels.** Half-integers avoid coordinate planes, not the planes `x=y`, `x=−y`, etc. T_d's coordinate-swapping mirrors fix these centres. Burnside gives `(n³+6n²+8n)/24=39,200`; its orbit histogram is {4:96, 12:4,512, 24:34,592}. O_h gives **19,600**, not 18,432, with histogram {8:48, 24:2,256, 48:17,296}. In both groups **54,528/884,736 = 6.163194%** of voxels have nontrivial stabilisers. Counting equality of absolute coordinates gives `n³−n(n−2)(n−4)=54,528`. Assert Burnside counts and actual orbit sizes; never write 24 or 48 images to a size-4/8 orbit without deduplicating stores.
+
+> “The ‘boundary the reconstruction must treat twice’ exists only for node-centred odd grids”
+
+**REFUTED · MEASURED — 54,528 such voxels on the EVEN live grid.** D₂h and the coordinate sign-flip C₂v are free on even cell-centred grids. Permutation groups need their own stabiliser law. Boundary means an orbit size below the group order; it does not require double counting physical density.
+
+**DERIVED-HERE.** For this *finite cubic texture*, use `H={R in G∩O_h : c−Rc=0}`, where c is the molecular symmetry centre and the cube is centred at zero (`field.js:190`). A signed permutation about a displaced centre is an affine transformation that can leave the cube. A symmetry of the molecule is not automatically a symmetry of the texture domain. Orbit counts below enumerate all 48 cubic signed permutations against the ACTUAL coordinates, using 1e−8 Å atom-match tolerance and no recentering.
+
+| status · group / current orientation | molecular G∩O_h about its centre | live domain H | representatives at 96³ | stabiliser-boundary voxels |
+|---|---|---|---:|---:|
+| MEASURED · C₂v, yz plane / z axis: water, bent helpers, formaldehyde, urea | C₂v, 4 | C₂v, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₃v, z axis, first ligand in xz: NH₃/c3v/CH₃CN | C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · T_d, cube diagonals: CH₄/td | T_d, 24 | T_d, 24 | 39,200 (0.0443070) | 54,528 |
+| MEASURED · D₃h, ring/ligands in xy, first at +x | C₂v, 4 | C₂v, 4 | 221,184 (1/4) | 0 |
+| MEASURED · D₂h, ethene in yz | D₂h, 8 | D₂h, 8 | 110,592 (1/8) | 0 |
+| MEASURED · D₃d, staggered ethane, upper first H at +x | C₂h, 4 | C₂h, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₂h, butadiene in yz centred at zero | C₂h, 4 | C₂h, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₂, peroxide about x through z=rOO/2 | C₂, 2 | C₁, 1 | 884,736 (1) | 0 |
+| MEASURED · C_s, methanol/formic/glycine, mirror x=0 | C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · D₆h, benzene ring in xy | D₂h, 8 | D₂h, 8 | 110,592 (1/8) | 0 |
+| MEASURED · D∞h, `diatomic`/frozen N₂, displaced midpoint | D₄h, 16 | C₄v, 8 | 112,896 (0.1276042) | 18,432 |
+| MEASURED · D∞h, centred `linear3`/acetylene | D₄h, 16 | D₄h, 16 | 56,448 (0.0638021) | 18,432 |
+| MEASURED · C∞v, z-linear heteronuclear species | C₄v, 8 | C₄v, 8 | 112,896 (0.1276042) | 18,432 |
+| MEASURED · furan/pyridine, CURRENT ring walk | exact C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · O_h, hypothetical origin-centred cubic frame (not a current entry) | O_h, 48 | O_h, 48 | 19,600 (0.0221535) | 54,528 |
+
+**DERIVED-HERE.** Linear C₄v has two diagonal mirror planes on this even grid, giving `(n³+2n²)/8=112,896`; D₄h adds the free z sign flip and halves that count. These larger linear subgroups were omitted from Round 1's 1/4-or-1/8 picture. Recentering N₂ restores D₄h; recentring peroxide restores C₂. It changes the texture's physical box and requires a field/reference/digest gate, not just a label change.
+
+> “An operation that is not a signed permutation of the axes maps no voxel centre onto the lattice”
+
+**REFUTED · DERIVED-HERE — one exact mapped centre.** The order-2 reflection `R=[[3/5,4/5,0],[4/5,−3/5,0],[0,0,1]]` maps `(1/2,3/2,1/2)` to `(3/2,−1/2,1/2)`, both centres of the 96³ cube. The corrected assertion is: only signed permutations are orthogonal automorphisms of the ENTIRE cubic lattice/domain; other operations can map a proper subset onto it. The existing tool's sixteen particular off-subgroup D₆h operations still measure **0** mapped centres.
+
+**DERIVED-HERE.** A hexagonal-prism lattice is consumable after an affine texture-address change, not by the current unchanged `uvw=(p+half)/(2half)` at `field.js:367`. Take physical lattice basis `b₁=(h,0,0)`, `b₂=(h/2,√3h/2,0)`, `b₃=(0,0,h_z)`. The 60° rotation has integer lattice matrix `[[0,−1,0],[1,1,0],[0,0,1]]`. A G-invariant hexagonal prism of integer nodes (with an invariant offset, padding and a domain mask) admits D₆h orbit reconstruction. Store it in a rectangular 3-D texture and sample at affine coordinates `B⁻¹p`, with the texel-centre offset accounted for. A rotated cubic texture similarly admits all T_d operations when its coordinate axes coincide with the S₄ axes; CURRENT `td()` already has that orientation. Neither construction deletes stabilisers.
+
+**DERIVED-HERE.** Trilinear interpolation over the oblique cells changes the interpolant. Repeated one-dimensional interpolation remainder gives `|f−I_B f| ≤ [h²||∂²_bhat1 f||∞+h²||∂²_bhat2 f||∞+h_z²||∂²_z f||∞]/8`. Against a Cartesian interpolant, sum the two remainder bounds. Explicit counterexample: `f(x,y)=xy` is reproduced exactly by Cartesian bilinear interpolation, but at the centre of an oblique unit cell the error is **√3 h²/16 = 0.1082531755 h²**. For amplitude error ε and |ψ|≤M, density error is ≤`2Mε+ε²`. **UNVERIFIED (no GPU/readback):** no absolute molecular interpolation error or net D₆h speedup follows until these derivatives or direct samples, padding cost, rgba16float rounding and ray-march output are measured. No browser was launched.
+
+### 3 · Q3 — C₆₀: the mirror is local, storage is not a dense-SCF requirement
+
+**DERIVED-HERE · KNOWN (Burnside; symmetric-square character formula).** For a representation with power characters `x₁=χ(g), x₂=χ(g²), x₄=χ(g⁴)`, write
+
+`q(g)=χ_Sym²Sym²V(g)=(x₁⁴+2x₁²x₂+3x₂²+2x₄)/8`.
+
+For a shell permutation representation q is the number of fixed canonical shell quartets. For the real AO representation its group average is the dimension of invariant 8-fold-symmetric ERIs. The ten I_h classes have sizes `(1,15,20,12,12,1,15,20,12,12)` for `(E,C₂,C₃,C₅,C₅²,i,iC₂,iC₃,iC₅,iC₅²)`. Site stabiliser C_s gives 4 fixed atoms per each of the 15 mirrors. Thus shell characters are E:180, mirror:12, others:0; AO characters are E:300, mirror:4·(2 s + tr mirror on p)=12, others:0. BigInt computes every class and all powers.
+
+**DERIVED-HERE.** Shell baseline `16,290·16,291/2=132,690,195`. Identity q=132,690,195; the 15 proper C₂ and inversion have q=12,195; 15 mirrors have q=21,267; all other q=0. Hence
+
+`(132690195 + 16·12195 + 15·21267)/120 = **1,110,036**`, fraction **0.008365621891**.
+
+This is near **1/120**, not 1/60. A C₆₀ mirror fixes 4 of 60 sites; benzene's planar mirror fixes ALL sites and lies in the kernel of the shell action. Those are different Burnside mechanisms.
+
+**DERIVED-HERE.** AO canonical baseline **1,019,283,825**. Identity q=1,019,283,825; proper C₂/inversion q=33,825; mirrors q=47,217. Thus
+
+`(1019283825 + 16·33825 + 15·47217)/120 = **8,504,444** independent ERIs`, fraction **0.008343548471**, storage **68,035,552 B = 64.883 MiB** at one f64 per parameter. This is an abstract invariant-tensor dimension; a reduced-integral implementation still needs Clebsch–Gordan maps and indexing. A scalar shell petite list for I_h does not provide reconstruction of p components by index permutations alone.
+
+**DERIVED-HERE.** Distinguish ordered storage from 8-fold storage: full 300⁴ tensor **64,800,000,000 B**; ordinary real 8-fold packing **8,154,270,600 B**; D₂h ordered label-allowed values **8,100,062,208 B**; I_h ordered-tensor invariant dimension **67,502,592**, storing **540,020,736 B** before 8-fold reduction. The “~0.6 GB under I_h” estimate is comparable to the ordered invariant count, not the 8-fold reduced count. All of these are storage formats, not PySCF's compulsory working set. Z₁₀'s equal block count is 30 each, Fock ratio 0.1 and ordered ERI fraction 0.1; D₂h ordered fraction is **0.1250009600**. Its four-moment correction is not a shell petite-list fraction.
+
+**MEASURED — actual 300-AO direct SCF.** The new Python tool constructs an ideal truncated icosahedron by taking the 60 directed edges of an icosahedron, truncating at one third, and scaling both C–C edge kinds to **1.400 Å**. Every vertex has degree 3. On the vendored C STO-3G decimals, PySCF has **300 AO, 180 occupied**, detects `topgroup='Ih'`, selects **`groupname='Ci'`**, and converges in **9 cycles**, **625.871 s**, two CPU threads, to **−2244.0187824773475 Eh**, HOMO–LUMO gap **0.2797763016 Eh**. `direct_scf=True`, `_eri is None` after convergence; process peak RSS **197,168 KiB = 192.547 MiB**. `max_memory=128 MB` is an algorithm-selection budget, not a hard RSS cap. Dense C and D each require **720,000 B**. This is a feasibility fixture with an ideal geometry, not a validated experimental-geometry library record or an RHF stability certificate.
+
+> “`symm` computes in the largest *real Abelian* subgroup”
+
+**REFUTED · MEASURED — I_h→C_i of order 2, not D₂h of order 8.** Installed PySCF 2.14 `symm.geom.get_subgroup` explicitly returns Ci for Ih, while returning D2h for D6h. The algebraic largest real Abelian subgroup of I_h remains D₂h; implementation support is another question. Gate `mol.topgroup==='Ih' && mol.groupname==='Ci'` for this default build, not an inference from benzene. [Primary PySCF source](https://pyscf.org/_modules/pyscf/symm/geom.html).
+
+**KNOWN (Almlöf–Faegri–Korsell, direct SCF) · MEASURED (installed PySCF source).** `RHF.get_jk` uses packed in-core ERIs only when its memory predicate allows them; otherwise it calls the direct J/K route, which does not retain the n⁴ tensor. [Primary implementation](https://pyscf.org/_modules/pyscf/scf/hf.html). The measured 193 MiB run kills the proposed memory dichotomy: the generator can compute a ground-state density as well as coefficients on this workstation. **UNVERIFIED (no GPU/stability run):** a 300-AO density renderer, excitation/stability matrices, experimental C₆₀ record and device budget. R-L2 is still a product/GPU constraint. CURRENT PLAN N3 already reports a 3.2–3.6 ms screened orbital-only dispatch; that earlier device measurement was read, not reproduced here.
+
+### 4 · Q4 — exact character coefficients, not exact rational physical energies
+
+**DERIVED-HERE · MEASURED (SymPy exact residues).** For one function per site, real symmetric C_n-circulant F and S, and S positive definite, write independent first-row coefficients `f_j,s_j`, j=0…floor(n/2). Every row below is a coefficient vector c; its energy is `(c·f)/(c·s)`. SymPy verifies all Fourier eigenvectors by reduction modulo Φ_n(ζ), with **0 nonzero residuals out of 50 (n=5), 72 (n=6), 200 (n=10)**. No decimal trigonometry enters the symbolic test.
+
+| status · n,k | coefficient vector c | degeneracy |
+|---|---|---:|
+| DERIVED-HERE · 6,0 | (1,2,2,1) | 1 |
+| DERIVED-HERE · 6,1 | (1,1,−1,−1) | 2 |
+| DERIVED-HERE · 6,2 | (1,−1,−1,1) | 2 |
+| DERIVED-HERE · 6,3 | (1,−2,2,−1) | 1 |
+| DERIVED-HERE · 5,0 | (1,2,2) | 1 |
+| DERIVED-HERE · 5,1 | (1,a,b) | 2 |
+| DERIVED-HERE · 5,2 | (1,b,a) | 2 |
+| DERIVED-HERE · 10,0 | (1,2,2,2,2,1) | 1 |
+| DERIVED-HERE · 10,1 | (1,p,a,−a,−p,−1) | 2 |
+| DERIVED-HERE · 10,2 | (1,a,−p,−p,a,1) | 2 |
+| DERIVED-HERE · 10,3 | (1,−a,−p,p,a,−1) | 2 |
+| DERIVED-HERE · 10,4 | (1,−p,a,a,−p,1) | 2 |
+| DERIVED-HERE · 10,5 | (1,−2,2,−2,2,−1) | 1 |
+
+**DERIVED-HERE.** Here `a=(√5−1)/2`, `b=−(√5+1)/2=−p`, `p=(√5+1)/2`. Degeneracies sum to 5,6,10 respectively. The four 6-ring forms are complete under the stated circulant/real/scalar hypotheses; “any 6-ring” without operator symmetry is false (one different on-site f₀ already destroys circulancy). For C₆₀'s S₁₀ AO grades, freeness gives multiplicity **30**, not one scalar function per site; the scalar 10-ring formula is not a complete C₆₀ Fock solve.
+
+> “For n equivalent sites with b functions each … their generalised eigenproblem is solved by the DFT: ε_k = F̃(k)/S̃(k)”
+
+**REFUTED · DERIVED-HERE — b=2.** Take six identical sites with `S=I`, no hopping, and on-site block `[[0,1],[1,1]]`. The DFT produces six identical 2×2 blocks, each with eigenvalues **(1±√5)/2**. It block diagonalises but does not solve the multiplicity matrix. Correct gate: for b=1 use scalar ratios; for b>1 solve `F̃(k)c=S̃(k)cε` in each b×b block. More generally Schur's lemma gives `F=⊕Γ(K_Γ⊗I_dΓ)`, not a diagonal matrix of characters when multiplicities exceed one.
+
+> “the C_n adaptation is exact over Q for exactly those n” [n∈{1,2,3,4,6}]
+
+**REFUTED · DERIVED-HERE — ζ₃=(−1+i√3)/2 and ζ₄=i are not rational.** The crystallographic restriction concerns integer traces / lattice rotations. The *real cosine coefficient field* `Q(ζ_n+ζ_n⁻¹)` is Q for n=3,4,6; the complex character field is not. Normalising the DFT also introduces √n. Correct gate: distinguish the character field, its real subfield, symbolic coefficients in F/S, and normalisation; no rational-coordinate DFT assertion for n=3,4,6.
+
+**KNOWN (Lindemann, π transcendental) · DERIVED-HERE.** One normalised primitive s Gaussian of exponent α=1 at one centre has `(ss|ss)=**2/√π=1.1283791670955126**`, which cannot be algebraic, hence is not in Q(ζ₆). Conversely `F_m(0)=**1/(2m+1)**` is rational; the prefactor, normalisation and other analytic values must be tracked separately. Thus “Boys-function values … (transcendental)” is not a blanket theorem about every Boys value. Symmetry-enforced zero ERIs are exactly the integer zero, but this supplies no nontrivial integral-lattice structure. For arbitrary exponents/geometries the honest coefficient module is over the field generated by the analytic AO values and the character coefficients, not just Q(ζ_n). Four Bloch coefficients contribute **1/n²** before the sums; orbit aggregation under exact cyclic symmetry can supply a factor n, leaving 1/n. This is exact transformation arithmetic, not integrality of physical ERIs.
+
+**KNOWN (Frobenius reciprocity; Schur–Wedderburn) · DERIVED-HERE.** For the 60 scalar atom functions / locally radial p functions on C₆₀, `V=Ind_Cs^Ih 1`. If an A₅ irrep has dimension d and C₂ character t, its g/u multiplicities are `(d±t)/2`. A₅'s `(d,t)` are `(1,1),(3,−1),(3,−1),(4,0),(5,1)`. Therefore
+
+`V = Ag + T1g + T2g + 2Gg + 3Hg + 2T1u + 2T2u + 2Gu + 2Hu`.
+
+**DERIVED-HERE · MEASURED (exact integer arithmetic).** Dimensions sum to **60**; `Σm_Γ²=**32**`, `Σm_Γ=**16**`, `Σm_Γ³=**70**`. The commutant is a noncommutative direct sum of matrix algebras (including **M₃ for Hg**), not a Bose–Mesner algebra with a scalar DFT. An invariant Hückel adjacency needs multiplicity blocks of size at most **3**, with each block eigenvalue repeated d_Γ times. Characters fix these dimensions and repetitions; they do not fix numerical eigenvalues. `H=0` and `H=I` have the identical representation/characters and different spectra. The truncated-icosahedron adjacency or its edge weights is additional required data. The dictionary to L-0408 stops at invariant-algebra decomposition: there is no Gaussian-period norm or L-value growth theorem for arbitrary molecular Fock coefficients merely from having a determinant.
+
+> “with equality iff χ_V(R)=0 … — iff G acts freely on the AO basis (no atom fixed by any non-identity operation)”
+
+**REFUTED · DERIVED-HERE — a central p triplet under C₃.** There is one fixed atom, but `χ(E)=3`, `χ(C₃)=χ(C₃²)=1+2cos(120°)=0`. Its three complex grades each have size 1; ordered allowed ERIs are **27/81=1/3**, Fock entries **3/9=1/3**. Character cancellation makes equal blocks without free atom action. Correct gate: equality iff every nonidentity character vanishes, equivalently a multiple of the regular representation; free action is sufficient for a permutation basis, not necessary for a rotating AO representation.
+
+> “In every group the measured non-zero set equals the label-allowed set exactly — 0 violations”
+
+**REFUTED · MEASURED — D₆h allows 450,624 entries but only 227,008 are nonzero: 223,616 allowed zeros.** Zero violations means no forbidden nonzero entries, not equality of sets. Water under the tool's C₂ basis also allows 1,201 but measures 777. Gate `nonzeroForbidden===0` separately from `allowed−nonzeroAllowed`; the D₆h label condition is necessary, not sufficient. The original table already contains the counterexample to its own sentence.
+
+### 5 · Q5 — the census and the density-fitting crossover that cannot be invented
+
+**MEASURED (current table + all 48 operations; weights are MODEL predictions).** At 1e−8 Å exact atom-match tolerance, all **54** entries total **37,908 predicted ms**; those with centred signed-permutation subgroup order≥4 total **22,511 ms = 59.383244%**. The **52 enabled** entries total **36,985 ms**; their symmetric share is **21,588 ms = 58.369609%**. Origin-preserving versus centred counting gives the same numerator for this ≥4 criterion even though peroxide and linear group orders differ. The two disabled entries contribute **923 ms**; current over-cap count is **0**, CAP_MS=**9,592**. Rows and subgroup orders are in the JSON; no point group was assigned solely from a formula or a `source` string.
+
+**MEASURED.** The low-subgroup enabled rows are NH₃ 20, PH₃ 53, H₂O₂ 53, CH₃OH 95, HCOOH 201, CH₃CN 281, furan 2,876, pyridine 8,071, glycine 3,184, H₃O⁺ 20, AsH₃ 543 ms. In particular the two imperfect ring walks carry **10,947/36,985=29.597134%** of predicted live time and have only exact C_s in the current coordinates. Calling them ideal C₂v without an operator gate can reverse a stage decision.
+
+**DERIVED-HERE.** The stipulated decision thresholds leave **58.37% between 25% and 60%**: the current census neither kills nor earns 0.5.x by that test. It is also weighted by the old 2026-09-12 cost model, not present solve timings or user visit frequencies. CURRENT PLAN N2 reports the old benzene prediction as **5–6.6× too slow** and requires a refit. The stage gate should consume a measured/refitted workload, include adaptation/schedule cost, and distinguish live cache misses from record opens (zero solver calls), not infer a universal verdict from one percentage.
+
+**DERIVED-HERE · UNVERIFIED (geometries, optional roster and refit absent).** PLAN F5 supplies names/families, not the geometry/frame/charge roster needed for a unique planned census. The tool computes a reproducible CONDITIONAL roster of **47 named instances** (the twenty amino acids, five bases, seven other BIO names including Gly-Gly, eleven lattice/cluster instances, and five Kr-row names; glycine overlaps the current table). It totals **6,100,844 model ms** from neutral formulas. Under explicitly ideal, aligned high-symmetry lattice/heavy conformers and ordinary low-symmetry BIO conformers, high share is **750,242 ms**, uncertain share **256,629 ms**: **12.297348%–16.503798%**. This is a scenario interval, NOT a certified fraction for all planned records. It omits the unspecified d-block experiments and optional I/Xe extension; their basis shell counts are not vendored here. With no assumptions about the missing roster and frame, the only universal fraction interval is **[0,1]**. An exact second percentage is not determined by PLAN.
+
+**DERIVED-HERE.** Formula cost alone cannot supply the missing symmetry: neutral C₅H₁₂ gives **37 AO, 11,293 predicted ms** whether a chosen conformer/geometry is Td neopentane or a generic C₁ pentane geometry. Even a Td molecule rotated by a generic angle can lose all nonidentity operations in the fixed cube's signed-permutation intersection. The script's conditional lattice symmetry assumption must therefore be checked against the actual record frames. Of the 47 formula instances, **38** exceed the present cap. Their prescribed contribution to NEW LIVE solves is **0 ms**: PLAN:252,272,274 and N2 put those entries on the record path. This does not erase offline generator work.
+
+> “1× on the heavy records the library plans, which are C₁/C_s or come from PySCF (which already computes in D₂h)”
+
+**REFUTED · DERIVED-HERE/MEASURED — TiCl₄ and GeCl₄ are Td targets with 55 AO each; KrF₂ is linear; PySCF I_h defaults to C_i.** The conditional model predicts TiCl₄ **47,076 ms**, GeCl₄ **23,081 ms**, not a collection consisting only of C₁/C_s. Correct gate: engine record-open solver count=0; generator symmetry is checked per geometry and actual backend subgroup. Do not multiply offline time by a purported universal PySCF D₂h factor.
+
+**KNOWN (Coulomb-metric RI/DF; PySCF implementation) · DERIVED-HERE.** Density fitting uses `(μν|λσ)≈Σ_P B_Pμν B_Pλσ`; with m_aux=κn, `d_P=Σ_λσ B_Pλσ D_λσ`, `J_μν=Σ_P B_Pμν d_P` is about **2κn³** MACs after setup, independent of point-group order. [Primary DF documentation](https://pyscf.org/user/df.html). It addresses C₁ molecules as well as symmetric ones. But RI-J alone does not make full RHF/RPA O(n³): the exchange contraction `K_μν=Σ_Pi L_Pμi L_Pνi` with occupied orbitals is **O(m_aux n² nocc)**, quartic at fixed occupancy; response/exchange and fitting errors remain. A prototype must state whether it fits J only, J/K, or uses additional exchange machinery.
+
+**DERIVED-HERE · UNVERIFIED (constants and auxiliary basis not measured).** For a D₂h petite-list J cost `c₄ f n⁴`, RI-J build cost `2 c₃ κ n³`, and amortised setup `Tsetup/r`, a crossover satisfies `c₄ f n⁴ > 2 c₃ κ n³ + Tsetup/r`; without setup, `n*>2(c₃/c₄)κ/f`. Using benzene's ACTIVE primitive fraction **f=0.2581950060** gives **n*>7.746086(c₃/c₄)κ**. This is the derivation asked for, not a fabricated nAO benchmark. Different κ, setup reuse, kernels, sparsity and exact-exchange requirements move n*. Gate the fitted constants, an explicit auxiliary basis and energy/response error before assigning one crossover number.
+
+### 6 · Q6 — names and a degeneracy meter must include operator error
+
+**DERIVED-HERE · KNOWN (generalized symmetric eigenproblem; Schur).** With symmetry basis Q, `F_Γ=Q_ΓᵀFQ_Γ`, `S_Γ=Q_ΓᵀSQ_Γ`, the one-line mathematical solve is
+
+`(ε,C) = sort_merge_Γ [ ε_Γ, Q_Γ S_Γ^(−1/2) eigSym(S_Γ^(−1/2) F_Γ S_Γ^(−1/2)).vectors ]`.
+
+This is the replacement contract for `scf.js:107–108`, reached through `ensureSolve`; it is not a new argument that ensureSolve accepts today. D₂h gives eight blocks ≤9 at n=36; exact D₆h projectors split the nonzero partner blocks further to ≤5. Independent partner eigensolves require ordering/matching within the same full-group isotypic component; central projectors alone do not align multiple copies of an E irrep.
+
+**DERIVED-HERE.** If two partner operators are related by the representation intertwiner T, `δ=||F_A−TᵀF_B T||₂` in the S-orthonormal frame and their eigensolver residual bounds are r_A,r_B, Weyl's bound gives matched `|ε_A−ε_B|≤δ+r_A+r_B`. Only after δ is below the numerical floor does the partner gap meter predominantly measure the eigensolver. Exact counterexample: `F_E=diag(ε−5e−7,ε+5e−7)`, `S_E=I`. The exact solver has **0 residual** and **1e−6 Eh partner splitting** because the operator broke E symmetry. Copying one reduced partner's eigenvalues instead makes the gap **0 by construction**, also not an independent meter. Gate `maxGeometryResidual`, `DᵀSD−S`, off-block F, intertwining δ, `CᵀSC−I` and `FC−SCε` before applying the proposed **1e−12 Eh** benzene pair-gap gate.
+
+**MEASURED.** Approximate C₂ axes through each ring heteroatom and ring centroid, with current geometries and unaltered solves, give:
+
+| status · molecule | max atom-match residual, bohr (Å) | max |MᵀSM−S| | max |MᵀFM−F|, Eh |
+|---|---:|---:|---:|
+| MEASURED · furan | 0.0010063468 (0.0005325358) | 0.0001485805 | **0.0007107408** |
+| MEASURED · pyridine | 0.0008323467 (0.0004404589) | 0.0001390489 | **0.0006070002** |
+
+**DERIVED-HERE.** These are operation residuals in this explicit axis convention, not merely the polygon closure distances. Both solves converged. A generous atom-match tolerance cannot turn **6–7e−4 Eh operator defects** into a 1e−12 exact block certificate. Forced C₂v projection discards real couplings and changes the operator; cluster-character labels with that approximate M instead become noninteger/mixed or must carry an approximate-symmetry status. The exact planar C_s operation is available for both. An exact-label gate should downgrade to the verified subgroup or refuse; snapping geometry would be a separate explicitly changed input, not naming the existing solve.
+
+**DERIVED-HERE — decision contract.** Use projector labels when a geometry/operator symmetry gate passes; they handle accidental near-coincidences of DIFFERENT irreps without energy clustering. Retain cluster traces as an independent, gauge-invariant auditor and for existing full-group/linear labels where a verified block road has not been implemented. Do not force an all-or-nothing choice of algorithm for approximate geometries: exact higher-group labels are unavailable to both algorithms there. A blocked solver also needs a canonical gauge WITHIN each block because `canonicalOrbitals:197–201` can rotate across an accidentally merged energy cluster and undo block membership. Cartesian d representations (`md.js:506–515`, RD2/rdOf) remain required for heavier atoms; the current quartet tool explicitly refuses them.
+
+### 7 · New machinery and further refutations
+
+**DERIVED-HERE — state symmetry, not molecular symmetry, controls the GPU saving.** For real symmetric density/matrix D in the coefficient convention of the engine, a sufficient reconstruction group is `H_D={R : M(R) D M(R)ᵀ=D}` intersected with lattice/domain automorphisms. A signed orbital instead requires the character factor `ψ(Rr)=χ(R)ψ(r)`; a multidimensional partner requires the corresponding vector transformation. A generic coherent superposition is not a scalar invariant of the molecular group. In D₂h, a superposition of Ag and one nontrivial grade has a density stabiliser of **order 4**, while generic nonzero coherences spanning all three independent character bits leave **order 1**. Equal occupations of complete irreps give invariant ground-state D; an E partner alone need not have full D₆h density symmetry. The rank/nullspace of grade differences provides the exact subgroup cheaply. This constraint is absent from Round 1's GPU fraction.
+
+> “it is not on the frame path, so it saves nothing the governor can feel”
+
+**REFUTED · MEASURED (current source) — `field.frame:1238–1240` encodes molecular compute before presentation when dirty.** `chemview.js:323–336` pumps propagation from the frame loop and publishes each returned D; `molecular-session.js:130–140` calls `setMoleculeMatrix`; `field.js:1476` sets molDirty; the next frame submits compute and render in the same command encoder. A still ground state reuses its texture; a changing TDHF density can dirty it repeatedly. Correct gate: count actual dispatches per frame and the CURRENT state's symmetry subgroup, then measure timestamp and presentation changes. “One dispatch per change” does not imply “never relevant to frames.” **UNVERIFIED (no GPU/browser):** whether this saves governor-visible time under any driven state.
+
+**DERIVED-HERE — the Fock's relevant count is not the entire allowed ERI tensor.** An invariant D has `Γ_k=Γ_l`, and output F has `Γ_i=Γ_j`. Coulomb AND exchange use only these terms, so the ordered density/integral contractions count `Σ_αβ n_α² n_β²=(Σ n_α²)²=**244²=59,536**`, **3.544620% of 36⁴** potential Fock MACs (each using J−K/2). This is tighter than Round 1's 15.0% tensor-density multiplier, and follows from the density's symmetry. A symmetry-broken SCF iterate or TDHF density invalidates this count. In particular `stabilityProbe:166–173` adds a random symmetric matrix, not a group-invariant one; constraining that probe to ground-state blocks would erase the cross-irrep perturbations it is intended to test. Block the Hessian into ALL excitation sectors; do not silently project away instability channels.
+
+**KNOWN (direct SCF; PySCF RI-J with exact K) · MEASURED (code already available).** The installed Python backend exposes `scf.RHF(mol).density_fit(only_dfj=True)`; its DF-J path delegates K to the direct exact-exchange implementation. [Primary source](https://pyscf.org/_modules/pyscf/df/df_jk.html). This is immediately available to a generator without changing `lab/`, unlike a hypothetical I_h reduced-integral engine. It still needs the fitting-error/response oracle and an auxiliary-basis timing census. The current tree already has block-ready Cholesky (`lab/linalg.js:107–121`) and a generalized Cholesky/QL eigensolve (`lab/sturmian.js:192–233`); positivity and small-block eigensolves do not require inventing a solver. Reusing them requires respecting their input conventions and the molecular S metric.
+
+> “588 → ~152 ms … → ~54 ms”
+
+**REFUTED AS A TIMING BOUND · MEASURED — even the active component ratios are 0.262238 and 0.094115, not the bare shell ratios, and the pass contains setup/screens.** A valid cost expression is `Tnew=Tsetup+Σ_representatives cost(P,Q)+Treconstruction`; the ordinary full tensor still has **1,679,616** slots and must be filled if the existing consumer remains dense. Quotienting a loop does not quotient its writes, setup, or per-orbit component rotations for free. Gate a measured skeleton implementation against the whole-tensor/energy oracle before asserting seconds saved. The active orbit fractions themselves remain measured facts.
+
+### 8 · Questions for ROUND 3
+
+- **Q7 (DEEPEN) · UNVERIFIED (implementation not timed):** Can a compact raw-SALC/block layout, avoiding the prototype's **244.8 ms** schedule preparation and dense-layout rotations, make one benzene Hessian cheaper INCLUDING its **22,394,880-MAC** raw adaptation? Gate cold and cached calls, all A/B sectors, roots and oscillator strengths against the unchanged worker.
+- **Q8 (LOCATE) · UNVERIFIED (skeleton loop absent):** On the verified **291-pair** active list, what are actual D₂h/D₆h representative `rInto` visits, contraction MACs, rotated component reconstruction writes and milliseconds? Does **10,966/42,486**, rather than the unscreened fraction, earn an ERI stage once reconstruction/setup are paid?
+- **Q9 (BROADEN) · UNVERIFIED (generator oracle not run):** For TiCl₄/GeCl₄ **55 AO**, the **87/120-AO** planned records and C₆₀ **300 AO**, does PySCF DF-J + exact K beat direct RHF while preserving required energy, density and response tolerances? Measure an auxiliary basis, κ, fitting error, RSS and a CPU time; do not call full exchange/RPA cubic.
+- **Q10 (DEEPEN) · UNVERIFIED (GPU/device test needed):** What symmetry subgroup survives a driven benzene density on each dispatch, and does subgroup-aware reconstruction improve dirty-frame timestamps after stabiliser deduplication and eight-way stores? Include T_d's **54,528** boundary voxels and failure controls with generic coherences.
+- **Q11 (LOCATE) · UNVERIFIED (record geometries/refit missing):** After the required COST refit, do the exact furan/pyridine C_s records and actual visit/cache-miss weights put the live symmetric workload above **60%**, below **25%**, or between? Build the real planned roster before replacing the conditional **12.30–16.50%** formula scenario.
+- **Q12 (BROADEN) · UNVERIFIED (reduced operator not assembled):** Can C₆₀'s **32-dimensional commutant**, with multiplicity matrices ≤3 for the scalar/radial-π representation, produce and name the two-edge-weight Hückel spectrum using the actual adjacency rather than characters alone, then expose what survives for the **300-AO** Fock/response spaces?
+
+### 9 · NOT CERTIFIED
+
+- **UNVERIFIED (no GPU, browser or device launched).** D₂h, T_d, linear-group and oblique-grid scatter performance; signed/complex orbital reconstruction; state-dependent group selection; rgba16float/readback errors; trilinear ray-march differences; dirty-frame governor benefit; RTX 3070, M5/iPad and worker budgets. Grid numbers here are CPU orbit counts.
+- **UNVERIFIED (prototype only).** Production skeleton ERI time, cold block-SCF/Hessian integration, browser-worker JIT, partner-root and oscillator-strength agreement after suppressing measured ~1.4e−9 off-block coefficient amplitudes, and Cartesian d representation gates. Raw adaptation reduces arithmetic without yet winning the measured first-call bill.
+- **UNVERIFIED (model/inputs).** An exact planned-library symmetry-time census and RI-J crossover nAO: geometries/frames/charge variants, optional heavy basis/roster, measured fitting constants, workload frequencies and COST refit remain absent. The scenario interval is explicitly conditional.
+- **UNVERIFIED (C₆₀ scope).** The equal-1.4 Å feasibility fixture is not an experimental-geometry record, a stability minimum, a spectrum or a density-device certification. The successful direct CPU solve proves that a stored 64.8 GB ERI is unnecessary; it does not certify the library model or the R-L2 device gate.
+- **MEASURED (scope law).** `du -sh research` gave **33M**. DISK was NOT rebuilt: the user's explicit “do not modify other existing files” overrides the brief/skill's DISK and memory-write instructions. No commit, push, tag, server, browser or edit under lab occurred. The earlier ledger bytes are retained verbatim; this round is appended by a quoted bash heredoc.
+
+**Files written · MEASURED.**
+
+- `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md` — this append only.
+- `tools/symmetry/round2-sol.mjs` — new Node arithmetic, cube/geometry census, in-memory md telemetry, independent SAOs/raw SALCs, blocked RPA and imperfect-ring measurements. `--out` is required; optional `--raw`; JSON writes refuse overwrite.
+- `tools/symmetry/round2-sol-exact.py` — new SymPy ring identities, induced-representation arithmetic, ideal C₆₀ geometry and two-thread direct-RHF feasibility; optional `--algebra-only`; output is exclusively created.
+- `research/release-0.4.0/measure/quartets-round2-sol.json` — fresh output of the existing quartet tool, with its original outputs untouched.
+- `research/release-0.4.0/measure/round2-sol.json` — retained unscheduled prototype measurement (not a timing claim for the scheduled implementation).
+- `research/release-0.4.0/measure/round2-sol-validated.json` — first scheduled/active-orbit measurement.
+- `research/release-0.4.0/measure/round2-sol-final.json` — authoritative S-orthonormal scheduled measurement, full census/active counts, and imperfect-ring operator defects.
+- `research/release-0.4.0/measure/round2-sol-raw.json` — raw-SALC counter-experiment including cold schedule time.
+- `research/release-0.4.0/measure/round2-sol-algebra.json` — independently rerun exact symbolic/representation and geometry-build results, no SCF.
+- `research/release-0.4.0/measure/round2-sol-exact.json` — exact arithmetic plus the completed 300-AO direct CPU solve and its coordinates/time/RSS.
+
+### 10 · Append-only arithmetic audit and closure
+
+**MEASURED · REFUTED (SOL's transcription, by independently recomputed quotients).** Q5's “29.597134%” is corrected to **100·10,947/36,985 = 29.598485872651%**. Q5's “7.746086” is corrected to **2/0.258195006021866 = 7.746083205926**. Q3's reduced storage is **64.883758544922 MiB** (64.884 MiB rounded to three decimals). These corrections change no decision threshold or integer count; gates should calculate the quotients from their integer inputs.
+
+**DERIVED-HERE · REFUTED (SOL's roster description, by 47=20+5+6+11+5).** In Q5, “seven other BIO names” must read **six**: Gly-Gly, N-methylacetamide, imidazole, indole, phosphoric acid, ribose. The JSON's actual 47 entries and weights are unaffected. The 47-instance roster includes glycine among the twenty amino acids and overlaps the current library; it is not 47 wholly new molecules.
+
+**MEASURED (Q6 table restated with unambiguous Markdown columns).** Here max-entry defects are not spectral-norm or eigenvalue-error bounds:
+
+| molecule | status | atom residual (bohr) | atom residual (Å) | maximum overlap entry defect | maximum Fock entry defect (Eh) |
+|---|---|---:|---:|---:|---:|
+| furan | MEASURED | 0.001006346795 | 0.000532535790 | 0.000148580519 | 0.000710740796 |
+| pyridine | MEASURED | 0.000832346684 | 0.000440458897 | 0.000139048915 | 0.000607000158 |
+
+**MEASURED.** The final byte-prefix gate preserves the original **37,575 bytes** and SHA-256 above; there is exactly one `## ROUND 2 · SOL — 2026-10-07` header. Both new script syntax checks pass; exact n=5/6/10 symbolic residual gates pass; the C₆₀ JSON asserts `converged=true` and `eriIsNone=true`. Q7–Q12 remain the six numbered questions for ROUND 3. A separate `research/release-0.4.0/HANDOFF.md` append appeared during this session; SOL's writes did not include that file.
+
+**NOT CERTIFIED · UNVERIFIED.** GPU/browser/device reconstruction and governor timing; cold production symmetry-SCF/ERI integration, response roots and oscillator strengths; auxiliary-basis errors/crossover; a geometry-complete planned census and refitted weights; experimental C₆₀ geometry, stability and density-device certification. No DISK regeneration is authorized under this turn's existing-file restriction.
+
+**Files written · MEASURED (final closure).** Append-only `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md`; new scripts `tools/symmetry/round2-sol.mjs`, `tools/symmetry/round2-sol-exact.py`; new JSONs `research/release-0.4.0/measure/quartets-round2-sol.json`, `research/release-0.4.0/measure/round2-sol.json`, `research/release-0.4.0/measure/round2-sol-validated.json`, `research/release-0.4.0/measure/round2-sol-final.json`, `research/release-0.4.0/measure/round2-sol-raw.json`, `research/release-0.4.0/measure/round2-sol-algebra.json`, `research/release-0.4.0/measure/round2-sol-exact.json`. No commit, push or tag.

@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-10-07 21:55 UTC by tools/disk.mjs from `research/`: 102 documents inlined in full (2.74 MB), 1028 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-10-07 22:25 UTC by tools/disk.mjs from `research/`: 107 documents inlined in full (2.85 MB), 1035 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -73,7 +73,7 @@ Built 2026-10-07 21:55 UTC by tools/disk.mjs from `research/`: 102 documents inl
 67. [beta/RESEARCH-COMMISSIONS.md](#doc-67) · 2026-10-07 · 14 kB
 68. [beta/SOURCES.md](#doc-68) · 2026-10-07 · 9 kB
 69. [device-reports/README.md](#doc-69) · 2026-10-07 · 0 kB
-70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 37 kB
+70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 83 kB
 71. [release-0.3.1/BRIEF-S3.md](#doc-71) · 2026-10-07 · 10 kB
 72. [release-0.3.1/BRIEF-S4.md](#doc-72) · 2026-10-07 · 3 kB
 73. [release-0.3.1/MIR-CONTRACT-THREE-SCOPES.md](#doc-73) · 2026-10-07 · 3 kB
@@ -90,22 +90,27 @@ Built 2026-10-07 21:55 UTC by tools/disk.mjs from `research/`: 102 documents inl
 84. [release-0.4.0/BRIEF-S1-CAMERAEYE.md](#doc-84) · 2026-10-07 · 5 kB
 85. [release-0.4.0/BRIEF-S1-NAMES.md](#doc-85) · 2026-10-07 · 9 kB
 86. [release-0.4.0/BRIEF-S1-SOL.md](#doc-86) · 2026-10-07 · 7 kB
-87. [release-0.4.0/HANDOFF.md](#doc-87) · 2026-10-07 · 14 kB
-88. [release-0.4.0/measure/MEASURE.md](#doc-88) · 2026-10-07 · 18 kB
-89. [release-0.4.0/NACRE.md](#doc-89) · 2026-10-07 · 9 kB
-90. [release-0.4.0/PLAN-DRAFT-0.md](#doc-90) · 2026-10-07 · 22 kB
-91. [release-0.4.0/PLAN-DRAFT-1.md](#doc-91) · 2026-10-07 · 28 kB
-92. [release-0.4.0/PLAN-DRAFT-2.md](#doc-92) · 2026-10-07 · 41 kB
-93. [release-0.4.0/PLAN-DRAFT-3.md](#doc-93) · 2026-10-07 · 41 kB
-94. [release-0.4.0/PLAN.md](#doc-94) · 2026-10-07 · 45 kB
-95. [release-0.4.0/REVIEW-SONNET-0.md](#doc-95) · 2026-10-07 · 35 kB
-96. [release-0.4.0/REVIEW-SONNET-2.md](#doc-96) · 2026-10-07 · 20 kB
-97. [release-0.4.0/S0-BUILD.md](#doc-97) · 2026-10-07 · 10 kB
-98. [release-0.4.0/survey/LWAVES-AUDIT.md](#doc-98) · 2026-10-07 · 67 kB
-99. [release-0.4.0/survey/MIR-1.5.md](#doc-99) · 2026-10-07 · 71 kB
-100. [release-0.4.0/survey/SIBLINGS.md](#doc-100) · 2026-10-07 · 48 kB
-101. [release-0.4.0/survey/VAULT.md](#doc-101) · 2026-10-07 · 61 kB
-102. [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](#doc-102) · 2026-10-07 · 50 kB
+87. [release-0.4.0/BRIEF-S2-CAMERA.md](#doc-87) · 2026-10-07 · 11 kB
+88. [release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md](#doc-88) · 2026-10-07 · 9 kB
+89. [release-0.4.0/BRIEF-S4-LIBRARY.md](#doc-89) · 2026-10-07 · 12 kB
+90. [release-0.4.0/BRIEF-S5-KIT-BRIEFS.md](#doc-90) · 2026-10-07 · 4 kB
+91. [release-0.4.0/HANDOFF.md](#doc-91) · 2026-10-07 · 18 kB
+92. [release-0.4.0/measure/MEASURE.md](#doc-92) · 2026-10-07 · 18 kB
+93. [release-0.4.0/NACRE.md](#doc-93) · 2026-10-07 · 9 kB
+94. [release-0.4.0/PLAN-DRAFT-0.md](#doc-94) · 2026-10-07 · 22 kB
+95. [release-0.4.0/PLAN-DRAFT-1.md](#doc-95) · 2026-10-07 · 28 kB
+96. [release-0.4.0/PLAN-DRAFT-2.md](#doc-96) · 2026-10-07 · 41 kB
+97. [release-0.4.0/PLAN-DRAFT-3.md](#doc-97) · 2026-10-07 · 41 kB
+98. [release-0.4.0/PLAN.md](#doc-98) · 2026-10-07 · 45 kB
+99. [release-0.4.0/REVIEW-SONNET-0.md](#doc-99) · 2026-10-07 · 35 kB
+100. [release-0.4.0/REVIEW-SONNET-2.md](#doc-100) · 2026-10-07 · 20 kB
+101. [release-0.4.0/S0-BUILD.md](#doc-101) · 2026-10-07 · 10 kB
+102. [release-0.4.0/S0-VERIFY.md](#doc-102) · 2026-10-07 · 16 kB
+103. [release-0.4.0/survey/LWAVES-AUDIT.md](#doc-103) · 2026-10-07 · 67 kB
+104. [release-0.4.0/survey/MIR-1.5.md](#doc-104) · 2026-10-07 · 71 kB
+105. [release-0.4.0/survey/SIBLINGS.md](#doc-105) · 2026-10-07 · 48 kB
+106. [release-0.4.0/survey/VAULT.md](#doc-106) · 2026-10-07 · 61 kB
+107. [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](#doc-107) · 2026-10-07 · 50 kB
 
 ## ARTEFACTS (not inlined)
 
@@ -1138,7 +1143,14 @@ Built 2026-10-07 21:55 UTC by tools/disk.mjs from `research/`: 102 documents inl
 | release-0.4.0/measure/limits.json | 12282 |
 | release-0.4.0/measure/orbital-dispatch.json | 12736 |
 | release-0.4.0/measure/pyscf-symm-oracle.json | 2514 |
+| release-0.4.0/measure/quartets-round2-sol.json | 70379 |
 | release-0.4.0/measure/quartets.json | 70411 |
+| release-0.4.0/measure/round2-sol-algebra.json | 10613 |
+| release-0.4.0/measure/round2-sol-exact.json | 11079 |
+| release-0.4.0/measure/round2-sol-final.json | 51012 |
+| release-0.4.0/measure/round2-sol-raw.json | 51159 |
+| release-0.4.0/measure/round2-sol-validated.json | 50415 |
+| release-0.4.0/measure/round2-sol.json | 49568 |
 
 
 ---
@@ -17996,6 +18008,284 @@ Benzene, this run: 1119 ms = integrals 588.5 (52.6 %) + Hessian 145.5 (13.0 %) +
 
 **Files.** The tool `tools/symmetry/unique-quartets.mjs` (node, no dependencies, read-only on `lab/`); the oracle `tools/symmetry/pyscf-symm-oracle.py`; the measurements `research/release-0.4.0/measure/quartets.json` and `research/release-0.4.0/measure/pyscf-symm-oracle.json`; this ledger `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md`. Rebuild the DISK after every round: `node tools/disk.mjs research research/DISK.md`.
 
+---
+
+### ROUND 2 · SOL — 2026-10-07
+
+#### 0 · Provenance and the live-loop number
+
+**MEASURED.** This round read BRIEF-S1-SOL.md and the complete 138-line ledger before writing; source HEAD is `bc103b3d3d986a3e0666f6758daba4d698fd82f1`, branch `sos-s0`. The original ledger is 37,575 bytes, SHA-256 `4d45dd7a1fc5ee76089ed14438d9ed819195af290f03c71011058df332ab916f`. Current evidence: `lab/md.js:255–436`, `lab/rhf-molecule.js:116–255`, `lab/scf.js:37–114`, `lab/rpa-inspector.js:39–118`, `lab/molecules.js:43–215,230–414,443–499`, `lab/field.js:167–250,351–368,923–976,1233–1249,1458–1476`; all 543 lines of `tools/symmetry/unique-quartets.mjs`. Also read the named names probe report, PLAN F5 and N2/N3, MASTER GOAL SPEC §39, and L-0408. No source under `lab/` was written. Node v22.22.1; SymPy 1.14.0; PySCF 2.14.0. New JSON files have exclusive-create writes.
+
+**MEASURED.** Rerunning the existing quartet tool into a NEW JSON reproduces benzene's D₂h numbers: 251,968/1,679,616 full entries, 34,187/222,111 canonical SAO entries and invariant parameters; 11,678/45,150 unscreened shell orbits. Water reproduces 777/2,401 and 154/406. These are different denominators, not interchangeable speedups.
+
+> “under D₂h, **11,678 of the 45,150 shell quartets `twoElectron` iterates are distinct**”
+
+**REFUTED · MEASURED — 42,486, not 45,150, iterations in the current screened main loop.** The new Node tool reads `md.js` into a data-URL module, adds counters IN MEMORY at unique source anchors, and compares its entire returned ERI with the unmodified module: max difference = **0 exactly**. It observes 291 surviving shell pairs, **42,486** candidate/contracted shell quartets, **0** Schwarz-rejected shell quartets, **2,733,372** primitive-pair-product visits, **149,857** primitive-quartet rejections (5.48250%). Thus “screening removes nothing” is true of the shell Schwarz test, false of screening collectively. The active pair set is verified closed under both D₂h and D₆h.
+
+| status · group | active shell orbits / 42,486 | fraction | primitive visits in representative quartets / 2,733,372 | component-weighted primitive visits / 15,977,316 |
+|---|---:|---:|---:|---:|
+| MEASURED · D₂h | **10,966** | **0.2581085534** | 705,743 = 0.2581950060 | 4,189,861 = 0.2622381006 |
+| MEASURED · D₆h | **3,854** | **0.0907122346** | 248,219 = 0.0908105446 | 1,503,705 = 0.0941149940 |
+
+**DERIVED-HERE.** Component weights count `(P.nc Q.nc P.np Q.np)` before the `TAU_PQ`, zero-Hermite and contraction skips; they are not actual MACs. Orbit representatives follow the live pair order. The D₂h active orbit histogram is {1:32, 2:641, 4:10,293}; D₆h is {3:32, 6:579, 12:3,243}. A build gate can assert `NP===291 && mainQuartets===42486 && schwarzRejected===0 && D2hOrbits===10966 && D6hOrbits===3854 && maxAbsERIReferenceDifference===0`. No measured skeleton-loop time follows from this gate.
+
+> “UNVERIFIED here (the loop is not instrumentable without editing `lab/`)”
+
+**REFUTED · MEASURED — 0 changed lab bytes and 0 ERI difference.** In-memory source instrumentation is sufficient; it is not a shipped engine change. Gate the source anchors and the returned tensor, not a copied mathematical model of its screening.
+
+#### 1 · Q1 — the RPA's actual operations and repayment
+
+**DERIVED-HERE.** Let `n=(9,6,2,1,1,2,6,9)`, occupied `o=(6,3,1,1,0,1,4,5)`, virtual `v=(3,3,1,0,1,1,2,4)` in Round 1's D₂h order. Encode characters by XOR grades. For domains `d₁…d₄`, replacing axis r by a target domain t costs exactly
+
+`MAC(r;d,t) = Σ_{a⊕b⊕c⊕d=0} t[grade_r] Π_{j=1}^4 d_j[grade_j]`.
+
+**DERIVED-HERE · MEASURED (enumerated independently in Node).** These are potential multiply-adds with each within-block coefficient treated dense and every structurally forbidden integral omitted. The seven contractions in CURRENT `hessianBlocks:54–75`, sharing A1 between G and Q, give:
+
+| contraction | dense MACs | D₂h MACs |
+|---|---:|---:|
+| DERIVED-HERE · A1: `(μνλσ)→(iνλσ)` | 35,271,936 | 1,090,752 |
+| DERIVED-HERE · G2: `(iνλσ)→(iaλσ)` | 14,696,640 | 430,056 |
+| DERIVED-HERE · G3: `(iaλσ)→(iajσ)` | 8,573,040 | 263,016 |
+| DERIVED-HERE · G4: `(iajσ)→(iajb)` | 3,572,100 | 103,736 |
+| DERIVED-HERE · Q2: `(iνλσ)→(ijλσ)` | 20,575,296 | 646,296 |
+| DERIVED-HERE · Q3: `(ijλσ)→(ijaσ)` | 8,573,040 | 254,916 |
+| DERIVED-HERE · Q4: `(ijaσ)→(ijab)` | 3,572,100 | 103,736 |
+| DERIVED-HERE · total | **94,834,152** | **2,892,508 = 3.050070%** |
+
+**DERIVED-HERE.** Pair blocks are `(57,55,25,20,22,23,53,60)`. Assembly visits **14,721/99,225 = 14.835979%** pair-pair entries, writing both A and B, versus the dense 99,225. This is an entry count, not 14,721 MACs: the current assembly has scalar additions and multiplies. The 3.05% transform fraction differs substantially from the 15.00% ERI occupancy because every coefficient contraction also stays inside a character block.
+
+> “four quarter transforms O(n³·nocc) (89M multiply-adds per the comment at l.43–45)”
+
+**REFUTED · DERIVED-HERE — 94,834,152 and degree 5.** With `O=nocc`, `V=n−O`, the seven-loop dense count is `2 O n⁴ + 2 O² V n² + 2 O² V² n`. In particular the FIRST contraction alone is `O n⁴`, not `O n³`. At fixed occupancy fraction θ, the total is `[2θ+2θ²(1−θ)+2θ²(1−θ)²]n⁵`; θ=7/12 gives 1.56838348765 n⁵. Actual zero coefficients can lower execution counts in the original loops. Gate the loop-domain polynomial and the seven integers above; do not certify the source comment's asymptotic or 89M number.
+
+**MEASURED.** `round2-sol-final.json`: a Node prototype in `tools/`, not `lab/`, transforms to independent S-orthonormal SAOs and precomputes contraction schedules. Five dense timings: 131.786, 130.100, 131.568, 131.896, 132.501 ms, median **131.786 ms**. Five scheduled blocked timings: 24.699, 18.264, 16.474, 13.968, 13.552 ms, median **16.474 ms**: **115.312 ms saved**. Thus the proposed 0.1 s saving is within 2× FOR THE WARM CONTRACTION, not for the whole first call. An independent run in `round2-sol-validated.json` gives 133.890→14.928 ms. The earlier unscheduled prototype in `round2-sol.json` gives 147.628→134.517 ms despite the same MAC count: loop/schedule overhead is a measured counterexample to proportional timing from sparsity alone.
+
+**MEASURED.** Same transformed tensor and coefficients, dense versus scheduled blocked A/B: **0 maximum difference exactly**. Relative to the original solver's unprojected canonical C, max differences are **4.2269174e−10 in A**, **3.0108019e−11 in B** after forcing off-block coefficients to zero. The largest removed coefficient is **1.3548286e−9**, despite the original tool's ≈4e−15 *weight* leakage. A squared-weight diagnostic is not an amplitude-error certificate. This prototype's gate is `sameBasisMaxDiffA/B<1e-11`, `originalBasisMaxDiffA/B<1e-8`; tighter original-basis gates require an actual block eigensolve and a root/oscillator-strength comparison.
+
+**DERIVED-HERE.** Four dense AO→SAO quarters cost `4n⁵ = 241,864,704` MACs at 36 AO. Their arithmetic repayment is **241,864,704/(94,834,152−2,892,508)=2.630633 Hessians**, hence **3 calls**, before setup. Both numerator and denominator scale as n⁵ for fixed block and occupied proportions. There is **no special nAO crossover** where one dense adaptation suddenly pays for one RPA; already its first contraction costs more than the savings, and increasing n preserves the ratio under these assumptions. Measured adaptation is **416.418 ms**, so 416.418/115.312=**3.611232**, hence **4 warm calls** ignoring schedule setup. `moleculeRHF:235` builds one Hessian per distinct solution; `mathworker.js:248–250` builds/caches a separate spectrum. These are not four guaranteed calls.
+
+**DERIVED-HERE · MEASURED — the missing option.** S-orthonormalising the ERI basis is optional. Raw Euclidean-orthogonal symmetry-adapted linear combinations Q keep `S'=QᵀSQ` block diagonal; solve generalized Fock blocks and use `C'=QᵀC`. D₂h's signed AO orbits have at most 4 members. Our raw Q has **120 nonzero coefficients**, versus 1,296 possible: four quarter transforms need **4·120·36³=22,394,880 MACs**, at most O(|G|n⁴) for fixed-size signed orbits, not inherently O(n⁵). Arithmetic can therefore pay back on one RPA. HOWEVER `round2-sol-raw.json` measures **210.351 ms** for the transform, **244.811 ms** for the first blocked call including schedule construction, and warm medians **134.474→19.518 ms**. The measured first-call bill **455.163 ms** exceeds the dense bill. This machinery changes the asymptotic premise, not today's measured verdict. A production block layout or direct symmetry-reduced integrals must earn its own timing gate.
+
+#### 2 · Q2 — the grid group includes stabilisers and the domain origin
+
+> “the asymmetric unit under the signed-permutation subgroup G ∩ O_h is exactly n³/|G ∩ O_h| with **zero boundary** … T_d … 1/24 … O_h … 1/48”
+
+**REFUTED · MEASURED — 39,200, not 36,864, representatives for T_d at 96³; 54,528 boundary voxels.** Half-integers avoid coordinate planes, not the planes `x=y`, `x=−y`, etc. T_d's coordinate-swapping mirrors fix these centres. Burnside gives `(n³+6n²+8n)/24=39,200`; its orbit histogram is {4:96, 12:4,512, 24:34,592}. O_h gives **19,600**, not 18,432, with histogram {8:48, 24:2,256, 48:17,296}. In both groups **54,528/884,736 = 6.163194%** of voxels have nontrivial stabilisers. Counting equality of absolute coordinates gives `n³−n(n−2)(n−4)=54,528`. Assert Burnside counts and actual orbit sizes; never write 24 or 48 images to a size-4/8 orbit without deduplicating stores.
+
+> “The ‘boundary the reconstruction must treat twice’ exists only for node-centred odd grids”
+
+**REFUTED · MEASURED — 54,528 such voxels on the EVEN live grid.** D₂h and the coordinate sign-flip C₂v are free on even cell-centred grids. Permutation groups need their own stabiliser law. Boundary means an orbit size below the group order; it does not require double counting physical density.
+
+**DERIVED-HERE.** For this *finite cubic texture*, use `H={R in G∩O_h : c−Rc=0}`, where c is the molecular symmetry centre and the cube is centred at zero (`field.js:190`). A signed permutation about a displaced centre is an affine transformation that can leave the cube. A symmetry of the molecule is not automatically a symmetry of the texture domain. Orbit counts below enumerate all 48 cubic signed permutations against the ACTUAL coordinates, using 1e−8 Å atom-match tolerance and no recentering.
+
+| status · group / current orientation | molecular G∩O_h about its centre | live domain H | representatives at 96³ | stabiliser-boundary voxels |
+|---|---|---|---:|---:|
+| MEASURED · C₂v, yz plane / z axis: water, bent helpers, formaldehyde, urea | C₂v, 4 | C₂v, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₃v, z axis, first ligand in xz: NH₃/c3v/CH₃CN | C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · T_d, cube diagonals: CH₄/td | T_d, 24 | T_d, 24 | 39,200 (0.0443070) | 54,528 |
+| MEASURED · D₃h, ring/ligands in xy, first at +x | C₂v, 4 | C₂v, 4 | 221,184 (1/4) | 0 |
+| MEASURED · D₂h, ethene in yz | D₂h, 8 | D₂h, 8 | 110,592 (1/8) | 0 |
+| MEASURED · D₃d, staggered ethane, upper first H at +x | C₂h, 4 | C₂h, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₂h, butadiene in yz centred at zero | C₂h, 4 | C₂h, 4 | 221,184 (1/4) | 0 |
+| MEASURED · C₂, peroxide about x through z=rOO/2 | C₂, 2 | C₁, 1 | 884,736 (1) | 0 |
+| MEASURED · C_s, methanol/formic/glycine, mirror x=0 | C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · D₆h, benzene ring in xy | D₂h, 8 | D₂h, 8 | 110,592 (1/8) | 0 |
+| MEASURED · D∞h, `diatomic`/frozen N₂, displaced midpoint | D₄h, 16 | C₄v, 8 | 112,896 (0.1276042) | 18,432 |
+| MEASURED · D∞h, centred `linear3`/acetylene | D₄h, 16 | D₄h, 16 | 56,448 (0.0638021) | 18,432 |
+| MEASURED · C∞v, z-linear heteronuclear species | C₄v, 8 | C₄v, 8 | 112,896 (0.1276042) | 18,432 |
+| MEASURED · furan/pyridine, CURRENT ring walk | exact C_s, 2 | C_s, 2 | 442,368 (1/2) | 0 |
+| MEASURED · O_h, hypothetical origin-centred cubic frame (not a current entry) | O_h, 48 | O_h, 48 | 19,600 (0.0221535) | 54,528 |
+
+**DERIVED-HERE.** Linear C₄v has two diagonal mirror planes on this even grid, giving `(n³+2n²)/8=112,896`; D₄h adds the free z sign flip and halves that count. These larger linear subgroups were omitted from Round 1's 1/4-or-1/8 picture. Recentering N₂ restores D₄h; recentring peroxide restores C₂. It changes the texture's physical box and requires a field/reference/digest gate, not just a label change.
+
+> “An operation that is not a signed permutation of the axes maps no voxel centre onto the lattice”
+
+**REFUTED · DERIVED-HERE — one exact mapped centre.** The order-2 reflection `R=[[3/5,4/5,0],[4/5,−3/5,0],[0,0,1]]` maps `(1/2,3/2,1/2)` to `(3/2,−1/2,1/2)`, both centres of the 96³ cube. The corrected assertion is: only signed permutations are orthogonal automorphisms of the ENTIRE cubic lattice/domain; other operations can map a proper subset onto it. The existing tool's sixteen particular off-subgroup D₆h operations still measure **0** mapped centres.
+
+**DERIVED-HERE.** A hexagonal-prism lattice is consumable after an affine texture-address change, not by the current unchanged `uvw=(p+half)/(2half)` at `field.js:367`. Take physical lattice basis `b₁=(h,0,0)`, `b₂=(h/2,√3h/2,0)`, `b₃=(0,0,h_z)`. The 60° rotation has integer lattice matrix `[[0,−1,0],[1,1,0],[0,0,1]]`. A G-invariant hexagonal prism of integer nodes (with an invariant offset, padding and a domain mask) admits D₆h orbit reconstruction. Store it in a rectangular 3-D texture and sample at affine coordinates `B⁻¹p`, with the texel-centre offset accounted for. A rotated cubic texture similarly admits all T_d operations when its coordinate axes coincide with the S₄ axes; CURRENT `td()` already has that orientation. Neither construction deletes stabilisers.
+
+**DERIVED-HERE.** Trilinear interpolation over the oblique cells changes the interpolant. Repeated one-dimensional interpolation remainder gives `|f−I_B f| ≤ [h²||∂²_bhat1 f||∞+h²||∂²_bhat2 f||∞+h_z²||∂²_z f||∞]/8`. Against a Cartesian interpolant, sum the two remainder bounds. Explicit counterexample: `f(x,y)=xy` is reproduced exactly by Cartesian bilinear interpolation, but at the centre of an oblique unit cell the error is **√3 h²/16 = 0.1082531755 h²**. For amplitude error ε and |ψ|≤M, density error is ≤`2Mε+ε²`. **UNVERIFIED (no GPU/readback):** no absolute molecular interpolation error or net D₆h speedup follows until these derivatives or direct samples, padding cost, rgba16float rounding and ray-march output are measured. No browser was launched.
+
+#### 3 · Q3 — C₆₀: the mirror is local, storage is not a dense-SCF requirement
+
+**DERIVED-HERE · KNOWN (Burnside; symmetric-square character formula).** For a representation with power characters `x₁=χ(g), x₂=χ(g²), x₄=χ(g⁴)`, write
+
+`q(g)=χ_Sym²Sym²V(g)=(x₁⁴+2x₁²x₂+3x₂²+2x₄)/8`.
+
+For a shell permutation representation q is the number of fixed canonical shell quartets. For the real AO representation its group average is the dimension of invariant 8-fold-symmetric ERIs. The ten I_h classes have sizes `(1,15,20,12,12,1,15,20,12,12)` for `(E,C₂,C₃,C₅,C₅²,i,iC₂,iC₃,iC₅,iC₅²)`. Site stabiliser C_s gives 4 fixed atoms per each of the 15 mirrors. Thus shell characters are E:180, mirror:12, others:0; AO characters are E:300, mirror:4·(2 s + tr mirror on p)=12, others:0. BigInt computes every class and all powers.
+
+**DERIVED-HERE.** Shell baseline `16,290·16,291/2=132,690,195`. Identity q=132,690,195; the 15 proper C₂ and inversion have q=12,195; 15 mirrors have q=21,267; all other q=0. Hence
+
+`(132690195 + 16·12195 + 15·21267)/120 = **1,110,036**`, fraction **0.008365621891**.
+
+This is near **1/120**, not 1/60. A C₆₀ mirror fixes 4 of 60 sites; benzene's planar mirror fixes ALL sites and lies in the kernel of the shell action. Those are different Burnside mechanisms.
+
+**DERIVED-HERE.** AO canonical baseline **1,019,283,825**. Identity q=1,019,283,825; proper C₂/inversion q=33,825; mirrors q=47,217. Thus
+
+`(1019283825 + 16·33825 + 15·47217)/120 = **8,504,444** independent ERIs`, fraction **0.008343548471**, storage **68,035,552 B = 64.883 MiB** at one f64 per parameter. This is an abstract invariant-tensor dimension; a reduced-integral implementation still needs Clebsch–Gordan maps and indexing. A scalar shell petite list for I_h does not provide reconstruction of p components by index permutations alone.
+
+**DERIVED-HERE.** Distinguish ordered storage from 8-fold storage: full 300⁴ tensor **64,800,000,000 B**; ordinary real 8-fold packing **8,154,270,600 B**; D₂h ordered label-allowed values **8,100,062,208 B**; I_h ordered-tensor invariant dimension **67,502,592**, storing **540,020,736 B** before 8-fold reduction. The “~0.6 GB under I_h” estimate is comparable to the ordered invariant count, not the 8-fold reduced count. All of these are storage formats, not PySCF's compulsory working set. Z₁₀'s equal block count is 30 each, Fock ratio 0.1 and ordered ERI fraction 0.1; D₂h ordered fraction is **0.1250009600**. Its four-moment correction is not a shell petite-list fraction.
+
+**MEASURED — actual 300-AO direct SCF.** The new Python tool constructs an ideal truncated icosahedron by taking the 60 directed edges of an icosahedron, truncating at one third, and scaling both C–C edge kinds to **1.400 Å**. Every vertex has degree 3. On the vendored C STO-3G decimals, PySCF has **300 AO, 180 occupied**, detects `topgroup='Ih'`, selects **`groupname='Ci'`**, and converges in **9 cycles**, **625.871 s**, two CPU threads, to **−2244.0187824773475 Eh**, HOMO–LUMO gap **0.2797763016 Eh**. `direct_scf=True`, `_eri is None` after convergence; process peak RSS **197,168 KiB = 192.547 MiB**. `max_memory=128 MB` is an algorithm-selection budget, not a hard RSS cap. Dense C and D each require **720,000 B**. This is a feasibility fixture with an ideal geometry, not a validated experimental-geometry library record or an RHF stability certificate.
+
+> “`symm` computes in the largest *real Abelian* subgroup”
+
+**REFUTED · MEASURED — I_h→C_i of order 2, not D₂h of order 8.** Installed PySCF 2.14 `symm.geom.get_subgroup` explicitly returns Ci for Ih, while returning D2h for D6h. The algebraic largest real Abelian subgroup of I_h remains D₂h; implementation support is another question. Gate `mol.topgroup==='Ih' && mol.groupname==='Ci'` for this default build, not an inference from benzene. [Primary PySCF source](https://pyscf.org/_modules/pyscf/symm/geom.html).
+
+**KNOWN (Almlöf–Faegri–Korsell, direct SCF) · MEASURED (installed PySCF source).** `RHF.get_jk` uses packed in-core ERIs only when its memory predicate allows them; otherwise it calls the direct J/K route, which does not retain the n⁴ tensor. [Primary implementation](https://pyscf.org/_modules/pyscf/scf/hf.html). The measured 193 MiB run kills the proposed memory dichotomy: the generator can compute a ground-state density as well as coefficients on this workstation. **UNVERIFIED (no GPU/stability run):** a 300-AO density renderer, excitation/stability matrices, experimental C₆₀ record and device budget. R-L2 is still a product/GPU constraint. CURRENT PLAN N3 already reports a 3.2–3.6 ms screened orbital-only dispatch; that earlier device measurement was read, not reproduced here.
+
+#### 4 · Q4 — exact character coefficients, not exact rational physical energies
+
+**DERIVED-HERE · MEASURED (SymPy exact residues).** For one function per site, real symmetric C_n-circulant F and S, and S positive definite, write independent first-row coefficients `f_j,s_j`, j=0…floor(n/2). Every row below is a coefficient vector c; its energy is `(c·f)/(c·s)`. SymPy verifies all Fourier eigenvectors by reduction modulo Φ_n(ζ), with **0 nonzero residuals out of 50 (n=5), 72 (n=6), 200 (n=10)**. No decimal trigonometry enters the symbolic test.
+
+| status · n,k | coefficient vector c | degeneracy |
+|---|---|---:|
+| DERIVED-HERE · 6,0 | (1,2,2,1) | 1 |
+| DERIVED-HERE · 6,1 | (1,1,−1,−1) | 2 |
+| DERIVED-HERE · 6,2 | (1,−1,−1,1) | 2 |
+| DERIVED-HERE · 6,3 | (1,−2,2,−1) | 1 |
+| DERIVED-HERE · 5,0 | (1,2,2) | 1 |
+| DERIVED-HERE · 5,1 | (1,a,b) | 2 |
+| DERIVED-HERE · 5,2 | (1,b,a) | 2 |
+| DERIVED-HERE · 10,0 | (1,2,2,2,2,1) | 1 |
+| DERIVED-HERE · 10,1 | (1,p,a,−a,−p,−1) | 2 |
+| DERIVED-HERE · 10,2 | (1,a,−p,−p,a,1) | 2 |
+| DERIVED-HERE · 10,3 | (1,−a,−p,p,a,−1) | 2 |
+| DERIVED-HERE · 10,4 | (1,−p,a,a,−p,1) | 2 |
+| DERIVED-HERE · 10,5 | (1,−2,2,−2,2,−1) | 1 |
+
+**DERIVED-HERE.** Here `a=(√5−1)/2`, `b=−(√5+1)/2=−p`, `p=(√5+1)/2`. Degeneracies sum to 5,6,10 respectively. The four 6-ring forms are complete under the stated circulant/real/scalar hypotheses; “any 6-ring” without operator symmetry is false (one different on-site f₀ already destroys circulancy). For C₆₀'s S₁₀ AO grades, freeness gives multiplicity **30**, not one scalar function per site; the scalar 10-ring formula is not a complete C₆₀ Fock solve.
+
+> “For n equivalent sites with b functions each … their generalised eigenproblem is solved by the DFT: ε_k = F̃(k)/S̃(k)”
+
+**REFUTED · DERIVED-HERE — b=2.** Take six identical sites with `S=I`, no hopping, and on-site block `[[0,1],[1,1]]`. The DFT produces six identical 2×2 blocks, each with eigenvalues **(1±√5)/2**. It block diagonalises but does not solve the multiplicity matrix. Correct gate: for b=1 use scalar ratios; for b>1 solve `F̃(k)c=S̃(k)cε` in each b×b block. More generally Schur's lemma gives `F=⊕Γ(K_Γ⊗I_dΓ)`, not a diagonal matrix of characters when multiplicities exceed one.
+
+> “the C_n adaptation is exact over Q for exactly those n” [n∈{1,2,3,4,6}]
+
+**REFUTED · DERIVED-HERE — ζ₃=(−1+i√3)/2 and ζ₄=i are not rational.** The crystallographic restriction concerns integer traces / lattice rotations. The *real cosine coefficient field* `Q(ζ_n+ζ_n⁻¹)` is Q for n=3,4,6; the complex character field is not. Normalising the DFT also introduces √n. Correct gate: distinguish the character field, its real subfield, symbolic coefficients in F/S, and normalisation; no rational-coordinate DFT assertion for n=3,4,6.
+
+**KNOWN (Lindemann, π transcendental) · DERIVED-HERE.** One normalised primitive s Gaussian of exponent α=1 at one centre has `(ss|ss)=**2/√π=1.1283791670955126**`, which cannot be algebraic, hence is not in Q(ζ₆). Conversely `F_m(0)=**1/(2m+1)**` is rational; the prefactor, normalisation and other analytic values must be tracked separately. Thus “Boys-function values … (transcendental)” is not a blanket theorem about every Boys value. Symmetry-enforced zero ERIs are exactly the integer zero, but this supplies no nontrivial integral-lattice structure. For arbitrary exponents/geometries the honest coefficient module is over the field generated by the analytic AO values and the character coefficients, not just Q(ζ_n). Four Bloch coefficients contribute **1/n²** before the sums; orbit aggregation under exact cyclic symmetry can supply a factor n, leaving 1/n. This is exact transformation arithmetic, not integrality of physical ERIs.
+
+**KNOWN (Frobenius reciprocity; Schur–Wedderburn) · DERIVED-HERE.** For the 60 scalar atom functions / locally radial p functions on C₆₀, `V=Ind_Cs^Ih 1`. If an A₅ irrep has dimension d and C₂ character t, its g/u multiplicities are `(d±t)/2`. A₅'s `(d,t)` are `(1,1),(3,−1),(3,−1),(4,0),(5,1)`. Therefore
+
+`V = Ag + T1g + T2g + 2Gg + 3Hg + 2T1u + 2T2u + 2Gu + 2Hu`.
+
+**DERIVED-HERE · MEASURED (exact integer arithmetic).** Dimensions sum to **60**; `Σm_Γ²=**32**`, `Σm_Γ=**16**`, `Σm_Γ³=**70**`. The commutant is a noncommutative direct sum of matrix algebras (including **M₃ for Hg**), not a Bose–Mesner algebra with a scalar DFT. An invariant Hückel adjacency needs multiplicity blocks of size at most **3**, with each block eigenvalue repeated d_Γ times. Characters fix these dimensions and repetitions; they do not fix numerical eigenvalues. `H=0` and `H=I` have the identical representation/characters and different spectra. The truncated-icosahedron adjacency or its edge weights is additional required data. The dictionary to L-0408 stops at invariant-algebra decomposition: there is no Gaussian-period norm or L-value growth theorem for arbitrary molecular Fock coefficients merely from having a determinant.
+
+> “with equality iff χ_V(R)=0 … — iff G acts freely on the AO basis (no atom fixed by any non-identity operation)”
+
+**REFUTED · DERIVED-HERE — a central p triplet under C₃.** There is one fixed atom, but `χ(E)=3`, `χ(C₃)=χ(C₃²)=1+2cos(120°)=0`. Its three complex grades each have size 1; ordered allowed ERIs are **27/81=1/3**, Fock entries **3/9=1/3**. Character cancellation makes equal blocks without free atom action. Correct gate: equality iff every nonidentity character vanishes, equivalently a multiple of the regular representation; free action is sufficient for a permutation basis, not necessary for a rotating AO representation.
+
+> “In every group the measured non-zero set equals the label-allowed set exactly — 0 violations”
+
+**REFUTED · MEASURED — D₆h allows 450,624 entries but only 227,008 are nonzero: 223,616 allowed zeros.** Zero violations means no forbidden nonzero entries, not equality of sets. Water under the tool's C₂ basis also allows 1,201 but measures 777. Gate `nonzeroForbidden===0` separately from `allowed−nonzeroAllowed`; the D₆h label condition is necessary, not sufficient. The original table already contains the counterexample to its own sentence.
+
+#### 5 · Q5 — the census and the density-fitting crossover that cannot be invented
+
+**MEASURED (current table + all 48 operations; weights are MODEL predictions).** At 1e−8 Å exact atom-match tolerance, all **54** entries total **37,908 predicted ms**; those with centred signed-permutation subgroup order≥4 total **22,511 ms = 59.383244%**. The **52 enabled** entries total **36,985 ms**; their symmetric share is **21,588 ms = 58.369609%**. Origin-preserving versus centred counting gives the same numerator for this ≥4 criterion even though peroxide and linear group orders differ. The two disabled entries contribute **923 ms**; current over-cap count is **0**, CAP_MS=**9,592**. Rows and subgroup orders are in the JSON; no point group was assigned solely from a formula or a `source` string.
+
+**MEASURED.** The low-subgroup enabled rows are NH₃ 20, PH₃ 53, H₂O₂ 53, CH₃OH 95, HCOOH 201, CH₃CN 281, furan 2,876, pyridine 8,071, glycine 3,184, H₃O⁺ 20, AsH₃ 543 ms. In particular the two imperfect ring walks carry **10,947/36,985=29.597134%** of predicted live time and have only exact C_s in the current coordinates. Calling them ideal C₂v without an operator gate can reverse a stage decision.
+
+**DERIVED-HERE.** The stipulated decision thresholds leave **58.37% between 25% and 60%**: the current census neither kills nor earns 0.5.x by that test. It is also weighted by the old 2026-09-12 cost model, not present solve timings or user visit frequencies. CURRENT PLAN N2 reports the old benzene prediction as **5–6.6× too slow** and requires a refit. The stage gate should consume a measured/refitted workload, include adaptation/schedule cost, and distinguish live cache misses from record opens (zero solver calls), not infer a universal verdict from one percentage.
+
+**DERIVED-HERE · UNVERIFIED (geometries, optional roster and refit absent).** PLAN F5 supplies names/families, not the geometry/frame/charge roster needed for a unique planned census. The tool computes a reproducible CONDITIONAL roster of **47 named instances** (the twenty amino acids, five bases, seven other BIO names including Gly-Gly, eleven lattice/cluster instances, and five Kr-row names; glycine overlaps the current table). It totals **6,100,844 model ms** from neutral formulas. Under explicitly ideal, aligned high-symmetry lattice/heavy conformers and ordinary low-symmetry BIO conformers, high share is **750,242 ms**, uncertain share **256,629 ms**: **12.297348%–16.503798%**. This is a scenario interval, NOT a certified fraction for all planned records. It omits the unspecified d-block experiments and optional I/Xe extension; their basis shell counts are not vendored here. With no assumptions about the missing roster and frame, the only universal fraction interval is **[0,1]**. An exact second percentage is not determined by PLAN.
+
+**DERIVED-HERE.** Formula cost alone cannot supply the missing symmetry: neutral C₅H₁₂ gives **37 AO, 11,293 predicted ms** whether a chosen conformer/geometry is Td neopentane or a generic C₁ pentane geometry. Even a Td molecule rotated by a generic angle can lose all nonidentity operations in the fixed cube's signed-permutation intersection. The script's conditional lattice symmetry assumption must therefore be checked against the actual record frames. Of the 47 formula instances, **38** exceed the present cap. Their prescribed contribution to NEW LIVE solves is **0 ms**: PLAN:252,272,274 and N2 put those entries on the record path. This does not erase offline generator work.
+
+> “1× on the heavy records the library plans, which are C₁/C_s or come from PySCF (which already computes in D₂h)”
+
+**REFUTED · DERIVED-HERE/MEASURED — TiCl₄ and GeCl₄ are Td targets with 55 AO each; KrF₂ is linear; PySCF I_h defaults to C_i.** The conditional model predicts TiCl₄ **47,076 ms**, GeCl₄ **23,081 ms**, not a collection consisting only of C₁/C_s. Correct gate: engine record-open solver count=0; generator symmetry is checked per geometry and actual backend subgroup. Do not multiply offline time by a purported universal PySCF D₂h factor.
+
+**KNOWN (Coulomb-metric RI/DF; PySCF implementation) · DERIVED-HERE.** Density fitting uses `(μν|λσ)≈Σ_P B_Pμν B_Pλσ`; with m_aux=κn, `d_P=Σ_λσ B_Pλσ D_λσ`, `J_μν=Σ_P B_Pμν d_P` is about **2κn³** MACs after setup, independent of point-group order. [Primary DF documentation](https://pyscf.org/user/df.html). It addresses C₁ molecules as well as symmetric ones. But RI-J alone does not make full RHF/RPA O(n³): the exchange contraction `K_μν=Σ_Pi L_Pμi L_Pνi` with occupied orbitals is **O(m_aux n² nocc)**, quartic at fixed occupancy; response/exchange and fitting errors remain. A prototype must state whether it fits J only, J/K, or uses additional exchange machinery.
+
+**DERIVED-HERE · UNVERIFIED (constants and auxiliary basis not measured).** For a D₂h petite-list J cost `c₄ f n⁴`, RI-J build cost `2 c₃ κ n³`, and amortised setup `Tsetup/r`, a crossover satisfies `c₄ f n⁴ > 2 c₃ κ n³ + Tsetup/r`; without setup, `n*>2(c₃/c₄)κ/f`. Using benzene's ACTIVE primitive fraction **f=0.2581950060** gives **n*>7.746086(c₃/c₄)κ**. This is the derivation asked for, not a fabricated nAO benchmark. Different κ, setup reuse, kernels, sparsity and exact-exchange requirements move n*. Gate the fitted constants, an explicit auxiliary basis and energy/response error before assigning one crossover number.
+
+#### 6 · Q6 — names and a degeneracy meter must include operator error
+
+**DERIVED-HERE · KNOWN (generalized symmetric eigenproblem; Schur).** With symmetry basis Q, `F_Γ=Q_ΓᵀFQ_Γ`, `S_Γ=Q_ΓᵀSQ_Γ`, the one-line mathematical solve is
+
+`(ε,C) = sort_merge_Γ [ ε_Γ, Q_Γ S_Γ^(−1/2) eigSym(S_Γ^(−1/2) F_Γ S_Γ^(−1/2)).vectors ]`.
+
+This is the replacement contract for `scf.js:107–108`, reached through `ensureSolve`; it is not a new argument that ensureSolve accepts today. D₂h gives eight blocks ≤9 at n=36; exact D₆h projectors split the nonzero partner blocks further to ≤5. Independent partner eigensolves require ordering/matching within the same full-group isotypic component; central projectors alone do not align multiple copies of an E irrep.
+
+**DERIVED-HERE.** If two partner operators are related by the representation intertwiner T, `δ=||F_A−TᵀF_B T||₂` in the S-orthonormal frame and their eigensolver residual bounds are r_A,r_B, Weyl's bound gives matched `|ε_A−ε_B|≤δ+r_A+r_B`. Only after δ is below the numerical floor does the partner gap meter predominantly measure the eigensolver. Exact counterexample: `F_E=diag(ε−5e−7,ε+5e−7)`, `S_E=I`. The exact solver has **0 residual** and **1e−6 Eh partner splitting** because the operator broke E symmetry. Copying one reduced partner's eigenvalues instead makes the gap **0 by construction**, also not an independent meter. Gate `maxGeometryResidual`, `DᵀSD−S`, off-block F, intertwining δ, `CᵀSC−I` and `FC−SCε` before applying the proposed **1e−12 Eh** benzene pair-gap gate.
+
+**MEASURED.** Approximate C₂ axes through each ring heteroatom and ring centroid, with current geometries and unaltered solves, give:
+
+| status · molecule | max atom-match residual, bohr (Å) | max |MᵀSM−S| | max |MᵀFM−F|, Eh |
+|---|---:|---:|---:|
+| MEASURED · furan | 0.0010063468 (0.0005325358) | 0.0001485805 | **0.0007107408** |
+| MEASURED · pyridine | 0.0008323467 (0.0004404589) | 0.0001390489 | **0.0006070002** |
+
+**DERIVED-HERE.** These are operation residuals in this explicit axis convention, not merely the polygon closure distances. Both solves converged. A generous atom-match tolerance cannot turn **6–7e−4 Eh operator defects** into a 1e−12 exact block certificate. Forced C₂v projection discards real couplings and changes the operator; cluster-character labels with that approximate M instead become noninteger/mixed or must carry an approximate-symmetry status. The exact planar C_s operation is available for both. An exact-label gate should downgrade to the verified subgroup or refuse; snapping geometry would be a separate explicitly changed input, not naming the existing solve.
+
+**DERIVED-HERE — decision contract.** Use projector labels when a geometry/operator symmetry gate passes; they handle accidental near-coincidences of DIFFERENT irreps without energy clustering. Retain cluster traces as an independent, gauge-invariant auditor and for existing full-group/linear labels where a verified block road has not been implemented. Do not force an all-or-nothing choice of algorithm for approximate geometries: exact higher-group labels are unavailable to both algorithms there. A blocked solver also needs a canonical gauge WITHIN each block because `canonicalOrbitals:197–201` can rotate across an accidentally merged energy cluster and undo block membership. Cartesian d representations (`md.js:506–515`, RD2/rdOf) remain required for heavier atoms; the current quartet tool explicitly refuses them.
+
+#### 7 · New machinery and further refutations
+
+**DERIVED-HERE — state symmetry, not molecular symmetry, controls the GPU saving.** For real symmetric density/matrix D in the coefficient convention of the engine, a sufficient reconstruction group is `H_D={R : M(R) D M(R)ᵀ=D}` intersected with lattice/domain automorphisms. A signed orbital instead requires the character factor `ψ(Rr)=χ(R)ψ(r)`; a multidimensional partner requires the corresponding vector transformation. A generic coherent superposition is not a scalar invariant of the molecular group. In D₂h, a superposition of Ag and one nontrivial grade has a density stabiliser of **order 4**, while generic nonzero coherences spanning all three independent character bits leave **order 1**. Equal occupations of complete irreps give invariant ground-state D; an E partner alone need not have full D₆h density symmetry. The rank/nullspace of grade differences provides the exact subgroup cheaply. This constraint is absent from Round 1's GPU fraction.
+
+> “it is not on the frame path, so it saves nothing the governor can feel”
+
+**REFUTED · MEASURED (current source) — `field.frame:1238–1240` encodes molecular compute before presentation when dirty.** `chemview.js:323–336` pumps propagation from the frame loop and publishes each returned D; `molecular-session.js:130–140` calls `setMoleculeMatrix`; `field.js:1476` sets molDirty; the next frame submits compute and render in the same command encoder. A still ground state reuses its texture; a changing TDHF density can dirty it repeatedly. Correct gate: count actual dispatches per frame and the CURRENT state's symmetry subgroup, then measure timestamp and presentation changes. “One dispatch per change” does not imply “never relevant to frames.” **UNVERIFIED (no GPU/browser):** whether this saves governor-visible time under any driven state.
+
+**DERIVED-HERE — the Fock's relevant count is not the entire allowed ERI tensor.** An invariant D has `Γ_k=Γ_l`, and output F has `Γ_i=Γ_j`. Coulomb AND exchange use only these terms, so the ordered density/integral contractions count `Σ_αβ n_α² n_β²=(Σ n_α²)²=**244²=59,536**`, **3.544620% of 36⁴** potential Fock MACs (each using J−K/2). This is tighter than Round 1's 15.0% tensor-density multiplier, and follows from the density's symmetry. A symmetry-broken SCF iterate or TDHF density invalidates this count. In particular `stabilityProbe:166–173` adds a random symmetric matrix, not a group-invariant one; constraining that probe to ground-state blocks would erase the cross-irrep perturbations it is intended to test. Block the Hessian into ALL excitation sectors; do not silently project away instability channels.
+
+**KNOWN (direct SCF; PySCF RI-J with exact K) · MEASURED (code already available).** The installed Python backend exposes `scf.RHF(mol).density_fit(only_dfj=True)`; its DF-J path delegates K to the direct exact-exchange implementation. [Primary source](https://pyscf.org/_modules/pyscf/df/df_jk.html). This is immediately available to a generator without changing `lab/`, unlike a hypothetical I_h reduced-integral engine. It still needs the fitting-error/response oracle and an auxiliary-basis timing census. The current tree already has block-ready Cholesky (`lab/linalg.js:107–121`) and a generalized Cholesky/QL eigensolve (`lab/sturmian.js:192–233`); positivity and small-block eigensolves do not require inventing a solver. Reusing them requires respecting their input conventions and the molecular S metric.
+
+> “588 → ~152 ms … → ~54 ms”
+
+**REFUTED AS A TIMING BOUND · MEASURED — even the active component ratios are 0.262238 and 0.094115, not the bare shell ratios, and the pass contains setup/screens.** A valid cost expression is `Tnew=Tsetup+Σ_representatives cost(P,Q)+Treconstruction`; the ordinary full tensor still has **1,679,616** slots and must be filled if the existing consumer remains dense. Quotienting a loop does not quotient its writes, setup, or per-orbit component rotations for free. Gate a measured skeleton implementation against the whole-tensor/energy oracle before asserting seconds saved. The active orbit fractions themselves remain measured facts.
+
+#### 8 · Questions for ROUND 3
+
+- **Q7 (DEEPEN) · UNVERIFIED (implementation not timed):** Can a compact raw-SALC/block layout, avoiding the prototype's **244.8 ms** schedule preparation and dense-layout rotations, make one benzene Hessian cheaper INCLUDING its **22,394,880-MAC** raw adaptation? Gate cold and cached calls, all A/B sectors, roots and oscillator strengths against the unchanged worker.
+- **Q8 (LOCATE) · UNVERIFIED (skeleton loop absent):** On the verified **291-pair** active list, what are actual D₂h/D₆h representative `rInto` visits, contraction MACs, rotated component reconstruction writes and milliseconds? Does **10,966/42,486**, rather than the unscreened fraction, earn an ERI stage once reconstruction/setup are paid?
+- **Q9 (BROADEN) · UNVERIFIED (generator oracle not run):** For TiCl₄/GeCl₄ **55 AO**, the **87/120-AO** planned records and C₆₀ **300 AO**, does PySCF DF-J + exact K beat direct RHF while preserving required energy, density and response tolerances? Measure an auxiliary basis, κ, fitting error, RSS and a CPU time; do not call full exchange/RPA cubic.
+- **Q10 (DEEPEN) · UNVERIFIED (GPU/device test needed):** What symmetry subgroup survives a driven benzene density on each dispatch, and does subgroup-aware reconstruction improve dirty-frame timestamps after stabiliser deduplication and eight-way stores? Include T_d's **54,528** boundary voxels and failure controls with generic coherences.
+- **Q11 (LOCATE) · UNVERIFIED (record geometries/refit missing):** After the required COST refit, do the exact furan/pyridine C_s records and actual visit/cache-miss weights put the live symmetric workload above **60%**, below **25%**, or between? Build the real planned roster before replacing the conditional **12.30–16.50%** formula scenario.
+- **Q12 (BROADEN) · UNVERIFIED (reduced operator not assembled):** Can C₆₀'s **32-dimensional commutant**, with multiplicity matrices ≤3 for the scalar/radial-π representation, produce and name the two-edge-weight Hückel spectrum using the actual adjacency rather than characters alone, then expose what survives for the **300-AO** Fock/response spaces?
+
+#### 9 · NOT CERTIFIED
+
+- **UNVERIFIED (no GPU, browser or device launched).** D₂h, T_d, linear-group and oblique-grid scatter performance; signed/complex orbital reconstruction; state-dependent group selection; rgba16float/readback errors; trilinear ray-march differences; dirty-frame governor benefit; RTX 3070, M5/iPad and worker budgets. Grid numbers here are CPU orbit counts.
+- **UNVERIFIED (prototype only).** Production skeleton ERI time, cold block-SCF/Hessian integration, browser-worker JIT, partner-root and oscillator-strength agreement after suppressing measured ~1.4e−9 off-block coefficient amplitudes, and Cartesian d representation gates. Raw adaptation reduces arithmetic without yet winning the measured first-call bill.
+- **UNVERIFIED (model/inputs).** An exact planned-library symmetry-time census and RI-J crossover nAO: geometries/frames/charge variants, optional heavy basis/roster, measured fitting constants, workload frequencies and COST refit remain absent. The scenario interval is explicitly conditional.
+- **UNVERIFIED (C₆₀ scope).** The equal-1.4 Å feasibility fixture is not an experimental-geometry record, a stability minimum, a spectrum or a density-device certification. The successful direct CPU solve proves that a stored 64.8 GB ERI is unnecessary; it does not certify the library model or the R-L2 device gate.
+- **MEASURED (scope law).** `du -sh research` gave **33M**. DISK was NOT rebuilt: the user's explicit “do not modify other existing files” overrides the brief/skill's DISK and memory-write instructions. No commit, push, tag, server, browser or edit under lab occurred. The earlier ledger bytes are retained verbatim; this round is appended by a quoted bash heredoc.
+
+**Files written · MEASURED.**
+
+- `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md` — this append only.
+- `tools/symmetry/round2-sol.mjs` — new Node arithmetic, cube/geometry census, in-memory md telemetry, independent SAOs/raw SALCs, blocked RPA and imperfect-ring measurements. `--out` is required; optional `--raw`; JSON writes refuse overwrite.
+- `tools/symmetry/round2-sol-exact.py` — new SymPy ring identities, induced-representation arithmetic, ideal C₆₀ geometry and two-thread direct-RHF feasibility; optional `--algebra-only`; output is exclusively created.
+- `research/release-0.4.0/measure/quartets-round2-sol.json` — fresh output of the existing quartet tool, with its original outputs untouched.
+- `research/release-0.4.0/measure/round2-sol.json` — retained unscheduled prototype measurement (not a timing claim for the scheduled implementation).
+- `research/release-0.4.0/measure/round2-sol-validated.json` — first scheduled/active-orbit measurement.
+- `research/release-0.4.0/measure/round2-sol-final.json` — authoritative S-orthonormal scheduled measurement, full census/active counts, and imperfect-ring operator defects.
+- `research/release-0.4.0/measure/round2-sol-raw.json` — raw-SALC counter-experiment including cold schedule time.
+- `research/release-0.4.0/measure/round2-sol-algebra.json` — independently rerun exact symbolic/representation and geometry-build results, no SCF.
+- `research/release-0.4.0/measure/round2-sol-exact.json` — exact arithmetic plus the completed 300-AO direct CPU solve and its coordinates/time/RSS.
+
+#### 10 · Append-only arithmetic audit and closure
+
+**MEASURED · REFUTED (SOL's transcription, by independently recomputed quotients).** Q5's “29.597134%” is corrected to **100·10,947/36,985 = 29.598485872651%**. Q5's “7.746086” is corrected to **2/0.258195006021866 = 7.746083205926**. Q3's reduced storage is **64.883758544922 MiB** (64.884 MiB rounded to three decimals). These corrections change no decision threshold or integer count; gates should calculate the quotients from their integer inputs.
+
+**DERIVED-HERE · REFUTED (SOL's roster description, by 47=20+5+6+11+5).** In Q5, “seven other BIO names” must read **six**: Gly-Gly, N-methylacetamide, imidazole, indole, phosphoric acid, ribose. The JSON's actual 47 entries and weights are unaffected. The 47-instance roster includes glycine among the twenty amino acids and overlaps the current library; it is not 47 wholly new molecules.
+
+**MEASURED (Q6 table restated with unambiguous Markdown columns).** Here max-entry defects are not spectral-norm or eigenvalue-error bounds:
+
+| molecule | status | atom residual (bohr) | atom residual (Å) | maximum overlap entry defect | maximum Fock entry defect (Eh) |
+|---|---|---:|---:|---:|---:|
+| furan | MEASURED | 0.001006346795 | 0.000532535790 | 0.000148580519 | 0.000710740796 |
+| pyridine | MEASURED | 0.000832346684 | 0.000440458897 | 0.000139048915 | 0.000607000158 |
+
+**MEASURED.** The final byte-prefix gate preserves the original **37,575 bytes** and SHA-256 above; there is exactly one `## ROUND 2 · SOL — 2026-10-07` header. Both new script syntax checks pass; exact n=5/6/10 symbolic residual gates pass; the C₆₀ JSON asserts `converged=true` and `eriIsNone=true`. Q7–Q12 remain the six numbered questions for ROUND 3. A separate `research/release-0.4.0/HANDOFF.md` append appeared during this session; SOL's writes did not include that file.
+
+**NOT CERTIFIED · UNVERIFIED.** GPU/browser/device reconstruction and governor timing; cold production symmetry-SCF/ERI integration, response roots and oscillator strengths; auxiliary-basis errors/crossover; a geometry-complete planned census and refitted weights; experimental C₆₀ geometry, stability and density-device certification. No DISK regeneration is authorized under this turn's existing-file restriction.
+
+**Files written · MEASURED (final closure).** Append-only `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md`; new scripts `tools/symmetry/round2-sol.mjs`, `tools/symmetry/round2-sol-exact.py`; new JSONs `research/release-0.4.0/measure/quartets-round2-sol.json`, `research/release-0.4.0/measure/round2-sol.json`, `research/release-0.4.0/measure/round2-sol-validated.json`, `research/release-0.4.0/measure/round2-sol-final.json`, `research/release-0.4.0/measure/round2-sol-raw.json`, `research/release-0.4.0/measure/round2-sol-algebra.json`, `research/release-0.4.0/measure/round2-sol-exact.json`. No commit, push or tag.
+
 
 
 ---
@@ -20444,7 +20734,496 @@ Numbers or nothing: no claim without its tag.
 
 ---
 
-## <a id="doc-87"></a>DOC 87 · release-0.4.0/HANDOFF.md · 2026-10-07
+## <a id="doc-87"></a>DOC 87 · release-0.4.0/BRIEF-S2-CAMERA.md · 2026-10-07
+
+## λWAVES 0.4.0 · S2 THE CAMERA — BRIEF for the camera builder (waves from the next free number)
+
+**Written by Claude Sos (the fallback Major Agent), 2026-10-07, from `PLAN.md` the way Yan wrote the S0/S1 briefs.**
+The contract is `research/release-0.4.0/PLAN.md` §4 **F4** and the §6 row **S2** (read both first, then §9 RULINGS TAKEN:
+the lens shift stays, R-C1 = shift only, no target pivot). It runs AFTER S1 NAMES and S1′ `cameraEye` are merged:
+`cameraEye(obs, half)` is the one projection helper and already carries `shift` as zeros (`BRIEF-S1-CAMERAEYE.md`). Your
+job is to make that shift real. A fresh-context verifier follows you (PLAN §6: the camera uniform is the frame path).
+
+Josh, on the feature: *"the planet photo is a bit of an over explanation but that sounds like a cool feature."*
+
+### 0 · Laws
+
+Never edit `lab/mir/**` or `lab/fonts/**` (the CAMERA panel's kit-side half is **brief 2** to MIR, not an edit). After
+any `lab/` edit `node tests/pwa.test.mjs --write`, then the suites. Subtract, don't add: count `lab/*.js` lines before
+and after and report both. Diagnostics in `tools/`. The glass is Josh's. Three scopes: `obs.shift` is PROJECT, not a
+history row (it travels with the pose, `docs/STATE-SCOPES.md` l.40). Never `pkill -f`; kill by pid. Git only in your
+worktree; never push. **Ports `LW_PORT=8747 GD_PORT=5215`** (the verifier gets 8749/5217). The GPU is shared: one browser
+suite at a time. **This is the frame path:** the 208-value lock (`node tools/perf/digest-lock.mjs --check`, 96³; read the
+tool's header and REPORT wave 116 for the exact flags of the 208 and the 1004 runs) after every commit that touches
+`field.js`, a shader, `cameraEye` or the pointer maths; a red lock is re-run ALONE before it is believed (the RTX 3070's
+one-ulp fault in power state P5). REPORT.md waves under `## <date> · 0.4.0 S2 — THE CAMERA`.
+
+### 1 · ONE convention (this brief supersedes three lines of the plan)
+
+PLAN F4 states the shift three ways that disagree: the forward lane `fwd + 2·sx·tanH·aspect·right + …` (pivot at
+u = −2·sx), "the pivot appears at minus the shift", and zoom-to-cursor `shift' = c − (c − shift)·dist/dist'` (which is
+right only if the pivot appears AT the shift). Use this one instead; it is the same feature:
+
+- **`obs.shift = [px, py]` is where the pivot appears on screen, in uv** (uv = NDC: −1…1 across the frame, +y up).
+  Clamp each component to **[−1, 1]**: the pivot reaches the frame's edge and never leaves it (the plan's "±0.5" is the
+  same edge in its half-units). Positive `px` moves the molecule right. The kit pad (0.5.0) maps onto it 1:1.
+- **The law: a lens shift is the on-axis picture translated by `p` in NDC.** The view matrix and `cameraBasis` do not
+  change; only the principal point moves. So every pass gets the same one-line change:
+  - **ray pass** (`field.js` `writeView`, the forward lane `v[12..14]`): `fwd − px·tanH·aspect·right − py·tanH·up` — the
+    pixel at uv `u` then marches the on-axis ray of `u − p`. The ray pass normalises; the headlight follows the lane.
+  - **line pass** (`M_PERSP` in `writeView`): `perspective()` (`field.js` l.557) is column-major with `o[11] = −1`
+    (w = −z), so the principal-point entries are `o[8] = −px`, `o[9] = −py`: `x_clip += o[8]·z`, divided by `−z`, adds
+    `px` to the NDC. The FRAME-corner test in §3 confirms the sign on the GPU; the test wins over this line.
+  - **2-D overlays** (everything that asks `cameraEye`: `fieldview`, `keplerview`, `particles`, `vortex`, the atom labels,
+    the export camera): project as today, then add `(px·W/2, −py·H/2)` pixels. Put that in `cameraEye`'s consumer road
+    once (a `toScreen` beside the helper), never nine times.
+  - **pointer** (`pointerRay`, `unproject`): use `u − px`, `v − py` in place of `u`, `v`.
+- **At `p = [0, 0]` every byte is today's** (the lane is `fwd` exactly, the matrix entries are 0, the offset is 0), so the
+  lock holds by construction — prove it, do not assume it.
+- **Zoom to the cursor** keeps the point of the pivot plane under the hand still: with `c` the cursor (or the two-finger
+  centroid) in uv and `k = (dist · tanH) / (dist′ · tanH′)`, **`p′ = c − (c − p) · k`**, clamped. A wheel or pinch step
+  changes `dist` (`k = dist/dist′`); a FOV step changes `tanH` (`k = tanH/tanH′`); a keyboard step anchors at the
+  frame centre (`c = 0`). Derivation, for the REPORT: the pivot-plane point under uv `u` sits at `D·(u − p)·tanH·aspect`
+  from the axis; holding it fixed at `u = c` gives the line above.
+
+### 2 · The commits, in order (line numbers are on `bc103b3`; grep on yours, S1 moved them)
+
+#### K1 · THE SHIFT in the engine (frame path; lock after)
+
+- `obs.shift` read through `cameraEye` (`field.js` near `cameraBasis` l.614 / `cameraKey` l.630; `cameraKey` already
+  carries the shift to 4 decimals after S1′). `writeView` (l.1009–1036): the forward lane and the two `M_PERSP` entries.
+- The 2-D overlays' one offset (§1); `pointerRay` (`rack.js` l.3261) and `unproject` (l.3393, which already reuses
+  `pointerRay`).
+- A shift is **TIER.PRESENT only**: it never re-solves, re-reconstructs or re-uploads a volume.
+- `tests/camera-shift.test.mjs` (node, pure maths over `cameraEye` and the projection helpers): shift then RESET =
+  identity; `p = 0` gives today's lane and matrix bit-for-bit; the pivot projects to `p` through the line maths and
+  through the ray maths; clamp at ±1.
+
+#### K2 · THE HANDS
+
+- **Zoom to the cursor** through §1's line: the wheel (`lab/stage-gestures.js` l.111–116) and the pinch (l.72–75, anchor at
+  the centroid) call one `zoomAt(c, dist′)` in `lab/camera-law.js` beside `setDist` (l.153), so the ZOOM dial still has ONE
+  road (the comment at l.151–152 is the law). The ZOOM dial and the keys anchor at the centre.
+- **Pan:** Alt-drag on a mouse or trackpad (`startSpecial` in `rack.js` l.4659 takes Ctrl, the Kepler grab takes plain
+  and Shift, so Alt is free on the stage — verify `preventDefault` holds in Firefox and that this desktop's window manager
+  does not take Alt-drag; if it does, say so in REPORT and keep the keys and knobs as the road); a two-finger drag on touch
+  moves `p` by the centroid's delta beside the pinch; one pixel of drag moves the molecule one pixel
+  (`Δp = (2Δx/W, −2Δy/H)`). Wheel stays dolly.
+- **Keys:** an Alt+Arrow quartet in `lab/shortcuts.js` (step 0.05 uv; Shift = fine, the existing law) — check `AltLeft` /
+  `AltRight` in the reserved set at l.3 means "not bindable ALONE", not "never a modifier"; extend
+  `tests/keyboard-shortcuts.test.mjs` (no overlap with Q/E, WASD, Shift+Q/E, Ctrl+Shift+Q/E).
+- RESET VIEW, double-click and double-tap clear the shift (`resetView`, `camera-law.js` l.158: `CAM.HOME` gains
+  `shift: [0, 0]`).
+
+#### K3 · THE PANEL, THE SCOPE, THE LINK
+
+- CAMERA (`rack.js` ~l.1553–1565): **PAN X / PAN Y** knobs (bipolar −1…1, targets `observer.panx` / `observer.pany` beside
+  the yaw/pitch/dist/fov targets at l.2576–2587 and the target map at l.4853) and **PAN HOME**; the panel note gains one
+  sentence ("Alt-drag or two fingers slide the picture; the molecule stays the pivot"). No new window, tab or setting.
+- `docs/STATE-SCOPES.md` l.40's pose row gains `shift`. `serialize`/`restore` carry it; an older project without it opens
+  at 0. `node tools/new-project.mjs` regenerates the empty project ONLY because the pose default gained a field — say so —
+  then `--check`.
+- **The link carries the shot** (`lab/statelink.js`, its VERSION POLICY l.23–31: fields appended to the END of a section and
+  a new section do not bump v1): the CAM section (write l.289–293, read l.489–495) gains `shift` as two f32 after the
+  quaternion; **one new tag** (the next free byte after `NATIVE: 0x09`, l.92–93, with its `TAG_NAME`) carries the molecule:
+  `{library id (as a literal string — the name tables are frozen), basis, view, orbital}` with the orbital as S1's
+  `{group, irrep, count}` and the index as the fallback when a molecule has no names. Today a link made under MOLECULES
+  silently drops the molecule; after this, "1b₁ of water, framed in the gap" is one link. `tests/statelink.test.mjs`:
+  round-trip with a shift and a molecule; a link minted before this commit opens with shift 0; an old decoder's view (a
+  section longer than it knows) still reads the pose.
+
+### 3 · Acceptance (PLAN §6 row S2)
+
+- **Shift then RESET = identity** (pose bytes equal).
+- **The cursor-anchored point** is invariant to ≤ 0.5 px across a wheel step, a pinch step and a FOV step at a non-zero
+  shift (read back through `unproject`).
+- **One FRAME corner, one pixel:** at `p = (0.4, −0.3)`, a FRAME corner lands on the same pixel through the line pass, the
+  ray pass (a readback of the box edge) and `pointerRay`/`unproject` — the test that decides the matrix sign.
+- Alt-drag, two-finger, Alt+Arrow; zoom-to-cursor; the link tail round-trips.
+- **The 1004-value lock byte-identical at shift 0**, once at the end; the 208 per frame-path commit.
+- `node tools/new-project.mjs --check`; `bash test.sh node`; browser, one at a time on 8747/5215: `render-regressions`
+  (the scaled hit-test — the pointer maths moved), `frame-occlusion`, `keyboard-window`, `export3d`, `current`,
+  `new-project`, `history`.
+- **The device report** (`tools/perf/device-report.js`, its 30 s scene) before and after on the 3070, equal within its
+  own noise; the M5 half is one command for Josh, recorded "M5 pending".
+
+### 4 · What you do not do
+
+No target pivot (R-C1: built only if Josh, having tried the shift zoomed in, asks). No XY pad (0.5.0, brief 5). No edit
+of the kit's CAMERA panel code (brief 2). No new per-tick work: a still camera costs nothing new. No version bump, tag,
+CHANGELOG, deploy or push.
+
+### 5 · Hand-off
+
+`research/release-0.4.0/S2-CAMERA-BUILD.md`: the commits, the convention as built (with the sign the corner test chose),
+the lock runs (208 per commit, 1004 at the end), the device report pair, the gates with counts, `lab/*.js` lines before
+and after, and **two paragraphs for S5's KIT BRIEFS**: brief **2** (lens shift in the kit's CAMERA panel and the CSS port;
+the 3-D HOME resets the shift) and brief **1** (the 3-D camera law as a pure module, `zoomAt` and its invariant test
+included — the gift for NEBULA, POLAR and EARTH). Kill your gate server by pid. Final message: ten lines + worktree path
++ branch.
+
+### 6 · Harness
+
+Compound shell with variables, loops, heredocs or backticks may be refused: plain commands, scripts as files under
+`.tmp/`. If a command is refused, reshape it; never retry verbatim. Commit after each K; the session may end mid-wave and
+the next agent picks up from your branch.
+
+
+
+---
+
+## <a id="doc-88"></a>DOC 88 · release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md · 2026-10-07
+
+## λWAVES 0.4.0 · S3 STAGE TEXT + WINDOWS — BRIEF for the S3 builder (waves from the next free number)
+
+**Written by Claude Sos (the fallback Major Agent), 2026-10-07, from `PLAN.md` the way Yan wrote the S0/S1 briefs.**
+The contract is `research/release-0.4.0/PLAN.md` §4 **F2** (THE STAGE TEXT AND ITS FADE — the first taste of the
+INFORMATIONAL) and **F3** (THE WINDOWS), the §6 row **S3**, and §9 (every ruling takes its first option: R-W1 retire
+DYNAMICS as mapped, R-W2 the prose figure, R-W3 PLANE with CLIP, R-A2 ATOMS back as the periodic table). The map is
+`research/release-0.4.0/survey/LWAVES-AUDIT.md` (its 27-card table). It runs AFTER S1 NAMES and S1′ `cameraEye` are
+merged: the fade speaks the names (`lab/names.js` `forms()`), and the atom labels already go through `cameraEye` and
+write only on change. One builder, sequential commits: `rack.js` is shared by most of them, and writes stay
+single-threaded. No verifier stage (PLAN §6: one light check); Fable/Sos looks once.
+
+### 0 · Laws
+
+Never edit `lab/mir/**` or `lab/fonts/**`: the kit's notebook renderer (`lab/mir/shell/notebook-render.js`,
+`notebook-math.js`) is IMPORTED, never changed. After any `lab/` edit `node tests/pwa.test.mjs --write`, then the suites.
+**Subtract, don't add**: count `lab/*.js` lines before and after (35,135 on `bc103b3`, 113 files) — this stage must go
+DOWN (DYNAMICS alone is `dynamics.js` 338 + `dynamicsview.js` 131). Diagnostics in `tools/`. **The glass is Josh's**: a
+text or layout change never licenses a skin change; RADIATION's tile skin goes to CALCULUS ONLY (Josh asked for
+CALCULUS "like RADIATION"; METERS and WIGNER were not asked for). Three scopes (`docs/STATE-SCOPES.md`). Never
+`pkill -f`. Git only in your worktree; never push. **Ports `LW_PORT=8751 GD_PORT=5219`.** One browser suite at a time.
+REPORT.md waves under `## <date> · 0.4.0 S3 — STAGE TEXT + WINDOWS`. CLAUDE.md is updated in the same commit as any law
+it states (the STAGE FORMULA paragraph, the legacy list, the window names).
+
+### 1 · The commits, in order (line numbers on `bc103b3`; grep on yours)
+
+#### T1 · THE STAGE TEXT renders real maths (F2)
+
+- Cloud's plain-text formula (`rack.js` `placeMolFormula` ~l.2385, `registerText` ~l.2425, `stageTextTick` ~l.2434)
+  becomes markdown + KaTeX through the kit's notebook renderer, from `stateLatex` (`lab/latex-state.js`) for SPECTRUM's
+  states and a one-function TeX of the library formula for a molecule (`H_2O`, `C_6H_6`).
+- **The key is the string it would render**: build the string, compare with the last, touch the DOM only on change; KaTeX
+  runs at most four times a second; never a live coefficient in the string; no per-tick layout read (the placement reads
+  layout only on resize, transport move, or a changed string).
+- **The type scale** is the notebook's three sizes: formula = title, announcement = heading, atom label = body.
+- Name the interim renderer in a comment and in REPORT as the thing 0.5.0 deletes (`announce` → `layer.addLabel({ttl})`,
+  the formula → `layer.addBlock({md})`).
+
+#### T2 · THE FADE (F2)
+
+- `announce(md, ttl)` writes into the same node and fades after `ttl`; the formula returns after it.
+- Called **on hand presses only** by MO-REGISTRY's presets (`lab/orbitalsview.js` `ORB_PRESETS` l.71: `WINDING · 1e1g (a) +
+  (b)`, `HOMO + LUMO · 1b₁ + 4a₁` — the names from `forms()`), and SPECTRUM's presets. Never on restore, undo, redo,
+  project open, a link open, or a modulated preset; Ctrl+Z replays no banner. Thread a `{ hand: true }` (or the existing
+  user-gesture flag if one exists) from the press, rather than detecting "not a restore".
+- The palette and camera HUD announcing (R-I2) is NOT this stage (0.5.0, the kit's `addLabel`).
+
+#### T3 · ONE DISPLAY ROW + THE CAPTION IN CAPTURE (F2)
+
+- SETTINGS › DISPLAY (`rack.js` ~l.1302–1307): STAGE FORMULA + ATOM LABELS and their two SIZE knobs become ONE row,
+  **STAGE TEXT** (switch + SIZE). PREFERENCE keeps `molFormula` / `molFormulaSize`; `atomLabels` / `atomLabelsSize` are
+  read once (if a stored `atomLabels: false` exists with `molFormula` on, say in REPORT what you chose and why) and
+  dropped. The EDIT-menu toggle (~l.4008 "STAGE FORMULA on / off") follows the new name. `docs/STATE-SCOPES.md` and the
+  PREF set in `tests/new-project.test.mjs` change with it; `node tools/new-project.mjs --check`.
+- **The caption in capture**: one plain-Unicode line (`H₂O · 1b₁ HOMO · STO-3G`, or the SPECTRUM states line) drawn into
+  the capture overlay canvas (`lab/capture.js`) so a PNG, a loop and a video carry the name — the DOM formula never
+  reaches an export. Plain form from `forms()`; no KaTeX in a canvas. Brief 6 replaces it at 0.5.0.
+
+#### T4 · RETIRE DYNAMICS (F3, R-W1) — the big subtraction
+
+- L/T/V/S and its plot → SHADOW's footer; the moments and the virial → CALCULUS rows (they become tiles in T5); the dipole
+  lines → RADIATION; ACTION–ANGLE → gone (SPECTRUM is it).
+- **PARTICLES → a switch in VORTEX** (same j/ρ; today `particlesVisible = canPresent(wDyn)`, `rack.js` ~l.1017 — the
+  particles ride DYNAMICS' card); VORTEX's note calls it "the flow".
+- `RETIRED_WINDOWS` (`rack.js` l.329, today `{ style: 'observer' }`) gains `dynamics: 'shadow'` so saved layouts land.
+  Saved projects naming DYNAMICS open (the history and project suites prove it).
+- Delete `lab/dynamics.js`, `lab/dynamicsview.js` and every road to them (`may('dynamics')` ~l.1075, the card, the menus,
+  the targets). Report the lines that went.
+
+#### T5 · CALCULUS AS TILES + THE PROSE FIGURE (F3, R-W2)
+
+- The laws become tiles in a grid (two columns on the card, three floating), opted out of LEAN, with RADIATION's tile skin
+  (`lab/radiationview.js` is the model; copy its classes, never repaint either).
+- Every row gains `tex`. ⧉ copies **the prose figure**: a heading, then "Figure. ⟨ψ|ψ⟩ = 1.000 (d/dt = 0 to 1e-9); …",
+  related rows combined into sentences (the Ehrenfest pair as one), inline `$…$`, display `$$…$$` for the laws — which
+  pastes into the notebook and renders. `DIGESTS.calculus` (fixed in S0 to read `calculus.last`) is the source.
+- Test: the copy parses under KaTeX `throwOnError` (the `tests/latex-state.test.mjs` pattern) and a paste into the
+  notebook renders (browser, once).
+
+#### T6 · THE SMALL MOVES (F3)
+
+- **METERS**: the PERFORMANCE seg (`rack.js` ~l.2509) moves beside GOVERNOR in SETTINGS › QUALITY; the GOVERNOR readout
+  and FRAME PROFILE stay in METERS.
+- **Names, ids stable** (R-W3): SLICE (`wSlice`, ~l.2268) → **PLANE**; SLICE / CLIP (`wClip`, ~l.1265) → **CLIP**. Eyebrows,
+  titles, menu rows, notes, CLAUDE.md. Saved ids `slice` / `clip` unchanged.
+
+#### T7 · ATOMS RETURNS AS THE PERIODIC TABLE (F3, R-A2)
+
+- `wAtoms` (~l.2835, eyebrow `ATOMS · LEGACY` → `ATOMS`): its Z stepper becomes a grid of H–Kr cells grouped by period
+  (periods as columns on the card and on a phone, rows when floating), built with SPECTRUM's own button builder.
+- SPECTRUM's ATOM opens it (S0 wired the button); **it gets its own row in the "+" and WINDOW menus** (two hops through a
+  folded SPECTRUM is not a seat). Its readouts (Δ-SCF beside −ε, the quantum defect, the α-dependent order) stay.
+- `docs/LEGACY-WINDOWS.md` and CLAUDE.md's legacy paragraph drop ATOMS from the hidden list. H₂⁺, HELIUM, H₂,
+  ELECTROSTATICS and QCD stay hidden (decided at 0.5.0).
+
+### 2 · Acceptance (PLAN §6 row S3)
+
+No per-tick layout reads (FRAME PROFILE shows no new per-tick cost; say how you checked); KaTeX only on a changed
+string; WINDING and HOMO + LUMO fade with their names, on hand presses only (a test presses, then undoes, then opens a
+project: one banner, not three); one STAGE TEXT row; the caption in capture (a captured PNG's overlay carries the line);
+DYNAMICS retired with PARTICLES in VORTEX and a saved DYNAMICS layout landing on SHADOW; CALCULUS tiles + the prose
+figure; PERFORMANCE in QUALITY; PLANE / CLIP; ATOMS back with its table and its "+" row. `lab/*.js` lines DOWN.
+Gates: `bash test.sh node`; `node tools/new-project.mjs --check`; browser, one at a time on 8751/5219: `menubar`,
+`latex-copy`, `register`, `molecular-names`, `chem`, `history`, `new-project`, `first-run`, `frame-occlusion` (windows
+moved), `current`, `render-regressions`, and every suite that named DYNAMICS, SLICE or METERS' PERFORMANCE (grep
+`tests/`). No digest lock unless you touched `field.js`, a shader or the frame order (you should not).
+
+### 3 · What you do not do
+
+No new window, tab or setting beyond what §1 names. No kit edits (briefs 3, 4, 6, 7, 13 are S5's). No INFORMATIONAL layer,
+springs, leader lines, pages or film overlay (0.5.0). No skin change outside CALCULUS taking RADIATION's tiles. No
+version bump, tag, CHANGELOG, deploy or push.
+
+### 4 · Hand-off
+
+`research/release-0.4.0/S3-BUILD.md`: the commits, the gates with counts, `lab/*.js` lines before and after (per commit
+for T4), the open items, and the KIT BRIEF notes S5 needs (the interim renderer's API as built, for brief 13 / 7; the
+CALCULUS grid and the ATOMS cells, for brief 4). Kill your gate server by pid. Final message: ten lines + worktree path
++ branch.
+
+### 5 · Harness
+
+Compound shell with variables, loops, heredocs or backticks may be refused: plain commands, scripts as files under
+`.tmp/`. If a command is refused, reshape it; never retry verbatim. Commit after each T; the session may end mid-wave and
+the next agent picks up from your branch.
+
+
+
+---
+
+## <a id="doc-89"></a>DOC 89 · release-0.4.0/BRIEF-S4-LIBRARY.md · 2026-10-07
+
+## λWAVES 0.4.0 · S4 THE LIBRARY a / b / c — BRIEFS for three builders (and two verifiers)
+
+**Written by Claude Sos (the fallback Major Agent), 2026-10-07, from `PLAN.md` the way Yan wrote the S0/S1 briefs.**
+The contract is `research/release-0.4.0/PLAN.md` §3 **B2** (LIBRARY, the fourth storage class, and the data cache), §4
+**F5** (THE LIBRARY as expansions), the §6 row **S4**, and **§10's numbers, which are the sizing** — read §10 before
+anything else here: N1 (the AO wall opens: the 3070 grants a 32 KiB workgroup), N2 (records GATE, they do not merely
+accelerate; **the 52-record starter is NOT shipped**; the live cap stays benzene; `COST` is refit), N3 (R-L2 = YES:
+C₆₀'s HOMO/LUMO in 0.4.0 through the orbital-only path with shell screening). The method and the record are the names
+plan, `research/molecular-orbitals-2026-10-01/NAMES-AND-CACHE-PLAN.md` §4 (the record) and §6 (the cache), and Sol's
+booster plan (`~/Documents/LAMBDAWAVES/research/molecular-orbitals-2026-09-29/PLAN.md`, `CACHE-BUDGET.md`,
+`DISTRIBUTION.md` — untracked in Josh's root checkout; read them by absolute path, never copy or commit them).
+
+**Order.** S4a first (the proof and the store; a verifier: worker + storage). Then **S4b ∥ S4c** in their own worktrees
+from the S4a-merged tree (disjoint files: S4b owns `chemview.js`'s picker, `lab/library/**`, `tools/orbital-library.mjs`'s
+entries; S4c owns `field.js`, `gpu-boot.js`, the kernel and VALENCE). S4c ends in a verifier (the kernel). Every stage
+starts from a tree where S1 NAMES is merged: a record carries its names.
+
+### 0 · Laws (all three)
+
+Never edit `lab/mir/**` or `lab/fonts/**`. After any `lab/` edit `node tests/pwa.test.mjs --write`, then the suites
+(`lab/sw.js`'s list is generated; its §2 code is edited deliberately, once, and said in REPORT). Subtract, don't add:
+count `lab/*.js` lines before and after. **Diagnostics in `tools/`, never `lab/`.** The glass is Josh's. Three scopes +
+LIBRARY (S4a writes the row). Never `pkill -f`. Git only in your worktree; never push. One browser suite at a time; the
+digest lock is re-run ALONE before a red is believed (the RTX 3070's one-ulp P5 fault). **Never a second solve road;
+never a record that fails validation; never a disabled row where a download would do** (PLAN F5). Ports: **S4a
+8753/5221 · its verifier 8755/5223 · S4b 8757/5225 · S4c 8759/5227 · its verifier 8761/5229.** REPORT.md waves under
+`## <date> · 0.4.0 S4<a|b|c> — …`.
+
+---
+
+### S4a · THE PROOF AND THE STORE
+
+**The scope (B2).** Installed records are device content, content-addressed, never in a project, a link or a history row.
+A project holds `{ id, hash, nameKey }`: PROJECT, one history row per change of molecule. `docs/STATE-SCOPES.md` gains
+the LIBRARY row; `tests/new-project.test.mjs`'s scope sets learn it.
+
+**Where records live.** `lab/library/<sha>.json` plus the section manifests: deployed, **NOT precached**. `sw.js` routes
+`library/` cache-first into `lw-data-v1`; the names are content hashes, so a new build never clears it.
+`tests/pwa.test.mjs` exempts exactly `library/**` and asserts every manifest row's file exists with its hash. Write the
+exemption as ONE rule the 0.5.0 kit-file policy can extend ("precache what a root reaches", PLAN §10 N4) — do not build
+the kit policy now.
+
+**The record path.** A worker op `chem.open(record)` (`lab/mathworker.js`, beside `ensureSolve` l.212) fills the solve
+cache from the record and replies with `ensureSolve`'s own `ground` shape, so no window downstream changes. Each record
+states `caps { orbitals, states, rpa, tdhf }`: ORBITAL needs ε and C; STATES needs the stored CIS states; RPA sticks are
+stored; TDHF needs the live ERI and past the cap is refused with a sentence. A project or link that names an
+uninstalled record fetches it on open, progress and failure said in the row; offline, the open restores the rest and
+names the part that refused. The schema is versioned (`schema: 1`); readers ignore unknown members.
+
+**The benzene-cap law** (`lab/molecules.js` l.25–28). A record past the live cap opens only from its record; absent, its
+row says DOWNLOAD, not DISABLED; a basis or charge change on it is refused with a sentence, not a solve.
+
+**The iPad law.** `navigator.storage.persist()` is asked on the user's first INSTALL press, never at boot (Firefox
+prompts); the quota and the persisted answer are shown; an evicted record degrades to "not installed", never a broken
+preset. In a Safari tab, KEEP ON THIS DEVICE is NOT offered until the M5 measures persist granted (M5 pending: write the
+one command for Josh into REPORT and `measure/MEASURE.md`).
+
+**`COST` refit (N2).** Refit `COST` (`molecules.js` l.382, `predictMs` l.414) from the measured rows in
+`research/release-0.4.0/measure/` (benzene, C₂H₄/6-31+G*, naphthalene); move the "~9.6 s" text that
+`tests/chem.browser-test.mjs` pins and `chemview.js` l.9 states. The live cap stays benzene (`CAP_MS`, l.467–470).
+
+**The generator is the app.** `tools/orbital-library.mjs` runs the shipped solver in node and writes the record;
+`--check` is byte-exact (the `tools/new-project.mjs` pattern). **Benzene's record is the proof**: Sol's native booster
+record + S1's names + the STEM fields + its page (`moleculeLatex`). Before S4c touches the kernel: **benzene and one
+64-AO fixture join the digest lock on the base tree** (its only molecular fixture today is water, tier 0), so "the ≤ 64
+tiers are untouched" becomes provable.
+
+**Acceptance.** Cached = fresh on energies, occupations, signed fields, canonical subspaces and names; **zero solver calls
+on open** (count them); `library/**` the one precache exemption; benzene + the 64-AO fixture in the lock; the LIBRARY
+scope row; DOWNLOAD (never DISABLED) on an absent record; offline open names what refused; `node tools/new-project.mjs
+--check`. Browser on 8753/5221: `chem`, `molecular-names`, `register`, `history`, `new-project`, `offer`, and a new
+`library` suite (install → open offline → evict → "not installed"). Then **a fresh verifier** (worker + storage) on
+8755/5223 with this section as its contract.
+
+---
+
+### S4b · THE SECTIONS AS CONTENT, BEHIND THE GATE
+
+**The picker.** A page turner `‹ SECTION ›` above the existing `<select>` in MOLECULES (`lab/chemview.js`), which then
+holds one section (about 25 rows); search is 0.5.0's FLY-TO. **The expansion seat** is each section's header row: name,
+record count, bytes, an installed lamp, INSTALL / REMOVE. No new tab (the fourth named exception to "nothing new in the
+interface": Josh asked for expansions by name).
+
+**The sections, diverse rather than variants** (Josh: *"Don't try to go for too many variations of the same molecule, try
+to be as diverse as possible."*; R-L1 first option): DIATOMICS · HYDRIDES · ORGANIC · **BIO** (the twenty amino acids as a
+family — sixteen ≤ 64 AO now, Phe, Arg, Tyr, Trp after S4c; the five nucleobases 44–60; Gly-Gly 57; N-methylacetamide,
+imidazole, indole, phosphoric acid, ribose) · **LATTICE** (finite clusters only, the solver has no k-points: LiH/LiF/MgO
+cubes, Na₂Cl₂, the ice hexamer and cube, cubane, neopentane, naphthalene, Si₅H₁₂; Na₄Cl₄ after S4c) · **HEAVY** (KrF₂, SeO₂,
+KBr, GeCl₄, TiCl₄; the d-block "try it and let the stability probe decide"; R-L6 first option: **if the vendored BSE
+record (`lab/vendor/bse/`) carries STO-3G to Z = 54**, widen to HI, CH₃I, XeF₂, XeF₄, I₂, labelled MODEL — all-electron
+minimal basis, no relativity; if it does not, say so and stop at Kr).
+
+**The diversity gate with a FAMILY allowance**, enforced mechanically by `tools/orbital-library.mjs --check`: an entry
+passes if its formula is unique AND it adds a new element, a new point group, or a tag from the fixed motif list (ring
+size, peptide bond, d-block, cluster, cage, nucleobase) — OR it belongs to a declared family (the amino acids, the
+nucleobases). Leu and Ile share a formula; the family keeps both and the record says so.
+
+**The STEM fields per record** (R-L4 first option): formula, point group and frame, mass, charge and multiplicity, dipole,
+HOMO–LUMO gap, geometry source, InChIKey and PubChem CID (open; not CAS), a two-line blurb, the curated IEs (where they
+exist; NIST CCCBDB = SRD 101 — the legal reading against `LEGAL-PROVENANCE` precedes any store build, say so in
+REPORT), and the sources. Bases: STO-3G, plus 6-31+G* for the anchors only; the name is the join key.
+
+**Sizing first.** Every entry needs a stated geometry source and a PySCF oracle energy (`~/bin/scipython`, PySCF 2.14, on
+the vendored decimals — `tools/symmetry/pyscf-symm-oracle.py` shows the pinned-basis road). **Build three end to end
+first — alanine, Li₄F₄, TiCl₄ — time them (generator ms, record bytes, open ms), put the table in REPORT, then size the
+sections from it.** Records past 64 AO are generated now and draw after S4c's tier lands.
+
+**Acceptance.** The three timed; every shipped record passes the gate and `--check`; the page turner + the headers;
+INSTALL / REMOVE / DOWNLOAD behave per S4a's laws; total library bytes and per-section bytes in REPORT. Browser on
+8757/5225: `chem`, `molecular-names`, `library`, `menubar`, `new-project`. No verifier (content behind a verified road).
+
+---
+
+### S4c · THE ENGINE UPGRADES
+
+**(i) The density wall.** The χ tile lives in workgroup memory: cap × 64 × 4 B = 16 KiB at cap 64 (`lab/field.js`
+`MOL_CAPS = [16, 40, MAX_MOL_AO]` l.677, `MAX_MOL_AO = 64` l.672 — "the shader's var<function> array<f32, 64>"). Add one
+tier, **cap 128**. N1: `lab/gpu-boot.js` `requestGpu()` (l.25–41) asks only for texture dimensions in `want`; add
+`maxComputeWorkgroupStorageSize: 32768` where the adapter reports ≥ 32768, and where it is refused (the M5 is the assumed
+case until measured) build that tier with a **workgroup of 32**. Records then reconstruct Phe–Trp (71–87), adamantane,
+Na₄Cl₄, B₁₂H₁₂²⁻, caffeine, DMT, the base pairs (99–106), C₂₀H₂₀ (120), the carbonyls and ferrocene. The dense ERI (458 MB
+at 87 AO) is the generator's, never a live solve's.
+
+**(ii) The orbital-only path, no tile** (N3, R-L2 = YES). An orbital is Σ c_μ χ_μ, O(nAO), accumulated shell by shell
+with shells screened at 1e-10 and a small reduction — the ORBITAL kind at any AO count (`field.js` ~l.1472 already sizes
+`orbital` as `n`, not `n²`). **C₆₀'s HOMO and LUMO draw in 0.4.0 from a PySCF coefficient record** (300 AO; N3 measured
+12.0 ms plain, 3.2–3.6 ms screened at 96³ — the reconstruct runs once per change, never per frame). The density, the
+I_h names and the grid-record road are 0.4.1 BUCKYBALL. `tools/perf/orbital-dispatch.mjs` is the measuring harness to
+reuse.
+
+**(iii) VALENCE** = `D − 2 Σ_core C_c C_cᵀ`, formed in f64 and drawn by the existing density kind, as a **switch on
+DENSITY** (not a fourth VIEW segment: the row is at the hand law's width), the core count from S1's `coreCount(atoms)`,
+so the heavy-atom core no longer drowns the valence.
+
+**Also:** the `field.js` comment that says Firefox's timestamp queries are zeroed is stale (MEASURE.md: they are real
+now) — fix the comment. The live cap moves only if the refit `COST` says a ≤ 64-AO solve now fits the cap (it should not;
+§10 N2).
+
+**Acceptance.** An 87-AO and a 120-AO record reconstruct (against the generator's f64 density at sampled voxels, to the
+rgba16float precision); VALENCE; C₆₀'s HOMO and LUMO draw from the record (screenshot + a sampled-voxel check against
+PySCF's orbital at the same points); **the 1004-value lock green** (the ≤ 64 tiers byte-identical, on the fixtures S4a
+added); the device report (`tools/perf/device-report.js`, 30 s scene) within the governor's tier on the 3070 (M5
+pending). Browser on 8759/5227: `chem`, `molecular-names`, `render-regressions`, `current`, `export3d`. Then **a fresh
+verifier** (the kernel) on 8761/5229.
+
+---
+
+### Hand-off (each builder)
+
+`research/release-0.4.0/S4<a|b|c>-BUILD.md`: the commits, the gates with counts, the numbers (bytes, ms, the lock runs),
+`lab/*.js` lines before and after, open items, and the KIT BRIEF notes for S5 (S4b: the section header and the cells
+filter — brief 4; S4c: nothing for the kit, the engine is λWAVES'). Kill your gate server by pid. Final message: ten
+lines + worktree path + branch.
+
+### Harness
+
+Compound shell with variables, loops, heredocs or backticks may be refused: plain commands, scripts as files under
+`.tmp/`. If a command is refused, reshape it; never retry verbatim. Commit after each piece; a session may end mid-wave
+and the next agent picks up from your branch.
+
+
+
+---
+
+## <a id="doc-90"></a>DOC 90 · release-0.4.0/BRIEF-S5-KIT-BRIEFS.md · 2026-10-07
+
+## λWAVES 0.4.0 · S5 THE KIT BRIEFS — BRIEF for the writer (no code)
+
+**Written by Claude Sos (the fallback Major Agent), 2026-10-07, from `PLAN.md` §5 and §6 row S5.** 0.4.0's deliverable to
+the MIR session: one file, `research/release-0.4.0/KIT-BRIEFS.md`, mirrored to the vault as `LAMBDAWAVES CLAUDE KIT
+BRIEFS FOR MIR <date>.md` (house naming; add, never edit another author's note). **λWAVES never touches MIR**: these are
+requests with acceptance, not patches. Done when (PLAN §6): each brief has acceptance and a consuming λWAVES port; brief 8
+is first; the MIR session has them before the `1.5.0` cut. A Sonnet writer is enough; the Major Agent reads it once.
+
+### Sources (read all; quote by file and line)
+
+PLAN.md §5 (the list) and §2 (engine / kit / content); `docs/MIR-1.5-CANARY.md` + PLAN §10 N4 (the canary's seams and
+its **three missing ADOPTING-1.5 guide entries**: default BPM 30, the Shift step `.01·keyFine`, kit strings through `tx()`);
+every stage hand-off that exists when you start — `S0-BUILD.md` (the kit's LINKED refusal reading a closed editor as "no
+sources"; Jet Black as `lab/palette-app.js` until the kit carries it; the paint gesture `lab/paint-stroke.js`),
+`S1-NAMES-BUILD.md`, `S1-CAMERAEYE-BUILD.md`, `S2-CAMERA-BUILD.md` (its two paragraphs for briefs 2 and 1),
+`S3-BUILD.md` (the interim stage-text API for 13 / 7; the CALCULUS grid and ATOMS cells for 4), `S4b-BUILD.md` (the
+section header and the cells filter for 4); `survey/MIR-1.5.md` (what the kit already has — do not ask for what exists);
+`~/Documents/MIR/PROMPT.md` and the 1.5 pin's ADOPTING guide (`~/Documents/MIR/.claude/worktrees/mir-1.5-pin`, read only).
+A stage not yet built gets its brief from the PLAN alone, marked "not yet exercised by λWAVES".
+
+### The briefs, in this order (PLAN §5)
+
+**8** `paintedSpace({rack, layer, extra})` + `subscribe(fn)` fired on window move, scroll, open and close, even while
+paused — FIRST, the adoption blocker (the frame/axis mask needs painted surfaces, not whole rects; `lab/rack.js`
+`refreshOcclusion()` and CLAUDE.md's occlusion paragraph are the consumer) · **2** lens shift in the CAMERA panel + the CSS
+port; the 3-D HOME resets the shift · **3** `rack.register({ md })` + TO NOTEBOOK + PIN FROM WINDOW · **4** the `cells` grid
+control (periodic, (l, n), sections; vertical on phones; a second mount as a filter) · **5** `createLattice` exported from
+the XY pad, the eight tokens, the inlay list · **6** `recorder.overlay(i, ctx)` · **7** `addLabel({ttl})`,
+`layer.setCheap(on)`, `html[data-take]`, TAKE MODE's switch delegated to the app's DISPLAY · **9′** STATUS TAGS never hides
+`[data-mir-offer]` · **13** the INFORMATIONAL rack window, its switch delegated to the app's settings, movable labels
+(`setEdit`) · **live-bound math labels** (`{{state}}`, `{{E}}`, `{{T}}` from `params.get()`) · **P** the paint gesture as a
+kit gesture · **J** `jetblack` + `flat` + the gate exemption in the 1.5 catalogue, for the big four · **1** the 3-D camera
+law as a pure module (λWAVES' numbers and tests, zoom-to-cursor included) — a gift for NEBULA, POLAR and EARTH, not a
+0.5.0 dependency · plus **the LINKED refusal** (S0-BUILD's first open item) and **the three missing guide entries** (N4).
+
+### Each brief's shape
+
+Title and number · the need in one paragraph, with Josh's words where he said it · the proposed API (signatures, events,
+the token names) · **acceptance a kit test can assert** · **the λWAVES port that consumes it** (file and function, and
+the app code it deletes on adoption, with line counts) · what λWAVES does until it lands (the interim) · risk to BASINS
+(Josh's rule: "prefer BASINS" for what BASINS designed; λWAVES' design wins for what it originated — the modulation
+controller, the 3-D camera, the notebook, the history ring, the three scopes, the keyboard window).
+
+### Laws
+
+No edit anywhere under `~/Documents/MIR` or `lab/mir/**`. No code. Git only in your worktree; commit the file; never push.
+The vault mirror is a copy written once at the end.
+
+
+
+---
+
+## <a id="doc-91"></a>DOC 91 · release-0.4.0/HANDOFF.md · 2026-10-07
 
 ## START HERE — the λWAVES handoff from Claude Yan (Major Agent, 2026-10-07)
 
@@ -20483,6 +21262,44 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 | the previous memory (may not exist for you) | `~/.claude/projects/-home-joshua-hosain/memory/lambdawaves-lab.md` + `MEMORY.md` — if present, read the last six paragraphs of the lab file |
 
 ### 2 · The state on 2026-10-07 (evening)
+
+> **UPDATE 2026-10-07 ~17:15 — Claude Sos took the baton** (the fallback Major Agent on Josh's second account; Josh:
+> *"'Claude Yan' is the first; this is her work, you are the fallback when usage gets rough"*). Yan's session ended with
+> both in-flight agents dead (files last written 15:18–15:20). What Sos found and did:
+> - **The line moved to branch `sos-s0`**, worktree `~/Documents/LAMBDAWAVES/.claude/worktrees/sos-s0`, a fast-forward
+>   of `release-0.4.0` (d5b9d1d). The permission guard refused merging inside Yan's locked worktree
+>   (`optimization-2026-09-24`), so the local `release-0.4.0` still points at d5b9d1d. Fast-forward it to `sos-s0` from a
+>   worktree that has it checked out (`git merge --ff-only sos-s0`) or push `sos-s0:release-0.4.0`.
+> - **S0-A rescued — DONE.** The builder had committed C1–C5 (to `eaecf5e`) and written C6 (three demos) and
+>   `S0-BUILD.md` without committing. Merged as `9090665`; C6 = `bff9057`; S0-BUILD.md = `767ab6e` (its placeholders
+>   filled with the recovery facts). Re-checked: `pwa`, `new-project --check`, `mir-manifest`, `bash test.sh node` green.
+>   **The builder's §4 browser light check never ran** — the verifier's full gate is the first run.
+> - **S1″ Sol thread Round 1 rescued — DONE** (`bc103b3`): ledger + `tools/symmetry/{unique-quartets.mjs,pyscf-symm-oracle.py}`
+>   + `measure/{quartets.json,pyscf-symm-oracle.json}`; the census re-run on the merged tree gave identical counts;
+>   DISK rebuilt (102 documents).
+> - **S0-V launched** (fresh Opus, own worktree, ports 8745/5213) on `bc103b3`; **Sol Round 2 launched** (Codex xhigh,
+>   in the `sos-s0` worktree, appends `## ROUND 2 · SOL` to the ledger, uncommitted until Sos commits it).
+> - A stale gate server from the dead builder (python, port 8731) is still running; the guard refused killing it. Use
+>   other ports or ask Josh to stop it.
+> - **S0-V DONE** (`e0d619f`, merged `eaf375b`): 23/24 browser suites green on the first full run; one BLOCKER (a stale
+>   `official-defaults-palette` assertion vs C3's MOLECULES `Aa` law) and one SHOULD (the LINKED wording) fixed by Sos in
+>   `ad9e8a0`, both suites re-run alone green. **Fit to cut: YES.**
+> - **v0.3.3-alpha CUT LOCALLY, NOT LIVE:** version line `9504700` (tag `v0.3.3-alpha`, annotated), CHANGELOG `eb3a132`,
+>   snapshot #15 in `~/Documents/LAMBDAWAVES-RELEASES/v0.3.3-alpha`, `dist/` built and verified (206 files, 5.23 MiB). The
+>   permission guard refused the push of `main`/`dev` as a production deploy. **Josh's ruling, 2026-10-07: "we don't have
+>   to push anything to live cloudflare or Github until the entire plan as run it's course, which is an extremely long
+>   plan."** So nothing is pushed, deployed or released until 0.4.0's plan is finished (this supersedes the HANDOFF §3.2
+>   "cut and go live" step; `sos-s0` was pushed once as a backup before the ruling). The road when that day comes, from
+>   the `sos-s0` worktree:
+>   `git push origin sos-s0 sos-s0:release-0.4.0 sos-s0:dev sos-s0:main --follow-tags` ·
+>   `npx wrangler deploy --env=""` · `gh release create v0.3.3-alpha --generate-notes --prerelease` ·
+>   `curl -s https://lambdawaves.magic-commons.com/rack.js | grep -o "BUILD_LINE = '[^']*'"`.
+> - **Briefs written for the rest of the road:** `BRIEF-S2-CAMERA.md` (one shift convention fixing PLAN F4's three
+>   disagreeing formulas), `BRIEF-S3-STAGE-AND-WINDOWS.md`, `BRIEF-S4-LIBRARY.md` (a/b/c), `BRIEF-S5-KIT-BRIEFS.md`.
+> - **Sol Round 2** (Codex task `task-muyncqpn-zablm5`, gpt-6.1-sol at xhigh) was still writing when this was recorded;
+>   its files are uncommitted in the `sos-s0` worktree (`tools/symmetry/round2-sol*`, `measure/*round2-sol*`). Josh:
+>   Sol 6.1 sits between Sonnet and Opus — re-run its headline numbers before the SYNTHESIS banks them.
+> The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
   paint gesture, SPECTRUM folds, Jet Black landed by a direct edit of `lab/mir/palette.js` with a FORGED
@@ -20608,7 +21425,7 @@ from the root checkout — Josh's call, it is his checkout).
 
 ---
 
-## <a id="doc-88"></a>DOC 88 · release-0.4.0/measure/MEASURE.md · 2026-10-07
+## <a id="doc-92"></a>DOC 92 · release-0.4.0/measure/MEASURE.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S0 MEASURE: the three numbers
 
@@ -20844,7 +21661,7 @@ node re-time needs no server.
 
 ---
 
-## <a id="doc-89"></a>DOC 89 · release-0.4.0/NACRE.md · 2026-10-07
+## <a id="doc-93"></a>DOC 93 · release-0.4.0/NACRE.md · 2026-10-07
 
 ## 0.4.0 · NACRE PLANNING — the common file every planner reads first
 
@@ -20957,7 +21774,7 @@ with internet research (`DESIGN BOOSTER.md` in the vault). Josh sees DRAFT 3 and
 
 ---
 
-## <a id="doc-90"></a>DOC 90 · release-0.4.0/PLAN-DRAFT-0.md · 2026-10-07
+## <a id="doc-94"></a>DOC 94 · release-0.4.0/PLAN-DRAFT-0.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 0 (Fable's pre-draft, 2026-10-07)
 
@@ -21190,7 +22007,7 @@ ten molecules in STO-3G with s and p only. Sol's pack delivery (Drive, R2) stand
 
 ---
 
-## <a id="doc-91"></a>DOC 91 · release-0.4.0/PLAN-DRAFT-1.md · 2026-10-07
+## <a id="doc-95"></a>DOC 95 · release-0.4.0/PLAN-DRAFT-1.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 1 (Fable, after Sonnet's review, 2026-10-07)
 
@@ -21483,7 +22300,7 @@ content beyond its title and description is unknown.
 
 ---
 
-## <a id="doc-92"></a>DOC 92 · release-0.4.0/PLAN-DRAFT-2.md · 2026-10-07
+## <a id="doc-96"></a>DOC 96 · release-0.4.0/PLAN-DRAFT-2.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 2 (Opus's edit of draft 1, synthesised by Fable, 2026-10-07)
 
@@ -21995,7 +22812,7 @@ Nothing else new is built in 0.4.0's interface.
 
 ---
 
-## <a id="doc-93"></a>DOC 93 · release-0.4.0/PLAN-DRAFT-3.md · 2026-10-07
+## <a id="doc-97"></a>DOC 97 · release-0.4.0/PLAN-DRAFT-3.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
 
@@ -22413,7 +23230,7 @@ and description is unknown.
 
 ---
 
-## <a id="doc-94"></a>DOC 94 · release-0.4.0/PLAN.md · 2026-10-07
+## <a id="doc-98"></a>DOC 98 · release-0.4.0/PLAN.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
 
@@ -22872,7 +23689,7 @@ and description is unknown.
 
 ---
 
-## <a id="doc-95"></a>DOC 95 · release-0.4.0/REVIEW-SONNET-0.md · 2026-10-07
+## <a id="doc-99"></a>DOC 99 · release-0.4.0/REVIEW-SONNET-0.md · 2026-10-07
 
 ## REVIEW-SONNET-0 · first reviewer of PLAN-DRAFT-0 (Sonnet 5.5, 2026-10-07)
 
@@ -23057,7 +23874,7 @@ General: every 0.4.0 feature should be reachable through three doors the reader 
 
 ---
 
-## <a id="doc-96"></a>DOC 96 · release-0.4.0/REVIEW-SONNET-2.md · 2026-10-07
+## <a id="doc-100"></a>DOC 100 · release-0.4.0/REVIEW-SONNET-2.md · 2026-10-07
 
 ## REVIEW-SONNET-2 · the junior's two cents on PLAN-DRAFT-2 (Sonnet 5.5, high effort, 2026-10-07)
 
@@ -23278,7 +24095,7 @@ Three lines for the top of Josh's note:
 
 ---
 
-## <a id="doc-97"></a>DOC 97 · release-0.4.0/S0-BUILD.md · 2026-10-07
+## <a id="doc-101"></a>DOC 101 · release-0.4.0/S0-BUILD.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S0 THE TAKE-IN — what the tree builder built (waves 136–139)
 
@@ -23293,7 +24110,7 @@ every commit below is on top of it, in the brief's order. Nothing was pushed, ta
 3. Under a molecule EDIT › COPY now copies the molecule's page (`moleculeLatex`: formula, RHF/basis, E, the ε ladder with HOMO/LUMO by index).
 4. `.mol-more` is a fold (open on desktop, folded on phone/tablet, saved in the card's WORKSPACE record); MOLECULES' `Aa` shows with HELP off; ATOM brings ATOMS back, QUARKONIUM's button is hidden.
 5. Cheap bugs fixed with a test each: CALCULUS ⧉ copies its rows; STATUS TAGS tick with METERS closed; WIGNER/RADIATION stand down under MOLECULES.
-6. LINKED: REPRODUCED. Editor closed + nothing routed → the kit refuses the modulation play; the 1 s retry left a stopped transport for up to a second when the editor opened (353 ms measured). Fixed: opening the editor re-arms the link (46 ms / 33 ms).
+6. LINKED: REPRODUCED. Editor closed + nothing routed → the kit refuses the modulation play; the 1 s retry left a stopped transport for up to a second when the editor opened (353 ms measured). Fixed only that stall: opening the editor re-arms the link (46 ms / 33 ms). Josh's symptom itself stands — at a fresh start or after NEW, with the editor closed and nothing routed, Space plays the field and the kit refuses the modulation clock (`nothing-to-run`, MIR's law; a KIT BRIEF). (Wording corrected by Claude Sos after the release verifier's SHOULD 1.)
 7. KaTeX and marked load from the kit's `lab/mir/shell/vendor/`; the duplicate is deleted (27 files, 602 870 B off the deploy). Precache 207 files / 4 899 078 B → 182 / 4 607 101 B (−291 977 B); 185 after the demos.
 8. `tests/mir-manifest.test.mjs` pins the manifest's sha-256 per accepted version; the `28fe445` forgery fails ("names MIR 1.4.4, which is not an accepted adoption"), and so does a copy relabelled 1.4.3.
 9. Three demos made by the app — WATER, BENZENE, N₂ — each opening with MOLECULES on its HOMO, a notebook, and the visitor's settings untouched.
@@ -23360,7 +24177,7 @@ The pinned 1.4.3 manifest: `a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f2897
 
 ### The LINKED verdict
 
-**Reproduced on this tree, fixed in place, guarded.** A real Space (the driver's key) at five starts:
+**Reproduced on this tree; the editor-open stall fixed in place and guarded; the fresh-start symptom stands (the kit's refusal, below).** A real Space (the driver's key) at five starts:
 
 | start | field | modulation |
 |---|---|---|
@@ -23399,7 +24216,158 @@ and a second Space pauses both. The clocks become one at 0.5.0 (PLAN §3 B0).
 
 ---
 
-## <a id="doc-98"></a>DOC 98 · release-0.4.0/survey/LWAVES-AUDIT.md · 2026-10-07
+## <a id="doc-102"></a>DOC 102 · release-0.4.0/S0-VERIFY.md · 2026-10-07
+
+## λWAVES 0.4.0 · S0 VERIFY — the release verifier's report on the merged S0 tree
+
+Written by the S0 release verifier (fresh eyes, no part in the build), 2026-10-07, against `BRIEF-S0-VERIFY.md`, the
+contract `BRIEF-S0.md` (C1–C6) and `PLAN.md` §3 B0 / §6 S0. **Tree verified: `bc103b3`** (= S0 tip `767ab6e` + the
+research-only Sol commit; `git diff 767ab6e bc103b3 -- lab/` is empty). Worktree fast-forwarded from `28fe445` with
+`git merge --ff-only bc103b3`; `git log --oneline -1` → `bc103b3`. Ports 8745 (gate server, my pid only) / 5213
+(geckodriver). Browser suites ran ONE AT A TIME (`.tmp/run-browser.sh`, a plain loop), 16:59–17:05 CDT. Nothing under
+`lab/` was touched; `git status` was clean after every run (no gate repaired a source file). Scratch scripts and logs
+are in this worktree's `.tmp/` (gitignored): `run-browser.sh`, `precache-sum.mjs`, `deleted-sum.mjs`, `who-touched.mjs`,
+`probe-desktop.mjs`, `probe-2.mjs`, `probe-3.mjs`, `odp-scratch.mjs`, `browser/*.log`.
+
+### 1 · The gate table
+
+| suite | count | verdict |
+|---|---|---|
+| `bash test.sh node` (82 `tests/*.test.mjs`, pwa last) | 82 suites, 0 red, exit 0 | GREEN |
+| `node tests/pwa.test.mjs` (no `--write`) | 185 files, 4.45 MiB, hashes re-verified | GREEN |
+| `node tools/new-project.mjs --check` | in step, 16 829 B | GREEN |
+| `node tests/mir-manifest.test.mjs` | MIR 1.4.3, 66 files, pinned `a4c3b90102d0…` | GREEN |
+| `node ~/Documents/MIR/tools/adopt.mjs <root> --check` | DRIFT `lab/mir/modulation/host.js`, `mod.js` only | GREEN (the two named exemptions; nothing else under `lab/mir`, `lab/fonts`) |
+| `chem.browser-test` | 54 / 54 | GREEN |
+| `current.browser-test` | 15 PASS | GREEN |
+| `export3d.browser-test` | 10 PASS | GREEN |
+| `field-molecule.browser-test` | 9 PASS | GREEN |
+| `frame-occlusion.browser-test` | 7 PASS | GREEN |
+| `gpu-recovery.browser-test` | 8 PASS | GREEN |
+| `history.browser-test` | 39 PASS (122 s) | GREEN |
+| `input.browser-test` | 13 PASS | GREEN |
+| `keyboard-window.browser-test` | 1 PASS | GREEN |
+| `latex-copy.browser-test` | 9 PASS | GREEN |
+| `lfo-tension.browser-test` | 3 PASS | GREEN |
+| `menubar.browser-test` | 8 PASS | GREEN |
+| `mir-controls.browser-test` | 2 PASS | GREEN |
+| `molecular-diff.browser-test` | 15 / 15 | GREEN |
+| `molecular-names.browser-test` | 5 PASS | GREEN |
+| `molecule-demos.browser-test` | 3 PASS (water 1.0 s, benzene 2.2 s, N₂ 0.6 s) | GREEN |
+| `new-project.browser-test` | 8 PASS | GREEN |
+| `offer.browser-test` | 16 / 16 scenes | GREEN |
+| **`official-defaults-palette.browser-test`** | **aborts at assertion 1 (0 of 3 scenes); re-run alone: identical red** | **RED → BLOCKER 1** |
+| `orbitals.browser-test` | 24 / 24 | GREEN |
+| `register.browser-test` | 17 / 17 | GREEN |
+| `render-regressions.browser-test` | 2 PASS | GREEN |
+| `routed-knob.browser-test` | 4 / 4 | GREEN |
+| `take-in-bugs.browser-test` | 4 PASS (LINKED 48 ms / 34 ms) | GREEN (see SHOULD 1) |
+
+Browser: **23 of 24 suites green on the first run**; no timing flake and no identical-hash gate went red, so nothing
+needed the re-run-alone rule except the one red, which reproduced identically alone. `tests/legacy/boot.browser-test.mjs`
+was not run (test.sh: not part of the shipped gate).
+
+### 2 · The laws, scene by scene (what was tested, what came back)
+
+| law (BRIEF-S0-VERIFY) | evidence | verdict |
+|---|---|---|
+| §2 manifest true and pinned | `MIR-MANIFEST.json` 1.4.3, sha-256 `a4c3b901…2d23`; `git diff 7a8fd89` / `61f7c2c -- lab/mir lab/fonts MIR-MANIFEST.json` empty | holds |
+| §2 the pin bites | scratch tree `.tmp/forge/` (the test copied, `lab` symlinked, `git show 28fe445:MIR-MANIFEST.json` as its manifest, sha `42b76e5a…aaf0`): `AssertionError … names MIR 1.4.4, which is not an accepted adoption (accepted: 1.4.3). A real adoption is a two-file edit: the manifest MIR's tools/adopt.mjs writes, and its sha-256 pinned in ACCEPTED in tests/mir-manifest.test.mjs.`; relabelled "1.4.3": `… has sha-256 bd3f7527…, not the pinned a4c3b901… a real adoption is a two-file edit …`; the real manifest in the same scaffold: PASS. The tree's own file was never touched. | holds |
+| §2 Jet Black listed and `flat` | the PALETTE window's select lists 34 rows, `jetblack` "Jet Black" in "3 points"; chosen through the select's `change`: stops `[0,0,0]×3`, no errors. Pixel probe on the composited stage (light theme, 1s+2p₀, 21 932 uncovered stage points; 1 776 "cloud" points with chroma > 60 under prism): median chroma 93 → **5** (99.2 % of cloud points < 12), median luminance 204 → 112, the ground stays 255 — a black body, not a phase map (`.tmp/verify-palette-before.png`, `.tmp/verify-palette-jetblack.png`) | holds |
+| §2 Jet Black's road | `lab/mir/palette.js` byte-identical to 1.4.3 (`git diff 7a8fd89 -- lab/mir/palette.js` empty); `lab/palette-app.js` appends the row; `rack.js:20` imports it ahead of `paletteview` (:59) and the palette (:67); `tests/palette.test.mjs:28` imports the app module | holds |
+| §2 a link / project naming `jetblack` | `__LW.link.mint()` on Jet Black → palette moved to twilight → `__LW.link.open(href)` → `jetblack`; a saved project exports `paletteId: "jetblack"` and reopening it restores `jetblack` | holds |
+| §2 EDIT › COPY under a molecule | `latex-copy` §8 (green): SPECTRUM `hidden=false`, `folded=true`; the EDIT row not disabled; clipboard `$\mathrm{H_{2}O}$, water — RHF/STO-3G … 5 occupied of 7 AO`, `\varepsilon_{5}`, `(\mathrm{HOMO})`, `(\mathrm{LUMO})`; MOLECULES off → unfolds and copies `$1s_{0}$ and $2p_{0}$` | holds |
+| §2 `.mol-more` desktop first run | fresh profile, 1500 × 1000, no click: MOLECULES on the rack, unfolded, `.mol-more` visible, chevron `aria-expanded=true`, KICK / RUN / TDA / CORE / FLOW / SPEED / STEP / INTEGRATOR visible; HELP off and MOLECULES' `Aa` shown (no other card's) | holds |
+| §2 `.mol-more` phone | 500 × 930 headless (hover:none, `layout.phone.on`): MOLECULES folded, `.mol-more` hidden, `aria-expanded=false`; rack shown, card unfolded by a real tap on its chevron → the MORE control is visible and the `Aa` shown with HELP off; a real tap on MORE opens it (KICK, RUN, TDA visible) (`.tmp/verify-phone-more.png`) | holds |
+| §2 tests un-bent | `grep -n "mol-more" tests/*.mjs` → only `chem:134` and `routed-knob:18`, both through `.mol-more-toggle`; no `.mol-more.hidden = false` left | holds |
+| §2 SPECTRUM's operators | OPERATOR seg = HYDROGEN · OSCILLATOR · BOX · ATOM · QUARKONIUM(hidden); a real driver tap on ATOM → hamiltonian `atom`, ATOMS un-hidden, open, on the right rack (126 451 px²); `git show 7a8fd89:lab/new-project.lambdawaves.json` edited to `hamiltonian.id = "cornell"`, through `projects.importText` → `projects.open`: restores `cornell`, the (hidden) QUARKONIUM seat selected, no errors | holds |
+| §2 CLAUDE.md | no "1.4.4" anywhere; the first-run rack law once (line 28); the Cloud process line (line 71); "never part of the occlusion mask" sits in the STAGE FORMULA paragraph | holds |
+| §3 CALCULUS ⧉ | a real tap on `.dev[data-id="calculus"] .dev-copy`: 56 lines with its rows (was the header alone) | holds |
+| §3 tags off METERS' tick | `take-in-bugs` §3 (Stark shown in ≤ 300 ms with METERS closed); STATUS TAGS OFF (the first-run default), playing, Stark switched on and off over 2 s: **0** mutations on `#badges`; the same observer with tags ON: 17 (the sanity) | holds |
+| §3 WIGNER / RADIATION under MOLECULES | water on: WIGNER `hydrogenic register only`, RADIATION `hydrogenic register only`, no errors | holds |
+| §3 LINKED | the suite exists and is green; REPORT's verdict vs its assertions → SHOULD 1 | holds, wording |
+| §4 vendor wired | `lab/vendor/` = `bse/` only (`git diff 7a8fd89 -- lab/vendor/bse` empty); `index.html:57,71,72` load `./mir/shell/vendor/…`; the six ABOUT licence hrefs all 200 on 8745 (curl; the old `vendor/katex/katex.min.js` 404); 26 of the 27 deleted files have a byte-identical kit copy (the 27th, `package.json`, by design) | holds |
+| §4 NOTEBOOK KaTeX | `verify $x^2$` in view mode: 1 `.katex`, 0 `.katex-error`, a `msupsub`; scripts from `mir/shell/vendor/` | holds |
+| §4 wiring ALLOWLIST | no vendor rows; five shell rows dated 2026-10-07, each naming "the 0.5.0 adoption (PLAN.md §6)" | holds |
+| §4 precache delta | reproduced from git objects (`node .tmp/precache-sum.mjs 7a8fd89 1424d9f eaecf5e bff9057 HEAD`): 7a8fd89 205 / 4 858 652 B · C4 tip 207 / 4 899 018 B · C5 182 / 4 607 101 B · C6 = HEAD 185 / 4 664 889 B. Deploy: 27 files, 602 870 B deleted (`node .tmp/deleted-sum.mjs 1424d9f eaecf5e lab/vendor`) — matches S0-BUILD except 60 B at the C4 tip (NOTE 1) | holds |
+| §5 the demos | `molecule-demos` (green): each button opens `DEMOS/…`, MOLECULES the field owner on H2O / C6H6 / N2, ORBITAL on the HOMO (5/7, 21/36, 7/10), notebook open, no microphone, settings byte-identical outside the WORKSPACE keys; benzene lands in 2.2 s; WAVE DANCER opens (`current`, `latex-copy`, `take-in-bugs`); camera poses ride in `presentation.obs` | holds |
+| §6 the merges | `0242bff` = 61f7c2c + **2a03c06**, `5c7109e` = 0242bff + **28fe445**; `git show --cc` on each touches only `lab/sw.js` (no evil merge); `git log --merges -3` shows later worktree merges (NOTE 2) | holds |
+| §6 the lab diff | `git diff 28fe445 HEAD --stat -- lab/` (43 files): C3 `ebd45d5`, C4 `1424d9f`, C5 `eaecf5e`, C6 `bff9057`, plus the release-0.4.0 parent's 0.3.3 exports (NOTE 3); nothing else | holds |
+| §6 `sw.js` regenerated; `frame-occlusion` | `node tests/pwa.test.mjs` passes without `--write`; `frame-occlusion` 7 PASS | holds |
+
+### 3 · Findings
+
+#### BLOCKER (1)
+
+**BLOCKER 1 — `tests/official-defaults-palette.browser-test.mjs` is RED on the release tree.**
+Reproduce: `python3 tools/gate/server.py <root> 8745 &` (wait for `λWAVES gate server on …`), then
+`LW_PORT=8745 GD_PORT=5213 node tests/official-defaults-palette.browser-test.mjs` →
+`AssertionError … + aaHidden: false  - aaHidden: true` at `tests/official-defaults-palette.browser-test.mjs:20`.
+Deterministic: identical red when re-run alone. Cause: C3(d) (`ebd45d5`) made the contract's law real —
+`lab/lab.css:425` `body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }`, MOLECULES' `Aa`
+visible with HELP off — but this suite (last edited `bd2b335`) still asserts that EVERY `.dev-lean` is hidden on a
+fresh desktop, while `tests/chem.browser-test.mjs:137` now asserts the opposite for MOLECULES. The suite was not in the
+builder's C3 gate list and the §4 light check was never run, so the red was never seen. Because it aborts at its first
+assertion, its other two scenes (the WAVE shader's palette θ seats; prior browser choices surviving the first-run
+defaults) did not run in the gate at all. With that one assertion scoped to the non-MOLECULES windows plus a
+`chemAaShown: true` row (scratch copy `.tmp/odp-scratch.mjs`, not committed), the suite runs **3 / 3 PASS** on this tree.
+Law broken: PLAN §6 S0 "every gate green on the merged tree"; CLAUDE.md "Keep
+`tests/official-defaults-palette.browser-test.mjs` green when editing either [the first-run preferences]". The fix is
+test-only (one line in `tests/`, no `lab/` edit); then re-run this suite alone.
+
+#### SHOULD (1)
+
+**SHOULD 1 — the LINKED verdict says "FIXED"; the test accepts the symptom Josh reported at a fresh start.**
+Reproduce: `LW_PORT=8745 GD_PORT=5213 node tests/take-in-bugs.browser-test.mjs` → its PASS line reads "a real Space
+plays both clocks …" and in the same line logs `project start, editor closed, nothing routed: … mod refused (nothing
+to run)` and `after NEW, editor closed, nothing routed: … mod refused`. `tests/take-in-bugs.browser-test.mjs:57-62`
+accepts `refused > before.refused` in place of the modulation clock advancing whenever the editor is closed and nothing
+is routed. BRIEF-S0 C4 asked the test to "assert the field clock AND the modulation clock both advance". What wave 137
+fixed is the ≤ 1 s stall when the editor opens under a playing field (48 ms / 34 ms here, ≤ 150 asserted). Josh's
+literal symptom (Space at a fresh start or after NEW plays the field and not the modulation clock) persists, by MIR's
+`nothing-to-run` refusal (`lab/mir/modulation/host.js`, not ours to edit). REPORT wave 137's body says exactly this.
+Its heading ("the LINKED bug reproduced") and S0-BUILD's "REPRODUCED … Fixed" read as closed. Law: BRIEF-S0 §1 "say what was measured,
+not what was hoped". Cheap: one REPORT/CHANGELOG line ("reproduced; the open-editor stall fixed; the unrouted refusal is
+MIR's law, a KIT issue") and the PASS message's wording, so the 0.3.3 notes do not tell Josh his bug is closed.
+
+#### NOTE
+
+1. **Precache vs the plan's "~650 KB".** PLAN §6 S0's done-when says "precache down ~650 KB". Measured: the deploy loses
+   602 870 B (27 files), the precache loses 291 917 B at C5 (207 → 182 files) and 193 763 B net from `7a8fd89` to HEAD
+   (205 → 185 files, the three demos +57 788 B). The builder's account (the kit's `katex.min.js` / `marked.min.js` were
+   staged and now join the precache) reproduces. My C4-tip sum is 4 899 018 B against S0-BUILD's 4 899 078 B (60 B; the
+   C5 and C6 numbers match to the byte). `node .tmp/precache-sum.mjs 7a8fd89 1424d9f eaecf5e HEAD`.
+2. **`git log --oneline --merges -3`** (the brief's command) shows `9090665`, `efaaed8`, `4ca4f54` (later worktree merges),
+   not the two Cloud merges; those are `0242bff` and `5c7109e` further back, both `--cc`-clean outside `lab/sw.js`, and
+   `git merge-base --is-ancestor` holds for `2a03c06` and `28fe445`.
+3. **`git diff 28fe445 HEAD -- lab/` beyond C3–C6:** `lab/export3d.js`, `lab/field.js` (19 lines), `lab/mathworker.js`, and
+   parts of `rack.js` / `latex-state.js` / `sw.js` come from `c3dba65` (0.3.3 wave 134, THE SHAPE) and `5cbff0c` (wave
+   135, THE COPY). These are the release-0.4.0 parent of the merges, the 0.3.3 exports BRIEF-S0 §0 says S0 carries. Nothing else
+   (`node .tmp/who-touched.mjs`).
+4. **`lab/sw.js:227`** NEVER_PRECACHE prose still names the deleted `vendor/katex/LICENSE` (S0-BUILD discloses it; no check
+   reads it). `grep -n "vendor/katex" lab/sw.js`.
+5. **The MORE chevron wraps to its own row** under VIEW + ORBITAL, on the phone too (`.tmp/verify-phone-more.png`), as
+   S0-BUILD discloses; reachable and functional, a layout call for S3 / Josh.
+6. **`molecular-names` proves `cornell` by `__LW.setHamiltonian`, not by a restore.** The import-road probe above shows the
+   restore works. If the suite should guard the road a user takes, use the import road.
+
+fit to cut: **NO**, because one gate is red: `official-defaults-palette` (BLOCKER 1). Its stale assertion contradicts
+C3(d)'s MOLECULES-`Aa` law, so it aborts before its palette-seat and saved-choice scenes. The fix is test-only and one
+line. With that line scoped as described, the suite ran 3 / 3 here. Every other gate is green and every law in
+BRIEF-S0-VERIFY §2–§6 holds. After that fix and a lone re-run of the suite, the tree is fit to cut. SHOULD 1 is a
+wording fix for the release notes.
+
+### Resolution (Claude Sos, 2026-10-07)
+
+- **BLOCKER 1 fixed** in `tests/official-defaults-palette.browser-test.mjs`: the "every `Aa` hidden" row now excludes MOLECULES (`chem`), and a new row `chemAaShown` asserts its `Aa` is visible with HELP off — the verifier's tested scratch fix, verbatim. Re-run ALONE on 8721/5241: **3/3 PASS** (fresh defaults; WAVE density θ=0, Δρ ±π/2, palette OFF; saved choices survive) — the two checks the red line had hidden now ran.
+- **SHOULD 1 fixed**: REPORT wave 137, `S0-BUILD.md` (summary line 6 and the LINKED verdict) and the `take-in-bugs` PASS line now say the editor-open stall is fixed and Josh's fresh-start symptom stands (the kit's `nothing-to-run` refusal, a KIT BRIEF). `take-in-bugs` re-run ALONE: **4/4 GREEN**.
+- No `lab/` file changed, so no other suite is touched. **Fit to cut: YES.**
+
+
+
+---
+
+## <a id="doc-103"></a>DOC 103 · release-0.4.0/survey/LWAVES-AUDIT.md · 2026-10-07
 
 ## λWAVES 0.4.0 — the audit (read-only survey, 2026-10-07)
 
@@ -23794,7 +24762,7 @@ Other display-class switches outside this tab: LEAN `Aa` per window (`window-chr
 
 ---
 
-## <a id="doc-99"></a>DOC 99 · release-0.4.0/survey/MIR-1.5.md · 2026-10-07
+## <a id="doc-104"></a>DOC 104 · release-0.4.0/survey/MIR-1.5.md · 2026-10-07
 
 ## SURVEY · MIR 1.5 for λWAVES 0.4.0
 
@@ -24134,7 +25102,7 @@ Recommended order, if Josh asks "what do we do first": (1) in 0.4.0 cut seams 2.
 
 ---
 
-## <a id="doc-100"></a>DOC 100 · release-0.4.0/survey/SIBLINGS.md · 2026-10-07
+## <a id="doc-105"></a>DOC 105 · release-0.4.0/survey/SIBLINGS.md · 2026-10-07
 
 ## SIBLINGS — what AUTOMATA, EARTH, SOLEIL, NEBULA-REDUX and BASINS know that λWAVES 0.4.0 can borrow
 
@@ -24367,7 +25335,7 @@ Best first. "Kit or app" = who owns it under the engine-only law. "1.5?" = alrea
 
 ---
 
-## <a id="doc-101"></a>DOC 101 · release-0.4.0/survey/VAULT.md · 2026-10-07
+## <a id="doc-106"></a>DOC 106 · release-0.4.0/survey/VAULT.md · 2026-10-07
 
 ## VAULT digest for λWAVES 0.4.0 planning
 
@@ -24714,7 +25682,7 @@ Not verified: the claims in §5.2 are from code and REPORT text, not from runnin
 
 ---
 
-## <a id="doc-102"></a>DOC 102 · RIVAL-FIELDS-AND-MOLECULES-OPUS.md · 2026-10-07
+## <a id="doc-107"></a>DOC 107 · RIVAL-FIELDS-AND-MOLECULES-OPUS.md · 2026-10-07
 
 ## RIVAL ROUND · FIELDS AND MOLECULES · OPUS
 #### An adversarial reply to ROUND 1 · FABLE of `research/MATH-FIELDS-AND-MOLECULES-2026-09-04.md`
