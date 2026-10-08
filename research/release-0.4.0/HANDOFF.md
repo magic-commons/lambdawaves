@@ -206,6 +206,15 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Then the cut:** v0.4.0-alpha LOCALLY on Josh's word (RELEASING.md's road: the version line in `lab/rack.js`, README status,
 >   `pwa --write`, the gates, commit, annotated tag, `tools/changelog.mjs` — CHANGELOG was already out of step at S4a's base —
 >   `tools/snapshot-release.mjs`, `tools/build-deploy.mjs`; NO push, NO deploy, NO GitHub release until Josh says the plan is done).
+> **UPDATE 2026-10-08 ~07:45 — Claude Sos: 0.5.0 begins (Josh: "Let's go onward to 0.5.0" · "do as many parallel work/subagents
+> you want").** The 0.5.0 planning lives in `research/release-0.5.0/` (`NACRE.md`, `PLAN-DRAFT-0.md` by Fable, `12451d2`); its
+> gates: brief 8 is unbuilt in MIR's 1.5 line (alpha.24, `~/Documents/MIR/.claude/worktrees/mir-1.5`), the `1.5.0` cut is open
+> (R-G1: wait, the default), the first look is Josh's. **Running from `12451d2`, each in its own worktree:** the S4c kernel verifier
+> (8761/5229 — the 0.4.0-alpha cut follows a YES); REVIEW-SONNET-0 of the pre-draft; stage A wave 1 — A4 the floating-rack module
+> (8763/5233), A5+A6 the modulation port and the one-clock facade (R-B1; 8765/5235), A9–A11 the actions table (R-K1), tests by hook
+> with the canary's four gate rewrites, the kit precache policy and a throwaway alpha.24 canary (8767/5237). Merge order A4, A5+A6,
+> A9–A11; then wave 2 (A1+A2+A3, A7+A8). Rulings taken by default until Josh says otherwise: R5-G1 wait for `1.5.0`; R5-M1 the MIR
+> briefs by Josh's primary account when its week resets.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
