@@ -74,6 +74,7 @@ import { stateLatex, moleculeLatex, formulaLatex, BASIS_LABEL } from './latex-st
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createEditHistory } from './edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
+import { historyList } from './mir/history/history-list.js';   // 0.5.0 C5: the HISTORY card's list is the kit's
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
@@ -5087,54 +5088,22 @@ export async function boot(dom) {
   };
 
 
+  /* 0.5.0 C5 · THE HISTORY CARD is the kit's list (mir/history/history-list.js: newest first, the row you stand on lit and kept in
+     view, a click is a jump, UNDO / REDO, the count; one paint a frame, none while hidden) over a view in the kit's row numbers
+     (the bottom is −1) whose travels go through historyApi; HISTORY UNDO and CLEAR stay λWAVES'.  A jump made while the card was
+     hidden is painted when it shows again (window-activity's flip, `histShown`). */
   const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
   rack.appendChild(wHist.root);
-  const histList = el('div', 'hist-list', wHist.body);
-  let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
-  {
-    const rh = wHist.row('tight hist-actions');
-    histUndoBtn = trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root; rh.appendChild(histUndoBtn).dataset.keyAction = 'undo';
-    histRedoBtn = trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn).dataset.keyAction = 'redo';
-    histReturnBtn = trig({ label: 'HISTORY UNDO', title: 'return once to the timeline from before the last history jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn);
-    rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
-    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
-  }
-  /* S4 · EVERY ROW (≤ 61 with the bottom), newest at the top; the list scrolls inside the card (lab.css `.hist-list`) and the
-     current row is kept in view — measured against the list's own box, never scrollIntoView, which would scroll the rack too.
-     A full ring built node by node, a listener each, inside the ring's onChange made one flush 2.6–3.9 ms on the desktop, past
-     S3's < 2 ms (probes/S4/render-*.js): so the list is ONE string with ONE click listener, and onChange asks for ONE repaint
-     per frame (sixty flushes in a loop paint once; the boot's first paint is the first frame's, no layout forced mid-boot) */
-  histList.addEventListener('click', (e) => { const b = e.target.closest('.hist-row'); if (b) historyApi.goto(+b.dataset.i); });
-  function renderHistory() {
-    histRaf = 0;
-    const rows = historyApi.entries();
-    let h = '';
-    for (let j = rows.length - 1; j >= 0; j--) {
-      const r = rows[j], name = esc(r.label || 'edit');   /* the title is the WHOLE name (a key's row is a long sentence the column cuts) */
-      h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + (r.state === 'current' ? ' aria-current="true"' : '')
-        + ' title="' + name.replace(/"/g, '&quot;') + (r.state === 'current' ? ' — where the instrument is standing' : ' — land on this moment') + '"><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + name + '</span></button>';
-    }
-    histList.innerHTML = h;
-    histHere();
-    if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
-    if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
-    if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
-    wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
-  }
-  /** keep the current row inside the list's box (a closed or folded card has no box: it is done when the card shows) */
-  function histHere() {
-    const here = histList.querySelector('[aria-current]');
-    if (!here || !histList.clientHeight) return;
-    const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
-    if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
-  }
-  /* S4 · …and when the card comes back into view (opened, unfolded, its rack shown or scrolled to): a jump made while it was
-     closed left its list at the top.  window-activity's onChange already fires on each of those flips; this reads one flag. */
+  const hS = history.stack, hList = historyList({ entries: () => history.entries().map((e) => ({ ...e, i: e.i - 1 })), goto: (i) => historyApi.goto(i + 1),
+    undo: () => historyApi.undo(), redo: () => historyApi.redo(), subscribe: (fn) => history.subscribe(fn), get canUndo() { return hS.canUndo; },
+    get canRedo() { return hS.canRedo; }, get length() { return hS.length; }, get limit() { return hS.limit; }, get bytes() { return hS.bytes; }, get maxBytes() { return hS.maxBytes; } }, wHist.body);
+  const histReturn = trig({ label: 'HISTORY UNDO', title: 'return once to the timeline from before the last history jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root;
+  wHist.row('tight hist-actions').append(histReturn, trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
+  el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
   let histWas = canPresent(wHist);   // tracks the card, so its flips reach onChange
-  histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
-  let histRaf = 0;
-  hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
-  renderHistory();
+  histShown = () => { const now = canPresent(wHist); if (now && !histWas) hList.paint(); histWas = now; };
+  hRender = (now) => { if (now) hList.paint(); histReturn.disabled = !historyApi.canHistoryUndo; };
+  hRender();
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const modEdited = () => { if (modView) modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
