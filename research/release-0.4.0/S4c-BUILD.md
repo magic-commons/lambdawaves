@@ -11,7 +11,7 @@ in parallel — the integrator renumbers if needed).
 ## Summary (ten lines)
 
 1. The density wall: `MOL_CAPS [16, 40, 64, 128]`; gpu-boot asks for 32 KiB where the adapter reports it; the 3070 grants it;
-   a refused device builds the cap-128 tier on 32 lanes and draws the same texels. The ≤ 64 tier sources are byte-identical.
+   a refused device builds the cap-128 tier on 32 lanes and draws texels identical to the 64-lane build within each browser (the two browsers' hashes differ from each other; each is self-consistent — S4c-VERIFY N1). The ≤ 64 tier sources are byte-identical.
 2. The orbital-only path: `ORB_WGSL` (no tile, shells screened at 1e-10) draws any orbital past 64 AOs; C₆₀'s HOMO 13.67 ms
    plain / 3.62 ms screened (Chromium), 15.01 / 4.08 (Firefox) at 96³.
 3. 87- and 120-AO records (tryptophan, C₂₀H₂₀ — my own fixtures, S4b's had not landed) reconstruct against the generator's
@@ -47,12 +47,12 @@ in parallel — the integrator renumbers if needed).
 
 | what | number |
 |---|---|
-| workgroup storage asked / granted (3070, both browsers) | 32768 / 32768 → lanes [64, 64, 64, 64]; refused device: 16384 → lanes [64, 64, 64, 32], same texels (`8ce0fdcb` FF, `ff0a77c2` Cr) |
+| workgroup storage asked / granted (3070, both browsers) | 32768 / 32768 → lanes [64, 64, 64, 64]; refused device: 16384 → lanes [64, 64, 64, 32], identical texels within each browser (`8ce0fdcb` FF, `ff0a77c2` Cr — the two differ from each other, S4c-VERIFY N1) |
 | 87-AO reconstruct (tryptophan, cap-128 tile) | density relToMax **4.56e-4** (per-voxel 9.3e-4 above 1 % of max); HOMO (ORB_WGSL) 4.81e-4 |
 | 120-AO reconstruct (C₂₀H₂₀, cap-128 tile) | density relToMax **3.69e-4** (8.0e-4); HOMO 5.56e-4 |
 | C₆₀ dispatch at 96³, ORB_WGSL plain / screened | **13.67 / 3.62 ms** Chromium 153 (Vulkan); **15.01 / 4.08 ms** Firefox 157; via the field 3.65 / 4.17 |
 | C₆₀ sampled-voxel check vs PySCF (256 voxel centres, 8 orbitals) | **4.0e-4 – 5.6e-4** of max \|ψ\| (max \|Δψ\| 6.0e-5); app f64 vs PySCF ≤ 9.7e-17; the record's own field check at Sol's 92 points 1.1e-16 |
-| C₆₀ record | `lab/library/9520cedc….json`, 140 712 B (140.7 KB), caps orbitals only; opened in 7–9 ms with 0 solver calls |
+| C₆₀ record | `lab/library/a8166591….json`, 145 328 B (142 KB; S4b regenerated it on the merged tree — it was `9520cedc…`, 140.7 KB, at the builder's tip), caps orbitals only; opened in 7–9 ms with 0 solver calls |
 | density dispatch at 96³, cap-128 tile | tryptophan 19.6 ms (Cr) / 21.5 (FF); C₂₀H₂₀ 43.0 / 48.2 — once per change, never per frame |
 | 32 KiB vs 32 lanes (same 87-AO density) | 19.41 vs 19.36 ms (Cr), 21.58 vs 20.85 (FF) |
 | VALENCE (app, 64³) | lysine max ρ 47.79 → 1.601 (29.8×), texel vs f64 5.6e-4; benzene 7.372 → 0.327 (22.5×), 8.1e-4 |
@@ -89,7 +89,7 @@ under `.tmp/`).
 - **M5 (pending) — one command for Josh:** on the desktop `./serve-lan.sh`; on the iPad open
   `https://<desktop LAN address>:8710/lab/?report=1&post=1` and keep hands off for three minutes (the device report lands under
   `research/device-reports/`); and `https://<desktop LAN address>:8710/tools/perf/limits.html` for MEASURE §1's ONE LINE —
-  `wgStorage` / `device32k` say whether the iPad draws the cap-128 tier on 64 lanes or 32 (both draw the same texels here).
+  `wgStorage` / `device32k` say whether the iPad draws the cap-128 tier on 64 lanes or 32 (both lane counts draw identical texels within a browser here).
 - The C₆₀ record's section is `LATTICE` (S4b may move it); its InChIKey and CID are S4b's to enter and verify. Its geometry is
   Sol's DRAFT (equal-edge ideal I_h); B4 (C₆₀ at the experimental geometry) precedes 0.4.1's I_h names.
 - The two fixtures under `tests/fixtures/` are test inputs; S4b's tryptophan and C₂₀H₂₀ records (BIO, ORGANIC) are the content.

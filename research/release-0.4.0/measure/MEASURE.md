@@ -244,7 +244,7 @@ rows were taken again on an idle GPU (P8): a run beside another agent's browser 
 |---|---|---|
 | workgroup storage asked / granted | 32768 / 32768 | 32768 / 32768 |
 | tryptophan (87 AO) density, cap-128 tile, 64 lanes | 19.6 ms | 21.5 ms |
-| same, 32 lanes on a device refused the 32 KiB (same texels) | 19.4 vs 19.4 | 20.9 vs 21.6 |
+| same, 32 lanes on a device refused the 32 KiB (identical texels within a browser) | 19.4 vs 19.4 | 20.9 vs 21.6 |
 | C₂₀H₂₀ (120 AO) density, cap-128 tile | 43.0 ms | 48.2 ms |
 | tryptophan HOMO, ORB_WGSL | 0.97 ms | 1.18 ms |
 | C₂₀H₂₀ HOMO, ORB_WGSL | 2.18 ms | 2.50 ms |
@@ -255,7 +255,7 @@ Checks (both browsers, identical texels): the 87/120-AO densities against the ge
 max √ρ; their HOMOs 4.81e-4 / 5.56e-4 of max |ψ|; C₆₀'s eight frontier orbitals against PySCF's own `GTOval_cart` at the centres of
 256 voxels (`c60-voxels-pyscf.json`, `tools/perf/c60-voxels.py`) 4.0e-4 – 5.6e-4 of max |ψ|; VALENCE through the app 5.6e-4
 (lysine) and 8.1e-4 (benzene). **The M5 (pending):** §1's ONE LINE answers whether the iPad draws the cap-128 tier on 64 lanes or
-32 (either draws the same texels here); its device report is one command — on the desktop `./serve-lan.sh`, on the iPad
+32 (either lane count draws identical texels within a browser here); its device report is one command — on the desktop `./serve-lan.sh`, on the iPad
 `https://<desktop LAN address>:8710/lab/?report=1&post=1`, hands off for three minutes.
 
 ---

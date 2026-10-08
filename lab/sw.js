@@ -205,7 +205,7 @@ const PRECACHE = [
   ['./stage-text.js',                                               'b6e2abd52ce1'],
   ['./state.js',                                                    'a75b089d5182'],
   ['./statelink.js',                                                '95ab7b495303'],
-  ['./statesview.js',                                               '4cb698a1e3c6'],
+  ['./statesview.js',                                               '988afab38119'],
   ['./sturmian.js',                                                 '47ed5b7c81da'],
   ['./sturmianreg.js',                                              '1ce5f44b2fae'],
   ['./sw-client.js',                                                '0f1ffadd0978'],

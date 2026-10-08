@@ -47,7 +47,7 @@ export function createStates(host, api) {
   const status = (t, cls) => { statusText = t; if (api.status) api.status(t, cls === undefined ? '' : cls); };
 
   let sol = null, ladder = null, model = null, on = false, active = api.active ? !!api.active() : true, shown = true;
-  let version = 0, pushedT = NaN, pushedV = -1, selected = GROUND, wanted = null, unsub = null, ladderSeq = 0;
+  let version = 0, pushedT = NaN, pushedV = -1, selected = GROUND, wanted = null, unsub = null, ladderSeq = 0, ladderRefused = null;   // S4c-VERIFY N5: the worker's refusal sentence outlives a press
   let view = 'change', ref = 'ground', brightOnly = true, morphOn = false, morphS = 0, storeA = null, storeB = null;
   const lanes = new Map();                         // key → { amp, phase, mute, solo }; GROUND first, then ascending K
   const pending = new Set();                       // state keys whose vectors are on their way from the worker
@@ -164,9 +164,9 @@ export function createStates(host, api) {
   function fetchLadder() {
     const c = C(), q = c && c.query ? c.query() : null;
     if (!q || !api.solve) return;
-    const seq = ++ladderSeq, forSol = sol;
+    const seq = ++ladderSeq, forSol = sol; ladderRefused = null;
     Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge }, () => null, (r) => r)).then((r) => {
-      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { status((r && r.refused) || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
+      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r;
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
       if (wanted) { applyRecord(wanted, true); wanted = null; }
@@ -279,7 +279,7 @@ export function createStates(host, api) {
     if (!c) return 'no MOLECULES window';
     if (!c.on) return 'MOLECULES OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
-    if (!ladder || !model) return 'the state ladder is still being solved';
+    if (!ladder || !model) return ladderRefused || 'the state ladder is still being solved';   // a record without its CIS ladder says so, not "still being solved"
     if (!s) return 'no molecular session';
     if (s.claimed('tdhf')) return 'MOLECULES RT RUN has the field: stop the run to take it';
     return null;

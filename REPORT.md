@@ -3956,7 +3956,7 @@ the orbital keeps its tile, so the lock's orbitals are untouched. The orbital's 
 `tools/orbital-library.mjs` gains a second, separately named road, `buildFrontier()` (not ENTRIES, not the gate): it re-encodes
 Sol's dump `research/release-0.4.0/library-census/c60-frontier.json` (PySCF 2.14 direct RHF on the vendored STO-3G decimals;
 the HOMO set h_u ×5 and the LUMO set t₁u ×3 already in the app's AO order, its water conversion proof inside at 1.03e-12) as a
-schema-1 **frontier record**, `lab/library/9520cedc….json`, 140.7 KB: ε for all 300, the eight columns (`ground.cols`
+schema-1 **frontier record**, `lab/library/a8166591….json`, 145 KB (`9520cedc…`, 140.7 KB, before S4b regenerated it on the merged tree): ε for all 300, the eight columns (`ground.cols`
 175–182), no D, no spectrum, no states — `caps { orbitals: true, states: false, rpa: false, tdhf: false }`; the geometry source
 reads *DRAFT GEOMETRY, NOT A MEASUREMENT* (Sol's equal-edge ideal I_h, experimental status UNVERIFIED), as the census does; the
 levels are named by energy (the I_h names are 0.4.1 BUCKYBALL). It writes nothing unless the basis file is the dump's, the

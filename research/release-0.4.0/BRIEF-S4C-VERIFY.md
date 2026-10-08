@@ -48,7 +48,7 @@ both in); `git reset --hard <sha>` first, then `git log --oneline -1`. The pre-S
 - `ORB_WGSL` draws an ORBITAL past 64 AOs with no tile, shells screened at 1e-10: at 96³ C₆₀'s HOMO 13.67 ms plain / 3.62 ms
   screened (Chromium), 15.01 / 4.08 (Firefox) — re-time; the screened path must equal the plain path to rgba16float precision at
   sampled voxels (screening at 1e-10 is not a visible change).
-- **C₆₀'s HOMO and LUMO draw from the record** (`lab/library/9520cedc….json`, 140.7 KB, caps orbitals only, DRAFT geometry
+- **C₆₀'s HOMO and LUMO draw from the record** (`lab/library/a8166591….json` (145 KB; `9520cedc…` at the builder's tip), caps orbitals only, DRAFT geometry
   stated): open it from MOLECULES' LIBRARY row with 0 solver calls (count them); the HOMO and LUMO against PySCF's own orbital at
   voxel centres (`~/bin/scipython -I tools/perf/c60-voxels.py`): the builder says 4.0e-4–5.6e-4 of max; spectrum, states and TDHF
   refused with a sentence; an unsorted column fails validation (`tests/library.test.mjs` §5c).
