@@ -339,6 +339,29 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - RUNNING from `1e1a4f8` (Opus): A1+A8 (8763), A7 (8773/8777, ms/s pair under the warm-up rule), A0 pass 2 (8771, `field.ok` per cell).
 > - Open with Josh: the agent-control auto-release patch (proposed, not applied).
 
+> **UPDATE (Claude Sos, 2026-10-08 ~14:10 CDT) — STAGE A CLOSED; the pre-C baseline taken; C0 launched.** On `sos-s0`:
+> - **A1+A8 MERGED `f277675`** (+62: `lab/settings-store.js`, the camera port with twelve ids and `modIds`, `STAGE_BINDINGS` as one frozen
+>   table, the quartet steps `STAGE_BINDINGS.nudge`; settings probe 48/48 identical; gates green; CLAUDE.md paragraph `1fad4a5`).
+>   Open from it: C1 registry conflict (the kit panel's `set` vs a hand's road) and missing notices from `observer.*` writes; C4 WAVE DANCER's
+>   `modwin.modes.s3` lost across reload (pre-existing); R5-C1 the doubleTap row (λWAVES 320 ms / 40 px vs the kit's 300 / 14 — Josh's row edit);
+>   C2 STATE-SCOPES to name `modpresets` and confirm `nativeLayout` PREFERENCE.
+> - **A7 MERGED `349c3d4`** (+28: `lab/occlusion.js`, three producers one `dirty()` each, `tools/a7-occlusion-probe.mjs`): probe 16 scenes
+>   byte-identical — A7's own run and mine on the merged tree against `1fad4a5` (14,807 B, sha ceb35024…b229); merged-tree gates node 0,
+>   frame-occlusion 7, history 39, menubar 8 (+ camera-shift 11, new-project 8 after A1+A8). Open: fold has no watcher (C8).
+> - **A0 spike pass 2 MERGED `d326c96`: A0 COMPLETE.** 8 bare labels **+115 %** with the field present (80.5 vs 37.5 ms/s, held 0) → **D1 is
+>   0.5.1**; the cost is ~63 DOM writes a frame (two thirds restyle + repaint), `viewChanged()` already coalesced → brief 7 re-worded; bare
+>   reads 12/12 (PROVISIONAL — Josh judges the 24 PNGs in `research/release-0.5.0/canary-a0/legibility/`); brief 18 confirmed (+ the block
+>   clamp); D4 text only (same-origin image files for brief 19); the M5 block in CANARY-A0 PASS 2 §5. PLAN.md `5316960`, KIT-BRIEFS
+>   amendments `62f27ba` (+ vault).
+> - **The notice:** CDP Chromium boots with the photosensitivity pane up (`navigator.webdriver` false) and it halves the present rate;
+>   `main-thread.mjs` now dismisses it (`fbde0b6`, `--keep-notice`). **THE PRE-C BASELINE on `fbde0b6` (`7044f37`, MEASURE §2): notice
+>   dismissed median 37.335 ms/s, spread 1.768, ~24.9 presents/s → C-V's gate 3.536 ms/s;** notice kept 19.535 (Δ −0.19 vs §1's 19.729:
+>   wave 2 cost nothing). `lab/*.js` **36,288** (stage A +8 vs the +150 cap; 36,280 at the cut).
+> - **C0 (Opus) launched from `7044f37`** (8783/5253 + base 8787/5257): the bare adopt (alpha.24 pinned), the cascade, the manifest pin, new-project,
+>   R5-W1, the seven glass classes with defaults applied + screenshot pairs in `c0-glass/` + `C0-GLASS-RULINGS.md` for Josh, the second canary
+>   (85 node + 27 browser), the ms/s pair vs 3.536, wave 196, `C0-BUILD.md`.
+> - Plugin: agent-control 0.1.4 (auto-release) on both profiles (Josh ran the primary update).
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
