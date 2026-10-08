@@ -130,6 +130,20 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Blocked:** the agent-control plugin is still in its handoff pause and REFUSES new Claude workers ("Agent Control is paused
 >   for handoff"), so the **S2 verifier** (`BRIEF-S2-VERIFY.md`, start `8259eee`, 8749/5217) and the **S4a builder**
 >   (`BRIEF-S4-LIBRARY.md` §S4a, 8753/5221, then its verifier 8755/5223) wait for Josh to lift the pause.
+> **UPDATE 2026-10-08 ~03:00 — Claude Sos, session 4, after `/resume-work`.**
+> - **S2 VERIFIED — stands** (`S2-VERIFY.md`, fresh Opus, merged `64c636b`): the 1004-value lock byte-identical at shift 0, the
+>   96³ lock green, 84 node suites, 11 browser suites and the verifier's 19 own scenes green on the first run, device report equal
+>   (19.6 vs 19.7 fps at load 1); the builder's lock-tool `meta()` change judged legitimate (a 0.002 shift still differs in 218
+>   readbacks). 0 BLOCKER; the 1 SHOULD fixed by Sos (`tests/camera-shift.browser-test.mjs`: re-clear the mask before the line
+>   pass, a third corner over the left rack, `defaultPrevented` on Alt+Arrow) and green alone. **NOTEs for Josh's R-C1 trial:**
+>   zoom-to-cursor holds the anchor only for cursors within ~0.18 uv of the centre once the pivot hits the frame edge (the clamp,
+>   by design); Alt now slides the picture before KEPLER's handle grab and HELIUM's Alt+Shift electron placement; the M5 half of
+>   the device report is still one command (`?report=1` on the iPad).
+> - **S5 KIT BRIEFS landed** (`d943fea`, Sol at xhigh, read once by Sos): 17 briefs for the MIR session in PLAN §5's order,
+>   26 consuming port groups, 672 gross lines the adoption would delete (361 without the camera gift); mirrored to the vault as
+>   `LAMBDAWAVES CLAUDE KIT BRIEFS FOR MIR 2026-10-08.md`.
+> - **Running:** the S4a LIBRARY builder (Opus, 8753/5221, from `9395ab3`). Then its verifier (8755/5223), S4b ∥ S4c, the local
+>   0.4.0-alpha cut on Josh's word.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
