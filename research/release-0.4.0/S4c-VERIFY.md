@@ -1,4 +1,4 @@
-# λWAVES 0.4.0 · S4c VERIFY — the kernel, fresh eyes (written at the usage pause)
+# λWAVES 0.4.0 · S4c VERIFY — the kernel, fresh eyes
 
 Written by the S4c kernel verifier (Opus 5.5, no part in the build), 2026-10-08, against `BRIEF-S4C-VERIFY.md` §1–§6, the contract
 `BRIEF-S4-LIBRARY.md` §0 and §S4c and PLAN §10 N1/N3. Nothing in `lab/` was edited; scratch and every script below live in `.tmp/verify/`
@@ -7,17 +7,21 @@ Written by the S4c kernel verifier (Opus 5.5, no part in the build), 2026-10-08,
 - **Worktree:** `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-aafa9cc0963957d0a`
 - **Branch:** `worktree-agent-aafa9cc0963957d0a`, reset to `12451d2` (the `sos-s0` tip; `lab/` identical to `3ced864`, checked:
   `git diff --stat 3ced864 HEAD -- lab/` is empty). Pre-S4c tree `b5eed68`; S4c merged at `a927fc3`; S4b merged at `3ced864`.
-- **Ports:** 8761 / 5229. Gate server pid 2542364, killed by pid at the pause.
+- **Ports:** 8761 / 5229. Gate server pid 2542364 (killed by pid at the usage pause; a PARTIAL report was committed as `ea66763`),
+  then pid 2649108 after the resume for the device report (killed by pid).
 - **GPU:** RTX 3070. The locks, the suites and the harness ran with the GPU at P8 most of the time; one sample read P0 69–76 % from
   another process during `s4c-kernel.mjs` (its timing rows are not used for the verdict). **My timing table was taken on an idle GPU**
   (P8, 0 %, no other headless browser running) — see §3.
 
-## VERDICT: PARTIAL — scenes not run: the device-report pair (§4, `tools/perf/device-report-run.mjs` at HEAD once)
+## VERDICT — the kernel as merged stands (fit for the 0.4.0-alpha cut): **YES**
 
-Every scene that ran is GREEN and every builder number I re-measured reproduced; **0 BLOCKER, 0 SHOULD, 12 NOTE**. The one scene
-not run is the device report at HEAD (brief §4). **If it lands within the governor's tier (nominal 64³, ~18–19 fps headless
-Firefox, 0 held) the kernel as merged stands (fit for the 0.4.0-alpha cut): YES.** I did not reach the optional cross-check of
-S4c's own 1148 claim on the `a927fc3` tree (not needed for the verdict: see §1, the chain is closed another way).
+Because: both locks GREEN first time (1004 and 1148, 0 readback and 0 record-byte differences) and the WGSL each ≤ 64 tier compiles
+is byte-identical to `b5eed68`; every gate, suite and builder harness GREEN; the refused device draws the same texels three ways in
+both browsers; every record past 64 AO (13, the 87/120-AO fixtures among them) reconstructs against PySCF — not the app's own
+evaluator — at 16,896 voxels of my own to the rgba16float figure; C₆₀'s record is the census dump bit for bit, opens with 0 solver
+calls and refuses what it does not carry; VALENCE reproduces (47.8 → 1.60, Tr = N − 2·core, water 8); the device report at HEAD sits
+inside the builder's pair (18.5 fps, 0 held, governor nominal at 64³). **0 BLOCKER, 0 SHOULD, 12 NOTE.** I did not run the optional
+cross-check of S4c's own 1148 claim on the `a927fc3` tree: the chain is closed another way (§1).
 
 ---
 
@@ -43,7 +47,8 @@ S4c's own 1148 claim on the `a927fc3` tree (not needed for the verdict: see §1,
 | builder's `s4c-kernel.mjs` | Firefox + Chromium, all sections | **GREEN**, every `pass: true` (tracked `s4c-kernel.json` restored after with `git checkout`) | `LW_PORT=8761 GD_PORT=5229 node tools/perf/s4c-kernel.mjs firefox chromium` |
 | builder's `s4c-c60-app.mjs` | 7 asserts | **PASS** (tracked `s4c-c60-app.json` restored) | `LW_PORT=8761 GD_PORT=5229 node tools/perf/s4c-c60-app.mjs` |
 | my page, 2 browsers × 3 device modes | 13 records, 112 texel arrays per browser | **GREEN** (§2, §3) | `.tmp/verify/run_kv.sh` (drives `.tmp/verify/kv.html`) |
-| my app scenes | water, VIEW row, lysine, per-frame, C₆₀, registers | **GREEN** (§2–§4) | `node .tmp/verify/app-checks.mjs`, `node .tmp/verify/app-c60-register.mjs` |
+| my app scenes | water, VIEW row, lysine, per-frame, C₆₀, registers | **GREEN** (§2–§4), page errors 0 | `node .tmp/verify/app-checks.mjs`, `node .tmp/verify/app-c60-register.mjs` |
+| device report at HEAD (30 s long play, headless Firefox) | 15 scenes | **within the pair**: 18.5 fps, 556 presents, 0 held, loop median 1 ms, p95 83.42 ms, governor nominal at 64³ (0 changes), errors [] | `LW_PORT=8761 GD_PORT=5229 node tools/perf/device-report-run.mjs .tmp/verify/device-report-head.json` |
 
 **Re-run alone:** nothing was red, so nothing needed a lone re-run. Each lock ran once, alone on the GPU, GREEN first time.
 
@@ -174,8 +179,10 @@ to `b5eed68` + field.js identical `a927fc3` → HEAD + 1004 and 1148 GREEN at HE
   library +8, molecules +5). WGSL template source lines in field.js **471 → 496**. Exactly as reported.
 - **No release act.** No CHANGELOG, `package.json` or version file in `git diff b5eed68 HEAD`; `git tag --contains b5eed68` → none;
   `git branch -r --contains b5eed68` → none. REPORT waves 178–182 present (REPORT.md l.3916–4003), every number I re-measured matched.
-- **NOT RUN: the device-report pair** (`tools/perf/device-report-run.mjs`, 30 s long play at HEAD, against 18.2 → 19.1 fps,
-  governor nominal 64³, 0 held).
+- **The device report, my own at HEAD once** (GPU P8 before, no other headless browser): long play **18.5 fps, 556 presents, 0 held,
+  loop median 1 ms, frame median 50.3 / p95 83.42 ms, governor nominal at 64³ with 0 changes, errors []**. The builder's pair:
+  before (`b5eed68`) 18.2 fps / 547 presents / p95 83.3; after 19.1 / 576 / 83.4; both nominal at 64³, 0 held. Mine sits between
+  them — within the report's noise, the same tier. M5 still pending (Josh's one command, MEASURE §5).
 
 ---
 
@@ -230,9 +237,8 @@ to `b5eed68` + field.js identical `a927fc3` → HEAD + 1004 and 1148 GREEN at HE
 
 ## The exact next step
 
-For whoever resumes (same worktree and branch): start the server on 8761 (`python3 tools/gate/server.py "$PWD" 8761 &`, record the
-pid), check the GPU is idle (`nvidia-smi --query-gpu=pstate,utilization.gpu --format=csv,noheader`), run the device report at HEAD once
-(`LW_PORT=8761 GD_PORT=5229 node tools/perf/device-report-run.mjs`, writing to `.tmp/`, never over the committed
-`device-report-s4c-*.json`), compare with 18.2 → 19.1 fps / 0 held / governor nominal at 64³, kill the server by pid, and turn the
-verdict line above into YES or NO. Optional: the `a927fc3` 1148 reproduction (`git archive a927fc3 lab tools research/release-0.4.0/measure
-research/optimization-2026-09-24 | tar -x -C .tmp/root-a927`, serve that root, run its own `digest-lock.mjs` against its own fixture).
+**The integrator (Claude Sos) merges this report into `sos-s0`** (one new file, `research/release-0.4.0/S4c-VERIFY.md`; nothing in
+`lab/`), then the local 0.4.0-alpha cut as PLAN §6 orders it — no push, tag or deploy until the whole plan is done (Josh, 2026-10-07).
+Three NOTEs are cheap to fold into the cut if wanted: N1 (two sentences in REPORT wave 178 and MEASURE §5), N2 (the C₆₀ record's
+current name and size in S4c-BUILD), N5 (`statesview.js` keeps the worker's refusal, so a record without a CIS ladder never reads
+"still being solved"). The M5 rows stay Josh's one command (MEASURE §5).
