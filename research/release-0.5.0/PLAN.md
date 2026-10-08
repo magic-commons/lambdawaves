@@ -9,7 +9,7 @@ SEAMS, is capped at +150 lines in total; stage D runs a ledger whose net must be
 or deployed). Josh's test servers serve the integration branch `sos-s0` — https://127.0.0.1:8721/lab/ and on the LAN
 https://10.0.0.18:8711/lab/. Stage A wave 1 is merged (A5+A6, A9–A11: `lab/*.js` 36,280 → 36,198), A0's row and A-M (the ms/s
 instrument, floor 13.879 ± 0.536 ms/s) are in; A1+A8 and A7 are building; nothing of C or D is built. **A0's cost rule has fired:**
-+90 % main-thread at 8 bare labels → D1 is 0.5.1 unless pass 2 or a kit fix changes the number (§2 D, §9).
++90 % main-thread at 8 bare labels; **pass 2 (field present, 0 held frames): +115 % → D1 is 0.5.1** (§2 D, §9; `CANARY-A0.md` PASS 2).
 
 ## 0 · The inputs, measured on this tree
 
@@ -84,7 +84,7 @@ A0 now · at the first re-adopt (then all 27 browser suites, because C0 is real)
 Nothing committed from a throwaway.
 
 **The spike decides by rule:** (1) **cost** — A-M's ms/s under AUTO-ROTATE, N = 0, 2, 8, 16 labels + 1 block, bare and pane: at N = 8 bare
-≤ +10 % over N = 0 and 0 held frames → D1 ships in 0.5.0, else D1 waits for brief 7's coalesced `viewChanged` (0.5.1); (2) **legibility** —
+≤ +10 % over N = 0 and 0 held frames → D1 ships in 0.5.0, else D1 waits for brief 7 (0.5.1) — **pass 2 read +115 %: 0.5.1**; and brief 7 is re-worded: `viewChanged()` is already coalesced (0.12 ms/s), the cost is ~63 DOM writes a frame (two thirds restyle + repaint), so brief 7 asks for **no per-frame DOM writes while the camera turns** (one paint a frame, a compositor-only transform per body); (2) **legibility** —
 12 screenshots (1s+2p, benzene HOMO, C₆₀ HOMO × light/dark × frost on/off), bare and with `mix-blend-mode: difference` on the layer ROOT;
 **Josh judges**: bare reads in ≥ 10 of 12 → no ink brief; only `difference` → a small INVERT brief; neither → pane mode with its cost;
 (3) **under a rack** — at shift ±1, labels whose rect meets the rack's keep-clear: any > 0 confirms the 18th brief; (4) **D4** — an
@@ -123,10 +123,10 @@ film slips, +1.2–1.8k and the bar is checked against that); CLAUDE.md rewritte
 | # | piece | rule | closer |
 |---|---|---|---|
 | **D9** | **first**: the legacy five. **Deletable ceiling 1,139** (`h2ci.js` 330 stays — six engine importers; H₂⁺'s files measured here and added). H₂⁺ and HELIUM are field owners (pages cannot own ψ): each a MOLECULES/preset demo, a kept window, or deleted with a restore shim; QCD deleted; H₂ and ELECTROSTATICS by use — **R5-L1**. Under the default (QCD only guaranteed) the credit is **219**; D ≤ 0 needs H₂ (268) and ELECTROSTATICS (437) too, or D's additions must fit in the credit | lines DOWN; the deleted node suites listed | the history/project suites open an old file naming them |
-| D1 | the window (brief 13), the DISPLAY switch; `stage-text.js` → `addBlock` / `addLabel({ttl})` / `addLabel({anchor})`; `{{state}}`, `{{E}}`, `{{T}}`; `viewChanged()` only on a `cameraKey` change | the spike's cost rule | the budget held; 0 per-tick layout reads by the layer's witness |
+| D1 **(0.5.1 by the spike's rule — pass 2 +115 %)** | the window (brief 13), the DISPLAY switch; `stage-text.js` → `addBlock` / `addLabel({ttl})` / `addLabel({anchor})`; `{{state}}`, `{{E}}`, `{{T}}`; `viewChanged()` only on a `cameraKey` change | the spike's cost rule | the budget held; 0 per-tick layout reads by the layer's witness |
 | D2 | pages generated from the records (38 + 4 demos), hydrogenic states by class, windows from the INFO copy; the RPA root names in SPECTRUM (the Sol thread's C3); brief 3's TO NOTEBOOK / PIN when it lands | no model-authored number; `CURATED_IE` verified or tagged; no SRD 101 table; the greeting the one exception (R5-I4) | render + round-trip; the root names' Σ d_Λ m_Λ gate |
 | D3 | feature labels (`features()`, `place()`) | the 18th brief if the spike's count > 0 | labels follow a turn, hold still after |
-| D4 | the overlays — **text only in 0.5.0**; a 19th brief in 0.5.x unless the spike's rule 4 says images survive; positions WORKSPACE | the spike | a moved label persists |
+| D4 | the overlays — **text only in 0.5.0** (pass 2: a data-URL `<img>` loses its `src`, an inline `<svg>` is removed; a same-origin image file survives, the 19th brief's route); positions WORKSPACE | the spike | a moved label persists |
 | D5 | the film overlay (brief 6) + TAKE MODE (brief 7); the caption retired | C7's film verifier reused | a video carries the layer deterministically |
 | D6 | FIGURE, chips, FLY-TO + search, SCENES (replaces A/B as two of eight — its out), MAPS (H₂'s FCI curve) | **a piece without a named "out" is not built**; the out is named in its brief | per piece |
 | D7 | the pad with the lattice (brief 5) and `cells` (brief 4; the S3 cells and S4b header retire, 38 lines) | — | ATOMS and MOLECULES suites |
@@ -207,3 +207,12 @@ Every ruling in §3 takes its first option until Josh says otherwise:
   leaves preferences alone, notes recent 8 with pages in the project, no chord invented for kit windows.
 - **Carried from 0.4.0, still open:** Br₂ vs the cap; C₆₀'s `milestone` allowance; C₂₀H₂₀ a fixture; one rock-salt cube; the M5 numbers.
 - **A0's rule, applied:** D1 (the INFORMATIONAL window) is 0.5.1 unless the spike's pass 2 or a kit fix brings 8 bare labels within +10 %.
+  **Pass 2 (2026-10-08, `CANARY-A0.md` PASS 2) read +115 % with the field present and 0 held frames: D1 is 0.5.1.** What pass 2 changes
+  in the wording, taken as the integrator's defaults under Josh's "defaults" ruling: (a) brief 7 asks for no per-frame DOM writes while the
+  camera turns, not a coalesced `viewChanged` (already true); (b) **no ink brief** — bare reads in 12 of 12 pictures and `difference` is never
+  better (worse in light) — PROVISIONAL until Josh looks at the 24 PNGs in `canary-a0/legibility/`; (c) brief 18 confirmed (2 of 3 labels meet a
+  rack at shift ±1; two overlap by 30–35 px even centred) and it carries a second line: the block placed beside the subject must be clamped
+  to the free stage (it lands under the rack despite `avoid`); (d) D4 text only in 0.5.0, same-origin image files for the 19th brief; (e) the
+  WebKit road for 0.5.0 is the kit's probe (PASS 2 §5's block), not `check-app.mjs`, which needs `createDescribe` wired and WebKit libraries
+  this machine lacks; (f) for A-M: `main-thread.mjs` measures with the photosensitivity notice open under CDP Chromium — UNVERIFIED whether
+  that moves the floor; the pre-C baseline takes a notice-dismissed pair beside it before anything is re-based.
