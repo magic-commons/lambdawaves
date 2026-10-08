@@ -249,7 +249,11 @@ const ALLOW_BLOCK = (WIRING.match(/\nconst ALLOWLIST = \[\n([\s\S]*?)\n\];/) || 
 assert.ok(ALLOW_BLOCK !== undefined, 'tests/wiring.test.mjs: the ALLOWLIST array moved — the precache cannot derive its STAGED set');
 const STAGED = new Set([...ALLOW_BLOCK.matchAll(/\{ file: 'lab\/([^']+)'/g)].map((m) => m[1]));
 assert.equal(STAGED.size, (ALLOW_BLOCK.match(/\bfile:/g) || []).length, 'tests/wiring.test.mjs: an ALLOWLIST entry this parser cannot read');
-const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel);
+/* 0.4.0 S4a · THE ONE EXEMPTION: a file under one of sw.js §1b's DATA roots (library/) is content-addressed device content —
+   deployed, never precached.  The list is READ from sw.js, so the worker, this walk and tools/build-deploy.mjs cannot disagree. */
+const DATA = JSON.parse((text('sw.js').match(/\nconst DATA = (\[[^\]]*\]);/) || [])[1].replace(/'/g, '"'));
+const IS_DATA = (rel) => DATA.some((d) => rel.startsWith(d));
+const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || IS_DATA(rel);
 const walk = (d, out = []) => { for (const e of readdirSync(d, { withFileTypes: true })) {
   const f = path.join(d, e.name); if (e.isDirectory()) walk(f, out); else out.push(path.relative(LAB, f).split(path.sep).join('/')); } return out; };
 const onDisk = walk(LAB).sort();
@@ -302,7 +306,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'a DATA root (§1b: library/)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -311,6 +315,24 @@ assert.deepEqual(licences.filter((r) => !listed.includes(r)), [],
   'a licence text in lab/ is NOT precached — an offline install would hold the font and not its licence (OFL §2)');
 console.log(`PASS the ${licences.length} licence texts are precached with the works they cover (${licences.join(', ')}).`);
 console.log(`PASS precache list == lab/ on disk: ${listed.length} files, ${(bytes / 1048576).toFixed(2)} MiB, every content hash re-verified. Skipped by rule: ${skipped.join(', ')}.`);
+
+/* ══ L.  THE LIBRARY (0.4.0 S4a · PLAN B2): library/** is the ONE exemption, and every catalogue row's record is really there ══
+   lab/library.json — the catalogue lab/molecules.js reads — is precached like any file; each row names lab/library/<sha-256>.json,
+   which must exist and hash to its name; and nothing sits in library/ that no row reaches (precache what a root reaches, and
+   ship nothing a root does not).  tools/orbital-library.mjs --check proves the bytes are the solver's. */
+assert.deepEqual(DATA, ['library/'], 'sw.js §1b: the DATA roots are exactly library/ — a second exemption is a second rule');
+assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
+const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter(IS_DATA);
+assert.ok(Array.isArray(CAT.rows) && CAT.rows.length >= 2, 'lab/library.json: no rows');
+for (const r of CAT.rows) {
+  const rel = 'library/' + r.hash + '.json';
+  assert.ok(/^[0-9a-f]{64}$/.test(r.hash) && existsSync(path.join(LAB, rel)), `lab/library.json: ${r.id}'s record ${rel} is not on disk`);
+  assert.equal(createHash('sha256').update(read(rel)).digest('hex'), r.hash, `lab/${rel} does not hash to its name`);
+  assert.equal(statSync(path.join(LAB, rel)).size, r.bytes, `lab/library.json: ${r.id}'s byte count is stale`);
+}
+assert.deepEqual(dataFiles.filter((f) => !CAT.rows.some((r) => f === 'library/' + r.hash + '.json')), [], 'a file in lab/library/ that no catalogue row reaches');
+assert.deepEqual(listed.filter(IS_DATA), [], 'a DATA file is in the precache');
+console.log(`PASS the library: ${CAT.rows.length} catalogue rows, each record on disk under its own sha-256 (${CAT.rows.reduce((n, r) => n + r.bytes, 0)} B, none precached); library/ holds nothing else; the catalogue is precached.`);
 
 /* ══ D.  NOTHING EXTERNAL, AND NOTHING MISSING ═══════════════════════════════════════════════════════════ */
 const TEXTY = /\.(js|mjs|html|css|md|txt|webmanifest|svg)$/i;
@@ -650,6 +672,26 @@ assert.equal((swCode.match(/skipWaiting\(\)/g) || []).length, 1, 'sw.js: skipWai
 assert.ok(!/clients\.claim\(/.test(swCode), 'sw.js: clients.claim() is in the code — a page that started uncontrolled would begin taking assets from a build it did not boot on');
 assert.ok(!/\bsetTimeout\b|\bsetInterval\b/.test(swCode), 'sw.js: a timer in a service worker is a build swapping itself in on a clock');
 assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split('addEventListener(\'message\'')[0]), 'sw.js: skipWaiting() is reachable outside the message handler');
+
+/* E6 — 0.4.0 S4a · A DATA PATH, DRIVEN.  A record the page has not installed goes to the network and nothing is stored; one it
+   has (lw-data-v1) is answered from there with no fetch; an activate that collects a stale build keeps lw-data-v1. */
+{
+  const W = loadWorker('/lab/'), url = 'https://host.invalid/lab/library/' + CAT.rows[0].hash + '.json';
+  const ask = async (u) => { let a = null; await W.handlers.fetch[0]({ request: { method: 'GET', url: u + '?x=1', mode: 'cors', headers: { get: () => null } }, respondWith: (p) => { a = p; } }); return a === null ? null : await a; };
+  const miss = await ask(url);
+  assert.ok(miss && miss.status === 200 && W.fetched.length === 1, 'sw.js: an uninstalled record was not passed to the network');
+  assert.equal((W.caches.get(W.LW_SW.DATA_CACHE) || { m: new Map() }).m.size, 0, 'sw.js: the worker stored a record — only the page stores one, after its hash is checked');
+  const dc = W.caches.get(W.LW_SW.DATA_CACHE) || new W.FakeCache(); W.caches.set(W.LW_SW.DATA_CACHE, dc);
+  await dc.put(url, new Response('the device copy'));
+  W.fetched.length = 0;
+  const hit = await ask(url);
+  assert.equal(hit && await hit.clone().text(), 'the device copy', 'sw.js: an installed record was not answered from lw-data-v1');
+  assert.equal(W.fetched.length, 0, 'sw.js: an installed record still went to the network');
+  W.caches.set('lw-lab-anolderbuild', new W.FakeCache());
+  let p; await W.handlers.activate[0]({ waitUntil: (x) => { p = x; } }); await p;
+  assert.ok(W.caches.has(W.LW_SW.DATA_CACHE) && !W.caches.has('lw-lab-anolderbuild'), 'sw.js: activate must collect a stale build and keep lw-data-v1');
+  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there, and a new build's activate keeps it.`);
+}
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +
   `activate collects only stale lw-lab-* and does NOT claim; fetch is cache-first over the precache and refuses POST / Range / cross-origin / out-of-scope / unlisted, growing nothing; ` +

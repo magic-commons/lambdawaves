@@ -53,6 +53,8 @@ import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
 import { namesOf } from './names.js';
+import { basisFrom } from './md.js';
+import { validateRecord, decodeRecord } from './library.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -70,7 +72,7 @@ let parked = false, busyMs = 0, jobs = 0, parks = 0, resumes = 0, parkedAt = 0, 
 const held = [];                                   // speculative jobs that arrived while parked, in order
 const SPECULATIVE = new Set(['warm']);             // everything else was asked for by a hand and is allowed to finish
 const stat = () => ({ parked, busyMs: +busyMs.toFixed(3), jobs, parks, resumes, held: held.length,
-  parkedMs: +(parkedMs + (parked ? Date.now() - parkedAt : 0)).toFixed(0) });
+  parkedMs: +(parkedMs + (parked ? Date.now() - parkedAt : 0)).toFixed(0), solverCalls });
 function run(m) {
   const t0 = performance.now();
   const r = work(m);
@@ -81,8 +83,8 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
-const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
+const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
   const basis = m.basis || 'sto-3g';
@@ -137,6 +139,7 @@ function work(m) {
     else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes ? [out.bytes.buffer] : []; }
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
+    else if (m.op === 'chem.open') { out = chemOpen(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.states') { out = chemStates(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.state.vectors') { out = chemStateVectors(m); transfer = chemTransfer(out); }
@@ -150,7 +153,7 @@ function work(m) {
     else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
     else out = { error: 'unknown op ' + m.op };
-  } catch (err) { out = { error: String(err && err.message || err) }; transfer = []; }
+  } catch (err) { out = err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };
 }
 
@@ -176,6 +179,7 @@ export function gasStats(m = {}) {
  * to the main-thread road whenever the worker fails to load, errors or times out.
  *   chem.solve        { atoms (bohr), basis, charge, record? }           → the RHF ground state + the RPA roots + the field spec
  *   chem.ground       { atoms, basis, charge, record? }                  → STAGE ONE: the ground state alone, about a second earlier
+ *   chem.open         { lib, hash, basis }                               → THE RECORD ROAD (0.4.0 S4a): chem.ground's reply from a library record, no solver call
  *   chem.spectrum     { atoms, basis, charge }                           → STAGE TWO: the RPA roots and the TDA ladder of that ground state
  *   chem.states       { atoms, basis, charge }                           → the STATE REGISTER's ladder: the TDA states in the CANONICAL GAUGE (ω, f, μ, cluster, pivot) + the MO position matrices
  *   chem.state.vectors { ks: [K…] }                                     → the canonical X^K amplitude vectors of those states, nocc·nvir numbers each
@@ -191,7 +195,11 @@ export function gasStats(m = {}) {
  */
 const TRACE_CAP = 2e6;
 const chemRecords = new Map();
-let chemSol = null, chemKey = '', rtState = null;
+let chemSol = null, chemKey = '', rtState = null, solverCalls = 0;   // every moleculeRHF and rpa this worker ran (stat): a record's open adds none
+/** a REFUSAL is an answer, `{ refused: sentence }`, never `error` (which would send rack.js to the frame thread's road) */
+class Refused extends Error {}
+export const chemSolverCalls = () => solverCalls;
+const keyOf = (basis, charge, atoms) => JSON.stringify([basis, charge, atoms.map((a) => [a.Z, a.x, a.y, a.z])]);
 
 /** hand a parsed lab/vendor/bse record to the chemistry ops once; every chem op is then synchronous */
 export function chemRegister(basis, record) {
@@ -209,15 +217,20 @@ const reD = (engine) => { const D = engine.D; return Float32Array.from(D.re); };
    quantum chemist's D_μν = Σ c_μ c̄_ν, the TRANSPOSE-CONJUGATE of the ⟨a†_μ a_ν⟩ the flow evaluator is written in, so the
    card negates this imaginary part before handing it over (tests/molecular-flow.test.mjs holds the sign). */
 const bothD = (engine) => { const D = engine.D; return { D_re: Float32Array.from(D.re), D_im: Float32Array.from(D.im) }; };
-/** the converged ground state, its integrals and the report — cached on (atoms, basis, charge) */
-function ensureSolve(m = {}) {
+/** the converged ground state, its integrals and the report — cached on (atoms, basis, charge).  `live`: the caller needs the
+    integrals (TDHF), which a library record never carries — where its caps say a live solve is offered that is THIS solve, now
+    (the record's spectrum and states are kept: cached = fresh), and past the cap it is a sentence. */
+function ensureSolve(m = {}, live = false) {
   const basis = m.basis || 'sto-3g';
   if (m.record) chemRegister(basis, m.record);
   if (!Array.isArray(m.atoms) || !m.atoms.length) throw new Error('chem: atoms = [{ Z, x, y, z }] in bohr');
   const atoms = m.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z }));
-  const charge = m.charge || 0, key = JSON.stringify([basis, charge, atoms.map((a) => [a.Z, a.x, a.y, a.z])]);
-  if (chemSol && chemKey === key) return chemSol;
+  const charge = m.charge || 0, key = keyOf(basis, charge, atoms);
+  if (chemSol && chemKey === key && (chemSol.I || !live)) return chemSol;
+  const from = chemSol && chemKey === key ? chemSol : null;
+  if (from && !from.record.caps.tdhf) throw new Refused(`${from.record.id} is past the live cap: it opens only from its record, which stores no electron-repulsion integrals, so TDHF (KICK, RUN) cannot run on it`);
   const rec = recordOf(basis);
+  solverCalls++;
   /* THERE IS ONE INTEGRAL PASS AND IT TIMES ITSELF.  The card used to send `split: true` and this function then ran
      a SECOND, discarded, integral pass purely to have a number for it — 0.56 s of benzene's wall, and a warm second
      pass is not a measurement of the cold first one anyway.  `moleculeRHF` now reports `timings.integrals` from
@@ -236,9 +249,23 @@ function ensureSolve(m = {}) {
   /* THE NAMES (0.4.0 S1) ride with the ground: computed HERE, from the solve's own S, C and ε (S never leaves the
      worker), against the library's declared group (`m.symmetry`); ≤ 10 ms for benzene, timed in the reply. */
   ground.names = namesOf(sol, atoms, m.symmetry); ground.timings.names = ground.names.ms;
-  chemSol = { key, sol, I, ground, spectrum: null, R: null, states: null, atoms, basis, charge }; chemKey = key;
+  chemSol = { key, sol, I, ground, spectrum: from ? from.spectrum : null, R: null, states: from ? from.states : null, atoms, basis, charge, record: from ? from.record : null }; chemKey = key;
   driveState = null;                                                          // a drive belongs to the molecule it was built on
   return chemSol;
+}
+/** chem.open — THE RECORD ROAD (0.4.0 S4a · PLAN B2): a library record (lab/library.js) fills the one solve cache and the reply is
+    chem.ground's own, so no window downstream changes.  No solver runs — `solverCalls` (stat) does not move.  Its `caps` say what
+    it answers: the RPA sticks always, STATES when it stores the CIS ladder, TDHF only where a live solve is offered (above). */
+export function chemOpen(m = {}) {
+  const t = performance.now(), r = m.lib, bad = validateRecord(r);              // `lib`: `record` is the BSE basis record on every chem op
+  if (bad.length) throw new Refused(`the record ${(r && r.id) || '?'} failed validation (${bad.join('; ')}) and was not opened`);
+  const R = decodeRecord(r), atoms = R.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), b = basisFrom(atoms, recordOf(R.basis), { cart: true });
+  if (b.hash !== R.ground.hash) throw new Refused(`the record ${r.id} was made against another ${R.basis} basis file and was not opened`);
+  chemSol = { key: keyOf(R.basis, R.charge, atoms), sol: { C: R.C, D: R.D, orbitalEnergies: R.eps, nocc: R.ground.nocc, basis: b }, I: null,
+    ground: { ...R.ground, timings: { integrals: null, scf: null, rpa: null, names: null, open: +(performance.now() - t).toFixed(2) } },
+    spectrum: R.spectrum, R: null, states: R.states, atoms, basis: R.basis, charge: R.charge, record: { id: r.id, hash: m.hash || null, caps: r.caps } };
+  chemKey = chemSol.key; driveState = null;
+  return { ...chemGround({ atoms, basis: R.basis, charge: R.charge }), record: chemSol.record };
 }
 /* THE STABILITY VERDICT ON THE WIRE.  stabilityHessian's `lowestApB`/`lowestAmB` are lazy getters and a structured
    clone would READ them, putting two eigensolves of a 315 × 315 back on every benzene reply; the verdict itself is
@@ -252,7 +279,7 @@ const wireSolution = (s) => ({ ...s, hessian: wireHessian(s.hessian) });
 function ensureSpectrum(m = {}) {
   const c = ensureSolve(m);
   if (c.spectrum) return c;
-  const { sol, I } = c, t = performance.now();
+  const { sol, I } = c, t = performance.now(); solverCalls++;
   const R = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc });
   const tRpa = +(performance.now() - t).toFixed(2);
   c.R = R; c.ground.timings.rpa = tRpa;
@@ -299,7 +326,9 @@ function canonicalStates(sol, I, R) {
 }
 /** chem.states — the register's ladder.  Fresh arrays every call (the reply transfers them); X stays in the worker. */
 export function chemStates(m = {}) {
-  const c = ensureSpectrum(m), st = c.states, n = st.n, rMO = new Float64Array(3 * n * n);
+  const c = ensureSpectrum(m), st = c.states;
+  if (!st) throw new Refused(`${c.record.id}'s record stores no CIS states (its caps), so the STATES ladder is not offered for it`);
+  const n = st.n, rMO = new Float64Array(3 * n * n);
   for (let q = 0; q < 3; q++) rMO.set(st.rMO[q], q * n * n);
   return { hash: c.ground.hash, n, nocc: st.nocc, nvir: st.nvir, count: st.d, omega: Float64Array.from(st.omega), f: Float64Array.from(st.f),
     mu: Float64Array.from(st.mu), cluster: Int32Array.from(st.cluster), size: Int32Array.from(st.size), pivot: Float64Array.from(st.pivot), rMO };
@@ -461,7 +490,7 @@ export function chemRootVectors(k) {
 }
 /** chem.rt.init — runs (or reuses) the solve, builds the propagator, applies the δ-kick along the chosen axis */
 export function chemRtInit(m = {}) {
-  const { sol, I } = ensureSolve(m), n = I.n;
+  const { sol, I } = ensureSolve(m, true), n = I.n;
   const kick = m.kick || {}, axis = kick.axis || 'z', kappa = kick.kappa === undefined ? 1e-3 : +kick.kappa;
   if (AXIS[axis] === undefined) throw new Error(`chem: kick axis must be 'x', 'y' or 'z', got '${axis}'`);
   const dt = m.dt === undefined ? 0.01 : +m.dt, integrator = m.integrator || 'mmut';

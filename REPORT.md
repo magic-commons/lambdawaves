@@ -3782,3 +3782,132 @@ FRAME PROFILE gains no reader, because the per-tick work is three compares.
 (−95 net, −176 of window code), but the brief counted `dynamics.js`' 338 lines as the window's, and they are the shared
 library; the new features cost the rest (`stage-text.js` +133, the prose figure ~+40, the SHADOW footer +52, the caption
 ~+25).
+
+## 2026-10-08 · 0.4.0 S4a — THE PROOF AND THE STORE
+
+Built by the S4a LIBRARY builder (Opus 5.5) against `research/release-0.4.0/BRIEF-S4-LIBRARY.md` §S4a (PLAN §3 B2, §4 F5, §6
+row S4, §10 N1–N3), branch `worktree-agent-af45bc4ac1018dbcf` from `9395ab3` (`sos-s0`: S0–S3 merged, S1 NAMES in). Josh's
+asks: the library as expansions; a record past the live cap is the only road there (DOWNLOAD, never DISABLED); the iPad
+keeps what it installed. Waves numbered from 162. Hand-off: `research/release-0.4.0/S4a-BUILD.md`.
+
+### wave 162: The record, and the generator that is the app
+
+A record is the worker's own reply, re-encoded. `tools/orbital-library.mjs` runs the SHIPPED solver in node — the exported
+ops `lab/mathworker.js` runs for `chem.ground`, `chem.spectrum`, `chem.states` (ensureSolve → `moleculeRHF` at its defaults →
+`rpa` → the canonical gauge) — and writes `lab/library/<sha-256 of the file>.json` plus the catalogue `lab/library.json`.
+**Schema 1** (`lab/library.js validateRecord` is the reader's law; a reader ignores what it does not know): `input` (the atoms
+in bohr exactly as `moleculeAtoms` gives them, charge, basis and its file hash), `caps { orbitals, states, rpa, tdhf }`,
+`ground` (chem.ground's reply minus its clocks — energy, ε, the AO order, the basis hash, the stability verdict, the
+solutions, the dipole, S1's names), ε/C/D and the RPA sticks + TDA ladder as base64 little-endian f64 (exact), `states` (the
+canonical TDA ladder, X and the MO position matrices) when stored, the STEM fields (formula, point group and frame, mass,
+charge and multiplicity, dipole, HOMO–LUMO gap, geometry source, InChIKey and PubChem CID, a two-line blurb, the curated
+IEs — still UNCHECKED, S1's finding — and the sources), the molecule's page (`moleculeLatex`), and an `oracle`: no record is
+written further than 1e-8 Eh from an independent PySCF energy, or unconverged, or on a reference that is not a minimum, or
+failing validation, or that does not open through `chem.open` to its own solve with zero solver calls. `--check` regenerates
+and compares bytes: two runs byte-identical. **Benzene is the proof** (36 AO, caps orbitals+states+rpa+tdhf, 1 257 474 B —
+1.06 MB of it the 315² CIS amplitudes, 136 KB without them — generated in 2.1 s, oracle Δ −2.6e-13 Eh); **lysine is the
+64-AO fixture** (the S4 census geometry, past the cap, caps orbitals+rpa — its 960² ladder would be 7.4 MB — 355 110 B,
+30.9 s, oracle Δ 1.1e-10 Eh against the census's PySCF −487.74428105991785). Lysine's InChIKey and CID are entered from
+memory and marked UNVERIFIED in the record; S4b checks them against PubChem before BIO ships.
+
+### wave 163: chem.open — the record road, zero solver calls
+
+`chem.open { lib, hash, basis }` (beside `ensureSolve`) validates and decodes the record, rebuilds the basis (`basisFrom`, no
+integrals), refuses one made against another basis file, fills the ONE solve cache and answers `chem.ground`'s own reply, so
+no window downstream changed. `solverCalls` (the worker's `stat`) counts every `moleculeRHF` and `rpa`: an open adds none, nor
+do the `chem.spectrum`, `chem.states`, `chem.state.vectors` and `chem.drive.init` that follow it. TDHF needs the ERI, which a
+record never stores: on an under-cap record a KICK is the one solve road, on demand (once; the record's ladder kept); past
+the cap it is refused. A record without its CIS ladder refuses STATES. **A refusal is an answer, `{ refused: sentence }`, never
+`error`** — `error` would send rack.js to run the work again on the frame thread. Cached = fresh in node, one engine
+(`tests/library.test.mjs`): bit for bit on E, ε, nocc, C, D, ψ and ρ at four points off every symmetry element, the names
+(D₆h, HOMO 1e₁g), the 315 RPA sticks, the TDA ladder, the STATES ladder and X; the open 8.9–10.2 ms. In Firefox against the
+node-made record (`tests/library.browser-test.mjs`) it is the solver's own convergence, measured: |ΔE| 1.3e-12, |Δε| 8.2e-14,
+|ΔD| 7.4e-14, twelve degenerate-subspace projectors 6.4e-10, |ΔC| 8.3e-10 with every sign kept, every name the same,
+|Δω| 1.8e-13. **A finding:** SpiderMonkey and V8 round `Math.exp` differently in the last ulp, so a record is bit-exact only on
+the engine that made it — which is why the digest lock (wave 166) opens benzene from its record, never from the browser's
+own solve. The frame-thread fallback (a browser with no Worker) is now the worker's own `chemGround` + `chemSpectrum`
+(−27 lines; probed in Firefox: the same energy, `half` and TDA strengths as the worker): the hand-built copy it replaced
+answered its TDA ladder outside the canonical gauge and its own `half`.
+
+### wave 164: The store — library/** the one exemption, lw-data-v1 across builds
+
+`lab/sw.js` §1b names `DATA = ['library/']` and `DATA_CACHE = 'lw-data-v1'`: a file under a DATA root is content-addressed
+device content — deployed, never precached. **§5's fetch code was edited once, deliberately**: a DATA path is answered from
+`lw-data-v1` when the page has stored it, else from the network, and the worker never writes there (the page stores a record
+only after its bytes hash to its name); §4's activate collects only `lw-lab-*`, so a new build keeps every installed record.
+`tests/pwa.test.mjs` and `tools/build-deploy.mjs` READ the list from sw.js — the ONE rule the 0.5.0 kit-file policy ("precache
+what a root reaches", N4) extends rather than a second — and the test asserts every catalogue row's file exists, hashes to
+its name and carries its byte count, that nothing else sits in `library/`, that the catalogue is precached, and drives the
+route (§E6: an uninstalled record goes to the network and nothing is stored; an installed one is served with no fetch; a new
+build's activate keeps the store). The catalogue `lab/library.json` is precached: it is the root that reaches the records
+(3.7 KB). Precache 188 files, 4.53 MiB.
+
+### wave 165: MOLECULES opens from the store; DOWNLOAD, never DISABLED; the LIBRARY scope
+
+`lab/molecules.js` reads the catalogue once (a top-level await; node reads the file): a listed molecule gains
+`records[basis]`; one that only its record opens joins `MOLECULE_BY_ID` as `RECORD_ONLY` (never `MOLECULES`, which the PySCF
+oracle covers row for row), so the menu, the atom labels, the copy and the stage text meet it like any other. **The
+benzene-cap law:** past the cap WITH a record a row is enabled and reads `C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD` until the
+record is on this device (the lamp is re-read when the menu opens: an evicted record says DOWNLOAD again, never a broken
+preset); a basis change on it is refused with a sentence and its 6-31+G* button is disabled; a KICK is refused with a sentence.
+`chemview.js` solve(): an installed record — or one past the cap, or one a project or link names — is fetched, checked against
+its name, kept and opened by `chem.open`; under the cap a record that cannot be had is the live solve and the status says why;
+past it MOLECULES names what refused and the rest of the project restores. Progress and failure are said in the status line
+and, for a record-only row, in its own option text (`downloading 34 %`). **The iPad law:** `navigator.storage.persist()` is
+asked once, on the user's first install press, never at boot (Firefox prompts; an unanswered prompt waits 4 s), the answer
+remembered in its own LIBRARY key `lambdawaves.q0.library`; the persisted answer and the quota are SHOWN (`persisted · 1.3 of
+7861 MB used`); in a Safari tab it is not asked and the line says "add λWAVES to the Home Screen" — KEEP ON THIS DEVICE waits
+for the M5. A project holds `instruments.chem.library = { id, hash, nameKey }` — PROJECT, moving with `preset` and `basis`
+(one history row per change of molecule); `nameKey` is the chosen orbital's S1 name, the portable half (benzene's HOMO
+`{ D6h, e1g, 1 }`; C₁ lysine names nothing, so its index rides alone). An open whose exact hash this device still holds opens
+that record, else the catalogue's current one with the orbital found by name, and says so. `docs/STATE-SCOPES.md` gains
+LIBRARY and its three rows; `tests/new-project.test.mjs` learns it. `__LW.chem.records() / install() / remove() /
+workerStat()` are S4b's header seat and the gate's ledger.
+
+**THE M5 COMMAND FOR JOSH** (the Web Inspector console of the iPad's λWAVES page, once in a Safari TAB and once in the
+Home-Screen app; `research/release-0.4.0/measure/MEASURE.md` §4):
+
+```js
+(async()=>{const S=navigator.storage,b=await S.persisted(),g=await S.persist(),e=await S.estimate();console.log(JSON.stringify({ua:navigator.userAgent,standalone:!!navigator.standalone||matchMedia('(display-mode: standalone)').matches,persistedBefore:b,persistGranted:g,persistedAfter:await S.persisted(),usageMB:+(e.usage/1048576).toFixed(1),quotaMB:Math.round(e.quota/1048576)}))})()
+```
+
+### wave 166: COST refit, and benzene and lysine in the lock before the kernel moves
+
+**COST** (N2, `tools/perf/cost-refit.mjs`): the same model and work measures (eriWork read off md.js's basis, so the 6-31+G*
+row counts its real primitives), relative-error NNLS over S0's five node rows — H₂O 7 ms, N₂ 16, C₆H₆ 1566, C₂H₄/6-31+G* 2091,
+naphthalene 17 536 — a 4.551569e-5, b 6.446788e-6, c 5.564985, predicted ÷ measured 0.73–1.14. Benzene's menu text
+`~9.6 s` → **`~1.7 s`** (chemview.js' header and `tests/chem.browser-test.mjs` L6 moved with it); the live cap stays benzene;
+nothing crosses it; Br₂ stays below it in the model. **A finding for Josh:** measured the same day in node, warm, Br₂ takes
+2.0 s against benzene's 1.7 s — the term the model lacks (SCF iterations; Br₂ takes ~55) is now its largest error, so on the
+clock Br₂ is 17 % past the cap. The model stands until he rules (the cap by the model, or Br₂ by a record).
+`COST.browserFactor` is now the measured 1.23 (Firefox ÷ node on benzene) instead of an unused 1.0: the menu prints the node
+model, and chem's L7 budget, which times Firefox, scales by it (glycine measured 1145–1197 ms in Firefox against the node
+prediction's 666 ms and a 1332 ms budget before; 1638 ms now). **The lock:**
+`tools/perf/digest-lock.mjs` gains three states opened from their records — benzene (the cap-40 tier), lysine by density
+(64 AO: the widest tier, full) and lysine's HOMO by ORBITAL — and `--states`. The 1004-value lock GREEN on this tree first
+(`--states` the thirteen, 51 s); `research/release-0.4.0/measure/digest-lock-s4a.json` written here, **1148 values** (the 1004
+identical, plus 144), and checked GREEN on a second run (0 readback differences, unrepeatable none, 59 s). S4c's check:
+`node tools/perf/digest-lock.mjs --check --query gastab=0 --fixture research/release-0.4.0/measure/digest-lock-s4a.json`.
+
+### wave 167: The `library` suite, the gates, the lines
+
+`tests/library.browser-test.mjs` (new): DOWNLOAD never DISABLED and a boot that creates no store → cached = fresh with zero
+solver calls (benzene live, then installed and opened from its record in 35–43 ms, 10–15 ms of it the worker's open) →
+INSTALL by a press (lysine downloaded, verified, kept; persist asked once; the answer and the quota shown; 6-31+G* and KICK
+refused with sentences) → OPEN OFFLINE (every `library/` fetch refused: the project opens lysine from `lw-data-v1`, its palette
+restores, the settings byte-identical outside the WORKSPACE keys) → EVICT → "not installed" (the same project offline
+restores the rest and MOLECULES says `lysine's record is not open: the network refused it (offline) — it opens only from its
+record`; the row says DOWNLOAD again).
+
+**Gates.** `bash test.sh node` exit 0, 85 suites (the first run's one red was `pwa`, from my own edit of `lab/library.js`
+during the run; green after `--write`). `node tools/orbital-library.mjs --check` in step (33 s; lysine is the 31 s of it);
+`node tools/new-project.mjs --check` in step; `node tools/build-deploy.mjs --no-test` complete (the two records shipped and
+not precached, by rule). Browser on 8753/5221, one at a time with a 4 s pause, all GREEN on the final tree: chem 54/54,
+molecular-names, register 17/17, history (39), new-project, offer 16/16, library (new), molecule-demos, latex-copy. The 1004-
+and 1148-value locks GREEN (above). Nothing was re-run alone: no timing or lock red was seen.
+
+**Lines.** `lab/*.js` 35,881 → 36,131: **+250 — "subtract, don't add" is NOT met.** The store and its schema are a new module
+(`library.js` +124), the record road and the library seat in `chemview.js` (+52 net, after the fallback's −27), the
+catalogue and the cap law in `molecules.js` (+29), `chem.open` and the refusals in `mathworker.js` (+29), DATA in `sw.js`
+(+16). The one subtraction found was the hand-built fallback; the generator, the refit and the lock live in `tools/`.
+Hand-off: `research/release-0.4.0/S4a-BUILD.md`.

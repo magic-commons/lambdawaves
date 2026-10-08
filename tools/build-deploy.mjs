@@ -136,8 +136,10 @@ const SHIP_EXTRA = [
  * proves the predicate and sw.js's prose still agree — that check is not repeated here. */
 /* M10 (2026-09-24): …and a module STAGED under tests/wiring.test.mjs's ALLOWLIST, read from that list exactly as pwa.test reads it. */
 const STAGED = new Set([...((readFileSync(path.join(ROOT, 'tests', 'wiring.test.mjs'), 'utf8').match(/\nconst ALLOWLIST = \[\n([\s\S]*?)\n\];/) || [])[1] || '').matchAll(/\{ file: 'lab\/([^']+)'/g)].map((m) => m[1]));
+/* 0.4.0 S4a: …and a file under one of sw.js §1b's DATA roots (library/: the orbital records, deployed, never precached), READ from sw.js. */
+const DATA = JSON.parse((readFileSync(path.join(LAB, 'sw.js'), 'utf8').match(/\nconst DATA = (\[[^\]]*\]);/) || [, '[]'])[1].replace(/'/g, '"'));
 const NOT_PRECACHED = (labRel) =>
-  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel);
+  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel) || DATA.some((d) => labRel.startsWith(d));
 
 /* Deploy-only files: correctly absent from the precache, because they are not in lab/ at all. */
 const DEPLOY_ONLY = new Set(['_headers', '_redirects', 'robots.txt', ...SHIP_EXTRA.map(([f]) => at(f))]);

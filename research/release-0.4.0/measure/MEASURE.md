@@ -212,6 +212,27 @@ judges these against the governor's tier.
 
 ---
 
+## §4 · The M5's persisted storage (0.4.0 S4a — PLAN B2's iPad law): **M5 pending**
+
+The LIBRARY keeps installed records in the Cache Storage `lw-data-v1` and asks `navigator.storage.persist()` once, on the first
+INSTALL press (`lab/library.js` `persistOnce`). In a Safari TAB it is NOT asked and KEEP ON THIS DEVICE is not offered, because
+Safari clears script-writable storage after seven days without a visit unless the origin is persisted — and whether a tab is
+granted it is exactly what nobody has measured. **The one command for Josh** (paste into the Web Inspector console of the iPad's
+λWAVES page — on the Mac: Safari › Develop › the iPad › the tab — once in a Safari TAB and once in the Home-Screen app):
+
+```js
+(async()=>{const S=navigator.storage,b=await S.persisted(),g=await S.persist(),e=await S.estimate();console.log(JSON.stringify({ua:navigator.userAgent,standalone:!!navigator.standalone||matchMedia('(display-mode: standalone)').matches,persistedBefore:b,persistGranted:g,persistedAfter:await S.persisted(),usageMB:+(e.usage/1048576).toFixed(1),quotaMB:Math.round(e.quota/1048576)}))})()
+```
+
+The same three calls, made through `lab/library.js` by `tests/library.browser-test.mjs` in Firefox 157 with the gate's
+prompt-testing prefs (which answer Firefox's doorhanger "allow"), read persisted `true` and a quota of 7861 MB; that is a
+harness answer, not a user's. **The M5 row:** in a
+tab, `persistGranted` decides the iPad law — `true` and the S4b header may offer KEEP ON THIS DEVICE in a Safari tab too
+(`lab/library.js` `safariTab()` is the one line that withholds it); `false` and the honest advice stays "add λWAVES to the
+Home Screen". In the Home-Screen app the answer should be `true`; if it is not, say so in REPORT before S4b ships a section.
+
+---
+
 ## Files
 
 | file | what |

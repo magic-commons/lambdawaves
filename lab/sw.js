@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./camera-law.js',                                               'd38b134cdbd2'],
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  '7eae68816e12'],
-  ['./chemview.js',                                                 '7bcc3de0764c'],
+  ['./chemview.js',                                                 '3841027982e2'],
   ['./clock.js',                                                    '6431963e1506'],
   ['./cornell.js',                                                  '70b64dee2baa'],
   ['./demos/benzene.lambdawaves.json',                              '5d1e0eb31304'],
@@ -96,10 +96,12 @@ const PRECACHE = [
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              '4511e84cddc9'],
+  ['./library.js',                                                  '8a6ca8699f81'],
+  ['./library.json',                                                '8c08cf85652b'],
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./main.js',                                                     'c57d65038f30'],
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
-  ['./mathworker.js',                                               '70d383f8d07e'],
+  ['./mathworker.js',                                               '16f739ce56b2'],
   ['./md.js',                                                       '63f8914d7dd3'],
   ['./menubar.js',                                                  'e266c664def0'],
   ['./meters.js',                                                   '2214d2302695'],
@@ -159,7 +161,7 @@ const PRECACHE = [
   ['./molecular-session.js',                                        '2a97abc1f4db'],
   ['./molecule-state.js',                                           '5a3b95de808b'],
   ['./molecule.js',                                                 'a2f3c70b3705'],
-  ['./molecules.js',                                                'bf3d8c9cc979'],
+  ['./molecules.js',                                                'a871ee2e21c7'],
   ['./moleculeview.js',                                             'c85cdab5e2c1'],
   ['./momentum.js',                                                 '0b32cc20e73a'],
   ['./motion-pref.js',                                              '34329c802c8b'],
@@ -203,7 +205,7 @@ const PRECACHE = [
   ['./stage-text.js',                                               'b6e2abd52ce1'],
   ['./state.js',                                                    'a75b089d5182'],
   ['./statelink.js',                                                '95ab7b495303'],
-  ['./statesview.js',                                               'd81e9ea85496'],
+  ['./statesview.js',                                               '4cb698a1e3c6'],
   ['./sturmian.js',                                                 '47ed5b7c81da'],
   ['./sturmianreg.js',                                              '1ce5f44b2fae'],
   ['./sw-client.js',                                                '0f1ffadd0978'],
@@ -219,6 +221,15 @@ const PRECACHE = [
   ['./worker-pool.js',                                              '393cc6e1cee2'],
 ];
 
+/* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────
+ * A file under a DATA root is CONTENT-ADDRESSED DEVICE CONTENT: deployed, NEVER precached, fetched when the lab asks for it and
+ * kept by the page in DATA_CACHE, a name no build changes — so a new build never clears an installed record (§4 collects only
+ * PREFIX caches).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
+ * an ordinary precached file.  tests/pwa.test.mjs and tools/build-deploy.mjs READ this list: it is the one rule, and the 0.5.0
+ * kit-file policy ("precache what a root reaches", PLAN §10 N4) extends it rather than adding a second. */
+const DATA = ['library/'];
+const DATA_CACHE = 'lw-data-v1';
+
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
 const NEVER_PRECACHE = [
   ['sw.js',                'a worker that caches itself can never be updated: the browser fetches sw.js through its own byte-comparison path, and a Cache API copy in front of that is the classic way to strand a build forever.'],
@@ -226,6 +237,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
+  ['a DATA root (§1b: library/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install.'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
 ];
 
@@ -236,6 +248,7 @@ const NEVER_CACHE_AT_RUNTIME = [
   ['a cross-origin request',    'lab/ has none (the test proves it), and an opaque response has status 0 and an unreadable body — it cannot be validated, so it is never kept.'],
   ['any navigation that is not the app entry', '/REPORT.md, /LICENSE, /NOTICE and the eight licence texts ABOUT opens in a new tab are DOCUMENTS, not the lab. They change every wave; a cached build log is a lie. This used to be enforced by a path prefix ("above /lab/"), which silently became a no-op the day the lab moved to its own origin and SCOPE became "/" — every navigation on the hostname was then answered with the lab\'s own index.html, and the nine document links in ABOUT each opened a second copy of the lab. Only the ENTRY set is served: everything else is the network\'s, which is also what restores the real 404 wrangler.jsonc\'s not_found_handling asks for. Offline a document fails, which is honest — it is not the lab.'],
   ['anything not already in §1', 'this worker NEVER grows a runtime cache. The precache is the whole app; a URL that is not in it is a URL the lab does not need, so it goes to the network and nothing is stored.'],
+  ['a DATA path (§1b) the page has not installed', 'it is answered from lw-data-v1 when the page has stored it and from the network otherwise — and the worker writes nothing there: the page stores a record only after its bytes match its name (lab/library.js).'],
 ];
 
 /* ── 2. THE BUILD NAME — a pure function of §1's contents, computed here, written nowhere ───────────────
@@ -331,6 +344,9 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;                      // never cross-origin / opaque
   if (!url.pathname.startsWith(SCOPE)) return;                          // never above the mount (a no-op at an origin root — see above)
   if (req.mode === 'navigate') { if (!ENTRY.has(url.pathname)) return; event.respondWith(serve(INDEX, req)); return; }   // the APP ENTRY only; a document is the network's
+  if (DATA.some((d) => url.pathname.startsWith(SCOPE + d))) {           // §1b: a record — the device's copy, else the network; stored by the page only
+    event.respondWith(caches.open(DATA_CACHE).then((c) => c.match(url.origin + url.pathname)).then((hit) => hit || fetch(req))); return;
+  }
   if (!BY_PATH.has(url.pathname)) return;                               // not ours: network, and store nothing
   event.respondWith(serve(url.pathname, req));
 });
@@ -386,4 +402,4 @@ async function announce(msg) {
 }
 
 /* Read by tests/pwa.test.mjs, which loads this file for real and drives the handlers above. */
-self.LW_SW = { PREFIX, BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, digest };
+self.LW_SW = { PREFIX, BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, DATA, DATA_CACHE, digest };

@@ -25,7 +25,9 @@
  * THE CAP IS BENZENE (Josh: "Have Benzene be the size cap … Benzene was probably the longest I could tolerate
  * waiting").  `COST` below is a two-term linear model of `moleculeRHF`'s wall time, fitted to measured node timings;
  * every entry carries `predictedMs` from it, and an entry whose prediction exceeds benzene's is listed but DISABLED
- * with the reason.  The model is a prediction and is labelled as one — the status line always shows the real timing.
+ * with the reason — unless the LIBRARY has its record (0.4.0 S4a, lab/library.js): past the cap a record is the only
+ * road, and the row says DOWNLOAD, never DISABLED.  The model is a prediction and is labelled as one — the status line
+ * always shows the real timing.
  */
 import { ANGSTROM } from './md.js';
 
@@ -357,16 +359,24 @@ const RAW = [
 
 /* ── THE COST MODEL ───────────────────────────────────────────────────────────────────────────────────────────
  * ms ≈ a·eriWork + b·rpaWork + c, fitted by NON-NEGATIVE least squares to MEASURED node timings of the whole
- * worker path — lab/mathworker.js's ensureSolve: the split integral pass, then `moleculeRHF` at its DEFAULTS (so
- * BOTH the SAD and the core guess are run, plus the stability probe and the two Hessian blocks), then the RPA
- * inspector.  All 54 entries were measured 2026-09-12; three are named below as the anchors.
+ * worker path — lab/mathworker.js's ensureSolve: the integral pass, then `moleculeRHF` at its DEFAULTS (so BOTH the
+ * SAD and the core guess are run, plus the stability probe and the two Hessian blocks), then the RPA inspector.
+ * REFIT 2026-10-08 (0.4.0 S4a, PLAN §10 N2): the 2026-09-12 fit predicted benzene at 9.6 s where S0 measured 1.57 s in
+ * node (1.92 s Firefox, 1.46 s Chromium) — the engine had become 5–8× faster and the model had not moved.  The new
+ * constants are tools/perf/cost-refit.mjs's: the same two work measures (read off md.js's basis, so the 6-31+G* row
+ * counts its real primitives), RELATIVE-error NNLS over S0's five node rows (research/release-0.4.0/measure/
+ * benzene-node.json: H₂O 7 ms, N₂ 16, C₆H₆ 1566, C₂H₄/6-31+G* 2091, naphthalene 17 536), every row inside 0.73–1.14×;
+ * nothing crosses the cap that did not before, and Br₂ stays below benzene IN THE MODEL.  Measured the same day in node,
+ * warm: Br₂ 2.0 s against benzene 1.7 s — the term the model lacks (SCF iterations: Br₂ takes ~55) is now its largest
+ * error, so on measurement Br₂ is 17 % past the cap.  Whether the cap is the model or the clock is Josh's ruling
+ * (S4a-BUILD.md); the model stands until he makes it.
  *   eriWork = Σ over the 8-fold-unique shell quartets of (components_a·components_b·components_c·components_d) × 3⁴,
  *             the exact trip count of lab/md.js's twoElectron inner loop — the integral pass.
  *   rpaWork = (nocc·nvirt)²·nAO², the occupied-virtual pair space squared: lab/rpa-inspector.js's A ± B build and
  *             lab/rhf-molecule.js's stabilityHessian, which together are HALF of benzene's wall time (4.2 s of 10.1).
  *
  * WHY NOT (eriWork, nAO³), THE PAIR THE COMMISSION NAMED.  Because it is wrong by 4.6× and, worse, in the wrong
- * ORDER on exactly the case that had to be measured rather than assumed.  Fitted to the same 54 points:
+ * ORDER on exactly the case that had to be measured rather than assumed.  Fitted to the 2026-09 fit's 54 points:
  *     a = 1.198562e-4, b = 7.903301e-2, c = 0   →  Br₂ 7410 ms predicted against 4005 measured,
  *                                                  C₆H₆ 5972 ms predicted against 10053 measured.
  * That model says dibromine is the more expensive molecule and it is not: Br₂ has 38 AOs to benzene's 36 and a
@@ -378,17 +388,19 @@ const RAW = [
  * WHAT THIS IS NOT.  A PREDICTION on one machine, printed in the menu so a choice can be made before paying for it.
  * The status line replaces it with the measured integral/scf/rpa split the moment the answer lands.  It does not
  * model the SCF iteration count — a heavy atom takes ~55 iterations to reach the residual's round-off floor where
- * H₂O takes 8 — so a heavy-atom prediction is the loosest one here (worst 1.36× over every entry above 100 ms). */
+ * H₂O takes 8 — so a heavy-atom prediction is the loosest one here (2026-09: worst 1.36× above 100 ms; 2026-10: the
+ * diffuse 6-31+G* row, whose SCF iterations the model cannot see, at 0.73×). */
 export const COST = {
-  fitted: '2026-09-12',
-  machine: 'node 22.22.1 on the λWAVES workstation (Linux 7.0.0-31-generic, RTX 3070 box); the browser worker measured 0.94× the node figure on benzene (9.5 s against 10.1 s)',
+  fitted: '2026-10-08',
+  machine: 'node 22.22.1 on the λWAVES workstation (Ryzen 5 5600G, Linux 7.0.0-34, RTX 3070 box); the browser worker measured 1.23× the node figure in Firefox and 0.93× in Chromium on benzene (MEASURE.md §2)',
   model: 'ms = a·eriWork + b·rpaWork + c,  rpaWork = (nocc·nvirt)²·nAO²',
-  a: 1.204028e-4, b: 5.665865e-5, c: 10.78,
-  fit: 'non-negative least squares over all 54 measured entries; worst |ratio| 1.36 above 100 ms, 2.9 below it (where the absolute error is single-digit milliseconds)',
-  anchors: { H2O: 9, C5H5N: 7531, C6H6: 10053 },              // the three named measurements, in ms
+  a: 4.551569e-5, b: 6.446788e-6, c: 5.564985,
+  fit: 'relative-error NNLS over S0\'s five node rows (tools/perf/cost-refit.mjs); predicted ÷ measured 1.08 H₂O · 0.82 N₂ · 1.09 C₆H₆ · 0.73 C₂H₄/6-31+G* · 1.14 C₁₀H₈',
+  anchors: { H2O: 7, C6H6: 1566, C2H4_631: 2091, C10H8: 17536 },  // S0's node medians, ground + spectrum, in ms
+  previous: { fitted: '2026-09-12', a: 1.204028e-4, b: 5.665865e-5, c: 10.78, anchors: { H2O: 9, C5H5N: 7531, C6H6: 10053 } },
   rejected: { model: 'ms = a·eriWork + b·nAO³ + c', a: 1.198562e-4, b: 7.903301e-2, c: 0,
     why: 'worst 4.63× above 100 ms, and it puts Br₂ (7410 predicted, 4005 measured) ABOVE C₆H₆ (5972 predicted, 10053 measured) — nAO³ cannot see the occupation, and the pair space is where benzene\'s time goes' },
-  browserFactor: 1.0,
+  browserFactor: 1.23,   // the gate's browser (Firefox) ÷ node on benzene, MEASURE.md §2: the menu prints the node model; a budget that times a browser scales by this
 };
 
 /* ── the derived counts ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -465,15 +477,31 @@ const SYMMETRY_OF = new Map(Object.entries(SYMMETRY).flatMap(([group, ids]) => i
   const [id, frame, geomTol, fallback] = Array.isArray(e) ? e : [e];
   return [id, { group, ...(frame ? { frame } : {}), ...(geomTol ? { geomTol } : {}), ...(fallback ? { fallback } : {}) }];
 })));
-export const MOLECULES = RAW.map((m) => {
+const derive = (m) => {
   const charge = m.charge || 0, c = counts(m.ang), work = eriWork(c.widths);
   const nElec = c.nElec - charge, nocc = nElec / 2;
   const rw = rpaWork(c.nAO, nocc);
-  return { ...m, symmetry: SYMMETRY_OF.get(m.id) || { group: 'C1' }, charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
+  return { ...m, symmetry: m.symmetry || SYMMETRY_OF.get(m.id) || { group: 'C1' }, charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
     eriWork: work, rpaWork: rw, predictedMs: Math.round(predictMs(work, rw)),
     instability: UNSTABLE[m.id] || null };
-});
-export const MOLECULE_BY_ID = new Map(MOLECULES.map((m) => [m.id, m]));
+};
+export const MOLECULES = RAW.map(derive);
+/* ── THE LIBRARY'S CATALOGUE (0.4.0 S4a · PLAN B2) ─────────────────────────────────────────────────────────────────────
+ * lab/library.json (tools/orbital-library.mjs) names every orbital record the lab can install — lab/library/<sha-256>.json,
+ * deployed and never precached (lab/library.js).  It is read ONCE, before this module finishes (a top-level await; node reads
+ * the file), so every reader of this table — the menu, the atom labels, the copy, the stage text — meets a record's molecule
+ * like any other.  A molecule listed above gains `records[basis]`; one past the cap that only its record opens (lysine) joins
+ * MOLECULE_BY_ID as RECORD_ONLY, never MOLECULES, whose 54 entries the PySCF oracle file covers row for row. */
+const CATALOGUE = await (async () => {
+  const u = new URL('./library.json', import.meta.url);
+  try { const fs = u.protocol === 'file:' && globalThis.process?.getBuiltinModule?.('fs');
+    return JSON.parse(fs ? fs.readFileSync(u, 'utf8') : await (await fetch(u)).text()); } catch (_) { return { rows: [] }; }
+})();
+export const RECORD_GROUP = { id: 'library', label: 'LIBRARY · FROM ITS RECORD' };
+export const RECORD_ONLY = CATALOGUE.rows.filter((r) => r.molecule && !RAW.some((m) => m.id === r.id))
+  .map((r) => derive({ id: r.id, group: RECORD_GROUP.id, library: true, ...r.molecule }));
+for (const m of [...MOLECULES, ...RECORD_ONLY]) m.records = Object.fromEntries(CATALOGUE.rows.filter((r) => r.id === m.id).map((r) => [r.basis, r]));
+export const MOLECULE_BY_ID = new Map([...MOLECULES, ...RECORD_ONLY].map((m) => [m.id, m]));
 /* ── THE LARGER BASIS (2026-09-18).  6-31+G* is vendored for H, C, N, O, F: 2 functions on hydrogen, 19 Cartesian ones on
  * a heavy atom.  It is offered where every atom is in the record AND the molecule stays near the benzene cap — MEASURED
  * on this engine (research/molecular-waves-2026-09-18/basis/engine-631.json): C₂H₄ at 46 AOs is 2.3 s, C₂H₆ at 50 is
@@ -492,14 +520,15 @@ export function basis631(id) {
 /* THE CAP IS BENZENE'S OWN PREDICTION, so the rule is one sentence: nothing slower than benzene. */
 export const CAP_ID = 'C6H6';
 export const CAP_MS = MOLECULE_BY_ID.get(CAP_ID).predictedMs;
-export const CAP_RULE = `the cap is benzene: ~${(CAP_MS / 1000).toFixed(1)} s predicted, 36 AOs, 42 electrons. An entry predicted slower than that is listed and disabled, and so are the two whose RHF reference is not a minimum (CuH, ZnH₂ — no RPA spectrum exists for them).`;
-for (const m of MOLECULES) {
+export const CAP_RULE = `the cap is benzene: ~${(CAP_MS / 1000).toFixed(1)} s predicted, 36 AOs, 42 electrons. An entry predicted slower than that is listed and disabled — unless the library carries its record, which is then its only road: its row says DOWNLOAD until the record is on this device — and so are the two whose RHF reference is not a minimum (CuH, ZnH₂ — no RPA spectrum exists for them).`;
+for (const m of [...MOLECULES, ...RECORD_ONLY]) {
   m.over = m.predictedMs > CAP_MS * 1.02;                     // 2 %: benzene must never disable itself by rounding
-  m.reason = m.over ? `over the benzene cap (~${(CAP_MS / 1000).toFixed(1)} s)`
+  m.recordOnly = m.over && !!m.records['sto-3g'];            // PLAN F5: never a disabled row where a download would do
+  m.reason = m.recordOnly ? null : m.over ? `over the benzene cap (~${(CAP_MS / 1000).toFixed(1)} s)`
     : m.instability ? 'RHF/STO-3G is not a minimum here (A−B ≺ 0) and, since 2026-09-18, its SCF does not converge within 200 cycles on this engine — no spectrum and no state ladder exist' : null;
   /* the SHORT form goes in the option text itself.  A `title` on an <option> is unreliable in a native select and
      lab/mir/control-help.js moves titles to data-help anyway, so a menu that refuses has to say so in its own row. */
-  m.shortReason = m.over ? 'over the cap' : m.instability ? 'not a minimum' : null;
+  m.shortReason = m.over && !m.recordOnly ? 'over the cap' : m.instability ? 'not a minimum' : null;
   m.disabled = !!m.reason;
 }
 export const UNDER_CAP = MOLECULES.filter((m) => !m.over);
@@ -513,11 +542,11 @@ export const moleculeAtoms = (id) => {
 };
 /** the entry's charge, which chem.solve needs beside the atoms */
 export const moleculeCharge = (id) => (MOLECULE_BY_ID.get(id) || MOLECULES[0]).charge;
-/** one line for the dropdown: "H₂O · 7 AO · ~11 ms", "C₆H₆ · 36 AO · ~9.6 s" — milliseconds below a second, since
+/** one line for the dropdown: "H₂O · 7 AO · ~8 ms", "C₆H₆ · 36 AO · ~1.7 s", "C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD" — milliseconds below a second, since
     half this library solves in under 50 ms and rounding all of it to "~0.0 s" would tell nobody anything */
 export const showMs = (ms) => (ms < 950 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
-export const optionLabel = (m) => `${m.formula.replace(/<\/?m>/g, '')} · ${m.nAO} AO · ~${showMs(m.predictedMs)}`
-  + (m.shortReason ? ` · ${m.shortReason}` : '');
+export const optionLabel = (m, installed = true) => `${m.formula.replace(/<\/?m>/g, '')} · ${m.nAO} AO · `
+  + (m.recordOnly ? 'record' + (installed ? '' : ' · DOWNLOAD') : `~${showMs(m.predictedMs)}` + (m.shortReason ? ` · ${m.shortReason}` : ''));
 /** the ring builders' closure residuals in ångström — a parameter set that does not close is a broken geometry */
 export const RING_RESIDUALS = { C4H4O: FURAN.residual, C5H5N: PYRIDINE.residual };
 /** the eight ids the laws pin, in their original order; `preset` semantics never leave this set behind */

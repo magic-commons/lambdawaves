@@ -6,8 +6,10 @@
  * shell species in seven <optgroup>s, each option carrying its Cartesian AO count and lab/molecules.js's PREDICTED
  * solve time, and each over-cap or unsolvable entry disabled WITH ITS REASON on the option itself.  The node is
  * paletteview.js's `<select class="sel">` — the same element, the same class, the same 44-px seat — because the
- * lab already had a dropdown and a second one would have been a second design.  The CAP is benzene: ~9.6 s
- * predicted, 36 AOs, 42 electrons, which is the longest wait this window asks anyone to accept.
+ * lab already had a dropdown and a second one would have been a second design.  The CAP is benzene: ~1.7 s
+ * predicted (COST refit 2026-10-08; 9.6 s before), 36 AOs, 42 electrons, which is the longest wait this window asks
+ * anyone to accept.  Past it a molecule opens only from its LIBRARY record (0.4.0 S4a, lab/library.js): its row says
+ * DOWNLOAD until the record is on this device, and its open is the worker's chem.open — no solver call.
  *
  * THE FIELD IS NOT THIS WINDOW'S (2026-09-18).  lab/molecular-session.js owns the volume; this card is a PRODUCER
  * of two of its models, 'ground' and 'tdhf', and hands it one tagged product a frame.  Nothing here calls the
@@ -22,14 +24,15 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
-import { MOLECULES, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
+import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
 import { orbitalName, forms } from './names.js';
+import { fetchRecord, installed, removeRecord, persistOnce, storageInfo } from './library.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
  * the first eight of their groups and their arrays are frozen there.  These three exports keep their old shapes so
  * nothing that read them has to change: `label` is the entry's formula markup, `ang` its ångström array. */
-export const CHEM_PRESETS = MOLECULES.map((m) => ({ ...m, label: m.formula }));
+export const CHEM_PRESETS = [...MOLECULES, ...RECORD_ONLY].map((m) => ({ ...m, label: m.formula }));
 const PRESET_BY_ID = new Map(CHEM_PRESETS.map((p) => [p.id, p]));
 /** the preset's atoms in bohr, as the worker and lab/rhf-molecule.js want them */
 export const chemAtoms = moleculeAtoms;
@@ -64,7 +67,7 @@ export function createChem(host, api) {
      different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
      (Invisible while there were eight presets and the laws only ever restored H₂O onto H₂O.)  One pending value,
      consumed by the next solve and then cleared. */
-  let pendingOrbital = null, pendingKey = null;                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
+  let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
 
@@ -85,7 +88,7 @@ export function createChem(host, api) {
   const mSel = el('select', 'sel', mWrap);
   mSel.setAttribute('aria-label', 'molecule');
   mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
-  for (const g of GROUPS) {
+  for (const g of [...GROUPS, RECORD_GROUP]) {
     const rows = CHEM_PRESETS.filter((p) => p.group === g.id);
     if (!rows.length) continue;
     const og = el('optgroup', '', mSel); og.label = g.label;
@@ -99,7 +102,16 @@ export function createChem(host, api) {
     }
   }
   mSel.value = 'H2O';
-  mSel.addEventListener('change', () => { solve(mSel.value); });
+  mSel.addEventListener('change', () => { solve(mSel.value, { press: true }); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
+     the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
+  const have = new Map(), optOf = (id) => [...mSel.options].find((o) => o.value === id);
+  async function lamps() {
+    for (const p of CHEM_PRESETS) for (const r of Object.values(p.records || {})) have.set(r.hash, await installed(r.hash));
+    for (const p of CHEM_PRESETS) if (p.recordOnly) { const o = optOf(p.id); if (o) o.textContent = optionLabel(p, have.get(p.records['sto-3g'].hash)); }
+    return have;
+  }
+  lamps(); mSel.addEventListener('focus', () => { lamps(); });
   const mSeg = { root: mWrap, set(v) { if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
@@ -186,60 +198,37 @@ export function createChem(host, api) {
 
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));
-  /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: it is the same pure maths, on the frame thread.
-     `half` here is the shell support envelope; the worker's own `half` is authoritative whenever it answers.
-     It answers the GROUND stage with the spectrum already attached, so the staged road simply skips stage two. */
-  /* the worker's own wire shape (lab/mathworker.js), so the two roads answer the SAME object: `lowestApB` and
-     `lowestAmB` are lazy getters over an eigensolve and are read only when the verdict FAILS, which is when they
-     are the evidence; `null` says "not computed" and never "zero". */
-  const wireHessian = (h) => (h ? { nOv: h.nOv, minimum: h.minimum, positiveDefinite: h.positiveDefinite,
-    lowestApB: h.minimum ? null : h.lowestApB, lowestAmB: h.minimum ? null : h.lowestAmB } : null);
-  const wireStability = (s) => (s ? { ...s, hessian: wireHessian(s.hessian) } : null);
+  /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: the worker's OWN exported ops (lab/mathworker.js installs its
+     message handler only inside a real worker), run here on the frame thread — one road and one reply, never a second
+     implementation (0.4.0 S4a: the hand-built copy this replaced answered its TDA ladder outside the canonical gauge, with
+     its own `half`).  It answers the GROUND stage with the spectrum attached, so the staged road skips stage two. */
+  const here = (basis) => Promise.all([import('./mathworker.js'), import('./rhf-molecule.js')]).then(async ([W, R]) => { W.chemRegister(basis, await R.loadRecord(basis)); return W; });
   async function localSolve(msg) {
-    const [{ loadRecord, moleculeRHF }, { rpa }, { evaluator, fieldShells }] =
-      await Promise.all([import('./rhf-molecule.js'), import('./rpa-inspector.js'), import('./molecular-field.js')]);
-    await loadRecord(msg.basis);
-    /* THE VERDICT COMES WITH THE SOLVE ON THIS ROAD TOO (2026-09-18).  This path ran with `stability: false,
-       hessian: false`, so a browser with no Worker got a report whose `stability` was null — the ONE field that
-       says whether the RHF reference is a minimum, silently absent on exactly the road nobody watches.  The
-       worker road has always sent it and now both send the same object.
-       WHAT IT COSTS, measured here rather than assumed (scratch/stage1/probe-localsolve.mjs, Node 22, Ryzen 5
-       5600G): H₂O 30 → 17 ms (inside the noise), benzene 783 → 1501 ms.  It is NOT the two Cholesky
-       factorisations that cost it — those are 1.3 ms — it is `hessianBlocks`, the AO → MO transform the A and B
-       blocks are built from, at 608 ms, plus 110 ms for the re-converge probe.  That is the same 718 ms the
-       worker pays for every solve; this road simply stopped hiding it.  `detect` stays off: naming a SECOND
-       aufbau solution costs a whole extra SCF, only N₂ has one, and this road is already on the frame thread. */
-    const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false });
-    const names = (await import('./names.js')).namesOf(r, msg.atoms, msg.symmetry);
-    const I = r.integrals, P = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: r.C, eps: r.orbitalEnergies, nocc: r.nocc });
-    const ev = evaluator(r.basis.shells);
-    let half = 0; for (const sh of r.basis.shells) half = Math.max(half, ev.supportRadius(sh, 1e-10));
-    return { energy: r.energy, Enuc: I.Enuc, eps: Float64Array.from(r.orbitalEnergies), C: Float64Array.from(r.C), D: Float64Array.from(r.D),
-      nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
-      roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
-      tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
-      timings: { integrals: r.timings.integrals, scf: null, rpa: null, names: names.ms }, names, stability: wireStability(r.stability),
-      solutions: (r.solutions || []).map((s) => ({ ...s, hessian: wireHessian(s.hessian) })), stage: 'full', local: true };
+    const W = await here(msg.basis), g = W.chemGround(msg), s = W.chemSpectrum(msg);
+    return { ...g, roots: s.roots, tda: s.tda, timings: s.timings, stage: 'full', local: true };
   }
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
-  function solve(id = preset, { force = false } = {}) {
+  function solve(id = preset, { force = false, press = false } = {}) {
     if (id !== preset) { preset = id; mSeg.set(id); }
     const P = PRESET_BY_ID.get(preset) || CHEM_PRESETS[0];
+    if (wantRef && wantRef.id !== preset) wantRef = null;                   // a project's record reference lasts until the molecule changes
     /* A DISABLED ENTRY IS REFUSED HERE AND NOT SENT.  CuH and ZnH₂ converge to an RHF solution that is not a
        minimum (both A ± B blocks negative), so lab/rpa-inspector.js refuses them and chem.solve cannot answer at
        all — the refusal belongs in front of the worker, with the reason, rather than as a failed solve. */
     if (P.disabled) { status(P.name + ': ' + P.reason, 'warn'); return Promise.resolve(null); }
-    const big = basis631(preset);
-    if (!big.ok && basis !== 'sto-3g') { basis = 'sto-3g'; bSeg.set('sto-3g'); status(`${P.name}: back to STO-3G — ${big.why}`, 'warn'); }
+    /* THE BENZENE-CAP LAW (PLAN B2): a molecule past the cap opens only from its record — a basis change would be a solve */
+    const big = P.recordOnly ? { ok: false, nAO: P.nAO, why: `${P.name} is past the live cap and opens only from its STO-3G record; another basis would be a live solve, which is not offered` } : basis631(preset);
+    const back = !big.ok && basis !== 'sto-3g' ? `${P.name}: back to STO-3G — ${big.why}` : null;   // a refusal is a sentence, not a solve
+    if (back) { basis = 'sto-3g'; bSeg.set('sto-3g'); status(back, 'warn'); }
     const b6 = bSeg.button('6-31+g-star'); if (b6) { b6.disabled = !big.ok; b6.title = big.why; }
     /* THE ANSWER WE ALREADY HAVE IS THE ANSWER.  Beyond not paying twice, this is load-bearing: the worker caches
        its report on (atoms, basis, charge) and TRANSFERS that report's typed arrays, so a second chem.solve for the
        same key posts detached buffers, throws inside the worker's own handler, and never replies at all — the call
        then sits until its timeout.  Re-solving is what changing the molecule or the basis does; asking twice is not. */
     const key = preset + '|' + basis + '|' + chemCharge(preset);
-    if (!force && sol && sol.key === key) { refresh(); return Promise.resolve(sol); }
-    if (!force && pending && pending.key === key) return pending.p;        // …and one IN FLIGHT is the same answer
+    if (!force && sol && sol.key === key) { refresh(); if (back) status(back, 'warn'); return Promise.resolve(sol); }
+    if (!force && pending && pending.key === key) return back ? pending.p.then((r) => { status(back, 'warn'); return r; }) : pending.p;   // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null;
     const atoms = chemAtoms(preset), charge = chemCharge(preset);
     /* TWO STAGES, ONE SEQUENCE NUMBER.  The ground state lands first — the molecule appears on the field, the
@@ -248,16 +237,46 @@ export function createChem(host, api) {
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
     const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry };
-    status(basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
+    const rec = P.records && P.records[basis];
+    status(rec && (P.recordOnly || wantRef || have.get(rec.hash)) ? `opening ${P.name} from its record… ${P.nAO} AOs, ${P.nElectrons} electrons`
+      : basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
     if (api.loading) api.loading(true);
-    const task = Promise.all([call(msg, () => localSolve(msg)), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
+    /* THE RECORD ROAD (0.4.0 S4a · PLAN B2).  A molecule whose record this device holds opens from it — the worker's chem.open,
+       zero solver calls, chem.ground's own reply — and so does one past the cap (DOWNLOAD: fetched, checked against its sha-256
+       name and kept) or one a project or link names (`wantRef`: the exact record when this device still holds it, else the
+       catalogue's, the orbital then found by its name).  Under the cap, a record that cannot be had is the live solve; past it
+       there is no live solve, and the row says what refused.  `why` is the sentence; `note` rides on the status line. */
+    let why = null, note = '';
+    const viaRecord = async () => {
+      const exact = wantRef && wantRef.hash !== rec.hash && await installed(wantRef.hash), hash = exact ? wantRef.hash : rec.hash;
+      const net = P.recordOnly || !!wantRef, o = P.recordOnly ? optOf(P.id) : null;
+      if (press && net && !have.get(hash)) persistOnce().then(storageNote);      // the user's install press: persist() asked once (lab/library.js)
+      const got = await fetchRecord(hash, { network: net, onProgress: (n, t) => {
+        const pc = t ? Math.round(100 * n / t) + ' %' : Math.round(n / 1024) + ' KB';
+        if (seq === solveSeq) status(`downloading ${P.name}'s record… ${pc}`, 'warn');
+        if (o) o.textContent = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); } });
+      if (!got.record) { why = `${P.name}'s record is not open: ${got.why}` + (P.recordOnly ? ' — it opens only from its record (DOWNLOAD when the network is back)' : ''); lamps(); return null; }
+      if (got.from === 'network') lamps();
+      const m = { op: 'chem.open', lib: got.record, hash, basis };
+      const r = await call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } }));
+      if (!r || r.refused) { why = (r && r.refused) || `${P.name}'s record did not open`; return null; }
+      if (wantRef && hash !== wantRef.hash) { pendingKey = pendingKey || wantRef.nameKey || null; note = 'the project named an older record; this is the current one, its orbital found by name'; }
+      r.opened = { bytes: got.bytes, from: got.from };
+      return r;
+    };
+    const first = () => (rec ? viaRecord() : Promise.resolve(null)).then((r) => {
+      if (r || P.recordOnly) return r;
+      if (why) note = why.replace(/ —.*$/, '') + ': solved live';
+      return call(msg, () => localSolve(msg));
+    });
+    const task = Promise.all([first(), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status('solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
+      if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status(why || 'solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
-        sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
+        sol = r; sol.key = key; sol.seq = seq; sol.note = note; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
@@ -297,7 +316,7 @@ export function createChem(host, api) {
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
     return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY }).then((r) => {
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && r.error) || 'no real-time engine'), 'warn'); return null; }
+      if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); if (r && r.refused) setRun(false); return null; }
       rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
@@ -476,6 +495,10 @@ export function createChem(host, api) {
 
   /* ── the readouts and the header ──────────────────────────────────────────────────────────────── */
   const status = (t, cls) => { statusText = t; if (api.status) api.status(t, cls === undefined ? '' : cls); };
+  /* PLAN B2's iPad law: after an install press the persisted answer and the quota are SHOWN, never assumed */
+  let stored = '';
+  const storageNote = (i) => { stored = !i ? '' : (i.persisted ? 'persisted' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : 'not persisted')
+    + (Number.isFinite(i.usage) && Number.isFinite(i.quota) ? ` · ${(i.usage / 1048576).toFixed(1)} of ${Math.round(i.quota / 1048576)} MB used` : ''); if (sol) refresh(); };
   function refresh() {
     if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT]) r.set('—', ''); paint(); return; }
     roE.set(sol.energy.toFixed(9), 'ok');
@@ -502,7 +525,8 @@ export function createChem(host, api) {
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
       + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : sol.roots ? '' : ' · spectrum pending')
-      + (running ? ' · running' : ''), running ? 'live' : 'ok');
+      + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
+      + (sol.note ? ' · ' + sol.note : '') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
   }
 
@@ -681,7 +705,19 @@ export function createChem(host, api) {
      carries a full record, instead of on every boot.  record() answers null until a solve exists, and a solve now
      waits for this import before it publishes, so record() is never null after one where it was not before. */
   const loadMS = () => msLoad || (msLoad = import('./molecule-state.js').then((m) => { MS = m; }).catch(() => { MS = null; }));
-  function save() { return presentation(); }
+  /** THE LIBRARY REFERENCE a project holds (PLAN B2: { id, hash, nameKey } — PROJECT, one history row per change of molecule;
+      the record itself is device content and never rides in a file): the record in use, else the one the opened project named,
+      else the catalogue's — and `nameKey` is the orbital's S1 name, the portable half for when the hash has moved on. */
+  function save() {
+    const o = presentation(), P = PRESET_BY_ID.get(preset), rec = P && P.records && P.records[basis];
+    if (!rec) return o;
+    const mine = sol && sol.key === preset + '|' + basis + '|' + chemCharge(preset);
+    o.library = { id: preset, hash: mine && sol.record ? sol.record.hash : wantRef ? wantRef.hash : rec.hash,
+      nameKey: mine ? orbitalKey() : wantRef ? wantRef.nameKey || null : null };
+    return o;
+  }
+  /** the chosen orbital as its S1 name { group, irrep, count, member }; null when none is chosen or named */
+  function orbitalKey() { const N = sol && sol.names, mo = N && N.reliable && Number.isFinite(orbital) ? N.mos[orbital - 1] : null; return mo && mo.irrep ? { group: N.group, irrep: mo.irrep, count: mo.count, member: mo.member || null } : null; }
   /** the canonical lab/molecule-state.js record of what is on screen — validated by serializeMolecule, or null */
   function record() {
     if (!MS || typeof MS.serializeMolecule !== 'function' || !sol) return null;
@@ -699,6 +735,8 @@ export function createChem(host, api) {
     let resolve = false;
     if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
+    const L = o.library;                                                          // 0.4.0 S4a: the record this file names, fetched on open if absent
+    wantRef = L && L.id === preset && /^[0-9a-f]{64}$/.test(L.hash) ? { id: L.id, hash: L.hash, nameKey: L.nameKey || null } : null;
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
     pendingKey = o.orbitalKey || null;                                            // 0.4.0 S2: a link's orbital by its S1 name, resolved when the solve lands
     if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
@@ -741,7 +779,20 @@ export function createChem(host, api) {
         orbital: view === 'orbital' ? { k: k + 1, frontier: mo ? mo.frontier : null, plain: f ? f.plain : null, latex: f ? f.latex : null, ascii: f ? f.ascii : null } : null };
     },
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
-    orbitalKey() { const N = sol && sol.names, mo = N && N.reliable && Number.isFinite(orbital) ? N.mos[orbital - 1] : null; return mo && mo.irrep ? { group: N.group, irrep: mo.irrep, count: mo.count, member: mo.member || null } : null; },
+    orbitalKey,
+    /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
+    async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,
+      caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).textContent : null }))); },
+    async install(id, b = 'sto-3g') {
+      const r = ((PRESET_BY_ID.get(id) || {}).records || {})[b]; if (!r) return { ok: false, why: 'no record for ' + id + ' in ' + b };
+      const info = await persistOnce(); storageNote(info);
+      const got = await fetchRecord(r.hash, { network: true }); await lamps();
+      return { ok: !!got.record, why: got.why || null, from: got.from || null, bytes: got.bytes || 0, storage: info };
+    },
+    async remove(id, b = 'sto-3g') { const r = ((PRESET_BY_ID.get(id) || {}).records || {})[b]; const ok = !!r && await removeRecord(r.hash); await lamps(); return ok; },
+    storage: () => storageInfo(),
+    /** the chem worker's own ledger — `solverCalls` counts every moleculeRHF and rpa it ran (a record's open adds none) */
+    workerStat() { return call({ op: 'stat' }); },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
@@ -802,6 +853,7 @@ export function createChem(host, api) {
         electrons: rt ? rt.electrons : (sol ? 2 * sol.nocc : 0), idempotency: rt ? rt.idempotency : null,
         t: rt ? rt.t : 0, steps: rt ? rt.steps : 0, trace: rt ? (rt.samples || rt.trace.length) : 0, fitWindow: rt ? rt.trace.length : 0, E0: rt ? rt.E0 : null,
         energyRT: rt ? rt.energy : null, half: sol ? sol.half : null, hash: sol ? sol.hash : null,
+        record: sol && sol.record ? { ...sol.record, ...sol.opened, ms: sol.timings && sol.timings.open } : null, note: sol ? sol.note || null : null,
         local: !!(sol && sol.local), status: statusText, roots: sol && sol.roots ? sol.roots.length : 0,
         tdaRoots: sol && sol.tda ? sol.tda.length : 0, stage: sol ? (sol.roots ? 'full' : 'ground') : 'none',
         restartEvery: rt ? rt.restartEvery : null, restartPolicy: rt ? rt.restartPolicy : null, sinceRestart: rt ? rt.sinceRestart : null,
