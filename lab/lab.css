@@ -424,6 +424,11 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
 body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .dev.lean .dev-body .note, .dev.lean .dev-body .ro, .dev.lean .dev-body .row:has(> .ro):not(:has(> :not(.ro))) { display: none; }
+/* CALCULUS AS TILES (0.4.0 S3 · F3; calculusview.js): the laws are RADIATION's tiles — the kit's .ro, untouched — in a grid,
+   two columns on the card and three floating, and OUT of LEAN: the tiles are the window, not its commentary */
+.calc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.dev.floating .calc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dev.lean .dev-body .calc-grid > .ro { display: flex; }
 /* A ROUTED KNOB STAYS UNDER ITS OWN LABEL, AND WEARS ITS BADGES ONE CONTROL AT A TIME (2026-09-18).  The kit seats a
    range dial beside every routed dial and slides the dial 10 px left to make room (modhost.css); in this rack that put
    the dial and its arc off-centre under the label, covered the right of the arc, and scattered small dials over every

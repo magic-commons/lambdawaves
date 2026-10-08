@@ -56,6 +56,11 @@ SHADOW's footer (in its details fold, computed only while the fold is open),
 its moments are CALCULUS rows, its emission lines RADIATION's, its rotor
 entropy ORBIT's Schmidt tile, and its PARTICLES a switch in VORTEX — the flow;
 the action–angle chart is SPECTRUM. `lab/dynamics.js` stays as their physics.
+CALCULUS is RADIATION's tiles (the kit's readouts, in a grid of two columns on
+the card and three floating, out of LEAN), and its ⧉ copies THE PROSE FIGURE
+(`calculusMarkdown`, `lab/calculus.js`: a heading, one "Figure." paragraph,
+the laws in display maths) that pastes into the notebook and renders. That
+skin went to CALCULUS alone, as Josh asked; METERS and WIGNER keep theirs.
 
 THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
 PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what

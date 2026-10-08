@@ -96,5 +96,27 @@ const idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m ==
   judge('C IN THE BOX THE WALL IS THE FORCE, EXACTLY (Round 11 §7.2): on the gas packet at t = 0, 3, 10, 14 (at the wall), 20 the register\'s d⟨p_z⟩/dt = −ΣRe(c_a*c_b)(E_a−E_b)²z_ab equals the hard-wall pressure −½a²∮|∂_rψ|²cosθ dΩ to 1e-10 (two routes sharing nothing; this route is limited by the dipole quadrature at 1.4e-11 — Round 11\'s closed-form route reaches 4e-16), and the live table\'s centred-difference residual against it is below 1e-6', worstExact < 1e-10 && worstFD < 1e-6 && peak > 0.05, { worstExact, worstFD, peak });
   setHamiltonian('hydrogen');
 }
+/* C7 — THE PROSE FIGURE (0.4.0 S3 · F3): ⧉ copies a heading, one paragraph reading the tiles as sentences (the Ehrenfest pair
+   as ONE) and the laws in display maths; every $…$ and $$…$$ must parse under KaTeX's throwOnError, so the paste renders */
+{
+  const { calculusMarkdown } = await import('../lab/calculus.js');
+  const { loadKatex } = await import('./helpers/katex-node.mjs');
+  const katex = loadKatex(), cases = [];
+  const mk = (H, fill) => { setHamiltonian(H); const R = new Register(); R.clear(); fill(R); return R; };
+  cases.push(['hydrogen 1s + 2p₀', mk('hydrogen', (R) => { R.set(idx(1, 0, 0), Math.SQRT1_2, 0); R.set(idx(2, 1, 0), Math.SQRT1_2, 0); })]);
+  cases.push(['the Stark field', mk('hydrogen', (R) => { R.set(idx(2, 0, 0), 1, 0); R.setField({ Fz: 2e-3 }); })]);
+  cases.push(['the DRAG toy', mk('hydrogen', (R) => { R.set(idx(1, 0, 0), 0.6, 0); R.set(idx(2, 1, 1), 0.8, 0); R.setDamping(0.01); })]);
+  cases.push(['the oscillator', mk('qho', (R) => { R.setEnergies((a) => BASIS[a] && (2 * (BASIS[a].n - BASIS[a].l - 1) + BASIS[a].l + 1.5)); R.set(idx(1, 0, 0), 0.7, 0); R.set(idx(2, 1, 0), 0.7, 0.1); })]);
+  let parsed = 0, bad = null; const shapes = [];
+  for (const [name, R] of cases) {
+    const md = calculusMarkdown(stats(R, 2.3)), maths = [];
+    md.replace(/\$\$([\s\S]+?)\$\$/g, (m, t) => { maths.push(t); return ''; }).replace(/\$([^$\n]+?)\$/g, (m, t) => { maths.push(t); return ''; });
+    for (const t of maths) { try { katex.renderToString(t, { throwOnError: true, strict: 'error' }); parsed++; } catch (e) { bad = bad || { name, t, e: String(e.message || e) }; } }
+    shapes.push(/^### CALCULUS · \$t = 2\.300\$\n\nFigure\. /.test(md) && (md.match(/Ehrenfest: /g) || []).length === 1 && /\$\$\\frac\{d\}\{dt\}\\langle z\\rangle = \\langle p_z\\rangle,\\qquad /.test(md));
+  }
+  setHamiltonian('hydrogen');
+  judge(`C THE PROSE FIGURE: on ${cases.length} states (hydrogen, the Stark field, the DRAG toy, the oscillator) every one of its ${parsed} $…$ / $$…$$ parses under KaTeX throwOnError + strict, and each is a heading, one "Figure." paragraph with the Ehrenfest pair read as one sentence, and the laws displayed one family a line`,
+    !bad && parsed > 40 && shapes.every(Boolean), { bad, parsed, shapes });
+}
 console.log((FAILED ? 'RED' : 'GREEN') + ' calculus.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

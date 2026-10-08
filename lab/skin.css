@@ -499,7 +499,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }
-.dev .picker, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
+.dev .picker, .dev .pj-list { max-height:none;overflow:visible; }
 .native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
 .native-clean .sp-knobs .k-val { max-width:80px; }
 .native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }

@@ -55,6 +55,7 @@ import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
 import { createCalculus } from './calculusview.js';
+import { calculusMarkdown } from './calculus.js';
 import { createPaletteEditor } from './paletteview.js';
 import { createSliceView } from './sliceview.js';
 import { createQCD } from './qcdview.js';
@@ -3830,10 +3831,11 @@ export async function boot(dom) {
     /** an INFO panel's digest: every readout, the status, and the module's own table — as text for the notebook */
     digest(id) {
       const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (!dev) return '';
+      const own = DIGESTS[id] ? DIGESTS[id]() : ''; if (own && own.md !== undefined) return own.md;   // a window whose copy is markdown (CALCULUS' prose figure) copies that alone
       const lines = ['λWAVES · ' + dev.querySelector('.dev-title').textContent + ' · t = ' + clock.t.toFixed(4) + ' · ' + new Date().toISOString()];
       const st = dev.querySelector('.dev-stat'); if (st && st.textContent.trim()) lines.push('status\t' + st.textContent.trim());
       for (const ro of dev.querySelectorAll('.ro')) { const l = ro.querySelector('.ro-lbl'), v = ro.querySelector('.ro-val'), s = ro.querySelector('.ro-sub'); lines.push([l ? l.textContent.trim() : '', v ? v.textContent.trim() : '', s ? s.textContent.trim() : ''].join('\t')); }
-      const extra = DIGESTS[id] ? DIGESTS[id]() : ''; if (extra) lines.push('', extra);
+      if (own) lines.push('', own);
       return lines.join('\n');
     },
     /** THE ONE CLIPBOARD ROAD for a window's copy: write the text, flash `copied` on the window (· COPIED on its status line) */
@@ -5578,7 +5580,7 @@ export async function boot(dom) {
      (or was accepted by this browser before).  See `armAutoplay` below. */
   Object.assign(DIGESTS, {
     meters: () => 'density period\t' + (() => { const P = __LW_hooks.period ? __LW_hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
-    calculus: () => calculus && calculus.last ? JSON.stringify(calculus.last, null, 1) : '',   // 0.4.0 S0 · wave 137: the view returns `last` (calculusview.js); `stats` never existed, so ⧉ copied the header alone
+    calculus: () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' }),   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
     vortex: () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '',
     spectrum: () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
       + (sturm.P ? (() => { const e = sturmEigen(); return '\n\nSTURMIAN λ = ' + sturm.lambda.toFixed(4) + ' · Z = ' + getZ() + ' · ⟨c|S|c⟩ = ' + e.norm.toFixed(6) + ' · ⟨H⟩ = ' + e.energy.toFixed(6) + '\neigenvalue\tpopulation\t(l, m)\n' + e.E.map((E, k) => E.toFixed(6) + '\t' + e.pop[k].toFixed(6) + '\t' + 'spdfgh'[e.l[k]] + (e.m[k] >= 0 ? '+' : '-') + Math.abs(e.m[k])).join('\n'); })() : ''); },
