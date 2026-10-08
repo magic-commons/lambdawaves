@@ -75,6 +75,7 @@ import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
+import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
@@ -1149,7 +1150,7 @@ export async function boot(dom) {
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
@@ -1158,6 +1159,7 @@ export async function boot(dom) {
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
+  let camKnobs = {};                      // 0.5.0 C1: the CAMERA panel's dials by modulation id, published the same way (the observer.* defs read it)
   let exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
   const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
   {
@@ -1416,53 +1418,20 @@ export async function boot(dom) {
     const rInv = el('div', 'row tight', wPal.body);
     ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     rInv.appendChild(ui.invertSw.root);
-    const gc = group(wCam.body, 'CAMERA MOTION');   // 0.5.0 A8: CONTROL, ZOOM, FOV and the PAN row call the camera port, which C1's kit panel takes whole
-    /* WAVE 54 (board #43): the mode comes FIRST, because it decides what every dial below it turns. */
-    const r4a = el('div', 'row tight', gc);
-    ui.camSeg = seg({ label: 'CONTROL', value: 'free', options: [
-      { id: 'turntable', label: 'TURNTABLE', title: 'Orbit with a level horizon' },
-      { id: 'free', label: 'FREE', title: 'Use unrestricted camera rotation with roll' }],
-      onChange: (v) => cameraPort.set('mode', v) });
-    r4a.appendChild(ui.camSeg.root);
-    const r4 = el('div', 'row', gc);
-    ui.spinSw = sw({ label: 'AUTO-ROTATE', value: false, onChange: (v) => { camera.autoRotate = v; camera.wake(); } });
-    ui.spinSw.root.title = 'Rotate continuously around the world z axis';
-    r4.appendChild(ui.spinSw.root);
-    ui.spinK = knob({ label: 'SPIN', min: 0.02, max: 2, value: 0.25, log: true, fmt: (v) => v.toFixed(2) + ' rad/s', onInput: (v) => { camera.speed = v; camera.wake(); }, onChange: () => saveSettings() });
-    ui.spinK.root.title = 'Set the auto-rotate speed';
-    r4.appendChild(ui.spinK.root);
-    ui.fricK = knob({ label: 'FRICTION', min: 0, max: CAM.MU_MAX, value: CAM.MU_DEF, step: CAM.MU_STEP, fmt: (v) => (v > 0 ? 'μ ' + v.toFixed(2) + ' /s' : '∞ · forever'), onInput: (v) => { camera.friction = v; camera.wake(); }, onChange: () => saveSettings() });
-    ui.fricK.root.title = 'Set camera momentum decay; double-click to reset';
-    r4.appendChild(ui.fricK.root);
-    /* WAVE 58 (board #63): the View window's two dials, in OUR units — see the CAM block for why the range travels
-       and the default does not.  Both sit with FRICTION because all three are the feel of the same hand. */
-    const r4h = el('div', 'row', gc);
-    ui.gainK = knob({ label: 'DRAG GAIN', min: CAM.GAIN[0], max: CAM.GAIN[1], value: CAM.GAIN_DEF, step: CAM.GAIN_STEP,
-      fmt: (v) => '×' + v.toFixed(2),
-      onInput: (v) => { camera.dragGain = v; }, onChange: () => saveSettings() });
-    ui.gainK.root.title = 'Set drag sensitivity; Shift is finer; double-click resets';
-    r4h.appendChild(ui.gainK.root);
-    ui.flingK = knob({ label: 'FLING', min: CAM.FLING[0], max: CAM.FLING[1], value: CAM.FLING_DEF, step: CAM.FLING_STEP,
-      fmt: (v) => '×' + v.toFixed(2),
-      onInput: (v) => { camera.flingGain = v; }, onChange: () => saveSettings() });
-    ui.flingK.root.title = 'Set released camera speed; double-click to reset';
-    r4h.appendChild(ui.flingK.root);
-    const r4b = el('div', 'row tight', gc);
-    ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => cameraPort.set('zoom', v) });
-    ui.zoomK.root.title = 'Camera distance. Use the wheel or pinch on the stage.';
-    r4b.appendChild(ui.zoomK.root);
-    ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => cameraPort.set('fov', v) });
-    ui.fovK.root.title = 'Vertical field of view';
-    r4b.appendChild(ui.fovK.root);
-    r4b.appendChild(trig({ label: 'RESET VIEW', title: 'Restore the default camera pose and motion', onFire: () => resetView() }).root).dataset.keyAction = 'camReset';
-    r4b.appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
-    /* 0.4.0 S2 · THE LENS SHIFT: where the pivot sits on the frame (obs.shift, NDC), the picture sliding under a still pivot —
-       the targets the kit's XY pad (0.5.0) will drive; every hand comes through setShift (lab/camera-law.js) */
-    const r4p = el('div', 'row tight', gc), panFmt = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
-    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panX', v) });
-    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panY', v) });
-    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => cameraPort.setShift(0, 0) }).root);
-    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Alt-drag or two fingers slide the picture; the molecule stays the pivot. Double-click, double-tap, or RESET VIEW restores the camera.';
+    /* 0.5.0 C1 · THE CAMERA PANEL: MIR's createCameraPanel over A8's port, its rows built into this card now — HOME and the port's
+       PAN HOME, CONTROL, the direction sphere (YAW · PITCH), the PAN pad (X · Y), ZOOM · FOV and the HAND (DRAG · FRICTION · FLING ·
+       AUTO-ROTATE · SPIN).  No project part and no history: the pose rides λWAVES' own project and is no edit; the feel is a
+       PREFERENCE, so a hand on it saves the settings (coalesced).  `mod` is the modulation port WITHOUT `add`: the panel registers no
+       target — the saved observer.* routes stay the defs' below, whose knob accessors are these dials (camKnobs) — and a hand on a
+       routed dial writes its base (modHand), as everywhere. */
+    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['spin', 'friction', 'drag', 'fling']); let feelSave = 0;
+    const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod,
+      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });
+    camPanel.spec.build(gc, null);
+    const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
+    camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
+    el('div', 'row tight', gc).appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
+    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt-drag, two fingers or the PAN pad slide the picture; the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
 
     /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────
      * lab/capture.js is 1033 lines, thirty node gates, and until this row nothing in the interface imported it.
@@ -2421,22 +2390,26 @@ export async function boot(dom) {
        So the two wrapped setters write only when the ANGLE differs — which is the only difference that
        means anything — and an un-modulated yaw is never quietly re-based by the sync above. */
     const sameCycle = (a, b, L) => Math.abs(((a - b) % L + L + L / 2) % L - L / 2) < 1e-9;
+    const camOut = (id, v) => { setKnob(camKnobs[id], v); cameraPort.notify(); schedule(TIER.PRESENT); };   // C1 (A8's open item 3): a route's write is a notice
     const defs = [
-      { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer',
+      /* 0.5.0 C1 · the six saved observer.* routes keep their ids, maps and ranges, and stay HERE (the registry's road writes the pose
+         raw; the panel registers none of them).  Their dials are the CAMERA panel's (camKnobs: the sphere's two arcs, ZOOM, FOV, the
+         pad's X and Y), and a modulator's write is a notice to the port's subscribers (camOut), so the panel follows a route. */
+      { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer', knob: () => camKnobs['observer.yaw'],
         hint: 'the camera azimuth — free-spinning, because an orbit that reaches the end of the dial and stops is not an orbit',
-        get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; schedule(TIER.PRESENT); } },
-      { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer',
+        get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; camOut('observer.yaw', obs.yaw); } },
+      { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer', knob: () => camKnobs['observer.pitch'],
         hint: 'Pitch balance; 50% is level',
-        get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; schedule(TIER.PRESENT); } },
-      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => ui.zoomK,
+        get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; camOut('observer.pitch', obs.pitch); } },
+      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => camKnobs['observer.dist'],
         hint: 'the ZOOM dial itself — log, because the interesting half of a zoom is always the near half',
-        get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); setKnob(ui.zoomK, obs.dist); schedule(TIER.PRESENT); } },
-      { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => ui.fovK,
-        get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); setKnob(ui.fovK, obs.fov); schedule(TIER.PRESENT); } },
-      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => ui.panXK, hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
-        get: () => obs.shift[0], set: (v) => { obs.shift = [clampShift([v, 0])[0], obs.shift[1]]; setKnob(ui.panXK, obs.shift[0]); schedule(TIER.PRESENT); } },
-      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => ui.panYK, hint: 'the lens shift up and down: where the pivot sits on the frame',
-        get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], clampShift([0, v])[1]]; setKnob(ui.panYK, obs.shift[1]); schedule(TIER.PRESENT); } },
+        get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); camOut('observer.dist', obs.dist); } },
+      { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => camKnobs['observer.fov'],
+        get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); camOut('observer.fov', obs.fov); } },
+      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => camKnobs['observer.panx'], hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
+        get: () => obs.shift[0], set: (v) => { obs.shift = [clampShift([v, 0])[0], obs.shift[1]]; camOut('observer.panx', obs.shift[0]); } },
+      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => camKnobs['observer.pany'], hint: 'the lens shift up and down: where the pivot sits on the frame',
+        get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], clampShift([0, v])[1]]; camOut('observer.pany', obs.shift[1]); } },
       { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => __LW_hooks.setStage(v) },
       { id: 'material.gamma', label: 'GAMMA', map: 'linear', min: 0.5, max: 2.4, group: 'material', knob: () => ui.gammaK, get: () => mat.gamma, set: (v) => { mat.gamma = v; setKnob(ui.gammaK, v); schedule(TIER.PRESENT); } },
       { id: 'material.exposure', label: 'EXPOSURE', map: 'log', min: 0.08, max: 12, group: 'material', knob: () => ui.expK,
@@ -2537,8 +2510,8 @@ export async function boot(dom) {
     ];
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
-       names the instrument, not the nearest existing group.  ELEVEN TARGETS, NINE STAMPS: `observer.yaw` / `observer.pitch`
-       carry no knob (the camera is dragged, not dialled), so they are picker rows and not drop targets. */
+       names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
+       sphere arcs, so they are drop targets now, like every observer.* dial. */
     modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
     restampParams = mod.stamp;
 

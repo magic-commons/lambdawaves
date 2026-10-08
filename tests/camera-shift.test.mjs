@@ -96,11 +96,11 @@ assert.ok(Object.is(clampShift([-0, 0])[0], 0), 'no negative zero');
 const s0 = [0.2, 0.1]; assert.notEqual(clampShift(s0), s0, 'a fresh array: never the caller\'s');
 pass('clampShift: each component in [−1, 1], a non-number reads 0, no −0, a fresh array');
 
-/* ── THE CAMERA LAW (lab/camera-law.js), built here as rack.js builds it: the pose, the dials (absent), present, modHand ── */
+/* ── THE CAMERA LAW (lab/camera-law.js), built here as rack.js builds it: the pose, present, modHand (C1: no dials — the panel reads the port) ── */
 const BOOT = () => ({ yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] });   // rack.js's boot pose
 function law(pose, held = () => false) {
   const obs = pose, writes = [];
-  const L = createCameraLaw({ obs, ui: {}, present() {}, modHand: (id, v) => { if (held(id)) { writes.push([id, v]); return true; } return false; }, resetWall() {} });
+  const L = createCameraLaw({ obs, present() {}, modHand: (id, v) => { if (held(id)) { writes.push([id, v]); return true; } return false; }, resetWall() {} });
   return { obs, writes, ...L };
 }
 /** the point of the pivot plane under uv c: the pointer's ray met with the plane through the target ⟂ fwd (rack.js unproject, unclamped) */
@@ -170,3 +170,20 @@ pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a mod
   for (const k of ['setShift', 'zoomAt', 'panBy', 'turn', 'subscribe']) assert.equal(typeof P[k], 'function', k);
 }
 pass('the camera port: get reads the law\'s numbers (12 ids, radians), set takes the hand\'s road (a routed YAW moves its base), subscribe hears every pose change and a still camera tells nobody, HOME is RESET VIEW, modIds name the saved observer.* routes');
+
+/* 8 · THE PORT AS THE KIT PANEL'S (0.5.0 C1): a dial is ONE axis — a hand on PAN Y never writes a routed PAN X's base (brief 2's
+   acceptance); the feel setters are notices (the panel has no dial the law could move); `notify` is the modulation's door; PAN HOME
+   is the port's verb and centres the pivot alone; the PAN readout is the shift in NDC; SPIN's range is CAM's, once. */
+{
+  const L = law(BOOT(), (id) => id === 'observer.panx'), P = L.port, o = L.obs; let told = 0; P.subscribe(() => told++);
+  P.set('panY', 0.3); assert.deepEqual(o.shift, [0, 0.3], 'PAN Y moves y'); assert.deepEqual(L.writes, [], 'and never writes the routed PAN X\'s base');
+  P.set('panX', 0.7); assert.deepEqual(L.writes, [['observer.panx', 0.7]], 'a hand on the routed PAN X writes its base'); assert.deepEqual(o.shift, [0, 0.3]);
+  const both = law(BOOT(), (id) => id === 'observer.panx'); both.setShift(0.2, 0.1); assert.deepEqual(both.writes, [['observer.panx', 0.2]], 'setShift(x, y), a two-axis hand, still moves both');
+  for (const [id, v] of [['drag', 2], ['fling', 0.5]]) { const n = told; P.set(id, v); assert.ok(told > n, id + ' is a notice'); }
+  const n = told; P.notify(); assert.equal(told, n + 1, 'notify tells every subscriber');
+  P.setShift(0.4, -0.2); P.zoomAt([0, 0], 2.5); const [verb] = P.verbs; assert.equal(verb.label, 'PAN HOME'); verb.run();
+  assert.deepEqual([o.shift, o.dist], [[0, 0], 2.5], 'PAN HOME centres the shift and nothing else (the routed X\'s pose is the modulation\'s)');
+  assert.deepEqual([P.ranges.panX.fmt(0.25), P.ranges.panY.fmt(-0.5), P.ranges.panX.fmt(0)], ['+0.25', '-0.50', '0.00']);
+  assert.deepEqual([P.ranges.spin.min, P.ranges.spin.max, P.ranges.spin.home, L.camera.speed], [...CAM.SPIN, CAM.SPIN_DEF, CAM.SPIN_DEF]);
+}
+pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its base under a hand on PAN Y), the feel setters and notify are notices, PAN HOME is the port\'s verb, PAN reads NDC, SPIN\'s range is CAM\'s');

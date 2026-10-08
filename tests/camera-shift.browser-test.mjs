@@ -130,7 +130,8 @@ try {
     const LW = __LW, kx = document.querySelector('[data-param="observer.panx"]'), ky = document.querySelector('[data-param="observer.pany"]');
     const home = [...document.querySelectorAll('button, [role="button"]')].find((b) => /PAN HOME/.test(b.textContent));
     LW.camera.reset(); const cursor = LW.history.cursor;
-    LW.camera.setShift(0.25, -0.5); const shown = [kx.querySelector('.k-val').textContent, ky.querySelector('.k-val').textContent];
+    LW.camera.setShift(0.25, -0.5); await new Promise((r) => setTimeout(r, 120));   /* C1: the kit panel reads the port on the frame after the notice */
+    const shown = [kx.querySelector('.k-val').textContent, ky.querySelector('.k-val').textContent];
     kx.focus(); kx.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', code: 'ArrowRight', bubbles: true, cancelable: true }));
     const afterKey = LW.obs.shift.slice(); home.click(); await new Promise((r) => setTimeout(r, 500));
     return { shown, afterKey, homed: LW.obs.shift, registry: LW.mod.registry ? [LW.mod.registry.has('observer.panx'), LW.mod.registry.has('observer.pany')] : null, rows: LW.history.cursor - cursor };`, (v) => {

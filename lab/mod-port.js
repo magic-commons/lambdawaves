@@ -56,6 +56,8 @@ export function createModPort({ available, present, view, onCapture, save }) {
     knobOf: (id) => (knobs[id] ? knobs[id]() : null),
     setKnob(k, v) { if (!k || k.root.classList.contains('drag')) return; const id = knobId(k); if (id && routed(id) && k.show) k.show(v); else k.set(v); },
     hand(id, v) { if (!routed(id)) return false; host.registry.write(id, v); return true; },
+    /** 0.5.0 C1: the kit panels' two reads (panels/camera.js `routed`, `base`).  No `add`: the panels register nothing, the catalogue is rack.js' */
+    isModulated: routed, baseOf: (id) => host.registry.baseOf(id),
     syncBases(all) {
       if (!host) return 0;
       const R = host.registry; let n = 0;
