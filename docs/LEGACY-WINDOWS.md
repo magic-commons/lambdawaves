@@ -1,5 +1,8 @@
 # LEGACY WINDOWS
 
+**ATOMS left this list in 0.4.0 S3 (R-A2):** it is back as the periodic-table window — H–Kr cells in SPECTRUM's own
+picker, opened by SPECTRUM's ATOM, with its own row in + and WINDOW.  The rest are decided at 0.5.0.
+
 **Status (2026-10, Josh):** hidden. Each of these windows **needs an upgrade, re-adoption, or deletion.** They are
 not offered by the + menu, the WINDOW menu or TAB, and a first visit never sees them. Nothing was deleted: ids,
 models, save records and node suites are intact, so every older project still opens.
@@ -9,7 +12,6 @@ models, save records and node suites are intact, so every older project still op
 | `molecule` | H₂⁺ · LEGACY | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest) | `molecule.js`, `moleculeview.js`, `mo.js`, `moview.js` |
 | `h2` | H₂ · LEGACY | two atoms, Heitler–London curves and the collision | `h2.js`, `h2view.js` (`h2ci.js` is a shared library — keep it) |
 | `helium` | HELIUM · LEGACY | two electrons, Hylleraas; the conditional cloud of electron 2 | `helium.js`, `heliumview.js` |
-| `atoms` | ATOMS · LEGACY | the periodic table as one central field (Xα(2/3) + Latter tail) | `atoms.js`, `atomsview.js` |
 | `qcd` | QCD · LEGACY | quarkonium under a chosen potential; the CORNELL parameters | `cornell.js`, `qcdview.js` |
 | `field` | ELECTROSTATICS · LEGACY | Φ, E, B and the current of the register's own charge; the stage overlay | `electrostatics.js`, `fieldlines` in `rack.js` |
 
@@ -28,8 +30,8 @@ A project that NEEDS one brings it back, so a live field owner never loses its O
   file turns one on (beside the H₂⁺ line).
 - **ELECTROSTATICS** — its overlay draws only while the card can present, so a file whose overlay is not `off` raises
   the card (`layout.raise('field')`: un-hidden, open, unfolded, on screen).
-- **ATOMS, QCD** — never. Their Hamiltonians (`atom`, `cornell`) are still chosen in SPECTRUM and QCD's saved
-  parameters still apply; they simply cannot be edited until this is decided.
+- **QCD** — never. Its Hamiltonian (`cornell`) still restores and its saved parameters still apply; it simply cannot be
+  edited until this is decided (SPECTRUM's QUARKONIUM button is hidden while QCD is).
 
 ## The three choices, per window
 

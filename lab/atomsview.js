@@ -16,7 +16,7 @@
  *
  * STATUS: NUMERICAL, reporting a MODEL.  Every number leaves here with its model string attached.
  */
-import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
+import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB, N_COLOR } from './mir/kit.js';
 import { ATOMS, atom, configOf, solveAtom, atomEnergyOf, ionisation, quantumDefect, atomRadial, atomDomainFor,
   EXCHANGE_MODEL, HARTREE_EV } from './atoms.js';
 
@@ -28,8 +28,8 @@ const mix = (a, b, t) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * 
 const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al})`;
 
 /**
- * createAtoms(host, api) — api: Z() the element in force, step(d) move the ELEMENT knob by d, fill() populate the
- * valence, active() whether the ATOM Hamiltonian is the one the register refers to.
+ * createAtoms(host, api) — api: Z() the element in force, select(Z) put an element in force (the ELEMENT knob's road), fill()
+ * populate the valence, active() whether the ATOM Hamiltonian is the one the register refers to.
  */
 export function createAtoms(host, api) {
   let Z = 0, cache = null, dirty = true;
@@ -53,9 +53,16 @@ export function createAtoms(host, api) {
   const ladHover = graphHover(lad, { repaint: () => paintLadder() });
   const radHover = graphHover(rad, { repaint: () => paintRadial() });
 
+  /* THE PERIODIC TABLE (0.4.0 S3 · R-A2), where the Z stepper was: H–Kr in SPECTRUM's own picker — a `.picker` of `.pk-n`
+     periods, each a `.pk-chips` of `.pk-c` buttons — with the periods as columns on the card and on a phone and rows when the
+     window floats (lab.css .atm-table); the element in force is `.on`.  At 0.5.0 it becomes the kit's `cells` (KIT BRIEF 4). */
+  const table = el('div', 'picker atm-table', host), cells = [];
+  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36]]) {
+    const g = el('div', 'pk-n', table); g.style.setProperty('--nc', N_COLOR[p]); el('div', 'pk-nl', g, String(p));
+    const cs = el('div', 'pk-chips', g);
+    for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
+  }
   const r2 = el('div', 'row tight', host);
-  r2.appendChild(trig({ label: '◂ Z', title: 'Select the previous element', onFire: () => api.step(-1) }).root);
-  r2.appendChild(trig({ label: 'Z ▸', title: 'the next element', onFire: () => api.step(1) }).root);
   r2.appendChild(trig({ label: 'FILL THE VALENCE', title: 'Load the outer occupied shell into the register', onFire: () => api.fill() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
@@ -82,6 +89,7 @@ export function createAtoms(host, api) {
 
   function write() {
     const C = cache, A = C.A, S = C.S;
+    for (let z = 1; z < cells.length; z++) cells[z].classList.toggle('on', z === A.Z);
     roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub(A.term + (Z === 24 || Z === 29 ? '  · an Aufbau exception' : ''));
     roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'}`);
     roE.set(S.E.toFixed(5) + ' Eh'); roE.setSub(`${(S.E * HARTREE_EV).toFixed(2)} eV · Slater\'s functional with the α-fraction restored · ${S.electrons.toFixed(4)} electrons on the mesh`);

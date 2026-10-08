@@ -8,7 +8,7 @@
  *
  * THE LAWS (BRIEF S3 T1).  The key is the STRING it would render: the DOM is touched only when the markdown changes, and
  * KaTeX (lab/mir/shell/notebook-render.js, imported, never changed) runs at most four times a second — a change inside the
- * quarter second waits, then renders whatever is wanted by then.  No live coefficient reaches a string (rack.js stageLines).
+ * quarter second waits, then renders whatever is wanted by then.  No live coefficient reaches a string (rack.js stageMd: the states go in with unit coefficients).
  * NO PER-TICK LAYOUT READ: place() reads the racks and measures the text only on a resize, a transport or rack move, a SIZE
  * change or a changed string; the labels project through toScreen on a camera key, the canvas size from a ResizeObserver.
  * OFF COSTS NOTHING: nothing renders while STAGE TEXT is off; turning it on renders the string wanted then.

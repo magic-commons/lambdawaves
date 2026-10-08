@@ -479,6 +479,14 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .pk-c { min-width: 38px; height: 34px; padding: 0 4px; border-radius: 5px; border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 100% / .04); color: var(--dim); font-size: var(--fs-tiny); }
 .pk-c.on { background: color-mix(in oklab, var(--nc) 28%, transparent); color: var(--fg); border-color: color-mix(in oklab, var(--nc) 60%, transparent); }
 .pk-c:active { background: var(--glass-press); }
+/* ATOMS' PERIODIC TABLE (0.4.0 S3 · R-A2; atomsview.js): SPECTRUM's picker with the periods as COLUMNS on the card and on a
+   phone (each its own column of wrapping cells, period 4 taking the rest of the width) and as ROWS when the window floats */
+.dev:not(.floating) .atm-table { flex-direction: row; align-items: flex-start; }
+.dev:not(.floating) .atm-table .pk-n { display: flex; flex-direction: column; flex: 0 0 auto; }
+.dev:not(.floating) .atm-table .pk-chips { flex-direction: column; }
+.dev:not(.floating) .atm-table .pk-n:last-child { flex: 1 1 0; min-width: 0; }
+.dev:not(.floating) .atm-table .pk-n:last-child .pk-chips { flex-direction: row; }
+.dev:not(.floating) .atm-table .pk-nl { padding-top: 0; }
 
 /* ── frontier: the vortex overlay, the orbit spheres, the ladder plots ──── */
 #fieldlines, #vortex, #particles, #flow, #kepler { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 5; }

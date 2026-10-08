@@ -2290,7 +2290,7 @@ export async function boot(dom) {
   rack.appendChild(wSlice.root);
 
   // QCD — the confining side: quarkonium under a chosen potential, the flavour-independence verdict, the string
-  /* ── LEGACY WINDOWS (2026-10, Josh): QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are HIDDEN, the way the H₂⁺ card below has
+  /* ── LEGACY WINDOWS (2026-10, Josh): QCD, HELIUM, H₂ and ELECTROSTATICS are HIDDEN (ATOMS is back since 0.4.0 S3), the way the H₂⁺ card below has
      been since 0.2.0.  Each NEEDS AN UPGRADE, RE-ADOPTION (into MIR) OR DELETION — docs/LEGACY-WINDOWS.md says what each
      one is and what each choice costs.  `hidden` takes a card out of the + menu, the WINDOW menu, TAB and canPresent();
      ids, models and save records are kept, so an older project still opens, and a project that NEEDS one brings it back
@@ -2780,16 +2780,16 @@ export async function boot(dom) {
     if (page.hidden) modHost.clock.setHidden(true);
   }
 
-  // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); a niche window: it ships CLOSED
-  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS · LEGACY', status: '' });
+  // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
+  // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
+  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
-    step: (d) => setElement(HAMILTONIANS.atom.Z + d),
+    select: (z) => setElement(z),
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
   });
-  legacyWindow(wAtoms);
 
   // ELECTROSTATICS — the classical field of the register's own charge, in closed form; a niche window: it ships CLOSED
   const wFld = device({ id: 'field', eyebrow: 'ELECTROSTATICS · LEGACY', status: '' });
