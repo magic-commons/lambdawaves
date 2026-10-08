@@ -213,7 +213,7 @@ export function createKeymap(host, keys, options = {}) {
   const rowDomMap = new Map();
 
   // Root screen
-  const root = el('div', 'km-panel glass', host);
+  const root = el('div', 'km-panel glass', host); host.dataset.mirWindow = 'keyboard';   // 0.5.0 A10: the kit's window hook, and the kit's id for this window
   root.hidden = true;
   root.setAttribute('role', 'dialog');
   root.setAttribute('aria-label', 'Keyboard shortcuts and bindings');
