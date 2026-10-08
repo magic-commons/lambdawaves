@@ -643,3 +643,10 @@ Q13 the worker skeleton · Q14 the component-level skip · Q15 C₆₀ at the ex
 ### 9 · The tags, once more
 
 MEASURED: every count in §1 rows 1–5, 9–14, 27–35, 38, 40, 42–44; the skeleton timings (as ratios); the census; the PySCF energies, cycles and errors. DERIVED: the 300-AO blocks and pair blocks (from measured characters), the per-frame group law, the asymmetric-unit byte count, the Hessian call count. UNVERIFIED: every GPU, worker, device and experimental-geometry statement (no device ran); the planned-roster interval (model); the literature (not opened).
+
+## RULING — Josh, 2026-10-07 (recorded by Claude Sos; the thread closes)
+
+Josh, on D1–D4 of SYNTHESIS §7, verbatim: *"Perhaps all default/option one's"*. Taken as option 1 on each: D1 R-S1-0.5
+option 1 (strike the symmetry-adapted SCF, keep the names and the root names; the petite-list ERI a flag gated by Q13);
+D2 C3 enters 0.5.0 THE INFORMATIONAL; D3 BUCKYBALL's grid record as its D₂h asymmetric unit; D4 no Round 4 — the thread
+closes here, Q13–Q17 stand as build gates for the waves that need them. Recorded in PLAN.md §9 and its 0.5.x row.

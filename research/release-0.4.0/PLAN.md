@@ -325,7 +325,7 @@ file, `research/release-0.4.0/KIT-BRIEFS.md`, mirrored to the vault as `LAMBDAWA
 | — | **cut 0.4.0-alpha** | | |
 | 0.4.1 | BUCKYBALL | C₆₀'s density from a PySCF record with precomputed grids uploaded into the molecular volume (one `field` upload road); the I_h names; the stepping stones' timings | C₆₀ draws whole on the 3070 and the M5, labelled GRID RECORD |
 | 0.5.0 | THE ADOPTION, then THE INFORMATIONAL | MIR `1.5.0` in BASINS' order with the canary's deltas and the glue seams; the 15 risks closed; then pages per orbital/state/molecule/window, feature labels, the window, the overlays as movable layers (SHADOW, ORBIT, PLANE, CALCULUS), the film overlay, TAKE MODE, FIGURE, chips, FLY-TO + search, SCENES, MAPS, the pad with the lattice, the periodic table as the library's map | stylehash neutral; ~9–10.5k lines out; every law re-proven; the device report on the 3070 and the M5 |
-| 0.5.x | the wave index (station ring, carousel, `Q_LM`) · symmetry-adapted SCF if the thread's number earns it | | |
+| 0.5.x | the wave index (station ring, carousel, `Q_LM`) · ~~symmetry-adapted SCF if the thread's number earns it~~ (R-S1-0.5: the number did not earn it — 25.81 %, 13.9 % of the library's live solve time; the names stay, RPA root names go to 0.5.0, the petite-list ERI is a flag gated by Q13, never a stage) | | |
 
 **Why this order [mine].** S0 first: the live main is unreviewed, and the canary and the three measurements are the
 cheapest information in the plan. S1 beside `cameraEye` and the Sol thread: disjoint files, no Opus cost for the thread,
@@ -420,6 +420,12 @@ and description is unknown.
 - R-U1 Josh first, visitors on the iPad second.
 - Every other ruling in §7 takes the first-named option until he says otherwise. The lens shift stays ("the planet photo is a bit of an over-explanation but that sounds like a cool feature").
 - The branches may be pushed ("yes to anything for the branches").
+- **R-S1-0.5 and D1–D4 of the Sol thread's SYNTHESIS** (`research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md` SYNTHESIS §3, §7), Josh
+  2026-10-07: *"Perhaps all default/option one's"* — taken as option 1 on each. D1: "symmetry-adapted SCF" struck from the 0.5.x
+  row; the names stay (S1); RPA root names in SPECTRUM (contract C3) and full-group labels at record generation (C5, in
+  S4a/S4b) are the symmetry work that remains; the petite-list ERI is a flag gated by Q13, not a stage. D2: C3 enters
+  0.5.0 THE INFORMATIONAL's pages-per-state. D3: BUCKYBALL's grid record is stored as its D₂h asymmetric unit (8× fewer
+  bytes, one expansion step on upload). D4: the thread closes after Round 3; Q13–Q17 are build gates, not a Round 4.
 
 ## 10 · THE NUMBERS TAKEN (S0, 2026-10-07 — `research/release-0.4.0/measure/MEASURE.md`, `docs/MIR-1.5-CANARY.md`)
 
