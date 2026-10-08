@@ -4273,3 +4273,32 @@ unrepeatable none); the fixture's other two changed keys are its `made` stamp an
 `cat lab/*.js | wc -l`: base `cfdd674` **36 131** → this tree **36 280**. Of the +149: Sos's B1 fix +6, S4c's merge +88 (`a927fc3` holds 36 225), and **S4b +55** (`lab/chemview.js` +42: the header/page turner and the per-section dropdown; `lab/molecules.js` +5: SECTIONS; `lab/library.js` +8: `atomsKey`, the geometry hash and the finite checks, the frontier's included). **"Subtract, don't add" is NOT met** by S4b (the turner and the header are the plan's named exception, PLAN F5; nothing in S4b's files was dead enough to delete).
 
 Open items (CLAUDE.md's paragraph drafted, not applied — an agent's message cannot authorise it), the KIT BRIEF notes for brief 4 and the exact next step are in `research/release-0.4.0/S4b-BUILD.md`.
+
+## 2026-10-08 · 0.5.0 A — THE SEAMS
+
+### wave 188: A5 THE MODULATION PORT — `lab/mod-port.js`, the object `createModulation(port)` takes
+
+The modulation's glue sat in five places of `rack.js` `boot()`: the microphone (the lazy capture, the feed, the closer, the
+silence), the cadence, the target maps with the base sync / `setKnob` / `modHand`, the catalogue's install (createModHost, the
+`.k[data-param]` stamps, `setBase`, the `.mod-held` subscription) and the port object literal handed to the window. They are one
+module now, `lab/mod-port.js` (119 lines), built where the host's state is declared (`createModPort({ available, present, view,
+onCapture, save })`) and filled where the catalogue is written (`mod.install(defs, roots)`); `rack.js` keeps the catalogue (the
+defs list, its ranges and adapters — the survey's "catalogue that goes home in 2.0"), the transport's dodge (`moved`), the RATE
+dial, the remembered input's settings write (its form kept: `{ ...S, audioDevice }` under SETTINGS_KEY) and the clock's edges, and
+hands them to `mod.port({...})`. The members, each with its kit twin (MIR 1.5 `modulation/window.js` `createModulation(host,
+port)`): `M` `registry` `targets` `clock` (the host's), `apply` (applyAll + PRESENT + the history note), `knobOf`, `persist`,
+`cadence` / `setCadence`, `armed` / `arm`, `audio` {state, support, start, stop, sync, devices}, `rateControl`, `moved`,
+`opened`, `closed` — key for key, none invented. Behind it the law the port owns: `hand` (a hand on a routed control moves the
+BASE), `setKnob` (a routed dial is PAINTED, a plain one SET, never under a finger), `syncBases` (the base follows the hand for
+everything not held; `all` only on a restore; `syncing` keeps it from asking for a frame), `feedAudio`. Behaviour byte for byte:
+the same calls in the same order (the capture's state object keeps its eleven keys in their order; the setBase closure, the
+knob-id cache built on first use and reset at install, the stamp one frame later). Every site outside the block reads the port
+through one alias line (`setKnob`, `modHand`, `modSyncBases`, `feedAudio`, `MOD`, `modKnobs`, `modGets`, `modHeld`) and the
+capture through `audioCap`, which the port hands back on its first MIC press — so `loop()`, the settings pair, `restore` and the
+`LW` literal are untouched (the integrator's sharing map); `schedule()` reads `mod.syncing`. `tests/access.test.mjs` A8 reads
+the `setBase` wire where it now lives.
+
+`cat lab/*.js | wc -l`: **36 280 → 36 237** (rack.js −163, mod-port.js +119, sw.js +1).
+
+Gates: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0 (85 suites; `mir.test`'s deterministic-replay judges
+green); browser on 8765/5235, one at a time: `mir-controls` 2 PASS, `lfo-tension` 3 PASS, `routed-knob` 4/4, `history` **39 PASS**.

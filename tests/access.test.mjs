@@ -84,8 +84,8 @@ judge('A3 the chatter guard survives in both writers: the value is announced whe
    moves it.  Read off the source here; B140 measures the ear, the eye and the model together. */
 const baseWire = /function setBase\(fn\)/.test(kit) && /setBase,\s*paint\s*\}/.test(kit);
 const baseSaid = /' \u00b7 base \u00b7 modulated'/.test(kit) || /' . base . modulated'/.test(kit);
-const rackWire = /k\.setBase\(\(\) =>/.test(TEXT.get('lab/rack.js') || '');
-judge('A8 a control the app is DRIVING under a focused user announces the base and says so: knob() takes setBase(fn), the announcement carries the word, and rack.js hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value',
+const rackWire = /k\.setBase\(\(\) =>/.test(TEXT.get('lab/mod-port.js') || '');   // 0.5.0 A5: the stamp moved into the modulation port
+judge('A8 a control the app is DRIVING under a focused user announces the base and says so: knob() takes setBase(fn), the announcement carries the word, and the modulation port (lab/mod-port.js) hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value',
   baseWire && baseSaid && rackWire, { baseWire, baseSaid, rackWire });
 
 /* WAVE 68 · ONE FOLD, NOT TWO.  The wrap fold lived in the keydown handler alone, so one mouse drag on
