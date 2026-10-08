@@ -11,7 +11,7 @@ try {
     return {n:a.length,collisions:a.flatMap((x,i)=>a.slice(i+1).filter(y=>overlap(x,y)).map(y=>[x.id,y.id])),
       camera:Object.fromEntries(['dollyIn','povIn','dollyZoomIn','dollyOut','povOut','dollyZoomOut'].map(id=>{const x=a.find(a=>a.id===id);return [id,[x.key,x.ctrl||false,!!x.shift]]})),
       chord:Object.fromEntries(['transport.play','folders','pitchDn','modArm','help','hide','modulation','save','notebook','rack','dock','fullscreen'].map(id=>{const x=a.find(a=>a.id===id);return [id,x&&[x.key,x.ctrl||false,!!x.shift]]})),
-      gone:['play','hideUI','keysheet','modWin'].filter(id=>a.some(x=>x.id===id)),
+      gone:['play','hideUI','keysheet','modWin'].filter(id=>a.some(x=>x.id===id)),kitWindows:['history','keyboard'].map(id=>{const x=a.find(y=>y.id===id);return x?x.key:'missing'}),
       hooks:[...document.querySelectorAll('[data-key-action]')].map(e=>e.dataset.keyAction).filter(id=>!a.some(x=>x.id===id)),
       hooked:['rack','folders','notebook','camReset','undo','redo','view','style','palette'].filter(id=>!document.querySelector('[data-key-action="'+id+'"]')),
       kit:await import('./mir/shell/keys.js').then(m=>m.KIT_KEYS?Object.fromEntries(Object.entries(m.KIT_KEYS).map(([k,v])=>[k,m.normalize(v)])):null,()=>null),errors:__e.slice()};`);
@@ -22,7 +22,7 @@ try {
   assert.deepEqual(binding.chord, { 'transport.play':['Space',false,false], folders:['KeyO',false,false], pitchDn:['KeyS',false,false],
     modArm:['Space','Ctrl',false], help:['Slash',false,true], hide:['KeyH',false,false], modulation:['KeyM',false,false], save:['KeyS',true,false],
     notebook:['KeyJ',false,false], rack:['KeyB',false,false], dock:['KeyT',false,false], fullscreen:['KeyF',false,false] });
-  assert.deepEqual(binding.gone, []); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row that exists'); assert.deepEqual(binding.hooked, []);
+  assert.deepEqual(binding.gone, []); assert.deepEqual(binding.kitWindows, [null, null], 'the kit\'s windows are rows with no chord (ADOPTING-1.5 §11)'); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row that exists'); assert.deepEqual(binding.hooked, []);
   /* on an adopted kit that ships its table (1.5: KIT_KEYS), every twin is the kit's own chord spelled the kit's way, but FOLDERS (R-K1) */
   if (binding.kit) {
     const kitSpell = ([key, ctrl, shift]) => [ctrl === 'Ctrl' ? 'Ctrl' : ctrl ? 'Mod' : '', shift ? 'Shift' : '', key].filter(Boolean).join('+');

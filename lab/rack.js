@@ -4751,6 +4751,9 @@ export async function boot(dom) {
       run: () => layout.notebook.open('projects') },
     { id: 'folders', group: KG.P, short: 'folders', label: 'the projects — save, open, folders, recent (FOLDERS)', key: 'KeyO',
       run: () => { const nb = layout.notebook; if (nb.isOpen && nb.face === 'projects') nb.close(); else nb.open('projects'); } },
+    /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
+    { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
+    { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
   ];
   /* A9 → A4 SEAM: the MENUS table (the floating-rack block) still finds four rows by their old ids (keyFor/runAction 'play', 'hideUI',
      'modWin', 'keysheet'); a lookup that misses tries each row under its `was`.  This line goes when A4 renames those calls. */
