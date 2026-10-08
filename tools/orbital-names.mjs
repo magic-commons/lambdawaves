@@ -95,6 +95,58 @@ print(json.dumps({'group': mol.groupname, 'labels': list(symm.label_orb_symm(mol
     if (!same && !swapped) fail('PySCF cross-check differs');
   } catch (e) { console.log('\nPySCF cross-check UNVERIFIED: ' + String(e.message || e).split('\n')[0]); }
 }
+/* 5 · THE LIBRARY'S RECORDS (0.4.0 S4b · ledger SYNTHESIS §4 C5).  Every record's names were made at generation by the
+   projection (this file's nameOrbitals on the app's own solve): with --check, every record that declares a group is named in it
+   (or says why), and its framework holds every operation; with --pyscf, PySCF solves every record's own atoms on the same pinned
+   decimals (tools/library/record-oracle.py --dump) and THOSE orbitals are labelled by the same projection — every label must be
+   the record's, the energy the record's oracle, and PySCF's own topgroup the one the record wrote down (recorded, never a name). */
+const CAT = JSON.parse(readFileSync(new URL('lab/library.json', ROOT), 'utf8'));
+const recOf = (row) => JSON.parse(readFileSync(new URL('lab/library/' + row.hash + '.json', ROOT), 'utf8'));
+const libRows = [];
+for (const row of CAT.rows) {
+  const r = recOf(row), N = r.ground.names, sym = r.input.symmetry, atoms = r.input.atoms;
+  if (sym.group !== 'C1') {
+    if (!N.reliable || N.group !== sym.group) fail(`${row.id}: declared ${sym.group}, the record's names ${N.reliable ? 'are in ' + N.group : 'refused: ' + N.reason}`);
+    const fr = frameOf(atoms, sym.frame); let worst = 0;
+    if (!/inf/.test(sym.group)) for (const { R } of operations(sym.group)) {
+      const F = fr.F, Rl = [0, 1, 2].flatMap((i) => [0, 1, 2].map((j) => { let t = 0; for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) t += F[i * 3 + a] * R[a * 3 + b] * F[j * 3 + b]; return t; }));
+      for (const a of atoms) {
+        const d = [a.x - fr.c[0], a.y - fr.c[1], a.z - fr.c[2]], q = [0, 1, 2].map((i) => fr.c[i] + Rl[i * 3] * d[0] + Rl[i * 3 + 1] * d[1] + Rl[i * 3 + 2] * d[2]);
+        let best = Infinity; for (const b of atoms) if (b.Z === a.Z) best = Math.min(best, Math.hypot(b.x - q[0], b.y - q[1], b.z - q[2]));
+        worst = Math.max(worst, best);
+      }
+    }
+    if (worst > (sym.geomTol || 1e-6)) fail(`${row.id}: declared ${sym.group} moves an atom ${worst.toExponential(2)} bohr`);
+  }
+  libRows.push({ row, r });
+}
+console.log(`\nlibrary records: ${libRows.length} — ${libRows.map(({ row, r }) => `${row.id} ${r.ground.names.reliable ? r.ground.names.group : 'C1'}`).join(' · ')}`);
+if (has('--pyscf')) {
+  const { basisFrom } = await import('../lab/md.js');
+  const inputs = { rows: libRows.map(({ row, r }) => ({ id: row.id, charge: r.input.charge, key: row.hash.slice(0, 16), atoms: r.input.atoms.map((a) => [a.Z, a.x, a.y, a.z]) })) };
+  mkdirSync(new URL('.tmp/', ROOT), { recursive: true });
+  const inFile = new URL('.tmp/names-records-inputs.json', ROOT).pathname, dumpFile = new URL('.tmp/names-records-pyscf.json', ROOT).pathname;
+  writeFileSync(inFile, JSON.stringify(inputs));
+  let dump = null;
+  try { execFileSync(process.env.HOME + '/bin/scipython', ['-I', new URL('tools/library/record-oracle.py', ROOT).pathname, inFile, '--dump', dumpFile], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 26 });
+    dump = JSON.parse(readFileSync(dumpFile, 'utf8')); } catch (e) { console.log('\nPySCF cross-check of the records UNVERIFIED: ' + String(e.message || e).split('\n')[0]); }
+  if (dump) {
+    const lines = [];
+    for (const { row, r } of libRows) {
+      const p = dump[row.id], atoms = r.input.atoms, sym = r.input.symmetry, N = r.ground.names;
+      if (!p) { fail(`${row.id}: PySCF gave no answer`); continue; }
+      const P = nameOrbitals({ atoms, S: Float64Array.from(p.S), C: Float64Array.from(p.C), eps: p.eps, nocc: p.nocc, basis: basisFrom(atoms, record), converged: p.converged }, sym);
+      const dE = p.energy - r.oracle.energy, labels = N.mos.map((m) => m.label + '|' + m.frontier), pl = P.mos.map((m) => m.label + '|' + m.frontier);
+      const same = P.reliable === N.reliable && P.group === N.group && pl.length === labels.length && pl.every((l, k) => l === labels[k]);
+      const top = r.stem.symmetry && r.stem.symmetry.pyscf ? r.stem.symmetry.pyscf.topgroup : null;
+      if (!same) fail(`${row.id}: PySCF's orbitals project to ${P.reliable ? P.group + ' ' + P.config : 'no names (' + P.reason + ')'}, the record says ${N.reliable ? N.group + ' ' + N.config : 'no names'}`);
+      if (!(Math.abs(dE) <= 1e-8)) fail(`${row.id}: PySCF ${p.energy} is ${dE.toExponential(2)} Eh from the record's oracle`);
+      const homo = N.mos[N.mos.findIndex((m) => m.frontier === 'LUMO') - 1] || {}, lumo = N.mos.find((m) => m.frontier === 'LUMO') || {};
+      lines.push(`| ${row.id} | ${sym.group}${r.stem.symmetry && r.stem.symmetry.pointGroup !== sym.group ? ' (of ' + r.stem.symmetry.pointGroup + ')' : ''} | ${top} | ${same ? 'MATCH' : 'DIFFERS'} | ${N.reliable ? (homo.label || '—') + ' / ' + (lumo.label || '—') : 'index only (C₁)'} | ${dE.toExponential(1)} |`);
+    }
+    console.log('\n| record | labelled in | PySCF topgroup (recorded) | PySCF orbitals, same projection | HOMO / LUMO | ΔE PySCF − oracle |\n|---|---|---|---|---|---|\n' + lines.join('\n'));
+  }
+}
 const jsonAt = args.indexOf('--json');
 if (jsonAt >= 0) writeFileSync(args[jsonAt + 1], JSON.stringify(records, null, 1) + '\n');
 console.log(failures ? `\n${failures} FAILURE(S)` : '\nOK — every anchor matches the probe; every enabled molecule is named or says why');

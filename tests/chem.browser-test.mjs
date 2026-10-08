@@ -19,7 +19,7 @@
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, COST, showMs } from '../lab/molecules.js';
+import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, COST, showMs, SECTIONS } from '../lab/molecules.js';
 
 const PORT = process.env.LW_PORT || 8704;
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -189,30 +189,41 @@ try {
    * /· d+ AO/ and refuses all 54 options while printing them back looking perfectly correct.  [0-9] survives.
    * The node is paletteview.js's `<select class="sel">`, the options carry their AO count and their predicted
    * time, and an entry this engine cannot answer for is DISABLED with its reason on the option itself. */
+  /* 0.4.0 S4b: the dropdown holds ONE SECTION; the page turner (‹ SECTION ›, the section header) turns it.  Every page is read
+     through __LW.chem.section (the turner's own road), and then the page goes back to the molecule on screen. */
   const l6 = await g.ev(`const card = document.querySelector('.dev[data-id="chem"]');
-    const sel = card.querySelector('.mol-pick select.sel');
-    const opts = sel ? [...sel.options] : [];
-    return { exists: !!sel, cls: sel && sel.className, tag: sel && sel.tagName,
+    const sel = card.querySelector('.mol-pick select.sel'), opts = [], groups = new Set(), pages = [];
+    for (const s of ${JSON.stringify(SECTIONS)}) {
+      const h = __LW.chem.section(s); const here = sel ? [...sel.options] : [];
+      for (const g of sel.querySelectorAll('optgroup')) groups.add(g.label);
+      pages.push({ s, name: h.name, n: here.length, ids: here.map((o) => o.value).join(), want: h.molecules.join(), head: card.querySelector('.mol-section .ro-val').textContent });
+      opts.push(...here.map((o) => ({ value: o.value, text: o.textContent, disabled: o.disabled, help: o.dataset.help || o.title || '' })));
+    }
+    __LW.chem.section('HYDRIDES');
+    return { exists: !!sel, cls: sel && sel.className, tag: sel && sel.tagName, pages,
       count: opts.length, disabled: opts.filter((o) => o.disabled).length,
-      disabledText: opts.filter((o) => o.disabled).map((o) => o.textContent + ' :: ' + (o.dataset.help || o.title || '')),
-      groups: sel ? [...sel.querySelectorAll('optgroup')].map((g) => g.label) : [],
+      disabledText: opts.filter((o) => o.disabled).map((o) => o.text + ' :: ' + o.help),
+      groups: [...groups], turners: card.querySelectorAll('.mol-section > .trig.mol-turn').length,
       help: sel && (sel.dataset.help || sel.title) || '', aria: sel && sel.getAttribute('aria-label'),
-      value: sel && sel.value, first: opts[0] && opts[0].textContent, benzene: opts.find((o) => o.value === 'C6H6')?.textContent,
-      bad: opts.filter((o) => !/· [0-9]+ AO · (~([0-9]+ ms|[0-9]+[.][0-9] s)|record( · DOWNLOAD)?$)/.test(o.textContent)).map((o) => o.value + ' :: ' + JSON.stringify(o.textContent)),
-      records: opts.filter((o) => / · record/.test(o.textContent)).map((o) => o.value),
+      value: sel && sel.value, first: opts[0] && opts[0].text, benzene: opts.find((o) => o.value === 'C6H6')?.text,
+      bad: opts.filter((o) => !/· [0-9]+ AO · (~([0-9]+ ms|[0-9]+[.][0-9] s)|record( · DOWNLOAD)?$)/.test(o.text)).map((o) => o.value + ' :: ' + JSON.stringify(o.text)),
+      records: opts.filter((o) => / · record/.test(o.text)).map((o) => o.value),
       seg: !!card.querySelector('.segw[data-nope]'), errs: window.__e.slice() };`);
+  judge(`L6 the page turner: ${l6.pages.length} sections, each page holds exactly its own molecules and its header names it (${l6.pages.map((p) => p.s + ' ' + p.n).join(' · ')})`,
+    l6.turners === 2 && l6.pages.length === SECTIONS.length && l6.pages.every((p) => p.name === p.s && p.head === p.s && p.ids === p.want && p.n > 0),
+    { pages: l6.pages.map((p) => ({ s: p.s, name: p.name, head: p.head, n: p.n, same: p.ids === p.want })) });
   judge('L6 the MOLECULE control is a <select class="sel"> with an aria-label', l6.exists && l6.tag === 'SELECT' && l6.cls === 'sel' && l6.aria === 'molecule',
     { tag: l6.tag, cls: l6.cls, aria: l6.aria });
-  judge(`L6 ≥ 30 options in ${l6.groups.length} optgroups, ≥ 1 disabled`, l6.count >= 30 && l6.disabled >= 1 && l6.groups.length >= 5,
+  judge(`L6 ≥ 30 options over the pages in ${l6.groups.length} optgroups, ≥ 1 disabled`, l6.count >= 30 && l6.disabled >= 1 && l6.groups.length >= 5,
     { options: l6.count, disabled: l6.disabled, groups: l6.groups, disabledText: l6.disabledText });
   /* 0.4.0 S4a: the COST refit (PLAN §10 N2) moved benzene's prediction from ~9.6 s to ~1.7 s; a row past the cap with a record
      says `record` (and DOWNLOAD until it is on this device) instead of a predicted time — never DISABLED */
   judge('L6 every option text carries its AO count and predicted time (a record-only row says record), and a disabled one says why',
-    l6.bad.length === 0 && /·\s*36 AO\s*·\s*~1\.7 s$/.test(l6.benzene || '') && JSON.stringify(l6.records) === JSON.stringify(RECORD_ONLY.map((m) => m.id))
+    l6.bad.length === 0 && /·\s*36 AO\s*·\s*~1\.7 s$/.test(l6.benzene || '') && JSON.stringify(l6.records) === JSON.stringify(RECORD_ONLY.filter((m) => m.recordOnly).map((m) => m.id))
     && l6.disabledText.every((t) => /not a minimum|over the cap/.test(t) && /A−B|cap/.test(t)),
     { first: l6.first, benzene: l6.benzene, malformed: l6.bad, disabledText: l6.disabledText.map((t) => t.split(' :: ')[0]) });
   judge('L6 the select names the cap rule in its own help', /cap is benzene/.test(l6.help) && /disabled/.test(l6.help), { help: l6.help });
-  judge('L6 the library agrees with the menu on how many entries there are', l6.count === MOLECULES.length + RECORD_ONLY.length && l6.value === 'H2O',
+  judge('L6 the library agrees with the menu on how many entries there are (every page summed), and the page went back to water\'s', l6.count === MOLECULES.length + RECORD_ONLY.length && l6.value === 'H2O',
     { menu: l6.count, library: MOLECULES.length, records: RECORD_ONLY.length, value: l6.value, errs: l6.errs });
   judge('L6 no page error', l6.errs.length === 0, l6.errs);
 

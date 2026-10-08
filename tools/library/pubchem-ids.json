@@ -44,6 +44,342 @@
    "title": "Titanium Tetrachloride",
    "checked": "2026-10-08",
    "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 24193 (\"Titanium Tetrachloride\") → InChIKey XJDNKRIXUMDJCW-UHFFFAOYSA-J; its formula Cl4Ti is the record's"
+  },
+  "serine": {
+   "formula": "C3H7NO3",
+   "query": "L-serine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 5951,
+   "inchiKey": "MTCFGRXMJLQNBG-REOHCLBHSA-N",
+   "pubchemFormula": "C3H7NO3",
+   "title": "L-Serine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5951 (\"L-Serine\") → InChIKey MTCFGRXMJLQNBG-REOHCLBHSA-N; its formula C3H7NO3 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "cysteine": {
+   "formula": "C3H7NO2S",
+   "query": "L-cysteine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 5862,
+   "inchiKey": "XUJNEKJLAYXESH-REOHCLBHSA-N",
+   "pubchemFormula": "C3H7NO2S",
+   "title": "L-(+)-Cysteine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5862 (\"L-(+)-Cysteine\") → InChIKey XUJNEKJLAYXESH-REOHCLBHSA-N; its formula C3H7NO2S is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "proline": {
+   "formula": "C5H9NO2",
+   "query": "L-proline",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 145742,
+   "inchiKey": "ONIBWKKTOPOVIA-BYPYZUCNSA-N",
+   "pubchemFormula": "C5H9NO2",
+   "title": "L-Proline",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 145742 (\"L-Proline\") → InChIKey ONIBWKKTOPOVIA-BYPYZUCNSA-N; its formula C5H9NO2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "threonine": {
+   "formula": "C4H9NO3",
+   "query": "L-threonine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6288,
+   "inchiKey": "AYFVYJQAPQTCCC-GBXIJSLDSA-N",
+   "pubchemFormula": "C4H9NO3",
+   "title": "L-Threonine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6288 (\"L-Threonine\") → InChIKey AYFVYJQAPQTCCC-GBXIJSLDSA-N; its formula C4H9NO3 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "valine": {
+   "formula": "C5H11NO2",
+   "query": "L-valine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6287,
+   "inchiKey": "KZSNJWFQEVHDMF-BYPYZUCNSA-N",
+   "pubchemFormula": "C5H11NO2",
+   "title": "L-Valine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6287 (\"L-Valine\") → InChIKey KZSNJWFQEVHDMF-BYPYZUCNSA-N; its formula C5H11NO2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "aspartic-acid": {
+   "formula": "C4H7NO4",
+   "query": "L-aspartic acid",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 5960,
+   "inchiKey": "CKLJMWTZIZZHCS-REOHCLBHSA-N",
+   "pubchemFormula": "C4H7NO4",
+   "title": "L-Aspartic Acid",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5960 (\"L-Aspartic Acid\") → InChIKey CKLJMWTZIZZHCS-REOHCLBHSA-N; its formula C4H7NO4 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "asparagine": {
+   "formula": "C4H8N2O3",
+   "query": "L-asparagine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6267,
+   "inchiKey": "DCXYFEDJOCDNAF-REOHCLBHSA-N",
+   "pubchemFormula": "C4H8N2O3",
+   "title": "(-)-Asparagine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6267 (\"(-)-Asparagine\") → InChIKey DCXYFEDJOCDNAF-REOHCLBHSA-N; its formula C4H8N2O3 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "isoleucine": {
+   "formula": "C6H13NO2",
+   "query": "L-isoleucine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6306,
+   "inchiKey": "AGPKZVBTJJNPAG-WHFBIAKZSA-N",
+   "pubchemFormula": "C6H13NO2",
+   "title": "L-Isoleucine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6306 (\"L-Isoleucine\") → InChIKey AGPKZVBTJJNPAG-WHFBIAKZSA-N; its formula C6H13NO2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "leucine": {
+   "formula": "C6H13NO2",
+   "query": "L-leucine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6106,
+   "inchiKey": "ROHFNLRQFUQHCH-YFKPBYRVSA-N",
+   "pubchemFormula": "C6H13NO2",
+   "title": "L-Leucine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6106 (\"L-Leucine\") → InChIKey ROHFNLRQFUQHCH-YFKPBYRVSA-N; its formula C6H13NO2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "glutamic-acid": {
+   "formula": "C5H9NO4",
+   "query": "L-glutamic acid",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 33032,
+   "inchiKey": "WHUUTDBJXJRKMK-VKHMYHEASA-N",
+   "pubchemFormula": "C5H9NO4",
+   "title": "L-Glutamic Acid",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 33032 (\"L-Glutamic Acid\") → InChIKey WHUUTDBJXJRKMK-VKHMYHEASA-N; its formula C5H9NO4 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "glutamine": {
+   "formula": "C5H10N2O3",
+   "query": "L-glutamine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 5961,
+   "inchiKey": "ZDXPYRJPNDTMRX-VKHMYHEASA-N",
+   "pubchemFormula": "C5H10N2O3",
+   "title": "L-Glutamine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5961 (\"L-Glutamine\") → InChIKey ZDXPYRJPNDTMRX-VKHMYHEASA-N; its formula C5H10N2O3 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "methionine": {
+   "formula": "C5H11NO2S",
+   "query": "L-methionine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6137,
+   "inchiKey": "FFEARJCKVFRZRR-BYPYZUCNSA-N",
+   "pubchemFormula": "C5H11NO2S",
+   "title": "L-Methionine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6137 (\"L-Methionine\") → InChIKey FFEARJCKVFRZRR-BYPYZUCNSA-N; its formula C5H11NO2S is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "histidine": {
+   "formula": "C6H9N3O2",
+   "query": "L-histidine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6274,
+   "inchiKey": "HNDVDQJCIGZPNO-YFKPBYRVSA-N",
+   "pubchemFormula": "C6H9N3O2",
+   "title": "L-Histidine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6274 (\"L-Histidine\") → InChIKey HNDVDQJCIGZPNO-YFKPBYRVSA-N; its formula C6H9N3O2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "phenylalanine": {
+   "formula": "C9H11NO2",
+   "query": "L-phenylalanine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6140,
+   "inchiKey": "COLNVLDHVKWLRT-QMMMGPOBSA-N",
+   "pubchemFormula": "C9H11NO2",
+   "title": "L-Phenylalanine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6140 (\"L-Phenylalanine\") → InChIKey COLNVLDHVKWLRT-QMMMGPOBSA-N; its formula C9H11NO2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "arginine": {
+   "formula": "C6H14N4O2",
+   "query": "L-arginine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6322,
+   "inchiKey": "ODKSFYDXXFIFQN-BYPYZUCNSA-N",
+   "pubchemFormula": "C6H14N4O2",
+   "title": "L-Arginine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6322 (\"L-Arginine\") → InChIKey ODKSFYDXXFIFQN-BYPYZUCNSA-N; its formula C6H14N4O2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "tyrosine": {
+   "formula": "C9H11NO3",
+   "query": "L-tyrosine",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6057,
+   "inchiKey": "OUYCCCASQSFEME-QMMMGPOBSA-N",
+   "pubchemFormula": "C9H11NO3",
+   "title": "L-Tyrosine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6057 (\"L-Tyrosine\") → InChIKey OUYCCCASQSFEME-QMMMGPOBSA-N; its formula C9H11NO3 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "tryptophan": {
+   "formula": "C11H12N2O2",
+   "query": "L-tryptophan",
+   "note": "the L-form, as the generator's CORN check finds the record's geometry",
+   "cid": 6305,
+   "inchiKey": "QIVBCDIJIAJPQS-VIFPVBQESA-N",
+   "pubchemFormula": "C11H12N2O2",
+   "title": "L-Tryptophan",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6305 (\"L-Tryptophan\") → InChIKey QIVBCDIJIAJPQS-VIFPVBQESA-N; its formula C11H12N2O2 is the record's — the L-form, as the generator's CORN check finds the record's geometry"
+  },
+  "uracil": {
+   "formula": "C4H4N2O2",
+   "query": "uracil",
+   "cid": 1174,
+   "inchiKey": "ISAKRJDGNUQOIC-UHFFFAOYSA-N",
+   "pubchemFormula": "C4H4N2O2",
+   "title": "Uracil",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 1174 (\"Uracil\") → InChIKey ISAKRJDGNUQOIC-UHFFFAOYSA-N; its formula C4H4N2O2 is the record's"
+  },
+  "cytosine": {
+   "formula": "C4H5N3O",
+   "query": "cytosine",
+   "cid": 597,
+   "inchiKey": "OPTASPLRGRRNAP-UHFFFAOYSA-N",
+   "pubchemFormula": "C4H5N3O",
+   "title": "Cytosine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 597 (\"Cytosine\") → InChIKey OPTASPLRGRRNAP-UHFFFAOYSA-N; its formula C4H5N3O is the record's"
+  },
+  "thymine": {
+   "formula": "C5H6N2O2",
+   "query": "thymine",
+   "cid": 1135,
+   "inchiKey": "RWQNBRDOKXIBIV-UHFFFAOYSA-N",
+   "pubchemFormula": "C5H6N2O2",
+   "title": "Thymine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 1135 (\"Thymine\") → InChIKey RWQNBRDOKXIBIV-UHFFFAOYSA-N; its formula C5H6N2O2 is the record's"
+  },
+  "adenine": {
+   "formula": "C5H5N5",
+   "query": "adenine",
+   "cid": 190,
+   "inchiKey": "GFFGJBXGBJISGV-UHFFFAOYSA-N",
+   "pubchemFormula": "C5H5N5",
+   "title": "Adenine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 190 (\"Adenine\") → InChIKey GFFGJBXGBJISGV-UHFFFAOYSA-N; its formula C5H5N5 is the record's"
+  },
+  "guanine": {
+   "formula": "C5H5N5O",
+   "query": "guanine",
+   "cid": 135398634,
+   "inchiKey": "UYTPUPDQBNUYGX-UHFFFAOYSA-N",
+   "pubchemFormula": "C5H5N5O",
+   "title": "Guanine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 135398634 (\"Guanine\") → InChIKey UYTPUPDQBNUYGX-UHFFFAOYSA-N; its formula C5H5N5O is the record's"
+  },
+  "N-methylacetamide": {
+   "formula": "C3H7NO",
+   "query": "N-methylacetamide",
+   "cid": 6582,
+   "inchiKey": "OHLUUHNLEMFGTQ-UHFFFAOYSA-N",
+   "pubchemFormula": "C3H7NO",
+   "title": "N-Methylacetamide",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 6582 (\"N-Methylacetamide\") → InChIKey OHLUUHNLEMFGTQ-UHFFFAOYSA-N; its formula C3H7NO is the record's"
+  },
+  "adamantane": {
+   "formula": "C10H16",
+   "query": "adamantane",
+   "cid": 9238,
+   "inchiKey": "ORILYTVJVMAKLC-UHFFFAOYSA-N",
+   "pubchemFormula": "C10H16",
+   "title": "Adamantane",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 9238 (\"Adamantane\") → InChIKey ORILYTVJVMAKLC-UHFFFAOYSA-N; its formula C10H16 is the record's"
+  },
+  "cubane": {
+   "formula": "C8H8",
+   "query": "cubane",
+   "cid": 136090,
+   "inchiKey": "TXWRERCHRDBNLG-UHFFFAOYSA-N",
+   "pubchemFormula": "C8H8",
+   "title": "Cubane",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 136090 (\"Cubane\") → InChIKey TXWRERCHRDBNLG-UHFFFAOYSA-N; its formula C8H8 is the record's"
+  },
+  "ferrocene": {
+   "formula": "C10H10Fe",
+   "query": "ferrocene",
+   "cid": 10219726,
+   "inchiKey": "DFRHTHSZMBROSH-UHFFFAOYSA-N",
+   "pubchemFormula": "C10H10Fe",
+   "title": "Ferrocene",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 10219726 (\"Ferrocene\") → InChIKey DFRHTHSZMBROSH-UHFFFAOYSA-N; its formula C10H10Fe is the record's"
+  },
+  "B12H12--": {
+   "formula": "B12H12-2",
+   "checked": "2026-10-08",
+   "status": "UNVERIFIED: no identifier — PubChem's name search answered 'dodecaborate' with an unrelated compound (CID 123133415, B12O36-36) and found nothing for 'closo-dodecaborate', 'dodecahydrododecaborate(2-)' or 'dodecahydrododecaborate', nor a fast-formula hit for B12H12 (2026-10-08); the record carries no CID rather than a guessed one"
+  },
+  "KrF2": {
+   "formula": "F2Kr",
+   "query": "krypton difluoride",
+   "cid": 83721,
+   "inchiKey": "QGOSZQZQVQAYFS-UHFFFAOYSA-N",
+   "pubchemFormula": "F2Kr",
+   "title": "Krypton difluoride",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 83721 (\"Krypton difluoride\") → InChIKey QGOSZQZQVQAYFS-UHFFFAOYSA-N; its formula F2Kr is the record's"
+  },
+  "KBr": {
+   "formula": "BrK",
+   "query": "potassium bromide",
+   "cid": 253877,
+   "inchiKey": "IOLCXVTUBQKXJR-UHFFFAOYSA-M",
+   "pubchemFormula": "BrK",
+   "title": "Potassium Bromide",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 253877 (\"Potassium Bromide\") → InChIKey IOLCXVTUBQKXJR-UHFFFAOYSA-M; its formula BrK is the record's"
+  },
+  "NiCO4": {
+   "formula": "C4NiO4",
+   "query": "nickel tetracarbonyl",
+   "cid": 26039,
+   "inchiKey": "AWDHUGLHGCVIEG-UHFFFAOYSA-N",
+   "pubchemFormula": "C4NiO4",
+   "title": "Nickel tetracarbonyl",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 26039 (\"Nickel tetracarbonyl\") → InChIKey AWDHUGLHGCVIEG-UHFFFAOYSA-N; its formula C4NiO4 is the record's"
+  },
+  "FeCO5": {
+   "formula": "C5FeO5",
+   "query": "iron pentacarbonyl",
+   "cid": 26040,
+   "inchiKey": "FYOFOKCECDGJBF-UHFFFAOYSA-N",
+   "pubchemFormula": "C5FeO5",
+   "title": "Iron pentacarbonyl",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 26040 (\"Iron pentacarbonyl\") → InChIKey FYOFOKCECDGJBF-UHFFFAOYSA-N; its formula C5FeO5 is the record's"
+  },
+  "CrCO6": {
+   "formula": "C6CrO6",
+   "query": "chromium hexacarbonyl",
+   "cid": 25589,
+   "inchiKey": "KOTQLLUQLXWWDK-UHFFFAOYSA-N",
+   "pubchemFormula": "C6CrO6",
+   "title": "Chromium hexacarbonyl",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 25589 (\"Chromium hexacarbonyl\") → InChIKey KOTQLLUQLXWWDK-UHFFFAOYSA-N; its formula C6CrO6 is the record's"
+  },
+  "ice-hexamer": {
+   "formula": "H12O6",
+   "none": "a finite hydrogen-bonded ring of six waters relaxed here; PubChem lists water (CID 962), not this cluster"
   }
  }
 }

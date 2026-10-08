@@ -26,7 +26,7 @@ import time
 
 import numpy as np
 import pyscf
-from pyscf import gto, scf, lib
+from pyscf import gto, scf, lib, symm
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 BASIS_FILE = os.path.join(ROOT, "lab", "vendor", "bse", "sto-3g-v1.json")
@@ -97,15 +97,26 @@ for row in rows:
         e = mf.kernel(mf.mo_coeff, mf.mo_occ)
         route = "DIIS then Newton"
     wall = time.perf_counter() - t0
+    occ_irrep, top, grp = None, None, None
     try:
         msym = mole(row["atoms"], row["charge"], symmetry=True)
         top, grp = msym.topgroup, msym.groupname
+        # PySCF's orbsym: its own symmetry-adapted SCF in the Abelian groupname (it may re-orient the molecule) — the occupied
+        # count per irrep is RECORDED beside the projection's names and is never one of them (ledger C5)
+        mfs = scf.RHF(msym)
+        mfs.conv_tol, mfs.max_cycle = 1e-11, 200
+        es = mfs.kernel()
+        orbsym = symm.label_orb_symm(msym, msym.irrep_name, msym.symm_orb, mfs.mo_coeff)
+        occ_irrep = {}
+        for s in list(orbsym)[: msym.nelectron // 2]:
+            occ_irrep[str(s)] = occ_irrep.get(str(s), 0) + 1
+        occ_irrep = {"groupname": grp, "occupied": dict(sorted(occ_irrep.items())), "energy": float(es), "converged": bool(mfs.converged)}
     except Exception as exc:                                     # noqa: BLE001 — recorded, never a name
-        top, grp = None, "detection failed: " + str(exc).split("\n")[0]
+        occ_irrep = {"failed": str(exc).split("\n")[0]}
     nocc = mol.nelectron // 2
     out = {"energy": float(e), "converged": bool(mf.converged), "route": route, "cycles": int(getattr(mf, "cycles", -1)),
            "wallSeconds": round(wall, 3), "nao": int(mol.nao_nr()), "nocc": nocc, "key": row["key"],
-           "topgroup": top, "groupname": grp,
+           "topgroup": top, "groupname": grp, "orbsym": occ_irrep,
            "homoLumoGapEh": float(np.sort(mf.mo_energy)[nocc] - np.sort(mf.mo_energy)[nocc - 1])}
     fixture["molecules"][row["id"]] = out
     print(f"{row['id']:<16} {out['nao']:>3} AO  E {out['energy']:.12f}  {'converged' if out['converged'] else 'NOT CONVERGED'} ({route})"

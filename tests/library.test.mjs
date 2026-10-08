@@ -23,6 +23,12 @@ const calls = () => W.chemSolverCalls();
 for (const r of CAT.rows) assert.deepEqual(validateRecord(load(r.id)), [], r.id + ' does not validate');
 const broken = load('C6H6'); delete broken.orbitals.C; broken.caps.tdhf = 'yes';
 assert.deepEqual(validateRecord(broken), ['caps.tdhf', 'orbitals: ε, C and D at nAO']);
+/* S4b: a record is the geometry it was made at, with finite numbers — a moved atom or a NaN in C is refused, not opened */
+const moved = load('C6H6'); moved.input.atoms[3].x += 1e-9;
+assert.deepEqual(validateRecord(moved), ['input.atoms: not the geometry the record was made at (atomsSha256)']);
+const nan = load('C6H6'), Cb = Buffer.from(nan.orbitals.C.$f64, 'base64'), Cn = new Float64Array(Cb.buffer.slice(Cb.byteOffset, Cb.byteOffset + Cb.length)); Cn[7] = NaN;
+nan.orbitals.C = { $f64: Buffer.from(Cn.buffer).toString('base64') };
+assert.deepEqual(validateRecord(nan), ['orbitals: a non-finite ε, C or D']);
 
 /* 2 · BENZENE, FRESH: the live road (two solver calls: the SCF and the RPA) */
 const m = MOLECULE_BY_ID.get('C6H6'), msg = { atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0, symmetry: m.symmetry };

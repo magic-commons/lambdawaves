@@ -9,13 +9,20 @@
 //       of the project restores, and the settings stay byte-identical outside the WORKSPACE keys.
 //   5 · EVICT → NOT INSTALLED: the record removed, the same project offline restores everything else and MOLECULES names the part
 //       that refused; the row says DOWNLOAD again; nothing throws.
+//   6 · THE SECTIONS (0.4.0 S4b): the page turner holds one section in the dropdown; each section's header names its records, its
+//       bytes and how many are on this device; INSTALLED installs the whole section (0 solver calls) and lights its lamp, and
+//       removes it again; a section with no record offers nothing to keep.  The three sizing entries (alanine, Li₄F₄, TiCl₄)
+//       open from their records in Firefox, timed (BRIEF-S4-LIBRARY §S4b).
+//   7 · THE TWO-PRESS RACE (the S4a verifier's BLOCKER B1, fixed by Claude Sos on sos-s0): benzene and lysine both installed, benzene
+//       pressed and lysine pressed before benzene's open lands — lysine must stay the molecule in the worker: 0 solver calls through
+//       its spectrum, and a KICK on it refused with a sentence, never a live solve of a past-the-cap molecule.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { open } from '../tools/gate/gatekit.mjs';
 
 const CAT = JSON.parse(readFileSync(new URL('../lab/library.json', import.meta.url), 'utf8'));
-const HASH = Object.fromEntries(CAT.rows.map((r) => [r.id, r.hash]));
+const HASH = Object.fromEntries(CAT.rows.map((r) => [r.id, r.hash])), SEC = Object.fromEntries(CAT.rows.map((r) => [r.id, r.section]));
 const LYS_E = JSON.parse(readFileSync(new URL('../lab/library/' + HASH.lysine + '.json', import.meta.url), 'utf8')).oracle.energy;
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { width: 1500, height: 1000, script: 240000,
   prefs: { 'dom.storageManager.prompt.testing': true, 'dom.storageManager.prompt.testing.allow': true } });
@@ -26,7 +33,8 @@ try {
   await g.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__calls = async () => (await __LW.chem.workerStat()).solverCalls;
-    window.__opt = (id) => [...document.querySelectorAll('.dev[data-id="chem"] .mol-pick option')].find((o) => o.value === id);
+    window.__sec = ${JSON.stringify(SEC)};   /* 0.4.0 S4b: the dropdown holds one section — turn to the row's page first */
+    window.__opt = (id) => { if (__sec[id]) __LW.chem.section(__sec[id]); return [...document.querySelectorAll('.dev[data-id="chem"] .mol-pick option')].find((o) => o.value === id); };
     window.__real = window.fetch;
     window.__offline = (on) => { window.fetch = on ? (u, o) => (/\\/library\\//.test(String(u && u.url || u)) ? Promise.reject(new TypeError('NetworkError: the gate is offline')) : __real(u, o)) : __real; };
     for (const k of await caches.keys()) if (k === 'lw-data-v1') await caches.delete(k);
@@ -36,7 +44,8 @@ try {
   /* 1 · DOWNLOAD, never DISABLED */
   const one = await g.ev(`const rows = await __LW.chem.records(), o = __opt('lysine');
     return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: o.parentElement.label, store: (await caches.keys()).includes('lw-data-v1'), errs: __e.slice() };`);
-  assert.deepEqual(one.rows, [['C6H6', false, false], ['lysine', false, true]], JSON.stringify(one));
+  assert.ok(one.rows.length === CAT.rows.length && one.rows.every((r) => r[1] === false), 'nothing is installed at first: ' + JSON.stringify(one));
+  assert.deepEqual([one.rows.find((r) => r[0] === 'C6H6'), one.rows.find((r) => r[0] === 'lysine')], [['C6H6', false, false], ['lysine', false, true]], JSON.stringify(one));
   assert.equal(one.text, 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(one.disabled, false);
   assert.equal(one.store, false, 'looking at the store created lw-data-v1 at boot'); assert.deepEqual(one.errs, []);
   pass(`DOWNLOAD, never DISABLED: lysine's row "${one.text}" (${one.group}) is enabled; nothing is installed and boot created no store`);
@@ -68,7 +77,7 @@ try {
   const w2 = JSON.stringify({ ...two, status: two.status });
   assert.equal(two.liveCalls, 2, 'a live benzene is one SCF and one RPA: ' + w2);
   assert.equal(two.recCalls, 0, 'ZERO solver calls on the record\'s open: ' + w2);
-  assert.ok(two.inst.ok && two.inst.from === 'network' && two.inst.bytes === CAT.rows[0].bytes, w2);
+  assert.ok(two.inst.ok && two.inst.from === 'network' && two.inst.bytes === CAT.rows.find((r) => r.id === 'C6H6').bytes, w2);
   assert.ok(two.dE < 1e-10 && two.dEps < 1e-8 && two.dD < 1e-8 && two.proj < 1e-8 && two.dC < 1e-6 && two.signs && two.names
     && two.nRoots === 315 && two.dOmega < 1e-8 && two.dF < 1e-7 && two.clusters >= 10, 'cached ≠ fresh: ' + w2);
   assert.deepEqual(two.record, { id: 'C6H6', hash: HASH.C6H6, caps: { orbitals: true, states: true, rpa: true, tdhf: true } }, w2);
@@ -134,7 +143,51 @@ try {
   assert.ok(five.preset === 'lysine' && five.nAO === 0 && five.label === 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD' && five.disabled === false, 'not installed, not broken: ' + w5);
   assert.equal(five.pal, five.wantPal, 'the rest of the project did not restore: ' + w5); assert.deepEqual(five.errs, []);
   pass(`EVICT → NOT INSTALLED: lysine removed; offline, the project restored everything else (palette ${five.pal}) and MOLECULES says "${five.status.slice(0, 120)}…"; the row says DOWNLOAD again, enabled; no page error`);
+  /* 6 · THE SECTIONS: the page turner, the header, INSTALLED for a whole section, and the three sizing entries opened, timed */
+  const six = await g.ev(`await __w(4000); __offline(false);
+    const card = document.querySelector('.dev[data-id="chem"]'), sel = card.querySelector('.mol-pick select');
+    const dia = __LW.chem.section('DIATOMICS');
+    const prev = card.querySelectorAll('.mol-section > .trig.mol-turn')[0], next = card.querySelectorAll('.mol-section > .trig.mol-turn')[1];
+    next.click(); const turned = __LW.chem.section().name; prev.click(); const back = __LW.chem.section().name;
+    const before = __LW.chem.section('LATTICE'), opts = [...sel.options].map((o) => o.value), c0 = await __calls();
+    const kept = await __LW.chem.keep(true), on = __LW.chem.section('LATTICE');
+    const removed = await __LW.chem.keep(false), off = __LW.chem.section('LATTICE'), c1 = await __calls();
+    const timed = [];
+    for (const id of ['alanine', 'Li4F4', 'TiCl4']) {
+      const inst = await __LW.chem.install(id); const t0 = performance.now(); await __LW.chem.solve(id, { force: true }); const ms = performance.now() - t0;
+      const st = __LW.chem.state(); timed.push({ id, bytes: inst.bytes, ok: inst.ok, nAO: st.nAO, open: st.record && st.record.ms, from: st.record && st.record.from, wall: +ms.toFixed(1), E: st.energy, group: st.names && st.names.group });
+    }
+    const c2 = await __calls();
+    for (const id of ['alanine', 'Li4F4', 'TiCl4']) await __LW.chem.remove(id);
+    return { dia, turned, back, before, opts, kept, on, removed, off, calls: [c1 - c0, c2 - c1], timed, errs: __e.slice() };`);
+  const w6 = JSON.stringify(six);
+  const LAT = CAT.rows.filter((r) => r.section === 'LATTICE');
+  assert.ok(six.dia.records === 0 && six.dia.keepOffered === false && /every one solves live/.test(six.dia.sub), 'a section with no record offers nothing to keep: ' + w6);
+  assert.ok(six.turned === 'HYDRIDES' && six.back === 'DIATOMICS', 'the turner ‹ › moves one section: ' + w6);
+  assert.ok(six.before.records === LAT.length && six.before.bytes === LAT.reduce((t, r) => t + r.bytes, 0) && six.before.installed === 0 && six.before.lamp === false && six.before.keepOffered
+    && LAT.every((r) => six.opts.includes(r.id)) && six.opts.length === six.before.molecules.length, 'the LATTICE header: ' + w6);
+  assert.ok(six.kept.installed === LAT.length && six.on.installed === LAT.length && six.on.lamp === true && new RegExp(LAT.length + ' on this device').test(six.on.sub), 'INSTALLED kept the section: ' + w6);
+  assert.ok(six.removed.installed === 0 && six.off.installed === 0 && six.off.lamp === false, 'INSTALLED off removed the section: ' + w6);
+  assert.deepEqual(six.calls, [0, 0], 'installing a section or opening its records ran the solver: ' + w6);
+  for (const t of six.timed) assert.ok(t.ok && t.from === 'device' && Number.isFinite(t.open) && Math.abs(t.E - JSON.parse(readFileSync(new URL('../lab/library/' + HASH[t.id] + '.json', import.meta.url), 'utf8')).oracle.energy) < 1e-8, w6);
+  assert.deepEqual(six.errs, []);
+  pass(`THE SECTIONS: ‹ › turns DIATOMICS → HYDRIDES → DIATOMICS; DIATOMICS offers nothing to keep ("${six.dia.sub}"); LATTICE "${six.before.sub}" → INSTALLED: "${six.on.sub}", lamp on → off: ${six.off.installed} kept; 0 solver calls; the sizing entries opened in Firefox: ${six.timed.map((t) => `${t.id} ${t.nAO} AO ${t.bytes} B, the worker's open ${t.open} ms, solve() whole ${t.wall} ms`).join(' · ')}`);
+  /* 7 · THE TWO-PRESS RACE: benzene then lysine, both from the device; lysine wins, 0 solver calls, a KICK on it refused */
+  const seven = await g.ev(`await __LW.chem.install('C6H6'); await __LW.chem.install('lysine'); await __LW.chem.solve('H2O'); await __w(300);
+    const c0 = await __calls();
+    const a = __LW.chem.solve('C6H6', { press: true }), b = __LW.chem.solve('lysine', { press: true });
+    await Promise.all([a, b]); await __w(1500);
+    let st = __LW.chem.state(); for (let i = 0; i < 100 && !(st.nAO === 64 && st.roots); i++) { await __w(100); st = __LW.chem.state(); }
+    const c1 = await __calls(), k = await __LW.chem.kick(), kickStatus = __LW.chem.state().status, c2 = await __calls();
+    await __LW.chem.remove('C6H6'); await __LW.chem.remove('lysine'); await __LW.chem.solve('H2O');
+    return { calls: [c1 - c0, c2 - c1], preset: st.preset, nAO: st.nAO, roots: st.roots, record: st.record, kick: k, kickStatus, errs: __e.slice() };`);
+  const w7 = JSON.stringify(seven);
+  assert.ok(seven.preset === 'lysine' && seven.nAO === 64 && seven.roots === 960 && seven.record && seven.record.from === 'device', 'lysine is not the molecule after the race: ' + w7);
+  assert.deepEqual(seven.calls, [0, 0], 'the race ran the solver on a record-only molecule: ' + w7);
+  assert.ok(seven.kick === null && /past the live cap/.test(seven.kickStatus), 'a KICK on lysine after the race was not refused: ' + w7);
+  assert.deepEqual(seven.errs, []);
+  pass(`THE TWO-PRESS RACE: benzene then lysine pressed together, lysine opened from the device with ${seven.roots} sticks, 0 solver calls, KICK refused ("${seven.kickStatus.slice(0, 80)}…")`);
 } catch (e) { failed = true; console.error('FAIL', e && e.message || e); }
 finally { await g.close(); }
-console.log(failed ? 'RED library' : 'GREEN library — install → open offline → evict → "not installed"');
+console.log(failed ? 'RED library' : 'GREEN library — install → open offline → evict → "not installed" → the sections → the two-press race');
 process.exit(failed ? 1 : 0);
