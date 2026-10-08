@@ -147,3 +147,26 @@ pass(`zoom to the cursor: the pivot-plane point under the hand stays on its pixe
   assert.deepEqual(CAM.HOME.shift, [0, 0]); assert.ok(Object.isFrozen(CAM.HOME.shift), 'HOME\'s shift cannot be written through obs');
 }
 pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a modulated PAN axis moves its base; shift then RESET VIEW = the boot pose, byte for byte (JSON)');
+
+/* 7 · THE CAMERA PORT (0.5.0 A8): the object MIR 1.5's CAMERA panel takes.  Its ids read the law's numbers, `set` takes a hand's road
+   (a routed axis moves its base), every pose change is a notice, and an id the law does not have reads undefined (the panel hides it). */
+{
+  const L = law(BOOT(), (id) => id === 'observer.yaw'), P = L.port, o = L.obs; let told = 0; const off = P.subscribe(() => told++);
+  assert.deepEqual(['mode', 'zoom', 'fov', 'panX', 'panY', 'yaw', 'pitch', 'autoRotate', 'spin', 'friction', 'drag', 'fling'].map((id) => P.get(id)),
+    ['free', 3.3, 0.6, 0, 0, 0.65, 0.38, false, 0.25, CAM.MU_DEF, CAM.GAIN_DEF, CAM.FLING_DEF], 'the law\'s own numbers, in its own units');
+  assert.equal(P.get('roll'), undefined); assert.equal(P.get('wheel'), undefined); assert.equal(P.angle, 'rad');
+  P.set('panX', 0.4); P.set('panY', -0.3); assert.deepEqual(o.shift, [0.4, -0.3], 'PAN X and PAN Y are the one setShift');
+  P.set('zoom', 2.2); assert.equal(o.dist, 2.2); P.set('fov', 0.9); assert.equal(o.fov, 0.9);
+  P.set('yaw', 1.5); assert.equal(o.yaw, 0.65, 'a routed YAW moves its base, not the pose'); assert.deepEqual(L.writes, [['observer.yaw', 1.5]]);
+  const n = told; P.set('pitch', 0.1); assert.ok(Math.abs(o.pitch - 0.1) < 1e-12 && told > n, 'PITCH by the turn road, and told');
+  P.set('mode', 'turntable'); P.set('drag', 2); P.set('friction', 3); P.set('fling', 0.5); P.set('spin', 0.5); P.set('autoRotate', true);
+  assert.deepEqual([L.camera.dragGain, L.camera.friction, L.camera.flingGain, L.camera.speed, L.camera.autoRotate], [2, 3, 0.5, 0.5, true]);
+  const m = told; L.cameraStep(0.016); assert.ok(told > m, 'a moving step is a notice'); L.camera.setAutoRotate(false); L.camera.stop();
+  const q = told; assert.equal(L.cameraStep(0.016), false); assert.equal(told, q, 'a still camera tells nobody');
+  P.home(); assert.deepEqual([o.dist, o.fov, o.shift], [3.3, 0.6, [0, 0]], 'HOME is RESET VIEW');
+  off(); const r = told; P.set('zoom', 4); assert.equal(told, r, 'unsubscribed');
+  assert.deepEqual(P.modIds, { yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' });
+  assert.deepEqual([P.ranges.zoom.min, P.ranges.zoom.max, P.ranges.zoom.home, P.ranges.zoom.log, P.ranges.pitch.max, P.ranges.drag.log], [1.2, 8, 3.3, true, CAM.PITCH, false]);
+  for (const k of ['setShift', 'zoomAt', 'panBy', 'turn', 'subscribe']) assert.equal(typeof P[k], 'function', k);
+}
+pass('the camera port: get reads the law\'s numbers (12 ids, radians), set takes the hand\'s road (a routed YAW moves its base), subscribe hears every pose change and a still camera tells nobody, HOME is RESET VIEW, modIds name the saved observer.* routes');

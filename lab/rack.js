@@ -1147,7 +1147,7 @@ export async function boot(dom) {
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, setShift, panBy } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
@@ -1414,13 +1414,13 @@ export async function boot(dom) {
     const rInv = el('div', 'row tight', wPal.body);
     ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     rInv.appendChild(ui.invertSw.root);
-    const gc = group(wCam.body, 'CAMERA MOTION');
+    const gc = group(wCam.body, 'CAMERA MOTION');   // 0.5.0 A8: CONTROL, ZOOM, FOV and the PAN row call the camera port, which C1's kit panel takes whole
     /* WAVE 54 (board #43): the mode comes FIRST, because it decides what every dial below it turns. */
     const r4a = el('div', 'row tight', gc);
     ui.camSeg = seg({ label: 'CONTROL', value: 'free', options: [
       { id: 'turntable', label: 'TURNTABLE', title: 'Orbit with a level horizon' },
       { id: 'free', label: 'FREE', title: 'Use unrestricted camera rotation with roll' }],
-      onChange: (v) => setCamMode(v) });
+      onChange: (v) => cameraPort.set('mode', v) });
     r4a.appendChild(ui.camSeg.root);
     const r4 = el('div', 'row', gc);
     ui.spinSw = sw({ label: 'AUTO-ROTATE', value: false, onChange: (v) => { camera.autoRotate = v; camera.wake(); } });
@@ -1446,10 +1446,10 @@ export async function boot(dom) {
     ui.flingK.root.title = 'Set released camera speed; double-click to reset';
     r4h.appendChild(ui.flingK.root);
     const r4b = el('div', 'row tight', gc);
-    ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => setDist(v) });
+    ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => cameraPort.set('zoom', v) });
     ui.zoomK.root.title = 'Camera distance. Use the wheel or pinch on the stage.';
     r4b.appendChild(ui.zoomK.root);
-    ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => setFov(v) });
+    ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => cameraPort.set('fov', v) });
     ui.fovK.root.title = 'Vertical field of view';
     r4b.appendChild(ui.fovK.root);
     r4b.appendChild(trig({ label: 'RESET VIEW', title: 'Restore the default camera pose and motion', onFire: () => resetView() }).root).dataset.keyAction = 'camReset';
@@ -1457,9 +1457,9 @@ export async function boot(dom) {
     /* 0.4.0 S2 · THE LENS SHIFT: where the pivot sits on the frame (obs.shift, NDC), the picture sliding under a still pivot —
        the targets the kit's XY pad (0.5.0) will drive; every hand comes through setShift (lab/camera-law.js) */
     const r4p = el('div', 'row tight', gc), panFmt = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
-    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => setShift(v, obs.shift[1]) });
-    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => setShift(obs.shift[0], v) });
-    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => setShift(0, 0) }).root);
+    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panX', v) });
+    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panY', v) });
+    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => cameraPort.setShift(0, 0) }).root);
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Alt-drag or two fingers slide the picture; the molecule stays the pivot. Double-click, double-tap, or RESET VIEW restores the camera.';
 
     /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────

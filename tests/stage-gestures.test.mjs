@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { bindStageGestures } from '../lab/stage-gestures.js';
+import { bindStageGestures, STAGE_BINDINGS } from '../lab/stage-gestures.js';
 
-function stage() {
+function stage(bindings) {
   const canvas = new EventTarget(), doc = new EventTarget(), win = new EventTarget(), classes = new Set();
   canvas.ownerDocument = doc; doc.defaultView = win;
   canvas.classList = { add: name => classes.add(name), remove: name => classes.delete(name) };
@@ -20,7 +20,7 @@ function stage() {
     pan: (du, dv) => result.pans.push([du, dv]),
     orbitBy: (yaw, pitch) => { travel.yaw += yaw; travel.pitch += pitch; },
     resetView: () => result.resets++, setDragging: v => { result.held = v; }, present() {}, hover() {}, now: () => time,
-    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null,
+    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null, bindings,
   });
   function send(type, id = 1, x = 100, y = 100, extra = {}) {
     const event = new Event(type, { cancelable: true });
@@ -113,3 +113,20 @@ for (const lifted of [1, 2]) {
   assert.equal(s.result.moved, 1); assert.equal(s.result.ended, 1); assert.equal(s.result.pans.length, 1);
 }
 console.log('PASS stage gestures: drag, fine gain, fling, interruption, special ownership, pinch handoff, deliberate double taps — and (S2) the wheel and the pinch zoom at the cursor / centroid, two fingers and Alt-drag slide the picture one pixel per pixel');
+// 0.5.0 A8 · THE BINDINGS ARE DATA: the table is today's (R5-C1), frozen, and an edited row is what the stage does.
+{
+  assert.deepEqual(JSON.parse(JSON.stringify(STAGE_BINDINGS)), { pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' },
+    wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: true }, pinch: { slide: true, atCentroid: true }, tap: { ms: 300, px: 8 },
+    doubleTap: { ms: null, px: 40 }, dblclick: true, nudge: 0.05 });
+  assert.ok(Object.isFrozen(STAGE_BINDINGS) && Object.isFrozen(STAGE_BINDINGS.pointer.slide) && Object.isFrozen(STAGE_BINDINGS.wheel));
+  const row = (o) => ({ ...STAGE_BINDINGS, ...o });
+  const quick = stage(row({ doubleTap: { ms: 150, px: 40 } })); quick.send('pointerdown'); quick.send('pointerup'); quick.advance(200); quick.send('pointerdown'); quick.send('pointerup');
+  assert.equal(quick.result.resets, 0, 'a 200 ms double tap is too slow for a 150 ms row');
+  const shift = stage(row({ pointer: { button: 0, slide: { shiftKey: true }, fine: 'altKey' } })); shift.send('pointerdown', 1, 100, 100, { shiftKey: true, pointerType: 'mouse' });
+  shift.send('pointermove', 1, 110, 100, { pointerType: 'mouse' }); shift.send('pointerup', 1, 110, 100, { pointerType: 'mouse' });
+  assert.deepEqual(shift.result.pans.map(([u, v]) => [u, v + 0]), [[0.02, 0]], 'Shift-drag slides when the row says so'); assert.equal(shift.travel.yaw, 0);
+  const centre = stage(row({ wheel: { ...STAGE_BINDINGS.wheel, atCursor: false } }));
+  centre.canvas.dispatchEvent(Object.assign(new Event('wheel', { cancelable: true }), { deltaY: 100, deltaMode: 1, clientX: 750, clientY: 200 }));
+  assert.deepEqual(centre.result.anchors, [[0, 0]]); assert.ok(Math.abs(centre.result.distance - 3 * Math.pow(1.1, 16)) < 1e-12, 'a line is 16 px');
+}
+console.log('PASS the bindings are one data table: STAGE_BINDINGS is today\'s (pointer, wheel, pinch, tap, double tap, double-click, nudge), frozen, and an edited row (a quicker double tap, Shift to slide, the wheel at the centre) is what the stage does');
