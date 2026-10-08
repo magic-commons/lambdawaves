@@ -1,5 +1,7 @@
 # λWAVES 0.4.0 · S4b THE SECTIONS — HAND-OFF (usage pause, 2026-10-08)
 
+**SUPERSEDED (2026-10-08, resumed and finished): see `S4b-BUILD.md` — the merge of `a927fc3` is done, C₆₀ ships under the declared milestone allowance, the lysine lock is re-recorded, and the gates are GREEN on the merged tree. This file is kept as the record of the pause.**
+
 Written by the S4b builder (Opus 5.5) at the agent-control usage pause (five-hour window at 98 %). Nothing was pushed, tagged or
 deployed. The work is committed; what remains is listed under "the exact next step".
 

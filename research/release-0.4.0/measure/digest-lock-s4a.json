@@ -365,7 +365,7 @@
    "rp": "943709fc"
   }
  },
- "made": "2026-10-08T07:54:54.097Z",
+ "made": "2026-10-08T11:01:28.195Z",
  "meta": {
   "adapter": {
    "architecture": "",
@@ -628,10 +628,10 @@
   "chemLys": {
    "64": {
     "count": 0,
-    "digest": "ca368f14",
+    "digest": "580d2d81",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 78.80090963685423,
+    "integral": 78.8008990863978,
     "maxRho": 47.75025939941406,
     "nan": 0,
     "nonBlack": 655360,
@@ -639,17 +639,17 @@
     "reconstructed": false,
     "repeat": true,
     "res": 64,
-    "rp": "dc17e70d",
-    "rpL": "6d158dde",
+    "rp": "b8c8904c",
+    "rpL": "b2f95cb5",
     "space": 0,
     "t": 3.7
    },
    "96": {
     "count": 0,
-    "digest": "3fe7c6e3",
+    "digest": "58fc2fbb",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 78.53433821332004,
+    "integral": 78.5343179611232,
     "maxRho": 43.78717041015625,
     "nan": 0,
     "nonBlack": 655360,
@@ -657,17 +657,17 @@
     "reconstructed": false,
     "repeat": true,
     "res": 96,
-    "rp": "2b82fa33",
-    "rpL": "ecede2b6",
+    "rp": "bbca0fd5",
+    "rpL": "791f1d4e",
     "space": 0,
     "t": 3.7
    },
    "128": {
     "count": 0,
-    "digest": "dd71357e",
+    "digest": "fa7ece45",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 80.15628390564375,
+    "integral": 80.15639860711619,
     "maxRho": 91.740478515625,
     "nan": 0,
     "nonBlack": 655360,
@@ -675,8 +675,8 @@
     "reconstructed": false,
     "repeat": true,
     "res": 128,
-    "rp": "18559c14",
-    "rpL": "ccd06e45",
+    "rp": "3c33ca47",
+    "rpL": "6f42c7c8",
     "space": 0,
     "t": 3.7
    }
@@ -684,10 +684,10 @@
   "chemLysHomo": {
    "64": {
     "count": 0,
-    "digest": "7e4a5f34",
+    "digest": "ccce2f07",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 0.9963580429484383,
+    "integral": 0.9963583853802134,
     "maxRho": 0.312572717666626,
     "nan": 0,
     "nonBlack": 655360,
@@ -695,17 +695,17 @@
     "reconstructed": false,
     "repeat": true,
     "res": 64,
-    "rp": "f42558d7",
-    "rpL": "a85acbb",
+    "rp": "995ae2eb",
+    "rpL": "7cda22ab",
     "space": 0,
     "t": 3.7
    },
    "96": {
     "count": 0,
-    "digest": "fb43fe33",
+    "digest": "aa5e45d8",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 0.9982944437574554,
+    "integral": 0.9982950482986199,
     "maxRho": 0.29006218910217285,
     "nan": 0,
     "nonBlack": 655360,
@@ -713,17 +713,17 @@
     "reconstructed": false,
     "repeat": true,
     "res": 96,
-    "rp": "114fa34e",
-    "rpL": "2408e403",
+    "rp": "112d08e",
+    "rpL": "2959955a",
     "space": 0,
     "t": 3.7
    },
    "128": {
     "count": 0,
-    "digest": "336ee079",
+    "digest": "ddde4457",
     "half": 12.500426168139189,
     "hamiltonian": "hydrogen",
-    "integral": 0.9990367640000499,
+    "integral": 0.9990368473259437,
     "maxRho": 0.30443668365478516,
     "nan": 0,
     "nonBlack": 655360,
@@ -731,8 +731,8 @@
     "reconstructed": false,
     "repeat": true,
     "res": 128,
-    "rp": "afc2a143",
-    "rpL": "c7e1c6",
+    "rp": "66d56bcb",
+    "rpL": "fe806d07",
     "space": 0,
     "t": 3.7
    }
@@ -1420,5 +1420,5 @@
   "slice-slab:real/cloud": "3c4e4d4e",
   "slice-slab:reim/glass": "84d09cfa"
  },
- "url": "https://127.0.0.1:8753/lab/?preset=1s%2B2pz&sw=0&gastab=0"
+ "url": "https://127.0.0.1:8757/lab/?preset=1s%2B2pz&sw=0&gastab=0"
 }

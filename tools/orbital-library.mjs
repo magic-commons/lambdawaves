@@ -422,7 +422,7 @@ if (INPUTS) {
 function fixtureEntry(id) {
   const row = CENSUS.get(id);
   if (!row || !row.converged || !row.geometry || !Array.isArray(row.geometry.atomsAngstrom)) throw new Error(`orbital-library: no converged census row '${id}'`);
-  return { id, census: id, section: 'S4C-FIXTURE', group: 'C1', fixture: true,
+  return { id, census: id, section: 'S4C-FIXTURE', group: pyGroup(row.topgroup || 'C1'), label: 'C1', fixture: true,   // its full group is PySCF's, recorded; labelled C1 here
     stem: { blurb: [row.name + ' at ' + row.nAO_STO3G + ' Cartesian AOs: an input for the field kernel\'s cap-128 tier (0.4.0 S4c), not library content.',
       'Point group taken as C1 here; the energy agrees with PySCF on these atoms (tests/fixtures/oracles/library-v1.json) or there is no file.'] } };
 }

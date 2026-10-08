@@ -4000,3 +4000,276 @@ orbitals 24/24, new-project, history — GREEN (chem and library each learnt one
 **Lines:** `lab/*.js` 36 137 → 36 225 (+88; field.js +52, chemview.js +24, library.js +7, gpu-boot.js +3, mathworker.js +1,
 orbitalsview.js +1) — *subtract, don't add* is NOT met: a kernel, a record kind and a switch are new; WGSL source lines in
 field.js 471 → 496 (the tile kernel unchanged; ORB_WGSL shares its header and shell loop).
+
+## 2026-10-08 · 0.4.0 S4b — THE SECTIONS
+
+Built by the S4b builder (Opus 5.5) against `research/release-0.4.0/BRIEF-S4-LIBRARY.md` §S4b (PLAN §4 F5, §6 row S4, §9
+R-S1-0.5 option 1 → ledger SYNTHESIS §4 C5, §10 N1–N3), branch `worktree-agent-aee5748ddb578d188` from `cfdd674` (`sos-s0`, S4a
+merged), with Sos's B1 fix `b5eed68` and then S4c's `a927fc3` merged in as the coordinator asked (wave 173). Josh's asks: the
+library as expansions by section; "Don't try to go for too many variations of the same molecule, try to be as diverse as
+possible." The sizing is Sol's census (`research/release-0.4.0/library-census/CENSUS.md`, spot-checked by Sos), consumed, not
+redone. Waves 168–174 (S4c holds 178–182). Hand-off: `research/release-0.4.0/S4b-BUILD.md`.
+
+### wave 168: Three entries end to end first — alanine, Li₄F₄, TiCl₄ — and the sections sized from them
+
+The generator reads its geometries from the census (`census.json`, by row id), and every record holds an oracle computed on its
+OWN atoms: `tools/library/record-oracle.py` (new) runs PySCF RHF on the vendored STO-3G decimals at the record's atoms in bohr
+(cart=True, conv_tol 1e-13), keyed by a hash of those atoms so a stale oracle is refused, into
+`tests/fixtures/oracles/library-v1.json`; no record is written further than 1e-8 Eh from it. The three, timed (node 22 on this
+machine for the generator and the worker's `chemOpen`; Firefox for the open in the browser, `tests/library.browser-test.mjs`
+§6, the record already on the device; two runs each):
+
+| entry | AO | RPA roots | generator (node) | record | the census's estimate | chem.open (node) | open in Firefox: worker / whole `solve()` | oracle ΔE |
+|---|---|---|---|---|---|---|---|---|
+| alanine (BIO, C₁) | 37 | 312 | 2.03–2.28 s | 128 830 B | 13 544 B (×9.5) | 2.2–2.9 ms | 4 ms / 17 ms | −6.8e-13 Eh |
+| Li₄F₄ (LATTICE, T_d) | 40 | 384 | 2.52–3.10 s | 156 882 B | 15 440 B (×10.2) | 1.0–1.9 ms | 2 ms / 17 ms | −2.0e-11 Eh |
+| TiCl₄ (HEAVY, T_d) | 55 | 450 | 11.4–13.6 s | 211 382 B | 27 080 B (×7.8) | 1.2–3.1 ms | 2 ms / 14 ms | +4.5e-12 Eh |
+
+The census's byte estimate (`8(n² + 2n) + 2000`: ε, C and occupations) is 8–10× short of a real record, because the RPA sticks
+dominate (d = nocc·nvirt roots × 19 f64 + 8 i32, base64): the sections were sized on the real bytes. The whole library is
+**11.53 MB** in 38 records (11 532 460 B; 37 RHF records 11 387 132 B + C₆₀'s frontier record 145 328 B) — deployed, never precached (S4a's DATA rule), installed only by a press.
+
+### wave 169: The diversity gate, with the FAMILY allowance, in `tools/orbital-library.mjs`
+
+In the page turner's order (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, each in its declared order) a candidate
+passes if its Hill formula (with its charge) is new AND it brings a new element, a new point group or a new tag from the fixed
+motif list (ring:n, peptide bond, d-block, cluster, cage, nucleobase) — OR it belongs to a declared family (the amino acids,
+the nucleobases; leucine and isoleucine share C₆H₁₃NO₂ and the family keeps both, saying so) — OR, since wave 173, it carries a
+declared allowance (one kind: Josh's named milestone, C₆₀). The live table is what came before the first candidate (its declared
+groups, and the census's motif declarations for C₃H₆, furan, pyridine, benzene, CuH, ZnH₂); only a pass seeds novelty; **a refused
+candidate is not built** — the gate decides what ships, and `--check` fails on a catalogue row the gate does not pass.
+`node tools/orbital-library.mjs --gate`: **38 pass · 20 refused · 5 blocked by the basis · 1 refused by the stability probe.**
+Refused, in the gate's words: Gly-Gly (C₄H₈N₂O₃ is asparagine's), imidazole, indole, phosphoric acid, ribose, caffeine, DMT, the
+A–T and G–C pairs (nothing new once the nucleobases are in), Li₄H₄, Mg₄O₄, Na₂Cl₂, Na₄Cl₄ (the cluster motif and T_d already
+in), the ice cube (C₁ as relaxed), C₂₀H₂₀ (I_h and the cage already in — it stays S4c's 120-AO test fixture), neopentane,
+naphthalene, Si₅H₁₂, SeO₂, GeCl₄. One ordering choice is declared in the source: of the four rock-salt cubes Li₄F₄ (past the live
+cap: a record is its only road, PLAN §10 N2) comes before Li₄H₄ (24 AO: a live solve would do). Blocked: HI, CH₃I, XeF₂, XeF₄,
+I₂ — **R-L6: the vendored STO-3G stops at Kr** (measured by the census: no I or Xe in `lab/vendor/bse/`, `basis_set_exchange`
+not importable in `~/bin/scipython`); nothing was vendored, and HEAVY stops at Kr. **The stability probe decided ferrocene**
+("try it and let the stability probe decide"): RHF/STO-3G at the census geometry is not a minimum (the app's singlet Hessian:
+A+B −0.0307, A−B −0.0586 Eh); PySCF's own `rhf_stability` on the same atoms agrees (lowest −0.1229, a degenerate pair = 4(A+B)),
+so the census's "internalStable: true" for that row is wrong. No record.
+
+### wave 170: The STEM fields, and the full-group labels by projection (C5)
+
+Every record carries the R-L4 STEM fields — formula, point group and frame, mass, charge and multiplicity, dipole, HOMO–LUMO
+gap, geometry source, InChIKey and PubChem CID, a two-line blurb, the curated IEs where they exist, the sources — and, for C5,
+`stem.symmetry`: the molecule's full point group, the group its orbitals are labelled in **by projection** (`lab/names.js` at
+generation on the app's own solve: the declared operations, D(R) on the AOs, Σₖ cₖᵀ S D cₖ per level, decomposed against the
+table, all or nothing), the frame (`names.js` CONVENTION), the atoms in that frame, and PySCF's own `topgroup`, `groupname` and
+orbsym (occupied orbitals per irrep of its Abelian subgroup, from its own symmetry-adapted SCF) — **recorded, never a name**.
+The generator refuses a record whose declared group is not PySCF's detected topgroup on the same atoms. Five shipped census
+geometries are averaged onto their group (ferrocene's was too, before the probe refused it), the shift stated in each source (Fe(CO)₅ → D₃h, which PySCF had called C_s; cubane → O_h, it had
+said D₄h; adamantane → T_d; Ni(CO)₄ → T_d; the water hexamer → C₆h) — a framework symmetric to 1e-9 bohr passes names.js's 1e-6
+but its overlap is then no symmetry to 1e-10, so the projection refuses (measured: the hexamer's DᵀSD − S was 3.8e-10). The water
+hexamer is C₆h, for which `names.js` has no table, and in any Abelian subgroup a degenerate level is two irreps: its record
+carries indices and says why. The tables S1 built and nothing exercised are exercised now: O_h (cubane, Cr(CO)₆) and I_h
+(B₁₂H₁₂²⁻). **C5's gate**, `node tools/orbital-names.mjs --check --pyscf`, now solves every record's atoms in PySCF and labels
+PySCF's orbitals (mapped to md.js's AO order and unit self-overlap) by the same projection, against the record:
+
+| molecule | group | name ms | configuration (STO-3G) or why not |
+|---|---|---|---|
+| H2 | Dinfh | 1.9 | (1σg)² · HOMO 1σg · LUMO 1σu |
+| LiH | Cinfv | 0.7 | (1σ)²(2σ)² · HOMO 2σ · LUMO 3σ |
+| HF | Cinfv | 0.6 | (1σ)²(2σ)²(3σ)²(1π)⁴ · HOMO 1π · LUMO 4σ |
+| N2 | Dinfh | 1.0 | (1σg)²(1σu)²(2σg)²(2σu)²(1πu)⁴(3σg)² · HOMO 3σg · LUMO 1πg |
+| CO | Cinfv | 0.4 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)² · HOMO 5σ · LUMO 2π |
+| F2 | Dinfh | 0.5 | (1σu)²(1σg)²(2σg)²(2σu)²(1πu)⁴(3σg)²(1πg)⁴ · HOMO 1πg · LUMO 3σu |
+| LiF | Cinfv | 0.4 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴ · HOMO 1π · LUMO 5σ |
+| NaH | Cinfv | 0.3 | (1σ)²(2σ)²(1π)⁴(3σ)²(4σ)² · HOMO 4σ · LUMO 5σ |
+| HCl | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(1π)⁴(4σ)²(5σ)²(2π)⁴ · HOMO 2π · LUMO 6σ |
+| Cl2 | Dinfh | 0.8 | (1σu)²(1σg)²(2σu)²(2σg)²(3σu)²(3σg)²(1πg)⁴(1πu)⁴(4σg)²(4σu)²(5σg)²(2πu)⁴(2πg)⁴ · HOMO 2πg · LUMO 5σu |
+| NaCl | Cinfv | 0.5 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)²(2π)⁴(6σ)²(7σ)²(8σ)²(3π)⁴ · HOMO 3π · LUMO 9σ |
+| BeH2 | Dinfh | 0.3 | (1σg)²(2σg)²(1σu)² · HOMO 1σu · LUMO 1πu |
+| BH3 | D3h | 0.9 | (1a1′)²(2a1′)²(1e′)⁴ · HOMO 1e′ · LUMO 1a2″ |
+| CH4 | Td | 0.6 | (1a1)²(2a1)²(1t2)⁶ · HOMO 1t2 · LUMO 2t2 |
+| NH3 | C3v | 0.2 | (1a1)²(2a1)²(1e)⁴(3a1)² · HOMO 3a1 · LUMO 4a1 |
+| H2O | C2v | 0.3 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)² · HOMO 1b1 · LUMO 4a1 |
+| MgH2 | Dinfh | 0.4 | (1σg)²(2σg)²(1πu)⁴(1σu)²(3σg)²(2σu)² · HOMO 2σu · LUMO 4σg |
+| AlH3 | D3h | 0.5 | (1a1′)²(2a1′)²(1a2″)²(1e′)⁴(3a1′)²(2e′)⁴ · HOMO 2e′ · LUMO 2a2″ |
+| SiH4 | Td | 0.9 | (1a1)²(2a1)²(1t2)⁶(3a1)²(2t2)⁶ · HOMO 2t2 · LUMO 4a1 |
+| PH3 | C3v | 0.3 | (1a1)²(2a1)²(1e)⁴(3a1)²(4a1)²(2e)⁴(5a1)² · HOMO 5a1 · LUMO 3e |
+| H2S | C2v | 0.4 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)²(4a1)²(2b2)²(5a1)²(2b1)² · HOMO 2b1 · LUMO 3b2 |
+| CO2 | Dinfh | 0.8 | (1σu)²(1σg)²(2σg)²(3σg)²(2σu)²(4σg)²(1πu)⁴(3σu)²(1πg)⁴ · HOMO 1πg · LUMO 2πu |
+| HCN | Cinfv | 0.4 | (1σ)²(2σ)²(3σ)²(4σ)²(5σ)²(1π)⁴ · HOMO 1π · LUMO 2π |
+| N2O | Cinfv | 0.6 | (1σ)²(2σ)²(3σ)²(4σ)²(5σ)²(6σ)²(1π)⁴(7σ)²(2π)⁴ · HOMO 2π · LUMO 3π |
+| O3 | C2v | 0.5 | (1a1)²(1b2)²(2a1)²(3a1)²(2b2)²(4a1)²(5a1)²(1b1)²(3b2)²(4b2)²(6a1)²(1a2)² · HOMO 1a2 · LUMO 2b1 |
+| SO2 | C2v | 0.8 | (1a1)²(2a1)²(1b2)²(3a1)²(2b2)²(1b1)²(4a1)²(5a1)²(3b2)²(6a1)²(7a1)²(2b1)²(4b2)²(5b2)²(8a1)²(1a2)² · HOMO 1a2 · LUMO 3b1 |
+| BF3 | D3h | 0.9 | (1a1′)²(1e′)⁴(2a1′)²(3a1′)²(2e′)⁴(4a1′)²(3e′)⁴(1a2″)²(1a2′)²(4e′)⁴(1e″)⁴ · HOMO 1e″ · LUMO 2a2″ |
+| CF4 | Td | 2.1 | (1a1)²(1t2)⁶(2a1)²(3a1)²(2t2)⁶(4a1)²(3t2)⁶(1e)⁴(1t1)⁶(4t2)⁶ · HOMO 4t2 · LUMO 5t2 |
+| H2O2 | C2 | 0.3 | (1b)²(1a)²(2a)²(2b)²(3a)²(3b)²(4a)²(5a)²(4b)² · HOMO 4b · LUMO 5b |
+| C2H2 | Dinfh | 0.4 | (1σg)²(1σu)²(2σg)²(2σu)²(3σg)²(1πu)⁴ · HOMO 1πu · LUMO 1πg |
+| C2H4 | D2h | 0.7 | (1ag)²(1b1u)²(2ag)²(2b1u)²(1b2u)²(3ag)²(1b3g)²(1b3u)² · HOMO 1b3u · LUMO 1b2g |
+| C2H6 | D3d | 0.9 | (1a2u)²(1a1g)²(2a1g)²(2a2u)²(1eu)⁴(3a1g)²(1eg)⁴ · HOMO 1eg · LUMO 2eu |
+| H2CO | C2v | 0.3 | (1a1)²(2a1)²(3a1)²(4a1)²(1b2)²(5a1)²(1b1)²(2b2)² · HOMO 2b2 · LUMO 2b1 |
+| CH3OH | Cs | 0.4 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(1a″)²(6a′)²(7a′)²(2a″)² · HOMO 2a″ · LUMO 8a′ |
+| HCOOH | Cs | 0.3 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(1a″)²(9a′)²(2a″)²(10a′)² · HOMO 10a′ · LUMO 3a″ |
+| CH3CN | C3v | 0.5 | (1a1)²(2a1)²(3a1)²(4a1)²(5a1)²(1e)⁴(6a1)²(7a1)²(2e)⁴ · HOMO 2e · LUMO 3e |
+| C3H6 | D3h | 1.0 | (1e′)⁴(1a1′)²(2a1′)²(2e′)⁴(1a2″)²(3a1′)²(1e″)⁴(3e′)⁴ · HOMO 3e′ · LUMO 1a2′ |
+| C4H6 | C2v | 1.1 | (1b2)²(1a1)²(2b2)²(2a1)²(3a1)²(3b2)²(4a1)²(4b2)²(5a1)²(6a1)²(5b2)²(6b2)²(7a1)²(1b1)²(1a2)² · HOMO 1a2 · LUMO 2b1 |
+| C4H4O | C2v | 2.2 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(9a′)²(10a′)²(11a′)²(1a″)²(12a′)²(13a′)²(14a′)²(15a′)²(2a″)²(3a″)² · HOMO 3a″ · LUMO 4a″ · Cs (downgraded from C2v → Cs) |
+| C5H5N | C2v | 2.3 | (1a1)²(1b2)²(2a1)²(3a1)²(2b2)²(4a1)²(5a1)²(6a1)²(3b2)²(7a1)²(4b2)²(8a1)²(9a1)²(5b2)²(6b2)²(10a1)²(1b1)²(7b2)²(11a1)²(2b1)²(1a2)² · HOMO 1a2 · LUMO 3b1 · approximate (framework 8.1e-4 bohr, residual 3.5e-3) |
+| urea | C2v | 0.8 | (1a1)²(2a1)²(1b2)²(3a1)²(4a1)²(5a1)²(2b2)²(6a1)²(3b2)²(7a1)²(4b2)²(1b1)²(8a1)²(1a2)²(5b2)²(2b1)² · HOMO 2b1 · LUMO 3b1 |
+| glycine | Cs | 1.1 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(9a′)²(10a′)²(1a″)²(11a′)²(12a′)²(2a″)²(13a′)²(3a″)²(14a′)²(15a′)²(4a″)²(16a′)² · HOMO 16a′ · LUMO 5a″ |
+| C6H6 | D6h | 4.7 | (1e1u)⁴(1a1g)²(1e2g)⁴(1b1u)²(2a1g)²(2e1u)⁴(2e2g)⁴(3a1g)²(2b1u)²(1b2u)²(3e1u)⁴(1a2u)²(3e2g)⁴(1e1g)⁴ · HOMO 1e1g · LUMO 1e2u |
+| NH4+ | Td | 0.5 | (1a1)²(2a1)²(1t2)⁶ · HOMO 1t2 · LUMO 3a1 |
+| H3O+ | C3v | 0.3 | (1a1)²(2a1)²(1e)⁴(3a1)² · HOMO 3a1 · LUMO 4a1 |
+| OH- | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(1π)⁴ · HOMO 1π · LUMO 4σ |
+| CN- | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)² · HOMO 5σ · LUMO 2π |
+| CuH | Cinfv | — | disabled: not a minimum |
+| ZnH2 | Dinfh | — | disabled: not a minimum |
+| GeH4 | Td | 1.3 | (1a1)²(2a1)²(1t2)⁶(3a1)²(2t2)⁶(4a1)²(3t2)⁶(1e)⁴(4t2)⁶ · HOMO 4t2 · LUMO 5t2 |
+| AsH3 | C3v | 0.6 | (1a1)²(2a1)²(1e)⁴(3a1)²(4a1)²(2e)⁴(5a1)²(3e)⁴(4e)⁴(6a1)²(7a1)²(5e)⁴(8a1)² · HOMO 8a1 · LUMO 6e |
+| H2Se | C2v | 0.7 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)²(4a1)²(2b2)²(5a1)²(2b1)²(3b2)²(6a1)²(1a2)²(3b1)²(7a1)²(8a1)²(4b2)²(9a1)²(4b1)² · HOMO 4b1 · LUMO 5b2 |
+| HBr | Cinfv | 0.6 | (1σ)²(2σ)²(3σ)²(1π)⁴(4σ)²(5σ)²(2π)⁴(6σ)²(3π)⁴(1δ)⁴(7σ)²(8σ)²(4π)⁴ · HOMO 4π · LUMO 9σ |
+| Br2 | Dinfh | 2.3 | (1σg)²(1σu)²(2σu)²(2σg)²(3σu)²(3σg)²(1πg)⁴(1πu)⁴(4σu)²(4σg)²(5σu)²(5σg)²(2πg)⁴(2πu)⁴(6σu)²(6σg)²(3πu)⁴(3πg)⁴(1δu)⁴(1δg)⁴(7σg)²(7σu)²(8σg)²(4πu)⁴(4πg)⁴ · HOMO 4πg · LUMO 8σu |
+| record | labelled in | PySCF topgroup (recorded) | PySCF orbitals, same projection | HOMO / LUMO | ΔE PySCF − oracle |
+|---|---|---|---|---|---|
+| C6H6 | D6h | D6h | MATCH | 1e1g / 1e2u | -4.3e-13 |
+| alanine | C1 | C1 | MATCH | index only (C₁) | 5.7e-13 |
+| serine | C1 | C1 | MATCH | index only (C₁) | -4.5e-13 |
+| cysteine | C1 | C1 | MATCH | index only (C₁) | -1.6e-12 |
+| proline | C1 | C1 | MATCH | index only (C₁) | -2.2e-12 |
+| threonine | C1 | C1 | MATCH | index only (C₁) | 9.1e-13 |
+| valine | C1 | C1 | MATCH | index only (C₁) | -2.2e-12 |
+| aspartic-acid | C1 | C1 | MATCH | index only (C₁) | 3.4e-13 |
+| asparagine | C1 | C1 | MATCH | index only (C₁) | -8.0e-13 |
+| isoleucine | C1 | C1 | MATCH | index only (C₁) | 1.7e-12 |
+| leucine | C1 | C1 | MATCH | index only (C₁) | 1.0e-12 |
+| glutamic-acid | C1 | C1 | MATCH | index only (C₁) | -6.8e-13 |
+| glutamine | C1 | C1 | MATCH | index only (C₁) | 2.3e-13 |
+| methionine | C1 | C1 | MATCH | index only (C₁) | 9.1e-13 |
+| histidine | C1 | C1 | MATCH | index only (C₁) | -9.1e-13 |
+| lysine | C1 | C1 | MATCH | index only (C₁) | -2.3e-12 |
+| phenylalanine | C1 | C1 | MATCH | index only (C₁) | 6.8e-13 |
+| arginine | C1 | C1 | MATCH | index only (C₁) | -3.6e-12 |
+| tyrosine | C1 | C1 | MATCH | index only (C₁) | -2.5e-12 |
+| tryptophan | C1 | C1 | MATCH | index only (C₁) | -4.3e-12 |
+| uracil | Cs | Cs | MATCH | 5a″ / 6a″ | 4.5e-13 |
+| cytosine | C1 | C1 | MATCH | index only (C₁) | -1.1e-13 |
+| thymine | C1 | C1 | MATCH | index only (C₁) | -1.0e-12 |
+| adenine | C1 | C1 | MATCH | index only (C₁) | -2.2e-12 |
+| guanine | C1 | C1 | MATCH | index only (C₁) | -4.5e-13 |
+| N-methylacetamide | C1 | C1 | MATCH | index only (C₁) | -6.8e-13 |
+| Li4F4 | Td | Td | MATCH | 5t2 / 5a1 | -5.7e-13 |
+| ice-hexamer | C2h (of C6h) | C6h | MATCH | index only (the record says why) | -1.0e-12 |
+| adamantane | Td | Td | MATCH | 7t2 / 8t2 | 2.5e-12 |
+| cubane | Oh | Oh | MATCH | 3t2g / 4t1u | 4.5e-12 |
+| B12H12-- | Ih | Ih | MATCH | 1gu / 1gg | -4.5e-13 |
+| C60 | — (frontier: 8 columns) | — | PySCF's own orbitals (field check 1.1e-16 at generation) | by energy | 0 |
+| KrF2 | Dinfh | Dooh | MATCH | 8σg / 6σu | 0.0e+0 |
+| KBr | Cinfv | Coov | MATCH | 6π / 14σ | 0.0e+0 |
+| TiCl4 | Td | Td | MATCH | 2t1 / 3e | 3.6e-12 |
+| NiCO4 | Td | Td | MATCH | 9t2 / 3e | -5.0e-12 |
+| FeCO5 | D3h | D3h | MATCH | 10e′ / 4e″ | -6.8e-12 |
+| CrCO6 | Oh | Oh | MATCH | 2t2g / 9t1u | -4.5e-13 |
+
+**A finding — nine census amino acids were the wrong hand.** The census built its amino acids from SMILES and called the
+absolute stereochemistry UNVERIFIED; the generator now checks it (the CORN sense of carboxyl C → side chain → N about Cα,
+against the wwPDB ideal L-alanine; the five wwPDB rows agree): serine, cysteine, proline, valine, glutamic acid, glutamine,
+**lysine**, arginine and tyrosine were the D-enantiomer (the builder dropped the SMILES' stereo). They are mirrored (x → −x) to
+the L-form their identifiers name — a reflection leaves every energy unchanged (PySCF on the mirrored atoms agrees with the
+census to 4e-12 Eh) — and each source says so. Lysine is S4a's lock fixture: its lock values were re-recorded (wave 173).
+**Identifiers:** `tools/library/pubchem-ids.mjs` asked PubChem's PUG REST once per record (2026-10-08): **36 VERIFIED** (CID →
+InChIKey and formula; every amino acid the L-form, by name; C₆₀ CID 123591, titled "Fullerenes" there), among them lysine's
+S4a key and CID (KDXKERNSBIXSRK-YFKPBYRVSA-N, CID 5962, now verified); two finite clusters have no PubChem compound (Li₄F₄, the
+water hexamer — said, not invented); and **B₁₂H₁₂²⁻ is UNVERIFIED** (four names and a formula search found nothing: the record
+carries no CID rather than a guess).
+
+THE LEGAL-PROVENANCE READING (before the store build, as S1 and S4a required). No file named LEGAL-PROVENANCE exists where the
+plan points (searched by name, never recursively: research/release-0.4.0, research/molecular-orbitals-2026-10-01, Sol's untracked
+booster plan PLAN.md / CACHE-BUDGET.md / DISTRIBUTION.md, docs/, the vault); so the reading is of the sources themselves, fetched
+2026-10-08. (1) NIST, "Copyright, Fair Use, and Licensing Statements for SRD, Data, Software, and Technical Series Publications":
+under the Standard Reference Data Act, 15 U.S.C. § 290e, the Secretary of Commerce secures copyright in Standard Reference Data,
+whose products carry "© … All rights reserved"; NIST data that are NOT SRD are public domain in the US (17 U.S.C. § 105).
+(2) CCCBDB's own page: "NIST Standard Reference Database Number 101, Release 22, May 2022 … © 2015 copyright by the U.S.
+Secretary of Commerce on behalf of the United States of America. All rights reserved", with its citation (DOI 10.18434/T47C7Z).
+CONCLUDED: SRD 101 is a copyrighted compilation, so the store must not reproduce its tables. What the store carries is within
+that: (a) single geometric parameters attributed per molecule ("CCCBDB experimental r(Ti–Cl)", TiCl4's census row; the live
+table's long-standing practice) — individual facts with attribution, not a copied table; (b) the ten curated IEs of S1, cited to
+the primary handbooks (Kimura et al. 1981, Turner et al. 1970), not to SRD 101, still UNCHECKED value by value, and carried by
+exactly one record (benzene's 1e1g 9.24 eV); (c) S4b adds no IE and no CCCBDB value: its identifiers are PubChem's (NCBI's open
+data), its geometries the census's (the wwPDB Chemical Component Dictionary's ideal coordinates, the Psi4 S22/S66 benchmark
+coordinates, or relaxed here). This is an agent's reading, not legal advice: if SRD 101 values are ever to ship in bulk (the
+IE pages per state of 0.5.0), it is Josh's ruling — or NIST's licence (www.nist.gov/srd) — that holds.
+
+### wave 171: The sections, generated and checked
+
+
+
+Past 64 AO: phenylalanine 71, arginine 74, tyrosine 76, tryptophan 87, adamantane 66, B₁₂H₁₂²⁻ 72, Fe(CO)₅ 69, Cr(CO)₆ 79 — drawn
+by S4c's 128-AO tier now that it is merged — and C₆₀ (300 AO, S4c's frontier record, eight columns, drawn by the orbital-only
+path). Every RHF record is converged, a minimum by the app's stability probe, within 1e-8 Eh of PySCF on its own atoms (the
+largest distance Cr(CO)₆'s 6.9e-9), opens through `chem.open` to its own solve with 0 solver calls, and passes the tightened
+`validateRecord`; `node tools/orbital-library.mjs --check` regenerates them and compares bytes: in step, 38 records, 11,532,460 B. STATES is stored for
+benzene alone (the proof, 1.06 MB of its 1.26 MB); every other RHF record is orbitals + RPA sticks (a 960² ladder would be
+7.4 MB). Under the refit live cap, so live-solvable when not installed: N-methylacetamide, KrF₂, KBr. The generator now writes
+each record as it lands and lists in the catalogue only what was built: one entry's failure no longer loses the rest.
+
+### wave 172: The page turner and the section header in MOLECULES
+
+The section header IS the page turner, one row above the dropdown: PALETTE's own ◂ ▸ (`.pal-nav`: the kit's `trig` with `chip`'s
+dirPrev/dirNext glyphs), a kit `readout` (SECTION; the section's name; "25 records · 6.8 MB · 3 here" or "13 molecules, all
+live"; the whole sentence in its title; it survives LEAN, being the name), and a kit `sw` INSTALLED whose LED is the installed
+lamp (lit when every record of the section is on this device) and whose press installs the section — persist() asked on that
+press, never at boot — or removes it. A section without a record (DIATOMICS, HYDRIDES) offers nothing to keep; in a Safari tab
+INSTALLED is not offered (S4a: the M5 has not measured persist there). The dropdown holds that one section in the table's
+optgroups; picking a molecule anywhere turns to its page, and a page turned away from the molecule on screen shows nothing
+chosen until a pick. No new tab, window, setting or skin: three layout lines in `lab/lab.css`. The page is never saved.
+`__LW.chem.section(name)` and `keep(on)` are the hand's roads for the gates. **The S4a verifier's notes, carried:**
+`validateRecord` refuses a record whose atoms do not hash to `input.atomsSha256` or with a non-finite ε, C or D (a 1e-9-bohr move
+and one NaN are refused in `tests/library.test.mjs`); a record says that inside a degenerate root the RPA μ and dominant pairs
+are the eigensolver's basis, not a canonical gauge (`spectrum.gauge`); the `library` suite presses **the two-press race**
+(benzene then lysine, both installed) on Sos's B1 fix: GREEN — lysine stays the molecule, 0 solver calls, the KICK refused with
+its sentence.
+
+### wave 173: S4c merged in; C₆₀ under a declared allowance; the lysine lock re-recorded
+
+`git merge a927fc3` (S4c THE ENGINE UPGRADES), seven files in conflict, each resolved to keep both intents:
+`tools/orbital-library.mjs` (both sides' imports; S4b's gate road, then S4c's `--fixture` road now on S4b's `build()` — a census
+row at C₁ with its PySCF oracle on these atoms, never shipped — then S4c's `buildFrontier`, which no longer runs from a list of
+its own: **C₆₀ is a gate candidate in LATTICE carrying `frontier`, passing by a DECLARED allowance kind beside the families**,
+`milestone`: Josh's "maybe a bucky-ball as our next milestone" (`NACRE.md` l.34, `HANDOFF.md` §5) with PLAN R-L2 = YES, the
+integrator's ruling of 2026-10-08 that Josh may overrule; the frontier record gains `input.atomsSha256`, PubChem's identifiers,
+a `stem.symmetry` saying its levels are named by energy (the I_h names are 0.4.1) and the generator's own `chem.open` check, 0
+solver calls, 6.3 ms); `lab/library.js` (S4c's frontier branch and S4b's finite check, both); `lab/chemview.js` (both sides'
+imports — every VALENCE and frontier hunk merged cleanly beside the picker); `lab/library.json` regenerated (38 rows: C₆₀ in
+LATTICE — carbon's third allotrope sits with the cages, adamantane being diamond's and B₁₂H₁₂²⁻ boron's); `lab/sw.js`
+regenerated; the two library tests read the record-only rows off the catalogue, C₆₀ among them. `tools/orbital-names.mjs
+--pyscf` skips a frontier record (it IS PySCF's orbitals, field-checked at generation to 1.1e-16). S4c's two test fixtures are
+regenerated on the merged `build()` (`tests/fixtures/record-tryptophan.json`, `record-C20H20.json`; the same atoms, so the same
+C and D the kernel harness reads). **The digest lock:** the 1004-value lock is GREEN untouched on the merged tree
+(`--check --query gastab=0`, 63 s); against the S4a fixture the merged tree differed in exactly **24 values, all lysine's** —
+`chemLys` (its density) and `chemLysHomo` (its HOMO) at 64, 96 and 128: digest, integral, rp and rpL — because lysine is now the
+L-enantiomer (the reflection moves it on the grid; the integral changes in its seventh digit, 78.8009096 → 78.8008991 at 64³);
+benzene's values and the 1004 old values were identical, and **no header-row screenshot value moved** (the lock's captures do not
+hold MOLECULES' card). Re-recorded with the tool's own road (`--write --query gastab=0 --fixture
+research/release-0.4.0/measure/digest-lock-s4a.json`, 1148 values, 60 s) and checked GREEN against it (0 differences,
+unrepeatable none); the fixture's other two changed keys are its `made` stamp and its `url` port.
+
+### wave 174: The gates, the lines, the hand-off
+
+- `bash test.sh node`: **exit 0, 85 suites, 0 FAIL** on the merged tree. `tests/library.test.mjs` gains: the record-only rows read off
+  the catalogue (lysine and C₆₀ among them), a 1e-9-bohr move and one NaN in C refused by `validateRecord`, §7 the sections; it keeps
+  Sos's §5b (B1) and S4c's §5c (the frontier record).
+- `node tools/orbital-library.mjs --check`: **in step, 38 records, 11,532,460 B** — the gate passes every entry, nothing else in `lab/library/`.
+- `node tools/orbital-library.mjs --gate`: 38 pass (C₆₀ by the declared milestone allowance) · 20 refused · 5 blocked by the basis ·
+  1 refused by the stability probe.
+- `node tools/orbital-names.mjs --check --pyscf`: **OK, 37 of 37 RHF records MATCH** (PySCF's orbitals project to the record's
+  labels; |ΔE| ≤ 7.5e-12 Eh), C₆₀ (frontier) skipped by design, plus the ten anchors and water's `label_orb_symm` as before.
+- `node tools/new-project.mjs --check`: in step (16 889 B, S4c's `valence` key in). `node tests/pwa.test.mjs --write` after every `lab/` edit.
+- **The locks** (8757/5225): 1004 values GREEN untouched (`--check --query gastab=0`, 63 s); the S4a fixture differed in exactly the
+  24 lysine values (density and HOMO × 3 grids × digest/integral/rp/rpL), re-recorded with `--write` (1148 values) and checked GREEN.
+- Browser on **8757/5225**, one suite at a time with pauses, all **GREEN** on the merged tree: `chem` **55/55** (L6 rewritten for the
+  page turner: every page holds exactly its section and its header names it — DIATOMICS 13 · HYDRIDES 20 · ORGANIC 12 · BIO 27 ·
+  LATTICE 6 · HEAVY 13 rows), `molecular-names` 6 PASS, `library` **7 PASS** (§6 the sections and the three sizing entries opened in
+  Firefox — LATTICE's INSTALLED now installs its six, C₆₀'s frontier record among them; §7 the two-press race), `menubar` 8 PASS,
+  `new-project` 8 PASS, `orbitals` **24/24**, `field-molecule` 9 PASS. (The same five S4b suites were GREEN on the pre-merge tree too.)
+- **Re-run alone:** `library` once on the pre-merge tree — its first run went red at step 3 on a TEST bug of mine (the scene set the
+  dropdown to lysine while it held ORGANIC; with one section per page the pick needs the page turned first, and the KICK that followed
+  ran on benzene and returned typed arrays the driver refused to clone); fixed in the test (`d2574a3`), GREEN alone. No timing red was
+  seen.
+
+`cat lab/*.js | wc -l`: base `cfdd674` **36 131** → this tree **36 280**. Of the +149: Sos's B1 fix +6, S4c's merge +88 (`a927fc3` holds 36 225), and **S4b +55** (`lab/chemview.js` +42: the header/page turner and the per-section dropdown; `lab/molecules.js` +5: SECTIONS; `lab/library.js` +8: `atomsKey`, the geometry hash and the finite checks, the frontier's included). **"Subtract, don't add" is NOT met** by S4b (the turner and the header are the plan's named exception, PLAN F5; nothing in S4b's files was dead enough to delete).
+
+Open items (CLAUDE.md's paragraph drafted, not applied — an agent's message cannot authorise it), the KIT BRIEF notes for brief 4 and the exact next step are in `research/release-0.4.0/S4b-BUILD.md`.
