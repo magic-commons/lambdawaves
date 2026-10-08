@@ -130,6 +130,32 @@ function build(e) {
 /** the live-cost prediction for a molecule lab/molecules.js does not list (lab/molecules.js does the same for its rows) */
 function predicted(ang, charge) { const c = counts(ang), nocc = (c.nElec - charge) / 2; return COST.a * eriWork(c.widths) + COST.b * rpaWork(c.nAO, nocc) + COST.c; }
 
+/* ── 0.4.0 S4c · THE TEST FIXTURES (S4c's own road, beside the catalogue: never ENTRIES, never the gate, never lab/library.json) ──
+ *   node tools/orbital-library.mjs --fixture tryptophan [--check]      (and C20H20)
+ * ONE schema-1 record by the same build() above, from a census row — its geometry and its PySCF energy as the oracle — written
+ * to tests/fixtures/record-<id>.json: the 87- and 120-AO inputs the cap-128 χ tier is checked against (tools/perf/s4c-kernel.mjs).
+ * Never shipped.  `--check` re-solves and compares the bytes.  S4b's own BIO / ORGANIC records supersede these as content. */
+const CENSUS = 'research/release-0.4.0/library-census/census.json';
+const SUB = (s) => s.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
+function fixtureEntry(id) {
+  const row = JSON.parse(readFileSync(fileURLToPath(new URL('../' + CENSUS, import.meta.url)), 'utf8')).rows.find((r) => r.id === id);
+  if (!row || !row.converged || !row.geometry || !Array.isArray(row.geometry.atomsAngstrom)) throw new Error(`orbital-library: no converged census row '${id}'`);
+  return { id, basis: 'sto-3g', section: 'S4C-FIXTURE', states: false,
+    molecule: { name: row.name, formula: '<m>' + SUB(row.formula) + '</m>', charge: row.charge || 0, symmetry: { group: 'C1' },
+      source: 'NOT A MEASUREMENT: the S4 census\'s ' + row.name + ' — ' + row.geometry.source + ' (' + CENSUS + ' rows[' + id + '])', ang: row.geometry.atomsAngstrom },
+    oracle: { energy: row.energyEh, source: CENSUS + ' rows[' + id + '].energyEh', what: 'PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals (Sol\'s census; MEASURED there)' },
+    stem: { inchiKey: null, pubchemCid: null, identifiers: 'a TEST FIXTURE (0.4.0 S4c): identifiers are S4b\'s, on its own record',
+      blurb: [row.name + ' at ' + row.nAO_STO3G + ' Cartesian AOs: an input for the field kernel\'s cap-128 tier, not library content.',
+        'Point group taken as C1 here (the names are S4b\'s record\'s); the energy agrees with the census\'s PySCF oracle or there is no file.'] } };
+}
+if (args.includes('--fixture')) {
+  const id = args[args.indexOf('--fixture') + 1], e = fixtureEntry(id), r = build(e);
+  const file = fileURLToPath(new URL(`../tests/fixtures/record-${id}.json`, import.meta.url));
+  console.log(`${id} · ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${(r.text.length / 1024).toFixed(1)} KB · generated in ${(r.ms / 1000).toFixed(1)} s · ${r.hash.slice(0, 12)}`);
+  if (CHECK) { const same = existsSync(file) && readFileSync(file, 'utf8') === r.text; console.log(same ? `fixture ${id}: in step` : `fixture ${id}: OUT OF STEP`); process.exit(same ? 0 : 1); }
+  writeFileSync(file, r.text); console.log('wrote', file); process.exit(0);
+}
+
 const out = [], fail = [];
 const disk = existsSync(CATALOGUE) ? JSON.parse(readFileSync(CATALOGUE, 'utf8')) : { rows: [] };
 for (const e of ENTRIES) {

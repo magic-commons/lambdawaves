@@ -163,9 +163,10 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * coarser number by three orders (an 11-bit mantissa on √ρ ⇒ ≈ 1e-3 relative on ρ) and it, not this sum, sets the
  * tolerance any gate on a read-back voxel may ask for.  Sorting the small terms first is not required.
  */
-/** ONE source, one knob: `cap` is the AO ceiling this pipeline's χ tile holds (see MOL_CAPS) */
-const molWgsl = (cap) => /* wgsl */`
-const WG: u32 = 64u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape
+/** ONE source, two knobs: `cap` is the AO ceiling this pipeline's χ tile holds (see MOL_CAPS) and `wg` its lanes — 64, or 32
+    (4 × 4 × 2) for the cap-128 tier on a device that holds 16 KiB of workgroup memory (0.4.0 S4c); at 64 the text is the
+    pre-S4c source byte for byte, so the ≤ 64 tiers compile the program the digest lock recorded */
+const MOL_HEAD = /* wgsl */`
 struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };   // l carries bit 8 = share the previous group's exponentials
 struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ), 2 complex orbital (ψ_re, ψ_im), 3 signed matrix (Δρ, no root)
 @group(0) @binding(0) var<uniform> P: MP;
@@ -174,17 +175,9 @@ struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: 
 @group(0) @binding(3) var<storage, read> wts: array<f32>;
 @group(0) @binding(4) var<storage, read> mat: array<f32>;
 @group(0) @binding(5) var outTex: texture_storage_3d<rgba16float, write>;
-@group(0) @binding(6) var<storage, read_write> stats: array<atomic<u32>>;
-/* χ LIVES IN WORKGROUP MEMORY, TRANSPOSED: invocation lid owns the column chiW[ao * WG + lid], so the 64 threads
-   of a workgroup read ${cap} consecutive addresses at every step of the contraction — bank-conflict-free, and off
-   the per-thread scratch that a var<function> array<f32, 64> lands in.  MEASURED on an RTX 3070 at 96³: benzene
-   went from 9.07 ms a dispatch to 2.80 ms and water from 0.84 to 0.50, because ~700 scratch loads a voxel through
-   L1 was the entire cost — 1.3k MACs a voxel is 1.15 GMAC for the volume, which this card does in a quarter of a
-   millisecond, so the arithmetic was never within an order of magnitude of being the problem. */
-var<workgroup> chiW: array<f32, ${cap}u * 64u>;
-
-@compute @workgroup_size(4, 4, 4)
-fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
+@group(0) @binding(6) var<storage, read_write> stats: array<atomic<u32>>;`;
+/* the shell loop both kernels run, up to shell s's contracted primitives `acc`; ORB_WGSL's screen goes in after r² */
+const MOL_LOOP = (screen = '') => /* wgsl */`
   var dens = 0.0;
   if (all(gid < vec3<u32>(P.n, P.n, P.n))) {
     let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);   // the domain, exactly as COMPUTE_WGSL reads it
@@ -194,7 +187,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       let l = sh.l & 255u;
       let dx = pos.x - sh.cx; let dy = pos.y - sh.cy; let dz = pos.z - sh.cz;
       let r2 = dx * dx + dy * dy + dz * dz;
-      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
+${screen}      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
       if ((sh.l & 256u) == 0u) {                              // a NEW group: one exp per primitive, and only here
         for (var p = 0u; p < sh.nP; p++) { ex[p] = exp(-alphas[sh.pOff + p] * r2); }
       }
@@ -204,7 +197,19 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         let e = ex[p];
         let wb = sh.wOff + p * nc;
         for (var c = 0u; c < nc; c++) { acc[c] += wts[wb + c] * e; }
-      }
+      }`;
+export const molWgsl = (cap, wg = 64) => /* wgsl */`
+const WG: u32 = ${wg}u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape${MOL_HEAD}
+/* χ LIVES IN WORKGROUP MEMORY, TRANSPOSED: invocation lid owns the column chiW[ao * WG + lid], so the 64 threads
+   of a workgroup read ${cap} consecutive addresses at every step of the contraction — bank-conflict-free, and off
+   the per-thread scratch that a var<function> array<f32, 64> lands in.  MEASURED on an RTX 3070 at 96³: benzene
+   went from 9.07 ms a dispatch to 2.80 ms and water from 0.84 to 0.50, because ~700 scratch loads a voxel through
+   L1 was the entire cost — 1.3k MACs a voxel is 1.15 GMAC for the volume, which this card does in a quarter of a
+   millisecond, so the arithmetic was never within an order of magnitude of being the problem. */
+var<workgroup> chiW: array<f32, ${cap}u * ${wg}u>;
+
+@compute @workgroup_size(4, 4, ${wg / 16})
+fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {${MOL_LOOP()}
       let a0 = sh.aOff * WG + lid;
       if (l == 0u) {
         chiW[a0] = acc[0];
@@ -250,6 +255,34 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
   if (lid == 0u) {
     var m = 0.0;
     for (var k = 0u; k < WG; k++) { m = max(m, chiW[k]); }
+    atomicMax(&stats[P.slot], bitcast<u32>(m));
+  }
+}`;
+/* ── ORB_WGSL — THE ORBITAL-ONLY KERNEL (0.4.0 S4c · PLAN §10 N3, R-L2).  An orbital is Σ_μ c_μ χ_μ, O(nAO) a voxel: each
+ * shell is contracted with its coefficients on the spot, so there is no χ tile and no AO ceiling but the shell table's.  A
+ * shell whose widest primitive is under 1e-10 here (r² > cut = ln 1e10 / α_min, packMolecule) is skipped, a shared one with
+ * its leader.  Kinds 1 and 2 only; the one workgroup array is the max reduction.  MEASURED, MEASURE.md §3: 300 AO at 96³
+ * 12.0 ms plain, 3.2–3.6 ms screened (tools/perf/s4c-kernel.mjs times this module). */
+export const ORB_WGSL = /* wgsl */`${MOL_HEAD}
+@group(0) @binding(7) var<storage, read> cut: array<f32>;
+var<workgroup> red: array<f32, 64>;
+@compute @workgroup_size(4, 4, 4)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
+  var amp = 0.0;
+  var ampIm = 0.0;${MOL_LOOP('      if (r2 > cut[s]) { continue; }\n')}
+      if (l == 1u) { acc[0] *= dx; acc[1] *= dy; acc[2] *= dz; }
+      else if (l == 2u) { acc[0] *= dx * dx; acc[1] *= dx * dy; acc[2] *= dx * dz; acc[3] *= dy * dy; acc[4] *= dy * dz; acc[5] *= dz * dz; }
+      for (var c = 0u; c < nc; c++) { amp += mat[sh.aOff + c] * acc[c]; }
+      if (P.kind == 2u) { for (var c = 0u; c < nc; c++) { ampIm += mat[P.nAO + sh.aOff + c] * acc[c]; } }
+    }
+    textureStore(outTex, vec3<i32>(gid), vec4<f32>(amp, ampIm, 0.0, 0.0));
+    dens = amp * amp + ampIm * ampIm;
+  }
+  red[lid] = dens;
+  workgroupBarrier();
+  if (lid == 0u) {
+    var m = 0.0;
+    for (var k = 0u; k < 64u; k++) { m = max(m, red[k]); }
     atomicMax(&stats[P.slot], bitcast<u32>(m));
   }
 }`;
@@ -707,22 +740,25 @@ export function tableFor(s) {
  * molecular-field.js's evaluator multiplies by, produced by its `fieldShells(basis)`.  Three flat STORAGE buffers,
  * not uniform arrays: f32 values with integer offsets, so 64 AOs and 256 shells cost nothing per frame.
  */
-export const MAX_MOL_AO = 64;                                 // the shader's var<function> array<f32, 64>
-export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: MAX_MOL_AO, prim: 32 };   // prim: the kernel's per-group register array
-/* THE AO TIERS.  The χ tile is cap × 64 × 4 bytes of WORKGROUP memory — 4, 10 and 16 KiB — and the workgroup budget
-   is 16 KiB, so how many workgroups an SM can hold is set by the SMALLEST tier the molecule fits in.  Three
-   pipelines off one source: water/STO-3G takes the 4 KiB one, benzene and H₂O/6-31+G* the 10 KiB one. */
-export const MOL_CAPS = [16, 40, MAX_MOL_AO];
+export const MAX_MOL_AO = 128;                                // the widest χ tile: a density (n²) needs one, so this is the density's ceiling
+export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, prim: 32 };   // ao: the ORBITAL's ceiling (ORB_WGSL, no tile; C₆₀ is 300) · prim: the kernel's per-group register array
+/* THE AO TIERS.  The χ tile is cap × 64 × 4 bytes of WORKGROUP memory — 4, 10, 16, 32 KiB — so the SMALLEST tier a molecule
+   fits sets how many workgroups an SM holds: water, benzene, lysine, then tryptophan (87) to C₂₀H₂₀ (120) in 32 KiB, which
+   lab/gpu-boot.js asks for and, where it is not granted, is built with 32 lanes (16 KiB).  An ORBITAL past 64 AOs takes
+   ORB_WGSL, no tile (faster at every size, MEASURE.md §3); at ≤ 64 it keeps its tile — what the digest lock recorded. */
+export const MOL_CAPS = [16, 40, 64, MAX_MOL_AO];
+export const MOL_ORB_FROM = 64;
 export const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
   if (t < 0) throw new Error(`field: nAO ${nAO} is beyond the kernel's ${MAX_MOL_AO}`); return t; };
 const MOL_SHELL_U = new Uint32Array(MOL_LIMITS.shells * 8), MOL_SHELL_F = new Float32Array(MOL_SHELL_U.buffer);
-const MOL_ALPHA = new Float32Array(MOL_LIMITS.prims), MOL_W = new Float32Array(MOL_LIMITS.weights);
+const MOL_ALPHA = new Float32Array(MOL_LIMITS.prims), MOL_W = new Float32Array(MOL_LIMITS.weights), MOL_CUT = new Float32Array(MOL_LIMITS.shells);
+const SCREEN = Math.log(1e10);                                // ORB_WGSL skips a shell where e^{−α_min r²} < 1e-10 (molecular-field supportRadius's 1e-10)
 const MOL_NC = [1, 3, 6];
 /** pack one spec into the module's three scratch arrays; returns the counts the kernel and the uploads need */
 export function packMolecule(spec) {
   if (!spec || !Array.isArray(spec.shells) || !spec.shells.length) throw new Error('field: a molecule spec needs { nAO, shells: [...] }');
   const nAO = spec.nAO | 0;
-  if (!(nAO > 0) || nAO > MAX_MOL_AO) throw new Error(`field: nAO ${spec.nAO} is outside 1..${MAX_MOL_AO}`);
+  if (!(nAO > 0) || nAO > MOL_LIMITS.ao) throw new Error(`field: nAO ${spec.nAO} is outside 1..${MOL_LIMITS.ao}`);
   let nShell = 0, pOff = 0, wOff = 0, ao = 0, nExp = 0, prev = null;
   for (const sh of spec.shells) {
     const nc = MOL_NC[sh.l];
@@ -745,18 +781,20 @@ export function packMolecule(spec) {
     const o = nShell * 8;
     MOL_SHELL_F[o] = sh.center[0]; MOL_SHELL_F[o + 1] = sh.center[1]; MOL_SHELL_F[o + 2] = sh.center[2];
     MOL_SHELL_U[o + 3] = sh.l | (share ? 256 : 0); MOL_SHELL_U[o + 4] = myOff; MOL_SHELL_U[o + 5] = nP; MOL_SHELL_U[o + 6] = base; MOL_SHELL_U[o + 7] = wOff;
+    let aMin = Infinity;
     for (let p = 0; p < nP; p++) {
       const pr = sh.prims[p];
       if (!pr || !(pr.alpha > 0) || !pr.w || pr.w.length !== nc) throw new Error(`field: an l = ${sh.l} primitive needs a positive alpha and ${nc} weights`);
-      MOL_ALPHA[myOff + p] = pr.alpha;
+      MOL_ALPHA[myOff + p] = pr.alpha; aMin = Math.min(aMin, pr.alpha);
       for (let c = 0; c < nc; c++) MOL_W[wOff + p * nc + c] = pr.w[c];
     }
+    MOL_CUT[nShell] = SCREEN / aMin;
     if (!share) { pOff += nP; nExp += nP; }
     prev = { c: sh.center, nP, off: myOff, alphas: sh.prims.map((pr) => pr.alpha) };
     wOff += nP * nc; ao += nc; nShell++;
   }
   if (ao !== nAO) throw new Error(`field: the shells cover ${ao} AOs, the spec declares ${nAO}`);
-  return { nShell, nPrim: pOff, nWeight: wOff, nExp, nAO, shell: MOL_SHELL_U, alpha: MOL_ALPHA, weight: MOL_W };
+  return { nShell, nPrim: pOff, nWeight: wOff, nExp, nAO, shell: MOL_SHELL_U, alpha: MOL_ALPHA, weight: MOL_W, cut: MOL_CUT };
 }
 
 export async function createField(canvas, opts = {}) {
@@ -832,10 +870,13 @@ export async function createField(canvas, opts = {}) {
   const computeModule = device.createShaderModule({ code: COMPUTE_WGSL });
   const renderModule = device.createShaderModule({ code: RENDER_WGSL });
   const lineModule = device.createShaderModule({ code: LINE_WGSL });
-  const molModules = MOL_CAPS.map((cap) => device.createShaderModule({ code: molWgsl(cap) }));   // the molecular volume (CHEMISTRY), one pipeline per AO tier
+  /* the molecular volume (CHEMISTRY): one pipeline per AO tier, each tier's lanes set by the workgroup memory this device
+     GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB */
+  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length;
+  const molModules = [...MOL_CAPS.map((cap, i) => device.createShaderModule({ code: molWgsl(cap, molWg[i]) })), device.createShaderModule({ code: ORB_WGSL })];
   /* compile messages are kept, never swallowed: a broken shader must say where */
   out.shaderMessages = [];
-  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + MOL_CAPS[i], m2])]) {
+  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + (MOL_CAPS[i] || 'Orbital'), m2])]) {
     try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
   }
   /* M1 · …AND ONE LOST DURING THE COMPILE STRETCH ABOVE.  Before this line, Firefox took the WGSL branch below (a dead
@@ -913,7 +954,8 @@ export async function createField(canvas, opts = {}) {
   const molShellBuf = device.createBuffer({ size: MOL_LIMITS.shells * 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const molAlphaBuf = device.createBuffer({ size: MOL_LIMITS.prims * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const molWBuf = device.createBuffer({ size: MOL_LIMITS.weights * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-  const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // ≥ 2 × MOL_LIMITS.ao: a complex orbital's two vectors
+  const molCutBuf = device.createBuffer({ size: MOL_LIMITS.shells * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });            // ORB_WGSL's screen, r² per shell
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
   const lineVerts = 44;                                            // box 24 + axes 6 + slice 8, then the corner axis 6
@@ -1003,11 +1045,11 @@ export async function createField(canvas, opts = {}) {
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
       { binding: 5, resource: { buffer: palBuf } }] });
-    molBind = molPipelines.map((pl) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
+    molBind = molPipelines.map((pl, p) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
       { binding: 0, resource: { buffer: molParamsBuf[i] } }, { binding: 1, resource: { buffer: molShellBuf } },
       { binding: 2, resource: { buffer: molAlphaBuf } }, { binding: 3, resource: { buffer: molWBuf } },
       { binding: 4, resource: { buffer: molMatBuf } }, { binding: 5, resource: tex.createView({ dimension: '3d' }) },
-      { binding: 6, resource: { buffer: statsBuf } }] })));
+      { binding: 6, resource: { buffer: statsBuf } }, ...(p === ORB ? [{ binding: 7, resource: { buffer: molCutBuf } }] : [])] })));
     molDirty = molDirty || !!molSpec; stats.resolution = n;
     refValid = false;
   }
@@ -1035,12 +1077,18 @@ export async function createField(canvas, opts = {}) {
     if (molParamSig[slot] === sig) return;                     // a queue.writeBuffer is ~2.5 ms of staging here
     molParamSig[slot] = sig; device.queue.writeBuffer(molParamsBuf[slot], 0, MOL_PARAMS);
   }
+  /** the road a dispatch takes: an orbital past MOL_ORB_FROM AOs takes ORB_WGSL, anything else its tier's χ tile */
+  const molRoad = () => ((molKind === 1 || molKind === 2) && molPack.nAO > MOL_ORB_FROM ? ORB : molTier);
+  function dispatchMol(pass, slot, k = 1) {
+    const r = molRoad(), g = Math.ceil(res / 4), z = r === ORB ? g : Math.ceil(res / (molWg[r] / 16));   // a 32-lane tier is 4 × 4 × 2
+    pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
+    for (let i = 0; i < k; i++) pass.dispatchWorkgroups(g, g, z);
+  }
   function encodeMolecule(enc, slot, tw) {
     writeMolParams(slot);
     device.queue.writeBuffer(statsBuf, slot * 4, ZERO_U32);     // the max accumulator: zeroed before every dispatch
     const pass = enc.beginComputePass(tw ? { timestampWrites: tw } : {});
-    pass.setPipeline(molPipelines[molTier]); pass.setBindGroup(0, molBind[molTier][slot]);
-    const g = Math.ceil(res / 4); pass.dispatchWorkgroups(g, g, g);
+    dispatchMol(pass, slot);
     pass.end();
     return molPack.nAO;
   }
@@ -1475,13 +1523,15 @@ export async function createField(canvas, opts = {}) {
   function setMolecule(spec) {
     if (!spec) { molSpec = null; molPack = null; molMat = null; molDirty = false; molRefDirty = false; refValid = false; return null; }
     const pack = packMolecule(spec);
-    molTier = molTierFor(pack.nAO);
+    molTier = pack.nAO <= MAX_MOL_AO ? molTierFor(pack.nAO) : -1;                 // −1: no χ tile holds it — an ORBITAL only (ORB_WGSL)
     device.queue.writeBuffer(molShellBuf, 0, pack.shell, 0, pack.nShell * 8);
     device.queue.writeBuffer(molAlphaBuf, 0, pack.alpha, 0, pack.nPrim);
     device.queue.writeBuffer(molWBuf, 0, pack.weight, 0, pack.nWeight);
+    device.queue.writeBuffer(molCutBuf, 0, pack.cut, 0, pack.nShell);
     molSpec = spec; molPack = pack; molDirty = true;
+    if (molTier < 0 && molMat && molKind !== 1 && molKind !== 2) molMat = null;   // a matrix kept from a smaller molecule cannot draw here
     if (spec.half !== undefined) { if (!(spec.half > 0)) throw new Error('field: a molecule spec half must be positive'); half = spec.half; }
-    return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier], half };
+    return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier] || null, half };
   }
   /** the volume's matrix.  'density' and 'diff': M = Float32Array(nAO²), symmetric Re D, ρ = Σ_μν M_μν χ_μ χ_ν and
       the texel is (√ρ, 0).  'signed': the same n² matrix WITHOUT the square root — the texel is the signed value,
@@ -1506,6 +1556,7 @@ export async function createField(canvas, opts = {}) {
       return { kind, nAO: n, length: 2 * n, complex: true, ref: !!ref };
     }
     const want = kind === 'orbital' ? n : n * n;
+    if (want > n && molTier < 0) throw new Error(`field: a ${kind} at ${n} AOs needs a χ tile and the widest holds ${MAX_MOL_AO} — past it only an ORBITAL draws`);
     if (!M || M.length !== want) throw new Error(`field: kind '${kind}' needs ${want} numbers, got ${M ? M.length : 0}`);
     const src = M instanceof Float32Array ? M : Float32Array.from(M);
     device.queue.writeBuffer(molMatBuf, 0, src, 0, want);
@@ -1537,15 +1588,15 @@ export async function createField(canvas, opts = {}) {
     const t0 = performance.now();
     const enc = device.createCommandEncoder();
     const pass = enc.beginComputePass();
-    pass.setPipeline(molPipelines[molTier]); pass.setBindGroup(0, molBind[molTier][0]);
-    const g = Math.ceil(res / 4);
-    for (let i = 0; i < n; i++) pass.dispatchWorkgroups(g, g, g);
+    dispatchMol(pass, 0, n);
     pass.end();
     device.queue.submit([enc.finish()]);
     await device.queue.onSubmittedWorkDone();
     const ms = (performance.now() - t0) / n;
-    return { msPerDispatch: +ms.toFixed(3), n, res, voxels: res ** 3, nAO: molPack.nAO, nShell: molPack.nShell, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName };
+    return { msPerDispatch: +ms.toFixed(3), n, res, voxels: res ** 3, nAO: molPack.nAO, nShell: molPack.nShell, expsPerVoxel: molPack.nExp, ...molPath(), kind: molKindName };
   }
+  /** which kernel the volume takes and its workgroup: { cap, wg, path: 'tile' | 'orbital' } — cap null on the orbital road */
+  const molPath = () => { const r = molRoad(); return r === ORB ? { cap: null, wg: 64, path: 'orbital' } : { cap: MOL_CAPS[r], wg: molWg[r], path: 'tile' }; };
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
@@ -1561,7 +1612,9 @@ export async function createField(canvas, opts = {}) {
        object, and the ORBITALS register asks this once a frame to notice when another card took the matrix back */
     moleculeComplex: { get: () => molKind === 2, enumerable: true },
     moleculeInfo: { get: () => (molSpec ? { nAO: molPack.nAO, nShell: molPack.nShell, nPrim: molPack.nPrim,
-      nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, cap: MOL_CAPS[molTier], kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true } });
+      nWeight: molPack.nWeight, expsPerVoxel: molPack.nExp, ...molPath(), kind: molKindName, complex: molKind === 2, dirty: molDirty, half, res } : null), enumerable: true },
+    /* 0.4.0 S4c: the workgroup memory the device GRANTED and the lanes each tier was built with — the cap-128 tier's 64 or 32 */
+    moleculeTiers: { get: () => ({ granted: device.limits.maxComputeWorkgroupStorageSize, caps: MOL_CAPS, wg: molWg, orbitalFrom: MOL_ORB_FROM }), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, lineColors, linePixels,
@@ -1622,7 +1675,7 @@ export async function createField(canvas, opts = {}) {
       if (out.disposed) return; out.disposed = true; out.ok = false;
       try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
       try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); palBuf.destroy(); } catch (_) {}
-      try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); } catch (_) {}
+      try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); molCutBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
       try { device.destroy(); } catch (_) {}
     },
