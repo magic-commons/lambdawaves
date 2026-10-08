@@ -1,0 +1,64 @@
+PASS manifest parses; 13 members, scope ./ display standalone orientation any, both colours = lab.css's ground #070a0f.
+PASS the link preview is the manifest's own words: description (215 chars) and og:title match the manifest and the ABOUT tagline exactly; og:image → img/icon-512.png, 12631 bytes.
+PASS 5 icons decoded by hand (signature, CRC, IHDR, un-filtered pixels): sizes as declared, opaque to the edge, λ-and-dot colours and maskable padding; ink radius any@192 40.7% · any@512 40.7% · maskable@192 32.6% · maskable@512 32.6% · any@180 40.9% (maskable safe zone 40%).
+PASS the 9 licence texts are precached with the works they cover (fonts/Roboto-OFL.txt, fonts/STIXTwoMath-OFL.txt, fonts/Spinwerad-OFL.txt, fonts/info/AlegreyaSC-OFL.txt, fonts/info/PlayfairDisplay-OFL.txt, fonts/info/Spectral-OFL.txt, mir/shell/vendor/katex/LICENSE, mir/shell/vendor/katex/fonts/OFL.txt, mir/shell/vendor/marked-LICENSE.md).
+PASS precache list == lab/ on disk: 382 files, 9.46 MiB, every content hash re-verified. Skipped by rule: fonts/Roboto-SOURCE.txt, fonts/STIXTwoMath-SOURCE.txt, fonts/STIXTwoMath-glyphs.txt, fonts/Spinwerad-SOURCE.txt, fonts/info/SOURCE.txt, library/07290ffeb118d18bcc1456049b76ccde466357a92835eac200debc5db9d0623e.json, library/07522e6f9b1de13114a57893d5dc66e5f506a44fcb3821bad472a275532749ba.json, library/1962b94e3599284349053f7ff97084f370c87154d3492d2e8919e6495b591299.json, library/2d988cf8060f0745e636f5a3ea8cde6a88659266bf8a26b7f8ed426f73cf12e2.json, library/307c0fa624557f7dd64ed41eebe3b26cad96c0b197f77d3c59c6e9868901bb2b.json, library/33707d52dd03de115db6ce8fbd0560c24ac030c74f108d4ea991493265a936bf.json, library/3d517324432133e344935f29d23d5fddfbd4739153eaf91fc1e9943941ccb175.json, library/402231beed810f1621508c2800f1b95c4cbce1dba180cd9b672cd6ad51aaefa7.json, library/47d48a2cd8ef2fc0a546399b5c692ca037e7dd4458c1bc926c2a33d2b8d0b58c.json, library/481379d5feac547c0006b1e1dc7ca24c532b7ed6c1c502590483acf58603ebb3.json, library/4a199f2f3ec1ec22950b185447ab70f778cbf6a39a44b309c22073900837e66f.json, library/4e33aa1d22a2e04846dabf9c7d9f07eebabeaed7baf1f2b0b3e311caeea0db5d.json, library/4fc7d04250df7cc0846fad78b1d8790c6ae9feb85bf29534c0cb98faf4b2c97a.json, library/51e98611d01a803c692e69a6a7924db626a023d8b63453011736ffe48bc3f12c.json, library/5fbda80fa99bc47a719c25ea0309e4a094da541b31160570259d0e615b898241.json, library/627459d234595d078f204cd1465cf9ba0cae17299416211f3e6fba670d14ac1b.json, library/741b78d2210b60f9000f10f2cc7778aa4383b8e65bfc42979944efe69667d0d0.json, library/7909fd50d0c78facb95b88a45c5f75e326609fb722ce62d4cc6e55ee3a823569.json, library/7df695c9c4d9ed5d7fc298ad3db32627607bae20948553eeabc3f5b78699b673.json, library/921081498ba2116bc3c0b3290e141830d4f3f4ca370c1bccfa518939efa4d359.json, library/9979c9a5d4202b0d7e8eb5fad89f0086cc6686b09ff55f0f5aac91fdd1b8e252.json, library/9e38a707e7ac9098bafd30782c2ce7dc77aa3b7f985f8714a852cdd8e061cee4.json, library/9eb860cf32230f84d8bf7c82ba967df9fd4398f2d7793dacb66758824f91a977.json, library/9f505b624b17d3da163fd5b3f4260f99638851e561a3d6d85694a2505e3691af.json, library/a8166591591b0c9cc9af32be63499bb4a3805e96bf08910bb444094b4fbf7d8f.json, library/b79cd5c20bf10e78ad867b017fab3438f16165a6813b2d793289f03b611684fa.json, library/baeb5625878e6ded20abe62f2d5a04f276e803b17315b6e8e877be2a46b264fd.json, library/c219284bdf4b32ec8ad2236f770f67e7cb13a4e7c9473a51a383e1e96898dbb1.json, library/c435dd8449f881155c3cb5a302e170e70f3f9250deaffa13f87822dbdd8569e0.json, library/cc5eaee096bc7a9e4af30a6b4e318bfdf1cce3249674be57440ed30521905a72.json, library/cd05f11d4e9c6a53bd76ac239b62e9a6fae14f54d81e1236cdf6b7d6f889f356.json, library/d2cc26181019bc1c2f81a34a31c256419824ad2005cc3582c7f9cad26700cf38.json, library/d9cffb225931da7af3201742205f400042798eb5386aaec2cd383219be270996.json, library/e0cc7a18e5131288fc3c2d718a5995f64ccf0d1842051258ba5526cbeffc1799.json, library/e920a7c3ff9071f656c0dc0b2d299f3af66b2dd4552239004d7f2f5cf0f961d8.json, library/ebe5037d11733e638e5aa1b0e950ea017c52b4c84a6300b3695c5e9b7652cab9.json, library/ec480fffc0c9110291c04cb18ab03ed1cf9c49a14cd303b56fff86d771a7ff10.json, library/f2af20b6b7343907a615b28b974043d5d3d63569d4896b7ab008e851b13ecced.json, mir/modulation/PORT-NOTES.md, mir/modulation/modwindow/ACCEPTANCE.md, mir/modulation/modwindow/MANIFEST.md, mir/modulation/modwindow/host-contract.md, mir/shell/about.js, mir/shell/accent.js, mir/shell/assets/LOGO-SOURCE.txt, mir/shell/menubar.js, mir/shell/notebook.js, mir/shell/wordmark.js, skin-notes.md, smoke.html, sw.js.
+PASS the library: 38 catalogue rows, each record on disk under its own sha-256 (11532460 B, none precached); library/ holds nothing else; the catalogue is precached.
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: lab/ loads a file that the precache does not hold — it will 404 offline:
+  lab/mir/app.js → ./shell/wordmark.js
+  lab/mir/app.js → ./shell/menubar.js
+  lab/mir/app.js → ./shell/accent.js
+  lab/mir/app.js → ./shell/notebook.js
+  lab/mir/app.js → ./shell/about.js
+  lab/mir/info/layer.js → ../shell/notebook.js
+  lab/mir/notes/face.js → ../shell/notebook.js
+  lab/mir/shell/gui.js → ./accent.js
+  lab/mir/shell/gui.js → ./about.js
+  lab/mir/shell/transport.js → ./wordmark.js
+  lab/mir/window/workspaces.js → ../shell/wordmark.js
++ actual - expected
+
++ [
++   'lab/mir/app.js → ./shell/wordmark.js',
++   'lab/mir/app.js → ./shell/menubar.js',
++   'lab/mir/app.js → ./shell/accent.js',
++   'lab/mir/app.js → ./shell/notebook.js',
++   'lab/mir/app.js → ./shell/about.js',
++   'lab/mir/info/layer.js → ../shell/notebook.js',
++   'lab/mir/notes/face.js → ../shell/notebook.js',
++   'lab/mir/shell/gui.js → ./accent.js',
++   'lab/mir/shell/gui.js → ./about.js',
++   'lab/mir/shell/transport.js → ./wordmark.js',
++   'lab/mir/window/workspaces.js → ../shell/wordmark.js'
++ ]
+- []
+
+    at file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a476e9d83319e9efd/.tmp/canary/tests/pwa.test.mjs:442:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'lab/mir/app.js → ./shell/wordmark.js',
+    'lab/mir/app.js → ./shell/menubar.js',
+    'lab/mir/app.js → ./shell/accent.js',
+    'lab/mir/app.js → ./shell/notebook.js',
+    'lab/mir/app.js → ./shell/about.js',
+    'lab/mir/info/layer.js → ../shell/notebook.js',
+    'lab/mir/notes/face.js → ../shell/notebook.js',
+    'lab/mir/shell/gui.js → ./accent.js',
+    'lab/mir/shell/gui.js → ./about.js',
+    'lab/mir/shell/transport.js → ./wordmark.js',
+    'lab/mir/window/workspaces.js → ../shell/wordmark.js'
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.22.1
