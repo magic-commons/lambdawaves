@@ -338,3 +338,22 @@ The **677** total (672 at Sol's writing + 5 from S4b's header, folded in by the 
 - The survey targets `alpha.22`; the canary and read pin target `alpha.23` [MEASURED release identifiers: `survey/MIR-1.5.md:3`, `docs/MIR-1.5-CANARY.md:80–82`, pin guide heading **175** [MEASURED]]. Its **7 node reds** [MEASURED: `PLAN.md:449–455`] are not evidence that absent migration APIs passed; guides/defaults/source tests are the named seams. No live servers, browsers or performance tests were run by this writer.
 - S4b landed after Sol's writing; brief 4's library half now carries the built header and filter (folded in by the integrator from `S4b-BUILD.md`; its 5-line count is S4b's). S1 also calls curated ionisation energies unchecked (`S1-NAMES-BUILD.md:54–55` [MEASURED]); a future `E` label must retain that provenance rather than upgrading it to verified physics.
 - The S5 job brief requests a commit and vault mirror (`BRIEF-S5-KIT-BRIEFS.md:45–48` [MEASURED]). The current task instruction supersedes that: this work writes only this new file, with no mirror, staging, commit, push, tag or existing-file edit.
+
+## Amendments from the 0.5.0 A0 spike, pass 2 (2026-10-08, the integrator; source `research/release-0.5.0/CANARY-A0.md` PASS 2)
+
+- **Brief 7, re-worded.** `viewChanged()` is already coalesced (0.12 ms/s [MEASURED]); the cost that put D1 in 0.5.1 is the layer's ~63 DOM writes a
+  frame while the camera turns — +43 ms/s at 8 bare labels over 0 (+115 %), two thirds of it style recalc (13.4) and paint/commit (14.1), the seat
+  chooser and leaders only +3.2 [MEASURED]. The brief therefore asks for **no per-frame DOM writes while the camera turns**: one paint a frame, a
+  compositor-only transform per body, no per-frame attribute or path churn, no skip-identical reads on the hot path. `setCheap(on)` as written
+  does not reach this number.
+- **No ink brief (PROVISIONAL).** Bare text reads in 12 of 12 pictures (hydrogen, benzene HOMO, C₆₀ HOMO × light/dark × frost); `mix-blend-mode:
+  difference` on the layer root is never better and is worse in the six light pictures [MEASURED pictures, the reading is the measurer's]. Josh judges
+  the 24 PNGs in `research/release-0.5.0/canary-a0/legibility/`. If INVERT is ever built, the shade goes under `difference`.
+- **Brief 18 (new, confirmed): label avoidance of the kit's windows.** At `setShift(±1, 0)` 2 of 3 of water's nuclear labels meet a rack column;
+  centred, two overlap a rack by 30–35 px [MEASURED with `uiSpace()` and with `getBoundingClientRect`, identical counts]. Labels should avoid the
+  painted space the way blocks do. **Second line:** a block placed beside its subject is not clamped to the free stage — at ±1 it lands under the
+  rack despite `avoid` [MEASURED]; the clamp belongs in the same brief.
+- **Brief 19 (new, 0.5.x): images in blocks.** The sanitiser strips `src` from a data-URL `<img>` and removes an inline `<svg>` [MEASURED]; a
+  same-origin image file survives and loads. D4 is text only in 0.5.0; the brief leans on same-origin files.
+- **The WebKit road.** `tools/check-app.mjs` cannot judge λWAVES until the adoption wires `createDescribe`, and WebKit lacks 12 system libraries
+  on the build machine [MEASURED errors in PASS 2]; the kit's probe (PASS 2 §5's block) is the 0.5.0 road for the M5.
