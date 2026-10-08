@@ -95,6 +95,27 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
    are written (contract · laws · commits in order · acceptance · hand-off · harness). Then **cut 0.4.0-alpha** on Josh's word.
 5. Memory of outcomes goes into REPORT.md waves and this file's §2 (update it as stages land; it is the baton).
 
+## 3½ · THE TWO-ACCOUNT LAW (Josh, 2026-10-07, verbatim)
+
+> Two Claude accounts work on this project. Before editing, identify your current directory, branch, assigned
+> task, and worktree. Use separate worktrees and branches for simultaneous implementation. Coordinate through
+> written reports; do not assume you can see or control the other account's conversation or workers.
+>
+> Stay inside your assigned worktree when editing and running Git commands. Report your worktree path, branch,
+> commits, tests, blockers, and next step in every handoff. Preserve unfinished work, and do not remove
+> another agent's worktree. Let one designated agent integrate changes.
+>
+> When blocked, report the exact error and command. Avoid repeatedly creating replacement worktrees.
+
+How it is applied here: **the designated integrator for `release-0.4.0` is Claude Yan** (this Major Session's Major
+Agent, worktree `optimization-2026-09-24`) until this file says otherwise. An agent of the OTHER Major Session takes a
+stage from §3, works in its own worktree and branch (`worktree-<name>`), and hands off by a written report at
+`research/release-0.4.0/handoffs/<YYYY-MM-DD>-<who>-<what>.md` committed on its branch, stating: worktree path · branch ·
+commits (sha + title) · tests run with counts · blockers (exact error + command) · next step. The integrator merges from
+its own worktree (`git merge <branch>`), never by running git in another agent's worktree. A worktree is never removed by
+anyone but Josh. An agent cut off mid-task (the session limit resets at a fixed hour) is RESUMED in its own worktree,
+not replaced: its branch and its uncommitted files are the work.
+
 ## 4 · How Josh works (the standing laws — every one has cost us before)
 
 - **Never edit `lab/mir/**` or `lab/fonts/**`** (adopted MIR; `tests/mir-manifest.test.mjs`). A kit need is a brief to the
