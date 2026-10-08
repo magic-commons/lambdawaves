@@ -27,7 +27,8 @@ assert.equal(M.macroOf(macro.id).value, .4);
 // Folding the rail does not rebuild or repurpose the depth seat.
 /* 0.5.0 A10 · the canary's red 6: Shift is the KIT's fine gear, read from the adopted kit, never a pinned .709.  MIR 1.5's
    bindSliderKeys steps .01·setKnobLaw().keyFine (an eighth); 1.4.3's steps a flat .001 and does not read the law.  So the
-   step is measured: a finer and constant gear, and — where it follows the law (turn the law, step again) — exactly .01·keyFine. */
+   step is measured: a finer and constant gear — where it follows the law (turn the law, step again) exactly .01·keyFine, and
+   where it does not, 1.4's own flat .001.  On 1.4.3 the second branch runs; on 1.5 the first, with no second edit. */
 const law = setKnobLaw();
 const shiftStep = () => { const v = M.macroOf(macro.id).masterDepth; key(seat, 'ArrowDown', { shiftKey: true }); return v - M.macroOf(macro.id).masterDepth; };
 const fine = shiftStep();
@@ -36,6 +37,7 @@ assert.ok(Math.abs(shiftStep() - fine) < 1e-12, 'and a constant one');
 setKnobLaw({ keyFine: law.keyFine / 2 }); const turned = shiftStep(); setKnobLaw({ keyFine: law.keyFine });
 const follows = Math.abs(turned - fine) > 1e-12;
 if (follows) assert.ok(Math.abs(fine - .01 * law.keyFine) < 1e-12 && Math.abs(turned - .005 * law.keyFine) < 1e-12, 'Shift steps .01·keyFine of the law in force');
+else assert.ok(Math.abs(fine - .001) < 1e-12, 'a kit whose slider does not read the law (1.4.x) keeps its own flat Shift step, .001');
 assert.equal(M.macroOf(macro.id).value, .4);
 seat = build(); // Reopening binds to current model values, not stale captured values.
 key(seat, 'End'); key(seat, 'ArrowUp');

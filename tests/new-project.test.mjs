@@ -64,7 +64,7 @@ const mod = P.modulation;
 assert.equal(mod.v, M.MOD_STATE_V);
 assert.deepEqual(mod.sources.map((s) => [s.id, s.kind]), [['s1', 'lfo'], ['s2', 'audio']]);
 assert.equal(mod.sources[0].shapeMode, 'curve'); assert.equal(mod.sources[0].wave, 'sine');
-assert.deepEqual(mod.routes, []); assert.equal(mod.transport.bpm, 60);
+assert.deepEqual(mod.routes, []); assert.equal(mod.transport.bpm, M.BPM_DEFAULT);   // 0.5.0 A10: the kit's own default (60 on 1.4, 30 on 1.5), not a pinned number
 assert.equal(M.deserialize(mod), true);
 assert.equal(M.scalarOutputId('s2', 'level'), 's2:level');
 assert.deepEqual(M.macroList().map((m) => [m.name, m.named, m.sourceId]), [['LFO', true, 's1'], ['AUDIO', true, M.scalarOutputId('s2', 'level')]]);

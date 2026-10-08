@@ -138,8 +138,12 @@ const SHIP_EXTRA = [
 const STAGED = new Set([...((readFileSync(path.join(ROOT, 'tests', 'wiring.test.mjs'), 'utf8').match(/\nconst ALLOWLIST = \[\n([\s\S]*?)\n\];/) || [])[1] || '').matchAll(/\{ file: 'lab\/([^']+)'/g)].map((m) => m[1]));
 /* 0.4.0 S4a: …and a file under one of sw.js §1b's DATA roots (library/: the orbital records, deployed, never precached), READ from sw.js. */
 const DATA = JSON.parse((readFileSync(path.join(LAB, 'sw.js'), 'utf8').match(/\nconst DATA = (\[[^\]]*\]);/) || [, '[]'])[1].replace(/'/g, '"'));
+/* 0.5.0 A11: …and sw.js §1b's SKIP paths (kit data an adoption brings: copied to dist/ like every lab/ file, never precached), READ
+   from sw.js with tests/pwa.test.mjs's own pattern (`*` one segment, a trailing `/` a folder). */
+const KIT_SKIP = JSON.parse((readFileSync(path.join(LAB, 'sw.js'), 'utf8').match(/\nconst SKIP = (\[[^\]]*\]);/) || [, '[]'])[1].replace(/'/g, '"'))
+  .map((p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + (p.endsWith('/') ? '' : '$')));
 const NOT_PRECACHED = (labRel) =>
-  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel) || DATA.some((d) => labRel.startsWith(d));
+  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel) || DATA.some((d) => labRel.startsWith(d)) || KIT_SKIP.some((r) => r.test(labRel));
 
 /* Deploy-only files: correctly absent from the precache, because they are not in lab/ at all. */
 const DEPLOY_ONLY = new Set(['_headers', '_redirects', 'robots.txt', ...SHIP_EXTRA.map(([f]) => at(f))]);
