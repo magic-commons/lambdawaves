@@ -4427,3 +4427,114 @@ with `keyboard-window`'s count **not recorded in the hand-off**. Final builder l
 **36,280 → 36,244 (−36)**; per-seam final line deltas are **not recorded in the hand-off**. Integrator
 merged A5+A6 and A9–A11: **36,198 (−82)** (PLAN). The builder kept `.tmp/canary-after/` for A0;
 this documentation work leaves it there.
+
+### wave 190: A1 THE SETTINGS ADAPTER — `lab/settings-store.js`, the blob's one door
+
+`lambdawaves.q0.settings` was written by hand in eight places of `rack.js`: `saveSettings`, the remembered microphone inside the
+modulation port's `device.write`, `saveLayout`, `forgetLayout`, the ABOUT and NOTES sizes in `nbSaveSize`, the photosensitivity
+`remember`, and FORGET. Seven wrote `localStorage.setItem(SETTINGS_KEY, JSON.stringify(…))` in their own try; FORGET removed it.
+They are one module now, `lab/settings-store.js` (27 lines): `SETTINGS_KEY` and `createSettingsStore(storage?)` → `{ key, read,
+write(obj), remove }`, with storage resolved lazily inside the try. `readSettings()` is `settingsStore.read()`. The seven writes
+are `settingsStore.write(…)`, each building the same object in the same key order: `saveSettings`' whole object (its outer try
+kept, because building it can throw) and six `{ ...S, x }` merges. FORGET is `settingsStore.remove()`. No other `rack.js` line
+touches the key. The store is `settingsStore`, not `settings`, because the capture block has its own `const settings`.
+
+The header holds the split the kit will read as data. `WORKSPACE` is the arrangement inside the blob: `closed`, `layouts`, `nbW/nbH`,
+`abW/abH`, `modwin`, `phoneTr`, `phoneRack`. MIR 1.5's `createRack({ store })` takes it at C3. Every other key is PREFERENCE, for
+`createGui` at C2. `nativeLayout` stays PREFERENCE, as STATE-SCOPES and the byte-identical gates have it; the design hand-off had
+listed it under WORKSPACE. `FAMILIES` names the twelve localStorage keys that stay outside the blob, each with its owner and scope:
+`NB_KEY/NB_TITLE/NB_SUBTITLE`, `PJ_KEY` and `LS_EXP/LS_PRES` (PROJECT), `lambdawaves.q0.keys`, `lw.keyboard.position.v1`,
+`lw.lean.v1` and `lw-window-info` (PREFERENCE), `lambdawaves.q0.library` (LIBRARY), and the kit's `lambdawaves.q0.modpresets`.
+STATE-SCOPES' table does not list the presets; no project or link writes them, so the store reads them as PREFERENCE.
+
+The probe is `tools/settings-probe.mjs`. It uses one fresh Firefox profile and six scenes: the boot, WAVE DANCER, WATER, BENZENE
+and N₂ through their PROJECTS buttons, then NEW. Around each open it takes three whole-`localStorage` snapshots: after a
+`saveSettings`, after the open, and after a second `saveSettings`. It classifies every changed key by the store's own tables. It
+also round-trips the blob: save → B1, reload → B2, save → B3. It ran on this tree and on `1e1a4f8` served from `git archive`, both
+on 8763/5233. The two dumps agree in **48 of 48 fields** (every blob, every diff, every verdict), so the adapter changes no byte.
+No open moved a PREFERENCE or LIBRARY key. The opens wrote only `lambdawaves.q0.projects`, the three notebook keys and the blob's
+`modwin` / `nbW` / `nbH`. The round trip is byte-identical on 5 of 6 scenes. WAVE DANCER's is RED **on both trees**: after the
+reload, `modwin.modes` keeps `s1` and drops `s3`, its AUDIO source. That is a WORKSPACE key, a pre-existing loss that belongs to
+the modulation window (C4).
+
+`cat lab/*.js | wc -l`: **36,198 → 36,227 (+29)**: `settings-store.js` +27, `rack.js` +1 (the import), `sw.js` +1 (the
+precache entry). Gates: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0; `node tools/new-project.mjs --check` in
+step (16,889 B). Browser on 8763/5233, one at a time: `new-project` **8 PASS**, `official-defaults-palette` **3 PASS**. No
+`__LW` member was renamed or removed: `LW.settings`, `LW.saveSettings` and `LW.applySettings` read through the same functions.
+
+### wave 191: A8 THE CAMERA PORT AND THE BINDINGS TABLE — the panel's object, and the stage's hands as data
+
+**The port.** `createCameraLaw` now builds `port`, the object MIR 1.5's CAMERA panel takes (`panels/camera.js`
+`createCameraPanel({ port })`). It returns `port` beside its old members.
+- `get(id)` / `set(id, v)` cover twelve ids: `mode`, `zoom`, `fov`, `panX`, `panY`, `yaw`, `pitch`, `autoRotate`, `spin`,
+  `friction`, `drag` and `fling`. Any other id reads `undefined`, so the kit hides `roll`, `wheel`, `inertia` and the 2-D ids.
+- `set` is a hand's road (brief 2: "a hand calls setShift"):
+  - `mode` → `setCamMode`, `zoom` → `setDist`, `fov` → `setFov`.
+  - `panX` / `panY` → the one `setShift`.
+  - `yaw` / `pitch` → `modHand(observer.*)`, else a turn by the difference.
+  - The camera feel goes to the camera's own setters.
+- `subscribe(fn)` returns its unsubscribe.
+- `angle: 'rad'`, `turn(dy, dp)` (`orbitBy` + PRESENT) and `home()` (RESET VIEW).
+- `modIds` maps yaw / pitch / zoom / fov / panX / panY onto the saved `observer.yaw` / `pitch` / `dist` / `fov` / `panx` /
+  `pany` routes, so no saved route changes its name.
+- `ranges` are in the law's units, from CAM:
+  - ZOOM is a distance, 1.2–8, home 3.3, log, ×. The kit's nearness unit is not forced onto `obs.dist`.
+  - FOV 0.25–1.2, home 0.6. YAW 0–2π, home 0.65. PITCH ±1.52, home 0.38. PAN ±1, home 0.
+  - SPIN 0.02–2, home 0.25. DRAG 0.2–8, home 1, step 0.01, not log.
+  - FRICTION 0–12, home 1, step 0.05. FLING 0–2, home 1, step 0.01.
+- Brief 1's three hands, `setShift`, `zoomAt` and `panBy`, are members too.
+
+**The notices.** The law's `present` edge is wrapped once: every PRESENT the law asks for also tells the subscribers, and so does
+`syncCamUI`. `cameraStep`, `camLevelStep`, `stepKeyOrbit` and the returned `orbitBy` are wrapped by `told`, which tells when the
+result is truthy. A drag, a fling, a level or a key orbit is therefore a notice, and a still camera tells nobody. `loop()` is not
+edited: it calls the same names. CAMERA MOTION's CONTROL, ZOOM, FOV, PAN X, PAN Y and PAN HOME now call the port. They reach the
+same functions with the same arguments, so C1's kit panel can take the port whole. RESET VIEW's line, which A9 rewrote, is
+untouched. `rack.js` stops destructuring `setShift`, because nothing else there called it.
+
+**The bindings.** `lab/stage-gestures.js` exports `STAGE_BINDINGS`, one frozen data table, and `bindStageGestures` reads it
+through a `bindings` option that defaults to it. The rows are today's bindings (R5-C1):
+- pointer: button 0; `{ altKey: true, ctrlKey: false }` slides; otherwise the instrument's special, otherwise orbit; `shiftKey`
+  is fine (× `law.FINE`).
+- wheel: 16 px a line, a page the canvas' height, distance × 1.1^(px / 100), at the cursor.
+- pinch: two fingers slide and zoom at their centroid.
+- tap: 300 ms and 8 px.
+- double tap: within the law's `TAP_MS` (`ms: null`; CAM says 320) and 40 px resets.
+- double-click: resets.
+- nudge: 0.05.
+
+Every literal the code had is now a read of its row, so a binding Josh changes is a row edit.
+
+**The tests.** `tests/stage-gestures.test.mjs` gains one block. The table must equal today's values and be frozen. An edited row
+must be what the stage does: a 150 ms double tap refuses a 200 ms pair, `{ shiftKey: true }` slides on Shift, and the wheel at the
+centre anchors at `[0, 0]` with a line of 16 px. `tests/camera-shift.test.mjs` §7 judges the port:
+- the twelve ids read the law's own numbers, and `roll` and `wheel` read undefined;
+- PAN X/Y are `setShift`; a routed YAW moves its base and not the pose;
+- PITCH turns and tells;
+- a moving step tells, and a still one does not;
+- HOME is RESET VIEW, and an unsubscribed listener hears nothing;
+- `modIds` and `ranges` are as above.
+
+`cat lab/*.js | wc -l`: **36,227 → 36,260 (+33)**: `camera-law.js` +20, `stage-gestures.js` +13, `rack.js` ±0. Gates:
+`node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0 (`camera-shift` 7 PASS, `stage-gestures` 2 PASS);
+`node tools/new-project.mjs --check` in step. No `writeView` change, so no digest lock. No `__LW` member was renamed or removed:
+`LW.camera`, `LW.orbitBy`, `LW.orbit` and `LW.setCamMode` read the same functions.
+
+**The quartet, its own last commit.** The four Alt+Arrow rows keep A9's ids, groups, shorts and chords (`panLeft`, `panRight`,
+`panUp`, `panDown`, `KG.C`). Each now steps `STAGE_BINDINGS.nudge * f`, where it had `0.05 * f`. `rack.js` imports the table
+beside `bindStageGestures`. If it conflicts at the merge, take A9's lines and put `STAGE_BINDINGS.nudge` where `0.05` stood.
+`lab/*.js` is unchanged at **36,260**. Gates on this final tree: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0;
+`new-project --check` in step. The browser suites ran on 8763/5233, one at a time, 4 s apart, all green on their first run, so
+none needed a re-run alone:
+
+| suite | result |
+|---|---|
+| `camera-shift` | **11/11 GREEN**: Alt+→, Alt+↑, Shift+Alt+↑ still step 0.05, 0.05, 0.0125; PAN X/Y/HOME through the port |
+| `render-regressions` | **2 PASS** |
+| `new-project` | **8 PASS** |
+| `history` | **39 PASS** |
+| `official-defaults-palette` | **3 PASS** |
+| `input` | **13 PASS** |
+| `keyboard-window` | **GREEN** (the ACTIONS rows) |
+
+`tools/settings-probe.mjs` ran again on the final tree and agrees with `1e1a4f8` in 48 of 48 fields. Stage A's ledger for
+A1 + A8 is **36,198 → 36,260 (+62)**.

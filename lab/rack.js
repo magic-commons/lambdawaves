@@ -1,4 +1,4 @@
-import { bindStageGestures } from './stage-gestures.js';
+import { bindStageGestures, STAGE_BINDINGS } from './stage-gestures.js';
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
@@ -77,6 +77,7 @@ import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 13
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
+import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
@@ -122,7 +123,7 @@ export async function boot(dom) {
      came back {}.  A silent {} is exactly the shape of "this browser has never said anything", so the palette this
      browser HAD chosen was read as no choice at all and the default won every reload.  One declaration, at the top,
      above the first reader. */
-  const SETTINGS_KEY = 'lambdawaves.q0.settings';
+  const settingsStore = createSettingsStore();   // 0.5.0 A1: `lambdawaves.q0.settings` through lab/settings-store.js (read / write / remove)
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
   /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
      (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
@@ -167,7 +168,7 @@ export async function boot(dom) {
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
-  function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
+  function readSettings() { return settingsStore.read(); }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
     if (!settingsLoaded) return;
@@ -190,7 +191,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -223,7 +224,7 @@ export async function boot(dom) {
            the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
            TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) }));
+        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) });
     } catch (e) {}
   }
 
@@ -1146,7 +1147,7 @@ export async function boot(dom) {
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, setShift, panBy } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, ui, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
   const rack = dom.rack;
 
@@ -1197,7 +1198,7 @@ export async function boot(dom) {
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
       onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); location.reload(); } }).root);
 
 
     const rc = el('div', 'row tight', gi);
@@ -1413,13 +1414,13 @@ export async function boot(dom) {
     const rInv = el('div', 'row tight', wPal.body);
     ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     rInv.appendChild(ui.invertSw.root);
-    const gc = group(wCam.body, 'CAMERA MOTION');
+    const gc = group(wCam.body, 'CAMERA MOTION');   // 0.5.0 A8: CONTROL, ZOOM, FOV and the PAN row call the camera port, which C1's kit panel takes whole
     /* WAVE 54 (board #43): the mode comes FIRST, because it decides what every dial below it turns. */
     const r4a = el('div', 'row tight', gc);
     ui.camSeg = seg({ label: 'CONTROL', value: 'free', options: [
       { id: 'turntable', label: 'TURNTABLE', title: 'Orbit with a level horizon' },
       { id: 'free', label: 'FREE', title: 'Use unrestricted camera rotation with roll' }],
-      onChange: (v) => setCamMode(v) });
+      onChange: (v) => cameraPort.set('mode', v) });
     r4a.appendChild(ui.camSeg.root);
     const r4 = el('div', 'row', gc);
     ui.spinSw = sw({ label: 'AUTO-ROTATE', value: false, onChange: (v) => { camera.autoRotate = v; camera.wake(); } });
@@ -1445,10 +1446,10 @@ export async function boot(dom) {
     ui.flingK.root.title = 'Set released camera speed; double-click to reset';
     r4h.appendChild(ui.flingK.root);
     const r4b = el('div', 'row tight', gc);
-    ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => setDist(v) });
+    ui.zoomK = knob({ label: 'ZOOM', min: CAM.DIST[0], max: CAM.DIST[1], value: CAM.HOME.dist, log: true, fmt: (v) => '×' + v.toFixed(2), onInput: (v) => cameraPort.set('zoom', v) });
     ui.zoomK.root.title = 'Camera distance. Use the wheel or pinch on the stage.';
     r4b.appendChild(ui.zoomK.root);
-    ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => setFov(v) });
+    ui.fovK = knob({ label: 'FOV', min: CAM.FOV[0], max: CAM.FOV[1], value: CAM.HOME.fov, fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => cameraPort.set('fov', v) });
     ui.fovK.root.title = 'Vertical field of view';
     r4b.appendChild(ui.fovK.root);
     r4b.appendChild(trig({ label: 'RESET VIEW', title: 'Restore the default camera pose and motion', onFire: () => resetView() }).root).dataset.keyAction = 'camReset';
@@ -1456,9 +1457,9 @@ export async function boot(dom) {
     /* 0.4.0 S2 · THE LENS SHIFT: where the pivot sits on the frame (obs.shift, NDC), the picture sliding under a still pivot —
        the targets the kit's XY pad (0.5.0) will drive; every hand comes through setShift (lab/camera-law.js) */
     const r4p = el('div', 'row tight', gc), panFmt = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
-    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => setShift(v, obs.shift[1]) });
-    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => setShift(obs.shift[0], v) });
-    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => setShift(0, 0) }).root);
+    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panX', v) });
+    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => cameraPort.set('panY', v) });
+    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => cameraPort.setShift(0, 0) }).root);
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Alt-drag or two fingers slide the picture; the molecule stays the pivot. Double-click, double-tap, or RESET VIEW restores the camera.';
 
     /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────
@@ -2601,7 +2602,7 @@ export async function boot(dom) {
          pick it again — a device HANDLE, never audio (lab/audio.js's header says why that distinction matters). */
       device: { read: () => readSettings().audioDevice || '',
         write: (id) => { const S = readSettings();
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, audioDevice: id })); } catch (_) {} } },
+          settingsStore.write({ ...S, audioDevice: id }); } },
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
       armed: () => modArm, arm: (on) => setModArm(!!on) }));
@@ -3635,11 +3636,11 @@ export async function boot(dom) {
       if (!n) { for (let i = 1; i <= LAYOUT_SLOTS && !n; i++) if (!m[i]) n = i; }
       if (!n) { let oldest = 1; for (let i = 2; i <= LAYOUT_SLOTS; i++) if ((m[i].at || 0) < (m[oldest].at || 0)) oldest = i; n = oldest; }   // full: the oldest goes
       m[n] = layout.captureLayout();
-      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, layouts: m })); } catch (e) {}
+      settingsStore.write({ ...S, layouts: m });
       return n;
     },
     loadLayout(slot) { const m = readSettings().layouts || {}; return m[slot] ? layout.applyLayout(m[slot]) : false; },
-    forgetLayout(slot) { const S = readSettings(), m = S.layouts || {}; delete m[slot]; try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, layouts: m })); } catch (e) {} return true; },
+    forgetLayout(slot) { const S = readSettings(), m = S.layouts || {}; delete m[slot]; settingsStore.write({ ...S, layouts: m }); return true; },
     resetLayout() {
       layout.dockAll(false);                                                 // wave 55: "reopen and unfold every window" now also means put every one of them back on a rack
       for (const d of document.querySelectorAll('.dev')) { d.classList.remove('closed', 'off'); if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } }
@@ -4098,10 +4099,10 @@ export async function boot(dom) {
         const S = readSettings();
         if (nb.dataset.face === 'about') {
           if (S.abW === w && S.abH === h) return;
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, abW: w, abH: h })); } catch (e) {}
+          settingsStore.write({ ...S, abW: w, abH: h });
         } else {
           if (S.nbW === w && S.nbH === h) return;
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, nbW: w, nbH: h })); } catch (e) {}
+          settingsStore.write({ ...S, nbW: w, nbH: h });
         }
       }
       { const grip = nb.querySelector('.nb-grip');
@@ -4521,10 +4522,10 @@ export async function boot(dom) {
     { id: 'dollyZoomIn', group: KG.C, short: 'dolly zoom in', label: 'dolly zoom in (size held)', key: 'KeyQ', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(-1, 1) },
     { id: 'dollyZoomOut', group: KG.C, short: 'dolly zoom out', label: 'dolly zoom out (size held)', key: 'KeyE', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(1, 1) },
     { id: 'camReset', group: KG.C, short: 'cam reset', label: 'reset the camera', key: 'KeyR', run: () => resetView() },
-    { id: 'panLeft', group: KG.C, short: 'pan left', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-0.05 * f, 0) },   // 0.4.0 S2: the lens shift, 0.05 of the half-frame a press
-    { id: 'panRight', group: KG.C, short: 'pan right', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(0.05 * f, 0) },
-    { id: 'panUp', group: KG.C, short: 'pan up', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, 0.05 * f) },
-    { id: 'panDown', group: KG.C, short: 'pan down', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -0.05 * f) },
+    { id: 'panLeft', group: KG.C, short: 'pan left', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-STAGE_BINDINGS.nudge * f, 0) },   // 0.4.0 S2: the lens shift, the bindings' nudge (0.05) of the half-frame a press
+    { id: 'panRight', group: KG.C, short: 'pan right', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(STAGE_BINDINGS.nudge * f, 0) },
+    { id: 'panUp', group: KG.C, short: 'pan up', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, STAGE_BINDINGS.nudge * f) },
+    { id: 'panDown', group: KG.C, short: 'pan down', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -STAGE_BINDINGS.nudge * f) },
     { id: 'axisX', group: KG.S, short: 'axis X', label: 'rotation axis x', key: 'KeyX', run: () => setAxis('x') },
     { id: 'axisY', group: KG.S, short: 'axis Y', label: 'rotation axis y', key: 'KeyY', run: () => setAxis('y') },
     { id: 'axisZ', group: KG.S, short: 'axis Z', label: 'rotation axis z', key: 'KeyZ', run: () => setAxis('z') },
@@ -5467,7 +5468,7 @@ export async function boot(dom) {
   const warning = (() => {
     const pane = document.getElementById('warnPane');
     const seen = () => readSettings().warned === true;
-    const remember = (v) => { const S = readSettings(); try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, warned: v })); } catch (e) {} };
+    const remember = (v) => { const S = readSettings(); settingsStore.write({ ...S, warned: v }); };
     let open = false, prevFocus = null, offKey = null;
     const accepted = [];                          // wave 57: what may only happen once the notice has been read
     function dismiss() {

@@ -3,9 +3,21 @@
 // 0.4.0 S2: the wheel and the pinch zoom at the cursor / the fingers' centroid
 // (zoomAt, in uv), and two fingers or an Alt-drag slide the picture (pan, in uv:
 // one pixel of drag moves the picture one pixel).
+// 0.5.0 A8 · THE BINDINGS are ONE data table (R5-C1: today's stand, and a change is a row edit; brief 1 takes it as
+// configuration).  bindStageGestures reads it through `bindings`; rack.js' Alt+Arrow quartet reads `nudge`.
+const frozen = (o) => Object.freeze(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v && typeof v === 'object' ? frozen(v) : v])));
+export const STAGE_BINDINGS = frozen({
+  pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' }, // one finger or the mouse: these modifiers slide; else the instrument's special; else orbit (`fine` × law.FINE)
+  wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: true }, // CSS px a line (a page: null = the canvas' height); distance × base^(px / per)
+  pinch: { slide: true, atCentroid: true }, // two fingers slide the picture and zoom at their centroid
+  tap: { ms: 300, px: 8 }, // a touch tap is shorter and stiller than this
+  doubleTap: { ms: null, px: 40 }, // a second tap this soon (null: the law's TAP_MS) and this near resets the view
+  dblclick: true, // a double-click resets the view
+  nudge: 0.05, // Alt+Arrows: the lens shift a press, of the half-frame (Shift × the key's fine factor)
+});
 export function bindStageGestures(canvas, {
   camera, travel, law, getDistance, zoomAt, pan, orbitBy, resetView,
-  setDragging, present, startSpecial, hover, now = () => performance.now(),
+  setDragging, present, startSpecial, hover, now = () => performance.now(), bindings: B = STAGE_BINDINGS,
 }) {
   const points = new Map(), history = [];
   let special = null, pinch = null, down = null, lastTap = null, fine = false;
@@ -13,6 +25,7 @@ export function bindStageGestures(canvas, {
   canvas.tabIndex = -1; // Pointer focus owns the stage's Tab-to-raise shortcut.
   const uv = (x, y, r) => [2 * (x - r.left) / r.width - 1, 1 - 2 * (y - r.top) / r.height];
   const centroid = () => { const [a, b] = points.values(); return [(a.x + b.x) / 2, (a.y + b.y) / 2]; };
+  const held = (e, m) => Object.keys(m).every((k) => !!e[k] === m[k]), FINE = B.pointer.fine;
   function slide(e) { // Alt-drag: the lens shift, never the instrument's specials.
     const r = canvas.getBoundingClientRect(); let x = e.clientX, y = e.clientY;
     return { move(m) { pan(2 * (m.clientX - x) / r.width, -2 * (m.clientY - y) / r.height); x = m.clientX; y = m.clientY; } };
@@ -46,10 +59,10 @@ export function bindStageGestures(canvas, {
     if (Math.hypot(wy, wp) >= law.REST) camera.fling(wy, wp);
   }
   function pointerDown(e) {
-    if (e.button !== 0 || special || points.has(e.pointerId) || points.size === 2) return;
+    if (e.button !== B.pointer.button || special || points.has(e.pointerId) || points.size === 2) return;
     try { canvas.focus({ preventScroll: true }); } catch (_) {}
     if (!points.size) {
-      const action = e.altKey && !e.ctrlKey ? slide(e) : startSpecial(e);
+      const action = held(e, B.pointer.slide) ? slide(e) : startSpecial(e);
       if (action) {
         e.preventDefault(); lastTap = null;
         special = { id: e.pointerId, action }; capture(e.pointerId); return;
@@ -58,7 +71,7 @@ export function bindStageGestures(canvas, {
     capture(e.pointerId);
     points.set(e.pointerId, { x: e.clientX, y: e.clientY });
     setDragging(true); canvas.classList.add('drag');
-    camera.stop(); fine = e.shiftKey;
+    camera.stop(); fine = e[FINE];
     down = points.size === 1 ? { x: e.clientX, y: e.clientY, t: now() } : null;
     if (points.size > 1) lastTap = null;
     rebase();
@@ -70,9 +83,9 @@ export function bindStageGestures(canvas, {
     }
     const p = points.get(e.pointerId);
     if (!p) { if (!points.size) hover(e); return; }
-    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= 8) down = null;
+    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= B.tap.px) down = null;
     if (points.size === 1) {
-      if (fine !== e.shiftKey) { fine = e.shiftKey; history.length = 0; }
+      if (fine !== e[FINE]) { fine = e[FINE]; history.length = 0; }
       const gain = law.SENS * camera.dragGain * (fine ? law.FINE : 1);
       orbitBy(-(e.clientX - p.x) * gain, (e.clientY - p.y) * gain);
       remember();
@@ -81,8 +94,8 @@ export function bindStageGestures(canvas, {
     p.x = e.clientX; p.y = e.clientY;
     if (pinch) {
       const [a, b] = points.values(), span = Math.hypot(a.x - b.x, a.y - b.y), c1 = centroid(), r = pinch.box;
-      pan(2 * (c1[0] - c0[0]) / r.width, -2 * (c1[1] - c0[1]) / r.height); // Two fingers slide the picture, then zoom about where they are.
-      if (pinch.span > 0) zoomAt(uv(c1[0], c1[1], r), pinch.distance * pinch.span / Math.max(1, span));
+      if (B.pinch.slide) pan(2 * (c1[0] - c0[0]) / r.width, -2 * (c1[1] - c0[1]) / r.height); // Two fingers slide the picture, then zoom about where they are.
+      if (pinch.span > 0) zoomAt(B.pinch.atCentroid ? uv(c1[0], c1[1], r) : [0, 0], pinch.distance * pinch.span / Math.max(1, span));
       else rebase(); // Two contacts can initially have the same coordinates.
     }
     present();
@@ -101,11 +114,11 @@ export function bindStageGestures(canvas, {
     setDragging(false); canvas.classList.remove('drag');
     if (!canceled) fling();
     rebase();
-    const t = now(), tap = !canceled && e.pointerType === 'touch' && down && t - down.t < 300
-      && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8;
+    const t = now(), tap = !canceled && e.pointerType === 'touch' && down && t - down.t < B.tap.ms
+      && Math.hypot(e.clientX - down.x, e.clientY - down.y) < B.tap.px;
     down = null;
     if (tap) {
-      if (lastTap && t - lastTap.t < law.TAP_MS && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+      if (lastTap && t - lastTap.t < (B.doubleTap.ms ?? law.TAP_MS) && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < B.doubleTap.px) {
         lastTap = null; resetView();
       } else lastTap = { t, x: e.clientX, y: e.clientY };
     } else lastTap = null;
@@ -122,10 +135,10 @@ export function bindStageGestures(canvas, {
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
     // WheelEvent deltaMode: pixels, lines (16 CSS px), or viewport pages.
-    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? canvas.clientHeight : 1;
-    zoomAt(uv(e.clientX, e.clientY, canvas.getBoundingClientRect()), getDistance() * Math.pow(1.1, e.deltaY * unit / 100));
+    const W = B.wheel, unit = e.deltaMode === 1 ? W.line : e.deltaMode === 2 ? (W.page ?? canvas.clientHeight) : 1;
+    zoomAt(W.atCursor ? uv(e.clientX, e.clientY, canvas.getBoundingClientRect()) : [0, 0], getDistance() * Math.pow(W.base, e.deltaY * unit / W.per));
   }, { passive: false });
-  canvas.addEventListener('dblclick', resetView);
+  if (B.dblclick) canvas.addEventListener('dblclick', resetView);
   win.addEventListener('blur', cancel);
   win.addEventListener('pagehide', cancel);
   doc.addEventListener('visibilitychange', () => { if (doc.hidden) cancel(); });
