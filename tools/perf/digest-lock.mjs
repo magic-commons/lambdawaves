@@ -191,7 +191,9 @@ async function lines() {
   return out;
 }
 window.__DL = { state, styles, lines, base, STATES: Object.keys(STATES),
-  meta: () => ({ obs: JSON.parse(JSON.stringify(LW.obs)), canvas: [F.canvas.width, F.canvas.height], dpr: devicePixelRatio, format: F.format,
+  /* 0.4.0 S2: the pose gained \`shift\`; a zero shift IS the pre-S2 pose (lensShift writes nothing), so it is read as absent and the
+     base fixtures' meta still matches — a non-zero shift is still an input difference */
+  meta: () => ({ obs: (({ shift, ...o }) => (shift && (shift[0] || shift[1]) ? { ...o, shift } : o))(JSON.parse(JSON.stringify(LW.obs))), canvas: [F.canvas.width, F.canvas.height], dpr: devicePixelRatio, format: F.format,
     gamut: F.gamut, adapter: F.adapterInfo, theme: LW.theme, lightUI: LW.mat.lightUI, palette: !!LW.mat.paletteOn, ua: navigator.userAgent, build: LW.build }) };
 return { ok: true, states: Object.keys(STATES) };
 `;
