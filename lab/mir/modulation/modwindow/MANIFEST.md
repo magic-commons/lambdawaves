@@ -8,6 +8,16 @@ later revisions are in `CHANGELOG.md`, not here. **BASINS-era references:** `ani
 MANDELBROT project as of 2026-09-06; `vid/` and the EXTRACT files (`modwindow-0N-*.css`,
 §-numbers) were the extraction's staging artefacts. None of them is in MIR.
 
+**1.5.1.** The window's CONTROLLER is in the kit now: `mir/modulation/window.js` (λWAVES' `lab/modwindow.js`,
+taken whole, its chip rail, drag, dock and seating replaced by `mir/window/`) and `mir/modulation/bind.js` (the app
+seam SOLEIL and NEBULA each wrote). This builder still builds and does not wire; `buildChipRail` stays for callers
+that build a rail themselves, and the controller uses `window/rail.js` instead. The builder's words go through `t()` /
+`label()` (J10 below). See `docs/MODULATION.md`.
+
+| # | change | why |
+|---|---|---|
+| J10 | Every word the tree writes goes through the kit's `label()` / `ariaLabel()` / `t()`; the kind and audio-output names come from word tables, not `toUpperCase()`; the captions OUT, TRIG IN, + MACRO, + DEVICE are `data-cap` (the sheets draw `content: attr(data-cap)`); `COPY.hint` is one literal. | docs/LANGUAGES.md: a translated label must keep its handler and its look, and case is the string's. |
+
 `modwindow.css` and `modwindow.js` began as BASINS' modulation window. The table
 records the import transformation and the deliberate λWAVES revisions that now
 ship with it.

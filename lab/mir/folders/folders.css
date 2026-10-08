@@ -1,0 +1,231 @@
+/* folders/folders.css — FOLDERS: the gallery inside the one window (folders/folders.js).
+ *
+ * Harvested from BASINS REDUX app/mir-plugins/files/save.css (HEAD b7eb63e, read 2026-10-01): the layout, the tiles
+ * with their pictures, the explorer, the one context box.  The window, its rail, its pointer and its glass are
+ * window/window.css: the pane is a `.glass` and `.mir-win` takes the pointer by its CLASS, so nothing here names an id
+ * (BASINS' `:root:root:root:root #savewin … { pointer-events: auto }` give-back is not needed and not carried).
+ * The RENDER half of save.css stays with the app (RENDER becomes its own window, ruling 5).
+ *
+ * INTENT (docs/INTENT.md), where BASINS broke it:
+ *   · the toolbar's resting buttons are kit triggers, RAISED ("press me"); BASINS drew them as wells (save.css:55);
+ *   · a tile at rest is flat (a hairline round its picture), not a sunk well (save.css:101);
+ *   · the selected tile is CHOSEN: the ON face and its thin rim, the name in accent A — not an accent ring on a well;
+ *   · pressed is the sink and the small scale, not a brightness flash (save.css:126);
+ *   · a carried tile is one height up (the floating window's shadow) with an accent ring; the folders it can land in
+ *     wear the kit's proximity guide (core.css .mir-prox), dotted and brightening, solid when release would land;
+ *   · the "save this first?" box loses its literal colours and its `!important`: a well with an accent rim.
+ * Tokens only; component tokens are declared on `.mir-folders` and read where they are used.  Kit layer. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md): the window's, and the carried tile's
+   (which lives in <body>, outside the window, so it carries its own); the rules below read names only. */
+.mir-folders {
+  --folders-thumb-ground: hsl(0 0% 0%);              /* behind a picture while it loads: BASINS' black (1.5.0-alpha.10) */
+  --folders-over-ink: hsl(0 0% 100%);                /* words and glyphs drawn on a picture */
+  --folders-over-scrim: hsl(0 0% 0% / .8);           /* the gradient that keeps those words legible */
+  --folders-over-scrim-soft: hsl(0 0% 0% / .35);     /* a button's face on a picture */
+  --folders-cover-scrim: hsl(0 0% 0% / .65);         /* a folder's cover picture, dimmed under its name (BASINS' .65) */
+  --folders-inset: 13px;                             /* the gallery's inset in the pane: BASINS' 12 px panel padding + its sheet's 1 px edge */
+  --folders-parallax: 6px;                           /* how far a tile's picture follows the pointer */
+  --folders-zoom: 1.08;                              /* the picture's rest scale inside its tile … */
+  --folders-zoom-hot: 1.13;                          /* … and hovered or chosen */
+}
+.mir-folders { --folders-gap: 6px; --folders-tool-gap: 4px; }   /* BASINS' SAVE: 6 px between the wrap's rows, the fields and the grid; 4 px between tools (1.5.0-alpha.11) */
+/* 1.5.0-alpha.12 · the rest of BASINS' SAVE (its save.css, kept until now): the tight 4 px step (the projects, the
+   components), the components' 6 px inset and 8 px labels, the one box's accent rims, and the ask's solid pane */
+.mir-folders {
+  --folders-gap-tight: 4px;
+  --folders-parts-pad: 6px;
+  --folders-part-size: var(--fs-micro);
+  --folders-part-track: .04em;
+  --folders-box-pad: 10px;
+  --folders-menu-rim: color-mix(in srgb, var(--acc) 40%, transparent);        /* the menu: a well with a .40 accent rim */
+  --folders-ask-rim: color-mix(in srgb, var(--acc) 55%, transparent);         /* the ask: a solid tinted pane with a .55 rim … */
+  --folders-ask-fill: color-mix(in srgb, hsl(var(--glass-hue) 18% 22% / .98) 88%, var(--acc) 12%);
+  --folders-ask-ink: hsl(204 23% 96%);                                         /* … its own light ink (#f2f5f7), in either theme */
+  --folders-ask-ink-soft: hsl(0 0% 88%);
+  --folders-ask-shadow: var(--glass-shadow);
+  --folders-page-glyph: 24px;
+}
+body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, hsl(var(--glass-hue) 20% 31% / .98) 92%, var(--acc) 8%); }
+.sv-ghost { --folders-thumb-ground: hsl(0 0% 0%); --folders-carry-scale: .5; --folders-ghost-fade: .92; }
+/* ── end of the values ── */
+
+/* ── the body: a column whose explorer is the one scroller ─────────────────────────────────────────────────── */
+.mir-folders .mir-win-body { display: flex; flex-direction: column; gap: var(--sp-2); overflow: hidden; padding: var(--folders-inset); }
+.mir-folders .fo-gallery { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+/* the panels (BASINS' GALLERY and RENDER): one shown at a time; the gallery is a column whose explorer scrolls, any
+   other panel scrolls itself */
+.mir-folders .mir-win-panel { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.mir-folders .mir-win-panel[hidden] { display: none; }
+.mir-folders .mir-win-panel:not([data-panel="gallery"]) { display: block; overflow: hidden auto; overscroll-behavior: contain; touch-action: pan-y; }
+.mir-folders .mir-win-panel:not([data-panel="gallery"])[hidden] { display: none; }
+.mir-folders .fo-head { display: flex; align-items: baseline; gap: var(--sp-3); min-height: 18px; padding: 0 var(--sp-1); touch-action: none; }
+.mir-folders .fo-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: var(--w-semi) var(--fs-small)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
+.mir-folders .fo-mark { flex: 0 0 auto; font: var(--w-semi) var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--acc); }
+.mir-folders .fo-head[data-dirty] .fo-current { color: var(--acc); }
+.mir-folders .fo-status { flex: 0 0 auto; min-height: 14px; padding: 0 var(--sp-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: var(--w-med) var(--fs-micro)/1.5 var(--font-ui); color: var(--fg-soft); touch-action: none; }
+.mir-folders .fo-status[data-tone="warn"] { color: var(--bad); }
+
+.mir-folders .sv-wrap { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: var(--folders-gap); container-type: inline-size; }
+
+/* ── the verbs: kit triggers, raised at rest, one row (two rows when the window is narrow) ───────────────────── */
+.mir-folders .sv-toolbar { display: grid; grid-template-columns: repeat(var(--sv-verbs, 6), minmax(0, 1fr)); gap: var(--folders-tool-gap); }   /* the gap sets the tool's width: six tools at 4 px = BASINS' 55 px */
+@container (max-width: 285px) { .mir-folders .sv-toolbar { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.mir-folders .sv-toolbar :is(.trig, .sv-options) { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  width: 100%; min-width: 0; height: 44px; min-height: 44px; padding: 0; }
+/* the options disclosure is BASINS' plain button: it wears a trigger's relief here (raised at rest, the ON face open) */
+.mir-folders .sv-toolbar .sv-options { border: 1px solid var(--glass-hairline); border-radius: var(--r-md); background: var(--glass-well);   /* BASINS' ground and hairline; raised, not a well (INTENT) */ box-shadow: var(--relief-raise, var(--neu-raise));
+  color: var(--fg-soft); cursor: pointer; transition: scale var(--motion-micro) var(--ease-out); }
+.mir-folders .sv-toolbar .sv-options:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-folders .sv-toolbar .sv-options:is(:active, .press) { scale: var(--state-press-scale, .96); }
+.mir-folders .sv-toolbar .sv-options[aria-expanded="true"] { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--acc); }
+.mir-folders .sv-toolbar .sv-options:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-folders .sv-toolbar .sv-options svg { width: 20px; height: 20px; }
+.mir-folders .sv-toolbar .trig .trig-l { display: flex; align-items: center; justify-content: center; line-height: 1; }
+.mir-folders .sv-toolbar .trig svg { width: 20px; height: 20px; }
+.mir-folders .sv-toolbar [aria-busy="true"] svg { opacity: .45; }
+
+/* ── components (when the app names any) ─────────────────────────────────────────────────────────────────── */
+.mir-folders .sv-parts { display: flex; flex-direction: column; gap: var(--folders-gap-tight); padding: var(--folders-parts-pad);
+  border-radius: var(--r-md); border: 1px solid var(--glass-hairline); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.mir-folders .sv-parts[hidden] { display: none; }
+.mir-folders .sv-partgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--folders-gap-tight); }
+.mir-folders .sv-part.sw { box-sizing: border-box; width: 100%; min-width: 0; justify-content: center; padding: 0 var(--folders-gap-tight); }
+.mir-folders .sv-part .sw-led { flex: 0 0 7px; }
+.mir-folders .sv-part .sw-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--folders-part-size); letter-spacing: var(--folders-part-track); }
+
+/* ── name and destination: fields are wells ──────────────────────────────────────────────────────────────── */
+.mir-folders .sv-fields { display: flex; gap: var(--folders-gap); }
+.mir-folders .sv-field { display: flex; flex: 1 1 0; min-width: 0; align-items: center; }
+.mir-folders .sv-flabel { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.mir-folders .sv-input { flex: 1 1 auto; min-width: 0; min-height: 40px; box-sizing: border-box; padding: 0 var(--sp-4); border: 1px solid var(--glass-hairline);
+  border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); font: var(--w-med) var(--fs-base)/1.2 var(--font-ui); }
+.mir-folders .sv-input::placeholder { color: var(--ink-faint); }
+.mir-folders .sv-input:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-folders .sv-count { flex: 0 0 16px; display: flex; align-items: center; justify-content: flex-end; padding: 0; margin-right: -9px; touch-action: none;   /* BASINS' geometry: flush to the explorer's inset */
+  font: var(--w-semi) var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
+
+/* ── the explorer ─────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-folders .sv-explorer { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; min-width: 0; padding: 9px 9px 0; border-radius: var(--r-lg); }   /* BASINS' geometry */
+.mir-folders .sv-explorer-scroll { flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--glass-hairline) transparent; touch-action: pan-y; }
+.mir-folders .sv-grid { display: flex; flex-direction: column; gap: var(--folders-gap); }
+.mir-folders .sv-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.mir-folders .sv-crumb { max-width: 100%; white-space: normal; overflow-wrap: anywhere; min-height: 30px; padding: 4px 6px; border: 0;
+  border-radius: var(--r-sm); background: none; color: var(--acc); font: var(--w-semi) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wide); cursor: pointer; }
+.mir-folders .sv-crumb:hover:not(:disabled) { background: var(--state-hover, var(--glass-raise)); }
+.mir-folders .sv-crumb:disabled { color: var(--fg-soft); cursor: default; }
+.mir-folders .sv-crumb:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-folders .sv-crumb-sep { color: var(--ink-faint); font-size: var(--fs-micro); }
+.mir-folders .sv-folder-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr)); gap: var(--folders-gap); touch-action: pan-y; }
+
+/* a tile and a folder at rest are FLAT: a hairline round the picture, no relief */
+.mir-folders :is(.sv-folder, .sv-card) { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+  border-radius: var(--r-lg); border: 1px solid var(--glass-hairline); background: var(--glass-well); }   /* the well's GROUND, as BASINS' (no inset relief: a tile is pressed, not a well, INTENT); GLASS faces clear it */
+.mir-folders .sv-folder { border-radius: var(--r-md); }
+.mir-folders .sv-projects { display: flex; flex-direction: column; gap: var(--folders-gap-tight); min-width: 0; }
+.mir-folders .sv-projects-heading { display: flex; align-items: center; gap: var(--sp-2); min-height: 18px; padding: 0 2px; touch-action: none;
+  font: var(--w-semi) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
+.mir-folders .sv-projects-glyph { display: flex; align-items: center; color: var(--acc); }
+.mir-folders .sv-project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: var(--folders-gap); }
+
+/* CHOSEN: the ON face and its thin rim, the name in accent A (INTENT) */
+.mir-folders .sv-card.selected { border-color: transparent; background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
+.mir-folders .sv-card.selected .sv-name { color: var(--acc); }
+/* the open project: a thin accent-B line under its picture (it belongs to now, a relationship) */
+.mir-folders .sv-card[data-current] { border-bottom-color: var(--acc2); }
+/* carried: the tile stays where it was, faded; the ghost travels */
+.mir-folders .sv-card.lifted { opacity: var(--state-disabled, .38); }
+
+.mir-folders .sv-shot { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; touch-action: pan-y;
+  border: 0; border-radius: 0; background: var(--folders-thumb-ground); cursor: pointer; transition: scale var(--motion-micro) var(--ease-out); }
+.mir-folders .sv-shot::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: var(--folders-thumb-ground) var(--sv-thumb, none) center / cover no-repeat;
+  translate: calc(var(--pxs, 0) * var(--folders-parallax) * -1) calc(var(--pys, 0) * var(--folders-parallax) * -1);
+  scale: var(--folders-zoom); transition: scale var(--motion-structural) var(--ease-out), translate var(--motion-structural) var(--ease-out); }
+.mir-folders .sv-card:is(.selected, :hover, :focus-within) .sv-shot::before { scale: var(--folders-zoom-hot); }
+.mir-folders .sv-shot:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
+.mir-folders :is(.sv-shot, .sv-folder-shot):is(:active, .press) { scale: var(--state-press-scale, .96); }
+
+.mir-folders .sv-folder-shot { position: relative; display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; padding: 8px;
+  border: 0; border-radius: 0; background: transparent; color: var(--fg-soft); cursor: pointer; isolation: isolate; transition: scale var(--motion-micro) var(--ease-out); }
+.mir-folders .sv-folder-shot:hover { background: var(--state-hover, var(--glass-raise)); }
+.mir-folders .sv-folder-shot:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
+.mir-folders .sv-folder.has-cover .sv-folder-shot { color: var(--folders-over-ink); }
+/* the cover is BASINS': the picture under the wash, as the button's own inline background-image (gallery.js) */
+.mir-folders .sv-folder.has-cover .sv-folder-shot { background-color: var(--glass-well);   /* BASINS' folder button ground (.22), not the picture's black (1.5.0-alpha.11) */
+  background-position: center; background-size: cover; background-repeat: no-repeat; }
+.mir-folders .sv-folder-glyph { flex: 0 0 auto; display: flex; color: var(--acc); }
+.mir-folders .sv-folder-files { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; color: var(--ink-faint); font: var(--w-semi) var(--fs-micro)/1 var(--font-mono); }
+.mir-folders .sv-folder.has-cover .sv-folder-files { color: var(--folders-over-ink); }
+.mir-folders .sv-folder-name { min-width: 0; font: var(--w-semi) var(--fs-small)/1.2 var(--font-ui); letter-spacing: var(--tr-wide); white-space: normal; overflow-wrap: anywhere; text-align: start; }
+
+/* the chosen tile's name and verbs, drawn on its picture */
+.mir-folders .sv-meta { position: absolute; top: 0; left: 0; right: 0; display: none; flex-direction: column; gap: 1px; min-width: 0;
+  padding: var(--sp-3) var(--sp-3) var(--sp-4); background: linear-gradient(var(--folders-over-scrim), transparent); pointer-events: none; }
+.mir-folders .sv-name { min-width: 0; font: var(--w-semi) var(--fs-base)/1.25 var(--font-ui); color: var(--folders-over-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mir-folders .sv-acts { position: absolute; bottom: 0; left: 0; right: 0; display: none; gap: 2px; padding: var(--sp-5) var(--sp-1) var(--sp-1);
+  background: linear-gradient(transparent, var(--folders-over-scrim)); pointer-events: none; }
+.mir-folders :is(.sv-card.selected, .sv-card:focus-within) :is(.sv-meta, .sv-acts) { display: flex; }
+.mir-folders .sv-acts button { flex: 1 1 0; min-width: 0; min-height: 36px; padding: 0; border: 0; border-radius: var(--r-sm);
+  background: var(--folders-over-scrim-soft); color: var(--folders-over-ink); pointer-events: auto;
+  display: inline-flex; align-items: center; justify-content: center; font: var(--w-semi) var(--fs-lead)/1 var(--font-ui); cursor: pointer; }
+.mir-folders .sv-acts button:hover { background: var(--state-hover, var(--glass-raise)); }
+.mir-folders .sv-acts button:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -2px; }
+.mir-folders .sv-acts .sv-del.armed { color: var(--bad); font: var(--w-heavy) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wide); }
+.mir-folders .sv-inline { width: 100%; min-height: 28px; padding: 0 var(--sp-1); pointer-events: auto; }
+.mir-folders .sv-empty { grid-column: 1 / -1; padding: var(--sp-4) var(--sp-1); font: var(--w-regular) var(--fs-small)/1.5 var(--font-ui); color: var(--dim); }
+@media (pointer: coarse) {
+  .mir-folders .sv-acts button { min-height: 44px; }
+  .mir-folders :is(.sv-input, .sv-part.sw, .sv-crumb) { min-height: 44px; }
+}
+
+/* ── the one box: menus, questions, refusals (a well) ────────────────────────────────────────────────────── */
+.mir-folders .sv-context { display: flex; flex-direction: column; gap: var(--folders-gap); padding: var(--folders-box-pad); border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border: 1px solid var(--folders-menu-rim); }
+.mir-folders .sv-context[hidden] { display: none; }
+.mir-folders .sv-context-title { font: var(--w-semi) var(--fs-small)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
+.mir-folders .sv-context-label { font: var(--w-semi) var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
+.mir-folders .sv-context-text { font: var(--w-regular) var(--fs-small)/1.5 var(--font-ui); color: var(--fg-soft); }
+.mir-folders .sv-context-row { display: flex; flex-wrap: wrap; gap: var(--folders-gap); }
+/* the ask ("save this first?") is not a well: BASINS' solid tinted pane at pane height, a .55 accent rim, its own ink */
+/* THE HAND (1.5.0-alpha.19): it floats over the explorer at the place it used to push down (gallery.js sets its top), so
+   opening or cancelling it moves nothing under it — before, ROOT and the tiles jumped 108 px */
+.mir-folders .sv-context.sv-ask { position: absolute; left: 0; right: 0; z-index: 3; border-color: var(--folders-ask-rim); padding-inline-end: 40px;
+  background: var(--folders-ask-fill); box-shadow: var(--folders-ask-shadow); --fg: var(--folders-ask-ink); --fg-soft: var(--folders-ask-ink-soft); }
+.mir-folders .sv-ask-close { position: absolute; top: var(--folders-gap); right: var(--folders-gap); width: 30px; height: 30px; padding: 0; border: 0; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center; background: transparent; color: var(--fg-soft); cursor: pointer; }
+.mir-folders .sv-ask-close:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-folders .sv-ask-close:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-folders .sv-ask .sv-context-row { justify-content: center; }
+.mir-folders .sv-move .sv-input { flex: 1 1 140px; }
+.mir-folders .sv-act.trig { flex: 1 1 auto; min-height: 40px; }
+.mir-folders .sv-moveto .sv-act.trig { flex: 0 1 auto; }
+.mir-folders .sv-primary.trig .trig-l { color: var(--acc); }
+.mir-folders :is(.sv-danger, .armed).trig .trig-l { color: var(--bad); }
+.mir-folders .sv-foot { display: flex; flex-direction: column; gap: var(--sp-1); padding-top: 8px; border-top: 1px solid var(--glass-hairline); }
+.mir-folders .sv-foot[hidden] { display: none; }
+
+/* a docked or paged gallery (an app's rack card): two columns, four rows a page */
+/* … and, as BASINS', a page RESERVES its four rows (the last page too), so the page buttons do not move; container
+   units follow the rack's width with no measuring (BASINS save.css) */
+.mir-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(var(--sv-page-rows, 4), auto); align-content: start;
+  min-height: calc(var(--sv-page-rows, 4) * ((100cqw - 24px) * .375 + 2px) + (var(--sv-page-rows, 4) - 1) * var(--folders-gap)); }
+.mir-folders .sv-paged .sv-card { align-self: start; }
+.mir-folders .sv-pages { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--folders-gap); margin-top: 8px; }
+.mir-folders .sv-pages button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--glass-hairline); border-radius: 50%; background: var(--glass-well);
+  color: var(--acc); font: var(--folders-page-glyph)/1 var(--font-ui); cursor: pointer; }   /* BASINS' page buttons: round wells */
+.mir-folders .sv-pages button > svg { display: block; width: 1em; height: 1em; margin: auto; pointer-events: none; }   /* the drawn chevron at the typed ‹ ›'s size */
+.mir-folders .sv-pages button:disabled { opacity: var(--state-disabled, .38); cursor: default; }
+.mir-folders .sv-page-label { text-align: center; color: var(--fg-soft); font: var(--w-semi) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); }
+
+/* ── the carried tile: one height up, an accent ring, under the hand (it lives in <body>, outside the window) ─ */
+.sv-ghost { position: fixed; left: 0; top: 0; z-index: var(--z-prox, 44); pointer-events: none; box-sizing: border-box;
+  border-radius: var(--r-lg); outline: 2px solid var(--acc); outline-offset: 0; opacity: var(--folders-ghost-fade);
+  background: var(--folders-thumb-ground) var(--sv-thumb, none) center / cover no-repeat;
+  box-shadow: var(--surface-shadow-float, var(--glass-shadow)); scale: var(--folders-carry-scale); }
+}

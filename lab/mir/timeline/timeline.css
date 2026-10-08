@@ -1,0 +1,384 @@
+/* timeline/timeline.css — THE TIMELINE PLUGIN'S SHEET (harvested from BASINS app/timeline-window.css as Josh last tuned it,
+ * branch basins-ui-fixes-2026-10-01, with app/readout.css, app/audio.css's clip rule and timeline-shortcuts.js's injected
+ * sheet, 2026-10-02).  Load it after the kit's sheets, mir/window/window.css and mir/shell/transport.css.
+ *
+ * THE LAW IT KEEPS: THE WINDOW IS CLEAR; ITS PANES ARE THE HOUSE'S GLASS.  As in BASINS, the TIMELINE window draws no pane
+ * of its own: the ruler, each lane and the two work bars are each a `.glass` pane (skin.css paints them in every seat —
+ * theme × card style × frost, the CORNERS and SHADOW settings), and this sheet lays them out.  The rail, its chips and the
+ * controls wear the modulation window's material through `data-mir-material="modulation"` (window.css), never a clone.
+ * What BASINS cloned from the modulation window (`.m2rail`, `.m2workbar`, `.m2pick` and kwin's rules, ~1,250 of them,
+ * fought with `!important` inside `@layer mir.timeline`) is gone: no `!important`, no `:root` ladder, no cloned rule.
+ * Every look value is a token in the block below (docs/SKINS.md): the rules read names only.  In `mir.kit.plugin.host`,
+ * as the modulation plugin's host sheet: it ranks above the house, and an app's plain rule beats it. */
+@layer mir.kit.plugin.host {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   @default: on the plugin's roots — the window, its popups and the shortcut sheet (values with no public var() in them) */
+.mir-timeline, .tl-pop, .tl-confirm, .readout-layer {
+  --tl-win-fill: transparent;                                  /* the window itself is clear (BASINS: its panes carry the glass) */
+  --tl-win-shadow: 0 0 0 0 transparent;
+  --tl-win-filter: none;
+  --tl-win-edge: 0;
+  --tl-win-r: 0;
+  --tl-pane-r: var(--surface-radius, var(--r-lg));             /* the ruler, the lanes and the tool bar: the house's corner (CORNERS reaches them, as in BASINS) */
+  --tl-surface-pad: 8px;                                       /* the surface's inset: the lanes end 8 px from the foot, as at the top (fix 6) */
+  --tl-lane-gap: 8px;                                          /* the work lane: the transport, then the one right bar */
+  --tl-bar-gap: 4px;
+  --tl-bar-h: 52px;                                            /* the tool bar is the transport's height (fix 8) */
+  --tl-bar-pad: 4px 8px;
+  --tl-bar-pad-corner: calc(var(--touch) - 4px);              /* the bar runs under the resize corner and keeps its last button clear (fix 5) */
+  --tl-bar-size: 9px;
+  --tl-action-h: 34px;                                         /* a tool button is the transport's work seat (fix 8): 34 × 34, radius 8 */
+  --tl-action-pad: 4px 8px;
+  --tl-action-r: 8px;
+  --tl-action-size: 9px;
+  --tl-action-track: .12em;
+  --tl-setting-h: 28px;
+  --tl-select-r: 6px;
+  --tl-select-pad: 0 22px 0 6px;
+  --tl-chevron: 4px;
+  --tl-chevron-w: 1.5px;
+  --tl-icon: 16px;
+  --tl-icon-min: 32px;
+  --tl-ruler-h: 32px;
+  --tl-measure-size: 9px;
+  --tl-measure-top: 5px;
+  --tl-measure-fade: .65;
+  --tl-measure-rule: 1px;
+  --tl-lane-min: 48px;
+  --tl-tick: color-mix(in srgb, currentColor 10%, transparent);      /* the measure ticks */
+  --tl-four-ink: color-mix(in srgb, currentColor 12%, transparent);  /* every fourth measure, the lane's full height */
+  --tl-tick-bevel-ink: hsl(var(--ink-contra, 0 0% 0%));             /* the ticks' shadow side: the ink's contrast (BASINS ink.css writes --ink-contra) */
+  --tl-bevel: color-mix(in srgb, var(--tl-tick-bevel-ink) 6%, transparent);
+  --tl-tab-name-size: 10px;
+  --tl-tab-name-narrow: 9px;
+  --tl-tab-name-weight: 600;
+  --tl-tab-name-track: .04em;
+  --tl-tab-shoulder-mix: 35%;
+  --tl-rim-light: color-mix(in srgb, white 70%, transparent);
+  --tl-rim-shade: color-mix(in srgb, var(--tl-tick-bevel-ink) 35%, transparent);
+  --tl-grip-w: 2px;
+  --tl-grip-r: 2px;
+  --tl-edge-w: 8px;
+  --tl-edge-touch: 14px;
+  --tl-trim-w: 12px;
+  --tl-curve-w: 2;
+  --tl-tension-w: 1.5;
+  --tl-point-hover: 1.35;
+  --tl-fade: 200ms;                                            /* the clip's fill */
+  --tl-quick: 120ms;                                           /* the points, the playhead's flag */
+  --tl-tab-t: 180ms;                                           /* the tab's tint and rim, the grips */
+  --tl-pop-t: 140ms;
+  --tl-ease: ease;
+  --tl-ease-spring: cubic-bezier(.2, .8, .2, 1);
+  --tl-playhead-w: 1.5px;
+  --tl-flag-w: 7px;                                            /* the playhead's flag: 14 × 10, its apex on the line at the strip's foot */
+  --tl-flag-h: 10px;
+  --tl-flag-top: 22px;
+  --tl-flag-left: -6.25px;
+  --tl-flag-hover: 1.3;
+  --tl-marquee-r: 3px;
+  --tl-status-size: 9px;
+  --tl-status-fade: .6;
+  --tl-status-left: 12px;
+  --tl-status-foot: 10px;
+  --tl-status-foot-bars: 72px;                                 /* with the work lane at the bottom, above it */
+  --tl-pop-pad: 8px;
+  --tl-pop-gap: 4px;
+  --tl-pop-min: 180px;
+  --tl-pop-title-size: 10px;
+  --tl-pop-title-track: .08em;
+  --tl-pop-trig-h: 32px;
+  --tl-pop-trig-size: 10px;
+  --tl-pop-row-gap: 8px;                                        /* a folded tool's row in ⋯'s list: icon, then word */
+  --tl-field-size: 9px;
+  --tl-field-gap: 6px;
+  --tl-input-r: 6px;
+  --tl-input-pad: 8px;
+  --tl-swatch: 20px;
+  --tl-color-w: 48px;
+  --tl-confirm-max: 220px;
+  --tl-confirm-pad: 12px;
+  --tl-confirm-size: 12px;
+  --tl-sheet-w: min(640px, calc(100vw - 16px));
+  --tl-sheet-cols: 150px 1fr 1fr;
+  --tl-sheet-section-track: .08em;
+  --tl-sheet-row-pad: 3px 4px;
+  --tl-sheet-stripe: hsl(0 0% 50% / .05);
+  --tl-sheet-key-weight: 600;
+  --tl-sheet-fade: .6;
+  --tl-sheet-note-fade: .65;
+  --tl-sheet-h: 60vh;
+  --tl-pattern-group: .04;                                     /* FL's alternating groups of four steps */
+  --tl-pattern-group-alt: .09;
+  --tl-pattern-off: .14;
+  --tl-pattern-lit: .88;
+  --tl-pattern-repeat: .5;
+  --tl-pattern-repeat-w: 1.5;
+  --rl-hover: .25;                                             /* the readout layer: dashed hairlines on hover, solid while held */
+  --rl-hover-tinted: .45;
+  --rl-dash: repeating-linear-gradient(to bottom, black 0 2px, transparent 2px 4px);
+  --rl-dash-x: repeating-linear-gradient(to right, black 0 2px, transparent 2px 4px);
+  --rl-track-mix: 75%;
+  --rl-track-track: .04em;
+  --rl-t: 100ms;
+}
+/* @light: the ticks' contrast ink is white on a light ground (BASINS ink.css) */
+:where(body[data-theme="light"]) :is(.mir-timeline, .tl-pop, .tl-confirm, .readout-layer) { --tl-tick-bevel-ink: hsl(var(--ink-contra, 0 0% 100%)); }
+/* @own: values that read a public ink or accent (--fg, --acc2), declared on the elements that paint them */
+.mir-timeline .tl-playhead {
+  --tl-playhead-glow: 0 0 8px color-mix(in srgb, var(--acc2) 70%, transparent), 0 0 18px color-mix(in srgb, var(--acc2) 35%, transparent);
+  --tl-playhead-glow-held: 0 0 6px color-mix(in srgb, var(--acc2) 65%, transparent);
+  --tl-tail-ink: color-mix(in srgb, var(--acc2) 22%, transparent);
+}
+.mir-timeline .tl-marquee { --tl-marquee-edge: color-mix(in srgb, var(--acc2) 65%, currentColor); --tl-marquee-fill: color-mix(in srgb, var(--acc2) 12%, transparent); }
+.mir-timeline .tl-range { --tl-range-fill: color-mix(in srgb, currentColor 12%, transparent); }
+.mir-timeline .tl-active { --tl-active-fill: color-mix(in srgb, var(--acc2) 9%, transparent); --tl-active-edge: color-mix(in srgb, var(--acc2) 35%, transparent); }   /* THE ACTIVE RANGE: a faint accent-B band (time) */
+.mir-timeline :is(.tl-clip, .tl-clip-title) { --tl-curve-ink: color-mix(in srgb, var(--tl-clip-tint) 65%, var(--fg)); }   /* the curve and its tab read one ink */
+.mir-timeline .tl-tab-base { --tl-tab-base-fill: color-mix(in srgb, hsl(var(--glass-tint) / 1) 25%, var(--tl-tick-bevel-ink)); }
+.mir-timeline .tl-tab-grad-top { --tl-tab-top: color-mix(in srgb, white var(--tl-tab-shoulder-mix), var(--tl-curve-ink)); }
+.mir-timeline :is(.tl-clip-title.selected .tl-tab-rim) { --tl-rim-selected: color-mix(in srgb, currentColor 32%, transparent); }
+.mir-timeline :is(.tl-clip-title:is(:hover, .held) .tl-tab-rim) { --tl-rim-held: color-mix(in srgb, currentColor 48%, transparent); }
+.mir-timeline .tl-edge:focus-visible { --tl-edge-focus: 1px solid var(--acc2); }
+.mir-timeline .tl-pane { --tl-beat-tick: color-mix(in srgb, currentColor 16%, transparent); --tl-beat-bevel: color-mix(in srgb, var(--tl-tick-bevel-ink) 8%, transparent); --tl-beat-height: 4px; }
+.mir-timeline .tl-select-wrap { --tl-chevron-fade: .7; }
+/* ── end of the values ── */
+
+/* ── THE WINDOW: clear; the surface fills it (BASINS: kwin's frame with its body unpadded) ── */
+.mir-win.mir-timeline { background: var(--tl-win-fill); box-shadow: var(--tl-win-shadow); backdrop-filter: var(--tl-win-filter); -webkit-backdrop-filter: var(--tl-win-filter); border: var(--tl-win-edge) none; border-radius: var(--tl-win-r); }
+/* the panes: the house's glass, at the house's corner */
+.mir-timeline :is(.tl-toolbar, .tl-ruler, .tl-pane) { border-radius: var(--tl-pane-r); }
+.mir-timeline > .mir-win-body { padding: 0; overflow: visible; height: 100%; }
+.mir-timeline .timeline-surface { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; box-sizing: border-box; padding: var(--tl-surface-pad);
+  gap: 0; overflow: visible; container-type: inline-size; container-name: timeline; pointer-events: auto; }
+.mir-timeline .timeline-surface:focus { outline: none; }
+
+/* ── THE RESIZE CORNER: BASINS' timeline corner, a touch-sized target with an 8 px L at its corner; docked at the bottom
+   it is the top-right one, turned (the window grows upward) ── */
+.mir-win.mir-timeline .mir-win-resize { width: var(--touch); height: var(--touch); right: 0; bottom: 0; background-image: none; opacity: 1; cursor: nwse-resize; }
+.mir-win.mir-timeline .mir-win-resize::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px;
+  border-right: var(--tl-grip-w) solid var(--fg-soft); border-bottom: var(--tl-grip-w) solid var(--fg-soft); border-radius: 0 0 var(--tl-grip-r) 0; }
+.mir-win.mir-timeline[data-dock="bottom"] .mir-win-resize { top: 0; bottom: auto; cursor: nesw-resize; }
+.mir-win.mir-timeline[data-dock="bottom"] .mir-win-resize::after { top: 8px; bottom: auto; transform: rotate(-90deg); }
+
+/* ── THE WORK LANE (Josh, 2026-10-01): the transport is the left bar and hugs the left; EDIT … ACTIVE · ⋯ are ONE right bar
+   that hugs the right and reaches the resize corner; the only flexible space is between them ── */
+.mir-timeline .tl-worklane { display: flex; align-items: flex-start; gap: var(--tl-lane-gap); flex: 0 0 auto; min-width: 0; margin-bottom: var(--tl-bar-gap); }
+.mir-timeline .tl-transport-host { display: flex; flex: 0 0 auto; min-width: 0; max-width: 100%; }
+.mir-timeline .tl-transport-host > .mir-transport { flex-shrink: 0; }
+/* ONE LINE, always (wave 19): the bar never wraps; editor.js folds the tools that do not fit, from the end, behind ⋯ */
+.mir-timeline .tl-toolbar { display: flex; align-items: center; gap: var(--tl-bar-gap); flex: 0 1 auto; flex-wrap: nowrap; min-width: 0; min-height: var(--tl-bar-h); height: auto; box-sizing: border-box;
+  padding: var(--tl-bar-pad); margin: 0 0 0 auto; font-size: var(--tl-bar-size); color: var(--fg-soft); color-scheme: dark; }
+.mir-timeline .tl-toolbar > * { flex: none; }
+:where(body[data-theme="light"]) .mir-timeline .tl-toolbar { color-scheme: light; }
+/* where the resize corner shares the bar's row (docked at the bottom with the lane on top, or floating with it below) */
+.mir-win.mir-timeline[data-dock="bottom"] .timeline-surface:not([data-work-lane="bottom"]) .tl-toolbar,
+.mir-win.mir-timeline:not([data-dock="bottom"]) .timeline-surface[data-work-lane="bottom"] .tl-toolbar { padding-right: var(--tl-bar-pad-corner); }
+.mir-timeline .timeline-surface[data-work-lane="bottom"] .tl-worklane { order: 2; margin: var(--tl-bar-gap) 0 0; }
+.mir-timeline .timeline-surface[data-work-lane="hidden"] .tl-worklane { display: none; }
+@container timeline (max-width: 760px) {
+  .mir-timeline .tl-worklane { flex-direction: column; gap: var(--tl-bar-gap); }
+  .mir-timeline .tl-transport-host { width: 100%; }
+  .mir-timeline .tl-toolbar { width: 100%; }
+}
+
+/* the bar's buttons: the kit's trig and sel faces (the GUI's CONTROL FACES paints them); this sheet owns their box */
+.mir-win.mir-timeline button.tl-action { box-sizing: border-box; min-height: var(--tl-action-h); height: var(--tl-action-h); padding: var(--tl-action-pad); border-radius: var(--tl-action-r);
+  font-size: var(--tl-action-size); letter-spacing: var(--tl-action-track); }
+.mir-win.mir-timeline .tl-toolbar .trig:not(.on) { color: var(--ink-key); }   /* BASINS: the bar's words are the key ink (.86), as the transport's */
+.mir-win.mir-timeline .tl-action.tl-icon { display: inline-flex; align-items: center; justify-content: center; min-width: var(--tl-icon-min); }
+.mir-win.mir-timeline .tl-action.tl-icon svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
+.mir-win.mir-timeline .tl-toolbar > .tl-folded { display: none; }   /* folded behind ⋯ (after the icon rule: it wins the tie) */
+.mir-timeline .tl-setting { display: flex; align-items: center; gap: var(--tl-bar-gap); padding: var(--tl-action-pad); height: var(--tl-setting-h); box-sizing: border-box; border-radius: var(--tl-action-r); white-space: nowrap; }
+.mir-timeline .tl-select-wrap { position: relative; display: inline-flex; align-items: center; flex: none; }
+/* THE KIT'S OWN CHOOSERS, never a native select (Josh, 2026-10-07, call 19): the scope is a SEGMENT at the tools' height (its
+   track 34 px: 28 px segments in the well's 2 px), and SNAP a compact STEPPER whose name wears the select's well and chevron —
+   its seat is its longest word (the stepper's own), so a choice moves nothing */
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b { min-height: var(--tl-setting-h); height: var(--tl-setting-h); font-size: var(--tl-action-size); letter-spacing: var(--tl-action-track); }
+.mir-timeline .tl-select-wrap .mir-step-name { min-width: 0; min-height: var(--tl-setting-h); height: var(--tl-setting-h); padding: var(--tl-select-pad); border-radius: var(--tl-select-r);
+  font-size: var(--tl-action-size); color: inherit; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.mir-timeline .tl-select-wrap::after { content: ''; position: absolute; right: 9px; top: 50%; width: var(--tl-chevron); height: var(--tl-chevron); border-right: var(--tl-chevron-w) solid currentColor; border-bottom: var(--tl-chevron-w) solid currentColor;
+  transform: translateY(-70%) rotate(45deg); pointer-events: none; opacity: var(--tl-chevron-fade); }
+@media (pointer: coarse) { .mir-win.mir-timeline .tl-toolbar :is(.tl-action, .tl-setting) { height: var(--touch); min-height: var(--touch); } }
+
+/* ── THE RULER AND THE LANES ── */
+.mir-timeline .tl-view { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; min-width: 0; overflow: hidden; gap: 2px; }
+.mir-timeline .tl-viewport { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.mir-timeline .tl-content { position: relative; min-height: 100%; }
+.mir-timeline .tl-ruler { position: relative; display: block; flex: none; width: 100%; min-width: 0; height: var(--tl-ruler-h); min-height: var(--tl-ruler-h); max-height: var(--tl-ruler-h); padding: 0; margin: 0;
+  touch-action: none; cursor: crosshair; overflow: hidden; }
+.mir-timeline .tl-ruler-ink { position: absolute; inset: 0 auto 0 0; pointer-events: none; }
+.mir-timeline .tl-measure { position: absolute; top: var(--tl-measure-top); font-size: var(--tl-measure-size); opacity: var(--tl-measure-fade); padding-left: 4px; border-left: var(--tl-measure-rule) solid currentColor; }
+.mir-timeline .tl-rows { position: relative; display: flex; flex-direction: column; gap: var(--tl-row-gap); }
+.mir-timeline .tl-row { position: relative; flex-shrink: 0; }
+.mir-timeline .tl-titleband { position: relative; height: var(--tl-tab-height); }
+.mir-timeline .tl-pane { position: relative; display: block; width: 100%; min-width: 0; height: var(--tl-lane-height); min-height: var(--tl-lane-min); max-height: none; padding: 0; margin: 0; flex: none; box-sizing: border-box; overflow: hidden; }
+.mir-timeline .tl-pane.clip-at-start { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.mir-timeline .tl-pane.clip-at-end { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.mir-timeline .tl-pane::after {
+  --tl-subdivision-ink: linear-gradient(transparent, transparent);
+  --tl-quarter-ink: var(--tl-beat-pattern);
+  --tl-measure-ink: repeating-linear-gradient(90deg, var(--tl-tick) 0 1px, var(--tl-bevel) 1px 2px, transparent 2px var(--tl-measure));
+  --tl-four-ink-rule: repeating-linear-gradient(90deg, var(--tl-four-ink) 0 1px, transparent 1px var(--tl-four-measures));
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    var(--tl-four-ink-rule) var(--tl-grid-origin) 0 / var(--tl-four-measures) 100% repeat-x,
+    var(--tl-measure-ink) var(--tl-grid-origin) 0 / var(--tl-measure) 10px repeat-x,
+    var(--tl-measure-ink) var(--tl-grid-origin) 100% / var(--tl-measure) 10px repeat-x,
+    var(--tl-quarter-ink) var(--tl-grid-origin) 0 / var(--tl-measure) var(--tl-beat-height) repeat-x,
+    var(--tl-quarter-ink) var(--tl-grid-origin) 100% / var(--tl-measure) var(--tl-beat-height) repeat-x,
+    var(--tl-subdivision-ink) var(--tl-grid-origin) 0 / var(--tl-measure) 2px repeat-x,
+    var(--tl-subdivision-ink) var(--tl-grid-origin) 100% / var(--tl-measure) 2px repeat-x;
+}
+.mir-timeline .tl-pane.subdivisions::after { --tl-subdivision-ink: var(--tl-subdivision-pattern); }
+.mir-timeline .tl-range { position: absolute; top: 0; height: var(--tl-ruler-h); background: var(--tl-range-fill); pointer-events: none; }
+.mir-timeline .tl-active { position: absolute; top: 0; height: var(--tl-ruler-h); box-sizing: border-box; background: var(--tl-active-fill); border-inline: 1px solid var(--tl-active-edge); pointer-events: none; }
+
+/* ── THE CLIPS: the curve alone (the body never highlights the track; all feedback is the curve and the tab) ── */
+.mir-timeline .tl-clip { position: absolute; height: 100%; top: 0; background: transparent; box-sizing: border-box; }
+.mir-timeline .tl-clip.muted { opacity: .35; }
+.mir-timeline .tl-clip.dormant { outline: 1px dashed currentColor; outline-offset: -2px; opacity: .5; }
+.mir-timeline .tl-clip svg { display: block; width: 100%; height: 100%; overflow: hidden; touch-action: none; }
+.mir-timeline .tl-step-mode .tl-clip svg, .mir-timeline .tl-step-mode :is(.tl-point, .tl-tension) { cursor: crosshair; }
+.mir-timeline .tl-fill { fill: var(--tl-clip-tint); opacity: .15; stroke: none; pointer-events: none; transition: opacity var(--tl-fade) var(--tl-ease); }
+.mir-timeline .tl-clip:is(.selected, :hover, .held) .tl-fill { opacity: .20; }
+.mir-timeline .tl-clip:is(.selected, :hover, .held) .tl-curve { filter: brightness(1.25); }
+.mir-timeline .tl-curve { stroke: var(--tl-curve-ink); stroke-width: var(--tl-curve-w); stroke-linecap: round; stroke-linejoin: round; }
+.mir-timeline :is(.tl-point, .tl-tension) { transform-box: fill-box; transform-origin: center; transition: transform var(--tl-quick) var(--tl-ease); }
+.mir-timeline :is(.tl-point, .tl-tension):hover { transform: scale(var(--tl-point-hover)); }
+.mir-timeline .tl-point { fill: var(--tl-curve-ink); stroke: none; cursor: move; }
+.mir-timeline .tl-point.selected { stroke: var(--fg); stroke-width: var(--tl-tension-w); r: 7; }
+.mir-timeline .tl-tension { fill: var(--glass-well); stroke: var(--tl-curve-ink); stroke-width: var(--tl-tension-w); cursor: ns-resize; }
+.mir-timeline .tl-clip-title { position: absolute; top: 0; height: var(--tl-tab-height); display: flex; align-items: center; gap: 2px; cursor: grab; touch-action: none; font-size: var(--tl-tab-name-size);
+  min-width: 0; padding: 1px 2px 0; box-sizing: border-box; isolation: isolate; -webkit-user-select: none; user-select: none; }
+.mir-timeline .tl-clip-title:active { cursor: grabbing; }
+.mir-timeline .tl-tab-shape { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; pointer-events: none; }
+.mir-timeline .tl-tab-base { fill: var(--tl-tab-base-fill); }
+/* bolder, fuller caps: a near-solid gradient of the curve's own ink over the theme base; the rim lights the top, darkens the foot */
+.mir-timeline .tl-tab-grad-top { stop-color: var(--tl-tab-top); }
+.mir-timeline .tl-tab-grad-foot { stop-color: var(--tl-curve-ink); }
+.mir-timeline .tl-tab-rim-top { stop-color: var(--tl-rim-light); }
+.mir-timeline .tl-tab-rim-foot { stop-color: var(--tl-rim-shade); }
+.mir-timeline .tl-tab-tint { opacity: .92; transition: opacity var(--tl-tab-t) var(--tl-ease-spring); }
+.mir-timeline .tl-tab-rim { fill: none; stroke-width: 1; transition: stroke var(--tl-tab-t) var(--tl-ease); }
+.mir-timeline .tl-clip-title.selected .tl-tab-tint { opacity: .96; }
+.mir-timeline .tl-clip-title.selected .tl-tab-rim { stroke: var(--tl-rim-selected); }
+.mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-tint { opacity: 1; }
+.mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-rim { stroke: var(--tl-rim-held); }
+.mir-timeline .tl-clip-title.held { z-index: 2; cursor: grabbing; }
+.mir-timeline .tl-clip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; pointer-events: none; font-weight: var(--tl-tab-name-weight); letter-spacing: var(--tl-tab-name-track); text-transform: uppercase; }
+.mir-timeline :is(.tl-trim, .tl-clip-more) { flex: none; border: 0; background: transparent; color: inherit; padding: 0; height: var(--tl-tab-height); width: var(--tl-trim-w); }
+.mir-timeline .tl-trim { cursor: ew-resize; touch-action: none; }
+.mir-timeline .tl-trim::after { content: ''; display: block; height: 6px; width: var(--tl-grip-w); margin: auto; border-radius: var(--tl-grip-r); background: currentColor; opacity: .55; }
+.mir-timeline .tl-clip-more { width: 16px; cursor: pointer; }
+.mir-timeline .tl-trim::after, .mir-timeline .tl-clip-more { transition: opacity var(--tl-tab-t) var(--tl-ease); }
+.mir-timeline .tl-clip-title:not(:hover):not(.held):not(:focus-within) .tl-clip-more { opacity: .45; }
+.mir-timeline .tl-clip-title:is(:hover, .held) .tl-trim::after { opacity: .85; }
+.mir-timeline .tl-clip-title.narrow { gap: 0; padding-inline: 0; }
+.mir-timeline .tl-clip-title.narrow .tl-clip-name { font-size: var(--tl-tab-name-narrow); }
+.mir-timeline .tl-clip-title.narrow .tl-trim { width: 6px; }
+.mir-timeline .tl-clip-title.micro :is(.tl-clip-name, .tl-clip-more) { display: none; }
+.mir-timeline .tl-clip-title.micro .tl-trim { width: 50%; min-width: 0; }
+.mir-timeline .tl-edge { position: absolute; top: 0; bottom: 0; width: var(--tl-edge-w); padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; cursor: ew-resize; touch-action: none; }
+.mir-timeline .tl-edge-left { left: 0; }
+.mir-timeline .tl-edge-right { right: 0; }
+.mir-timeline .tl-edge::after { content: ''; position: absolute; top: 50%; width: var(--tl-grip-w); height: 16px; margin-top: -8px; border-radius: var(--tl-grip-r); background: currentColor; opacity: 0; transition: opacity var(--tl-tab-t) var(--tl-ease); }
+.mir-timeline .tl-edge-left::after { left: 1px; }
+.mir-timeline .tl-edge-right::after { right: 1px; }
+.mir-timeline :is(.tl-clip:is(:hover, .held) .tl-edge, .tl-edge:focus-visible)::after { opacity: .5; }
+.mir-timeline .tl-edge:focus-visible { outline: var(--tl-edge-focus); outline-offset: -1px; }
+.mir-timeline .tl-clip.narrow .tl-edge { width: 50%; }
+@media (pointer: coarse) { .mir-timeline :is(.tl-trim, .tl-edge) { width: var(--tl-edge-touch); } }
+/* no positional tween on authored geometry: a pointer edit is exact; feedback animates paint only */
+.mir-timeline .timeline-surface[data-gesture] :is(.tl-fill, .tl-tab-tint, .tl-tab-rim) { transition: none; }
+/* KIND CLIPS: the body handles like the tab (move, Shift-copy, right-delete); the kind paints its own ink */
+.mir-timeline .tl-clip[data-kind] svg { cursor: grab; }
+.mir-timeline .tl-clip[data-kind].held svg { cursor: grabbing; }
+/* THE PATTERN CLIP, as FL paints one: alternating groups of four, lit steps in the device's colour, repeat boundaries */
+.mir-timeline .tl-pattern-group { fill: currentColor; opacity: var(--tl-pattern-group); }
+.mir-timeline .tl-pattern-group.alt { opacity: var(--tl-pattern-group-alt); }
+.mir-timeline .tl-pattern-step:not(.lit) { fill: currentColor; opacity: var(--tl-pattern-off); }
+.mir-timeline .tl-pattern-step.lit { opacity: var(--tl-pattern-lit); }
+.mir-timeline .tl-clip:is(.selected, :hover, .held) .tl-pattern-step.lit { opacity: 1; }
+.mir-timeline .tl-pattern-repeat { stroke: currentColor; stroke-width: var(--tl-pattern-repeat-w); opacity: var(--tl-pattern-repeat); }
+/* THE AUDIO CLIP: its envelope (and peaks, when the app has them) on a canvas under the svg (BASINS audio.css) */
+.mir-timeline .tl-clip > .tl-audio-wave { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.mir-timeline .tl-clip[data-kind="audio"] svg { position: relative; }
+
+/* ── THE PLAYHEAD: accent B (time), a downward flag at the strip's foot; grown on a ruler hover and while scrubbing ── */
+.mir-timeline .tl-playhead { position: absolute; inset: 0 auto 0 0; width: var(--tl-playhead-w); z-index: 3; pointer-events: none; background: var(--acc2); box-shadow: var(--tl-playhead-glow); }
+.mir-timeline .tl-playhead::before { content: ''; position: absolute; top: var(--tl-flag-top); left: var(--tl-flag-left); width: 0; height: 0;
+  border-left: var(--tl-flag-w) solid transparent; border-right: var(--tl-flag-w) solid transparent; border-top: var(--tl-flag-h) solid var(--acc2);
+  transition: transform var(--tl-quick) var(--tl-ease); transform-origin: 50% 100%; }
+.mir-timeline .tl-ruler:hover ~ .tl-playhead::before, .mir-timeline .tl-playhead.scrubbing::before { transform: scale(var(--tl-flag-hover)); }
+.mir-timeline .tl-playhead-tail { position: absolute; top: 0; right: 100%; bottom: 0; width: 0; background: linear-gradient(90deg, transparent, var(--tl-tail-ink)); }
+.mir-timeline .tl-playhead.scrubbing { box-shadow: var(--tl-playhead-glow-held); }
+.mir-timeline .tl-marquee { display: none; position: absolute; z-index: 4; pointer-events: none; border: 1px solid var(--tl-marquee-edge); background: var(--tl-marquee-fill); box-sizing: border-box; border-radius: var(--tl-marquee-r); }
+.mir-timeline .timeline-surface[data-tool="select"] .tl-viewport { cursor: crosshair; }
+.mir-timeline .timeline-surface[data-tool="scrub"] .tl-viewport { cursor: ew-resize; }
+.mir-timeline .timeline-surface[data-tool="slice"] :is(.tl-viewport, .tl-clip svg, .tl-clip-title, .tl-point, .tl-tension) { cursor: col-resize; }
+
+/* ── THE STATUS LINE (fix 6): no message, no row — laid over the lanes' foot only while it says something ── */
+.mir-timeline .tl-status { position: absolute; left: var(--tl-status-left); bottom: var(--tl-status-foot); max-width: calc(100% - 24px); height: auto; padding: 0; pointer-events: none; z-index: 3;
+  font-size: var(--tl-status-size); opacity: var(--tl-status-fade); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mir-timeline .timeline-surface[data-work-lane="bottom"] .tl-status { bottom: var(--tl-status-foot-bars); }
+.mir-timeline .tl-status:empty { display: none; }
+
+/* ── THE READOUT LAYER (BASINS readout.css): transform and opacity only, no layout cost ── */
+.readout-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.readout-layer[data-state="idle"] { display: none; }
+.readout-layer .rl-line { position: absolute; top: 0; left: 0; opacity: 0; background-color: currentColor; transition: opacity var(--rl-t) var(--tl-ease); }
+.readout-layer .rl-vline { width: 1px; -webkit-mask-image: var(--rl-dash); mask-image: var(--rl-dash); }
+.readout-layer .rl-hline { height: 1px; -webkit-mask-image: var(--rl-dash-x); mask-image: var(--rl-dash-x); }
+.readout-layer[data-state="hover"] .rl-line { opacity: var(--rl-hover); }
+.readout-layer[data-state="hover"] .rl-line[data-tinted="1"] { opacity: var(--rl-hover-tinted); }
+.readout-layer[data-state="held"] .rl-line { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+.readout-layer :is(.rl-track, .rl-corner) { position: absolute; top: 0; left: 0; opacity: 0; white-space: nowrap; pointer-events: none;
+  font: var(--w-med) var(--fs-tiny) var(--font-num); font-variant-numeric: tabular-nums lining-nums; letter-spacing: var(--rl-track-track); transition: opacity var(--rl-t) var(--tl-ease); }
+.readout-layer .rl-track { display: flex; align-items: baseline; gap: 4px; color: color-mix(in srgb, currentColor var(--rl-track-mix), transparent); }
+.readout-layer .rl-track-bar { font-size: var(--fs-micro); opacity: .8; }
+.readout-layer .rl-corner { color: var(--tl-curve-ink, currentColor); }
+
+/* ── THE POPUPS: the house's menu pane (`.glass[data-mir-surface="menu"]`), BASINS' box ── */
+.tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
+  max-height: calc(100dvh - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+.tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }
+.tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
+/* a folded tool's row in ⋯'s list: its icon (when it has one), then its word */
+.tl-pop .trig.tl-row { display: flex; align-items: center; gap: var(--tl-pop-row-gap); }
+.tl-pop .trig.tl-row svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
+.tl-confirm { position: fixed; z-index: calc(var(--z-veil) + 21); max-width: var(--tl-confirm-max); padding: var(--tl-confirm-pad); font-size: var(--tl-confirm-size); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+.tl-confirm .trig { margin: 8px 4px 0 0; }
+.tl-pop .tl-value-input { width: 100%; box-sizing: border-box; color: inherit; background: var(--glass-well); border: 1px solid var(--glass-border-color); border-radius: var(--tl-input-r); padding: var(--tl-input-pad); font: inherit; }
+.tl-pop .tl-field { display: flex; flex-direction: column; gap: var(--tl-field-gap); font-size: var(--tl-field-size); padding: 4px; }
+.tl-pop .tl-audio-target { flex-direction: row; align-items: center; gap: var(--tl-field-gap); padding: 2px 4px; font-size: var(--tl-pop-title-size); letter-spacing: var(--tl-pop-title-track); }
+.tl-pop .tl-audio-target :is(.sel, .mir-select) { flex: 1; min-width: 0; font-size: var(--tl-pop-title-size); }
+.tl-pop .tl-color-field { flex-direction: row; align-items: center; justify-content: space-between; }
+.tl-pop .tl-color-input { width: var(--tl-color-w); height: var(--tl-setting-h); border: 0; padding: 0; background: transparent; cursor: pointer; }
+.tl-pop .tl-swatches { display: flex; gap: var(--tl-field-gap); padding: 4px; }
+.tl-pop .tl-swatch { width: var(--tl-swatch); height: var(--tl-swatch); padding: 0; border: 1px solid var(--glass-border-color); border-radius: 50%; background: var(--tl-clip-tint); cursor: pointer; }
+/* THE SHORTCUT SHEET (BASINS' injected sheet, as rules) */
+.tl-pop.tl-shortcuts { width: var(--tl-sheet-w); }
+.tl-shortcuts .tl-shortcuts-section { font-size: var(--fs-micro); letter-spacing: var(--tl-sheet-section-track); opacity: var(--tl-sheet-fade); padding: 6px 4px 2px; }
+.tl-shortcuts .tl-shortcuts-list { display: flex; flex-direction: column; gap: 1px; max-height: var(--tl-sheet-h); overflow: auto; }
+.tl-shortcuts .tl-shortcut-row { display: grid; grid-template-columns: var(--tl-sheet-cols); gap: 8px; padding: var(--tl-sheet-row-pad); font-size: var(--fs-tiny); align-items: baseline; }
+.tl-shortcuts .tl-shortcut-row:nth-child(odd) { background: var(--tl-sheet-stripe); }
+.tl-shortcuts .tl-shortcut-col:first-child { font-weight: var(--tl-sheet-key-weight); white-space: nowrap; }
+.tl-shortcuts .tl-shortcut-col:last-child { font-size: var(--fs-micro); opacity: var(--tl-sheet-note-fade); }
+.k[data-param] { -webkit-touch-callout: none; }
+
+/* reduced motion (the kit's policy on <html data-motion>): no tail, no transition */
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-timeline .tl-playhead-tail { display: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) :is(.mir-timeline :is(.tl-fill, .tl-tab-tint, .tl-tab-rim, .tl-clip-more, .tl-point, .tl-tension), .tl-pop, .tl-confirm, .readout-layer :is(.rl-line, .rl-track, .rl-corner)) { transition: none; animation: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-timeline :is(.tl-trim, .tl-edge)::after, :root:is([data-motion="reduced"], [data-motion="off"]) .mir-timeline .tl-playhead::before { transition: none; }
+
+/* THE TRANSPORT IN A WORK BAR, IN ANY WINDOW (alpha.14, BASINS parity round five, row 36 iii-4).  modwindow.css draws this
+   bar as the house pane inside .mir-modwindow (alpha.12); a work bar is the same pane wherever its window stands, so the rule
+   does not name the window.  The fill is the pane's by CARD STYLE (--pane-fill: TINTED .58 under FROST, REFRACTIVE the veil),
+   the shadow the pane's (--surface-shadow), the tempo's Hz reading the ink ladder's .82 (--dim), as BASINS draws its
+   timeline-mounted bar.  The filter and the sheen stay the house's.  This sheet is a later layer than the window's, so it
+   wins inside .mir-modwindow with the same values. */
+.glass.mir-transport[data-bar="work"] { background-color: var(--pane-fill, hsl(var(--glass-tint) / var(--card-opacity))); box-shadow: var(--surface-shadow, var(--glass-shadow)); }
+.mir-transport[data-bar="work"] .tempo-hz { color: var(--dim); }
+
+}   /* end @layer mir.kit.plugin.host */

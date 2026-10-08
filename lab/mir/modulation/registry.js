@@ -90,6 +90,14 @@ export function idFault(id, roots) {
   return null;
 }
 
+/** handWrite(mod, id, v) → true when `mod` (an installModulation, or anything with its `hand` door) took the hand as a
+ *  routed control's new base; false, and nothing written, when there is no mod, the id is unknown or unrouted, or the
+ *  door throws.  THE HAND LAW in one place: a control writes `if (!handWrite(mod, id, v)) <its own value> = v`. */
+export function handWrite(mod, id, v) {
+  if (!mod || typeof mod.hand !== 'function') return false;
+  try { return !!mod.hand(id, v); } catch (_) { return false; }
+}
+
 /* ── the five maps ────────────────────────────────────────────────────────────────
  * Each map is { fault, snap, toNorm, fromNorm }.  toNorm SNAPS FIRST and fromNorm
  * SNAPS LAST, so the round trip is exact wherever the map is discrete (integer, and

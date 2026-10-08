@@ -33,6 +33,31 @@
 
 /* ── THE NAMESPACE ──────────────────────────────────────────────────────── */
 
+import { setGlyph, glyphEl, glyphSvg, hasGlyph } from '../../glyph.js';
+import { label as kitLabel, ariaLabel as kitAria, hint as kitHint, placeholder as kitPlaceholder } from '../../kit.js';
+import { t, phrase, onLanguage } from '../../core/i18n.js';
+
+/* ── THE WORDS (1.5.4).  Every word the tree shows goes through the kit's choke points: label() for a node that holds
+   only its words, ariaLabel() for a name, and two small helpers for the two places label() cannot reach — the leading
+   text of a node that also holds children (the MACROS head, the CONDITIONING head: label() would replace the
+   children), and a CSS caption, which the sheets now draw from data-cap (`content: attr(data-cap)`) instead of an
+   English `content:` string.  One language pass, here, rewrites those two; kit.js rewrites the rest. */
+const firstText = (node) => [...node.childNodes].find((n) => n.nodeType === 3) || null;
+function leadText(node, word) {
+  node.dataset.tLead = word.t;
+  const tn = firstText(node) || node.insertBefore(document.createTextNode(''), node.firstChild);
+  tn.nodeValue = t(word.t);
+  return node;
+}
+function cap(node, word) { node.dataset.tCap = word.t; node.dataset.cap = t(word.t); return node; }
+if (typeof document !== 'undefined') onLanguage(() => {
+  for (const n of document.querySelectorAll('[data-t-lead]')) { const tn = firstText(n); if (tn) tn.nodeValue = t(n.dataset.tLead); }
+  for (const n of document.querySelectorAll('[data-t-cap]')) n.dataset.cap = t(n.dataset.tCap);
+});
+/** the words for a device kind and an audio output, so no code upper-cases an id */
+const KIND_WORD = { lfo: { t: 'LFO' }, env: { t: 'ENV' }, audio: { t: 'AUDIO' } };
+const OUT_WORD = { level: { t: 'LEVEL' }, low: { t: 'LOW' }, mid: { t: 'MID' }, high: { t: 'HIGH' }, hit: { t: 'HIT' } };
+
 /** The one class modwindow.css scopes on.  It goes on the window root and on
  *  nothing else. */
 export const NS = 'mir-modwindow';
@@ -43,11 +68,9 @@ export const NS = 'mir-modwindow';
 export const WINDOW_ID = 'modwin';
 
 /** LOAD-BEARING FOR PAINT.  The chip rail's label is (title || root.id) +
- *  ' window controls', and five rules in modwindow.css select on the result
- *  byte-for-byte.  Translate this and the chips silently lose their material,
- *  with no error and no hint beyond "the chips look wrong". */
+ *  ' window controls'.  Since 1.5 no kit CSS selects on it: the rail carries
+ *  data-mir-rail and each chip data-mir-chip, so this label may be translated. */
 export const WINDOW_TITLE = 'MODULATION';
-export const CHIPRAIL_LABEL = WINDOW_TITLE + ' window controls';
 
 /** The ten global ids the window plants.  Only modwin, mod2css,
  *  m2-dead-send-warning and m2-dead-send-inspector are load-bearing (the last
@@ -136,65 +159,65 @@ export const sizeLaw = {
  *  named MANDELBROT, and the extraction's §5 calls it "a word, not a
  *  mechanism". */
 export const COPY = {
-  railHead: 'MACROS',
-  tab: 'MOD',
-  presetPlaceholder: 'PRESET NAME',
+  railHead: phrase('MACROS'),
+  tab: phrase('MOD'),
+  presetPlaceholder: phrase('PRESET NAME'),
   deadChip: '⊘ 0',
-  tap: 'TAP',
-  hold: ['HOLD 1/4', 'HOLD 1'],
-  colHead: { lfo: 'PRESET', env: 'TIME', audio: 'SOURCE' },
-  zoom: ['↑', 'FIT', '↓'],
+  tap: phrase('TAP'),
+  hold: [phrase('HOLD 1/4'), phrase('HOLD 1')],
+  colHead: { lfo: phrase('PRESET'), env: phrase('TIME'), audio: phrase('SOURCE') },   // tr: the head of a device's left column: the shape PRESETs, the envelope TIME, the audio SOURCE
+  zoom: ['↑', phrase('FIT'), '↓'],
   lfoPresets: [
-    ['tri', 'TRI'], ['sawup', 'SAW↑'], ['sine', 'SINE'],
-    ['square', 'SQR'], ['msaw', 'MULTI-SAW'], ['mtri', 'MULTI-TRI']
+    ['tri', phrase('TRI')], ['sawup', phrase('SAW↑')], ['sine', phrase('SINE')],
+    ['square', phrase('SQR')], ['msaw', phrase('MULTI-SAW')], ['mtri', phrase('MULTI-TRI')]
   ],
   lfoChecks: [
-    ['invert', 'INVERT'], ['sync', 'BPM'], ['anchor', 'ANCHOR'],
-    ['triplet', 'TRIPLET'], ['dotted', 'DOTTED']
+    ['invert', phrase('INVERT')], ['sync', phrase('BPM')], ['anchor', phrase('ANCHOR')],   // tr[ANCHOR]: ANCHOR: on resume, the LFO continues from the phase where the pause caught it, holding the beat
+    ['triplet', phrase('TRIPLET')], ['dotted', phrase('DOTTED')]
   ],
-  envChecks: [['invert', 'INVERT'], ['gate', 'GATE']],
+  envChecks: [['invert', phrase('INVERT')], ['gate', phrase('GATE')]],
   audioOuts: ['level', 'low', 'mid', 'high', 'hit'],
-  lfoCmpToggles: [['trig', 'TRIG'], ['invert', 'INVERT'], ['sync', 'BPM'], ['anchor', 'ANCHOR']],
+  lfoCmpToggles: [['trig', phrase('TRIG')], ['invert', phrase('INVERT')], ['sync', phrase('BPM')], ['anchor', phrase('ANCHOR')]],   // tr[TRIG]: short for TRIGGER: restart the curve on a trigger
   /* [dataKnob, cap, lo, hi].  The cap paints; lo/hi land in `.m2kends`, which
      `#modwin .m2kends { display: none }` never shows — they are MODEL-DERIVED
      in the source (String(M.ENV_MAX_S) + 's', String(M.STEPS_MAX), …) and are
      reproduced here at BASINS' shipping values.  A host with different model
      limits should override these through host.copy; nothing paints either way. */
   knobs: {
-    lfo: [['rate', 'RATE', '0.01', '3.0'], ['phase', 'PHASE', '0', '1'],
-    ['smooth', 'SMOOTH', 'OFF', '500'], ['steps', 'STEPS', 'OFF', '1024']],
-    env: [['a', 'ATTACK', '0', '8s'], ['hold', 'HOLD', '0', '8s'],
-    ['d', 'DECAY', '0', '8s'], ['s', 'SUSTAIN', '0', '1'],
-    ['r', 'RELEASE', '0', '8s'], ['steps', 'STEPS', 'OFF', '1024']],
-    audio: [['sens', 'GAIN', '-24', '+24'], ['attack', 'ATTACK', '0', '2s'],
-    ['release', 'RELEASE', '0', '2s'], ['peakHold', 'HOLD', '0', '2s']]
+    lfo: [['rate', phrase('RATE'), '0.01', '3.0'], ['phase', phrase('PHASE'), '0', '1'],
+    ['smooth', phrase('SMOOTH'), phrase('OFF'), '500'], ['steps', phrase('STEPS'), phrase('OFF'), '1024']],
+    env: [['a', phrase('ATTACK'), '0', '8s'], ['hold', phrase('HOLD'), '0', '8s'],   // tr[HOLD]: HOLD: the envelope stage that stays at full level after ATTACK, before DECAY (a time)
+    ['d', phrase('DECAY'), '0', '8s'], ['s', phrase('SUSTAIN'), '0', '1'],
+    ['r', phrase('RELEASE'), '0', '8s'], ['steps', phrase('STEPS'), phrase('OFF'), '1024']],
+    audio: [['sens', phrase('GAIN'), '-24', '+24'], ['attack', phrase('ATTACK'), '0', '2s'],
+    ['release', phrase('RELEASE'), '0', '2s'], ['peakHold', phrase('HOLD', 'peak hold'), '0', '2s']]   // tr[peak hold::HOLD]: the audio follower's PEAK HOLD: how long a band's peak is held before it falls (a time), not the envelope stage
   },
-  audioSheetRows: [['out', 'OUTPUT'], ['att', 'ATTACK'], ['rel', 'RELEASE'],
-  ['hyst', 'HYST'], ['flux', 'SENSE']],
-  devicePick: [['lfo', 'ADD LFO'], ['env', 'ADD ENV'], ['audio', 'ADD AUDIO']],
-  macroPick: [['knob', 'KNOB'], ['trigger', 'TRIGGER']],
-  factory: 'FACTORY',
-  presetSheetLabel: 'Rack presets, in folders: {factory} ships with the app, ' +
-    'the rest are yours',
-  presetOpenLabel: 'Open the preset list — {factory} ships with the app, ' +
-    'the rest are yours',
+  audioSheetRows: [['out', phrase('OUTPUT')], ['att', phrase('ATTACK')], ['rel', phrase('RELEASE')],
+  ['hyst', phrase('HYST')], ['flux', phrase('SENSE')]],
+  devicePick: [['lfo', phrase('ADD LFO')], ['env', phrase('ADD ENV')], ['audio', phrase('ADD AUDIO')]],
+  macroPick: [['knob', phrase('KNOB')], ['trigger', phrase('TRIGGER')]],   // tr: the two kinds of macro: KNOB (a value you turn) and TRIGGER (a button that fires)
+  factory: phrase('FACTORY'),
+  presetSheetLabel: phrase('Rack presets, in folders: {factory} ships with the app, the rest are yours'),
+  presetOpenLabel: phrase('Open the preset list — {factory} ships with the app, the rest are yours'),
   /* anim.js:3932 — the hint line, verbatim, U+2019 apostrophes and all. */
-  hint: 'Drag ✥ onto a slider or knob to route it (a PAD’s ✥ makes that ' +
-    'control get hit) · drop it there again to release · ' +
-    'a macro bar: drag sideways to set, double-tap to reset, tap to rename or unassign · ' +
-    'number ring: up/down = master depth, double-tap = 100% · route ring: up/down = depth, ' +
-    'sideways = direction.',
+  /* one literal, not a sum: it is one sentence to a translator (1.5.4) */
+  hint: phrase('Drag ✥ onto a slider or knob to route it (a PAD’s ✥ makes that control get hit) · drop it there again to release · a macro bar: drag sideways to set, double-tap to reset, tap to rename or unassign · number ring: up/down = master depth, double-tap = 100% · route ring: up/down = depth, sideways = direction.'),   // tr: ✥ is the macro’s routing grip; a PAD is a trigger macro; one sentence of help shown along the window’s foot
   chips: [
-    { id: 'compact', glyph: 'compact', label: 'COMPACT' },
-    { id: 'workbars', glyph: 'barsTop', label: 'Work bars: bottom' },
-    { id: 'ribbon', glyph: 'leave', label: 'RIBBON' }
+    { id: 'compact', glyph: 'compact', label: phrase('COMPACT') },
+    { id: 'workbars', glyph: 'barsTop', label: phrase('Work bars: bottom') },
+    { id: 'ribbon', glyph: 'leave', label: phrase('RIBBON') }
   ]
 };
 
-/* anim.js:1525-1526 — the two transport faces, verbatim.  They are swapped
-   through innerHTML; they are not glyphs. */
-export const SVG_PAUSE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;margin:auto"><rect x="6" y="4" width="3.5" height="16" rx="1"/><rect x="14.5" y="4" width="3.5" height="16" rx="1"/></svg>';
-export const SVG_PLAY = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;margin:auto"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+/* the two transport faces, swapped through innerHTML: the house's own play and pause (glyph.js), 14 px, centred by `.m2-xport-gly` */
+export const SVG_PAUSE = glyphSvg('pause', 'gly gly-pause m2-xport-gly', 14);
+export const SVG_PLAY = glyphSvg('play', 'gly gly-play m2-xport-gly', 14);
+
+/* 1.5.0-alpha.4 · THE WORK BAR'S FIRST SEAT IS MODULATION'S POWER, NOT A PLAY (Josh, 2026-10-01: one clock — the timeline
+   has the true play, modulation a power button like BASINS').  The drawing is BASINS' own (transport-controls.js
+   mountModulationPower): a faint halo, the ring, the stem; its weight is a token.  SVG_PLAY / SVG_PAUSE stay exported
+   for callers that still draw them; the window no longer does. */
+export const SVG_POWER = glyphSvg('power', 'mir-power-icon', 24);
 
 /* ── THE TWO ELEMENT HELPERS (anim.js:1042, 3313) ───────────────────────── */
 
@@ -219,89 +242,8 @@ export function m2svg(tag, cls, parent, attrs) {
   return e;
 }
 
-/* ── THE GLYPHS (EXTRACT file 05, verbatim from glyph.js) ────────────────── */
-
-/* glyph.js:44,60,65,70 — ONE stroke weight for the whole set. */
-const STROKE = 'fill="none" stroke="currentColor" stroke-width="1.9" ' +
-  'stroke-linecap="round" stroke-linejoin="round"';
-
-export const GLYPHS = {
-  chevronDown:
-    '<path ' + STROKE + ' d="M6.6 9.4 L12 15.2 L17.4 9.4"/>',
-  clear:
-    '<path ' + STROKE + ' d="M8.6 5.4 L20.1 5.4 A1.7 1.7 0 0 1 21.8 7.1 ' +
-    'L21.8 16.9 A1.7 1.7 0 0 1 20.1 18.6 L8.6 18.6 L2.4 12 Z"/>' +
-    '<path ' + STROKE + ' d="M11.6 9.4 L16.8 14.6 M16.8 9.4 L11.6 14.6"/>',
-  close:
-    '<path ' + STROKE + ' d="M7.1 7.1 L16.9 16.9 M16.9 7.1 L7.1 16.9"/>',
-
-
-  dirNext:
-    '<path fill="currentColor" d="M9.4 6.4 L17.4 11.4 A0.7 0.7 0 0 1 17.4 12.6 ' +
-    'L9.4 17.6 A0.7 0.7 0 0 1 8.3 17 L8.3 7 A0.7 0.7 0 0 1 9.4 6.4 Z"/>',
-  dirPrev:
-    '<path fill="currentColor" d="M14.6 6.4 L6.6 11.4 A0.7 0.7 0 0 0 6.6 12.6 ' +
-    'L14.6 17.6 A0.7 0.7 0 0 0 15.7 17 L15.7 7 A0.7 0.7 0 0 0 14.6 6.4 Z"/>',
-  grip:
-    '<circle cx="9" cy="7" r="1.45" fill="currentColor"/>' +
-    '<circle cx="15" cy="7" r="1.45" fill="currentColor"/>' +
-    '<circle cx="9" cy="12" r="1.45" fill="currentColor"/>' +
-    '<circle cx="15" cy="12" r="1.45" fill="currentColor"/>' +
-    '<circle cx="9" cy="17" r="1.45" fill="currentColor"/>' +
-    '<circle cx="15" cy="17" r="1.45" fill="currentColor"/>',
-  leave:
-    '<path ' + STROKE + ' d="M6.6 12 L17.4 12"/>',
-  save:
-    '<circle cx="12" cy="12" r="9.2" ' + STROKE + '/>' +
-    '<path ' + STROKE + ' d="M7.78 6.79 H14.23 L17.21 9.77 V16.22 ' +
-    'A0.99 0.99 0 0 1 16.22 17.21 H7.78 A0.99 0.99 0 0 1 6.79 16.22 V7.78 ' +
-    'A0.99 0.99 0 0 1 7.78 6.79 Z"/>' +
-    '<path ' + STROKE + ' d="M9.52 6.79 V9.89 H13.61 V6.79"/>' +
-    '<path ' + STROKE + ' d="M9.15 17.21 V13.36 H14.85 V17.21"/>',
-  swap:
-    '<path ' + STROKE + ' d="M3.4 9.1 L20.6 9.1 M16.6 5.1 L20.6 9.1 L16.6 13.1"/>' +
-    '<path ' + STROKE + ' d="M20.6 16.5 L3.4 16.5 M7.4 12.5 L3.4 16.5 L7.4 20.5"/>',
-  compact:
-    '<path ' + STROKE + ' d="M7.6 3.9 L7.6 20.1 M16.4 3.9 L16.4 20.1"/>' +
-    '<path ' + STROKE + ' d="M2.2 12 L6.5 12 M4.5 9.6 L6.9 12 L4.5 14.4"/>' +
-    '<path ' + STROKE + ' d="M21.8 12 L17.5 12 M19.5 9.6 L17.1 12 L19.5 14.4"/>',
-  barsTop:
-    '<path ' + STROKE + ' d="M3.1 5.2 H9.2 M14.8 5.2 H20.9"/>' +
-    '<path ' + STROKE + ' opacity="0.42" d="M3.1 18.8 H20.9"/>',
-  barsBottom:
-    '<path ' + STROKE + ' opacity="0.42" d="M3.1 5.2 H20.9"/>' +
-    '<path ' + STROKE + ' d="M3.1 18.8 H9.2 M14.8 18.8 H20.9"/>'
-};
-
-/** glyph.js:~70 glyphEl.  createElementNS + innerHTML — NOT createElement,
- *  which makes an HTML element named svg that lays out as an inline box and
- *  draws nothing. */
-export function glyphEl(name, cls, size) {
-  const body = GLYPHS[name];
-  if (!body) return null;
-  const s = document.createElementNS(SVGNS, 'svg');
-  s.setAttribute('class', cls || ('gly gly-' + name));
-  s.setAttribute('viewBox', '0 0 24 24');
-  s.setAttribute('aria-hidden', 'true');
-  s.setAttribute('focusable', 'false');
-  const px = String(size === undefined ? 20 : size);
-  s.setAttribute('width', px);
-  s.setAttribute('height', px);
-  s.innerHTML = body;
-  return s;
-}
-
-/** glyph.js:414 setGlyph, exactly. */
-export function setGlyph(el, name, opts) {
-  const o = opts || {};
-  const s = glyphEl(name, o.cls, o.size);
-  if (!s) return null;
-  el.textContent = '';
-  el.appendChild(s);
-  el.setAttribute('data-gly', name);
-  if (o.label) el.setAttribute('aria-label', o.label);
-  return s;
-}
+/* ── THE GLYPHS: the house's one library (glyph.js, docs/ICONS.md); `glyphEl` stays exported for old imports ── */
+export { glyphEl, setGlyph };
 
 /* ── THE KNOB ARC (window.js:4175 knobArc) ──────────────────────────────── */
 
@@ -356,28 +298,17 @@ export function knobArc(elm, opts) {
 
 /* ── SMALL SHARED ICONS (anim.js:3322, 3332) ────────────────────────────── */
 
-/** anim.js:3322 — the four-way drag cross.  The svg has NO class. */
+/** the four-way drag cross: the house's `move` glyph (glyph.js).  The svg carries the glyph's own classes. */
 export function gripIcon(parent) {
-  const s = m2svg('svg', null, parent, { viewBox: '0 0 24 24' });
-  m2svg('path', null, s, {
-    d: 'M12 2.5 L15 6 H13 V11 H18 V9 L21.5 12 L18 15 V13 H13 V18 H15 L12 21.5 L9 18 H11 V13 H6 V15 ' +
-      'L2.5 12 L6 9 V11 H11 V6 H9 Z',
-    fill: 'currentColor'
-  });
+  const s = glyphEl('move', null, 24);
+  if (parent) parent.appendChild(s);
   return s;
 }
 
-/** anim.js:3332 — the power ring.  The svg has NO class. */
+/** the power ring: the house's `power` glyph (glyph.js); its two weights are this window's tokens (modhost.css `.m2pow`). */
 export function powIcon(parent) {
-  const s = m2svg('svg', null, parent, { viewBox: '0 0 24 24' });
-  m2svg('path', null, s, {
-    d: 'M12 2 V11', stroke: 'currentColor', 'stroke-width': '2.6',
-    'stroke-linecap': 'round', fill: 'none'
-  });
-  m2svg('path', null, s, {
-    d: 'M6.2 5.6 A8.4 8.4 0 1 0 17.8 5.6', stroke: 'currentColor',
-    'stroke-width': '2.2', 'stroke-linecap': 'round', fill: 'none'
-  });
+  const s = glyphEl('power', 'mir-power-icon', 24);
+  if (parent) parent.appendChild(s);
   return s;
 }
 
@@ -411,7 +342,7 @@ export function createModWindow(host) {
   root.id = id;
   root.dataset.windowKind = 'persistent';
   root.setAttribute('role', 'group');
-  root.setAttribute('aria-label', title);
+  kitAria(root, title);
   root.hidden = true;
   /* .m2retired hides the retired tab strip: `.modwin.m2retired .kwin-tabs
      { display: none }`.  anim.js:1115 puts it on the window root and 1116 on
@@ -424,11 +355,11 @@ export function createModWindow(host) {
      is .kwin-chips-only.  `.kwin.kwin-chips-only > .kwin-bar` then hides it. */
   const bar = m2mk('div', 'kwin-bar', root);
   const titleEl = m2mk('span', 'kwin-title', bar);
-  titleEl.textContent = title;
+  kitLabel(titleEl, title);
   const close = m2mk('button', 'kwin-close', bar);
   close.type = 'button';
-  close.setAttribute('aria-label', 'Close ' + title);
-  close.dataset.ink = 'close';
+  kitAria(close, 'Close {name}', { name: { t: title } });
+  close.dataset.glyph = 'close';
   const closeInk = glyphEl('close', 'crail-ink gly-close', 26);
   if (closeInk) close.appendChild(closeInk);
 
@@ -441,7 +372,7 @@ export function createModWindow(host) {
   tab.setAttribute('aria-selected', 'true');
   tab.tabIndex = 0;
   tab.dataset.tab = 'mod';
-  tab.textContent = copy.tab;
+  kitLabel(tab, copy.tab);
 
   const body = m2mk('div', 'kwin-body', root);
   const panel = m2mk('div', 'kwin-panel on', body);
@@ -456,7 +387,7 @@ export function createModWindow(host) {
   const rack = buildRack(panel, copy);
   const foot = buildPresetStrip(panel, copy);
   const hint = m2mk('div', 'm2hint', panel);
-  hint.textContent = copy.hint;
+  kitLabel(hint, copy.hint);
 
   /* THE BARLESS SWAP, done here rather than deferred: the timing bar's DOM
      order is pure install order, which is why the strip reads
@@ -494,8 +425,11 @@ export function buildChipRail(windowRoot, host) {
   const rail = m2mk('div', 'crail crail-float kwin-chiprail kwin-chiprail-' + side);
   rail.setAttribute('role', 'toolbar');
   /* window.js builds this as (o.title || root.id) + ' window controls'.
-     modwindow.css selects on the exact result in five rules. */
+     The label is for people and may be translated; the kit's CSS keys on the
+     hooks below, never on the label text. */
   rail.setAttribute('aria-label', (title || windowRoot.id) + ' window controls');
+  /* STYLING HOOKS (1.5): the rail names its window, each chip names itself. */
+  rail.dataset.mirRail = windowRoot.id === WINDOW_ID ? 'modulation' : windowRoot.id;
 
   const chips = {};
   const chip = (spec, kind) => {
@@ -504,24 +438,25 @@ export function buildChipRail(windowRoot, host) {
       (drag ? ' crail-grip' : '') + (kind === 'close' ? ' kwin-close-chip' : ''));
     if (!drag) b.type = 'button';
     b.dataset.rail = spec.id;
+    b.dataset.mirChip = spec.id;
     b.dataset.chromeKind = kind;
     b.dataset.reopensWindow = 'false';
-    b.setAttribute('aria-label', spec.label);
-    b.title = spec.title || spec.label;
+    kitAria(b, spec.label);
+    kitHint(b, spec.title || spec.label);
     rail.appendChild(b);
     chips[spec.id] = b;
     return b;
   };
 
   const closeChip = chip({ id: 'close', label: 'Close window', title: 'Close window' }, 'close');
-  closeChip.dataset.ink = 'close';
+  closeChip.dataset.glyph = 'close';
   const closeInk = glyphEl('close', 'crail-ink gly-close', 26);
   if (closeInk) closeChip.appendChild(closeInk);
 
   for (const c of copy.chips) {
     const b = chip({ id: c.id, label: c.label, title: c.label }, 'action');
     b.setAttribute('aria-pressed', 'false');
-    b.dataset.ink = c.glyph;
+    b.dataset.glyph = c.glyph;
     const ink = glyphEl(c.glyph, 'crail-ink gly-' + c.glyph, 26);
     if (ink) b.appendChild(ink);
   }
@@ -546,17 +481,17 @@ function buildRack(panel, copy) {
 
   const rail = m2mk('div', 'm2rail', root);
   const railhead = m2mk('div', 'm2railhead', rail);
-  railhead.textContent = copy.railHead;
+  leadText(railhead, { t: copy.railHead });
   const slots = m2mk('div', 'm2slots', rail);
   /* PINNED OUTSIDE THE SCROLLER, at the rail's foot, so "the button that grows
      the rail can never be pushed out of view by growing the rail". */
   const macrow = m2mk('div', 'm2macrow', rail);
   const macadd = m2mk('button', 'm2macadd', macrow);
   macadd.type = 'button';
-  macadd.textContent = 'ADD MACRO';
+  kitLabel(macadd, 'ADD MACRO'); cap(macadd, { t: '+ MACRO' });
   const devadd = m2mk('button', 'm2devadd', macrow);
   devadd.type = 'button';
-  devadd.textContent = 'ADD DEVICE';
+  kitLabel(devadd, 'ADD DEVICE'); cap(devadd, { t: '+ DEVICE' });
 
   const run = m2mk('div', 'm2run', root);
   run.dataset.inputOwner = 'rack-scroll';
@@ -594,41 +529,43 @@ function buildPresetStrip(panel, copy) {
   const prebar = m2mk('div', 'm2workbar m2prebar glass', foot);
   const core = m2mk('div', 'm2precore', prebar);
 
-  const navBtn = (cls, glyph, size, label, parent) => {
+  const navBtn = (cls, glyph, size, label, parent, vars) => {
     const b = m2mk('button', cls, parent || core);
     b.type = 'button';
-    if (glyph && GLYPHS[glyph]) setGlyph(b, glyph, { size, label });
-    else { if (glyph) b.textContent = glyph; b.setAttribute('aria-label', label); }
+    if (glyph && hasGlyph(glyph)) setGlyph(b, glyph, { size, label, vars });
+    else { if (glyph) b.textContent = glyph; kitAria(b, label, vars); }
     return b;
   };
 
   /* the ▾: dirNext turned a quarter turn by the stylesheet — glyph.js carries
      no chevron-down, and a drawing rotated is still a drawing. */
   const open = navBtn('m2prenav m2preopen', 'chevronDown', 15,
-    copy.presetOpenLabel.replace('{factory}', copy.factory));
+    copy.presetOpenLabel, null, { factory: { t: copy.factory } });
   open.setAttribute('aria-haspopup', 'listbox');
   open.setAttribute('aria-expanded', 'false');
-  open.title = 'PRESETS';
+  kitHint(open, 'PRESETS');
 
-  const save = navBtn('m2presave', 'save', 21, 'Save this rack as a preset');
-  save.title = 'SAVE';
+  const save = navBtn('m2presave', null, 20, 'Save this rack as a preset');
+  setGlyph(save, 'save', { size: 20 });
+  kitAria(save, 'Save this rack as a preset');
+  kitHint(save, 'SAVE');
 
   const name = m2mk('input', 'm2prename', core);
   name.type = 'text';
   name.spellcheck = false;
-  name.placeholder = copy.presetPlaceholder;
+  kitPlaceholder(name, copy.presetPlaceholder);
   name.setAttribute('autocapitalize', 'characters');
-  name.setAttribute('aria-label', 'Preset name — type one, then tap SAVE');
+  kitAria(name, 'Preset name — type one, then tap {:SAVE}');
 
-  const prev = navBtn('m2prenav', 'dirPrev', 15, 'Previous preset');
-  const next = navBtn('m2prenav', 'dirNext', 15, 'Next preset');
+  const prev = navBtn('m2prenav', 'dirPrev', 15, phrase('Previous preset'));
+  const next = navBtn('m2prenav', 'dirNext', 15, phrase('Next preset'));
   /* m2preDel is null.  NO DELETE BUTTON IS BUILT. */
 
   /* THE DEAD LIGHT.  A SIBLING of .m2precore, not inside it, so it lives in
      the 46 px extension.  Hidden entirely when nothing is dormant — a warning
      that is always on the glass is furniture, not a warning. */
   const dead = navBtn('m2predead off', copy.deadChip,
-    null, 'Sends that are dead until their controls come back', prebar);
+    null, phrase('Sends that are dead until their controls come back'), prebar);
   dead.id = IDS.deadWarn;
   dead.setAttribute('aria-haspopup', 'dialog');
   dead.setAttribute('aria-controls', IDS.deadInspector);
@@ -645,17 +582,20 @@ function buildPresetStrip(panel, copy) {
  *  the order IS the strip: each installer appends to the barless bar, whose
  *  querySelector('.kwin-close') is null there. */
 function buildTimingBar(pre, copy) {
-  const xport = m2mk('button', 'modxport', pre);
+  const xport = m2mk('button', 'modxport mir-mod-power', pre);
   xport.type = 'button';
   xport.id = IDS.xport;
-  xport.innerHTML = SVG_PLAY;
+  xport.innerHTML = SVG_POWER;
+  xport.dataset.face = 'power';
+  xport.setAttribute('aria-pressed', 'false');
+  kitAria(xport, 'Modulation on or off');
 
   const tempo = m2mk('button', 'modtempo', pre);
   tempo.type = 'button';
   tempo.id = IDS.tempo;
   const tempoNum = m2mk('b', null, tempo);
   const tempoUnit = m2mk('span', null, tempo);
-  tempoUnit.textContent = 'BPM';                    // hidden by .tighter
+  tempoUnit.textContent = 'BPM';                    // hidden by .tighter; a unit, never translated
   const tempoHz = m2mk('i', 'modhz', tempo);        // hidden by .tight
 
   /* It stands exactly where the field stood: the two swap `hidden`. */
@@ -670,7 +610,7 @@ function buildTimingBar(pre, copy) {
   const tap = m2mk('button', 'modtap', pre);
   tap.type = 'button';
   tap.id = IDS.tap;
-  tap.textContent = copy.tap;
+  kitLabel(tap, copy.tap);
 
   const sync = m2mk('button', 'modsync', pre);
   sync.type = 'button';
@@ -685,9 +625,9 @@ function buildTimingBar(pre, copy) {
   const holds = copy.hold.map((label) => {
     const b = m2mk('button', 'm2hold', pre);
     b.type = 'button';
-    b.textContent = label;
+    kitLabel(b, label);
     b.setAttribute('aria-pressed', 'false');
-    b.title = label;
+    kitHint(b, label);
     return b;
   });
 
@@ -750,7 +690,7 @@ function mkEditRow(root, what, index) {
   name.maxLength = 24;
   name.spellcheck = false;
   name.setAttribute('autocapitalize', 'characters');
-  name.setAttribute('aria-label', what + ' ' + index + ' name — type your own');
+  kitAria(name, '{what} {i} name — type your own', { what: { t: what }, i: index });   // tr: the name field of a macro or a trigger: {what} is Macro or Trigger, {i} its number
   const clr = m2mk('button', 'm2mclr', row);
   clr.type = 'button';
   setGlyph(clr, 'clear', { size: 16 });
@@ -784,9 +724,9 @@ export function buildMacroSlot(slotbox, m, index) {
   gripIcon(reorder);
   const del = m2mk('button', 'm2slotx', tools);
   del.type = 'button';
-  setGlyph(del, 'close', { size: 14, label: 'Delete ' + (trigger ? 'trigger ' : 'macro ') + index });
+  setGlyph(del, 'close', { size: 14, label: trigger ? 'Delete trigger {i}' : 'Delete macro {i}', vars: { i: index } });
 
-  const ed = mkEditRow(root, trigger ? 'Trigger' : 'Macro', index);
+  const ed = mkEditRow(root, trigger ? phrase('Trigger') : phrase('Macro'), index);
 
   return {
     id: m && m.id, kind: trigger ? 'trigger' : 'knob', index,
@@ -813,11 +753,12 @@ function statusCapsule(parent, o) {
   const main = m2mk('span', 'm2statusmain ' + o.mainClass, root);
   m2mk('i', 'm2statuslamp', main);
   const text = m2mk('b', null, main);
-  text.textContent = o.text;
+  const words = (v) => (Array.isArray(v) ? t(v[0], v[1]) : t(v));   // a word, or [sentence, vars]: the same keys the live paint uses
+  text.textContent = words(o.text);
   const middle = o.middleClass ? m2mk('span', o.middleClass, root) : null;
-  if (middle) middle.textContent = o.middleText;
+  if (middle) middle.textContent = words(o.middleText);
   const out = m2mk('span', o.outClass, root);
-  out.textContent = o.outText;
+  out.textContent = words(o.outText);
   return { root, main, text, middle, out };
 }
 
@@ -840,20 +781,20 @@ function buildEditor(dev, body, kind) {
   if (kind === 'lfo') {
     status = statusCapsule(box, {
       rootClass: 'm2lfostatus', mainClass: 'm2lforun',
-      text: 'HOLD', outClass: 'm2lfoout', outText: '0 OUT'
+      text: 'clock state::HOLD', outClass: 'm2lfoout', outText: ['{n} OUT', { n: '0' }]
     });
   } else if (kind === 'env') {
     status = statusCapsule(box, {
       rootClass: 'm2envstatus', mainClass: 'm2envrun',
-      text: 'IDLE', outClass: 'm2envout', outText: '0.00 · 0 OUT'
+      text: 'IDLE', outClass: 'm2envout', outText: ['{value} · {n} OUT', { value: '0.00', n: '0' }]
     });
     progress = m2mk('div', 'm2envprogress', box);
     progressFill = m2mk('i', null, progress);
   } else {
     status = statusCapsule(box, {
       rootClass: 'm2audiostatus', mainClass: 'm2audiolife', text: 'OFF',
-      middleClass: 'm2audiolevel', middleText: 'LEVEL 0.00',
-      outClass: 'm2audioout', outText: '0 OUT'
+      middleClass: 'm2audiolevel', middleText: ['{:LEVEL} {v}', { v: '0.00' }],
+      outClass: 'm2audioout', outText: ['{n} OUT', { n: '0' }]
     });
   }
   return {
@@ -885,15 +826,15 @@ function buildAudioMeter(ed) {
     flash: m2svg('rect', 'm2audflash', g, { x: -10, y: -10, width: 8, height: 8, rx: 1.5 }),
     labels: []
   };
-  for (const t of ['LOW', 'MID', 'HIGH']) {
+  for (const w of [OUT_WORD.low, OUT_WORD.mid, OUT_WORD.high]) {
     const e = m2svg('text', 'm2audtxt', g, { x: 2, y: 0 });
-    e.textContent = t;
+    kitLabel(e, w.t);
     m.labels.push(e);
   }
   m.scale = m2svg('text', 'm2audtxt', g, { x: 2, y: 0 });
-  m.scale.textContent = 'LEVEL';
+  kitLabel(m.scale, 'LEVEL');
   m.hitLabel = m2svg('text', 'm2audtxt m2audhitlabel', g, { x: 0, y: 0 });
-  m.hitLabel.textContent = 'HIT';
+  kitLabel(m.hitLabel, 'HIT');
   return m;
 }
 
@@ -908,15 +849,15 @@ function mkKnob(parent, o, arcFn) {
     span: o.bounded === false ? 1 : 300 / 360,
     start: o.bounded === false ? 0 : -150
   });
-  const cap = m2mk('div', 'm2kcap', root);
-  cap.textContent = o.cap;
+  const capEl = m2mk('div', 'm2kcap', root);
+  kitLabel(capEl, o.cap);
   const val = m2mk('div', 'm2kval', root);
   const ends = m2mk('div', 'm2kends', root);      // display:none inside #modwin
   const e1 = m2mk('span', null, ends);
-  e1.textContent = o.lo === undefined ? 'MIN' : o.lo;
+  e1.textContent = o.lo === undefined ? t('MIN') : o.lo;
   const e2 = m2mk('span', null, ends);
-  e2.textContent = o.hi === undefined ? 'MAX' : o.hi;
-  return { root, dial, cap, val, ends, e1, e2, arc, id: o.id, label: o.cap };
+  e2.textContent = o.hi === undefined ? t('MAX') : o.hi;
+  return { root, dial, cap: capEl, val, ends, e1, e2, arc, id: o.id, label: o.cap };
 }
 
 /** anim.js:5910 m2mkCheck.  The lamp is a 9 px `i.m2dot`, all CSS. */
@@ -924,9 +865,9 @@ function mkCheck(parent, label, aria) {
   const b = m2mk('button', 'm2chk m2seat44', parent);
   b.type = 'button';
   m2mk('i', 'm2dot', b);
-  const t = m2mk('span', null, b);                // NO class
-  t.textContent = label;
-  if (aria) b.setAttribute('aria-label', aria);
+  const lbl = m2mk('span', null, b);              // NO class
+  kitLabel(lbl, label);
+  if (aria) kitAria(b, aria);
   b.setAttribute('aria-pressed', 'false');
   return b;
 }
@@ -963,18 +904,18 @@ export function buildDevice(run, add, src, copyIn) {
   fold.setAttribute('aria-expanded', 'true');
   m2mk('i', 'm2chev', fold);                      // empty; a CSS triangle
   const kindEl = m2mk('span', 'm2kind', fold);
-  kindEl.textContent = kind.toUpperCase();
+  kitLabel(kindEl, KIND_WORD[kind] ? KIND_WORD[kind].t : String(kind));
   const modeLabel = m2mk('span', 'm2modelabel', fold);
-  modeLabel.textContent = 'FULL';
+  modeLabel.textContent = t('FULL', null, 'device view');   // tr: a device's view: FULL shows every control, CMP (compact) only the performance bank
 
   /* .m2headc is present on all three kinds. */
   const headc = m2mk('div', 'm2headc', head);
   const lfoWave = kind === 'lfo' ? m2mk('span', 'm2lfowave', headc) : null;
-  if (lfoWave) lfoWave.textContent = 'SINE';
+  if (lfoWave) lfoWave.textContent = t('SINE');
   const envStage = kind === 'env' ? m2mk('span', 'm2envstage', headc) : null;
-  if (envStage) envStage.textContent = 'IDLE';
+  if (envStage) envStage.textContent = t('IDLE');
   const audioState = kind === 'audio' ? m2mk('span', 'm2audioheadstate', headc) : null;
-  if (audioState) audioState.textContent = 'OFF';
+  if (audioState) audioState.textContent = t('OFF');
 
   const bank = m2mk('button', 'm2bank', headc);
   bank.type = 'button';
@@ -983,9 +924,9 @@ export function buildDevice(run, add, src, copyIn) {
   const bankB = m2mk('span', 'm2bb', bank); bankB.textContent = 'B';
 
   const cpy = m2mk('button', 'm2ab', headc);
-  cpy.type = 'button'; cpy.textContent = 'COPY';
+  cpy.type = 'button'; kitLabel(cpy, 'COPY');
   const pst = m2mk('button', 'm2ab', headc);
-  pst.type = 'button'; pst.textContent = 'PASTE';
+  pst.type = 'button'; kitLabel(pst, 'PASTE');
 
   /* back into .m2headl: the macro numeral, the vertical bay, the status line */
   const minNum = m2mk('button', 'm2minnum', headl);
@@ -1026,7 +967,7 @@ export function buildDevice(run, add, src, copyIn) {
   let trig = null;
   if (kind === 'env') {
     trig = m2mk('button', 'm2trig', headr);
-    trig.type = 'button'; trig.textContent = 'TRIG';
+    trig.type = 'button'; kitLabel(trig, 'TRIG');
   }
   const pow = m2mk('button', 'm2pow', headr);
   pow.type = 'button';
@@ -1040,7 +981,7 @@ export function buildDevice(run, add, src, copyIn) {
   const body = m2mk('div', 'm2body', root);
   const col = m2mk('div', 'm2col', body);
   const colhead = m2mk('div', 'm2colhead', col);
-  colhead.textContent = copy.colHead[kind];
+  kitLabel(colhead, copy.colHead[kind]);
 
   const presets = {};
   const zoom = [];
@@ -1055,13 +996,13 @@ export function buildDevice(run, add, src, copyIn) {
       /* the `d` is SAMPLED FROM THE PRESET ITSELF by the host's curve maths,
          so the button can never draw a shape the engine would not produce. */
       const p = m2svg('path', 'm2gl', s, { d: '' });
-      b.setAttribute('aria-label', label);
+      kitAria(b, label);
       presets[name] = { btn: b, path: p };
     }
   } else if (kind === 'audio') {
     const wrap = m2mk('div', 'm2aud', col);
     const srcBtn = m2mk('button', 'm2audsrc', wrap);
-    srcBtn.type = 'button'; srcBtn.textContent = 'AUDIO IN';
+    srcBtn.type = 'button'; srcBtn.textContent = t('AUDIO IN');
     srcBtn.setAttribute('aria-pressed', 'false');
     /* its OWN class, not .m2audout: the five routable outputs are counted by
        a gate, and a LIVE lamp in that count is a sixth output that does not
@@ -1069,18 +1010,18 @@ export function buildDevice(run, add, src, copyIn) {
     const live = m2mk('div', 'm2audlive', wrap);
     const liveLed = m2mk('i', 'm2audled', live);
     const liveTxt = m2mk('span', null, live);     // NO class
-    liveTxt.textContent = 'OFF';
+    liveTxt.textContent = t('OFF');
     const setBtn = m2mk('button', 'm2audsrc', wrap);
-    setBtn.type = 'button'; setBtn.textContent = 'SET';
+    setBtn.type = 'button'; kitLabel(setBtn, 'SET');
     const note = m2mk('div', 'm2audnote', col);
-    note.textContent = 'OFF';
+    note.textContent = t('OFF');
     aud = { srcBtn, setBtn, live, liveLed, liveTxt, note, outs: {}, meter: null, sheet: null };
   } else {
     /* FIT is spelled out because a magnifier glyph reads as zoom. */
     for (const glyph of copy.zoom) {
       const b = m2mk('button', 'm2zoom m2seat44' + (glyph === 'FIT' ? ' m2fit' : ''), col);
       b.type = 'button';
-      b.textContent = glyph;
+      if (glyph === 'FIT') kitLabel(b, 'FIT'); else b.textContent = glyph;
       zoom.push(b);
     }
   }
@@ -1088,20 +1029,20 @@ export function buildDevice(run, add, src, copyIn) {
   /* AUDIO has no .m2macbox and no .m2capbox at all. */
   let macbox = null, mac = null, bus = null, capbox = null;
   if (kind !== 'audio') {
-    macbox = m2mk('div', 'm2macbox', col);
-    mac = m2mk('button', 'm2mac', macbox);
-    mac.type = 'button'; mac.textContent = '--'; mac.title = 'MACRO';
+    macbox = cap(m2mk('div', 'm2macbox', col), { t: 'OUT' });
+    mac = cap(m2mk('button', 'm2mac', macbox), { t: 'OUT' });
+    mac.type = 'button'; mac.textContent = '--'; kitHint(mac, 'MACRO');
     capbox = m2mk('div', 'm2capbox', col);
     /* the captions "OUT" and "TRIG IN" are pseudo-elements on .m2mac; these
        two divs are the SEPARATE caption row .m2capbox carries. */
     const macCap = m2mk('div', 'm2maccap m2capgone', capbox);
-    macCap.textContent = 'MACRO';
+    kitLabel(macCap, 'MACRO');
     macCap.setAttribute('aria-hidden', 'true');
     if (kind === 'env') {
-      bus = m2mk('button', 'm2mac m2bus', macbox);
-      bus.type = 'button'; bus.textContent = '--'; bus.title = 'TRIG';
+      bus = cap(m2mk('button', 'm2mac m2bus', macbox), { t: 'TRIG IN' });
+      bus.type = 'button'; bus.textContent = '--'; kitHint(bus, 'TRIG');
       const busCap = m2mk('div', 'm2maccap', capbox);
-      busCap.textContent = 'TRIG';
+      kitLabel(busCap, 'TRIG');
     }
   }
 
@@ -1115,12 +1056,12 @@ export function buildDevice(run, add, src, copyIn) {
   if (kind === 'lfo') {
     const swBox = m2mk('div', 'm2sw', rt);
     sw.trig = m2mk('button', 'm2swb m2seat44', swBox);
-    sw.trig.type = 'button'; sw.trig.textContent = 'TRIG';
+    sw.trig.type = 'button'; kitLabel(sw.trig, 'TRIG');
     sw.trig.setAttribute('aria-pressed', 'false');
     flipBtn = m2mk('button', 'm2flipb m2seat44', swBox);
-    flipBtn.type = 'button'; flipBtn.textContent = 'FLIP';
+    flipBtn.type = 'button'; kitLabel(flipBtn, 'FLIP');
     sw.off = m2mk('button', 'm2swb m2seat44', swBox);
-    sw.off.type = 'button'; sw.off.textContent = 'OFF';
+    sw.off.type = 'button'; kitLabel(sw.off, 'OFF');
     sw.off.setAttribute('aria-pressed', 'false');
     const cks = m2mk('div', 'm2chks', rt);
     for (const [key, label] of copy.lfoChecks) checks[key] = mkCheck(cks, label);
@@ -1137,7 +1078,7 @@ export function buildDevice(run, add, src, copyIn) {
       boxBtn.type = 'button';
       boxBtn.dataset.child = '';
       const nm = m2mk('span', 'm2audname', boxBtn);
-      nm.textContent = k.toUpperCase();
+      kitLabel(nm, OUT_WORD[k] ? OUT_WORD[k].t : String(k));
       const slot = m2mk('span', 'm2audslot', boxBtn);
       slot.textContent = '--';
       aud.outs[k] = { row: rowEl, grip, led, box: boxBtn, name: nm, slot };
@@ -1162,15 +1103,15 @@ export function buildDevice(run, add, src, copyIn) {
     const zone = m2mk('div', 'm2lfocmpzone', root);
     const shape = m2mk('button', 'm2lfocmpcmd m2lfocmpshape', zone);
     shape.type = 'button';
-    const shapeCap = m2mk('span', 'm2lfocmpcap', shape); shapeCap.textContent = 'WAVE';
+    const shapeCap = kitLabel(m2mk('span', 'm2lfocmpcap', shape), 'WAVE');
     const shapeSvg = m2svg('svg', null, shape,
       { viewBox: '0 0 52 14', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
     const shapePath = m2svg('path', null, shapeSvg, {});
-    const shapeValue = m2mk('span', 'm2lfocmpvalue', shape); shapeValue.textContent = 'SINE';
+    const shapeValue = m2mk('span', 'm2lfocmpvalue', shape); shapeValue.textContent = t('SINE');
 
     const macroBtn = m2mk('button', 'm2lfocmpcmd m2lfocmpmacro', zone);
     macroBtn.type = 'button';
-    m2mk('span', 'm2lfocmpcap', macroBtn).textContent = 'OUT';
+    kitLabel(m2mk('span', 'm2lfocmpcap', macroBtn), 'OUT');
     const macroValue = m2mk('span', 'm2lfocmpvalue', macroBtn); macroValue.textContent = '--';
 
     const toggles = {};
@@ -1178,13 +1119,13 @@ export function buildDevice(run, add, src, copyIn) {
       const b = m2mk('button', 'm2lfocmpcmd m2lfocmptoggle', zone);
       b.type = 'button';
       b.setAttribute('aria-pressed', 'false');
-      m2mk('span', 'm2lfocmplabel', b).textContent = label;
+      kitLabel(m2mk('span', 'm2lfocmplabel', b), label);
       toggles[key] = b;
     }
     const copyCmd = m2mk('button', 'm2lfocmpcmd m2lfocmpclip', zone);
-    copyCmd.type = 'button'; copyCmd.textContent = 'COPY';
+    copyCmd.type = 'button'; kitLabel(copyCmd, 'COPY');
     const pasteCmd = m2mk('button', 'm2lfocmpcmd m2lfocmpclip', zone);
-    pasteCmd.type = 'button'; pasteCmd.textContent = 'PASTE';
+    pasteCmd.type = 'button'; kitLabel(pasteCmd, 'PASTE');
     compactLfo = {
       root: zone, shape, shapeCap, shapeSvg, shapePath, shapeValue,
       macro: macroBtn, macroValue, toggles, copy: copyCmd, paste: pasteCmd
@@ -1219,7 +1160,7 @@ export function setDeviceMode(dev, mode, anatomy) {
   d.root.dataset.anatomy = an === 'C' ? 'compact' : 'full';
   d.root.classList.toggle('m2cmp', want === 'C');
   d.root.classList.toggle('m2min', want === 'M');
-  if (d.modeLabel) d.modeLabel.textContent = an === 'C' ? 'CMP' : 'FULL';
+  if (d.modeLabel) d.modeLabel.textContent = an === 'C' ? t('CMP') : t('FULL', null, 'device view');   // tr[CMP]: short for COMPACT: the device shows only its performance bank
   return want;
 }
 
@@ -1231,29 +1172,29 @@ export function buildAudioSheet(dev, copyIn) {
   const root = m2mk('div', 'm2audsheet', dev.root);
   root.hidden = true;
   const head = m2mk('div', 'm2audshead', root);
-  head.textContent = 'CONDITIONING';              // set FIRST; children after
+  leadText(head, { t: 'CONDITIONING' });          // set FIRST; children after
   const input = m2mk('select', 'm2audinput', head);
-  input.setAttribute('aria-label', 'Audio input device');
+  kitAria(input, 'Audio input device');
   const opt = document.createElement('option');
   opt.value = '';
-  opt.textContent = 'SYSTEM DEFAULT';
+  kitLabel(opt, 'SYSTEM DEFAULT');
   input.appendChild(opt);
   const x = m2mk('button', 'm2audsx', head);
   x.type = 'button';
   x.textContent = '×';
-  x.setAttribute('aria-label', 'Close the conditioning sheet');
+  kitAria(x, 'Close the conditioning sheet');
   const rows = {};
   for (const [key, label] of copy.audioSheetRows) {
     const row = m2mk('div', 'm2audsrow', root);
     const lab = m2mk('div', 'm2audslab', row);
-    lab.textContent = label;
+    kitLabel(lab, label);
     const dn = m2mk('button', 'm2audsbtn', row);
     dn.type = 'button'; dn.textContent = '−';
-    dn.setAttribute('aria-label', 'Lower ' + label);
+    kitAria(dn, 'Lower {name}', { name: { t: label } });
     const val = m2mk('div', 'm2audsval', row);
     const up = m2mk('button', 'm2audsbtn', row);
     up.type = 'button'; up.textContent = '+';
-    up.setAttribute('aria-label', 'Raise ' + label);
+    kitAria(up, 'Raise {name}', { name: { t: label } });
     const leg = m2mk('div', 'm2audsleg', root);   // ← the sheet root, not `row`
     rows[key] = { row, lab, dn, val, up, leg };
   }
@@ -1319,11 +1260,11 @@ export function buildSpan(hostEl, shape) {
     };
   }
   /* the two caps are SIBLINGS of the band, children of the host. */
-  const cap = m2mk('i', 'm2spancap ' + shape, hostEl);
-  cap.setAttribute('aria-hidden', 'true');
+  const spanCap = m2mk('i', 'm2spancap ' + shape, hostEl);
+  spanCap.setAttribute('aria-hidden', 'true');
   const liveCap = m2mk('i', 'm2spanlivecap ' + shape, hostEl);
   liveCap.setAttribute('aria-hidden', 'true');
-  return { shape, root, cap, liveCap, arc: null, base: null, live: null };
+  return { shape, root, cap: spanCap, liveCap, arc: null, base: null, live: null };
 }
 
 /** anim.js:5114 m2ensureClear. */
@@ -1338,7 +1279,7 @@ export function buildClear(hostEl, targetId) {
 /** anim.js:4932.  Appended to document.body, outside every window. */
 export function buildGhost(text) {
   const g = m2mk('div', 'm2ghost', document.body);
-  g.textContent = String(text === undefined ? 'MACRO' : text).slice(0, 12);
+  g.textContent = String(text === undefined ? t('MACRO') : text).slice(0, 12);
   return g;
 }
 
@@ -1355,7 +1296,7 @@ export function buildDevicePick(windowRoot, copyIn) {
   for (const [kind, label] of copy.devicePick) {
     const b = m2mk('button', 'm2pickb', root);
     b.type = 'button';
-    b.textContent = label;
+    kitLabel(b, label);
     btns[kind] = b;
   }
   root.hidden = true;          // born closed, so the first tap SHOWS
@@ -1370,7 +1311,7 @@ export function buildMacroPick(windowRoot, copyIn) {
   for (const [kind, label] of copy.macroPick) {
     const b = m2mk('button', 'm2pickb', root);
     b.type = 'button';
-    b.textContent = label;
+    kitLabel(b, label);
     btns[kind] = b;
   }
   root.hidden = true;
@@ -1383,7 +1324,7 @@ export function buildPresetSheet(windowRoot, copyIn) {
   const copy = Object.assign({}, COPY, copyIn || {});
   const root = m2mk('div', 'm2ppick glass', windowRoot);
   root.setAttribute('role', 'listbox');
-  root.setAttribute('aria-label', copy.presetSheetLabel.replace('{factory}', copy.factory));
+  kitAria(root, copy.presetSheetLabel, { factory: { t: copy.factory } });
   root.hidden = true;
   return { root, group: (name, shut, on) => buildPresetGroup(root, name, shut, on) };
 }
@@ -1419,7 +1360,7 @@ function buildPresetGroup(sheet, name, shut, on) {
       const nm = m2mk('span', 'm2prowname', b);
       nm.textContent = preset;
       const rtag = m2mk('span', 'm2prowtag', b);
-      rtag.textContent = o.factory ? 'FACTORY' : (o.stale ? 'OLDER MODEL' : '');
+      rtag.textContent = o.factory ? t('FACTORY') : (o.stale ? t('OLDER MODEL') : '');
       if (o.factory) return { wrap, btn: b, name: nm, tag: rtag, del: null };
       const del = m2mk('button', 'm2prowdel', wrap);
       del.type = 'button';
@@ -1434,7 +1375,7 @@ export function buildDeadInspector(windowRoot) {
   const root = m2mk('div', 'm2deadpick glass', windowRoot);
   root.id = IDS.deadInspector;
   root.setAttribute('role', 'dialog');
-  root.setAttribute('aria-label', 'Dead-send inspector');
+  kitAria(root, 'Dead-send inspector');
   root.hidden = true;
   root.dataset.side = 'below';
   const head = m2mk('div', 'm2deadhead', root);
@@ -1442,7 +1383,7 @@ export function buildDeadInspector(windowRoot) {
   const close = m2mk('button', 'm2deadclose', head);
   close.type = 'button';
   close.textContent = '×';
-  close.setAttribute('aria-label', 'Close dead-send inspector');
+  kitAria(close, 'Close dead-send inspector');
   const list = m2mk('div', 'm2deadlist', root);
   list.setAttribute('role', 'list');
   return {
@@ -1466,7 +1407,7 @@ export function buildDeadInspector(windowRoot) {
       const remove = m2mk('button', 'm2deadremove', r);
       remove.type = 'button';
       if (o.routeId !== undefined) remove.dataset.routeId = String(o.routeId);
-      remove.textContent = 'REMOVE';
+      kitLabel(remove, 'REMOVE');
       return { root: r, source, target, why, trail, remove };
     }
   };

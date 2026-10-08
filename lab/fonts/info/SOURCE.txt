@@ -1,0 +1,22 @@
+MIR notebook faces — fetched 2026-10-01
+
+Spectral-400i-latin-ext.woff2  20644 B  https://fonts.gstatic.com/s/spectral/v15/rnCt-xNNww_2s0amA9M8onTmTMuk.woff2
+Spectral-400i-latin.woff2  22712 B  https://fonts.gstatic.com/s/spectral/v15/rnCt-xNNww_2s0amA9M8onrmTA.woff2
+Spectral-600i-latin-ext.woff2  21516 B  https://fonts.gstatic.com/s/spectral/v15/rnCu-xNNww_2s0amA9M8qqXCWfqFXUIJ.woff2
+Spectral-600i-latin.woff2  24232 B  https://fonts.gstatic.com/s/spectral/v15/rnCu-xNNww_2s0amA9M8qqXCWfSFXQ.woff2
+Spectral-400-latin-ext.woff2  20240 B  https://fonts.gstatic.com/s/spectral/v15/rnCr-xNNww_2s0amA9M3knj-SA.woff2
+Spectral-400-latin.woff2  21696 B  https://fonts.gstatic.com/s/spectral/v15/rnCr-xNNww_2s0amA9M5kng.woff2
+Spectral-600-latin-ext.woff2  20824 B  https://fonts.gstatic.com/s/spectral/v15/rnCs-xNNww_2s0amA9vmtm3PafadWQ.woff2
+Spectral-600-latin.woff2  22936 B  https://fonts.gstatic.com/s/spectral/v15/rnCs-xNNww_2s0amA9vmtm3BafY.woff2
+Spectral-OFL.txt  https://github.com/google/fonts/blob/main/ofl/spectral/OFL.txt
+
+PlayfairDisplay-700i-latin-ext.woff2  14128 B  https://fonts.gstatic.com/s/playfairdisplay/v40/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_k-UXt_A-W2r.woff2
+PlayfairDisplay-700i-latin.woff2  23196 B  https://fonts.gstatic.com/s/playfairdisplay/v40/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_k-UXtHA-Q.woff2
+PlayfairDisplay-700-latin-ext.woff2  12904 B  https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDZbtPY_Q.woff2
+PlayfairDisplay-700-latin.woff2  23224 B  https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDXbtM.woff2
+PlayfairDisplay-OFL.txt  https://github.com/google/fonts/blob/main/ofl/playfairdisplay/OFL.txt
+
+AlegreyaSC-400-latin-ext.woff2  30264 B  https://fonts.gstatic.com/s/alegreyasc/v28/taiOGmRtCJ62-O0HhNEa-Z6h2ZAJaQ.woff2
+AlegreyaSC-400-latin.woff2  29096 B  https://fonts.gstatic.com/s/alegreyasc/v28/taiOGmRtCJ62-O0HhNEa-Z6v2ZA.woff2
+AlegreyaSC-OFL.txt  https://github.com/google/fonts/blob/main/ofl/alegreyasc/OFL.txt
+
