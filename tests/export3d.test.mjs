@@ -133,6 +133,13 @@ function readGLB(bytes) {
   const near = (a, b) => a.every((q, i) => Math.abs(q - b[i]) < 1e-5);
   assert.ok(near(fwd, yUp(camera.dir.map((d) => -d))), 'the camera looks along −dir'); assert.ok(near(up, yUp(camera.up)), 'and its up is the observer\'s');
   assert.ok(near(quatOfBasis([1, 0, 0], [0, 1, 0], [0, 0, 1]), [0, 0, 0, 1]));
+  /* 0.4.0 S2: glTF has no principal point, so a lens shift rides as the camera node's extras — and only when there is one */
+  assert.equal(node.extras, undefined, 'an on-axis camera carries no extras');
+  for (const shift of [[0, 0], [0.4, -0.3]]) {
+    const n2 = readGLB(glb(mesh, { camera: { ...camera, shift } })).json.nodes.find((n) => n.camera === 0);
+    assert.deepEqual(n2.extras, shift[0] ? { lensShift: [0.4, -0.3] } : undefined);
+    assert.deepEqual(n2.translation, node.translation); assert.deepEqual(n2.rotation, node.rotation);
+  }
   pass(`GLB: magic glTF, version 2, length ${bytes.byteLength} = the header's, JSON and BIN chunks 4-aligned, accessors ${J.accessors.map((a) => a.count).join('/')} = the mesh's, POSITION min/max = the measured bounds, Y up, colours linear in 0–1, and the observer camera (yfov 0.6, aspect 1.5, near 0.05, far 100·half) looking along −dir with its up`);
 }
 

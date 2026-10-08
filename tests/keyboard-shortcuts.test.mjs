@@ -20,3 +20,22 @@ assert.equal(bindAction(actions, 'free', { key: 'Tab' }).ok, false);
 assert.equal(bindAction(actions, 'free', { key: 'Escape' }).ok, false);
 assert.equal(bindAction(actions, 'free', { key: 'ControlLeft' }).ok, false);
 console.log('PASS keyboard chords: layered modifiers, wildcard Shift conflicts, atomic steals and reserved keys');
+
+/* 0.4.0 S2 · THE ALT+ARROW QUARTET slides the picture (the lens shift).  The shipped camera and transport chords it sits beside
+   (rack.js ACTIONS): no overlap with the bare arrows, Q/E, Shift+Q/E, Ctrl+Shift+Q/E or WASD.  Alt in the reserved set means
+   "not bindable ALONE" (AltLeft as the key), never "not a modifier". */
+const shipped = [
+  { id: 'stepBack', key: 'ArrowLeft' }, { id: 'stepFwd', key: 'ArrowRight' }, { id: 'zoomIn', key: 'ArrowUp' }, { id: 'zoomOut', key: 'ArrowDown' },
+  { id: 'yawL', key: 'KeyA' }, { id: 'yawR', key: 'KeyD' }, { id: 'pitchUp', key: 'KeyW' }, { id: 'pitchDn', key: 'KeyS' },
+  { id: 'dollyIn', key: 'KeyQ', shift: false }, { id: 'dollyOut', key: 'KeyE', shift: false }, { id: 'povIn', key: 'KeyQ', shift: true }, { id: 'povOut', key: 'KeyE', shift: true },
+  { id: 'dollyZoomIn', key: 'KeyQ', ctrl: true, shift: true }, { id: 'dollyZoomOut', key: 'KeyE', ctrl: true, shift: true },
+  { id: 'historyUndo', key: 'KeyZ', ctrl: true, alt: true, shift: false },
+  { id: 'panLeft', key: 'ArrowLeft', alt: true }, { id: 'panRight', key: 'ArrowRight', alt: true }, { id: 'panUp', key: 'ArrowUp', alt: true }, { id: 'panDown', key: 'ArrowDown', alt: true },
+];
+for (let i = 0; i < shipped.length; i++) for (let j = i + 1; j < shipped.length; j++)
+  assert.equal(bindingOverlap(shipped[i], shipped[j]), false, `shipped ${shipped[i].id} / ${shipped[j].id}`);
+assert.deepEqual(bindingConflicts(shipped, 'x', { key: 'ArrowLeft', alt: true, shift: true }).map((a) => a.id), ['panLeft'], 'Shift+Alt+← is the fine pan (wildcard Shift), not a new chord');
+assert.deepEqual(bindingConflicts(shipped, 'x', { key: 'ArrowLeft' }).map((a) => a.id), ['stepBack'], 'the bare arrow is still time');
+assert.equal(bindAction(shipped, 'panLeft', { key: 'AltLeft' }).ok, false, 'Alt alone is not a binding');
+assert.equal(bindAction(shipped, 'panLeft', { key: 'KeyJ', alt: true }).ok, true, 'Alt is a modifier like any other');
+console.log('PASS the Alt+Arrow pan quartet: no overlap with the arrows, WASD, Q/E, Shift+Q/E, Ctrl+Shift+Q/E or Ctrl+Alt+Z; Shift+Alt+Arrow is its fine step; Alt binds as a modifier and never alone');

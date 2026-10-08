@@ -1,13 +1,22 @@
 // Pointer ownership and camera gestures. Physics-specific drags are supplied by
 // the instrument; only their owning pointer may move, commit, or cancel them.
+// 0.4.0 S2: the wheel and the pinch zoom at the cursor / the fingers' centroid
+// (zoomAt, in uv), and two fingers or an Alt-drag slide the picture (pan, in uv:
+// one pixel of drag moves the picture one pixel).
 export function bindStageGestures(canvas, {
-  camera, travel, law, getDistance, setDistance, orbitBy, resetView,
+  camera, travel, law, getDistance, zoomAt, pan, orbitBy, resetView,
   setDragging, present, startSpecial, hover, now = () => performance.now(),
 }) {
   const points = new Map(), history = [];
   let special = null, pinch = null, down = null, lastTap = null, fine = false;
   const doc = canvas.ownerDocument, win = doc.defaultView;
   canvas.tabIndex = -1; // Pointer focus owns the stage's Tab-to-raise shortcut.
+  const uv = (x, y, r) => [2 * (x - r.left) / r.width - 1, 1 - 2 * (y - r.top) / r.height];
+  const centroid = () => { const [a, b] = points.values(); return [(a.x + b.x) / 2, (a.y + b.y) / 2]; };
+  function slide(e) { // Alt-drag: the lens shift, never the instrument's specials.
+    const r = canvas.getBoundingClientRect(); let x = e.clientX, y = e.clientY;
+    return { move(m) { pan(2 * (m.clientX - x) / r.width, -2 * (m.clientY - y) / r.height); x = m.clientX; y = m.clientY; } };
+  }
 
   function capture(id) {
     try { canvas.setPointerCapture(id); } catch (_) {} // Synthetic or expired pointer.
@@ -25,7 +34,7 @@ export function bindStageGestures(canvas, {
     pinch = null;
     if (points.size === 2) {
       const [a, b] = points.values();
-      pinch = { span: Math.hypot(a.x - b.x, a.y - b.y), distance: getDistance() };
+      pinch = { span: Math.hypot(a.x - b.x, a.y - b.y), distance: getDistance(), box: canvas.getBoundingClientRect() };
     }
     if (points.size === 1) remember();
   }
@@ -40,7 +49,7 @@ export function bindStageGestures(canvas, {
     if (e.button !== 0 || special || points.has(e.pointerId) || points.size === 2) return;
     try { canvas.focus({ preventScroll: true }); } catch (_) {}
     if (!points.size) {
-      const action = startSpecial(e);
+      const action = e.altKey && !e.ctrlKey ? slide(e) : startSpecial(e);
       if (action) {
         e.preventDefault(); lastTap = null;
         special = { id: e.pointerId, action }; capture(e.pointerId); return;
@@ -68,10 +77,12 @@ export function bindStageGestures(canvas, {
       orbitBy(-(e.clientX - p.x) * gain, (e.clientY - p.y) * gain);
       remember();
     }
+    const c0 = pinch && centroid();
     p.x = e.clientX; p.y = e.clientY;
     if (pinch) {
-      const [a, b] = points.values(), span = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinch.span > 0) setDistance(pinch.distance * pinch.span / Math.max(1, span));
+      const [a, b] = points.values(), span = Math.hypot(a.x - b.x, a.y - b.y), c1 = centroid(), r = pinch.box;
+      pan(2 * (c1[0] - c0[0]) / r.width, -2 * (c1[1] - c0[1]) / r.height); // Two fingers slide the picture, then zoom about where they are.
+      if (pinch.span > 0) zoomAt(uv(c1[0], c1[1], r), pinch.distance * pinch.span / Math.max(1, span));
       else rebase(); // Two contacts can initially have the same coordinates.
     }
     present();
@@ -112,7 +123,7 @@ export function bindStageGestures(canvas, {
     e.preventDefault();
     // WheelEvent deltaMode: pixels, lines (16 CSS px), or viewport pages.
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? canvas.clientHeight : 1;
-    setDistance(getDistance() * Math.pow(1.1, e.deltaY * unit / 100));
+    zoomAt(uv(e.clientX, e.clientY, canvas.getBoundingClientRect()), getDistance() * Math.pow(1.1, e.deltaY * unit / 100));
   }, { passive: false });
   canvas.addEventListener('dblclick', resetView);
   win.addEventListener('blur', cancel);

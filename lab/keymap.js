@@ -126,6 +126,7 @@ const KNOWN_SHORTS = {
   dollyZoomIn: 'dolly zoom in',
   dollyZoomOut: 'dolly zoom out',
   camReset: 'cam reset',
+  panLeft: 'pan left', panRight: 'pan right', panUp: 'pan up', panDown: 'pan down',
   axisX: 'axis X',
   axisY: 'axis Y',
   axisZ: 'axis Z',
@@ -415,7 +416,7 @@ export function createKeymap(host, keys, options = {}) {
 
   function categoryOf(a) {
     if (['play','home','stepBack','stepFwd','modArm','modBar'].includes(a.id)) return 'TRANSPORT';
-    if (['zoomIn','zoomOut','yawL','yawR','pitchUp','pitchDn','dollyIn','dollyOut','povIn','povOut','dollyZoomIn','dollyZoomOut','camReset'].includes(a.id)) return 'CAMERA';
+    if (['zoomIn','zoomOut','yawL','yawR','pitchUp','pitchDn','dollyIn','dollyOut','povIn','povOut','dollyZoomIn','dollyZoomOut','camReset','panLeft','panRight','panUp','panDown'].includes(a.id)) return 'CAMERA';
     if (['axisX','axisY','axisZ','rotorBoth','rotorPlus','rotorMinus','rotorK','turnNeg','turnPos','slap','reseed'].includes(a.id)) return 'STATE';
     if (['undo','redo','redoY','historyUndo','save','saveAs'].includes(a.id)) return 'PROJECT';
     return 'WINDOWS & DISPLAY';

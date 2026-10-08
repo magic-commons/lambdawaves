@@ -35,8 +35,12 @@ import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE ca
  * (two turns a second) so no flick can outrun the picture.  A fling that hits the POLE CLAMP loses its pitch
  * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
  * not on the undo stack, and reg.version cannot move because of it (§14). */
-export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 },
-  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01 };
+export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
+  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
+/** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
+ *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything
+ *  that is not a finite number reads 0 (an older project, a hand-edited file). */
+export const clampShift = (s) => [0, 1].map((i) => { const v = s ? +s[i] : 0; return Math.max(-CAM.SHIFT, Math.min(CAM.SHIFT, Number.isFinite(v) ? v : 0)) + 0; });
 
 export function createCameraLaw({ obs, ui, present, modHand, resetWall }) {
   const camera = {
@@ -65,7 +69,8 @@ export function createCameraLaw({ obs, ui, present, modHand, resetWall }) {
     get radPerPixel() { return this.dragGain * CAM.SENS; },
     setAutoRotate(v) { this.autoRotate = !!v; if (ui.spinSw) ui.spinSw.set(this.autoRotate); this.wake(); return this.autoRotate; },
     setSpeed(v) { this.speed = v; if (ui.spinK) ui.spinK.set(v); this.wake(); return v; },
-    setDist(v) { return setDist(v); }, setFov(v) { return setFov(v); }, reset() { resetView(); },
+    setDist(v) { return setDist(v); }, setFov(v, c) { return setFov(v, c); }, reset() { resetView(); },
+    zoomAt(c, v) { return zoomAt(c, v); }, setShift(x, y) { return setShift(x, y); }, panBy(du, dv) { return panBy(du, dv); },   // 0.4.0 S2
   };
   const camTravel = { yaw: 0, pitch: 0 };     // the turn a drag has APPLIED, in the turntable's units — the FLING reads this in BOTH modes
   const camLevel = { from: null, to: null, t0: 0, ms: 150, yaw: 0, pitch: 0 };   // FREE → TURNTABLE levels the roll over 150 ms; it never snaps
@@ -149,13 +154,26 @@ export function createCameraLaw({ obs, ui, present, modHand, resetWall }) {
     return dyaw !== 0 || ip !== 0;
   }
   /* the camera's pose has ONE road each: the ZOOM dial, the wheel, the pinch and the arrow keys all come through
-     setDist, so the dial can never lie about where the camera is (and neither can a restored project) */
-  function setDist(v) { if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); if (ui.zoomK) ui.zoomK.set(obs.dist); present(); return obs.dist; }
-  function setFov(v) { if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); if (ui.fovK) ui.fovK.set(obs.fov); present(); return obs.fov; }
-  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); }
+     zoomAt, so the dial can never lie about where the camera is (and neither can a restored project).
+     ZOOM TO THE CURSOR (0.4.0 S2): the point of the pivot plane under uv c holds still.  That point sits at D·(c − p)·tanH
+     (× aspect in x) from the axis, so holding it through D·tanH → D′·tanH′ moves the shift to p′ = c − (c − p)·k with
+     k = D·tanH / (D′·tanH′).  The wheel and the pinch pass the cursor or the fingers' centroid; the dials and the keys
+     anchor at the frame's centre (c = 0, p′ = p·k).  A modulated ZOOM or FOV leaves the shift alone. */
+  const CENTRE = Object.freeze([0, 0]);
+  const anchor = (c, k) => { if (k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
+  function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); if (ui.zoomK) ui.zoomK.set(obs.dist); anchor(c, d0 / obs.dist); present(); return obs.dist; }
+  const setDist = (v) => zoomAt(CENTRE, v);
+  function setFov(v, c = CENTRE) { const t0 = Math.tan(obs.fov / 2); if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); if (ui.fovK) ui.fovK.set(obs.fov); anchor(c, t0 / Math.tan(obs.fov / 2)); present(); return obs.fov; }
+  /** THE LENS SHIFT's one road: the PAN knobs, PAN HOME, Alt-drag, two fingers, the Alt+Arrows and the zooms above */
+  function setShift(x, y) {
+    const s = obs.shift || CENTRE, c = clampShift([x, y]), hx = modHand('observer.panx', c[0]), hy = modHand('observer.pany', c[1]);
+    obs.shift = [hx ? s[0] : c[0], hy ? s[1] : c[1]]; if (ui.panXK) ui.panXK.set(obs.shift[0]); if (ui.panYK) ui.panYK.set(obs.shift[1]); present(); return obs.shift;
+  }
+  const panBy = (du, dv) => { const s = obs.shift || CENTRE; return setShift(s[0] + du, s[1] + dv); };
+  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); if (ui.panXK) { const s = obs.shift || CENTRE; ui.panXK.set(s[0]); ui.panYK.set(s[1]); } }
   /** RESET VIEW (the trigger, R, a double-click and a double-tap): the shipped pose and the motion with it —
       AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
   function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); syncCamUI(); present(); }   // wave 54: the pose is the same pose in either mode
   return { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView };
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, setShift, panBy };
 }

@@ -3589,3 +3589,84 @@ on the base and after each of the four commits; `bash test.sh node` green (61 su
 `keyboard-shortcuts` green; browser one at a time: `export3d` green, `render-regressions` green, `current` 15/15,
 `frame-occlusion` 7/7 (one red under a load of 18 from the sibling's runs — the scrolled-mask timing — green alone
 and green on the base tree). Light check: MOLECULES H₂O's three labels move on an orbit and hold still after.
+
+## 2026-10-07 · 0.4.0 S2 — THE CAMERA
+
+### wave 145: THE SHIFT — the on-axis picture translated by `obs.shift`, in every seat at once
+
+PLAN F4 under `BRIEF-S2-CAMERA.md` §1's one convention: `obs.shift = [px, py]` is where the pivot appears on the frame, in
+NDC (+y up), each component clamped to [−1, 1] (`camera-law.js` `CAM.SHIFT`, `clampShift`). It is a lens shift — the view
+matrix and `cameraBasis` do not move, only the principal point — so each pass changes by one line, in the three seats S1′
+left for it. `field.js` `lensShift(E, aspect, lane, at, P)` writes the ray pass's forward lane `fwd − px·tanH·aspect·right
+− py·tanH·up` (the pixel at uv u marches the on-axis ray of u − p; the ray pass normalises, the headlight follows the lane)
+and the line pass's principal point `P[8] = −px`, `P[9] = −py` (column-major, w = −z: `x_clip += P[8]·z` adds px to the
+NDC); at p = 0 it writes nothing, so the lane is `fwd` and the matrix `perspective()`'s, byte for byte. `toScreen.at` adds
+`(px·W/2, −py·H/2)`; its new inverse `toScreen.ray` is the pointer's ray, so `pointerRay` is three lines over it and
+`unproject`, the KEPLER drag and the HELIUM placement inherit the shift. glTF's camera has no principal point, so a GLB
+carries a shift as the observer node's `extras.lensShift` (only when there is one). `tests/camera-shift.test.mjs`: p = 0
+bit for bit against bd9b0e5's own expressions (the lane, the matrix, `at`, the ray); the pivot at p through the line
+matrix, the ray lane, `at` and the pointer to 1e-12; 80 (pose, shift, point) triples on one pixel through all four (worst
+NDC gap 1.1e-15), each the unshifted pixel moved by exactly (px·W/2, −py·H/2).
+
+### wave 146: THE HANDS — zoom to the cursor, the slide, the keys
+
+**Zoom to the cursor.** The pivot-plane point under uv u sits at D·(u − p)·tanH (× aspect in x) from the axis; holding it
+still at u = c through D·tanH → D′·tanH′ gives `p′ = c − (c − p)·k`, `k = D·tanH / (D′·tanH′)` — the plan's
+`c − (c − shift)·dist/dist′`, right once the pivot appears AT the shift. `camera-law.js` `zoomAt(c, dist′)` is the ZOOM road
+(`setDist` = `zoomAt` at the centre, so the dial keeps ONE road) and `setFov(v, c)` the FOV's; the wheel passes the cursor
+and the pinch the fingers' centroid (`stage-gestures.js`), the dials and the keys anchor at the frame's centre (p′ = p·k), a
+modulated ZOOM or FOV and a zoom held at the DIST limit (k = 1) leave the shift alone. **The slide.** `setShift(x, y)` is
+the shift's one road (clamped, `modHand` per axis); an Alt-drag on a mouse or trackpad and a two-finger drag move it by
+`Δp = (2Δx/W, −2Δy/H)` — one pixel of drag, one pixel of picture — the two fingers sliding before they zoom about where they
+are. Ctrl+Alt stays the impulse; Alt takes the stage before the KEPLER grab (Alt is the slide, always); the wheel stays
+dolly. This desktop's window manager (Ubuntu GNOME) drags windows with Super, not Alt (`mouse-button-modifier` =
+`<Super>`), and the driver's own Alt-drag in Firefox reached the stage, `preventDefault` held, no orbit. **The keys.**
+Alt+←/→/↑/↓ slide 0.05 of the half-frame (Shift = fine, 0.0125); `AltLeft`/`AltRight` in the reserved set mean "not
+bindable alone", Alt binds as a modifier like any other, and the matched keydown's `preventDefault` keeps Alt+← from
+taking the page Back. RESET VIEW, the double-click and the double-tap bring the pivot home (`CAM.HOME.shift`, frozen).
+`readPixels` / `linePixels` take `keep` and hand back their pixels for a gate that needs WHERE (the hashes untouched).
+
+### wave 147: THE PANEL, THE SCOPE, THE LINK — "1b₁ of water, framed in the gap" is one link
+
+CAMERA gains PAN X / PAN Y (bipolar −1…1), PAN HOME and one sentence in its note; the targets `observer.panx` /
+`observer.pany` sit beside yaw / pitch / dist / fov and in `modSeats`. The boot pose carries `shift: [0, 0]`; `serialize()`
+copies it (a seat write must never reach the live pose), `restore()` reads it clamped, and a pose without one (an older
+project or link) opens at 0. `docs/STATE-SCOPES.md`'s pose row gains `shift` (PROJECT, not in history: a view is not an
+edit). `node tools/new-project.mjs` rewrote the empty project ONLY because the pose default gained the field (16,829 →
+16,866 B, `"shift": [0, 0]`); `--check` in step. **The link** (`statelink.js`, its v1 policy): the CAM section gains the
+shift as two f32 at its END, written only when there is one, so a centred shot mints the very bytes bd9b0e5 minted; one new
+tag, `MOL 0x0A` ('molecule'), carries `{library id, basis, view}` as literal strings (the name tables are frozen), the
+orbital's index (0 = not chosen) and, when the solve named it, its S1 name `{group, irrep, count, member}` — the join key
+chemview resolves first (on the landing solve, or at once when the molecule is already up), the index its fallback.
+Measured with bd9b0e5's own `decodeState` on a new link: it reads the pose (the 33 CAM bytes it knows, the 8-byte tail
+ignored) and skips 0x0A with its "minted by a newer build" warning; the new decoder reads bd9b0e5's link centred. In the
+app, a water link (orbital view, orbital 5 = 1b₁ · HOMO, p = (0.4, −0.3)) is 340 characters and lands H₂O, its view, its
+shift and orbital 5 by its name — also from a forged copy whose index says 3.
+
+### wave 148: The proof — one FRAME corner on one pixel, the lock at 1004, the device report equal
+
+`tests/camera-shift.browser-test.mjs` (new, in the gate): at ZOOM 8 with a flat grey stage, the ray pass at GAMMA 2.4 with
+no chrome shows the box's silhouette (where the march begins, `bg^(1/γ)` appears) and `linePixels` the box alone, both
+read back with the new `keep`. At p = (0.4, −0.3) the box's left corner lands at (677.5, 354.5) in the lines and
+(678.5, 354.5) in the ray pass against the +p prediction (677.78, 354.44); the −p prediction is 568 px away, so the line
+pass's `P[8] = −px` is the right sign, as the brief wrote it; the pointer's ray through that pixel passes the 3-D corner
+at 0.29 px. At p = 0 the same corner sits on the unshifted prediction. Through `unproject`, the pivot-plane point under the
+cursor moves 0.0145 px across a real wheel step (the event's integer clientY), 0 px across a two-finger pinch about it and
+0 px across an anchored FOV step. The driver's own Alt-drag, two fingers, Alt+→/↑ and Shift+Alt+↑, the double-click home,
+the PAN knobs, a project's shift and the water link are judged in the same file.
+
+The digest lock (`--grids 96 --query gastab=0`, 588 values) GREEN on the base and after K1, K2 and K3; **the 1004-value
+lock GREEN at the end** (61 s, 0 readback and 0 record-byte differences). Its first full run read RED on `META DIFFERS:
+obs` alone — the boot pose it ran under had gained `shift: [0, 0]` — so `digest-lock.mjs`'s `meta()` reads a zero shift as
+absent (it is the pre-S2 pose; a non-zero one is still an input difference); no fixture was rewritten. The device report
+(`tools/perf/device-report-run.mjs`, new: the report's scenes and its 30 s long play, driven from this desk) on the 3070,
+base and this tree back to back at a load of ~11: long play 13.8 vs 13.5 fps, frame median 82.46 vs 82.94 ms, p95 100.26
+vs 100.48 ms, loop median 1 ms both — equal within its noise; the M5 half is `?report=1` on the iPad, pending. Gates:
+`bash test.sh node` green but for five wall-time budgets under a load of ~23 (green alone); browser one at a time —
+`camera-shift` 11/11, `render-regressions`, `frame-occlusion` 7/7, `keyboard-window`, `new-project` 8/8, `input` 13/13,
+`chem` 54/54, `export3d` (green alone; its loop-median timing read 3 → 2 ms once), `history` 39/39 and `offer` 16/16 with a
+4 s pause between Firefox sessions (both hit `EADDRINUSE 127.0.0.1:5215` opening the next driver at once, the untouched
+base too), `current` 9/15 with its audio-face check (`valuesReveal`/`followsPalette`) red exactly as on the untouched
+base. `lab/*.js` 35,738 → 35,828 (+90: a feature; `pointerRay` gave back two). Hand-off:
+`research/release-0.4.0/S2-CAMERA-BUILD.md`, with the two paragraphs for S5's KIT BRIEFS (2: the lens shift in the kit's
+CAMERA panel and the CSS port; 1: the camera law as a pure module, `zoomAt` and its invariant test included).

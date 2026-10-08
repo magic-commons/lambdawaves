@@ -387,6 +387,43 @@ const SIZES = [];
     { free: d.quat, turntableHasQuat: d2.quat !== undefined });
 }
 
+/* ══ 9b · 0.4.0 S2 — THE LINK CARRIES THE SHOT: the lens shift at the CAM section's tail, and the molecule (tag 0x0A) ══════ */
+{
+  /* minted by bd9b0e5 (the build before the shift) from 1s+2pz, the boot pose, FREE: no tail, no molecule */
+  const OLD_LINK = 'AbsM30EBEAD0BDU_AgD_fwAAA_9_AAADHgAAAAAAAAAAAAAAgEAAAAAAAAAAAAAAAAAAAAAABAQhAWZmJj9cj8I-MzNTQJqZGT8AAAA_AAAAPwAAAD8AAAA_BTcBAAAAgD8zMzM_AAAAAI_CdT0zM7M-mpkZPwAAAACgAAYAAAAAAAAAAAAAAAAAAgAAAACPwvU8';
+  const pose = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: [0.5, 0.5, 0.5, 0.5] };
+  const st = (obs, chem) => ({ experiment: { modes: [{ id: 'h:1:0:0', n: 1, l: 0, m: 0, re: Math.SQRT1_2, im: 0 }, { id: 'h:2:1:0', n: 2, l: 1, m: 0, re: Math.SQRT1_2, im: 0 }], t: 0, rate: 4, window: 0, field: { Bz: 0, Fz: 0 }, damping: 0, preset: '1s+2pz' },
+    presentation: { obs, mat: { view: 1, style: 0, exposure: 1, softness: 0.7, steps: 160 }, ...(chem ? { instruments: { chem } } : {}) } });
+  const old = decodeState(OLD_LINK).state.presentation.obs;
+  const centred = encodeState(st({ ...pose, shift: [0, 0] })).text, bare = encodeState(st(pose)).text;
+  judge('S2 · A LINK MINTED BEFORE THE SHIFT opens centred: bd9b0e5\'s link decodes with no shift (restore() opens it at 0), and a centred shot mints the very bytes that build minted — the tail is written only when there is a shift',
+    old.shift === undefined && Math.abs(old.yaw - 0.65) <= TOL.f32 && centred === OLD_LINK && bare === OLD_LINK, { oldShift: old.shift, sameBytes: centred === OLD_LINK });
+
+  const chem = { preset: 'H2O', basis: 'sto-3g', view: 'orbital', orbital: 5, on: true, axis: 'z', kappa: 0.001 };
+  const key = { group: 'C2v', irrep: 'B1', count: 1, member: null };
+  const E = encodeState(st({ ...pose, shift: [0.4, -0.3] }, chem), { orbitalKey: key }), D = decodeState(E.text), P = D.state.presentation;
+  const again = encodeState(D.state, { orbitalKey: P.instruments.chem.orbitalKey }).text;
+  judge('S2 · THE SHOT ROUND-TRIPS: the shift to float32, and "1b₁ of water" as { library id H2O, basis, view, orbital 5, its name C2v/B1/1 } — and mint(open(link)) is the same link (the fixed point B98 asks of every section)',
+    Math.abs(P.obs.shift[0] - 0.4) <= TOL.f32 && Math.abs(P.obs.shift[1] + 0.3) <= TOL.f32 && again === E.text
+    && JSON.stringify(P.instruments) === JSON.stringify({ chem: { preset: 'H2O', basis: 'sto-3g', view: 'orbital', orbital: 5, on: true, orbitalKey: key } }) && !D.warnings.length,
+    { chars: E.chars, shift: P.obs.shift, chem: P.instruments.chem });
+  const noName = decodeState(encodeState(st(pose, { ...chem, orbital: null })).text).state.presentation.instruments.chem;
+  const off = decodeState(encodeState(st(pose, { ...chem, on: false })).text).state.presentation;
+  judge('S2 · …the index is the fallback when there is no name (an unnamed molecule, or the HOMO by default: orbital null), and MOLECULES off writes no molecule at all',
+    noName.orbital === null && noName.orbitalKey === undefined && off.instruments === undefined, { noName, off: off.instruments });
+
+  /* AN OLDER DECODER'S VIEW, by its own reading rule (THE VERSION POLICY): it walks [tag][varint len][payload], skips a tag it does
+     not know, and reads a section up to what it knows — bd9b0e5's CAM was u8 mode + 4 f32 + 4 f32 quaternion = 33 bytes. */
+  const bytes = fromBase64url(E.text), seen = [];
+  let i = 5, cam = null;
+  while (i < bytes.length) { const tag = bytes[i++]; let len = 0, sh = 0, b; do { b = bytes[i++]; len |= (b & 0x7f) << sh; sh += 7; } while (b & 0x80); seen.push(tag); if (tag === 0x04) cam = bytes.subarray(i, i + len); i += len; }
+  const dv = new DataView(cam.buffer, cam.byteOffset, cam.byteLength), f = (o) => dv.getFloat32(o, true);
+  const oldPose = { mode: cam[0], yaw: f(1), pitch: f(5), dist: f(9), fov: f(13), quat: [f(17), f(21), f(25), f(29)] };
+  judge('S2 · AN OLDER DECODER STILL READS THE POSE: the CAM section is the 33 bytes it knows plus the 8-byte tail it ignores, and the molecule is a tag it skips with a warning (0x0A is not in bd9b0e5\'s table) — measured with bd9b0e5\'s own decodeState in REPORT wave 147',
+    cam.length === 41 && oldPose.mode === 1 && Math.abs(oldPose.yaw - 0.65) <= TOL.f32 && Math.abs(oldPose.dist - 3.3) <= TOL.f32 && oldPose.quat.every((v) => v === 0.5) && seen.includes(0x0A),
+    { camBytes: cam.length, tags: seen });
+}
+
 /* ══ 10 · the size ledger: what the shipped presets cost, and what the worst case costs ═════════ */
 {
   /* THE WORST CASE the codec can be handed: 91 populated labels, every one of them muted AND soloed,
