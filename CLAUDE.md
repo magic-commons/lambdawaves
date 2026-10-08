@@ -149,6 +149,16 @@ subtitle-free Record/Reset controls above search; contextual status carries
 the recording instructions. Preserve the raised/inset charcoal-blue skin,
 visible focus glows and the phone's taller action-only editor.
 
+The ACTIONS rows in `lab/rack.js` are the rows MIR's `createKeys` will read:
+an id is the kit's where the kit has a twin (`transport.play`, `save`,
+`folders`, `modulation`, `notebook`, `rack`, `dock`, `hide`, `fullscreen`,
+`help`, `undo`, `redo`) and `was` keeps a binding saved under the old id
+loading; `group`/`short` feed the keyboard window; `inFields` lets a row run
+from a text field; a control a row drives carries `data-key-action`. `ctrl:
+true` is the kit's `Mod` (Ctrl or ⌘); `ctrl: 'Ctrl'` is the Control key alone
+— Ctrl+Shift+Q/E and the MOD arm (Ctrl+Space) are spelled so, never `Mod` (⌘⇧Q
+logs a Mac out). S stays WASD's pitch-down; FOLDERS is O (R-K1). (0.5.0 A9)
+
 First-run λWAVES preferences are specified in `lab/rack.js` and
 `lab/native-ui.js`: tags, captions, Help and window notes off; hints,
 AUTO SCALE and governor on; light/refractive/ALWAYS frost, 22 px blur and
