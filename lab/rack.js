@@ -17,7 +17,7 @@ import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuali
  * reconstruction cadence (cappable, never alters c); the camera clock is observer motion; the
  * presentation clock is the display rate.  Observer controls never touch the register (§14).
  */
-import './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
+import { DEFAULT_PALETTE } from './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
 import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
@@ -57,7 +57,7 @@ import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
 import { createCalculus } from './calculusview.js';
 import { calculusMarkdown } from './calculus.js';
-import { createPaletteEditor } from './paletteview.js';
+import { createRampPanel } from './mir/panels/ramp.js';   // 0.5.0 C1: the phase palette's editor (paletteview.js left)
 import { createSliceView } from './sliceview.js';
 import { createQCD } from './qcdview.js';
 import { createAtoms } from './atomsview.js';
@@ -65,7 +65,7 @@ import { createFieldLines } from './fieldview.js';
 import { createWigner } from './wignerview.js';
 import { createRadiation } from './radiationview.js';
 import { ATOMS, configOf } from './atoms.js';
-import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
+import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
 import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
@@ -129,7 +129,7 @@ export async function boot(dom) {
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
   /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
      (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
-  const PAL_DEF = 'prism';
+  const PAL_DEF = DEFAULT_PALETTE;
   /* THE WHEEL AS THE UI's ACCENT, the mark and its turn: lab/accent-wheel.js (N7 seam 4). */
   const wheel = createAccentWheel({ mat, getModView: () => modView, lut: toLUT(PALETTE_BY_ID.get(PAL_DEF).stops) });
   const { accent, wheelColor, applyAccent, paintMarks, markBatchBegin, markBatchEnd, markInk, stageGround, inkCtx,
@@ -1406,13 +1406,25 @@ export async function boot(dom) {
     r3.appendChild(ui.slicePosK.root);
     ui.sliceThickK = knob({ label: 'THICK', min: 0.01, max: 0.4, value: 0.03, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.slice.thick', v)) return; mat.slice.thick = v; schedule(TIER.PRESENT); } });
     r3.appendChild(ui.sliceThickK.root);
+    /* 0.5.0 C1 · RAMP: the phase palette's editor is MIR's createRampPanel (panels/ramp.js — paletteview.js made generic, which leaves):
+       the strip IS the phase circle (−π … +π, wrapping), its seam read in OKLab, the ring, the stops as handles, the presets in λWAVES'
+       grouped order; the table is palette.js toLUT bit for bit.  PALETTE (on/off, the `palette` key) stays the app's switch, and the
+       stops ride λWAVES' own project (`project: false`); `palette` keeps the editor's old API for serialize/restore, the link and LW. */
     const gp = group(wPal.body, 'COLOUR');
-    palette = createPaletteEditor(gp, {
-      startId: PAL_DEF,
-      setLUT(lut) { wheel.setWheelLUT(lut); if (field.ok) field.setPalette(lut); applyAccent(); },
-      setEnabled(v) { mat.paletteOn = v;applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } },
-      repaint() { schedule(TIER.PRESENT); }
-    });
+    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } schedule(TIER.PRESENT); };
+    const palSw = sw({ label: 'PALETTE', value: false, onChange: palOn });
+    el('div', 'row tight palette-enable', gp).appendChild(palSw.root).dataset.keyAction = 'palette';
+    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops;
+    const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items),
+      labels: { ticks: [[0, '−π'], [0.25, '−π/2'], [0.5, '0'], [0.75, '+π/2'], [1, '+π']], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad' },
+      ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset) palId = o.preset; },
+        lut: (lut) => { wheel.setWheelLUT(lut); if (field.ok) field.setPalette(lut); applyAccent(); schedule(TIER.PRESENT); } } }).view;
+    el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
+    palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
+      get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
+      setOn(v) { palSw.set(!!v); palOn(!!v); }, select: (id) => rv.preset(id),
+      /** the file's own stops under its name (the preset is kept when the file names none, so RESET still reloads it); `selected` is the stop the hand had */
+      load(s, selected = 0, id) { rv.load(s, PALETTE_BY_ID.get(id) ? id : palId); const h = rv.handle(Math.max(0, Math.min(rv.stops().length - 1, Math.trunc(selected) || 0))); if (h) h.dispatchEvent(new FocusEvent('focus')); } };
 
 
     const rInv = el('div', 'row tight', wPal.body);
@@ -5497,7 +5509,6 @@ export async function boot(dom) {
   }
   armAutoplay();
   if (MOTION.reduced && ui.rateKnob) ui.rateKnob.root.title = 'Reduced motion lowered RATE. Adjust it to override.';
-  if (palette && palette.repaint) requestAnimationFrame(() => palette.repaint());   // the strip sat in a zero-size card when first painted
   history.clear(linkAtBoot.opened && linkAtBoot.ok ? 'link' : 'boot');   // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
 
 

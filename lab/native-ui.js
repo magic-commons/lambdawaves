@@ -32,10 +32,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const flat=document.createDocumentFragment();
   for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);
-  const palette=document.querySelector('.dev[data-id="palette"]');
-  const reverse=[...palette.querySelectorAll('.trig')].find(b=>b.textContent.trim()==='REVERSE');
-  if(reverse){reverse.parentElement.appendChild(ui.invertSw.root);ui.invertSw.root.classList.add('palette-action');reverse.classList.add('palette-action');}
-  palette.querySelector('.palette-seam')?.remove();
   const exportRow=ui.capExact.root.parentElement;exportRow.classList.add('camera-export-row');
   const exportDetails=el('div','camera-export-details');exportDetails.id='camera-export-details';exportDetails.hidden=true;exportRow.after(exportDetails);
   exportDetails.append(ui.capExactRo.root,ui.capShot.root,ui.capPlanRo.root);

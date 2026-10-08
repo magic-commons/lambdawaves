@@ -12,6 +12,9 @@
  */
 import { PRESETS, PRESET_BY_ID, PRESET_GROUPS, hexToRgb } from './mir/palette.js';
 
+/** the palette a boot and the empty project wear (0.5.0 C1: it lived in paletteview.js, which left; tools/new-project.mjs reads it) */
+export const DEFAULT_PALETTE = 'prism';
+
 const JET_BLACK = {
   id: 'jetblack', label: 'Jet Black', points: 3, constL: true, harsh: false, cvd: false, flat: true,
   note: 'three bands of pure black — a solid body, not a phase map',

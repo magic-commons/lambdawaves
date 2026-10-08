@@ -160,8 +160,10 @@ try {
   await scene('A/B · STORE B', `await __press(__show(__trig('STORE B')));`, 'STORE B · STATE');
   await scene('A/B · the transition on', `const s = __show(__sw('TRANSITION')); await __press(s.querySelector('button') || s);`, 'TRANSITION · STATE');
   await g.ev(`const s = __sw('TRANSITION'); await __press(s.querySelector('button') || s); await __w(500); __LW.history.flush(); return 1;`);   /* stood down again: the scenes below need a still register */
-  await scene('a palette choice (its select)', `const s = __show(document.querySelector('select[aria-label="palette"]')); await __field(s, [...s.options].map((o) => o.value).find((v) => v !== s.value));`, 'PALETTE');
-  undoMs.palette = (await scene('a custom palette stop (its colour well)', `await __field(__show(document.querySelector('.dev[data-id="palette"] input.pal-color')), '#a04020');`, 'COLOUR · PALETTE')).undoMs;
+  /* 0.5.0 C1: the palette's editor is MIR's RAMP (paletteview.js left) — a preset is the stepper's ›, a stop's colour is the swatch's chooser.
+     The row names are what the history's naming (hTouchName) makes of the kit's controls today; C5's kit gesture names replace them. */
+  await scene('a palette choice (the RAMP stepper ›)', `await __press(__show(document.querySelector('.dev[data-id="palette"] .mir-ramp-step [aria-label="next"]')));`, 'edit');
+  undoMs.palette = (await scene('a custom palette stop (the RAMP swatch\'s colour well)', `await __field(__show(document.querySelector('.dev[data-id="palette"] .mir-ramp-swatch input[type="color"]')), '#a04020');`, 'STOP COLOUR — TAP FOR THE CHOOSER, DRAG UP OR DOWN TO TURN ITS HUE · PALETTE')).undoMs;
 
   /* THE CHEM / MOLECULE OWNER SWITCH IS NOT A SCENE (BRIEF-S3 allows stating why): MOLECULES ON lands its solution asynchronously and
      the instrument then fills derived defaults (chem.orbital null → 5, the MO-REGISTRY default selection, the STATES ground lane,
