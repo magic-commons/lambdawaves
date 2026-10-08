@@ -1463,26 +1463,206 @@
   "gapEh": 0.603954985732476,
   "gapEv": 16.4345,
   "homo": "HOMO",
-  "geometrySource": "NOT A MEASUREMENT: the S4 census's neutral L-lysine (SMILES N[C@@H](CCCCN)C(=O)O), relaxed by PySCF RHF/STO-3G on the vendored decimals — optimised there, UNVERIFIED against experiment; one conformer, absolute stereochemistry unverified (research/release-0.4.0/library-census/census.json)",
+  "geometrySource": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCCN)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; downloaded wwPDB reference had cationic protonation; neutral census connectivity built here instead",
   "inchiKey": "KDXKERNSBIXSRK-YFKPBYRVSA-N",
   "pubchemCid": 5962,
-  "identifiers": "L-lysine; InChIKey and CID entered from memory and UNVERIFIED — S4b checks them against PubChem before the BIO section ships",
+  "identifiers": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5962 (\"L-Lysine\") → InChIKey KDXKERNSBIXSRK-YFKPBYRVSA-N; its formula C6H14N2O2 is the record's; the key entered from memory before (S4a) is the same — L-lysine",
   "blurb": [
    "An essential amino acid: the backbone of glycine with a four-carbon chain ending in a second amine (ε-NH₂).",
    "At 64 Cartesian AOs it fills the field kernel's widest tier exactly; past the live cap, it opens only from this record."
   ],
   "ies": null,
+  "symmetry": {
+   "pointGroup": "C1",
+   "labelledIn": null,
+   "why": "C₁: no symmetry beyond the identity, so an orbital has only its index",
+   "frame": "no symmetry beyond the identity",
+   "axes": {
+    "x": [
+     1,
+     0,
+     0
+    ],
+    "y": [
+     0,
+     1,
+     0
+    ],
+    "z": [
+     0,
+     0,
+     1
+    ],
+    "centre": [
+     -0.6364163120809854,
+     0.2833420930800724,
+     0.16844752040954908
+    ]
+   },
+   "atomsInFrame": [
+    [
+     7,
+     -4.1005428085274405,
+     -3.125312625313072,
+     1.401453531391726
+    ],
+    [
+     6,
+     -2.2009093415846523,
+     -1.7955221357026092,
+     -0.21181690684058985
+    ],
+    [
+     6,
+     0.5094980799645918,
+     -2.5147845673760405,
+     0.6527778374933346
+    ],
+    [
+     6,
+     2.553781945521452,
+     -2.294988457126226,
+     -1.4298601095546302
+    ],
+    [
+     6,
+     3.293744512516361,
+     0.41842420714226636,
+     -2.2342087783984557
+    ],
+    [
+     6,
+     5.091306951155351,
+     1.7930058998195824,
+     -0.3817035553568954
+    ],
+    [
+     7,
+     4.004374916935607,
+     2.004143418828321,
+     2.200358424737634
+    ],
+    [
+     6,
+     -2.8009665702647766,
+     1.0684228768027708,
+     0.04206250537288278
+    ],
+    [
+     8,
+     -1.4922425328530433,
+     2.742989342392719,
+     0.9183047220371585
+    ],
+    [
+     8,
+     -5.211937757445193,
+     1.5647872791980624,
+     -0.8832170384067113
+    ],
+    [
+     1,
+     -3.8914137823283355,
+     -5.038246290161761,
+     1.073791762937183
+    ],
+    [
+     1,
+     -5.864009856058204,
+     -2.681494882963142,
+     0.6893935380015581
+    ],
+    [
+     1,
+     -2.4419646485044018,
+     -2.2750246180542724,
+     -2.214810991012806
+    ],
+    [
+     1,
+     1.0427222919618473,
+     -1.389737187367737,
+     2.2837348590184385
+    ],
+    [
+     1,
+     0.4456424025424426,
+     -4.479614835011346,
+     1.2560205204254522
+    ],
+    [
+     1,
+     4.241653546822237,
+     -3.262790836764615,
+     -0.7642680109508149
+    ],
+    [
+     1,
+     1.9004169235345856,
+     -3.312700372400032,
+     -3.0955222767354096
+    ],
+    [
+     1,
+     4.2497371651829905,
+     0.3134262083395485,
+     -4.0525424181894865
+    ],
+    [
+     1,
+     1.6094031914635711,
+     1.5601954140128167,
+     -2.5126773412213104
+    ],
+    [
+     1,
+     6.860493821382666,
+     0.7402323929722602,
+     -0.24668075763291894
+    ],
+    [
+     1,
+     5.546115337766737,
+     3.643115507160243,
+     -1.192837019155266
+    ],
+    [
+     1,
+     5.130922395339186,
+     3.241320470667186,
+     3.2036759918684794
+    ],
+    [
+     1,
+     2.273580615277445,
+     2.88852401997869,
+     2.037518425306472
+    ],
+    [
+     1,
+     -5.475415304703991,
+     3.3914195409007086,
+     -0.5816874009025519
+    ]
+   ],
+   "pyscf": {
+    "topgroup": "C1",
+    "groupname": "C1",
+    "use": "recorded — PySCF's own detection on these atoms, never a name"
+   }
+  },
   "sources": [
-   "geometry: NOT A MEASUREMENT: the S4 census's neutral L-lysine (SMILES N[C@@H](CCCCN)C(=O)O), relaxed by PySCF RHF/STO-3G on the vendored decimals — optimised there, UNVERIFIED against experiment; one conformer, absolute stereochemistry unverified (research/release-0.4.0/library-census/census.json)",
-   "energy oracle: research/release-0.4.0/library-census/census.json rows[lysine].energyEh",
-   "basis: lab/vendor/bse/sto-3g-v1.json (Basis Set Exchange, vendored)"
+   "geometry: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCCN)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; downloaded wwPDB reference had cationic protonation; neutral census connectivity built here instead",
+   "energy oracle: tests/fixtures/oracles/library-v1.json (tools/library/record-oracle.py, PySCF on these atoms)",
+   "basis: lab/vendor/bse/sto-3g-v1.json (Basis Set Exchange, vendored)",
+   "census: research/release-0.4.0/library-census/census.json row lysine (S4 census, Sol; spot-checked by Claude Sos)"
   ]
  },
  "page": "$\\mathrm{C_{6}H_{14}N_{2}O_{2}}$, lysine — RHF/STO-3G, neutral, $E = -487.744281\\,E_h$, 40 occupied of 64 AO, orbital energies $\\varepsilon_{i}$ in $E_h$:\n$\\varepsilon_{1} = -20.3054\\ (\\mathrm{HOMO{-}39}),\\ \\varepsilon_{2} = -20.2669\\ (\\mathrm{HOMO{-}38}),\\ \\varepsilon_{3} = -15.3205\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{4} = -15.2891\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{5} = -11.1742\\ (\\mathrm{HOMO{-}35}),\\ \\varepsilon_{6} = -11.0944\\ (\\mathrm{HOMO{-}34}),\\ \\varepsilon_{7} = -11.0612\\ (\\mathrm{HOMO{-}33}),\\ \\varepsilon_{8} = -11.0394\\ (\\mathrm{HOMO{-}32}),\\ \\varepsilon_{9} = -11.0391\\ (\\mathrm{HOMO{-}31}),\\ \\varepsilon_{10} = -11.0380\\ (\\mathrm{HOMO{-}30}),\\ \\varepsilon_{11} = -1.3800\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{12} = -1.2775\\ (\\mathrm{HOMO{-}28}),\\ \\varepsilon_{13} = -1.1347\\ (\\mathrm{HOMO{-}27}),\\ \\varepsilon_{14} = -1.1076\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{15} = -1.0144\\ (\\mathrm{HOMO{-}25}),\\ \\varepsilon_{16} = -0.9400\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{17} = -0.8737\\ (\\mathrm{HOMO{-}23}),\\ \\varepsilon_{18} = -0.8073\\ (\\mathrm{HOMO{-}22}),\\ \\varepsilon_{19} = -0.7486\\ (\\mathrm{HOMO{-}21}),\\ \\varepsilon_{20} = -0.6992\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{21} = -0.6314\\ (\\mathrm{HOMO{-}19}),\\ \\varepsilon_{22} = -0.6145\\ (\\mathrm{HOMO{-}18}),\\ \\varepsilon_{23} = -0.5977\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{24} = -0.5871\\ (\\mathrm{HOMO{-}16}),\\ \\varepsilon_{25} = -0.5732\\ (\\mathrm{HOMO{-}15}),\\ \\varepsilon_{26} = -0.5621\\ (\\mathrm{HOMO{-}14}),\\ \\varepsilon_{27} = -0.5502\\ (\\mathrm{HOMO{-}13}),\\ \\varepsilon_{28} = -0.5182\\ (\\mathrm{HOMO{-}12}),\\ \\varepsilon_{29} = -0.5158\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{30} = -0.5046\\ (\\mathrm{HOMO{-}10}),\\ \\varepsilon_{31} = -0.4681\\ (\\mathrm{HOMO{-}9}),\\ \\varepsilon_{32} = -0.4621\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{33} = -0.4494\\ (\\mathrm{HOMO{-}7}),\\ \\varepsilon_{34} = -0.4244\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{35} = -0.4175\\ (\\mathrm{HOMO{-}5}),\\ \\varepsilon_{36} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{37} = -0.3599\\ (\\mathrm{HOMO{-}3}),\\ \\varepsilon_{38} = -0.3497\\ (\\mathrm{HOMO{-}2}),\\ \\varepsilon_{39} = -0.3276\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{40} = -0.3066\\ (\\mathrm{HOMO}),\\ \\varepsilon_{41} = 0.2973\\ (\\mathrm{LUMO}),\\ \\varepsilon_{42} = 0.5281\\ (\\mathrm{LUMO{+}1}),\\ \\varepsilon_{43} = 0.5709\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{44} = 0.5820\\ (\\mathrm{LUMO{+}3}),\\ \\varepsilon_{45} = 0.5989\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{46} = 0.6161\\ (\\mathrm{LUMO{+}5}),\\ \\varepsilon_{47} = 0.6246\\ (\\mathrm{LUMO{+}6}),\\ \\varepsilon_{48} = 0.6381\\ (\\mathrm{LUMO{+}7}),\\ \\varepsilon_{49} = 0.6504\\ (\\mathrm{LUMO{+}8}),\\ \\varepsilon_{50} = 0.6712\\ (\\mathrm{LUMO{+}9}),\\ \\varepsilon_{51} = 0.6836\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{52} = 0.7004\\ (\\mathrm{LUMO{+}11}),\\ \\varepsilon_{53} = 0.7060\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{54} = 0.7184\\ (\\mathrm{LUMO{+}13}),\\ \\varepsilon_{55} = 0.7254\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{56} = 0.7373\\ (\\mathrm{LUMO{+}15}),\\ \\varepsilon_{57} = 0.7681\\ (\\mathrm{LUMO{+}16}),\\ \\varepsilon_{58} = 0.7707\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{59} = 0.7904\\ (\\mathrm{LUMO{+}18}),\\ \\varepsilon_{60} = 0.7960\\ (\\mathrm{LUMO{+}19}),\\ \\varepsilon_{61} = 0.8094\\ (\\mathrm{LUMO{+}20}),\\ \\varepsilon_{62} = 0.8256\\ (\\mathrm{LUMO{+}21}),\\ \\varepsilon_{63} = 0.8335\\ (\\mathrm{LUMO{+}22}),\\ \\varepsilon_{64} = 0.9969\\ (\\mathrm{LUMO{+}23})$",
  "oracle": {
-  "energy": -487.74428105991785,
-  "source": "research/release-0.4.0/library-census/census.json rows[lysine].energyEh",
-  "what": "PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals (Sol's census; MEASURED there)",
-  "delta": 1.1380052455933765e-10
+  "energy": -487.7442810599197,
+  "source": "tests/fixtures/oracles/library-v1.json molecules.lysine.energy",
+  "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+  "delta": 1.156195139628835e-10
  }
 }

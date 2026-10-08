@@ -84,7 +84,8 @@ assert.equal(calls(), before);
        the one a window asks with — a mismatch would make a past-cap molecule a live solve), and the benzene-cap law reads it */
 for (const r of CAT.rows) assert.deepEqual(load(r.id).input.atoms, moleculeAtoms(r.id), r.id + ': the record\'s atoms are not the menu\'s');
 const lys = MOLECULE_BY_ID.get('lysine');
-assert.deepEqual(RECORD_ONLY.map((x) => x.id), ['lysine'], 'the record-only rows');
+assert.deepEqual(RECORD_ONLY.map((x) => x.id), CAT.rows.filter((r) => r.molecule).map((r) => r.id), 'the record-only rows are the catalogue\'s own molecules');
+assert.ok(RECORD_ONLY.includes(lys), 'lysine is a record-only row');
 assert.ok(!MOLECULES.includes(lys) && lys.over && lys.recordOnly && !lys.disabled && lys.reason === null, 'lysine: past the cap, DOWNLOAD, never DISABLED');
 assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · 64 AO · record');
 assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');

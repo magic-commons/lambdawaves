@@ -1,0 +1,81 @@
+{
+ "molecules": {
+  "C6H6": {
+   "energy": -227.891006464181,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 32,
+   "wallSeconds": 0.304,
+   "nao": 36,
+   "nocc": 21,
+   "key": "0097c6ffbdd7125f",
+   "topgroup": "D6h",
+   "groupname": "D2h",
+   "homoLumoGapEh": 0.5515653327750634
+  },
+  "Li4F4": {
+   "energy": -422.1710776958549,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 43,
+   "wallSeconds": 0.296,
+   "nao": 40,
+   "nocc": 24,
+   "key": "42250178667ac731",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "homoLumoGapEh": 0.5578493642430531
+  },
+  "TiCl4": {
+   "energy": -2658.6466804742113,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 40,
+   "wallSeconds": 0.337,
+   "nao": 55,
+   "nocc": 45,
+   "key": "0e96451d8aec550a",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "homoLumoGapEh": 0.584991975478061
+  },
+  "alanine": {
+   "energy": -317.6787453451102,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 74,
+   "wallSeconds": 0.403,
+   "nao": 37,
+   "nocc": 24,
+   "key": "3044c4b9d66fb72d",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "homoLumoGapEh": 0.6411725769569402
+  },
+  "lysine": {
+   "energy": -487.7442810599197,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 63,
+   "wallSeconds": 0.936,
+   "nao": 64,
+   "nocc": 40,
+   "key": "5ea25eb6c8e9f614",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "homoLumoGapEh": 0.6039549857459514
+  }
+ },
+ "provenance": {
+  "tool": "tools/library/record-oracle.py",
+  "pyscf": "2.14.0",
+  "numpy": "2.4.6",
+  "basis": "lab/vendor/bse/sto-3g-v1.json",
+  "basisSha256": "22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b",
+  "cart": true,
+  "unit": "Bohr (the record's own atoms)",
+  "method": "RHF, conv_tol 1e-13, conv_tol_grad 1e-10, DIIS (Newton if DIIS stops short)",
+  "symmetry": "topgroup/groupname are PySCF's detection on the same atoms \u2014 recorded, never used as a name (ledger C5)",
+  "status": "MEASURED on this machine; wallSeconds is a clock and is not part of any record"
+ }
+}

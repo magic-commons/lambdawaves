@@ -1,0 +1,49 @@
+{
+ "note": "The library's open identifiers (R-L4: InChIKey and PubChem CID, not CAS). `formula` is the record's (Hill, neutral); `cid` or `query` is what PubChem is asked; tools/library/pubchem-ids.mjs fills the rest from PUG REST. `none` = PubChem lists no compound for this finite model, so the record carries no identifier.",
+ "molecules": {
+  "C6H6": {
+   "formula": "C6H6",
+   "cid": 241,
+   "statedInchiKey": "UHOVQNZJYSORNB-UHFFFAOYSA-N",
+   "inchiKey": "UHOVQNZJYSORNB-UHFFFAOYSA-N",
+   "pubchemFormula": "C6H6",
+   "title": "Benzene",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 241 (\"Benzene\") → InChIKey UHOVQNZJYSORNB-UHFFFAOYSA-N; its formula C6H6 is the record's; the key entered from memory before (S4a) is the same"
+  },
+  "alanine": {
+   "formula": "C3H7NO2",
+   "cid": 5950,
+   "note": "L-alanine, as the wwPDB ALA ideal coordinates are",
+   "inchiKey": "QNAYBMKLOCPYGJ-REOHCLBHSA-N",
+   "pubchemFormula": "C3H7NO2",
+   "title": "L-Alanine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5950 (\"L-Alanine\") → InChIKey QNAYBMKLOCPYGJ-REOHCLBHSA-N; its formula C3H7NO2 is the record's — L-alanine, as the wwPDB ALA ideal coordinates are"
+  },
+  "lysine": {
+   "formula": "C6H14N2O2",
+   "cid": 5962,
+   "statedInchiKey": "KDXKERNSBIXSRK-YFKPBYRVSA-N",
+   "note": "L-lysine",
+   "inchiKey": "KDXKERNSBIXSRK-YFKPBYRVSA-N",
+   "pubchemFormula": "C6H14N2O2",
+   "title": "L-Lysine",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 5962 (\"L-Lysine\") → InChIKey KDXKERNSBIXSRK-YFKPBYRVSA-N; its formula C6H14N2O2 is the record's; the key entered from memory before (S4a) is the same — L-lysine"
+  },
+  "Li4F4": {
+   "formula": "F4Li4",
+   "none": "a finite (LiF)₄ cube cut from the rock-salt lattice; PubChem's lithium fluoride (CID 224478, FLi, asked 2026-10-08) is the salt LiF, not this cluster"
+  },
+  "TiCl4": {
+   "formula": "Cl4Ti",
+   "cid": 24193,
+   "inchiKey": "XJDNKRIXUMDJCW-UHFFFAOYSA-J",
+   "pubchemFormula": "Cl4Ti",
+   "title": "Titanium Tetrachloride",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 24193 (\"Titanium Tetrachloride\") → InChIKey XJDNKRIXUMDJCW-UHFFFAOYSA-J; its formula Cl4Ti is the record's"
+  }
+ }
+}

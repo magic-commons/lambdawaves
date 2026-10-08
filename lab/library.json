@@ -6,8 +6,8 @@
   {
    "id": "C6H6",
    "basis": "sto-3g",
-   "hash": "ba9dc726779e934844da94c522f144cdfca925d6301dd69004284b7a5cf83a2e",
-   "bytes": 1257474,
+   "hash": "42eaf94eee6d171e9210124410538d7e5ace247f4a4402000f23428b797371c3",
+   "bytes": 1259326,
    "section": "ORGANIC",
    "nAO": 36,
    "nocc": 21,
@@ -19,10 +19,114 @@
    }
   },
   {
+   "id": "alanine",
+   "basis": "sto-3g",
+   "hash": "26981e6d1ec6fe746e1d40fad16cd985c979f263d8ff4a6728799bd861f8ab24",
+   "bytes": 128206,
+   "section": "BIO",
+   "nAO": 37,
+   "nocc": 24,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "molecule": {
+    "name": "alanine",
+    "formula": "<m>C₃H₇NO₂</m>",
+    "charge": 0,
+    "symmetry": {
+     "group": "C1"
+    },
+    "source": "wwPDB Chemical Component Dictionary ALA ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ALA.cif; computed reference, UNVERIFIED against experiment",
+    "ang": [
+     [
+      7,
+      -0.966,
+      0.493,
+      1.5
+     ],
+     [
+      6,
+      0.257,
+      0.418,
+      0.692
+     ],
+     [
+      6,
+      -0.094,
+      0.017,
+      -0.716
+     ],
+     [
+      8,
+      -1.056,
+      -0.682,
+      -0.923
+     ],
+     [
+      6,
+      1.204,
+      -0.62,
+      1.296
+     ],
+     [
+      8,
+      0.661,
+      0.439,
+      -1.742
+     ],
+     [
+      1,
+      -1.383,
+      -0.425,
+      1.482
+     ],
+     [
+      1,
+      -0.676,
+      0.661,
+      2.452
+     ],
+     [
+      1,
+      0.746,
+      1.392,
+      0.682
+     ],
+     [
+      1,
+      1.459,
+      -0.33,
+      2.316
+     ],
+     [
+      1,
+      0.715,
+      -1.594,
+      1.307
+     ],
+     [
+      1,
+      2.113,
+      -0.676,
+      0.697
+     ],
+     [
+      1,
+      0.435,
+      0.182,
+      -2.647
+     ]
+    ]
+   }
+  },
+  {
    "id": "lysine",
    "basis": "sto-3g",
-   "hash": "4c74f1e41e26eac8a2e35637e903c1ac73e4019ed4ec13d36b505f2abed5f91d",
-   "bytes": 355110,
+   "hash": "4bf3ae35ca4cc34b928e60966c5999ce099145ddf29b7c3dd29aaeb8595386a1",
+   "bytes": 358164,
    "section": "BIO",
    "nAO": 64,
    "nocc": 40,
@@ -39,7 +143,7 @@
     "symmetry": {
      "group": "C1"
     },
-    "source": "NOT A MEASUREMENT: the S4 census's neutral L-lysine (SMILES N[C@@H](CCCCN)C(=O)O), relaxed by PySCF RHF/STO-3G on the vendored decimals — optimised there, UNVERIFIED against experiment; one conformer, absolute stereochemistry unverified (research/release-0.4.0/library-census/census.json)",
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCCN)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; downloaded wwPDB reference had cationic protonation; neutral census connectivity built here instead",
     "ang": [
      [
       7,
@@ -184,6 +288,136 @@
       -3.234242008582948,
       1.9446001122657717,
       -0.21867712740020134
+     ]
+    ]
+   }
+  },
+  {
+   "id": "Li4F4",
+   "basis": "sto-3g",
+   "hash": "6315f4f3bdcf3046c048c10e504d65ad81af2cdf9157a4d592361331ec46c389",
+   "bytes": 156369,
+   "section": "LATTICE",
+   "nAO": 40,
+   "nocc": 24,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "molecule": {
+    "name": "lithium fluoride cube",
+    "formula": "<m>Li₄F₄</m>",
+    "charge": 0,
+    "symmetry": {
+     "group": "Td"
+    },
+    "source": "optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry",
+    "ang": [
+     [
+      9,
+      -0.8421747348343531,
+      -0.8421747348343531,
+      -0.8421747348343531
+     ],
+     [
+      3,
+      -0.8421747348343531,
+      -0.8421747348343531,
+      0.8421747348343531
+     ],
+     [
+      3,
+      -0.8421747348343531,
+      0.8421747348343531,
+      -0.8421747348343531
+     ],
+     [
+      9,
+      -0.8421747348343531,
+      0.8421747348343531,
+      0.8421747348343531
+     ],
+     [
+      3,
+      0.8421747348343531,
+      -0.8421747348343531,
+      -0.8421747348343531
+     ],
+     [
+      9,
+      0.8421747348343531,
+      -0.8421747348343531,
+      0.8421747348343531
+     ],
+     [
+      9,
+      0.8421747348343531,
+      0.8421747348343531,
+      -0.8421747348343531
+     ],
+     [
+      3,
+      0.8421747348343531,
+      0.8421747348343531,
+      0.8421747348343531
+     ]
+    ]
+   }
+  },
+  {
+   "id": "TiCl4",
+   "basis": "sto-3g",
+   "hash": "e14680c0723fe90649e3688ba3d1d3bea8f83c212365472c58610d5755769a1b",
+   "bytes": 210867,
+   "section": "HEAVY",
+   "nAO": 55,
+   "nocc": 45,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "molecule": {
+    "name": "titanium tetrachloride",
+    "formula": "<m>TiCl₄</m>",
+    "charge": 0,
+    "symmetry": {
+     "group": "Td"
+    },
+    "source": "NIST CCCBDB experimental Ti-Cl bond length, Td reconstruction; https://cccbdb.nist.gov/exp2x.asp?casno=7550450; DOI https://doi.org/10.1063/1.1727535",
+    "ang": [
+     [
+      22,
+      0,
+      0,
+      0
+     ],
+     [
+      17,
+      1.252850084141488,
+      1.252850084141488,
+      1.252850084141488
+     ],
+     [
+      17,
+      1.252850084141488,
+      -1.252850084141488,
+      -1.252850084141488
+     ],
+     [
+      17,
+      -1.252850084141488,
+      1.252850084141488,
+      -1.252850084141488
+     ],
+     [
+      17,
+      -1.252850084141488,
+      -1.252850084141488,
+      1.252850084141488
      ]
     ]
    }

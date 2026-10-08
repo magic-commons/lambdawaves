@@ -1350,6 +1350,7 @@
   "geometrySource": "CCCBDB experimental r(C–C) = 1.39 Å, r(C–H) = 1.09 Å, D₆ₕ, hydrogens at radius 2.48 Å (the window's original preset, frozen) — THE CAP",
   "inchiKey": "UHOVQNZJYSORNB-UHFFFAOYSA-N",
   "pubchemCid": 241,
+  "identifiers": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 241 (\"Benzene\") → InChIKey UHOVQNZJYSORNB-UHFFFAOYSA-N; its formula C6H6 is the record's; the key entered from memory before (S4a) is the same",
   "blurb": [
    "The aromatic ring: six carbons, six π electrons in three bonding orbitals, the HOMO a degenerate pair (1e₁g).",
    "Its RHF/STO-3G record is the library's proof — the one molecule here that also solves live, so cached = fresh can be measured."
@@ -1360,6 +1361,113 @@
    },
    "source": "Kimura et al. (1981)",
    "status": "UNCHECKED: entered from memory in S1 (S1-NAMES-BUILD.md); verify against NIST SRD 101 and the LEGAL-PROVENANCE reading before any store build"
+  },
+  "symmetry": {
+   "pointGroup": "D6h",
+   "labelledIn": "D6h",
+   "why": "labelled by projection in the full group (lab/names.js at generation)",
+   "frame": "z = the C₆ axis, x through carbon 0: C₂′ and σv through the atoms, C₂″ and σd through the bond midpoints",
+   "axes": {
+    "x": [
+     1,
+     0,
+     0
+    ],
+    "y": [
+     0,
+     1,
+     0
+    ],
+    "z": [
+     0,
+     0,
+     1
+    ],
+    "centre": [
+     5.2867763077388404e-17,
+     1.9032394707859825e-16,
+     0
+    ]
+   },
+   "atomsInFrame": [
+    [
+     6,
+     2.626719313145436,
+     -1.9032394707859825e-16,
+     0
+    ],
+    [
+     1,
+     4.686520788921353,
+     -1.9032394707859825e-16,
+     0
+    ],
+    [
+     6,
+     1.3133596565727181,
+     2.274805653795159,
+     0
+    ],
+    [
+     1,
+     2.343260394460677,
+     4.058646058569781,
+     0
+    ],
+    [
+     6,
+     -1.3133596565727172,
+     2.2748056537951595,
+     0
+    ],
+    [
+     1,
+     -2.343260394460676,
+     4.0586460585697814,
+     0
+    ],
+    [
+     6,
+     -2.626719313145436,
+     1.3135639283161096e-16,
+     0
+    ],
+    [
+     1,
+     -4.686520788921353,
+     3.836093212504082e-16,
+     0
+    ],
+    [
+     6,
+     -1.3133596565727192,
+     -2.274805653795159,
+     0
+    ],
+    [
+     1,
+     -2.3432603944606787,
+     -4.058646058569781,
+     0
+    ],
+    [
+     6,
+     1.3133596565727181,
+     -2.274805653795159,
+     0
+    ],
+    [
+     1,
+     2.343260394460677,
+     -4.058646058569781,
+     0
+    ]
+   ],
+   "pyscf": {
+    "topgroup": "D6h",
+    "groupname": "D2h",
+    "use": "recorded — PySCF's own detection on these atoms, never a name"
+   }
   },
   "sources": [
    "geometry: CCCBDB experimental r(C–C) = 1.39 Å, r(C–H) = 1.09 Å, D₆ₕ, hydrogens at radius 2.48 Å (the window's original preset, frozen) — THE CAP",

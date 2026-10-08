@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-/* tools/orbital-library.mjs — THE GENERATOR IS THE APP (0.4.0 S4a · PLAN B2, F5).  It runs the SHIPPED solver in node — the
- * worker's own exported ops, lab/mathworker.js chemGround → chemSpectrum → chemStates / chemStateVectors, which are
- * ensureSolve → lab/rhf-molecule.js moleculeRHF at its defaults → lab/rpa-inspector.js rpa → the canonical gauge — and writes
- * what they answered as a record: lab/library/<sha-256 of the file>.json, plus the catalogue lab/library.json that
+/* tools/orbital-library.mjs — THE GENERATOR IS THE APP (0.4.0 S4a · PLAN B2, F5), and THE SECTIONS (S4b).  It runs the SHIPPED
+ * solver in node — the worker's own exported ops, lab/mathworker.js chemGround → chemSpectrum → chemStates / chemStateVectors,
+ * which are ensureSolve → lab/rhf-molecule.js moleculeRHF at its defaults → lab/rpa-inspector.js rpa → the canonical gauge — and
+ * writes what they answered as a record: lab/library/<sha-256 of the file>.json, plus the catalogue lab/library.json that
  * lab/molecules.js reads.  No second implementation exists to drift: a record IS the worker's reply, re-encoded.
  *
  *   node tools/orbital-library.mjs                 write every record and the catalogue; delete a record file no row reaches
  *   node tools/orbital-library.mjs --check         write nothing; exit 1 unless every byte on disk is what this writes, every
- *                                                  record validates (lab/library.js), and lab/library/ holds nothing else
- *   node tools/orbital-library.mjs --only C6H6     (with --check) regenerate only these ids; the rest are re-hashed, not re-solved
+ *                                                  record validates (lab/library.js), every entry passes THE GATE (below), and
+ *                                                  lab/library/ holds nothing else
+ *   node tools/orbital-library.mjs --only a,b      re-solve only these ids; every other row is re-hashed from disk (with or
+ *                                                  without --check — a write keeps the other records byte for byte)
+ *   node tools/orbital-library.mjs --gate          THE GATE's verdict on every candidate, in order, and nothing else
+ *   node tools/orbital-library.mjs --inputs FILE   the atoms (bohr) of every entry the gate passes, for tools/library/record-oracle.py
  *
  * THE RECORD (schema 1; lab/library.js validateRecord is the reader's law and readers ignore members they do not know):
  *   input     the atoms in bohr exactly as lab/molecules.js moleculeAtoms gives them, the charge, the basis and its file hash
@@ -19,49 +23,89 @@
  *             the stability verdict, the solutions, the dipole, the names (lab/names.js, S1) — what MOLECULES and MO-REGISTRY read
  *   orbitals  ε, C (the canonical gauge) and D as f64; spectrum: the RPA sticks and the TDA ladder; states: the canonical ladder
  *   stem      the STEM fields (R-L4): formula, point group and frame, mass, charge and multiplicity, dipole, HOMO–LUMO gap,
- *             geometry source, InChIKey and PubChem CID, a two-line blurb, the curated IEs, the sources
+ *             geometry source, InChIKey and PubChem CID (checked against PubChem: tools/library/pubchem-ids.json), a two-line
+ *             blurb, the curated IEs, the sources — and (S4b, ledger C5) `symmetry`: the molecule's full point group, the group
+ *             its orbitals are labelled in BY PROJECTION (lab/names.js at generation: the declared operations, D(R) on the AOs,
+ *             Σ_k c_kᵀ S D c_k per level, decomposed against the table), the frame (names.js CONVENTION), the atoms in that
+ *             frame, and PySCF's own topgroup / groupname — recorded, never used as a name
  *   page      the molecule's page, lab/latex-state.js moleculeLatex — what EDIT › COPY writes
- *   oracle    an independent energy (PySCF on the same vendored decimals) and the app's distance from it (≤ 1e-8 Eh, or no record)
+ *   oracle    an independent energy (PySCF on the same vendored decimals and the same atoms) and the app's distance from it
+ *             (≤ 1e-8 Eh, or no record) — tests/fixtures/oracles/library-v1.json, written by tools/library/record-oracle.py
  * Numbers that a clock moves are never written, so --check is byte-exact on one machine; typed arrays are base64 of
- * little-endian bytes, exact. */
+ * little-endian bytes, exact.
+ *
+ * THE GATE (BRIEF-S4-LIBRARY §S4b; Josh: "Don't try to go for too many variations of the same molecule, try to be as diverse as
+ * possible").  In order — the six sections in the page turner's order, each in its declared order — a candidate passes if its
+ * formula (Hill, with its charge) is new AND it brings a new element, a new point group, or a new tag from the fixed motif list
+ * (ring:n, peptide bond, d-block, cluster, cage, nucleobase) — OR it belongs to a declared family (the amino acids, the
+ * nucleobases: Leu and Ile share a formula and the family keeps both).  The live table (lab/molecules.js, its declared groups and
+ * the motifs below) is what came before the first candidate; only a passing candidate seeds novelty.  A candidate that fails is
+ * not built: the gate decides what ships, and the refused stay listed here with the reason the gate prints. */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { chemRegister, chemGround, chemSpectrum, chemStates, chemStateVectors, chemOpen, chemSolverCalls } from '../lab/mathworker.js';
 import { BASIS_FILES } from '../lab/rhf-molecule.js';
 import { ANGSTROM } from '../lab/md.js';
-import { MOLECULE_BY_ID, COST, eriWork, rpaWork, counts, CAP_MS } from '../lab/molecules.js';
-import { CURATED_IE } from '../lab/names.js';
+import { MOLECULES, MOLECULE_BY_ID, SECTIONS, COST, eriWork, rpaWork, counts, CAP_MS } from '../lab/molecules.js';
+import { CURATED_IE, CONVENTION, operations, frameOf } from '../lab/names.js';
 import { moleculeLatex } from '../lab/latex-state.js';
 import { validateRecord, recordPath, SCHEMA } from '../lab/library.js';
 
-const LAB = fileURLToPath(new URL('../lab/', import.meta.url));
-const CATALOGUE = LAB + 'library.json';
-const args = process.argv.slice(2), CHECK = args.includes('--check');
-const ONLY = args.includes('--only') ? new Set(args[args.indexOf('--only') + 1].split(',')) : null;
-if (ONLY && !CHECK) { console.error('orbital-library: --only is a --check option (a write regenerates the whole catalogue)'); process.exit(2); }
+const ROOT = new URL('../', import.meta.url), at = (rel) => fileURLToPath(new URL(rel, ROOT));
+const LAB = at('lab/'), CATALOGUE = LAB + 'library.json';
+const CENSUS_FILE = 'research/release-0.4.0/library-census/census.json', ORACLE_FILE = 'tests/fixtures/oracles/library-v1.json', IDS_FILE = 'tools/library/pubchem-ids.json';
+const args = process.argv.slice(2), CHECK = args.includes('--check'), GATE_ONLY = args.includes('--gate');
+const argOf = (f) => (args.includes(f) ? args[args.indexOf(f) + 1] : null);
+const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, INPUTS = argOf('--inputs');
+const json = (rel) => JSON.parse(readFileSync(at(rel), 'utf8'));
+const CENSUS = new Map(json(CENSUS_FILE).rows.map((r) => [r.id, r]));
+const ORACLE = existsSync(at(ORACLE_FILE)) ? json(ORACLE_FILE).molecules : {};
+const IDS = existsSync(at(IDS_FILE)) ? json(IDS_FILE).molecules : {};
 
-/* ── THE ENTRIES.  S4a ships two: benzene (the proof — under the cap, everything stored) and lysine (the 64-AO fixture the digest
-   lock needs before S4c touches the kernel; past the cap, so it opens only from its record).  S4b adds the sections. ── */
-const ENTRIES = [
-  { id: 'C6H6', basis: 'sto-3g', section: 'ORGANIC', states: true,
+/* ── THE CANDIDATES, in the gate's order.  A row names its geometry (`census`: research/release-0.4.0/library-census/census.json,
+   Sol's census, consumed and not redone), its full point group (`group`; C1 when it has none) and, where lab/names.js has no
+   table for that group, the subgroup its orbitals are labelled in (`label`); `frame` places the group's axes on the census
+   atoms ({ atom: k } from the centre of nuclear charge, { edge: [i, j] } along a bond) — such a row is turned into that frame,
+   and `symmetrize` averages it over the group (the shift is stated in its source).  `motifs` are declared from connectivity,
+   `family` is the gate's allowance, `stem` carries the identifiers and the two-line blurb. ── */
+const S3 = 'sto-3g';
+const CANDIDATES = [
+  /* ORGANIC — benzene is the live table's own molecule: its record (S4a, the proof) is not a candidate for novelty */
+  { id: 'C6H6', basis: S3, section: 'ORGANIC', live: true, states: true,
     oracle: { file: 'tests/fixtures/oracles/sto-3g-v1.json', path: ['molecules_extended', 'C6H6', 'energy'], what: 'PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals' },
-    stem: { inchiKey: 'UHOVQNZJYSORNB-UHFFFAOYSA-N', pubchemCid: 241,
-      blurb: ['The aromatic ring: six carbons, six π electrons in three bonding orbitals, the HOMO a degenerate pair (1e₁g).',
-        'Its RHF/STO-3G record is the library\'s proof — the one molecule here that also solves live, so cached = fresh can be measured.'] } },
-  { id: 'lysine', basis: 'sto-3g', section: 'BIO', states: false,
-    molecule: { name: 'lysine', formula: '<m>C₆H₁₄N₂O₂</m>', charge: 0, symmetry: { group: 'C1' },
-      source: 'NOT A MEASUREMENT: the S4 census\'s neutral L-lysine (SMILES N[C@@H](CCCCN)C(=O)O), relaxed by PySCF RHF/STO-3G on the vendored decimals — optimised there, UNVERIFIED against experiment; one conformer, absolute stereochemistry unverified (research/release-0.4.0/library-census/census.json)',
-      ang: [[7, -2.506690815685623, -1.5039060397638868, 0.8307558600125732], [6, -1.5014480758785482, -0.8002112173638809, -0.022950090950889856], [6, -0.0671622360862503, -1.1808285048763643, 0.4345737444318268], [6, 1.0146261982178855, -1.0645174122833025, -0.66751079574317], [6, 1.406197525605455, 0.37135873346930465, -1.0931537809291603], [6, 2.3574266033389892, 1.0987560397819793, -0.11285023378529478], [7, 1.7822469410109834, 1.210485203211592, 1.253518123263701], [6, -1.818984686543881, 0.7153232165819607, 0.11139710831424458], [8, -1.1264377505623782, 1.601465628343012, 0.5750845206190044], [8, -3.094815694984495, 0.9779879466414739, -0.37823973998437105], [1, -2.396024500879165, -2.51618694120349, 0.6573647192566833], [1, -3.43987738944728, -1.2690478047103397, 0.4539499387026505], [1, -1.6290090508718056, -1.0539530036039504, -1.082888913902403], [1, 0.21500786521347212, -0.585479070170717, 1.297639032212872], [1, -0.10095320536591046, -2.220571905834812, 0.7537960248937426], [1, 1.907809384585309, -1.5766563762620842, -0.31529462539361325], [1, 0.6688803181701908, -1.6030673651279468, -1.5489412557068576], [1, 1.9120870512035941, 0.31579618531070086, -2.05537450495579], [1, 0.5148824830934312, 0.9755580362298248, -1.2405129983326593], [1, 3.293639976922164, 0.5416522916980459, -0.04139924627510559], [1, 2.5981008368690275, 2.0777918816908065, -0.5420835778419953], [1, 2.378390193601548, 1.865171104917911, 1.7844509151050416], [1, 0.8663500397832878, 1.6784792631200973, 1.1673469065385045], [1, -3.234242008582948, 1.9446001122657717, -0.21867712740020134]] },
-    oracle: { energy: -487.74428105991785, source: 'research/release-0.4.0/library-census/census.json rows[lysine].energyEh', what: 'PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals (Sol\'s census; MEASURED there)' },
-    stem: { inchiKey: 'KDXKERNSBIXSRK-YFKPBYRVSA-N', pubchemCid: 5962, identifiers: 'L-lysine; InChIKey and CID entered from memory and UNVERIFIED — S4b checks them against PubChem before the BIO section ships',
-      blurb: ['An essential amino acid: the backbone of glycine with a four-carbon chain ending in a second amine (ε-NH₂).',
-        'At 64 Cartesian AOs it fills the field kernel\'s widest tier exactly; past the live cap, it opens only from this record.'] } },
+    stem: { blurb: ['The aromatic ring: six carbons, six π electrons in three bonding orbitals, the HOMO a degenerate pair (1e₁g).',
+      'Its RHF/STO-3G record is the library\'s proof — the one molecule here that also solves live, so cached = fresh can be measured.'] } },
+
+  /* BIO — the twenty amino acids are one family (glycine is live); lysine is S4a's 64-AO fixture */
+  { id: 'alanine', census: 'alanine', section: 'BIO', family: 'amino-acids', group: 'C1', formula: '<m>C₃H₇NO₂</m>',
+    stem: { blurb: ['The smallest chiral amino acid: glycine with a methyl side chain, L-alanine here (wwPDB ideal coordinates).',
+      'One of the three sizing entries of the library (S4b): 37 Cartesian AOs, just past the benzene cap, so it opens from its record.'] } },
+  { id: 'lysine', census: 'lysine', section: 'BIO', family: 'amino-acids', group: 'C1', formula: '<m>C₆H₁₄N₂O₂</m>',
+    stem: { blurb: ['An essential amino acid: the backbone of glycine with a four-carbon chain ending in a second amine (ε-NH₂).',
+      'At 64 Cartesian AOs it fills the field kernel\'s widest tier exactly; past the live cap, it opens only from this record.'] } },
+
+  /* LATTICE — finite clusters only (the solver has no k-points) */
+  { id: 'Li4F4', census: 'Li4F4', section: 'LATTICE', group: 'Td', motifs: ['cluster'], name: 'lithium fluoride cube', formula: '<m>Li₄F₄</m>',
+    stem: { blurb: ['A rock-salt cube cut from the LiF crystal: four Li⁺ and four F⁻ on alternating corners, T_d.',
+      'One of the three sizing entries (S4b): the smallest piece of an ionic lattice, its edge relaxed by RHF/STO-3G under T_d.'] } },
+
+  /* HEAVY — the Kr row: the vendored STO-3G stops at Kr (R-L6: iodine and xenon are not in the record, and nothing is vendored) */
+  { id: 'TiCl4', census: 'TiCl4', section: 'HEAVY', group: 'Td', motifs: ['d-block'], name: 'titanium tetrachloride', formula: '<m>TiCl₄</m>',
+    stem: { blurb: ['A d⁰ transition-metal halide: Ti(IV) in a tetrahedron of chlorines, a volatile liquid and the Ziegler–Natta precursor.',
+      'One of the three sizing entries (S4b): 55 Cartesian AOs with a 3d shell on titanium, the first d-block record of the library.'] } },
 ];
+
+/* the live table's motifs, declared from connectivity like the candidates' (the census's own declarations) */
+const LIVE_MOTIFS = { C3H6: ['ring:3'], C4H4O: ['ring:5'], C5H5N: ['ring:6'], C6H6: ['ring:6'], CuH: ['d-block'], ZnH2: ['d-block'] };
+const MOTIF = /^(ring:\d+|peptide bond|d-block|cluster|cage|nucleobase)$/, FAMILIES = new Set(['amino-acids', 'nucleobases']);
+const DBLOCK = (Z) => (Z >= 21 && Z <= 30);
 
 /* standard atomic weights (IUPAC conventional values), Z ≤ 36 — the vendored STO-3G's reach */
 const MASS = [0, 1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.180, 22.990, 24.305, 26.982, 28.085, 30.974, 32.06,
   35.45, 39.95, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938, 55.845, 58.933, 58.693, 63.546, 65.38, 69.723, 72.630, 74.922, 78.971, 79.904, 83.798];
+const SYMBOL = ['X', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
+  'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'];
 const DEBYE = 2.541746473;                                         // debye per atomic unit of dipole (e·a₀)
 const EV = 27.211386245988;
 const sha = (b) => createHash('sha256').update(b).digest('hex');
@@ -69,37 +113,104 @@ const f64 = (a) => ({ $f64: Buffer.from(Float64Array.from(a).buffer).toString('b
 const i32 = (a) => ({ $i32: Buffer.from(Int32Array.from(a).buffer).toString('base64') });
 const bse = Object.fromEntries(Object.entries(BASIS_FILES).map(([k, f]) => [k, { file: 'lab/vendor/bse/' + f, text: readFileSync(LAB + 'vendor/bse/' + f, 'utf8') }]));
 for (const [k, b] of Object.entries(bse)) chemRegister(k, JSON.parse(b.text));
-
-function rowOf(e) {
-  const m = MOLECULE_BY_ID.get(e.id);
-  if (m && !m.library) return m;                                    // a molecule lab/molecules.js already lists (benzene)
-  if (!e.molecule) throw new Error(`orbital-library: ${e.id} is neither in lab/molecules.js nor defined here`);
-  return { id: e.id, ...e.molecule };
+/** Hill order with the charge: the gate's formula key */
+function hill(ang, charge) {
+  const n = {}; for (const [Z] of ang) n[Z] = (n[Z] || 0) + 1;
+  const rank = (Z) => (n[6] ? (Z === 6 ? 0 : Z === 1 ? 1 : 2) : 2);          // carbon first, then hydrogen, when there is carbon
+  const keys = Object.keys(n).map(Number).sort((a, b) => rank(a) - rank(b) || SYMBOL[a].localeCompare(SYMBOL[b]));
+  return keys.map((Z) => SYMBOL[Z] + (n[Z] > 1 ? n[Z] : '')).join('') + (charge ? (charge > 0 ? '+' : '-').repeat(Math.abs(charge)) : '');
 }
+
+/* ── THE GEOMETRY: the census atoms, turned into the declared frame and (where said) averaged over the group ── */
+const sub3 = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function geometry(e) {
+  if (e.live) { const m = MOLECULE_BY_ID.get(e.id); return { ang: m.ang, charge: m.charge || 0, source: m.source, symmetry: m.symmetry, name: m.name, formula: m.formula, molecule: m }; }
+  const c = CENSUS.get(e.census); if (!c) throw new Error(`orbital-library: ${e.id}: no census row '${e.census}'`);
+  let ang = c.geometry.atomsAngstrom.map((a) => a.slice()), source = c.geometry.source, note = '';
+  const group = e.label || e.group, P = (a) => [a[1], a[2], a[3]];
+  if (e.frame) {                                                   // into the frame: the centre of nuclear charge at 0, the axes x, y, z
+    const Ztot = ang.reduce((s, a) => s + a[0], 0), cen = [0, 1, 2].map((q) => ang.reduce((s, a) => s + a[0] * a[q + 1], 0) / Ztot);
+    const vec = (f) => (Array.isArray(f) ? f : f.edge ? sub3(P(ang[f.edge[1]]), P(ang[f.edge[0]])) : sub3(P(ang[f.atom]), cen));
+    const fr = frameOf(ang.map(([Z, x, y, z]) => ({ Z, x, y, z })), { z: vec(e.frame.z), x: vec(e.frame.x) });
+    ang = ang.map(([Z, ...p]) => { const d = sub3(p, fr.c); return [Z, dot3(d, fr.x), dot3(d, fr.y), dot3(d, fr.z)]; });
+    note += ` · turned into the ${group} frame (${CONVENTION[group]}), the centre of nuclear charge at the origin — a rigid rotation, the energy unchanged`;
+  }
+  if (e.symmetrize) {                                              // the average over the group's images: exact symmetry, the shift stated
+    const ops = operations(group).map((o) => o.R);
+    const img = (R, p) => [R[0] * p[0] + R[1] * p[1] + R[2] * p[2], R[3] * p[0] + R[4] * p[1] + R[5] * p[2], R[6] * p[0] + R[7] * p[1] + R[8] * p[2]];
+    let shift = 0;
+    const out = ang.map(([Z, ...p]) => {
+      const s = [0, 0, 0];
+      for (const R of ops) {
+        const q = img(R, p); let best = -1, bd = Infinity;
+        ang.forEach(([Zb, ...pb], k) => { if (Zb !== Z) return; const d = Math.hypot(...sub3(pb, q)); if (d < bd) { bd = d; best = k; } });
+        if (bd > 1e-3) throw new Error(`orbital-library: ${e.id} is ${bd.toExponential(2)} Å from ${group} — too far to symmetrize`);
+        const back = img([R[0], R[3], R[6], R[1], R[4], R[7], R[2], R[5], R[8]], P(ang[best]));   // Rᵀ applied to the image atom
+        for (let q2 = 0; q2 < 3; q2++) s[q2] += back[q2] / ops.length;
+      }
+      shift = Math.max(shift, Math.hypot(...sub3(s, p)));
+      return [Z, ...s];
+    });
+    ang = out;
+    note += ` · averaged over the ${ops.length} operations of ${group} (largest shift ${shift.toExponential(1)} Å), so the declared group holds exactly`;
+  }
+  const charge = c.charge || 0;
+  return { ang, charge, source: source + note, symmetry: { group: group }, name: e.name || c.name, formula: e.formula || '<m>' + hill(ang, 0).replace(/\d+/g, (d) => [...d].map((x) => '₀₁₂₃₄₅₆₇₈₉'[+x]).join('')) + '</m>' };
+}
+
+/* ── THE GATE ── */
+function gate(cands) {
+  const formulas = new Set(), elements = new Set(), groups = new Set(), motifs = new Set();
+  for (const m of MOLECULES) {
+    formulas.add(hill(m.ang, m.charge)); for (const [Z] of m.ang) elements.add(Z);
+    if (m.symmetry.group !== 'C1') groups.add(m.symmetry.group); for (const t of LIVE_MOTIFS[m.id] || []) motifs.add(t);
+  }
+  return cands.map((e) => {
+    if (e.live) return { e, pass: true, why: 'the live table\'s own molecule (its record is not a new entry)' };
+    const g = geometry(e), key = hill(g.ang, g.charge), els = [...new Set(g.ang.map(([Z]) => Z))];
+    const bad = (e.motifs || []).filter((t) => !MOTIF.test(t));
+    if (bad.length) throw new Error(`orbital-library: ${e.id}: '${bad.join(', ')}' is not on the fixed motif list`);
+    if ((e.motifs || []).includes('d-block') !== els.some(DBLOCK)) throw new Error(`orbital-library: ${e.id}: the d-block tag must say whether a d-block atom is present`);
+    const unique = !formulas.has(key), newEls = els.filter((Z) => !elements.has(Z)), newGroup = e.group !== 'C1' && !groups.has(e.group);
+    const newMotifs = (e.motifs || []).filter((t) => !motifs.has(t)), fam = e.family && FAMILIES.has(e.family);
+    const pass = fam || (unique && (newEls.length > 0 || newGroup || newMotifs.length > 0));
+    const why = fam ? `the declared ${e.family} family` + (unique ? '' : ` (shares ${key} — the family keeps it)`)
+      : !unique ? `${key} is already in the library`
+      : pass ? [newEls.length ? 'new element ' + newEls.map((Z) => SYMBOL[Z]).join(', ') : '', newGroup ? 'new point group ' + e.group : '', newMotifs.length ? 'new motif ' + newMotifs.join(', ') : ''].filter(Boolean).join('; ')
+      : `${key}: no new element, point group (${e.group}) or motif (${(e.motifs || []).join(', ') || 'none'})`;
+    if (pass) { formulas.add(key); for (const Z of els) elements.add(Z); if (e.group !== 'C1') groups.add(e.group); for (const t of e.motifs || []) motifs.add(t); }
+    return { e, pass, why, key };
+  });
+}
+
+/* ── ONE RECORD ── */
 function build(e) {
-  const row = rowOf(e), charge = row.charge || 0, sym = row.symmetry || { group: 'C1' };
+  const row = geometry(e), charge = row.charge, sym = row.symmetry || { group: 'C1' };
   const atoms = row.ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));   // moleculeAtoms' own arithmetic
-  const msg = { atoms, basis: e.basis, charge, symmetry: sym }, t0 = performance.now();
+  const msg = { atoms, basis: e.basis || S3, charge, symmetry: sym }, basis = msg.basis, t0 = performance.now();
   const g = chemGround(msg), sp = chemSpectrum(msg);
   const st = e.states ? chemStates(msg) : null, X = st ? chemStateVectors({ ks: [...Array(st.count).keys()] }).X : null;
   const ms = performance.now() - t0, n = g.nAO, nocc = g.nocc, d = nocc * (n - nocc);
   if (!g.converged) throw new Error(`orbital-library: ${e.id} did not converge — never a record that fails`);
   if (g.stability && g.stability.minimum === false) throw new Error(`orbital-library: ${e.id}'s RHF reference is not a minimum`);
-  const oracleE = e.oracle.energy ?? e.oracle.path.reduce((o, k) => o[k], JSON.parse(readFileSync(fileURLToPath(new URL('../' + e.oracle.file, import.meta.url)), 'utf8')));
+  const O = ORACLE[e.id], group = e.group || sym.group;
+  if (!O || O.key !== atomsKey(atoms)) throw new Error(`orbital-library: ${e.id} has no PySCF oracle on these atoms — run --inputs, then tools/library/record-oracle.py`);
+  const oracleE = e.oracle ? e.oracle.path.reduce((o, k) => o[k], json(e.oracle.file)) : O.energy;
   const delta = g.energy - oracleE;
   if (!(Math.abs(delta) <= 1e-8)) throw new Error(`orbital-library: ${e.id} is ${delta} Eh from its oracle — no record`);
   /* the ground as the wire carries it, minus the clocks */
   const { timings, stage, eps, C, D, shells, ...wire } = g, names = { ...wire.names }; delete names.ms;
+  if (sym.group !== 'C1' && !names.reliable) throw new Error(`orbital-library: ${e.id}: the projection named nothing in ${sym.group} — ${names.reason}`);
   const dom = (k) => { const q = []; for (let r = 0; r < d; r++) for (let j = 0; j < 4; j++) { const p = sp.roots[r].dominant[j]; q.push(p ? k(p) : (k === domI || k === domA ? -1 : 0)); } return q; };
   const domI = (p) => p.i, domA = (p) => p.a;
   const nm = names.reliable ? names.mos : null, gap = g.eps[nocc] - g.eps[nocc - 1];
   const homo = nm ? nm[nocc - 1] : null, ie = CURATED_IE[e.id];
-  const over = row.predictedMs !== undefined ? row.predictedMs > CAP_MS * 1.02
-    : predicted(row.ang, charge) > CAP_MS * 1.02;
+  const over = predicted(row.ang, charge) > CAP_MS * 1.02;
+  const fr = frameOf(atoms, sym.frame), ids = IDS[e.id] || null;
   const record = {
-    schema: SCHEMA, kind: 'lambdawaves.orbital-record', id: e.id, basis: e.basis, name: row.name, formula: row.formula,
+    schema: SCHEMA, kind: 'lambdawaves.orbital-record', id: e.id, basis, name: row.name, formula: row.formula,
     generator: 'tools/orbital-library.mjs — lab/mathworker.js chemGround → chemSpectrum' + (st ? ' → chemStates / chemStateVectors' : '') + ' in node',
-    input: { atoms, charge, multiplicity: 1, basis: e.basis, basisFile: bse[e.basis].file, basisSha256: sha(bse[e.basis].text), symmetry: sym },
+    input: { atoms, charge, multiplicity: 1, basis, basisFile: bse[basis].file, basisSha256: sha(bse[basis].text), symmetry: sym },
     caps: { orbitals: true, states: !!st, rpa: true, tdhf: !over },
     ground: { ...wire, names },
     orbitals: { eps: f64(g.eps), C: f64(g.C), D: f64(g.D) },
@@ -111,40 +222,70 @@ function build(e) {
       mass: +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), massUnit: 'u (IUPAC conventional atomic weights)', charge, multiplicity: 1,
       dipoleDebye: +(Math.hypot(...g.dipole) * DEBYE).toFixed(4),
       gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: homo ? homo.label + ' · ' + homo.frontier : 'HOMO', geometrySource: row.source,
-      inchiKey: e.stem.inchiKey, pubchemCid: e.stem.pubchemCid, ...(e.stem.identifiers ? { identifiers: e.stem.identifiers } : {}), blurb: e.stem.blurb,
+      inchiKey: (ids && !ids.none && ids.inchiKey) || null, pubchemCid: (ids && !ids.none && ids.cid) || null,
+      identifiers: !ids ? 'UNVERIFIED: no PubChem identifiers recorded for this entry (tools/library/pubchem-ids.json)' : ids.none ? 'none: ' + ids.none : ids.status || 'UNVERIFIED: not yet asked of PubChem', blurb: e.stem.blurb,
       ies: ie ? { ev: ie.ev, source: ie.source, status: 'UNCHECKED: entered from memory in S1 (S1-NAMES-BUILD.md); verify against NIST SRD 101 and the LEGAL-PROVENANCE reading before any store build' } : null,
-      sources: ['geometry: ' + row.source, 'energy oracle: ' + (e.oracle.file || e.oracle.source), 'basis: ' + bse[e.basis].file + ' (Basis Set Exchange, vendored)'] },
-    page: moleculeLatex({ molecule: row, basis: e.basis, charge, ground: { energy: g.energy, eps: g.eps, nocc, nAO: n, names } }),
-    oracle: { energy: oracleE, source: e.oracle.file ? e.oracle.file + ' ' + e.oracle.path.join('.') : e.oracle.source, what: e.oracle.what, delta },
+      symmetry: {
+        pointGroup: group, labelledIn: names.reliable ? names.group : null, why: names.reliable ? (e.label ? `lab/names.js has no ${group} table: the orbitals are labelled by projection in its subgroup ${e.label}` : 'labelled by projection in the full group (lab/names.js at generation)') : names.reason,
+        frame: CONVENTION[sym.group] || null, axes: { x: fr.x, y: fr.y, z: fr.z, centre: fr.c },
+        atomsInFrame: atoms.map((a) => { const p = sub3([a.x, a.y, a.z], fr.c); return [a.Z, dot3(p, fr.x), dot3(p, fr.y), dot3(p, fr.z)]; }),
+        pyscf: { topgroup: O.topgroup, groupname: O.groupname, use: 'recorded — PySCF\'s own detection on these atoms, never a name' } },
+      sources: ['geometry: ' + row.source, 'energy oracle: ' + (e.oracle ? e.oracle.file : ORACLE_FILE + ' (tools/library/record-oracle.py, PySCF on these atoms)'), 'basis: ' + bse[basis].file + ' (Basis Set Exchange, vendored)',
+        ...(e.live ? [] : ['census: ' + CENSUS_FILE + ' row ' + e.census + ' (S4 census, Sol; spot-checked by Claude Sos)'])] },
+    page: moleculeLatex({ molecule: row, basis, charge, ground: { energy: g.energy, eps: g.eps, nocc, nAO: n, names } }),
+    oracle: { energy: oracleE, source: e.oracle ? e.oracle.file + ' ' + e.oracle.path.join('.') : ORACLE_FILE + ' molecules.' + e.id + '.energy', what: e.oracle ? e.oracle.what : 'PySCF RHF, cart=True, the vendored STO-3G decimals, on the record\'s own atoms in bohr', delta },
   };
+  if (pyGroup(O.topgroup) !== group) throw new Error(`orbital-library: ${e.id}: declared ${group}, PySCF detects ${O.topgroup} on the same atoms`);
   const text = JSON.stringify(record, null, 1) + '\n', bytes = Buffer.from(text), hash = sha(bytes);
   const bad = validateRecord(JSON.parse(text));
   if (bad.length) throw new Error(`orbital-library: ${e.id} fails validation — ${bad.join('; ')}`);
   /* the record opens through the worker's own chem.open with no solver call, and answers what it was made from */
-  const before = chemSolverCalls(), o = chemOpen({ lib: JSON.parse(text), hash, basis: e.basis });
+  const before = chemSolverCalls(), lib = JSON.parse(text), t1 = performance.now(), o = chemOpen({ lib, hash, basis }), openMs = performance.now() - t1;
   if (chemSolverCalls() !== before || o.energy !== g.energy || o.C.some((v, i) => v !== g.C[i])) throw new Error(`orbital-library: ${e.id}'s record does not open to its own solve`);
-  const catalogue = { id: e.id, basis: e.basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps,
-    ...(MOLECULE_BY_ID.has(e.id) && !MOLECULE_BY_ID.get(e.id).library ? {} : { molecule: e.molecule }) };
-  return { text, hash, catalogue, ms, nAO: n, d, energy: g.energy, delta };
+  const catalogue = { id: e.id, basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps,
+    ...(e.live ? {} : { molecule: { name: row.name, formula: row.formula, charge, symmetry: sym, source: row.source, ang: row.ang } }) };
+  return { text, hash, catalogue, ms, openMs, nAO: n, d, energy: g.energy, delta };
 }
+const pyGroup = (g) => ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[g] || g);
+/** the key the oracle file holds for the atoms it was computed on: a mismatch means the oracle is stale */
+function atomsKey(atoms) { return sha(JSON.stringify(atoms.map((a) => [a.Z, a.x, a.y, a.z]))).slice(0, 16); }
 /** the live-cost prediction for a molecule lab/molecules.js does not list (lab/molecules.js does the same for its rows) */
 function predicted(ang, charge) { const c = counts(ang), nocc = (c.nElec - charge) / 2; return COST.a * eriWork(c.widths) + COST.b * rpaWork(c.nAO, nocc) + COST.c; }
 
+/* ── the run ── */
+const order = (e) => SECTIONS.indexOf(e.section);
+if (CANDIDATES.some((e) => order(e) < 0)) throw new Error('orbital-library: a candidate names no section of lab/molecules.js SECTIONS');
+const verdicts = gate([...CANDIDATES].sort((a, b) => order(a) - order(b)));
+if (GATE_ONLY) {
+  for (const v of verdicts) console.log(`${v.pass ? 'PASS  ' : 'REFUSE'} ${v.e.section.padEnd(9)} ${v.e.id.padEnd(18)} ${v.why}`);
+  console.log(`THE GATE: ${verdicts.filter((v) => v.pass).length} pass, ${verdicts.filter((v) => !v.pass).length} refused`); process.exit(0);
+}
+const ENTRIES = verdicts.filter((v) => v.pass).map((v) => v.e);
+if (INPUTS) {
+  const rows = ENTRIES.filter((e) => !ONLY || ONLY.has(e.id)).map((e) => {
+    const g = geometry(e), atoms = g.ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
+    return { id: e.id, charge: g.charge, group: e.group || g.symmetry.group, key: atomsKey(atoms), atoms: atoms.map((a) => [a.Z, a.x, a.y, a.z]) };
+  });
+  writeFileSync(INPUTS, JSON.stringify({ basis: 'lab/vendor/bse/sto-3g-v1.json', unit: 'bohr', rows }, null, 1) + '\n');
+  console.log(`orbital-library: ${rows.length} inputs → ${INPUTS}`); process.exit(0);
+}
 const out = [], fail = [];
+for (const v of verdicts) if (!v.pass) console.log(`refused by the gate: ${v.e.id} — ${v.why}`);
 const disk = existsSync(CATALOGUE) ? JSON.parse(readFileSync(CATALOGUE, 'utf8')) : { rows: [] };
 for (const e of ENTRIES) {
   if (ONLY && !ONLY.has(e.id)) {                                      // re-hashed from disk, not re-solved
-    const r = disk.rows.find((x) => x.id === e.id && x.basis === e.basis);
+    const r = disk.rows.find((x) => x.id === e.id && x.basis === (e.basis || S3));
     if (!r) { fail.push(`${e.id}: not in the catalogue on disk`); continue; }
     out.push({ catalogue: r, hash: r.hash, text: readFileSync(LAB + recordPath(r.hash), 'utf8'), skipped: true }); continue;
   }
   const r = build(e); out.push(r);
-  console.log(`${e.id.padEnd(8)} ${e.basis} · ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${(r.text.length / 1024).toFixed(1)} KB · caps ${Object.entries(r.catalogue.caps).filter(([, v]) => v).map(([k]) => k).join('+')} · generated in ${(r.ms / 1000).toFixed(2)} s · ${r.hash.slice(0, 12)}`);
+  console.log(`${e.id.padEnd(12)} ${e.section.padEnd(9)} ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${r.catalogue.bytes} B · caps ${Object.entries(r.catalogue.caps).filter(([, v]) => v).map(([k]) => k).join('+')} · generated in ${(r.ms / 1000).toFixed(2)} s · opened in ${r.openMs.toFixed(1)} ms · ${r.hash.slice(0, 12)}`);
 }
 const catalogueText = JSON.stringify({ schema: SCHEMA, generator: 'tools/orbital-library.mjs', note: 'the catalogue lab/molecules.js reads; each row\'s record is lab/library/<hash>.json — deployed, never precached (sw.js DATA)',
   rows: out.map((r) => r.catalogue) }, null, 1) + '\n';
 const want = new Set(out.map((r) => recordPath(r.hash).slice('library/'.length)));
 const present = existsSync(LAB + 'library') ? readdirSync(LAB + 'library') : [];
+const sizes = SECTIONS.map((s) => { const rs = out.filter((r) => r.catalogue.section === s); return `${s} ${rs.length} records ${rs.reduce((t, r) => t + r.catalogue.bytes, 0)} B`; }).join(' · ');
 if (CHECK) {
   for (const r of out) {
     const p = LAB + recordPath(r.hash);
@@ -153,14 +294,16 @@ if (CHECK) {
     else if (!r.skipped && readFileSync(p, 'utf8') !== r.text) fail.push(`${r.catalogue.id}: the record on disk is not what the solver writes`);
     else { const bad = validateRecord(JSON.parse(readFileSync(p, 'utf8'))); if (bad.length) fail.push(`${r.catalogue.id}: ${bad.join('; ')}`); }
   }
+  for (const r of disk.rows) if (!ENTRIES.some((e) => e.id === r.id)) fail.push(`${r.id}: in the catalogue but not an entry the gate passes`);
   if (!existsSync(CATALOGUE) || readFileSync(CATALOGUE, 'utf8') !== catalogueText) fail.push('lab/library.json is out of step');
   for (const f of present) if (!want.has(f)) fail.push(`lab/library/${f} is reached by no catalogue row`);
   if (fail.length) { console.log('orbital-library: OUT OF STEP — run `node tools/orbital-library.mjs`\n  ' + fail.join('\n  ')); process.exit(1); }
-  console.log(`orbital-library: in step — ${out.length} records, ${out.reduce((s, r) => s + Buffer.byteLength(r.text), 0)} B, lab/library.json ${catalogueText.length} B, nothing else in lab/library/`);
+  console.log(`orbital-library: in step — ${out.length} records, ${out.reduce((s, r) => s + Buffer.byteLength(r.text), 0)} B, lab/library.json ${catalogueText.length} B, nothing else in lab/library/; the gate passes every entry\n  ${sizes}`);
 } else {
+  if (fail.length) { console.log('orbital-library: NOT WRITTEN\n  ' + fail.join('\n  ')); process.exit(1); }
   mkdirSync(LAB + 'library', { recursive: true });
-  for (const r of out) writeFileSync(LAB + recordPath(r.hash), r.text);
+  for (const r of out) if (!r.skipped) writeFileSync(LAB + recordPath(r.hash), r.text);
   for (const f of present) if (!want.has(f)) { unlinkSync(LAB + 'library/' + f); console.log('removed lab/library/' + f + ' (no row reaches it)'); }
   writeFileSync(CATALOGUE, catalogueText);
-  console.log(`orbital-library: wrote ${out.length} records and lab/library.json — now run node tests/pwa.test.mjs --write`);
+  console.log(`orbital-library: wrote ${out.filter((r) => !r.skipped).length} records (${out.length} in the catalogue) and lab/library.json — now run node tests/pwa.test.mjs --write\n  ${sizes}`);
 }
