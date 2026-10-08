@@ -1,6 +1,7 @@
 /* cdp.mjs — a headless Chromium over the DevTools protocol, no dependency (vendored from MIR/tools/cdp.mjs,
  * 2026-09-24, with `args` so a benchmark can accept the gate server's self-signed certificate and ask for
- * the real GPU).  launch() → { goto, eval, mouse, shot, resize, close, logs }. */
+ * the real GPU).  launch() → { goto, eval, mouse, shot, resize, close, logs, metrics }.
+ * metrics() (0.5.0 A-M): Performance.enable once, then Performance.getMetrics → { TaskDuration, ScriptDuration, LayoutDuration, ... } in seconds, by name. */
 import { spawn, execFileSync } from 'node:child_process';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 const LIVE = new Set();
@@ -47,8 +48,15 @@ export async function launch({ width = 1280, height = 900, scale = 1, gpu = fals
   });
   await send('Runtime.enable'); await send('Page.enable');
   await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: scale, mobile: false });
+  let perfOn = false;
   return {
     logs, send,
+    async metrics() {
+      if (!perfOn) { await send('Performance.enable'); perfOn = true; }
+      const r = await send('Performance.getMetrics');
+      if (r.error) throw new Error('cdp: Performance.getMetrics: ' + r.error.message);
+      return Object.fromEntries(r.result.metrics.map((m) => [m.name, m.value]));
+    },
     async goto(url, settle = 1500) { await send('Page.navigate', { url }); await sleep(settle); },
     async eval(expression) {
       const r = await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
