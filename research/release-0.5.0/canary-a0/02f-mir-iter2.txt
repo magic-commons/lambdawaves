@@ -1,0 +1,163 @@
+GREEN AN UNROUTED SOURCE RUNS FOR ITS OPEN EDITOR AND STOPS WHEN THAT EDITOR CLOSES, while transport intent remains ready for reopening
+      {"closed":{"ok":false,"reason":"nothing-to-run","playing":false},"open":{"ok":true,"playing":true,"running":true,"resume":{"law":"FREE","grid":0,"anch":0,"bpm":0,"trig":0,"free":1,"from":0,"to":0,"moved":0,"mode":"wall","applied":false}},"shut":{"playing":true,"running":false,"presentationActive":false},"phase":0.009248627527554908}
+GREEN A ROUTED SOURCE REMAINS MACHINERY AFTER THE EDITOR CLOSES
+      {"playing":true,"running":true,"presentationActive":false,"value":0.5002109949769094}
+GREEN ONE REAL SYNCED SINE LFO DRIVES FIVE REGISTRY TARGETS through real macros and routes: five routes off one macro give five distinct normalised values in the sample window
+      {"distinctAcross":5,"values":[0.2741613911283867,0.7489907653388315,0.756066017177982,0.8133883476483184,0.8]}
+GREEN ...and the trace itself moves: one target takes many distinct values across a 16-sample window
+      {"distinctOverTime":9,"of":16}
+GREEN ...while every UNROUTED parameter stays exactly on its base and is not marked modulated
+      {"unrouted":9}
+GREEN ...and the number really LEFT the registry and landed on the instrument: the Card’s own plain object moved on all five, through nothing but its own get/set adapters
+      {"yaw":1.7226068245337953,"pitch":0.7822275592001731,"exposure":4.6376624809396905,"knee":0.8133883476483184,"res":160}
+GREEN CHANGING 60 BPM TO 120 PRESERVES BEATS, MODEL TIME AND SOURCE PHASE AT THE EDIT EDGE — the tempo changes what happens next, never what already happened
+      {"beats":[1,1],"time":[1,1],"phase":[0,0]}
+GREEN ...and the doubled tempo takes effect from the edit forward: the next step advances twice the beats it used to
+      {"advanced":0.25}
+GREEN REPLAYING THE SAME WALL/dt SCHEDULE IS EXACTLY DETERMINISTIC — same rack, same steps, byte-identical trace of transport, source phase and every target value
+      {"bytes":40942,"equal":true}
+GREEN PAUSED WALL TIME CHANGES NO MODEL TIME, NO PHASE AND NO TARGET VALUE — 0.75 s of wall passes and the only field that moves is the wall itself
+      {"wall":[1000.5000000000001,1001.2500000000001],"time":[0.5,0.5]}
+GREEN ...and RESUME ADVANCES AGAIN: model time moves and the targets move with it
+      {"time":[0.5,0.6]}
+GREEN ...and resume never LEAPS FORWARD to where the paused wall says the beat should be — the whole point of the re-anchor — while a plain BPM source now lands on the note boundary just passed (wave 65: 0.5 beats floors to 0, then the step)
+      {"beats":[0.5000000000001137,0.10000000000002274],"wouldBeIfItLeapt":1.3500000000001138,"reanchors":[4,9]}
+GREEN ...and the ANCHORED source keeps that identity exactly as it always read — the beat continues from where it stopped plus the step, and the phase with it: ANCH outranks the grid, which is the whole of Josh’s "hold the current state in the curve it was on during the pause"
+      {"beats":[0.5000000000001137,0.6000000000001364],"law":"ANCH"}
+GREEN serializeRack() / deserializeRack() ROUND-TRIPS IDENTICALLY through a bare reset — five routes, two macros, one LFO, byte for byte
+      {"bytes":2007,"empty":{"sources":0,"routes":0,"macros":0}}
+GREEN ...and a rack serialized MID-RUN is idempotent rather than byte-identical: a source-driven macro’s value is a live read-out and a load starts at bar 1 with phase 0, exactly as the model documents — load it twice and nothing more moves
+      {"liveValue":0.49999999999999994,"afterLoad":0}
+GREEN THE COMPLETE IMPORT CLOSURE IS EXACTLY FOUR FILES — walked from host.js and registry.js, not eyeballed: no rack, no kit, no view, no renderer, no GPU, no npm package, no computed dynamic import
+      {"closure":["lab/mir/modulation/curve.js","lab/mir/modulation/host.js","lab/mir/modulation/mod.js","lab/mir/modulation/registry.js"],"bare":[],"outside":[],"computed":false}
+GREEN ...and OUR two files name no DOM, renderer, GPU or rack symbol anywhere outside a comment
+      {"hits":[]}
+GREEN ...and the only storage in the closure is the vendored model’s own guarded globalThis.localStorage, pointed at the λWAVES namespace by the one forced edit — our two files touch no storage at all
+      {"ourStorage":null,"presetKey":"lambdawaves.q0.modpresets"}
+GREEN ...and node really has no DOM: importing the whole host defined neither document nor window
+      {"document":"undefined","window":"undefined"}
+GREEN EVERY MAP KIND ROUND-TRIPS value → norm → value TO 1e-12 — linear, log with min > 0, wrap, integer snapping and bipolar
+      {"linear":0,"log":2.1316282072803006e-14,"wrap":0,"integer":0,"bipolar":1.5011390860842853e-16}
+GREEN ...the BIPOLAR map puts 0.5 EXACTLY at zero even on a lopsided range (−1 … +3), in both directions — a centre detent that is only nearly centred is a bug you find in a screenshot six months later
+      {"atZero":0.5,"fromHalf":0}
+GREEN ...the WRAP map is a circle: its maximum IS its minimum, toNorm at the seam is 0, and a value one turn out lands back on itself
+      {"seam":0,"oneTurnOut":0.6500000000000014}
+GREEN ...the LOG map is exact at both ends and refuses a range that contains zero (log of zero has no dial position)
+GREEN ...the INTEGER map snaps to its rungs, in both directions, exactly: every rung is reachable, everything between rounds to the nearest one, and toNorm snaps BEFORE it normalises so the round trip cannot drift
+      {"rungs":[32,64,96,128,160,192]}
+GREEN ...and MAP_KINDS is exactly the five things a kit.js control already is
+      ["linear","log","wrap","integer","bipolar"]
+GREEN ID VALIDATION REJECTS A MALFORMED ID — the five shipped shapes pass, and 15 near-misses (case, empty segment, space, punctuation, an unknown root, a mode key that is not one) are each refused with a reason
+      {"accepted":6,"refused":15}
+GREEN ...and the refusal is a THROW at registration, not a silent null: a control registered under a typo is a ghost that takes routes and moves nothing
+      {"message":"mir/registry: bad id \"Observer.Yaw\" — the root \"Observer\" is not one of observer · material · state · transport · field"}
+GREEN ...state.mode.* insists on a real register key h:n:l:m, so a route saved against a mode can always find its amplitude again
+GREEN BASE AND CURRENT ARE SEPARATE THROUGH A WHOLE RUN: the modulator moved the current value and never touched the base the user set
+      {"user":1.2345678901234567,"base":1.2345678901234567,"current":2.371206790072625}
+GREEN restoreBase() RETURNS THE USER’S NUMBER EXACTLY — not to 1e-12, bit for bit: the base is stored in value space and never round-trips through the normalised form
+      {"returned":1.2345678901234567,"user":1.2345678901234567,"card":1.2345678901234567,"identical":true}
+GREEN ...and the SYNTH RULE fires on the stop edge by itself: pausing in BASE mode already put the knob back before anyone asked
+      {"onStop":1.2345678901234567,"user":1.2345678901234567}
+GREEN ...and a hand on the knob UNDER a running modulator moves the BASE and lets the modulation ride on top of it — a knob you turn while an LFO runs must feel like a knob, not like a fight
+      {"base":2.5,"currentAtWrite":5.082479220327315,"currentNext":15.08544084136291}
+GREEN THE PAUSE LAW · HOLD freezes a source-driven control exactly where the modulator had it
+      {"frozen":1.4724796345907611}
+GREEN THE PAUSE LAW · BASE (what ships) returns it to the knob instead
+      {"at":0.65}
+GREEN THE PAUSE LAW · a HAND MACRO holds its value across the stop edge in either mode — a hand does not let go because the clock did
+      {"running":1,"stopped":1,"base":0.35}
+GREEN THE PAUSE LAW · switching the only source OFF bypasses every route on the target, and a bypassed target goes straight back to the user’s knob
+GREEN HOT RE-REGISTRATION replaces the descriptor and the adapters, KEEPS THE BASE and the modulated state, and keeps the parameter’s place in the order and its subscribers
+      {"base":[7.5,7.5],"oldSet":2,"newSet":1,"subscriberStillWired":2}
+GREEN ...and a re-registration that MOVES the range re-snaps the base into it, rather than leaving a base that can never be restored
+      {"base":4}
+GREEN A SUBSCRIBER THAT THROWS DOES NOT BREAK THE WRITE — the value reached the instrument, the other subscriber still ran, the writer got its return, and the throw was counted and reported instead of re-raised
+      {"returned":0.9,"landed":0.9,"second":1,"errors":[["material.knee","write","a spectator fell over"]]}
+GREEN ...and the asymmetry is deliberate: a SETTER that throws is not swallowed, because a registry that quietly reports a value the instrument never took is worse than a crash
+GREEN ...and subscribe(‘*’) sees every parameter while it is wired, and unsubscribing really unsubscribes without disturbing the per-id subscribers
+      {"withStar":11,"afterUnsub":1}
+GREEN describe() IS A JSON-SERIALISABLE CATALOGUE — id, label, unit, range, map, group — which is the entire thing a modulation window’s target list is built from, and it survives a JSON round trip with no functions in it
+      {"count":14,"maps":["bipolar","integer","linear","log","wrap"]}
+GREEN ...and state.mode.h:n:l:m.* really registers: two register modes give four parameters, the amplitudes are linear, the phases wrap, and a modulator pushed one a full turn past its seam and landed back inside the circle
+      {"ids":["state.mode.h:2:1:0.amp","state.mode.h:2:1:0.phase","state.mode.h:3:2:-1.amp","state.mode.h:3:2:-1.phase"],"phaseAfterFullTurn":0.24999999999999986}
+GREEN ...and the shipped λWAVES vocabulary really uses all five maps, on real controls: YAW and HUE wrap, DIST and EXPOSURE and RATE are log, PITCH is bipolar, RESOLUTION is an integer
+      {"maps":["bipolar","integer","linear","log","wrap"]}
+GREEN EDGE 4 · PRESENTATION IS A CALLBACK THAT DEFAULTS TO A NO-OP, and the model asked for a paint on every edge and every output frame without any painting machinery existing
+      {"requests":5,"reasons":["transport-start","modulation-output"]}
+GREEN ...and an injected presentation callback is what the rack will pass — schedule(TIER.PRESENT) goes here, and the glass-geometry invalidator goes beside it
+      {"painted":0,"geom":1}
+GREEN EDGE 2 · THE AVAILABILITY GATE holds the clock stopped while the instrument is not live, and starts it the moment it is — this is where the rack wires whatever λWAVES’s answer to flowActive turns out to be
+      {"whileUnavailable":false,"whenAvailable":true}
+GREEN EDGE 2 · A ROUTE WHOSE TARGET IS NOT INSTALLED GOES DORMANT AND KEEPS ITS SETTINGS, and wakes the instant the target appears — which is how a preset written against a closed window, or against another project’s target ids entirely, is safe to load
+      {"dormantBefore":1,"dormantAfter":0}
+GREEN EDGE 2 · UNINSTALL MAKES EVERY TARGET LET GO FIRST — abandoning a parameter with a modulator’s number still in it leaves the instrument holding a value nobody set and nobody can explain
+      {"whileModulated":0.87,"afterUninstall":0.5}
+GREEN EDGE 3 · THE CLOCK CARRIES THE SOURCE’S OWN CONSTANTS: the 0.25 s wall-step clamp (a frame longer than that is a tab that was away, not a frame) and the two pause modes
+      {"MAX_WALL_STEP":0.25,"PAUSE_MODES":["BASE","HOLD"]}
+GREEN THE MODULATION CLOCK IS NOT THE PHYSICS CLOCK: an LFO modulating transport.rate swings the physics rate all over its range while the modulation transport keeps advancing exactly 0.125 beats per 0.125 s step — the modulator cannot accelerate itself
+      {"rates":[15.4116,100,100,100,100,100,15.4116,4],"beatStep":0.125}
+GREEN VISIBILITY · hidden stops the clock WITHOUT touching `playing`, releases the stutter hold (a hold is a gesture and the gesture is over), advances no model time however much wall time passes, and comes back running
+      {"hiddenState":{"playing":true,"running":false,"hold":false},"time":[0.30000000000000004,0.30000000000000004],"backState":{"playing":true,"running":true}}
+GREEN A WINDOW CLOSE CANNOT RESET RUNTIME STATE — the geometry callback is a view event and reaches nothing that owns time
+      {"running":true}
+GREEN THE VENDORED FILES ARE STILL THE VENDORED FILES (the source tree is not readable from here — skipped, not failed)
+      {"skipped":true}
+GREEN THE FOUR EDGES COME APART: a registry alone, a target host over it, and a clock over both — each built by hand with no createModHost() in sight, and the LFO still drives the Card
+      {"whileRunning":0.6464466094067263,"afterStop":0.5,"reasons":["transport-start","modulation-output","transport-stop"]}
+GREEN ...and restoreAll() lets every modulated parameter go at once, while resync() re-reads an UNMODULATED parameter after a preset load or an undo moved its control without going through the registry
+      {"letGo":1,"resynced":1,"base":0.31,"current":0.31}
+GREEN THE USER'S NUMBER SURVIVES A resync() UNDER A RUNNING MODULATOR: the Card is showing the LFO's 1.9, so resync() reads NOTHING out of it — it counts nothing, announces nothing, and restoreBase() still hands back the 0.734 the hand set, bit for bit
+      {"restored":0.734,"resynced":0,"eventsFromTheResync":[],"card":0.734}
+GREEN ...and it survives in ALL SIX ORDERINGS of hand, modulator and resync — the base is the user's in every one of them, not in four of them
+      {"orderingsThatLoseTheBase":[]}
+GREEN ...and resync() still does the OTHER half of its job for a modulated parameter: a control moved from outside is no longer the value the registry last pushed, so the CURRENT value is re-read and announced — while the base stays the user's and nothing is written back at the Card
+      {"resynced":1,"current":0.25,"base":0.734,"cardWritesDuringResync":0,"events":[{"reason":"resync","value":0.25,"base":0.734}]}
+GREEN ...while an UNMODULATED parameter is still re-read whole — base and current both become the number the instrument holds, which is the case resync() exists for
+      {"resynced":1,"base":1.25,"current":1.25}
+GREEN CURVE LAW 1 — EXACT AT EVERY POINT: evaluate(pts, pts[i].t) returns pts[i].v as the SAME DOUBLE, for all seven presets and for hand-drawn curves with tension at both signs — and at a duplicate `t` (which is how SQUARE writes a jump) the LATER point wins, which is the rule the analytic square wave already used
+      {"points":40,"wrong":0,"squareAtTheJump":1}
+GREEN CURVE LAW 2 — tension 0 IS BITWISE LINEAR: bend(x, 0) is `x` itself at 1001 samples (and -0 and NaN land on the same branch, which is refuse-don't-repair applied to arithmetic), so a curve carrying no tension is EXACTLY the piecewise-linear interpolation — TRI agrees with 2u / 2−2u to the double at 501 samples
+      {"bendMismatches":0,"triMismatches":0}
+GREEN CURVE LAW 3 — MONOTONE, AND NO OVERSHOOT ANYWHERE: over 201 tensions x 401 samples (80 601 readings) bend() is non-decreasing, its image is inside [0,1], and bend(0) and bend(1) are EXACTLY 0 and 1 at every tension; in value space a hard-bent curve never leaves the interval between a segment's own endpoints, which is what stops a modulator driving a control past the range handle the user set
+      {"readings":80601,"endpointFailures":0,"monotoneFailures":0,"outOfRange":0,"segmentEscapes":0}
+GREEN CURVE LAW 4 — C0 BY CONSTRUCTION, AND THE ONE JUMP IS DELIBERATE: segments share their endpoints, so TRI is continuous across its own breakpoint to 4e-9 with no spline that could ring; SQUARE's duplicate `t` reads 0 an instant before 0.5 and 1 at 0.5, which is a legal discontinuity and not a defect — four points, two of them at 0.5
+      {"justBefore":0,"at":1,"triJumpAcrossItsBreakpoint":1.1102230246251565e-16}
+GREEN CURVE LAW 5 — THE MIRROR IS CLOSED IN THE FAMILY: bend(x, −τ) = 1 − bend(1 − x, τ) to 1.2e-16 over 80 601 samples, which is the ANTISYMMETRY that makes mirror() a sign flip and nothing else — the single-branch power law fails exactly there. flip∘flip is BIT-IDENTICAL on all seven presets (every t is a dyadic rational, so 1−(1−t) is exact), and the −0 normalisation makes "symmetric shapes are invariant" true TO THE BIT: TRI · SINE · MULTI-TRI flip to the same HASH, and the four that are not symmetric all change theirs
+      {"antisymmetryWorst":1.1102230246251565e-16,"flipFlipExact":[true,true,true,true,true,true,true],"symmetric":["tri","sine","mtri"]}
+GREEN A CURVE-MODE SOURCE AND A WAVE-MODE SOURCE CAN BE COMPARED, because four of the presets ARE the analytic waves: SAW↑ = rotate and SAW↓ = sawdown and SQR = square are BIT EXACT over [0,1), TRI agrees with its wave to 5.6e-17, and SINE is the one APPROXIMATION — 0.008759 at worst, which curve.js states rather than hides (a tensioned segment is monotone with one curvature and cannot be an S). The exact sine is still available AS A WAVE, so nothing needing it is forced through the approximation
+      [{"preset":"tri","wave":"tri","maxErr":5.551115123125783e-17},{"preset":"sawup","wave":"rotate","maxErr":0},{"preset":"sawdown","wave":"sawdown","maxErr":0},{"preset":"square","wave":"square","maxErr":0},{"preset":"sine","wave":"sine","maxErr":0.00875850942854084}]
+GREEN THE TAP-AGAIN-TO-FLIP LAW IS THE MODEL'S, NOT THE FACE'S — which is why the window has SIX shape buttons for SEVEN presets: tapping SAW↑ once draws it, twice gives exactly presetPoints('sawdown'), three times is back, and both forms are recomputed from the canonical table so the toggle is exact however many times it is tapped. Tapping TRI twice reports `symmetric` and leaves the hash untouched, so a face can honestly say NOTHING HAPPENED instead of pretending
+      {"tap2IsSawDown":true,"triSymmetric":true}
+GREEN THE FOUR EDITOR DOORS REFUSE IN THE ENGINE, NEVER IN THE UI: addPoint at the 32-point ceiling returns `full` and changes nothing; removePoint on a two-point curve refuses (a curve with fewer than two points has no segment and no reading) while a three-point one gives one up; movePoint keeps the FIRST and LAST points' `t` (a cycle's ends are its ends) and moves their value only; and setTension on the last point is a no-op because the last point bends nothing. All four return a NEW canonical list and none mutates its argument
+      {"ceiling":true,"twoPointRefusal":false,"endKeptItsT":0,"lastTensionIsANoOp":true}
+GREEN ...and `curveEdit` ADDS THE ONE THING A DRAG NEEDS: it clamps a move's `t` between its two neighbours, so point 3 of MULTI-TRI dragged to 0.9 lands on 0.5 and the index it was grabbed by is still the index it is — where the bare movePoint lets it sail past four neighbours and REORDER the list under the finger. The window calls curveEdit and nothing else
+      {"throughCurveEdit":[0,0.125,0.25,0.5,0.5,0.625,0.75,0.875,1],"bareMovePoint":[0,0.125,0.25,0.5,0.625,0.75,0.875,0.9,1]}
+GREEN curveInfo NAMES A SHAPE BY THE BUTTON THAT DRAWS IT: exact matches are swept before mirrors, because presetMirror('sawup') IS presetPoints('sawdown') and one interleaved pass would report the down-saw as "saw up, mirrored". SAW↓ is `sawdown`, not mirrored; a mirrored MULTI-SAW says so
+      {"sawdown":{"points":2,"bent":0,"lo":0,"hi":1,"preset":"sawdown","mirrored":false,"hash":415116133},"mirroredMsaw":{"preset":"msaw","mirrored":true}}
+GREEN DEFECT (a) — THE SMOOTH READOUT WAS WRONG BY UP TO 4x, and only ever right at the two ends: the card printed `v · SMOOTH_TAU_MAX · 1000` where the model's law is tau = 0.5 · v² seconds, so at knob 0.25 it said 125 ms and the truth is 31.25 ms. A number on a card that is wrong by 4x is worse than no number; the fix is to call the model's own smoothTau(), which modState() has been publishing correctly all along
+      {"rows":[{"knob":0.25,"printedByWave52":125,"trueTau":31.25},{"knob":0.5,"printedByWave52":250,"trueTau":125},{"knob":0.75,"printedByWave52":375,"trueTau":281.25},{"knob":1,"printedByWave52":500,"trueTau":500}],"worstRatio":4}
+GREEN DEFECT (b) — THE ENV TIME KNOBS COULD NOT REACH THEIR OWN DEFAULTS: a LINEAR knob over 0 … ENV_MAX_S = 8 s on kit.js's 220-px travel is 36.4 ms per pixel, and the DEFAULT ATTACK IS 10 ms — the smallest adjustment the control could make was nearly four times the value it started on, and the attack stage was unreachable by hand. BASINS' square law (get √(v/8), set p²·8) makes one pixel 0.165 ms at the bottom and 72.6 ms at the top, which is what a time knob is supposed to feel like
+      {"defaultAttackMs":10,"linearMsPerPixel":36.36363636363636,"squareMsPerPixelAtTheBottom":0.16528925619834708,"squareMsPerPixelAtTheTop":72.56198347107379}
+GREEN FIT IS NOT POLISH, IT IS LEGIBILITY: a DEFAULT envelope (a 10 ms · d 300 ms · s 0.5 · r 600 ms, duration 0.910 s) drawn over its default 4 s window puts its breakpoints on pixels 0 · 1 · 21 · 60 of a 265-px picture — the whole envelope lives in the left quarter and THE ATTACK IS ONE PIXEL WIDE. After FIT (timeScale = clamp(0.25, 8, duration × 1.15) = 1.046 s) they are 0 · 3 · 78 · 230. Without it the ENV display is not merely ugly, it is unreadable
+      {"durationS":0.9099999999999999,"pixelsAtTimeScale4":[0,1,21,60,265],"timeScaleAfterFit":1.0464999999999998,"pixelsAfterFit":[0,3,78,230,265]}
+GREEN THE ENVELOPE IS A CURVE TOO, which is why ONE renderer serves both cards: envPoints() hands back the SAME {t, v, tension} list the LFO draws — six points here, with the HOLD stage present — and evaluating that list agrees with envAt() to 1e-12 at 401 samples across the window. It is DERIVED every call and never stored, so the knobs are the model and the drawing follows them; the two cannot drift
+      {"points":6,"disagreements":0,"worst":2.498001805406602e-16,"tensions":[0.3,0,-0.4,0.2,0,0]}
+GREEN 21 · A BIPOLAR ROUTE PUTS THE BASE IN THE MIDDLE OF THE SWING, and a macro at 0.5 moves the target BY EXACTLY NOTHING (Object.is on the base, not a tolerance) — at 0 it is base − h and at 1 it is base + h, with h the half-span. That is Josh's "center of dial", and routeInfluence measuring from the MIDPOINT rather than from r.min is the whole of it
+      {"base":0.5,"atZero":0.2,"atHalf":0.5,"atOne":0.8,"halfSpan":0.3,"exactAtHalf":true}
+GREEN 21 · …and a UNIPOLAR route is bit-for-bit what it always was: clear the flag and the same route runs base … base + span again, so the one changed expression in routeInfluence() is inert for every route that does not ask for it
+      {"atZero":0.5,"atOne":0.9,"base":0.5}
+GREEN 21 · THE DROP DEPTH FILLS THE ROOM THE KNOB HAS LEFT, WHICH IS WHERE WE BEAT SERUM: Serum infers POLARITY from where the control is standing and then assigns a FULL-SCALE depth, which is why its own author tells people on his forum to park base controls at 0 or 50 % first. We know baseNorm at the instant of the drop, so the range is the room — nothing clips on the first frame at ANY base, and at every base the arc lands exactly on an end
+      {"rows":[[0,0,1,"UP"],[0.1,0.1,1,"UP"],[0.3,0.3,1,"UP"],[0.5,0,1,"CENTRE"],[0.7,0,0.7,"DOWN"],[0.9,0,0.9,"DOWN"],[1,0,1,"DOWN"]],"clipped":0}
+GREEN 21 · AND `bi` SURVIVES serialize → deserialize, which is the touch that mattered most: a flag that does not round-trip does not change a control, it changes the SOUND OF EVERY SAVED PATCH, silently and only on the second open. It rides as 1 when set and is ABSENT when clear (undefined is dropped by JSON.stringify), so a rack with no bipolar route is byte-identical on the wire to one written before this edit existed
+      {"onWire":1,"restored":true,"min":0,"max":0.6,"unipolarWireHasBi":false}
+file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a476e9d83319e9efd/.tmp/canary/tests/mir.test.mjs:1332
+      folders[0].name === LAB_PRESET_FOLDER && folders[0].count === 3,
+                 ^
+
+TypeError: Cannot read properties of undefined (reading 'name')
+    at file:///home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a476e9d83319e9efd/.tmp/canary/tests/mir.test.mjs:1332:18
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.1

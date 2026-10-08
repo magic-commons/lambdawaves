@@ -1,0 +1,1 @@
+PASS MIR 1.5.0-alpha.24: all 262 adopted files match the committed manifest, and the manifest is the pinned one (sha-256 3f969725fe44…)

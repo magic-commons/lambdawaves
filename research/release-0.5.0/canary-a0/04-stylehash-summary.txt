@@ -1,0 +1,68 @@
+# stylehash summary closed rack, 8 states — before vs after, noise before2
+  dark-tinted-off: 790 -> 790 elements, 211 changed, 0 gone, 0 new
+  dark-tinted-on: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+  dark-refractive-off: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+  dark-refractive-on: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+  light-tinted-off: 790 -> 790 elements, 183 changed, 0 gone, 0 new
+  light-tinted-on: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+  light-refractive-off: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+  light-refractive-on: 790 -> 790 elements, 197 changed, 0 gone, 0 new
+element-state diffs (elements with >=1 property beyond noise, summed over states): 1576
+by CLASS (property-diffs; elements-with-this-class in brackets):
+  1 press-scale transition: 816 property-diffs [816 element-states]; props transition; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > div.segw > div.seg > button.on.seg-b:0","transition","background 0.12s, box-shadow 0.12s","background 0.12s, box-shadow 0.12s, scale 0.12s"]
+  2 box-shadow: 613 property-diffs [613 element-states]; props box-shadow; e.g. ["div#lab > div#stage > button#rackToggle.glass","box-shadow","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.16) 0px 
+  3 focus outline: 673 property-diffs [225 element-states]; props outline-color,outline-style,outline-width; e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","outline-color","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  4 background-color (.dev-head and others): 224 property-diffs [224 element-states]; props background-color; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","background-color","rgba(255, 255, 255, 0.043)","rgba(28, 32, 38, 0.84)"]
+  5 ON text-shadow: 132 property-diffs [132 element-states]; props text-shadow; e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1","text-shadow","none","color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px"]
+  6 backdrop-filter: 80 property-diffs [80 element-states]; props backdrop-filter; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","backdrop-filter","brightness(1.03) saturate(1.03)","none"]
+  7 border: 964 property-diffs [81 element-states]; props border-top-color,border-right-color,border-bottom-color,border-left-color,border-top-width,border-right-width,border-bottom-width,border-left-width,border-top-style,border-right-style,border-bottom-style,border-left-style; e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","border-top-color","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  x other: #box: 16 property-diffs [16 element-states]; props #box; e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","#box","899 810.5 12 12","898.5 810 13 13"]
+  x other: ::before height: 80 property-diffs [80 element-states]; props ::before height; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","::before height","6px","8px"]
+  x other: ::before width: 80 property-diffs [80 element-states]; props ::before width; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","::before width","6px","8px"]
+  x other: background-clip: 62 property-diffs [62 element-states]; props background-clip; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","background-clip","border-box","border-box, border-box"]
+  x other: background-image: 62 property-diffs [62 element-states]; props background-image; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","background-image","none","linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 42%), none"]
+  x other: background-position: 62 property-diffs [62 element-states]; props background-position; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","background-position","0% 0%","0% 0%, 0% 0%"]
+  x other: background-size: 62 property-diffs [62 element-states]; props background-size; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","background-size","auto","auto, auto"]
+  x other: color: 1 property-diffs [1 element-states]; props color; e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","color","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  x other: filter: 80 property-diffs [80 element-states]; props filter; e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","filter","none","drop-shadow(color(srgb 0.188235 0.996078 0.933333 / 0.7) 0px 0px 3px)"]
+  x other: height: 8 property-diffs [8 element-states]; props height; e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","height","12px","13px"]
+  x other: justify-content: 8 property-diffs [8 element-states]; props justify-content; e.g. ["div#lab > aside#rackL > section.dev.lean:4 > div#devb-orbitals.dev-body > div.reg-pane:1 > div.reg-morph.row.tight:2","justify-content","flex-start","space-between"]
+  x other: opacity: 16 property-diffs [16 element-states]; props opacity; e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:3 > div.disabled.k:1","opacity","0.3","0.38"]
+  x other: text-decoration-color: 1 property-diffs [1 element-states]; props text-decoration-color; e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","text-decoration-color","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  x other: width: 8 property-diffs [8 element-states]; props width; e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","width","12px","13px"]
+by PROPERTY:
+  816 transition  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > div#devb-shadow.dev-body > div.row.shadow-controls:0 > div.segw > div.seg > button.on.seg-b:0","background 0.12s, box-shadow 0.12s","background 0.12s, box-shadow 0.12s, scale 0.12s"]
+  613 box-shadow  e.g. ["div#lab > div#stage > button#rackToggle.glass","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 6px 0px, rgba(0, 0, 0, 0.16) 0px 1px 2px 0px","rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset, rgba(0,
+  225 outline-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  224 background-color  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","rgba(255, 255, 255, 0.043)","rgba(28, 32, 38, 0.84)"]
+  224 outline-style  e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2","none","solid"]
+  224 outline-width  e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:1 > div.k:1 > div.k-val:2","3px","1px"]
+  132 text-shadow  e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.row.sp-head.tight:1 > button.on.trig:1","none","color(srgb 0.188235 0.996078 0.933333 / 0.75) 0px 0px 17px"]
+  81 border-top-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  81 border-right-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  81 border-bottom-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  81 border-left-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  80 backdrop-filter  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","brightness(1.03) saturate(1.03)","none"]
+  80 border-top-width  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  80 border-right-width  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  80 border-bottom-width  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  80 border-left-width  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","1px","0px"]
+  80 border-top-style  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+  80 border-right-style  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+  80 border-bottom-style  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+  80 border-left-style  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","solid","none"]
+  80 filter  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","none","drop-shadow(color(srgb 0.188235 0.996078 0.933333 / 0.7) 0px 0px 3px)"]
+  80 ::before width  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","6px","8px"]
+  80 ::before height  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head > div.dev-util:2 > button.dev-power:1","6px","8px"]
+  62 background-image  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","none","linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 42%), none"]
+  62 background-size  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","auto","auto, auto"]
+  62 background-position  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","0% 0%","0% 0%, 0% 0%"]
+  62 background-clip  e.g. ["div#lab > aside#rackL > section.dev.lean:1 > header.dev-head","border-box","border-box, border-box"]
+  16 #box  e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","899 810.5 12 12","898.5 810 13 13"]
+  16 opacity  e.g. ["div#lab > aside#rackL > section.dev.lean.native-clean:2 > div#devb-spectrum.dev-body > div.grp:5 > div.row.tight:3 > div.disabled.k:1","0.3","0.38"]
+  8 width  e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","12px","13px"]
+  8 height  e.g. ["div#lab > div#stage > div#transport.glass.mini > div.native-play-row:0 > button.dock-btn:6 > svg.gly.gly-north","12px","13px"]
+  8 justify-content  e.g. ["div#lab > aside#rackL > section.dev.lean:4 > div#devb-orbitals.dev-body > div.reg-pane:1 > div.reg-morph.row.tight:2","flex-start","space-between"]
+  1 color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+  1 text-decoration-color  e.g. ["div#lab > div#warnPane > div.warn-card > button.warn-btn","rgb(255, 255, 255)","rgb(0, 0, 0)"]
+distinct tokens with text diffs: 16; --fr-r-card --gl-b --gl-glow --gl-l --gl-r --gl-t --gl-w --glass-bevel --glass-shadow --glass-shadow-flat --m2-mat-shadow --m2-signal-glow --neu-inset --neu-raise --card-opacity --ink-shadow
