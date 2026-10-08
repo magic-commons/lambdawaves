@@ -86,11 +86,11 @@ const PRECACHE = [
   ['./img/icon-maskable.svg',                                       '5695511bc1f4'],
   ['./img/icon.svg',                                                'e59093ac4a71'],
   ['./img/warning-orbital.png',                                     'fb796735bfd5'],
-  ['./index.html',                                                  'b7f8ea0a131d'],
+  ['./index.html',                                                  '3c976eef2591'],
   ['./kepler.js',                                                   '11e0235e3f0d'],
   ['./keplerview.js',                                               '0b2d7636992f'],
-  ['./keymap.js',                                                   'b4cd762465da'],
-  ['./keys.js',                                                     'ab919a7877db'],
+  ['./keymap.js',                                                   '9c4d439d1a9e'],
+  ['./keys.js',                                                     'bb78c9e95855'],
   ['./kick.js',                                                     '586697c01ee5'],
   ['./lab.css',                                                     '60b0eda1511a'],
   ['./ladder-model.js',                                             '69199febdca1'],
@@ -103,7 +103,7 @@ const PRECACHE = [
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
   ['./mathworker.js',                                               'a9b5f1e3a3dd'],
   ['./md.js',                                                       '63f8914d7dd3'],
-  ['./menubar.js',                                                  'e266c664def0'],
+  ['./menubar.js',                                                  '99c71e5a74e3'],
   ['./meters.js',                                                   '2214d2302695'],
   ['./mir/control-help.js',                                         '106f96f8b143'],
   ['./mir/css/base.css',                                            '464135a2b313'],
@@ -155,7 +155,7 @@ const PRECACHE = [
   ['./mo.js',                                                       'ef8b99702547'],
   ['./mod-port.js',                                                 '8e79ede8b40a'],
   ['./modrive.js',                                                  '89b99a6568d1'],
-  ['./modwindow.js',                                                '41739c39da27'],
+  ['./modwindow.js',                                                '22b6a09d4729'],
   ['./molecular-field.js',                                          'caa6acc2bd92'],
   ['./molecular-flow.js',                                           '805b732eebdc'],
   ['./molecular-register.js',                                       'c274a236d6ef'],
@@ -174,7 +174,7 @@ const PRECACHE = [
   ['./orbitalsview.js',                                             '0cb15ed2a47d'],
   ['./paint-stroke.js',                                             'cbfdfa8270c5'],
   ['./palette-app.js',                                              'c4c4247de44c'],
-  ['./paletteview.js',                                              '44a62edde37d'],
+  ['./paletteview.js',                                              '7d3b7004fc45'],
   ['./particles.js',                                                '639d5fc3f9dd'],
   ['./period.js',                                                   'c04a731fcddd'],
   ['./project-import.js',                                           '1dcec46408e2'],
@@ -185,7 +185,7 @@ const PRECACHE = [
   ['./qcdview.js',                                                  'f9c72c4c4ff4'],
   ['./qho.js',                                                      'dc55dfe4479f'],
   ['./rack-menus.js',                                               'adecc705a800'],
-  ['./rack.js',                                                     '078db62c21c4'],
+  ['./rack.js',                                                     'efd2bae417eb'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '9b6823ea41df'],
   ['./registerview.js',                                             'c990893a456b'],
@@ -197,7 +197,7 @@ const PRECACHE = [
   ['./scf.js',                                                      '50cc85f7fd01'],
   ['./shadow.js',                                                   '98d26391c1b5'],
   ['./shadowview.js',                                               '7e055c93afe3'],
-  ['./shortcuts.js',                                                '21bfdfdabe69'],
+  ['./shortcuts.js',                                                '6f0fc3211c39'],
   ['./skin.css',                                                    '3df4e6f2a513'],
   ['./slice.js',                                                    '6d7648bd5e5b'],
   ['./sliceview.js',                                                'f5d04bcfd8e3'],
@@ -227,9 +227,15 @@ const PRECACHE = [
  * kept by the page in DATA_CACHE, a name no build changes — so a new build never clears an installed record (§4 collects only
  * PREFIX caches).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
  * an ordinary precached file.  tests/pwa.test.mjs and tools/build-deploy.mjs READ this list: it is the one rule, and the 0.5.0
- * kit-file policy ("precache what a root reaches", PLAN §10 N4) extends it rather than adding a second. */
+ * kit-file policy extends it rather than adding a second:
+ * SKIP (0.5.0 A11) — kit data an adoption brings and the lab reads lazily or never: DEPLOYED, NEVER PRECACHED, and nothing more
+ * (no cache of its own, no handler: §4 sends it to the network like any URL outside §1).  MIR 1.5's language packs (twelve
+ * mir/locales/*.json, 2.24 MB with the token sheet; a pack the network cannot give leaves the words English, which is the kit's
+ * own fallback) and mir/tokens.json (the token schema, read by tools, never by a page) took an adopted install from 4.6 to
+ * 9.5 MiB, over the 8 MiB ceiling; without them it is 7.3.  `*` is one path segment.  On a 1.4 tree neither exists. */
 const DATA = ['library/'];
 const DATA_CACHE = 'lw-data-v1';
+const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
 const NEVER_PRECACHE = [
@@ -239,6 +245,7 @@ const NEVER_PRECACHE = [
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
   ['a DATA root (§1b: library/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install.'],
+  ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
 ];
 
