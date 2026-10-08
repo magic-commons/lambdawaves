@@ -276,11 +276,14 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   INFORMATIONAL window) waits for brief 7's coalesced layer and is 0.5.1**, unless pass 2 or a kit fix changes the number. Stylehash
 >   with the modulation window open shows R13 as a DOM change (34 elements swapped; `#modwin` gains a backdrop-filter). Not measured:
 >   legibility (headless Chromium screenshots the WebGPU canvas blank — use the gate Firefox), the under-a-rack count, the sanitiser.
+> - **A-M merged after all** (`d7edc99`, Sonnet `ed05ca3`): `tools/perf/main-thread.mjs` + `cdp.mjs` `metrics()`; the floor on `02dce23`
+>   median **13.879 ms/s, spread 0.536, MAD 0.158** (5 runs, load < 2.3) → C-V's gate is the 2 ms/s minimum. UNVERIFIED: presents stayed 0
+>   (check `__LW.field.ok` under the same flags). §6 landed in 0.4.0's MEASURE.md; move to `research/release-0.5.0/measure/MEASURE.md` §1.
+>   The pre-C baseline = the tool re-run after A1+A8 and A7 merge.
 > - **Parked with designs, no code:** A1+A8 (`worktree-agent-a93d670fd213115b8`, `df081b1`, `A1-A8-HANDOFF.md`: the store's API and
 >   the 7+1 sites on `b5b6d7d`; the camera port's members; the bindings table; the Alt+Arrow conflict with A9's rows and its
 >   resolution), A7 (`worktree-agent-a45dd079234049e48`, `89452ae`, `A7-HANDOFF.md`: the registry design, +25 lines, `modDodge` still
->   in `rack.js`), A-M (no commit; its reconnaissance in `~/.claude/handoffs/agents/a20bbec16555e4c3f.md`; ruling: 0.5.0 gets its own
->   `research/release-0.5.0/measure/MEASURE.md`). **Resume all three from the tip after `ff17874`**, not from `b5b6d7d`.
+>   in `rack.js`). **Resume both from the tip after `d7edc99`**, not from `b5b6d7d`.
 > - **Josh's reading:** `PLAN-DRAFT-3` (`371c100`) — the glass (seven classes), the camera bindings, R5-G1, R5-L1; Q2, Q3. D1's new
 >   number belongs in his read: the plan's rule has already fired once.
 > The bullets below are Yan's text as she left it.
