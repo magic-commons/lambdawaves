@@ -45,7 +45,7 @@ try {
   const one = await g.ev(`const rows = await __LW.chem.records(), o = __opt('lysine');
     return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: o.parentElement.label, store: (await caches.keys()).includes('lw-data-v1'), errs: __e.slice() };`);
   assert.ok(one.rows.length === CAT.rows.length && one.rows.every((r) => r[1] === false), 'nothing is installed at first: ' + JSON.stringify(one));
-  assert.deepEqual([one.rows.find((r) => r[0] === 'C6H6'), one.rows.find((r) => r[0] === 'lysine')], [['C6H6', false, false], ['lysine', false, true]], JSON.stringify(one));
+  assert.deepEqual(['C6H6', 'lysine', 'C60'].map((id) => one.rows.find((r) => r[0] === id)), [['C6H6', false, false], ['lysine', false, true], ['C60', false, true]], JSON.stringify(one));   // C60: S4c's frontier record
   assert.equal(one.text, 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(one.disabled, false);
   assert.equal(one.store, false, 'looking at the store created lw-data-v1 at boot'); assert.deepEqual(one.errs, []);
   pass(`DOWNLOAD, never DISABLED: lysine's row "${one.text}" (${one.group}) is enabled; nothing is installed and boot created no store`);

@@ -1,0 +1,76 @@
+{
+ "open": {
+  "installed": true,
+  "bytes": 144491,
+  "record": {
+   "id": "C60",
+   "hash": "9520cedceff89f0337ce5f0c57bcaf6e5060d5bb5c7aad76facec98cde50caaf",
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": false,
+    "tdhf": false
+   },
+   "bytes": 144491,
+   "from": "device",
+   "ms": 9
+  },
+  "nAO": 300,
+  "nocc": 180,
+  "energy": -2244.0187824768127,
+  "view": "orbital",
+  "viewAfterDensityAsk": "orbital",
+  "orbitalDefault": 180,
+  "orbitalName": "HOMO",
+  "dial": [
+   176,
+   183
+  ],
+  "solverCalls": 0,
+  "status": "300 AOs · 360 electrons · orbitals only · from its record (141 KB, on this device) in 9 ms, no solver call · persisted · 0.1 of 7861 MB used",
+  "field": {
+   "nAO": 300,
+   "nShell": 180,
+   "nPrim": 360,
+   "nWeight": 900,
+   "expsPerVoxel": 360,
+   "cap": null,
+   "wg": 64,
+   "path": "orbital",
+   "kind": "orbital",
+   "complex": false,
+   "dirty": false,
+   "half": 12.421046307847265,
+   "res": 64
+  },
+  "densityButton": {
+   "disabled": true,
+   "title": "",
+   "help": "this record carries its frontier orbitals only — the density is 0.4.1 BUCKYBALL"
+  }
+ },
+ "lumo": {
+  "orbital": 181,
+  "name": "LUMO",
+  "field": {
+   "nAO": 300,
+   "nShell": 180,
+   "nPrim": 360,
+   "nWeight": 900,
+   "expsPerVoxel": 360,
+   "cap": null,
+   "wg": 64,
+   "path": "orbital",
+   "kind": "orbital",
+   "complex": false,
+   "dirty": false,
+   "half": 12.421046307847265,
+   "res": 64
+  }
+ },
+ "pixels": {
+  "nonBlack": 76800,
+  "hash": "20ca67ba"
+ },
+ "errors": []
+}

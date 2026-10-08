@@ -48,7 +48,9 @@ import { chemRegister, chemGround, chemSpectrum, chemStates, chemStateVectors, c
 import { BASIS_FILES } from '../lab/rhf-molecule.js';
 import { ANGSTROM } from '../lab/md.js';
 import { MOLECULES, MOLECULE_BY_ID, SECTIONS, COST, eriWork, rpaWork, counts, CAP_MS } from '../lab/molecules.js';
-import { CURATED_IE, CONVENTION, operations, frameOf } from '../lab/names.js';
+import { CURATED_IE, CONVENTION, operations, frameOf, nameOrbitals, characters, coreCount } from '../lab/names.js';
+import { basisFrom, nuclearRepulsion } from '../lab/md.js';
+import { evaluator } from '../lab/molecular-field.js';
 import { moleculeLatex } from '../lab/latex-state.js';
 import { validateRecord, recordPath, SCHEMA, atomsKey as geometryKey } from '../lab/library.js';
 
@@ -169,6 +171,11 @@ const CANDIDATES = [
     stem: { blurb: ['Twelve borons on an icosahedron, each with an outward hydrogen: the dianion is a three-dimensionally aromatic cage.',
       '72 Cartesian AOs, ' + PAST + '; its orbitals named in the full icosahedral group, I_h.'] } },
   { id: 'C20H20', census: 'C20H20', section: 'LATTICE', group: 'Ih', motifs: ['cage', 'ring:5'] },
+  /* C₆₀ is carbon's third allotrope and the unit of the fullerite lattice: it sits with the cages (adamantane is diamond's, B₁₂H₁₂²⁻
+     boron's), and the gate would refuse it on novelty (I_h, the cage and both ring sizes are in) — so it ships under a DECLARED
+     allowance, the milestone Josh named, and its record is S4c's frontier record (PySCF's eight frontier columns, re-encoded) */
+  { id: 'C60', census: 'C60', basis: S3, section: 'LATTICE', group: 'Ih', motifs: ['cage', 'ring:5', 'ring:6'], allowance: 'milestone', name: 'buckminsterfullerene', formula: '<m>C₆₀</m>',
+    frontier: { dump: 'research/release-0.4.0/library-census/c60-frontier.json', samples: 'research/release-0.4.0/library-census/c60-pyscf-samples.json' } },
   { id: 'neopentane', census: 'neopentane', section: 'LATTICE', group: 'C1' },
   { id: 'naphthalene', census: 'naphthalene', section: 'LATTICE', group: 'C1', motifs: ['ring:6'] },
   { id: 'Si5H12', census: 'Si5H12', section: 'LATTICE', group: 'C1' },
@@ -206,6 +213,8 @@ const CANDIDATES = [
 /* the live table's motifs, declared from connectivity like the candidates' (the census's own declarations) */
 const LIVE_MOTIFS = { C3H6: ['ring:3'], C4H4O: ['ring:5'], C5H5N: ['ring:6'], C6H6: ['ring:6'], CuH: ['d-block'], ZnH2: ['d-block'] };
 const MOTIF = /^(ring:\d+|peptide bond|d-block|cluster|cage|nucleobase)$/, FAMILIES = new Set(['amino-acids', 'nucleobases']);
+/* the gate's second exception kind, beside a family: a DECLARED allowance, named and sourced, so the gate stays mechanical */
+const GATE_ALLOWANCE = { milestone: 'Josh\'s named milestone — "maybe a bucky-ball as our next milestone" (research/release-0.4.0/NACRE.md l.34, HANDOFF.md §5) — with PLAN §9 R-L2 = YES (its HOMO and LUMO in 0.4.0); entered by the integrator\'s ruling of 2026-10-08, Josh may overrule' };
 const DBLOCK = (Z) => (Z >= 21 && Z <= 30);
 
 /* standard atomic weights (IUPAC conventional values), Z ≤ 36 — the vendored STO-3G's reach */
@@ -301,9 +310,10 @@ function gate(cands) {
     if (bad.length) throw new Error(`orbital-library: ${e.id}: '${bad.join(', ')}' is not on the fixed motif list`);
     if ((e.motifs || []).includes('d-block') !== els.some(DBLOCK)) throw new Error(`orbital-library: ${e.id}: the d-block tag must say whether a d-block atom is present`);
     const unique = !formulas.has(key), newEls = els.filter((Z) => !elements.has(Z)), newGroup = e.group !== 'C1' && !groups.has(e.group);
-    const newMotifs = (e.motifs || []).filter((t) => !motifs.has(t)), fam = e.family && FAMILIES.has(e.family);
-    const pass = fam || (unique && (newEls.length > 0 || newGroup || newMotifs.length > 0));
-    const why = fam ? `the declared ${e.family} family` + (unique ? '' : ` (shares ${key} — the family keeps it)`)
+    const newMotifs = (e.motifs || []).filter((t) => !motifs.has(t)), fam = e.family && FAMILIES.has(e.family), named = e.allowance && GATE_ALLOWANCE[e.allowance];
+    if (e.allowance && !named) throw new Error(`orbital-library: ${e.id}: '${e.allowance}' is not a declared allowance`);
+    const pass = fam || !!named || (unique && (newEls.length > 0 || newGroup || newMotifs.length > 0));
+    const why = named ? `the declared ${e.allowance} allowance: ${named}` : fam ? `the declared ${e.family} family` + (unique ? '' : ` (shares ${key} — the family keeps it)`)
       : !unique ? `${key} is already in the library`
       : pass ? [newEls.length ? 'new element ' + newEls.map((Z) => SYMBOL[Z]).join(', ') : '', newGroup ? 'new point group ' + e.group : '', newMotifs.length ? 'new motif ' + newMotifs.join(', ') : ''].filter(Boolean).join('; ')
       : `${key}: no new element, point group (${e.group}) or motif (${(e.motifs || []).join(', ') || 'none'})`;
@@ -394,15 +404,92 @@ if (GATE_ONLY) {
   for (const v of verdicts) console.log(`${v.pass ? 'PASS   ' : v.probe ? 'PROBE  ' : v.blocked ? 'BLOCKED' : 'REFUSE '} ${v.e.section.padEnd(9)} ${v.e.id.padEnd(18)} ${v.why}`);
   console.log(`THE GATE: ${verdicts.filter((v) => v.pass).length} pass, ${verdicts.filter((v) => !v.pass && !v.blocked).length} refused, ${verdicts.filter((v) => v.blocked && !v.probe).length} blocked by the basis, ${verdicts.filter((v) => v.probe).length} refused by the stability probe`); process.exit(0);
 }
-const ENTRIES = verdicts.filter((v) => v.pass).map((v) => v.e);
+const ENTRIES = verdicts.filter((v) => v.pass).map((v) => v.e), FIX = argOf('--fixture');
 if (INPUTS) {
-  const rows = ENTRIES.filter((e) => !ONLY || ONLY.has(e.id)).map((e) => {
+  const rows = (FIX ? [fixtureEntry(FIX)] : ENTRIES.filter((e) => !e.frontier && (!ONLY || ONLY.has(e.id)))).map((e) => {
     const g = geometry(e), atoms = g.ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
     return { id: e.id, charge: g.charge, group: e.group || g.symmetry.group, key: atomsKey(atoms), atoms: atoms.map((a) => [a.Z, a.x, a.y, a.z]) };
   });
   writeFileSync(INPUTS, JSON.stringify({ basis: 'lab/vendor/bse/sto-3g-v1.json', unit: 'bohr', rows }, null, 1) + '\n');
   console.log(`orbital-library: ${rows.length} inputs → ${INPUTS}`); process.exit(0);
 }
+/* ── 0.4.0 S4c · THE TEST FIXTURES (S4c's own road, beside the catalogue: never ENTRIES, never the gate, never lab/library.json) ──
+ *   node tools/orbital-library.mjs --fixture tryptophan [--check]      (and C20H20)
+ * ONE schema-1 record by the same build() above, from a census row at C1 — its PySCF oracle on these atoms first
+ * (`--inputs F --fixture id`, then tools/library/record-oracle.py) — written to tests/fixtures/record-<id>.json: the 87- and 120-AO
+ * inputs the cap-128 χ tier is checked against (tools/perf/s4c-kernel.mjs).  Never shipped.  `--check` re-solves and compares the
+ * bytes.  S4b's tryptophan record supersedes the first as content; C₂₀H₂₀ is refused by the gate and stays a fixture only. */
+function fixtureEntry(id) {
+  const row = CENSUS.get(id);
+  if (!row || !row.converged || !row.geometry || !Array.isArray(row.geometry.atomsAngstrom)) throw new Error(`orbital-library: no converged census row '${id}'`);
+  return { id, census: id, section: 'S4C-FIXTURE', group: 'C1', fixture: true,
+    stem: { blurb: [row.name + ' at ' + row.nAO_STO3G + ' Cartesian AOs: an input for the field kernel\'s cap-128 tier (0.4.0 S4c), not library content.',
+      'Point group taken as C1 here; the energy agrees with PySCF on these atoms (tests/fixtures/oracles/library-v1.json) or there is no file.'] } };
+}
+/* ── 0.4.0 S4c · THE FRONTIER RECORD (S4c's own road: a separate function, never ENTRIES, never the gate) ──────────────────
+ * C₆₀ is 300 AOs: no live road solves it and no χ tile holds its density, so its record is PySCF's, re-encoded — Sol's dump
+ * research/release-0.4.0/library-census/c60-frontier.json (PySCF 2.14 direct RHF on the vendored STO-3G decimals, the HOMO set
+ * h_u ×5 and the LUMO set t1u ×3 ALREADY in the app's AO order and normalisation, its water conversion proof inside at
+ * 1.03e-12).  caps: orbitals ONLY — ε for all 300 and the eight frontier columns (`ground.cols`), no D, no spectrum, no
+ * states; the field draws them through ORB_WGSL.  The geometry is Sol's DRAFT (equal-edge ideal I_h, experimental status
+ * UNVERIFIED) and the record says so; the I_h names are 0.4.1 BUCKYBALL, so the levels are named by energy only.
+ * Checked here or there is no file: the basis file's sha-256 is the dump's, the app's own AOs (md.js basisFrom +
+ * molecular-field.js evaluator) contracted with the columns answer PySCF's GTOval_cart at Sol's 92 points
+ * (c60-pyscf-samples.json) to ≤ 1e-10, and every level's spread is under names.js's 2e-10 Eh. */
+function buildFrontier(e) {
+  const read = (p) => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
+  const F = read(e.frontier.dump), P = read(e.frontier.samples), b0 = bse[e.basis || S3];
+  if (F.basis.sha256 !== sha(b0.text)) throw new Error(`orbital-library: ${e.id}'s dump was made on another basis file`);
+  const ang = F.geometry.atomsAngstrom, atoms = ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
+  const b = basisFrom(atoms, JSON.parse(b0.text), { cart: true }), n = b.n, eps = F.solver.orbitalEnergiesEh, nocc = F.solver.occupations.filter((o) => o === 2).length;
+  const sets = [F.frontier.HOMO, F.frontier.LUMO], cols = sets.flatMap((s) => s.indices), cs = sets.flatMap((s) => s.coefficientColumns), m = cols.length;
+  if (eps.length !== n || cs.some((c) => c.length !== n) || !F.solver.converged) throw new Error(`orbital-library: ${e.id}'s dump does not fit ${n} AOs`);
+  const ev = evaluator(b.shells); let worst = 0;
+  P.pointsBohr.forEach((p, q) => { const a = ev.ao(p); cs.forEach((c, j) => { let s = 0; for (let i = 0; i < n; i++) s += c[i] * a[i]; worst = Math.max(worst, Math.abs(s - P.signedValues[q][j])); }); });
+  if (!(worst <= 1e-10)) throw new Error(`orbital-library: ${e.id}'s columns on the app's AOs miss PySCF's orbital by ${worst} — the AO order or normalisation is not the app's`);
+  const C = new Float64Array(n * m); cs.forEach((c, j) => { for (let i = 0; i < n; i++) C[i * m + j] = c[i]; });   // row-major n × m, as C is n × n
+  const names = nameOrbitals({ atoms, eps, nocc, basis: b, converged: true }, null), ch = characters({ atoms, basis: b }, names);
+  names.mos.forEach((mo, i) => { mo.character = ch[i]; }); names.core = Math.min(coreCount(atoms), nocc); delete names.axes; delete names.ms;
+  names.reason = 'C₆₀\'s I_h names are 0.4.1 BUCKYBALL (Sol computed and checked them: HOMO 6h_u, LUMO 7t₁u); here the levels are named by energy';
+  for (const s of sets) if (!(s.energySpreadEh < 2e-10)) throw new Error(`orbital-library: ${e.id}'s ${s.irrep} set spreads ${s.energySpreadEh} Eh`);
+  const ids = IDS[e.id] || null, half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6, gap = eps[nocc] - eps[nocc - 1];
+  const source = `DRAFT GEOMETRY, NOT A MEASUREMENT: ${F.geometry.why} (${F.geometry.source}; experimental status ${F.geometry.experimentalStatus})`;
+  const molecule = { name: e.name, formula: e.formula, charge: 0, symmetry: { group: 'C1' }, source, ang };
+  const ground = { energy: F.solver.energyEh, Enuc: nuclearRepulsion(atoms), nocc, nAO: n, order: b.order, hash: b.hash, basis: e.basis, charge: 0,
+    electrons: 2 * nocc, converged: true, dipole: [0, 0, 0], half, stability: null, solutions: [], names, cols };
+  const record = {
+    schema: SCHEMA, kind: 'lambdawaves.orbital-record', id: e.id, basis: e.basis, name: e.name, formula: e.formula,
+    generator: 'tools/orbital-library.mjs buildFrontier — PySCF\'s orbitals re-encoded (' + e.frontier.dump + '); no app solve: 300 AOs are past every live road',
+    input: { atoms, atomsSha256: geometryKey(atoms), charge: 0, multiplicity: 1, basis: e.basis, basisFile: b0.file, basisSha256: sha(b0.text), symmetry: molecule.symmetry },
+    caps: { orbitals: true, states: false, rpa: false, tdhf: false },
+    ground, orbitals: { eps: f64(eps), C: f64(C) },
+    stem: { formula: e.formula, pointGroup: null, frame: null, approximate: false, mass: +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), massUnit: 'u (IUPAC conventional atomic weights)',
+      charge: 0, multiplicity: 1, dipoleDebye: 0, gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: `HOMO (${F.frontier.HOMO.irrep} ×5) · LUMO (${F.frontier.LUMO.irrep} ×3)`, geometrySource: source,
+      inchiKey: (ids && ids.inchiKey) || null, pubchemCid: (ids && ids.cid) || null, identifiers: ids ? ids.status || 'UNVERIFIED: not yet asked of PubChem' : 'UNVERIFIED: no PubChem identifiers recorded (tools/library/pubchem-ids.json)',
+      symmetry: { pointGroup: e.group, labelledIn: null, why: 'a FRONTIER record (S4c): its levels are named by energy only — C₆₀\'s I_h names are 0.4.1 BUCKYBALL (lab/names.js has the I_h table; this record carries 8 columns, not the whole C the projection needs)',
+        frame: CONVENTION.Ih, atomsInFrame: null, pyscf: null, allowance: GATE_ALLOWANCE[e.allowance] || null },
+      blurb: ['Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field\'s orbital-only kernel.',
+        'Its density, its I_h names and a geometry checked against experiment are 0.4.1 BUCKYBALL; this record carries the frontier orbitals only.'],
+      ies: null, sources: ['geometry: ' + source, 'orbitals and energy: ' + e.frontier.dump + ' (PySCF ' + F.solver.pyscf + ', ' + F.solver.method + ')', 'field check: ' + e.frontier.samples, 'basis: ' + b0.file + ' (Basis Set Exchange, vendored)'] },
+    page: moleculeLatex({ molecule: { id: e.id, ...molecule }, basis: e.basis, charge: 0, ground: { energy: ground.energy, eps, nocc, nAO: n, names } }),
+    oracle: { energy: F.solver.energyEh, source: e.frontier.dump + ' solver.energyEh', what: 'PySCF ' + F.solver.pyscf + ' — the record IS PySCF\'s; its check is the field at Sol\'s 92 points', delta: 0, fieldMaxAbsErr: worst },
+  };
+  const text = JSON.stringify(record, null, 1) + '\n', bytes = Buffer.from(text), hash = sha(bytes);
+  const bad = validateRecord(JSON.parse(text));
+  if (bad.length) throw new Error(`orbital-library: ${e.id} fails validation — ${bad.join('; ')}`);
+  const before = chemSolverCalls(), t1 = performance.now(), o = chemOpen({ lib: JSON.parse(text), hash, basis: e.basis }), openMs = performance.now() - t1;
+  if (chemSolverCalls() !== before || o.energy !== ground.energy) throw new Error(`orbital-library: ${e.id}'s frontier record does not open to its own energy with 0 solver calls`);
+  const catalogue = { id: e.id, basis: e.basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps, molecule };
+  return { text, hash, catalogue, ms: 0, openMs, nAO: n, d: 0, energy: ground.energy, delta: 0, fieldErr: worst };
+}
+if (FIX) {
+  const id = FIX, e = fixtureEntry(id), r = build(e);
+  const file = fileURLToPath(new URL(`../tests/fixtures/record-${id}.json`, import.meta.url));
+  console.log(`${id} · ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${(r.text.length / 1024).toFixed(1)} KB · generated in ${(r.ms / 1000).toFixed(1)} s · ${r.hash.slice(0, 12)}`);
+  if (CHECK) { const same = existsSync(file) && readFileSync(file, 'utf8') === r.text; console.log(same ? `fixture ${id}: in step` : `fixture ${id}: OUT OF STEP`); process.exit(same ? 0 : 1); }
+  writeFileSync(file, r.text); console.log('wrote', file); process.exit(0);
+}
+
 const out = [], fail = [];
 for (const v of verdicts) if (!v.pass) console.log(`${v.probe ? 'refused by the stability probe' : v.blocked ? 'blocked' : 'refused by the gate'}: ${v.e.id} — ${v.why}`);
 const disk = existsSync(CATALOGUE) ? JSON.parse(readFileSync(CATALOGUE, 'utf8')) : { rows: [] };
@@ -412,7 +499,7 @@ for (const e of ENTRIES) {
     if (!r) { fail.push(`${e.id}: not in the catalogue on disk`); continue; }
     out.push({ catalogue: r, hash: r.hash, text: readFileSync(LAB + recordPath(r.hash), 'utf8'), skipped: true }); continue;
   }
-  let r; try { r = build(e); } catch (err) { fail.push(String(err && err.message || err)); console.log('FAILED ' + e.id + ': ' + (err && err.message || err)); continue; }
+  let r; try { r = e.frontier ? buildFrontier(e) : build(e); } catch (err) { fail.push(String(err && err.message || err)); console.log('FAILED ' + e.id + ': ' + (err && err.message || err)); continue; }
   out.push(r); if (!CHECK) { mkdirSync(LAB + 'library', { recursive: true }); writeFileSync(LAB + recordPath(r.hash), r.text); }   // written as it lands
   console.log(`${e.id.padEnd(12)} ${e.section.padEnd(9)} ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${r.catalogue.bytes} B · caps ${Object.entries(r.catalogue.caps).filter(([, v]) => v).map(([k]) => k).join('+')} · generated in ${(r.ms / 1000).toFixed(2)} s · opened in ${r.openMs.toFixed(1)} ms · ${r.hash.slice(0, 12)}`);
 }

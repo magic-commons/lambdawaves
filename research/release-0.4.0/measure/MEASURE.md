@@ -233,6 +233,33 @@ Home Screen". In the Home-Screen app the answer should be `true`; if it is not, 
 
 ---
 
+## §5 · 0.4.0 S4c — the kernel's numbers (`tools/perf/s4c-kernel.mjs`, `s4c-kernel.json`)
+
+Measured 2026-10-08 on the same RTX 3070, Firefox 157 and Chromium 153 (Vulkan), each number a median of 5 batches of n
+dispatches in one pass and one wait, n GROWN until a batch lasts 2.5 s (an estimate from a short batch inherits Firefox's ~100 ms
+completion tick: a 20-dispatch batch of 1.2 ms reads 5 ms and the batches it sizes come out a whole number of ticks). The surprising
+rows were taken again on an idle GPU (P8): a run beside another agent's browser suite read up to 2× slow and is not used.
+
+| what (96³) | Chromium | Firefox |
+|---|---|---|
+| workgroup storage asked / granted | 32768 / 32768 | 32768 / 32768 |
+| tryptophan (87 AO) density, cap-128 tile, 64 lanes | 19.6 ms | 21.5 ms |
+| same, 32 lanes on a device refused the 32 KiB (same texels) | 19.4 vs 19.4 | 20.9 vs 21.6 |
+| C₂₀H₂₀ (120 AO) density, cap-128 tile | 43.0 ms | 48.2 ms |
+| tryptophan HOMO, ORB_WGSL | 0.97 ms | 1.18 ms |
+| C₂₀H₂₀ HOMO, ORB_WGSL | 2.18 ms | 2.50 ms |
+| **C₆₀ HOMO, ORB_WGSL plain / screened** (the shipped module) | **13.67 / 3.62 ms** | **15.01 / 4.08 ms** |
+| C₆₀ HOMO through the field (screened) | 3.65 ms | 4.17 ms |
+
+Checks (both browsers, identical texels): the 87/120-AO densities against the generator's f64 at 256 voxels 4.56e-4 / 3.69e-4 of
+max √ρ; their HOMOs 4.81e-4 / 5.56e-4 of max |ψ|; C₆₀'s eight frontier orbitals against PySCF's own `GTOval_cart` at the centres of
+256 voxels (`c60-voxels-pyscf.json`, `tools/perf/c60-voxels.py`) 4.0e-4 – 5.6e-4 of max |ψ|; VALENCE through the app 5.6e-4
+(lysine) and 8.1e-4 (benzene). **The M5 (pending):** §1's ONE LINE answers whether the iPad draws the cap-128 tier on 64 lanes or
+32 (either draws the same texels here); its device report is one command — on the desktop `./serve-lan.sh`, on the iPad
+`https://<desktop LAN address>:8710/lab/?report=1&post=1`, hands off for three minutes.
+
+---
+
 ## Files
 
 | file | what |
@@ -245,6 +272,8 @@ Home Screen". In the Home-Screen app the answer should be `true`; if it is not, 
 | `benzene-node.json`, `benzene-node-rerun.json` | §2 node raw (every run of both passes) and the re-run alone |
 | `benzene-browser.json` | §2 browser raw (every run, including the status lines) |
 | `orbital-dispatch.json` | §3 raw: every row, check probes, app references, both browsers |
+| `tools/perf/s4c-kernel.mjs`, `tools/perf/c60-voxels.py`, `tools/perf/s4c-c60-app.mjs` | §5 (0.4.0 S4c): the kernel's checks and timings, PySCF at the voxel centres, the app's C₆₀ road |
+| `s4c-kernel.json`, `c60-voxels-pyscf.json`, `s4c-c60-app.json`, `s4c-c60-{homo,lumo}.jpg`, `s4c-valence-lysine.jpg`, `device-report-s4c-{before,after}.json` | §5 raw, screenshots and the device report pair |
 
 Running them: `python3 tools/gate/server.py "$PWD" 8735 &` then `LW_PORT=8735 GD_PORT=5205 node tools/perf/<script>.mjs`. The
 node re-time needs no server.

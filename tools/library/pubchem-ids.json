@@ -380,6 +380,16 @@
   "ice-hexamer": {
    "formula": "H12O6",
    "none": "a finite hydrogen-bonded ring of six waters relaxed here; PubChem lists water (CID 962), not this cluster"
+  },
+  "C60": {
+   "formula": "C60",
+   "query": "buckminsterfullerene",
+   "cid": 123591,
+   "inchiKey": "XMWRBQBLMFGWIX-UHFFFAOYSA-N",
+   "pubchemFormula": "C60",
+   "title": "Fullerenes",
+   "checked": "2026-10-08",
+   "status": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 123591 (\"Fullerenes\") → InChIKey XMWRBQBLMFGWIX-UHFFFAOYSA-N; its formula C60 is the record's"
   }
  }
 }

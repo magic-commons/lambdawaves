@@ -254,6 +254,7 @@ export function createOrbitals(host, api) {
     if (!c) return 'no MOLECULES window';
     if (!c.on) return 'MOLECULES OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
+    if (sol.cols && keys().some((k) => !sol.cols.includes(k))) return `this record carries orbitals ${sol.cols[0] + 1}–${sol.cols[sol.cols.length - 1] + 1} only (its HOMO and LUMO sets)`;   // 0.4.0 S4c: a frontier record
     const s = S();
     if (s && s.claimed('tdhf')) return 'MOLECULES RT RUN has the field: stop the run to take it';
     const f = F();

@@ -34,9 +34,12 @@ export async function requestGpu() {
      * A device MUST grant a limit its own adapter reported, so this cannot fail on a conforming implementation;
      * it is still wrapped, because a device that does not come up is the whole application and a bigger PNG is
      * not worth that trade.  `capture.limits()` READS what was granted rather than believing this comment.
-     * (Moved here from field.js createField, byte for byte, by M1.) */
-    const want = {};
-    for (const k of ['maxTextureDimension2D', 'maxTextureDimension1D']) if (adapter.limits && adapter.limits[k]) want[k] = adapter.limits[k];
+     * (Moved here from field.js createField, byte for byte, by M1.)  0.4.0 S4c: and 32 KiB of workgroup memory where the
+     * adapter reports it, for field.js' cap-128 χ tile (MEASURE.md §1); refused, field.js reads the granted 16384 and builds
+     * that tier with 32 lanes. */
+    const want = {}, L = adapter.limits || {};
+    for (const k of ['maxTextureDimension2D', 'maxTextureDimension1D']) if (L[k]) want[k] = L[k];
+    if (L.maxComputeWorkgroupStorageSize >= 32768) want.maxComputeWorkgroupStorageSize = 32768;
     let device, limitsRequested;
     try { device = await adapter.requestDevice({ requiredLimits: want }); limitsRequested = want; }
     catch (_) { device = await adapter.requestDevice(); limitsRequested = null; }

@@ -36,10 +36,13 @@ export function validateRecord(r) {
     need(I.atomsSha256 === atomsKey(I.atoms), 'input.atoms: not the geometry the record was made at (atomsSha256)');
   need(typeof I.basis === 'string' && Number.isInteger(I.charge), 'input.basis / input.charge');
   for (const k of ['orbitals', 'states', 'rpa', 'tdhf']) need(typeof caps[k] === 'boolean', 'caps.' + k);
-  need(caps.orbitals === true && caps.rpa === true, 'a record always carries its orbitals and its RPA sticks');
-  const n = G.nAO, nocc = G.nocc, d = nocc * (n - nocc);
+  /* 0.4.0 S4c: a FRONTIER record (C₆₀) carries ε and a few whole columns of C — `ground.cols`, ascending — and nothing else */
+  const n = G.nAO, nocc = G.nocc, d = nocc * (n - nocc), cols = G.cols;
+  need(caps.orbitals === true && (caps.rpa === true || (Array.isArray(cols) && !caps.states && !caps.tdhf)), 'a record always carries its orbitals and its RPA sticks, or is a frontier record');
   if (!need(Number.isFinite(G.energy) && Number.isInteger(n) && n > 0 && Number.isInteger(nocc) && nocc > 0 && nocc < n && typeof G.hash === 'string' && G.names && typeof G.names === 'object', 'ground')) return bad;
   const O = r.orbitals || {};
+  if (cols) return need(cols.length > 0 && cols.every((k, j) => Number.isInteger(k) && k >= (j ? cols[j - 1] + 1 : 0) && k < n) && len(O.eps) === n && len(O.C) === n * cols.length, 'frontier: ε at nAO, C at nAO × cols')
+    && need(['eps', 'C'].every((k) => arr(O[k]).every(Number.isFinite)), 'orbitals: a non-finite ε or C'), bad;
   if (need(len(O.eps) === n && len(O.C) === n * n && len(O.D) === n * n, 'orbitals: ε, C and D at nAO'))
     need(['eps', 'C', 'D'].every((k) => arr(O[k]).every(Number.isFinite)), 'orbitals: a non-finite ε, C or D');
   const S = r.spectrum || {};
@@ -55,6 +58,11 @@ export function validateRecord(r) {
 /** the record as the worker's solve cache holds it: typed arrays, the RPA sticks and the TDA ladder as the wire's objects */
 export function decodeRecord(r) {
   const G = r.ground, n = G.nAO, nocc = G.nocc, d = nocc * (n - nocc);
+  if (G.cols) {   // a FRONTIER record: C laid out n × n as every reader indexes it, the columns it does not carry zero (and never offered)
+    const m = G.cols.length, c = arr(r.orbitals.C), C = new Float64Array(n * n);
+    for (let i = 0; i < n; i++) G.cols.forEach((k, j) => { C[i * n + k] = c[i * m + j]; });
+    return { id: r.id, atoms: r.input.atoms, basis: r.input.basis, charge: r.input.charge, caps: r.caps, ground: G, eps: arr(r.orbitals.eps), C, D: null, spectrum: null, states: null, cols: G.cols };
+  }
   const s = Object.fromEntries(Object.entries(r.spectrum).map(([k, v]) => [k, arr(v)]));
   const roots = [], tda = [];
   for (let k = 0; k < d; k++) {

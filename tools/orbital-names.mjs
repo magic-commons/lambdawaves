@@ -124,7 +124,8 @@ for (const row of CAT.rows) {
 console.log(`\nlibrary records: ${libRows.length} — ${libRows.map(({ row, r }) => `${row.id} ${r.ground.names.reliable ? r.ground.names.group : 'C1'}`).join(' · ')}`);
 if (has('--pyscf')) {
   const { basisFrom } = await import('../lab/md.js');
-  const inputs = { rows: libRows.map(({ row, r }) => ({ id: row.id, charge: r.input.charge, key: row.hash.slice(0, 16), atoms: r.input.atoms.map((a) => [a.Z, a.x, a.y, a.z]) })) };
+  /* a FRONTIER record (S4c's C₆₀) IS PySCF's orbitals, checked at generation against PySCF's own field — no second solve of 300 AOs */
+  const inputs = { rows: libRows.filter(({ r }) => !r.ground.cols).map(({ row, r }) => ({ id: row.id, charge: r.input.charge, key: row.hash.slice(0, 16), atoms: r.input.atoms.map((a) => [a.Z, a.x, a.y, a.z]) })) };
   mkdirSync(new URL('.tmp/', ROOT), { recursive: true });
   const inFile = new URL('.tmp/names-records-inputs.json', ROOT).pathname, dumpFile = new URL('.tmp/names-records-pyscf.json', ROOT).pathname;
   writeFileSync(inFile, JSON.stringify(inputs));
@@ -134,6 +135,7 @@ if (has('--pyscf')) {
   if (dump) {
     const lines = [];
     for (const { row, r } of libRows) {
+      if (r.ground.cols) { lines.push(`| ${row.id} | — (frontier: ${r.ground.cols.length} columns) | — | PySCF's own orbitals (field check ${r.oracle.fieldMaxAbsErr.toExponential(1)} at generation) | by energy | 0 |`); continue; }
       const p = dump[row.id], atoms = r.input.atoms, sym = r.input.symmetry, N = r.ground.names;
       if (!p) { fail(`${row.id}: PySCF gave no answer`); continue; }
       const P = nameOrbitals({ atoms, S: Float64Array.from(p.S), C: Float64Array.from(p.C), eps: p.eps, nocc: p.nocc, basis: basisFrom(atoms, record), converged: p.converged }, sym);

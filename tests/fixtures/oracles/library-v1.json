@@ -22,6 +22,28 @@
    },
    "homoLumoGapEh": 0.6826978304911099
   },
+  "C20H20": {
+   "energy": -760.1379718913095,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 32,
+   "wallSeconds": 5.98,
+   "nao": 120,
+   "nocc": 70,
+   "key": "240019bfd850fd8f",
+   "topgroup": "Ih",
+   "groupname": "Ci",
+   "orbsym": {
+    "groupname": "Ci",
+    "occupied": {
+     "Ag": 35,
+     "Au": 35
+    },
+    "energy": -760.1379718913072,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.7978671096900188
+  },
   "C6H6": {
    "energy": -227.89100646418078,
    "converged": true,
