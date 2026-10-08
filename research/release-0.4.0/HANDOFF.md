@@ -162,6 +162,27 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - Josh tried the camera on the test servers (https://127.0.0.1:8721/lab/, LAN https://10.0.0.18:8711/lab/, serving `sos-s0`):
 >   *"Nice, I'm impressed. We might change the default keybinds for new camera mouse-controls and perhaps touch gestures but this is
 >   good for now!"* — an open item after 0.4.0. Josh: Haiku 5.5 may take the easiest bulk tasks at high–xhigh effort.
+> **UPDATE 2026-10-08 ~06:10 — Claude Sos, session 4 continued after a second usage pause (Josh: "Usage is back so let's
+> continue, Yan is still weekly blocked so we'll resume as usual").**
+> - **S4c THE ENGINE UPGRADES merged** (`a927fc3`, builder `c6f5957`, waves 178–182, `S4c-BUILD.md` + `S4C-HANDOFF.md`, MEASURE.md §5):
+>   `MOL_CAPS = [16, 40, 64, 128]` (the 3070 grants 32 KiB; a refused device builds the 128 tier with 32 lanes and draws the same
+>   texels); `ORB_WGSL`, the orbital-only path (C₆₀'s HOMO 3.6 ms screened at 96³); **C₆₀'s HOMO and LUMO draw** from a schema-1
+>   frontier record (`lab/library/9520cedc….json`, DRAFT geometry stated, 0 solver calls, 4–6e-4 of max against PySCF at 256
+>   voxels); VALENCE as a switch on DENSITY (lysine's max density 47.8 → 1.60); the lock compares only its fixture's states
+>   (`cbc7b0f`); 1004 and 1148 locks GREEN; device report 18.2 → 19.1 fps. `lab/*.js` 36,137 → 36,225 (+88, the law not met — for
+>   Josh). 87 AO is tryptophan (phenylalanine is 71; the brief's example was wrong). M5 pending: `./serve-lan.sh`, then
+>   `https://<LAN>:8710/lab/?report=1&post=1` on the iPad.
+> - **S4b THE SECTIONS — built to B4, resumed:** `worktree-agent-aee5748ddb578d188` tip `2770699` (B1 the three sizing entries as
+>   records; B2–B5 code: the gate with the family allowance, the STEM fields and C5 labels by projection, the page turner and the
+>   header; B4: **37 records behind the gate, 11.4 MB**, every one labelled by projection and held against PySCF). The builder died
+>   on the Opus session limit at ~05:30 without a hand-off (one uncommitted edit, `tests/library.browser-test.mjs`); its gate server
+>   was killed by pid by Sos; it was RESUMED by message at ~06:00 with the order: commit, **merge `a927fc3` (S4c) on its own branch
+>   and resolve the nine-file overlap** (chemview.js, library.js, library.json, mathworker.js, sw.js, orbital-library.mjs, three
+>   tests), decide C₆₀'s section and identifiers, gates, REPORT waves 168–177, `S4b-BUILD.md`.
+> - Josh on lysine from its record (the first past-the-cap molecule): *"Holy, Lysine is beautiful!"*
+> - **Next, in order:** merge S4b → node gate + `library`/`chem`/`orbitals` light check → **the kernel verifier** (fresh Opus,
+>   8761/5229, the commands at the end of `S4c-BUILD.md`, contract BRIEF-S4-LIBRARY §S4c) → fold S4b's brief-4 notes into
+>   `KIT-BRIEFS.md` (Haiku 5.5 may do it) → **the local 0.4.0-alpha cut on Josh's word** (RELEASING.md's road, no push, no deploy).
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
