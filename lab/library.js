@@ -68,7 +68,8 @@ export function decodeRecord(r) {
 
 /* ── the store ── the page is its one writer, and stores a record only after its bytes match its name ── */
 const urlOf = (hash) => new URL('./' + recordPath(hash), import.meta.url).href;
-const store = async () => { try { return await caches.open(DATA_CACHE); } catch (_) { return null; } };
+/* a READ never creates lw-data-v1 (a boot that only looks writes nothing); the first install does */
+const store = async (create = false) => { try { return create || await caches.has(DATA_CACHE) ? await caches.open(DATA_CACHE) : null; } catch (_) { return null; } };
 const hex = async (buf) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map((b) => b.toString(16).padStart(2, '0')).join('');
 export async function installed(hash) { const c = await store(); return !!(c && await c.match(urlOf(hash)).catch(() => null)); }
 export async function removeRecord(hash) { const c = await store(); return !!(c && await c.delete(urlOf(hash))); }
@@ -94,7 +95,8 @@ export async function fetchRecord(hash, { network = false, onProgress = null } =
   } else { const b = new Uint8Array(await res.arrayBuffer()); parts.push(b); got = b.length; }
   const buf = new Uint8Array(got); let o = 0; for (const p of parts) { buf.set(p, o); o += p.length; }
   if (await hex(buf) !== hash) return { record: null, why: 'its bytes do not match its name' };
-  if (c) await c.put(url, new Response(buf, { headers: { 'content-type': 'application/json' } })).catch(() => {});
+  const w = await store(true);
+  if (w) await w.put(url, new Response(buf, { headers: { 'content-type': 'application/json' } })).catch(() => {});
   return { record: JSON.parse(new TextDecoder().decode(buf)), from: 'network', bytes: got };
 }
 
@@ -113,7 +115,9 @@ export async function persistOnce() {
   const S = typeof navigator !== 'undefined' && navigator.storage;
   let seen = null; try { seen = JSON.parse(localStorage.getItem(ASKED) || 'null'); } catch (_) {}
   if (!seen && S && S.persist && !safariTab()) {
-    const granted = await S.persist().catch(() => null);
+    /* Firefox asks with a doorhanger: an unanswered prompt must not hold the install, so the answer waits 4 s and then reads
+       `null` (unanswered) — the question is still remembered as asked, and storageInfo() reads the real state each time */
+    const granted = await Promise.race([S.persist().catch(() => null), new Promise((r) => setTimeout(() => r(null), 4000))]);
     try { localStorage.setItem(ASKED, JSON.stringify({ asked: new Date().toISOString().slice(0, 10), granted })); } catch (_) {}
   }
   return storageInfo();

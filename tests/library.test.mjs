@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import * as W from '../lab/mathworker.js';
 import { validateRecord, decodeRecord, recordPath } from '../lab/library.js';
-import { MOLECULE_BY_ID, moleculeAtoms } from '../lab/molecules.js';
+import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, moleculeAtoms, optionLabel, CAP_MS } from '../lab/molecules.js';
 import { evaluator, shellsFromField } from '../lab/molecular-field.js';
 
 const at = (rel) => fileURLToPath(new URL(rel, import.meta.url));
@@ -79,6 +79,17 @@ assert.equal(calls() - c0, 0, 'a refusal ran the solver');
 const before = calls();
 assert.throws(() => W.chemOpen({ lib: broken, basis: 'sto-3g' }), /failed validation/);
 assert.equal(calls(), before);
+
+/* 6 · THE CATALOGUE IN THE TABLE (lab/molecules.js): a record's input is the menu's own atoms (so the worker's solve-cache key is
+       the one a window asks with — a mismatch would make a past-cap molecule a live solve), and the benzene-cap law reads it */
+for (const r of CAT.rows) assert.deepEqual(load(r.id).input.atoms, moleculeAtoms(r.id), r.id + ': the record\'s atoms are not the menu\'s');
+const lys = MOLECULE_BY_ID.get('lysine');
+assert.deepEqual(RECORD_ONLY.map((x) => x.id), ['lysine'], 'the record-only rows');
+assert.ok(!MOLECULES.includes(lys) && lys.over && lys.recordOnly && !lys.disabled && lys.reason === null, 'lysine: past the cap, DOWNLOAD, never DISABLED');
+assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · 64 AO · record');
+assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');
+assert.ok(CAP_MS > 1000 && CAP_MS < 2500, 'the refit cap is benzene at ~1.7 s, not 9.6 s: ' + CAP_MS);
+assert.equal(L.caps.tdhf, false); assert.equal(rec.caps.tdhf, true);
 
 console.log(`GREEN library: benzene opens from its ${(row('C6H6').bytes / 1024).toFixed(0)} KB record in ${openMs.toFixed(1)} ms with 0 solver calls `
   + `(fresh: 1 SCF + 1 RPA) and equals the fresh solve bit for bit — E, ε, nocc, C, D, ψ and ρ at ${pts.length} points, the names (D6h, HOMO 1e1g), `

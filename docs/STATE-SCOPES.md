@@ -1,6 +1,7 @@
 # State scopes
 
-Every piece of state in λWAVES lives in exactly one of three scopes. This is the standing law for any key a
+Every piece of state in λWAVES lives in exactly one of three scopes — and, since 0.4.0 S4a, one storage class beside them,
+LIBRARY, which is not the reader's, the arrangement's or the work's: it is the device's (below). This is the standing law for any key a
 change adds or moves. It came from Josh's 0.3.1 brief and the plan in `research/release-0.3.1/PLAN.md` §1
 (decisions D1–D6 are there). Stage S1 put it into `serialize()`, `restore()`, `saveSettings()` and
 `applySettings()` in `lab/rack.js`. Where this file and the code disagree, the code is right; please fix
@@ -19,6 +20,15 @@ this file.
   carries what link format v1 has room for. Every PROJECT key is a history row except the camera pose (a view is
   not an edit), the notebook (text has its own editor) and quality (a device budget that rides along as advice).
   Since S3 the history covers exactly this: the edit scope below.
+
+- **LIBRARY** (0.4.0 S4a, `research/release-0.4.0/PLAN.md` B2): installed orbital records — DEVICE CONTENT,
+  content-addressed (`lab/library/<sha-256>.json`, named by the hash of its own bytes), kept in the Cache Storage
+  `lw-data-v1`, a name no build changes, so a new build never clears them (`lab/sw.js` §1b DATA, the one precache
+  exemption). A record is never written into a project, a link or a history row. A project holds only its
+  reference, `instruments.chem.library = { id, hash, nameKey }`, which is PROJECT (below). Opening a project or a
+  link that names a record this device lacks fetches it, checks it against its name and keeps it; offline, the open
+  restores everything else and MOLECULES names the part that refused. An evicted record is "not installed" again
+  (its row says DOWNLOAD), never a broken preset.
 
 ## The table
 
@@ -44,6 +54,9 @@ this file.
 | notebook text, title and subtitle | beside the project data | PROJECT, not in history |
 | `layout` (cards — each with its fold, power, float and, for MOLECULES, its `more` fold — docked, rackHidden, nb), `closed[]`, `nbW/nbH`, `abW/abH`, `modwin` placement, favourite `layouts` | settings and project | WORKSPACE |
 | `phoneTr` / `phoneRack` (a phone's transport fold and hidden rack, read back from the page, so a project's layout writes them) | settings, through the layout | WORKSPACE (S2) |
+| `instruments.chem.library` `{ id, hash, nameKey }` — the record a molecule opened from (or the one the opened file named, or the catalogue's): `id` the library row, `hash` the record's sha-256 (the exact reference), `nameKey` the chosen orbital's S1 name `{ group, irrep, count, member }` (the portable one, used when the hash has moved on). Written only for a molecule the catalogue `lab/library.json` lists a record for | project | PROJECT; one history row per change of molecule (it moves with `preset` and `basis`; its `nameKey` with `orbital`) |
+| the installed records themselves (`lab/library/<sha-256>.json` in Cache Storage `lw-data-v1`) | the device | LIBRARY: never in a project, a link or a history row; never changed by an undo |
+| `lambdawaves.q0.library` `{ asked, granted }` — that `navigator.storage.persist()` was asked, on the first INSTALL press (never at boot) | its own localStorage key, never settings | LIBRARY |
 
 ## What each road does (as of S2)
 
@@ -116,6 +129,8 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 
 ## Adding a key
 
-Choose its scope before you write it. A PREFERENCE key goes in `saveSettings()` / `applySettings()` only. A PROJECT
+Choose its scope before you write it.  Device content a build ships and a hand installs (a record, a future pack) is
+LIBRARY: content-addressed under a DATA root (`lab/sw.js` §1b), never inside a project; a project names it by
+`{ id, hash, nameKey }`. A PREFERENCE key goes in `saveSettings()` / `applySettings()` only. A PROJECT
 key goes in `serialize()` / `restore()` only, and joins the history unless it is a view. A WORKSPACE key goes in the
 layout record and the settings. No key belongs to two scopes.

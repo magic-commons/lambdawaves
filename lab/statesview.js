@@ -166,7 +166,7 @@ export function createStates(host, api) {
     if (!q || !api.solve) return;
     const seq = ++ladderSeq, forSol = sol;
     Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge }, () => null, (r) => r)).then((r) => {
-      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { status('the state ladder needs the chemistry worker', 'warn'); } return; }
+      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { status((r && r.refused) || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r;
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
       if (wanted) { applyRecord(wanted, true); wanted = null; }

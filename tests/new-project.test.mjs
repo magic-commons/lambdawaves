@@ -48,6 +48,11 @@ assert.deepEqual({ ui: LOOK.filter((k) => k in P.ui), camera: FEEL.filter((k) =>
 /* where a PREFERENCE key has ever ridden in a project: the presentation's top level, ui, camera, mat and obs (S1's list) */
 const leaks = [['', P], ['ui.', P.ui], ['camera.', P.camera], ['mat.', P.mat], ['obs.', P.obs]].flatMap(([at, o]) => Object.keys(o).filter((k) => PREF.has(k)).map((k) => at + k));
 assert.deepEqual(leaks, [], 'PREFERENCE keys in the empty project');
+/* 0.4.0 S4a · THE FOURTH CLASS, LIBRARY (docs/STATE-SCOPES.md): an installed record is device content and never rides in a
+   project — only its reference { id, hash, nameKey } does, and only for a molecule with a record (H₂O has none) */
+const LIBRARY = ['lambdawaves.q0.library', 'lw-data-v1', 'lambdawaves.orbital-record', '$f64', '$i32'];
+assert.deepEqual(LIBRARY.filter((k) => text.includes(k)), [], 'LIBRARY content in the empty project');
+assert.equal('library' in P.instruments.chem, false, 'the empty project names a record');
 
 /* 4 · the register is empty (D3), the field off, time at zero */
 const E = parsed.data.experiment;
