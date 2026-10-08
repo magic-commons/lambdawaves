@@ -1,0 +1,212 @@
+/* MIR · shell/parts.css — the small shell parts every app wrote again: the dialog, the notice, the busy mark, the boot
+ * card, the settings rows and their two new fields.  Load after the kit's sheets (it is in mir.kit.house).
+ *
+ * THE LAWS IT DRAWS (docs/INTENT.md)
+ *   · A DIALOG IS A PANE AT MENU HEIGHT AND NOTHING ELSE: no scrim, no dimming, no dark layer behind it (rule 7).
+ *     It wears CARD STYLE's material through `.glass` (TINTED: the tint, never a blur; REFRACTIVE: the veil and blur).
+ *   · A NOTICE is BASINS' toast by default: one centred pill 84 px above the bottom (--toast-bottom), a new one replacing
+ *     it.  NEBULA's corner stack is the other seat (`seat: 'corner'`); its box is `pointer-events: none`, only a
+ *     notice itself takes a press.
+ *   · THE LOADING MARK IS THE 3×3 DIAMOND (rule 6).  Its squares carry the palette and TRAVEL ROUND THE RING, so the
+ *     colours turn through the mark — by `translate` and `opacity` only, which the compositor runs; nothing animates a
+ *     fill or a colour.  Reduced motion keeps the breath and drops the travel; motion off stills it.
+ *   · A FIELD YOU TYPE IN IS A WELL (`--relief-well` on `--glass-well`), as the kit's `select.sel` already is.
+ *   · Every look value is a token declared on the part's own root, read with the 1.4 name as its fallback.
+ */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · the look values of this sheet (docs/SKINS.md): the busy mark's motion.  Everything else this sheet
+   declares on a part's root (the dialog's width, the notice's inset, the field's height …) is layout and stays with
+   its part. */
+.mir-busy {
+  --busy-turn: var(--logo-turn, 1.2s);
+  --busy-breathe: 1.1s;
+  --busy-ease: linear;
+  --busy-low: .42;
+  --busy-ring: calc(var(--busy-turn) * 2);
+}
+/* the toast: BASINS' pill (basins.css:6-11), value for value.  It is a `.glass` pane, so CARD STYLE's blur reaches it
+   (REFRACTIVE + FROST); its own fill, edge, shadow and ink win over the pane's (`#mir-toast`, as BASINS' `#toast`). */
+.mir-toast {
+  --toast-fill: color-mix(in srgb, var(--glass-tint-color, hsl(212 12% 17%)) 82%, transparent);
+  --toast-ink: var(--fg);
+  --toast-edge: var(--glass-border-color);
+  --toast-shadow: var(--glass-shadow);
+  --toast-radius: var(--r-pill);
+  --toast-size: 11px;
+  --toast-weight: 500;
+  --toast-lh: 1.4;
+  --toast-tracking: .04em;
+}
+body[data-theme="light"] .mir-toast { --toast-fill: hsl(0 0% 100% / .86); --toast-ink: #071114; }
+/* ── end of the values ── */
+
+/* ── the dialog ─────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-dialog {
+  --dialog-w: 26em;
+  --dialog-pad: 18px 20px 16px;
+  --dialog-gap: 12px;
+  --dialog-gutter: 32px;
+  --dialog-max-h: 80vh;
+  --dialog-z: calc(var(--z-banner) + 10);
+  position: fixed; inset: 0; margin: auto; z-index: var(--dialog-z);
+  width: min(var(--dialog-w), calc(100vw - var(--dialog-gutter))); height: fit-content; max-height: var(--dialog-max-h); overflow: auto;
+  display: flex; flex-direction: column; gap: var(--dialog-gap); padding: var(--dialog-pad);
+  border-radius: var(--card-r); color: var(--fg); font-family: var(--font-ui); user-select: text; -webkit-user-select: text;
+}
+.mir-dialog.glass { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
+.mir-dialog-title { margin: 0; font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); color: var(--fg); }
+.mir-dialog-body { margin: 0; font-size: var(--fs-base); line-height: var(--lh); color: var(--fg-soft); }
+.mir-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-3); }
+.mir-dialog-actions .trig { min-width: 6em; }
+.mir-dialog-actions .trig[data-kind="primary"] .trig-l { color: var(--acc); }
+.mir-dialog-actions .trig[data-kind="danger"] .trig-l { color: var(--bad); }
+/* THE NOTICE IS BASINS' COLD-START WARNING (Josh, 2026-10-07: "return the design of the warning to the original design (font,
+   text, spacing, button dimensions …)"): basins-ui-fixes app/startup.css .mandel-warn-* — the system face, one column 34em
+   wide, the picture (2rem below it), the title (1rem), the words (2.25rem), CONTINUE at .8rem × 2.5rem — kept on the kit's
+   pane, its colour tokens, its trigger and its focus ring.  The values are BASINS', as BASINS wrote them. */
+.mir-dialog[data-kind="notice"] {
+  --warn-w: 34em;                                        /* the column (.mandel-warn-card) */
+  --warn-art: clamp(200px, 44vmin, 420px);               /* the picture's square (.mandel-warn-image) */
+  --warn-title-size: clamp(1.1rem, 2.8vmin, 1.45rem);    /* the title (.mandel-warn-heading) … */
+  --warn-title-track: .18em;                             /* … and its tracking */
+  --warn-body-size: clamp(.95rem, 2vmin, 1.05rem);       /* the words (.mandel-warn-body) */
+  --warn-btn-size: .95rem;                               /* CONTINUE (.mandel-warn-button): its size … */
+  --warn-btn-track: .14em;                               /* … its tracking … */
+  --warn-btn-r: 4px;                                     /* … and its corner */
+  --dialog-w: calc(var(--warn-w) + 40px + 2 * var(--glass-border)); --dialog-gap: 0; --dialog-max-h: calc(100dvh - 3rem); text-align: center; align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }   /* BASINS' stack as written: --font-sans puts system-ui before Roboto, which is another face on Linux */
+.mir-dialog[data-kind="notice"] > :is(.mir-caution, .mir-notice-art) { margin: 0 auto 2rem; }
+.mir-notice-art { display: block; width: var(--warn-art); height: var(--warn-art); max-width: 100%; object-fit: contain; user-select: none; -webkit-user-select: none; pointer-events: none; }
+.mir-dialog[data-kind="notice"] .mir-dialog-title { margin: 0 0 1rem; font-size: var(--warn-title-size); font-weight: 700; letter-spacing: var(--warn-title-track); line-height: 1.3; text-transform: uppercase; color: var(--fg); }
+.mir-dialog[data-kind="notice"] .mir-dialog-body { margin: 0 0 2.25rem; font-size: var(--warn-body-size); font-weight: 400; line-height: 1.65; color: var(--fg); }
+.mir-dialog[data-kind="notice"] .mir-dialog-actions { justify-content: center; }
+.mir-dialog[data-kind="notice"] .mir-dialog-actions .trig { min-height: 44px; padding: .8rem 2.5rem; border-radius: var(--warn-btn-r); font-family: inherit; font-size: var(--warn-btn-size); font-weight: 600; letter-spacing: var(--warn-btn-track); line-height: 1.45; }
+
+/* the caution sign: a triangle in accent A with the "!" knocked out of it (λWAVES' sign, without its picture) */
+.mir-caution { --caution-size: 72px; width: var(--caution-size); height: auto; display: block; color: var(--acc); }
+
+/* ── the notice: the toast (the default, BASINS') ───────────────────────────────────────────────────────── */
+.mir-toast {
+  --toast-bottom: 84px;
+  --toast-w: 560px;
+  --toast-max: 90vw;
+  --toast-pad: 8px 14px;
+  --toast-z: calc(var(--z-veil) + 10);          /* BASINS' 50: above the veil (40), under the banner (60) and the menus */
+  position: fixed; inset-inline: 0; bottom: var(--toast-bottom); margin-inline: auto; z-index: var(--toast-z);
+  width: fit-content; max-width: min(var(--toast-w), var(--toast-max)); display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--toast-pad); border-radius: var(--toast-radius);
+  font: var(--toast-weight) var(--toast-size) / var(--toast-lh) var(--font-ui); letter-spacing: var(--toast-tracking);
+  pointer-events: none;                         /* a toast never eats a press on the picture or a control beneath it */
+}
+/* the pane's own drawing wins over CARD STYLE's fill and shadow, as BASINS' `#toast` does; the blur is CARD STYLE's */
+#mir-toast { border: 1px solid var(--toast-edge); background: var(--toast-fill); box-shadow: var(--toast-shadow); color: var(--toast-ink); }
+/* under TINTED the toast never blurs, FROST or not (BASINS' #toast: since TINTED can blur, 1.5.0-alpha.11, the .glass rule
+   would frost it with the panes); REFRACTIVE + FROST still blur it */
+body:not([data-card="refractive"]) #mir-toast { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mir-toast .mir-notice-text { overflow-wrap: anywhere; }
+.mir-toast .trig { flex: 0 0 auto; pointer-events: auto; }   /* with an action, only the action takes the pointer */
+
+/* ── the notice: the corner stack (seat: 'corner', NEBULA's) ────────────────────────────────────────────── */
+.mir-notices {
+  --notice-w: 22em;
+  --notice-inset: 16px;
+  --notice-gap: 8px;
+  --notice-z: calc(var(--z-banner) + 8);
+  position: fixed; inset-block-end: var(--notice-inset); inset-inline-end: var(--notice-inset); z-index: var(--notice-z);
+  width: min(var(--notice-w), calc(100vw - 2 * var(--notice-inset))); display: flex; flex-direction: column; gap: var(--notice-gap);
+  pointer-events: none;
+}
+.mir-notices > .mir-notice {
+  --notice-pad: 9px 8px 9px 12px;
+  --notice-bar: 3px;
+  --notice-x: 24px;
+  pointer-events: auto; display: flex; align-items: center; gap: var(--sp-3); padding: var(--notice-pad);
+  border-radius: var(--r-md); color: var(--fg); font: var(--fs-small) / var(--lh) var(--font-ui);
+}
+.mir-notices > .mir-notice.glass { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
+.mir-notice-text { flex: 1 1 auto; overflow-wrap: anywhere; }
+/* the kind is a short bar at the start edge in its own ink; the words stay ink (a state said with material, not colour) */
+.mir-notices > .mir-notice::before { content: ""; align-self: stretch; flex: 0 0 var(--notice-bar); border-radius: var(--r-pill); background: var(--glass-hairline); }
+.mir-notices > .mir-notice[data-kind="ok"]::before { background: var(--ok); }
+.mir-notices > .mir-notice[data-kind="warn"]::before { background: var(--warn); }
+.mir-notices > .mir-notice[data-kind="error"]::before { background: var(--bad); }
+.mir-notices > .mir-notice .trig { flex: 0 0 auto; }
+.mir-notice-x { flex: 0 0 auto; min-width: var(--notice-x); min-height: var(--notice-x); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--dim); }
+.mir-notice-x:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-notice-x:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+@media (pointer: coarse) { .mir-notice-x { --notice-x: 32px; } }
+
+/* ── the busy mark ──────────────────────────────────────────────────────────────────────────────────────── */
+.mir-busy {
+  --busy-size: 22px;
+  display: inline-block; position: relative; flex: 0 0 auto; width: var(--busy-size); height: var(--busy-size); pointer-events: none;
+}
+.mir-busy-g { position: absolute; inset: 0; rotate: 45deg; }
+.mir-busy-sq { position: absolute; width: 22.5%; height: 22.5%; background: var(--busy-c); }
+/* the cells of the mark (viewBox 10: squares 2.25 at 1.7 / 3.95 / 6.2) */
+.mir-busy-sq:nth-child(3n + 1) { left: 17%; } .mir-busy-sq:nth-child(3n + 2) { left: 39.5%; } .mir-busy-sq:nth-child(3n) { left: 62%; }
+.mir-busy-sq:nth-child(-n + 3) { top: 17%; } .mir-busy-sq:nth-child(n + 4):nth-child(-n + 6) { top: 39.5%; } .mir-busy-sq:nth-child(n + 7) { top: 62%; }
+.mir-busy[data-on] .mir-busy-g { animation: mir-busy-breathe var(--busy-breathe) var(--busy-ease) infinite alternate; }
+.mir-busy[data-on] .mir-busy-sq { animation: var(--busy-path) var(--busy-ring) var(--busy-ease) infinite; }
+.mir-busy-sq:nth-child(1) { --busy-path: mir-busy-ring-0; } .mir-busy-sq:nth-child(2) { --busy-path: mir-busy-ring-1; }
+.mir-busy-sq:nth-child(3) { --busy-path: mir-busy-ring-2; } .mir-busy-sq:nth-child(6) { --busy-path: mir-busy-ring-3; }
+.mir-busy-sq:nth-child(9) { --busy-path: mir-busy-ring-4; } .mir-busy-sq:nth-child(8) { --busy-path: mir-busy-ring-5; }
+.mir-busy-sq:nth-child(7) { --busy-path: mir-busy-ring-6; } .mir-busy-sq:nth-child(4) { --busy-path: mir-busy-ring-7; }
+.mir-busy-sq:nth-child(5) { --busy-path: mir-busy-hub; }
+:root[data-motion="reduced"] .mir-busy[data-on] .mir-busy-sq { animation: none; }
+:root[data-motion="off"] .mir-busy[data-on] .mir-busy-g, :root[data-motion="off"] .mir-busy[data-on] .mir-busy-sq { animation: none; }
+@keyframes mir-busy-breathe { from { opacity: var(--busy-low); } to { opacity: 1; } }
+@keyframes mir-busy-hub { 0%, 100% { opacity: 1; } 50% { opacity: var(--busy-low); } }
+@keyframes mir-busy-ring-0{0%{translate:0% 0%}12.5%{translate:100% 0%}25%{translate:200% 0%}37.5%{translate:200% 100%}50%{translate:200% 200%}62.5%{translate:100% 200%}75%{translate:0% 200%}87.5%{translate:0% 100%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-1{0%{translate:0% 0%}12.5%{translate:100% 0%}25%{translate:100% 100%}37.5%{translate:100% 200%}50%{translate:0% 200%}62.5%{translate:-100% 200%}75%{translate:-100% 100%}87.5%{translate:-100% 0%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-2{0%{translate:0% 0%}12.5%{translate:0% 100%}25%{translate:0% 200%}37.5%{translate:-100% 200%}50%{translate:-200% 200%}62.5%{translate:-200% 100%}75%{translate:-200% 0%}87.5%{translate:-100% 0%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-3{0%{translate:0% 0%}12.5%{translate:0% 100%}25%{translate:-100% 100%}37.5%{translate:-200% 100%}50%{translate:-200% 0%}62.5%{translate:-200% -100%}75%{translate:-100% -100%}87.5%{translate:0% -100%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-4{0%{translate:0% 0%}12.5%{translate:-100% 0%}25%{translate:-200% 0%}37.5%{translate:-200% -100%}50%{translate:-200% -200%}62.5%{translate:-100% -200%}75%{translate:0% -200%}87.5%{translate:0% -100%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-5{0%{translate:0% 0%}12.5%{translate:-100% 0%}25%{translate:-100% -100%}37.5%{translate:-100% -200%}50%{translate:0% -200%}62.5%{translate:100% -200%}75%{translate:100% -100%}87.5%{translate:100% 0%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-6{0%{translate:0% 0%}12.5%{translate:0% -100%}25%{translate:0% -200%}37.5%{translate:100% -200%}50%{translate:200% -200%}62.5%{translate:200% -100%}75%{translate:200% 0%}87.5%{translate:100% 0%}100%{translate:0% 0%}}
+@keyframes mir-busy-ring-7{0%{translate:0% 0%}12.5%{translate:0% -100%}25%{translate:100% -100%}37.5%{translate:200% -100%}50%{translate:200% 0%}62.5%{translate:200% 100%}75%{translate:100% 100%}87.5%{translate:0% 100%}100%{translate:0% 0%}}
+
+/* the three seats: a waiting card's overlay (transparent: no dark layer), beside the pointer, on the logo */
+.mir-busy-overlay { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3);
+  pointer-events: none; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wider); }
+.mir-busy[data-seat="card"] { --busy-size: 28px; }
+.mir-busy[data-seat="pointer"] { --busy-off: 15px; position: fixed; left: 0; top: 0; z-index: calc(var(--z-banner) + 20);
+  translate: calc(var(--busy-x, -100px) + var(--busy-off)) calc(var(--busy-y, -100px) + var(--busy-off)); }
+.mir-busy[data-seat="logo"] { vertical-align: middle; }
+
+/* ── the boot card ──────────────────────────────────────────────────────────────────────────────────────── */
+.mir-boot {
+  --boot-w: 22em;
+  --boot-pad: 18px 20px;
+  --boot-gutter: 32px;
+  position: fixed; inset: 0; margin: auto; z-index: var(--z-veil); width: min(var(--boot-w), calc(100vw - var(--boot-gutter))); height: fit-content;
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); padding: var(--boot-pad); text-align: center;
+  border-radius: var(--card-r); color: var(--fg); font-family: var(--font-ui);
+}
+.mir-boot-name { margin: 0; font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
+.mir-boot-step { margin: 0; font-size: var(--fs-small); color: var(--fg-soft); min-height: 1.45em; }
+.mir-boot-count { font-size: var(--fs-tiny); color: var(--dim); letter-spacing: var(--tr-wide); }
+.mir-boot-what { margin: 0; font-size: var(--fs-base); line-height: var(--lh); color: var(--fg); }
+.mir-boot-todo { margin: 0; font-size: var(--fs-small); line-height: var(--lh); color: var(--fg-soft); }
+.mir-boot-acts { display: flex; gap: var(--sp-3); flex-wrap: wrap; justify-content: center; }
+.mir-boot[data-state="fail"] .mir-boot-name { color: var(--bad); }
+.mir-boot[data-state="fail"] { user-select: text; -webkit-user-select: text; }
+
+/* ── the settings rows and the two fields ───────────────────────────────────────────────────────────────── */
+.mir-settings { --settings-gap: 8px; display: flex; flex-direction: column; gap: var(--settings-gap); }
+.mir-set-row[hidden] { display: none; }
+.mir-set-row > .k { align-self: flex-start; }
+.mir-field {
+  --field-h: 28px;
+  --field-pad: 0 8px;
+  display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0;
+}
+.mir-field > select.sel, .mir-field > .mir-num { min-height: var(--field-h); width: 100%; }
+@media (pointer: coarse) { .mir-field { --field-h: var(--touch); } }
+.mir-num { padding: var(--field-pad); border: var(--glass-border) solid transparent; border-radius: var(--r-md); color: var(--fg-soft);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); font-size: var(--fs-small); font-family: var(--font-num); user-select: text; -webkit-user-select: text; }
+.mir-num:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-num:disabled, .mir-field select.sel:disabled { opacity: var(--state-disabled, .38); }
+}

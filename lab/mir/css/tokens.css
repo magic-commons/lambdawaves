@@ -1,0 +1,112 @@
+/* MIR · tokens.css — the token law, and the PERFORMANCE TIER (MIR 1.5.0-alpha.2).
+ *
+ * LOAD IT anywhere after base.css (base.css names the layers once; this sheet is in `mir.tier`, which ranks after
+ * mir.core and before mir.a11y, so its place in the <link> order does not matter).  Without it the kit is unchanged:
+ * every rule below is gated, and with no `data-ui-tier` on <html> nothing here applies.
+ *
+ * ── THE THREE TIERS OF TOKEN (plan §5.2; the schema is mir/tokens.json, the page docs/TOKENS.md) ──────────────────
+ *   primitive  a raw scale step: --fs-*, --r-*, --sp-*, --t-*, --glass-blur … (1.5 will name them --p-*).  A skin owns
+ *              them; a component never reads one directly once the semantic tier covers it.
+ *   semantic   what a thing is FOR — the names a skin sets and a component reads: the ink ladder (--fg, --fg-soft,
+ *              --ink-key, --dim, --ink-faint), the accents (--acc, --acc2 …), and the 1.5 names landed here:
+ *                --surface-fill --surface-sheen --surface-veil --surface-filter --surface-edge
+ *                --surface-edge-width --surface-radius --surface-shadow --surface-shadow-float --surface-shadow-menu
+ *                --relief-raise --relief-well
+ *                --state-hover --state-press --state-press-scale --state-on --state-on-rim --state-on-light
+ *                --state-focus --state-carried --state-disabled
+ *                --label-tracking --label-case --font-display
+ *   component  one part's knob, read with a semantic fallback at the place of use: var(--knob-face, var(--face-fill)).
+ *
+ * ── THE CONSTRAINT THAT DECIDES HOW A NEW NAME IS READ ─────────────────────────────────────────────────────────────
+ *   A custom property whose value contains var() is resolved on the element that DECLARES it.  Apps re-point the 1.4
+ *   names below :root (BASINS re-points the ink ladder per label; apps write the accents on <body>), so an alias
+ *   declared at :root — `--surface-shadow: var(--glass-shadow)` — would freeze :root's value and miss every re-point.
+ *   So a 1.5 name is read FIRST at the place of use with the 1.4 expression as its fallback:
+ *   box-shadow: var(--surface-shadow, var(--glass-shadow)).  Unset, it costs nothing and every 1.4 re-point still works;
+ *   set by a skin or by the tier below, it wins.  1.5.0-alpha.3 (docs/INTENT.md) DECLARES the few whose value has no
+ *   var() in it, in skin.css on :root and body[data-theme="light"]: the two new pane heights (--surface-shadow-float,
+ *   --surface-shadow-menu), the ON face and rim (--state-on, --state-on-rim) and the two single numbers
+ *   (--state-press-scale, --state-disabled).  The ones that read the accent (--state-on-light, --state-focus,
+ *   --state-carried) stay undeclared and are read with their drawing as the fallback.
+ *
+ * ── THE NAMING LAW ──────────────────────────────────────────────────────────────────────────────────────────────────
+ *   lower-kebab · --p-* primitive · a bare semantic group (--surface-, --relief-, --state-, --label-, --ink-, --acc,
+ *   --motion-, --type-, --z-) · --<component>-<part> component, read with a semantic fallback · data-ui-tier on <html>
+ *   for the switches · runtime state written by script is documented as such in the schema (owner: runtime).
+ *   A token's row in mir/tokens.json comes first; tests/tokens.node.mjs fails a name the schema does not have.
+ *
+ * ── THE TIER (docs/TIERS.md) ────────────────────────────────────────────────────────────────────────────────────────
+ *   <html data-ui-tier="full|lite|flat">, absent = full.
+ *     lite  no backdrop filter anywhere (the whole filter `none`), the pane wears the TINTED fill so text stays
+ *           legible, and every pane shadow is one layer, falling down
+ *     flat  lite, and: control relief off, pane shadows off, sheen off, motion durations 0s
+ *   @media (prefers-reduced-transparency: reduce) takes the lite surface values whatever the tier.
+ *   TWO RULES.  A switched-off blur is the whole filter `none`, never `blur(0)` (blur(0) still allocates a render
+ *   surface).  A switched-off shadow is `0 0 0 0 transparent`, never `none` (a shadow LIST with `none` in it is
+ *   invalid, and the whole declaration would drop).
+ *   WHERE EACH VALUE IS DECLARED follows the constraint: a value with no var() and no theme goes on :root; a value
+ *   that reads another token (the fill) or depends on the theme (the shadows; the kit's theme is body[data-theme])
+ *   goes on <body>, where it resolves against the body's own --glass-tint.  An app that declares one of these names
+ *   itself, on <body> or deeper, outranks the tier there: an app sheet is in no layer.
+ *   THE BRIDGES.  --frost-filter, --glass-filter, --t-* and core.css's --motion-* are 1.4 / 1.5.0 names the tier also
+ *   sets, with plain values, because sheets that do not read the 1.5 names yet (the modulation plugin) and kit script
+ *   (core/motion.js reads --motion-* on <html>) read them.  Setting a 1.4 name to a value with no var() is safe at
+ *   :root; it is only an ALIAS (a var() to another name) that must never be declared there. */
+
+@layer mir.tier {
+
+/* ── LITE, and FLAT, which is lite and more ── */
+:where(html[data-ui-tier="lite"], html[data-ui-tier="flat"]) {
+  --surface-filter: none;            /* every blur the house draws: frost panes, the disconnected islands, the tip, the notebook, the menubar list */
+  --frost-filter: none;              /* bridge: the plugin sheets read the 1.4 name */
+  --glass-filter: none;              /* bridge: the TINTED filter, none already unless a skin set it */
+}
+:where(html[data-ui-tier="lite"], html[data-ui-tier="flat"]) :where(body) {
+  --surface-fill: hsl(var(--glass-tint) / var(--card-opacity));     /* the TINTED pane: the .97/.98 tips and popovers take it too */
+  --surface-veil: hsl(var(--glass-tint) / var(--card-opacity));     /* REFRACTIVE, unblurred, would be the bare field: it wears the tinted fill */
+  --surface-shadow: 0 1px 2px hsl(0 0% 0% / .16);                    /* one layer, falling down: the drop term of --glass-shadow */
+  --surface-shadow-float: 0 1px 2px hsl(0 0% 0% / .16);
+  --surface-shadow-menu: 0 1px 2px hsl(0 0% 0% / .16);
+}
+:where(html[data-ui-tier="lite"], html[data-ui-tier="flat"]) :where(body.frost[data-card="tinted"]) {
+  --card-opacity: var(--glass-opacity);  /* no blur is drawn, so the tinted pane does not thin for one (skin.css, INTENT O12) */
+}
+:where(html[data-ui-tier="lite"], html[data-ui-tier="flat"]) :where(body[data-theme="light"]) {
+  --surface-shadow: 0 1px 2px hsl(214 40% 20% / .09);
+  --surface-shadow-float: 0 1px 2px hsl(214 40% 20% / .09);
+  --surface-shadow-menu: 0 1px 2px hsl(214 40% 20% / .09);
+}
+
+/* ── REDUCED TRANSPARENCY takes the lite surface values, whatever the tier (flat, below, still wins its own) ── */
+@media (prefers-reduced-transparency: reduce) {
+  :where(html) { --surface-filter: none; --frost-filter: none; --glass-filter: none; }
+  :where(body) {
+    --surface-fill: hsl(var(--glass-tint) / var(--card-opacity));
+    --surface-veil: hsl(var(--glass-tint) / var(--card-opacity));
+    --surface-shadow: 0 1px 2px hsl(0 0% 0% / .16);
+    --surface-shadow-float: 0 1px 2px hsl(0 0% 0% / .16);
+    --surface-shadow-menu: 0 1px 2px hsl(0 0% 0% / .16);
+  }
+  :where(body.frost[data-card="tinted"]) { --card-opacity: var(--glass-opacity); }
+  :where(body[data-theme="light"]) {
+    --surface-shadow: 0 1px 2px hsl(214 40% 20% / .09);
+    --surface-shadow-float: 0 1px 2px hsl(214 40% 20% / .09);
+    --surface-shadow-menu: 0 1px 2px hsl(214 40% 20% / .09);
+  }
+}
+
+/* ── FLAT: relief off, shadows off, sheen off, motion 0s ── */
+:where(html[data-ui-tier="flat"]) {
+  --relief-raise: 0 0 0 0 transparent;
+  --relief-well: 0 0 0 0 transparent;
+  --surface-sheen: none;             /* a background LAYER, so `none` is legal: background: none, hsl(…) */
+  --t-fast: 0s; --t-soft: 0s; --t-linger: 0s;                       /* bridge: the house transitions read these */
+  --motion-micro: 0ms; --motion-ui: 0ms; --motion-structural: 0ms;  /* bridge: core.css and core/motion.js */
+}
+:where(html[data-ui-tier="flat"]) :where(body) {
+  --surface-shadow: 0 0 0 0 transparent;
+  --surface-shadow-float: 0 0 0 0 transparent;
+  --surface-shadow-menu: 0 0 0 0 transparent;
+}
+
+}   /* end @layer mir.tier */

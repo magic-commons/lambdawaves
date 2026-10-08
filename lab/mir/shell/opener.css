@@ -1,0 +1,149 @@
+/* shell/opener.css — the OPENER (shell/opener.js): BASINS' title screen (app/startup.css, 2026-10-02) in the house layer.
+ *
+ * It is an opaque page, not a glass pane: it is up before the app's engine and its interface exist, over nothing (BASINS:
+ * black, white type, 9:16 covers).  So it paints with its own tokens, whose defaults are BASINS' values, and not with the
+ * glass tokens (there is no glass to read them from yet).  An app re-points any --opener-* name on `.mir-opener`.
+ * The Butler font never enters the kit; the cover titles read --opener-title-font (BASINS: its brand serif).
+ *
+ * THE LAWS IT KEEPS
+ *   · THE HOVER ZONES NEVER MOVE: the buttons' slots stay still while their covers grow (transform only), so the nearest
+ *     slot decides (opener.js nearestSlot) and an enlarged cover cannot take its neighbour's hover.
+ *   · THE LIGHT IS THE KIT'S: the cover carries `data-light`, so fx/pointer-light.js writes --light-x/--light-y on it;
+ *     this sheet paints it OVER the art under `overlay` (the art is opaque, where a pane's glow sits under its content).
+ *     With no pointer (a finger, a key, reduced motion) the active cover is lit from its middle, as BASINS'.
+ *   · REDUCED MOTION is the policy on <html data-motion>: no transition, no growth, no drift, no animation.
+ *   · TRANSFORM AND OPACITY ONLY while it moves. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.13 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only.
+   BASINS' numbers, unchanged. */
+.mir-opener {
+  --opener-ground: #000; --opener-ink: #fff;
+  --opener-accent: #c5e0ea;                                        /* a cover with no accent of its own */
+  --opener-cover-ground: #090909; --opener-cover-rim: #ffffff38; --opener-cover-r: 18px;
+  --opener-cover-lift: 0 7px 22px #0006;                           /* the cover at rest: a drop shadow, falling down */
+  --opener-mask: linear-gradient(#fff, #fff);                      /* a mask only: keeps the decoded video and its drift in one rounded group */
+  --opener-card-w: min(29vw, calc(48dvh * 9 / 16), 340px);         /* one cover's width */
+  --opener-logo-w: min(60vw, 460px, 46dvh);
+  --opener-title-font: var(--font-display, Georgia, serif);
+  --opener-title-size: clamp(21px, 2.5vw, 32px); --opener-foot-size: clamp(23px, 2.2vw, 30px); --opener-sup-size: .65em;
+  --opener-zoom: 1.06; --opener-spill: .03;                        /* the active cover's growth, and how far its labels spill */
+  --opener-light-r: 105px;
+  --opener-btn-line: rgba(255, 255, 255, .45); --opener-btn-fill-hot: #fff; --opener-btn-ink-hot: #000; --opener-btn-fill-press: rgba(255, 255, 255, .85);
+  --opener-btn-r: 24px; --opener-btn-size: .72rem; --opener-btn-tracking: .14em;
+  --opener-dim: .65; --opener-dim-filter: saturate(.7) brightness(.8);
+  --opener-fade: 380ms; --opener-launch: 420ms;                    /* the screen's fade-out and the chosen cover's growth (opener.js waits these) */
+  --opener-ease: cubic-bezier(.16, .84, .24, 1); --opener-ease-art: cubic-bezier(.2, .75, .2, 1);
+  --opener-t-in: 350ms ease-out; --opener-t-card: .6s var(--opener-ease); --opener-t-stagger: .065s;
+  --opener-t-dim: .5s ease; --opener-t-fade: .35s ease; --opener-t-shadow: .55s ease; --opener-t-launch: .3s ease; --opener-t-btn: 150ms ease;
+  --opener-t-grow: .35s var(--opener-ease); --opener-t-art: .6s var(--opener-ease-art); --opener-t-label: .7s var(--opener-ease);
+  --opener-t-vis: visibility 0s .35s; --opener-t-now: 0s;
+}
+.mir-opener-option { --opener-ring: 0 0 0 1px color-mix(in srgb, var(--cover-accent) 25%, transparent), 0 0 32px color-mix(in srgb, var(--cover-accent) 16%, transparent); }
+/* the light's paint is declared on the cover, where fx/pointer-light.js writes --light-x/--light-y, so it resolves there */
+.mir-opener-cover { --opener-glow: radial-gradient(circle var(--opener-light-r) at var(--light-x, var(--pointer-x, 50%)) var(--light-y, var(--pointer-y, 50%)),
+  color-mix(in srgb, var(--cover-accent) 100%, transparent), color-mix(in srgb, var(--cover-accent) 72%, transparent) 30%, transparent 100%); }
+@media (max-width: 620px) { .mir-opener { --opener-title-size: 26px; --opener-foot-size: 27px; } }
+/* ── end of the values ── */
+
+.mir-opener {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 2147483647; box-sizing: border-box; padding: 1.5rem;
+  display: flex; align-items: flex-start; justify-content: center; overflow: hidden auto; overflow-x: hidden;
+  background-color: var(--opener-ground); color: var(--opener-ink); font-family: var(--font-ui, system-ui, sans-serif);
+  opacity: 1; animation: lw-warn-in var(--opener-t-in) forwards; transition: opacity var(--opener-t-in);
+}
+.mir-opener:focus { outline: none; }
+.mir-opener[data-fading] { opacity: 0; pointer-events: none; }
+.mir-opener-card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px; padding: 8px 0;
+  width: 100%; max-width: 1280px; min-height: calc(100dvh - 3rem); margin: auto; box-sizing: border-box;
+}
+.mir-opener-logo { display: block; width: var(--opener-logo-w); height: auto; flex: 0 0 auto; user-select: none; -webkit-user-select: none; }
+.mir-opener-covers {
+  display: grid; grid-template-columns: repeat(3, minmax(0, var(--opener-card-w))); justify-content: center; column-gap: 14px; row-gap: 120px; width: 100%;
+  padding-block: calc(var(--opener-card-w) * 16 / 9 * .03 + 58px);
+}
+.mir-opener-option {
+  --cover-accent: var(--opener-accent);
+  position: relative; z-index: 1; overflow: visible; display: block; min-width: 0; margin: 0; padding: 0; background: none; border: 0;
+  color: inherit; text-align: center; font: inherit; cursor: pointer; touch-action: manipulation;
+  opacity: 1; filter: saturate(1); transition: opacity var(--opener-t-dim), filter var(--opener-t-dim);
+  animation: lw-warn-in var(--opener-t-card) backwards; animation-delay: calc(var(--index, 0) * var(--opener-t-stagger));
+}
+.mir-opener-cover {
+  position: relative; display: block; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; isolation: isolate;
+  border-radius: var(--opener-cover-r); background: var(--opener-cover-ground); border: 1px solid var(--opener-cover-rim);
+  box-shadow: var(--opener-cover-lift); transform: perspective(950px) rotateX(0) rotateY(0) scale(1);
+  transition: transform var(--opener-t-grow), box-shadow var(--opener-t-shadow), border-color var(--opener-t-fade);
+}
+.mir-opener-media {
+  position: absolute; inset: 0; overflow: hidden; border-radius: inherit; isolation: isolate;
+  -webkit-mask-image: var(--opener-mask); mask-image: var(--opener-mask);
+  clip-path: inset(0 round var(--opener-cover-r)); transform: translateZ(0);
+}
+/* the light: painted over the art under overlay, in the cover's accent.  fx.css gates its own copy on <html data-pointer-light>
+   and puts it under the content; this one is not gated (a finger or a key lights from the middle), names the same
+   --light-x/--light-y, and out-ranks fx.css's rule by a class. */
+html .mir-opener .mir-opener-cover[data-light]::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; mix-blend-mode: overlay;
+  background: var(--opener-glow); opacity: 0; transition: opacity var(--opener-t-fade);
+}
+.mir-opener-art {
+  position: absolute; inset: -8px; display: block; width: calc(100% + 16px); height: calc(100% + 16px); object-fit: cover; object-position: center; pointer-events: none;
+  transform: translate3d(var(--art-x, 0px), var(--art-y, 0px), 0) scale(1.02); transition: transform var(--opener-t-art), opacity var(--opener-t-dim);
+}
+.mir-opener-preview { opacity: 0; }
+.mir-opener-preview.is-playing { opacity: 1; }
+.mir-opener-meta { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.mir-opener-title, .mir-opener-foot {
+  position: absolute; display: block; opacity: 0; visibility: hidden; font-family: var(--opener-title-font); font-weight: 400; font-synthesis: none; line-height: 1.15; white-space: nowrap;
+  transition: opacity var(--opener-t-fade), top var(--opener-t-label), left var(--opener-t-label), transform var(--opener-t-label), var(--opener-t-vis);
+}
+.mir-opener-title { left: 18px; top: 18px; text-align: left; font-size: var(--opener-title-size); transform: translate3d(var(--label-x, 0px), var(--label-y, 0px), 0); }
+.mir-opener-foot { left: 50%; top: calc(100% - 20px); font-size: var(--opener-foot-size); transform: translate3d(calc(-50% + var(--label-x, 0px)), calc(-100% + var(--label-y, 0px)), 0); }
+.mir-opener-foot sup { display: inline-block; font-size: var(--opener-sup-size); vertical-align: super; line-height: 0; margin-left: .06em; }
+.mir-opener-option:focus-visible { outline: none; }
+.mir-opener-option:focus-visible .mir-opener-cover { outline: 2px solid var(--opener-ink); outline-offset: 5px; }
+.mir-opener-covers[data-has-active] .mir-opener-option:not([data-active]) { opacity: var(--opener-dim); filter: var(--opener-dim-filter); }
+.mir-opener-covers[data-has-active] .mir-opener-option:not([data-active]) .mir-opener-cover { transform: perspective(950px) scale(.98); }
+.mir-opener-option[data-active] { z-index: 3; }
+.mir-opener-option[data-active] .mir-opener-cover {
+  transform: perspective(950px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(var(--opener-zoom));
+  border-color: var(--cover-accent); box-shadow: var(--opener-ring);
+}
+html .mir-opener .mir-opener-option[data-active] .mir-opener-cover[data-light]::after { opacity: 1; }
+.mir-opener-option[data-active] .mir-opener-art { transform: translate3d(var(--art-x, 0px), var(--art-y, 0px), 0) scale(1.04); }
+.mir-opener-option[data-active] :is(.mir-opener-title, .mir-opener-foot) { opacity: 1; visibility: visible; transition-delay: var(--opener-t-now); }
+.mir-opener-option[data-active] .mir-opener-title { left: calc(-100% * var(--opener-spill)); top: calc(-100% * var(--opener-spill) - 24px); transform: translate3d(var(--label-x, 0px), calc(-100% + var(--label-y, 0px)), 0); }
+.mir-opener-option[data-active] .mir-opener-foot { top: calc(100% * (1 + var(--opener-spill)) + 24px); transform: translate3d(calc(-50% + var(--label-x, 0px)), var(--label-y, 0px), 0); }
+.mir-opener-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
+.mir-opener-btn {
+  display: inline-block; flex: 0 0 160px; width: 160px; margin: 0; padding: .8rem 1rem; min-height: 44px; min-width: 44px; box-sizing: border-box;
+  background: transparent; color: var(--opener-ink); font: inherit; font-size: var(--opener-btn-size); font-weight: 600; letter-spacing: var(--opener-btn-tracking); text-transform: var(--label-case, uppercase);
+  border: 1px solid var(--opener-btn-line); border-radius: var(--opener-btn-r); cursor: pointer;
+  transition: background-color var(--opener-t-btn), border-color var(--opener-t-btn), color var(--opener-t-btn);
+}
+.mir-opener-btn:hover { background-color: var(--opener-btn-fill-hot); color: var(--opener-btn-ink-hot); border-color: var(--opener-btn-fill-hot); }
+.mir-opener-btn:active { background-color: var(--opener-btn-fill-press); color: var(--opener-btn-ink-hot); border-color: var(--opener-btn-fill-hot); }
+.mir-opener-btn:focus-visible { outline: 2px solid var(--opener-ink); outline-offset: 4px; }
+.mir-opener-card[data-launching] .mir-opener-option:not([data-chosen]) { opacity: 0; }
+.mir-opener-card[data-launching] .mir-opener-option[data-chosen] .mir-opener-cover { transform: scale(calc(var(--opener-zoom) + .08)); }
+.mir-opener-card[data-launching] :is(.mir-opener-meta, .mir-opener-logo, .mir-opener-actions) { opacity: 0; transition: opacity var(--opener-t-launch); }
+@media (max-width: 620px) {
+  .mir-opener-card { padding: 10px 0 20px; gap: 22px; }
+  .mir-opener-logo { width: min(66vw, 280px); }
+  .mir-opener-covers {
+    display: flex; justify-content: flex-start; gap: 14px; overflow: auto hidden; scroll-snap-type: x mandatory; scroll-padding: 18px;
+    overscroll-behavior-inline: contain; padding: 80px 38px; scrollbar-width: none;
+  }
+  .mir-opener-option { flex: 0 0 min(74vw, calc(52dvh * 9 / 16), 280px); scroll-snap-align: center; }
+  .mir-opener-actions { gap: 10px; }
+}
+/* reduced or no motion (the policy on <html>): the screen stays, nothing moves */
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-opener { animation: none; transition: none; opacity: 1; --opener-zoom: 1; --opener-spill: 0; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-opener[data-fading] { opacity: 0; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-opener :is(*, *::before, *::after) { animation: none; transition: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-opener :is(.mir-opener-option, .mir-opener-cover, .mir-opener-art) { transform: none; }
+
+}   /* end @layer mir.kit.house */
