@@ -36,7 +36,7 @@ try {
   /* 1 · DOWNLOAD, never DISABLED */
   const one = await g.ev(`const rows = await __LW.chem.records(), o = __opt('lysine');
     return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: o.parentElement.label, store: (await caches.keys()).includes('lw-data-v1'), errs: __e.slice() };`);
-  assert.deepEqual(one.rows, [['C6H6', false, false], ['lysine', false, true]], JSON.stringify(one));
+  assert.deepEqual(one.rows, [['C6H6', false, false], ['lysine', false, true], ['C60', false, true]], JSON.stringify(one));   // C60: S4c's frontier record
   assert.equal(one.text, 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(one.disabled, false);
   assert.equal(one.store, false, 'looking at the store created lw-data-v1 at boot'); assert.deepEqual(one.errs, []);
   pass(`DOWNLOAD, never DISABLED: lysine's row "${one.text}" (${one.group}) is enabled; nothing is installed and boot created no store`);

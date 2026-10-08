@@ -1,0 +1,5580 @@
+{
+ "schema": 1,
+ "kind": "lambdawaves.orbital-record",
+ "id": "C60",
+ "basis": "sto-3g",
+ "name": "buckminsterfullerene",
+ "formula": "<m>C₆₀</m>",
+ "generator": "tools/orbital-library.mjs buildFrontier — PySCF's orbitals re-encoded (research/release-0.4.0/library-census/c60-frontier.json); no app solve: 300 AOs are past every live road",
+ "input": {
+  "atoms": [
+   {
+    "Z": 6,
+    "x": -2.1403487692824217,
+    "y": -2.645616574391086,
+    "z": -5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": -4.785965343673508,
+    "z": -4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": 2.1403487692824217,
+    "y": -2.645616574391086,
+    "z": -5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 0,
+    "y": -1.322808287195543,
+    "z": -6.421046307847265
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": -4.785965343673508,
+    "z": -4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": -4.280697538564843,
+    "y": -1.322808287195543,
+    "z": -4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": -5.603505825760386,
+    "y": -2.1403487692824217,
+    "z": -2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": -5.603505825760386,
+    "y": 2.1403487692824217,
+    "z": -2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": -4.280697538564843,
+    "y": 1.322808287195543,
+    "z": -4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": -6.421046307847265,
+    "y": 0,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -2.645616574391086,
+    "y": -5.603505825760386,
+    "z": -2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": -4.785965343673508,
+    "y": -4.280697538564843,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -2.645616574391086,
+    "y": -5.603505825760386,
+    "z": 2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": -4.785965343673508,
+    "y": -4.280697538564843,
+    "z": 1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": -6.421046307847265,
+    "z": 0
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": -4.785965343673508,
+    "z": 4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": -2.1403487692824217,
+    "y": -2.645616574391086,
+    "z": 5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": -4.785965343673508,
+    "z": 4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": 0,
+    "y": -1.322808287195543,
+    "z": 6.421046307847265
+   },
+   {
+    "Z": 6,
+    "x": 2.1403487692824217,
+    "y": -2.645616574391086,
+    "z": 5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 4.280697538564843,
+    "y": -1.322808287195543,
+    "z": -4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": 4.280697538564843,
+    "y": 1.322808287195543,
+    "z": -4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": 5.603505825760386,
+    "y": -2.1403487692824217,
+    "z": -2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": 6.421046307847265,
+    "y": 0,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": 5.603505825760386,
+    "y": 2.1403487692824217,
+    "z": -2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": -4.785965343673508,
+    "y": 4.280697538564843,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -2.645616574391086,
+    "y": 5.603505825760386,
+    "z": -2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": -4.785965343673508,
+    "y": 4.280697538564843,
+    "z": 1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -2.645616574391086,
+    "y": 5.603505825760386,
+    "z": 2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": 6.421046307847265,
+    "z": 0
+   },
+   {
+    "Z": 6,
+    "x": 0,
+    "y": 1.322808287195543,
+    "z": -6.421046307847265
+   },
+   {
+    "Z": 6,
+    "x": -2.1403487692824217,
+    "y": 2.645616574391086,
+    "z": -5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 2.1403487692824217,
+    "y": 2.645616574391086,
+    "z": -5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": 4.785965343673508,
+    "z": -4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": 4.785965343673508,
+    "z": -4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": -6.421046307847265,
+    "y": 0,
+    "z": 1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": -5.603505825760386,
+    "y": -2.1403487692824217,
+    "z": 2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": -4.280697538564843,
+    "y": -1.322808287195543,
+    "z": 4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": -5.603505825760386,
+    "y": 2.1403487692824217,
+    "z": 2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": -4.280697538564843,
+    "y": 1.322808287195543,
+    "z": 4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": 2.645616574391086,
+    "y": -5.603505825760386,
+    "z": -2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": -6.421046307847265,
+    "z": 0
+   },
+   {
+    "Z": 6,
+    "x": 2.645616574391086,
+    "y": -5.603505825760386,
+    "z": 2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": 4.785965343673508,
+    "y": -4.280697538564843,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": 4.785965343673508,
+    "y": -4.280697538564843,
+    "z": 1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": 0,
+    "y": 1.322808287195543,
+    "z": 6.421046307847265
+   },
+   {
+    "Z": 6,
+    "x": -1.322808287195543,
+    "y": 4.785965343673508,
+    "z": 4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": -2.1403487692824217,
+    "y": 2.645616574391086,
+    "z": 5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 2.1403487692824217,
+    "y": 2.645616574391086,
+    "z": 5.603505825760386
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": 4.785965343673508,
+    "z": 4.280697538564843
+   },
+   {
+    "Z": 6,
+    "x": 4.280697538564843,
+    "y": -1.322808287195543,
+    "z": 4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": 6.421046307847265,
+    "y": 0,
+    "z": 1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": 5.603505825760386,
+    "y": -2.1403487692824217,
+    "z": 2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": 4.280697538564843,
+    "y": 1.322808287195543,
+    "z": 4.785965343673508
+   },
+   {
+    "Z": 6,
+    "x": 5.603505825760386,
+    "y": 2.1403487692824217,
+    "z": 2.645616574391086
+   },
+   {
+    "Z": 6,
+    "x": 4.785965343673508,
+    "y": 4.280697538564843,
+    "z": -1.322808287195543
+   },
+   {
+    "Z": 6,
+    "x": 1.322808287195543,
+    "y": 6.421046307847265,
+    "z": 0
+   },
+   {
+    "Z": 6,
+    "x": 2.645616574391086,
+    "y": 5.603505825760386,
+    "z": -2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": 2.645616574391086,
+    "y": 5.603505825760386,
+    "z": 2.1403487692824217
+   },
+   {
+    "Z": 6,
+    "x": 4.785965343673508,
+    "y": 4.280697538564843,
+    "z": 1.322808287195543
+   }
+  ],
+  "charge": 0,
+  "multiplicity": 1,
+  "basis": "sto-3g",
+  "basisFile": "lab/vendor/bse/sto-3g-v1.json",
+  "basisSha256": "22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b",
+  "symmetry": {
+   "group": "C1"
+  }
+ },
+ "caps": {
+  "orbitals": true,
+  "states": false,
+  "rpa": false,
+  "tdhf": false
+ },
+ "ground": {
+  "energy": -2244.0187824768127,
+  "Enuc": 8521.859950452324,
+  "nocc": 180,
+  "nAO": 300,
+  "order": [
+   "0 C 1s",
+   "0 C 2s",
+   "0 C 2px",
+   "0 C 2py",
+   "0 C 2pz",
+   "1 C 1s",
+   "1 C 2s",
+   "1 C 2px",
+   "1 C 2py",
+   "1 C 2pz",
+   "2 C 1s",
+   "2 C 2s",
+   "2 C 2px",
+   "2 C 2py",
+   "2 C 2pz",
+   "3 C 1s",
+   "3 C 2s",
+   "3 C 2px",
+   "3 C 2py",
+   "3 C 2pz",
+   "4 C 1s",
+   "4 C 2s",
+   "4 C 2px",
+   "4 C 2py",
+   "4 C 2pz",
+   "5 C 1s",
+   "5 C 2s",
+   "5 C 2px",
+   "5 C 2py",
+   "5 C 2pz",
+   "6 C 1s",
+   "6 C 2s",
+   "6 C 2px",
+   "6 C 2py",
+   "6 C 2pz",
+   "7 C 1s",
+   "7 C 2s",
+   "7 C 2px",
+   "7 C 2py",
+   "7 C 2pz",
+   "8 C 1s",
+   "8 C 2s",
+   "8 C 2px",
+   "8 C 2py",
+   "8 C 2pz",
+   "9 C 1s",
+   "9 C 2s",
+   "9 C 2px",
+   "9 C 2py",
+   "9 C 2pz",
+   "10 C 1s",
+   "10 C 2s",
+   "10 C 2px",
+   "10 C 2py",
+   "10 C 2pz",
+   "11 C 1s",
+   "11 C 2s",
+   "11 C 2px",
+   "11 C 2py",
+   "11 C 2pz",
+   "12 C 1s",
+   "12 C 2s",
+   "12 C 2px",
+   "12 C 2py",
+   "12 C 2pz",
+   "13 C 1s",
+   "13 C 2s",
+   "13 C 2px",
+   "13 C 2py",
+   "13 C 2pz",
+   "14 C 1s",
+   "14 C 2s",
+   "14 C 2px",
+   "14 C 2py",
+   "14 C 2pz",
+   "15 C 1s",
+   "15 C 2s",
+   "15 C 2px",
+   "15 C 2py",
+   "15 C 2pz",
+   "16 C 1s",
+   "16 C 2s",
+   "16 C 2px",
+   "16 C 2py",
+   "16 C 2pz",
+   "17 C 1s",
+   "17 C 2s",
+   "17 C 2px",
+   "17 C 2py",
+   "17 C 2pz",
+   "18 C 1s",
+   "18 C 2s",
+   "18 C 2px",
+   "18 C 2py",
+   "18 C 2pz",
+   "19 C 1s",
+   "19 C 2s",
+   "19 C 2px",
+   "19 C 2py",
+   "19 C 2pz",
+   "20 C 1s",
+   "20 C 2s",
+   "20 C 2px",
+   "20 C 2py",
+   "20 C 2pz",
+   "21 C 1s",
+   "21 C 2s",
+   "21 C 2px",
+   "21 C 2py",
+   "21 C 2pz",
+   "22 C 1s",
+   "22 C 2s",
+   "22 C 2px",
+   "22 C 2py",
+   "22 C 2pz",
+   "23 C 1s",
+   "23 C 2s",
+   "23 C 2px",
+   "23 C 2py",
+   "23 C 2pz",
+   "24 C 1s",
+   "24 C 2s",
+   "24 C 2px",
+   "24 C 2py",
+   "24 C 2pz",
+   "25 C 1s",
+   "25 C 2s",
+   "25 C 2px",
+   "25 C 2py",
+   "25 C 2pz",
+   "26 C 1s",
+   "26 C 2s",
+   "26 C 2px",
+   "26 C 2py",
+   "26 C 2pz",
+   "27 C 1s",
+   "27 C 2s",
+   "27 C 2px",
+   "27 C 2py",
+   "27 C 2pz",
+   "28 C 1s",
+   "28 C 2s",
+   "28 C 2px",
+   "28 C 2py",
+   "28 C 2pz",
+   "29 C 1s",
+   "29 C 2s",
+   "29 C 2px",
+   "29 C 2py",
+   "29 C 2pz",
+   "30 C 1s",
+   "30 C 2s",
+   "30 C 2px",
+   "30 C 2py",
+   "30 C 2pz",
+   "31 C 1s",
+   "31 C 2s",
+   "31 C 2px",
+   "31 C 2py",
+   "31 C 2pz",
+   "32 C 1s",
+   "32 C 2s",
+   "32 C 2px",
+   "32 C 2py",
+   "32 C 2pz",
+   "33 C 1s",
+   "33 C 2s",
+   "33 C 2px",
+   "33 C 2py",
+   "33 C 2pz",
+   "34 C 1s",
+   "34 C 2s",
+   "34 C 2px",
+   "34 C 2py",
+   "34 C 2pz",
+   "35 C 1s",
+   "35 C 2s",
+   "35 C 2px",
+   "35 C 2py",
+   "35 C 2pz",
+   "36 C 1s",
+   "36 C 2s",
+   "36 C 2px",
+   "36 C 2py",
+   "36 C 2pz",
+   "37 C 1s",
+   "37 C 2s",
+   "37 C 2px",
+   "37 C 2py",
+   "37 C 2pz",
+   "38 C 1s",
+   "38 C 2s",
+   "38 C 2px",
+   "38 C 2py",
+   "38 C 2pz",
+   "39 C 1s",
+   "39 C 2s",
+   "39 C 2px",
+   "39 C 2py",
+   "39 C 2pz",
+   "40 C 1s",
+   "40 C 2s",
+   "40 C 2px",
+   "40 C 2py",
+   "40 C 2pz",
+   "41 C 1s",
+   "41 C 2s",
+   "41 C 2px",
+   "41 C 2py",
+   "41 C 2pz",
+   "42 C 1s",
+   "42 C 2s",
+   "42 C 2px",
+   "42 C 2py",
+   "42 C 2pz",
+   "43 C 1s",
+   "43 C 2s",
+   "43 C 2px",
+   "43 C 2py",
+   "43 C 2pz",
+   "44 C 1s",
+   "44 C 2s",
+   "44 C 2px",
+   "44 C 2py",
+   "44 C 2pz",
+   "45 C 1s",
+   "45 C 2s",
+   "45 C 2px",
+   "45 C 2py",
+   "45 C 2pz",
+   "46 C 1s",
+   "46 C 2s",
+   "46 C 2px",
+   "46 C 2py",
+   "46 C 2pz",
+   "47 C 1s",
+   "47 C 2s",
+   "47 C 2px",
+   "47 C 2py",
+   "47 C 2pz",
+   "48 C 1s",
+   "48 C 2s",
+   "48 C 2px",
+   "48 C 2py",
+   "48 C 2pz",
+   "49 C 1s",
+   "49 C 2s",
+   "49 C 2px",
+   "49 C 2py",
+   "49 C 2pz",
+   "50 C 1s",
+   "50 C 2s",
+   "50 C 2px",
+   "50 C 2py",
+   "50 C 2pz",
+   "51 C 1s",
+   "51 C 2s",
+   "51 C 2px",
+   "51 C 2py",
+   "51 C 2pz",
+   "52 C 1s",
+   "52 C 2s",
+   "52 C 2px",
+   "52 C 2py",
+   "52 C 2pz",
+   "53 C 1s",
+   "53 C 2s",
+   "53 C 2px",
+   "53 C 2py",
+   "53 C 2pz",
+   "54 C 1s",
+   "54 C 2s",
+   "54 C 2px",
+   "54 C 2py",
+   "54 C 2pz",
+   "55 C 1s",
+   "55 C 2s",
+   "55 C 2px",
+   "55 C 2py",
+   "55 C 2pz",
+   "56 C 1s",
+   "56 C 2s",
+   "56 C 2px",
+   "56 C 2py",
+   "56 C 2pz",
+   "57 C 1s",
+   "57 C 2s",
+   "57 C 2px",
+   "57 C 2py",
+   "57 C 2pz",
+   "58 C 1s",
+   "58 C 2s",
+   "58 C 2px",
+   "58 C 2py",
+   "58 C 2pz",
+   "59 C 1s",
+   "59 C 2s",
+   "59 C 2px",
+   "59 C 2py",
+   "59 C 2pz"
+  ],
+  "hash": "7ee79f71701dec0d423511158eadacc26afa8cad0aad60f2a63fa1df5fb0c609",
+  "basis": "sto-3g",
+  "charge": 0,
+  "electrons": 360,
+  "converged": true,
+  "dipole": [
+   0,
+   0,
+   0
+  ],
+  "half": 12.421046307847265,
+  "stability": null,
+  "solutions": [],
+  "names": {
+   "group": null,
+   "frame": null,
+   "tolerance": {
+    "energy": 2e-10,
+    "geometric": 0.000001
+   },
+   "reliable": false,
+   "reason": "C₆₀'s I_h names are 0.4.1 BUCKYBALL (Sol computed and checked them: HOMO 6h_u, LUMO 7t₁u); here the levels are named by energy",
+   "approximate": null,
+   "config": null,
+   "mos": [
+    {
+     "k": 1,
+     "level": 0,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−47",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 2,
+     "level": 0,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−47",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 3,
+     "level": 0,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−47",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 4,
+     "level": 0,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−47",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 5,
+     "level": 1,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−46",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 6,
+     "level": 1,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−46",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 7,
+     "level": 1,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−46",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 8,
+     "level": 1,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−46",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 9,
+     "level": 1,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−46",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 10,
+     "level": 2,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−45",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 11,
+     "level": 2,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−45",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 12,
+     "level": 2,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−45",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 13,
+     "level": 2,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−45",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 14,
+     "level": 3,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−44",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 15,
+     "level": 3,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−44",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 16,
+     "level": 3,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−44",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 17,
+     "level": 3,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−44",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 18,
+     "level": 3,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−44",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 19,
+     "level": 4,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−43",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 20,
+     "level": 4,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−43",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 21,
+     "level": 4,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−43",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 22,
+     "level": 5,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−42",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 23,
+     "level": 5,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−42",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 24,
+     "level": 5,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−42",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 25,
+     "level": 5,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−42",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 26,
+     "level": 5,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−42",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 27,
+     "level": 6,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−41",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 28,
+     "level": 6,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−41",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 29,
+     "level": 6,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−41",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 30,
+     "level": 7,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−40",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 31,
+     "level": 7,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−40",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 32,
+     "level": 7,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−40",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 33,
+     "level": 8,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−39",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 34,
+     "level": 8,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−39",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 35,
+     "level": 8,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−39",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 36,
+     "level": 9,
+     "dim": 1,
+     "member": null,
+     "frontier": "HOMO−38",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 37,
+     "level": 10,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−37",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 38,
+     "level": 10,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−37",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 39,
+     "level": 10,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−37",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 40,
+     "level": 10,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−37",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 41,
+     "level": 10,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−37",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 42,
+     "level": 11,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−36",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 43,
+     "level": 11,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−36",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 44,
+     "level": 11,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−36",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 45,
+     "level": 11,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−36",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 46,
+     "level": 11,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−36",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 47,
+     "level": 12,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−35",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 48,
+     "level": 12,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−35",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 49,
+     "level": 12,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−35",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 50,
+     "level": 13,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−34",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 51,
+     "level": 13,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−34",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 52,
+     "level": 13,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−34",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 53,
+     "level": 13,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−34",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 54,
+     "level": 14,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−33",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 55,
+     "level": 14,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−33",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 56,
+     "level": 14,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−33",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 57,
+     "level": 14,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−33",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 58,
+     "level": 15,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−32",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 59,
+     "level": 15,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−32",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 60,
+     "level": 15,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−32",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": "core",
+      "lcao": null,
+      "source": "derived"
+     }
+    },
+    {
+     "k": 61,
+     "level": 16,
+     "dim": 1,
+     "member": null,
+     "frontier": "HOMO−31",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 62,
+     "level": 17,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−30",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 63,
+     "level": 17,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−30",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 64,
+     "level": 17,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−30",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 65,
+     "level": 18,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 66,
+     "level": 18,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 67,
+     "level": 18,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 68,
+     "level": 18,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 69,
+     "level": 18,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 70,
+     "level": 19,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 71,
+     "level": 19,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 72,
+     "level": 19,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 73,
+     "level": 20,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 74,
+     "level": 20,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 75,
+     "level": 20,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 76,
+     "level": 20,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 77,
+     "level": 21,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 78,
+     "level": 21,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 79,
+     "level": 21,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 80,
+     "level": 21,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 81,
+     "level": 21,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 82,
+     "level": 22,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 83,
+     "level": 22,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 84,
+     "level": 22,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 85,
+     "level": 22,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 86,
+     "level": 23,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 87,
+     "level": 23,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 88,
+     "level": 23,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 89,
+     "level": 23,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 90,
+     "level": 23,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 91,
+     "level": 24,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 92,
+     "level": 24,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 93,
+     "level": 24,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 94,
+     "level": 25,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 95,
+     "level": 25,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 96,
+     "level": 25,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 97,
+     "level": 26,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 98,
+     "level": 26,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 99,
+     "level": 26,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 100,
+     "level": 27,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 101,
+     "level": 27,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 102,
+     "level": 27,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 103,
+     "level": 27,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 104,
+     "level": 27,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 105,
+     "level": 28,
+     "dim": 1,
+     "member": null,
+     "frontier": "HOMO−19",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 106,
+     "level": 29,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 107,
+     "level": 29,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 108,
+     "level": 29,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 109,
+     "level": 29,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 110,
+     "level": 30,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 111,
+     "level": 30,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 112,
+     "level": 30,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 113,
+     "level": 30,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 114,
+     "level": 30,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 115,
+     "level": 31,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 116,
+     "level": 31,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 117,
+     "level": 31,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 118,
+     "level": 32,
+     "dim": 1,
+     "member": null,
+     "frontier": "HOMO−15",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 119,
+     "level": 33,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 120,
+     "level": 33,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 121,
+     "level": 33,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 122,
+     "level": 34,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 123,
+     "level": 34,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 124,
+     "level": 34,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 125,
+     "level": 34,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 126,
+     "level": 35,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 127,
+     "level": 35,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 128,
+     "level": 35,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 129,
+     "level": 36,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 130,
+     "level": 36,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 131,
+     "level": 36,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 132,
+     "level": 36,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 133,
+     "level": 36,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 134,
+     "level": 37,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 135,
+     "level": 37,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 136,
+     "level": 37,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 137,
+     "level": 38,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 138,
+     "level": 38,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 139,
+     "level": 38,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 140,
+     "level": 38,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 141,
+     "level": 39,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 142,
+     "level": 39,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 143,
+     "level": 39,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 144,
+     "level": 39,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 145,
+     "level": 39,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 146,
+     "level": 40,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 147,
+     "level": 40,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 148,
+     "level": 40,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 149,
+     "level": 40,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 150,
+     "level": 41,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 151,
+     "level": 41,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 152,
+     "level": 41,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 153,
+     "level": 41,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 154,
+     "level": 41,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 155,
+     "level": 42,
+     "dim": 3,
+     "member": "a",
+     "frontier": "HOMO−5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 156,
+     "level": 42,
+     "dim": 3,
+     "member": "b",
+     "frontier": "HOMO−5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 157,
+     "level": 42,
+     "dim": 3,
+     "member": "c",
+     "frontier": "HOMO−5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 158,
+     "level": 43,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 159,
+     "level": 43,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 160,
+     "level": 43,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 161,
+     "level": 43,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 162,
+     "level": 43,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 163,
+     "level": 44,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 164,
+     "level": 44,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 165,
+     "level": 44,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 166,
+     "level": 44,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 167,
+     "level": 45,
+     "dim": 4,
+     "member": "a",
+     "frontier": "HOMO−2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 168,
+     "level": 45,
+     "dim": 4,
+     "member": "b",
+     "frontier": "HOMO−2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 169,
+     "level": 45,
+     "dim": 4,
+     "member": "c",
+     "frontier": "HOMO−2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 170,
+     "level": 45,
+     "dim": 4,
+     "member": "d",
+     "frontier": "HOMO−2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 171,
+     "level": 46,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO−1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 172,
+     "level": 46,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO−1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 173,
+     "level": 46,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO−1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 174,
+     "level": 46,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO−1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 175,
+     "level": 46,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO−1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 176,
+     "level": 47,
+     "dim": 5,
+     "member": "a",
+     "frontier": "HOMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 177,
+     "level": 47,
+     "dim": 5,
+     "member": "b",
+     "frontier": "HOMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 178,
+     "level": 47,
+     "dim": 5,
+     "member": "c",
+     "frontier": "HOMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 179,
+     "level": 47,
+     "dim": 5,
+     "member": "d",
+     "frontier": "HOMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 180,
+     "level": 47,
+     "dim": 5,
+     "member": "e",
+     "frontier": "HOMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 181,
+     "level": 48,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 182,
+     "level": 48,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 183,
+     "level": 48,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 184,
+     "level": 49,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 185,
+     "level": 49,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 186,
+     "level": 49,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+1",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 187,
+     "level": 50,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 188,
+     "level": 50,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 189,
+     "level": 50,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 190,
+     "level": 50,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 191,
+     "level": 50,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+2",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 192,
+     "level": 51,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 193,
+     "level": 51,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 194,
+     "level": 51,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+3",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 195,
+     "level": 52,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 196,
+     "level": 52,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 197,
+     "level": 52,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 198,
+     "level": 52,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 199,
+     "level": 52,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+4",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 200,
+     "level": 53,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 201,
+     "level": 53,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 202,
+     "level": 53,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 203,
+     "level": 53,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+5",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 204,
+     "level": 54,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 205,
+     "level": 54,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 206,
+     "level": 54,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 207,
+     "level": 54,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+6",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 208,
+     "level": 55,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 209,
+     "level": 55,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 210,
+     "level": 55,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+7",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 211,
+     "level": 56,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 212,
+     "level": 56,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 213,
+     "level": 56,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+8",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 214,
+     "level": 57,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 215,
+     "level": 57,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 216,
+     "level": 57,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+9",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 217,
+     "level": 58,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 218,
+     "level": 58,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 219,
+     "level": 58,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 220,
+     "level": 58,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 221,
+     "level": 58,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+10",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 222,
+     "level": 59,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 223,
+     "level": 59,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 224,
+     "level": 59,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+11",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 225,
+     "level": 60,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 226,
+     "level": 60,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 227,
+     "level": 60,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 228,
+     "level": 60,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 229,
+     "level": 60,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+12",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 230,
+     "level": 61,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 231,
+     "level": 61,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 232,
+     "level": 61,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 233,
+     "level": 61,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+13",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 234,
+     "level": 62,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 235,
+     "level": 62,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 236,
+     "level": 62,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 237,
+     "level": 62,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 238,
+     "level": 62,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+14",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 239,
+     "level": 63,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+15",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 240,
+     "level": 63,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+15",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 241,
+     "level": 63,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+15",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 242,
+     "level": 64,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 243,
+     "level": 64,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 244,
+     "level": 64,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 245,
+     "level": 64,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+16",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 246,
+     "level": 65,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 247,
+     "level": 65,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 248,
+     "level": 65,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 249,
+     "level": 65,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 250,
+     "level": 65,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+17",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 251,
+     "level": 66,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 252,
+     "level": 66,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 253,
+     "level": 66,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+18",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 254,
+     "level": 67,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+19",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 255,
+     "level": 67,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+19",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 256,
+     "level": 67,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+19",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 257,
+     "level": 68,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 258,
+     "level": 68,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 259,
+     "level": 68,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+20",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 260,
+     "level": 69,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 261,
+     "level": 69,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 262,
+     "level": 69,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 263,
+     "level": 69,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+21",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 264,
+     "level": 70,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 265,
+     "level": 70,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 266,
+     "level": 70,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 267,
+     "level": 70,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+22",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 268,
+     "level": 71,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 269,
+     "level": 71,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 270,
+     "level": 71,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+23",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 271,
+     "level": 72,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 272,
+     "level": 72,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 273,
+     "level": 72,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 274,
+     "level": 72,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 275,
+     "level": 72,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+24",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 276,
+     "level": 73,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 277,
+     "level": 73,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 278,
+     "level": 73,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 279,
+     "level": 73,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 280,
+     "level": 73,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+25",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 281,
+     "level": 74,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 282,
+     "level": 74,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 283,
+     "level": 74,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 284,
+     "level": 74,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+26",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 285,
+     "level": 75,
+     "dim": 5,
+     "member": "a",
+     "frontier": "LUMO+27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 286,
+     "level": 75,
+     "dim": 5,
+     "member": "b",
+     "frontier": "LUMO+27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 287,
+     "level": 75,
+     "dim": 5,
+     "member": "c",
+     "frontier": "LUMO+27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 288,
+     "level": 75,
+     "dim": 5,
+     "member": "d",
+     "frontier": "LUMO+27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 289,
+     "level": 75,
+     "dim": 5,
+     "member": "e",
+     "frontier": "LUMO+27",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 290,
+     "level": 76,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 291,
+     "level": 76,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 292,
+     "level": 76,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+28",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 293,
+     "level": 77,
+     "dim": 4,
+     "member": "a",
+     "frontier": "LUMO+29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 294,
+     "level": 77,
+     "dim": 4,
+     "member": "b",
+     "frontier": "LUMO+29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 295,
+     "level": 77,
+     "dim": 4,
+     "member": "c",
+     "frontier": "LUMO+29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 296,
+     "level": 77,
+     "dim": 4,
+     "member": "d",
+     "frontier": "LUMO+29",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 297,
+     "level": 78,
+     "dim": 1,
+     "member": null,
+     "frontier": "LUMO+30",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 298,
+     "level": 79,
+     "dim": 3,
+     "member": "a",
+     "frontier": "LUMO+31",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 299,
+     "level": 79,
+     "dim": 3,
+     "member": "b",
+     "frontier": "LUMO+31",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    },
+    {
+     "k": 300,
+     "level": 79,
+     "dim": 3,
+     "member": "c",
+     "frontier": "LUMO+31",
+     "irrep": null,
+     "count": null,
+     "label": null,
+     "residual": null,
+     "character": {
+      "kind": null,
+      "lcao": null,
+      "source": null
+     }
+    }
+   ],
+   "levels": [],
+   "aliases": [],
+   "core": 60
+  },
+  "cols": [
+   175,
+   176,
+   177,
+   178,
+   179,
+   180,
+   181,
+   182
+  ]
+ },
+ "orbitals": {
+  "eps": {
+   "$f64": "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"
+  },
+  "C": {
+   "$f64": "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"
+  }
+ },
+ "stem": {
+  "formula": "<m>C₆₀</m>",
+  "pointGroup": null,
+  "frame": null,
+  "approximate": false,
+  "mass": 720.66,
+  "massUnit": "u (IUPAC conventional atomic weights)",
+  "charge": 0,
+  "multiplicity": 1,
+  "dipoleDebye": 0,
+  "gapEh": 0.2797763012837597,
+  "gapEv": 7.6131,
+  "homo": "HOMO (h_u ×5) · LUMO (t1u ×3)",
+  "geometrySource": "DRAFT GEOMETRY, NOT A MEASUREMENT: Equal-edge ideal truncated icosahedron from Round 2; both edge kinds are equal, unlike experimental C60. This is a reference feasibility fixture, not experimental geometry. (tools/symmetry/round2-sol-exact.py; research/release-0.4.0/measure/round2-sol-exact.json directC60.coordinatesAngstrom; experimental status UNVERIFIED)",
+  "inchiKey": null,
+  "pubchemCid": null,
+  "identifiers": "buckminsterfullerene; InChIKey and CID are S4b's to enter and verify",
+  "blurb": [
+   "Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field's orbital-only kernel.",
+   "Its density, its I_h names and a geometry checked against experiment are 0.4.1 BUCKYBALL; this record carries the frontier orbitals only."
+  ],
+  "ies": null,
+  "sources": [
+   "geometry: DRAFT GEOMETRY, NOT A MEASUREMENT: Equal-edge ideal truncated icosahedron from Round 2; both edge kinds are equal, unlike experimental C60. This is a reference feasibility fixture, not experimental geometry. (tools/symmetry/round2-sol-exact.py; research/release-0.4.0/measure/round2-sol-exact.json directC60.coordinatesAngstrom; experimental status UNVERIFIED)",
+   "orbitals and energy: research/release-0.4.0/library-census/c60-frontier.json (PySCF 2.14.0, direct RHF; pinned vendored decimals; cart=True; symmetry=True; no density fitting)",
+   "field check: research/release-0.4.0/library-census/c60-pyscf-samples.json",
+   "basis: lab/vendor/bse/sto-3g-v1.json (Basis Set Exchange, vendored)"
+  ]
+ },
+ "page": "$\\mathrm{C_{60}}$, buckminsterfullerene — RHF/STO-3G, neutral, $E = -2244.018782\\,E_h$, 180 occupied of 300 AO, orbital energies $\\varepsilon_{i}$ in $E_h$:\n$\\varepsilon_{1} = -11.0540\\ (\\mathrm{HOMO{-}47}),\\ \\varepsilon_{2} = -11.0540\\ (\\mathrm{HOMO{-}47}),\\ \\varepsilon_{3} = -11.0540\\ (\\mathrm{HOMO{-}47}),\\ \\varepsilon_{4} = -11.0540\\ (\\mathrm{HOMO{-}47}),\\ \\varepsilon_{5} = -11.0540\\ (\\mathrm{HOMO{-}46}),\\ \\varepsilon_{6} = -11.0540\\ (\\mathrm{HOMO{-}46}),\\ \\varepsilon_{7} = -11.0540\\ (\\mathrm{HOMO{-}46}),\\ \\varepsilon_{8} = -11.0540\\ (\\mathrm{HOMO{-}46}),\\ \\varepsilon_{9} = -11.0540\\ (\\mathrm{HOMO{-}46}),\\ \\varepsilon_{10} = -11.0540\\ (\\mathrm{HOMO{-}45}),\\ \\varepsilon_{11} = -11.0540\\ (\\mathrm{HOMO{-}45}),\\ \\varepsilon_{12} = -11.0540\\ (\\mathrm{HOMO{-}45}),\\ \\varepsilon_{13} = -11.0540\\ (\\mathrm{HOMO{-}45}),\\ \\varepsilon_{14} = -11.0540\\ (\\mathrm{HOMO{-}44}),\\ \\varepsilon_{15} = -11.0540\\ (\\mathrm{HOMO{-}44}),\\ \\varepsilon_{16} = -11.0540\\ (\\mathrm{HOMO{-}44}),\\ \\varepsilon_{17} = -11.0540\\ (\\mathrm{HOMO{-}44}),\\ \\varepsilon_{18} = -11.0540\\ (\\mathrm{HOMO{-}44}),\\ \\varepsilon_{19} = -11.0539\\ (\\mathrm{HOMO{-}43}),\\ \\varepsilon_{20} = -11.0539\\ (\\mathrm{HOMO{-}43}),\\ \\varepsilon_{21} = -11.0539\\ (\\mathrm{HOMO{-}43}),\\ \\varepsilon_{22} = -11.0539\\ (\\mathrm{HOMO{-}42}),\\ \\varepsilon_{23} = -11.0539\\ (\\mathrm{HOMO{-}42}),\\ \\varepsilon_{24} = -11.0539\\ (\\mathrm{HOMO{-}42}),\\ \\varepsilon_{25} = -11.0539\\ (\\mathrm{HOMO{-}42}),\\ \\varepsilon_{26} = -11.0539\\ (\\mathrm{HOMO{-}42}),\\ \\varepsilon_{27} = -11.0538\\ (\\mathrm{HOMO{-}41}),\\ \\varepsilon_{28} = -11.0538\\ (\\mathrm{HOMO{-}41}),\\ \\varepsilon_{29} = -11.0538\\ (\\mathrm{HOMO{-}41}),\\ \\varepsilon_{30} = -11.0538\\ (\\mathrm{HOMO{-}40}),\\ \\varepsilon_{31} = -11.0538\\ (\\mathrm{HOMO{-}40}),\\ \\varepsilon_{32} = -11.0538\\ (\\mathrm{HOMO{-}40}),\\ \\varepsilon_{33} = -11.0538\\ (\\mathrm{HOMO{-}39}),\\ \\varepsilon_{34} = -11.0538\\ (\\mathrm{HOMO{-}39}),\\ \\varepsilon_{35} = -11.0538\\ (\\mathrm{HOMO{-}39}),\\ \\varepsilon_{36} = -11.0538\\ (\\mathrm{HOMO{-}38}),\\ \\varepsilon_{37} = -11.0536\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{38} = -11.0536\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{39} = -11.0536\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{40} = -11.0536\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{41} = -11.0536\\ (\\mathrm{HOMO{-}37}),\\ \\varepsilon_{42} = -11.0536\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{43} = -11.0536\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{44} = -11.0536\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{45} = -11.0536\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{46} = -11.0536\\ (\\mathrm{HOMO{-}36}),\\ \\varepsilon_{47} = -11.0536\\ (\\mathrm{HOMO{-}35}),\\ \\varepsilon_{48} = -11.0536\\ (\\mathrm{HOMO{-}35}),\\ \\varepsilon_{49} = -11.0536\\ (\\mathrm{HOMO{-}35}),\\ \\varepsilon_{50} = -11.0535\\ (\\mathrm{HOMO{-}34}),\\ \\varepsilon_{51} = -11.0535\\ (\\mathrm{HOMO{-}34}),\\ \\varepsilon_{52} = -11.0535\\ (\\mathrm{HOMO{-}34}),\\ \\varepsilon_{53} = -11.0535\\ (\\mathrm{HOMO{-}34}),\\ \\varepsilon_{54} = -11.0534\\ (\\mathrm{HOMO{-}33}),\\ \\varepsilon_{55} = -11.0534\\ (\\mathrm{HOMO{-}33}),\\ \\varepsilon_{56} = -11.0534\\ (\\mathrm{HOMO{-}33}),\\ \\varepsilon_{57} = -11.0534\\ (\\mathrm{HOMO{-}33}),\\ \\varepsilon_{58} = -11.0534\\ (\\mathrm{HOMO{-}32}),\\ \\varepsilon_{59} = -11.0534\\ (\\mathrm{HOMO{-}32}),\\ \\varepsilon_{60} = -11.0534\\ (\\mathrm{HOMO{-}32}),\\ \\varepsilon_{61} = -1.2470\\ (\\mathrm{HOMO{-}31}),\\ \\varepsilon_{62} = -1.2209\\ (\\mathrm{HOMO{-}30}),\\ \\varepsilon_{63} = -1.2209\\ (\\mathrm{HOMO{-}30}),\\ \\varepsilon_{64} = -1.2209\\ (\\mathrm{HOMO{-}30}),\\ \\varepsilon_{65} = -1.1716\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{66} = -1.1716\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{67} = -1.1716\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{68} = -1.1716\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{69} = -1.1716\\ (\\mathrm{HOMO{-}29}),\\ \\varepsilon_{70} = -1.1251\\ (\\mathrm{HOMO{-}28}),\\ \\varepsilon_{71} = -1.1251\\ (\\mathrm{HOMO{-}28}),\\ \\varepsilon_{72} = -1.1251\\ (\\mathrm{HOMO{-}28}),\\ \\varepsilon_{73} = -1.0653\\ (\\mathrm{HOMO{-}27}),\\ \\varepsilon_{74} = -1.0653\\ (\\mathrm{HOMO{-}27}),\\ \\varepsilon_{75} = -1.0653\\ (\\mathrm{HOMO{-}27}),\\ \\varepsilon_{76} = -1.0653\\ (\\mathrm{HOMO{-}27}),\\ \\varepsilon_{77} = -1.0056\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{78} = -1.0056\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{79} = -1.0056\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{80} = -1.0056\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{81} = -1.0056\\ (\\mathrm{HOMO{-}26}),\\ \\varepsilon_{82} = -0.9755\\ (\\mathrm{HOMO{-}25}),\\ \\varepsilon_{83} = -0.9755\\ (\\mathrm{HOMO{-}25}),\\ \\varepsilon_{84} = -0.9755\\ (\\mathrm{HOMO{-}25}),\\ \\varepsilon_{85} = -0.9755\\ (\\mathrm{HOMO{-}25}),\\ \\varepsilon_{86} = -0.9009\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{87} = -0.9009\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{88} = -0.9009\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{89} = -0.9009\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{90} = -0.9009\\ (\\mathrm{HOMO{-}24}),\\ \\varepsilon_{91} = -0.8936\\ (\\mathrm{HOMO{-}23}),\\ \\varepsilon_{92} = -0.8936\\ (\\mathrm{HOMO{-}23}),\\ \\varepsilon_{93} = -0.8936\\ (\\mathrm{HOMO{-}23}),\\ \\varepsilon_{94} = -0.8234\\ (\\mathrm{HOMO{-}22}),\\ \\varepsilon_{95} = -0.8234\\ (\\mathrm{HOMO{-}22}),\\ \\varepsilon_{96} = -0.8234\\ (\\mathrm{HOMO{-}22}),\\ \\varepsilon_{97} = -0.7864\\ (\\mathrm{HOMO{-}21}),\\ \\varepsilon_{98} = -0.7864\\ (\\mathrm{HOMO{-}21}),\\ \\varepsilon_{99} = -0.7864\\ (\\mathrm{HOMO{-}21}),\\ \\varepsilon_{100} = -0.7674\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{101} = -0.7674\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{102} = -0.7674\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{103} = -0.7674\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{104} = -0.7674\\ (\\mathrm{HOMO{-}20}),\\ \\varepsilon_{105} = -0.7438\\ (\\mathrm{HOMO{-}19}),\\ \\varepsilon_{106} = -0.6920\\ (\\mathrm{HOMO{-}18}),\\ \\varepsilon_{107} = -0.6920\\ (\\mathrm{HOMO{-}18}),\\ \\varepsilon_{108} = -0.6920\\ (\\mathrm{HOMO{-}18}),\\ \\varepsilon_{109} = -0.6920\\ (\\mathrm{HOMO{-}18}),\\ \\varepsilon_{110} = -0.6538\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{111} = -0.6538\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{112} = -0.6538\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{113} = -0.6538\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{114} = -0.6538\\ (\\mathrm{HOMO{-}17}),\\ \\varepsilon_{115} = -0.6348\\ (\\mathrm{HOMO{-}16}),\\ \\varepsilon_{116} = -0.6348\\ (\\mathrm{HOMO{-}16}),\\ \\varepsilon_{117} = -0.6348\\ (\\mathrm{HOMO{-}16}),\\ \\varepsilon_{118} = -0.6052\\ (\\mathrm{HOMO{-}15}),\\ \\varepsilon_{119} = -0.5876\\ (\\mathrm{HOMO{-}14}),\\ \\varepsilon_{120} = -0.5876\\ (\\mathrm{HOMO{-}14}),\\ \\varepsilon_{121} = -0.5876\\ (\\mathrm{HOMO{-}14}),\\ \\varepsilon_{122} = -0.5724\\ (\\mathrm{HOMO{-}13}),\\ \\varepsilon_{123} = -0.5724\\ (\\mathrm{HOMO{-}13}),\\ \\varepsilon_{124} = -0.5724\\ (\\mathrm{HOMO{-}13}),\\ \\varepsilon_{125} = -0.5724\\ (\\mathrm{HOMO{-}13}),\\ \\varepsilon_{126} = -0.5718\\ (\\mathrm{HOMO{-}12}),\\ \\varepsilon_{127} = -0.5718\\ (\\mathrm{HOMO{-}12}),\\ \\varepsilon_{128} = -0.5718\\ (\\mathrm{HOMO{-}12}),\\ \\varepsilon_{129} = -0.5379\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{130} = -0.5379\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{131} = -0.5379\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{132} = -0.5379\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{133} = -0.5379\\ (\\mathrm{HOMO{-}11}),\\ \\varepsilon_{134} = -0.5181\\ (\\mathrm{HOMO{-}10}),\\ \\varepsilon_{135} = -0.5181\\ (\\mathrm{HOMO{-}10}),\\ \\varepsilon_{136} = -0.5181\\ (\\mathrm{HOMO{-}10}),\\ \\varepsilon_{137} = -0.5094\\ (\\mathrm{HOMO{-}9}),\\ \\varepsilon_{138} = -0.5094\\ (\\mathrm{HOMO{-}9}),\\ \\varepsilon_{139} = -0.5094\\ (\\mathrm{HOMO{-}9}),\\ \\varepsilon_{140} = -0.5094\\ (\\mathrm{HOMO{-}9}),\\ \\varepsilon_{141} = -0.5056\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{142} = -0.5056\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{143} = -0.5056\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{144} = -0.5056\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{145} = -0.5056\\ (\\mathrm{HOMO{-}8}),\\ \\varepsilon_{146} = -0.4767\\ (\\mathrm{HOMO{-}7}),\\ \\varepsilon_{147} = -0.4767\\ (\\mathrm{HOMO{-}7}),\\ \\varepsilon_{148} = -0.4767\\ (\\mathrm{HOMO{-}7}),\\ \\varepsilon_{149} = -0.4767\\ (\\mathrm{HOMO{-}7}),\\ \\varepsilon_{150} = -0.4264\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{151} = -0.4264\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{152} = -0.4264\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{153} = -0.4264\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{154} = -0.4264\\ (\\mathrm{HOMO{-}6}),\\ \\varepsilon_{155} = -0.4240\\ (\\mathrm{HOMO{-}5}),\\ \\varepsilon_{156} = -0.4240\\ (\\mathrm{HOMO{-}5}),\\ \\varepsilon_{157} = -0.4240\\ (\\mathrm{HOMO{-}5}),\\ \\varepsilon_{158} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{159} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{160} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{161} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{162} = -0.4132\\ (\\mathrm{HOMO{-}4}),\\ \\varepsilon_{163} = -0.3860\\ (\\mathrm{HOMO{-}3}),\\ \\varepsilon_{164} = -0.3860\\ (\\mathrm{HOMO{-}3}),\\ \\varepsilon_{165} = -0.3860\\ (\\mathrm{HOMO{-}3}),\\ \\varepsilon_{166} = -0.3860\\ (\\mathrm{HOMO{-}3}),\\ \\varepsilon_{167} = -0.2797\\ (\\mathrm{HOMO{-}2}),\\ \\varepsilon_{168} = -0.2797\\ (\\mathrm{HOMO{-}2}),\\ \\varepsilon_{169} = -0.2797\\ (\\mathrm{HOMO{-}2}),\\ \\varepsilon_{170} = -0.2797\\ (\\mathrm{HOMO{-}2}),\\ \\varepsilon_{171} = -0.2735\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{172} = -0.2735\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{173} = -0.2735\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{174} = -0.2735\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{175} = -0.2735\\ (\\mathrm{HOMO{-}1}),\\ \\varepsilon_{176} = -0.1980\\ (\\mathrm{HOMO}),\\ \\varepsilon_{177} = -0.1980\\ (\\mathrm{HOMO}),\\ \\varepsilon_{178} = -0.1980\\ (\\mathrm{HOMO}),\\ \\varepsilon_{179} = -0.1980\\ (\\mathrm{HOMO}),\\ \\varepsilon_{180} = -0.1980\\ (\\mathrm{HOMO}),\\ \\varepsilon_{181} = 0.0818\\ (\\mathrm{LUMO}),\\ \\varepsilon_{182} = 0.0818\\ (\\mathrm{LUMO}),\\ \\varepsilon_{183} = 0.0818\\ (\\mathrm{LUMO}),\\ \\varepsilon_{184} = 0.1440\\ (\\mathrm{LUMO{+}1}),\\ \\varepsilon_{185} = 0.1440\\ (\\mathrm{LUMO{+}1}),\\ \\varepsilon_{186} = 0.1440\\ (\\mathrm{LUMO{+}1}),\\ \\varepsilon_{187} = 0.2571\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{188} = 0.2571\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{189} = 0.2571\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{190} = 0.2571\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{191} = 0.2571\\ (\\mathrm{LUMO{+}2}),\\ \\varepsilon_{192} = 0.2631\\ (\\mathrm{LUMO{+}3}),\\ \\varepsilon_{193} = 0.2631\\ (\\mathrm{LUMO{+}3}),\\ \\varepsilon_{194} = 0.2631\\ (\\mathrm{LUMO{+}3}),\\ \\varepsilon_{195} = 0.3398\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{196} = 0.3398\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{197} = 0.3398\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{198} = 0.3398\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{199} = 0.3398\\ (\\mathrm{LUMO{+}4}),\\ \\varepsilon_{200} = 0.3795\\ (\\mathrm{LUMO{+}5}),\\ \\varepsilon_{201} = 0.3795\\ (\\mathrm{LUMO{+}5}),\\ \\varepsilon_{202} = 0.3795\\ (\\mathrm{LUMO{+}5}),\\ \\varepsilon_{203} = 0.3795\\ (\\mathrm{LUMO{+}5}),\\ \\varepsilon_{204} = 0.4261\\ (\\mathrm{LUMO{+}6}),\\ \\varepsilon_{205} = 0.4261\\ (\\mathrm{LUMO{+}6}),\\ \\varepsilon_{206} = 0.4261\\ (\\mathrm{LUMO{+}6}),\\ \\varepsilon_{207} = 0.4261\\ (\\mathrm{LUMO{+}6}),\\ \\varepsilon_{208} = 0.4412\\ (\\mathrm{LUMO{+}7}),\\ \\varepsilon_{209} = 0.4412\\ (\\mathrm{LUMO{+}7}),\\ \\varepsilon_{210} = 0.4412\\ (\\mathrm{LUMO{+}7}),\\ \\varepsilon_{211} = 0.5498\\ (\\mathrm{LUMO{+}8}),\\ \\varepsilon_{212} = 0.5498\\ (\\mathrm{LUMO{+}8}),\\ \\varepsilon_{213} = 0.5498\\ (\\mathrm{LUMO{+}8}),\\ \\varepsilon_{214} = 0.5955\\ (\\mathrm{LUMO{+}9}),\\ \\varepsilon_{215} = 0.5955\\ (\\mathrm{LUMO{+}9}),\\ \\varepsilon_{216} = 0.5955\\ (\\mathrm{LUMO{+}9}),\\ \\varepsilon_{217} = 0.6398\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{218} = 0.6398\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{219} = 0.6398\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{220} = 0.6398\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{221} = 0.6398\\ (\\mathrm{LUMO{+}10}),\\ \\varepsilon_{222} = 0.6807\\ (\\mathrm{LUMO{+}11}),\\ \\varepsilon_{223} = 0.6807\\ (\\mathrm{LUMO{+}11}),\\ \\varepsilon_{224} = 0.6807\\ (\\mathrm{LUMO{+}11}),\\ \\varepsilon_{225} = 0.7115\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{226} = 0.7115\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{227} = 0.7115\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{228} = 0.7115\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{229} = 0.7115\\ (\\mathrm{LUMO{+}12}),\\ \\varepsilon_{230} = 0.7164\\ (\\mathrm{LUMO{+}13}),\\ \\varepsilon_{231} = 0.7164\\ (\\mathrm{LUMO{+}13}),\\ \\varepsilon_{232} = 0.7164\\ (\\mathrm{LUMO{+}13}),\\ \\varepsilon_{233} = 0.7164\\ (\\mathrm{LUMO{+}13}),\\ \\varepsilon_{234} = 0.7429\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{235} = 0.7429\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{236} = 0.7429\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{237} = 0.7429\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{238} = 0.7429\\ (\\mathrm{LUMO{+}14}),\\ \\varepsilon_{239} = 0.7955\\ (\\mathrm{LUMO{+}15}),\\ \\varepsilon_{240} = 0.7955\\ (\\mathrm{LUMO{+}15}),\\ \\varepsilon_{241} = 0.7955\\ (\\mathrm{LUMO{+}15}),\\ \\varepsilon_{242} = 0.7974\\ (\\mathrm{LUMO{+}16}),\\ \\varepsilon_{243} = 0.7974\\ (\\mathrm{LUMO{+}16}),\\ \\varepsilon_{244} = 0.7974\\ (\\mathrm{LUMO{+}16}),\\ \\varepsilon_{245} = 0.7974\\ (\\mathrm{LUMO{+}16}),\\ \\varepsilon_{246} = 0.8473\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{247} = 0.8473\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{248} = 0.8473\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{249} = 0.8473\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{250} = 0.8473\\ (\\mathrm{LUMO{+}17}),\\ \\varepsilon_{251} = 0.8545\\ (\\mathrm{LUMO{+}18}),\\ \\varepsilon_{252} = 0.8545\\ (\\mathrm{LUMO{+}18}),\\ \\varepsilon_{253} = 0.8545\\ (\\mathrm{LUMO{+}18}),\\ \\varepsilon_{254} = 0.8715\\ (\\mathrm{LUMO{+}19}),\\ \\varepsilon_{255} = 0.8715\\ (\\mathrm{LUMO{+}19}),\\ \\varepsilon_{256} = 0.8715\\ (\\mathrm{LUMO{+}19}),\\ \\varepsilon_{257} = 0.9436\\ (\\mathrm{LUMO{+}20}),\\ \\varepsilon_{258} = 0.9436\\ (\\mathrm{LUMO{+}20}),\\ \\varepsilon_{259} = 0.9436\\ (\\mathrm{LUMO{+}20}),\\ \\varepsilon_{260} = 0.9781\\ (\\mathrm{LUMO{+}21}),\\ \\varepsilon_{261} = 0.9781\\ (\\mathrm{LUMO{+}21}),\\ \\varepsilon_{262} = 0.9781\\ (\\mathrm{LUMO{+}21}),\\ \\varepsilon_{263} = 0.9781\\ (\\mathrm{LUMO{+}21}),\\ \\varepsilon_{264} = 0.9820\\ (\\mathrm{LUMO{+}22}),\\ \\varepsilon_{265} = 0.9820\\ (\\mathrm{LUMO{+}22}),\\ \\varepsilon_{266} = 0.9820\\ (\\mathrm{LUMO{+}22}),\\ \\varepsilon_{267} = 0.9820\\ (\\mathrm{LUMO{+}22}),\\ \\varepsilon_{268} = 0.9937\\ (\\mathrm{LUMO{+}23}),\\ \\varepsilon_{269} = 0.9937\\ (\\mathrm{LUMO{+}23}),\\ \\varepsilon_{270} = 0.9937\\ (\\mathrm{LUMO{+}23}),\\ \\varepsilon_{271} = 1.0032\\ (\\mathrm{LUMO{+}24}),\\ \\varepsilon_{272} = 1.0032\\ (\\mathrm{LUMO{+}24}),\\ \\varepsilon_{273} = 1.0032\\ (\\mathrm{LUMO{+}24}),\\ \\varepsilon_{274} = 1.0032\\ (\\mathrm{LUMO{+}24}),\\ \\varepsilon_{275} = 1.0032\\ (\\mathrm{LUMO{+}24}),\\ \\varepsilon_{276} = 1.0523\\ (\\mathrm{LUMO{+}25}),\\ \\varepsilon_{277} = 1.0523\\ (\\mathrm{LUMO{+}25}),\\ \\varepsilon_{278} = 1.0523\\ (\\mathrm{LUMO{+}25}),\\ \\varepsilon_{279} = 1.0523\\ (\\mathrm{LUMO{+}25}),\\ \\varepsilon_{280} = 1.0523\\ (\\mathrm{LUMO{+}25}),\\ \\varepsilon_{281} = 1.0599\\ (\\mathrm{LUMO{+}26}),\\ \\varepsilon_{282} = 1.0599\\ (\\mathrm{LUMO{+}26}),\\ \\varepsilon_{283} = 1.0599\\ (\\mathrm{LUMO{+}26}),\\ \\varepsilon_{284} = 1.0599\\ (\\mathrm{LUMO{+}26}),\\ \\varepsilon_{285} = 1.0672\\ (\\mathrm{LUMO{+}27}),\\ \\varepsilon_{286} = 1.0672\\ (\\mathrm{LUMO{+}27}),\\ \\varepsilon_{287} = 1.0672\\ (\\mathrm{LUMO{+}27}),\\ \\varepsilon_{288} = 1.0672\\ (\\mathrm{LUMO{+}27}),\\ \\varepsilon_{289} = 1.0672\\ (\\mathrm{LUMO{+}27}),\\ \\varepsilon_{290} = 1.1528\\ (\\mathrm{LUMO{+}28}),\\ \\varepsilon_{291} = 1.1528\\ (\\mathrm{LUMO{+}28}),\\ \\varepsilon_{292} = 1.1528\\ (\\mathrm{LUMO{+}28}),\\ \\varepsilon_{293} = 1.1814\\ (\\mathrm{LUMO{+}29}),\\ \\varepsilon_{294} = 1.1814\\ (\\mathrm{LUMO{+}29}),\\ \\varepsilon_{295} = 1.1814\\ (\\mathrm{LUMO{+}29}),\\ \\varepsilon_{296} = 1.1814\\ (\\mathrm{LUMO{+}29}),\\ \\varepsilon_{297} = 1.2032\\ (\\mathrm{LUMO{+}30}),\\ \\varepsilon_{298} = 1.2041\\ (\\mathrm{LUMO{+}31}),\\ \\varepsilon_{299} = 1.2041\\ (\\mathrm{LUMO{+}31}),\\ \\varepsilon_{300} = 1.2041\\ (\\mathrm{LUMO{+}31})$",
+ "oracle": {
+  "energy": -2244.0187824768127,
+  "source": "research/release-0.4.0/library-census/c60-frontier.json solver.energyEh",
+  "what": "PySCF 2.14.0 — the record IS PySCF's; its check is the field at Sol's 92 points",
+  "delta": 0,
+  "fieldMaxAbsErr": 1.1102230246251565e-16
+ }
+}

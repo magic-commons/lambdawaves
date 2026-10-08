@@ -31,7 +31,9 @@ import { chemRegister, chemGround, chemSpectrum, chemStates, chemStateVectors, c
 import { BASIS_FILES } from '../lab/rhf-molecule.js';
 import { ANGSTROM } from '../lab/md.js';
 import { MOLECULE_BY_ID, COST, eriWork, rpaWork, counts, CAP_MS } from '../lab/molecules.js';
-import { CURATED_IE } from '../lab/names.js';
+import { CURATED_IE, nameOrbitals, characters, coreCount } from '../lab/names.js';
+import { basisFrom, nuclearRepulsion } from '../lab/md.js';
+import { evaluator } from '../lab/molecular-field.js';
 import { moleculeLatex } from '../lab/latex-state.js';
 import { validateRecord, recordPath, SCHEMA } from '../lab/library.js';
 
@@ -130,6 +132,86 @@ function build(e) {
 /** the live-cost prediction for a molecule lab/molecules.js does not list (lab/molecules.js does the same for its rows) */
 function predicted(ang, charge) { const c = counts(ang), nocc = (c.nElec - charge) / 2; return COST.a * eriWork(c.widths) + COST.b * rpaWork(c.nAO, nocc) + COST.c; }
 
+/* ── 0.4.0 S4c · THE TEST FIXTURES (S4c's own road, beside the catalogue: never ENTRIES, never the gate, never lab/library.json) ──
+ *   node tools/orbital-library.mjs --fixture tryptophan [--check]      (and C20H20)
+ * ONE schema-1 record by the same build() above, from a census row — its geometry and its PySCF energy as the oracle — written
+ * to tests/fixtures/record-<id>.json: the 87- and 120-AO inputs the cap-128 χ tier is checked against (tools/perf/s4c-kernel.mjs).
+ * Never shipped.  `--check` re-solves and compares the bytes.  S4b's own BIO / ORGANIC records supersede these as content. */
+const CENSUS = 'research/release-0.4.0/library-census/census.json';
+const SUB = (s) => s.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
+function fixtureEntry(id) {
+  const row = JSON.parse(readFileSync(fileURLToPath(new URL('../' + CENSUS, import.meta.url)), 'utf8')).rows.find((r) => r.id === id);
+  if (!row || !row.converged || !row.geometry || !Array.isArray(row.geometry.atomsAngstrom)) throw new Error(`orbital-library: no converged census row '${id}'`);
+  return { id, basis: 'sto-3g', section: 'S4C-FIXTURE', states: false,
+    molecule: { name: row.name, formula: '<m>' + SUB(row.formula) + '</m>', charge: row.charge || 0, symmetry: { group: 'C1' },
+      source: 'NOT A MEASUREMENT: the S4 census\'s ' + row.name + ' — ' + row.geometry.source + ' (' + CENSUS + ' rows[' + id + '])', ang: row.geometry.atomsAngstrom },
+    oracle: { energy: row.energyEh, source: CENSUS + ' rows[' + id + '].energyEh', what: 'PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals (Sol\'s census; MEASURED there)' },
+    stem: { inchiKey: null, pubchemCid: null, identifiers: 'a TEST FIXTURE (0.4.0 S4c): identifiers are S4b\'s, on its own record',
+      blurb: [row.name + ' at ' + row.nAO_STO3G + ' Cartesian AOs: an input for the field kernel\'s cap-128 tier, not library content.',
+        'Point group taken as C1 here (the names are S4b\'s record\'s); the energy agrees with the census\'s PySCF oracle or there is no file.'] } };
+}
+/* ── 0.4.0 S4c · THE FRONTIER RECORD (S4c's own road: a separate function, never ENTRIES, never the gate) ──────────────────
+ * C₆₀ is 300 AOs: no live road solves it and no χ tile holds its density, so its record is PySCF's, re-encoded — Sol's dump
+ * research/release-0.4.0/library-census/c60-frontier.json (PySCF 2.14 direct RHF on the vendored STO-3G decimals, the HOMO set
+ * h_u ×5 and the LUMO set t1u ×3 ALREADY in the app's AO order and normalisation, its water conversion proof inside at
+ * 1.03e-12).  caps: orbitals ONLY — ε for all 300 and the eight frontier columns (`ground.cols`), no D, no spectrum, no
+ * states; the field draws them through ORB_WGSL.  The geometry is Sol's DRAFT (equal-edge ideal I_h, experimental status
+ * UNVERIFIED) and the record says so; the I_h names are 0.4.1 BUCKYBALL, so the levels are named by energy only.
+ * Checked here or there is no file: the basis file's sha-256 is the dump's, the app's own AOs (md.js basisFrom +
+ * molecular-field.js evaluator) contracted with the columns answer PySCF's GTOval_cart at Sol's 92 points
+ * (c60-pyscf-samples.json) to ≤ 1e-10, and every level's spread is under names.js's 2e-10 Eh. */
+const FRONTIERS = [{ id: 'C60', basis: 'sto-3g', section: 'LATTICE', name: 'buckminsterfullerene', formula: '<m>C₆₀</m>',
+  dump: 'research/release-0.4.0/library-census/c60-frontier.json', samples: 'research/release-0.4.0/library-census/c60-pyscf-samples.json' }];
+function buildFrontier(e) {
+  const read = (p) => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
+  const F = read(e.dump), P = read(e.samples), b0 = bse[e.basis];
+  if (F.basis.sha256 !== sha(b0.text)) throw new Error(`orbital-library: ${e.id}'s dump was made on another ${e.basis} file`);
+  const ang = F.geometry.atomsAngstrom, atoms = ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
+  const b = basisFrom(atoms, JSON.parse(b0.text), { cart: true }), n = b.n, eps = F.solver.orbitalEnergiesEh, nocc = F.solver.occupations.filter((o) => o === 2).length;
+  const sets = [F.frontier.HOMO, F.frontier.LUMO], cols = sets.flatMap((s) => s.indices), cs = sets.flatMap((s) => s.coefficientColumns), m = cols.length;
+  if (eps.length !== n || cs.some((c) => c.length !== n) || !F.solver.converged) throw new Error(`orbital-library: ${e.id}'s dump does not fit ${n} AOs`);
+  const ev = evaluator(b.shells); let worst = 0;
+  P.pointsBohr.forEach((p, q) => { const a = ev.ao(p); cs.forEach((c, j) => { let s = 0; for (let i = 0; i < n; i++) s += c[i] * a[i]; worst = Math.max(worst, Math.abs(s - P.signedValues[q][j])); }); });
+  if (!(worst <= 1e-10)) throw new Error(`orbital-library: ${e.id}'s columns on the app's AOs miss PySCF's orbital by ${worst} — the AO order or normalisation is not the app's`);
+  const C = new Float64Array(n * m); cs.forEach((c, j) => { for (let i = 0; i < n; i++) C[i * m + j] = c[i]; });   // row-major n × m, as C is n × n
+  const names = nameOrbitals({ atoms, eps, nocc, basis: b, converged: true }, null), ch = characters({ atoms, basis: b }, names);
+  names.mos.forEach((mo, i) => { mo.character = ch[i]; }); names.core = Math.min(coreCount(atoms), nocc); delete names.axes; delete names.ms;
+  names.reason = 'C₆₀\'s I_h names are 0.4.1 BUCKYBALL (Sol computed and checked them: HOMO 6h_u, LUMO 7t₁u); here the levels are named by energy';
+  for (const s of sets) if (!(s.energySpreadEh < 2e-10)) throw new Error(`orbital-library: ${e.id}'s ${s.irrep} set spreads ${s.energySpreadEh} Eh`);
+  const half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6, gap = eps[nocc] - eps[nocc - 1];
+  const source = `DRAFT GEOMETRY, NOT A MEASUREMENT: ${F.geometry.why} (${F.geometry.source}; experimental status ${F.geometry.experimentalStatus})`;
+  const molecule = { name: e.name, formula: e.formula, charge: 0, symmetry: { group: 'C1' }, source, ang };
+  const ground = { energy: F.solver.energyEh, Enuc: nuclearRepulsion(atoms), nocc, nAO: n, order: b.order, hash: b.hash, basis: e.basis, charge: 0,
+    electrons: 2 * nocc, converged: true, dipole: [0, 0, 0], half, stability: null, solutions: [], names, cols };
+  const record = {
+    schema: SCHEMA, kind: 'lambdawaves.orbital-record', id: e.id, basis: e.basis, name: e.name, formula: e.formula,
+    generator: 'tools/orbital-library.mjs buildFrontier — PySCF\'s orbitals re-encoded (' + e.dump + '); no app solve: 300 AOs are past every live road',
+    input: { atoms, charge: 0, multiplicity: 1, basis: e.basis, basisFile: b0.file, basisSha256: sha(b0.text), symmetry: molecule.symmetry },
+    caps: { orbitals: true, states: false, rpa: false, tdhf: false },
+    ground, orbitals: { eps: f64(eps), C: f64(C) },
+    stem: { formula: e.formula, pointGroup: null, frame: null, approximate: false, mass: +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), massUnit: 'u (IUPAC conventional atomic weights)',
+      charge: 0, multiplicity: 1, dipoleDebye: 0, gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: `HOMO (${F.frontier.HOMO.irrep} ×5) · LUMO (${F.frontier.LUMO.irrep} ×3)`, geometrySource: source,
+      inchiKey: null, pubchemCid: null, identifiers: 'buckminsterfullerene; InChIKey and CID are S4b\'s to enter and verify',
+      blurb: ['Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field\'s orbital-only kernel.',
+        'Its density, its I_h names and a geometry checked against experiment are 0.4.1 BUCKYBALL; this record carries the frontier orbitals only.'],
+      ies: null, sources: ['geometry: ' + source, 'orbitals and energy: ' + e.dump + ' (PySCF ' + F.solver.pyscf + ', ' + F.solver.method + ')', 'field check: ' + e.samples, 'basis: ' + b0.file + ' (Basis Set Exchange, vendored)'] },
+    page: moleculeLatex({ molecule: { id: e.id, ...molecule }, basis: e.basis, charge: 0, ground: { energy: ground.energy, eps, nocc, nAO: n, names } }),
+    oracle: { energy: F.solver.energyEh, source: e.dump + ' solver.energyEh', what: 'PySCF ' + F.solver.pyscf + ' — the record IS PySCF\'s; its check is the field at Sol\'s 92 points', delta: 0, fieldMaxAbsErr: worst },
+  };
+  const text = JSON.stringify(record, null, 1) + '\n', bytes = Buffer.from(text), hash = sha(bytes);
+  const bad = validateRecord(JSON.parse(text));
+  if (bad.length) throw new Error(`orbital-library: ${e.id} fails validation — ${bad.join('; ')}`);
+  const catalogue = { id: e.id, basis: e.basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps, molecule };
+  return { text, hash, catalogue, ms: 0, nAO: n, d: 0, energy: ground.energy, delta: 0, fieldErr: worst };
+}
+if (args.includes('--fixture')) {
+  const id = args[args.indexOf('--fixture') + 1], e = fixtureEntry(id), r = build(e);
+  const file = fileURLToPath(new URL(`../tests/fixtures/record-${id}.json`, import.meta.url));
+  console.log(`${id} · ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${(r.text.length / 1024).toFixed(1)} KB · generated in ${(r.ms / 1000).toFixed(1)} s · ${r.hash.slice(0, 12)}`);
+  if (CHECK) { const same = existsSync(file) && readFileSync(file, 'utf8') === r.text; console.log(same ? `fixture ${id}: in step` : `fixture ${id}: OUT OF STEP`); process.exit(same ? 0 : 1); }
+  writeFileSync(file, r.text); console.log('wrote', file); process.exit(0);
+}
+
 const out = [], fail = [];
 const disk = existsSync(CATALOGUE) ? JSON.parse(readFileSync(CATALOGUE, 'utf8')) : { rows: [] };
 for (const e of ENTRIES) {
@@ -140,6 +222,10 @@ for (const e of ENTRIES) {
   }
   const r = build(e); out.push(r);
   console.log(`${e.id.padEnd(8)} ${e.basis} · ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${(r.text.length / 1024).toFixed(1)} KB · caps ${Object.entries(r.catalogue.caps).filter(([, v]) => v).map(([k]) => k).join('+')} · generated in ${(r.ms / 1000).toFixed(2)} s · ${r.hash.slice(0, 12)}`);
+}
+for (const e of FRONTIERS) {                                          // S4c: re-encoded every run (no solve), so --only never skips one
+  const r = buildFrontier(e); out.push(r);
+  console.log(`${e.id.padEnd(8)} ${e.basis} · ${r.nAO} AO · frontier ${r.catalogue.caps.orbitals ? 'orbitals only' : ''} · E ${r.energy.toFixed(12)} (PySCF's) · field vs PySCF ${r.fieldErr.toExponential(1)} · ${(r.text.length / 1024).toFixed(1)} KB · ${r.hash.slice(0, 12)}`);
 }
 const catalogueText = JSON.stringify({ schema: SCHEMA, generator: 'tools/orbital-library.mjs', note: 'the catalogue lab/molecules.js reads; each row\'s record is lab/library/<hash>.json — deployed, never precached (sw.js DATA)',
   rows: out.map((r) => r.catalogue) }, null, 1) + '\n';

@@ -82,7 +82,7 @@ function presentation() {
       helium: { on: false, basis: 'six', x1: [0, 0, 0.8] },           // heliumview.js:11 (r1 0.8 on the z axis)
       h2: { on: false, R: 6, which: 'triplet', showCI: true, ke: 0.02, kappa: 300 },                 // h2view.js:23
       chem: { preset: 'H2O', basis: 'sto-3g', view: 'density', orbital: null, axis: 'y', kappa: 0.001, speed: 10, dt: 0.01,
-        integrator: 'mmut', tda: false, core: false, on: false },     // chemview.js:56–57
+        integrator: 'mmut', tda: false, core: false, valence: false, on: false },     // chemview.js:56–57 (valence: 0.4.0 S4c)
       orbitals: { on: false, selection: [] },                         // orbitalsview.js:469
       states: { on: false, view: 'change', ref: 'ground', flow: false, morph: 0, morphOn: false, A: null, B: null,
         drive: { pol: 'x', omega: 0.4, e0: 0.01, envelope: 'cw', duration: 400, phase: 0 }, lanes: [] },   // statesview.js:60

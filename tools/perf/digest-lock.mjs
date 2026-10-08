@@ -252,7 +252,11 @@ if (MODE === 'write') {
   process.exit(0);
 }
 const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
-const pick = (r) => { const o = {}; if (ONLY.includes('states')) { o.states = {}; for (const [s, v] of Object.entries(r.states || {})) { if (ONLY_STATES && !ONLY_STATES.includes(s)) continue; o.states[s] = {}; for (const gr of GRIDS) if (v[gr]) o.states[s][gr] = v[gr]; } } if (ONLY.includes('styles')) o.styles = r.styles; if (ONLY.includes('lines')) o.lines = r.lines; return o; };
+/* 0.4.0 S4c (the S4a verifier's S1): a state this tree has and the FIXTURE does not hold is skipped and named, never a difference —
+   the pre-S4a fixtures predate S4a's three record-opened states, and `--check` against them is the old lock, not a red one */
+const held = new Set(Object.keys(fixture.states || {})), skipped = Object.keys(result.states).filter((s) => !held.has(s));
+const pick = (r) => { const o = {}; if (ONLY.includes('states')) { o.states = {}; for (const [s, v] of Object.entries(r.states || {})) { if ((ONLY_STATES && !ONLY_STATES.includes(s)) || !held.has(s)) continue; o.states[s] = {}; for (const gr of GRIDS) if (v[gr]) o.states[s][gr] = v[gr]; } } if (ONLY.includes('styles')) o.styles = r.styles; if (ONLY.includes('lines')) o.lines = r.lines; return o; };
+if (skipped.length) console.log('SKIPPED (not in the fixture):', skipped.join(', '));
 const A = leaves(pick(fixture)), B = leaves(pick(result));
 const diffs = [];
 for (const k of new Set([...Object.keys(A), ...Object.keys(B)])) if (A[k] !== B[k]) diffs.push({ k, base: A[k], now: B[k] });
