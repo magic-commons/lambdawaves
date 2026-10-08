@@ -1,0 +1,59 @@
+/* panels/camera.css — THE CAMERA PANEL'S SHEET (panels/camera.js): the rows of a rack card that says where the view is.
+ *
+ * Layout and order are BASINS' camera window as Josh's second message left it: the row of verbs at the very top, no divider under it,
+ * no MOTION heading, no route hint; then the dials; the four scales in one row.  The 3-D mode adds the direction sphere (the kit's plane
+ * model drawing) and the hand's section.  The controls are the kit's (.trig, .k, .mir-xy, .seg, .sw): this sheet only lays them out and
+ * draws the sphere.
+ *
+ * INTENT (docs/INTENT.md): the sphere is a WELL (inset) the hand turns; the arrow, the film plane and the tip are accent A (live, the hand's);
+ * routed, they are accent B (a relationship, the modulator's value), and the hand's base is the arcs' own.  Rings are faint ink; no fill is an
+ * accent: the film is the accent at a low mix with a thin rim.  Focus is the accent ring outside.  Tokens only; kit layer. */
+@layer mir.kit.house {
+
+/* ── the values ── */
+.mir-camera {
+  --cam-gap: var(--sp-3);                            /* between the rows */
+  --cam-cell: 56px;                                  /* the narrowest dial's column: four across a 274 px rack card (BASINS' camera-motion-dials) */
+  --cam-verb-min: 72px;                              /* the narrowest verb button */
+  --cam-btn: 40px;                                   /* a verb's height (BASINS: 40; a finger: the kit's touch seat) */
+  --cam-sphere: 240px;                               /* the sphere's largest width (its drawing is 400 × 280) */
+  --cam-film-mix: 22%;                               /* the film plane: the accent at a low mix under a thin rim */
+  --cam-ring: var(--ink-faint);
+}
+@media (pointer: coarse) { .mir-camera { --cam-btn: var(--touch); } }
+/* ── end of the values ── */
+
+.mir-camera { display: flex; flex-direction: column; gap: var(--cam-gap); min-width: 0; }
+.mir-camera .cam-row { display: grid; gap: var(--sp-2); min-width: 0; }
+.mir-camera .cam-verbs { grid-template-columns: repeat(auto-fit, minmax(var(--cam-verb-min), 1fr)); }
+.mir-camera .cam-verbs > .trig { width: 100%; min-width: 0; min-height: var(--cam-btn); }
+.mir-camera :is(.cam-view, .cam-scales, .cam-handrow) { grid-template-columns: repeat(auto-fit, minmax(var(--cam-cell), 1fr)); justify-items: center; align-items: start; row-gap: var(--sp-3); }
+.mir-camera :is(.cam-view, .cam-scales, .cam-handrow) > :is(.k, .sw, .segw) { min-width: 0; }
+.mir-camera .cam-handrow > .segw { grid-column: 1 / -1; width: 100%; }
+.mir-camera .cam-handrow > .sw { grid-column: span 2; width: 100%; }
+.mir-camera .cam-mode > .segw { width: 100%; }
+.mir-camera .cam-mode .seg { display: flex; width: 100%; }
+.mir-camera .cam-mode .seg-b { flex: 1 1 0; min-width: 0; padding: 0 var(--sp-1); }
+.mir-camera .cam-pan .mir-xy { width: 100%; }
+.mir-camera .cam-hand { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.mir-camera .cam-title { font-size: var(--fs-tiny); letter-spacing: var(--tr-wider); color: var(--ink-key); }
+
+/* ── the direction sphere: a well, and the two arcs beside it (the XY pad's seat) ── */
+.mir-camsphere { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: 100%; min-width: 0; }
+.mir-camsphere-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-4); align-items: start; width: 100%; }
+.mir-camsphere-side { display: flex; flex-direction: column; gap: var(--sp-2); align-items: center; }
+.mir-camsphere .cs-svg { display: block; width: 100%; max-width: var(--cam-sphere); aspect-ratio: 400 / 280; box-sizing: border-box; border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.mir-camsphere .cs-svg.drag { cursor: grabbing; }
+.mir-camsphere .cs-svg:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-camsphere .cs-ball { fill: none; stroke: var(--glass-hairline); stroke-width: 1.4; }
+.mir-camsphere .cs-ring { fill: none; stroke: var(--cam-ring); stroke-width: 1.2; opacity: .55; }
+.mir-camsphere .cs-film { fill: color-mix(in srgb, var(--acc) var(--cam-film-mix), transparent); stroke: var(--acc); stroke-width: 1.4; stroke-linejoin: round; }
+.mir-camsphere .cs-look { stroke: var(--acc); stroke-width: 2; stroke-linecap: round; }
+.mir-camsphere .cs-tip { fill: var(--acc); }
+.mir-camsphere .cs-svg.mod :is(.cs-film, .cs-look) { stroke: var(--acc2); }
+.mir-camsphere .cs-svg.mod .cs-film { fill: color-mix(in srgb, var(--acc2) var(--cam-film-mix), transparent); }
+.mir-camsphere .cs-svg.mod .cs-tip { fill: var(--acc2); }
+.mir-camsphere.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+
+}

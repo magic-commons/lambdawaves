@@ -1,0 +1,55 @@
+/* locales/locales.css — the per-language type tokens and the right-to-left mirror (docs/LANGUAGES.md).
+ *
+ * THE LAW IT KEEPS: A LANGUAGE CHANGES TOKENS, NOT COMPONENTS.  core/i18n.js writes <html lang dir>; these gates read
+ * them and set the house's own type tokens there — case (--label-case), tracking (--label-tracking), line height
+ * (--lh) and the UI face (--font-ui).  English sets nothing, so an English page is the 1.4 page exactly.
+ *   · Arabic, Hindi, Bengali: no upper-casing, no tracking (both break joining and conjuncts), a taller line.
+ *   · Chinese, Japanese: no upper-casing, no tracking; hierarchy comes from weight and size.
+ *   · Every stack keeps Roboto first, so Latin letters and every digit are the house's, then names the planned
+ *     script face, then the system faces.  THE PLANNED FACES ARE NOT SHIPPED YET (downloads are on hold): until a
+ *     pack's @font-face lands, the browser falls through to the system face.
+ *   · dir="rtl" mirrors chrome — the wordmark's corner, the menu lists, a window's head.  A control that shows a value
+ *     (knob, fader) is a dir="ltr" island, set by the builders in kit.js; readout digits are isolated here.
+ * Load it AFTER mir/css/base.css: base.css declares the layer order, and `mir.kit.locale` must come after the house.
+ * The gates are :where(), so an app's own `:lang()` rule wins with any selector at all. */
+@layer mir.kit.locale {
+
+/* FROST · values — this sheet's values are the type per script: the label case, tracking, line height and face each
+   script asks for (docs/SKINS.md: a skin sets these names for the Latin default; the script gates win over it). */
+/* ── TYPE, PER SCRIPT ─────────────────────────────────────────────────────────────────────────────────────── */
+:where(:root:lang(ar)) {
+  --label-case: none; --label-tracking: 0; --lh: 1.7;
+  --font-ui: 'Roboto', 'Noto Sans Arabic', 'Geeza Pro', 'Segoe UI', 'Noto Sans', system-ui, sans-serif;
+}
+:where(:root:lang(hi)) {
+  --label-case: none; --label-tracking: 0; --lh: 1.7;
+  --font-ui: 'Roboto', 'Noto Sans Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', 'Mangal', system-ui, sans-serif;
+}
+:where(:root:lang(bn)) {
+  --label-case: none; --label-tracking: 0; --lh: 1.7;
+  --font-ui: 'Roboto', 'Noto Sans Bengali', 'Kohinoor Bangla', 'Nirmala UI', 'Vrinda', system-ui, sans-serif;
+}
+:where(:root:lang(zh)) {
+  --label-case: none; --label-tracking: 0; --lh: 1.6;
+  --font-ui: 'Roboto', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif;
+}
+:where(:root:lang(ja)) {
+  --label-case: none; --label-tracking: 0; --lh: 1.6;
+  --font-ui: 'Roboto', 'M PLUS 1', 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', 'Noto Sans CJK JP', system-ui, sans-serif;
+}
+/* Latin and Cyrillic keep the house's case and tracking; the planned face is a fuller cut of Roboto itself, and until it
+   ships an accented letter the subset lacks is drawn by the next face in the house stack (base.css --font-ui). */
+
+/* ── RIGHT TO LEFT: THE CHROME MIRRORS ───────────────────────────────────────────────────────────────────── */
+/* The house sheets draw their sides as logical properties (inset-inline-start, padding-inline, text-align: start,
+   border-inline-start, margin-inline-*), so the wordmark's corner, the menu lists, a window's head, its status and the
+   notebook's quotes mirror by themselves.  What is left here is what has no logical spelling, and the wordmark: it is
+   a dir="ltr" island (λ stays before WAVES), so a logical inset on it would resolve left to right. */
+/* the wordmark takes the other top corner; menubar.js places the bar on its far side */
+:where([dir="rtl"]) #title { left: auto; right: calc(var(--rack-w) + 14px); transform-origin: right center; }
+
+/* ── RIGHT TO LEFT: WHAT NEVER MIRRORS ───────────────────────────────────────────────────────────────────── */
+/* a readout's number is Latin digits in an LTR island in every language: "-1.25 Hz" never becomes "Hz 1.25-" */
+:where([dir="rtl"]) :is(.ro-val, .k-val, .fd-val, .calc-res) { direction: ltr; unicode-bidi: isolate; }
+
+}

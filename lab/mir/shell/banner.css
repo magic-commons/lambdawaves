@@ -1,0 +1,48 @@
+/* MIR · shell/banner.css — the banner (shell/banner.js) and the boot veil (shell/boot.js bootVeil).
+ *
+ * THE BANNER is BASINS' `#banner` (app/lab.css 280–297, basins.css:5), value for value: one pane over the stage at 40 %
+ * of its height, at most 520 px wide, BASINS' maroon with its own near-white ink on BOTH themes (BASINS wave 59: the
+ * pane does not follow the theme, so its ink cannot either — 13.69 : 1 on its own ground).  The × is 26 px of ink and
+ * 44 px of finger.  No shadow, no text shadow, no scrim.
+ * THE BOOT VEIL is BASINS' `#veil` (app/index.html): one opaque layer over the stage until the first real frame, a
+ * 160 ms opacity fade, then gone.  It takes no pointer.  Its first paint must not wait for this sheet: the starter's
+ * page (starter/index.html) carries the same three rules inline in its <head>, as BASINS' does.
+ * Every look value is a token declared on the part's own root, BASINS' value as its default. */
+@layer mir.kit.house {
+
+.mir-banner {
+  --banner-fill: hsl(350 40% 18% / .95);
+  --banner-edge: hsl(350 60% 50% / .6);
+  --banner-ink: hsl(0 0% 96%);
+  --banner-x-hover: hsl(0 0% 100% / .12);
+  --banner-w: 520px;
+  --banner-rise: 23px;   /* its top sits this far above the stage's 40 %, so a one-line message is centred where BASINS' was */
+  /* THE HAND (1.5.0-alpha.19): its top and its width are fixed — a longer or a second message grows it DOWN, so the ×
+     stays where the finger left it (centred and as wide as its words, the × moved 16 px a line and 148 px across) */
+  position: absolute; left: 50%; top: calc(40% - var(--banner-rise)); transform: translateX(-50%); z-index: var(--z-banner);
+  box-sizing: border-box; width: min(var(--banner-w), calc(100% - 2 * var(--sp-4))); padding: var(--sp-5); border-radius: var(--r-lg);
+  font-family: var(--font-sans); background: var(--banner-fill); border: 1px solid var(--banner-edge); color: var(--banner-ink);
+  pointer-events: auto; user-select: text; -webkit-user-select: text;
+}
+.mir-banner[hidden] { display: none; }
+.mir-banner-body { margin: 0; padding-right: 30px; color: var(--banner-ink); }
+.mir-banner-x {
+  position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; border-radius: var(--r-sm); color: var(--banner-ink); opacity: .75; font-size: var(--fs-lead); line-height: 1; cursor: pointer;
+}
+.mir-banner-x::after { content: ''; position: absolute; inset: -9px; }    /* 26 px of ink, 44 px of finger */
+.mir-banner-x:hover, .mir-banner-x:focus-visible { opacity: 1; background: var(--banner-x-hover); }
+.mir-banner-acts { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); }
+.mir-banner-acts[hidden] { display: none; }
+
+.mir-veil {
+  --veil-fill: #000000;
+  --veil-fade: 160ms;
+  --veil-ease: ease;
+  position: fixed; inset: 0; z-index: var(--z-veil); background: var(--veil-fill); pointer-events: none; opacity: 1;
+  transition: opacity var(--veil-fade) var(--veil-ease);
+}
+.mir-veil.gone { opacity: 0; }
+.mir-veil[hidden] { display: none; }
+
+}   /* end @layer mir.kit.house */

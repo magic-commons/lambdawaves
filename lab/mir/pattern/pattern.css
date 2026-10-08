@@ -1,0 +1,118 @@
+/* pattern/pattern.css — THE PATTERN WINDOW'S SHEET (harvested from BASINS app/pattern.css, branch basins-ui-fixes-2026-10-01,
+ * 2026-10-02).  Load it after the kit's sheets (mir.css imports it after the timeline's).
+ *
+ * FL's channel rack for the ENVs, docked over its ENV device, that device's width (Josh, 2026-10-01): one --pt-row per ENV;
+ * a cap in the device's colour; 16 solid kit-faced blocks (.trig — Settings › LOOK › CONTROL FACES and FLAT paint them as
+ * they paint every button) in four groups of four, each with an LED bar on its top edge: dark when off, the device's
+ * colour when on, its length the velocity; the playing step's bar glows accent B (time).  GAP 2 / GROUP_GAP 6 below are
+ * window.js's too.  The window is the kit's one window wearing the modulation material: its glass is the plate (BASINS'
+ * `.pt-surface.m2rail` plate inside a click-through kwin root is one pane here, not two).
+ * Every look value is a token in the block below; the rules read names only.  In `mir.kit.plugin.host`, as the
+ * modulation and timeline plugins' host sheets: it ranks above the house, and an app's plain rule beats it. */
+@layer mir.kit.plugin.host {
+
+/* FROST · values — on the plugin's roots: the window and its row menu */
+.mir-pattern, .pt-menu {
+  --pt-row: 40px;                                              /* one row per ENV (52 under a finger, below) */
+  --pt-inset: 3px;                                             /* a block's inset from its row */
+  --pt-surface-pad: 8px 10px;
+  --pt-cap-w: 60px;                                            /* the cap narrowed 96 → 60 so 16 steps fit a 360 px ENV device (ui-fixes §1) */
+  --pt-cap-r: 6px;
+  --pt-cap-size: 8.5px;
+  --pt-cap-weight: 700;
+  --pt-cap-track: .08em;
+  --pt-cap-stripe-dim: .45;                                    /* the device stripe at rest; full and glowing when the row is live */
+  --pt-cap-glow: 0 0 6px var(--dev);
+  --pt-step-r: 6px;
+  --pt-min-sw: 14px;                                           /* the narrowest a step gets before the strip scrolls (20 under a finger) */
+  --pt-group-shade: color-mix(in srgb, var(--fg) 7%, transparent);   /* the second and fourth groups of four, a shade over the face */
+  --pt-off-dim: .45;                                           /* a row PATT has off (and no clip rules): dimmed, kept */
+  --pt-led-r: 2px;
+  --pt-led-off: hsl(0 0% 0% / .5);                             /* the LED bar, dark when the step is off */
+  --pt-led-well: inset 0 1px 1px hsl(0 0% 0% / .4);
+  --pt-led-glow: 0 0 5px var(--dev);
+  --pt-play-ink: var(--acc2);                                  /* the playing step: accent B, time */
+  --pt-play-glow: 0 0 8px var(--acc2), 0 0 2px var(--acc2);
+  --pt-flash: 0 0 0 2px var(--dev);                            /* PATT's arrival: the row's cap rings once in its device's colour */
+  --pt-flash-time: .6s;
+  --pt-flash-ease: ease-out;
+  --pt-empty-size: 9px;
+  --pt-empty-weight: 600;
+  --pt-empty-track: .1em;
+  --pt-menu-r: 10px;
+  --pt-menu-fill: hsl(var(--glass-tint, 220 14% 16%) / .97);
+  --pt-menu-shadow: 0 8px 24px hsl(0 0% 0% / .35), inset 0 0 0 1px var(--glass-hairline, hsl(0 0% 100% / .12));
+  --pt-menu-z: 2000100;
+  --pt-mi-h: 30px;
+  --pt-mi-r: 6px;
+  --pt-mi-size: 9.5px;
+  --pt-mi-weight: 600;
+  --pt-mi-track: .08em;
+  --pt-mi-press: var(--glass-press, hsl(0 0% 100% / .1));
+  --pt-rule-ink: var(--glass-hairline, hsl(0 0% 100% / .12));
+}
+
+/* the body holds the rows and nothing else; the window's own glass is the plate */
+.mir-pattern > .mir-win-body { padding: 0; overflow: hidden; }
+.mir-pattern .pt-surface { position: relative; width: 100%; height: 100%; box-sizing: border-box; padding: var(--pt-surface-pad);
+  display: flex; flex-direction: column; }
+.mir-pattern .pt-rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
+.mir-pattern .pt-empty { margin: auto; font-size: var(--pt-empty-size); font-weight: var(--pt-empty-weight); letter-spacing: var(--pt-empty-track); color: var(--fg-soft); }
+.mir-pattern .pt-empty[hidden] { display: none; }
+/* no ENV on the rack, no pattern window on screen (window.js keeps its open state for the first ENV) */
+.mir-pattern.pt-noenv, .mir-rail.pt-noenv { display: none; }
+.mir-pattern .pt-row { --dev: var(--acc); display: flex; align-items: center; gap: 8px; flex: 0 0 var(--pt-row); height: var(--pt-row); }
+.mir-pattern .pt-row.pt-flash .pt-cap { animation: pt-flash var(--pt-flash-time) var(--pt-flash-ease) 1; }
+@keyframes pt-flash { from { box-shadow: var(--pt-flash); } }
+
+/* the cap: the kit's trig, the device's colour as its stripe and its lamp when the row is live */
+.mir-pattern .pt-cap.trig { position: relative; flex: 0 0 var(--pt-cap-w); width: var(--pt-cap-w); min-width: 0; height: calc(var(--pt-row) - 2 * var(--pt-inset)); min-height: 0;
+  padding: 0 6px 0 12px; border-radius: var(--pt-cap-r); justify-content: flex-start; overflow: hidden;
+  font-size: var(--pt-cap-size); font-weight: var(--pt-cap-weight); letter-spacing: var(--pt-cap-track); white-space: nowrap; text-overflow: ellipsis; }
+.mir-pattern .pt-cap[data-user="true"] .trig-l { text-transform: uppercase; }   /* the user's own ENV name in caps, as BASINS shows it (data, not a translation) */
+.mir-pattern .pt-cap::before { content: ''; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 3px; border-radius: var(--pt-led-r); background: var(--dev); opacity: var(--pt-cap-stripe-dim); }
+.mir-pattern .pt-cap.on::before { opacity: 1; box-shadow: var(--pt-cap-glow); }
+.mir-pattern .pt-cap .trig-l { overflow: hidden; text-overflow: ellipsis; }
+
+/* the strip: the 16 steps share the row's width; 32 and 64 scroll with four groups in view (no bar: the row keeps its height) */
+.mir-pattern .pt-strip { flex: 1 1 auto; min-width: 0; height: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.mir-pattern .pt-strip::-webkit-scrollbar { display: none; }
+.mir-pattern .pt-track { --len: 16; position: relative; height: 100%; touch-action: none;
+  width: max(calc(var(--len) / 16 * (100% + 6px) - 6px), calc(var(--len) * (var(--pt-min-sw) + 2px) + (var(--len) / 4 - 1) * 4px - 2px));
+  --sw: calc((100% - (var(--len) - 1) * 2px - (var(--len) / 4 - 1) * 4px) / var(--len)); }
+.mir-pattern .pt-row[data-long="true"] .pt-track { touch-action: pan-x; }   /* a finger scrolls a 32/64-step row */
+.mir-pattern .pt-row[data-live="false"]:not([data-clip="true"]) .pt-track { opacity: var(--pt-off-dim); }
+
+/* THE BLOCK: a .trig, placed by its index; the face is the kit's (and the LOOK's), the second group of four a shade over it */
+.mir-pattern .pt-step.trig { position: absolute; top: var(--pt-inset); bottom: var(--pt-inset); left: calc(var(--i) * (var(--sw) + 2px) + var(--q) * 4px); width: var(--sw);
+  min-width: 0; min-height: 0; height: auto; padding: 0; margin: 0; border-radius: var(--pt-step-r); cursor: pointer; }
+.mir-pattern .pt-step[data-g="1"]::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--pt-group-shade); pointer-events: none; }
+
+/* THE LED BAR: dark when off; lit in the device's colour, as long as the velocity (127 = full) */
+.mir-pattern .pt-bar { position: absolute; left: 14%; right: 14%; top: 4px; height: 3px; border-radius: var(--pt-led-r); background: var(--pt-led-off);
+  box-shadow: var(--pt-led-well); pointer-events: none; }
+.mir-pattern .pt-lamp { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v, 0) * 100%); border-radius: inherit; background: var(--dev); box-shadow: var(--pt-led-glow); opacity: 0; }
+.mir-pattern .pt-step.on .pt-lamp { opacity: 1; }
+
+/* THE PLAYING STEP: its bar glows accent B; the tick sets --i/--q and the steps' own formula places it */
+.mir-pattern .pt-play { position: absolute; top: var(--pt-inset); bottom: var(--pt-inset); left: calc(var(--i, 0) * (var(--sw) + 2px) + var(--q, 0) * 4px); width: var(--sw); opacity: 0; pointer-events: none; }
+.mir-pattern .pt-play-bar { position: absolute; left: 14%; right: 14%; top: 4px; height: 3px; border-radius: var(--pt-led-r); background: var(--pt-play-ink); box-shadow: var(--pt-play-glow); }
+
+/* the cap's menu (on the document, above every window and rail, as the timeline's menus are) */
+.pt-menu { pointer-events: auto; position: fixed; z-index: var(--pt-menu-z); min-width: 184px; padding: 4px; border-radius: var(--pt-menu-r); display: flex; flex-direction: column;
+  background: var(--pt-menu-fill); box-shadow: var(--pt-menu-shadow); }
+.pt-menu .pt-mi { height: var(--pt-mi-h); min-height: var(--pt-mi-h); padding: 0 10px; border: 0; border-radius: var(--pt-mi-r); background: transparent; text-align: left;
+  color: var(--fg); font-size: var(--pt-mi-size); font-weight: var(--pt-mi-weight); letter-spacing: var(--pt-mi-track); cursor: pointer; }
+.pt-menu .pt-mi:hover, .pt-menu .pt-mi:active { background: var(--pt-mi-press); }
+.pt-menu .pt-mi.on { color: var(--acc); }
+.pt-menu .pt-rule { display: block; height: 1px; margin: 3px 6px; background: var(--pt-rule-ink); }
+
+/* docked, the row owns the height and the device owns the width: no resize corner */
+.mir-pattern[data-dock="anchor"] .mir-win-resize { display: none; }
+
+/* FINGER SEATS (BASINS lab.css §903, pattern.css): 52 px rows, a 44 px block, 20 px steps, 44 px menu rows */
+@media (pointer: coarse) {
+  .mir-pattern, .pt-menu { --pt-row: 52px; --pt-inset: 4px; --pt-min-sw: 20px; --pt-mi-h: 44px; }
+}
+
+}   /* end @layer mir.kit.plugin.host */

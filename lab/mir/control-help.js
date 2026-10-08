@@ -1,7 +1,12 @@
 /* control-help.js — MIR · the hint that steps aside, the ⓘ panel, and one help surface per window.
  * Hints: every [title] becomes a data-help read by ONE tooltip after a short hover; a press, a wheel or an
- * operating key closes it and it stays closed until the pointer leaves and returns. */
-import { el } from './kit.js';
+ * operating key closes it and it stays closed until the pointer leaves and returns.
+ * 1.5.4 · THIS IS THE ONE HOP WHERE A TITLE BECOMES A HINT, AND SO THE ONE PLACE A HINT IS TRANSLATED: the English stays
+ * on the node as `data-help-en`, `data-help` is what the tip shows, and a language change rewrites the second from the
+ * first.  Tests and selectors that want a control by its hint read `data-help-en`, which never changes. */
+import { el, ariaLabel } from './kit.js';
+import { t, onLanguage } from './core/i18n.js';
+const vars = (n) => { try { return n.dataset.tHvars ? JSON.parse(n.dataset.tHvars) : undefined; } catch (_) { return undefined; } };
 export const HELP_HOVER_DELAY = 600;
 /* THE TWO SWITCHES an app flips on <body> to silence help:
      hintsOff  hover hints stay closed          (λWAVES SETTINGS › CONTROL HINTS) — read only by this file, so an app may rename it
@@ -13,10 +18,11 @@ let hintsOffClass = HELP_CLASSES.hintsOff;
 export function setHelpClasses(o = {}) { if (o.hintsOff) hintsOffClass = o.hintsOff; return { hintsOff: hintsOffClass, infoOff: HELP_CLASSES.infoOff }; }
 
 // Explanations are out-of-flow: a live formula can never resize its instrument.
+// `label` is the button's English name, or [template, vars] for a composed one (both translate, and re-translate).
 export function infoPanel(content, label = 'Information') {
   const anchor = el('span', 'native-info');
   const b = el('button', 'native-info-button', anchor, 'ⓘ'); b.type = 'button';
-  b.setAttribute('aria-label', label); b.setAttribute('aria-expanded', 'false');
+  if (Array.isArray(label)) ariaLabel(b, label[0], label[1]); else ariaLabel(b, label); b.setAttribute('aria-expanded', 'false');
   content.before(anchor); anchor.appendChild(content); content.classList.add('native-info-content');
   content.setAttribute('popover','manual');
   let pinned=false, hoverTimer=0;
@@ -56,14 +62,18 @@ export function installControlHelp(root = document) {
     for (const n of nodes) {
       if (!n.hasAttribute('title')) continue;
       const copy = (n.getAttribute('title') || '').trim();
-      if (!copy) { n.removeAttribute('title'); n.removeAttribute('data-help'); if (n === owner) close(); continue; }
-      n.dataset.help = copy; n.removeAttribute('title');
-      if (!n.getAttribute('aria-label') && /^(BUTTON|INPUT|SELECT|CANVAS)$/.test(n.tagName) && !n.textContent.trim()) n.setAttribute('aria-label', copy);
+      if (!copy) { n.removeAttribute('title'); n.removeAttribute('data-help'); n.removeAttribute('data-help-en'); if (n === owner) close(); continue; }
+      /* a title kit.js hint() wrote is already in this language: its English key and vars are on the node */
+      const keyed = n.dataset.tTitle, hv = vars(n), own = keyed && t(keyed, hv).replace(/<\/?m>/g, '') === copy;
+      if (!own) { delete n.dataset.tTitle; delete n.dataset.tHvars; }
+      const en = own ? keyed : copy;
+      n.dataset.helpEn = en; n.dataset.help = t(en, own ? hv : undefined); n.removeAttribute('title');
+      if (!n.getAttribute('aria-label') && /^(BUTTON|INPUT|SELECT|CANVAS)$/.test(n.tagName) && !n.textContent.trim()) ariaLabel(n, en, own ? hv : undefined);
     }
   };
   const open = (node) => {
     const copy = node?.dataset?.help; if (!copy || document.body.classList.contains(hintsOffClass)) return;
-    close(); owner = node; tip.textContent = copy; tip.hidden = false; node.setAttribute('aria-describedby', tip.id);
+    close(); owner = node; tip.textContent = node.dataset.keyHint ? copy + '  ' + node.dataset.keyHint : copy; tip.hidden = false; node.setAttribute('aria-describedby', tip.id);   // a key cap (data-key-hint, keys.hints) is never translated
     const r = node.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
     tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
     tip.style.top = (r.bottom + h + 8 <= innerHeight ? r.bottom + 7 : Math.max(8, r.top - h - 7)) + 'px';
@@ -84,6 +94,7 @@ export function installControlHelp(root = document) {
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (owner) close(); return; } if (owner && !/^(Tab|Shift|Control|Alt|Meta)$/.test(e.key)) close(); });
   addEventListener('resize', close, { passive: true }); addEventListener('scroll', close, { passive: true, capture: true });
   root.addEventListener('controlhintschange', close);
+  onLanguage(() => { close(); for (const n of (root.documentElement || root).querySelectorAll('[data-help-en]')) n.dataset.help = t(n.dataset.helpEn, vars(n)); });
 }
 
 
@@ -97,8 +108,9 @@ export function consolidateWindowHelp(root = document, { sources: sourceSel = '.
     if (!sources.length) continue;
     const book = el('div', 'window-help-book');
     for (const n of sources) book.appendChild(n);
-    const name = card.querySelector('.dev-eyebrow')?.textContent.trim() || 'Window';
-    const control = infoPanel(book, name + ' help'); control.classList.add('window-help');
+    const eb = card.querySelector('.dev-eyebrow');
+    const name = eb ? (eb.dataset.t || eb.textContent.trim()) : '';   // the English, so the name translates with the label
+    const control = infoPanel(book, ['{name} help', { name: { t: name || 'Window' } }]); control.classList.add('window-help');
     card.querySelector('.dev-util')?.prepend(control);
   }
 }

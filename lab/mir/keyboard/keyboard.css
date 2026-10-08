@@ -1,0 +1,154 @@
+/* keyboard/keyboard.css — the keyboard window and the keys help view, untinted and layered.
+ *
+ * THE LAW IT KEEPS: λWAVES' GEOMETRY, INTENT'S MATERIAL.  Every box below is λWAVES' (lab.css §KEYBOARD, waves
+ * 113–115: the 2.1 : 1 wells, the 52 px keys with their 44 px finger, the flex widths of the ANSI board, the 38 px
+ * rows, the 118 px chip column, one list under 860 px).  The four places λWAVES spent its glass tint are drawn by
+ * docs/INTENT.md instead:
+ *   BOUND KEY   the ON frost face (--state-on) and rim (--state-on-rim); its LIGHT is the accent LED the legend shows
+ *   WELLS       --glass-well under --relief-well (← --neu-inset), the same in both themes: no dark layer
+ *   SWITCH      the kit's .seg (a well; the chosen side wears the ON face, its glyph in accent A)
+ *   SEARCH      the kit's field: a well, the focus ring OUTSIDE (--state-focus)
+ *   PANE        the window's own .glass (window/window.js); this sheet paints no pane
+ * And the states: hover = a lighter face (--state-hover); pressed = the press wash + --state-press-scale; chosen (the
+ * selected action's keys, a latched drawn modifier) = the ON face with the cap in accent A; recording = LIVE, an
+ * accent-A glow (--km-live); a conflict = a neutral ring (--km-conflict) and words, no colour that means another
+ * thing; an unbound key = no face and no relief, a hairline and faint ink (a resting button is never a well).
+ * Look values are tokens; the two this sheet adds are declared on .km and .km-help.  Everything is in mir.kit.house. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+:root { --km-shift-fade: .55; }                                            /* a key's shifted character, quieter than its cap */
+.km, .km-help {
+  --km-live: 0 0 14px color-mix(in srgb, var(--acc) 60%, transparent);   /* recording: LIVE, accent A */
+  --km-conflict: 0 0 0 2px var(--fg-soft);                                /* a conflict: a neutral ring, outside */
+  --km-badge-alt: color-mix(in oklch, var(--acc) 50%, var(--acc2));        /* the ⌥ layer: between the two accents */
+}
+/* ── end of the values ── */
+
+/* ── the body: the window's pane holds two wells and nothing else ─────────────────────────────────────────── */
+.km-win > .mir-win-body, .km-help-win > .mir-win-body { padding: var(--sp-4); overflow: hidden; }
+.km-help-win > .mir-win-body { overflow: hidden auto; }
+.km { display: flex; gap: var(--sp-4); height: 100%; min-height: 0; min-width: 0; }
+.km-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: var(--sp-4); border: 0; border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.km-col-left { flex: 2.1; }
+.km-col-right { flex: 1; min-width: 285px; }
+.km-col-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 34px; margin-bottom: 5px; flex: 0 0 auto; }
+
+/* ── the legend and the platform switch (the kit's seg, sized as λWAVES' round pair) ──────────────────────── */
+.km-legend { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap;
+  font: var(--fs-micro) / 1 var(--font-ui); color: var(--dim); }
+.km-legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+.km-legend-active { background: var(--acc); box-shadow: var(--state-on-light, var(--acc-glow)); }
+.km-legend-unbound { box-sizing: border-box; border: var(--glass-border) solid var(--ink-faint); }
+.km-legend-sample { padding: 1px 5px; border-radius: var(--r-xs); font-size: var(--fs-small); font-weight: var(--w-bold); }
+.km-legend-text { color: var(--dim); }
+.km-platform { flex: 0 0 auto; }
+.km-platform .seg { border-radius: var(--r-pill); flex-wrap: nowrap; }
+.km-platform .seg-b { display: grid; place-items: center; padding: 0; border-radius: var(--r-pill); }
+@media (pointer: fine) { .km-platform .seg-b { min-width: 34px; min-height: 28px; } }
+.km-os-mac { font: var(--fs-lead) / 1 var(--font-ui); }
+.km-os-windows { width: 12px; height: 12px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; transform: skewY(-5deg); }
+.km-os-windows > span { background: currentColor; }
+
+/* ── the board ────────────────────────────────────────────────────────────────────────────────────────────── */
+.km-keyboard { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 5px; min-height: 0; }
+.km-kb-row { display: flex; gap: 4px; }
+.km-key { position: relative; box-sizing: border-box; flex: 1 0 0; min-width: 0; min-height: 52px; padding: 15px 2px 4px; margin: 0;
+  border: var(--glass-border) solid transparent; border-radius: var(--r-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer;
+  font-family: var(--font-ui); text-align: center; overflow: hidden; background-color: transparent; color: var(--ink-key);
+  transition: background-color var(--t-fast), box-shadow var(--t-fast), scale var(--t-fast); }
+/* the 44 px finger over smaller ink */
+.km-key::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max(100%, 44px); height: max(100%, 44px); }
+.km-key-w-1 { flex-grow: 1; } .km-key-w-esc { flex-grow: 1.25; } .km-key-w-bksp { flex-grow: 1.6; }
+.km-key-w-tab { flex-grow: 1.5; } .km-key-w-backslash { flex-grow: 1.35; } .km-key-w-caps { flex-grow: 1.8; }
+.km-key-w-enter { flex-grow: 2.05; } .km-key-w-lshift { flex-grow: 2.2; } .km-key-w-rshift { flex-grow: 1.8; }
+.km-key-w-ctrl { flex-grow: 1.4; } .km-key-w-win { flex-grow: 1.3; } .km-key-w-alt { flex-grow: 1.3; }
+.km-key-w-space { flex-grow: 5.2; } .km-key-w-arrow { flex-grow: 1; }
+.km-key-top { position: absolute; inset: 2px 3px auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 2px; pointer-events: none; }
+.km-key-shift-char { font-size: var(--fs-micro); opacity: var(--km-shift-fade); }
+.km-key-cap { font-size: var(--fs-base); font-weight: var(--w-bold); letter-spacing: var(--tr-tight); color: inherit; pointer-events: none; }
+.km-key-sub { max-width: 100%; font-size: var(--fs-micro); color: var(--dim); letter-spacing: var(--tr-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+
+/* UNBOUND: no face, no relief — a hairline and faint ink */
+.km-key-unbound { border-color: var(--glass-hairline); color: var(--ink-faint); }
+/* BOUND: the ON frost face and rim; the LED is its light */
+.km-key-bound { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--fg); }
+.km-key-bound::after { content: ''; position: absolute; left: 5px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%;
+  background: var(--acc); box-shadow: var(--state-on-light, var(--acc-glow)); pointer-events: none; }
+/* CHOSEN: the selected action's keys and modifiers, a latched drawn modifier — the ON face, the cap in accent A */
+.km-key:is(.km-key-selected, .km-key-latched) { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
+.km-key:is(.km-key-selected, .km-key-latched) .km-key-cap { color: var(--acc); }
+/* LIVE: the key being recorded */
+.km-key.km-key-recording { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-live); }
+.km-key.km-key-recording .km-key-sub { color: var(--acc); }
+/* A CONFLICT: a neutral ring outside the face */
+.km-key.km-key-conflict { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-conflict); }
+/* HOVER: a lighter face over whatever face it has; PRESSED: the wash and the small scale; FOCUS: the ring outside */
+.km-key.km-key-hovered { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }
+:where(:root:not(.kbm-touch)) .km-key:hover { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }   /* the live pointer hovers (core/kbm.js) */
+.km-key:active { background-color: var(--state-press, var(--glass-press)); scale: var(--state-press-scale, .96); }
+.km-key:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; z-index: 1; overflow: visible; }
+
+/* the modifier badge: a layer's own accent (λWAVES): Ctrl / ⌘ accent A, ⇧ accent B, ⌥ their mix, several a blend */
+.km-badge { font-size: var(--fs-micro); font-weight: var(--w-bold); padding: 0 2px; border-radius: var(--r-xs); color: var(--acc-ink); white-space: nowrap; }
+.km-badge-ctrl { background: var(--acc); color: var(--acc-ink); }
+.km-badge-shift { background: var(--acc2); color: var(--acc-ink); }
+.km-badge-alt { background: var(--km-badge-alt); }
+.km-badge-combo { background: linear-gradient(90deg, var(--acc), var(--acc2)); }
+
+/* ── the right well: record and reset, the status, the search, the list ───────────────────────────────────── */
+.km-editor-actions { display: flex; justify-content: center; gap: 6px; margin-bottom: 6px; flex: 0 0 auto; }
+.km-editor-actions .km-btn { flex: 0 1 128px; min-width: 0; padding: 5px 7px; }
+.km-editor-actions .km-btn .trig-l { font-size: var(--fs-small); font-weight: var(--w-bold); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+.km-btn-record:not(.on) .trig-l { color: var(--acc); }
+.km-recording .km-btn-record { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-live); }
+.km-status { margin: 0 0 6px; min-height: 1lh; font: var(--w-bold) var(--fs-base) / 1.3 var(--font-ui); color: var(--acc); overflow-wrap: anywhere; }   /* THE HAND (1.5.0-alpha.19): one line kept even when it is empty, so a message never pushes the search and the list down */
+.km-status[data-tone="conflict"] { color: var(--fg); }
+.km-search { box-sizing: border-box; width: 100%; height: 30px; flex: 0 0 auto; margin: 0 0 6px; padding: 0 9px; border: 0; border-radius: var(--r-sm);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); outline: none; user-select: text; -webkit-user-select: text; }
+.km-search:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.km-search::placeholder { color: var(--ink-faint); }
+.km-list { flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px;
+  scrollbar-width: thin; scrollbar-color: var(--glass-groove-hot) transparent; touch-action: pan-y; }
+.km-action-group { padding: 9px 5px 2px; color: var(--acc); font: var(--w-bold) var(--fs-micro) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+.km-action-row { box-sizing: border-box; flex: 0 0 auto; width: 100%; min-height: 38px; padding: 3px 7px; margin: 0; border: 0; border-radius: var(--r-sm);
+  display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 5px;
+  background-color: transparent; color: var(--fg-soft); cursor: pointer; text-align: start; transition: background-color var(--t-fast), scale var(--t-fast); }
+.km-action-row.km-action-row-hovered { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }
+:where(:root:not(.kbm-touch)) .km-action-row:hover { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }
+.km-action-row:active { background-color: var(--state-press, var(--glass-press)); scale: var(--state-press-scale, .96); }
+.km-action-row:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.km-action-row.km-action-row-selected { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
+.km-action-row.km-action-row-selected .km-action-label { color: var(--acc); }
+.km-action-row.km-action-row-recording { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-live); }
+.km-action-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; text-align: start; }
+.km-action-label { font-size: var(--fs-base); font-weight: var(--w-med); letter-spacing: var(--tr-tight); color: var(--fg-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km-action-desc { color: var(--dim); font-size: var(--fs-tiny); font-weight: var(--w-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km-empty { padding: 12px 5px; font-size: var(--fs-small); color: var(--dim); }
+
+/* the chord chips: a key cap's legend in a hairline, no relief (a chip is read, not pressed) */
+.km-chips { display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; gap: 2px; min-width: 0; overflow: hidden; direction: ltr; }
+.km-chip { box-sizing: border-box; padding: 3px 5px; border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-xs);
+  font: var(--w-bold) var(--fs-small) / 1 var(--font-mono); color: var(--fg-soft); white-space: nowrap; }
+.km-chip-key { color: var(--fg); }
+.km-chip-unbound, .km-chip-more { color: var(--ink-faint); }
+.km-chip-recording { border-color: transparent; color: var(--acc); font-family: var(--font-ui); }
+
+/* ── the help view: the same rows, read-only ──────────────────────────────────────────────────────────────── */
+.km-help { display: flex; flex-direction: column; gap: 3px; }
+.km-help > * { flex: 0 0 auto; }
+.km-help-row { min-height: 32px; padding: 3px 7px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.km-help .km-chips { justify-content: flex-end; flex-wrap: wrap; }
+
+/* the phone gets one column (λWAVES): the board needs ~700 px to stay legible; below that the LIST is the manual */
+@media (max-width: 860px) {
+  .km { flex-direction: column; gap: var(--sp-5); }
+  .km-col-left { display: none; }
+  .km-col-right { min-width: 0; }
+  .km-editor-actions .km-btn .trig-l { font-size: var(--fs-tiny); }
+}
+
+}   /* end @layer mir.kit.house */

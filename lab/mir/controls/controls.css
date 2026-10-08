@@ -1,0 +1,160 @@
+/* MIR · controls/controls.css — the general control set: stepper, select and its list pane, number field, range slider, XY pad, and the
+ * states the knob and the switch gained (docs/CONTROLS.md).
+ *
+ * THE LAW IT KEEPS: EVERY DRAWING HERE IS INTENT'S, and no control invents a relief.  A field you type in or a track is a WELL (the inset
+ * relief on the well fill); a thumb or a puck is PRESS ME (the raised relief); ON and chosen are a frost face with a thin rim and the label
+ * in accent A, never an accent fill; hover is a lighter face; pressed sinks and scales a little; focus is an accent ring outside; disabled is
+ * one fade.  A warning is --warn, never an accent.  The list pane is the menu height of the four, and wears the card style through the one
+ * `.glass[data-mir-surface="menu"]` rule, so this sheet draws only its box.  Every look value is a token declared on the component's root;
+ * inside `@layer mir.kit.house`, after skin.css (it beats skin.css's equal-specificity knob rules by order). */
+@layer mir.kit.house {
+
+/* ── the values ── */
+.mir-step { --step-b: var(--touch); }                                      /* the stepper's button: the full touch seat (BASINS' round 44 px) */
+.mir-pick { --list-z: calc(var(--z-banner) + 4); }                         /* above the rack, the windows and the banner; one under the tip */
+.mir-num { --num-w: 7em; }                                                 /* the number field's face */
+.mir-range { --rng-thumb: 18px; --rng-rail: 6px; }                        /* the thumb's disc and the track's groove */
+.rng-t { --rng-face: hsl(var(--glass-tint) / 1); --rng-hair: 0 0 0 1px var(--glass-hairline); --rng-mod: 0 0 0 2px var(--acc2);   /* the puck: the opaque tint (the knob's face), a hairline, accent B's ring when routed */
+  --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }
+.mir-xy { --xy-size: 240px; --xy-dot: 14px;                              /* AUTOMATA's pad: square, 240 px at most, a 14 px dot */
+  /* the lattice (wave 20): a dot grid that swells toward the point; it replaced the dot's glow (Josh 2026-10-06) */
+  --xy-lattice-n: auto;                              /* dots across: a number, or auto (the pad's side over the pitch) */
+  --xy-lattice-pitch: 10px;                          /* the spacing auto aims at (24 across a 240 px pad) */
+  --xy-lattice-dot: .9px;                            /* a far dot's radius */
+  --xy-lattice-swell: 3.1px;                         /* the radius added at the point (capped just under half the pitch) */
+  --xy-lattice-reach: .35;                           /* the bell's radius, as a fraction of the pad's side */
+  --xy-lattice-hover: .5;                            /* the cursor's swell, as a fraction of the point's (a hover device only) */
+  --xy-lattice-far: 1;                               /* a far dot's alpha, as a share of its ink's own (1 = exactly the tint) */
+  --xy-lattice-near: .9;                             /* the alpha at the point, where the ink has become the accent */
+  --xy-lattice-ink: var(--glass-well);               /* a far dot's ink: the well's tint, so the dots ARE the tint (Josh 2026-10-06: "make the dots the
+                                                        same color as the tint"); the pad's own fill is gone; the light theme's well gives the light dots */
+}
+/* ── end of the values ── */
+
+/* ── a switch without a lamp: its label is ON's light, as a trigger's is ── */
+.sw.sw-nolamp.on { color: var(--acc); }
+
+/* ── a switch whose glyph is the state (sw({ glyph }): power, an eye, invert; BASINS colour.css:96–102): a 44 px round target with no
+   face, no lamp and no ON face (the owner shows ON in the glyph); the glyph is ink, a lighter ink on hover; focus is the accent ring ── */
+.sw.sw-glyph {
+  --sw-glyph: 44px;                                  /* the round target */
+  --sw-glyph-size: 24px;                             /* its glyph */
+  --sw-glyph-shadow: 0 0 0 0 transparent;            /* no face, so no relief (BASINS: box-shadow none) */
+}
+.sw.sw-glyph, .sw.sw-glyph.on { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--sw-glyph); width: var(--sw-glyph); height: var(--sw-glyph); min-height: var(--sw-glyph);
+  padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: var(--sw-glyph-shadow); color: var(--ink-key); }
+.sw.sw-glyph svg { display: block; width: var(--sw-glyph-size); height: var(--sw-glyph-size); }
+.sw.sw-glyph:hover { color: var(--fg); }
+.sw.sw-glyph:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
+
+/* ── the stepper: ‹ NAME › (and the page turner) ── */
+.mir-step { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.mir-step-row { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.mir-step-name { min-width: 6em; min-height: var(--step-b); padding: 0 var(--sp-3); border: 0; border-radius: var(--r-md); background: transparent; text-align: center; font: inherit; font-size: var(--fs-small);
+  letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--fg); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); }
+/* THE HAND (1.5.0-alpha.19): the name's seat is its longest option — every option's word, unseen, in one grid cell — so
+   the ‹ › never move with the name (6em stays the floor) */
+.mir-step-seat { display: inline-grid; grid-template-columns: minmax(0, auto); min-width: 0; max-width: 100%; }   /* a name that fills its row (lanes, ramp, the list pane) still shrinks and ellipsises */
+.mir-step-seat > * { grid-area: 1 / 1; }
+.mir-step-size { visibility: hidden; white-space: nowrap; overflow: hidden; pointer-events: none; }
+.mir-step-size::before { content: attr(data-w); }
+button.mir-step-name { cursor: pointer; transition: background-color var(--motion-micro) var(--ease-out); }
+button.mir-step-name:hover:not(:disabled) { background: var(--state-hover, var(--glass-raise)); }
+button.mir-step-name:is(:active, .press) { background: var(--state-press, var(--glass-press)); scale: var(--state-press-scale, .96); }
+button.mir-step-name:disabled { cursor: default; }
+.mir-step-count { color: var(--ink-faint); font-size: var(--fs-tiny); }
+.mir-step-b {
+  width: var(--step-b); height: var(--step-b); padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--ink-key); font-size: var(--fs-lead); line-height: 1; cursor: pointer;
+  transition: background-color var(--motion-micro) var(--ease-out), transform var(--motion-micro) var(--ease-out);
+}
+.mir-step-b > svg { display: block; width: 1em; height: 1em; margin: auto; pointer-events: none; }   /* the drawn chevron, as large as the typed ‹ › it replaced (its font size is still the knob) */
+.mir-step-b:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-step-b:is(:active, .press) { background: var(--state-press, var(--glass-press)); transform: scale(.92); }
+.mir-step-b:disabled { opacity: var(--state-disabled, .38); cursor: default; background: transparent; }
+:is(.mir-step-b, button.mir-step-name):focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+
+/* ── the select: a well that opens the list pane ── */
+.mir-select { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; min-width: 0; max-width: 100%; }
+.mir-sel-b { display: inline-flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-width: 8em; max-width: 100%; min-height: var(--touch); padding: 0 var(--sp-3) 0 var(--sp-4);
+  border: var(--glass-border) solid transparent; border-radius: var(--r-md); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg-soft);
+  font: inherit; font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); cursor: pointer; text-align: start; }
+.mir-sel-b:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-sel-b[aria-expanded="true"] { color: var(--fg); }
+.mir-sel-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mir-select.empty .mir-sel-t { color: var(--ink-faint); }
+.mir-sel-c { display: inline-flex; flex: 0 0 auto; color: var(--ink-key); }
+.mir-sel-c > svg { width: 12px; height: 12px; }
+.mir-sel-b[aria-expanded="true"] .mir-sel-c { transform: rotate(180deg); }
+.mir-sel-b:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-select.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+
+/* ── the list pane: the menu height, the card style's material (skin.css), a box here ── */
+.mir-pick { position: fixed; z-index: var(--list-z); display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1); overflow-y: auto; box-sizing: border-box;
+  max-width: calc(100vw - 16px); border-radius: var(--surface-radius, var(--r-lg)); }
+.mir-pick-i { display: flex; align-items: center; min-height: var(--touch); padding: 0 var(--sp-4); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--fg-soft);
+  font: inherit; font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); text-align: start; white-space: nowrap; cursor: pointer; }
+.mir-pick-i:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-pick-i.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--acc); }   /* chosen: the frost face, a thin rim, the label in accent A */
+.mir-pick-i.coming { opacity: var(--state-disabled, .38); cursor: default; }
+.mir-pick-i.coming:hover { background: transparent; color: var(--fg-soft); }
+.mir-pick-i:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 0; }
+
+/* ── the number field: a well; drag it, type it, key it ── */
+.mir-num { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.mir-num-box { display: inline-flex; }
+.mir-num-face, .mir-num-in { box-sizing: border-box; min-width: var(--num-w); min-height: var(--touch); padding: 0 var(--sp-4); border: var(--glass-border) solid transparent; border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); font: inherit; font-size: var(--fs-small); font-variant-numeric: tabular-nums; text-align: center; }
+.mir-num-face { cursor: ns-resize; touch-action: none; }
+.mir-num-face:hover { background: var(--state-hover, var(--glass-raise)); }
+.mir-num-face:is(.drag, :active) { color: var(--acc); }
+.mir-num-in { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; cursor: text; }
+.mir-num-face:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-num.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+
+/* ── the range slider: one track, two thumbs ── */
+.mir-range { display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
+.mir-rng-rail { position: relative; height: var(--touch); margin: 0 calc(var(--rng-thumb) / 2); touch-action: none; cursor: ew-resize; }
+.mir-rng-track { position: absolute; left: calc(var(--rng-thumb) / -2); right: calc(var(--rng-thumb) / -2); top: 50%; height: var(--rng-rail); margin-top: calc(var(--rng-rail) / -2);
+  border-radius: var(--r-pill); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); pointer-events: none; }
+.mir-rng-span { position: absolute; top: 50%; height: var(--rng-rail); margin-top: calc(var(--rng-rail) / -2); left: calc(var(--u-lo, 0) * 100%); right: calc((1 - var(--u-hi, 1)) * 100%);
+  border-radius: var(--r-pill); background: var(--fd-fill-color, var(--acc-soft)); pointer-events: none; }
+.rng-t { position: absolute; top: 50%; left: calc(var(--u, 0) * 100%); width: var(--rng-thumb); height: var(--rng-thumb); margin: calc(var(--rng-thumb) / -2) 0 0 calc(var(--rng-thumb) / -2);
+  border-radius: 50%; background: var(--rng-face); box-shadow: var(--relief-raise, var(--neu-raise)), var(--rng-hair); cursor: grab; touch-action: none; }
+.rng-t::before { content: ""; position: absolute; inset: -13px; }            /* the 44-px finger, the 18-px ink */
+.rng-t:hover { box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); }
+.rng-t.drag { cursor: grabbing; box-shadow: var(--relief-raise, var(--neu-raise)), var(--acc-glow); }
+.rng-t.mod { box-shadow: var(--relief-raise, var(--neu-raise)), var(--rng-mod); }   /* a routed thumb wears accent B: a relationship */
+.rng-t:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.rng-t.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+.mir-rng-base { position: absolute; top: 50%; left: calc(var(--u, 0) * 100%); width: 2px; height: calc(var(--rng-thumb) + 6px); margin: calc((var(--rng-thumb) + 6px) / -2) 0 0 -1px;
+  border-radius: var(--r-pill); background: var(--acc); pointer-events: none; }
+.mir-rng-base[hidden] { display: none; }
+.mir-rng-vals { display: flex; justify-content: space-between; font-size: var(--fs-tiny); color: var(--fg-soft); font-variant-numeric: tabular-nums; }
+.mir-range.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+
+/* ── the XY pad: a well with a dot, beside its two knobs ── */
+.mir-xy { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.mir-xy-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-4); align-items: start; width: 100%; }
+.xy-pad { position: relative; aspect-ratio: 1; width: 100%; max-width: var(--xy-size); box-sizing: border-box; overflow: hidden; border-radius: var(--r-md);
+  border: var(--glass-border) solid transparent; background: transparent; box-shadow: none; touch-action: none; cursor: crosshair; }   /* no well: the lattice is the tint (2026-10-06) */
+.xy-pad::before, .xy-pad::after { content: ""; position: absolute; background: var(--glass-hairline); pointer-events: none; }
+.xy-pad::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+.xy-pad::after { top: 50%; left: 0; right: 0; height: 1px; }
+.xy-pad:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.xy-lattice { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }   /* transparent: it draws only dots; the well is the pad's */
+.xy-tag { position: absolute; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); pointer-events: none; }
+.xy-tag-bl { left: 6px; bottom: 4px; } .xy-tag-br { right: 6px; bottom: 4px; } .xy-tag-tl { left: 6px; top: 4px; } .xy-tag-tr { right: 6px; top: 4px; }
+.xy-dot, .xy-base { position: absolute; left: calc(var(--x, .5) * 100%); bottom: calc(var(--y, .5) * 100%); width: var(--xy-dot); height: var(--xy-dot); margin: 0 0 calc(var(--xy-dot) / -2) calc(var(--xy-dot) / -2);
+  border-radius: 50%; box-sizing: border-box; pointer-events: none; }
+.xy-dot { background: var(--fg-soft); }
+.xy-pad:is(.drag, :focus-visible) .xy-dot { background: var(--acc); }
+.xy-pad.mod .xy-dot { background: var(--acc2); }   /* a routed pair: the dot is the modulated value (accent B), the ring is the hand's base; no glow: the lattice's swell shows where it is */
+.xy-base { border: 2px solid var(--acc); }
+.xy-base[hidden] { display: none; }
+.mir-xy-side { display: flex; flex-direction: column; gap: var(--sp-2); align-items: center; }
+.mir-xy.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) { .mir-step-b, button.mir-step-name { transition: none; } }
+
+}   /* end @layer mir.kit.house */

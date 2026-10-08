@@ -1,0 +1,17 @@
+MIR logo — where these two files come from, and what may be done with them
+
+mir-light.svg   1 979 bytes   for LIGHT grounds   copied byte for byte from Josh's Library logos, JL-LOGOS/light/mir-light.svg
+mir-dark.svg    1 978 bytes   for DARK grounds    copied byte for byte from Josh's Library logos, JL-LOGOS/dark/mir-dark.svg
+Copied 2026-10-01.  They are Joshua Hosain's approved logos; do not redraw them.  Replace them only with a newer copy
+from the same folder.
+
+What they are (the folder's README): the MIR wordmark in Butler Free Extra Bold, OUTLINED (the letters are paths, no
+font is embedded or needed), with the large nine-tile rainbow diamond.  Use the light file on light backgrounds and
+the dark file on dark backgrounds.  mir/shell/gui.js shows the one that matches the theme.
+
+The typeface the letters were outlined from:
+  Butler (free version) — © Fabian De Smet, www.fabiandesmet.com.  "Butler" is a Reserved Font Name.
+  Its EULA (v2.00, in JL-LOGOS/licenses/Butler-EULA-v2-00.pdf) permits use "for personal and commercial creative
+  work" and the publishing of original designs made with it.  These files are such a design: the kit does not
+  redistribute the typeface itself, so the font file and its EULA are not shipped here.  The ABOUT page of the GUI
+  window credits the typeface and links the designer's site.
