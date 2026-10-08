@@ -107,6 +107,11 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >
 > When blocked, report the exact error and command. Avoid repeatedly creating replacement worktrees.
 
+The other Major Session's Major Agent is **Sos** (Josh, 2026-10-07: "You'll see some of the work Sos left behind. He's
+going to be ahead of you every time you hit usage. I'll let you know when to set up shop for all the agents."). So the
+baton alternates: when one account's limit hits, the other continues from the committed branches and this file; Josh gives
+the word to pause ("all pause") and the word to set up shop again. Neither agent assumes the other's agents are visible.
+
 How it is applied here: **the designated integrator for `release-0.4.0` is Claude Yan** (this Major Session's Major
 Agent, worktree `optimization-2026-09-24`) until this file says otherwise. An agent of the OTHER Major Session takes a
 stage from §3, works in its own worktree and branch (`worktree-<name>`), and hands off by a written report at
