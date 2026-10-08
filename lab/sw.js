@@ -55,7 +55,7 @@ const PRECACHE = [
   ['./dynamics.js',                                                 '20d98cde51ac'],
   ['./electrostatics.js',                                           '793bcb83905b'],
   ['./export3d.js',                                                 '2c48e5794f50'],
-  ['./field.js',                                                    '79bd7fa137cc'],
+  ['./field.js',                                                    '640e2a01cdd1'],
   ['./fieldview.js',                                                '5685fae27b27'],
   ['./first-run.js',                                                '4e5678226cc6'],
   ['./fonts/LWTitle-title.woff2',                                   '8069abf19624'],

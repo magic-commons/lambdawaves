@@ -46,6 +46,9 @@ const f16 = (h) => { const s = h & 0x8000 ? -1 : 1, e = (h >> 10) & 31, m = h & 
 const rng = (seed) => { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const med = (a) => { const s = [...a].sort((x, y) => x - y), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
 const RES = 96;
+/* n is GROWN until one batch itself lasts 2.5 s: an estimate from a short batch inherits Firefox's ~100 ms completion tick
+   (a 20-dispatch batch of 1.2 ms reads as 5 ms) and the batches it sizes come out a whole number of ticks */
+const grow = async (run) => { let n = 20; for (;;) { const ms = await run(n); if (ms * n >= 2500 || n >= 20000) return n; n = Math.min(20000, Math.max(2 * n, Math.ceil(2700 / ms))); } };
 /** the worker's own road from atoms (bohr) to the field's spec: basisFrom → fieldShells, half = extent + 6 (mathworker ensureSolve) */
 function specOf(atoms) {
   const basis = basisFrom(atoms, sto, { cart: true });
@@ -117,6 +120,9 @@ if (ONLY.includes('fallback') && recs.tryptophan) {
     const one = async (F) => { F.setResolution(RES); F.setMolecule(spec); F.setMoleculeMatrix(D, { kind: 'density' }); F.reconstructMolecule(); return { digest: (await F.fieldDigest()).hash, info: F.moleculeInfo, tiers: F.moleculeTiers }; };
     const a = await one(f), b = await one(f2);
     out.fallback = { full: { digest: a.digest, wg: a.info.wg, granted: a.tiers.granted }, refused: { digest: b.digest, wg: b.info.wg, granted: b.tiers.granted, requested: f2.limitsRequested, wrapCalls: window.__s4cCalls }, identical: a.digest === b.digest };
+    /* what the 32 KiB buys: the same 87-AO density on 64 lanes (32 KiB tile) and on 32 lanes (16 KiB), each n grown to 2.5 s */
+    const tm = async (F) => { await F.moleculeThroughput({ n: 10 }); const n = await grow(async (m) => (await F.moleculeThroughput({ n: m })).msPerDispatch); const r = []; for (let k = 0; k < 3; k++) r.push((await F.moleculeThroughput({ n })).msPerDispatch); return +med(r).toFixed(3); };
+    out.fallback.densityMs = { lanes64: await tm(f), lanes32: await tm(f2) };
     try { f2.dispose(); } catch (_) {}
   }
 }
@@ -170,9 +176,6 @@ if (ONLY.includes('valence')) {
 }
 if (ONLY.includes('timing')) {
   out.timing = [];
-  /* n is GROWN until one batch itself lasts 2.5 s: an estimate from a short batch inherits Firefox's ~100 ms completion tick
-     (a 20-dispatch batch of 1.2 ms reads as 5 ms) and the batches it sizes come out a whole number of ticks */
-  const grow = async (run) => { let n = 20; for (;;) { const ms = await run(n); if (ms * n >= 2500 || n >= 20000) return n; n = Math.min(20000, Math.max(2 * n, Math.ceil(2700 / ms))); } };
   const time = async (label) => {
     await f.moleculeThroughput({ n: 10 });
     const n = await grow(async (m) => (await f.moleculeThroughput({ n: m })).msPerDispatch);

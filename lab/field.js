@@ -1475,8 +1475,8 @@ export async function createField(canvas, opts = {}) {
   }
 
   /**
-   * GPU THROUGHPUT, the honest number this browser can give (Firefox zeroes timestamp queries and
-   * polls completion at ~100 ms): encode n frames back-to-back into an offscreen target of the
+   * GPU THROUGHPUT, the honest number any browser gives (Firefox resolves completion on a ~100 ms tick; its timestamp
+   * queries are real since 157, MEASURE.md §3, but this needs no feature): encode n frames back-to-back into an offscreen target of the
    * canvas' size, wait once for the GPU, and divide.  Returns ms per frame for
    * reconstruct+present, reconstruct only, and present only.
    * `targetMs` (optimization 2026-09-24, K9 · AUDIT-A FA5; tools only): grow n, for each of the three roads, until ONE
@@ -1577,7 +1577,7 @@ export async function createField(canvas, opts = {}) {
     return { generation, res, half, nAO: molPack.nAO, nShell: molPack.nShell, kind: molKindName, encodeMs: +stats.molMs.toFixed(3) };
   }
   /** the honest dispatch cost: n dispatches in ONE compute pass, ONE wait, divided — the method `throughput` uses,
-      because Firefox zeroes timestamp queries and polls completion at ~100 ms.  NO queue.writeBuffer and no extra
+      because Firefox resolves completion on a ~100 ms tick (its timestamps are real since 157).  NO queue.writeBuffer and no extra
       pass inside the timed region: measured here, each of those costs about 2.5 ms of staging and would be read as
       if it were the kernel — which is what a 64³ water volume timing the same as a 96³ one was telling us. */
   async function moleculeThroughput({ n = 40 } = {}) {
