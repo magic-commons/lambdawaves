@@ -35,6 +35,7 @@ try {
     LW.camera.reset(); LW.camera.setDist(8); LW.camera.setShift(P[0], P[1]); F.setOcclusion([]);
     const base = { ...LW.mat, dither: 0, invert: false, bg: [0.25, 0.25, 0.25], slice: { ...LW.mat.slice, mode: 0 } };
     const ray = await F.readPixels(LW.obs, { ...base, gamma: 2.4, frame: false, axis: false }, w, h, true);
+    F.setOcclusion([]);   /* S2-VERIFY S1: a frame between the two readbacks puts the racks' mask back; clear it again just before the line pass */
     const line = await F.linePixels(LW.obs, { ...base, frame: true, frameMode: 'box', axis: false }, w, h, true);
     const gl = (line.ground[0] + line.ground[1] + line.ground[2]) / 3;
     const corners = []; for (const a of [-1, 1]) for (const b of [-1, 1]) for (const c of [-1, 1]) corners.push([a * half, b * half, c * half]);
@@ -57,6 +58,9 @@ try {
   });
   await check('…and at p = 0 the same corner sits on the unshifted prediction (the method, on today\'s picture)', 'const P = [0, 0];' + CORNER, (v) => {
     assert.ok(v.rayErr <= 1 && v.lineErr <= 1 && v.pointerMissPx <= 1);
+  });
+  await check('…and at p = (−0.35, 0.3) — the corner over the LEFT rack — line pass = ray pass = pointer (S2-VERIFY S1: the mask, not the engine, once read 207 px here)', 'const P = [-0.35, 0.3];' + CORNER, (v) => {
+    assert.ok(v.rayErr <= 1 && v.lineErr <= 1 && v.pointerMissPx <= 1, 'one pixel over the rack');
   });
 
   /* ── 2 · THE CURSOR-ANCHORED POINT, through unproject ── */
@@ -107,14 +111,15 @@ try {
     assert.ok(Math.abs(v.shift[0] - 60 / v.w) < 1e-9 && Math.abs(v.shift[1] + 40 / v.h) < 1e-9, 'the centroid moved (30, 20) px');
     assert.ok(Math.abs(v.dist - v.d0) < 1e-12);
   });
-  await g.ev(`__LW.camera.reset(); document.getElementById('field').focus(); return 1;`);
+  await g.ev(`__LW.camera.reset(); document.getElementById('field').focus(); window.__altArrow = []; window.addEventListener('keydown', (e) => { if (e.altKey && e.key.startsWith('Arrow')) window.__altArrow.push(e.defaultPrevented); }); return 1;`);
   for (const [keys] of [[[ALT, '']], [[ALT, '']], [[ALT, SHIFT, '']]]) {
     await actions(g.s, [{ type: 'key', id: 'kk', actions: [...keys.map((k) => ({ type: 'keyDown', value: k })), { type: 'pause', duration: 30 }, ...keys.slice().reverse().map((k) => ({ type: 'keyUp', value: k }))] }]);
     await relActions(g.s);
   }
-  await check('Alt+→, Alt+↑ and Shift+Alt+↑ step the shift 0.05, 0.05 and 0.0125 (and Alt+Arrow never takes the page Back)', `
-    await __LW.settle(); return { shift: __LW.obs.shift, href: location.href, active: document.activeElement && document.activeElement.id };`, (v) => {
+  await check('Alt+→, Alt+↑ and Shift+Alt+↑ step the shift 0.05, 0.05 and 0.0125 (and every Alt+Arrow keydown is defaultPrevented — the driver cannot reach Firefox\'s Back, so the href check was vacuous; S2-VERIFY N1)', `
+    await __LW.settle(); return { shift: __LW.obs.shift, href: location.href, altArrow: window.__altArrow, active: document.activeElement && document.activeElement.id };`, (v) => {
     assert.ok(Math.abs(v.shift[0] - 0.05) < 1e-12 && Math.abs(v.shift[1] - 0.0625) < 1e-12); assert.equal(v.href, box.href);
+    assert.equal(v.altArrow.length, 3, 'three Alt+Arrow keydowns were seen'); assert.ok(v.altArrow.every((x) => x === true), 'each one defaultPrevented');
   });
   await check('a double-click (RESET VIEW) brings the pivot home', `
     const cv = document.getElementById('field'); __LW.camera.setShift(0.3, 0.2); cv.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
