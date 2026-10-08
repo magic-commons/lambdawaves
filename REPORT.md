@@ -4343,3 +4343,87 @@ after the last compaction of `follow`), `history` **39 PASS**, `mir-controls` 2,
 `new-project` 8, `offer` 16 PASS. Not run: `current` (red on the untouched base under load, the integrator's note).
 CLAUDE.md states no LINKED law; the sentence for the modulation paragraph is drafted in `research/release-0.5.0/A5-A6-BUILD.md`,
 not applied (an agent's message cannot authorise a CLAUDE.md edit).
+
+
+### wave 193: THE ACTIONS TABLE — the kit's ids, old bindings lifted, Control spelled alone
+
+`lab/rack.js`'s `ACTIONS` maps four ids to the kit's twins: `play → transport.play`, `hideUI → hide`,
+`keysheet → help`, `modWin → modulation`. `fullscreen`, `notebook`, `rack`, `dock`, `save`, `undo`, `redo`
+already match. FOLDERS gains O (free in both tables, “Open”, right hand off WASD/QE, not Ctrl+O); S stays
+`pitchDn`, and MOD arm stays Ctrl+Space (R-K1). `history` and `keyboard` are rows with no chord, per
+ADOPTING §11. Each renamed row's `was` lifts an old saved binding in `lab/keys.js` `installKeys`; the next
+save uses the new id. The MENUS block still calls `keyFor/runAction('play'|'hideUI'|'modWin'|'keysheet')`:
+`ACTIONS.find` falls back to `was` until A4/C3 renames those four calls.
+
+`group`/`short`/`inFields` live on the rows; `lab/keymap.js` loses KNOWN_SHORTS and the id lists.
+`ctrl: 'Ctrl'` spells Control alone for `dollyZoomIn`/`dollyZoomOut` and `modArm`; `ctrl: true` is the kit's
+Mod. The first hand-off records `lab/keys.js` `ctrlHeld`, `lab/keymap.js` `ctrlCap` and the recorder,
+`lab/shortcuts.js` `ctrlOf`: the explicit spelling survives matching, display and saved bindings.
+Ten controls carry `data-key-action`: `#rackToggle`, the notebook's projects/close buttons in
+`lab/index.html`; RESET VIEW, OBSERVABLE, STYLE and HISTORY UNDO/REDO in `lab/rack.js`; PALETTE in
+`lab/paletteview.js`; the keyboard × in `lab/keymap.js`. Five transport controls remain for A5+A6
+(play, MOD, home, step back/forward), dock-btn and mod-exp for A4/C3; `native-ui.js` windowInfoSw (notes)
+is untagged. A9's `CAM` shadowing caused a boot TDZ, found by the browser and fixed.
+
+Gates recorded by the builder: node **85/85** after each seam; `keyboard-shortcuts` proves the lift and
+spelling; browser alone on 8767/5237, `keyboard-window` GREEN (count **not recorded in the hand-off**),
+`menubar` **8 GREEN**. No timing red. Final builder ledger for A9–A11 together:
+`cat lab/*.js | wc -l` **36,280 → 36,244 (−36)**; per-seam final line deltas are **not recorded in the
+hand-off**. The integrator's merged A5+A6 and A9–A11 tree reads **36,198 (−82)** (PLAN).
+
+### wave 194: TESTS FIND THINGS BY HOOK — eleven suites, four gate rewrites, one port settle
+
+`lab/menubar.js` carries `data-menu`; `lab/keymap.js`, `lab/index.html` and `lab/modwindow.js` carry
+`data-mir-window` for keyboard/notebook/modulation; `modwindow.js`'s rail carries
+`data-mir-rail="modulation"`, and `index.html`'s add/fav lists carry `data-rack-list`. Eleven browser
+suites find things by those hooks: `frame-occlusion`, `history`, `keyboard-window`, `menubar`,
+`latex-copy`, `export3d`, `molecular-names`, `current`, `input`, `molecule-demos`, `new-project`.
+Kept on purpose: `#menubar` (the kit's id), `#offer` (C9), history's 'ADD LFO' (inside the kit), menu
+rows by label (no kit row hook).
+
+Four node gates stop pinning the old kit's source shape. `tests/mir.test.mjs` takes namespace imports
+and a USES list; §16 judges the imported modules against the manifest's inventory and every used name
+against exported names (`labPresetFolders` is a NOTE, ADOPTING §10), with `MOD_STATE_READS` containing
+104 and `MOD_STATE_V`, `PRESET_LS` under `lambdawaves.q0.`. `tests/mir-manifest.test.mjs` accepts a
+pre-release and a `"line"` member; the ACCEPTED sha-256 pin is untouched. `tests/slider-keys.test.mjs`
+measures Shift's step: `.01·keyFine` where the kit's law exists (1.5 ran **0.00125**), else 1.4.3's
+**.001** (the branch this tree ran). `tests/access.test.mjs` A8 judges the rendered announcement of a
+real kit knob through the new `tests/helpers/dom-shim.mjs`. `tests/new-project.test.mjs` reads
+`M.BPM_DEFAULT` instead of a pinned 60. `tools/gate/drv.mjs` waits up to **4 s** for the driver port.
+
+Gates: node **85/85** after each seam. Browser each ALONE on 8767/5237: `keyboard-window` GREEN
+(count **not recorded in the hand-off**), `menubar` **8**, `frame-occlusion` **7/7**, `history` **39**
+(no pause hack; reopened sessions), `offer` **16**, `current` **15**, `input` **13**, `latex-copy` **10**,
+`export3d` **10**, `molecular-names` **6**, `molecule-demos` **3**, `new-project` **8**, `mir-controls` **2**
+GREEN. No timing red. Final builder ledger A9–A11: **36,280 → 36,244 (−36)**; per-seam final line deltas
+are **not recorded in the hand-off**. Integrator merged A5+A6 and A9–A11: **36,198 (−82)** (PLAN).
+
+### wave 195: THE KIT PRECACHE POLICY — the SKIP list, 7.33 MiB, wiring still red
+
+`lab/sw.js` §1b gains `const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];` and a NEVER_PRECACHE
+row. `tests/pwa.test.mjs` reads SKIP like DATA, proves it on **10 paths** and states headroom;
+`tools/build-deploy.mjs` `NOT_PRECACHED` reads the same policy. On the adopted alpha.24 copy,
+**382 entries / 9,924,481 B (9.46 MiB) → 369 / 7,690,553 B (7.33 MiB)**, **0.67 MiB** below the 8 MiB
+ceiling. The **13** skipped files total **2,237,604 B** (12 packs **1,568,985 B** + tokens.json
+**668,619 B**); `build-deploy` **V1 PASS**, all 13 shipped in `dist/` uncached. Untouched tree:
+**188 / 4,864,170 B**.
+
+The canary's node result moves **78/85 → 81/85**, seven reds to four. `access` A8, `mir`'s
+`labPresetFolders` import and `slider-keys` (.709) clear. `mir-manifest` now reaches the preserved
+forgery pin: alpha.24 is not yet an accepted adoption (C0's row passes **262 files**).
+`new-project --check` is OUT OF STEP, bpm 60→30 (C0's documented regeneration makes it green).
+`wiring` still finds unreached kit modules. `pwa` passes the ceiling, then exposes the kit's ABOUT type
+credit (`lab/mir/shell/gui.js`, D2), dangling `lab/mir/app.js → ../LICENSE` (D3), uncached imports of
+five STAGED shell modules (about, accent, menubar, notebook, wordmark; M10's exclusion), and the font
+gate counting **14** new fonts/info faces as ours (expects **3**). The hand-off calls these “three kit
+deltas” but lists four; all four set aside in the throwaway, `pwa` is GREEN. None of those probes was
+committed.
+
+“Precache what a root reaches” is NOT built; the SKIP list does not clear `wiring`. R5-W1 proposes
+reporting adopted kit files nothing reaches, leaving them unprecached, without failing the gate;
+it is **taken as the default in PLAN §9**, with implementation still separate. Gates on the builder's
+tree: node **85/85** after each seam; the thirteen browser suites and counts are recorded in wave 194,
+with `keyboard-window`'s count **not recorded in the hand-off**. Final builder ledger A9–A11:
+**36,280 → 36,244 (−36)**; per-seam final line deltas are **not recorded in the hand-off**. Integrator
+merged A5+A6 and A9–A11: **36,198 (−82)** (PLAN). The builder kept `.tmp/canary-after/` for A0;
+this documentation work leaves it there.
