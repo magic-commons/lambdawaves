@@ -1,7 +1,7 @@
 // THE TAKE-IN's CHEAP BUGS (0.4.0 S0 · wave 137), in the real app, each with the road a user takes:
 //   1 · LINKED: at project start, after a project open and after NEW, a real Space plays BOTH clocks (Josh's NEXT UPDATE note);
 //       with nothing to run the modulation clock waits for its editor, and plays the instant it opens
-//   2 · CALCULUS's ⧉ copies its rows, not one header line (DIGESTS.calculus read a `stats` field the view never had)
+//   2 · CALCULUS's ⧉ copies its rows, not one header line (DIGESTS.calculus read a `stats` field the view never had); since 0.4.0 S3 the prose figure
 //   3 · the STATUS TAGS tick with METERS closed (they rode METERS' tick and went stale)
 //   4 · WIGNER stands down under MOLECULES (hydroReader did not know `chem`)
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
@@ -67,12 +67,12 @@ try {
   }
   console.log('PASS LINKED: a real Space plays the field, and the modulation clock wherever it has something to run (routed, or its editor open — then within 150 ms of opening); a second Space pauses both. At a fresh start and after NEW the kit refuses the modulation play (nothing-to-run): Josh\'s symptom, open as a KIT BRIEF — ' + starts.map((s) => `${s.label}: t ${s.before.t.toFixed(2)} → ${s.after.t.toFixed(2)}, mod ${s.after.mod ? 'playing' : 'refused (nothing to run)'}` + (s.opened ? `, playing ${s.opened.ms.toFixed(0)} ms after the editor opened` : '')).join('; '));
 
-  /* ── 2 · CALCULUS's ⧉: the digest carries the rows ── */
+  /* ── 2 · CALCULUS's ⧉: the digest carries the rows — since 0.4.0 S3 as THE PROSE FIGURE (calculus.js calculusMarkdown) ── */
   const calc = await g.ev(`__LW.loadPreset('1s+2pz'); __LW.layout.raise('calculus'); await __LW.settle(); await __w(300); await __LW.settle();
     const d = __LW.layout.digest('calculus'), lines = d.split('\\n');
-    return { lines: lines.length, rows: /"rows"/.test(d), named: /"name"/.test(d), head: lines[0] };`);
-  assert.ok(calc.rows && calc.named && calc.lines > 3, JSON.stringify(calc));
-  console.log(`PASS CALCULUS's ⧉ copies ${calc.lines} lines with its rows (was the header line alone)`);
+    return { lines: lines.length, head: lines[0], figure: /\\nFigure\\. /.test(d), ehrenfest: (d.match(/Ehrenfest: /g) || []).length, laws: (d.match(/\\$\\$/g) || []).length / 2 };`);
+  assert.ok(/^### CALCULUS · \$t = /.test(calc.head) && calc.figure && calc.ehrenfest === 1 && calc.laws >= 3 && calc.lines > 3, JSON.stringify(calc));
+  console.log(`PASS CALCULUS's ⧉ copies the prose figure — ${calc.lines} lines, one Ehrenfest sentence, ${calc.laws} displayed laws (was the header line alone)`);
 
   /* ── 3 · the STATUS TAGS tick with METERS closed ── */
   const tags = await g.ev(`const met = document.querySelector('.dev[data-id="meters"]'); if (met && !met.classList.contains('closed')) met.querySelector('.dev-close').click();
