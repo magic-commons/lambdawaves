@@ -16,6 +16,12 @@
    Old card untouched (it reads the facade). `lab/history.js` no longer imported (still on disk).
    **history browser 39/39** (8803/5273, alone): flush 0.32 ms median, undo max 108 ms.
 
+4. `54c94e0` — hand-off.
+5. `f52dbb0` — **`lab/history.js` deleted**; the facade moved out of rack.js into **`lab/edit-domain.js`**
+   (`createEditHistory`, the old ring's port, over the kit's `createHistory`; laws K1–K9 in its header). rack.js is back to its
+   0.4.0 shape (+4/−3 vs `7044f37`: import + `createEditHistory(`). `tests/history.test.mjs` re-aimed (import + 2 comments):
+   **node 18/18 GREEN**. CLAUDE.md's undo-ring path updated. Browser `history` NOT yet re-run on this commit (next: after the card).
+
 ## State
 
 Node after the adopt (85 suites): red = `mir-manifest` (alpha.24 not in ACCEPTED), `new-project` (--check out of step),
@@ -24,5 +30,5 @@ Gate server running on 8803 (pid 3337977; stop it by pid).
 
 ## Next step
 
-Delete `lab/history.js` and handle `tests/history.test.mjs` (it imports the deleted file); then the card → a `device` holding
-the kit's `historyList`; then the gates; then C5-BUILD.md + REPORT.
+The card → a `device` holding the kit's `historyList` (over a view with the kit's row indices); then browser `history` 39 +
+the other gates; then C5-BUILD.md + REPORT.
