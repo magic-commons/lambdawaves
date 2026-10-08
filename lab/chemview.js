@@ -64,7 +64,8 @@ export function createChem(host, api) {
      different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
      (Invisible while there were eight presets and the laws only ever restored H₂O onto H₂O.)  One pending value,
      consumed by the next solve and then cleared. */
-  let pendingOrbital = null;
+  let pendingOrbital = null, pendingKey = null;                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
+  const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
@@ -257,8 +258,9 @@ export function createChem(host, api) {
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
         sol = r; sol.key = key; sol.seq = seq; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
-        orbital = (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
-        pendingOrbital = null;
+        const named = keyed(r.names, pendingKey);
+        orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
+        pendingOrbital = pendingKey = null;
         rebuildOrbKnob(); pushField(); refresh(); notify();
       };
       if (api.derived) api.derived(fill); else fill();
@@ -698,6 +700,7 @@ export function createChem(host, api) {
     if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
+    pendingKey = o.orbitalKey || null;                                            // 0.4.0 S2: a link's orbital by its S1 name, resolved when the solve lands
     if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
     else if (o.orbital === null) orbital = pendingOrbital = null;   // 0.3.1 · S4: the record's "not chosen" (HOMO by default) lands too — an undo of ON and NEW clear the fill
     if (typeof o.axis === 'string' && AXES.includes(o.axis)) { axis = o.axis; aSeg.set(axis); }
@@ -709,6 +712,7 @@ export function createChem(host, api) {
     if (o.core !== undefined) { core = !!o.core; coreSw.set(core); cvCore.hidden = !core; }
     setRun(false); rt = null; spec = null; fit = null; selected = null;
     if (resolve && sol) sol = null;
+    if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = m.k; pendingKey = null; }   // S2: the same molecule, already solved: the name lands now
     orbKnob.root.classList.toggle('off', view !== 'orbital');
     if (o.on !== undefined) setOn(!!o.on);
     else if (sol) { pushField(); refresh(); } else refresh();
@@ -736,6 +740,8 @@ export function createChem(host, api) {
       return { group: N.reliable ? N.group : null, config: N.reliable ? N.config : null, reason: N.reliable ? null : N.reason,
         orbital: view === 'orbital' ? { k: k + 1, frontier: mo ? mo.frontier : null, plain: f ? f.plain : null, latex: f ? f.latex : null, ascii: f ? f.ascii : null } : null };
     },
+    /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
+    orbitalKey() { const N = sol && sol.names, mo = N && N.reliable && Number.isFinite(orbital) ? N.mos[orbital - 1] : null; return mo && mo.irrep ? { group: N.group, irrep: mo.irrep, count: mo.count, member: mo.member || null } : null; },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one

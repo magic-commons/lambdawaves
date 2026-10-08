@@ -37,7 +37,7 @@ this file.
 | `hamiltonian`, `rates`, `rotationRates`, `sturmian`, `wigner`, `mo`, `instruments`, `field`, `readers`, `space`, `domain`, `shadow` | project | PROJECT |
 | `mat` LOOK: view, style, exposure, softness, iso, grain, knee, dither, hueShift, boost, gamma, finish, bow, slice, steps, paletteOn | project | PROJECT |
 | `overlays` (vortex, kepler, particles, dials) | project | PROJECT |
-| `obs` pose (yaw, pitch, dist, fov, quat) and `camera.autoRotate` | project | PROJECT, not in history |
+| `obs` pose (yaw, pitch, dist, fov, quat, `shift` — the lens shift, 0.4.0 S2; a file or link without it opens at 0) and `camera.autoRotate` | project | PROJECT, not in history |
 | `modulation` (sources, macros, routes, transport, seq, v) and `modulationBases` | project | PROJECT |
 | `ab` (A/B stores, omega, on) | project | PROJECT |
 | `quality {res, steps, scale}` | project, clamped by the device (`deviceQuality`; a file never switches AUTO SCALE off) | PROJECT, advisory, not in history (D5) |

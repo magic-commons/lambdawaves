@@ -73,7 +73,7 @@ import { stateLatex, moleculeLatex } from './latex-state.js';   // 0.3.3 · wave
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
-import { CAM, createCameraLaw } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
+import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
@@ -106,7 +106,7 @@ export async function boot(dom) {
   const clock = new Clock();
 
 
-  const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38) };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT
+  const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT; 0.4.0 S2: `shift`, the pivot's place on the frame (NDC)
   const mat = { view: VIEW.phase, exposure: 1, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, invert: false, frame: true, axis: true, axisInk: 'theme', paletteOn: false, style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, bg: [0.028, 0.038, 0.058], gamma: 1, lightUI: false, finish: 'lit' };   // S3: 'lit' from the boot, as restore() writes it
   const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];   // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
   let palette = null;
@@ -1562,7 +1562,13 @@ export async function boot(dom) {
     r4b.appendChild(ui.fovK.root);
     r4b.appendChild(trig({ label: 'RESET VIEW', title: 'Restore the default camera pose and motion', onFire: () => resetView() }).root);
     r4b.appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
-    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Double-click, double-tap, or RESET VIEW restores the camera.';
+    /* 0.4.0 S2 · THE LENS SHIFT: where the pivot sits on the frame (obs.shift, NDC), the picture sliding under a still pivot —
+       the targets the kit's XY pad (0.5.0) will drive; every hand comes through setShift (lab/camera-law.js) */
+    const r4p = el('div', 'row tight', gc), panFmt = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
+    ui.panXK = knob({ label: 'PAN X', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture across: where the pivot sits, edge to edge', onInput: (v) => setShift(v, obs.shift[1]) });
+    ui.panYK = knob({ label: 'PAN Y', min: -CAM.SHIFT, max: CAM.SHIFT, value: 0, fmt: panFmt, title: 'Slide the picture up and down: where the pivot sits, edge to edge', onInput: (v) => setShift(obs.shift[0], v) });
+    r4p.append(ui.panXK.root, ui.panYK.root, trig({ label: 'PAN HOME', title: 'Put the pivot back in the middle of the frame', onFire: () => setShift(0, 0) }).root);
+    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag turns the view; Shift gives finer motion. DRAG GAIN changes sensitivity, FLING sets release speed, and FRICTION controls decay. TURNTABLE keeps the horizon level; FREE permits roll. Alt-drag or two fingers slide the picture; the molecule stays the pivot. Double-click, double-tap, or RESET VIEW restores the camera.';
 
     /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────
      * lab/capture.js is 1033 lines, thirty node gates, and until this row nothing in the interface imported it.
@@ -2587,6 +2593,10 @@ export async function boot(dom) {
         get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); setKnob(ui.zoomK, obs.dist); schedule(TIER.PRESENT); } },
       { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => ui.fovK,
         get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); setKnob(ui.fovK, obs.fov); schedule(TIER.PRESENT); } },
+      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => ui.panXK, hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
+        get: () => obs.shift[0], set: (v) => { obs.shift = [clampShift([v, 0])[0], obs.shift[1]]; setKnob(ui.panXK, obs.shift[0]); schedule(TIER.PRESENT); } },
+      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => ui.panYK, hint: 'the lens shift up and down: where the pivot sits on the frame',
+        get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], clampShift([0, v])[1]]; setKnob(ui.panYK, obs.shift[1]); schedule(TIER.PRESENT); } },
       { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => __LW_hooks.setStage(v) },
       { id: 'material.gamma', label: 'GAMMA', map: 'linear', min: 0.5, max: 2.4, group: 'material', knob: () => ui.gammaK, get: () => mat.gamma, set: (v) => { mat.gamma = v; setKnob(ui.gammaK, v); schedule(TIER.PRESENT); } },
       { id: 'material.exposure', label: 'EXPOSURE', map: 'log', min: 0.08, max: 12, group: 'material', knob: () => ui.expK,
@@ -4746,6 +4756,10 @@ export async function boot(dom) {
     { id: 'dollyZoomIn', label: 'dolly zoom in (size held)', key: 'KeyQ', ctrl: true, shift: true, run: () => dollyZoom(-1, 1) },
     { id: 'dollyZoomOut', label: 'dolly zoom out (size held)', key: 'KeyE', ctrl: true, shift: true, run: () => dollyZoom(1, 1) },
     { id: 'camReset', label: 'reset the camera', key: 'KeyR', run: () => resetView() },
+    { id: 'panLeft', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-0.05 * f, 0) },   // 0.4.0 S2: the lens shift, 0.05 of the half-frame a press
+    { id: 'panRight', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(0.05 * f, 0) },
+    { id: 'panUp', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, 0.05 * f) },
+    { id: 'panDown', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -0.05 * f) },
     { id: 'axisX', label: 'rotation axis x', key: 'KeyX', run: () => setAxis('x') },
     { id: 'axisY', label: 'rotation axis y', key: 'KeyY', run: () => setAxis('y') },
     { id: 'axisZ', label: 'rotation axis z', key: 'KeyZ', run: () => setAxis('z') },
@@ -4756,10 +4770,6 @@ export async function boot(dom) {
     { id: 'turnNeg', label: 'turn ψ about the axis, −', key: 'BracketLeft', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: -0.12 * f, t: clock.t }); touchState(); } },
     { id: 'turnPos', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
     { id: 'slap', label: 'impulse along the axis (k = 0.2)', key: 'KeyK', run: (f) => { if (__LW_hooks.slap) __LW_hooks.slap(0.2 * f, keyState.axis); } },
-    { id: 'panLeft', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-0.05 * f, 0) },   // 0.4.0 S2: the lens shift, 0.05 of the half-frame a press
-    { id: 'panRight', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(0.05 * f, 0) },
-    { id: 'panUp', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, 0.05 * f) },
-    { id: 'panDown', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -0.05 * f) },
     { id: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'grain', 'signed', 'bands']; const nx = order[(order.indexOf(STYLE_NAMES[mat.style]) + 1) % 5]; mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = ['density', 'phase', 'real', 'imag', 'diff', 'reim']; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % 6]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (palette) palette.setOn(!palette.on); } },
@@ -4860,6 +4870,7 @@ export async function boot(dom) {
   function modSeats(data) {
     const pr = data.presentation, I = pr.instruments || {}, st = I.states, T = 2 * Math.PI;
     return { 'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'], 'observer.dist': [pr.obs, 'dist'], 'observer.fov': [pr.obs, 'fov'],
+      'observer.panx': [pr.obs && pr.obs.shift, 0], 'observer.pany': [pr.obs && pr.obs.shift, 1],
       'material.stage': [pr.ui.stage, 'mix'], 'material.gamma': [pr.mat, 'gamma'], 'material.exposure': [pr.mat, 'exposure'], 'material.softness': [pr.mat, 'softness'],
       'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'], 'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
@@ -4877,7 +4888,7 @@ export async function boot(dom) {
        yesterday and a project written yesterday opens here, unchanged in either direction — the link-open path
        below is what applies them, because a link is the one road on which they are somebody else's. */
     const S = { experiment: Object.assign(reg.serialize(clock.t), { rate: clock.rate, window: clock.window, damping: reg.damping }),
-      presentation: { obs: { ...obs }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
+      presentation: { obs: { ...obs, shift: [...obs.shift] }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
         paletteId: palette ? palette.id : PAL_DEF,
         space, palette: palette ? { on: palette.on, selected: palette.selected, stops: palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
         hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: gasAxial ? 'axial' : 'reg' },
@@ -4993,7 +5004,7 @@ export async function boot(dom) {
         if (Number.isFinite(ex.damping)) { reg.setDamping(ex.damping); if (ui.dragKnob) ui.dragKnob.set(reg.damping); }
         ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; lastNmax = -1; setReference();
       }
-      if (pr) { if (!hist) { camLevel.from = null; Object.assign(obs, pr.obs || {}); obs.mode = obs.mode === 'free' ? 'free' : 'turntable'; if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
+      if (pr) { if (!hist) { camLevel.from = null; Object.assign(obs, pr.obs || {}); if (pr.obs) obs.shift = clampShift(pr.obs.shift); obs.mode = obs.mode === 'free' ? 'free' : 'turntable';   /* S2: a pose without a shift (an older file or link) opens at 0 */ if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
       A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
       ones the link carried, so mint(open(link)) stopped being byte-identical the moment the camera began booting
       FREE — B98's fixed point, and the codec's own node suite cannot see it because the asymmetry is here and not
@@ -5160,7 +5171,7 @@ export async function boot(dom) {
   }
 
   /** the href for the state as it stands, with everything encodeState measured about it */
-  function mintLink() { linkLast = linkFor(serialize(), { paletteId: palette ? palette.id : PAL_DEF }); return linkLast; }
+  function mintLink() { linkLast = linkFor(serialize(), { paletteId: palette ? palette.id : PAL_DEF, orbitalKey: chem.on ? chem.orbitalKey() : null }); return linkLast; }   // S2: the molecule's orbital rides by its S1 name
 
   /** MINT and copy.  Reports `chars`, and when something is not carried it SAYS SO. */
   async function copyLink() {

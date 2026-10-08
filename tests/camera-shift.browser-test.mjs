@@ -120,6 +120,45 @@ try {
     const cv = document.getElementById('field'); __LW.camera.setShift(0.3, 0.2); cv.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     return { shift: __LW.obs.shift };`, (v) => assert.deepEqual(v.shift, [0, 0]));
 
+  /* ── 4 · THE PANEL, THE SCOPE, THE LINK (K3) ── */
+  await check('CAMERA\'s PAN X / PAN Y follow every hand and drive the shift; PAN HOME centres it; neither is a history row', `
+    const LW = __LW, kx = document.querySelector('[data-param="observer.panx"]'), ky = document.querySelector('[data-param="observer.pany"]');
+    const home = [...document.querySelectorAll('button, [role="button"]')].find((b) => /PAN HOME/.test(b.textContent));
+    LW.camera.reset(); const cursor = LW.history.cursor;
+    LW.camera.setShift(0.25, -0.5); const shown = [kx.querySelector('.k-val').textContent, ky.querySelector('.k-val').textContent];
+    kx.focus(); kx.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', code: 'ArrowRight', bubbles: true, cancelable: true }));
+    const afterKey = LW.obs.shift.slice(); home.click(); await new Promise((r) => setTimeout(r, 500));
+    return { shown, afterKey, homed: LW.obs.shift, registry: LW.mod.registry ? [LW.mod.registry.has('observer.panx'), LW.mod.registry.has('observer.pany')] : null, rows: LW.history.cursor - cursor };`, (v) => {
+    assert.deepEqual(v.shown, ['+0.25', '-0.50']); assert.ok(v.afterKey[0] > 0.25 && v.afterKey[1] === -0.5, 'the PAN X dial moves x alone');
+    assert.deepEqual(v.homed, [0, 0]); assert.equal(v.rows, 0, 'a view is not an edit');
+  });
+  await check('a project carries the shift, and an older project without one opens centred', `
+    const LW = __LW; LW.camera.reset(); LW.camera.setShift(0.3, 0.2); const S = LW.serialize(), saved = S.presentation.obs.shift.slice();
+    LW.camera.setShift(-0.7, 0.1); LW.restore(JSON.parse(JSON.stringify(S))); const back = LW.obs.shift.slice();
+    const older = JSON.parse(JSON.stringify(S)); delete older.presentation.obs.shift; LW.camera.setShift(0.5, 0.5); LW.restore(older);
+    const res = { saved, back, older: LW.obs.shift.slice() }; LW.camera.reset(); return res;`, (v) => {
+    assert.deepEqual(v.saved, [0.3, 0.2]); assert.deepEqual(v.back, [0.3, 0.2]); assert.deepEqual(v.older, [0, 0]);
+  });
+  await check('THE LINK CARRIES THE SHOT: "1b₁ of water, framed in the gap" is one link — the shift, the molecule, and the orbital by its name (which wins over the index)', `
+    const LW = __LW, sl = await import('/lab/statelink.js');
+    await LW.chem.solve('H2O'); LW.chem.setOn(true); LW.chem.setView('orbital'); LW.chem.orbital(5); await LW.settle();
+    LW.camera.reset(); LW.camera.setShift(0.4, -0.3);
+    const key = LW.chem.orbitalKey(), m = LW.link.mint();
+    /* the same shot with a WRONG index: the name must win */
+    const S = LW.serialize(); S.presentation.instruments.chem.orbital = 3; const forged = sl.linkFor(S, { orbitalKey: key }).href;
+    const land = async (href) => { LW.camera.reset(); await LW.chem.solve('NH3'); LW.chem.orbital(2); LW.chem.setOn(false); await LW.settle();
+      const r = LW.link.open(href); await LW.chem.prepare(); await LW.settle(); await new Promise((q) => setTimeout(q, 300));
+      return { ok: r.ok, warnings: r.warnings, shift: LW.obs.shift.map((v) => +v.toFixed(6)), on: LW.chem.on, preset: LW.chem.save().preset, view: LW.chem.save().view, orbital: LW.chem.orbital(), key: LW.chem.orbitalKey() }; };
+    const a = await land(m.href), b = await land(forged);
+    LW.camera.reset(); LW.chem.setOn(false); await LW.settle();
+    return { key, chars: m.chars, a, b };`, (v) => {
+    assert.ok(v.key && v.key.group === 'C2v', 'water is named');
+    for (const r of [v.a, v.b]) {
+      assert.ok(r.ok && r.on && r.preset === 'H2O' && r.view === 'orbital'); assert.deepEqual(r.shift, [0.4, -0.3]);
+      assert.equal(r.orbital, 5, 'the orbital by its name'); assert.deepEqual(r.key, v.key);
+    }
+  });
+
   const errs = await g.errors();
   if (errs.errs.length) { failed++; console.error('FAIL page errors', errs.errs); }
 } finally {

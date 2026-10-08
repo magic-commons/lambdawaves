@@ -60,7 +60,7 @@ function presentation() {
   const H = getHamiltonian();
   const prism = PRESET_BY_ID.get(DEFAULT_PALETTE);
   return {
-    obs: { yaw: CAM.HOME.yaw, pitch: CAM.HOME.pitch, dist: CAM.HOME.dist, fov: CAM.HOME.fov, mode: 'free', quat: quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch) },   // rack.js:104; the MODE is the project's (D4's escape hatch)
+    obs: { yaw: CAM.HOME.yaw, pitch: CAM.HOME.pitch, dist: CAM.HOME.dist, fov: CAM.HOME.fov, mode: 'free', quat: quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch), shift: [...CAM.HOME.shift] },   // rack.js:109; the MODE is the project's (D4's escape hatch); 0.4.0 S2: the lens shift
     /* rack.js:105 minus bg / lightUI / stageCustom and the FIELD_CHROME (S1), plus bow (rack.js:1837) and finish (restore() writes
        'lit' where a file has none).  NOT steps: applyRebuild writes mat.steps from quality.steps — the device's, like quality. */
     mat: { view: VIEW.phase, exposure: 1, softness: 0.7, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, paletteOn: false,

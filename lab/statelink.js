@@ -89,8 +89,9 @@ const T_SOURCE  = ['total', 'rho'];
    place.  Index 3 is unused and reads as 'theme'. */
 const AXIS_INK = ['theme', 'cmy', 'rgb'];
 
-const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08, NATIVE: 0x09 };
-const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates', 9: 'native material' };
+const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08, NATIVE: 0x09, MOL: 0x0A };
+const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates', 9: 'native material', 10: 'molecule' };
+const LITERAL = [];                    // 0.4.0 S2: no table — the molecule's names always travel as literal strings (THE VERSION POLICY)
 
 /* ── base64url, no padding (portable: no Buffer, no btoa) ──────────────────────────────────── */
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
@@ -290,6 +291,17 @@ export function encodeState(state, opts = {}) {
     x.u8(obs.mode === 'free' ? 1 : 0);
     x.f32(num(obs.yaw, 0.65)).f32(num(obs.pitch, 0.38)).f32(num(obs.dist, 3.3)).f32(num(obs.fov, 0.6));
     for (let k = 0; k < 4; k++) x.f32(num(quat[k], 0));
+    const s = Array.isArray(obs.shift) ? obs.shift : [];
+    if (num(s[0], 0) || num(s[1], 0)) x.f32(num(s[0], 0)).f32(num(s[1], 0));   // 0.4.0 S2: THE LENS SHIFT at the section's end, only when there is one (a centred shot keeps its old bytes)
+  });
+
+  /* 0.4.0 S2 · THE MOLECULE, while MOLECULES owns the field: the library id, the basis and the view (literal strings), the orbital's
+     index (0 = not chosen: the HOMO) and, when the solve named it, its S1 name { group, irrep, count, member } — the join key a
+     reader's build resolves first (opts.orbitalKey: rack.js hands chem.orbitalKey()), the index its fallback. */
+  const chem = pr.instruments && pr.instruments.chem, key = opts.orbitalKey;
+  if (chem && chem.on && chem.preset) section(TAG.MOL, (x) => {
+    x.u8(key ? 1 : 0).name(LITERAL, chem.preset).name(LITERAL, chem.basis).name(LITERAL, chem.view).varint(int(chem.orbital, 0, 0, 65535));
+    if (key) x.name(LITERAL, key.group).name(LITERAL, key.irrep).varint(int(key.count, 0, 0, 65535)).name(LITERAL, key.member);
   });
 
   const mat = pr.mat || {}, slice = mat.slice || {}, boost = mat.boost || {};
@@ -492,7 +504,16 @@ export function decodeState(text) {
     const obs = { mode, yaw: x.f32(), pitch: x.f32(), dist: x.f32(), fov: x.f32() };
     const q = [x.f32(), x.f32(), x.f32(), x.f32()];
     if (q.some((v) => v !== 0)) obs.quat = q;              // an all-zero quaternion means "the file had none": restore() rebuilds it from yaw/pitch
+    if (x.left >= 8) obs.shift = [x.f32(), x.f32()];      // 0.4.0 S2: the lens shift; a link minted before it has none, and opens centred
     presentation.obs = obs;
+  }
+
+  /* MOLECULE (0.4.0 S2) — restore() turns MOLECULES on with it; chemview resolves the orbital by its name, else by the index */
+  if (sec.has(TAG.MOL)) {
+    const x = new Reader(sec.get(TAG.MOL), 'the molecule'), f = x.u8();
+    const chem = { preset: x.name(LITERAL, 'molecule'), basis: x.name(LITERAL, 'basis'), view: x.name(LITERAL, 'view'), orbital: x.varint() || null, on: true };
+    if (f & 1) chem.orbitalKey = { group: x.name(LITERAL, 'point group'), irrep: x.name(LITERAL, 'irrep'), count: x.varint(), member: x.name(LITERAL, 'member') };
+    presentation.instruments = { chem };
   }
 
   /* MATERIAL */
