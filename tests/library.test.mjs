@@ -86,6 +86,19 @@ const before = calls();
 assert.throws(() => W.chemOpen({ lib: broken, basis: 'sto-3g' }), /failed validation/);
 assert.equal(calls(), before);
 
+/* 5b · THE STALE OPEN (S4a-VERIFY B1): another record's open replaces the worker's ONE cache; a later op for the past-cap molecule
+       must then be a REFUSAL, never a live solve — the worker remembers every record-only key it opened.  (The frame-thread half of
+       the same law is lab/chemview.js: no worker post for a solve the hand has left; tests/library.browser-test.mjs presses it.) */
+c0 = calls();
+W.chemOpen({ lib: L, hash: row('lysine').hash, basis: 'sto-3g' });           // lysine is current…
+W.chemOpen({ lib: rec, hash: row('C6H6').hash, basis: 'sto-3g' });           // …then benzene's open lands and the cache is benzene's
+assert.throws(() => W.chemSpectrum(Lm), /opens only from its record, which is no longer the worker's current molecule/);
+assert.throws(() => W.chemStates(Lm), /opens only from its record, which is no longer/);
+assert.throws(() => W.chemRtInit({ ...Lm, kick: { axis: 'x' } }), /opens only from its record, which is no longer/);
+assert.equal(calls() - c0, 0, 'a cache miss on a record-only molecule ran the solver');
+W.chemOpen({ lib: L, hash: row('lysine').hash, basis: 'sto-3g' });           // opened again, it answers again, still with no solver call
+assert.equal(W.chemSpectrum(Lm).roots.length, 960); assert.equal(calls() - c0, 0);
+
 /* 6 · THE CATALOGUE IN THE TABLE (lab/molecules.js): a record's input is the menu's own atoms (so the worker's solve-cache key is
        the one a window asks with — a mismatch would make a past-cap molecule a live solve), and the benzene-cap law reads it */
 for (const r of CAT.rows) assert.deepEqual(load(r.id).input.atoms, moleculeAtoms(r.id), r.id + ': the record\'s atoms are not the menu\'s');
