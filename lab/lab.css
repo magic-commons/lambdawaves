@@ -860,9 +860,10 @@ body.ui-hidden #keymap { display: none; }
    shrinking to fit its longest option — `.segw` is not in base.css's `.row >` flex list, so it says so itself. */
 .mol-pick { flex: 1 1 200px; }
 .mol-pick > select.sel { width: 100%; }
-/* the SECTION header above it (0.4.0 S4b): ‹ and › at the kit's own trig seat, the header readout takes the slack, INSTALLED its label */
-.mol-section > .trig.mol-turn { flex: 0 0 auto; }
+/* the SECTION header above it (0.4.0 S4b): PALETTE's ◂ ▸ (.pal-nav), the header readout takes the slack and survives LEAN (it is
+   the section's name), INSTALLED keeps its label */
 .mol-section > .ro { flex: 3 1 0; }
+.dev.lean .dev-body .mol-section > .ro { display: flex; }
 .mol-section > .sw { flex: 0 1 auto; }
 
 /* THE STAGE TEXT (Settings › Display; lab/stage-text.js, the interim renderer 0.5.0 deletes): what is playing, in the

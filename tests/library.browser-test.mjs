@@ -162,11 +162,11 @@ try {
     return { dia, turned, back, before, opts, kept, on, removed, off, calls: [c1 - c0, c2 - c1], timed, errs: __e.slice() };`);
   const w6 = JSON.stringify(six);
   const LAT = CAT.rows.filter((r) => r.section === 'LATTICE');
-  assert.ok(six.dia.records === 0 && six.dia.keepOffered === false && /every one solves live/.test(six.dia.sub), 'a section with no record offers nothing to keep: ' + w6);
+  assert.ok(six.dia.records === 0 && six.dia.keepOffered === false && /molecules, all live/.test(six.dia.sub), 'a section with no record offers nothing to keep: ' + w6);
   assert.ok(six.turned === 'HYDRIDES' && six.back === 'DIATOMICS', 'the turner ‹ › moves one section: ' + w6);
   assert.ok(six.before.records === LAT.length && six.before.bytes === LAT.reduce((t, r) => t + r.bytes, 0) && six.before.installed === 0 && six.before.lamp === false && six.before.keepOffered
     && LAT.every((r) => six.opts.includes(r.id)) && six.opts.length === six.before.molecules.length, 'the LATTICE header: ' + w6);
-  assert.ok(six.kept.installed === LAT.length && six.on.installed === LAT.length && six.on.lamp === true && new RegExp(LAT.length + ' on this device').test(six.on.sub), 'INSTALLED kept the section: ' + w6);
+  assert.ok(six.kept.installed === LAT.length && six.on.installed === LAT.length && six.on.lamp === true && new RegExp(LAT.length + ' here$').test(six.on.sub), 'INSTALLED kept the section: ' + w6);
   assert.ok(six.removed.installed === 0 && six.off.installed === 0 && six.off.lamp === false, 'INSTALLED off removed the section: ' + w6);
   assert.deepEqual(six.calls, [0, 0], 'installing a section or opening its records ran the solver: ' + w6);
   for (const t of six.timed) assert.ok(t.ok && t.from === 'device' && Number.isFinite(t.open) && Math.abs(t.E - JSON.parse(readFileSync(new URL('../lab/library/' + HASH[t.id] + '.json', import.meta.url), 'utf8')).oracle.energy) < 1e-8, w6);

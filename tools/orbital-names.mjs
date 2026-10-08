@@ -106,7 +106,8 @@ const libRows = [];
 for (const row of CAT.rows) {
   const r = recOf(row), N = r.ground.names, sym = r.input.symmetry, atoms = r.input.atoms;
   if (sym.group !== 'C1') {
-    if (!N.reliable || N.group !== sym.group) fail(`${row.id}: declared ${sym.group}, the record's names ${N.reliable ? 'are in ' + N.group : 'refused: ' + N.reason}`);
+    const said = !N.reliable && r.stem.symmetry && r.stem.symmetry.labelledIn === null && /indices/.test(r.stem.symmetry.why || '');   // a record that SAYS it carries indices only (the water hexamer)
+    if (!said && (!N.reliable || N.group !== sym.group)) fail(`${row.id}: declared ${sym.group}, the record's names ${N.reliable ? 'are in ' + N.group : 'refused: ' + N.reason}`);
     const fr = frameOf(atoms, sym.frame); let worst = 0;
     if (!/inf/.test(sym.group)) for (const { R } of operations(sym.group)) {
       const F = fr.F, Rl = [0, 1, 2].flatMap((i) => [0, 1, 2].map((j) => { let t = 0; for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) t += F[i * 3 + a] * R[a * 3 + b] * F[j * 3 + b]; return t; }));
@@ -142,7 +143,7 @@ if (has('--pyscf')) {
       if (!same) fail(`${row.id}: PySCF's orbitals project to ${P.reliable ? P.group + ' ' + P.config : 'no names (' + P.reason + ')'}, the record says ${N.reliable ? N.group + ' ' + N.config : 'no names'}`);
       if (!(Math.abs(dE) <= 1e-8)) fail(`${row.id}: PySCF ${p.energy} is ${dE.toExponential(2)} Eh from the record's oracle`);
       const homo = N.mos[N.mos.findIndex((m) => m.frontier === 'LUMO') - 1] || {}, lumo = N.mos.find((m) => m.frontier === 'LUMO') || {};
-      lines.push(`| ${row.id} | ${sym.group}${r.stem.symmetry && r.stem.symmetry.pointGroup !== sym.group ? ' (of ' + r.stem.symmetry.pointGroup + ')' : ''} | ${top} | ${same ? 'MATCH' : 'DIFFERS'} | ${N.reliable ? (homo.label || '—') + ' / ' + (lumo.label || '—') : 'index only (C₁)'} | ${dE.toExponential(1)} |`);
+      lines.push(`| ${row.id} | ${sym.group}${r.stem.symmetry && r.stem.symmetry.pointGroup !== sym.group ? ' (of ' + r.stem.symmetry.pointGroup + ')' : ''} | ${top} | ${same ? 'MATCH' : 'DIFFERS'} | ${N.reliable ? (homo.label || '—') + ' / ' + (lumo.label || '—') : 'index only (' + (sym.group === 'C1' ? 'C₁' : 'the record says why') + ')'} | ${dE.toExponential(1)} |`);
     }
     console.log('\n| record | labelled in | PySCF topgroup (recorded) | PySCF orbitals, same projection | HOMO / LUMO | ΔE PySCF − oracle |\n|---|---|---|---|---|---|\n' + lines.join('\n'));
   }

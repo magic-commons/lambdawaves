@@ -81,9 +81,10 @@ export function createChem(host, api) {
      M5 has not measured persist there).  The page is the molecule's own section, or the one the hand turned to — never saved. */
   const rH = el('div', 'row tight mol-section', host);
   const pageBy = (d) => () => { page = SECTIONS[(SECTIONS.indexOf(page) + d + SECTIONS.length) % SECTIONS.length]; fillSel(); };
-  rH.appendChild(trig({ label: '‹', cls: 'mol-turn', title: 'The previous section of the library', onFire: pageBy(-1) }).root);
-  const roSec = readout({ label: 'SECTION', value: '—', sub: '' }); rH.appendChild(roSec.root);
-  rH.appendChild(trig({ label: '›', cls: 'mol-turn', title: 'The next section of the library', onFire: pageBy(1) }).root);
+  for (const [d, g, t] of [[-1, 'dirPrev', 'previous'], [1, 'dirNext', 'next']]) {             // PALETTE's own page-turner buttons
+    const b = trig({ label: '', cls: 'pal-nav mol-turn', title: `The ${t} section of the library`, onFire: pageBy(d) }); chip(b.root, g, t + ' section'); rH.appendChild(b.root);
+  }
+  const roSec = readout({ label: 'SECTION', value: '—', sub: '' }); rH.insertBefore(roSec.root, rH.lastChild);
   const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
   rH.appendChild(keepSw.root);
   const r0 = el('div', 'row tight', host);
@@ -132,8 +133,9 @@ export function createChem(host, api) {
   }
   function header() {
     const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
-    roSec.set(page); roSec.setSub(recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${(recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1)} MB · ${on} on this device · ${n} molecules`
-      : `${n} molecules · every one solves live`);
+    const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
+    roSec.set(page); roSec.setSub(recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`);
+    roSec.root.title = `${page}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
     keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length);
   }
   /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */

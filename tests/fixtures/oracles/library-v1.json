@@ -197,14 +197,14 @@
    "homoLumoGapEh": 0.6191267169602275
   },
   "NiCO4": {
-   "energy": -1935.0686193287584,
+   "energy": -1935.068619328748,
    "converged": true,
    "route": "DIIS",
-   "cycles": 120,
-   "wallSeconds": 0.652,
+   "cycles": 187,
+   "wallSeconds": 0.976,
    "nao": 59,
    "nocc": 42,
-   "key": "91390a2188f6f44a",
+   "key": "f63b25be7b80372b",
    "topgroup": "Td",
    "groupname": "D2",
    "orbsym": {
@@ -215,10 +215,10 @@
      "B2": 10,
      "B3": 10
     },
-    "energy": -1935.0686193287738,
+    "energy": -1935.0686193287552,
     "converged": true
    },
-   "homoLumoGapEh": 0.47910035852404875
+   "homoLumoGapEh": 0.4791003585596364
   },
   "TiCl4": {
    "energy": -2658.6466804742095,
@@ -444,14 +444,14 @@
    "homoLumoGapEh": 0.4685445128196124
   },
   "ferrocene": {
-   "energy": -1628.5705018413414,
+   "energy": -1628.5705018413319,
    "converged": true,
    "route": "DIIS",
-   "cycles": 76,
-   "wallSeconds": 1.257,
+   "cycles": 92,
+   "wallSeconds": 1.524,
    "nao": 79,
    "nocc": 48,
-   "key": "bec89500deb2bbf3",
+   "key": "f35bfcffd1374ca6",
    "topgroup": "D5h",
    "groupname": "C2v",
    "orbsym": {
@@ -462,10 +462,10 @@
      "B1": 10,
      "B2": 13
     },
-    "energy": -1628.5705018413187,
+    "energy": -1628.5705018413278,
     "converged": true
    },
-   "homoLumoGapEh": 0.4905752279861346
+   "homoLumoGapEh": 0.4905752330158204
   },
   "glutamic-acid": {
    "energy": -541.3611162409488,
@@ -552,14 +552,14 @@
    "homoLumoGapEh": 0.5087541500727606
   },
   "ice-hexamer": {
-   "energy": -449.88756349453314,
+   "energy": -449.88756349453166,
    "converged": true,
    "route": "DIIS",
-   "cycles": 28,
-   "wallSeconds": 0.217,
+   "cycles": 27,
+   "wallSeconds": 0.236,
    "nao": 42,
    "nocc": 30,
-   "key": "bad2e2f1309a3c8a",
+   "key": "86effe96601139f3",
    "topgroup": "C6h",
    "groupname": "C2h",
    "orbsym": {
@@ -570,10 +570,10 @@
      "Bg": 3,
      "Bu": 12
     },
-    "energy": -449.887563494531,
+    "energy": -449.8875634945302,
     "converged": true
    },
-   "homoLumoGapEh": 0.858979888312714
+   "homoLumoGapEh": 0.8589798883119657
   },
   "isoleucine": {
    "energy": -433.40537994232943,

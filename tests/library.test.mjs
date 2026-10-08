@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import * as W from '../lab/mathworker.js';
 import { validateRecord, decodeRecord, recordPath } from '../lab/library.js';
-import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, moleculeAtoms, optionLabel, CAP_MS } from '../lab/molecules.js';
+import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, SECTIONS, moleculeAtoms, optionLabel, CAP_MS } from '../lab/molecules.js';
 import { evaluator, shellsFromField } from '../lab/molecular-field.js';
 
 const at = (rel) => fileURLToPath(new URL(rel, import.meta.url));
@@ -110,6 +110,11 @@ assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record ·
 assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');
 assert.ok(CAP_MS > 1000 && CAP_MS < 2500, 'the refit cap is benzene at ~1.7 s, not 9.6 s: ' + CAP_MS);
 assert.equal(L.caps.tdhf, false); assert.equal(rec.caps.tdhf, true);
+/* 7 · THE SECTIONS (0.4.0 S4b): every row of the table and of the catalogue sits on exactly one page of the turner, and a catalogue
+       row's section is its molecule's */
+for (const m of [...MOLECULES, ...RECORD_ONLY]) assert.ok(SECTIONS.includes(m.section), m.id + ' sits on no section');
+for (const r of CAT.rows) assert.equal(MOLECULE_BY_ID.get(r.id).section, r.section, r.id + ': the catalogue and the table disagree on its section');
+assert.deepEqual(SECTIONS.map((s) => [...MOLECULES, ...RECORD_ONLY].filter((m) => m.section === s).length).reduce((a, b) => a + b, 0), MOLECULES.length + RECORD_ONLY.length);
 
 console.log(`GREEN library: benzene opens from its ${(row('C6H6').bytes / 1024).toFixed(0)} KB record in ${openMs.toFixed(1)} ms with 0 solver calls `
   + `(fresh: 1 SCF + 1 RPA) and equals the fresh solve bit for bit — E, ε, nocc, C, D, ψ and ρ at ${pts.length} points, the names (D6h, HOMO 1e1g), `
