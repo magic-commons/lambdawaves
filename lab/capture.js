@@ -636,8 +636,24 @@ export function pickMime(want) {
 }
 
 /**
- * createCapture(LW, { canvas }) — the camera and the recorder over a booted lab.
- * LW is window.__LW; the canvas is the FIELD's (dom.canvas), found by id if not given.
+ * THE CAPTION (0.4.0 S3 · F2): the stage text's one plain-Unicode line (`H₂O · 1b1 HOMO · STO-3G`, or SPECTRUM's states)
+ * drawn into a 2-D frame, so a picture, a loop and a video carry the name — the DOM formula never reaches an export, and a
+ * teacher's slide needs it.  No KaTeX in a canvas: the plain form.  At the foot, left, sized to the frame, white over a soft
+ * dark stroke so it reads on any ground.  KIT BRIEF 6 (`recorder.overlay(i, ctx)`) replaces it at 0.5.0.
+ */
+export function drawCaption(g, W, H, text) {
+  if (!text) return false;
+  const px = Math.max(12, Math.round(H * 0.034)), pad = Math.round(px * 0.9);
+  g.save(); g.font = `${px}px "STIX Two Math", "Latin Modern Math", serif`; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.lineJoin = 'round'; g.lineWidth = Math.max(2, px / 6); g.strokeStyle = 'rgba(0,0,0,0.55)'; g.fillStyle = 'rgba(255,255,255,0.94)';
+  g.strokeText(text, pad, H - pad); g.fillText(text, pad, H - pad); g.restore();
+  return true;
+}
+
+/**
+ * createCapture(LW, { canvas, caption }) — the camera and the recorder over a booted lab.
+ * LW is window.__LW; the canvas is the FIELD's (dom.canvas), found by id if not given; `caption()` is the line a capture
+ * carries ('' for none).
  */
 export function createCapture(LW, opts = {}) {
   const canvas = opts.canvas || (typeof document !== 'undefined' ? document.getElementById('field') : null);
@@ -653,6 +669,8 @@ export function createCapture(LW, opts = {}) {
   function unpinJitter(k) { const f = field(); if (f && f.ok && k !== null) f.stats.presents = k; }
 
   const field = () => LW.field;
+  /** the caption line: `o.caption` (a string, or false for none) wins over the host's opts.caption() */
+  const captionOf = (o) => { if (o && o.caption !== undefined) return o.caption || ''; try { return opts.caption ? String(opts.caption() || '') : ''; } catch (_) { return ''; } };
   const dev = () => { const f = field(); return f && f.ok ? f.device : null; };
   const ctx = () => canvas.getContext('webgpu');
   const gpuOk = () => !!dev();
@@ -770,13 +788,20 @@ export function createCapture(LW, opts = {}) {
         upscaled.push({ id: typeof id === 'string' ? id : 'layer', from: layer.w + 'x' + layer.h, to: fit.w + 'x' + fit.h });
       }
     }
+    /* the caption, last and at the picture's own size: drawn into a strip the height of the foot, composited over it */
+    const caption = captionOf(o);
+    if (caption && typeof document !== 'undefined') {
+      const sh = Math.min(fit.h, Math.ceil(fit.h * 0.1) + 8), c2 = document.createElement('canvas'); c2.width = fit.w; c2.height = sh;
+      const g2 = c2.getContext('2d'); g2.translate(0, sh - fit.h); drawCaption(g2, fit.w, fit.h, caption);
+      compositeOver(shot.rgba.subarray((fit.h - sh) * fit.w * 4), fit.w, sh, g2.getImageData(0, 0, fit.w, sh).data, fit.w, sh);
+    }
     const png = await encodePNG(shot.rgba, fit.w, fit.h, { filter: o.filter === undefined ? -1 : o.filter });
     const name = uniqueName(o.name || captureName({ kind: 'still', label: stateLabel(), w: fit.w, h: fit.h, ext: 'png' }), taken);
     return {
       ok: true, blob: new Blob([png], { type: 'image/png' }), bytes: png.length, name,
       w: fit.w, h: fit.h, scale: fit.scaleW, clipped: fit.clipped, aspectKept: fit.aspectKept,
       renderMs: shot.ms, ms: performance.now() - t0, limits: lim,
-      overlays: upscaled, upscaledOverlays: !!(upscaled && upscaled.length),
+      overlays: upscaled, upscaledOverlays: !!(upscaled && upscaled.length), caption,
       note: fit.clipped ? 'clipped to ' + lim.side + ' on the long side — ' + lim.why : '',
     };
   }
@@ -880,7 +905,7 @@ export function createCapture(LW, opts = {}) {
    * cadence aimed at.  Returns { stop(), done } immediately — `done` resolves with the blob and the MEASURED
    * tempo, which is the only tempo claim this file makes.
    */
-  function drive({ N, at, fps = 30, engine = 'auto', mime, bitrate, width, height, label, kind = 'clip', T = 0, onProgress, note = '', jitter = 'lock' }) {
+  function drive({ N, at, fps = 30, engine = 'auto', mime, bitrate, width, height, label, kind = 'clip', T = 0, onProgress, note = '', jitter = 'lock', caption }) {
     const lockJitter = jitter !== 'free';
     let cancelled = false;
     const done = (async () => {
@@ -902,8 +927,12 @@ export function createCapture(LW, opts = {}) {
         LW.schedule(LW.TIER.PRESENT); await raf(); await raf();
       } else if (q.auto) { q.auto = false; q.scale = q0.scale; LW.schedule(LW.TIER.PRESENT); await raf(); }   // AUTO SCALE must not move the frame size mid-take
       const W = canvas.width, H = canvas.height;
+      /* THE CAPTION needs a 2-D frame: the direct engine copies the WebGPU canvas into one with drawImage where the probe
+         read it lit, and takes the relay road where it did not (drawImage of a WebGPU canvas is blank in some browsers) */
+      const line = captionOf({ caption });
+      if (line && engine === 'direct' && !(probed && probed.canvasReadable)) { engine = 'relay'; note = (note ? note + ' · ' : '') + 'relay: the caption needs a 2-D frame and drawImage did not read this canvas'; }
       let relay = null, relayCtx = null, src = canvas;
-      if (engine === 'relay') { relay = document.createElement('canvas'); relay.width = W; relay.height = H; relayCtx = relay.getContext('2d'); src = relay; configure(true); }
+      if (engine === 'relay' || line) { relay = document.createElement('canvas'); relay.width = W; relay.height = H; relayCtx = relay.getContext('2d'); src = relay; if (engine === 'relay') configure(true); }
       LW.clock.pause();
       if (LW.helium && LW.helium.on) void LW.helium.sol;   // 2026-09-24: the take starts on HELIUM's basis in force, not the last one shown while its worker solves
       const stream = src.captureStream(0);
@@ -933,7 +962,8 @@ export function createCapture(LW, opts = {}) {
             const shot = await grab(W, H);
             const img = new ImageData(new Uint8ClampedArray(shot.rgba.buffer, 0, W * H * 4), W, H);
             relayCtx.putImageData(img, 0, 0);
-          }
+          } else if (relayCtx) relayCtx.drawImage(canvas, 0, 0, W, H);
+          if (line) drawCaption(relayCtx, W, H, line);
           if (track.requestFrame) track.requestFrame();
           marks[k] = performance.now();
           delivered++;
@@ -958,7 +988,7 @@ export function createCapture(LW, opts = {}) {
       const blob = new Blob(chunks, { type: m });
       const name = uniqueName(captureName({ kind, label: label || stateLabel(), w: W, h: H, fps, frames: delivered, T, ext: 'webm' }), taken);
       return {
-        ok: !err && delivered > 0, error: err, blob, bytes: blob.size, name, mime: m, engine,
+        ok: !err && delivered > 0, error: err, blob, bytes: blob.size, name, mime: m, engine, caption: line,
         frames: delivered, requested: N, w: W, h: H, fps, cancelled,
         measured: { seconds, fps: delivered / Math.max(1e-9, seconds), meanIntervalMs: n ? sum / n : 0, worstIntervalErrMs: worst, targetIntervalMs: 1000 / fps },
         note,

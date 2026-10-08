@@ -77,6 +77,26 @@ try {
   assert.ok(t3.moved > 0, 'the atom labels did not follow the camera: ' + JSON.stringify(t3));
   assert.deepEqual(t3.errs, []);
   pass(`the banners speak the names: "${t3.homo}", "${t3.winding}"; the labels wrote 0 times under a still camera across eight clock times and ${t3.moved} after a turn`);
+
+  /* ── 4 · THE CAPTION IN CAPTURE (T3): a picture's foot carries the stage text's plain line; with STAGE TEXT off it is clean ── */
+  const t4 = await ev(`const C = __LW.capture, hash = async (r) => { const b = new Uint8Array(await r.blob.arrayBuffer()); let h = 2166136261; for (let i = 0; i < b.length; i++) h = Math.imul(h ^ b[i], 16777619) >>> 0; return h; };
+    const sw = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'STAGE TEXT');
+    if (__LW.ab && __LW.ab.on) __LW.ab.set(false);   /* WAVE DANCER (section 2) left its A ↔ B transition playing */
+    __LW.loadPreset('1s+2pz'); await __LW.settle(); await __w(300);
+    const on = await C.picture({ scale: 1 }), off = await C.picture({ scale: 1, caption: false }), off2 = await C.picture({ scale: 1, caption: false });
+    sw.click(); await __w(100); const swOff = await C.picture({ scale: 1 }), stageOff = !__LW.stageText.on, hidden = __node().hidden; sw.click(); await __w(100);
+    await __LW.chem.solve('H2O'); __LW.chem.setOn(true); __LW.chem.setView('orbital'); await __LW.settle(); await __w(400);
+    const mol = await C.picture({ scale: 1 }); __LW.chem.setOn(false); await __LW.settle();
+    return { caption: on.caption, hOn: await hash(on), hOff: await hash(off), hOff2: await hash(off2), swCaption: swOff.caption, hSw: await hash(swOff), stageOff, hidden,
+      mol: mol.caption, rows: [...document.querySelectorAll('.dev[data-id="settings"] .sw-lbl')].map((e) => e.textContent).filter((t) => /STAGE (TEXT|FORMULA)|ATOM/.test(t)), errs: __e.slice() };`);
+  assert.equal(t4.caption, '1s₀, 2p₀', 'the caption: ' + JSON.stringify(t4));
+  assert.equal(t4.hOff, t4.hOff2, 'a captionless picture is not deterministic: ' + JSON.stringify(t4));
+  assert.notEqual(t4.hOn, t4.hOff, 'the caption did not reach the picture\'s pixels: ' + JSON.stringify(t4));
+  assert.ok(t4.stageOff && t4.hidden && t4.swCaption === '' && t4.hSw === t4.hOff, 'STAGE TEXT off still captions: ' + JSON.stringify(t4));
+  assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G');
+  assert.deepEqual(t4.rows, ['STAGE TEXT'], 'SETTINGS › DISPLAY is not one STAGE TEXT row: ' + JSON.stringify(t4.rows));
+  assert.deepEqual(t4.errs, []);
+  pass(`the picture carries "${t4.caption}" (its bytes differ from the captionless picture, which is byte-identical twice); STAGE TEXT off hides the text and takes a clean picture; MOLECULES captions "${t4.mol}"; DISPLAY has one STAGE TEXT row`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {

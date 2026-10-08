@@ -69,7 +69,7 @@ import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
-import { stateLatex, moleculeLatex, formulaLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
+import { stateLatex, moleculeLatex, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
@@ -166,7 +166,7 @@ export async function boot(dom) {
   let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1, atomLabelScale = 1, atomLabelsOn = true;   // the STAGE FORMULA's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
+  let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
@@ -190,7 +190,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale, atomLabels: !document.body.classList.contains('no-atom-labels'), atomLabelsSize: atomLabelScale,
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -266,13 +266,13 @@ export async function boot(dom) {
     document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
-    const molFormula = s.molFormula !== false;                       // MOLECULE FORMULA: nothing said means ON (it only shows while MOLECULES is on)
+    /* THE STAGE TEXT (0.4.0 S3): one switch for the formula, the fade and the atom labels; nothing said means ON.  The ATOM
+       LABELS' own key is read ONCE — only where the formula's was never written (an older profile) — and is dropped by the
+       next save with its SIZE: a stored molFormula decides, because the row is one switch and that is the key it keeps. */
+    const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false;
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
     molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
-    atomLabelsOn = s.atomLabels !== false;                          // ATOM LABELS: nothing said means ON (they only show while MOLECULES is on)
-    document.body.classList.toggle('no-atom-labels', !atomLabelsOn); if (ui.atomSw) ui.atomSw.set(atomLabelsOn);
-    atomLabelScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : 1; if (ui.atomK) ui.atomK.set(atomLabelScale);
-    if (stageText) { stageText.setScale(molFormulaScale); stageText.setLabelScale(atomLabelScale); stageText.setOn(molFormula); }
+    if (stageText) { stageText.setScale(molFormulaScale); stageText.setOn(molFormula); }
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
@@ -1001,7 +1001,7 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half, atomLabelsOn); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (stage-text.js: compares only)
+      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (stage-text.js: compares only)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
@@ -1301,12 +1301,9 @@ export async function boot(dom) {
     ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
-    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is the notebook\'s title, 34 px; it wraps inside the same width between the racks',
-      onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
-    ui.atomSw = sw({ label: 'ATOM LABELS', value: true, title: 'Mark each nucleus of the MOLECULES molecule with its element symbol, inverted against whatever is under it', onChange: (v) => { atomLabelsOn = v; document.body.classList.toggle('no-atom-labels', !v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.atomSw.root);
-    ui.atomK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The ATOM LABELS\' size: 100% is the notebook\'s body, 14 px',
-      onInput: (v) => { atomLabelScale = v; if (stageText) stageText.setLabelScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.atomK.root);
+    ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
+      onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -1588,7 +1585,7 @@ export async function boot(dom) {
     const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
     let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
-    const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩
+    const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
     const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
     const rc1 = el('div', 'row tight', gcap);
     ui.capScale = seg({ label: 'PICTURE', value: '2', options: [{ id: '1', label: '×1' }, { id: '2', label: '×2' }, { id: '3', label: '×3' }, { id: '4', label: '×4' }],
@@ -2383,14 +2380,28 @@ export async function boot(dom) {
      only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
   let stageText = null;
   const stageSrc = { v: -1, id: null, own: null };
-  function stageMd() {
-    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
-    if (row) return '$' + formulaLatex(row.formula) + '$';
-    if (molecule.on || helium.on || h2.on) return '';
-    const H = getHamiltonian(), line = (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0];
-    const mix = reg.transition, live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
+  /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
+  function stageStates(md) {
+    const H = getHamiltonian(), mix = reg.transition;
+    const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
+      : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
+    const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
     if (mix) { const A = line(live(mix.reA, mix.imA)), B = line(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
     return line(reg.populated());
+  }
+  function stageMd() {
+    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    return row ? '$' + formulaLatex(row.formula) + '$' : molecule.on || helium.on || h2.on ? '' : stageStates(true);
+  }
+  /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
+   *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
+   *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE TEXT switch.  KIT BRIEF 6 replaces it. */
+  function stageCaption() {
+    if (!stageText || !stageText.on) return '';
+    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    if (!row) return molecule.on || helium.on || h2.on ? '' : stageStates(false);
+    const o = chem.exportNames(), k = o && o.orbital;
+    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[chem.basis] || ''].filter(Boolean).join(' · ');
   }
   function stageTextTick() {
     if (!stageText) return;
@@ -3937,7 +3948,7 @@ export async function boot(dom) {
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
         WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,

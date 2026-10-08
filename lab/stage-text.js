@@ -29,7 +29,7 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
   const node = el('div', '', stage); node.id = 'molFormula'; node.setAttribute('aria-hidden', 'true'); node.hidden = true;
   const narrow = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
   const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, layout reads, label moves
-  let on = true, scale = 1, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0;
+  let on = true, scale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0;   // ONE switch and ONE SIZE: the formula, the fade, the labels
 
   /** the markdown wanted now, rendered if it changed and KaTeX's quarter second has passed (else when it has) */
   function show() {
@@ -90,13 +90,13 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
   let cssW = canvas.clientWidth, cssH = canvas.clientHeight;
   if (typeof ResizeObserver === 'function') new ResizeObserver((e) => { const b = e[e.length - 1].contentRect; cssW = b.width; cssH = b.height; }).observe(canvas);
   let atomsId = '', atoms = [], spans = [], labelsKey = '', placeKey = '';
-  function atomLabels(id, obs, half, show = true) {
-    if (!id || !show) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
+  function atomLabels(id, obs, half) {
+    if (!id || !on) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
     if (id !== atomsId) { atomsId = id; atoms = moleculeAtoms(id); labelsKey = ''; }
-    if (labelsKey !== id + '|' + labelScale) {
-      labelsKey = id + '|' + labelScale; placeKey = '';
+    if (labelsKey !== id + '|' + scale) {
+      labelsKey = id + '|' + scale; placeKey = '';
       labels.textContent = ''; spans = atoms.map((a) => el('span', 'atom-label', labels, ELEMENT[a.Z] || '?'));
-      labels.style.fontSize = Math.round(TYPE.body * labelScale) + 'px';
+      labels.style.fontSize = Math.round(TYPE.body * scale) + 'px';
     }
     labels.hidden = false;
     if (cssW < 32 || cssH < 32) return;
@@ -126,8 +126,7 @@ export function createStageText({ stage, canvas, racks, docked, render = renderN
     setFormula(md) { formula = md || ''; if (banner === null) show(); },
     announce, atomLabels, place, stats,
     setOn(v) { on = !!v; show(); },
-    setScale(s) { scale = s; place(); },
-    setLabelScale(s) { labelScale = s; labelsKey = ''; },
+    setScale(s) { scale = s; labelsKey = ''; place(); },
     get on() { return on; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
   };
 }
