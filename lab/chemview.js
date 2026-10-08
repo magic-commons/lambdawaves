@@ -129,9 +129,8 @@ export function createChem(host, api) {
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
   r1.appendChild(orbKnob.root);
-  /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ, formed in f64 and drawn by the density kind, so a
-     heavy atom's core stops drowning its bonds; the core is S1's coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY
-     is the view — the dial reads nothing there — so the row keeps its width. */
+  /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ in f64, drawn by the density kind; the core is S1's
+     coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY is the view (the dial reads nothing there): no wider row. */
   const valSw = sw({ label: 'VALENCE', value: false, title: 'The valence density: D − 2 Σ C_c C_cᵀ over the frozen-core orbitals (He for Li–Ne, Ne for Na–Ar, Ar for K–Zn …) — the core no longer drowns the bonds',
     onChange: (v) => { valence = v; pushMatrix(); refresh(); } });
   r1.insertBefore(valSw.root, orbKnob.root);
@@ -315,11 +314,8 @@ export function createChem(host, api) {
   const span = () => (sol && sol.cols ? [sol.cols[0] + 1, sol.cols[sol.cols.length - 1] + 1] : [1, sol ? sol.nAO : 7]);
   const noSpectrum = (r) => !!(r && r.record && !r.record.caps.rpa);
   const ORB_ONLY = 'this record carries its frontier orbitals only — the density is 0.4.1 BUCKYBALL', vTitle = new Map(['density', 'diff'].map((id) => [id, vSeg.button(id).title]));
-  function views() {
-    const d = !!(sol && sol.D);
-    for (const [id, t] of vTitle) { const b = vSeg.button(id); b.disabled = !d; b.title = d ? t : ORB_ONLY; }
-    if (!d && view !== 'orbital') { view = 'orbital'; vSeg.set(view); }
-  }
+  function views() { const d = !!(sol && sol.D); for (const [id, t] of vTitle) { const b = vSeg.button(id); b.disabled = !d; b.title = d ? t : ORB_ONLY; }
+    if (!d && view !== 'orbital') { view = 'orbital'; vSeg.set(view); } }
   function rebuildOrbKnob() {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
@@ -489,12 +485,10 @@ export function createChem(host, api) {
     for (let i = 0; i < n * n; i++) mBuf[i] = P ? src[i] - P[i] : src[i];
     return mBuf;
   }
-  /** VALENCE's subtrahend 2 Σ_core C_c C_cᵀ, f64, once per solve */
-  let coreP = null, coreOf = null;
+  let coreP = null, coreOf = null;                                       // VALENCE's subtrahend 2 Σ_core C_c C_cᵀ, f64, once per solve
   function corePart() {
     if (coreOf === sol) return coreP;
-    const n = sol.nAO, C = sol.C, nc = Math.min(coreCount(chemAtoms(preset)), sol.nocc);
-    coreP = new Float64Array(n * n); coreOf = sol;
+    const n = sol.nAO, C = sol.C, nc = Math.min(coreCount(chemAtoms(preset)), sol.nocc); coreP = new Float64Array(n * n); coreOf = sol;
     for (let c = 0; c < nc; c++) for (let i = 0; i < n; i++) { const a = 2 * C[i * n + c]; if (a) for (let j = 0; j < n; j++) coreP[i * n + j] += a * C[j * n + c]; }
     return coreP;
   }

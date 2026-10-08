@@ -163,9 +163,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * coarser number by three orders (an 11-bit mantissa on √ρ ⇒ ≈ 1e-3 relative on ρ) and it, not this sum, sets the
  * tolerance any gate on a read-back voxel may ask for.  Sorting the small terms first is not required.
  */
-/** ONE source, two knobs: `cap` is the AO ceiling this pipeline's χ tile holds (see MOL_CAPS) and `wg` its lanes — 64, or 32
-    (4 × 4 × 2) for the cap-128 tier on a device that holds 16 KiB of workgroup memory (0.4.0 S4c); at 64 the text is the
-    pre-S4c source byte for byte, so the ≤ 64 tiers compile the program the digest lock recorded */
+/** ONE source, two knobs: `cap` is the AO ceiling this pipeline's χ tile holds (MOL_CAPS) and `wg` its lanes — 32 (4 × 4 × 2) for
+    the cap-128 tier on a 16 KiB device (0.4.0 S4c); at 64 the text is the pre-S4c source byte for byte (the lock's program) */
 const MOL_HEAD = /* wgsl */`
 struct Shell { cx: f32, cy: f32, cz: f32, l: u32, pOff: u32, nP: u32, aOff: u32, wOff: u32 };   // l carries bit 8 = share the previous group's exponentials
 struct MP { n: u32, nAO: u32, nShell: u32, kind: u32, half: f32, slot: u32, r0: f32, r1: f32 };   // kind: 0 density (√ρ), 1 orbital (signed ψ), 2 complex orbital (ψ_re, ψ_im), 3 signed matrix (Δρ, no root)
