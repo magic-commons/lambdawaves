@@ -1,13 +1,13 @@
 /* tests/history.test.mjs — the node proof of the UNDO / REDO ring's law.
  *   node tests/history.test.mjs
- * lab/history.js touches neither the DOM nor the register: it works through a port
+ * lab/edit-domain.js (0.5.0 C5: the one `edit` domain on the kit's stack, the old ring's port kept) touches neither the DOM nor the register: it works through a port
  * (read / write / liveKey), so the whole law — capture is of the PRE-IMAGE, a held pointer or a
  * quiet window coalesces a drag into one entry, ⚠ a new edit TRUNCATES the future at the cursor, any
  * row is reachable in one goto() hop, every row carries the name its caller gave it, and the ring keeps
  * at most `depth` undos — is judged here against a toy port with one integer of state.  What the
  * browser proof (B59) adds is that the instrument's own read / write really are that port.
  */
-import { createHistory } from '../lab/history.js';
+import { createEditHistory as createHistory } from '../lab/edit-domain.js';   // 0.5.0 C5: lab/history.js left; the same laws, on the kit's stack
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -29,7 +29,7 @@ function toy(quiet = 20, depth = 60) {
 }
 
 /* ── THE INJECTED CLOCK (ANTI-PATTERNS §19: inject the speed rather than measuring it) ──────────────
- * lab/history.js reaches for the ambient setTimeout / clearTimeout / Date.now, so a test can hand it a
+ * lab/edit-domain.js and the kit's stack under it reach for the ambient setTimeout / clearTimeout / Date.now, so a test can hand it a
  * clock it drives itself — the same move mir.test.mjs makes with createModHost({ wall: 1000 }) and
  * render-exact.test.mjs with fakeLab({ msPerFrame: 90 }).  Everything inside withClock() is
  * SYNCHRONOUS, so no other task in the process can be caught by the swap, and the real globals go back

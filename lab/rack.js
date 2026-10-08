@@ -73,7 +73,7 @@ import { createRegisterSturmian } from './sturmianreg.js';
 import { stateLatex, moleculeLatex, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
-import { createHistory } from './mir/history/history.js';   // 0.5.0 C5: the kit's stack; the one `edit` domain is registered at the foot of boot()
+import { createEditHistory } from './edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
@@ -4979,42 +4979,17 @@ export async function boot(dom) {
 
 
   /* 0.3.1 · S3 THE TRUE HISTORY: one reader, writer and key over the edit scope (the chrome, a PREFERENCE, left with the hand-kept
-     lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame */
+     lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame.  0.5.0 C5: the
+     rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
   const hKey = (j) => { let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) h = Math.imul(h ^ j.charCodeAt(i), 0x01000193); return (h >>> 0).toString(36) + ':' + j.length; };
   let __hver = reg.version;
   Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!rotTicking) hNote(); } });
-  /* 0.5.0 C5 · THE ONE `edit` DOMAIN ON THE KIT'S STACK (mir/history/history.js keeps the rows, the quiet window, the gesture
-     hold, the cap and the travel).  λWAVES hands it one snapshot domain — read serialize({ scope: 'edit' }) keyed by FNV-1a, write
-     restore(S, { history: true }) — and `historyApi` below is the facade the rack and __LW.history already speak.  Each line of
-     it that does more than forward keeps a law of the old ring the kit's stack lacks (C5-BUILD.md names each as a brief):
-     K1 a turning drive is one gesture · K2 an undo, a redo, a jump or a press commits the edit standing, announced or not ·
-     K3 a jump is one write · K4 HISTORY UNDO · K5 a solve's fill re-keys the row it joins · K6 the bottom row is the oldest
-     state still reachable, named for the row that made it · K7 'edit' / 'start' and row i = the i-th state · K8 canUndo
-     and depth count an edit in its quiet window. */
-  const hTimers = { armed: new Set(),   // the kit's one quiet timer, seen (K5's "nothing pending"), through its `timers` seam
-    setTimeout(fn, ms) { const id = setTimeout(() => { hTimers.armed.delete(id); fn(); }, ms); hTimers.armed.add(id); return id; },
-    clearTimeout(id) { hTimers.armed.delete(id); clearTimeout(id); } };
-  const hStack = createHistory({ limit: 60, quiet: 400, timers: hTimers });
-  const hRead = () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; };
-  const hLive = () => hKey(JSON.stringify(serialize({ scope: 'edit' })));
-  const driven = () => rotMoved && rotDriving();
-  const WALK = { key: '\u0000walk' }, hSay = (l) => (l === 'EDIT' ? 'edit' : l);
-  let hStood = null, hBase = '', hWalk = null, hHush = false, hBranch = null, hBottom = 'start', hBusy = false, hSeen = { c: 0, L: [] };
-  const hRefill = new Map();   // K5: a row's key → the filled state it stands for now
-  const hLand = (S) => { for (let n = 0; hRefill.has(S.key) && n < 8; n++) S = hRefill.get(S.key); hHush = true; try { restore(S, { history: true }); } finally { hHush = false; } };
-  hStack.register('edit', {   // K1: while a drive turns the register the domain reads the state it stood on; K3: a walk's writes are held
-    read: () => (hWalk ? WALK : driven() && hStood ? hStood : (hStood = hRead())),
-    write: (S) => { hStood = null; if (hWalk) hWalk.push(S); else hLand(S); },
-    key: (S) => (hBase = S.key) });   // the kit keys its baseline last, so hBase is that baseline's key (K8)
-  const hDirty = () => !driven() && hLive() !== hBase;
-  const hWalkTo = (i) => { hWalk = []; try { hStack.goto(i); return hWalk; } finally { hWalk = null; } };
+  /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
+     every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
   let hRender = null;
-  hStack.subscribe(() => {   // K6: a push that dropped d rows off the front leaves the d-th dropped row's state at the bottom
-    const E = hStack.entries(), c = hStack.cursor;
-    if (!hBusy && c > 0 && c === E.length - 1 && c <= hSeen.c) hBottom = hSay(hSeen.L[hSeen.c - c]);
-    hSeen = { c, L: E.slice(1).map((e) => e.label) };
-    if (hRender) hRender();
-  });
+  history = createEditHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
+    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => rotMoved && rotDriving(),
+    onChange: () => { if (hRender) hRender(); } });
   /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════
      An FL-style list is only worth having if a row says what it was — "Move Pattern", not "edit #17".
      The ring can carry a label now; the question was where a name could come from without touching
@@ -5094,58 +5069,21 @@ export async function boot(dom) {
   window.addEventListener('blur', releasePointers);
   window.addEventListener('pagehide', releasePointers);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releasePointers(); });
-  const historyApi = history = {
-    undo() { hStack.flush(); const ok = hStack.undo(); if (ok) wState.setStatus('undone · ' + historyApi.depth + ' back, ' + historyApi.redoDepth + ' forward', 'live'); return ok; },
-    redo() { hStack.flush(); const ok = hStack.redo(); if (ok) wState.setStatus('redone · ' + historyApi.depth + ' back, ' + historyApi.redoDepth + ' forward', 'live'); return ok; },
-    /** K3 + K4: a jump harvests the timeline (a walk with the writes held), walks to row i and writes it ONCE */
-    goto(i) {
-      const n = Math.trunc(i); if (!Number.isFinite(n)) return false;
-      hStack.flush();
-      const want = Math.max(0, Math.min(hStack.length, n)), c = hStack.cursor, L = hStack.length;
-      if (want === c) return false;
-      hBusy = true;
-      try {
-        const labels = [hBottom, ...hStack.entries().slice(1).map((e) => e.label)], down = hWalkTo(-1);
-        hBranch = { c, labels, states: [c ? down[down.length - 1] : hRead(), ...hWalkTo(L - 1)] };
-        hWalkTo(want - 1); hLand(hBranch.states[want]); hStack.absorb();
-      } finally { hBusy = false; }
-      wState.setStatus('history · row ' + (want + 1) + ' of ' + (L + 1), 'live');
-      return true;
-    },
-    /** K4: the timeline from before the last jump, rebuilt row by row on the kit's stack, standing where it stood (one use) */
-    historyUndo() {
-      hStack.flush();
-      const b = hBranch; if (!b) return false;
-      hBranch = null; hBusy = true;
-      try {
-        hBottom = b.labels[0]; hStack.clear(hBottom);
-        for (let i = 1; i < b.states.length; i++) hStack.record('edit', b.labels[i], b.states[i - 1], b.states[i]);
-        hWalkTo(b.c - 1); hLand(b.states[b.c]); hStack.absorb();
-      } finally { hBusy = false; }
-      wState.setStatus('returned from history jump', 'live');
-      return true;
-    },
-    clear(name) { hBranch = null; hRefill.clear(); hBottom = name || 'start'; hStack.clear(hBottom); },
-    flush() { return driven() ? false : hStack.flush(); },
-    note(name) { if (!hHush && !driven()) hStack.note(name); },
-    hold(name) { if (!hStack.holding) hStack.flush(); hStack.hold(name); },   // K2: a press closes the edit standing first
-    release() { hStack.release(); },
-    label(name) { hStack.label(name); },
-    /** K5: a fill derived from the row the stack stands on, with nothing pending, re-keys that row on what it filled */
-    absorb(fill) {
-      const clean = !hStack.holding && !hTimers.armed.size && !hStack.applying && !driven() && hLive() === hBase;
-      fill();
-      if (!clean) return;
-      const S = hRead();
-      if (S.key !== hBase) { hRefill.set(hBase, S); hStack.absorb(); }
-    },
-    entries() { return hStack.entries().map((e, i) => Object.freeze({ i, label: i ? hSay(e.label) : hBottom, at: e.at, state: e.state })); },
-    get cursor() { return hStack.cursor; }, get limit() { return hStack.limit; },
-    get canUndo() { return hStack.canUndo || hDirty(); }, get canRedo() { return hStack.canRedo && !hDirty(); },
-    get canHistoryUndo() { return !!hBranch; },
-    get depth() { return hStack.cursor + (hDirty() ? 1 : 0); }, get redoDepth() { return hDirty() ? 0 : hStack.length - hStack.cursor; },
-    get pendingLabel() { return hStack.pendingLabel; }, get holding() { return hStack.holding; },
-    render() { if (hRender) hRender(true); },
+  const historyApi = {
+    undo() { const ok = history.undo(); if (ok) wState.setStatus('undone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
+    redo() { const ok = history.redo(); if (ok) wState.setStatus('redone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
+    historyUndo() { const ok = history.historyUndo(); if (ok) wState.setStatus('returned from history jump', 'live'); return ok; },
+    get canUndo() { return history.canUndo; }, get canRedo() { return history.canRedo; },
+    get canHistoryUndo() { return history.canHistoryUndo; },
+    get depth() { return history.depth; }, get redoDepth() { return history.redoDepth; }, get limit() { return history.limit; },
+    clear() { history.clear(); }, flush() { return history.flush(); }, note(name) { history.note(name); },
+    /* wave 106: the three the LIST needs — the rows, where the instrument is standing, and the jump.
+       `goto` commits first (that is the ring's own rule), so jumping away from an unbanked edit banks
+       it rather than losing it. */
+    entries() { return history.entries(); }, get cursor() { return history.cursor; },
+    render() { if (hRender) hRender(true); },   // S4: now (the ring's own onChange waits for the next frame)
+    goto(i) { const ok = history.goto(i); if (ok) wState.setStatus('history · row ' + (history.cursor + 1) + ' of ' + history.entries().length, 'live'); return ok; },
+    label(name) { history.label(name); },
   };
 
 
