@@ -1,0 +1,118 @@
+{
+  "id": "C3H6",
+  "name": "cyclopropane",
+  "formula": "C3H6",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0.8677574545920075,
+        0,
+        0
+      ],
+      [
+        1,
+        1.4488556232587064,
+        0,
+        0.9139003875544691
+      ],
+      [
+        1,
+        1.4488556232587064,
+        0,
+        -0.9139003875544691
+      ],
+      [
+        6,
+        -0.4338787272960036,
+        0.7515000000000001,
+        0
+      ],
+      [
+        1,
+        -0.7244278116293529,
+        1.254745776157976,
+        0.9139003875544691
+      ],
+      [
+        1,
+        -0.7244278116293529,
+        1.254745776157976,
+        -0.9139003875544691
+      ],
+      [
+        6,
+        -0.43387872729600413,
+        -0.7514999999999998,
+        0
+      ],
+      [
+        1,
+        -0.7244278116293539,
+        -1.2547457761579754,
+        0.9139003875544691
+      ],
+      [
+        1,
+        -0.7244278116293539,
+        -1.2547457761579754,
+        -0.9139003875544691
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013C) = 1.503 \u00c5, r(C\u2013H) = 1.083 \u00c5, \u2220HCH = 115.1\u00b0, D\u2083\u2095; each CH\u2082 bisector is radial in the ring plane, which is exact by symmetry rather than an idealisation; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "ring:3"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 587,
+  "nocc": 12,
+  "nElectrons": 24,
+  "nAO_631plusGstar": 69,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 21,
+  "predictedRecordBytes": 5912,
+  "predictedRecordBytes631": 41240,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -115.66595933028825,
+  "wallSeconds": 0.8665832609985955,
+  "converged": true,
+  "gapEh": 0.8787983674932918,
+  "topgroup": "D3h",
+  "computedGroup": "C2v",
+  "cycles": 40,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

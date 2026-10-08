@@ -1,0 +1,159 @@
+{
+  "id": "cytosine",
+  "name": "cytosine",
+  "formula": "C4H5N3O",
+  "section": "BIO",
+  "family": "nucleobases",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -1.449007693447775,
+        -0.4028736077026895,
+        -1.8209304504260029
+      ],
+      [
+        6,
+        -0.5921685659637409,
+        -0.04265481927367839,
+        -0.7345393363908799
+      ],
+      [
+        6,
+        0.07640629574261933,
+        -1.1413104262720914,
+        -0.024579328536263163
+      ],
+      [
+        6,
+        0.8136129206347417,
+        -0.8173960747214126,
+        1.034021358906949
+      ],
+      [
+        7,
+        0.9280862878279155,
+        0.5131235638619847,
+        1.4184931374665992
+      ],
+      [
+        6,
+        0.2662066714380936,
+        1.5894836081347044,
+        0.7242944021892126
+      ],
+      [
+        8,
+        0.3947470433306982,
+        2.73835162706874,
+        1.1141984687377204
+      ],
+      [
+        7,
+        -0.5230554444945095,
+        1.2222162052520866,
+        -0.4324480539672641
+      ],
+      [
+        1,
+        -1.0419909719750178,
+        -1.1431366236665979,
+        -2.4053978217367
+      ],
+      [
+        1,
+        -1.6619102769664218,
+        0.4218258957708881,
+        -2.3948195224931874
+      ],
+      [
+        1,
+        -0.048016166477723894,
+        -2.1575233621639796,
+        -0.35784301767856447
+      ],
+      [
+        1,
+        1.352704095268344,
+        -1.5396438503597454,
+        1.64252431614627
+      ],
+      [
+        1,
+        1.4843858050698735,
+        0.7595378640379837,
+        2.23702584777041
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; neutral canonical tautomer connectivity Nc1cc[nH]c(=O)n1; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 24,
+      "wallSeconds": 168.01939404600125,
+      "maxGradientEhPerBohr": 6.022970326036159e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "nucleobase",
+    "ring:6"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "Nc1cc[nH]c(=O)n1",
+  "origin": "PLAN F5",
+  "nocc": 29,
+  "nElectrons": 58,
+  "nAO_631plusGstar": 162,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 45,
+  "predictedRecordBytes": 18968,
+  "predictedRecordBytes631": 214592,
+  "appPredictedMs": 30204,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 103
+    }
+  ],
+  "energyEh": -387.5492535848079,
+  "wallSeconds": 3.1653508769959444,
+  "converged": true,
+  "gapEh": 0.4685445128196212,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 103,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

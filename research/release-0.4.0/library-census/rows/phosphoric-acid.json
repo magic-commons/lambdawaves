@@ -1,0 +1,125 @@
+{
+  "id": "phosphoric-acid",
+  "name": "phosphoric acid",
+  "formula": "H3O4P",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        -0.7827836174339518,
+        -1.0936456333109614,
+        0.9080373339728662
+      ],
+      [
+        15,
+        -0.008619838441034115,
+        -0.019130825455083583,
+        -0.1025250533044906
+      ],
+      [
+        8,
+        -0.0988324034354659,
+        -0.29129684109515996,
+        -1.6476757233310582
+      ],
+      [
+        8,
+        -0.6234780820632143,
+        1.4258232315691157,
+        0.4537905450593242
+      ],
+      [
+        8,
+        1.5125004932132604,
+        0.0061485891649674315,
+        0.5766556667315325
+      ],
+      [
+        1,
+        -1.2097557152717924,
+        -1.7610285560287584,
+        0.3186757755583523
+      ],
+      [
+        1,
+        -0.9307082162001623,
+        1.9160540261631018,
+        -0.34646818809866164
+      ],
+      [
+        1,
+        2.141677379632425,
+        -0.18292399101126056,
+        -0.1604903565910127
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity OP(=O)(O)O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 7,
+      "wallSeconds": 6.757694556989009,
+      "maxGradientEhPerBohr": 5.20083321555731e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "OP(=O)(O)O",
+  "origin": "PLAN F5",
+  "nocc": 25,
+  "nElectrons": 50,
+  "nAO_631plusGstar": 105,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "15": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 32,
+  "predictedRecordBytes": 10752,
+  "predictedRecordBytes631": 91928,
+  "appPredictedMs": 3254,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 72
+    }
+  ],
+  "energyEh": -633.9139011335889,
+  "wallSeconds": 0.18755666000652127,
+  "converged": true,
+  "gapEh": 0.6700290704791529,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 72,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

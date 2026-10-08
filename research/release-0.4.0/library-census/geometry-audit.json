@@ -1,0 +1,255 @@
+{
+  "status": "DERIVED",
+  "numericStatus": "Counts, indices, distances, ratios and angles DERIVED from saved MEASURED coordinates. Thresholds and covalent radii are UNVERIFIED heuristics for a broad screen, not experimental validations.",
+  "scope": "Named built SMILES connectivity only; references/cages/clusters excluded. No chemical, conformer, stereochemical, vibrational or experimental certification.",
+  "thresholds": {
+    "status": "UNVERIFIED",
+    "ratioRange": [
+      0.65,
+      1.5
+    ],
+    "why": "Broad bond-distance heuristic; a flag requires review, and a pass is not a bond-order or tautomer proof."
+  },
+  "checkedRows": 26,
+  "flaggedRows": [],
+  "checks": [
+    {
+      "id": "arginine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 25,
+      "maxExpectedBondRadiusRatio": 1.0259246658866776,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "aspartic-acid",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 15,
+      "maxExpectedBondRadiusRatio": 1.026090609229762,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "cysteine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 13,
+      "maxExpectedBondRadiusRatio": 1.0254576850053896,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "glutamine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 19,
+      "maxExpectedBondRadiusRatio": 1.0250302136360274,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "glutamic-acid",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 18,
+      "maxExpectedBondRadiusRatio": 1.025564237263996,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "histidine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 20,
+      "maxExpectedBondRadiusRatio": 1.0257733022367481,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "leucine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 21,
+      "maxExpectedBondRadiusRatio": 1.0250664091552795,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "lysine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 23,
+      "maxExpectedBondRadiusRatio": 1.0255394481803723,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "methionine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 19,
+      "maxExpectedBondRadiusRatio": 1.0241351951448598,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "proline",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 17,
+      "maxExpectedBondRadiusRatio": 1.0236428507746569,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "serine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 13,
+      "maxExpectedBondRadiusRatio": 1.024764411999264,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "tryptophan",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 28,
+      "maxExpectedBondRadiusRatio": 1.0263255394461228,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "tyrosine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 24,
+      "maxExpectedBondRadiusRatio": 1.0269396033327491,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "valine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 18,
+      "maxExpectedBondRadiusRatio": 1.0280240202155122,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "guanine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 17,
+      "maxExpectedBondRadiusRatio": 1.012490806297479,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "cytosine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 13,
+      "maxExpectedBondRadiusRatio": 1.0163038951315004,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "Gly-Gly",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 16,
+      "maxExpectedBondRadiusRatio": 1.0294458968033984,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "imidazole",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 9,
+      "maxExpectedBondRadiusRatio": 1.0124051119048325,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "phosphoric-acid",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 7,
+      "maxExpectedBondRadiusRatio": 1.0180278622562273,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "ribose",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 20,
+      "maxExpectedBondRadiusRatio": 1.0334185060017873,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "cubane",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 20,
+      "maxExpectedBondRadiusRatio": 1.0274361130176275,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "naphthalene",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 19,
+      "maxExpectedBondRadiusRatio": 1.0119260477240382,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "Si5H12",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 16,
+      "maxExpectedBondRadiusRatio": 1.0128811120273506,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "adamantane",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 28,
+      "maxExpectedBondRadiusRatio": 1.0183305478138853,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "caffeine",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 25,
+      "maxExpectedBondRadiusRatio": 1.0197665296889025,
+      "flaggedBonds": [],
+      "screenPass": true
+    },
+    {
+      "id": "DMT",
+      "status": "DERIVED from MEASURED final coordinates",
+      "expectedBondCount": 31,
+      "maxExpectedBondRadiusRatio": 1.0238850200417122,
+      "flaggedBonds": [],
+      "screenPass": true
+    }
+  ],
+  "GCContactStatus": "UNVERIFIED Watson-Crick validation; geometric contact metrics are DERIVED observations only",
+  "GCContacts": [
+    {
+      "label": "C N4-H to G O6",
+      "donorIndex": 16,
+      "hydrogenIndex": 25,
+      "acceptorIndex": 9,
+      "donorAcceptorAngstrom": 2.8336316224315694,
+      "hydrogenAcceptorAngstrom": 1.8629010955218785,
+      "donorHydrogenAcceptorDegrees": 156.31658115777856
+    },
+    {
+      "label": "G N1-H to C N3",
+      "donorIndex": 10,
+      "hydrogenIndex": 15,
+      "acceptorIndex": 23,
+      "donorAcceptorAngstrom": 2.8659124771031723,
+      "hydrogenAcceptorAngstrom": 1.8486905236919293,
+      "donorHydrogenAcceptorDegrees": 173.58988920253205
+    },
+    {
+      "label": "G N2-H to C O2",
+      "donorIndex": 0,
+      "hydrogenIndex": 12,
+      "acceptorIndex": 22,
+      "donorAcceptorAngstrom": 2.8336691062465693,
+      "hydrogenAcceptorAngstrom": 2.1528055552078453,
+      "donorHydrogenAcceptorDegrees": 121.82885889922898
+    }
+  ]
+}

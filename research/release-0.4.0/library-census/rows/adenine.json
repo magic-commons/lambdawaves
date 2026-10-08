@@ -1,0 +1,163 @@
+{
+  "id": "adenine",
+  "name": "adenine",
+  "formula": "C5H5N5",
+  "section": "BIO",
+  "family": "nucleobases",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        0.9350155,
+        -0.0279801,
+        -0.3788916
+      ],
+      [
+        6,
+        1.6739638,
+        -0.0357766,
+        0.7424316
+      ],
+      [
+        6,
+        3.0747955,
+        -0.009448,
+        0.5994562
+      ],
+      [
+        6,
+        3.5646109,
+        0.0195446,
+        -0.7059872
+      ],
+      [
+        7,
+        2.853151,
+        0.0258031,
+        -1.8409596
+      ],
+      [
+        6,
+        1.549076,
+        0.0012569,
+        -1.5808009
+      ],
+      [
+        7,
+        4.0885824,
+        -0.0054429,
+        1.5289786
+      ],
+      [
+        6,
+        5.1829921,
+        0.0253971,
+        0.7872176
+      ],
+      [
+        7,
+        4.9294871,
+        0.0412404,
+        -0.5567274
+      ],
+      [
+        7,
+        1.0716177,
+        -0.0765366,
+        1.939139
+      ],
+      [
+        1,
+        0.8794435,
+        0.005026,
+        -2.4315709
+      ],
+      [
+        1,
+        6.1882591,
+        0.0375542,
+        1.1738824
+      ],
+      [
+        1,
+        5.6035368,
+        0.0648755,
+        -1.3036811
+      ],
+      [
+        1,
+        0.0586915,
+        -0.0423765,
+        2.0039181
+      ],
+      [
+        1,
+        1.6443796,
+        -0.0347395,
+        2.7619159
+      ]
+    ],
+    "source": "https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; adenine-thymine; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Copied benchmark reference coordinates; this does not claim an experimental geometry or an RHF minimum."
+  },
+  "motifs": [
+    "nucleobase",
+    "ring:6",
+    "ring:5"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "Nc1ncnc2[nH]cnc12",
+  "origin": "PLAN F5",
+  "nocc": 35,
+  "nElectrons": 70,
+  "nAO_631plusGstar": 200,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 55,
+  "predictedRecordBytes": 27128,
+  "predictedRecordBytes631": 325248,
+  "appPredictedMs": 96047,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 67
+    }
+  ],
+  "energyEh": -458.6127899481065,
+  "wallSeconds": 0.9907024660060415,
+  "converged": true,
+  "gapEh": 0.46226701358620625,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 67,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

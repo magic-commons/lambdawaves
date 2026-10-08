@@ -1,0 +1,178 @@
+{
+  "id": "guanine",
+  "name": "guanine",
+  "formula": "C5H5N5O",
+  "section": "BIO",
+  "family": "nucleobases",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.28063982805501203,
+        -2.142682538314764,
+        2.044979826198429
+      ],
+      [
+        6,
+        -0.09529709281212576,
+        -1.162262744316894,
+        1.0183933085743349
+      ],
+      [
+        7,
+        -0.9684289078286763,
+        -0.19411397983325934,
+        0.8990035681444648
+      ],
+      [
+        6,
+        -0.5583221344449739,
+        0.7187620781289853,
+        -0.10226181872910539
+      ],
+      [
+        7,
+        -1.2549397295464986,
+        1.8572651726624085,
+        -0.4675878411944998
+      ],
+      [
+        6,
+        -0.5122629871500265,
+        2.465024125693952,
+        -1.481226608675082
+      ],
+      [
+        7,
+        0.5811325412293162,
+        1.7994227140567056,
+        -1.7752167709251294
+      ],
+      [
+        6,
+        0.5498152885830786,
+        0.6903984914272914,
+        -0.900989258685718
+      ],
+      [
+        6,
+        1.5343496915915456,
+        -0.40709653815821834,
+        -0.7652945956563864
+      ],
+      [
+        8,
+        2.5841975280671394,
+        -0.6178852350651716,
+        -1.3470547296681652
+      ],
+      [
+        7,
+        1.0663246571929783,
+        -1.3269523219946908,
+        0.25852967380397973
+      ],
+      [
+        1,
+        -1.2356018176655925,
+        -2.06431396002119,
+        2.415868646112921
+      ],
+      [
+        1,
+        -0.13000840892988025,
+        -3.0962210088346356,
+        1.688922817133166
+      ],
+      [
+        1,
+        -2.132701071720528,
+        2.182947974175666,
+        -0.059821862374064866
+      ],
+      [
+        1,
+        -0.8425013747306834,
+        3.3858674598011103,
+        -1.9467051121889698
+      ],
+      [
+        1,
+        1.6948836458747583,
+        -2.0881596892845624,
+        0.5204607582504744
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; neutral canonical tautomer connectivity Nc1nc2[nH]cnc2c(=O)[nH]1; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 38,
+      "wallSeconds": 585.3815815720009,
+      "maxGradientEhPerBohr": 4.663658475356769e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "nucleobase",
+    "ring:6",
+    "ring:5"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "Nc1nc2[nH]cnc2c(=O)[nH]1",
+  "origin": "PLAN F5",
+  "nocc": 39,
+  "nElectrons": 78,
+  "nAO_631plusGstar": 219,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 60,
+  "predictedRecordBytes": 31808,
+  "predictedRecordBytes631": 389240,
+  "appPredictedMs": 153792,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 119
+    }
+  ],
+  "energyEh": -532.4666886665507,
+  "wallSeconds": 2.3851812619977864,
+  "converged": true,
+  "gapEh": 0.46553362896068673,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 119,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

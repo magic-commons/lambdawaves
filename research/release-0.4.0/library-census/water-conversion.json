@@ -1,0 +1,59 @@
+{
+  "status": "MEASURED",
+  "pass": true,
+  "tolerance": 1e-08,
+  "maxCoefficientErrorUpToSign": 1.02873265461767e-12,
+  "perOrbitalMaxError": [
+    1.4823212102221817e-14,
+    1.011302153131055e-12,
+    1.02873265461767e-12,
+    9.00390872971002e-14,
+    4.440892098500626e-16,
+    9.980904991380157e-13,
+    6.302736110797014e-13
+  ],
+  "signs": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "maxEnergyDifferenceEh": 5.019984428145108e-12,
+  "maxOverlapDifference": 5.551115123125783e-16,
+  "pyscfConverged": true,
+  "appConverged": true,
+  "appBasisHash": "d6aadbf2ff716c8699e9a5fca05aa079c9507d4c9b51a11a2563e22fd9ffd2fc",
+  "appAOOrder": [
+    "0 O 1s",
+    "0 O 2s",
+    "0 O 2px",
+    "0 O 2py",
+    "0 O 2pz",
+    "1 H 1s",
+    "2 H 1s"
+  ],
+  "permutationAppToPySCF": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "rowScalePySCFToApp": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "pyscfWallSeconds": 0.027456847004941665,
+  "geometrySource": "lab/molecules.js H2O, exact app bohr coordinates; water-app.json contains the native solve",
+  "comparison": "All occupied AND virtual coefficient columns, in the same fixed Cartesian frame, up to independent signs; no density-only or subspace-only substitution."
+}

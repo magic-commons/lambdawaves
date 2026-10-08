@@ -1,0 +1,126 @@
+{
+  "id": "Na4Cl4",
+  "name": "Na4Cl4 finite alternating cube",
+  "formula": "Cl4Na4",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        17,
+        -1.2172965034383123,
+        -1.2172965034383123,
+        -1.2172965034383123
+      ],
+      [
+        11,
+        -1.2172965034383123,
+        -1.2172965034383123,
+        1.2172965034383123
+      ],
+      [
+        11,
+        -1.2172965034383123,
+        1.2172965034383123,
+        -1.2172965034383123
+      ],
+      [
+        17,
+        -1.2172965034383123,
+        1.2172965034383123,
+        1.2172965034383123
+      ],
+      [
+        11,
+        1.2172965034383123,
+        -1.2172965034383123,
+        -1.2172965034383123
+      ],
+      [
+        17,
+        1.2172965034383123,
+        -1.2172965034383123,
+        1.2172965034383123
+      ],
+      [
+        17,
+        1.2172965034383123,
+        1.2172965034383123,
+        -1.2172965034383123
+      ],
+      [
+        11,
+        1.2172965034383123,
+        1.2172965034383123,
+        1.2172965034383123
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 10,
+      "wallSeconds": 10.944077576001291,
+      "maxGradientEhPerBohr": null,
+      "details": "constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof"
+    }
+  },
+  "motifs": [
+    "cluster"
+  ],
+  "optimise": true,
+  "optimisationMode": "scale",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 56,
+  "nElectrons": 112,
+  "nAO_631plusGstar": 184,
+  "basis631CountSource": {
+    "17": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "11": "installed PySCF 6-31+G* table, count only, not vendored or solved"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 72,
+  "predictedRecordBytes": 44672,
+  "predictedRecordBytes631": 275840,
+  "appPredictedMs": 270804,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 47
+    }
+  ],
+  "energyEh": -2458.476288658288,
+  "wallSeconds": 1.8078913700010162,
+  "converged": true,
+  "gapEh": 0.7699771016992344,
+  "topgroup": "Td",
+  "computedGroup": "D2",
+  "cycles": 47,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

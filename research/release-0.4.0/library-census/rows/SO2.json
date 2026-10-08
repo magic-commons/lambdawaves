@@ -1,0 +1,80 @@
+{
+  "id": "SO2",
+  "name": "sulfur dioxide",
+  "formula": "O2S",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        16,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        1.2349051530946782,
+        -0.7226326195655782
+      ],
+      [
+        8,
+        0,
+        -1.2349051530946782,
+        -0.7226326195655782
+      ]
+    ],
+    "source": "CCCBDB experimental r(S=O) = 1.4308 \u00c5, \u2220OSO = 119.33\u00b0; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 262,
+  "nocc": 16,
+  "nElectrons": 32,
+  "nAO_631plusGstar": 61,
+  "basis631CountSource": {
+    "16": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "8": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 19,
+  "predictedRecordBytes": 5240,
+  "predictedRecordBytes631": 32792,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -540.6018797759026,
+  "wallSeconds": 0.5670059249969199,
+  "converged": true,
+  "gapEh": 0.45461267228182645,
+  "topgroup": "C2v",
+  "computedGroup": "C2v",
+  "cycles": 42,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

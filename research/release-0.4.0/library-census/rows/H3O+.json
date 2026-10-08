@@ -1,0 +1,86 @@
+{
+  "id": "H3O+",
+  "name": "hydronium",
+  "formula": "H3O",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 1,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0.9302573999951842,
+        0,
+        -0.29462995393238584
+      ],
+      [
+        1,
+        -0.4651286999975919,
+        0.8056265404542915,
+        -0.29462995393238584
+      ],
+      [
+        1,
+        -0.4651286999975925,
+        -0.8056265404542913,
+        -0.29462995393238584
+      ]
+    ],
+    "source": "r\u2080(O\u2013H) = 0.9758 \u00c5, \u2220HOH = 111.3\u00b0, C\u2083\u1d65, from the infrared spectrum of H\u2083O\u207a (Sears, Bunker, Davies et al., 1985); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "ions",
+  "presentInstability": null,
+  "appPredictedMs": 20,
+  "nocc": 5,
+  "nElectrons": 10,
+  "nAO_631plusGstar": 25,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 8,
+  "predictedRecordBytes": 2688,
+  "predictedRecordBytes631": 7448,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -75.32904700782338,
+  "wallSeconds": 0.032932846996118315,
+  "converged": true,
+  "gapEh": 1.0235788977387354,
+  "topgroup": "C3v",
+  "computedGroup": "Cs",
+  "cycles": 9,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

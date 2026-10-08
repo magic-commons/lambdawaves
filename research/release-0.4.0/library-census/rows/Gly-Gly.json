@@ -1,0 +1,182 @@
+{
+  "id": "Gly-Gly",
+  "name": "glycylglycine",
+  "formula": "C4H8N2O3",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        1.8215407965771913,
+        1.1427511667016266,
+        -1.1048076983722999
+      ],
+      [
+        6,
+        1.7595031757809547,
+        -0.33367815827685315,
+        -1.2521885986152868
+      ],
+      [
+        6,
+        0.5535237186728463,
+        -0.9331001445707328,
+        -0.4712670272888049
+      ],
+      [
+        8,
+        0.38164998700936364,
+        -2.127319860841229,
+        -0.3139500169711766
+      ],
+      [
+        7,
+        -0.32681372911539663,
+        0.06041345518100899,
+        0.09113571716352695
+      ],
+      [
+        6,
+        -1.717390333726515,
+        -0.3624021234502509,
+        0.35723673499072417
+      ],
+      [
+        6,
+        -2.1980836612087216,
+        0.21103651844991497,
+        1.7314888611307282
+      ],
+      [
+        8,
+        -3.362687072175415,
+        0.25907883926811637,
+        2.075216515550267
+      ],
+      [
+        8,
+        -1.1776015831085307,
+        0.6580879063975725,
+        2.5534893271261394
+      ],
+      [
+        1,
+        2.234282727461864,
+        1.3528800388959832,
+        -0.18206670486573887
+      ],
+      [
+        1,
+        2.5089950696404735,
+        1.4942978274984096,
+        -1.7893388625571378
+      ],
+      [
+        1,
+        1.615724286071206,
+        -0.5673248867782927,
+        -2.309041814002447
+      ],
+      [
+        1,
+        2.6691399686233876,
+        -0.8473936595547182,
+        -0.9262779935372176
+      ],
+      [
+        1,
+        -0.24983858544291443,
+        0.9395962130500495,
+        -0.43282927633970314
+      ],
+      [
+        1,
+        -2.4087000706042767,
+        -0.04494929496600066,
+        -0.42658276020251257
+      ],
+      [
+        1,
+        -1.7346908474282334,
+        -1.4530463901424835,
+        0.4070414220234888
+      ],
+      [
+        1,
+        -0.3685538460540576,
+        0.551072555994826,
+        1.9927421764646707
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity NCC(=O)NCC(=O)O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 112,
+      "wallSeconds": 653.7550205519947,
+      "maxGradientEhPerBohr": 8.067438273684502e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "peptide bond"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "NCC(=O)NCC(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 35,
+  "nElectrons": 70,
+  "nAO_631plusGstar": 187,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 53,
+  "predictedRecordBytes": 25320,
+  "predictedRecordBytes631": 284744,
+  "appPredictedMs": 73575,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 105
+    }
+  ],
+  "energyEh": -483.2525924607919,
+  "wallSeconds": 0.9238705659954576,
+  "converged": true,
+  "gapEh": 0.5954688538134506,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 105,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

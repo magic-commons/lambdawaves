@@ -1,0 +1,99 @@
+{
+  "id": "TiCl4",
+  "name": "titanium tetrachloride",
+  "formula": "Cl4Ti",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        22,
+        0,
+        0,
+        0
+      ],
+      [
+        17,
+        1.252850084141488,
+        1.252850084141488,
+        1.252850084141488
+      ],
+      [
+        17,
+        1.252850084141488,
+        -1.252850084141488,
+        -1.252850084141488
+      ],
+      [
+        17,
+        -1.252850084141488,
+        1.252850084141488,
+        -1.252850084141488
+      ],
+      [
+        17,
+        -1.252850084141488,
+        -1.252850084141488,
+        1.252850084141488
+      ]
+    ],
+    "source": "NIST CCCBDB experimental Ti-Cl bond length, Td reconstruction; https://cccbdb.nist.gov/exp2x.asp?casno=7550450; DOI https://doi.org/10.1063/1.1727535",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "d-block"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 45,
+  "nElectrons": 90,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "17": "installed PySCF 6-31+G* table, count only, not vendored or solved"
+  },
+  "basis631MissingElements": [
+    "Ti"
+  ],
+  "nAO_STO3G": 55,
+  "predictedRecordBytes": 27128,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 47076,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -2658.646680474214,
+  "wallSeconds": 0.40496326399443205,
+  "converged": true,
+  "gapEh": 0.5849919754817672,
+  "topgroup": "Td",
+  "computedGroup": "D2",
+  "cycles": 59,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "pyscfStability": {
+    "status": "MEASURED",
+    "internalStable": true,
+    "externalStable": true,
+    "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"
+  },
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Ti",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

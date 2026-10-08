@@ -1,0 +1,89 @@
+{
+  "id": "KBr",
+  "name": "potassium bromide",
+  "formula": "BrK",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        19,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        35,
+        0.0,
+        0.0,
+        2.764082301443156
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; diatomic RHF optimisation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 10,
+      "wallSeconds": 0.8815651600016281,
+      "maxGradientEhPerBohr": null,
+      "details": "constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": "ligand-scale",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 27,
+  "nElectrons": 54,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "19": "installed PySCF 6-31+G* table, count only, not vendored or solved"
+  },
+  "basis631MissingElements": [
+    "Br"
+  ],
+  "nAO_STO3G": 32,
+  "predictedRecordBytes": 10752,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 2631,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 52
+    }
+  ],
+  "energyEh": -3138.6810947476747,
+  "wallSeconds": 0.28236048099643085,
+  "converged": true,
+  "gapEh": 0.3343318468451377,
+  "topgroup": "Coov",
+  "computedGroup": "C2v",
+  "cycles": 52,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Br",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

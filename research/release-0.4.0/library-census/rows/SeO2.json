@@ -1,0 +1,95 @@
+{
+  "id": "SeO2",
+  "name": "selenium dioxide",
+  "formula": "O2Se",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        34,
+        9.56918796339534e-14,
+        7.983681134708513e-09,
+        -0.02270126840933262
+      ],
+      [
+        8,
+        -6.22210635733526e-14,
+        1.308939168210785,
+        1.03135064178877
+      ],
+      [
+        8,
+        -3.3470816061430416e-14,
+        -1.3089391761957518,
+        1.0313506266191625
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; bent RHF optimisation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 5,
+      "wallSeconds": 5.539386942997226,
+      "maxGradientEhPerBohr": 3.1029468186005715e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 25,
+  "nElectrons": 50,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Se"
+  ],
+  "nAO_STO3G": 29,
+  "predictedRecordBytes": 9192,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 1565,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 66
+    }
+  ],
+  "energyEh": -2521.739283286803,
+  "wallSeconds": 0.739014954000595,
+  "converged": true,
+  "gapEh": 0.35010987413488415,
+  "topgroup": "C2v",
+  "computedGroup": "C2v",
+  "cycles": 66,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Se",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

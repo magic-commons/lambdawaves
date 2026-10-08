@@ -1,0 +1,92 @@
+{
+  "id": "XeF4",
+  "name": "XeF4 conditional MODEL",
+  "formula": "F4Xe",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        54,
+        0,
+        0,
+        0
+      ],
+      [
+        9,
+        2,
+        0,
+        0
+      ],
+      [
+        9,
+        -2,
+        0,
+        0
+      ],
+      [
+        9,
+        0,
+        2,
+        0
+      ],
+      [
+        9,
+        0,
+        -2,
+        0
+      ]
+    ],
+    "source": "UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record",
+    "status": "UNVERIFIED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Unoptimised conditional MODEL seed only; missing pinned basis prevents the required fallback optimisation."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "conditionalBasisBlocked": true,
+  "nocc": 45,
+  "nElectrons": 90,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "9": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Xe"
+  ],
+  "nAO_STO3G": null,
+  "energyEh": null,
+  "wallSeconds": null,
+  "converged": null,
+  "gapEh": null,
+  "predictedRecordBytes": null,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": null,
+  "overLiveBudget": null,
+  "renderTier": "BLOCKED basis",
+  "topgroup": null,
+  "computedGroup": null,
+  "solveStatus": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+  "seedTopgroup": "D4h",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "UNVERIFIED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "UNVERIFIED: pinned basis absent",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Xe",
+    "energyEh": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "wallSeconds": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "gapEh": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "predictedRecordBytes": "UNVERIFIED: nAO unavailable",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

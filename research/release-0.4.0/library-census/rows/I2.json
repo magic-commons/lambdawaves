@@ -1,0 +1,72 @@
+{
+  "id": "I2",
+  "name": "I2 conditional MODEL",
+  "formula": "I2",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        53,
+        0,
+        0,
+        -1.33
+      ],
+      [
+        53,
+        0,
+        0,
+        1.33
+      ]
+    ],
+    "source": "UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record",
+    "status": "UNVERIFIED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Unoptimised conditional MODEL seed only; missing pinned basis prevents the required fallback optimisation."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "conditionalBasisBlocked": true,
+  "nocc": 53,
+  "nElectrons": 106,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {},
+  "basis631MissingElements": [
+    "I"
+  ],
+  "nAO_STO3G": null,
+  "energyEh": null,
+  "wallSeconds": null,
+  "converged": null,
+  "gapEh": null,
+  "predictedRecordBytes": null,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": null,
+  "overLiveBudget": null,
+  "renderTier": "BLOCKED basis",
+  "topgroup": null,
+  "computedGroup": null,
+  "solveStatus": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+  "seedTopgroup": "Dooh",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "UNVERIFIED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "UNVERIFIED: pinned basis absent",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for I",
+    "energyEh": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "wallSeconds": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "gapEh": "UNVERIFIED: required vendored STO-3G lacks iodine/xenon; no solve attempted",
+    "predictedRecordBytes": "UNVERIFIED: nAO unavailable",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

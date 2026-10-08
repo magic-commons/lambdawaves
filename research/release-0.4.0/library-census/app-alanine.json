@@ -1,0 +1,40 @@
+{
+  "id": "alanine",
+  "status": "MEASURED",
+  "wallMs": 2135.2710199999997,
+  "nAO": 37,
+  "converged": true,
+  "energyEh": -317.67874534511134,
+  "gapEh": 0.6411725769568966,
+  "iterations": 35,
+  "timings": {
+    "integrals": 961.65
+  },
+  "stability": {
+    "seed": 20260912,
+    "amplitude": 0.05,
+    "energy": -317.6787453451118,
+    "delta": -4.547473508864641e-13,
+    "converged": true,
+    "iterations": 37,
+    "same": true,
+    "hessian": {
+      "nOv": 312,
+      "minimum": true,
+      "positiveDefinite": {
+        "ApB": true,
+        "AmB": true
+      },
+      "lowestApB": 0.2126571434028217,
+      "lowestAmB": 0.17768729544230966
+    },
+    "minimum": true
+  },
+  "method": "moleculeRHF defaults; no RPA spectrum call",
+  "predictedRecordBytes": 13592,
+  "numericStatus": {
+    "nAO": "DERIVED from pinned basis shell/component inventory",
+    "gapEh": "DERIVED from MEASURED native orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO*nAO+2*nAO)+2048, early checkpoint binary allowance; authoritative census uses decimal 2000 bytes"
+  }
+}

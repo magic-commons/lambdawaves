@@ -1,0 +1,81 @@
+{
+  "id": "CuH",
+  "name": "copper hydride",
+  "formula": "CuH",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        29,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1.4626
+      ]
+    ],
+    "source": "CCCBDB experimental r(Cu\u2013H) = 1.4626 \u00c5 (X\u00b9\u03a3\u207a, a closed-shell singlet; the Cu ATOM is \u00b2S and cannot be done here); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "d-block"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": {
+    "lowestApB": -0.006966,
+    "lowestAmB": -0.1173,
+    "energy": -1620.944903679
+  },
+  "appPredictedMs": 420,
+  "nocc": 15,
+  "nElectrons": 30,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Cu"
+  ],
+  "nAO_STO3G": 20,
+  "predictedRecordBytes": 5568,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -1620.9457053773676,
+  "wallSeconds": 1.9734589700092329,
+  "converged": false,
+  "gapEh": 0.32046717841468114,
+  "topgroup": "Coov",
+  "computedGroup": "C2v",
+  "cycles": 200,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Cu",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

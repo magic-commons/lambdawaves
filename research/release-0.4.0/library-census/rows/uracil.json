@@ -1,0 +1,145 @@
+{
+  "id": "uracil",
+  "name": "uracil",
+  "formula": "C4H4N2O2",
+  "section": "BIO",
+  "family": "nucleobases",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        -1.4663316,
+        1.0121693,
+        0
+      ],
+      [
+        6,
+        -0.6281464,
+        1.9142678,
+        0
+      ],
+      [
+        7,
+        0.7205093,
+        1.6882688,
+        0
+      ],
+      [
+        6,
+        1.636729,
+        2.7052764,
+        0
+      ],
+      [
+        6,
+        1.2769036,
+        4.0061763,
+        0
+      ],
+      [
+        6,
+        -0.1286005,
+        4.3621549,
+        0
+      ],
+      [
+        7,
+        -0.977723,
+        3.2396433,
+        0
+      ],
+      [
+        8,
+        -0.5972229,
+        5.4864066,
+        0
+      ],
+      [
+        1,
+        2.0103504,
+        4.7938642,
+        0
+      ],
+      [
+        1,
+        1.0232515,
+        0.706182,
+        0
+      ],
+      [
+        1,
+        -1.9700268,
+        3.432385,
+        0
+      ],
+      [
+        1,
+        2.669062,
+        2.3883417,
+        0
+      ]
+    ],
+    "source": "https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; uracil; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Copied benchmark reference coordinates; this does not claim an experimental geometry or an RHF minimum."
+  },
+  "motifs": [
+    "nucleobase",
+    "ring:6"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "O=c1cc[nH]c(=O)[nH]1",
+  "origin": "PLAN F5",
+  "nocc": 29,
+  "nElectrons": 58,
+  "nAO_631plusGstar": 160,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 44,
+  "predictedRecordBytes": 18240,
+  "predictedRecordBytes631": 209408,
+  "appPredictedMs": 25803,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 61
+    }
+  ],
+  "energyEh": -407.0748602350504,
+  "wallSeconds": 0.4972782120021293,
+  "converged": true,
+  "gapEh": 0.4944700243913439,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 61,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "id": "FeCO5",
+  "name": "FeCO5 carbonyl representative",
+  "formula": "C5FeO5",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        26,
+        -8.282684196470628e-08,
+        -1.2602938866466024e-08,
+        -7.01952558670741e-11
+      ],
+      [
+        6,
+        2.2387838928748078e-08,
+        3.318484023340511e-09,
+        2.006959844450999
+      ],
+      [
+        8,
+        2.3565292757301414e-07,
+        3.586819435913482e-08,
+        3.154163533418879
+      ],
+      [
+        6,
+        2.3612711670908415e-08,
+        3.738038534451885e-09,
+        -2.0069598445899595
+      ],
+      [
+        8,
+        2.353659320689181e-07,
+        3.577227290070386e-08,
+        -3.1541635331688322
+      ],
+      [
+        6,
+        1.6407150998094755,
+        6.375477259776496e-07,
+        1.1984925996103806e-09
+      ],
+      [
+        8,
+        2.811531641701449,
+        -7.062776271262398e-07,
+        -8.702398561292598e-10
+      ],
+      [
+        6,
+        -0.8203539229599769,
+        1.420903119270744,
+        -2.139634146308355e-10
+      ],
+      [
+        8,
+        -1.4057696777771571,
+        2.434855439152287,
+        1.2551684302027762e-10
+      ],
+      [
+        6,
+        -0.8203545803791732,
+        -1.4209027528934812,
+        -9.162925016784355e-10
+      ],
+      [
+        8,
+        -1.405768994619564,
+        -2.4348558028835754,
+        6.217185446991071e-10
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; class representative built here; RHF optimisation with retained point symmetry",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 11,
+      "wallSeconds": 182.90580655100348,
+      "maxGradientEhPerBohr": 6.594446179519764e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "d-block"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 48,
+  "nElectrons": 96,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Fe"
+  ],
+  "nAO_STO3G": 69,
+  "predictedRecordBytes": 41192,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 303904,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 127
+    }
+  ],
+  "energyEh": -1805.0054478075413,
+  "wallSeconds": 3.239188257008209,
+  "converged": true,
+  "gapEh": 0.39462199560044264,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 127,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "pyscfStability": {
+    "status": "MEASURED",
+    "internalStable": true,
+    "externalStable": true,
+    "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"
+  },
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Fe",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

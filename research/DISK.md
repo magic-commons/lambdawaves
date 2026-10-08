@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inlined in full (2.93 MB), 1045 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-10-08 05:59 UTC by tools/disk.mjs from `research/`: 113 documents inlined in full (3.08 MB), 1203 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -73,7 +73,7 @@ Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inl
 67. [beta/RESEARCH-COMMISSIONS.md](#doc-67) · 2026-10-07 · 14 kB
 68. [beta/SOURCES.md](#doc-68) · 2026-10-07 · 9 kB
 69. [device-reports/README.md](#doc-69) · 2026-10-07 · 0 kB
-70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 142 kB
+70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 143 kB
 71. [release-0.3.1/BRIEF-S3.md](#doc-71) · 2026-10-07 · 10 kB
 72. [release-0.3.1/BRIEF-S4.md](#doc-72) · 2026-10-07 · 3 kB
 73. [release-0.3.1/MIR-CONTRACT-THREE-SCOPES.md](#doc-73) · 2026-10-07 · 3 kB
@@ -91,17 +91,17 @@ Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inl
 85. [release-0.4.0/BRIEF-S1-NAMES.md](#doc-85) · 2026-10-07 · 9 kB
 86. [release-0.4.0/BRIEF-S1-SOL.md](#doc-86) · 2026-10-07 · 7 kB
 87. [release-0.4.0/BRIEF-S2-CAMERA.md](#doc-87) · 2026-10-07 · 11 kB
-88. [release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md](#doc-88) · 2026-10-07 · 9 kB
-89. [release-0.4.0/BRIEF-S4-LIBRARY.md](#doc-89) · 2026-10-07 · 12 kB
-90. [release-0.4.0/BRIEF-S5-KIT-BRIEFS.md](#doc-90) · 2026-10-07 · 4 kB
-91. [release-0.4.0/HANDOFF.md](#doc-91) · 2026-10-07 · 18 kB
-92. [release-0.4.0/measure/MEASURE.md](#doc-92) · 2026-10-07 · 18 kB
-93. [release-0.4.0/NACRE.md](#doc-93) · 2026-10-07 · 9 kB
-94. [release-0.4.0/PLAN-DRAFT-0.md](#doc-94) · 2026-10-07 · 22 kB
-95. [release-0.4.0/PLAN-DRAFT-1.md](#doc-95) · 2026-10-07 · 28 kB
-96. [release-0.4.0/PLAN-DRAFT-2.md](#doc-96) · 2026-10-07 · 41 kB
-97. [release-0.4.0/PLAN-DRAFT-3.md](#doc-97) · 2026-10-07 · 41 kB
-98. [release-0.4.0/PLAN.md](#doc-98) · 2026-10-07 · 45 kB
+88. [release-0.4.0/BRIEF-S2-VERIFY.md](#doc-88) · 2026-10-07 · 8 kB
+89. [release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md](#doc-89) · 2026-10-07 · 9 kB
+90. [release-0.4.0/BRIEF-S4-LIBRARY.md](#doc-90) · 2026-10-07 · 12 kB
+91. [release-0.4.0/BRIEF-S5-KIT-BRIEFS.md](#doc-91) · 2026-10-07 · 4 kB
+92. [release-0.4.0/HANDOFF.md](#doc-92) · 2026-10-07 · 21 kB
+93. [release-0.4.0/measure/MEASURE.md](#doc-93) · 2026-10-07 · 18 kB
+94. [release-0.4.0/NACRE.md](#doc-94) · 2026-10-07 · 9 kB
+95. [release-0.4.0/PLAN-DRAFT-0.md](#doc-95) · 2026-10-07 · 22 kB
+96. [release-0.4.0/PLAN-DRAFT-1.md](#doc-96) · 2026-10-07 · 28 kB
+97. [release-0.4.0/PLAN-DRAFT-2.md](#doc-97) · 2026-10-07 · 41 kB
+98. [release-0.4.0/PLAN-DRAFT-3.md](#doc-98) · 2026-10-07 · 41 kB
 99. [release-0.4.0/REVIEW-SONNET-0.md](#doc-99) · 2026-10-07 · 35 kB
 100. [release-0.4.0/REVIEW-SONNET-2.md](#doc-100) · 2026-10-07 · 20 kB
 101. [release-0.4.0/S0-BUILD.md](#doc-101) · 2026-10-07 · 10 kB
@@ -114,6 +114,9 @@ Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inl
 108. [release-0.4.0/survey/SIBLINGS.md](#doc-108) · 2026-10-07 · 48 kB
 109. [release-0.4.0/survey/VAULT.md](#doc-109) · 2026-10-07 · 61 kB
 110. [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](#doc-110) · 2026-10-07 · 50 kB
+111. [release-0.4.0/library-census/CENSUS.md](#doc-111) · 2026-10-08 · 121 kB
+112. [release-0.4.0/PLAN.md](#doc-112) · 2026-10-08 · 46 kB
+113. [release-0.4.0/S2-CAMERA-BUILD.md](#doc-113) · 2026-10-08 · 13 kB
 
 ## ARTEFACTS (not inlined)
 
@@ -1140,6 +1143,164 @@ Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inl
 | release-0.4.0/canary/04-stylehash-compare.log | 1735 |
 | release-0.4.0/canary/04-stylehash-report-head.log | 14821 |
 | release-0.4.0/canary/04-stylehash-summary.log | 1937 |
+| release-0.4.0/library-census/app-Li4F4.json | 1064 |
+| release-0.4.0/library-census/app-TiCl4.json | 1042 |
+| release-0.4.0/library-census/app-alanine.json | 1072 |
+| release-0.4.0/library-census/audit.json | 702 |
+| release-0.4.0/library-census/bse-coverage-isolated.json | 487 |
+| release-0.4.0/library-census/bse-coverage-plain.json | 488 |
+| release-0.4.0/library-census/c60-field-check.json | 638 |
+| release-0.4.0/library-census/c60-frontier.json | 113723 |
+| release-0.4.0/library-census/c60-pyscf-samples.json | 31053 |
+| release-0.4.0/library-census/census-input.json | 254689 |
+| release-0.4.0/library-census/census.json | 548228 |
+| release-0.4.0/library-census/geometry-audit.json | 7770 |
+| release-0.4.0/library-census/geometry-work/Gly-Gly/evaluation-100.json | 2015 |
+| release-0.4.0/library-census/geometry-work/Gly-Gly/evaluation-20.json | 2011 |
+| release-0.4.0/library-census/geometry-work/Gly-Gly/evaluation-40.json | 2006 |
+| release-0.4.0/library-census/geometry-work/Gly-Gly/evaluation-60.json | 2016 |
+| release-0.4.0/library-census/geometry-work/Gly-Gly/evaluation-80.json | 2013 |
+| release-0.4.0/library-census/geometry-work/arginine/evaluation-20.json | 2910 |
+| release-0.4.0/library-census/geometry-work/ice-cube/evaluation-100.json | 2702 |
+| release-0.4.0/library-census/geometry-work/ice-cube/evaluation-20.json | 2706 |
+| release-0.4.0/library-census/geometry-work/ice-cube/evaluation-40.json | 2703 |
+| release-0.4.0/library-census/geometry-work/ice-cube/evaluation-60.json | 2690 |
+| release-0.4.0/library-census/geometry-work/ice-cube/evaluation-80.json | 2707 |
+| release-0.4.0/library-census/geometry-work/leucine/evaluation-20.json | 2507 |
+| release-0.4.0/library-census/geometry-work/leucine/evaluation-40.json | 2515 |
+| release-0.4.0/library-census/geometry-work/naphthalene/evaluation-20.json | 2107 |
+| release-0.4.0/library-census/geometry-work/ribose/evaluation-20.json | 2310 |
+| release-0.4.0/library-census/geometry-work/ribose/evaluation-40.json | 2306 |
+| release-0.4.0/library-census/geometry-work/ribose/evaluation-60.json | 2305 |
+| release-0.4.0/library-census/present-input.json | 54997 |
+| release-0.4.0/library-census/rows/A-T.json | 4850 |
+| release-0.4.0/library-census/rows/AlH3.json | 2664 |
+| release-0.4.0/library-census/rows/AsH3.json | 2406 |
+| release-0.4.0/library-census/rows/B12H12--.json | 4838 |
+| release-0.4.0/library-census/rows/BF3.json | 2375 |
+| release-0.4.0/library-census/rows/BH3.json | 2404 |
+| release-0.4.0/library-census/rows/BeH2.json | 2386 |
+| release-0.4.0/library-census/rows/Br2.json | 2179 |
+| release-0.4.0/library-census/rows/C20H20.json | 6566 |
+| release-0.4.0/library-census/rows/C2H2.json | 2302 |
+| release-0.4.0/library-census/rows/C2H4.json | 2597 |
+| release-0.4.0/library-census/rows/C2H6-refined.json | 3035 |
+| release-0.4.0/library-census/rows/C2H6.json | 2850 |
+| release-0.4.0/library-census/rows/C3H6.json | 3090 |
+| release-0.4.0/library-census/rows/C4H4O.json | 3285 |
+| release-0.4.0/library-census/rows/C4H6.json | 3212 |
+| release-0.4.0/library-census/rows/C5H5N.json | 3514 |
+| release-0.4.0/library-census/rows/C60.json | 7670 |
+| release-0.4.0/library-census/rows/C6H6-refined.json | 3371 |
+| release-0.4.0/library-census/rows/C6H6.json | 3185 |
+| release-0.4.0/library-census/rows/CF4.json | 2503 |
+| release-0.4.0/library-census/rows/CH3CN.json | 2649 |
+| release-0.4.0/library-census/rows/CH3I.json | 2492 |
+| release-0.4.0/library-census/rows/CH3OH.json | 2902 |
+| release-0.4.0/library-census/rows/CH4.json | 2548 |
+| release-0.4.0/library-census/rows/CN-.json | 2148 |
+| release-0.4.0/library-census/rows/CO.json | 2121 |
+| release-0.4.0/library-census/rows/CO2.json | 2196 |
+| release-0.4.0/library-census/rows/Cl2.json | 2126 |
+| release-0.4.0/library-census/rows/CrCO6.json | 4370 |
+| release-0.4.0/library-census/rows/CuH-refined.json | 2658 |
+| release-0.4.0/library-census/rows/CuH.json | 2318 |
+| release-0.4.0/library-census/rows/DMT.json | 6024 |
+| release-0.4.0/library-census/rows/F2.json | 2077 |
+| release-0.4.0/library-census/rows/FeCO5.json | 4118 |
+| release-0.4.0/library-census/rows/G-C-geometry-refined.json | 6392 |
+| release-0.4.0/library-census/rows/G-C.json | 6137 |
+| release-0.4.0/library-census/rows/GeCl4.json | 3035 |
+| release-0.4.0/library-census/rows/GeH4.json | 2500 |
+| release-0.4.0/library-census/rows/Gly-Gly.json | 4578 |
+| release-0.4.0/library-census/rows/H2.json | 2072 |
+| release-0.4.0/library-census/rows/H2CO.json | 2411 |
+| release-0.4.0/library-census/rows/H2O.json | 2255 |
+| release-0.4.0/library-census/rows/H2O2.json | 2437 |
+| release-0.4.0/library-census/rows/H2S.json | 2308 |
+| release-0.4.0/library-census/rows/H2Se.json | 2268 |
+| release-0.4.0/library-census/rows/H3O+.json | 2476 |
+| release-0.4.0/library-census/rows/HBr.json | 2122 |
+| release-0.4.0/library-census/rows/HCN.json | 2263 |
+| release-0.4.0/library-census/rows/HCOOH.json | 2621 |
+| release-0.4.0/library-census/rows/HCl.json | 2167 |
+| release-0.4.0/library-census/rows/HF.json | 2159 |
+| release-0.4.0/library-census/rows/HI.json | 2235 |
+| release-0.4.0/library-census/rows/I2.json | 2201 |
+| release-0.4.0/library-census/rows/KBr.json | 2640 |
+| release-0.4.0/library-census/rows/KrF2.json | 2693 |
+| release-0.4.0/library-census/rows/Li4F4.json | 3239 |
+| release-0.4.0/library-census/rows/Li4H4.json | 3398 |
+| release-0.4.0/library-census/rows/LiF.json | 2166 |
+| release-0.4.0/library-census/rows/LiH.json | 2199 |
+| release-0.4.0/library-census/rows/Mg4O4.json | 3429 |
+| release-0.4.0/library-census/rows/MgH2.json | 2322 |
+| release-0.4.0/library-census/rows/N-methylacetamide.json | 3367 |
+| release-0.4.0/library-census/rows/N2.json | 2117 |
+| release-0.4.0/library-census/rows/N2O.json | 2241 |
+| release-0.4.0/library-census/rows/NH3.json | 2452 |
+| release-0.4.0/library-census/rows/NH4+.json | 2558 |
+| release-0.4.0/library-census/rows/Na2Cl2.json | 2953 |
+| release-0.4.0/library-census/rows/Na4Cl4.json | 3485 |
+| release-0.4.0/library-census/rows/NaCl.json | 2211 |
+| release-0.4.0/library-census/rows/NaH.json | 2163 |
+| release-0.4.0/library-census/rows/NiCO4.json | 3833 |
+| release-0.4.0/library-census/rows/O3.json | 2227 |
+| release-0.4.0/library-census/rows/OH-.json | 2147 |
+| release-0.4.0/library-census/rows/PH3.json | 2450 |
+| release-0.4.0/library-census/rows/SO2.json | 2311 |
+| release-0.4.0/library-census/rows/SeO2.json | 2832 |
+| release-0.4.0/library-census/rows/Si5H12.json | 4525 |
+| release-0.4.0/library-census/rows/SiH4.json | 2543 |
+| release-0.4.0/library-census/rows/TiCl4.json | 2778 |
+| release-0.4.0/library-census/rows/XeF2.json | 2305 |
+| release-0.4.0/library-census/rows/XeF4.json | 2421 |
+| release-0.4.0/library-census/rows/ZnH2.json | 2624 |
+| release-0.4.0/library-census/rows/adamantane.json | 5533 |
+| release-0.4.0/library-census/rows/adenine.json | 3548 |
+| release-0.4.0/library-census/rows/alanine.json | 3065 |
+| release-0.4.0/library-census/rows/arginine-geometry-refined.json | 5744 |
+| release-0.4.0/library-census/rows/arginine.json | 5639 |
+| release-0.4.0/library-census/rows/asparagine.json | 3564 |
+| release-0.4.0/library-census/rows/aspartic-acid.json | 4451 |
+| release-0.4.0/library-census/rows/caffeine.json | 5389 |
+| release-0.4.0/library-census/rows/cubane.json | 4387 |
+| release-0.4.0/library-census/rows/cysteine.json | 4287 |
+| release-0.4.0/library-census/rows/cytosine.json | 4101 |
+| release-0.4.0/library-census/rows/ferrocene.json | 5178 |
+| release-0.4.0/library-census/rows/glutamic-acid.json | 4784 |
+| release-0.4.0/library-census/rows/glutamine.json | 4892 |
+| release-0.4.0/library-census/rows/glycine.json | 3508 |
+| release-0.4.0/library-census/rows/guanine.json | 4473 |
+| release-0.4.0/library-census/rows/histidine.json | 4910 |
+| release-0.4.0/library-census/rows/ice-cube-geometry-refined.json | 5378 |
+| release-0.4.0/library-census/rows/ice-cube.json | 5314 |
+| release-0.4.0/library-census/rows/ice-hexamer.json | 4644 |
+| release-0.4.0/library-census/rows/imidazole.json | 3609 |
+| release-0.4.0/library-census/rows/indole.json | 3480 |
+| release-0.4.0/library-census/rows/isoleucine.json | 3935 |
+| release-0.4.0/library-census/rows/leucine-geometry-refined.json | 5275 |
+| release-0.4.0/library-census/rows/leucine.json | 5022 |
+| release-0.4.0/library-census/rows/lysine-interrupted.json | 5247 |
+| release-0.4.0/library-census/rows/lysine.json | 5354 |
+| release-0.4.0/library-census/rows/methionine.json | 4974 |
+| release-0.4.0/library-census/rows/naphthalene.json | 4599 |
+| release-0.4.0/library-census/rows/neopentane.json | 3692 |
+| release-0.4.0/library-census/rows/phenylalanine.json | 4022 |
+| release-0.4.0/library-census/rows/phosphoric-acid.json | 3545 |
+| release-0.4.0/library-census/rows/proline.json | 4572 |
+| release-0.4.0/library-census/rows/ribose-geometry-refined.json | 5006 |
+| release-0.4.0/library-census/rows/ribose.json | 4754 |
+| release-0.4.0/library-census/rows/serine.json | 4225 |
+| release-0.4.0/library-census/rows/threonine.json | 3560 |
+| release-0.4.0/library-census/rows/thymine.json | 3594 |
+| release-0.4.0/library-census/rows/tryptophan.json | 5766 |
+| release-0.4.0/library-census/rows/tyrosine.json | 5384 |
+| release-0.4.0/library-census/rows/uracil.json | 3209 |
+| release-0.4.0/library-census/rows/urea.json | 3036 |
+| release-0.4.0/library-census/rows/valine.json | 4767 |
+| release-0.4.0/library-census/water-app.json | 2945 |
+| release-0.4.0/library-census/water-conversion.json | 1281 |
 | release-0.4.0/measure/benzene-browser.json | 26574 |
 | release-0.4.0/measure/benzene-node-rerun.json | 16911 |
 | release-0.4.0/measure/benzene-node.json | 16909 |
@@ -18528,6 +18689,13 @@ Q13 the worker skeleton · Q14 the component-level skip · Q15 C₆₀ at the ex
 
 MEASURED: every count in §1 rows 1–5, 9–14, 27–35, 38, 40, 42–44; the skeleton timings (as ratios); the census; the PySCF energies, cycles and errors. DERIVED: the 300-AO blocks and pair blocks (from measured characters), the per-frame group law, the asymmetric-unit byte count, the Hessian call count. UNVERIFIED: every GPU, worker, device and experimental-geometry statement (no device ran); the planned-roster interval (model); the literature (not opened).
 
+### RULING — Josh, 2026-10-07 (recorded by Claude Sos; the thread closes)
+
+Josh, on D1–D4 of SYNTHESIS §7, verbatim: *"Perhaps all default/option one's"*. Taken as option 1 on each: D1 R-S1-0.5
+option 1 (strike the symmetry-adapted SCF, keep the names and the root names; the petite-list ERI a flag gated by Q13);
+D2 C3 enters 0.5.0 THE INFORMATIONAL; D3 BUCKYBALL's grid record as its D₂h asymmetric unit; D4 no Round 4 — the thread
+closes here, Q13–Q17 stand as build gates for the waves that need them. Recorded in PLAN.md §9 and its 0.5.x row.
+
 
 
 ---
@@ -21114,7 +21282,119 @@ the next agent picks up from your branch.
 
 ---
 
-## <a id="doc-88"></a>DOC 88 · release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md · 2026-10-07
+## <a id="doc-88"></a>DOC 88 · release-0.4.0/BRIEF-S2-VERIFY.md · 2026-10-07
+
+## λWAVES 0.4.0 · S2 VERIFY — BRIEF for the camera verifier (fresh eyes)
+
+**Written by Claude Sos (the fallback Major Agent), 2026-10-07, the way `BRIEF-S0-VERIFY.md` was written.** PLAN.md §6
+row S2 ends "a verifier": the camera uniform is the frame path, and the lens shift touches the ray pass, the line pass,
+every 2-D overlay, the pointer maths, the pose scope and the link. You are a FRESH Opus with no memory of the build; the
+builder's report (`research/release-0.4.0/S2-CAMERA-BUILD.md`) is a claim list to test, not evidence. The contract you
+verify against is `BRIEF-S2-CAMERA.md` (§1 the one convention, §2 K1–K3, §3 acceptance) and `PLAN.md` §4 F4 / §6 S2 / §9
+(R-C1: shift only, no target pivot). You fix nothing; you report, with the reproducing command for every finding, ranked
+BLOCKER (must be fixed before S3 is merged on top) / SHOULD (fix in S2 if cheap, else a REPORT line) / NOTE.
+
+### 0 · Laws
+
+Never edit `lab/`. Never `pkill -f`; kill by pid. Git only inside your worktree; never push. Your ports: `LW_PORT=8749`,
+`GD_PORT=5217` (`python3 tools/gate/server.py <your-root> 8749 &`; ready when it prints `λWAVES gate server on …`). The
+GPU is shared and another builder may be running suites: one browser suite at a time; a timing flake (`current`,
+`frame-occlusion`, `export3d`'s loop median, `wigner`, `electrostatics`) and a red digest lock are re-run ALONE before
+they are believed (the RTX 3070's one-ulp fault in power state P5). Your worktree starts at the merged S2 tree (the
+integrator names the commit in your prompt; your branch is new, so `git reset --hard <sha>` first); confirm with
+`git log --oneline -1`.
+
+### 1 · The locks and the gates, once
+
+- **The 1004-value digest lock at shift 0** (`node tools/perf/digest-lock.mjs --check` with the all-grids flags the tool's
+  header and REPORT wave 116 give; the 96³ run used `--grids 96 --query gastab=0` in waves 144–1xx) — byte-identical
+  (0 readback differences, 0 record-byte differences). This is the one result that decides "frame path untouched at
+  p = 0". A red is re-run alone; a second red is a BLOCKER whatever the builder's report says.
+- `bash test.sh node` (all green; name every red with its first message). `node tools/new-project.mjs --check`.
+  `node tests/pwa.test.mjs` without `--write` (the generated `lab/sw.js` is in step).
+- Browser, one at a time, on your ports: `render-regressions` (the scaled hit-test — the pointer maths moved),
+  `frame-occlusion`, `keyboard-window`, `export3d`, `current`, `new-project`, `history`, `statelink` if a browser half
+  exists, plus any suite the builder added. Record suite · count · verdict.
+- **The device report** (`tools/perf/device-report.js`, its 30 s scene) on the 3070: the builder's before/after pair is
+  a claim; run it once yourself at HEAD and compare with the builder's "before" numbers within the report's own noise.
+
+### 2 · The one convention (K1) — each a scene, each with its command
+
+- **At `p = [0, 0]` every byte is today's.** `tests/camera-shift.test.mjs` exists, runs green, and actually asserts the
+  lane and the matrix bit-for-bit against the pre-S2 formulas (read it; a test that compares the new code with itself is
+  a SHOULD). The lock above is the GPU half.
+- **The pivot appears at `p`.** With `obs.shift = [0.4, −0.3]`: the origin projects through `toScreen` to
+  `((1 + 0.4)/2·W, (1 − (−0.3))/2·H)` within 0.5 px; `pointerRay` at that pixel passes within 1e-6 of the origin;
+  `unproject` of that pixel on the pivot plane returns ≈ (0, 0, 0). Read back through the app's own functions
+  (`lab/field.js`, `lab/rack.js`) in the browser.
+- **One FRAME corner, one pixel** (the test that decided the matrix sign): at `p = (0.4, −0.3)`, a FRAME corner lands on
+  the same pixel through the line pass (the FRAME lines on the stage canvas — a pixel probe along the expected edge) and
+  the ray pass (the box edge of the volume's readback), and `pointerRay`/`unproject` of that pixel returns the corner's
+  world coordinate. If the builder's test does this, run it and read its assertions; if the sign were wrong the line pass
+  and the ray pass would disagree by `2·0.4·W/2` pixels — say which you saw.
+- **Clamp:** `obs.shift = [3, −3]` reads back as `[1, −1]`; the pivot sits on the frame's edge, inside the canvas.
+- **TIER.PRESENT only:** a shift step triggers no solve, no reconstruct and no volume upload (count the worker messages
+  or the field's upload counter across ten shift steps: 0).
+
+### 3 · The hands (K2)
+
+- **Shift then RESET = identity:** pose bytes equal before a shift and after RESET VIEW (serialize the pose, compare).
+  Double-click and double-tap also clear it.
+- **The cursor-anchored point** is invariant to ≤ 0.5 px across a wheel step, a pinch step and a FOV step at a non-zero
+  shift: `unproject` the cursor pixel before and after each step; compare the world point. The ZOOM dial and the keys
+  anchor at the centre (the centre's world point is invariant instead).
+- **Alt-drag** pans one pixel per pixel (`Δp = (2Δx/W, −2Δy/H)`); a two-finger drag on touch pans by the centroid's
+  delta beside the pinch; the wheel is still dolly. If the builder reported that the window manager takes Alt-drag,
+  check the REPORT line and that keys and knobs remain the road (a NOTE, not a BLOCKER).
+- **Alt+Arrow** steps 0.05 uv, Shift fine; `tests/keyboard-shortcuts.test.mjs` extended; no overlap with Q/E, WASD,
+  Shift+Q/E, Ctrl+Shift+Q/E; `AltLeft`/`AltRight` are still not bindable alone.
+- Nothing per tick: a still camera at a non-zero shift adds no per-frame CPU work (FRAME PROFILE, or a 2 s MutationObserver
+  on the overlays' spans = 0 writes).
+
+### 4 · The panel, the scope, the link (K3)
+
+- CAMERA has PAN X / PAN Y (bipolar −1…1) and PAN HOME; the targets `observer.panx` / `observer.pany` modulate (an LFO on
+  PAN X moves the picture); the panel note gained its sentence; no new window, tab or setting.
+- **Three scopes:** `obs.shift` travels with the pose (PROJECT), is not a history row (shift, then Ctrl+Z: the shift
+  stays), and a project open leaves `lambdawaves.q0.settings` byte-identical outside the WORKSPACE keys.
+  `docs/STATE-SCOPES.md` l.40's pose row says `shift`. An older project without `shift` opens at 0 (`git show
+  bd9b0e5:lab/new-project.lambdawaves.json` through the import road).
+- **The link:** mint a link with a shift and a molecule (water, 1b₁); open it in a fresh page: the shift, the molecule,
+  the basis, the view and the orbital are back. A link minted on `bd9b0e5` (`tests/statelink` fixtures, or mint one from
+  the old tree via `git show bd9b0e5:lab/statelink.js` in node) opens with shift 0 and the right pose. The VERSION POLICY
+  (`lab/statelink.js` l.23–31) was kept: v1 unchanged, fields appended at the END of the CAM section, ONE new tag with
+  its `TAG_NAME`. `tests/statelink.test.mjs` runs green and asserts the three round-trips the brief names.
+- `node tools/new-project.mjs` was regenerated only because the pose default gained a field (the builder said so);
+  `--check` is in step.
+
+### 5 · The laws of the house
+
+- `lab/mir/**` and `lab/fonts/**` byte-identical to `bd9b0e5` (`git diff bd9b0e5 HEAD --stat -- lab/mir lab/fonts`
+  empty); the CAMERA panel's kit half was NOT edited (it is S5's brief 2).
+- `lab/*.js` line count before and after as the builder reports; recount yourself (`cat lab/*.js | wc -l` on
+  `bd9b0e5` and HEAD). "Subtract, don't add" is a SHOULD if the count grew without the report saying why.
+- No target pivot built (R-C1). No XY pad. No version bump, tag, CHANGELOG, deploy or push in the branch's log.
+- REPORT.md has the S2 waves under `## 2026-10-07 · 0.4.0 S2 — THE CAMERA`, numbers measured not hoped; the derivation
+  of zoom-to-cursor is there.
+
+### 6 · Report
+
+`research/release-0.4.0/S2-VERIFY.md`: the lock and gate table (suite · count · verdict), then findings ranked BLOCKER /
+SHOULD / NOTE, each with its reproducing command and the law it breaks; then "fit to merge S3 on top: YES / NO
+(because)". Commit it on your worktree's branch. Kill your gate server by pid. Final message (Josh's rule): the verdict
+line, the BLOCKER count, the SHOULD count, the file path, your worktree path, your branch, the commit, the tests you ran
+with counts and which were re-run alone, blockers with the exact command and error text, and the exact next step.
+
+### 7 · Harness
+
+Compound shell with variables, loops, heredocs or backticks may be refused: plain commands, scripts as files (your job
+tmp dir or `.tmp/`). If a command is refused, reshape it; never retry verbatim.
+
+
+
+---
+
+## <a id="doc-89"></a>DOC 89 · release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S3 STAGE TEXT + WINDOWS — BRIEF for the S3 builder (waves from the next free number)
 
@@ -21245,7 +21525,7 @@ the next agent picks up from your branch.
 
 ---
 
-## <a id="doc-89"></a>DOC 89 · release-0.4.0/BRIEF-S4-LIBRARY.md · 2026-10-07
+## <a id="doc-90"></a>DOC 90 · release-0.4.0/BRIEF-S4-LIBRARY.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S4 THE LIBRARY a / b / c — BRIEFS for three builders (and two verifiers)
 
@@ -21411,7 +21691,7 @@ and the next agent picks up from your branch.
 
 ---
 
-## <a id="doc-90"></a>DOC 90 · release-0.4.0/BRIEF-S5-KIT-BRIEFS.md · 2026-10-07
+## <a id="doc-91"></a>DOC 91 · release-0.4.0/BRIEF-S5-KIT-BRIEFS.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S5 THE KIT BRIEFS — BRIEF for the writer (no code)
 
@@ -21465,7 +21745,7 @@ The vault mirror is a copy written once at the end.
 
 ---
 
-## <a id="doc-91"></a>DOC 91 · release-0.4.0/HANDOFF.md · 2026-10-07
+## <a id="doc-92"></a>DOC 92 · release-0.4.0/HANDOFF.md · 2026-10-07
 
 ## START HERE — the λWAVES handoff from Claude Yan (Major Agent, 2026-10-07)
 
@@ -21541,6 +21821,34 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Sol Round 2** (Codex task `task-muyncqpn-zablm5`, gpt-6.1-sol at xhigh) was still writing when this was recorded;
 >   its files are uncommitted in the `sos-s0` worktree (`tools/symmetry/round2-sol*`, `measure/*round2-sol*`). Josh:
 >   Sol 6.1 sits between Sonnet and Opus — re-run its headline numbers before the SYNTHESIS banks them.
+> **UPDATE 2026-10-07 ~18:25 — Claude Sos, third session (Fable).** Josh's coordination rule, verbatim: *"Two Claude
+> accounts work on this project. Before editing, identify your current directory, branch, assigned task, and worktree.
+> Use separate worktrees and branches for simultaneous implementation. Coordinate through written reports; do not assume
+> you can see or control the other account's conversation or workers. Stay inside your assigned worktree when editing
+> and running Git commands. Report your worktree path, branch, commits, tests, blockers, and next step in every handoff.
+> Preserve unfinished work, and do not remove another agent's worktree. Let one designated agent integrate changes. When
+> blocked, report the exact error and command. Avoid repeatedly creating replacement worktrees."*
+> - **The integrator is Claude Sos on `sos-s0`** (worktree `~/Documents/LAMBDAWAVES/.claude/worktrees/sos-s0`). Builders
+>   work in their own `.claude/worktrees/agent-*` worktrees and are merged here; nobody else merges into `sos-s0`. If
+>   Yan's account is active on λWAVES at the same time, hand branches over by a written report (this file's §2, a vault
+>   note, or a `*-BUILD.md` beside the briefs), never by editing `sos-s0`.
+> - **Landed since the previous update:** S0-V fixed (`ad9e8a0`); v0.3.3-alpha tagged locally at `9504700`, not live;
+>   Sol Round 2 committed (`58852c7`); **S1′ `cameraEye` merged** (`f247f0c`, wave 144, `S1-CAMERAEYE-BUILD.md`);
+>   **S1 NAMES merged** (`bd9b0e5`, waves 140–143, `S1-NAMES-BUILD.md` + the builder's `S1-NAMES-HANDOFF.md`). Tip of
+>   `sos-s0` at this update: `bd9b0e5`.
+> - **Running now, all from `bd9b0e5`:** the S2 CAMERA builder (Opus, `BRIEF-S2-CAMERA.md`, ports 8747/5215, waves from
+>   145); the S3 STAGE TEXT + WINDOWS builder (Opus, `BRIEF-S3-STAGE-AND-WINDOWS.md`, ports 8751/5219, waves from 155 —
+>   the integrator renumbers if the two collide); the Sol thread Round 3 + SYNTHESIS (Fable lead at max, own worktree,
+>   appends to the ledger and rebuilds the DISK); and Sol's LIBRARY CENSUS + C₆₀ frontier (Codex `task-muyotogt-mb4bgz`,
+>   gpt-6.1-sol at xhigh) writing UNTRACKED files into the `sos-s0` worktree under `research/release-0.4.0/library-census/`
+>   and `tools/library/` — leave those paths alone until Sos commits them. Merge order when they land: S2, then S3
+>   (`rack.js` is shared in disjoint regions), then the ledger; then the S2 verifier (8749/5217).
+> - **Still true:** local `release-0.4.0` sits at `d5b9d1d` in Yan's locked worktree (fast-forward it to `sos-s0` from a
+>   worktree that has it checked out); the stale gate server from Yan's dead S0 builder (python pid 1544349, port 8731)
+>   is still up; nothing is pushed or deployed (Josh's ruling above). The unused worktree `agent-a851ec0dd786a3819`
+>   (a Round 3 agent stopped before it wrote anything) is left for Josh to remove.
+> - **Next after this session's workers land:** S5 KIT BRIEFS (Sonnet or Sol; needs `S2-CAMERA-BUILD.md` and
+>   `S3-BUILD.md`), S4 LIBRARY a/b/c on the census's numbers, then the local 0.4.0-alpha cut on Josh's word.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
@@ -21667,7 +21975,7 @@ from the root checkout — Josh's call, it is his checkout).
 
 ---
 
-## <a id="doc-92"></a>DOC 92 · release-0.4.0/measure/MEASURE.md · 2026-10-07
+## <a id="doc-93"></a>DOC 93 · release-0.4.0/measure/MEASURE.md · 2026-10-07
 
 ## λWAVES 0.4.0 · S0 MEASURE: the three numbers
 
@@ -21903,7 +22211,7 @@ node re-time needs no server.
 
 ---
 
-## <a id="doc-93"></a>DOC 93 · release-0.4.0/NACRE.md · 2026-10-07
+## <a id="doc-94"></a>DOC 94 · release-0.4.0/NACRE.md · 2026-10-07
 
 ## 0.4.0 · NACRE PLANNING — the common file every planner reads first
 
@@ -22016,7 +22324,7 @@ with internet research (`DESIGN BOOSTER.md` in the vault). Josh sees DRAFT 3 and
 
 ---
 
-## <a id="doc-94"></a>DOC 94 · release-0.4.0/PLAN-DRAFT-0.md · 2026-10-07
+## <a id="doc-95"></a>DOC 95 · release-0.4.0/PLAN-DRAFT-0.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 0 (Fable's pre-draft, 2026-10-07)
 
@@ -22249,7 +22557,7 @@ ten molecules in STO-3G with s and p only. Sol's pack delivery (Drive, R2) stand
 
 ---
 
-## <a id="doc-95"></a>DOC 95 · release-0.4.0/PLAN-DRAFT-1.md · 2026-10-07
+## <a id="doc-96"></a>DOC 96 · release-0.4.0/PLAN-DRAFT-1.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 1 (Fable, after Sonnet's review, 2026-10-07)
 
@@ -22542,7 +22850,7 @@ content beyond its title and description is unknown.
 
 ---
 
-## <a id="doc-96"></a>DOC 96 · release-0.4.0/PLAN-DRAFT-2.md · 2026-10-07
+## <a id="doc-97"></a>DOC 97 · release-0.4.0/PLAN-DRAFT-2.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 2 (Opus's edit of draft 1, synthesised by Fable, 2026-10-07)
 
@@ -23054,7 +23362,7 @@ Nothing else new is built in 0.4.0's interface.
 
 ---
 
-## <a id="doc-97"></a>DOC 97 · release-0.4.0/PLAN-DRAFT-3.md · 2026-10-07
+## <a id="doc-98"></a>DOC 98 · release-0.4.0/PLAN-DRAFT-3.md · 2026-10-07
 
 ## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
 
@@ -23467,465 +23775,6 @@ quick-settings, ijk mini-maps, "2×6 layout"), the About/Notebook buttons at the
 pack delivery (Drive, R2). A symmetry saving on a Cartesian grid is bounded by its signed-permutation operations (at
 most 48, usually 8). The legal reading of CAS and NIST SRD is unverified. The YouTube video's content beyond its title
 and description is unknown.
-
-
-
----
-
-## <a id="doc-98"></a>DOC 98 · release-0.4.0/PLAN.md · 2026-10-07
-
-## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
-
-> **New here? Read `research/release-0.4.0/HANDOFF.md` first** — the baton from Claude Yan, the Major Agent of the
-> previous Major Session: where everything is, the state of each stage, the laws, and what happens next.
-
-The third layer of the nacre: Fable's pre-draft → Sonnet's review → draft 1 → Opus's audit and edit → draft 2 → Sonnet's
-junior pass → this. The record is beside it: `NACRE.md` (Josh's ask verbatim, the laws), `survey/*` (the ground truth),
-`REVIEW-SONNET-0.md`, `AUDIT-OPUS-1.md`, `REVIEW-SONNET-2.md`. Numbers are the surveys' or the audits', each checked in
-code; `[mine]` marks Fable's own. Nothing is built.
-
-### 1 · THE GOAL
-
-**Josh's words.** A pre-refactor for MIR 1.5 that makes λWAVES the flagship; the cache treated as expansions with
-metadata, STEM information and LaTeX copy into the journal; true ladder names (`1a1, 1b2`) where the knob reads HOMO−1
-today; wave-indexed presolved orbitals toward dynamic waves with true electrostatics; diverse library sections (a
-vertical periodic table, heavy atoms, crystal lattices, biology, a bucky-ball milestone); engine upgrades for larger
-counts and heavier atoms, with a cyclotomic-scaling thread with Sol; the INFORMATIONAL as a live, cursor-aware markdown
-overlay with proper maths that announces changes and fades; GPU-recording optimisation; camera pan and the dot-matrix
-XY; the legacy windows audited and consolidated with power buttons and DISPLAY doing the resource work; CALCULUS as an
-overlay with a prose figure copied into a built-in journal; STATE audited; the dot matrix on every inlay.
-
-**Ours [mine].** 0.4.0 is **the engine-and-library release on today's MIR**: every orbital gets its textbook name,
-dozens of new molecules from the amino acids to ferrocene arrive as records, the periodic table returns as a window, the
-camera can sit off-centre, and the stage text is real maths. It also subtracts what the adoption should not have to
-carry, and it writes the briefs that MIR `1.5.0` must carry for λWAVES. **0.5.0 is the adoption and the full
-INFORMATIONAL** (springs, leader lines, pages, the pad, the film overlay): they need the kit's new shell and would be
-built twice on 1.4.3. **0.4.1 BUCKYBALL** finishes C₆₀. The ENGINE stays λWAVES'; every window and behaviour is the
-kit's; what λWAVES needs and the kit lacks becomes a brief; pages and records are content.
-
-**Flagship, operationally (R-F1).** BASINS has already adopted 1.5. "First" can only mean first of the three still on
-1.4.3, and Josh named λWAVES and NEBULA as next. So in 0.4.0 flagship means: λWAVES writes the briefs `1.5.0` must carry
-and runs the canary at the cut; in 0.5.0 its gates join the kit's release checklist beside BASINS'. "Prefer BASINS"
-stays the rule for what BASINS designed; λWAVES' design wins for what it originated (the modulation controller, the 3-D
-camera, the notebook, the history ring, the three scopes, the keyboard window) and for everything new in the briefs.
-
-### 2 · THE SHAPE: engine / kit / content
-
-| | λWAVES keeps (ENGINE) | The kit's, or λWAVES' brief to the kit | CONTENT |
-|---|---|---|---|
-| now | `field.js` with the cap-128 tier, the orbital-only path and the lens-shift ray; the register and the solvers; `electrostatics.js`, `period.js`; the palette's meaning; `badges.js`; `statelink.js` v1 (extended at its tails); `export3d.js`; `latex-state.js`; `names.js` (new); the digest lock; `sw.js` and the build offer (the kit has no offline layer; λWAVES keeps its own for good); the camera law | the adoption glue (modulation port, project parts, occlusion feed, one-clock facade, camera port; about 1–1.5k lines) is written at 0.5.0 | `.md` pages; the LIBRARY records with names, STEM fields, sources and a page inside; sections; demos (water, benzene, N₂); covers |
-| briefs, 0.4.0 → kit | — | **8** painted-surfaces provider (the adoption blocker) · **2** lens shift in the CAMERA panel · **3** `md()` window copy + TO NOTEBOOK + PIN FROM WINDOW · **4** the `cells` grid control · **5** `createLattice` exported · **6** overlay in the film · **7** `addLabel({ttl})`, `setCheap`, `html[data-take]` · **9′** STATUS TAGS never hides `[data-mir-offer]` · **13** the INFORMATIONAL window · live-bound math labels · **P** the paint gesture · **J** `jetblack` + `flat` for the big four · **1** the 3-D camera law as a gift | — |
-
-### 3 · THE BASELINE (0.4.0, in order)
-
-**B0 · TAKE-IN, then subtract, then cut 0.3.3.** The live site serves Cloud's main: the version line still reads
-0.3.2-alpha and the served rack carries the stage formula, so unreviewed work, the forged MIR manifest included, is what
-users run, and 0.3.3's exports are not live.
-- Merge PR #1, then PR #2 (one textual conflict, the generated `sw.js`; regenerate).
-- One subtraction commit:
-  - **Jet Black stays live and the manifest becomes true.** Cloud's direct `lab/mir` edit and the forged
-    `MIR-MANIFEST.json` go; the preset returns by R-A3's route — a real MIR 1.4.4 on the `mir-1.4.x` branch (the MIR
-    session's work) or, because the palette's meaning is the engine's, one app-side catalogue row appended at runtime
-    from `lab/` until 1.5 carries it. S0 does not wait on the MIR session.
-  - **Under a molecular owner, EDIT › COPY copies the molecule's page** instead of greying out — the journal copy Josh
-    asked for, on an existing road. The page is a pure function of `{library row, ground, names}` in `names.js`, built
-    at copy time for every molecule, old and new; the generator only snapshots it into records.
-  - **`.mol-more` opens by default on desktop**, folded on phone and tablet, and the card's `Aa` stays visible even with
-    HELP off (today LEAN hides the controls and HELP hides the button that reveals them, so KICK / RUN / TDA / the RPA
-    spectra, which the README sells, are unreachable on a first run).
-  - SPECTRUM's orphaned buttons: ATOM opens ATOMS again (F3); QUARKONIUM is hidden while QCD stays hidden.
-  - CLAUDE.md: the false MIR line and the stray sentence go; the first-run law is stated once (Cloud's left rack
-    supersedes "MOLECULES start off the rack").
-  - A REPORT wave for what was kept: the paint gesture's behaviour, MO-REGISTRY "standing by", the first-run left rack,
-    `docs/LEGACY-WINDOWS.md`, the wrangler bump.
-- The audit's cheap bugs, one commit, each with a test: CALCULUS's ⧉ (`DIGESTS.calculus` reads `calculus.last`, the
-  field the view returns); the badges and the canvas sentence on their own ≤ 10 Hz tick (today they tick only while
-  METERS is presentable); `hydroReader` learns `chem` (WIGNER and RADIATION compute hydrogenic physics under a molecule).
-- **Wire, don't re-date.** `index.html` loads KaTeX and marked from `lab/mir/shell/vendor/`; the byte-identical
-  `lab/vendor/katex` and `marked*` are deleted — about 650 KB less on every deploy. Two expiring allowlist entries close
-  by wiring; the other five are renewed once with REPORT saying who consumes them (the 0.5.0 adoption). The two node
-  tests that `createRequire` the vendor KaTeX (`tests/latex-state.test.mjs`, `tests/notebook-math.test.mjs`) get a
-  small `vm` loader, because the kit's copy has no CommonJS `package.json` and may not get one.
-- The reported "Space does not play both clocks in LINKED mode at project open": reproduced and fixed in place; the
-  clocks become one at 0.5.0.
-- **Close the process hole.** One CLAUDE.md line: "Cloud: PRs only, never `lab/mir`; a kit need is a MIR issue or a line
-  in the PR." `tests/mir-manifest.test.mjs` pins the sha-256 of `MIR-MANIFEST.json` per accepted MIR version (1.4.3
-  today), so a forged version fails everywhere, the cloud included, and a real adoption is a visible two-file edit.
-- **Three one-line measurements**, here because they size later stages: the adapter's `maxComputeWorkgroupStorageSize`
-  on the 3070 (Firefox, Chromium) and the M5; a like-for-like re-time of the benzene worker path, ground + spectrum, in
-  node and in the browser (the 1.0 s probe timed the ground solve only; the cost model also covers the response, so
-  "stale" is unmeasured); **one 300-AO orbital-only dispatch** with synthetic coefficients (F5's road to C₆₀).
-- **Three demos as content** (`lab/demos/`): water, benzene, N₂ — so a new visitor meets the names in the first minute.
-- Then **cut 0.3.3** from this tree (R-A1): the exports plus Cloud's kept work, the live site made honest. The release
-  road is the verifier case; `frame-occlusion` runs (Cloud's first run moved four windows onto the left rack).
-
-**B0.5 · THE CANARY.** A throwaway worktree, `canary-1.5`, never merged, takes a REAL `tools/adopt.mjs <canary> --line
-1.5` from the pin (a dry run writes nothing), boots, and logs one row in `docs/MIR-1.5-CANARY.md`: red suites
-(`bash test.sh node`, then `frame-occlusion`, `history`, `new-project`), the stylehash delta (README recipe, `--gpu 1`),
-the precache bytes after `pwa.test.mjs --write`. It runs twice — now, on alpha.23, and at the `1.5.0` cut — not on every
-alpha (the pin moved under the survey; BASINS' eleven re-adopts are the churn to avoid). Its red rows decide which
-seams enter 0.4.0 and turn 0.5.0's adoption into a diff of known deltas.
-
-**B1 · THE SEAMS, cut to one.** `cameraEye(obs, half) → {eye, target, basis, shift}`: one projection helper for the nine
-copies (`field.js` `writeView`, `fieldview`, `keplerview`, `particles`, `vortex` and its cache key, `export3d`,
-`pointerRay`, `unproject`, Cloud's atom labels). It is a deletion and the precondition for the shift and the labels;
-`cameraKey` gains the shift so cached 2-D overlays redraw. The stage text keys on the string it would render — one
-compare per tick, no new register event. The other seams (settings adapter, project parts, modulation port, one-clock
-facade, occlusion providers, camera port, tests by hook) enter 0.4.0 only where a canary row names their block as a
-blocker; otherwise the adoption writes them as glue. Measure `lab/*.js` total lines (34,721 today), not `rack.js` alone.
-The 208-value lock runs on frame-path commits, the 1004-value lock once at the end, and a red result is re-run alone
-before it is believed (the RTX 3070 one-ulp fault).
-
-**B2 · LIBRARY, the fourth storage class, and the data cache.**
-- **The scope.** Installed records are device content, content-addressed, never in a project, link or history row. A
-  project holds `{id, hash, nameKey}`: PROJECT, with one history row per change of molecule.
-- **Where records live.** `lab/library/<sha>.json` plus the section manifests: deployed, NOT precached. `sw.js` routes
-  `library/` cache-first into `lw-data-v1`; the names are content hashes, so a new build never clears it.
-  `tests/pwa.test.mjs` exempts exactly `library/**` and asserts every manifest row's file exists with its hash.
-- **The record path.** A worker op `chem.open(record)` fills the solve cache from the record and replies with
-  `ensureSolve`'s own `ground` shape, so no window downstream changes. Each record states `caps {orbitals, states, rpa,
-  tdhf}`: ORBITAL needs ε and C; STATES needs the stored CIS states; RPA sticks are stored; TDHF needs the live ERI and
-  past the cap is refused with a sentence. A project or link that names an uninstalled record fetches it on open, with
-  progress and failure said in the row; offline, the open restores the rest and names the part that refused.
-- **The iPad law.** `navigator.storage.persist()` is asked on the user's first INSTALL press, never at boot (Firefox
-  prompts); the quota and the persisted answer are shown; an evicted record degrades to "not installed", never a broken
-  preset. In a Safari tab (seven-day cap on script-writable storage) KEEP ON THIS DEVICE is offered only if the M5
-  measurement shows persist is granted there; a Home-Screen install is the honest advice for a prepared class.
-- **The benzene-cap law** (`molecules.js:25–27`). A record past the live cap opens only from its record; absent, its row
-  says DOWNLOAD, not DISABLED; a basis or charge change on it is refused with a sentence, not a solve. **Gate on the
-  re-time:** if B0's number puts ground solves up to 64 AO under a few seconds on the M5, records accelerate rather than
-  gate, and sixteen amino acids need no download.
-- **The schema** is versioned (`schema: 1`) and readers ignore unknown members, so the wave index's `Q_LM` and a grid
-  handle can arrive later without a bump.
-- **The generator is the app.** `tools/orbital-library.mjs --check` is byte-exact (the `new-project.mjs` pattern) and
-  enforces a mechanical **diversity gate with a FAMILY allowance**: an entry passes if its formula is unique AND it adds
-  a new element, a new point group, or a tag from a fixed motif list (ring size, peptide bond, d-block, cluster, cage,
-  nucleobase) — OR it belongs to a declared family (the amino acids, the nucleobases) whose completeness Josh asked for.
-  Leu and Ile share a formula; the family keeps both and the record says so.
-- **The expansion seat** is each section's header row in MOLECULES: name, record count, bytes, an installed lamp,
-  INSTALL / REMOVE. No new tab.
-- `docs/STATE-SCOPES.md` gains the row.
-
-**B3 · The frame-path budget, with numbers as acceptance.** Nothing new on the frame path. Names in the worker inside
-`ensureSolve` (≤ 10 ms, benzene); the library fetch in idle; the stage text re-renders only when its string changes,
-never carries a live coefficient, runs KaTeX at most four times a second, and announces only on hand presses (never on
-restore, undo, project open or a modulated preset, or Ctrl+Z replays banners); the atom labels write only when
-`cameraKey`, the shift, the preset or the size changes; a lens shift is TIER.PRESENT only; every reader stays
-`may()`-gated and idle when its window is off, folded, closed, hidden or offscreen. **Big records:** the density
-contraction grows as nAO² — about 16 ms at 87 AO and 31 ms at 120 AO at 96³ on the 3070, scaled from benzene's measured
-2.80 ms; a static record costs one dispatch per change; a playing STATES register rides the existing governor's GRID
-step and the tablet ceiling, no new mechanism. **The frame-time protocol** is the existing device report
-(`tools/perf/device-report.js`, its 30 s scene) before and after, on the 3070 here; the M5 half is one command for Josh,
-recorded as "M5 pending" until he runs it — no stage hangs on it.
-
-### 4 · THE FEATURES (0.4.0)
-
-Each: what the reader does, where · kit or app · cost · what it must not do.
-
-**F1 · THE NAMES** (the probe named ten molecules from the live solver; every textbook configuration matched).
-- The ORBITAL knob and ladder in MO-REGISTRY read `1b₁ · HOMO`, `3a₁`, `1e₁g (a)`, `2σu`. Hovering a rung shows the
-  name, its frame, its `computed / derived / curated` tag, and for `(a) / (b)` the sentence "the two real combinations of
-  the degenerate pair". A degenerate HOMO is one HOMO (today its members read HOMO−2, HOMO−1, HOMO in CH₄, HF, CO₂,
-  C₆H₆). ⧉ copies `$1b_{1}$`; the GLB, the cube and the NPZ carry the names.
-- **Two forms of every name:** the plain form for dials and canvases (`3σg`, `1e1g`; a dial's text node takes no
-  markup and Unicode has no subscript g) and the typeset form for DOM and KaTeX (`3σ_g`, `$3\sigma_{g}$`).
-- The machinery: one service `lab/names.js` for atoms and molecules (the four formatters become one); declared groups
-  and frames in the library; d shells and the tables the library needs — the five remaining finite groups plus **O_h,
-  D₅d, D₅h and I_h** for the showpieces (cubane, Cr(CO)₆, ferrocene, B₁₂H₁₂²⁻, C₂₀H₂₀, C₆₀), so a showpiece is not the
-  one molecule without names; cluster tolerance 2e-10 Eh; the geometric tolerance stated; a names record all or nothing
-  (below tolerance a record shows indices throughout, never a mix); one PySCF cross-check in `tools/`.
-- **"True human information."** Per orbital the textbook LCAO name (derived for diatomics) and the character (core / σ /
-  π / lone pair); for the ten probed molecules the vertical ionisation energy beside Koopmans' −ε, tagged `curated`
-  with the honest gap, each value citing its primary measurement (CCCBDB is NIST SRD 101; the legal reading is checked
-  against `LEGAL-PROVENANCE` before a store build).
-- **The CORE fold.** The ladder folds the frozen-core levels into one `core ×n` row opened by a click; the count is per
-  element in the generator — He for Li–Ne, Ne for Na–Ar, Ar for K–Ca, **Ar for Sc–Zn (3d is valence)**, Ar + 3d¹⁰ for
-  Ga–Kr. Without it an 87-AO ladder is fifteen core lines and a heap.
-- **The teaching moment** becomes a demo and a page: N₂'s HOMO is `3σg` in STO-3G and `1πu` in 6-31+G*.
-· MO-REGISTRY, SPECTRUM, exports · engine/app · M · never asserts an ordering.
-
-**F2 · THE STAGE TEXT AND ITS FADE — the first taste of the INFORMATIONAL.**
-- Cloud's plain-text formula becomes markdown + KaTeX through the notebook's own renderer (marked and KaTeX are already
-  loaded), from `stateLatex` and a one-function TeX of the library formula, re-rendered only when the string changes.
-  The atom labels go through `cameraEye` and write only on change.
-- **The fade.** `announce(md, ttl)` writes into the same node and fades after its ttl; the formula returns after it. It is
-  called by the controls Josh named — MO-REGISTRY's WINDING and HOMO + LUMO presets, whose text the names make
-  meaningful (`WINDING · 1e1g (a) + (b)`), and SPECTRUM's presets — on hand presses only. The palette and camera HUD
-  ("other elements could do that too") is R-I2 and lands with the kit's `addLabel({ttl})` at 0.5.0.
-- **The type scale** is the notebook's three sizes now (formula = title, announcement = heading, atom label = body); the
-  kit's "typomagical" faces (Spectral, Playfair Display, Alegreya SC under `fonts/info/`) and its per-element sizes come
-  with the layer at 0.5.0.
-- **One DISPLAY row.** STAGE FORMULA + ATOM LABELS and their two SIZE knobs become ONE row, STAGE TEXT (switch + SIZE);
-  PREFERENCE keeps `molFormula` / `molFormulaSize`, `atomLabels` / `atomLabelsSize` are read once and dropped,
-  STATE-SCOPES and the PREF set in `tests/new-project.test.mjs` change with it.
-- **A caption in capture.** One plain-Unicode line (`H₂O · 1b₁ HOMO · STO-3G`) drawn into the capture overlay canvas so
-  PNG, loop and video carry the name (the DOM formula never reaches an export; a teacher's slide needs the name). Brief 6
-  replaces it at 0.5.0.
-- At 0.5.0 `announce` becomes `layer.addLabel({ttl})` and the formula `layer.addBlock({md})`; this interim renderer is
-  named here so 0.5.0 deletes it.
-· the stage, SETTINGS › DISPLAY, capture · app now, kit at 0.5.0 · S · no per-tick layout reads; no live coefficient.
-
-**F3 · THE WINDOWS** (the audit's 27-card table; Josh: audit, consolidate, leverage power and DISPLAY).
-- **Retire DYNAMICS** (R-W1): L/T/V/S and its plot → SHADOW's footer; the moments and the virial → CALCULUS tiles; the
-  dipole lines → RADIATION; ACTION–ANGLE → gone (SPECTRUM is it); **PARTICLES → a switch in VORTEX** (same j/ρ; VORTEX
-  becomes "the flow"). `RETIRED_WINDOWS` maps `dynamics → shadow` for saved layouts. One card and up to ~470 lines go.
-- **CALCULUS like RADIATION** (Josh's words; RADIATION's skin goes to CALCULUS alone — METERS and WIGNER were not asked
-  for, and a look change is Josh's ruling). The laws become tiles in a grid (two columns on the card, three floating),
-  opted out of LEAN; every row gains `tex`; ⧉ copies **the prose figure** — a heading, then "Figure. ⟨ψ|ψ⟩ = 1.000 (d/dt
-  = 0 to 1e-9); …", related rows combined into sentences (the Ehrenfest pair as one), inline `$…$`, display `$$…$$` for
-  the laws — which pastes into the notebook and renders. TO NOTEBOOK and the other readers' markdown copy are brief 3
-  (on 1.4.3 there is no menu behind ⧉, and paste already reaches the journal). The CALCULUS **overlay** (its residuals
-  typeset on the stage) is a 0.5.0 layer (§8).
-- **METERS.** The badges leave its tick (B0); the PERFORMANCE seg moves beside GOVERNOR in SETTINGS › QUALITY; the
-  GOVERNOR readout and FRAME PROFILE stay — FRAME PROFILE already prints each reader's ms, so there is no new cost line.
-- **Names:** SLICE → **PLANE** and SLICE / CLIP → **CLIP**, ids stable (R-W3; ψ-PLANE if "plane wave" clashes for Josh).
-- **ATOMS returns as the periodic-table window.** Its Z stepper becomes a grid of H–Kr cells grouped by period (periods
-  as columns on the card and on a phone, rows when floating), built with SPECTRUM's own button builder; choosing ATOM in
-  SPECTRUM opens it, **and it gets its own row in the "+" and WINDOW menus** (two hops through a folded SPECTRUM is not a
-  seat). Its readouts (Δ-SCF beside −ε, the quantum defect, the α-dependent order) are physics no other window has. At
-  0.5.0 the grid becomes the kit's `cells` (brief 4) and, mounted a second time in MOLECULES, the **library's map**: a
-  lit cell counts the molecules holding that element, a tap filters, a dark cell is what the diversity gate wants next.
-- **The legacy rest** (R-A2): H₂⁺, HELIUM, H₂, ELECTROSTATICS and QCD stay hidden in 0.4.0 and are decided at 0.5.0; H₂'s
-  FCI curve becomes a MAP there.
-- **STATE audited** (R-W5): the window holds preparation controls, has no reader, hides under a molecular owner, and no
-  other window duplicates it — it keeps its controls (SCENES is 0.5.0); the app's state — the three scopes plus LIBRARY —
-  is re-proven after every stage by the existing suites, and B2's open path is the new case.
-- **"Somewhat realtime"** (R-W6): power stays binary; the cadence is the existing reader law (every 4th frame at
-  PERFORMANCE 120, every frame at FULL, parked above 6/16 ms); its meter is FRAME PROFILE.
-- **Which windows are popular** is a ruling, not a guess (R-W7): there are no analytics.
-- The window cost law restated: off, folded, closed, hidden or offscreen costs zero; the stage text joins it.
-· app (the CALCULUS grid and the ATOMS cells become kit by briefs 3–4) · M · nothing that reads layout per tick.
-
-**F4 · THE CAMERA.**
-- **A lens shift.** The picture slides and the molecule stays the pivot — "a planet photo at max FOV", and the kit pad's
-  unit. `obs.shift = [sx, sy]` is defined **in the ray's uv units** (uv spans −1…1): `writeView` writes the shifted
-  principal ray `fwd + 2·sx·tanH·aspect·right + 2·sy·tanH·up` into the forward lane, the ray pass normalises it and the
-  headlight follows; the line chrome's perspective matrix gains the same principal-point offset in two entries; the
-  pivot appears at minus the shift; `cameraEye` hands the shift to the 2-D overlays. Clamp ±0.5 uv, so the pivot reaches
-  the frame's edge and never leaves it. At shift 0 both passes are byte-identical, so the lock holds by construction.
-- **Zoom to the cursor, through the shift.** On wheel and on pinch, `shift' = c − (c − shift)·dist/dist'` (c = the cursor
-  or the finger centroid, uv) keeps the world point under the hand still — one line, the maps behaviour people expect,
-  and the cure for pinch drift on the iPad.
-- **Hands.** Alt-drag pans on a trackpad and a mouse (Alt is free on the stage: the specials use Ctrl and Shift; verify
-  `preventDefault` holds in Firefox and that the desktop's window manager does not take Alt-drag); a two-finger drag pans
-  on touch beside pinch; wheel stays dolly; an Alt+Arrow pair in `lab/shortcuts.js`, with `tests/keyboard-shortcuts.test.mjs`
-  extended. CAMERA gains PAN X / PAN Y (two knobs now; the pad with the lattice at 0.5.0 — the knobs are its targets)
-  and PAN HOME; RESET VIEW clears the shift; targets `observer.panx/pany`; STATE-SCOPES' pose row gains `shift`
-  (PROJECT, not history); the empty project is regenerated (`tools/new-project.mjs --check`).
-- **The link carries the shot.** `statelink.js`'s own policy lets fields be appended at a section's end under v1: the
-  shift rides the CAM section's tail, and one new tag carries `{library id, basis, view, orbital as {group, irrep,
-  count}}` — a few dozen bytes under the ceiling. Today a link made under MOLECULES silently drops the molecule; after
-  this a teacher posts one link: "1b₁ of water, framed in the gap".
-- The target pivot (orbit about what you inspect) is built only if Josh, having tried the shift zoomed in, asks for it
-  (R-C1).
-· CAMERA, the stage · engine (ray-gen) + kit (panel, brief 2) · M · PRESENT tier only; a verifier (the camera uniform is
-the frame path); `render-regressions` and `keyboard-shortcuts` in the gate (the shift changes `pointerRay`/`unproject`).
-
-**F5 · THE LIBRARY as expansions.**
-- **S4a · the proof and the store.** Benzene's record (Sol's native booster + names + STEM fields + its page) opens with
-  no SCF through `chem.open`; `lw-data-v1` serves from `lab/library/`; the scope row lands; persistence, eviction and
-  quota are measured on the M5. **The 52-record starter** for the existing molecules ships only if B0's re-time shows a
-  saving worth its bytes; the new sections' records ship regardless (they are past the cap). A verifier (worker +
-  storage). **Before S4c touches the kernel**, benzene and a 64-AO fixture join the digest lock on the base tree — its
-  only molecular fixture today is water, tier 0, so "the ≤ 64 tiers are untouched" is provable only after that.
-- **S4b · the sections as content, behind the gate.** The picker: a page turner `‹ SECTION ›` above the existing
-  `<select>`, which then holds one section (about 25 rows); search is 0.5.0's FLY-TO. The sections, diverse rather than
-  variants (R-L1): DIATOMICS · HYDRIDES · ORGANIC · **BIO** (the twenty amino acids as a family — sixteen ≤ 64 AO now,
-  Phe, Arg, Tyr, Trp after S4c; the five nucleobases 44–60; Gly-Gly 57; N-methylacetamide, imidazole, indole, phosphoric
-  acid, ribose) · **LATTICE** (finite clusters only, the solver has no k-points: LiH/LiF/MgO cubes, Na₂Cl₂, the ice
-  hexamer and cube, cubane, neopentane, naphthalene, Si₅H₁₂; Na₄Cl₄ after S4c) · **HEAVY** (the Kr row: KrF₂, SeO₂, KBr,
-  GeCl₄, TiCl₄; the d-block "try it and let the stability probe decide"; **and, if the BSE record carries STO-3G to
-  Z = 54, the vendored basis widens to iodine and xenon** — HI, CH₃I, XeF₂, XeF₄, I₂ — labelled MODEL, all-electron
-  minimal basis, no relativity; an ECP belongs to def2-type bases, not here). Bases: STO-3G + 6-31+G* for anchors only;
-  the name is the join key, so an A/B MORPH between bases means the same orbitals. STEM fields per record (R-L4):
-  formula, point group and frame, mass, charge and multiplicity, dipole, HOMO–LUMO gap, geometry source, InChIKey and
-  PubChem CID (open; not CAS), a two-line blurb, the curated IEs, and the sources. **Sizing:** every entry needs a stated
-  geometry source and a PySCF oracle energy; build three end to end first (alanine, Li₄F₄, TiCl₄), time them, then size.
-- **S4c · the engine upgrades.** (i) **The density wall** is the χ tile in workgroup memory, cap × 64 × 4 B = 16 KiB at
-  cap 64, WebGPU's default `maxComputeWorkgroupStorageSize`; one more tier in `MOL_CAPS`, cap 128, by B0's numbers —
-  request the adapter's limit where every target grants ≥ 32 KiB, else a workgroup of 32 for that tier only. Records
-  then reconstruct Phe–Trp (71–87), adamantane, Na₄Cl₄, B₁₂H₁₂²⁻, caffeine, DMT, the base pairs (99–106), C₂₀H₂₀ (120),
-  the carbonyls and ferrocene. The dense ERI (458 MB at 87 AO, 1.66 GB at 120) is the generator's, never a live solve's.
-  (ii) **The orbital-only path, no tile:** an orbital is Σ c_μ χ_μ, O(nAO), accumulated shell by shell with a small
-  reduction — the ORBITAL kind at any AO count, so **C₆₀'s HOMO and LUMO draw in 0.4.0 from a PySCF coefficient record**
-  if B0's 300-AO dispatch measures under the tier's budget (R-L2); density, the I_h names and the grid-record road stay
-  0.4.1. (iii) **VALENCE** = `D − 2 Σ_core C_c C_cᵀ`, formed in f64 and drawn by the existing density kind, as a switch on
-  DENSITY (not a fourth segment: the VIEW row is at the hand law's width), so the heavy-atom core no longer drowns the
-  valence. The live cap moves only after B0's re-time and a refit of `COST`. A verifier and the frame-time protocol.
-· MOLECULES (sections, headers, CORE, VALENCE — the fourth named exception to "nothing new in the interface", because
-Josh asked for expansions and layouts by name), FOLDERS at 0.5.0 · engine/content · L · never a second solve road; never a
-record that fails validation; never a disabled row where a download would do.
-
-**Cut from 0.4.0** (each with its reason and its home): FIGURE (needs the kit's envelope and intake; 0.5.0); honesty chips
-and a CITE face (HELP is off at first run, they would ship invisible; the sources ride the record now; 0.5.0); TAKE MODE
-(optimises a layer λWAVES does not have yet; brief 7, 0.5.0); the warm cover (trades ~2 s of Safari boot stalls for one
-hitch WebKit has fixed upstream; measured on the M5 before it is planned again); the OVERLAYS row with new stage
-overlays for SHADOW, ORBIT, PLANE and CALCULUS (Josh placed them "on the informational"; 0.5.0 layers); the EXPANSIONS
-tab (the section header is the seat); the target pivot (R-C1).
-
-### 5 · THE KIT BRIEFS (0.4.0's deliverable to the MIR session)
-
-One brief per row, each with acceptance and the λWAVES port that consumes it, written during S1–S4 and delivered as one
-file, `research/release-0.4.0/KIT-BRIEFS.md`, mirrored to the vault as `LAMBDAWAVES CLAUDE KIT BRIEFS FOR MIR <date>.md`.
-λWAVES never touches MIR.
-- **8** `paintedSpace({rack, layer, extra})` + `subscribe(fn)` fired on window move, scroll, open and close, even while
-  paused — first, because it is the adoption blocker: the frame/axis mask needs painted surfaces, not whole rects.
-- **2** Lens shift in the CAMERA panel and the CSS port; the 3-D HOME resets the shift.
-- **3** `rack.register({ md })` + TO NOTEBOOK + PIN FROM WINDOW — the journal "throughout the app".
-- **4** The `cells` grid control: periodic, (l, n), sections; vertical on phones; a second mount as a filter.
-- **5** `createLattice` exported from the XY pad for inlays, with the eight tokens. The inlay list: STATE's IMPULSE
-  VECTOR, KEPLER tilt/turn, PLANE's mini, ORBIT's rotor spheres, WIGNER's (z, p_z) map, RADIATION's polar, the A/B morph,
-  STATIC FIELD's direction. "A little less intense, smaller circles" is eight tokens in λWAVES' sheet, no kit code.
-- **6** `recorder.overlay(i, ctx)` — the overlay in the film.
-- **7** `addLabel({ttl})`, `layer.setCheap(on)`, `html[data-take]`, with the TAKE MODE switch delegated to the app's
-  DISPLAY — the GPU-recording optimisation.
-- **9′** STATUS TAGS never hides `[data-mir-offer]`.
-- **13** The INFORMATIONAL rack window, with its switch delegated to the app's own settings; movable labels (`setEdit`).
-- **Live-bound math labels** (`{{state}}`, `{{E}}`, `{{T}}` from `params.get()`): "it will dynamically change as things
-  and settings in the rack windows are changed".
-- **P** The paint gesture as a kit gesture (Cloud's `paint-stroke.js` is generic); the app copy is then deleted.
-- **J** `jetblack` + `flat` and the gate exemption in the 1.5 catalogue, for the big four.
-- **1** The 3-D camera law and stage gestures (`mir/camera/law.js`, pure, with λWAVES' numbers and tests, zoom-to-cursor
-  included) — a gift for NEBULA, POLAR and EARTH, not a 0.5.0 dependency.
-
-### 6 · THE STAGES
-
-| # | Stage | What | Done when |
-|---|---|---|---|
-| S0 | TAKE-IN + CANARY | B0, B0.5, the bug fixes, the vendor wiring, the process hole, the three measurements, the three demos, 0.3.3 cut | every gate green on the merged tree (incl. `frame-occlusion`); no forged manifest and the pinned test fails on one; Jet Black live by R-A3's route; precache down ~650 KB; the canary's first row; the AO-limit, benzene re-time and 300-AO numbers in REPORT; the live site = the cut (a verifier: release) |
-| S1 ∥ S1′ ∥ S1″ | NAMES ∥ `cameraEye` ∥ THE SOL THREAD | F1 ∥ B1 ∥ a mathcollab ledger on "cyclotomic scaling" in Josh's sense, off the Opus path | every enabled molecule named or says why; the knob reads `1b₁ · HOMO`; the CORE fold; the plain and typeset forms; the copy renders; the N₂ demo ∥ `cameraEye` the only projection; `lab/*.js` down; 208-lock green ∥ the ledger plus one number: benzene's unique-quartet fraction under D₂h, measured on `md.js`'s own loop by a `tools/` script |
-| S2 | CAMERA | F4 | shift tests (shift then RESET = identity; the cursor-anchored point invariant across zoom and FOV; a FRAME corner on the same pixel through the line pass, the ray pass and `pointerRay`/`unproject` at a non-zero shift); Alt-drag, two-finger, Alt+Arrow; zoom-to-cursor; the link tail round-trips; 1004-lock byte-identical at shift 0; `new-project --check`; `render-regressions`; the device report equal before and after on the 3070 (M5 pending) — a verifier |
-| S3 | STAGE TEXT + WINDOWS | F2, F3 | no per-tick layout reads; KaTeX only on a changed string; WINDING and HOMO + LUMO fade with their names, hand presses only; one STAGE TEXT row; the caption in capture; DYNAMICS retired (PARTICLES in VORTEX); CALCULUS tiles + the prose figure; PERFORMANCE in QUALITY; PLANE/CLIP; ATOMS back with its table and its "+" row |
-| S4 | LIBRARY a / b / c | B2 + F5 | a: cached = fresh on energies, occupations, signed fields, subspaces, names; zero solver calls; `library/**` the one precache exemption; benzene and a 64-AO fixture in the lock; persistence on the M5 measured (a verifier) · b: three entries built end to end and timed, then the sections pass the gate with the family allowance; the page turner + headers · c: an 87-AO and a 120-AO record reconstruct; VALENCE; C₆₀'s HOMO/LUMO if the dispatch measured; 1004-lock green; the device report within the governor's tier (a verifier) |
-| S5 | KIT BRIEFS | §5 | each brief has acceptance and a consuming port; brief 8 first; the MIR session has them before the `1.5.0` cut |
-| — | **cut 0.4.0-alpha** | | |
-| 0.4.1 | BUCKYBALL | C₆₀'s density from a PySCF record with precomputed grids uploaded into the molecular volume (one `field` upload road); the I_h names; the stepping stones' timings | C₆₀ draws whole on the 3070 and the M5, labelled GRID RECORD |
-| 0.5.0 | THE ADOPTION, then THE INFORMATIONAL | MIR `1.5.0` in BASINS' order with the canary's deltas and the glue seams; the 15 risks closed; then pages per orbital/state/molecule/window, feature labels, the window, the overlays as movable layers (SHADOW, ORBIT, PLANE, CALCULUS), the film overlay, TAKE MODE, FIGURE, chips, FLY-TO + search, SCENES, MAPS, the pad with the lattice, the periodic table as the library's map | stylehash neutral; ~9–10.5k lines out; every law re-proven; the device report on the 3070 and the M5 |
-| 0.5.x | the wave index (station ring, carousel, `Q_LM`) · symmetry-adapted SCF if the thread's number earns it | | |
-
-**Why this order [mine].** S0 first: the live main is unreviewed, and the canary and the three measurements are the
-cheapest information in the plan. S1 beside `cameraEye` and the Sol thread: disjoint files, no Opus cost for the thread,
-and the names are Josh's loudest ask. S2 right after `cameraEye`: small, visible, one verifier. S3 after the names,
-because the fade speaks them. S4 last and split, so the iPad measurement and the three-entry build precede the sizing.
-The briefs throughout. **Verification:** one light check per stage; a verifier for S0 (release), S2 (the camera
-uniform), S4a (worker + storage) and S4c (the kernel); at 0.5.0, the adoption. The 208-lock runs only on frame-path
-commits.
-
-### 7 · RULINGS FOR JOSH (each flips one line)
-
-**For 0.4.0:**
-- **R-A1** Cut 0.3.3 from the merged-and-subtracted tree (the exports + Cloud's kept work); 0.4.0 starts from it.
-- **R-A2** ATOMS returns as the periodic-table window and SPECTRUM's ATOM opens it; QUARKONIUM hidden while QCD is;
-  H₂⁺, HELIUM, H₂ and ELECTROSTATICS stay hidden until 0.5.0 — or name the ones you want back now.
-- **R-A3** Jet Black: a real MIR 1.4.4 on `mir-1.4.x`, or one app-side catalogue row until 1.5 carries it.
-- **R-F1** Flagship, operationally, as §1 — or your own definition.
-- **R-G2** The INFORMATIONAL proper (springs, lines, pages, the pad, the film overlay) needs MIR 1.5 in the app: 0.4.0
-  ships its first taste and 0.5.0 the layer — or 0.4.0 waits for the `1.5.0` cut and carries it.
-- **R-L2 (the one that decides the most work)** C₆₀: its HOMO and LUMO in 0.4.0 through the orbital-only path if the
-  300-AO dispatch measures, the rest in 0.4.1 — or all of it in 0.4.1.
-- **R-W1** Retire DYNAMICS as mapped. · **R-W2** The copy is the prose figure — or add a table. · **R-W3** PLANE (or
-  ψ-PLANE), with CLIP. · **R-W5** "State audited" meant the window, the saved state, or both (both are done). ·
-  **R-W6** "Somewhat realtime": the reader law as is, or a per-window LIVE cadence. · **R-W7** Which windows you and a
-  visitor actually open.
-- **R-C1** Lens shift only; the target pivot if, after trying it, you want to orbit a lobe. · **R-C3** The pan chord is
-  Alt-drag — or another free one.
-- **R-L1** The sections under the gate with the family allowance. · **R-L4** Which STEM fields you want to see. ·
-  **R-L5** Stores builds: expansions bundled or downloaded. · **R-L6** Widen STO-3G to iodine and xenon if the BSE
-  record has it.
-- **R-N1..8** The names plan's rulings stand (its R6 is R-L3 here: records live in `lw-data-`, not the build).
-- **R-S1** "Cyclotomic scaling": the default reading is your corpus's — the character-basis principle (MASTER GOAL SPEC
-  §39, L-0408), concrete as symmetry adaptation (Fock blocks, unique ERI quartets, asymmetric-unit reconstruction) — or
-  the ring-character reading alone, or something else you mean. The Sol thread starts from your answer.
-- **R-U1** Who 0.4.0 is for (you, a class, Reddit on an iPad): it decides what leads 0.5.0.
-
-**For 0.5.0 (ask now, needed later):** **R-B1** one clock (the transport's play is THE play; modulation gets POWER;
-LINKED/SEPARATE retired) · **R-K1** the S key (WASD keeps S; FOLDERS takes another chord) and the MOD arm on Ctrl+Space ·
-**R-D1** the first-run look under the kit: λWAVES' light theme, 22 px, 50 % VIVID, normal ink · **R-I1** the INFORMATIONAL
-switch in SETTINGS › DISPLAY · **R-I2** `lw:` action links in pages, and the non-educational HUD through the same engine ·
-**R-I3** pages travel with the project vs "an open never closes the notebook" · **R-G1** 0.5.0 waits for a `1.5.0` cut
-and the canary runs again then.
-
-### 8 · DISPOSITIONS AND WHAT IS NOT CLAIMED
-
-**Josh's sentences with a later home:** the dot matrix on every inlay (brief 5, 0.5.0 tokens); GPU-recording
-optimisation (brief 7, 0.5.0); the overlays of SHADOW, ORBIT, PLANE and CALCULUS as movable layers (0.5.0); "other
-elements" announcing (the HUD, R-I2, 0.5.0); the journal "throughout the app" (brief 3, 0.5.0 — paste reaches it now);
-the other readers' markdown copy (brief 3); "typomagical" faces (0.5.0); heavier atoms beyond xenon (basis data and
-relativity: a Sol thread, not 0.4.x); wave indexing, electrostatics and Taylor shells (0.5.x; VAULT §1.2–1.3 holds the
-three readings); the bucky-ball whole (0.4.1).
-
-**SIBLINGS rows:** 0.4.0 — CITE as record content; the caption in capture. 0.5.0 — 1 SCENES (in STATE, replacing A/B as
-two of eight), 2 FIGURE, 4 chips, 6 named orbitals + FLY-TO + search, 7 pages, 8 the library gallery, 9 MAPS (H₂'s FCI
-curve first), 19 flash guard, 20 title card, 21 ink law, 24 CURVES, 27 kit project parts, 33 kit panels and the lattice,
-TAKE MODE. 0.5.x — 5 period-exact export, 10 TIMELINE, 11 the atom as metronome, 12 LAYERS, 13 ATLAS, 14 RULER, 15 LENS,
-16 CHORD and the ladder keyboard, 17 kymograph, 18 scale bar, 22 LIC/bloom, 25 TAKE, 26 LIGHT, 29 DEROTATE, 31 TUNER,
-32 PATTERN, 34 GPU anchor, hover-to-peek, the character-table page, the vs-EXPERIMENT lamp beyond the ten, SHARE LOOP.
-Declined — 23 params registry (check `app.param()` / `describe.js` at adoption), 28 MIDI, 30 OUTPUT, 35, the known-answer
-lamp in the shipped build (diagnostics live in `tools/`), the anti-harvest as written. Measured before planned again —
-the warm cover.
-
-**One in, one out:**
-
-| In | Out |
-|---|---|
-| ATOMS back, with a "+" row | an orphaned button and a stepper |
-| PARTICLES into VORTEX | DYNAMICS (~470 lines) |
-| one STAGE TEXT row | STAGE FORMULA + ATOM LABELS + two SIZEs |
-| the caption in capture (now) | brief 6's film overlay at 0.5.0 |
-| — | the duplicate vendor tree (~650 KB a deploy) |
-| one projection helper | nine projection copies |
-| — | Cloud's polling and per-tick label writes |
-| the section header as the expansion seat | no new tab |
-| the interim stage-text renderer (now) | deleted at 0.5.0 |
-| the ATOMS cells and the library chrome (now) | the kit's `cells` at 0.5.0 |
-
-**Not claimed.** No line of 0.4.0 is built. The INFORMATIONAL has run in no real app; its touch, WebKit and
-over-WebGPU looks are unproven. The AO tier's route waits on the adapter numbers; the orbital-only path on one measured
-dispatch; the cost model's staleness on B0's re-time; the BSE's STO-3G range to Z = 54 is unverified. The names probe
-covered ten molecules in STO-3G with s and p only; the showpiece groups' tables are unbuilt. Later or not re-planned:
-the wave index, the Sol thread's engine consequences, the parked asks (the Serum matrix, shader plugins, knob
-quick-settings, ijk mini-maps, "2×6 layout"), the About/Notebook buttons at the top right (the kit's at 0.5.0), Sol's
-pack delivery (Drive, R2). A symmetry saving on a Cartesian grid is bounded by its signed-permutation operations (at
-most 48, usually 8). The legal reading of CAS and NIST SRD is unverified. The YouTube video's content beyond its title
-and description is unknown.
-
-### 9 · RULINGS TAKEN (Josh, 2026-10-07: "defaults are good")
-
-- R-A1 0.3.3 is cut from the merged-and-subtracted tree; 0.4.0 starts from it.
-- R-L2 C₆₀'s HOMO and LUMO in 0.4.0 only if the one 300-AO orbital-only dispatch measures under the tier's budget; the rest in 0.4.1 BUCKYBALL.
-- R-U1 Josh first, visitors on the iPad second.
-- Every other ruling in §7 takes the first-named option until he says otherwise. The lens shift stays ("the planet photo is a bit of an over-explanation but that sounds like a cool feature").
-- The branches may be pushed ("yes to anything for the branches").
-
-### 10 · THE NUMBERS TAKEN (S0, 2026-10-07 — `research/release-0.4.0/measure/MEASURE.md`, `docs/MIR-1.5-CANARY.md`)
-
-- **N1 · The AO wall opens.** The RTX 3070 reports `maxComputeWorkgroupStorageSize` = 49152 in Chromium (Vulkan) and
-  Firefox 157, and both grant a device asked for 32768; a device asked for nothing gets 16384, and `lab/gpu-boot.js`
-  `requestGpu()` asks only for texture dimensions today. **S4c's cap-128 tier asks for 32 KiB in `want` and falls back to
-  the workgroup-32 variant where it is refused.** The M5 is pending (the one line for Josh is in MEASURE.md §1;
-  `tools/perf/limits.html` serves it); until then the fallback is the iPad's assumed path.
-- **N2 · Records GATE, they do not merely accelerate; the starter is not shipped.** Benzene (36 AO) ground + spectrum
-  is 1.57 s in node, 1.92 s in Firefox, 1.46 s in Chromium against 9.6 s predicted (the model is 5–6.6× slow; 8.1× at
-  58 AO). A 58-AO ground solve alone is ~8 s on this desktop (17.5 s with its spectrum), so "64 AO in a few seconds on the
-  M5" fails already here: **a record past the live cap is the only road to those molecules (DOWNLOAD, not DISABLED), the
-  live cap stays benzene, and the 52-record starter for ≤ 36-AO entries is NOT shipped** (it would save ≤ 2 s on a
-  desktop for its bytes). S4a refits `COST` from the measured rows (benzene, C₂H₄/6-31+G*, naphthalene) and moves the
-  "~9.6 s" menu text that `tests/chem.browser-test.mjs` pins.
-- **N3 · R-L2 resolves YES.** One 300-AO orbital-only dispatch at 96³ costs 12.0 ms of GPU time plain and **3.2–3.6 ms
-  with shells screened at 1e-10** (1.19× benzene's density dispatch, measured today at 2.72 / 3.00 ms), linear at 0.040
-  ms per AO; every row checked against the f64 evaluator to the rgba16float precision. A reconstruct runs once per
-  change, not per frame, so **C₆₀'s HOMO and LUMO draw in 0.4.0 (S4c ii) from a PySCF coefficient record, with shell
-  screening as the kernel**; the density, the I_h names and the grid record stay 0.4.1.
-- **N4 · The canary's seams for 0.4.0** (7 of 82 node suites red on a bare alpha.23 adopt; it boots; browser green):
-  a precache POLICY for kit files (9.46 MiB on a bare adopt against the 8 MiB ceiling; `locales/` + `tokens.json`
-  alone are 2.2 MB) — designed with S4a's `library/**` exemption as one rule, "precache what a root reaches"; the
-  gates that pin kit bytes or kit source text (`mir`, `mir-manifest`'s version regex, `access` A8, `slider-keys`) are
-  rewritten at 0.5.0 as the adoption's first commit, not before; `tools/new-project.mjs` regenerates inside the adoption
-  (BPM 30); three missing ADOPTING-1.5 entries (default BPM 30, the Shift step `.01·keyFine`, strings through `tx()`) go
-  to the MIR session in the KIT BRIEFS (S5).
-- Notes: Firefox's timestamp queries return real values now (the `field.js` comment that says they are zeroed is stale —
-  S4c fixes the comment); headless Chromium reaches the RTX only with `--enable-features=Vulkan --use-angle=vulkan`
-  (`tools/perf/` says so); Firefox reports `onSubmittedWorkDone` on a ~100 ms tick.
 
 
 
@@ -26869,4 +26718,1686 @@ and the residual norm also gives a Temple bound on the energy itself, E − E_ex
 - Nothing here touches Thread B beyond KILL 12, and no Larmor power was recomputed.
 
 **Final output: research/RIVAL-FIELDS-AND-MOLECULES-OPUS.md**
+
+
+
+---
+
+## <a id="doc-111"></a>DOC 111 · release-0.4.0/library-census/CENSUS.md · 2026-10-08
+
+## S4 molecular LIBRARY census — DRAFT
+
+All numeric cells carry **M = MEASURED**, **D = DERIVED**, or **U = UNVERIFIED**, followed by the reason where needed. JSON uses per-field `numericStatus` or a containing `status` block. M means observed on this machine or copied from a cited reference; it does not mean measured experimentally here. Geometry provenance and its experimental status are separate. Null is unavailable, never zero. Dates, atomic numbers, MO indices, formula subscripts and version strings identify inputs or conventions.
+
+### One-page summary
+
+D: **117 named rows**, including M: **54 present entries**, D: **20 amino acids** and D: **5 nucleobases**. Glycine is counted once. Carbonyl representatives are Ni(CO)4, Fe(CO)5 and Cr(CO)6. Conditional iodine/xenon candidates remain in the census.
+
+| Section | Rows D | STO-3G record bytes D | 6-31+G* bytes where defined D | Gate pass/fail D | Need 128-AO tier D | Over 128 D | Basis blocked D | Over live COST budget D |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| DIATOMICS | 13 | 39,696 | 144,712 | 7/6 | 0 | 0 | 0 | 0 |
+| HYDRIDES | 20 | 71,768 | 373,848 | 11/9 | 0 | 0 | 0 | 0 |
+| ORGANIC | 16 | 1,004,672 | 13,367,136 | 8/8 | 3 | 1 | 0 | 4 |
+| BIO | 36 | 1,147,664 | 13,126,720 | 26/10 | 8 | 0 | 0 | 31 |
+| LATTICE | 11 | 246,240 | 2,110,112 | 3/8 | 1 | 0 | 0 | 9 |
+| HEAVY | 21 | 311,368 | 0 | 15/6 | 3 | 0 | 5 | 6 |
+
+D: STO-3G payload **2,821,408 B**; gate-passing available subset **1,191,160 B**. D: count-only 6-31+G* payload **29,122,528 B**, where defined. Formula: `8*(nAO²+2*nAO)+2000`: decimal D: **2 KB** metadata. The JSON also gives D: **2 KiB** alternatives, adding D: **48 B/record**. U: transport/installed JSON size and response/grid payloads are excluded.
+
+D: STO-3G records requiring S4c's density tier **15**: arginine, phenylalanine, tryptophan, tyrosine, adamantane, caffeine, DMT, Na4Cl4, FeCO5, CrCO6, ferrocene, B12H12--, C20H20, A-T, G-C. D: over the density tier **1**: C60; C60 uses S4c's orbital-only path. U: iPad/device capacity and GPU field timing are not measured here.
+
+D: **50** rows exceed the current benzene live COST budget (listed below); cap D: **9592 ms**, with the app's D: **2% margin**. U: S4a refit/device eligibility remains unmeasured.
+
+D: diversity gate **70 pass / 47 fail**. D: **111 RHF solves converged**, **1 did not**; D: **5 basis-blocked rows** have no solve. D: **0 geometry optimisations failed their criterion**. Convergence flags are M; the counts are D. Sources, constraints and failures are explicit below.
+
+M: `basis_set_exchange` is unavailable in `~/bin/scipython`, with and without `-I`; vendored STO-3G ends at Z=36. M: iodine Z=53 and xenon Z=54 are absent. U: package coverage remains unknown. Nothing was vendored. Missing heavy-element 6-31+G* counts remain U.
+
+M: all water coefficient columns pass the sign-adjusted AO proof: maximum error **1.029e-12**, D: tolerance **1e-08**. The C60 draft stores D: **5 h_u HOMOs + 3 t1u LUMOs**, with M: Ih characters checked over **60 rotations** and inversion. Geometry experiment, GPU rendering and C60 stability remain U.
+
+### The three sizing entries
+
+App times use `moleculeRHF` at its defaults, including SAD/core solution detection, the density stability probe and singlet electronic Hessians, with read-only imports exactly as the symmetry tools do. These are electronic stability tests, not vibrational/geometry Hessians. PySCF times are final RHF kernel calls only; its geometry relaxation and stability probes are outside that timing. They therefore measure different work, stated explicitly. Runs can overlap other CPU work; the observations are not isolated throughput claims. U: record-open time is not measured because the production record schema/store lands in S4a and browsers/servers were forbidden.
+
+Record-byte estimates in the authoritative census and these tables use decimal metadata units. Early raw row/app timing checkpoints used the binary allowance; their byte fields are D: **48 B larger** per defined record. No energy, time or geometry measurement was changed by this bookkeeping normalisation.
+
+| Entry | STO-3G AO D | PySCF RHF seconds M | App defaults seconds M | App converged M | Absolute energy difference Eh D | Predicted record bytes D | App Hessian minimum M |
+|---|---:|---:|---:|---|---:|---:|---|
+| alanine | 37 | 0.256557 | 2.135271 | yes | 1.364e-12 | 13,544 | True |
+| Li4F4 | 40 | 0.231938 | 1.756959 | yes | 2.029e-11 | 15,440 | True |
+| TiCl4 | 55 | 0.404963 | 8.993780 | yes | 9.095e-12 | 27,080 | True |
+
+### Additional basis sizing
+
+D: for the 6-31+G* count-only inventory, **16** entries require the 128-AO tier: BF3, CF4, C3H6, C4H6, C4H4O, C5H5N, urea, glycine, C6H6, alanine, N-methylacetamide, imidazole, phosphoric-acid, neopentane, Li4H4, Na2Cl2. D: **42** exceed that density tier: arginine, asparagine, aspartic-acid, cysteine, glutamine, glutamic-acid, histidine, isoleucine, leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine, adenine, guanine, cytosine, thymine, uracil, Gly-Gly, indole, ribose, cubane, naphthalene, Si5H12, adamantane, caffeine, DMT, Li4F4, Mg4O4, Na4Cl4, ice-hexamer, ice-cube, B12H12--, C20H20, C60, A-T, G-C. These are basis-size findings, not extra solves or a commitment to ship every anchor.
+
+### Census and mechanical diversity gate
+
+One row per named molecule, without duplicating glycine. Formula is canonical Hill composition; charge is separate and included in the gate key. `Dooh`/`Coov` are PySCF topgroup names for the linear groups. With Cartesian functions, these solves compute in the supported finite Abelian subgroup, D2h/C2v; the second name is the actual computed subgroup for every solved row. Conditional models have no measured point group or computed subgroup, and no pinned-basis optimisation. Motifs are declared from connectivity, not inferred from rounded energies. An optimisation can lower a built cage/cluster symmetry; the measured group wins.
+
+Section assignments are a proposed disjoint picker mapping, UNVERIFIED as production manifests. The legacy small-triatomic/ion bucket is included under HYDRIDES, including its oxides and halides; that label is an editorial bucket, not a claim that every member is chemically a hydride. Original `appGroup` is preserved for taxonomy review. Ring tags denote declared covalent cycle sizes; cluster tags denote the finite repeat-unit aggregates in the LATTICE roster.
+
+| Name (id) | Formula D; charge D | Section | Family | Geometry source | PySCF top/computed M | AO STO-3G / 6-31+G* D | nocc D | RHF E Eh M | Wall s M | Converged M | Gap Eh D | Record bytes STO-3G / 6-31+G* D | Live-cost ms D | Gate D: result and reason |
+|---|---|---|---|---|---|---:|---:|---:|---:|---|---:|---:|---:|---|
+| dihydrogen (H2) | H2; 0 | DIATOMICS | — | reference copied, U experiment [G1](#geometry-g1) | Dooh/D2h | D: 2 / D: 4 | 1 | M: -1.116706137 | M: 0.012314 | yes | D: 1.2482512 | D: 2064 / D: 2192 | D: 11 | PASS: new elements H; new measured point group Dooh |
+| lithium hydride (LiH) | HLi; 0 | DIATOMICS | — | reference copied, U experiment [G2](#geometry-g2) | Coov/C2v | D: 6 / D: 21 | 2 | M: -7.862023874 | M: 0.053699 | yes | D: 0.3639572 | D: 2384 / D: 5864 | D: 14 | PASS: new elements Li; new measured point group Coov |
+| hydrogen fluoride (HF) | FH; 0 | DIATOMICS | — | reference copied, U experiment [G3](#geometry-g3) | Coov/C2v | D: 6 / D: 21 | 5 | M: -98.570757663 | M: 0.029449 | yes | D: 1.0934083 | D: 2384 / D: 5864 | D: 14 | PASS: new elements F |
+| dinitrogen (N2) | N2; 0 | DIATOMICS | — | reference copied, U experiment [G4](#geometry-g4) | Dooh/D2h | D: 10 / D: 38 | 7 | M: -107.495887883 | M: 0.022183 | yes | D: 0.8206861 | D: 2960 / D: 14160 | D: 33 | PASS: new elements N |
+| carbon monoxide (CO) | CO; 0 | DIATOMICS | — | reference copied, U experiment [G5](#geometry-g5) | Coov/C2v | D: 10 / D: 38 | 7 | M: -111.224589557 | M: 0.073108 | yes | D: 0.7598180 | D: 2960 / D: 14160 | D: 33 | PASS: new elements C,O |
+| difluorine (F2) | F2; 0 | DIATOMICS | — | reference copied, U experiment [G6](#geometry-g6) | Dooh/D2h | D: 10 / D: 38 | 9 | M: -195.967460837 | M: 0.049693 | yes | D: 0.8166546 | D: 2960 / D: 14160 | D: 31 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| lithium fluoride (LiF) | FLi; 0 | DIATOMICS | — | reference copied, U experiment [G7](#geometry-g7) | Coov/C2v | D: 10 / D: 38 | 6 | M: -105.362471441 | M: 0.084073 | yes | D: 0.4189864 | D: 2960 / D: 14160 | D: 34 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| sodium hydride (NaH) | HNa; 0 | DIATOMICS | — | reference copied, U experiment [G8](#geometry-g8) | Coov/C2v | D: 10 / D: 25 | 6 | M: -160.302186544 | M: 0.055493 | yes | D: 0.5287364 | D: 2960 / D: 7400 | D: 34 | PASS: new elements Na |
+| hydrogen chloride (HCl) | ClH; 0 | DIATOMICS | — | reference copied, U experiment [G9](#geometry-g9) | Coov/C2v | D: 10 / D: 25 | 9 | M: -455.134809703 | M: 0.049529 | yes | D: 0.8274369 | D: 2960 / D: 7400 | D: 31 | PASS: new elements Cl |
+| dichlorine (Cl2) | Cl2; 0 | DIATOMICS | — | reference copied, U experiment [G10](#geometry-g10) | Dooh/D2h | D: 18 / D: 46 | 17 | M: -909.111606308 | M: 0.101184 | yes | D: 0.5403950 | D: 4880 / D: 19664 | D: 184 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| sodium chloride (NaCl) | ClNa; 0 | DIATOMICS | — | reference copied, U experiment [G11](#geometry-g11) | Coov/C2v | D: 18 / D: 46 | 14 | M: -614.524175556 | M: 0.225175 | yes | D: 0.5842678 | D: 4880 / D: 19664 | D: 237 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| beryllium dihydride (BeH2) | BeH2; 0 | HYDRIDES | — | reference copied, U experiment [G12](#geometry-g12) | Dooh/D2h | D: 7 / D: 23 | 3 | M: -15.560312317 | M: 0.044523 | yes | D: 0.6340942 | D: 2504 / D: 6600 | D: 16 | PASS: new elements Be |
+| borane (BH3) | BH3; 0 | HYDRIDES | — | reference copied, U experiment [G13](#geometry-g13) | D3h/C2v | D: 8 / D: 25 | 4 | M: -26.068995739 | M: 0.050824 | yes | D: 0.7020186 | D: 2640 / D: 7400 | D: 20 | PASS: new elements B; new measured point group D3h |
+| methane (CH4) | CH4; 0 | HYDRIDES | — | reference copied, U experiment [G14](#geometry-g14) | Td/D2 | D: 9 / D: 27 | 5 | M: -39.726810112 | M: 0.034924 | yes | D: 1.2345931 | D: 2792 / D: 8264 | D: 25 | PASS: new measured point group Td |
+| ammonia (NH3) | H3N; 0 | HYDRIDES | — | reference copied, U experiment [G15](#geometry-g15) | C3v/Cs | D: 8 / D: 25 | 5 | M: -55.454038544 | M: 0.050672 | yes | D: 0.9929594 | D: 2640 / D: 7400 | D: 20 | PASS: new measured point group C3v |
+| water (H2O) | H2O; 0 | HYDRIDES | — | reference copied, U experiment [G16](#geometry-g16) | C2v/C2v | D: 7 / D: 23 | 5 | M: -74.963023163 | M: 0.041752 | yes | D: 0.9964087 | D: 2504 / D: 6600 | D: 16 | PASS: new measured point group C2v |
+| magnesium dihydride (MgH2) | H2Mg; 0 | HYDRIDES | — | reference copied, U experiment [G17](#geometry-g17) | Dooh/D2h | D: 11 / D: 27 | 7 | M: -198.200772688 | M: 0.091416 | yes | D: 0.6735723 | D: 3144 / D: 8264 | D: 43 | PASS: new elements Mg |
+| alane (AlH3) | AlH3; 0 | HYDRIDES | — | reference copied, U experiment [G18](#geometry-g18) | D3h/C2v | D: 12 / D: 29 | 8 | M: -240.728422174 | M: 0.098360 | yes | D: 0.6817122 | D: 3344 / D: 9192 | D: 55 | PASS: new elements Al |
+| silane (SiH4) | H4Si; 0 | HYDRIDES | — | reference copied, U experiment [G19](#geometry-g19) | Td/D2 | D: 13 / D: 31 | 9 | M: -287.910228208 | M: 0.172407 | yes | D: 0.9424487 | D: 3560 / D: 10184 | D: 71 | PASS: new elements Si |
+| phosphine (PH3) | H3P; 0 | HYDRIDES | — | reference copied, U experiment [G20](#geometry-g20) | C3v/Cs | D: 12 / D: 29 | 9 | M: -338.633616319 | M: 0.058483 | yes | D: 0.7707727 | D: 3344 / D: 9192 | D: 53 | PASS: new elements P |
+| hydrogen sulfide (H2S) | H2S; 0 | HYDRIDES | — | reference copied, U experiment [G21](#geometry-g21) | C2v/C2v | D: 11 / D: 27 | 9 | M: -394.311556110 | M: 0.072256 | yes | D: 0.7458445 | D: 3144 / D: 8264 | D: 40 | PASS: new elements S |
+| carbon dioxide (CO2) | CO2; 0 | HYDRIDES | — | reference copied, U experiment [G22](#geometry-g22) | Dooh/D2h | D: 15 / D: 57 | 11 | M: -185.064695727 | M: 0.145018 | yes | D: 0.7237567 | D: 4040 / D: 28904 | D: 120 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| hydrogen cyanide (HCN) | CHN; 0 | HYDRIDES | — | reference copied, U experiment [G23](#geometry-g23) | Coov/C2v | D: 11 / D: 40 | 7 | M: -91.675190787 | M: 0.103940 | yes | D: 0.7911093 | D: 3144 / D: 15440 | D: 43 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| nitrous oxide (N2O) | N2O; 0 | HYDRIDES | — | reference copied, U experiment [G24](#geometry-g24) | Coov/C2v | D: 15 / D: 57 | 11 | M: -181.191855826 | M: 0.233728 | yes | D: 0.6205090 | D: 4040 / D: 28904 | D: 120 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| ozone (O3) | O3; 0 | HYDRIDES | — | reference copied, U experiment [G25](#geometry-g25) | C2v/C2v | D: 15 / D: 57 | 12 | M: -221.289064358 | M: 0.333888 | yes | D: 0.4292563 | D: 4040 / D: 28904 | D: 112 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| sulfur dioxide (SO2) | O2S; 0 | HYDRIDES | — | reference copied, U experiment [G26](#geometry-g26) | C2v/C2v | D: 19 / D: 61 | 16 | M: -540.601879776 | M: 0.567006 | yes | D: 0.4546127 | D: 5192 / D: 32744 | D: 262 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| boron trifluoride (BF3) | BF3; 0 | HYDRIDES | — | reference copied, U experiment [G27](#geometry-g27) | D3h/C2v | D: 20 / D: 76 | 16 | M: -318.661925697 | M: 0.564855 | yes | D: 0.8230817 | D: 5520 / D: 49424 | D: 349 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| carbon tetrafluoride (CF4) | CF4; 0 | HYDRIDES | — | reference copied, U experiment [G28](#geometry-g28) | Td/D2 | D: 25 / D: 95 | 21 | M: -429.567473664 | M: 0.791936 | yes | D: 1.1094560 | D: 7400 / D: 75720 | D: 833 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| hydrogen peroxide (H2O2) | H2O2; 0 | HYDRIDES | — | reference copied, U experiment [G29](#geometry-g29) | C2/C2 | D: 12 / D: 42 | 9 | M: -148.757369155 | M: 0.129317 | yes | D: 0.8210820 | D: 3344 / D: 16784 | D: 53 | PASS: new measured point group C2 |
+| acetylene (C2H2) | C2H2; 0 | ORGANIC | — | reference copied, U experiment [G30](#geometry-g30) | Dooh/D2h | D: 12 / D: 42 | 7 | M: -75.852805971 | M: 0.086982 | yes | D: 0.7438515 | D: 3344 / D: 16784 | D: 57 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| ethene (C2H4) | C2H4; 0 | ORGANIC | — | reference copied, U experiment [G31](#geometry-g31) | D2h/D2h | D: 14 / D: 46 | 8 | M: -77.072090207 | M: 0.291148 | yes | D: 0.6405398 | D: 3792 / D: 19664 | D: 99 | PASS: new measured point group D2h |
+| ethane (C2H6) | C2H6; 0 | ORGANIC | — | reference copied, U experiment [G32](#geometry-g32) | D3d/C2h | D: 16 / D: 50 | 9 | M: -78.305808411 | M: 0.082625 | yes | D: 1.1019157 | D: 4304 / D: 22800 | D: 169 | PASS: new measured point group D3d |
+| formaldehyde (H2CO) | CH2O; 0 | ORGANIC | — | reference copied, U experiment [G33](#geometry-g33) | C2v/C2v | D: 12 / D: 42 | 8 | M: -112.353733118 | M: 0.153005 | yes | D: 0.6384454 | D: 3344 / D: 16784 | D: 55 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| methanol (CH3OH) | CH4O; 0 | ORGANIC | — | reference copied, U experiment [G34](#geometry-g34) | Cs/Cs | D: 14 / D: 46 | 9 | M: -113.544578079 | M: 0.296804 | yes | D: 0.9348503 | D: 3792 / D: 19664 | D: 95 | PASS: new measured point group Cs |
+| formic acid (HCOOH) | CH2O2; 0 | ORGANIC | — | reference copied, U experiment [G35](#geometry-g35) | Cs/Cs | D: 17 / D: 61 | 12 | M: -186.206937269 | M: 0.468363 | yes | D: 0.6606376 | D: 4584 / D: 32744 | D: 201 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| acetonitrile (CH3CN) | C2H3N; 0 | ORGANIC | — | reference copied, U experiment [G36](#geometry-g36) | C3v/Cs | D: 18 / D: 63 | 11 | M: -130.028620973 | M: 0.548660 | yes | D: 0.7633753 | D: 4880 / D: 34760 | D: 281 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| cyclopropane (C3H6) | C3H6; 0 | ORGANIC | — | reference copied, U experiment [G37](#geometry-g37) | D3h/C2v | D: 21 / D: 69 | 12 | M: -115.665959330 | M: 0.866583 | yes | D: 0.8787984 | D: 5864 / D: 41192 | D: 587 | PASS: new motifs ring:3 |
+| 1,3-butadiene (C4H6) | C4H6; 0 | ORGANIC | — | reference copied, U experiment [G38](#geometry-g38) | C2v/C2v | D: 26 / D: 88 | 15 | M: -153.011879135 | M: 1.282607 | yes | D: 0.5046570 | D: 7824 / D: 65360 | D: 1703 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| furan (C4H4O) | C4H4O; 0 | ORGANIC | — | reference copied, U experiment [G39](#geometry-g39) | Cs/Cs | D: 29 / D: 103 | 18 | M: -225.744565981 | M: 2.484997 | yes | D: 0.5499693 | D: 9192 / D: 88520 | D: 2876 | PASS: new motifs ring:5 |
+| pyridine (C5H5N) | C5H5N; 0 | ORGANIC | — | reference copied, U experiment [G40](#geometry-g40) | Cs/Cs | D: 35 / D: 124 | 21 | M: -243.637481819 | M: 4.419753 | yes | D: 0.5420102 | D: 12360 / D: 126992 | D: 8071 | PASS: new motifs ring:6 |
+| urea (urea) | CH4N2O; 0 | BIO | — | reference copied, U experiment [G41](#geometry-g41) | C2v/C2v | D: 24 / D: 84 | 16 | M: -221.013180472 | M: 1.302639 | yes | D: 0.6586359 | D: 6992 / D: 59792 | D: 1027 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| glycine (glycine) | C2H5NO2; 0 | BIO | amino-acids | reference copied, U experiment [G42](#geometry-g42) | Cs/Cs | D: 30 / D: 105 | 20 | M: -279.088562183 | M: 2.519311 | yes | D: 0.6009432 | D: 9680 / D: 91880 | D: 3184 | PASS: declared amino-acids family; formula/novelty exception |
+| benzene (C6H6) | C6H6; 0 | ORGANIC | — | reference copied, U experiment [G43](#geometry-g43) | D6h/D2h | D: 36 / D: 126 | 21 | M: -227.891006464 | M: 0.164197 | yes | D: 0.5515653 | D: 12944 / D: 131024 | D: 9592 | PASS: new measured point group D6h |
+| ammonium (NH4+) | H4N; 1 | HYDRIDES | — | reference copied, U experiment [G44](#geometry-g44) | Td/D2 | D: 9 / D: 27 | 5 | M: -55.866800273 | M: 0.043624 | yes | D: 1.2463354 | D: 2792 / D: 8264 | D: 25 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| hydronium (H3O+) | H3O; 1 | HYDRIDES | — | reference copied, U experiment [G45](#geometry-g45) | C3v/Cs | D: 8 / D: 25 | 5 | M: -75.329047008 | M: 0.032933 | yes | D: 1.0235789 | D: 2640 / D: 7400 | D: 20 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| hydroxide (OH-) | HO; -1 | DIATOMICS | — | reference copied, U experiment [G46](#geometry-g46) | Coov/C2v | D: 6 / D: 21 | 5 | M: -74.056328189 | M: 0.028514 | yes | D: 0.9984896 | D: 2384 / D: 5864 | D: 14 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| cyanide (CN-) | CN; -1 | DIATOMICS | — | reference copied, U experiment [G47](#geometry-g47) | Coov/C2v | D: 10 / D: 38 | 7 | M: -90.937064898 | M: 0.071314 | yes | D: 0.7642413 | D: 2960 / D: 14160 | D: 33 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| copper hydride (CuH) | CuH; 0 | HEAVY | — | reference copied, U experiment [G48](#geometry-g48) | Coov/C2v | D: 20 / U: unavailable | 15 | M: -1620.945705377 | M: 0.329966 | no | D: 0.3204672 | D: 5520 / U: unavailable | D: 420 | PASS: new elements Cu; new motifs d-block |
+| zinc dihydride (ZnH2) | H2Zn; 0 | HEAVY | — | reference copied, U experiment [G49](#geometry-g49) | Dooh/D2h | D: 21 / U: unavailable | 16 | M: -1758.305613634 | M: 0.599349 | yes | D: 0.2832386 | D: 5864 / U: unavailable | D: 503 | PASS: new elements Zn |
+| germane (GeH4) | GeH4; 0 | HEAVY | — | reference copied, U experiment [G50](#geometry-g50) | Td/D2 | D: 23 / U: unavailable | 18 | M: -2054.609803498 | M: 0.495089 | yes | D: 0.9344147 | D: 6600 / U: unavailable | D: 708 | PASS: new elements Ge |
+| arsine (AsH3) | AsH3; 0 | HEAVY | — | reference copied, U experiment [G51](#geometry-g51) | C3v/Cs | D: 22 / U: unavailable | 18 | M: -2211.650316900 | M: 0.411572 | yes | D: 0.7028489 | D: 6224 / U: unavailable | D: 543 | PASS: new elements As |
+| hydrogen selenide (H2Se) | H2Se; 0 | HEAVY | — | reference copied, U experiment [G52](#geometry-g52) | C2v/C2v | D: 21 / U: unavailable | 18 | M: -2375.434704067 | M: 0.323839 | yes | D: 0.6518103 | D: 5864 / U: unavailable | D: 416 | PASS: new elements Se |
+| hydrogen bromide (HBr) | BrH; 0 | HEAVY | — | reference copied, U experiment [G53](#geometry-g53) | Coov/C2v | D: 20 / U: unavailable | 18 | M: -2546.097097090 | M: 0.208031 | yes | D: 0.7309011 | D: 5520 / U: unavailable | D: 322 | PASS: new elements Br |
+| dibromine (Br2) | Br2; 0 | HEAVY | — | reference copied, U experiment [G54](#geometry-g54) | Dooh/D2h | D: 38 / U: unavailable | 35 | M: -5091.063777548 | M: 0.947687 | yes | D: 0.4753548 | D: 14160 / U: unavailable | D: 4000 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| alanine (alanine) | C3H7NO2; 0 | BIO | amino-acids | reference copied, U experiment [G55](#geometry-g55) | C1/C1 | D: 37 / D: 128 | 24 | M: -317.678745345 | M: 0.256557 | yes | D: 0.6411726 | D: 13544 / D: 135120 | D: 10110 | PASS: declared amino-acids family; formula/novelty exception |
+| arginine (arginine) | C6H14N4O2; 0 | BIO | amino-acids | optimised here, U experiment [G56](#geometry-g56) | C1/C1 | D: 74 / D: 256 | 47 | M: -595.201285656 | M: 2.827848 | yes | D: 0.5471538 | D: 46992 / D: 530384 | D: 538232 | PASS: declared amino-acids family; formula/novelty exception |
+| asparagine (asparagine) | C4H8N2O3; 0 | BIO | amino-acids | reference copied, U experiment [G57](#geometry-g57) | C1/C1 | D: 53 / D: 187 | 35 | M: -483.217909656 | M: 0.999557 | yes | D: 0.6036277 | D: 25320 / D: 284744 | D: 73575 | PASS: declared amino-acids family; formula/novelty exception |
+| aspartic acid (aspartic-acid) | C4H7NO4; 0 | BIO | amino-acids | optimised here, U experiment [G58](#geometry-g58) | C1/C1 | D: 52 / D: 185 | 35 | M: -502.786082016 | M: 0.930188 | yes | D: 0.6082029 | D: 24464 / D: 278760 | D: 63904 | PASS: declared amino-acids family; formula/novelty exception |
+| cysteine (cysteine) | C3H7NO2S; 0 | BIO | amino-acids | optimised here, U experiment [G59](#geometry-g59) | C1/C1 | D: 46 / D: 151 | 32 | M: -710.869545191 | M: 0.441910 | yes | D: 0.5665702 | D: 19664 / D: 186824 | D: 30050 | PASS: declared amino-acids family; formula/novelty exception |
+| glutamine (glutamine) | C5H10N2O3; 0 | BIO | amino-acids | optimised here, U experiment [G60](#geometry-g60) | C1/C1 | D: 60 / D: 210 | 39 | M: -521.834853501 | M: 1.180176 | yes | D: 0.6100285 | D: 31760 / D: 358160 | D: 153734 | PASS: declared amino-acids family; formula/novelty exception |
+| glutamic acid (glutamic-acid) | C5H9NO4; 0 | BIO | amino-acids | optimised here, U experiment [G61](#geometry-g61) | C1/C1 | D: 59 / D: 208 | 39 | M: -541.361116241 | M: 2.493862 | yes | D: 0.6089282 | D: 30792 / D: 351440 | D: 135841 | PASS: declared amino-acids family; formula/novelty exception |
+| histidine (histidine) | C6H9N3O2; 0 | BIO | amino-acids | optimised here, U experiment [G62](#geometry-g62) | C1/C1 | D: 64 / D: 227 | 41 | M: -538.553484527 | M: 5.491978 | yes | D: 0.5087542 | D: 35792 / D: 417864 | D: 228197 | PASS: declared amino-acids family; formula/novelty exception |
+| isoleucine (isoleucine) | C6H13NO2; 0 | BIO | amino-acids | reference copied, U experiment [G63](#geometry-g63) | C1/C1 | D: 58 / D: 197 | 36 | M: -433.405379942 | M: 1.264154 | yes | D: 0.6346393 | D: 29840 / D: 315624 | D: 134329 | PASS: declared amino-acids family; formula/novelty exception |
+| leucine (leucine) | C6H13NO2; 0 | BIO | amino-acids | optimised here, U experiment [G64](#geometry-g64) | C1/C1 | D: 58 / D: 197 | 36 | M: -433.439894722 | M: 1.204981 | yes | D: 0.6058659 | D: 29840 / D: 315624 | D: 134329 | PASS: declared amino-acids family; formula/novelty exception |
+| lysine (lysine) | C6H14N2O2; 0 | BIO | amino-acids | optimised here, U experiment [G65](#geometry-g65) | C1/C1 | D: 64 / D: 218 | 40 | M: -487.744281060 | M: 1.771815 | yes | D: 0.6039550 | D: 35792 / D: 385680 | D: 235639 | PASS: declared amino-acids family; formula/novelty exception |
+| methionine (methionine) | C5H11NO2S; 0 | BIO | amino-acids | optimised here, U experiment [G66](#geometry-g66) | C1/C1 | D: 60 / D: 197 | 40 | M: -788.034426569 | M: 1.255317 | yes | D: 0.5484396 | D: 31760 / D: 315624 | D: 147460 | PASS: declared amino-acids family; formula/novelty exception |
+| phenylalanine (phenylalanine) | C9H11NO2; 0 | BIO | amino-acids | reference copied, U experiment [G67](#geometry-g67) | C1/C1 | D: 71 / D: 250 | 44 | M: -544.424047979 | M: 3.499572 | yes | D: 0.5402308 | D: 43464 / D: 506000 | D: 435927 | PASS: declared amino-acids family; formula/novelty exception |
+| proline (proline) | C5H9NO2; 0 | BIO | amino-acids | optimised here, U experiment [G68](#geometry-g68) | C1/C1 | D: 49 / D: 170 | 31 | M: -393.710655173 | M: 0.752689 | yes | D: 0.6107915 | D: 21992 / D: 235920 | D: 50000 | PASS: declared amino-acids family; formula/novelty exception |
+| serine (serine) | C3H7NO3; 0 | BIO | amino-acids | optimised here, U experiment [G69](#geometry-g69) | C1/C1 | D: 42 / D: 147 | 28 | M: -391.528977531 | M: 0.743920 | yes | D: 0.6192675 | D: 16784 / D: 177224 | D: 19551 | PASS: declared amino-acids family; formula/novelty exception |
+| threonine (threonine) | C4H9NO3; 0 | BIO | amino-acids | reference copied, U experiment [G70](#geometry-g70) | C1/C1 | D: 49 / D: 170 | 32 | M: -430.075719123 | M: 1.124247 | yes | D: 0.6384284 | D: 21992 / D: 235920 | D: 47901 | PASS: declared amino-acids family; formula/novelty exception |
+| tryptophan (tryptophan) | C11H12N2O2; 0 | BIO | amino-acids | optimised here, U experiment [G71](#geometry-g71) | C1/C1 | D: 87 / D: 309 | 54 | M: -673.589979097 | M: 4.376795 | yes | D: 0.4729589 | D: 63944 / D: 770792 | D: 1435057 | PASS: declared amino-acids family; formula/novelty exception |
+| tyrosine (tyrosine) | C9H11NO3; 0 | BIO | amino-acids | optimised here, U experiment [G72](#geometry-g72) | C1/C1 | D: 76 / D: 269 | 48 | M: -618.288308810 | M: 6.924906 | yes | D: 0.5127225 | D: 49424 / D: 585192 | D: 634082 | PASS: declared amino-acids family; formula/novelty exception |
+| valine (valine) | C5H11NO2; 0 | BIO | amino-acids | optimised here, U experiment [G73](#geometry-g73) | C1/C1 | D: 51 / D: 174 | 32 | M: -394.858534026 | M: 1.070822 | yes | D: 0.6067722 | D: 23624 / D: 246992 | D: 63400 | PASS: declared amino-acids family; formula/novelty exception |
+| adenine (adenine) | C5H5N5; 0 | BIO | nucleobases | reference copied, U experiment [G74](#geometry-g74) | C1/C1 | D: 55 / D: 200 | 35 | M: -458.612789948 | M: 0.990702 | yes | D: 0.4622670 | D: 27080 / D: 325200 | D: 96047 | PASS: declared nucleobases family; formula/novelty exception |
+| guanine (guanine) | C5H5N5O; 0 | BIO | nucleobases | optimised here, U experiment [G75](#geometry-g75) | C1/C1 | D: 60 / D: 219 | 39 | M: -532.466688667 | M: 2.385181 | yes | D: 0.4655336 | D: 31760 / D: 389192 | D: 153792 | PASS: declared nucleobases family; formula/novelty exception |
+| cytosine (cytosine) | C4H5N3O; 0 | BIO | nucleobases | optimised here, U experiment [G76](#geometry-g76) | C1/C1 | D: 45 / D: 162 | 29 | M: -387.549253585 | M: 3.165351 | yes | D: 0.4685445 | D: 18920 / D: 214544 | D: 30204 | PASS: declared nucleobases family; formula/novelty exception |
+| thymine (thymine) | C5H6N2O2; 0 | BIO | nucleobases | reference copied, U experiment [G77](#geometry-g77) | C1/C1 | D: 51 / D: 183 | 33 | M: -445.659504822 | M: 0.837633 | yes | D: 0.4875981 | D: 23624 / D: 272840 | D: 60963 | PASS: declared nucleobases family; formula/novelty exception |
+| uracil (uracil) | C4H4N2O2; 0 | BIO | nucleobases | reference copied, U experiment [G78](#geometry-g78) | Cs/Cs | D: 44 / D: 160 | 29 | M: -407.074860235 | M: 0.497278 | yes | D: 0.4944700 | D: 18192 / D: 209360 | D: 25803 | PASS: declared nucleobases family; formula/novelty exception |
+| glycylglycine (Gly-Gly) | C4H8N2O3; 0 | BIO | — | optimised here, U experiment [G79](#geometry-g79) | C1/C1 | D: 53 / D: 187 | 35 | M: -483.252592461 | M: 0.923871 | yes | D: 0.5954689 | D: 25320 / D: 284744 | D: 73575 | FAIL: duplicate formula with charge C4H8N2O3 |
+| N-methylacetamide (N-methylacetamide) | C3H7NO; 0 | BIO | — | reference copied, U experiment [G80](#geometry-g80) | C1/C1 | D: 32 / D: 109 | 20 | M: -243.852738749 | M: 0.260276 | yes | D: 0.6191267 | D: 10704 / D: 98792 | D: 4801 | PASS: new motifs peptide bond |
+| imidazole (imidazole) | C3H4N2; 0 | BIO | — | optimised here, U experiment [G81](#geometry-g81) | C1/C1 | D: 29 / D: 103 | 18 | M: -221.987994939 | M: 1.241086 | yes | D: 0.5772233 | D: 9192 / D: 88520 | D: 2876 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| indole (indole) | C8H7N; 0 | BIO | — | reference copied, U experiment [G82](#geometry-g82) | Cs/Cs | D: 52 / D: 185 | 31 | M: -357.028444784 | M: 0.783091 | yes | D: 0.4611480 | D: 24464 / D: 278760 | D: 74594 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| phosphoric acid (phosphoric-acid) | H3O4P; 0 | BIO | — | optimised here, U experiment [G83](#geometry-g83) | C1/C1 | D: 32 / D: 105 | 25 | M: -633.913901134 | M: 0.187557 | yes | D: 0.6700291 | D: 10704 / D: 91880 | D: 3254 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| ribose (ribofuranose conformer) (ribose) | C5H10O5; 0 | BIO | — | optimised here, U experiment [G84](#geometry-g84) | C1/C1 | D: 60 / D: 210 | 40 | M: -562.074022608 | M: 1.214216 | yes | D: 0.8007969 | D: 31760 / D: 358160 | D: 147460 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| cubane (cubane) | C8H8; 0 | LATTICE | — | optimised here, U experiment [G85](#geometry-g85) | D4h/D2h | D: 48 / D: 168 | 28 | M: -303.781399980 | M: 0.517199 | yes | D: 0.8180484 | D: 21200 / D: 230480 | D: 47995 | PASS: new measured point group D4h; new motifs cage,ring:4 |
+| neopentane (neopentane) | C5H12; 0 | LATTICE | — | reference copied, U experiment [G86](#geometry-g86) | C1/C1 | D: 37 / D: 119 | 21 | M: -194.044845210 | M: 0.361612 | yes | D: 1.0140299 | D: 13544 / D: 117192 | D: 11293 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| naphthalene (naphthalene) | C10H8; 0 | LATTICE | — | optimised here, U experiment [G87](#geometry-g87) | C1/C1 | D: 58 / D: 206 | 34 | M: -378.686849501 | M: 0.939424 | yes | D: 0.4505247 | D: 29840 / D: 344784 | D: 141739 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| neopentasilane (Si5H12) | H12Si5; 0 | LATTICE | — | optimised here, U experiment [G88](#geometry-g88) | C1/C1 | D: 57 / D: 139 | 41 | M: -1435.085620950 | M: 0.671829 | yes | D: 0.7076895 | D: 28904 / D: 158792 | D: 93076 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| adamantane (adamantane) | C10H16; 0 | ORGANIC | — | optimised here, U experiment [G89](#geometry-g89) | Td/D2 | D: 66 / D: 222 | 38 | M: -383.515360714 | M: 2.255331 | yes | D: 0.9232869 | D: 37904 / D: 399824 | D: 303948 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| caffeine (caffeine) | C8H10N4O2; 0 | BIO | — | optimised here, U experiment [G90](#geometry-g90) | C1/C1 | D: 80 / D: 286 | 51 | M: -667.736056048 | M: 3.591420 | yes | D: 0.4586373 | D: 54480 / D: 660944 | D: 845804 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| N,N-dimethyltryptamine (DMT) | C12H16N2; 0 | BIO | — | optimised here, U experiment [G91](#geometry-g91) | C1/C1 | D: 86 / D: 298 | 51 | M: -565.660364801 | M: 4.631044 | yes | D: 0.4725098 | D: 62544 / D: 717200 | D: 1405049 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| Li4H4 finite alternating cube (Li4H4) | H4Li4; 0 | LATTICE | — | optimised here, U experiment [G92](#geometry-g92) | Td/D2 | D: 24 / D: 84 | 8 | M: -31.656054664 | M: 0.190052 | yes | D: 0.4363706 | D: 6992 / D: 59792 | D: 1027 | PASS: new motifs cluster |
+| Li4F4 finite alternating cube (Li4F4) | F4Li4; 0 | LATTICE | — | optimised here, U experiment [G93](#geometry-g93) | Td/D2 | D: 40 / D: 152 | 24 | M: -422.171077696 | M: 0.231938 | yes | D: 0.5578494 | D: 15440 / D: 189264 | D: 16872 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| Mg4O4 finite alternating cube (Mg4O4) | Mg4O4; 0 | LATTICE | — | optimised here, U experiment [G94](#geometry-g94) | Td/D2 | D: 56 / D: 168 | 40 | M: -1084.139416543 | M: 0.815896 | yes | D: 0.4439725 | D: 27984 / D: 230480 | D: 85819 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| Na4Cl4 finite alternating cube (Na4Cl4) | Cl4Na4; 0 | LATTICE | — | optimised here, U experiment [G95](#geometry-g95) | Td/D2 | D: 72 / D: 184 | 56 | M: -2458.476288658 | M: 1.807891 | yes | D: 0.7699771 | D: 44624 / D: 275792 | D: 270804 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| disodium dichloride finite square (Na2Cl2) | Cl2Na2; 0 | LATTICE | — | optimised here, U experiment [G96](#geometry-g96) | D2h/D2h | D: 36 / D: 92 | 28 | M: -1229.174573934 | M: 0.259005 | yes | D: 0.7056733 | D: 12944 / D: 71184 | D: 6036 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| water hexamer ring (ice-hexamer) | H12O6; 0 | LATTICE | — | optimised here, U experiment [G97](#geometry-g97) | C6h/C2h | D: 42 / D: 138 | 30 | M: -449.887563495 | M: 0.297055 | yes | D: 0.8589799 | D: 16784 / D: 156560 | D: 17116 | PASS: new measured point group C6h |
+| water octamer cube (ice-cube) | H16O8; 0 | LATTICE | — | optimised here, U experiment [G98](#geometry-g98) | C1/C1 | D: 56 / D: 184 | 40 | M: -599.837528887 | M: 0.467937 | yes | D: 0.8125647 | D: 27984 / D: 275792 | D: 85615 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| titanium tetrachloride (TiCl4) | Cl4Ti; 0 | HEAVY | — | reference copied, U experiment [G99](#geometry-g99) | Td/D2 | D: 55 / U: unavailable | 45 | M: -2658.646680474 | M: 0.404963 | yes | D: 0.5849920 | D: 27080 / U: unavailable | D: 47076 | PASS: new elements Ti |
+| germanium tetrachloride (GeCl4) | Cl4Ge; 0 | HEAVY | — | optimised here, U experiment [G100](#geometry-g100) | Td/D2 | D: 55 / U: unavailable | 50 | M: -3870.833832410 | M: 0.690036 | yes | D: 0.5968629 | D: 27080 / U: unavailable | D: 23081 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| krypton difluoride (KrF2) | F2Kr; 0 | HEAVY | — | optimised here, U experiment [G101](#geometry-g101) | Dooh/D2h | D: 29 / U: unavailable | 27 | M: -2919.354524969 | M: 0.155531 | yes | D: 0.3551324 | D: 9192 / U: unavailable | D: 1228 | PASS: new elements Kr |
+| selenium dioxide (SeO2) | O2Se; 0 | HEAVY | — | optimised here, U experiment [G102](#geometry-g102) | C2v/C2v | D: 29 / U: unavailable | 25 | M: -2521.739283287 | M: 0.739015 | yes | D: 0.3501099 | D: 9192 / U: unavailable | D: 1565 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| potassium bromide (KBr) | BrK; 0 | HEAVY | — | optimised here, U experiment [G103](#geometry-g103) | Coov/C2v | D: 32 / U: unavailable | 27 | M: -3138.681094748 | M: 0.282360 | yes | D: 0.3343318 | D: 10704 / U: unavailable | D: 2631 | PASS: new elements K |
+| NiCO4 carbonyl representative (NiCO4) | C4NiO4; 0 | HEAVY | — | optimised here, U experiment [G104](#geometry-g104) | Td/D2 | D: 59 / U: unavailable | 42 | M: -1935.068619329 | M: 2.066118 | yes | D: 0.4791004 | D: 30792 / U: unavailable | D: 116738 | PASS: new elements Ni |
+| FeCO5 carbonyl representative (FeCO5) | C5FeO5; 0 | HEAVY | — | optimised here, U experiment [G105](#geometry-g105) | Cs/Cs | D: 69 / U: unavailable | 48 | M: -1805.005447808 | M: 3.239188 | yes | D: 0.3946220 | D: 41192 / U: unavailable | D: 303904 | PASS: new elements Fe |
+| CrCO6 carbonyl representative (CrCO6) | C6CrO6; 0 | HEAVY | — | optimised here, U experiment [G106](#geometry-g106) | Oh/D2h | D: 79 / U: unavailable | 54 | M: -1699.721928902 | M: 4.586534 | yes | D: 0.3739855 | D: 53192 / U: unavailable | D: 695121 | PASS: new elements Cr; new measured point group Oh |
+| ferrocene (eclipsed) (ferrocene) | C10H10Fe; 0 | HEAVY | — | optimised here, U experiment [G107](#geometry-g107) | D5h/C2v | D: 79 / U: unavailable | 48 | M: -1628.570501841 | M: 6.224549 | yes | D: 0.4905752 | D: 53192 / U: unavailable | D: 833409 | PASS: new measured point group D5h |
+| closo-dodecaborate dianion (B12H12--) | B12H12; -2 | ORGANIC | — | optimised here, U experiment [G108](#geometry-g108) | Ih/Ci | D: 72 / D: 252 | 37 | M: -299.506013435 | M: 4.703959 | yes | D: 0.6826978 | D: 44624 / D: 514064 | D: 527244 | PASS: new measured point group Ih |
+| dodecahedrane (C20H20) | C20H20; 0 | ORGANIC | — | optimised here, U experiment [G109](#geometry-g109) | Ih/Ci | D: 120 / D: 420 | 70 | M: -760.137971891 | M: 34.178950 | yes | D: 0.7978671 | D: 119120 / D: 1419920 | D: 10256026 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| buckminsterfullerene (equal-edge reference fixture) (C60) | C60; 0 | ORGANIC | — | D: Round 2 ideal fixture, U experiment [G110](#geometry-g110) | Ih/Ci | D: 300 / D: 1140 | 180 | M: -2244.018782477 | M: 804.868427 | yes | D: 0.2797763 | D: 726800 / D: 10417040 | D: 2389140354 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| HI conditional MODEL (HI) | HI; 0 | HEAVY | — | U: basis-blocked seed, not optimised [G111](#geometry-g111) | U: pinned basis absent | U: unavailable / U: unavailable | 27 | U: unavailable | U: unavailable | U: not attempted | U: unavailable | U: unavailable / U: unavailable | U: unavailable | PASS: new elements I |
+| CH3I conditional MODEL (CH3I) | CH3I; 0 | HEAVY | — | U: basis-blocked seed, not optimised [G112](#geometry-g112) | U: pinned basis absent | U: unavailable / U: unavailable | 31 | U: unavailable | U: unavailable | U: not attempted | U: unavailable | U: unavailable / U: unavailable | U: unavailable | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| XeF2 conditional MODEL (XeF2) | F2Xe; 0 | HEAVY | — | U: basis-blocked seed, not optimised [G113](#geometry-g113) | U: pinned basis absent | U: unavailable / U: unavailable | 36 | U: unavailable | U: unavailable | U: not attempted | U: unavailable | U: unavailable / U: unavailable | U: unavailable | PASS: new elements Xe |
+| XeF4 conditional MODEL (XeF4) | F4Xe; 0 | HEAVY | — | U: basis-blocked seed, not optimised [G114](#geometry-g114) | U: pinned basis absent | U: unavailable / U: unavailable | 45 | U: unavailable | U: unavailable | U: not attempted | U: unavailable | U: unavailable / U: unavailable | U: unavailable | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| I2 conditional MODEL (I2) | I2; 0 | HEAVY | — | U: basis-blocked seed, not optimised [G115](#geometry-g115) | U: pinned basis absent | U: unavailable / U: unavailable | 53 | U: unavailable | U: unavailable | U: not attempted | U: unavailable | U: unavailable / U: unavailable | U: unavailable | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| adenine-thymine base pair (A-T) | C10H11N7O2; 0 | BIO | — | reference copied, U experiment [G116](#geometry-g116) | C1/C1 | D: 106 / D: 383 | 68 | M: -904.297304619 | M: 20.868307 | yes | D: 0.4612682 | D: 93584 / D: 1181640 | D: 4410849 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+| guanine-cytosine base pair (G-C) | C9H10N8O2; 0 | BIO | — | optimised here, U experiment [G117](#geometry-g117) | C1/C1 | D: 105 / D: 381 | 68 | M: -920.037697121 | M: 14.120672 | yes | D: 0.4205506 | D: 91880 / D: 1169384 | D: 4108525 | FAIL: unique formula, but no new element, measured point group or fixed-list motif |
+
+M: the additional C60 CPU signed-field check compares D: **736 values** across D: **92 Bohr-space points** and D: **8 frontier orbitals**, using md.js contraction coefficients against PySCF GTOval_cart. M: maximum error **1.11e-16**; D: tolerance **1e-10**. See `c60-field-check.json` and `c60-pyscf-samples.json`. This is a CPU convention check; no GPU rendering was run.
+
+D: the brief's Gly-Gly sizing is corrected here to **53 STO-3G AOs**, from C4H8N2O3: D: 9 heavy atoms times D: 5 AOs, plus D: 8 hydrogen AOs. Its same-formula collision with asparagine is explicit in the gate; a peptide-bond motif cannot override duplicate formula outside the declared family allowance.
+
+### Independent checks
+
+M: the independent native-module audit passed all arithmetic, original-input preservation, AO-count, family-cardinality and literal gate replay checks. D: **117 rows** and D: **112 available pinned-basis counts** were checked. The broad expected-bond distance screen covers D: **26 built connectivity rows**; D: **0 rows** were flagged. Its thresholds are U: heuristics, and a pass does not certify chemical identity, stereochemistry or an experimental geometry.
+
+The G-C model remains U: Watson-Crick geometry and unconstrained minimum. The third donor-H-acceptor angle is D: **121.829 degrees**, calculated from its saved coordinates; the rigid-pair fit therefore does not establish a validated three-hydrogen-bond structure. Contact distances and angles are preserved in `geometry-audit.json`.
+
+### Gate decisions and budget distinctions
+
+**D: over live COST budget (50):** alanine, arginine, asparagine, aspartic-acid, cysteine, glutamine, glutamic-acid, histidine, isoleucine, leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine, adenine, guanine, cytosine, thymine, uracil, Gly-Gly, indole, ribose, cubane, neopentane, naphthalene, Si5H12, adamantane, caffeine, DMT, Li4F4, Mg4O4, Na4Cl4, ice-hexamer, ice-cube, TiCl4, GeCl4, NiCO4, FeCO5, CrCO6, ferrocene, B12H12--, C20H20, C60, A-T, G-C. This prediction includes response work, unlike the final RHF wall times. The old model is preserved; no lab files were edited.
+
+The gate is intentionally applied literally and globally. A unique formula by itself is insufficient. A repeated occurrence of a motif already admitted is insufficient. Leucine and isoleucine are retained by the declared family exception; asparagine and Gly-Gly share composition, so the latter fails the literal uniqueness test unless a later plan explicitly expands the family allowance. Li4F4 can be scientifically sound and useful while failing novelty after Li4H4 introduces the cluster motif. The same applies to familiar ring extensions. These are dry-run findings, not deletions or recommendations to silently widen the gate.
+
+**D: pass:** H2, LiH, HF, N2, CO, NaH, HCl, BeH2, BH3, CH4, NH3, H2O, MgH2, AlH3, SiH4, PH3, H2S, H2O2, C2H4, C2H6, CH3OH, C3H6, C4H4O, C5H5N, glycine, C6H6, CuH, ZnH2, GeH4, AsH3, H2Se, HBr, alanine, arginine, asparagine, aspartic-acid, cysteine, glutamine, glutamic-acid, histidine, isoleucine, leucine, lysine, methionine, phenylalanine, proline, serine, threonine, tryptophan, tyrosine, valine, adenine, guanine, cytosine, thymine, uracil, N-methylacetamide, cubane, Li4H4, ice-hexamer, TiCl4, KrF2, KBr, NiCO4, FeCO5, CrCO6, ferrocene, B12H12--, HI, XeF2.
+
+**D: fail:** F2, LiF, Cl2, NaCl, CO2, HCN, N2O, O3, SO2, BF3, CF4, C2H2, H2CO, HCOOH, CH3CN, C4H6, urea, NH4+, H3O+, OH-, CN-, Br2, Gly-Gly, imidazole, indole, phosphoric-acid, ribose, neopentane, naphthalene, Si5H12, adamantane, caffeine, DMT, Li4F4, Mg4O4, Na4Cl4, Na2Cl2, ice-cube, GeCl4, SeO2, C20H20, C60, CH3I, XeF4, I2, A-T, G-C.
+
+Budget categories are separate: the COST live cap requires records, the density AO cap determines renderer support, and byte counts size offline storage. No library-wide byte ceiling was specified by F5. A nominal fit in a density tier does not authorise a live solve; a gate pass does not override missing basis, nonconvergence, instability or unverified topology. `libraryReady` in the JSON is only a preliminary census screening flag; production scientific/schema/record validation is still pending S4a/S4b.
+
+### Geometry provenance and qualifications
+
+Present coordinates and their complete source strings are retained from `lab/molecules.js`, including its stated idealisations and the repository-optimised alane. The original sources are citations, not an assertion that their uncertainties or atom frames were experimentally reverified here. wwPDB ideal free-component coordinates include hydrogens and leaving atoms; these are computed references, not experimental gas-phase structures. Missing external coordinates were built from explicit connectivity and relaxed by PySCF RHF on the vendored decimals. Such rows retain the exact required label **optimised here, UNVERIFIED against experiment**; constrained relaxations state their symmetry restriction. No geometry is silently snapped to a higher point group.
+
+Additional computed reference coordinates come from the official [Psi4 S22 geometry database](https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py) (uracil, adenine, thymine, their reference hydrogen-bonded pair, and indole) and [Psi4 S66 geometry database](https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S66.py) (N-methylacetamide and neopentane). Their copied coordinates are preserved in `tools/library/benchmark-reference-geometries.json` and `tools/library/s66-reference-geometries.json`; `census.py` applies the explicit fragment overrides before solving. They are benchmark references, UNVERIFIED against experiment. Rounded/distorted reference coordinates can produce a lower detected point group than an idealised structure.
+
+[NIST CCCBDB experimental geometry index](https://cccbdb.nist.gov/expgeom1x.asp) documents its experimental geometry service. [TiCl4's NIST entry](https://cccbdb.nist.gov/exp2x.asp?casno=7550450) supplies the bond length used here. [wwPDB alanine reference](https://files.rcsb.org/ligands/view/ALA.cif) supplies ideal free-component coordinates. The raw fetched reference CIF text is preserved in `tools/library/reference-geometries.json`; failed fetches do not become sources. PubChem coordinate endpoints and several wwPDB/CCCBDB detail pages were inaccessible through the available read routes; shell networking also lacked DNS.
+
+#### Geometry G1
+
+**H2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(H–H) = 0.741 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G2
+
+**LiH** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Li–H) = 1.595 Å (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/LiH.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G3
+
+**HF** — M: provenance copied; experimental attribution U: CCCBDB experimental r(H–F) = 0.9168 Å (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HF.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G4
+
+**N2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(N≡N) = 1.09768 Å (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/N2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G5
+
+**CO** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C≡O) = 1.1283 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CO.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G6
+
+**F2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(F–F) = 1.4119 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/F2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G7
+
+**LiF** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Li–F) = 1.5639 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/LiF.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G8
+
+**NaH** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Na–H) = 1.8873 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/NaH.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G9
+
+**HCl** — M: provenance copied; experimental attribution U: CCCBDB experimental r(H–Cl) = 1.2746 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HCl.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G10
+
+**Cl2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Cl–Cl) = 1.9878 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Cl2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G11
+
+**NaCl** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Na–Cl) = 2.3609 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/NaCl.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G12
+
+**BeH2** — M: provenance copied; experimental attribution U: linear D∞h; r₀(Be–H) = 1.3264 Å from the gas-phase IR emission spectrum (Bernath, Shayesteh et al., 2002) — BeH₂ is a solid at room temperature and this is the free molecule; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/BeH2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G13
+
+**BH3** — M: provenance copied; experimental attribution U: planar D₃ₕ; r₀(B–H) = 1.190 Å from the ν₃ band of free BH₃ (Kawaguchi, 1992); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/BH3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G14
+
+**CH4** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–H) = 1.087 Å, T_d, d = r/√3 (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CH4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G15
+
+**NH3** — M: provenance copied; experimental attribution U: CCCBDB experimental r(N–H) = 1.0124 Å, ∠HNH = 106.67°, C₃ᵥ (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/NH3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G16
+
+**H2O** — M: provenance copied; experimental attribution U: CCCBDB experimental r(O–H) = 0.9578 Å, ∠HOH = 104.5° (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2O.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G17
+
+**MgH2** — M: provenance copied; experimental attribution U: linear D∞h; r₀(Mg–H) = 1.7031 Å from the gas-phase IR emission spectrum (Shayesteh, Appadoo, Gordon & Bernath, 2003); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/MgH2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G18
+
+**AlH3** — M: provenance copied; experimental attribution U: NOT A MEASUREMENT: monomeric AlH₃ has no determined gas-phase structure (Al₂H₆ is what has been observed). Planar D₃ₕ at r = 1.4769 Å, this repository's own RHF/STO-3G minimum on the vendored decimals (scanned by research/h2o-2026-09-11/scratch/fix-molecules.py). STO-3G shortens Al–H by ≈0.1 Å against correlated estimates; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/AlH3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G19
+
+**SiH4** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Si–H) = 1.4798 Å, T_d; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/SiH4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G20
+
+**PH3** — M: provenance copied; experimental attribution U: CCCBDB experimental r(P–H) = 1.420 Å, ∠HPH = 93.345°, C₃ᵥ; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/PH3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G21
+
+**H2S** — M: provenance copied; experimental attribution U: CCCBDB experimental r(S–H) = 1.3356 Å, ∠HSH = 92.12°; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2S.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G22
+
+**CO2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C=O) = 1.160 Å, linear D∞h; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CO2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G23
+
+**HCN** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–H) = 1.0655 Å, r(C≡N) = 1.1532 Å, linear; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HCN.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G24
+
+**N2O** — M: provenance copied; experimental attribution U: CCCBDB experimental r(N–N) = 1.1282 Å, r(N–O) = 1.1842 Å, linear N–N–O; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/N2O.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G25
+
+**O3** — M: provenance copied; experimental attribution U: CCCBDB experimental r(O–O) = 1.2717 Å, ∠OOO = 116.78°; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/O3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G26
+
+**SO2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(S=O) = 1.4308 Å, ∠OSO = 119.33°; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/SO2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G27
+
+**BF3** — M: provenance copied; experimental attribution U: CCCBDB experimental r(B–F) = 1.307 Å, planar D₃ₕ; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/BF3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G28
+
+**CF4** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–F) = 1.315 Å, T_d; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CF4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G29
+
+**H2O2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(O–O) = 1.4556 Å, r(O–H) = 0.967 Å, ∠OOH = 102.32°, HOOH dihedral 113.70°, C₂; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2O2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G30
+
+**C2H2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C≡C) = 1.2033 Å, r(C–H) = 1.0605 Å, linear D∞h; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C2H2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G31
+
+**C2H4** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C=C) = 1.339 Å, r(C–H) = 1.087 Å, ∠HCH = 117.4°, D₂ₕ (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C2H4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G32
+
+**C2H6** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–C) = 1.5351 Å, r(C–H) = 1.094 Å, ∠CCH = 111.17°, D₃d staggered; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C2H6.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G33
+
+**H2CO** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C=O) = 1.2078 Å, r(C–H) = 1.1161 Å, ∠HCH = 116.13°, C₂ᵥ; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2CO.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G34
+
+**CH3OH** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–O) = 1.4246 Å, r(O–H) = 0.9451 Å, r(C–H) = 1.0936 Å, ∠COH = 108.53°; the methyl group is placed IDEALLY TETRAHEDRAL about the C–O axis (∠OCH = 109.471°, staggered to O–H) rather than with the measured 106.7°/112.0° splitting — the idealisation is stated, not hidden; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CH3OH.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G35
+
+**HCOOH** — M: provenance copied; experimental attribution U: CCCBDB experimental (Z conformer) r(C=O) = 1.202 Å, r(C–O) = 1.343 Å, r(O–H) = 0.972 Å, r(C–H) = 1.097 Å, ∠OCO = 124.9°, ∠COH = 106.3°, ∠HC=O = 124.1°, planar Cs; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HCOOH.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G36
+
+**CH3CN** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C≡N) = 1.158 Å, r(C–C) = 1.458 Å, r(C–H) = 1.087 Å, ∠HCC = 109.5°, C₃ᵥ; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CH3CN.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G37
+
+**C3H6** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–C) = 1.503 Å, r(C–H) = 1.083 Å, ∠HCH = 115.1°, D₃ₕ; each CH₂ bisector is radial in the ring plane, which is exact by symmetry rather than an idealisation; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C3H6.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G38
+
+**C4H6** — M: provenance copied; experimental attribution U: gas electron diffraction (Kveseth, Seip & Stølevik, 1980) r(C1=C2) = 1.3410 Å, r(C2–C3) = 1.4632 Å, ∠CCC = 123.62°, trans C₂ₕ planar; every C–H is placed at the measured mean 1.090 Å with ∠CCH = 120.0° in the plane — the ED analysis's own ∠CCH lie within 1.5° of 120°, and the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C4H6.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G39
+
+**C4H4O** — M: provenance copied; experimental attribution U: microwave r_s structure (Mata, Martin & Sørensen, 1977) r(O–C₂) = 1.362 Å, r(C₂=C₃) = 1.361 Å, r(C₃–C₄) = 1.431 Å, ∠C₂OC₅ = 106.55°, ∠OC₂C₃ = 110.68°, ∠C₂C₃C₄ = 106.05°; hydrogens at the measured 1.075/1.077 Å along the external ring bisector — stated as an idealisation of the measured ∠C–C–H; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C4H4O.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G40
+
+**C5H5N** — M: provenance copied; experimental attribution U: microwave structure r(N–C₂) = 1.3402 Å, r(C₂–C₃) = 1.3945 Å, r(C₃–C₄) = 1.3944 Å, ∠C₂NC₆ = 116.94°, ∠NC₂C₃ = 123.80°, ∠C₂C₃C₄ = 118.53°, ∠C₃C₄C₅ = 118.40° (the six interior angles sum to 720.00°, so the ring closes); hydrogens at 1.0865/1.0826/1.0818 Å along the external ring bisector — stated as an idealisation; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C5H5N.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G41
+
+**urea** — M: provenance copied; experimental attribution U: microwave heavy-atom values (Godfrey, Brown & Hunter, 1997) r(C=O) = 1.221 Å, r(C–N) = 1.378 Å, ∠NCN = 114.7°; the free molecule is slightly pyramidal at N and this entry is the PLANAR C₂ᵥ idealisation with r(N–H) = 1.005 Å at ∠CNH = 120° — the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/urea.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G42
+
+**glycine** — M: provenance copied; experimental attribution U: gas electron diffraction of conformer I (Iijima, Tanaka & Onuma, 1991) r(C–C) = 1.526 Å, r(C–N) = 1.467 Å, r(C=O) = 1.205 Å, r(C–O) = 1.355 Å, ∠CCN = 112.1°, ∠CCO(=) = 125.1°, ∠CCO(–) = 111.6°, ∠COH = 112.3°; the CH₂ and NH₂ hydrogens are placed IDEALLY (∠HCH = 109.471°, ∠HNH = 107.0°, symmetric about the heavy-atom plane) at r(C–H) = 1.081 Å and r(N–H) = 1.001 Å — the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/glycine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G43
+
+**C6H6** — M: provenance copied; experimental attribution U: CCCBDB experimental r(C–C) = 1.39 Å, r(C–H) = 1.09 Å, D₆ₕ, hydrogens at radius 2.48 Å (the window's original preset, frozen) — THE CAP; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C6H6.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G44
+
+**NH4+** — M: provenance copied; experimental attribution U: r₀(N–H) = 1.021 Å, T_d, from the ν₃ infrared band of NH₄⁺ (Crofton & Oka, 1987); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/NH4+.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G45
+
+**H3O+** — M: provenance copied; experimental attribution U: r₀(O–H) = 0.9758 Å, ∠HOH = 111.3°, C₃ᵥ, from the infrared spectrum of H₃O⁺ (Sears, Bunker, Davies et al., 1985); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H3O+.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G46
+
+**OH-** — M: provenance copied; experimental attribution U: r₀(O–H) = 0.964 Å from the rotational/vibrational spectrum of OH⁻; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/OH-.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G47
+
+**CN-** — M: provenance copied; experimental attribution U: r₀(C–N) = 1.177 Å from the rotational spectrum of CN⁻ (Amano, 2005); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CN-.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G48
+
+**CuH** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Cu–H) = 1.4626 Å (X¹Σ⁺, a closed-shell singlet; the Cu ATOM is ²S and cannot be done here); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CuH.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Cu; no other basis was substituted.
+
+#### Geometry G49
+
+**ZnH2** — M: provenance copied; experimental attribution U: linear D∞h; r₀(Zn–H) = 1.5241 Å from the gas-phase IR emission spectrum (Shayesteh, Tereszchuk, Bernath & Colin, 2003); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/ZnH2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Zn; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": false, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G50
+
+**GeH4** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Ge–H) = 1.5251 Å, T_d; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/GeH4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Ge; no other basis was substituted.
+
+#### Geometry G51
+
+**AsH3** — M: provenance copied; experimental attribution U: CCCBDB experimental r(As–H) = 1.511 Å, ∠HAsH = 92.1°, C₃ᵥ; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/AsH3.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks As; no other basis was substituted.
+
+#### Geometry G52
+
+**H2Se** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Se–H) = 1.460 Å, ∠HSeH = 90.6°; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/H2Se.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Se; no other basis was substituted.
+
+#### Geometry G53
+
+**HBr** — M: provenance copied; experimental attribution U: CCCBDB experimental r(H–Br) = 1.4145 Å; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HBr.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Br; no other basis was substituted.
+
+#### Geometry G54
+
+**Br2** — M: provenance copied; experimental attribution U: CCCBDB experimental r(Br–Br) = 2.2811 Å — 38 Cartesian AOs, the widest entry, and still cheaper than benzene because Br has only 8 shells; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Br2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Br; no other basis was substituted.
+
+#### Geometry G55
+
+**alanine** — M: provenance copied; experimental attribution U: wwPDB Chemical Component Dictionary ALA ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ALA.cif; computed reference, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/alanine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G56
+
+**arginine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCNC(=N)N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; downloaded wwPDB reference had cationic protonation; neutral census connectivity built here instead; optimisation convergence UNVERIFIED (see optimisation diagnostics); current refinement supersedes the preceding incomplete optimisation attempt
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/arginine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 550.554158; M: objective evaluations = 37; M: maximum reported gradient = 7.734012017523995e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G57
+
+**asparagine** — M: provenance copied; experimental attribution U: wwPDB Chemical Component Dictionary ASN ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ASN.cif; computed reference, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/asparagine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G58
+
+**aspartic-acid** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CC(=O)O)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/aspartic-acid.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 810.602840; M: objective evaluations = 181; M: maximum reported gradient = 8.365611134664164e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G59
+
+**cysteine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CS)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/cysteine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 302.180984; M: objective evaluations = 106; M: maximum reported gradient = 7.186445381890394e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G60
+
+**glutamine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCC(=O)N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/glutamine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 1368.836090; M: objective evaluations = 157; M: maximum reported gradient = 9.744371410536079e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G61
+
+**glutamic-acid** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCC(=O)O)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/glutamic-acid.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 3112.348198; M: objective evaluations = 225; M: maximum reported gradient = 8.825370563148027e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G62
+
+**histidine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](Cc1cnc[nH]1)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/histidine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 2264.177702; M: objective evaluations = 167; M: maximum reported gradient = 9.042111996571123e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G63
+
+**isoleucine** — M: provenance copied; experimental attribution U: wwPDB Chemical Component Dictionary ILE ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ILE.cif; computed reference, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/isoleucine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G64
+
+**leucine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity CC(C)C[C@H](N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible; optimisation FAILED, best visited geometry only, UNVERIFIED; current refinement supersedes the preceding incomplete optimisation attempt
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/leucine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 502.354581; M: objective evaluations = 42; M: maximum reported gradient = 9.304601013687686e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G65
+
+**lysine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCCN)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; downloaded wwPDB reference had cationic protonation; neutral census connectivity built here instead
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/lysine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 2607.182510; M: objective evaluations = 126; M: maximum reported gradient = 5.9035301118282035e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G66
+
+**methionine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCSC)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/methionine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 3379.869660; M: objective evaluations = 223; M: maximum reported gradient = 7.597538759673839e-05. CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G67
+
+**phenylalanine** — M: provenance copied; experimental attribution U: wwPDB Chemical Component Dictionary PHE ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/PHE.cif; computed reference, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/phenylalanine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G68
+
+**proline** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity O=C(O)[C@@H]1CCCN1; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/proline.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 253.115923; M: objective evaluations = 48; M: maximum reported gradient = 6.759136652823017e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G69
+
+**serine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CO)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/serine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 162.277442; M: objective evaluations = 39; M: maximum reported gradient = 7.531018373363452e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G70
+
+**threonine** — M: provenance copied; experimental attribution U: wwPDB Chemical Component Dictionary THR ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/THR.cif; computed reference, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/threonine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G71
+
+**tryptophan** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](Cc1c[nH]c2ccccc12)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/tryptophan.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 3586.167809; M: objective evaluations = 137; M: maximum reported gradient = 9.732007965013167e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G72
+
+**tyrosine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](Cc1ccc(O)cc1)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/tyrosine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 2053.950988; M: objective evaluations = 92; M: maximum reported gradient = 8.765479239158935e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G73
+
+**valine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built from checked neutral connectivity CC(C)[C@H](N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/valine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 1088.073098; M: objective evaluations = 170; M: maximum reported gradient = 3.941539170904118e-05. Optimization terminated successfully.; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G74
+
+**adenine** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; adenine-thymine; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/adenine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G75
+
+**guanine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; neutral canonical tautomer connectivity Nc1nc2[nH]cnc2c(=O)[nH]1; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/guanine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 585.381582; M: objective evaluations = 38; M: maximum reported gradient = 4.663658475356769e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G76
+
+**cytosine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; neutral canonical tautomer connectivity Nc1cc[nH]c(=O)n1; coordinate downloads inaccessible
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/cytosine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 168.019394; M: objective evaluations = 24; M: maximum reported gradient = 6.022970326036159e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G77
+
+**thymine** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; adenine-thymine; published computed benchmark reference; fragment(s) [1]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/thymine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G78
+
+**uracil** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; uracil; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/uracil.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G79
+
+**Gly-Gly** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity NCC(=O)NCC(=O)O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Gly-Gly.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 653.755021; M: objective evaluations = 112; M: maximum reported gradient = 8.067438273684502e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G80
+
+**N-methylacetamide** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S66.py; N-methylacetamide monomer from S66 dimer; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/N-methylacetamide.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G81
+
+**imidazole** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity c1ncc[nH]1; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/imidazole.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 15.114400; M: objective evaluations = 15; M: maximum reported gradient = 6.018991834721987e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G82
+
+**indole** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; indole-benzene; published computed benchmark reference; fragment(s) [1]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/indole.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G83
+
+**phosphoric-acid** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity OP(=O)(O)O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/phosphoric-acid.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 6.757695; M: objective evaluations = 7; M: maximum reported gradient = 5.20083321555731e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G84
+
+**ribose** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity OCC1OC(O)C(O)C1O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified; optimisation FAILED, best visited geometry only, UNVERIFIED; current refinement supersedes the preceding incomplete optimisation attempt
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/ribose.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 742.243554; M: objective evaluations = 76; M: maximum reported gradient = 7.65246750633608e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G85
+
+**cubane** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity C12C3C4C1C5C2C3C45; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/cubane.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 29.685069; M: objective evaluations = 5; M: maximum reported gradient = 9.514062403681578e-06. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G86
+
+**neopentane** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S66.py; neopentane monomer from S66 dimer; published computed benchmark reference; fragment(s) [0]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/neopentane.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G87
+
+**naphthalene** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity c1ccc2ccccc2c1; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/naphthalene.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 163.772351; M: objective evaluations = 21; M: maximum reported gradient = 6.782853679898615e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G88
+
+**Si5H12** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity Si[Si](Si)(Si)Si; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Si5H12.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 103.690455; M: objective evaluations = 17; M: maximum reported gradient = 9.680897269959132e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G89
+
+**adamantane** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity C1C2CC3CC1CC(C2)C3; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/adamantane.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 103.722278; M: objective evaluations = 5; M: maximum reported gradient = 2.832915807715608e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G90
+
+**caffeine** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity Cn1c(=O)c2c(ncn2C)n(C)c1=O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/caffeine.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 2438.783945; M: objective evaluations = 97; M: maximum reported gradient = 8.328301192239707e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G91
+
+**DMT** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built connectivity CN(C)CCc1c[nH]c2ccccc12; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/DMT.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 3494.385562; M: objective evaluations = 120; M: maximum reported gradient = 8.38644043694714e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G92
+
+**Li4H4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Li4H4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 0.582196; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+#### Geometry G93
+
+**Li4F4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Li4F4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 1.171423; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+#### Geometry G94
+
+**Mg4O4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Mg4O4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 5.921490; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+#### Geometry G95
+
+**Na4Cl4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; finite alternating cube; scalar edge-length RHF optimisation under Td symmetry
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Na4Cl4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 10.944078; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+#### Geometry G96
+
+**Na2Cl2** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; alternating square, RHF edge-length optimisation under D2h symmetry
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/Na2Cl2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 1.478692; M: objective evaluations = 11; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+#### Geometry G97
+
+**ice-hexamer** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built finite hydrogen-bonded hexamer ring; unconstrained RHF relaxation, topology must be reviewed
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/ice-hexamer.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 22.829579; M: objective evaluations = 11; M: maximum reported gradient = 2.3881520210267126e-06. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G98
+
+**ice-cube** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; built finite hydrogen-bonded octamer cube; unconstrained RHF relaxation, topology must be reviewed; optimisation convergence UNVERIFIED (see optimisation diagnostics); current refinement supersedes the preceding incomplete optimisation attempt
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/ice-cube.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 458.967084; M: objective evaluations = 115; M: maximum reported gradient = 9.182664925821982e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+#### Geometry G99
+
+**TiCl4** — M: provenance copied; experimental attribution U: NIST CCCBDB experimental Ti-Cl bond length, Td reconstruction; https://cccbdb.nist.gov/exp2x.asp?casno=7550450; DOI https://doi.org/10.1063/1.1727535
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/TiCl4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Ti; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": true, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G100
+
+**GeCl4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; tetrahedral RHF bond-length optimisation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/GeCl4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 3.929519; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+U: 6-31+G* count unavailable because the installed requested table lacks Ge; no other basis was substituted.
+
+#### Geometry G101
+
+**KrF2** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; linear RHF bond-length optimisation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/KrF2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 0.605091; M: objective evaluations = 11; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+U: 6-31+G* count unavailable because the installed requested table lacks Kr; no other basis was substituted.
+
+#### Geometry G102
+
+**SeO2** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; bent RHF optimisation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/SeO2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 5.539387; M: objective evaluations = 5; M: maximum reported gradient = 3.1029468186005715e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+U: 6-31+G* count unavailable because the installed requested table lacks Se; no other basis was substituted.
+
+#### Geometry G103
+
+**KBr** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; diatomic RHF optimisation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/KBr.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 0.881565; M: objective evaluations = 10; M: maximum reported gradient = None. constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof
+
+U: 6-31+G* count unavailable because the installed requested table lacks Br; no other basis was substituted.
+
+#### Geometry G104
+
+**NiCO4** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; class representative built here; unconstrained Cartesian RHF optimisation from the initial ideal symmetry; final detected group reported
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/NiCO4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 93.802777; M: objective evaluations = 8; M: maximum reported gradient = 1.0185102079063313e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+U: 6-31+G* count unavailable because the installed requested table lacks Ni; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": false, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G105
+
+**FeCO5** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; class representative built here; unconstrained Cartesian RHF optimisation from the initial ideal symmetry; final detected group reported
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/FeCO5.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 182.905807; M: objective evaluations = 11; M: maximum reported gradient = 6.594446179519764e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+U: 6-31+G* count unavailable because the installed requested table lacks Fe; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": true, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G106
+
+**CrCO6** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; class representative built here; unconstrained Cartesian RHF optimisation from the initial ideal symmetry; final detected group reported
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CrCO6.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 127.318060; M: objective evaluations = 6; M: maximum reported gradient = 2.3536729607087636e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+U: 6-31+G* count unavailable because the installed requested table lacks Cr; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": false, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G107
+
+**ferrocene** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; eclipsed D5h built sandwich, RHF optimisation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/ferrocene.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 225.388971; M: objective evaluations = 8; M: maximum reported gradient = 1.8006927081870572e-05. Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison
+
+U: 6-31+G* count unavailable because the installed requested table lacks Fe; no other basis was substituted.
+
+Stability: {"status": "MEASURED", "internalStable": true, "externalStable": true, "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"}
+
+#### Geometry G108
+
+**B12H12--** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; ideal icosahedral borane cage built here; RHF relaxation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/B12H12--.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 198.032894; M: objective evaluations = 8; M: maximum reported gradient = None. Ih-constrained cage radius and radial X-H distance optimisation; experimental geometry and unconstrained minimum UNVERIFIED
+
+#### Geometry G109
+
+**C20H20** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; ideal dodecahedral carbon cage built here; RHF relaxation
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C20H20.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 1317.826752; M: objective evaluations = 8; M: maximum reported gradient = None. Ih-constrained cage radius and radial X-H distance optimisation; experimental geometry and unconstrained minimum UNVERIFIED
+
+#### Geometry G110
+
+**C60** — M: provenance copied; experimental attribution U: Round 2 reference geometry: tools/symmetry/round2-sol-exact.py and research/release-0.4.0/measure/round2-sol-exact.json; ideal truncated icosahedron, equal C-C edges; DERIVED, UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/C60.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G111
+
+**HI** — M: provenance copied; experimental attribution U: UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/HI.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks I; no other basis was substituted.
+
+#### Geometry G112
+
+**CH3I** — M: provenance copied; experimental attribution U: UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/CH3I.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks I; no other basis was substituted.
+
+#### Geometry G113
+
+**XeF2** — M: provenance copied; experimental attribution U: UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/XeF2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Xe; no other basis was substituted.
+
+#### Geometry G114
+
+**XeF4** — M: provenance copied; experimental attribution U: UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/XeF4.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks Xe; no other basis was substituted.
+
+#### Geometry G115
+
+**I2** — M: provenance copied; experimental attribution U: UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/I2.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+U: 6-31+G* count unavailable because the installed requested table lacks I; no other basis was substituted.
+
+#### Geometry G116
+
+**A-T** — M: provenance copied; experimental attribution U: https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; adenine-thymine; published computed benchmark reference; fragment(s) [0, 1]; UNVERIFIED against experiment
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/A-T.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+#### Geometry G117
+
+**G-C** — M: provenance copied; experimental attribution U: optimised here, UNVERIFIED against experiment; assembled neutral monomers, intermolecular RHF relaxation; Watson-Crick hydrogen-bond topology UNVERIFIED; Watson-Crick donor/acceptor triple aligned, rigid-monomer constrained separation optimisation, fixed orientation; Watson-Crick donor/acceptor triple aligned, rigid-monomer constrained separation optimisation, fixed orientation; orientation refined from ring-plane frames
+
+Authoritative final coordinates and charge are in `census.json`. Raw attempts are checkpointed in `rows/G-C.json`; explicit `-refined`/`-geometry-refined` files preserve subsequent attempts without erasing earlier observations.
+
+M: optimiser converged = True; M: wall seconds = 119.904233; M: objective evaluations = 17; M: maximum reported gradient = None. rigid separately relaxed G/C monomers; donor/acceptor triple G(O6,N1,N2)-C(N4,N3,O2) Kabsch aligned, fixed orientation, constrained contact-separation optimisation; hydrogen-bond angles, Watson-Crick topology and unconstrained minimum UNVERIFIED; refined orientation from complete heavy-atom ring planes, outward base edges facing each other
+
+### Reproduction and limits
+
+In a fresh checkout/destination, run the following tools in order: `node tools/library/app-probe.mjs --inventory`; `~/bin/scipython -I tools/library/prepare.py`; `~/bin/scipython tools/library/bse-coverage.py`; `~/bin/scipython -I tools/library/bse-coverage.py`; `~/bin/scipython -I tools/library/frontier.py`; `~/bin/scipython -I tools/library/census.py --precondition`; `node tools/library/app-probe.mjs --rows`; `~/bin/scipython -I tools/library/field-check.py`; `node tools/library/validate.mjs`; `node tools/library/audit.mjs`; `~/bin/scipython -I tools/library/geometry-audit.py`; `~/bin/scipython -I tools/library/report.py`. Census rows are restartable checkpoints; outputs refuse overwriting. This census used Cartesian L-BFGS-B, BFGS and bond-angle-preconditioned BFGS; the saved geometry diagnostics identify the method where recorded. Scalar/cage/pair constraints are explicit. Final coordinates in `census.json` are the exact energy inputs; a fresh relaxation may find a different conformer, and wall times are not reproducible byte-for-byte. For reconstruction, `C_app = R * P * C_pyscf`, where P permutes AO rows into atom/stable-l/component order and R is md.js Cartesian normalisation. The C60 record stores explicit permutation and scale arrays and the full water proof. No alternate app solver, basis vendoring, installed record, browser, server, commit, push or tag is part of this census.
+
+U: these data do not certify C60 experimental geometry, an unconstrained RHF minimum for constrained clusters/cages, absolute stereochemistry of handmade amino-acid conformers, canonical gauges within C60's degenerate sets, Watson-Crick geometry of the assembled G-C model, response/spectrum payloads, record-open latency or GPU/iPad reconstruction. A-T uses the cited published reference pair. The generated tables report the actual final geometry's detected group and the optimiser's status. File status is DRAFT until the later production schema and validation land.
+
+
+
+---
+
+## <a id="doc-112"></a>DOC 112 · release-0.4.0/PLAN.md · 2026-10-08
+
+## λWAVES 0.4.0-alpha · THE FLAGSHIP — PLAN DRAFT 3 (Fable, 2026-10-07)
+
+> **New here? Read `research/release-0.4.0/HANDOFF.md` first** — the baton from Claude Yan, the Major Agent of the
+> previous Major Session: where everything is, the state of each stage, the laws, and what happens next.
+
+The third layer of the nacre: Fable's pre-draft → Sonnet's review → draft 1 → Opus's audit and edit → draft 2 → Sonnet's
+junior pass → this. The record is beside it: `NACRE.md` (Josh's ask verbatim, the laws), `survey/*` (the ground truth),
+`REVIEW-SONNET-0.md`, `AUDIT-OPUS-1.md`, `REVIEW-SONNET-2.md`. Numbers are the surveys' or the audits', each checked in
+code; `[mine]` marks Fable's own. Nothing is built.
+
+### 1 · THE GOAL
+
+**Josh's words.** A pre-refactor for MIR 1.5 that makes λWAVES the flagship; the cache treated as expansions with
+metadata, STEM information and LaTeX copy into the journal; true ladder names (`1a1, 1b2`) where the knob reads HOMO−1
+today; wave-indexed presolved orbitals toward dynamic waves with true electrostatics; diverse library sections (a
+vertical periodic table, heavy atoms, crystal lattices, biology, a bucky-ball milestone); engine upgrades for larger
+counts and heavier atoms, with a cyclotomic-scaling thread with Sol; the INFORMATIONAL as a live, cursor-aware markdown
+overlay with proper maths that announces changes and fades; GPU-recording optimisation; camera pan and the dot-matrix
+XY; the legacy windows audited and consolidated with power buttons and DISPLAY doing the resource work; CALCULUS as an
+overlay with a prose figure copied into a built-in journal; STATE audited; the dot matrix on every inlay.
+
+**Ours [mine].** 0.4.0 is **the engine-and-library release on today's MIR**: every orbital gets its textbook name,
+dozens of new molecules from the amino acids to ferrocene arrive as records, the periodic table returns as a window, the
+camera can sit off-centre, and the stage text is real maths. It also subtracts what the adoption should not have to
+carry, and it writes the briefs that MIR `1.5.0` must carry for λWAVES. **0.5.0 is the adoption and the full
+INFORMATIONAL** (springs, leader lines, pages, the pad, the film overlay): they need the kit's new shell and would be
+built twice on 1.4.3. **0.4.1 BUCKYBALL** finishes C₆₀. The ENGINE stays λWAVES'; every window and behaviour is the
+kit's; what λWAVES needs and the kit lacks becomes a brief; pages and records are content.
+
+**Flagship, operationally (R-F1).** BASINS has already adopted 1.5. "First" can only mean first of the three still on
+1.4.3, and Josh named λWAVES and NEBULA as next. So in 0.4.0 flagship means: λWAVES writes the briefs `1.5.0` must carry
+and runs the canary at the cut; in 0.5.0 its gates join the kit's release checklist beside BASINS'. "Prefer BASINS"
+stays the rule for what BASINS designed; λWAVES' design wins for what it originated (the modulation controller, the 3-D
+camera, the notebook, the history ring, the three scopes, the keyboard window) and for everything new in the briefs.
+
+### 2 · THE SHAPE: engine / kit / content
+
+| | λWAVES keeps (ENGINE) | The kit's, or λWAVES' brief to the kit | CONTENT |
+|---|---|---|---|
+| now | `field.js` with the cap-128 tier, the orbital-only path and the lens-shift ray; the register and the solvers; `electrostatics.js`, `period.js`; the palette's meaning; `badges.js`; `statelink.js` v1 (extended at its tails); `export3d.js`; `latex-state.js`; `names.js` (new); the digest lock; `sw.js` and the build offer (the kit has no offline layer; λWAVES keeps its own for good); the camera law | the adoption glue (modulation port, project parts, occlusion feed, one-clock facade, camera port; about 1–1.5k lines) is written at 0.5.0 | `.md` pages; the LIBRARY records with names, STEM fields, sources and a page inside; sections; demos (water, benzene, N₂); covers |
+| briefs, 0.4.0 → kit | — | **8** painted-surfaces provider (the adoption blocker) · **2** lens shift in the CAMERA panel · **3** `md()` window copy + TO NOTEBOOK + PIN FROM WINDOW · **4** the `cells` grid control · **5** `createLattice` exported · **6** overlay in the film · **7** `addLabel({ttl})`, `setCheap`, `html[data-take]` · **9′** STATUS TAGS never hides `[data-mir-offer]` · **13** the INFORMATIONAL window · live-bound math labels · **P** the paint gesture · **J** `jetblack` + `flat` for the big four · **1** the 3-D camera law as a gift | — |
+
+### 3 · THE BASELINE (0.4.0, in order)
+
+**B0 · TAKE-IN, then subtract, then cut 0.3.3.** The live site serves Cloud's main: the version line still reads
+0.3.2-alpha and the served rack carries the stage formula, so unreviewed work, the forged MIR manifest included, is what
+users run, and 0.3.3's exports are not live.
+- Merge PR #1, then PR #2 (one textual conflict, the generated `sw.js`; regenerate).
+- One subtraction commit:
+  - **Jet Black stays live and the manifest becomes true.** Cloud's direct `lab/mir` edit and the forged
+    `MIR-MANIFEST.json` go; the preset returns by R-A3's route — a real MIR 1.4.4 on the `mir-1.4.x` branch (the MIR
+    session's work) or, because the palette's meaning is the engine's, one app-side catalogue row appended at runtime
+    from `lab/` until 1.5 carries it. S0 does not wait on the MIR session.
+  - **Under a molecular owner, EDIT › COPY copies the molecule's page** instead of greying out — the journal copy Josh
+    asked for, on an existing road. The page is a pure function of `{library row, ground, names}` in `names.js`, built
+    at copy time for every molecule, old and new; the generator only snapshots it into records.
+  - **`.mol-more` opens by default on desktop**, folded on phone and tablet, and the card's `Aa` stays visible even with
+    HELP off (today LEAN hides the controls and HELP hides the button that reveals them, so KICK / RUN / TDA / the RPA
+    spectra, which the README sells, are unreachable on a first run).
+  - SPECTRUM's orphaned buttons: ATOM opens ATOMS again (F3); QUARKONIUM is hidden while QCD stays hidden.
+  - CLAUDE.md: the false MIR line and the stray sentence go; the first-run law is stated once (Cloud's left rack
+    supersedes "MOLECULES start off the rack").
+  - A REPORT wave for what was kept: the paint gesture's behaviour, MO-REGISTRY "standing by", the first-run left rack,
+    `docs/LEGACY-WINDOWS.md`, the wrangler bump.
+- The audit's cheap bugs, one commit, each with a test: CALCULUS's ⧉ (`DIGESTS.calculus` reads `calculus.last`, the
+  field the view returns); the badges and the canvas sentence on their own ≤ 10 Hz tick (today they tick only while
+  METERS is presentable); `hydroReader` learns `chem` (WIGNER and RADIATION compute hydrogenic physics under a molecule).
+- **Wire, don't re-date.** `index.html` loads KaTeX and marked from `lab/mir/shell/vendor/`; the byte-identical
+  `lab/vendor/katex` and `marked*` are deleted — about 650 KB less on every deploy. Two expiring allowlist entries close
+  by wiring; the other five are renewed once with REPORT saying who consumes them (the 0.5.0 adoption). The two node
+  tests that `createRequire` the vendor KaTeX (`tests/latex-state.test.mjs`, `tests/notebook-math.test.mjs`) get a
+  small `vm` loader, because the kit's copy has no CommonJS `package.json` and may not get one.
+- The reported "Space does not play both clocks in LINKED mode at project open": reproduced and fixed in place; the
+  clocks become one at 0.5.0.
+- **Close the process hole.** One CLAUDE.md line: "Cloud: PRs only, never `lab/mir`; a kit need is a MIR issue or a line
+  in the PR." `tests/mir-manifest.test.mjs` pins the sha-256 of `MIR-MANIFEST.json` per accepted MIR version (1.4.3
+  today), so a forged version fails everywhere, the cloud included, and a real adoption is a visible two-file edit.
+- **Three one-line measurements**, here because they size later stages: the adapter's `maxComputeWorkgroupStorageSize`
+  on the 3070 (Firefox, Chromium) and the M5; a like-for-like re-time of the benzene worker path, ground + spectrum, in
+  node and in the browser (the 1.0 s probe timed the ground solve only; the cost model also covers the response, so
+  "stale" is unmeasured); **one 300-AO orbital-only dispatch** with synthetic coefficients (F5's road to C₆₀).
+- **Three demos as content** (`lab/demos/`): water, benzene, N₂ — so a new visitor meets the names in the first minute.
+- Then **cut 0.3.3** from this tree (R-A1): the exports plus Cloud's kept work, the live site made honest. The release
+  road is the verifier case; `frame-occlusion` runs (Cloud's first run moved four windows onto the left rack).
+
+**B0.5 · THE CANARY.** A throwaway worktree, `canary-1.5`, never merged, takes a REAL `tools/adopt.mjs <canary> --line
+1.5` from the pin (a dry run writes nothing), boots, and logs one row in `docs/MIR-1.5-CANARY.md`: red suites
+(`bash test.sh node`, then `frame-occlusion`, `history`, `new-project`), the stylehash delta (README recipe, `--gpu 1`),
+the precache bytes after `pwa.test.mjs --write`. It runs twice — now, on alpha.23, and at the `1.5.0` cut — not on every
+alpha (the pin moved under the survey; BASINS' eleven re-adopts are the churn to avoid). Its red rows decide which
+seams enter 0.4.0 and turn 0.5.0's adoption into a diff of known deltas.
+
+**B1 · THE SEAMS, cut to one.** `cameraEye(obs, half) → {eye, target, basis, shift}`: one projection helper for the nine
+copies (`field.js` `writeView`, `fieldview`, `keplerview`, `particles`, `vortex` and its cache key, `export3d`,
+`pointerRay`, `unproject`, Cloud's atom labels). It is a deletion and the precondition for the shift and the labels;
+`cameraKey` gains the shift so cached 2-D overlays redraw. The stage text keys on the string it would render — one
+compare per tick, no new register event. The other seams (settings adapter, project parts, modulation port, one-clock
+facade, occlusion providers, camera port, tests by hook) enter 0.4.0 only where a canary row names their block as a
+blocker; otherwise the adoption writes them as glue. Measure `lab/*.js` total lines (34,721 today), not `rack.js` alone.
+The 208-value lock runs on frame-path commits, the 1004-value lock once at the end, and a red result is re-run alone
+before it is believed (the RTX 3070 one-ulp fault).
+
+**B2 · LIBRARY, the fourth storage class, and the data cache.**
+- **The scope.** Installed records are device content, content-addressed, never in a project, link or history row. A
+  project holds `{id, hash, nameKey}`: PROJECT, with one history row per change of molecule.
+- **Where records live.** `lab/library/<sha>.json` plus the section manifests: deployed, NOT precached. `sw.js` routes
+  `library/` cache-first into `lw-data-v1`; the names are content hashes, so a new build never clears it.
+  `tests/pwa.test.mjs` exempts exactly `library/**` and asserts every manifest row's file exists with its hash.
+- **The record path.** A worker op `chem.open(record)` fills the solve cache from the record and replies with
+  `ensureSolve`'s own `ground` shape, so no window downstream changes. Each record states `caps {orbitals, states, rpa,
+  tdhf}`: ORBITAL needs ε and C; STATES needs the stored CIS states; RPA sticks are stored; TDHF needs the live ERI and
+  past the cap is refused with a sentence. A project or link that names an uninstalled record fetches it on open, with
+  progress and failure said in the row; offline, the open restores the rest and names the part that refused.
+- **The iPad law.** `navigator.storage.persist()` is asked on the user's first INSTALL press, never at boot (Firefox
+  prompts); the quota and the persisted answer are shown; an evicted record degrades to "not installed", never a broken
+  preset. In a Safari tab (seven-day cap on script-writable storage) KEEP ON THIS DEVICE is offered only if the M5
+  measurement shows persist is granted there; a Home-Screen install is the honest advice for a prepared class.
+- **The benzene-cap law** (`molecules.js:25–27`). A record past the live cap opens only from its record; absent, its row
+  says DOWNLOAD, not DISABLED; a basis or charge change on it is refused with a sentence, not a solve. **Gate on the
+  re-time:** if B0's number puts ground solves up to 64 AO under a few seconds on the M5, records accelerate rather than
+  gate, and sixteen amino acids need no download.
+- **The schema** is versioned (`schema: 1`) and readers ignore unknown members, so the wave index's `Q_LM` and a grid
+  handle can arrive later without a bump.
+- **The generator is the app.** `tools/orbital-library.mjs --check` is byte-exact (the `new-project.mjs` pattern) and
+  enforces a mechanical **diversity gate with a FAMILY allowance**: an entry passes if its formula is unique AND it adds
+  a new element, a new point group, or a tag from a fixed motif list (ring size, peptide bond, d-block, cluster, cage,
+  nucleobase) — OR it belongs to a declared family (the amino acids, the nucleobases) whose completeness Josh asked for.
+  Leu and Ile share a formula; the family keeps both and the record says so.
+- **The expansion seat** is each section's header row in MOLECULES: name, record count, bytes, an installed lamp,
+  INSTALL / REMOVE. No new tab.
+- `docs/STATE-SCOPES.md` gains the row.
+
+**B3 · The frame-path budget, with numbers as acceptance.** Nothing new on the frame path. Names in the worker inside
+`ensureSolve` (≤ 10 ms, benzene); the library fetch in idle; the stage text re-renders only when its string changes,
+never carries a live coefficient, runs KaTeX at most four times a second, and announces only on hand presses (never on
+restore, undo, project open or a modulated preset, or Ctrl+Z replays banners); the atom labels write only when
+`cameraKey`, the shift, the preset or the size changes; a lens shift is TIER.PRESENT only; every reader stays
+`may()`-gated and idle when its window is off, folded, closed, hidden or offscreen. **Big records:** the density
+contraction grows as nAO² — about 16 ms at 87 AO and 31 ms at 120 AO at 96³ on the 3070, scaled from benzene's measured
+2.80 ms; a static record costs one dispatch per change; a playing STATES register rides the existing governor's GRID
+step and the tablet ceiling, no new mechanism. **The frame-time protocol** is the existing device report
+(`tools/perf/device-report.js`, its 30 s scene) before and after, on the 3070 here; the M5 half is one command for Josh,
+recorded as "M5 pending" until he runs it — no stage hangs on it.
+
+### 4 · THE FEATURES (0.4.0)
+
+Each: what the reader does, where · kit or app · cost · what it must not do.
+
+**F1 · THE NAMES** (the probe named ten molecules from the live solver; every textbook configuration matched).
+- The ORBITAL knob and ladder in MO-REGISTRY read `1b₁ · HOMO`, `3a₁`, `1e₁g (a)`, `2σu`. Hovering a rung shows the
+  name, its frame, its `computed / derived / curated` tag, and for `(a) / (b)` the sentence "the two real combinations of
+  the degenerate pair". A degenerate HOMO is one HOMO (today its members read HOMO−2, HOMO−1, HOMO in CH₄, HF, CO₂,
+  C₆H₆). ⧉ copies `$1b_{1}$`; the GLB, the cube and the NPZ carry the names.
+- **Two forms of every name:** the plain form for dials and canvases (`3σg`, `1e1g`; a dial's text node takes no
+  markup and Unicode has no subscript g) and the typeset form for DOM and KaTeX (`3σ_g`, `$3\sigma_{g}$`).
+- The machinery: one service `lab/names.js` for atoms and molecules (the four formatters become one); declared groups
+  and frames in the library; d shells and the tables the library needs — the five remaining finite groups plus **O_h,
+  D₅d, D₅h and I_h** for the showpieces (cubane, Cr(CO)₆, ferrocene, B₁₂H₁₂²⁻, C₂₀H₂₀, C₆₀), so a showpiece is not the
+  one molecule without names; cluster tolerance 2e-10 Eh; the geometric tolerance stated; a names record all or nothing
+  (below tolerance a record shows indices throughout, never a mix); one PySCF cross-check in `tools/`.
+- **"True human information."** Per orbital the textbook LCAO name (derived for diatomics) and the character (core / σ /
+  π / lone pair); for the ten probed molecules the vertical ionisation energy beside Koopmans' −ε, tagged `curated`
+  with the honest gap, each value citing its primary measurement (CCCBDB is NIST SRD 101; the legal reading is checked
+  against `LEGAL-PROVENANCE` before a store build).
+- **The CORE fold.** The ladder folds the frozen-core levels into one `core ×n` row opened by a click; the count is per
+  element in the generator — He for Li–Ne, Ne for Na–Ar, Ar for K–Ca, **Ar for Sc–Zn (3d is valence)**, Ar + 3d¹⁰ for
+  Ga–Kr. Without it an 87-AO ladder is fifteen core lines and a heap.
+- **The teaching moment** becomes a demo and a page: N₂'s HOMO is `3σg` in STO-3G and `1πu` in 6-31+G*.
+· MO-REGISTRY, SPECTRUM, exports · engine/app · M · never asserts an ordering.
+
+**F2 · THE STAGE TEXT AND ITS FADE — the first taste of the INFORMATIONAL.**
+- Cloud's plain-text formula becomes markdown + KaTeX through the notebook's own renderer (marked and KaTeX are already
+  loaded), from `stateLatex` and a one-function TeX of the library formula, re-rendered only when the string changes.
+  The atom labels go through `cameraEye` and write only on change.
+- **The fade.** `announce(md, ttl)` writes into the same node and fades after its ttl; the formula returns after it. It is
+  called by the controls Josh named — MO-REGISTRY's WINDING and HOMO + LUMO presets, whose text the names make
+  meaningful (`WINDING · 1e1g (a) + (b)`), and SPECTRUM's presets — on hand presses only. The palette and camera HUD
+  ("other elements could do that too") is R-I2 and lands with the kit's `addLabel({ttl})` at 0.5.0.
+- **The type scale** is the notebook's three sizes now (formula = title, announcement = heading, atom label = body); the
+  kit's "typomagical" faces (Spectral, Playfair Display, Alegreya SC under `fonts/info/`) and its per-element sizes come
+  with the layer at 0.5.0.
+- **One DISPLAY row.** STAGE FORMULA + ATOM LABELS and their two SIZE knobs become ONE row, STAGE TEXT (switch + SIZE);
+  PREFERENCE keeps `molFormula` / `molFormulaSize`, `atomLabels` / `atomLabelsSize` are read once and dropped,
+  STATE-SCOPES and the PREF set in `tests/new-project.test.mjs` change with it.
+- **A caption in capture.** One plain-Unicode line (`H₂O · 1b₁ HOMO · STO-3G`) drawn into the capture overlay canvas so
+  PNG, loop and video carry the name (the DOM formula never reaches an export; a teacher's slide needs the name). Brief 6
+  replaces it at 0.5.0.
+- At 0.5.0 `announce` becomes `layer.addLabel({ttl})` and the formula `layer.addBlock({md})`; this interim renderer is
+  named here so 0.5.0 deletes it.
+· the stage, SETTINGS › DISPLAY, capture · app now, kit at 0.5.0 · S · no per-tick layout reads; no live coefficient.
+
+**F3 · THE WINDOWS** (the audit's 27-card table; Josh: audit, consolidate, leverage power and DISPLAY).
+- **Retire DYNAMICS** (R-W1): L/T/V/S and its plot → SHADOW's footer; the moments and the virial → CALCULUS tiles; the
+  dipole lines → RADIATION; ACTION–ANGLE → gone (SPECTRUM is it); **PARTICLES → a switch in VORTEX** (same j/ρ; VORTEX
+  becomes "the flow"). `RETIRED_WINDOWS` maps `dynamics → shadow` for saved layouts. One card and up to ~470 lines go.
+- **CALCULUS like RADIATION** (Josh's words; RADIATION's skin goes to CALCULUS alone — METERS and WIGNER were not asked
+  for, and a look change is Josh's ruling). The laws become tiles in a grid (two columns on the card, three floating),
+  opted out of LEAN; every row gains `tex`; ⧉ copies **the prose figure** — a heading, then "Figure. ⟨ψ|ψ⟩ = 1.000 (d/dt
+  = 0 to 1e-9); …", related rows combined into sentences (the Ehrenfest pair as one), inline `$…$`, display `$$…$$` for
+  the laws — which pastes into the notebook and renders. TO NOTEBOOK and the other readers' markdown copy are brief 3
+  (on 1.4.3 there is no menu behind ⧉, and paste already reaches the journal). The CALCULUS **overlay** (its residuals
+  typeset on the stage) is a 0.5.0 layer (§8).
+- **METERS.** The badges leave its tick (B0); the PERFORMANCE seg moves beside GOVERNOR in SETTINGS › QUALITY; the
+  GOVERNOR readout and FRAME PROFILE stay — FRAME PROFILE already prints each reader's ms, so there is no new cost line.
+- **Names:** SLICE → **PLANE** and SLICE / CLIP → **CLIP**, ids stable (R-W3; ψ-PLANE if "plane wave" clashes for Josh).
+- **ATOMS returns as the periodic-table window.** Its Z stepper becomes a grid of H–Kr cells grouped by period (periods
+  as columns on the card and on a phone, rows when floating), built with SPECTRUM's own button builder; choosing ATOM in
+  SPECTRUM opens it, **and it gets its own row in the "+" and WINDOW menus** (two hops through a folded SPECTRUM is not a
+  seat). Its readouts (Δ-SCF beside −ε, the quantum defect, the α-dependent order) are physics no other window has. At
+  0.5.0 the grid becomes the kit's `cells` (brief 4) and, mounted a second time in MOLECULES, the **library's map**: a
+  lit cell counts the molecules holding that element, a tap filters, a dark cell is what the diversity gate wants next.
+- **The legacy rest** (R-A2): H₂⁺, HELIUM, H₂, ELECTROSTATICS and QCD stay hidden in 0.4.0 and are decided at 0.5.0; H₂'s
+  FCI curve becomes a MAP there.
+- **STATE audited** (R-W5): the window holds preparation controls, has no reader, hides under a molecular owner, and no
+  other window duplicates it — it keeps its controls (SCENES is 0.5.0); the app's state — the three scopes plus LIBRARY —
+  is re-proven after every stage by the existing suites, and B2's open path is the new case.
+- **"Somewhat realtime"** (R-W6): power stays binary; the cadence is the existing reader law (every 4th frame at
+  PERFORMANCE 120, every frame at FULL, parked above 6/16 ms); its meter is FRAME PROFILE.
+- **Which windows are popular** is a ruling, not a guess (R-W7): there are no analytics.
+- The window cost law restated: off, folded, closed, hidden or offscreen costs zero; the stage text joins it.
+· app (the CALCULUS grid and the ATOMS cells become kit by briefs 3–4) · M · nothing that reads layout per tick.
+
+**F4 · THE CAMERA.**
+- **A lens shift.** The picture slides and the molecule stays the pivot — "a planet photo at max FOV", and the kit pad's
+  unit. `obs.shift = [sx, sy]` is defined **in the ray's uv units** (uv spans −1…1): `writeView` writes the shifted
+  principal ray `fwd + 2·sx·tanH·aspect·right + 2·sy·tanH·up` into the forward lane, the ray pass normalises it and the
+  headlight follows; the line chrome's perspective matrix gains the same principal-point offset in two entries; the
+  pivot appears at minus the shift; `cameraEye` hands the shift to the 2-D overlays. Clamp ±0.5 uv, so the pivot reaches
+  the frame's edge and never leaves it. At shift 0 both passes are byte-identical, so the lock holds by construction.
+- **Zoom to the cursor, through the shift.** On wheel and on pinch, `shift' = c − (c − shift)·dist/dist'` (c = the cursor
+  or the finger centroid, uv) keeps the world point under the hand still — one line, the maps behaviour people expect,
+  and the cure for pinch drift on the iPad.
+- **Hands.** Alt-drag pans on a trackpad and a mouse (Alt is free on the stage: the specials use Ctrl and Shift; verify
+  `preventDefault` holds in Firefox and that the desktop's window manager does not take Alt-drag); a two-finger drag pans
+  on touch beside pinch; wheel stays dolly; an Alt+Arrow pair in `lab/shortcuts.js`, with `tests/keyboard-shortcuts.test.mjs`
+  extended. CAMERA gains PAN X / PAN Y (two knobs now; the pad with the lattice at 0.5.0 — the knobs are its targets)
+  and PAN HOME; RESET VIEW clears the shift; targets `observer.panx/pany`; STATE-SCOPES' pose row gains `shift`
+  (PROJECT, not history); the empty project is regenerated (`tools/new-project.mjs --check`).
+- **The link carries the shot.** `statelink.js`'s own policy lets fields be appended at a section's end under v1: the
+  shift rides the CAM section's tail, and one new tag carries `{library id, basis, view, orbital as {group, irrep,
+  count}}` — a few dozen bytes under the ceiling. Today a link made under MOLECULES silently drops the molecule; after
+  this a teacher posts one link: "1b₁ of water, framed in the gap".
+- The target pivot (orbit about what you inspect) is built only if Josh, having tried the shift zoomed in, asks for it
+  (R-C1).
+· CAMERA, the stage · engine (ray-gen) + kit (panel, brief 2) · M · PRESENT tier only; a verifier (the camera uniform is
+the frame path); `render-regressions` and `keyboard-shortcuts` in the gate (the shift changes `pointerRay`/`unproject`).
+
+**F5 · THE LIBRARY as expansions.**
+- **S4a · the proof and the store.** Benzene's record (Sol's native booster + names + STEM fields + its page) opens with
+  no SCF through `chem.open`; `lw-data-v1` serves from `lab/library/`; the scope row lands; persistence, eviction and
+  quota are measured on the M5. **The 52-record starter** for the existing molecules ships only if B0's re-time shows a
+  saving worth its bytes; the new sections' records ship regardless (they are past the cap). A verifier (worker +
+  storage). **Before S4c touches the kernel**, benzene and a 64-AO fixture join the digest lock on the base tree — its
+  only molecular fixture today is water, tier 0, so "the ≤ 64 tiers are untouched" is provable only after that.
+- **S4b · the sections as content, behind the gate.** The picker: a page turner `‹ SECTION ›` above the existing
+  `<select>`, which then holds one section (about 25 rows); search is 0.5.0's FLY-TO. The sections, diverse rather than
+  variants (R-L1): DIATOMICS · HYDRIDES · ORGANIC · **BIO** (the twenty amino acids as a family — sixteen ≤ 64 AO now,
+  Phe, Arg, Tyr, Trp after S4c; the five nucleobases 44–60; Gly-Gly 57; N-methylacetamide, imidazole, indole, phosphoric
+  acid, ribose) · **LATTICE** (finite clusters only, the solver has no k-points: LiH/LiF/MgO cubes, Na₂Cl₂, the ice
+  hexamer and cube, cubane, neopentane, naphthalene, Si₅H₁₂; Na₄Cl₄ after S4c) · **HEAVY** (the Kr row: KrF₂, SeO₂, KBr,
+  GeCl₄, TiCl₄; the d-block "try it and let the stability probe decide"; **and, if the BSE record carries STO-3G to
+  Z = 54, the vendored basis widens to iodine and xenon** — HI, CH₃I, XeF₂, XeF₄, I₂ — labelled MODEL, all-electron
+  minimal basis, no relativity; an ECP belongs to def2-type bases, not here). Bases: STO-3G + 6-31+G* for anchors only;
+  the name is the join key, so an A/B MORPH between bases means the same orbitals. STEM fields per record (R-L4):
+  formula, point group and frame, mass, charge and multiplicity, dipole, HOMO–LUMO gap, geometry source, InChIKey and
+  PubChem CID (open; not CAS), a two-line blurb, the curated IEs, and the sources. **Sizing:** every entry needs a stated
+  geometry source and a PySCF oracle energy; build three end to end first (alanine, Li₄F₄, TiCl₄), time them, then size.
+- **S4c · the engine upgrades.** (i) **The density wall** is the χ tile in workgroup memory, cap × 64 × 4 B = 16 KiB at
+  cap 64, WebGPU's default `maxComputeWorkgroupStorageSize`; one more tier in `MOL_CAPS`, cap 128, by B0's numbers —
+  request the adapter's limit where every target grants ≥ 32 KiB, else a workgroup of 32 for that tier only. Records
+  then reconstruct Phe–Trp (71–87), adamantane, Na₄Cl₄, B₁₂H₁₂²⁻, caffeine, DMT, the base pairs (99–106), C₂₀H₂₀ (120),
+  the carbonyls and ferrocene. The dense ERI (458 MB at 87 AO, 1.66 GB at 120) is the generator's, never a live solve's.
+  (ii) **The orbital-only path, no tile:** an orbital is Σ c_μ χ_μ, O(nAO), accumulated shell by shell with a small
+  reduction — the ORBITAL kind at any AO count, so **C₆₀'s HOMO and LUMO draw in 0.4.0 from a PySCF coefficient record**
+  if B0's 300-AO dispatch measures under the tier's budget (R-L2); density, the I_h names and the grid-record road stay
+  0.4.1. (iii) **VALENCE** = `D − 2 Σ_core C_c C_cᵀ`, formed in f64 and drawn by the existing density kind, as a switch on
+  DENSITY (not a fourth segment: the VIEW row is at the hand law's width), so the heavy-atom core no longer drowns the
+  valence. The live cap moves only after B0's re-time and a refit of `COST`. A verifier and the frame-time protocol.
+· MOLECULES (sections, headers, CORE, VALENCE — the fourth named exception to "nothing new in the interface", because
+Josh asked for expansions and layouts by name), FOLDERS at 0.5.0 · engine/content · L · never a second solve road; never a
+record that fails validation; never a disabled row where a download would do.
+
+**Cut from 0.4.0** (each with its reason and its home): FIGURE (needs the kit's envelope and intake; 0.5.0); honesty chips
+and a CITE face (HELP is off at first run, they would ship invisible; the sources ride the record now; 0.5.0); TAKE MODE
+(optimises a layer λWAVES does not have yet; brief 7, 0.5.0); the warm cover (trades ~2 s of Safari boot stalls for one
+hitch WebKit has fixed upstream; measured on the M5 before it is planned again); the OVERLAYS row with new stage
+overlays for SHADOW, ORBIT, PLANE and CALCULUS (Josh placed them "on the informational"; 0.5.0 layers); the EXPANSIONS
+tab (the section header is the seat); the target pivot (R-C1).
+
+### 5 · THE KIT BRIEFS (0.4.0's deliverable to the MIR session)
+
+One brief per row, each with acceptance and the λWAVES port that consumes it, written during S1–S4 and delivered as one
+file, `research/release-0.4.0/KIT-BRIEFS.md`, mirrored to the vault as `LAMBDAWAVES CLAUDE KIT BRIEFS FOR MIR <date>.md`.
+λWAVES never touches MIR.
+- **8** `paintedSpace({rack, layer, extra})` + `subscribe(fn)` fired on window move, scroll, open and close, even while
+  paused — first, because it is the adoption blocker: the frame/axis mask needs painted surfaces, not whole rects.
+- **2** Lens shift in the CAMERA panel and the CSS port; the 3-D HOME resets the shift.
+- **3** `rack.register({ md })` + TO NOTEBOOK + PIN FROM WINDOW — the journal "throughout the app".
+- **4** The `cells` grid control: periodic, (l, n), sections; vertical on phones; a second mount as a filter.
+- **5** `createLattice` exported from the XY pad for inlays, with the eight tokens. The inlay list: STATE's IMPULSE
+  VECTOR, KEPLER tilt/turn, PLANE's mini, ORBIT's rotor spheres, WIGNER's (z, p_z) map, RADIATION's polar, the A/B morph,
+  STATIC FIELD's direction. "A little less intense, smaller circles" is eight tokens in λWAVES' sheet, no kit code.
+- **6** `recorder.overlay(i, ctx)` — the overlay in the film.
+- **7** `addLabel({ttl})`, `layer.setCheap(on)`, `html[data-take]`, with the TAKE MODE switch delegated to the app's
+  DISPLAY — the GPU-recording optimisation.
+- **9′** STATUS TAGS never hides `[data-mir-offer]`.
+- **13** The INFORMATIONAL rack window, with its switch delegated to the app's own settings; movable labels (`setEdit`).
+- **Live-bound math labels** (`{{state}}`, `{{E}}`, `{{T}}` from `params.get()`): "it will dynamically change as things
+  and settings in the rack windows are changed".
+- **P** The paint gesture as a kit gesture (Cloud's `paint-stroke.js` is generic); the app copy is then deleted.
+- **J** `jetblack` + `flat` and the gate exemption in the 1.5 catalogue, for the big four.
+- **1** The 3-D camera law and stage gestures (`mir/camera/law.js`, pure, with λWAVES' numbers and tests, zoom-to-cursor
+  included) — a gift for NEBULA, POLAR and EARTH, not a 0.5.0 dependency.
+
+### 6 · THE STAGES
+
+| # | Stage | What | Done when |
+|---|---|---|---|
+| S0 | TAKE-IN + CANARY | B0, B0.5, the bug fixes, the vendor wiring, the process hole, the three measurements, the three demos, 0.3.3 cut | every gate green on the merged tree (incl. `frame-occlusion`); no forged manifest and the pinned test fails on one; Jet Black live by R-A3's route; precache down ~650 KB; the canary's first row; the AO-limit, benzene re-time and 300-AO numbers in REPORT; the live site = the cut (a verifier: release) |
+| S1 ∥ S1′ ∥ S1″ | NAMES ∥ `cameraEye` ∥ THE SOL THREAD | F1 ∥ B1 ∥ a mathcollab ledger on "cyclotomic scaling" in Josh's sense, off the Opus path | every enabled molecule named or says why; the knob reads `1b₁ · HOMO`; the CORE fold; the plain and typeset forms; the copy renders; the N₂ demo ∥ `cameraEye` the only projection; `lab/*.js` down; 208-lock green ∥ the ledger plus one number: benzene's unique-quartet fraction under D₂h, measured on `md.js`'s own loop by a `tools/` script |
+| S2 | CAMERA | F4 | shift tests (shift then RESET = identity; the cursor-anchored point invariant across zoom and FOV; a FRAME corner on the same pixel through the line pass, the ray pass and `pointerRay`/`unproject` at a non-zero shift); Alt-drag, two-finger, Alt+Arrow; zoom-to-cursor; the link tail round-trips; 1004-lock byte-identical at shift 0; `new-project --check`; `render-regressions`; the device report equal before and after on the 3070 (M5 pending) — a verifier |
+| S3 | STAGE TEXT + WINDOWS | F2, F3 | no per-tick layout reads; KaTeX only on a changed string; WINDING and HOMO + LUMO fade with their names, hand presses only; one STAGE TEXT row; the caption in capture; DYNAMICS retired (PARTICLES in VORTEX); CALCULUS tiles + the prose figure; PERFORMANCE in QUALITY; PLANE/CLIP; ATOMS back with its table and its "+" row |
+| S4 | LIBRARY a / b / c | B2 + F5 | a: cached = fresh on energies, occupations, signed fields, subspaces, names; zero solver calls; `library/**` the one precache exemption; benzene and a 64-AO fixture in the lock; persistence on the M5 measured (a verifier) · b: three entries built end to end and timed, then the sections pass the gate with the family allowance; the page turner + headers · c: an 87-AO and a 120-AO record reconstruct; VALENCE; C₆₀'s HOMO/LUMO if the dispatch measured; 1004-lock green; the device report within the governor's tier (a verifier) |
+| S5 | KIT BRIEFS | §5 | each brief has acceptance and a consuming port; brief 8 first; the MIR session has them before the `1.5.0` cut |
+| — | **cut 0.4.0-alpha** | | |
+| 0.4.1 | BUCKYBALL | C₆₀'s density from a PySCF record with precomputed grids uploaded into the molecular volume (one `field` upload road); the I_h names; the stepping stones' timings | C₆₀ draws whole on the 3070 and the M5, labelled GRID RECORD |
+| 0.5.0 | THE ADOPTION, then THE INFORMATIONAL | MIR `1.5.0` in BASINS' order with the canary's deltas and the glue seams; the 15 risks closed; then pages per orbital/state/molecule/window, feature labels, the window, the overlays as movable layers (SHADOW, ORBIT, PLANE, CALCULUS), the film overlay, TAKE MODE, FIGURE, chips, FLY-TO + search, SCENES, MAPS, the pad with the lattice, the periodic table as the library's map | stylehash neutral; ~9–10.5k lines out; every law re-proven; the device report on the 3070 and the M5 |
+| 0.5.x | the wave index (station ring, carousel, `Q_LM`) · ~~symmetry-adapted SCF if the thread's number earns it~~ (R-S1-0.5: the number did not earn it — 25.81 %, 13.9 % of the library's live solve time; the names stay, RPA root names go to 0.5.0, the petite-list ERI is a flag gated by Q13, never a stage) | | |
+
+**Why this order [mine].** S0 first: the live main is unreviewed, and the canary and the three measurements are the
+cheapest information in the plan. S1 beside `cameraEye` and the Sol thread: disjoint files, no Opus cost for the thread,
+and the names are Josh's loudest ask. S2 right after `cameraEye`: small, visible, one verifier. S3 after the names,
+because the fade speaks them. S4 last and split, so the iPad measurement and the three-entry build precede the sizing.
+The briefs throughout. **Verification:** one light check per stage; a verifier for S0 (release), S2 (the camera
+uniform), S4a (worker + storage) and S4c (the kernel); at 0.5.0, the adoption. The 208-lock runs only on frame-path
+commits.
+
+### 7 · RULINGS FOR JOSH (each flips one line)
+
+**For 0.4.0:**
+- **R-A1** Cut 0.3.3 from the merged-and-subtracted tree (the exports + Cloud's kept work); 0.4.0 starts from it.
+- **R-A2** ATOMS returns as the periodic-table window and SPECTRUM's ATOM opens it; QUARKONIUM hidden while QCD is;
+  H₂⁺, HELIUM, H₂ and ELECTROSTATICS stay hidden until 0.5.0 — or name the ones you want back now.
+- **R-A3** Jet Black: a real MIR 1.4.4 on `mir-1.4.x`, or one app-side catalogue row until 1.5 carries it.
+- **R-F1** Flagship, operationally, as §1 — or your own definition.
+- **R-G2** The INFORMATIONAL proper (springs, lines, pages, the pad, the film overlay) needs MIR 1.5 in the app: 0.4.0
+  ships its first taste and 0.5.0 the layer — or 0.4.0 waits for the `1.5.0` cut and carries it.
+- **R-L2 (the one that decides the most work)** C₆₀: its HOMO and LUMO in 0.4.0 through the orbital-only path if the
+  300-AO dispatch measures, the rest in 0.4.1 — or all of it in 0.4.1.
+- **R-W1** Retire DYNAMICS as mapped. · **R-W2** The copy is the prose figure — or add a table. · **R-W3** PLANE (or
+  ψ-PLANE), with CLIP. · **R-W5** "State audited" meant the window, the saved state, or both (both are done). ·
+  **R-W6** "Somewhat realtime": the reader law as is, or a per-window LIVE cadence. · **R-W7** Which windows you and a
+  visitor actually open.
+- **R-C1** Lens shift only; the target pivot if, after trying it, you want to orbit a lobe. · **R-C3** The pan chord is
+  Alt-drag — or another free one.
+- **R-L1** The sections under the gate with the family allowance. · **R-L4** Which STEM fields you want to see. ·
+  **R-L5** Stores builds: expansions bundled or downloaded. · **R-L6** Widen STO-3G to iodine and xenon if the BSE
+  record has it.
+- **R-N1..8** The names plan's rulings stand (its R6 is R-L3 here: records live in `lw-data-`, not the build).
+- **R-S1** "Cyclotomic scaling": the default reading is your corpus's — the character-basis principle (MASTER GOAL SPEC
+  §39, L-0408), concrete as symmetry adaptation (Fock blocks, unique ERI quartets, asymmetric-unit reconstruction) — or
+  the ring-character reading alone, or something else you mean. The Sol thread starts from your answer.
+- **R-U1** Who 0.4.0 is for (you, a class, Reddit on an iPad): it decides what leads 0.5.0.
+
+**For 0.5.0 (ask now, needed later):** **R-B1** one clock (the transport's play is THE play; modulation gets POWER;
+LINKED/SEPARATE retired) · **R-K1** the S key (WASD keeps S; FOLDERS takes another chord) and the MOD arm on Ctrl+Space ·
+**R-D1** the first-run look under the kit: λWAVES' light theme, 22 px, 50 % VIVID, normal ink · **R-I1** the INFORMATIONAL
+switch in SETTINGS › DISPLAY · **R-I2** `lw:` action links in pages, and the non-educational HUD through the same engine ·
+**R-I3** pages travel with the project vs "an open never closes the notebook" · **R-G1** 0.5.0 waits for a `1.5.0` cut
+and the canary runs again then.
+
+### 8 · DISPOSITIONS AND WHAT IS NOT CLAIMED
+
+**Josh's sentences with a later home:** the dot matrix on every inlay (brief 5, 0.5.0 tokens); GPU-recording
+optimisation (brief 7, 0.5.0); the overlays of SHADOW, ORBIT, PLANE and CALCULUS as movable layers (0.5.0); "other
+elements" announcing (the HUD, R-I2, 0.5.0); the journal "throughout the app" (brief 3, 0.5.0 — paste reaches it now);
+the other readers' markdown copy (brief 3); "typomagical" faces (0.5.0); heavier atoms beyond xenon (basis data and
+relativity: a Sol thread, not 0.4.x); wave indexing, electrostatics and Taylor shells (0.5.x; VAULT §1.2–1.3 holds the
+three readings); the bucky-ball whole (0.4.1).
+
+**SIBLINGS rows:** 0.4.0 — CITE as record content; the caption in capture. 0.5.0 — 1 SCENES (in STATE, replacing A/B as
+two of eight), 2 FIGURE, 4 chips, 6 named orbitals + FLY-TO + search, 7 pages, 8 the library gallery, 9 MAPS (H₂'s FCI
+curve first), 19 flash guard, 20 title card, 21 ink law, 24 CURVES, 27 kit project parts, 33 kit panels and the lattice,
+TAKE MODE. 0.5.x — 5 period-exact export, 10 TIMELINE, 11 the atom as metronome, 12 LAYERS, 13 ATLAS, 14 RULER, 15 LENS,
+16 CHORD and the ladder keyboard, 17 kymograph, 18 scale bar, 22 LIC/bloom, 25 TAKE, 26 LIGHT, 29 DEROTATE, 31 TUNER,
+32 PATTERN, 34 GPU anchor, hover-to-peek, the character-table page, the vs-EXPERIMENT lamp beyond the ten, SHARE LOOP.
+Declined — 23 params registry (check `app.param()` / `describe.js` at adoption), 28 MIDI, 30 OUTPUT, 35, the known-answer
+lamp in the shipped build (diagnostics live in `tools/`), the anti-harvest as written. Measured before planned again —
+the warm cover.
+
+**One in, one out:**
+
+| In | Out |
+|---|---|
+| ATOMS back, with a "+" row | an orphaned button and a stepper |
+| PARTICLES into VORTEX | DYNAMICS (~470 lines) |
+| one STAGE TEXT row | STAGE FORMULA + ATOM LABELS + two SIZEs |
+| the caption in capture (now) | brief 6's film overlay at 0.5.0 |
+| — | the duplicate vendor tree (~650 KB a deploy) |
+| one projection helper | nine projection copies |
+| — | Cloud's polling and per-tick label writes |
+| the section header as the expansion seat | no new tab |
+| the interim stage-text renderer (now) | deleted at 0.5.0 |
+| the ATOMS cells and the library chrome (now) | the kit's `cells` at 0.5.0 |
+
+**Not claimed.** No line of 0.4.0 is built. The INFORMATIONAL has run in no real app; its touch, WebKit and
+over-WebGPU looks are unproven. The AO tier's route waits on the adapter numbers; the orbital-only path on one measured
+dispatch; the cost model's staleness on B0's re-time; the BSE's STO-3G range to Z = 54 is unverified. The names probe
+covered ten molecules in STO-3G with s and p only; the showpiece groups' tables are unbuilt. Later or not re-planned:
+the wave index, the Sol thread's engine consequences, the parked asks (the Serum matrix, shader plugins, knob
+quick-settings, ijk mini-maps, "2×6 layout"), the About/Notebook buttons at the top right (the kit's at 0.5.0), Sol's
+pack delivery (Drive, R2). A symmetry saving on a Cartesian grid is bounded by its signed-permutation operations (at
+most 48, usually 8). The legal reading of CAS and NIST SRD is unverified. The YouTube video's content beyond its title
+and description is unknown.
+
+### 9 · RULINGS TAKEN (Josh, 2026-10-07: "defaults are good")
+
+- R-A1 0.3.3 is cut from the merged-and-subtracted tree; 0.4.0 starts from it.
+- R-L2 C₆₀'s HOMO and LUMO in 0.4.0 only if the one 300-AO orbital-only dispatch measures under the tier's budget; the rest in 0.4.1 BUCKYBALL.
+- R-U1 Josh first, visitors on the iPad second.
+- Every other ruling in §7 takes the first-named option until he says otherwise. The lens shift stays ("the planet photo is a bit of an over-explanation but that sounds like a cool feature").
+- The branches may be pushed ("yes to anything for the branches").
+- **R-S1-0.5 and D1–D4 of the Sol thread's SYNTHESIS** (`research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md` SYNTHESIS §3, §7), Josh
+  2026-10-07: *"Perhaps all default/option one's"* — taken as option 1 on each. D1: "symmetry-adapted SCF" struck from the 0.5.x
+  row; the names stay (S1); RPA root names in SPECTRUM (contract C3) and full-group labels at record generation (C5, in
+  S4a/S4b) are the symmetry work that remains; the petite-list ERI is a flag gated by Q13, not a stage. D2: C3 enters
+  0.5.0 THE INFORMATIONAL's pages-per-state. D3: BUCKYBALL's grid record is stored as its D₂h asymmetric unit (8× fewer
+  bytes, one expansion step on upload). D4: the thread closes after Round 3; Q13–Q17 are build gates, not a Round 4.
+
+### 10 · THE NUMBERS TAKEN (S0, 2026-10-07 — `research/release-0.4.0/measure/MEASURE.md`, `docs/MIR-1.5-CANARY.md`)
+
+- **N1 · The AO wall opens.** The RTX 3070 reports `maxComputeWorkgroupStorageSize` = 49152 in Chromium (Vulkan) and
+  Firefox 157, and both grant a device asked for 32768; a device asked for nothing gets 16384, and `lab/gpu-boot.js`
+  `requestGpu()` asks only for texture dimensions today. **S4c's cap-128 tier asks for 32 KiB in `want` and falls back to
+  the workgroup-32 variant where it is refused.** The M5 is pending (the one line for Josh is in MEASURE.md §1;
+  `tools/perf/limits.html` serves it); until then the fallback is the iPad's assumed path.
+- **N2 · Records GATE, they do not merely accelerate; the starter is not shipped.** Benzene (36 AO) ground + spectrum
+  is 1.57 s in node, 1.92 s in Firefox, 1.46 s in Chromium against 9.6 s predicted (the model is 5–6.6× slow; 8.1× at
+  58 AO). A 58-AO ground solve alone is ~8 s on this desktop (17.5 s with its spectrum), so "64 AO in a few seconds on the
+  M5" fails already here: **a record past the live cap is the only road to those molecules (DOWNLOAD, not DISABLED), the
+  live cap stays benzene, and the 52-record starter for ≤ 36-AO entries is NOT shipped** (it would save ≤ 2 s on a
+  desktop for its bytes). S4a refits `COST` from the measured rows (benzene, C₂H₄/6-31+G*, naphthalene) and moves the
+  "~9.6 s" menu text that `tests/chem.browser-test.mjs` pins.
+- **N3 · R-L2 resolves YES.** One 300-AO orbital-only dispatch at 96³ costs 12.0 ms of GPU time plain and **3.2–3.6 ms
+  with shells screened at 1e-10** (1.19× benzene's density dispatch, measured today at 2.72 / 3.00 ms), linear at 0.040
+  ms per AO; every row checked against the f64 evaluator to the rgba16float precision. A reconstruct runs once per
+  change, not per frame, so **C₆₀'s HOMO and LUMO draw in 0.4.0 (S4c ii) from a PySCF coefficient record, with shell
+  screening as the kernel**; the density, the I_h names and the grid record stay 0.4.1.
+- **N4 · The canary's seams for 0.4.0** (7 of 82 node suites red on a bare alpha.23 adopt; it boots; browser green):
+  a precache POLICY for kit files (9.46 MiB on a bare adopt against the 8 MiB ceiling; `locales/` + `tokens.json`
+  alone are 2.2 MB) — designed with S4a's `library/**` exemption as one rule, "precache what a root reaches"; the
+  gates that pin kit bytes or kit source text (`mir`, `mir-manifest`'s version regex, `access` A8, `slider-keys`) are
+  rewritten at 0.5.0 as the adoption's first commit, not before; `tools/new-project.mjs` regenerates inside the adoption
+  (BPM 30); three missing ADOPTING-1.5 entries (default BPM 30, the Shift step `.01·keyFine`, strings through `tx()`) go
+  to the MIR session in the KIT BRIEFS (S5).
+- Notes: Firefox's timestamp queries return real values now (the `field.js` comment that says they are zeroed is stale —
+  S4c fixes the comment); headless Chromium reaches the RTX only with `--enable-features=Vulkan --use-angle=vulkan`
+  (`tools/perf/` says so); Firefox reports `onSubmittedWorkDone` on a ~100 ms tick.
+
+
+
+---
+
+## <a id="doc-113"></a>DOC 113 · release-0.4.0/S2-CAMERA-BUILD.md · 2026-10-08
+
+## λWAVES 0.4.0 · S2 THE CAMERA — BUILD (waves 145–148)
+
+Built by Opus 5.5 (the S2 camera builder) in worktree
+`/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a404c855dc2be006b`, branch
+`worktree-agent-a404c855dc2be006b`, from `bd9b0e5` (the tip of `sos-s0`: S1 NAMES + S1′ cameraEye). Nothing pushed, tagged
+or deployed. A fresh-context verifier follows (PLAN §6: the camera uniform is the frame path).
+
+### The hand-off in ten lines
+
+1. K1–K3 are built and committed; the lens shift is real in the ray pass, the line pass, the 2-D overlays and the pointer.
+2. The line pass's sign is the brief's (`P[8] = −px`, `P[9] = −py`), confirmed on the GPU by the FRAME-corner gate.
+3. One FRAME corner, one pixel at p = (0.4, −0.3): line 0.29 px, ray 0.72 px, pointer 0.29 px from the prediction.
+4. The point under the cursor moves 0.015 px (wheel), 0 px (pinch), 0 px (FOV) through `unproject`; shift then RESET = the boot pose.
+5. Alt-drag, two fingers, Alt+Arrows (no Back navigation), PAN X / PAN Y / PAN HOME all drive one `setShift`.
+6. The link carries the shot: the CAM tail + `MOL 0x0A`; "1b₁ of water, framed in the gap" is a 340-character link.
+7. Digest lock 588 GREEN on base, K1, K2 and the final tree; the 1004-value lock GREEN at the end (meta reads a zero shift as absent).
+8. Gates green, re-run alone where timing or the driver-port race bit; `current`'s audio-face check fails identically on the base.
+9. `lab/*.js` 35,738 → 35,828 (+90, a feature); the device report equal within its noise; M5 pending.
+10. Next: Sos merges this branch into `sos-s0`; the S2 verifier runs on 8749/5217 (start with `tests/camera-shift.browser-test.mjs`).
+
+### The commits
+
+| sha | what |
+|---|---|
+| `38f63fd` | K1 · THE SHIFT in the engine: `lensShift` (the ray lane + the principal point), `toScreen.at` + its inverse `toScreen.ray` (the pointer's), `clampShift`, the GLB's `extras.lensShift` |
+| `1c1bbf6` | K2 · THE HANDS: `zoomAt` / `setFov(v, c)` / `setShift` / `panBy`, the wheel and pinch at the cursor / centroid, two fingers and Alt-drag slide, the Alt+Arrow quartet, `CAM.HOME.shift`, `readPixels`/`linePixels` `keep` |
+| `3acaac0` | K3 · THE PANEL, THE SCOPE, THE LINK: PAN X / PAN Y / PAN HOME, `observer.panx/pany`, the pose's `shift` in serialize/restore/STATE-SCOPES/the empty project, the CAM tail + the `MOL 0x0A` tag, chemview's name-first orbital |
+| (this file + REPORT waves 145–148) | hand-off |
+
+### The convention as built (BRIEF §1; the sign the corner test chose)
+
+- `obs.shift = [px, py]` = where the pivot appears on the frame, NDC (+y up), each component in [−1, 1] (`CAM.SHIFT`,
+  `clampShift`). Positive px moves the molecule right.
+- **Ray pass** (`field.js` `writeView` → `lensShift`): forward lane `v[12..14] = fwd − px·tanH·aspect·right − py·tanH·up`.
+- **Line pass**: `M_PERSP[8] = −px`, `M_PERSP[9] = −py` — **the brief's sign, confirmed on the GPU**: at p = (0.4, −0.3) the
+  box's left corner lands at (677.5, 354.5) in `linePixels` and (678.5, 354.5) in the ray pass against the +p prediction
+  (677.78, 354.44) — 0.29 px and 0.72 px — while the −p prediction is 568 px away and the unshifted one 284 px.
+- **2-D overlays** (`toScreen.at`): `((u + px + 1)/2·W, (1 − v − py)/2·H)`, i.e. today's pixel + (px·W/2, −py·H/2).
+- **Pointer** (`toScreen.ray`, `pointerRay` = three lines over it): `u − px`, `v − py`. Its ray through the GPU's corner
+  pixel misses the 3-D corner by 0.29 px.
+- **At p = 0** `lensShift` writes nothing and `at`/`ray` add exact zeros: node proves the bytes against bd9b0e5's own
+  expressions; the lock proves the frame.
+- **Zoom to the cursor**: `p′ = c − (c − p)·k`, `k = D·tanH / (D′·tanH′)`; wheel and pinch anchor at the cursor / centroid,
+  the dials and keys at the centre; a modulated ZOOM/FOV or a zoom at the DIST limit leaves the shift alone.
+- **GLB**: glTF has no principal point; a shifted shot's camera node carries `extras.lensShift`.
+
+### The lock
+
+`LW_PORT=8747 GD_PORT=5215 node tools/perf/digest-lock.mjs --check --grids 96 --query gastab=0` (588 values at 96³):
+GREEN on the base `bd9b0e5` (42 s), after K1 (81 s), after K2 (107 s) and on the final tree (38 s) — 0 readback
+differences, 0 record-byte differences, nothing unrepeatable, 0 page errors. No red result, so no P5 re-run was needed.
+
+**The 1004-value lock** (`--check --query gastab=0`, all three grids) on the final tree: **GREEN, 1004 values, 0 readback
+differences, 0 record-byte differences, 61 s.** Its first run read RED with `META DIFFERS (inputs, not outputs): obs` and
+0 value differences: the lock compares the boot pose it ran under with the fixture's, and K3's boot pose gained
+`shift: [0, 0]`. `tools/perf/digest-lock.mjs`'s `meta()` now reads a zero shift as absent (it IS the pre-S2 pose:
+`lensShift` writes nothing), so the base fixtures still match and a non-zero shift is still an input difference. No
+fixture was rewritten.
+
+### The gates
+
+- `node tests/camera-shift.test.mjs`: 6 PASS (p = 0 bit for bit; the pivot at p in four seats; 80 triples on one pixel; the
+  clamp; zoom to the cursor, worst 2.3e-13 px; the pan law and shift-then-RESET = the boot pose byte for byte).
+- `node tests/statelink.test.mjs` 22/22 (four new S2 checks); `stage-gestures`, `keyboard-shortcuts`, `export3d`,
+  `new-project` (16,866 B), `history`: green.
+- `node tools/new-project.mjs --check`: in step (16,866 B).
+- `bash test.sh node` (84 suites) under a load average of ~23 from the sibling: green but for five WALL-TIME budgets
+  (electrostatics W42-7 190 ms < 60, mo G5 124 ms < 120, twocentre Q7 < 50 ms, wigner W42-8 < 150 ms, names "benzene named
+  in 60 ms"). Re-run alone: mo, twocentre, wigner, names green (load 21); electrostatics red again at load 21.7 (95 ms) and
+  **green alone at load 9.8**. None imports a file S2 touched.
+- Browser, one at a time on 8747/5215: **`camera-shift` (new) 11/11 GREEN** (three runs); `render-regressions` GREEN;
+  `frame-occlusion` 7/7; `keyboard-window` GREEN; `new-project` 8/8; `input` 13/13; `chem` 54/54; `export3d` red once on
+  its loop-median timing (3 → 2 ms, Δ33 % on a 1 ms tick) and **GREEN alone**. Three need words:
+  - `history`: red twice at loads ~21–22 on the LFO-through-an-undo timing (the macro unmoved over 600 ms; a redo's base
+    read mid-cycle; the route target was EXPOSURE, as on the base), then those scenes passed on the next two runs, and the
+    last scene — it opens a second Firefox — hit `EADDRINUSE 127.0.0.1:5215` (the previous geckodriver not yet gone). With a
+    4 s pause before each new session (a `.tmp` copy; the suite itself untouched) **all 39 scenes pass on this tree**,
+    the MOLECULES undo included. The untouched base `bd9b0e5` (served from `git archive` on the same port) passed 39 once
+    and hit the same `EADDRINUSE` in the same place the second time.
+  - `offer`: `EADDRINUSE 127.0.0.1:5215` at its second session — the same race; the base fails the same way (14 of 16);
+    with the 4 s pause, **16/16 GREEN** on this tree (its link scenes included).
+  - `current`: 9 of 15, then the modulation window's audio face (`valuesReveal` or `followsPalette`, a CSS read 50–250 ms
+    after a change) — **the untouched base fails the same check the same way**, at loads 10–22. Not the camera; worth a
+    look by whoever owns the audio face.
+- **The device report** (`tools/perf/device-report-run.mjs`, the report's own scenes with its 30 s long play, headless
+  Firefox on the 3070, frost on): base `bd9b0e5` 13.8 fps long play, frame median 82.46 / p95 100.26 / max 232 ms, loop
+  median 1 ms; this tree 13.5 fps, 82.94 / 100.48 / max 217 ms, loop median 1 ms — **equal within its noise** at the same
+  load (~11). (A first base run at load ~23 read 7.8 fps: the long play tracks the sibling's CPU, which is why the pair was
+  re-taken back to back.) **M5 pending**: one command for Josh, `?report=1` on the iPad.
+
+### Line counts
+
+`cat lab/*.js | wc -l`: **35,738 before (bd9b0e5) → 35,828 after (+90)**. This is a feature and it added; the honest
+subtractions available were taken (`pointerRay` is three lines over `toScreen.ray` instead of five of its own maths; the
+`writeView` seat is one call), and no unrelated code was cut to make the number. Where the 90 went (`git diff --numstat bd9b0e5`): `statelink.js`
++21 (the CAM tail, the MOL tag both ways, its law), `camera-law.js` +18 (the zoom/shift roads and the clamp), `field.js` +17
+(`lensShift` and its law, `toScreen.ray`, the readbacks' `keep`), `rack.js` +14 (the PAN row, two targets, four keys; −2 in
+`pointerRay`), `stage-gestures.js` +11 (the slide, the centroid, uv), `chemview.js` +6 (the name-first orbital),
+`export3d.js` +2, `keymap.js` +1.
+
+### Blockers (none stops the merge)
+
+- **The driver-port race**, base and this tree alike: `LW_PORT=8747 GD_PORT=5215 node tests/offer.browser-test.mjs` (and
+  `history`'s last scene) → `Error: listen EADDRINUSE: address already in use 127.0.0.1:5215` when a suite closes one
+  Firefox and opens the next at once under load. A 4 s pause before the next `open()` cures it; the suites were not edited.
+- **`current`'s audio face**: `LW_PORT=8747 GD_PORT=5215 node tests/current.browser-test.mjs` → `AssertionError
+  [ERR_ASSERTION]: valuesReveal` (or `followsPalette`) after 9 of 15 scenes — the same on the untouched `bd9b0e5`.
+- **A note for the merge**: K2's `git apply` landed the four Alt+Arrow actions after `slap`; K3 moves them beside
+  `camReset` (cosmetic, one hunk).
+
+### The exact next step
+
+Claude Sos merges `worktree-agent-a404c855dc2be006b` into `sos-s0` (it touches `rack.js` only in `pointerRay`, the CAMERA
+panel, the observer targets, the pose default, serialize/restore's pose, `mintLink`, the gesture wiring and four ACTIONS —
+none of S3's regions), then launches the S2 verifier on 8749/5217:
+`LW_PORT=8749 GD_PORT=5217 node tests/camera-shift.browser-test.mjs`, `node tests/camera-shift.test.mjs`,
+`LW_PORT=8749 GD_PORT=5217 node tools/perf/digest-lock.mjs --check --query gastab=0`, then the brief's browser list.
+
+### Not done, and why
+
+- **The device report's M5 half**: one command for Josh — open `https://<host>/lab/?report=1` on the iPad (or
+  `__LW.report()` in a console there); recorded **M5 pending**.
+- **The GLB cannot express the shift** (glTF has no principal point): it rides as `extras.lensShift` on the camera node; an
+  importer shows the on-axis framing.
+- **A modulated ZOOM or FOV** zooms about the pivot (the shift stays), by design: a route writes the pose, not a hand.
+- **Firefox's lone-Alt menu bar** cannot be exercised headless; a drag between Alt's press and release is input, so the
+  menu bar should not toggle — not verified on a headed Firefox.
+
+### For S5's KIT BRIEFS
+
+**Brief 2 · the lens shift in the kit's CAMERA panel, and the CSS port.** λWAVES' CAMERA now carries PAN X / PAN Y (bipolar
+−1…1) and PAN HOME (`rack.js` row `r4p`), the modulation targets `observer.panx` / `observer.pany`, and one setter behind every
+hand (`camera-law.js` `setShift(x, y)`: clamped to the frame's edge, `modHand` per axis so a routed axis moves its base). The
+kit's CAMERA panel takes the two knobs and PAN HOME as they are; at 0.5.0 the XY pad with the lattice replaces the knobs and
+drives the same two targets 1:1 (the pad's unit IS the shift: the pivot's place on the frame in NDC, +y up). The CSS port is
+one line for any 2-D consumer — project as before, then add `(px·W/2, −py·H/2)` pixels (`field.js` `toScreen` is the
+reference; its inverse `toScreen.ray` is the pointer's). The 3-D HOME (RESET VIEW, the double-click, the double-tap) resets
+the shift with the rest of the pose (`CAM.HOME.shift = [0, 0]`, frozen). Acceptance: shift then HOME is the boot pose byte
+for byte (`tests/camera-shift.test.mjs` §6); the knobs follow every hand (`tests/camera-shift.browser-test.mjs` §4); a route
+on either axis moves its base and leaves the other alone. The λWAVES port that consumes it: the `r4p` row and its two
+target definitions give way to the kit's panel; `setShift` stays as the host seam.
+
+**Brief 1 · the 3-D camera law as a pure module (`mir/camera/law.js`), zoom to the cursor included — the gift for NEBULA,
+POLAR and EARTH.** `lab/camera-law.js` is already pure (five edges handed in: `obs`, `ui`, `present`, `modHand`,
+`resetWall`) and `lab/stage-gestures.js` already DOM-generic; together they are the module: the first-order law
+(`cameraStep`, the exact integral of a relaxing fling), TURNTABLE ⇄ FREE with the levelling slerp, the one road for a
+relative turn, the eased key orbit, and now `zoomAt(c, dist′)` / `setFov(v, c)` / `setShift` / `panBy` with the invariant
+`p′ = c − (c − p)·k`, `k = D·tanH / (D′·tanH′)` (dials and keys anchor at c = 0), the wheel at the cursor, the pinch at the
+fingers' centroid with the two-finger slide, and the Alt-drag slide. Acceptance: `tests/camera-shift.test.mjs` §5–6 and
+`tests/stage-gestures.test.mjs` run unchanged against the kit's module (the point under the cursor drifts 2.3e-13 px in
+node, ≤ 0.015 px through λWAVES' pointer on the GPU). `cameraEye`'s `target` is the seam a consumer with another pivot would
+use (λWAVES keeps the origin — R-C1). The λWAVES port: `camera-law.js` and `stage-gestures.js` become imports of the kit
+module, CAM's numbers handed in.
 

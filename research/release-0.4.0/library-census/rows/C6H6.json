@@ -1,0 +1,136 @@
+{
+  "id": "C6H6",
+  "name": "benzene",
+  "formula": "C6H6",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        1.39,
+        0,
+        0
+      ],
+      [
+        1,
+        2.48,
+        0,
+        0
+      ],
+      [
+        6,
+        0.6950000000000001,
+        1.2037753112603695,
+        0
+      ],
+      [
+        1,
+        1.2400000000000002,
+        2.1477430013854075,
+        0
+      ],
+      [
+        6,
+        -0.6949999999999996,
+        1.2037753112603697,
+        0
+      ],
+      [
+        1,
+        -1.2399999999999995,
+        2.147743001385408,
+        0
+      ],
+      [
+        6,
+        -1.39,
+        1.702259050814821e-16,
+        0
+      ],
+      [
+        1,
+        -2.48,
+        3.037124061885436e-16,
+        0
+      ],
+      [
+        6,
+        -0.6950000000000006,
+        -1.2037753112603695,
+        0
+      ],
+      [
+        1,
+        -1.240000000000001,
+        -2.1477430013854075,
+        0
+      ],
+      [
+        6,
+        0.6950000000000001,
+        -1.2037753112603695,
+        0
+      ],
+      [
+        1,
+        1.2400000000000002,
+        -2.1477430013854075,
+        0
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013C) = 1.39 \u00c5, r(C\u2013H) = 1.09 \u00c5, D\u2086\u2095, hydrogens at radius 2.48 \u00c5 (the window's original preset, frozen) \u2014 THE CAP; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "ring:6"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 9592,
+  "nocc": 21,
+  "nElectrons": 42,
+  "nAO_631plusGstar": 126,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 36,
+  "predictedRecordBytes": 12992,
+  "predictedRecordBytes631": 131072,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -227.89100646512108,
+  "wallSeconds": 6.76183114000014,
+  "converged": false,
+  "gapEh": 0.5515653328215432,
+  "topgroup": "D6h",
+  "computedGroup": "D2h",
+  "cycles": 200,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

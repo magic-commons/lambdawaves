@@ -1,0 +1,202 @@
+{
+  "id": "isoleucine",
+  "name": "isoleucine",
+  "formula": "C6H13NO2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -1.944,
+        0.335,
+        -0.343
+      ],
+      [
+        6,
+        -0.487,
+        0.519,
+        -0.369
+      ],
+      [
+        6,
+        0.066,
+        -0.032,
+        -1.657
+      ],
+      [
+        8,
+        -0.484,
+        -0.958,
+        -2.203
+      ],
+      [
+        6,
+        0.14,
+        -0.219,
+        0.814
+      ],
+      [
+        6,
+        -0.421,
+        0.341,
+        2.122
+      ],
+      [
+        6,
+        1.658,
+        -0.027,
+        0.788
+      ],
+      [
+        6,
+        0.206,
+        -0.397,
+        3.305
+      ],
+      [
+        8,
+        1.171,
+        0.504,
+        -2.197
+      ],
+      [
+        1,
+        -2.112,
+        -0.656,
+        -0.41
+      ],
+      [
+        1,
+        -2.256,
+        0.622,
+        0.572
+      ],
+      [
+        1,
+        -0.253,
+        1.582,
+        -0.299
+      ],
+      [
+        1,
+        -0.092,
+        -1.281,
+        0.744
+      ],
+      [
+        1,
+        -1.502,
+        0.204,
+        2.141
+      ],
+      [
+        1,
+        -0.188,
+        1.403,
+        2.192
+      ],
+      [
+        1,
+        1.891,
+        1.034,
+        0.857
+      ],
+      [
+        1,
+        2.105,
+        -0.554,
+        1.631
+      ],
+      [
+        1,
+        2.059,
+        -0.427,
+        -0.143
+      ],
+      [
+        1,
+        -0.193,
+        0.001,
+        4.237
+      ],
+      [
+        1,
+        -0.026,
+        -1.46,
+        3.235
+      ],
+      [
+        1,
+        1.287,
+        -0.261,
+        3.286
+      ],
+      [
+        1,
+        1.527,
+        0.15,
+        -3.024
+      ]
+    ],
+    "source": "wwPDB Chemical Component Dictionary ILE ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ILE.cif; computed reference, UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "CC[C@H](C)[C@H](N)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 36,
+  "nElectrons": 72,
+  "nAO_631plusGstar": 197,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 58,
+  "predictedRecordBytes": 29888,
+  "predictedRecordBytes631": 315672,
+  "appPredictedMs": 134329,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 100
+    }
+  ],
+  "energyEh": -433.40537994232807,
+  "wallSeconds": 1.2641538659954676,
+  "converged": true,
+  "gapEh": 0.6346392609926906,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 100,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

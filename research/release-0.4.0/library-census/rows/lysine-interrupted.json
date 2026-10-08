@@ -1,0 +1,221 @@
+{
+  "id": "lysine",
+  "name": "lysine",
+  "formula": "C6H14N2O2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -2.1995242478615116,
+        -1.1194043585314437,
+        1.8609971177539648
+      ],
+      [
+        6,
+        -1.7193975102391235,
+        -0.7981671054152604,
+        0.48442553627055307
+      ],
+      [
+        6,
+        -0.27865117674914053,
+        -1.374819684593644,
+        0.33162114472274834
+      ],
+      [
+        6,
+        0.5567863427308384,
+        -1.0570428783232508,
+        -0.9343423022507201
+      ],
+      [
+        6,
+        0.9802587868355828,
+        0.43163107113831756,
+        -1.1079844078680718
+      ],
+      [
+        6,
+        2.3746451228227667,
+        0.8830416179044975,
+        -0.6308114479036467
+      ],
+      [
+        7,
+        2.323344802009524,
+        1.2416976594908888,
+        0.8099264041584564
+      ],
+      [
+        6,
+        -1.7918062288324623,
+        0.7419457685549006,
+        0.32446511471150385
+      ],
+      [
+        8,
+        -1.6340292921209945,
+        1.5972630204945797,
+        1.1817439203237825
+      ],
+      [
+        8,
+        -2.054501686829636,
+        1.0395561752289504,
+        -1.0138135736395668
+      ],
+      [
+        1,
+        -2.0595571203953704,
+        -2.1279360907254845,
+        2.028293565256164
+      ],
+      [
+        1,
+        -3.2249626242074743,
+        -1.003074846905371,
+        1.876031492456371
+      ],
+      [
+        1,
+        -2.374408838826046,
+        -1.2076012129066693,
+        -0.2960457278086315
+      ],
+      [
+        1,
+        0.28648744753779465,
+        -1.0548242079083403,
+        1.1995911682073972
+      ],
+      [
+        1,
+        -0.39614532132145597,
+        -2.454267772521975,
+        0.4082947525558201
+      ],
+      [
+        1,
+        1.4269853921609077,
+        -1.7053153008511746,
+        -0.874849120156528
+      ],
+      [
+        1,
+        -0.007225481336337042,
+        -1.3565138049563568,
+        -1.8150687203004037
+      ],
+      [
+        1,
+        0.8749822897565586,
+        0.7017192727858466,
+        -2.1620025391704973
+      ],
+      [
+        1,
+        0.2857416431313343,
+        1.0346924660314447,
+        -0.5421299257170834
+      ],
+      [
+        1,
+        3.1317704633834023,
+        0.11428649694393478,
+        -0.7754162659626838
+      ],
+      [
+        1,
+        2.661671611331745,
+        1.7434595072613837,
+        -1.2375546631968986
+      ],
+      [
+        1,
+        3.2331417191455816,
+        1.6637202634192922,
+        1.0669927326483977
+      ],
+      [
+        1,
+        1.673830397248269,
+        2.0345374018608986,
+        0.8964587185799344
+      ],
+      [
+        1,
+        -2.0694364893638344,
+        2.0314165425190245,
+        -1.0788229736788681
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCCN)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible; optimisation FAILED, best visited geometry only, UNVERIFIED",
+    "status": "DERIVED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": false,
+      "objectiveEvaluations": 20,
+      "wallSeconds": 572.3222368880088,
+      "details": "[Errno 32] Broken pipe"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](CCCCN)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 40,
+  "nElectrons": 80,
+  "nAO_631plusGstar": 218,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 64,
+  "predictedRecordBytes": 35840,
+  "predictedRecordBytes631": 385728,
+  "appPredictedMs": 235639,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 62
+    }
+  ],
+  "energyEh": -487.72784748916797,
+  "wallSeconds": 5.366216744005214,
+  "converged": true,
+  "gapEh": 0.6233677786552922,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 62,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "DERIVED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

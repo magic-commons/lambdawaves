@@ -1,0 +1,140 @@
+{
+  "id": "alanine",
+  "name": "alanine",
+  "formula": "C3H7NO2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.966,
+        0.493,
+        1.5
+      ],
+      [
+        6,
+        0.257,
+        0.418,
+        0.692
+      ],
+      [
+        6,
+        -0.094,
+        0.017,
+        -0.716
+      ],
+      [
+        8,
+        -1.056,
+        -0.682,
+        -0.923
+      ],
+      [
+        6,
+        1.204,
+        -0.62,
+        1.296
+      ],
+      [
+        8,
+        0.661,
+        0.439,
+        -1.742
+      ],
+      [
+        1,
+        -1.383,
+        -0.425,
+        1.482
+      ],
+      [
+        1,
+        -0.676,
+        0.661,
+        2.452
+      ],
+      [
+        1,
+        0.746,
+        1.392,
+        0.682
+      ],
+      [
+        1,
+        1.459,
+        -0.33,
+        2.316
+      ],
+      [
+        1,
+        0.715,
+        -1.594,
+        1.307
+      ],
+      [
+        1,
+        2.113,
+        -0.676,
+        0.697
+      ],
+      [
+        1,
+        0.435,
+        0.182,
+        -2.647
+      ]
+    ],
+    "source": "wwPDB Chemical Component Dictionary ALA ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ALA.cif; computed reference, UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](C)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 24,
+  "nElectrons": 48,
+  "nAO_631plusGstar": 128,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 37,
+  "predictedRecordBytes": 13592,
+  "predictedRecordBytes631": 135168,
+  "appPredictedMs": 10110,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -317.67874534511,
+  "wallSeconds": 0.25655654299771413,
+  "converged": true,
+  "gapEh": 0.6411725769569105,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 80,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

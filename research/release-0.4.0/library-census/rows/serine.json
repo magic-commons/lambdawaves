@@ -1,0 +1,162 @@
+{
+  "id": "serine",
+  "name": "serine",
+  "formula": "C3H7NO3",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.4404127320881684,
+        0.023995768813549815,
+        -1.75893187677497
+      ],
+      [
+        6,
+        0.4018877132296949,
+        0.1923024199046462,
+        -0.5478713513882122
+      ],
+      [
+        6,
+        0.5267000197416448,
+        -1.1665130337598397,
+        0.188132124334334
+      ],
+      [
+        8,
+        -0.7829038539927015,
+        -1.523094207643326,
+        0.6529771335570725
+      ],
+      [
+        6,
+        -0.16757466763789408,
+        1.2748486637815641,
+        0.4155839175256369
+      ],
+      [
+        8,
+        -1.1545756950125297,
+        1.954544505580986,
+        0.20782880148069147
+      ],
+      [
+        8,
+        0.5994587031230821,
+        1.4104431614022783,
+        1.5666743006201354
+      ],
+      [
+        1,
+        -0.688228996500282,
+        0.9703467226873145,
+        -2.092621608138247
+      ],
+      [
+        1,
+        -1.335936937469749,
+        -0.37842830100092006,
+        -1.4365177644810256
+      ],
+      [
+        1,
+        1.4008437376154637,
+        0.515423879463067,
+        -0.8540938307543097
+      ],
+      [
+        1,
+        0.9239249683050057,
+        -1.9064780822032428,
+        -0.5163412164728601
+      ],
+      [
+        1,
+        1.2372573993035474,
+        -1.06514020722201,
+        1.0170708740586845
+      ],
+      [
+        1,
+        -0.6609090364785888,
+        -2.4143666447725542,
+        1.0654026337483187
+      ],
+      [
+        1,
+        0.14046937799151382,
+        2.1121153549321545,
+        2.0927078626892626
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CO)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 39,
+      "wallSeconds": 162.27744196799176,
+      "maxGradientEhPerBohr": 7.531018373363452e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](CO)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 28,
+  "nElectrons": 56,
+  "nAO_631plusGstar": 147,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 42,
+  "predictedRecordBytes": 16832,
+  "predictedRecordBytes631": 177272,
+  "appPredictedMs": 19551,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 66
+    }
+  ],
+  "energyEh": -391.5289775312843,
+  "wallSeconds": 0.7439204609981971,
+  "converged": true,
+  "gapEh": 0.6192675099799293,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 66,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

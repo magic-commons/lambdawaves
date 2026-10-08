@@ -1,0 +1,131 @@
+{
+  "id": "C5H5N",
+  "name": "pyridine",
+  "formula": "C5H5N",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.7318768240683985,
+        -1.1931636266665837,
+        0
+      ],
+      [
+        6,
+        0.6083231759316016,
+        -1.1931636266665837,
+        0
+      ],
+      [
+        6,
+        1.3840774117467767,
+        -0.03435578426353314,
+        0
+      ],
+      [
+        6,
+        0.736548183325371,
+        1.2005763022659162,
+        0
+      ],
+      [
+        6,
+        -0.6577386412952687,
+        1.2183417375066794,
+        0
+      ],
+      [
+        6,
+        -1.3393333056400816,
+        0.0017649978241052189,
+        0
+      ],
+      [
+        1,
+        1.1200775848764906,
+        -2.15159446659478,
+        0
+      ],
+      [
+        1,
+        2.4651287728927542,
+        -0.09224114134483462,
+        0
+      ],
+      [
+        1,
+        1.3022700133794771,
+        2.1226663472182694,
+        0
+      ],
+      [
+        1,
+        -1.1991204567003688,
+        2.155853598737607,
+        0
+      ],
+      [
+        1,
+        -2.425611991917962,
+        0.023693648908997608,
+        0
+      ]
+    ],
+    "source": "microwave structure r(N\u2013C\u2082) = 1.3402 \u00c5, r(C\u2082\u2013C\u2083) = 1.3945 \u00c5, r(C\u2083\u2013C\u2084) = 1.3944 \u00c5, \u2220C\u2082NC\u2086 = 116.94\u00b0, \u2220NC\u2082C\u2083 = 123.80\u00b0, \u2220C\u2082C\u2083C\u2084 = 118.53\u00b0, \u2220C\u2083C\u2084C\u2085 = 118.40\u00b0 (the six interior angles sum to 720.00\u00b0, so the ring closes); hydrogens at 1.0865/1.0826/1.0818 \u00c5 along the external ring bisector \u2014 stated as an idealisation; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "ring:6"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 8071,
+  "nocc": 21,
+  "nElectrons": 42,
+  "nAO_631plusGstar": 124,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 35,
+  "predictedRecordBytes": 12408,
+  "predictedRecordBytes631": 127040,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -243.6374818192588,
+  "wallSeconds": 4.41975269599061,
+  "converged": true,
+  "gapEh": 0.5420102471354757,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 46,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

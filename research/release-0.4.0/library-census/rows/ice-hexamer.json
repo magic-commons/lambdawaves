@@ -1,0 +1,187 @@
+{
+  "id": "ice-hexamer",
+  "name": "water hexamer ring",
+  "formula": "H12O6",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        2.441311601741561,
+        -0.022617080231310527,
+        -6.85383544905857e-12
+      ],
+      [
+        1,
+        1.982908846704815,
+        0.8774471800005669,
+        -1.4136123462813956e-12
+      ],
+      [
+        1,
+        3.4033692065012238,
+        0.15913217541553842,
+        3.4493976493494496e-12
+      ],
+      [
+        8,
+        1.2402427660108755,
+        2.1029293263380593,
+        8.441403956384433e-12
+      ],
+      [
+        1,
+        0.23156287413103072,
+        2.1559730254926874,
+        1.321415634269281e-12
+      ],
+      [
+        1,
+        1.5638720963175712,
+        3.026970279645981,
+        -4.132257330532198e-12
+      ],
+      [
+        8,
+        -1.2010688356329495,
+        2.125546405029223,
+        -6.7280426409143935e-12
+      ],
+      [
+        1,
+        -1.7513459728284353,
+        1.2785258441101974,
+        -1.6709325805072242e-12
+      ],
+      [
+        1,
+        -1.839497110051443,
+        2.86783810333645,
+        3.3610327362439947e-12
+      ],
+      [
+        8,
+        -2.4413116016823193,
+        0.0226170797116577,
+        5.356192425747963e-12
+      ],
+      [
+        1,
+        -1.9829088466723042,
+        -0.8774471805243957,
+        6.669345653922183e-13
+      ],
+      [
+        1,
+        -3.4033692064992205,
+        -0.15913217572987431,
+        -2.153584559332191e-12
+      ],
+      [
+        8,
+        -1.2402427665439566,
+        -2.1029293261225845,
+        -4.956101042398842e-12
+      ],
+      [
+        1,
+        -0.2315628746508509,
+        -2.1559730251541254,
+        -9.347026078958614e-13
+      ],
+      [
+        1,
+        -1.5638720965617041,
+        -3.026970279501581,
+        2.391839677269436e-12
+      ],
+      [
+        8,
+        1.2010688360833126,
+        -2.1255464047695627,
+        6.078981464763621e-12
+      ],
+      [
+        1,
+        1.751345973255118,
+        -1.2785258438458529,
+        4.1758241755800245e-13
+      ],
+      [
+        1,
+        1.839497110375059,
+        -2.867838103196837,
+        -2.641711970056796e-12
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built finite hydrogen-bonded hexamer ring; unconstrained RHF relaxation, topology must be reviewed",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 11,
+      "wallSeconds": 22.829578620992834,
+      "maxGradientEhPerBohr": 2.3881520210267126e-06,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "cluster",
+    "ring:6"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 30,
+  "nElectrons": 60,
+  "nAO_631plusGstar": 138,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 42,
+  "predictedRecordBytes": 16784,
+  "predictedRecordBytes631": 156560,
+  "appPredictedMs": 17116,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 38
+    }
+  ],
+  "energyEh": -449.88756349453257,
+  "wallSeconds": 0.29705461900448427,
+  "converged": true,
+  "gapEh": 0.8589798883144636,
+  "topgroup": "C6h",
+  "computedGroup": "C2h",
+  "cycles": 38,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

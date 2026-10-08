@@ -1,0 +1,133 @@
+{
+  "id": "imidazole",
+  "name": "imidazole",
+  "formula": "C3H4N2",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        -0.6705476641922251,
+        -0.9899826723984385,
+        0.3118327959118484
+      ],
+      [
+        7,
+        0.5715735903778977,
+        -1.104768274864931,
+        0.7313082271961008
+      ],
+      [
+        6,
+        1.1958763584462766,
+        0.08583979488022911,
+        0.30333821990584486
+      ],
+      [
+        6,
+        0.33000097567571757,
+        0.8808304964321056,
+        -0.354960831333291
+      ],
+      [
+        7,
+        -0.8838033988638545,
+        0.20121913227024163,
+        -0.35968231453741223
+      ],
+      [
+        1,
+        -1.4638015403932938,
+        -1.7142148751459625,
+        0.45225150774906997
+      ],
+      [
+        1,
+        2.2383580125298175,
+        0.27250622260834345,
+        0.510599083112148
+      ],
+      [
+        1,
+        0.4419696971692933,
+        1.8491711828612905,
+        -0.8178544040136257
+      ],
+      [
+        1,
+        -1.7596260307509106,
+        0.5193989933590543,
+        -0.7768322839902729
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity c1ncc[nH]1; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 15,
+      "wallSeconds": 15.114399935991969,
+      "maxGradientEhPerBohr": 6.018991834721987e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "ring:5"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "c1ncc[nH]1",
+  "origin": "PLAN F5",
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": 103,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 29,
+  "predictedRecordBytes": 9192,
+  "predictedRecordBytes631": 88520,
+  "appPredictedMs": 2876,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 50
+    }
+  ],
+  "energyEh": -221.9879949393363,
+  "wallSeconds": 1.241086430993164,
+  "converged": true,
+  "gapEh": 0.577223346091271,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 50,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "id": "ferrocene",
+  "name": "ferrocene (eclipsed)",
+  "formula": "C10H10Fe",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        26,
+        -5.761357961007413e-09,
+        1.6477308468045789e-09,
+        9.374585528820139e-13
+      ],
+      [
+        6,
+        1.2081421362058289,
+        -3.452741489835003e-09,
+        -1.6842212995924188
+      ],
+      [
+        1,
+        2.2825957531979846,
+        -2.917727937920754e-09,
+        -1.7393870197030108
+      ],
+      [
+        6,
+        0.37333644576303615,
+        1.1490114326324516,
+        -1.684221307388315
+      ],
+      [
+        1,
+        0.7053608744807582,
+        2.17087754818202,
+        -1.7393870368686324
+      ],
+      [
+        6,
+        -0.9774075233392606,
+        0.7101281305293515,
+        -1.684221279868257
+      ],
+      [
+        1,
+        -1.8466587584312628,
+        1.3416761212719017,
+        -1.7393869983800676
+      ],
+      [
+        6,
+        -0.9774075116123654,
+        -0.7101281199333895,
+        -1.6842212958605896
+      ],
+      [
+        1,
+        -1.8466587475924159,
+        -1.3416761122387013,
+        -1.7393870219911762
+      ],
+      [
+        6,
+        0.3733364535035257,
+        -1.1490114399294327,
+        -1.6842213043055632
+      ],
+      [
+        1,
+        0.7053608806889128,
+        -2.170877554969018,
+        -1.7393870292993712
+      ],
+      [
+        6,
+        1.2081421362056823,
+        -3.451973208763352e-09,
+        1.684221299594761
+      ],
+      [
+        1,
+        2.282595753197816,
+        -2.9167291335116896e-09,
+        1.7393870197058265
+      ],
+      [
+        6,
+        0.37333644576428693,
+        1.1490114326341734,
+        1.6842213073888945
+      ],
+      [
+        1,
+        0.7053608744814027,
+        2.1708775481838196,
+        1.7393870368681752
+      ],
+      [
+        6,
+        -0.9774075233371291,
+        0.7101281305282418,
+        1.6842212798726577
+      ],
+      [
+        1,
+        -1.8466587584294198,
+        1.34167612127061,
+        1.7393869983856785
+      ],
+      [
+        6,
+        -0.9774075116115453,
+        -0.7101281199348924,
+        1.6842212958623177
+      ],
+      [
+        1,
+        -1.846658747591376,
+        -1.3416761122402419,
+        1.7393870219923608
+      ],
+      [
+        6,
+        0.3733364535041636,
+        -1.1490114399300593,
+        1.6842213043068224
+      ],
+      [
+        1,
+        0.7053608806896926,
+        -2.170877554969696,
+        1.739387029300186
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; eclipsed D5h built sandwich, RHF optimisation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 8,
+      "wallSeconds": 225.38897059499868,
+      "maxGradientEhPerBohr": 1.8006927081870572e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "d-block",
+    "ring:5"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 48,
+  "nElectrons": 96,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Fe"
+  ],
+  "nAO_STO3G": 79,
+  "predictedRecordBytes": 53192,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 833409,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 95
+    }
+  ],
+  "energyEh": -1628.5705018413287,
+  "wallSeconds": 6.224549491002108,
+  "converged": true,
+  "gapEh": 0.4905752281360769,
+  "topgroup": "D5h",
+  "computedGroup": "C2v",
+  "cycles": 95,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "pyscfStability": {
+    "status": "MEASURED",
+    "internalStable": true,
+    "externalStable": true,
+    "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"
+  },
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Fe",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

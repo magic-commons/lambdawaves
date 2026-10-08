@@ -1,0 +1,122 @@
+{
+  "id": "C4H6",
+  "name": "1,3-butadiene",
+  "formula": "C4H6",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        1.1166882746561553,
+        1.4740879105045814
+      ],
+      [
+        6,
+        0,
+        0,
+        0.7316
+      ],
+      [
+        6,
+        0,
+        0,
+        -0.7316
+      ],
+      [
+        6,
+        0,
+        1.1166882746561553,
+        -1.4740879105045814
+      ],
+      [
+        1,
+        0,
+        -0.9764949347594187,
+        1.2159115137896257
+      ],
+      [
+        1,
+        0,
+        -0.9764949347594187,
+        -1.2159115137896257
+      ],
+      [
+        1,
+        0,
+        2.0931832094155736,
+        0.9897763967149555
+      ],
+      [
+        1,
+        0,
+        1.0478668815635592,
+        2.561913087567879
+      ],
+      [
+        1,
+        0,
+        1.0478668815635592,
+        -2.561913087567879
+      ],
+      [
+        1,
+        0,
+        2.0931832094155736,
+        -0.9897763967149555
+      ]
+    ],
+    "source": "gas electron diffraction (Kveseth, Seip & St\u00f8levik, 1980) r(C1=C2) = 1.3410 \u00c5, r(C2\u2013C3) = 1.4632 \u00c5, \u2220CCC = 123.62\u00b0, trans C\u2082\u2095 planar; every C\u2013H is placed at the measured mean 1.090 \u00c5 with \u2220CCH = 120.0\u00b0 in the plane \u2014 the ED analysis's own \u2220CCH lie within 1.5\u00b0 of 120\u00b0, and the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 1703,
+  "nocc": 15,
+  "nElectrons": 30,
+  "nAO_631plusGstar": 88,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 26,
+  "predictedRecordBytes": 7872,
+  "predictedRecordBytes631": 65408,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -153.01187913498734,
+  "wallSeconds": 1.2826074799959315,
+  "converged": true,
+  "gapEh": 0.5046570304789917,
+  "topgroup": "C2v",
+  "computedGroup": "C2v",
+  "cycles": 28,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "id": "B12H12--",
+  "name": "closo-dodecaborate dianion",
+  "formula": "B12H12",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": -2,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        5,
+        0.0,
+        -0.8852401720515414,
+        -1.4323486865861987
+      ],
+      [
+        5,
+        0.0,
+        -0.8852401720515414,
+        1.4323486865861987
+      ],
+      [
+        5,
+        0.0,
+        0.8852401720515414,
+        -1.4323486865861987
+      ],
+      [
+        5,
+        0.0,
+        0.8852401720515414,
+        1.4323486865861987
+      ],
+      [
+        5,
+        -1.4323486865861987,
+        0.0,
+        -0.8852401720515414
+      ],
+      [
+        5,
+        1.4323486865861987,
+        0.0,
+        -0.8852401720515414
+      ],
+      [
+        5,
+        -1.4323486865861987,
+        0.0,
+        0.8852401720515414
+      ],
+      [
+        5,
+        1.4323486865861987,
+        0.0,
+        0.8852401720515414
+      ],
+      [
+        5,
+        -0.8852401720515414,
+        -1.4323486865861987,
+        0.0
+      ],
+      [
+        5,
+        -0.8852401720515414,
+        1.4323486865861987,
+        0.0
+      ],
+      [
+        5,
+        0.8852401720515414,
+        -1.4323486865861987,
+        0.0
+      ],
+      [
+        5,
+        0.8852401720515414,
+        1.4323486865861987,
+        0.0
+      ],
+      [
+        1,
+        0.0,
+        -1.491221134399719,
+        -2.412846480200921
+      ],
+      [
+        1,
+        0.0,
+        -1.491221134399719,
+        2.412846480200921
+      ],
+      [
+        1,
+        0.0,
+        1.491221134399719,
+        -2.412846480200921
+      ],
+      [
+        1,
+        0.0,
+        1.491221134399719,
+        2.412846480200921
+      ],
+      [
+        1,
+        -2.412846480200921,
+        0.0,
+        -1.491221134399719
+      ],
+      [
+        1,
+        2.412846480200921,
+        0.0,
+        -1.491221134399719
+      ],
+      [
+        1,
+        -2.412846480200921,
+        0.0,
+        1.491221134399719
+      ],
+      [
+        1,
+        2.412846480200921,
+        0.0,
+        1.491221134399719
+      ],
+      [
+        1,
+        -1.491221134399719,
+        -2.412846480200921,
+        0.0
+      ],
+      [
+        1,
+        -1.491221134399719,
+        2.412846480200921,
+        0.0
+      ],
+      [
+        1,
+        1.491221134399719,
+        -2.412846480200921,
+        0.0
+      ],
+      [
+        1,
+        1.491221134399719,
+        2.412846480200921,
+        0.0
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; ideal icosahedral borane cage built here; RHF relaxation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 8,
+      "wallSeconds": 198.03289422499074,
+      "maxGradientEhPerBohr": 1.1348142219415173e-06,
+      "details": "Ih-constrained cage radius and radial X-H distance optimisation; experimental geometry and unconstrained minimum UNVERIFIED"
+    }
+  },
+  "motifs": [
+    "cage"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 37,
+  "nElectrons": 74,
+  "nAO_631plusGstar": 252,
+  "basis631CountSource": {
+    "5": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 72,
+  "predictedRecordBytes": 44672,
+  "predictedRecordBytes631": 514112,
+  "appPredictedMs": 527244,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 43
+    }
+  ],
+  "energyEh": -299.5060134347292,
+  "wallSeconds": 4.703959018996102,
+  "converged": true,
+  "gapEh": 0.6826978304911426,
+  "topgroup": "Ih",
+  "computedGroup": "Ci",
+  "cycles": 43,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

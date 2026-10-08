@@ -1,0 +1,74 @@
+{
+  "id": "HF",
+  "name": "hydrogen fluoride",
+  "formula": "FH",
+  "section": "DIATOMICS",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        9,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0.9168
+      ]
+    ],
+    "source": "CCCBDB experimental r(H\u2013F) = 0.9168 \u00c5 (the window's original preset, frozen); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "diatomics",
+  "presentInstability": null,
+  "appPredictedMs": 14,
+  "nocc": 5,
+  "nElectrons": 10,
+  "nAO_631plusGstar": 21,
+  "basis631CountSource": {
+    "9": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 6,
+  "predictedRecordBytes": 2432,
+  "predictedRecordBytes631": 5912,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -98.57075766347853,
+  "wallSeconds": 0.02944903699972201,
+  "converged": true,
+  "gapEh": 1.0934082999596768,
+  "topgroup": "Coov",
+  "computedGroup": "C2v",
+  "cycles": 11,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

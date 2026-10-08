@@ -1,0 +1,73 @@
+{
+  "id": "Br2",
+  "name": "dibromine",
+  "formula": "Br2",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        35,
+        0,
+        0,
+        0
+      ],
+      [
+        35,
+        0,
+        0,
+        2.2811
+      ]
+    ],
+    "source": "CCCBDB experimental r(Br\u2013Br) = 2.2811 \u00c5 \u2014 38 Cartesian AOs, the widest entry, and still cheaper than benzene because Br has only 8 shells; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": null,
+  "appPredictedMs": 4000,
+  "nocc": 35,
+  "nElectrons": 70,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {},
+  "basis631MissingElements": [
+    "Br"
+  ],
+  "nAO_STO3G": 38,
+  "predictedRecordBytes": 14208,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -5091.06377754789,
+  "wallSeconds": 0.9476872259983793,
+  "converged": true,
+  "gapEh": 0.4753547645008962,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 17,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Br",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

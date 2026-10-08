@@ -1,0 +1,102 @@
+{
+  "id": "Na2Cl2",
+  "name": "disodium dichloride finite square",
+  "formula": "Cl2Na2",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        11,
+        -1.1771550138820066,
+        -1.1771550138820066,
+        0.0
+      ],
+      [
+        17,
+        1.1771550138820066,
+        -1.1771550138820066,
+        0.0
+      ],
+      [
+        11,
+        1.1771550138820066,
+        1.1771550138820066,
+        0.0
+      ],
+      [
+        17,
+        -1.1771550138820066,
+        1.1771550138820066,
+        0.0
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; alternating square, RHF edge-length optimisation under D2h symmetry",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 11,
+      "wallSeconds": 1.4786921109916875,
+      "maxGradientEhPerBohr": null,
+      "details": "constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof"
+    }
+  },
+  "motifs": [
+    "cluster"
+  ],
+  "optimise": true,
+  "optimisationMode": "scale",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 28,
+  "nElectrons": 56,
+  "nAO_631plusGstar": 92,
+  "basis631CountSource": {
+    "11": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "17": "installed PySCF 6-31+G* table, count only, not vendored or solved"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 36,
+  "predictedRecordBytes": 12992,
+  "predictedRecordBytes631": 71232,
+  "appPredictedMs": 6036,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 39
+    }
+  ],
+  "energyEh": -1229.1745739335763,
+  "wallSeconds": 0.2590052360028494,
+  "converged": true,
+  "gapEh": 0.7056732666469554,
+  "topgroup": "D2h",
+  "computedGroup": "D2h",
+  "cycles": 39,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

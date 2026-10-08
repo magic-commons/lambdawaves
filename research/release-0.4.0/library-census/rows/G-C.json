@@ -1,0 +1,258 @@
+{
+  "id": "G-C",
+  "name": "guanine-cytosine base pair",
+  "formula": "C9H10N8O2",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.2806398280334383,
+        -2.142682538322435,
+        2.0449798261908883
+      ],
+      [
+        6,
+        -0.09529709279055198,
+        -1.1622627443245648,
+        1.0183933085667942
+      ],
+      [
+        7,
+        -0.9684289078071024,
+        -0.1941139798409302,
+        0.8990035681369242
+      ],
+      [
+        6,
+        -0.5583221344234001,
+        0.7187620781213144,
+        -0.10226181873664597
+      ],
+      [
+        7,
+        -1.2549397295249247,
+        1.8572651726547378,
+        -0.4675878412020404
+      ],
+      [
+        6,
+        -0.5122629871284526,
+        2.465024125686281,
+        -1.4812266086826227
+      ],
+      [
+        7,
+        0.5811325412508901,
+        1.7994227140490349,
+        -1.77521677093267
+      ],
+      [
+        6,
+        0.5498152886046525,
+        0.6903984914196205,
+        -0.9009892586932586
+      ],
+      [
+        6,
+        1.5343496916131194,
+        -0.4070965381658892,
+        -0.765294595663927
+      ],
+      [
+        8,
+        2.5841975280887133,
+        -0.6178852350728424,
+        -1.3470547296757058
+      ],
+      [
+        7,
+        1.0663246572145522,
+        -1.3269523220023616,
+        0.25852967379643915
+      ],
+      [
+        1,
+        -1.2356018176440187,
+        -2.0643139600288607,
+        2.4158686461053804
+      ],
+      [
+        1,
+        -0.1300084089083065,
+        -3.0962210088423063,
+        1.6889228171256254
+      ],
+      [
+        1,
+        -2.1327010716989543,
+        2.182947974167995,
+        -0.059821862381605445
+      ],
+      [
+        1,
+        -0.8425013747091096,
+        3.3858674597934395,
+        -1.9467051121965104
+      ],
+      [
+        1,
+        1.6948836458963321,
+        -2.088159689292233,
+        0.5204607582429338
+      ],
+      [
+        7,
+        4.453796778616278,
+        -2.917836100120409,
+        -0.7991593010749359
+      ],
+      [
+        6,
+        4.114815557486425,
+        -3.1015119340752153,
+        0.5776237022780476
+      ],
+      [
+        6,
+        5.131468869572419,
+        -2.721245124058432,
+        1.5675190995155015
+      ],
+      [
+        6,
+        4.851079153914244,
+        -2.9612598791101554,
+        2.845331313845588
+      ],
+      [
+        7,
+        3.6370559999090304,
+        -3.5421256830673054,
+        3.191666279296529
+      ],
+      [
+        6,
+        2.6430063352214264,
+        -3.920419781479274,
+        2.2183696673631625
+      ],
+      [
+        8,
+        1.5988343195405457,
+        -4.437078872834271,
+        2.580604008965285
+      ],
+      [
+        7,
+        2.9579859262622046,
+        -3.642322662078308,
+        0.8329733370121184
+      ],
+      [
+        1,
+        4.939156182934038,
+        -2.0273158393293045,
+        -0.9624197257041217
+      ],
+      [
+        1,
+        3.6108881249832727,
+        -2.9717473892498454,
+        -1.3834571897170305
+      ],
+      [
+        1,
+        6.060034480976711,
+        -2.27915714602383,
+        1.2488366687566477
+      ],
+      [
+        1,
+        5.522798406676209,
+        -2.7290706046324336,
+        3.668385612927837
+      ],
+      [
+        1,
+        3.427490195770017,
+        -3.7362076907543393,
+        4.170747126867304
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; assembled neutral monomers, intermolecular RHF relaxation; Watson-Crick hydrogen-bond topology UNVERIFIED; Watson-Crick donor/acceptor triple aligned, rigid-monomer constrained separation optimisation, fixed orientation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 12,
+      "wallSeconds": 111.08836435599369,
+      "maxGradientEhPerBohr": null,
+      "details": "rigid separately relaxed G/C monomers; donor/acceptor triple G(O6,N1,N2)-C(N4,N3,O2) Kabsch aligned, fixed orientation, constrained contact-separation optimisation; hydrogen-bond angles, Watson-Crick topology and unconstrained minimum UNVERIFIED"
+    }
+  },
+  "motifs": [
+    "nucleobase"
+  ],
+  "optimise": true,
+  "optimisationMode": "pair",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "monomers": [
+    "guanine",
+    "cytosine"
+  ],
+  "nocc": 68,
+  "nElectrons": 136,
+  "nAO_631plusGstar": 381,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 105,
+  "predictedRecordBytes": 91928,
+  "predictedRecordBytes631": 1169432,
+  "appPredictedMs": 4108525,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 112
+    }
+  ],
+  "energyEh": -920.0280066338664,
+  "wallSeconds": 45.47184994400595,
+  "converged": true,
+  "gapEh": 0.4313992870719181,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 112,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

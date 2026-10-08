@@ -1,0 +1,172 @@
+{
+  "id": "asparagine",
+  "name": "asparagine",
+  "formula": "C4H8N2O3",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -0.293,
+        1.686,
+        0.094
+      ],
+      [
+        6,
+        -0.448,
+        0.292,
+        -0.34
+      ],
+      [
+        6,
+        -1.846,
+        -0.179,
+        -0.031
+      ],
+      [
+        8,
+        -2.51,
+        0.402,
+        0.794
+      ],
+      [
+        6,
+        0.562,
+        -0.588,
+        0.401
+      ],
+      [
+        6,
+        1.96,
+        -0.197,
+        -0.002
+      ],
+      [
+        8,
+        2.132,
+        0.697,
+        -0.804
+      ],
+      [
+        7,
+        3.019,
+        -0.841,
+        0.527
+      ],
+      [
+        8,
+        -2.353,
+        -1.243,
+        -0.673
+      ],
+      [
+        1,
+        -0.904,
+        2.297,
+        -0.427
+      ],
+      [
+        1,
+        -0.453,
+        1.776,
+        1.086
+      ],
+      [
+        1,
+        -0.27,
+        0.223,
+        -1.413
+      ],
+      [
+        1,
+        0.442,
+        -0.451,
+        1.476
+      ],
+      [
+        1,
+        0.389,
+        -1.633,
+        0.146
+      ],
+      [
+        1,
+        2.881,
+        -1.556,
+        1.168
+      ],
+      [
+        1,
+        3.919,
+        -0.59,
+        0.268
+      ],
+      [
+        1,
+        -3.254,
+        -1.508,
+        -0.441
+      ]
+    ],
+    "source": "wwPDB Chemical Component Dictionary ASN ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/ASN.cif; computed reference, UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](CC(=O)N)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 35,
+  "nElectrons": 70,
+  "nAO_631plusGstar": 187,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 53,
+  "predictedRecordBytes": 25368,
+  "predictedRecordBytes631": 284792,
+  "appPredictedMs": 73575,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 75
+    }
+  ],
+  "energyEh": -483.21790965622233,
+  "wallSeconds": 0.9995565669960342,
+  "converged": true,
+  "gapEh": 0.6036276532378729,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 75,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

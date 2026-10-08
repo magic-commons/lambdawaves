@@ -1,0 +1,178 @@
+{
+  "id": "Si5H12",
+  "name": "neopentasilane",
+  "formula": "H12Si5",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        14,
+        -0.8448114998220838,
+        1.5635218634033574,
+        -1.3767979395977348
+      ],
+      [
+        14,
+        -0.0001356545577183865,
+        0.00013429537496418087,
+        0.0010039921662937585
+      ],
+      [
+        14,
+        -1.4070364582236143,
+        -0.3180347345595115,
+        1.7259917826190658
+      ],
+      [
+        14,
+        1.996629832586046,
+        0.6841539576083747,
+        0.7763536200163748
+      ],
+      [
+        14,
+        0.2550735119926004,
+        -1.9295313169032655,
+        -1.124725921043356
+      ],
+      [
+        1,
+        -2.1219810266061176,
+        1.178347861105771,
+        -1.874926089629071
+      ],
+      [
+        1,
+        -1.0017781293888066,
+        2.811494915756899,
+        -0.7091604778432058
+      ],
+      [
+        1,
+        0.0068088444013563966,
+        1.7792980194169035,
+        -2.4974835800693604
+      ],
+      [
+        1,
+        -2.6755676528418486,
+        -0.7850564070269971,
+        1.2786826196743617
+      ],
+      [
+        1,
+        -1.6235121815305604,
+        0.8905185932091303,
+        2.446920650071879
+      ],
+      [
+        1,
+        -0.8934560901251355,
+        -1.2793421099051414,
+        2.6422173467688777
+      ],
+      [
+        1,
+        1.8880560695863828,
+        1.9288138722490595,
+        1.4591939539827972
+      ],
+      [
+        1,
+        2.5483742508425373,
+        -0.2600027224927575,
+        1.6881642293531522
+      ],
+      [
+        1,
+        2.931655803693735,
+        0.8553133530660044,
+        -0.283693996578388
+      ],
+      [
+        1,
+        1.1132990199729407,
+        -1.7621501441847838,
+        -2.2486421089205004
+      ],
+      [
+        1,
+        0.8218864550762208,
+        -2.9405704179952576,
+        -0.2974680241462721
+      ],
+      [
+        1,
+        -0.9935050951904072,
+        -2.416908878099816,
+        -1.605630057011531
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity Si[Si](Si)(Si)Si; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 17,
+      "wallSeconds": 103.69045518399798,
+      "maxGradientEhPerBohr": 9.680897269959132e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "Si[Si](Si)(Si)Si",
+  "origin": "PLAN F5",
+  "nocc": 41,
+  "nElectrons": 82,
+  "nAO_631plusGstar": 139,
+  "basis631CountSource": {
+    "14": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 57,
+  "predictedRecordBytes": 28904,
+  "predictedRecordBytes631": 158792,
+  "appPredictedMs": 93076,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 43
+    }
+  ],
+  "energyEh": -1435.085620949659,
+  "wallSeconds": 0.6718290519929724,
+  "converged": true,
+  "gapEh": 0.7076894968197258,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 43,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

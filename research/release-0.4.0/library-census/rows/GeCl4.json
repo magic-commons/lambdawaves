@@ -1,0 +1,107 @@
+{
+  "id": "GeCl4",
+  "name": "germanium tetrachloride",
+  "formula": "Cl4Ge",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        32,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        17,
+        1.2258722635452828,
+        1.2258722635452828,
+        1.2258722635452828
+      ],
+      [
+        17,
+        1.2258722635452828,
+        -1.2258722635452828,
+        -1.2258722635452828
+      ],
+      [
+        17,
+        -1.2258722635452828,
+        1.2258722635452828,
+        -1.2258722635452828
+      ],
+      [
+        17,
+        -1.2258722635452828,
+        -1.2258722635452828,
+        1.2258722635452828
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; tetrahedral RHF bond-length optimisation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 10,
+      "wallSeconds": 3.9295188329997472,
+      "maxGradientEhPerBohr": null,
+      "details": "constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": "ligand-scale",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 50,
+  "nElectrons": 100,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "17": "installed PySCF 6-31+G* table, count only, not vendored or solved"
+  },
+  "basis631MissingElements": [
+    "Ge"
+  ],
+  "nAO_STO3G": 55,
+  "predictedRecordBytes": 27128,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 23081,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 32
+    }
+  ],
+  "energyEh": -3870.8338324100005,
+  "wallSeconds": 0.6900356779951835,
+  "converged": true,
+  "gapEh": 0.5968629476171661,
+  "topgroup": "Td",
+  "computedGroup": "D2",
+  "cycles": 32,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Ge",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "KrF2",
+  "name": "krypton difluoride",
+  "formula": "F2Kr",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        36,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        9,
+        0.0,
+        0.0,
+        1.9317839295288821
+      ],
+      [
+        9,
+        0.0,
+        0.0,
+        -1.9317839295288821
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; experimental coordinate fetch inaccessible; linear RHF bond-length optimisation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 11,
+      "wallSeconds": 0.6050906980090076,
+      "maxGradientEhPerBohr": null,
+      "details": "constrained common-distance optimisation preserving initial point symmetry; not an unconstrained minimum proof"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": "ligand-scale",
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 27,
+  "nElectrons": 54,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "9": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Kr"
+  ],
+  "nAO_STO3G": 29,
+  "predictedRecordBytes": 9240,
+  "predictedRecordBytes631": null,
+  "appPredictedMs": 1228,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 27
+    }
+  ],
+  "energyEh": -2919.3545249690296,
+  "wallSeconds": 0.15553064200503286,
+  "converged": true,
+  "gapEh": 0.3551324082638567,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 27,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Kr",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

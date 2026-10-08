@@ -1,0 +1,81 @@
+{
+  "id": "HCN",
+  "name": "hydrogen cyanide",
+  "formula": "CHN",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        -1.0655
+      ],
+      [
+        7,
+        0,
+        0,
+        1.1532
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013H) = 1.0655 \u00c5, r(C\u2261N) = 1.1532 \u00c5, linear; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 43,
+  "nocc": 7,
+  "nElectrons": 14,
+  "nAO_631plusGstar": 40,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 11,
+  "predictedRecordBytes": 3192,
+  "predictedRecordBytes631": 15488,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -91.67519078743625,
+  "wallSeconds": 0.10393993600155227,
+  "converged": true,
+  "gapEh": 0.791109303175134,
+  "topgroup": "Coov",
+  "computedGroup": "C2v",
+  "cycles": 24,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "status": "MEASURED",
+  "pass": true,
+  "checks": [
+    "all original geometries/charges preserved",
+    "both vendored AO-count checks where available",
+    "charge-adjusted occupied counts",
+    "record-byte arithmetic",
+    "independent literal diversity gate replay",
+    "family cardinalities",
+    "finite final energies/gaps/times",
+    "conditional basis nulls",
+    "section/byte totals",
+    "water coefficient proof",
+    "full Ih character proof",
+    "C60 signed-field proof"
+  ],
+  "numericStatus": "All counts DERIVED from the audited inputs",
+  "rows": 117,
+  "originalRows": 54,
+  "pinnedBasisCountChecks": 112,
+  "gatePass": 70,
+  "gateFail": 47,
+  "predictedStoBytes": 2821408
+}

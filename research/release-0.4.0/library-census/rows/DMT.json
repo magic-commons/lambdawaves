@@ -1,0 +1,260 @@
+{
+  "id": "DMT",
+  "name": "N,N-dimethyltryptamine",
+  "formula": "C12H16N2",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        -1.364072236303736,
+        -2.5099262341555195,
+        -1.4349047378348776
+      ],
+      [
+        7,
+        -1.3570065401921605,
+        -1.5365481843521127,
+        -0.31209350974586775
+      ],
+      [
+        6,
+        -1.9282592827864438,
+        -2.1765269927970765,
+        0.9013672575500173
+      ],
+      [
+        6,
+        -2.1223363423827224,
+        -0.30928926481302893,
+        -0.6803579833866016
+      ],
+      [
+        6,
+        -1.7108083824647575,
+        0.9317432441866974,
+        0.160353492776197
+      ],
+      [
+        6,
+        -0.3216861265475399,
+        1.453337775437466,
+        -0.16984259690631356
+      ],
+      [
+        6,
+        -0.03148970936118188,
+        2.4206161766544056,
+        -1.0582927199044
+      ],
+      [
+        7,
+        1.3527672592587112,
+        2.6294867785572382,
+        -1.111501250347093
+      ],
+      [
+        6,
+        1.9617695905927188,
+        1.7626486786731765,
+        -0.20389254639816995
+      ],
+      [
+        6,
+        3.315249915907353,
+        1.5933941344511926,
+        0.12346882839804124
+      ],
+      [
+        6,
+        3.6232411222809615,
+        0.650582544310906,
+        1.0685390668238703
+      ],
+      [
+        6,
+        2.617724598931304,
+        -0.11917946740732242,
+        1.6874042635746076
+      ],
+      [
+        6,
+        1.2964122680431684,
+        0.04983613688106626,
+        1.3633784638478925
+      ],
+      [
+        6,
+        0.9457310123783396,
+        1.0085315745225993,
+        0.3972538344111696
+      ],
+      [
+        1,
+        -0.8907020514270997,
+        -2.0601795236396026,
+        -2.3056055367314956
+      ],
+      [
+        1,
+        -0.7903936180103291,
+        -3.3894486784559055,
+        -1.1482047581577846
+      ],
+      [
+        1,
+        -2.370782832033846,
+        -2.832882355660979,
+        -1.7157447093856508
+      ],
+      [
+        1,
+        -2.9565668439448136,
+        -2.518907359481156,
+        0.7539653182553162
+      ],
+      [
+        1,
+        -1.9192790020065627,
+        -1.4739824824964063,
+        1.7311043408184916
+      ],
+      [
+        1,
+        -1.3166800924548252,
+        -3.034477834113327,
+        1.1743801487534298
+      ],
+      [
+        1,
+        -3.201203277620298,
+        -0.4696659519388252,
+        -0.5775448910366001
+      ],
+      [
+        1,
+        -1.9258804061368342,
+        -0.09305298211664291,
+        -1.7299885077095274
+      ],
+      [
+        1,
+        -1.7746900573476887,
+        0.6933664259033063,
+        1.219531040406802
+      ],
+      [
+        1,
+        -2.4397810190764995,
+        1.7165512735076858,
+        -0.03606448312866432
+      ],
+      [
+        1,
+        -0.6907185784717232,
+        3.007033533833032,
+        -1.683326400291707
+      ],
+      [
+        1,
+        1.825807885030091,
+        3.332284752686291,
+        -1.6770769077757834
+      ],
+      [
+        1,
+        4.081804507924671,
+        2.1876782754140525,
+        -0.3548488985479937
+      ],
+      [
+        1,
+        4.6566552881228995,
+        0.4900735499574018,
+        1.3490656653508986
+      ],
+      [
+        1,
+        2.9028679419841485,
+        -0.8537401341664544,
+        2.4284333778234064
+      ],
+      [
+        1,
+        0.5323050094603575,
+        -0.5493574113575312,
+        1.8410453357356507
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity CN(C)CCc1c[nH]c2ccccc12; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 120,
+      "wallSeconds": 3494.385561821997,
+      "maxGradientEhPerBohr": 8.38644043694714e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "ring:5",
+    "ring:6"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "CN(C)CCc1c[nH]c2ccccc12",
+  "origin": "PLAN F5",
+  "nocc": 51,
+  "nElectrons": 102,
+  "nAO_631plusGstar": 298,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 86,
+  "predictedRecordBytes": 62592,
+  "predictedRecordBytes631": 717248,
+  "appPredictedMs": 1405049,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 83
+    }
+  ],
+  "energyEh": -565.6603648014342,
+  "wallSeconds": 4.631043921996024,
+  "converged": true,
+  "gapEh": 0.4725097731537795,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 83,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

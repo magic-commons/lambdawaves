@@ -1,0 +1,80 @@
+{
+  "id": "MgH2",
+  "name": "magnesium dihydride",
+  "formula": "H2Mg",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        12,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1.7031
+      ],
+      [
+        1,
+        0,
+        0,
+        -1.7031
+      ]
+    ],
+    "source": "linear D\u221eh; r\u2080(Mg\u2013H) = 1.7031 \u00c5 from the gas-phase IR emission spectrum (Shayesteh, Appadoo, Gordon & Bernath, 2003); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "hydrides",
+  "presentInstability": null,
+  "appPredictedMs": 43,
+  "nocc": 7,
+  "nElectrons": 14,
+  "nAO_631plusGstar": 27,
+  "basis631CountSource": {
+    "12": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 11,
+  "predictedRecordBytes": 3192,
+  "predictedRecordBytes631": 8312,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -198.20077268831582,
+  "wallSeconds": 0.09141643899783958,
+  "converged": true,
+  "gapEh": 0.673572254003461,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 21,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

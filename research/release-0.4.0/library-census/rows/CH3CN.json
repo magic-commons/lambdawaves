@@ -1,0 +1,99 @@
+{
+  "id": "CH3CN",
+  "name": "acetonitrile",
+  "formula": "C2H3N",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        0,
+        1.458
+      ],
+      [
+        7,
+        0,
+        0,
+        2.6159999999999997
+      ],
+      [
+        1,
+        1.024651300817198,
+        0,
+        0.36284805598710895
+      ],
+      [
+        1,
+        -0.5123256504085988,
+        0.8873740565284642,
+        0.36284805598710895
+      ],
+      [
+        1,
+        -0.5123256504085995,
+        -0.887374056528464,
+        0.36284805598710895
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2261N) = 1.158 \u00c5, r(C\u2013C) = 1.458 \u00c5, r(C\u2013H) = 1.087 \u00c5, \u2220HCC = 109.5\u00b0, C\u2083\u1d65; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "organics",
+  "presentInstability": null,
+  "appPredictedMs": 281,
+  "nocc": 11,
+  "nElectrons": 22,
+  "nAO_631plusGstar": 63,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 18,
+  "predictedRecordBytes": 4928,
+  "predictedRecordBytes631": 34808,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -130.02862097332695,
+  "wallSeconds": 0.5486596320115495,
+  "converged": true,
+  "gapEh": 0.7633752664254868,
+  "topgroup": "C3v",
+  "computedGroup": "Cs",
+  "cycles": 35,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

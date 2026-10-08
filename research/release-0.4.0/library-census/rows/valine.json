@@ -1,0 +1,192 @@
+{
+  "id": "valine",
+  "name": "valine",
+  "formula": "C5H11NO2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        -1.3886214501774679,
+        -0.17947485548235145,
+        -1.4703900648025099
+      ],
+      [
+        6,
+        0.07065967319410771,
+        -0.03533169769602254,
+        -0.9812545535274181
+      ],
+      [
+        6,
+        0.43668010610908536,
+        1.4508434938738268,
+        -0.7658290107365097
+      ],
+      [
+        6,
+        0.3247383376420486,
+        -0.9128958011271839,
+        0.2864335516386024
+      ],
+      [
+        7,
+        1.7824444393866843,
+        -1.010696367109783,
+        0.5660465364449913
+      ],
+      [
+        6,
+        -0.49609721960682374,
+        -0.4039646262186969,
+        1.5111030857094965
+      ],
+      [
+        8,
+        -1.6579020895468313,
+        -0.6588859063223504,
+        1.766111233399835
+      ],
+      [
+        8,
+        0.26654388989828154,
+        0.4163222569892833,
+        2.3390239033895255
+      ],
+      [
+        1,
+        -2.0889031852940234,
+        0.1814234631156772,
+        -0.7233894100417643
+      ],
+      [
+        1,
+        -1.6211602853346743,
+        -1.2189494781716053,
+        -1.6800090169921678
+      ],
+      [
+        1,
+        -1.53540070705805,
+        0.3933532602401259,
+        -2.3807326910605915
+      ],
+      [
+        1,
+        0.7302352719485792,
+        -0.43505369304758496,
+        -1.7514899971608433
+      ],
+      [
+        1,
+        0.2874750733625293,
+        2.003357220200388,
+        -1.6882010006845747
+      ],
+      [
+        1,
+        -0.18431743701285583,
+        1.9020218518058478,
+        0.0021164998885965917
+      ],
+      [
+        1,
+        1.4762118235638928,
+        1.558542676724726,
+        -0.47461133945367234
+      ],
+      [
+        1,
+        -0.03606845340282559,
+        -1.9199096318177447,
+        0.06625698302832315
+      ],
+      [
+        1,
+        1.9028665937108276,
+        -1.6978827496053734,
+        1.3281585803517284
+      ],
+      [
+        1,
+        2.0789938655298803,
+        -0.11443475368599448,
+        0.9834846692112734
+      ],
+      [
+        1,
+        -0.3483782468807408,
+        0.6816153372862335,
+        3.067172041361912
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity CC(C)[C@H](N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 170,
+      "wallSeconds": 1088.0730984240072,
+      "maxGradientEhPerBohr": 3.941539170904118e-05,
+      "details": "Optimization terminated successfully.; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "CC(C)[C@H](N)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 32,
+  "nElectrons": 64,
+  "nAO_631plusGstar": 174,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 51,
+  "predictedRecordBytes": 23672,
+  "predictedRecordBytes631": 247040,
+  "appPredictedMs": 63400,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 75
+    }
+  ],
+  "energyEh": -394.85853402568284,
+  "wallSeconds": 1.070822171997861,
+  "converged": true,
+  "gapEh": 0.6067722426784373,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 75,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

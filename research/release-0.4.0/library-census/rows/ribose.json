@@ -1,0 +1,198 @@
+{
+  "id": "ribose",
+  "name": "ribose (ribofuranose conformer)",
+  "formula": "C5H10O5",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        1.1519076480463855,
+        2.333857461055149,
+        -0.603095077045039
+      ],
+      [
+        6,
+        1.815058406802375,
+        1.0806422274641054,
+        -0.816549600750907
+      ],
+      [
+        6,
+        0.7628765458934552,
+        -0.05668755808335164,
+        -0.6691093450463613
+      ],
+      [
+        8,
+        -0.5191889384027745,
+        0.41486075354206803,
+        -1.1271331564245395
+      ],
+      [
+        6,
+        -1.4905965386087399,
+        -0.4873728964742389,
+        -0.5777690218717404
+      ],
+      [
+        8,
+        -2.745494294223709,
+        0.1779479747338708,
+        -0.42340958907686443
+      ],
+      [
+        6,
+        -0.9855637582425198,
+        -0.894332260384791,
+        0.8500579253722348
+      ],
+      [
+        8,
+        -1.5968200608873773,
+        -0.1141800863878092,
+        1.8781270451232972
+      ],
+      [
+        6,
+        0.5441214286849286,
+        -0.580717843384094,
+        0.7894569890371095
+      ],
+      [
+        8,
+        1.4020788543715355,
+        -1.702050588398367,
+        1.0264122227931285
+      ],
+      [
+        1,
+        1.866498412676412,
+        3.0084897244309197,
+        -0.7279152659139712
+      ],
+      [
+        1,
+        2.627581380333795,
+        0.9142786738357284,
+        -0.09051630712379115
+      ],
+      [
+        1,
+        2.2494903005185103,
+        1.028033430398145,
+        -1.824748551666967
+      ],
+      [
+        1,
+        1.087167116419726,
+        -0.8973374368116703,
+        -1.2936303217064355
+      ],
+      [
+        1,
+        -1.5827789566622676,
+        -1.3879567820415273,
+        -1.218425984158167
+      ],
+      [
+        1,
+        -2.733168980258539,
+        0.9133121484930649,
+        -1.0901267699461714
+      ],
+      [
+        1,
+        -1.1621425416642563,
+        -1.9679377305749806,
+        1.0025349162667059
+      ],
+      [
+        1,
+        -2.512702710993517,
+        0.03972770654838835,
+        1.521830284439099
+      ],
+      [
+        1,
+        0.7328073584932769,
+        0.23431013830674582,
+        1.4957648496008105
+      ],
+      [
+        1,
+        1.0888693276759236,
+        -2.0568870562650026,
+        1.8982447581089825
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity OCC1OC(O)C(O)C1O; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified; optimisation FAILED, best visited geometry only, UNVERIFIED",
+    "status": "DERIVED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": false,
+      "objectiveEvaluations": 40,
+      "wallSeconds": 432.7802851229935,
+      "details": "[Errno 32] Broken pipe"
+    }
+  },
+  "motifs": [
+    "ring:5"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "OCC1OC(O)C(O)C1O",
+  "origin": "PLAN F5",
+  "nocc": 40,
+  "nElectrons": 80,
+  "nAO_631plusGstar": 210,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 60,
+  "predictedRecordBytes": 31808,
+  "predictedRecordBytes631": 358208,
+  "appPredictedMs": 147460,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 43
+    }
+  ],
+  "energyEh": -562.0578900161355,
+  "wallSeconds": 1.161916624987498,
+  "converged": true,
+  "gapEh": 0.8048140609584622,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 43,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "DERIVED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

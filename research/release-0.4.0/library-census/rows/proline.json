@@ -1,0 +1,180 @@
+{
+  "id": "proline",
+  "name": "proline",
+  "formula": "C5H9NO2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        -0.30517325483195046,
+        -2.2258348251344415,
+        -1.6142819700485291
+      ],
+      [
+        6,
+        0.5903004638927927,
+        -1.6008084388335446,
+        -1.0801063824502641
+      ],
+      [
+        8,
+        1.866356994443927,
+        -2.131179921062931,
+        -0.9189855693098149
+      ],
+      [
+        6,
+        0.5058012348286014,
+        -0.17025483738453426,
+        -0.488024363966618
+      ],
+      [
+        6,
+        -0.8479704124845657,
+        0.5307622657560945,
+        -0.7784763008856158
+      ],
+      [
+        6,
+        -1.2947942290920331,
+        1.138913562210661,
+        0.5778581881694552
+      ],
+      [
+        6,
+        -0.059682169294064585,
+        0.9976533861195612,
+        1.4934669997878998
+      ],
+      [
+        7,
+        0.5856857982311816,
+        -0.24901860227230746,
+        1.0015794084279115
+      ],
+      [
+        1,
+        1.8067257177039677,
+        -3.0467329196633774,
+        -1.2906331975216982
+      ],
+      [
+        1,
+        1.3352058770162134,
+        0.4099636600307254,
+        -0.9064880012278381
+      ],
+      [
+        1,
+        -0.7227515952020663,
+        1.2968969280641982,
+        -1.53841559663695
+      ],
+      [
+        1,
+        -1.5713870073155367,
+        -0.19183267684255495,
+        -1.146100449067817
+      ],
+      [
+        1,
+        -1.607894679903671,
+        2.1746228460993082,
+        0.4785467722405953
+      ],
+      [
+        1,
+        -2.1257382643915563,
+        0.5722878993683072,
+        0.9886720276730547
+      ],
+      [
+        1,
+        0.5928581052196181,
+        1.8701904834050185,
+        1.389376561536808
+      ],
+      [
+        1,
+        -0.32593350715553593,
+        0.894279884440616,
+        2.5457356075233353
+      ],
+      [
+        1,
+        1.5783909280525132,
+        -0.2699086936264557,
+        1.2862762663883485
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity O=C(O)[C@@H]1CCCN1; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 48,
+      "wallSeconds": 253.11592305199883,
+      "maxGradientEhPerBohr": 6.759136652823017e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "O=C(O)[C@@H]1CCCN1",
+  "origin": "PLAN F5",
+  "nocc": 31,
+  "nElectrons": 62,
+  "nAO_631plusGstar": 170,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 49,
+  "predictedRecordBytes": 22040,
+  "predictedRecordBytes631": 235968,
+  "appPredictedMs": 50000,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 112
+    }
+  ],
+  "energyEh": -393.71065517295705,
+  "wallSeconds": 0.7526885990082519,
+  "converged": true,
+  "gapEh": 0.61079146141595,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 112,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

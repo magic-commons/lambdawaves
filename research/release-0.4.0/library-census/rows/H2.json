@@ -1,0 +1,73 @@
+{
+  "id": "H2",
+  "name": "dihydrogen",
+  "formula": "H2",
+  "section": "DIATOMICS",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0.741
+      ]
+    ],
+    "source": "CCCBDB experimental r(H\u2013H) = 0.741 \u00c5; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "diatomics",
+  "presentInstability": null,
+  "appPredictedMs": 11,
+  "nocc": 1,
+  "nElectrons": 2,
+  "nAO_631plusGstar": 4,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 2,
+  "predictedRecordBytes": 2112,
+  "predictedRecordBytes631": 2240,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -1.1167061373496687,
+  "wallSeconds": 0.012313555009313859,
+  "converged": true,
+  "gapEh": 1.2482512243164627,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 2,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

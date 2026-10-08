@@ -1,0 +1,16 @@
+{
+  "status": "MEASURED",
+  "pythonExecutable": "/home/joshua-hosain/bin/scipython",
+  "isolatedMode": true,
+  "numericTagging": "Atomic numbers DERIVED identifiers; package queries MEASURED. Null coverage is UNVERIFIED with the recorded reason.",
+  "atomicNumbers": [
+    53,
+    54
+  ],
+  "basis": "STO-3G",
+  "importable": false,
+  "coverage": null,
+  "coverageStatus": "UNVERIFIED",
+  "vendoredAnything": false,
+  "why": "ModuleNotFoundError: No module named 'basis_set_exchange'"
+}

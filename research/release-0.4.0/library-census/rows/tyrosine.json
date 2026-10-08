@@ -1,0 +1,224 @@
+{
+  "id": "tyrosine",
+  "name": "tyrosine",
+  "formula": "C9H11NO3",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        -1.8099895970763824,
+        -0.3083204508907239,
+        -1.6448573611077766
+      ],
+      [
+        6,
+        -0.6981469221788547,
+        0.6233885393239108,
+        -1.9834033097219093
+      ],
+      [
+        6,
+        0.6783381957047455,
+        0.04133668083058049,
+        -1.5488545885547143
+      ],
+      [
+        6,
+        0.749782879502968,
+        -0.3904676251198776,
+        -0.08337819470639957
+      ],
+      [
+        6,
+        1.244704570811451,
+        0.4637096043354092,
+        0.8925365035830225
+      ],
+      [
+        6,
+        1.314004534202118,
+        0.07311045264280251,
+        2.2206579125492087
+      ],
+      [
+        6,
+        0.8854885742122783,
+        -1.1953522573812958,
+        2.5957295911603016
+      ],
+      [
+        8,
+        0.9295573393897537,
+        -1.6568398485832498,
+        3.912212185371464
+      ],
+      [
+        6,
+        0.39087064899664453,
+        -2.0669249792690407,
+        1.6231706004359967
+      ],
+      [
+        6,
+        0.32839936777718026,
+        -1.6627420735262823,
+        0.3052260454557521
+      ],
+      [
+        6,
+        -0.9787892501779065,
+        1.9986764263591388,
+        -1.3170138184120577
+      ],
+      [
+        8,
+        -0.1822439632076442,
+        2.71754549334477,
+        -0.7462448317017953
+      ],
+      [
+        8,
+        -2.307439331502856,
+        2.3732618984962874,
+        -1.4950991809766845
+      ],
+      [
+        1,
+        -1.7339758109868078,
+        -1.1178564379939004,
+        -2.2817946348578944
+      ],
+      [
+        1,
+        -2.6895602574343562,
+        0.16280769930868397,
+        -1.9099193786830861
+      ],
+      [
+        1,
+        -0.6495906981002743,
+        0.818614029263449,
+        -3.0636562926703252
+      ],
+      [
+        1,
+        0.8880815649694641,
+        -0.8146375760450063,
+        -2.188026991084851
+      ],
+      [
+        1,
+        1.437618843653045,
+        0.7943086265464748,
+        -1.749464317715359
+      ],
+      [
+        1,
+        1.580793302390662,
+        1.4549053448403144,
+        0.614668429964688
+      ],
+      [
+        1,
+        1.7026761482618138,
+        0.7521109950884836,
+        2.968182714285529
+      ],
+      [
+        1,
+        1.295488911763848,
+        -0.9044307140597474,
+        4.43920417378937
+      ],
+      [
+        1,
+        0.063527219683287,
+        -3.05413760553785,
+        1.919064290117873
+      ],
+      [
+        1,
+        -0.05273085897902058,
+        -2.34949438968562,
+        -0.4399879024458969
+      ],
+      [
+        1,
+        -2.3868654112967223,
+        3.247428165760626,
+        -1.0389516441764286
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](Cc1ccc(O)cc1)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 92,
+      "wallSeconds": 2053.950987959004,
+      "maxGradientEhPerBohr": 8.765479239158935e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "ring:6"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](Cc1ccc(O)cc1)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 48,
+  "nElectrons": 96,
+  "nAO_631plusGstar": 269,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 76,
+  "predictedRecordBytes": 49472,
+  "predictedRecordBytes631": 585240,
+  "appPredictedMs": 634082,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 80
+    }
+  ],
+  "energyEh": -618.2883088096354,
+  "wallSeconds": 6.92490601199097,
+  "converged": true,
+  "gapEh": 0.512722542231391,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 80,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

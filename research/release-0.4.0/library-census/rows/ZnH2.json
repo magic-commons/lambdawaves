@@ -1,0 +1,93 @@
+{
+  "id": "ZnH2",
+  "name": "zinc dihydride",
+  "formula": "H2Zn",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        30,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1.5241
+      ],
+      [
+        1,
+        0,
+        0,
+        -1.5241
+      ]
+    ],
+    "source": "linear D\u221eh; r\u2080(Zn\u2013H) = 1.5241 \u00c5 from the gas-phase IR emission spectrum (Shayesteh, Tereszchuk, Bernath & Colin, 2003); immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "d-block"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": {
+    "lowestApB": -0.01885,
+    "lowestAmB": -0.0676,
+    "energy": -1758.305613634
+  },
+  "appPredictedMs": 503,
+  "nocc": 16,
+  "nElectrons": 32,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Zn"
+  ],
+  "nAO_STO3G": 21,
+  "predictedRecordBytes": 5912,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -1758.305613633921,
+  "wallSeconds": 0.5993493759888224,
+  "converged": true,
+  "gapEh": 0.28323860344155183,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 51,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "pyscfStability": {
+    "status": "MEASURED",
+    "internalStable": true,
+    "externalStable": false,
+    "meaning": "PySCF internal RHF orbital rotation and external RHF->UHF/complex probes; convergence alone does not certify stability"
+  },
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Zn",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

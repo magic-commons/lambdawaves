@@ -1,0 +1,93 @@
+{
+  "id": "GeH4",
+  "name": "germane",
+  "formula": "GeH4",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        32,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0.8805168955410982,
+        0.8805168955410982,
+        0.8805168955410982
+      ],
+      [
+        1,
+        0.8805168955410982,
+        -0.8805168955410982,
+        -0.8805168955410982
+      ],
+      [
+        1,
+        -0.8805168955410982,
+        0.8805168955410982,
+        -0.8805168955410982
+      ],
+      [
+        1,
+        -0.8805168955410982,
+        -0.8805168955410982,
+        0.8805168955410982
+      ]
+    ],
+    "source": "CCCBDB experimental r(Ge\u2013H) = 1.5251 \u00c5, T_d; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": null,
+  "appPredictedMs": 708,
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Ge"
+  ],
+  "nAO_STO3G": 23,
+  "predictedRecordBytes": 6648,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -2054.609803498356,
+  "wallSeconds": 0.49508884899842087,
+  "converged": true,
+  "gapEh": 0.934414680058787,
+  "topgroup": "Td",
+  "computedGroup": "D2",
+  "cycles": 25,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Ge",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

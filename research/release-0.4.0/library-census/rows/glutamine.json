@@ -1,0 +1,198 @@
+{
+  "id": "glutamine",
+  "name": "glutamine",
+  "formula": "C5H10N2O3",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        0.5988512210646474,
+        1.537831419691091,
+        -1.5661563028325176
+      ],
+      [
+        6,
+        1.1827260508755308,
+        0.4920479217211655,
+        -0.6859412331091892
+      ],
+      [
+        6,
+        0.48634674903645575,
+        -0.8827306174742515,
+        -0.8955685691299394
+      ],
+      [
+        6,
+        -1.0601338971225538,
+        -0.8388232610918356,
+        -0.9063116728189917
+      ],
+      [
+        6,
+        -1.6898135317467977,
+        -0.2611340873803966,
+        0.38272758368988213
+      ],
+      [
+        8,
+        -2.398060024643352,
+        0.7297172168704472,
+        0.408930148774472
+      ],
+      [
+        7,
+        -1.3107536126975445,
+        -0.9542768665905329,
+        1.5939846675132336
+      ],
+      [
+        6,
+        1.168151378762529,
+        0.9138579925309843,
+        0.8138490677842005
+      ],
+      [
+        8,
+        0.6208000613192103,
+        1.9018078514069967,
+        1.2657033452275748
+      ],
+      [
+        8,
+        1.894388948506583,
+        0.0335296292125687,
+        1.6053237432769534
+      ],
+      [
+        1,
+        -0.27778222218668336,
+        1.858297371793555,
+        -1.1223470432451437
+      ],
+      [
+        1,
+        1.2220487873917667,
+        2.359902319872184,
+        -1.5123747913393242
+      ],
+      [
+        1,
+        2.232073310773315,
+        0.3662517707127354,
+        -0.9631395662737685
+      ],
+      [
+        1,
+        0.8104448776557959,
+        -1.2778605326398518,
+        -1.8559384825874254
+      ],
+      [
+        1,
+        0.8348768388734724,
+        -1.5642370228853113,
+        -0.12210486191838033
+      ],
+      [
+        1,
+        -1.4066600043353803,
+        -0.23865669404158915,
+        -1.7433572057628801
+      ],
+      [
+        1,
+        -1.431990400443523,
+        -1.8523753563868608,
+        -1.0497531076659963
+      ],
+      [
+        1,
+        -1.9559687498339653,
+        -0.7210458439341384,
+        2.3592445031134326
+      ],
+      [
+        1,
+        -1.2977550772922752,
+        -1.973314814728233,
+        1.4648925588018364
+      ],
+      [
+        1,
+        1.7782092958455966,
+        0.371211603237891,
+        2.5283372186713273
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCC(=O)N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 157,
+      "wallSeconds": 1368.8360896569939,
+      "maxGradientEhPerBohr": 9.744371410536079e-05,
+      "details": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](CCC(=O)N)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 39,
+  "nElectrons": 78,
+  "nAO_631plusGstar": 210,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 60,
+  "predictedRecordBytes": 31808,
+  "predictedRecordBytes631": 358208,
+  "appPredictedMs": 153734,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 77
+    }
+  ],
+  "energyEh": -521.8348535005109,
+  "wallSeconds": 1.1801755499909632,
+  "converged": true,
+  "gapEh": 0.6100284771248677,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 77,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "id": "CH3OH",
+  "name": "methanol",
+  "formula": "CH4O",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        1.4246
+      ],
+      [
+        1,
+        0,
+        0.8961035444595873,
+        1.7249538706375607
+      ],
+      [
+        1,
+        1.262681109880501e-16,
+        -1.0310573716108422,
+        -0.3645293629420561
+      ],
+      [
+        1,
+        -0.8929218765742016,
+        0.5155286858054212,
+        -0.3645293629420561
+      ],
+      [
+        1,
+        0.8929218765742019,
+        0.5155286858054208,
+        -0.3645293629420561
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013O) = 1.4246 \u00c5, r(O\u2013H) = 0.9451 \u00c5, r(C\u2013H) = 1.0936 \u00c5, \u2220COH = 108.53\u00b0; the methyl group is placed IDEALLY TETRAHEDRAL about the C\u2013O axis (\u2220OCH = 109.471\u00b0, staggered to O\u2013H) rather than with the measured 106.7\u00b0/112.0\u00b0 splitting \u2014 the idealisation is stated, not hidden; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "organics",
+  "presentInstability": null,
+  "appPredictedMs": 95,
+  "nocc": 9,
+  "nElectrons": 18,
+  "nAO_631plusGstar": 46,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 14,
+  "predictedRecordBytes": 3840,
+  "predictedRecordBytes631": 19712,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -113.54457807851787,
+  "wallSeconds": 0.2968044339941116,
+  "converged": true,
+  "gapEh": 0.9348503472784295,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 31,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "id": "naphthalene",
+  "name": "naphthalene",
+  "formula": "C10H8",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        -1.4081551268287893,
+        -2.093498362685496,
+        -0.05588295890780865
+      ],
+      [
+        6,
+        -1.4670249371542379,
+        -1.6042413854408735,
+        1.2817910002581816
+      ],
+      [
+        6,
+        -0.8015754764471713,
+        -0.4776267474369252,
+        1.626509395310425
+      ],
+      [
+        6,
+        -0.02888888660382724,
+        0.24101033476843875,
+        0.659153592830486
+      ],
+      [
+        6,
+        0.6858657405051519,
+        1.4357936064804842,
+        0.9921297165920105
+      ],
+      [
+        6,
+        1.407578529487309,
+        2.0939053012607953,
+        0.055715170575957
+      ],
+      [
+        6,
+        1.4671257781454272,
+        1.6041841726981936,
+        -1.2817501203508372
+      ],
+      [
+        6,
+        0.8018831188889235,
+        0.4774171943565677,
+        -1.6264082668805067
+      ],
+      [
+        6,
+        0.029384959418805222,
+        -0.24133297593777187,
+        -0.6590062220927791
+      ],
+      [
+        6,
+        -0.6858845177805732,
+        -1.4357677088215417,
+        -0.9921430841262217
+      ],
+      [
+        1,
+        -1.9480416609941924,
+        -2.996645822016146,
+        -0.3105738375695859
+      ],
+      [
+        1,
+        -2.049670546627691,
+        -2.146436425280483,
+        2.0156866106585443
+      ],
+      [
+        1,
+        -0.8414489742865191,
+        -0.09951970848857146,
+        2.6402836928565714
+      ],
+      [
+        1,
+        0.6354989353218642,
+        1.801416394333851,
+        2.010001317296937
+      ],
+      [
+        1,
+        1.9464375545539039,
+        2.9977013894443694,
+        0.3101051270522692
+      ],
+      [
+        1,
+        2.050873702440365,
+        2.145608644886309,
+        -2.015337724107667
+      ],
+      [
+        1,
+        0.8418592350726244,
+        0.09922033642133353,
+        -2.6401834641957778
+      ],
+      [
+        1,
+        -0.6358174271097861,
+        -1.8011882385447566,
+        -2.0100899451935588
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built connectivity c1ccc2ccccc2c1; coordinate downloads inaccessible; conformer/stereochemistry not experimentally verified",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 21,
+      "wallSeconds": 163.77235087000008,
+      "maxGradientEhPerBohr": 6.782853679898615e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "ring:6"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "c1ccc2ccccc2c1",
+  "origin": "PLAN F5",
+  "nocc": 34,
+  "nElectrons": 68,
+  "nAO_631plusGstar": 206,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 58,
+  "predictedRecordBytes": 29840,
+  "predictedRecordBytes631": 344784,
+  "appPredictedMs": 141739,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 80
+    }
+  ],
+  "energyEh": -378.68684950122537,
+  "wallSeconds": 0.9394238740060246,
+  "converged": true,
+  "gapEh": 0.45052472414010414,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 80,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2000",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

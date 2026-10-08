@@ -1,0 +1,252 @@
+{
+  "id": "A-T",
+  "name": "adenine-thymine base pair",
+  "formula": "C10H11N7O2",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        0.9350155,
+        -0.0279801,
+        -0.3788916
+      ],
+      [
+        6,
+        1.6739638,
+        -0.0357766,
+        0.7424316
+      ],
+      [
+        6,
+        3.0747955,
+        -0.009448,
+        0.5994562
+      ],
+      [
+        6,
+        3.5646109,
+        0.0195446,
+        -0.7059872
+      ],
+      [
+        7,
+        2.853151,
+        0.0258031,
+        -1.8409596
+      ],
+      [
+        6,
+        1.549076,
+        0.0012569,
+        -1.5808009
+      ],
+      [
+        7,
+        4.0885824,
+        -0.0054429,
+        1.5289786
+      ],
+      [
+        6,
+        5.1829921,
+        0.0253971,
+        0.7872176
+      ],
+      [
+        7,
+        4.9294871,
+        0.0412404,
+        -0.5567274
+      ],
+      [
+        7,
+        1.0716177,
+        -0.0765366,
+        1.939139
+      ],
+      [
+        1,
+        0.8794435,
+        0.005026,
+        -2.4315709
+      ],
+      [
+        1,
+        6.1882591,
+        0.0375542,
+        1.1738824
+      ],
+      [
+        1,
+        5.6035368,
+        0.0648755,
+        -1.3036811
+      ],
+      [
+        1,
+        0.0586915,
+        -0.0423765,
+        2.0039181
+      ],
+      [
+        1,
+        1.6443796,
+        -0.0347395,
+        2.7619159
+      ],
+      [
+        7,
+        -3.9211729,
+        -0.0009646,
+        -1.5163659
+      ],
+      [
+        6,
+        -4.6136833,
+        0.0169051,
+        -0.333652
+      ],
+      [
+        6,
+        -3.9917387,
+        0.0219348,
+        0.8663338
+      ],
+      [
+        6,
+        -2.5361367,
+        0.0074651,
+        0.8766724
+      ],
+      [
+        7,
+        -1.9256484,
+        -0.0110593,
+        -0.3638948
+      ],
+      [
+        6,
+        -2.5395897,
+        -0.0149474,
+        -1.5962357
+      ],
+      [
+        6,
+        -4.7106131,
+        0.0413373,
+        2.1738637
+      ],
+      [
+        8,
+        -1.867473,
+        0.0112093,
+        1.9120833
+      ],
+      [
+        8,
+        -1.9416783,
+        -0.0291878,
+        -2.6573783
+      ],
+      [
+        1,
+        -4.4017172,
+        -0.0036078,
+        -2.4004924
+      ],
+      [
+        1,
+        -0.8838255,
+        -0.0216168,
+        -0.3784269
+      ],
+      [
+        1,
+        -5.690922,
+        0.0269347,
+        -0.4227183
+      ],
+      [
+        1,
+        -4.4439282,
+        -0.8302573,
+        2.7695655
+      ],
+      [
+        1,
+        -4.4267056,
+        0.9186178,
+        2.7530256
+      ],
+      [
+        1,
+        -5.7883971,
+        0.050553,
+        2.024728
+      ]
+    ],
+    "source": "https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; adenine-thymine; published computed benchmark reference; fragment(s) [0, 1]; UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Copied benchmark reference coordinates; this does not claim an experimental geometry or an RHF minimum."
+  },
+  "motifs": [
+    "nucleobase"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 68,
+  "nElectrons": 136,
+  "nAO_631plusGstar": 383,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 106,
+  "predictedRecordBytes": 93632,
+  "predictedRecordBytes631": 1181688,
+  "appPredictedMs": 4410849,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 68
+    }
+  ],
+  "energyEh": -904.2973046192888,
+  "wallSeconds": 20.868306732008932,
+  "converged": true,
+  "gapEh": 0.461268154134024,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 68,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "id": "CO2",
+  "name": "carbon dioxide",
+  "formula": "CO2",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        1.16
+      ],
+      [
+        8,
+        0,
+        0,
+        -1.16
+      ]
+    ],
+    "source": "CCCBDB experimental r(C=O) = 1.160 \u00c5, linear D\u221eh; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 120,
+  "nocc": 11,
+  "nElectrons": 22,
+  "nAO_631plusGstar": 57,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 15,
+  "predictedRecordBytes": 4088,
+  "predictedRecordBytes631": 28952,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -185.0646957269593,
+  "wallSeconds": 0.14501841200399213,
+  "converged": true,
+  "gapEh": 0.7237567075102365,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 19,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

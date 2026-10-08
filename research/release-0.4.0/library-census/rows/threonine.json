@@ -1,0 +1,172 @@
+{
+  "id": "threonine",
+  "name": "threonine",
+  "formula": "C4H9NO3",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        1.543,
+        -0.702,
+        0.43
+      ],
+      [
+        6,
+        0.122,
+        -0.706,
+        0.056
+      ],
+      [
+        6,
+        -0.038,
+        -0.09,
+        -1.309
+      ],
+      [
+        8,
+        0.732,
+        0.761,
+        -1.683
+      ],
+      [
+        6,
+        -0.675,
+        0.104,
+        1.079
+      ],
+      [
+        8,
+        -0.193,
+        1.448,
+        1.103
+      ],
+      [
+        6,
+        -0.511,
+        -0.521,
+        2.466
+      ],
+      [
+        8,
+        -1.039,
+        -0.488,
+        -2.11
+      ],
+      [
+        1,
+        1.839,
+        0.261,
+        0.434
+      ],
+      [
+        1,
+        1.593,
+        -1.025,
+        1.385
+      ],
+      [
+        1,
+        -0.245,
+        -1.732,
+        0.038
+      ],
+      [
+        1,
+        -1.729,
+        0.101,
+        0.802
+      ],
+      [
+        1,
+        0.74,
+        1.406,
+        1.352
+      ],
+      [
+        1,
+        -1.08,
+        0.056,
+        3.194
+      ],
+      [
+        1,
+        -0.879,
+        -1.547,
+        2.448
+      ],
+      [
+        1,
+        0.542,
+        -0.518,
+        2.743
+      ],
+      [
+        1,
+        -1.143,
+        -0.092,
+        -2.986
+      ]
+    ],
+    "source": "wwPDB Chemical Component Dictionary THR ideal reference coordinates, free neutral component including leaving atoms; https://files.rcsb.org/ligands/view/THR.cif; computed reference, UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "N[C@@H]([C@H](O)C)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 32,
+  "nElectrons": 64,
+  "nAO_631plusGstar": 170,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 49,
+  "predictedRecordBytes": 22040,
+  "predictedRecordBytes631": 235968,
+  "appPredictedMs": 47901,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 92
+    }
+  ],
+  "energyEh": -430.07571912251234,
+  "wallSeconds": 1.1242471560108243,
+  "converged": true,
+  "gapEh": 0.6384283903556132,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 92,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

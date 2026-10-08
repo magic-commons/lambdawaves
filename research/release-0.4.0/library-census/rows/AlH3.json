@@ -1,0 +1,86 @@
+{
+  "id": "AlH3",
+  "name": "alane",
+  "formula": "AlH3",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        13,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1.4769,
+        0,
+        0
+      ],
+      [
+        1,
+        -0.7384499999999997,
+        1.2790329188492375,
+        0
+      ],
+      [
+        1,
+        -0.7384500000000007,
+        -1.2790329188492373,
+        0
+      ]
+    ],
+    "source": "NOT A MEASUREMENT: monomeric AlH\u2083 has no determined gas-phase structure (Al\u2082H\u2086 is what has been observed). Planar D\u2083\u2095 at r = 1.4769 \u00c5, this repository's own RHF/STO-3G minimum on the vendored decimals (scanned by research/h2o-2026-09-11/scratch/fix-molecules.py). STO-3G shortens Al\u2013H by \u22480.1 \u00c5 against correlated estimates; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "hydrides",
+  "presentInstability": null,
+  "appPredictedMs": 55,
+  "nocc": 8,
+  "nElectrons": 16,
+  "nAO_631plusGstar": 29,
+  "basis631CountSource": {
+    "13": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 12,
+  "predictedRecordBytes": 3392,
+  "predictedRecordBytes631": 9240,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -240.72842217411255,
+  "wallSeconds": 0.0983595630095806,
+  "converged": true,
+  "gapEh": 0.6817121748319943,
+  "topgroup": "D3h",
+  "computedGroup": "C2v",
+  "cycles": 20,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

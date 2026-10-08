@@ -1,0 +1,112 @@
+{
+  "id": "urea",
+  "name": "urea",
+  "formula": "CH4N2O",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        1.221
+      ],
+      [
+        7,
+        0,
+        -1.1602510720890724,
+        -0.7434389347593775
+      ],
+      [
+        7,
+        0,
+        1.1602510720890724,
+        -0.7434389347593775
+      ],
+      [
+        1,
+        0,
+        -2.0529088024280724,
+        -0.28171696596644125
+      ],
+      [
+        1,
+        0,
+        -1.1137851613796206,
+        -1.7473641905139785
+      ],
+      [
+        1,
+        0,
+        1.1137851613796206,
+        -1.7473641905139785
+      ],
+      [
+        1,
+        0,
+        2.0529088024280724,
+        -0.28171696596644125
+      ]
+    ],
+    "source": "microwave heavy-atom values (Godfrey, Brown & Hunter, 1997) r(C=O) = 1.221 \u00c5, r(C\u2013N) = 1.378 \u00c5, \u2220NCN = 114.7\u00b0; the free molecule is slightly pyramidal at N and this entry is the PLANAR C\u2082\u1d65 idealisation with r(N\u2013H) = 1.005 \u00c5 at \u2220CNH = 120\u00b0 \u2014 the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 1027,
+  "nocc": 16,
+  "nElectrons": 32,
+  "nAO_631plusGstar": 84,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 24,
+  "predictedRecordBytes": 7040,
+  "predictedRecordBytes631": 59840,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -221.01318047198475,
+  "wallSeconds": 1.3026394400076242,
+  "converged": true,
+  "gapEh": 0.658635896126101,
+  "topgroup": "C2v",
+  "computedGroup": "C2v",
+  "cycles": 36,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

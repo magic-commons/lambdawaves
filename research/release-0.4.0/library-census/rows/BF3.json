@@ -1,0 +1,86 @@
+{
+  "id": "BF3",
+  "name": "boron trifluoride",
+  "formula": "BF3",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        9,
+        1.307,
+        0,
+        0
+      ],
+      [
+        9,
+        -0.6534999999999996,
+        1.1318952027462614,
+        0
+      ],
+      [
+        9,
+        -0.6535000000000005,
+        -1.131895202746261,
+        0
+      ]
+    ],
+    "source": "CCCBDB experimental r(B\u2013F) = 1.307 \u00c5, planar D\u2083\u2095; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 349,
+  "nocc": 16,
+  "nElectrons": 32,
+  "nAO_631plusGstar": 76,
+  "basis631CountSource": {
+    "5": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "9": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 20,
+  "predictedRecordBytes": 5568,
+  "predictedRecordBytes631": 49472,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -318.66192569720346,
+  "wallSeconds": 0.5648551990016131,
+  "converged": true,
+  "gapEh": 0.8230816518437469,
+  "topgroup": "D3h",
+  "computedGroup": "C2v",
+  "cycles": 41,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

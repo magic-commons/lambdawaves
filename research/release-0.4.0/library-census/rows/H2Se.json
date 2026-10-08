@@ -1,0 +1,81 @@
+{
+  "id": "H2Se",
+  "name": "hydrogen selenide",
+  "formula": "H2Se",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        34,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        1.037767231854569,
+        -1.0269562661033356
+      ],
+      [
+        1,
+        0,
+        -1.037767231854569,
+        -1.0269562661033356
+      ]
+    ],
+    "source": "CCCBDB experimental r(Se\u2013H) = 1.460 \u00c5, \u2220HSeH = 90.6\u00b0; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": null,
+  "appPredictedMs": 416,
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Se"
+  ],
+  "nAO_STO3G": 21,
+  "predictedRecordBytes": 5912,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -2375.434704067309,
+  "wallSeconds": 0.323838940996211,
+  "converged": true,
+  "gapEh": 0.651810256601515,
+  "topgroup": "C2v",
+  "computedGroup": "C2v",
+  "cycles": 20,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Se",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

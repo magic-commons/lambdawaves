@@ -1,0 +1,92 @@
+{
+  "id": "CF4",
+  "name": "carbon tetrafluoride",
+  "formula": "CF4",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        9,
+        0.759215603984358,
+        0.759215603984358,
+        0.759215603984358
+      ],
+      [
+        9,
+        0.759215603984358,
+        -0.759215603984358,
+        -0.759215603984358
+      ],
+      [
+        9,
+        -0.759215603984358,
+        0.759215603984358,
+        -0.759215603984358
+      ],
+      [
+        9,
+        -0.759215603984358,
+        -0.759215603984358,
+        0.759215603984358
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013F) = 1.315 \u00c5, T_d; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 833,
+  "nocc": 21,
+  "nElectrons": 42,
+  "nAO_631plusGstar": 95,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "9": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 25,
+  "predictedRecordBytes": 7448,
+  "predictedRecordBytes631": 75768,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -429.56747366430056,
+  "wallSeconds": 0.7919364359986503,
+  "converged": true,
+  "gapEh": 1.1094559558419497,
+  "topgroup": "Td",
+  "computedGroup": "D2",
+  "cycles": 55,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "id": "C4H4O",
+  "name": "furan",
+  "formula": "C4H4O",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        -0.702465707255846,
+        -0.9416576398874691,
+        0
+      ],
+      [
+        6,
+        0.6595342927441541,
+        -0.9416576398874691,
+        0
+      ],
+      [
+        6,
+        1.1401691163662317,
+        0.3316495368463207,
+        0
+      ],
+      [
+        6,
+        -0.006723890789062326,
+        1.1874517512266571,
+        0
+      ],
+      [
+        6,
+        -1.0905138110654775,
+        0.3642139917019608,
+        0
+      ],
+      [
+        1,
+        1.2708926191687326,
+        -1.8258895080710007,
+        0
+      ],
+      [
+        1,
+        2.1739057906231505,
+        0.6338373729619473,
+        0
+      ],
+      [
+        1,
+        -0.011329189785418796,
+        2.264441904951915,
+        0
+      ],
+      [
+        1,
+        -2.112229741789957,
+        0.6984617394936403,
+        0
+      ]
+    ],
+    "source": "microwave r_s structure (Mata, Martin & S\u00f8rensen, 1977) r(O\u2013C\u2082) = 1.362 \u00c5, r(C\u2082=C\u2083) = 1.361 \u00c5, r(C\u2083\u2013C\u2084) = 1.431 \u00c5, \u2220C\u2082OC\u2085 = 106.55\u00b0, \u2220OC\u2082C\u2083 = 110.68\u00b0, \u2220C\u2082C\u2083C\u2084 = 106.05\u00b0; hydrogens at the measured 1.075/1.077 \u00c5 along the external ring bisector \u2014 stated as an idealisation of the measured \u2220C\u2013C\u2013H; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [
+    "ring:5"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 2876,
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": 103,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 29,
+  "predictedRecordBytes": 9240,
+  "predictedRecordBytes631": 88568,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -225.7445659808877,
+  "wallSeconds": 2.4849967080081115,
+  "converged": true,
+  "gapEh": 0.5499693267516654,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 49,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

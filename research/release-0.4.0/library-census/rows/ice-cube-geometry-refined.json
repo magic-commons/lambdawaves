@@ -1,0 +1,222 @@
+{
+  "id": "ice-cube",
+  "name": "water octamer cube",
+  "formula": "H16O8",
+  "section": "LATTICE",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        0.7239092820219487,
+        -2.1468916169801218,
+        -1.9834438336760414
+      ],
+      [
+        1,
+        -0.06885330343382569,
+        -1.7730750740593302,
+        -1.4300084200741383
+      ],
+      [
+        1,
+        0.4115833371500059,
+        -3.0398289704489465,
+        -2.253397569690537
+      ],
+      [
+        8,
+        -0.9727178232065151,
+        -1.3101832000867344,
+        -0.510997850037974
+      ],
+      [
+        1,
+        -1.2090257196421756,
+        -0.3673462209782233,
+        -0.6785852620574858
+      ],
+      [
+        1,
+        -0.42888308390524366,
+        -1.285081584037717,
+        0.33976977666496944
+      ],
+      [
+        8,
+        -1.6125565016309518,
+        1.2398487772255482,
+        -0.8660291331710169
+      ],
+      [
+        1,
+        -2.520266082901894,
+        1.4257112600209314,
+        -0.5054069279164602
+      ],
+      [
+        1,
+        -1.6974591577551463,
+        1.504424703979892,
+        -1.8091067551498
+      ],
+      [
+        8,
+        -3.9215489839831177,
+        1.7861076882475302,
+        0.16871090263719063
+      ],
+      [
+        1,
+        -3.819484998321279,
+        2.5309782184051164,
+        0.8061619041650141
+      ],
+      [
+        1,
+        -4.252458311367967,
+        1.0664229952005493,
+        0.755263802267229
+      ],
+      [
+        8,
+        2.3543114885971472,
+        -2.222189476338326,
+        -0.16733647912678629
+      ],
+      [
+        1,
+        2.54694270721339,
+        -3.1776242450296737,
+        -0.0311672757546252
+      ],
+      [
+        1,
+        1.7619149802434348,
+        -2.2210061382119144,
+        -1.0001719066669927
+      ],
+      [
+        8,
+        0.622749613008811,
+        -1.2960975804289658,
+        1.3755946100146101
+      ],
+      [
+        1,
+        0.9553387658485349,
+        -0.38442868486092396,
+        1.5341903233923446
+      ],
+      [
+        1,
+        1.3834000957861123,
+        -1.7136193036021468,
+        0.8667910999235824
+      ],
+      [
+        8,
+        -0.1661968148334724,
+        3.018601931244979,
+        0.6642700390552941
+      ],
+      [
+        1,
+        0.5539248777472706,
+        2.4394470512732083,
+        1.0077099585555325
+      ],
+      [
+        1,
+        -0.6303212883663413,
+        2.3906064336528603,
+        0.05907129873128411
+      ],
+      [
+        8,
+        1.8655366177447374,
+        1.1825442778236097,
+        1.4990836052525003
+      ],
+      [
+        1,
+        2.3429941112522115,
+        1.4077682742046629,
+        2.3320218299498703
+      ],
+      [
+        1,
+        2.610532816451929,
+        1.131276129444616,
+        0.8547265064635006
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built finite hydrogen-bonded octamer cube; unconstrained RHF relaxation, topology must be reviewed; optimisation convergence UNVERIFIED (see optimisation diagnostics); current refinement supersedes the preceding incomplete optimisation attempt",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 115,
+      "wallSeconds": 458.96708355699957,
+      "maxGradientEhPerBohr": 9.182664925821982e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [
+    "cluster"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 40,
+  "nElectrons": 80,
+  "nAO_631plusGstar": 184,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 56,
+  "predictedRecordBytes": 27984,
+  "predictedRecordBytes631": 275792,
+  "appPredictedMs": 85615,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 58
+    }
+  ],
+  "energyEh": -599.837528887416,
+  "wallSeconds": 0.46793701700516976,
+  "converged": true,
+  "gapEh": 0.8125647197402842,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 58,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

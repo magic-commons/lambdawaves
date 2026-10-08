@@ -1,0 +1,93 @@
+{
+  "id": "HCOOH",
+  "name": "formic acid",
+  "formula": "CH2O2",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        1.202
+      ],
+      [
+        8,
+        0,
+        -1.1014639692984758,
+        -0.7683919080373285
+      ],
+      [
+        1,
+        0,
+        0.9083821870808765,
+        -0.6150209770358759
+      ],
+      [
+        1,
+        0,
+        -0.7914355206607515,
+        -1.6896228025666458
+      ]
+    ],
+    "source": "CCCBDB experimental (Z conformer) r(C=O) = 1.202 \u00c5, r(C\u2013O) = 1.343 \u00c5, r(O\u2013H) = 0.972 \u00c5, r(C\u2013H) = 1.097 \u00c5, \u2220OCO = 124.9\u00b0, \u2220COH = 106.3\u00b0, \u2220HC=O = 124.1\u00b0, planar Cs; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "organics",
+  "presentInstability": null,
+  "appPredictedMs": 201,
+  "nocc": 12,
+  "nElectrons": 24,
+  "nAO_631plusGstar": 61,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 17,
+  "predictedRecordBytes": 4632,
+  "predictedRecordBytes631": 32792,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -186.20693726943233,
+  "wallSeconds": 0.46836302999872714,
+  "converged": true,
+  "gapEh": 0.660637634127469,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 38,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

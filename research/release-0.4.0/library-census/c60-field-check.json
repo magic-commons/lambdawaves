@@ -1,0 +1,18 @@
+{
+  "status": "MEASURED",
+  "pass": true,
+  "maxSignedFieldError": 1.1102230246251565e-16,
+  "tolerance": 1e-10,
+  "points": 92,
+  "orbitals": 8,
+  "valuesCompared": 736,
+  "appBasisHash": "7ee79f71701dec0d423511158eadacc26afa8cad0aad60f2a63fa1df5fb0c609",
+  "meaning": "CPU signed Gaussian evaluation using md.js basisFrom contraction coefficients and exact app AO row order vs independent PySCF GTOval_cart. No GPU or browser.",
+  "numericTags": {
+    "tolerance": "DERIVED chosen bound",
+    "points": "DERIVED count",
+    "orbitals": "DERIVED count",
+    "valuesCompared": "DERIVED count",
+    "maxSignedFieldError": "MEASURED"
+  }
+}

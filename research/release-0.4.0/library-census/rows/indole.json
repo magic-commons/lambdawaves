@@ -1,0 +1,168 @@
+{
+  "id": "indole",
+  "name": "indole",
+  "formula": "C8H7N",
+  "section": "BIO",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        1,
+        0.8065245,
+        -0.4358866,
+        0
+      ],
+      [
+        7,
+        -0.1442408,
+        -0.7686927,
+        0
+      ],
+      [
+        6,
+        -0.5161122,
+        -2.089322,
+        0
+      ],
+      [
+        6,
+        -1.8898755,
+        -2.1814495,
+        0
+      ],
+      [
+        6,
+        -2.3932317,
+        -0.847083,
+        0
+      ],
+      [
+        6,
+        -1.2640653,
+        0.0195887,
+        0
+      ],
+      [
+        6,
+        -1.3896004,
+        1.4117668,
+        0
+      ],
+      [
+        6,
+        -2.6726501,
+        1.936645,
+        0
+      ],
+      [
+        6,
+        -3.8054511,
+        1.097479,
+        0
+      ],
+      [
+        6,
+        -3.6798167,
+        -0.2817209,
+        0
+      ],
+      [
+        1,
+        0.2310024,
+        -2.8653173,
+        0
+      ],
+      [
+        1,
+        -2.4585759,
+        -3.0956052,
+        0
+      ],
+      [
+        1,
+        -0.5188733,
+        2.053952,
+        0
+      ],
+      [
+        1,
+        -2.807757,
+        3.0097859,
+        0
+      ],
+      [
+        1,
+        -4.7905991,
+        1.5439372,
+        0
+      ],
+      [
+        1,
+        -4.5580187,
+        -0.9142916,
+        0
+      ]
+    ],
+    "source": "https://raw.githubusercontent.com/psi4/psi4/master/psi4/share/psi4/databases/S22.py; indole-benzene; published computed benchmark reference; fragment(s) [1]; UNVERIFIED against experiment",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Copied benchmark reference coordinates; this does not claim an experimental geometry or an RHF minimum."
+  },
+  "motifs": [
+    "ring:5",
+    "ring:6"
+  ],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": "c1ccc2[nH]ccc2c1",
+  "origin": "PLAN F5",
+  "nocc": 31,
+  "nElectrons": 62,
+  "nAO_631plusGstar": 185,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 52,
+  "predictedRecordBytes": 24512,
+  "predictedRecordBytes631": 278808,
+  "appPredictedMs": 74594,
+  "overLiveBudget": true,
+  "renderTier": "existing <=64 AO",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 77
+    }
+  ],
+  "energyEh": -357.02844478400334,
+  "wallSeconds": 0.7830905849987175,
+  "converged": true,
+  "gapEh": 0.4611480109525715,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 77,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

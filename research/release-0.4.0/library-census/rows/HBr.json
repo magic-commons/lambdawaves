@@ -1,0 +1,75 @@
+{
+  "id": "HBr",
+  "name": "hydrogen bromide",
+  "formula": "BrH",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        35,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1.4145
+      ]
+    ],
+    "source": "CCCBDB experimental r(H\u2013Br) = 1.4145 \u00c5; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": null,
+  "appPredictedMs": 322,
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "Br"
+  ],
+  "nAO_STO3G": 20,
+  "predictedRecordBytes": 5568,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -2546.0970970902918,
+  "wallSeconds": 0.20803141099167988,
+  "converged": true,
+  "gapEh": 0.7309010529223492,
+  "topgroup": "Coov",
+  "computedGroup": "C2v",
+  "cycles": 16,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for Br",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

@@ -1,0 +1,319 @@
+{
+  "id": "C20H20",
+  "name": "dodecahedrane",
+  "formula": "C20H20",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        -1.2576231834196892,
+        -1.2576231834196892,
+        -1.2576231834196892
+      ],
+      [
+        6,
+        -1.2576231834196892,
+        1.2576231834196892,
+        -1.2576231834196892
+      ],
+      [
+        6,
+        0.7772538723932111,
+        0.0,
+        -2.0348770558129
+      ],
+      [
+        6,
+        -0.7772538723932111,
+        0.0,
+        -2.0348770558129
+      ],
+      [
+        6,
+        0.0,
+        -2.0348770558129,
+        0.7772538723932111
+      ],
+      [
+        6,
+        1.2576231834196892,
+        -1.2576231834196892,
+        -1.2576231834196892
+      ],
+      [
+        6,
+        0.0,
+        -2.0348770558129,
+        -0.7772538723932111
+      ],
+      [
+        6,
+        -2.0348770558129,
+        0.7772538723932111,
+        0.0
+      ],
+      [
+        6,
+        -2.0348770558129,
+        -0.7772538723932111,
+        0.0
+      ],
+      [
+        6,
+        -1.2576231834196892,
+        -1.2576231834196892,
+        1.2576231834196892
+      ],
+      [
+        6,
+        -0.7772538723932111,
+        0.0,
+        2.0348770558129
+      ],
+      [
+        6,
+        -1.2576231834196892,
+        1.2576231834196892,
+        1.2576231834196892
+      ],
+      [
+        6,
+        0.0,
+        2.0348770558129,
+        0.7772538723932111
+      ],
+      [
+        6,
+        0.0,
+        2.0348770558129,
+        -0.7772538723932111
+      ],
+      [
+        6,
+        1.2576231834196892,
+        1.2576231834196892,
+        -1.2576231834196892
+      ],
+      [
+        6,
+        2.0348770558129,
+        -0.7772538723932111,
+        0.0
+      ],
+      [
+        6,
+        0.7772538723932111,
+        0.0,
+        2.0348770558129
+      ],
+      [
+        6,
+        1.2576231834196892,
+        -1.2576231834196892,
+        1.2576231834196892
+      ],
+      [
+        6,
+        1.2576231834196892,
+        1.2576231834196892,
+        1.2576231834196892
+      ],
+      [
+        6,
+        2.0348770558129,
+        0.7772538723932111,
+        0.0
+      ],
+      [
+        1,
+        -1.885381322612103,
+        -1.885381322612103,
+        -1.885381322612103
+      ],
+      [
+        1,
+        -1.885381322612103,
+        1.885381322612103,
+        -1.885381322612103
+      ],
+      [
+        1,
+        1.1652297391285102,
+        0.0,
+        -3.0506110617406126
+      ],
+      [
+        1,
+        -1.1652297391285102,
+        0.0,
+        -3.0506110617406126
+      ],
+      [
+        1,
+        0.0,
+        -3.0506110617406126,
+        1.1652297391285102
+      ],
+      [
+        1,
+        1.885381322612103,
+        -1.885381322612103,
+        -1.885381322612103
+      ],
+      [
+        1,
+        0.0,
+        -3.0506110617406126,
+        -1.1652297391285102
+      ],
+      [
+        1,
+        -3.0506110617406126,
+        1.1652297391285102,
+        0.0
+      ],
+      [
+        1,
+        -3.0506110617406126,
+        -1.1652297391285102,
+        0.0
+      ],
+      [
+        1,
+        -1.885381322612103,
+        -1.885381322612103,
+        1.885381322612103
+      ],
+      [
+        1,
+        -1.1652297391285102,
+        0.0,
+        3.0506110617406126
+      ],
+      [
+        1,
+        -1.885381322612103,
+        1.885381322612103,
+        1.885381322612103
+      ],
+      [
+        1,
+        0.0,
+        3.0506110617406126,
+        1.1652297391285102
+      ],
+      [
+        1,
+        0.0,
+        3.0506110617406126,
+        -1.1652297391285102
+      ],
+      [
+        1,
+        1.885381322612103,
+        1.885381322612103,
+        -1.885381322612103
+      ],
+      [
+        1,
+        3.0506110617406126,
+        -1.1652297391285102,
+        0.0
+      ],
+      [
+        1,
+        1.1652297391285102,
+        0.0,
+        3.0506110617406126
+      ],
+      [
+        1,
+        1.885381322612103,
+        -1.885381322612103,
+        1.885381322612103
+      ],
+      [
+        1,
+        1.885381322612103,
+        1.885381322612103,
+        1.885381322612103
+      ],
+      [
+        1,
+        3.0506110617406126,
+        1.1652297391285102,
+        0.0
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; ideal dodecahedral carbon cage built here; RHF relaxation",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 8,
+      "wallSeconds": 1317.8267516690103,
+      "maxGradientEhPerBohr": 4.968869336083639e-06,
+      "details": "Ih-constrained cage radius and radial X-H distance optimisation; experimental geometry and unconstrained minimum UNVERIFIED"
+    }
+  },
+  "motifs": [
+    "cage",
+    "ring:5"
+  ],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "PLAN F5",
+  "nocc": 70,
+  "nElectrons": 140,
+  "nAO_631plusGstar": 420,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 120,
+  "predictedRecordBytes": 119168,
+  "predictedRecordBytes631": 1419968,
+  "appPredictedMs": 10256026,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 48
+    }
+  ],
+  "energyEh": -760.1379718913172,
+  "wallSeconds": 34.17894960400008,
+  "converged": true,
+  "gapEh": 0.7978671096899729,
+  "topgroup": "Ih",
+  "computedGroup": "Ci",
+  "cycles": 48,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

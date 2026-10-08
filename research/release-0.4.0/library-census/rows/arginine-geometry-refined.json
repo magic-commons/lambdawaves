@@ -1,0 +1,234 @@
+{
+  "id": "arginine",
+  "name": "arginine",
+  "formula": "C6H14N4O2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        7,
+        0.7577538519989644,
+        1.4822617602118073,
+        -0.7443811645813779
+      ],
+      [
+        6,
+        1.3875801859635426,
+        0.34956105524551406,
+        -1.478243776254013
+      ],
+      [
+        6,
+        0.3526789595764436,
+        -0.7390296967903379,
+        -1.8808090784441929
+      ],
+      [
+        6,
+        -0.26064079789923134,
+        -1.5985582064961088,
+        -0.7447985363169435
+      ],
+      [
+        6,
+        -1.393148735981983,
+        -0.9370754823633364,
+        0.07943108080685075
+      ],
+      [
+        7,
+        -0.8493038106679912,
+        0.021795912534263676,
+        1.063634980033184
+      ],
+      [
+        6,
+        -1.8352070361085775,
+        0.660110869620511,
+        1.8774954171321876
+      ],
+      [
+        7,
+        -3.048554865933789,
+        0.24468346042019157,
+        1.9334910810618173
+      ],
+      [
+        7,
+        -1.2886838861009997,
+        1.7970928418249508,
+        2.587783442317557
+      ],
+      [
+        6,
+        2.529162354999134,
+        -0.2137872613927571,
+        -0.589320402358408
+      ],
+      [
+        8,
+        2.988556654728159,
+        0.3278038772195308,
+        0.3977878541969371
+      ],
+      [
+        8,
+        3.0235733845977584,
+        -1.4171872341668865,
+        -1.075563967333298
+      ],
+      [
+        1,
+        0.21533615451469532,
+        2.041522112917931,
+        -1.4202995868158312
+      ],
+      [
+        1,
+        1.51239673477167,
+        2.09968492891302,
+        -0.4074828086120663
+      ],
+      [
+        1,
+        1.8626485516056321,
+        0.6978152350081028,
+        -2.4045595151290224
+      ],
+      [
+        1,
+        -0.4447232132457253,
+        -0.2512004159096516,
+        -2.439397992286084
+      ],
+      [
+        1,
+        0.8609858396909058,
+        -1.4095769090369727,
+        -2.5706244520766397
+      ],
+      [
+        1,
+        -0.6780024894616397,
+        -2.4867191724834647,
+        -1.2150919202400943
+      ],
+      [
+        1,
+        0.5225880624815727,
+        -1.9356259857339069,
+        -0.06970956603931919
+      ],
+      [
+        1,
+        -2.1142049120209183,
+        -0.4662084016356027,
+        -0.5967344627774731
+      ],
+      [
+        1,
+        -1.9295486284498384,
+        -1.714787886919859,
+        0.6241232925242848
+      ],
+      [
+        1,
+        -0.2474414780436065,
+        0.7147067528312978,
+        0.581600503131997
+      ],
+      [
+        1,
+        -3.5512965779541896,
+        0.8245393619516433,
+        2.6404641392457635
+      ],
+      [
+        1,
+        -0.306137567153702,
+        1.6162674920302218,
+        2.832693638623856
+      ],
+      [
+        1,
+        -1.8087275758570494,
+        1.9580441163407005,
+        3.4608351063980907
+      ],
+      [
+        1,
+        3.7423608375838726,
+        -1.666133126383644,
+        -0.4423233055900034
+      ]
+    ],
+    "source": "optimised here, UNVERIFIED against experiment; built from checked neutral connectivity N[C@@H](CCCNC(=N)N)C(=O)O; one conformer, absolute stereochemistry UNVERIFIED; coordinate downloads inaccessible; optimisation convergence UNVERIFIED (see optimisation diagnostics); current refinement supersedes the preceding incomplete optimisation attempt",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured.",
+    "optimisation": {
+      "status": "MEASURED",
+      "converged": true,
+      "objectiveEvaluations": 37,
+      "wallSeconds": 550.5541580960125,
+      "maxGradientEhPerBohr": 7.734012017523995e-05,
+      "details": "Optimization terminated successfully.; bond-angle preconditioned Cartesian BFGS; one conformer, no vibrational Hessian or experimental comparison"
+    }
+  },
+  "motifs": [],
+  "optimise": true,
+  "optimisationMode": null,
+  "smiles": "N[C@@H](CCCNC(=N)N)C(=O)O",
+  "origin": "PLAN F5",
+  "nocc": 47,
+  "nElectrons": 94,
+  "nAO_631plusGstar": 256,
+  "basis631CountSource": {
+    "7": "vendored 6-31+G* decimals",
+    "6": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 74,
+  "predictedRecordBytes": 46992,
+  "predictedRecordBytes631": 530384,
+  "appPredictedMs": 538232,
+  "overLiveBudget": true,
+  "renderTier": "S4c 128-AO density tier",
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 86
+    }
+  ],
+  "energyEh": -595.201285656192,
+  "wallSeconds": 2.8278479610016802,
+  "converged": true,
+  "gapEh": 0.5471537511790491,
+  "topgroup": "C1",
+  "computedGroup": "C1",
+  "cycles": 86,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

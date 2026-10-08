@@ -1,0 +1,2606 @@
+{
+  "status": "MEASURED",
+  "note": "Read directly from the present lab/molecules.js module",
+  "COST": {
+    "fitted": "2026-09-12",
+    "machine": "node 22.22.1 on the λWAVES workstation (Linux 7.0.0-31-generic, RTX 3070 box); the browser worker measured 0.94× the node figure on benzene (9.5 s against 10.1 s)",
+    "model": "ms = a·eriWork + b·rpaWork + c,  rpaWork = (nocc·nvirt)²·nAO²",
+    "a": 0.0001204028,
+    "b": 0.00005665865,
+    "c": 10.78,
+    "fit": "non-negative least squares over all 54 measured entries; worst |ratio| 1.36 above 100 ms, 2.9 below it (where the absolute error is single-digit milliseconds)",
+    "anchors": {
+      "H2O": 9,
+      "C5H5N": 7531,
+      "C6H6": 10053
+    },
+    "rejected": {
+      "model": "ms = a·eriWork + b·nAO³ + c",
+      "a": 0.0001198562,
+      "b": 0.07903301,
+      "c": 0,
+      "why": "worst 4.63× above 100 ms, and it puts Br₂ (7410 predicted, 4005 measured) ABOVE C₆H₆ (5972 predicted, 10053 measured) — nAO³ cannot see the occupation, and the pair space is where benzene's time goes"
+    },
+    "browserFactor": 1
+  },
+  "CAP_MS": 9592,
+  "ANGSTROM": 1.8897261245650618,
+  "molecules": [
+    {
+      "id": "H2",
+      "name": "dihydrogen",
+      "formula": "<m>H₂</m>",
+      "group": "diatomics",
+      "ang": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0.741
+        ]
+      ],
+      "source": "CCCBDB experimental r(H–H) = 0.741 Å",
+      "charge": 0,
+      "nAO": 2,
+      "nShell": 2,
+      "nElectrons": 2,
+      "nocc": 1,
+      "eriWork": 486,
+      "rpaWork": 4,
+      "predictedMs": 11,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "LiH",
+      "name": "lithium hydride",
+      "formula": "LiH",
+      "group": "diatomics",
+      "ang": [
+        [
+          3,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.595
+        ]
+      ],
+      "source": "CCCBDB experimental r(Li–H) = 1.595 Å (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 6,
+      "nShell": 4,
+      "nElectrons": 4,
+      "nocc": 2,
+      "eriWork": 27945,
+      "rpaWork": 2304,
+      "predictedMs": 14,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "HF",
+      "name": "hydrogen fluoride",
+      "formula": "HF",
+      "group": "diatomics",
+      "ang": [
+        [
+          9,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0.9168
+        ]
+      ],
+      "source": "CCCBDB experimental r(H–F) = 0.9168 Å (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 6,
+      "nShell": 4,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 27945,
+      "rpaWork": 900,
+      "predictedMs": 14,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "N2",
+      "name": "dinitrogen",
+      "formula": "<m>N₂</m>",
+      "group": "diatomics",
+      "ang": [
+        [
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          1.09768
+        ]
+      ],
+      "source": "CCCBDB experimental r(N≡N) = 1.09768 Å (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 163863,
+      "rpaWork": 44100,
+      "predictedMs": 33,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CO",
+      "name": "carbon monoxide",
+      "formula": "CO",
+      "group": "diatomics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.1283
+        ]
+      ],
+      "source": "CCCBDB experimental r(C≡O) = 1.1283 Å",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 163863,
+      "rpaWork": 44100,
+      "predictedMs": 33,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "F2",
+      "name": "difluorine",
+      "formula": "<m>F₂</m>",
+      "group": "diatomics",
+      "ang": [
+        [
+          9,
+          0,
+          0,
+          0
+        ],
+        [
+          9,
+          0,
+          0,
+          1.4119
+        ]
+      ],
+      "source": "CCCBDB experimental r(F–F) = 1.4119 Å",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 163863,
+      "rpaWork": 8100,
+      "predictedMs": 31,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "LiF",
+      "name": "lithium fluoride",
+      "formula": "LiF",
+      "group": "diatomics",
+      "ang": [
+        [
+          3,
+          0,
+          0,
+          0
+        ],
+        [
+          9,
+          0,
+          0,
+          1.5639
+        ]
+      ],
+      "source": "CCCBDB experimental r(Li–F) = 1.5639 Å",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 12,
+      "nocc": 6,
+      "eriWork": 163863,
+      "rpaWork": 57600,
+      "predictedMs": 34,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "NaH",
+      "name": "sodium hydride",
+      "formula": "NaH",
+      "group": "diatomics",
+      "ang": [
+        [
+          11,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.8873
+        ]
+      ],
+      "source": "CCCBDB experimental r(Na–H) = 1.8873 Å",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 12,
+      "nocc": 6,
+      "eriWork": 163863,
+      "rpaWork": 57600,
+      "predictedMs": 34,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "HCl",
+      "name": "hydrogen chloride",
+      "formula": "HCl",
+      "group": "diatomics",
+      "ang": [
+        [
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.2746
+        ]
+      ],
+      "source": "CCCBDB experimental r(H–Cl) = 1.2746 Å",
+      "charge": 0,
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 163863,
+      "rpaWork": 8100,
+      "predictedMs": 31,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "Cl2",
+      "name": "dichlorine",
+      "formula": "<m>Cl₂</m>",
+      "group": "diatomics",
+      "ang": [
+        [
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          17,
+          0,
+          0,
+          1.9878
+        ]
+      ],
+      "source": "CCCBDB experimental r(Cl–Cl) = 1.9878 Å",
+      "charge": 0,
+      "nAO": 18,
+      "nShell": 10,
+      "nElectrons": 34,
+      "nocc": 17,
+      "eriWork": 1398708,
+      "rpaWork": 93636,
+      "predictedMs": 184,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "NaCl",
+      "name": "sodium chloride",
+      "formula": "NaCl",
+      "group": "diatomics",
+      "ang": [
+        [
+          11,
+          0,
+          0,
+          0
+        ],
+        [
+          17,
+          0,
+          0,
+          2.3609
+        ]
+      ],
+      "source": "CCCBDB experimental r(Na–Cl) = 2.3609 Å",
+      "charge": 0,
+      "nAO": 18,
+      "nShell": 10,
+      "nElectrons": 28,
+      "nocc": 14,
+      "eriWork": 1398708,
+      "rpaWork": 1016064,
+      "predictedMs": 237,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "BeH2",
+      "name": "beryllium dihydride",
+      "formula": "<m>BeH₂</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.3264
+        ],
+        [
+          1,
+          0,
+          0,
+          -1.3264
+        ]
+      ],
+      "source": "linear D∞h; r₀(Be–H) = 1.3264 Å from the gas-phase IR emission spectrum (Bernath, Shayesteh et al., 2002) — BeH₂ is a solid at room temperature and this is the free molecule",
+      "charge": 0,
+      "nAO": 7,
+      "nShell": 5,
+      "nElectrons": 6,
+      "nocc": 3,
+      "eriWork": 44064,
+      "rpaWork": 7056,
+      "predictedMs": 16,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "BH3",
+      "name": "borane",
+      "formula": "<m>BH₃</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          5,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1.19,
+          0,
+          0
+        ],
+        [
+          1,
+          -0.5949999999999998,
+          1.030570230503482,
+          0
+        ],
+        [
+          1,
+          -0.5950000000000005,
+          -1.0305702305034818,
+          0
+        ]
+      ],
+      "source": "planar D₃ₕ; r₀(B–H) = 1.190 Å from the ν₃ band of free BH₃ (Kawaguchi, 1992)",
+      "charge": 0,
+      "nAO": 8,
+      "nShell": 6,
+      "nElectrons": 8,
+      "nocc": 4,
+      "eriWork": 67311,
+      "rpaWork": 16384,
+      "predictedMs": 20,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CH4",
+      "name": "methane",
+      "formula": "<m>CH₄</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.6275797426091232,
+          0.6275797426091232,
+          0.6275797426091232
+        ],
+        [
+          1,
+          0.6275797426091232,
+          -0.6275797426091232,
+          -0.6275797426091232
+        ],
+        [
+          1,
+          -0.6275797426091232,
+          0.6275797426091232,
+          -0.6275797426091232
+        ],
+        [
+          1,
+          -0.6275797426091232,
+          -0.6275797426091232,
+          0.6275797426091232
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–H) = 1.087 Å, T_d, d = r/√3 (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 9,
+      "nShell": 7,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 99630,
+      "rpaWork": 32400,
+      "predictedMs": 25,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "NH3",
+      "name": "ammonia",
+      "formula": "<m>NH₃</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.9375295736636662,
+          0,
+          -0.38102794977012433
+        ],
+        [
+          1,
+          -0.46876478683183287,
+          0.8119244275919292,
+          -0.38102794977012433
+        ],
+        [
+          1,
+          -0.46876478683183354,
+          -0.8119244275919288,
+          -0.38102794977012433
+        ]
+      ],
+      "source": "CCCBDB experimental r(N–H) = 1.0124 Å, ∠HNH = 106.67°, C₃ᵥ (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 8,
+      "nShell": 6,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 67311,
+      "rpaWork": 14400,
+      "predictedMs": 20,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H2O",
+      "name": "water",
+      "formula": "<m>H₂O</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          8,
+          0,
+          0,
+          0.1173
+        ],
+        [
+          1,
+          0,
+          0.7572,
+          -0.4692
+        ],
+        [
+          1,
+          0,
+          -0.7572,
+          -0.4692
+        ]
+      ],
+      "source": "CCCBDB experimental r(O–H) = 0.9578 Å, ∠HOH = 104.5° (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 7,
+      "nShell": 5,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 44064,
+      "rpaWork": 4900,
+      "predictedMs": 16,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "MgH2",
+      "name": "magnesium dihydride",
+      "formula": "<m>MgH₂</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          12,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.7031
+        ],
+        [
+          1,
+          0,
+          0,
+          -1.7031
+        ]
+      ],
+      "source": "linear D∞h; r₀(Mg–H) = 1.7031 Å from the gas-phase IR emission spectrum (Shayesteh, Appadoo, Gordon & Bernath, 2003)",
+      "charge": 0,
+      "nAO": 11,
+      "nShell": 7,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 224046,
+      "rpaWork": 94864,
+      "predictedMs": 43,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "AlH3",
+      "name": "alane",
+      "formula": "<m>AlH₃</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          13,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1.4769,
+          0,
+          0
+        ],
+        [
+          1,
+          -0.7384499999999997,
+          1.2790329188492375,
+          0
+        ],
+        [
+          1,
+          -0.7384500000000007,
+          -1.2790329188492373,
+          0
+        ]
+      ],
+      "source": "NOT A MEASUREMENT: monomeric AlH₃ has no determined gas-phase structure (Al₂H₆ is what has been observed). Planar D₃ₕ at r = 1.4769 Å, this repository's own RHF/STO-3G minimum on the vendored decimals (scanned by research/h2o-2026-09-11/scratch/fix-molecules.py). STO-3G shortens Al–H by ≈0.1 Å against correlated estimates",
+      "charge": 0,
+      "nAO": 12,
+      "nShell": 8,
+      "nElectrons": 16,
+      "nocc": 8,
+      "eriWork": 300834,
+      "rpaWork": 147456,
+      "predictedMs": 55,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "SiH4",
+      "name": "silane",
+      "formula": "<m>SiH₄</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          14,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.8543629283468083,
+          0.8543629283468083,
+          0.8543629283468083
+        ],
+        [
+          1,
+          0.8543629283468083,
+          -0.8543629283468083,
+          -0.8543629283468083
+        ],
+        [
+          1,
+          -0.8543629283468083,
+          0.8543629283468083,
+          -0.8543629283468083
+        ],
+        [
+          1,
+          -0.8543629283468083,
+          -0.8543629283468083,
+          0.8543629283468083
+        ]
+      ],
+      "source": "CCCBDB experimental r(Si–H) = 1.4798 Å, T_d",
+      "charge": 0,
+      "nAO": 13,
+      "nShell": 9,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 397143,
+      "rpaWork": 219024,
+      "predictedMs": 71,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "PH3",
+      "name": "phosphine",
+      "formula": "<m>PH₃</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          15,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1.1927707571949706,
+          0,
+          -0.7705179561700924
+        ],
+        [
+          1,
+          -0.5963853785974851,
+          1.0329697766220451,
+          -0.7705179561700924
+        ],
+        [
+          1,
+          -0.5963853785974859,
+          -1.032969776622045,
+          -0.7705179561700924
+        ]
+      ],
+      "source": "CCCBDB experimental r(P–H) = 1.420 Å, ∠HPH = 93.345°, C₃ᵥ",
+      "charge": 0,
+      "nAO": 12,
+      "nShell": 8,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 300834,
+      "rpaWork": 104976,
+      "predictedMs": 53,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H2S",
+      "name": "hydrogen sulfide",
+      "formula": "<m>H₂S</m>",
+      "group": "hydrides",
+      "ang": [
+        [
+          16,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0.961721285298095,
+          -0.926779115757676
+        ],
+        [
+          1,
+          0,
+          -0.961721285298095,
+          -0.926779115757676
+        ]
+      ],
+      "source": "CCCBDB experimental r(S–H) = 1.3356 Å, ∠HSH = 92.12°",
+      "charge": 0,
+      "nAO": 11,
+      "nShell": 7,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 224046,
+      "rpaWork": 39204,
+      "predictedMs": 40,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CO2",
+      "name": "carbon dioxide",
+      "formula": "<m>CO₂</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.16
+        ],
+        [
+          8,
+          0,
+          0,
+          -1.16
+        ]
+      ],
+      "source": "CCCBDB experimental r(C=O) = 1.160 Å, linear D∞h",
+      "charge": 0,
+      "nAO": 15,
+      "nShell": 9,
+      "nElectrons": 22,
+      "nocc": 11,
+      "eriWork": 701055,
+      "rpaWork": 435600,
+      "predictedMs": 120,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "HCN",
+      "name": "hydrogen cyanide",
+      "formula": "HCN",
+      "group": "triatomics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          -1.0655
+        ],
+        [
+          7,
+          0,
+          0,
+          1.1532
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–H) = 1.0655 Å, r(C≡N) = 1.1532 Å, linear",
+      "charge": 0,
+      "nAO": 11,
+      "nShell": 7,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 224046,
+      "rpaWork": 94864,
+      "predictedMs": 43,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "N2O",
+      "name": "nitrous oxide",
+      "formula": "<m>N₂O</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          -1.1282
+        ],
+        [
+          8,
+          0,
+          0,
+          1.1842
+        ]
+      ],
+      "source": "CCCBDB experimental r(N–N) = 1.1282 Å, r(N–O) = 1.1842 Å, linear N–N–O",
+      "charge": 0,
+      "nAO": 15,
+      "nShell": 9,
+      "nElectrons": 22,
+      "nocc": 11,
+      "eriWork": 701055,
+      "rpaWork": 435600,
+      "predictedMs": 120,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "O3",
+      "name": "ozone",
+      "formula": "<m>O₃</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          1.0830248251363492,
+          -0.6665419102639984
+        ],
+        [
+          8,
+          0,
+          -1.0830248251363492,
+          -0.6665419102639984
+        ]
+      ],
+      "source": "CCCBDB experimental r(O–O) = 1.2717 Å, ∠OOO = 116.78°",
+      "charge": 0,
+      "nAO": 15,
+      "nShell": 9,
+      "nElectrons": 24,
+      "nocc": 12,
+      "eriWork": 701055,
+      "rpaWork": 291600,
+      "predictedMs": 112,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "SO2",
+      "name": "sulfur dioxide",
+      "formula": "<m>SO₂</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          16,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          1.2349051530946782,
+          -0.7226326195655782
+        ],
+        [
+          8,
+          0,
+          -1.2349051530946782,
+          -0.7226326195655782
+        ]
+      ],
+      "source": "CCCBDB experimental r(S=O) = 1.4308 Å, ∠OSO = 119.33°",
+      "charge": 0,
+      "nAO": 19,
+      "nShell": 11,
+      "nElectrons": 32,
+      "nocc": 16,
+      "eriWork": 1696707,
+      "rpaWork": 831744,
+      "predictedMs": 262,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "BF3",
+      "name": "boron trifluoride",
+      "formula": "<m>BF₃</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          5,
+          0,
+          0,
+          0
+        ],
+        [
+          9,
+          1.307,
+          0,
+          0
+        ],
+        [
+          9,
+          -0.6534999999999996,
+          1.1318952027462614,
+          0
+        ],
+        [
+          9,
+          -0.6535000000000005,
+          -1.131895202746261,
+          0
+        ]
+      ],
+      "source": "CCCBDB experimental r(B–F) = 1.307 Å, planar D₃ₕ",
+      "charge": 0,
+      "nAO": 20,
+      "nShell": 12,
+      "nElectrons": 32,
+      "nocc": 16,
+      "eriWork": 2041929,
+      "rpaWork": 1638400,
+      "predictedMs": 349,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CF4",
+      "name": "carbon tetrafluoride",
+      "formula": "<m>CF₄</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          9,
+          0.759215603984358,
+          0.759215603984358,
+          0.759215603984358
+        ],
+        [
+          9,
+          0.759215603984358,
+          -0.759215603984358,
+          -0.759215603984358
+        ],
+        [
+          9,
+          -0.759215603984358,
+          0.759215603984358,
+          -0.759215603984358
+        ],
+        [
+          9,
+          -0.759215603984358,
+          -0.759215603984358,
+          0.759215603984358
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–F) = 1.315 Å, T_d",
+      "charge": 0,
+      "nAO": 25,
+      "nShell": 15,
+      "nElectrons": 42,
+      "nocc": 21,
+      "eriWork": 4751460,
+      "rpaWork": 4410000,
+      "predictedMs": 833,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H2O2",
+      "name": "hydrogen peroxide",
+      "formula": "<m>H₂O₂</m>",
+      "group": "triatomics",
+      "ang": [
+        [
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.4556
+        ],
+        [
+          1,
+          -0.7909684030184553,
+          0.5166099559607663,
+          -0.20633016945819999
+        ],
+        [
+          1,
+          0.7909684030184553,
+          0.5166099559607663,
+          1.6619301694582
+        ]
+      ],
+      "source": "CCCBDB experimental r(O–O) = 1.4556 Å, r(O–H) = 0.967 Å, ∠OOH = 102.32°, HOOH dihedral 113.70°, C₂",
+      "charge": 0,
+      "nAO": 12,
+      "nShell": 8,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 300834,
+      "rpaWork": 104976,
+      "predictedMs": 53,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C2H2",
+      "name": "acetylene",
+      "formula": "<m>C₂H₂</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0.60165
+        ],
+        [
+          6,
+          0,
+          0,
+          -0.60165
+        ],
+        [
+          1,
+          0,
+          0,
+          1.66215
+        ],
+        [
+          1,
+          0,
+          0,
+          -1.66215
+        ]
+      ],
+      "source": "CCCBDB experimental r(C≡C) = 1.2033 Å, r(C–H) = 1.0605 Å, linear D∞h",
+      "charge": 0,
+      "nAO": 12,
+      "nShell": 8,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 300834,
+      "rpaWork": 176400,
+      "predictedMs": 57,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C2H4",
+      "name": "ethene",
+      "formula": "<m>C₂H₄</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0.6695
+        ],
+        [
+          6,
+          0,
+          0,
+          -0.6695
+        ],
+        [
+          1,
+          0,
+          0.9287967483543617,
+          1.2342172746130267
+        ],
+        [
+          1,
+          0,
+          -0.9287967483543617,
+          1.2342172746130267
+        ],
+        [
+          1,
+          0,
+          0.9287967483543617,
+          -1.2342172746130267
+        ],
+        [
+          1,
+          0,
+          -0.9287967483543617,
+          -1.2342172746130267
+        ]
+      ],
+      "source": "CCCBDB experimental r(C=C) = 1.339 Å, r(C–H) = 1.087 Å, ∠HCH = 117.4°, D₂ₕ (the window's original preset, frozen)",
+      "charge": 0,
+      "nAO": 14,
+      "nShell": 10,
+      "nElectrons": 16,
+      "nocc": 8,
+      "eriWork": 516132,
+      "rpaWork": 451584,
+      "predictedMs": 99,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C2H6",
+      "name": "ethane",
+      "formula": "<m>C₂H₆</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0.76755
+        ],
+        [
+          6,
+          0,
+          0,
+          -0.76755
+        ],
+        [
+          1,
+          1.02016924342933,
+          0,
+          1.1626331744846001
+        ],
+        [
+          1,
+          -0.5100846217146647,
+          0.8834924809693507,
+          1.1626331744846001
+        ],
+        [
+          1,
+          -0.5100846217146654,
+          -0.8834924809693505,
+          1.1626331744846001
+        ],
+        [
+          1,
+          0.5100846217146651,
+          0.8834924809693506,
+          -1.1626331744846001
+        ],
+        [
+          1,
+          -1.02016924342933,
+          1.249346998554306e-16,
+          -1.1626331744846001
+        ],
+        [
+          1,
+          0.5100846217146651,
+          -0.8834924809693506,
+          -1.1626331744846001
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–C) = 1.5351 Å, r(C–H) = 1.094 Å, ∠CCH = 111.17°, D₃d staggered",
+      "charge": 0,
+      "nAO": 16,
+      "nShell": 12,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 836001,
+      "rpaWork": 1016064,
+      "predictedMs": 169,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H2CO",
+      "name": "formaldehyde",
+      "formula": "<m>H₂CO</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.2078
+        ],
+        [
+          1,
+          0,
+          0.9471768415711793,
+          -0.5903687329044833
+        ],
+        [
+          1,
+          0,
+          -0.9471768415711793,
+          -0.5903687329044833
+        ]
+      ],
+      "source": "CCCBDB experimental r(C=O) = 1.2078 Å, r(C–H) = 1.1161 Å, ∠HCH = 116.13°, C₂ᵥ",
+      "charge": 0,
+      "nAO": 12,
+      "nShell": 8,
+      "nElectrons": 16,
+      "nocc": 8,
+      "eriWork": 300834,
+      "rpaWork": 147456,
+      "predictedMs": 55,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CH3OH",
+      "name": "methanol",
+      "formula": "<m>CH₃OH</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.4246
+        ],
+        [
+          1,
+          0,
+          0.8961035444595873,
+          1.7249538706375607
+        ],
+        [
+          1,
+          1.262681109880501e-16,
+          -1.0310573716108422,
+          -0.3645293629420561
+        ],
+        [
+          1,
+          -0.8929218765742016,
+          0.5155286858054212,
+          -0.3645293629420561
+        ],
+        [
+          1,
+          0.8929218765742019,
+          0.5155286858054208,
+          -0.3645293629420561
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–O) = 1.4246 Å, r(O–H) = 0.9451 Å, r(C–H) = 1.0936 Å, ∠COH = 108.53°; the methyl group is placed IDEALLY TETRAHEDRAL about the C–O axis (∠OCH = 109.471°, staggered to O–H) rather than with the measured 106.7°/112.0° splitting — the idealisation is stated, not hidden",
+      "charge": 0,
+      "nAO": 14,
+      "nShell": 10,
+      "nElectrons": 18,
+      "nocc": 9,
+      "eriWork": 516132,
+      "rpaWork": 396900,
+      "predictedMs": 95,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "HCOOH",
+      "name": "formic acid",
+      "formula": "HCOOH",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.202
+        ],
+        [
+          8,
+          0,
+          -1.1014639692984758,
+          -0.7683919080373285
+        ],
+        [
+          1,
+          0,
+          0.9083821870808765,
+          -0.6150209770358759
+        ],
+        [
+          1,
+          0,
+          -0.7914355206607515,
+          -1.6896228025666458
+        ]
+      ],
+      "source": "CCCBDB experimental (Z conformer) r(C=O) = 1.202 Å, r(C–O) = 1.343 Å, r(O–H) = 0.972 Å, r(C–H) = 1.097 Å, ∠OCO = 124.9°, ∠COH = 106.3°, ∠HC=O = 124.1°, planar Cs",
+      "charge": 0,
+      "nAO": 17,
+      "nShell": 11,
+      "nElectrons": 24,
+      "nocc": 12,
+      "eriWork": 1092771,
+      "rpaWork": 1040400,
+      "predictedMs": 201,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CH3CN",
+      "name": "acetonitrile",
+      "formula": "<m>CH₃CN</m>",
+      "group": "organics",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          1.458
+        ],
+        [
+          7,
+          0,
+          0,
+          2.6159999999999997
+        ],
+        [
+          1,
+          1.024651300817198,
+          0,
+          0.36284805598710895
+        ],
+        [
+          1,
+          -0.5123256504085988,
+          0.8873740565284642,
+          0.36284805598710895
+        ],
+        [
+          1,
+          -0.5123256504085995,
+          -0.887374056528464,
+          0.36284805598710895
+        ]
+      ],
+      "source": "CCCBDB experimental r(C≡N) = 1.158 Å, r(C–C) = 1.458 Å, r(C–H) = 1.087 Å, ∠HCC = 109.5°, C₃ᵥ",
+      "charge": 0,
+      "nAO": 18,
+      "nShell": 12,
+      "nElectrons": 22,
+      "nocc": 11,
+      "eriWork": 1343547,
+      "rpaWork": 1920996,
+      "predictedMs": 281,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C3H6",
+      "name": "cyclopropane",
+      "formula": "<m>C₃H₆</m>",
+      "group": "rings",
+      "ang": [
+        [
+          6,
+          0.8677574545920075,
+          0,
+          0
+        ],
+        [
+          1,
+          1.4488556232587064,
+          0,
+          0.9139003875544691
+        ],
+        [
+          1,
+          1.4488556232587064,
+          0,
+          -0.9139003875544691
+        ],
+        [
+          6,
+          -0.4338787272960036,
+          0.7515000000000001,
+          0
+        ],
+        [
+          1,
+          -0.7244278116293529,
+          1.254745776157976,
+          0.9139003875544691
+        ],
+        [
+          1,
+          -0.7244278116293529,
+          1.254745776157976,
+          -0.9139003875544691
+        ],
+        [
+          6,
+          -0.43387872729600413,
+          -0.7514999999999998,
+          0
+        ],
+        [
+          1,
+          -0.7244278116293539,
+          -1.2547457761579754,
+          0.9139003875544691
+        ],
+        [
+          1,
+          -0.7244278116293539,
+          -1.2547457761579754,
+          -0.9139003875544691
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–C) = 1.503 Å, r(C–H) = 1.083 Å, ∠HCH = 115.1°, D₃ₕ; each CH₂ bisector is radial in the ring plane, which is exact by symmetry rather than an idealisation",
+      "charge": 0,
+      "nAO": 21,
+      "nShell": 15,
+      "nElectrons": 24,
+      "nocc": 12,
+      "eriWork": 2368764,
+      "rpaWork": 5143824,
+      "predictedMs": 587,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C4H6",
+      "name": "1,3-butadiene",
+      "formula": "<m>C₄H₆</m>",
+      "group": "rings",
+      "ang": [
+        [
+          6,
+          0,
+          1.1166882746561553,
+          1.4740879105045814
+        ],
+        [
+          6,
+          0,
+          0,
+          0.7316
+        ],
+        [
+          6,
+          0,
+          0,
+          -0.7316
+        ],
+        [
+          6,
+          0,
+          1.1166882746561553,
+          -1.4740879105045814
+        ],
+        [
+          1,
+          0,
+          -0.9764949347594187,
+          1.2159115137896257
+        ],
+        [
+          1,
+          0,
+          -0.9764949347594187,
+          -1.2159115137896257
+        ],
+        [
+          1,
+          0,
+          2.0931832094155736,
+          0.9897763967149555
+        ],
+        [
+          1,
+          0,
+          1.0478668815635592,
+          2.561913087567879
+        ],
+        [
+          1,
+          0,
+          1.0478668815635592,
+          -2.561913087567879
+        ],
+        [
+          1,
+          0,
+          2.0931832094155736,
+          -0.9897763967149555
+        ]
+      ],
+      "source": "gas electron diffraction (Kveseth, Seip & Stølevik, 1980) r(C1=C2) = 1.3410 Å, r(C2–C3) = 1.4632 Å, ∠CCC = 123.62°, trans C₂ₕ planar; every C–H is placed at the measured mean 1.090 Å with ∠CCH = 120.0° in the plane — the ED analysis's own ∠CCH lie within 1.5° of 120°, and the idealisation is stated",
+      "charge": 0,
+      "nAO": 26,
+      "nShell": 18,
+      "nElectrons": 30,
+      "nocc": 15,
+      "eriWork": 5394114,
+      "rpaWork": 18404100,
+      "predictedMs": 1703,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C4H4O",
+      "name": "furan",
+      "formula": "<m>C₄H₄O</m>",
+      "group": "rings",
+      "ang": [
+        [
+          8,
+          -0.702465707255846,
+          -0.9416576398874691,
+          0
+        ],
+        [
+          6,
+          0.6595342927441541,
+          -0.9416576398874691,
+          0
+        ],
+        [
+          6,
+          1.1401691163662317,
+          0.3316495368463207,
+          0
+        ],
+        [
+          6,
+          -0.006723890789062326,
+          1.1874517512266571,
+          0
+        ],
+        [
+          6,
+          -1.0905138110654775,
+          0.3642139917019608,
+          0
+        ],
+        [
+          1,
+          1.2708926191687326,
+          -1.8258895080710007,
+          0
+        ],
+        [
+          1,
+          2.1739057906231505,
+          0.6338373729619473,
+          0
+        ],
+        [
+          1,
+          -0.011329189785418796,
+          2.264441904951915,
+          0
+        ],
+        [
+          1,
+          -2.112229741789957,
+          0.6984617394936403,
+          0
+        ]
+      ],
+      "source": "microwave r_s structure (Mata, Martin & Sørensen, 1977) r(O–C₂) = 1.362 Å, r(C₂=C₃) = 1.361 Å, r(C₃–C₄) = 1.431 Å, ∠C₂OC₅ = 106.55°, ∠OC₂C₃ = 110.68°, ∠C₂C₃C₄ = 106.05°; hydrogens at the measured 1.075/1.077 Å along the external ring bisector — stated as an idealisation of the measured ∠C–C–H",
+      "charge": 0,
+      "nAO": 29,
+      "nShell": 19,
+      "nElectrons": 36,
+      "nocc": 18,
+      "eriWork": 8280225,
+      "rpaWork": 32970564,
+      "predictedMs": 2876,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C5H5N",
+      "name": "pyridine",
+      "formula": "<m>C₅H₅N</m>",
+      "group": "rings",
+      "ang": [
+        [
+          7,
+          -0.7318768240683985,
+          -1.1931636266665837,
+          0
+        ],
+        [
+          6,
+          0.6083231759316016,
+          -1.1931636266665837,
+          0
+        ],
+        [
+          6,
+          1.3840774117467767,
+          -0.03435578426353314,
+          0
+        ],
+        [
+          6,
+          0.736548183325371,
+          1.2005763022659162,
+          0
+        ],
+        [
+          6,
+          -0.6577386412952687,
+          1.2183417375066794,
+          0
+        ],
+        [
+          6,
+          -1.3393333056400816,
+          0.0017649978241052189,
+          0
+        ],
+        [
+          1,
+          1.1200775848764906,
+          -2.15159446659478,
+          0
+        ],
+        [
+          1,
+          2.4651287728927542,
+          -0.09224114134483462,
+          0
+        ],
+        [
+          1,
+          1.3022700133794771,
+          2.1226663472182694,
+          0
+        ],
+        [
+          1,
+          -1.1991204567003688,
+          2.155853598737607,
+          0
+        ],
+        [
+          1,
+          -2.425611991917962,
+          0.023693648908997608,
+          0
+        ]
+      ],
+      "source": "microwave structure r(N–C₂) = 1.3402 Å, r(C₂–C₃) = 1.3945 Å, r(C₃–C₄) = 1.3944 Å, ∠C₂NC₆ = 116.94°, ∠NC₂C₃ = 123.80°, ∠C₂C₃C₄ = 118.53°, ∠C₃C₄C₅ = 118.40° (the six interior angles sum to 720.00°, so the ring closes); hydrogens at 1.0865/1.0826/1.0818 Å along the external ring bisector — stated as an idealisation",
+      "charge": 0,
+      "nAO": 35,
+      "nShell": 23,
+      "nElectrons": 42,
+      "nocc": 21,
+      "eriWork": 17118378,
+      "rpaWork": 105884100,
+      "predictedMs": 8071,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "urea",
+      "name": "urea",
+      "formula": "<m>CO(NH₂)₂</m>",
+      "group": "rings",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          1.221
+        ],
+        [
+          7,
+          0,
+          -1.1602510720890724,
+          -0.7434389347593775
+        ],
+        [
+          7,
+          0,
+          1.1602510720890724,
+          -0.7434389347593775
+        ],
+        [
+          1,
+          0,
+          -2.0529088024280724,
+          -0.28171696596644125
+        ],
+        [
+          1,
+          0,
+          -1.1137851613796206,
+          -1.7473641905139785
+        ],
+        [
+          1,
+          0,
+          1.1137851613796206,
+          -1.7473641905139785
+        ],
+        [
+          1,
+          0,
+          2.0529088024280724,
+          -0.28171696596644125
+        ]
+      ],
+      "source": "microwave heavy-atom values (Godfrey, Brown & Hunter, 1997) r(C=O) = 1.221 Å, r(C–N) = 1.378 Å, ∠NCN = 114.7°; the free molecule is slightly pyramidal at N and this entry is the PLANAR C₂ᵥ idealisation with r(N–H) = 1.005 Å at ∠CNH = 120° — the idealisation is stated",
+      "charge": 0,
+      "nAO": 24,
+      "nShell": 16,
+      "nElectrons": 32,
+      "nocc": 16,
+      "eriWork": 3995892,
+      "rpaWork": 9437184,
+      "predictedMs": 1027,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "glycine",
+      "name": "glycine",
+      "formula": "<m>NH₂CH₂COOH</m>",
+      "group": "rings",
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          -1.526
+        ],
+        [
+          7,
+          0,
+          -1.3592175014889856,
+          -2.0779209940254493
+        ],
+        [
+          8,
+          0,
+          -1.2598471383785808,
+          0.49880876888773834
+        ],
+        [
+          8,
+          0,
+          0.9858704094971532,
+          0.6928813287121507
+        ],
+        [
+          1,
+          0,
+          -1.2716487611854297,
+          1.464736675979735
+        ],
+        [
+          1,
+          0.8826316023095092,
+          0.5177210895184692,
+          -1.8745503235866487
+        ],
+        [
+          1,
+          -0.8826316023095092,
+          0.5177210895184692,
+          -1.8745503235866487
+        ],
+        [
+          1,
+          0.8046607174778344,
+          -1.910888964051297,
+          -2.3019315454341207
+        ],
+        [
+          1,
+          -0.8046607174778344,
+          -1.910888964051297,
+          -2.3019315454341207
+        ]
+      ],
+      "source": "gas electron diffraction of conformer I (Iijima, Tanaka & Onuma, 1991) r(C–C) = 1.526 Å, r(C–N) = 1.467 Å, r(C=O) = 1.205 Å, r(C–O) = 1.355 Å, ∠CCN = 112.1°, ∠CCO(=) = 125.1°, ∠CCO(–) = 111.6°, ∠COH = 112.3°; the CH₂ and NH₂ hydrogens are placed IDEALLY (∠HCH = 109.471°, ∠HNH = 107.0°, symmetric about the heavy-atom plane) at r(C–H) = 1.081 Å and r(N–H) = 1.001 Å — the idealisation is stated",
+      "charge": 0,
+      "nAO": 30,
+      "nShell": 20,
+      "nElectrons": 40,
+      "nocc": 20,
+      "eriWork": 9412605,
+      "rpaWork": 36000000,
+      "predictedMs": 3184,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "C6H6",
+      "name": "benzene",
+      "formula": "<m>C₆H₆</m>",
+      "group": "rings",
+      "ang": [
+        [
+          6,
+          1.39,
+          0,
+          0
+        ],
+        [
+          1,
+          2.48,
+          0,
+          0
+        ],
+        [
+          6,
+          0.6950000000000001,
+          1.2037753112603695,
+          0
+        ],
+        [
+          1,
+          1.2400000000000002,
+          2.1477430013854075,
+          0
+        ],
+        [
+          6,
+          -0.6949999999999996,
+          1.2037753112603697,
+          0
+        ],
+        [
+          1,
+          -1.2399999999999995,
+          2.147743001385408,
+          0
+        ],
+        [
+          6,
+          -1.39,
+          1.702259050814821e-16,
+          0
+        ],
+        [
+          1,
+          -2.48,
+          3.037124061885436e-16,
+          0
+        ],
+        [
+          6,
+          -0.6950000000000006,
+          -1.2037753112603695,
+          0
+        ],
+        [
+          1,
+          -1.240000000000001,
+          -2.1477430013854075,
+          0
+        ],
+        [
+          6,
+          0.6950000000000001,
+          -1.2037753112603695,
+          0
+        ],
+        [
+          1,
+          1.2400000000000002,
+          -2.1477430013854075,
+          0
+        ]
+      ],
+      "source": "CCCBDB experimental r(C–C) = 1.39 Å, r(C–H) = 1.09 Å, D₆ₕ, hydrogens at radius 2.48 Å (the window's original preset, frozen) — THE CAP",
+      "charge": 0,
+      "nAO": 36,
+      "nShell": 24,
+      "nElectrons": 42,
+      "nocc": 21,
+      "eriWork": 19063350,
+      "rpaWork": 128595600,
+      "predictedMs": 9592,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "NH4+",
+      "name": "ammonium",
+      "formula": "<m>NH₄⁺</m>",
+      "group": "ions",
+      "charge": 1,
+      "ang": [
+        [
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.5894746248426079,
+          0.5894746248426079,
+          0.5894746248426079
+        ],
+        [
+          1,
+          0.5894746248426079,
+          -0.5894746248426079,
+          -0.5894746248426079
+        ],
+        [
+          1,
+          -0.5894746248426079,
+          0.5894746248426079,
+          -0.5894746248426079
+        ],
+        [
+          1,
+          -0.5894746248426079,
+          -0.5894746248426079,
+          0.5894746248426079
+        ]
+      ],
+      "source": "r₀(N–H) = 1.021 Å, T_d, from the ν₃ infrared band of NH₄⁺ (Crofton & Oka, 1987)",
+      "nAO": 9,
+      "nShell": 7,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 99630,
+      "rpaWork": 32400,
+      "predictedMs": 25,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H3O+",
+      "name": "hydronium",
+      "formula": "<m>H₃O⁺</m>",
+      "group": "ions",
+      "charge": 1,
+      "ang": [
+        [
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.9302573999951842,
+          0,
+          -0.29462995393238584
+        ],
+        [
+          1,
+          -0.4651286999975919,
+          0.8056265404542915,
+          -0.29462995393238584
+        ],
+        [
+          1,
+          -0.4651286999975925,
+          -0.8056265404542913,
+          -0.29462995393238584
+        ]
+      ],
+      "source": "r₀(O–H) = 0.9758 Å, ∠HOH = 111.3°, C₃ᵥ, from the infrared spectrum of H₃O⁺ (Sears, Bunker, Davies et al., 1985)",
+      "nAO": 8,
+      "nShell": 6,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 67311,
+      "rpaWork": 14400,
+      "predictedMs": 20,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "OH-",
+      "name": "hydroxide",
+      "formula": "<m>OH⁻</m>",
+      "group": "ions",
+      "charge": -1,
+      "ang": [
+        [
+          8,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0.964
+        ]
+      ],
+      "source": "r₀(O–H) = 0.964 Å from the rotational/vibrational spectrum of OH⁻",
+      "nAO": 6,
+      "nShell": 4,
+      "nElectrons": 10,
+      "nocc": 5,
+      "eriWork": 27945,
+      "rpaWork": 900,
+      "predictedMs": 14,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CN-",
+      "name": "cyanide",
+      "formula": "<m>CN⁻</m>",
+      "group": "ions",
+      "charge": -1,
+      "ang": [
+        [
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          1.177
+        ]
+      ],
+      "source": "r₀(C–N) = 1.177 Å from the rotational spectrum of CN⁻ (Amano, 2005)",
+      "nAO": 10,
+      "nShell": 6,
+      "nElectrons": 14,
+      "nocc": 7,
+      "eriWork": 163863,
+      "rpaWork": 44100,
+      "predictedMs": 33,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "CuH",
+      "name": "copper hydride",
+      "formula": "CuH",
+      "group": "heavy",
+      "ang": [
+        [
+          29,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.4626
+        ]
+      ],
+      "source": "CCCBDB experimental r(Cu–H) = 1.4626 Å (X¹Σ⁺, a closed-shell singlet; the Cu ATOM is ²S and cannot be done here)",
+      "charge": 0,
+      "nAO": 20,
+      "nShell": 9,
+      "nElectrons": 30,
+      "nocc": 15,
+      "eriWork": 2342520,
+      "rpaWork": 2250000,
+      "predictedMs": 420,
+      "instability": {
+        "lowestApB": -0.006966,
+        "lowestAmB": -0.1173,
+        "energy": -1620.944903679
+      },
+      "over": false,
+      "reason": "RHF/STO-3G is not a minimum here (A−B ≺ 0) and, since 2026-09-18, its SCF does not converge within 200 cycles on this engine — no spectrum and no state ladder exist",
+      "shortReason": "not a minimum",
+      "disabled": true
+    },
+    {
+      "id": "ZnH2",
+      "name": "zinc dihydride",
+      "formula": "<m>ZnH₂</m>",
+      "group": "heavy",
+      "ang": [
+        [
+          30,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.5241
+        ],
+        [
+          1,
+          0,
+          0,
+          -1.5241
+        ]
+      ],
+      "source": "linear D∞h; r₀(Zn–H) = 1.5241 Å from the gas-phase IR emission spectrum (Shayesteh, Tereszchuk, Bernath & Colin, 2003)",
+      "charge": 0,
+      "nAO": 21,
+      "nShell": 10,
+      "nElectrons": 32,
+      "nocc": 16,
+      "eriWork": 2761209,
+      "rpaWork": 2822400,
+      "predictedMs": 503,
+      "instability": {
+        "lowestApB": -0.01885,
+        "lowestAmB": -0.0676,
+        "energy": -1758.305613634
+      },
+      "over": false,
+      "reason": "RHF/STO-3G is not a minimum here (A−B ≺ 0) and, since 2026-09-18, its SCF does not converge within 200 cycles on this engine — no spectrum and no state ladder exist",
+      "shortReason": "not a minimum",
+      "disabled": true
+    },
+    {
+      "id": "GeH4",
+      "name": "germane",
+      "formula": "<m>GeH₄</m>",
+      "group": "heavy",
+      "ang": [
+        [
+          32,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0.8805168955410982,
+          0.8805168955410982,
+          0.8805168955410982
+        ],
+        [
+          1,
+          0.8805168955410982,
+          -0.8805168955410982,
+          -0.8805168955410982
+        ],
+        [
+          1,
+          -0.8805168955410982,
+          0.8805168955410982,
+          -0.8805168955410982
+        ],
+        [
+          1,
+          -0.8805168955410982,
+          -0.8805168955410982,
+          0.8805168955410982
+        ]
+      ],
+      "source": "CCCBDB experimental r(Ge–H) = 1.5251 Å, T_d",
+      "charge": 0,
+      "nAO": 23,
+      "nShell": 12,
+      "nElectrons": 36,
+      "nocc": 18,
+      "eriWork": 3778407,
+      "rpaWork": 4284900,
+      "predictedMs": 708,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "AsH3",
+      "name": "arsine",
+      "formula": "<m>AsH₃</m>",
+      "group": "heavy",
+      "ang": [
+        [
+          33,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1.2561271222467416,
+          0,
+          -0.8398009602019513
+        ],
+        [
+          1,
+          -0.6280635611233705,
+          1.0878379982483195,
+          -0.8398009602019513
+        ],
+        [
+          1,
+          -0.6280635611233714,
+          -1.087837998248319,
+          -0.8398009602019513
+        ]
+      ],
+      "source": "CCCBDB experimental r(As–H) = 1.511 Å, ∠HAsH = 92.1°, C₃ᵥ",
+      "charge": 0,
+      "nAO": 22,
+      "nShell": 11,
+      "nElectrons": 36,
+      "nocc": 18,
+      "eriWork": 3238056,
+      "rpaWork": 2509056,
+      "predictedMs": 543,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "H2Se",
+      "name": "hydrogen selenide",
+      "formula": "<m>H₂Se</m>",
+      "group": "heavy",
+      "ang": [
+        [
+          34,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1.037767231854569,
+          -1.0269562661033356
+        ],
+        [
+          1,
+          0,
+          -1.037767231854569,
+          -1.0269562661033356
+        ]
+      ],
+      "source": "CCCBDB experimental r(Se–H) = 1.460 Å, ∠HSeH = 90.6°",
+      "charge": 0,
+      "nAO": 21,
+      "nShell": 10,
+      "nElectrons": 36,
+      "nocc": 18,
+      "eriWork": 2761209,
+      "rpaWork": 1285956,
+      "predictedMs": 416,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "HBr",
+      "name": "hydrogen bromide",
+      "formula": "HBr",
+      "group": "heavy",
+      "ang": [
+        [
+          35,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1.4145
+        ]
+      ],
+      "source": "CCCBDB experimental r(H–Br) = 1.4145 Å",
+      "charge": 0,
+      "nAO": 20,
+      "nShell": 9,
+      "nElectrons": 36,
+      "nocc": 18,
+      "eriWork": 2342520,
+      "rpaWork": 518400,
+      "predictedMs": 322,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    },
+    {
+      "id": "Br2",
+      "name": "dibromine",
+      "formula": "<m>Br₂</m>",
+      "group": "heavy",
+      "ang": [
+        [
+          35,
+          0,
+          0,
+          0
+        ],
+        [
+          35,
+          0,
+          0,
+          2.2811
+        ]
+      ],
+      "source": "CCCBDB experimental r(Br–Br) = 2.2811 Å — 38 Cartesian AOs, the widest entry, and still cheaper than benzene because Br has only 8 shells",
+      "charge": 0,
+      "nAO": 38,
+      "nShell": 16,
+      "nElectrons": 70,
+      "nocc": 35,
+      "eriWork": 25638201,
+      "rpaWork": 15920100,
+      "predictedMs": 4000,
+      "instability": null,
+      "over": false,
+      "reason": null,
+      "shortReason": null,
+      "disabled": false
+    }
+  ]
+}

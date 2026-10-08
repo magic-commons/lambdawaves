@@ -1,0 +1,118 @@
+{
+  "id": "C2H6",
+  "name": "ethane",
+  "formula": "C2H6",
+  "section": "ORGANIC",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0.76755
+      ],
+      [
+        6,
+        0,
+        0,
+        -0.76755
+      ],
+      [
+        1,
+        1.02016924342933,
+        0,
+        1.1626331744846001
+      ],
+      [
+        1,
+        -0.5100846217146647,
+        0.8834924809693507,
+        1.1626331744846001
+      ],
+      [
+        1,
+        -0.5100846217146654,
+        -0.8834924809693505,
+        1.1626331744846001
+      ],
+      [
+        1,
+        0.5100846217146651,
+        0.8834924809693506,
+        -1.1626331744846001
+      ],
+      [
+        1,
+        -1.02016924342933,
+        1.249346998554306e-16,
+        -1.1626331744846001
+      ],
+      [
+        1,
+        0.5100846217146651,
+        -0.8834924809693506,
+        -1.1626331744846001
+      ]
+    ],
+    "source": "CCCBDB experimental r(C\u2013C) = 1.5351 \u00c5, r(C\u2013H) = 1.094 \u00c5, \u2220CCH = 111.17\u00b0, D\u2083d staggered; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "organics",
+  "presentInstability": null,
+  "appPredictedMs": 169,
+  "nocc": 9,
+  "nElectrons": 18,
+  "nAO_631plusGstar": 50,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 16,
+  "predictedRecordBytes": 4352,
+  "predictedRecordBytes631": 22848,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -78.30580841075903,
+  "wallSeconds": 0.08262521600408945,
+  "converged": true,
+  "gapEh": 1.1019156779553043,
+  "topgroup": "D3d",
+  "computedGroup": "C2h",
+  "cycles": 26,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel (DIIS, plus explicit Newton rescue if needed), molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  },
+  "solverAttempts": [
+    {
+      "status": "MEASURED",
+      "method": "DIIS RHF",
+      "converged": true,
+      "cycles": 26
+    }
+  ]
+}

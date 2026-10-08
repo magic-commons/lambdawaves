@@ -1,0 +1,80 @@
+{
+  "id": "BeH2",
+  "name": "beryllium dihydride",
+  "formula": "BeH2",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1.3264
+      ],
+      [
+        1,
+        0,
+        0,
+        -1.3264
+      ]
+    ],
+    "source": "linear D\u221eh; r\u2080(Be\u2013H) = 1.3264 \u00c5 from the gas-phase IR emission spectrum (Bernath, Shayesteh et al., 2002) \u2014 BeH\u2082 is a solid at room temperature and this is the free molecule; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "hydrides",
+  "presentInstability": null,
+  "appPredictedMs": 16,
+  "nocc": 3,
+  "nElectrons": 6,
+  "nAO_631plusGstar": 23,
+  "basis631CountSource": {
+    "4": "installed PySCF 6-31+G* table, count only, not vendored or solved",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 7,
+  "predictedRecordBytes": 2552,
+  "predictedRecordBytes631": 6648,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -15.560312316767027,
+  "wallSeconds": 0.044523272998048924,
+  "converged": true,
+  "gapEh": 0.6340942416960912,
+  "topgroup": "Dooh",
+  "computedGroup": "D2h",
+  "cycles": 8,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

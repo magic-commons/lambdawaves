@@ -1,0 +1,40 @@
+{
+  "id": "TiCl4",
+  "status": "MEASURED",
+  "wallMs": 8993.779934,
+  "nAO": 55,
+  "converged": true,
+  "energyEh": -2658.646680474205,
+  "gapEh": 0.5849919754814021,
+  "iterations": 37,
+  "timings": {
+    "integrals": 1862.27
+  },
+  "stability": {
+    "seed": 20260912,
+    "amplitude": 0.05,
+    "energy": -2658.646680474205,
+    "delta": 0,
+    "converged": true,
+    "iterations": 43,
+    "same": true,
+    "hessian": {
+      "nOv": 450,
+      "minimum": true,
+      "positiveDefinite": {
+        "ApB": true,
+        "AmB": true
+      },
+      "lowestApB": 0.3261559786947983,
+      "lowestAmB": 0.32247271586635273
+    },
+    "minimum": true
+  },
+  "method": "moleculeRHF defaults; no RPA spectrum call",
+  "predictedRecordBytes": 27128,
+  "numericStatus": {
+    "nAO": "DERIVED from pinned basis shell/component inventory",
+    "gapEh": "DERIVED from MEASURED native orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO*nAO+2*nAO)+2048, early checkpoint binary allowance; authoritative census uses decimal 2000 bytes"
+  }
+}

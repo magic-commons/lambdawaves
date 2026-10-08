@@ -1,0 +1,87 @@
+{
+  "id": "AsH3",
+  "name": "arsine",
+  "formula": "AsH3",
+  "section": "HEAVY",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        33,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1.2561271222467416,
+        0,
+        -0.8398009602019513
+      ],
+      [
+        1,
+        -0.6280635611233705,
+        1.0878379982483195,
+        -0.8398009602019513
+      ],
+      [
+        1,
+        -0.6280635611233714,
+        -1.087837998248319,
+        -0.8398009602019513
+      ]
+    ],
+    "source": "CCCBDB experimental r(As\u2013H) = 1.511 \u00c5, \u2220HAsH = 92.1\u00b0, C\u2083\u1d65; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "heavy",
+  "presentInstability": null,
+  "appPredictedMs": 543,
+  "nocc": 18,
+  "nElectrons": 36,
+  "nAO_631plusGstar": null,
+  "basis631CountSource": {
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [
+    "As"
+  ],
+  "nAO_STO3G": 22,
+  "predictedRecordBytes": 6272,
+  "predictedRecordBytes631": null,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -2211.6503169002253,
+  "wallSeconds": 0.4115715590014588,
+  "converged": true,
+  "gapEh": 0.7028489015314179,
+  "topgroup": "C3v",
+  "computedGroup": "Cs",
+  "cycles": 23,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "UNVERIFIED: basis unavailable for As",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "UNVERIFIED: nAO unavailable",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

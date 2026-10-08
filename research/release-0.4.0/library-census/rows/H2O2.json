@@ -1,0 +1,86 @@
+{
+  "id": "H2O2",
+  "name": "hydrogen peroxide",
+  "formula": "H2O2",
+  "section": "HYDRIDES",
+  "family": null,
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        8,
+        0,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0,
+        1.4556
+      ],
+      [
+        1,
+        -0.7909684030184553,
+        0.5166099559607663,
+        -0.20633016945819999
+      ],
+      [
+        1,
+        0.7909684030184553,
+        0.5166099559607663,
+        1.6619301694582
+      ]
+    ],
+    "source": "CCCBDB experimental r(O\u2013O) = 1.4556 \u00c5, r(O\u2013H) = 0.967 \u00c5, \u2220OOH = 102.32\u00b0, HOOH dihedral 113.70\u00b0, C\u2082; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "triatomics",
+  "presentInstability": null,
+  "appPredictedMs": 53,
+  "nocc": 9,
+  "nElectrons": 18,
+  "nAO_631plusGstar": 42,
+  "basis631CountSource": {
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 12,
+  "predictedRecordBytes": 3392,
+  "predictedRecordBytes631": 16832,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -148.75736915510478,
+  "wallSeconds": 0.12931745999958366,
+  "converged": true,
+  "gapEh": 0.8210819791715251,
+  "topgroup": "C2",
+  "computedGroup": "C2",
+  "cycles": 29,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}

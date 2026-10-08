@@ -1,0 +1,124 @@
+{
+  "id": "glycine",
+  "name": "glycine",
+  "formula": "C2H5NO2",
+  "section": "BIO",
+  "family": "amino-acids",
+  "charge": 0,
+  "multiplicity": 1,
+  "geometry": {
+    "atomsAngstrom": [
+      [
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        0,
+        -1.526
+      ],
+      [
+        7,
+        0,
+        -1.3592175014889856,
+        -2.0779209940254493
+      ],
+      [
+        8,
+        0,
+        -1.2598471383785808,
+        0.49880876888773834
+      ],
+      [
+        8,
+        0,
+        0.9858704094971532,
+        0.6928813287121507
+      ],
+      [
+        1,
+        0,
+        -1.2716487611854297,
+        1.464736675979735
+      ],
+      [
+        1,
+        0.8826316023095092,
+        0.5177210895184692,
+        -1.8745503235866487
+      ],
+      [
+        1,
+        -0.8826316023095092,
+        0.5177210895184692,
+        -1.8745503235866487
+      ],
+      [
+        1,
+        0.8046607174778344,
+        -1.910888964051297,
+        -2.3019315454341207
+      ],
+      [
+        1,
+        -0.8046607174778344,
+        -1.910888964051297,
+        -2.3019315454341207
+      ]
+    ],
+    "source": "gas electron diffraction of conformer I (Iijima, Tanaka & Onuma, 1991) r(C\u2013C) = 1.526 \u00c5, r(C\u2013N) = 1.467 \u00c5, r(C=O) = 1.205 \u00c5, r(C\u2013O) = 1.355 \u00c5, \u2220CCN = 112.1\u00b0, \u2220CCO(=) = 125.1\u00b0, \u2220CCO(\u2013) = 111.6\u00b0, \u2220COH = 112.3\u00b0; the CH\u2082 and NH\u2082 hydrogens are placed IDEALLY (\u2220HCH = 109.471\u00b0, \u2220HNH = 107.0\u00b0, symmetric about the heavy-atom plane) at r(C\u2013H) = 1.081 \u00c5 and r(N\u2013H) = 1.001 \u00c5 \u2014 the idealisation is stated; immutable input: lab/molecules.js; https://cccbdb.nist.gov/expgeom1x.asp",
+    "status": "MEASURED",
+    "experimentalStatus": "UNVERIFIED",
+    "why": "Coordinates copied from a reference or built here; experimental attribution is quoted, not independently remeasured."
+  },
+  "motifs": [],
+  "optimise": false,
+  "optimisationMode": null,
+  "smiles": null,
+  "origin": "present entry",
+  "appGroup": "rings",
+  "presentInstability": null,
+  "appPredictedMs": 3184,
+  "nocc": 20,
+  "nElectrons": 40,
+  "nAO_631plusGstar": 105,
+  "basis631CountSource": {
+    "6": "vendored 6-31+G* decimals",
+    "7": "vendored 6-31+G* decimals",
+    "8": "vendored 6-31+G* decimals",
+    "1": "vendored 6-31+G* decimals"
+  },
+  "basis631MissingElements": [],
+  "nAO_STO3G": 30,
+  "predictedRecordBytes": 9728,
+  "predictedRecordBytes631": 91928,
+  "overLiveBudget": false,
+  "renderTier": "existing <=64 AO",
+  "energyEh": -279.0885621834341,
+  "wallSeconds": 2.519311423006002,
+  "converged": true,
+  "gapEh": 0.6009432444056141,
+  "topgroup": "Cs",
+  "computedGroup": "Cs",
+  "cycles": 46,
+  "solveStatus": "MEASURED: fresh pinned-decimal RHF kernel, molecule/basis build and geometry optimisation excluded from wallSeconds",
+  "numericStatus": {
+    "geometry.atomsAngstrom": "MEASURED",
+    "charge": "DERIVED",
+    "multiplicity": "DERIVED",
+    "nocc": "DERIVED",
+    "nElectrons": "DERIVED",
+    "nAO_STO3G": "DERIVED",
+    "nAO_631plusGstar": "DERIVED",
+    "energyEh": "MEASURED",
+    "wallSeconds": "MEASURED",
+    "gapEh": "DERIVED from MEASURED orbital energies",
+    "predictedRecordBytes": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "predictedRecordBytes631": "DERIVED: 8*(nAO^2+2*nAO)+2048",
+    "appPredictedMs": "DERIVED from present COST; timing prediction UNVERIFIED after N2 refit",
+    "cycles": "MEASURED"
+  }
+}
