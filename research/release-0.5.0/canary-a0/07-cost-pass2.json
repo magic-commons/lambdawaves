@@ -1,0 +1,877 @@
+{
+ "pass": 2,
+ "method": "A-M (tools/perf/main-thread.mjs): fresh browser per cell, warm-up navigation, field.ok required, pause/settle/400ms/play, ΔTaskDuration×1000/SECS",
+ "scene": "H2O MOLECULES orbital (HOMO), AUTO-ROTATE, 1400x900, headless Chromium 1243 + Vulkan, adopted copy MIR 1.5.0-alpha.24 (served by tools/gate/server.py on 8771)",
+ "secs": 30,
+ "rows": [
+  {
+   "mode": "off",
+   "n": 0,
+   "at": "2026-10-08T17:17:55.474Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    0.92,
+    1,
+    0.94
+   ],
+   "loadAfter": [
+    1.64,
+    1.16,
+    1
+   ],
+   "msPerSec": 32.511,
+   "script": 9.484,
+   "layout": 0.712,
+   "recalcStyle": 0.575,
+   "frames": 679,
+   "presents": 679,
+   "held": 0,
+   "presentsPerS": 22.6,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 0,
+   "viewChangedMsPerS": 0,
+   "kitFrame": {
+    "readMsPerS": 0,
+    "writeMsPerS": 0,
+    "coalesceMsPerS": 0,
+    "reads": 0,
+    "writes": 0,
+    "coalesced": 0
+   },
+   "mirPerf": {
+    "writesPerS": 4.7,
+    "skippedPerS": 13.1,
+    "readsPerS": 0
+   },
+   "labelsInDom": null,
+   "trace": {
+    "thread": "2790044:2790044",
+    "span": 6.01,
+    "taskMsPerS": 46.62,
+    "scriptMsPerS": 11.12,
+    "rafMsPerS": 10.97,
+    "rafCallbacksPerS": 24.8,
+    "recalc": {
+     "msPerS": 0.62,
+     "forcedMsPerS": 0,
+     "lifecycleMsPerS": 0.62,
+     "perS": 9,
+     "elementsPerS": 13,
+     "forcedElementsPerS": 0
+    },
+    "layout": {
+     "msPerS": 0.74,
+     "forcedMsPerS": 0,
+     "perS": 4.5
+    },
+    "paintEtcMsPerS": 17.41,
+    "mainFramesPerS": 0
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 0,
+   "at": "2026-10-08T17:18:42.462Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "device lost: A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 0,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    2.06,
+    1.29,
+    1.04
+   ],
+   "loadAfter": [
+    2.08,
+    1.37,
+    1.08
+   ],
+   "msPerSec": 36.801,
+   "script": 14.345,
+   "layout": 0.738,
+   "recalcStyle": 0.567,
+   "frames": 639,
+   "presents": 639,
+   "held": 0,
+   "presentsPerS": 21.2,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 639,
+   "viewChangedMsPerS": 0.226,
+   "kitFrame": {
+    "readMsPerS": 2.043,
+    "writeMsPerS": 0.429,
+    "coalesceMsPerS": 0.422,
+    "reads": 640,
+    "writes": 639,
+    "coalesced": 326
+   },
+   "mirPerf": {
+    "writesPerS": 4.8,
+    "skippedPerS": 183.9,
+    "readsPerS": 42.5
+   },
+   "labelsInDom": {
+    "labels": 0,
+    "blocks": 1,
+    "elements": 84
+   },
+   "trace": {
+    "thread": "2792170:2792170",
+    "span": 5.99,
+    "taskMsPerS": 46.61,
+    "scriptMsPerS": 18.91,
+    "rafMsPerS": 15.12,
+    "rafCallbacksPerS": 57.3,
+    "recalc": {
+     "msPerS": 0.65,
+     "forcedMsPerS": 0.65,
+     "lifecycleMsPerS": 0,
+     "perS": 9,
+     "elementsPerS": 11,
+     "forcedElementsPerS": 11
+    },
+    "layout": {
+     "msPerS": 0.83,
+     "forcedMsPerS": 0.83,
+     "perS": 4.5
+    },
+    "paintEtcMsPerS": 16.2,
+    "mainFramesPerS": 0
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 2,
+   "at": "2026-10-08T17:19:32.242Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "device lost: A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 2,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.09,
+   "loadBefore": [
+    1.99,
+    1.39,
+    1.09
+   ],
+   "loadAfter": [
+    2.12,
+    1.49,
+    1.13
+   ],
+   "msPerSec": 60.547,
+   "script": 20.861,
+   "layout": 1.807,
+   "recalcStyle": 6.509,
+   "frames": 631,
+   "presents": 631,
+   "held": 0,
+   "presentsPerS": 21,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 631,
+   "viewChangedMsPerS": 0.096,
+   "kitFrame": {
+    "readMsPerS": 3.788,
+    "writeMsPerS": 0.352,
+    "coalesceMsPerS": 5.347,
+    "reads": 631,
+    "writes": 631,
+    "coalesced": 1268
+   },
+   "mirPerf": {
+    "writesPerS": 223.9,
+    "skippedPerS": 1161.4,
+    "readsPerS": 41.9
+   },
+   "labelsInDom": {
+    "labels": 2,
+    "blocks": 1,
+    "elements": 126
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 8,
+   "at": "2026-10-08T17:20:15.672Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "device lost: A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 8,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    2.17,
+    1.53,
+    1.15
+   ],
+   "loadAfter": [
+    2.86,
+    1.75,
+    1.24
+   ],
+   "msPerSec": 79.117,
+   "script": 28.155,
+   "layout": 2.403,
+   "recalcStyle": 13.99,
+   "frames": 626,
+   "presents": 626,
+   "held": 0,
+   "presentsPerS": 20.8,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 626,
+   "viewChangedMsPerS": 0.11,
+   "kitFrame": {
+    "readMsPerS": 5.192,
+    "writeMsPerS": 1.176,
+    "coalesceMsPerS": 10.375,
+    "reads": 626,
+    "writes": 627,
+    "coalesced": 1253
+   },
+   "mirPerf": {
+    "writesPerS": 1291.4,
+    "skippedPerS": 3452.4,
+    "readsPerS": 41.6
+   },
+   "labelsInDom": {
+    "labels": 8,
+    "blocks": 1,
+    "elements": 252
+   },
+   "trace": {
+    "thread": "2795935:2795935",
+    "span": 6,
+    "taskMsPerS": 98.22,
+    "scriptMsPerS": 44.76,
+    "rafMsPerS": 33.96,
+    "rafCallbacksPerS": 72.5,
+    "recalc": {
+     "msPerS": 14.62,
+     "forcedMsPerS": 10.02,
+     "lifecycleMsPerS": 4.61,
+     "perS": 50,
+     "elementsPerS": 1619,
+     "forcedElementsPerS": 880
+    },
+    "layout": {
+     "msPerS": 2.68,
+     "forcedMsPerS": 2.15,
+     "perS": 49
+    },
+    "paintEtcMsPerS": 32.05,
+    "mainFramesPerS": 0
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 16,
+   "at": "2026-10-08T17:21:05.409Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 16,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    2.27,
+    1.69,
+    1.23
+   ],
+   "loadAfter": [
+    1.97,
+    1.67,
+    1.24
+   ],
+   "msPerSec": 91.478,
+   "script": 33.326,
+   "layout": 2.787,
+   "recalcStyle": 19.896,
+   "frames": 626,
+   "presents": 626,
+   "held": 0,
+   "presentsPerS": 20.8,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 626,
+   "viewChangedMsPerS": 0.086,
+   "kitFrame": {
+    "readMsPerS": 6.687,
+    "writeMsPerS": 1.85,
+    "coalesceMsPerS": 14.245,
+    "reads": 626,
+    "writes": 625,
+    "coalesced": 1256
+   },
+   "mirPerf": {
+    "writesPerS": 2631.9,
+    "skippedPerS": 6613.4,
+    "readsPerS": 41.6
+   },
+   "labelsInDom": {
+    "labels": 16,
+    "blocks": 1,
+    "elements": 420
+   }
+  },
+  {
+   "mode": "pane",
+   "n": 0,
+   "at": "2026-10-08T17:21:48.721Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "device lost: A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 0,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.09,
+   "loadBefore": [
+    1.98,
+    1.68,
+    1.25
+   ],
+   "loadAfter": [
+    1.71,
+    1.65,
+    1.25
+   ],
+   "msPerSec": 34.015,
+   "script": 13.415,
+   "layout": 0.704,
+   "recalcStyle": 0.513,
+   "frames": 580,
+   "presents": 580,
+   "held": 0,
+   "presentsPerS": 19.3,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 580,
+   "viewChangedMsPerS": 0.229,
+   "kitFrame": {
+    "readMsPerS": 1.931,
+    "writeMsPerS": 0.479,
+    "coalesceMsPerS": 0.449,
+    "reads": 581,
+    "writes": 580,
+    "coalesced": 301
+   },
+   "mirPerf": {
+    "writesPerS": 4.6,
+    "skippedPerS": 167.9,
+    "readsPerS": 38.6
+   },
+   "labelsInDom": {
+    "labels": 0,
+    "blocks": 1,
+    "elements": 84
+   }
+  },
+  {
+   "mode": "pane",
+   "n": 2,
+   "at": "2026-10-08T17:22:32.254Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 2,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    2.15,
+    1.75,
+    1.29
+   ],
+   "loadAfter": [
+    2.19,
+    1.79,
+    1.32
+   ],
+   "msPerSec": 53.322,
+   "script": 18.786,
+   "layout": 1.623,
+   "recalcStyle": 5.999,
+   "frames": 544,
+   "presents": 544,
+   "held": 0,
+   "presentsPerS": 18.1,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 544,
+   "viewChangedMsPerS": 0.076,
+   "kitFrame": {
+    "readMsPerS": 3.385,
+    "writeMsPerS": 0.326,
+    "coalesceMsPerS": 4.97,
+    "reads": 544,
+    "writes": 543,
+    "coalesced": 1131
+   },
+   "mirPerf": {
+    "writesPerS": 204.7,
+    "skippedPerS": 1015,
+    "readsPerS": 36.1
+   },
+   "labelsInDom": {
+    "labels": 2,
+    "blocks": 1,
+    "elements": 126
+   }
+  },
+  {
+   "mode": "pane",
+   "n": 8,
+   "at": "2026-10-08T17:23:15.293Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 8,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    3.11,
+    2.01,
+    1.4
+   ],
+   "loadAfter": [
+    3.98,
+    2.33,
+    1.52
+   ],
+   "msPerSec": 76.758,
+   "script": 27.21,
+   "layout": 2.469,
+   "recalcStyle": 13.502,
+   "frames": 523,
+   "presents": 523,
+   "held": 0,
+   "presentsPerS": 17.4,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 523,
+   "viewChangedMsPerS": 0.136,
+   "kitFrame": {
+    "readMsPerS": 5.103,
+    "writeMsPerS": 1.09,
+    "coalesceMsPerS": 10.285,
+    "reads": 523,
+    "writes": 522,
+    "coalesced": 1103
+   },
+   "mirPerf": {
+    "writesPerS": 1162.3,
+    "skippedPerS": 2936.7,
+    "readsPerS": 34.7
+   },
+   "labelsInDom": {
+    "labels": 8,
+    "blocks": 1,
+    "elements": 252
+   }
+  },
+  {
+   "mode": "pane",
+   "n": 16,
+   "at": "2026-10-08T17:23:58.420Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 16,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.1,
+   "loadBefore": [
+    3.89,
+    2.37,
+    1.54
+   ],
+   "loadAfter": [
+    3.05,
+    2.3,
+    1.55
+   ],
+   "msPerSec": 87.383,
+   "script": 31.708,
+   "layout": 2.858,
+   "recalcStyle": 19.483,
+   "frames": 560,
+   "presents": 560,
+   "held": 0,
+   "presentsPerS": 18.6,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 560,
+   "viewChangedMsPerS": 0.086,
+   "kitFrame": {
+    "readMsPerS": 6.628,
+    "writeMsPerS": 1.711,
+    "coalesceMsPerS": 13.631,
+    "reads": 560,
+    "writes": 559,
+    "coalesced": 1133
+   },
+   "mirPerf": {
+    "writesPerS": 2416.9,
+    "skippedPerS": 5899.8,
+    "readsPerS": 37.2
+   },
+   "labelsInDom": {
+    "labels": 16,
+    "blocks": 1,
+    "elements": 420
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 8,
+   "at": "2026-10-08T17:24:41.967Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "WebGPU device request failed: Failed to execute 'requestDevice' on 'GPUAdapter': A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 8,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.04,
+   "loadBefore": [
+    3.18,
+    2.37,
+    1.58
+   ],
+   "loadAfter": [
+    3.61,
+    2.54,
+    1.67
+   ],
+   "msPerSec": 81.838,
+   "script": 28.224,
+   "layout": 2.536,
+   "recalcStyle": 13.932,
+   "frames": 594,
+   "presents": 594,
+   "held": 0,
+   "presentsPerS": 19.8,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 594,
+   "viewChangedMsPerS": 0.136,
+   "kitFrame": {
+    "readMsPerS": 5.357,
+    "writeMsPerS": 1.112,
+    "coalesceMsPerS": 10.287,
+    "reads": 594,
+    "writes": 595,
+    "coalesced": 1219
+   },
+   "mirPerf": {
+    "writesPerS": 1258.3,
+    "skippedPerS": 3327.5,
+    "readsPerS": 39.6
+   },
+   "labelsInDom": {
+    "labels": 8,
+    "blocks": 1,
+    "elements": 252
+   }
+  },
+  {
+   "mode": "bare",
+   "n": 0,
+   "at": "2026-10-08T17:25:25.298Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "device lost: A valid external Instance reference no longer exists."
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "made": {
+    "labels": 0,
+    "blocks": 1
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.07,
+   "loadBefore": [
+    3.11,
+    2.48,
+    1.66
+   ],
+   "loadAfter": [
+    3,
+    2.5,
+    1.69
+   ],
+   "msPerSec": 38.198,
+   "script": 14.409,
+   "layout": 0.769,
+   "recalcStyle": 0.568,
+   "frames": 653,
+   "presents": 653,
+   "held": 0,
+   "presentsPerS": 21.7,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 653,
+   "viewChangedMsPerS": 0.2,
+   "kitFrame": {
+    "readMsPerS": 2.095,
+    "writeMsPerS": 0.492,
+    "coalesceMsPerS": 0.482,
+    "reads": 652,
+    "writes": 653,
+    "coalesced": 329
+   },
+   "mirPerf": {
+    "writesPerS": 5,
+    "skippedPerS": 187.7,
+    "readsPerS": 43.4
+   },
+   "labelsInDom": {
+    "labels": 0,
+    "blocks": 1,
+    "elements": 84
+   }
+  },
+  {
+   "mode": "off",
+   "n": 0,
+   "at": "2026-10-08T17:26:08.302Z",
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "warmField": {
+    "ok": false,
+    "error": "no WebGPU adapter"
+   },
+   "warning": {
+    "open": true,
+    "webdriver": false
+   },
+   "water": {
+    "nocc": 5,
+    "on": true,
+    "view": "orbital"
+   },
+   "motion": "{\"reduced\":false,\"source\":\"media\",\"divisor\":4,\"autoplay\":\"not asked\",\"rate\":4}",
+   "secs": 30.06,
+   "loadBefore": [
+    3.06,
+    2.54,
+    1.71
+   ],
+   "loadAfter": [
+    3.09,
+    2.58,
+    1.76
+   ],
+   "msPerSec": 32.74,
+   "script": 9.574,
+   "layout": 0.749,
+   "recalcStyle": 0.578,
+   "frames": 639,
+   "presents": 639,
+   "held": 0,
+   "presentsPerS": 21.3,
+   "fieldOkAfter": true,
+   "viewChangedCalls": 0,
+   "viewChangedMsPerS": 0,
+   "kitFrame": {
+    "readMsPerS": 0,
+    "writeMsPerS": 0,
+    "coalesceMsPerS": 0,
+    "reads": 0,
+    "writes": 0,
+    "coalesced": 0
+   },
+   "mirPerf": {
+    "writesPerS": 4.9,
+    "skippedPerS": 13.6,
+    "readsPerS": 0
+   },
+   "labelsInDom": null
+  }
+ ]
+}

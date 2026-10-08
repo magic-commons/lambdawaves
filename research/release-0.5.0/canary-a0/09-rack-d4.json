@@ -1,0 +1,410 @@
+{
+ "field": {
+  "ok": true,
+  "error": null,
+  "adapter": "NVIDIA GeForce RTX 3070"
+ },
+ "warmField": {
+  "ok": false,
+  "error": "no WebGPU adapter"
+ },
+ "warning": {
+  "open": true,
+  "webdriver": false
+ },
+ "load": [
+  3.49,
+  2.76,
+  1.97
+ ],
+ "water": {
+  "nocc": 5,
+  "on": true,
+  "view": "orbital"
+ },
+ "uiSpaceWired": [
+  {
+   "left": 0,
+   "right": 300,
+   "top": 0,
+   "bottom": 900
+  },
+  {
+   "left": 1100,
+   "right": 1400,
+   "top": 0,
+   "bottom": 900
+  }
+ ],
+ "rack": [
+  {
+   "shift": [
+    1,
+    0
+   ],
+   "uiSpace": [
+    {
+     "left": 0,
+     "right": 300,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    },
+    {
+     "left": 1100,
+     "right": 1400,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    }
+   ],
+   "plain": [
+    {
+     "id": "rackL",
+     "left": 0,
+     "top": 0,
+     "right": 300,
+     "bottom": 900
+    },
+    {
+     "id": "rack",
+     "left": 1100,
+     "top": 0,
+     "right": 1400,
+     "bottom": 900
+    }
+   ],
+   "labels": [
+    {
+     "i": 0,
+     "title": "O 1",
+     "gone": false,
+     "state": "in",
+     "left": 1064,
+     "top": 563,
+     "right": 1364,
+     "bottom": 619,
+     "underUiSpace": true,
+     "underPlain": true
+    },
+    {
+     "i": 1,
+     "title": "H 2",
+     "gone": true,
+     "state": "in",
+     "left": 0,
+     "top": 0,
+     "right": 300,
+     "bottom": 56,
+     "underUiSpace": false,
+     "underPlain": false
+    },
+    {
+     "i": 2,
+     "title": "H 3",
+     "gone": false,
+     "state": "in",
+     "left": 1000,
+     "top": 298,
+     "right": 1299,
+     "bottom": 353,
+     "underUiSpace": true,
+     "underPlain": true
+    }
+   ],
+   "blocks": [
+    {
+     "left": 911,
+     "top": 371,
+     "right": 1292,
+     "bottom": 545,
+     "underUiSpace": true
+    }
+   ],
+   "made": {
+    "labels": 3,
+    "blocks": 1
+   },
+   "countUiSpace": 2,
+   "countPlain": 2,
+   "blocksUnder": 1
+  },
+  {
+   "shift": [
+    -1,
+    0
+   ],
+   "uiSpace": [
+    {
+     "left": 0,
+     "right": 300,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    },
+    {
+     "left": 1100,
+     "right": 1400,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    }
+   ],
+   "plain": [
+    {
+     "id": "rackL",
+     "left": 0,
+     "top": 0,
+     "right": 300,
+     "bottom": 900
+    },
+    {
+     "id": "rack",
+     "left": 1100,
+     "top": 0,
+     "right": 1400,
+     "bottom": 900
+    }
+   ],
+   "labels": [
+    {
+     "i": 0,
+     "title": "O 1",
+     "gone": false,
+     "state": "in",
+     "left": 36,
+     "top": 318,
+     "right": 336,
+     "bottom": 373,
+     "underUiSpace": true,
+     "underPlain": true
+    },
+    {
+     "i": 1,
+     "title": "H 2",
+     "gone": false,
+     "state": "in",
+     "left": 105,
+     "top": 584,
+     "right": 405,
+     "bottom": 639,
+     "underUiSpace": true,
+     "underPlain": true
+    },
+    {
+     "i": 2,
+     "title": "H 3",
+     "gone": true,
+     "state": "in",
+     "left": 0,
+     "top": 0,
+     "right": 300,
+     "bottom": 56,
+     "underUiSpace": false,
+     "underPlain": false
+    }
+   ],
+   "blocks": [
+    {
+     "left": 112,
+     "top": 391,
+     "right": 494,
+     "bottom": 566,
+     "underUiSpace": true
+    }
+   ],
+   "made": {
+    "labels": 3,
+    "blocks": 1
+   },
+   "countUiSpace": 2,
+   "countPlain": 2,
+   "blocksUnder": 1
+  },
+  {
+   "shift": [
+    0,
+    0
+   ],
+   "uiSpace": [
+    {
+     "left": 0,
+     "right": 300,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    },
+    {
+     "left": 1100,
+     "right": 1400,
+     "top": 0,
+     "bottom": 900,
+     "scroll": {}
+    }
+   ],
+   "plain": [
+    {
+     "id": "rackL",
+     "left": 0,
+     "top": 0,
+     "right": 300,
+     "bottom": 900
+    },
+    {
+     "id": "rack",
+     "left": 1100,
+     "top": 0,
+     "right": 1400,
+     "bottom": 900
+    }
+   ],
+   "labels": [
+    {
+     "i": 0,
+     "title": "O 1",
+     "gone": false,
+     "state": "in",
+     "left": 364,
+     "top": 371,
+     "right": 664,
+     "bottom": 426,
+     "underUiSpace": false,
+     "underPlain": false
+    },
+    {
+     "i": 1,
+     "title": "H 2",
+     "gone": false,
+     "state": "in",
+     "left": 835,
+     "top": 458,
+     "right": 1135,
+     "bottom": 513,
+     "underUiSpace": true,
+     "underPlain": true
+    },
+    {
+     "i": 2,
+     "title": "H 3",
+     "gone": false,
+     "state": "in",
+     "left": 270,
+     "top": 488,
+     "right": 569,
+     "bottom": 543,
+     "underUiSpace": true,
+     "underPlain": true
+    }
+   ],
+   "blocks": [
+    {
+     "left": 511,
+     "top": 562,
+     "right": 893,
+     "bottom": 736,
+     "underUiSpace": false
+    }
+   ],
+   "made": {
+    "labels": 3,
+    "blocks": 1
+   },
+   "countUiSpace": 2,
+   "countPlain": 2,
+   "blocksUnder": 0
+  }
+ ],
+ "d4": {
+  "markdown image, PNG data URL": {
+   "html": "<p>Before.</p>\n<p><img alt=\"a dot\"></p>\n<p>After.</p>\n",
+   "img": 1,
+   "imgWithSrc": 0,
+   "imgSrc": [
+    ""
+   ],
+   "imgLoaded": [
+    false
+   ],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  },
+  "raw <img>, PNG data URL": {
+   "html": "<p>Before.</p>\n<img alt=\"a dot\">\n\n<p>After.</p>\n",
+   "img": 1,
+   "imgWithSrc": 0,
+   "imgSrc": [
+    ""
+   ],
+   "imgLoaded": [
+    false
+   ],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  },
+  "raw <img>, SVG data URL": {
+   "html": "<p>Before.</p>\n<img alt=\"a circle\">\n\n<p>After.</p>\n",
+   "img": 1,
+   "imgWithSrc": 0,
+   "imgSrc": [
+    ""
+   ],
+   "imgLoaded": [
+    false
+   ],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  },
+  "inline <svg>": {
+   "html": "<p>Before.</p>\n<p></p>\n<p>After.</p>\n",
+   "img": 0,
+   "imgWithSrc": 0,
+   "imgSrc": [],
+   "imgLoaded": [],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  },
+  "control: <img>, same-origin URL": {
+   "html": "<p>Before.</p>\n<img src=\"/lab/img/icon-192.png\" alt=\"the icon\">\n\n<p>After.</p>\n",
+   "img": 1,
+   "imgWithSrc": 1,
+   "imgSrc": [
+    "/lab/img/icon-192.png"
+   ],
+   "imgLoaded": [
+    true
+   ],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  },
+  "control: <img onerror>, same-origin URL": {
+   "html": "<p>Before.</p>\n<img src=\"/lab/img/icon-192.png\" alt=\"x\">\n\n<p>After.</p>\n",
+   "img": 1,
+   "imgWithSrc": 1,
+   "imgSrc": [
+    "/lab/img/icon-192.png"
+   ],
+   "imgLoaded": [
+    true
+   ],
+   "svg": 0,
+   "script": 0,
+   "onAttrs": [],
+   "pwned": false
+  }
+ },
+ "loadAfter": [
+  4.23,
+  3.02,
+  2.09
+ ]
+}

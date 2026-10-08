@@ -1,0 +1,248 @@
+{
+ "n": 8,
+ "field": {
+  "ok": true,
+  "error": null,
+  "adapter": "NVIDIA GeForce RTX 3070"
+ },
+ "load": [
+  3.04,
+  2.61,
+  1.78
+ ],
+ "made": {
+  "labels": 8,
+  "blocks": 1
+ },
+ "span": 10.18,
+ "byFile": [
+  [
+   "((idle))",
+   913.81
+  ],
+  [
+   "((program))",
+   36.03
+  ],
+  [
+   "(proj)",
+   8.16
+  ],
+  [
+   "/lab/mir/info/layer.js",
+   4.02
+  ],
+  [
+   "/lab/field.js",
+   2.43
+  ],
+  [
+   "/lab/rack.js",
+   1.88
+  ],
+  [
+   "(getBoundingClientRect)",
+   1.75
+  ],
+  [
+   "(getPropertyValue)",
+   1.68
+  ],
+  [
+   "(setAttribute)",
+   1.65
+  ],
+  [
+   "/lab/mir/core/perf.js",
+   1.23
+  ],
+  [
+   "(getAttribute)",
+   1.17
+  ],
+  [
+   "/lab/mir/info/bodies.js",
+   1.16
+  ],
+  [
+   "/lab/mir/core/frame.js",
+   0.94
+  ],
+  [
+   "(setProperty)",
+   0.91
+  ],
+  [
+   "/lab/mir/info/leader.js",
+   0.82
+  ],
+  [
+   "((garbage collector))",
+   0.65
+  ],
+  [
+   "(getCurrentTexture)",
+   0.58
+  ],
+  [
+   "/lab/mir/info/seats.js",
+   0.54
+  ],
+  [
+   "(beginRenderPass)",
+   0.38
+  ],
+  [
+   "(createCommandEncoder)",
+   0.33
+  ],
+  [
+   "/lab/mir/kit.js",
+   0.31
+  ],
+  [
+   "()",
+   0.3
+  ],
+  [
+   "/lab/mir/core/motion.js",
+   0.28
+  ],
+  [
+   "/lab/mir/window-activity.js",
+   0.25
+  ],
+  [
+   "(setTimeout)",
+   0.25
+  ]
+ ],
+ "kitFunctions": [
+  [
+   "info/layer.js paint",
+   1.28
+  ],
+  [
+   "info/layer.js (anon)",
+   0.89
+  ],
+  [
+   "core/perf.js setAttr",
+   0.78
+  ],
+  [
+   "info/bodies.js sub",
+   0.58
+  ],
+  [
+   "core/perf.js setVar",
+   0.39
+  ],
+  [
+   "info/leader.js leader",
+   0.33
+  ],
+  [
+   "info/layer.js computeRests",
+   0.26
+  ],
+  [
+   "core/motion.js motionPolicy",
+   0.26
+  ],
+  [
+   "info/seats.js troubleOf",
+   0.25
+  ],
+  [
+   "info/layer.js readStage",
+   0.25
+  ],
+  [
+   "info/layer.js lineOf",
+   0.25
+  ],
+  [
+   "info/bodies.js tick",
+   0.23
+  ],
+  [
+   "core/frame.js (anon)",
+   0.23
+  ],
+  [
+   "info/layer.js seatGroup",
+   0.2
+  ],
+  [
+   "info/seats.js clipLength",
+   0.18
+  ],
+  [
+   "info/layer.js layoutSeat",
+   0.18
+  ],
+  [
+   "core/frame.js run",
+   0.18
+  ],
+  [
+   "info/leader.js toPath",
+   0.18
+  ],
+  [
+   "info/layer.js env",
+   0.18
+  ],
+  [
+   "info/leader.js route",
+   0.18
+  ],
+  [
+   "info/bodies.js resolveRests",
+   0.18
+  ],
+  [
+   "info/layer.js placeBlocks",
+   0.15
+  ],
+  [
+   "core/frame.js call",
+   0.13
+  ],
+  [
+   "info/bodies.js measure",
+   0.13
+  ],
+  [
+   "core/frame.js now",
+   0.13
+  ],
+  [
+   "info/leader.js (anon)",
+   0.1
+  ],
+  [
+   "info/layer.js resolveAnchor",
+   0.08
+  ],
+  [
+   "core/frame.js coalesce",
+   0.05
+  ],
+  [
+   "core/frame.js pending",
+   0.05
+  ],
+  [
+   "info/layer.js viewChanged",
+   0.05
+  ]
+ ],
+ "total": 983.91,
+ "loadAfter": [
+  2.87,
+  2.6,
+  1.8
+ ]
+}
