@@ -4427,3 +4427,52 @@ with `keyboard-window`'s count **not recorded in the hand-off**. Final builder l
 **36,280 → 36,244 (−36)**; per-seam final line deltas are **not recorded in the hand-off**. Integrator
 merged A5+A6 and A9–A11: **36,198 (−82)** (PLAN). The builder kept `.tmp/canary-after/` for A0;
 this documentation work leaves it there.
+
+### wave 192: A7 THE OCCLUSION PROVIDERS — `lab/occlusion.js`, one producer, the rect lists byte for byte
+
+`refreshOcclusion` used to know every window species itself. Now each species is a provider in `lab/occlusion.js` (40
+lines): `paintedRect(el, clip)` (null when hidden, `visibility: hidden` or under 2 px, else the rect clipped by `clip`'s)
+and `createOcclusion(dirty)` → `{ register(name, rects, { standIn }), unregister(name), rects(map), dirty, watch(el, opts) }`.
+`rack.js` registers, in the old order: `modwin` (`.m2rail`, `.m2dev` clipped by its `.m2run`, `.m2workbar`), `chiprail`
+(`.crail-chip`), `floats` (a floated card's one pane, or its head and body when DISCONNECTED), `extra` (`#transport`,
+`#notebook`, `#sheet`, `#offer`, `#rackAddList`, `#rackFavList`), `keymap` (`#keymap .km-panel`) and `rack` (its open cards,
+with the two columns as its stand-in). KIT BRIEF 8's twins, in the header: `layer` = modwin + chiprail + floats, `rack` =
+rack, `extra()` = extra + keymap, `subscribe` = `dirty()` + `watch()`, so C8 is one subscription. The host keeps the canvas
+conversion, the hidden-interface clearing and the PRESENT. `field.setOcclusion` still cuts at 32 itself, and nothing cuts
+the list before it. The cap converts before it counts. A provider with a stand-in counts last; when its own rects would carry
+the block past 32, its stand-in's rects replace them. That is the old rack-column rule, now an explicit host overflow policy, as brief 8 asks.
+The clip is taken in viewport pixels before the canvas origin is subtracted. Rounding is monotonic, so max/min commute with
+`x − c` and every number is bitwise the old one. The three producers (`placeFloat`, `modDodge`, the keyboard window's
+`onMove`/`onClose`) are one `occlusion.dirty()` call each. The loop's line is untouched. The watchers are the same observers,
+installed at the same point. No `__LW` member is touched.
+
+**The probe.** `tools/a7-occlusion-probe.mjs` wraps `__LW.field.setOcclusion` and pauses. It walks `frame-occlusion`'s
+seven scenes, with box and dots as two, and then a float moved by `moveFloat`, the racks scrolled, two cards folded, the
+keyboard window open, the interface hidden and back, DISCONNECTED with every rack card open, and every card folded under the
+modulation window. After each scene a body-class flicker dirties the block, and the probe writes the list that refresh hands over.
+The base copy (`git archive 1e1a4f8 lab tools`, 8777/5247) and this tree (8773/5243) each give 14,807 B with sha-256
+`ceb35024…b229`, and `cmp` finds them identical. The counts are 20 · 20 · 20 · 20 · 23 · 11 · 11 · 7 · 7 · 6 · 6 · 7 · 0 · 7 · 12 · 16.
+Scene 15 crosses 32, and on both trees the two rack columns stand in.
+
+**The frame loop's gate (the S2 pattern).** The device report (`tools/perf/device-report-run.mjs`, the gate's headless
+Firefox, 30 s long play) was run back to back. The first pair was re-taken because the base began at a load of 4.23. In the
+second pair the base read 17.4 fps, 523 presents, 0 held, loop median 1 ms (load 2.77 → 2.41), and A7 read 18.2 fps, 548
+presents, 0 held, loop median 1 ms (2.21 → 2.27). The discarded first pair read 18.2/548 against 18.1/544. They are equal
+within the noise. **Main-thread ms/s** (`tools/perf/main-thread.mjs`, interleaved A B × 3, every run `field ok · NVIDIA
+GeForce RTX 3070`, 0 held):
+
+| tree | runs (ms/s) | Script | load (1 min) | median · spread |
+|---|---|---|---|---|
+| base 1e1a4f8 | 19.653 · 20.788 · 20.392 | 7.41 · 7.71 · 7.73 | 1.92→2.07 · 3.14→3.46 · 3.42→2.98 | **20.392** · 1.135 |
+| A7 | 21.583 · 21.941 · 20.350 | 7.93 · 8.40 · 7.64 | 2.58→3.38 · 3.32→3.57 · 3.29→3.31 | **21.583** · 1.591 |
+
+|Δ median| is **1.191 ms/s**, within the 2 ms/s gate (MEASURE §1). The two higher A7 runs came at the higher loads; the third
+pair, at equal load, read 20.392 against 20.350. The burst still runs at most every 300 ms, and its reads are the old reads.
+The digest lock was not run because `digest-lock.mjs:34` sets the occlusion block itself before every capture, so it
+cannot see this change.
+
+Gates: `node tests/pwa.test.mjs --write`. `bash test.sh node` exited 0 (85 suites). The browser suites ran on 8773/5243,
+one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**, `keyboard-window` **1**, `history`
+**39**, `render-regressions` **2** and `offer` **16** (it reads the masks too). No timing red, so nothing was re-run alone.
+`cat lab/*.js | wc -l`: **36,198 → 36,226 (+28**: occlusion.js +40, rack.js −13, sw.js +1). Hand-off:
+`research/release-0.5.0/A7-BUILD.md`.
