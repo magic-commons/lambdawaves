@@ -262,6 +262,27 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   **A4 parked** (`4bd0bbc`), never merged. Next after wave 2: **A-M**, the ms/s instrument (`tools/perf/main-thread.mjs`, CDP
 >   `TaskDuration`) and the pre-C baseline. The standing merge conflict between A branches is the generated `lab/sw.js` (take either side,
 >   `pwa --write`).
+> **UPDATE 2026-10-08 ~12:50 — Claude Sos, fourth usage pause: stage A wave 1 all merged; A0's row in; wave 2 parked with designs.**
+> - **Merged on `sos-s0`:** A5+A6 (`b5b6d7d`), **A9–A11** (`611474b` + follow-up `9443c2d`: the ACTIONS table on the kit's ids with
+>   FOLDERS on O and `Ctrl` explicit; eleven suites by hook; the canary's four gate rewrites with the manifest's sha pin kept; the
+>   driver-port settle in `tools/gate/drv.mjs`; `sw.js` §1b `SKIP = ['mir/locales/*.json', 'mir/tokens.json']` — the adopted alpha.24
+>   copy 9.46 → 7.33 MiB; the canary's node reds 78 → 81 of 85, the four left are the kit's: `mir-manifest` (C0's pin), `new-project`
+>   (C0's bpm regeneration), `wiring` (R5-W1), `pwa`'s three hidden kit deltas), and **CANARY-A0 PARTIAL** (`ff17874`). `lab/*.js`
+>   36,280 → **36,198 (−82)**. Merged-tree gate running at this writing (node + keyboard-window, menubar, history, offer, take-in-bugs,
+>   frame-occlusion; log in the job tmp). Still to write for A9–A11: REPORT waves 193– and `A9-A11-BUILD.md` from its hand-off
+>   `15b4d5e` (a Haiku 5.5 task), including the R5-W1 proposal and the drafted CLAUDE.md keyboard paragraph.
+> - **A0's decisive number:** the kit's label layer over the stage costs **+90 % main-thread ms/s at 8 bare labels** (45.1 → 85.9;
+>   style recalc scales with labels; `viewChanged` itself is 0.09 ms/s) against the plan's +10 % rule → **by the rule, D1 (the
+>   INFORMATIONAL window) waits for brief 7's coalesced layer and is 0.5.1**, unless pass 2 or a kit fix changes the number. Stylehash
+>   with the modulation window open shows R13 as a DOM change (34 elements swapped; `#modwin` gains a backdrop-filter). Not measured:
+>   legibility (headless Chromium screenshots the WebGPU canvas blank — use the gate Firefox), the under-a-rack count, the sanitiser.
+> - **Parked with designs, no code:** A1+A8 (`worktree-agent-a93d670fd213115b8`, `df081b1`, `A1-A8-HANDOFF.md`: the store's API and
+>   the 7+1 sites on `b5b6d7d`; the camera port's members; the bindings table; the Alt+Arrow conflict with A9's rows and its
+>   resolution), A7 (`worktree-agent-a45dd079234049e48`, `89452ae`, `A7-HANDOFF.md`: the registry design, +25 lines, `modDodge` still
+>   in `rack.js`), A-M (no commit; its reconnaissance in `~/.claude/handoffs/agents/a20bbec16555e4c3f.md`; ruling: 0.5.0 gets its own
+>   `research/release-0.5.0/measure/MEASURE.md`). **Resume all three from the tip after `ff17874`**, not from `b5b6d7d`.
+> - **Josh's reading:** `PLAN-DRAFT-3` (`371c100`) — the glass (seven classes), the camera bindings, R5-G1, R5-L1; Q2, Q3. D1's new
+>   number belongs in his read: the plan's rule has already fired once.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
