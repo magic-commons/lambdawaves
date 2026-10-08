@@ -23,6 +23,7 @@ import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
+import { createOcclusion, paintedRect } from './occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
 import { MOLECULE_BY_ID } from './molecules.js';
@@ -508,6 +509,7 @@ export async function boot(dom) {
   let modArm = true;
   let clockLink = true;
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
+  const occlusion = createOcclusion(() => { occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
   let refSnapshot = null;        // { re, im, ids } — the DIFF reference state
   let pendingRef = null;
@@ -2550,8 +2552,7 @@ export async function boot(dom) {
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     function modDodge(r) {
-      occludeDirty = true;
-      schedule(TIER.PRESENT);   // a paused field still has to move its line masks with the window
+      occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
@@ -3272,7 +3273,8 @@ export async function boot(dom) {
    * the stage showed them as a hairline through a device's title. Skip only PAINTED surfaces, not the
    * transparent layout box around a disconnected card or the modulation constellation. Otherwise the
    * frame is cut into a moving rectangle wherever that box goes. Rectangles are gathered here — one
-   * layout burst, at most every 300 ms while a frame runs, and never inside a paint. */
+   * layout burst, at most every 300 ms while a frame runs, and never inside a paint.  0.5.0 A7: each species is a
+   * provider in lab/occlusion.js, registered below in the old order; this host converts, clears and presents. */
   const NO_OCCLUSION = [];
   function refreshOcclusion(nowMs) {
     occludeDirty = false; occludeAt = nowMs;
@@ -3284,41 +3286,27 @@ export async function boot(dom) {
        signature, so an already-empty block costs a string compare.  The body-class observer below re-dirties the
        burst on the way back. */
     if (document.body.classList.contains('ui-hidden')) { if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
-    const cb = dom.canvas.getBoundingClientRect(), out = [], body = document.body;
-    const rect = (el) => { if (!el || el.hidden || getComputedStyle(el).visibility === 'hidden') return null;
-      const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return null;
-      let x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
-      /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
-      if (el.classList.contains('m2dev')) { const clip = el.closest('.m2run')?.getBoundingClientRect();
-        if (clip) { x0 = Math.max(x0, clip.left - cb.left); y0 = Math.max(y0, clip.top - cb.top);
-          x1 = Math.min(x1, clip.right - cb.left); y1 = Math.min(y1, clip.bottom - cb.top); } }
+    const cb = dom.canvas.getBoundingClientRect();
+    const toCanvas = (r) => { const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
       return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
-    const add = (el) => { const r = rect(el); if (r) out.push(r); };
-    const disconnected = body.classList.contains('disconnected') && !body.classList.contains('phone');
-    const surfaces = (d) => {
-      if (d.id === 'modwin') return d.querySelectorAll('.m2rail, .m2dev, .m2workbar');
-      if (d.classList.contains('kwin-chiprail')) return d.querySelectorAll('.crail-chip');
-      if (disconnected && d.classList.contains('dev')) return [d.querySelector('.dev-head'), d.querySelector('.dev-body')];
-      return [d];
-    };
-    const rackShown = !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek');
-    const cards = [];
-    if (rackShown) for (const rk of [rack, rackL]) if (rk) for (const d of rk.children) if (d.classList.contains('dev') && !d.classList.contains('closed')) cards.push(d);
-    for (const d of floats.children) if (!d.hidden && !d.classList.contains('closed')) for (const s of surfaces(d)) add(s);
-    for (const id of ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList']) add(document.getElementById(id));
-    add(document.querySelector('#keymap .km-panel'));
-    const rackRects = [];
-    for (const d of cards) for (const s of surfaces(d)) { const r = rect(s); if (r) rackRects.push(r); }
-    if (out.length + rackRects.length <= 32) out.push(...rackRects);
-    else if (rackShown) { add(rack); add(rackL); }   // past the block's 32 the two columns stand in for their cards
-    if (field.setOcclusion(out)) schedule(TIER.PRESENT);
+    if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
   }
-  { const dirty = () => { occludeDirty = true; schedule(TIER.PRESENT); };
-    const mo = new MutationObserver(dirty);
-    for (const el of [floats, rack, rackL]) if (el) mo.observe(el, { childList: true });
+  { const body = document.body, { root: mw, rail } = modView, dirty = occlusion.dirty, shown = (d) => !d.hidden && !d.classList.contains('closed');
+    const rackShown = () => !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek'), rects = (els) => els.map((s) => paintedRect(s));
+    /* a card is one pane, or (DISCONNECTED, never on a phone) its head and its body with the stage showing between them */
+    const panes = (d) => body.classList.contains('disconnected') && !body.classList.contains('phone') ? [d.querySelector('.dev-head'), d.querySelector('.dev-body')] : [d];
+    /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
+    occlusion.register('modwin', () => shown(mw) ? [...mw.querySelectorAll('.m2rail, .m2dev, .m2workbar')].map((s) => paintedRect(s, s.classList.contains('m2dev') && s.closest('.m2run'))) : []);
+    occlusion.register('chiprail', () => shown(rail) ? rects([...rail.querySelectorAll('.crail-chip')]) : []);
+    occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
+    occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
+    occlusion.register('keymap', () => [paintedRect(document.querySelector('#keymap .km-panel'))]);
+    occlusion.register('rack', () => rackShown() ? rects([rack, rackL].flatMap((rk) => rk ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)) : [],
+      { standIn: () => rackShown() ? [paintedRect(rack), paintedRect(rackL)] : [] });   // past the block's 32 the two columns stand in for their cards
+    for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
     /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
     if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
-    for (const id of ['notebook', 'transport', 'sheet', 'offer', 'rackAddList', 'rackFavList']) { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['style', 'hidden', 'class'] }); }
+    for (const id of ['notebook', 'transport', 'sheet', 'offer', 'rackAddList', 'rackFavList']) occlusion.watch(document.getElementById(id), { attributes: true, attributeFilter: ['style', 'hidden', 'class'] });
     new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
     window.addEventListener('resize', dirty, { passive: true });
@@ -3337,8 +3325,8 @@ export async function boot(dom) {
   function placeFloat(d, x, y) {
     const st = floatState.get(d.dataset.id); if (!st) return;
     const [cx, cy] = clampFloat(x, y, st.w);
-    st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px'; occludeDirty = true;
-    schedule(TIER.PRESENT);   // detached windows move over a paused canvas too
+    st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px';
+    occlusion.dirty();   // detached windows move over a paused canvas too
   }
   const raiseFloat = (d) => { if (!d || !d.classList.contains('floating')) return false; d.style.zIndex = String(++floatZ); return true; };
   const frontFloat = () => { let best = null, z = -1; if (floats) for (const d of floats.querySelectorAll('.dev')) { const q = +d.style.zIndex || 0; if (q > z) { z = q; best = d; } } return best; };
@@ -3805,15 +3793,14 @@ export async function boot(dom) {
       const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
       km.setAttribute('aria-label', 'Keyboard shortcuts window');
       let returnFocus = null;
-      const keymapMoved = () => { occludeDirty = true; schedule(TIER.PRESENT); };
       const man = createKeymap(km, {
         get actions() { return __LW_hooks.keys ? __LW_hooks.keys.actions : []; },
         bind(id, spec, options) { return __LW_hooks.keys.bind(id, spec, options); },
         conflicts(id, spec) { return __LW_hooks.keys.conflicts(id, spec); },
         reset() { return __LW_hooks.keys.reset(); }
-      }, { onMove: keymapMoved, onClose() {
+      }, { onMove: occlusion.dirty, onClose() {
         km.hidden = true;
-        keymapMoved();
+        occlusion.dirty();
         if (returnFocus && returnFocus.isConnected) returnFocus.focus();
       } });
       // The editor owns a second hidden root and its recording lifecycle. Showing only
