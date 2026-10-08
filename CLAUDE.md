@@ -31,10 +31,20 @@ a restored project whose field owner is MOLECULES brings them back onto the rack
 (MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
 closes MO-REGISTRY: its switch stands down (it must release the field) and the
 ladder stays painted and editable. Its MO-REGISTRY ON switch sits beside the
-ORBITAL | STATES seg (registerview.js). Below its top rows (ON, MOLECULE,
-BASIS, VIEW + ORBITAL) MOLECULES keeps KICK / RUN / TDA / the spectra in the
-`.mol-more` fold: open on a desktop, folded on a phone or tablet, its state in
-the card's WORKSPACE record (`more`); its `Aa` stays visible with HELP off.
+ORBITAL | STATES seg (registerview.js). MOLECULES' first row is the SECTION
+header, which is the library's page turner (0.4.0 S4b): PALETTE's ◂ ▸, a
+readout naming the section (it survives LEAN), and INSTALLED, whose lamp says
+every record of the section is on this device and whose press installs or
+removes them all; the MOLECULE dropdown below holds that one section
+(DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
+SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
+library record ships only through `tools/orbital-library.mjs`'s diversity
+gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
+never DISABLED). Below the header and the top rows (ON, MOLECULE, BASIS,
+VIEW + ORBITAL — VALENCE takes the dial's seat under DENSITY, 0.4.0 S4c)
+MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
+on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
+record (`more`); its `Aa` stays visible with HELP off.
 
 THE PAINT GESTURE (`lab/paint-stroke.js`) is one law for the ORBITAL and STATES
 ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every
