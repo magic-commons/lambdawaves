@@ -2,8 +2,8 @@
  * lab/molecules.js's library, RHF through the worker, the RPA/TDA inspector beside the live δ-kick trace, the fitted
  * poles with their certificate, and the AO density on the field.  Atomic units; atoms in bohr through ANGSTROM.
  *
- * THE MOLECULE CONTROL IS A DROPDOWN (2026-09-12, Josh: "this should be a dropdown menu hehe").  Fifty-four closed-
- * shell species in seven <optgroup>s, each option carrying its Cartesian AO count and lab/molecules.js's PREDICTED
+ * THE MOLECULE CONTROL IS A DROPDOWN (2026-09-12, Josh: "this should be a dropdown menu hehe") holding ONE SECTION of the
+ * library (0.4.0 S4b: the page turner ‹ SECTION › above it), in the table's <optgroup>s, each option carrying its Cartesian AO count and lab/molecules.js's PREDICTED
  * solve time, and each over-cap or unsolvable entry disabled WITH ITS REASON on the option itself.  The node is
  * paletteview.js's `<select class="sel">` — the same element, the same class, the same 44-px seat — because the
  * lab already had a dropdown and a second one would have been a second design.  The CAP is benzene: ~1.7 s
@@ -24,9 +24,9 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
-import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
+import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
 import { orbitalName, forms, coreCount } from './names.js';
-import { fetchRecord, installed, removeRecord, persistOnce, storageInfo } from './library.js';
+import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -74,6 +74,19 @@ export function createChem(host, api) {
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
   function orbFmt(k) { return sol ? orbitalName(sol.names, k - 1, sol.nocc) : String(k); }   // lab/names.js: '1b1 · HOMO' (a dial's text takes the plain form)
   /* ── the rows ─────────────────────────────────────────────────────────────────────────────────── */
+  /* THE SECTION HEADER IS THE PAGE TURNER (0.4.0 S4b · PLAN F5, the expansion seat): ‹ SECTION › above the dropdown, which then
+     holds that one section; the name, its record count and bytes, how many are on this device, and INSTALLED — the switch's lamp
+     is lit when every record of the section is kept here, and its press installs them all (persist() asked once) or removes
+     them.  A section with no record solves live and offers nothing to keep; in a Safari tab nothing is offered to keep (S4a: the
+     M5 has not measured persist there).  The page is the molecule's own section, or the one the hand turned to — never saved. */
+  const rH = el('div', 'row tight mol-section', host);
+  const pageBy = (d) => () => { page = SECTIONS[(SECTIONS.indexOf(page) + d + SECTIONS.length) % SECTIONS.length]; fillSel(); };
+  for (const [d, g, t] of [[-1, 'dirPrev', 'previous'], [1, 'dirNext', 'next']]) {             // PALETTE's own page-turner buttons
+    const b = trig({ label: '', cls: 'pal-nav mol-turn', title: `The ${t} section of the library`, onFire: pageBy(d) }); chip(b.root, g, t + ' section'); rH.appendChild(b.root);
+  }
+  const roSec = readout({ label: 'SECTION', value: '—', sub: '' }); rH.insertBefore(roSec.root, rH.lastChild);
+  const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
+  rH.appendChild(keepSw.root);
   const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
   r0.appendChild(onSw.root);
@@ -88,31 +101,54 @@ export function createChem(host, api) {
   const mSel = el('select', 'sel', mWrap);
   mSel.setAttribute('aria-label', 'molecule');
   mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
-  for (const g of [...GROUPS, RECORD_GROUP]) {
-    const rows = CHEM_PRESETS.filter((p) => p.group === g.id);
-    if (!rows.length) continue;
-    const og = el('optgroup', '', mSel); og.label = g.label;
-    for (const p of rows) {
-      const o = el('option', '', og, optionLabel(p)); o.value = p.id;
-      o.disabled = !!p.disabled;
-      /* the source goes on `data-help` as well as `title`: lab/mir/control-help.js moves a title to data-help at
-         boot, which is fine for the control but leaves an <option> with neither unless both are set here. */
-      const why = p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source;
-      o.title = why; o.dataset.help = why;
+  let page = PRESET_BY_ID.get(preset).section;
+  /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
+  function fillSel() {
+    mSel.replaceChildren();
+    for (const g of [...GROUPS, RECORD_GROUP]) {
+      const rows = CHEM_PRESETS.filter((p) => p.group === g.id && p.section === page);
+      if (!rows.length) continue;
+      const og = el('optgroup', '', mSel); og.label = g.label;
+      for (const p of rows) {
+        const o = el('option', '', og, optionLabel(p, !p.recordOnly || !!have.get(p.records['sto-3g'].hash))); o.value = p.id;
+        o.disabled = !!p.disabled;
+        /* the source goes on `data-help` as well as `title`: lab/mir/control-help.js moves a title to data-help at
+           boot, which is fine for the control but leaves an <option> with neither unless both are set here. */
+        const why = p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source;
+        o.title = why; o.dataset.help = why;
+      }
     }
+    mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
+    header();
   }
-  mSel.value = 'H2O';
   mSel.addEventListener('change', () => { solve(mSel.value, { press: true }); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
   const have = new Map(), optOf = (id) => [...mSel.options].find((o) => o.value === id);
+  const sectionRecs = () => CHEM_PRESETS.filter((p) => p.section === page).flatMap((p) => Object.values(p.records || {}));
   async function lamps() {
     for (const p of CHEM_PRESETS) for (const r of Object.values(p.records || {})) have.set(r.hash, await installed(r.hash));
     for (const p of CHEM_PRESETS) if (p.recordOnly) { const o = optOf(p.id); if (o) o.textContent = optionLabel(p, have.get(p.records['sto-3g'].hash)); }
-    return have;
+    header(); return have;
   }
-  lamps(); mSel.addEventListener('focus', () => { lamps(); });
-  const mSeg = { root: mWrap, set(v) { if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
+  function header() {
+    const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
+    const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
+    roSec.set(page); roSec.setSub(recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`);
+    roSec.root.title = `${page}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
+    keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length);
+  }
+  /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
+  async function keep(v) {
+    const recs = sectionRecs(), sec = page;
+    if (v) { storageNote(await persistOnce()); let k = 0; for (const r of recs) { status(`installing ${sec}… ${++k} of ${recs.length}`, 'warn'); if (!have.get(r.hash)) await fetchRecord(r.hash, { network: true }); } }
+    else for (const r of recs) await removeRecord(r.hash);
+    await lamps(); const on = recs.filter((r) => have.get(r.hash)).length;
+    status(`${sec}: ${on} of ${recs.length} records on this device` + (v && on < recs.length ? ' — the rest did not download (offline?)' : ''), on === (v ? recs.length : 0) ? 'ok' : 'warn');
+    return { section: sec, records: recs.length, installed: on };
+  }
+  fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
+  const mSeg = { root: mWrap, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
     { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
@@ -816,6 +852,12 @@ export function createChem(host, api) {
       return { ok: !!got.record, why: got.why || null, from: got.from || null, bytes: got.bytes || 0, storage: info };
     },
     async remove(id, b = 'sto-3g') { const r = ((PRESET_BY_ID.get(id) || {}).records || {})[b]; const ok = !!r && await removeRecord(r.hash); await lamps(); return ok; },
+    /** THE PAGE TURNER (S4b): turn to a section by name (the hand's ‹ › road) and read its header back */
+    section(s) { if (SECTIONS.includes(s) && s !== page) { page = s; fillSel(); } const recs = sectionRecs();
+      return { name: page, molecules: CHEM_PRESETS.filter((p) => p.section === page).map((p) => p.id), records: recs.length, bytes: recs.reduce((t, r) => t + r.bytes, 0),
+        installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: !keepSw.root.hidden, lamp: keepSw.get(), sub: roSec.root.querySelector('.ro-sub').textContent }; },
+    /** INSTALLED pressed from outside: every record of the page's section kept (true) or removed (false) — the switch's own road */
+    keep(v) { keepSw.set(!!v); return keep(!!v); },
     storage: () => storageInfo(),
     /** the chem worker's own ledger — `solverCalls` counts every moleculeRHF and rpa it ran (a record's open adds none) */
     workerStat() { return call({ op: 'stat' }); },

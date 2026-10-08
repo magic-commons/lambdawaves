@@ -369,6 +369,7 @@
     "z": 1.322808287195543
    }
   ],
+  "atomsSha256": "cb2e5efa952b663212386bd0f73221f7c3052300790789c27422c52e7fbc760f",
   "charge": 0,
   "multiplicity": 1,
   "basis": "sto-3g",
@@ -5554,9 +5555,18 @@
   "gapEv": 7.6131,
   "homo": "HOMO (h_u ×5) · LUMO (t1u ×3)",
   "geometrySource": "DRAFT GEOMETRY, NOT A MEASUREMENT: Equal-edge ideal truncated icosahedron from Round 2; both edge kinds are equal, unlike experimental C60. This is a reference feasibility fixture, not experimental geometry. (tools/symmetry/round2-sol-exact.py; research/release-0.4.0/measure/round2-sol-exact.json directC60.coordinatesAngstrom; experimental status UNVERIFIED)",
-  "inchiKey": null,
-  "pubchemCid": null,
-  "identifiers": "buckminsterfullerene; InChIKey and CID are S4b's to enter and verify",
+  "inchiKey": "XMWRBQBLMFGWIX-UHFFFAOYSA-N",
+  "pubchemCid": 123591,
+  "identifiers": "VERIFIED against PubChem PUG REST on 2026-10-08: CID 123591 (\"Fullerenes\") → InChIKey XMWRBQBLMFGWIX-UHFFFAOYSA-N; its formula C60 is the record's",
+  "symmetry": {
+   "pointGroup": "Ih",
+   "labelledIn": null,
+   "why": "a FRONTIER record (S4c): its levels are named by energy only — C₆₀'s I_h names are 0.4.1 BUCKYBALL (lab/names.js has the I_h table; this record carries 8 columns, not the whole C the projection needs)",
+   "frame": "x, y, z = three C₂ axes",
+   "atomsInFrame": null,
+   "pyscf": null,
+   "allowance": "Josh's named milestone — \"maybe a bucky-ball as our next milestone\" (research/release-0.4.0/NACRE.md l.34, HANDOFF.md §5) — with PLAN §9 R-L2 = YES (its HOMO and LUMO in 0.4.0); entered by the integrator's ruling of 2026-10-08, Josh may overrule"
+  },
   "blurb": [
    "Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field's orbital-only kernel.",
    "Its density, its I_h names and a geometry checked against experiment are 0.4.1 BUCKYBALL; this record carries the frontier orbitals only."

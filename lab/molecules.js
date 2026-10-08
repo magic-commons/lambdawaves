@@ -217,6 +217,11 @@ const UREA = (() => {                                        // C2v planar ideal
     grow(1, N2, C, rNH, aCNH, 1), grow(1, N2, C, rNH, aCNH, -1)];
 })();
 
+/* ── THE SECTIONS (0.4.0 S4b · PLAN F5): the page turner's pages, in order — every row, live or from its record, sits on one, and
+   the dropdown holds one section at a time in the groups below.  A record's section is its catalogue row's (lab/library.json). */
+export const SECTIONS = ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY'];
+const SECTION_OF = { diatomics: 'DIATOMICS', hydrides: 'HYDRIDES', triatomics: 'HYDRIDES', ions: 'HYDRIDES', organics: 'ORGANIC', rings: 'ORGANIC', heavy: 'HEAVY',
+  'OH-': 'DIATOMICS', 'CN-': 'DIATOMICS', urea: 'BIO', glycine: 'BIO' };
 /* ── the groups, in the order the dropdown shows them ──────────────────────────────────────────────────────── */
 export const GROUPS = [
   { id: 'diatomics', label: 'DIATOMICS' },
@@ -481,7 +486,7 @@ const derive = (m) => {
   const charge = m.charge || 0, c = counts(m.ang), work = eriWork(c.widths);
   const nElec = c.nElec - charge, nocc = nElec / 2;
   const rw = rpaWork(c.nAO, nocc);
-  return { ...m, symmetry: m.symmetry || SYMMETRY_OF.get(m.id) || { group: 'C1' }, charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
+  return { ...m, symmetry: m.symmetry || SYMMETRY_OF.get(m.id) || { group: 'C1' }, section: m.section || SECTION_OF[m.id] || SECTION_OF[m.group], charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
     eriWork: work, rpaWork: rw, predictedMs: Math.round(predictMs(work, rw)),
     instability: UNSTABLE[m.id] || null };
 };
@@ -499,7 +504,7 @@ const CATALOGUE = await (async () => {
 })();
 export const RECORD_GROUP = { id: 'library', label: 'LIBRARY · FROM ITS RECORD' };
 export const RECORD_ONLY = CATALOGUE.rows.filter((r) => r.molecule && !RAW.some((m) => m.id === r.id))
-  .map((r) => derive({ id: r.id, group: RECORD_GROUP.id, library: true, ...r.molecule }));
+  .map((r) => derive({ id: r.id, group: RECORD_GROUP.id, library: true, section: r.section, ...r.molecule }));
 for (const m of [...MOLECULES, ...RECORD_ONLY]) m.records = Object.fromEntries(CATALOGUE.rows.filter((r) => r.id === m.id).map((r) => [r.basis, r]));
 export const MOLECULE_BY_ID = new Map([...MOLECULES, ...RECORD_ONLY].map((m) => [m.id, m]));
 /* ── THE LARGER BASIS (2026-09-18).  6-31+G* is vendored for H, C, N, O, F: 2 functions on hydrogen, 19 Cartesian ones on

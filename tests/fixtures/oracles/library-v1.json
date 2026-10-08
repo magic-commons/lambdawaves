@@ -1,0 +1,887 @@
+{
+ "molecules": {
+  "B12H12--": {
+   "energy": -299.50601343472624,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 55,
+   "wallSeconds": 1.023,
+   "nao": 72,
+   "nocc": 37,
+   "key": "da2679a662faf5ea",
+   "topgroup": "Ih",
+   "groupname": "Ci",
+   "orbsym": {
+    "groupname": "Ci",
+    "occupied": {
+     "Ag": 18,
+     "Au": 19
+    },
+    "energy": -299.5060134347177,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6826978304911099
+  },
+  "C20H20": {
+   "energy": -760.1379718913095,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 32,
+   "wallSeconds": 5.98,
+   "nao": 120,
+   "nocc": 70,
+   "key": "240019bfd850fd8f",
+   "topgroup": "Ih",
+   "groupname": "Ci",
+   "orbsym": {
+    "groupname": "Ci",
+    "occupied": {
+     "Ag": 35,
+     "Au": 35
+    },
+    "energy": -760.1379718913072,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.7978671096900188
+  },
+  "C6H6": {
+   "energy": -227.89100646418078,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 44,
+   "wallSeconds": 0.188,
+   "nao": 36,
+   "nocc": 21,
+   "key": "0097c6ffbdd7125f",
+   "topgroup": "D6h",
+   "groupname": "D2h",
+   "orbsym": {
+    "groupname": "D2h",
+    "occupied": {
+     "Ag": 6,
+     "B1g": 3,
+     "B1u": 1,
+     "B2g": 1,
+     "B2u": 4,
+     "B3g": 1,
+     "B3u": 5
+    },
+    "energy": -227.8910064641805,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5515653327750493
+  },
+  "CrCO6": {
+   "energy": -1699.7219289017053,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 109,
+   "wallSeconds": 1.407,
+   "nao": 79,
+   "nocc": 54,
+   "key": "65db7e212b8eeb7a",
+   "topgroup": "Oh",
+   "groupname": "D2h",
+   "orbsym": {
+    "groupname": "D2h",
+    "occupied": {
+     "Ag": 18,
+     "B1g": 3,
+     "B1u": 9,
+     "B2g": 3,
+     "B2u": 9,
+     "B3g": 3,
+     "B3u": 9
+    },
+    "energy": -1699.721928901683,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.3739854786414285
+  },
+  "FeCO5": {
+   "energy": -1805.005447807563,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 95,
+   "wallSeconds": 0.839,
+   "nao": 69,
+   "nocc": 48,
+   "key": "6e408fac6cb3e640",
+   "topgroup": "D3h",
+   "groupname": "C2v",
+   "orbsym": {
+    "groupname": "C2v",
+    "occupied": {
+     "A1": 23,
+     "A2": 3,
+     "B1": 11,
+     "B2": 11
+    },
+    "energy": -1805.005447807569,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.39462261061395054
+  },
+  "KBr": {
+   "energy": -3138.681094747674,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 35,
+   "wallSeconds": 0.151,
+   "nao": 32,
+   "nocc": 27,
+   "key": "ce89424ced1df853",
+   "topgroup": "Coov",
+   "groupname": "C2v",
+   "orbsym": {
+    "groupname": "C2v",
+    "occupied": {
+     "A1": 14,
+     "A2": 1,
+     "B1": 6,
+     "B2": 6
+    },
+    "energy": -3138.681094747672,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.334331846833121
+  },
+  "KrF2": {
+   "energy": -2919.3545249690296,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 32,
+   "wallSeconds": 0.152,
+   "nao": 29,
+   "nocc": 27,
+   "key": "d8343f01fea15328",
+   "topgroup": "Dooh",
+   "groupname": "D2h",
+   "orbsym": {
+    "groupname": "D2h",
+    "occupied": {
+     "Ag": 9,
+     "B1g": 1,
+     "B1u": 5,
+     "B2g": 2,
+     "B2u": 4,
+     "B3g": 2,
+     "B3u": 4
+    },
+    "energy": -2919.3545249690333,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.35513240826372794
+  },
+  "Li4F4": {
+   "energy": -422.17107769585385,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 31,
+   "wallSeconds": 0.187,
+   "nao": 40,
+   "nocc": 24,
+   "key": "42250178667ac731",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "orbsym": {
+    "groupname": "D2",
+    "occupied": {
+     "A": 6,
+     "B1": 6,
+     "B2": 6,
+     "B3": 6
+    },
+    "energy": -422.17107769585544,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5578493642451162
+  },
+  "N-methylacetamide": {
+   "energy": -243.8527387492605,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 48,
+   "wallSeconds": 0.237,
+   "nao": 32,
+   "nocc": 20,
+   "key": "9153aa84e44af702",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 20
+    },
+    "energy": -243.85273874925988,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6191267169602275
+  },
+  "NiCO4": {
+   "energy": -1935.068619328748,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 187,
+   "wallSeconds": 0.976,
+   "nao": 59,
+   "nocc": 42,
+   "key": "f63b25be7b80372b",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "orbsym": {
+    "groupname": "D2",
+    "occupied": {
+     "A": 12,
+     "B1": 10,
+     "B2": 10,
+     "B3": 10
+    },
+    "energy": -1935.0686193287552,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4791003585596364
+  },
+  "TiCl4": {
+   "energy": -2658.6466804742095,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 38,
+   "wallSeconds": 0.269,
+   "nao": 55,
+   "nocc": 45,
+   "key": "0e96451d8aec550a",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "orbsym": {
+    "groupname": "D2",
+    "occupied": {
+     "A": 12,
+     "B1": 11,
+     "B2": 11,
+     "B3": 11
+    },
+    "energy": -2658.6466804742213,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5849919754788699
+  },
+  "adamantane": {
+   "energy": -383.5153607141551,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 75,
+   "wallSeconds": 0.952,
+   "nao": 66,
+   "nocc": 38,
+   "key": "16eaf9ea129687c8",
+   "topgroup": "Td",
+   "groupname": "D2",
+   "orbsym": {
+    "groupname": "D2",
+    "occupied": {
+     "A": 11,
+     "B1": 9,
+     "B2": 9,
+     "B3": 9
+    },
+    "energy": -383.51536071414967,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.9232869049425205
+  },
+  "adenine": {
+   "energy": -458.6127899481014,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 55,
+   "wallSeconds": 0.45,
+   "nao": 55,
+   "nocc": 35,
+   "key": "04969fc11771e58d",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 35
+    },
+    "energy": -458.6127899481063,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4622670135867516
+  },
+  "alanine": {
+   "energy": -317.67874534511066,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 82,
+   "wallSeconds": 0.286,
+   "nao": 37,
+   "nocc": 24,
+   "key": "3044c4b9d66fb72d",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 24
+    },
+    "energy": -317.67874534510963,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6411725769568807
+  },
+  "arginine": {
+   "energy": -595.2012856561895,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 71,
+   "wallSeconds": 0.987,
+   "nao": 74,
+   "nocc": 47,
+   "key": "8d362c0406470122",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 47
+    },
+    "energy": -595.2012856561877,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5471537511789913
+  },
+  "asparagine": {
+   "energy": -483.2179096562219,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 115,
+   "wallSeconds": 0.558,
+   "nao": 53,
+   "nocc": 35,
+   "key": "930e903167b942ea",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 35
+    },
+    "energy": -483.2179096562186,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6036276532380519
+  },
+  "aspartic-acid": {
+   "energy": -502.78608201566465,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 97,
+   "wallSeconds": 0.469,
+   "nao": 52,
+   "nocc": 35,
+   "key": "f4ceb7e29440cead",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 35
+    },
+    "energy": -502.7860820156651,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.608202860867102
+  },
+  "cubane": {
+   "energy": -303.78139997974483,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 49,
+   "wallSeconds": 0.337,
+   "nao": 48,
+   "nocc": 28,
+   "key": "e3967fe3e6f4f3af",
+   "topgroup": "Oh",
+   "groupname": "D2h",
+   "orbsym": {
+    "groupname": "D2h",
+    "occupied": {
+     "Ag": 5,
+     "Au": 2,
+     "B1g": 3,
+     "B1u": 4,
+     "B2g": 3,
+     "B2u": 4,
+     "B3g": 3,
+     "B3u": 4
+    },
+    "energy": -303.78139997973574,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.818048392074369
+  },
+  "cysteine": {
+   "energy": -710.8695451913395,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 77,
+   "wallSeconds": 0.367,
+   "nao": 46,
+   "nocc": 32,
+   "key": "10fb3642b32bde0a",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 32
+    },
+    "energy": -710.8695451913402,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5665702402430636
+  },
+  "cytosine": {
+   "energy": -387.54925358480745,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 147,
+   "wallSeconds": 0.47,
+   "nao": 45,
+   "nocc": 29,
+   "key": "7763e8dd2c35a6ce",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 29
+    },
+    "energy": -387.54925358480676,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4685445128196124
+  },
+  "ferrocene": {
+   "energy": -1628.5705018413319,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 92,
+   "wallSeconds": 1.524,
+   "nao": 79,
+   "nocc": 48,
+   "key": "f35bfcffd1374ca6",
+   "topgroup": "D5h",
+   "groupname": "C2v",
+   "orbsym": {
+    "groupname": "C2v",
+    "occupied": {
+     "A1": 18,
+     "A2": 7,
+     "B1": 10,
+     "B2": 13
+    },
+    "energy": -1628.5705018413278,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4905752330158204
+  },
+  "glutamic-acid": {
+   "energy": -541.3611162409488,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 76,
+   "wallSeconds": 0.549,
+   "nao": 59,
+   "nocc": 39,
+   "key": "d3b4fd170c0684cf",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 39
+    },
+    "energy": -541.3611162409481,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6089281960023074
+  },
+  "glutamine": {
+   "energy": -521.8348535005102,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 85,
+   "wallSeconds": 0.647,
+   "nao": 60,
+   "nocc": 39,
+   "key": "c93556668c9c0fd6",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 39
+    },
+    "energy": -521.834853500515,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6100284771244849
+  },
+  "guanine": {
+   "energy": -532.466688666553,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 98,
+   "wallSeconds": 0.621,
+   "nao": 60,
+   "nocc": 39,
+   "key": "db6ba7db1ee06129",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 39
+    },
+    "energy": -532.4666886665523,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4655336289607068
+  },
+  "histidine": {
+   "energy": -538.5534845270143,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 75,
+   "wallSeconds": 0.682,
+   "nao": 64,
+   "nocc": 41,
+   "key": "a864f58b54969b28",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 41
+    },
+    "energy": -538.5534845270194,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5087541500727606
+  },
+  "ice-hexamer": {
+   "energy": -449.88756349453166,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 27,
+   "wallSeconds": 0.236,
+   "nao": 42,
+   "nocc": 30,
+   "key": "86effe96601139f3",
+   "topgroup": "C6h",
+   "groupname": "C2h",
+   "orbsym": {
+    "groupname": "C2h",
+    "occupied": {
+     "Ag": 12,
+     "Au": 3,
+     "Bg": 3,
+     "Bu": 12
+    },
+    "energy": -449.8875634945302,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.8589798883119657
+  },
+  "isoleucine": {
+   "energy": -433.40537994232943,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 58,
+   "wallSeconds": 0.503,
+   "nao": 58,
+   "nocc": 36,
+   "key": "e37ae52304586992",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 36
+    },
+    "energy": -433.4053799423302,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6346392609923504
+  },
+  "leucine": {
+   "energy": -433.43989472198865,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 101,
+   "wallSeconds": 0.65,
+   "nao": 58,
+   "nocc": 36,
+   "key": "ad9f7619346ad885",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 36
+    },
+    "energy": -433.4398947219872,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6058658863410705
+  },
+  "lysine": {
+   "energy": -487.74428105991876,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 52,
+   "wallSeconds": 0.62,
+   "nao": 64,
+   "nocc": 40,
+   "key": "2f4f211dc64374a7",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 40
+    },
+    "energy": -487.7442810599199,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6039549857457588
+  },
+  "methionine": {
+   "energy": -788.0344265691895,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 59,
+   "wallSeconds": 0.51,
+   "nao": 60,
+   "nocc": 40,
+   "key": "1baf94c5598670ad",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 40
+    },
+    "energy": -788.0344265691845,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5484396323808102
+  },
+  "phenylalanine": {
+   "energy": -544.4240479794066,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 79,
+   "wallSeconds": 0.922,
+   "nao": 71,
+   "nocc": 44,
+   "key": "09b54ff319b68d1d",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 44
+    },
+    "energy": -544.4240479794062,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5402308019401356
+  },
+  "proline": {
+   "energy": -393.71065517295614,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 48,
+   "wallSeconds": 0.32,
+   "nao": 49,
+   "nocc": 31,
+   "key": "81a4b6334bc928a8",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 31
+    },
+    "energy": -393.7106551729609,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6107914614142299
+  },
+  "serine": {
+   "energy": -391.5289775312844,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 53,
+   "wallSeconds": 0.248,
+   "nao": 42,
+   "nocc": 28,
+   "key": "7a4996459ec98435",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 28
+    },
+    "energy": -391.52897753128156,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6192675099789471
+  },
+  "threonine": {
+   "energy": -430.07571912251154,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 63,
+   "wallSeconds": 0.38,
+   "nao": 49,
+   "nocc": 32,
+   "key": "9ffde26844fd4a3b",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 32
+    },
+    "energy": -430.0757191225103,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6384283903552328
+  },
+  "thymine": {
+   "energy": -445.6595048224535,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 66,
+   "wallSeconds": 0.419,
+   "nao": 51,
+   "nocc": 33,
+   "key": "afe04816a25b0119",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 33
+    },
+    "energy": -445.65950482245205,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.4875981493978132
+  },
+  "tryptophan": {
+   "energy": -673.5899790971555,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 143,
+   "wallSeconds": 2.893,
+   "nao": 87,
+   "nocc": 54,
+   "key": "f1e21dafacfeafb3",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 54
+    },
+    "energy": -673.5899790971523,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.472958937150987
+  },
+  "tyrosine": {
+   "energy": -618.288308809632,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 77,
+   "wallSeconds": 1.033,
+   "nao": 76,
+   "nocc": 48,
+   "key": "59c539bedbf27879",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 48
+    },
+    "energy": -618.2883088096286,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.5127225422311703
+  },
+  "uracil": {
+   "energy": -407.0748602350504,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 72,
+   "wallSeconds": 0.31,
+   "nao": 44,
+   "nocc": 29,
+   "key": "881f187488bb6d75",
+   "topgroup": "Cs",
+   "groupname": "Cs",
+   "orbsym": {
+    "groupname": "Cs",
+    "occupied": {
+     "A\"": 5,
+     "A'": 24
+    },
+    "energy": -407.0748602350505,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.49447002439175614
+  },
+  "valine": {
+   "energy": -394.8585340256826,
+   "converged": true,
+   "route": "DIIS",
+   "cycles": 75,
+   "wallSeconds": 0.423,
+   "nao": 51,
+   "nocc": 32,
+   "key": "aca456cd0fa9c0e2",
+   "topgroup": "C1",
+   "groupname": "C1",
+   "orbsym": {
+    "groupname": "C1",
+    "occupied": {
+     "A": 32
+    },
+    "energy": -394.85853402568296,
+    "converged": true
+   },
+   "homoLumoGapEh": 0.6067722426784528
+  }
+ },
+ "provenance": {
+  "tool": "tools/library/record-oracle.py",
+  "pyscf": "2.14.0",
+  "numpy": "2.4.6",
+  "basis": "lab/vendor/bse/sto-3g-v1.json",
+  "basisSha256": "22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b",
+  "cart": true,
+  "unit": "Bohr (the record's own atoms)",
+  "method": "RHF, conv_tol 1e-13, conv_tol_grad 1e-10, DIIS (Newton if DIIS stops short)",
+  "symmetry": "topgroup/groupname are PySCF's detection on the same atoms \u2014 recorded, never used as a name (ledger C5)",
+  "status": "MEASURED on this machine; wallSeconds is a clock and is not part of any record"
+ }
+}

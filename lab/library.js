@@ -4,10 +4,15 @@
  * them in the Cache Storage `lw-data-v1`, a name no build changes, so a new build never clears an installed record.
  *   decodeRecord / validateRecord  the schema (`schema: 1`; a reader ignores members it does not know) — the worker's
  *                                  chem.open reads a record through these, and tools/orbital-library.mjs --check proves them;
+ *                                  S4b: the atoms must hash to `input.atomsSha256` and ε, C, D must be finite (a moved atom
+ *                                  or a NaN is refused, not opened);
  *   installed / fetchRecord / removeRecord / persistOnce / storageInfo   the store MOLECULES installs into and opens from.
  * tools/orbital-library.mjs writes the records and lab/library.json, the catalogue lab/molecules.js reads. */
+import { sha256Hex } from './md.js';
 export const SCHEMA = 1, DATA_CACHE = 'lw-data-v1';
 export const recordPath = (hash) => 'library/' + hash + '.json';
+/** the geometry's own key (0.4.0 S4b): sha-256 of the atoms as [Z, x, y, z] in bohr — a moved atom is not the record it says it is */
+export const atomsKey = (atoms) => sha256Hex(JSON.stringify(atoms.map((a) => [a.Z, a.x, a.y, a.z])));
 
 /* ── the record ── a big array is { $f64 | $i32: base64 } (little-endian, exact); everything else is plain JSON */
 const TYPED = { $f64: Float64Array, $i32: Int32Array };
@@ -27,7 +32,8 @@ export function validateRecord(r) {
   need(r.schema === SCHEMA, `schema ${r.schema} is not ${SCHEMA}`);
   need(typeof r.id === 'string' && r.id.length > 0, 'no id');
   const I = r.input || {}, G = r.ground || {}, caps = r.caps || {};
-  need(Array.isArray(I.atoms) && I.atoms.length > 0 && I.atoms.every((a) => Number.isInteger(a.Z) && [a.x, a.y, a.z].every(Number.isFinite)), 'input.atoms');
+  if (need(Array.isArray(I.atoms) && I.atoms.length > 0 && I.atoms.every((a) => Number.isInteger(a.Z) && [a.x, a.y, a.z].every(Number.isFinite)), 'input.atoms'))
+    need(I.atomsSha256 === atomsKey(I.atoms), 'input.atoms: not the geometry the record was made at (atomsSha256)');
   need(typeof I.basis === 'string' && Number.isInteger(I.charge), 'input.basis / input.charge');
   for (const k of ['orbitals', 'states', 'rpa', 'tdhf']) need(typeof caps[k] === 'boolean', 'caps.' + k);
   /* 0.4.0 S4c: a FRONTIER record (C₆₀) carries ε and a few whole columns of C — `ground.cols`, ascending — and nothing else */
@@ -35,8 +41,10 @@ export function validateRecord(r) {
   need(caps.orbitals === true && (caps.rpa === true || (Array.isArray(cols) && !caps.states && !caps.tdhf)), 'a record always carries its orbitals and its RPA sticks, or is a frontier record');
   if (!need(Number.isFinite(G.energy) && Number.isInteger(n) && n > 0 && Number.isInteger(nocc) && nocc > 0 && nocc < n && typeof G.hash === 'string' && G.names && typeof G.names === 'object', 'ground')) return bad;
   const O = r.orbitals || {};
-  if (cols) return need(cols.length > 0 && cols.every((k, j) => Number.isInteger(k) && k >= (j ? cols[j - 1] + 1 : 0) && k < n) && len(O.eps) === n && len(O.C) === n * cols.length, 'frontier: ε at nAO, C at nAO × cols'), bad;
-  need(len(O.eps) === n && len(O.C) === n * n && len(O.D) === n * n, 'orbitals: ε, C and D at nAO');
+  if (cols) return need(cols.length > 0 && cols.every((k, j) => Number.isInteger(k) && k >= (j ? cols[j - 1] + 1 : 0) && k < n) && len(O.eps) === n && len(O.C) === n * cols.length, 'frontier: ε at nAO, C at nAO × cols')
+    && need(['eps', 'C'].every((k) => arr(O[k]).every(Number.isFinite)), 'orbitals: a non-finite ε or C'), bad;
+  if (need(len(O.eps) === n && len(O.C) === n * n && len(O.D) === n * n, 'orbitals: ε, C and D at nAO'))
+    need(['eps', 'C', 'D'].every((k) => arr(O[k]).every(Number.isFinite)), 'orbitals: a non-finite ε, C or D');
   const S = r.spectrum || {};
   need(['omega', 'omegaTDA', 'f', 'tdaOmega', 'tdaF'].every((k) => len(S[k]) === d) && len(S.mu) === 3 * d && len(S.tdaMu) === 3 * d
     && ['domI', 'domA'].every((k) => len(S[k]) === 4 * d) && ['domX', 'domY'].every((k) => len(S[k]) === 4 * d), 'spectrum: the RPA sticks and the TDA ladder');

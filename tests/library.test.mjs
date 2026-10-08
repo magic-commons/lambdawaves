@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import * as W from '../lab/mathworker.js';
 import { validateRecord, decodeRecord, recordPath } from '../lab/library.js';
-import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, moleculeAtoms, optionLabel, CAP_MS } from '../lab/molecules.js';
+import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, SECTIONS, moleculeAtoms, optionLabel, CAP_MS } from '../lab/molecules.js';
 import { evaluator, shellsFromField } from '../lab/molecular-field.js';
 
 const at = (rel) => fileURLToPath(new URL(rel, import.meta.url));
@@ -23,6 +23,12 @@ const calls = () => W.chemSolverCalls();
 for (const r of CAT.rows) assert.deepEqual(validateRecord(load(r.id)), [], r.id + ' does not validate');
 const broken = load('C6H6'); delete broken.orbitals.C; broken.caps.tdhf = 'yes';
 assert.deepEqual(validateRecord(broken), ['caps.tdhf', 'orbitals: ε, C and D at nAO']);
+/* S4b: a record is the geometry it was made at, with finite numbers — a moved atom or a NaN in C is refused, not opened */
+const moved = load('C6H6'); moved.input.atoms[3].x += 1e-9;
+assert.deepEqual(validateRecord(moved), ['input.atoms: not the geometry the record was made at (atomsSha256)']);
+const nan = load('C6H6'), Cb = Buffer.from(nan.orbitals.C.$f64, 'base64'), Cn = new Float64Array(Cb.buffer.slice(Cb.byteOffset, Cb.byteOffset + Cb.length)); Cn[7] = NaN;
+nan.orbitals.C = { $f64: Buffer.from(Cn.buffer).toString('base64') };
+assert.deepEqual(validateRecord(nan), ['orbitals: a non-finite ε, C or D']);
 
 /* 2 · BENZENE, FRESH: the live road (two solver calls: the SCF and the RPA) */
 const m = MOLECULE_BY_ID.get('C6H6'), msg = { atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0, symmetry: m.symmetry };
@@ -115,12 +121,18 @@ const badC = load('C60'); badC.ground.cols = [176, 175]; assert.ok(validateRecor
        the one a window asks with — a mismatch would make a past-cap molecule a live solve), and the benzene-cap law reads it */
 for (const r of CAT.rows) assert.deepEqual(load(r.id).input.atoms, moleculeAtoms(r.id), r.id + ': the record\'s atoms are not the menu\'s');
 const lys = MOLECULE_BY_ID.get('lysine');
-assert.deepEqual(RECORD_ONLY.map((x) => x.id), ['lysine', 'C60'], 'the record-only rows');
+assert.deepEqual(RECORD_ONLY.map((x) => x.id), CAT.rows.filter((r) => r.molecule).map((r) => r.id), 'the record-only rows are the catalogue\'s own molecules');
+assert.ok(RECORD_ONLY.includes(lys) && RECORD_ONLY.some((x) => x.id === 'C60'), 'lysine and C60 (S4c\'s frontier record) are record-only rows');
 assert.ok(!MOLECULES.includes(lys) && lys.over && lys.recordOnly && !lys.disabled && lys.reason === null, 'lysine: past the cap, DOWNLOAD, never DISABLED');
 assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · 64 AO · record');
 assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');
 assert.ok(CAP_MS > 1000 && CAP_MS < 2500, 'the refit cap is benzene at ~1.7 s, not 9.6 s: ' + CAP_MS);
 assert.equal(L.caps.tdhf, false); assert.equal(rec.caps.tdhf, true);
+/* 7 · THE SECTIONS (0.4.0 S4b): every row of the table and of the catalogue sits on exactly one page of the turner, and a catalogue
+       row's section is its molecule's */
+for (const m of [...MOLECULES, ...RECORD_ONLY]) assert.ok(SECTIONS.includes(m.section), m.id + ' sits on no section');
+for (const r of CAT.rows) assert.equal(MOLECULE_BY_ID.get(r.id).section, r.section, r.id + ': the catalogue and the table disagree on its section');
+assert.deepEqual(SECTIONS.map((s) => [...MOLECULES, ...RECORD_ONLY].filter((m) => m.section === s).length).reduce((a, b) => a + b, 0), MOLECULES.length + RECORD_ONLY.length);
 
 console.log(`GREEN library: benzene opens from its ${(row('C6H6').bytes / 1024).toFixed(0)} KB record in ${openMs.toFixed(1)} ms with 0 solver calls `
   + `(fresh: 1 SCF + 1 RPA) and equals the fresh solve bit for bit — E, ε, nocc, C, D, ψ and ρ at ${pts.length} points, the names (D6h, HOMO 1e1g), `
