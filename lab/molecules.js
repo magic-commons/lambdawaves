@@ -400,7 +400,7 @@ export const COST = {
   previous: { fitted: '2026-09-12', a: 1.204028e-4, b: 5.665865e-5, c: 10.78, anchors: { H2O: 9, C5H5N: 7531, C6H6: 10053 } },
   rejected: { model: 'ms = a·eriWork + b·nAO³ + c', a: 1.198562e-4, b: 7.903301e-2, c: 0,
     why: 'worst 4.63× above 100 ms, and it puts Br₂ (7410 predicted, 4005 measured) ABOVE C₆H₆ (5972 predicted, 10053 measured) — nAO³ cannot see the occupation, and the pair space is where benzene\'s time goes' },
-  browserFactor: 1.0,
+  browserFactor: 1.23,   // the gate's browser (Firefox) ÷ node on benzene, MEASURE.md §2: the menu prints the node model; a budget that times a browser scales by this
 };
 
 /* ── the derived counts ─────────────────────────────────────────────────────────────────────────────────────── */

@@ -19,7 +19,7 @@
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, showMs } from '../lab/molecules.js';
+import { MOLECULE_BY_ID, MOLECULES, RECORD_ONLY, COST, showMs } from '../lab/molecules.js';
 
 const PORT = process.env.LW_PORT || 8704;
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -38,7 +38,8 @@ const LIB = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'fixtures', 'ora
    frame boundary on top of that, and no cost model of the MATHS can or should predict those.  So the budget is
    max(2 × predictedMs, 400 ms) — the 2× the commission asked for wherever 2× is the larger number, which is every
    entry that takes long enough for the prediction to be about anything. */
-const budget = (id) => Math.max(2 * MOLECULE_BY_ID.get(id).predictedMs, 400);
+/* 0.4.0 S4a: the COST refit predicts NODE (benzene ~1.7 s); this times FIREFOX, measured 1.23× node (COST.browserFactor) */
+const budget = (id) => Math.max(2 * MOLECULE_BY_ID.get(id).predictedMs * COST.browserFactor, 400);
 
 const g = await open(`https://127.0.0.1:${PORT}/lab/`, { width: 1500, height: 1150, script: 300000 });
 try {
@@ -232,7 +233,7 @@ try {
     judge(`L7 ${id} = ${o.energy.toFixed(9)} within 1e-8 (${o.nao} AOs, ${o.nelec} electrons)`,
       near(r.energy, o.energy, 1e-8) && r.nAO === m.nAO && r.electrons === m.nElectrons,
       { energy: r.energy, delta: r.energy - o.energy, nAO: r.nAO, electrons: r.electrons, status: r.status });
-    judge(`L7 ${id} solved off the frame thread in ≤ ${Math.round(cap)} ms (2× the predicted ${showMs(m.predictedMs)}, floor 400) and under 12 s`,
+    judge(`L7 ${id} solved off the frame thread in ≤ ${Math.round(cap)} ms (2× the predicted ${showMs(m.predictedMs)} × Firefox's ${COST.browserFactor}, floor 400) and under 12 s`,
       r.ms <= cap && r.ms < 12000 && r.local === false,
       { ms: +r.ms.toFixed(0), predictedMs: m.predictedMs, budget: Math.round(cap), local: r.local });
     judge(`L7 ${id} no page error`, r.errs.length === 0, r.errs);
