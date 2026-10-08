@@ -216,6 +216,7 @@
      "integrator": "mmut",
      "tda": false,
      "core": false,
+     "valence": false,
      "on": false
     },
     "orbitals": {

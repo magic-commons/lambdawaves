@@ -25,7 +25,7 @@
  */
 import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
-import { orbitalName, forms } from './names.js';
+import { orbitalName, forms, coreCount } from './names.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo } from './library.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -58,7 +58,7 @@ const AO_GUESS = (atoms) => atoms.reduce((k, a) => k + (a.Z === 1 ? 1 : 5), 0); 
 export function createChem(host, api) {
   let on = false, active = api.active ? !!api.active() : true;
   let preset = 'H2O', basis = 'sto-3g', view = 'density', orbital = null, axis = 'y';
-  let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false;
+  let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false, valence = false;
   let sol = null, rt = null, running = false, inflight = false;
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
   let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'no molecule solved yet', pending = null;
@@ -124,11 +124,19 @@ export function createChem(host, api) {
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
     { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' }],
-    onChange: (v) => { view = v; orbKnob.root.classList.toggle('off', v !== 'orbital'); pushMatrix(v === 'diff' && !rt); refresh(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
+    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   r1.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
   r1.appendChild(orbKnob.root);
+  /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ, formed in f64 and drawn by the density kind, so a
+     heavy atom's core stops drowning its bonds; the core is S1's coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY
+     is the view — the dial reads nothing there — so the row keeps its width. */
+  const valSw = sw({ label: 'VALENCE', value: false, title: 'The valence density: D − 2 Σ C_c C_cᵀ over the frozen-core orbitals (He for Li–Ne, Ne for Na–Ar, Ar for K–Zn …) — the core no longer drowns the bonds',
+    onChange: (v) => { valence = v; pushMatrix(); refresh(); } });
+  r1.insertBefore(valSw.root, orbKnob.root);
+  function seats() { valSw.root.style.display = view === 'density' ? '' : 'none'; orbKnob.root.style.display = view === 'density' ? 'none' : ''; orbKnob.root.classList.toggle('off', view !== 'orbital'); }
+  seats();
   /* THE TDA TOGGLE SWAPS THE WHOLE LADDER, positions AND strengths.  It used to draw each RPA root's height and
      polarisation at the k-th TDA root's ω — and the two ladders CROSS: for benzene RPA root 2 is the bright line
      while TDA root 2 is dark, its bright pair sitting at roots 3 and 4.  The TDA ladder is its own ascending list
@@ -319,7 +327,7 @@ export function createChem(host, api) {
     const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, title: help,
       fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
     orbKnob.root.replaceWith(next.root); orbKnob = next;
-    orbKnob.root.classList.toggle('off', view !== 'orbital');
+    seats();
   }
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
@@ -475,11 +483,20 @@ export function createChem(host, api) {
     api.repaint(); return flowOn;
   }
   function densityRe() {
-    const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
-    if (src instanceof Float32Array && src.length === n * n) return src;
+    const n = sol.nAO, src = (rt && rt.D_re) || sol.D, P = valence ? corePart() : null;
+    if (!P && src instanceof Float32Array && src.length === n * n) return src;
     if (!mBuf || mBuf.length !== n * n) mBuf = new Float32Array(n * n);
-    for (let i = 0; i < n * n; i++) mBuf[i] = src[i];
+    for (let i = 0; i < n * n; i++) mBuf[i] = P ? src[i] - P[i] : src[i];
     return mBuf;
+  }
+  /** VALENCE's subtrahend 2 Σ_core C_c C_cᵀ, f64, once per solve */
+  let coreP = null, coreOf = null;
+  function corePart() {
+    if (coreOf === sol) return coreP;
+    const n = sol.nAO, C = sol.C, nc = Math.min(coreCount(chemAtoms(preset)), sol.nocc);
+    coreP = new Float64Array(n * n); coreOf = sol;
+    for (let c = 0; c < nc; c++) for (let i = 0; i < n; i++) { const a = 2 * C[i * n + c]; if (a) for (let j = 0; j < n; j++) coreP[i * n + j] += a * C[j * n + c]; }
+    return coreP;
   }
   /* ── Δρ, AND WHY IT IS A MATRIX DIFFERENCE AND NOT A VOLUME DIFFERENCE (2026-09-18) ────────────────────────────
    * DIFF used to upload ρ(t) and ρ_ref as two rgba16float volumes of √ρ and subtract them in the fragment shader.
@@ -702,7 +719,7 @@ export function createChem(host, api) {
     else if (on) solve(preset);
     return on;
   }
-  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, on });
+  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on });
   /* ── THE SAVED STATE, and the one place this window departs from its commission ──────────────────────────────
    * save() returns THE PRESENTATION ONLY, not lab/molecule-state.js's record.  Two reasons, both in the tree:
    *   · rack.js:5048's law — "Solver caches, traces, collisions, particles and pulse runs do not [belong to the
@@ -762,10 +779,11 @@ export function createChem(host, api) {
     if (typeof o.integrator === 'string') { integrator = o.integrator; iSeg.set(integrator); }
     if (o.tda !== undefined) { tda = !!o.tda; tdaSw.set(tda); }
     if (o.core !== undefined) { core = !!o.core; coreSw.set(core); cvCore.hidden = !core; }
+    if (o.valence !== undefined) { valence = !!o.valence; valSw.set(valence); }
     setRun(false); rt = null; spec = null; fit = null; selected = null;
     if (resolve && sol) sol = null;
     if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = m.k; pendingKey = null; }   // S2: the same molecule, already solved: the name lands now
-    orbKnob.root.classList.toggle('off', view !== 'orbital');
+    seats();
     if (o.on !== undefined) setOn(!!o.on);
     else if (sol) { pushField(); refresh(); } else refresh();
     return save();
@@ -817,13 +835,14 @@ export function createChem(host, api) {
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); },
     preset() { return preset; },
-    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); orbKnob.root.classList.toggle('off', v !== 'orbital'); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
+    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
     orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
     setDt(v) { if (!DTS.includes(String(v))) return dt; dt = Number(v); dSeg.set(String(v)); reset(); return dt; },
     setTda(v) { tda = !!v; tdaSw.set(tda); paint(); return tda; },
     setCore(v) { core = !!v; coreSw.set(core); cvCore.hidden = !core; paint(); return core; },
+    setValence(v) { valence = !!v; valSw.set(valence); pushMatrix(); refresh(); return valence; },
     kick() { return kick(); },
     /** RUN n steps and settle — the gate's road, and it never leaves the switch on behind it */
     async run(n) {
@@ -872,7 +891,7 @@ export function createChem(host, api) {
         tdaRoots: sol && sol.tda ? sol.tda.length : 0, stage: sol ? (sol.roots ? 'full' : 'ground') : 'none',
         restartEvery: rt ? rt.restartEvery : null, restartPolicy: rt ? rt.restartPolicy : null, sinceRestart: rt ? rt.sinceRestart : null,
         fitted: fit ? fit.poles.map((p) => p.omega) : null, certified: fit ? fit.certified : null,
-        fieldOwner: fieldHash !== null, kappa, speed, dt, integrator, axis, tda, core, orbital };
+        fieldOwner: fieldHash !== null, kappa, speed, dt, integrator, axis, tda, core, valence, orbital };
     },
     /** the RPA ladder; `omegaTDA` on an entry is the k-th TDA ROOT BY INDEX, never that root's partner */
     roots(n) { const r = bright(); return (Number.isFinite(n) ? r.slice(0, n) : r).map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu || []), pol: polOf(k), dominant: dominantOf(k) })); },

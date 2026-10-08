@@ -10,88 +10,36 @@
     "description": ""
    },
    "res": 96,
-   "timing": [
-    {
-     "label": "tryptophan density",
-     "nAO": 87,
-     "kind": "density",
-     "path": "tile",
-     "cap": 128,
-     "wg": 64,
-     "n": 212,
-     "median": 20.784,
-     "min": 20.776,
-     "max": 20.82
+   "valence": {
+    "lysine": {
+     "nAO": 64,
+     "core": 10,
+     "res": 64,
+     "rhoMaxTotal": 47.786,
+     "rhoMaxValence": 1.6011,
+     "drownedBy": 29.8,
+     "voxels": 256,
+     "maxAbsErr": 0.0007137,
+     "relToMax": 0.000564,
+     "pass": true,
+     "state": true
     },
-    {
-     "label": "tryptophan HOMO",
-     "nAO": 87,
-     "kind": "orbital",
-     "path": "orbital",
-     "cap": null,
-     "wg": 64,
-     "n": 4164,
-     "median": 1.154,
-     "min": 1.154,
-     "max": 1.158
-    },
-    {
-     "label": "C20H20 density",
-     "nAO": 120,
-     "kind": "density",
-     "path": "tile",
-     "cap": 128,
-     "wg": 64,
-     "n": 54,
-     "median": 46.347,
-     "min": 46.337,
-     "max": 46.382
-    },
-    {
-     "label": "C20H20 HOMO",
-     "nAO": 120,
-     "kind": "orbital",
-     "path": "orbital",
-     "cap": null,
-     "wg": 64,
-     "n": 1120,
-     "median": 2.413,
-     "min": 2.413,
-     "max": 2.414
-    },
-    {
-     "label": "C60 HOMO (field, screened)",
-     "nAO": 300,
-     "kind": "orbital",
-     "path": "orbital",
-     "cap": null,
-     "wg": 64,
-     "n": 1080,
-     "median": 4.083,
-     "min": 4.078,
-     "max": 4.09
-    },
-    {
-     "label": "C60 HOMO ORB_WGSL plain (own pass, the shipped module)",
-     "nAO": 300,
-     "path": "orbital",
-     "n": 180,
-     "median": 14.464,
-     "min": 14.462,
-     "max": 14.465
-    },
-    {
-     "label": "C60 HOMO ORB_WGSL screened (own pass, the shipped module)",
-     "nAO": 300,
-     "path": "orbital",
-     "n": 1080,
-     "median": 4.078,
-     "min": 4.078,
-     "max": 4.078
+    "C6H6": {
+     "nAO": 36,
+     "core": 6,
+     "res": 64,
+     "rhoMaxTotal": 7.3721,
+     "rhoMaxValence": 0.32702,
+     "drownedBy": 22.5,
+     "voxels": 256,
+     "maxAbsErr": 0.0004619,
+     "relToMax": 0.0008078,
+     "pass": true,
+     "state": true
     }
-   ],
-   "wallSec": 179,
-   "at": "2026-10-08T08:43:59.619Z"
+   },
+   "wallSec": 6.4,
+   "at": "2026-10-08T08:54:30.776Z"
   },
   "chromium": {
    "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",

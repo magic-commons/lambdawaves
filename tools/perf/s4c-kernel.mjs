@@ -12,7 +12,9 @@
  * (4) C₆₀       the library record's HOMO set and LUMO set (lab/library.json row C60) through the orbital-only kernel, against
  *               PySCF's own orbital at the same voxel centres (research/release-0.4.0/measure/c60-voxels-pyscf.json, written
  *               by `~/bin/scipython -I tools/perf/c60-voxels.py`) — skipped until both exist.
- * (5) TIMING    the shipped kernels at 96³, n dispatches in one pass and one wait, n grown until a batch lasts 2.5 s (Firefox's
+ * (5) VALENCE   MOLECULES' switch on DENSITY, through the app: lysine and benzene, the texel against the f64 √ρ of
+ *               D − 2 Σ_core C_c C_cᵀ (lab/names.js coreCount), and max ρ with the core and without it.
+ * (6) TIMING    the shipped kernels at 96³, n dispatches in one pass and one wait, n grown until a batch lasts 2.5 s (Firefox's
  *               ~100 ms completion tick, MEASURE.md §3), 5 batches: the density at 87 / 120 AO (cap-128 tile), the orbital at
  *               87 / 120 / 300 AO (ORB_WGSL) — and ORB_WGSL at 300 AO PLAIN (every shell's cut at +∞) beside SCREENED, on the
  *               field's own device with the module the field compiled from (field.js exports ORB_WGSL and packMolecule).
@@ -29,7 +31,7 @@ const OUT = 'research/release-0.4.0/measure/s4c-kernel.json';
 const PW = path.join(os.homedir(), '.cache/ms-playwright/chromium-1243/chrome-linux64/chrome');
 const CHROME_ARGS = ['--no-sandbox', '--ignore-certificate-errors', '--enable-features=Vulkan', '--use-angle=vulkan', '--enable-webgpu-developer-features'];
 const argv = process.argv.slice(2), oi = argv.indexOf('--only');
-const ONLY = oi >= 0 ? argv[oi + 1].split(',') : ['tiers', 'records', 'fallback', 'c60', 'timing'];
+const ONLY = oi >= 0 ? argv[oi + 1].split(',') : ['tiers', 'records', 'fallback', 'c60', 'valence', 'timing'];
 const BROWSERS = argv.filter((a, i) => !a.startsWith('--') && (oi < 0 || i !== oi + 1));
 
 const PAGE = (only) => `
@@ -146,6 +148,25 @@ if (ONLY.includes('c60') && c60) {
     out.c60.orbitals.push({ k, set: k < c60.ground.nocc ? 'HOMO' : 'LUMO', path: f.moleculeInfo.path, voxels: vox.length, maxAbsErr: +worst.toExponential(3),
       relToMax: +(worst / gridMax).toExponential(3), appF64VsRef: +worstApp.toExponential(3), maxPsi: +big.toExponential(4), gridMax: +gridMax.toExponential(4), pass: worst / gridMax <= 1e-3 });
   }
+}
+/* VALENCE through the APP (MOLECULES' switch on DENSITY): lysine from its record, the field read back, and the texel compared with
+   the f64 √ρ of D − 2 Σ_core C_c C_cᵀ (lab/names.js coreCount) on the CPU; and how far the core had drowned it (max ρ, both) */
+if (ONLY.includes('valence')) {
+  const { coreCount } = await import('./names.js'), { moleculeAtoms } = await import('./molecules.js'), c = __LW.chem, settle = async () => { for (let i = 0; i < 4; i++) await __LW.settle(); };
+  out.valence = {};
+  for (const id of ['lysine', 'C6H6']) {
+    await c.solve(id); c.setOn(true); c.setView('density'); c.setValence(false); await settle();
+    const total = await f.readStats(); c.setValence(true); await settle();
+    const G = await f.readGrid(), N = G.N, s = c.solution(), n = s.nAO, atoms = moleculeAtoms(id), nc = Math.min(coreCount(atoms), s.nocc), { ev } = specOf(atoms);
+    const Dv = Float64Array.from(s.D); for (let k = 0; k < nc; k++) for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) Dv[i * n + j] -= 2 * s.C[i * n + k] * s.C[j * n + k];
+    let worst = 0, big = 0; const vox = voxels(atoms, G.half, 7 + n).map((v) => v.map((q) => Math.min(N - 1, Math.round(q * N / RES))));
+    for (const v of vox) { const p = v.map((i) => (i + 0.5) / N * 2 * G.half - G.half), a = ev.ao(p); let r = 0; for (let i = 0; i < n; i++) { let t = 0; for (let j = 0; j < n; j++) t += Dv[i * n + j] * a[j]; r += a[i] * t; }
+      const cpu = Math.sqrt(Math.max(r, 0)), g = f16(G.texels[((v[2] * N + v[1]) * N + v[0]) * 4]); worst = Math.max(worst, Math.abs(cpu - g)); big = Math.max(big, cpu); }
+    out.valence[id] = { nAO: n, core: nc, res: N, rhoMaxTotal: +total.rhoMax.toExponential(4), rhoMaxValence: +G.rhoMax.toExponential(4), drownedBy: +(total.rhoMax / G.rhoMax).toFixed(1),
+      voxels: vox.length, maxAbsErr: +worst.toExponential(3), relToMax: +(worst / Math.sqrt(G.rhoMax)).toExponential(3), pass: worst / Math.sqrt(G.rhoMax) <= 1e-3, state: c.state().valence };
+    c.setValence(false);
+  }
+  c.setOn(false);
 }
 if (ONLY.includes('timing')) {
   out.timing = [];
