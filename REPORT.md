@@ -3589,3 +3589,116 @@ on the base and after each of the four commits; `bash test.sh node` green (61 su
 `keyboard-shortcuts` green; browser one at a time: `export3d` green, `render-regressions` green, `current` 15/15,
 `frame-occlusion` 7/7 (one red under a load of 18 from the sibling's runs — the scrolled-mask timing — green alone
 and green on the base tree). Light check: MOLECULES H₂O's three labels move on an orbit and hold still after.
+
+## 2026-10-07 · 0.4.0 S3 — STAGE TEXT + WINDOWS
+
+Waves numbered from 155 because the sibling S2 CAMERA builder numbered from 145 at the same time; the integrator
+renumbers if needed. Built by the S3 builder (Opus 5.5) against `research/release-0.4.0/BRIEF-S3-STAGE-AND-WINDOWS.md`
+(PLAN §4 F2 + F3, §6 row S3, §9: every ruling its first option), branch `worktree-agent-a4faa45d300fd21dc` from `bd9b0e5`.
+Josh's asks: the atom and formula text as "the first taste" of the INFORMATIONAL, written in the markdown engine; WINDING
+and HOMO/LUMO "shows in the main screen at the top and then fades away"; the windows audited and consolidated; CALCULUS
+"like RADIATION". Hand-off: `research/release-0.4.0/S3-BUILD.md`.
+
+### wave 155: The stage text renders real maths — and stops reading layout every tick
+
+Cloud's plain-text STAGE FORMULA becomes markdown + KaTeX through the notebook's own renderer (`renderNotebook`, the kit's,
+imported, never changed), in a new module `lab/stage-text.js` — **the interim renderer, named so 0.5.0 deletes it**: the
+formula becomes the kit's `layer.addBlock({ md })`, the fade `layer.addLabel({ ttl })`, the labels
+`layer.addLabel({ anchor })`. The source stays in `rack.js` (`stageMd`): `$\mathrm{H_{2}O}$` (`formulaLatex`) while
+MOLECULES is on, else SPECTRUM's states in `stateLatex`'s own prose — fed UNIT coefficients, so the string depends on
+which labels are populated and never on c: no live coefficient can reach the stage. The source is asked only when the
+register's version, the pick or a legacy owner moved (three compares a CPU tick, no string built). The key is the string:
+the DOM moves only on a change; KaTeX runs at most four times a second (a change inside the quarter second waits, then
+renders whatever is wanted by then); nothing renders while the switch is off. The placement reads layout only on a resize,
+a transport or rack move, a SIZE change or a new string — the old body-class observer re-measured on every frost-hold and
+tablet-motion toggle, i.e. on every play and pause; it now keys on the six classes that move a rack. The atom labels moved
+into the module; their canvas size comes from a ResizeObserver instead of a per-tick `clientWidth`, and the molecule's
+atoms are cached per pick. THE TYPE SCALE is the notebook's three sizes: formula = title (34 px), announcement = heading
+(22 px), atom label = body (14 px), each × SIZE — so the formula's base went **88 px → 34 px** (SIZE 300 % gives 102 px);
+said here because Josh will see it.
+
+### wave 156: The fade — a hand's preset is announced, and only a hand's
+
+`announce(md, ttl)` writes into the same node at the heading size, fades after 2.4 s (a 0.6 s CSS fade) and the formula
+fades back. It is called by threading the PRESS, not by detecting "not a restore": STATE's PRESET select and RELOAD pass
+`loadPreset(id, { hand: true })` (the label as text, markdown's specials escaped); MO-REGISTRY's preset select announces
+its rule and the orbitals the names give it — `HOMO + LUMO · $1b_{1}$ + $4a_{1}$` on water, `WINDING · $2e$ (a) + (b)` on
+ammonia (`forms()`, a degenerate pair written once with its two members); the STATES pane's preset select announces its
+rule. `preset()` itself — the API, a restore — says nothing; the boot, a URL preset, an undo, a project or link open never
+announce. `tests/stage-text.browser-test.mjs` (new): a press, then the undo, a link open and a project open — **one
+banner, not three**; the banners speak the names. The palette / camera HUD announcing (R-I2) stays 0.5.0's.
+
+### wave 157: One STAGE TEXT row, and the caption in capture
+
+SETTINGS › DISPLAY's STAGE FORMULA + ATOM LABELS and their two SIZE knobs become ONE row, **STAGE TEXT** (switch + SIZE),
+for the formula, the fade, the atom labels and the caption together; the EDIT row reads "STAGE TEXT on / off". PREFERENCE
+keeps `molFormula` / `molFormulaSize`; `atomLabels` / `atomLabelsSize` are read once — only where `molFormula` was never
+written — and dropped by the next save. **What was chosen:** a stored `atomLabels: false` beside `molFormula` on is NOT
+honoured (the labels return), because the row is one switch and `molFormula` is the key it keeps; the other way round
+would have let a key that no longer exists switch the formula off. STATE-SCOPES and the PREF set in
+`tests/new-project.test.mjs` changed with it; `tools/new-project.mjs --check` in step. The DOM formula never reaches an
+export, so `capture.js` gains `drawCaption()`: the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G`
+(names.js' plain form) or SPECTRUM's states — at the foot, left, white over a soft dark stroke. A picture composites it
+through a strip the height of the foot; RECORD and ONE PERIOD draw each frame into a 2-D canvas (drawImage of the WebGPU
+canvas where the probe read it lit, else the relay road) and caption that. It follows the STAGE TEXT switch. The gate: the
+picture's bytes differ from the captionless picture (itself byte-identical twice); a recorded clip's foot-left corner
+carries the text (edge sum 106 805 against 203 without). KIT BRIEF 6 replaces it at 0.5.0.
+
+### wave 158: DYNAMICS retired (R-W1)
+
+Its five sections go where the audit mapped them and the card goes. L = T − V, T, V, S and the L(t), S(t) plot are
+SHADOW's footer, in its details fold, run only while the fold is open (SHADOW ships open; DYNAMICS shipped closed, so an
+always-on footer would have been a new per-tick cost). The moments are CALCULUS rows: ⟨L_z⟩ (d/dt = 0), ⟨L²⟩ (d/dt = 0, or
+"no law here" under the Stark field, which mixes l), ⟨r⟩ with ⟨1/r⟩ (a moment, no law). The rotor entanglement
+−Σλ² ln λ² joins ORBIT's SCHMIDT SPECTRUM tile, which shows the λ it is a function of. The emission lines are RADIATION's
+(the whole Δl = ±1 spectrum, strongest first, recomputed on an edit). ACTION–ANGLE is gone: it is SPECTRUM. PARTICLES is
+a switch in VORTEX (COUNT, TRAIL, RESEED; the overlay presents while VORTEX can) and VORTEX's note calls it the flow; the
+CLOUD readout went (a per-tick write). `RETIRED_WINDOWS` gains `dynamics: 'shadow'`: the four demo projects name DYNAMICS
+in their layouts and open. `lab/dynamicsview.js` (131 lines) and every road to it are deleted. **`lab/dynamics.js` is
+not**: it is the shared physics library (kick, calculus, radiation, particles, slice and sliceview import its dipole,
+radial and Bohmian functions); what only the window used went — the action–angle chart and its three normal-mode variants
+(−45 lines), with their proofs. `lab/*.js` 35,846 → 35,751 (−95).
+
+### wave 159: CALCULUS as tiles, and the prose figure (R-W2)
+
+CALCULUS' laws are RADIATION's tiles — the kit's readouts, classes copied, neither skin repainted; RADIATION's skin went
+to CALCULUS alone — in a grid of two columns on the card and three floating, opted OUT of LEAN (a first visit sees all
+eight). Every row gains `tex`, and ⧉ copies **the prose figure** (`calculusMarkdown`): a heading, one "Figure." paragraph
+reading the tiles as sentences — the conservation pair, the Ehrenfest pair as ONE sentence, the virial, the moments, ⟨r⟩ —
+with inline `$…$`, then the laws in display `$$…$$`, one family a line. It pastes into the notebook and renders:
+`tests/calculus.test.mjs` parses all 109 maths of four states under KaTeX throwOnError + strict; `latex-copy` §8 pastes the
+copy and counts 30 formulas, 4 displayed, 0 `.katex-error`. The view lost its per-tick `clientWidth` read; wave 137's
+take-in-bugs guard now asserts the figure.
+
+### wave 160: PERFORMANCE in QUALITY; PLANE and CLIP (R-W3)
+
+METERS' PERFORMANCE seg moves beside GOVERNOR in SETTINGS › QUALITY; METERS keeps the GOVERNOR readout and FRAME PROFILE.
+SLICE is **PLANE** and SLICE / CLIP is **CLIP** (eyebrows, notes, the CLIP POS / CLIP THICK target labels); the ids
+`slice` / `clip`, `slice.*` and the `material.slice.*` targets are unchanged.
+
+### wave 161: ATOMS returns as the periodic table (R-A2)
+
+ATOMS is no longer a hidden legacy window: it has its own row in + and WINDOW (it ships closed) and no banner, and
+SPECTRUM's ATOM still opens it. Its Z stepper is the periodic table H–Kr, built from SPECTRUM's own picker (`.picker`,
+`.pk-n` periods, `.pk-c` cells), periods as columns on the card and on a phone and as rows floating; a press puts the
+element in force, the element in force is lit; its readouts (Δ-SCF beside −ε, the quantum defect at both α, the
+α-dependent order) stay. LEGACY-WINDOWS and CLAUDE.md drop ATOMS from the hidden list; H₂⁺, HELIUM, H₂, ELECTROSTATICS and
+QCD stay hidden.
+
+**Gates.** `bash test.sh node` exit 0, 83 suites (three timing budgets in untouched files — electrostatics W42-7, mo G5,
+wigner W42-8 — went red under the load of 22–28 while S2 ran, green in the final run). `node tools/new-project.mjs
+--check` in step. Browser, one at a time on 8751/5219, all GREEN at the tip: stage-text (new), menubar, latex-copy,
+molecular-names, new-project, register, chem, history (39), frame-occlusion 7/7, current 15/15, render-regressions,
+orbitals (25), take-in-bugs, molecule-demos, export3d, field-molecule, gpu-recovery, input, keyboard-window, lfo-tension,
+mir-controls, molecular-diff, offer, official-defaults-palette, routed-knob. Re-run alone and believed only then:
+`current` (`valuesReveal` red three times under load — and once on the BASE tree, served from `git archive bd9b0e5` — green
+on a quiet machine), `orbitals` L9 (the free-running rAF starved to 2–3 frames/s under load; green alone). No digest lock:
+no field.js, shader or frame-order change. **How "no per-tick layout read" was checked:** the stage text carries witnesses
+(`stats.places`, `stats.renders`, `stats.labelWrites`); twelve CPU ticks at twelve clock times read layout 0 times and
+render KaTeX 0 times, and the labels write 0 times under a still camera across eight clock times and again after a turn —
+FRAME PROFILE gains no reader, because the per-tick work is three compares.
+
+**Lines.** `lab/*.js` 35,738 → 35,791: **+53, so the brief's "lines DOWN" is NOT met.** DYNAMICS' subtraction was real
+(−95 net, −176 of window code), but the brief counted `dynamics.js`' 338 lines as the window's, and they are the shared
+library; the new features cost the rest (`stage-text.js` +133, the prose figure ~+40, the SHADOW footer +52, the caption
+~+25).
