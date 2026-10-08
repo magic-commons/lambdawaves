@@ -326,6 +326,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
     the lead writes `## SYNTHESIS`.
 - **Not started:** S0-V (the release verifier), the 0.3.3 cut, S1 NAMES, S1′ cameraEye, S2–S5.
 
+> **UPDATE (Claude Sos, 2026-10-08 ~12:35 CDT, after the compaction and Josh's `/resume-work`).** Agent Control stayed paused through the
+> compaction; four relaunches were denied until Josh released it. Josh's rule of the morning: **Sol 6.1 at medium for bulk cheap work,
+> xhigh for code** — Sol is not stopped by the pause (Codex companion). Landed on `sos-s0`:
+> - **A9–A11 write-up** by Sol at medium: REPORT waves 193–195 + `research/release-0.5.0/A9-A11-BUILD.md` (`9e85217`, merged `369fb30`;
+>   Codex's sandbox could not take git's lock, Sos committed); the CLAUDE.md ACTIONS-rows paragraph applied (`eeef10f`).
+> - **A-M's UNVERIFIED line resolved (`1e1a4f8`)**: the five floor runs had NO field (`__LW.field.ok` false) — a fresh headless Chromium
+>   loses its WebGPU device on the first navigation and boots the field on every later one (0/4 cold, 2/2 reloads). `tools/perf/main-thread.mjs`
+>   now warms, measures on the second navigation and refuses without a field. **Floor with the field: 19.729 ms/s, spread 0.980, MAD 0.216,
+>   held 0 — gate 2 ms/s unchanged**; `research/release-0.5.0/measure/MEASURE.md` §1 (0.4.0's §6 is a pointer). All later A/Bs compare
+>   with this row, never with 13.879.
+> - RUNNING from `1e1a4f8` (Opus): A1+A8 (8763), A7 (8773/8777, ms/s pair under the warm-up rule), A0 pass 2 (8771, `field.ok` per cell).
+> - Open with Josh: the agent-control auto-release patch (proposed, not applied).
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
