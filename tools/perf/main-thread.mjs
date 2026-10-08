@@ -14,7 +14,14 @@
  * A/B between two trees (the integrator): serve each tree on its own port (python3 tools/gate/server.py <rootA> 8775 &,
  * <rootB> 8776 &) and interleave A B A B A B, 5 each, LW_PORT=8775 then LW_PORT=8776 per round; compare the medians against
  * |Δ median| ≤ max(2 × spread, 2 ms/s), spread = max − min of 5 same-tree runs (MEASURE.md §6).
- * STATUS: written whole; first measured under MEASURE.md §6 (see its PARTIAL line for how many of the 5 floor runs completed). */
+ * THE WARM-UP (2026-10-08, the integrator, after the five floor runs): a FRESH headless Chromium loses its WebGPU device on the
+ * page's first navigation ("device lost: A valid external Instance reference no longer exists", or "no WebGPU adapter" from the
+ * early request in lab/gpu-boot.js), and every later navigation in the same browser boots the field — 0 of 4 cold launches had
+ * `__LW.field.ok`, 2 of 2 reloads did.  So each run navigates ONCE to warm the browser, waits for __LW.ready, then navigates
+ * AGAIN for the measured page, and REFUSES to measure unless `__LW.field.ok` is true (`--allow-no-field` keeps the old behaviour
+ * for a deliberate no-GPU figure).  The five floor runs in 0.5.0 MEASURE.md §1 were taken before this and had no field present
+ * (presents 0): read them as the loop's cost without a picture; the field-present floor is the row that follows them.
+ * STATUS: written whole; the first five runs are in 0.4.0 MEASURE.md §6 → 0.5.0 MEASURE.md §1. */
 import { launch, sleep } from './cdp.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -28,6 +35,7 @@ const CHROME_ARGS = ['--no-sandbox', '--ignore-certificate-errors', '--enable-fe
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const RUNS = Number(opt('--runs', 5)), SECS = Number(opt('--secs', 30)), JSON_OUT = opt('--json', null), LABEL = opt('--label', '');
+const ALLOW_NO_FIELD = argv.includes('--allow-no-field');
 const load = () => fs.readFileSync('/proc/loadavg', 'utf8').split(' ').slice(0, 3).map(Number);
 const sha = () => { try { return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return 'unknown'; } };
 const med = (a) => { const s = [...a].sort((x, y) => x - y), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
@@ -36,10 +44,12 @@ const r3 = (x) => Math.round(x * 1000) / 1000;
 async function one(i) {
   const b = await launch({ width: 1600, height: 1000, gpu: true, args: CHROME_ARGS });
   try {
-    await b.goto(`https://127.0.0.1:${PORT}/lab/?sw=0&warn=0`, 500);
-    let ready = false;
-    for (let k = 0; k < 120 && !ready; k++) { ready = await b.eval('!!(window.__LW && __LW.ready)'); if (!ready) await sleep(500); }
-    if (!ready) throw new Error('the lab never became ready: ' + b.logs.slice(0, 3).join(' | '));
+    const url = `https://127.0.0.1:${PORT}/lab/?sw=0&warn=0`;
+    const ready = async () => { let r = false; for (let k = 0; k < 120 && !r; k++) { r = await b.eval('!!(window.__LW && __LW.ready)'); if (!r) await sleep(500); } return r; };
+    await b.goto(url, 500); if (!(await ready())) throw new Error('the lab never became ready (warm-up): ' + b.logs.slice(0, 3).join(' | '));   // the warm-up navigation (header)
+    await b.goto(url, 500); if (!(await ready())) throw new Error('the lab never became ready: ' + b.logs.slice(0, 3).join(' | '));
+    const field = await b.eval('(() => { const f = __LW.field || {}; return { ok: !!f.ok, error: f.error ? String(f.error) : null, adapter: f.adapterInfo && f.adapterInfo.description || null }; })()');
+    if (!field.ok && !ALLOW_NO_FIELD) throw new Error('no field present on the measured page (__LW.field.ok false: ' + field.error + '); pass --allow-no-field for a deliberate no-GPU figure');
     await b.eval('(async () => { __LW.pause(); await __LW.settle(); })()');
     await sleep(400);
     const st = () => b.eval('(() => { const s = __LW.stats || {}; return { frames: s.frames, presents: s.presents, skipped: s.skipped || 0 }; })()');
@@ -48,7 +58,7 @@ async function one(i) {
     await sleep(SECS * 1000);
     const m1 = await b.metrics(), s1 = await st(), L1 = load(), dt = (Date.now() - t0) / 1000;
     const d = (k) => (m1[k] - m0[k]) * 1000 / SECS;
-    return { run: i + 1, secs: dt, loadBefore: L0, loadAfter: L1, msPerSec: r3(d('TaskDuration')), script: r3(d('ScriptDuration')), layout: r3(d('LayoutDuration')),
+    return { run: i + 1, secs: dt, field, loadBefore: L0, loadAfter: L1, msPerSec: r3(d('TaskDuration')), script: r3(d('ScriptDuration')), layout: r3(d('LayoutDuration')),
       recalcStyle: r3(d('RecalcStyleDuration')), frames: s0.frames === undefined ? null : s1.frames - s0.frames, presents: s0.presents === undefined ? null : s1.presents - s0.presents,
       skipped: s1.skipped - s0.skipped, errors: b.logs.slice(0, 5) };
   } finally { await b.close(); }
@@ -57,7 +67,7 @@ async function one(i) {
 const out = { sha: sha(), port: PORT, secs: SECS, label: LABEL, when: new Date().toISOString(), runs: [] };
 for (let i = 0; i < RUNS; i++) {
   const r = await one(i); out.runs.push(r);
-  console.log(`run ${r.run}/${RUNS}  ${r.msPerSec} ms/s   (script ${r.script} · layout ${r.layout} · recalcStyle ${r.recalcStyle} ms/s)  frames ${r.frames ?? '—(__LW.stats not exposed)'} · presents ${r.presents ?? '—'} · held ${r.skipped}  load ${r.loadBefore[0]}→${r.loadAfter[0]}  sha ${out.sha}`);
+  console.log(`run ${r.run}/${RUNS}  ${r.msPerSec} ms/s   (script ${r.script} · layout ${r.layout} · recalcStyle ${r.recalcStyle} ms/s)  frames ${r.frames ?? '—(__LW.stats not exposed)'} · presents ${r.presents ?? '—'} · held ${r.skipped}  field ${r.field.ok ? 'ok · ' + r.field.adapter : 'ABSENT'}  load ${r.loadBefore[0]}→${r.loadAfter[0]}  sha ${out.sha}`);
 }
 const v = out.runs.map((r) => r.msPerSec), m = med(v);
 out.median = r3(m); out.spread = r3(Math.max(...v) - Math.min(...v)); out.mad = r3(med(v.map((x) => Math.abs(x - m))));

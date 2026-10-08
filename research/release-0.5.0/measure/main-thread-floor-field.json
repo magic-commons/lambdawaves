@@ -1,0 +1,147 @@
+{
+ "sha": "83f8bb1",
+ "port": "8721",
+ "secs": 30,
+ "label": "floor with the field present, 83f8bb1 tree, after the warm-up patch",
+ "when": "2026-10-08T17:06:33.300Z",
+ "runs": [
+  {
+   "run": 1,
+   "secs": 30.091,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "loadBefore": [
+    1.14,
+    1.08,
+    0.79
+   ],
+   "loadAfter": [
+    1.44,
+    1.16,
+    0.83
+   ],
+   "msPerSec": 20.493,
+   "script": 7.669,
+   "layout": 0.556,
+   "recalcStyle": 0.232,
+   "frames": 323,
+   "presents": 323,
+   "skipped": 0,
+   "errors": []
+  },
+  {
+   "run": 2,
+   "secs": 30.101,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "loadBefore": [
+    1.4,
+    1.15,
+    0.83
+   ],
+   "loadAfter": [
+    1.3,
+    1.15,
+    0.84
+   ],
+   "msPerSec": 20.061,
+   "script": 7.82,
+   "layout": 0.56,
+   "recalcStyle": 0.228,
+   "frames": 315,
+   "presents": 315,
+   "skipped": 0,
+   "errors": []
+  },
+  {
+   "run": 3,
+   "secs": 30.098,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "loadBefore": [
+    1.3,
+    1.15,
+    0.84
+   ],
+   "loadAfter": [
+    1.31,
+    1.17,
+    0.85
+   ],
+   "msPerSec": 19.606,
+   "script": 7.661,
+   "layout": 0.561,
+   "recalcStyle": 0.245,
+   "frames": 323,
+   "presents": 323,
+   "skipped": 0,
+   "errors": []
+  },
+  {
+   "run": 4,
+   "secs": 30.087,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "loadBefore": [
+    1.69,
+    1.25,
+    0.88
+   ],
+   "loadAfter": [
+    1.76,
+    1.31,
+    0.91
+   ],
+   "msPerSec": 19.729,
+   "script": 7.558,
+   "layout": 0.567,
+   "recalcStyle": 0.212,
+   "frames": 328,
+   "presents": 328,
+   "skipped": 0,
+   "errors": []
+  },
+  {
+   "run": 5,
+   "secs": 30.065,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "loadBefore": [
+    1.76,
+    1.31,
+    0.91
+   ],
+   "loadAfter": [
+    1.72,
+    1.35,
+    0.95
+   ],
+   "msPerSec": 19.513,
+   "script": 7.624,
+   "layout": 0.532,
+   "recalcStyle": 0.213,
+   "frames": 327,
+   "presents": 327,
+   "skipped": 0,
+   "errors": []
+  }
+ ],
+ "median": 19.729,
+ "spread": 0.98,
+ "mad": 0.216
+}

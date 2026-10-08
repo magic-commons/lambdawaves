@@ -258,41 +258,11 @@ max √ρ; their HOMOs 4.81e-4 / 5.56e-4 of max |ψ|; C₆₀'s eight frontier o
 32 (either lane count draws identical texels within a browser here); its device report is one command — on the desktop `./serve-lan.sh`, on the iPad
 `https://<desktop LAN address>:8710/lab/?report=1&post=1`, hands off for three minutes.
 
-## §6 · 0.5.0 A-M — THE MAIN-THREAD MS/S (`tools/perf/main-thread.mjs`, `cdp.mjs` `metrics()`)
+## §6 · 0.5.0 A-M — moved
 
-**COMPLETE: 5 of 5 floor runs done** (a builder pause came after them). Measured 2026-10-08, tree `02dce23` (the `sos-s0` tip), RTX 3070,
-Chromium 153 (playwright `chromium-1243`) headless on Vulkan, node v22.
-
-**Method [MEASURED].** Per run a fresh browser profile and page: open `/lab/?sw=0&warn=0` on the gate server, wait for `__LW.ready`,
-`__LW.pause()` + `settle()` + 400 ms (the device report's `start()`), `__LW.play()`, then CDP `Performance.getMetrics` at t = 0 and
-t = 30 s. **main-thread ms/s = ΔTaskDuration × 1000 / 30**; Script / Layout / RecalcStyle deltas are attribution. No rAF callback is put on
-the page (the device report's `play()` does), so the instrument adds no main-thread work. The scene is the device report's long play
-(as found, UI shown, 1600 x 1000), NOT its 1 s bin harness. One browser at a time; load average read from `/proc/loadavg` at the start and
-end of each 30 s window; the machine was shared with sibling builders.
-
-| run | ms/s (Task) | Script | Layout | RecalcStyle | frames / 30 s | presents | load avg (1 min) start → end |
-|---|---|---|---|---|---|---|---|
-| 1 | 13.890 | 4.247 | 0.567 | 0.218 | 589 | 0 | 2.25 → 1.77 |
-| 2 | 13.879 | 4.299 | 0.590 | 0.200 | 600 | 0 | 1.86 → 1.86 |
-| 3 | 14.037 | 4.488 | 0.575 | 0.205 | 581 | 0 | 1.86 → 2.17 |
-| 4 | 13.501 | 4.148 | 0.575 | 0.192 | 572 | 0 | 2.24 → 1.84 |
-| 5 | 13.607 | 4.250 | 0.570 | 0.155 | 592 | 0 | 1.84 → 1.50 |
-
-**The floor [DERIVED from the 5 above].** median **13.879 ms/s**; spread (max − min) **0.536 ms/s**; MAD **0.158 ms/s**. All five at load
-< 4 (1.5 – 2.25). C-V's gate `|Δ median| <= max(2 x spread, 2 ms/s)` is therefore `max(1.07, 2) = 2 ms/s` on this machine today: the floor is
-smaller than the 2 ms/s minimum, so the minimum governs. A 5 s smoke run read 18.5 ms/s (warm-up and shader compile inside a short
-window), so the window must stay 30 s.
-
-**Not established [UNVERIFIED].** `__LW.stats.presents` stayed 0 in all five windows while `frames` advanced (~19-20 per s): this
-headless run's figures are the main-thread cost of the app's loop with no field present counted. I did not check whether `__LW.field.ok`
-was true (WebGPU on the 3070 vs. a fallback) before the pause; do that first when re-using the number as a GPU-play figure. The floor
-is still a valid same-tree spread of this exact method, which is what the gate needs. Second-order: one tree, one day, load 1.5-2.3.
-
-**The pre-C baseline is this tool re-run on the tree after stage A closes [PLAN, not yet taken].** The 13.879 ms/s above is the floor on
-`02dce23`, not that baseline.
-
-Recipe: `python3 tools/gate/server.py "$PWD" 8775 &` then `LW_PORT=8775 node tools/perf/main-thread.mjs --runs 5 --json out.json`;
-an A/B is two trees on two ports, interleaved A B A B A B (header of the tool).
+The main-thread ms/s instrument's section (its method, the five floor runs on `02dce23`, the floor 13.879 ms/s with spread 0.536,
+the UNVERIFIED `presents = 0` note) now lives in `../../release-0.5.0/measure/MEASURE.md` §1, where the pre-C baseline and the C-V
+pairs join it. This file closes with 0.4.0's five sections.
 
 ---
 
