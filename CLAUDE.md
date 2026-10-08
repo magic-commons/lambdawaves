@@ -190,3 +190,10 @@ ring (`lab/history.js`) reads `serialize({ scope: 'edit' })` and writes
 An open never closes the notebook; it opens it only for non-blank text. Run
 `tests/history.browser-test.mjs`, `tests/new-project.browser-test.mjs` and
 `node tests/new-project.test.mjs` when touching any of this.
+
+Every read and write of `lambdawaves.q0.settings` goes through
+`lab/settings-store.js` (`createSettingsStore`; `WORKSPACE` and `FAMILIES` are
+its scope tables, and `tools/settings-probe.mjs` is their gate). The camera's
+port is `createCameraLaw(...).port`, the object MIR's CAMERA panel takes. The
+stage's bindings are `STAGE_BINDINGS` in `lab/stage-gestures.js`; a binding
+change is a row edit there. (0.5.0 A1/A8)
