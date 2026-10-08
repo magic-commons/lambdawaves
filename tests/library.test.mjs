@@ -93,11 +93,29 @@ assert.equal(calls() - c0, 0, 'a cache miss on a record-only molecule ran the so
 W.chemOpen({ lib: L, hash: row('lysine').hash, basis: 'sto-3g' });           // opened again, it answers again, still with no solver call
 assert.equal(W.chemSpectrum(Lm).roots.length, 960); assert.equal(calls() - c0, 0);
 
+/* 5c · C₆₀, THE FRONTIER RECORD (0.4.0 S4c): PySCF's orbitals re-encoded — ε for all 300 and the HOMO and LUMO sets only (ground.cols);
+       it opens with no solver call, answers whole (no spectrum to wait for), has no density, refuses everything it does not carry,
+       and its columns are the dump's, laid out n × n where every reader indexes them */
+const C60 = load('C60'), Cd = decodeRecord(C60), Cm = { atoms: Cd.atoms, basis: 'sto-3g', charge: 0 };
+const dump = JSON.parse(readFileSync(at('../research/release-0.4.0/library-census/c60-frontier.json'), 'utf8'));
+assert.deepEqual(Cd.cols, [175, 176, 177, 178, 179, 180, 181, 182]); assert.equal(Cd.D, null);
+assert.deepEqual(C60.caps, { orbitals: true, states: false, rpa: false, tdhf: false });
+assert.ok(/DRAFT GEOMETRY/.test(C60.stem.geometrySource) && /UNVERIFIED/.test(C60.stem.geometrySource), 'the record says its geometry is a draft');
+[...dump.frontier.HOMO.coefficientColumns, ...dump.frontier.LUMO.coefficientColumns].forEach((c, j) => same(Float64Array.from({ length: 300 }, (_, i) => Cd.C[i * 300 + Cd.cols[j]]), Float64Array.from(c), 'C60 column ' + Cd.cols[j]));
+c0 = calls();
+const co = W.chemOpen({ lib: C60, hash: row('C60').hash, basis: 'sto-3g' });
+assert.ok(co.nAO === 300 && co.nocc === 180 && co.D === null && co.roots.length === 0 && co.energy === dump.solver.energyEh, 'C60 opens whole: 300 AO, 180 occupied, no D, PySCF\'s energy');
+assert.throws(() => W.chemSpectrum(Cm), /frontier orbitals only/);
+assert.throws(() => W.chemStates(Cm), /refused|stores no|only/);
+assert.throws(() => W.chemRtInit({ ...Cm, kick: { axis: 'x' } }), /past the live cap/);
+assert.equal(calls() - c0, 0, 'C60 ran the solver');
+const badC = load('C60'); badC.ground.cols = [176, 175]; assert.ok(validateRecord(badC).some((w) => /frontier/.test(w)), 'unsorted frontier columns validate');
+
 /* 6 · THE CATALOGUE IN THE TABLE (lab/molecules.js): a record's input is the menu's own atoms (so the worker's solve-cache key is
        the one a window asks with — a mismatch would make a past-cap molecule a live solve), and the benzene-cap law reads it */
 for (const r of CAT.rows) assert.deepEqual(load(r.id).input.atoms, moleculeAtoms(r.id), r.id + ': the record\'s atoms are not the menu\'s');
 const lys = MOLECULE_BY_ID.get('lysine');
-assert.deepEqual(RECORD_ONLY.map((x) => x.id), ['lysine'], 'the record-only rows');
+assert.deepEqual(RECORD_ONLY.map((x) => x.id), ['lysine', 'C60'], 'the record-only rows');
 assert.ok(!MOLECULES.includes(lys) && lys.over && lys.recordOnly && !lys.disabled && lys.reason === null, 'lysine: past the cap, DOWNLOAD, never DISABLED');
 assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · 64 AO · record');
 assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');
