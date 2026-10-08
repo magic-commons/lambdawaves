@@ -183,6 +183,29 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Next, in order:** merge S4b → node gate + `library`/`chem`/`orbitals` light check → **the kernel verifier** (fresh Opus,
 >   8761/5229, the commands at the end of `S4c-BUILD.md`, contract BRIEF-S4-LIBRARY §S4c) → fold S4b's brief-4 notes into
 >   `KIT-BRIEFS.md` (Haiku 5.5 may do it) → **the local 0.4.0-alpha cut on Josh's word** (RELEASING.md's road, no push, no deploy).
+> **UPDATE 2026-10-08 ~07:05 — Claude Sos, session 4: S4 complete on `sos-s0`; only the kernel verifier and the cut remain.**
+> - **S4b THE SECTIONS merged** (`3ced864`, builder `7d93277`, waves 168–174, `S4b-BUILD.md`; the builder merged S4c on its own branch
+>   and resolved the seven conflicts, so the merge was clean): **38 records behind the diversity gate, 11,532,460 B** (ORGANIC 1,
+>   BIO 25, LATTICE 6 with C₆₀, HEAVY 6; DIATOMICS and HYDRIDES all live), eight past 64 AO drawing on S4c's tier; every RHF record
+>   labelled by projection (C5) and within 6.9e-9 Eh of its PySCF oracle; the three sizing entries timed (alanine 2.0 s to generate,
+>   129 KB, 2–3 ms to open; Li₄F₄; TiCl₄ 11–14 s, 211 KB); the section header = the page turner (◂ ▸, SECTION readout, INSTALLED
+>   switch) above the dropdown; 36 identifiers PubChem-verified (B₁₂H₁₂²⁻ UNVERIFIED, Li₄F₄ and the water hexamer have no entry);
+>   **nine of the census's self-built amino acids were the D form — mirrored to L**, lysine's two lock values re-recorded (24 of the
+>   1148, the 1004 untouched); **ferrocene refused by the stability probe** (PySCF agrees; the census was wrong); R-L6: stopped at Kr;
+>   **the census's byte estimate was 8–10× too small** (the RPA sticks dominate); **NIST SRD 101 is a copyrighted compilation — no
+>   CCCBDB table in the store**. `lab/*.js` 36,131 → 36,280 (S4b +55; the law not met — for Josh). CLAUDE.md's MOLECULES paragraph
+>   and KIT-BRIEFS brief 4 updated by Sos (`3dfbc46`, vault mirror refreshed).
+> - **Merged-tree gates (Sos, 06:41–07:00):** `orbital-library --check` in step; `bash test.sh node` exit 0; browser on 8721/5231 one
+>   at a time: `library` (incl. the sections scene and the two-press race), `chem` 55/55, `orbitals` 24/24 — GREEN.
+> - **Rulings taken by default, for Josh to confirm or overrule:** C₆₀ ships under a declared `milestone` allowance in the gate
+>   (his words: "maybe a bucky-ball as our next milestone"; R-L2 = YES); C₂₀H₂₀ is a test fixture only, not shipped; of the four
+>   rock-salt cubes only Li₄F₄ ships; the C₆₀ geometry is Sol's DRAFT until 0.4.1. Still open from earlier: Br₂ vs the cap; the
+>   subtraction law unmet by S3 (+53), S4a (+250), S4c (+88), S4b (+55); the stage formula at 34 px; `atomLabels:false` not honoured.
+> - **Blocked:** the kernel verifier (`BRIEF-S4C-VERIFY.md`, 8761/5229, start `3ced864` or later) — the agent-control plugin is in its
+>   pause again (tripped at 98 % during S4b) and refuses new workers until `/resume-work`.
+> - **Then the cut:** v0.4.0-alpha LOCALLY on Josh's word (RELEASING.md's road: the version line in `lab/rack.js`, README status,
+>   `pwa --write`, the gates, commit, annotated tag, `tools/changelog.mjs` — CHANGELOG was already out of step at S4a's base —
+>   `tools/snapshot-release.mjs`, `tools/build-deploy.mjs`; NO push, NO deploy, NO GitHub release until Josh says the plan is done).
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
