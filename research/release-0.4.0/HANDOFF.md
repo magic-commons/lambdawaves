@@ -215,6 +215,35 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > with the canary's four gate rewrites, the kit precache policy and a throwaway alpha.24 canary (8767/5237). Merge order A4, A5+A6,
 > A9–A11; then wave 2 (A1+A2+A3, A7+A8). Rulings taken by default until Josh says otherwise: R5-G1 wait for `1.5.0`; R5-M1 the MIR
 > briefs by Josh's primary account when its week resets.
+> **UPDATE 2026-10-08 ~11:05 — Claude Sos: v0.4.0-alpha CUT LOCALLY; the 0.5.0 plan at layer four; stage A wave 1 in flight.**
+> - **S4c VERIFIED** (`S4c-VERIFY.md`, fresh Opus, merged `0724d2b`): 0 BLOCKER, 0 SHOULD, 12 NOTEs; 1004 and 1148 locks GREEN; the ≤ 64
+>   tiers' compiled WGSL byte-identical to `b5eed68`; the refused-device fallback identical three ways; 13 past-64-AO records within
+>   8.5e-4 of PySCF; C₆₀ bit-identical to the census dump; VALENCE 47.786 → 1.601 in the app and in PySCF. Three NOTEs fixed by Sos
+>   (`c913fca`): the STATES press on a record-only molecule keeps the worker's refusal sentence; "same texels" across browsers
+>   reworded (each browser is self-consistent); C₆₀'s record is `a8166591…` (145 KB) since S4b regenerated it.
+> - **v0.4.0-alpha CUT, LOCAL ONLY:** version line `8193016` (`BUILD_LINE = '0.4.0-alpha · the library · 2026-10-08'`, README
+>   "Status: 0.4.0 alpha."), annotated tag `v0.4.0-alpha`, CHANGELOG `32bf806` (waves 140–182, 34 waves; the numbering has gaps at
+>   149–154 and 175–177 from the parallel builders — cosmetic), snapshot #16 at `~/Documents/LAMBDAWAVES-RELEASES/v0.4.0-alpha` (17 MB)
+>   + the vault index note, `dist/` built and verified (247 files, 16.51 MiB, the 11.5 MB library inside). Node gate exit 0 at the cut.
+>   **Nothing pushed, deployed or released** (Josh's ruling). The road when that day comes is the one in the Sos update above, with
+>   `v0.4.0-alpha` in place of `v0.3.3-alpha`. Josh's test servers (8721 / LAN 8711) now serve the 0.4.0-alpha tree.
+> - **0.5.0 planning (NACRE) in `research/release-0.5.0/`:** `PLAN-DRAFT-0` (Fable) → `REVIEW-SONNET-0` (`636c044`) → `PLAN-DRAFT-1`
+>   (`7d10a63`) → `AUDIT-OPUS-1` (`87f5bd6`) → **`PLAN-DRAFT-2` (`2c6cbe2`)** → REVIEW-SONNET-2 (running) → DRAFT 3 (the one Josh reads)
+>   → `PLAN.md`. The plan's spine: the release is judged by `lab/*.js` falling (0.4.0 added +1,559 against its law); stage A THE SEAMS
+>   capped at +150 with A2/A3/A4/A12 struck and the `__LW` law (1,507 uses of 96 members: no renamed member without its test); A6 a
+>   facade holding `demand('app.play')` under `modArm && clockLink` (LINKED retires at C4); R5-G1 default = pin alpha.24, re-adopt once
+>   at the first kit carrying brief 8; C0 the bare adopt + cascade with seven stylehash classes as Josh's rulings; the one lock at C7;
+>   CDP `TaskDuration` ms/s with a measured floor; 28.2–29.6k ESTIMATE; D on a net-≤-0 ledger with D9 (the legacy five, 1,469 lines)
+>   first. **Rulings for Josh first:** R5-G1, R5-W1 (the kit-file wiring law), R5-A3 (one project part), R5-L1 (the legacy five); then
+>   his Q1–Q3 (camera bindings; the 0.5.0 minimum + who builds the MIR briefs; MIR OPTIONS / LANGUAGE / KEYBOARD skin).
+> - **Stage A wave 1 (from `12451d2`, each in its own worktree, NOT merged yet):** A5 DONE on `worktree-agent-ac7efdcc9d1fca69a`
+>   (`f9b47dd`: `lab/mod-port.js`, rack.js −163, −44 net) with A6 (the facade) being built by the same builder; A9 DONE and A10 half on
+>   `worktree-agent-a951ee2405b1383e6` (hand-off `b6dfda6`), A11 next, builder resumed; A0 (the baseline, stylehash with modwindow +
+>   notebook open, the INFORMATIONAL spike by five rules) running on Sonnet; **A4 PARKED** on `worktree-agent-a42dc49a851951ba4`
+>   (`4bd0bbc`, lab/windows.js, green, +38) — struck as a stage by the audit, kept as C3's reference, never merged. Wave 2 after wave 1
+>   merges: A1+A8 ∥ A7. Merge order: A9–A11, then A5+A6 (A5 may merge alone if A6 lags).
+> - **Still Josh's:** the M5 numbers (persist, `limits.html`, `?report=1&post=1`); the camera bindings; the carried rulings (Br₂, C₆₀'s
+>   allowance, C₂₀H₂₀, one rock-salt cube, the subtraction law unmet four times).
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
