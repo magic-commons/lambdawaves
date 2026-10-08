@@ -144,6 +144,24 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   `LAMBDAWAVES CLAUDE KIT BRIEFS FOR MIR 2026-10-08.md`.
 > - **Running:** the S4a LIBRARY builder (Opus, 8753/5221, from `9395ab3`). Then its verifier (8755/5223), S4b ∥ S4c, the local
 >   0.4.0-alpha cut on Josh's word.
+> **UPDATE 2026-10-08 ~04:30 — Claude Sos, session 4: S4a merged, verified, its BLOCKER fixed; S4b ∥ S4c running.**
+> - **S4a THE PROOF AND THE STORE merged** (`cfdd674`, builder `4b49642`, waves 162–167, `S4a-BUILD.md`): schema-1 records,
+>   `tools/orbital-library.mjs --check` byte-exact, benzene (the proof) and lysine (the 64-AO lock fixture), `chem.open` with 0
+>   solver calls, `library/` the one precache exemption into `lw-data-v1`, the LIBRARY scope row, COST refit (benzene ~1.7 s, was
+>   ~9.6 s), the 1148-value lock fixture `measure/digest-lock-s4a.json`. `lab/*.js` 35,881 → 36,131 (+250: the law not met — for Josh).
+> - **S4a VERIFIED** (`S4a-VERIFY.md`, fresh Opus, merged `96c8b08`): every gate and both locks green, 0 solver calls on open counted
+>   independently, cached = fresh in Firefox (|ΔE| 1.3e-12, 0 of 1,048,576 texels differ), persist() once, the store survives a
+>   build. **BLOCKER B1 fixed by Sos (`b5eed68`):** a stale `chem.open` (press benzene then lysine) replaced the worker's one cache and
+>   the next lysine op live-solved a past-the-cap molecule; now `seq === solveSeq` guards every worker post in `chemview.js` and the
+>   worker refuses a cache miss on a record-only key (`recordOnlyIds`); probe 0 calls, KICK refused in 5 ms; `tests/library.test.mjs`
+>   §5b. **SHOULD S1** (the plain 1004 lock reads RED by fixture shape since S4a's three record states; GREEN with `--states` or
+>   the 1148 fixture): told to S4c, which owns `tools/perf`. NOTEs for S4b: `validateRecord` checks shape only; RPA sticks' μ not in
+>   a canonical gauge for degenerate roots; pyridine at 0.99× and Br₂ at 1.13× benzene in node.
+> - **Running from `cfdd674` (+ `b5eed68` offered to both):** S4b THE SECTIONS (Opus, 8757/5225, waves from 168) and S4c THE ENGINE
+>   UPGRADES (Opus, 8759/5227, waves from 178). Then the kernel verifier (8761/5229), then the local 0.4.0-alpha cut on Josh's word.
+> - Josh tried the camera on the test servers (https://127.0.0.1:8721/lab/, LAN https://10.0.0.18:8711/lab/, serving `sos-s0`):
+>   *"Nice, I'm impressed. We might change the default keybinds for new camera mouse-controls and perhaps touch gestures but this is
+>   good for now!"* — an open item after 0.4.0. Josh: Haiku 5.5 may take the easiest bulk tasks at high–xhigh effort.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
