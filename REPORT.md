@@ -3911,3 +3911,92 @@ and 1148-value locks GREEN (above). Nothing was re-run alone: no timing or lock 
 catalogue and the cap law in `molecules.js` (+29), `chem.open` and the refusals in `mathworker.js` (+29), DATA in `sw.js`
 (+16). The one subtraction found was the hand-built fallback; the generator, the refit and the lock live in `tools/`.
 Hand-off: `research/release-0.4.0/S4a-BUILD.md`.
+
+
+## 2026-10-08 · 0.4.0 S4c — THE ENGINE UPGRADES
+
+Built by the S4c builder (Opus 5.5) against `research/release-0.4.0/BRIEF-S4-LIBRARY.md` §S4c (PLAN §4 F5 (i)–(iii), §6 row S4,
+§10 N1 and N3), branch `worktree-agent-a734418d1e508c803` from `cfdd674` (`sos-s0`: S4a merged), with `b5eed68` (the S4a
+verifier's B1 fix) merged in as the integrator asked. Waves numbered from 178 (S4b numbers from 168 in parallel; the integrator
+renumbers). Hand-off: `research/release-0.4.0/S4c-BUILD.md`. Nothing pushed, tagged or deployed.
+
+### wave 178: The density wall — a cap-128 χ tier
+
+The χ tile is cap × 64 lanes × 4 B of workgroup memory, so the n² density stopped at 64 AOs (16 KiB, WebGPU's default).
+`lab/gpu-boot.js requestGpu()` now asks for `maxComputeWorkgroupStorageSize: 32768` wherever the adapter reports at least that
+(PLAN §10 N1: the RTX 3070 reports 49152 in Chromium and Firefox and grants 32768), and `lab/field.js` adds the tier:
+`MOL_CAPS = [16, 40, 64, 128]`. Each tier's lanes come from the limit the device GRANTED, never from the request: where 32 KiB
+is not granted the cap-128 tier is built with 32 lanes (`@workgroup_size(4, 4, 2)`, 16 KiB, dispatched ceil(n/2) deep).
+`molWgsl(cap, wg)` renders the pre-S4c source byte for byte at 64 lanes — checked for caps 16, 40 and 64 — so the ≤ 64 tiers
+compile the program the digest lock recorded. Past 128 a density, Δρ or signed matrix is refused with a sentence. **Measured
+(RTX 3070, Firefox 157 and Chromium 153 on Vulkan, which draw the same texels):** an 87-AO record (tryptophan) and a 120-AO
+record (dodecahedrane, C₂₀H₂₀) reconstruct at 96³ against the GENERATOR's own f64 density — the record's D on
+`molecular-field.js`'s evaluator — at 256 sampled voxels to **4.56e-4 and 3.69e-4 of max √ρ** (per voxel above 1 % of max: 9.3e-4
+and 8.0e-4), the rgba16float figure. A device refused the 32 KiB (the harness wraps `requestDevice` to drop the one key) gets
+16384, builds 32 lanes, and draws **the same texels** (fieldDigest `8ce0fdcb` both, Firefox; `ff0a77c2` both, Chromium). A
+dispatch: tryptophan's density 19.6 ms (Chromium) / 21.5 ms (Firefox), C₂₀H₂₀'s 43.0 / 48.2 ms — once per change, never per
+frame. **A finding:** the 32 KiB tile buys nothing measurable on the 3070 (19.41 ms on 64 lanes against 19.36 on 32 in Chromium;
+21.58 against 20.85 in Firefox): the tier asks for it because the plan rules it, and the 32-lane fallback costs nothing.
+Records past 64 AOs need not wait on the M5's answer.
+
+### wave 179: The orbital-only path — an orbital at any AO count
+
+An orbital is Σ c_μ χ_μ: O(nAO) a voxel, so it needs no tile. `ORB_WGSL` (field.js) shares the tile kernel's shell loop
+(`MOL_LOOP`, one exponential per primitive per group) and contracts each shell with its coefficients on the spot; a shell whose
+widest primitive is under 1e-10 at the voxel (r² > ln 1e10 / α_min, a per-shell table `packMolecule` now writes, 1 KiB) is
+skipped with its exponentials, a shared shell with its leader. The ORBITAL kind (real and complex) past 64 AOs takes it; at ≤ 64
+the orbital keeps its tile, so the lock's orbitals are untouched. The orbital's AO ceiling is the shell table's (`MOL_LIMITS.ao`
+768; C₆₀ is 300). Checked: tryptophan's and C₂₀H₂₀'s HOMOs against the generator's f64 at 4.81e-4 and 5.56e-4 of max |ψ|.
+**C₆₀'s HOMO at 96³, the shipped module, plain against screened** (the cut table at +∞, the same inputs): **13.67 / 3.62 ms
+(Chromium), 15.01 / 4.08 ms (Firefox)** — MEASURE §3's proxy said 12.0 / 3.2–3.6; through the field (`moleculeThroughput`)
+3.65 / 4.17 ms. Tryptophan's HOMO 0.97 / 1.18 ms, C₂₀H₂₀'s 2.18 / 2.50 ms.
+
+### wave 180: C₆₀'s HOMO and LUMO, from PySCF's own orbitals
+
+`tools/orbital-library.mjs` gains a second, separately named road, `buildFrontier()` (not ENTRIES, not the gate): it re-encodes
+Sol's dump `research/release-0.4.0/library-census/c60-frontier.json` (PySCF 2.14 direct RHF on the vendored STO-3G decimals;
+the HOMO set h_u ×5 and the LUMO set t₁u ×3 already in the app's AO order, its water conversion proof inside at 1.03e-12) as a
+schema-1 **frontier record**, `lab/library/9520cedc….json`, 140.7 KB: ε for all 300, the eight columns (`ground.cols`
+175–182), no D, no spectrum, no states — `caps { orbitals: true, states: false, rpa: false, tdhf: false }`; the geometry source
+reads *DRAFT GEOMETRY, NOT A MEASUREMENT* (Sol's equal-edge ideal I_h, experimental status UNVERIFIED), as the census does; the
+levels are named by energy (the I_h names are 0.4.1 BUCKYBALL). It writes nothing unless the basis file is the dump's, the
+app's own AOs contracted with the columns answer PySCF's `GTOval_cart` at Sol's 92 points (measured **1.1e-16**), and each set's
+spread is under 2e-10 Eh. `lab/library.js` validates and decodes such a record (C laid out n × n, the columns it does not
+carry zero and never offered); the worker's `chem.open` answers it whole (no spectrum to wait for) and refuses spectrum,
+STATES and TDHF with a sentence. MOLECULES lists C₆₀ in its LIBRARY group as a record-only row (DOWNLOAD, never DISABLED); open,
+the view is ORBITAL, DENSITY and Δρ are disabled with *"this record carries its frontier orbitals only — the density is 0.4.1
+BUCKYBALL"*, the dial spans orbitals 176–183, the status reads *"300 AOs · 360 electrons · orbitals only · from its record
+(141 KB) in 7 ms, no solver call"*; MO-REGISTRY refuses a rung the record does not carry. **The sampled-voxel check against
+PySCF:** `tools/perf/c60-voxels.py` evaluates PySCF's own orbitals (libcint, the dump's coefficients mapped back into PySCF
+order) at the centres of 256 voxels of the 96³ grid; the field's texels for all eight orbitals sit **4.0e-4 – 5.6e-4 of max
+|ψ|** from them (max |Δψ| 6.0e-5), the app's f64 evaluator ≤ 9.7e-17. Screenshots by the driver:
+`research/release-0.4.0/measure/s4c-c60-{homo,lumo}.jpg` (`tools/perf/s4c-c60-app.mjs`, 0 solver calls, asserts green).
+
+### wave 181: VALENCE — a switch on DENSITY
+
+`D − 2 Σ_core C_c C_cᵀ`, formed in f64 (`corePart()`, once per solve) on its way to the density kind's f32 matrix, the core
+count S1's `coreCount(atoms)` (He for Li–Ne, Ne for Na–Ar, Ar for K–Zn …). A kit switch, VALENCE, on the VIEW row: it takes the
+ORBITAL dial's seat while DENSITY is the view — the dial reads nothing there — so the row stays at its width (VIEW 175 px +
+VALENCE 79 px in the 256 px row; the dial was 62 px). VALENCE off is the old road byte for byte. It is PROJECT state like CORE
+(`valence` in the presentation; `tools/new-project.mjs` and the empty project carry `valence: false`, so NEW resets it).
+**Through the app:** lysine (10 core orbitals) max ρ 47.79 → 1.601 with VALENCE — the core had drowned the valence 29.8× —
+and benzene (6 core) 7.372 → 0.327 (22.5×); the texel against the f64 √ρ of `D − 2 Σ_core C_c C_cᵀ` at 256 voxels:
+5.6e-4 and 8.1e-4 of max. Screenshot: `research/release-0.4.0/measure/s4c-valence-lysine.jpg`.
+
+### wave 182: The lock, the comments, the device report, the lines
+
+`field.js`'s comments that said Firefox zeroes timestamp queries are corrected (real since 157, MEASURE §3; the batch method
+stays for Firefox's ~100 ms completion tick). The digest lock now compares only the states its fixture holds and names the
+ones it skipped (the S4a verifier's S1), so the plain command is the 1004-value lock again. **Locks on the final tree:** 1004
+values GREEN (61 s; chemC6H6, chemLys, chemLysHomo named as skipped) and the S4a fixture's 1148 GREEN (62 s), each run once,
+no red to re-run; the 588-value 96³ run GREEN after every frame-path commit. **Device report pair** (`tools/perf/device-report-run.mjs`,
+the gate's headless Firefox, the 30 s long play): before (b5eed68) 18.2 fps, 547 presents, 0 held, loop median 1 ms, governor
+nominal at 64³; after 19.1 fps, 576 presents, 0 held, loop median 1 ms, governor nominal at 64³ — the same tier. M5 pending.
+Fixtures: `node tools/orbital-library.mjs --fixture tryptophan|C20H20` wrote `tests/fixtures/record-{tryptophan,C20H20}.json`
+(87 AO, oracle Δ −8.0e-10 Eh, 190 s; 120 AO, −1.0e-9 Eh, 1091 s) — S4b's BIO/ORGANIC records supersede them as content.
+Gates: node 85 suites GREEN; `orbital-library --check` in step (3 records, 1 757 075 B); `new-project --check` in step; browser
+on 8759/5227, one at a time: chem 54/54, molecular-names, render-regressions, current, export3d, library, field-molecule,
+orbitals 24/24, new-project, history — GREEN (chem and library each learnt one S4c fact: the `valence` key, the C₆₀ row).
+**Lines:** `lab/*.js` 36 137 → 36 225 (+88; field.js +52, chemview.js +24, library.js +7, gpu-boot.js +3, mathworker.js +1,
+orbitalsview.js +1) — *subtract, don't add* is NOT met: a kernel, a record kind and a switch are new; WGSL source lines in
+field.js 471 → 496 (the tile kernel unchanged; ORB_WGSL shares its header and shell loop).
