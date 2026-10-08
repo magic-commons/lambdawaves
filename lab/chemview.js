@@ -258,6 +258,7 @@ export function createChem(host, api) {
         if (o) o.textContent = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); } });
       if (!got.record) { why = `${P.name}'s record is not open: ${got.why}` + (P.recordOnly ? ' — it opens only from its record (DOWNLOAD when the network is back)' : ''); lamps(); return null; }
       if (got.from === 'network') lamps();
+      if (seq !== solveSeq) return null;   /* S4a-VERIFY B1: the hand has moved on while the record was read — an abandoned chem.open would replace the worker's ONE cache */
       const m = { op: 'chem.open', lib: got.record, hash, basis };
       const r = await call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } }));
       if (!r || r.refused) { why = (r && r.refused) || `${P.name}'s record did not open`; return null; }
@@ -267,6 +268,7 @@ export function createChem(host, api) {
     };
     const first = () => (rec ? viaRecord() : Promise.resolve(null)).then((r) => {
       if (r || P.recordOnly) return r;
+      if (seq !== solveSeq) return null;   /* S4a-VERIFY B1: the same law for a live solve — never post for a molecule the hand has left */
       if (why) note = why.replace(/ —.*$/, '') + ': solved live';
       return call(msg, () => localSolve(msg));
     });
@@ -284,9 +286,10 @@ export function createChem(host, api) {
       };
       if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
+      if (seq !== solveSeq) return null;                                       // S4a-VERIFY B1: no stale spectrum post either
       return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
         if (seq !== solveSeq || sol !== r) return null;
-        if (!s || s.error || !s.roots) { status('spectrum failed: ' + ((s && s.error) || 'no answer'), 'warn'); return r; }
+        if (!s || s.error || !s.roots) { status((s && s.refused) || 'spectrum failed: ' + ((s && s.error) || 'no answer'), 'warn'); return r; }
         sol.roots = s.roots; sol.tda = s.tda; sol.timings = s.timings || sol.timings;
         refresh(); return r;
       });

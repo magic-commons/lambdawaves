@@ -196,6 +196,7 @@ export function gasStats(m = {}) {
 const TRACE_CAP = 2e6;
 const chemRecords = new Map();
 let chemSol = null, chemKey = '', rtState = null, solverCalls = 0;   // every moleculeRHF and rpa this worker ran (stat): a record's open adds none
+const recordOnlyIds = new Map();   // S4a-VERIFY B1: key → record id for every record opened here whose caps forbid a live solve (past the cap); a cache miss on one is a REFUSAL, never a solve
 /** a REFUSAL is an answer, `{ refused: sentence }`, never `error` (which would send rack.js to the frame thread's road) */
 class Refused extends Error {}
 export const chemSolverCalls = () => solverCalls;
@@ -229,6 +230,7 @@ function ensureSolve(m = {}, live = false) {
   if (chemSol && chemKey === key && (chemSol.I || !live)) return chemSol;
   const from = chemSol && chemKey === key ? chemSol : null;
   if (from && !from.record.caps.tdhf) throw new Refused(`${from.record.id} is past the live cap: it opens only from its record, which stores no electron-repulsion integrals, so TDHF (KICK, RUN) cannot run on it`);
+  if (!from && (m.recordOnly || recordOnlyIds.has(key))) throw new Refused(`${recordOnlyIds.get(key) || 'this molecule'} is past the live cap and opens only from its record, which is no longer the worker's current molecule (another open replaced it) — open it again; nothing is solved live`);
   const rec = recordOf(basis);
   solverCalls++;
   /* THERE IS ONE INTEGRAL PASS AND IT TIMES ITSELF.  The card used to send `split: true` and this function then ran
@@ -265,6 +267,7 @@ export function chemOpen(m = {}) {
     ground: { ...R.ground, timings: { integrals: null, scf: null, rpa: null, names: null, open: +(performance.now() - t).toFixed(2) } },
     spectrum: R.spectrum, R: null, states: R.states, atoms, basis: R.basis, charge: R.charge, record: { id: r.id, hash: m.hash || null, caps: r.caps } };
   chemKey = chemSol.key; driveState = null;
+  if (!(r.caps && r.caps.tdhf)) recordOnlyIds.set(chemSol.key, r.id);     // S4a-VERIFY B1
   return { ...chemGround({ atoms, basis: R.basis, charge: R.charge }), record: chemSol.record, ...(r.caps.rpa ? {} : { roots: [], tda: [] }) };   // S4c: a frontier record answers whole — it has no spectrum to wait for
 }
 /* THE STABILITY VERDICT ON THE WIRE.  stabilityHessian's `lowestApB`/`lowestAmB` are lazy getters and a structured
