@@ -149,9 +149,12 @@ if (ONLY.includes('c60') && c60) {
 }
 if (ONLY.includes('timing')) {
   out.timing = [];
+  /* n is GROWN until one batch itself lasts 2.5 s: an estimate from a short batch inherits Firefox's ~100 ms completion tick
+     (a 20-dispatch batch of 1.2 ms reads as 5 ms) and the batches it sizes come out a whole number of ticks */
+  const grow = async (run) => { let n = 20; for (;;) { const ms = await run(n); if (ms * n >= 2500 || n >= 20000) return n; n = Math.min(20000, Math.max(2 * n, Math.ceil(2700 / ms))); } };
   const time = async (label) => {
     await f.moleculeThroughput({ n: 10 });
-    const est = (await f.moleculeThroughput({ n: 20 })).msPerDispatch, n = Math.max(20, Math.min(4000, Math.ceil(2500 / Math.max(est, 0.05))));
+    const n = await grow(async (m) => (await f.moleculeThroughput({ n: m })).msPerDispatch);
     const runs = []; let r; for (let b = 0; b < 5; b++) { r = await f.moleculeThroughput({ n }); runs.push(r.msPerDispatch); }
     out.timing.push({ label, nAO: r.nAO, kind: r.kind, path: r.path, cap: r.cap, wg: r.wg, n, median: +med(runs).toFixed(3), min: Math.min(...runs), max: Math.max(...runs) });
   };
@@ -175,7 +178,7 @@ if (ONLY.includes('timing')) {
         .concat([{ binding: 5, resource: tex.createView() }, { binding: 6, resource: { buffer: bufs[5] } }, { binding: 7, resource: { buffer: cb } }]) });
       const g = Math.ceil(RES / 4), batch = async (m) => { await d.queue.onSubmittedWorkDone(); const t0 = performance.now(); const e = d.createCommandEncoder(), p = e.beginComputePass();
         p.setPipeline(pipe); p.setBindGroup(0, bind); for (let i = 0; i < m; i++) p.dispatchWorkgroups(g, g, g); p.end(); d.queue.submit([e.finish()]); await d.queue.onSubmittedWorkDone(); return (performance.now() - t0) / m; };
-      await batch(4); const est = await batch(20), m = Math.max(20, Math.min(4000, Math.ceil(2500 / Math.max(est, 0.05))));
+      await batch(4); const m = await grow(batch);
       const runs = []; for (let b = 0; b < 5; b++) runs.push(await batch(m));
       out.timing.push({ label: 'C60 HOMO ORB_WGSL ' + label + ' (own pass, the shipped module)', nAO: n, path: 'orbital', n: m, median: +med(runs).toFixed(3), min: +Math.min(...runs).toFixed(3), max: +Math.max(...runs).toFixed(3) });
       cb.destroy();
@@ -194,6 +197,9 @@ async function chromium() {
   process.env.CHROMIUM = PW; process.env.LW_CDP_TIMEOUT = '1800000';
   const b = await launch({ width: 1200, height: 900, gpu: true, args: CHROME_ARGS });
   try {
+    /* a fresh headless Chromium on Vulkan can answer the lab's very first requestAdapter (top of <head>) with null; one adapter
+       asked for on another page first brings the GPU process up (the S0 orbital-dispatch run went there first, too) */
+    await b.goto(`${ORIGIN}/tools/perf/limits.html`, 1500);
     await b.goto(`${ORIGIN}/lab/?sw=0`, 1000);
     for (let i = 0; i < 600; i++) { try { if (await b.eval('!!(window.__LW && __LW.ready)')) break; } catch {} await sleep(100); }
     return await b.eval(`(async()=>{ ${PAGE(ONLY)} })()`);

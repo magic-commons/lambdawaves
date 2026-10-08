@@ -299,10 +299,21 @@ export function createChem(host, api) {
      the fact.  The handle is a `let` and is REASSIGNED: kit.js's knob() publishes `get shown()`, so copying the new
      widget's members over the old object throws "setting getter-only property" in a module's strict mode — which
      is exactly how the first H₂O solve failed, silently, inside the promise chain. */
+  /* 0.4.0 S4c · A FRONTIER RECORD (C₆₀: its HOMO and LUMO sets) carries orbitals and no density: the dial spans the columns it
+     carries, and DENSITY and Δρ refuse with a sentence while it is up — the view is ORBITAL */
+  const span = () => (sol && sol.cols ? [sol.cols[0] + 1, sol.cols[sol.cols.length - 1] + 1] : [1, sol ? sol.nAO : 7]);
+  const noSpectrum = (r) => !!(r && r.record && !r.record.caps.rpa);
+  const ORB_ONLY = 'this record carries its frontier orbitals only — the density is 0.4.1 BUCKYBALL', vTitle = new Map(['density', 'diff'].map((id) => [id, vSeg.button(id).title]));
+  function views() {
+    const d = !!(sol && sol.D);
+    for (const [id, t] of vTitle) { const b = vSeg.button(id); b.disabled = !d; b.title = d ? t : ORB_ONLY; }
+    if (!d && view !== 'orbital') { view = 'orbital'; vSeg.set(view); }
+  }
   function rebuildOrbKnob() {
-    const n = sol ? sol.nAO : 7, k = Math.min(Math.max(1, orbital || 1), n);
+    views();
+    const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
     const help = orbKnob.root.dataset.help || 'The molecular orbital index, ascending in ε; HOMO by default';
-    const next = knob({ label: 'ORBITAL', min: 1, max: n, value: k, title: help,
+    const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, title: help,
       fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
     orbKnob.root.replaceWith(next.root); orbKnob = next;
     orbKnob.root.classList.toggle('off', view !== 'orbital');
@@ -524,7 +535,7 @@ export function createChem(host, api) {
     status(`${sol.nAO} AOs · ${2 * sol.nocc} electrons`
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
-      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : sol.roots ? '' : ' · spectrum pending')
+      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : noSpectrum(sol) ? ' · orbitals only' : sol.roots ? '' : ' · spectrum pending')
       + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
       + (sol.note ? ' · ' + sol.note : '') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
@@ -578,7 +589,7 @@ export function createChem(host, api) {
     const { W, H } = s, L = 42, Rt = W - 8, Tp = 12;
     g.font = '8px ui-monospace, monospace';
     const CAP = sol ? `${tda ? 'TDA' : 'RPA'} sticks, h ∝ f · Im α from the ${axis} kick`
-      + (sol.roots ? '' : ' · spectrum pending')
+      + (noSpectrum(sol) ? ' · no spectrum in its record' : sol.roots ? '' : ' · spectrum pending')
       + (fit ? (fit.certified ? ` · ▲ poles, 4ε/σ = ${fit.bound.toExponential(1)}` : ` · ▽ raw maxima, UNCERTIFIED`) : spec ? ' · fitting…' : ' · kick and RUN')
       : 'no molecule solved';
     const caps = wrap(g, CAP, Rt - L);
@@ -803,8 +814,8 @@ export function createChem(host, api) {
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); },
     preset() { return preset; },
-    setView(v) { if (!['density', 'orbital', 'diff'].includes(v)) return view; view = v; vSeg.set(v); orbKnob.root.classList.toggle('off', v !== 'orbital'); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
-    orbital(k) { if (Number.isFinite(k)) { orbital = Math.min(sol ? sol.nAO : 7, Math.max(1, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
+    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); orbKnob.root.classList.toggle('off', v !== 'orbital'); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
+    orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
     setDt(v) { if (!DTS.includes(String(v))) return dt; dt = Number(v); dSeg.set(String(v)); reset(); return dt; },

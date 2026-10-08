@@ -265,7 +265,7 @@ export function chemOpen(m = {}) {
     ground: { ...R.ground, timings: { integrals: null, scf: null, rpa: null, names: null, open: +(performance.now() - t).toFixed(2) } },
     spectrum: R.spectrum, R: null, states: R.states, atoms, basis: R.basis, charge: R.charge, record: { id: r.id, hash: m.hash || null, caps: r.caps } };
   chemKey = chemSol.key; driveState = null;
-  return { ...chemGround({ atoms, basis: R.basis, charge: R.charge }), record: chemSol.record };
+  return { ...chemGround({ atoms, basis: R.basis, charge: R.charge }), record: chemSol.record, ...(r.caps.rpa ? {} : { roots: [], tda: [] }) };   // S4c: a frontier record answers whole — it has no spectrum to wait for
 }
 /* THE STABILITY VERDICT ON THE WIRE.  stabilityHessian's `lowestApB`/`lowestAmB` are lazy getters and a structured
    clone would READ them, putting two eigensolves of a 315 × 315 back on every benzene reply; the verdict itself is
@@ -279,6 +279,7 @@ const wireSolution = (s) => ({ ...s, hessian: wireHessian(s.hessian) });
 function ensureSpectrum(m = {}) {
   const c = ensureSolve(m);
   if (c.spectrum) return c;
+  if (!c.I) throw new Refused(`${c.record.id}'s record carries its frontier orbitals only: it stores no spectrum, and past the cap none is solved`);
   const { sol, I } = c, t = performance.now(); solverCalls++;
   const R = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc });
   const tRpa = +(performance.now() - t).toFixed(2);
@@ -474,7 +475,7 @@ export function chemGround(m = {}) {
   const c = ensureSolve(m);
   return { ...c.ground, stage: 'ground', timings: { ...c.ground.timings },
     eps: Float64Array.from(c.sol.orbitalEnergies),
-    C: Float64Array.from(c.sol.C), D: Float64Array.from(c.sol.D), shells: fieldShells(c.sol.basis) };
+    C: Float64Array.from(c.sol.C), D: c.sol.D && Float64Array.from(c.sol.D), shells: fieldShells(c.sol.basis) };   // D null: a frontier record (S4c)
 }
 /** chem.spectrum — STAGE TWO: the roots for the cached ground state (it is re-solved if the cache moved on) */
 export function chemSpectrum(m = {}) {

@@ -10,10 +10,102 @@
     "description": ""
    },
    "res": 96,
+   "timing": [
+    {
+     "label": "tryptophan density",
+     "nAO": 87,
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
+     "wg": 64,
+     "n": 212,
+     "median": 20.784,
+     "min": 20.776,
+     "max": 20.82
+    },
+    {
+     "label": "tryptophan HOMO",
+     "nAO": 87,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 4164,
+     "median": 1.154,
+     "min": 1.154,
+     "max": 1.158
+    },
+    {
+     "label": "C20H20 density",
+     "nAO": 120,
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
+     "wg": 64,
+     "n": 54,
+     "median": 46.347,
+     "min": 46.337,
+     "max": 46.382
+    },
+    {
+     "label": "C20H20 HOMO",
+     "nAO": 120,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 1120,
+     "median": 2.413,
+     "min": 2.413,
+     "max": 2.414
+    },
+    {
+     "label": "C60 HOMO (field, screened)",
+     "nAO": 300,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 1080,
+     "median": 4.083,
+     "min": 4.078,
+     "max": 4.09
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL plain (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 180,
+     "median": 14.464,
+     "min": 14.462,
+     "max": 14.465
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL screened (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 1080,
+     "median": 4.078,
+     "min": 4.078,
+     "max": 4.078
+    }
+   ],
+   "wallSec": 179,
+   "at": "2026-10-08T08:43:59.619Z"
+  },
+  "chromium": {
+   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+   "adapter": {
+    "vendor": "nvidia",
+    "architecture": "ampere",
+    "device": "0x2484",
+    "description": "NVIDIA GeForce RTX 3070"
+   },
+   "res": 96,
    "tiers": {
     "requested": {
-     "maxTextureDimension2D": 32767,
-     "maxTextureDimension1D": 32767,
+     "maxTextureDimension2D": 16384,
+     "maxTextureDimension1D": 16384,
      "maxComputeWorkgroupStorageSize": 32768
     },
     "granted": 32768,
@@ -32,294 +124,88 @@
     "orbitalFrom": 64,
     "shaderErrors": []
    },
-   "records": {
-    "tryptophan": {
+   "timing": [
+    {
+     "label": "tryptophan density",
      "nAO": 87,
-     "nocc": 54,
-     "half": 14.635385660262282,
-     "energy": -673.5899790979712,
-     "density": {
-      "kind": "density",
-      "path": "tile",
-      "cap": 128,
-      "wg": 64,
-      "nAO": 87,
-      "voxels": 256,
-      "maxAbsErr": 0.003918,
-      "maxSampled": 5.7891,
-      "gridMax": 8.5986,
-      "relToMax": 0.0004557,
-      "maxRelAbove1pc": 0.000934,
-      "pass": true,
-      "probes": [
-       [
-        62,
-        51,
-        23,
-        0.788198,
-        0.788086
-       ],
-       [
-        7,
-        50,
-        63,
-        0.0000673446,
-        0.0000672936
-       ],
-       [
-        54,
-        37,
-        42,
-        0.360535,
-        0.360352
-       ],
-       [
-        6,
-        20,
-        78,
-        2.13408e-9,
-        0
-       ],
-       [
-        59,
-        54,
-        29,
-        0.486046,
-        0.48584
-       ],
-       [
-        16,
-        48,
-        38,
-        0.00136259,
-        0.00136185
-       ],
-       [
-        38,
-        38,
-        65,
-        0.537059,
-        0.536621
-       ],
-       [
-        50,
-        65,
-        55,
-        0.00381482,
-        0.0038147
-       ]
-      ]
-     },
-     "homo": {
-      "kind": "orbital",
-      "path": "orbital",
-      "cap": null,
-      "wg": 64,
-      "nAO": 87,
-      "voxels": 256,
-      "maxAbsErr": 0.0001064,
-      "maxSampled": 0.16792,
-      "gridMax": 0.22129,
-      "relToMax": 0.0004809,
-      "maxRelAbove1pc": 0.0008489,
-      "pass": true,
-      "probes": [
-       [
-        62,
-        51,
-        23,
-        0.0127086,
-        0.0127029
-       ],
-       [
-        7,
-        50,
-        63,
-        -8.04325e-7,
-        -7.7486e-7
-       ],
-       [
-        54,
-        37,
-        42,
-        -0.00097336,
-        -0.000973225
-       ],
-       [
-        6,
-        20,
-        78,
-        2.50462e-12,
-        0
-       ],
-       [
-        59,
-        54,
-        29,
-        -0.00562716,
-        -0.00562668
-       ],
-       [
-        16,
-        48,
-        38,
-        -0.0000107443,
-        -0.0000107288
-       ],
-       [
-        38,
-        38,
-        65,
-        -0.167919,
-        -0.167847
-       ],
-       [
-        50,
-        65,
-        55,
-        -0.0000720737,
-        -0.000072062
-       ]
-      ]
-     }
-    }
-   },
-   "fallback": {
-    "full": {
-     "digest": "8ce0fdcb",
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
      "wg": 64,
-     "granted": 32768
+     "n": 139,
+     "median": 19.261,
+     "min": 19.245,
+     "max": 19.294
     },
-    "refused": {
-     "digest": "8ce0fdcb",
-     "wg": 32,
-     "granted": 16384,
-     "requested": {
-      "maxTextureDimension2D": 32767,
-      "maxTextureDimension1D": 32767,
-      "maxComputeWorkgroupStorageSize": 32768
-     },
-     "wrapCalls": 1
+    {
+     "label": "tryptophan HOMO",
+     "nAO": 87,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 2770,
+     "median": 0.961,
+     "min": 0.96,
+     "max": 0.962
     },
-    "identical": true
-   },
-   "c60": {
-    "from": "research/release-0.4.0/library-census/c60-frontier.json",
-    "nAO": 300,
-    "half": 12.421046307847265,
-    "refHalf": null,
-    "against": "the app f64 evaluator (no PySCF file yet)",
-    "cols": [
-     175,
-     176,
-     177,
-     178,
-     179,
-     180,
-     181,
-     182
-    ],
-    "orbitals": [
-     {
-      "k": 175,
-      "set": "HOMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005176,
-      "relToMax": 0.0004494,
-      "appF64VsRef": 0,
-      "maxPsi": 0.093105,
-      "gridMax": 0.11517,
-      "pass": true
-     },
-     {
-      "k": 176,
-      "set": "HOMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.0000568,
-      "relToMax": 0.0004783,
-      "appF64VsRef": 0,
-      "maxPsi": 0.10009,
-      "gridMax": 0.11874,
-      "pass": true
-     },
-     {
-      "k": 177,
-      "set": "HOMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005729,
-      "relToMax": 0.0005024,
-      "appF64VsRef": 0,
-      "maxPsi": 0.094911,
-      "gridMax": 0.11403,
-      "pass": true
-     },
-     {
-      "k": 178,
-      "set": "HOMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005608,
-      "relToMax": 0.0004727,
-      "appF64VsRef": 0,
-      "maxPsi": 0.10126,
-      "gridMax": 0.11863,
-      "pass": true
-     },
-     {
-      "k": 179,
-      "set": "HOMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005699,
-      "relToMax": 0.0004572,
-      "appF64VsRef": 0,
-      "maxPsi": 0.1052,
-      "gridMax": 0.12464,
-      "pass": true
-     },
-     {
-      "k": 180,
-      "set": "LUMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005667,
-      "relToMax": 0.0005163,
-      "appF64VsRef": 0,
-      "maxPsi": 0.098633,
-      "gridMax": 0.10975,
-      "pass": true
-     },
-     {
-      "k": 181,
-      "set": "LUMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005534,
-      "relToMax": 0.0005156,
-      "appF64VsRef": 0,
-      "maxPsi": 0.10568,
-      "gridMax": 0.10734,
-      "pass": true
-     },
-     {
-      "k": 182,
-      "set": "LUMO",
-      "path": "orbital",
-      "voxels": 256,
-      "maxAbsErr": 0.00005822,
-      "relToMax": 0.0005506,
-      "appF64VsRef": 0,
-      "maxPsi": 0.093329,
-      "gridMax": 0.10574,
-      "pass": true
-     }
-    ]
-   },
-   "wallSec": 5.2,
-   "at": "2026-10-08T08:31:56.240Z"
+    {
+     "label": "C20H20 density",
+     "nAO": 120,
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
+     "wg": 64,
+     "n": 65,
+     "median": 42.062,
+     "min": 42.038,
+     "max": 42.082
+    },
+    {
+     "label": "C20H20 HOMO",
+     "nAO": 120,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 1256,
+     "median": 2.111,
+     "min": 2.11,
+     "max": 2.123
+    },
+    {
+     "label": "C60 HOMO (field, screened)",
+     "nAO": 300,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 745,
+     "median": 3.571,
+     "min": 3.569,
+     "max": 3.573
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL plain (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 205,
+     "median": 13.241,
+     "min": 13.148,
+     "max": 13.646
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL screened (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 745,
+     "median": 3.57,
+     "min": 3.569,
+     "max": 3.573
+    }
+   ],
+   "wallSec": 118.6,
+   "at": "2026-10-08T08:48:38.831Z"
   }
  }
 }
