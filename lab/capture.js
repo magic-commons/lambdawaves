@@ -650,6 +650,67 @@ export function drawCaption(g, W, H, text) {
   return true;
 }
 
+/** the caption over the foot of an RGBA frame, at the frame's own size: drawn into a strip the height of the foot and
+ *  composited straight-alpha over it — a picture and every film frame carry the line the same way.  Mutates `rgba`. */
+export function captionOver(rgba, w, h, text) {
+  if (!text || typeof document === 'undefined') return false;
+  const sh = Math.min(h, Math.ceil(h * 0.1) + 8), c2 = document.createElement('canvas'); c2.width = w; c2.height = sh;
+  const g2 = c2.getContext('2d'); g2.translate(0, sh - h); drawCaption(g2, w, h, text);
+  compositeOver(rgba.subarray((h - sh) * w * 4), w, sh, g2.getImageData(0, 0, w, sh).data, w, sh);
+  return true;
+}
+
+/** the context's usage.  COPY_SRC is not the default and no readback can be taken without it; `false` puts the plain one back. */
+export function configureCopy(f, canvas, withCopy) {
+  const c = f && f.ok && canvas ? canvas.getContext('webgpu') : null;
+  if (!c) return false;
+  const base = { device: f.device, format: f.format, alphaMode: 'opaque' };
+  if (f.gamut && f.gamut !== 'srgb') base.colorSpace = 'display-p3';
+  if (withCopy) base.usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;
+  c.configure(base);
+  return true;
+}
+
+/**
+ * THE READBACK — ONE FRAME AT A GIVEN SIZE, OFF THE GPU: the one road for a picture and for every film frame
+ * (render-exact.js' `frame(i, ctx)`).  `draw()` renders through the renderer's own `field.frame` — the same shader,
+ * camera and material the screen is showing — and the swapchain texture is copied back, banded under maxBufferSize.
+ * THE RENDER AND THE COPY SIT IN ONE SYNCHRONOUS BLOCK: the swapchain texture EXPIRES at the end of the animation-frame
+ * task, so a copy taken in a later task gets a fresh, CLEARED texture — black.  THE SETTLE is `onSubmittedWorkDone`: the
+ * frame is complete when the copy has run, not when a rAF fired.  `wit` receives what a film's witnesses read at that
+ * moment, before the await on the map can let anything else in: the present count, the generation step, the canvas size.
+ * Returns { rgba, w, h, ms }; the caller puts the canvas' backing store back.
+ */
+export async function readback(f, canvas, w, h, draw, wit = null) {
+  const d = f.device, c = canvas.getContext('webgpu');
+  const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  if (canvas.width !== w) canvas.width = w;             // assigning even the same value would reallocate the swapchain
+  if (canvas.height !== h) canvas.height = h;
+  const gen0 = f.stats.generation;
+  draw();
+  const tex = c.getCurrentTexture();                    // the SAME texture draw() just rendered into
+  const bpr = alignedBytesPerRow(w);
+  const bands = planBands(h, bpr, d.limits.maxBufferSize);
+  const enc = d.createCommandEncoder();
+  const bufs = bands.map((b) => {
+    const buf = d.createBuffer({ size: bpr * b.rows, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    enc.copyTextureToBuffer({ texture: tex, origin: [0, b.y0, 0] }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: b.rows }, [w, b.rows, 1]);
+    return { buf, y0: b.y0, rows: b.rows };
+  });
+  d.queue.submit([enc.finish()]);
+  await d.queue.onSubmittedWorkDone();                  // the texture must outlive the copy: only then may the canvas resize
+  if (wit) { wit.presents = f.stats.presents; wit.generation = f.stats.generation - gen0; wit.canvasW = canvas.width; wit.canvasH = canvas.height; }
+  const bgra = /^bgra/.test(f.format);
+  const rgba = new Uint8Array(w * h * 4);
+  for (const b of bufs) {
+    await b.buf.mapAsync(GPUMapMode.READ);
+    const src = new Uint8Array(b.buf.getMappedRange());
+    rgba.set(toRGBA(src, w, b.rows, { bytesPerRow: bpr, bgra, opaque: true }), b.y0 * w * 4);
+    b.buf.unmap(); b.buf.destroy();
+  }
+  return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
+}
+
 /**
  * createCapture(LW, { canvas, caption }) — the camera and the recorder over a booted lab.
  * LW is window.__LW; the canvas is the FIELD's (dom.canvas), found by id if not given; `caption()` is the line a capture

@@ -211,9 +211,13 @@
 import {
   AU_FS, VIEW_NAMES, viewCarriesGlobalPhase, wavePeriod, seamError, planPeriodRecording,
   alignedBytesPerRow, planBands, maxPictureSize, fitPicture,
-  slug, stamp, uniqueName,
+  slug, stamp, uniqueName, captureName,
   toRGBA, crc32, zlibStored, pngFilter, buildPNG,
+  readback, configureCopy, captionOver,
 } from './capture.js';
+import { createRecorder } from './mir/render/recorder.js';
+import { RECORD_FPS, fmtMs, fmtBytes } from './mir/render/plan.js';
+import { saveBlob } from './mir/folders/save-blob.js';
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    PART 1 — THE LAWS.  Nothing below touches the DOM, WebGPU or a clock; all of it is proved in node.
@@ -1230,4 +1234,345 @@ export function createExactRenderer(LW, opts = {}) {
     /** the pure laws, re-exported on the instance so a caller needs one import */
     laws: { exactSchedule, endpointLaw, arithmeticLaw, planExact, foldOrigin, estimate, digest, manifest, zipStored, offsetOf, ulpsBetween, HAZARDS, COST_TABLE },
   };
+}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   PART 3 — THE FILM (0.5.0 C7): MIR's recorder, with λWAVES' frame.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/** the frame rates a film runs at: the kit's (render/plan.js RECORD_FPS — 24, 30, 48, 60); its recorder refuses any other */
+export const FILM_FPS = RECORD_FPS;
+
+/**
+ * createFilm(LW, opts) — THE FILM: `createRecorder` from lab/mir/render/recorder.js, handed λWAVES' `frame(i, ctx)`.
+ *
+ * THE KIT'S: the take (one run per page; Escape or a [data-render-cancel] button cancels it, and the page's input is
+ * swallowed for its length), the modulation clock stepped by exactly 1/fps when a film DRIVES it (render/clock.js — with
+ * nothing driven the recorder is built with no host and steps nothing, so a frozen look is the rack's own, untouched),
+ * the MP4 (WebCodecs down the avc1 ladder, its own muxer, the encoder proven on two frames before the first), or the
+ * lossless PNG frames in stored ZIP parts beside their recording.json, the store on disk, and the progress.
+ * λWAVES': THE SCHEDULE — which logical time frame i is (exactSchedule's two endpoint rules and the fold, a driven rate
+ * integrated frame by frame) — handed to the kit as a motion whose view(i) is that time; THE FRAME — the physics clock
+ * SET, the pose path and H₂'s update applied, the picture rendered and read back off the GPU and settled (capture.js
+ * `readback`); its PINS AND WITNESSES — H1 the jitter seed 13 pinned per frame, H2 the governor, H3 AUTO SCALE, with the
+ * field-clock, clock, domain and interloper witnesses beside them; a frame is emitted only when they agree, and one that
+ * will not settle ABORTS the film by name; and the caption (KIT BRIEF 6's overlay replaces it).
+ *
+ *   const film = createFilm(LW, { canvas, energies, host: () => modHost, hold });
+ *   film.plan(o)    → planExact + the size + the cost + every hazard's live reading (a button shows it, commits to nothing)
+ *   film.render({ schedule | <plan options>, format: 'mp4' | 'png', scale | width | height, caption, poseAt, beforeFrame,
+ *                 modulation: 'freeze' | 'drive', camera: 'refuse' | 'still', onProgress }) → { stop(), stopped, done }
+ *   film.verify(o)  → the same short schedule rendered twice through the seam, digest against digest
+ *   film.save(r)    → every file of a finished film handed over (the kit's saveBlob), under λWAVES' names
+ * `opts.hold(on)` is the host's own lock (rack.js: its loop stands aside and its state is put back); `opts.grab` replaces
+ * the GPU road (the proof's fake lab); `opts.storage` / `opts.calib` / `opts.guard` reach the kit's recorder.
+ */
+export function createFilm(LW, opts = {}) {
+  const canvas = opts.canvas || (typeof document !== 'undefined' ? document.getElementById('field') : null);
+  const now = opts.now || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
+  const raf = opts.raf || ((typeof requestAnimationFrame === 'function') ? (() => new Promise((r) => requestAnimationFrame(r))) : (() => Promise.resolve()));
+  const JITTER_SEED = opts.jitterSeed === undefined ? DEFAULTS.jitterSeed : (opts.jitterSeed | 0);
+  const taken = new Set(), recs = {};
+  const field = () => LW.field;
+  const gpuOk = () => { const f = field(); return !!(f && f.ok); };
+  let job = null, cfgUsage = null, token = 0;
+
+  function limits() { const f = field(); return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); }
+  function stateLabel() {
+    try {
+      if (opts.label) return opts.label;
+      const p = LW.reg && LW.reg.presetId; if (p) return p;
+      const pop = LW.reg && LW.reg.populated ? LW.reg.populated() : [];
+      return pop.length ? pop.length + 'modes' : 'state';
+    } catch (_) { return 'state'; }
+  }
+  /** the host's own energy expression, or none — never a guess under a propagator (capture.js' wave 58) */
+  function energiesNow() {
+    try {
+      if (opts.energies) { const E = opts.energies(); return E && E.length ? Array.from(E) : null; }
+      if (LW.reg && LW.reg.P) return null;
+      return LW.reg.populated().map((a) => LW.reg.Ediag(a));
+    } catch (_) { return null; }
+  }
+  /** the film's size, resolved — even sides of at least 16, as the kit's recorder takes them (H.264's 4:2:0) — and whether
+   *  the machine decided it (H10: no width or height given, so it inherits the canvas at this device pixel ratio) */
+  function sizeFor(o) {
+    const lim = limits();
+    const fit = fitPicture({ srcW: canvas ? canvas.width : 16, srcH: canvas ? canvas.height : 16, scale: o.scale, width: o.width, height: o.height, max: lim.side });
+    const even = (n) => Math.max(16, Math.round(n) & ~1), explicit = !!(o.width || o.height);
+    return Object.assign({}, fit, { w: even(fit.w), h: even(fit.h), explicit, sizeFromMachine: !explicit, limits: lim });
+  }
+
+  /** WHAT WILL HAPPEN, before anything does: the schedule, the refusal if there is one, the cost, every pin's live reading */
+  function plan(o = {}) {
+    const observable = o.observable || (LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density') || 'density';
+    const energies = energiesNow();
+    let wave = null;
+    if (energies && energies.length && (viewCarriesGlobalPhase(observable) || o.pixelExact)) { try { wave = wavePeriod(energies); } catch (_) { wave = null; } }
+    const period = o.period !== undefined ? o.period : (LW.period || null);
+    const size = sizeFor(o);
+    const p = planExact(period, Object.assign({ t0: LW.clock ? LW.clock.t : 0, rate: LW.clock ? LW.clock.rate : undefined, energies, observable, wave, w: size.w, h: size.h }, o));
+    const H = hazards(), warnings = [];
+    for (const h of H.readings) if (h.state === 'live' && h.blocking) warnings.push(h.note);
+    if (size.sizeFromMachine) warnings.push('THE SIZE CAME FROM THIS MACHINE: no width or height was given, so the film inherits the canvas at this device pixel ratio (' + size.w + '×' + size.h + '). Two machines will render two different pictures. Give an explicit width for a size that travels.');
+    if (size.clipped) warnings.push('CLIPPED to ' + (size.limits ? size.limits.side : '?') + ' on the long side — the DEVICE limit.');
+    const cost = estimate({ w: size.w, h: size.h, frames: p.N || 0 });
+    if (p.ok && cost.warning) warnings.push(cost.warning);
+    return Object.assign({}, p, { opts: Object.assign({}, o), size, observable, energies: energies ? energies.length : 0, hazards: H, warnings, cost });
+  }
+
+  /** every hazard's LIVE reading — what is armed right now, before or after a film */
+  function hazards() {
+    const f = field();
+    const read = (id) => {
+      switch (id) {
+        case 'jitter': return { state: 'live', blocking: false, value: f && f.ok ? f.stats.presents : null, note: 'the jitter counter is running; a film pins it to ' + JITTER_SEED + ' for every frame' };
+        case 'governor': return { state: (LW.governor && LW.governor.on) ? 'live' : 'off', blocking: false, value: LW.governor ? LW.governor.drop : null, note: (LW.governor && LW.governor.drop) ? 'THE GOVERNOR HAS ALREADY STEPPED THE GRID DOWN ' + LW.governor.drop + ' notch(es): this machine is rendering a coarser volume than the one you set. Pausing restores it, and a film pauses.' : 'the governor is armed; a film pauses the clock and turns it off, which is what disarms it' };
+        case 'autoscale': return { state: (LW.quality && LW.quality.auto) ? 'live' : 'off', blocking: false, value: LW.quality ? LW.quality.autoScale : null, note: 'auto scale ' + ((LW.quality && LW.quality.auto) ? 'is on; a film holds it off and renders at the size asked for' : 'is off') };
+        case 'camera': { const m = !!(LW.camera && LW.camera.moving); return { state: m ? 'live' : 'off', blocking: m, value: LW.camera ? { dy: LW.camera.dy, dp: LW.camera.dp, ambient: LW.camera.ambient } : null, note: m ? 'THE CAMERA IS MOVING' + (LW.camera.ambient ? ' (AUTO-ROTATE is on)' : ' (a fling is still coasting)') + ': its pose is an integrator on the wall clock, so a film would depend on machine speed. camera: "still" brings it to rest; poseAt(k, N) is a camera move that IS deterministic.' : 'the camera is at rest' }; }
+        case 'modulation': { const r = !!(LW.mod && LW.mod.running); return { state: r ? 'live' : 'off', blocking: r, value: r, note: r ? 'THE MODULATION RACK IS RUNNING on the wall clock, and its smoothing filters accumulate. A film freezes it (every target back to its knob), or modulation: "drive" hands it to the kit\'s record clock, FROM FIRST SPACE at 1/fps a frame.' : 'the modulation rack is not running' }; }
+        case 'h2': { const on = !!(LW.h2 && LW.h2.on); return { state: on ? 'live' : 'off', blocking: false, value: on, note: on ? 'H2 IS ON: a film calls h2.update(t) itself before every frame.' : 'H2 is off' }; }
+        case 'interloper': { const s = !!(LW.stats && LW.stats.scheduled); return { state: s ? 'live' : 'off', blocking: false, value: s, note: s ? 'a rack frame is scheduled; a film drains it and the per-frame witnesses catch any that arrive anyway' : 'no rack frame is scheduled' }; }
+        case 'gamut': return { state: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'live' : 'off', blocking: false, value: f && f.ok ? f.gamut : null, note: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'THIS CANVAS IS ' + f.gamut + ': the film is declared display-p3 to the kit\'s encoder' : 'the canvas is sRGB' };
+        default: return { state: 'off', blocking: false, value: null, note: (HAZARDS.find((h) => h.id === id) || {}).pin || '' };
+      }
+    };
+    const readings = HAZARDS.map((h) => Object.assign({}, h, read(h.id)));
+    return { readings, blocking: readings.filter((r) => r.blocking).map((r) => r.id), byId: Object.fromEntries(readings.map((r) => [r.id, r])) };
+  }
+
+  const configure = (withCopy) => { const ok = configureCopy(field(), canvas, withCopy); if (ok) cfgUsage = withCopy ? 'copy' : 'plain'; return ok; };
+
+  /* ── THE PINS: applied when the recorder hands the page over (`before`), released when it takes it back (`after`, always) ── */
+  async function before() {
+    const J = job; if (!J) return;
+    const f = field(), pinned = J.pinned;
+    J.prev = { playing: LW.clock.playing, t: LW.clock.t, rate: LW.clock.rate, cfg: cfgUsage,
+      qAuto: LW.quality ? LW.quality.auto : null, qScale: LW.quality ? LW.quality.scale : null, gov: LW.governor ? LW.governor.on : null,
+      camAuto: LW.camera ? LW.camera.autoRotate : null, modPlaying: !!(LW.mod && LW.mod.playing),
+      presents: f && f.stats ? f.stats.presents : 0, canvasW: canvas ? canvas.width : 0, canvasH: canvas ? canvas.height : 0 };
+    if (opts.hold) await opts.hold(true);
+    if (f && f.pinRenderPipeline) f.pinRenderPipeline(true);   // optimization K2: the whole film draws with the GENERIC present pipeline
+    /* H2 · THE CLOCK IS PAUSED, AND THAT IS WHAT DISARMS THE GOVERNOR: the rack only judges while playing, and pausing resets its
+       drop.  Turning it off is the belt beside that brace.  H3 · AUTO SCALE is held off for the film. */
+    if (pinned('governor')) { LW.clock.pause(); if (LW.governor) LW.governor.on = false; J.pins.governor = 'the clock is paused (which disarms it) and the governor is off'; } else J.pins.governor = 'NOT PINNED (unpin)';
+    if (pinned('autoscale') && LW.quality) { LW.quality.auto = false; J.pins.autoscale = 'quality.auto = false'; } else J.pins.autoscale = 'NOT PINNED (unpin)';
+    if (LW.camera && LW.camera.moving && pinned('camera')) { LW.camera.dy = 0; LW.camera.dp = 0; LW.camera.autoRotate = false; J.pins.camera = 'stilled (dy = dp = 0, autoRotate off)'; }
+    else J.pins.camera = pinned('camera') ? 'at rest' : 'NOT PINNED (unpin)';
+    if (J.drive) J.pins.modulation = 'driven by the kit\'s record clock from the first Space, 1/' + J.fps + ' s a frame';
+    else if (LW.mod && LW.mod.host && pinned('modulation')) { if (LW.mod.running) LW.mod.stop(); J.pins.modulation = 'frozen: every target back to its base'; }
+    else J.pins.modulation = LW.mod && LW.mod.host ? 'NOT PINNED (unpin)' : 'no modulation rack';
+    if (pinned('interloper')) { await raf(); await raf(); }   // DRAIN: let an armed rack frame run and decline to re-arm
+    J.drained = !(LW.stats && LW.stats.scheduled);
+    J.pins.interloper = J.drained ? 'the rack loop is idle' : 'THE RACK LOOP IS STILL ASKING FOR FRAMES — the witnesses will catch what it does';
+    if (LW.helium && LW.helium.on) void LW.helium.sol;     // HELIUM's basis in force from frame 0 (heliumview.js, 2026-09-24)
+    if (canvas && !opts.grab) configure(true);
+    J.base = { resolution: f && f.ok ? f.resolution : null, half: LW.domain ? LW.domain.half : null, format: f && f.ok ? f.format : null, gamut: f && f.ok ? f.gamut : null };
+    J.rate = LW.clock.rate;
+  }
+  async function after() {
+    const J = job; if (!J || !J.prev) return;
+    const P = J.prev, f = field();
+    try {
+      if (f && f.pinRenderPipeline) f.pinRenderPipeline(false);
+      if (canvas && P.canvasW) { canvas.width = P.canvasW; canvas.height = P.canvasH; }
+      if (LW.quality && P.qAuto !== null) { LW.quality.auto = P.qAuto; LW.quality.scale = P.qScale; }
+      if (LW.camera && P.camAuto !== null) LW.camera.autoRotate = P.camAuto;
+      if (LW.governor && P.gov !== null) LW.governor.on = P.gov;
+      if (f && f.stats) f.stats.presents = P.presents + J.log.length;   // the diagnostic counter, put back honestly: the frames really did happen
+      if (!J.drive && P.modPlaying && LW.mod && LW.mod.play) LW.mod.play();
+      if (LW.clock) { LW.clock.scrub(P.t); if (LW.clock.setRate) LW.clock.setRate(P.rate); }
+      if (P.playing && LW.play) LW.play();
+      if (canvas && P.cfg !== 'copy' && !opts.grab) configure(false);
+    } catch (_) { /* a restore must never be the thing that throws */ }
+    if (opts.hold) { try { await opts.hold(false); } catch (_) { /* the host's own restore */ } }
+    if (LW.schedule && LW.TIER) LW.schedule(LW.TIER.PRESENT);   // the screen goes back to showing the lab
+  }
+  const check = () => { if (!opts.grab && !gpuOk()) throw new Error('THE GRAPHICS DEVICE IS GONE: the FIELD is not up, so no frame can be read'); };
+
+  /** THE WITNESSES.  A pin that is asserted and not verified is a hope. */
+  function witnesses(J, wit, t, w, h) {
+    const f = field(), pinned = J.pinned, fail = [];
+    if (pinned('jitter') && wit.presents !== JITTER_SEED + 1) fail.push('jitter: presents read ' + wit.presents + ', not ' + (JITTER_SEED + 1) + ' — another frame presented during ours');
+    if (pinned('fieldclock') && wit.generation !== 1) fail.push('fieldclock: the field generation advanced ' + wit.generation + ' times, not once');
+    if (pinned('autoscale') && (wit.canvasW !== w || wit.canvasH !== h)) fail.push('autoscale: the canvas was ' + wit.canvasW + '×' + wit.canvasH + ' at readback, not ' + w + '×' + h);
+    const res = f && f.ok ? f.resolution : J.base.resolution;
+    if (pinned('governor') && res !== J.base.resolution) fail.push('governor: the field grid moved from ' + J.base.resolution + '³ to ' + res + '³ mid-film');
+    const half = LW.domain ? LW.domain.half : J.base.half;
+    if (half !== J.base.half) fail.push('domain: the half-width moved from ' + J.base.half + ' to ' + half + ' mid-film');
+    if (LW.clock.t !== t) fail.push('clock: t read ' + LW.clock.t + ', not the scheduled ' + t);
+    if (!J.drive && pinned('modulation') && LW.mod && LW.mod.running) fail.push('modulation: the rack is running on wall time');
+    return fail;
+  }
+
+  /**
+   * THE FRAME — what the kit's recorder calls for frame i, at ctx.width × ctx.height.  When a film drives the modulation the
+   * kit's clock has already stepped to frame i and the host has applied every parameter; `ctx.view` is this motion's plan
+   * for the frame, `{ k, t }`.  THE PHYSICS CLOCK IS SET (clock.scrub — never LW.scrub, which schedules a rack frame: H9),
+   * THE OBSERVER CLOCKS ARE STEPPED by the frame index alone, the jitter is pinned, the frame is read back and settled, and
+   * it is emitted only when its witnesses agree; a contended frame is rendered again (the same t with the same seed is the
+   * same picture), and one that will not settle throws, which ends the film through the kit's own failure road.
+   */
+  async function frame(i, ctx) {
+    const J = job; if (!J) throw new Error('render-exact: no film is running');
+    const f = field(), w = ctx.width, h = ctx.height, pinned = J.pinned;
+    let t = ctx.view && Number.isFinite(ctx.view.t) ? ctx.view.t : J.sched.at(i);
+    /* A DRIVEN film's physics time is the previous frame's RATE (which the modulation may move) integrated once per output
+       interval — frame zero is time zero, and a retry below never integrates twice */
+    if (J.drive) { if (i > 0) J.driven += J.rate / J.fps; t = J.driven; }
+    if (J.beforeFrame) J.beforeFrame({ k: i, t, dt: i ? 1 / J.fps : 0 });
+    let shot = null, tries = 0;
+    for (;;) {
+      tries++;
+      const wit = {};
+      LW.clock.scrub(t);
+      if (J.poseAt) Object.assign(LW.obs, J.poseAt(i, J.N, t) || {});
+      if (pinned('h2') && LW.h2 && LW.h2.on && LW.h2.update) LW.h2.update(t);       // H7: H2's R is set before modesAt reads it
+      if (pinned('jitter') && f && f.stats) f.stats.presents = JITTER_SEED;         // H1: the seed, pinned for THIS frame
+      shot = opts.grab ? await opts.grab({ t, w, h, wit, k: i, seed: JITTER_SEED, pinned })
+        : await readback(f, canvas, w, h, () => f.frame({ modes: LW.modesAt(t), obs: LW.obs, mat: LW.mat }), wit);   // H8: modesAt inline, nothing between
+      const fail = witnesses(J, wit, t, w, h);
+      if (!fail.length) break;
+      J.contended++;
+      if (tries > J.retries) {
+        J.aborted = { k: i, t, why: fail, tries };
+        throw new Error('ABORTED at frame ' + i + ' of ' + J.N + ' after ' + tries + ' attempts — ' + fail.join(' · ') + '. The frames before it are exact; nothing here emits a frame it cannot vouch for.');
+      }
+    }
+    J.rate = LW.clock.rate;
+    if (J.caption) captionOver(shot.rgba, w, h, J.caption);
+    J.log.push({ k: i, t, off: J.drive ? t : J.sched.off(i), digest: digest(shot.rgba), retries: tries - 1 });
+    return { rgba: shot.rgba, width: w, height: h };
+  }
+
+  /* λWAVES' motions in the kit's terms: the SCHEDULE is the motion, and view(i) is frame i's logical time.  Rebuilt from the
+     run's own options when no film of this page is in hand (a run the kit resumes from its store). */
+  const motion = (label) => ({ label, prepare: (c) => {
+    const s = job ? job.sched : exactSchedule(Object.assign({ fps: c.fps, frames: c.frames }, c.options || {}));
+    return { view: (i) => ({ k: i, t: s.at(i) }), spec: { mode: s.mode, endpoint: s.endpoint, t0: s.t0, L: s.L, N: s.N, D: s.D } };
+  } });
+  const MOTIONS = { loop: motion('ONE PERIOD'), span: motion('SPAN') };
+
+  function describe() {
+    const J = job; if (!J) return null;
+    return { token: J.token, film: manifest({ schedule: J.sched, picture: { w: J.size.w, h: J.size.h, sizeFromMachine: !!J.size.sizeFromMachine, format: J.format, jitterSeed: JITTER_SEED },
+      state: { label: J.label, observable: J.observable, version: LW.version || null } }) };
+  }
+  function recorderFor(drive) {
+    const key = drive ? 'drive' : 'freeze';
+    if (recs[key]) return recs[key];
+    const host = drive ? (opts.host ? opts.host() : null) : null, f = field();
+    if (drive && !host) throw new Error('there is no modulation host to drive');
+    return (recs[key] = createRecorder({
+      host, frame, before, after, check, motions: MOTIONS, describe, app: 'lambdawaves', dir: 'lambdawaves-recordings',
+      storage: opts.storage, calib: opts.calib, wake: opts.wake, guard: opts.guard, hidden: opts.hidden, pauseWhileHidden: opts.pauseWhileHidden,
+      colorSpace: f && f.ok && f.gamut && f.gamut !== 'srgb' ? 'display-p3' : undefined,
+      currentSize: () => ({ w: canvas ? canvas.width : 16, h: canvas ? canvas.height : 16 }),
+    }));
+  }
+  /** a film's own copy in the kit's store, removed — after the hand-over, or when a cancelled film leaves one (λWAVES shows no
+   *  RECOVER row yet: the kit's RENDER card would) */
+  async function discard(r) {
+    const rec = Object.values(recs)[0];                    // both recorders keep one directory
+    if (!rec || !r) return;
+    try {
+      if (r.kit) { await rec.discard(r.kit); return; }
+      for (const j of await rec.recoveries()) if (j.spec && j.spec.app && j.spec.app.token === r.token) await j.store.discard();
+    } catch (_) { /* nothing on disk, or already gone */ }
+  }
+  function progressOf(p, wall0, size) {
+    const total = p.frames || 0, done = Math.min(total, p.frame || 0), el = now() - wall0, per = done > 0 ? el / done : 0;
+    return { phase: p.phase, done, total, fraction: total ? done / total : 0, elapsedMs: el, msPerFrame: per, etaMs: per * (total - done), size,
+      human: done + ' / ' + total + ' · ' + p.phase + ' · ' + fmtMs(el) + (done >= 3 && done < total ? ' · ' + fmtMs(per * (total - done)) + ' left' : '') };
+  }
+
+  /**
+   * render(o) → { stop(), stopped, done }.  `done` resolves with the files the kit wrote, λWAVES' frame log (every scheduled t
+   * and every digest), the pins and the honest report.  stop() is the kit's cancel.
+   */
+  function render(o = {}) {
+    let stopped = false, rec = null;
+    const done = (async () => {
+      const P = o.schedule ? { ok: true, schedule: o.schedule, N: o.schedule.N, kind: o.kind || 'given', message: '' } : plan(o);
+      if (!P.ok) return { ok: false, refused: true, plan: P, error: P.message };
+      if (!gpuOk() && !opts.grab) return { ok: false, error: 'no WebGPU device: the FIELD is not up' };
+      const sched = P.schedule, N = sched.N, fps = sched.fps;
+      if (!FILM_FPS.includes(fps)) return { ok: false, refused: true, plan: P, error: 'A film runs at ' + FILM_FPS.join(', ') + ' fps (the kit\'s recorder); ' + fps + ' is not one of them.' };
+      const unpin = new Set(o.unpin || []), pinned = (id) => !unpin.has(id);
+      const camMode = o.camera || DEFAULTS.camera, drive = o.modulation === 'drive', format = o.format === 'mp4' ? 'mp4' : 'png';
+      if (LW.camera && LW.camera.moving && pinned('camera') && camMode === 'refuse') {
+        return { ok: false, refused: true, hazard: 'camera', error: 'THE CAMERA IS MOVING. Its pose is an integrator on the wall clock — ' + (LW.camera.ambient ? 'AUTO-ROTATE is on' : 'a fling is still coasting') + ' — so this film would depend on how fast the machine ran. Bring it to rest, pass camera: "still" to have the film do it, or hand a poseAt(k, N) for a camera move that is a function of the frame index and therefore exact.' };
+      }
+      const size = P.size || sizeFor(o);
+      const J = job = { token: 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned, drive, format, size, kind: o.kind || P.kind || sched.mode,
+        label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
+        retries: o.retries === undefined ? DEFAULTS.retries : o.retries, log: [], contended: 0, aborted: null, driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
+        pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame',
+          h2: (LW.h2 && LW.h2.on) ? 'h2.update(t) called before every frame' : 'H2 off' } };
+      const wall0 = now();
+      let result = null, err = null;
+      try {
+        rec = recorderFor(drive);
+        const run = rec.run({ motion: sched.mode === 'span' ? 'span' : 'loop', fps, durationS: N / fps, format, size: { w: size.w, h: size.h },
+          modulation: drive, timeline: false, motionOptions: { mode: sched.mode, t0: sched.t0, [sched.mode === 'span' ? 'span' : 'T']: sched.L },
+          onProgress: (p) => { if (o.onProgress) o.onProgress(progressOf(p, wall0, size)); } });
+        if (stopped) rec.cancel();
+        result = await run;
+      } catch (e) { err = e; }
+      finally { if (job === J) job = null; }
+      const delivered = J.log.length, elapsed = now() - wall0, aborted = J.aborted;
+      const cancelled = !aborted && (stopped || !!(err && /cancel/i.test(String(err.message || err))));
+      if (!result && opts.discardFailed !== false) await discard({ token: J.token });
+      const files = result ? result.files : [], bytes = files.reduce((n, x) => n + (x.bytes || 0), 0);
+      const ext = format === 'mp4' ? 'mp4' : 'zip';
+      const name = files.length ? uniqueName(captureName({ kind: J.kind, label: J.label, w: size.w, h: size.h, fps, frames: delivered, T: sched.mode === 'loop' ? sched.L : 0, ext }), taken) : null;
+      const man = manifest({ stamp: stamp(new Date()), schedule: sched,
+        picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED },
+        state: { label: J.label, observable: J.observable, digest: (LW.stateDigest ? (() => { try { return LW.stateDigest(); } catch (_) { return null; } })() : null), version: LW.version || null },
+        pins: J.pins, witnesses: { contended: J.contended, aborted: aborted ? aborted.why : null, drained: J.drained }, frames: J.log,
+        ffmpeg: format === 'png' ? 'ffmpeg -framerate ' + fps + ' -i frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 18 ' + slug(J.label) + '.mp4' : null });
+      if (drive) man.modulationClock = { origin: 0, stepSeconds: 1 / fps, clock: 'the kit\'s record clock (render/clock.js), from the first Space', physics: 'the previous frame\'s RATE integrated once per output interval; the frame log carries the physics times; no loop closure asserted' };
+      const ok = !!result && !aborted && delivered === N;
+      return {
+        ok, partial: !!(cancelled && delivered > 0), error: ok || cancelled || aborted ? null : String((err && err.message) || err || 'the film did not complete'), aborted, stopped: cancelled, refused: false,
+        frames: delivered, requested: N, w: size.w, h: size.h, fps, mode: sched.mode, format, schedule: sched, plan: P,
+        files, blob: files.length ? files[0].blob : null, name, bytes, manifest: man, pins: J.pins, contended: J.contended, token: J.token, kit: result,
+        report: { elapsedMs: elapsed, msPerFrame: delivered ? elapsed / delivered : 0, human: fmtMs(elapsed) + ' for ' + delivered + ' frames · ' + fmtBytes(bytes),
+          note: 'the elapsed time is a REPORT of how long this machine took. It was never an input to a picture: every frame was rendered at a scheduled logical time, and the same schedule on a machine half this speed gives the same pixels.' },
+        message: aborted ? 'ABORTED at frame ' + aborted.k + ' of ' + N + ' after ' + aborted.tries + ' attempts — ' + aborted.why.join(' · ') + '.'
+          : cancelled ? 'STOPPED at ' + delivered + ' of ' + N + ' frames. A film is a whole schedule: run it again with the same options for the same pictures.'
+            : !ok ? 'FAILED after ' + delivered + ' frames: ' + String((err && err.message) || err)
+              : delivered + ' frames · ' + size.w + '×' + size.h + ' · ' + sched.mode.toUpperCase() + ' · ' + (format === 'mp4' ? 'MP4' : 'PNG frames') + ' · ' + fmtBytes(bytes) + ' · rendered in ' + fmtMs(elapsed) + '. Exact: frame k is t0 + off(k), whatever the machine\'s speed.',
+      };
+    })();
+    return { stop() { stopped = true; if (rec) rec.cancel(); }, get stopped() { return stopped; }, done };
+  }
+
+  /** RENDER THE SAME SHORT SCHEDULE TWICE AND COMPARE THE DIGESTS: the determinism claim, checked in the browser in about a
+   *  second, at a size nobody has to wait for.  A mismatch names the frame and hands back both digests. */
+  async function verify(o = {}) {
+    const frames = o.frames || 6, width = o.width || 160;
+    const P = plan(Object.assign({ frames, width }, o));
+    if (!P.ok) return { ok: false, refused: true, plan: P, error: P.message };
+    const run = async () => { const r = await render(Object.assign({ format: 'png' }, o, { schedule: P.schedule, width })).done; if (r.ok) await discard(r); return r; };
+    const a = await run(), b = await run();
+    if (!a.ok || !b.ok) return { ok: false, error: a.error || b.error || a.message || b.message || 'a run did not complete', a, b };
+    const da = a.manifest.frames.map((x) => x.digest), db = b.manifest.frames.map((x) => x.digest), bad = [];
+    for (let i = 0; i < Math.max(da.length, db.length); i++) if (da[i] !== db[i]) bad.push({ k: i, a: da[i], b: db[i] });
+    return { ok: bad.length === 0 && da.length === frames, frames: da.length, digests: da, mismatches: bad,
+      message: bad.length === 0 ? 'DETERMINISTIC: ' + da.length + ' frames rendered twice through the kit\'s recorder, every digest identical.'
+        : bad.length + ' of ' + da.length + ' frames differ between two runs of the SAME schedule — ' + JSON.stringify(bad.slice(0, 4)) + '. Something in the picture\'s input closure is not pinned; read hazards() and the witnesses in the manifest.' };
+  }
+
+  /** the hand-over: every file of a finished film, under λWAVES' name (the kit's saveBlob); the store's copy goes a little later */
+  function save(r) {
+    if (!r || !r.files || !r.files.length) return false;
+    r.files.forEach((x, i) => saveBlob(x.blob, r.files.length === 1 ? r.name : r.name.replace(/\.zip$/, '') + '-part' + String(i + 1).padStart(3, '0') + '.zip'));
+    setTimeout(() => discard(r), 120000);
+    return true;
+  }
+
+  return { plan, render, verify, hazards, save, discard, limits, sizeFor, frame, get names() { return taken; }, canvas,
+    get running() { return !!job; },
+    laws: { exactSchedule, endpointLaw, arithmeticLaw, planExact, foldOrigin, estimate, digest, manifest, offsetOf, ulpsBetween, HAZARDS } };
 }
