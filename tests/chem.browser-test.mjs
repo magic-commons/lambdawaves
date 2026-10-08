@@ -180,7 +180,7 @@ try {
     return { ok, A, B, keys: Object.keys(A).sort(), state: __LW.chem.state(), errs: window.__e.slice() };`);
   const same = JSON.stringify(l4.A) === JSON.stringify(l4.B);
   judge('L4 presentation.instruments.chem round-trips deep-equal', l4.ok === true && same, { A: l4.A, B: l4.B });
-  judge('L4 the record carries the whole presentation and no solver cache', l4.keys.join(',') === 'axis,basis,core,dt,integrator,kappa,on,orbital,preset,speed,tda,view', l4.keys);
+  judge('L4 the record carries the whole presentation and no solver cache', l4.keys.join(',') === 'axis,basis,core,dt,integrator,kappa,on,orbital,preset,speed,tda,valence,view', l4.keys);
   judge('L4 no page error', l4.errs.length === 0, l4.errs);
 
   /* ── LAW 6 · THE DROPDOWN (2026-09-12: "this should be a dropdown menu hehe") ─────────────────
