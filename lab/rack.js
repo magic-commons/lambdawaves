@@ -20,7 +20,7 @@ import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuali
 import './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
 import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
-import { Clock } from './clock.js';
+import { Clock, onePlay } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, quatFromYawPitch } from './field.js';
@@ -103,7 +103,7 @@ export async function boot(dom) {
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */
   let history = null;
   const hNote = () => { if (history) history.note(); };
-  const clock = new Clock();
+  const clock = new Clock(), appPlay = onePlay(clock);   // 0.5.0 A6: THE play (clock.js) — every road that plays or pauses the physics clock is its edge
 
 
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT; 0.4.0 S2: `shift`, the pivot's place on the frame (NDC)
@@ -460,6 +460,7 @@ export async function boot(dom) {
   let modHost = null, modView = null, modWall = 0, modExpOn = null;
   const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: () => saveSettings() });
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
+  appPlay.onChange((on) => { if (modArm && clockLink) mod.follow(on); });   // 0.5.0 A6: LINKED, at the edge, holding the app-play demand while it plays
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
 
 
@@ -505,7 +506,7 @@ export async function boot(dom) {
 
 
   let modArm = true;
-  let clockLink = true, linkFollowed = null, linkRetryAt = 0;
+  let clockLink = true;
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
   let refSnapshot = null;        // { re, im, ids } — the DIFF reference state
@@ -808,19 +809,6 @@ export async function boot(dom) {
         if (modRunning || (audioCap && audioCap.live) || rotDriving()) {
           feedAudio(feedHz);
           modHost.clock.advanceTo(now);
-        }
-        /* LINKED means linked every frame, not only on the press that toggled play: a scrub, a preset,
-           a project open or a HOLD can stop or start either clock on its own, and this is what closes
-           the in-between state (one clock running, the other not) that used to appear afterwards. */
-        if (clockLink && modArm && clock.playing !== linkFollowed && nowMs >= linkRetryAt) {
-          linkFollowed = clock.playing;
-          const r = clock.playing ? modHost.clock.play(now) : modHost.clock.pause(now);
-          /* a refused play ("nothing-to-run": no route and no open window) is retried once a second, not
-             every frame — so a source routed later joins a running transport within a second */
-          if (r && r.ok === false) { linkFollowed = null; linkRetryAt = nowMs + 1000; }
-          else if (modView) modView.sync();   /* LA2: a REFUSED play changed neither the model nor `playing` (host.js refuses
-                                                 before it touches either), so its repaint was the same window again —
-                                                 a whole closed window, once a second, while playing (AUDIT-B FB3) */
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
@@ -2614,10 +2602,6 @@ export async function boot(dom) {
       device: { read: () => readSettings().audioDevice || '',
         write: (id) => { const S = readSettings();
           try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, audioDevice: id })); } catch (_) {} } },
-      /* 0.4.0 S0 · wave 137 (THE LINKED BUG, reproduced): with nothing routed the kit refuses a play until the editor shows
-         its preview ('nothing-to-run'), and the link law retried that refusal once a second — so opening the editor under a
-         playing field showed a STOPPED modulation transport for up to a second.  Opening it re-arms the link: the next frame plays. */
-      opened: () => { modHost.clock.setPresentationActive(true); linkFollowed = null; linkRetryAt = 0; schedule(TIER.PRESENT); },
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
       armed: () => modArm, arm: (on) => setModArm(!!on) }));
@@ -2898,19 +2882,9 @@ export async function boot(dom) {
   })();
 
 
-  function playMod(on) {
-    if (!modHost || !modArm || !clockLink) return null;          // FREE: the transport does not touch the modulation clock
-    const w = performance.now() / 1000;
-    const r = on ? modHost.clock.play(w) : modHost.clock.pause(w);
-    if (modView) modView.sync();
-    return r;
-  }
-  function togglePlay() {
-    const want = !clock.playing;
-    clock.toggle(performance.now() / 1000);
-    playMod(want);
-    schedule(TIER.EVOLVE);
-  }
+  /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation while armed and LINKED (FREE /
+   *  SEPARATE: the transport does not touch the modulation clock). */
+  function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
   /** THE ARM.  `setEnabled(false)` is not `pause()`: it hands every routed control back to its base
    *  — including the ones a HAND macro holds, which a stopped transport keeps by the pause law's own
    *  second line — and it deliberately does NOT touch the modulation transport's `playing`, so
@@ -2924,7 +2898,9 @@ export async function boot(dom) {
     }
     if (modHost) {
       modHost.clock.setEnabled(want);
-      if (want && clock.playing) modHost.clock.play(performance.now() / 1000);   // one control, and it was already pressed
+      if (want && clockLink) mod.follow(clock.playing);                          // 0.5.0 A6: LINKED catches up at once — the play (with its demand) or the pause
+      else if (want && clock.playing) modHost.clock.play(performance.now() / 1000);   // one control, and it was already pressed
+      else if (!want) modHost.clock.demand('app.play', false);                   // the app-play demand is held only while armed and LINKED
       if (modView) modView.sync();
     }
     if (!o.quiet) saveSettings();
@@ -4915,7 +4891,6 @@ export async function boot(dom) {
            palette and state controls, so no later project step can overwrite a routed hand value. */
         const modWas = hist && pr.modulation !== undefined && modHost && modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
-        if (hist && pr.modulation !== undefined) linkFollowed = null;   // a load is STOPPED: LINKED time re-follows the field next frame
         if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · …and under SEPARATE nothing re-follows: an undo puts a playing transport back to playing
         if (pr.modwin && modView) modView.restore(pr.modwin);
       }
@@ -5531,7 +5506,7 @@ export async function boot(dom) {
       get remembered() { return seen(); }, get open() { return open; } };
   })();
   ui.saveNative = saveSettings;
-  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; linkFollowed = null; saveSettings(); };   // the frame loop's edge takes it from here
+  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; if (modHost) { if (clockLink && modArm) mod.follow(clock.playing); else modHost.clock.demand('app.play', false); } saveSettings(); };   // 0.5.0 A6: LINKED follows at once; SEPARATE holds no app-play demand
   reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();

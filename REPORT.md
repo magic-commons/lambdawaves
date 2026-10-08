@@ -4302,3 +4302,44 @@ the `setBase` wire where it now lives.
 
 Gates: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0 (85 suites; `mir.test`'s deterministic-replay judges
 green); browser on 8765/5235, one at a time: `mir-controls` 2 PASS, `lfo-tension` 3 PASS, `routed-knob` 4/4, `history` **39 PASS**.
+
+### wave 189: A6 THE ONE-CLOCK FACADE — THE play's edge, holding the kit's app-play demand
+
+`lab/clock.js` gains `onePlay(clock)` → `{ play, pause, isPlaying, toggle, onChange, seek }`, the `clock` the kit's
+`createTransport` takes, and the Clock an `onEdge` ear told of every real play and pause edge — so EVERY road that starts or
+stops the physics clock (the button, Space, LW.play, A/B, the bow, the slap, a restore, capture.js' and render-exact's
+`LW.clock.pause()`) is an edge, heard at once. `lab/mod-port.js` gains `follow(on)`: a play holds
+`host.clock.demand('app.play', true)` first (MIR 1.4.3 `host.js:474`; the kit's 1.5 contract, `installModulation().play`,
+KIT-BRIEFS "LINKED refusal"), a pause releases it after. `rack.js` takes the edge while MOD is armed and LINKED
+(`appPlay.onChange`), exactly the old link law's condition, and **deletes the LINKED follow/retry block in `loop()`** (13 lines:
+the per-frame poll and its once-a-second retry of a refused play) **and the S0 re-arm in the window's `opened`** (the editor's
+open is presentation demand only, now the port's own `opened`). `playMod` went into the edge (`togglePlay` is THE play's toggle);
+arming (`setModArm`) and LINKED (`ui.setClockLink`) catch up at once instead of on the next frame (the play with its demand, or
+the pause); disarming or SEPARATE releases the demand; `restore()`'s `linkFollowed = null` line goes (an undo's reloaded rack is
+STOPPED and the S4 line beside it plays it again — the held demand keeps that play from refusal).
+
+**What a user sees.** S0's open item, closed: at a fresh boot or after NEW, with the editor closed, no routes — even no
+sources — Space plays the field AND the modulation, with no `nothing-to-run` (S0 measured the refusal on this road,
+`S0-BUILD.md` "The LINKED verdict"); the editor's open no longer has anything to re-arm. A bare host play with no demand still
+refuses with its own reason — that law stays the kit's.
+
+**What A6 does not do (the integrator's narrowing after the Opus audit of the plan).** LINKED / SEPARATE are NOT retired;
+`clockLink`, `modArm`, `modCadence` stay PREFERENCE keys; `native-ui.js`' tempo tiles (LINKED, the SEPARATE-only MOD ▶),
+`docs/STATE-SCOPES.md` and `tests/new-project.test.mjs`' PREF set are untouched; the ACTIONS row and its handler
+(`setModArm`) are unchanged; `LW.mod.play/stop` and the window's ▶ are still the modulation transport's own (SEPARATE's road).
+All of that moves to C4 with the kit's one play — so an old settings file's `clockLink: false` is still SEPARATE today, read and
+kept as it always was. No default changed: `tools/new-project.mjs --check` in step, not regenerated.
+
+`tests/take-in-bugs.browser-test.mjs` §1 is the facade's four scenes (S0's LINKED scenes rewritten): a real Space from a
+fresh boot, with no sources at all and after NEW (editor closed, nothing routed) plays the field and the modulation, app time
+advancing, 0 refusals, the demand held; a second Space pauses both and releases it; WAVE DANCER's routed `material.stage`
+follows the one clock; `__LW.mod.clock.play()` with no demand returns `nothing-to-run` (refusedPlays +1).
+
+`cat lab/*.js | wc -l`: **36 237 → 36 234** (rack.js −25, mod-port.js +10, clock.js +12); A5 + A6 **36 280 → 36 234 (−46)**.
+
+Gates (8765/5235, one suite at a time, 4 s apart; nothing needed a re-run alone): `bash test.sh node` exit 0 (85 suites:
+`mir.test`'s deterministic-replay judges, `render-exact`, `new-project --check` in step); `take-in-bugs` 4/4 (twice: before and
+after the last compaction of `follow`), `history` **39 PASS**, `mir-controls` 2, `routed-knob` 4/4, `lfo-tension` 3,
+`new-project` 8, `offer` 16 PASS. Not run: `current` (red on the untouched base under load, the integrator's note).
+CLAUDE.md states no LINKED law; the sentence for the modulation paragraph is drafted in `research/release-0.5.0/A5-A6-BUILD.md`,
+not applied (an agent's message cannot authorise a CLAUDE.md edit).

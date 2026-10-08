@@ -18,9 +18,10 @@ export class Clock {
     this._wall = null;       // last wall time we accounted for (seconds)
     this.steps = 0;          // physics steps taken (diagnostics)
     this.lastDt = 0;
+    this.onEdge = null;      // THE ONE PLAY's ear (onePlay, below): told of every play and pause edge, from whichever road
   }
-  play(nowSec) { if (!this.playing) { this.playing = true; this._wall = nowSec; } }
-  pause() { this.playing = false; this._wall = null; }
+  play(nowSec) { if (!this.playing) { this.playing = true; this._wall = nowSec; if (this.onEdge) this.onEdge(true); } }
+  pause() { const was = this.playing; this.playing = false; this._wall = null; if (was && this.onEdge) this.onEdge(false); }
   toggle(nowSec) { if (this.playing) this.pause(); else this.play(nowSec); }
   /** advance by the wall interval since the last advance (0 when paused) → dt in a.u. */
   advance(nowSec) {
@@ -38,4 +39,15 @@ export class Clock {
   scrub(t) { this.t = t; this.lastDt = 0; }
   reset() { this.t = 0; this.lastDt = 0; }
   setRate(r) { this.rate = Math.max(1e-6, r); }
+}
+
+/** THE ONE PLAY (0.5.0 A6 · R-B1; MIR TRANSPORT.md "the two clocks become one"): `{ play, pause, isPlaying, toggle, onChange,
+ *  seek }` over this clock, the `clock` the kit's createTransport takes.  The physics clock IS the play: every road that starts or
+ *  stops it (the button, Space, LW.play, A/B, the bow, the slap, a restore, a capture) is an edge, and onChange hears each one at
+ *  once — so the modulation follows by holding its app-play demand (mod-port.js `follow`), never by a per-frame poll. */
+export function onePlay(clock, now = () => performance.now() / 1000) {
+  const subs = new Set();
+  clock.onEdge = (on) => { for (const f of subs) f(on); };
+  return { play: () => clock.play(now()), pause: () => clock.pause(), toggle: () => clock.toggle(now()), isPlaying: () => clock.playing,
+    seek: (t) => clock.scrub(t), onChange: (f) => { subs.add(f); return () => subs.delete(f); } };
 }

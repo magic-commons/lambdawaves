@@ -17,6 +17,9 @@
  *     (`feedAudio`, one read for every AUDIO card); the closer off the frame path (`audio.sync` after every rebuild); silence when
  *     the signal stops (`audioReset`, or every follower pins its last value); the input remembered as a device HANDLE, never audio.
  *   · THE CADENCE: 60 or 120 Hz, the panel's, never the display's.
+ *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade): `follow(on)` is THE play's edge (clock.js onePlay), taken while MOD is
+ *     armed and LINKED.  A play holds the kit's `demand('app.play')` first, so the modulation is never refused for want of a route
+ *     or an open editor (MIR 1.5 `installModulation().play`; KIT-BRIEFS "LINKED refusal"); a pause releases it.
  */
 import { createModHost } from './mir/modulation/host.js';
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the kit's port deliberately left behind
@@ -92,16 +95,23 @@ export function createModPort({ available, present, view, onCapture, save }) {
       });
       return host;
     },
+    follow(on) {
+      if (!host) return null;
+      const C = host.clock, w = performance.now() / 1000; if (on) C.demand('app.play', true);   // the demand first, then the play
+      const r = on ? C.play(w) : C.pause(w); if (!on) C.demand('app.play', false);           // the pause first, then the release
+      const v = win(); if (v) v.sync(); return r;
+    },
     stamp() {
       for (const d of adapters) { const k = d.knob && d.knob(); if (!k || !k.root) continue; k.root.dataset.param = d.id;
         if (k.setBase) k.setBase(() => (routed(d.id) ? host.registry.baseOf(d.id) : null)); }
     },
     /** THE PORT.  `extra` is the host's own: moved (the transport's dodge), rateControl, persist, note (a model edit may be a
-     *  history row), device { read, write } (the remembered input, a PREFERENCE), and the clock's edges (armed, arm, opened). */
-    port({ moved, rateControl, persist, note, device, armed, arm, opened }) {
+     *  history row), device { read, write } (the remembered input, a PREFERENCE), and the arm (armed, arm). */
+    port({ moved, rateControl, persist, note, device, armed, arm }) {
       const C = host.clock;
-      return { moved, rateControl, persist, armed, arm, opened, knobOf: P.knobOf,
+      return { moved, rateControl, persist, armed, arm, knobOf: P.knobOf,
         M: host.model, registry: host.registry, targets: host.targets, clock: C,
+        opened: () => { C.setPresentationActive(true); present(); },   // the editor's preview demand only: THE play holds its own (A6)
         closed: () => { C.setPresentationActive(false); moved({ left: -1, right: -1, top: -1, bottom: -1 }); },
         apply: () => { C.applyAll(false); present(); note(); },
         cadence: () => cadence.hz, setCadence: P.setCadence,
