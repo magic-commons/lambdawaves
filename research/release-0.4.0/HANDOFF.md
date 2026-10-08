@@ -100,6 +100,23 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   (a Round 3 agent stopped before it wrote anything) is left for Josh to remove.
 > - **Next after this session's workers land:** S5 KIT BRIEFS (Sonnet or Sol; needs `S2-CAMERA-BUILD.md` and
 >   `S3-BUILD.md`), S4 LIBRARY a/b/c on the census's numbers, then the local 0.4.0-alpha cut on Josh's word.
+> **UPDATE 2026-10-08 ~00:20 — Claude Sos, end of the third session (usage pause).** Tip of `sos-s0` after this commit; tree clean.
+> - **Merged:** the Sol thread Round 3 + SYNTHESIS (`4b935e9`; the one number 25.81 % — 10,966 of 42,486 live quartets under D₂h;
+>   symmetry does not earn a symmetry-adapted SCF). **Josh's ruling** on its D1–D4: *"Perhaps all default/option one's"* →
+>   R-S1-0.5 option 1 and D2–D4 option 1, recorded in PLAN §9, the 0.5.x row and the ledger (`81f5df2`); the thread is CLOSED.
+>   **S2 THE CAMERA** (`babb58f`, builder `93cd70f`, waves 145–148, `S2-CAMERA-BUILD.md`): both digest locks GREEN, the matrix sign
+>   proved on the GPU, the link carries the shot; `lab/*.js` +90 (the feature). **Sol's LIBRARY CENSUS + C₆₀ frontier** committed
+>   as DRAFT, UNVERIFIED by Sos (`9e79132`; `research/release-0.4.0/library-census/`, `tools/library/`; spot-check before S4 banks a
+>   number).
+> - **Built, NOT merged:** **S3 STAGE TEXT + WINDOWS** on `worktree-agent-a4faa45d300fd21dc` tip `3621836` (T1–T7 + follow-up +
+>   `S3-BUILD.md`, waves 155–161; 83 node suites and 26 browser suites green at its tip). It overlaps S2 in `lab/rack.js`, `lab/sw.js`,
+>   `REPORT.md`, `docs/STATE-SCOPES.md`, `tools/new-project.mjs` — small conflicts, the resolution is written in
+>   `~/.claude/handoffs/latest.md` step 1 and in the branch's `S3-HANDOFF.md`. Its "lines DOWN" acceptance is NOT met (+53:
+>   `dynamics.js` is a shared library; only `dynamicsview.js` could go) — Josh decides. It also set the stage formula's base size to
+>   34 px (the notebook's title) and drops `atomLabels:false` beside `molFormula` on — in `S3-BUILD.md` for Josh.
+> - **Not started:** the S2 verifier (`BRIEF-S2-VERIFY.md` is written, `9d8d8ed`; ports 8749/5217), S5 KIT BRIEFS, S4 LIBRARY a/b/c.
+> - **Order for the next session:** merge S3 (then `new-project`, `pwa --write`, node gate, light browser check) → S2 verifier → census
+>   spot-check → S5 ∥ S4a → the local 0.4.0-alpha cut on Josh's word. Worker notes: `~/.claude/handoffs/agents/*.md`.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
