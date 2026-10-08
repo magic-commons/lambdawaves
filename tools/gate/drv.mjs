@@ -9,12 +9,21 @@ const PORT = Number(process.env.GD_PORT || 4444);
 const BASE = `http://127.0.0.1:${PORT}`;
 
 export async function startDriver() {
-  // Refuse an occupied port before spawning: /status can belong to another run.
-  await new Promise((resolve, reject) => {
+  // Refuse an occupied port before spawning: /status can belong to another run.  0.5.0 A10 · THE PORT RACE, fixed once here:
+  // a suite that closes one session and opens the next (history, offer) asked while the geckodriver it had just killed was
+  // still listening (S2: EADDRINUSE, cured in each run by a 4 s pause).  The probe now waits up to 4 s for the port to settle
+  // and refuses only a port still held after that — someone else's run, as before.
+  const free = () => new Promise((resolve, reject) => {
     const probe = net.createServer();
     probe.once('error', reject);
     probe.listen(PORT, '127.0.0.1', () => probe.close(resolve));
   });
+  for (let waited = 0; ; waited += 100) {
+    try { await free(); break; } catch (error) {
+      if (error.code !== 'EADDRINUSE' || waited >= 4000) throw error;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }
   /* Ubuntu's /snap/bin/geckodriver is a launcher. It asks snapd to create the real
      process and then exits, so the ChildProcess returned by spawn() no longer owns
      the listener: p.kill() succeeds against the dead launcher while geckodriver and

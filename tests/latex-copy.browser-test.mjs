@@ -16,7 +16,7 @@ try {
     window.__row = async (menu, label) => {
       __LW.layout.menu.open();
       const bar = document.getElementById('menubar');
-      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.textContent === menu);
+      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
       const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
@@ -107,7 +107,7 @@ try {
   console.log(`     copied (B at t = ${tB}): ` + JSON.stringify(gotB[0]));
 
   /* ── 6 · pasted into the notebook, both copies render under KaTeX with no error ── */
-  const paste = await g.ev(`const nb = document.getElementById('notebook'), ta = nb.querySelector('.nb-text');
+  const paste = await g.ev(`const nb = document.querySelector('[data-mir-window="notebook"]'), ta = nb.querySelector('.nb-text');
     __LW.layout.notebook.open('notes');
     ta.value = ${JSON.stringify(gotA.clip[0] + '\n\n' + gotB[0])}; ta.dispatchEvent(new Event('input'));
     __LW.layout.notebook.setMode('view');
@@ -154,7 +154,7 @@ try {
   assert.ok(molHead.includes('Configuration in C2v: $(1a_{1})^{2}'), molHead);
   assert.match(mol.status, /H₂O’s page as LaTeX/);
   /* 0.4.0 S1: the named page pasted into the notebook renders (head formula + E + configuration + the ladder), no error */
-  const molPaste = await g.ev(`const nb = document.getElementById('notebook'), ta = nb.querySelector('.nb-text');
+  const molPaste = await g.ev(`const nb = document.querySelector('[data-mir-window="notebook"]'), ta = nb.querySelector('.nb-text');
     __LW.layout.notebook.open('notes'); ta.value = ${JSON.stringify(mol.page[0])}; ta.dispatchEvent(new Event('input'));
     __LW.layout.notebook.setMode('view'); const view = nb.querySelector('.nb-view');
     const out = { formulas: view.querySelectorAll('.katex').length, errors: view.querySelectorAll('.katex-error').length, dollars: (view.textContent.match(/\\$/g) || []).length };
@@ -176,7 +176,7 @@ try {
     const seen = tiles.filter((t) => getComputedStyle(t).display !== 'none').length, onCard = cols(grid);
     __LW.layout.popOut('calculus', { x: 420, y: 120, w: 520 }); await __LW.settle(); const floating = cols(d.querySelector('.calc-grid'));
     d.querySelector('.dev-copy').click(); await w(200); const md = __clip[__clip.length - 1] || '';
-    const nb = document.getElementById('notebook'), ta = nb.querySelector('.nb-text');
+    const nb = document.querySelector('[data-mir-window="notebook"]'), ta = nb.querySelector('.nb-text');
     __LW.layout.notebook.open('notes'); ta.value = md; ta.dispatchEvent(new Event('input'));
     __LW.layout.notebook.setMode('view'); const view = nb.querySelector('.nb-view');
     const out = { tiles: tiles.length, seen, lean, onCard, floating, head: md.split('\\n')[0], figure: /\\nFigure\\. /.test(md), formulas: view.querySelectorAll('.katex').length, display: view.querySelectorAll('.katex-display').length, errors: view.querySelectorAll('.katex-error').length, dollars: (view.textContent.match(/\\$/g) || []).length, errs: __e.slice() };

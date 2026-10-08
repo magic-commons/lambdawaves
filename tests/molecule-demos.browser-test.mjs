@@ -25,7 +25,7 @@ try {
       let st = __LW.chem.state();
       for (let i = 0; i < 600 && !(st.on && st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }
       await __LW.settle(); await __w(200);
-      const nb = document.getElementById('notebook');
+      const nb = document.querySelector('[data-mir-window="notebook"]');
       return { label: btn.textContent, status: status(), ms: performance.now() - t0, preset: __LW.chem.preset(), on: st.on, owner: st.fieldOwner, view: st.view,
         orbital: st.orbital, nocc: st.nocc, nAO: st.nAO, notebookOpen: !nb.hidden, text: __LW.layout.notebook.text.split('\\n')[0],
         settingsSame: __ws() === before, gum: __gum, errs: __e.slice() };`);

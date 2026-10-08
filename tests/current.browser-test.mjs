@@ -42,7 +42,7 @@ try {
  const longNotebook=await g.ev(`const p=__LW.layout.projects,n=__LW.layout.notebook;
   const text=Array.from({length:30},(_,i)=>'## Section '+(i+1)+'\\n\\nParagraph '+(i+1)).join('\\n\\n');
   n.text=text;p.save('acceptance/long-notebook');n.text='temporary';p.open('acceptance/long-notebook');
-  const view=document.querySelector('#notebook .nb-view');return {last:n.html.includes('Section 30'),more:!!view.querySelector('.nb-more'),scrolls:view.scrollHeight>view.clientHeight};`);
+  const view=document.querySelector('[data-mir-window="notebook"] .nb-view');return {last:n.html.includes('Section 30'),more:!!view.querySelector('.nb-more'),scrolls:view.scrollHeight>view.clientHeight};`);
  assert.deepEqual(longNotebook,{last:true,more:false,scrolls:true});
  console.log('PASS project landing renders the complete Markdown notebook and scrolls instead of clipping it');
  const malformed = await g.ev(`const key='lambdawaves.q0.projects',old=localStorage.getItem(key);try{
@@ -120,7 +120,7 @@ try {
   ott.lowMixHome=M.audioReadout(audio.id).levelMix.low===0;lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));
   document.querySelector('.m2dev.audio .m2audout[data-out="low"] .m2audmac').click();await w(80);const assignedRoute=document.querySelector('.m2dev.audio .m2audout[data-out="low"]');ott.assignedNumber=assignedRoute.querySelector('.m2audslot').textContent!=='--'&&getComputedStyle(assignedRoute.querySelector('.m2audslot')).color===accB;
   __LW.mod.addSource('lfo');__LW.mod.addSource('env');await w(120);
-  const compact=[...document.querySelectorAll('.kwin-chiprail button')].find(e=>e.getAttribute('aria-label')==='COMPACT');compact.click();await w(180);
+  const compact=document.querySelector('[data-mir-rail="modulation"] [data-rail="compact"]');compact.click();await w(180);
   const card2=document.querySelector('.m2dev.audio'),knobBoxes=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>e.getBoundingClientRect()),dialBoxes=[...card2.querySelectorAll('.m2knobs .m2kd')].map(e=>e.getBoundingClientRect()),referenceDialRows=['lfo','env'].map(k=>[...document.querySelectorAll('.m2dev.'+k+' .m2knobs .m2kd')].map(e=>e.getBoundingClientRect().top)),compactRows=[...card2.querySelectorAll('.aud-range-row')],compactTracks=compactRows.map(e=>e.querySelector('.aud-range-track').getBoundingClientRect()),compactRings=compactRows.map(e=>e.querySelector('.m2depthring').getBoundingClientRect()),compactNames=compactRows.map(e=>e.querySelector('.aud-range-name').getBoundingClientRect()),bodyBox=card2.querySelector('.m2body').getBoundingClientRect(),editBox=card2.querySelector('.m2edit').getBoundingClientRect(),sourceBox=card2.querySelector('.m2col').getBoundingClientRect(),routeBox=card2.querySelector('.m2rt').getBoundingClientRect(),compactRoutes=[...card2.querySelectorAll('.m2audout')],sourceButtons=[...card2.querySelectorAll('.m2audsrc')].map(e=>e.getBoundingClientRect());
   const result={allBands:compactRows.every(e=>getComputedStyle(e).display!=='none'),twoByTwo:new Set(knobBoxes.map(b=>Math.round(b.top))).size===2&&new Set(knobBoxes.map(b=>Math.round(b.left))).size===2,
     sideLayout:Math.max(...knobBoxes.map(b=>b.right))<Math.min(...compactTracks.map(b=>b.left))&&sourceBox.right<editBox.left&&routeBox.right<editBox.left&&editBox.height>bodyBox.height-10,
@@ -243,7 +243,7 @@ try {
     modes, three macros, five routes, the A/B stores and the notebook, with no page error.  0.3.1 · S2: the button asks before it
     discards unsaved changes (the scenes above leave some), so the confirm is accepted here. */
  const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.layout.notebook.open('projects');await w(200);document.querySelector('.pj-demo').click();await w(1500);
-  const S=__LW.serialize(),nb=document.getElementById('notebook');return {status:nb.querySelector('.pj-status')?.textContent||'',modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
+  const S=__LW.serialize(),nb=document.querySelector('[data-mir-window="notebook"]');return {status:nb.querySelector('.pj-status')?.textContent||'',modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
  assert.match(demo.status,/opened demo DEMOS\/WAVE DANCER/); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER'); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
  console.log('PASS the bundled demo: WAVE DANCER opens with its modes, macros, routes, A/B and notebook');
 } catch(error) { failed=true;console.error(error); }

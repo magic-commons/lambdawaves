@@ -30,7 +30,7 @@ try {
     window.__row = async (menu, label) => {
       __LW.layout.menu.open();
       const bar = document.getElementById('menubar');
-      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.textContent === menu);
+      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
       const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));

@@ -21,7 +21,7 @@ try {
       if (P.mat) delete P.mat.steps; if (P.domain && P.domain.auto) delete P.domain.half; return P; };
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__arr = () => { const L = __LW.layout.captureLayout(); return JSON.stringify({ cards: L.cards, docked: L.docked, rackHidden: L.rackHidden, closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id).sort() }); };
-    window.__st = () => document.querySelector('#notebook .pj-status').textContent;
+    window.__st = () => document.querySelector('[data-mir-window="notebook"] .pj-status').textContent;
     window.__w = (n) => new Promise((r) => setTimeout(r, n));
     return 1;`);
 
@@ -120,7 +120,7 @@ try {
     const data = JSON.parse(JSON.stringify(__LW.serialize()));
     const put = (path, text) => P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path, data, notebook: { title: path, text } }));
     const blank = put('probe/blank', '  \\n\\t '), hello = put('probe/hello', 'hello');
-    const click = (name) => { const it = [...document.querySelectorAll('#notebook .pj-item .pj-name')].find((e) => e.textContent.split('  ·')[0] === name); if (it) it.click(); return !!it; };
+    const click = (name) => { const it = [...document.querySelectorAll('[data-mir-window="notebook"] .pj-item .pj-name')].find((e) => e.textContent.split('  ·')[0] === name); if (it) it.click(); return !!it; };
     const r = {};
     N.close(); r.a = { ok: await P.requestFresh(), open: N.isOpen };                                   /* (a) NEW with the notebook closed */
     N.close(); r.closedBlank = { ok: P.open(blank), open: N.isOpen };                                   /* a blank open over a closed notebook */

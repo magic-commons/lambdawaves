@@ -50,7 +50,7 @@ try {
       const H = __LW.history, { n0, pre } = window.__s0;
       await __w(520); H.flush();
       const rows = H.entries(), post = __ser();
-      const run = document.querySelector('#modwin .m2run'), ndev = run ? run.querySelectorAll('.m2dev').length : 0; let removed = 0;
+      const run = document.querySelector('[data-mir-window="modulation"] .m2run'), ndev = run ? run.querySelectorAll('.m2dev').length : 0; let removed = 0;
       const mo = run ? new MutationObserver((rs) => { for (const r of rs) for (const x of r.removedNodes) if (x.classList && x.classList.contains('m2dev')) removed++; }) : null;
       if (mo) mo.observe(run, { childList: true, subtree: true });
       const t0 = performance.now(), undid = H.undo(), undoMs = performance.now() - t0, u0 = __ser();
@@ -170,15 +170,15 @@ try {
 
   /* the modulation window: a source added through its own menu, a dial moved, a route dragged from a macro's grip onto a knob */
   await g.ev(`__LW.layout.modulation.expand(); await __w(400); return 1;`);
-  const modAdd = await scene('modulation · ADD DEVICE → ADD LFO (the window\'s own menu)', `await __press(document.querySelector('#modwin .m2devadd')); await __w(150);
-      await __press([...document.querySelectorAll('#modwin button')].find((b) => b.textContent.trim() === 'ADD LFO'));`, 'ADD LFO · MODULATION',
+  const modAdd = await scene('modulation · ADD DEVICE → ADD LFO (the window\'s own menu)', `await __press(document.querySelector('[data-mir-window="modulation"] .m2devadd')); await __w(150);
+      await __press([...document.querySelectorAll('[data-mir-window="modulation"] button')].find((b) => b.textContent.trim() === 'ADD LFO'));`, 'ADD LFO · MODULATION',
     (r) => assert.equal(r.rebuilds, 1, 'undoing a modulation edit rebuilt the window ' + r.rebuilds + '×'));
-  undoMs.modulation = (await scene('modulation · an LFO dial dragged (RATE)', `await __drag(document.querySelector('#modwin .m2dev.lfo .m2kd'), 0, -30);`, 'LFO RATE · MODULATION')).undoMs;
+  undoMs.modulation = (await scene('modulation · an LFO dial dragged (RATE)', `await __drag(document.querySelector('[data-mir-window="modulation"] .m2dev.lfo .m2kd'), 0, -30);`, 'LFO RATE · MODULATION')).undoMs;
   /* S4 · a REAL right-drag on LFO 1's curve (MIR: right-drag on empty space adds a point and places it).  The capture holds button 2
      like button 0, so the drag is ONE row even with a rest longer than the quiet window in it, named for the curve and its window */
   /* EMPTY curve space (a right press there adds a point; on a point or a tension handle it does something else): the uncovered spot
      of LFO 1's editor farthest from every drawn point and handle */
-  await g.ev(`window.__empty = () => { const svg = document.querySelector('#modwin .m2dev.lfo .m2svg'), b = svg.getBoundingClientRect();
+  await g.ev(`window.__empty = () => { const svg = document.querySelector('[data-mir-window="modulation"] .m2dev.lfo .m2svg'), b = svg.getBoundingClientRect();
       const marks = [...svg.querySelectorAll('.m2pt, .m2tn, .m2playdot')].map((e) => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
       let best = null, far = 0;
       for (let u = 0.12; u <= 0.88; u += 0.04) for (let v = 0.15; v <= 0.85; v += 0.05) { const x = b.left + b.width * u, y = b.top + b.height * v, h = document.elementFromPoint(x, y);
@@ -198,7 +198,7 @@ try {
   /* the drop is hit-tested (elementFromPoint), so the target is the first routable dial whose centre is not under the window */
   await g.ev(`window.__drop = () => { for (const k of [__knob('EXPOSURE'), ...document.querySelectorAll('.dev .k[data-param]')]) { if (!k || !k.dataset.param) continue; __show(k);
       for (const block of ['center', 'start', 'end']) { k.scrollIntoView({ block, behavior: 'instant' }); const [x, y] = __c(k.querySelector('.k-dial')), h = document.elementFromPoint(x, y); if (h && k.contains(h)) return k; } } return null; }; return 1;`);
-  await scene('modulation · a route dragged from MACRO 1\'s grip onto a dial', `const grip = document.querySelector('#modwin .m2slot .m2grip'), k = __drop(); window.__target = k && k.dataset.param;
+  await scene('modulation · a route dragged from MACRO 1\'s grip onto a dial', `const grip = document.querySelector('[data-mir-window="modulation"] .m2slot .m2grip'), k = __drop(); window.__target = k && k.dataset.param;
       const [gx, gy] = __c(grip), [kx, ky] = __c(k.querySelector('.k-dial')); await __drag(grip, kx - gx, ky - gy, 8);`, 'ROUTE MACRO 1 · MODULATION',
     (r) => assert.equal(r.rebuilds, 1));
   const routed = await ev(`return { routes: __LW.mod.model.routeList().map((r) => r.targetId), target: window.__target };`);
@@ -371,7 +371,7 @@ try {
   await ev(`__LW.layout.notebook.open('notes'); await __w(150); const ta = document.querySelector('.nb-text'); ta.focus();
     for (const ch of 'a note') { ta.value += ch; ta.dispatchEvent(new Event('input', { bubbles: true })); await __w(20); } return 1;`);
   none.notebook = { rows: (await rows()) - n, text: await ev(`return __LW.notebook.text;`) }; n += none.notebook.rows;
-  await realDrag(await at('#notebook .nb-grip'), 40, 30, 4);
+  await realDrag(await at('[data-mir-window="notebook"] .nb-grip'), 40, 30, 4);
   none.nbResize = { rows: (await rows()) - n }; n += none.nbResize.rows;
   Object.assign(none, await ev(`const H = __LW.history, r = {}, count = () => H.entries().length; __LW.layout.notebook.close(); let n = count();
     const grid = __show(document.querySelector('.dev[data-id="settings"]')); const b = [...grid.querySelectorAll('.seg-b')].find((x) => x.textContent.trim() === '96³' && x.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'GRID');

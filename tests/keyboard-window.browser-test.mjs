@@ -34,7 +34,7 @@ try {
 
   const geometry = await g.ev(`const field=__LW.field,original=field.setOcclusion;window.__frameMasks=[];
     field.setOcclusion=function(rects){window.__frameMasks=rects.map(r=>r.slice());return original.call(field,rects)};
-    __LW.keymap.open();await __LW.settle();const host=document.querySelector('#keymap'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
+    __LW.keymap.open();await __LW.settle();const host=document.querySelector('[data-mir-window="keyboard"]'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
     const canvas=document.querySelector('#field').getBoundingClientRect(), mask=__frameMasks.some(r=>r[0]<=b.left-canvas.left+20&&r[1]<=b.top-canvas.top+20&&r[2]>=b.right-canvas.left-20&&r[3]>=b.bottom-canvas.top-20);
     const col=p.querySelector('.km-col-left').getBoundingClientRect(),header=p.querySelector('.km-col-header').getBoundingClientRect(),rows=p.querySelectorAll('.km-kb-row');
     const first=rows[0].getBoundingClientRect(),last=rows[rows.length-1].getBoundingClientRect();

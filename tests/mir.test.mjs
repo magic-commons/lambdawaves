@@ -21,17 +21,25 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, relative } from 'node:path';
 
-import { createRegistry, idFault, MAP_KINDS } from '../lab/mir/modulation/registry.js';
-import { createModHost, createTargetHost, createModClock, labParameters, model as M,
-         MAX_WALL_STEP, PAUSE_MODES,
-         LAB_PRESETS, LAB_PRESET_FOLDER, labPresetList, labPresetFolders, labPresetGet,
-         labPresetApply, foreignPresets, presetRouteTargets, barTempo,
-         resumeGrid, RESUME_LAWS } from '../lab/mir/modulation/host.js';
-/* WAVE 60 · curve.js is imported HERE for the first time.  §16 asserts it is byte-identical to its
-   source, which is a PROVENANCE claim and not a behavioural one — until this wave the file had 430
-   correct lines, an importer, and NOT ONE GATE ON WHAT IT COMPUTES.  That is our own ANTI-PATTERN 17
-   sitting inside the file Josh asked to be copied. */
+import { createHash } from 'node:crypto';
+/* 0.5.0 A10 · THE IMPORT LIST, against the kit's exported names (the canary's red 4: MIR 1.5.0-alpha.18 removed
+   `labPresetFolders`, and a named import of it killed the whole suite before its first judge).  The modules are taken whole;
+   USES lists what this file reads from each, and §16 judges it: a name the kit no longer exports is a red, unless the kit's own
+   guide names the removal (REMOVED), which is a NOTE and stands its one judge (§22a's folder clause) down, said. */
+import * as REG from '../lab/mir/modulation/registry.js';
+import * as HOST from '../lab/mir/modulation/host.js';
+/* WAVE 60 · curve.js is imported HERE for the first time — until that wave the file had 430 correct lines, an importer, and NOT
+   ONE GATE ON WHAT IT COMPUTES (our own ANTI-PATTERN 17 inside the file Josh asked to be copied); §19 gates it. */
 import * as CV from '../lab/mir/modulation/curve.js';
+const USES = {
+  'registry.js': [REG, ['createRegistry', 'idFault', 'MAP_KINDS']],
+  'host.js': [HOST, ['createModHost', 'createTargetHost', 'createModClock', 'labParameters', 'model', 'MAX_WALL_STEP', 'PAUSE_MODES',
+    'LAB_PRESETS', 'LAB_PRESET_FOLDER', 'labPresetList', 'labPresetFolders', 'labPresetGet', 'labPresetApply', 'foreignPresets',
+    'presetRouteTargets', 'barTempo', 'resumeGrid', 'RESUME_LAWS']] };
+const REMOVED = { labPresetFolders: 'MIR 1.5.0-alpha.18 (docs/ADOPTING-1.5.md §10)' };
+const { createRegistry, idFault, MAP_KINDS } = REG;
+const { createModHost, createTargetHost, createModClock, labParameters, model: M, MAX_WALL_STEP, PAUSE_MODES, LAB_PRESETS, LAB_PRESET_FOLDER,
+  labPresetList, labPresetFolders, labPresetGet, labPresetApply, foreignPresets, presetRouteTargets, barTempo, resumeGrid, RESUME_LAWS } = HOST;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -742,142 +750,28 @@ function runWindow(r, n, dt) {
     { running: w.host.clock.isRunning() });
 }
 
-/* ══════════════ 16 · the vendored files are still the vendored files ═══════════ */
+/* ══════════════ 16 · the vendored files are the kit's files — by the manifest and by their names ═════════
+ * 0.5.0 A10 (the canary's red 4).  Until 0.4.0 this section reversed eight marked edits and proved mod.js and curve.js
+ * byte-identical to a MANDELBROT checkout: a provenance claim the kit no longer makes (1.5's mod.js is not λWAVES' copy, and
+ * the checkout was machine-local).  What the kit DOES promise is MIR-MANIFEST.json — every adopted file and its hash, all of
+ * them proved by tests/mir-manifest.test.mjs.  So: the modules this suite imports are in that inventory with their bytes; every
+ * name it takes is exported (USES, at the top); and the three facts a λWAVES project leans on hold in whatever kit is adopted —
+ * a rack saved since wave 63 (version 104) is still read, the model reads its own version, and the preset store is λWAVES'. */
 {
-  // The upstream plugin checkout is machine-local; point LW_MIR_SRC at it to run the byte comparison elsewhere.
-  const SRC = process.env.LW_MIR_SRC || '/home/joshua-hosain/Documents/MANDELBROT APP/project/app';
-  const noHeader = (s) => s.replace(/^\/\*[\s\S]*?\*\/\n/, '');
-  const ours = (f) => {
-    let source = readFileSync(resolve(ROOT, 'lab/mir/modulation/' + f), 'utf8');
-    if (f === 'mod.js') for (const patch of JSON.parse(readFileSync(resolve(ROOT,'docs/mir-matrix-patch.json'),'utf8'))) {
-      if (!source.includes(patch.after)) throw new Error('Final II provenance patch no longer matches');
-      source=source.replace(patch.after,patch.before);
-    }
-    return noHeader(source);
-  };
-  let comparable = true, theirMod = '', theirCurve = '';
-  try {
-    theirMod = readFileSync(SRC + '/mod.js', 'utf8');
-    theirCurve = readFileSync(SRC + '/curve.js', 'utf8');
-  } catch (_) { comparable = false; }
-
-  if (comparable) {
-    const ourMod = ours('mod.js'), ourCurve = ours('curve.js');
-    /* UNDO the one documented edit — its marker comment and its one line — and the
-       file must be byte-identical to its source.  That is a far stronger claim than
-       counting changed lines, and it is the claim the diff law actually needs. */
-    /* WAVE 61 · SIX MARKED EDITS, NOT ONE — and the claim is unchanged in strength.  Each one
-       is undone here by its EXACT text, so the gate still proves the file is the vendored file
-       plus a diff somebody can read, rather than counting lines.  Edits 2-6 are the bipolar
-       route (PORT-NOTES.md): the model's offset is 0 whenever the macro is at 0, so "the base
-       is the CENTRE of the swing" — Josh's "center of dial" — is NOT expressible without them,
-       and the only alternatives move the user's base value, which is what registry.js exists to
-       prevent.  Half of what was asked for is not worth protecting a two-hunk diff. */
-    const EDITS = [
-      [`/* λWAVES: forced edit 1/8 — the storage namespace.  'mandel.modpresets' is
-   BASINS identity, and the boundary law is that MIR never carries a Card's.
-   Our house namespace is lambdawaves.q0.* (lab/rack.js LS_EXP / SETTINGS_KEY). */
-export const PRESET_LS = 'lambdawaves.q0.modpresets';
-`, `export const PRESET_LS = 'mandel.modpresets';
-`],
-      [`    /* λWAVES: forced edit 2/8 — the BIPOLAR flag.  A unipolar route's offset is always 0
-       when the macro is at 0, so "the base is the CENTRE of the swing" is not expressible
-       in this model; the flag is read in routeInfluence() and nowhere else. */
-    bi: !!o.bi,
-`, ''],
-      [`  /* λWAVES: forced edit 3/8 — the ANCHOR.  A unipolar route measures its influence from
-     r.min, so the offset is 0 when the macro is at 0; a BIPOLAR route measures it from the
-     MIDPOINT, so the base is the CENTRE of the swing and a macro at 0.5 moves nothing. */
-  const influence = lerped - (r.bi ? (r.min + r.max) / 2 : r.min);
-`, `  const influence = lerped - r.min;
-`],
-      [`  /* λWAVES: forced edit 4/8 — the bipolar flag is patchable, exactly like min and max. */
-  if (patch.bi !== undefined) r.bi = !!patch.bi;
-`, ''],
-      [`    /* λWAVES: forced edit 5/8 — \`bi\` travels with the route.  undefined is dropped by
-       JSON.stringify, so a rack with no bipolar route serialises exactly as it always did. */
-    routes: routes.map((r) => ({ id: r.id, macroId: r.macroId, targetId: r.targetId,
-                                 min: r.min, max: r.max, bi: r.bi ? 1 : undefined }))
-`, `    routes: routes.map((r) => ({ id: r.id, macroId: r.macroId, targetId: r.targetId,
-                                 min: r.min, max: r.max }))
-`],
-      [`      /* λWAVES: forced edit 6/8 — …and comes back.  A flag that does not survive a preset
-         silently changes the sound of every patch that was ever saved with it. */
-      newRoute(r.macroId, r.targetId, r.min, r.max, { id: String(r.id), bi: !!r.bi });
-`, `      newRoute(r.macroId, r.targetId, r.min, r.max, { id: String(r.id) });
-`],
-      /* WAVE 63 · TWO MORE, AND THEY ARE THE ONES THE OTHER SIX MADE NECESSARY.  Edits 2/8 and 6/8
-         changed what a stored route MEANS: a rack carrying `bi`, read by a build that lost those two
-         markers to an upstream re-take, drops the flag and routeInfluence measures from r.min again —
-         the base walks from the centre of the swing to its floor, 30 % of scale at the macro's middle,
-         in silence, on the second open.  A version stamp is the only thing such a build already reads,
-         and leaving MOD_STATE_V at 4 made the change version-INDISTINGUISHABLE. */
-      [`/* λWAVES: forced edit 7/8 — THE VERSION HAD TO MOVE, because edits 2/8 and 6/8 changed
-   what a stored route MEANS.  A rack carrying \`bi\` and read by a build without them drops
-   the flag, \`routeInfluence\` measures from r.min again, and the base walks from the centre
-   of the swing to its floor — 30 % of scale at the macro's middle, silently, on the second
-   open.  That is exactly what a version stamp is for, and leaving it at 4 made the change
-   version-INDISTINGUISHABLE.  The λWAVES namespace starts at 100 (= 100 + the upstream
-   version this model is derived from) so our 104 can never be mistaken for an upstream 5,
-   and an upstream 5 we have never seen is refused here rather than half-read. */
-export const MOD_STATE_V = 104;
-`, `export const MOD_STATE_V = 4;
-`],
-      [`/* λWAVES: forced edit 8/8 — and 3 and 4 are still read: a rack with no \`bi\` on any route
-   is byte-identical on the wire to one written before the flag existed, so there is nothing
-   to migrate in that direction and refusing it would throw away every patch made before
-   wave 61.  The refusal only runs the other way. */
-export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
-`, `export const MOD_STATE_READS = Object.freeze([3, 4]);
-`]];
-    let undone = ourMod, missed = [];
-    for (let i = 0; i < EDITS.length; i++) {
-      const [ours2, theirs] = EDITS[i];
-      if (ourMod.indexOf(ours2) < 0) missed.push(i + 1);
-      undone = undone.split(ours2).join(theirs);
-    }
-    /* MIR 1.4.3 deliberately changes its own model's fresh-LFO default. Undo
-       that small upstream evolution too before comparing with the original
-       MANDELBROT extraction; the adopted-file manifest separately proves the
-       current bytes match MIR's committed source. */
-    const MIR_143 = [
-      [`function newShape(o, kind) {
-  const wave = (o && WAVES.indexOf(o.wave) >= 0) ? o.wave : 'sine';
-  /* A fresh LFO IS the editable sine preset. Explicit wave/shape fields remain
-     authoritative so old saves, factory patches and requested analytic waves
-     keep their exact meaning. */
-  const explicitShape = o && (Object.hasOwn(o, 'shapeMode') || Object.hasOwn(o, 'wave') || Object.hasOwn(o, 'points'));
-  const mode = (o && o.shapeMode === 'curve') || (kind === 'lfo' && !explicitShape) ? 'curve' : 'wave';
-`, `function newShape(o) {
-  const wave = (o && WAVES.indexOf(o.wave) >= 0) ? o.wave : 'sine';
-  const mode = (o && o.shapeMode === 'curve') ? 'curve' : 'wave';
-`],
-      [`  const shape = newShape(o, kind);\n`, `  const shape = newShape(o);\n`]
-    ];
-    for (let i = 0; i < MIR_143.length; i++) {
-      const [current, original] = MIR_143[i];
-      if (!undone.includes(current)) missed.push('MIR 1.4.3/' + (i + 1));
-      undone = undone.replace(current, original);
-    }
-    const markers = (ourMod.match(/λWAVES:/g) || []).length;
-    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES: reverse the documented Final II matrix patch, MIR 1.4.3 default-shape change, provenance headers and EIGHT marked edits, and both files are byte-identical to their MANDELBROT sources',
-      ourCurve === theirCurve && undone === theirMod && markers === EDITS.length && missed.length === 0,
-      { curveIdentical: ourCurve === theirCurve, modIdenticalOnceUndone: undone === theirMod,
-        markedEdits: markers, wantEdits: EDITS.length, editsNotFound: missed, modBytes: ourMod.length });
-    /* WAVE 63 · AND THE HEADER'S OWN COUNT, which is the one sentence in the port that NOTHING could
-       see.  The judge above strips `/^\/\*[\s\S]*?\*\/\n/` — exactly the provenance block — before it
-       compares, and so it read straight past "Forced 1 edit … Every other byte below this header is
-       the source, unmodified" for a whole wave after five more edits went in under it.  A maintainer
-       taking an upstream fix reads that header FIRST, because it is the file that tells them how.
-       So the number is read out of the header and made to equal the markers in the body. */
-    const head = readFileSync(resolve(ROOT, 'lab/mir/modulation/mod.js'), 'utf8').slice(0, 2400);
-    const said = head.match(/Forced\s+(\d+)\s+edits?/);
-    judge('THE VENDORED HEADER COUNTS ITS OWN EDITS, and the count is gated: §16 strips the provenance block before it diffs, so the sentence that tells a maintainer how to read the file is the one sentence the byte-identity proof structurally cannot see — it said "Forced 1 edit" for a whole wave with six in the file. The number in the header must now equal the marked edits in the body and the entries in the table above, all three',
-      !!said && Number(said[1]) === markers && Number(said[1]) === EDITS.length,
-      { headerSays: said ? Number(said[1]) : null, markersInBody: markers, tableEntries: EDITS.length });
-  } else {
-    judge('THE VENDORED FILES ARE STILL THE VENDORED FILES (the source tree is not readable from here — skipped, not failed)', true, { skipped: true });
-  }
+  const manifest = JSON.parse(readFileSync(resolve(ROOT, 'MIR-MANIFEST.json'), 'utf8'));
+  const hash = (f) => createHash('sha256').update(readFileSync(resolve(ROOT, f))).digest('hex').slice(0, 16);
+  const mods = ['registry.js', 'host.js', 'mod.js', 'curve.js'].map((f) => 'lab/mir/modulation/' + f);
+  const off = mods.filter((f) => !manifest.files || manifest.files[f] !== hash(f));
+  judge('16 · THE MODULES THIS SUITE IMPORTS ARE THE KIT\'S FILES: each is in MIR-MANIFEST.json\'s inventory (MIR ' + manifest.version + ') with its bytes',
+    off.length === 0, { off });
+  const missing = [], noted = [];
+  for (const [file, [ns, names]] of Object.entries(USES)) for (const n of names) if (!(n in ns)) (REMOVED[n] ? noted : missing).push(file + ' ' + n);
+  judge('16 · THE IMPORT LIST: every name this suite takes is exported by the adopted kit' +
+    (noted.length ? ' — NOTE, removed by the kit\'s own guide: ' + noted.map((n) => n + ' (' + REMOVED[n.split(' ')[1]] + ')').join(', ') : ''),
+    missing.length === 0, { missing, noted });
+  judge('16 · A λWAVES PROJECT\'S MODULATION STILL READS: MOD_STATE_READS holds 104 (every rack saved since wave 63) and the model\'s own MOD_STATE_V, and the preset store is λWAVES\' namespace (lambdawaves.q0.*)',
+    Array.isArray(M.MOD_STATE_READS) && M.MOD_STATE_READS.includes(104) && M.MOD_STATE_READS.includes(M.MOD_STATE_V) && /^lambdawaves\.q0\./.test(M.PRESET_LS),
+    { reads: M.MOD_STATE_READS, v: M.MOD_STATE_V, store: M.PRESET_LS });
 }
 
 /* ══════════════ 17 · the edges come apart ══════════════════════════════════════
@@ -1271,7 +1165,7 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
  * three FACTORY_PRESETS and every route in all three goes to a target λWAVES does not
  * register, so all three load 100 % DORMANT.  A preset menu whose whole contents do
  * nothing is worse than an empty one, so host.js filters that folder out of what this lab
- * OFFERS (without touching the vendored file, which §16 holds to byte-identity) and puts
+ * OFFERS (without touching the vendored file, which the manifest pins, §16) and puts
  * three of our own in its place.
  *
  * The gate below is the one that would have caught them: EVERY ROUTE MUST RESOLVE TO A
@@ -1322,16 +1216,16 @@ export const MOD_STATE_READS = Object.freeze([3, 4, 104]);
   {
     const theirs = M.presetList().filter((p) => p.factory);
     const offered = labPresetList();
-    const folders = labPresetFolders();
+    const folders = labPresetFolders ? labPresetFolders() : null;   // 0.5.0 A10: a kit without it (REMOVED, §16) stands this clause down
     const foreign = foreignPresets();
     const mine = offered.filter((p) => p.lab);
-    judge('22a · THE FOREIGN FACTORY FOLDER IS FILTERED OUT OF WHAT THIS LAB OFFERS, and the filter is the marker the vendored model already stamps: presetPublic() writes `factory: 1` on its three and on nothing else, so `M.presetList().filter((p) => !p.factory)` names exactly that folder and cannot ever catch a user’s own patch. The vendored file is not touched — §16’s byte-identity claim is worth more than a deletion that belongs at the SEAM anyway, which is what this file is',
+    judge('22a · THE FOREIGN FACTORY FOLDER IS FILTERED OUT OF WHAT THIS LAB OFFERS, and the filter is the marker the vendored model already stamps: presetPublic() writes `factory: 1` on its three and on nothing else, so `M.presetList().filter((p) => !p.factory)` names exactly that folder and cannot ever catch a user’s own patch. The vendored file is not touched — the manifest’s pin (§16) is worth more than a deletion that belongs at the SEAM anyway, which is what this file is',
       theirs.length === 3 && mine.length === 3 && offered.length === 3 &&
       offered.every((p) => p.folder !== M.PRESET_FOLDER_FACTORY) &&
-      folders.every((f) => f.name !== M.PRESET_FOLDER_FACTORY) &&
-      folders[0].name === LAB_PRESET_FOLDER && folders[0].count === 3,
+      (!folders || (folders.every((f) => f.name !== M.PRESET_FOLDER_FACTORY) &&
+      folders[0].name === LAB_PRESET_FOLDER && folders[0].count === 3)),
       { vendoredStillThere: theirs.map((p) => p.name), offered: offered.map((p) => p.name),
-        folders: folders.map((f) => f.name + '×' + f.count) });
+        folders: folders ? folders.map((f) => f.name + '×' + f.count) : 'labPresetFolders removed by the kit (§16 NOTE)' });
 
     const rShut = labRig();
     const refused = labPresetApply('f.breathe', { host: rShut.host });
