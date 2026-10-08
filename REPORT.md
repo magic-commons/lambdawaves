@@ -4518,3 +4518,23 @@ centre anchors at `[0, 0]` with a line of 16 px. `tests/camera-shift.test.mjs` �
 `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0 (`camera-shift` 7 PASS, `stage-gestures` 2 PASS);
 `node tools/new-project.mjs --check` in step. No `writeView` change, so no digest lock. No `__LW` member was renamed or removed:
 `LW.camera`, `LW.orbitBy`, `LW.orbit` and `LW.setCamMode` read the same functions.
+
+**The quartet, its own last commit.** The four Alt+Arrow rows keep A9's ids, groups, shorts and chords (`panLeft`, `panRight`,
+`panUp`, `panDown`, `KG.C`). Each now steps `STAGE_BINDINGS.nudge * f`, where it had `0.05 * f`. `rack.js` imports the table
+beside `bindStageGestures`. If it conflicts at the merge, take A9's lines and put `STAGE_BINDINGS.nudge` where `0.05` stood.
+`lab/*.js` is unchanged at **36,260**. Gates on this final tree: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0;
+`new-project --check` in step. The browser suites ran on 8763/5233, one at a time, 4 s apart, all green on their first run, so
+none needed a re-run alone:
+
+| suite | result |
+|---|---|
+| `camera-shift` | **11/11 GREEN**: Alt+→, Alt+↑, Shift+Alt+↑ still step 0.05, 0.05, 0.0125; PAN X/Y/HOME through the port |
+| `render-regressions` | **2 PASS** |
+| `new-project` | **8 PASS** |
+| `history` | **39 PASS** |
+| `official-defaults-palette` | **3 PASS** |
+| `input` | **13 PASS** |
+| `keyboard-window` | **GREEN** (the ACTIONS rows) |
+
+`tools/settings-probe.mjs` ran again on the final tree and agrees with `1e1a4f8` in 48 of 48 fields. Stage A's ledger for
+A1 + A8 is **36,198 → 36,260 (+62)**.

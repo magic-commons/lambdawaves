@@ -1,4 +1,4 @@
-import { bindStageGestures } from './stage-gestures.js';
+import { bindStageGestures, STAGE_BINDINGS } from './stage-gestures.js';
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
@@ -4522,10 +4522,10 @@ export async function boot(dom) {
     { id: 'dollyZoomIn', group: KG.C, short: 'dolly zoom in', label: 'dolly zoom in (size held)', key: 'KeyQ', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(-1, 1) },
     { id: 'dollyZoomOut', group: KG.C, short: 'dolly zoom out', label: 'dolly zoom out (size held)', key: 'KeyE', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(1, 1) },
     { id: 'camReset', group: KG.C, short: 'cam reset', label: 'reset the camera', key: 'KeyR', run: () => resetView() },
-    { id: 'panLeft', group: KG.C, short: 'pan left', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-0.05 * f, 0) },   // 0.4.0 S2: the lens shift, 0.05 of the half-frame a press
-    { id: 'panRight', group: KG.C, short: 'pan right', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(0.05 * f, 0) },
-    { id: 'panUp', group: KG.C, short: 'pan up', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, 0.05 * f) },
-    { id: 'panDown', group: KG.C, short: 'pan down', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -0.05 * f) },
+    { id: 'panLeft', group: KG.C, short: 'pan left', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-STAGE_BINDINGS.nudge * f, 0) },   // 0.4.0 S2: the lens shift, the bindings' nudge (0.05) of the half-frame a press
+    { id: 'panRight', group: KG.C, short: 'pan right', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(STAGE_BINDINGS.nudge * f, 0) },
+    { id: 'panUp', group: KG.C, short: 'pan up', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, STAGE_BINDINGS.nudge * f) },
+    { id: 'panDown', group: KG.C, short: 'pan down', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -STAGE_BINDINGS.nudge * f) },
     { id: 'axisX', group: KG.S, short: 'axis X', label: 'rotation axis x', key: 'KeyX', run: () => setAxis('x') },
     { id: 'axisY', group: KG.S, short: 'axis Y', label: 'rotation axis y', key: 'KeyY', run: () => setAxis('y') },
     { id: 'axisZ', group: KG.S, short: 'axis Z', label: 'rotation axis z', key: 'KeyZ', run: () => setAxis('z') },
