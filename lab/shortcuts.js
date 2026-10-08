@@ -1,11 +1,11 @@
 /* One binding law for the keyboard window, saved overrides and the dispatcher. */
 const MODIFIER_CODES = new Set(['ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight',
   'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight']);
-
+const ctrlOf = (c) => (c === 'Ctrl' ? 'Ctrl' : !!c);
 export function normalizeBinding(action, spec = {}) {
   return {
     key: Object.hasOwn(spec, 'key') ? spec.key : action.key,
-    ctrl: Object.hasOwn(spec, 'ctrl') ? !!spec.ctrl : !!action.ctrl,
+    ctrl: ctrlOf(Object.hasOwn(spec, 'ctrl') ? spec.ctrl : action.ctrl),   // true: Ctrl or ⌘ (the kit's Mod); 'Ctrl': the Control key alone
     alt: Object.hasOwn(spec, 'alt') ? !!spec.alt : !!action.alt,
     shift: Object.hasOwn(spec, 'shift') ? (spec.shift === undefined ? undefined : !!spec.shift) : action.shift,
   };

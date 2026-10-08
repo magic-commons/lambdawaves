@@ -18,7 +18,7 @@ export function createPaletteEditor(host, api) {
   const ui = {};
   const r0 = el('div', 'row tight palette-presets', host);
   ui.on = sw({ label: 'PALETTE', value: false, onChange: (v) => { api.setEnabled(v); push(); } });
-  const enableRow=el('div','row tight palette-enable',host);enableRow.appendChild(ui.on.root);
+  const enableRow=el('div','row tight palette-enable',host);enableRow.appendChild(ui.on.root).dataset.keyAction='palette';
   ui.sel = el('select', 'sel', r0); ui.sel.setAttribute('aria-label', 'palette');   // wave 62: the other five <select>s name themselves through a `title`; this one had nothing
 
 
