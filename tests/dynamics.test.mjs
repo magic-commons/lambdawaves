@@ -1,10 +1,10 @@
-/* tests/dynamics.test.mjs — the node proof of the LAGRANGIAN picture, the action–angle chart, the dipole and the
+/* tests/dynamics.test.mjs — the node proof of the LAGRANGIAN picture (SHADOW's footer since 0.4.0 S3), the moments, the dipole and the
  * particle (Bohmian) velocity field.
  *   node tests/dynamics.test.mjs
  * Anchors are hand-typed table values (⟨1s|z|2p_z⟩ = 128√2/243), exact analytic limits (2p₊'s velocity field is
  * φ̂/(r sinθ) exactly), and independent numerical routes (central differences; Simpson; RK4 of q̈ = −E²q).
  */
-import { lagrangian, action, actionAngle, angularMoments, rotorEntropy, angularDipoleZ, radialDipole, dipoleZ,
+import { lagrangian, action, angularMoments, rotorEntropy, angularDipoleZ, radialDipole, dipoleZ,
   dipoleLines, psiAndGrad, bohmVelocity, bohmStep, radialMoment, radialObservables } from '../lab/dynamics.js';
 import { BASIS, stateOf, orbital, radial } from '../lab/hydrogen.js';
 import { Register, PRESETS } from '../lab/state.js';
@@ -51,11 +51,6 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
     worst = Math.max(worst, Math.abs(num - cf));
   }
   judge('D the action S(t) = ½Σ|c_a|²[sin 2θ_a(t) − sin 2θ_a(0)] equals ∫₀ᵗ L dt′ at four times (1e-9)', worst < 1e-9, worst);
-  /* action–angle: J is the population, θ is the phase */
-  const c = R.at(7.77), aa = actionAngle(c.re, c.im, ids);
-  let wj = 0, wt = 0;
-  for (const x of aa) { wj = Math.max(wj, Math.abs(x.J - R.population(x.a))); const want = Math.atan2(c.im[x.a], c.re[x.a]); wt = Math.max(wt, Math.abs(x.theta - want)); }
-  judge('D the action variable J_a = (1/2π)∮p dq IS the population |c_a|², and its angle is arg c_a — SPECTRUM is the action–angle chart of SHADOW', wj < 1e-15 && wt < 1e-15 && aa.length === 2, { wj, wt });
   /* Euler–Lagrange: q̈ = −E²q reproduces the closed form */
   {
     const a0 = ids[0], E = BASIS[a0].E;

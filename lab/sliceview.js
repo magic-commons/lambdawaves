@@ -1,5 +1,5 @@
 import { planeModel } from './native-ui.js';
-/* sliceview.js — the SLICE window: a rotatable complex plane through ψ, painted with the phase palette.
+/* sliceview.js — the PLANE window (id `slice`; SLICE until 0.4.0 S3): a rotatable complex plane through ψ, painted with the phase palette.
  *
  * Drag the picture to turn the plane.  Plain drag moves the MINUS rotor, which is a HOLOMORPHIC (U(2)) motion —
  * n₊ stands still — and shift-drag moves the PLUS rotor, which is not.  That is the 4D engine's two-trackball
@@ -103,7 +103,7 @@ export function createSliceView(host, api) {
   r2.appendChild(trig({ label: 'RESET', onFire: () => { rotor = { ...IDENTITY }; tour = null; res = 128; dirty = true; api.repaint(); } }).root);
   const ro = readout({ label: 'PLANE  n₊ · n₋', value: '—', cls: 'wide', sub: '' });
   el('div', 'row tight', host).appendChild(ro.root);
-  el('div', 'note', host).innerHTML = '<b>Slice.</b> Hue shows arg ψ, brightness shows |ψ|, and faint bands trace |ψ| contours. Drag rotates the plane; Shift-drag rotates the other SO(4) factor. KS maps a plane in four dimensions into a cone-like surface in three dimensions.';
+  el('div', 'note', host).innerHTML = '<b>Plane.</b> Hue shows arg ψ, brightness shows |ψ|, and faint bands trace |ψ| contours. Drag rotates the plane; Shift-drag rotates the other SO(4) factor. KS maps a plane in four dimensions into a cone-like surface in three dimensions.';
 
 
   /** the ImageData for a resolution, seeded by rescaling whatever is on screen so a res change never flashes empty */

@@ -85,7 +85,15 @@ export function createOrbitals(host, api) {
   const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
   presetSel.title = 'HOMO + LUMO: the frozen-orbital beat. WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density';
   { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of ORB_PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
-  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p) preset(p); });
+  /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
+     `WINDING · $1e_{1g}$ (a) + (b)`, `HOMO + LUMO · $1b_{1}$ + $4a_{1}$`; preset() itself (an API, a restore) says nothing */
+  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(presetMd(p)); });
+  function presetMd(name) {
+    const mos = [...sel.keys()].sort((a, b) => a - b).map(moOf);
+    if (!mos.length || !mos.every((m) => m && m.label)) return name;
+    const pair = mos.length === 2 && mos[0].label === mos[1].label && mos[0].member;
+    return name + ' · ' + (pair ? `${forms(mos[0].label).latex} (${mos[0].member}) + (${mos[1].member})` : mos.map((m) => forms(m).latex).join(' + '));
+  }
   const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
   const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
   aBtn.addEventListener('click', () => store('A')); bBtn.addEventListener('click', () => store('B'));

@@ -23,13 +23,13 @@ import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, cameraKey, toScreen, quatFromYawPitch } from './field.js';
+import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
-import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
-import { ELEMENT } from './md.js';                 // the ATOM LABELS' symbols, H–Kr   // the MOLECULE FORMULA overlay reads the pick's own formula
+import { MOLECULE_BY_ID } from './molecules.js';
+import { createStageText } from './stage-text.js';   // 0.4.0 S3 · F2: the STAGE TEXT — the interim renderer 0.5.0 deletes
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
-import { createShadowView } from './shadowview.js';
+import { createShadowView, createShadowFoot } from './shadowview.js';
 import { createLadder } from './ladder.js';
 import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
@@ -55,7 +55,7 @@ import { hylleraas, BASES as HELIUM_BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
 import { createCalculus } from './calculusview.js';
-import { createDynamics } from './dynamicsview.js';
+import { calculusMarkdown } from './calculus.js';
 import { createPaletteEditor } from './paletteview.js';
 import { createSliceView } from './sliceview.js';
 import { createQCD } from './qcdview.js';
@@ -69,7 +69,7 @@ import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
-import { stateLatex, moleculeLatex } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
+import { stateLatex, moleculeLatex, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
@@ -166,7 +166,7 @@ export async function boot(dom) {
   let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1, atomLabelScale = 1;                     // the STAGE FORMULA's SIZE knob (Settings › Display): × the 88 px base, a PREFERENCE
+  let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
   function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
@@ -190,7 +190,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale, atomLabels: !document.body.classList.contains('no-atom-labels'), atomLabelsSize: atomLabelScale,
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -266,13 +266,13 @@ export async function boot(dom) {
     document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
-    const molFormula = s.molFormula !== false;                       // MOLECULE FORMULA: nothing said means ON (it only shows while MOLECULES is on)
+    /* THE STAGE TEXT (0.4.0 S3): one switch for the formula, the fade and the atom labels; nothing said means ON.  The ATOM
+       LABELS' own key is read ONCE — only where the formula's was never written (an older profile) — and is dropped by the
+       next save with its SIZE: a stored molFormula decides, because the row is one switch and that is the key it keeps. */
+    const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false;
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
     molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
-    const atomLabels = s.atomLabels !== false;                      // ATOM LABELS: nothing said means ON (they only show while MOLECULES is on)
-    document.body.classList.toggle('no-atom-labels', !atomLabels); if (ui.atomSw) ui.atomSw.set(atomLabels);
-    atomLabelScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : 1; if (ui.atomK) ui.atomK.set(atomLabelScale);
-    placeMolFormula(); atomLabelsKey = '';
+    if (stageText) { stageText.setScale(molFormulaScale); stageText.setOn(molFormula); }
     /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
        mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
        whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
@@ -319,14 +319,16 @@ export async function boot(dom) {
   }
 
 
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', dynamics: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', qcd: 'info', atoms: 'info', field: 'control', molecule: 'other', helium: 'other', h2: 'other', chem: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
      board #59, which kept the heir's id precisely so that three CSS selectors and the gate did not have to
      move.  Read by layout.applyLayout(); the settings key's `closed[]` needs nothing, because it names each
      window independently and the heir already names itself. */
-  const RETIRED_WINDOWS = { style: 'observer' };
+  /* 0.4.0 S3 (R-W1): DYNAMICS is retired into SHADOW (L, T, V, S and the plot), CALCULUS (the moments), RADIATION (the
+     lines) and VORTEX (PARTICLES); a saved layout's DYNAMICS seat lands on SHADOW. */
+  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow' };
   /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
      leaving the viewport must save work without rewriting the user's project or switches. */
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
@@ -385,7 +387,7 @@ export async function boot(dom) {
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
      the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */
-  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, fieldlines: 0, dynamics: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, badges: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
+  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, fieldlines: 0, slice: 0, qcd: 0, molecule: 0, calculus: 0, meters: 0, badges: 0, atoms: 0, wigner: 0, radiation: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
   const frameBudget = createFrameBudget();
   const perfBudgetMs = () => frameBudget.milliseconds(perf.mode);
   const tick = (name, fn) => { const a = performance.now(); fn(); const d = performance.now() - a; perf.profile[name] = perf.profile[name] * 0.9 + d * 0.1; if (d >= 1) { perf.work[name] = perf.work[name] ? perf.work[name] * 0.7 + d * 0.3 : d; perf.wall[name] = a; } };
@@ -1001,10 +1003,9 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (molFormulaEl) stageTextTick();
-      if (atomLabelsEl) placeAtomLabels();                                // the ATOM LABELS follow the camera                                   // the stage text follows the atom register (rack.js placeMolFormula)
+      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (stage-text.js: compares only)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
-      if (may('shadow', wSh)) tick('shadow', () => shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected));
+      if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
     const overlayDomain = space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P &&
@@ -1014,7 +1015,7 @@ export async function boot(dom) {
       if (vortexVisible && may('vortex')) tick('vortex', () => vortex.update(reg, clock.t, obs, domain.half, clock.playing));
       else if (!vortexVisible) vortex.suspend();
 
-      const particlesVisible = canPresent(wDyn);
+      const particlesVisible = canPresent(wVor);   // 0.4.0 S3: PARTICLES live in VORTEX — the flow
       if (particlesVisible && particles.on && may('particles')) tick('particles', () => {
         if (perf.cpuEvery === 1 || (perf.counts.frames % 2) === 0) particles.advance(reg, clock.t, domain.half);
         particles.draw(obs, domain.half);
@@ -1072,7 +1073,6 @@ export async function boot(dom) {
       });
     }
     if (cpuTick) {
-      if (may('dynamics', wDyn)) tick('dynamics', () => dynamics.update(reg, clock.t, clock.playing));
       if (sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t, clock.playing));
       if (may('qcd', wQCD)) tick('qcd', () => qcd.update());
       if (may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
@@ -1109,7 +1109,7 @@ export async function boot(dom) {
        their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
        shown or the canvas being read (focused); the governor's readout stays with METERS. */
     if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }
-    if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
+    if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in CLIP (id `clip`), not in PLANE (id `slice`) — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[slot] = spent;                                          // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
@@ -1186,8 +1186,11 @@ export async function boot(dom) {
     if (domain.auto && nm !== lastNmax) { lastNmax = nm; schedule(TIER.REBUILD); }
     else schedule(TIER.RECONSTRUCT);
   }
-  function loadPreset(id) {
+  /** a preset into the atom register.  `opt.hand` is the PRESS (the STATE select and RELOAD): only a hand's preset is
+   *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
+  function loadPreset(id, opt) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
+    if (opt && opt.hand && stageText) stageText.announce(p.label.replace(/[\\`*_{}[\]()#+\-.!|$<>~]/g, '\\$&'));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); lastNmax = -1;
     clock.window = p.visual.window;
@@ -1262,7 +1265,7 @@ export async function boot(dom) {
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
   let exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
-  const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
+  const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
   {
 
 
@@ -1299,12 +1302,9 @@ export async function boot(dom) {
     ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
     ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing large on the stage: the MOLECULES formula, or the SPECTRUM states (A ↔ B under a transition)', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); placeMolFormula(); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
-    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE FORMULA\'s size: 100% is 88 px; it wraps inside the same width between the racks',
-      onInput: (v) => { molFormulaScale = v; placeMolFormula(); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
-    ui.atomSw = sw({ label: 'ATOM LABELS', value: true, title: 'Mark each nucleus of the MOLECULES molecule with its element symbol, inverted against whatever is under it', onChange: (v) => { document.body.classList.toggle('no-atom-labels', !v); atomLabelsKey = ''; schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.atomSw.root);
-    ui.atomK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The ATOM LABELS\' size: 100% is 13 px',
-      onInput: (v) => { atomLabelScale = v; atomLabelsKey = ''; schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.atomK.root);
+    ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
+      onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
 
@@ -1592,7 +1592,7 @@ export async function boot(dom) {
     const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
     let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
-    const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩
+    const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
     const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
     const rc1 = el('div', 'row tight', gcap);
     ui.capScale = seg({ label: 'PICTURE', value: '2', options: [{ id: '1', label: '×1' }, { id: '2', label: '×2' }, { id: '3', label: '×3' }, { id: '4', label: '×4' }],
@@ -1764,6 +1764,11 @@ export async function boot(dom) {
     const r5b = el('div', 'row tight', gq);
     ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
     ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
+    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with
+      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
+      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
+      onChange: (v) => { setPerfMode(v); saveSettings(); } });
+    r5b.appendChild(ui.perfSeg.root);
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
     const r6 = el('div', 'row', gq);
@@ -1774,7 +1779,7 @@ export async function boot(dom) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
   /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
@@ -1789,11 +1794,11 @@ export async function boot(dom) {
     const r1 = wState.row();
     ui.presetSel = el('select', 'sel', r1); ui.presetSel.setAttribute('aria-label', 'preset superposition');
     for (const p of PRESETS) { const o = el('option', '', ui.presetSel, p.label); o.value = p.id; }
-    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value));
+    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value, { hand: true }));
     ui.presetSel.style.flex = '1 1 160px';
 
 
-    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value) }).root);
+    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value, { hand: true }) }).root);
     r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { applyVisuals = v; } }).root);
     ui.presetNote = el('div', 'note', wState.body, '');
     const r2 = wState.row();
@@ -2071,7 +2076,7 @@ export async function boot(dom) {
     reg.setEnergies(energyOf);
     if (!H.stark && reg.field.Fz !== 0) { reg.setField({ Fz: 0 }); if (ui.fz) ui.fz.set(0); }
     if (H.noMomentum && space === 'p') { space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
-    for (const w of [wOrb, wVor, wDyn, wSlice, wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
+    for (const w of [wOrb, wVor, wSlice, wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     if (ui.fldWin) { const hy = H.id === 'hydrogen'; ui.fldWin.setStatus(hy ? 'exact · closed form · reads c(t)' : 'hydrogenic register only', hy ? '' : 'warn'); if (!hy) { for (const r of [ui.fldQ, ui.fldPhi, ui.fldE, ui.fldB]) if (r) r.set('—', 'warn'); } }
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });   // wave 50: the API, so the RATE is in the number the card shows
@@ -2125,7 +2130,7 @@ export async function boot(dom) {
     if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L² drives a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
     if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'not built for the Sturmians: position space only under STURMIAN'); } }
     if (ui.spaceNote) ui.spaceNote.hidden = !on;
-    if (!(helium && helium.on)) { for (const w of [wOrb, wVor, wDyn, wSlice, wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems; if (wCalc) wCalc.root.hidden = on; }   // theorems about hydrogen's eigenfunctions stand down
+    if (!(helium && helium.on)) { for (const w of [wOrb, wVor, wSlice, wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems; if (wCalc) wCalc.root.hidden = on; }   // theorems about hydrogen's eigenfunctions stand down
     if (ui.fldWin) { const hy = H.id === 'hydrogen' && !on; ui.fldWin.setStatus(hy ? 'exact · closed form · reads c(t)' : on ? 'hydrogen only: no closed-form field for the scaled radials' : 'hydrogenic register only', hy ? '' : 'warn'); if (!hy) { for (const r of [ui.fldQ, ui.fldPhi, ui.fldE, ui.fldB]) if (r) r.set('—', 'warn'); } }
     wSpec.setStatus(...specStatus());
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });
@@ -2214,6 +2219,10 @@ export async function boot(dom) {
     el('div', 'epi', wSh.body, 'THE SAME COEFFICIENTS IN q,p COORDINATES');
   el('div', 'note', wSh.body).innerHTML = '<b>Shadow.</b> Each complex coefficient appears as one q,p oscillator. This is a coordinate map of the same quantum state, not a classical atom model.';
   }
+  /* the FOOTER (0.4.0 S3, out of the retired DYNAMICS): L, T, V, S and their history — native-ui.js seats it in SHADOW's
+     details fold, and the frame loop runs it only while that fold is open */
+  ui.shFoot = el('div', 'shadow-foot', wSh.body);
+  const shadowFoot = createShadowFoot(ui.shFoot);
 
   // ORBIT — the two rotors (print, Thread B)
   const wOrb = device({ id: 'orbit', eyebrow: 'ORBIT', status: '' });
@@ -2250,28 +2259,32 @@ export async function boot(dom) {
   el('div', 'note', wOrb.body).innerHTML = '<b>Kepler overlay.</b> The selected shell sets the ellipse size and eccentricity from ⟨L⟩ and ⟨K⟩. Dashed lines indicate a low-coherence correspondence; no orbit is drawn below the threshold.';
   }
 
-  // VORTEX — the nodal lines (print, Thread C)
+  // VORTEX — the flow: the nodal lines (print, Thread C), and the PARTICLES that ride the same current
   const wVor = device({ id: 'vortex', eyebrow: 'VORTEX', status: '' });
   rack.appendChild(wVor.root);
   const vortex = createVortex(wVor.body, dom.vortex, { reg, clock, scrubTo: (t) => { clock.scrub(t); schedule(TIER.EVOLVE); } });
-
-  // DYNAMICS — the Lagrangian picture, the action–angle chart, the dipole, and the particle view
+  /* PARTICLES (0.4.0 S3 · R-W1: out of the retired DYNAMICS): de Broglie–Bohm tracers seeded from |ψ|² and riding v = j/ρ —
+     the same current whose singular lines VORTEX locates, so the switch lives here and its overlay presents while VORTEX
+     can.  COUNT and TRAIL are the project's (instruments.particles); the switch is the overlay's (overlays.particles). */
   const particles = createParticles(dom.particles, {});
+  {
+    const gP = group(wVor.body, 'PARTICLES'), r = el('div', 'row tight', gP);
+    const seed = () => { particles.seed(Math.round(ui.pN.get()), reg, clock.t, domain.half); schedule(TIER.PRESENT); };
+    ui.pOn = sw({ label: 'PARTICLES', value: false, title: 'Draw de Broglie–Bohm tracers seeded from |ψ|², riding the current v = j/ρ', onChange: (v) => { particles.setOn(v); if (v) seed(); else schedule(TIER.PRESENT); } });
+    ui.pN = knob({ label: 'COUNT', min: 20, max: 600, value: 160, log: true, step: 10, fmt: (v) => v.toFixed(0), onChange: () => { if (ui.pOn.get()) seed(); } });
+    ui.pTrail = knob({ label: 'TRAIL', min: 0, max: 120, value: 24, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { particles.setTrail(Math.round(v)); schedule(TIER.PRESENT); } });
+    for (const c of [ui.pOn, ui.pN, ui.pTrail]) r.appendChild(c.root);
+    r.appendChild(trig({ label: 'RESEED', title: 'sample a fresh cloud from |ψ|² at the current time', onFire: () => { if (ui.pOn.get()) seed(); } }).root);
+    el('div', 'note', gP).innerHTML = '<b>Particles.</b> Seeds follow |ψ|² and move with the probability current; a path never crosses a nodal line. Paths stop at the domain edge or near a node; speed is capped for display.';
+  }
   /* FLOW (MOLECULAR WAVES stage 6): the SAME tracer view on its own canvas, riding a molecule's current v = j/ρ —
      the STATES register hands it a source (lab/molecular-flow.js) whose matrices it rebuilds once a frame */
   const flowTracers = dom.flow ? createParticles(dom.flow, { ink: () => (document.body.dataset.theme === 'light' ? { trail: 'rgba(16,36,84,0.42)', dot: 'rgba(10,22,56,0.92)', text: 'rgba(20,30,50,0.6)' } : { trail: 'rgba(190,230,255,0.4)', dot: 'rgba(235,248,255,0.95)', text: 'rgba(255,255,255,0.5)' }),
     caption: (st) => `FLOW · ${st.alive}/${st.count} tracers on v = j/ρ of the TD-CIS density matrix · sense exact, magnitude qualitative in STO-3G` }) : null;
   let flowEpoch = null;                                                // the SOURCE the tracers were seeded from: a new source is a new ensemble
-  const wDyn = device({ id: 'dynamics', eyebrow: 'DYNAMICS', status: '' });
-  rack.appendChild(wDyn.root);
-  const dynamics = createDynamics(wDyn.body, {
-    particles,
-    seedParticles(n) { particles.seed(n, reg, clock.t, domain.half); },
-    repaint() { schedule(TIER.PRESENT); }
-  });
 
-  // SLICE — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
-  const wSlice = device({ id: 'slice', eyebrow: 'SLICE', status: '' });
+  // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
+  const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
   const slice = createSliceView(wSlice.body, {
     lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
@@ -2283,7 +2296,7 @@ export async function boot(dom) {
   rack.appendChild(wSlice.root);
 
   // QCD — the confining side: quarkonium under a chosen potential, the flavour-independence verdict, the string
-  /* ── LEGACY WINDOWS (2026-10, Josh): QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are HIDDEN, the way the H₂⁺ card below has
+  /* ── LEGACY WINDOWS (2026-10, Josh): QCD, HELIUM, H₂ and ELECTROSTATICS are HIDDEN (ATOMS is back since 0.4.0 S3), the way the H₂⁺ card below has
      been since 0.2.0.  Each NEEDS AN UPGRADE, RE-ADOPTION (into MIR) OR DELETION — docs/LEGACY-WINDOWS.md says what each
      one is and what each choice costs.  `hidden` takes a card out of the + menu, the WINDOW menu, TAB and canPresent();
      ids, models and save records are kept, so an older project still opens, and a project that NEEDS one brings it back
@@ -2320,7 +2333,7 @@ export async function boot(dom) {
   pulsePanel = createPulse(wMol.body, { now: () => clock.t });
   let specFoldedByMol = false;           // 2026-10: SPECTRUM folded by a molecule taking the field (so the molecule's end unfolds it)
   function moleculeMode(v) {
-    for (const w of [wState, wSh, wOrb, wVor, wDyn, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    for (const w of [wState, wSh, wOrb, wVor, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     /* 2026-10 (Josh) · SPECTRUM is MINIMISED, not hidden: it stays on the rack, folded, while a molecule has the field, and
        unfolds when the molecule lets go — unless the reader folded or unfolded it themselves in between. */
     if (wSpec) {
@@ -2372,119 +2385,56 @@ export async function boot(dom) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
-    setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); placeMolFormula(); },
+    setOn(v) { if (v) { if (molecule.on) molecule.setOn(false); if (helium.on) helium.setOn(false); if (h2.on) h2.setOn(false); } moleculeMode(v); stageTextTick(); },
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: molSession,
     derived: (fill) => (history ? history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
     now: () => clock.t });
 
-  /* MOLECULE FORMULA (Settings › Display, 2026-10; interim — the stage rework will reabsorb it).  The MOLECULES pick, set
-     large in the maths face on the stage while MOLECULES is on.  It sits on the side the transport is NOT on: the TOP
-     while the pill floats at the foot, the FOOT when the transport is docked or the pill has gone up (modDodge's
-     `.at-top`, or the narrow layout's top-right seat).  It is transparent text, so it is never in refreshOcclusion(),
-     never takes a pointer, and it sits beneath every window (z 20 < the rack's 30 < #floats' 32): the modulation window
-     may cover it.  Its ink follows the live STAGE colour (accent-wheel.js paintMarks), not the theme's. */
-  let molFormulaEl = null;
-  const molFormulaNarrow = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
-  function placeMolFormula() {
-    const fe = molFormulaEl; if (!fe) return;                      // built at the end of boot, after `layout` exists
-    const text = stageText();
-    const show = !!text && !document.body.classList.contains('no-mol-formula');
-    if (fe.textContent !== text) fe.textContent = text;
-    const tr = document.getElementById('transport');
-    const foot = layout.docked || !!(tr && tr.classList.contains('at-top')) || !!(molFormulaNarrow && molFormulaNarrow.matches);
-    fe.classList.toggle('mf-foot', foot); fe.classList.toggle('mf-top', !foot);
-    /* 2026-10 (Josh) · HALF the first size (88 px on a desktop, 8 vw on a phone), and CAPPED TO THE MIDDLE: centred in the
-       open stage between the two racks, then MEASURED down until it fits that gap less a large margin each side. */
-    if (show) {
-      fe.hidden = false;
-      let l = 0, r = window.innerWidth;
-      for (const rk of [rackL, rack]) {
-        if (!rk) continue;
-        const b = rk.getBoundingClientRect();
-        if (b.width < 2 || b.right <= 0 || b.left >= window.innerWidth || getComputedStyle(rk).display === 'none') continue;
-        if (b.left + b.width / 2 < window.innerWidth / 2) l = Math.max(l, b.right); else r = Math.min(r, b.left);
-      }
-      if (r - l < 120) { l = 0; r = window.innerWidth; }                // a phone's rack covers the stage: use the whole width
-      fe.style.left = Math.round((l + r) / 2) + 'px';
-      const gap = r - l, room = Math.max(80, gap - 2 * Math.max(48, gap * 0.12));       // a LARGE margin off each rack: ≥ 48 px or 12 % of the gap
-      /* the SIZE knob scales the base; the width limit is unchanged, so a long line WRAPS inside it, and only a single
-         unbreakable word (a long formula) wider than the room is measured down to fit */
-      const cap = Math.round(Math.max(24, Math.min(88, window.innerWidth * 0.08)) * molFormulaScale);
-      fe.style.maxWidth = Math.round(room) + 'px'; fe.style.fontSize = cap + 'px';
-      if (fe.scrollWidth > fe.clientWidth + 1) fe.style.fontSize = Math.max(16, Math.floor((cap * fe.clientWidth) / fe.scrollWidth)) + 'px';
-      /* … and never past the MIDDLE of the screen: wrapped lines that would run beyond 45 % of the height shrink the
-         size until they fit (each pass re-wraps, so it converges in a few) */
-      const maxH = window.innerHeight * 0.45;
-      for (let i = 0; i < 8 && fe.offsetHeight > maxH; i++) {
-        const fs = parseFloat(fe.style.fontSize) || cap, next = Math.max(16, Math.floor(fs * Math.max(0.6, Math.sqrt(maxH / fe.offsetHeight))));
-        if (next >= fs) break; fe.style.fontSize = next + 'px';
-      }
-    }
-    fe.hidden = !show;
+  /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2) — lab/stage-text.js renders it, and 0.5.0 deletes that file for the
+     kit's INFORMATIONAL layer.  Here is only its SOURCE: what is playing, as markdown — the MOLECULES formula
+     ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
+     own prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION).  The states go in with UNIT coefficients — the list line
+     depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
+     only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
+  let stageText = null;
+  const stageSrc = { v: -1, id: null, own: null };
+  /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
+  function stageStates(md) {
+    const H = getHamiltonian(), mix = reg.transition;
+    const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
+      : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
+    const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
+    if (mix) { const A = line(live(mix.reA, mix.imA)), B = line(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
+    return line(reg.populated());
   }
-  /** 2026-10 (Josh) · the same stage text for SPECTRUM: the atom register's populated states, "2s₀, 2p₋₁"; under an A ↔ B
-   *  TRANSITION, A's states ↔ B's states.  Only while the atom register owns the field (no molecular owner is on). */
-  let molFormulaKey = '';
-  function registerText() {
-    if ((molecule && molecule.on) || (helium && helium.on) || (h2 && h2.on) || (chem && chem.on)) return '';
-    const H = getHamiltonian(), name = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
-    const list = (re, im) => { const out = []; for (let a = 0; a < BASIS.length; a++) if (re[a] * re[a] + im[a] * im[a] > 1e-12) out.push(name(a)); return out.join(', '); };
-    const mix = reg.transition;
-    if (mix) { const A = list(mix.reA, mix.imA), B = list(mix.reB, mix.imB); return A && B ? A + '  ↔  ' + B : A || B; }
-    return reg.populated().map(name).join(', ');
+  function stageMd() {
+    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    return row ? '$' + formulaLatex(row.formula) + '$' : molecule.on || helium.on || h2.on ? '' : stageStates(true);
   }
-  function stageText() { const m = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null; return m ? mathPlain(m.formula) : registerText(); }
-  /** polled from the CPU tick (the register has no change event): the key is the string it would render, so a modulated
-   *  coefficient that leaves the populated set alone is one compare and no DOM */
+  /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
+   *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
+   *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE TEXT switch.  KIT BRIEF 6 replaces it. */
+  function stageCaption() {
+    if (!stageText || !stageText.on) return '';
+    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    if (!row) return molecule.on || helium.on || h2.on ? '' : stageStates(false);
+    const o = chem.exportNames(), k = o && o.orbital;
+    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[chem.basis] || ''].filter(Boolean).join(' · ');
+  }
   function stageTextTick() {
-    const key = stageText();
-    if (key !== molFormulaKey) { molFormulaKey = key; placeMolFormula(); }
+    if (!stageText) return;
+    const id = chem && chem.on ? chem.preset() : '', own = molecule.on || helium.on || h2.on;
+    if (reg.version === stageSrc.v && id === stageSrc.id && own === stageSrc.own) return;
+    stageSrc.v = reg.version; stageSrc.id = id; stageSrc.own = own;
+    stageText.setFormula(stageMd());
   }
-  /* 2026-10 (Josh) · ATOM LABELS (Settings › Display, PREFERENCE `atomLabels` / `atomLabelsSize`): each nucleus of the
-     MOLECULES molecule marked with its element symbol, small, at its projected screen position.  The atoms are
-     moleculeAtoms(preset) in bohr — the very centres the field's shells sit on — projected through toScreen (field.js),
-     the road every 2-D overlay takes.  The layer is white with
-     `mix-blend-mode: difference`, so every glyph INVERTS whatever is under it: dark on a light cloud, light on a dark one.
-     Transparent, no pointer, under every window, never in the occlusion mask.  Written only when the camera
-     (cameraKey, dist, fov), the preset, the size or the canvas changed (PLAN B3). */
-  let atomLabelsEl = null, atomLabelsKey = '', atomPlaceKey = '', atomSpans = [];
-  function placeAtomLabels() {
-    const L = atomLabelsEl; if (!L) return;
-    const on = !!(chem && chem.on) && !document.body.classList.contains('no-atom-labels');
-    if (!on) { if (!L.hidden) L.hidden = true; atomLabelsKey = atomPlaceKey = ''; return; }
-    const id = chem.preset(), atoms = moleculeAtoms(id);
-    if (atomLabelsKey !== id + '|' + atomLabelScale) {
-      atomLabelsKey = id + '|' + atomLabelScale; atomPlaceKey = '';
-      L.textContent = ''; atomSpans = atoms.map((a) => el('span', 'atom-label', L, ELEMENT[a.Z] || '?'));
-      L.style.fontSize = Math.round(13 * atomLabelScale) + 'px';
-    }
-    L.hidden = false;
-    const cv = dom.canvas, W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
-    const key = `${atomLabelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${domain.half}|${W}|${H}`;
-    if (key === atomPlaceKey) return;
-    atomPlaceKey = key;
-    const S = toScreen(obs, domain.half, W, H);
-    for (let i = 0; i < atoms.length; i++) {
-      const a = atoms[i], sp = atomSpans[i]; if (!sp) continue;
-      const q = S.at(a.x, a.y, a.z);
-      if (!q) { sp.style.display = 'none'; continue; }
-      sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
-    }
-  }
-  function initMolFormula() {
-    atomLabelsEl = el('div', '', dom.stage); atomLabelsEl.id = 'atomLabels'; atomLabelsEl.setAttribute('aria-hidden', 'true'); atomLabelsEl.hidden = true;
-    molFormulaEl = el('div', '', dom.stage); molFormulaEl.id = 'molFormula'; molFormulaEl.setAttribute('aria-hidden', 'true'); molFormulaEl.hidden = true;
-    const tr = document.getElementById('transport');
-    if (tr) new MutationObserver(placeMolFormula).observe(tr, { attributes: true, attributeFilter: ['class'] });   // dock / undock / .at-top
-    /* the racks hide, peek and slide (body classes), so the middle moves: place now and again once the slide has landed */
-    new MutationObserver(() => { placeMolFormula(); setTimeout(placeMolFormula, 400); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    window.addEventListener('resize', placeMolFormula, { passive: true });
-    if (molFormulaNarrow && molFormulaNarrow.addEventListener) molFormulaNarrow.addEventListener('change', placeMolFormula);
-    wChem.root.addEventListener('change', placeMolFormula);          // the pick lands in `preset` at once; the solve comes later
-    chem.subscribe(() => placeMolFormula());                         // … and a restore / undo / link that re-solves
-    paintMarks(); placeMolFormula();
+  function initStageText() {
+    stageText = createStageText({ stage: dom.stage, canvas: dom.canvas, racks: [rackL, rack], docked: () => layout.docked });
+    wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
+    chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
+    paintMarks(); stageTextTick();
   }
 
   /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
@@ -2500,6 +2450,7 @@ export async function boot(dom) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
+    announce: (md) => stageText && stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
     now: () => clock.t, field: () => field, chem: () => chem, session: molSession });
   orbitals = register.orbitals; states = register.states;
 
@@ -2514,14 +2465,9 @@ export async function boot(dom) {
   const meters = createMeters(wMet.body);
 
   {
-    const rp = wMet.row('tight');
-    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [
-      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
-      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
-      onChange: (v) => { setPerfMode(v); saveSettings(); } });
-    rp.appendChild(ui.perfSeg.root);
+    const rp = wMet.row('tight');                                     // 0.4.0 S3: PERFORMANCE moved to SETTINGS › QUALITY; the GOVERNOR's readout stays here
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 22 ms · the window median' }); rp.appendChild(ui.govRo.root);
-  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. 120 Hz mode updates visible CPU readers every fourth frame while the field continues to present each frame.';
+  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. PERFORMANCE (SETTINGS › QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
@@ -2620,10 +2566,10 @@ export async function boot(dom) {
         get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); } },
 
 
-      { id: 'material.slice.pos', label: 'SLICE POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
+      { id: 'material.slice.pos', label: 'CLIP POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
         hint: 'Set the clip or slab position',
         get: () => mat.slice.pos, set: (v) => { mat.slice.pos = v; setKnob(ui.slicePosK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.slice.thick', label: 'SLICE THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
+      { id: 'material.slice.thick', label: 'CLIP THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
         hint: 'Set slab depth',
         get: () => mat.slice.thick, set: (v) => { mat.slice.thick = v; setKnob(ui.sliceThickK, v); schedule(TIER.PRESENT); } },
 
@@ -2844,16 +2790,16 @@ export async function boot(dom) {
     if (page.hidden) modHost.clock.setHidden(true);
   }
 
-  // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); a niche window: it ships CLOSED
-  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS · LEGACY', status: '' });
+  // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
+  // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
+  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
-    step: (d) => setElement(HAMILTONIANS.atom.Z + d),
+    select: (z) => setElement(z),
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
   });
-  legacyWindow(wAtoms);
 
   // ELECTROSTATICS — the classical field of the register's own charge, in closed form; a niche window: it ships CLOSED
   const wFld = device({ id: 'field', eyebrow: 'ELECTROSTATICS · LEGACY', status: '' });
@@ -2916,8 +2862,8 @@ export async function boot(dom) {
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
   const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => __LW_hooks.ab });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
-  Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wDyn, kepler: wOrb, fieldlines: wFld,
-    dynamics: wDyn, slice: wSlice, qcd: wQCD, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+  Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb, fieldlines: wFld,
+    slice: wSlice, qcd: wQCD, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMol, wHe, wH2, wMet, wFld, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one
@@ -3894,10 +3840,11 @@ export async function boot(dom) {
     /** an INFO panel's digest: every readout, the status, and the module's own table — as text for the notebook */
     digest(id) {
       const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (!dev) return '';
+      const own = DIGESTS[id] ? DIGESTS[id]() : ''; if (own && own.md !== undefined) return own.md;   // a window whose copy is markdown (CALCULUS' prose figure) copies that alone
       const lines = ['λWAVES · ' + dev.querySelector('.dev-title').textContent + ' · t = ' + clock.t.toFixed(4) + ' · ' + new Date().toISOString()];
       const st = dev.querySelector('.dev-stat'); if (st && st.textContent.trim()) lines.push('status\t' + st.textContent.trim());
       for (const ro of dev.querySelectorAll('.ro')) { const l = ro.querySelector('.ro-lbl'), v = ro.querySelector('.ro-val'), s = ro.querySelector('.ro-sub'); lines.push([l ? l.textContent.trim() : '', v ? v.textContent.trim() : '', s ? s.textContent.trim() : ''].join('\t')); }
-      const extra = DIGESTS[id] ? DIGESTS[id]() : ''; if (extra) lines.push('', extra);
+      if (own) lines.push('', own);
       return lines.join('\n');
     },
     /** THE ONE CLIPBOARD ROAD for a window's copy: write the text, flash `copied` on the window (· COPIED on its status line) */
@@ -4020,7 +3967,7 @@ export async function boot(dom) {
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
         WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
@@ -4899,7 +4846,7 @@ export async function boot(dom) {
            particles and pulse runs do not: every project still opens paused on its first frame. */
         instruments: { molecule: molecule.save(), helium: helium.save(), h2: h2.save(), chem: chem.save(), orbitals: orbitals.save(), states: states.save(), register: { mode: register.mode }, qcd: qcd.save(),
           pulse: pulsePanel ? pulsePanel.api.save() : null, ladder: { ...ladder.params },
-          particles: { count: Math.round(dynamics.ui.n.get()), trail: particles.trailLen } },
+          particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
         mo: moPanel ? moPanel.save() : null,
         rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: modHost ? modRackStamped() : null,
@@ -4997,7 +4944,7 @@ export async function boot(dom) {
         if (!hist) {
           clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
           if (ui.scrub) ui.scrub.set(0);
-          shadowView.clearTrail(); dynamics.clearHistory(); particles.resetClock(clock.t);
+          shadowView.clearTrail(); shadowFoot.clear(); particles.resetClock(clock.t);
         }
         if (Number.isFinite(ex.rate) && ex.rate > 0) clock.setRate(paceRate(ex.rate));
         if (ex.window) clock.window = ex.window;
@@ -5067,8 +5014,8 @@ export async function boot(dom) {
           if (I.states && I.states.on && fieldOwner === 'chem') states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
           if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
           if (I.particles) {
-            if (Number.isFinite(I.particles.count)) dynamics.ui.n.set(I.particles.count);
-            if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); dynamics.ui.trail.set(I.particles.trail); }
+            if (Number.isFinite(I.particles.count)) ui.pN.set(I.particles.count);
+            if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); ui.pTrail.set(I.particles.trail); }
           }
         }
         if (pr.field) { const F = pr.field; if (F.overlay !== undefined) fieldlines.setOverlay(F.overlay); if (F.lines !== undefined) fieldlines.setLines(F.lines); if (F.source !== undefined) fieldlines.setSource(F.source); }
@@ -5087,7 +5034,7 @@ export async function boot(dom) {
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
           if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
-          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(count || 160, reg, clock.t, domain.half); } else particles.setOn(false); if (dynamics.ui.on) dynamics.ui.on.set(!!O.particles.on); }
+          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(count || 160, reg, clock.t, domain.half); } else particles.setOn(false); ui.pOn.set(!!O.particles.on); }
           if (O.dials !== undefined && spectrum.setDials && !(pr.readers && pr.readers.spectrum)) spectrum.setDials(!!O.dials); }
         if (pr.readers) {
           if (pr.readers.spectrum) { const S = pr.readers.spectrum; if (Number.isFinite(S.selected)) spectrum.select(S.selected); if (S.dials !== undefined) spectrum.setDials(!!S.dials); }
@@ -5105,7 +5052,7 @@ export async function boot(dom) {
         if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
         if (fieldlines.overlay !== 'off' && !hist) layout.raise('field');   // a hidden ELECTROSTATICS cannot present, so a file whose overlay is on raises it (on, unfolded, on screen)
         if (pr.instruments && chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
-        placeMolFormula();                                            // the MOLECULE FORMULA follows whatever MOLECULES the file left
+        stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
@@ -5381,7 +5328,7 @@ export async function boot(dom) {
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const modEdited = () => { if (modView) modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, dynamics, slice, qcd, kepler, molecule, helium, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, get particleUI() { return { on: ui.pOn, n: ui.pN, trail: ui.pTrail }; }, slice, qcd, kepler, molecule, helium, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, placeElectron(px, py) { if (helium && helium.on) { helium.placeAt(unproject(px, py)); schedule(TIER.RECONSTRUCT); } }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */
@@ -5647,7 +5594,7 @@ export async function boot(dom) {
      (or was accepted by this browser before).  See `armAutoplay` below. */
   Object.assign(DIGESTS, {
     meters: () => 'density period\t' + (() => { const P = __LW_hooks.period ? __LW_hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
-    calculus: () => calculus && calculus.last ? JSON.stringify(calculus.last, null, 1) : '',   // 0.4.0 S0 · wave 137: the view returns `last` (calculusview.js); `stats` never existed, so ⧉ copied the header alone
+    calculus: () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' }),   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
     vortex: () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '',
     spectrum: () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
       + (sturm.P ? (() => { const e = sturmEigen(); return '\n\nSTURMIAN λ = ' + sturm.lambda.toFixed(4) + ' · Z = ' + getZ() + ' · ⟨c|S|c⟩ = ' + e.norm.toFixed(6) + ' · ⟨H⟩ = ' + e.energy.toFixed(6) + '\neigenvalue\tpopulation\t(l, m)\n' + e.E.map((E, k) => E.toFixed(6) + '\t' + e.pop[k].toFixed(6) + '\t' + 'spdfgh'[e.l[k]] + (e.m[k] >= 0 ? '+' : '-') + Math.abs(e.m[k])).join('\n'); })() : ''); },
@@ -5667,7 +5614,7 @@ export async function boot(dom) {
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
   }
-  initMolFormula();
+  initStageText(); LW.stageText = stageText;   // the gate reads its string, its render count and its announcements
   applySettings();
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them
 

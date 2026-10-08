@@ -42,26 +42,64 @@ item it crosses; RIGHT click removes one, RIGHT drag removes every item it
 crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is
 taken whole. One stroke is one undo row.
 
-QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are hidden LEGACY windows (2026-10)
+QCD, HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows (2026-10)
 that need an upgrade, re-adoption into MIR, or deletion — read
 `docs/LEGACY-WINDOWS.md` before touching them. They keep their ids, models and
 save records; HELIUM/H₂ resurface when a project turns them on as field owner,
-ELECTROSTATICS when a project's overlay is on, ATOMS when SPECTRUM's ATOM
-operator is chosen (QUARKONIUM's button is hidden while QCD is; the value still
-restores). Do not re-list them in + or WINDOW.
+ELECTROSTATICS when a project's overlay is on (QUARKONIUM's button is hidden
+while QCD is; the value still restores). Do not re-list them in + or WINDOW.
+ATOMS left that list in 0.4.0 (R-A2): it is the periodic-table window — H–Kr
+cells in SPECTRUM's own picker, periods as columns on the card and a phone and
+rows floating, its Δ-SCF / quantum-defect / α-order readouts kept — opened by
+SPECTRUM's ATOM and listed in + and WINDOW (it ships closed).
 
-The STAGE FORMULA (Settings › Display, PREFERENCE `molFormula`, on by
-default) writes what is playing in the maths face on the stage: the MOLECULES
-formula while MOLECULES is on, otherwise SPECTRUM's populated states ("2s₀,
-2p₋₁"; A ↔ B under a TRANSITION). 88 px × its SIZE knob (`molFormulaSize`,
-50–300 %), centred between the racks with a wide margin; it WRAPS inside that
-width (only an unbreakable word is shrunk); at the top while the transport pill
-floats at the foot, at the foot when the transport is docked or the pill is at
-the top. It is transparent text under every window and never part of the
-occlusion mask. ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by
-default, 13 px × SIZE) mark each MOLECULES nucleus with its element symbol at
-its projected position (`placeAtomLabels`, the PARTICLES projection), white
-under `mix-blend-mode: difference` so they invert whatever is beneath them.
+DYNAMICS is RETIRED (0.4.0 S3): `RETIRED_WINDOWS` maps a saved `dynamics` seat
+to `shadow`, as `style` maps to `observer`. Its L, T, V, S and their plot are
+SHADOW's footer (in its details fold, computed only while the fold is open),
+its moments are CALCULUS rows, its emission lines RADIATION's, its rotor
+entropy ORBIT's Schmidt tile, and its PARTICLES a switch in VORTEX — the flow;
+the action–angle chart is SPECTRUM. `lab/dynamics.js` stays as their physics.
+CALCULUS is RADIATION's tiles (the kit's readouts, in a grid of two columns on
+the card and three floating, out of LEAN), and its ⧉ copies THE PROSE FIGURE
+(`calculusMarkdown`, `lab/calculus.js`: a heading, one "Figure." paragraph,
+the laws in display maths) that pastes into the notebook and renders. That
+skin went to CALCULUS alone, as Josh asked; METERS and WIGNER keep theirs.
+The rotor plane is PLANE and the stage's cut is CLIP (0.4.0; once SLICE and
+SLICE / CLIP): the ids `slice` / `clip`, `slice.*` and the `material.slice.*`
+targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
+METERS keeps the GOVERNOR readout and FRAME PROFILE.
+
+THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
+PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what
+is playing on the stage in the notebook's own markdown + KaTeX
+(`lab/stage-text.js` — the interim renderer, which 0.5.0 deletes for the kit's
+INFORMATIONAL layer): the MOLECULES formula ($\mathrm{H_{2}O}$) while
+MOLECULES is on, otherwise SPECTRUM's populated states in `stateLatex`'s prose
+("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a live
+coefficient. Its key is the string it would render: the DOM moves only when
+the string does, KaTeX runs at most four times a second, nothing renders while
+it is off, and nothing reads layout per tick (only on a resize, a transport or
+rack move, a SIZE change or a new string). THE FADE: a HAND's preset (STATE's
+PRESET and RELOAD, MO-REGISTRY's WINDING / HOMO + LUMO and STATES presets) is
+announced in the same node — `WINDING · $1e_{1g}$ (a) + (b)`, the names from
+`lab/names.js` — and fades back to the formula; the press threads
+`{ hand: true }`, so a restore, an undo, a project or link open never announces
+(`tests/stage-text.browser-test.mjs`). The same switch and SIZE govern the
+ATOM LABELS: each MOLECULES nucleus marked with its element symbol at its
+projected position (`toScreen`, written only when the camera, molecule, size or
+canvas changed), white under `mix-blend-mode: difference` so they invert
+whatever is beneath them. The older `atomLabels` / `atomLabelsSize` keys are
+read once (only where `molFormula` was never written) and dropped. The type
+scale is the notebook's three sizes: the formula is its title (34 px), an
+announcement its heading (22 px), an atom label its body (14 px), each × SIZE;
+the formula is centred between the racks with a wide margin; it WRAPS inside
+that width (only an unbreakable word is shrunk); at the top while the transport
+pill floats at the foot, at the foot when the transport is docked or the pill is
+at the top. It is transparent text under every window and never part of the
+occlusion mask, and it never reaches an export: a picture, a loop and a video
+carry instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the
+states), drawn by `lab/capture.js` `drawCaption` and following the same switch
+(KIT BRIEF 6 replaces it at 0.5.0).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).

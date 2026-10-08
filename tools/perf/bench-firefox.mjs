@@ -53,9 +53,9 @@ try {
   await loop('sim-ladder · 96³ · UI shown (default windows)');
   await loop('sim-ladder · 96³ · UI hidden', `if(!__LW.uiHidden) __LW.keys.toggleUI()`);
   await loop('sim-ladder · 96³ · UI shown again', `if(__LW.uiHidden) __LW.keys.toggleUI()`);
-  await loop('sim-ladder · 96³ · METERS + DYNAMICS + VORTEX + ORBIT + SLICE open', `for(const id of ['meters','dynamics','vortex','orbit','slice']) __LW.layout.reopen(id,'R'); __LW.windowActivity.presentOffscreen(true)`);
+  await loop('sim-ladder · 96³ · METERS + VORTEX + ORBIT + PLANE open', `for(const id of ['meters','vortex','orbit','slice']) __LW.layout.reopen(id,'R'); __LW.windowActivity.presentOffscreen(true)`);
   await loop('sim-ladder · 96³ · particles on (160) + vortex locate', `__LW.seedParticles(160); __LW.vortex.setOn(true); __LW.vortex.setOverlay(true)`);
-  await ev(`__LW.particles.setOn(false); __LW.vortex.setOn(false); __LW.vortex.setOverlay(false); __LW.windowActivity.presentOffscreen(false); for(const id of ['meters','dynamics','vortex','orbit','slice']) document.querySelector('.dev[data-id="'+id+'"]').classList.add('closed'); return 1;`);
+  await ev(`__LW.particles.setOn(false); __LW.vortex.setOn(false); __LW.vortex.setOverlay(false); __LW.windowActivity.presentOffscreen(false); for(const id of ['meters','vortex','orbit','slice']) document.querySelector('.dev[data-id="'+id+'"]').classList.add('closed'); return 1;`);
   await ev(`__LW.setHamiltonian('well'); __LW.setGasBasis('axial'); __LW.enterBox(); __LW.pause(); return 1;`); await setGrid(128);
   await loop('BOX axial gas · 128³ · UI shown');
   await loop('BOX axial gas · 128³ · UI hidden', `if(!__LW.uiHidden) __LW.keys.toggleUI()`);

@@ -107,7 +107,7 @@ export class Register {
   /**
    * The normal modes of the Hamiltonian in force, with the state's amplitude in each, at time t.
    * With no electric field these ARE the register's modes; with one they are the Stark (parabolic) states —
-   * which is why the action–angle chart in DYNAMICS switches to them automatically.
+   * energy() and autocorrelation() read them (the action–angle chart DYNAMICS drew from them retired with it, 0.4.0 S3).
    */
   normalAmplitudes(t = 0, scratch = false) {
     const out = scratch ? this._na : { E: [], re: [], im: [], label: [] };

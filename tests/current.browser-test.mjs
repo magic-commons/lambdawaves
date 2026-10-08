@@ -197,7 +197,7 @@ try {
   const rotor={qL:[.9238795325,.3826834324,0,0],qR:[.9659258263,0,.2588190451,0]};__LW.slice.load({mode:'ks',half:13.5,gain:3.25,rotor});
   __LW.qcd.load({kind:'bottom',potential:'log',params:{alphaS:.51,sigma:.23,C:.81}});__LW.molecule.load({on:true,R:3.4,kind:'sigma_u'});
   __LW.pulse.load({basis:'lcao1s',R:2.7,dt:.1,pulse:{amplitude:.041,omega:.62,duration:72,phase:.4}});__LW.helium.load({on:false,basis:'one',x1:[.3,.4,.5]});
-  __LW.h2.load({on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});__LW.ladder.set({nbar:42,sigma:3.5,d:4,teeth:6});__LW.particles.setTrail(37);__LW.dynamics.ui.n.set(230);__LW.dynamics.ui.trail.set(37);
+  __LW.h2.load({on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});__LW.ladder.set({nbar:42,sigma:3.5,d:4,teeth:6});__LW.particles.setTrail(37);__LW.particleUI.n.set(230);__LW.particleUI.trail.set(37);
   const pal=__LW.paletteGroups.flatMap(g=>g.items).find(id=>id!==__LW.paletteId);__LW.setPalette(pal);__LW.palette.load([{at:.08,rgb:[.1,.2,.3]},{at:.47,rgb:[.7,.4,.2]},{at:.82,rgb:[.2,.8,.5]}],1);__LW.palette.setOn(true);
   const macro=M.macroList()[0];M.setMacro(macro.id,{value:.88,masterDepth:.73});const added=M.addRoute(macro.id,'material.exposure',.12,.42);__LW.mod.clock.applyAll(true);
   const current=R.state('material.exposure').current,base=R.baseOf('material.exposure'),route={...added.route};
@@ -206,7 +206,7 @@ try {
   P.save('acceptance/complete-state');const disk=JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items['acceptance/complete-state'].data;
   __LW.ab.set(false);R.setBase('material.gamma',.8);R.setBase('material.exposure',.4);R.setBase('transport.rate',4);__LW.spectrum.select(-1);__LW.spectrum.setDials(true);
   __LW.slice.load({mode:'space',half:3,gain:.2,rotor:{qL:[1,0,0,0],qR:[1,0,0,0]}});__LW.setPalette(__LW.paletteGroups[0].items[0]);__LW.palette.load([{at:0,rgb:[1,0,0]},{at:.5,rgb:[0,0,1]}],0);
-  __LW.qcd.load({kind:'charm',potential:'cornell',params:{alphaS:.2,sigma:.1,C:.4}});__LW.molecule.load({on:false,R:1.1,kind:'sigma_g'});__LW.pulse.load({basis:'lcao1s',R:1.2,dt:.2,pulse:{amplitude:.01,omega:.2,duration:12,phase:0}});__LW.helium.load({on:false,basis:'six',x1:[0,0,.8]});__LW.h2.load({on:false,R:8,which:'triplet',showCI:true,ke:.01,kappa:100});__LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.dynamics.ui.n.set(40);
+  __LW.qcd.load({kind:'charm',potential:'cornell',params:{alphaS:.2,sigma:.1,C:.4}});__LW.molecule.load({on:false,R:1.1,kind:'sigma_g'});__LW.pulse.load({basis:'lcao1s',R:1.2,dt:.2,pulse:{amplitude:.01,omega:.2,duration:12,phase:0}});__LW.helium.load({on:false,basis:'six',x1:[0,0,.8]});__LW.h2.load({on:false,R:8,which:'triplet',showCI:true,ke:.01,kappa:100});__LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.particleUI.n.set(40);
   const opened=P.open('acceptance/complete-state');await w(600);const restored=__LW.serialize().presentation,restoredRoute=M.routeList().find(r=>r.id===route.id),restoredSlice=__LW.slice.save(),poseNow={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
   const beforePlay={t:__LW.clock.t,playing:__LW.clock.playing,transition:__LW.ab.on,theta:__LW.reg.mixAngle(__LW.clock.t)};__LW.play();await w(250);
   const afterPlay={t:__LW.clock.t,theta:__LW.reg.mixAngle(__LW.clock.t),transition:__LW.ab.on};__LW.pause();

@@ -424,6 +424,11 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
 body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .dev.lean .dev-body .note, .dev.lean .dev-body .ro, .dev.lean .dev-body .row:has(> .ro):not(:has(> :not(.ro))) { display: none; }
+/* CALCULUS AS TILES (0.4.0 S3 · F3; calculusview.js): the laws are RADIATION's tiles — the kit's .ro, untouched — in a grid,
+   two columns on the card and three floating, and OUT of LEAN: the tiles are the window, not its commentary */
+.calc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.dev.floating .calc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dev.lean .dev-body .calc-grid > .ro { display: flex; }
 /* A ROUTED KNOB STAYS UNDER ITS OWN LABEL, AND WEARS ITS BADGES ONE CONTROL AT A TIME (2026-09-18).  The kit seats a
    range dial beside every routed dial and slides the dial 10 px left to make room (modhost.css); in this rack that put
    the dial and its arc off-centre under the label, covered the right of the arc, and scattered small dials over every
@@ -474,6 +479,14 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .pk-c { min-width: 38px; height: 34px; padding: 0 4px; border-radius: 5px; border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 100% / .04); color: var(--dim); font-size: var(--fs-tiny); }
 .pk-c.on { background: color-mix(in oklab, var(--nc) 28%, transparent); color: var(--fg); border-color: color-mix(in oklab, var(--nc) 60%, transparent); }
 .pk-c:active { background: var(--glass-press); }
+/* ATOMS' PERIODIC TABLE (0.4.0 S3 · R-A2; atomsview.js): SPECTRUM's picker with the periods as COLUMNS on the card and on a
+   phone (each its own column of wrapping cells, period 4 taking the rest of the width) and as ROWS when the window floats */
+.dev:not(.floating) .atm-table { flex-direction: row; align-items: flex-start; }
+.dev:not(.floating) .atm-table .pk-n { display: flex; flex-direction: column; flex: 0 0 auto; }
+.dev:not(.floating) .atm-table .pk-chips { flex-direction: column; }
+.dev:not(.floating) .atm-table .pk-n:last-child { flex: 1 1 0; min-width: 0; }
+.dev:not(.floating) .atm-table .pk-n:last-child .pk-chips { flex-direction: row; }
+.dev:not(.floating) .atm-table .pk-nl { padding-top: 0; }
 
 /* ── frontier: the vortex overlay, the orbit spheres, the ladder plots ──── */
 #fieldlines, #vortex, #particles, #flow, #kepler { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 5; }
@@ -503,9 +516,6 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .pal-strip { width: 100%; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: crosshair; }
 .pal-ring { width: 62px; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .25); }
 .pal-color { width: 46px; height: var(--touch); padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); }
-.dyn-rows { display: flex; flex-direction: column; gap: 2px; }
-.dyn-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 4px; padding: 3px 5px;
-  border-radius: 5px; background: hsl(0 0% 100% / .04); }
 .ladder-c { position: relative; height: 96px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder-c canvas { width: 100%; height: 100%; display: block; }
 .orbit-c { width: 100%; height: 156px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); touch-action: none; }
@@ -851,13 +861,17 @@ body.ui-hidden #keymap { display: none; }
 .mol-pick { flex: 1 1 200px; }
 .mol-pick > select.sel { width: 100%; }
 
-/* MOLECULE FORMULA (Settings › Display; rack.js placeMolFormula): the MOLECULES pick, large, on the stage.  Transparent
-   text beneath every window (z 20 < rack 30 < #floats 32), never a pointer target, never in the occlusion mask.  Its
-   ink and halo are written by accent-wheel.js from the live STAGE colour; the side is chosen against the transport. */
+/* THE STAGE TEXT (Settings › Display; lab/stage-text.js, the interim renderer 0.5.0 deletes): what is playing, in the
+   notebook's markdown + KaTeX, on the stage.  Transparent text beneath every window (z 20 < rack 30 < #floats 32), never a
+   pointer target, never in the occlusion mask.  Its ink and halo are written by accent-wheel.js from the live STAGE colour
+   (KaTeX inherits both); the side is chosen against the transport; an announcement fades out and the formula fades back. */
 #molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
   font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1.08; letter-spacing: .01em;
-  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width rack.js sets */
-  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); }
+  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width stage-text.js sets */
+  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); transition: opacity .6s ease; }
+#molFormula p { margin: 0; }
+#molFormula .katex { font-size: 1.08em; }   /* the notebook's own KaTeX size (.nb-view .katex) */
+#molFormula.st-fade { opacity: 0; }
 #molFormula.mf-top { top: 64px; }
 #molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
 #molFormula[hidden] { display: none; }
@@ -867,7 +881,7 @@ body.ui-hidden #keymap { display: none; }
   color: var(--fg); background: color-mix(in srgb, var(--warn, #d9a441) 18%, transparent); border: 1px solid color-mix(in srgb, var(--warn, #d9a441) 45%, transparent); }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
-/* ATOM LABELS (Settings › Display; rack.js placeAtomLabels): each nucleus's element symbol, small, at its projected
+/* ATOM LABELS (Settings › Display; stage-text.js atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
 #atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;

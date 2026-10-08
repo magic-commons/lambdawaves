@@ -21,7 +21,6 @@
 .sp-b:active, .pk-c:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
-.dyn-row { background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 #title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 
@@ -500,7 +499,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }
-.dev .picker, .dev .calc-table, .dev .pj-list { max-height:none;overflow:visible; }
+.dev .picker, .dev .pj-list { max-height:none;overflow:visible; }
 .native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
 .native-clean .sp-knobs .k-val { max-width:80px; }
 .native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }

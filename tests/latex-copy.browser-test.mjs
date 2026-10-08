@@ -165,6 +165,29 @@ try {
   assert.equal(mol.clip.length, 1); assert.equal(mol.clip[0].split('\n')[0], '$1s_{0}$ and $2p_{0}$');
   assert.deepEqual(mol.errs, []);
   console.log('PASS under MOLECULES (water) SPECTRUM folds and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder named (1b₁ HOMO, 4a₁ LUMO); back on hydrogen SPECTRUM unfolds and the row copies "$1s_{0}$ and $2p_{0}$"');
+
+  /* ── 8 · 0.4.0 S3: CALCULUS is tiles (two columns on the card, three floating, seen through LEAN), and its ⧉ copies the
+         PROSE FIGURE, which pasted into the notebook renders with no .katex-error ── */
+  const calc = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); window.__clip = [];
+    __LW.loadPreset('1s+2pz'); __LW.layout.reopen('calculus', 'R'); const d = document.querySelector('.dev[data-id="calculus"]');
+    if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); await __LW.settle(); await __LW.settle();
+    const grid = d.querySelector('.calc-grid'), tiles = [...grid.querySelectorAll(':scope > .ro')];
+    const cols = (g) => getComputedStyle(g).gridTemplateColumns.split(' ').length, lean = d.classList.contains('lean');
+    const seen = tiles.filter((t) => getComputedStyle(t).display !== 'none').length, onCard = cols(grid);
+    __LW.layout.popOut('calculus', { x: 420, y: 120, w: 520 }); await __LW.settle(); const floating = cols(d.querySelector('.calc-grid'));
+    d.querySelector('.dev-copy').click(); await w(200); const md = __clip[__clip.length - 1] || '';
+    const nb = document.getElementById('notebook'), ta = nb.querySelector('.nb-text');
+    __LW.layout.notebook.open('notes'); ta.value = md; ta.dispatchEvent(new Event('input'));
+    __LW.layout.notebook.setMode('view'); const view = nb.querySelector('.nb-view');
+    const out = { tiles: tiles.length, seen, lean, onCard, floating, head: md.split('\\n')[0], figure: /\\nFigure\\. /.test(md), formulas: view.querySelectorAll('.katex').length, display: view.querySelectorAll('.katex-display').length, errors: view.querySelectorAll('.katex-error').length, dollars: (view.textContent.match(/\\$/g) || []).length, errs: __e.slice() };
+    __LW.layout.notebook.setMode('edit'); ta.value = ''; ta.dispatchEvent(new Event('input')); __LW.layout.notebook.close();
+    return out;`);
+  assert.ok(calc.tiles === 8 && calc.seen === 8 && calc.lean, 'the tiles: ' + JSON.stringify(calc));
+  assert.equal(calc.onCard, 2, 'two columns on the card: ' + JSON.stringify(calc)); assert.equal(calc.floating, 3, 'three floating: ' + JSON.stringify(calc));
+  assert.ok(/^### CALCULUS · \$t = /.test(calc.head) && calc.figure, 'the copy is not the prose figure: ' + JSON.stringify(calc));
+  assert.ok(calc.formulas > 15 && calc.display >= 3 && calc.errors === 0 && calc.dollars === 0, 'the paste: ' + JSON.stringify(calc));
+  assert.deepEqual(calc.errs, []);
+  console.log(`PASS CALCULUS: ${calc.tiles} tiles, all seen under LEAN, ${calc.onCard} columns on the card and ${calc.floating} floating; ⧉ copies the prose figure ("${calc.head}"), which pastes into the notebook as ${calc.formulas} KaTeX formulas (${calc.display} displayed) with no .katex-error`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {

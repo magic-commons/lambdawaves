@@ -1,7 +1,8 @@
 // The visible molecular names may change, while CSS hooks and project keys stay stable.
 // 2026-10 (supersedes W129's first-run rule): MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack under SPECTRUM;
 // closed, + and WINDOW bring them back; a project whose field owner is MOLECULES brings them back onto the rack (MO-REGISTRY
-// too when its register is on) — the H₂⁺ card's law.  QCD, HELIUM, H₂, ATOMS and ELECTROSTATICS are hidden LEGACY windows.
+// too when its register is on) — the H₂⁺ card's law.  QCD, HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows; ATOMS is back
+// (0.4.0 S3 · R-A2) as the periodic table, with its own row in + and WINDOW.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -23,7 +24,7 @@ try {
       oldHidden: card('molecule').hidden && getComputedStyle(card('molecule')).display === 'none',
       onLeft: ['chem', 'orbitals'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'),
       underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 3); })(),
-      legacyHidden: ['qcd', 'helium', 'h2', 'atoms', 'field'].map(id => card(id).hidden),
+      legacyHidden: ['qcd', 'helium', 'h2', 'field'].map(id => card(id).hidden), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
       choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
@@ -32,9 +33,12 @@ try {
   assert.equal(boot.oldHidden, true);
   assert.deepEqual(boot.onLeft, [true, true]);                       // 2026-10: the first-run LEFT rack, under SPECTRUM
   assert.deepEqual(boot.underSpectrum, ['chem', 'orbitals']);
-  assert.deepEqual(boot.legacyHidden, [true, true, true, true, true]);
+  assert.deepEqual(boot.legacyHidden, [true, true, true, true]);
+  assert.equal(boot.atomsSeat, 'ATOMS');
+  assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in +: ' + JSON.stringify(boot.choices));
+  assert.equal(boot.windows.some((w) => /ATOMS$/.test(w)), true, 'ATOMS has no row in WINDOW: ' + JSON.stringify(boot.windows));
   assert.equal(boot.choices.includes('molecule'), false);
-  for (const id of ['qcd', 'helium', 'h2', 'atoms', 'field']) assert.equal(boot.choices.includes(id), false);
+  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);
   assert.equal(boot.windows.includes('↑  MOLECULES'), true);
   assert.equal(boot.windows.includes('↑  MO-REGISTRY'), true);
   for (const id of ['molecule', 'chem', 'orbitals']) {
@@ -42,10 +46,10 @@ try {
     assert.equal(boot.records.includes(id), true);
   }
   assert.deepEqual(boot.errors, []);
-  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, saved IDs are stable');
+  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, ATOMS has its + and WINDOW rows, saved IDs are stable');
 
   /* 0.4.0 S0 · wave 136 (audit F6): SPECTRUM's two orphaned operators — QUARKONIUM's button is hidden while QCD is, but the
-     value still restores; a press on ATOM brings ATOMS (its element picker) back by the legacy un-hide road */
+     value still restores; a press on ATOM opens ATOMS, the periodic table (0.4.0 S3) */
   const ops = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]');
     const btns = [...card('spectrum').querySelectorAll('.segw')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'OPERATOR').querySelectorAll('.seg-b');
@@ -53,13 +57,18 @@ try {
     const quarkHidden = b('QUARKONIUM').hidden && getComputedStyle(b('QUARKONIUM')).display === 'none';
     __LW.setHamiltonian('cornell'); await __LW.settle(); const cornellRestores = __LW.hamiltonian === 'cornell';
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
-    const atomsHidden = card('atoms').hidden; b('ATOM').click(); await __LW.settle();
+    const atomsHidden = card('atoms').classList.contains('closed') && !card('atoms').hidden; b('ATOM').click(); await __LW.settle();
     const atomsBack = !card('atoms').hidden && !card('atoms').classList.contains('closed'), op = __LW.hamiltonian;
+    /* 0.4.0 S3: the Z stepper is a periodic table — 36 cells in 4 periods; a press puts the element in force and lights its cell */
+    const A = card('atoms'); if (A.classList.contains('folded')) A.querySelector('.dev-fold').click(); await __LW.settle();
+    const cells = [...A.querySelectorAll('.atm-table .pk-c')], periods = [...A.querySelectorAll('.atm-table .pk-n')].map((p) => p.querySelectorAll('.pk-c').length);
+    cells.find((b) => b.textContent === 'Na').click(); await __LW.settle(); await __LW.settle();
+    const table = { cells: cells.length, periods, Z: __LW.atomZ, lit: [...A.querySelectorAll('.atm-table .pk-c.on')].map((b) => b.textContent), stepper: [...A.querySelectorAll('.trig')].some((t) => /Z ▸|◂ Z/.test(t.textContent)) };
     __LW.setHamiltonian('hydrogen'); card('atoms').querySelector('.dev-close').click(); await __LW.settle();
-    return { quarkHidden, cornellRestores, atomsHidden, atomsBack, op, errors: __e.slice() };
+    return { quarkHidden, cornellRestores, atomsHidden, atomsBack, op, table, errors: __e.slice() };
   `);
-  assert.deepEqual(ops, { quarkHidden: true, cornellRestores: true, atomsHidden: true, atomsBack: true, op: 'atom', errors: [] });
-  console.log('PASS SPECTRUM\'s QUARKONIUM button is hidden (the cornell value still restores) and ATOM brings the hidden ATOMS window back');
+  assert.deepEqual(ops, { quarkHidden: true, cornellRestores: true, atomsHidden: true, atomsBack: true, op: 'atom', table: { cells: 36, periods: [2, 8, 8, 18], Z: 11, lit: ['Na'], stepper: false }, errors: [] });
+  console.log('PASS SPECTRUM\'s QUARKONIUM button is hidden (the cornell value still restores) and ATOM opens the closed ATOMS window; its periodic table (2 · 8 · 8 · 18 cells) puts Na in force and lights it');
 
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');

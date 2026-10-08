@@ -89,7 +89,7 @@ export function stateLatex(o) {
  * Every level carries its symmetry name when the worker named the solve (`ground.names`, lab/names.js) and its frontier tag
  * BY LEVEL (a degenerate HOMO is one HOMO): `\varepsilon_{5} = -0.3913\ (1b_{1},\ \mathrm{HOMO})`.  With no names the tag is
  * by level when the record has levels, by index otherwise.  '' when there is no ground. */
-const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
+export const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
 const SUB = '₀₁₂₃₄₅₆₇₈₉';
 /** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'CO(NH₂)₂') as upright LaTeX: \mathrm{H_{2}O} */
 export function formulaLatex(f) {

@@ -83,7 +83,7 @@ export function createStates(host, api) {
   const presetSel = el('select', 'sel', bar); presetSel.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
   presetSel.setAttribute('aria-label', 'register preset');
   { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
-  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p) preset(p); });
+  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(p); });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'The ladder shows the bright valence states only, or every state';
   const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
   const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';

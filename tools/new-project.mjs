@@ -90,7 +90,7 @@ function presentation() {
       qcd: { kind: 'charm', potential: 'cornell', params: { alphaS: 0.39, sigma: 0.18, C: 0.733 } },  // qcdview.js:10 (qcd.js DEFAULTS)
       pulse: { basis: 'lcao1s', R: 2, dt: 0.05, pulse: { amplitude: 0.02, omega: 0.3929175297217954, duration: 48, phase: 0, start: 0 } },   // pulseview.js:16
       ladder: { nbar: 30, sigma: 2, d: 0, teeth: 8 },                 // ladder.js:13
-      particles: { count: 160, trail: 24 } },                         // dynamicsview.js:50, particles.js:21
+      particles: { count: 160, trail: 24 } },                         // rack.js VORTEX's PARTICLES knobs (0.4.0 S3), particles.js:21
     mo: { kind: 'lcao1s', lambda: 1.7611, R: 2, electron: 'hold', force: 'exact', connection: true, dt: 5 },   // moview.js:54–55
     rates: new Array(91).fill(1),                                     // rack.js:109
     rotationRates: { z: 0, kz: 0, def: 0 },                           // rack.js:450

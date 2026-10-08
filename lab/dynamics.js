@@ -1,4 +1,7 @@
-/* dynamics.js — the LAGRANGIAN picture, the action–angle chart, the dipole, and the particle (Bohmian) velocity field.
+/* dynamics.js — the LAGRANGIAN picture, the moments, the dipole, and the particle (Bohmian) velocity field: the physics the
+ * retired DYNAMICS window computed (0.4.0 S3 · R-W1), now read by SHADOW's footer (L, T, V, S), CALCULUS (the moments, ⟨z⟩,
+ * ⟨r⟩), RADIATION (the lines) and kick.js (the dipole matrix), ORBIT (the rotor entropy), and VORTEX's PARTICLES and PLANE
+ * (the Bohmian field).
  *
  * STATUS: EXACT ANALYTIC throughout, except the radial integrals (NUMERICAL: Gauss–Legendre on doubling panels for
  * hydrogen and the oscillator, exponentially convergent — 1e-14 against mpmath; Simpson in ln r for the atom's tabulated
@@ -21,11 +24,8 @@
  * so the action is BOUNDED and periodic — and ⟨L⟩ = 0 over any full period of every mode: the virial theorem
  * ⟨T⟩ = ⟨V⟩ = ½⟨H⟩ for the harmonic shadow.
  *
- * THE ACTION–ANGLE CHART.  Each mode's shadow orbit is the circle q² + p² = 2|c_a|², traversed at angular
- * velocity −E_a.  Its action variable is
- *     J_a = (1/2π) ∮ p dq = |c_a|²  — the POPULATION — with conjugate angle θ_a = arg c_a.
- * So the SPECTRUM rail (population and phase per lane) is exactly the action–angle chart of the SHADOW's phase
- * space, and the constancy of every population is Liouville's theorem for this system.
+ * THE ACTION–ANGLE CHART is SPECTRUM itself: each mode's action J_a = (1/2π)∮p dq = |c_a|² is its POPULATION and its angle
+ * is arg c_a, so the window that printed them twice is gone (0.4.0 S3).
  *
  * THE PARTICLE VIEW.  The de Broglie–Bohm velocity field of the SAME ψ is
  *     v = j/ρ = Im(∇ψ/ψ)   (atomic units, m = 1),
@@ -49,40 +49,6 @@ export function lagrangian(re, im, ids) {
   return { T, V, L: T - V, H: T + V };
 }
 /**
- * The same, in the NORMAL MODES of whatever Hamiltonian is in force (Register.normalAmplitudes): with a static
- * field the shadow's oscillators are the Stark states, not the |nlm⟩, and T, V, L, S and the action–angle chart
- * are the same closed forms written in that basis.  With no field the two agree exactly.
- */
-export function lagrangianNormal(na) {
-  let T = 0, V = 0;
-  for (let k = 0; k < na.E.length; k++) {
-    const q = SQRT2 * na.re[k], p = SQRT2 * na.im[k];
-    T += 0.5 * na.E[k] * p * p; V += 0.5 * na.E[k] * q * q;
-  }
-  return { T, V, L: T - V, H: T + V };
-}
-/** S(t) from the normal-mode amplitudes taken AT the anchor (t = 0) */
-export function actionNormal(na0, t) {
-  let S = 0;
-  for (let k = 0; k < na0.E.length; k++) {
-    const p0 = na0.re[k] * na0.re[k] + na0.im[k] * na0.im[k];
-    if (p0 === 0) continue;
-    const th0 = Math.atan2(na0.im[k], na0.re[k]), th = th0 - na0.E[k] * t;
-    S += 0.5 * p0 * (Math.sin(2 * th) - Math.sin(2 * th0));
-  }
-  return S;
-}
-/** the action–angle chart of the normal modes: J = |a|², θ = arg a, ω = −E */
-export function actionAngleNormal(na) {
-  const out = [];
-  for (let k = 0; k < na.E.length; k++) {
-    const J = na.re[k] * na.re[k] + na.im[k] * na.im[k];
-    if (J < 1e-14) continue;
-    out.push({ label: na.label[k], J, theta: Math.atan2(na.im[k], na.re[k]), omega: -na.E[k] });
-  }
-  return out;
-}
-/**
  * The action S(t) = ∫₀ᵗ L dt′ in closed form: ½ Σ |c_a|² [sin 2θ_a(t) − sin 2θ_a(0)], θ_a(t) = arg c_a(0) − E_a t.
  * Takes the ANCHOR coefficients (c(0)) so the integral is exact from the anchor, whatever the current time.
  */
@@ -97,17 +63,6 @@ export function action(re0, im0, t, ids) {
   }
   return S;
 }
-/** the action–angle chart: J_a = |c_a|² (the population) and θ_a = arg c_a, per populated mode */
-export function actionAngle(re, im, ids) {
-  const list = ids || BASIS.map((s) => s.index), out = [];
-  for (const a of list) {
-    const J = re[a] * re[a] + im[a] * im[a];
-    if (J === 0) continue;
-    out.push({ a, label: BASIS[a].label, J, theta: Math.atan2(im[a], re[a]), omega: -BASIS[a].E });
-  }
-  return out;
-}
-
 /* ── exact angular moments (L_z and L² are diagonal in this basis: no cross terms) ────────────────────────── */
 export function angularMoments(re, im) {
   let lz = 0, l2 = 0, n2 = 0;
