@@ -89,7 +89,7 @@ try {
 
   /* 3 · INSTALL BY A PRESS: lysine downloads, opens with 0 solver calls; a basis change and a KICK are refused with a sentence */
   const three = await g.ev(`const c0 = await __calls(); const sel = document.querySelector('.dev[data-id="chem"] .mol-pick select');
-    sel.value = 'lysine'; sel.dispatchEvent(new Event('change'));
+    __opt('lysine'); sel.value = 'lysine'; sel.dispatchEvent(new Event('change'));   // S4b: turn to BIO first — the dropdown holds one section
     let st = __LW.chem.state(); for (let i = 0; i < 300 && !(st.nAO === 64 && st.roots); i++) { await __w(100); st = __LW.chem.state(); }
     await __w(200); st = __LW.chem.state();
     const c1 = await __calls(), label = __opt('lysine').textContent, statusOpen = st.status;
