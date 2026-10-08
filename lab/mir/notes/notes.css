@@ -1,0 +1,55 @@
+/* MIR · notes/notes.css — THE SHELF's face in the notebook (notes/face.js).  Load after mir/shell/shell.css.
+ * λWAVES' PROJECTS face (lab.css .pj-*), re-spelled .nt-* so an app that still draws its own .pj-* list is not
+ * touched, and read through tokens.  INTENT: the path field and the rename field are wells; the folder chips and
+ * RECENT chips are the notebook's own small buttons; the note open in YOURS is CHOSEN (the ON face, its name in
+ * accent A); a row's hover is a lighter face; focus is an accent ring outside. */
+@layer mir.kit.house {
+  /* FROST · values ─────────────────────────────────────────────────────────────────────────────────────────────────
+     1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+  .nb-shelfface {
+    --nt-line: hsl(0 0% 50% / .3);
+    --nt-row-hover: var(--state-hover, hsl(0 0% 50% / .12));
+    --nt-on: var(--state-on, var(--nb-btn));
+    --nt-on-rim: var(--state-on-rim, inset 0 0 0 1px var(--nb-btn-line));
+    --nt-h: 26px;
+  }
+  @media (pointer: coarse) { .nb-shelfface { --nt-h: 32px; } }
+  /* ── end of the values ── */
+  .nb-shelfface { gap: 8px; }
+  .nt-new { display: flex; gap: 6px; }
+  .nt-path, .nt-rename { flex: 1 1 auto; min-width: 0; height: var(--nt-h); box-sizing: border-box; padding: 0 8px; border: 1px solid var(--nt-line); border-radius: var(--r-md);
+    background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); font: var(--fs-lead) var(--font-ui); outline: none; }
+  .nt-path:focus, .nt-rename:focus { border-color: var(--acc); }
+  .nb-shelfface button { height: var(--nt-h); box-sizing: border-box; padding: 0 12px; border: 1px solid var(--nb-btn-line); border-radius: var(--r-md);
+    background: var(--nb-btn); color: var(--fg-soft); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
+  .nb-shelfface button:hover { color: var(--acc); }
+  .nb-shelfface button:active { background: var(--state-press, var(--glass-press)); }
+  .nb-shelfface button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+  .nt-recent, .nt-roots { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .nt-label { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--dim); margin-right: 4px; }
+  .nb-shelfface .nt-chip, .nb-shelfface .nt-root { height: auto; min-height: 20px; padding: 2px 9px; border-color: var(--nt-line); border-radius: var(--r-pill);
+    font: var(--fs-micro)/1.5 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--dim); }
+  .nb-shelfface .nt-chip { color: var(--fg-soft); }
+  @media (pointer: coarse) { .nb-shelfface .nt-chip, .nb-shelfface .nt-root { min-height: 32px; } }
+
+  .nt-list { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-height: 60px; overflow: hidden auto; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
+  .nt-folder { margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--dim); }
+  .nt-item { display: flex; align-items: center; gap: 6px; min-height: var(--nt-h); padding: 1px 4px; border-radius: var(--r-sm); }
+  .nt-item:hover { background: var(--nt-row-hover); }
+  .nt-item[data-current] { background: var(--nt-on); box-shadow: var(--nt-on-rim); }
+  .nb-shelfface .nt-name { flex: 1 1 auto; min-width: 0; height: auto; padding: 3px 2px; border: 0; background: transparent; text-align: left;
+    font: var(--fs-lead) var(--font-ui); letter-spacing: normal; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nt-item[data-current] .nt-name { color: var(--acc); }
+  .nt-when { font-size: var(--fs-micro); color: var(--dim); white-space: nowrap; }
+  .nb-shelfface .nt-act { width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--dim); font: var(--fs-lead)/1 var(--font-ui); }
+  @media (pointer: coarse) { .nb-shelfface .nt-act { width: 32px; height: 32px; } }
+  .nt-item[data-renaming] > :not(.nt-rename), .nt-item[data-asking] > :is(.nt-act, .nt-when) { display: none; }
+  .nt-ask { display: inline-flex; align-items: center; gap: 4px; font: var(--w-semi) var(--fs-small) var(--font-ui); color: var(--fg); white-space: nowrap; }
+  .nb-shelfface .nt-ask button { height: 22px; padding: 0 8px; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
+  @media (pointer: coarse) { .nb-shelfface .nt-ask button { height: 32px; } }
+  .nt-none { font-size: var(--fs-lead); color: var(--dim); padding: 6px; }
+  .nt-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: var(--fs-micro); color: var(--dim); }
+  .nt-status { flex: 1 1 12em; min-width: 0; }
+}   /* end @layer mir.kit.house */

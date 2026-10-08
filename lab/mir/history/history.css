@@ -1,0 +1,40 @@
+/* history/history.css — the HISTORY list (history-list.js) in the house layer, from existing tokens only.
+ * The rows are λWAVES's list as BASINS drew it: newest first, the row you stand on marked, the future dimmed.  INTENT:
+ * the row you stand on is CHOSEN, so it takes the frost face with its number and label in accent A — not an accent
+ * fill, not a rule.  (BASINS drew it with an accent border and --acc-soft; that is the one change from the source.)
+ * The frame around it (title, close, placement) belongs to whatever window hosts the list. */
+@layer mir.kit.house {
+  /* FROST · values ─────────────────────────────────────────────────────────────────────────────────────────────────
+     1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+  :root { --hist-future-fade: .45; }                               /* the rows you have undone */
+  /* the window (history/window.js): BASINS' HISTORY frame, in the notebook's inks and head */
+  :root { --hist-title-size: 26px; --hist-title-tracking: .04em; --hist-pad-x: 10px; --hist-pad-b: 8px; --hist-foot-btn-h: 24px; }
+  .hist-win { --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
+  body[data-theme="dark"] .hist-win { --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
+  /* ── end of the values ── */
+  .hist { display: flex; flex-direction: column; min-height: 0; gap: 6px; font-family: var(--font-ui); color: var(--fg); }
+  .hist-tools { display: flex; gap: 6px; }
+  .hist-tools .trig { flex: 1 1 0; }
+  .hist-list { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 2px; padding: 2px; border-radius: var(--r-md);
+    background: var(--glass-well); box-shadow: var(--neu-inset); }
+  .hist-row { display: grid; grid-template-columns: 2.4em 1fr auto; align-items: baseline; gap: 6px; width: 100%; min-height: 28px; padding: 4px 8px; border: 0; border-radius: var(--r-sm);
+    background: transparent; color: var(--fg-soft); font: var(--fs-base)/1.3 var(--font-ui); text-align: left; cursor: pointer; transition: background var(--t-fast); }
+  .hist-row:hover { background: var(--glass-raise); color: var(--fg); }
+  .hist-row:active { background: var(--glass-press); }
+  .hist-row.hist-current { background: var(--m2-mat-frost); color: var(--acc); }
+  .hist-row.hist-future { opacity: var(--hist-future-fade); }
+  .hist-i { font-size: var(--fs-small); font-weight: var(--w-semi); color: var(--dim); text-align: right; font-variant-numeric: tabular-nums; }
+  .hist-current .hist-i { color: var(--acc); }
+  .hist-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: var(--tr-wide); text-transform: var(--label-case, uppercase); }
+  .hist-dom { font-size: var(--fs-tiny); font-weight: var(--w-heavy); letter-spacing: var(--tr-wider); color: var(--dim); text-transform: var(--label-case, uppercase); }
+  /* ── the window ── */
+  .hist-body { display: flex; flex-direction: column; padding: 0 var(--hist-pad-x) var(--hist-pad-b); overflow: hidden; }
+  .hist-win { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .hist-win .nb-head { padding: 8px 0 6px 4px; cursor: grab; }
+  .hist-win .hist { flex: 1 1 auto; }
+  .hist-title { font-family: var(--font-display, var(--font-ui)); font-weight: var(--w-heavy); font-size: var(--hist-title-size); letter-spacing: var(--hist-title-tracking); color: var(--fg); pointer-events: none; }
+  .hist-win .nb-tools button:disabled { opacity: var(--state-disabled, .38); cursor: default; }
+  .hist-win .nb-foot { margin-top: 6px; }
+  .hist-win .nb-foot button { height: var(--hist-foot-btn-h); padding: 0 10px; }
+  .hist-count { font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); color: var(--dim); }
+}   /* end @layer mir.kit.house */

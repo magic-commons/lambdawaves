@@ -104,7 +104,7 @@ behaviour change.
 
 | # | File | Line (ours) | Change | Why it was forced |
 |---|---|---|---|---|
-| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js` (λWAVES): `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). *(Still true in MIR 1.4.0, by choice: making the key injectable is a `mod.js` edit, and it waits for λWAVES' §16 byte gate to retire so the gate is not broken by an adopt.)* |
+| 1/8 | `mod.js` | `PRESET_LS` | `'mandel.modpresets'` → `'lambdawaves.q0.modpresets'` | The boundary law is that MIR never carries a Card's identity, and this is a live `localStorage` key. Left alone, a λWAVES build would read and write BASINS's preset store. `PRESET_LS` is an exported `const` string, so there is no way to override it from the host — it is the one thing in the file that cannot be injected. Our house namespace is `lambdawaves.q0.*` (`lab/rack.js` (λWAVES): `LS_EXP`, `LS_PRES`, `SETTINGS_KEY`). *(Still true in MIR 1.4.0, by choice: making the key injectable is a `mod.js` edit, and it waits for λWAVES' §16 byte gate to retire so the gate is not broken by an adopt.)* **MIR 1.5.1: injectable.** λWAVES stays on the 1.4 line, so its gate no longer constrains the kit: `setPresetKey(key)` names the store (`bind.js` and `window.js` take `presetKey`), and `PRESET_LS` is the default. |
 | 2/8 | `mod.js` | `newRoute` | `bi: !!o.bi,` added to the route record | **wave 61 · THE BIPOLAR ROUTE.** See the block below. |
 | 3/8 | `mod.js` | `routeInfluence` | `lerped - r.min` → `lerped - (r.bi ? (r.min + r.max) / 2 : r.min)` | The one expression the flag is read in. |
 | 4/8 | `mod.js` | `setRouteRange` | `if (patch.bi !== undefined) r.bi = !!patch.bi;` | The flag is patchable, exactly like `min` and `max`. |
@@ -230,7 +230,7 @@ goes wrong (iOS substitutes a colour emoji; the advance width is the font's busi
 missing codepoint is a notdef box). Wave 55 replaced the ones with a drawn equivalent and left the ones
 without, and REPORT.md wave 55 (λWAVES) lists both sides of that line so the polish wave knows what is outstanding.
 The two NEW chips this wave needed — pop-out / dock, and compact / full — were already in the library:
-`north` and `reopen`, `compact` and `expand`.
+`popOut` and `dock` (the old `north` is an alias), and `reopen`, `compact` and `expand`.
 
 ## THE THREE DIVERGENCES (wave 69) — the plugin's own defects, fixed HERE, and the diff for the port back
 

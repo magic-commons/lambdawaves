@@ -1,0 +1,69 @@
+/* core/core.css — the motion tokens, the proximity guide and the pointer-field light.
+ * Everything is inside `@layer mir.core`, so any unlayered app rule beats it: an app restyles a guide by writing
+ * a rule, never by fighting a selector.  Load it after the kit's sheets. */
+@layer mir.core {
+  /* FROST · values ─────────────────────────────────────────────────────────────────────────────────────────────
+     Every look value this sheet draws with, in one place (docs/SKINS.md).  A value with no var() is on :root; one that
+     reads the accent is declared on the part that draws it, so it resolves against that part's own --acc (and the
+     host's own --prox).  The rules below read these names only. */
+  /* THE MOTION TOKENS — read by core/motion.js (with these same numbers as its fallback) and by any sheet.
+     Structural is BASINS' RACK_MOTION, the curve the rack and window motion already share. */
+  :root {
+    --motion-micro: 80ms;
+    --motion-ui: 160ms;
+    --motion-structural: 320ms;
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+    --ease-in: cubic-bezier(.55, 0, 1, .45);
+    --prox-r: 16px;                                                       /* the guide's corner */
+  }
+  /* the one reduced-motion signal, mirrored by motion.js onto <html data-motion="full|reduced|off">.
+     'off' zeroes every duration; 'reduced' keeps them, because what goes under it is travel, not fades. */
+  :root[data-motion="off"] { --motion-micro: 0ms; --motion-ui: 0ms; --motion-structural: 0ms; }
+  .mir-prox {
+    --prox-fill: color-mix(in srgb, var(--acc) 6%, transparent);          /* near: a faint wash of accent A */
+    --prox-fill-capture: color-mix(in srgb, var(--acc) 14%, transparent); /* capture: filled */
+  }
+  .mir-prox-host { --prox-host-ring: color-mix(in srgb, var(--acc) calc(12% + var(--prox, 0) * 50%), transparent); }   /* reads the host's own --prox */
+  .mir-glow { --pointer-light: color-mix(in srgb, var(--acc) 24%, transparent); }
+
+  /* ── THE PROXIMITY GUIDE (core/proximity.js) ─────────────────────────────────────────────────────────────
+     A pooled overlay at the exact landing rect.  Opacity follows --prox (0..1) from a faint .12 at the edge of
+     reach to .5 at capture distance; CAPTURE is a different state, not just a brighter one: solid, filled, lit.
+     It fades out on end (the visibility delay lets the fade finish without a timer). */
+  .mir-prox {
+    position: fixed; z-index: var(--z-prox, 44); pointer-events: none; box-sizing: border-box;
+    border: 2px dotted var(--acc); border-radius: var(--prox-r);
+    background: var(--prox-fill);
+    opacity: 0; visibility: hidden;
+    transition: opacity var(--motion-ui) var(--ease-out), background-color var(--motion-micro) var(--ease-linear),
+      box-shadow var(--motion-micro) var(--ease-linear), visibility 0s var(--ease-linear) var(--motion-ui);
+  }
+  .mir-prox[data-prox] { visibility: visible; transition-delay: 0s; }
+  .mir-prox[data-prox="near"] { opacity: calc(.12 + var(--prox, 0) * .38); }
+  .mir-prox[data-prox="capture"] {
+    opacity: .9; border-style: solid;
+    background: var(--prox-fill-capture); box-shadow: var(--acc-glow);
+  }
+  /* slot: an insertion line between cards — the caller passes a thin rect; the line is the rect */
+  .mir-prox[data-shape="slot"] { border: 0; border-radius: var(--r-pill); background: var(--acc); }
+  .mir-prox[data-shape="slot"][data-prox="capture"] { background: var(--acc); }
+  /* ring: a small round target drawn as an overlay */
+  .mir-prox[data-shape="ring"] { border-radius: 50%; }
+  /* ring on the target itself (a knob): an outline, so the control's own box and paint are untouched */
+  .mir-prox-host[data-prox="near"] {
+    outline: 2px dotted var(--prox-host-ring); outline-offset: 3px;
+  }
+  .mir-prox-host[data-prox="capture"] { outline: 2px solid var(--acc); outline-offset: 3px; }
+
+  /* ── THE POINTER-FIELD LIGHT (core/pointer.js pointerField) ──────────────────────────────────────────────
+     A soft accent light under the content, at the pointer.  pointerField writes nothing unless the motion
+     policy is 'full', so under reduced motion the light simply never comes on. */
+  .mir-glow { position: relative; isolation: isolate; }
+  .mir-glow::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(circle at calc(var(--px, .5) * 100%) calc(var(--py, .5) * 100%),
+      var(--pointer-light), transparent 62%);
+    opacity: 0; transition: opacity var(--motion-ui) var(--ease-out);
+  }
+  .mir-glow[data-pointer="in"]::before { opacity: 1; }
+}
