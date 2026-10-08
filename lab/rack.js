@@ -77,6 +77,7 @@ import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 13
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
+import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
@@ -122,7 +123,7 @@ export async function boot(dom) {
      came back {}.  A silent {} is exactly the shape of "this browser has never said anything", so the palette this
      browser HAD chosen was read as no choice at all and the default won every reload.  One declaration, at the top,
      above the first reader. */
-  const SETTINGS_KEY = 'lambdawaves.q0.settings';
+  const settingsStore = createSettingsStore();   // 0.5.0 A1: `lambdawaves.q0.settings` through lab/settings-store.js (read / write / remove)
   const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
   /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
      (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
@@ -167,7 +168,7 @@ export async function boot(dom) {
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
-  function readSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } }
+  function readSettings() { return settingsStore.read(); }
   document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
     if (!settingsLoaded) return;
@@ -190,7 +191,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -223,7 +224,7 @@ export async function boot(dom) {
            the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
            TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) }));
+        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) });
     } catch (e) {}
   }
 
@@ -1197,7 +1198,7 @@ export async function boot(dom) {
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
       onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { try { localStorage.removeItem(SETTINGS_KEY); } catch (e) {} location.reload(); } }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); location.reload(); } }).root);
 
 
     const rc = el('div', 'row tight', gi);
@@ -2601,7 +2602,7 @@ export async function boot(dom) {
          pick it again — a device HANDLE, never audio (lab/audio.js's header says why that distinction matters). */
       device: { read: () => readSettings().audioDevice || '',
         write: (id) => { const S = readSettings();
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, audioDevice: id })); } catch (_) {} } },
+          settingsStore.write({ ...S, audioDevice: id }); } },
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
       armed: () => modArm, arm: (on) => setModArm(!!on) }));
@@ -3635,11 +3636,11 @@ export async function boot(dom) {
       if (!n) { for (let i = 1; i <= LAYOUT_SLOTS && !n; i++) if (!m[i]) n = i; }
       if (!n) { let oldest = 1; for (let i = 2; i <= LAYOUT_SLOTS; i++) if ((m[i].at || 0) < (m[oldest].at || 0)) oldest = i; n = oldest; }   // full: the oldest goes
       m[n] = layout.captureLayout();
-      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, layouts: m })); } catch (e) {}
+      settingsStore.write({ ...S, layouts: m });
       return n;
     },
     loadLayout(slot) { const m = readSettings().layouts || {}; return m[slot] ? layout.applyLayout(m[slot]) : false; },
-    forgetLayout(slot) { const S = readSettings(), m = S.layouts || {}; delete m[slot]; try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, layouts: m })); } catch (e) {} return true; },
+    forgetLayout(slot) { const S = readSettings(), m = S.layouts || {}; delete m[slot]; settingsStore.write({ ...S, layouts: m }); return true; },
     resetLayout() {
       layout.dockAll(false);                                                 // wave 55: "reopen and unfold every window" now also means put every one of them back on a rack
       for (const d of document.querySelectorAll('.dev')) { d.classList.remove('closed', 'off'); if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } }
@@ -4098,10 +4099,10 @@ export async function boot(dom) {
         const S = readSettings();
         if (nb.dataset.face === 'about') {
           if (S.abW === w && S.abH === h) return;
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, abW: w, abH: h })); } catch (e) {}
+          settingsStore.write({ ...S, abW: w, abH: h });
         } else {
           if (S.nbW === w && S.nbH === h) return;
-          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, nbW: w, nbH: h })); } catch (e) {}
+          settingsStore.write({ ...S, nbW: w, nbH: h });
         }
       }
       { const grip = nb.querySelector('.nb-grip');
@@ -5467,7 +5468,7 @@ export async function boot(dom) {
   const warning = (() => {
     const pane = document.getElementById('warnPane');
     const seen = () => readSettings().warned === true;
-    const remember = (v) => { const S = readSettings(); try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, warned: v })); } catch (e) {} };
+    const remember = (v) => { const S = readSettings(); settingsStore.write({ ...S, warned: v }); };
     let open = false, prevFocus = null, offKey = null;
     const accepted = [];                          // wave 57: what may only happen once the notice has been read
     function dismiss() {

@@ -4427,3 +4427,37 @@ with `keyboard-window`'s count **not recorded in the hand-off**. Final builder l
 **36,280 → 36,244 (−36)**; per-seam final line deltas are **not recorded in the hand-off**. Integrator
 merged A5+A6 and A9–A11: **36,198 (−82)** (PLAN). The builder kept `.tmp/canary-after/` for A0;
 this documentation work leaves it there.
+
+### wave 190: A1 THE SETTINGS ADAPTER — `lab/settings-store.js`, the blob's one door
+
+`lambdawaves.q0.settings` was written by hand in eight places of `rack.js`: `saveSettings`, the remembered microphone inside the
+modulation port's `device.write`, `saveLayout`, `forgetLayout`, the ABOUT and NOTES sizes in `nbSaveSize`, the photosensitivity
+`remember`, and FORGET. Seven wrote `localStorage.setItem(SETTINGS_KEY, JSON.stringify(…))` in their own try; FORGET removed it.
+They are one module now, `lab/settings-store.js` (27 lines): `SETTINGS_KEY` and `createSettingsStore(storage?)` → `{ key, read,
+write(obj), remove }`, with storage resolved lazily inside the try. `readSettings()` is `settingsStore.read()`. The seven writes
+are `settingsStore.write(…)`, each building the same object in the same key order: `saveSettings`' whole object (its outer try
+kept, because building it can throw) and six `{ ...S, x }` merges. FORGET is `settingsStore.remove()`. No other `rack.js` line
+touches the key. The store is `settingsStore`, not `settings`, because the capture block has its own `const settings`.
+
+The header holds the split the kit will read as data. `WORKSPACE` is the arrangement inside the blob: `closed`, `layouts`, `nbW/nbH`,
+`abW/abH`, `modwin`, `phoneTr`, `phoneRack`. MIR 1.5's `createRack({ store })` takes it at C3. Every other key is PREFERENCE, for
+`createGui` at C2. `nativeLayout` stays PREFERENCE, as STATE-SCOPES and the byte-identical gates have it; the design hand-off had
+listed it under WORKSPACE. `FAMILIES` names the twelve localStorage keys that stay outside the blob, each with its owner and scope:
+`NB_KEY/NB_TITLE/NB_SUBTITLE`, `PJ_KEY` and `LS_EXP/LS_PRES` (PROJECT), `lambdawaves.q0.keys`, `lw.keyboard.position.v1`,
+`lw.lean.v1` and `lw-window-info` (PREFERENCE), `lambdawaves.q0.library` (LIBRARY), and the kit's `lambdawaves.q0.modpresets`.
+STATE-SCOPES' table does not list the presets; no project or link writes them, so the store reads them as PREFERENCE.
+
+The probe is `tools/settings-probe.mjs`. It uses one fresh Firefox profile and six scenes: the boot, WAVE DANCER, WATER, BENZENE
+and N₂ through their PROJECTS buttons, then NEW. Around each open it takes three whole-`localStorage` snapshots: after a
+`saveSettings`, after the open, and after a second `saveSettings`. It classifies every changed key by the store's own tables. It
+also round-trips the blob: save → B1, reload → B2, save → B3. It ran on this tree and on `1e1a4f8` served from `git archive`, both
+on 8763/5233. The two dumps agree in **48 of 48 fields** (every blob, every diff, every verdict), so the adapter changes no byte.
+No open moved a PREFERENCE or LIBRARY key. The opens wrote only `lambdawaves.q0.projects`, the three notebook keys and the blob's
+`modwin` / `nbW` / `nbH`. The round trip is byte-identical on 5 of 6 scenes. WAVE DANCER's is RED **on both trees**: after the
+reload, `modwin.modes` keeps `s1` and drops `s3`, its AUDIO source. That is a WORKSPACE key, a pre-existing loss that belongs to
+the modulation window (C4).
+
+`cat lab/*.js | wc -l`: **36,198 → 36,227 (+29)**: `settings-store.js` +27, `rack.js` +1 (the import), `sw.js` +1 (the
+precache entry). Gates: `node tests/pwa.test.mjs --write`; `bash test.sh node` exit 0; `node tools/new-project.mjs --check` in
+step (16,889 B). Browser on 8763/5233, one at a time: `new-project` **8 PASS**, `official-defaults-palette` **3 PASS**. No
+`__LW` member was renamed or removed: `LW.settings`, `LW.saveSettings` and `LW.applySettings` read through the same functions.

@@ -1,0 +1,82 @@
+/* tools/settings-probe.mjs — THE SETTINGS PROBE (0.5.0 A1, PLAN §2 A1's closer; C2 widens it).  One fresh Firefox profile, six
+ * scenes in order: the boot, the four bundled demos through their PROJECTS buttons (WAVE DANCER, WATER, BENZENE, N₂) and NEW.
+ *   1 · THE WHOLE-localStorage DIFF around each open: a snapshot after a saveSettings, the open, a snapshot (what the open wrote),
+ *       a saveSettings and a third snapshot (what the live state now says).  Every changed key is classified by
+ *       lab/settings-store.js — the blob's own keys by WORKSPACE (else PREFERENCE), the rest by FAMILIES — and a change outside
+ *       WORKSPACE and PROJECT is RED.
+ *   2 · THE BLOB ROUND TRIP: saveSettings → B1; reload → B2 (what the boot left) → saveSettings → B3.  B1 and B3 must be the
+ *       same bytes; B2 is reported.
+ *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
+ *   LW_PORT=… GD_PORT=… node tools/settings-probe.mjs [--out .tmp/settings-probe.json]
+ * --out keeps every blob and every diff, so a tree served from `git archive` can be compared with this one by `diff`. */
+import { writeFileSync } from 'node:fs';
+import { open } from './gate/gatekit.mjs';
+import { go } from './gate/drv.mjs';
+import { SETTINGS_KEY, WORKSPACE, FAMILIES } from '../lab/settings-store.js';
+
+const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
+const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
+const SCENES = [['boot'], ['WAVE DANCER', 'wave-dancer'], ['WATER', 'water'], ['BENZENE', 'benzene'], ['N₂', 'n2'], ['NEW']];
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+  const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('probe: no microphone'));
+  window.__snap = () => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; };
+  window.__quiet = async () => { await __LW.settle(); let st = __LW.chem.state();
+    for (let i = 0; i < 600 && st.on && !(st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }
+    await __LW.settle(); await __w(400); return 1; };
+  return 1;`;
+const scopeOf = (k) => { const f = FAMILIES[k] || Object.entries(FAMILIES).find(([p]) => k.startsWith(p + '.'))?.[1]; return f ? f[1] : 'UNKNOWN'; };
+/** what moved from snapshot a to b: [{ key, sub?, scope }]; the blob is read key by key */
+function diff(a, b) {
+  const out = [];
+  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    if (a[k] === b[k]) continue;
+    if (k !== SETTINGS_KEY) { out.push({ key: k, scope: scopeOf(k) }); continue; }
+    const A = JSON.parse(a[k] || '{}'), B = JSON.parse(b[k] || '{}');
+    for (const s of new Set([...Object.keys(A), ...Object.keys(B)])) if (JSON.stringify(A[s]) !== JSON.stringify(B[s]))
+      out.push({ key: k, sub: s, scope: WORKSPACE.includes(s) ? 'WORKSPACE' : 'PREFERENCE', from: A[s], to: B[s] });
+    if (a[k] !== b[k] && !out.some((d) => d.key === k)) out.push({ key: k, sub: '(key order)', scope: 'PREFERENCE' });
+  }
+  return out;
+}
+const bad = (d) => d.filter((x) => x.scope !== 'WORKSPACE' && x.scope !== 'PROJECT');
+const g = await open(LAB, { width: 1500, height: 1000, script: 180000 });
+const dump = { lab: LAB, scenes: [] };
+let red = 0;
+try {
+  if ((await g.waitFor('window.__LW&&__LW.ready', 300, 100)).ok !== 1) throw new Error('the lab never became ready');
+  await g.ev(HELP); await g.ev('return __quiet();');
+  for (const [name, file] of SCENES) {
+    const r = { name };
+    if (name !== 'boot') {
+      const opened = await g.ev(`__LW.layout.notebook.open('projects'); await __w(200); __LW.saveSettings(); await __w(50); const s0 = __snap();
+        if (${JSON.stringify(!!file)}) { document.querySelector('.pj-demo[data-file=${JSON.stringify(file || '')}]').click();
+          for (let i = 0; i < 100 && !/opened demo/.test(document.querySelector('.pj-status').textContent); i++) await __w(100); }
+        else await __LW.layout.projects.requestFresh();
+        await __quiet(); const s1 = __snap(); __LW.saveSettings(); await __w(50);
+        return { s0, s1, s2: __snap(), status: document.querySelector('.pj-status').textContent, errs: __e.slice() };`);
+      if (!opened || opened.E) throw new Error(name + ': the open threw in the page — ' + (opened && opened.E));
+      r.status = opened.status; r.errs = opened.errs;
+      r.wrote = diff(opened.s0, opened.s1); r.live = diff(opened.s0, opened.s2);
+      r.outside = [...bad(r.wrote), ...bad(r.live)];
+    }
+    r.B1 = await g.ev(`__LW.saveSettings(); await __w(50); return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
+    await go(g.s, LAB);
+    if ((await g.waitFor('window.__LW&&__LW.ready', 300, 100)).ok !== 1) throw new Error(name + ': the reload never became ready');
+    await g.armErrors(); await g.ev(HELP); await g.ev('return __quiet();');
+    r.B2 = await g.ev(`return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
+    r.B3 = await g.ev(`__LW.saveSettings(); await __w(50); return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
+    r.roundTrip = r.B1 === r.B3; r.bootLeft = r.B2 === r.B1;
+    r.reloadErrs = (await g.ev('return __e.slice();'));
+    const ok = r.roundTrip && !(r.outside || []).length && !(r.errs || []).length && !r.reloadErrs.length && (name === 'boot' || /^(opened demo|new)/.test(r.status));
+    if (!ok) red++;
+    console.log((ok ? 'GREEN ' : 'RED   ') + name.padEnd(12) + ' blob ' + r.B1.length + ' B, reload ' + (r.roundTrip ? 'byte-identical' : 'DIFFERS: ' + JSON.stringify(diff({ [SETTINGS_KEY]: r.B1 }, { [SETTINGS_KEY]: r.B3 })))
+      + (r.bootLeft ? '' : ' (the boot left ' + (r.B2 ? r.B2.length + ' B' : 'no blob') + ' before its save)')
+      + (r.wrote ? ' · the open wrote ' + (r.wrote.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') + ' · after a save ' + (r.live.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') : '')
+      + (r.outside && r.outside.length ? ' · OUTSIDE WORKSPACE/PROJECT: ' + JSON.stringify(r.outside) : '') + (r.status ? ' · "' + r.status + '"' : ''));
+    dump.scenes.push(r);
+  }
+} catch (e) { red++; console.error(e); }
+finally { await g.close(); }
+if (OUT) writeFileSync(OUT, JSON.stringify(dump, null, 1));
+console.log((red ? 'RED' : 'GREEN') + ' settings-probe — ' + red + ' of ' + SCENES.length + ' scenes red');
+process.exit(red ? 1 : 0);
