@@ -244,6 +244,24 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   merges: A1+A8 ∥ A7. Merge order: A9–A11, then A5+A6 (A5 may merge alone if A6 lags).
 > - **Still Josh's:** the M5 numbers (persist, `limits.html`, `?report=1&post=1`); the camera bindings; the carried rulings (Br₂, C₆₀'s
 >   allowance, C₂₀H₂₀, one rock-salt cube, the subtraction law unmet four times).
+> **UPDATE 2026-10-08 ~12:10 — Claude Sos: the 0.5.0 plan is at DRAFT 3 for Josh; A5+A6 merged; wave 2 building.**
+> - **PLAN-DRAFT-3** (`371c100`; vault mirror `LAMBDAWAVES CLAUDE 0.5.0 PLAN DRAFT 3 2026-10-08.md`) closes the NACRE rounds: Fable
+>   pre-draft → Sonnet review → DRAFT 1 → Opus audit → DRAFT 2 → Sonnet review 2 → DRAFT 3. Josh reads it; his rulings go into a §9 and it
+>   becomes `research/release-0.5.0/PLAN.md` (+ the vault `LAMBDAWAVES CLAUDE 0.5.0 PLAN <date>.md`). Its §3 asks him four things first:
+>   the glass (seven stylehash classes at C0, each a screenshot ruling), the camera bindings (Q1), R5-G1 (pin alpha.24, re-adopt when
+>   brief 8 lands), R5-L1 (the legacy five, deletable ceiling 1,139 — they pay for the INFORMATIONAL); then Q2 (the 0.5.0 minimum without
+>   C8; who builds the MIR briefs) and Q3 (MIR OPTIONS / LANGUAGE / KEYBOARD skin — defaults hidden, hidden, λWAVES'). Defaults taken
+>   unless he objects: R5-W1, R5-A3 and the rest of §3's list.
+> - **A5+A6 merged** (`b5b6d7d`, builder `8fee157`, waves 188–189): `lab/mod-port.js` the port `createModulation(port)` takes; `onePlay`
+>   in `lab/clock.js`; the facade holds the kit's `demand('app.play')` while MOD is armed and LINKED — S0's refusal closed; the LINKED
+>   retry and re-arm deleted. `lab/*.js` 36,280 → **36,234 (−46): the first seam of 0.5.0 subtracts.** Merged-tree gate: node exit 0;
+>   `take-in-bugs` 4/4, `history` 39, `mir-controls`, `routed-knob` green. CLAUDE.md's modulation paragraph carries it (`994c4e1`).
+> - **Building from `b5b6d7d`:** A1+A8 (the settings adapter + the camera port with the bindings as a data table; 8763/5233) ∥ A7 (the
+>   occlusion providers; 8773/5243); A9–A11 (A9 done; A10's four gate rewrites with the manifest pin kept; A11 = the skip list; the
+>   throwaway alpha.24 canary) on 8767/5237; A0 (the baseline, stylehash with the window open, the INFORMATIONAL spike by five rules).
+>   **A4 parked** (`4bd0bbc`), never merged. Next after wave 2: **A-M**, the ms/s instrument (`tools/perf/main-thread.mjs`, CDP
+>   `TaskDuration`) and the pre-C baseline. The standing merge conflict between A branches is the generated `lab/sw.js` (take either side,
+>   `pwa --write`).
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
