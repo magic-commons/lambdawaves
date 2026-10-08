@@ -12,10 +12,10 @@ try {
   const boot = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]');
     __LW.layout.addMenu.open();
-    const choices = [...document.querySelectorAll('#rackAddList .mb-item')].map(b => b.dataset.win);
+    const choices = [...document.querySelectorAll('[data-rack-list="add"] .mb-item')].map(b => b.dataset.win);
     __LW.layout.addMenu.close();
     __LW.layout.menu.open();
-    const win = [...document.querySelectorAll('#menubar .mb-btn')].find(b => b.textContent === 'WINDOW'); win.click();
+    const win = [...document.querySelectorAll('#menubar .mb-btn')].find(b => b.dataset.menu === 'WINDOW'); win.click();
     const windows = [...win.parentElement.querySelectorAll('.mb-item .mb-lbl')].map(l => l.textContent);
     __LW.layout.menu.close();
     const saved = __LW.serialize();
@@ -73,7 +73,7 @@ try {
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');
     card('chem').querySelector('.dev-close').click();                 // it starts on the rack now: take it off first
-    __LW.layout.addMenu.open(); document.querySelector('#rackAddList .mb-item[data-win="chem"]').click();
+    __LW.layout.addMenu.open(); document.querySelector('[data-rack-list="add"] .mb-item[data-win="chem"]').click();
     const chem = on('chem'); card('chem').querySelector('.dev-close').click();
     return { chem, closedAgain: !on('chem'), errors: __e.slice() };
   `);

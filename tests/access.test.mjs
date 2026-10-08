@@ -81,12 +81,21 @@ judge('A3 the chatter guard survives in both writers: the value is announced whe
    screen reader reads aria-valuetext ON DEMAND, and for four waves what it read on a modulated dial was
    the string from the moment focus arrived — measured 9.3x off the instrument.  A driven dial now
    announces its BASE and says the word, which cannot go stale because the base moves only when the user
-   moves it.  Read off the source here; B140 measures the ear, the eye and the model together. */
-const baseWire = /function setBase\(fn\)/.test(kit) && /setBase,\s*paint\s*\}/.test(kit);
-const baseSaid = /' \u00b7 base \u00b7 modulated'/.test(kit) || /' . base . modulated'/.test(kit);
-const rackWire = /k\.setBase\(\(\) =>/.test(TEXT.get('lab/mod-port.js') || '');   // 0.5.0 A5: the stamp moved into the modulation port
-judge('A8 a control the app is DRIVING under a focused user announces the base and says so: knob() takes setBase(fn), the announcement carries the word, and the modulation port (lab/mod-port.js) hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value',
-  baseWire && baseSaid && rackWire, { baseWire, baseSaid, rackWire });
+   moves it.  B140 measures the ear, the eye and the model together.
+   0.5.0 A10 · READ OFF THE RENDERED CONTROL, NOT THE KIT'S SOURCE (the canary's red 7: MIR 1.5 builds the words through tx(),
+   so a regex on the kit's ' · base · modulated' went red with the behaviour unchanged).  A real kit knob is built in the smallest
+   DOM (tests/helpers/dom-shim.mjs), handed a base, driven, focused and driven again, and what it SAYS is judged — in any language:
+   the base's own text, then words, and never the driven number. */
+const { install } = await import('./helpers/dom-shim.mjs'); install();
+const { knob } = await import('../lab/mir/kit.js');
+const gfmt = (v) => 'γ ' + v.toFixed(2), dial = knob({ label: 'GAMMA', min: 0.1, max: 4, value: 1, fmt: gfmt });
+const said = () => [dial.root.getAttribute('aria-valuenow'), dial.root.getAttribute('aria-valuetext') || ''];
+const plain = said(); dial.setBase(() => 1.71); dial.show(2.5); const driven = said(); dial.root.focus(); dial.show(3.1); const focusedDriven = said();
+const baseSaid = plain[1] === gfmt(1) && driven[0] === '1.71' && driven[1].startsWith(gfmt(1.71)) && driven[1].length > gfmt(1.71).length
+  && !driven[1].includes(gfmt(2.5)) && focusedDriven[0] === '1.71' && focusedDriven[1] === driven[1];
+const rackWire = /k\.setBase\(\(\) =>/.test(TEXT.get('lab/rack.js') || '');
+judge('A8 a control the app is DRIVING under a focused user announces the base and says so: a kit knob given setBase(fn) and driven to another number speaks the base (valuenow, and the base\'s own text followed by the word) and keeps speaking it while focused and driven again, and rack.js hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value',
+  baseSaid && rackWire, { plain, driven, focusedDriven, rackWire });
 
 /* WAVE 68 · ONE FOLD, NOT TWO.  The wrap fold lived in the keydown handler alone, so one mouse drag on
    ACCENT A left aria-valuenow at 654.5 against a declared aria-valuemax of 360. */

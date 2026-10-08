@@ -9,15 +9,32 @@ try {
   const binding = await g.ev(`const a=__LW.keys.actions;
     const overlap=(x,y)=>x.key&&x.key===y.key&&!!x.ctrl===!!y.ctrl&&!!x.alt===!!y.alt&&(x.shift===undefined||y.shift===undefined||!!x.shift===!!y.shift);
     return {n:a.length,collisions:a.flatMap((x,i)=>a.slice(i+1).filter(y=>overlap(x,y)).map(y=>[x.id,y.id])),
-      camera:Object.fromEntries(['dollyIn','povIn','dollyZoomIn','dollyOut','povOut','dollyZoomOut'].map(id=>{const x=a.find(a=>a.id===id);return [id,[x.key,!!x.ctrl,!!x.shift]]})),errors:__e.slice()};`);
+      camera:Object.fromEntries(['dollyIn','povIn','dollyZoomIn','dollyOut','povOut','dollyZoomOut'].map(id=>{const x=a.find(a=>a.id===id);return [id,[x.key,x.ctrl||false,!!x.shift]]})),
+      chord:Object.fromEntries(['transport.play','folders','pitchDn','modArm','help','hide','modulation','save','notebook','rack','dock','fullscreen'].map(id=>{const x=a.find(a=>a.id===id);return [id,x&&[x.key,x.ctrl||false,!!x.shift]]})),
+      gone:['play','hideUI','keysheet','modWin'].filter(id=>a.some(x=>x.id===id)),kitWindows:['history','keyboard'].map(id=>{const x=a.find(y=>y.id===id);return x?x.key:'missing'}),
+      hooks:[...document.querySelectorAll('[data-key-action]')].map(e=>e.dataset.keyAction).filter(id=>!a.some(x=>x.id===id)),
+      hooked:['rack','folders','notebook','camReset','undo','redo','view','style','palette'].filter(id=>!document.querySelector('[data-key-action="'+id+'"]')),
+      kit:await import('./mir/shell/keys.js').then(m=>m.KIT_KEYS?Object.fromEntries(Object.entries(m.KIT_KEYS).map(([k,v])=>[k,m.normalize(v)])):null,()=>null),errors:__e.slice()};`);
   assert.deepEqual(binding.collisions, []);
-  assert.deepEqual(binding.camera, { dollyIn:['KeyQ',false,false],povIn:['KeyQ',false,true],dollyZoomIn:['KeyQ',true,true],
-    dollyOut:['KeyE',false,false],povOut:['KeyE',false,true],dollyZoomOut:['KeyE',true,true] });
+  assert.deepEqual(binding.camera, { dollyIn:['KeyQ',false,false],povIn:['KeyQ',false,true],dollyZoomIn:['KeyQ','Ctrl',true],
+    dollyOut:['KeyE',false,false],povOut:['KeyE',false,true],dollyZoomOut:['KeyE','Ctrl',true] });   // the coupled dolly is the Control key alone (0.5.0 A9)
+  /* 0.5.0 A9 · the kit's ids where the kit has a twin; R-K1: S stays pitch-down, FOLDERS is O, the MOD arm is Ctrl+Space */
+  assert.deepEqual(binding.chord, { 'transport.play':['Space',false,false], folders:['KeyO',false,false], pitchDn:['KeyS',false,false],
+    modArm:['Space','Ctrl',false], help:['Slash',false,true], hide:['KeyH',false,false], modulation:['KeyM',false,false], save:['KeyS',true,false],
+    notebook:['KeyJ',false,false], rack:['KeyB',false,false], dock:['KeyT',false,false], fullscreen:['KeyF',false,false] });
+  assert.deepEqual(binding.gone, []); assert.deepEqual(binding.kitWindows, [null, null], 'the kit\'s windows are rows with no chord (ADOPTING-1.5 §11)'); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row that exists'); assert.deepEqual(binding.hooked, []);
+  /* on an adopted kit that ships its table (1.5: KIT_KEYS), every twin is the kit's own chord spelled the kit's way, but FOLDERS (R-K1) */
+  if (binding.kit) {
+    const kitSpell = ([key, ctrl, shift]) => [ctrl === 'Ctrl' ? 'Ctrl' : ctrl ? 'Mod' : '', shift ? 'Shift' : '', key].filter(Boolean).join('+');
+    for (const id of Object.keys(binding.kit)) assert.ok(binding.chord[id], 'the kit row ' + id + ' has a twin here');
+    for (const id of Object.keys(binding.kit).filter((id) => id !== 'folders')) assert.equal(kitSpell(binding.chord[id]), binding.kit[id], id);
+    assert.equal(binding.kit.folders, 'KeyS'); assert.equal(kitSpell(binding.chord.folders), 'KeyO', 'R-K1: FOLDERS is O here, S is pitch-down');
+  }
   assert.deepEqual(binding.errors, []);
 
   const geometry = await g.ev(`const field=__LW.field,original=field.setOcclusion;window.__frameMasks=[];
     field.setOcclusion=function(rects){window.__frameMasks=rects.map(r=>r.slice());return original.call(field,rects)};
-    __LW.keymap.open();await __LW.settle();const host=document.querySelector('#keymap'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
+    __LW.keymap.open();await __LW.settle();const host=document.querySelector('[data-mir-window="keyboard"]'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
     const canvas=document.querySelector('#field').getBoundingClientRect(), mask=__frameMasks.some(r=>r[0]<=b.left-canvas.left+20&&r[1]<=b.top-canvas.top+20&&r[2]>=b.right-canvas.left-20&&r[3]>=b.bottom-canvas.top-20);
     const col=p.querySelector('.km-col-left').getBoundingClientRect(),header=p.querySelector('.km-col-header').getBoundingClientRect(),rows=p.querySelectorAll('.km-kb-row');
     const first=rows[0].getBoundingClientRect(),last=rows[rows.length-1].getBoundingClientRect();
@@ -69,12 +86,12 @@ try {
     L.keymap.close();await L.settle();const keyboardMask=__frameMasks.some(r=>Math.abs(r[0]-(panel.left-canvas.left))<1&&Math.abs(r[1]-(panel.top-canvas.top))<1);
     L.camera.reset();let d0=L.obs.dist,f0=L.obs.fov;
     K('KeyQ',{shiftKey:true});const pov={dist:L.obs.dist,fov:L.obs.fov};
-    K('KeyE',{shiftKey:true});
+    K('KeyE',{shiftKey:true});const m0=[L.obs.dist,L.obs.fov];K('KeyQ',{metaKey:true,shiftKey:true});const cmdInert=L.obs.dist===m0[0]&&L.obs.fov===m0[1];
     K('KeyQ',{ctrlKey:true,shiftKey:true});const zoom={dist:L.obs.dist,fov:L.obs.fov,product:L.obs.dist*Math.tan(L.obs.fov/2)};
     L.camera.reset();const yaw0=L.obs.yaw;K('KeyA');const instant=L.obs.yaw;
     await new Promise(r=>setTimeout(r,450));const eased=L.obs.yaw;L.camera.reset();
-    return {d0,f0,pov,zoom,product0:d0*Math.tan(f0/2),yaw0,instant,eased,keyboardMask,errors:__e.slice()};`);
-  assert.equal(camera.keyboardMask, false);
+    return {d0,f0,pov,zoom,cmdInert,product0:d0*Math.tan(f0/2),yaw0,instant,eased,keyboardMask,errors:__e.slice()};`);
+  assert.equal(camera.keyboardMask, false); assert.equal(camera.cmdInert, true, '⌘⇧Q is never the dolly (the kit\'s Ctrl, not Mod)');
   assert.equal(camera.pov.dist, camera.d0); assert.ok(camera.pov.fov < camera.f0);
   assert.ok(camera.zoom.dist < camera.d0 && camera.zoom.fov > camera.f0);
   assert.ok(Math.abs(camera.zoom.product - camera.product0) < 1e-9);

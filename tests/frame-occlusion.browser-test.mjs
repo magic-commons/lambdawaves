@@ -9,12 +9,12 @@ const inspect = () => g.ev(`
   const b = e => { const r=e.getBoundingClientRect(); return [r.left,r.top,r.right,r.bottom]; };
   const hit = p => window.__frameMasks.some(r => r[0] <= p[0] && p[0] < r[2] && r[1] <= p[1] && p[1] < r[3]);
   const mid = r => [(r[0]+r[2])/2,(r[1]+r[3])/2];
-  const root=b(document.querySelector('#modwin'));
-  const rail=b(document.querySelector('#modwin .m2rail'));
-  const lfo=b(document.querySelector('#modwin .m2dev.lfo'));
-  const env=b(document.querySelector('#modwin .m2dev.env'));
-  const bars=[...document.querySelectorAll('#modwin .m2workbar')].map(b);
-  const chips=[...document.querySelectorAll('.kwin-chiprail .crail-chip')]
+  const root=b(document.querySelector('[data-mir-window="modulation"]'));
+  const rail=b(document.querySelector('[data-mir-window="modulation"] .m2rail'));
+  const lfo=b(document.querySelector('[data-mir-window="modulation"] .m2dev.lfo'));
+  const env=b(document.querySelector('[data-mir-window="modulation"] .m2dev.env'));
+  const bars=[...document.querySelectorAll('[data-mir-window="modulation"] .m2workbar')].map(b);
+  const chips=[...document.querySelectorAll('[data-mir-rail="modulation"] .crail-chip')]
     .filter(e=>e.getBoundingClientRect().width>0).map(b);
   return {root, count:__frameMasks.length,
     fullRoot:__frameMasks.some(r=>r.every((n,i)=>Math.abs(n-root[i])<1)),
@@ -50,7 +50,7 @@ try {
   }
   console.log('PASS box and dots use the same surface-accurate mask');
 
-  const grip = await g.ev(`const r=document.querySelector('.kwin-chiprail .crail-grip').getBoundingClientRect();
+  const grip = await g.ev(`const r=document.querySelector('[data-mir-rail="modulation"] [data-rail="drag"]').getBoundingClientRect();
     return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};`);
   await actions(g.s, [{ type:'pointer', id:'mod-drag', parameters:{pointerType:'mouse'}, actions:[
     {type:'pointerMove',origin:'viewport',x:grip.x,y:grip.y,duration:0},
@@ -69,7 +69,7 @@ try {
   const scrolled = await g.ev(`
     for(let i=0;i<4;i++) __LW.mod.addSource('lfo');
     await new Promise(r=>setTimeout(r,300));
-    const run=document.querySelector('#modwin .m2run'),before=JSON.stringify(__frameMasks);
+    const run=document.querySelector('[data-mir-window="modulation"] .m2run'),before=JSON.stringify(__frameMasks);
     const overflow=run.scrollWidth-run.clientWidth;
     run.scrollLeft=overflow;
     await new Promise(r=>setTimeout(r,250));

@@ -17,7 +17,7 @@ try {
   await g.ev(`window.__row = async (menu, label) => {
       __LW.layout.menu.open();
       const bar = document.getElementById('menubar');
-      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.textContent === menu);
+      const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
       const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
@@ -32,23 +32,23 @@ try {
     return 1;`);
 
   /* ── 1 · every key hint is the LIVE binding, and a rebind renames the row ── */
-  const hints = await g.ev(`const want = { EDIT: [['PLAY / PAUSE', 'play'], ['RESET the view', 'camReset'], ['RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
-      VIEW: [['HIDE the interface', 'hideUI'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['MODULATION', 'modWin'], ['NOTEBOOK', 'notebook'], ['HIDE / SHOW the rack', 'rack'], ['DOCK / UNDOCK', 'dock'], ['HIDE the interface', 'hideUI'], ['SHOW / HIDE help', 'notes']],
-      ABOUT: [['KEYBOARD SHORTCUTS', 'keysheet'], ['SETTINGS', 'settings']], FILE: [['SAVE project AS', 'saveAs']] };
+  const hints = await g.ev(`const want = { EDIT: [['PLAY / PAUSE', 'transport.play'], ['RESET the view', 'camReset'], ['RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
+      VIEW: [['HIDE the interface', 'hide'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['MODULATION', 'modulation'], ['NOTEBOOK', 'notebook'], ['HIDE / SHOW the rack', 'rack'], ['DOCK / UNDOCK', 'dock'], ['HIDE the interface', 'hide'], ['SHOW / HIDE help', 'notes']],
+      ABOUT: [['KEYBOARD SHORTCUTS', 'help'], ['SETTINGS', 'settings']], FILE: [['SAVE project AS', 'saveAs']] };
     const bad = [];
     const bar = document.getElementById('menubar');
     for (const [menu, rows] of Object.entries(want)) {
-      __LW.layout.menu.open(); const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.textContent === menu); btn.click();
+      __LW.layout.menu.open(); const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu); btn.click();
       for (const [label, id] of rows) { const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
         const k = it && it.querySelector('.mb-key') ? it.querySelector('.mb-key').textContent : null; if (k !== __keyOf(id)) bad.push([menu, label, k, __keyOf(id)]); }
       btn.click();
     }
-    __LW.layout.menu.open(); { const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.textContent === 'VIEW'); btn.click();
+    __LW.layout.menu.open(); { const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === 'VIEW'); btn.click();
       const cyc = [...btn.parentElement.querySelectorAll('.mb-key')].map((k) => k.textContent).filter((t) => /cycles/.test(t));
       if (cyc.join('|') !== __keyOf('view') + ' cycles|' + __keyOf('style') + ' cycles') bad.push(['VIEW', 'cycles', cyc]); btn.click(); }
-    const b = __LW.keys.bind('hideUI', { key: 'KeyU' });
+    const b = __LW.keys.bind('hide', { key: 'KeyU' });
     __LW.layout.menu.open(); const out = {};
-    for (const menu of ['VIEW', 'WINDOW']) { const btn = [...bar.querySelectorAll('.mb-btn')].find((x) => x.textContent === menu); btn.click();
+    for (const menu of ['VIEW', 'WINDOW']) { const btn = [...bar.querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === menu); btn.click();
       out[menu] = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith('HIDE the interface')).querySelector('.mb-key').textContent; btn.click(); }
     __LW.keys.reset(); __LW.layout.menu.close();
     return { bad, bound: b.ok, rebound: out };`);
@@ -72,11 +72,11 @@ try {
   console.log('PASS EDIT › RESEED seeds 160 particles and leaves the orbited camera bit for bit where it was');
 
   /* ── 3 · RESET KEYS restores a rebound key and forgets the override ── */
-  const keys = await g.ev(`const b = __LW.keys.bind('play', { key: 'KeyO' });
-    const rebound = __LW.keys.actions.find((a) => a.id === 'play').key, stored = localStorage.getItem('lambdawaves.q0.keys');
+  const keys = await g.ev(`const b = __LW.keys.bind('transport.play', { key: 'KeyL' });
+    const rebound = __LW.keys.actions.find((a) => a.id === 'transport.play').key, stored = localStorage.getItem('lambdawaves.q0.keys');
     const r = await __row('EDIT', 'RESET the key bindings');
-    return { ok: b.ok, rebound, stored: !!stored && /play/.test(stored), r, after: __LW.keys.actions.find((a) => a.id === 'play').key, storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
-  assert.equal(keys.ok, true); assert.equal(keys.rebound, 'KeyO'); assert.equal(keys.stored, true);
+    return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.actions.find((a) => a.id === 'transport.play').key, storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
+  assert.equal(keys.ok, true); assert.equal(keys.rebound, 'KeyL'); assert.equal(keys.stored, true);
   assert.equal(keys.r.found, true); assert.equal(keys.r.closed, true);
   assert.equal(keys.after, 'Space'); assert.equal(keys.storedAfter, null); assert.deepEqual(keys.errors, []);
   console.log('PASS EDIT › RESET the key bindings puts PLAY back on Space and removes the stored override');
@@ -183,7 +183,7 @@ try {
     { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', '⊕  WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
     /* ABOUT */
     { const r = await __row('ABOUT', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.notebook.isOpen && __LW.layout.notebook.face === 'about'; __LW.layout.notebook.close(); }
-    { const r = await __row('ABOUT', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.getElementById('keymap').contains(document.activeElement); __LW.keymap.close(); }
+    { const r = await __row('ABOUT', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
     { document.querySelector('.dev[data-id="settings"]').classList.add('closed'); const r = await __row('ABOUT', 'SETTINGS'); R.settingsA = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }
     { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('ABOUT', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
     /* FILE (the project rows) */

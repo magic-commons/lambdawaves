@@ -253,7 +253,12 @@ assert.equal(STAGED.size, (ALLOW_BLOCK.match(/\bfile:/g) || []).length, 'tests/w
    deployed, never precached.  The list is READ from sw.js, so the worker, this walk and tools/build-deploy.mjs cannot disagree. */
 const DATA = JSON.parse((text('sw.js').match(/\nconst DATA = (\[[^\]]*\]);/) || [])[1].replace(/'/g, '"'));
 const IS_DATA = (rel) => DATA.some((d) => rel.startsWith(d));
-const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || IS_DATA(rel);
+/* 0.5.0 A11 · …and §1b's SKIP paths (kit data an adoption brings: deployed, never precached), READ from sw.js the same way.
+   A path is literal but for `*`, one segment; a trailing `/` is a whole folder.  tools/build-deploy.mjs reads it with this pattern. */
+const KIT_SKIP = JSON.parse((text('sw.js').match(/\nconst SKIP = (\[[^\]]*\]);/) || [])[1].replace(/'/g, '"'));
+const skipRe = (p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + (p.endsWith('/') ? '' : '$'));
+const IS_KIT_SKIP = (rel) => KIT_SKIP.some((p) => skipRe(p).test(rel));
+const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || IS_DATA(rel) || IS_KIT_SKIP(rel);
 const walk = (d, out = []) => { for (const e of readdirSync(d, { withFileTypes: true })) {
   const f = path.join(d, e.name); if (e.isDirectory()) walk(f, out); else out.push(path.relative(LAB, f).split(path.sep).join('/')); } return out; };
 const onDisk = walk(LAB).sort();
@@ -306,7 +311,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'a DATA root (§1b: library/)'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'a DATA root (§1b: library/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -332,6 +337,15 @@ for (const r of CAT.rows) {
 }
 assert.deepEqual(dataFiles.filter((f) => !CAT.rows.some((r) => f === 'library/' + r.hash + '.json')), [], 'a file in lab/library/ that no catalogue row reaches');
 assert.deepEqual(listed.filter(IS_DATA), [], 'a DATA file is in the precache');
+/* 0.5.0 A11 · THE KIT SKIP, proved on a fixture (on a 1.4 tree the paths do not exist) and on whatever is on disk: the packs and
+   the token schema are skipped; the stylesheet and the pseudo-locale module beside them, and every other kit file, are not. */
+assert.deepEqual(KIT_SKIP, ['mir/locales/*.json', 'mir/tokens.json'], 'sw.js §1b: the SKIP paths are the language packs and the token schema');
+const SKIP_FIX = { 'mir/locales/en.json': true, 'mir/locales/pt-BR.json': true, 'mir/locales/en.unreached.json': true, 'mir/tokens.json': true,
+  'mir/locales/locales.css': false, 'mir/locales/pseudo.js': false, 'mir/locales/x/y.json': false, 'mir/tokens.json.bak': false, 'mir/kit.js': false, 'tokens.json': false };
+assert.deepEqual(Object.fromEntries(Object.keys(SKIP_FIX).map((r) => [r, IS_KIT_SKIP(r)])), SKIP_FIX, 'sw.js §1b SKIP: the rule matches exactly the fixture');
+assert.deepEqual(listed.filter(IS_KIT_SKIP), [], 'a SKIP file is in the precache');
+const kitSkipped = onDisk.filter(IS_KIT_SKIP), kitSkipBytes = kitSkipped.reduce((n, r) => n + statSync(path.join(LAB, r)).size, 0);
+console.log(`PASS the kit SKIP (§1b: ${KIT_SKIP.join(', ')}): the fixture's ${Object.keys(SKIP_FIX).length} paths classified exactly; on disk ${kitSkipped.length} file(s), ${kitSkipBytes} B, deployed and never precached; precache ${(bytes / 1048576).toFixed(2)} MiB, ${((8 * 1048576 - bytes) / 1048576).toFixed(2)} MiB under the ceiling.`);
 console.log(`PASS the library: ${CAT.rows.length} catalogue rows, each record on disk under its own sha-256 (${CAT.rows.reduce((n, r) => n + r.bytes, 0)} B, none precached); library/ holds nothing else; the catalogue is precached.`);
 
 /* ══ D.  NOTHING EXTERNAL, AND NOTHING MISSING ═══════════════════════════════════════════════════════════ */

@@ -86,6 +86,7 @@ export function createModulation(host, port) {
   });
   host.appendChild(root);
   const rail = buildChipRail(root, {});
+  root.dataset.mirWindow = 'modulation'; rail.dataset.mirRail = 'modulation';   // 0.5.0 A10: the kit's hooks (1.5's buildChipRail sets the rail's itself)
   dressGlass();                         // wave 74: the boot pass; rebuildDevices' callers do the rest
   seatCurveName();
   seatRailHead();

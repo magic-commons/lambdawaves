@@ -39,7 +39,7 @@ export function installMenubar({ title, host, menus }) {
     bar.hidden = !want;if(want&&!bar.matches(':popover-open'))bar.showPopover();else if(!want&&bar.matches(':popover-open'))bar.hidePopover(); title.classList.toggle('menu-open', want); title.setAttribute('aria-expanded', String(want)); };
   for (const name of Object.keys(menus)) {
     const grp = el('div', 'mb-group', bar);
-    const btn = el('button', 'mb-btn', grp, name); btn.type = 'button';
+    const btn = el('button', 'mb-btn', grp, name); btn.type = 'button'; btn.dataset.menu = name;   // 0.5.0 A10: the kit's hook (a group is found by data-menu, never by its text)
     btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
     const list = el('div', 'mb-list', grp); list.hidden = true;
     const fill = () => { list.innerHTML = ''; for (const entry of menus[name]()) { if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; } const [label, run, dis, hint] = entry; const it = el('button', 'mb-item', list); const kk = label.split('\t'); el('span', 'mb-lbl', it, kk[0]); if (kk[1]) el('span', 'mb-key', it, kk[1]); it.type = 'button'; if (hint) it.title = hint; if (dis && dis()) it.disabled = true;

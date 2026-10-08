@@ -52,7 +52,7 @@ try {
   });
   await check('notebook resize commits its final frame before saving', `
     __LW.layout.notebook.open();__LW.layout.notebookResize(500,350);
-    const nb=document.getElementById('notebook'),grip=nb.querySelector('.nb-grip');
+    const nb=document.querySelector('[data-mir-window="notebook"]'),grip=nb.querySelector('.nb-grip');
     const send=(type,x,y)=>grip.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:6,pointerType:'touch',button:0,clientX:x,clientY:y}));
     send('pointerdown',500,350);send('pointermove',580,410);send('pointerup',580,410);
     await new Promise(r=>requestAnimationFrame(r));
@@ -85,7 +85,7 @@ try {
     assert.equal(response.ok, true);
     assert.equal((await g.waitFor(`__LW.layout.phone.on===${phone}`, 40, 50)).ok, 1);
     const layout = await g.ev(`__LW.layout.notebook.open();
-      const nb=document.getElementById('notebook').getBoundingClientRect();
+      const nb=document.querySelector('[data-mir-window="notebook"]').getBoundingClientRect();
       return {phone:__LW.layout.phone.on,viewport:[innerWidth,innerHeight],notebook:[nb.width,nb.height],overflow:document.documentElement.scrollWidth>innerWidth};`);
     assert.equal(layout.overflow, false);
     if (phone) assert.deepEqual(layout.notebook, layout.viewport);

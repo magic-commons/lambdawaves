@@ -106,57 +106,6 @@ const MODIFIER_CODES = new Set([
   'MetaLeft', 'MetaRight',
 ]);
 
-const KNOWN_SHORTS = {
-  play: 'play',
-  fullscreen: 'fullscreen',
-  notebook: 'notebook',
-  home: 'zero',
-  stepBack: 'step back',
-  stepFwd: 'step fwd',
-  zoomIn: 'zoom in',
-  zoomOut: 'zoom out',
-  yawL: 'yaw left',
-  yawR: 'yaw right',
-  pitchUp: 'pitch up',
-  pitchDn: 'pitch down',
-  dollyIn: 'dolly in',
-  dollyOut: 'dolly out',
-  povIn: 'POV tighter',
-  povOut: 'POV wider',
-  dollyZoomIn: 'dolly zoom in',
-  dollyZoomOut: 'dolly zoom out',
-  camReset: 'cam reset',
-  panLeft: 'pan left', panRight: 'pan right', panUp: 'pan up', panDown: 'pan down',
-  axisX: 'axis X',
-  axisY: 'axis Y',
-  axisZ: 'axis Z',
-  rotorBoth: 'rotor both',
-  rotorPlus: 'rotor +',
-  rotorMinus: 'rotor −',
-  rotorK: 'rotor K',
-  turnNeg: 'turn −',
-  turnPos: 'turn +',
-  slap: 'slap',
-  style: 'style',
-  view: 'view',
-  palette: 'palette',
-  hideUI: 'hide UI',
-  nextWindow: 'next win',
-  prevWindow: 'prev win',
-  reseed: 'reseed',
-  keysheet: 'keys',
-  notes: 'notes',
-  rack: 'rack',
-  dock: 'dock',
-  modArm: 'mod arm',
-  modBar: 'bar lock',
-  undo: 'undo',
-  redo: 'redo',
-  redoY: 'redo',
-  save: 'save',
-  saveAs: 'save as',
-};
-
 function displayKey(code) {
   if (!code) return '';
   if (code.startsWith('Key')) return code.slice(3);
@@ -215,8 +164,7 @@ function getActionLabelAndDesc(a) {
 
 function deriveShortName(a) {
   if (!a) return '';
-  if (a.short) return a.short;
-  if (KNOWN_SHORTS[a.id]) return KNOWN_SHORTS[a.id];
+  if (a.short) return a.short;   // 0.5.0 A9: the row's own (the kit's action `short`), no longer a table by id here
   const { label } = getActionLabelAndDesc(a);
   const cleaned = label
     .replace(/^(the|open the|cycle the|toggle the|toggle|hide \/ show the|show \/ hide the|hide \/ show|show \/ hide|reset the|step time)\s+/i, '')
@@ -225,11 +173,13 @@ function deriveShortName(a) {
   return words.slice(0, 2).join(' ').toLowerCase();
 }
 
+/* `ctrl: true` is Ctrl or ⌘ (the kit's Mod); `ctrl: 'Ctrl'` is the Control key alone, drawn ⌃ on a Mac (0.5.0 A9) */
+const ctrlCap = (a, isMac) => (!isMac ? 'Ctrl' : a.ctrl === 'Ctrl' ? '⌃' : '⌘');
 function formatChord(spec, platform) {
   if (!spec.key) return '—';
   const isMac = platform === 'mac';
   const parts = [];
-  if (spec.ctrl) parts.push(isMac ? '⌘' : 'Ctrl');
+  if (spec.ctrl) parts.push(ctrlCap(spec, isMac));
   if (spec.alt) parts.push(isMac ? '⌥' : 'Alt');
   if (spec.shift) parts.push('⇧');
   parts.push(displayKey(spec.key));
@@ -240,7 +190,7 @@ function isSameChord(b1, b2) {
   if (!b1 || !b2) return false;
   const s1 = b1.shift === undefined ? false : !!b1.shift;
   const s2 = b2.shift === undefined ? false : !!b2.shift;
-  return b1.key === b2.key && !!b1.ctrl === !!b2.ctrl && !!b1.alt === !!b2.alt && s1 === s2;
+  return b1.key === b2.key && (b1.ctrl || false) === (b2.ctrl || false) && !!b1.alt === !!b2.alt && s1 === s2;
 }
 
 /* ── 3. EXPORTED BUILDER ──────────────────────────────────────────────────────────────────────── */
@@ -263,7 +213,7 @@ export function createKeymap(host, keys, options = {}) {
   const rowDomMap = new Map();
 
   // Root screen
-  const root = el('div', 'km-panel glass', host);
+  const root = el('div', 'km-panel glass', host); host.dataset.mirWindow = 'keyboard';   // 0.5.0 A10: the kit's window hook, and the kit's id for this window
   root.hidden = true;
   root.setAttribute('role', 'dialog');
   root.setAttribute('aria-label', 'Keyboard shortcuts and bindings');
@@ -276,7 +226,7 @@ export function createKeymap(host, keys, options = {}) {
   el('h2', 'km-title', titles, 'KEYBOARD');
 
   const closeBtn = el('button', 'km-close', header, '×');
-  closeBtn.type = 'button';
+  closeBtn.type = 'button'; closeBtn.dataset.keyAction = 'help';
   closeBtn.setAttribute('aria-label', 'Close keybindings editor');
   closeBtn.addEventListener('click', () => close());
 
@@ -414,13 +364,7 @@ export function createKeymap(host, keys, options = {}) {
     return Array.isArray(keys && keys.actions) ? keys.actions : [];
   }
 
-  function categoryOf(a) {
-    if (['play','home','stepBack','stepFwd','modArm','modBar'].includes(a.id)) return 'TRANSPORT';
-    if (['zoomIn','zoomOut','yawL','yawR','pitchUp','pitchDn','dollyIn','dollyOut','povIn','povOut','dollyZoomIn','dollyZoomOut','camReset','panLeft','panRight','panUp','panDown'].includes(a.id)) return 'CAMERA';
-    if (['axisX','axisY','axisZ','rotorBoth','rotorPlus','rotorMinus','rotorK','turnNeg','turnPos','slap','reseed'].includes(a.id)) return 'STATE';
-    if (['undo','redo','redoY','historyUndo','save','saveAs'].includes(a.id)) return 'PROJECT';
-    return 'WINDOWS & DISPLAY';
-  }
+  const categoryOf = (a) => a.group || 'WINDOWS & DISPLAY';   // 0.5.0 A9: the row's `group` (the kit's), not five lists of ids
 
   function getSelectedAction() {
     const acts = getActions();
@@ -535,17 +479,17 @@ export function createKeymap(host, keys, options = {}) {
               const hasAlt = rep.alt;
 
               badge.className = 'km-badge';
-              const layers = [...new Set(matching.map(a => (a.ctrl ? (isMac ? '⌘' : '⌃') : '') + (a.alt ? '⌥' : '') + (a.shift ? '⇧' : '')))].filter(Boolean);
+              const layers = [...new Set(matching.map(a => (a.ctrl ? (isMac ? ctrlCap(a, true) : '⌃') : '') + (a.alt ? '⌥' : '') + (a.shift ? '⇧' : '')))].filter(Boolean);
               if (!isSelected && layers.length > 1) {
                 badge.textContent = layers.join(' · ');
                 badge.classList.add('km-badge-combo');
                 badge.hidden = false;
               } else if (hasCtrl && hasShift) {
-                badge.textContent = (isMac ? '⌘' : 'Ctrl') + '+⇧';
+                badge.textContent = ctrlCap(rep, isMac) + '+⇧';
                 badge.classList.add('km-badge-combo');
                 badge.hidden = false;
               } else if (hasCtrl) {
-                badge.textContent = isMac ? '⌘' : 'Ctrl';
+                badge.textContent = ctrlCap(rep, isMac);
                 badge.classList.add('km-badge-ctrl');
                 badge.hidden = false;
               } else if (hasShift) {
@@ -636,7 +580,7 @@ export function createKeymap(host, keys, options = {}) {
       if (isSel && recording) {
         el('span', 'km-chip km-chip-recording', chips, 'press a key…');
       } else {
-        if (a.ctrl) el('span', 'km-chip km-chip-mod', chips, isMac ? '⌘' : 'Ctrl');
+        if (a.ctrl) el('span', 'km-chip km-chip-mod', chips, ctrlCap(a, isMac));
         if (a.alt) el('span', 'km-chip km-chip-mod', chips, isMac ? '⌥' : 'Alt');
         if (a.shift) el('span', 'km-chip km-chip-mod', chips, '⇧');
         if (a.key) el('span', 'km-chip km-chip-key', chips, displayKey(a.key));
@@ -790,7 +734,7 @@ export function createKeymap(host, keys, options = {}) {
 
       const proposed = {
         key: e.code,
-        ctrl: !!(e.ctrlKey || e.metaKey),
+        ctrl: detectPlatform() === 'mac' && e.ctrlKey && !e.metaKey ? 'Ctrl' : !!(e.ctrlKey || e.metaKey),   // a Mac's Control alone is the kit's Ctrl, never ⌘
         alt: !!e.altKey,
         shift: !!e.shiftKey,
       };

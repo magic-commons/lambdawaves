@@ -12,10 +12,11 @@ import { bindAction, bindingConflicts, normalizeBinding } from './shortcuts.js';
 const LS_KEYS = 'lambdawaves.q0.keys';
 const MAC = /Mac|iPhone|iPad/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
 export function keyName(a) { if (!a.key) return '—'; const k = a.key.replace(/^Key/, '').replace(/^Digit/, '').replace('Arrow', '').replace('BracketLeft', '[').replace('BracketRight', ']').replace('Slash', '/').replace('Comma', ',');
-  const n = (a.ctrl ? (MAC ? '⌘+' : 'Ctrl+') : '') + (a.alt ? (MAC ? '⌥+' : 'Alt+') : '') + (a.shift ? 'Shift+' : '') + k;
+  const n = (a.ctrl ? (!MAC ? 'Ctrl+' : a.ctrl === 'Ctrl' ? '⌃+' : '⌘+') : '') + (a.alt ? (MAC ? '⌥+' : 'Alt+') : '') + (a.shift ? 'Shift+' : '') + k;
   return n === 'Shift+/' ? '?' : n; }
-
-function matches(a, e) { return a.key === e.code && (a.ctrl ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey)) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
+/* `ctrl: true` is the kit's Mod (Ctrl or ⌘, as ever); `ctrl: 'Ctrl'` is the Control key alone, so ⌘⇧Q (a Mac's log-out) is never the dolly (0.5.0 A9) */
+const ctrlHeld = (a, e) => (a.ctrl === 'Ctrl' ? e.ctrlKey && !e.metaKey : a.ctrl ? e.ctrlKey || e.metaKey : !(e.ctrlKey || e.metaKey));
+function matches(a, e) { return a.key === e.code && ctrlHeld(a, e) && !!a.alt === e.altKey && (a.shift === undefined || !!a.shift === e.shiftKey); }
 const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 const OWNED = {
   slider: new Set([...ARROWS, 'Home', 'End', 'PageUp', 'PageDown', 'Delete', 'Backspace']),
@@ -47,11 +48,12 @@ const seatOf = (el) => {
 };
 
 export function installKeys({ ACTIONS, layout, canvas, stageHasFocus, refresh, edit = (a, run) => run() }) {
-  const DEFAULT_KEYS = Object.fromEntries(ACTIONS.map((a) => [a.id, { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }]));
+  const DEFAULT_KEYS = Object.fromEntries(ACTIONS.map((a) => [a.id, { key: a.key, ctrl: a.ctrl || false, alt: !!a.alt, shift: a.shift }]));
   /* Saved chords pass the same collision/reservation law as a live edit. Old corrupt
-     overrides cannot silently shadow a newer default action. */
-  try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) if (ov[a.id]) bindAction(ACTIONS, a.id, ov[a.id]); } catch (_) {}
-  function saveKeys() { try { const ov = {}; for (const a of ACTIONS) { const d = DEFAULT_KEYS[a.id]; if (a.key !== d.key || !!a.ctrl !== d.ctrl || !!a.alt !== d.alt || a.shift !== d.shift) ov[a.id] = { key: a.key, ctrl: !!a.ctrl, alt: !!a.alt, shift: a.shift }; } localStorage.setItem(LS_KEYS, JSON.stringify(ov)); } catch (_) {} }
+     overrides cannot silently shadow a newer default action.  0.5.0 A9: a row renamed to the kit's id reads its old
+     one (`was`) too, so a binding saved before the rename still loads; the next save writes it under the new id. */
+  try { const ov = JSON.parse(localStorage.getItem(LS_KEYS) || '{}'); for (const a of ACTIONS) { const o = ov[a.id] || (a.was && ov[a.was]); if (o) bindAction(ACTIONS, a.id, o); } } catch (_) {}
+  function saveKeys() { try { const ov = {}; for (const a of ACTIONS) { const d = DEFAULT_KEYS[a.id]; if (a.key !== d.key || (a.ctrl || false) !== d.ctrl || !!a.alt !== d.alt || a.shift !== d.shift) ov[a.id] = { key: a.key, ctrl: a.ctrl || false, alt: !!a.alt, shift: a.shift }; } localStorage.setItem(LS_KEYS, JSON.stringify(ov)); } catch (_) {} }
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
 
@@ -61,9 +63,9 @@ export function installKeys({ ACTIONS, layout, canvas, stageHasFocus, refresh, e
        places a hand most plausibly is when it reaches for save — reached nobody at all.
          IT IS AN ALLOWLIST AND NOT A LOOSENING.  Ctrl+Z inside the notebook still does the TEXTAREA'S
        undo and not the register's. Save and the platform-standard Settings shortcut have no useful
-       text-editing meaning, so they stay global while the caret is active. */
-    const appCommandFromText = (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma');
-    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !appCommandFromText) return;
+       text-editing meaning, so they stay global while the caret is active.  0.5.0 A9: the allowlist is the rows that say
+       `inFields` (the kit's word), so a rebound save takes its passage out of a field with it. */
+    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !ACTIONS.some((a) => a.inFields && matches(a, e))) return;
     if (tag === 'SELECT' && e.code !== 'Space') return;
     if (e.code === 'Escape' && layout.keymap && layout.keymap.isOpen) { e.preventDefault(); layout.keymap.close(); return; }   // wave 106: the manual closes on Escape (layout.keysheet is this same object)
     if (e.code === 'Escape' && stageHasFocus()) { try { canvas.blur(); } catch (_) {} return; }   // wave 57: the keyboard way OFF the stage — the next Tab then walks the interface
