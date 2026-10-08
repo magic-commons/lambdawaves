@@ -503,9 +503,6 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .pal-strip { width: 100%; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: crosshair; }
 .pal-ring { width: 62px; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .25); }
 .pal-color { width: 46px; height: var(--touch); padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); }
-.dyn-rows { display: flex; flex-direction: column; gap: 2px; }
-.dyn-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 4px; padding: 3px 5px;
-  border-radius: 5px; background: hsl(0 0% 100% / .04); }
 .ladder-c { position: relative; height: 96px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder-c canvas { width: 100%; height: 100%; display: block; }
 .orbit-c { width: 100%; height: 156px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); touch-action: none; }

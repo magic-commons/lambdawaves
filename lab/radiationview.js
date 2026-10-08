@@ -26,6 +26,7 @@
  */
 import { dipoleMatrix, einsteinA, lifetime, coherentPower, pattern, vec3c, C_AU, MU_H, AU_S } from './radiation.js';
 import { BASIS } from './hydrogen.js';
+import { dipoleLines } from './dynamics.js';
 import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 const HARTREE_EV = 27.211386245988;          // CODATA 2018
@@ -64,6 +65,17 @@ export function createRadiation(host, api = {}) {
   const roD = readout({ label: '|⟨a|r|b⟩|  e a₀', value: '—', sub: 'the register\'s own radial integral × the Condon–Shortley angular factor' });
   const roP = readout({ label: 'P = |c₁|²|c₂|² ħωA', value: '—', cls: 'wide', sub: 'field of a coherent superposition, radiating |c₁|²|c₂|² ħωA' });
   r3.appendChild(roD.root); r3.appendChild(roP.root);
+  /* EVERY LINE (0.4.0 S3 · R-W1, out of the retired DYNAMICS): the state's whole dipole spectrum, not only the pair above —
+     each Δl = ±1 pair with ΔE ≠ 0, strongest first; recomputed on an edit (the anchors), never on a tick */
+  const roLines = readout({ label: 'EMISSION LINES', value: '—', cls: 'wide', sub: '' });
+  el('div', 'row tight', host).appendChild(roLines.root);
+  let linesV = -1;
+  function lines(reg) {
+    if (reg.version === linesV) return; linesV = reg.version;
+    const L = dipoleLines(reg.re0, reg.im0, reg.populated());
+    roLines.set(L.length ? `${L.length} · ω = ${L[0].omega.toFixed(4)}` : 'none: no Δl = ±1 pair with ΔE ≠ 0', L.length ? '' : 'warn');
+    roLines.setSub(L.length ? L.slice(0, 3).map((l) => `${l.label}  T = ${l.period.toFixed(2)} a.u.  d = ${l.amplitude.toFixed(3)} a₀  P = ${sci(l.power, 2)}`).join(' · ') : 'z couples l → l ± 1: nothing here does');
+  }
 
   el('div', 'note', host).innerHTML = '<b>Interpretation.</b> Matrix elements set the transition rate, lifetime, wavelength, and far-field dipole pattern. The plot rescales the radiation pattern to fit; it omits near fields and radiation reaction, so the state does not decay.';
 
@@ -197,12 +209,14 @@ export function createRadiation(host, api = {}) {
   function update(reg, t, playing, on, why) {
     if (!on) {
       if (cache) { cache = null; say(); }
+      if (linesV !== -1) { linesV = -1; roLines.set('—', 'warn'); roLines.setSub(''); }
       key = ''; stand.hidden = false; cap.hidden = true;
       stand.textContent = why || 'hydrogenic register only — the ω of a line is the register\'s own −1/2n²';
       paint(t); return;
     }
     const k = `${reg.version}|${t.toFixed(6)}`;
     if (k !== key) { key = k; build(reg, t, api.ab ? api.ab() : null); say(); }
+    lines(reg);
     if (!cache) {
       stand.hidden = false; cap.hidden = true;
       stand.textContent = 'no dipole in this state — radiation needs two labels with l′ = l ± 1, and this state has none';

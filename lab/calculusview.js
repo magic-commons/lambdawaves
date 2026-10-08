@@ -31,11 +31,11 @@ export function createCalculus(host, api) {
       const c = cells[i];
       put(c, 'name', r.name);
       put(c, 'val', Number.isFinite(r.value) ? r.value.toFixed(6) + (r.unit ? ' ' + r.unit : '') : '—');
-      put(c, 'res', 'residual ' + (Number.isFinite(r.residual) ? r.residual.toExponential(2) : 'toy on'));
+      put(c, 'res', r.residual === null ? '' : 'residual ' + (Number.isFinite(r.residual) ? r.residual.toExponential(2) : 'toy on'));   // null: a moment states no law
       put(c, 'formula', r.formula);
       put(c, 'law', r.law + (Number.isFinite(r.predicted) ? (r.derivative !== undefined ? `  ·  d/dt = ${r.derivative.toFixed(6)}, law says ${r.predicted.toFixed(6)}` : `  ·  predicted ${r.predicted.toFixed(6)}`) : ''));
       const tol = 1e-4 * (1 + Math.abs(r.predicted || 0));
-      const cls = 'calc-res ' + (!Number.isFinite(r.residual) ? 'warn' : Math.abs(r.residual) < tol ? 'ok' : (r.name.startsWith('2⟨T⟩') ? '' : 'warn'));
+      const cls = 'calc-res ' + (r.residual === null ? '' : !Number.isFinite(r.residual) ? 'warn' : Math.abs(r.residual) < tol ? 'ok' : (r.name.startsWith('2⟨T⟩') ? '' : 'warn'));
       if (c.res.className !== cls) c.res.className = cls;
     });
     const f = `t = ${S.t.toFixed(3)} · ${S.ids} populated states · h = ${S.h}`;

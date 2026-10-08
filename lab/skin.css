@@ -21,7 +21,6 @@
 .sp-b:active, .pk-c:active { box-shadow: var(--neu-inset); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--neu-inset), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
-.dyn-row { background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 #title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 

@@ -10,6 +10,7 @@
  */
 import { BASIS } from './hydrogen.js';
 import { shellMatrix, shellCharacter } from './frontier.js';
+import { rotorEntropy } from './dynamics.js';
 import { cameraBasis, cameraKey } from './field.js';
 import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
 
@@ -70,7 +71,7 @@ export function createOrbit(host, api) {
       const row = el('div', 'orbit-row', rows); row.style.setProperty('--nc', `rgb(${nRGB(s.n).join(',')})`);
       el('div', 'orbit-band', row);
       const idz = el('div', 'orbit-id', row); el('div', 'sp-name', idz, `n${s.n}`); el('div', 'sp-sub', idz, `${(s.weight * 100).toFixed(1)}% of norm · j = ${s.j}`);
-      const spec = readout({ label: 'SCHMIDT SPECTRUM', value: s.spectrum.map((v) => v.toFixed(3)).join(' · '), sub: characterLabel(s) }); row.appendChild(spec.root); spec.set(spec.root.querySelector('.ro-val').textContent, s.coherent ? 'ok' : '');
+      const spec = readout({ label: 'SCHMIDT SPECTRUM', value: s.spectrum.map((v) => v.toFixed(3)).join(' · '), sub: `${characterLabel(s)} · entanglement ${rotorEntropy(s.spectrum).toFixed(4)}` }); row.appendChild(spec.root); spec.set(spec.root.querySelector('.ro-val').textContent, s.coherent ? 'ok' : '');   // 0.4.0 S3: the rotor entanglement −Σλ² ln λ², from the retired DYNAMICS (ln 2 is maximal at n = 2)
       const lk = readout({ label: '|⟨L⟩| · |⟨K⟩| · e', cls: 'wide', value: `${s.absL.toFixed(3)} · ${s.absK.toFixed(3)} · ${s.e.toFixed(3)}`, sub: `⟨z⟩ = ${s.z.toFixed(3)} a₀ · |⟨L⟩|²+|⟨K⟩|² = ${s.casimir.toFixed(4)} of ${s.casimirMax} (coherent ⟺ equal)` }); row.appendChild(lk.root);
     }
   }

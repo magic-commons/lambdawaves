@@ -10,9 +10,10 @@
  *   Ehrenfest II     d⟨p_z⟩/dt = ⟨−∂V/∂z⟩                               hydrogen: −Z⟨z/r³⟩ ; oscillator: −⟨z⟩ ; box: 0 inside (the wall is not an operator of the register — the residual IS the wall)
  *   the dipole-acceleration identity  (E_a − E_b)²⟨a|z|b⟩ = ⟨a|∂V/∂z|b⟩ for eigenstates — which is what makes II exact here
  *   virial            2⟨T⟩ + ⟨r·∇V⟩ = 0 on time average  (hydrogen: 2⟨T⟩ = −⟨V⟩; oscillator: ⟨T⟩ = ⟨V⟩)
+ *   the moments       d⟨L_z⟩/dt = 0, d⟨L²⟩/dt = 0 (a central H; the Stark field mixes l), and ⟨r⟩ (0.4.0 S3, from DYNAMICS)
  */
 import { BASIS } from './hydrogen.js';
-import { angularDipoleZ, radialDipole, dipoleZ, radialObservables } from './dynamics.js';
+import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments } from './dynamics.js';
 import { momentumZ } from './kick.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { wellNorm, wellK, wellZ, wellRadius } from './well.js';
@@ -76,9 +77,14 @@ export function stats(reg, t, h = 1e-3) {
     { name: '⟨z⟩', formula: 'Σ c_a*c_b ⟨a|z|b⟩', value: z0, law: 'Ehrenfest I:  d⟨z⟩/dt = ⟨p_z⟩', predicted: p0, residual: dz - p0, unit: H.lengthUnit, derivative: dz },
     { name: '⟨p_z⟩', formula: 'Σ c_a*c_b · i(E_a−E_b)⟨a|z|b⟩', value: p0, law: 'Ehrenfest II:  d⟨p_z⟩/dt = ⟨−∂V/∂z⟩ = ' + F.label, predicted: F.value, residual: dp - F.value, unit: '', derivative: dp },
   ];
-  if (H.id === 'hydrogen') {
-    const ro = radialObservables(c.re, c.im, ids, E0);
-    rows.push({ name: '2⟨T⟩ + ⟨V⟩', formula: 'virial (hydrogen: 2⟨T⟩ = −⟨V⟩ on time average)', value: 2 * ro.T + ro.V, law: '= 0 on time average', predicted: 0, residual: 2 * ro.T + ro.V, unit: H.unit });
-  }
+  const ro = radialObservables(c.re, c.im, ids, E0);
+  if (H.id === 'hydrogen') rows.push({ name: '2⟨T⟩ + ⟨V⟩', formula: 'virial (hydrogen: 2⟨T⟩ = −⟨V⟩ on time average)', value: 2 * ro.T + ro.V, law: '= 0 on time average', predicted: 0, residual: 2 * ro.T + ro.V, unit: H.unit });
+  /* THE MOMENTS (0.4.0 S3 · R-W1, out of the retired DYNAMICS).  L_z and L² are diagonal in |nlm⟩, so they are population
+     sums and exact; L_z commutes with every H here (central, with B and F along z), L² with every one but the Stark field,
+     which mixes l.  ⟨r⟩ is a moment and states no law: its residual is null (the tile prints its ⟨1/r⟩ instead). */
+  const am = angularMoments(c.re, c.im), ap = angularMoments(cp.re, cp.im), an = angularMoments(cm.re, cm.im), Fz = reg.field ? reg.field.Fz : 0;
+  rows.push({ name: '⟨L_z⟩', formula: 'Σ|c_a|² m_a', value: am.Lz, law: 'd/dt = 0: L_z commutes with H', predicted: 0, residual: (ap.Lz - an.Lz) / (2 * h), unit: 'ħ' });
+  rows.push({ name: '⟨L²⟩', formula: 'Σ|c_a|² l_a(l_a + 1)', value: am.L2, law: Fz ? 'no law here: the Stark field mixes l' : 'd/dt = 0: L² commutes with a central H', predicted: Fz ? NaN : 0, residual: Fz ? null : (ap.L2 - an.L2) / (2 * h), unit: 'ħ²' });
+  rows.push({ name: '⟨r⟩', formula: 'Σ c_a*c_b ⟨a|r|b⟩ (l = l′, m = m′)', value: ro.r, law: `⟨1/r⟩ = ${ro.rinv.toFixed(5)}`, predicted: NaN, residual: null, unit: H.lengthUnit });
   return { t, h, rows, ids: ids.length };
 }

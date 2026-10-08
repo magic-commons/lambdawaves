@@ -7,8 +7,9 @@
  * Nothing here integrates anything: the coordinates are read from the register's c(t).
  */
 import { BASIS } from './hydrogen.js';
-import { nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
+import { el, readout, nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
 import { SQRT2 } from './shadow.js';
+import { lagrangian, action } from './dynamics.js';
 
 export function createShadowView(canvas, api) {
   const trail = [];            // Lissajous trace, in (q_a, q_b)
@@ -122,4 +123,55 @@ export function createShadowView(canvas, api) {
   }
   const out = { update, setMode(m) { mode = m; trail.length = 0; }, get mode() { return mode; }, clearTrail() { trail.length = 0; }, last: null };
   return out;
+}
+
+/* SHADOW's FOOTER (0.4.0 S3 · R-W1, out of the retired DYNAMICS): the Lagrangian of the same oscillators — L = T − V, T, V
+ * and the closed-form action S = ∫₀ᵗ L dt′ (dynamics.js, exact), and the L(t), S(t) history.  It sits in SHADOW's details
+ * fold and the rack runs it only while the fold is open: closed, it costs nothing. */
+export function createShadowFoot(host) {
+  const ro = {}, r1 = el('div', 'row tight', host);
+  ro.L = readout({ label: 'L = T − V', value: '—', sub: 'the Lagrangian, exact' });
+  ro.T = readout({ label: 'T = ½Σ E p²', value: '—' });
+  ro.V = readout({ label: 'V = ½Σ E q²', value: '—' });
+  ro.S = readout({ label: 'S = ∫₀ᵗ L dt′', value: '—', sub: 'closed form' });
+  for (const k of ['L', 'T', 'V', 'S']) r1.appendChild(ro[k].root);
+  const plot = el('div', 'dyn-c', host), pcv = el('canvas', '', plot);
+  /* WAVE 46 — the two curves name themselves on hover, not in a corner legend: the curves ARE the objects */
+  let hist = [], hovers = [], rect = null;
+  const hover = graphHover(pcv, { repaint: () => paint(), plot: () => rect });
+  function update(reg, c, t, ids) {
+    const lg = lagrangian(c.re, c.im, ids), S = action(reg.re0, reg.im0, t, ids);
+    ro.L.set(lg.L.toFixed(6)); ro.T.set(lg.T.toFixed(6)); ro.V.set(lg.V.toFixed(6)); ro.S.set(S.toFixed(6));
+    hist.push([t, lg.L, S]); if (hist.length > 600) hist.shift();
+    paint();
+  }
+  function paint() {
+    const W = plot.clientWidth, H = plot.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (W < 32 || H < 32) return;
+    if (pcv.width !== W * dpr || pcv.height !== H * dpr) { pcv.width = W * dpr; pcv.height = H * dpr; }
+    const g = pcv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
+    if (hist.length < 2) return;
+    const t0 = hist[0][0], t1 = hist[hist.length - 1][0] || 1;
+    let lo = Infinity, hi = -Infinity;
+    for (const [, L, S] of hist) { lo = Math.min(lo, L, S); hi = Math.max(hi, L, S); }
+    if (!(hi > lo)) hi = lo + 1e-9;
+    const pad = (hi - lo) * 0.15; lo -= pad; hi += pad;
+    const X = (u) => 26 + (u - t0) / Math.max(1e-12, t1 - t0) * (W - 34), Y = (v) => H - 12 - (v - lo) / (hi - lo) * (H - 22);
+    const T = themeInk(g);
+    rect = { x0: 26, y0: 10, x1: W - 8, y1: H - 12 }; hovers = [];
+    g.strokeStyle = T.ink(0.22); g.beginPath(); g.moveTo(26, Y(0)); g.lineTo(W - 8, Y(0)); g.stroke();
+    g.fillStyle = T.ink(0.6); g.textAlign = 'right'; g.fillText('0', 24, Y(0));           // the one tick, in the gutter
+    for (const [k, name, law] of [[1, 'L(t)', 'the Lagrangian T − V'], [2, 'S(t)', 'the action ∫₀ᵗ L dt′']]) {
+      const c = nRGB(k), col = `rgba(${c[0]},${c[1]},${c[2]},0.95)`, pts = [];
+      g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath();
+      hist.forEach(([u, ...v], i) => { const x = X(u), y = Y(v[k - 1]); pts.push(x, y); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
+      g.stroke();
+      hovers.push({ kind: 'curve', key: name, points: pts, lw: 1.2, colour: col,
+        info: `${name}  ·  ${law}  ·  now ${hist[hist.length - 1][k].toFixed(6)}  ·  over the window [${lo.toFixed(4)}, ${hi.toFixed(4)}]` });
+    }
+    hover.set(hovers, rect);
+  }
+  window.addEventListener('resize', () => paint());
+  return { update, clear() { hist = []; } };
 }

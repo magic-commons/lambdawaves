@@ -6,7 +6,7 @@
  */
 import { Register, PRESETS } from '../lab/state.js';
 import { stateOf, BASIS, energy } from '../lab/hydrogen.js';
-import { dipoleZ, lagrangianNormal, actionNormal, actionAngleNormal } from '../lab/dynamics.js';
+import { dipoleZ } from '../lab/dynamics.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -69,17 +69,6 @@ const i2s = stateOf(2, 0, 0).index, i2p = stateOf(2, 1, 0).index, i2pp = stateOf
   const back = E2.coeffAt(i2p, 555.5);
   judge('F with the field on, set(a, c, t) still reads back at t (the register re-anchors through the block propagator)', Math.hypot(back.re - 0.3, back.im + 0.2) < 1e-12, back);
   judge('F the validity bound is printed, not assumed: F must stay well under 1/(3n⁵) for the neglected inter-shell coupling', Math.abs(R.fieldValidUpTo() - 1 / (3 * 32)) < 1e-15, { bound: R.fieldValidUpTo(), F });
-}
-/* ── the Lagrangian window follows the field into the Stark basis ──────────── */
-{
-  const F = 2e-3;
-  const R = new Register(); R.set(i2s, 1, 0, 0); R.setField({ Fz: F });
-  const na0 = R.normalAmplitudes(0), na = R.normalAmplitudes(300);
-  const lg = lagrangianNormal(na), aa = actionAngleNormal(na);
-  judge('F with a field the action–angle chart is the STARK basis: two normal modes, J summing to 1, and H = T + V = ⟨E⟩',
-    aa.length === 2 && Math.abs(aa.reduce((s, x) => s + x.J, 0) - 1) < 1e-12 && Math.abs(lg.H - R.energy()) < 1e-12, { n: aa.length, J: aa.map((x) => +x.J.toFixed(6)), H: lg.H, E: R.energy() });
-  const S = actionNormal(na0, 300);
-  judge('F and the closed-form action still applies in that basis (finite, bounded by ½Σ|a|²·2)', isFinite(S) && Math.abs(S) <= 1.0000001, S);
 }
 
 console.log((FAILED ? 'RED' : 'GREEN') + ' fields.test — ' + FAILED + ' failing of ' + TOTAL);

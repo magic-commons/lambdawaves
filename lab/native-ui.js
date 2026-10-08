@@ -55,7 +55,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   for(const r of ui.capExact.root.closest('.grp').querySelectorAll('.row'))if(!r.children.length)r.remove();
   const shadow=document.querySelector('.dev[data-id="shadow"] .dev-body');
   const shadowDetails=el('div','shadow-details');shadowDetails.id='shadow-details';shadowDetails.hidden=true;shadow.appendChild(shadowDetails);
-  shadowDetails.append(ui.hc.root);for(const n of shadow.querySelectorAll(':scope > .epi'))shadowDetails.appendChild(n);
+  shadowDetails.append(ui.hc.root);for(const n of shadow.querySelectorAll(':scope > .epi'))shadowDetails.appendChild(n);if(ui.shFoot)shadowDetails.appendChild(ui.shFoot);ui.shadowDetails=shadowDetails;   // 0.4.0 S3: the footer (L, T, V, S) runs only while this fold is open
   const shadowRow=ui.shadowSeg.root.parentElement;shadowRow.classList.add('shadow-controls');
   const shadowToggle=el('button','trig shadow-details-toggle',shadowRow);shadowToggle.type='button';chip(shadowToggle,'chevronDown','Show shadow details');shadowToggle.setAttribute('aria-controls',shadowDetails.id);shadowToggle.setAttribute('aria-expanded','false');
   shadowToggle.addEventListener('click',()=>{shadowDetails.hidden=!shadowDetails.hidden;shadowToggle.setAttribute('aria-expanded',String(!shadowDetails.hidden));shadowToggle.setAttribute('aria-label',shadowDetails.hidden?'Show shadow details':'Hide shadow details');});

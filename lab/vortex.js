@@ -1,4 +1,5 @@
-/* vortex.js — VORTEX: the nodal lines of ψ(t), located exactly (print of 2026-09-03, Thread C).
+/* vortex.js — VORTEX, the flow: the nodal lines of ψ(t), located exactly (print of 2026-09-03, Thread C); since 0.4.0 S3 the
+ * window also carries DYNAMICS' PARTICLES (rack.js), which ride the current these lines are the singular set of.
  *
  * STATUS: EXACT ANALYTIC on the sampled circles.  On the coaxial circle (r, θ), ψ = Σ_m g_m(r,θ,t) e^{imφ}, so the
  * nodal set on that circle is the set of unimodular roots of the polynomial P(w) = Σ g_m w^{m−m_min} (Theorem C.1):
@@ -26,7 +27,7 @@ export function createVortex(host, overlay, api) {
   const cRo = readout({ label: 'RECONNECTION CENSUS', value: '—', cls: 'wide', sub: '' }); r2.appendChild(cRo.root);
   const r3 = el('div', 'row tight', host);
   const jump = trig({ label: 'JUMP TO EVENT', title: 'Jump to the next reconnection time', onFire: () => { if (census && census.count && api.scrubTo) { const t = api.clock.t, Td = census.Td; const fires = [...new Set(census.points.filter((p) => p.admissible).map((p) => +p.t0.toFixed(6)))].sort((a, b) => a - b); let best = null; for (const f of fires) { let cand = f + Td * Math.floor((t - f) / Td + 1e-9) + Td; if (cand - t < 1e-6) cand += Td; if (best === null || cand < best) best = cand; } if (best !== null) api.scrubTo(best); } } }); r3.appendChild(jump.root);
-  el('div', 'note', host).innerHTML = '<b>Nodal lines.</b> Roots of P(w) locate nodes on sampled coaxial circles. A double root marks a reconnection. The three-mode test searches the corresponding beat phases directly.';
+  el('div', 'note', host).innerHTML = '<b>The flow.</b> Roots of P(w) locate the nodal lines on sampled coaxial circles — where the current v = j/ρ is singular, and which the PARTICLES below never cross. A double root marks a reconnection. The three-mode test searches the corresponding beat phases directly.';
   const cv = overlay; const g = cv.getContext('2d');
   let dirty = true, last = null, census = null, lastKey = '', lastCensusVersion = -1, lastObs = '';
 

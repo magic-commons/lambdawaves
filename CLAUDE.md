@@ -50,6 +50,13 @@ ELECTROSTATICS when a project's overlay is on, ATOMS when SPECTRUM's ATOM
 operator is chosen (QUARKONIUM's button is hidden while QCD is; the value still
 restores). Do not re-list them in + or WINDOW.
 
+DYNAMICS is RETIRED (0.4.0 S3): `RETIRED_WINDOWS` maps a saved `dynamics` seat
+to `shadow`, as `style` maps to `observer`. Its L, T, V, S and their plot are
+SHADOW's footer (in its details fold, computed only while the fold is open),
+its moments are CALCULUS rows, its emission lines RADIATION's, its rotor
+entropy ORBIT's Schmidt tile, and its PARTICLES a switch in VORTEX — the flow;
+the action–angle chart is SPECTRUM. `lab/dynamics.js` stays as their physics.
+
 THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
 PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what
 is playing on the stage in the notebook's own markdown + KaTeX
