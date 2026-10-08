@@ -366,7 +366,10 @@ const RAW = [
  * constants are tools/perf/cost-refit.mjs's: the same two work measures (read off md.js's basis, so the 6-31+G* row
  * counts its real primitives), RELATIVE-error NNLS over S0's five node rows (research/release-0.4.0/measure/
  * benzene-node.json: H₂O 7 ms, N₂ 16, C₆H₆ 1566, C₂H₄/6-31+G* 2091, naphthalene 17 536), every row inside 0.73–1.14×;
- * nothing crosses the cap that did not before, and Br₂ stays below benzene.
+ * nothing crosses the cap that did not before, and Br₂ stays below benzene IN THE MODEL.  Measured the same day in node,
+ * warm: Br₂ 2.0 s against benzene 1.7 s — the term the model lacks (SCF iterations: Br₂ takes ~55) is now its largest
+ * error, so on measurement Br₂ is 17 % past the cap.  Whether the cap is the model or the clock is Josh's ruling
+ * (S4a-BUILD.md); the model stands until he makes it.
  *   eriWork = Σ over the 8-fold-unique shell quartets of (components_a·components_b·components_c·components_d) × 3⁴,
  *             the exact trip count of lab/md.js's twoElectron inner loop — the integral pass.
  *   rpaWork = (nocc·nvirt)²·nAO², the occupied-virtual pair space squared: lab/rpa-inspector.js's A ± B build and

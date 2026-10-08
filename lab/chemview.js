@@ -198,40 +198,14 @@ export function createChem(host, api) {
 
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));
-  /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: it is the same pure maths, on the frame thread.
-     `half` here is the shell support envelope; the worker's own `half` is authoritative whenever it answers.
-     It answers the GROUND stage with the spectrum already attached, so the staged road simply skips stage two. */
-  /* the worker's own wire shape (lab/mathworker.js), so the two roads answer the SAME object: `lowestApB` and
-     `lowestAmB` are lazy getters over an eigensolve and are read only when the verdict FAILS, which is when they
-     are the evidence; `null` says "not computed" and never "zero". */
-  const wireHessian = (h) => (h ? { nOv: h.nOv, minimum: h.minimum, positiveDefinite: h.positiveDefinite,
-    lowestApB: h.minimum ? null : h.lowestApB, lowestAmB: h.minimum ? null : h.lowestAmB } : null);
-  const wireStability = (s) => (s ? { ...s, hessian: wireHessian(s.hessian) } : null);
+  /* THE FALLBACK IS FOR A BROWSER WITH NO WORKER, and only that: the worker's OWN exported ops (lab/mathworker.js installs its
+     message handler only inside a real worker), run here on the frame thread — one road and one reply, never a second
+     implementation (0.4.0 S4a: the hand-built copy this replaced answered its TDA ladder outside the canonical gauge, with
+     its own `half`).  It answers the GROUND stage with the spectrum attached, so the staged road skips stage two. */
+  const here = (basis) => Promise.all([import('./mathworker.js'), import('./rhf-molecule.js')]).then(async ([W, R]) => { W.chemRegister(basis, await R.loadRecord(basis)); return W; });
   async function localSolve(msg) {
-    const [{ loadRecord, moleculeRHF }, { rpa }, { evaluator, fieldShells }] =
-      await Promise.all([import('./rhf-molecule.js'), import('./rpa-inspector.js'), import('./molecular-field.js')]);
-    await loadRecord(msg.basis);
-    /* THE VERDICT COMES WITH THE SOLVE ON THIS ROAD TOO (2026-09-18).  This path ran with `stability: false,
-       hessian: false`, so a browser with no Worker got a report whose `stability` was null — the ONE field that
-       says whether the RHF reference is a minimum, silently absent on exactly the road nobody watches.  The
-       worker road has always sent it and now both send the same object.
-       WHAT IT COSTS, measured here rather than assumed (scratch/stage1/probe-localsolve.mjs, Node 22, Ryzen 5
-       5600G): H₂O 30 → 17 ms (inside the noise), benzene 783 → 1501 ms.  It is NOT the two Cholesky
-       factorisations that cost it — those are 1.3 ms — it is `hessianBlocks`, the AO → MO transform the A and B
-       blocks are built from, at 608 ms, plus 110 ms for the re-converge probe.  That is the same 718 ms the
-       worker pays for every solve; this road simply stopped hiding it.  `detect` stays off: naming a SECOND
-       aufbau solution costs a whole extra SCF, only N₂ has one, and this road is already on the frame thread. */
-    const r = moleculeRHF({ atoms: msg.atoms, basis: msg.basis, charge: msg.charge, detect: false });
-    const names = (await import('./names.js')).namesOf(r, msg.atoms, msg.symmetry);
-    const I = r.integrals, P = rpa({ S: I.S, h: I.h, eri: I.eri, X: I.X, Y: I.Y, Z: I.Z, C: r.C, eps: r.orbitalEnergies, nocc: r.nocc });
-    const ev = evaluator(r.basis.shells);
-    let half = 0; for (const sh of r.basis.shells) half = Math.max(half, ev.supportRadius(sh, 1e-10));
-    return { energy: r.energy, Enuc: I.Enuc, eps: Float64Array.from(r.orbitalEnergies), C: Float64Array.from(r.C), D: Float64Array.from(r.D),
-      nocc: r.nocc, nAO: I.n, order: I.order, hash: r.hash, dipole: r.dipole, shells: fieldShells(r.basis), half,
-      roots: P.roots.map((k) => ({ omega: k.omega, omegaTDA: k.omegaTDA, f: k.f, mu: Array.from(k.mu), dominant: k.dominant.slice(0, 4) })),
-      tda: P.tda.map((k) => ({ omega: k.omega, f: k.f, mu: Array.from(k.mu) })),
-      timings: { integrals: r.timings.integrals, scf: null, rpa: null, names: names.ms }, names, stability: wireStability(r.stability),
-      solutions: (r.solutions || []).map((s) => ({ ...s, hessian: wireHessian(s.hessian) })), stage: 'full', local: true };
+    const W = await here(msg.basis), g = W.chemGround(msg), s = W.chemSpectrum(msg);
+    return { ...g, roots: s.roots, tda: s.tda, timings: s.timings, stage: 'full', local: true };
   }
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
@@ -285,8 +259,7 @@ export function createChem(host, api) {
       if (!got.record) { why = `${P.name}'s record is not open: ${got.why}` + (P.recordOnly ? ' — it opens only from its record (DOWNLOAD when the network is back)' : ''); lamps(); return null; }
       if (got.from === 'network') lamps();
       const m = { op: 'chem.open', lib: got.record, hash, basis };
-      const r = await call(m, () => import('./mathworker.js').then(async (W) => { W.chemRegister(basis, await (await import('./rhf-molecule.js')).loadRecord(basis));
-        try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } }));
+      const r = await call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } }));
       if (!r || r.refused) { why = (r && r.refused) || `${P.name}'s record did not open`; return null; }
       if (wantRef && hash !== wantRef.hash) { pendingKey = pendingKey || wantRef.nameKey || null; note = 'the project named an older record; this is the current one, its orbital found by name'; }
       r.opened = { bytes: got.bytes, from: got.from };

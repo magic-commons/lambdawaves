@@ -7,11 +7,16 @@
  *             the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
  *             digest-lock-base-w125.json is the base with it on)
  *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
+ *             --states a,b,c   only these states (0.4.0 S4a: `--states` with the thirteen pre-S4a names checks the old fixture
+ *                        on a tree that has the new ones; research/release-0.4.0/measure/digest-lock-s4a.json is the lock
+ *                        S4c checks: the 1004 values plus benzene, lysine and lysine's HOMO, recorded on the S4a base tree)
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:
  *   states × grids   {1s+2pz, rydberg, 91 labels, BOX packet, AXIAL gas 256, helium, H₂, momentum, oscillator,
- *                     quarkonium, a Sturmian state, legacy H₂⁺, one molecule (MOLECULES · H₂O)} × {64, 96, 128}:
+ *                     quarkonium, a Sturmian state, legacy H₂⁺, one molecule (MOLECULES · H₂O); since 0.4.0 S4a benzene (36 AO,
+ *                     the cap-40 tier) and lysine (64 AO: the widest tier, full) by density and lysine's HOMO by ORBITAL, all
+ *                     three opened from their library records (fixed bytes, so no browser's own solve moves an input)} × {64, 96, 128}:
  *                     fieldDigest (hash of every rgba16float texel's re/im halves + integral + maxRho), readPixels at
  *                     320×240 and 1024×640 (volume + chrome), and a hash of packModes' bytes (the CPU record side).
  *   styles           readPixels (1024×640) for every VIEW × every draw STYLE at 96³ on 1s+2pz, plus the flags a
@@ -49,6 +54,7 @@ const ONLY = opt('--only', 'states,styles,lines').split(',');
 const GRIDS = opt('--grids', '64,96,128').split(',').map(Number);
 const QUERY = opt('--query', '');
 const NOWARM = flag('--nowarm');           // K2: skip the specialised-pipeline warm-up (every readPixels then draws generic)
+const ONLY_STATES = opt('--states', '') ? opt('--states', '').split(',') : null;
 const PORT = process.env.LW_PORT || '8721';
 const W = 1600, H = 1000;
 const url = `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0${QUERY ? '&' + QUERY : ''}`;
@@ -140,6 +146,14 @@ const STATES = {
   sturmian: async () => { LW.sturmian.set(true); LW.sturmian.setLambda(1.4); await freeze(3.7); },
   h2plus: async () => { LW.molecule.load({ on: true, R: 2.0, kind: 'sigma_g' }); await freeze(3.7); },
   chem: async () => { await LW.chem.solve('H2O'); LW.chem.setOn(true); LW.chem.setView('density'); await settle(4); await freeze(3.7); },
+  /* 0.4.0 S4a — the tiers S4c must leave byte-identical: benzene from its INSTALLED record (the record road, not this browser's
+     solve), lysine (record-only, 64 AO) by density and by its HOMO */
+  chemC6H6: async () => { const i = await LW.chem.install('C6H6'); if (!i.ok) throw new Error('benzene record: ' + i.why); await LW.chem.solve('C6H6', { force: true });
+    if (!LW.chem.state().record) throw new Error('benzene did not open from its record'); LW.chem.setOn(true); LW.chem.setView('density'); await settle(4); await freeze(3.7); },
+  chemLys: async () => { await LW.chem.solve('lysine'); if (LW.chem.state().nAO !== 64) throw new Error('lysine: ' + LW.chem.state().status);
+    LW.chem.setOn(true); LW.chem.setView('density'); await settle(4); await freeze(3.7); },
+  chemLysHomo: async () => { await LW.chem.solve('lysine'); if (LW.chem.state().nAO !== 64) throw new Error('lysine: ' + LW.chem.state().status);
+    LW.chem.setOn(true); LW.chem.setView('orbital'); LW.chem.orbital(40); await settle(4); await freeze(3.7); },
 };
 async function state(name, grids) {
   await base(); await STATES[name]();
@@ -199,7 +213,8 @@ return { ok: true, states: Object.keys(STATES) };
 `;
 
 const t0 = Date.now();
-const g = await open(url, { width: W, height: H, script: 1800000, prefs: { 'privacy.reduceTimerPrecision': false } });
+const g = await open(url, { width: W, height: H, script: 1800000, prefs: { 'privacy.reduceTimerPrecision': false,
+  'dom.storageManager.prompt.testing': true, 'dom.storageManager.prompt.testing.allow': true } });   // S4a: the record install asks persist() once
 const result = { made: new Date().toISOString(), url, meta: null, states: {}, styles: null, lines: null, pageErrors: [] };
 let failed = null;
 try {
@@ -211,7 +226,7 @@ try {
   result.meta = await g.ev('return __DL.meta();');
   if (ONLY.includes('styles')) { result.styles = await g.ev('return await __DL.styles();'); if (result.styles && result.styles.E) throw new Error('styles: ' + result.styles.E); console.log('styles', Object.keys(result.styles).length); }
   if (ONLY.includes('lines')) { result.lines = await g.ev('return await __DL.lines();'); if (result.lines && result.lines.E) throw new Error('lines: ' + result.lines.E); console.log('lines', Object.keys(result.lines).length); }
-  if (ONLY.includes('states')) for (const s of inst.states) {
+  if (ONLY.includes('states')) for (const s of inst.states.filter((x) => !ONLY_STATES || ONLY_STATES.includes(x))) {
     const t = Date.now();
     const o = await g.ev(`return await __DL.state(${JSON.stringify(s)}, ${JSON.stringify(GRIDS)});`);
     if (!o || o.E) throw new Error('state ' + s + ': ' + JSON.stringify(o));
@@ -237,7 +252,7 @@ if (MODE === 'write') {
   process.exit(0);
 }
 const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
-const pick = (r) => { const o = {}; if (ONLY.includes('states')) { o.states = {}; for (const [s, v] of Object.entries(r.states || {})) { o.states[s] = {}; for (const gr of GRIDS) if (v[gr]) o.states[s][gr] = v[gr]; } } if (ONLY.includes('styles')) o.styles = r.styles; if (ONLY.includes('lines')) o.lines = r.lines; return o; };
+const pick = (r) => { const o = {}; if (ONLY.includes('states')) { o.states = {}; for (const [s, v] of Object.entries(r.states || {})) { if (ONLY_STATES && !ONLY_STATES.includes(s)) continue; o.states[s] = {}; for (const gr of GRIDS) if (v[gr]) o.states[s][gr] = v[gr]; } } if (ONLY.includes('styles')) o.styles = r.styles; if (ONLY.includes('lines')) o.lines = r.lines; return o; };
 const A = leaves(pick(fixture)), B = leaves(pick(result));
 const diffs = [];
 for (const k of new Set([...Object.keys(A), ...Object.keys(B)])) if (A[k] !== B[k]) diffs.push({ k, base: A[k], now: B[k] });
