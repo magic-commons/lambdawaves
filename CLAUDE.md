@@ -4,6 +4,11 @@ MIR owns generic instrument behavior. Before changing modulation controls, read
 `lab/mir/modulation/modwindow/host-contract.md` and the upstream
 `/home/joshua-hosain/Documents/MIR/PROMPT.md`. Update MIR first, adopt it, then
 adapt `lab/modwindow.js`; do not edit adopted files under `lab/mir/`.
+The modulation port is `lab/mod-port.js` (the object `createModulation(port)`
+takes, key for key with MIR 1.5); THE play is `onePlay` in `lab/clock.js`, and
+while MOD is armed and LINKED the modulation follows its edges holding the kit's
+`demand('app.play')`, so a play is never refused for want of a route or an open
+editor (0.5.0 A5/A6).
 
 MIR 1.4.2 restores FL Studio's curve workflow: right-drag empty space adds and
 places a point; Shift-right-click adds at the curve's current value; left-drag moves a point or tension handle; Ctrl fine-tunes
