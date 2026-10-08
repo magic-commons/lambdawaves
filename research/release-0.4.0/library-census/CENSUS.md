@@ -2,6 +2,24 @@
 
 All numeric cells carry **M = MEASURED**, **D = DERIVED**, or **U = UNVERIFIED**, followed by the reason where needed. JSON uses per-field `numericStatus` or a containing `status` block. M means observed on this machine or copied from a cited reference; it does not mean measured experimentally here. Geometry provenance and its experimental status are separate. Null is unavailable, never zero. Dates, atomic numbers, MO indices, formula subscripts and version strings identify inputs or conventions.
 
+## Claude Sos's spot-check (2026-10-08, before S4 reads a number)
+
+Sol (gpt-6.1-sol) wrote this census; Josh's calibration says to re-run its headline numbers before banking them. Checked on the
+merged `sos-s0` tree, reading the rows and the app-solver probes as written (no re-solve):
+
+| entry | this census (PySCF, STO-3G) | the second lab | Δ | verdict |
+|---|---|---|---|---|
+| H₂O | −74.96302316286219 Eh, converged, 11 cycles | `tests/fixtures/oracles/sto-3g-v1.json` molecules/H2O −74.96302316286219 | 0 | MATCH |
+| C₆H₆ (refined row) | −227.89100646417987 Eh, converged, 25 cycles | oracle molecules_extended/C6H6 −227.89100646418058 | 7e-13 | MATCH |
+| C₆H₆ (unrefined row) | −227.89100646512108 Eh, **not converged at 200 cycles** | the refined row | 9.4e-10 | the energy is right; the flag is the census's own SCF criterion, not a chemistry fact |
+| alanine | −317.67874534511 Eh, converged | the app's node solver (`app-alanine.json`) −317.67874534511134 | 1e-12 | MATCH (two independent solvers) |
+| Li₄F₄ | −422.17107769585317 Eh | app solver −422.17107769587346 | 2e-11 | MATCH |
+| TiCl₄ | −2658.646680474214 Eh | app solver −2658.646680474205 | 9e-12 | MATCH |
+
+Verdict: the energies this census rests on reproduce in a second lab; the counts, bytes and gate verdicts are DERIVED from them and
+are taken as Sol tagged them. Not re-checked here: the geometries' experimental provenance (U where Sol says U), the 6-31+G* AO
+counts, the C₆₀ frontier beyond Sol's own water proof (1.03e-12), and the wall times (the machine was loaded).
+
 ## One-page summary
 
 D: **117 named rows**, including M: **54 present entries**, D: **20 amino acids** and D: **5 nucleobases**. Glycine is counted once. Carbonyl representatives are Ni(CO)4, Fe(CO)5 and Cr(CO)6. Conditional iodine/xenon candidates remain in the census.
