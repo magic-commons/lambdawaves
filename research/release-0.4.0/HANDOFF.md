@@ -117,6 +117,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > - **Not started:** the S2 verifier (`BRIEF-S2-VERIFY.md` is written, `9d8d8ed`; ports 8749/5217), S5 KIT BRIEFS, S4 LIBRARY a/b/c.
 > - **Order for the next session:** merge S3 (then `new-project`, `pwa --write`, node gate, light browser check) → S2 verifier → census
 >   spot-check → S5 ∥ S4a → the local 0.4.0-alpha cut on Josh's word. Worker notes: `~/.claude/handoffs/agents/*.md`.
+> **UPDATE 2026-10-08 ~02:00 — Claude Sos, fourth session (Fable), Josh: "Lets continue".** On `sos-s0`:
+> - **S3 STAGE TEXT + WINDOWS merged** (`7e6220b`, builder `3621836`, waves 155–161, `S3-BUILD.md`). Resolved: REPORT.md keeps both
+>   sections (S2 then S3); `lab/rack.js` l.26 keeps `toScreen` in the `field.js` import (S3 trimmed it as unused, S2's `pointerRay`
+>   uses it); `lab/sw.js` and the empty project regenerated (16,866 B, in step). Merged tree: `bash test.sh node` exit 0; browser
+>   one at a time on 8753/5221: `stage-text`, `camera-shift`, `frame-occlusion`, `new-project`, `molecular-names`, `history` all
+>   green. `lab/*.js` 35,738 (bd9b0e5) → 35,881 (+143 = S2 +90, S3 +53; S3's "lines DOWN" NOT met — for Josh).
+> - **The census spot-checked** (`8259eee`): water and benzene MATCH the oracle (0, 7e-13 Eh); alanine, Li₄F₄, TiCl₄ MATCH the app's
+>   own solver (≤ 2e-11 Eh). The energies stand; the counts are taken as Sol tagged them. S4 may read it.
+> - **S5 KIT BRIEFS → Sol** (Codex `task-muz6hazq-eqsd8r`, gpt-6.1-sol at xhigh, Josh: Sol for any task) writing ONE untracked file
+>   `research/release-0.4.0/KIT-BRIEFS.md` inside the `sos-s0` worktree; Sos reads it once, then commits and mirrors it to the vault.
+> - **Blocked:** the agent-control plugin is still in its handoff pause and REFUSES new Claude workers ("Agent Control is paused
+>   for handoff"), so the **S2 verifier** (`BRIEF-S2-VERIFY.md`, start `8259eee`, 8749/5217) and the **S4a builder**
+>   (`BRIEF-S4-LIBRARY.md` §S4a, 8753/5221, then its verifier 8755/5223) wait for Josh to lift the pause.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
