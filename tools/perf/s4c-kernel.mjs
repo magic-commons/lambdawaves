@@ -18,7 +18,7 @@
  *               ~100 ms completion tick, MEASURE.md §3), 5 batches: the density at 87 / 120 AO (cap-128 tile), the orbital at
  *               87 / 120 / 300 AO (ORB_WGSL) — and ORB_WGSL at 300 AO PLAIN (every shell's cut at +∞) beside SCREENED, on the
  *               field's own device with the module the field compiled from (field.js exports ORB_WGSL and packMolecule).
- * Writes research/release-0.4.0/measure/s4c-kernel.json (merged per browser). */
+ * Writes research/release-0.4.0/measure/s4c-kernel.json (per browser; an --only run replaces only its own sections). */
 import { launch, sleep } from './cdp.mjs';
 import { open } from '../gate/gatekit.mjs';
 import fs from 'node:fs';
@@ -175,12 +175,13 @@ if (ONLY.includes('valence')) {
   c.setOn(false);
 }
 if (ONLY.includes('timing')) {
+  try { __LW.quality.res = RES; } catch (_) {} f.setResolution(RES);          // the VALENCE section ran the app, whose loop sets its own grid (64³ here)
   out.timing = [];
   const time = async (label) => {
     await f.moleculeThroughput({ n: 10 });
     const n = await grow(async (m) => (await f.moleculeThroughput({ n: m })).msPerDispatch);
     const runs = []; let r; for (let b = 0; b < 5; b++) { r = await f.moleculeThroughput({ n }); runs.push(r.msPerDispatch); }
-    out.timing.push({ label, nAO: r.nAO, kind: r.kind, path: r.path, cap: r.cap, wg: r.wg, n, median: +med(runs).toFixed(3), min: Math.min(...runs), max: Math.max(...runs) });
+    out.timing.push({ label, res: r.res, nAO: r.nAO, kind: r.kind, path: r.path, cap: r.cap, wg: r.wg, n, median: +med(runs).toFixed(3), min: Math.min(...runs), max: Math.max(...runs) });
   };
   for (const [id, R] of Object.entries(recs)) {
     const { spec } = specOf(R.atoms), n = R.ground.nAO; f.setMolecule(spec);
@@ -234,7 +235,7 @@ let prev = {}; try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch {}
 const res = prev.browsers || {};
 for (const k of BROWSERS.length ? BROWSERS : ['firefox']) {
   const t0 = Date.now();
-  try { res[k] = await (k === 'chromium' ? chromium() : firefox()); } catch (e) { res[k] = { error: String(e && e.stack || e) }; }
+  try { res[k] = { ...(res[k] || {}), ...await (k === 'chromium' ? chromium() : firefox()) }; } catch (e) { res[k] = { error: String(e && e.stack || e) }; }   // an --only run replaces its own sections, keeps the rest
   res[k].wallSec = +((Date.now() - t0) / 1000).toFixed(1); res[k].at = new Date().toISOString();
   console.log(`\n── ${k} (${res[k].wallSec} s)`);
   console.log(JSON.stringify(res[k], (key, v) => (key === 'probes' ? undefined : v), 1));

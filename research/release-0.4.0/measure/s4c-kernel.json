@@ -10,6 +10,555 @@
     "description": ""
    },
    "res": 96,
+   "tiers": {
+    "requested": {
+     "maxTextureDimension2D": 32767,
+     "maxTextureDimension1D": 32767,
+     "maxComputeWorkgroupStorageSize": 32768
+    },
+    "granted": 32768,
+    "caps": [
+     16,
+     40,
+     64,
+     128
+    ],
+    "wg": [
+     64,
+     64,
+     64,
+     64
+    ],
+    "orbitalFrom": 64,
+    "shaderErrors": []
+   },
+   "fallback": {
+    "full": {
+     "digest": "8ce0fdcb",
+     "wg": 64,
+     "granted": 32768
+    },
+    "refused": {
+     "digest": "8ce0fdcb",
+     "wg": 32,
+     "granted": 16384,
+     "requested": {
+      "maxTextureDimension2D": 32767,
+      "maxTextureDimension1D": 32767,
+      "maxComputeWorkgroupStorageSize": 32768
+     },
+     "wrapCalls": 1
+    },
+    "identical": true,
+    "densityMs": {
+     "lanes64": 21.584,
+     "lanes32": 20.853
+    }
+   },
+   "timing": [
+    {
+     "label": "tryptophan density",
+     "res": 96,
+     "nAO": 87,
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
+     "wg": 64,
+     "n": 214,
+     "median": 21.515,
+     "min": 21.047,
+     "max": 21.525
+    },
+    {
+     "label": "tryptophan HOMO",
+     "res": 96,
+     "nAO": 87,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 4154,
+     "median": 1.181,
+     "min": 1.158,
+     "max": 1.181
+    },
+    {
+     "label": "C20H20 density",
+     "res": 96,
+     "nAO": 120,
+     "kind": "density",
+     "path": "tile",
+     "cap": 128,
+     "wg": 64,
+     "n": 54,
+     "median": 48.196,
+     "min": 48.19,
+     "max": 48.441
+    },
+    {
+     "label": "C20H20 HOMO",
+     "res": 96,
+     "nAO": 120,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 1080,
+     "median": 2.502,
+     "min": 2.41,
+     "max": 2.502
+    },
+    {
+     "label": "C60 HOMO (field, screened)",
+     "res": 96,
+     "nAO": 300,
+     "kind": "orbital",
+     "path": "orbital",
+     "cap": null,
+     "wg": 64,
+     "n": 1080,
+     "median": 4.17,
+     "min": 4.078,
+     "max": 4.17
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL plain (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 180,
+     "median": 15.013,
+     "min": 14.457,
+     "max": 15.02
+    },
+    {
+     "label": "C60 HOMO ORB_WGSL screened (own pass, the shipped module)",
+     "nAO": 300,
+     "path": "orbital",
+     "n": 1080,
+     "median": 4.078,
+     "min": 4.078,
+     "max": 4.078
+    }
+   ],
+   "wallSec": 7.6,
+   "at": "2026-10-08T09:32:15.574Z",
+   "records": {
+    "tryptophan": {
+     "nAO": 87,
+     "nocc": 54,
+     "half": 14.635385660262282,
+     "energy": -673.5899790979712,
+     "density": {
+      "kind": "density",
+      "path": "tile",
+      "cap": 128,
+      "wg": 64,
+      "nAO": 87,
+      "voxels": 256,
+      "maxAbsErr": 0.003918,
+      "maxSampled": 5.7891,
+      "gridMax": 8.5986,
+      "relToMax": 0.0004557,
+      "maxRelAbove1pc": 0.000934,
+      "pass": true,
+      "probes": [
+       [
+        62,
+        51,
+        23,
+        0.788198,
+        0.788086
+       ],
+       [
+        7,
+        50,
+        63,
+        0.0000673446,
+        0.0000672936
+       ],
+       [
+        54,
+        37,
+        42,
+        0.360535,
+        0.360352
+       ],
+       [
+        6,
+        20,
+        78,
+        2.13408e-9,
+        0
+       ],
+       [
+        59,
+        54,
+        29,
+        0.486046,
+        0.48584
+       ],
+       [
+        16,
+        48,
+        38,
+        0.00136259,
+        0.00136185
+       ],
+       [
+        38,
+        38,
+        65,
+        0.537059,
+        0.536621
+       ],
+       [
+        50,
+        65,
+        55,
+        0.00381482,
+        0.0038147
+       ]
+      ]
+     },
+     "homo": {
+      "kind": "orbital",
+      "path": "orbital",
+      "cap": null,
+      "wg": 64,
+      "nAO": 87,
+      "voxels": 256,
+      "maxAbsErr": 0.0001064,
+      "maxSampled": 0.16792,
+      "gridMax": 0.22129,
+      "relToMax": 0.0004809,
+      "maxRelAbove1pc": 0.0008489,
+      "pass": true,
+      "probes": [
+       [
+        62,
+        51,
+        23,
+        0.0127086,
+        0.0127029
+       ],
+       [
+        7,
+        50,
+        63,
+        -8.04325e-7,
+        -7.7486e-7
+       ],
+       [
+        54,
+        37,
+        42,
+        -0.00097336,
+        -0.000973225
+       ],
+       [
+        6,
+        20,
+        78,
+        2.50462e-12,
+        0
+       ],
+       [
+        59,
+        54,
+        29,
+        -0.00562716,
+        -0.00562668
+       ],
+       [
+        16,
+        48,
+        38,
+        -0.0000107443,
+        -0.0000107288
+       ],
+       [
+        38,
+        38,
+        65,
+        -0.167919,
+        -0.167847
+       ],
+       [
+        50,
+        65,
+        55,
+        -0.0000720737,
+        -0.000072062
+       ]
+      ]
+     }
+    },
+    "C20H20": {
+     "nAO": 120,
+     "nocc": 70,
+     "half": 11.764819419258396,
+     "energy": -760.1379718923313,
+     "density": {
+      "kind": "density",
+      "path": "tile",
+      "cap": 128,
+      "wg": 64,
+      "nAO": 120,
+      "voxels": 256,
+      "maxAbsErr": 0.002547,
+      "maxSampled": 6.9127,
+      "gridMax": 6.9128,
+      "relToMax": 0.0003685,
+      "maxRelAbove1pc": 0.0008037,
+      "pass": true,
+      "probes": [
+       [
+        34,
+        52,
+        46,
+        0.517109,
+        0.51709
+       ],
+       [
+        23,
+        84,
+        5,
+        6.57471e-8,
+        5.96046e-8
+       ],
+       [
+        62,
+        43,
+        46,
+        0.606995,
+        0.606934
+       ],
+       [
+        60,
+        73,
+        37,
+        0.0300359,
+        0.0300293
+       ],
+       [
+        63,
+        31,
+        33,
+        0.39027,
+        0.390137
+       ],
+       [
+        26,
+        62,
+        5,
+        0.0000427295,
+        0.0000426769
+       ],
+       [
+        47,
+        62,
+        52,
+        0.812808,
+        0.8125
+       ],
+       [
+        70,
+        3,
+        5,
+        1.39452e-9,
+        0
+       ]
+      ]
+     },
+     "homo": {
+      "kind": "orbital",
+      "path": "orbital",
+      "cap": null,
+      "wg": 64,
+      "nAO": 120,
+      "voxels": 256,
+      "maxAbsErr": 0.0000598,
+      "maxSampled": 0.10385,
+      "gridMax": 0.10764,
+      "relToMax": 0.0005555,
+      "maxRelAbove1pc": 0.000856,
+      "pass": true,
+      "probes": [
+       [
+        34,
+        52,
+        46,
+        -0.0679421,
+        -0.0679321
+       ],
+       [
+        23,
+        84,
+        5,
+        -1.15392e-8,
+        0
+       ],
+       [
+        62,
+        43,
+        46,
+        -0.0731838,
+        -0.0731812
+       ],
+       [
+        60,
+        73,
+        37,
+        -0.000777511,
+        -0.000777245
+       ],
+       [
+        63,
+        31,
+        33,
+        -0.0625024,
+        -0.0625
+       ],
+       [
+        26,
+        62,
+        5,
+        -0.00000257801,
+        -0.000002563
+       ],
+       [
+        47,
+        62,
+        52,
+        -0.0331265,
+        -0.0331116
+       ],
+       [
+        70,
+        3,
+        5,
+        -2.46557e-10,
+        0
+       ]
+      ]
+     }
+    }
+   },
+   "c60": {
+    "from": "lab/library/9520cedceff89f0337ce5f0c57bcaf6e5060d5bb5c7aad76facec98cde50caaf.json",
+    "nAO": 300,
+    "half": 12.421046307847265,
+    "refHalf": 12.421046307847265,
+    "against": "PySCF GTOval_cart at the voxel centres",
+    "cols": [
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182
+    ],
+    "orbitals": [
+     {
+      "k": 175,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005436,
+      "relToMax": 0.000472,
+      "appF64VsRef": 5.551e-17,
+      "maxPsi": 0.095359,
+      "gridMax": 0.11517,
+      "pass": true
+     },
+     {
+      "k": 176,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005929,
+      "relToMax": 0.0004993,
+      "appF64VsRef": 4.857e-17,
+      "maxPsi": 0.11824,
+      "gridMax": 0.11874,
+      "pass": true
+     },
+     {
+      "k": 177,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005512,
+      "relToMax": 0.0004834,
+      "appF64VsRef": 6.939e-17,
+      "maxPsi": 0.091145,
+      "gridMax": 0.11403,
+      "pass": true
+     },
+     {
+      "k": 178,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00004769,
+      "relToMax": 0.000402,
+      "appF64VsRef": 9.714e-17,
+      "maxPsi": 0.097176,
+      "gridMax": 0.11863,
+      "pass": true
+     },
+     {
+      "k": 179,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005872,
+      "relToMax": 0.0004711,
+      "appF64VsRef": 6.939e-17,
+      "maxPsi": 0.098499,
+      "gridMax": 0.12464,
+      "pass": true
+     },
+     {
+      "k": 180,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00006006,
+      "relToMax": 0.0005472,
+      "appF64VsRef": 8.327e-17,
+      "maxPsi": 0.087995,
+      "gridMax": 0.10975,
+      "pass": true
+     },
+     {
+      "k": 181,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00006024,
+      "relToMax": 0.0005612,
+      "appF64VsRef": 5.551e-17,
+      "maxPsi": 0.096911,
+      "gridMax": 0.10734,
+      "pass": true
+     },
+     {
+      "k": 182,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005154,
+      "relToMax": 0.0004875,
+      "appF64VsRef": 8.327e-17,
+      "maxPsi": 0.098858,
+      "gridMax": 0.10574,
+      "pass": true
+     }
+    ]
+   },
    "valence": {
     "lysine": {
      "nAO": 64,
@@ -37,9 +586,7 @@
      "pass": true,
      "state": true
     }
-   },
-   "wallSec": 6.4,
-   "at": "2026-10-08T08:54:30.776Z"
+   }
   },
   "chromium": {
    "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
@@ -72,88 +619,561 @@
     "orbitalFrom": 64,
     "shaderErrors": []
    },
+   "fallback": {
+    "full": {
+     "digest": "ff0a77c2",
+     "wg": 64,
+     "granted": 32768
+    },
+    "refused": {
+     "digest": "ff0a77c2",
+     "wg": 32,
+     "granted": 16384,
+     "requested": {
+      "maxTextureDimension2D": 16384,
+      "maxTextureDimension1D": 16384,
+      "maxComputeWorkgroupStorageSize": 32768
+     },
+     "wrapCalls": 1
+    },
+    "identical": true,
+    "densityMs": {
+     "lanes64": 19.414,
+     "lanes32": 19.362
+    }
+   },
    "timing": [
     {
      "label": "tryptophan density",
+     "res": 96,
      "nAO": 87,
      "kind": "density",
      "path": "tile",
      "cap": 128,
      "wg": 64,
      "n": 139,
-     "median": 19.261,
-     "min": 19.245,
-     "max": 19.294
+     "median": 19.621,
+     "min": 19.343,
+     "max": 19.745
     },
     {
      "label": "tryptophan HOMO",
+     "res": 96,
      "nAO": 87,
      "kind": "orbital",
      "path": "orbital",
      "cap": null,
      "wg": 64,
-     "n": 2770,
-     "median": 0.961,
-     "min": 0.96,
-     "max": 0.962
+     "n": 2756,
+     "median": 0.968,
+     "min": 0.966,
+     "max": 1.565
     },
     {
      "label": "C20H20 density",
+     "res": 96,
      "nAO": 120,
      "kind": "density",
      "path": "tile",
      "cap": 128,
      "wg": 64,
-     "n": 65,
-     "median": 42.062,
-     "min": 42.038,
-     "max": 42.082
+     "n": 40,
+     "median": 43.03,
+     "min": 42.405,
+     "max": 65.938
     },
     {
      "label": "C20H20 HOMO",
+     "res": 96,
      "nAO": 120,
      "kind": "orbital",
      "path": "orbital",
      "cap": null,
      "wg": 64,
-     "n": 1256,
-     "median": 2.111,
-     "min": 2.11,
-     "max": 2.123
+     "n": 1228,
+     "median": 2.175,
+     "min": 2.144,
+     "max": 2.224
     },
     {
      "label": "C60 HOMO (field, screened)",
+     "res": 96,
      "nAO": 300,
      "kind": "orbital",
      "path": "orbital",
      "cap": null,
      "wg": 64,
-     "n": 745,
-     "median": 3.571,
-     "min": 3.569,
-     "max": 3.573
+     "n": 744,
+     "median": 3.65,
+     "min": 3.639,
+     "max": 3.678
     },
     {
      "label": "C60 HOMO ORB_WGSL plain (own pass, the shipped module)",
      "nAO": 300,
      "path": "orbital",
-     "n": 205,
-     "median": 13.241,
-     "min": 13.148,
-     "max": 13.646
+     "n": 202,
+     "median": 13.67,
+     "min": 13.289,
+     "max": 14.108
     },
     {
      "label": "C60 HOMO ORB_WGSL screened (own pass, the shipped module)",
      "nAO": 300,
      "path": "orbital",
-     "n": 745,
-     "median": 3.57,
+     "n": 723,
+     "median": 3.622,
      "min": 3.569,
-     "max": 3.573
+     "max": 3.825
     }
    ],
-   "wallSec": 118.6,
-   "at": "2026-10-08T08:48:38.831Z"
+   "wallSec": 7.7,
+   "at": "2026-10-08T09:32:27.564Z",
+   "records": {
+    "tryptophan": {
+     "nAO": 87,
+     "nocc": 54,
+     "half": 14.635385660262282,
+     "energy": -673.5899790979712,
+     "density": {
+      "kind": "density",
+      "path": "tile",
+      "cap": 128,
+      "wg": 64,
+      "nAO": 87,
+      "voxels": 256,
+      "maxAbsErr": 0.003918,
+      "maxSampled": 5.7891,
+      "gridMax": 8.5986,
+      "relToMax": 0.0004557,
+      "maxRelAbove1pc": 0.000934,
+      "pass": true,
+      "probes": [
+       [
+        62,
+        51,
+        23,
+        0.788198,
+        0.788086
+       ],
+       [
+        7,
+        50,
+        63,
+        0.0000673446,
+        0.0000672936
+       ],
+       [
+        54,
+        37,
+        42,
+        0.360535,
+        0.360352
+       ],
+       [
+        6,
+        20,
+        78,
+        2.13408e-9,
+        0
+       ],
+       [
+        59,
+        54,
+        29,
+        0.486046,
+        0.48584
+       ],
+       [
+        16,
+        48,
+        38,
+        0.00136259,
+        0.00136185
+       ],
+       [
+        38,
+        38,
+        65,
+        0.537059,
+        0.536621
+       ],
+       [
+        50,
+        65,
+        55,
+        0.00381482,
+        0.0038147
+       ]
+      ]
+     },
+     "homo": {
+      "kind": "orbital",
+      "path": "orbital",
+      "cap": null,
+      "wg": 64,
+      "nAO": 87,
+      "voxels": 256,
+      "maxAbsErr": 0.0001064,
+      "maxSampled": 0.16792,
+      "gridMax": 0.22129,
+      "relToMax": 0.0004809,
+      "maxRelAbove1pc": 0.0008489,
+      "pass": true,
+      "probes": [
+       [
+        62,
+        51,
+        23,
+        0.0127086,
+        0.0127029
+       ],
+       [
+        7,
+        50,
+        63,
+        -8.04325e-7,
+        -7.7486e-7
+       ],
+       [
+        54,
+        37,
+        42,
+        -0.00097336,
+        -0.000973225
+       ],
+       [
+        6,
+        20,
+        78,
+        2.50462e-12,
+        0
+       ],
+       [
+        59,
+        54,
+        29,
+        -0.00562716,
+        -0.00562668
+       ],
+       [
+        16,
+        48,
+        38,
+        -0.0000107443,
+        -0.0000107288
+       ],
+       [
+        38,
+        38,
+        65,
+        -0.167919,
+        -0.167847
+       ],
+       [
+        50,
+        65,
+        55,
+        -0.0000720737,
+        -0.000072062
+       ]
+      ]
+     }
+    },
+    "C20H20": {
+     "nAO": 120,
+     "nocc": 70,
+     "half": 11.764819419258396,
+     "energy": -760.1379718923313,
+     "density": {
+      "kind": "density",
+      "path": "tile",
+      "cap": 128,
+      "wg": 64,
+      "nAO": 120,
+      "voxels": 256,
+      "maxAbsErr": 0.002547,
+      "maxSampled": 6.9127,
+      "gridMax": 6.9128,
+      "relToMax": 0.0003685,
+      "maxRelAbove1pc": 0.0008037,
+      "pass": true,
+      "probes": [
+       [
+        34,
+        52,
+        46,
+        0.517109,
+        0.51709
+       ],
+       [
+        23,
+        84,
+        5,
+        6.57471e-8,
+        5.96046e-8
+       ],
+       [
+        62,
+        43,
+        46,
+        0.606995,
+        0.606934
+       ],
+       [
+        60,
+        73,
+        37,
+        0.0300359,
+        0.0300293
+       ],
+       [
+        63,
+        31,
+        33,
+        0.39027,
+        0.390137
+       ],
+       [
+        26,
+        62,
+        5,
+        0.0000427295,
+        0.0000426769
+       ],
+       [
+        47,
+        62,
+        52,
+        0.812808,
+        0.8125
+       ],
+       [
+        70,
+        3,
+        5,
+        1.39452e-9,
+        0
+       ]
+      ]
+     },
+     "homo": {
+      "kind": "orbital",
+      "path": "orbital",
+      "cap": null,
+      "wg": 64,
+      "nAO": 120,
+      "voxels": 256,
+      "maxAbsErr": 0.0000598,
+      "maxSampled": 0.10385,
+      "gridMax": 0.10764,
+      "relToMax": 0.0005555,
+      "maxRelAbove1pc": 0.000856,
+      "pass": true,
+      "probes": [
+       [
+        34,
+        52,
+        46,
+        -0.0679421,
+        -0.0679321
+       ],
+       [
+        23,
+        84,
+        5,
+        -1.15392e-8,
+        0
+       ],
+       [
+        62,
+        43,
+        46,
+        -0.0731838,
+        -0.0731812
+       ],
+       [
+        60,
+        73,
+        37,
+        -0.000777511,
+        -0.000777245
+       ],
+       [
+        63,
+        31,
+        33,
+        -0.0625024,
+        -0.0625
+       ],
+       [
+        26,
+        62,
+        5,
+        -0.00000257801,
+        -0.000002563
+       ],
+       [
+        47,
+        62,
+        52,
+        -0.0331265,
+        -0.0331116
+       ],
+       [
+        70,
+        3,
+        5,
+        -2.46557e-10,
+        0
+       ]
+      ]
+     }
+    }
+   },
+   "c60": {
+    "from": "lab/library/9520cedceff89f0337ce5f0c57bcaf6e5060d5bb5c7aad76facec98cde50caaf.json",
+    "nAO": 300,
+    "half": 12.421046307847265,
+    "refHalf": 12.421046307847265,
+    "against": "PySCF GTOval_cart at the voxel centres",
+    "cols": [
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182
+    ],
+    "orbitals": [
+     {
+      "k": 175,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005436,
+      "relToMax": 0.000472,
+      "appF64VsRef": 5.551e-17,
+      "maxPsi": 0.095359,
+      "gridMax": 0.11517,
+      "pass": true
+     },
+     {
+      "k": 176,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005929,
+      "relToMax": 0.0004993,
+      "appF64VsRef": 4.857e-17,
+      "maxPsi": 0.11824,
+      "gridMax": 0.11874,
+      "pass": true
+     },
+     {
+      "k": 177,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005512,
+      "relToMax": 0.0004834,
+      "appF64VsRef": 6.939e-17,
+      "maxPsi": 0.091145,
+      "gridMax": 0.11403,
+      "pass": true
+     },
+     {
+      "k": 178,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00004769,
+      "relToMax": 0.000402,
+      "appF64VsRef": 9.714e-17,
+      "maxPsi": 0.097176,
+      "gridMax": 0.11863,
+      "pass": true
+     },
+     {
+      "k": 179,
+      "set": "HOMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005872,
+      "relToMax": 0.0004711,
+      "appF64VsRef": 6.939e-17,
+      "maxPsi": 0.098499,
+      "gridMax": 0.12464,
+      "pass": true
+     },
+     {
+      "k": 180,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00006006,
+      "relToMax": 0.0005472,
+      "appF64VsRef": 8.327e-17,
+      "maxPsi": 0.087995,
+      "gridMax": 0.10975,
+      "pass": true
+     },
+     {
+      "k": 181,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00006024,
+      "relToMax": 0.0005612,
+      "appF64VsRef": 5.551e-17,
+      "maxPsi": 0.096911,
+      "gridMax": 0.10734,
+      "pass": true
+     },
+     {
+      "k": 182,
+      "set": "LUMO",
+      "path": "orbital",
+      "voxels": 256,
+      "maxAbsErr": 0.00005154,
+      "relToMax": 0.0004875,
+      "appF64VsRef": 8.327e-17,
+      "maxPsi": 0.098858,
+      "gridMax": 0.10574,
+      "pass": true
+     }
+    ]
+   },
+   "valence": {
+    "lysine": {
+     "nAO": 64,
+     "core": 10,
+     "res": 64,
+     "rhoMaxTotal": 47.786,
+     "rhoMaxValence": 1.6011,
+     "drownedBy": 29.8,
+     "voxels": 256,
+     "maxAbsErr": 0.0007137,
+     "relToMax": 0.000564,
+     "pass": true,
+     "state": true
+    },
+    "C6H6": {
+     "nAO": 36,
+     "core": 6,
+     "res": 64,
+     "rhoMaxTotal": 7.3721,
+     "rhoMaxValence": 0.32702,
+     "drownedBy": 22.5,
+     "voxels": 256,
+     "maxAbsErr": 0.0004619,
+     "relToMax": 0.0008078,
+     "pass": true,
+     "state": true
+    }
+   }
   }
  }
 }
