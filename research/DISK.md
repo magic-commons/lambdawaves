@@ -1,6 +1,6 @@
 # THE DISK · RESEARCH
 
-Built 2026-10-07 22:25 UTC by tools/disk.mjs from `research/`: 107 documents inlined in full (2.85 MB), 1035 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
+Built 2026-10-08 00:12 UTC by tools/disk.mjs from `research/`: 110 documents inlined in full (2.93 MB), 1045 artefacts indexed by path. Read it top to bottom; each document begins with a heading naming its path and date, and its own headings are demoted one level so the DISK's outline is the folder's outline.
 
 ## CONTENTS
 
@@ -73,7 +73,7 @@ Built 2026-10-07 22:25 UTC by tools/disk.mjs from `research/`: 107 documents inl
 67. [beta/RESEARCH-COMMISSIONS.md](#doc-67) · 2026-10-07 · 14 kB
 68. [beta/SOURCES.md](#doc-68) · 2026-10-07 · 9 kB
 69. [device-reports/README.md](#doc-69) · 2026-10-07 · 0 kB
-70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 83 kB
+70. [MATH-CYCLOTOMIC-SCALING-2026-10-07.md](#doc-70) · 2026-10-07 · 142 kB
 71. [release-0.3.1/BRIEF-S3.md](#doc-71) · 2026-10-07 · 10 kB
 72. [release-0.3.1/BRIEF-S4.md](#doc-72) · 2026-10-07 · 3 kB
 73. [release-0.3.1/MIR-CONTRACT-THREE-SCOPES.md](#doc-73) · 2026-10-07 · 3 kB
@@ -106,11 +106,14 @@ Built 2026-10-07 22:25 UTC by tools/disk.mjs from `research/`: 107 documents inl
 100. [release-0.4.0/REVIEW-SONNET-2.md](#doc-100) · 2026-10-07 · 20 kB
 101. [release-0.4.0/S0-BUILD.md](#doc-101) · 2026-10-07 · 10 kB
 102. [release-0.4.0/S0-VERIFY.md](#doc-102) · 2026-10-07 · 16 kB
-103. [release-0.4.0/survey/LWAVES-AUDIT.md](#doc-103) · 2026-10-07 · 67 kB
-104. [release-0.4.0/survey/MIR-1.5.md](#doc-104) · 2026-10-07 · 71 kB
-105. [release-0.4.0/survey/SIBLINGS.md](#doc-105) · 2026-10-07 · 48 kB
-106. [release-0.4.0/survey/VAULT.md](#doc-106) · 2026-10-07 · 61 kB
-107. [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](#doc-107) · 2026-10-07 · 50 kB
+103. [release-0.4.0/S1-CAMERAEYE-BUILD.md](#doc-103) · 2026-10-07 · 6 kB
+104. [release-0.4.0/S1-NAMES-BUILD.md](#doc-104) · 2026-10-07 · 12 kB
+105. [release-0.4.0/S1-NAMES-HANDOFF.md](#doc-105) · 2026-10-07 · 6 kB
+106. [release-0.4.0/survey/LWAVES-AUDIT.md](#doc-106) · 2026-10-07 · 67 kB
+107. [release-0.4.0/survey/MIR-1.5.md](#doc-107) · 2026-10-07 · 71 kB
+108. [release-0.4.0/survey/SIBLINGS.md](#doc-108) · 2026-10-07 · 48 kB
+109. [release-0.4.0/survey/VAULT.md](#doc-109) · 2026-10-07 · 61 kB
+110. [RIVAL-FIELDS-AND-MOLECULES-OPUS.md](#doc-110) · 2026-10-07 · 50 kB
 
 ## ARTEFACTS (not inlined)
 
@@ -1151,6 +1154,16 @@ Built 2026-10-07 22:25 UTC by tools/disk.mjs from `research/`: 107 documents inl
 | release-0.4.0/measure/round2-sol-raw.json | 51159 |
 | release-0.4.0/measure/round2-sol-validated.json | 50415 |
 | release-0.4.0/measure/round2-sol.json | 49568 |
+| release-0.4.0/measure/round3-fable-c60-df.json | 27318 |
+| release-0.4.0/measure/round3-fable-c60-incore.json | 27317 |
+| release-0.4.0/measure/round3-fable-c60.json | 27246 |
+| release-0.4.0/measure/round3-fable-group.json | 800 |
+| release-0.4.0/measure/round3-fable-pyscf.json | 3018 |
+| release-0.4.0/measure/round3-fable.json | 46801 |
+| release-0.4.0/measure/round3-rerun-quartets.json | 70422 |
+| release-0.4.0/measure/round3-rerun-sol-algebra.json | 10613 |
+| release-0.4.0/measure/round3-rerun-sol-raw.json | 51164 |
+| release-0.4.0/measure/round3-rerun-sol.json | 51132 |
 
 
 ---
@@ -18287,6 +18300,235 @@ This is the replacement contract for `scf.js:107–108`, reached through `ensure
 **Files written · MEASURED (final closure).** Append-only `research/MATH-CYCLOTOMIC-SCALING-2026-10-07.md`; new scripts `tools/symmetry/round2-sol.mjs`, `tools/symmetry/round2-sol-exact.py`; new JSONs `research/release-0.4.0/measure/quartets-round2-sol.json`, `research/release-0.4.0/measure/round2-sol.json`, `research/release-0.4.0/measure/round2-sol-validated.json`, `research/release-0.4.0/measure/round2-sol-final.json`, `research/release-0.4.0/measure/round2-sol-raw.json`, `research/release-0.4.0/measure/round2-sol-algebra.json`, `research/release-0.4.0/measure/round2-sol-exact.json`. No commit, push or tag.
 
 
+---
+
+### ROUND 3 · FABLE (lead) — 2026-10-07
+
+#### 0 · Provenance
+
+**MEASURED.** Worktree `.claude/worktrees/agent-aaf3907fff3a638f3`, branch `worktree-agent-aaf3907fff3a638f3`, reset to `bd9b0e5` (S1 THE NAMES merged beside S1′ cameraEye). Between Sol's HEAD `bc103b3` and `bd9b0e5`, `git diff --stat -- lab/` lists neither `lab/md.js`, `lab/rhf-molecule.js`, `lab/scf.js` nor `lab/rpa-inspector.js`: the solver Sol instrumented is byte-identical to the one measured here. `lab/molecules.js` gained only the `SYMMETRY` declarations of S1 (+27 lines; every geometry and `predictedMs` unchanged). `lab/field.js` moved under cameraEye: Sol's l.1238–1240 are l.1257–1259 now, his l.1476 is `setMoleculeMatrix` at l.1477–1495. The append-only law held through Round 2: the ledger's first 37,575 bytes still hash to `4d45dd7a1fc5ee76089ed14438d9ed819195af290f03c71011058df332ab916f` (`head -c 37575 | sha256sum`); the file was 85,450 bytes (`bb52a99a…`) when this round began. Node v22.22.1, PySCF 2.14.0, NumPy 2.4.6, SymPy 1.14.0, 12 cores, 30 GB. **The machine was not quiet**: other sessions held the load average between 17 and 28 for the whole round, so every millisecond below is a ratio inside one process's round-robin, never an absolute for the worker, and Rounds 1–2 ran lighter. Nothing under `lab/` was written; md.js is instrumented in memory the way Sol did it, at this round's own anchors.
+
+Sol's own scripts were re-run into NEW files, Sol's outputs untouched: `round3-rerun-sol.json` and `round3-rerun-sol-raw.json` (`round2-sol.mjs`, plain and `--raw`), `round3-rerun-sol-algebra.json` (`round2-sol-exact.py --algebra-only`), `round3-rerun-quartets.json` (`unique-quartets.mjs`). The independent instruments are new: `tools/symmetry/round3-fable.mjs` (node; its own group construction from benzene's frame, its own orbit, Burnside, grid, census and Hückel code; md.js spliced at six unique anchors with counters and two hooks — a petite-list skip and a reconstruction call — and checked with the hooks off against the solver's tensor) → `round3-fable.json`; `tools/symmetry/round3-fable.py` (PySCF) → `round3-fable-pyscf.json` (the installed `get_subgroup`; Q9's timings on benzene and TiCl₄), `round3-fable-group.json` (the I_h machinery alone), `round3-fable-c60.json` (the 300-AO direct RHF on Sol's own coordinates, then every converged level named in I_h), `round3-fable-c60-df.json` (the same with density fitting), `round3-fable-c60-incore.json` (the same with the 8-fold packed tensor in memory).
+
+#### 1 · The audit of Round 2 — every headline number, MATCH or MISMATCH
+
+| # | Sol's number (Round 2) | re-run with Sol's own script | independent (this round's instruments) | verdict |
+|---|---|---|---|---|
+| 1 | live loop: 291 pairs, 42,486 shell quartets, 0 Schwarz-rejected, 2,733,372 primitive visits, 149,857 rejected (5.48250 %) | 291 · 42,486 · 0 · 2,733,372 · 149,857, ERI difference 0 | 291 · 42,486 · 0 · 2,583,515 `rInto` calls + 149,857 skipped = 2,733,372 · 5.48250 % | **MATCH** |
+| 2 | the instrumented module's ERI differs from the solver's by exactly 0 | 0 | 0 with every hook off | **MATCH** |
+| 3 | D₂h orbits of the active loop 10,966/42,486 = 0.2581085534; sizes {1:32, 2:641, 4:10,293}; primitive 705,743 = 0.2581950060; component-weighted 4,189,861 = 0.2622381006 | 10,966 · {1:32, 2:641, 4:10,293} · 0.258195006021866 · 0.262238100567079 | 10,966 · {1:32, 2:641, 4:10,293} · 705,743/2,733,372 · 4,189,861/15,977,316 — every digit, from an orbit code whose representative is the first quartet met in `twoElectron`'s own order | **MATCH** |
+| 4 | D₆h 3,854 = 0.0907122346; {3:32, 6:579, 12:3,243}; 248,219 = 0.0908105446; 1,503,705 = 0.0941149940 | 3,854 · {3:32, 6:579, 12:3,243} · 0.0908105446 · 0.0941149940 | identical, with the 24 operations generated as C₆ᵏ × {E, σ_h} × {E, σ_v(0°)} in `lab/molecules.js`'s own frame (each verified as an atom permutation to 1e-8 bohr; fixed atoms 12 for E and σ_h, 4 for each σ_v and C₂′, 0 for the rest) | **MATCH** |
+| 5 | RPA: dense 94,834,152 MACs, D₂h-blocked 2,892,508 = 3.050070 %, assembly 14,721/99,225, pair blocks (57,55,25,20,22,23,53,60), closed form 2On⁴ + 2O²Vn² + 2O²V²n | — | the same seven integers read off `hessianBlocks`'s loop bounds as written (A1: n·O·n³; G: O·n·V·n², O·V·n·O·n, V·O·V·O·n; Q: O·n·O·n², O·O·n·V·n, V·O·O·V·n) and an independent (C₂(z), C₂(y), i)-parity-bit encoding of the irreps | **MATCH** |
+| 6 | dense `hessianBlocks` 131.786 ms → scheduled blocked 16.474 ms (medians of 5); S-orthonormal SAO transform 416.418 ms; raw SALCs: transform 210.351, first blocked call 244.811, warm 134.474 → 19.518 ms | at load 20–30: dense 1,761.5 → blocked 191.6 ms (ratio 9.2 against Sol's 8.0); SAO transform 5,016.7 ms; raw: 120 non-zero coefficients, transform 2,639.2 ms, first blocked call 1,076.7 ms, warm 1,002.4 → 170.5 ms (ratio 5.9 against Sol's 6.9) | dense `hessianBlocks` here: 1,281.8 ms wall / 248.7 ms CPU (median of 7, loaded machine; Round 1 measured 145.5 wall quiet — the same 1.7× CPU inflation the ERI pass shows) | **MATCH as ratios**; the absolutes ran 6–13× slower on the loaded machine and are not comparable |
+| 7 | A/B errors: same basis 0; original basis A 4.2269174e-10, B 3.0108019e-11; largest zeroed coefficient 1.3548286e-9; forbidden ERI max 8.4e-16 | identical to every digit: 0 · 4.2269173703e-10 · 3.0108019159e-11 · 1.3548285626e-9 · 8.409e-16 (raw basis: off-block 1.3629e-9, forbidden 3.05e-16) | — (deterministic arithmetic of Sol's prototype; not re-derived) | **MATCH** |
+| 8 | grid 96³: T_d 39,200 representatives, 54,528 stabilised voxels; O_h 19,600; linear C₄v 112,896 (18,432), D₄h 56,448 (18,432); the 13 library rows | — | identical for all 13 ids and O_h by a fresh enumeration; the closed forms (n³ + 6n² + 8n)/24 = 39,200, /48 = 19,600, n³ − n(n−2)(n−4) = 54,528, (n³ + 2n²)/8 = 112,896, /16 = 56,448 | **MATCH** |
+| 9 | the reflection [[3/5, 4/5, 0], [4/5, −3/5, 0], [0, 0, 1]] maps "one exact" voxel centre onto a centre | — | it maps **147,456 of 884,736** centres onto centres — exactly one sixth (1,536 of the 9,216 (x, y) centres); Round 1's sixteen D₆h operations still map 0 | **MATCH, sharpened** |
+| 10 | C₆₀ Burnside: shell orbits 1,110,036/132,690,195 = 0.0083656; independent ERIs 8,504,444/1,019,283,825 = 0.0083435; 64.884 MiB | 1,110,036 · 8,504,444 | identical, BigInt, from the class list and the symmetric-square character written again | **MATCH** |
+| 11 | PySCF 2.14 `get_subgroup`: Ih → Ci, D6h → D2h | — | from the installed function's source: **Ih → Ci**, I → C1, Oh → D2h, O → D2, **Td → D2**, T/Th → D2, D6h/D4h → D2h, D3h/D5h → C2v, D3d/D5d → C2h, D2d → D2, C6h → C2h, C3v → Cs, C4v → C2v, S6 → C3, S4 → C2, Dooh/Coov kept whole | **MATCH** (+ new: T_d computes in D₂, not C₂v) |
+| 12 | direct 300-AO RHF on the ideal truncated icosahedron: −2244.0187824773475 Eh, 9 cycles, 625.871 s at 2 threads, peak RSS 192.5 MiB, gap 0.2797763016 Eh, `_eri is None` | — | re-solved from Sol's own coordinates, symmetry off: **−2244.0187824773675 Eh (Δ = −2.0e-11)**, 9 cycles, gap 0.2797763016 (ten digits), `_eri is None`; 1245.6 s at 6 threads under the other sessions' load (not a comparable wall time; RSS not recorded); PySCF with symmetry on: topgroup Ih, groupname Ci | **MATCH** |
+| 13 | SymPy: 0 nonzero residuals of 50/72/200 for n = 5/6/10; the coefficient rows (1,2,2,1), (1,1,−1,−1), (1,−1,−1,1), (1,−2,2,−1) for the 6-ring | 0/0/0, identical rows | — | **MATCH** |
+| 14 | Ind_{C_s}^{I_h} 1 = Ag + T1g + T2g + 2Gg + 3Hg + 2T1u + 2T2u + 2Gu + 2Hu; Σm² = 32, Σm = 16 | identical | identical, from the permutation character of 120 operations generated from the icosahedron's directed edges (classes 1·12·12·20·15·1·12·12·20·15; table orthogonal to 7e-15) | **MATCH** |
+| 15 | census: 54 entries 37,908 model ms, 22,511 = 59.383244 % with centred cube subgroup ≥ 4; 52 enabled 36,985 ms, 21,588 = 58.369609 %; furan + pyridine 10,947 = 29.598 % | 52 → 36,985 ms, 21,588 = 58.369609 %; 54 → 37,908 ms, 59.383244 %; the conditional roster 47 → 6,100,844 ms, 12.297–16.504 % | 36,985 ms, 21,588 ms, 58.3696 % and 37,908 / 22,511 / 59.3832 % from an independent census (`frameworkPerms` about the charge centre; same `MOLECULES`, `predictedMs` unchanged since `bc103b3`) | **MATCH** (on the model's numbers; the measured weights are Q11) |
+| 16 | furan / pyridine, C₂ through the ring centroid: atom residual 1.0063468e-3 / 8.323467e-4 bohr; |MᵀSM − S| 1.4858e-4 / 1.3905e-4; |MᵀFM − F| 7.1074e-4 / 6.0700e-4 Eh | identical to every digit (1.0063467954e-3 / 8.323466843e-4 bohr; 1.48580519e-4 / 1.39048915e-4; 7.10740796e-4 / 6.07000158e-4 Eh; both solves converged) | residuals 1.00634680e-3 / 8.3234668e-4 bohr about Sol's axis (identical to 10 digits); **9.604161e-4 / 8.078543e-4 bohr** about `lab/names.js`'s axis (from the centre of nuclear charge to the heteroatom) — the "9.6e-4" and "8.1e-4" S1-NAMES-BUILD reports | **MATCH** (two axes, two residuals, one molecule each) |
+| 17 | the Fock build's invariant contraction touches 244² = 59,536 = 3.544620 % of 36⁴ | — | 59,536 | **MATCH** |
+| 18 | `field.frame` dispatches the molecular compute inside the frame's own encoder when dirty; `molecular-session` calls `setMoleculeMatrix`; the frame loop asks for propagation | — | at `bd9b0e5`: `field.js` l.1257–1259 (`if (molDirty ‖ molRefDirty) … encodeMolecule(enc, 0); stats.molDispatches++`), l.1477–1495 (`setMoleculeMatrix` … `molDirty = true`); `molecular-session.js` l.140 `f.setMoleculeMatrix(p.matrix, OPT)`; `chemview.js` l.321 "one outstanding propagation request at a time — the frame loop asks" | **MATCH** (lines moved by cameraEye) |
+| 19 | Sol's §10 self-corrections: 29.598485872651 %, 7.746083205926, 64.883758544922 MiB, six BIO names | — | 100·10,947/36,985 = 29.5984859 %; 2/0.258195006021866 = 7.7460832; 68,035,552/2²⁰ = 64.88376 MiB; 20 + 5 + 6 + 11 + 5 = 47 | **MATCH** |
+| 20 | Round 1's own counts, unchanged at `bd9b0e5` (`unique-quartets.mjs`): 251,968 · 34,187 · 11,678/45,150 · 56,871 AO orbits of which 22,684 forced-zero · 110,592 · π DFT 1.9e-14 · leakage 3.9e-15 | every count identical: 251,968 · 34,187 · 11,678 · 56,871 / 22,684 · 110,592 with 0 boundary · π DFT worst 1.91e-14 · leakage 3.89e-15 (D₂h) and 3.55e-15 (D₆h) · forbidden max 3.44e-15 · PySCF Δ 8.81e-13 (water 3.41e-13); the timings ran 6–9× slower (solve 10,131 ms, integrals 4,905 ms, Hessian 542.9 ms) | — | **MATCH** |
+
+**Every integer Sol wrote reproduces.** The rounds disagree nowhere on a number; they disagree on what the numbers earn, and that is §2–§4.
+
+#### 2 · Q7–Q12, with numbers
+
+**Q7 (a compact raw-SALC layout for one cheaper Hessian).** Not built here — a timing claim without a build is exactly what Round 2 killed, and this round spends its build on Q8 instead. The ceiling, DERIVED from the current tree: `hessianBlocks` runs **twice** per benzene solve-with-spectrum — `lab/rhf-molecule.js` l.151 (`stabilityHessian`, one per distinct solution; benzene has one) and `lab/rpa-inspector.js` l.169 (the spectrum stage, `lab/mathworker.js` l.251–260, once and cached). Sol's warm saving is 115.3 ms a call (131.786 − 16.474), so **≤ 230.6 ms per solve is the most any blocked Hessian can return**, before its adaptation. The raw-SALC transform (210.351 ms) plus a schedule that depends on the molecule (244.811 ms on the first call, not amortisable across molecules) already exceeds it; the dense SAO road (416.418 ms) exceeds it alone. Gate for anyone who builds it anyway: cold first call including adaptation and schedule < 2 × 131.8 ms on the unchanged worker, with roots and oscillator strengths equal to the dense ones to 1e-8. Verdict: **Q7 is DEAD as a 0.5.x saving (≤ 0.23 s on one molecule, zero on the C₁/C_s entries) and OPEN as engineering nobody needs yet**; what the blocks DO give for free is the irrep of every RPA root (210 distinct roots of benzene's 315 under D₆h, Round 1), which SPECTRUM cannot say today — a naming feature, not a speed-up (→ SYNTHESIS, contract C3).
+
+**Q8 (the skeleton loop on the verified 291-pair list: `rInto` visits, writes, milliseconds; does 10,966/42,486 earn an ERI stage?)** **MEASURED — the experiment the thread lacked.** `twoElectron` was run in five modes inside one process, round-robin 7 times each so no mode owns the cache or the JIT, after two warm-up passes, each call clocked twice — wall (`performance.now`) and process CPU (`process.cpuUsage`, the figure a loaded machine cannot inflate; the wall samples of one mode spread 1,637–6,001 ms, its CPU samples 909–1,050); `full` is the unchanged loop (hooks off), `setupOnly` skips every quartet and rebuilds nothing (the fixed cost: pair tables, primitive and Schwarz screens), the three skeletons compute only the orbit representatives and REBUILD the rest of the tensor from them — D₂h by the signed permutation of AO indices (one read, one sign, eight writes a component), D₂h and D₆h by the general road (the representative's shell block gathered, rotated by M_A ⊗ M_B ⊗ M_C ⊗ M_D with M = [1] for s and R for p, written through the eight index symmetries).
+
+| mode | pass, CPU ms (median of 7) | pass, wall ms | of which rebuild (CPU / wall) | quartets contracted | `rInto` calls | rebuild writes | max |Δ| against the solver's tensor | × vs full (CPU / wall) | saved CPU ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| full (the live loop) | **929.9** | 4,313.9 | 0 | 42,486 | 2,583,515 | 0 | 0 | 1 | 0 |
+| setupOnly (the fixed cost) | **16.4** | 75.2 | 0 | 0 | 0 | 0 | (3.54 — the tensor is empty) | 56.8 / 57.4 | 913.6 |
+| D₂h skeleton, signed permutations | **286.7** | 1,386.5 | 12.5 / 43.9 | 10,966 | 667,169 (0.25824) | 1,353,536 | 5.0e-16 | **3.24** / 3.11 | **643.2** |
+| D₂h skeleton, general rotation road | 305.9 | 1,526.9 | 44.2 / 214.9 | 10,966 | 667,169 | 1,353,536 | 5.0e-16 | 3.04 / 2.83 | 624.0 |
+| D₆h skeleton, general rotation road | **160.1** | 727.6 | 50.1 / 222.4 | 3,854 | 234,757 (0.09087) | 1,661,792 | 5.8e-16 | **5.81** / 5.93 | **769.8** |
+
+The rebuilt tensors agree with the live loop's to the last bit (5–6e-16 on entries of order 1): **the petite list is exact on `md.js`'s own arithmetic**, D₆h included — the rotation of p components costs nothing in precision. The `rInto` ratios (0.25824, 0.09087) sit on Sol's primitive fractions (0.25820, 0.09081) to four digits: the live screen is symmetric. The writes are 8 × 169,192 and 8 × 207,724 components — every image slot of a 1,679,616-slot tensor is written once, so the rebuild is a fixed 12.5 ms (signed) to 50 ms (rotated) of CPU the fraction cannot shrink, and the setup another 16.4 ms. The full pass's 930 ms of CPU is itself 1.6× Round 1's quiet-machine 588 ms (memory and SMT contention inflate CPU time too); scaled to that quiet pass, the D₂h skeleton would be ≈ 181 ms and the D₆h ≈ 101 ms (DERIVED by the ratio) against Round 1's fraction-only guesses of 152 and 54 — right to 1.2× for D₂h, 1.9× off for D₆h, the whole difference being setup and rebuild. **Answer:** a D₂h skeleton saves 643 ms of a 930 ms pass (×3.24), a D₆h skeleton 770 ms (×5.81) — on benzene, once per solve, **34.5 % and 41.3 % of its 1,863 ms CPU solve** (`ensureSolve`'s call, SAD and core guesses, Hessian, probe: the census row). Round 1's "588 → 152 / 54 ms" is replaced by these; Sol's "quotienting a loop does not quotient its writes, setup or rotations" is now a measured sentence: 16.4 + 12.5 ms is the floor, 7 % of the D₂h skeleton's time. **Does it earn an ERI stage?** On benzene it earns a 1.7× solve, once per session, on the molecule PLAN §10 N2 refused a 2-second record for because the saving was not worth the bytes; on the library it earns 13.9 % of the live solve time at most (Q11); on the sixteen planar and linear entries whose cube operations fix every atom it earns nothing. **Not a stage; a flag** the day the cap holds a T_d or O_h entry, with this table as its gate (§6) — or now, for benzene alone, if Josh wants the 1.7× (SYNTHESIS, R-S1-0.5 option 2).
+
+**Q9 (PySCF DF-J with exact K against direct RHF at 55, 87–120 and 300 AO).** **MEASURED (PySCF 2.14.0, the vendored decimals, cart=True, 2 threads for the small runs, loaded machine).** Benzene, 36 AO: in-core 0.94 s (7 cycles) · forced-direct 5.52 s · DF-J + exact K 2.46 s, **error −9.20e-3 Eh** · DF-JK 1.24 s, error −2.95e-3 Eh; automatic auxiliary basis (PySCF's even-tempered fallback for a custom basis dictionary) 354 functions, κ = 9.83. TiCl₄, 55 AO, T_d, r = 2.170 Å: in-core 1.83 s (10 cycles) · direct 11.31 s · DF-J + exact K 3.64 s, error −4.37e-5 Eh · DF-JK 2.33 s, error +1.36e-3 Eh; 600 auxiliary functions, κ = 10.9; PySCF detects T_d and **computes in D₂** (so Round 1's "PySCF already computes in D₂h" is wrong for every T_d record, and C₂v is not what it chooses either). C₆₀, 300 AO: direct 1245.6 s at 6 threads on the loaded machine (energy −2244.0187824773675, Sol's to 2.0e-11) against Sol's 625.9 s at 2 threads on a lighter one; **DF-JK 266.7 s at 4 threads, error −1.058e-2 Eh** (3,240 auxiliary functions, κ = 10.8, 9 cycles, gap 0.28028 against 0.27978); **in-core, the 8-fold packed tensor held in memory (`_eri` 8,154,270,600 B, peak RSS 7.74 GiB): 490.3 s at 4 threads on the same loaded machine, −2244.018782477804 Eh (4.6e-10 from Sol's direct energy, inside the two runs' convergence tolerances), 9 cycles, gap identical to 1e-10** — 2.5× the direct run's pace under the same load, and on this 30 GB workstation the "stored ERI" Round 1 priced at 64.8 GB is 8.15 GB and ordinary. Three verdicts, each a number: (i) **for every record up to 120 AO the in-core path is one to two seconds** — there is nothing to beat, and a 120-AO tensor is 207 MB; (ii) **DF-J with exact K cannot beat it**: the exact-K pass visits the same integrals, and it measured 2.0–2.6× slower than in-core at 36 and 55 AO; (iii) **fitting errors of 4e-5 to 1.1e-2 Eh exclude every DF record** from the LIBRARY on S4's own gate — "cached = fresh on energies" (PLAN §6 S4a), where fresh is an engine that agrees with PySCF to 8.8e-13 Eh (Round 1): the gate, not the speed, kills DF. So the only 300-AO question is **direct versus in-core**, and the memory dichotomy Round 1 drew (64.8 GB dense) and Sol narrowed (193 MiB direct) has its third point: in-core at 7.74 GiB RSS, 2.5× faster than direct on the same loaded machine, bit-for-bit the same orbitals to the convergence tolerance. Sol's crossover n* > 7.746 (c₃/c₄) κ stays DERIVED and unneeded.
+
+**Q10 (the subgroup a driven benzene density keeps; stabiliser deduplication; T_d's boundary).** No GPU ran (law). The group that matters is the state's, and it is DERIVED exactly for the three live kinds (`field.js` `setMoleculeMatrix`: `density`, `orbital`, `signed`, complex): a still ground-state density keeps the whole cube subgroup (D₂h for benzene: 1/8, zero stabilised voxels — Sol's table, re-measured); a single orbital or signed partner keeps D₂h too, as |ψ|², and as a signed field needs the character table on the eight images (ψ(Rr) = χ(R) ψ(r), still 1/8); **the per-frame case** — MOLECULES' RT run, the one road that dirties the texture every frame (`chemview.js` l.321, `molecular-session.js` l.140) — starts from a kick exp(−iκ q̂) along an axis, and the propagated density keeps exactly the operations that fix that axis: for a kick along x in benzene {E, C₂(x), σ(xy), σ(xz)}, **order 4 (1/4 of the voxels)**; along a generic direction, **order 1**. The saving is largest where it is never felt (one dispatch per change, 2.80 ms) and smallest where it would be (every frame, ≤ 4×, ≤ 2× for a kick off an axis); T_d's 54,528 stabilised voxels (6.16 %) need the deduplicated-store rule Sol wrote in every case. **UNVERIFIED on a device**, and not for 0.5.x: the RT run is the only customer, and it is a 1/4 customer.
+
+**Q11 (after the COST refit: does the live symmetric workload sit above 60 %, below 25 %, between?)** **MEASURED, with the weight Josh's instrument actually pays.** The 52 enabled entries were solved once each in node with the call `ensureSolve` makes (SAD + core guesses, Hessian, stability probe), and for each the cube subgroup about its centre of nuclear charge, its measured solve and integral milliseconds, and — the number Q5/Q11 should have asked for — the shell petite list that subgroup gives on the entry's own quartets, times its integral pass: the ERI milliseconds a petite-list loop could remove at most. **The 52 solves cost 16,743 ms of CPU (74,309 ms wall under the load) against the model's 36,985 ms — the model is 2.2× slow in total and 0.19× to 9.8× off per entry (benzene 1,863 ms CPU against 9,592 predicted; LiH 137 ms against 14), the refit PLAN §10 N2 orders is confirmed.** By Sol's criterion (cube subgroup ≥ 4) the measured share is **66.4 % of the CPU** (68.4 % of the wall) against 58.4 % predicted — above the 60 % Round 1 set for "alive". By the achievable saving it is another number altogether: the ERI passes are 6,069 ms of the 16,743 (36.2 %), and the petite list could remove **2,331.5 ms = 13.9 % of the library's live solve CPU** (18.3 % by wall), before setup and rebuild — of which benzene alone is 653 ms, Br₂ (D∞h, fraction 0.505) 422, CF₄ (T_d, 0.097) 198, GeH₄ 148, C₃H₆ 110, glycine 120, and the two ring walks 0. Furan and pyridine are 19.1 % of the live CPU (not the model's 29.6 %); Br₂ is 19.5 %, benzene 11.1 %, glycine 6.8 %. **The second number is the gate**, because a mirror that fixes every atom is in the "symmetric" column and saves nothing on the loop (Prop. 4, Burnside with Fix(σ) = N): **fifteen enabled entries have a petite list of size exactly 1** — the twelve C∞v molecules (LiH, HF, CO, LiF, NaH, HCl, NaCl, HCN, N₂O, OH⁻, CN⁻, HBr: every cube operation that keeps the axis fixes every atom on it) and the three planar C_s ones (HCOOH, furan, pyridine) — and the D∞h ones keep only the z-flip (0.51–0.67). Nine entries sit under one half: CH₄ 0.202, NH₄⁺ 0.202, SiH₄ 0.273, CF₄ 0.097, C₂H₄ 0.310, C₂H₆ 0.321, C₃H₆ 0.305, GeH₄ 0.369, C₆H₆ 0.259 — the T_d and D_nh frameworks, and their solves are small except benzene's. **Verdict on Q11: by the right weight the live symmetric workload is 13.9 %, below Round 1's 25 % — the stage is dead by its own test**, and Sol's conditional 12.3–16.5 % for the planned roster lands in the same place for a different reason (those records are never solved live: PLAN §10 N2).
+
+**Q12 (C₆₀'s 32-dimensional commutant: the two-weight Hückel spectrum from the actual adjacency, named; what survives for the 300-AO spaces).** **MEASURED on Sol's own 60 coordinates.** 90 edges at 1.400 Å: 30 between hexagons (the icosahedron's edges), 60 pentagon edges. Equal weights, H = adjacency, x its eigenvalue (Hückel ε = α + xβ, β < 0, so the largest x is the lowest level; 60 electrons fill 30 levels), every level labelled by projecting its eigenspace with the 120 permutation matrices against the I_h table (residual ≤ 1e-15):
+
+| level | x | irrep (dimension) | e⁻ |
+|---|---:|---|---:|
+| 1 | 3 | a_g (1) | 2 |
+| 2 | 2.7565982539 | t_1u (3) | 6 |
+| 3 | 2.3027756377 | h_g (5) | 10 |
+| 4 | 1.8202492507 | t_2u (3) | 6 |
+| 5 | 1.5615528128 | g_u (4) | 8 |
+| 6 | 1 | **g_g ⊕ h_g (9): an accidental degeneracy** | 18 |
+| 7 | 0.6180339887 = φ − 1 | **h_u (5) — HOMO** | 10 |
+| 8 | −0.1385642651 | **t_1u (3) — LUMO** | 0 |
+| 9 | −0.3819660113 = 1 − φ | t_1g | 0 |
+| 10 | −1.3027756377 | h_g | 0 |
+| 11 | −1.4382832394 | t_2u | 0 |
+| 12 | −1.6180339887 = −φ | h_u | 0 |
+| 13 | −2 | g_g | 0 |
+| 14 | −2.5615528128 | g_u | 0 |
+| 15 | −2.6180339887 = −φ − 1 | t_2g | 0 |
+
+Fifteen distinct levels, HOMO h_u, LUMO t_1u, gap 0.756598 |β| — the textbook result (Haddon, Brus & Raghavachari 1986, KNOWN · UNVERIFIED, not opened; the numbers here are the adjacency's, not the paper's). Level 6 is Sol's sentence made concrete: one eigenvalue carrying two irreps — characters fix the dimensions (3 h_g, 2 g_g, …: the multiplicities of Ind 1), the adjacency fixes the numbers, and they happen to coincide. With β₆₆/β₅₆ = 1.1 the coincidence breaks (g_g 1.0684, h_g 1.0349), the three h_g levels read 2.3753, 1.0349, −1.3103 — Sol's 3 × 3 block visible — and the gap is 0.895775 |β| (HOMO h_u 0.6662, LUMO t_1u −0.2296); sixteen levels. **For the 300-AO spaces (DERIVED from the AO character χ = 300 at E, 12 at each σ, 0 elsewhere — MEASURED for all 120 operations):** the Cartesian STO-3G AOs decompose as **Ag 4 · T1g 6 · T2g 6 · Gg 10 · Hg 14 · Au 1 · T1u 9 · T2u 9 · Gu 10 · Hu 11** (Σ d_Γ n_Γ = 300); a symmetry-adapted Fock matrix has **3,104 of 90,000 entries (3.45 %)**, its eigensolve work Σ d n³ = 34,110 against 2.7·10⁷ (1.3·10⁻³), and **its largest block is 14 × 14**. The converged STO-3G ground state on this geometry (the direct run, `round3-fable-c60.json`, every operation's DᵀSD − S ≤ 5.8e-16, every cluster's multiplicities integer to 8.7e-15): **80 levels, none mixed**, worst in-cluster spread 1.1e-10 Eh, narrowest gap between clusters 3.73e-6 Eh; **occupied: Ag 4 · T1g 2 · T2g 2 · Gg 6 · Hg 10 · T1u 6 · T2u 6 · Gu 6 · Hu 6** (Σ d n = 180); the configuration (1g_g)⁸(1h_u)¹⁰(1g_u)⁸(1h_g)¹⁰(1t_2u)⁶(2h_g)¹⁰(1t_1u)⁶(1t_1g)⁶(2t_1u)⁶(1a_g)²(3h_g)¹⁰(2h_u)¹⁰(2t_2u)⁶(2g_g)⁸(2g_u)⁸(1t_2g)⁶ — the sixty carbon-1s levels, **16 symmetry-distinct clusters inside 5.92e-4 Eh (−11.054024 to −11.053432), the narrowest gap of the whole spectrum (3.73e-6 Eh) among them** — then (2a_g)²(3t_1u)⁶(4h_g)¹⁰(3t_2u)⁶(3g_u)⁸(5h_g)¹⁰(3g_g)⁸(3h_u)¹⁰(4t_1u)⁶(4t_2u)⁶(2t_1g)⁶(6h_g)¹⁰(3a_g)²(4g_g)⁸(4h_u)¹⁰(5t_1u)⁶(4a_g)²(5t_2u)⁶(4g_u)⁸(6t_1u)⁶(7h_g)¹⁰(2t_2g)⁶(5g_g)⁸(8h_g)¹⁰(5g_u)⁸(9h_g)¹⁰(6t_2u)⁶(5h_u)¹⁰(6g_u)⁸(6g_g)⁸(10h_g)¹⁰(6h_u)¹⁰; **HOMO 6h_u at −0.198006 Eh, LUMO 7t_1u at +0.081771 Eh** (gap 0.279776), then 3t_1g, 11h_g, 7t_2u, 7h_u, 7g_g — the h_u/t_1u frontier of every C₆₀ textbook, here from the live decimals. The density-fitted orbitals (`round3-fable-c60-df.json`) carry the identical irrep sequence with every energy shifted by ~1e-3 Eh. The response space: pair blocks **Ag 170 · T1g 550 · T2g 550 · Gg 720 · Hg 890 · Au 186 · T1u 534 · T2u 534 · Gu 720 · Hu 906** (Σ d m = 21,600 = 180 × 120), **5,760 distinct roots of 21,600**, Σ d m²/m² = 0.0339. What survives of "cyclotomic" at 300 AO is therefore this: the character basis turns a 300 × 300 eigenproblem into ten blocks of at most 14, and a 21,600-root RPA into 5,760 named roots — and does nothing at all to the 8.5 million independent integrals except name them.
+
+#### 3 · Kills (the sentence, then the line a gate could assert)
+
+- Round 1 Prop. 6 / §1: *"An operation that is not a signed permutation of the axes maps no voxel centre onto the lattice."* **FALLS** — Sol's 3-4-5 reflection maps 147,456 of 884,736 centres (1/6). Corrected: *the sixteen D₆h operations outside D₂h map 0 centres of the 96³ cell-centred lattice onto it (MEASURED); an orthogonal operation with rational cosines can map a proper subset — only the signed permutations are automorphisms of the whole lattice.*
+- Round 1 Prop. 6: *"T_d … 1/24; an O_h molecule 1/48; zero boundary."* **FALLS** — 39,200 (1/22.57) and 19,600 (1/45.14) with 54,528 stabilised voxels (6.163 %), because half-integers avoid the coordinate planes, not x = ±y. Corrected: *n³/|G| with zero stabilisers holds for sign-flip groups only (D₂h, C₂v, C₂h, C_s, C₂, C_i); permutation groups obey Burnside with (n³ + 6n² + 8n)/|G| and n³ − n(n−2)(n−4) stabilised voxels.*
+- Round 1 §1: *"In every group the measured non-zero set equals the label-allowed set exactly."* **FALLS** for D₆h (450,624 allowed, 227,008 non-zero) and for water's C₂ basis (1,201 vs 777) — Round 1's own table held both. Corrected: *0 forbidden non-zeros in every group; allowed zeros exist wherever the label rule is only necessary (2-D irreps) or the basis is adapted to more than its label.*
+- Round 1 Prop. 2's parenthetical *"iff G acts freely on the AO basis (no atom fixed)"* **FALLS** (Sol's central p triplet under C₃: one fixed atom, χ(C₃) = 0, f = 1/3 exactly). The identity N₄ = (1/h) Σ|χ|⁴ and the condition χ_V(R) = 0 ∀ R ≠ E STAND.
+- Round 1 Prop. 5: *"for n equivalent sites with b functions each … solved by the DFT"* **FALLS** for b > 1 (Sol's block-circulant: the DFT block-diagonalises to b × b, eigenvalues (1 ± √5)/2 need a solve); *"exact over Q for exactly n ∈ {1, 2, 3, 4, 6}"* STANDS for the real coefficient field Q(ζ + ζ⁻¹) — Sol's rows (1, 2, 2, 1), (1, 1, −1, −1), … are integers — and FALLS as a sentence about the complex characters. Corrected: *the real symmetry-adapted combinations of a C_n ring have integer coefficients iff n ∈ {1, 2, 3, 4, 6}; the DFT matrix itself lives in Q(ζ_n)/√n.*
+- Round 1 §4: *"588 → ~152 ms … → ~54 ms."* **FALLS** as a timing (Sol); **replaced** by Q8's table: 930 → 287 (D₂h) and 160 (D₆h) ms of CPU on the loaded machine (≈ 588 → 181 and 101 on Round 1's quiet one, by ratio), with 16.4 ms of setup and 12.5–50 ms of rebuild that no fraction touches.
+- Round 1 §4: *"it is not on the frame path, so it saves nothing the governor can feel."* **FALLS** for a propagating RT density (`field.js` l.1257, `chemview.js` l.321), STANDS for a still ground state — and in the per-frame case the surviving group is 4 (axis kick) or 1 (generic), Q10.
+- Round 1 §4: *"1× on the heavy records the library plans, which are C₁/C_s or come from PySCF (which already computes in D₂h)."* **FALLS** — TiCl₄, GeCl₄, cubane, neopentane, Na₄Cl₄ are T_d/O_h targets (PLAN §4 F5) and PySCF computes T_d in D₂, I_h in C_i.
+- Round 1 §3: *"PySCF's `symm` computes in the largest real Abelian subgroup."* **FALLS** as a law — `get_subgroup` is a table (Ih → Ci although D₂h ⊂ I_h; Td → D2; D3h → C2v …). Corrected: *the record generator's subgroup is whatever `get_subgroup` returns for the detected `topgroup`, and the full-group labels must be computed, never read from `orbsym`.*
+- Round 1 Prop. 7's recommendation — *"a blocked eigensolve … as THE NAMES' seat"* — **FALLS as a need.** S1 shipped `lab/names.js` on cluster characters with no solver change: 52 enabled molecules named or saying why, benzene in 4 ms, furan refused in approximate C₂v and named in exact C_s, pyridine named approximate (S1-NAMES-BUILD), and the builder's judgement that the blocked road "would not have been simpler" is confirmed by this round's 60-atom case: the cluster road names all 80 levels of C₆₀/STO-3G with 0 mixed clusters and 1.3e-12 Eh worst spread against a 3.8e-6 Eh narrowest gap (Q12) — four orders of room above `names.js`'s 2e-10 Eh. The measured facts of Prop. 7 (the 1s band 5.4e-4 Eh wide, leakage 3.9e-15) STAND; the recommendation has no customer.
+- Round 2: **no number falls.** Two sentences are sharpened: *"one exact mapped centre"* → 147,456 (row 9); *"the current census neither kills nor earns"* → it kills, once the weight is the achievable ERI saving rather than a subgroup order (Q11). One omission is filled: Sol's Q1 counted "4 warm calls" to pay back the adaptation without saying how many the tree makes — it makes two (Q7).
+
+#### 4 · What is new in this round
+
+1. **The skeleton loop, measured** (Q8): the petite list applied to `twoElectron`'s live loop with the tensor rebuilt exactly (5–6e-16), its fixed costs named (16.4 ms setup, 12.5–50 ms rebuild, CPU), and the savings on the cap molecule bounded: ×3.24 (D₂h, 643 ms CPU) and ×5.81 (D₆h, 770 ms) on the pass, 34.5 % and 41.3 % of benzene's solve.
+2. **The I_h structure of the 300-AO problem** (Q12): blocks {4, 6, 6, 10, 14, 1, 9, 9, 10, 11}, a 14 × 14 largest eigenproblem, 5,760 named RPA roots of 21,600, and the STO-3G configuration of C₆₀ with every one of its 80 levels named — the oracle 0.4.1 BUCKYBALL's "I_h names" can be checked against, computed by projection because PySCF's record will say only Ag/Au.
+3. **The named Hückel spectrum of C₆₀** (Q12), with the accidental g_g ⊕ h_g degeneracy at x = 1 that two bond weights split — Sol's "characters fix dimensions, not eigenvalues" as a table.
+4. **The census with the right weight** (Q11): CPU-clocked solves of all 52 enabled entries and the achievable petite-list saving per entry — 13.9 % of the library's live solve time, fifteen entries with nothing to save.
+5. **Q9 closed by a gate, not a race**: DF's fitting errors (4e-5 to 1.1e-2 Eh with PySCF's automatic auxiliary basis) exclude it from a library whose records must equal the engine; in-core RHF covers every planned record ≤ 120 AO in seconds; at 300 AO the in-core road (8.15 GB, 7.74 GiB RSS) runs 2.5× the direct pace on this workstation; PySCF computes T_d in D₂.
+6. **The per-frame symmetry law** (Q10): an axis kick keeps order 4, a generic kick order 1 — the GPU saving is anti-correlated with the frame path.
+7. **Prop. 4 sharpened to the library**: an operation that fixes every atom is a petite list of size 1 on the loop's units — the twelve C∞v entries and the three planar C_s ones; the D∞h entries keep only their z-flip.
+
+#### 5 · Questions for a future round (Q13–Q17; continue the numbering)
+
+- **Q13 (LOCATE) · UNVERIFIED (no worker ran):** reproduce Q8's table inside `lab/mathworker.js`'s `ensureSolve` in Chromium and Firefox (the JIT and the typed-array writes differ from node), with the gate max |Δ| < 1e-14 on the tensor, the energy identical to 1e-12, and the pass time; if the D₆h skeleton returns less than ×4 on the worker's pass, the flag is not worth its code.
+- **Q14 (DEEPEN) · UNVERIFIED (not instrumented):** the component-level forced zeros (39.8 % of what `quartetAcc` writes, Round 1) — a sign-stabiliser skip inside the (ia, jc) loops costs a branch per component; measure whether it returns anything once the primitive R-tables, which it cannot skip, are counted.
+- **Q15 (BROADEN) · UNVERIFIED (experimental geometry not run):** C₆₀ at the experimental bond lengths (1.391 / 1.455 Å) in STO-3G — does the configuration of Q12 (HOMO 6h_u, LUMO 7t_1u, the 1s band's 16 clusters) hold, and what does `lab/names.js` return on that record in the I_h frame it already carries (`CONVENTION.Ih`: x, y, z the three C₂ axes — Sol's and this round's frame)?
+- **Q16 (LOCATE) · answered here, MEASURED on a loaded machine:** in-core 300-AO RHF (8.15 GB packed, 7.74 GiB RSS) 490 s at 4 threads against direct 1,246 s at 6 threads on the same load — what remains is the quiet-machine pair and whether the generator wants 8 GB resident for a C₆₀ record it builds once.
+- **Q17 (DEEPEN) · UNVERIFIED (not built):** the RPA root names — the pair-space projectors give the irrep of every root (benzene 210 of 315 distinct under D₆h; C₆₀ 5,760 of 21,600) with no speed-up and no solver change; specify the contract for SPECTRUM (labels from Σ_Γ weight on one block > 1 − 1e-10) and its gate (Σ_Λ d_Λ m_Λ = the pair space; the weights integer to 1e-9).
+
+#### 6 · NOT CERTIFIED
+
+- **No GPU, browser, worker or device ran.** The grid numbers are CPU orbit counts; the skeleton is an in-memory instrument of `md.js`, not a shipped loop; node's JIT is not the worker's.
+- **Timings were taken on a loaded shared machine** (load average 17–28 on 12 cores); the ratios inside one process are the claim, the absolutes are not.
+- **The C₆₀ geometry is Sol's ideal fixture** (both edge kinds 1.400 Å), not an experimental record; its configuration is the oracle for the names, not a library entry.
+- **The literature was not opened** (Haddon 1986, Dupuis–King 1977, Pisani 1988): KNOWN · UNVERIFIED stays on each.
+- **The census weights are one node solve per entry**, not visit frequencies; the model's `COST` refit (PLAN §10 N2) is S4a's, not this round's.
+
+**Files.** `tools/symmetry/round3-fable.mjs`, `tools/symmetry/round3-fable.py`; `research/release-0.4.0/measure/round3-fable.json`, `round3-fable-pyscf.json`, `round3-fable-group.json`, `round3-fable-c60.json`, `round3-fable-c60-df.json`, `round3-fable-c60-incore.json` (each solve's 300 × 300 orbitals, overlap and energies were also saved as a 1.4 MB `.npz` beside its JSON; the three binaries are kept out of the tree in the worktree's `.tmp/`, and `--part analyze --npz` re-labels them), `round3-rerun-sol.json`, `round3-rerun-sol-raw.json`, `round3-rerun-sol-algebra.json`, `round3-rerun-quartets.json`; this ledger, appended.
+
+
+---
+
+### SYNTHESIS — 2026-10-07 (Fable, lead)
+
+*Three rounds, two labs, one question: does symmetry — the petite list, the unique quartets under benzene's D₂h, the cyclotomic structure of the C₆ / D₆h characters — earn a symmetry-adapted SCF in 0.5.x, and what is the one number PLAN §6 asks for? Every number below carries MEASURED, DERIVED or UNVERIFIED (why). Verdicts: STANDS · FALLS · OPEN (what would close it).*
+
+#### 1 · The ledger of claims
+
+| # | claim (where) | verdict | the evidence line |
+|---|---|---|---|
+| 1 | Three different fractions wear the word: (a) non-zero in an adapted basis, (b) independent integrals, (c) the petite list on the loop's units (R1 §0) | **STANDS** | D₂h benzene 0.1500 / 0.1539 / 0.2586 (R1 MEASURED); the triangle 34,187 = 34,187 = 56,871 − 22,684 (R1); the live loop 0.2581 (R2, R3) |
+| 2 | THE NUMBER, unscreened: 11,678 of 45,150 shell quartets under D₂h = 25.86 % (R1 §1) | **STANDS** as the enumeration; superseded on the live loop | 10,966 of 42,486 = 25.81 % (R2 MEASURED, R3 independently to every digit); 291 of 300 pairs survive the primitive screen, 0 Schwarz rejections |
+| 3 | Component level: 34,187 of 222,111 canonical quartets live (15.39 %); 88,408 = 39.8 % forced zero and computed anyway, max 8.6e-18 (R1) | **STANDS** | R1 MEASURED; `rInto` is 2,583,515 calls on the primitives, which no component skip touches (R3) |
+| 4 | D₆h petite list 4,116 (9.1 %) unscreened; 3,854 of 42,486 = 9.07 % live (R1, R2) | **STANDS** | R3 MEASURED to every digit; orbit sizes {3:32, 6:579, 12:3,243} |
+| 5 | PySCF detects D6h, computes in D2h, blocks and occupations identical, energy 8.8e-13 away (R1 oracle) | **STANDS** | R1 MEASURED; R3: `get_subgroup` source confirms D6h → D2h |
+| 6 | The π ring is a circulant; ε_k = F̃(k)/S̃(k) reproduces the solver's six π energies to 1.9e-14 with no eigensolver (R1 Prop. 5) | **STANDS** for one function per site | R1 MEASURED, re-run R3: 1.91e-14; FALLS for b > 1 (R2's block-circulant) |
+| 7 | "Exact over Q for n ∈ {1, 2, 3, 4, 6}" (R1 Prop. 5) | **STANDS** for the real coefficients, **FALLS** for the complex characters | R2's ζ₃, ζ₄; R2's integer rows (1,2,2,1), (1,1,−1,−1), (1,−1,−1,1), (1,−2,2,−1) (SymPy, 0 residuals; re-run R3) |
+| 8 | "Integrality is only about the adaptation, never about the integrals" (R1 Prop. 5) | **STANDS** | R2: (ss|ss) = 2/√π transcendental; F_m(0) = 1/(2m+1) a special value, not structure |
+| 9 | N₄ = (1/h) Σ_R |χ_V(R)|⁴ ≥ 1/h with equality iff χ_V(R) = 0 ∀ R ≠ E (R1 Prop. 2) | **STANDS** | exact to the integer on D₂h, C₆, C₆h (R1); the parenthetical "iff free action" FALLS (R2's C₃ p triplet) |
+| 10 | dim (Sym²Sym²V)^G counts the independent integrals; 11,666 for D₆h = 5.25 % against 1/24 (R1 Prop. 3) | **STANDS** | R1 MEASURED three ways; R2/R3 apply the same character formula to C₆₀ (8,504,444) and agree |
+| 11 | A planar mirror is paid as forced zeros, never as orbits: the petite list of a planar molecule saves at most h/2 on the loop's units (R1 Prop. 4) | **STANDS, sharpened** | benzene orbits never of size 8 (R1, R2, R3); an operation fixing every atom gives a petite list of size 1 — fifteen enabled entries: the twelve C∞v molecules and HCOOH, furan, pyridine (R3 census) |
+| 12 | The selection rule holds with 0 violations (R1 Prop. 1) | **STANDS** as "no forbidden non-zero" | R1 max forbidden 3.4e-15 … 7.2e-13 against min allowed 2.1e-8; "equals the allowed set" FALLS for D₆h (450,624 vs 227,008) and water's C₂ basis (R2) |
+| 13 | The live 96³ cell-centred grid: D₂h 1/8, C₂v 1/4, zero boundary (R1 Prop. 6) | **STANDS** for sign-flip groups | R1, R2, R3 MEASURED: 110,592 and 221,184, boundary 0 |
+| 14 | "T_d 1/24, O_h 1/48, zero boundary; a non-signed-permutation maps no centre onto the lattice; the boundary exists only for odd grids" (R1 Prop. 6) | **FALLS** | R2: 39,200 / 19,600 with 54,528 stabilised voxels (6.16 %), the 3-4-5 reflection; R3: the reflection maps 147,456 centres (1/6); the sixteen D₆h operations still map 0 |
+| 15 | The ring character saves nothing on a Cartesian grid; a hexagonal prism lattice would need a new texture address (R1 Prop. 6, R2 Q2) | **STANDS** | R1/R3: 0 centres mapped by the C₆ operations; R2 DERIVED: affine address B⁻¹p, oblique bilinear error √3h²/16 for f = xy (checked by hand, R3); UNVERIFIED on a GPU |
+| 16 | Benzene's carbon-1s levels: four symmetry-distinct levels in 5.4e-4 Eh, first gap 1.7e-5 Eh; the solver's canonical gauge leaks 3.9e-15 off the D₂h blocks (R1 Prop. 7) | **STANDS** | R1 MEASURED, re-run R3 identical (leakage 3.89e-15); C₆₀: 60 1s levels in 5.92e-4 Eh, 16 clusters, narrowest gap 3.73e-6 Eh (R3 MEASURED) |
+| 17 | "A blocked eigensolve should be THE NAMES' seat" (R1 Prop. 7, Q6) | **FALLS** as a need | S1 shipped `lab/names.js` on cluster characters, no solver change, 52 molecules, benzene 4 ms (S1-NAMES-BUILD); R2's Q6 contract keeps cluster traces as the auditor; R3: the cluster road names all 80 levels of C₆₀ with 0 mixed clusters |
+| 18 | ERI pass "588 → ~152 ms (D₂h) / ~54 ms (D₆h)" (R1 §4) | **FALLS**, replaced | R2: a fraction is not a timing; R3 MEASURED (CPU, loaded machine): 930 → 287 ms (D₂h, ×3.24) and 160 ms (D₆h, ×5.81), setup 16.4 ms, rebuild 12.5–50 ms, tensor exact to 6e-16; ≈ 588 → 181 / 101 ms on Round 1's quiet machine by ratio |
+| 19 | Fock build 3.5 → 0.5 ms a call; ~0.12 s over a solve (R1 §4) | **OPEN** (not timed) | R2 tightened the count to 244² = 59,536 entries = 3.54 % (DERIVED); 3.5 ms × ~40 builds = 0.14 s is the ceiling either way |
+| 20 | RPA Hessian ~145 → ~30 ms (R1 §4 / Q1) | **STANDS** within 2× for the warm contraction; **FALLS** as a net saving | R2 MEASURED 131.8 → 16.5 ms; adaptation 416 ms (dense) or 210 + 245 ms (raw, first call); R3: two Hessians per solve (`rhf-molecule.js:151`, `rpa-inspector.js:169`) → ≤ 231 ms returnable |
+| 21 | The source comment "O(n³·nocc), 89M multiply-adds" (R1 citing `rpa-inspector.js` l.43–45) | **FALLS** (the comment) | R2: 94,834,152 and degree 5 (first contraction O·n⁴); R3 MATCH from the loop bounds — a comment for S4c to fix, not this thread |
+| 22 | GPU reconstruct: 1/8 of the voxels, −2.4 ms a dispatch, zero boundary, "not on the frame path" (R1 §4) | **OPEN** / partly **FALLS** | R2: the dirty path is inside `field.frame` (R3: l.1257–1259 at bd9b0e5) and a TDHF density dirties every frame; R3 DERIVED: an axis kick keeps order 4, a generic kick order 1 — ≤ 4× where it is felt; UNVERIFIED (no GPU) |
+| 23 | "What none of it saves": the Boys function per primitive, the screen, SAD, the volume render, the names (R1 §4) | **STANDS** | R3: `rInto` 2,583,515 calls; the petite list divides their count, not their cost |
+| 24 | Provisional verdict: no symmetry-adapted SCF stage for 0.5.x (R1 §4) | **STANDS** | §2–§3 below: 770 ms of CPU once per benzene solve (41 % of it); 13.9 % of the library's live solve time at most |
+| 25 | "1× on the heavy records, which are C₁/C_s or from PySCF in D₂h" (R1 §4) | **FALLS** | R2: TiCl₄, GeCl₄, cubane, neopentane, Na₄Cl₄ are T_d/O_h; R3: PySCF computes T_d in D₂, I_h in C_i; records are gated by nAO, not by group (PLAN §10 N2) |
+| 26 | "`symm` uses the largest real Abelian subgroup" (R1 §3) | **FALLS** as a law | R2 MEASURED Ih → Ci; R3 the whole table from the installed source |
+| 27 | Live-loop telemetry 291 / 42,486 / 0 / 2,733,372 / 149,857 and "the loop is instrumentable without editing lab" (R2 §0) | **STANDS** | R3 MATCH with independent anchors; hooks-off difference 0 |
+| 28 | The build gate `NP===291 && mainQuartets===42486 && schwarzRejected===0 && D2hOrbits===10966 && D6hOrbits===3854 && maxAbsERIReferenceDifference===0` (R2) | **STANDS**, extended | R3 adds `rInto===2583515` and the five-mode table |
+| 29 | RPA MAC counts 94.8M / 2.89M / 14,721 (R2 Q1) | **STANDS** | R3 MATCH by independent encoding |
+| 30 | The raw-SALC transform is O(|G| n⁴) not n⁵, yet loses the first-call bill (R2 Q1) | **STANDS** | R2 MEASURED 455 ms first call; R3: two Hessians per solve make the bill unpayable at any layout cost above 231 ms |
+| 31 | Grid table for every library frame; T_d's 54,528 stabilised voxels; the linear groups C₄v/D₄h (R2 Q2) | **STANDS** | R3 MATCH for all 13 ids and O_h |
+| 32 | C₆₀: shell petite list 1,110,036 (1/119.5), independent ERIs 8,504,444 (64.9 MiB); the mirror is local (4 of 60 atoms) (R2 Q3) | **STANDS** | R3 MATCH (BigInt); fixed atoms per mirror 4 (MEASURED on the 120 operations) |
+| 33 | Direct 300-AO RHF: −2244.0187824773 Eh, 9 cycles, 626 s at 2 threads, 193 MiB (R2 Q3) | **STANDS** | R3 MEASURED: −2244.0187824773675 Eh (Δ 2.0e-11), 9 cycles, gap identical to ten digits; 1245.6 s at 6 threads on a machine at load 20–30 (wall not comparable) |
+| 34 | Ind_{C_s}^{I_h} 1 = Ag + T1g + T2g + 2Gg + 3Hg + 2T1u + 2T2u + 2Gu + 2Hu; the commutant is non-commutative (M₃ for Hg); characters fix dimensions, not eigenvalues (R2 Q4) | **STANDS** | R3 MATCH; the Hückel spectrum with the accidental g_g ⊕ h_g level at x = 1 that two bond weights split |
+| 35 | Census by predicted ms: 58.37 % of the live total on entries with cube subgroup ≥ 4 — "neither kills nor earns" (R2 Q5) | **STANDS** as arithmetic, **FALLS** as the gate | R3 MATCH on the model numbers; by measured CPU the order ≥ 4 share is 66.4 % (above Round 1's 60 %), but the achievable petite-list saving is 13.9 % (below its 25 %): the subgroup order was the wrong weight |
+| 36 | The planned-roster interval 12.3–16.5 % (R2 Q5) | **UNVERIFIED** (model, conditional roster) — **OPEN** until S4b fixes geometries | R2's own tag |
+| 37 | DF: RI-J O(n³) but exact K quartic; crossover n* > 7.746 (c₃/c₄) κ (R2 Q5) | **STANDS** as derivation, **moot** for the library | R3 MEASURED: fitting errors 4e-5 to 1.1e-2 Eh with PySCF's automatic auxiliary basis; S4a's equality gate excludes every fitted record; in-core ≤ 120 AO is 1–2 s |
+| 38 | Furan / pyridine: the approximate C₂ breaks S by 1.4e-4 and F by 6–7e-4 Eh; exact labels only in C_s; projector labels need an operator gate (R2 Q6) | **STANDS** | R3 MATCH on the residuals (two axes: 1.006e-3 / 9.60e-4 and 8.32e-4 / 8.08e-4 bohr); S1 shipped exactly this (furan → C_s fallback, pyridine approximate) |
+| 39 | State symmetry, not molecular symmetry, controls the GPU saving (R2 §7) | **STANDS** | R3 DERIVED for the three live kinds and the RT kick: order 8 / 8 / 4 / 1 |
+| 40 | The invariant Fock contraction is 244² = 59,536 entries, 3.54 % (R2 §7) | **STANDS** | R3 MATCH |
+| 41 | A 300-AO direct SCF needs no stored ERI: the 64.8 GB dichotomy is dead (R2 Q3) | **STANDS**, extended | R3: in-core, 8.15 GB packed and 7.74 GiB RSS, 490 s at 4 threads against direct 1,246 s at 6 on the same loaded machine, energies 4.6e-10 apart |
+| 42 | The skeleton loop rebuilds the tensor exactly: 5–6e-16 for D₂h and D₆h, writes 1,353,536 / 1,661,792 (R3 Q8) | **STANDS** (MEASURED) | `round3-fable.json` skeleton.*.maxAbsDiffVsSolver |
+| 43 | C₆₀'s 300 Cartesian AOs under I_h: Ag 4 · T1g 6 · T2g 6 · Gg 10 · Hg 14 · Au 1 · T1u 9 · T2u 9 · Gu 10 · Hu 11; largest Fock block 14 × 14; 5,760 RPA roots of 21,600 (R3 Q12) | **STANDS** (DERIVED from measured characters; the configuration MEASURED) | `round3-fable-group.json`, `round3-fable-c60.json` |
+| 44 | PySCF's automatic DF is excluded from the LIBRARY by the equality gate, not by speed (R3 Q9) | **STANDS** (MEASURED errors) | `round3-fable-pyscf.json`, `round3-fable-c60-df.json` |
+
+#### 2 · THE ONE NUMBER (PLAN §6, row S1″)
+
+**Benzene, STO-3G, 36 AO, on `lab/md.js`'s own `twoElectron` loop: of the 42,486 shell quartets the live, screened loop contracts (291 of 300 shell pairs survive the primitive screen; the Schwarz screen rejects none), 10,966 are distinct under D₂h — 25.81 % — MEASURED (Round 2, Sol; Round 3, Fable, independently, to every digit).** Beside it: 11,678 of 45,150 unscreened (25.86 %, Round 1); 3,854 of 42,486 under the full D₆h (9.07 %); at the component level 34,187 of 222,111 canonical AO quartets live (15.39 %) while 39.8 % are zero by symmetry and computed anyway. **On the loop's clock (Round 3, MEASURED in one process by CPU time, medians of 7, loaded machine): the full pass 930 ms; the D₂h skeleton 287 ms (×3.24); the D₆h skeleton 160 ms (×5.81); 16.4 ms of setup and 12.5–50 ms of rebuild that no symmetry removes; the rebuilt tensor equals the live one to 6e-16.** The symmetry saving on benzene's solve (1,863 ms of CPU for `ensureSolve`'s whole call) is therefore 643–770 ms — 35–41 % of the cap molecule, once per session, and nothing of any other number on the stage.
+
+#### 3 · The ruling for PLAN §6's 0.5.x row — R-S1-0.5, for Josh
+
+PLAN §6 l.328: *"0.5.x — the wave index · symmetry-adapted SCF if the thread's number earns it."* The number does not earn it. **R-S1-0.5 (default = the first option):**
+
+1. **Strike "symmetry-adapted SCF" from the 0.5.x row.** The whole library's achievable ERI saving from a D₂h-type petite list is 2,332 ms of its 16,743 ms of live solve CPU (13.9 %, one solve of each of the 52 enabled entries, MEASURED), fifteen entries saving nothing; on benzene, the cap, 770 ms of a 1,863 ms solve (41 %) once per session — the same class of saving as the 52-record starter PLAN §10 N2 declined to ship for its bytes; the RPA blocks return ≤ 231 ms against ≥ 416 ms of adaptation; the Fock blocks ≤ 0.14 s; the GPU asymmetric unit is ≤ 4× on the only per-frame road and unmeasured. A symmetry-adapted SCF — SAO integrals, blocked Fock, blocked eigensolve — would buy the ERI saving and nothing more, at the cost of touching `lab/md.js` and `lab/scf.js` for one molecule. **Keep what symmetry does earn, none of it a solver change:** (a) the names (shipped, S1); (b) the irrep of every RPA root in SPECTRUM (contract C3 below — the one build this thread recommends, for 0.5.0 THE INFORMATIONAL, where pages per state want a name); (c) full-group labels computed at record generation (S4, contract C5); (d) the petite-list ERI as a **flag, not a stage**, to be built only when the live cap admits a T_d or O_h entry (adamantane, cubane, Na₄Cl₄), gated by Q13.
+2. Build the D₆h skeleton behind a flag now, for benzene alone (and CF₄, GeH₄, SiH₄ at a tenth of the return): a 1.7× solve on the cap molecule once per session, with the representative table, the rebuild and the p-component rotation as shipped code in `lab/md.js`, gated by Q13 (×4 or more on the worker's pass, tensor to 1e-14).
+3. Strike the row and build nothing symmetry-related in 0.5.x, the root names included.
+
+#### 4 · The contracts, restated so a wave could be commissioned (none is commissioned for 0.5.x under option 1 except C3 and C5)
+
+- **C1 · PETITE-LIST ERI (flag).** Files: `lab/md.js` `twoElectron` (a representative table over the live pair list; the rebuild — signed permutations for sign-flip groups, the M⊗M⊗M⊗M rotation of shell blocks for the rest); `lab/molecules.js` (the cube subgroup from `symmetry`). Gate: tensor max |Δ| < 1e-14 against the unflagged loop on all 52 entries, energies identical to 1e-12, benzene's pass at least 4× faster in the worker (Round 3 measured ×5.81 in node), the unflagged path byte-identical in behaviour. Oracle: `tools/symmetry/round3-fable.mjs` modes `full` / `d2hSigned` / `d6hGeneral`. **Status: not commissioned** — no customer under the benzene cap; the planar C_s entries gain nothing.
+- **C2 · BLOCKED FOCK AND EIGENSOLVE.** Files: `lab/scf.js` l.37–42 (`fockReal` over the 244² invariant entries), l.107–108 (the eigensolve by block, with Sol's Q6 one-liner). Gate: Sol's list — geometry residual, DᵀSD − S, off-block F, the intertwiner δ, CᵀSC − I, FC − SCε — and energies identical. **Status: not commissioned** — ≤ 0.14 s on benzene, and the names no longer need it.
+- **C3 · RPA ROOT NAMES in SPECTRUM.** Files: `lab/rpa-inspector.js` (project each root's X + Y onto the pair-space blocks built from `names.js`'s D(R) ⊗ D(R)), `lab/names.js` `forms` (state labels ¹B₁u, ¹E₁u …), SPECTRUM's state grid. Gate: Σ_Λ d_Λ m_Λ = the pair space (benzene 315; the multiplicities integer to 1e-9); every root's weight on one block > 1 − 1e-10; benzene's 210 distinct roots named, degenerate E pairs one label. Oracle: `quartets.json` D6h.rpaBlocks; C₆₀'s pair blocks (R3). **Status: recommended for 0.5.0 THE INFORMATIONAL** — a naming build, zero solver change, zero speed claim.
+- **C4 · GPU ASYMMETRIC UNIT.** Files: `lab/field.js` molecular kernel (compute 1/|H_D| of the voxels, scatter |H_D| writes with the deduplicated-store rule for stabilised voxels). Gate: device timestamps on the 3070 and the M5 for an RT run with an axis kick (order 4) and a generic kick (order 1), and for a still density (order 8, not per frame). **Status: not commissioned** — UNVERIFIED, ≤ 4× where felt.
+- **C5 · RECORD LABELS (S4).** Files: the generator in `tools/` (PySCF): write every orbital's full-group irrep by projection (the recipe of `tools/symmetry/round3-fable.py` `ih_analysis`: the operations from the declared group, D(R) on the AOs, Σ_k c_kᵀ S D c_k per cluster, decomposed against the table), the frame (`names.js` CONVENTION), the atoms in that frame, PySCF's `topgroup`/`groupname` recorded but never used as a name. Gate: `tools/orbital-names.mjs --check --pyscf` on each record; C₆₀'s configuration (R3, ideal geometry) as the fixture for the I_h table. **Status: part of S4a/S4b** as written in PLAN §4 F5 (one PySCF cross-check in `tools/`).
+
+#### 5 · What S4 (LIBRARY) and 0.4.1 BUCKYBALL take from the thread
+
+**S4 · LIBRARY.** (1) **In-core PySCF for every record up to 120 AO**: 0.94 s (36 AO) and 1.83 s (55 AO) MEASURED; a 120-AO packed tensor is 207 MB; there is nothing to optimise in the generator. (2) **No density fitting anywhere**: errors 4e-5 to 1.1e-2 Eh with the automatic auxiliary basis against a gate of "cached = fresh" on an engine that agrees with PySCF to 1e-11 (MEASURED, R3 Q9). (3) **Labels by projection, never from `orbsym`**: PySCF computes T_d in D₂, D_nh in D₂h/C₂v, I_h in C_i (MEASURED from the installed source) — the record carries the full-group irrep, the frame and the atoms in that frame (C5). (4) **A record's point group does not change its live cost**: records are gated by nAO (PLAN §10 N2), and the planar entries' mirrors save nothing on any loop (Prop. 4) — the census weight for "symmetric" molecules is the achievable saving, 13.9 % of the library's live solve CPU (R3). (5) The direct-SCF route is the generator's for anything past the in-core memory: 300 AO in 626 s at 2 threads (R2) / 1245.6 s at 6 threads on a loaded machine (R3), 193 MiB.
+
+**0.4.1 · BUCKYBALL.** (1) **The I_h names of C₆₀ are computable and their oracle exists**: the 300 Cartesian AOs block as Ag 4 · T1g 6 · T2g 6 · Gg 10 · Hg 14 · Au 1 · T1u 9 · T2u 9 · Gu 10 · Hu 11; the STO-3G ground state on the ideal geometry is (1g_g)⁸(1h_u)¹⁰ … (10h_g)¹⁰(6h_u)¹⁰ with occupied Ag 4 · T1g 2 · T2g 2 · Gg 6 · Hg 10 · T1u 6 · T2u 6 · Gu 6 · Hu 6 — **HOMO 6h_u (−0.198006 Eh), LUMO 7t_1u (+0.081771 Eh)**, 80 levels, 0 mixed clusters, worst in-cluster spread 1.1e-10 Eh, narrowest gap 3.73e-6 Eh (MEASURED, R3, Round 3 §2 Q12; UNVERIFIED at the experimental geometry, Q15). `lab/names.js` already carries the I_h table in exactly this frame (`CONVENTION.Ih`: x, y, z the three C₂ axes); the record must store the atoms in it. (2) **The 1s band at 60 atoms**: 60 core levels inside 5.92e-4 Eh in 16 symmetry-distinct clusters, the narrowest gap of the whole spectrum (3.73e-6 Eh) among them — Josh's "lower orbitals going nuts", named at 2e-10 Eh with four orders of room. (3) **The grid record can be stored as its D₂h asymmetric unit**: I_h ∩ O_h in the names frame is D₂h (order 8), the live 96³ texture has zero stabilised voxels under it, so a precomputed density grid is 110,592 voxels, not 884,736 — 8× fewer bytes, expanded on upload by eight sign flips (DERIVED from the measured grid orbits; UNVERIFIED as a kernel). (4) **A C₆₀ spectrum, if ever**: 21,600 pairs make a 3.7 GB dense Hessian; by irrep 5,760 roots in blocks ≤ 906 (6.6 MB each) — it exists only blocked (DERIVED). (5) The CPU cost of the record: 626–1,246 s direct (2 threads light / 6 threads loaded), 490 s in-core at 4 threads loaded with 8.15 GB resident, 267 s fitted-and-wrong — a background job, not a problem.
+
+#### 6 · Benchmarks that must precede any build
+
+- **B1** Q8's five-mode table inside the worker in Chromium and Firefox (Q13) — before C1 is ever flagged on.
+- **B2** Device timestamps of the RT run with and without the asymmetric unit, axis kick and generic kick (Q10) — before C4.
+- **B3** The `COST` refit from measured rows (PLAN §10 N2, S4a) — before any census-based ruling is revisited; this thread's census used node solves, not the model.
+- **B4** C₆₀ at the experimental geometry in STO-3G through `lab/names.js` in the I_h frame (Q15) — before 0.4.1 prints an I_h name.
+- **B5** For C3: benzene's 210 named roots against PySCF TDHF in D₂h (irrep labels of the lowest 20 roots) — the oracle every SPECTRUM name must pass.
+
+#### 7 · Decisions only Josh can make
+
+- **D1** R-S1-0.5: option 1 (strike the SCF, keep the names and the root names), 2 (flag the D₆h skeleton for benzene now) or 3 (strike everything).
+- **D2** Whether C3 (RPA root names) enters 0.5.0 THE INFORMATIONAL's pages-per-state, or waits.
+- **D3** Whether BUCKYBALL's grid record is stored as its D₂h asymmetric unit (8× fewer bytes; an expansion step on upload).
+- **D4** Whether a Round 4 (Sol) is launched on Q13–Q17, or the thread closes here. The protocol closes after two dry rounds; Round 3 was not dry (nine kills, five new numbers), but the question PLAN asked is answered, and Q13–Q17 are build gates rather than mathematics.
+
+#### 8 · Open questions (for a future round)
+
+Q13 the worker skeleton · Q14 the component-level skip · Q15 C₆₀ at the experimental geometry through `names.js` · Q16 in-core 300-AO against direct (answered on a loaded machine, 490 s against 1,246 s; the quiet pair remains) · Q17 the RPA root-name contract — as written in Round 3 §5; and the literature (Dupuis–King 1977, Haddon 1986, Pisani 1988) still unopened.
+
+#### 9 · The tags, once more
+
+MEASURED: every count in §1 rows 1–5, 9–14, 27–35, 38, 40, 42–44; the skeleton timings (as ratios); the census; the PySCF energies, cycles and errors. DERIVED: the 300-AO blocks and pair blocks (from measured characters), the per-frame group law, the asymmetric-unit byte count, the Hessian call count. UNVERIFIED: every GPU, worker, device and experimental-geometry statement (no device ran); the planned-roster interval (model); the literature (not opened).
+
+
 
 ---
 
@@ -24367,7 +24609,351 @@ wording fix for the release notes.
 
 ---
 
-## <a id="doc-103"></a>DOC 103 · release-0.4.0/survey/LWAVES-AUDIT.md · 2026-10-07
+## <a id="doc-103"></a>DOC 103 · release-0.4.0/S1-CAMERAEYE-BUILD.md · 2026-10-07
+
+## λWAVES 0.4.0 · S1′ `cameraEye` — BUILD (wave 144)
+
+Built by Opus 5.5 on branch `worktree-agent-ad4bb36f5df8a7072`, from `58852c7` (fast-forwarded). Nothing pushed, tagged or deployed.
+
+### The commits
+
+| sha | what |
+|---|---|
+| `a6f764b` | 1/4 `cameraEye` + `toScreen` beside `cameraBasis`; `writeView` asks it; `cameraKey` carries the shift |
+| `f0e0af6` | 2/4 FIELDVIEW, KEPLER, PARTICLES, VORTEX project through `toScreen` |
+| `f0efa03` | 3/4 `pointerRay`, `unproject` and the GLB camera ask `cameraEye` |
+| `09a9e1d` | 4/4 the atom labels project through `toScreen` and write only on change; the stage text keys on its string |
+| (this file + REPORT wave 144) | hand-off |
+
+### The helper (`lab/field.js`)
+
+```
+cameraEye(obs, half) → { eye, target: [0,0,0], basis: cameraBasis(obs), shift: obs.shift || [0,0], D: obs.dist·half, tanH }
+toScreen(obs, half, W, H) → cameraEye(…) + at(x, y, z, out?) → [px, py, depth] | null   (stage CSS px)
+cameraKey(obs) → the orientation + '|sx,sy' (4 decimals; '|0.0000,0.0000' with no shift)
+```
+
+The arithmetic of every site is kept operand for operand (`depth * tanH * aspect`, `(u + 1) / 2 * W`), so at shift 0 nothing moved: the lock proves the ray pass and the lines; the overlays use the same expressions.
+
+**For S2 — the shift lands in three seats, nowhere else:** `writeView` (the forward lane `v[12..14]` and `M_PERSP` `o[8]`, `o[9]`), `toScreen`'s `at` (add `shift·(W/2, −H/2)` to `out[0]`, `out[1]`), and `pointerRay` (`u − px`, `v − py`). The shift is NOT applied anywhere yet (deliberately: applying it in the overlays before the ray pass would split the picture). The GLB camera cannot express a lens shift (glTF perspective has no principal point); S2 decides whether to say so in the export's extras.
+
+### The nine sites and their deleted lines
+
+| site | before | after |
+|---|---|---|
+| `field.js` `writeView` | own `B`, `D = obs.dist * half`, `cam`, `tanH` (4 lines) + `lookAt(cam, ORIGIN, …)` | one line from `cameraEye`; `lookAt(cam, E.target, …)` |
+| `fieldview.js` `draw` | eye + 6-line `proj` | `toScreen` + 1-line `proj` (−7) |
+| `keplerview.js` `draw` | eye + 6-line `proj` | 1 line (−7) |
+| `particles.js` | eye + the 9-line `project()` helper | 1 line; `project` is a closure on `S.at` (−10) |
+| `vortex.js` `drawOverlay` | eye + inline dot projection + an inline one-line axis projection | `S.at` for both (−4); key gains `obs.fov` |
+| `vortex.js` cache key | already `cameraKey` | unchanged apart from the FOV |
+| `export3d.js` l.305 | `position: c.dir.map((d) => d * c.dist * half)` | `position: c.eye.map((e) => e * half)`; `rack.js` sends `cameraEye(obs, 1).eye`, the same `(dir·dist)·half` product byte for byte. `tests/export3d.test.mjs`' base camera now carries `eye: [3.3, 0, 0]` for `dist: 3.3`; its `[3.3·HALF, 0, 0]` assertion is unchanged and green |
+| `rack.js` `pointerRay` | own `B`, `D`, `cam`, `tanH` | from `cameraEye`; returns `target` too |
+| `rack.js` `unproject` | plane through the origin, `-(cam·fwd)` | plane through `target`: `((T − cam)·fwd)` — identical IEEE arithmetic at T = 0 |
+| `rack.js` `placeAtomLabels` | the fourth PARTICLES copy, rewriting every span each CPU tick | `toScreen`; returns at once unless the key `(preset, size, cameraKey, dist, fov, half, W, H)` changed |
+
+No tenth copy: `orbit.js` (the orthographic Bloch spheres) and `bowMove` / `fieldview`'s plane use `cameraBasis` for orientation only, not an eye. Grep: no site in `lab/*.js` computes `dist * half` or `lookAt(…, ORIGIN)` outside `cameraEye`.
+
+### The two laws that rode along
+
+- **The stage text** (`stageTextTick`): keyed on the string it would render (`stageText()`, now shared with `placeMolFormula`), not on `reg.version`; the DOM is touched only on change. No new event, no per-tick layout read.
+- **The atom labels** write only on change (PLAN B3).
+
+### Line counts
+
+`lab/*.js` (`cat lab/*.js | wc -l`): **35,135 → 35,128** (−7). `git diff --stat 58852c7 -- lab`: 81 insertions, 88 deletions including `sw.js`' regenerated stamps. The helper and its comment cost 22 lines in `field.js`; the sites gave back 29.
+
+### The lock
+
+The tool's default is all three grids; the per-commit run is 96³ on the base fixture, which predates the W125 gas table, so it is checked with `--query gastab=0` (without it the gas state differs on the untouched tree, as the header says):
+
+`LW_PORT=8743 GD_PORT=5211 node tools/perf/digest-lock.mjs --check --grids 96 --query gastab=0`
+
+It compares **588 values** at 96³ today (the "208" of earlier waves is the fixture's older size). GREEN on the untouched `58852c7` and after each of the four commits: 0 readback differences, 0 record-byte differences, nothing unrepeatable, 0 page errors, 35 s each. No red result, so no P5 re-run was needed. The 1004-value lock (all grids) is not run here; it is S2's end gate.
+
+### The gates
+
+- `bash test.sh node`: green, 61 suites, none red.
+- `node tools/new-project.mjs --check`: in step (16,829 B).
+- `node tests/keyboard-shortcuts.test.mjs`: PASS.
+- `node tests/export3d.test.mjs`, `node tests/kepler.test.mjs` (9/9): green.
+- Browser on 8743/5211, one at a time: `export3d.browser-test` GREEN; `render-regressions.browser-test` exit 0; `current.browser-test` 15 PASS, exit 0; `frame-occlusion.browser-test` 7/7. Its first two runs went red at "scrolled-away modulation cards" (`updated` false: the mask had not refreshed 250 ms after a scroll) under a load average of 17–18 from the sibling's runs; the untouched base passed at that load, and this tree then passed 7/7. It is a timing flake under load, not the change, but S2 should watch it.
+- There is no particles or vortex browser suite (`ls tests | grep -i 'kepler\|vortex\|particles'` finds `kepler.test.mjs` only).
+- Light check (`.tmp/labels-check.mjs`, not committed): MOLECULES H₂O. The stage text reads `1s₀, 2p₀` before and `H₂O` after; the three labels move on `orbitBy(0.4, 0.2)` and are byte-identical 400 ms later.
+- The before/after screenshot pair was not taken: the lock already covers the ray pass, and the overlays keep operand-for-operand arithmetic.
+
+
+
+---
+
+## <a id="doc-104"></a>DOC 104 · release-0.4.0/S1-NAMES-BUILD.md · 2026-10-07
+
+## λWAVES 0.4.0 · S1 THE NAMES — what the names builder built (waves 140–143)
+
+Written by Claude Sos from the builder's own hand-off (`S1-NAMES-HANDOFF.md`, kept beside this file) after the builder
+hit the account's session limit, plus a fresh run of the check tool on the merged tree (`sos-s0`, NAMES merged beside
+S1′ cameraEye). Nothing was pushed, tagged or deployed (Josh 2026-10-07: nothing goes to GitHub or Cloudflare until the
+whole plan is done).
+
+### Summary
+
+1. Four commits on `s1-names` from `58852c7` (N1–N4), merged into `sos-s0` after cameraEye; the only conflict was the
+   generated `lab/sw.js`, regenerated.
+2. `lab/names.js` (497 lines): fifteen finite character tables plus D∞h / C∞v, Cartesian d, clusters at 2e-10 Eh, all or
+   nothing, the frontier by level, one `forms()` for plain / typeset / LaTeX / ASCII / speech; the atomic labels read
+   the same service.
+3. `tools/orbital-names.mjs --check --pyscf`: exit 0; 52 enabled molecules named, CuH and ZnH₂ disabled; the ten anchors
+   MATCH the probe; PySCF agrees on water in the same frame.
+4. The worker names the solve inside `ensureSolve`: benzene 4 ms in the browser worker, ≤ 10 ms cold in node.
+5. MO-REGISTRY reads `1b₁ · HOMO`; a degenerate HOMO is one HOMO; the CORE fold; MOLECULES' knob and ε readout named.
+6. The copy, the GLB, the cube and the NPZ carry the names.
+7. The demos name their HOMO; N₂ carries the teaching moment (`3σg` in STO-3G, `1πu` in 6-31+G*).
+8. Gates green at the builder's tip (below); the merged tree re-checked by Claude Sos (below).
+9. `lab/*.js` 35,135 → 35,745 (+610): four formatters became one, but the total grew.
+10. Open: the curated ionisation energies are unchecked; no O_h or I_h molecule exists yet to exercise those tables.
+
+### The commits
+
+| # | sha | title |
+|---|---|---|
+| N1 | `777a4dc` | 0.4.0 S1 N1 · THE NAMES: lab/names.js, the one service |
+| N2 | `7b49926` | 0.4.0 S1 N2 · tools/orbital-names.mjs --check: every framework, the anchors, every molecule |
+| N3 | `ea125ec` | 0.4.0 S1 N3 · the worker's names in the views, the copy and the exports |
+| N4 | `04e86f4` | 0.4.0 S1 N4 · the demos learn their names; the N2 teaching moment |
+| — | `cea608c` | 0.4.0 S1 · hand-off on usage pause |
+
+### Gates
+
+**At the builder's tip** (its hand-off): `bash test.sh node` 83 suites, exit 0; `tests/names.test.mjs` 5/5 blocks;
+browser on 8741/5209, one at a time — `molecular-names` (benzene named in 4 ms), `chem` 0 failing of 54, `register` 0 of
+17, `latex-copy` (0 `.katex-error` on a pasted named page), `export3d`, `new-project`, `current`, `molecule-demos`: all
+green.
+
+**On the merged tree** (NAMES + cameraEye, Claude Sos): see REPORT and the merge commit for the node gate, the precache
+and the browser light check.
+
+### Findings
+
+- **Butadiene** is built s-cis (C1 and C4 on the same side), not the trans its name says; declared C2v as built, not
+  rebuilt (its geometry is oracle-pinned). A geometry fix is a separate decision.
+- **Furan**: approximate C2v at geomTol 1e-2 is refused (core residual 5.6e-2); falls back to exact Cs, and says so.
+- **Pyridine**: named in approximate C2v (residual 3.5e-3, framework 8.1e-4 bohr).
+- **Worst exact-group residual**: 5.8e-10 (SO₂).
+- **The blocked-projector road** (Sol thread, Prop. 7, leakage 3.9e-15) would not have been simpler: an SCF eigensolve
+  change plus full-group partner matching, against a road that needed no solver change.
+- **`CURATED_IE` is UNCHECKED**: HeI band maxima entered from memory; verify against NIST SRD 101 and the
+  LEGAL-PROVENANCE reading before any store build.
+
+### Open items
+
+- Verify the ten curated ionisation energies (above).
+- The O_h, D₅d, D₅h and I_h tables self-test but no library molecule exercises them until S4b/S4c (cubane, ferrocene,
+  C₆₀).
+- The furan geometry (approximate symmetry), and butadiene's s-cis build.
+
+### The `--check` output (fresh run on the merged tree, `node tools/orbital-names.mjs --check --pyscf`, exit 0)
+
+tables: C1(1) Cs(2) C2(2) C2h(4) C2v(4) C3v(6) D2h(8) D3h(12) D3d(12) Td(24) D5h(20) D5d(20) D6h(24) Oh(48) Ih(120) — every one self-tests (orthogonality, Σdim² = h, the vector rep whole)
+frameworks: H2 Dinfh · LiH Cinfv · HF Cinfv · N2 Dinfh · CO Cinfv · F2 Dinfh · LiF Cinfv · NaH Cinfv · HCl Cinfv · Cl2 Dinfh · NaCl Cinfv · BeH2 Dinfh · BH3 D3h · CH4 Td · NH3 C3v · H2O C2v · MgH2 Dinfh · AlH3 D3h · SiH4 Td · PH3 C3v · H2S C2v · CO2 Dinfh · HCN Cinfv · N2O Cinfv · O3 C2v · SO2 C2v · BF3 D3h · CF4 Td · H2O2 C2 · C2H2 Dinfh · C2H4 D2h · C2H6 D3d · H2CO C2v · CH3OH Cs · HCOOH Cs · CH3CN C3v · C3H6 D3h · C4H6 C2v · C4H4O C2v 9.6e-4 · C5H5N C2v 8.1e-4 · urea C2v · glycine Cs · C6H6 D6h · NH4+ Td · H3O+ C3v · OH- Cinfv · CN- Cinfv · CuH Cinfv · ZnH2 Dinfh · GeH4 Td · AsH3 C3v · H2Se C2v · HBr Cinfv · Br2 Dinfh
+MATCH HF    (1σ)²(2σ)²(3σ)²(1π)⁴  HOMO 1π LUMO 4σ  0.5 ms (solve 9 ms)
+MATCH N2    (1σg)²(1σu)²(2σg)²(2σu)²(1πu)⁴(3σg)²  HOMO 3σg LUMO 1πg  0.8 ms (solve 85 ms)
+MATCH CO    (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)²  HOMO 5σ LUMO 2π  0.3 ms (solve 27 ms)
+MATCH CH4   (1a1)²(2a1)²(1t2)⁶  HOMO 1t2 LUMO 2t2  1.0 ms (solve 13 ms)
+MATCH NH3   (1a1)²(2a1)²(1e)⁴(3a1)²  HOMO 3a1 LUMO 4a1  0.2 ms (solve 11 ms)
+MATCH H2O   (1a1)²(2a1)²(1b2)²(3a1)²(1b1)²  HOMO 1b1 LUMO 4a1  0.4 ms (solve 8 ms)
+MATCH CO2   (1σu)²(1σg)²(2σg)²(3σg)²(2σu)²(4σg)²(1πu)⁴(3σu)²(1πg)⁴  HOMO 1πg LUMO 2πu  0.6 ms (solve 56 ms)
+MATCH C2H4  (1ag)²(1b1u)²(2ag)²(2b1u)²(1b2u)²(3ag)²(1b3g)²(1b3u)²  HOMO 1b3u LUMO 1b2g  1.1 ms (solve 38 ms)
+MATCH H2CO  (1a1)²(2a1)²(3a1)²(4a1)²(1b2)²(5a1)²(1b1)²(2b2)²  HOMO 2b2 LUMO 2b1  0.3 ms (solve 25 ms)
+MATCH C6H6  (1e1u)⁴(1a1g)²(1e2g)⁴(1b1u)²(2a1g)²(2e1u)⁴(2e2g)⁴(3a1g)²(2b1u)²(1b2u)²(3e1u)⁴(1a2u)²(3e2g)⁴(1e1g)⁴  HOMO 1e1g LUMO 1e2u  4.4 ms (solve 1064 ms)
+
+| molecule | group | name ms | configuration (STO-3G) or why not |
+|---|---|---|---|
+| H2 | Dinfh | 2.0 | (1σg)² · HOMO 1σg · LUMO 1σu |
+| LiH | Cinfv | 0.8 | (1σ)²(2σ)² · HOMO 2σ · LUMO 3σ |
+| HF | Cinfv | 0.5 | (1σ)²(2σ)²(3σ)²(1π)⁴ · HOMO 1π · LUMO 4σ |
+| N2 | Dinfh | 0.8 | (1σg)²(1σu)²(2σg)²(2σu)²(1πu)⁴(3σg)² · HOMO 3σg · LUMO 1πg |
+| CO | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)² · HOMO 5σ · LUMO 2π |
+| F2 | Dinfh | 0.9 | (1σu)²(1σg)²(2σg)²(2σu)²(1πu)⁴(3σg)²(1πg)⁴ · HOMO 1πg · LUMO 3σu |
+| LiF | Cinfv | 0.7 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴ · HOMO 1π · LUMO 5σ |
+| NaH | Cinfv | 0.3 | (1σ)²(2σ)²(1π)⁴(3σ)²(4σ)² · HOMO 4σ · LUMO 5σ |
+| HCl | Cinfv | 0.2 | (1σ)²(2σ)²(3σ)²(1π)⁴(4σ)²(5σ)²(2π)⁴ · HOMO 2π · LUMO 6σ |
+| Cl2 | Dinfh | 0.8 | (1σu)²(1σg)²(2σu)²(2σg)²(3σu)²(3σg)²(1πg)⁴(1πu)⁴(4σg)²(4σu)²(5σg)²(2πu)⁴(2πg)⁴ · HOMO 2πg · LUMO 5σu |
+| NaCl | Cinfv | 0.5 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)²(2π)⁴(6σ)²(7σ)²(8σ)²(3π)⁴ · HOMO 3π · LUMO 9σ |
+| BeH2 | Dinfh | 0.3 | (1σg)²(2σg)²(1σu)² · HOMO 1σu · LUMO 1πu |
+| BH3 | D3h | 0.8 | (1a1′)²(2a1′)²(1e′)⁴ · HOMO 1e′ · LUMO 1a2″ |
+| CH4 | Td | 1.0 | (1a1)²(2a1)²(1t2)⁶ · HOMO 1t2 · LUMO 2t2 |
+| NH3 | C3v | 0.2 | (1a1)²(2a1)²(1e)⁴(3a1)² · HOMO 3a1 · LUMO 4a1 |
+| H2O | C2v | 0.4 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)² · HOMO 1b1 · LUMO 4a1 |
+| MgH2 | Dinfh | 0.6 | (1σg)²(2σg)²(1πu)⁴(1σu)²(3σg)²(2σu)² · HOMO 2σu · LUMO 4σg |
+| AlH3 | D3h | 0.5 | (1a1′)²(2a1′)²(1a2″)²(1e′)⁴(3a1′)²(2e′)⁴ · HOMO 2e′ · LUMO 2a2″ |
+| SiH4 | Td | 0.7 | (1a1)²(2a1)²(1t2)⁶(3a1)²(2t2)⁶ · HOMO 2t2 · LUMO 4a1 |
+| PH3 | C3v | 0.6 | (1a1)²(2a1)²(1e)⁴(3a1)²(4a1)²(2e)⁴(5a1)² · HOMO 5a1 · LUMO 3e |
+| H2S | C2v | 0.3 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)²(4a1)²(2b2)²(5a1)²(2b1)² · HOMO 2b1 · LUMO 3b2 |
+| CO2 | Dinfh | 0.6 | (1σu)²(1σg)²(2σg)²(3σg)²(2σu)²(4σg)²(1πu)⁴(3σu)²(1πg)⁴ · HOMO 1πg · LUMO 2πu |
+| HCN | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(4σ)²(5σ)²(1π)⁴ · HOMO 1π · LUMO 2π |
+| N2O | Cinfv | 0.3 | (1σ)²(2σ)²(3σ)²(4σ)²(5σ)²(6σ)²(1π)⁴(7σ)²(2π)⁴ · HOMO 2π · LUMO 3π |
+| O3 | C2v | 0.4 | (1a1)²(1b2)²(2a1)²(3a1)²(2b2)²(4a1)²(5a1)²(1b1)²(3b2)²(4b2)²(6a1)²(1a2)² · HOMO 1a2 · LUMO 2b1 |
+| SO2 | C2v | 0.5 | (1a1)²(2a1)²(1b2)²(3a1)²(2b2)²(1b1)²(4a1)²(5a1)²(3b2)²(6a1)²(7a1)²(2b1)²(4b2)²(5b2)²(8a1)²(1a2)² · HOMO 1a2 · LUMO 3b1 |
+| BF3 | D3h | 1.1 | (1a1′)²(1e′)⁴(2a1′)²(3a1′)²(2e′)⁴(4a1′)²(3e′)⁴(1a2″)²(1a2′)²(4e′)⁴(1e″)⁴ · HOMO 1e″ · LUMO 2a2″ |
+| CF4 | Td | 1.9 | (1a1)²(1t2)⁶(2a1)²(3a1)²(2t2)⁶(4a1)²(3t2)⁶(1e)⁴(1t1)⁶(4t2)⁶ · HOMO 4t2 · LUMO 5t2 |
+| H2O2 | C2 | 0.3 | (1b)²(1a)²(2a)²(2b)²(3a)²(3b)²(4a)²(5a)²(4b)² · HOMO 4b · LUMO 5b |
+| C2H2 | Dinfh | 0.4 | (1σg)²(1σu)²(2σg)²(2σu)²(3σg)²(1πu)⁴ · HOMO 1πu · LUMO 1πg |
+| C2H4 | D2h | 1.1 | (1ag)²(1b1u)²(2ag)²(2b1u)²(1b2u)²(3ag)²(1b3g)²(1b3u)² · HOMO 1b3u · LUMO 1b2g |
+| C2H6 | D3d | 0.8 | (1a2u)²(1a1g)²(2a1g)²(2a2u)²(1eu)⁴(3a1g)²(1eg)⁴ · HOMO 1eg · LUMO 2eu |
+| H2CO | C2v | 0.3 | (1a1)²(2a1)²(3a1)²(4a1)²(1b2)²(5a1)²(1b1)²(2b2)² · HOMO 2b2 · LUMO 2b1 |
+| CH3OH | Cs | 0.3 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(1a″)²(6a′)²(7a′)²(2a″)² · HOMO 2a″ · LUMO 8a′ |
+| HCOOH | Cs | 0.3 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(1a″)²(9a′)²(2a″)²(10a′)² · HOMO 10a′ · LUMO 3a″ |
+| CH3CN | C3v | 0.5 | (1a1)²(2a1)²(3a1)²(4a1)²(5a1)²(1e)⁴(6a1)²(7a1)²(2e)⁴ · HOMO 2e · LUMO 3e |
+| C3H6 | D3h | 1.5 | (1e′)⁴(1a1′)²(2a1′)²(2e′)⁴(1a2″)²(3a1′)²(1e″)⁴(3e′)⁴ · HOMO 3e′ · LUMO 1a2′ |
+| C4H6 | C2v | 1.1 | (1b2)²(1a1)²(2b2)²(2a1)²(3a1)²(3b2)²(4a1)²(4b2)²(5a1)²(6a1)²(5b2)²(6b2)²(7a1)²(1b1)²(1a2)² · HOMO 1a2 · LUMO 2b1 |
+| C4H4O | C2v | 2.4 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(9a′)²(10a′)²(11a′)²(1a″)²(12a′)²(13a′)²(14a′)²(15a′)²(2a″)²(3a″)² · HOMO 3a″ · LUMO 4a″ · Cs (downgraded from C2v → Cs) |
+| C5H5N | C2v | 2.2 | (1a1)²(1b2)²(2a1)²(3a1)²(2b2)²(4a1)²(5a1)²(6a1)²(3b2)²(7a1)²(4b2)²(8a1)²(9a1)²(5b2)²(6b2)²(10a1)²(1b1)²(7b2)²(11a1)²(2b1)²(1a2)² · HOMO 1a2 · LUMO 3b1 · approximate (framework 8.1e-4 bohr, residual 3.5e-3) |
+| urea | C2v | 1.4 | (1a1)²(2a1)²(1b2)²(3a1)²(4a1)²(5a1)²(2b2)²(6a1)²(3b2)²(7a1)²(4b2)²(1b1)²(8a1)²(1a2)²(5b2)²(2b1)² · HOMO 2b1 · LUMO 3b1 |
+| glycine | Cs | 1.0 | (1a′)²(2a′)²(3a′)²(4a′)²(5a′)²(6a′)²(7a′)²(8a′)²(9a′)²(10a′)²(1a″)²(11a′)²(12a′)²(2a″)²(13a′)²(3a″)²(14a′)²(15a′)²(4a″)²(16a′)² · HOMO 16a′ · LUMO 5a″ |
+| C6H6 | D6h | 4.4 | (1e1u)⁴(1a1g)²(1e2g)⁴(1b1u)²(2a1g)²(2e1u)⁴(2e2g)⁴(3a1g)²(2b1u)²(1b2u)²(3e1u)⁴(1a2u)²(3e2g)⁴(1e1g)⁴ · HOMO 1e1g · LUMO 1e2u |
+| NH4+ | Td | 0.5 | (1a1)²(2a1)²(1t2)⁶ · HOMO 1t2 · LUMO 3a1 |
+| H3O+ | C3v | 0.2 | (1a1)²(2a1)²(1e)⁴(3a1)² · HOMO 3a1 · LUMO 4a1 |
+| OH- | Cinfv | 0.2 | (1σ)²(2σ)²(3σ)²(1π)⁴ · HOMO 1π · LUMO 4σ |
+| CN- | Cinfv | 0.2 | (1σ)²(2σ)²(3σ)²(4σ)²(1π)⁴(5σ)² · HOMO 5σ · LUMO 2π |
+| CuH | Cinfv | — | disabled: not a minimum |
+| ZnH2 | Dinfh | — | disabled: not a minimum |
+| GeH4 | Td | 2.0 | (1a1)²(2a1)²(1t2)⁶(3a1)²(2t2)⁶(4a1)²(3t2)⁶(1e)⁴(4t2)⁶ · HOMO 4t2 · LUMO 5t2 |
+| AsH3 | C3v | 0.9 | (1a1)²(2a1)²(1e)⁴(3a1)²(4a1)²(2e)⁴(5a1)²(3e)⁴(4e)⁴(6a1)²(7a1)²(5e)⁴(8a1)² · HOMO 8a1 · LUMO 6e |
+| H2Se | C2v | 0.5 | (1a1)²(2a1)²(1b2)²(3a1)²(1b1)²(4a1)²(2b2)²(5a1)²(2b1)²(3b2)²(6a1)²(1a2)²(3b1)²(7a1)²(8a1)²(4b2)²(9a1)²(4b1)² · HOMO 4b1 · LUMO 5b2 |
+| HBr | Cinfv | 0.6 | (1σ)²(2σ)²(3σ)²(1π)⁴(4σ)²(5σ)²(2π)⁴(6σ)²(3π)⁴(1δ)⁴(7σ)²(8σ)²(4π)⁴ · HOMO 4π · LUMO 9σ |
+| Br2 | Dinfh | 2.6 | (1σg)²(1σu)²(2σu)²(2σg)²(3σu)²(3σg)²(1πg)⁴(1πu)⁴(4σu)²(4σg)²(5σu)²(5σg)²(2πg)⁴(2πu)⁴(6σu)²(6σg)²(3πu)⁴(3πg)⁴(1δu)⁴(1δg)⁴(7σg)²(7σu)²(8σg)²(4πu)⁴(4πg)⁴ · HOMO 4πg · LUMO 8σu |
+
+PySCF C2v label_orb_symm (water): A1 A1 B2 A1 B1 A1 B2
+lab/names.js:                     A1 A1 B2 A1 B1 A1 B2
+MATCH (same frame)
+
+OK — every anchor matches the probe; every enabled molecule is named or says why
+
+
+
+---
+
+## <a id="doc-105"></a>DOC 105 · release-0.4.0/S1-NAMES-HANDOFF.md · 2026-10-07
+
+## 0.4.0 S1 THE NAMES: hand-off (usage pause, 2026-10-07)
+
+- **Worktree:** /home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-adbed8cf26d8e8216
+- **Branch:** `s1-names`, from 58852c7. Nothing has been pushed, tagged or deployed.
+- **Gate server:** pid 1728026 on port 8741, killed.
+- **Tree:** clean. No uncommitted files and no half-done edits. This hand-off is the only new file.
+
+### Commits
+
+| sha | title | status |
+|---|---|---|
+| 777a4dc | 0.4.0 S1 N1 · THE NAMES: lab/names.js, the one service | done |
+| 7b49926 | 0.4.0 S1 N2 · tools/orbital-names.mjs --check: every framework, the anchors, every molecule | done |
+| ea125ec | 0.4.0 S1 N3 · the worker's names in the views, the copy and the exports | done |
+| 04e86f4 | 0.4.0 S1 N4 · the demos learn their names; the N2 teaching moment | done |
+
+**N1–N4 are all done.**
+
+Not done:
+- the REPORT.md section (waves 140–143). A heredoc append was refused by the harness, and nothing was written.
+- `research/release-0.4.0/S1-NAMES-BUILD.md`.
+
+### What landed
+
+#### `lab/names.js` (new, 497 lines)
+- **Character tables.** Fifteen finite tables as data: C1, Cs, C2, C2h, C2v, C3v, D2h, D3h, D3d, Td, D5h, D5d, D6h, Oh and Ih.
+  - The operations come from closure over generators and are classified by det, trace and axis.
+  - Every table self-tests: row and column orthogonality, Σdim² = h, and the vector representation whole.
+- **Linear molecules.** Dinfh and Cinfv are handled by fitting σ/π/δ at three angles, with a fourth angle as a check.
+- **AO representation.** Sparse, with Cartesian d.
+- **Labelling rules.** Levels are clustered at 2e-10 Eh. Labels are all or nothing. The frontier is named by level.
+- **Exports:**
+  - `forms` and `orbitalName`
+  - `atomForms` and `stateName`
+  - `coreCount`
+  - `characters` (derived LCAO name for diatomics)
+  - `CURATED_IE` and `ionisation`
+  - `namesOf`
+
+#### Wiring of the names
+- **`lab/molecules.js`:** a `symmetry` record for all 54 molecules.
+- **`lab/mathworker.js`, `ensureSolve`:** sets `ground.names` and `timings.names`.
+- **`lab/chemview.js`:**
+  - the knob uses `orbitalName`
+  - the ε readout shows the names
+  - the local fallback also names its solve
+  - adds `exportNames()`
+  - `state().names` and `state().orbitalName`
+- **`lab/orbitalsview.js`:**
+  - rungs and lanes read `1b1 · HOMO`, with the lane's subscript in a `<sub>`
+  - hover text from `about()`
+  - the CORE fold: `.orb-core-toggle` plus a tap on the `core ×n` rung
+  - `state().rungs` and `state().coreOpen`
+- **`lab/latex-state.js`:** each level is written as `(1b_{1},\ \mathrm{HOMO})`, plus the configuration. `latexName` now reads `atomForms`.
+- **`lab/hydrogen.js` and `lab/hamiltonian.js`:** the labels now come from `atomForms`.
+- **`lab/statesview.js`:** uses `stateName`.
+- **`lab/export3d.js`, metadata only:** the names go into the GLB extras, cube comment line 1 and the NPZ `meta.names`.
+- **`lab/rack.js`, three small hunks, none on the camera or projection lines:**
+  - the captureLayout `core` key
+  - applying that key on load
+  - one `names:` line in the exporter env
+
+#### Tests and tools
+- New: `tools/orbital-names.mjs` and `tests/names.test.mjs`.
+- Extended:
+  - `tests/latex-state.test.mjs`
+  - `tests/export3d.test.mjs`
+  - `tests/latex-copy.browser-test.mjs`
+  - `tests/molecular-names.browser-test.mjs`
+
+#### Demos
+The notebooks of the three demos in `lab/demos/` now name their orbitals.
+
+### Gates (all green at the tip)
+- **Node:** `bash test.sh node` passes, 83 suites, exit 0. `tests/names.test.mjs` passes 5/5 blocks.
+- **Browser** (8741/5209, one at a time):
+  - molecular-names: green. Benzene is named in 4 ms in the worker.
+  - chem: 0 failing of 54.
+  - register: 0 failing of 17.
+  - latex-copy: green. The named page pasted into the notebook gives 0 `.katex-error`.
+  - export3d: green.
+  - new-project: green.
+  - current: green.
+  - molecule-demos: green.
+- **Names check:** `node tools/orbital-names.mjs --check --pyscf` exits 0.
+  - All 52 enabled molecules are named; CuH and ZnH2 are disabled.
+  - The 10 anchors MATCH `names-probe.json`.
+  - PySCF `label_orb_symm` on water gives A1 A1 B2 A1 B1 A1 B2, a MATCH in the same frame.
+  - The full output is in `.tmp/names-check.txt`, which is not committed. Regenerate it with the same command.
+
+### Errors and findings
+- **Butadiene geometry.** C4H6, "trans-1,3-butadiene", is built s-cis (C1 and C4 land on the same side). It is declared C2v as built and is not rebuilt, because the geometry is oracle-pinned.
+- **Furan.** Approximate C2v at geomTol 1e-2 is refused: the core level has residual 5.6e-2. It falls back to exact Cs, and the record says so.
+- **Pyridine.** Named in approximate C2v: residual 3.5e-3, framework 8.1e-4 bohr.
+- **Worst residual on exact symmetry** across the 52: 5.8e-10 (SO2).
+- **Blocked-projector road (Sol, Prop. 7).** Its leakage is 3.9e-15. It would not have been simpler here:
+  - it needs a change to the SCF eigensolve
+  - it needs full-group matching of E/T partners
+  - the cluster-character road needed no change to the solver
+- **`CURATED_IE` is UNCHECKED.** The values are the standard HeI band maxima, entered from memory. They need a check against NIST SRD 101, and the LEGAL-PROVENANCE reading, before any store build.
+- **`lab/*.js` line count:** 35135 before, 35745 after (+610). `names.js` alone is +497. The four formatters now read one service, but the total grew. Report it that way.
+
+### Exact next step
+1. Append the REPORT.md section `## 2026-10-07 · 0.4.0 S1 — THE NAMES` with waves 140 (names.js), 141 (the check tool), 142 (the views, copy and exports) and 143 (the demos). Use the Write/Edit tool or a `.tmp` python script; a shell heredoc is refused.
+2. Write `research/release-0.4.0/S1-NAMES-BUILD.md`:
+   - the commits above
+   - the gates above
+   - the `--check` table from a fresh run of the tool
+   - the timings: benzene at 4 ms in the browser and ≤10 ms cold in node
+   - the line counts
+   - the findings
+   - the open items: verify the IEs; no O_h/I_h library molecule exists yet to exercise those tables; the furan geometry
+3. Commit with `git commit -F <msgfile>`; inline messages containing backslashes are refused. End the message with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Never push.
+
+
+
+---
+
+## <a id="doc-106"></a>DOC 106 · release-0.4.0/survey/LWAVES-AUDIT.md · 2026-10-07
 
 ## λWAVES 0.4.0 — the audit (read-only survey, 2026-10-07)
 
@@ -24762,7 +25348,7 @@ Other display-class switches outside this tab: LEAN `Aa` per window (`window-chr
 
 ---
 
-## <a id="doc-104"></a>DOC 104 · release-0.4.0/survey/MIR-1.5.md · 2026-10-07
+## <a id="doc-107"></a>DOC 107 · release-0.4.0/survey/MIR-1.5.md · 2026-10-07
 
 ## SURVEY · MIR 1.5 for λWAVES 0.4.0
 
@@ -25102,7 +25688,7 @@ Recommended order, if Josh asks "what do we do first": (1) in 0.4.0 cut seams 2.
 
 ---
 
-## <a id="doc-105"></a>DOC 105 · release-0.4.0/survey/SIBLINGS.md · 2026-10-07
+## <a id="doc-108"></a>DOC 108 · release-0.4.0/survey/SIBLINGS.md · 2026-10-07
 
 ## SIBLINGS — what AUTOMATA, EARTH, SOLEIL, NEBULA-REDUX and BASINS know that λWAVES 0.4.0 can borrow
 
@@ -25335,7 +25921,7 @@ Best first. "Kit or app" = who owns it under the engine-only law. "1.5?" = alrea
 
 ---
 
-## <a id="doc-106"></a>DOC 106 · release-0.4.0/survey/VAULT.md · 2026-10-07
+## <a id="doc-109"></a>DOC 109 · release-0.4.0/survey/VAULT.md · 2026-10-07
 
 ## VAULT digest for λWAVES 0.4.0 planning
 
@@ -25682,7 +26268,7 @@ Not verified: the claims in §5.2 are from code and REPORT text, not from runnin
 
 ---
 
-## <a id="doc-107"></a>DOC 107 · RIVAL-FIELDS-AND-MOLECULES-OPUS.md · 2026-10-07
+## <a id="doc-110"></a>DOC 110 · RIVAL-FIELDS-AND-MOLECULES-OPUS.md · 2026-10-07
 
 ## RIVAL ROUND · FIELDS AND MOLECULES · OPUS
 #### An adversarial reply to ROUND 1 · FABLE of `research/MATH-FIELDS-AND-MOLECULES-2026-09-04.md`
