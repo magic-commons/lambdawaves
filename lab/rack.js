@@ -1109,7 +1109,7 @@ export async function boot(dom) {
        their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
        shown or the canvas being read (focused); the governor's readout stays with METERS. */
     if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }
-    if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in the SLICE / CLIP window, not in SLICE — gated on the wrong window it never repainted while dragged
+    if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in CLIP (id `clip`), not in PLANE (id `slice`) — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
     perf.ring[slot] = spent;                                          // wave 48: the loop's OWN main-thread ms, 60 deep — LW.perf.median reads it
@@ -1265,7 +1265,7 @@ export async function boot(dom) {
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
   let exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
-  const wClip = device({ id: 'clip', eyebrow: 'SLICE / CLIP', status: '' });
+  const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
   {
 
 
@@ -1758,6 +1758,11 @@ export async function boot(dom) {
     const r5b = el('div', 'row tight', gq);
     ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
     ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
+    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with
+      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
+      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
+      onChange: (v) => { setPerfMode(v); saveSettings(); } });
+    r5b.appendChild(ui.perfSeg.root);
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
     const r6 = el('div', 'row', gq);
@@ -1768,7 +1773,7 @@ export async function boot(dom) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
   /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
@@ -2272,8 +2277,8 @@ export async function boot(dom) {
     caption: (st) => `FLOW · ${st.alive}/${st.count} tracers on v = j/ρ of the TD-CIS density matrix · sense exact, magnitude qualitative in STO-3G` }) : null;
   let flowEpoch = null;                                                // the SOURCE the tracers were seeded from: a new source is a new ensemble
 
-  // SLICE — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
-  const wSlice = device({ id: 'slice', eyebrow: 'SLICE', status: '' });
+  // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
+  const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
   const slice = createSliceView(wSlice.body, {
     lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
@@ -2454,14 +2459,9 @@ export async function boot(dom) {
   const meters = createMeters(wMet.body);
 
   {
-    const rp = wMet.row('tight');
-    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [
-      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
-      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
-      onChange: (v) => { setPerfMode(v); saveSettings(); } });
-    rp.appendChild(ui.perfSeg.root);
+    const rp = wMet.row('tight');                                     // 0.4.0 S3: PERFORMANCE moved to SETTINGS › QUALITY; the GOVERNOR's readout stays here
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 22 ms · the window median' }); rp.appendChild(ui.govRo.root);
-  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. 120 Hz mode updates visible CPU readers every fourth frame while the field continues to present each frame.';
+  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. PERFORMANCE (SETTINGS › QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
@@ -2556,10 +2556,10 @@ export async function boot(dom) {
         get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); } },
 
 
-      { id: 'material.slice.pos', label: 'SLICE POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
+      { id: 'material.slice.pos', label: 'CLIP POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
         hint: 'Set the clip or slab position',
         get: () => mat.slice.pos, set: (v) => { mat.slice.pos = v; setKnob(ui.slicePosK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.slice.thick', label: 'SLICE THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
+      { id: 'material.slice.thick', label: 'CLIP THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
         hint: 'Set slab depth',
         get: () => mat.slice.thick, set: (v) => { mat.slice.thick = v; setKnob(ui.sliceThickK, v); schedule(TIER.PRESENT); } },
 

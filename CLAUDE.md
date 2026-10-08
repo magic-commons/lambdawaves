@@ -61,6 +61,10 @@ the card and three floating, out of LEAN), and its ⧉ copies THE PROSE FIGURE
 (`calculusMarkdown`, `lab/calculus.js`: a heading, one "Figure." paragraph,
 the laws in display maths) that pastes into the notebook and renders. That
 skin went to CALCULUS alone, as Josh asked; METERS and WIGNER keep theirs.
+The rotor plane is PLANE and the stage's cut is CLIP (0.4.0; once SLICE and
+SLICE / CLIP): the ids `slice` / `clip`, `slice.*` and the `material.slice.*`
+targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
+METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
 THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
 PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what
