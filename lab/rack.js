@@ -20,7 +20,7 @@ import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuali
 import './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
 import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
-import { Clock } from './clock.js';
+import { Clock, onePlay } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, quatFromYawPitch } from './field.js';
@@ -74,9 +74,9 @@ import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
-import { createModHost, labParameters, barTempo } from './mir/modulation/host.js';
+import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
-import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the port deliberately left behind
+import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
@@ -103,7 +103,7 @@ export async function boot(dom) {
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */
   let history = null;
   const hNote = () => { if (history) history.note(); };
-  const clock = new Clock();
+  const clock = new Clock(), appPlay = onePlay(clock);   // 0.5.0 A6: THE play (clock.js) — every road that plays or pauses the physics clock is its edge
 
 
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT; 0.4.0 S2: `shift`, the pivot's place on the frame (NDC)
@@ -456,8 +456,11 @@ export async function boot(dom) {
   let applyVisuals = true;
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
-     guard on it before the window that shows it has been built. */
-  let modHost = null, modView = null, modWall = 0, modExpOn = null, modSyncing = false;
+     guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
+  let modHost = null, modView = null, modWall = 0, modExpOn = null;
+  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: () => saveSettings() });
+  const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
+  appPlay.onChange((on) => { if (modArm && clockLink) mod.follow(on); });   // 0.5.0 A6: LINKED, at the edge, holding the app-play demand while it plays
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
 
 
@@ -499,112 +502,13 @@ export async function boot(dom) {
     touchState();                                     // ONE schedule for all three, not three
     return true;
   }
-  /* ── WAVE 102 · ONE MICROPHONE FOR THE WHOLE RACK ───────────────────────────────────────────
-   * `lab/audio.js` owns the stream, the graph and the permission story; the MODEL owns the
-   * normaliser, the gate, the four followers and the onset detector.  This holds the one capture
-   * they meet at.  It is created lazily — the object costs nothing, but building it before anything
-   * asks would be one more thing to reason about at boot — and it NEVER opens the microphone on its
-   * own: only a press on an AUDIO device's MIC button reaches `start()`. */
-  let audioCap = null;
-  const audioCapture = () => (audioCap || (audioCap = createAudioCapture({
-    onState: () => { if (modView && modView.isOpen) modView.paint(true); schedule(TIER.PRESENT); }
-  })));
-  /** THE FEED, at the modulation cadence and only while something wants it.  One `read()` serves
-   *  every AUDIO device in the rack: two cards listening to one microphone are two ANALYSES of one
-   *  signal, and each applies its own gain, gate and followers on the other side of this call. */
-  function feedAudio(feedHz) {
-    if (!audioCap || !audioCap.live || !modHost) return 0;
-    const MM = modHost.model;
-    const packet = audioCap.read(feedHz);
-    if (!packet) return 0;
-    let n = 0;
-    for (const src of MM.sourceList()) {
-      if (src.kind !== 'audio') continue;
-      MM.modFeedAudio(src.id, packet); n++;
-    }
-    return n;
-  }
-  /** WAVE 105 · THE CLOSER, AND IT MAY NOT LIVE ON THE FRAME PATH.  It used to sit at the foot of
-   *  `feedAudio`, which only runs from the rAF loop — so removing the last AUDIO device while the loop
-   *  was idle left the microphone open for the session.  This is called from the window after every
-   *  rebuild, and from `LW.mod.reset()`, neither of which needs a frame.
-   *  It also tells the MODEL the signal has stopped: without `audioReset` every follower keeps its last
-   *  published value for ever, so closing the mic mid-phrase pinned every routed parameter at whatever
-   *  the last frame happened to be rather than letting it fall to zero. */
-  function audioSync() {
-    if (!modHost) return;
-    const MM = modHost.model;
-    const devs = MM.sourceList().filter((q) => q.kind === 'audio');
-    if (!devs.length && audioCap && (audioCap.live || audioCap.state === 'asking')) audioCap.stop();
-    for (const q of devs) { if (MM.audioArm) MM.audioArm(q.id, true); }   // `armed` is false at birth; audioDemand is dead without this
-  }
-  /** every AUDIO device back to silence — the signal really has stopped, so say so rather than leaving
-   *  the last frame's numbers standing. */
-  function audioSilence() {
-    if (!modHost || !modHost.model.audioReset) return;
-    for (const q of modHost.model.sourceList()) if (q.kind === 'audio') modHost.model.audioReset(q.id);
-  }
-  const MOD = { hz: 60, get step() { return 1000 / this.hz - 0.5; } };   /* the cadence cap: 60 or 120, never the display's */
+  let audioCap = null;   // wave 102: THE ONE MICROPHONE, built lazily by the port on a MIC press (never by adding a device); read by the loop and setPageHidden
 
 
   let modArm = true;
-  let clockLink = true, linkFollowed = null, linkRetryAt = 0;
+  let clockLink = true;
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
-  const modKnobs = Object.create(null), modGets = Object.create(null), modHeld = new Set();
-  /** THE BASE FOLLOWS THE HAND, EVERY FRAME, FOR EVERYTHING NOT HELD.
-   *  Found here and fixed here: every transport EDGE calls the host's applyAll(force), which hands
-   *  each unrouted target back to its registry BASE — and the base was seeded once, at registration.
-   *  So a camera the hand had orbited to yaw 1.85 and a 3.7 EXPOSURE snapped back to 0.65 and 1.0 the
-   *  moment RUN was pressed on a route that had nothing to do with either.  The registry's own
-   *  resync() is the wrong tool — it writes the base of MODULATED parameters too, which ratchets the
-   *  base up to wherever the LFO happens to be — so this is resync() minus that: re-read the Card's
-   *  own adapter for every parameter NOT currently held, and never for one that is.  Eleven property
-   *  reads on a frame that was going to run anyway; idle stays zero work, because idle runs no frame. */
-  /** WAVE 63 · `all` — INCLUDE THE MODULATED ONES, and it is only ever true on one road.
-   *  Per frame the skip is the whole point (the Card of a modulated parameter is showing the
-   *  MODULATOR's output, so reading it back would ratchet the base up to wherever the LFO is —
-   *  registry.js's own law).  But a RESTORE has just written somebody else's numbers straight into
-   *  `mat`/`obs` with `Object.assign`, so at that instant the Card is NOT the modulator's output: it
-   *  is the file's, or the LINK's, and it is the only copy of it in the program.  Read it, and read
-   *  it BEFORE anything else in the restore can overwrite it.  `setBase` under modulation moves only
-   *  the base and leaves `current` to the modulator, which is exactly the law wanted here. */
-  function modSyncBases(all) {
-    if (!modHost) return 0;
-    const R = modHost.registry; let n = 0;
-    /* AND IT MUST NOT ASK FOR A FRAME.  setBase publishes through the Card's own setter, which is the
-       setter that schedules — but everything written here is the number the instrument ALREADY holds,
-       so the paint it would ask for is a paint of what is on the screen.  §45 says idle is zero work,
-       and a re-base of a camera that has just come to rest must not be the frame that breaks it. */
-    modSyncing = true;
-    try {
-      for (const id of R.list()) {
-        if (!all && R.isModulated(id)) continue;
-        const g = modGets[id]; if (!g) continue;
-        const v = Number(g());
-        if (!Number.isFinite(v) || Object.is(R.snap(id, v), R.baseOf(id))) continue;
-        R.write(id, v); n++;
-      }
-    } finally { modSyncing = false; }
-    return n;
-  }
-  /** the modulator's own write to a control's DIAL — skipped while a finger is on that dial, so the
-   *  hand and the LFO never take turns painting the same needle inside one gesture */
-  /* A MODULATED knob is PAINTED, a plain one is SET (Josh, 2026-09-10: "touching a macro'd dial teleported the whole
-     range"). The registry drives the instrument's value through the adapter's set(), which lands here; for a routed
-     id that value is the modulator's, so it goes to show() — the needle dances, the base the hand owns is untouched,
-     and a drag starts from the base and moves the range. An unrouted id is a base write and set() is right. */
-  let knobIdCache = null, modAdapters = null;   // filled where the adapters are declared (defs)
-  const knobIdOf = (k) => { if (!knobIdCache) { knobIdCache = new Map(); for (const a of (modAdapters || [])) { try { const kk = a.knob && a.knob(); if (kk) knobIdCache.set(kk, a.id); } catch (_) {} } } return knobIdCache.get(k); };
-  const setKnob = (k, v) => { if (!k || k.root.classList.contains('drag')) return; const id = knobIdOf(k); if (id && modHost && modHost.registry.has(id) && modHost.registry.isModulated(id) && k.show) k.show(v); else k.set(v); };
-  /** THE HAND ON A MODULATED CONTROL.  mir/registry's law: `write` IS `setBase`, so turning a knob
-   *  under a running LFO moves the BASE and leaves the current value where the modulator has it —
-   *  the next output rides on the new base and the picture catches up on the next frame.  Without
-   *  this the direct write would be stomped by applyAll one frame later and the knob would fight. */
-  const modHand = (id, v) => {
-    if (!modHost || !modHost.registry.has(id) || !modHost.registry.isModulated(id)) return false;
-    modHost.registry.write(id, v); return true;
-  };
   let refSnapshot = null;        // { re, im, ids } — the DIFF reference state
   let pendingRef = null;
 
@@ -783,7 +687,7 @@ export async function boot(dom) {
   document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
   let exportLocked = false;
   function schedule(tier) {
-    if (modSyncing) return;                    // wave 52: a re-base writes what is already there (modSyncBases)
+    if (mod.syncing) return;                   // wave 52: a re-base writes what is already there (modSyncBases)
     if (tier > pending) pending = tier;
     /* LA8 · AN EXPORT RECORDS THE ASK, IT ARMS NOTHING.  This return used to come first, so a REBUILD asked for
        during an export (GRID, DOMAIN, SPACE, OPERATOR) was dropped: the export's finally raises only RECONSTRUCT, and
@@ -905,19 +809,6 @@ export async function boot(dom) {
         if (modRunning || (audioCap && audioCap.live) || rotDriving()) {
           feedAudio(feedHz);
           modHost.clock.advanceTo(now);
-        }
-        /* LINKED means linked every frame, not only on the press that toggled play: a scrub, a preset,
-           a project open or a HOLD can stop or start either clock on its own, and this is what closes
-           the in-between state (one clock running, the other not) that used to appear afterwards. */
-        if (clockLink && modArm && clock.playing !== linkFollowed && nowMs >= linkRetryAt) {
-          linkFollowed = clock.playing;
-          const r = clock.playing ? modHost.clock.play(now) : modHost.clock.pause(now);
-          /* a refused play ("nothing-to-run": no route and no open window) is retried once a second, not
-             every frame — so a source routed later joins a running transport within a second */
-          if (r && r.ok === false) { linkFollowed = null; linkRetryAt = nowMs + 1000; }
-          else if (modView) modView.sync();   /* LA2: a REFUSED play changed neither the model nor `playing` (host.js refuses
-                                                 before it touches either), so its repaint was the same window again —
-                                                 a whole closed window, once a second, while playing (AUDIT-B FB3) */
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
@@ -2641,50 +2532,12 @@ export async function boot(dom) {
         get: () => __LW_hooks.ab.omega,
         set: (v) => { __LW_hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
     ];
-    modAdapters = defs; knobIdCache = null;
-    modHost = createModHost({
-      available: () => field.ok,                          /* BASINS’s flowActive: is the reader live */
-      present: () => schedule(TIER.PRESENT),               /* EDGE 4 — and never a tier above it */
-      presentationActive: false,                           /* a closed editor has no preview demand */
-      /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the
-         vendored module: CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what
-         a saved route is addressed by — so it names the instrument, not the nearest existing group. */
-      roots: ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg'],
-    });
-    modHost.install(defs.map(({ knob: _k, ...d }) => d));
-    for (const d of defs) { if (d.knob) modKnobs[d.id] = d.knob; modGets[d.id] = d.get; }
-    /* ── WAVE 61 · THE ONE LINE THE ROUTER NEEDED: DOM → id ───────────────────────────────────────
-     * The lab has always had id → DOM (`modKnobs[id]`, lazily).  A DROP has the other question — the
-     * finger is at (x, y), what is under it — and `elementFromPoint` answers with an element, not an
-     * id.  So every dial that has one is STAMPED with its parameter id, and the drop hit-test is
-     * `el.closest('.k[data-param]')`.  It is deferred one frame because the `ui.*` handles the
-     * accessors close over do not exist while the defs list is being written.
-     * ELEVEN TARGETS, NINE STAMPS: `observer.yaw` and `observer.pitch` carry no knob accessor at all
-     * (the camera is dragged, not dialled), so they stay reachable through the modulation window's
-     * own picker and are NOT drop targets.  The gesture is exactly as large as the registry's knobs
-     * and no larger, and saying so here is cheaper than having it discovered. */
-    /* WAVE 68 · AND THE SAME LOOP HANDS EACH DIAL ITS BASE.  kit.js's knob() cannot know what is
-       driving it, and a focused dial under a running LFO used to leave the string from the moment
-       focus ARRIVED in `aria-valuetext` — 9.3× off the instrument, measured.  `setBase(fn)` is the
-       whole wire: while a parameter is modulated the dial announces its REGISTRY BASE and says the
-       word, which is the number the user's own hand owns (modHand: on a routed parameter `write` IS
-       `setBase`), so the announcement is true, it is not a claim about the moving value, and it
-       changes only when the user changes it — the mutation count stays at zero. */
-    const stampParams = () => { for (const d of defs) { const k = d.knob && d.knob(); if (!k || !k.root) continue; k.root.dataset.param = d.id;
-      if (k.setBase) k.setBase(() => { const R = modHost && modHost.registry; return R && R.has(d.id) && R.isModulated(d.id) ? R.baseOf(d.id) : null; }); } };
-    requestAnimationFrame(stampParams); restampParams = stampParams;
-    /* A DIAL WHOSE PARAMETER A MODULATOR IS HOLDING WEARS ACCENT B, wherever in the rack it lives —
-       and it keeps wearing it with this window closed, which is the boundary law made visible. */
-    modHost.registry.subscribe('*', (ev) => {
-      const held = !!ev.modulated;
-      if (held === modHeld.has(ev.id)) return;
-      if (held) modHeld.add(ev.id); else modHeld.delete(ev.id);
-      const k = modKnobs[ev.id] && modKnobs[ev.id]();
-      if (k && k.root) k.root.classList.toggle('mod-held', held);
-    });
-    /* THE FOUR EDGES, HANDED TO THE PORTED WINDOW.  Registry · target host · clock ·
-       presentation — the four `lab/mir/modulation/host.js` has provided since the MIR wave, and the four
-       `host-contract.md` PART 3 says this window boots on and nothing else. */
+    /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
+       CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
+       names the instrument, not the nearest existing group.  ELEVEN TARGETS, NINE STAMPS: `observer.yaw` / `observer.pitch`
+       carry no knob (the camera is dragged, not dialled), so they are picker rows and not drop targets. */
+    modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
+    restampParams = mod.stamp;
 
 
     let trSeat = 'bottom', trMoving = false;
@@ -2741,49 +2594,17 @@ export async function boot(dom) {
       setTimeout(arrive, 220);                                  // the same belt on the leaving half
     }
 
-    modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), {
-      moved: modDodge,
-      /* 0.4.0 S0 · wave 137 (THE LINKED BUG, reproduced): with nothing routed the kit refuses a play until the editor shows
-         its preview ('nothing-to-run'), and the link law retried that refusal once a second — so opening the editor under a
-         playing field showed a STOPPED modulation transport for up to a second.  Opening it re-arms the link: the next frame plays. */
-      opened: () => { modHost.clock.setPresentationActive(true); linkFollowed = null; linkRetryAt = 0; schedule(TIER.PRESENT); },
-      closed: () => { modHost.clock.setPresentationActive(false); modDodge({ left: -1, right: -1, top: -1, bottom: -1 }); },
+    modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
+      moved: modDodge, persist: () => saveSettings(), note: hNote,
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
-      M: modHost.model, registry: modHost.registry, targets: modHost.targets, clock: modHost.clock,
-      apply: () => { modHost.clock.applyAll(false); schedule(TIER.PRESENT); hNote(); },   // S3: a model edit may be a history row
-      cadence: () => MOD.hz, setCadence: (hz) => { MOD.hz = hz === 120 ? 120 : 60; saveSettings(); return MOD.hz; },
-      /* WAVE 65 · THE ARM'S OTHER DOOR.  The window's own play button is the modulation playhead and
-         keeps its own meaning, but pressing PLAY on a disarmed rack should not be a control that does
-         nothing — so the window asks the host to arm, and the MOD lamp on the transport lights.  It is
-         the host that owns the flag, the glow and the persistence; the window only asks. */
-      armed: () => modArm, arm: (on) => setModArm(!!on),
-      /* the router's road back to the real control: it draws the arc into `k.root` and restores the
-         dial's own value text with `k.paint()` when the depth drag lets go */
-      knobOf: (id) => (modKnobs[id] ? modKnobs[id]() : null),
-      /* WAVE 102 · THE FIFTH EDGE.  The window asks for the microphone and reads its state; it does
-         not own the stream, exactly as it does not own the clock.  `audioDevice` is remembered in
-         this browser's settings so a returning user is not asked to pick an input again — a device
-         HANDLE, never audio (lab/audio.js's header says why that distinction matters). */
-      audio: {
-        state: () => (audioCap ? { state: audioCap.state, reason: audioCap.reason, live: audioCap.live,
-                                   deviceId: audioCap.deviceId, sampleRate: audioCap.sampleRate,
-                                   frames: audioCap.frames, inputLatencyMs: audioCap.inputLatencyMs,
-                                   analysisLatencyMs: audioCap.analysisLatencyMs, visualLatencyMs: audioCap.visualLatencyMs,
-                                   latencyMs: audioCap.latencyMs, latencyEstimated: audioCap.latencyEstimated }
-                               : { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0,
-                                   inputLatencyMs: null, analysisLatencyMs: 0, visualLatencyMs: 0,
-                                   latencyMs: 0, latencyEstimated: true }),
-        support: () => audioCapture().support(),
-        start: (id) => audioCapture().start(id === undefined ? (readSettings().audioDevice || '') : id)
-          .then((st) => { if (audioCap && audioCap.live) { const S = readSettings();
-            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, audioDevice: audioCap.deviceId })); } catch (_) {} }
-            return st; }),
-        stop: () => { audioSilence(); return audioCapture().stop(); },
-        sync: () => audioSync(),
-        devices: () => audioCapture().devices(),
-      },
-      persist: () => saveSettings(),
-    });
+      /* WAVE 102 · THE FIFTH EDGE's memory: the chosen input, kept in this browser's settings so a returning user is not asked to
+         pick it again — a device HANDLE, never audio (lab/audio.js's header says why that distinction matters). */
+      device: { read: () => readSettings().audioDevice || '',
+        write: (id) => { const S = readSettings();
+          try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...S, audioDevice: id })); } catch (_) {} } },
+      /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
+         the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
+      armed: () => modArm, arm: (on) => setModArm(!!on) }));
     applyAccent();                                    // the two angles reach the window as soon as it exists
     modView.restore(readSettings().modwin);
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
@@ -3061,19 +2882,9 @@ export async function boot(dom) {
   })();
 
 
-  function playMod(on) {
-    if (!modHost || !modArm || !clockLink) return null;          // FREE: the transport does not touch the modulation clock
-    const w = performance.now() / 1000;
-    const r = on ? modHost.clock.play(w) : modHost.clock.pause(w);
-    if (modView) modView.sync();
-    return r;
-  }
-  function togglePlay() {
-    const want = !clock.playing;
-    clock.toggle(performance.now() / 1000);
-    playMod(want);
-    schedule(TIER.EVOLVE);
-  }
+  /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation while armed and LINKED (FREE /
+   *  SEPARATE: the transport does not touch the modulation clock). */
+  function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
   /** THE ARM.  `setEnabled(false)` is not `pause()`: it hands every routed control back to its base
    *  — including the ones a HAND macro holds, which a stopped transport keeps by the pause law's own
    *  second line — and it deliberately does NOT touch the modulation transport's `playing`, so
@@ -3087,7 +2898,9 @@ export async function boot(dom) {
     }
     if (modHost) {
       modHost.clock.setEnabled(want);
-      if (want && clock.playing) modHost.clock.play(performance.now() / 1000);   // one control, and it was already pressed
+      if (want && clockLink) mod.follow(clock.playing);                          // 0.5.0 A6: LINKED catches up at once — the play (with its demand) or the pause
+      else if (want && clock.playing) modHost.clock.play(performance.now() / 1000);   // one control, and it was already pressed
+      else if (!want) modHost.clock.demand('app.play', false);                   // the app-play demand is held only while armed and LINKED
       if (modView) modView.sync();
     }
     if (!o.quiet) saveSettings();
@@ -5078,7 +4891,6 @@ export async function boot(dom) {
            palette and state controls, so no later project step can overwrite a routed hand value. */
         const modWas = hist && pr.modulation !== undefined && modHost && modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
-        if (hist && pr.modulation !== undefined) linkFollowed = null;   // a load is STOPPED: LINKED time re-follows the field next frame
         if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · …and under SEPARATE nothing re-follows: an undo puts a playing transport back to playing
         if (pr.modwin && modView) modView.restore(pr.modwin);
       }
@@ -5694,7 +5506,7 @@ export async function boot(dom) {
       get remembered() { return seen(); }, get open() { return open; } };
   })();
   ui.saveNative = saveSettings;
-  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; linkFollowed = null; saveSettings(); };   // the frame loop's edge takes it from here
+  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; if (modHost) { if (clockLink && modArm) mod.follow(clock.playing); else modHost.clock.demand('app.play', false); } saveSettings(); };   // 0.5.0 A6: LINKED follows at once; SEPARATE holds no app-play demand
   reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();
