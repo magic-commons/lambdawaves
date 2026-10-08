@@ -7,7 +7,7 @@ the pre-C baseline), C-V (`|Δ median| <= max(2 x spread, 2 ms/s)`), C7 (the one
 DERIVED, UNVERIFIED — and the load average beside it.
 
 **Sections.** §1 A-M the main-thread ms/s instrument, its floor on `02dce23` (moved here from 0.4.0's §6, text unchanged but for the
-heading and the two notes marked 2026-10-08 below). §2 the pre-C baseline (to be taken after A1+A8 and A7 merge). §3 the C-V A/B
+heading and the two notes marked 2026-10-08 below). §2 the pre-C baseline (taken 2026-10-08 on `fbde0b6`, both notice footings; the gate is 3.536 ms/s). §3 the C-V A/B
 pairs, one row per C seam. §4 the C7 lock.
 
 ---
@@ -77,9 +77,41 @@ an A/B is two trees on two ports, interleaved A B A B A B (header of the tool).
 
 ---
 
-## §2 · the pre-C baseline — NOT YET TAKEN
+## §2 · the pre-C baseline — TAKEN 2026-10-08 on `fbde0b6` (stage A closed: A0, A1, A5–A11, A-M merged; A4 struck) [MEASURED]
 
-Taken with `tools/perf/main-thread.mjs --runs 5` on the `sos-s0` tree after A1+A8 and A7 merge (stage A closed), same recipe as §1.
+**The notice [MEASURED, the A0 spike's side finding].** Under a CDP-launched Chromium `navigator.webdriver` is false, so `?warn=0` is not
+honoured and the photosensitivity notice pane was UP in every §1 run. With the pane up the app presents at ~10.9 / s; with it dismissed, at
+~24.9 / s. The instrument now calls `__LW.warning.dismiss()` on the measured page (`notice dismissed` in every row) and keeps the old footing
+behind `--keep-notice`. Both were taken here, five runs each, one browser at a time, no other browser on the GPU, load 1.5–2.3; served by the
+integrator's test server on 8721; raw in `main-thread-preC-baseline.json` and `main-thread-preC-baseline-notice.json`.
+
+**THE PRE-C BASELINE (notice dismissed — the footing every C-V pair uses):**
+
+| run | ms/s (Task) | Script | Layout | RecalcStyle | frames / 30 s | presents | held | load start → end |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 37.335 | 14.905 | 0.676 | 0.334 | 746 | 746 | 0 | 1.54 → 1.58 |
+| 2 | 38.605 | 14.970 | 0.647 | 0.324 | 748 | 748 | 0 | 1.58 → 1.71 |
+| 3 | 36.973 | 14.589 | 0.644 | 0.289 | 744 | 744 | 0 | 1.65 → 1.80 |
+| 4 | 37.691 | 14.935 | 0.690 | 0.330 | 753 | 753 | 0 | 1.80 → 1.60 |
+| 5 | 36.837 | 14.341 | 0.670 | 0.298 | 748 | 748 | 0 | 2.27 → 1.99 |
+
+**median 37.335 ms/s · spread 1.768 · MAD 0.362** [DERIVED]. **C-V's gate = `max(2 × 1.768, 2)` = 3.536 ms/s** on this footing. Per present:
+37.335 / 24.9 ≈ 1.50 ms.
+
+**The same tree with the notice kept (comparable with §1's rows):**
+
+| run | ms/s (Task) | Script | Layout | RecalcStyle | frames / 30 s | presents | held | load start → end |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 19.535 | 7.593 | 0.562 | 0.216 | 331 | 331 | 0 | 1.83 → 1.78 |
+| 2 | 19.715 | 7.695 | 0.548 | 0.216 | 326 | 326 | 0 | 2.12 → 2.18 |
+| 3 | 19.437 | 7.541 | 0.543 | 0.212 | 328 | 328 | 0 | 2.08 → 1.72 |
+| 4 | 19.503 | 7.620 | 0.566 | 0.218 | 329 | 329 | 0 | 1.72 → 1.78 |
+| 5 | 19.760 | 7.641 | 0.566 | 0.236 | 329 | 329 | 0 | 1.96 → 1.71 |
+
+**median 19.535 ms/s · spread 0.323 · MAD 0.098** [DERIVED]. Against §1's field-present floor on `83f8bb1` (19.729, spread 0.980):
+**Δ −0.194 ms/s, inside the 2 ms/s gate — stage A's wave 2 (A1+A8 +62, A7 +28) cost the main thread nothing measurable.** A7's own
+interleaved pair (A7-BUILD.md: base 20.392 / A7 21.583, Δ +1.19 at unequal loads) is not seen here at equal load. Per present with the pane
+up: 19.535 / 10.9 ≈ 1.79 ms — the pane's own compositing is in that figure, which is why the dismissed footing is the one C-V uses.
 
 ## §3 · the C-V pairs — none yet
 
