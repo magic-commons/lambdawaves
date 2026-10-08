@@ -286,6 +286,15 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   in `rack.js`). **Resume both from the tip after `d7edc99`**, not from `b5b6d7d`.
 > - **Josh's reading:** `PLAN-DRAFT-3` (`371c100`) — the glass (seven classes), the camera bindings, R5-G1, R5-L1; Q2, Q3. D1's new
 >   number belongs in his read: the plan's rule has already fired once.
+> **UPDATE 2026-10-08 ~13:20 — Claude Sos: THE 0.5.0 PLAN IS APPROVED. Josh: "defaults, let's continue".** `research/release-0.5.0/PLAN.md`
+> (`6dedfc6`; vault `LAMBDAWAVES CLAUDE 0.5.0 PLAN 2026-10-08.md`) = DRAFT 3 + §9 RULINGS TAKEN (the glass class by class at C0; today's
+> camera bindings as the table; pin alpha.24, re-adopt at brief 8; the legacy five by the default; the 0.5.0 minimum without C8; MIR
+> OPTIONS and LANGUAGE hidden, the KEYBOARD skin λWAVES'; R5-W1, R5-A3 and the defaults list; A0's rule applied: D1 → 0.5.1 unless the
+> number moves). **Running from `b02dce1`/`6dedfc6`:** A1+A8 (Opus, 8763/5233) ∥ A7 (Opus, 8773/5243 + the base copy on 8777/5247) —
+> both from their design notes; the A9–A11 REPORT waves 193–195 + `A9-A11-BUILD.md` (Haiku 5.5 high, docs only); **the spike's pass 2**
+> (Opus, 8771/5241): cost pass 2, the 24 legibility PNGs on gate Firefox, the under-a-rack count, the sanitiser, the M5 commands.
+> Then: merge each (the `sw.js` rule), the pre-C baseline with `tools/perf/main-thread.mjs`, CLAUDE.md's keyboard paragraph from
+> A9's draft, the §6 ms/s section moved to a 0.5.0 measure file, and C0 — which waits for Josh's seven glass screenshots.
 > The bullets below are Yan's text as she left it.
 
 - **Live:** v0.3.2-alpha's version line, but the tree is Cloud's unreviewed `main` (`28fe445`: stage formula, atom labels,
