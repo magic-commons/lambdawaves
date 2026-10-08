@@ -1,0 +1,41 @@
+A0 PASS 2 (Opus, 2026-10-08) — rule (5): the M5/WebKit commands, run here before they are handed to Josh.
+Kit: /home/joshua-hosain/Documents/MIR/.claude/worktrees/mir-1.5 (MIR 1.5.0-alpha.24 line).  Served tree: the adopted throwaway
+(.tmp/canary, since deleted).  The "device" was a headless Chromium 153 on this machine (tools: .tmp/p2-hold.mjs), not the iPad.
+
+$ node <kit>/tools/probe.mjs serve 8771 <adopted copy> --http --data <worktree>/.tmp/probe-data
+probe: serving <adopted copy> on http://127.0.0.1:8771/
+  records: <worktree>/.tmp/probe-data/<session>/   control (sessions, log, run, shot): this machine only
+(the page's <head> starts with <script src="/__probe/client.js"></script>; checked with curl)
+NOTE: without --data the records go to <kit>/tools/.probe/ — inside ~/Documents/MIR; Josh may want --data elsewhere.
+
+$ node <kit>/tools/probe.mjs sessions --port 8771
+● 20261008-123919-1h0l  Linux · Chrome 153.0.0.0 · 1400×900@1x · WebGPU  started 12:39:19  last 12:39:20  15 records  0 problems  connected
+○ 20261008-123915-e3xw  Linux · Chrome 153.0.0.0 · 1400×900@1x · WebGPU  started 12:39:16  last 12:39:19  19 records  2 problems
+
+$ node <kit>/tools/probe.mjs log 20261008-123915-e3xw --errors --port 8771     (the warm-up navigation: this morning's fact, seen by the probe)
+#3  +0.58s  gpu  {"ev":"device-failed","error":{"error":"OperationError","message":"Failed to execute 'requestDevice' on 'GPUAdapter': A valid external Instance reference no longer exists." …
+#4  +0.59s  gpu  (the same)
+
+$ node <kit>/tools/probe.mjs report latest --port 8771      (first lines)
+url: http://127.0.0.1:8771/lab/?sw=0 · ua: … HeadlessChrome/153.0.0.0 … · maxTouchPoints: 0 · secure: true · viewport 1400×900 · dpr 1 …
+
+$ node <kit>/tools/probe.mjs run latest research/release-0.5.0/canary-a0/m5-info.probe.js --timeout 120000 --port 8771
+{ "field": { "ok": true, "adapter": "NVIDIA GeForce RTX 3070" },
+  "none":  { "frames": 101, "mean": 99.7, "p95": 100.1, "max": 116.7, "over33": 101, "over50": 101, "presentsPerS": 10.1 },
+  "made":  { "labels": 8, "blocks": 1 },
+  "bare8": { "frames": 95, "mean": 105.4, "p95": 116.7, "max": 216.7, "over33": 94, "over50": 94, "presentsPerS": 9.5, "layerFrameMsPerS": 15.01, "viewChangedCalls": 95 } }
+(a background headless page is throttled to ~10 frames/s here: these numbers prove the command, not a frame rate)
+
+$ node <kit>/tools/probe.mjs run latest -e "const S=navigator.storage,b=await S.persisted(),g=await S.persist(),e=await S.estimate();return {ua:navigator.userAgent,standalone:!!navigator.standalone||matchMedia('(display-mode: standalone)').matches,persistedBefore:b,persistGranted:g,persistedAfter:await S.persisted(),usageMB:+(e.usage/1048576).toFixed(1),quotaMB:Math.round(e.quota/1048576)}" --port 8771
+{ "standalone": false, "persistedBefore": false, "persistGranted": false, "persistedAfter": false, "usageMB": 0, "quotaMB": 10240 }   (headless Chromium's answer, not the iPad's)
+
+$ node <kit>/tools/check-app.mjs "http://127.0.0.1:8771/lab/?sw=0" --webkit
+FAIL  --webkit needs a Playwright that is already on this machine, and none was found: set PW_CORE=/path/to/node_modules/playwright-core/index.mjs (or run from a folder where `playwright-core` resolves). Nothing is installed by this tool.
+
+$ PW_CORE=/home/joshua-hosain/.npm/_npx/9833c18b2d85bc59/node_modules/playwright-core/index.mjs node <kit>/tools/check-app.mjs "http://127.0.0.1:8771/lab/?sw=0" --webkit
+FAIL  webkit would not start from /home/joshua-hosain/.cache/ms-playwright/webkit-2227/pw_run.sh: this machine lacks 12 shared libraries it needs (libWPEBackend-fdo-1.0.so.1, libWPEWebKit-2.0.so.1, libicudata.so.74, libicui18n.so.74, libicuuc.so.74, libxml2.so.2, libwoff2dec.so.1.0.2, libvpx.so.9, libevent-2.1.so.7, libjxl.so.0.8, libavif.so.16, libwpe-1.0.so.1); they come from the system's packages, which this tool does not install
+[pid=2862427][err] …/minibrowser-wpe/bin/MiniBrowser: error while loading shared libraries: libicudata.so.74: cannot open shared object file: No such file or directory
+
+$ node <kit>/tools/check-app.mjs "http://127.0.0.1:8771/lab/?sw=0"          (Chromium, to see what WebKit would meet next)
+FAIL  window.__MIR.describe never appeared: the app did not finish starting (or does not call createDescribe / createApp)
+=> check-app cannot judge λWAVES until the adoption wires createDescribe/createApp (stage C); the probe is the WebKit road for 0.5.0.
