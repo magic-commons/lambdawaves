@@ -1,0 +1,2305 @@
+{
+ "tool": "tools/symmetry/round3-fable.mjs",
+ "node": "v22.22.1",
+ "date": "2026-10-07",
+ "reps": 7,
+ "benzene": {
+  "nAO": 36,
+  "nocc": 21,
+  "energy": -227.89100646418083,
+  "solveMs": 11378,
+  "integralMs": 4783.83,
+  "shells": 24,
+  "shellPairsUnscreened": 300
+ },
+ "instrumentation": {
+  "eriDifferenceHooksOff": 0,
+  "NP": 291,
+  "quartets": 42486,
+  "schwarzSkipped": 0,
+  "rInto": 2583515,
+  "primSkipped": 149857,
+  "primitiveTrips": 2733372,
+  "primSkippedFraction": 0.05482495613476687
+ },
+ "liveLoop": {
+  "D2h": {
+   "quartets": 42486,
+   "orbits": 10966,
+   "fraction": 0.2581085534058278,
+   "orbitSizes": {
+    "1": 32,
+    "2": 641,
+    "4": 10293
+   },
+   "primitiveProductsAll": 2733372,
+   "primitiveProductsRep": 705743,
+   "primitiveFraction": 0.258195006021866,
+   "componentWeightedAll": 15977316,
+   "componentWeightedRep": 4189861,
+   "componentFraction": 0.26223810056707897
+  },
+  "D6h": {
+   "quartets": 42486,
+   "orbits": 3854,
+   "fraction": 0.09071223461846255,
+   "orbitSizes": {
+    "3": 32,
+    "6": 579,
+    "12": 3243
+   },
+   "primitiveProductsAll": 2733372,
+   "primitiveProductsRep": 248219,
+   "primitiveFraction": 0.09081054463131985,
+   "componentWeightedAll": 15977316,
+   "componentWeightedRep": 1503705,
+   "componentFraction": 0.09411499403278999
+  },
+  "fixedAtomsByOp": {
+   "D2h": [
+    12,
+    4,
+    12,
+    4,
+    0,
+    0,
+    0,
+    0
+   ],
+   "D6h": [
+    [
+     "C6^0",
+     12
+    ],
+    [
+     "C6^0·sv0",
+     4
+    ],
+    [
+     "C6^0·sh",
+     12
+    ],
+    [
+     "C6^0·sh·sv0",
+     4
+    ],
+    [
+     "C6^1",
+     0
+    ],
+    [
+     "C6^1·sv0",
+     0
+    ],
+    [
+     "C6^1·sh",
+     0
+    ],
+    [
+     "C6^1·sh·sv0",
+     0
+    ],
+    [
+     "C6^2",
+     0
+    ],
+    [
+     "C6^2·sv0",
+     4
+    ],
+    [
+     "C6^2·sh",
+     0
+    ],
+    [
+     "C6^2·sh·sv0",
+     4
+    ],
+    [
+     "C6^3",
+     0
+    ],
+    [
+     "C6^3·sv0",
+     0
+    ],
+    [
+     "C6^3·sh",
+     0
+    ],
+    [
+     "C6^3·sh·sv0",
+     0
+    ],
+    [
+     "C6^4",
+     0
+    ],
+    [
+     "C6^4·sv0",
+     4
+    ],
+    [
+     "C6^4·sh",
+     0
+    ],
+    [
+     "C6^4·sh·sv0",
+     4
+    ],
+    [
+     "C6^5",
+     0
+    ],
+    [
+     "C6^5·sv0",
+     0
+    ],
+    [
+     "C6^5·sh",
+     0
+    ],
+    [
+     "C6^5·sh·sv0",
+     0
+    ]
+   ]
+  }
+ },
+ "skeleton": {
+  "full": {
+   "quartetsVisited": 42486,
+   "schwarzSkipped": 0,
+   "quartetsSkippedByPetiteList": 0,
+   "quartetsContracted": 42486,
+   "rIntoCalls": 2583515,
+   "primitiveQuartetsSkipped": 149857,
+   "reconstructionWrites": 0,
+   "maxAbsDiffVsSolver": 0,
+   "passMsSamples": [
+    6000.74,
+    4625.96,
+    4313.9,
+    3690.44,
+    2728.16,
+    5626.36,
+    1637.2
+   ],
+   "passMsMedian": 4313.9,
+   "reconstructMsMedian": 0,
+   "speedupVsFull": 1,
+   "savedMsVsFull": 0,
+   "passCpuMsSamples": [
+    1049.61,
+    942.79,
+    937.97,
+    928.46,
+    909.57,
+    929.94,
+    920.83
+   ],
+   "passCpuMsMedian": 929.94,
+   "reconstructCpuMsMedian": 0,
+   "speedupVsFullCpu": 1,
+   "savedCpuMsVsFull": 0
+  },
+  "setupOnly": {
+   "quartetsVisited": 42486,
+   "schwarzSkipped": 0,
+   "quartetsSkippedByPetiteList": 42486,
+   "quartetsContracted": 0,
+   "rIntoCalls": 0,
+   "primitiveQuartetsSkipped": 0,
+   "reconstructionWrites": 0,
+   "maxAbsDiffVsSolver": 3.5419481476898564,
+   "passMsSamples": [
+    32.04,
+    115.68,
+    17,
+    119.44,
+    40.21,
+    89.46,
+    75.21
+   ],
+   "passMsMedian": 75.21,
+   "reconstructMsMedian": 0,
+   "speedupVsFull": 57.355,
+   "savedMsVsFull": 4238.7,
+   "passCpuMsSamples": [
+    34.8,
+    17.13,
+    16.34,
+    16.34,
+    16,
+    16.6,
+    16.37
+   ],
+   "passCpuMsMedian": 16.37,
+   "reconstructCpuMsMedian": 0,
+   "speedupVsFullCpu": 56.808,
+   "savedCpuMsVsFull": 913.6
+  },
+  "d2hSigned": {
+   "quartetsVisited": 42486,
+   "schwarzSkipped": 0,
+   "quartetsSkippedByPetiteList": 31520,
+   "quartetsContracted": 10966,
+   "rIntoCalls": 667169,
+   "primitiveQuartetsSkipped": 38574,
+   "reconstructionWrites": 1353536,
+   "maxAbsDiffVsSolver": 4.996003610813204e-16,
+   "passMsSamples": [
+    1519.82,
+    2078.87,
+    454.14,
+    391.17,
+    1386.46,
+    1587.21,
+    432.62
+   ],
+   "passMsMedian": 1386.46,
+   "reconstructMsMedian": 43.93,
+   "speedupVsFull": 3.111,
+   "savedMsVsFull": 2927.4,
+   "passCpuMsSamples": [
+    340.71,
+    300.94,
+    286.74,
+    253.01,
+    266.27,
+    289.27,
+    254.58
+   ],
+   "passCpuMsMedian": 286.74,
+   "reconstructCpuMsMedian": 12.54,
+   "speedupVsFullCpu": 3.243,
+   "savedCpuMsVsFull": 643.2
+  },
+  "d2hGeneral": {
+   "quartetsVisited": 42486,
+   "schwarzSkipped": 0,
+   "quartetsSkippedByPetiteList": 31520,
+   "quartetsContracted": 10966,
+   "rIntoCalls": 667169,
+   "primitiveQuartetsSkipped": 38574,
+   "reconstructionWrites": 1353536,
+   "maxAbsDiffVsSolver": 4.996003610813204e-16,
+   "passMsSamples": [
+    2045.45,
+    2277.68,
+    856.92,
+    299.02,
+    1526.91,
+    2053.77,
+    288.53
+   ],
+   "passMsMedian": 1526.91,
+   "reconstructMsMedian": 214.88,
+   "speedupVsFull": 2.825,
+   "savedMsVsFull": 2787,
+   "passCpuMsSamples": [
+    526.16,
+    522.12,
+    296.38,
+    279.93,
+    317.24,
+    305.9,
+    285.07
+   ],
+   "passCpuMsMedian": 305.9,
+   "reconstructCpuMsMedian": 44.17,
+   "speedupVsFullCpu": 3.04,
+   "savedCpuMsVsFull": 624
+  },
+  "d6hGeneral": {
+   "quartetsVisited": 42486,
+   "schwarzSkipped": 0,
+   "quartetsSkippedByPetiteList": 38632,
+   "quartetsContracted": 3854,
+   "rIntoCalls": 234757,
+   "primitiveQuartetsSkipped": 13462,
+   "reconstructionWrites": 1661792,
+   "maxAbsDiffVsSolver": 5.771583302929784e-16,
+   "passMsSamples": [
+    1035.93,
+    1091.84,
+    272.76,
+    626.62,
+    780.76,
+    727.59,
+    163.93
+   ],
+   "passMsMedian": 727.59,
+   "reconstructMsMedian": 222.38,
+   "speedupVsFull": 5.929,
+   "savedMsVsFull": 3586.3,
+   "passCpuMsSamples": [
+    301.23,
+    200.07,
+    146.98,
+    168.7,
+    150.83,
+    149.19,
+    160.12
+   ],
+   "passCpuMsMedian": 160.12,
+   "reconstructCpuMsMedian": 50.11,
+   "speedupVsFullCpu": 5.808,
+   "savedCpuMsVsFull": 769.8
+  },
+  "note": "passMs = the whole twoElectron (pair tables, primitive and Schwarz screens, the loop, the reconstruction); setupOnly skips every quartet and reconstructs nothing, so pass(setupOnly) is the fixed cost the petite list cannot touch; *CpuMs = process.cpuUsage over the same call, the figure a loaded shared machine cannot inflate"
+ },
+ "loadAverage": [
+  32.89,
+  30.29,
+  26.6
+ ],
+ "rpa": {
+  "denseMacsBySte": [
+   35271936,
+   14696640,
+   8573040,
+   3572100,
+   20575296,
+   8573040,
+   3572100
+  ],
+  "denseMacs": 94834152,
+  "blockedMacs": 2892508,
+  "blockedFraction": 0.030500699790092498,
+  "closedForm": 94834152,
+  "sourceCommentClaims": {
+   "multiplyAdds": 89000000,
+   "fullTransform": 242000000,
+   "fourQuarterTransformsN5": 241864704
+  },
+  "pairBlocks": [
+   57,
+   55,
+   25,
+   20,
+   22,
+   23,
+   53,
+   60
+  ],
+  "pairSpace": 315,
+  "assemblyEntriesBlocked": 14721,
+  "assemblyEntriesDense": 99225,
+  "denseHessianMsSamples": [
+   462.5,
+   377.4,
+   1180.4,
+   1595.1,
+   1786.4,
+   1788.7,
+   1281.8
+  ],
+  "denseHessianMsMedian": 1281.8,
+  "denseHessianCpuMsSamples": [
+   312.9,
+   269,
+   254.7,
+   248.7,
+   246.5,
+   244.2,
+   242.5
+  ],
+  "denseHessianCpuMsMedian": 248.7,
+  "fockInvariantContractionEntries": 59536,
+  "fockDenseEntries": 1679616
+ },
+ "grids": {
+  "H2O": {
+   "order": 4,
+   "orbits": 221184,
+   "fraction": 0.25,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "4": 221184
+   }
+  },
+  "NH3": {
+   "order": 2,
+   "orbits": 442368,
+   "fraction": 0.5,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "2": 442368
+   }
+  },
+  "CH4": {
+   "order": 24,
+   "orbits": 39200,
+   "fraction": 0.04430700231481482,
+   "boundaryVoxels": 54528,
+   "boundaryFraction": 0.06163194444444445,
+   "orbitSizes": {
+    "4": 96,
+    "12": 4512,
+    "24": 34592
+   }
+  },
+  "BH3": {
+   "order": 4,
+   "orbits": 221184,
+   "fraction": 0.25,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "4": 221184
+   }
+  },
+  "C2H4": {
+   "order": 8,
+   "orbits": 110592,
+   "fraction": 0.125,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "8": 110592
+   }
+  },
+  "C2H6": {
+   "order": 4,
+   "orbits": 221184,
+   "fraction": 0.25,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "4": 221184
+   }
+  },
+  "C4H6": {
+   "order": 4,
+   "orbits": 221184,
+   "fraction": 0.25,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "4": 221184
+   }
+  },
+  "H2O2": {
+   "order": 1,
+   "orbits": 884736,
+   "fraction": 1,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "1": 884736
+   }
+  },
+  "CH3OH": {
+   "order": 2,
+   "orbits": 442368,
+   "fraction": 0.5,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "2": 442368
+   }
+  },
+  "C6H6": {
+   "order": 8,
+   "orbits": 110592,
+   "fraction": 0.125,
+   "boundaryVoxels": 0,
+   "boundaryFraction": 0,
+   "orbitSizes": {
+    "8": 110592
+   }
+  },
+  "N2": {
+   "order": 8,
+   "orbits": 112896,
+   "fraction": 0.12760416666666666,
+   "boundaryVoxels": 18432,
+   "boundaryFraction": 0.020833333333333332,
+   "orbitSizes": {
+    "4": 4608,
+    "8": 108288
+   }
+  },
+  "BeH2": {
+   "order": 16,
+   "orbits": 56448,
+   "fraction": 0.06380208333333333,
+   "boundaryVoxels": 18432,
+   "boundaryFraction": 0.020833333333333332,
+   "orbitSizes": {
+    "8": 2304,
+    "16": 54144
+   }
+  },
+  "CO": {
+   "order": 8,
+   "orbits": 112896,
+   "fraction": 0.12760416666666666,
+   "boundaryVoxels": 18432,
+   "boundaryFraction": 0.020833333333333332,
+   "orbitSizes": {
+    "4": 4608,
+    "8": 108288
+   }
+  },
+  "Oh": {
+   "order": 48,
+   "orbits": 19600,
+   "fraction": 0.02215350115740741,
+   "boundaryVoxels": 54528,
+   "boundaryFraction": 0.06163194444444445,
+   "orbitSizes": {
+    "8": 48,
+    "24": 2256,
+    "48": 17296
+   }
+  },
+  "burnside": {
+   "Td96": 39200,
+   "Oh96": 19600,
+   "stabilised96": 54528,
+   "C4v96": 112896,
+   "D4h96": 56448
+  },
+  "solReflection": {
+   "matrix": [
+    [
+     0.6,
+     0.8,
+     0
+    ],
+    [
+     0.8,
+     -0.6,
+     0
+    ],
+    [
+     0,
+     0,
+     1
+    ]
+   ],
+   "xyCentresMappedOntoCentres": 1536,
+   "ofXYCentres": 9216,
+   "voxelsMapped": 147456,
+   "example": {
+    "from": [
+     0.5,
+     1.5,
+     0.5
+    ],
+    "to": [
+     1.5,
+     -0.5,
+     0.5
+    ]
+   }
+  }
+ },
+ "census": {
+  "capMs": 9592,
+  "rows": [
+   {
+    "id": "H2",
+    "nAO": 2,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 11,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 16,
+    "measuredMs": 16.9,
+    "measuredCpuMs": 3.3,
+    "integralMs": 11.85,
+    "integralCpuMs": 0.2,
+    "energy": -1.1167061373496874,
+    "converged": true,
+    "shellQuartets": 6,
+    "shellOrbits": 4,
+    "petiteFraction": 0.6666666666666666,
+    "eriSavedMs": 3.95,
+    "eriSavedCpuMs": 0.07
+   },
+   {
+    "id": "LiH",
+    "nAO": 6,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 14,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 225.4,
+    "measuredCpuMs": 136.6,
+    "integralMs": 25.55,
+    "integralCpuMs": 25.5,
+    "energy": -7.8620238740153,
+    "converged": true,
+    "shellQuartets": 55,
+    "shellOrbits": 55,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "HF",
+    "nAO": 6,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 14,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 132.3,
+    "measuredCpuMs": 72.6,
+    "integralMs": 45.27,
+    "integralCpuMs": 4,
+    "energy": -98.57075766347859,
+    "converged": true,
+    "shellQuartets": 55,
+    "shellOrbits": 55,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "N2",
+    "nAO": 10,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 33,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 16,
+    "measuredMs": 215.5,
+    "measuredCpuMs": 164.1,
+    "integralMs": 24.03,
+    "integralCpuMs": 9.1,
+    "energy": -107.49588788341288,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 123,
+    "petiteFraction": 0.5324675324675324,
+    "eriSavedMs": 11.23,
+    "eriSavedCpuMs": 4.25
+   },
+   {
+    "id": "CO",
+    "nAO": 10,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 33,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 89.8,
+    "measuredCpuMs": 45.2,
+    "integralMs": 24.81,
+    "integralCpuMs": 17,
+    "energy": -111.22458955706435,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 231,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "F2",
+    "nAO": 10,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 31,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 16,
+    "measuredMs": 110.6,
+    "measuredCpuMs": 62.2,
+    "integralMs": 37.62,
+    "integralCpuMs": 26,
+    "energy": -195.96746083720205,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 123,
+    "petiteFraction": 0.5324675324675324,
+    "eriSavedMs": 17.59,
+    "eriSavedCpuMs": 12.16
+   },
+   {
+    "id": "LiF",
+    "nAO": 10,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 34,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 142,
+    "measuredCpuMs": 54.3,
+    "integralMs": 48.75,
+    "integralCpuMs": 18.8,
+    "energy": -105.36247144106753,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 231,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "NaH",
+    "nAO": 10,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 34,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 238.2,
+    "measuredCpuMs": 68.8,
+    "integralMs": 48.88,
+    "integralCpuMs": 22.5,
+    "energy": -160.30218654395713,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 231,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "HCl",
+    "nAO": 10,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 31,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 160.5,
+    "measuredCpuMs": 44.5,
+    "integralMs": 86.3,
+    "integralCpuMs": 19.7,
+    "energy": -455.13480970268745,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 231,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "Cl2",
+    "nAO": 18,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 184,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 16,
+    "measuredMs": 510.6,
+    "measuredCpuMs": 120.1,
+    "integralMs": 285.07,
+    "integralCpuMs": 66.7,
+    "energy": -909.1116063086964,
+    "converged": true,
+    "shellQuartets": 1540,
+    "shellOrbits": 790,
+    "petiteFraction": 0.512987012987013,
+    "eriSavedMs": 138.83,
+    "eriSavedCpuMs": 32.48
+   },
+   {
+    "id": "NaCl",
+    "nAO": 18,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 237,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 676.4,
+    "measuredCpuMs": 139.9,
+    "integralMs": 307.85,
+    "integralCpuMs": 96.6,
+    "energy": -614.5241755555123,
+    "converged": true,
+    "shellQuartets": 1540,
+    "shellOrbits": 1540,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "BeH2",
+    "nAO": 7,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 16,
+    "disabled": false,
+    "originOrder": 16,
+    "centredOrder": 16,
+    "measuredMs": 85.1,
+    "measuredCpuMs": 42.2,
+    "integralMs": 38.9,
+    "integralCpuMs": 6.3,
+    "energy": -15.560312316766924,
+    "converged": true,
+    "shellQuartets": 120,
+    "shellOrbits": 76,
+    "petiteFraction": 0.6333333333333333,
+    "eriSavedMs": 14.26,
+    "eriSavedCpuMs": 2.31
+   },
+   {
+    "id": "BH3",
+    "nAO": 8,
+    "declaredGroup": "D3h",
+    "declaredFallback": null,
+    "predictedMs": 20,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 79.1,
+    "measuredCpuMs": 25.3,
+    "integralMs": 48.46,
+    "integralCpuMs": 7.4,
+    "energy": -26.068995738523526,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 151,
+    "petiteFraction": 0.6536796536796536,
+    "eriSavedMs": 16.78,
+    "eriSavedCpuMs": 2.56
+   },
+   {
+    "id": "CH4",
+    "nAO": 9,
+    "declaredGroup": "Td",
+    "declaredFallback": null,
+    "predictedMs": 25,
+    "disabled": false,
+    "originOrder": 24,
+    "centredOrder": 24,
+    "measuredMs": 85.9,
+    "measuredCpuMs": 21.1,
+    "integralMs": 63.69,
+    "integralCpuMs": 9,
+    "energy": -39.726810112299496,
+    "converged": true,
+    "shellQuartets": 406,
+    "shellOrbits": 82,
+    "petiteFraction": 0.2019704433497537,
+    "eriSavedMs": 50.83,
+    "eriSavedCpuMs": 7.18
+   },
+   {
+    "id": "NH3",
+    "nAO": 8,
+    "declaredGroup": "C3v",
+    "declaredFallback": null,
+    "predictedMs": 20,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 55,
+    "measuredCpuMs": 16.5,
+    "integralMs": 35.25,
+    "integralCpuMs": 5.2,
+    "energy": -55.454038544351576,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 151,
+    "petiteFraction": 0.6536796536796536,
+    "eriSavedMs": 12.21,
+    "eriSavedCpuMs": 1.8
+   },
+   {
+    "id": "H2O",
+    "nAO": 7,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 16,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 38.7,
+    "measuredCpuMs": 11.5,
+    "integralMs": 21.86,
+    "integralCpuMs": 3.6,
+    "energy": -74.96302316286258,
+    "converged": true,
+    "shellQuartets": 120,
+    "shellOrbits": 76,
+    "petiteFraction": 0.6333333333333333,
+    "eriSavedMs": 8.02,
+    "eriSavedCpuMs": 1.32
+   },
+   {
+    "id": "MgH2",
+    "nAO": 11,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 43,
+    "disabled": false,
+    "originOrder": 16,
+    "centredOrder": 16,
+    "measuredMs": 214,
+    "measuredCpuMs": 37,
+    "integralMs": 83.47,
+    "integralCpuMs": 14.5,
+    "energy": -198.2007726883157,
+    "converged": true,
+    "shellQuartets": 406,
+    "shellOrbits": 274,
+    "petiteFraction": 0.6748768472906403,
+    "eriSavedMs": 27.14,
+    "eriSavedCpuMs": 4.71
+   },
+   {
+    "id": "AlH3",
+    "nAO": 12,
+    "declaredGroup": "D3h",
+    "declaredFallback": null,
+    "predictedMs": 55,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 197.4,
+    "measuredCpuMs": 50.8,
+    "integralMs": 100.34,
+    "integralCpuMs": 19.4,
+    "energy": -240.72842217411173,
+    "converged": true,
+    "shellQuartets": 666,
+    "shellOrbits": 463,
+    "petiteFraction": 0.6951951951951952,
+    "eriSavedMs": 30.58,
+    "eriSavedCpuMs": 5.91
+   },
+   {
+    "id": "SiH4",
+    "nAO": 13,
+    "declaredGroup": "Td",
+    "declaredFallback": null,
+    "predictedMs": 71,
+    "disabled": false,
+    "originOrder": 24,
+    "centredOrder": 24,
+    "measuredMs": 258.9,
+    "measuredCpuMs": 65,
+    "integralMs": 145.29,
+    "integralCpuMs": 27.5,
+    "energy": -287.9102282076231,
+    "converged": true,
+    "shellQuartets": 1035,
+    "shellOrbits": 282,
+    "petiteFraction": 0.27246376811594203,
+    "eriSavedMs": 105.7,
+    "eriSavedCpuMs": 20.01
+   },
+   {
+    "id": "PH3",
+    "nAO": 12,
+    "declaredGroup": "C3v",
+    "declaredFallback": null,
+    "predictedMs": 53,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 187.9,
+    "measuredCpuMs": 45.2,
+    "integralMs": 92.88,
+    "integralCpuMs": 20.1,
+    "energy": -338.6336163194649,
+    "converged": true,
+    "shellQuartets": 666,
+    "shellOrbits": 463,
+    "petiteFraction": 0.6951951951951952,
+    "eriSavedMs": 28.31,
+    "eriSavedCpuMs": 6.13
+   },
+   {
+    "id": "H2S",
+    "nAO": 11,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 40,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 153.6,
+    "measuredCpuMs": 36.6,
+    "integralMs": 62.71,
+    "integralCpuMs": 14,
+    "energy": -394.31155610967187,
+    "converged": true,
+    "shellQuartets": 406,
+    "shellOrbits": 274,
+    "petiteFraction": 0.6748768472906403,
+    "eriSavedMs": 20.39,
+    "eriSavedCpuMs": 4.55
+   },
+   {
+    "id": "CO2",
+    "nAO": 15,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 120,
+    "disabled": false,
+    "originOrder": 16,
+    "centredOrder": 16,
+    "measuredMs": 396.7,
+    "measuredCpuMs": 102.6,
+    "integralMs": 156.36,
+    "integralCpuMs": 32.6,
+    "energy": -185.06469572696042,
+    "converged": true,
+    "shellQuartets": 1035,
+    "shellOrbits": 549,
+    "petiteFraction": 0.5304347826086957,
+    "eriSavedMs": 73.42,
+    "eriSavedCpuMs": 15.31
+   },
+   {
+    "id": "HCN",
+    "nAO": 11,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 43,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 222.4,
+    "measuredCpuMs": 50.2,
+    "integralMs": 80.22,
+    "integralCpuMs": 12.6,
+    "energy": -91.67519078743658,
+    "converged": true,
+    "shellQuartets": 406,
+    "shellOrbits": 406,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "N2O",
+    "nAO": 15,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 120,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 263,
+    "measuredCpuMs": 81.4,
+    "integralMs": 162.12,
+    "integralCpuMs": 34.5,
+    "energy": -181.19185582614472,
+    "converged": true,
+    "shellQuartets": 1035,
+    "shellOrbits": 1035,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "O3",
+    "nAO": 15,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 112,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 302.3,
+    "measuredCpuMs": 128.4,
+    "integralMs": 44.86,
+    "integralCpuMs": 35.9,
+    "energy": -221.28906435812598,
+    "converged": true,
+    "shellQuartets": 1035,
+    "shellOrbits": 549,
+    "petiteFraction": 0.5304347826086957,
+    "eriSavedMs": 21.06,
+    "eriSavedCpuMs": 16.86
+   },
+   {
+    "id": "SO2",
+    "nAO": 19,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 262,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 1672.6,
+    "measuredCpuMs": 266.8,
+    "integralMs": 566,
+    "integralCpuMs": 77.4,
+    "energy": -540.6018797759023,
+    "converged": true,
+    "shellQuartets": 2211,
+    "shellOrbits": 1203,
+    "petiteFraction": 0.5440976933514247,
+    "eriSavedMs": 258.04,
+    "eriSavedCpuMs": 35.29
+   },
+   {
+    "id": "BF3",
+    "nAO": 20,
+    "declaredGroup": "D3h",
+    "declaredFallback": null,
+    "predictedMs": 349,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 503.4,
+    "measuredCpuMs": 172.9,
+    "integralMs": 386.75,
+    "integralCpuMs": 90.4,
+    "energy": -318.6619256971938,
+    "converged": true,
+    "shellQuartets": 3081,
+    "shellOrbits": 1704,
+    "petiteFraction": 0.5530671859785784,
+    "eriSavedMs": 172.85,
+    "eriSavedCpuMs": 40.4
+   },
+   {
+    "id": "CF4",
+    "nAO": 25,
+    "declaredGroup": "Td",
+    "declaredFallback": null,
+    "predictedMs": 833,
+    "disabled": false,
+    "originOrder": 24,
+    "centredOrder": 24,
+    "measuredMs": 2328.3,
+    "measuredCpuMs": 451.6,
+    "integralMs": 1292.9,
+    "integralCpuMs": 219.8,
+    "energy": -429.5674736643128,
+    "converged": true,
+    "shellQuartets": 7260,
+    "shellOrbits": 705,
+    "petiteFraction": 0.09710743801652892,
+    "eriSavedMs": 1167.35,
+    "eriSavedCpuMs": 198.46
+   },
+   {
+    "id": "H2O2",
+    "nAO": 12,
+    "declaredGroup": "C2",
+    "declaredFallback": null,
+    "predictedMs": 53,
+    "disabled": false,
+    "originOrder": 1,
+    "centredOrder": 2,
+    "measuredMs": 267.9,
+    "measuredCpuMs": 83.5,
+    "integralMs": 118.98,
+    "integralCpuMs": 21.7,
+    "energy": -148.75736915510535,
+    "converged": true,
+    "shellQuartets": 666,
+    "shellOrbits": 346,
+    "petiteFraction": 0.5195195195195195,
+    "eriSavedMs": 57.17,
+    "eriSavedCpuMs": 10.43
+   },
+   {
+    "id": "C2H2",
+    "nAO": 12,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 57,
+    "disabled": false,
+    "originOrder": 16,
+    "centredOrder": 16,
+    "measuredMs": 232.1,
+    "measuredCpuMs": 47.9,
+    "integralMs": 121.24,
+    "integralCpuMs": 20.5,
+    "energy": -75.85280597081322,
+    "converged": true,
+    "shellQuartets": 666,
+    "shellOrbits": 346,
+    "petiteFraction": 0.5195195195195195,
+    "eriSavedMs": 58.25,
+    "eriSavedCpuMs": 9.85
+   },
+   {
+    "id": "C2H4",
+    "nAO": 14,
+    "declaredGroup": "D2h",
+    "declaredFallback": null,
+    "predictedMs": 99,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 242.4,
+    "measuredCpuMs": 65.3,
+    "integralMs": 176.67,
+    "integralCpuMs": 34.7,
+    "energy": -77.07209020662717,
+    "converged": true,
+    "shellQuartets": 1540,
+    "shellOrbits": 478,
+    "petiteFraction": 0.3103896103896104,
+    "eriSavedMs": 121.83,
+    "eriSavedCpuMs": 23.93
+   },
+   {
+    "id": "C2H6",
+    "nAO": 16,
+    "declaredGroup": "D3d",
+    "declaredFallback": null,
+    "predictedMs": 169,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 398.6,
+    "measuredCpuMs": 101.4,
+    "integralMs": 275.19,
+    "integralCpuMs": 59.1,
+    "energy": -78.3058084107597,
+    "converged": true,
+    "shellQuartets": 3081,
+    "shellOrbits": 989,
+    "petiteFraction": 0.3209996754300552,
+    "eriSavedMs": 186.85,
+    "eriSavedCpuMs": 40.13
+   },
+   {
+    "id": "H2CO",
+    "nAO": 12,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 55,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 220,
+    "measuredCpuMs": 46.7,
+    "integralMs": 114.93,
+    "integralCpuMs": 20.7,
+    "energy": -112.3537331183951,
+    "converged": true,
+    "shellQuartets": 666,
+    "shellOrbits": 463,
+    "petiteFraction": 0.6951951951951952,
+    "eriSavedMs": 35.03,
+    "eriSavedCpuMs": 6.31
+   },
+   {
+    "id": "CH3OH",
+    "nAO": 14,
+    "declaredGroup": "Cs",
+    "declaredFallback": null,
+    "predictedMs": 95,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 296.5,
+    "measuredCpuMs": 69.4,
+    "integralMs": 177.12,
+    "integralCpuMs": 35.7,
+    "energy": -113.54457807851993,
+    "converged": true,
+    "shellQuartets": 1540,
+    "shellOrbits": 1126,
+    "petiteFraction": 0.7311688311688311,
+    "eriSavedMs": 47.62,
+    "eriSavedCpuMs": 9.6
+   },
+   {
+    "id": "HCOOH",
+    "nAO": 17,
+    "declaredGroup": "Cs",
+    "declaredFallback": null,
+    "predictedMs": 201,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 655.4,
+    "measuredCpuMs": 126.9,
+    "integralMs": 311.12,
+    "integralCpuMs": 59,
+    "energy": -186.20693726943392,
+    "converged": true,
+    "shellQuartets": 2211,
+    "shellOrbits": 2211,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "CH3CN",
+    "nAO": 18,
+    "declaredGroup": "C3v",
+    "declaredFallback": null,
+    "predictedMs": 281,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 1943.3,
+    "measuredCpuMs": 280.8,
+    "integralMs": 680.27,
+    "integralCpuMs": 72.7,
+    "energy": -130.02862097332755,
+    "converged": true,
+    "shellQuartets": 3081,
+    "shellOrbits": 2344,
+    "petiteFraction": 0.7607919506653684,
+    "eriSavedMs": 162.73,
+    "eriSavedCpuMs": 17.39
+   },
+   {
+    "id": "C3H6",
+    "nAO": 21,
+    "declaredGroup": "D3h",
+    "declaredFallback": null,
+    "predictedMs": 587,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 1901.9,
+    "measuredCpuMs": 298.7,
+    "integralMs": 1178.81,
+    "integralCpuMs": 157.7,
+    "energy": -115.66595933028236,
+    "converged": true,
+    "shellQuartets": 7260,
+    "shellOrbits": 2216,
+    "petiteFraction": 0.3052341597796143,
+    "eriSavedMs": 819,
+    "eriSavedCpuMs": 109.56
+   },
+   {
+    "id": "C4H6",
+    "nAO": 26,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 1703,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 4112.8,
+    "measuredCpuMs": 636.3,
+    "integralMs": 2326.84,
+    "integralCpuMs": 293.1,
+    "energy": -153.01187913500135,
+    "converged": true,
+    "shellQuartets": 14706,
+    "shellOrbits": 7416,
+    "petiteFraction": 0.5042839657282742,
+    "eriSavedMs": 1153.45,
+    "eriSavedCpuMs": 145.29
+   },
+   {
+    "id": "C4H4O",
+    "nAO": 29,
+    "declaredGroup": "C2v",
+    "declaredFallback": "Cs",
+    "predictedMs": 2876,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 2845.5,
+    "measuredCpuMs": 1000.2,
+    "integralMs": 1040.33,
+    "integralCpuMs": 399.7,
+    "energy": -225.74456598087554,
+    "converged": true,
+    "shellQuartets": 18145,
+    "shellOrbits": 18145,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "C5H5N",
+    "nAO": 35,
+    "declaredGroup": "C2v",
+    "declaredFallback": "Cs",
+    "predictedMs": 8071,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 10774.8,
+    "measuredCpuMs": 2189.2,
+    "integralMs": 3228.74,
+    "integralCpuMs": 822.7,
+    "energy": -243.63748181925186,
+    "converged": true,
+    "shellQuartets": 38226,
+    "shellOrbits": 38226,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "urea",
+    "nAO": 24,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 1027,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 2940.9,
+    "measuredCpuMs": 458.5,
+    "integralMs": 1363.56,
+    "integralCpuMs": 207.1,
+    "energy": -221.01318047198572,
+    "converged": true,
+    "shellQuartets": 9316,
+    "shellOrbits": 4861,
+    "petiteFraction": 0.5217904680120223,
+    "eriSavedMs": 652.07,
+    "eriSavedCpuMs": 99.04
+   },
+   {
+    "id": "glycine",
+    "nAO": 30,
+    "declaredGroup": "Cs",
+    "declaredFallback": null,
+    "predictedMs": 3184,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 4865.6,
+    "measuredCpuMs": 1145.8,
+    "integralMs": 2378,
+    "integralCpuMs": 423.2,
+    "energy": -279.0885621834272,
+    "converged": true,
+    "shellQuartets": 22155,
+    "shellOrbits": 15891,
+    "petiteFraction": 0.7172647257955315,
+    "eriSavedMs": 672.34,
+    "eriSavedCpuMs": 119.65
+   },
+   {
+    "id": "C6H6",
+    "nAO": 36,
+    "declaredGroup": "D6h",
+    "declaredFallback": null,
+    "predictedMs": 9592,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 6426.3,
+    "measuredCpuMs": 1862.7,
+    "integralMs": 5198.39,
+    "integralCpuMs": 881,
+    "energy": -227.89100646418083,
+    "converged": true,
+    "shellQuartets": 45150,
+    "shellOrbits": 11678,
+    "petiteFraction": 0.2586489479512735,
+    "eriSavedMs": 3853.83,
+    "eriSavedCpuMs": 653.13
+   },
+   {
+    "id": "NH4+",
+    "nAO": 9,
+    "declaredGroup": "Td",
+    "declaredFallback": null,
+    "predictedMs": 25,
+    "disabled": false,
+    "originOrder": 24,
+    "centredOrder": 24,
+    "measuredMs": 64.5,
+    "measuredCpuMs": 20.3,
+    "integralMs": 50.01,
+    "integralCpuMs": 7.3,
+    "energy": -55.86680027315079,
+    "converged": true,
+    "shellQuartets": 406,
+    "shellOrbits": 82,
+    "petiteFraction": 0.2019704433497537,
+    "eriSavedMs": 39.91,
+    "eriSavedCpuMs": 5.83
+   },
+   {
+    "id": "H3O+",
+    "nAO": 8,
+    "declaredGroup": "C3v",
+    "declaredFallback": null,
+    "predictedMs": 20,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 57.4,
+    "measuredCpuMs": 20.7,
+    "integralMs": 33.84,
+    "integralCpuMs": 5.3,
+    "energy": -75.32904700782296,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 151,
+    "petiteFraction": 0.6536796536796536,
+    "eriSavedMs": 11.72,
+    "eriSavedCpuMs": 1.84
+   },
+   {
+    "id": "OH-",
+    "nAO": 6,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 14,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 24.8,
+    "measuredCpuMs": 8.4,
+    "integralMs": 11.03,
+    "integralCpuMs": 2,
+    "energy": -74.05632818927484,
+    "converged": true,
+    "shellQuartets": 55,
+    "shellOrbits": 55,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "CN-",
+    "nAO": 10,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 33,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 180.1,
+    "measuredCpuMs": 30.4,
+    "integralMs": 36.1,
+    "integralCpuMs": 8.8,
+    "energy": -90.93706489769352,
+    "converged": true,
+    "shellQuartets": 231,
+    "shellOrbits": 231,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "CuH",
+    "nAO": 20,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 420,
+    "disabled": true,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": null,
+    "measuredCpuMs": null,
+    "integralMs": null,
+    "integralCpuMs": null,
+    "energy": null,
+    "converged": null,
+    "shellQuartets": null,
+    "shellOrbits": null,
+    "petiteFraction": null,
+    "eriSavedMs": null,
+    "eriSavedCpuMs": null
+   },
+   {
+    "id": "ZnH2",
+    "nAO": 21,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 503,
+    "disabled": true,
+    "originOrder": 16,
+    "centredOrder": 16,
+    "measuredMs": null,
+    "measuredCpuMs": null,
+    "integralMs": null,
+    "integralCpuMs": null,
+    "energy": null,
+    "converged": null,
+    "shellQuartets": null,
+    "shellOrbits": null,
+    "petiteFraction": null,
+    "eriSavedMs": null,
+    "eriSavedCpuMs": null
+   },
+   {
+    "id": "GeH4",
+    "nAO": 23,
+    "declaredGroup": "Td",
+    "declaredFallback": null,
+    "predictedMs": 708,
+    "disabled": false,
+    "originOrder": 24,
+    "centredOrder": 24,
+    "measuredMs": 5234.4,
+    "measuredCpuMs": 700.9,
+    "integralMs": 1650.55,
+    "integralCpuMs": 235,
+    "energy": -2054.609803498356,
+    "converged": true,
+    "shellQuartets": 3081,
+    "shellOrbits": 1137,
+    "petiteFraction": 0.36903602726387535,
+    "eriSavedMs": 1041.44,
+    "eriSavedCpuMs": 148.28
+   },
+   {
+    "id": "AsH3",
+    "nAO": 22,
+    "declaredGroup": "C3v",
+    "declaredFallback": null,
+    "predictedMs": 543,
+    "disabled": false,
+    "originOrder": 2,
+    "centredOrder": 2,
+    "measuredMs": 1558.9,
+    "measuredCpuMs": 655.8,
+    "integralMs": 466.02,
+    "integralCpuMs": 199.6,
+    "energy": -2211.650316900223,
+    "converged": true,
+    "shellQuartets": 2211,
+    "shellOrbits": 1651,
+    "petiteFraction": 0.7467209407507915,
+    "eriSavedMs": 118.03,
+    "eriSavedCpuMs": 50.55
+   },
+   {
+    "id": "H2Se",
+    "nAO": 21,
+    "declaredGroup": "C2v",
+    "declaredFallback": null,
+    "predictedMs": 416,
+    "disabled": false,
+    "originOrder": 4,
+    "centredOrder": 4,
+    "measuredMs": 1133.6,
+    "measuredCpuMs": 592.3,
+    "integralMs": 275.08,
+    "integralCpuMs": 175.4,
+    "energy": -2375.4347040673147,
+    "converged": true,
+    "shellQuartets": 1540,
+    "shellOrbits": 1126,
+    "petiteFraction": 0.7311688311688311,
+    "eriSavedMs": 73.95,
+    "eriSavedCpuMs": 47.15
+   },
+   {
+    "id": "HBr",
+    "nAO": 20,
+    "declaredGroup": "Cinfv",
+    "declaredFallback": null,
+    "predictedMs": 322,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 8,
+    "measuredMs": 2359.4,
+    "measuredCpuMs": 526.8,
+    "integralMs": 694.21,
+    "integralCpuMs": 137.8,
+    "energy": -2546.097097090293,
+    "converged": true,
+    "shellQuartets": 1035,
+    "shellOrbits": 1035,
+    "petiteFraction": 1,
+    "eriSavedMs": 0,
+    "eriSavedCpuMs": 0
+   },
+   {
+    "id": "Br2",
+    "nAO": 38,
+    "declaredGroup": "Dinfh",
+    "declaredFallback": null,
+    "predictedMs": 4000,
+    "disabled": false,
+    "originOrder": 8,
+    "centredOrder": 16,
+    "measuredMs": 16009,
+    "measuredCpuMs": 3257.4,
+    "integralMs": 4629.15,
+    "integralCpuMs": 852.8,
+    "energy": -5091.063777547874,
+    "converged": true,
+    "shellQuartets": 9316,
+    "shellOrbits": 4708,
+    "petiteFraction": 0.5053671103477888,
+    "eriSavedMs": 2289.73,
+    "eriSavedCpuMs": 421.82
+   }
+  ],
+  "predictedAll": {
+   "records": 54,
+   "totalMs": 37908,
+   "symmetricMs": 22511,
+   "fraction": 0.593832436425029
+  },
+  "predictedLive": {
+   "records": 52,
+   "totalMs": 36985,
+   "symmetricMs": 21588,
+   "fraction": 0.58369609301068
+  },
+  "measuredLive": {
+   "records": 52,
+   "totalMs": 74308.6,
+   "symmetricMs": 50800.4,
+   "fraction": 0.6836409244690385
+  },
+  "measuredCpuLive": {
+   "records": 52,
+   "totalMs": 16743,
+   "symmetricMs": 11109,
+   "fraction": 0.6635011646658306
+  },
+  "measuredLiveOrder8plus": {
+   "records": 52,
+   "totalMs": 74308.6,
+   "symmetricMs": 37145.5,
+   "fraction": 0.4998815749455648
+  },
+  "measuredCpuLiveOrder8plus": {
+   "records": 52,
+   "totalMs": 16743,
+   "symmetricMs": 8282.8,
+   "fraction": 0.49470226363256303
+  },
+  "measuredLiveExactNonAbelianOrDeclaredHigh": {
+   "records": 52,
+   "totalMs": 74308.6,
+   "symmetricMs": 35511.6,
+   "fraction": 0.4778935412590198
+  },
+  "lowSubgroupLive": [
+   [
+    "NH3",
+    "C3v",
+    20,
+    55,
+    16.5
+   ],
+   [
+    "PH3",
+    "C3v",
+    53,
+    187.9,
+    45.2
+   ],
+   [
+    "H2O2",
+    "C2",
+    53,
+    267.9,
+    83.5
+   ],
+   [
+    "CH3OH",
+    "Cs",
+    95,
+    296.5,
+    69.4
+   ],
+   [
+    "HCOOH",
+    "Cs",
+    201,
+    655.4,
+    126.9
+   ],
+   [
+    "CH3CN",
+    "C3v",
+    281,
+    1943.3,
+    280.8
+   ],
+   [
+    "C4H4O",
+    "C2v",
+    2876,
+    2845.5,
+    1000.2
+   ],
+   [
+    "C5H5N",
+    "C2v",
+    8071,
+    10774.8,
+    2189.2
+   ],
+   [
+    "glycine",
+    "Cs",
+    3184,
+    4865.6,
+    1145.8
+   ],
+   [
+    "H3O+",
+    "C3v",
+    20,
+    57.4,
+    20.7
+   ],
+   [
+    "AsH3",
+    "C3v",
+    543,
+    1558.9,
+    655.8
+   ]
+  ],
+  "modelVsMeasured": {
+   "sumPredictedLive": 36985,
+   "sumMeasuredLive": 74308.6,
+   "sumMeasuredCpuLive": 16743
+  },
+  "petiteList": {
+   "sumIntegralMsLive": 30864.2,
+   "sumEriSavedMsLive": 13573.5,
+   "eriSavedShareOfSolveMs": 0.18266378319602306,
+   "sumIntegralCpuMsLive": 6068.9,
+   "sumEriSavedCpuMsLive": 2331.5,
+   "eriSavedShareOfSolveCpuMs": 0.13925461386848237,
+   "entriesWithPetiteFractionOne": [
+    "LiH",
+    "HF",
+    "CO",
+    "LiF",
+    "NaH",
+    "HCl",
+    "NaCl",
+    "HCN",
+    "N2O",
+    "HCOOH",
+    "C4H4O",
+    "C5H5N",
+    "OH-",
+    "CN-",
+    "HBr"
+   ],
+   "entriesBelowHalf": [
+    [
+     "CH4",
+     0.202
+    ],
+    [
+     "SiH4",
+     0.2725
+    ],
+    [
+     "CF4",
+     0.0971
+    ],
+    [
+     "C2H4",
+     0.3104
+    ],
+    [
+     "C2H6",
+     0.321
+    ],
+    [
+     "C3H6",
+     0.3052
+    ],
+    [
+     "C6H6",
+     0.2586
+    ],
+    [
+     "NH4+",
+     0.202
+    ],
+    [
+     "GeH4",
+     0.369
+    ]
+   ],
+   "note": "the petite list is the signed-permutation (cube) subgroup about the centre of nuclear charge on the UNSCREENED shell quartets (benzene: 11,678/45,150 against the live loop's 10,966/42,486 — within 0.2 %); eriSavedMs = integralMs × (1 − fraction) is the ceiling a petite-list loop could remove from one solve of that entry, before reconstruction and setup"
+  }
+ },
+ "c60": {
+  "burnside": {
+   "canonicalShellQuartets": "132690195",
+   "shellOrbitsIh": "1110036",
+   "canonicalAoQuartets": "1019283825",
+   "independentErisIh": "8504444",
+   "shellFraction": 0.008365621890901585,
+   "aoFraction": 0.008343548471398534
+  },
+  "group": {
+   "operations": 120,
+   "classSizes": [
+    1,
+    12,
+    12,
+    20,
+    15,
+    1,
+    12,
+    12,
+    20,
+    15
+   ],
+   "tableDefect": 1.4210854715202004e-14,
+   "fixedAtomsByClass": {
+    "E": 60,
+    "12C5": 0,
+    "12C5^2": 0,
+    "20C3": 0,
+    "15C2": 0,
+    "i": 0,
+    "12S10": 0,
+    "12S10^3": 0,
+    "20S6": 0,
+    "15sigma": 4
+   },
+   "aoCharacterByClass": {
+    "E": 300,
+    "12C5": 0,
+    "12C5^2": 0,
+    "20C3": 0,
+    "15C2": 0,
+    "i": 0,
+    "12S10": 0,
+    "12S10^3": 0,
+    "20S6": 0,
+    "15sigma": 12
+   }
+  },
+  "aoBlocks": {
+   "Ag": 4,
+   "T1g": 6,
+   "T2g": 6,
+   "Gg": 10,
+   "Hg": 14,
+   "Au": 1,
+   "T1u": 9,
+   "T2u": 9,
+   "Gu": 10,
+   "Hu": 11
+  },
+  "aoBlockResidual": 0,
+  "aoBlockDimensionCheck": 300,
+  "fockEntriesInBlocks": 3104,
+  "fockEntriesDense": 90000,
+  "eigensolveWorkInBlocks": 34110,
+  "eigensolveWorkDense": 27000000,
+  "largestBlock": 14,
+  "piRepresentation": {
+   "Ag": 1,
+   "T1g": 1,
+   "T2g": 1,
+   "Gg": 2,
+   "Hg": 3,
+   "T1u": 2,
+   "T2u": 2,
+   "Gu": 2,
+   "Hu": 2
+  },
+  "edges": {
+   "total": 90,
+   "hexHex66": 30,
+   "pentHex56": 60
+  },
+  "huckelEqual": {
+   "beta66": 1,
+   "beta56": 1,
+   "levels": [
+    {
+     "x": 3,
+     "degeneracy": 1,
+     "irrep": "Ag",
+     "residual": 2.22e-16,
+     "name": "1ag",
+     "electrons": 2
+    },
+    {
+     "x": 2.7565982539,
+     "degeneracy": 3,
+     "irrep": "T1u",
+     "residual": 3.11e-15,
+     "name": "1t1u",
+     "electrons": 6
+    },
+    {
+     "x": 2.3027756377,
+     "degeneracy": 5,
+     "irrep": "Hg",
+     "residual": 2.11e-16,
+     "name": "1hg",
+     "electrons": 10
+    },
+    {
+     "x": 1.8202492507,
+     "degeneracy": 3,
+     "irrep": "T2u",
+     "residual": 2.22e-15,
+     "name": "1t2u",
+     "electrons": 6
+    },
+    {
+     "x": 1.5615528128,
+     "degeneracy": 4,
+     "irrep": "Gu",
+     "residual": 4.44e-16,
+     "name": "1gu",
+     "electrons": 8
+    },
+    {
+     "x": 1,
+     "degeneracy": 9,
+     "irrep": "Gg+Hg",
+     "residual": 5.15e-16,
+     "name": "1gg+hg",
+     "electrons": 18
+    },
+    {
+     "x": 0.6180339887,
+     "degeneracy": 5,
+     "irrep": "Hu",
+     "residual": 6.66e-16,
+     "name": "1hu",
+     "electrons": 10
+    },
+    {
+     "x": -0.1385642651,
+     "degeneracy": 3,
+     "irrep": "T1u",
+     "residual": 6.66e-16,
+     "name": "2t1u",
+     "electrons": 0
+    },
+    {
+     "x": -0.3819660113,
+     "degeneracy": 3,
+     "irrep": "T1g",
+     "residual": 8.88e-16,
+     "name": "1t1g",
+     "electrons": 0
+    },
+    {
+     "x": -1.3027756377,
+     "degeneracy": 5,
+     "irrep": "Hg",
+     "residual": 6.66e-16,
+     "name": "2hg",
+     "electrons": 0
+    },
+    {
+     "x": -1.4382832394,
+     "degeneracy": 3,
+     "irrep": "T2u",
+     "residual": 1.55e-15,
+     "name": "2t2u",
+     "electrons": 0
+    },
+    {
+     "x": -1.6180339887,
+     "degeneracy": 5,
+     "irrep": "Hu",
+     "residual": 6.66e-16,
+     "name": "2hu",
+     "electrons": 0
+    },
+    {
+     "x": -2,
+     "degeneracy": 4,
+     "irrep": "Gg",
+     "residual": 4.44e-16,
+     "name": "1gg",
+     "electrons": 0
+    },
+    {
+     "x": -2.5615528128,
+     "degeneracy": 4,
+     "irrep": "Gu",
+     "residual": 2.22e-16,
+     "name": "2gu",
+     "electrons": 0
+    },
+    {
+     "x": -2.6180339887,
+     "degeneracy": 3,
+     "irrep": "T2g",
+     "residual": 2.22e-16,
+     "name": "1t2g",
+     "electrons": 0
+    }
+   ],
+   "distinctLevels": 15,
+   "homo": "1hu",
+   "lumo": "2t1u",
+   "gapInBetaUnits": 0.756598,
+   "hgLevels": [
+    2.3027756377,
+    -1.3027756377
+   ]
+  },
+  "huckelTwoWeights": {
+   "beta66": 1.1,
+   "beta56": 1,
+   "levels": [
+    {
+     "x": 3.1,
+     "degeneracy": 1,
+     "irrep": "Ag",
+     "residual": 2.89e-15,
+     "name": "1ag",
+     "electrons": 2
+    },
+    {
+     "x": 2.8476186003,
+     "degeneracy": 3,
+     "irrep": "T1u",
+     "residual": 2.22e-15,
+     "name": "1t1u",
+     "electrons": 6
+    },
+    {
+     "x": 2.3753195568,
+     "degeneracy": 5,
+     "irrep": "Hg",
+     "residual": 2.22e-16,
+     "name": "1hg",
+     "electrons": 10
+    },
+    {
+     "x": 1.8349736073,
+     "degeneracy": 3,
+     "irrep": "T2u",
+     "residual": 1.11e-15,
+     "name": "1t2u",
+     "electrons": 6
+    },
+    {
+     "x": 1.6587033145,
+     "degeneracy": 4,
+     "irrep": "Gu",
+     "residual": 1.55e-15,
+     "name": "1gu",
+     "electrons": 8
+    },
+    {
+     "x": 1.0684387141,
+     "degeneracy": 4,
+     "irrep": "Gg",
+     "residual": 6.66e-16,
+     "name": "1gg",
+     "electrons": 8
+    },
+    {
+     "x": 1.0349349031,
+     "degeneracy": 5,
+     "irrep": "Hg",
+     "residual": 6.66e-16,
+     "name": "2hg",
+     "electrons": 10
+    },
+    {
+     "x": 0.666190379,
+     "degeneracy": 5,
+     "irrep": "Hu",
+     "residual": 4.44e-16,
+     "name": "1hu",
+     "electrons": 10
+    },
+    {
+     "x": -0.2295846115,
+     "degeneracy": 3,
+     "irrep": "T1u",
+     "residual": 2.44e-15,
+     "name": "2t1u",
+     "electrons": 0
+    },
+    {
+     "x": -0.4819660113,
+     "degeneracy": 3,
+     "irrep": "T1g",
+     "residual": 3.33e-15,
+     "name": "1t1g",
+     "electrons": 0
+    },
+    {
+     "x": -1.3102544599,
+     "degeneracy": 5,
+     "irrep": "Hg",
+     "residual": 1.55e-16,
+     "name": "3hg",
+     "electrons": 0
+    },
+    {
+     "x": -1.453007596,
+     "degeneracy": 3,
+     "irrep": "T2u",
+     "residual": 2.89e-15,
+     "name": "2t2u",
+     "electrons": 0
+    },
+    {
+     "x": -1.666190379,
+     "degeneracy": 5,
+     "irrep": "Hu",
+     "residual": 4.44e-16,
+     "name": "2hu",
+     "electrons": 0
+    },
+    {
+     "x": -2.0684387141,
+     "degeneracy": 4,
+     "irrep": "Gg",
+     "residual": 1.86e-16,
+     "name": "2gg",
+     "electrons": 0
+    },
+    {
+     "x": -2.6587033145,
+     "degeneracy": 4,
+     "irrep": "Gu",
+     "residual": 4.44e-16,
+     "name": "2gu",
+     "electrons": 0
+    },
+    {
+     "x": -2.7180339887,
+     "degeneracy": 3,
+     "irrep": "T2g",
+     "residual": 8.88e-16,
+     "name": "1t2g",
+     "electrons": 0
+    }
+   ],
+   "distinctLevels": 16,
+   "homo": "1hu",
+   "lumo": "2t1u",
+   "gapInBetaUnits": 0.895775,
+   "hgLevels": [
+    2.3753195568,
+    1.0349349031,
+    -1.3102544599
+   ]
+  }
+ },
+ "approximateRings": {
+  "C4H4O": {
+   "c2ThroughRingCentroidBohr": 0.0010063467954283878,
+   "c2ThroughChargeCentreBohr": 0.0009604160761538964,
+   "mirrorPlaneExact": 0
+  },
+  "C5H5N": {
+   "c2ThroughRingCentroidBohr": 0.0008323466843101612,
+   "c2ThroughChargeCentreBohr": 0.0008078542701921014,
+   "mirrorPlaneExact": 0
+  }
+ }
+}
