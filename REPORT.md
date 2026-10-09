@@ -5080,6 +5080,55 @@ gap 102 ms), and that probe disturbed `current`'s timing when every open paid fo
 The session, the opener, the banner, the veil and the wake lock (BRIEF-C6 step 3) are the named next step. The tabbed notebook is a
 0.5.x brief candidate, because it changes what the notebook is. Details: `research/release-0.5.0/C6-BUILD.md`.
 
+### wave 208: C7b THE FILM'S UI IS THE KIT'S — the RENDER card and the TIMELINE window on the one clock; ONE PERIOD is a clip; the CAPTURE group out
+
+Josh, PLAN §9 (2026-10-09): *"record or render should be something related to the timeline window of MIR 1.5"*. C7B-DESIGN took
+that as an adoption: the kit's RENDER card and its TIMELINE window, with λWAVES' motions becoming the timeline's. Josh took the
+design's eleven rulings as defaults. Three Opus builders built it: the first made step 1 and was paused by the usage alarm; the
+second (`agent-ab12528fb3c1bb358`) merged yan-c `011e6a5` (C6) into the branch and made steps 2–3, and was paused with one gate
+red; the third (`agent-a0ff0fd25c7aa306c`) closed that gate and made step 4.
+
+**Step 1** (`f40733d`, the predecessor). createFilm learns the card's road: `describe()` records the lab at the tap, `before(spec)`
+builds the job from the kit's spec, THE TIME LAW in `frame()` (the period clip's times, else the RATE integral, else the RECORD
+law), `take('clip' | 'period' | 'frames')` (the three schedules, moved unchanged), MOTIONS out. render-exact 36 → 40.
+
+**Step 2** (`9d8671b`). `installTimeline` over λWAVES' one modulation host through an eight-member seam; its play is THE play, its
+playhead paints from `loop()`'s present. The arrangement is the host clock's automation and rides as `presentation.timeline` (only
+when it holds a clip or a range), replaced on an open and cleared by NEW, never an undo row. The window ships closed, docks at the
+foot of the span, and is the WORKSPACE key `tlwin`; λWAVES' pill stays the one transport and dodges both kit windows. One ACTIONS
+row and WINDOW › TIMELINE. The timeline's rows join the ONE KEY TABLE under THE FOCUS LAW (a scoped row wins its chord while its
+surface has the focus: table order had handed E, C, P, Y, Home and the Shift-arrows to the stage). A routed dial's hold stays its
+ring's pop-over (B13: the kit's two holds collided).
+
+**Step 3.** `lab/film-card.js` (54 lines): `createRenderCard` over createFilm's host recorder, the picture adapter (×1–×4, CAPTURE
+IMAGE then DOWNLOAD IMAGE), every save through capture.js `handOver` under λWAVES' name, the PERIOD section (THE LOOP PLAN, PLAN,
+PLACE ONE PERIOD), the `lw-period` kind and R7's seed. The CAPTURE group leaves the CAMERA card (187 lines), with the hover plan,
+native-ui's export disclosure and render-exact's ten-minute discard. `__LW.captureUI` keeps every member as createFilm's takes.
+The kit's FREEZE writes no byte here, so one recorder serves the card (no proxy). The card stands at the TOP of the right rack:
+the blob's `closed` is the closed cards in document order, a demo's layout does not list `render`, and the kit's arrange appends
+the cards a layout names — so a card appended at the foot stood second after a demo open and last after a reload, the same set in
+another order, and settings-probe went 4 of 6 red. At the top it is where every road leaves it, and where a reopen puts it.
+
+**The proofs** (`tests/timeline.browser-test.mjs`, new, real input): PLACE ONE PERIOD then a real RENDER equals the facade's ONE
+PERIOD in every digest, every time and the MP4's bytes (180 frames, 683,782 B); the card's STILL equals C7's RECORD; MODULATION
+ON integrates RATE from the lab's t and repeats; an Escape at frame 75 RESUMEs to the uninterrupted frames; a changed state is
+refused with the kit's sentence; a CANCEL survives a reload and RECOVERs a valid MP4. `film-handover` is re-aimed at the card.
+
+**The ledger.** `cat lab/*.js | wc -l`: 27,228 → 27,309 (step 1) → 27,596 (C6 merged, +287) → 27,657 (step 2) → 27,555 (step 3, the `closed` fix 0).
+C7b's own: **+40** (+25 generated `sw.js` rows, +15 hand-written), over the design's band (−50…+20) by 20 — createFilm's road cost
+twice its estimate, and the three workarounds were unplanned.
+
+Gates, on `c815e35`, one browser suite at a time:
+- **The lock** ran ALONE: **860 values · 0/0** with `--query gastab=0`, and **1004 · 0/0** with the s4a fixture. No fixture was re-baked.
+- `settings-probe` **0 of 6 RED** (it was 4 of 6 on the WIP). `timeline` **14/14**.
+- `film-probe` + `film-compare` exit 0 against the base copy: the picture, the 25 frames, and ONE PERIOD and RECORD (digests,
+  times, MP4 bytes) are identical.
+- `render-exact` 40/40 · `gpu-recovery` 10/10 · `history` 44 · `new-project` 8 and `--check` 16,117 B · `bash test.sh node` exit 0.
+- On the step-3 tree: `film-handover` 4/4, `offer` 16/16, `menubar` 8/8, `frame-occlusion` 7, `hit-probe-set` 49 / 0, pwa 327 files
+  6.45 MiB.
+
+Hand-off: `research/release-0.5.0/C7B-BUILD.md` (decisions, merge notes, B1–B17, the CLAUDE.md draft).
+
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 
 ### wave 202: D9 THE LEGACY FIVE — QCD, H₂⁺ and HELIUM deleted behind restore shims, two demos, H₂ and ELECTROSTATICS measured

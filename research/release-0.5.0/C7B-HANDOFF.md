@@ -1,49 +1,65 @@
-# C7b · THE FILM'S UI IS THE KIT'S RENDER CARD AND TIMELINE WINDOW — live hand-off (the C7b builder, Opus 5.5)
+# C7b · THE FILM'S UI IS THE KIT'S RENDER CARD AND TIMELINE WINDOW — final hand-off (the C7b builder's second relaunch, Opus 5.5)
 
-**State: PAUSED by the usage alarm (five_hour 94 %) inside step 3.  Step 3 is committed as a WIP commit (one gate red:
-settings-probe 4/6).  Nothing merged into yan-c, pushed, tagged or deployed.**
+**State: DONE. Steps 1–4 are committed and every gate is green. Nothing is merged into yan-c, pushed, tagged or deployed.
+CLAUDE.md is not edited: the draft THE FILM paragraph and the CHANGES-0.5.0 line are in `C7B-BUILD.md`, for the integrator.**
 
 | | |
 |---|---|
-| worktree | `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-ab12528fb3c1bb358` |
-| branch | `worktree-agent-ab12528fb3c1bb358` (reset to `ae5add1`, the first builder's tip on `4555945`) |
+| worktree | `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a0ff0fd25c7aa306c` (reset to the paused `f34569a`; the predecessor's worktree `agent-ab12528fb3c1bb358` was left untouched) |
+| branch | `worktree-agent-a0ff0fd25c7aa306c` |
 | `f40733d` | step 1 · createFilm takes the card's road (the first builder) |
 | `8b93ef8` | merge `yan-c` `011e6a5` (C6 + HANDOFF + two briefs); `lab/sw.js` regenerated |
-| `9d8671b` | step 2 · the TIMELINE window on the one clock (all step-2 gates green) |
-| the WIP commit after `44dda44` | step 3 · the RENDER card, ONE PERIOD as a span clip, the CAPTURE group out, `LW.thumbnail()`'s dead probe branch out (the integrator's item) — **WIP: settings-probe red** |
-| servers | 8913 (tree, pid of `server.py … agent-ab12528fb3c1bb358 8913`) and 8917 (`.tmp/base2` = `git archive 7c7da54`) — stopped by pid at the pause |
-| `lab/*.js` | 27,228 (`4555945`) · 27,309 (`f40733d`) · 27,596 (`8b93ef8`, C6 +287) · 27,657 (`9d8671b`) · **27,555 (step 3)** → C7b's own +40 (+25 generated sw.js rows) |
+| `7c7da54` · `44dda44` | hand-offs |
+| `9d8671b` | step 2 · the TIMELINE window on the one clock |
+| `c815e35` | step 3 · the RENDER card; ONE PERIOD is a span clip; the CAPTURE group leaves (the WIP `f34569a` amended with the fix below) |
+| step 4 | the commit on top of `c815e35`: `C7B-BUILD.md` (the STEP3 cells, decision 9, the lines), REPORT.md wave 208, this file |
+| servers | 8913 (this tree), stopped by pid; 8917 not needed. No browser left. |
+| `lab/*.js` | 27,228 (`4555945`) · 27,309 · 27,596 (C6 +287) · 27,657 · **27,555** (step 3, the fix 0; step 4 0) → C7b's own **+40** |
 
-## Step 3 gates (on the WIP tree)
+## The fix (settings-probe 4/6 → 0/6)
 
-- THE LOCK: `860 values · 0/0 · page errors 0` and `1004 values · 0/0 · page errors 0`.
-- `tests/timeline.browser-test.mjs` **14/14** (T0–T5, T9, T10; T6 card period = facade ONE PERIOD, every digest + MP4 bytes 683,782;
-  T7 card STILL = facade RECORD, PNG = MP4 frames; T8 MOD ON; T11a RESUME after Escape = uninterrupted frames; T11b state change →
-  RESUME refused + DISCARD STORED; T11c CANCEL + reload → RECOVER → one valid MP4).
-- film-probe + `node tools/perf/film-compare.mjs .tmp/film-base.json .tmp/film-c3.json` **exit 0** (picture bytes identical; EXPORT
-  FRAMES 25 pixel-identical; ONE PERIOD 180 digests + 953,793 B; RECORD 180 + 743,644 B; verify DETERMINISTIC).
-- film-handover **4/4** (re-aimed at the card) · offer **16/16** · menubar **8/8** · frame-occlusion **7** · hit-probe-set 49 / 0 ·
-  render-exact **40/40** · `bash test.sh node` exit 0 (wiring 220 reached) · pwa 327 files 6.45 MiB · gpu-recovery **10/10**
-  (the thumbnail scene is one road now; a first run was timing-red at reload 2, green alone) · `new-project --check` 16117 B ·
-  node new-project GREEN · keyboard-shortcuts PASS.
-- **RED: `tools/settings-probe.mjs` 4 of 6** (boot and NEW green; WAVE DANCER, WATER, BENZENE, N₂ red: "reload DIFFERS").
-  WATER/BENZENE/N₂: the blob's `closed` holds `render` before the reload and not after (from `[transport, render, orbit, …]` to
-  `[transport, orbit, …]`). WAVE DANCER: a `modwin` diff (read the full line in `.tmp/s3-sprobe.txt`; it may be the probe's named
-  modwin.modes exception plus the same `closed` change). Suspect: a demo's saved `layout` has no `render` card, and the open road
-  (rk apply / `layoutExtras`) or the boot's applySettings treats an unlisted, late-registered card differently before and after a
-  reload — the card is built and registered after `window.__LW` (rack.js, grep `filmCard = createFilmCard`), after the C3 register
-  loop but before `applySettings()` and `rk.start()`.
-- NOT RUN on step 3: new-project browser 8, history 44 (both green at step 2; step 3 touches serialize only through the card),
-  the ms/s pair with the TIMELINE open.
+The blob's `closed` is the closed cards in document order (`saveSettings`). The WIP put the RENDER card at the foot of the right rack.
+A demo's layout does not list `render`, and the kit's arrange appends the cards a layout names, so after a demo open the card stood
+second (`[transport, render, orbit, …]`); after a reload it stood last. The set was the same and the order was not, so 4 of 6 scenes
+went red. WAVE DANCER's `modwin` row was the probe's named `s3` exception and is green now. The card is now put at the **top** of the
+right rack (`rack.prepend(filmCard.card.root)`; the redundant `classList.add('closed')` went, because `register`'s `closed: true` adds
+it). Every road leaves it there: a demo's or an older ☆ slot's layout, a reload, and a reopen, which inserts at index 0. R2 holds: the
+card ships closed. One line was changed and none added. As a side effect, `LW.bootOrder` ends at `history` again.
 
-## Exact next step
+## Gates on `c815e35` (one browser suite at a time, ports 8913 / 5383)
 
-1. Restart the servers (`python3 tools/gate/server.py <worktree> 8913`; base `.tmp/base2` on 8917 if ms/s is wanted), run
-   `LW_PORT=8913 GD_PORT=5383 node tools/settings-probe.mjs --out .tmp/sp.json` and read the WATER scene's B1/B2/B3 `closed` lists.
-2. Fix the `closed` round trip for the late-registered `render` card (likely: register it in the C3 loop's position, or make its
-   closed state come from the saved list the same way before and after a reload); keep R2 (closed on first run).
-3. Re-run settings-probe (0 RED), new-project browser 8, history 44, THE LOCK ×2, and the timeline suite (≈ 7 min, run it in the
-   background: one foreground call is capped at 600 s).
-4. Amend the WIP commit message to `0.5.0 C7b · the RENDER card; ONE PERIOD is a span clip; the CAPTURE group leaves`, fill the
-   STEP3_* cells in `research/release-0.5.0/C7B-BUILD.md` (already written: decisions 1–15, B1–B17, merge notes, the CLAUDE.md draft,
-   the CHANGES line), then step 4: append `.tmp/wave208.md` to REPORT.md (fill GATES_LINE), commit, update this file.
+- THE LOCK, run ALONE: `--check --query gastab=0` gave **860 values · 0/0 · page errors 0**. Adding `--fixture …/digest-lock-s4a.json`
+  gave **1004 · 0/0 · page errors 0**. One fixture run was red on `states.gas.*` because I left out `--query gastab=0`; that is the W125
+  gas table the header names, not the tree. No fixture was re-baked.
+- `tools/settings-probe.mjs` **0 of 6 RED**. WATER's B1 = B2 = B3 `closed` is `[transport, render, orbit, vortex, slice, calculus,
+  meters, ladder, atoms, wigner, radiation, history]`.
+- `tests/new-project.browser-test.mjs` **8 PASS** · `node tools/new-project.mjs --check` in step (16,117 B) · `tests/history.browser-test.mjs` **44**.
+- `tests/timeline.browser-test.mjs` **14/14** (281 s). In T6, the card's ONE PERIOD equals the facade's in every digest, and the MP4 is
+  683,782 B both times.
+- `tools/perf/film-probe.mjs` + `film-compare` against `.tmp/film-base.json`: **exit 0**, everything identical (picture,
+  25 frames, ONE PERIOD 953,793 B, RECORD 743,644 B, verify DETERMINISTIC).
+- `render-exact` **40/40** · `gpu-recovery` **10/10** (first run green) · `bash test.sh node` **exit 0** (wiring 220 reached).
+- These were not re-run after the one-line fix (green on `f34569a`): film-handover 4/4, offer 16/16, menubar 8/8, frame-occlusion 7,
+  hit-probe-set 49 / 0, pwa 327 files 6.45 MiB.
+
+## For the integrator
+
+1. **Merge across C6b** (`yan-c` `8388309`). The rack.js sites are listed in `C7B-BUILD.md` § Merge notes. Expect trivial conflicts at
+   four places: the LW literal's end (`get timeline()`, `get render()` beside C6b's `LW.session`), the import block, FAMILIES' end, and
+   `lab/sw.js` (run `node tests/pwa.test.mjs --write` after the merge). The fix is the line right after `window.__LW = LW` and the
+   film card's construction; C6b's boot tail and banner come after it.
+2. **REPORT.md wave number.** This branch has wave **208** at the end of the C section, after wave 206. `yan-c` has C6b's wave **209**
+   in the same spot, so the merge conflicts there. Keep both: 208 is free on yan-c, so it goes before 209 with no renumbering. If the
+   merged tree already holds a 208, make this one 210.
+3. Apply the CLAUDE.md THE FILM paragraph and the CHANGES-0.5.0 line from `C7B-BUILD.md`.
+4. For the legacy/boot re-aim row: B54's `shipsLast` (`history` last in `LW.bootOrder`) is true again. Its `atoms field wigner
+   radiation` expectation still names ELECTROSTATICS' `field`, which D9b removed.
+
+## Open (unchanged from `C7B-BUILD.md`)
+
+- Brief candidates B13–B17. Not fixed: a film carries the window mask that stood at its start (C7's own); B17, NEW's AUDIO source,
+  refuses MODULATION ON films.
+- A profile saved before this build has no `render` in its `closed`, so the card opens once on the first boot after the update (decision
+  9). It now opens at the top of the right rack, where before the fix it was at the foot.
+- ms/s with the TIMELINE open is not measured. The phone and the iPad are not checked, and neither is the STAGE TEXT under a docked
+  timeline.

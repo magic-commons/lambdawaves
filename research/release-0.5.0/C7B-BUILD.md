@@ -13,14 +13,14 @@ LAW for the keys (B15). Nothing is pushed, merged into yan-c, tagged or deployed
 
 | | |
 |---|---|
-| worktree | `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-ab12528fb3c1bb358` (the relaunched builder) |
-| branch | `worktree-agent-ab12528fb3c1bb358`, reset to `ae5add1` (the paused predecessor's tip on `4555945`) |
+| worktree | `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-ab12528fb3c1bb358` (the relaunched builder: steps 2–3) · `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a0ff0fd25c7aa306c` (the second relaunch: the step-3 fix, step 4) |
+| branch | `worktree-agent-ab12528fb3c1bb358`, reset to `ae5add1` (the paused predecessor's tip on `4555945`); then `worktree-agent-a0ff0fd25c7aa306c`, reset to its WIP `f34569a` |
 | `f40733d` | step 1 · createFilm takes the card's road (the predecessor) |
 | `8b93ef8` | merge `yan-c` `011e6a5` (C6 FOLDERS + HANDOFF + two briefs); `lab/sw.js` the one conflict, regenerated |
 | `9d8671b` | step 2 · the TIMELINE window on the one clock |
-| step 3 | the RENDER card; ONE PERIOD is a span clip; the CAPTURE group leaves (see the hand-off for the sha) |
+| `c815e35` | step 3 · the RENDER card; ONE PERIOD is a span clip; the CAPTURE group leaves (the WIP `f34569a` amended with the one-line `closed` fix, decision 9) |
 | step 4 | this file, REPORT.md wave 208, the CLAUDE.md draft (below, for the integrator to apply) |
-| servers | 8913 (tree) · 8917 (`.tmp/base` = `4555945`, then `.tmp/base2` = `7c7da54` for ms/s) — both stopped by pid at the end |
+| servers | 8913 (tree) · 8917 (`.tmp/base` = `4555945`, then `.tmp/base2` = `7c7da54` for ms/s) — both stopped by pid at the end (the fix: 8913 only) |
 
 ## The decisions (each a default taken; the design's rulings R1–R11 built as written)
 
@@ -46,9 +46,15 @@ LAW for the keys (B15). Nothing is pushed, merged into yan-c, tagged or deployed
 7. **B14 · the CAMERA arcs.** The kit's CAMERA panel re-dispatches a press on its YAW/PITCH arcs to `.mir-camsphere-side`, which
    cancels knobs.js' pending hold: a held arc never opens TIMELINE CLIP. Its right-click does. T3 holds ZOOM and right-clicks YAW.
 8. **The pill dodges both kit windows.** `modDodge(rect, who)` keeps each window's open rect and seats the pill where neither is.
-9. **The RENDER card is built after `window.__LW`** (createFilm reads `LW`) and registered then with `rk.register({ id: 'render',
-   el, side: 'right', closed: true, glyph: 'render' })`. The first-run block closes it (R2). A profile saved before this build has a
-   `closed` list without `render`, so applySettings opens it once on the first boot after the update (the same as any new card).
+9. **The RENDER card is built after `window.__LW`** (createFilm reads `LW`), put at the TOP of the right rack (`rack.prepend`) and
+   registered then with `rk.register({ id: 'render', el, side: 'right', closed: true, glyph: 'render' })`. The first-run block closes
+   it (R2). **Why the top:** the blob's `closed` is the closed cards in document order; a demo's layout does not list `render`, and
+   the kit's arrange appends the cards a layout names, so a card appended at the foot stood second (`[transport, render, orbit, …]`)
+   after a demo open and last after a reload — the same set in another order, and settings-probe was 4/6 red on the WIP. At the top
+   it is where every road leaves it (a demo's or an older ☆ slot's layout, a reload, a reopen, which inserts at index 0). One line
+   changed, none added; `LW.bootOrder` now ends at `history` again. A profile saved before this build has a `closed` list without
+   `render`, so applySettings opens it once on the first boot after the update (the same as any new card) — at the top of the right
+   rack.
 10. **The facade** (`__LW.captureUI`) keeps every member: `record`, `loop`, `exportFrames` are createFilm's `take('clip' | 'period'
     | 'frames')` at C7's defaults (30 fps, 6 s, ×2) with `drive: modArm`; a verb while one runs stops it (offer s9's STOP EXPORT);
     `picture` is capture + capture.js' save; `busy` is the facade's run or any recorder's; `plan` is `planLoop({ fps: 30, seconds: 6 })`.
@@ -81,21 +87,21 @@ ten-minute discard in `save()` (MOTIONS left at step 1).
 
 | gate | step 2 (`9d8671b`) | step 3 |
 |---|---|---|
-| THE LOCK `--query gastab=0` | 860 · 0/0 · page errors 0 (×2 runs across the step) | STEP3_LOCK_A |
-| THE LOCK `--fixture …s4a.json` | 1004 · 0/0 · page errors 0 | STEP3_LOCK_B |
+| THE LOCK `--query gastab=0` | 860 · 0/0 · page errors 0 (×2 runs across the step) | 860 · 0/0 · page errors 0 (alone, on `c815e35`) |
+| THE LOCK `--fixture …s4a.json` | 1004 · 0/0 · page errors 0 | 1004 · 0/0 · page errors 0 (alone, with `--query gastab=0`) |
 | `bash test.sh node` | exit 0 (wiring 218 reached) | exit 0 (wiring 220 reached, 32 kit modules unreached) |
 | `render-exact.test` | 40/40 (step 1) | 40/40 |
-| timeline suite (NEW) | 8/8 (T1–T5, T9, T10) | STEP3_TL |
+| timeline suite (NEW) | 8/8 (T1–T5, T9, T10) | **14/14** (T6 ONE PERIOD 683,782 B both; T7; T8; T11a–c), 281 s |
 | film-handover | 4/4 (C7's, step 1) | 4/4 re-aimed (§4.1) |
-| film-probe + film-compare | — | STEP3_FILM |
-| offer | 16/16 (on `8b93ef8`) | STEP3_OFFER |
+| film-probe + film-compare | — | exit 0 vs `.tmp/film-base.json`: picture bytes, 25 frame pixel hashes, ONE PERIOD (180 · 953,793 B) and RECORD (180 · 743,644 B) digests, times and MP4 identical; verify DETERMINISTIC |
+| offer | 16/16 (on `8b93ef8`) | 16/16 (on `f34569a`) |
 | take-in-bugs · lfo-tension · routed-knob · mir-controls | 4/4 · 3/3 · 4/4 · 2/2 | — |
-| history · new-project · `--check` | 44 · 8 · 16117 B in step | — · STEP3_NEWP · 16117 B in step (+ node new-project GREEN, keyboard-shortcuts 6 PASS) |
+| history · new-project · `--check` | 44 · 8 · 16117 B in step | 44 · 8 · 16117 B in step (+ node new-project GREEN, keyboard-shortcuts 6 PASS) |
 | gpu-recovery | (8/11 on every tree since C7: the thumbnail probe threw) | **10/10** (the thumbnail scene is one road; first run timing-red at reload 2, green alone) |
-| settings-probe | 0 of 6 red | STEP3_SPROBE |
-| frame-occlusion · hit-probe-set | 7 · 49 presses / 0 reached (2 timeline scenes added) | STEP3_OCC |
+| settings-probe | 0 of 6 red | **0 of 6 red** (4 of 6 on the WIP `f34569a`; decision 9) |
+| frame-occlusion · hit-probe-set | 7 · 49 presses / 0 reached (2 timeline scenes added) | 7 · 49 / 0 (on `f34569a`) |
 | keyboard-window · keyboard-shortcuts | 8 (re-aimed) · PASS | — |
-| menubar | — | STEP3_MENU |
+| menubar | — | 8/8 (on `f34569a`) |
 | pwa | 325 files 6.43 MiB | 327 files 6.45 MiB (≤ 8) |
 | ms/s, window closed | tip − pre-step `7c7da54` ≈ +1.2 (43.4 vs 42.2); tip − `4555945` ≈ +3.5 (C6 ≈ 2 of it); bar 3.536 | — |
 
@@ -107,7 +113,8 @@ ten-minute discard in `save()` (MOTIONS left at step 1).
 | `f40733d` step 1 | 27,309 | +81 (render-exact +91, rack −10, sw 0) |
 | `8b93ef8` merge yan-c | 27,596 | +287 (C6's) |
 | `9d8671b` step 2 | 27,657 | +61 (rack +32, key-table +5, settings-store +1, sw +23 generated) |
-| step 3 | 27,555 | −102 (rack −149, film-card +54, native-ui −9, render-exact −2, settings-store +2, sw +2) |
+| `c815e35` step 3 | 27,555 | −102 (rack −149, film-card +54, native-ui −9, render-exact −2, settings-store +2, sw +2; the `closed` fix 0) |
+| step 4 (docs) | 27,555 | 0 |
 | **C7b's own** | | **+40** = +25 generated `sw.js` rows + 15 hand-written |
 
 The design estimated −15 (band −50…+20). It lands +40: createFilm's card road cost +91 at step 1 where +45 was estimated, and the
@@ -169,7 +176,8 @@ section as a ⋯ row: −6), both kit work.
 10. after the KEYBOARD window block: the TIMELINE install block (seam, occlusion provider, the B13 shield).
 11. `serialize`: one line before `if (!edit) return S;`. `restore`: one line after `modView.restore(pr.modwin)`.
 12. the end of the LW literal: `get timeline()`, `get render()` (C6b's `LW.session` is also a last member: keep all three at the
-    end); `async thumbnail()` one line (the probe branch out); after `window.__LW = LW`: the RENDER card's four lines.
+    end); `async thumbnail()` one line (the probe branch out); after `window.__LW = LW`: the RENDER card's four lines (`rack.prepend`, not
+    `appendChild`: decision 9).
 Other files: `lab/key-table.js`, `lab/settings-store.js` (WORKSPACE `tlwin`; FAMILIES `lambdawaves.q0.render`, `mir.render.calib`
 appended after the C6 rows — C6b adds a `session` row nearby), `lab/native-ui.js`, `lab/skin.css`, `lab/render-exact.js`, new
 `lab/film-card.js`, `lab/sw.js` (regenerate with `node tests/pwa.test.mjs --write` after the merge), `docs/STATE-SCOPES.md`,
@@ -178,7 +186,7 @@ appended after the C6 rows — C6b adds a `session` row nearby), `lab/native-ui.
 
 ## What Josh will see and feel
 
-- The CAMERA card is shorter: the CAPTURE group is gone. **RENDER** is a card of its own on the right rack (closed; ⊕ in + and
+- The CAMERA card is shorter: the CAPTURE group is gone. **RENDER** is a card of its own at the top of the right rack (closed — a profile from before this build finds it open there once; ⊕ in + and
   WINDOW): IMAGE (×1–×4, CAPTURE IMAGE then DOWNLOAD IMAGE), the film rows (STILL / TIMELINE · ACTIVE / SELECTION, MP4 or PNG
   frames, size, FPS, LENGTH 6 s, START AT, MODULATION, TIMELINE), the estimate, RENDER, PREVIEW FIRST 3 SECONDS, CANCEL, SAVE and
   DISCARD after a film, the stored renders (RECOVER, RESUME, DISCARD), RUN SELF-TEST, and PERIOD (PLAN, PLACE ONE PERIOD).
