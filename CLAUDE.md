@@ -225,3 +225,18 @@ kit's record `lambdawaves.q0.modulation` (`rack.js` `modStore`/`saveMod`,
 bind.js `localStore`), never in the settings blob. `lab/modwindow.js` and
 `lab/audio.js` are gone; the kit's `audio-capture.js` is the capture.
 (0.5.0 C4)
+
+MIR 1.5.0-alpha.24 is adopted and pinned (0.5.0 C0): its manifest sha-256 is
+in `tests/mir-manifest.test.mjs` `ACCEPTED`; re-adopt only with the 1.5
+worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
+mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
+every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
+so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
+made live with a twin `:not(:where())`. The 37 `!important`s stay unlayered.
+R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
+never precached, never failed; our own modules keep the hard gate. The
+keyboard editor's stacking (`#keymap` fixed at `--z-veil`, `[hidden]` none) is
+λWAVES' own in `lab.css`. Knobs follow 1.5's ONE KNOB LAW (vertical drag, ⅛
+gear), guarded by `mir-controls`. Josh's seven glass rulings are read from
+`research/release-0.5.0/C0-GLASS-RULINGS.md`; the defaults applied there are
+five the kit's, two λWAVES' (the disconnected head's fill and lift, lab.css §G).

@@ -409,6 +409,34 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `LAMBDAWAVES CLAUDE YAN HANDOFF 2026-10-08.md` and `~/.claude/handoffs/agents/` hold the state; `git log <tip>..<branch>` on each of the five
 > branches shows how far each got; spawn fresh from the tips again, never from the old worktrees; the integrator's branch is `yan-c`.
 
+> **UPDATE (Claude Yan, 2026-10-08 22:50 CDT) — C4 and C0 MERGED on `yan-c`; D9 and the C7 fix DONE and waiting; the verifier runs.**
+> - **C4 merged `d212ecd`** (Opus tip `05e6d6c`; −3,548 incl. the badge ladder): the kit's `createModulation(floats, port)` over A5's port, THE ONE CLOCK
+>   (play's edge → `mod.follow`; MOD power = `setModulationEnabled`, a route bypass), LINKED/SEPARATE and `clockLink` retired, `modArm`/`modCadence` in the
+>   kit's record `lambdawaves.q0.modulation`, `lab/modwindow.js` 3,110 + `lab/audio.js` 438 gone (the kit's `audio-capture.js` is the capture), the
+>   tempo grid 2×4; take-in-bugs 4, history 39, new-project 8, routed-knob 4, lfo-tension 3, first-run 11, settings-probe 6/6; on the merged line
+>   take-in-bugs/history/new-project/routed-knob/lfo-tension/frame-occlusion/menubar all exit 0; CLAUDE.md paragraph `6582243`. Four brief
+>   candidates (port.targets read as a selector; a closed window still measures; `localStore` lacks `remove()`; `installModulation` persists
+>   PROJECT/WORKSPACE keys). mir-controls left to C0.
+> - **C0 merged `9c62346`** (Opus tip `7074ce9`): the pin, the cascade, R5-W1, the glass defaults, the two 1.4.3 `#keymap` rules in lab.css
+>   (keyboard-window green; the kit's 87 `.km-*` rules break nothing — an LED dot on bound keys and the kit's scrollbar until C3), `mir-controls`
+>   re-aimed to the ONE KNOB LAW (the base copy now fails its sideways line), node 85/85, browser 27/27, adopt `--check` in step; **the ms/s pair
+>   PASS by the interleaved method: base 39.345 vs C0 41.634, |Δ| 2.289 ≤ 3.536** (vs the stored 37.335 both sides drift ~+2 in that session; C0's
+>   own cost ≈ +2 ms/s → C-V's open item). On the merged line pwa is GREEN (286 files precached), new-project in step (16,889 B), `lab/*.js` **32,593**.
+>   C1's four interim `<link>`s left `index.html` (C0's `mir.css` supersedes them). REPORT's duplicate C headings folded; wave 196 sits first.
+> - **D9 DONE `0c1645f`** (Opus; not yet merged — after this gate round): QCD, H₂⁺, HELIUM deleted with restore shims (an old file names its retired
+>   window in one status line and lands on its heir: QUARKONIUM keeps QCD's parameters; H₂⁺ → MOLECULES · H₂ σg/σu; HELIUM → ATOM · He 1s), two shim
+>   DEMOS (`H₂ σu`, `HELIUM`) made by the app, history 39 → 42, molecule-demos 5/5, node 82 suites exit 0, `lab/*.js` 36,288 → 34,248 on its tree
+>   (−2,040; D's ledger credit −1,226 after the 814 moved to tests/lib). **For Josh's "by use" ruling:** H₂ = 268 lines (h2view 186 + h2.js 82; h2ci.js
+>   330 stays), reached only by an old project with `instruments.h2.on`; ELECTROSTATICS = 673 (electrostatics.js 437 + fieldview.js 236, missed by the
+>   plan), reached only by a project with `field.overlay` ≠ off; neither in + / WINDOW / TAB; no bundled file turns either on. `legacy/boot` is out of
+>   date (55 green / 57 red, all six D9 cases green; not run on the base) and needs its own pass.
+> - **C7-FIX DONE `27fb75b`** (Opus): `handOver(blob, name)` in capture.js — the kit's `saveBlob` only while `navigator.userActivation.isActive`, else
+>   the pre-C7 anchor download (URL kept 10 min for video); THE LOCK alone: GREEN 1004 · 0/0 and GREEN 1148 · 0/0; film-compare exit 0 (pixels and
+>   times unchanged); the probe with share stubbed: before 1 share rejected / 0 downloads → after 0 / 1 download, a real tap still shares; +15 lines.
+>   Not verified on a real Chrome/Safari/iPad. Merges with C7 (`74ade0c`) on the verifier's verdict. **The verifier (`worktree-agent-a4c46eea610dff207`)
+>   is still running.**
+> - Next: D9 merge → C2 (BRIEF-C2.md) ∥ C3 (BRIEF-C3.md) ∥ C6 (BRIEF-C6.md) from the D9-merged tip → C7 + fix on the verdict → C8? (0.5.1) → C-V.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
