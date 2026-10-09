@@ -1,5 +1,9 @@
 // Compatibility of the adopted MIR controls, measured in a real DOM. The app's
 // modulation/base-value wiring is covered by current.browser-test.mjs as well.
+// MIR 1.5's ONE KNOB LAW (kit.js setKnobLaw, 1.5.0-alpha.13; 0.5.0 C0 re-aimed this test from 1.4.3's numbers):
+// a knob drags VERTICALLY — 220 px of rise is a full scale, 320 under a finger, sideways motion is ignored —
+// and the fine gear is one eighth everywhere: on a knob drag, a fader drag (its Shift divisor, a fifth on 1.4.3)
+// and an arrow step (Shift = 1/8 of the 1/100 step, a quarter on 1.4.3). A knob's own travel/fine still win.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -14,23 +18,25 @@ try {
     document.body.append(fixture);
     const mount=control=>{fixture.replaceChildren(control.root);return control};
     const key=(control,code,shiftKey=false)=>control.root.dispatchEvent(new KeyboardEvent('keydown',{code,key:code,shiftKey,cancelable:true}));
-    const drag=(control,dx,shiftKey=false,pointerType='mouse')=>{
-      const target=control.root.querySelector('.k-dial')||control.root,r=target.getBoundingClientRect();
-      const send=(type,x)=>target.dispatchEvent(new PointerEvent(type,{pointerId:71,pointerType,button:0,clientX:x,clientY:r.top+r.height/2,shiftKey,cancelable:true}));
-      send('pointerdown',r.left+r.width/2);send('pointermove',r.left+r.width/2+dx);send('pointerup',r.left+r.width/2+dx);
+    const drag=(control,dx,dy,shiftKey=false,pointerType='mouse')=>{
+      const target=control.root.querySelector('.k-dial')||control.root,r=target.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+      const send=(type,px,py)=>target.dispatchEvent(new PointerEvent(type,{pointerId:71,pointerType,button:0,clientX:px,clientY:py,shiftKey,cancelable:true}));
+      send('pointerdown',x,y);send('pointermove',x+dx,y-dy);send('pointerup',x+dx,y-dy);
       return control.get();
     };
+    const rise=(control,dy,shiftKey,pointerType)=>drag(control,0,dy,shiftKey,pointerType);      // a knob: up is +
+    const slide=(control,dx,shiftKey,pointerType)=>drag(control,dx,0,shiftKey,pointerType);     // a fader: right is +
     const dial=options=>mount(knob({label:'test knob',min:0,max:1,value:.25,...options}));
     const slider=options=>mount(fader({label:'test fader',min:0,max:1,value:.25,...options}));
     try {
-      const normal=drag(dial(),55),fine=drag(dial(),90,true,'touch');
+      const normal=rise(dial(),55),sideways=drag(dial(),55,0),fine=rise(dial(),256,true,'touch');
       let k=dial();key(k,'ArrowUp');const arrow=k.get();key(k,'ArrowUp',true);const fineArrow=k.get();
       key(k,'Home');const home=k.get();key(k,'End');const end=k.get();
-      const tuned=drag(dial({travel:110,fine:8}),55),tunedFine=drag(dial({travel:110,fine:8}),88,true);
+      const tuned=rise(dial({travel:110,fine:8}),55),tunedFine=rise(dial({travel:110,fine:8}),88,true);
       const f=slider(),width=f.root.getBoundingClientRect().width;
-      const faderFine=drag(f,width/2,true,'touch');key(f,'ArrowUp');const faderArrow=f.get();key(f,'ArrowUp',true);const faderFineArrow=f.get();
+      const faderFine=slide(f,width*.8,true,'touch');key(f,'ArrowUp');const faderArrow=f.get();key(f,'ArrowUp',true);const faderFineArrow=f.get();
       const log=slider({min:1,max:100,value:1,log:true});
-      const midpoint=drag(log,0);key(log,'ArrowUp');const logArrow=log.get();
+      const midpoint=slide(log,0);key(log,'ArrowUp');const logArrow=log.get();
       let overlay=null;
       if(typeof log.show==='function') {
         log.set(10);log.show(20);
@@ -38,16 +44,16 @@ try {
         log.set(5);overlay.cleared=log.shown===null&&!log.root.classList.contains('mod');
         log.setDefault(2);key(log,'Delete');overlay.reset=log.get();
       }
-      return {normal,fine,arrow,fineArrow,home,end,tuned,tunedFine,faderFine,faderArrow,faderFineArrow,midpoint,logArrow,overlay,errors:__e};
+      return {normal,sideways,fine,arrow,fineArrow,home,end,tuned,tunedFine,faderFine,faderArrow,faderFineArrow,midpoint,logArrow,overlay,errors:__e};
     } finally { fixture.remove(); }
   `);
   assert.equal(measured.E, undefined, measured.E);
-  near(measured.normal, .5); near(measured.fine, .35);
-  near(measured.arrow, .26); near(measured.fineArrow, .2625);
+  near(measured.normal, .5); near(measured.sideways, .25); near(measured.fine, .35);     // 55/220; sideways ignored; 256/(320·8)
+  near(measured.arrow, .26); near(measured.fineArrow, .26125);                                 // .01; Shift = .01/8
   near(measured.home, 0); near(measured.end, 1);
-  near(measured.faderFine, .35); near(measured.faderArrow, .36); near(measured.faderFineArrow, .3625);
-  console.log('PASS adopted MIR preserves default knob/fader drag, touch fine gain, keyboard steps and bounds');
-  near(measured.tuned, .75); near(measured.tunedFine, .35);
+  near(measured.faderFine, .35); near(measured.faderArrow, .36); near(measured.faderFineArrow, .36125);   // .8 of the width / 8
+  console.log('PASS adopted MIR keeps the ONE KNOB LAW: a vertical knob drag (sideways ignored), the 1/8 fine gear under a finger, on a fader and on an arrow, and the bounds');
+  near(measured.tuned, .75); near(measured.tunedFine, .35);                                    // 55/110; 88/(110·8)
   near(measured.midpoint, 10); near(measured.logArrow, 100 ** .51);
   assert.ok(measured.overlay, 'adopted fader supports a displayed modulation value');
   near(measured.overlay.base, 10); near(measured.overlay.shown, 20);
