@@ -56,13 +56,11 @@ const TODAY = new Date();
  *     alternative is a permanent exemption, which is the thing #17 is about.
  */
 /* 0.4.0 S0 · wave 138: the two vendor rows (katex.min.js, marked.min.js) CLOSED BY WIRING — lab/index.html loads the kit's
-   copies and the byte-identical lab/vendor duplicates are deleted.  The five shell rows are renewed ONCE, naming their consumer. */
+   copies and the byte-identical lab/vendor duplicates are deleted.  The five shell rows were renewed ONCE, naming their consumer.
+   0.5.0 C0 · R5-W1 (PLAN §9): those five (lab/mir/shell/{about,accent,menubar,notebook,wordmark}.js) are KIT files, and a kit
+   file no root reaches is now §6b's to report, not this list's to excuse; the rows retire and the list is for λWAVES' own. */
 const ALLOWLIST = [
-  { file: 'lab/mir/shell/about.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ ABOUT face onto the kit shell.' },
-  { file: 'lab/mir/shell/accent.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ accent editor onto the kit shell.' },
-  { file: 'lab/mir/shell/menubar.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ menubar onto the kit shell.' },
-  { file: 'lab/mir/shell/notebook.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ notebook controller onto the kit shell.' },
-  { file: 'lab/mir/shell/wordmark.js', date: '2026-10-07', reason: 'Staged by MIR 1.4.3; its consumer is the 0.5.0 adoption (PLAN.md §6), where lab/rack.js moves λWAVES’ wordmark onto the kit shell.' },
+  // empty since 0.5.0 C0 — an app module staged for a named later wave is the only thing that may be named here
 ]; // Wave 107 wired the deterministic renderer into CAPTURE; the ChronusQ ports and the H₂O modules were staged here 2026-09-11/12 and reached by mathworker.js + chemview.js on 2026-09-12.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════
@@ -444,6 +442,22 @@ for (const h of walk(LAB).filter((f) => /\.html?$/i.test(f) && f !== INDEX)) {
   }
 }
 
+/* ══ 6b. R5-W1 · THE KIT'S OWN FILES (0.5.0 C0; PLAN §9, AUDIT-OPUS-1 A11) ════════════════════════════════════
+ * A file MIR-MANIFEST.json lists is the kit's: λWAVES may not edit or delete it (CLAUDE.md), and a kit adopted whole brings
+ * modules for consumers λWAVES has not reached yet (C1–C9).  So a manifest .js that no root reaches is REPORTED (name and KB)
+ * and NOT PRECACHED, and it does not fail: ANTI-PATTERN 17 is about inert APP code that every visitor downloads, and both its
+ * halves stand — an app module keeps the hard gate below, and the kit's unreached set is asserted absent from sw.js's precache.
+ * tests/pwa.test.mjs and tools/build-deploy.mjs read the set from `node tests/wiring.test.mjs --unreached-kit` (one JSON array of
+ * lab/-relative paths), so the precache, the deploy and this walk cannot disagree. */
+const MANIFEST_FILE = path.join(ROOT, 'MIR-MANIFEST.json');
+const KIT_FILES = new Set(Object.keys((JSON.parse(read(MANIFEST_FILE)).files) || {}).map((f) => path.resolve(ROOT, f)));
+assert.ok(KIT_FILES.size > 0, 'MIR-MANIFEST.json lists no files — R5-W1 cannot tell the kit\'s modules from λWAVES\'');
+const kitUnreached = universe.filter((f) => KIT_FILES.has(f) && !reached.has(f));
+if (process.argv.includes('--unreached-kit')) {
+  console.log(JSON.stringify(kitUnreached.map((f) => path.relative(LAB, f).split(path.sep).join('/'))));
+  process.exit(0);
+}
+
 /* Where does an orphan's NAME appear?  This is the near-miss that made capture.js look wired for a week. */
 function mentions(orphan) {
   const base = path.basename(orphan);
@@ -505,7 +519,21 @@ for (const u of unresolvable) console.log(`    UNRESOLVABLE  ${u.file}:${u.line}
 for (const r of rootedSpecs) console.log(`    UNRESOLVABLE  ${r.from}  server-absolute specifier '${r.spec}' — resolved against the deploy root, not the repo`);
 if (externals.length) console.log(`    external (not this repo's to reach): ${externals.map((e) => e.spec).join(', ')}`);
 
-const orphans = universe.filter((f) => !reached.has(f) && !allowed.has(f));
+/* R5-W1 (§6b): the kit's unreached modules, printed every run with their size, never failed — and never precached. */
+console.log(`\n  ── KIT FILES NO ROOT REACHES (R5-W1: reported, not precached, not failed) ─────────────────────`);
+if (!kitUnreached.length) console.log('    none: every kit module is reached');
+else {
+  const kitKB = (kitUnreached.reduce((s, f) => s + statSync(f).size, 0) / 1024).toFixed(0);
+  console.log(`    ${kitUnreached.length} of ${universe.filter((f) => KIT_FILES.has(f)).length} kit modules, ${kitKB} KB, waiting for their consumers (PLAN §2 C1–C9):`);
+  const byDir = new Map();
+  for (const f of kitUnreached) { const d = path.relative(LAB, path.dirname(f)).split(path.sep).join('/'); (byDir.get(d) || byDir.set(d, []).get(d)).push(`${path.basename(f)} ${KB(f)}`); }
+  for (const [d, list] of byDir) console.log(`    lab/${d}/  ${list.join(' · ')}`);
+}
+const kitPrecached = kitUnreached.filter((f) => PRECACHED.has(f));
+assert.deepEqual(kitPrecached.map(rel), [],
+  'R5-W1: a kit module no root reaches is in sw.js\'s precache — every install would download it for nothing. Run `node tests/pwa.test.mjs --write` (it reads this suite\'s --unreached-kit set).');
+
+const orphans = universe.filter((f) => !reached.has(f) && !allowed.has(f) && !KIT_FILES.has(f));
 if (orphans.length) {
   console.log('\n  ── ORPHANS ───────────────────────────────────────────────────────────────────────────────');
   for (const o of orphans) {
@@ -523,6 +551,6 @@ assert.equal(orphans.length, 0,
   "  add it to §1's ALLOWLIST with a reason that names its caller and today's date.\n");
 
 const totalKB = (universe.reduce((s, f) => s + statSync(f).size, 0) / 1024).toFixed(0);
-console.log(`\nPASS wiring: all ${universe.length} .js files under lab/ (${totalKB} KB) are reached from the real roots ` +
-  `(${reached.size} nodes, ${edgeCount.static + edgeCount.dynamic} edges), or named in the allowlist (${ALLOWLIST.length}). ` +
+console.log(`\nPASS wiring: all ${universe.length - kitUnreached.length} reachable .js files of ${universe.length} under lab/ (${totalKB} KB) are reached from the real roots ` +
+  `(${reached.size} nodes, ${edgeCount.static + edgeCount.dynamic} edges), or named in the allowlist (${ALLOWLIST.length}); ${kitUnreached.length} kit modules wait unreached and unprecached (R5-W1). ` +
   'Comments, strings, template literals and sw.js\'s precache table are read as data, never as edges.\n');

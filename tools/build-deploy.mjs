@@ -142,8 +142,11 @@ const DATA = JSON.parse((readFileSync(path.join(LAB, 'sw.js'), 'utf8').match(/\n
    from sw.js with tests/pwa.test.mjs's own pattern (`*` one segment, a trailing `/` a folder). */
 const KIT_SKIP = JSON.parse((readFileSync(path.join(LAB, 'sw.js'), 'utf8').match(/\nconst SKIP = (\[[^\]]*\]);/) || [, '[]'])[1].replace(/'/g, '"'))
   .map((p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + (p.endsWith('/') ? '' : '$')));
+/* 0.5.0 C0 · R5-W1 (PLAN §9): …and an adopted kit module no root reaches (copied to dist/, never precached), READ from
+   tests/wiring.test.mjs's own walk (`--unreached-kit`) exactly as pwa.test reads it. */
+const KIT_UNREACHED = new Set(JSON.parse(execFileSync(process.execPath, [path.join(ROOT, 'tests', 'wiring.test.mjs'), '--unreached-kit'], { encoding: 'utf8' })));
 const NOT_PRECACHED = (labRel) =>
-  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel) || DATA.some((d) => labRel.startsWith(d)) || KIT_SKIP.some((r) => r.test(labRel));
+  labRel === 'sw.js' || /\.(md|txt)$/i.test(labRel) || labRel === 'mir/shell/vendor/katex/LICENSE' || STAGED.has(labRel) || KIT_UNREACHED.has(labRel) || DATA.some((d) => labRel.startsWith(d)) || KIT_SKIP.some((r) => r.test(labRel));
 
 /* Deploy-only files: correctly absent from the precache, because they are not in lab/ at all. */
 const DEPLOY_ONLY = new Set(['_headers', '_redirects', 'robots.txt', ...SHIP_EXTRA.map(([f]) => at(f))]);

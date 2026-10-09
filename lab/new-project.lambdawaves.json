@@ -395,7 +395,7 @@
      "route": 0
     },
     "transport": {
-     "bpm": 60
+     "bpm": 30
     },
     "macros": [
      {
