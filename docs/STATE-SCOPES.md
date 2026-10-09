@@ -39,6 +39,7 @@ this file.
 | the kit's modulation presets, `lambdawaves.q0.modpresets` (`mir/modulation/mod.js` `PRESET_LS`: the presets this browser saved, in their folders) | its own key | PREFERENCE (no project, link or history row writes it) |
 | AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode` | settings | PREFERENCE |
 | the modulation's POWER `modArm` (routes on or bypassed; time runs on) and its cadence `modCadence` (60 / 120 Hz) | the kit's modulation record `lambdawaves.q0.modulation` (`rack.js` `modStore`, MIR's `bind.js` `localStore`: the record `installModulation` reads), never settings; since 0.5.0 C4 an older settings blob's pair is read once into the record and dropped by the blob's next save; FORGET clears it with the settings | PREFERENCE |
+| the RENDER card's choices (`lambdawaves.q0.render.*`: motion, format, size, fps, duration, offset, modulation, timeline, the picture `scale`; R7's first-run seed is duration 6, size current, modulation ON when MOD is armed) and the kit recorder's measured speed `mir.render.calib` (0.5.0 C7b) | their own localStorage keys, never settings | PREFERENCE |
 | `clockLink` (LINKED / SEPARATE) — RETIRED at 0.5.0 C4 (R-B1, the one clock: THE play plays the modulation, the power never plays). An older blob's key is never read and is dropped by the next save | — | — |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |

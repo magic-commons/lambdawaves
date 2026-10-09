@@ -779,8 +779,7 @@ export function createFilm(LW, opts = {}) {
     const base = uniqueName(captureName({ kind: L.kind, label: L.label, w: L.w, h: L.h, fps: L.fps, frames: L.frames, T: L.T, ext }), taken);
     return /recovered/.test(name) ? base.replace('.' + ext, '-recovered.' + ext) : part && part !== '001' ? base.replace(/\.zip$/, '-part' + part + '.zip') : base;
   }
-  /** a film's own copy in the kit's store, removed — after the hand-over, or when a cancelled film leaves one (λWAVES shows no
-   *  RECOVER row yet: the kit's RENDER card would) */
+  /** a film's own copy in the kit's store, removed — a verify's runs, or a failed film's leftovers (the card lists the rest) */
   async function discard(r) {
     const rec = Object.values(recs)[0];                    // both recorders keep one directory
     if (!rec || !r) return;
@@ -913,12 +912,11 @@ export function createFilm(LW, opts = {}) {
   }
 
   /** the hand-over: every file of a finished film, under λWAVES' name (capture.js' handOver: the render spent the tap, so a
-   *  download).  The handed-over URL reads the store's file, so the store's copy goes after ten minutes, the longest a
-   *  hand-over keeps its URL (a video's); at two a download confirmed late failed (C7-VERIFY N1, film-handover scene 2) */
+   *  download).  The store's copy stays (0.5.0 C7b): the RENDER card's DISCARD RENDER and DISCARD STORED RENDER are its discard, so
+   *  a hand-over's URL never outlives its file (C7-VERIFY N1) and no timer is set */
   function save(r) {
     if (!r || !r.files || !r.files.length) return false;
     r.files.forEach((x, i) => handOver(x.blob, r.files.length === 1 ? r.name : r.name.replace(/\.zip$/, '') + '-part' + String(i + 1).padStart(3, '0') + '.zip'));
-    setTimeout(() => discard(r), 10 * 60 * 1000);
     return true;
   }
 

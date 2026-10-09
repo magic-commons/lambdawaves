@@ -32,15 +32,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const flat=document.createDocumentFragment();
   for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);
-  const exportRow=ui.capExact.root.parentElement;exportRow.classList.add('camera-export-row');
-  const exportDetails=el('div','camera-export-details');exportDetails.id='camera-export-details';exportDetails.hidden=true;exportRow.after(exportDetails);
-  exportDetails.append(ui.capExactRo.root,ui.capShot.root,ui.capPlanRo.root);
-  const disclosure=el('button','trig camera-export-toggle',exportRow);disclosure.type='button';
-  disclosure.setAttribute('aria-controls',exportDetails.id);disclosure.setAttribute('aria-expanded','false');
-  chip(disclosure,'chevronDown','Show export details');
-  const syncDisclosure=()=>{disclosure.setAttribute('aria-expanded',String(!exportDetails.hidden));disclosure.setAttribute('aria-label',exportDetails.hidden?'Show export details':'Hide export details');};
-  disclosure.addEventListener('click',()=>{exportDetails.hidden=!exportDetails.hidden;syncDisclosure();});syncDisclosure();
-  for(const r of ui.capExact.root.closest('.grp').querySelectorAll('.row'))if(!r.children.length)r.remove();
   const shadow=document.querySelector('.dev[data-id="shadow"] .dev-body');
   const shadowDetails=el('div','shadow-details');shadowDetails.id='shadow-details';shadowDetails.hidden=true;shadow.appendChild(shadowDetails);
   shadowDetails.append(ui.hc.root);for(const n of shadow.querySelectorAll(':scope > .epi'))shadowDetails.appendChild(n);if(ui.shFoot)shadowDetails.appendChild(ui.shFoot);ui.shadowDetails=shadowDetails;   // 0.4.0 S3: the footer (L, T, V, S) runs only while this fold is open

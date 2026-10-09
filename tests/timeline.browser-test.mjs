@@ -7,11 +7,17 @@
 //   T5  THE FOCUS LAW: with the surface focused, E is the timeline's SELECT tool (not a dolly), and Space still plays
 //   T9  undo: a clip edit is one row of the timeline's own undo; a λWAVES undo leaves the arrangement; NEW clears it
 //   T10 a project with an arrangement saves, reopens and serialises byte-identically; NEW and the demos carry no `timeline`
+//   T6  PLACE ONE PERIOD → the period clip, ACTIVE over it, the card armed; a real RENDER = captureUI.loop(), digest for digest, MP4 bytes too
+//   T7  the card's STILL (6 s, 30 fps, CURRENT, MODULATION OFF, TIMELINE OFF) = captureUI.record(); its PNG FRAMES are the same frames
+//   T8  MODULATION ON with a routed LFO: frame zero is the lab's t, RATE integrates, two runs identical
+//   T11 the stored rows: Escape at frame 75 (a scrub refused meanwhile) → RESUME WITH MATCHING PROJECT = the uninterrupted frames; a state
+//       change → RESUME refused, DISCARD STORED RENDER removes it; CANCEL then a reload → RECOVER COMPLETED FRAMES hands over a valid MP4
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
-import { actions, relActions } from '../tools/gate/drv.mjs';
+import { actions, relActions, go } from '../tools/gate/drv.mjs';
 
-const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz&sw=0&warn=0`, { width: 1500, height: 950, script: 300000,
+const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz&sw=0&warn=0`;
+const g = await open(URL_, { width: 1500, height: 950, script: 300000,
   prefs: { 'dom.storageManager.prompt.testing': true, 'dom.storageManager.prompt.testing.allow': true } });
 const ev = async (body) => { const r = await g.ev(body); if (r && r.E) throw new Error('page threw: ' + r.E); return r; };
 const SPACE = '';
@@ -133,6 +139,107 @@ try {
     return { inFile: JSON.parse(text).data.presentation.timeline ? JSON.parse(text).data.presentation.timeline.clips.length : -1, empty, emptyKey, back, same: strip(text) === strip(again), diff: diff.slice(0, 12), carry, errs: __e.slice() };`);
   judge('T10 a project with an arrangement saves it (presentation.timeline), NEW empties it with no key, the open brings it back, and a re-save is byte-identical; NEW and the six demos carry none',
     t10.inFile === 1 && t10.empty === 0 && !t10.emptyKey && t10.back && t10.same && !t10.carry.length && !t10.errs.length, t10);
+
+  /* ── the RENDER card's roads (C7B-DESIGN §5.2 4–8): a card film is the facade's film, digest for digest, when the take is the same ── */
+  await ev(`const tl = __LW.timeline; tl.model.restore(null); __LW.loadPreset('1s+2pz'); __LW.pause(); __LW.scrub(0); await __LW.settle();
+    try { await (await navigator.storage.getDirectory()).removeEntry('lambdawaves-recordings', { recursive: true }); } catch (_) {}
+    const F = __LW.captureUI.exact; window.__saved = []; F.save = (r) => { __saved.push(r); return true; };   /* the facade's hand-over, counted not followed */
+    window.__R = __LW.render; window.__C = __R.view.controls; window.__set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
+    window.__log = () => { const L = __LW.captureUI.exact.last; return L ? { kind: L.kind, n: L.log.length, d: L.log.map((x) => x.digest), t: L.log.map((x) => x.t), k: L.log.map((x) => x.k) } : null; };
+    window.__fac = (r) => r && r.manifest ? { n: r.frames, d: r.manifest.frames.map((x) => x.digest), t: r.manifest.frames.map((x) => x.t), bytes: r.bytes } : { none: true };
+    window.__same = (a, b) => !!(a && b && a.d && b.d && a.d.length === b.d.length && a.d.every((x, i) => x === b.d[i]) && a.t.every((x, i) => x === b.t[i]));
+    window.__films = async () => { try { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('lambdawaves-recordings'); let n = 0; for await (const _ of d.keys()) n++; return n; } catch (_) { return 0; } };
+    window.__btn = (text) => [...document.querySelectorAll('.dev[data-id="render"] button')].find((b) => b.textContent.trim() === text && !b.disabled);
+    if (__LW.mod.armed) __LW.mod.arm(false);   /* MOD off: the facade freezes, as the card's MODULATION OFF does */
+    __LW.layout.raise('render'); tl.close(); await __w(800); await __LW.settle(); await __w(500); return 1;`);
+  const tapRender0 = async () => { await ev(`__C.renderBtn.id = 'tl-render'; __C.renderBtn.scrollIntoView({ block: 'center', behavior: 'instant' }); await __w(500); await __LW.settle(); await __w(400); return 1;`); return g.tap('#tl-render'); };
+  const tapRender = async () => { const t = await tapRender0(); await g.waitFor('__R.recorder.running()', 200, 50); await g.waitFor('!__R.recorder.running()', 560, 500); await ev(`await __w(300); return 1;`); return t; };
+
+  /* ── T6 · PLACE ONE PERIOD → the period clip at beat 0, ACTIVE over it, the card on TIMELINE · ACTIVE with MODULATION OFF; a real RENDER
+     films the facade's ONE PERIOD, every frame's digest and time, and the MP4's bytes ── */
+  const t6a = await ev(`const id = __R.place(); await __w(600); const opened = __LW.timeline.isOpen(); __LW.timeline.close(); await __w(500); await __LW.settle(); await __w(400); const st = __R.view.state(), doc = __LW.timeline.model.state(), c = doc.clips.find((x) => x.id === id), cv = c && doc.curves.find((x) => x.id === c.curveId);
+    return { id, opened, clip: c && { start: c.start, duration: c.duration }, kind: cv && cv.kind, active: doc.active, motion: st.motion, mod: __C.modSelect.value, plan: st.plan };`);
+  const t6tap = await tapRender();
+  const t6 = await ev(`const card = __log(), done = __R.view.state().done; const fac = __fac(await __LW.captureUI.loop());
+    return { card: card && { kind: card.kind, n: card.n }, fac: { n: fac.n, bytes: fac.bytes }, done, same: __same(card, fac), bytes: !!done && fac.bytes === done.bytes, errs: __e.slice() };`);
+  judge('T6 PLACE ONE PERIOD places a lw-period clip at beat 0 with ACTIVE over it and arms the card (TIMELINE · ACTIVE, MODULATION OFF); a real RENDER films ONE PERIOD: every digest, every time and the MP4 bytes equal the facade\'s',
+    t6a.opened && t6a.kind === 'lw-period' && t6a.clip.start === 0 && t6a.active && t6a.active.start === 0 && t6a.active.end === t6a.clip.duration && t6a.motion === 'timeline-active' && t6a.mod === 'off' && t6tap.ok === 1
+      && t6.card.kind === 'loop' && t6.same && t6.bytes && !t6.errs.length, { t6a, t6tap, t6 });
+
+  /* ── T7 · the card's STILL (6 s, 30 fps, CURRENT, MODULATION OFF, TIMELINE OFF) is C7's RECORD, digest for digest; its PNG FRAMES are the same frames ── */
+  await ev(`__set(__C.motion, 'still'); __set(__C.recFormat, 'mp4'); __set(__C.recDuration, '6'); __set(__C.recFps, '30'); __set(__C.recSize, 'current'); __set(__C.modSelect, 'off'); __set(__C.timelineSelect, 'off');
+    __LW.scrub(0); await __LW.settle(); return 1;`);
+  const t7tap = await tapRender();
+  const t7a = await ev(`window.__T7 = __log(); __LW.scrub(0); await __LW.settle(); const fac = __fac(await __LW.captureUI.record()); __set(__C.recDuration, '1'); __LW.scrub(0); await __LW.settle();
+    __C.renderBtn.click(); await __w(300); for (let i = 0; i < 300 && __R.recorder.running(); i++) await __w(200); await __w(300); window.__T7s = __log(); __set(__C.recFormat, 'png'); __LW.scrub(0); await __LW.settle();   /* 1 s: 6 s of PNG overflows a test profile's store */
+    return { card: __T7.n, fac: fac.n, same: __same(__T7, fac) };`);
+  const t7ptap = await tapRender();
+  const t7 = await ev(`const png = __log(), done = __R.view.state().done; __set(__C.recFormat, 'mp4'); __set(__C.recDuration, '6'); return { png: png.n, mp4: __T7s.n, pngSame: __same(png, __T7s), file: done && done.name, status: __R.view.state().status, errs: __e.slice() };`);
+  judge('T7 the card\'s STILL (6 s · 30 fps · CURRENT · MODULATION OFF · TIMELINE OFF, a real RENDER) equals captureUI.record() frame for frame; its PNG FRAMES are the same frames as its MP4 (1 s, 30 frames each)',
+    t7tap.ok === 1 && t7ptap.ok === 1 && t7a.card === 180 && t7a.same && t7.png === 30 && t7.mp4 === 30 && t7.pngSame && /\.zip$/.test(t7.file || '') && !t7.errs.length, { t7a, t7, t7tap, t7ptap });
+
+  /* ── T8 · MODULATION ON with a routed LFO: frame zero is the lab's time, RATE integrates from it, the picture moves, two runs are identical ── */
+  const t8 = await ev(`__LW.mod.arm(true); const M = __LW.mod.model, audio = M.sourceList().filter((x) => x.kind === 'audio' && x.on !== false); for (const a of audio) M.setSource(a.id, { on: false });   /* NEW's AUDIO level: a live input cannot replay (the kit's refusal) */
+    const s = __LW.mod.addSource('lfo'), m = __LW.mod.addMacro(); __LW.mod.bind(m, s); const route = __LW.mod.route(m, 'material.hue', 0, 0.6);
+    __set(__C.recDuration, '1'); __set(__C.modSelect, 'on'); __set(__C.timelineSelect, 'off'); __LW.scrub(2); await __LW.settle(); await __w(300);
+    const run = async () => { __C.renderBtn.click(); await __w(400); for (let i = 0; i < 600 && (__R.view.state().running || __R.recorder.running()); i++) await __w(200); await __w(200); return __log(); };
+    const a = await run(); __LW.scrub(2); await __LW.settle(); const b = await run(); const rate = __LW.clock.rate;
+    __LW.mod.unroute(route); for (const a of audio) M.setSource(a.id, { on: true }); __LW.mod.arm(false); __set(__C.modSelect, 'off'); __set(__C.recDuration, '6');
+    return { route: !!route, status: __R.view.state().status, err: __R.recorder.state().lastError, n: a.n, same: __same(a, b), t0: a.t[0], dt: a.t[1] - a.t[0], want: rate / 30, moved: a.d[0] !== a.d[a.n - 1], errs: __e.slice() };`);
+  judge('T8 MODULATION ON with a routed LFO: frame zero is the lab\'s t (2), each frame advances RATE/fps, the picture moves, and two runs are identical',
+    t8.route && t8.n === 30 && t8.same && t8.t0 === 2 && Math.abs(t8.dt - t8.want) < 1e-9 && t8.moved && !t8.errs.length, t8);
+
+  /* ── T11 · THE STORED ROWS.  A film cancelled by a real Escape at frame 75 (a scrub refused while it ran) is RESUMED WITH MATCHING PROJECT and
+     its frames are an uninterrupted run's; one cancelled before a state change is refused with the kit's sentence and DISCARD STORED RENDER
+     removes it; one cancelled by a real CANCEL tap is still listed after a reload, and RECOVER COMPLETED FRAMES hands over a valid MP4 ── */
+  const runTo = async (frame) => { await ev(`__LW.scrub(0); await __LW.settle(); window.__p0 = __R.recorder.state().progress; __C.renderBtn.click(); return 1;`); await g.waitFor('__R.recorder.running()', 200, 50);   /* the RENDER press is T6's and T7's claim; here the film is the setting */ return g.waitFor(`__R.recorder.running() && __R.recorder.state().progress !== __p0 && /^(resolve|capture)$/.test((__R.recorder.state().progress || {}).phase) && __R.recorder.state().progress.frame >= ${frame}`, 1200, 100); };   /* the last run's progress object stands until this run's first */
+  await runTo(75);
+  const scrub = await ev(`const C = __LW.timeline.controller, began = C.beginScrub(); if (began) C.endScrub({ cancel: true }); return { refused: began === false, running: __R.recorder.running() };`);
+  await g.press('');
+  const t11a = await ev(`for (let i = 0; i < 100 && __R.recorder.running(); i++) await __w(200); await __w(600); __R.view.paint(); await __w(900);
+    const b = __btn('RESUME WITH MATCHING PROJECT'); if (b) { b.id = 'tl-resume'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); } await __w(400);
+    return { phase: __R.recorder.state().phase, resume: !!b, recover: !!__btn('RECOVER COMPLETED FRAMES') };`);
+  const resumeTap = await g.tap('#tl-resume');
+  await g.waitFor('!__R.recorder.running() && (!!__R.view.state().done || !!__R.view.state().status)', 560, 500);
+  const t11b = await ev(`await __w(300); const L = __log(), ref = __T7, bad = L.k.filter((k, j) => L.d[j] !== ref.d[k] || L.t[j] !== ref.t[k]);
+    return { n: L.n, first: L.k[0], last: L.k[L.n - 1], bad: bad.length, status: __R.view.state().status, err: __R.recorder.state().lastError };`);
+  judge('T11a a real Escape cancels a film at frame 75 (a scrub refused while it ran); RESUME WITH MATCHING PROJECT (a real tap) finishes it, and its frames are the uninterrupted run\'s, digest and time',
+    scrub.refused && scrub.running && t11a.phase === 'cancelled' && t11a.resume && t11a.recover && resumeTap.ok === 1 && t11b.n > 0 && t11b.last === 179 && t11b.bad === 0, { scrub, t11a, resumeTap, t11b });
+  await runTo(75);
+  await ev(`__C.cancel.id = 'tl-cancel'; return 1;`);
+  const cancelTap = await g.tap('#tl-cancel');
+  const t11c = await ev(`for (let i = 0; i < 100 && __R.recorder.running(); i++) await __w(200); await __w(600); const n0 = await __films();
+    __LW.loadPreset('1s+2s'); await __LW.settle(); for (let i = 0; i < 25 && !__btn('RESUME WITH MATCHING PROJECT'); i++) { __R.view.paint(); await __w(500); } const b = __btn('RESUME WITH MATCHING PROJECT'); if (b) { b.id = 'tl-resume2'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); } await __w(400);
+    const jobs = (await __R.recorder.recoveries()).map((j) => [j.frames, j.files.length, j.store.manifest.state, j.spec.frames]); return { n0, resume: !!b, phase: __R.recorder.state().phase, err: __R.recorder.state().lastError, jobs };`);
+  const resume2 = await g.tap('#tl-resume2');
+  const t11d = await ev(`for (let i = 0; i < 50 && __R.recorder.running(); i++) await __w(200); await __w(500); const status = __R.view.state().status;
+    __R.view.paint(); await __w(1500); const it = [...document.querySelectorAll('.dev[data-id="render"] button')].find((x) => x.textContent.trim() === 'RESUME WITH MATCHING PROJECT');
+    const d = it && [...it.parentElement.querySelectorAll('button')].find((x) => x.textContent.trim() === 'DISCARD STORED RENDER'); if (d) { d.id = 'tl-discard'; d.scrollIntoView({ block: 'center', behavior: 'instant' }); } await __w(400); return { status, discard: !!d };`);
+  const discardTap = await g.tap('#tl-discard');
+  const t11e = await ev(`await __w(900); return { n1: await __films(), resume: !!__btn('RESUME WITH MATCHING PROJECT') };`);
+  judge('T11b a film cancelled by a real CANCEL tap, then a state change: RESUME is refused with the kit\'s sentence; DISCARD STORED RENDER (a real tap) removes its directory',
+    cancelTap.ok === 1 && t11c.resume && resume2.ok === 1 && /changed/.test(t11d.status) && t11d.discard && discardTap.ok === 1 && t11e.n1 === t11c.n0 - 1 && !t11e.resume, { cancelTap, t11c, t11d, t11e });
+  await ev(`__LW.loadPreset('1s+2pz'); await __LW.settle(); return 1;`);
+  await runTo(75);
+  await g.tap('#tl-cancel');
+  await ev(`for (let i = 0; i < 100 && __R.recorder.running(); i++) await __w(200); await __w(800); __LW.layout.projects.markClean(); window.__before = 1; return 1;`);   /* clean: no beforeunload question */
+  await go(g.s, URL_);
+  await g.waitFor('window.__LW && __LW.ready && __LW.render', 3000, 20);
+  const t11f = await ev(`try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
+    const live = () => !!(navigator.userActivation && navigator.userActivation.isActive); window.__H = { shares: [], downloads: [] };
+    Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
+    Object.defineProperty(navigator, 'share', { configurable: true, value: (d) => { __H.shares.push({ names: d.files.map((f) => f.name), blob: d.files[0] }); return live() ? Promise.resolve() : Promise.reject(new DOMException('no gesture', 'NotAllowedError')); } });
+    const click = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) { __H.downloads.push({ name: this.download, href: this.href }); return; } return click.call(this); };
+    __LW.layout.raise('render'); await new Promise((r) => setTimeout(r, 1500)); const find = () => [...document.querySelectorAll('.dev[data-id="render"] button')].find((x) => x.textContent.trim() === 'RECOVER COMPLETED FRAMES');
+    for (let i = 0; i < 25 && !find(); i++) { __LW.render.view.paint(); await new Promise((r) => setTimeout(r, 500)); } const b = find(); if (b) { b.id = 'tl-recover'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); }
+    await new Promise((r) => setTimeout(r, 400)); return { recover: !!b, reloaded: !window.__before };`);
+  const recoverTap = await g.tap('#tl-recover');
+  const t11g = await ev(`for (let i = 0; i < 60 && !(__H.shares.length + __H.downloads.length); i++) await new Promise((r) => setTimeout(r, 250));
+    const blob = __H.downloads[0] ? await (await fetch(__H.downloads[0].href)).blob() : __H.shares[0] ? __H.shares[0].blob : null;
+    const head = blob ? new TextDecoder().decode(new Uint8Array(await blob.slice(4, 8).arrayBuffer())) : null;
+    return { shares: __H.shares.length, downloads: __H.downloads.length, head, bytes: blob && blob.size, errs: (window.__e || []).slice() };`);
+  judge('T11c a film cancelled by a real CANCEL tap is still listed after a reload; RECOVER COMPLETED FRAMES (a real tap) hands over one valid MP4',
+    t11f.reloaded && t11f.recover && recoverTap.ok === 1 && t11g.shares + t11g.downloads === 1 && t11g.head === 'ftyp' && t11g.bytes > 0 && !t11g.errs.length, { t11f, recoverTap, t11g });
 } catch (e) {
   judge('the suite ran to its end', false, String(e && e.message || e).slice(0, 500));
 } finally { await g.close(); }

@@ -21,6 +21,8 @@ export const FAMILIES = Object.freeze({
   'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows)', 'PREFERENCE'],                     // 0.5.0 C2
   'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
   'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
+  'lambdawaves.q0.render': ['film-card.js (MIR createRenderView, its prefix): the RENDER card\'s choices and the picture scale', 'PREFERENCE'],   // 0.5.0 C7b
+  'mir.render.calib': ['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
 });
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;
