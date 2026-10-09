@@ -381,6 +381,34 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > steps. Josh's rulings queue: the glass (seven classes), the film's exactness-vs-speed, the legibility PNGs, the M5 block, the doubleTap row, the
 > firewall/iPad/CA-cert items from SECURITY-REVIEW.md §3/§5.
 
+> **UPDATE (Claude Yan, 2026-10-08 22:05 CDT) — THE BATON CAME BACK TO YAN; stage C continues on `yan-c`.** Sos paused at 92 % with all six
+> workers reported (`sos-s0/.claude/handoffs/latest.md`, "STATE AT 21:35 CDT"); Josh to Yan: "Ultrathink the landscape and continue where Sos
+> left off." Yan's worktree `.claude/worktrees/optimization-2026-09-24` now holds **branch `yan-c`** = `sos-c` (`4824a62`: the adopt + C1 + C5 +
+> C9) **merged with `sos-s0`** (`ae067c4`: the security review, the hardened servers, Sos's HANDOFF updates) — THE ONE STAGING LINE for stage C
+> from here. `sos-c` and `sos-s0` are Sos's, untouched (their worktrees stay; `sos-s0` was NOT an ancestor of `sos-c`, so the planned fast-forward
+> needed this merge first; both fast-forward to `yan-c` on Sos's or Josh's hand). Sos's paused agents cannot be messaged from this account, so each
+> row was RELAUNCHED as a fresh Opus agent that resets its own fresh worktree to the paused tip and continues from the committed hand-off (the old
+> worktrees are left as they were, read-only, their `.tmp/` copied across):
+> - **C0 continuation** `worktree-agent-ae28efe993cf25783` from `07b03d7` — the two browser reds (`keyboard-window`: the two 1.4.3 `#keymap` rules
+>   into lab.css; `mir-controls`: re-aim to the 1.5 ONE KNOB LAW, vertical drag ⅛ fine — C0 owns that test tonight), the `.km-*` judgment,
+>   wave 196, C0-BUILD.md, the ms/s pair LAST (deferred to C-V if the load never drops under 4). Ports 8783/5253 + base 8787/5257.
+> - **C4 continuation** `worktree-agent-a96a66756bee373da` from `aa9cd40` — the browser closers on the one clock, the scopes (`modArm`/`modCadence`
+>   to the kit's record), the deletions (modwindow.js 3,110 + audio.js 438 + the badge ladder), s3, wave 201; NOT mir-controls. Ports 8833/5303.
+> - **D9 continuation** `worktree-agent-a22de79aa0ec72dc9` from `79d10c4` — browser verification of H₂⁺'s shim, HELIUM → ATOM · He 1s, the history
+>   cases, the two demos, the by-use table for H₂/ELECTROSTATICS (NOT deleted), wave 202 under the D heading. Ports 8843/5313.
+> - **C7 FILM VERIFIER** (fresh) `worktree-agent-a4c46eea610dff207` on `74ade0c` — `BRIEF-C7-VERIFY.md` point by point + the paused reader's three
+>   leads as hypotheses; verdict MERGE / MERGE WITH NOTES / HOLD. Ports 8853/5323 + 8857/5327.
+> - **C7-FIX** `worktree-agent-a60503e61fea6f97e` from `74ade0c` — the film's hand-over goes through the kit's `saveBlob` only while
+>   `navigator.userActivation.isActive`, else λWAVES' anchor download. Confirmed by reading `lab/mir/folders/save-blob.js`: share-first when
+>   `canShare({files})`, never awaited, no fallback; `createFilm.save` runs ~37 s after the tap, so Chrome/Edge/Safari lose the MP4 and the iPad
+>   loses the EXPORT FRAMES zip (Linux has no `share`, hence every green gate). Wave 203; two brief candidates for MIR. Ports 8863/5333.
+>
+> Merge order on `yan-c`: C0 → C7 (the verifier's YES + the fix, the lock re-run once) → C4 → D9 → C2 (after C0) → C3/C6 → C-V. Nothing pushed,
+> deployed or released (Josh's ruling). Josh's rulings queue is unchanged (the seven glass classes in C0's `C0-GLASS-RULINGS.md`; the film's
+> exactness-vs-speed; the legibility PNGs; the M5 block; the doubleTap row; SECURITY-REVIEW §3/§5). **If Yan dies:** this block, the vault note
+> `LAMBDAWAVES CLAUDE YAN HANDOFF 2026-10-08.md` and `~/.claude/handoffs/agents/` hold the state; `git log <tip>..<branch>` on each of the five
+> branches shows how far each got; spawn fresh from the tips again, never from the old worktrees; the integrator's branch is `yan-c`.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
