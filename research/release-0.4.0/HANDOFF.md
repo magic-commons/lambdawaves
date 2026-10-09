@@ -362,6 +362,25 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   (85 node + 27 browser), the ms/s pair vs 3.536, wave 196, `C0-BUILD.md`.
 > - Plugin: agent-control 0.1.4 (auto-release) on both profiles (Josh ran the primary update).
 
+> **UPDATE (Claude Sos, 2026-10-08 22:40 CDT) — the new week; stage C staged; the security review; the LAN server.** Josh (17:00 + 20:50 resets):
+> "use the normal set of agent line ups as usual"; C0/C1/C5/C7 resumed by message, C9, C4 and D9 launched (Opus). **Staging branch `sos-c`**
+> (worktree `.claude/worktrees/sos-c`): C1 merged `a72905b` (camera panel + RAMP, −176 own; CLAUDE.md `f719481`), C5 merged `f403f3c` (history as the
+> kit's edit domain, −83 own; K1–K10 brief candidates); staged gates green (camera-shift 11, history 39 + 18, new-project 8, palette 3, routes 5/5;
+> node = C0's four known reds). `sos-s0` stays green and fast-forwards when C0 lands. **The security review** Josh asked for is
+> `research/release-0.5.0/SECURITY-REVIEW.md` (`f93b91d`; 120 agents, 56 raised, 25 survived): production safe by construction; the live item was the
+> LAN gate server serving the whole worktree incl. the TLS key — stopped at 22:20, the key set aside, and **both local servers hardened `762f25a`**
+> (dot-paths/listings 404, LAN clients `/lab/` + `/tools/perf/` only, certs outside the tree as a leaf, per-connection handshake timeout, LAN logging,
+> `/report` caps + inbox; the device report POSTs only on `post=1`). Josh's: the firewall command, the iPad's exception, the 8768/8931 servers and
+> the MANDELBROT CA cert (§5), CSP/HSTS at the next deploy (§3 fix 10), the content caps (§3 fixes 6–8, for C-V/D).
+
+> **UPDATE (Claude Sos, 2026-10-08 21:40 CDT — set up early at 92 % usage).** `sos-s0` tip `09b45b7` (code `762f25a`), GREEN. **Staging `sos-c`
+> `4824a62`**: the adopt + C1 (`a72905b`) + C5 (`f403f3c`) + C9 (`8b5fe3a`) + three CLAUDE.md paragraphs; `lab/*.js` 36,223; staged gates green but
+> C0's four node reds and `keyboard-window` (C0's cascade). C7 DONE on `74ade0c` (the lock green at every step; own −716; films pixel-identical);
+> its fresh-Opus verifier RUNNING → `C7-VERIFY.md`, merge on YES. RUNNING: C0 (at the seven classes, `C0-GLASS-RULINGS.md` on its branch), C4
+> (kit window wired), D9 (QCD out, H₂⁺ next). The checkpoint `~/.claude/handoffs/latest.md` "STATE AT 21:35 CDT" has the table and the resume
+> steps. Josh's rulings queue: the glass (seven classes), the film's exactness-vs-speed, the legibility PNGs, the M5 block, the doubleTap row, the
+> firewall/iPad/CA-cert items from SECURITY-REVIEW.md §3/§5.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on

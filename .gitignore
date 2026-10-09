@@ -22,3 +22,4 @@ dist/
 *.p12
 *.pfx
 __pycache__/
+\nresearch/device-reports/inbox/\n

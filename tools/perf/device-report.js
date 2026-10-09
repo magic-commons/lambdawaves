@@ -73,8 +73,6 @@ import { VIEW_NAMES, STYLE_NAMES } from '../../lab/field.js';                   
 const SETTINGS_KEY = 'lambdawaves.q0.settings';                                    // rack.js SETTINGS_KEY
 const PAIR = { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } };   // rack.js ui.gridSeg's onChange
 const BIN_MS = 250;
-const LOOPBACK = /^(127\.\d+\.\d+\.\d+|localhost|\[?::1\]?)$/i;
-const PRIVATE_LAN = /^(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[a-z0-9-]+\.local)$/i;
 
 const r3 = (v) => (Number.isFinite(v) ? Math.round(v * 1000) / 1000 : v === Infinity ? 'Infinity' : null);
 const r1 = (v) => (Number.isFinite(v) ? Math.round(v * 10) / 10 : null);
@@ -1111,16 +1109,14 @@ export async function run(LW, params, t) {
 /* ══ THE FLAG · `?report=1` ═══════════════════════════════════════════════════════════════════════════════
  * Runs once, after __LW.ready AND after the photosensitivity notice has been accepted (nothing plays before it);
  * under prefers-reduced-motion it waits for a RUN press instead of starting the field by itself (?play=1's law).
- * THE POST RULE: `post=1` always POSTs the JSON to `${origin}/report`; `post=0` never does; with neither, it POSTs
- * only when the page was served from a private-LAN address (10/8, 172.16/12, 192.168/16, *.local) — the LAN dev
- * server (serve-lan.py) — and never from loopback or a public host, where nothing is listening and a device's
- * details have no business going.  Either way the toast offers COPY, so a device with no POST route can still
- * hand the report over by pasting it. */
+ * THE POST RULE (opt-in since the 2026-10-08 security review, §3 fix 4): `post=1` POSTs the JSON to `${origin}/report`;
+ * anything else never does — a device's details leave the page only on the owner's say-so, whatever host served it.
+ * Either way the toast offers COPY, so a device with no POST route can still hand the report over by pasting it. */
 let flagRan = false;
 async function runFromFlag(LW, qs, readyAt) {
   if (flagRan) return null; flagRan = true;
   const host = location.hostname;
-  const post = qs.get('post') === '1' ? true : qs.get('post') === '0' ? false : PRIVATE_LAN.test(host) && !LOOPBACK.test(host);
+  const post = qs.get('post') === '1';
   const toast = makeToast();
   toast.say('device report · waiting for the instrument…');
   for (let i = 0; i < 600 && !LW.ready; i++) await sleep(50);
