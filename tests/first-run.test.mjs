@@ -4,10 +4,20 @@
  * Oracles: the desktop's official defaults (CLAUDE.md, tests/official-defaults-palette.browser-test.mjs: light /
  * refractive / ALWAYS frost), the phone/tablet's (tinted / frost OFF), and rack.js' own reading laws — a card counts only
  * when this browser SAID it (cardSet, wave 51), a legacy frost `true` is ALWAYS (wave 67), anything unreadable is the
- * default.  And the wiring: rack.js asks with its own crossings and feeds these into defaultCard / frostMode /
- * applySettings (a source read, because rack.js needs a DOM). */
+ * default.  0.5.0 C2: those laws are the look lift's (lab/look.js liftLook: an older blob into the kit's `mir.gui`, once), and
+ * the device's material is the look store's defaults.  And the wiring: rack.js asks with its own crossings and feeds these
+ * into the look store (a source read, because rack.js needs a DOM). */
 import { readFileSync, readdirSync } from 'node:fs';
-import { firstRunMaterial, storedCard, storedFrost, bootMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
+import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
+import { liftLook, LOOK_ROWS, BLOB_LOOK } from '../lab/look.js';
+import { repair } from '../lab/mir/core/prefs.js';
+import { lookSchema } from '../lab/mir/shell/gui.js';
+/** what a boot wears (0.5.0 C2): an older blob lifted (liftLook), repaired by the kit's own LOOK_SCHEMA rows, over the device's
+ *  first-run material as their defaults — rack.js' LOOK_DEFAULTS into createLook */
+function bootMaterial(s, mobile) {
+  const d = firstRunMaterial(mobile), rows = lookSchema().filter((r) => LOOK_ROWS.includes(r.key)).map((r) => (r.key in d ? { ...r, default: d[r.key] } : r));
+  const st = repair(liftLook(s || {}), rows); return { card: st.card, frost: st.frost };
+}
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -36,29 +46,44 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const rows = {
     savedNotSaid: [bootMaterial({ card: 'refractive' }, true).card, bootMaterial({ card: 'tinted', cardSet: false }, false).card],
-    corruptSaid: [storedCard({ card: 'glass', cardSet: true }, 'tinted'), storedCard({ card: 'glass', cardSet: true }, undefined)],
-    legacyTrue: [storedFrost({ frost: true }, 'off'), storedFrost({ frost: true }, 'always')],
-    unreadable: [storedFrost({ frost: false }, 'off'), storedFrost({ frost: false }, 'always'), storedFrost({ frost: 'nonsense' }, 'always'), storedFrost({}, 'still')],
+    corruptSaid: [bootMaterial({ card: 'glass', cardSet: true }, true).card, liftLook({ card: 'glass', cardSet: true }).card],
+    legacyTrue: [bootMaterial({ frost: true }, true).frost, bootMaterial({ frost: true }, false).frost],
+    unreadable: [bootMaterial({ frost: false }, true).frost, bootMaterial({ frost: false }, false).frost, bootMaterial({ frost: 'nonsense' }, false).frost, liftLook({}).frost],
   };
-  judge('THE READING LAWS rack.js always used: a card saved but not SAID follows the device (wave 51), a said-but-unknown card is the fallback, a legacy frost `true` is ALWAYS (wave 67), `false` / absent falls to the default, and every result is one of the three seats',
+  judge('THE READING LAWS rack.js always used, now the lift\'s (liftLook): a card saved but not SAID follows the device (wave 51), a said-but-unknown card is not lifted, a legacy frost `true` is ALWAYS (wave 67), an unknown one OFF, `false` / absent is not lifted (the device\'s default stands), and every result is one of the three seats',
     eq(rows.savedNotSaid, ['tinted', 'refractive']) && eq(rows.corruptSaid, ['tinted', undefined]) && eq(rows.legacyTrue, ['always', 'always'])
-    && eq(rows.unreadable, ['off', 'always', 'off', 'still']), rows);
+    && eq(rows.unreadable, ['off', 'always', 'off', undefined]), rows);
+}
+{
+  const rows = {
+    fresh: [liftLook({}), liftLook({}, null)],
+    theme: ['light', 'dark', 'system', 'sepia'].map((t) => liftLook({ theme: t }).theme),
+    rest: liftLook({ disc: false, blur: 14, accent: [12, '200', null], badges: true, controlHints: false }, 'on'),
+    hints: [liftLook({ controlHints: true, hint: false }).hints, liftLook({ hint: false }).hints, liftLook({ hint: 1 }).hints, liftLook({ badges: 'yes' }).badges],
+    help: [liftLook({}, 'off').help, liftLook({}, 'maybe').help],
+    blobLook: BLOB_LOOK,
+  };
+  judge('THE LOOK LIFT (0.5.0 C2): a fresh profile lifts nothing; an unknown theme was DARK; DISCONNECTED, BLUR, the accents, STATUS TAGS, CONTROL HINTS (or the legacy `hint`) and HELP (its own key, on / off) are read as rack.js and native-ui.js read them; BLOB_LOOK names every blob key the lift reads',
+    eq(rows.fresh, [{}, {}]) && eq(rows.theme, ['light', 'dark', 'system', 'dark'])
+    && eq(rows.rest, { disconnected: false, blur: 14, accentA: 12, accentB: 200, vivid: 0, badges: true, hints: false, help: true })
+    && eq(rows.hints, [true, false, true, false]) && eq(rows.help, [false, undefined])
+    && eq(rows.blobLook, ['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']), rows);
 }
 {
   const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
   const wires = {
-    imported: /import \{ firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
+    imported: /import \{ firstRunMaterial, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
-    defaultCard: /const defaultCard = \(\) => FIRST_RUN\.card;/.test(src),
-    frostSeed: /let frostMode = FIRST_RUN\.frost;/.test(src),
-    applyFrost: src.includes('setFrost(storedFrost(s, frostMode), { quiet: true });'),
-    applyCard: src.includes('setCardStyle(storedCard(s, undefined));'),
-    phoneOverrideKept: src.includes("phone.wasFrost = frostMode; setFrost('off', { quiet: true });"),
+    /* 0.5.0 C2: the first-run material is the look store's `defaults` (lab/look.js, mir.gui); a stored choice is the store's */
+    lookDefaults: src.includes("const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };"),
+    storeTakesThem: src.includes('createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS,'),
+    unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
+    phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
   };
-  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds defaultCard, frostMode and the furniture\'s folds from the answer, reads stored choices through storedFrost / storedCard, and the phone crossing\'s FROST OFF override is untouched',
+  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds the look store\'s card and frost defaults (0.5.0 C2: LOOK_DEFAULTS → createLook, mir.gui) and the furniture\'s folds from the answer, an unnamed card is the device\'s, and the phone crossing\'s FROST OFF override is kept',
     Object.values(wires).every(Boolean), wires);
 }
 {

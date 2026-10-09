@@ -6,7 +6,7 @@ import { readProjectCollection } from './project-storage.js';
 import { MAX_PROJECT_BYTES, parseProjectImport, storeProjectImport } from './project-import.js';
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
-import { firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
+import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -79,7 +79,7 @@ import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the se
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createBusyMark } from './busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
-import { createAccentWheel } from './accent-wheel.js';  // N7 seam 4: the accent wheel, the mark and its turn, out of boot()
+import { createLook, CARD_GROUND } from './look.js';    // 0.5.0 C2: the look is the kit's — mir.gui (createPrefs over LOOK_SCHEMA rows) and createAccent (once N7 seam 4, accent-wheel.js)
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
 import { installRackMenus } from './rack-menus.js';     // N7 seam 7: the + and ☆ lists, out of boot()
@@ -126,10 +126,6 @@ export async function boot(dom) {
   /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
      (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
   const PAL_DEF = DEFAULT_PALETTE;
-  /* THE WHEEL AS THE UI's ACCENT, the mark and its turn: lab/accent-wheel.js (N7 seam 4). */
-  const wheel = createAccentWheel({ mat, getModView: () => modView, lut: toLUT(PALETTE_BY_ID.get(PAL_DEF).stops) });
-  const { accent, wheelColor, applyAccent, paintMarks, markBatchBegin, markBatchEnd, markInk, stageGround, inkCtx,
-    ensureTurnCSS, turnStops, markTurn, MARK_N, MARK_STEP, MARK_FLOOR, MARK_GROUND, TURN_STOPS } = wheel;
   /* THE PHONE SENTINEL (wave 51).  skin.css's LAST block raises `--phone` to 1 at a (hover: none) + size
      pair; the breakpoint is written THERE, once, and this reads it back out of the computed style — exactly
      as the peek handler already reads --rack-w — so the script can never disagree with the stylesheet about
@@ -146,7 +142,7 @@ export async function boot(dom) {
   } catch (_) { return false; } };
   /* W125 (Josh, 2026-09-25) · THE FIRST-RUN MATERIAL FOLLOWS THE DEVICE: a desktop's is REFRACTIVE + FROST ALWAYS, a phone's
      or a tablet's is TINTED + FROST OFF (first-run.js, a pure function of this one answer).  It is only the DEFAULT —
-     what a browser that has never said anything gets; a stored choice always wins (applySettings). */
+     what a browser that has never said anything gets; a stored choice always wins (0.5.0 C2: the look store's `defaults`). */
   const FIRST_RUN = firstRunMaterial(isPhone() || isTablet());
   /** WAVE 101 · is this an Apple display?  Used for ONE first-run default (the colour gamut) and for
    *  nothing else — no capability is inferred from it, and a saved choice always wins. */
@@ -154,20 +150,14 @@ export async function boot(dom) {
     const ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '') + ' ' + (navigator.vendor || '');
     return /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua);
   } catch (_) { return false; } };
-  /* CARD STYLE's first-run default is the device's (W125: REFRACTIVE on a desktop, TINTED on a phone or tablet). A browser
-     that has named a surface still gets exactly what it named. */
-  const defaultCard = () => FIRST_RUN.card;   // new desktops get the clear glass; new phones and tablets the tinted pane
-  /* `cardChosen` is the difference between "this browser wants TINTED" and "this browser has never said":
-     without it the first saveSettings() of a session freezes whatever the default happened to be, and the
-     surface could never follow the device again.  The seg — the one place a HAND can say it — sets it. */
-  let cardChosen = readSettings().cardSet === true;
-  /* The desktop's first-run glass is frosted, a phone's or tablet's is not (W125); the phone crossing also disables it. */
-  let frostMode = FIRST_RUN.frost;            // 'off' | 'still' | 'always'
+  /* 0.5.0 C2 · λWAVES' HOME LOOK, the look store's `defaults` (lab/look.js, `mir.gui`): light, the device's first-run card and
+     frost (W125), 22 px blur, 50 % VIVID, disconnected cards.  A browser that has never chosen wears these; a stored choice wins.
+     The phone crossing's FROST OFF is a later, separate law (enterPhone). */
+  const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
   let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
   function readSettings() { return settingsStore.read(); }
-  document.body.dataset.card = (readSettings().cardSet === true && readSettings().card) || defaultCard();   // before a single window is built, so the FIRST paint is already this browser's glass
   function saveSettings() {
     if (!settingsLoaded) return;
     try {
@@ -189,8 +179,8 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, theme: document.body.dataset.themeChoice || document.body.dataset.theme || 'light', badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
-        frost: frostMode, disc: document.body.classList.contains('disconnected'), blur: ui.blurK ? ui.blurK.get() : 22, card: document.body.dataset.card || defaultCard(), cardSet: cardChosen, accent: [accent.a, accent.b, accent.vivid], auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+        auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
@@ -227,42 +217,20 @@ export async function boot(dom) {
   }
 
 
-  /** wear a surface without claiming anyone chose it — the phone's default and the way back use this */
-  function applyCard(c) {
-    document.body.dataset.card = c;
-    if (ui.cardSeg) ui.cardSeg.set(c);
-    saveSettings();
-    return c;
-  }
-  /** SAY which surface this browser wants: naming one IS the choice, whether it came from the seg or from LW */
-  function setCardStyle(id) {
-    const named = id === 'tinted' || id === 'refractive';
-    if (named) cardChosen = true;
-    return applyCard(named ? id : defaultCard());
-  }
-
-
-  function setFrost(mode, opt) {
-    frostMode = mode === 'still' || mode === 'always' ? mode : 'off';
-    document.body.classList.toggle('frost', frostMode !== 'off');
-    frostSync();
-    if (ui.frostSeg) ui.frostSeg.set(frostMode);
-    if (!(opt && opt.quiet)) saveSettings();
-    return frostMode;
-  }
-  function setDisconnected(v, opt) {
-    document.body.classList.toggle('disconnected', !!v);
-    if (ui.discSw) ui.discSw.set(!!v);
-    if (!(opt && opt.quiet)) saveSettings();
-    return !!v;
+  /* 0.5.0 C2 · THE LOOK'S SETTERS are the store's (lab/look.js): one `set`, on the page in the same task, and SETTINGS repainted
+     from the store (lookSync).  An unnamed card is the device's and an unknown frost is OFF, as they always were. */
+  function setCardStyle(id) { look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card }); return document.body.dataset.card; }
+  function setFrost(mode) { look.set({ frost: mode === 'still' || mode === 'always' ? mode : 'off' }); return look.get('frost'); }
+  function setDisconnected(v) { look.set({ disconnected: !!v }); return !!v; }
+  /** the SETTINGS controls the look store drives, repainted from it */
+  function lookSync(s, keys) {
+    const c = { theme: ui.themeSeg, card: ui.cardSeg, frost: ui.frostSeg, disconnected: ui.discSw, blur: ui.blurK, accentA: ui.accA, accentB: ui.accB, vivid: ui.vivid,
+      badges: ui.badgesSw, hints: ui.controlHintsSw, help: ui.windowInfoSw };
+    for (const k of keys) if (c[k]) c[k].set(s[k]);
   }
   function applySettings() {
     const s = readSettings();
-    if (__LW_hooks.setTheme) __LW_hooks.setTheme(s.theme || 'light');
-    const badges = s.badges === true;
-    document.body.classList.toggle('no-badges', !badges); if (ui.badgesSw) ui.badgesSw.set(badges);
-    const controlHints = s.controlHints === undefined ? s.hint !== false : s.controlHints !== false;
-    document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
+    look.rerun(); lookSync(look.prefs.all(), Object.keys(look.prefs.all()));   // 0.5.0 C2: the look again, now that the theme's engine hooks exist
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     /* THE STAGE TEXT (0.4.0 S3): one switch for the formula, the fade and the atom labels; nothing said means ON.  The ATOM
@@ -272,18 +240,6 @@ export async function boot(dom) {
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
     molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
     if (stageText) { stageText.setScale(molFormulaScale); stageText.setOn(molFormula); }
-    /* WAVE 67 · FROST used to be a BOOLEAN and is now a policy with three seats, so a stored `true` has to
-       mean something: it means ALWAYS, because that is literally what an old `on` did — the glass was there
-       whatever the transport was doing.  Anything unreadable falls to the shipped default (ALWAYS on a desktop, OFF on a phone or
-       tablet since W125: first-run.js). */
-    setFrost(storedFrost(s, frostMode), { quiet: true });   // first-run.js: `true` = ALWAYS, unreadable → frostMode (at boot, the device's first-run policy)
-
-
-    setDisconnected(s.disc !== false, { quiet: true });
-    cardChosen = s.cardSet === true;                                          // whether this browser has SAID is part of what applySettings restores
-    setCardStyle(storedCard(s, undefined));                                   // wave 47: the glass of the cards — the device's default unless this browser SAID otherwise (wave 51: said, not merely saved; W125: the default is TINTED on a phone or tablet)
-    if (typeof s.blur === 'number') { document.documentElement.style.setProperty('--glass-blur', s.blur.toFixed(1) + 'px'); if (ui.blurK) ui.blurK.set(s.blur); }
-    if (Array.isArray(s.accent)) { accent.a = +s.accent[0] || 0; accent.b = +s.accent[1] || 0; if (ui.accA) ui.accA.set(accent.a); if (ui.accB) ui.accB.set(accent.b); accent.vivid = +s.accent[2] || 0; if (ui.vivid) ui.vivid.set(accent.vivid); applyAccent(); }
     if (s.auto === false) { quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
@@ -374,11 +330,6 @@ export async function boot(dom) {
   const gov = { on: true, drop: 0, median: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
-  /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill */
-  function frostSync() {
-    const hold = frostMode === 'still' && clock.playing;
-    if (hold !== document.body.classList.contains('frost-hold')) document.body.classList.toggle('frost-hold', hold);
-  }
   const effectiveRes = () => { if (!gov.drop) return quality.res; let i = RES_LADDER.findIndex((r) => r >= quality.res); if (i < 0) i = RES_LADDER.length - 1; return RES_LADDER[Math.max(0, i - gov.drop)]; };
   const READER_LAW = { park: 16, slow: 6, parkDrop: 8, slowDrop: 3, probeMs: 3000 };   // ms per update: parked while playing / slowed to every 6 × cost — and the tighter pair once stepped down
 
@@ -517,7 +468,14 @@ export async function boot(dom) {
   let pendingRef = null;
 
 
-  const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, ensureTurnCSS });   // N7 seam 2: lab/busy-mark.js
+  /* 0.5.0 C2 · THE LOOK (lab/look.js): the kit's store `mir.gui` over LOOK_SCHEMA rows and its accent engine, applied at once —
+     before a single window is built, so the FIRST paint is already this browser's glass.  The theme's engine side (the stage
+     ground, the GPU chrome, the browser's bar) is __LW_hooks.theme, which the SETTINGS block registers. */
+  const look = createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS, mat, wheelStops: PALETTE_BY_ID.get(PAL_DEF).stops,
+    getModView: () => modView, onTheme: (t, choice) => { if (__LW_hooks.theme) __LW_hooks.theme(t, choice); } });
+  const { accent, applyAccent, paintMarks, markBatchBegin, markBatchEnd, stageGround, inkCtx } = look, { wheelColor, markInk } = accent;
+  look.prefs.subscribe(lookSync);
+  const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, markBusy: accent.busy });   // N7 seam 2: lab/busy-mark.js
 
   /* ── FIELD ────────────────────────────────────────────────────────────── */
   /* WAVE 59 · `onLost` WAS NEVER PASSED, and field.js has offered it since it was written: `device.lost`
@@ -528,7 +486,7 @@ export async function boot(dom) {
   const field = await createField(dom.canvas, { resolution: quality.res,
     onError: (m) => showBanner('GPU error', m),
     onLost: function gpuRecovery(i) { showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
-  if (field.ok) wheel.setGamutCss((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
+  if (field.ok) look.setGamut((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
   if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
@@ -770,7 +728,8 @@ export async function boot(dom) {
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
     if(ui.axisSw) { const mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase(); if(ui.axisSw.root.dataset.mode!==mode)ui.axisSw.root.dataset.mode=mode; }
-    frostSync();   /* WAVE 67: the FROST policy's one per-frame act — a class compare, no read of anything.
+    look.moving(clock.playing);   /* WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
+                      edge the kit's frost row writes frost-hold under STILL: the filter moves while the field runs, never the fill).
                       It rides the loop rather than the play button because there are seven ways to start the
                       transport in this lab (the button, the key, LW.play, the A/B switch, the bow, the slap,
                       a preset restore) and a policy wired to one of them is a policy that is wrong six times.
@@ -1182,14 +1141,17 @@ export async function boot(dom) {
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
-    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
+    /* 0.5.0 C2: STATUS TAGS, CONTROL HINTS and HELP are the look store's (mir.gui); native-ui.js seats them on DISPLAY */
+    ui.badgesSw = sw({ label: 'STATUS TAGS', value: look.get('badges'), title: 'Show status tags at the top', onChange: (v) => look.set({ badges: v }) }); ri.appendChild(ui.badgesSw.root);
+    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: look.get('hints'), title: 'Show control hints after a short hover', onChange: (v) => look.set({ hints: v }) }); ri.appendChild(ui.controlHintsSw.root);
+    ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
+    ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
       onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); modStore.write({ modArm: undefined, modCadence: undefined }); location.reload(); } }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); location.reload(); } }).root);
 
 
     const rc = el('div', 'row tight', gi);
@@ -1210,48 +1172,37 @@ export async function boot(dom) {
     const THEMES = { dark: { bg: [0.028, 0.038, 0.058], invert: false }, light: { bg: [0.93, 0.95, 0.975], invert: true } };
 
 
-    const sysMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-    const systemTheme = () => (sysMQ && sysMQ.matches ? 'dark' : 'light');
-    let themeChoice = 'dark', theme = 'dark';
-    function setTheme(id) {
-      themeChoice = (id === 'system' || THEMES[id]) ? id : 'dark';
-      theme = themeChoice === 'system' ? systemTheme() : themeChoice;
-      document.body.dataset.theme = theme;
-      document.body.dataset.themeChoice = themeChoice;
-      /* WAVE 56: the browser's own chrome follows the theme.  A manifest's theme_color is one static value and
-         cannot; <meta name="theme-color"> can, and overrides the manifest wherever it is honoured — most visibly
-         as the bar behind an installed standalone window.  #eef1f6 is skin.css's `body[data-theme="light"] #stage`,
-         #070a0f is lab.css's unconditional ground, which is what the document IS before a theme resolves. */
+    /* THE THEME'S ENGINE SIDE (0.5.0 C2): the kit's theme row writes body[data-theme] (SYSTEM follows the OS by itself) and its
+       `run` calls this once per resolved change.  WAVE 56: the browser's own chrome follows the theme — <meta name="theme-color">
+       overrides the manifest wherever it is honoured; #eef1f6 is skin.css's `body[data-theme="light"] #stage`, #070a0f lab.css's
+       unconditional ground.  Wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads lightUI. */
+    __LW_hooks.theme = (theme) => {
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
       mat.bg = THEMES[theme].bg.slice();
       if (__LW_hooks.restage) __LW_hooks.restage();
-      mat.lightUI = theme === 'light';                                     // wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads this
-      if (ui.themeSeg) ui.themeSeg.set(themeChoice);
+      mat.lightUI = theme === 'light';
       if (__LW_hooks.themeChanged) __LW_hooks.themeChanged(theme);
-      applyAccent(); saveSettings();
       schedule(TIER.PRESENT);
-    }
-    if (sysMQ) { const onSys = () => { if (themeChoice === 'system') setTheme('system'); };
-      if (sysMQ.addEventListener) sysMQ.addEventListener('change', onSys); else if (sysMQ.addListener) sysMQ.addListener(onSys); }
-    ui.themeSeg = seg({ label: 'THEME', value: 'light', options: [
+    };
+    ui.themeSeg = seg({ label: 'THEME', value: look.get('theme'), options: [
       { id: 'light', label: 'LIGHT', title: 'Use the light interface and stage' },
       { id: 'dark', label: 'DARK', title: 'Use the dark interface and stage' },
       { id: 'system', label: 'SYSTEM', title: 'Follow the operating system theme' }],
-      onChange: (v) => setTheme(v) });
+      onChange: (v) => look.set({ theme: v }) });
     rt.appendChild(ui.themeSeg.root);
 
 
-    ui.discSw = sw({ label: 'DISCONNECTED', value: false, title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
+    ui.discSw = sw({ label: 'DISCONNECTED', value: look.get('disconnected'), title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
     rt.appendChild(ui.discSw.root);
-    ui.frostSeg = seg({ label: 'FROST', value: 'always', options: [
+    ui.frostSeg = seg({ label: 'FROST', value: look.get('frost'), options: [
       { id: 'off', label: 'OFF', title: 'Disable backdrop filtering' },
       { id: 'still', label: 'STILL', title: 'Apply frost while the field is paused' },
       { id: 'always', label: 'ALWAYS', title: 'Apply frost continuously. This can reduce frame rate.' }],
       onChange: (v) => setFrost(v) });
     rt.appendChild(ui.frostSeg.root);
     el('div', 'note', rt, 'Frost filters the field behind windows. STILL applies it while paused; ALWAYS keeps it during motion.');
-    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: 22, fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => { document.documentElement.style.setProperty('--glass-blur', v.toFixed(1) + 'px'); }, onChange: () => saveSettings() }); rt.appendChild(ui.blurK.root);
+    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: look.get('blur'), fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => look.set({ blur: v }) }); rt.appendChild(ui.blurK.root);
     /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
        correction against a ground the hand can drag is not a correction.  One named function, so the knob,
@@ -1288,7 +1239,7 @@ export async function boot(dom) {
       ui.stageFollow.addEventListener('click', () => setStageFollow(!stageFollow));
       rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
-    ui.cardSeg = seg({ label: 'CARD STYLE', value: 'refractive', options: [
+    ui.cardSeg = seg({ label: 'CARD STYLE', value: look.get('card'), options: [
       { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
       { id: 'tinted', label: 'TINTED', title: 'Add the theme tint behind window content' },
     ], onChange: (v) => setCardStyle(v) });
@@ -1331,11 +1282,11 @@ export async function boot(dom) {
     ui.gamutRo.set('sRGB'); ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both sRGB' : gamutSup.reason);
     el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
     const ra = el('div', 'row tight', gt);
-    ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: 30, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => { accent.a = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accA.root);
-    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: 300, wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => { accent.b = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.accB.root);
-    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: .5, fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => { accent.vivid = v; applyAccent(); }, onChange: () => saveSettings() }); ra.appendChild(ui.vivid.root);
+    ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: look.get('accentA'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => look.set({ accentA: v }) }); ra.appendChild(ui.accA.root);
+    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: look.get('accentB'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => look.set({ accentB: v }) }); ra.appendChild(ui.accB.root);
+    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: look.get('vivid'), fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => look.set({ vivid: v }) }); ra.appendChild(ui.vivid.root);
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
-    __LW_hooks.setTheme = setTheme;
+    __LW_hooks.setTheme = (t) => look.set({ theme: t });
 
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
@@ -1405,7 +1356,7 @@ export async function boot(dom) {
     const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items),
       labels: { ticks: [[0, '−π'], [0.25, '−π/2'], [0.5, '0'], [0.75, '+π/2'], [1, '+π']], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad' },
       ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset) palId = o.preset; },
-        lut: (lut) => { wheel.setWheelLUT(lut); if (field.ok) field.setPalette(lut); applyAccent(); schedule(TIER.PRESENT); } } }).view;
+        lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
     palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
       get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
@@ -4261,7 +4212,7 @@ export async function boot(dom) {
   }
 
 
-  const phone = { on: false, applied: false, hooked: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasCard: '', wasRackHidden: false, wasFrost: 'off', floats: null };
+  const phone = { on: false, applied: false, hooked: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasRackHidden: false, wasFrost: 'off', floats: null };
   function enterPhone() {
 
 
@@ -4288,7 +4239,6 @@ export async function boot(dom) {
 
     phone.wasRackHidden = document.body.classList.contains('rack-hidden');   // the crossing is reversible in BOTH directions (wave 51's law)
     document.body.classList.toggle('rack-hidden', readSettings().phoneRack !== true);
-    phone.wasCard = document.body.dataset.card;
     if (!phone.hooked) { phone.hooked = true; const fb = wTr.root.querySelector('.dev-fold'); if (fb) fb.addEventListener('click', () => saveSettings()); }
     /* THE LOW-POWER PATH, once per page.  Every one of these is a DEFAULT, not an override: a value this
        browser has SAID in SETTINGS still wins, exactly as CARD STYLE's default does. */
@@ -4326,7 +4276,7 @@ export async function boot(dom) {
          given back on the way out, which is wave 51's law: the crossing is reversible in both directions.
          (The DISCONNECTED window fuses here too, in CSS, on BASINS' own FR_COMPACT_W law — a constellation
          needs air and a 390-px screen has none — so there is nothing to remember for it.) */
-      phone.wasFrost = frostMode; setFrost('off', { quiet: true });
+      phone.wasFrost = look.get('frost'); setFrost('off');
       if (s.keepFrames === undefined) setKeepFrames(false);
       schedule(TIER.REBUILD);
     }
@@ -4337,8 +4287,7 @@ export async function boot(dom) {
        in the meantime, in which case the hand wins. */
     document.body.classList.toggle('rack-hidden', !!phone.wasRackHidden);   // wave 59: the phone's default was the PHONE's; the desktop gets back exactly the state it crossed with
     for (const d of [...rack.querySelectorAll('.dev[data-phone-from="L"]')]) { delete d.dataset.phoneFrom; if (rackL) rackL.appendChild(d); }
-    if (!cardChosen && phone.wasCard && document.body.dataset.card !== phone.wasCard) applyCard(phone.wasCard);
-    if (phone.wasFrost !== 'off' && frostMode === 'off') setFrost(phone.wasFrost, { quiet: true });   // wave 67: the policy the desktop crossed with
+    if (phone.wasFrost !== 'off' && look.get('frost') === 'off') setFrost(phone.wasFrost);   // wave 67: the policy the desktop crossed with
     if (layout.docked !== phone.wasDocked) layout.dockTransport();
     if (phone.wasRes && ui.gridSeg && ui.gridSeg.get() === '64') { ui.gridSeg.set(String(phone.wasRes)); quality.res = phone.wasRes; quality.steps = { 64: 110, 96: 160, 128: 240 }[phone.wasRes]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[phone.wasRes]; }
     /* wave 106: …and the crossing is reversible in the case where the GRID never moved, which is now
@@ -5110,7 +5059,7 @@ export async function boot(dom) {
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const modEdited = () => { if (modView) modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, get particleUI() { return { on: ui.pOn, n: ui.pN, trail: ui.pTrail }; }, slice, kepler, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return frostMode; }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { if (a !== undefined) accent.a = a; if (b !== undefined) accent.b = b; applyAccent(); }, get a() { return accent.a; }, get b() { return accent.b; }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return document.body.dataset.themeChoice || document.body.dataset.theme || 'dark'; }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, get particleUI() { return { on: ui.pOn, n: ui.pN, trail: ui.pTrail }; }, slice, kepler, h2, chem, calculus, layout, fieldlines, get electrostatics() { return fieldlines.field; }, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return look.get('frost'); }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { look.set({ ...(a !== undefined && { accentA: a }), ...(b !== undefined && { accentB: b }) }); }, get a() { return look.get('accentA'); }, get b() { return look.get('accentB'); }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return look.get('theme'); }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */
@@ -5298,11 +5247,11 @@ export async function boot(dom) {
     /** WAVE 53 · THE LOGO.  Nothing here rotates: `colours(φ)` is the nine squares at palette phase φ, `stops` is
      *  what the generated keyframes actually animate through, and `turn()` runs the boot's one turn again. */
     logo: {
-      colours(phi = 0) { return Array.from({ length: MARK_N }, (_, i) => rgbToHex(wheelColor(i * MARK_STEP + phi))); },
-      get stops() { ensureTurnCSS(); return turnStops(); },
-      get css() { const sheet = ensureTurnCSS(); return sheet ? sheet.textContent : ''; },
-      get steps() { return TURN_STOPS; }, get step() { return MARK_STEP; },
-      turn() { return markTurn(); },
+      colours(phi = 0) { return Array.from({ length: 9 }, (_, i) => rgbToHex(wheelColor(i * 40 + phi))); },
+      get stops() { return look.turnStops(); },
+      get css() { const sheet = document.getElementById('mirTurn'); return sheet ? sheet.textContent : ''; },   // the kit accent's turn sheet
+      get steps() { return 36; }, get step() { return 40; },
+      turn() { return accent.turn(); },
       get turning() { const m = document.querySelector('#title .mark'); return !!m && (m.classList.contains('turn') || m.classList.contains('busy')); },
       get menu() { return layout.menu; },
     },
@@ -5312,7 +5261,7 @@ export async function boot(dom) {
        resolves to 'off', which is not the same as the policy it borrowed.  B62 is exactly that caller: it
        has to take FROST off to see the CARD STYLE pane at all, because the frost rule is a later rule of
        equal specificity that replaces the pane with its own veil. */
-    get frost() { return frostMode; },
+    get frost() { return look.get('frost'); },
     /** WAVE 53 · the '?' sheet: open / close / what it is showing (read back out of the DOM) */
     get keysheet() { return layout.keysheet; },
     get windowActivity() { return windowActivity; },   // the gate presents below-the-fold windows through presentOffscreen()
@@ -5350,8 +5299,8 @@ export async function boot(dom) {
          `stageMark`/`stageGround` are the live canvas clear colour the header λ actually sits on. */
       stageMark: (deg) => markInk(deg || 0, stageGround()).map((v) => Math.round(v * 255)),
       get stageGround() { return stageGround().map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255)); },
-      get floor() { return MARK_FLOOR; },
-      get ground() { return MARK_GROUND[document.body.dataset.theme === 'light' ? 'light' : 'dark'].map((v) => Math.round(v * 255)); },
+      get floor() { return 3; },
+      get ground() { return CARD_GROUND[document.body.dataset.theme === 'light' ? 'light' : 'dark'].map((v) => Math.round(v * 255)); },
       /** the WCAG ratio between two 0…255 triples — the gate's own arithmetic, from the shipping code */
       ratio: (a, b) => contrastRatio(a.map((v) => v / 255), b.map((v) => v / 255)) },
     /** the ONE input to the TAB rule: are the hands on the world, or in the rack? */
@@ -5359,7 +5308,8 @@ export async function boot(dom) {
     version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03',
     /** 0.5.0 C9 · R14 · FOLDERS' thumbnail() for C6's project adapter, whose toThumb() drawImage()s what it gets (a WebGPU canvas can
      *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
-    async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; }
+    async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; },
+    look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
   };
   window.__LW = LW;
 
@@ -5498,7 +5448,7 @@ export async function boot(dom) {
   history.clear(linkAtBoot.opened && linkAtBoot.ok ? 'link' : 'boot');   // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
 
 
-  markTurn();
+  accent.turn();
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) layout.projects.markClean();

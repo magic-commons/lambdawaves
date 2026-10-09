@@ -162,12 +162,13 @@ true` is the kit's `Mod` (Ctrl or ⌘); `ctrl: 'Ctrl'` is the Control key alone
 — Ctrl+Shift+Q/E and the MOD arm (Ctrl+Space) are spelled so, never `Mod` (⌘⇧Q
 logs a Mac out). S stays WASD's pitch-down; FOLDERS is O (R-K1). (0.5.0 A9)
 
-First-run λWAVES preferences are specified in `lab/rack.js` and
-`lab/native-ui.js`: tags, captions, Help and window notes off; hints,
-AUTO SCALE and governor on; light/refractive/ALWAYS frost, 22 px blur and
-50% VIVID on desktop; on a phone or tablet (rack.js' own
-`isPhone()`/`isTablet()`, via `lab/first-run.js`) the first-run material is
-frost OFF, tinted. Stored choices and the phone's frost override win.
+THE LOOK IS THE KIT'S (0.5.0 C2): theme, card, frost, DISCONNECTED, glass blur, ACCENT A/B, VIVID, STATUS TAGS, CONTROL HINTS and HELP
+live in MIR's `mir.gui` (`lab/look.js`: `createPrefs` over the kit's own LOOK_SCHEMA rows, `createAccent`), never in the settings blob;
+SETTINGS keeps each control in its seat as a `look.set`, repainted from the store, and MIR OPTIONS (`createGui`) is not built. λWAVES'
+first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light/refractive/ALWAYS frost, 22 px blur, 50% VIVID, DISCONNECTED,
+hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' own `isPhone()`/`isTablet()`) frost OFF, tinted. Captions
+and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
+lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
 STATUS TAGS off hides the four ψ-badges, never the build offer; an untouched
 session takes a waiting build itself (`lab/sw-client.js`, `rack.js`
 `untouched`), any other session only on a press. DOMAIN

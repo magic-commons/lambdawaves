@@ -10,7 +10,7 @@ this file.
 ## The three scopes
 
 - **PREFERENCE**: the reader's furniture, meaning how this person, on this device, likes to see and handle any
-  picture. It is stored in settings (`lambdawaves.q0.settings`). It is never written into a project, a link or a
+  picture. It is stored in settings (`lambdawaves.q0.settings`), the look in the kit's `mir.gui` (0.5.0 C2), and a few families in their own keys (the table). It is never written into a project, a link or a
   history row, and opening one of those never changes it. An older file that still carries a preference key is
   opened with that key ignored. The file itself is not rewritten.
 - **WORKSPACE**: the arrangement, meaning which windows are where, how big they are, and whether they are folded or
@@ -34,9 +34,9 @@ this file.
 
 | key(s) | home | scope |
 |---|---|---|
-| `theme` (light / dark / system) | settings | PREFERENCE |
-| `card`, `cardSet`, `frost`, `disc`, `blur`, `accent [a, b, vivid]` | settings | PREFERENCE |
-| tags (`badges`), `controlHints`, `captions`, `molFormula` / `molFormulaSize` (the STAGE TEXT and its SIZE: the formula, the fade, the atom labels and the capture's caption; since 0.4.0 S3 an older `atomLabels` / `atomLabelsSize` is read once, where `molFormula` was never written, and dropped by the next save), Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout` | settings (and their own keys) | PREFERENCE |
+| THE LOOK (0.5.0 C2): `theme` (light / dark / system), `card` (tinted / refractive), `frost` (off / still / always), `disconnected`, `blur`, `accentA`, `accentB`, `vivid`, and the three help-and-status switches `badges` (STATUS TAGS), `hints` (CONTROL HINTS), `help` (HELP, the ⓘ panels) | the kit's `mir.gui` (`lab/look.js` `createLook`: MIR's `createPrefs` over the kit's own LOOK_SCHEMA rows, with λWAVES' first-run look as their defaults), never settings. An older settings blob's `theme`, `card` (only where `cardSet` said it), `frost` (a legacy `true` is ALWAYS), `disc`, `blur`, `accent [a, b, vivid]`, `badges` and `controlHints` (or the legacy `hint`), and HELP's own key `lw-window-info`, are lifted into it once, at boot, and leave; a browser that never chose has no `mir.gui` and wears its device's first-run look. FORGET clears it with the settings | PREFERENCE |
+| `captions`, `molFormula` / `molFormulaSize` (the STAGE TEXT and its SIZE: the formula, the fade, the atom labels and the capture's caption; since 0.4.0 S3 an older `atomLabels` / `atomLabelsSize` is read once, where `molFormula` was never written, and dropped by the next save), window notes (LEAN, `lw.lean.v1`), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings (`lambdawaves.q0.keys`), keyboard-editor position (`lw.keyboard.position.v1`), `nativeLayout` (the compact first-visit furniture: 1 once this browser has booted it) | settings (and their own keys) | PREFERENCE |
+| the kit's modulation presets, `lambdawaves.q0.modpresets` (`mir/modulation/mod.js` `PRESET_LS`: the presets this browser saved, in their folders) | its own key | PREFERENCE (no project, link or history row writes it) |
 | AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode` | settings | PREFERENCE |
 | the modulation's POWER `modArm` (routes on or bypassed; time runs on) and its cadence `modCadence` (60 / 120 Hz) | the kit's modulation record `lambdawaves.q0.modulation` (`rack.js` `modStore`, MIR's `bind.js` `localStore`: the record `installModulation` reads), never settings; since 0.5.0 C4 an older settings blob's pair is read once into the record and dropped by the blob's next save; FORGET clears it with the settings | PREFERENCE |
 | `clockLink` (LINKED / SEPARATE) — RETIRED at 0.5.0 C4 (R-B1, the one clock: THE play plays the modulation, the power never plays). An older blob's key is never read and is dropped by the next save | — | — |
@@ -134,6 +134,6 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 Choose its scope before you write it.  Device content a build ships and a hand installs (a record, a future pack) is
 LIBRARY: content-addressed under a DATA root (`lab/sw.js` §1b), never inside a project; a project names it by
 `{ id, hash, nameKey }`. A PREFERENCE key goes in `saveSettings()` / `applySettings()` only (the modulation's own preferences go in the kit's
-modulation record, `saveMod()`, read by `applySettings()`). A PROJECT
+modulation record, `saveMod()`, read by `applySettings()`; a look option is a row of the kit's `mir.gui`, `lab/look.js` `LOOK_ROWS`). A PROJECT
 key goes in `serialize()` / `restore()` only, and joins the history unless it is a view. A WORKSPACE key goes in the
 layout record and the settings. No key belongs to two scopes.

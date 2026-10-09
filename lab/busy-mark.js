@@ -2,10 +2,10 @@
  * nesting counter (`busy.n`), a time window (`busy.until`, the frame-gap rule's flash), the one DOM host (#busyMark,
  * a clone of the header's mark) and the pointer position it rides at.  A seam out of rack.js boot() (optimization
  * 2026-09-24 · N7 seam 2, AUDIT-E §6): two closure edges, handed in — `paintMarks` (the clone takes the wheel's
- * colours) and `ensureTurnCSS` (the loop animates the CURRENT palette).  `busy` is returned as the same live object
+ * colours) and `markBusy` (the kit accent's busy(): the loop animates the CURRENT palette, 0.5.0 C2).  `busy` is returned as the same live object
  * boot()'s callers bump (setElement, a project open) and LW.busy reads.  The pointermove listener is registered
  * here, at the moment boot() calls createBusyMark — where the block used to register it. */
-export function createBusyMark({ paintMarks, ensureTurnCSS }) {
+export function createBusyMark({ paintMarks, markBusy }) {
   const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0 };
   function busyHost() {
     if (busy.host) return busy.host;
@@ -19,8 +19,7 @@ export function createBusyMark({ paintMarks, ensureTurnCSS }) {
     if (want === busy.shown) return;
     busy.shown = want;
     const h = busyHost(); if (h) { h.hidden = !want; if (want) busyWrite(); }
-    if (want) ensureTurnCSS();                                    // the loop reads the CURRENT palette's keyframes
-    const m = document.querySelector('#title .mark'); if (m) m.classList.toggle('busy', want);
+    markBusy(want);                                               // the header mark loops the CURRENT palette's keyframes
   }
   function busyWrite() { const h = busy.host; if (!h) return; h.style.setProperty('--cx', busy.x + 'px'); h.style.setProperty('--cy', busy.y + 'px'); }
   /** raise the mark for `ms` from now — the frame-gap rule and any caller that cannot bracket its own work */
