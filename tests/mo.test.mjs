@@ -1,14 +1,15 @@
 /* tests/mo.test.mjs — the node proof of W-MO: the general LCAO on two centres, the electrostatic force for any state
  * with its Pulay term and bound, and the nuclei it drives.
  *   node tests/mo.test.mjs
- * Oracles: lab/molecule.js (Eg, ψ), lab/electrostatics.js hellmannFeynman(2) (F_elec −0.13390616, pulay 0.06228945,
+ * Oracles: lab/molecule.js (Eg, ψ), tests/lib/hellmann-feynman.js hellmannFeynman(2) (lab/electrostatics.js's until 0.5.0 D9b;
+ * G0 judges it: F_elec −0.13390616, pulay 0.06228945,
  * bound 0.102024, F_exact 0.0538044, and ‖(H−E)ψ‖, ‖∂_Rψ‖ separately), the FIELDS AND MOLECULES numbers (the Sturmian
  * −0.602624, the register R_e = 2.35227 / D_e = 2.1246 eV), Hurley's identity −dE_c/dR = F_rel − pulay checked by
  * central differences for RANDOM real and complex vectors, grid doubling, and the dynamics' own energy bookkeeping.
  */
 import { createMO, createDynamics, aLower, aUpper, oneCentreP, symmetricEigen, solveInPlace } from './lib/mo.js';
-import { energies, equilibrium as lcaoEquilibrium, psiAt as lcaoPsi, moState } from '../lab/molecule.js';
-import { hellmannFeynman } from '../lab/electrostatics.js';
+import { energies, equilibrium as lcaoEquilibrium, psiAt as lcaoPsi, moState, overlapS } from '../lab/molecule.js';
+import { hellmannFeynman, inverseSquareIntegral, gaussLegendre as gaussLegendreHF } from './lib/hellmann-feynman.js';
 import { sturmianFn, hydrogenicFn, sigmaBasis, twoCentre } from './lib/twocentre.js';
 
 let FAILED = 0, TOTAL = 0;
@@ -56,10 +57,40 @@ const one = createMO({ kind: 'lcao1s' }), st4 = createMO({ kind: 'sturmian', nMa
   const E4 = st4.groundEnergy(2);
   judge('G1 THE OPUS NUMBER: sturmian nMax 4, λ = 1.7611, R = 2 → −0.602624 (2e-6), ABOVE the exact −0.602634214 (a bound)', near(E4, -0.602624, 2e-6) && E4 > EXACT_H2P, { E4, exact: EXACT_H2P });
 }
-/* ── G2 the anchor: force(2, ground) for lcao1s against electrostatics.js ── */
+/* ── G0 THE ORACLE: Hellmann–Feynman on the 1s-LCAO H₂⁺ (electrostatics.test §6 and W42-11, moved in 0.5.0 D9b) ────────────────────────────────────────────────────────────────────────── */
+{
+  const fmt = (x, d = 9) => +x.toFixed(d);
+  const H = hellmannFeynman(2);
+  judge('G0 OPUS/P7: F_elec(H₂⁺, R = 2) on proton B = −0.13391 (2e-5)  [got ' + H.F_elec.toFixed(8) + '; Opus −0.13390616]', near(H.F_elec, -0.13391, 2e-5) && near(H.F_elec, -0.13390616, 2e-7), { F_elec: fmt(H.F_elec), F_HF: fmt(H.F_HF) });
+  judge('G0 −dE/dR = 0.053804 (the variational force, central differences of energies(R))', near(H.F_exact, 0.05380439, 1e-6), { F_exact: fmt(H.F_exact) });
+  judge('G0 the Pulay term = 0.06229 (2e-4), computed analytically as 2⟨∂_Rψ|(H−E)ψ⟩ [got ' + H.pulay.toFixed(8) + '; Opus 0.06228945]', near(H.pulay, 0.06229, 2e-4) && near(H.pulay, 0.06228945, 2e-7), { pulay: fmt(H.pulay) });
+  judge('G0 F_exact = F_elec + 1/R² − Pulay to 1e-7: the analytic Pulay integral and the difference of the energy curve are the same number', near(H.F_exact, H.F_HF - H.pulay, 1e-7) && near(H.pulayByDifference, H.pulay, 1e-7), { byDifference: fmt(H.pulayByDifference), analytic: fmt(H.pulay) });
+  judge('G0 OPUS: the Pulay bound 2‖∂_Rψ‖‖(H−E)ψ‖ = 0.102 (1e-2) [got ' + H.bound.toFixed(6) + '; Opus 0.102024], and it holds the Pulay term at 61 %', near(H.bound, 0.102, 1e-2) && near(H.bound, 0.102024, 1e-5) && H.pulay < H.bound, { bound: fmt(H.bound), residual: fmt(H.residual), dpsi: fmt(H.dpsiNorm), ratio: fmt(H.pulay / H.bound, 3) });
+  /* F_elec by an independent B-centred quadrature of the full LCAO density: ∫ ρ cos θ_B dr_B dΩ (P7's kernel, GL here;
+     cos θ_B = −1 + 2v⁴ so the cusp of |1s_A|² on the sphere r_B = R is a smooth even function of v) */
+  const R = 2, S = overlapS(R), { x: gx, w: gw } = gaussLegendreHF(48), { x: tx, w: tw } = gaussLegendreHF(64);
+  let Fq = 0; const bounds = [0, 0.5, 1, 1.7, 2, 2.3, 3, 5, 8, 14, 24, 40];
+  for (let p = 0; p + 1 < bounds.length; p++) { const h = (bounds[p + 1] - bounds[p]) / 2, c = (bounds[p] + bounds[p + 1]) / 2;
+    for (let i = 0; i < 48; i++) { const rb = c + h * gx[i]; for (let k = 0; k < 64; k++) { const v = 0.5 + 0.5 * tx[k], u = -1 + 2 * v ** 4, rA = Math.sqrt(rb * rb + R * R + 2 * R * rb * u);
+      const a = Math.exp(-rA) / Math.sqrt(Math.PI), b = Math.exp(-rb) / Math.sqrt(Math.PI); Fq += gw[i] * h * 0.5 * tw[k] * 8 * v * v * v * 2 * Math.PI * (a + b) * (a + b) / (2 * (1 + S)) * u; } } }
+  judge('G0 F_elec by a B-centred Gauss–Legendre quadrature of the LCAO density (48 × 64 on eleven panels, no closed forms) agrees with the closed form to 1e-8', near(Fq, H.F_elec, 1e-8), { quadrature: fmt(Fq), closed: fmt(H.F_elec) });
+  const HH = hellmannFeynman(2.49), Hb = hellmannFeynman(1.5);
+  judge('G0 at the LCAO minimum R = 2.49 the variational force vanishes while F_HF does not (the Pulay gap); at R = 1.5 the identity still holds', Math.abs(HH.F_exact) < 2e-3 && HH.F_HF > 0.05 && near(Hb.F_exact, Hb.F_HF - Hb.pulay, 1e-7), { R249: [fmt(HH.F_exact, 5), fmt(HH.F_HF, 5)], R15: [fmt(Hb.F_elec, 6), fmt(Hb.pulay, 6), fmt(Hb.bound, 6)] });
+  /* 11. inverseSquareIntegral's left branch r = R − t² had fixed panels 0.02 … 0.6 and one panel from 0.6 to √R: the density
+        r e^{−2r} lives at t ∈ [√(R−5), √R], a sliver at the END that the rule never saw — 1.6e-4 relative at R = 40, 8e-3
+        at R = 60, where the residual ‖(H−E)ψ‖² = gg − (½+E_el)² (a four-digit cancellation) went negative and the bound
+        clipped to 0.  Panel edges now sit at √(R − 8), √(R − 2), √R. */
+  const brute = (R) => { const N = 4000000, h = 60 / N; let s = 0; for (let i = 0; i < N; i++) { const r = (i + 0.5) * h; s += r * Math.exp(-2 * r) * Math.log((r + R) / Math.abs(r - R)); } return (2 / R) * s * h; };
+  const I2 = [2, 40, 60].map((R) => ({ R, module: inverseSquareIntegral(R), brute: brute(R) })), law = [40, 60].map((R) => hellmannFeynman(R).bound * Math.sqrt(3) * R * R);
+  const H60 = hellmannFeynman(60);
+  judge('G0 W42-11 ⟨1s_A|1/r_B²|1s_A⟩ at R = 2, 40, 60 against a 4·10⁶-point midpoint rule to 1e-8 relative (it was 1.6e-4 off at 40 and 8e-3 at 60), R = 2 unchanged at 0.29468077249 to 1e-10, and the Pulay bound at R = 60 is 1.6048e-4 (not 0): the large-R law bound → 1/(√3 R²) — from ‖∂_Rψ‖ → 1/√12 and ‖(H−E)ψ‖² = ⟨1/r_B²⟩ − 1/R² → ⟨r²⟩/(3R⁴) = 1/R⁴ — holds to 0.2 % at R = 40 and 60 (the reviewer\'s "≈ 1.8e-4" was an estimate; the law gives 1.604e-4)',
+    I2.every((x) => Math.abs(x.module - x.brute) < 1e-8 * x.brute) && near(inverseSquareIntegral(2), 0.29468077249, 1e-10) && H60.bound > 1.5e-4 && near(H60.bound, 1 / (Math.sqrt(3) * 3600), 2e-3 * 1.6e-4) && law.every((v) => near(v, 1, 2e-3)),
+    { I2: I2.map((x) => ({ R: x.R, module: x.module, rel: (x.module - x.brute) / x.brute })), bound60: H60.bound, law: 1 / (Math.sqrt(3) * 3600), lawRatio: law });
+}
+/* ── G2 the anchor: force(2, ground) for lcao1s against the closed forms (tests/lib/hellmann-feynman.js) ── */
 {
   const H = hellmannFeynman(2), f = one.force(2, one.vector(one.solve(2), 0));
-  judge('G2 THE ANCHOR force(2, σg) on the 1s pair: F_elec = −0.13390616 (1e-6), pulay = 0.06228945 (1e-5), bound = 0.102024 (1e-4), F_exact = 0.0538044 (1e-6) — the general machinery lands on electrostatics.js\'s closed forms', near(f.F_elec, -0.13390616, 1e-6) && near(f.pulay, 0.06228945, 1e-5) && near(f.bound, 0.102024, 1e-4) && near(f.F_exact, 0.0538044, 1e-6), { F_elec: sig(f.F_elec), pulay: sig(f.pulay), bound: sig(f.bound), F_exact: sig(f.F_exact) });
+  judge('G2 THE ANCHOR force(2, σg) on the 1s pair: F_elec = −0.13390616 (1e-6), pulay = 0.06228945 (1e-5), bound = 0.102024 (1e-4), F_exact = 0.0538044 (1e-6) — the general machinery lands on the closed forms of tests/lib/hellmann-feynman.js', near(f.F_elec, -0.13390616, 1e-6) && near(f.pulay, 0.06228945, 1e-5) && near(f.bound, 0.102024, 1e-4) && near(f.F_exact, 0.0538044, 1e-6), { F_elec: sig(f.F_elec), pulay: sig(f.pulay), bound: sig(f.bound), F_exact: sig(f.F_exact) });
   judge('G2 …and to the closed forms\' own digits: F_elec, pulay, bound, ‖(H−E)ψ‖ = 0.22293275 and ‖∂_Rψ‖ = 0.22882249 each to 1e-9; F_HF − pulay = F_exact = F_fixed to 1e-9 (Hurley); F_A = −F_B to 1e-12; the pointwise norm and energy agree with c†Sc, c†Hc/c†Sc to 1e-12', near(f.F_elec, H.F_elec, 1e-9) && near(f.pulay, H.pulay, 1e-9) && near(f.bound, H.bound, 1e-9) && near(f.residual, H.residual, 1e-9) && near(f.dpsiNorm, H.dpsiNorm, 1e-9) && near(f.F_HF - f.pulay, f.F_exact, 1e-9) && near(f.F_fixed, f.F_exact, 1e-9) && near(f.F_elecA, -f.F_elec, 1e-12) && Math.abs(f.checks.norm) < 1e-12 && Math.abs(f.checks.energy) < 1e-12, { dF: sig(f.F_elec - H.F_elec, 3), dPulay: sig(f.pulay - H.pulay, 3), dBound: sig(f.bound - H.bound, 3), dRes: sig(f.residual - H.residual, 3), dDpsi: sig(f.dpsiNorm - H.dpsiNorm, 3), hurley: sig(f.F_HF - f.pulay - f.F_exact, 3), checks: f.checks });
   const one2 = createMO({ kind: 'lcao1s', quad: DOUBLED }), g = one2.force(2, one2.vector(one2.solve(2), 0), { differences: false });
   judge('G2 THE DIGITS: doubling every Gauss order (ξ 24 × η 40 prolate; 20 radial × 40 / 64 angular spherical) moves F_elec, pulay and bound by < 1e-10 on the 1s pair — the singularity-typed rule is converged, not tuned', Math.abs(g.F_elec - f.F_elec) < 1e-10 && Math.abs(g.pulay - f.pulay) < 1e-10 && Math.abs(g.bound - f.bound) < 1e-10, { dF: sig(g.F_elec - f.F_elec, 3), dPulay: sig(g.pulay - f.pulay, 3), dBound: sig(g.bound - f.bound, 3), points: [f.points, g.points] });

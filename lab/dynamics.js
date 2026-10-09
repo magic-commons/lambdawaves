@@ -244,7 +244,7 @@ export function psiAndGrad(re, im, ids, x, y, z) {
     drR += cr * rr - ci * ri; drI += cr * ri + ci * rr;
     const tr = dfdt * cph, ti = dfdt * sph;
     dtR += cr * tr - ci * ti; dtI += cr * ti + ci * tr;
-    // ∂_φ ψ_a / sin θ = i m · (f / sin θ), with sin^{|m|−1}θ carried explicitly (electrostatics.js's thetaFuncs): finite ON the
+    // ∂_φ ψ_a / sin θ = i m · (f / sin θ), with sin^{|m|−1}θ carried explicitly (as the retired electrostatics.js's thetaFuncs did): finite ON the
     // axis, where (∂_φψ)/(r sin θ) was dropped as 0/0 before — 2p₊1 at (0, 0, 1) read g_y = 0 for a true −0.04277i (wave 42)
     const fs = am ? T.norm * e * rl * L * stm1 * D : 0, ur = fs * cph, ui = fs * sph;
     const br = cr * ur - ci * ui, bi = cr * ui + ci * ur;

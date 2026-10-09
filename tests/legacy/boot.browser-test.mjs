@@ -993,100 +993,9 @@ try {
     && atT.savedZ === 11 && atT.noTheme && atT.movedZ === 18 && atT.backZ === 11 && atT.backHam === 'atom' && /Z = 11  Na/.test(atT.knobBack)
     && Math.abs(atT.E1s + 0.5) < 1e-12 && atT.hSpace === 0 && atT.hLabel === '1s₊0' && atT.errs === 0 && !atT.gpu, atT);
 
-  /* ── B55: W-FIELD — the classical field of the register's own charge, in closed form, on the stage ── */
-  const elT = await g.ev(`try { ${RATE}
-    const Hy = await import('/lab/hydrogen.js');
-    __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
-    const shipsClosed = (__LW.bootClosed || []).includes('field'), iF = __LW.bootOrder.indexOf('field'), shipsLast = __LW.bootOrder.slice(iF, iF + 3).join(' ') === 'field wigner radiation';
-    __LW.layout.reopen('field', 'R');
-    const hasCopy = !!document.querySelector('.dev[data-id="field"] .dev-copy');
-    const stat = () => document.querySelector('.dev[data-id="field"] .dev-stat').textContent;
-    const cv = document.getElementById('fieldlines');
-    const ink = () => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let k = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 8) k++; return k; };
-    const settle = async (ms) => { await __LW.settle(); await new Promise((r) => setTimeout(r, ms || 400)); };
-    /* 2p₊1: one label, a real current, and the two axis numbers the ledger certifies */
-    __LW.api.clear(); __LW.api.toggleMode(Hy.stateOf(2, 1, 1).index); __LW.scrub(0); await settle(300);
-    const inkBefore = ink();
-    __LW.fieldlines.setOverlay('phi'); await settle();
-    const s = JSON.parse(JSON.stringify(__LW.fieldlines.stats)), inkPhi = ink(), dig = __LW.layout.digest('field');
-    const el = __LW.electrostatics, bn = el.bNucleus();
-    __LW.fieldlines.setOverlay('E'); await settle(); const inkE = ink(), polysE = __LW.fieldlines.stats.polys;
-    __LW.fieldlines.setOverlay('j'); await settle(); const inkJ = ink(), polysJ = __LW.fieldlines.stats.polys;
-    __LW.fieldlines.setOverlay('off'); await settle(300); const inkOff = ink();
-    /* 1s: Φ is spherically symmetric, so its ink must be symmetric about the nucleus's screen x.
-       The stage CAPTION is ink too and it lives on the left, so it is switched off for the measurement. */
-    __LW.api.clear(); __LW.api.toggleMode(Hy.stateOf(1, 0, 0).index); __LW.scrub(0);
-    const hadCaps = !document.body.classList.contains('no-captions');
-    document.body.classList.add('no-captions');
-    __LW.fieldlines.setOverlay('phi'); await settle(500);
-    const px = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
-    let mL = 0, mR = 0; const W = cv.width, H = cv.height;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (px[4 * (y * W + x) + 3] > 8) { if (x < W / 2) mL++; else mR++; }
-    const mirror = Math.abs(mL - mR) / Math.max(1, (mL + mR) / 2);
-    const phiE0_1s = __LW.fieldlines.stats.phiE0, Q1s = __LW.fieldlines.stats.Q, B1s = __LW.fieldlines.stats.Bmag;
-    if (hadCaps) document.body.classList.remove('no-captions');
-    /* the Hamiltonian guard: the closed form is hydrogenic */
-    __LW.setHamiltonian('qho'); await settle(350);
-    const qhoInk = ink(), qhoStat = stat();
-    __LW.setHamiltonian('hydrogen'); await settle(450);
-    const backInk = ink(), backStat = stat();
-    /* the project carries the overlay, and still not the theme */
-    __LW.fieldlines.setOverlay('E'); __LW.fieldlines.setLines(14); await settle(300);
-    const proj = __LW.serialize(), saved = proj.presentation.field, noTheme = proj.presentation.mat.bg === undefined;
-    __LW.fieldlines.setOverlay('phi'); __LW.fieldlines.setLines(6);
-    __LW.restore(proj); await settle(300);
-    const back = { ov: __LW.fieldlines.overlay, lines: __LW.fieldlines.lines, src: __LW.fieldlines.source, ink: ink() };
-    /* what the window costs the frame rate: frames counted against the wall clock over two seconds, three times on
-       the SAME page — window closed, window open with no overlay, window open drawing Φ.  (An absolute rate is not a
-       property of this window: five minutes into a headless run on a shared machine the page is at a third of the
-       rate it holds fresh, whatever is drawn.  The comparison is.) */
-    /* WAVE 63: 40 FRAMES, not 2000 ms — the comment above says an absolute rate is not a property of
-       this window, and a fixed sleep makes the SAMPLE SIZE a property of the machine as well. */
-    const rate = async () => { const r = await rateN(40); return { fr: r.fps, meter: r.meter, short: r.short }; };
-    __LW.fieldlines.setOverlay('off'); document.querySelector('.dev[data-id="field"] .dev-close').click(); await settle(250);
-    await rate();                                                  // a warm-up run, thrown away: the first play after a long pause is cold
-    const shut = await rate();
-    __LW.layout.reopen('field', 'R'); await settle(250);
-    const idle = await rate();
-    __LW.fieldlines.setOverlay('phi'); await settle(300);
-    const buildMs = __LW.fieldlines.stats.buildMs, drawnInk = ink();
-    const on = await rate(), fpsShut = shut.fr, fpsIdle = idle.fr, fps = on.fr, fpsMeter = on.meter;
-    __LW.fieldlines.setOverlay('off'); await settle(250);
-    document.querySelector('.dev[data-id="field"] .dev-close').click();
-    __LW.loadPreset('1s+2pz'); await settle(250);
-    const chk = { ship: shipsClosed && shipsLast && hasCopy && inkBefore === 0,
-      num: Math.abs(s.Q - 1) < 1e-9 && Math.abs(s.Q - s.norm2) < 1e-9 && s.terms === 1 && s.slots === 2 && s.Lmax === 2 && Math.abs(s.phiE0 + 0.25) < 1e-9 && Math.abs(s.Emag - 0.9855758458) < 1e-9,
-      B: Math.abs(s.Bz + 0.521534351) < 1e-6 && Math.abs(s.Bz1 + 0.429533192) < 1e-6,
-      dig: dig.indexOf('0.52') >= 0 && dig.indexOf('T') >= 0 && dig.indexOf('-6.803') >= 0 && dig.indexOf('5.068e+11') >= 0 && dig.length > 600,
-      ink: inkPhi > 500 && inkE > 500 && inkJ > 500 && inkOff === 0,
-      mir: mirror < 0.10 && mL > 500, s1: Math.abs(phiE0_1s + 1) < 1e-9 && Math.abs(Q1s - 1) < 1e-9 && B1s === 0,
-      guard: qhoInk === 0 && /hydrogenic register only/.test(qhoStat) && backInk > 500,
-      proj: saved.overlay === 'E' && saved.lines === 14 && noTheme && back.ov === 'E' && back.lines === 14 && back.ink > 500,
-      fps: fps > 0.72 * fpsShut && !on.short && !shut.short && drawnInk > 500, closed: document.querySelector('.dev[data-id="field"]').classList.contains('closed'), err: window.__e.length === 0 };
-    const env = { fpsShut, fpsIdle, fps, fpsMeter, cost: 1 - fps / fpsShut, buildMs, drawnInk,
-      frames: __LW.stats.frames, open: document.querySelectorAll('.dev:not(.closed)').length, half: __LW.domain.half };
-    return { chk, env, shipsClosed, shipsLast, hasCopy, inkBefore, inkPhi, inkE, inkJ, inkOff, polysE, polysJ,
-      Q: s.Q, norm2: s.norm2, phiE0: s.phiE0, phiE0V: s.phiE0V, Emag: s.Emag, EmagV: s.EmagV, Bz: s.Bz, Bz1: s.Bz1,
-      bnZ: bn.Bz, bnMag: bn.mag, slots: s.slots, Lmax: s.Lmax, buildMs: s.buildMs, terms: s.terms,
-      digHasB: dig.indexOf('0.52') >= 0 && dig.indexOf('T') >= 0, digHasVolts: dig.indexOf('-6.803') >= 0,
-      digHasE: dig.indexOf('5.068e+11') >= 0, digLen: dig.length,
-      mL, mR, mirror, phiE0_1s, Q1s, B1s, qhoInk, qhoStat, backInk, backStat,
-      saved, noTheme, back, closedAtEnd: document.querySelector('.dev[data-id="field"]').classList.contains('closed'),
-      errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B55 THE CLASSICAL FIELD: ELECTROSTATICS ships CLOSED with WIGNER and RADIATION consecutive behind it (HISTORY closes the rack since wave 106, so THIRD FROM LAST is no longer the address), and once opened it solves Poisson for the register\'s own |ψ|² in closed form — 2p₊1 gives the monopole = ‖c‖² = 1 exactly, Φ_e(0) = −0.25 a.u. = −6.803 V, |E|(0,0,1) = 0.985576 a.u. = 5.068e11 V/m, and the certified magnetostatic numbers B_z = −0.521534 T at the nucleus and −0.429533 T at 1 a₀, all of them in a copyable digest; Φ, E and j each draw ink on the stage overlay and OFF clears it; a 1s state\'s equipotentials are left–right symmetric about the nucleus\'s screen x to better than 10 % (0.1 % with the caption off) and carry no current at all; the MOLECULE window prints the Hellmann–Feynman force −0.1339 with its Pulay bound 0.102 against the variational 0.053804; a project keeps the overlay and its 14 lines and still no theme; drawing Φ every frame costs the frame rate under 28 % against the same page with the window shut, counted against the wall clock back to back over a fixed FORTY FRAMES each (an absolute rate is the machine\'s, not this window\'s — and wave 63 deleted the `fps > 6` beside this arm, which the sentence had refuted in its own parenthesis while asserting it anyway; a sleep of 2000 ms made the sample size the machine\'s too, so the sample is counted now and a run that could not reach it says `short` instead); and the whole window stands down with "hydrogenic register only" under the oscillator and comes back under hydrogen',
-    !elT.error && elT.shipsClosed && elT.shipsLast && elT.hasCopy && elT.inkBefore === 0
-    && Math.abs(elT.Q - 1) < 1e-9 && Math.abs(elT.Q - elT.norm2) < 1e-9 && elT.terms === 1 && elT.slots === 2 && elT.Lmax === 2
-    && Math.abs(elT.phiE0 + 0.25) < 1e-9 && Math.abs(elT.phiE0V + 6.802846561) < 1e-6
-    && Math.abs(elT.Emag - 0.9855758458) < 1e-9 && Math.abs(elT.EmagV - 5.068034768e11) / 5.068e11 < 1e-6
-    && Math.abs(elT.Bz + 0.521534351) < 1e-6 && Math.abs(elT.Bz1 + 0.429533192) < 1e-6 && Math.abs(elT.bnZ - elT.Bz) < 1e-9
-    && elT.digHasB && elT.digHasVolts && elT.digHasE && elT.digLen > 600
-    && elT.inkPhi > 500 && elT.inkE > 500 && elT.inkJ > 500 && elT.polysE > 0 && elT.polysJ > 0 && elT.inkOff === 0
-    && elT.mirror < 0.10 && elT.mL > 500 && Math.abs(elT.phiE0_1s + 1) < 1e-9 && Math.abs(elT.Q1s - 1) < 1e-9 && elT.B1s === 0
-    && elT.qhoInk === 0 && /hydrogenic register only/.test(elT.qhoStat) && elT.backInk > 500 && /closed form/.test(elT.backStat)
-    && elT.saved.overlay === 'E' && elT.saved.lines === 14 && elT.noTheme && elT.back.ov === 'E' && elT.back.lines === 14 && elT.back.ink > 500
-    && elT.chk.fps && elT.closedAtEnd && elT.errs === 0 && !elT.gpu, elT);
+  /* ── B55: W-FIELD — the ELECTROSTATICS window is deleted (0.5.0 D9b) ── */
+  const elT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="field"]') && !document.getElementById('fieldlines') && !('fieldlines' in __LW) && !('electrostatics' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B55 (0.5.0 D9b) RETIRED: the ELECTROSTATICS window, its #fieldlines overlay and `__LW.fieldlines` / `__LW.electrostatics` were deleted in 0.5.0 D9b — restore opens a file whose overlay was on with the notice and nothing drawn', elT.gone && elT.errs === 0, elT);
 
   /* ── B56 W-STURMIAN: the SCALE switch ───────────────────────────────────── */
   const srT = await g.ev(`try { __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.ab.set(false); __LW.setRate(0, 1); __LW.sturmian.set(false); __LW.setSpace('x'); __LW.setView('density'); __LW.reg.setField({ Bz: 0, Fz: 0 }); await __LW.settle();
@@ -1174,7 +1083,7 @@ try {
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const order = __LW.bootOrder, closed = __LW.bootClosed || [];
     const ships = closed.indexOf('wigner') >= 0 && closed.indexOf('radiation') >= 0
-      && order.slice(order.indexOf('field'), order.indexOf('field') + 3).join(' ') === 'field wigner radiation';
+      && order.slice(order.indexOf('wigner'), order.indexOf('wigner') + 2).join(' ') === 'wigner radiation';   // 0.5.0 D9b: ELECTROSTATICS, before them, is gone
     __LW.layout.reopen('radiation', 'R'); __LW.layout.reopen('wigner', 'R');
     const hasCopy = !!document.querySelector('.dev[data-id="wigner"] .dev-copy') && !!document.querySelector('.dev[data-id="radiation"] .dev-copy');
     const settle = async (ms) => { await __LW.settle(); await new Promise((r) => setTimeout(r, ms || 500)); };
@@ -1263,7 +1172,7 @@ try {
       rad, dig2, pair, patInk, api, flat, turn, rotPair, lone, ink0, onS: { ...onS, slice: onS.slice === null, pair: onS.pair === null }, offS, qho, home,
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B57 PHASE SPACE AND THE DIPOLE: WIGNER and RADIATION ship CLOSED, after ELECTROSTATICS, each with a ⧉ COPY digest. Opened on the 1s, WIGNER draws the (z, p_z) SLICE at 64 × 64 with W(0, 0) = 1/π³ = 0.0322515344 to 1e-9 and its minimum refined off the grid to the certified −3.09725752e-4 at (1.3295, 1.3791), the digest carrying 0.03225, −3.0973e-4 and the word SLICE — the map is signed, with more than 200 pixels of the first accent AND of the second, so both signs of a function that is not positive are on the card; on 2p_z, a real orbital of definite parity, the map is EVEN in z to 1.5e-11 of its peak; Z RANGE 14 and P RANGE 3 round-trip through a project (and the theme still never). On 1s + 2p_z, RADIATION reads the pair 1s₀ → 2p₀ with A = 6.2649 × 10⁸ s⁻¹ (NIST\'s reduced-mass value), τ = 1.596 ns, λ = 2296 a₀, ħω = 10.2043 eV, |⟨a|r|b⟩| = 0.744935539 and P = |c₁|²|c₂|² ħωA = 1.4215e-9 a.u. — the identity held to 1e-20 — and draws its far-field pattern; the Δm = 0 pattern stands still at three times while the Δm = +1 pattern of 1s + 2p₊1 turns with the clock and returns at Δωt = π. A lone 1s has no allowed pair and the window says exactly "no dipole in this state" and draws its EMPTY FRAME and nothing more (under a third of the pattern\u2019s ink) rather than the blank slab it used to leave. The STURMIAN scale stands the slice down (no ink, LW.wigner.slice() null) with its note, and disables STARK K_z and DEFECT L² with the wave-39 note in their titles; HYDROGEN re-enables both and the ink comes back; the oscillator stands both windows down with "hydrogenic register only"; zero errors',
+  judge('B57 PHASE SPACE AND THE DIPOLE: WIGNER and RADIATION ship CLOSED, consecutive (ELECTROSTATICS, before them, left in 0.5.0 D9b), each with a ⧉ COPY digest. Opened on the 1s, WIGNER draws the (z, p_z) SLICE at 64 × 64 with W(0, 0) = 1/π³ = 0.0322515344 to 1e-9 and its minimum refined off the grid to the certified −3.09725752e-4 at (1.3295, 1.3791), the digest carrying 0.03225, −3.0973e-4 and the word SLICE — the map is signed, with more than 200 pixels of the first accent AND of the second, so both signs of a function that is not positive are on the card; on 2p_z, a real orbital of definite parity, the map is EVEN in z to 1.5e-11 of its peak; Z RANGE 14 and P RANGE 3 round-trip through a project (and the theme still never). On 1s + 2p_z, RADIATION reads the pair 1s₀ → 2p₀ with A = 6.2649 × 10⁸ s⁻¹ (NIST\'s reduced-mass value), τ = 1.596 ns, λ = 2296 a₀, ħω = 10.2043 eV, |⟨a|r|b⟩| = 0.744935539 and P = |c₁|²|c₂|² ħωA = 1.4215e-9 a.u. — the identity held to 1e-20 — and draws its far-field pattern; the Δm = 0 pattern stands still at three times while the Δm = +1 pattern of 1s + 2p₊1 turns with the clock and returns at Δωt = π. A lone 1s has no allowed pair and the window says exactly "no dipole in this state" and draws its EMPTY FRAME and nothing more (under a third of the pattern\u2019s ink) rather than the blank slab it used to leave. The STURMIAN scale stands the slice down (no ink, LW.wigner.slice() null) with its note, and disables STARK K_z and DEFECT L² with the wave-39 note in their titles; HYDROGEN re-enables both and the ink comes back; the oscillator stands both windows down with "hydrogenic register only"; zero errors',
     !wrT.error && wrT.chk && Object.keys(wrT.chk).every((k) => wrT.chk[k] === true) && !wrT.gpu, wrT);
 
   /* ── B58: W-MO — deleted with the H₂⁺ card (0.5.0 D9); tests/lib/mo.js keeps its engine for the node proofs ── */
@@ -4414,7 +4323,7 @@ try {
     document.body.style.removeProperty('--w57probe');
     /* AND THE CALL SITES ARE THE SHARED ONE — read off the bytes the SERVER hands a browser */
     R.mods = {};
-    for (const f of ['atomsview', 'fieldview', 'moview', 'radiationview', 'wignerview']) {
+    for (const f of ['atomsview', 'moview', 'radiationview', 'wignerview']) {   // fieldview left with ELECTROSTATICS (0.5.0 D9b)
       const src = await (await fetch('./' + f + '.js')).text();
       R.mods[f] = { shared: src.indexOf('accentRGB') >= 0, cyan: src.indexOf('78e1f0') >= 0 || src.indexOf('d97ce8') >= 0 || src.indexOf('120, 225, 240') >= 0 };
     }
@@ -6403,7 +6312,7 @@ try {
     R.live = live.length;
     R.liveBad = live.filter(function (e) { return e.closest('.ro') || e.classList.contains('dev-stat') || e.id === 'field'; }).length;
     R.liveWhat = live.map(function (e) { return e.tagName + '.' + (typeof e.className === 'string' ? e.className : '') + '#' + e.id; });
-    R.overlays = [...document.querySelectorAll('#fieldlines,#vortex,#particles,#kepler')].filter(function (c) { return c.getAttribute('aria-hidden') === 'true'; }).length;
+    R.overlays = [...document.querySelectorAll('#vortex,#particles,#kepler')].filter(function (c) { return c.getAttribute('aria-hidden') === 'true'; }).length;
     R.errs = window.__e.length;
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -6434,7 +6343,7 @@ try {
       && canvasT.density.indexOf('density') >= 0 && canvasT.grain.indexOf('grain') >= 0
       && canvasT.during === 0 && canvasT.tMoved === true && canvasT.onPause === 1
       && canvasT.paused.indexOf('paused at t =') >= 0
-      && canvasT.live <= 4 && canvasT.liveBad === 0 && canvasT.overlays === 4
+      && canvasT.live <= 4 && canvasT.liveBad === 0 && canvasT.overlays === 3
       && chatterT.focused === true && chatterT.tab === 0 && chatterT.during === 0
       && chatterAfterT.after === 1 && chatterAfterT.text !== chatterT.text
       && chatterAfterT.scrubTab === -1 && chatterAfterT.errs === 0 && canvasT.errs === 0, sayT);

@@ -433,7 +433,7 @@ export function toRGBA(src, w, h, { bytesPerRow = w * 4, bgra = false, opaque = 
 }
 
 /**
- * The 2-D overlays (VORTEX, KEPLER, PARTICLES, the field lines) are drawn by their owners at DISPLAY resolution
+ * The 2-D overlays (VORTEX, KEPLER, PARTICLES) are drawn by their owners at DISPLAY resolution
  * and cannot be re-rendered at 4x without touching their modules, so compositing them into a bigger picture is an
  * UPSCALE and is labelled one.  Straight (non-premultiplied) alpha over, bilinear in the layer.  Mutates `base`.
  */
@@ -740,7 +740,7 @@ export function createCapture(LW, opts = {}) {
     let upscaled = null;
     if (o.overlays) {
       upscaled = [];
-      for (const id of (Array.isArray(o.overlays) ? o.overlays : ['fieldlines', 'vortex', 'particles', 'kepler'])) {
+      for (const id of (Array.isArray(o.overlays) ? o.overlays : ['vortex', 'particles', 'kepler'])) {
         const layer = overlayBytes(typeof id === 'string' ? document.getElementById(id) : id);
         if (!layer) continue;
         compositeOver(shot.rgba, fit.w, fit.h, layer.rgba, layer.w, layer.h);

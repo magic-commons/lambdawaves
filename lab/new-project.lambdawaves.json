@@ -144,11 +144,6 @@
     "well": 10,
     "gasBasis": "reg"
    },
-   "field": {
-    "overlay": "off",
-    "lines": 10,
-    "source": "total"
-   },
    "wigner": {
     "zmax": 8,
     "pmax": 2

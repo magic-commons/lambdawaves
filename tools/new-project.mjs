@@ -72,7 +72,6 @@ function presentation() {
     space: 'x',                                                       // rack.js:321
     palette: { on: false, selected: 0, stops: normalize(prism.stops).map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) },   // rack.js' RAMP (mir/panels/ramp.js): the editor starts on the preset, normalised
     hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: 'reg' },         // rack.js serialize(); gasAxial starts false
-    field: { overlay: 'off', lines: 10, source: 'total' },           // fieldview.js:50
     wigner: { zmax: 8, pmax: 2 },                                     // wignerview.js:41
     readers: { spectrum: { selected: -1, dials: false },              // spectrumview.js:78
       slice: { mode: 'space', half: 8, gain: 1.6, rotor: { qL: [1, 0, 0, 0], qR: [1, 0, 0, 0] } },   // sliceview.js:63
