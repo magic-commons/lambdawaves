@@ -1,13 +1,15 @@
 /* camera-law.js — THE CAMERA LAW and the observer's pose: the one first-order law (wave 50), its constants CAM, the camera
  * object, the two modes (TURNTABLE ⇄ FREE, wave 54, and the levelling slerp between them), the one road for a relative
  * turn, the eased key orbit, and the ZOOM / FOV / RESET VIEW roads.  A seam out of rack.js boot() (optimization
- * 2026-09-24 · wave 130 seam 11, AUDIT-E §6).  Five edges, handed in: `obs` (the pose it writes), `ui` (the dials it
- * moves), `present` (schedule(TIER.PRESENT) — the only tier the camera may ask for), `modHand` (a routed ZOOM / FOV
+ * 2026-09-24 · wave 130 seam 11, AUDIT-E §6).  Four edges, handed in: `obs` (the pose it writes), `present`
+ * (schedule(TIER.PRESENT) — the only tier the camera may ask for), `modHand` (a routed ZOOM / FOV
  * turn moves the base) and `resetWall` (the loop's camera clock starts NOW: `lastWall = performance.now() / 1000`, the
  * one write camera.wake() and the key orbit make).  0.3.1 · S1: the MODE is the project's (`obs.mode`, D4 — a pose
  * cannot be read back without it), so the sixth edge, `saveSettings`, is gone.
  * createCameraLaw() runs where the windows begin, before the first control that reads it is built.
- * 0.5.0 A8 · THE CAMERA PORT (`port`, at the foot): the object MIR 1.5's CAMERA panel takes, and the notices it subscribes to. */
+ * 0.5.0 A8 · THE CAMERA PORT (`port`, at the foot): the object MIR 1.5's CAMERA panel takes, and the notices it subscribes to.
+ * 0.5.0 C1 · the panel is that window now, so the fifth edge, `ui` (the dials the law moved by hand), is gone: every change
+ * the law makes is a notice, and the panel reads the port on the frame after it. */
 import { quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
 
@@ -37,16 +39,16 @@ import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE ca
  * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
  * not on the undo stack, and reg.version cannot move because of it (§14). */
 export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
-  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
+  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1, SPIN: [0.02, 2], SPIN_DEF: 0.25 };   // C1: SPIN's range, once
 /** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
  *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything
  *  that is not a finite number reads 0 (an older project, a hand-edited file). */
 export const clampShift = (s) => [0, 1].map((i) => { const v = s ? +s[i] : 0; return Math.max(-CAM.SHIFT, Math.min(CAM.SHIFT, Number.isFinite(v) ? v : 0)) + 0; });
 
-export function createCameraLaw({ obs, ui, present: paint, modHand, resetWall }) {
+export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   const subs = new Set(), tell = () => { for (const f of subs) f(); }, present = () => { paint(); tell(); };   // A8: every PRESENT the law asks for is a notice
   const camera = {
-    autoRotate: false, speed: 0.25, friction: CAM.MU_DEF,
+    autoRotate: false, speed: CAM.SPIN_DEF, friction: CAM.MU_DEF,
     dragGain: CAM.GAIN_DEF, flingGain: CAM.FLING_DEF,   // wave 58: rad/px = dragGain × CAM.SENS · the release is multiplied by flingGain before the law sees it
     dy: 0, dp: 0,                                    // THE RESIDUAL d = ω − ω_amb (rad/s): the only state the law carries
     t: 0, steps: 0, flings: 0, last: null,           // t: the seconds the law has integrated — the CAMERA clock (§12)
@@ -65,12 +67,12 @@ export function createCameraLaw({ obs, ui, present: paint, modHand, resetWall })
     stop() { this.dy = 0; this.dp = 0; },
     /** the camera clock starts NOW: the first frame after an idle must not integrate the idle */
     wake() { resetWall(); present(); },
-    setFriction(v) { this.friction = Math.max(0, Math.min(CAM.MU_MAX, v)); if (ui.fricK) ui.fricK.set(this.friction); this.wake(); return this.friction; },
-    setDragGain(v) { this.dragGain = Math.max(CAM.GAIN[0], Math.min(CAM.GAIN[1], +v || 0)); if (ui.gainK) ui.gainK.set(this.dragGain); return this.dragGain; },
-    setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); if (ui.flingK) ui.flingK.set(this.flingGain); return this.flingGain; },
+    setFriction(v) { this.friction = Math.max(0, Math.min(CAM.MU_MAX, v)); this.wake(); return this.friction; },
+    setDragGain(v) { this.dragGain = Math.max(CAM.GAIN[0], Math.min(CAM.GAIN[1], +v || 0)); tell(); return this.dragGain; },
+    setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); tell(); return this.flingGain; },
     get radPerPixel() { return this.dragGain * CAM.SENS; },
-    setAutoRotate(v) { this.autoRotate = !!v; if (ui.spinSw) ui.spinSw.set(this.autoRotate); this.wake(); return this.autoRotate; },
-    setSpeed(v) { this.speed = v; if (ui.spinK) ui.spinK.set(v); this.wake(); return v; },
+    setAutoRotate(v) { this.autoRotate = !!v; this.wake(); return this.autoRotate; },
+    setSpeed(v) { this.speed = v; this.wake(); return v; },
     setDist(v) { return setDist(v); }, setFov(v, c) { return setFov(v, c); }, reset() { resetView(); },
     zoomAt(c, v) { return zoomAt(c, v); }, setShift(x, y) { return setShift(x, y); }, panBy(du, dv) { return panBy(du, dv); },   // 0.4.0 S2
   };
@@ -112,7 +114,6 @@ export function createCameraLaw({ obs, ui, present: paint, modHand, resetWall })
   /** TURNTABLE ⇄ FREE.  Into FREE is an EXACT conversion and moves no pixel; out of it slerps the roll away. */
   function setCamMode(m, opt) {
     const want = m === 'free' ? 'free' : 'turntable';
-    if (ui.camSeg) ui.camSeg.set(want);
     if (want === obs.mode && !camLevel.from) return obs.mode;
     if (want === 'free') { camLevel.from = null; obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); obs.mode = 'free'; }
     else {
@@ -163,37 +164,40 @@ export function createCameraLaw({ obs, ui, present: paint, modHand, resetWall })
      anchor at the frame's centre (c = 0, p′ = p·k).  A modulated ZOOM or FOV leaves the shift alone. */
   const CENTRE = Object.freeze([0, 0]);
   const anchor = (c, k) => { if (k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
-  function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); if (ui.zoomK) ui.zoomK.set(obs.dist); anchor(c, d0 / obs.dist); present(); return obs.dist; }
+  function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); anchor(c, d0 / obs.dist); present(); return obs.dist; }
   const setDist = (v) => zoomAt(CENTRE, v);
-  function setFov(v, c = CENTRE) { const t0 = Math.tan(obs.fov / 2); if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); if (ui.fovK) ui.fovK.set(obs.fov); anchor(c, t0 / Math.tan(obs.fov / 2)); present(); return obs.fov; }
-  /** THE LENS SHIFT's one road: the PAN knobs, PAN HOME, Alt-drag, two fingers, the Alt+Arrows and the zooms above */
-  function setShift(x, y) {
-    const s = obs.shift || CENTRE, c = clampShift([x, y]), hx = modHand('observer.panx', c[0]), hy = modHand('observer.pany', c[1]);
-    obs.shift = [hx ? s[0] : c[0], hy ? s[1] : c[1]]; if (ui.panXK) ui.panXK.set(obs.shift[0]); if (ui.panYK) ui.panYK.set(obs.shift[1]); present(); return obs.shift;
+  function setFov(v, c = CENTRE) { const t0 = Math.tan(obs.fov / 2); if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); anchor(c, t0 / Math.tan(obs.fov / 2)); present(); return obs.fov; }
+  /** THE LENS SHIFT's one road: the PAN pad and its knobs, PAN HOME, Alt-drag, two fingers, the Alt+Arrows and the zooms above.
+   *  `axis` (0 · 1): a dial's road — that axis alone is the hand's, so a routed OTHER axis keeps its base (C1, brief 2) */
+  function setShift(x, y, axis) {
+    const s = obs.shift || CENTRE, c = clampShift([x, y]), hx = axis !== 1 && modHand('observer.panx', c[0]), hy = axis !== 0 && modHand('observer.pany', c[1]);
+    obs.shift = [hx ? s[0] : c[0], hy ? s[1] : c[1]]; present(); return obs.shift;
   }
   const panBy = (du, dv) => { const s = obs.shift || CENTRE; return setShift(s[0] + du, s[1] + dv); };
-  function syncCamUI() { if (ui.zoomK) ui.zoomK.set(obs.dist); if (ui.fovK) ui.fovK.set(obs.fov); if (ui.gainK) ui.gainK.set(camera.dragGain); if (ui.flingK) ui.flingK.set(camera.flingGain); if (ui.panXK) { const s = obs.shift || CENTRE; ui.panXK.set(s[0]); ui.panYK.set(s[1]); } tell(); }
-  /** RESET VIEW (the trigger, R, a double-click and a double-tap): the shipped pose and the motion with it —
+  /** RESET VIEW (HOME, R, a double-click and a double-tap): the shipped pose and the motion with it —
       AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
-  function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); syncCamUI(); present(); }   // wave 54: the pose is the same pose in either mode
+  function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); present(); }   // wave 54: the pose is the same pose in either mode
   /* ── 0.5.0 A8 · THE PORT (MIR 1.5 panels/camera.js: get / set / subscribe, ranges in the port's unit, angle 'rad', modIds onto the
      saved observer.* routes, turn, home) and brief 1's three hands.  `set` is a HAND's road: a routed axis moves its base, as every
-     dial here does.  An id the law does not have reads undefined, and the panel hides it.  Notices: every PRESENT, syncCamUI, and
-     a step, a level or a turn that moved the pose (`told`); the modulation's observer.* writes in rack.js tell nobody yet (C1). */
+     dial here does.  An id the law does not have reads undefined, and the panel hides it.  Notices: every PRESENT, a feel setter, and
+     a step, a level or a turn that moved the pose (`told`); C1: `notify` is the modulation's door (rack.js' observer.* setters write
+     the pose raw, then tell), PAN HOME is the panel's verb, and the PAN readout is the shift in NDC (the pivot's place, ±1 = the edge). */
   const told = (f) => (...a) => { const r = f(...a); if (r) tell(); return r; }, turn = (dy, dp) => { orbitBy(dy, dp); present(); };
   const sh = () => obs.shift || CENTRE, R = (min, max, home, o) => ({ min, max, home, ...o }), H = CAM.HOME;
   const ROADS = { mode: [() => obs.mode, (v) => setCamMode(v)], zoom: [() => obs.dist, setDist], fov: [() => obs.fov, (v) => setFov(v)],
-    panX: [() => sh()[0], (v) => setShift(v, sh()[1])], panY: [() => sh()[1], (v) => setShift(sh()[0], v)],
+    panX: [() => sh()[0], (v) => setShift(v, sh()[1], 0)], panY: [() => sh()[1], (v) => setShift(sh()[0], v, 1)],
     yaw: [() => obs.yaw, (v) => modHand('observer.yaw', v) || turn(v - obs.yaw, 0)], pitch: [() => obs.pitch, (v) => modHand('observer.pitch', v) || turn(0, v - obs.pitch)],
     autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)], spin: [() => camera.speed, (v) => camera.setSpeed(v)],
     friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)] };
+  const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
-    subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, turn, home: () => resetView(), setShift, zoomAt, panBy,
+    subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,
+    verbs: Object.freeze([{ label: 'PAN HOME', title: 'PAN HOME — put the pivot back in the middle of the frame', run: () => { setShift(0, 0); } }]),
     modIds: Object.freeze({ yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' }),
     ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom' }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
-      pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0), panY: R(-CAM.SHIFT, CAM.SHIFT, 0), spin: R(0.02, 2, 0.25),
+      pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), panY: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), spin: R(...CAM.SPIN, CAM.SPIN_DEF),
       drag: R(...CAM.GAIN, CAM.GAIN_DEF, { step: CAM.GAIN_STEP, log: false }), friction: R(0, CAM.MU_MAX, CAM.MU_DEF, { step: CAM.MU_STEP }),
       fling: R(...CAM.FLING, CAM.FLING_DEF, { step: CAM.FLING_STEP }) }) };
   return { camera, camTravel, camLevel, syncFreeAngles, orbitBy: told(orbitBy), keyOrbitMoving, queueKeyOrbit, stepKeyOrbit: told(stepKeyOrbit), setCamMode,
-    camLevelStep: told(camLevelStep), cameraStep: told(cameraStep), setDist, setFov, syncCamUI, resetView, zoomAt, setShift, panBy, port };
+    camLevelStep: told(camLevelStep), cameraStep: told(cameraStep), setDist, setFov, syncCamUI: tell, resetView, zoomAt, setShift, panBy, port };
 }

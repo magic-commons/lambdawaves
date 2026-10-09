@@ -18,7 +18,7 @@
  *             (lab/state.js) and the Clock (lab/clock.js) — rack.js:95 and :101 construct exactly these; the boot pose
  *             CAM.HOME (lab/camera-law.js) and quatFromYawPitch / VIEW / STYLE (lab/field.js) — rack.js:104–105; the
  *             Hamiltonian table (lab/hamiltonian.js); the palette catalogue and its normalize (lab/mir/palette.js) with
- *             DEFAULT_PALETTE (lab/paletteview.js) — rack.js:124; and the modulation model (lab/mir/modulation/mod.js).
+ *             DEFAULT_PALETTE (lab/palette-app.js) — rack.js' PAL_DEF; and the modulation model (lab/mir/modulation/mod.js).
  *   TABLED    everything that lives inside a closure (rack.js boot() or a view factory) and cannot be imported.  Each
  *             entry below names the line it mirrors.  tests/new-project.browser-test.mjs holds the table honest: a fresh
  *             boot's own serialize() must equal this file on every key a boot does not choose for itself.
@@ -31,7 +31,7 @@ import { CAM } from '../lab/camera-law.js';
 import { quatFromYawPitch, VIEW, STYLE } from '../lab/field.js';
 import { HAMILTONIANS, getZ, getHamiltonian } from '../lab/hamiltonian.js';
 import { PRESET_BY_ID, normalize } from '../lab/mir/palette.js';
-import { DEFAULT_PALETTE } from '../lab/paletteview.js';
+import { DEFAULT_PALETTE } from '../lab/palette-app.js';
 import * as M from '../lab/mir/modulation/mod.js';
 
 const OUT = fileURLToPath(new URL('../lab/new-project.lambdawaves.json', import.meta.url));
@@ -70,7 +70,7 @@ function presentation() {
     shadow: 'phasors',                                                // shadowview.js:16
     paletteId: DEFAULT_PALETTE,
     space: 'x',                                                       // rack.js:321
-    palette: { on: false, selected: 0, stops: normalize(prism.stops).map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) },   // paletteview.js: the editor starts on the preset, normalised
+    palette: { on: false, selected: 0, stops: normalize(prism.stops).map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) },   // rack.js' RAMP (mir/panels/ramp.js): the editor starts on the preset, normalised
     hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: 'reg' },         // rack.js serialize(); gasAxial starts false
     field: { overlay: 'off', lines: 10, source: 'total' },           // fieldview.js:50
     wigner: { zmax: 8, pmax: 2 },                                     // wignerview.js:41

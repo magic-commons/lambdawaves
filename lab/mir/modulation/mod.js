@@ -9,6 +9,8 @@
  *              1/8  the PRESET_LS storage namespace                        (wave 52)
  *              2/8 … 6/8  the BIPOLAR route — flag, anchor, patch, save, load   (wave 61)
  *              7/8, 8/8  MOD_STATE_V and MOD_STATE_READS                   (wave 63)
+ *              MIR 1.5.1: the preset key became an option (setPresetKey; PRESET_LS is its default).
+ *              λWAVES' byte gate (§16) that held it back stays on the frozen 1.4 line.
  *              THE COUNT ON THIS LINE IS GATED.  It said "1 edit" for a whole wave after
  *              five more went in under it, and it could, because tests/mir.test.mjs §16
  *              strips exactly this header before it compares — the one sentence in the
@@ -39,8 +41,8 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const frac = (v) => v - Math.floor(v);
 const TAU = 6.283185307179586;
 
-/* Tempo range and default, BPM. */
-export const BPM_MIN = 20, BPM_MAX = 300, BPM_DEFAULT = 60;
+/* Tempo range and default, BPM.  The default is 30 (Josh, 2026-10-01: "Let 30BPM be the default"); it was 60 through 1.5.0-alpha.3. */
+export const BPM_MIN = 20, BPM_MAX = 300, BPM_DEFAULT = 30;
 /* The LFO clock divisions and their labels, 1 down to 1/128. */
 export const LFO_MULTS = [1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64, 1 / 128];
 export const LFO_MULT_LABEL = ['1', '1/2', '1/4', '1/8', '1/16', '1/32', '1/64', '1/128'];
@@ -978,26 +980,6 @@ export function releaseMacro(id) {
   return n;
 }
 
-/** Fires every pad at once; reports both counts because sources and pads differ. */
-export function fireTriggers() {
-  let macrosFired = 0, sourcesFired = 0;
-  for (const m of macros) {
-    if (m.kind !== 'trigger') continue;
-    const n = fireMacro(m.id);
-    if (n) { macrosFired++; sourcesFired += n; }
-  }
-  return { macros: macrosFired, sources: sourcesFired };
-}
-/** …and the key coming back up. */
-export function releaseTriggers() {
-  let macrosRel = 0, sourcesRel = 0;
-  for (const m of macros) {
-    if (m.kind !== 'trigger') continue;
-    const n = releaseMacro(m.id);
-    if (n) { macrosRel++; sourcesRel += n; }
-  }
-  return { macros: macrosRel, sources: sourcesRel };
-}
 
 /** THE LOUDEST THING THIS PAD IS FIRING RIGHT NOW, 0..1 — what the rail's dot
     lights with, so a press is visible on the pad that made it.  Allocation-free
@@ -1013,14 +995,6 @@ export function triggerLevel(id) {
   return v;
 }
 
-/** Clears a pad: every device lets go of the trigger. Returns how many. */
-export function clearTrigger(id) {
-  if (!isFireSource(id)) return 0;      // a hit socket clears too
-  const key = String(id);
-  let n = 0;
-  for (const s of sources) if (s.triggerId === key) { s.triggerId = null; n++; }
-  return n;
-}
 
 /* Clears references to deleted triggers; returns how many it cleared. */
 export function pruneTriggerRefs() {
@@ -1915,7 +1889,6 @@ export function audioDemand(deviceId) {
   return !!(c && c.any);
 }
 
-export function audioApplicationDemand(deviceId) { return audioDemand(deviceId); }
 
 /** EVERY BINDABLE SOURCE ID, in rack order — LFOs and ENVs by their own id,
     an AUDIO device by its five SOCKETS.  `:beat` is absent, and that absence is
@@ -2145,7 +2118,7 @@ export function targetPos(id, base, wrap) {
 }
 
 /* Returns a target's modulated value. */
-export function targetValue(id, base, wrap) {
+export function targetValue(id, base, wrap, handOnly = false) {
   const list = routeByTarget.get(String(id));
   if (!list) return NaN;
   /* THE PER-FRAME SUM.  No allocation, no closure, no Array method — this runs
@@ -2158,6 +2131,7 @@ export function targetValue(id, base, wrap) {
     const r = list[i];
     const m = macroById.get(r.macroId);
     if (!m) continue;
+    if (handOnly && m.sourceId) continue;
     const s = m.sourceId ? sourceById.get(m.sourceId) : null;
     const lerped = r.min + (r.max - r.min) * routeReading(m, s, wrap, r);
     const influence = routeInfluence(m, r, lerped);
@@ -2235,7 +2209,7 @@ function audioRtSnapshot(s) {
            refractory: r.refractory, lastDb: r.lastDb, lastFlux: r.lastFlux,
            threshold: r.threshold, feedHz: r.feedHz, sampleRate: r.sampleRate,
            hits: r.hits, frames: r.frames, fed: r.fed,
-           hitAgeSeconds: r.hitAgeSeconds, capturedAt: r.capturedAt, outs };
+           hitAgeSeconds: r.hitAgeSeconds, capturedAt: r.capturedAt, inputDb: { ...r.inputDb }, outs };
 }
 function audioRtRestore(s, v) {
   const r = s.audioRt;
@@ -2249,6 +2223,7 @@ function audioRtRestore(s, v) {
   r.threshold = v.threshold; r.feedHz = v.feedHz; r.sampleRate = v.sampleRate;
   r.hits = v.hits; r.frames = v.frames; r.fed = v.fed;
   r.hitAgeSeconds = v.hitAgeSeconds; r.capturedAt = v.capturedAt;
+  if (v.inputDb) r.inputDb = { ...v.inputDb };
   for (const k of AUDIO_EXPOSED) audioPublish(s, k, v.outs[k]);
 }
 
@@ -2258,6 +2233,8 @@ export function snapshotPhases() {
     map.set(s.id, { phase: s.phase, cycles: s.cycles | 0, t: s.t, gate: s.gate,
                     fired: s.fired, releasedAt: s.releasedAt, releaseFrom: s.releaseFrom,
                     out: s.out, cont: s.cont, primed: s.primed,
+                    shadowPhase: s.shadowPhase, shadowCycles: s.shadowCycles | 0,
+                    shadowed: s.shadowed, fires: s.fires,
                     audio: s.kind === 'audio' ? audioRtSnapshot(s) : undefined });
   }
   return { sources: map, beats: transport.beats, time: transport.time };
@@ -2266,6 +2243,15 @@ export function snapshotPhases() {
 export function restorePhases(snap) {
   if (!snap) return false;
   if (transport.hold) holdEnd();
+  restoreSourceRuntime(snap, false);
+  transport.beats = snap.beats;
+  transport.time = snap.time;
+  reanchorTransport(null);
+  syncMacros();
+  return true;
+}
+
+function restoreSourceRuntime(snap, shadows) {
   for (const [id, v] of snap.sources) {
     const s = sourceById.get(id);
     if (!s) continue;
@@ -2273,11 +2259,34 @@ export function restorePhases(snap) {
     s.fired = v.fired; s.releasedAt = v.releasedAt; s.releaseFrom = v.releaseFrom;
     s.out = v.out; s.cont = Number.isFinite(v.cont) ? v.cont : v.out;
     s.primed = v.primed;
+    if (shadows) {
+      s.shadowPhase = v.shadowPhase; s.shadowCycles = v.shadowCycles;
+      s.shadowed = v.shadowed; s.fires = v.fires;
+    }
     if (s.kind === 'audio' && v.audio) audioRtRestore(s, v.audio);
   }
-  transport.beats = snap.beats;
-  transport.time = snap.time;
-  reanchorTransport(null);
+}
+
+/** In-memory suspension state, not a project preset. Unlike restorePhases,
+ * restoring it preserves an active stutter and its un-held shadow. No play,
+ * trigger, release, or registry edge is emitted during this operation. */
+export function snapshotRuntime() {
+  return { v: 1, transport: { ...transport }, phases: snapshotPhases(),
+    macros: macros.map(m => ({ id: m.id, value: m.value })), stats: { ...modStat } };
+}
+
+export function restoreRuntime(snap, options = {}) {
+  if (!snap || snap.v !== 1 || !snap.transport || !(snap.phases?.sources instanceof Map) ||
+      !Array.isArray(snap.macros) || Object.keys(transport).some(k => !Object.hasOwn(snap.transport, k))) return false;
+  Object.assign(transport, snap.transport);
+  restoreSourceRuntime(snap.phases, true);
+  for (const m of snap.macros) { const current = macroById.get(m.id); if (current) current.value = m.value; }
+  if (snap.stats) Object.assign(modStat, snap.stats);
+  if (Number.isFinite(options.wall)) {
+    transport.wall = options.wall; transport.anchorAt = options.wall;
+    transport.anchorBeats = transport.beats; transport.anchorTime = transport.time;
+    transport.pending = options.wall <= 0;
+  }
   syncMacros();
   return true;
 }
@@ -2472,13 +2481,6 @@ export function dormantRoutes() {
   }
   return out;
 }
-/** How many of this macro's sends are dead — the number the rail paints red. */
-export function dormantCountOfMacro(id) {
-  const k = String(id);
-  let n = 0;
-  for (const r of routes) if (r.dormant && r.macroId === k) n++;
-  return n;
-}
 export function dormantCount() {
   let n = 0;
   for (const r of routes) if (r.dormant) n++;
@@ -2583,6 +2585,19 @@ export const FACTORY_PRESETS = [
    BASINS identity, and the boundary law is that MIR never carries a Card's.
    Our house namespace is lambdawaves.q0.* (lab/rack.js LS_EXP / SETTINGS_KEY). */
 export const PRESET_LS = 'lambdawaves.q0.modpresets';
+/* MIR 1.5.1 · THE PRESET KEY IS AN OPTION.  PRESET_LS stays the default (every reader shipped with it); an app
+   names its own store with setPresetKey(key) — window.js passes port.presetKey — so two apps on one origin never
+   share presets.  Blocked on the 1.4 line by λWAVES' byte gate on this file; λWAVES is frozen on 1.4. */
+let presetKey = PRESET_LS;
+/** setPresetKey(key) — the localStorage key of this app's presets; '' or a non-string restores PRESET_LS.  The live
+ *  store is re-read from the new key on its next use.  → the key now in force */
+export function setPresetKey(key) {
+  const k = typeof key === 'string' && key.trim() ? key.trim() : PRESET_LS;
+  if (k !== presetKey) { presetKey = k; pstore = null; pRefusedRaw = null; pRefusedKey = null; pError = null; }
+  return presetKey;
+}
+/** the preset key in force */
+export function presetKeyOf() { return presetKey; }
 export const PRESET_FORMAT_V = 1;
 export const PRESET_NAME_MAX = 24;
 
@@ -2629,7 +2644,7 @@ function validPreset(p) {
 function presetStore() {
   if (pstore) return pstore;
   pError = null; pRefusedRaw = null;
-  const raw = presetLsGet(PRESET_LS);
+  const raw = presetLsGet(presetKey);
   let o = null;
   try { o = JSON.parse(raw || 'null'); } catch (_) { o = null; }
   if (o && typeof o === 'object' && o.formatVersion === PRESET_FORMAT_V &&
@@ -2651,7 +2666,7 @@ function presetStore() {
            PRESET_FORMAT_V + ' — the file is left untouched and this session runs on the ' +
            'factory presets')
         : ('the stored modulation presets are unreadable — left in place; the first save will ' +
-           'move them to "' + PRESET_LS + '.refused-<time>" and start a fresh set');
+           'move them to "' + presetKey + '.refused-<time>" and start a fresh set');
     }
     pstore = { seq: 0, presets: [] };
   }
@@ -2665,11 +2680,11 @@ function presetSetAsideRefused() {
     const s = globalThis.localStorage;
     for (let i = 0; s && i < s.length; i++) {
       const k = s.key(i);
-      if (k && k.indexOf(PRESET_LS + '.refused-') === 0 && presetLsGet(k) === raw) { key = k; break; }
+      if (k && k.indexOf(presetKey + '.refused-') === 0 && presetLsGet(k) === raw) { key = k; break; }
     }
   } catch (_) {}
   if (!key) {
-    key = PRESET_LS + '.refused-' + Date.now();
+    key = presetKey + '.refused-' + Date.now();
     presetLsSet(key, raw);          // a quota throw here reaches the caller: nothing was overwritten
     if (presetLsGet(key) !== raw) {
       throw new Error('could not set the unreadable presets aside — nothing was overwritten');
@@ -2683,7 +2698,7 @@ function presetSetAsideRefused() {
 
 function presetPersist() {
   if (pRefusedRaw != null) presetSetAsideRefused();
-  presetLsSet(PRESET_LS, JSON.stringify({ formatVersion: PRESET_FORMAT_V,
+  presetLsSet(presetKey, JSON.stringify({ formatVersion: PRESET_FORMAT_V,
                                           modV: MOD_STATE_V,
                                           seq: pstore.seq, presets: pstore.presets }));
 }
@@ -2752,28 +2767,6 @@ export function presetFolders() {
   return out.concat(list);
 }
 
-/* Moves a preset into a folder. */
-export function setPresetFolder(id, folder) {
-  const k = String(id);
-  if (FACTORY_PRESETS.some((f) => f.id === k)) return { ok: false, error: 'factory', id: k };
-  const st = presetStore();
-  const rec = st.presets.find((p) => p.id === k);
-  if (!rec) return { ok: false, error: 'missing', id: k };
-  const want = String(folder === undefined || folder === null ? '' : folder)
-    .trim().slice(0, PRESET_FOLDER_MAX).trim();
-  if (want && presetSameFolder(want, PRESET_FOLDER_FACTORY)) {
-    return { ok: false, error: 'reserved', id: k, folder: PRESET_FOLDER_FACTORY };
-  }
-  const before = Object.prototype.hasOwnProperty.call(rec, 'folder') ? rec.folder : undefined;
-  const had = Object.prototype.hasOwnProperty.call(rec, 'folder');
-  if (!want || presetSameFolder(want, PRESET_FOLDER_DEFAULT)) delete rec.folder;
-  else rec.folder = want;
-  try { presetPersist(); } catch (e) {
-    if (had) rec.folder = before; else delete rec.folder;
-    return { ok: false, error: 'storage', message: String((e && e.message) || e) };
-  }
-  return { ok: true, id: k, name: rec.name, folder: presetFolderOf(rec) };
-}
 
 export function presetGet(id) {
   const k = String(id);
@@ -2804,6 +2797,45 @@ export function presetApply(id) {
   return { ok: true, id: p.id, name: p.name, factory: !!p.factory,
            migratedFrom: p.migratedFrom,
            counts: { macros: macros.length, sources: sources.length, routes: routes.length } };
+}
+
+/** presetCaps(name) — a preset name as Josh's law writes it: trimmed, in CAPS (10-01: "All caps in titles for
+    modulation preset name").  The name is data, not a label. */
+export function presetCaps(name) { return String(name == null ? '' : name).trim().toUpperCase(); }
+
+/** THE BUNDLED STARTERS (BASINS starter-modulation.js): the app's authored racks, listed apart from the user's saves and
+    the model's FACTORY_PRESETS, named in CAPS, in their own folder.  bundledPresets(list, folder) → the public rows
+    [{ id, name, folder, bundled: 1, rack }] (ids are the app's; a row without a rack or a name is dropped). */
+export function bundledPresets(list, folder = 'STARTERS') {
+  const out = [];
+  for (const p of Array.isArray(list) ? list : []) {
+    if (!p || !p.rack || typeof p.rack !== 'object') continue;
+    const name = presetCaps(p.name); if (!name) continue;
+    out.push(Object.freeze({ id: String(p.id || 'starter.' + name), name, folder: p.folder ? String(p.folder) : folder, bundled: 1, factory: 0, rack: p.rack }));
+  }
+  return out;
+}
+/** rackApply(rack, fromV) — load a rack that is not in the store (a bundled starter): migrated from its model version
+    (default this one), the transport untouched.  → { ok, counts } or { ok: false, error } */
+export function rackApply(rack, fromV) {
+  let body = null;
+  try { body = JSON.parse(JSON.stringify(rack)); } catch (_) { return { ok: false, error: 'rack' }; }
+  const migrated = migrateRack(body, Number.isFinite(fromV) ? fromV : MOD_STATE_V);
+  if (!migrated) return { ok: false, error: 'version' };
+  deserializeRack(migrated);
+  modStat.presetLoads++;
+  return { ok: true, counts: { macros: macros.length, sources: sources.length, routes: routes.length } };
+}
+
+/** A PROJECT'S PRESET (1.5.0-alpha.12, BASINS project-session.js upsertProjectPreset): the rack saved under the name in
+    CAPS (Josh 10-01: "All caps in titles for modulation preset name"), replacing its own earlier self; a name a factory
+    preset owns takes the free copy name, in CAPS.  The name is data, not a label: its case is the law, not the font. */
+export function presetUpsertCaps(name, rack) {
+  const nm = presetCaps(name);
+  if (!nm || !rack) return { ok: false, error: 'name' };
+  let r = presetSave(nm, rack, { replace: true });
+  if (r && r.error === 'factory-name' && r.suggest) r = presetSave(presetCaps(r.suggest), rack, { replace: true });
+  return r || { ok: false };
 }
 
 /* Saves a rack as a preset. */
@@ -2884,8 +2916,8 @@ export function presetStoreReload() {
 
 export function presetStoreState() {
   const st = presetStore();
-  const raw = presetLsGet(PRESET_LS);
-  return { key: PRESET_LS, formatVersion: PRESET_FORMAT_V, modV: MOD_STATE_V,
+  const raw = presetLsGet(presetKey);
+  return { key: presetKey, formatVersion: PRESET_FORMAT_V, modV: MOD_STATE_V,
            reads: MOD_STATE_READS.slice(),
            factories: FACTORY_PRESETS.length, users: st.presets.length,
            folders: presetFolders(),

@@ -1,0 +1,53 @@
+/* mir/mir.css — THE KIT'S ONE STYLESHEET: every kit sheet, in the order the kit is tested in.
+ *
+ *   <link rel="stylesheet" href="mir/mir.css">        one line, instead of a link per sheet
+ *
+ * WHICH ORDER STILL MATTERS (docs/LAYERS.md).  Every kit sheet puts its rules in a cascade layer, so between layers
+ * the load order no longer decides anything: mir.kit.house < mir.kit.plugin.artifact < mir.kit.plugin.host <
+ * mir.kit.locale < mir.core < mir.tier < mir.a11y, and an app's own unlayered sheet beats them all whatever comes
+ * first.  Two orders are left:
+ *   1. base.css FIRST.  It holds the order statement (`@layer mir.tokens, mir.kit, …`); a layer named before it would
+ *      take the wrong rank.
+ *   2. INSIDE mir.kit.house (base, skin, shell, stage, window, rack, pages, notes, history, parts, gui, fx, keyboard,
+ *      folders, transport, info) two rules of equal specificity are decided by order, as in 1.4.  The order below is
+ *      the one the starter and the gallery were proved in: keep it.  modhost.css and modwindow.css are in their own
+ *      layers (the host beats the artifact by rank), so "modwindow.css last" is no longer a law; they stay last here
+ *      because that is where every page has had them.
+ * Not here: mir/shell/vendor/katex/katex.min.css (the notebook loads it when a page first needs maths).
+ * tests/mir-css.node.mjs fails if a sheet under mir/ is missing from this list or listed twice.
+ * The long form (one <link> per sheet, in this order) keeps working. */
+@import url("css/base.css");
+@import url("css/skin.css");
+@import url("css/tokens.css");
+@import url("locales/locales.css");
+@import url("shell/shell.css");
+@import url("shell/stage.css");
+@import url("core/core.css");
+@import url("window/window.css");
+@import url("shell/rack.css");
+@import url("shell/pages.css");
+@import url("notes/notes.css");
+@import url("history/history.css");
+@import url("shell/parts.css");
+@import url("shell/banner.css");
+@import url("shell/gui.css");
+@import url("controls/controls.css");
+@import url("controls/colour-controls.css");
+@import url("panels/lanes.css");
+@import url("panels/ramp.css");
+@import url("fx/fx.css");
+@import url("shell/opener.css");
+@import url("keyboard/keyboard.css");
+@import url("folders/folders.css");
+@import url("shell/transport.css");
+@import url("info/faces.css");
+@import url("info/info.css");
+@import url("modulation/modhost.css");
+@import url("modulation/modwindow/modwindow.css");
+@import url("timeline/timeline.css");
+@import url("pattern/pattern.css");
+@import url("render/render.css");
+@import url("panels/camera.css");
+@import url("panels/xy.css");
+@import url("panels/grade.css");
+@import url("panels/curves.css");

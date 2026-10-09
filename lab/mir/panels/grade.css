@@ -1,0 +1,33 @@
+/* panels/grade.css — THE GRADE PANEL'S SHEET (panels/grade.js): the master picture controls, laid out.
+ *
+ * The controls are the kit's (.k, the arc, .mir-range, the lane slider, the stepper, the glyph switch): this sheet only lays them out and
+ * turns INVERT's glyph over when ON, as BASINS does (colour.css:96–102): the 44 px face-less round target is `sw({ glyph })`'s.  Order, top down: the four tone knobs; BLACK · WHITE; OPACITY across the width; HUE and
+ * INVERT; BLEND; the app's own rows under their group words.
+ *
+ * INTENT (docs/INTENT.md): no fill is an accent; the glyph is ink, a lighter ink on hover; focus is the accent ring.  Tokens only, declared
+ * on the panel's root; a kit layer (mir.kit.plugin.host, level with the colour controls whose arcs and pills it holds). */
+@layer mir.kit.plugin.host {
+
+/* ── the values ── */
+.mir-grade {
+  --grade-gap: var(--sp-3);                          /* between the rows */
+  --grade-cell: 56px;                                /* the narrowest knob column: four across a rack card (the CAMERA panel's) */
+  --grade-invert-turn: var(--motion-ui);             /* INVERT's glyph turning over (BASINS: 170 ms) */
+}
+/* ── end of the values ── */
+
+.mir-grade { display: flex; flex-direction: column; gap: var(--grade-gap); min-width: 0; }
+.mir-grade .grade-row { display: grid; gap: var(--sp-2); min-width: 0; }
+.mir-grade :is(.grade-knobs, .grade-extra) { grid-template-columns: repeat(auto-fit, minmax(var(--grade-cell), 1fr)); justify-items: center; align-items: start; row-gap: var(--sp-3); }
+.mir-grade :is(.grade-knobs, .grade-extra) > :is(.k, .sw, .segw) { min-width: 0; }
+.mir-grade .grade-extra > :is(.segw, .mir-range, .mir-step, .mir-lane-slider) { grid-column: 1 / -1; width: 100%; }
+.mir-grade :is(.grade-levels, .grade-amount, .grade-blend) > * { width: 100%; min-width: 0; }
+.mir-grade .grade-turns { grid-template-columns: repeat(auto-fit, minmax(var(--grade-cell), max-content)); justify-content: center; align-items: center; column-gap: var(--sp-4); }
+.mir-grade .grade-group { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.mir-grade .grade-title { font-size: var(--fs-tiny); letter-spacing: var(--tr-wider); color: var(--ink-key); }
+
+/* ── INVERT: the glyph is the state (BASINS); the face-less round target is the kit's .sw-glyph (controls.css), this turns it over ── */
+.mir-grade .grade-invert svg { transition: transform var(--grade-invert-turn) var(--ease-out); }
+.mir-grade .grade-invert.on svg { transform: rotate(180deg); }
+
+}   /* end @layer mir.kit.plugin.host */

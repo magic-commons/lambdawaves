@@ -1,0 +1,86 @@
+/* MIR · shell/pages.css — the notebook's TABS (shell/notebook.js with `pages`): yours, a divider, the project's pages.
+ * Load after mir/shell/shell.css.  Every rule here is scoped to markup that exists only when the app hands the
+ * notebook a pages model, so an app without pages draws exactly what it drew before.
+ *
+ * INTENT (docs/INTENT.md), as the tabs wear it:
+ *   chosen   the selected tab is the ON frost face with a thin rim, its label in accent A — never an accent fill
+ *   hover    a lighter face
+ *   focus    an accent ring OUTSIDE the tab
+ *   carried  a tab being dragged rides one height up (the floating window's drop) with an accent ring
+ *   drop     the slots between tabs are core/proximity.js guides (core.css); a file over the notebook is a dotted ring
+ *   a well   the rename field (a field you type in)
+ * The component tokens are declared on the notebook itself (#notebook[data-tab] exists only with tabs) because the
+ * strip and the foot's SHOW ON OPEN read the same ON face.  Each reads the semantic name first, the 1.4 value after. */
+@layer mir.kit.house {
+  /* FROST · values ─────────────────────────────────────────────────────────────────────────────────────────────────
+     1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+  #notebook[data-tab] {
+    --nb-tab-on: var(--state-on, var(--nb-btn));
+    --nb-tab-on-rim: var(--state-on-rim, inset 0 0 0 1px var(--nb-btn-line));
+    --nb-tab-hover: var(--state-hover, var(--glass-raise));
+    --nb-tab-carried: var(--surface-shadow-float, 0 6px 16px hsl(0 0% 0% / .32));
+    --nb-tab-h: 28px;
+    --nb-tab-max: 180px;
+  }
+  @media (pointer: coarse) { #notebook[data-tab] { --nb-tab-h: 34px; } }
+  /* ── end of the values ── */
+
+  .nb-tabs { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; min-width: 0; margin: 0 -4px 2px; }
+  /* the list scrolls sideways inside itself; the notebook never does */
+  .nb-tablist { position: relative; display: flex; align-items: center; gap: 2px; flex: 1 1 auto; min-width: 0;
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; padding: 4px 4px 6px; }
+  .nb-tablist::-webkit-scrollbar { display: none; }
+
+  .nb-tab { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; max-width: var(--nb-tab-max); height: var(--nb-tab-h);
+    border-radius: var(--r-md); color: var(--fg-soft); transition: background-color var(--t-fast); }
+  .nb-tab:hover { background: var(--nb-tab-hover); }
+  .nb-tab[data-sel] { background: var(--nb-tab-on); box-shadow: var(--nb-tab-on-rim); }
+  .nb-tab:has(> .nb-tab-b:focus-visible) { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .nb-tab[data-carried] { z-index: 2; background: var(--nb-tab-on); box-shadow: var(--nb-tab-carried), var(--nb-tab-on-rim); outline: 2px solid var(--acc); outline-offset: 1px; }
+
+  .nb-tab-b { display: inline-flex; align-items: baseline; gap: 5px; min-width: 0; height: 100%; padding: 0 9px; margin: 0;
+    border: 0; border-radius: inherit; background: transparent; color: inherit; outline: none; cursor: pointer;
+    font: var(--w-semi) var(--fs-base)/var(--nb-tab-h) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); white-space: nowrap;
+    touch-action: pan-x; -webkit-tap-highlight-color: transparent; }
+  .nb-tab[data-sel] > .nb-tab-b { color: var(--acc); }
+  .nb-tab[data-sel]:not(.nb-tab-mine) > .nb-tab-b { touch-action: none; cursor: grab; }   /* a finger drags the selected tab; any other tab lets the strip scroll */
+  .nb-tab[data-carried] > .nb-tab-b { cursor: grabbing; }
+  .nb-tab-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .nb-tab-mark { font-size: var(--fs-micro); font-weight: var(--w-heavy); color: var(--dim); }
+  .nb-tab[data-sel] .nb-tab-mark { color: var(--acc); }
+  .nb-tab-div { flex: 0 0 1px; align-self: stretch; margin: 5px 6px; background: var(--nb-btn-line); }
+
+  .nb-tab-eye, .nb-tab-x { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 20px; height: 20px; margin: 0 2px 0 -4px; padding: 0;
+    border: 0; border-radius: 50%; background: transparent; color: var(--dim); cursor: pointer; font: var(--fs-lead)/1 var(--font-ui); }
+  .nb-tab-x { margin-left: 0; }
+  .nb-tab-eye[aria-pressed="true"] { color: var(--fg); }
+  .nb-tab-eye:hover, .nb-tab-x:hover { color: var(--acc); }
+  .nb-tab:not([data-sel]):not(:hover) > .nb-tab-x { display: none; }
+  @media (pointer: coarse) { .nb-tab-eye, .nb-tab-x { width: 32px; height: 32px; } }
+
+  /* rename in place (a well) and the inline delete question */
+  .nb-tab[data-renaming] > :is(.nb-tab-b, .nb-tab-eye, .nb-tab-x), .nb-tab[data-asking] > :is(.nb-tab-b, .nb-tab-eye, .nb-tab-x) { display: none; }
+  .nb-tab-in { width: 11em; height: calc(var(--nb-tab-h) - 6px); margin: 0 3px; padding: 0 6px; border: 0; border-radius: var(--r-sm);
+    background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); outline: none;
+    font: var(--w-semi) var(--fs-base) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+  .nb-tab-ask { display: inline-flex; align-items: center; gap: 4px; padding: 0 6px; font: var(--w-semi) var(--fs-small) var(--font-ui); color: var(--fg); white-space: nowrap; }
+  .nb-tab-ask button { height: 20px; padding: 0 8px; border: 1px solid var(--nb-btn-line); border-radius: var(--r-pill); background: var(--nb-btn); color: var(--fg-soft);
+    font: var(--w-heavy) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
+  .nb-tab-ask button:hover { color: var(--acc); }
+  .nb-tab-ask button:focus-visible, .nb-tab-add:focus-visible, .nb-pageacts button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  @media (pointer: coarse) { .nb-tab-ask button { height: 32px; } }
+
+  .nb-tab-add { flex: 0 0 auto; width: 24px; height: 24px; margin-right: 4px; padding: 0; border: 1px solid var(--nb-btn-line); border-radius: 50%;
+    background: var(--nb-btn); color: var(--fg-soft); font: var(--fs-lead)/1 var(--font-ui); cursor: pointer; }
+  .nb-tab-add:hover { color: var(--acc); }
+  @media (pointer: coarse) { .nb-tab-add { width: 32px; height: 32px; } }
+
+  /* the foot: the page's own actions sit before COPY and wrap on a narrow notebook */
+  .nb-tabs ~ .nb-foot { flex-wrap: wrap; gap: 4px; }
+  .nb-pageacts { display: flex; flex-wrap: wrap; gap: 4px; margin-left: auto; }
+  .nb-pageacts > [hidden] { display: none; }
+  .nb-pg-greet[aria-pressed="true"] { background: var(--nb-tab-on); box-shadow: var(--nb-tab-on-rim); color: var(--acc); }
+
+  /* a file carried over the notebook: drop here */
+  #notebook[data-drop] { outline: 2px dotted var(--acc); outline-offset: -6px; }
+}   /* end @layer mir.kit.house */

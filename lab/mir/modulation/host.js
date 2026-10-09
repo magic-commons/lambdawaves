@@ -45,6 +45,8 @@ export { M as model };
  *  that was away, not a frame.  It bites free sync and envelope time; wall sync
  *  derives its beat from the absolute stamp and is untouched by it (see above). */
 export const MAX_WALL_STEP = 0.25;
+/** the automation sampling grids, in beats (SAMPLING › AUTOMATION: FRAME · 1/32 · 1/16 · 1/8) */
+export const AUTOMATION_GRIDS = Object.freeze([0, 1 / 32, 1 / 16, 1 / 8]);
 
 /** The pause law's two settings.  BASE is what ships: when the transport stops, every
  *  source-driven control returns to the knob the user left it on.  HOLD freezes it
@@ -212,7 +214,24 @@ export function createModClock(opts) {
   let stepping = 0;                 /* > 0 inside a deterministic step (their videoClock.on) */
   let wall = Number.isFinite(o.wall) ? o.wall : 0;
   let prevWall = null;              /* null: the next dt is NOT a dt (their prevTs = 0) */
+  let realtimeOwner = null;        /* a scrub owns advancement, never Play/BASE/HOLD */
   const demands = new Set();        /* things that want the clock without owning a route */
+  /* THE ADVANCE NOTICE (1.5.0-alpha.12): a client that must see every move of musical time — the pattern sequencer, which
+     fires on beat crossings — hears it here, after the model moved and the routes applied: 'tick' (the realtime pump),
+     'step' (the recorder's deterministic door) and 'seek'.  One call site per move, so live play and a recording fire
+     exactly the same crossings; no client needs a loop of its own. */
+  const advanceWatchers = new Set();
+  const advanced = (kind) => { for (const fn of advanceWatchers) { try { fn(kind); } catch (e) { (globalThis.reportError || console.error)(e); } } };
+  let automation = null;           /* optional beat-sampled moving baseline, never an authored write */
+  let modulationEnabled = true;    /* deterministic clients may drive automation without macro routes */
+  let exactResume = !!o.exactResume; /* arrangements can own an exact play cursor; legacy ships */
+  let automationHold = !!o.automationHold; /* paused arrangement baseline is independent of LFO BASE/HOLD */
+  /* THE AUTOMATION SAMPLING GRID (BASINS modulation.js, docs TIMELINE-SAMPLING 2026-10-01): 0 = every frame; 1/32, 1/16,
+     1/8 floor the beat the provider is asked for, so a value only changes when the transport crosses a grid line.
+     Bypassed inside the recorder's deterministic step (exactStep): an export always samples per frame. */
+  let automationGrid = AUTOMATION_GRIDS.includes(+o.automationGrid) ? +o.automationGrid : 0;
+  let exactStep = 0;
+  const automationBeat = (beats) => (automationGrid && exactStep === 0 ? Math.floor(beats / automationGrid) * automationGrid : beats);
   const stats = { plays: 0, pauses: 0, autoPauses: 0, resumes: 0, frames: 0, steps: 0,
                   seconds: 0, sets: 0, restores: 0, presents: 0, refusedPlays: 0,
                   arms: 0, disarms: 0, quantised: 0, beatsRewound: 0 };
@@ -250,9 +269,14 @@ export function createModClock(opts) {
    * exactly what it did in the last one, armed or not. */
   function livePos(id) {
     const st = registry.state(id);
-    const v = M.targetValue(id, st.baseNorm, st.wrap);
-    if (v !== v) return null;
     if (!enabled && stepping === 0) return null;
+    const active = running || stepping > 0 || pauseMode === 'HOLD';
+    const sample = (active || (automationHold && !hidden)) && automation ? automation.value(id, automationBeat(M.transport.beats)) : null;
+    const baseline = Number.isFinite(sample) ? sample : st.baseNorm;
+    const pausedBaseline = automationHold && !running && stepping === 0 && pauseMode === 'BASE' && Number.isFinite(sample);
+    const v = modulationEnabled ? M.targetValue(id, baseline, st.wrap, pausedBaseline) : NaN;
+    if (v !== v) return Number.isFinite(sample) ? sample : null;
+    if (pausedBaseline) return v; // Hand offsets remain; paused source offsets return to the Timeline baseline.
     if (!M.targetDriven(id)) return v;
     if (running || stepping > 0) return v;
     return pauseMode === 'HOLD' ? v : null;
@@ -302,14 +326,14 @@ export function createModClock(opts) {
    *  is the number `modPlayEdge` re-anchors and the frame after it places every source from.
    *  Returns the plan whether or not it moved anything, so a face can say which law is in force
    *  even when the answer is "nothing to do". */
-  function applyResume() {
+  function applyResume(exact = exactResume) {
     const plan = resumeGrid(M.sourceList());
     const mode = M.effectiveSyncMode();
     const from = M.transport.beats;
     const p = { ...plan, from, to: from, moved: 0, mode, applied: false };
     /* FREE sync is deliberately left alone: a non-anchored synced source accumulates its OWN
        phase there, so the beat is not its position and `modPlayEdge` already floors it to 0. */
-    if (plan.law === 'BPM' && plan.grid > 0 && mode !== 'free') {
+    if (!exact && plan.law === 'BPM' && plan.grid > 0 && mode !== 'free') {
       const q = Math.floor(from / plan.grid) * plan.grid;
       if (from - q > 1e-12) {
         M.setTransport({ beats: q });              /* the model's own road — it re-anchors */
@@ -336,13 +360,13 @@ export function createModClock(opts) {
    *  for an EDIT — it advances no time and re-reads every source where the beat says it is — so
    *  the placement happens HERE, before anything is applied.  Under FREE there is nothing to
    *  place: the phase is the source's own and `modPlayEdge` has just said what it should be. */
-  function placeOnResume() {
-    if (!(wall > 0) || M.effectiveSyncMode() === 'free') return false;
+  function placeOnResume(exact = exactResume) {
+    if ((!exact && !(wall > 0)) || M.effectiveSyncMode() === 'free') return false;
     M.advance(0, wall);
     return true;
   }
 
-  function setPlaying(on) {
+  function setPlaying(on, options) {
     const want = !!on;
     if (want && !anyLive()) {
       /* A transport with NO SOURCES is a control that does nothing.  Refuse, and SAY so — the caller
@@ -354,7 +378,7 @@ export function createModClock(opts) {
     if (want !== playing) {
       playing = want;
       M.setTransport({ playing });
-      if (want) { stats.plays++; applyResume(); M.modPlayEdge(); placeOnResume(); } else stats.pauses++;
+      if (want) { const exact = options?.resume === 'exact' ? true : options?.resume === 'legacy' ? false : exactResume; stats.plays++; applyResume(exact); M.modPlayEdge(); placeOnResume(exact); } else stats.pauses++;
     }
     recomputeRunning();
     return { ok: true, playing, running, resume: want ? lastResume : null };
@@ -362,13 +386,35 @@ export function createModClock(opts) {
 
   return Object.freeze({
     /* transport */
-    play: (at) => { if (Number.isFinite(at)) { wall = at; prevWall = at; } return setPlaying(true); },
+    play: (at, options) => { if (Number.isFinite(at)) { wall = at; prevWall = at; } return setPlaying(true, options); },
     pause: (at) => { if (Number.isFinite(at)) { wall = at; prevWall = at; } return setPlaying(false); },
-    toggle: (at) => { if (Number.isFinite(at)) { wall = at; prevWall = at; } return setPlaying(!playing); },
+    toggle: (at, options) => { if (Number.isFinite(at)) { wall = at; prevWall = at; } return setPlaying(!playing, options); },
     setPlaying,
     isPlaying: () => playing,
     isRunning: () => running,
     anyRouted,
+
+    /** Suspend only the realtime pump. Seeking still previews at the cursor;
+     *  deterministic stepping remains the recorder's explicit door. A release
+     *  cannot restore stale transport state or manufacture a new play edge. */
+    suspendRealtime(at) {
+      if (realtimeOwner) return null;
+      const owner = {};
+      realtimeOwner = owner;
+      if (Number.isFinite(at)) { wall = at; prevWall = at; M.reanchorTransport(at); }
+      return (stamp) => {
+        if (realtimeOwner !== owner) return false;
+        realtimeOwner = null;
+        if (Number.isFinite(stamp)) wall = stamp;
+        prevWall = wall;
+        M.reanchorTransport(wall);
+        requestPresentation('realtime-resume');
+        return true;
+      };
+    },
+    isRealtimeSuspended: () => realtimeOwner !== null,
+    /** true inside a deterministic step (the recorder's door): what is applied now is applied as though running */
+    isStepping: () => stepping > 0,
 
     /** Unrouted sources run only to animate their editor. Routed sources remain machinery and
      *  continue when the editor closes. This changes presentation demand, never transport state. */
@@ -403,6 +449,7 @@ export function createModClock(opts) {
      *  the clock is running; the MODEL only moves when it is. */
     advanceTo(w) {
       if (!Number.isFinite(w)) return 0;
+      if (realtimeOwner) return 0;     // a scrub or a recorder owns the clock: the wall stamp is theirs, an app's own tick must not move it
       const dt = prevWall === null ? 0 : Math.min(Math.max(w - prevWall, 0), maxStep);
       prevWall = w;
       wall = w;
@@ -411,6 +458,7 @@ export function createModClock(opts) {
       stats.seconds += dt;
       M.advance(dt, w);
       if (applyAll(false)) requestPresentation('modulation-output');
+      if (advanceWatchers.size) advanced('tick');
       return dt;
     },
 
@@ -421,8 +469,9 @@ export function createModClock(opts) {
      *  running, exactly as the source's video clock does. */
     step(dt) {
       const d = Number.isFinite(dt) && dt > 0 ? dt : 0;
-      stepping++;
+      stepping++; exactStep++;
       try {
+        if (wall === 0) M.advance(0, wall); // establish the zero-time anchor before advancing
         wall += d;
         prevWall = wall;
         stats.steps++;
@@ -430,7 +479,10 @@ export function createModClock(opts) {
         M.advance(d, wall);
         applyAll(false);
         requestPresentation(running ? 'modulation-output' : 'manual-step');
-      } finally { stepping--; }
+        /* the notice is heard INSIDE the deterministic door, so what a client applies (the pattern's velocity) is applied
+           as though running even while the page is hidden — a recording in a hidden tab plays exactly as a visible one */
+        if (advanceWatchers.size) advanced('step');
+      } finally { stepping--; exactStep--; }
       return d;
     },
 
@@ -472,6 +524,35 @@ export function createModClock(opts) {
 
     /** Clients that want the clock to run without owning a route of their own. */
     demand(id, on) { if (on) demands.add(String(id)); else demands.delete(String(id)); recomputeRunning(); return demands.size; },
+    /** A host's automation evaluator supplies normalized values or null. No second writer/clock. */
+    setAutomation(provider) {
+      automation = provider && typeof provider.value === 'function' ? provider : null;
+      applyAll(true); requestPresentation('automation-provider');
+    },
+    setModulationEnabled(on) { modulationEnabled = !!on; applyAll(true); },
+    isModulationEnabled: () => modulationEnabled,
+    setExactResume(on) { exactResume = !!on; return exactResume; },
+    isExactResume: () => exactResume,
+    /** onAdvance(fn(kind)) → off: fn after every move of musical time — 'tick', 'step' or 'seek' (see the notice above) */
+    onAdvance(fn) { advanceWatchers.add(fn); return () => advanceWatchers.delete(fn); },
+    /** the sampling grid in beats: 0 (FRAME), 1/32, 1/16 or 1/8; anything else is 0.  → the grid now */
+    setAutomationGrid(g) { automationGrid = AUTOMATION_GRIDS.includes(+g) ? +g : 0; applyAll(true); requestPresentation('automation-grid'); return automationGrid; },
+    automationGrid: () => automationGrid,
+    setAutomationHold(on) { automationHold = !!on; applyAll(true); requestPresentation('automation-hold'); return automationHold; },
+    isAutomationHold: () => automationHold,
+    /** Seek musical time through the model, including a stopped transport preview. */
+    seek(beats) {
+      if (!Number.isFinite(beats) || beats < 0) return M.transport.beats;
+      M.setTransport({ beats }); M.reanchorTransport(wall);
+      M.advance(0, wall);
+      // Timeline cursor preview follows the same paused BASE/HOLD law as the
+      // next paint. Legacy clients retain their deterministic preview door.
+      const previewStep = !automationHold || running;
+      if (previewStep) stepping++;
+      try { applyAll(true); requestPresentation('transport-seek'); } finally { if (previewStep) stepping--; }
+      if (advanceWatchers.size) advanced('seek');
+      return M.transport.beats;
+    },
 
     setPauseMode(m) {
       pauseMode = m === 'HOLD' ? 'HOLD' : 'BASE';
@@ -501,9 +582,36 @@ export function createModClock(opts) {
     applyAll,
     recomputeRunning,
     reanchor: (w) => M.reanchorTransport(Number.isFinite(w) ? w : wall).anchorAt,
+    /** Suspension state for a deterministic renderer. It contains an evaluator
+     * reference and Maps, so belongs in memory rather than project JSON. */
+    captureRuntime: () => ({ v: 1, model: M.snapshotRuntime(),
+      host: { playing, hidden, presentationActive, wall, pauseMode, enabled,
+        modulationEnabled, exactResume, automationHold, demands: [...demands], automation,
+        lastResume: { ...lastResume }, stats: { ...stats } } }),
+    restoreRuntime(snapshot, options = {}) {
+      const state = snapshot?.host;
+      if (snapshot?.v !== 1 || !state || !Array.isArray(state.demands)) return false;
+      const at = Number.isFinite(options.wall) ? options.wall : wall;
+      if (!M.restoreRuntime(snapshot.model, { wall: at })) return false;
+      playing = !!state.playing; hidden = Object.hasOwn(options, 'hidden') ? !!options.hidden : !!state.hidden;
+      presentationActive = !!state.presentationActive; pauseMode = state.pauseMode === 'HOLD' ? 'HOLD' : 'BASE';
+      enabled = !!state.enabled; modulationEnabled = !!state.modulationEnabled;
+      exactResume = !!state.exactResume; automationHold = !!state.automationHold;
+      automation = state.automation; demands.clear(); for (const id of state.demands) demands.add(String(id));
+      lastResume = { ...state.lastResume }; Object.assign(stats, state.stats);
+      wall = at; prevWall = null; stepping = 0; exactStep = 0; realtimeOwner = null;
+      if (hidden && M.transport.hold) M.holdEnd();
+      M.transport.playing = playing;
+      running = enabled && playing && !hidden && available() && anyLive();
+      // One final output, after every gate and phase is restored: no transient
+      // BASE write or play/retrigger/quantization edge escapes the suspension.
+      if (options.apply !== false) { applyAll(true); requestPresentation('transport-runtime-restore'); }
+      return true;
+    },
     stats: () => ({ ...stats }),
     snapshot: () => ({
-      playing, running, hidden, presentationActive, wall, pauseMode, enabled,
+      playing, running, hidden, presentationActive, wall, pauseMode, enabled, modulationEnabled, exactResume, automationHold,
+      demands: [...demands],
       resume: { ...resumeGrid(M.sourceList()), mode: M.effectiveSyncMode(), last: { ...lastResume } },
       bpm: M.transport.bpm, beats: M.transport.beats, time: M.transport.time,
       sync: M.transport.sync, reanchors: M.transport.reanchors,
@@ -559,7 +667,8 @@ export function createModHost(opts) {
   const targets = o.targets || createTargetHost({ registry, available: o.available });
   const clock = createModClock({ registry, targets, present,
                                  pauseMode: o.pauseMode, wall: o.wall, maxStep: o.maxStep,
-                                 enabled: o.enabled, presentationActive: o.presentationActive });
+                                 enabled: o.enabled, presentationActive: o.presentationActive,
+                                 exactResume: o.exactResume, automationHold: o.automationHold });
 
   return Object.freeze({
     /* the four edges, each reachable on its own */
@@ -613,14 +722,14 @@ export function labParameters(port) {
     add('observer.pitch', { label: 'PITCH', unit: 'rad', map: 'bipolar', min: -Math.PI / 2, max: Math.PI / 2, group: 'observer', def: 0, ...field(p.obs, 'pitch') });
     /* DISTANCE is a log knob: the interesting half of a zoom is always the near half. */
     add('observer.dist', { label: 'DIST', map: 'log', min: 0.4, max: 40, group: 'observer', ...field(p.obs, 'dist') });
-    add('observer.fov', { label: 'FOV', map: 'linear', min: 0.2, max: 1.6, group: 'observer', ...field(p.obs, 'fov') });
+    add('observer.fov', { label: 'FOV', map: 'linear', min: 0.2, max: 1.6, group: 'observer', ...field(p.obs, 'fov') });   // tr[FOV]: field of view: how wide the camera sees
   }
   if (p.mat) {
     add('material.exposure', { label: 'EXPOSURE', map: 'log', min: 0.05, max: 20, group: 'material', ...field(p.mat, 'exposure') });
     add('material.softness', { label: 'SOFTNESS', map: 'linear', min: 0, max: 1, group: 'material', ...field(p.mat, 'softness') });
     add('material.iso', { label: 'ISO', map: 'log', min: 1e-4, max: 1, group: 'material', ...field(p.mat, 'iso') });
     add('material.grain', { label: 'GRAIN', map: 'linear', min: 0, max: 1, group: 'material', ...field(p.mat, 'grain') });
-    add('material.knee', { label: 'KNEE', map: 'linear', min: 0, max: 1, group: 'material', ...field(p.mat, 'knee') });
+    add('material.knee', { label: 'KNEE', map: 'linear', min: 0, max: 1, group: 'material', ...field(p.mat, 'knee') });   // tr[KNEE]: the bend in the picture's tone curve where the highlights start to roll off (as in a compressor's knee)
     /* HUE SHIFT wraps: the palette wheel is a wheel. */
     add('material.hueshift', { label: 'HUE', unit: '°', map: 'wrap', min: 0, max: 360, group: 'material', ...field(p.mat, 'hueShift') });
   }
@@ -634,7 +743,8 @@ export function labParameters(port) {
        the modulation clock cannot be the physics clock: this is a thing an LFO may
        modulate, so it cannot also be the thing that tells the LFO how fast to run. */
     add('transport.rate', { label: 'RATE', unit: ' a.u./s', map: 'log', min: 0.01, max: 100, group: 'transport', get: () => p.clock.rate, set: (v) => p.clock.setRate(v) });
-    add('transport.window', { label: 'WINDOW', map: 'log', min: 0.1, max: 1000, group: 'transport', ...field(p.clock, 'window') });
+    add('transport.window', { label: 'time span::WINDOW',   // tr[time span::WINDOW]: a span of time (in seconds) the view looks across, not an interface window
+    map: 'log', min: 0.1, max: 1000, group: 'transport', ...field(p.clock, 'window') });
   }
   /* The register's own address space.  `modes` is a list of stable ids "h:n:l:m"
      (lab/hydrogen.js), and each one contributes an AMPLITUDE and a PHASE — the phase
@@ -745,12 +855,12 @@ export const LAB_PRESETS = [
       sources: [
         /* SAW↑ on a circle is seamless BY CONSTRUCTION: position 1 IS position 0, so a
            full turn has no jump in it to hide.  One whole note = 4 beats = one bar. */
-        { id: 's1', kind: 'lfo', on: 1, label: 'LAP', shapeMode: 'wave', wave: 'rotate',
+        { id: 's1', kind: 'lfo', on: 1, label: 'LAP', shapeMode: 'wave', wave: 'rotate',   // tr[LAP]: a demo LFO's name: it moves the camera one lap round per bar (the user can rename it)
           sync: 1, mult: 0, triplet: 0, dotted: 0,
           ratePos: 0.39, phaseOff: 0, smooth: 0, steps: 0,
           trig: 0, anchor: 1, invert: 0, minimized: 0 },
         /* the rise: one raised cosine per lap, on the SAME bar, so the two close together */
-        { id: 's2', kind: 'lfo', on: 1, label: 'RISE', shapeMode: 'wave', wave: 'sine',
+        { id: 's2', kind: 'lfo', on: 1, label: 'RISE', shapeMode: 'wave', wave: 'sine',   // tr[RISE]: a demo LFO's name: it moves the camera up and down (the user can rename it)
           sync: 1, mult: 0, triplet: 0, dotted: 0,
           ratePos: 0.39, phaseOff: 0, smooth: 0, steps: 0,
           trig: 0, anchor: 1, invert: 0, minimized: 0 }
@@ -773,7 +883,7 @@ export const LAB_PRESETS = [
 
   {
     id: 'lw.peel', lab: 1, name: 'PEEL',
-    hint: 'Step through twelve density levels to reveal shells.',
+    hint: 'Step through twelve density levels to reveal shells.',   // tr: shells: the nested surfaces of equal density in the picture (like the layers of an onion)
     /* ── WHY IT EXISTS ────────────────────────────────────────────────────────────
      * A volume render shows one level of the density at a time and the viewer has no way
      * to know which.  |ψ_{nl}|² has n − l − 1 RADIAL nodes, and they are invisible until
@@ -850,7 +960,7 @@ export const LAB_PRESETS = [
     rack: {
       seq: { macro: 2, source: 1, route: 1 },
       sources: [
-        { id: 's1', kind: 'lfo', on: 1, label: 'TURN', shapeMode: 'wave', wave: 'rotate',
+        { id: 's1', kind: 'lfo', on: 1, label: 'TURN', shapeMode: 'wave', wave: 'rotate',   // tr[TURN]: a demo LFO's name: it turns the picture once per bar (the user can rename it)
           sync: 1, mult: 0, triplet: 0, dotted: 0,
           ratePos: 0.39, phaseOff: 0, smooth: 0, steps: 0,
           trig: 0, anchor: 1, invert: 0, minimized: 0 }
@@ -912,11 +1022,6 @@ export function labPresetList() {
   return LAB_PRESETS.map(labPublic).concat(M.presetList().filter((p) => !p.factory));
 }
 
-/** The folders, ours in the factory slot theirs used to hold. */
-export function labPresetFolders() {
-  return [{ name: LAB_PRESET_FOLDER, factory: 1, lab: 1, count: LAB_PRESETS.length }]
-    .concat(M.presetFolders().filter((f) => !f.factory));
-}
 
 /** One preset by id, rack and all.  A foreign one IS returned — marked, so a caller
  *  cannot load it by accident — because filtering a menu is not the same as sealing a

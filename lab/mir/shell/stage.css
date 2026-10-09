@@ -1,8 +1,15 @@
 /* MIR · shell/stage.css — λWAVES' ground, for an app that wants the stage the shell was drawn on.
  * Optional: the stage is the app's (λWAVES lab.css: "THE GROUND IS THE APP'S").  Load it after shell.css.
  *   <body> > #lab (fixed, the whole window) > #stage (the ground: #070a0f dark, #eef1f6 light)
- * shell/accent.js's STAGE_GROUND is the same two colours as numbers, for the λ's contrast floor. */
-html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
+ * shell/accent.js's STAGE_GROUND is the same two colours as numbers, for the λ's contrast floor.
+ * 1.5.0 · LAYER mir.kit.house (docs/LAYERS.md): an app's own ground, in no layer, beats this one with any selector. */
+@layer mir.kit.house {
+/* FROST · values (docs/SKINS.md) — the two grounds.  Not themed by the token: the light ground is its own name, because
+   <html> and <body> keep the dark ground in both themes and only #stage turns light. */
+:root { --stage-ground: #070a0f; --stage-ground-light: #eef1f6; }
+
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-ground); }
 #lab { position: fixed; inset: 0; display: block; }
-#stage { position: absolute; inset: 0; min-width: 0; min-height: 0; background: #070a0f; }
-body[data-theme="light"] #stage { background: #eef1f6; }
+#stage { position: absolute; inset: 0; min-width: 0; min-height: 0; background: var(--stage-ground); }
+body[data-theme="light"] #stage { background: var(--stage-ground-light); }
+}

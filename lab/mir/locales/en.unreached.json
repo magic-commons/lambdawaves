@@ -1,0 +1,464 @@
+[
+ {
+  "file": "mir/app.js",
+  "line": 344,
+  "why": "fragment",
+  "text": " · an MIR app"
+ },
+ {
+  "file": "mir/core/describe.js",
+  "line": 250,
+  "why": "fragment",
+  "text": "unhandled rejection: "
+ },
+ {
+  "file": "mir/core/envelope.js",
+  "line": 75,
+  "why": "fragment",
+  "text": "not JSON: "
+ },
+ {
+  "file": "mir/core/envelope.js",
+  "line": 135,
+  "why": "fragment",
+  "text": "the packed text does not inflate: "
+ },
+ {
+  "file": "mir/core/envelope.js",
+  "line": 168,
+  "why": "fragment",
+  "text": "the checker could not read this: "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 210,
+  "why": "fragment",
+  "text": "input mode  "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 210,
+  "why": "fragment",
+  "text": "   decided by "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 211,
+  "why": "fragment",
+  "text": "   last pointer "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 212,
+  "why": "fragment",
+  "text": "   touch seen "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 214,
+  "why": "fragment",
+  "text": "   density arms after "
+ },
+ {
+  "file": "mir/core/kbm.js",
+  "line": 214,
+  "why": "fragment",
+  "text": " ms of observed mouse, drops on the first touch"
+ },
+ {
+  "file": "mir/core/wakelock.js",
+  "line": 142,
+  "why": "fragment",
+  "text": ", planted by "
+ },
+ {
+  "file": "mir/core/wakelock.js",
+  "line": 143,
+  "why": "fragment",
+  "text": ", released "
+ },
+ {
+  "file": "mir/core/wakelock.js",
+  "line": 143,
+  "why": "fragment",
+  "text": ", refused "
+ },
+ {
+  "file": "mir/core/wakelock.js",
+  "line": 144,
+  "why": "fragment",
+  "text": "   asked by context: gesture "
+ },
+ {
+  "file": "mir/core/wakelock.js",
+  "line": 146,
+  "why": "fragment",
+  "text": "   held for: "
+ },
+ {
+  "file": "mir/glyph.js",
+  "line": 601,
+  "why": "fragment",
+  "text": " — known: "
+ },
+ {
+  "file": "mir/modulation/mod.js",
+  "line": 2494,
+  "why": "fragment",
+  "text": "a slow sine opening and closing the colour bands, with the whole palette "
+ },
+ {
+  "file": "mir/modulation/mod.js",
+  "line": 2554,
+  "why": "fragment",
+  "text": "two sample-and-hold wanderers on the first two colour phases — "
+ },
+ {
+  "file": "mir/modulation/mod.js",
+  "line": 2665,
+  "why": "fragment",
+  "text": "the stored modulation presets are format "
+ },
+ {
+  "file": "mir/modulation/mod.js",
+  "line": 2665,
+  "why": "fragment",
+  "text": " and this build reads format "
+ },
+ {
+  "file": "mir/modulation/mod.js",
+  "line": 2666,
+  "why": "fragment",
+  "text": " — the file is left untouched and this session runs on the "
+ },
+ {
+  "file": "mir/modulation/modwindow/modwindow.js",
+  "line": 430,
+  "why": "fragment",
+  "text": " window controls"
+ },
+ {
+  "file": "mir/modulation/modwindow/modwindow.js",
+  "line": 598,
+  "why": "textContent",
+  "text": "BPM"
+ },
+ {
+  "file": "mir/modulation/modwindow/modwindow.js",
+  "line": 922,
+  "why": "textContent",
+  "text": "A"
+ },
+ {
+  "file": "mir/modulation/modwindow/modwindow.js",
+  "line": 924,
+  "why": "textContent",
+  "text": "B"
+ },
+ {
+  "file": "mir/modulation/registry.js",
+  "line": 67,
+  "why": "fragment",
+  "text": "an id must be a string, not "
+ },
+ {
+  "file": "mir/modulation/registry.js",
+  "line": 69,
+  "why": "fragment",
+  "text": "an id must be at most "
+ },
+ {
+  "file": "mir/modulation/window.js",
+  "line": 1116,
+  "why": "fragment",
+  "text": "px,"
+ },
+ {
+  "file": "mir/modulation/window.js",
+  "line": 1862,
+  "why": "fragment",
+  "text": " failed to build"
+ },
+ {
+  "file": "mir/panels/camera-rig.js",
+  "line": 161,
+  "why": "fragment",
+  "text": "px, "
+ },
+ {
+  "file": "mir/panels/camera.js",
+  "line": 366,
+  "why": "fragment",
+  "text": "NORTH · back to "
+ },
+ {
+  "file": "mir/panels/curves.js",
+  "line": 121,
+  "why": "fragment",
+  "text": ": in "
+ },
+ {
+  "file": "mir/panels/curves.js",
+  "line": 121,
+  "why": "fragment",
+  "text": ", out "
+ },
+ {
+  "file": "mir/panels/xy.js",
+  "line": 322,
+  "why": "fragment",
+  "text": " — XY pad"
+ },
+ {
+  "file": "mir/panels/xy.js",
+  "line": 331,
+  "why": "fragment",
+  "text": " — XY controller"
+ },
+ {
+  "file": "mir/panels/xy.js",
+  "line": 353,
+  "why": "fragment",
+  "text": "the XY controller's "
+ },
+ {
+  "file": "mir/panels/xy.js",
+  "line": 405,
+  "why": "fragment",
+  "text": "the morph pad's "
+ },
+ {
+  "file": "mir/panels/xy.js",
+  "line": 405,
+  "why": "fragment",
+  "text": ": A and "
+ },
+ {
+  "file": "mir/render/encoder.js",
+  "line": 36,
+  "why": "fragment",
+  "text": "every avc1 rung refused "
+ },
+ {
+  "file": "mir/render/encoder.js",
+  "line": 137,
+  "why": "fragment",
+  "text": " sps, "
+ },
+ {
+  "file": "mir/render/encoder.js",
+  "line": 140,
+  "why": "fragment",
+  "text": " sps, "
+ },
+ {
+  "file": "mir/render/mp4.js",
+  "line": 348,
+  "why": "fragment",
+  "text": "bad box "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 78,
+  "why": "fragment",
+  "text": "TIMELINE · "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 78,
+  "why": "fragment",
+  "text": " needs the TIMELINE window — open it first"
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 261,
+  "why": "fragment",
+  "text": ", not "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 364,
+  "why": "fragment",
+  "text": " frames · "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 364,
+  "why": "fragment",
+  "text": " of video · projected "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 364,
+  "why": "fragment",
+  "text": " to render"
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 365,
+  "why": "fragment",
+  "text": " held before the file exists"
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 376,
+  "why": "fragment",
+  "text": " · runs "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 376,
+  "why": "fragment",
+  "text": " · cancelled "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 376,
+  "why": "fragment",
+  "text": " · errors "
+ },
+ {
+  "file": "mir/render/recorder.js",
+  "line": 377,
+  "why": "fragment",
+  "text": "            last error: "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 50,
+  "why": "fragment",
+  "text": " fps, "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 50,
+  "why": "fragment",
+  "text": " Mpx, dpr "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 63,
+  "why": "fragment",
+  "text": " MB, "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 63,
+  "why": "fragment",
+  "text": " distinct tones over "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 63,
+  "why": "fragment",
+  "text": " samples, "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 71,
+  "why": "fragment",
+  "text": " MB, header valid"
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 83,
+  "why": "fragment",
+  "text": " · share files "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 83,
+  "why": "fragment",
+  "text": " · route this device would take: "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 85,
+  "why": "fragment",
+  "text": "VideoEncoder ladder at "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 111,
+  "why": "fragment",
+  "text": " kB, "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 111,
+  "why": "fragment",
+  "text": " samples, "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 111,
+  "why": "fragment",
+  "text": ", header valid, decoded"
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 121,
+  "why": "fragment",
+  "text": " bytes, not 65536"
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 122,
+  "why": "fragment",
+  "text": "origin-private file system: wrote and read back "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 122,
+  "why": "fragment",
+  "text": ", checkpoints and recovery available"
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 140,
+  "why": "fragment",
+  "text": "  FIRST FAILURE: "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 72,
+  "why": "fragment",
+  "text": " could not start · "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 76,
+  "why": "fragment",
+  "text": "steps done: "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 141,
+  "why": "fragment",
+  "text": "boot veil   "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 142,
+  "why": "fragment",
+  "text": "down after "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 143,
+  "why": "fragment",
+  "text": " ms via "
+ },
+ {
+  "file": "mir/shell/boot.js",
+  "line": 143,
+  "why": "fragment",
+  "text": " frames waited"
+ },
+ {
+  "file": "mir/shell/gui.js",
+  "line": 295,
+  "why": "fragment",
+  "text": "the bench threw: "
+ }
+]

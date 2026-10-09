@@ -1,0 +1,80 @@
+/* MIR · panels/ramp.css — THE RAMP EDITOR'S SHEET (panels/ramp.js; docs/PANEL-RAMP.md).
+ *
+ * λWAVES' palette editor (paletteview.js) laid out on the kit's controls: the preset stepper and RESET on top, the seam reading, the strip (a gradient of
+ * the ramp's own lookup table) with its stops as handles and its ticks, the ring beside it (the same ramp round, the seam at nine o'clock), the selected
+ * stop's swatch, place and armed ×, and the verbs.  The controls are the kit's; this sheet draws only the strip, the handles, the ticks and the ring.
+ * INTENT: the strip is a WELL (the ramp is what is in it); a handle is a pin that stands on it: PRESS ME, so it carries the raised relief's rim; the chosen
+ * handle wears a ring (chosen = brighter, never an accent fill); a handle pulled off the strip fades (it will go); focus is an accent ring outside.
+ * Tokens only: every look value is in the values block.  Kit layer `mir.kit.plugin.host`, level with the colour controls. */
+@layer mir.kit.plugin.host {
+
+/* ── values ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-ramp {
+  --ramp-gap: 8px;
+  --ramp-strip-h: 44px;                                          /* the strip: a finger wide */
+  --ramp-strip-r: var(--r-sm);
+  --ramp-strip-rim: inset 0 0 0 1px var(--glass-hairline);
+  --ramp-pin: 16px;                                              /* a stop's marker: the colour of the stop */
+  --ramp-pin-sel: 22px;                                          /* the chosen stop's marker */
+  --ramp-pin-rim: 0 0 0 2px hsl(0 0% 100% / .9), 0 0 0 3px hsl(0 0% 0% / .55);   /* λWAVES' white ring with a dark edge, so it reads on any colour */
+  --ramp-pin-rim-sel: 0 0 0 2px hsl(0 0% 100%), 0 0 0 4px hsl(0 0% 0% / .6);
+  --ramp-line: hsl(0 0% 100% / .6);                              /* the stop's line down the strip */
+  --ramp-line-sel: hsl(0 0% 100%);
+  --ramp-target: 28px;                                           /* a handle's hit area: a square on the strip's top edge (44 px under a finger); the rest of the strip is for adding */
+  --ramp-tick-h: 14px;
+  --ramp-ring: 84px;                                             /* λWAVES' ring beside the strip */
+  --ramp-ring-w: 16px;
+  --ramp-seam-mark: 1px dashed var(--ink-key);
+  --ramp-ring-mask: #000;                                        /* the ring's mask: only its alpha is read */
+  --ramp-removing: .35;                                          /* a handle pulled off the strip: it will go */
+}
+
+.mir-ramp { display: flex; flex-direction: column; gap: var(--ramp-gap); min-width: 0; }
+.mir-ramp [hidden] { display: none; }
+.mir-ramp-presets { display: flex; align-items: center; gap: var(--ramp-gap); min-width: 0; }
+.mir-ramp-step { flex: 1 1 auto; min-width: 0; align-items: stretch; }
+.mir-ramp-step .mir-step-row { width: 100%; justify-content: space-between; }
+.mir-ramp-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mir-ramp-seam { min-width: 0; }
+
+.mir-ramp-wrap { display: flex; align-items: flex-start; gap: var(--ramp-gap); min-width: 0; }
+.mir-ramp-stage { flex: 1 1 auto; min-width: 0; padding: 0 calc(var(--ramp-pin-sel) / 2); }
+.mir-ramp-strip { position: relative; height: var(--ramp-strip-h); margin-top: calc(var(--ramp-target) / 2); border-radius: var(--ramp-strip-r); background: var(--ramp-gradient, var(--glass-well));
+  box-shadow: var(--ramp-strip-rim); cursor: copy; touch-action: manipulation; }
+.mir-ramp-ticks { position: relative; height: var(--ramp-tick-h); margin-top: 3px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.mir-ramp-tick { position: absolute; top: 0; left: calc(var(--at, 0) * 100%); transform: translateX(-50%); white-space: nowrap; }
+.mir-ramp-tick:first-child { transform: none; }
+.mir-ramp-tick:last-child { transform: translateX(-100%); }
+
+/* a stop: a square hit area on the strip's top edge holds the marker (the strip below it is for adding stops); its line runs down the strip */
+.mir-ramp-stop { position: absolute; top: calc(var(--ramp-target) / -2); height: var(--ramp-target); left: calc(var(--at, 0) * 100%); width: var(--ramp-target); margin-left: calc(var(--ramp-target) / -2);
+  padding: 0; border: 0; background: transparent; cursor: ew-resize; touch-action: none; z-index: 1; }
+.mir-ramp-stop::before { content: ''; position: absolute; left: 50%; top: 50%; height: var(--ramp-strip-h); width: 1px; margin-left: -.5px; background: var(--ramp-line); pointer-events: none; }
+.mir-ramp-pin { position: absolute; left: 50%; top: 50%; width: var(--ramp-pin); height: var(--ramp-pin); margin: calc(var(--ramp-pin) / -2) 0 0 calc(var(--ramp-pin) / -2);
+  border-radius: 50%; background: var(--stop, var(--acc)); box-shadow: var(--ramp-pin-rim); pointer-events: none; transition: width var(--motion-micro) var(--ease-out), height var(--motion-micro) var(--ease-out), margin var(--motion-micro) var(--ease-out); }
+.mir-ramp-stop.sel { z-index: 2; }
+.mir-ramp-stop.sel::before { background: var(--ramp-line-sel); }
+.mir-ramp-stop.sel .mir-ramp-pin { width: var(--ramp-pin-sel); height: var(--ramp-pin-sel); margin: calc(var(--ramp-pin-sel) / -2) 0 0 calc(var(--ramp-pin-sel) / -2); box-shadow: var(--ramp-pin-rim-sel); }
+.mir-ramp-stop.drag { cursor: grabbing; }
+.mir-ramp-stop[data-removing] { opacity: var(--ramp-removing); }
+.mir-ramp-stop:focus-visible { outline: 0; }
+.mir-ramp-stop:focus-visible .mir-ramp-pin { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 3px; }
+@media (pointer: coarse) { .mir-ramp { --ramp-target: 44px; } }
+
+/* the ring: the same ramp round, nine o'clock = the start, clockwise; the dashed mark is where the seam is */
+.mir-ramp-ring { position: relative; flex: 0 0 var(--ramp-ring); width: var(--ramp-ring); height: var(--ramp-ring); border-radius: 50%; background: var(--ramp-conic, var(--glass-well));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ramp-ring-w)), var(--ramp-ring-mask) calc(100% - var(--ramp-ring-w) + .5px)); mask: radial-gradient(farthest-side, transparent calc(100% - var(--ramp-ring-w)), var(--ramp-ring-mask) calc(100% - var(--ramp-ring-w) + .5px)); }
+.mir-ramp-ring::after { content: ''; position: absolute; left: 0; top: 50%; width: var(--ramp-ring-w); border-top: var(--ramp-seam-mark); }
+
+/* the selected stop */
+.mir-ramp-sel { display: flex; align-items: center; gap: var(--ramp-gap); min-width: 0; }
+.mir-ramp-sel[data-empty="true"] { display: none; }
+.mir-ramp-swatch { flex: 0 0 auto; margin: 0 4px; }
+.mir-ramp-at { flex: 1 1 auto; min-width: 0; }
+.mir-ramp-remove { margin-left: auto; flex: 0 0 auto; }
+.mir-ramp-verbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ramp-gap); }
+.mir-ramp-note { font-size: var(--fs-small); line-height: 1.45; color: var(--ink-faint); }
+
+@media (prefers-reduced-motion: reduce) { .mir-ramp-pin { transition: none; } }
+
+}   /* end @layer mir.kit.plugin.host */
