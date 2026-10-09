@@ -38,7 +38,7 @@ for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', '
   assert.equal(k in P.mat, false, 'mat carries ' + k);
 const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camMode',
   'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
-  'auto', 'governor', 'keepFrames', 'perfMode', 'modCadence', 'modArm', 'clockLink']);
+  'auto', 'governor', 'keepFrames', 'perfMode', 'modCadence', 'modArm', 'clockLink']);   // 0.5.0 C4: modArm / modCadence live in the kit's record `lambdawaves.q0.modulation` and clockLink is retired — all three still never ride in a project
 /* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its same three lists — the
    camera block itself is allowed here: the empty project carries auto-rotate, which is PROJECT */
 const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'dragGain', 'fling'],

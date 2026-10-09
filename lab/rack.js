@@ -77,6 +77,7 @@ import { createHistory } from './history.js';
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './mir/modulation/window.js';   // 0.5.0 C4: the kit's window controller (MIR 1.5), over A5's port
+import { localStore } from './mir/modulation/bind.js';          // 0.5.0 C4: the kit's modulation record (the power and the cadence)
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -198,7 +199,7 @@ export async function boot(dom) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain, modCadence: MOD.hz, modArm: modArm,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN; wave 65: the MOD arm is one too
+        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod)
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -295,8 +296,12 @@ export async function boot(dom) {
     if (typeof s.spin === 'number') camera.setSpeed(s.spin);              // … but AUTO-ROTATE never does (see saveSettings)
     if (typeof s.dragGain === 'number') camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') camera.setFling(s.fling);
-    MOD.hz = s.modCadence === 120 ? 120 : 60; if (modView) modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
-    if (s.modArm === false) setModArm(false, { quiet: true });   // wave 65: the arm is this browser's, and ARMED is the default a fresh visit gets
+    /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
+       MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
+    const mr = { modArm: s.modArm, modCadence: s.modCadence, ...modStore.read() };
+    MOD.hz = mr.modCadence === 120 ? 120 : 60; if (modView) modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
+    if (mr.modArm === false) setModArm(false, { quiet: true });   // wave 65: ARMED is the default a fresh visit gets
+    if (s.modArm !== undefined || s.modCadence !== undefined) saveMod();
     if (s.frame === false) { mat.frame = false; if (ui.frameSw) ui.frameSw.set(false); }     // wave 53: FRAME and AXIS, independently
     if (['box','lattice','dots'].includes(s.frameMode)) mat.frameMode=s.frameMode;
     if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
@@ -459,7 +464,7 @@ export async function boot(dom) {
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
   let modHost = null, modView = null, modWall = 0, modExpOn = null;
-  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: () => saveSettings() });
+  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod });
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
   appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
@@ -507,6 +512,8 @@ export async function boot(dom) {
 
 
   let modArm = true;
+  const modStore = localStore('lambdawaves.q0.modulation');   // 0.5.0 C4: { modArm, modCadence }, PREFERENCE (docs/STATE-SCOPES.md)
+  function saveMod() { modStore.write({ modArm, modCadence: MOD.hz }); }
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   const occlusion = createOcclusion(() => { occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
@@ -1198,7 +1205,7 @@ export async function boot(dom) {
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
       onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); location.reload(); } }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); modStore.write({ modArm: undefined, modCadence: undefined }); location.reload(); } }).root);
 
 
     const rc = el('div', 'row tight', gi);
@@ -2902,7 +2909,7 @@ export async function boot(dom) {
       modHost.clock.setModulationEnabled(want);
       if (modView) modView.sync();
     }
-    if (!o.quiet) saveSettings();
+    if (!o.quiet) saveMod();
     schedule(TIER.PRESENT);
     return modArm;
   }
@@ -5219,7 +5226,7 @@ export async function boot(dom) {
       get running() { return !!(modHost && modHost.clock.isRunning()); },
       get playing() { return !!(modHost && modHost.clock.isPlaying()); },
       get cadence() { return MOD.hz; },
-      setCadence(hz) { MOD.hz = hz === 120 ? 120 : 60; if (modView) modView.sync(); saveSettings(); return MOD.hz; },
+      setCadence(hz) { mod.setCadence(hz); if (modView) modView.sync(); return MOD.hz; },
       /* ── WAVE 65 · THE ARM, THE ONE KEY AND THE RESUME LAW, all readable from outside ────────── */
       get armed() { return modArm; },
       arm(on) { return setModArm(!!on); },
@@ -5505,7 +5512,7 @@ export async function boot(dom) {
       get remembered() { return seen(); }, get open() { return open; } };
   })();
   ui.saveNative = saveSettings;
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();} });
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
