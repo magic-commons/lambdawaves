@@ -16,7 +16,7 @@
 2. `9ebf35c` — H₂ deleted (−274). `83e9def` hand-off (`history` 43/43 on that tree).
 3. `1012497` — ELECTROSTATICS deleted (−740). `fa8e7ab` hand-off.
 4. `b71022c` — the lock's counts in its header; CLAUDE.md's legacy paragraph; `docs/LEGACY-WINDOWS.md`; `docs/STATE-SCOPES.md`.
-5. the ledger commit — `D9B-BUILD.md`, this file, `D9B-rack.patch` (every rack.js hunk for C3's re-apply), REPORT.md wave 207.
+5. `4f0a828` the ledger commit (and a one-line wording fix after it) — `D9B-BUILD.md`, this file, `D9B-rack.patch` (every rack.js hunk for C3's re-apply), REPORT.md wave 207.
 
 `lab/*.js` **29,863 → 28,849 (−1,014; −951 without the 63 lines moved to `tests/lib/`)**. Node: exit 0, **80** suites.
 The lock, ALONE: **860 · 0/0** and **1004 · 0/0** (s4a).

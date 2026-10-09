@@ -125,7 +125,7 @@ shader, so it belongs to a lock run of its own.
 
 ## Every rack.js hunk (for C3's re-apply)
 
-`research/release-0.5.0/D9B-rack.patch` is the whole diff, `git diff c83b7ee HEAD -- lab/rack.js`, 42 hunks. If C3's merge
+`research/release-0.5.0/D9B-rack.patch` is the whole diff, `git diff c83b7ee HEAD -- lab/rack.js`: 30 hunks with git's three lines of context, 44 at `-U0`; the 30 rows below cover them all. If C3's merge
 moved a block, re-apply it by its text, not by its line. Base line numbers:
 
 | base line | hunk |
