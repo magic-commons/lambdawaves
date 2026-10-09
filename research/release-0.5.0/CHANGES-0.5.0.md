@@ -9,3 +9,6 @@ keys and keyboard window, C6 FOLDERS).
 
 - λWAVES opens on a title screen now: the photosensitivity notice first (once per browser), then the six demos as covers, NEW, and RESUME, which
   brings back exactly what you were working on. (C6b)
+
+- The film is the kit's now: a RENDER card (pictures, films, previews, recovery of interrupted renders) and a TIMELINE window
+  (automation clips on any dial, ONE PERIOD as a clip you can render). (C7b)

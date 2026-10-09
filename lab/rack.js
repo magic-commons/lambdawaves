@@ -37,13 +37,15 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
-import { createFilm, exactSchedule, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
+import { createFilm, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
+import { installTimeline } from './mir/timeline/bind.js';   // 0.5.0 C7b: the kit's TIMELINE window, on λWAVES' one modulation host
+import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createKeyboardWindow } from './mir/keyboard/keyboard.js';   // 0.5.0 C3: the KEYBOARD window is the kit's (keymap.js left)
 import { createKeyTable } from './key-table.js';    // 0.5.0 C3: ACTIONS on MIR's ONE KEY TABLE (keys.js and shortcuts.js left)
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
 import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
-import { createCapture, maxPictureSize, viewCarriesGlobalPhase } from './capture.js';
+import { createCapture, maxPictureSize } from './capture.js';
 import { createExporter, EXPORTS as SHAPE_EXPORTS } from './export3d.js';   // wave 134: FILE › EXPORT SHAPE / GRID
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
 import { createRegister } from './registerview.js';   // REGISTER: one window, two registers — ORBITAL (orbitalsview.js, MATH-H2O Proposition 1) and STATES (statesview.js, the many-electron TD-CIS register)
@@ -190,6 +192,7 @@ export async function boot(dom) {
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
            is not here — that rides in the project file, exactly as it did before. */
         modwin: modView ? modView.presentation() : S0.modwin,
+        tlwin: S0.tlwin,   // 0.5.0 C7b: the TIMELINE window's shape and work lane (WORKSPACE), written by its own store and carried here
         frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide,
         /* ⚠ WAVE 106 · TWO MORE OF THE FIELD'S CHROME, AND ONE CLOSES AN ASYMMETRY NEVER DECIDED.
            `invert` IS NEW HERE: it sat in the same row as FRAME and AXIS from wave 56 and was the only
@@ -409,7 +412,7 @@ export async function boot(dom) {
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
-  let modHost = null, modView = null, modWall = 0, modExpOn = null;
+  let modHost = null, modView = null, modWall = 0, modExpOn = null, dodge = null, tl = null, filmCard = null;   // C7b: the pill's dodge (both kit windows) · the TIMELINE · the RENDER card
   const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod });
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
   appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
@@ -918,6 +921,7 @@ export async function boot(dom) {
        the EXPAND lamp, which is the one thing that must be painted whether the window is open or not. */
     if (modHost) {
       if (!uiHidden && modView && modView.isOpen) modView.paint(false);
+      if (!uiHidden && tl && tl.isOpen()) tl.paintHead();   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
       const on = modHost.clock.isRunning();
       if (on !== modExpOn) { modExpOn = on; if (ui.modExp) ui.modExp.classList.toggle('live', on); }
     }
@@ -1362,29 +1366,12 @@ export async function boot(dom) {
     el('div', 'row tight', gc).appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt-drag, two fingers or the PAN pad slide the picture; the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
 
-    /* ── THE CAMERA AND THE RECORD BUTTONS (wave 58, board #57) ────────────────────────────────────────────────
-     * lab/capture.js is 1033 lines, thirty node gates, and until this row nothing in the interface imported it.
-     * Everything hard is already decided in there and NOTHING is re-decided here: the picture is a real render at
-     * the requested size read straight off the GPU (never an upscale, never the canvas' image contents), the
-     * recording engine is chosen by a runtime PROBE rather than by documentation, and the loop's schedule is a
-     * theorem — N frames on [t0, t0 + T), the endpoint dropped because it IS frame 0.
-     *   `planLoop()` DID THE THINKING, so this shows `plan.message` and lets `plan.ok` gate the button.  Two of the
-     * facts it hands back must not be hidden and are the reason the readout is `wide`:
-     *   · A STATE WITH NO EXACT PERIOD IS REFUSED, with its best near-recurrence and how far that misses in turns.
-     *     A loop that does not close is not a loop, and recording one quietly would be the lie.
-     *   · THE PERIOD DEPENDS ON THE OBSERVABLE.  ρ repeats at T_ρ, but arg ψ, Re ψ and Im ψ carry the global phase
-     *     and repeat only at T_ψ = 2π/gcd{|E|} — three times longer for 1s+2s — and PHASE is the shipped view.
-     *     The plan says which period it used, how many laps that is, and why.
-     * THE PLAN IS NEVER COMPUTED ON A FRAME.  A bowed BOX state has 56 incommensurate energies and the scan cost
-     * 1.2 s in wave 45; so it is computed on a press, on a control change and on the pointer entering this group,
-     * and the readout says STALE (with the button down) when the state or the view has moved since.  A stale plan
-     * is not an ok plan, which is exactly what `plan.ok` gating the button has to mean. */
-    const gcap = group(wCam.body, 'CAPTURE');
-    let exact = null, exactRun = null, filmBefore = null;
-    /* 0.5.0 C7 · THE FILM IS MIR's RECORDER (render-exact.js createFilm): RECORD and ONE PERIOD are MP4s and EXPORT FRAMES the
-       lossless PNG frames, every frame rendered at its scheduled time by λWAVES' frame(i, ctx) and encoded by the kit.  While a
-       film owns the page the rack's loop stands aside (no frame of ours presents with an unpinned seed: hazard H9), and what the
-       film steps through — the state, the material, the pose, the rotation rates — is put back exactly as it was. */
+    /* ── THE FILM (0.5.0 C7 · C7b): MIR's recorder handed λWAVES' frame(i, ctx) (render-exact.js createFilm); its UI is the kit's — the
+       RENDER card (lab/film-card.js) and the TIMELINE window — and the CAPTURE group left.  While a film owns the page the rack's loop
+       stands aside (no frame of ours presents with an unpinned seed: hazard H9), and what the film steps through — the state, the
+       material, the pose, the rotation rates — is put back exactly as it was.  `__LW.captureUI` is its scripting facade: createFilm's
+       named takes at C7's defaults (30 fps, 6 s, ×2), no UI; a verb while one runs stops it. */
+    let exact = null, filmBefore = null, cap = null, facadeRun = null;
     function filmHold(on) {
       if (on) {
         filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
@@ -1396,169 +1383,21 @@ export async function boot(dom) {
       exportLocked = false; modWall = 0; lastWall = performance.now() / 1000;
       schedule(TIER.RECONSTRUCT);
     }
-    const exactRenderer = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold }));
-    let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
-    let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
+    const film = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold,
+      road: { pending: () => ({ caption: stageCaption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
+        plan: (o) => capture().planLoop(o) } }));   // the rack's own for the film's three schedules (take) and the card's road
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
-    const capKeyNow = () => `${reg.version}|${mat.view}|${ui.capFps.get()}|${ui.capSec.get()}`;
-    const rc1 = el('div', 'row tight', gcap);
-    ui.capScale = seg({ label: 'PICTURE', value: '2', options: [{ id: '1', label: '×1' }, { id: '2', label: '×2' }, { id: '3', label: '×3' }, { id: '4', label: '×4' }],
-      onChange: () => capShowLimits() });
-    ui.capScale.root.title = 'Render scale for still images';
-    rc1.appendChild(ui.capScale.root);
-    ui.capPic = trig({ label: 'TAKE A PICTURE', title: 'Render and save a PNG at the chosen size', onFire: () => capPicture() });
-    rc1.appendChild(ui.capPic.root);
-    const rc2 = el('div', 'row', gcap);
-    ui.capSec = knob({ label: 'SECONDS', min: 1, max: 30, value: 6, step: 0.5, fmt: (v) => v.toFixed(1) + ' s', onInput: () => capStale() });
-    ui.capSec.root.title = 'Duration for free recording and loop frame planning';
-    rc2.appendChild(ui.capSec.root);
-    ui.capFps = seg({ label: 'FPS', value: '30', options: FILM_FPS.map((f) => ({ id: String(f), label: String(f) })), onChange: () => capStale() });
-    rc2.appendChild(ui.capFps.root);
-    ui.capRec = trig({ label: 'RECORD', title: 'Record an MP4 of the clock as it runs, every frame at its exact time', onFire: () => capRecord() });
-    ui.capRec.root.dataset.renderCancel = '';   // the kit's input guard lets its STOP through while a film runs
-    rc2.appendChild(ui.capRec.root);
-    ui.capLoop = trig({ label: 'ONE PERIOD', title: 'Record one usable recurrence period', onFire: () => capRecordLoop() });
-    rc2.appendChild(ui.capLoop.root);
-    ui.capPlanT = trig({ label: 'PLAN', title: 'Find a recurrence for the current state and observable', onFire: () => capMakePlan(true) });
-    rc2.appendChild(ui.capPlanT.root);
-    const rx = el('div', 'row tight', gcap);
-    ui.capExact = trig({ label: 'EXPORT FRAMES', title: 'Export deterministic PNG frames and a manifest as ZIP', onFire: () => capExportFrames() });
-    ui.capExact.root.dataset.renderCancel = '';
-    rx.appendChild(ui.capExact.root);
-    ui.capExactRo = readout({ label: 'FRAME EXPORT', cls: 'wide', value: '—', sub: 'At least 30 seconds · PNG sequence + manifest · modulation starts at beat zero' });
-    gcap.appendChild(ui.capExactRo.root);
-    const rc3 = el('div', 'row tight', gcap);
-    ui.capShot = readout({ label: 'PICTURE', value: '—', sub: '' });
-    ui.capPlanRo = readout({ label: 'THE LOOP PLAN', cls: 'wide', value: '—', sub: '' });
-    rc3.appendChild(ui.capShot.root); rc3.appendChild(ui.capPlanRo.root);
-    el('div', 'note', gcap).innerHTML = '<b>Capture.</b> Pictures render at the chosen size. RECORD follows browser timing. ONE PERIOD is available when the current observable has a usable recurrence; EXPORT FRAMES writes deterministic PNG frames and a manifest.';
-
-    /* the ceiling is READ, never asserted — and read WITHOUT forcing the capture object into existence, because
-       this runs while the window is being built and `LW` does not exist yet (a const in its own temporal dead zone) */
-    const capLimits = () => { try { return capture().limits(); } catch (_) { return maxPictureSize(field && field.ok ? field.device.limits : null, 16384); } };
-    function capShowLimits() {
-      const L = capLimits(), scale = +ui.capScale.get(), w = Math.round(dom.canvas.width * scale), h = Math.round(dom.canvas.height * scale);
-      const over = Math.max(w, h) > L.side;
-      ui.capShot.set(over ? `${w} × ${h} → clipped to ${L.side}` : `${w} × ${h}`, over ? 'warn' : '');
-      ui.capShot.setSub(`ceiling ${L.side} on a side (${L.why}) · ${L.note}`);
-    }
-    function capStale() { if (capPlan && capKey !== capKeyNow()) capPaint(); }
-    function capMakePlan(force) {
-      if (!force && capPlan && capKey === capKeyNow() && !capSoft) return capPlan;
-      capWait = false; capSoft = false;
-      try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get() }); capKey = capKeyNow(); }
-      catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
-      capPaint(); return capPlan;
-    }
-    /* LA7 · THE HOVER ASKS, IT DOES NOT FORCE.  Wave 58's hover plan ran the FORCED period read — one or two synchronous
-       2·10⁶-step scans on an incommensurate state (0.36 s on the BOX, 0.76 s in its phase view, 1.3 s under STURMIAN)
-       every time the pointer crossed this group (AUDIT-F F2).  The hover now takes the frame path's answer: fresh, the
-       exact half, or posted to the scan worker — and while it runs the readout says so and ONE PERIOD stays down; the
-       landing re-plans.  The plan it paints is the PLAN button's: the same density period (bit-identical in the worker)
-       and the same W, because W is used only when T_ψ is EXACT, and the exact half of T_ψ is microseconds.  The one
-       field it leaves unset is T_ψ's near-recurrence (Twave), which nothing reads; so a hover's plan is painted and never
-       handed to a caller (capSoft).  ⟳, G, PLAN, LW.period and LW.capturePlan stay forced. */
-    const capWaveExact = () => {
-      if (!viewCarriesGlobalPhase(mat.view | 0)) return null;
-      const E = periodEnergies(); return E && E.length ? densityPeriodExact([0].concat(Array.from(E))) : null;
+    const take = async (kind, o, keep) => {
+      if (facadeRun) { facadeRun.stop(); return null; }
+      facadeRun = film().take(kind, { fps: 30, seconds: 6, scale: 2, drive: modArm, ...o });
+      try { const r = await facadeRun.done; if (r && r.ok && keep) film().save(r); return r; }
+      catch (e) { return { ok: false, error: String(e && e.message || e) }; } finally { facadeRun = null; }
     };
-    function capHover() {
-      if (capPlan && capKey === capKeyNow() && !capWait) return;
-      const soon = __LW_hooks.periodSoon ? __LW_hooks.periodSoon() : null;
-      if (!soon) { capMakePlan(false); return; }
-      if (soon.settling) { if (!capWait) { capWait = true; capPaint(); } return; }
-      capWait = false; capSoft = true;
-      try { capPlan = capture().planLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get(), period: soon.period, wave: capWaveExact() }); capKey = capKeyNow(); }
-      catch (e) { capPlan = { ok: false, label: 'ERROR', message: String(e && e.message || e) }; capKey = capKeyNow(); }
-      capPaint();
-    }
-    __LW_hooks.onPeriodLand = () => { if (capWait) capHover(); };
-    function capPaint() {
-      const P = capPlan, stale = P && capKey !== capKeyNow();
-      if (capWait) { ui.capPlanRo.set('…', ''); ui.capPlanRo.setSub('settling — the recurrence scan runs off the frame; the plan appears when it lands'); ui.capLoop.root.disabled = true; return; }
-      if (!P) { ui.capPlanRo.set('—', ''); ui.capPlanRo.setSub('press PLAN (or hover this group) and period.js will say what closes here, for the observable in force'); ui.capLoop.root.disabled = true; return; }
-      ui.capPlanRo.set(stale ? P.label + ' · STALE' : P.label + (P.undersampled ? ' · UNDERSAMPLED' : ''), stale ? 'warn' : P.undersampled ? 'warn' : P.ok ? 'ok' : 'warn');
-      ui.capPlanRo.setSub((stale ? 'THE STATE OR THE VIEW HAS MOVED since this plan was made — press PLAN. · ' : '')
-        + P.message + (P.usedPeriod ? ` · period used: ${P.usedPeriod} (${P.laps} lap${P.laps === 1 ? '' : 's'} of T_ρ)` : ''));
-      ui.capLoop.root.disabled = capBusy || stale || !P.ok;
-    }
-    async function capPicture() {
-      if (capBusy) return; capBusy = true; ui.capPic.root.disabled = true;
-      ui.capShot.set('rendering…', 'live');
-      try {
-        const r = await capture().picture({ scale: +ui.capScale.get() });
-        if (!r || r.ok === false) { ui.capShot.set('refused', 'warn'); ui.capShot.setSub(String(r && r.error || 'no result')); }
-        else { capture().save(r); ui.capShot.set(`${r.w} × ${r.h} · ${(r.bytes / 1024).toFixed(0)} kB`, 'ok');
-          ui.capShot.setSub(`${r.name} · ${r.ms.toFixed(0)} ms${r.clipped ? ' · CLIPPED to the device ceiling' : ''} · the clock and the jitter seed are back where they were`); }
-      } catch (e) { ui.capShot.set('error', 'warn'); ui.capShot.setSub(String(e && e.message || e)); }
-      capBusy = false; ui.capPic.root.disabled = false; capPaint();
-    }
-    const capProgressTo = (ro) => (p) => { ro.set(`${p.done} / ${p.total} frames`, 'live'); ro.setSub(p.human || 'Rendering the scheduled frame times'); };
-    function capBadge(kind, r) {
-      if (!r || r.ok === false) { ui.capPlanRo.set(r && r.stopped ? 'stopped' : 'refused', 'warn'); ui.capPlanRo.setSub(String(r && (r.message || r.error) || 'no result')); return; }
-      ui.capPlanRo.set(`${kind} · ${r.frames} frames · ${(r.bytes / 1024).toFixed(0)} kB`, 'ok');
-      ui.capPlanRo.setSub(`${r.name} · ${r.w} × ${r.h} · ${r.fps} fps MP4 — every frame rendered at its scheduled time, so the tempo is exact; MIR's recorder encoded it (${r.report.human})`);
-    }
-    /** RECORD: a CLIP of the clock as it runs, [t0, t0 + seconds·rate) in N frames, the next take's first dropped as a loop's is.
-     *  AUTO-ROTATE rides as a pose path, yaw by the frame index: the one camera move a film can render exactly. */
-    async function capRecord() {
-      if (capRun) { capRun.stop(); return; }
-      if (capBusy) return;
-      const fps = +ui.capFps.get(), N = Math.max(1, Math.round(fps * ui.capSec.get()));
-      const sched = exactSchedule({ mode: 'loop', T: (N / fps) * clock.rate, t0: clock.t, fps, frames: N });
-      const spin = camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0 = obs.yaw;
-      capBusy = true; ui.capRec.setLabel('STOP'); ui.capRec.on = true; capPaint();
-      try { capRun = exactRenderer().render({ schedule: sched, kind: 'clip', format: 'mp4', camera: 'still', caption: stageCaption(), modulation: modArm ? 'drive' : 'freeze',
-          beforeFrame: ({ dt }) => rotStep(dt), poseAt: spin ? (k) => ({ yaw: yaw0 + spin * (k / fps) }) : null, onProgress: capProgressTo(ui.capPlanRo) });
-        const r = await capRun.done; capBadge('CLIP', r); if (r && r.ok) exactRenderer().save(r);
-      } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
-      capRun = null; capBusy = false; ui.capRec.setLabel('RECORD'); ui.capRec.on = false; capPaint();
-    }
-    /** ONE PERIOD: the plan's own times, bit for bit (render-exact.test §11), the camera still and the modulation frozen — a loop closes only if nothing else moves */
-    async function capRecordLoop() {
-      if (capBusy || capRun) return;
-      const P = capMakePlan(true);
-      if (!P.ok) return;                                       // the readout already carries plan.message: the refusal IS the answer
-      if (P.kind === 'stationary') { capBadge('STATIONARY', { ok: false, message: P.message }); return; }
-      const sched = exactSchedule({ mode: 'loop', T: P.T, t0: P.schedule.t0, fps: P.fps, frames: P.N });
-      capBusy = true; ui.capLoop.on = true; capPaint();
-      try { capRun = exactRenderer().render({ schedule: sched, kind: P.kind === 'exact' ? 'loop' : 'near', format: 'mp4', camera: 'still', caption: stageCaption(), onProgress: capProgressTo(ui.capPlanRo) });
-        const r = await capRun.done; capBadge(P.kind === 'exact' ? 'PERIOD LOOP' : 'NEAR', r); if (r && r.ok) exactRenderer().save(r);
-      } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
-      capRun = null; capBusy = false; ui.capLoop.on = false; capPaint();
-    }
-    async function capExportFrames(options = {}) {
-      if (exactRun) { exactRun.stop(); return; }
-      if (capBusy) return;
-      const ex = exactRenderer();
-      const driven = modArm;
-      const seconds = Math.max(30, ui.capSec.get());
-      const settings = { fps: +ui.capFps.get(), seconds, t0: 0, scale: +ui.capScale.get(), camera: 'still', modulation: driven ? 'drive' : 'freeze', format: 'png', kind: 'frames', ...options };
-      let plan = ex.plan(settings);
-      if (driven || rotDriving() || !plan.ok || plan.N < seconds * settings.fps) {
-        settings.mode = 'span'; settings.span = seconds * Math.max(.1, clock.rate);
-        plan = ex.plan(settings);
-      }
-      if (!plan.ok) { ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(plan.message); return plan; }
-      capBusy = true; ui.capExact.setLabel('STOP EXPORT'); ui.capExact.on = true; capPaint();
-      try {
-        exactRun = ex.render({ ...settings, beforeFrame: ({ dt }) => rotStep(dt), onProgress: capProgressTo(ui.capExactRo) });
-        const result = await exactRun.done;
-        ui.capExactRo.set(result.ok ? 'exported' : result.stopped ? 'stopped' : 'refused', result.ok ? 'ok' : 'warn');
-        ui.capExactRo.setSub(result.message || result.error || 'Export finished');
-        if (result.ok && options.download !== false) ex.save(result); else if (result.ok) setTimeout(() => ex.discard(result), 120000);   // the files are the kit store's: a caller that keeps the result reads them first
-        return result;
-      } catch (e) {
-        ui.capExactRo.set('error', 'warn'); ui.capExactRo.setSub(String(e.message || e));
-        return { ok: false, error: String(e.message || e) };
-      } finally {
-        exactRun = null; capBusy = false;
-        ui.capExact.setLabel('EXPORT FRAMES'); ui.capExact.on = false; capPaint();
-      }
-    }
-    gcap.addEventListener('pointerenter', () => { if (!capBusy) capHover(); });
-    capShowLimits(); capPaint();
-    capApi = { exportFrames: capExportFrames, get exact() { return exactRenderer(); }, get capture() { return capture(); }, plan: (force = true) => capMakePlan(force), picture: capPicture, record: capRecord, loop: capRecordLoop, limits: capLimits, get busy() { return capBusy || !!capRun; } };
+    capApi = { get exact() { return film(); }, get capture() { return capture(); }, plan: () => capture().planLoop({ fps: 30, seconds: 6 }),
+      limits: () => { try { return capture().limits(); } catch (_) { return maxPictureSize(field && field.ok ? field.device.limits : null, 16384); } },
+      async picture() { const r = await capture().picture({ scale: 2 }); if (r && r.ok !== false) capture().save(r); return r; },
+      record: () => take('clip', {}, true), loop: () => take('period', {}, true), exportFrames: (options = {}) => take('frames', { options }, options.download !== false),
+      get busy() { return !!facadeRun || !!(exact && exact.running); } };
     const gq = group(ui.set.body, 'FIELD QUALITY');
     const r5 = el('div', 'row', gq);
     ui.gridSeg = seg({ label: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
@@ -2425,14 +2264,16 @@ export async function boot(dom) {
       return { left, right: left + w, top, bottom: top + h };
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-    function modDodge(rect) {
+    const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
+    function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
-      const r = rect && modView && modView.isOpen ? rect : { left: -1, right: -1, top: -1, bottom: -1 };
+      dodging[who] = rect && (who === 'mod' ? modView && modView.isOpen : tl && tl.isOpen()) ? rect : null;
+      const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
-      if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
+      if (trMoving) { if (!rs.length) setTimeout(() => modDodge(rect, who), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
          modulation window reports the origin's empty rect (the kit's window.js place(); `closed` sends −1s).  No seat can hit a
@@ -2441,14 +2282,14 @@ export async function boot(dom) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (r.right <= 0 && r.bottom <= 0 && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
+      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
       if (narrowRack) trSeat = 'top';
       const want = narrowRack ? 'top'
-                 : !hits(seatRect('bottom', w, h), r) ? 'bottom'
-                 : !hits(seatRect('top', w, h), r) ? 'top' : trSeat;
+                 : free('bottom', w, h) ? 'bottom'
+                 : free('top', w, h) ? 'top' : trSeat;
       if (want === trSeat) return;
       trMoving = true;
       const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
@@ -2486,6 +2327,7 @@ export async function boot(dom) {
     modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
     modView.restore(readSettings().modwin);
+    dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
     if (page.hidden) modHost.clock.setHidden(true);
   }
@@ -2594,7 +2436,6 @@ export async function boot(dom) {
       const P = Object.assign({}, r); delete P.id; delete P.op;
       lastPeriod = P; Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null;
       paintPeriod(); schedule(TIER.PRESENT);                           // paused, no frame would repaint the readout
-      if (__LW_hooks.onPeriodLand) __LW_hooks.onPeriodLand();          // LA7: a CAPTURE hover waiting on this scan plans now
     }
     /* …and a dial held down by an ARROW KEY is a gesture too (auto-repeat bumps reg.version ~30×/s with no pointer):
        the wave-44 hold-off below reads it beside pointerHeld; a released key lets the settled scan run once. */
@@ -2676,7 +2517,6 @@ export async function boot(dom) {
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
     function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
     __LW_hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
-    __LW_hooks.periodSoon = () => { const P = periodNow(); return { period: P, settling: periodSettling }; };   // LA7: the CAPTURE hover's read — the frame path's own, never forced
     const laps = () => Math.floor(clock.t / clock.window);
     const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
       ? v.toFixed(decimals)
@@ -3445,7 +3285,7 @@ export async function boot(dom) {
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
@@ -3930,6 +3770,7 @@ export async function boot(dom) {
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
+    { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (tl) tl.toggle(); } },   // 0.5.0 C7b
   ];
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
@@ -3966,6 +3807,28 @@ export async function boot(dom) {
        (wave 106), and from the stage it hands the keyboard back to the interface (wave 57).  The menubar and the + / ☆ lists are the kit's. */
     window.addEventListener('keydown', (e) => { if (e.code !== 'Escape' || e.defaultPrevented) return; if (kb.isOpen()) { e.preventDefault(); kb.close(); } else if (stageHasFocus()) dom.canvas.blur(); });
     kt.table.hints(document); kt.table.onChange(() => kt.table.hints(document));   // every [data-key-action] says its live chord (aria-keyshortcuts)
+  }
+  /* ── 0.5.0 C7b · THE TIMELINE is the kit's installTimeline (TIMELINE.md) on λWAVES' ONE modulation host: its `mod` is this seam (bind.js
+     reads host, registry, play, arm, armed, onPlay, setTimeline), so it builds no second host and no tick.  Its play is THE play (clock.js
+     onePlay), its playhead paints from loop()'s present, the arrangement is the host clock's automation and rides in serialize()
+     (presentation.timeline) with its own undo; λWAVES' pill stays the one transport (R9), the window a WORKSPACE record (`tlwin`) that
+     ships closed (R1).  Its rows join the ONE KEY TABLE (undo/redo are λWAVES' own ids: its own are reachable from its ⋯ menu). */
+  if (modHost && modView) {
+    tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
+      mod: { host: modHost, registry: modHost.registry, armed: () => modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => modView.setTimeline(x),
+        play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
+      dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, transport: false, audio: false,
+      store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
+      busy: () => capApi.busy, moved: (r) => dodge(r, 'tl'), onWindow: () => occlusion.dirty() });
+    /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
+    occlusion.register('timeline', () => tl.isOpen() ? [...tl.root.querySelectorAll('.glass'), ...(tl.rail.el ? tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
+    for (const n of [tl.root, tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
+    /* a ROUTED dial's hold and right-click stay its ring's (RANGE · REMOVE · RESET): the kit's TIMELINE CLIP (timeline/knobs.js, 500 ms,
+       document capture) and the ring (600 ms) claim one gesture, so the window's capture hides that dial's id from the timeline for the
+       one event and gives it back right after the timeline has looked (brief B13); an unrouted dial's hold is TIMELINE CLIP's */
+    for (const type of ['pointerdown', 'contextmenu']) window.addEventListener(type, (e) => { const k = e.target.closest && e.target.closest('.k[data-param]');
+      if (!k || !modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
+      document.addEventListener(type, () => { k.dataset.param = id; }, { capture: true, once: true }); }, true);
   }
 
 
@@ -4070,6 +3933,7 @@ export async function boot(dom) {
         overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
+    const T = !edit && tl ? tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     if (!edit) return S;
     const pr = S.presentation, R = modHost && modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -4297,6 +4161,7 @@ export async function boot(dom) {
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
         if (pr.modwin && modView) modView.restore(pr.modwin);
+        if (!hist && tl) tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
       }
       schedule(TIER.REBUILD); wState.setStatus(gone.length ? restoreNotice : 'restored', gone.length ? 'warn' : 'live');
       return true;
@@ -4793,12 +4658,20 @@ export async function boot(dom) {
     get stageFocus() { return stageHasFocus(); },
     version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03',
     /** 0.5.0 C9 · R14 · FOLDERS' thumbnail() for C6's project adapter, whose toThumb() drawImage()s what it gets (a WebGPU canvas can
-     *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
-    async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; },
+     *  answer that BLANK): the GPU readback's PNG, always (C7 took capture's readability probe away; C7b drops its dead branch). */
+    async thumbnail() { const r = await capApi.capture.picture({ width: 320 }); return r.ok ? r.blob : null; },
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
     session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
+    get timeline() { return tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
+    get render() { return filmCard; },   // 0.5.0 C7b: the RENDER card ({ card, view, recorder, plan, place }; view.state() is the kit's harness read)
   };
   window.__LW = LW;
+  /* ── 0.5.0 C7b · THE RENDER CARD (lab/film-card.js): MIR's createRenderCard over the film's host recorder, built once LW exists (the film
+     reads it) and registered closed on the right rack (R2), in + and WINDOW; its saves are the hand-over fix (capture.js handOver) ── */
+  filmCard = createFilmCard({ film: capApi.exact, capture: capApi.capture, editor: () => tl && tl.editor, open: () => tl && tl.open(), armed: () => modArm,
+    digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|') });
+  rack.prepend(filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
+  rk.register({ id: 'render', el: filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply

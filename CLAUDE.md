@@ -259,9 +259,16 @@ gear), guarded by `mir-controls`. Josh's seven glass rulings are read from
 `research/release-0.5.0/C0-GLASS-RULINGS.md`; the defaults applied there are
 five the kit's, two λWAVES' (the disconnected head's fill and lift, lab.css §G).
 
-THE FILM (0.5.0 C7) is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`): RECORD and ONE
-PERIOD are MP4s, EXPORT FRAMES the PNG frames in the kit's stored ZIP, every frame at its scheduled time. The kit owns the encoding,
-the take clock (only when a film drives the modulation; a frozen film's recorder has no host), the store, the input guard and the
-progress; λWAVES keeps the schedules, the GPU readback + settle (`lab/capture.js` `readback`, the one road a picture shares), the
-jitter seed 13 pinned per frame and hazards H1–H3 with their witnesses (`HAZARDS[].owner`). Run `node tests/render-exact.test.mjs`,
-the digest lock (1004 + 1148) and `tools/perf/film-probe.mjs` after touching any of it.
+THE FILM (0.5.0 C7, C7b) is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`), and its UI
+is the kit's: the RENDER card (`createRenderCard` in `lab/film-card.js`, registered in the rack as `render`, closed on the right)
+and the TIMELINE window (`installTimeline` over λWAVES' one modulation host through the seam in `rack.js`: its play is THE play,
+λWAVES' pill the one transport, the arrangement `presentation.timeline` with its own undo, the window the WORKSPACE key `tlwin`).
+RENDER films STILL (a clip of the clock), TIMELINE · ACTIVE or TIMELINE · SELECTION as an MP4 or PNG frames; ONE PERIOD is a
+`lw-period` clip (PLACE ONE PERIOD) whose t0 and T the frame reads. THE TIME LAW: the ruler is the automation's beat and t the
+physics'; a frame's t is the period clip's, else the RATE integral when RATE can move, else the RECORD law from the lab's t. The
+kit owns the encoding, the take clock, the store with its RECOVER / RESUME / DISCARD rows and the input guard; λWAVES keeps the
+schedules, the readback and settle, seed 13, H1–H3 with their witnesses, `filmHold`, and capture.js `handOver` as every save;
+`__LW.captureUI` is the scripting facade (createFilm's takes, no UI). The timeline's rows join the ONE KEY TABLE under THE FOCUS LAW
+(`lab/key-table.js`: a scoped row wins its chord while its surface has the focus). Run `node tests/render-exact.test.mjs`, the
+digest lock, `tools/perf/film-probe.mjs`, `tests/film-handover.browser-test.mjs` and `tests/timeline.browser-test.mjs` after
+touching any of it.

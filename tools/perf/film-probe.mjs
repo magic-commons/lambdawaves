@@ -47,7 +47,8 @@ try {
       decoded = { w: v.videoWidth, h: v.videoHeight, duration: v.duration }; URL.revokeObjectURL(v.src); } catch (e) { decoded = { E: String(e.message || e) }; }
     return { kind: '${kind}', name: r.name, ok: r.ok, frames: r.frames, w: r.w, h: r.h, fps: r.fps, bytes: r.bytes, files: r.files.map((f) => [f.name, f.bytes]),
       box: new TextDecoder().decode(head.slice(4, 8)), decoded, contended: r.contended, report: r.report.human, mode: r.mode,
-      first: r.manifest.frames[0], last: r.manifest.frames[r.manifest.frames.length - 1], err, ro };
+      first: r.manifest.frames[0], last: r.manifest.frames[r.manifest.frames.length - 1], err, ro,
+      digests: r.manifest.frames.map((f) => f.digest), times: r.manifest.frames.map((f) => f.t) };   /* 0.5.0 C7b: every frame, for film-compare */
     } catch (e) { return { E: String(e && e.stack || e) }; }`;
   await step('loop', film('loop', 'ONE PERIOD'));
   await step('video', film('record', 'RECORD'));

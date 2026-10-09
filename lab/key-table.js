@@ -27,7 +27,7 @@ export function chordsOf(b) {
 /** liftSaved(record, rows) — a 0.4.0 record (or an old id's, through `was`) as { id: [chords] }; the kit's own shape passes */
 export function liftSaved(o, rows) {
   if (!o || typeof o !== 'object') return null;
-  const out = {};
+  const out = Object.fromEntries(Object.entries(o).filter(([, v]) => Array.isArray(v)));   // C7b: a row another module added (timeline.*) keeps its saved chords
   for (const a of rows) { const v = o[a.id] ?? (a.was ? o[a.was] : undefined); if (v !== undefined) out[a.id] = Array.isArray(v) || typeof v === 'string' ? v : chordsOf({ ...a, ...v }); }
   return out;
 }
@@ -43,10 +43,15 @@ export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus =
   const view = target || (typeof window !== 'undefined' ? window : null);   // wave 88: a focused <select> yields Space (the kit counts it a field)
   if (view) view.addEventListener('keydown', (e) => { const t = e.target; if (e.code !== 'Space' || e.defaultPrevented || !t || t.tagName !== 'SELECT') return;
     const id = table.holders(chordFromEvent(e, P))[0]; if (id) { e.preventDefault(); table.run(id, e); } });
+  /* THE FOCUS LAW (0.5.0 C7b): a row another module added with a `when` (the TIMELINE's: its surface has the focus) wins its chord
+     over λWAVES' row while that holds; table order alone handed Home, E, C, P, Y and the Shift-arrows to the stage */
+  if (view) view.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.isComposing || table.recording()) return;
+    const id = table.holders(chordFromEvent(e, P)).find((x) => { const a = !byId.has(x) && table.get(x); try { return !!(a && a.when && a.when()); } catch (_) { return false; } });
+    if (id) { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) table.run(id, e); } }, true);
   for (const { chord, ids } of table.conflicts()) for (const id of ids) if (!row(id).defaults.includes(chord)) table.reset(id);   // the law on read
   function sync() {
     for (const x of table.list()) {
-      const a = byId.get(x.id);
+      const a = byId.get(x.id); if (!a) continue;   // a row another module added (timeline.*) has no λWAVES spec to follow the table
       if (x.keys.length === x.defaults.length && x.keys.every((c) => x.defaults.includes(c))) { Object.assign(a, declared.get(x.id)); continue; }
       const p = x.keys.length ? parseChord(x.keys[0], P) : null, fine = x.keys.length === 2 && normalize('Shift+' + x.keys[0], P) === x.keys[1];
       Object.assign(a, p ? { key: p.code, ctrl: p.mods.includes('Mod') ? true : p.mods.includes('Ctrl') ? 'Ctrl' : false, alt: p.mods.includes('Alt'),
