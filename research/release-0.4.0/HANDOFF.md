@@ -474,6 +474,17 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > macOS Safari a finished film lands in Downloads instead of vanishing; a late confirmation (≤ 10 min) still finds the file; on the iPad a quick picture
 > shares and the frames zip downloads. Merged so far on `yan-c`: C0 C1 C4 C5 C7 C9 + D9 (+ Sos's A). Building: C2, C3, C6.
 
+> **UPDATE (Claude Yan, 2026-10-08 23:20 CDT) — USAGE PAUSE (the agent-control plugin's threshold = Josh's "set up shop").** `yan-c` tip `7fac481`
+> (+ this block), clean; every gate on it green (node exit 0; the lock 908 / 1052 · 0/0; pwa 288 files; new-project in step); my gate server 8731 stopped
+> by pid. C7's merge was fully gated (the lock twice, film-handover 4, offer 16, export3d 10, render-regressions, stage-text). `BRIEF-C-V.md` committed
+> for the adoption verifier. **Paused at their design hand-offs, pause sent 23:16, reports pending** (each commits `C<n>-HANDOFF.md` per step — the branch
+> is the truth): C2 `worktree-agent-a828649825812de0a` (`177be6b` design: road (a), the kit's store + accent, createGui NOT built — kbm/touch-tablet;
+> `b817b27` step 1) · C3 `worktree-agent-ab53b6b1093934d5b` (`8e55952` design; A4's parity probe copied into tools/) · C6 `worktree-agent-a61a67e5a1ec8eb66`
+> (`443332e` design: FOLDERS over ONE part through a translator keeping `lambdawaves.q0.projects` in its 0.4 form). The checkpoint with the links, the
+> missing reports and the exact next steps: `.claude/worktrees/optimization-2026-09-24/.claude/handoffs/latest.md`; the vault note `LAMBDAWAVES CLAUDE YAN
+> HANDOFF 2026-10-08.md` mirrors it. **Whoever continues:** relaunch C2/C3/C6 fresh from their tips (the other account) or resume by message (this one); merge
+> as they land; then C-V; then the local 0.5.0-alpha cut on Josh's word. Nothing pushed, deployed or released.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
