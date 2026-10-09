@@ -3020,6 +3020,7 @@ export async function boot(dom) {
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
   /* the kit's + list knows nothing of `hidden` (a legacy card, or one a molecule stood down): those rows go (BRIEF R5) */
   if (rk.el.add) rk.el.add.addEventListener('click', () => { for (const it of rk.el.addList.querySelectorAll('.mb-item[data-win]')) { const d = devById(it.dataset.win); if (d && d.hidden) it.remove(); } });
+  if (rk.el.toggle) rk.el.toggle.addEventListener('click', () => saveSettings());   // wave 59 (B111): the kit's ◧ hides by setHidden alone; on a phone the press IS the browser saying which it wants, stored as the B key stores it
   /* the ☆ list's LOAD is the kit's apply; the extras follow from the same slot once its click is done (BRIEF R4) */
   if (rk.el.favList) rk.el.favList.addEventListener('click', (e) => {
     const it = e.target.closest('.mb-item'); if (!it || e.target.closest('.fav-x')) return;
