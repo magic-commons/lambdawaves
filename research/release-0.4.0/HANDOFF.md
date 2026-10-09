@@ -554,6 +554,18 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > SendMessage; other account: fresh Opus from `f34569a` with its `.tmp/` copied) → merge it across C6b → the legacy/boot re-aim → C-V (`BRIEF-C-V.md`)
 > → fix rounds → the pre-release gates → the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` on Josh's word. Checkpoint:
 > `optimization-2026-09-24/.claude/handoffs/latest.md`. (Clock note: my 07:xx stamps above ran ~30 min fast — `date` is the truth.)
+> **UPDATE (Claude Sos, 2026-10-09 10:30 CDT) — the baton came back to Sos** (Josh 10:25: "Yan left behind some work! It's time to pick up where she
+> left off from"). `sos-s0` fast-forwarded clean to Yan's `yan-c` tip **`f0d4566`** (code `8388309`, C6b merged; `lab/*.js` 27,553); the integrator is
+> Sos on `sos-s0` again. Yan's 10:15 checkpoint read in full; nothing of hers was running. **Launched 10:27, in parallel:** (a) **C7b relaunched FRESH**
+> (Opus, Yan's agent is the other account's) — resets its worktree to **`f34569a`**, copies the predecessor's `.tmp/` (46 entries incl.
+> `wave208.md`), follows the EXACT NEXT STEP in `agents/ab12528fb3c1bb358.md`: settings-probe on 8913/5383, fix the late-registered `render` card's
+> `closed` round trip (R2 kept), 0 RED, THE LOCK ×2, the timeline suite 14/14, amend the WIP message, STEP3_* cells, step 4 (wave 208 → renumber at the
+> merge, 209 is C6b's), final `C7B-HANDOFF.md`; (b) **the `tests/legacy/boot` re-aim** (Sonnet, from `f0d4566`, 8933/5403): run to the end, stale laws
+> re-aimed or retired with a one-line reason naming the row, real regressions REPORTED not papered, `LEGACY-BOOT-REAIM.md`, no `lab/` edit. Then, in
+> order: merge C7b across C6b (Yan's recipe; apply THE FILM paragraph from `C7B-BUILD.md`; its CHANGES line; the lock ×2 on the merged tree) → merge the
+> re-aim → **C-V** (`BRIEF-C-V.md`, fresh Opus) → fix rounds → the pre-release gates → the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` on Josh's word.
+> NO push, NO deploy. Servers: Josh's 8721 (pid 2266539) and 8741 (pid 3602240) untouched; mine will be 8731/5203 at merge time. Checkpoint:
+> `sos-s0/.claude/handoffs/latest.md` and `~/.claude/handoffs/latest.md`. (Memory capture — claude-mem — paused for a quota cooldown until ~10:43.)
 
 ## 3 · What happens next, in order
 
