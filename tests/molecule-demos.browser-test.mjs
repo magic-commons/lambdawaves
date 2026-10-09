@@ -3,6 +3,8 @@
 // molecule, viewing its HOMO; its notebook opens with its text; and the visitor's settings are byte-identical outside the
 // WORKSPACE keys after the open (docs/STATE-SCOPES.md; W129: a demo carries no look and writes no preference).  Benzene is
 // the cap: its open solves for seconds, and the status line says so — that is correct, and this waits for it.
+// 0.5.0 D9 (R5-L1): two more, the shim targets of the retired windows — H₂ σu (MOLECULES on its LUMO, where H₂⁺'s two
+// orbitals live) and HELIUM (SPECTRUM's ATOM at Z = 2, the 1s filled, where HELIUM's files open), under the same laws.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -15,8 +17,9 @@ try {
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__gum = 0; const md = navigator.mediaDevices; if (md) md.getUserMedia = () => { __gum++; return Promise.reject(new Error('probe: no microphone')); };
     return 1;`);
-  const DEMOS = [['water', 'H2O', 'DEMOS/WATER', 5, 7], ['benzene', 'C6H6', 'DEMOS/BENZENE', 21, 36], ['n2', 'N2', 'DEMOS/N₂', 7, 10]];
-  for (const [file, id, path, homo, nAO] of DEMOS) {
+  const DEMOS = [['water', 'H2O', 'DEMOS/WATER', 5, 7, 5], ['benzene', 'C6H6', 'DEMOS/BENZENE', 21, 36, 21], ['n2', 'N2', 'DEMOS/N₂', 7, 10, 7],
+    ['h2-sigma-u', 'H2', 'DEMOS/H₂ σu', 1, 2, 2]];   // [file, preset, path, occupied, AOs, the orbital on view]
+  for (const [file, id, path, homo, nAO, view] of DEMOS) {
     const r = await g.ev(`__LW.saveSettings(); await __w(50); const before = __ws(), t0 = performance.now();
       __LW.layout.notebook.open('projects'); await __w(200);
       const btn = document.querySelector('.pj-demo[data-file="${file}"]'); btn.click();
@@ -32,12 +35,30 @@ try {
     const why = JSON.stringify(r);
     assert.ok(r.status.includes('opened demo ' + path), why);
     assert.equal(r.preset, id, why); assert.equal(r.on, true, why); assert.equal(r.owner, true, 'MOLECULES is the field owner: ' + why);
-    assert.equal(r.view, 'orbital', why); assert.equal(r.nocc, homo, why); assert.equal(r.nAO, nAO, why); assert.equal(r.orbital, homo, 'VIEW ORBITAL on the HOMO: ' + why);
+    assert.equal(r.view, 'orbital', why); assert.equal(r.nocc, homo, why); assert.equal(r.nAO, nAO, why); assert.equal(r.orbital, view, 'VIEW ORBITAL on orbital ' + view + ': ' + why);
     assert.equal(r.notebookOpen, true, why); assert.ok(r.text.startsWith('# '), why);
     assert.equal(r.settingsSame, true, 'the open wrote the visitor\'s settings outside the WORKSPACE keys: ' + why);
     assert.equal(r.gum, 0, 'a demo asked for the microphone: ' + why); assert.deepEqual(r.errs, [], why);
-    console.log(`PASS ${r.label} opens ${path} in ${(r.ms / 1000).toFixed(1)} s: MOLECULES owns the field on ${id}, ORBITAL ${r.orbital} of ${r.nAO} (the HOMO), its notebook open ("${r.text}"), settings byte-identical outside the WORKSPACE keys`);
+    console.log(`PASS ${r.label} opens ${path} in ${(r.ms / 1000).toFixed(1)} s: MOLECULES owns the field on ${id}, ORBITAL ${r.orbital} of ${r.nAO} (the ${r.orbital === r.nocc ? 'HOMO' : r.orbital === r.nocc + 1 ? 'LUMO' : 'orbital ' + r.orbital}), its notebook open ("${r.text}"), settings byte-identical outside the WORKSPACE keys`);
   }
+  /* HELIUM: no molecule — SPECTRUM's ATOM at Z = 2 with the 1s filled, ATOMS open beside it, MOLECULES off */
+  const he = await g.ev(`__LW.saveSettings(); await __w(50); const before = __ws(), t0 = performance.now();
+    __LW.layout.notebook.open('projects'); await __w(200);
+    const btn = document.querySelector('.pj-demo[data-file="helium"]'); btn.click();
+    const status = () => document.querySelector('.pj-status').textContent;
+    for (let i = 0; i < 100 && !status().includes('DEMOS/HELIUM'); i++) await __w(100);
+    await __LW.settle(); await __w(300);
+    const nb = document.querySelector('[data-mir-window="notebook"]'), atoms = document.querySelector('.dev[data-id="atoms"]');
+    return { label: btn.textContent, status: status(), ms: performance.now() - t0, ham: __LW.hamiltonian, Z: __LW.atomZ, populated: __LW.reg.populated(),
+      atomsOpen: !atoms.hidden && !atoms.classList.contains('closed'), chemOn: __LW.chem.state().on, notebookOpen: !nb.hidden, text: __LW.layout.notebook.text.split('\\n')[0],
+      settingsSame: __ws() === before, gum: __gum, errs: __e.slice() };`);
+  const whyHe = JSON.stringify(he);
+  assert.ok(he.status.includes('opened demo DEMOS/HELIUM'), whyHe);
+  assert.deepEqual({ ham: he.ham, Z: he.Z, populated: he.populated, atomsOpen: he.atomsOpen, chemOn: he.chemOn }, { ham: 'atom', Z: 2, populated: [0], atomsOpen: true, chemOn: false }, whyHe);
+  assert.equal(he.notebookOpen, true, whyHe); assert.ok(he.text.startsWith('# '), whyHe);
+  assert.equal(he.settingsSame, true, 'the open wrote the visitor\'s settings outside the WORKSPACE keys: ' + whyHe);
+  assert.equal(he.gum, 0, whyHe); assert.deepEqual(he.errs, [], whyHe);
+  console.log(`PASS ${he.label} opens DEMOS/HELIUM in ${(he.ms / 1000).toFixed(1)} s: SPECTRUM's ATOM at Z = 2 with the 1s filled, ATOMS open, MOLECULES off, its notebook open ("${he.text}"), settings byte-identical outside the WORKSPACE keys`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {
