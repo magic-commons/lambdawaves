@@ -7,11 +7,16 @@
 
 ## State
 
-1. DONE — three REAL old files written by the pre-D9 build (`0.4.0-alpha · the library · 2026-10-08` at `7044f37`) through
-   `.tmp/make-legacy-fixtures.mjs` (not committed; it drives `__LW.molecule`, `__LW.helium`, `__LW.qcd`, which D9 deletes):
+1. DONE `719aca3` — three REAL old files written by the pre-D9 build (`0.4.0-alpha · the library · 2026-10-08` at `7044f37`)
+   through `.tmp/make-legacy-fixtures.mjs` (not committed; it drives `__LW.molecule`, `__LW.helium`, `__LW.qcd`):
    `tests/fixtures/legacy-h2plus.lambdawaves.json` (H₂⁺ owns the field, σu, R = 2), `legacy-helium` (HELIUM owns the field,
    3 Hylleraas terms), `legacy-qcd` (QUARKONIUM in force, QCD open on bb̄ under LOG, α_s .51 σ .23 C .81).
-2. NEXT — QCD deleted (commit 1); H₂⁺ (commit 2); HELIUM (commit 3); the shim + suites (commit 4); the ledger + hand-off (commit 5).
+2. DONE `59bb55f` — QCD deleted: `lab/*.js` 36,288 → **36,134 (−154)**; `tests/qcd.test.mjs` deleted (node 85 → 84, GREEN);
+   cornell.js took numerov/POTENTIALS/DEFAULTS/MEASURED/spectrum/fitOffset (+60); `instruments.qcd` stays as QUARKONIUM's
+   parameters; `restoreNotice` (one line, PROJECTS status + STATE status) names a retired window a file used. Probed in the page
+   on the legacy-qcd fixture: "opened LEGACY/QCD · retired in 0.5.0: QCD (QUARKONIUM keeps its parameters)", cornell in force
+   with bb̄/LOG/.51/.23/.81, no page error.
+3. NEXT — H₂⁺ (commit 2), HELIUM (commit 3), the history cases (commit 4), the ledger + REPORT + D9-BUILD (commit 5).
 
 ## Decisions so far
 
