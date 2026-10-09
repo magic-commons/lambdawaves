@@ -5080,6 +5080,55 @@ gap 102 ms), and that probe disturbed `current`'s timing when every open paid fo
 The session, the opener, the banner, the veil and the wake lock (BRIEF-C6 step 3) are the named next step. The tabbed notebook is a
 0.5.x brief candidate, because it changes what the notebook is. Details: `research/release-0.5.0/C6-BUILD.md`.
 
+### wave 209: C6b THE SESSION, THE OPENER, THE NOTICE, THE BANNER, THE VEIL AND THE WAKE LOCK — a cold start opens on the kit's notice and title screen, RESUME brings back the last work, the photosensitivity law stays λWAVES'
+
+**The start is decided in `lab/main.js`.**
+- A test driver (unless `?opener=1`), a link in the fragment, `?preset=` or `?view=` go straight in. The choice is `?starter=` or
+  the boot, with the session armed and nothing restored.
+- A reload of a tab that made nothing since NEW goes straight to NEW. rack.js asks the quiet take's own question, `untouched`, on
+  `pagehide`, and only then remembers `home` for the tab (sessionStorage).
+- Otherwise the kit's photosensitivity notice when it is needed, THEN MIR's `createOpener`: the six demos as 9 : 16 covers
+  (`lab/demos/covers/*.jpg`, made by the app itself through `tools/make-covers.mjs`), NEW, and RESUME when the session holds work.
+- The boot runs behind the opaque screen and waits for the choice before `LW.ready`. The screen starts from the boot's first await,
+  so the notice and the screen wear this browser's glass. The notice never holds `LW.ready`: a given choice does not wait for it,
+  which is what the CDP tools' new `&starter=home` relies on.
+
+**THE PHOTOSENSITIVITY LAW stays λWAVES'.**
+- A human reads the notice once per browser before anything animates, and no query string silences it for a human: the kit's
+  `?warn=0` is not honoured. Only a driver skips it (`?warn=1` forces it there; `?opener=1` makes a driven start a human one).
+- `__LW.warning` keeps `show dismiss needed onAccept reset seen remembered open` over the kit's `photosensitivityNotice`. Its
+  seen-flag is the settings blob's `warned`, through a Storage-shaped adapter.
+- `dismiss()` presses the kit's CONTINUE, because the kit's notice cannot be closed from code.
+- `?play=1` waits for the choice and then for the notice.
+- The sign is the old SVG composite rendered once into `lab/img/warning-sign.png` (68 KB, replacing the 160 KB `warning-orbital.png`).
+
+**THE SESSION** is MIR's `createSession({ key: 'lambdawaves.q0.session' })` over the one part (PROJECT; a FAMILIES row, STATE-SCOPES).
+- The part's new `subscribe` (`projects.changed`, once a frame) hears the ring's moves and the notebook's input. Through the shared
+  registry it reaches the session and FOLDERS' head.
+- The session never adds a ring row, and its autosave is not an edit.
+- RESUME is `projects.resume(session)`: the part's own restore, then the landing, origin `resume`. A resumed session and a cover
+  are offered a build, never taken.
+
+**The banner, the veil, the wake lock.**
+- The banner is MIR's `installBanner({ errors: false })`: λWAVES' words, `role="alert"`, BASINS' maroon pane, its own ×.
+- The veil is MIR's `bootVeil`: down at the first presented frame, 8 s at most.
+- The wake lock is `installWakeLock({ clock: appPlay })`, on ONE clock.
+- `#warnPane`, `#banner`, `showBanner`, the 50-line `warning` object, main.js' × wiring and 48 lines of CSS are gone.
+
+**Gates**, 8923/5393, one browser at a time:
+- NEW `opener` **7/7** · `offer` **16/16** · `history` **44/44** · `new-project` **8/8** + `--check`.
+- `settings-probe` **0 of 6 RED** · `serialize-bytes` **11/11 identical** against the base.
+- `first-run` 12 · `stage-text` 4 · `film-handover` 4 · `frame-occlusion` 7 · `menubar` 8 · `take-in-bugs` 4.
+- `hit-probe-set` **49 presses, 0 reached**.
+- **THE LOCK 860 · 0/0 and 1004 · 0/0** on `1989f3d`.
+- `legacy/boot`: 112 verdicts identical to the base. Both stop at wave 56's `?sw=1` reload, outside C6b.
+- `gpu-recovery` stops at its thumbnail probe on base and tree alike. C7 removed `capture.probe`, which `__LW.thumbnail()` still
+  calls: an open item for the integrator. Its recovery scene, run alone, is green on the kit banner.
+- Node 79 suites green.
+
+`cat lab/*.js | wc -l`: **27,515 → 27,553 (+38)** against the brief's ≈ +20 (main.js +56, rack.js −45, projects.js +12, sw.js +14).
+Details: `research/release-0.5.0/C6B-BUILD.md`.
+
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 
 ### wave 202: D9 THE LEGACY FIVE — QCD, H₂⁺ and HELIUM deleted behind restore shims, two demos, H₂ and ELECTROSTATICS measured

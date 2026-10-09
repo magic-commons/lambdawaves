@@ -4604,10 +4604,13 @@ try {
   /* ── B109 · THE ONLY MESSAGE A VISITOR WITHOUT WebGPU EVER SEES ────────────────────────────────── */
   const banT = await g.ev(`try {
     const R = { theme0: __LW.themeChoice };
-    /* 0.5.0 C6b: the banner is the kit's (main.js installBanner): the messages go through its own module, the one main.js holds */
+    /* 0.5.0 C6b: the banner is the kit's (main.js installBanner).  The messages go through its module; an import() from a
+       driver's script can be a second instance of it (measured under geckodriver), which builds its own pane — so the pane under
+       test is the one holding the message, and a second one is taken away at the end */
     const K = await import('./mir/shell/banner.js');
     K.warn('WebGPU unavailable', 'navigator.gpu is absent — WebGPU is not enabled in this browser. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
-    const b = document.getElementById('mir-banner'), item = b.querySelector('.mir-banner-item'), h3 = item.querySelector('.mir-banner-title'), p = item, x = b.querySelector('.mir-banner-x');
+    const b = [...document.querySelectorAll('.mir-banner')].find((n) => n.querySelector('.mir-banner-item')), main = document.getElementById('mir-banner');
+    const item = b.querySelector('.mir-banner-item'), h3 = item.querySelector('.mir-banner-title'), p = item, x = b.querySelector('.mir-banner-x');
     R.hasX = !!x; R.role = b.getAttribute('role');
     const px = (s) => __LW.ink.parse(s);            /* kit.js's reader returns 0…255, which is what ink.ratio takes */
     const LOST = 'the browser took the WebGPU device back — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.';
@@ -4633,7 +4636,7 @@ try {
     const far = document.elementFromPoint(xr.left - 6, xr.top + xr.height / 2);
     R.xFinger = far === x || (far && far.parentElement === x);
     x.click(); await new Promise((r) => setTimeout(r, 60));
-    R.dismissed = b.hidden === true;
+    R.dismissed = b.hidden === true; R.mainPane = !!main && main.getAttribute('role') === 'alert'; if (b !== main) b.remove();
     /* WHAT IS PROVED FROM THE SOURCE, and it is said so: a real device cannot be lost on demand */
     const rackSrc = await (await fetch('./rack.js')).text(), fieldSrc = await (await fetch('./field.js')).text(), mainSrc = await (await fetch('./main.js')).text();
     /* plain string search, not a regex: ANTI-PATTERN 10, and it is also what makes this block replayable
