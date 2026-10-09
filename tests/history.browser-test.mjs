@@ -215,7 +215,7 @@ try {
     const before = { playing: __LW.mod.playing, v: M.macroList()[0].value };
     __LW.setStyle(__LW.mat.style === 1 ? 'cloud' : 'solid'); H.note(); H.flush(); H.undo(); const after = { playing: __LW.mod.playing, v: M.macroList()[0].value };
     await __w(600); const later = { playing: __LW.mod.playing, v: M.macroList()[0].value };
-    /* …and an undo that DOES reload the rack (a modulation edit) is re-followed by LINKED time on the next frame */
+    /* …and an undo that DOES reload the rack (a modulation edit) is re-followed by the one clock (0.5.0 C4) */
     __LW.mod.addSource('lfo'); H.flush(); H.undo(); await __w(300); const relinked = { playing: __LW.mod.playing, field: __LW.clock.playing };
     __LW.pause(); await __w(300); H.flush(); return { before, after, later, relinked, errs: __e.slice() };`);
   assert.equal(plays.before.playing, true); assert.equal(plays.after.playing, true, 'the undo stopped the modulation transport');
@@ -223,7 +223,7 @@ try {
   assert.equal(plays.later.playing, true); assert.notEqual(plays.later.v, plays.after.v, 'the LFO stopped moving after the undo');
   assert.deepEqual(plays.relinked, { playing: true, field: true }, 'an undo that reloaded the rack left the modulation stopped under a playing field');
   assert.deepEqual(plays.errs, []);
-  pass('the modulation plays through an undo: an unchanged rack is not reloaded (transport running, LFO continuous); an undo that reloads it is re-followed by LINKED time');
+  pass('the modulation plays through an undo: an unchanged rack is not reloaded (transport running, LFO continuous); an undo that reloads it is re-followed by the one clock');
 
   /* ── 3b · A ROUTE UNDONE WHILE IT PLAYS (the S2 follow-up's question for this road): the STAGE routed to the playing LFO, then the
          route undone — the stage is its hand value again, exactly, not the modulator's last output; redo routes it again on the same
@@ -306,26 +306,27 @@ try {
     return b ? [b.textContent.trim(), b.closest('.dev').querySelector('.dev-eyebrow').textContent.trim()] : { E: 'no STYLE option' };`);
   await scene('a STYLE segment press', `const b = __show(window.__styleB); await __w(50); await __press(b);`, 'STYLE ' + styleOpt[0] + ' · ' + styleOpt[1]);
 
-  /* SEPARATE (a PREFERENCE): the modulation transport plays alone; undoing a route must leave it playing with the target back at its
-     base, and redo route it and hold it — restoreModulation pauses, and under SEPARATE nothing re-follows */
+  /* THE ONE CLOCK (0.5.0 C4, R-B1; it replaces the SEPARATE scene — the modulation no longer plays alone): under THE play, undoing a
+     route must leave the modulation playing with the target back at its base, and redo route it and hold it — restoreModulation
+     puts the clock down, and the restore puts a playing one back (S4) */
   const separate = await ev(`const H = __LW.history, M = __LW.mod.model, R = __LW.mod.registry, live = () => __LW.serialize().presentation.ui.stage.mix;
-    const link0 = __LW.mod.clockLink; __LW.mod.clockLink = false; __LW.pause(); await __w(100);
+    __LW.pause(); await __w(100);
     const lfo = M.sourceList().find((s) => s.kind === 'lfo'); __LW.mod.bind(M.macroList()[0].id, lfo.id);
     for (const r of M.routeList()) __LW.mod.unroute(r.id);
-    __LW.setStage(0.3); H.flush(); __LW.mod.play(); await __w(400);
+    __LW.setStage(0.3); H.flush(); __LW.play(); await __w(400);
     __LW.mod.route(M.macroList()[0].id, 'material.stage', 0, 1); H.flush(); await __w(500);
     const routed = { playing: __LW.mod.playing, modulated: R.isModulated('material.stage'), live: live() };
     H.undo(); await __w(400);
     const undone = { playing: __LW.mod.playing, modulated: R.isModulated('material.stage'), base: R.baseOf('material.stage'), live: live() };
     H.redo(); await __w(500);
     const redone = { playing: __LW.mod.playing, modulated: R.isModulated('material.stage'), base: R.baseOf('material.stage'), live: live() };
-    __LW.mod.stop(); __LW.mod.clockLink = link0; for (const r of M.routeList()) __LW.mod.unroute(r.id); await __w(200); H.flush();   /* the stage unrouted for the scenes after */
+    __LW.pause(); for (const r of M.routeList()) __LW.mod.unroute(r.id); await __w(200); H.flush();   /* the stage unrouted for the scenes after */
     return { routed, undone, redone, errs: __e.slice() };`);
   assert.equal(separate.routed.playing, true); assert.equal(separate.routed.modulated, true);
-  assert.deepEqual(separate.undone, { playing: true, modulated: false, base: 0.3, live: 0.3 }, 'SEPARATE, undo of a route: ' + JSON.stringify(separate.undone));
-  assert.equal(separate.redone.playing, true, 'SEPARATE, redo: the transport stopped'); assert.equal(separate.redone.modulated, true, 'SEPARATE, redo: the route is not held');
-  assert.equal(separate.redone.base, 0.3); assert.notEqual(separate.redone.live, 0.3, 'SEPARATE, redo: the modulator does not move the stage'); assert.deepEqual(separate.errs, []);
-  pass(`SEPARATE: a route undone under a playing modulation transport leaves it playing with the stage on its base 0.3; redo routes and holds it again (${separate.redone.live.toFixed(3)} under the LFO)`);
+  assert.deepEqual(separate.undone, { playing: true, modulated: false, base: 0.3, live: 0.3 }, 'THE ONE CLOCK, undo of a route: ' + JSON.stringify(separate.undone));
+  assert.equal(separate.redone.playing, true, 'THE ONE CLOCK, redo: the modulation stopped'); assert.equal(separate.redone.modulated, true, 'THE ONE CLOCK, redo: the route is not held');
+  assert.equal(separate.redone.base, 0.3); assert.notEqual(separate.redone.live, 0.3, 'THE ONE CLOCK, redo: the modulator does not move the stage'); assert.deepEqual(separate.errs, []);
+  pass(`THE ONE CLOCK: a route undone under THE play leaves the modulation playing with the stage on its base 0.3; redo routes and holds it again (${separate.redone.live.toFixed(3)} under the LFO)`);
 
   /* THE DRIVE: a rotation rate that turns nothing (ROTATE z on an m = 0 state) does not freeze the ring; one that turns the register
      is one gesture however long it runs, paused or playing (the drive integrates on the wall clock) */

@@ -17,9 +17,9 @@
  *     (`feedAudio`, one read for every AUDIO card); the closer off the frame path (`audio.sync` after every rebuild); silence when
  *     the signal stops (`audioReset`, or every follower pins its last value); the input remembered as a device HANDLE, never audio.
  *   · THE CADENCE: 60 or 120 Hz, the panel's, never the display's.
- *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade): `follow(on)` is THE play's edge (clock.js onePlay), taken while MOD is
- *     armed and LINKED.  A play holds the kit's `demand('app.play')` first, so the modulation is never refused for want of a route
- *     or an open editor (MIR 1.5 `installModulation().play`; KIT-BRIEFS "LINKED refusal"); a pause releases it.
+ *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade; C4, R-B1: every edge, LINKED/SEPARATE retired): `follow(on)` is THE
+ *     play's edge (clock.js onePlay), the power on or off.  A play holds the kit's `demand('app.play')` first, so the modulation is
+ *     never refused for want of a route or an open editor (MIR 1.5 `installModulation().play`); a pause releases it.
  */
 import { createModHost } from './mir/modulation/host.js';
 import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the kit's port deliberately left behind

@@ -101,18 +101,19 @@ try {
   assert.equal(fresh.current, null); assert.equal(fresh.depth, 0); assert.equal(fresh.dirty, false); assert.equal(fresh.gum, 0); assert.deepEqual(fresh.errs, []);
   console.log(`PASS NEW (${fresh.ms.toFixed(1)} ms, fetch + restore): every PROJECT key is the file's, modulation = LFO + AUDIO bound (s1, s2:level), no routes; the open notebook stays open on NOTES, emptied, its empty placeholder shown (the debounced keystrokes did not flush back); A/B off, stores empty; settings minus WORKSPACE, theme and window arrangement byte-identical; nothing current, history depth 0, clean; no getUserMedia`);
 
-  /* ── 4 · LINKED TIME ON THE GET-GO: show the modulation window, play the field → the transport plays and macro LFO moves ── */
+  /* ── 4 · THE ONE CLOCK ON THE GET-GO (0.5.0 C4: LINKED retired, the modulation follows THE play): show the modulation window,
+         play the field → the modulation plays and macro LFO moves ── */
   const linked = await g.ev(`const M = __LW.mod.model, refused0 = __LW.mod.clock.stats().refusedPlays;
     __LW.layout.modulation.expand(); await __w(300);
     const v0 = M.macroList()[0].value; __LW.play(); let moved = false, playing = false, ms = 0; const t0 = performance.now();
     while (performance.now() - t0 < 1000) { await __w(50); playing = __LW.mod.playing; if (playing && Math.abs(M.macroList()[0].value - v0) > 1e-6) { moved = true; ms = performance.now() - t0; break; } }
-    const out = { link: __LW.mod.clockLink, playing, moved, ms, name: M.macroList()[0].name, refused: __LW.mod.clock.stats().refusedPlays - refused0, gum: __gum(), dirty: __LW.layout.projects.dirty, errs: __e.slice() };
+    const out = { playing, moved, ms, name: M.macroList()[0].name, refused: __LW.mod.clock.stats().refusedPlays - refused0, gum: __gum(), dirty: __LW.layout.projects.dirty, errs: __e.slice() };
     __LW.pause(); await __w(100); __LW.layout.modulation.collapse(); __gumRestore();
     return out;`);
-  assert.equal(linked.link, true); assert.equal(linked.name, 'LFO'); assert.equal(linked.playing, true, 'the mod transport did not follow the field');
+  assert.equal(linked.name, 'LFO'); assert.equal(linked.playing, true, 'the mod transport did not follow the field');
   assert.equal(linked.moved, true, 'macro LFO did not move within 1 s'); assert.equal(linked.refused, 0, 'a nothing-to-run refusal'); assert.equal(linked.gum, 0);
   assert.equal(linked.dirty, false, 'the LFO moving its own macro made the empty project dirty'); assert.deepEqual(linked.errs, []);
-  console.log(`PASS linked time on the get-go: with the modulation window shown, play moved the mod transport and macro LFO in ${linked.ms.toFixed(0)} ms, no refusal, no microphone, still clean`);
+  console.log(`PASS the one clock on the get-go: with the modulation window shown, play moved the mod transport and macro LFO in ${linked.ms.toFixed(0)} ms, no refusal, no microphone, still clean`);
 
   /* ── 5 · THE NOTEBOOK LAW (the coordinator's ruling): an open NEVER CLOSES the notebook, it only declines to OPEN one — a
          project with text opens onto its NOTES; a blank one (NEW's included) leaves the pane's visibility and face as they are ── */

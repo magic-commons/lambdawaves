@@ -198,7 +198,7 @@ export async function boot(dom) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain, modCadence: MOD.hz, modArm: modArm, clockLink,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN; wave 65: the MOD arm is one too
+        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain, modCadence: MOD.hz, modArm: modArm,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN; wave 65: the MOD arm is one too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -297,7 +297,6 @@ export async function boot(dom) {
     if (typeof s.fling === 'number') camera.setFling(s.fling);
     MOD.hz = s.modCadence === 120 ? 120 : 60; if (modView) modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
     if (s.modArm === false) setModArm(false, { quiet: true });   // wave 65: the arm is this browser's, and ARMED is the default a fresh visit gets
-    if (s.clockLink === false) clockLink = false;                 // 2026-09-10: LINKED is the default a fresh visit gets
     if (s.frame === false) { mat.frame = false; if (ui.frameSw) ui.frameSw.set(false); }     // wave 53: FRAME and AXIS, independently
     if (['box','lattice','dots'].includes(s.frameMode)) mat.frameMode=s.frameMode;
     if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
@@ -462,7 +461,7 @@ export async function boot(dom) {
   let modHost = null, modView = null, modWall = 0, modExpOn = null;
   const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: () => saveSettings() });
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
-  appPlay.onChange((on) => { if (modArm && clockLink) mod.follow(on); });   // 0.5.0 A6: LINKED, at the edge, holding the app-play demand while it plays
+  appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
 
 
@@ -508,7 +507,6 @@ export async function boot(dom) {
 
 
   let modArm = true;
-  let clockLink = true;
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   const occlusion = createOcclusion(() => { occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
@@ -2888,13 +2886,11 @@ export async function boot(dom) {
   })();
 
 
-  /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation while armed and LINKED (FREE /
-   *  SEPARATE: the transport does not touch the modulation clock). */
+  /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation (C4: the one clock, always). */
   function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
-  /** THE ARM.  `setEnabled(false)` is not `pause()`: it hands every routed control back to its base
-   *  — including the ones a HAND macro holds, which a stopped transport keeps by the pause law's own
-   *  second line — and it deliberately does NOT touch the modulation transport's `playing`, so
-   *  re-arming picks up the rack the user left rather than a rack that quietly stopped. */
+  /** THE POWER (MIR 1.5, R-B1 at 0.5.0 C4; the MOD button, Ctrl+Space, the window's power seat): `setModulationEnabled` is a
+   *  ROUTE BYPASS — off, every routed control is back on its base and the hand owns it, while the clock, the sources, the tempo
+   *  and the HOLDs run on, so power on picks the routes up in time.  Power never plays; play never powers (bind.js setArm). */
   function setModArm(on, opts) {
     const want = !!on, o = opts || {};
     modArm = want;
@@ -2903,10 +2899,7 @@ export async function boot(dom) {
       ui.modB.setAttribute('aria-pressed', String(want));
     }
     if (modHost) {
-      modHost.clock.setEnabled(want);
-      if (want && clockLink) mod.follow(clock.playing);                          // 0.5.0 A6: LINKED catches up at once — the play (with its demand) or the pause
-      else if (want && clock.playing) modHost.clock.play(performance.now() / 1000);   // one control, and it was already pressed
-      else if (!want) modHost.clock.demand('app.play', false);                   // the app-play demand is held only while armed and LINKED
+      modHost.clock.setModulationEnabled(want);
       if (modView) modView.sync();
     }
     if (!o.quiet) saveSettings();
@@ -4546,7 +4539,7 @@ export async function boot(dom) {
        editor, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
     /* R-K1 · the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); A5+A6 seam: its run() follows the one clock's POWER. */
-    { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation on / off (space then plays both clocks)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!modArm) },
+    { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation’s power: routes on or bypassed (time runs on; space plays the one clock)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!modArm) },
     { id: 'modulation', was: 'modWin', label: 'the modulation window — open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
     { id: 'modBar', group: KG.T, short: 'bar lock', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', group: KG.P, short: 'undo', label: 'undo the last edit', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
@@ -4897,7 +4890,7 @@ export async function boot(dom) {
            palette and state controls, so no later project step can overwrite a routed hand value. */
         const modWas = hist && pr.modulation !== undefined && modHost && modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
-        if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · …and under SEPARATE nothing re-follows: an undo puts a playing transport back to playing
+        if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
         if (pr.modwin && modView) modView.restore(pr.modwin);
       }
       schedule(TIER.REBUILD); wState.setStatus('restored', 'live');
@@ -5229,7 +5222,6 @@ export async function boot(dom) {
       setCadence(hz) { MOD.hz = hz === 120 ? 120 : 60; if (modView) modView.sync(); saveSettings(); return MOD.hz; },
       /* ── WAVE 65 · THE ARM, THE ONE KEY AND THE RESUME LAW, all readable from outside ────────── */
       get armed() { return modArm; },
-      get clockLink() { return clockLink; }, set clockLink(v) { ui.setClockLink(v); },
       arm(on) { return setModArm(!!on); },
       /** which law the rack's own chips put on the next resume, and what the last one actually did */
       resume() { return modHost ? modHost.clock.resumePlan() : null; },
@@ -5240,8 +5232,9 @@ export async function boot(dom) {
       /** PACE P3 · the window's remembered presentation, and the road that puts one back (the device report's put-back: its
        *  first open prunes remembered rows for sources that no longer exist, which is the report's doing, not the hand's) */
       presentation() { return modView ? modView.presentation() : null; }, restorePresentation(o) { if (modView && o) modView.restore(o); return !!(modView && o); },
-      play() { const r = modHost.clock.play(performance.now() / 1000); if (modView) modView.sync(); schedule(TIER.PRESENT); return r; },
-      stop() { const r = modHost.clock.pause(performance.now() / 1000); if (modView) modView.sync(); schedule(TIER.PRESENT); return r; },
+      /* 0.5.0 C4 (R-B1): the modulation has no play of its own — these are THE play and THE pause (the edge follows) */
+      play() { appPlay.play(); schedule(TIER.EVOLVE); return { ok: true, playing: modHost.clock.isPlaying() }; },
+      stop() { appPlay.pause(); schedule(TIER.PRESENT); return { ok: true, playing: modHost.clock.isPlaying() }; },
       /** a deterministic step — no realtime anywhere near it, which is what a proof wants */
       step(dt) { const d = modHost.clock.step(dt); if (modView) modView.paint(true); return d; },
       targets() { return modHost.registry.describe(); },
@@ -5512,8 +5505,7 @@ export async function boot(dom) {
       get remembered() { return seen(); }, get open() { return open; } };
   })();
   ui.saveNative = saveSettings;
-  ui.clockLink = () => clockLink; ui.setClockLink = (on) => { clockLink = !!on; if (modHost) { if (clockLink && modArm) mod.follow(clock.playing); else modHost.clock.demand('app.play', false); } saveSettings(); };   // 0.5.0 A6: LINKED follows at once; SEPARATE holds no app-play demand
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();}, arm:setModArm });
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:hz=>{MOD.hz=hz;saveSettings();} });
   __LW_hooks.warning = warning;
   if (warning.needed()) warning.show();
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
