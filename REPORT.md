@@ -4641,3 +4641,38 @@ Each took about 37 s to render; the old real-time WebM took 6 s. `verify()` was 
 - A RENDER card for an app with no timeline.
 
 Hand-off: `research/release-0.5.0/C7-BUILD.md`. The film verifier's brief: `BRIEF-C7-VERIFY.md`.
+
+### wave 203: C7 THE HAND-OVER — a spent activation downloads, a live one shares
+
+**What was wrong.** The kit's `saveBlob` shares whenever the browser offers `navigator.share`, without awaiting the share and
+without a fallback. A film's save runs after its render, and a picture's after a GPU readback, so the activation is spent:
+`share()` rejects and nothing was saved. That held on Chrome, Edge and macOS Safari, and for the iPad's EXPORT FRAMES zip.
+Linux has no `navigator.share`, so every gate here was green.
+
+**The fix.** `lab/capture.js` `handOver(blob, name)` is now the one hand-over, reached by `cap.save` and by `render-exact.js`
+`film.save` through the existing import seam. It uses the kit's `saveBlob` only while `navigator.userActivation.isActive`;
+otherwise it makes λWAVES' pre-C7 `<a download>`, with the URL kept ten minutes for a video and one minute otherwise.
+`lab/mir/**`, the 2-minute discard and the store are untouched. `lab/*.js` went from 35,753 to 35,768.
+
+**The evidence** (`tools/perf/handover-probe.mjs`, which stubs `navigator.share` in the gate Firefox and counts shares and anchor
+downloads):
+
+| hand-over | before | after |
+|---|---|---|
+| EXPORT FRAMES (activation spent) | 1 share, 0 downloads | 0 shares, 1 download |
+| a scripted picture (spent) | 1 share, 0 downloads | 0 shares, 1 download |
+| a picture from a real press (live) | 1 share | 1 share |
+
+**Gates.**
+- The lock: 1004 and 1148 GREEN, 0/0, 59 s each.
+- `render-exact` 37/37 and `capture` 33/33.
+- Node: 85 suites, with only C0's four reds.
+- Browser: `export3d` 10, `offer` 16/16 and `render-regressions` 2.
+- `film-compare` against `c7-film-42438c6` exits 0: the picture is byte-identical, and the frames are pixel-identical at the same
+  times.
+
+**Brief candidates for MIR.**
+- `saveBlob` should consult `userActivation.isActive` and download when `share()` rejects.
+- The recorder store wants a sweep of orphaned films.
+
+Hand-off: `research/release-0.5.0/C7-BUILD.md` § the hand-over fix.

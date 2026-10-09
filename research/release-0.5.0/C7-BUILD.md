@@ -162,3 +162,68 @@ The one met: EXPORT FRAMES failed with `AbortError: The operation was aborted.` 
 3. **No RECOVER / RESUME / DISCARD rows in λWAVES.** The kit's `createRenderCard` would give them, but the panel lists TIMELINE · ACTIVE / SELECTION motions that an app without a timeline cannot use. Candidate: an option to hide the timeline motions.
 4. **The caption is the interim.** It is drawn in `frame()` by `captionOver`; KIT BRIEF 6's `overlay(i, ctx)` replaces it (D5).
 5. **Unverified:** a P3 screen (`colorSpace: 'display-p3'`), WebKit or the iPad (Safari's worker store writer), and a 4K or 16384²-scale PNG export's memory.
+
+## § the hand-over fix (2026-10-08, the C7-FIX builder, Opus 5.5)
+
+**What.** `lab/capture.js` exports `handOver(blob, name)`, the one hand-over both roads reach: `cap.save` (TAKE A PICTURE, and
+EXPORT SHAPE / GRID through export3d's `env.save`) and `render-exact.js` `film.save` (RECORD, ONE PERIOD, EXPORT FRAMES), through
+the import seam render-exact already had from capture.js. It calls the kit's `saveBlob` only while
+`navigator.userActivation.isActive`; otherwise it makes the plain `<a download>` λWAVES used before C7
+(`git show 2171df3:lab/capture.js`, `save`), its object URL kept ten minutes for a video and one minute otherwise, as the kit
+keeps one. A browser without `navigator.userActivation` counts as spent, so it downloads. `prefersVideoDownload()` is untouched:
+inside a live tap the iPad's video still takes the kit's own download road. `lab/mir/**`, the 2-minute discard and the store are
+unchanged.
+
+**Why.** The kit's `saveBlob` shares whenever `navigator.share` and `canShare({ files })` say yes. It does not await the share,
+swallows its rejection, sets `shared = true` and never falls back. Its header says it must be reached inside the tap with nothing
+awaited first. A film's save runs after its render (about 37 s for a 6 s clip) and a picture's after a GPU readback, so the
+activation is spent: `share()` rejects with NotAllowedError and **nothing was saved**. That held on Chrome and Edge (Windows,
+macOS, ChromeOS, Android) and on macOS Safari. On the iPad a video took the download road, but the EXPORT FRAMES zip was lost.
+Linux Firefox has no `navigator.share`, so every gate here was green.
+
+**The lines.**
+- `lab/capture.js` +15: `handOver` is 8 lines of code and 6 of comment, and `save` calls it.
+- `lab/render-exact.js` ±0: the `saveBlob` import leaves, `handOver` joins the `./capture.js` import, and `save` calls it.
+- `lab/sw.js` is rewritten by `pwa --write` (hashes only).
+- `lab/*.js` went from **35,753 to 35,768**.
+- `tools/perf/handover-probe.mjs` is new: 58 lines, the only probe that runs the hand-over (`film-probe.mjs` stubs it away).
+
+**The evidence** (`LW_PORT=8863 GD_PORT=5333 node tools/perf/handover-probe.mjs`, Firefox 157 headless, RTX 3070). The probe
+stubs `navigator.share` / `canShare`: a share outside a live activation rejects with NotAllowedError, as Chrome's does. It
+patches `HTMLAnchorElement.prototype.click` to count `download` anchors without making them. *film* is EXPORT FRAMES (25 frames,
+about 4.3 s of rendering). *picture* is TAKE A PICTURE from a script, which carries no activation. *tap* is TAKE A PICTURE from a
+real WebDriver pointer press on a stand-in button.
+
+| hand-over | `isActive` at the save | before (`74ade0c`) | after (`c994505`) |
+|---|---|---|---|
+| film (EXPORT FRAMES zip) | false | 1 share (rejected), **0 downloads** | 0 shares, **1 download** (blob URL) |
+| picture (script) | false | 1 share (rejected), **0 downloads** | 0 shares, **1 download** (blob URL) |
+| tap (real press) | true | 1 share (accepted), 0 downloads | 1 share (accepted), 0 downloads |
+
+The raw rows are in `.tmp/handover-before.json` and `.tmp/handover-after.json` (gitignored).
+
+**Gates on `c994505`** (port 8863/5333, one browser at a time, `wait-gpu` before each):
+- `DIGEST LOCK GREEN: 1004 values compared · 0 readback differences · 0 record-byte differences · unrepeatable now: none · page errors 0 · 59 s`
+- `DIGEST LOCK GREEN: 1148 values compared · 0 readback differences · 0 record-byte differences · unrepeatable now: none · page errors 0 · 59 s`
+- `render-exact` 37/37 and `capture` 33/33.
+- `bash test.sh node`: 85 suites, only C0's four reds (mir-manifest, new-project, wiring, pwa). `electrostatics` went red once on a
+  timing budget (77.6 ms against 60) under load, and was GREEN 38/38 when run alone.
+- Browser: `export3d` 10 PASS, `offer` 16/16 and `render-regressions` 2 PASS.
+- `film-probe.mjs picture,frames` then `film-compare.mjs research/release-0.5.0/measure/c7-film-42438c6.json .tmp/film-fix.json`
+  exits 0. TAKE A PICTURE is byte-identical (97,866 B, `ff9ca6bf`), and EXPORT FRAMES' 25 frames have identical pixel hashes at
+  identical times.
+
+**Brief candidates for MIR.**
+1. `saveBlob` should consult `navigator.userActivation.isActive` before sharing, and fall back to a download when `share()`
+   rejects with anything but AbortError (a person dismissing the sheet). λWAVES' `handOver` then shrinks to one line.
+2. The recorder store wants a sweep of orphaned films. A film whose page closes inside the 2-minute discard window, or whose
+   `discard` throws, leaves its OPFS directory under `lambdawaves-recordings` forever, because λWAVES shows no RECOVER row.
+
+**Unverified.** No real Chrome, Edge, Safari or iPad was run; the stub models Chrome's rule. Safari's activation window is
+not measured. A picture on the iPad that outlasts it now downloads (Files › Downloads) instead of opening the share sheet. Chrome
+and Firefox keep an activation 5 s, and a 1× picture takes about 0.25 s. A share consumes the activation, so a multi-part film
+handed over inside a live tap would share part 1 and download the rest. No film is ever handed over inside a live tap.
+
+**What Josh will see.** On Chrome, Edge and macOS Safari, a finished RECORD, ONE PERIOD, EXPORT FRAMES, picture or EXPORT SHAPE
+lands in Downloads. Before this fix it vanished without a word. On the iPad a quick TAKE A PICTURE still opens the share sheet
+("Save Image"), and the EXPORT FRAMES zip now downloads instead of being lost.
