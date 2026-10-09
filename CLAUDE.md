@@ -205,3 +205,9 @@ registers none (its `mod` has no `add`). The phase palette is MIR's
 `createRampPanel` (`DEFAULT_PALETTE` in `lab/palette-app.js`).
 `tools/camera-routes.mjs` proves the saved routes after a camera change.
 (0.5.0 C1)
+
+The stage's pointer road asks MIR's scene guard first (`createSceneGuard({
+install: false })` in `lab/stage-gestures.js`, UI space from `uiSpace` in
+`rack.js`): a press, a double-click or a wheel in a window's gap never reaches
+the stage. `tools/hit-probe-set.mjs` is its gate, and the count is 0 reached.
+(0.5.0 C9)
