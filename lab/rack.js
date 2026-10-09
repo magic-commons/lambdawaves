@@ -84,7 +84,7 @@ import { createSwClient } from './sw-client.js';        // N7 seam 5: the instal
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
 import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';
 import { device as kitDevice } from './mir/kit.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
-import { installMenubar } from './menubar.js';           // N7 seam 8: the logo's bar, out of boot() (its MENUS table stays)
+import { createMenubar } from './mir/shell/menubar.js';    // 0.5.0 C3: the logo's bar is the kit's (menubar.js left; its MENUS table stays)
 import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
@@ -3473,14 +3473,14 @@ export async function boot(dom) {
     const tr = document.getElementById('transport');
     /* WAVE 55: the same drawing every floating window's DOCK chip wears — one mark, one meaning, and never
        a text character (glyph.js: iOS answers several of ours with a colour emoji). */
-    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button';
+    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button'; b.dataset.keyAction = 'dock';
 
 
       chip(b, 'north', 'dock the transport into the rack'); b.title = 'move the transport between the stage and the rack (T)'; b.addEventListener('click', () => layout.dockTransport()); }
 
 
     if (tr) {
-      const e = el('button', 'mod-exp mod-logo', tr); e.type = 'button';
+      const e = el('button', 'mod-exp mod-logo', tr); e.type = 'button'; e.dataset.keyAction = 'modulation';
       /* WAVE 55: the mark is now the POP-OUT's, because that is literally what the press does — the pill's
          EXPAND opens modulation as a FLOATING window over the stage, not as a card in the rack. */
 
@@ -3552,7 +3552,7 @@ export async function boot(dom) {
       const keyFor = (id) => { const a = ACTIONS.find((x) => x.id === id); return a ? keyName(a) : ''; };
       const MENUS = {
         FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
-          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p)]),
+          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p), null, '', { raw: true }]),
           null,
           ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
           null,
@@ -3561,23 +3561,28 @@ export async function boot(dom) {
           null,
           ...SHAPE_EXPORTS.map((spec) => [spec.row, () => exporter3d.run(spec.fmt), () => exporter3d.busy || !field.ok, spec.tip])],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\t' + keyFor('play'), () => runAction('play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), null, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases; under a molecule, the molecule\'s page: formula, RHF/basis, E and the ε ladder'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('transport.play'), () => runAction('transport.play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), null, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases; under a molecule, the molecule\'s page: formula, RHF/basis, E and the ε ladder'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => LW.setStyle('cloud')], ['— style: SOLID', () => LW.setStyle('solid')], ['— style: GRAIN', () => LW.setStyle('grain')], ['— style: SIGNED', () => LW.setStyle('signed')], ['— style: BANDS', () => LW.setStyle('bands')],
-          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
+          ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\t' + keyFor('modWin'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hideUI'), () => runAction('hideUI')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
-        ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('keysheet'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
+        ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('help'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
       };
-      const mb = installMenubar({ title, host: document.getElementById('lab'), menus: MENUS });   // N7 seam 8: lab/menubar.js
-      __LW_hooks.showMenuBar = mb.showMenuBar;                 // wave 106: the phone crossing PLACES the bar through the one placement
-      layout.menu = mb.menu;
+      /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,
+         Escape → the wordmark, the phone crossing, a row that throws still closes it).  N1's hand-back stays app glue: the kit closes the
+         bar BEFORE the act and returns focus only on Escape, so a row that leaves focus on the vanished item (or nowhere) gives it back
+         to the wordmark, an act that moved it on purpose (the keyboard window, the notebook) keeps it (BRIEF candidate M1). */
+      const back = (run) => () => { try { run(); } finally { const f = document.activeElement; if (!f || f === document.body || mb.bar.contains(f)) title.focus({ preventScroll: true }); } };
+      const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
+        menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => rows().map((r) => r && [r[0], back(r[1]), ...r.slice(2)])])) });
+      layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
     }
 
 
@@ -3937,9 +3942,6 @@ export async function boot(dom) {
 
   const phone = { on: false, applied: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasCard: '', wasFrost: 'off' };
   function enterPhone() {
-
-
-    requestAnimationFrame(() => { if (document.body.classList.contains('phone') && __LW_hooks.showMenuBar) __LW_hooks.showMenuBar(); });
     /* WAVE 55 · THE PHONE HAS NO FLOATING, and ONE RACK: the kit's crossing (createRack `phone`) has already docked every float
        (remembered, so the crossing is reversible — wave 51's law) and folded the mirror rack into the one rack, each card
        marked `data-phone-from="left"`; this half is the transport, the phone's rack default and the low-power path. */
@@ -4179,9 +4181,6 @@ export async function boot(dom) {
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
   ];
-  /* A9 → A4 SEAM: the MENUS table (the floating-rack block) still finds four rows by their old ids (keyFor/runAction 'play', 'hideUI',
-     'modWin', 'keysheet'); a lookup that misses tries each row under its `was`.  This line goes when A4 renames those calls. */
-  ACTIONS.find = function (fn) { return Array.prototype.find.call(this, fn) || Array.prototype.find.call(this, (a) => a.was && fn({ ...a, id: a.was })); };
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
      at the next commit under whatever name was standing (probes/S3-verify/edges*.mjs).  An edit still pending under another name
