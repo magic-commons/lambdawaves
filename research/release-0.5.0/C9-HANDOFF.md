@@ -16,6 +16,11 @@
    Node gate: 81/85, exactly C0's four reds (mir-manifest alpha.24 not ACCEPTED; new-project OUT OF STEP; wiring 108 unreached
    — scene-guard.js is now reached; pwa absolute URL in lab/mir/shell/gui.js).
 
+3. `37ae218` THE HIT-PROBE SET `tools/hit-probe-set.mjs` (kit probe()/gridPoints() from the 1.5 worktree; λWAVES' cdp.mjs):
+   ten scenes (control + the C9 list). **After (a2823bb, 8823): 58 gap presses, 0 reached the stage**; before (4cee6c7, 8827,
+   `.tmp/base` = git archive of the adopt): 58 of 58 reached. Control 3/3 both. JSON in `research/release-0.5.0/c9-hit-probe/`.
+   Servers: 8823 (this tree) still up, pid 3578115 — stop by pid at the end; 8827 stopped.
+
 ## Findings so far
 - The kit (alpha.24) has NO "readability probe": the probe is λWAVES' own `capture.probe()` (`canvasReadable`, capture.js).
 - λWAVES has NO `thumbnail()` today (FOLDERS is C6's). Plan: add `LW.thumbnail()` at the END of the LW literal (reads
@@ -27,5 +32,5 @@
   camera; the guard now makes it UI (the kit's law: a window's whole rect is UI space).
 
 ## Next
-The hit-probe set `tools/hit-probe-set.mjs` (kit `probe()`/`gridPoints()` from the 1.5 worktree, λWAVES' tools/perf/cdp.mjs),
-run on this tree (8823) and on a base copy of `4cee6c7` (8827); then R14; then REPORT + C9-BUILD.md.
+R14 (name `gpuRecovery` in place; `LW.thumbnail()` at the END; gpu-recovery test gains the device-lost + thumbnail cases);
+then the browser suites (offer 16, input, gpu-recovery, frame-occlusion 7, keyboard-window, menubar); then REPORT + C9-BUILD.md.
